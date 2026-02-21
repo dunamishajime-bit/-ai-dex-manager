@@ -1,0 +1,43 @@
+{
+  "name": "DIS TERMINAL",
+  "short_name": "DIS",
+  "description": "AI-Powered Autonomous Trading Terminal - 5 Agent Synergy",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#FFD700",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI評議会",
+      "short_name": "評議会",
+      "description": "AIエージェントとのディスカッション",
+      "url": "/ai-agents",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "ポジション",
+      "short_name": "ポジション",
+      "description": "現在のポジション確認",
+      "url": "/positions",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

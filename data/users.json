@@ -1,0 +1,68 @@
+[
+  {
+    "id": "user_1771062863567_80djstb12",
+    "email": "testuser@example.com",
+    "displayName": "testuser",
+    "role": "user",
+    "createdAt": 1771062863567,
+    "lastLogin": 1771062863567,
+    "isApproved": false
+  },
+  {
+    "id": "user_1771477229663_6pu7rkeh8",
+    "email": "testluke@luke.com",
+    "displayName": "luke",
+    "role": "user",
+    "createdAt": 1771477229663,
+    "lastLogin": 1771478156532,
+    "isApproved": true,
+    "isTotpEnabled": false,
+    "passwordHash": "dGVzdGx1a2UxMzEz",
+    "securitySettings": {
+      "requireAllMethods": false
+    },
+    "nickname": "luke"
+  },
+  {
+    "id": "user_1771489627651_k9kowstyl",
+    "email": "subagent@test.com",
+    "displayName": "SubAgent",
+    "passwordHash": "cGFzc3dvcmQxMjM=",
+    "role": "user",
+    "createdAt": 1771489627651,
+    "lastLogin": 1771489627651,
+    "isApproved": false,
+    "isTotpEnabled": false,
+    "securitySettings": {
+      "requireAllMethods": false
+    }
+  },
+  {
+    "id": "user_1771494755368_97jfdzqlr",
+    "email": "password",
+    "displayName": "",
+    "role": "user",
+    "createdAt": 1771494755368,
+    "lastLogin": 1771494755368,
+    "isApproved": false,
+    "isTotpEnabled": false,
+    "passwordHash": "",
+    "securitySettings": {
+      "requireAllMethods": false
+    }
+  },
+  {
+    "id": "user_1771497746294_24i5tl8",
+    "email": "test@example.com",
+    "displayName": "testuser",
+    "passwordHash": "cGFzc3dvcmQxMjM=",
+    "role": "user",
+    "createdAt": 1771497746294,
+    "lastLogin": 1771497746294,
+    "isApproved": false,
+    "isTotpEnabled": false,
+    "securitySettings": {
+      "requireAllMethods": false
+    }
+  }
+]
