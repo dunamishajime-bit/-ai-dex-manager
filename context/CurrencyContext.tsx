@@ -13,7 +13,11 @@ interface CurrencyContextType {
     currency: CurrencyCode;
     setCurrency: (code: CurrencyCode) => void;
     jpyRate: number;
+    setJpyRate: (rate: number) => void;
+    symbol: string;
+    toggleCurrency: () => void;
     formatPrice: (usdPrice: number) => string;
+    formatLarge: (usdValue: number) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -65,6 +69,12 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
         localStorage.setItem(STORAGE_KEY, code);
     };
 
+    const toggleCurrency = () => {
+        setCurrency(currency === "USD" ? "JPY" : "USD");
+    };
+
+    const symbol = currency === "JPY" ? "¥" : "$";
+
     const formatPrice = (usdPrice: number) => {
         if (currency === "JPY") {
             const jpyPrice = usdPrice * jpyRate;
@@ -80,8 +90,27 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
     };
 
+    const formatLarge = (usdValue: number) => {
+        const val = currency === "JPY" ? usdValue * jpyRate : usdValue;
+        const prefix = currency === "JPY" ? "¥" : "$";
+
+        if (val >= 1e12) return `${prefix}${(val / 1e12).toFixed(2)}T`;
+        if (val >= 1e9) return `${prefix}${(val / 1e9).toFixed(2)}B`;
+        if (val >= 1e6) return `${prefix}${(val / 1e6).toFixed(2)}M`;
+        return `${prefix}${val.toLocaleString()}`;
+    };
+
     return (
-        <CurrencyContext.Provider value={{ currency, setCurrency, jpyRate, formatPrice }}>
+        <CurrencyContext.Provider value={{
+            currency,
+            setCurrency,
+            toggleCurrency,
+            jpyRate,
+            setJpyRate,
+            symbol,
+            formatPrice,
+            formatLarge
+        }}>
             {children}
         </CurrencyContext.Provider>
     );

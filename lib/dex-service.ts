@@ -187,7 +187,26 @@ export async function fetchCoinMarkets(page = 1): Promise<any[]> {
     return fetchTokensByChain("all", page);
 }
 
-export async function fetchTrendingCoins(): Promise<any[]> {
+export interface TrendingCoin {
+    id: string;
+    symbol: string;
+    name: string;
+    thumb: string;
+    market_cap_rank: number;
+    data: {
+        price_change_percentage_24h: { usd: number };
+    };
+}
+
+export interface TrendingResult {
+    id: string;
+    symbol: string;
+    name: string;
+    image: string;
+    market_cap_rank: number;
+}
+
+export async function fetchTrendingCoins(): Promise<TrendingCoin[]> {
     return [];
 }
 
@@ -289,6 +308,13 @@ function detectChain(id: string): ChainId {
     return "ethereum";
 }
 
+function generateVolumeHistory(currentVolume: number): { time: string; volume: number }[] {
+    return Array.from({ length: 24 }, (_, i) => ({
+        time: `${String(i).padStart(2, "0")}:00`,
+        volume: currentVolume * (0.7 + Math.random() * 0.6) / 24,
+    }));
+}
+
 export function formatJPY(value: number): string {
     if (value < 1) {
         return `¥${value.toLocaleString("ja-JP", { minimumFractionDigits: 8, maximumFractionDigits: 8 })}`;
@@ -296,7 +322,16 @@ export function formatJPY(value: number): string {
     return `¥${value.toLocaleString("ja-JP", { maximumFractionDigits: 0 })}`;
 }
 
-export async function getTopMovers(): Promise<any> {
+export interface TopMover {
+    id: string;
+    symbol: string;
+    name: string;
+    price: number;
+    change24h: number;
+    image: string;
+}
+
+export async function getTopMovers(): Promise<{ gainers: TopMover[]; losers: TopMover[] }> {
     const markets = await fetchCoinMarkets(1);
     const mapped = markets
         .filter((c: any) => c.price_change_percentage_24h != null)
@@ -316,7 +351,14 @@ export async function getTopMovers(): Promise<any> {
     };
 }
 
-export async function getMarketSentiment(): Promise<any> {
+export interface MarketSentiment {
+    score: number; // 0-100 (Fear to Greed)
+    label: "EXTREME_FEAR" | "FEAR" | "NEUTRAL" | "GREED" | "EXTREME_GREED";
+    marketTrend: "BULL" | "BEAR" | "SIDEWAYS";
+    volatilityIndex: number; // 0-100
+}
+
+export async function getMarketSentiment(): Promise<MarketSentiment> {
     const markets = await fetchCoinMarkets(1);
     const avgChange = markets.reduce((sum, c) => sum + (c.price_change_percentage_24h || 0), 0) / (markets.length || 1);
 
@@ -331,7 +373,17 @@ export async function getMarketSentiment(): Promise<any> {
     };
 }
 
-export async function getCryptoNews(): Promise<any[]> {
+export interface CryptoNews {
+    id: string;
+    title: string;
+    source: string;
+    url: string;
+    published_at: string;
+    description?: string;
+    content?: string;
+}
+
+export async function getCryptoNews(): Promise<CryptoNews[]> {
     try {
         const res = await fetch("/api/news");
         const data = await res.json();
