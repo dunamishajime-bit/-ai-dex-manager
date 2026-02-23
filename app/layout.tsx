@@ -117,12 +117,13 @@ export default function RootLayout({
                 <meta name="description" content="DIS TERMINAL - AIエージェントによる自律型DEXトレーディングプラットフォーム" />
                 <meta name="robots" content="noindex, nofollow" />
                 {/* Phase 7: PWA Meta Tags */}
-                <link rel="manifest" href="/manifest.json" />
-                <meta name="theme-color" content="#FFD700" />
+                <link rel="manifest" href="/manifest.webmanifest" />
+                <link rel="icon" href="/favicon.ico" />
+                <link rel="apple-touch-icon" href="/icon-192.png" />
+                <meta name="theme-color" content="#000000" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-title" content="DIS TERMINAL" />
-                <link rel="apple-touch-icon" href="/icon-192.png" />
                 <script dangerouslySetInnerHTML={{
                     __html: `
                     if ('serviceWorker' in navigator) {

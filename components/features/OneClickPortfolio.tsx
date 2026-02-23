@@ -43,6 +43,12 @@ export const OneClickPortfolio: React.FC = () => {
     const data = allocation.map(a => ({ name: a.name, value: a.ratio * 100, color: a.color }));
 
     const handleExecute = async () => {
+        console.warn("[UI_TRADE_CLICK]", {
+            mode: "AUTO-ALLOCATION",
+            ts: Date.now(),
+            risk: riskTolerance,
+            amount: amount,
+        });
         setIsConstructing(true);
 
         // Execute trades sequentially with delay to simulate realism

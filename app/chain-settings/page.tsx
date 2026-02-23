@@ -80,7 +80,7 @@ export default function ChainSettingsPage() {
                                 </div>
                                 <div>
                                     <div className={cn("font-bold", targetAllCurrencies ? "text-white" : "text-gray-500")}>全ての通貨</div>
-                                    <div className="text-[10px] text-gray-500">CoinGecko全銘柄を対象（推奨）</div>
+                                    <div className="text-[10px] text-gray-500">全銘柄を対象（推奨）</div>
                                 </div>
                             </div>
                             {targetAllCurrencies ? <CheckCircle2 className="w-6 h-6 text-gold-500" /> : <Circle className="w-6 h-6 text-gray-700" />}

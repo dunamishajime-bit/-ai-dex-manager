@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { createChart, ColorType, ISeriesApi, CandlestickData, LineSeries, CandlestickSeries } from "lightweight-charts";
+import { createChart, ColorType, ISeriesApi, AreaSeries, LineSeries } from "lightweight-charts";
 import { RefreshCw, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { smartFetch } from "@/lib/coingecko-optimizer";
 
 // ===== Types =====
 type Timeframe = "1" | "5" | "15" | "60" | "240" | "1D";
@@ -47,28 +46,21 @@ interface OHLCV {
     close: number;
 }
 
-// ===== Fetch OHLCV from CoinGecko =====
-async function fetchOHLCV(coinId: string, days: number): Promise<OHLCV[]> {
-    const url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`;
-    const data = await smartFetch<number[][]>(url);
-    if (!data || !Array.isArray(data)) return [];
+// ===== Fetch Data from Terminal API =====
+async function fetchChartData(coinId: string, days: number): Promise<any[]> {
+    try {
+        const res = await fetch(`/api/market/chart?id=${coinId}&days=${days}`);
+        const data = await res.json();
+        if (!data.ok || !data.prices) return [];
 
-    // CoinGecko OHLC returns [timestamp_ms, open, high, low, close]
-    const seen = new Set<number>();
-    const result: OHLCV[] = [];
-    for (const row of data) {
-        const timeSec = Math.floor(row[0] / 1000);
-        if (seen.has(timeSec)) continue;
-        seen.add(timeSec);
-        result.push({
-            time: timeSec,
-            open: row[1],
-            high: row[2],
-            low: row[3],
-            close: row[4],
-        });
+        return data.prices.map(([time, price]: [number, number]) => ({
+            time: Math.floor(time / 1000),
+            value: price
+        })).sort((a: any, b: any) => a.time - b.time);
+    } catch (e) {
+        console.error("Chart fetch failed:", e);
+        return [];
     }
-    return result.sort((a, b) => a.time - b.time);
 }
 
 // ===== Stable coin warning =====
@@ -95,7 +87,7 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
     const initialPair = PAIR_OPTIONS.find(p => p.coinId === initialCoinId) ?? PAIR_OPTIONS[1]; // default ETH/USDT
     const [selectedPair, setSelectedPair] = useState(initialPair);
     const [selectedTF, setSelectedTF] = useState<TimeframeOption>(TIMEFRAMES[0]); // default 1min
-    const [ohlcv, setOhlcv] = useState<OHLCV[]>([]);
+    const [chartData, setChartData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showPairDropdown, setShowPairDropdown] = useState(false);
@@ -126,12 +118,11 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
             crosshair: { mode: 1 },
         });
 
-        const candleSeries = chart.addSeries(CandlestickSeries, {
-            upColor: "#10b981",
-            downColor: "#ef4444",
-            borderVisible: false,
-            wickUpColor: "#10b981",
-            wickDownColor: "#ef4444",
+        const areaSeries = chart.addSeries(AreaSeries, {
+            lineColor: "#3b82f6",
+            topColor: "rgba(59, 130, 246, 0.3)",
+            bottomColor: "rgba(59, 130, 246, 0.0)",
+            lineWidth: 2,
         });
         const emaSeries = chart.addSeries(LineSeries, {
             color: "#fbbf24",
@@ -140,21 +131,22 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
         });
 
         chartRef.current = chart;
-        candleSeriesRef.current = candleSeries;
+        candleSeriesRef.current = areaSeries as any;
         emaSeriesRef.current = emaSeries;
 
-        const handleResize = () => {
-            if (chartContainerRef.current) {
-                chart.applyOptions({
-                    width: chartContainerRef.current.clientWidth,
-                    height: chartContainerRef.current.clientHeight,
-                });
+        const resizeObserver = new ResizeObserver((entries) => {
+            if (entries[0] && chartRef.current) {
+                const { width, height } = entries[0].contentRect;
+                chartRef.current.applyOptions({ width, height: height || 280 });
             }
-        };
-        window.addEventListener("resize", handleResize);
+        });
+
+        if (chartContainerRef.current) {
+            resizeObserver.observe(chartContainerRef.current);
+        }
 
         return () => {
-            window.removeEventListener("resize", handleResize);
+            resizeObserver.disconnect();
             chart.remove();
             chartRef.current = null;
             candleSeriesRef.current = null;
@@ -163,21 +155,21 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // === Load OHLCV Data ===
+    // === Load Chart Data ===
     const loadData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await fetchOHLCV(selectedPair.coinId, selectedTF.days);
+            const data = await fetchChartData(selectedPair.coinId, selectedTF.days);
             if (!data.length) {
                 setError("データの取得に失敗しました");
                 return;
             }
-            setOhlcv(data);
+            setChartData(data);
             const last = data[data.length - 1];
             const first = data[0];
-            setLastPrice(last.close);
-            setPriceChange(((last.close - first.open) / first.open) * 100);
+            setLastPrice(last.value);
+            setPriceChange(((last.value - first.value) / first.value) * 100);
         } catch (e) {
             setError("価格データの取得に失敗しました");
         } finally {
@@ -189,30 +181,23 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
         loadData();
     }, [loadData]);
 
-    // === Push OHLCV to Chart ===
+    // === Push Data to Chart ===
     useEffect(() => {
-        if (!candleSeriesRef.current || !emaSeriesRef.current || ohlcv.length === 0) return;
+        if (!candleSeriesRef.current || !emaSeriesRef.current || chartData.length === 0) return;
 
-        const candleData: CandlestickData[] = ohlcv.map(d => ({
-            time: d.time as any,
-            open: d.open,
-            high: d.high,
-            low: d.low,
-            close: d.close,
-        }));
+        candleSeriesRef.current.setData(chartData);
 
-        // EMA(14)
+        // Simple MA (14)
         const period = 14;
-        const emaData = ohlcv.map((d, i) => {
-            const subset = ohlcv.slice(Math.max(0, i - period + 1), i + 1);
-            const avg = subset.reduce((s, o) => s + o.close, 0) / subset.length;
+        const maData = chartData.map((d, i) => {
+            const subset = chartData.slice(Math.max(0, i - period + 1), i + 1);
+            const avg = subset.reduce((s, o) => s + o.value, 0) / subset.length;
             return { time: d.time as any, value: avg };
         });
 
-        candleSeriesRef.current.setData(candleData);
-        emaSeriesRef.current.setData(emaData);
+        emaSeriesRef.current.setData(maData);
         chartRef.current?.timeScale().fitContent();
-    }, [ohlcv]);
+    }, [chartData]);
 
     const isStable = isStablePair(selectedPair.label);
     const changePositive = (priceChange ?? 0) >= 0;
@@ -325,7 +310,7 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
                         <span className="text-[10px] text-gray-400 font-mono">EMA(14)</span>
                     </div>
                 </div>
-                <div className="text-[10px] text-gray-600 font-mono">CoinGecko</div>
+                <div className="text-[10px] text-gray-600 font-mono">CoinCap</div>
             </div>
         </div>
     );

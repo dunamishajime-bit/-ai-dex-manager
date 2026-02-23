@@ -106,14 +106,14 @@ export async function generateGeminiDiscussion(
         let marketContext = "";
         if (marketData) {
             marketContext = `
-【リアルタイム市場データ(CoinGecko)】
+【リアルタイム市場データ(Market Data)】
 - 通貨名: ${marketData.name} (${marketData.symbol})
 - 事業年数 / 開始日: ${marketData.genesis_date || "不明"}
 - HP: ${marketData.homepage[0] || "N/A"}
 - 現在価格: ${formatUSD(marketData.current_price)}
 - 時価総額: ${formatUSD(marketData.market_cap)} (Rank #${marketData.market_cap_rank})
 - 24h変動: ${marketData.price_change_percentage_24h.toFixed(2)}%
-    - 概要(Source: CoinGecko): ${marketData.description ? marketData.description.substring(0, 1000) : "N/A"}
+    - 概要(Source: Aggregator): ${marketData.description ? marketData.description.substring(0, 1000) : "N/A"}
 `;
         }
 

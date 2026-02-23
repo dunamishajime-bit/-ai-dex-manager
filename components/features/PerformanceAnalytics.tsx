@@ -45,8 +45,8 @@ export function PerformanceAnalytics() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card title="累積損益推移" className="lg:col-span-2 h-[300px]">
-                <div className="w-full h-full pt-4">
+            <Card title="累積損益推移" className="lg:col-span-2 h-[350px]">
+                <div className="w-full h-[280px] min-h-[280px] pt-4">
                     {pnlData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={pnlData}>
@@ -91,7 +91,7 @@ export function PerformanceAnalytics() {
                         </div>
                     )}
 
-                    <div className="flex-1 w-full text-xs">
+                    <div className="flex-1 w-full h-[150px] min-h-[150px] text-xs">
                         <h4 className="text-gray-400 mb-2 uppercase tracking-wider">トークン別勝率</h4>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={tokenStats} layout="vertical">

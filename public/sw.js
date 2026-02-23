@@ -42,7 +42,7 @@ self.addEventListener('fetch', (event) => {
     if (!request.url.startsWith(self.location.origin)) return;
 
     // For API calls: network only (no caching)
-    if (request.url.includes('/api/') || request.url.includes('coingecko.com')) return;
+    if (request.url.includes('/api/')) return;
 
     // Navigation: network first with cache fallback
     if (request.mode === 'navigate') {

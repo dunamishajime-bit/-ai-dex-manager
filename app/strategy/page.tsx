@@ -154,7 +154,7 @@ export default function StrategyPage() {
                             </div>
                         </div>
 
-                        <div className="h-[350px] w-full">
+                        <div className="w-full h-[350px] min-h-[350px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={simulationData.points}>
                                     <defs>

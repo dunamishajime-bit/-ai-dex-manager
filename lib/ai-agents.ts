@@ -350,6 +350,18 @@ export const AGENTS = AI_AGENTS;
 export type Agent = AIAgent;
 export type Message = AgentMessage;
 
+/**
+ * ペア名を SYMBOL/USDT 形式に正規化する。
+ * 例: "BNB", "BNB/JPY", "BNB-USDT" -> "BNB/USDT"
+ */
+export function normalizeToUSDTPair(pair: string): string {
+    if (!pair) return "USDT/USDT";
+    // 記号で分割
+    const parts = pair.split(/[-/_]/);
+    const symbol = parts[0].toUpperCase();
+    return `${symbol}/USDT`;
+}
+
 // ========== 3-round Discussion Flow Engine ==========
 
 // ========== 3-round Discussion Flow Engine ==========
@@ -577,10 +589,12 @@ export async function generateDiscussion(
     marketData?: CoinDetails | null,
     latestNews?: any[] // New
 ): Promise<{ messages: AgentMessage[]; result: DiscussionResult }> {
+    const normalizedPair = normalizeToUSDTPair(pair);
+
     // Gemini APIを使用
     try {
         const geminiResult = await generateGeminiDiscussion(
-            pair,
+            normalizedPair,
             price,
             agents.map(a => a.id),
             "トレーダー",

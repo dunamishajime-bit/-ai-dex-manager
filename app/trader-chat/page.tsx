@@ -8,6 +8,7 @@ import { useUserLearning } from "@/context/UserLearningContext";
 import { useAgents } from "@/context/AgentContext";
 import { useSimulation } from "@/context/SimulationContext";
 import { generateAgentReply } from "@/lib/gemini-service";
+import { normalizeToUSDTPair } from "@/lib/ai-agents";
 import Link from "next/link";
 
 export default function TraderChatPage() {
@@ -58,64 +59,8 @@ export default function TraderChatPage() {
 
             await addInteraction("assistant", result.content, result.agentId);
 
-            // If it's a trading topic, trigger the AI Council discussion in the background
-            if (isTradingTopic) {
-                console.log("Trading topic detected, triggering AI Council...");
-                // Trigger council background analysis (simplified for demo)
-                // In a real app, we'd call the council API or update a global state
-                setTimeout(async () => {
-                    try {
-                        const { fetchAIRecommendations } = await import("@/lib/coingecko-optimizer");
-                        const { fetchCoinDetails } = await import("@/lib/dex-service");
-                        const { generateGeminiDiscussion } = await import("@/lib/gemini-service");
-                        const { saveHistoryItem } = await import("@/lib/history-service");
-                        // Note: We cannot easily get state from hook inside async callback 
-                        // It's better to pass it down or use a global store if needed.
-                        // For now, let's assume it's passed or available via window/global for this specific background task
-                        const addDiscussion = (window as any).jdex_addDiscussion;
-
-                        // Find relevant coin if mentioned, otherwise BTC
-                        const mention = tradingKeywords.slice(4, 11).find(k => text.toUpperCase().includes(k));
-                        const coinId = mention ? mention.toLowerCase() : "bitcoin";
-
-                        const details = await fetchCoinDetails(coinId);
-                        if (details) {
-                            const councilResult = await generateGeminiDiscussion(
-                                `${details.name} (${details.symbol})`,
-                                details.current_price,
-                                agents.map(a => a.id),
-                                userState.userName,
-                                undefined,
-                                details
-                            );
-
-                            const now = Date.now();
-                            const mappedMessages = councilResult.messages.map((m, i) => ({
-                                id: `council_${now}_${i}`,
-                                timestamp: now + i * 1000,
-                                agentId: m.agentId,
-                                content: m.content,
-                                round: m.round || 1,
-                                type: (m.type as any) || "ANALYSIS"
-                            }));
-
-                            // Sync with global discussion feed
-                            if (addDiscussion) {
-                                (addDiscussion as any)({
-                                    id: `chat_triggered_${now}`,
-                                    pair: `${details.symbol}/JPY`,
-                                    messages: mappedMessages,
-                                    result: councilResult.result,
-                                    source: "trader-chat",
-                                    timestamp: now
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Background council trigger failed", e);
-                    }
-                }, 1000);
-            }
+            // Triggering Council in background is disabled here to avoid redundant processing.
+            // Council analysis should be triggered explicitly by the user in the AI Council page.
         } catch (error) {
             console.error("Chat error:", error);
         } finally {

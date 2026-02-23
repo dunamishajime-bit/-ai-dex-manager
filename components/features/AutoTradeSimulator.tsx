@@ -44,12 +44,18 @@ export const AutoTradeSimulator: React.FC<AutoTradeSimulatorProps> = ({ marketDa
 
     // Fetch historical data based on period
     useEffect(() => {
-        if (!marketData) return;
+        if (!marketData?.id) return;
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Fetch days based on period selection
-                const res = await fetch(`/api/coingecko?path=/coins/${marketData.id}/market_chart?vs_currency=usd&days=${period}`);
+                const qs = new URLSearchParams({
+                    id: marketData.id,
+                    days: String(period),
+                });
+
+                const res = await fetch(`/api/market/chart?${qs.toString()}`);
+                if (!res.ok) throw new Error(`Chart API failed: ${res.status}`);
+
                 const data = await res.json();
                 if (data.prices) {
                     const formatted = data.prices.map(([time, price]: [number, number]) => ({
@@ -134,6 +140,14 @@ export const AutoTradeSimulator: React.FC<AutoTradeSimulatorProps> = ({ marketDa
                 return;
             }
         }
+
+        console.warn("[UI_TRADE_CLICK]", {
+            mode: proposal.action,
+            ts: Date.now(),
+            symbol: marketData.symbol,
+            price: marketData.current_price,
+            amount: customAmount,
+        });
 
         executeTrade(
             marketData.symbol,
@@ -337,7 +351,7 @@ export const AutoTradeSimulator: React.FC<AutoTradeSimulatorProps> = ({ marketDa
                             </span>
                         </h3>
 
-                        <div className="h-[300px] w-full min-h-[300px]">
+                        <div className="w-full h-[300px] min-h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={chartData}>
                                     <defs>

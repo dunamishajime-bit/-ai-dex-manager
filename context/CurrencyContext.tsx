@@ -2,17 +2,20 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
+/**
+ * [IMPORTANT] This file MUST NOT call external market data providers directly.
+ * All FX rates should come from internal /api/market/dashboard or be hardcoded.
+ */
+
 export type CurrencyCode = "USD" | "JPY";
 
 interface CurrencyContextValue {
     currency: CurrencyCode;
     toggleCurrency: () => void;
-    jpyRate: number;           // 1 USD = X JPY
-    /** 価格を現在の通貨でフォーマット */
+    jpyRate: number;
+    setJpyRate: (rate: number) => void;
     formatPrice: (usdValue: number) => string;
-    /** 大きな数値（時価総額・出来高）を現在の通貨でフォーマット */
     formatLarge: (usdValue: number) => string;
-    /** 通貨シンボルのみ */
     symbol: string;
 }
 
@@ -25,39 +28,40 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const [currency, setCurrency] = useState<CurrencyCode>(() => {
         if (typeof window === "undefined") return "JPY";
         const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored === "USD") {
-            localStorage.setItem(STORAGE_KEY, "JPY");
-            return "JPY";
-        }
+        // Default to JPY for this platform
         return (stored as CurrencyCode) || "JPY";
     });
+
     const [jpyRate, setJpyRate] = useState<number>(() => {
         if (typeof window === "undefined") return 150;
         return parseFloat(localStorage.getItem(JPY_RATE_LS) || "150");
     });
 
-    // CoinGecko から USD→JPY レートを取得
-    const fetchJpyRate = useCallback(async () => {
+    // Sync JPY rate from Dashboard API (Internal source ONLY)
+    // No external direct API calls allowed here.
+    const syncJpyRate = useCallback(async () => {
         try {
-            const res = await fetch(
-                "/api/coingecko?path=/simple/price?ids=usd&vs_currencies=jpy"
-            );
+            console.log("[CurrencyContext] Syncing JPY rate via internal dashboard...");
+            const res = await fetch("/api/market/dashboard");
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
             const data = await res.json();
-            const rate = data?.usd?.jpy as number | undefined;
-            if (rate && rate > 100) {
-                setJpyRate(rate);
-                localStorage.setItem(JPY_RATE_LS, String(rate));
+            if (data.ok && data.fxRate) {
+                const newRate = Number(data.fxRate);
+                setJpyRate(newRate);
+                localStorage.setItem(JPY_RATE_LS, String(newRate));
             }
-        } catch {
-            // fallback: keep cached rate
+        } catch (err) {
+            console.warn("[CurrencyContext] Failed to sync JPY rate from dashboard, using fallback:", err);
+            // Keeping current rate or default 150
         }
     }, []);
 
     useEffect(() => {
-        fetchJpyRate();
-        const interval = setInterval(fetchJpyRate, 10 * 60 * 1000); // 10分ごとに更新
+        syncJpyRate();
+        const interval = setInterval(syncJpyRate, 10 * 60 * 1000); // Sync every 10 mins
         return () => clearInterval(interval);
-    }, [fetchJpyRate]);
+    }, [syncJpyRate]);
 
     const toggleCurrency = useCallback(() => {
         setCurrency(prev => {
@@ -67,7 +71,6 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
-    // ヘルパー: 価格フォーマット
     const formatPrice = useCallback((usdValue: number): string => {
         if (!isFinite(usdValue)) return currency === "JPY" ? "¥0" : "$0";
         if (currency === "JPY") {
@@ -75,13 +78,11 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
             if (jpy < 1) return `¥${jpy.toLocaleString("ja-JP", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
             return `¥${jpy.toLocaleString("ja-JP", { maximumFractionDigits: 0 })}`;
         }
-        // USD
         if (usdValue < 0.001) return `$${usdValue.toFixed(8)}`;
         if (usdValue < 1) return `$${usdValue.toFixed(6)}`;
         return `$${usdValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
     }, [currency, jpyRate]);
 
-    // ヘルパー: 大きな数値（時価総額・出来高）
     const formatLarge = useCallback((usdValue: number): string => {
         if (!isFinite(usdValue)) return currency === "JPY" ? "¥0" : "$0";
         const value = currency === "JPY" ? usdValue * jpyRate : usdValue;
@@ -96,7 +97,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const symbol = currency === "JPY" ? "¥" : "$";
 
     return (
-        <CurrencyContext.Provider value={{ currency, toggleCurrency, jpyRate, formatPrice, formatLarge, symbol }}>
+        <CurrencyContext.Provider value={{ currency, toggleCurrency, jpyRate, setJpyRate, formatPrice, formatLarge, symbol }}>
             {children}
         </CurrencyContext.Provider>
     );

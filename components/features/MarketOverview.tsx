@@ -17,17 +17,19 @@ export function MarketOverview() {
     const [losers, setLosers] = useState<TopMover[]>([]);
     const [news, setNews] = useState<CryptoNews[]>([]);
     const [loading, setLoading] = useState(true);
+    const { setJpyRate } = useCurrency();
 
     useEffect(() => {
         const load = async () => {
             try {
-                const [movers, newsData] = await Promise.all([
-                    getTopMovers(),
-                    getCryptoNews()
-                ]);
-                setGainers(movers.gainers);
-                setLosers(movers.losers);
-                setNews(newsData);
+                const res = await fetch("/api/market/dashboard");
+                const data = await res.json();
+                if (data.ok) {
+                    if (data.fxRate) setJpyRate(data.fxRate);
+                    setGainers(data.trendTop3.up);
+                    setLosers(data.trendTop3.down);
+                    getCryptoNews().then(setNews);
+                }
             } catch (e) {
                 console.error("Failed to load market overview", e);
             } finally {
@@ -35,9 +37,9 @@ export function MarketOverview() {
             }
         };
         load();
-        const interval = setInterval(load, 60000);
+        const interval = setInterval(load, 10000); // 10s polling
         return () => clearInterval(interval);
-    }, []);
+    }, [setJpyRate]);
 
     // Profit calculation (Mock logic based on portfolio)
     // In a real app, this would calculate daily PnL from transaction history
@@ -63,19 +65,19 @@ export function MarketOverview() {
                     <TrendingUp className="w-4 h-4" /> 上昇トレンド TOP3
                 </h3>
                 <div className="space-y-3 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                    {gainers.map(coin => (
-                        <div key={coin.id} className="flex items-center justify-between p-2 bg-emerald-500/5 rounded border border-emerald-500/10 hover:bg-emerald-500/10 transition-colors">
+                    {gainers.map((coin: any) => (
+                        <div key={coin.providerId || coin.id} className="flex items-center justify-between p-2 bg-emerald-500/5 rounded border border-emerald-500/10 hover:bg-emerald-500/10 transition-colors">
                             <div className="flex items-center gap-2">
-                                <img src={coin.image} alt={coin.name} className="w-6 h-6 rounded-full" />
+                                <img src={coin.image || coin.thumb || "/placeholder.png"} alt={coin.name} className="w-6 h-6 rounded-full" />
                                 <div>
                                     <div className="text-xs font-bold text-white">{coin.symbol}</div>
                                     <div className="text-[10px] text-gray-400">
-                                        {formatPrice(coin.price)}
+                                        {formatPrice(coin.currentPrice || coin.price)}
                                     </div>
                                 </div>
                             </div>
                             <div className="text-xs font-bold text-emerald-400">
-                                +{coin.change24h.toFixed(2)}%
+                                +{(coin.priceChange24h || coin.change24h || 0).toFixed(2)}%
                             </div>
                         </div>
                     ))}
@@ -88,19 +90,19 @@ export function MarketOverview() {
                     <TrendingDown className="w-4 h-4" /> 下降トレンド TOP3
                 </h3>
                 <div className="space-y-3 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                    {losers.map(coin => (
-                        <div key={coin.id} className="flex items-center justify-between p-2 bg-red-500/5 rounded border border-red-500/10 hover:bg-red-500/10 transition-colors">
+                    {losers.map((coin: any) => (
+                        <div key={coin.providerId || coin.id} className="flex items-center justify-between p-2 bg-red-500/5 rounded border border-red-500/10 hover:bg-red-500/10 transition-colors">
                             <div className="flex items-center gap-2">
-                                <img src={coin.image} alt={coin.name} className="w-6 h-6 rounded-full" />
+                                <img src={coin.image || coin.thumb || "/placeholder.png"} alt={coin.name} className="w-6 h-6 rounded-full" />
                                 <div>
                                     <div className="text-xs font-bold text-white">{coin.symbol}</div>
                                     <div className="text-[10px] text-gray-400">
-                                        {formatPrice(coin.price)}
+                                        {formatPrice(coin.currentPrice || coin.price)}
                                     </div>
                                 </div>
                             </div>
                             <div className="text-xs font-bold text-red-400">
-                                {coin.change24h.toFixed(2)}%
+                                {(coin.priceChange24h || coin.change24h || 0).toFixed(2)}%
                             </div>
                         </div>
                     ))}

@@ -2,9 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { fetchMarketPrices } from "@/lib/market-service";
+
 import { useAccount } from "wagmi";
 import { fetchDEXRanking, fetchMarketOverview, fetchPairs, fetchTokensByChain, getTopMovers, getCryptoNews, ChainId } from "@/lib/dex-service";
-import { getZeroExQuote, getTokenAddress } from "@/lib/swap-service";
+import { AGENTS, Agent, Message, normalizeToUSDTPair } from "@/lib/ai-agents";
+import { resolveToken, NATIVE_TOKEN_ADDRESS } from "@/lib/tokens";
+import { isSupportedChain } from "@/lib/chains";
 import { parseUnits, formatUnits } from "viem";
 import { useSendTransaction, usePublicClient, useWalletClient, useBalance } from "wagmi";
 import { ERC20_ABI } from "@/lib/erc20-abi";
@@ -13,11 +16,11 @@ import { useAgents } from "./AgentContext";
 import { isMaintenanceMode } from "@/lib/user-store";
 import { useSoundFX } from "@/hooks/useSoundFX";
 import { useCurrency } from "./CurrencyContext";
-import { AGENTS, Agent, Message } from "@/lib/ai-agents";
-export type { Message };
 import { generateRandomNews, convertRealToMarketNews, MarketNews } from "@/lib/news-service";
 import { GeminiDiscussionResult } from "@/lib/gemini-service";
 import { TRADE_CONFIG } from "@/config/tradeConfig";
+
+export type { Message };
 
 export type Currency = "BTC" | "ETH" | "SOL" | "BNB" | "MATIC" | "DOGE";
 export type ProposalFrequency = "OFF" | "LOW" | "MEDIUM" | "HIGH";
@@ -239,6 +242,8 @@ interface SimulationContextType {
     toggleMockConnection: () => void;
     isAutoPilotEnabled: boolean;
     setIsAutoPilotEnabled: (val: boolean) => void;
+    isPricingPaused: boolean;
+    resumePricing: () => void;
 }
 
 const SimulationContext = createContext<SimulationContextType | undefined>(undefined);
@@ -250,6 +255,17 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const { data: walletClient } = useWalletClient();
     const { sendTransactionAsync } = useSendTransaction();
     const [isAuthenticated, setIsAuthenticatedState] = useState(false);
+
+    /**
+     * ウォレット接続を監視し、接続直後にシミュレーションループを起動する。
+     * isConnected が false→true に変化した瞬間のみ実行（冪等性確保）。
+     */
+    const prevConnectedRef = useRef<boolean>(false);
+    const manualTestDoneRef = useRef<boolean>(false);
+    // 一時フラグ（本番でのテスト完了後に削除する）
+    const shouldFireOnceRef = useRef(true);
+
+    const [isSimulating, setIsSimulatingState] = useState(true);
 
     // Fetch live wallet native balance
     const { data: balanceData } = useBalance({
@@ -275,13 +291,52 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    const [isSimulating, setIsSimulatingState] = useState(true);
+    useEffect(() => {
+        const justConnected = isConnected && !prevConnectedRef.current;
+        prevConnectedRef.current = isConnected;
+
+        if (!justConnected) return;
+
+        const IS_PROD = process.env.NODE_ENV === "production";
+
+        // 実トレードを有効化
+        setIsDemoMode(false);
+        localStorage.removeItem("jdex_demo_mode"); // 整合性確保のため確実に削除
+
+        console.log('[TRADE MODE]', {
+            isConnected,
+            demo: false,
+        });
+
+        if (!IS_PROD) {
+            setIsAutoPilotEnabled(true);
+        }
+
+        // ループが未起動なら起動
+        if (!isSimulating) {
+            setIsSimulating(true);
+        }
+    }, [isConnected, isSimulating]);
+
+
+    // アンマウント時・切断時のクリーンアップ
+    useEffect(() => {
+        if (!isConnected && isSimulating) {
+            setIsSimulating(false);
+            setIsAutoPilotEnabled(false);
+        }
+    }, [isConnected, isSimulating]);
+
     const [messages, setMessages] = useState<Message[]>([]);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [priceHistory, setPriceHistory] = useState<PricePoint[]>([]);
     const [strategyProposals, setStrategyProposals] = useState<StrategyProposal[]>([]);
     const [aiPopupMessage, setAiPopupMessage] = useState<Message | null>(null);
     const [selectedCurrency, setSelectedCurrency] = useState<Currency>("BNB");
+    const [tradeInProgress, setTradeInProgress] = useState(false);
+    const lastTradeErrorTime = useRef<number>(0);
+    const [news, setNews] = useState<MarketNews[]>([]);
+    const [lastAction, setLastAction] = useState<"BUY" | "SELL" | null>(null);
 
     // Persist isSimulating
     const setIsSimulating = (val: boolean) => {
@@ -339,11 +394,12 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             const blockIndex = Math.floor(currentHour / 6);
             const block = blocks[blockIndex];
 
+            const normalizedPair = normalizeToUSDTPair(entry.pair);
             const proposal: StrategyProposal = {
                 id: `strat-${entry.id}`,
                 agentId: "coordinator",
-                title: `AI評議会提案: ${entry.pair}`,
-                description: `${entry.pair}の分析に基づく${entry.result.action}戦略。`,
+                title: `AI評議会提案: ${normalizedPair}`,
+                description: `${normalizedPair}の分析に基づく${entry.result.action}戦略。`,
                 status: "PENDING",
                 timestamp: Date.now(),
                 durationBlock: block as any,
@@ -397,7 +453,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("jdex_demo_strategy", val);
     };
 
-    const [isAutoPilotEnabled, setIsAutoPilotEnabledState] = useState(true);
+    const [isAutoPilotEnabled, setIsAutoPilotEnabledState] = useState(false);
 
     useEffect(() => {
         const stored = localStorage.getItem("jdex_autopilot_enabled");
@@ -457,7 +513,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         const amount = demoFundConfig.amount;
 
-        // Use passed-in CoinGecko price if available, otherwise fall back to allMarketPrices
+        // Use passed-in market price if available, otherwise fall back to allMarketPrices
         let usdPrice: number;
         if (jpyPricePerUnit && jpyPricePerUnit > 0) {
             usdPrice = jpyPricePerUnit / 155; // Approximation to get USD value
@@ -650,7 +706,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const requestProposal = () => [setForceProposal(true)];
 
     // ... (Initial Data same)
-    // Fallback initial data (overridden by CoinGecko API)
+    // Fallback initial data (overridden by Market Data API)
     const initialData: Record<string, { price: number, volume: number }> = {
         BTC: { price: 65000.00, volume: 35000000 },
         ETH: { price: 3450.20, volume: 12000000 },
@@ -735,6 +791,14 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         return newMessage;
     }, [isSoundEnabled, playTrade, playAlert, playNotification]);
 
+    const resumerRef = useRef<(() => void) | null>(null);
+    const [isPricingPaused, setIsPricingPaused] = useState(false);
+
+    /** 通貨ペア価格取得の再開 */
+    const resumePricing = useCallback(() => {
+        addMessage("SYSTEM", "価格更新を再開しました。", "SYSTEM");
+    }, [addMessage]);
+
     const unlockAchievement = useCallback((id: string) => {
         setAchievements(prev => prev.map(a => a.id === id ? { ...a, unlocked: true } : a));
     }, []);
@@ -814,117 +878,143 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     }, [addMessage]);
 
     const executeTrade = useCallback(async (tokenSymbol: string, action: "BUY" | "SELL", amount: number, price: number, reason?: string, dex?: string): Promise<boolean> => {
+        // --- HARD STOP (temporary) ---
+        // Mitigation: Setting to false as we are implementing robust locks
+        const HARD_STOP_TRADING = false;
+
+        if (tradeInProgress) {
+            console.warn("[TRADE_BLOCKED] Trade already in progress. Skipping duplicate request.", { tokenSymbol, action });
+            return false;
+        }
+
+        console.warn("[UI_TRADE_CLICK]", {
+            symbol: tokenSymbol,
+            action,
+            amount,
+            price,
+            reason,
+            ts: Date.now(),
+            walletConnected: effectiveIsConnected,
+            chainId: effectiveChainId,
+        });
+
+        if (HARD_STOP_TRADING) {
+            console.warn("[TRADE_BLOCKED] HARD_STOP_TRADING is enabled. No request will be sent.");
+            addMessage("SYSTEM", "⚠️ [安全ガード] 現在取引機能はメンテナンスのため停止されています。", "ALERT");
+            return false;
+        }
 
         const currentDemoMode = isDemoMode || typeof window !== 'undefined' && localStorage.getItem("jdex_demo_mode") === "true";
+        const IS_PROD = process.env.NODE_ENV === "production";
+
+        // [LOCK GUARD] Prevent concurrent trades
+        if (tradeInProgress) {
+            console.warn("[TRADE_BLOCKED] Trade already in progress.");
+            return false;
+        }
+
+        // Set lock early
+        setTradeInProgress(true);
+        lastTradeRef.current = Date.now();
+
+        if (IS_PROD && (reason === "AI technical signal" || reason?.startsWith("IMMEDIATE_TEST_TRIGGER") || reason?.includes("戦略:"))) {
+            console.log(`[SAFEGUARD] Automated trade ${action} ${tokenSymbol} blocked in Production.`);
+            setTradeInProgress(false);
+            return false;
+        }
+
         if (!effectiveIsConnected && !currentDemoMode) {
             addMessage("SYSTEM", "⚠️ ウォレットが接続されていません。取引を実行するにはウォレットを接続してください。", "ALERT");
+            console.log('[DEBUG] executeTrade: Stopped - Wallet not connected.');
+            setTradeInProgress(false);
+            return false;
+        }
+
+        const now = Date.now();
+        if (now - lastTradeErrorTime.current < 5000) {
+            const remaining = Math.ceil((5000 - (now - lastTradeErrorTime.current)) / 1000);
+            addMessage("SYSTEM", `⚠️ クールダウン中... あと ${remaining}秒待ってください。`, "ALERT");
+            setTradeInProgress(false);
             return false;
         }
 
         if (!currentDemoMode && effectiveAddress && effectiveChainId) {
-            // ==========================================
-            // ON-CHAIN EXECUTION PATH (Real Web3 Swap)
-            // ==========================================
+            console.log('[DEBUG] executeTrade: Starting ParaSwap On-Chain Execution...', { tokenSymbol, action, amount, effectiveChainId, effectiveAddress });
+            setTradeInProgress(true);
             try {
-                // Determine base currency for the swap (USDT or USDC)
-                // For simplicity in this demo, we assume selling Token for USDT or buying Token with USDT.
-                const stableSymbol = effectiveChainId === 137 ? "USDT" : "USDT"; // Defaulting to USDT
-                const stableAddress = getTokenAddress(stableSymbol, effectiveChainId as number);
-                const targetAddress = getTokenAddress(tokenSymbol, effectiveChainId as number);
-
-                if (!stableAddress || !targetAddress) {
-                    addMessage("SYSTEM", `⚠️ このネットワーク(${effectiveChainId})での ${tokenSymbol} のコントラクトアドレスが未登録です。デモモードへ切り替えてください。`, "ALERT");
-                    return false;
+                if (!isSupportedChain(effectiveChainId)) {
+                    throw new Error(`Chain ${effectiveChainId} is not supported by our implementation.`);
                 }
 
-                const sellTokenAddress = action === "BUY" ? stableAddress : targetAddress;
-                const buyTokenAddress = action === "BUY" ? targetAddress : stableAddress;
+                // Resolve Addresses & Decimals through Registry
+                const stableSymbol = "USDT";
+                const srcTokenInfo = resolveToken(action === "BUY" ? stableSymbol : tokenSymbol, effectiveChainId);
+                const destTokenInfo = resolveToken(action === "BUY" ? tokenSymbol : stableSymbol, effectiveChainId);
 
-                // Calculate raw amount (assuming 18 decimals for most except USDT/USDC which are usually 6)
-                // Quick hack for demo: we'll assume 18 for native/target, 6 for USDT/USDC if on Polygon/BSC
-                const sellDecimals = (sellTokenAddress.toLowerCase() === stableAddress.toLowerCase() && effectiveChainId === 137) ? 6 : 18;
+                // Amount in Wei
+                const srcAmountNumber = action === "BUY" ? (amount * price) : amount;
+                const amountInWei = parseUnits(srcAmountNumber.toFixed(srcTokenInfo.decimals), srcTokenInfo.decimals).toString();
 
-                // For BUY: we sell `totalValue` (USD amount) of Stablecoin
-                // For SELL: we sell `amount` of Target Token
-                const sellAmountNumber = action === "BUY" ? (amount * price) : amount;
-                const sellAmountBase = parseUnits(sellAmountNumber.toFixed(sellDecimals), sellDecimals).toString();
+                setTradeInProgress(true);
+                addMessage("SYSTEM", `🔄 ParaSwapで${action === "BUY" ? "購入" : "売却"}プロセスを開始中...`, "SYSTEM");
 
-                addMessage("SYSTEM", `🔄 ${action === "BUY" ? "購入" : "売却"}ルートを計算中... (${tokenSymbol})`, "SYSTEM");
-
-                const quote = await getZeroExQuote(
-                    sellTokenAddress,
-                    buyTokenAddress,
-                    sellAmountBase,
-                    effectiveChainId as number,
-                    effectiveAddress as string
-                );
-
-                if (!quote || !quote.data || !quote.to) {
-                    throw new Error("Quote API returned invalid data (possibly unsupported pair or insufficient liquidity).");
-                }
-
-                // --------- APPROVAL FLOW (If selling an ERC20) ---------
-                const NATIVE_TOKEN = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-                if (sellTokenAddress.toLowerCase() !== NATIVE_TOKEN && walletClient && publicClient) {
-                    addMessage("SYSTEM", `🔑 ${action === "BUY" ? "USDT" : tokenSymbol} のアプルーバル（承認）を確認しています...`, "SYSTEM");
-
-                    const allowance = await publicClient.readContract({
-                        address: sellTokenAddress as `0x${string}`,
-                        abi: ERC20_ABI,
-                        functionName: 'allowance',
-                        args: [address, quote.allowanceTarget]
-                    }) as bigint;
-
-                    if (allowance < BigInt(sellAmountBase)) {
-                        addMessage("SYSTEM", `✍️ ウォレットでトランザクションを承認してください (Approve)`, "SYSTEM");
-                        const hash = await walletClient.writeContract({
-                            address: sellTokenAddress as `0x${string}`,
-                            abi: ERC20_ABI,
-                            functionName: 'approve',
-                            args: [quote.allowanceTarget, BigInt(sellAmountBase)],
-                            account: address,
-                            chain: publicClient.chain
-                        });
-                        addMessage("SYSTEM", `⏳ Approveトランザクション送信完了。承認を待機中...`, "SYSTEM");
-                        await publicClient.waitForTransactionReceipt({ hash });
-                        addMessage("SYSTEM", `✅ Approve完了。続いてスワップを実行します。`, "SYSTEM");
-                    }
-                }
-
-                // --------- SWAP EXECUTION FLOW ---------
-                addMessage("SYSTEM", `✍️ ウォレットでトランザクションを承認してください (Swap)`, "SYSTEM");
-                const txHash = await sendTransactionAsync({
-                    to: quote.to as `0x${string}`,
-                    data: quote.data as `0x${string}`,
-                    value: quote.value ? BigInt(quote.value) : 0n,
+                console.warn("[TRADE_CALL]", {
+                    chainId: effectiveChainId,
+                    srcSymbol: action === "BUY" ? stableSymbol : tokenSymbol,
+                    destSymbol: action === "BUY" ? tokenSymbol : stableSymbol,
+                    amountWei: amountInWei,
+                    fromAddress: effectiveAddress,
+                    mode: currentDemoMode ? "demo" : "real",
+                    auto: (reason === "AI technical signal" || reason?.includes("戦略:"))
                 });
 
-                addMessage("SYSTEM", `🚀 トランザクション送信完了！ネットワークの承認を待機中... (Tx: ${txHash.slice(0, 10)}...)`, "SYSTEM");
+                const tradeRes = await fetch("/api/trade", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chainId: effectiveChainId,
+                        srcSymbol: action === "BUY" ? stableSymbol : tokenSymbol,
+                        destSymbol: action === "BUY" ? tokenSymbol : stableSymbol,
+                        amountWei: amountInWei,
+                        fromAddress: effectiveAddress,
+                    }),
+                });
+
+                const tradeResText = await tradeRes.text();
+                let tradeData: any;
+                try {
+                    tradeData = JSON.parse(tradeResText);
+                } catch (e) {
+                    throw new Error(`Trade API Non-JSON response (Status:${tradeRes.status}): ${tradeResText.slice(0, 200)}`);
+                }
+
+                if (!tradeRes.ok || !tradeData.ok) {
+                    throw new Error(tradeData.error || `Trade API failed (Status:${tradeRes.status})`);
+                }
+
+                const txHash = tradeData.txHash;
+                setLastAction(action);
+                addMessage("SYSTEM", `🚀 トレード実行完了！ (Tx: ${txHash.slice(0, 10)}...)`, "SYSTEM");
 
                 if (publicClient) {
-                    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+                    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash as `0x${string}` });
                     if (receipt.status === 'success') {
-                        addMessage("manager", `✅ [オンチェーン実行完了] トランザクションが成功しました！`, "EXECUTION");
-                        if (isSoundEnabled) playSuccess();
+                        addMessage("manager", `✅ ParaSwapでの取引が成功しました！`, "EXECUTION");
+                        if (isSoundEnabled) playTrade();
                         unlockAchievement("first-trade");
                     } else {
-                        throw new Error("Transaction reverted on-chain.");
+                        throw new Error("Transaction execution failed on blockchain.");
                     }
                 }
 
-                // NOTE: For a real app, we would fetch the exact received amounts from event logs.
-                // Here we will just record the simulated delta into our local portfolio for UI consistency.
+                setTradeInProgress(false);
                 return true;
-
             } catch (error: any) {
-                console.error("On-chain swap error:", error);
-
-                // Format user-friendly error message
-                let errorMsg = error.message.substring(0, 100);
-                if (error.message.includes("User rejected")) errorMsg = "ユーザーによってキャンセルされました。";
-                if (error.message.includes("insufficient funds")) errorMsg = "ガス代（ネイティブトークン）または残高が不足しています。";
-
-                addMessage("SYSTEM", `❌ [取引失敗] オンチェーン取引に失敗しました: ${errorMsg}`, "ALERT");
+                setTradeInProgress(false);
+                lastTradeErrorTime.current = Date.now();
+                console.error("ParaSwap trade error:", error);
+                let errorMsg = error.message.substring(0, 150);
+                addMessage("SYSTEM", `❌ [取引失敗] ${errorMsg}`, "ALERT");
                 return false;
             }
         }
@@ -932,8 +1022,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         // ==========================================
         // DEMO EXECUTION PATH (Simulation)
         // ==========================================
-        const totalValue = amount * price;
-
+        const validPrice = (price && price > 0) ? price : (allMarketPrices[tokenSymbol]?.price || 0);
+        const totalValue = amount * validPrice;
         const selectedDex = dex || ["Uniswap", "QuickSwap", "PancakeSwap", "SushiSwap"][Math.floor(Math.random() * 4)];
 
         // Phase 11: Accurate Fee & Slippage (0.3% Swap + 0.1% Slip + Dynamic Gas)
@@ -950,17 +1040,19 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         const totalFee = swapFee + slippage + gasFee;
 
         // Effective Price for calculations (including slippage impact on price)
-        const effectivePrice = action === "BUY" ? price * 1.001 : price * 0.999;
+        const effectivePrice = action === "BUY" ? validPrice * 1.001 : validPrice * 0.999;
 
         if (action === "BUY") {
             if (portfolioRef.current.cashbalance < (totalValue + totalFee)) {
                 addMessage("SYSTEM", `⚠️ 残高不足: 必要 ¥${(totalValue + totalFee).toLocaleString()} / 保有 ¥${portfolioRef.current.cashbalance.toLocaleString()}`, "ALERT");
+                setTradeInProgress(false);
                 return false;
             }
         } else {
             const pos = portfolioRef.current.positions.find(p => p.symbol === tokenSymbol);
             if (!pos || pos.amount < amount) {
                 addMessage("SYSTEM", `⚠️ 保有トークン不足: ${tokenSymbol}`, "ALERT");
+                setTradeInProgress(false);
                 return false;
             }
         }
@@ -1064,6 +1156,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         addMessage("manager", `[実行完了] ${action === "BUY" ? "購 入" : "売 却"}完了: ${amount} ${tokenSymbol} @ ¥${price.toLocaleString()}${action === "SELL" ? ` (損益: ¥${tradePnl.toLocaleString()})` : ""}`, "EXECUTION");
         if (isSoundEnabled) playSuccess();
         unlockAchievement("first-trade");
+
+        setTradeInProgress(false);
         return true;
     }, [isConnected, isDemoMode, addMessage, isSoundEnabled, playTrade, playSuccess, takeProfitThreshold, agents, awardExp, updateAchievementProgress, addDisPoints, unlockAchievement]);
 
@@ -1097,10 +1191,6 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
     const addUserMessage = (content: string) => {
         addMessage("USER", content, "OPINION");
-        setTimeout(() => {
-            const agent = AGENTS[Math.floor(Math.random() * AGENTS.length)];
-            addMessage(agent.id, `>> USER: Received. Analyzing...`, "OPINION");
-        }, 1000);
     };
 
     const resetSimulation = () => {
@@ -1235,13 +1325,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
     const riskAlertTriggered = useRef({ stopLoss: false, takeProfit: false });
 
-    // Fetch real market prices from CoinGecko API
+    // Fetch real market prices from internal aggregator API
     useEffect(() => {
         const loadPrices = async () => {
             try {
                 const symbols = ["BTC", "ETH", "SOL", "BNB", "MATIC", "DOGE"];
                 const prices = await fetchMarketPrices(symbols);
-                if (Object.keys(prices).length > 0) {
+                if (prices && Object.keys(prices).length > 0) {
                     setAllMarketPrices(prev => {
                         const updated = { ...prev };
                         Object.entries(prices).forEach(([symbol, data]) => {
@@ -1253,16 +1343,15 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         return updated;
                     });
                     setRealPricesLoaded(true);
-                    console.log("[J-DEX] Real market prices loaded:", prices);
                 }
             } catch (e) {
-                console.warn("[J-DEX] Failed to fetch real prices, using fallback:", e);
+                console.warn("[J-DEX] Failed to fetch real prices:", e);
             }
         };
         loadPrices();
         const interval = setInterval(loadPrices, 60000); // Refresh every 60s
         return () => clearInterval(interval);
-    }, []);
+    }, [addMessage]);
 
     // Auto-exit Demo Mode when a live Wallet connects
     useEffect(() => {
@@ -1292,7 +1381,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     // Sync Wallet Balance to Portfolio Cash when Connected
     useEffect(() => {
         if (isConnected && !isDemoMode && balanceData) {
-            // Web3 connections sometimes append "t" for testnets, normalize back to mainnet ticker for CoinGecko Lookup
+            // Web3 connections sometimes append "t" for testnets, normalize back to mainnet ticker for Market Data Lookup
             let nativeSymbol = (balanceData.symbol || "BNB").toUpperCase();
             if (nativeSymbol === "TBNB" || nativeSymbol === "WBNB") nativeSymbol = "BNB";
             if (nativeSymbol === "TMATIC" || nativeSymbol === "POL") nativeSymbol = "MATIC";
@@ -1456,6 +1545,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             const currentMarketData = marketDataRef.current;
             const currentPortfolio = portfolioRef.current;
             const currentAgents = agentsRef.current;
+            const isBuyActuallyAllowed = isDemoMode; // Strictly disable BUY in Real Mode test phase
+
 
             let newPrice = currentMarketData.price;
             let newTrend = currentMarketData.trend;
@@ -1588,8 +1679,12 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     // Signal based execution logic
                     const isTargetStable = TRADE_CONFIG.STABLECOINS.includes(selectedCurrency.toUpperCase());
 
-                    // Allow autonomous execution if AutoPilot is enabled OR in Demo mode
-                    const canExecuteAutonomous = isDemoMode || isAutoPilotEnabled;
+                    // [REFINED GUARD] Autonomous execution must respect locks and cooldown
+                    const now = Date.now();
+                    const autonomousCooldown = 30000; // 30s cooldown for auto
+                    const canExecuteAutonomous = isAutoPilotEnabled &&
+                        !tradeInProgress &&
+                        (now - lastTradeRef.current > autonomousCooldown);
 
                     if (canExecuteAutonomous && agent.id === "technical" && Math.random() > 0.8 && !isTargetStable) {
                         const action = Math.random() > 0.5 ? "BUY" : "SELL";
@@ -1598,7 +1693,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         const pos = currentPortfolio.positions.find(p => p.symbol === selectedCurrency);
                         const hasInventory = action === "SELL" ? (pos && pos.amount >= amount) : true;
 
-                        if (action === "BUY" && currentPositions < 3) {
+                        if (action === "BUY" && currentPositions < 3 && isBuyActuallyAllowed) {
                             type = "EXECUTION";
                             const jpyPrice = convertJPY(newPrice);
                             content = `${action === "BUY" ? "購入実行" : "売却実行"}: ${amount} ${selectedCurrency} @ ¥${jpyPrice.toLocaleString()}`;
@@ -1856,7 +1951,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     }
 
 
-                    if (shouldBuy && currentPortfolio.cashbalance >= (amountInJPY + (amountInJPY * 0.003))) {
+                    if (shouldBuy && currentPortfolio.cashbalance >= (amountInJPY + (amountInJPY * 0.003)) && isBuyActuallyAllowed) {
                         // CONCENTRATION LIMIT & POSITION COUNT CHECK
                         const existingPosCount = currentPortfolio.positions.length;
                         const existingPos = currentPortfolio.positions.find(p => p.symbol === targetSymbol);
@@ -1906,8 +2001,26 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             (window as any).jdex_addDiscussion = addDiscussion;
+            (window as any).__DIS_EXECUTE_TRADE__ = executeTrade;
+            console.warn("[DEBUG] window.__DIS_EXECUTE_TRADE__ ready");
         }
-    }, [addDiscussion]);
+    }, [addDiscussion, executeTrade]);
+
+    // [VERIFICATION ONLY] One-time Manual SELL test to trigger Signature UI
+    useEffect(() => {
+        const IS_PROD = process.env.NODE_ENV === "production";
+        if (IS_PROD) return; // Productionでは完全停止
+
+        // shouldFireOnceRef が true の場合のみ、接続直後に SELL をトリガーする
+        if (effectiveIsConnected && !isDemoMode && effectiveAddress && effectiveChainId && shouldFireOnceRef.current && executeTrade) {
+            console.log('[DEBUG] Immediate one-time SELL test triggered on connection');
+            const bnbPrice = allMarketPrices["BNB"]?.price || 600;
+            // Execute a small sell trade for verification
+            executeTrade("BNB", "SELL", 0.005, bnbPrice, "IMMEDIATE_TEST_TRIGGER").catch(err => {
+                console.log('[DEBUG] Immediate test SELL error (expected/ignored):', err.message);
+            });
+        }
+    }, [effectiveIsConnected, isDemoMode, effectiveAddress, effectiveChainId, executeTrade, allMarketPrices]);
 
     return (
         <SimulationContext.Provider value={{
@@ -1942,6 +2055,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             addMessage,
             liveInitialBalance,
             isAutoPilotEnabled, setIsAutoPilotEnabled,
+            isPricingPaused, resumePricing,
         }}>
             {children}
         </SimulationContext.Provider>

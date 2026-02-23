@@ -32,7 +32,8 @@ export function TopBar() {
     const { user, logout, updateAvatar, updateNickname } = useAuth();
     const {
         portfolio, disPoints, isDemoMode, setIsDemoMode, startFixedDemo, demoStrategy, setDemoStrategy, initialTradeSymbol, setInitialTradeSymbol,
-        isMockConnected, mockAddress, toggleMockConnection, isAutoPilotEnabled, setIsAutoPilotEnabled
+        isMockConnected, mockAddress, toggleMockConnection, isAutoPilotEnabled, setIsAutoPilotEnabled,
+        isPricingPaused, resumePricing
     } = useSimulation();
     const { currency, toggleCurrency, formatLarge } = useCurrency();
     const title = pageTitles[pathname] || "DIS-DEX";
@@ -97,14 +98,26 @@ export function TopBar() {
                     <span className={currency === 'JPY' ? 'text-gold-400' : 'text-gray-500'}>¥</span>
                 </button>
 
-                {/* Total Assets (Portfolio) */}
                 <div className="hidden sm:flex items-center gap-3 px-4 py-1.5 rounded-full bg-gold-500/5 border border-gold-500/10 hover-lift transition-all hover:bg-gold-500/10 group cursor-default">
                     <span className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter group-hover:text-gold-300 transition-colors">
                         運用資産 {(isDemoMode && !isMockConnected) ? "(DEMO)" : `(${currency})`}
                     </span>
-                    <span className="text-sm font-bold text-gold-400 font-mono shadow-gold-500/20 drop-shadow-sm">
-                        {formatLarge(portfolio?.totalValue || 0)}
+                    <span className={cn(
+                        "text-sm font-bold font-mono shadow-gold-500/20 drop-shadow-sm",
+                        isPricingPaused ? "text-gray-500 italic" : "text-gold-400"
+                    )}>
+                        {isPricingPaused ? "N/A" : formatLarge(portfolio?.totalValue || 0)}
                     </span>
+                    {isPricingPaused && (
+                        <button
+                            onClick={resumePricing}
+                            className="ml-1 px-2 py-0.5 bg-gold-500 text-black text-[9px] font-black rounded hover:bg-gold-400 transition-colors flex items-center gap-1"
+                            title="価格更新を再開"
+                        >
+                            <Play className="w-2.5 h-2.5" />
+                            再開
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -171,7 +184,12 @@ export function TopBar() {
                                         if (!connected) {
                                             return (
                                                 <button
-                                                    onClick={openConnectModal}
+                                                    onClick={async () => {
+                                                        openConnectModal();
+                                                        // モーダルは非同期で完了するため、接続完了の検知は
+                                                        // SimulationContext 側の useAccount() 監視に委譲する。
+                                                        // ここでは openConnectModal() の呼び出しのみ行う（副作用なし）。
+                                                    }}
                                                     className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-gold-500/10 border border-gold-500/30 text-gold-400 hover:bg-gold-500/20 transition-all text-[10px] sm:text-xs font-mono shadow-[0_0_10px_rgba(255,215,0,0.1)]"
                                                 >
                                                     <Wallet className="w-3.5 h-3.5" />

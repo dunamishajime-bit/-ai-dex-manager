@@ -662,7 +662,7 @@ export default function AdminPage() {
                             <h2 className="text-lg font-bold flex items-center gap-2"><BarChart3 className="w-5 h-5 text-red-400" /> API使用量モニタリング</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 {[
-                                    { api: "CoinGecko", used: 245, limit: 500, color: "bg-emerald-500" },
+                                    { api: "Market Data", used: 245, limit: 500, color: "bg-emerald-500" },
                                     { api: "Gemini", used: 89, limit: 1000, color: "bg-blue-500" },
                                     { api: "SendGrid", used: 12, limit: 100, color: "bg-purple-500" },
                                 ].map((item, i) => (

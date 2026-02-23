@@ -37,7 +37,7 @@ export function LearningDashboard() {
                         <span>意思決定ウェイト可視化</span>
                     </div>
 
-                    <div className="flex-1 w-full relative">
+                    <div className="flex-1 w-full h-[200px] min-h-[200px] relative">
                         <ResponsiveContainer width="100%" height="100%">
                             <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
                                 <PolarGrid stroke="#334155" />

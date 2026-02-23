@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChainId, CHAIN_OPTIONS, fetchTrendingCoins, TrendingCoin, fetchTokensByChain, searchCoinsWithMarketData } from "@/lib/dex-service";
-import { fetchTopCoinsMarkets } from "@/lib/coingecko-optimizer";
+
 import { useSimulation } from "@/context/SimulationContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import {
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Token info derived from CoinGecko coins/markets
+// Token info derived from Market Data
 export interface TradableToken {
     id: string;
     symbol: string;
@@ -38,8 +38,8 @@ function getAvailableDEXs(tokenId: string, symbol: string): string[] {
         ethereum: ["Uniswap", "SushiSwap", "1inch", "Balancer"],
         bitcoin: ["Uniswap (WBTC)", "PancakeSwap (BTCB)", "Curve"],
         solana: ["Raydium", "Jupiter", "Orca"],
-        "binancecoin": ["PancakeSwap", "Uniswap", "1inch"],
-        "matic-network": ["Uniswap", "QuickSwap", "Balancer"],
+        "bnb": ["PancakeSwap", "Uniswap", "1inch"],
+        "polygon": ["Uniswap", "QuickSwap", "Balancer"],
         avalanche: ["Trader Joe", "Pangolin", "GMX"],
         arbitrum: ["Camelot", "GMX", "Uniswap"],
         optimism: ["Velodrome", "Uniswap"],
@@ -102,7 +102,7 @@ const ITEMS_PER_PAGE = 20;
 
 export function TradableTokensTable({ onSelectToken, selectedChain = "all", initialTokenSymbol }: Props) {
     const router = useRouter(); // Use App Router
-    const { formatPrice, formatLarge, currency } = useCurrency();
+    const { formatPrice, formatLarge, currency, setJpyRate } = useCurrency();
     const [tokens, setTokens] = useState<TradableToken[]>([]);
     const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
     const [loading, setLoading] = useState(true);
@@ -138,114 +138,109 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
         return () => clearTimeout(timer);
     }, [search]);
 
-    // Fetch token data from CoinGecko
+    // Fetch token data from Centralized Dashboard API
     const loadTokens = useCallback(async () => {
-        if (debouncedSearch && debouncedSearch.length >= 2) {
-            setSearchLoading(true);
-        } else {
+        if (!debouncedSearch || debouncedSearch.length < 2) {
             setLoading(true);
+        } else {
+            setSearchLoading(true);
         }
         try {
-            // Parallel fetch for trending coins (only on first load or manual refresh, but here simple is fine)
-            // Ideally trending should be separate, but let's keep structure.
-            fetchTrendingCoins().then((trendData: TrendingCoin[]) => {
-                if (trendData) setTrendingCoins(trendData);
-            });
+            const res = await fetch("/api/market/dashboard");
+            const data = await res.json();
+
+            if (!data.ok) throw new Error(data.error);
+
+            // Sync server JPY rate
+            if (data.fxRate) setJpyRate(data.fxRate);
 
             let marketData: any[] = [];
 
             if (debouncedSearch && debouncedSearch.length >= 2) {
-                // API Search
-                marketData = await searchCoinsWithMarketData(debouncedSearch);
+                // SERVER-SIDE SEARCH
+                const sRes = await fetch(`/api/tokens/search?q=${encodeURIComponent(debouncedSearch)}`);
+                const sData = await sRes.json();
+
+                if (sData.ok) {
+                    marketData = sData.tokens;
+                    // If results are from external search, they might lack price. 
+                    // This is OK as the table will show prices from the next poll or N/A
+                } else if (sData.status === 429) {
+                    console.warn("Search rate limited");
+                    // Fallback to local search in current tokens
+                    marketData = tokens.filter(t => t.symbol.toLowerCase().includes(debouncedSearch.toLowerCase()));
+                }
                 setHasMore(false);
                 setWasSearched(true);
             } else {
-                // List Fetch
                 setWasSearched(false);
-                if (selectedChain === "all" || selectedChain === "favorites") {
-                    // Fetch top 500 (2 pages of 250) for "all"
-                    const [page1, page2] = await Promise.all([
-                        fetchTopCoinsMarkets(1, 250),
-                        fetchTopCoinsMarkets(2, 250)
-                    ]);
-                    marketData = [...(page1 || []), ...(page2 || [])];
-                    setHasMore(marketData.length >= 500);
-                    setLastFetchedPage(2);
+                setHasMore(false); // Categories are fixed size now (10-15 tokens)
+
+                if (selectedChain === "all") {
+                    marketData = data.dexTradableMajorsTop10;
+                } else if (selectedChain === "bsc") {
+                    marketData = data.bnbTop15;
+                } else if (selectedChain === "polygon") {
+                    marketData = data.polygonTop15;
+                } else if (selectedChain === "favorites") {
+                    // Current user defaults to "default" in simulated backend
+                    marketData = data.favoritesByUser["default"] || [];
                 } else {
-                    // Fetch top 100 for specific chain
-                    const [page1, page2] = await Promise.all([
-                        fetchTokensByChain(selectedChain, 1),
-                        fetchTokensByChain(selectedChain, 2)
-                    ]);
-                    marketData = [...(page1 || []), ...(page2 || [])];
-                    setHasMore(marketData.length >= 100);
-                    setLastFetchedPage(2);
+                    marketData = data.dexTradableMajorsTop10;
                 }
             }
 
             if (marketData && marketData.length > 0) {
                 const mapped: TradableToken[] = marketData.map((coin: any) => ({
-                    id: coin.id,
+                    id: coin.id || coin.providerId,
                     symbol: (coin.symbol || "").toUpperCase(),
                     name: coin.name,
                     image: coin.image || "",
-                    currentPrice: coin.current_price || 0,
-                    priceChange24h: coin.price_change_percentage_24h || 0,
+                    currentPrice: coin.usdPrice || coin.current_price || 0, // Use USD as base
+                    priceChange24h: coin.priceChange24h || coin.price_change_percentage_24h || 0,
                     priceChange7d: 0,
-                    volume24h: coin.total_volume || 0,
-                    marketCap: coin.market_cap || 0,
-                    marketCapRank: coin.market_cap_rank || 999,
+                    volume24h: coin.volume24h || coin.total_volume || 0,
+                    marketCap: coin.marketCap || coin.market_cap || 0,
+                    marketCapRank: coin.marketCapRank || coin.market_cap_rank || 999,
                     sparkline: coin.sparkline_in_7d?.price || [],
-                    availableDEXs: getAvailableDEXs(coin.id, coin.symbol || ""),
+                    availableDEXs: coin.availableDEXs || getAvailableDEXs(coin.id, coin.symbol || ""),
                     high24h: coin.high_24h || 0,
                     low24h: coin.low_24h || 0,
                 }));
                 setTokens(mapped);
                 setLastUpdated(new Date());
-                // Reset page to 1 when data source changes
                 setCurrentPage(1);
-            } else if (marketData === null || marketData.length === 0) {
-                // Only clear if search didn't return anything
-                if (debouncedSearch.length >= 2) {
-                    setTokens([]);
-                }
+            } else if (debouncedSearch.length >= 2) {
+                setTokens([]);
             }
         } catch (e) {
             console.error("Token fetch failed:", e);
         } finally {
             setLoading(false);
+            setRefreshing(false);
             setSearchLoading(false);
         }
-    }, [debouncedSearch, selectedChain]);
+    }, [debouncedSearch, selectedChain, setJpyRate]);
 
     // Refresh a single token's data
     const handleIndividualRefresh = async (tokenId: string, symbol: string) => {
         setRefreshingRows(prev => new Set(prev).add(tokenId));
         try {
-            // Fetch only this coin in USD
-            const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${tokenId}&sparkline=true`;
-            const data = await fetch(url).then(res => res.json());
+            const res = await fetch(`/api/market/prices?ids=${tokenId}`);
+            const data = await res.json();
 
-            if (data && data.length > 0) {
-                const coin = data[0];
-                const updatedToken: TradableToken = {
-                    id: coin.id,
-                    symbol: (coin.symbol || "").toUpperCase(),
-                    name: coin.name,
-                    image: coin.image || "",
-                    currentPrice: coin.current_price || 0,
-                    priceChange24h: coin.price_change_percentage_24h || 0,
-                    priceChange7d: 0,
-                    volume24h: coin.total_volume || 0,
-                    marketCap: coin.market_cap || 0,
-                    marketCapRank: coin.market_cap_rank || 999,
-                    sparkline: coin.sparkline_in_7d?.price || [],
-                    availableDEXs: getAvailableDEXs(coin.id, coin.symbol || ""),
-                    high24h: coin.high_24h || 0,
-                    low24h: coin.low_24h || 0,
-                };
-
-                setTokens(prev => prev.map(t => t.id === tokenId ? updatedToken : t));
+            if (data && data[tokenId]) {
+                const coin = data[tokenId];
+                setTokens(prev => prev.map(t => {
+                    if (t.id === tokenId) {
+                        return {
+                            ...t,
+                            currentPrice: coin.usd,
+                            priceChange24h: coin.usd_24h_change || t.priceChange24h
+                        };
+                    }
+                    return t;
+                }));
             }
         } catch (e) {
             console.error("Individual refresh failed:", e);
@@ -262,44 +257,8 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
         if (loadingMore || !hasMore) return;
         setLoadingMore(true);
         try {
-            const nextPage = lastFetchedPage + 1;
-            let newData: any[] = [];
-
-            if (selectedChain === "all" || selectedChain === "favorites") {
-                newData = await fetchTopCoinsMarkets(nextPage, 250);
-            } else {
-                newData = await fetchTokensByChain(selectedChain, nextPage);
-            }
-
-            if (newData && newData.length > 0) {
-                const mapped: TradableToken[] = newData.map((coin: any) => ({
-                    id: coin.id,
-                    symbol: (coin.symbol || "").toUpperCase(),
-                    name: coin.name,
-                    image: coin.image || "",
-                    currentPrice: coin.current_price || 0,
-                    priceChange24h: coin.price_change_percentage_24h || 0,
-                    priceChange7d: 0,
-                    volume24h: coin.total_volume || 0,
-                    marketCap: coin.market_cap || 0,
-                    marketCapRank: coin.market_cap_rank || 999,
-                    sparkline: coin.sparkline_in_7d?.price || [],
-                    availableDEXs: getAvailableDEXs(coin.id, coin.symbol || ""),
-                    high24h: coin.high_24h || 0,
-                    low24h: coin.low_24h || 0,
-                }));
-
-                setTokens(prev => {
-                    // Prevent duplicates
-                    const existingIds = new Set(prev.map(t => t.id));
-                    const uniqueNew = mapped.filter(t => !existingIds.has(t.id));
-                    return [...prev, ...uniqueNew];
-                });
-                setLastFetchedPage(nextPage);
-                setHasMore(newData.length === 250 || (selectedChain !== "all" && newData.length === 50));
-            } else {
-                setHasMore(false);
-            }
+            // Paging currently disabled for static/dashboard universe
+            setHasMore(false);
         } catch (e) {
             console.error("Load more failed:", e);
         } finally {
@@ -320,7 +279,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
 
     useEffect(() => {
         loadTokens();
-        const interval = setInterval(loadTokens, 60000); // 1 min update
+        const interval = setInterval(loadTokens, 10000); // 10 sec update
         return () => clearInterval(interval);
     }, [loadTokens]); // loadTokens now depends on debouncedSearch and selectedChain
 

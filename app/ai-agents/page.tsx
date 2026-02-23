@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { AgentCouncil } from "@/components/features/AgentCouncil";
 import { useSimulation } from "@/context/SimulationContext";
 import { generateGeminiDiscussion } from "@/lib/gemini-service";
-import { fetchAIRecommendations, AIRecommendation } from "@/lib/coingecko-optimizer";
 import { fetchCoinDetails } from "@/lib/dex-service";
 import { AgentMessage, DiscussionResult } from "@/lib/ai-agents";
 
@@ -20,7 +19,7 @@ export default function AgentsPage() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [discussionData, setDiscussionData] = useState<{ messages: AgentMessage[], result: DiscussionResult } | null>(null);
     const [statusMessage, setStatusMessage] = useState("");
-    const [selectedCoin, setSelectedCoin] = useState<AIRecommendation | null>(null);
+    const [selectedCoin, setSelectedCoin] = useState<any | null>(null);
     const [isAutoPilot, setIsAutoPilot] = useState(false);
     const [customSymbol, setCustomSymbol] = useState("");
 
@@ -47,7 +46,7 @@ export default function AgentsPage() {
             setStatusMessage(autoSelect ? "🤖 AI Autonomous Scanning..." : "Scanning market for opportunities...");
             if (autoSelect) await new Promise(r => setTimeout(r, 2000));
 
-            let target: AIRecommendation | null = null;
+            let target: any = null;
             let details: any = null;
 
             if (!autoSelect && customSymbol.trim()) {
@@ -71,45 +70,59 @@ export default function AgentsPage() {
                             marketCap: found.market_cap || 0,
                             score: 90,
                             reason: "Manual Request"
-                        } as AIRecommendation;
+                        };
                     }
                 }
             }
 
             if (!target) {
-                const recommendations = await fetchAIRecommendations();
-                const candidates = autoSelect
-                    ? recommendations.sort(() => 0.5 - Math.random()).slice(0, 5)
-                    : recommendations;
-                for (const candidate of candidates) {
+                // Instead of fetchAIRecommendations, we use dashboard data
+                const dashRes = await fetch("/api/market/dashboard");
+                const dashData = await dashRes.json();
+
+                let candidates: any[] = [];
+                if (dashData.ok && dashData.universe) {
+                    candidates = dashData.universe.majorsTop10;
+                }
+
+                if (candidates.length > 0) {
+                    const candidate = candidates[Math.floor(Math.random() * candidates.length)];
                     setStatusMessage(`Fetching data for ${candidate.name} (${candidate.symbol})...`);
-                    if (target) await new Promise(r => setTimeout(r, 1500));
-                    try {
-                        details = await fetchCoinDetails(candidate.id);
-                        if (details) {
-                            target = candidate;
-                            break;
-                        }
-                    } catch (e) {
-                        console.warn(`Failed to fetch details for ${candidate.id}`, e);
+                    details = await fetchCoinDetails(candidate.providerId || candidate.id);
+                    if (details) {
+                        target = {
+                            id: candidate.providerId || candidate.id,
+                            symbol: candidate.symbol,
+                            name: candidate.name,
+                            currentPrice: details.current_price,
+                            priceChange24h: details.price_change_percentage_24h,
+                            image: candidate.image || "",
+                            volume24h: details.total_volume,
+                            marketCap: details.market_cap,
+                            score: 85,
+                            reason: "Algorithm Analysis"
+                        };
                     }
                 }
             }
+
             if (!target || !details) {
+                // Final Fallback
                 target = {
                     id: "bitcoin",
                     symbol: "BTC",
                     name: "Bitcoin",
                     currentPrice: 9500000,
                     priceChange24h: 2.5,
-                    image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+                    image: "https://assets.coincap.io/assets/icons/btc@2x.png",
                     volume24h: 5000000000000,
                     marketCap: 150000000000000,
                     score: 95,
                     reason: "Fallback"
-                } as AIRecommendation;
+                };
                 details = await fetchCoinDetails("bitcoin");
             }
+
             setSelectedCoin(target);
             setStatusMessage(autoSelect ? `🤖 AI Selected: ${target.name}` : "データ解析完了。評議会を招集しています...");
             const rawResult = await generateGeminiDiscussion(

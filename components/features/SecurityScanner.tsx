@@ -15,7 +15,8 @@ interface ScanResult {
 // Minimal on-chain security check using Go Plus API (free tier)
 async function scanContract(address: string, chainId: number): Promise<ScanResult> {
     try {
-        const url = `https://api.gopluslabs.io/api/v1/token_security/${chainId}?contract_addresses=${address}`;
+        const baseUrl = `https://api.gopluslabs.io/api/v1/token_security/${chainId}`;
+        const url = `/api/rpcProxy?target=${encodeURIComponent(baseUrl)}&contract_addresses=${address}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error("API error");
         const data = await res.json();

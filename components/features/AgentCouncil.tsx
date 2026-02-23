@@ -127,6 +127,14 @@ export function AgentCouncil({ messages, result, symbol, onComplete, isAutoPlay 
     const handleAutoTrade = async () => {
         if (!result || !symbol || tradeRequested) return;
 
+        console.warn("[UI_TRADE_CLICK]", {
+            mode: "COUNCIL-AUTO",
+            ts: Date.now(),
+            symbol,
+            action: result.action,
+            amount: result.autoTradeProposal?.amount,
+        });
+
         try {
             const amount = result.autoTradeProposal?.amount || 0.1;
             const price = result.autoTradeProposal?.entryPrice || 0; // Fallback or handle

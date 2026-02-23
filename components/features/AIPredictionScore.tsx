@@ -131,20 +131,12 @@ export function AIPredictionScore({ symbol = "BTC", coinId = "bitcoin" }: Props)
                         : 0;
                     setCoinName(simCoin.name || symbol);
                 } else {
-                    // Fallback to CoinGecko
-                    const res = await fetch(
-                        `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`
-                    );
-                    if (res.ok) {
-                        const data = await res.json();
-                        change24h = data.market_data?.price_change_percentage_24h || 0;
-                        change7d = data.market_data?.price_change_percentage_7d || 0;
-                        rank = data.market_cap_rank || 50;
-                        const mc = data.market_data?.market_cap?.usd || 1;
-                        const vol24 = data.market_data?.total_volume?.usd || 0;
-                        vol = vol24 / mc;
-                        setCoinName(data.name || symbol);
-                    }
+                    // Fallback: If not in context, we could fetch from dashboard API but if it's not a major it might not be there.
+                    // For now, if not in context, we use neutral scores to avoid direct GC calls.
+                    change24h = 0;
+                    change7d = 0;
+                    rank = 50;
+                    vol = 0.02;
                 }
 
                 if (!cancelled) {

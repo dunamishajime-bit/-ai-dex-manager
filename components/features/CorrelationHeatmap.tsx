@@ -6,29 +6,16 @@ import { TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
 
 // Major crypto pairs to correlate
 const ASSETS = ["BTC", "ETH", "SOL", "BNB", "AVAX", "ADA", "DOT", "LINK"];
-const COINGECKO_IDS: Record<string, string> = {
-    BTC: "bitcoin",
-    ETH: "ethereum",
-    SOL: "solana",
-    BNB: "binancecoin",
-    AVAX: "avalanche-2",
-    ADA: "cardano",
-    DOT: "polkadot",
-    LINK: "chainlink",
-};
 
 // Cache for 30-day price data
 let priceCache: Record<string, number[]> = {};
 let cacheExpiry = 0;
 
-async function fetchPrices(coinId: string): Promise<number[]> {
+async function fetchPrices(symbol: string): Promise<number[]> {
     try {
-        const res = await fetch(
-            `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=30&interval=daily`,
-            { cache: "force-cache" }
-        );
-        if (!res.ok) return [];
+        const res = await fetch(`/api/market/chart?id=${symbol}&days=30`);
         const data = await res.json();
+        if (!data.ok || !data.prices) return [];
         return data.prices.map((p: [number, number]) => p[1]);
     } catch {
         return [];
@@ -90,7 +77,7 @@ export function CorrelationHeatmap() {
         // Fetch all with stagger to avoid rate limiting
         const results: Record<string, number[]> = {};
         for (const asset of ASSETS) {
-            const prices = await fetchPrices(COINGECKO_IDS[asset]);
+            const prices = await fetchPrices(asset);
             results[asset] = prices;
             await new Promise(r => setTimeout(r, 300)); // stagger
         }

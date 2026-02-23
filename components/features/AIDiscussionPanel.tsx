@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { AI_AGENTS, AIAgent, AgentMessage, generateDiscussion, DiscussionResult } from "@/lib/ai-agents";
+import { AI_AGENTS, AIAgent, AgentMessage, generateDiscussion, DiscussionResult, normalizeToUSDTPair } from "@/lib/ai-agents";
 import { BarChart3, Heart, Shield, Lightbulb, Star, AlertTriangle, Maximize2, Minimize2, Bot, CheckCircle, ShoppingCart, ArrowRightLeft, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSimulation } from "@/context/SimulationContext";
 import { useAgents } from "@/context/AgentContext";
-import { getSymbolId } from "@/lib/market-service";
 import { fetchCoinDetails, CoinDetails } from "@/lib/dex-service";
 import { useUserLearning } from "@/context/UserLearningContext";
 import { generateAgentReply } from "@/lib/gemini-service";
@@ -15,7 +14,7 @@ import { Send, User } from "lucide-react";
 
 interface Props {
     pair: string;
-    coinId?: string; // Optional CoinGecko ID
+    coinId?: string; // Optional Internal ID
     price?: number; // Optional, fetched internally if not provided
     autoStart?: boolean;
 }
@@ -383,7 +382,7 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
     useEffect(() => {
         const fetchMarketData = async () => {
             const symbol = pair.split("/")[0]; // e.g. "BTC" from "BTC/JPY"
-            const coinId = initialCoinId || getSymbolId(symbol);
+            const coinId = initialCoinId || symbol;
             if (coinId) {
                 try {
                     const data = await fetchCoinDetails(coinId);
@@ -446,7 +445,8 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
         setIsGatheringData(true);
         setGatheringStep(0);
 
-        // Phase 3: Load short-term memory from localStorage
+        const normalizedPair = normalizeToUSDTPair(pair);
+        const memoryKey = `dis_memory_${normalizedPair.replace('/', '_')}`;
         let lastDiscussionSummary: string | undefined;
         try {
             const stored = localStorage.getItem(memoryKey);
@@ -459,7 +459,7 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
             // Try to fetch if missing
             if (!currentMarketData && pair) {
                 const symbol = pair.split("/")[0];
-                const finalCoinId = initialCoinId || getSymbolId(symbol);
+                const finalCoinId = initialCoinId || symbol;
                 if (finalCoinId) {
                     try {
                         currentMarketData = await fetchCoinDetails(finalCoinId);
@@ -495,7 +495,7 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
             setGatheringStep(4);
             await new Promise(r => setTimeout(r, 800));
 
-            const { messages: newMsgs, result: newResult } = await generateDiscussion(pair, priceToUse, agents, currentMarketData || undefined, newsArray);
+            const { messages: newMsgs, result: newResult } = await generateDiscussion(normalizedPair, priceToUse, agents, currentMarketData || undefined, newsArray);
             setIsGatheringData(false);
             setGatheringStep(0);
             setMessages(newMsgs);
@@ -616,6 +616,14 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
         // Suggested amount from AI or fixed demo amount (e.g. ¥50,000)
         const targetValueJPY = 50000;
         const amount = result.autoTradeProposal?.amount || parseFloat((targetValueJPY / currentPrice).toPrecision(4));
+
+        console.warn("[UI_TRADE_CLICK]", {
+            mode: "AI-PANEL-REQUEST",
+            ts: Date.now(),
+            pair,
+            action: result.action,
+            amount,
+        });
 
         try {
             const success = await executeTrade(
