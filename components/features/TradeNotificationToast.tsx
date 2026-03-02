@@ -19,14 +19,14 @@ export function TradeNotificationToast() {
     }, [tradeNotifications, dismissNotification]);
 
     return (
-        <div className="fixed bottom-4 left-[216px] z-50 flex flex-col gap-2 max-w-xs">
+        <div className="fixed top-16 right-4 z-50 flex flex-col gap-2 w-[min(360px,calc(100vw-1.5rem))]">
             <AnimatePresence>
                 {tradeNotifications.slice(0, 3).map((notif) => (
                     <motion.div
                         key={notif.id}
-                        initial={{ x: -100, opacity: 0, scale: 0.9 }}
+                        initial={{ x: 80, opacity: 0, scale: 0.95 }}
                         animate={{ x: 0, opacity: 1, scale: 1 }}
-                        exit={{ x: -100, opacity: 0, scale: 0.9 }}
+                        exit={{ x: 80, opacity: 0, scale: 0.95 }}
                         transition={{ type: "spring", damping: 20 }}
                         className={`bg-[#0d1117] border rounded-xl p-3 shadow-2xl backdrop-blur-lg ${notif.type === "BUY"
                             ? "border-emerald-500/30 shadow-emerald-500/10"

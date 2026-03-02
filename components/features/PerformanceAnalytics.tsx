@@ -48,7 +48,7 @@ export function PerformanceAnalytics() {
             <Card title="累積損益推移" className="lg:col-span-2 h-[350px]">
                 <div className="w-full h-[280px] min-h-[280px] pt-4">
                     {pnlData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={220} minWidth={240} minHeight={180}>
                             <LineChart data={pnlData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                                 <XAxis dataKey="time" stroke="#94a3b8" fontSize={12} />
@@ -93,7 +93,7 @@ export function PerformanceAnalytics() {
 
                     <div className="flex-1 w-full h-[150px] min-h-[150px] text-xs">
                         <h4 className="text-gray-400 mb-2 uppercase tracking-wider">トークン別勝率</h4>
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={220} minWidth={240} minHeight={180}>
                             <BarChart data={tokenStats} layout="vertical">
                                 <XAxis type="number" domain={[0, 100]} hide />
                                 <YAxis dataKey="symbol" type="category" width={40} tick={{ fill: '#94a3b8', fontSize: 10 }} />

@@ -19,6 +19,7 @@ const STATIC_MAJORS: TokenRef[] = [
 
 const STATIC_BNB: TokenRef[] = [
     { symbol: "CAKE", name: "PancakeSwap", chain: "BNB", provider: "coincap", providerId: "pancakeswap" },
+    { symbol: "SHIB", name: "Shiba Inu", chain: "BNB", provider: "coincap", providerId: "shiba-inu" },
     { symbol: "XVS", name: "Venus", chain: "BNB", provider: "coincap", providerId: "venus" },
     { symbol: "ALPACA", name: "Alpaca Finance", chain: "BNB", provider: "coincap", providerId: "alpaca-finance" },
     { symbol: "ASTR", name: "AstarNetwork", chain: "BNB", provider: "coincap", providerId: "astar" },
@@ -28,7 +29,7 @@ const STATIC_BNB: TokenRef[] = [
 const STATIC_POLYGON: TokenRef[] = [
     { symbol: "POL", name: "Polygon Ecosystem Token", chain: "POLYGON", provider: "coincap", providerId: "polygon" },
     { symbol: "QUICK", name: "QuickSwap", chain: "POLYGON", provider: "coincap", providerId: "quickswap" },
-    { symbol: "WMATIC", name: "Wrapped Matic", chain: "POLYGON", provider: "coincap", providerId: "wrapped-matic" },
+    { symbol: "WPOL", name: "Wrapped POL", chain: "POLYGON", provider: "coincap", providerId: "wrapped-matic" },
 ];
 
 export async function POST() {

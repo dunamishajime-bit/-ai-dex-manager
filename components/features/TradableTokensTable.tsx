@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -226,11 +226,12 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
     const handleIndividualRefresh = async (tokenId: string, symbol: string) => {
         setRefreshingRows(prev => new Set(prev).add(tokenId));
         try {
-            const res = await fetch(`/api/market/prices?ids=${tokenId}`);
+            const res = await fetch(`/api/market/prices?ids=${symbol}`);
             const data = await res.json();
 
-            if (data && data[tokenId]) {
-                const coin = data[tokenId];
+            const key = symbol.toLowerCase();
+            if (data && data[key]) {
+                const coin = data[key];
                 setTokens(prev => prev.map(t => {
                     if (t.id === tokenId) {
                         return {
@@ -415,7 +416,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
             <div className="p-4 md:p-6 border-b border-gold-500/10 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shrink-0 bg-black/20">
                 <div>
                     <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                        <span className="text-2xl">💎</span> DEX取引可能な仮想通貨
+                        <span className="text-2xl">🔎</span> DEX取引可能通貨の市場データ
                         <span className="text-xs px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-400 border border-gold-500/30 font-mono">
                             LIVE
                         </span>
@@ -426,7 +427,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                         )}
                     </h2>
                     <p className="text-xs text-gray-500 mt-1">
-                        Uniswap・PancakeSwap・Raydiumなどで取引可能なトークン • {filtered.length}通貨
+                        Uniswap / PancakeSwap / Raydium などで取引可能なトークン ・ {filtered.length}通貨
                     </p>
                 </div>
                 <div className="flex items-center gap-2 w-full md:w-auto">
@@ -455,7 +456,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                         onClick={handleManualRefresh}
                         disabled={refreshing}
                         className="p-2 bg-gold-500/10 text-gold-400 border border-gold-500/30 rounded-lg hover:bg-gold-500/20 transition-colors disabled:opacity-50"
-                        title="手動更新"
+                        title="価格を更新"
                     >
                         <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin")} />
                     </button>
@@ -474,7 +475,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                 <div className="px-4 py-2 bg-white/5 border-b border-gold-500/10 flex items-center gap-3 overflow-x-auto whitespace-nowrap scrollbar-hide shrink-0">
                     <div className="flex items-center gap-1 text-gold-400 text-xs font-bold">
                         <TrendingUp className="w-3.5 h-3.5" />
-                        トレンド:
+                        トレンド
                     </div>
                     <div className="flex items-center gap-2">
                         {trendingCoins.slice(0, 5).map(coin => (
@@ -516,7 +517,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                     {sortBy === "priceChange24h" && <ChevronDown className={cn("w-3 h-3", sortDir === "asc" && "rotate-180")} />}
                                 </span>
                             </th>
-                            <th className="px-3 py-3 hidden lg:table-cell">7日チャート</th>
+                            <th className="px-3 py-3 hidden lg:table-cell"> 7日チャート</th>
                             <th
                                 className="px-3 py-3 text-right cursor-pointer hover:text-gold-400 transition-colors"
                                 onClick={() => handleSort("volume24h")}
@@ -551,9 +552,11 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                         ) : (paginatedTokens.length === 0 && !loading && !searchLoading) ? (
                             <tr>
                                 <td colSpan={10} className="px-4 py-12 text-center text-gray-500">
-                                    {search ? `「${search}」に一致する通貨が見つかりません` :
-                                        selectedChain !== "all" ? `${CHAIN_OPTIONS.find(c => c.id === selectedChain)?.name} チェーン対応の通貨が見つかりません` :
-                                            "通貨データの読み込みに失敗しました"}
+                                    {search
+                                        ? `「${search}」に一致する通貨が見つかりません`
+                                        : selectedChain !== "all"
+                                            ? `${CHAIN_OPTIONS.find(c => c.id === selectedChain)?.name} に該当する通貨が見つかりません`
+                                            : "通貨データの読み込みに失敗しました"}
                                 </td>
                             </tr>
                         ) : paginatedTokens.length > 0 ? (
@@ -644,7 +647,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                                     "p-1.5 rounded bg-gold-500/5 text-gold-500/40 border border-gold-500/10 hover:bg-gold-500/20 hover:text-gold-400 hover:border-gold-500/30 transition-all",
                                                     refreshingRows.has(token.id) && "animate-spin text-gold-500 opacity-100"
                                                 )}
-                                                title="データを更新"
+                                                title="価格更新"
                                             >
                                                 <RefreshCw className="w-3 h-3" />
                                             </button>
@@ -655,7 +658,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                         ) : (
                             <tr>
                                 <td colSpan={10} className="px-4 py-12 text-center text-gray-700 italic">
-                                    データを取得中...
+                                    データを読み込み中...
                                 </td>
                             </tr>
                         )}
@@ -666,7 +669,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
             {/* Pagination & Footer */}
             <div className="px-4 py-3 border-t border-gold-500/10 flex justify-between items-center text-xs text-gray-500 shrink-0">
                 <div className="flex items-center gap-4">
-                    <span>{filtered.length} 通貨中 {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, filtered.length)} - {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} 件表示</span>
+                    <span>{filtered.length} 通貨中 {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, filtered.length)} - {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} 件を表示</span>
                 </div>
 
                 {totalPages > 1 && (
@@ -713,3 +716,4 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
         </div>
     );
 }
+

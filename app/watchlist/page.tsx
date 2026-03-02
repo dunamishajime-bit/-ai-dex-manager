@@ -12,7 +12,7 @@ const POPULAR_TOKENS = [
     { symbol: "SOL", name: "Solana", price: 195, change: 5.1 },
     { symbol: "BNB", name: "BNB", price: 610, change: 1.2 },
     { symbol: "DOGE", name: "Dogecoin", price: 0.32, change: -2.1 },
-    { symbol: "MATIC", name: "Polygon", price: 0.85, change: 3.4 },
+    { symbol: "POL", name: "Polygon", price: 0.85, change: 3.4 },
     { symbol: "AVAX", name: "Avalanche", price: 38.5, change: 4.2 },
     { symbol: "LINK", name: "Chainlink", price: 18.2, change: 1.8 },
     { symbol: "UNI", name: "Uniswap", price: 12.5, change: -1.5 },

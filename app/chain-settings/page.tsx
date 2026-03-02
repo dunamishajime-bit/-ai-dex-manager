@@ -15,7 +15,7 @@ export default function ChainSettingsPage() {
 
     const chains: { id: Chain; name: string; color: string }[] = [
         { id: "BNB", name: "BNB Chain", color: "text-yellow-400" },
-        { id: "POLYGON", name: "Polygon (MATIC)", color: "text-purple-400" },
+        { id: "POLYGON", name: "Polygon (POL)", color: "text-purple-400" },
     ];
 
     return (

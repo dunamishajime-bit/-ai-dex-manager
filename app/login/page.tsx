@@ -43,7 +43,7 @@ export default function LoginPage() {
 
     const handlePasskeyLogin = async () => {
         if (!email) {
-            setError("Please enter your email for Passkey authentication.");
+            setError("パスキー認証にはメールアドレスの入力が必要です。");
             return;
         }
         setIsPasskeyAuth(true);
@@ -53,11 +53,11 @@ export default function LoginPage() {
             if (result.success) {
                 router.push("/");
             } else {
-                setError(result.error || "Passkey verification failed.");
+                setError(result.error || "パスキー認証に失敗しました。");
             }
         } catch (err: any) {
             console.error(err);
-            setError(err.message || "Passkey login failed");
+            setError(err.message || "パスキーログインに失敗しました。");
         } finally {
             setIsPasskeyAuth(false);
         }

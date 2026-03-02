@@ -44,14 +44,14 @@ function computePlan(
             { symbol: "BTC", name: "Bitcoin", coinId: "bitcoin", allocation: 40, rationale: "ポートフォリオの安定核。", riskLevel: "low" },
             { symbol: "BNB", name: "BNB", coinId: "binancecoin", allocation: 30, rationale: "広範なエコシステムを持つ基盤通貨。", riskLevel: "low" },
             { symbol: "SOL", name: "Solana", coinId: "solana", allocation: 20, rationale: "高速チェーン。成長ポテンシャルあり。", riskLevel: "medium" },
-            { symbol: "POL", name: "Polygon", coinId: "matic-network", allocation: 10, rationale: "L2ソリューションとして安定した需要。", riskLevel: "medium" },
+            { symbol: "POL", name: "Polygon", coinId: "polygon", allocation: 10, rationale: "L2ソリューションとして安定した需要。", riskLevel: "medium" },
         ];
     } else {
         allocations = [
             { symbol: "BTC", name: "Bitcoin", coinId: "bitcoin", allocation: 30, rationale: "アンカー資産。", riskLevel: "low" },
             { symbol: "BNB", name: "BNB", coinId: "binancecoin", allocation: 20, rationale: "エコシステム基盤通貨。", riskLevel: "low" },
             { symbol: "SOL", name: "Solana", coinId: "solana", allocation: 30, rationale: "高パフォーマンスチェーン。", riskLevel: "medium" },
-            { symbol: "POL", name: "Polygon", coinId: "matic-network", allocation: 20, rationale: "DeFiエコシステム拡大期待。", riskLevel: "high" },
+            { symbol: "POL", name: "Polygon", coinId: "polygon", allocation: 20, rationale: "DeFiエコシステム拡大期待。", riskLevel: "high" },
         ];
     }
 

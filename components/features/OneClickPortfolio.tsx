@@ -116,7 +116,7 @@ export const OneClickPortfolio: React.FC = () => {
                 <div className="flex flex-col md:flex-row gap-8 items-center">
                     {/* Chart */}
                     <div className="w-48 h-48 relative">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={220} minWidth={240} minHeight={180}>
                             <PieChart>
                                 <Pie
                                     data={data}

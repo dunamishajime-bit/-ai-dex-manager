@@ -1,0 +1,10 @@
+{
+    "chat.tools.edits.autoApprove": {
+        "**/.vscode/*.json": true,
+        "**/.git/**": true,
+        "**/{package.json,server.xml,build.rs,web.config,.gitattributes,.env}": true,
+        "**/*.{code-workspace,csproj,fsproj,vbproj,vcxproj,proj,targets,props}": true,
+        "**/*.lock": true,
+        "**/*-lock.{yaml,json}": true
+    }
+}

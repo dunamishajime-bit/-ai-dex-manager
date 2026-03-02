@@ -1,0 +1,2378 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
+import { fetchMarketPrices } from "@/lib/market-service";
+
+import { useAccount } from "wagmi";
+import { fetchDEXRanking, fetchMarketOverview, fetchPairs, fetchTokensByChain, getTopMovers, getCryptoNews, ChainId } from "@/lib/dex-service";
+import { AGENTS, Agent, Message, normalizeToUSDTPair } from "@/lib/ai-agents";
+import { resolveToken, NATIVE_TOKEN_ADDRESS, TOKEN_REGISTRY } from "@/lib/tokens";
+import { isSupportedChain } from "@/lib/chains";
+import { parseUnits, formatUnits } from "viem";
+import { useSendTransaction, usePublicClient, useWalletClient, useBalance } from "wagmi";
+import { ERC20_ABI } from "@/lib/erc20-abi";
+import { Achievement } from "@/components/features/AchievementHub";
+import { useAgents } from "./AgentContext";
+import { isMaintenanceMode } from "@/lib/user-store";
+import { useSoundFX } from "@/hooks/useSoundFX";
+import { useCurrency } from "./CurrencyContext";
+import { generateRandomNews, convertRealToMarketNews, MarketNews } from "@/lib/news-service";
+import { GeminiDiscussionResult } from "@/lib/gemini-service";
+import { TRADE_CONFIG } from "@/config/tradeConfig";
+
+export type { Message };
+
+export type Currency = "BTC" | "ETH" | "SOL" | "BNB" | "POL" | "DOGE" | "LINK" | "WLFI" | "ASTER" | "USDT" | "USDC" | "USD1";
+export type ProposalFrequency = "OFF" | "LOW" | "MEDIUM" | "HIGH";
+export type DemoStrategy = "AGGRESSIVE" | "MODERATE" | "CONSERVATIVE";
+export type Chain = "BNB" | "POLYGON";
+
+const isInterestingToken = (symbol: string) => TRADE_CONFIG.isTradeableVolatilityToken(symbol);
+
+type DailyTradePlanCycle = {
+    key: string;
+    label: string;
+    phase: "ELAPSED" | "IN_PROGRESS" | "UPCOMING";
+    plannedTrades: number;
+    maxTrades: number;
+    targetPairs: string[];
+    timeframePlan: { timeframe: string; objective: string; trigger: string }[];
+    technical: string[];
+    fundamental: string[];
+    sentiment: string[];
+    security: string[];
+    longSpan: string[];
+    business: string[];
+    aiAssignments: { agentName: string; task: string }[];
+    riskHedge: string[];
+};
+
+type DailyTradePlan = {
+    dateJst: string;
+    loginAtJst: string;
+    cycleTradeLimit: number;
+    notes: string[];
+    cycles: DailyTradePlanCycle[];
+};
+
+const PLAN_BLOCKS = [
+    { key: "0-6", label: "0:00-6:00", start: 0, end: 6 },
+    { key: "6-12", label: "6:00-12:00", start: 6, end: 12 },
+    { key: "12-18", label: "12:00-18:00", start: 12, end: 18 },
+    { key: "18-24", label: "18:00-24:00", start: 18, end: 24 },
+] as const;
+
+function getJstNow() {
+    return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+}
+
+function formatJstDate(date: Date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function formatJstTime(date: Date) {
+    const h = String(date.getHours()).padStart(2, "0");
+    const m = String(date.getMinutes()).padStart(2, "0");
+    return `${h}:${m}`;
+}
+
+export interface DiscussionEntry {
+    id: string;
+    pair: string;
+    messages: { agentId: string; content: string; round?: number; type?: string }[];
+    result?: {
+        action: string;
+        confidence: number;
+        reasoning: string;
+        takeProfit?: number;
+        stopLoss?: number;
+    };
+    source: "dex-tracker" | "council";
+    timestamp: number;
+}
+
+export interface TradeNotification {
+    id: string;
+    agentId: string;
+    agentName: string;
+    title: string;
+    message: string;
+    type: "BUY" | "SELL" | "ALERT";
+    symbol: string;
+    timestamp: number;
+}
+
+interface LiveWalletBalance {
+    symbol: string;
+    amount: number;
+    usdPrice: number;
+    usdValue: number;
+    isStable: boolean;
+}
+
+interface MarketData {
+    price: number;
+    change24h: number;
+    volume: number;
+    trend: "BULL" | "BEAR" | "SIDEWAYS";
+}
+
+interface Portfolio {
+    totalValue: number;
+    pnl24h: number;
+    cashbalance: number;
+    positions: {
+        symbol: string;
+        amount: number;
+        entryPrice: number;
+        highestPrice?: number; // New: High watermark for trailing stop
+        reason?: string; // New: Why bought
+        exitStrategy?: string; // New: Exit plan
+    }[];
+}
+
+export interface Transaction {
+    id: string;
+    agentId: string;
+    type: "BUY" | "SELL";
+    symbol: string; // Ensure symbol is here
+    amount: number;
+    price: number;
+    timestamp: number;
+    txHash: string;
+    fee: number;
+    pnl?: number;
+    targetPrice?: number;
+    pair?: string; // New: e.g. USDT-ETH(ETH)
+    dex?: string; // New: e.g. Uniswap
+    chain?: string; // New: e.g. Ethereum, Polygon
+    feedback?: "GOOD" | "BAD";
+}
+
+export interface PricePoint {
+    time: string;
+    price: number;
+    timestamp: number; // Unix seconds for chart continuity
+}
+
+export interface LearningParams {
+    rsiWeight: number;
+    macdWeight: number;
+    sentimentWeight: number;
+    securityWeight: number;
+    fundamentalWeight: number;
+    winRate: number;
+    totalTrades: number;
+}
+
+export interface StrategyProposal {
+    id: string;
+    agentId: string;
+    title: string;
+    description: string;
+    status: "PENDING" | "APPROVED" | "REJECTED" | "ACTIVE"; // Added ACTIVE
+    timestamp: number;
+    durationBlock?: "0-6" | "6-12" | "12-18" | "18-24"; // New: 6h block
+    proposedSettings?: {
+        riskTolerance: number;
+        stopLoss: number;
+        takeProfit: number;
+    }
+}
+
+export interface TradingPipeline {
+    id: string;
+    baseToken: string;
+    targetToken: string;
+    selectedDEXs: string[];
+    isActive: boolean;
+    lastPrice?: number;
+}
+
+function buildDailyTradePlan(options: {
+    selectedCurrency: string;
+    pipelines: TradingPipeline[];
+    latestNews: MarketNews | null;
+    chainId?: number;
+}): DailyTradePlan {
+    const jst = getJstNow();
+    const currentHour = jst.getHours();
+    const defaultPairs = options.chainId === 137
+        ? ["POL-USDT", "POL-USDC"]
+        : ["BNB-USDT", "WLFI-USD1", "ASTER-USDT", "ETH-USDT"];
+    const pipelinePairs = options.pipelines
+        .filter((pipeline) => pipeline.isActive && pipeline.baseToken && pipeline.targetToken)
+        .map((pipeline) => `${pipeline.baseToken.toUpperCase()}-${pipeline.targetToken.toUpperCase()}`);
+    const pairPool = Array.from(new Set([...pipelinePairs, ...defaultPairs]));
+
+    const cycles = PLAN_BLOCKS.map((block, index): DailyTradePlanCycle => {
+        const phase: DailyTradePlanCycle["phase"] = currentHour >= block.end
+            ? "ELAPSED"
+            : currentHour >= block.start
+                ? "IN_PROGRESS"
+                : "UPCOMING";
+        const pairA = pairPool[index % pairPool.length] || "BNB-USDT";
+        const pairB = pairPool[(index + 1) % pairPool.length] || pairA;
+        const pairC = pairPool[(index + 2) % pairPool.length] || `${options.selectedCurrency}-USDT`;
+        const targetPairs = Array.from(new Set([pairA, pairB, pairC]));
+        const currentCycleNews = phase === "IN_PROGRESS" && options.latestNews
+            ? `${options.latestNews.title} 繧貞女縺代※迴ｾ蝨ｨ繧ｵ繧､繧ｯ繝ｫ縺ｮ繝輔ぃ繝ｳ繝譚｡莉ｶ繧呈峩譁ｰ`
+            : "繝九Η繝ｼ繧ｹ隕∝屏縺ｯ迴ｾ蝨ｨ繧ｵ繧､繧ｯ繝ｫ縺ｮ縺ｿ縺ｧ蜀崎ｩ穂ｾ｡";
+
+        return {
+            key: block.key,
+            label: block.label,
+            phase,
+            plannedTrades: phase === "ELAPSED" ? 0 : 48,
+            maxTrades: 144,
+            targetPairs,
+            timeframePlan: [
+                { timeframe: "1m", objective: `${targetPairs[0]} 縺ｮ遏ｭ譛滓款縺礼岼繝ｻ謌ｻ繧翫ｒ逶｣隕冒, trigger: "譚ｿ縺ｮ蛛上ｊ縺ｨ逶ｴ霑鷹ｫ伜ｮ牙､繝悶Ξ繧､繧ｯ" },
+                { timeframe: "5m", objective: `${targetPairs[0]} 縺ｮ蛻晏虚遒ｺ隱港, trigger: "VWAP蝗槫ｾｩ / 5m鬮伜､譖ｴ譁ｰ" },
+                { timeframe: "15m", objective: `${targetPairs[1]} 縺ｮ荳ｻ謌ｦ逡･蝓ｷ陦形, trigger: "15m繝医Ξ繝ｳ繝芽ｻ｢謠・+ 蜃ｺ譚･鬮伜｢怜刈" },
+                { timeframe: "1H", objective: `${targetPairs[2]} 縺ｮ譁ｹ蜷第ｧ遒ｺ隱港, trigger: "1H鬮伜､螳牙､蛻・ｊ荳翫￡ / 蛻・ｊ荳九￡" },
+            ],
+            technical: [
+                `${targetPairs[0]} 縺ｯ RSI繝ｻMACD繝ｻ蜃ｺ譚･鬮倥〒繧ｨ繝ｳ繝医Μ繝ｼ邊ｾ蠎ｦ繧堤｢ｺ隱港,
+                `${targetPairs[1]} 縺ｯ 15m 縺ｨ 1H 縺ｮ譁ｹ蜷台ｸ閾ｴ繧貞━蜈・,
+            ],
+            fundamental: [
+                currentCycleNews,
+                `${targetPairs[0]} 縺ｨ ${targetPairs[1]} 縺ｮ髢｢騾｣繝九Η繝ｼ繧ｹ繧堤屮隕冒,
+            ],
+            sentiment: [
+                `${targetPairs[1]} 縺ｮ SNS 繧ｻ繝ｳ繝√Γ繝ｳ繝医→蜃ｺ譚･鬮倥・荵夜屬繧堤｢ｺ隱港,
+                "驕守・譎ゅ・鬟帙・荵励ｊ繧帝∩縺代ｋ",
+            ],
+            security: [
+                "螟ｧ蜿｣騾・≡縲．EX 豬∝虚諤ｧ縲√さ繝ｳ繝医Λ繧ｯ繝育焚蟶ｸ繧堤屮隕・,
+                "諤･縺ｪ豬∝虚諤ｧ菴惹ｸ区凾縺ｯ譁ｰ隕丞ｻｺ縺ｦ繧貞●豁｢",
+            ],
+            longSpan: [
+                "6H / 24H 縺ｮ鬮伜ｮ峨→譁ｹ蜷代ｒ蝓ｺ貅悶↓遏ｭ譛溷｣ｲ雋ｷ繧定ｪｿ謨ｴ",
+                "迴ｾ蝨ｨ繧ｵ繧､繧ｯ繝ｫ縺ｮ荳ｻ霆ｸ繝壹い繧貞━蜈医＠縲∽ｻ悶・繧｢縺ｯ陬懷勧縺ｫ蝗槭☆",
+            ],
+            business: [
+                `${targetPairs[0]} 縺ｮ莠区･ｭ繝・・繝槭→雉・≡豬∝・繝・・繝槭ｒ辣ｧ蜷・,
+                "繝・・繝樔ｸ堺ｸ閾ｴ縺ｮ驫俶氛縺ｯ繧ｵ繧､繧ｺ繧定誠縺ｨ縺・,
+            ],
+            aiAssignments: [
+                { agentName: "Technical", task: `${targetPairs[0]} 縺ｮ遏ｭ譛溘お繝ｳ繝医Μ繝ｼ邊ｾ譟ｻ` },
+                { agentName: "Fundamental", task: `${targetPairs[1]} 縺ｮ繝九Η繝ｼ繧ｹ譖ｴ譁ｰ蜿肴丐` },
+                { agentName: "Security", task: "螟ｧ蜿｣雉・≡縺ｨ繧ｻ繧ｭ繝･繝ｪ繝・ぅ逡ｰ蟶ｸ逶｣隕・ },
+            ],
+            riskHedge: [
+                "1蝗槭・蛻､譁ｭ繧呈怙螟ｧ3蛻・牡縺ｧ蝓ｷ陦・,
+                "謇区焚譁呵ｲ縺代☆繧句､蟷・〒縺ｯ隕矩√ｊ",
+                "繧ｬ繧ｹ莉｣逕ｨ縺ｮ BNB/POL 繧呈ｮ九☆",
+            ],
+        };
+    });
+
+    return {
+        dateJst: formatJstDate(jst),
+        loginAtJst: formatJstTime(jst),
+        cycleTradeLimit: 144,
+        notes: [
+            "JST蝓ｺ貅悶〒蠖捺律縺ｮ谿九ｊ繧ｵ繧､繧ｯ繝ｫ繧剃ｽ懈・",
+            "繝九Η繝ｼ繧ｹ譖ｴ譁ｰ縺ｯ蜴溷援縺ｨ縺励※迴ｾ蝨ｨ繧ｵ繧､繧ｯ繝ｫ縺縺代↓蜿肴丐",
+            "謇区焚譁呵ｲ縺大屓驕ｿ繧貞━蜈医＠縲∬埋縺・､蟷・・隕矩√ｋ",
+        ],
+        cycles,
+    };
+}
+
+interface SimulationContextType {
+    // ... existing
+    messages: Message[];
+    isAuthenticated: boolean;
+    setIsAuthenticated: (auth: boolean) => void;
+    isSimulating: boolean;
+    toggleSimulation: () => void;
+    marketData: MarketData;
+    allMarketData: Record<string, { price: number }>;
+    convertJPY: (usd: number) => number;
+    portfolio: Portfolio;
+    agents: Agent[];
+    activeStrategies: StrategyProposal[]; // Changed from single strategy string
+    // ... risk settings
+    riskTolerance: number;
+    setRiskTolerance: (level: number) => void;
+    stopLossThreshold: number;
+    setStopLossThreshold: (val: number) => void;
+    takeProfitThreshold: number;
+    setTakeProfitThreshold: (val: number) => void;
+    isFlashEnabled: boolean;
+    setIsFlashEnabled: (enabled: boolean) => void;
+    transactions: Transaction[];
+    priceHistory: PricePoint[];
+    strategyProposals: StrategyProposal[];
+    // Updated proposal actions
+    updateProposalStatus: (id: string, status: "APPROVED" | "REJECTED" | "ACTIVE" | "PENDING") => void;
+    deleteProposal: (id: string) => void;
+    addUserMessage: (content: string) => void;
+    aiPopupMessage: Message | null;
+    closePopup: () => void;
+    selectedCurrency: Currency;
+    setSelectedCurrency: (c: Currency) => void;
+    initialTradeSymbol: string;
+    setInitialTradeSymbol: (s: string) => void;
+    // ... existing new features
+    proposalFrequency: ProposalFrequency;
+    setProposalFrequency: (f: ProposalFrequency) => void;
+    activeChains: Chain[];
+    toggleChain: (c: Chain) => void;
+    targetTop100: boolean;
+    setTargetTop100: (b: boolean) => void;
+    targetAllCurrencies: boolean;
+    setTargetAllCurrencies: (b: boolean) => void;
+    targetMemeCoins: boolean;
+    setTargetMemeCoins: (b: boolean) => void;
+    requestProposal: () => void;
+    // Nickname
+    nickname: string;
+    setNickname: (name: string) => void;
+    favorites: Set<string>;
+    toggleFavorite: (id: string) => void;
+    // Discussion history
+    discussionHistory: DiscussionEntry[];
+    addDiscussion: (entry: DiscussionEntry) => void;
+    // Trade notifications
+    tradeNotifications: TradeNotification[];
+    dismissNotification: (id: string) => void;
+    clearNotifications: () => void;
+    // New: Wallet & Trade Execution
+    isWalletConnected: boolean;
+    executeTrade: (tokenSymbol: string, action: "BUY" | "SELL", amount: number, price: number, reason?: string) => Promise<boolean>;
+    latestDiscussion: GeminiDiscussionResult | null;
+    riskStatus: "SAFE" | "CAUTION" | "CRITICAL";
+    atmosphere: "NEUTRAL" | "POSITIVE" | "NEGATIVE" | "ALERT";
+    // Pipeline Management
+    tradingPipelines: TradingPipeline[];
+    addPipeline: (base: string, target: string, dexs: string[]) => void;
+    removePipeline: (id: string) => void;
+    togglePipeline: (id: string) => void;
+    latestNews: MarketNews | null;
+    awardExp: (agentId: string, amount: number) => void;
+    disPoints: number;
+    addDisPoints: (amount: number) => void;
+    leaderboard: { name: string; score: number; dailyProfit: number; dailyChange: number; rank: number }[];
+    isSoundEnabled: boolean;
+    setIsSoundEnabled: (enabled: boolean) => void;
+    achievements: Achievement[];
+    unlockAchievement: (id: string) => void;
+    updateAchievementProgress: (id: string, progress: number) => void;
+    resetSimulation: () => void;
+    clearMessages: () => void;
+    // Demo Mode
+    isDemoMode: boolean;
+    setIsDemoMode: (val: boolean) => void;
+    demoBalance: number;
+    setDemoBalance: (val: number) => void;
+    demoStrategy: DemoStrategy;
+    setDemoStrategy: (val: DemoStrategy) => void;
+    demoAddress: string;
+    // Demo modal control (shared state so Header button and DemoModal can talk)
+    showDemoModal: boolean;
+    setShowDemoModal: (val: boolean) => void;
+    // New: Start Fund Selection
+    allowedStartTokens: string[];
+    setAllowedStartTokens: (tokens: string[]) => void;
+    startFixedDemo: (startingSymbol?: string, jpyPricePerUnit?: number) => void;
+    // Learning & Tuning
+    learningParams: LearningParams;
+    provideTradeFeedback: (txId: string, feedback: "GOOD" | "BAD") => void;
+    marketRegime: "TREND_UP" | "TREND_DOWN" | "RANGE" | "VOLATILE";
+    addMessage: (sender: string, text: string, type?: "NORMAL" | "ALERT" | "EXECUTION" | "SYSTEM") => void;
+    liveInitialBalance: number;
+    isMockConnected: boolean;
+    mockAddress: string;
+    toggleMockConnection: () => void;
+    isAutoPilotEnabled: boolean;
+    setIsAutoPilotEnabled: (val: boolean) => void;
+    isPricingPaused: boolean;
+    resumePricing: () => void;
+    dailyTradePlan: DailyTradePlan | null;
+    refreshDailyTradePlan: () => void;
+}
+
+const SimulationContext = createContext<SimulationContextType | undefined>(undefined);
+
+export function SimulationProvider({ children }: { children: ReactNode }) {
+    // Wagmi Connection hook
+    const { isConnected, address, chainId } = useAccount();
+    const publicClient = usePublicClient();
+    const { data: walletClient } = useWalletClient();
+    const { sendTransactionAsync } = useSendTransaction();
+    const [isAuthenticated, setIsAuthenticatedState] = useState(false);
+
+    /**
+     * 繧ｦ繧ｩ繝ｬ繝・ヨ謗･邯壹ｒ逶｣隕悶＠縲∵磁邯夂峩蠕後↓繧ｷ繝溘Η繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ繝ｫ繝ｼ繝励ｒ襍ｷ蜍輔☆繧九・
+     * isConnected 縺・false竊稚rue 縺ｫ螟牙喧縺励◆迸ｬ髢薙・縺ｿ螳溯｡鯉ｼ亥・遲画ｧ遒ｺ菫晢ｼ峨・
+     */
+    const prevConnectedRef = useRef<boolean>(false);
+    const manualTestDoneRef = useRef<boolean>(false);
+    // 荳譎ゅヵ繝ｩ繧ｰ・域悽逡ｪ縺ｧ縺ｮ繝・せ繝亥ｮ御ｺ・ｾ後↓蜑企勁縺吶ｋ・・
+    const shouldFireOnceRef = useRef(true);
+    const lastFundingWarningRef = useRef<number>(0);
+
+    const [isSimulating, setIsSimulatingState] = useState(true);
+
+    // Fetch live wallet native balance
+    const { data: balanceData } = useBalance({
+        address: address,
+        chainId: chainId,
+        query: { enabled: isConnected },
+    });
+
+    // Wrap setIsAuthenticated to update sessionStorage
+    const setIsAuthenticated = (auth: boolean) => {
+        setIsAuthenticatedState(auth);
+        if (auth) {
+            sessionStorage.setItem("jdex_auth", "true");
+        } else {
+            sessionStorage.removeItem("jdex_auth");
+        }
+    };
+
+    useEffect(() => {
+        const storedAuth = sessionStorage.getItem("jdex_auth");
+        if (storedAuth === "true") {
+            setIsAuthenticatedState(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        const justConnected = isConnected && !prevConnectedRef.current;
+        prevConnectedRef.current = isConnected;
+
+        if (!justConnected) return;
+
+        const IS_PROD = process.env.NODE_ENV === "production";
+
+        // 螳溘ヨ繝ｬ繝ｼ繝峨ｒ譛牙柑蛹・
+        setIsDemoMode(false);
+        localStorage.removeItem("jdex_demo_mode"); // 謨ｴ蜷域ｧ遒ｺ菫昴・縺溘ａ遒ｺ螳溘↓蜑企勁
+
+        localStorage.removeItem("jdex_live_initial_balance");
+        setLiveInitialBalance(0);
+        setHasInitialTradeExecuted(false);
+
+        console.log('[TRADE MODE]', {
+            isConnected,
+            demo: false,
+        });
+
+        if (!IS_PROD) {
+            setIsAutoPilotEnabled(true);
+        }
+
+        // 繝ｫ繝ｼ繝励′譛ｪ襍ｷ蜍輔↑繧芽ｵｷ蜍・
+        if (!isSimulating) {
+            setIsSimulating(true);
+        }
+    }, [isConnected, isSimulating]);
+
+
+    // 繧｢繝ｳ繝槭え繝ｳ繝域凾繝ｻ蛻・妙譎ゅ・繧ｯ繝ｪ繝ｼ繝ｳ繧｢繝・・
+    useEffect(() => {
+        if (!isConnected && isSimulating) {
+            setIsSimulating(false);
+            setIsAutoPilotEnabled(false);
+        }
+    }, [isConnected, isSimulating]);
+
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [priceHistory, setPriceHistory] = useState<PricePoint[]>([]);
+    const [strategyProposals, setStrategyProposals] = useState<StrategyProposal[]>([]);
+    const [aiPopupMessage, setAiPopupMessage] = useState<Message | null>(null);
+    const [selectedCurrency, setSelectedCurrency] = useState<Currency>("BNB");
+    const [tradeInProgress, setTradeInProgress] = useState(false);
+    const lastTradeErrorTime = useRef<number>(0);
+    const [news, setNews] = useState<MarketNews[]>([]);
+    const [lastAction, setLastAction] = useState<"BUY" | "SELL" | null>(null);
+
+    // Persist isSimulating
+    const setIsSimulating = (val: boolean) => {
+        setIsSimulatingState(val);
+        localStorage.setItem("jdex_simulating", val.toString());
+    };
+
+    const toggleSimulation = () => setIsSimulating(!isSimulating);
+
+    // New/Updated State
+    const [activeStrategies, setActiveStrategies] = useState<StrategyProposal[]>([]);
+
+    // ... (ProposalFrequency, activeChains etc same)
+    const [proposalFrequency, setProposalFrequency] = useState<ProposalFrequency>("MEDIUM");
+    const [activeChains, setActiveChains] = useState<Chain[]>(["BNB", "POLYGON"]);
+    const [allowedStartTokens, setAllowedStartTokensState] = useState<string[]>(TRADE_CONFIG.ALLOWED_START_FUNDS);
+    const [showDemoModal, setShowDemoModal] = useState(false);
+
+    const [liveInitialBalance, setLiveInitialBalance] = useState<number>(0);
+    const [liveWalletBalances, setLiveWalletBalances] = useState<LiveWalletBalance[]>([]);
+    const [dailyTradePlan, setDailyTradePlan] = useState<DailyTradePlan | null>(null);
+
+    useEffect(() => {
+        const storedLiveInit = localStorage.getItem("jdex_live_initial_balance");
+        if (storedLiveInit) setLiveInitialBalance(parseFloat(storedLiveInit));
+    }, []);
+
+    const setAllowedStartTokens = (tokens: string[]) => {
+        setAllowedStartTokensState(tokens);
+        localStorage.setItem("jdex_allowed_start_tokens", JSON.stringify(tokens));
+    };
+    const [targetTop100, setTargetTop100] = useState(false);
+    const [targetAllCurrencies, setTargetAllCurrencies] = useState(true);
+    const [targetMemeCoins, setTargetMemeCoins] = useState(false);
+    const [forceProposal, setForceProposal] = useState(false);
+
+    // Nickname
+    const [nickname, setNicknameState] = useState("");
+    useEffect(() => {
+        const stored = localStorage.getItem("jdex_nickname");
+        if (stored) setNicknameState(stored);
+    }, []);
+    const setNickname = (name: string) => {
+        setNicknameState(name);
+        localStorage.setItem("jdex_nickname", name);
+    };
+
+    // Discussion history
+    const [discussionHistory, setDiscussionHistory] = useState<DiscussionEntry[]>([]);
+    const addDiscussion = (entry: any) => {
+        setDiscussionHistory(prev => [entry as DiscussionEntry, ...prev].slice(0, 50));
+
+        // Auto-sync to strategy proposals if result exists
+        if (entry.result) {
+            const blocks = ["0:00-6:00", "6:00-12:00", "12:00-18:00", "18:00-24:00"];
+            const currentHour = new Date().getHours();
+            const blockIndex = Math.floor(currentHour / 6);
+            const block = blocks[blockIndex];
+
+            const normalizedPair = normalizeToUSDTPair(entry.pair);
+            const proposal: StrategyProposal = {
+                id: `strat-${entry.id}`,
+                agentId: "coordinator",
+                title: `AI隧戊ｭｰ莨壽署譯・ ${normalizedPair}`,
+                description: `${normalizedPair}縺ｮ蛻・梵縺ｫ蝓ｺ縺･縺・{entry.result.action}謌ｦ逡･縲Ａ,
+                status: "PENDING",
+                timestamp: Date.now(),
+                durationBlock: block as any,
+                proposedSettings: {
+                    riskTolerance: entry.result.confidence >= 80 ? 5 : entry.result.confidence >= 60 ? 3 : 2,
+                    stopLoss: entry.result.stopLoss || -3,
+                    takeProfit: entry.result.takeProfit || 5
+                }
+            };
+            setStrategyProposals(prev => {
+                // Remove duplicates if same id
+                const filtered = prev.filter(p => p.id !== proposal.id);
+                return [proposal, ...filtered].slice(0, 20);
+            });
+        }
+    };
+
+    // Trade notifications
+    const [tradeNotifications, setTradeNotifications] = useState<TradeNotification[]>([]);
+    const [latestDiscussion, setLatestDiscussion] = useState<GeminiDiscussionResult | null>(null);
+    const [riskStatus, setRiskStatus] = useState<"SAFE" | "CAUTION" | "CRITICAL">("SAFE");
+    const [tradingPipelines, setTradingPipelines] = useState<TradingPipeline[]>([]);
+    const [favorites, setFavorites] = useState<Set<string>>(new Set());
+    const [latestNews, setLatestNews] = useState<MarketNews | null>(null);
+    const [isSoundEnabled, setIsSoundEnabled] = useState(false);
+    const [atmosphere, setAtmosphere] = useState<"NEUTRAL" | "POSITIVE" | "NEGATIVE" | "ALERT">("NEUTRAL");
+    const [achievements, setAchievements] = useState<Achievement[]>([]);
+    const [disPoints, setDisPoints] = useState(0);
+    const [leaderboard, setLeaderboard] = useState([
+        { name: "Global Whale", score: 1250000, dailyProfit: 45000, dailyChange: 3.6, rank: 1 },
+        { name: "AI Master", score: 854000, dailyProfit: 12000, dailyChange: 1.4, rank: 2 },
+        { name: "Crypto King", score: 621000, dailyProfit: -5000, dailyChange: -0.8, rank: 3 },
+        { name: "DIS Fan", score: 450000, dailyProfit: 8000, dailyChange: 1.8, rank: 4 },
+        { name: "Anonymous", score: 320000, dailyProfit: 2500, dailyChange: 0.8, rank: 5 },
+    ]);
+
+    // Demo Mode State
+    const [isDemoMode, setIsDemoModeState] = useState(false);
+    const [demoBalance, setDemoBalanceState] = useState(0);
+    const [demoAddress] = useState("demo-" + Math.random().toString(36).substring(2, 10));
+
+    const [demoStrategy, setDemoStrategyState] = useState<DemoStrategy>("MODERATE");
+
+    const setIsDemoMode = (val: boolean) => {
+        setIsDemoModeState(val);
+        localStorage.setItem("jdex_demo_mode", val.toString());
+    };
+
+    const setDemoStrategy = (val: DemoStrategy) => {
+        setDemoStrategyState(val);
+        localStorage.setItem("jdex_demo_strategy", val);
+    };
+
+    const [isAutoPilotEnabled, setIsAutoPilotEnabledState] = useState(false);
+
+    useEffect(() => {
+        const stored = localStorage.getItem("jdex_autopilot_enabled");
+        if (stored !== null) setIsAutoPilotEnabledState(stored === "true");
+    }, []);
+
+    const setIsAutoPilotEnabled = (val: boolean) => {
+        setIsAutoPilotEnabledState(val);
+        localStorage.setItem("jdex_autopilot_enabled", val.toString());
+    };
+
+    const setDemoBalance = (val: number) => {
+        setDemoBalanceState(val);
+        localStorage.setItem("jdex_demo_balance", val.toString());
+
+        // Comprehensive reset for Demo Mode
+        // Note: We reset even if isDemoMode is not yet true because this is often called just before setIsDemoMode(true)
+        const newPortfolio = {
+            totalValue: val,
+            pnl24h: 0,
+            cashbalance: val,
+            positions: []
+        };
+        setPortfolio(newPortfolio);
+        localStorage.setItem("jdex_portfolio", JSON.stringify(newPortfolio));
+        setTransactions([]);
+        setMessages([]);
+        setTradeNotifications([]);
+        setDiscussionHistory([]);
+        setPriceHistory([]);
+        setHasInitialTradeExecuted(false);
+
+        // Clear persistence (except portfolio which we just set)
+        localStorage.removeItem("jdex_price_history");
+    };
+
+    // --- MOCK CONNECTION FOR DEV/TESTING ---
+    const [isMockConnected, setIsMockConnected] = useState(false);
+    const mockAddress = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Standard mock address
+
+    const toggleMockConnection = () => {
+        setIsMockConnected(prev => !prev);
+    };
+
+    // Effective connection status (Real or Mock)
+    const effectiveIsConnected = isConnected || isMockConnected;
+    const effectiveAddress = address || (isMockConnected ? mockAddress : undefined);
+    const effectiveChainId = chainId || (isMockConnected ? 56 : undefined); // Default to BSC for mock
+    const refreshDailyTradePlan = useCallback(() => {
+        setDailyTradePlan(buildDailyTradePlan({
+            selectedCurrency,
+            pipelines: tradingPipelines,
+            latestNews,
+            chainId: effectiveChainId,
+        }));
+    }, [selectedCurrency, tradingPipelines, latestNews, effectiveChainId]);
+
+    useEffect(() => {
+        refreshDailyTradePlan();
+    }, [refreshDailyTradePlan]);
+
+    const startFixedDemo = (startingSymbol: string = "BNB", jpyPricePerUnit?: number) => {
+        // Find matching config from TRADE_CONFIG.DEMO_FUNDS
+        // Find a demo fund key that matches the requested startingSymbol
+        const demoFundKey = Object.keys(TRADE_CONFIG.DEMO_FUNDS).find(key =>
+            (TRADE_CONFIG.DEMO_FUNDS as any)[key].symbol === startingSymbol
+        );
+        const demoFundConfig = demoFundKey ? (TRADE_CONFIG.DEMO_FUNDS as any)[demoFundKey] : { symbol: startingSymbol, amount: 100 };
+
+        const amount = demoFundConfig.amount;
+
+        // Use passed-in market price if available, otherwise fall back to allMarketPrices
+        let usdPrice: number;
+        if (jpyPricePerUnit && jpyPricePerUnit > 0) {
+            usdPrice = jpyPricePerUnit / 155; // Approximation to get USD value
+        } else {
+            const priceData = allMarketPrices[startingSymbol] || initialData[startingSymbol];
+            usdPrice = priceData ? priceData.price : (TRADE_CONFIG.STABLECOINS.includes(startingSymbol) ? 1 : 0);
+        }
+
+        const totalValUSD = usdPrice * amount;
+        const totalValJPY = convertJPY(totalValUSD);
+        const jpyPrice = convertJPY(usdPrice);
+
+        // Stablecoins go to cashbalance; volatile crypto goes to positions
+        const isStable = TRADE_CONFIG.STABLECOINS.includes(startingSymbol);
+
+        const initialPositions = isStable ? [] : [{
+            symbol: startingSymbol,
+            amount: amount,
+            entryPrice: usdPrice,
+            highestPrice: usdPrice
+        }];
+
+        const initialCash = isStable ? totalValUSD : 0;
+
+        // Set Demo Mode
+        setIsDemoModeState(true);
+        localStorage.setItem("jdex_demo_mode", "true");
+
+        const newPortfolio: Portfolio = {
+            totalValue: totalValUSD,
+            pnl24h: 0,
+            cashbalance: initialCash,
+            positions: initialPositions
+        };
+
+        setPortfolio(newPortfolio);
+        localStorage.setItem("jdex_portfolio", JSON.stringify(newPortfolio));
+        setDemoBalanceState(newPortfolio.totalValue);
+        localStorage.setItem("jdex_demo_balance", newPortfolio.totalValue.toString());
+
+        // Reset Simulation State
+        setTransactions([]);
+        setMessages([]);
+        setTradeNotifications([]);
+        setDiscussionHistory([]);
+        setPriceHistory([]);
+
+        setHasInitialTradeExecuted(true);
+
+        // Set Allowed Start Tokens
+        const tokens = TRADE_CONFIG.ALLOWED_START_FUNDS;
+        setAllowedStartTokensState(tokens);
+        localStorage.setItem("jdex_allowed_start_tokens", JSON.stringify(tokens));
+
+        // Clear other persistence
+        localStorage.removeItem("jdex_transactions");
+        localStorage.removeItem("jdex_chat_history");
+        localStorage.removeItem("jdex_price_history");
+
+        addMessage("coordinator", `噫 蝗ｺ螳夊ｳ・肇繝・Δ繝｢繝ｼ繝峨ｒ髢句ｧ九＠縺ｾ縺励◆縲ょ・譛溯ｳ・肇: ${amount} ${startingSymbol}`, "SYSTEM");
+
+        // Sync Market Data & Selection
+        setSelectedCurrency(startingSymbol as Currency);
+        const priceData = allMarketPrices[startingSymbol] || initialData[startingSymbol];
+        if (priceData) {
+            setMarketData(prev => ({
+                ...prev,
+                price: priceData.price,
+                volume: priceData.volume
+            }));
+        }
+    };
+
+    const { playSuccess, playNotification, playAlert, playTrade } = useSoundFX();
+    const { agents, updateAgent, evolveAgent, addLearningEvent } = useAgents();
+
+    useEffect(() => {
+        const storedPoints = localStorage.getItem("jdex_dis_points");
+        if (storedPoints) setDisPoints(parseInt(storedPoints));
+    }, []);
+
+    const addDisPoints = (amount: number) => {
+        setDisPoints(prev => {
+            const next = prev + amount;
+            localStorage.setItem("jdex_dis_points", next.toString());
+            return next;
+        });
+    };
+
+
+    const saveFavorites = (favs: Set<string>) => {
+        setFavorites(favs);
+        localStorage.setItem("jdex_favorites", JSON.stringify(Array.from(favs)));
+    };
+
+    const toggleFavorite = (id: string) => {
+        const next = new Set(favorites);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        saveFavorites(next);
+    };
+
+    const savePipelines = (pipelines: TradingPipeline[]) => {
+        setTradingPipelines(pipelines);
+        localStorage.setItem("jdex_pipelines", JSON.stringify(pipelines));
+    };
+
+    const addPipeline = (base: string, target: string, dexs: string[]) => {
+        const newPipeline: TradingPipeline = {
+            id: Math.random().toString(36).substring(7),
+            baseToken: base.toUpperCase(),
+            targetToken: target.toUpperCase(),
+            selectedDEXs: dexs,
+            isActive: true
+        };
+        const next = [...tradingPipelines, newPipeline];
+        savePipelines(next);
+        addMessage("SYSTEM", `繝代う繝励Λ繧､繝ｳ霑ｽ蜉: ${newPipeline.baseToken}/${newPipeline.targetToken} (${dexs.join(", ")})`, "SYSTEM");
+    };
+
+    const removePipeline = (id: string) => {
+        const next = tradingPipelines.filter(p => p.id !== id);
+        savePipelines(next);
+    };
+
+    const clearMessages = () => {
+        setMessages([]);
+        localStorage.removeItem("jdex_chat_history");
+    };
+
+    const awardExp = async (agentId: string, amount: number) => {
+        const agent = agents.find(a => a.id === agentId);
+        if (!agent) return;
+
+        const newExp = (agent.exp || 0) + amount;
+        const currentLevel = agent.level || 1;
+        const nextLevelExp = currentLevel * 100;
+        let newLevel = currentLevel;
+
+        if (newExp >= nextLevelExp) {
+            newLevel += 1;
+            addMessage("coordinator", `脂 ${agent.name} 縺後Ξ繝吶Ν繧｢繝・・・・Lv.${newLevel} 縺ｫ蛻ｰ驕斐＠縲∵眠縺溘↑遏･隕九ｒ迯ｲ蠕励＠縺ｾ縺励◆縲Ａ, "SYSTEM");
+
+            // Trigger Evolution
+            const newsArr = latestNews ? [latestNews] : [];
+            await evolveAgent(agentId, newsArr);
+        }
+
+        updateAgent(agentId, { exp: newExp, level: newLevel });
+    };
+
+    const triggerLearningPulse = useCallback((news?: MarketNews) => {
+        // Pick a relevant agent for the news, or random
+        let agentId = agents[Math.floor(Math.random() * agents.length)].id;
+
+        if (news) {
+            if (news.category === "REAL" || news.source === "X") agentId = "sentiment";
+            else if (news.category === "SECURITY") agentId = "security";
+        }
+
+        const topics = ["蟶ょｴ讒矩縺ｮ蜀咲炊隗｣", "繧｢繝ｫ繧ｴ繝ｪ繧ｺ繝縺ｮ譛驕ｩ蛹・, "繝翫Λ繝・ぅ繝悶・豺ｱ謗倥ｊ", "繝ｪ繧ｹ繧ｯ邂｡逅・Δ繝・Ν縺ｮ譖ｴ譁ｰ"];
+        const topic = topics[Math.floor(Math.random() * topics.length)];
+
+        addLearningEvent({
+            agentId,
+            topic,
+            content: news ? `${news.title} 縺ｫ蝓ｺ縺･縺阪∝ｰる摩鬆伜沺縺ｮ遏･隴倥ｒ繧｢繝・・繝・・繝医＠縺ｾ縺励◆縲Ａ : "髱樊ｧ矩蛹悶ョ繝ｼ繧ｿ縺九ｉ譁ｰ縺励＞繝代ち繝ｼ繝ｳ繧呈歓蜃ｺ縺励∪縺励◆縲・
+        });
+
+        awardExp(agentId, 25);
+    }, [agents, latestNews, evolveAgent, addLearningEvent]);
+
+    const togglePipeline = (id: string) => {
+        const next = tradingPipelines.map(p => p.id === id ? { ...p, isActive: !p.isActive } : p);
+        savePipelines(next);
+    };
+
+    const dismissNotification = (id: string) => {
+        setTradeNotifications(prev => prev.filter(n => n.id !== id));
+    };
+
+    const clearNotifications = () => {
+        setTradeNotifications([]);
+    };
+
+    const toggleChain = (chain: Chain) => {
+        setActiveChains(prev => prev.includes(chain) ? prev.filter(c => c !== chain) : [...prev, chain]);
+    };
+
+    const requestProposal = () => [setForceProposal(true)];
+
+    // ... (Initial Data same)
+    // Fallback initial data (overridden by Market Data API)
+    const initialData: Record<string, { price: number, volume: number }> = {
+        BTC: { price: 65000.00, volume: 35000000 },
+        ETH: { price: 3450.20, volume: 12000000 },
+        SOL: { price: 145.50, volume: 8000000 },
+        BNB: { price: 580.20, volume: 5000000 },
+        MATIC: { price: 0.95, volume: 2000000 },
+        POL: { price: 0.95, volume: 2000000 },
+        DOGE: { price: 0.15, volume: 15000000 },
+        USDT: { price: 1.00, volume: 50000000 },
+        USD1: { price: 1.00, volume: 1000000 },
+    };
+
+    const [allMarketPrices, setAllMarketPrices] = useState(initialData);
+    const [realPricesLoaded, setRealPricesLoaded] = useState(false);
+
+    const [marketData, setMarketData] = useState<MarketData>({
+        price: initialData["BNB"].price,
+        change24h: 0,
+        volume: initialData["BNB"].volume,
+        trend: "SIDEWAYS",
+    });
+
+    // Initial fund: ﾂ･30,000 (Demo requirement)
+    // Base currency for calculations is USD. 
+    // Formatters in CurrencyContext will handle the conversion to JPY if selected.
+    const INITIAL_CASH_USD = 200; // Approx 30,000 JPY
+    const INITIAL_PORTFOLIO: Portfolio = {
+        totalValue: INITIAL_CASH_USD,
+        pnl24h: 0,
+        cashbalance: INITIAL_CASH_USD,
+        positions: [], // Start with no positions - pure cash
+    };
+    // We initialize as 0 if we detect we're likely in a live environment to prevent flashes of 30,000 JPY
+    // Note: since localStorage takes a tick to load, we assume 0 until proven otherwise if auth might exist
+    const isLikelyLive = typeof window !== 'undefined' && sessionStorage.getItem("jdex_auth") === "true";
+
+    const [portfolio, setPortfolio] = useState<Portfolio>(isLikelyLive ? {
+        totalValue: 0,
+        pnl24h: 0,
+        cashbalance: 0,
+        positions: []
+    } : INITIAL_PORTFOLIO);
+
+    // Strategy Management
+    const [riskTolerance, setRiskTolerance] = useState(4); // 1-5
+    const [stopLossThreshold, setStopLossThreshold] = useState(-5);
+    const [takeProfitThreshold, setTakeProfitThreshold] = useState(10);
+    const [isFlashEnabled, setIsFlashEnabled] = useState(true);
+
+    const { jpyRate } = useCurrency();
+
+    const convertJPY = useCallback((usd: number) => {
+        return usd * jpyRate; // Use the dynamic rate from CurrencyContext
+    }, [jpyRate]);
+
+    const [initialTradeSymbol, setInitialTradeSymbol] = useState("BNB");
+    const [hasInitialTradeExecuted, setHasInitialTradeExecuted] = useState(false);
+
+    const addMessage = useCallback((agentId: string, content: string, type: Message["type"] | "NORMAL" = "OPINION") => {
+        const actualType = type === "NORMAL" ? "OPINION" : type;
+        const newMessage: Message = {
+            id: Math.random().toString(36).substring(7),
+            agentId,
+            content,
+            timestamp: Date.now(),
+            type: actualType,
+        };
+        setMessages((prev) => [...prev, newMessage]);
+
+        if (actualType === "EXECUTION" || actualType === "ALERT") {
+            setAiPopupMessage(newMessage);
+            if (isSoundEnabled) {
+                if (actualType === "EXECUTION") playTrade();
+                else playAlert();
+            }
+        }
+
+        if (isSoundEnabled && actualType === "OPINION") {
+            playNotification();
+        }
+
+        return newMessage;
+    }, [isSoundEnabled, playTrade, playAlert, playNotification]);
+
+    const resumerRef = useRef<(() => void) | null>(null);
+    const [isPricingPaused, setIsPricingPaused] = useState(false);
+
+    /** 騾夊ｲｨ繝壹い萓｡譬ｼ蜿門ｾ励・蜀埼幕 */
+    const resumePricing = useCallback(() => {
+        addMessage("SYSTEM", "萓｡譬ｼ譖ｴ譁ｰ繧貞・髢九＠縺ｾ縺励◆縲・, "SYSTEM");
+    }, [addMessage]);
+
+    const unlockAchievement = useCallback((id: string) => {
+        setAchievements(prev => prev.map(a => a.id === id ? { ...a, unlocked: true } : a));
+    }, []);
+
+    const updateAchievementProgress = useCallback((id: string, progress: number) => {
+        setAchievements(prev => prev.map(a => {
+            if (a.id === id) {
+                const newProgress = Math.min(a.target || 0, (a.progress || 0) + progress);
+                return { ...a, progress: newProgress, unlocked: a.unlocked || (a.target ? newProgress >= a.target : false) };
+            }
+            return a;
+        }));
+    }, []);
+
+    const marketDataRef = useRef(marketData);
+    const portfolioRef = useRef(portfolio);
+    const agentsRef = useRef(agents);
+    const isActiveRef = useRef(false);
+    const lastTradeRef = useRef(0); // Cooldown for demo trades
+
+    useEffect(() => {
+        marketDataRef.current = marketData;
+    }, [marketData]);
+
+    useEffect(() => {
+        portfolioRef.current = portfolio;
+    }, [portfolio]);
+
+    useEffect(() => {
+        agentsRef.current = agents;
+    }, [agents]);
+
+    // Learning System
+    const [learningParams, setLearningParams] = useState<LearningParams>({
+        rsiWeight: 1.0,
+        macdWeight: 1.0,
+        sentimentWeight: 1.0,
+        securityWeight: 1.0,
+        fundamentalWeight: 1.0,
+        winRate: 0.5,
+        totalTrades: 0,
+    });
+    const [marketRegime, setMarketRegime] = useState<"TREND_UP" | "TREND_DOWN" | "RANGE" | "VOLATILE">("RANGE");
+
+    useEffect(() => {
+        const stored = localStorage.getItem("jdex_learning_params");
+        if (stored) {
+            try { setLearningParams(JSON.parse(stored)); } catch (e) { }
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("jdex_learning_params", JSON.stringify(learningParams));
+    }, [learningParams]);
+
+    const provideTradeFeedback = useCallback((txId: string, feedback: "GOOD" | "BAD") => {
+        setTransactions(prev => prev.map(tx => {
+            if (tx.id === txId) {
+                return { ...tx, feedback };
+            }
+            return tx;
+        }));
+
+        // Update Learning Params based on feedback
+        const isGood = feedback === "GOOD";
+        const multiplier = isGood ? 1.05 : 0.95;
+
+        setLearningParams(prev => ({
+            ...prev,
+            rsiWeight: Math.max(0.1, Math.min(2.0, parseFloat((prev.rsiWeight * multiplier).toFixed(2)))),
+            macdWeight: Math.max(0.1, Math.min(2.0, parseFloat((prev.macdWeight * multiplier).toFixed(2)))),
+            sentimentWeight: Math.max(0.1, Math.min(2.0, parseFloat((prev.sentimentWeight * multiplier).toFixed(2)))),
+            totalTrades: prev.totalTrades + 1,
+        }));
+
+        addMessage("manager", `蟄ｦ鄙偵ヵ繧｣繝ｼ繝峨ヰ繝・け: ${feedback} - 繝代Λ繝｡繝ｼ繧ｿ閾ｪ蜍戊ｪｿ謨ｴ螳御ｺ・, "SYSTEM");
+    }, [addMessage]);
+
+    const executeTrade = useCallback(async (tokenSymbol: string, action: "BUY" | "SELL", amount: number, price: number, reason?: string, dex?: string): Promise<boolean> => {
+        // --- HARD STOP (temporary) ---
+        // Mitigation: Setting to false as we are implementing robust locks
+        const HARD_STOP_TRADING = false;
+
+        if (tradeInProgress) {
+            console.warn("[TRADE_BLOCKED] Trade already in progress. Skipping duplicate request.", { tokenSymbol, action });
+            return false;
+        }
+
+        console.warn("[UI_TRADE_CLICK]", {
+            symbol: tokenSymbol,
+            action,
+            amount,
+            price,
+            reason,
+            ts: Date.now(),
+            walletConnected: effectiveIsConnected,
+            chainId: effectiveChainId,
+        });
+
+        if (HARD_STOP_TRADING) {
+            console.warn("[TRADE_BLOCKED] HARD_STOP_TRADING is enabled. No request will be sent.");
+            addMessage("SYSTEM", "笞・・[螳牙・繧ｬ繝ｼ繝云 迴ｾ蝨ｨ蜿門ｼ墓ｩ溯・縺ｯ繝｡繝ｳ繝・リ繝ｳ繧ｹ縺ｮ縺溘ａ蛛懈ｭ｢縺輔ｌ縺ｦ縺・∪縺吶・, "ALERT");
+            return false;
+        }
+
+        const currentDemoMode = isDemoMode || typeof window !== 'undefined' && localStorage.getItem("jdex_demo_mode") === "true";
+        const IS_PROD = process.env.NODE_ENV === "production";
+
+        // [LOCK GUARD] Prevent concurrent trades
+        if (tradeInProgress) {
+            console.warn("[TRADE_BLOCKED] Trade already in progress.");
+            return false;
+        }
+
+        // Set lock early
+        setTradeInProgress(true);
+        lastTradeRef.current = Date.now();
+
+        if (IS_PROD && reason?.startsWith("IMMEDIATE_TEST_TRIGGER")) {
+            console.log(`[SAFEGUARD] Automated trade ${action} ${tokenSymbol} blocked in Production.`);
+            setTradeInProgress(false);
+            return false;
+        }
+
+        if (!effectiveIsConnected && !currentDemoMode) {
+            addMessage("SYSTEM", "笞・・繧ｦ繧ｩ繝ｬ繝・ヨ縺梧磁邯壹＆繧後※縺・∪縺帙ｓ縲ょ叙蠑輔ｒ螳溯｡後☆繧九↓縺ｯ繧ｦ繧ｩ繝ｬ繝・ヨ繧呈磁邯壹＠縺ｦ縺上□縺輔＞縲・, "ALERT");
+            console.log('[DEBUG] executeTrade: Stopped - Wallet not connected.');
+            setTradeInProgress(false);
+            return false;
+        }
+
+        const now = Date.now();
+        if (now - lastTradeErrorTime.current < 5000) {
+            const remaining = Math.ceil((5000 - (now - lastTradeErrorTime.current)) / 1000);
+            addMessage("SYSTEM", `笞・・繧ｯ繝ｼ繝ｫ繝繧ｦ繝ｳ荳ｭ... 縺ゅ→ ${remaining}遘貞ｾ・▲縺ｦ縺上□縺輔＞縲Ａ, "ALERT");
+            setTradeInProgress(false);
+            return false;
+        }
+
+        if (!currentDemoMode && effectiveAddress && effectiveChainId) {
+            console.log('[DEBUG] executeTrade: Starting ParaSwap On-Chain Execution...', { tokenSymbol, action, amount, effectiveChainId, effectiveAddress });
+            setTradeInProgress(true);
+            try {
+                if (!isSupportedChain(effectiveChainId)) {
+                    throw new Error(`Chain ${effectiveChainId} is not supported by our implementation.`);
+                }
+
+                // Resolve Addresses & Decimals through Registry
+                const stableSymbol = action === "BUY"
+                    ? (liveWalletBalances
+                        .filter((entry) => entry.isStable && entry.usdValue > 1)
+                        .sort((a, b) => b.usdValue - a.usdValue)[0]?.symbol || "USDT")
+                    : "USDT";
+                const srcTokenInfo = resolveToken(action === "BUY" ? stableSymbol : tokenSymbol, effectiveChainId);
+                const destTokenInfo = resolveToken(action === "BUY" ? tokenSymbol : stableSymbol, effectiveChainId);
+
+                // Amount in Wei
+                const srcAmountNumber = action === "BUY" ? (amount * price) : amount;
+                const amountInWei = parseUnits(srcAmountNumber.toFixed(srcTokenInfo.decimals), srcTokenInfo.decimals).toString();
+
+                setTradeInProgress(true);
+                addMessage("SYSTEM", `売 ParaSwap縺ｧ${action === "BUY" ? "雉ｼ蜈･" : "螢ｲ蜊ｴ"}繝励Ο繧ｻ繧ｹ繧帝幕蟋倶ｸｭ...`, "SYSTEM");
+
+                console.warn("[TRADE_CALL]", {
+                    chainId: effectiveChainId,
+                    srcSymbol: action === "BUY" ? stableSymbol : tokenSymbol,
+                    destSymbol: action === "BUY" ? tokenSymbol : stableSymbol,
+                    amountWei: amountInWei,
+                    fromAddress: effectiveAddress,
+                    mode: currentDemoMode ? "demo" : "real",
+                    auto: (reason === "AI technical signal" || reason?.includes("謌ｦ逡･:"))
+                });
+
+                const tradeRes = await fetch("/api/trade", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chainId: effectiveChainId,
+                        srcSymbol: action === "BUY" ? stableSymbol : tokenSymbol,
+                        destSymbol: action === "BUY" ? tokenSymbol : stableSymbol,
+                        amountWei: amountInWei,
+                        fromAddress: effectiveAddress,
+                    }),
+                });
+
+                const tradeResText = await tradeRes.text();
+                let tradeData: any;
+                try {
+                    tradeData = JSON.parse(tradeResText);
+                } catch (e) {
+                    throw new Error(`Trade API Non-JSON response (Status:${tradeRes.status}): ${tradeResText.slice(0, 200)}`);
+                }
+
+                if (!tradeRes.ok || !tradeData.ok) {
+                    throw new Error(tradeData.error || `Trade API failed (Status:${tradeRes.status})`);
+                }
+
+                const txHash = tradeData.txHash;
+                setLastAction(action);
+                addMessage("SYSTEM", `噫 繝医Ξ繝ｼ繝牙ｮ溯｡悟ｮ御ｺ・ｼ・(Tx: ${txHash.slice(0, 10)}...)`, "SYSTEM");
+
+                if (publicClient) {
+                    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash as `0x${string}` });
+                    if (receipt.status === 'success') {
+                        addMessage("manager", `笨・ParaSwap縺ｧ縺ｮ蜿門ｼ輔′謌仙粥縺励∪縺励◆・～, "EXECUTION");
+                        if (isSoundEnabled) playTrade();
+                        unlockAchievement("first-trade");
+                    } else {
+                        throw new Error("Transaction execution failed on blockchain.");
+                    }
+                }
+
+                setTradeInProgress(false);
+                return true;
+            } catch (error: any) {
+                setTradeInProgress(false);
+                lastTradeErrorTime.current = Date.now();
+                console.error("ParaSwap trade error:", error);
+                let errorMsg = error.message.substring(0, 150);
+                addMessage("SYSTEM", `笶・[蜿門ｼ募､ｱ謨余 ${errorMsg}`, "ALERT");
+                return false;
+            }
+        }
+
+        // ==========================================
+        // DEMO EXECUTION PATH (Simulation)
+        // ==========================================
+        const validPrice = (price && price > 0) ? price : (allMarketPrices[tokenSymbol]?.price || 0);
+        const totalValue = amount * validPrice;
+        const selectedDex = dex || ["Uniswap", "QuickSwap", "PancakeSwap", "SushiSwap"][Math.floor(Math.random() * 4)];
+
+        // Phase 11: Accurate Fee & Slippage (0.3% Swap + 0.1% Slip + Dynamic Gas)
+        const swapFee = totalValue * 0.003;
+        const slippage = totalValue * 0.001;
+
+        // Gas Fee Calculation based on DEX (Chain approximation)
+        let gasFee = 50; // Default Low
+        if (selectedDex.includes("Uniswap")) gasFee = 400 + Math.random() * 400; // Ethereum: ﾂ･400-800
+        else if (selectedDex.includes("PancakeSwap")) gasFee = 10 + Math.random() * 20; // BSC: ﾂ･10-30
+        else if (selectedDex.includes("QuickSwap")) gasFee = 1 + Math.random() * 5; // Polygon: ﾂ･1-6
+        else if (selectedDex.includes("SushiSwap")) gasFee = 50 + Math.random() * 50; // Mixed: ﾂ･50-100
+
+        const totalFee = swapFee + slippage + gasFee;
+
+        // Effective Price for calculations (including slippage impact on price)
+        const effectivePrice = action === "BUY" ? validPrice * 1.001 : validPrice * 0.999;
+
+        if (action === "BUY") {
+            if (portfolioRef.current.cashbalance < (totalValue + totalFee)) {
+                addMessage("SYSTEM", `笞・・谿矩ｫ倅ｸ崎ｶｳ: 蠢・ｦ・ﾂ･${(totalValue + totalFee).toLocaleString()} / 菫晄怏 ﾂ･${portfolioRef.current.cashbalance.toLocaleString()}`, "ALERT");
+                setTradeInProgress(false);
+                return false;
+            }
+        } else {
+            const pos = portfolioRef.current.positions.find(p => p.symbol === tokenSymbol);
+            if (!pos || pos.amount < amount) {
+                addMessage("SYSTEM", `笞・・菫晄怏繝医・繧ｯ繝ｳ荳崎ｶｳ: ${tokenSymbol}`, "ALERT");
+                setTradeInProgress(false);
+                return false;
+            }
+        }
+
+        let tradePnl = 0;
+        setPortfolio(prev => {
+            let newCash = prev.cashbalance;
+            let newPositions = [...prev.positions];
+            const posIndex = newPositions.findIndex(p => p.symbol === tokenSymbol);
+
+            if (action === "BUY") {
+                newCash -= (totalValue + totalFee);
+                if (posIndex >= 0) {
+                    const currentAmount = newPositions[posIndex].amount;
+                    const newAmount = currentAmount + amount;
+                    const newEntryPrice = (newPositions[posIndex].entryPrice * currentAmount + effectivePrice * amount) / newAmount;
+
+                    newPositions[posIndex] = {
+                        ...newPositions[posIndex],
+                        amount: newAmount,
+                        entryPrice: newEntryPrice,
+                        highestPrice: Math.max(newPositions[posIndex].highestPrice || 0, effectivePrice)
+                    };
+                } else {
+                    newPositions.push({
+                        symbol: tokenSymbol,
+                        amount,
+                        entryPrice: effectivePrice,
+                        highestPrice: effectivePrice,
+                        reason: reason || "Manual Trade",
+                        exitStrategy: "Target +30~50%, Stop -10%" // Phase 11 Aggressive
+                    });
+                }
+            } else {
+                newCash += (totalValue - totalFee);
+                if (posIndex >= 0) {
+                    const entryPrice = newPositions[posIndex].entryPrice;
+                    tradePnl = (effectivePrice - entryPrice) * amount; // PnL based on effective price
+                    newPositions[posIndex].amount -= amount;
+                    if (newPositions[posIndex].amount < 0.000001) {
+                        newPositions.splice(posIndex, 1);
+                    }
+                }
+            }
+            return { ...prev, cashbalance: newCash, positions: newPositions };
+        });
+
+        const txHash = "0x" + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join("");
+
+        // Ensure pair display format - use proper stablecoin pairs usually (Demo fallback)
+        const stablePair = "USDT";
+        const pairDisplay = `${tokenSymbol}/${stablePair}`;
+
+        const chain = tokenSymbol === "POL" || tokenSymbol === "MATIC" ? "Polygon" : "BNB Chain";
+
+        const newTx: Transaction = {
+            id: Math.random().toString(36).substring(7),
+            agentId: "user",
+            type: action,
+            amount: amount,
+            price: price,
+            symbol: tokenSymbol,
+            timestamp: Date.now(),
+            txHash,
+            fee: totalFee,
+            pnl: action === "SELL" ? tradePnl : undefined,
+            pair: pairDisplay,
+            targetPrice: action === "BUY" ? price * (1 + takeProfitThreshold / 100) : undefined, // Integration of TP
+            dex: selectedDex,
+            chain: chain
+        };
+        setTransactions(prev => [newTx, ...prev].slice(0, 100));
+
+        // Add to notifications
+        const notification: TradeNotification = {
+            id: Math.random().toString(36).substring(7),
+            agentId: "manager",
+            agentName: "AI Trading Manager",
+            title: action === "BUY" ? "雉ｼ蜈･豕ｨ譁・ｮ溯｡・ : "螢ｲ蜊ｴ豕ｨ譁・ｮ溯｡・,
+            message: `${selectedDex} 縺ｧ ${amount.toFixed(4)} ${tokenSymbol} 繧・ﾂ･${(totalValue).toLocaleString()} 縺ｧ${action === "BUY" ? "雉ｼ蜈･" : "螢ｲ蜊ｴ"}縺励∪縺励◆縲・(謇区焚譁・ ﾂ･${totalFee.toFixed(0)})`,
+            type: action,
+            symbol: tokenSymbol,
+            timestamp: Date.now(),
+        };
+        setTradeNotifications(prev => [notification, ...prev]);
+
+        if (action === "SELL" && tradePnl > 0) {
+            const pointsToAdd = Math.floor(tradePnl / 100);
+            if (pointsToAdd > 0) {
+                addDisPoints(pointsToAdd);
+                addMessage("manager", `腸 蛻ｩ逶顔｢ｺ螳壹・繝ｼ繝翫せ迯ｲ蠕・ +${pointsToAdd} DIS繝昴う繝ｳ繝・, "ALERT");
+            }
+            agents.forEach(a => awardExp(a.id, 50));
+            updateAchievementProgress("profit-100", tradePnl);
+        } else if (action === "SELL") {
+            agents.forEach(a => awardExp(a.id, 10));
+        } else {
+            agents.forEach(a => awardExp(a.id, 5));
+        }
+
+        addMessage("manager", `[螳溯｡悟ｮ御ｺ・ ${action === "BUY" ? "雉ｼ 蜈･" : "螢ｲ 蜊ｴ"}螳御ｺ・ ${amount} ${tokenSymbol} @ ﾂ･${price.toLocaleString()}${action === "SELL" ? ` (謳咲寢: ﾂ･${tradePnl.toLocaleString()})` : ""}`, "EXECUTION");
+        if (isSoundEnabled) playSuccess();
+        unlockAchievement("first-trade");
+
+        setTradeInProgress(false);
+        return true;
+    }, [isConnected, isDemoMode, addMessage, isSoundEnabled, playTrade, playSuccess, takeProfitThreshold, agents, awardExp, updateAchievementProgress, addDisPoints, unlockAchievement, liveWalletBalances]);
+
+    const updateProposalStatus = (id: string, status: "APPROVED" | "REJECTED" | "ACTIVE" | "PENDING") => {
+        setStrategyProposals(prev => prev.map(p => {
+            if (p.id === id) {
+                const updated = { ...p, status };
+                if (status === "ACTIVE") {
+                    // Add to active strategies if not already there
+                    setActiveStrategies(current => [...current, updated]);
+
+                    // Apply settings if present
+                    if (updated.proposedSettings) {
+                        setRiskTolerance(updated.proposedSettings.riskTolerance);
+                        setStopLossThreshold(updated.proposedSettings.stopLoss);
+                        setTakeProfitThreshold(updated.proposedSettings.takeProfit);
+                    }
+
+                    addMessage("SYSTEM", `謌ｦ逡･驕ｩ蠢・ ${updated.title} (繝悶Ο繝・け: ${updated.durationBlock || "N/A"})`, "SYSTEM");
+                }
+                return updated;
+            }
+            return p;
+        }));
+    };
+
+    const deleteProposal = (id: string) => {
+        setStrategyProposals(prev => prev.filter(p => p.id !== id));
+        setActiveStrategies(prev => prev.filter(p => p.id !== id));
+    };
+
+    const addUserMessage = (content: string) => {
+        addMessage("USER", content, "OPINION");
+    };
+
+    const resetSimulation = () => {
+        setPortfolio(INITIAL_PORTFOLIO);
+        setTransactions([]);
+        setTradingPipelines([]);
+        setMessages([]); // Clear chat history as requested
+        setFavorites(new Set());
+        setStrategyProposals([]);
+        setDiscussionHistory([]);
+        setTradeNotifications([]);
+        localStorage.removeItem("jdex_portfolio");
+        localStorage.removeItem("jdex_transactions");
+        localStorage.removeItem("jdex_pipelines");
+        localStorage.removeItem("jdex_favorites");
+        localStorage.removeItem("jdex_risk_settings");
+        localStorage.removeItem("jdex_last_active");
+        addMessage("manager", "縲舌ョ繝｢蜿｣蠎ｧ繝ｪ繧ｻ繝・ヨ縲代☆縺ｹ縺ｦ縺ｮ蜿門ｼ輔ョ繝ｼ繧ｿ縺悟・譛溷喧縺輔ｌ縺ｾ縺励◆縲る°逕ｨ雉・肇繧偵Μ繧ｻ繝・ヨ縺励∵磁邯壹ｒ蜀埼幕縺励∪縺吶・, "SYSTEM");
+        window.location.reload();
+    };
+
+    useEffect(() => {
+        const storedPoints = localStorage.getItem("jdex_dis_points");
+        if (storedPoints) setDisPoints(parseInt(storedPoints));
+    }, []);
+
+    // Load all persisted states
+    useEffect(() => {
+        const storedSim = localStorage.getItem("jdex_simulating");
+        if (storedSim !== null) setIsSimulatingState(storedSim === "true");
+
+        const storedPipelines = localStorage.getItem("jdex_pipelines");
+        if (storedPipelines) {
+            try { setTradingPipelines(JSON.parse(storedPipelines)); } catch (e) { }
+        }
+
+        const storedFavs = localStorage.getItem("jdex_favorites");
+        if (storedFavs) {
+            try { setFavorites(new Set(JSON.parse(storedFavs))); } catch (e) { }
+        }
+
+        const storedDemo = localStorage.getItem("jdex_demo_mode");
+        const isDemo = storedDemo === "true";
+
+        if (storedDemo !== null) setIsDemoModeState(isDemo);
+
+        if (isDemo && !sessionStorage.getItem("jdex_auth")) {
+            const storedPortfolio = localStorage.getItem("jdex_portfolio");
+            if (storedPortfolio) {
+                try {
+                    setPortfolio(JSON.parse(storedPortfolio));
+                } catch (e) { }
+            } else {
+                // Check for demo mode fallback
+                const demoBalStr = localStorage.getItem("jdex_demo_balance");
+                if (demoBalStr) {
+                    const val = parseFloat(demoBalStr);
+                    setPortfolio({
+                        totalValue: val,
+                        pnl24h: 0,
+                        cashbalance: val,
+                        positions: []
+                    });
+                }
+            }
+
+            const storedTx = localStorage.getItem("jdex_transactions");
+            if (storedTx) {
+                try { setTransactions(JSON.parse(storedTx)); } catch (e) { }
+            }
+        } else {
+            // Force flat initialization if connected to Live Wallet to prevent ghost caches
+            setPortfolio({
+                totalValue: 0,
+                pnl24h: 0,
+                cashbalance: 0,
+                positions: []
+            });
+            setTransactions([]);
+            setIsDemoModeState(false);
+            localStorage.setItem("jdex_demo_mode", "false");
+            localStorage.removeItem("jdex_portfolio"); // Ensure demo data is wiped on fresh load for live users
+            localStorage.removeItem("jdex_transactions");
+            localStorage.removeItem("jdex_live_initial_balance"); // Prevent stale ghost balance
+        }
+
+        const storedRisk = localStorage.getItem("jdex_risk_settings");
+        if (storedRisk) {
+            try {
+                const r = JSON.parse(storedRisk);
+                setRiskTolerance(r.tolerance);
+                setStopLossThreshold(r.stopLoss);
+                setTakeProfitThreshold(r.takeProfit);
+            } catch (e) { }
+        }
+
+        const storedDemoBalance = localStorage.getItem("jdex_demo_balance");
+        let demoBal = 0;
+        if (storedDemoBalance) {
+            demoBal = parseFloat(storedDemoBalance);
+            setDemoBalanceState(demoBal);
+        }
+
+
+
+        const storedStartTokens = localStorage.getItem("jdex_allowed_start_tokens");
+        if (storedStartTokens) {
+            try { setAllowedStartTokensState(JSON.parse(storedStartTokens)); } catch (e) { }
+        }
+    }, []);
+
+    // Save state on changes (only if in demo mode to protect live state isolation)
+    useEffect(() => {
+        if (isDemoMode) {
+            localStorage.setItem("jdex_portfolio", JSON.stringify(portfolio));
+        }
+    }, [portfolio, isDemoMode]);
+
+    useEffect(() => {
+        if (isDemoMode) {
+            localStorage.setItem("jdex_transactions", JSON.stringify(transactions));
+        }
+    }, [transactions, isDemoMode]);
+
+    useEffect(() => {
+        localStorage.setItem("jdex_risk_settings", JSON.stringify({
+            tolerance: riskTolerance,
+            stopLoss: stopLossThreshold,
+            takeProfit: takeProfitThreshold
+        }));
+    }, [riskTolerance, stopLossThreshold, takeProfitThreshold]);
+
+    const riskAlertTriggered = useRef({ stopLoss: false, takeProfit: false });
+
+    // Fetch real market prices from internal aggregator API
+    useEffect(() => {
+        const loadPrices = async () => {
+            try {
+                const symbols = ["BTC", "ETH", "SOL", "BNB", "MATIC", "DOGE"];
+                const prices = await fetchMarketPrices(symbols);
+                if (prices && Object.keys(prices).length > 0) {
+                    setAllMarketPrices(prev => {
+                        const updated = { ...prev };
+                        Object.entries(prices).forEach(([symbol, data]) => {
+                            updated[symbol] = {
+                                price: data.price,
+                                volume: prev[symbol]?.volume || 0,
+                            };
+                        });
+                        return updated;
+                    });
+                    setRealPricesLoaded(true);
+                }
+            } catch (e) {
+                console.warn("[J-DEX] Failed to fetch real prices:", e);
+            }
+        };
+        loadPrices();
+        const interval = setInterval(loadPrices, 60000); // Refresh every 60s
+        return () => clearInterval(interval);
+    }, [addMessage]);
+
+    // Auto-exit Demo Mode when a live Wallet connects
+    useEffect(() => {
+        if (isConnected && isDemoMode) {
+            setIsDemoModeState(false);
+            localStorage.setItem("jdex_demo_mode", "false");
+
+            // WIPE DEMO PORTFOLIO TO PREVENT LEAKING INTO LIVE DASHBOARD
+            setPortfolio({
+                totalValue: 0,
+                pnl24h: 0,
+                cashbalance: 0,
+                positions: []
+            });
+            localStorage.removeItem("jdex_portfolio");
+            localStorage.removeItem("jdex_live_initial_balance"); // Force clear on switch
+
+
+            // Wipe demo transaction history
+            setTransactions([]);
+            localStorage.removeItem("jdex_transactions");
+
+            addMessage("manager", "笨・繧ｦ繧ｩ繝ｬ繝・ヨ謗･邯壹ｒ讀懃衍縺励∪縺励◆縲ゅョ繝｢繝｢繝ｼ繝峨ｒ隗｣髯､縺励∵ｮ矩ｫ倥ｒ蜷梧悄縺励∪縺吶・, "SYSTEM");
+        }
+    }, [isConnected, isDemoMode, addMessage]);
+
+    // Legacy native-only sync. Keep as a fallback until registry sync populates holdings.
+    useEffect(() => {
+        if (isConnected && !isDemoMode && balanceData && liveWalletBalances.length === 0) {
+            // Web3 connections sometimes append "t" for testnets, normalize back to mainnet ticker for Market Data Lookup
+            let nativeSymbol = (balanceData.symbol || "BNB").toUpperCase();
+            if (nativeSymbol === "TBNB" || nativeSymbol === "WBNB") nativeSymbol = "BNB";
+            if (nativeSymbol === "TMATIC" || nativeSymbol === "POL") nativeSymbol = "MATIC";
+
+            const priceData = allMarketPrices[nativeSymbol] || initialData[nativeSymbol];
+            const usdPrice = priceData ? priceData.price : 0;
+            const usdPriceTotal = usdPrice * Number(balanceData.formatted);
+
+            // TELEMETRY: Help debug why the user sees 340k
+            console.log(`[J-DEX SYNC] Symbol: ${nativeSymbol}, USD Price: ${usdPrice}, Formatted: ${balanceData.formatted}, USD Result: ${usdPriceTotal}`);
+
+            setPortfolio((prev) => {
+                // Prevent ghost calculations by enforcing 0 positions on live initial load hook
+                if (prev.totalValue >= 200 && prev.positions.length === 0 && prev.cashbalance >= 200) {
+                    return prev; // Ignore the $200 (approx 30,000 JPY) spike
+                }
+
+                // Calculate active position values
+                // CRITICAL: Filter out any demo-only positions if we are in live mode.
+                const trackedPositionsValue = prev.positions.reduce((acc, pos) => {
+                    const symbol = pos.symbol.toUpperCase();
+                    // If it's a major asset and we aren't explicitly tracking a LIVE trade for it, skip.
+                    if (["BNB", "BTC", "ETH", "SOL", "MATIC"].includes(symbol)) {
+                        if (!localStorage.getItem("jdex_live_active_trade_" + symbol)) {
+                            console.log(`[J-DEX] Filtering ghost position: ${symbol} (${pos.amount})`);
+                            return acc;
+                        }
+                    }
+                    const pData = allMarketPrices[pos.symbol] || initialData[pos.symbol];
+                    const val = (pos.amount * (pData ? pData.price : 0));
+                    return acc + val;
+                }, 0);
+
+                const newTotalValue = usdPriceTotal + trackedPositionsValue;
+
+                if (Math.abs(newTotalValue - prev.totalValue) > 1) {
+                    console.log(`[J-DEX] Portfolio Updated: USD ${newTotalValue.toLocaleString()}`);
+                }
+
+                // Strictly sync the initial balance if it deviates significantly from the newly established true balance
+                setLiveInitialBalance((prevInit) => {
+                    if (prevInit === 0 || Math.abs(prevInit - newTotalValue) > newTotalValue * 2) {
+                        // It's likely a leaked demo balance or a completely stale cache if it's vastly different.
+                        localStorage.setItem("jdex_live_initial_balance", newTotalValue.toString());
+                        return newTotalValue;
+                    }
+
+                    // Only set warning if no realistic live balance was previously tracked
+                    if (usdPrice > 0 && Number(balanceData.formatted) * usdPrice < 1.0) {
+                        setTimeout(() => {
+                            addMessage("manager", `笞・・[谿矩ｫ倩ｭｦ蜻馨 蜿｣蠎ｧ谿矩ｫ倥′讌ｵ繧√※蟆鷹｡阪〒縺呻ｼ・{balanceData.formatted} ${nativeSymbol}・峨・EX縺ｮ譛菴取ｳｨ譁・Ν繝ｼ繝ｫ繧・ぎ繧ｹ莉｣荳崎ｶｳ縺ｫ繧医ｊ縲√Μ繧｢繝ｫ繝医Ξ繝ｼ繝峨′繧ｨ繝ｩ繝ｼ縺ｫ縺ｪ繧句庄閭ｽ諤ｧ縺碁ｫ倥＞縺ｧ縺吶よ怙菴・1 USD逶ｸ蠖難ｼ育ｴ・50蜀・ｼ我ｻ･荳翫・蜈･驥代ｒ謗ｨ螂ｨ縺励∪縺吶Ａ, "ALERT");
+                        }, 3000);
+                    }
+
+                    return prevInit;
+                });
+
+                return {
+                    ...prev,
+                    cashbalance: usdPriceTotal,
+                    totalValue: newTotalValue,
+                };
+            });
+        }
+    }, [isConnected, isDemoMode, balanceData, allMarketPrices, liveWalletBalances.length]);
+
+    useEffect(() => {
+        if (!isConnected || isDemoMode || !publicClient || !address || !chainId || !isSupportedChain(chainId)) {
+            setLiveWalletBalances([]);
+            return;
+        }
+
+        let cancelled = false;
+
+        const syncLiveWalletBalances = async () => {
+            try {
+                const registry = TOKEN_REGISTRY[chainId];
+                const balances = await Promise.all(
+                    Object.entries(registry).map(async ([symbol, info]) => {
+                        let rawBalance = 0n;
+
+                        if (info.address.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()) {
+                            rawBalance = await publicClient.getBalance({ address });
+                        } else {
+                            rawBalance = await publicClient.readContract({
+                                address: info.address as `0x${string}`,
+                                abi: ERC20_ABI,
+                                functionName: "balanceOf",
+                                args: [address],
+                            }) as bigint;
+                        }
+
+                        const normalizedSymbol = symbol.toUpperCase().endsWith("ATIC") ? "POL" : symbol.toUpperCase();
+                        const amount = Number(formatUnits(rawBalance, info.decimals));
+                        const usdPrice = Number(allMarketPrices[normalizedSymbol]?.price ?? initialData[normalizedSymbol]?.price ?? 0);
+
+                        return {
+                            symbol: normalizedSymbol,
+                            amount,
+                            usdPrice,
+                            usdValue: amount * usdPrice,
+                            isStable: TRADE_CONFIG.STABLECOINS.includes(normalizedSymbol),
+                        };
+                    })
+                );
+
+                if (cancelled) return;
+
+                setLiveWalletBalances(
+                    balances.filter((entry) => entry.amount > 0.0000001 || entry.symbol === "BNB" || entry.symbol === "POL")
+                );
+            } catch (error) {
+                console.warn("[J-DEX] Failed to sync live wallet balances:", error);
+            }
+        };
+
+        syncLiveWalletBalances();
+        const interval = setInterval(syncLiveWalletBalances, 30000);
+
+        return () => {
+            cancelled = true;
+            clearInterval(interval);
+        };
+    }, [isConnected, isDemoMode, publicClient, address, chainId, allMarketPrices]);
+
+    useEffect(() => {
+        if (!isConnected || isDemoMode) return;
+
+        const totalUsd = liveWalletBalances.reduce((sum, entry) => sum + entry.usdValue, 0);
+        const stableUsd = liveWalletBalances
+            .filter((entry) => entry.isStable)
+            .reduce((sum, entry) => sum + entry.usdValue, 0);
+
+        const nextPositions = liveWalletBalances
+            .filter((entry) => !entry.isStable && entry.amount > 0)
+            .map((entry) => {
+                const existing = portfolioRef.current.positions.find((position) => position.symbol === entry.symbol);
+                const referencePrice = entry.usdPrice || existing?.entryPrice || 0;
+
+                return {
+                    symbol: entry.symbol,
+                    amount: entry.amount,
+                    entryPrice: existing?.entryPrice || referencePrice,
+                    highestPrice: existing?.highestPrice || referencePrice,
+                    reason: existing?.reason,
+                    exitStrategy: existing?.exitStrategy,
+                };
+            });
+
+        setPortfolio((prev) => ({
+            ...prev,
+            cashbalance: stableUsd,
+            totalValue: totalUsd,
+            positions: nextPositions,
+        }));
+
+        if (totalUsd > 0) {
+            setLiveInitialBalance((prevInit) => {
+                if (prevInit > 0) return prevInit;
+                localStorage.setItem("jdex_live_initial_balance", totalUsd.toString());
+                return totalUsd;
+            });
+        }
+
+        if (!hasInitialTradeExecuted && totalUsd > 0 && nextPositions.length > 0) {
+            setHasInitialTradeExecuted(true);
+        }
+
+        if (totalUsd > 0 && totalUsd < 1 && Date.now() - lastFundingWarningRef.current > 60000) {
+            lastFundingWarningRef.current = Date.now();
+            addMessage("manager", "谿矩ｫ倥′蟆鷹｡阪・縺溘ａ閾ｪ蜍募｣ｲ雋ｷ縺悟､ｱ謨励☆繧句庄閭ｽ諤ｧ縺後≠繧翫∪縺吶よ怙菴弱〒繧・1 USD 逶ｸ蠖謎ｻ･荳翫ｒ謗ｨ螂ｨ縺励∪縺吶・, "ALERT");
+        }
+    }, [isConnected, isDemoMode, liveWalletBalances, hasInitialTradeExecuted, addMessage]);
+
+    // Catch-up simulation on mount (Strictly Demo Strategy Only)
+    useEffect(() => {
+        if (!isSimulating || !realPricesLoaded || !isDemoMode) return;
+
+        const runCatchUp = async () => {
+            const lastTime = localStorage.getItem("jdex_last_active");
+            if (!lastTime) {
+                localStorage.setItem("jdex_last_active", Date.now().toString());
+                return;
+            }
+
+            const elapsedMs = Date.now() - parseInt(lastTime);
+            const elapsedMinutes = Math.floor(elapsedMs / (1000 * 60));
+
+            if (elapsedMinutes < 5) return; // Only catch up if away for > 5 mins
+
+            addMessage("manager", `縲舌す繧ｹ繝・Β蠕ｩ蟶ｰ縲代♀縺九∴繧翫↑縺輔＞・∽ｸ榊惠縺ｮ${elapsedMinutes}蛻・俣縺ｮ蟶ょｴ蜍募髄繧貞・譫舌＠縲∬・蜍輔ヨ繝ｬ繝ｼ繝峨ｒ蜷梧悄縺励※縺・∪縺・..`, "SYSTEM");
+
+            // Simplified Catch-up: Simulate a few potential trades
+            const numPotentialTrades = Math.min(5, Math.floor(elapsedMinutes / 60));
+
+            if (numPotentialTrades > 0) {
+                setTimeout(() => {
+                    let pnlGained = 0;
+                    for (let i = 0; i < numPotentialTrades; i++) {
+                        const isWin = Math.random() > 0.4;
+                        const pnl = isWin ? Math.random() * 5000 : -Math.random() * 2000;
+                        pnlGained += pnl;
+
+                        const mockTx: Transaction = {
+                            id: `offline-${Date.now()}-${i}`,
+                            agentId: "technical",
+                            type: isWin ? "SELL" : "SELL",
+                            symbol: selectedCurrency,
+                            amount: 0.5,
+                            price: convertJPY(marketData.price),
+                            timestamp: Date.now() - (Math.random() * elapsedMs),
+                            txHash: "0x_offline_processed_" + i,
+                            fee: 50,
+                            pnl: pnl,
+                            pair: `USDT-${selectedCurrency}`
+                        };
+                        setTransactions(prev => [mockTx, ...prev].slice(0, 50));
+                    }
+
+                    setPortfolio(prev => ({
+                        ...prev,
+                        cashbalance: prev.cashbalance + pnlGained,
+                        totalValue: prev.totalValue + pnlGained
+                    }));
+
+                    addMessage("manager", `荳榊惠譛滄俣縺ｮ蜷梧悄螳御ｺ・ｼ哂I縺・{numPotentialTrades}莉ｶ縺ｮ蜿門ｼ輔ｒ蜃ｦ逅・＠縺ｾ縺励◆縲よ錐逶雁粋險・ ﾂ･${pnlGained.toLocaleString()}`, "EXECUTION");
+                }, 3000);
+            }
+
+            localStorage.setItem("jdex_last_active", Date.now().toString());
+        };
+
+        runCatchUp();
+    }, [realPricesLoaded, isSimulating, selectedCurrency, addMessage, marketData.price]);
+
+    // Update last active timestamp periodically
+    useEffect(() => {
+        if (!isSimulating) return;
+        const interval = setInterval(() => {
+            localStorage.setItem("jdex_last_active", Date.now().toString());
+        }, 10000); // Every 10s
+        return () => clearInterval(interval);
+    }, [isSimulating]);
+
+    useEffect(() => {
+        const data = allMarketPrices[selectedCurrency] || initialData[selectedCurrency];
+        setMarketData(prev => ({
+            price: data.price,
+            change24h: realPricesLoaded ? prev.change24h : 0,
+            volume: data.volume,
+            trend: prev.change24h > 0 ? "BULL" : prev.change24h < 0 ? "BEAR" : "SIDEWAYS",
+        }));
+        setPriceHistory([]);
+    }, [selectedCurrency, realPricesLoaded]);
+
+    // Simulation Loop
+    useEffect(() => {
+        if (!isSimulating) {
+            isActiveRef.current = false;
+            return;
+        }
+
+        isActiveRef.current = true;
+        let timeoutId: NodeJS.Timeout;
+
+        const loop = async () => {
+            if (!isActiveRef.current) return;
+
+            const currentMarketData = marketDataRef.current;
+            const currentPortfolio = portfolioRef.current;
+            const currentAgents = agentsRef.current;
+            const isBuyActuallyAllowed = isDemoMode || (effectiveIsConnected && isAutoPilotEnabled);
+
+
+            let newPrice = currentMarketData.price;
+            let newTrend = currentMarketData.trend;
+
+            setMarketData((prev) => {
+                const change = (Math.random() - 0.5) * (prev.price * 0.002);
+                newPrice = prev.price + change;
+                const newChange24h = prev.change24h + (change / prev.price) * 100;
+                newTrend = newChange24h > 0 ? "BULL" : "BEAR";
+
+                return {
+                    ...prev,
+                    price: parseFloat(newPrice.toFixed(2)),
+                    change24h: parseFloat(newChange24h.toFixed(2)),
+                    trend: newTrend,
+                };
+            });
+
+            // Update Risk Status based on 24h change
+            const currentPriceData = allMarketPrices[selectedCurrency] || initialData[selectedCurrency];
+            const currentChange = (newPrice - currentPriceData.price) / currentPriceData.price * 100;
+
+            if (currentChange < -5) {
+                setRiskStatus("CRITICAL");
+                setAtmosphere("ALERT");
+            } else if (currentChange < -2) {
+                setRiskStatus("CAUTION");
+                setAtmosphere("NEGATIVE");
+            } else if (currentChange > 3) {
+                const initialBalance = 30000;
+                const newProfit = currentPortfolio.totalValue - initialBalance;
+                if (newProfit > 0) {
+                    setAtmosphere("POSITIVE");
+                    updateAchievementProgress("profit-100", Math.floor(newProfit));
+                } else if (newProfit < -100) {
+                    setAtmosphere("NEGATIVE");
+                }
+                setRiskStatus("SAFE");
+            } else {
+                setRiskStatus("SAFE");
+                setAtmosphere("NEUTRAL");
+            }
+
+            setPriceHistory((history) => {
+                const now = new Date();
+                const ts = Math.floor(now.getTime() / 1000);
+                const validPrice = typeof newPrice === 'number' && !isNaN(newPrice) ? newPrice : (history.length > 0 ? history[history.length - 1].price : currentMarketData.price);
+
+                const newPoint: PricePoint = {
+                    time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    price: validPrice,
+                    timestamp: ts
+                };
+
+                const newHistory = [...history.filter(p => p.timestamp !== ts), newPoint];
+                if (newHistory.length > 50) newHistory.shift();
+                return newHistory.sort((a, b) => a.timestamp - b.timestamp);
+            });
+
+            if (isDemoMode) {
+                setPortfolio((prevPortfolio) => {
+                    const positionsValue = prevPortfolio.positions.reduce((acc, pos) => {
+                        let price = 0;
+                        if (pos.symbol === selectedCurrency) {
+                            price = newPrice;
+                        } else {
+                            // Prices here are in USD
+                            price = allMarketPrices[pos.symbol]?.price || initialData[pos.symbol]?.price || 0;
+                        }
+                        return acc + (pos.amount * price);
+                    }, 0);
+                    return {
+                        ...prevPortfolio,
+                        totalValue: parseFloat((positionsValue + prevPortfolio.cashbalance).toFixed(2)),
+                    };
+                });
+            }
+
+            // AI Logic Tick
+            if (Math.random() > 0.6) {
+                const favArray = Array.from(favorites);
+                let currentSymbol = selectedCurrency;
+
+                // 1. Reactive and Proactive Conversations
+                const roll = Math.random();
+                let agentIndex = roll < 0.2 ? 0 : roll < 0.4 ? 1 : roll < 0.6 ? 2 : roll < 0.8 ? 3 : 4;
+                const agent = AGENTS[agentIndex];
+                let content = "";
+                let type: Message["type"] = "OPINION";
+
+                // Check for significant price moves in the current selected currency
+                const priceChangePct = (newPrice - currentMarketData.price) / currentMarketData.price * 100;
+
+                if (Math.abs(priceChangePct) > 0.2) {
+                    // Reactions to price moves
+                    if (agent.id === "technical") {
+                        content = `${selectedCurrency} 縺悟虚縺阪∪縺励◆縺ｭ縲ら洒譛溽噪縺ｫ縺ｯ ${priceChangePct > 0 ? "荳頑・繧ｦ繧ｧ繝・ず" : "繧ｵ繝昴・繝医Λ繧､繝ｳ"} 縺ｮ謾ｻ髦ｲ縺ｫ縺ｪ繧翫◎縺・〒縺吶Ａ;
+                    } else if (agent.id === "sentiment") {
+                        content = `${selectedCurrency} 縺ｮ繝懊Λ繝・ぅ繝ｪ繝・ぅ縺ｫ蜿榊ｿ懊＠縺ｦSNS繧ら屁繧贋ｸ翫′縺｣縺ｦ縺阪∪縺励◆縲ゅ・繧ｸ繝・ぅ繝悶↑繝翫Λ繝・ぅ繝悶′蠖｢謌舌＆繧後※縺・∪縺吶Ａ;
+                    } else if (agent.id === "security") {
+                        content = `諤･豼縺ｪ蜍輔″縺ｯ繝輔Λ繝・す繝･繝ｭ繝ｼ繝ｳ謾ｻ謦・・莠亥・縺ｧ縺ゅｋ蝣ｴ蜷医ｂ縺ゅｊ縺ｾ縺吶ゅさ繝ｳ繝医Λ繧ｯ繝医・迥ｶ諷九↓逡ｰ蟶ｸ縺ｯ縺ゅｊ縺ｾ縺帙ｓ縺後∬ｭｦ謌偵′蠢・ｦ√〒縺吶Ａ;
+                    } else if (agent.id === "fundamental") {
+                        content = `萓｡譬ｼ縺ｮ螟牙虚縺ｯ縺ゅｊ縺ｾ縺吶′縲・{selectedCurrency} 縺ｮ譛ｬ雉ｪ逧・↑萓｡蛟､・医Θ繝ｼ繧ｹ繧ｱ繝ｼ繧ｹ・峨↓謠ｺ繧九℃縺ｯ縺ゅｊ縺ｾ縺帙ｓ縲ゅ・繝ｼ繝ｫ繝峨′雉｢譏弱〒縺励ｇ縺・Ａ;
+                    }
+                } else if (Math.random() > 0.7) {
+                    // "Interesting coins to trade" - Pick a random coin from allMarketPrices (Filter out stables)
+                    const allSymbols = Object.keys(allMarketPrices).filter(s => isInterestingToken(s));
+                    const randomCoin = allSymbols[Math.floor(Math.random() * allSymbols.length)];
+                    const coinData = allMarketPrices[randomCoin] as any;
+
+                    // Note: allMarketPrices items might be CoinDetails or simple {price, volume}
+                    // Let's use current_price and price_change_percentage_24h if they exist.
+                    const timeframe = ["15m", "1h", "4h"][Math.floor(Math.random() * 3)];
+                    const change = coinData.price_change_percentage_24h || coinData.change24h || 0;
+
+                    if (agent.id === "technical" && change > 5) {
+                        content = `縲舌ユ繧ｯ繝九き繝ｫ蛻・梵/ ${randomCoin}-JPY (${timeframe})縲閃ACD縺後ざ繝ｼ繝ｫ繝・Φ繧ｯ繝ｭ繧ｹ縺ｸ蜷代°縺｣縺ｦ縺・∪縺吶・4h縺ｧ +${change.toFixed(1)}% 縺ｧ縺吶よ款縺礼岼雋ｷ縺・・螂ｽ讖溘Ａ;
+                    } else if (agent.id === "sentiment" && Math.random() > 0.5) {
+                        content = `縲舌そ繝ｳ繝√Γ繝ｳ繝・ ${randomCoin}-JPY (${timeframe})縲題送蜷阪い繧ｫ繧ｦ繝ｳ繝医′縺薙・繝壹い縺ｫ縺､縺・※繝昴ず繝・ぅ繝悶↑險蜿翫ｒ縺励※縺・∪縺吶ゅさ繝溘Η繝九ユ繧｣縺ｮ蜍｢縺・′蜉騾滉ｸｭ縲Ａ;
+                    } else if (agent.id === "fundamental" && change < -10) {
+                        content = `縲舌ヵ繧｡繝ｳ繝繝｡繝ｳ繧ｿ繝ｫ/ ${randomCoin}-JPY (${timeframe})縲醍樟蝨ｨ縺ｮ諤･關ｽ縺ｯ髢狗匱騾ｲ謐励↓蠖ｱ髻ｿ縺励∪縺帙ｓ縲る聞譛溽噪縺ｪ繝輔ぃ繝ｳ繝繝｡繝ｳ繧ｿ繝ｫ縺ｯ蛛･蜈ｨ縲∬ｲｷ縺・ｴ縺ｨ蛻､譁ｭ縲Ａ;
+                    } else if (agent.id === "coordinator") {
+                        content = `縲先姶逡･謠先｡・ ${selectedCurrency}/${randomCoin}縲醍樟蝨ｨ縺ｮ蟶ょｴ迺ｰ蠅・〒縺ｯ ${selectedCurrency} 莉･螟悶・ ${randomCoin} 繝壹い繧ゅメ繝｣繝ｳ繧ｹ縺後≠繧翫∪縺吶ょ・謨｣謚戊ｳ・ｒ謗ｨ螂ｨ縲Ａ;
+                    }
+                }
+
+                if (content) {
+                    addMessage(agent.id, content, type);
+                } else {
+                    // Signal based execution logic
+                    const isTargetStable = TRADE_CONFIG.STABLECOINS.includes(selectedCurrency.toUpperCase());
+
+                    // [REFINED GUARD] Autonomous execution must respect locks and cooldown
+                    const now = Date.now();
+                    const autonomousCooldown = 30000; // 30s cooldown for auto
+                    const canExecuteAutonomous = isAutoPilotEnabled &&
+                        !tradeInProgress &&
+                        (now - lastTradeRef.current > autonomousCooldown);
+
+                    if (canExecuteAutonomous && agent.id === "technical" && Math.random() > 0.8 && !isTargetStable) {
+                        const action = Math.random() > 0.5 ? "BUY" : "SELL";
+                        const amount = parseFloat((Math.random() * 0.5 + 0.1).toFixed(4));
+                        const currentPositions = currentPortfolio.positions.length;
+                        const pos = currentPortfolio.positions.find(p => p.symbol === selectedCurrency);
+                        const hasInventory = action === "SELL" ? (pos && pos.amount >= amount) : true;
+
+                        if (action === "BUY" && currentPositions < 3 && isBuyActuallyAllowed) {
+                            type = "EXECUTION";
+                            const jpyPrice = convertJPY(newPrice);
+                            content = `${action === "BUY" ? "雉ｼ蜈･螳溯｡・ : "螢ｲ蜊ｴ螳溯｡・}: ${amount} ${selectedCurrency} @ ﾂ･${jpyPrice.toLocaleString()}`;
+                            executeTrade(selectedCurrency, action, amount, newPrice, "AI technical signal"); // Use USD price for logic
+                            addMessage(agent.id, content, type);
+                        } else if (action === "SELL" && hasInventory) {
+                            type = "EXECUTION";
+                            const jpyPrice = convertJPY(newPrice);
+                            content = `${action === "SELL" ? "螢ｲ蜊ｴ螳溯｡・ : "雉ｼ蜈･螳溯｡・}: ${amount} ${selectedCurrency} @ ﾂ･${jpyPrice.toLocaleString()}`;
+                            executeTrade(selectedCurrency, action, amount, newPrice, "AI technical signal"); // Use USD price for logic
+                            addMessage(agent.id, content, type);
+                        }
+                    }
+                }
+            }
+
+            // News Simulation
+            if (Math.random() > 0.98) {
+                let news: MarketNews;
+                if (Math.random() > 0.7) {
+                    try {
+                        const realFeeds = await getCryptoNews();
+                        news = realFeeds.length > 0 ? convertRealToMarketNews(realFeeds[Math.floor(Math.random() * realFeeds.length)]) : generateRandomNews(selectedCurrency);
+                    } catch (e) {
+                        news = generateRandomNews(selectedCurrency);
+                    }
+                } else {
+                    news = generateRandomNews(selectedCurrency);
+                }
+
+                setLatestNews(news);
+                triggerLearningPulse(news);
+
+                const reactingAgent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
+                let reactionPrefix = news.category === "REAL" ? `縲絶國・・REAL-TIME NEWS from ${news.source}縲疏 : `縲信arket Intelligence縲疏;
+                if (news.impact === "BULLISH") {
+                    addMessage(reactingAgent.id, `${reactionPrefix} ${news.title} - 繝昴ず繝・ぅ繝悶↑繝九Η繝ｼ繧ｹ繧呈､懃衍縲・{selectedCurrency}縺ｯ荳頑・蛯ｾ蜷代→莠域ｸｬ縲Ａ, "OPINION");
+                } else if (news.impact === "BEARISH") {
+                    addMessage(reactingAgent.id, `${reactionPrefix} ${news.title} - 繝阪ぎ繝・ぅ繝悶↑繝九Η繝ｼ繧ｹ繧呈､懃衍縲りｭｦ謌偵′蠢・ｦ√〒縺吶Ａ, "ALERT");
+                }
+            }
+
+            if (isSimulating && (isDemoMode || isAutoPilotEnabled)) {
+                // 1. Risk Management Check (Positions level)
+                const currentPortfolio = portfolioRef.current;
+                for (const pos of currentPortfolio.positions) {
+                    const priceData = allMarketPrices[pos.symbol] || initialData[pos.symbol];
+                    if (!priceData) continue;
+                    const posPrice = priceData.price;
+
+                    const currentPriceJPY = convertJPY(posPrice);
+                    const pnlPct = ((currentPriceJPY - pos.entryPrice) / pos.entryPrice) * 100;
+
+                    // Stop Loss Check
+                    if (pnlPct <= stopLossThreshold) {
+                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `笞・・繧ｹ繝医ャ繝励Ο繧ｹ逋ｺ蜍・(${stopLossThreshold}%)`);
+                        addMessage("security", `笞・・[邱頑･豎ｺ貂・ ${pos.symbol} 縺後せ繝医ャ繝励Ο繧ｹ・・{stopLossThreshold}%・峨↓驕斐＠縺溘◆繧∝｣ｲ蜊ｴ縺励∪縺励◆縲Ａ, "ALERT");
+                    }
+                    // Take Profit Check
+                    else if (pnlPct >= takeProfitThreshold) {
+                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `腸 蛻ｩ逶顔｢ｺ螳壽ｳｨ譁・ｮ溯｡・(+${takeProfitThreshold}%)`);
+                        addMessage("manager", `腸 [蛻ｩ遒ｺ螳御ｺ・ ${pos.symbol} 縺檎岼讓吝茜逶奇ｼ・{takeProfitThreshold}%・峨↓蛻ｰ驕斐＠縺ｾ縺励◆縲Ａ, "EXECUTION");
+                    }
+
+                    // --- NEW RISK MANAGEMENT ---
+                    // 1. Update Highest Price (Mutate ref for tracking during session)
+                    if (!pos.highestPrice || posPrice > pos.highestPrice) {
+                        pos.highestPrice = posPrice;
+                    }
+
+                    // 2. Trailing Stop
+                    const trailingThreshold = 3; // 3%
+                    const highest = pos.highestPrice || posPrice;
+                    if (highest > 0 && posPrice < highest * (1 - trailingThreshold / 100)) {
+                        if (posPrice > pos.entryPrice * 1.02) { // Secure at least 2% profit
+                            executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `悼 繝医Ξ繝ｼ繝ｪ繝ｳ繧ｰ繧ｹ繝医ャ繝玲ｱｺ貂・(譛鬮伜､ $${highest.toLocaleString()} 縺九ｉ -${trailingThreshold}%)`);
+                            addMessage("manager", `悼 [蛻ｩ逶顔｢ｺ菫拆 ${pos.symbol} 縺梧怙鬮伜､縺九ｉ蜿崎誠縺励◆縺溘ａ縲∝茜逶顔｢ｺ螳壹＠縺ｾ縺励◆縲Ａ, "EXECUTION");
+                        }
+                    }
+
+                    // 3. Smart Stop-Loss (Emergency)
+                    if (riskStatus === "CRITICAL" && pnlPct < -2) {
+                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `孱・・邱頑･蝗樣∩: 蟶ょｴ繝ｪ繧ｹ繧ｯ鬮倬ｨｰ縺ｫ莨ｴ縺・掠譛滓錐蛻・ｊ`);
+                        addMessage("security", `孱・・[邱頑･蝗樣∩] 蟶ょｴ繝ｪ繧ｹ繧ｯ繝ｬ繝吶Ν縲靴RITICAL縲肴､懃衍縲・{pos.symbol} 繧呈掠譛滓錐蛻・ｊ縺励∪縺励◆縲Ａ, "ALERT");
+                    }
+                    // ---------------------------
+                }
+
+                // RISK HEDGING: Move to stables if atmosphere is bad
+                if (atmosphere === "ALERT" || atmosphere === "NEGATIVE") {
+                    if (Math.random() > 0.8) {
+                        const topPos = [...currentPortfolio.positions].sort((a, b) => b.amount - a.amount)[0];
+                        if (topPos && topPos.amount > 0) {
+                            const priceData = allMarketPrices[topPos.symbol] || initialData[topPos.symbol];
+                            if (priceData) {
+                                const hedgeAmount = topPos.amount * 0.3; // Move 30% to cash
+                                executeTrade(topPos.symbol, "SELL", hedgeAmount, priceData.price, `孱・・繝ｪ繧ｹ繧ｯ繝倥ャ繧ｸ: 蟶ょｴ繧ｻ繝ｳ繝√Γ繝ｳ繝域が蛹悶↓莨ｴ縺・ｳ・≡蠕・∩`);
+                            }
+                        }
+                    }
+                }
+
+                // 2. Fund Validation Logic (Real Wallet only)
+                if (!isDemoMode && isConnected) {
+                    const availableFundSymbols = liveWalletBalances
+                        .filter((entry) => entry.amount > 0)
+                        .map((entry) => entry.symbol.toUpperCase());
+
+                    const hasRequiredFunds = allowedStartTokens.some((token) => availableFundSymbols.includes(token.toUpperCase()));
+
+                    if (!hasRequiredFunds && allowedStartTokens.length > 0 && Date.now() - lastFundingWarningRef.current > 60000) {
+                        lastFundingWarningRef.current = Date.now();
+                        const warningTokenStr = allowedStartTokens.join(", ");
+                        addMessage("manager", `[Warning] 開始資金として認識できる保有通貨がありません: ${warningTokenStr}`, "ALERT");
+                    }
+                }
+
+                // 3. Demo/Auto Automation Logic
+                if (isDemoMode || isAutoPilotEnabled) {
+                    const stableFundingUsd = isDemoMode
+                        ? demoBalance
+                        : liveWalletBalances
+                            .filter((entry) => entry.isStable)
+                            .reduce((sum, entry) => sum + entry.usdValue, 0);
+                    const preferredLivePosition = !isDemoMode
+                        ? [...currentPortfolio.positions].sort((a, b) => {
+                            const aPrice = allMarketPrices[a.symbol]?.price || initialData[a.symbol]?.price || 0;
+                            const bPrice = allMarketPrices[b.symbol]?.price || initialData[b.symbol]?.price || 0;
+                            return (b.amount * bPrice) - (a.amount * aPrice);
+                        })[0] ?? null
+                        : null;
+                    const baseBalance = isDemoMode
+                        ? demoBalance
+                        : (stableFundingUsd > 0 ? stableFundingUsd : currentPortfolio.totalValue);
+                    let targetSymbol = selectedCurrency;
+
+                    if (!isDemoMode && stableFundingUsd < 2 && preferredLivePosition) {
+                        targetSymbol = preferredLivePosition.symbol as Currency;
+                    }
+
+                    // MARKET SCANNING (Multi-currency)
+                    if (hasInitialTradeExecuted && Math.random() > 0.6) {
+                        const otherSymbols = Object.keys(allMarketPrices).filter(s => s !== selectedCurrency && isInterestingToken(s));
+                        const opportunity = otherSymbols.find(s => {
+                            const p = allMarketPrices[s] as any;
+                            return p && Math.abs(p.change24h || p.price_change_percentage_24h || 0) > 3;
+                        });
+
+                        if (opportunity) {
+                            targetSymbol = opportunity as Currency;
+                        } else {
+                            if (otherSymbols.length > 0) {
+                                targetSymbol = otherSymbols[Math.floor(Math.random() * otherSymbols.length)] as Currency;
+                            }
+                        }
+                    }
+
+                    // Strict Stablecoin Prevention during Automated Trading
+                    const isTargetStable = TRADE_CONFIG.STABLECOINS.includes(targetSymbol.toUpperCase());
+                    if (isTargetStable && hasInitialTradeExecuted) {
+                        targetSymbol = "BNB" as Currency;
+                        addMessage("manager", `売 繧ｹ繝・・繝悶Ν繧ｳ繧､繝ｳ縺碁∈謚槭＆繧後◆縺溘ａ縲∝ｯｾ蜿門ｼ暮夊ｲｨ繧貞ｼｷ蛻ｶ逧・↓ BNB 縺ｫ螟画峩縺励※蜿門ｼ墓ｩ滉ｼ壹ｒ遒ｺ菫昴＠縺ｾ縺吶Ａ, "SYSTEM");
+                    }
+
+                    const currentTokenPrice = allMarketPrices[targetSymbol]?.price || initialData[targetSymbol]?.price || 0;
+                    if (currentTokenPrice === 0) {
+                        if (isActiveRef.current) timeoutId = setTimeout(loop, Math.random() * 3000 + 1000);
+                        return;
+                    }
+
+                    const volatility = Math.abs(currentTokenPrice - (priceHistory[priceHistory.length - 2]?.price || currentTokenPrice)) / currentTokenPrice;
+
+                    // --- NEW: Regime Detection ---
+                    if (priceHistory.length > 5 && targetSymbol === selectedCurrency) {
+                        const startP = priceHistory[0].price;
+                        const endP = priceHistory[priceHistory.length - 1].price;
+                        const chg = (endP - startP) / startP;
+                        if (volatility > 0.03) {
+                            setMarketRegime(prev => (prev !== "VOLATILE" ? "VOLATILE" : prev));
+                        } else if (chg > 0.01) {
+                            setMarketRegime(prev => (prev !== "TREND_UP" ? "TREND_UP" : prev));
+                        } else if (chg < -0.01) {
+                            setMarketRegime(prev => (prev !== "TREND_DOWN" ? "TREND_DOWN" : prev));
+                        } else {
+                            setMarketRegime(prev => (prev !== "RANGE" ? "RANGE" : prev));
+                        }
+                    }
+                    // -----------------------------
+
+                    let shouldBuy = false;
+                    let shouldSell = false;
+
+                    // Ensure we trade within our cash limits. 
+                    // To prevent exceeding the 100 USDT (or whatever) starting balance, we cap amountInJPY.
+                    let amountInJPY = baseBalance * (TRADE_CONFIG.MAX_TRADE_SIZE_PERCENT / 100);
+
+
+                    // RISK HEDGING: Volatility scaling
+                    if (volatility > 0.03) {
+                        amountInJPY *= 0.5; // Reduce size by 50% in high volatility
+                    }
+
+                    let amountToTrade = amountInJPY / currentTokenPrice;
+
+                    // STRICT INITIAL ENFORCEMENT: 
+                    // If no trade has happened yet, we MUST use one of the allowed start tokens.
+                    if (!hasInitialTradeExecuted) {
+                        if (!allowedStartTokens.includes(targetSymbol)) {
+                            // If user selected a coin not in start funds, pick one from allowed list
+                            if (allowedStartTokens.length > 0) {
+                                targetSymbol = allowedStartTokens[0] as Currency;
+                            } else {
+                                targetSymbol = "BNB" as Currency; // Default fallback
+                            }
+                        }
+                    }
+
+                    // Initial Trade Logic (Story-telling)
+                    // Initial Trade Logic
+                    if (!hasInitialTradeExecuted) {
+                        if (!isDemoMode && currentPortfolio.positions.length > 0) {
+                            setHasInitialTradeExecuted(true);
+                        } else {
+                            const isInitialSymbolStable = TRADE_CONFIG.STABLECOINS.includes(initialTradeSymbol.toUpperCase());
+                            const bootstrapTarget = symbolPool.includes(initialTradeSymbol) ? initialTradeSymbol : (symbolPool[0] || targetSymbol);
+
+                            if (isInitialSymbolStable) {
+                                setHasInitialTradeExecuted(true);
+                                addMessage("coordinator", `初回資金 ${initialTradeSymbol} はステーブルのため、次の機会から執行します。`, "SYSTEM");
+                            } else {
+                                targetSymbol = bootstrapTarget as Currency;
+                                shouldBuy = true;
+                                setHasInitialTradeExecuted(true);
+                                addMessage("coordinator", `初回ブートストラップとして ${targetSymbol} を監視対象に設定しました。`, "SYSTEM");
+                            }
+                        }
+                    } else {
+                    } else {
+                        // --- REALISTIC FREQUENCY CHECK (Cooldown) ---
+                        // Aggressive: 5 mins, Moderate: 15 mins, Conservative: 30 mins
+                        const aggressiveCooldown = 5 * 60 * 1000;
+                        const moderateCooldown = 15 * 60 * 1000;
+                        const conservativeCooldown = 30 * 60 * 1000;
+
+                        const now = Date.now();
+
+                        // Standard Strategy Logic
+                        if (!isDemoMode && stableFundingUsd < 2 && preferredLivePosition) {
+                            targetSymbol = preferredLivePosition.symbol as Currency;
+                            const livePositionPrice = allMarketPrices[targetSymbol]?.price || initialData[targetSymbol]?.price || currentTokenPrice;
+                            const livePositionUsdValue = preferredLivePosition.amount * livePositionPrice;
+                            amountInJPY = Math.min(livePositionUsdValue, Math.max(livePositionUsdValue * 0.25, 2));
+                            amountToTrade = Math.min(preferredLivePosition.amount, amountInJPY / Math.max(livePositionPrice, 0.0000001));
+                            shouldSell = amountToTrade > 0;
+                        } else if (demoStrategy === "AGGRESSIVE" && (now - lastTradeRef.current) > aggressiveCooldown) {
+                            if (volatility > 0.005) {
+                                if (newPrice < (priceHistory[priceHistory.length - 2]?.price || newPrice)) shouldBuy = true;
+                                else shouldSell = true;
+                                amountInJPY = baseBalance * 0.2;
+                                amountToTrade = amountInJPY / newPrice;
+                            }
+                        } else if (demoStrategy === "MODERATE" && (now - lastTradeRef.current) > moderateCooldown) {
+                            if (volatility > 0.01) {
+                                if (newPrice < (priceHistory[priceHistory.length - 2]?.price || newPrice)) shouldBuy = true;
+                                else shouldSell = true;
+                            }
+                        } else if (demoStrategy === "CONSERVATIVE" && (now - lastTradeRef.current) > conservativeCooldown) { // CONSERVATIVE
+                            if (volatility > 0.02) {
+                                if (newPrice < (priceHistory[priceHistory.length - 2]?.price || newPrice)) shouldBuy = true;
+                                else shouldSell = true;
+                                amountInJPY = Math.min(baseBalance * 0.05, baseBalance);
+                                amountToTrade = amountInJPY / newPrice;
+                            }
+                        }
+                    }
+
+                    const availableBuyingPower = isDemoMode ? currentPortfolio.cashbalance : stableFundingUsd;
+
+                    if (shouldBuy && availableBuyingPower >= (amountInJPY + (amountInJPY * 0.003)) && isBuyActuallyAllowed) {
+                        // CONCENTRATION LIMIT & POSITION COUNT CHECK
+                        const existingPosCount = currentPortfolio.positions.length;
+                        const existingPos = currentPortfolio.positions.find(p => p.symbol === targetSymbol);
+                        const totalPortfolioValue = currentPortfolio.totalValue || baseBalance;
+                        const hypotheticalNewValue = (existingPos ? existingPos.amount * currentTokenPrice : 0) + amountInJPY;
+
+                        if (existingPosCount < 5 || existingPos) {
+                            if (hypotheticalNewValue <= totalPortfolioValue * 0.4) {
+                                executeTrade(targetSymbol as Currency, "BUY", amountToTrade, currentTokenPrice, `${demoStrategy}謌ｦ逡･: 蛻・淵謚戊ｳ・ｮ溯｡形);
+                                lastTradeRef.current = Date.now();
+                            } else {
+                                if (Math.random() > 0.95) {
+                                    addMessage("manager", `笞・・[雉・≡髮・ｸｭ隴ｦ蜻馨 ${targetSymbol} 縺ｮ菫晄怏豈皮紫縺・40% 繧定ｶ・∴繧九◆繧√∬ｳｼ蜈･繧貞宛髯舌＠縺ｾ縺励◆縲Ａ, "ALERT");
+                                }
+                            }
+                        } else {
+                            if (Math.random() > 0.95) {
+                                addMessage("manager", `笞・・[蛻・淵蛻ｶ髯疹 譛螟ｧ菫晄怏驫俶氛謨ｰ・・・峨↓驕斐＠縺ｦ縺・∪縺吶よ眠隕城釜譟・・霑ｽ蜉繧呈而縺医∪縺吶Ａ, "ALERT");
+                            }
+                        }
+
+                    } else if (shouldSell) {
+                        const pos = currentPortfolio.positions.find(p => p.symbol === targetSymbol);
+                        if (pos && pos.amount >= (amountToTrade)) {
+                            executeTrade(targetSymbol as Currency, "SELL", amountToTrade, currentTokenPrice, `${demoStrategy}謌ｦ逡･: 繝ｪ繝舌Λ繝ｳ繧ｹ螢ｲ蜊ｴ`);
+                            lastTradeRef.current = Date.now();
+                        }
+                    }
+                }
+            }
+
+            if (isActiveRef.current) {
+                const delay = Math.random() * 3000 + 1000;
+                timeoutId = setTimeout(loop, delay);
+            }
+        };
+
+        timeoutId = setTimeout(loop, 1000);
+
+        return () => {
+            isActiveRef.current = false;
+            clearTimeout(timeoutId);
+        };
+    }, [isSimulating, selectedCurrency, addMessage, isDemoMode, isAutoPilotEnabled, demoBalance, hasInitialTradeExecuted, executeTrade, demoStrategy, allowedStartTokens, liveWalletBalances]);
+
+    // Expose addDiscussion to window for background tasks (like TraderChat's auto-council)
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            (window as any).jdex_addDiscussion = addDiscussion;
+            (window as any).__DIS_EXECUTE_TRADE__ = executeTrade;
+            console.warn("[DEBUG] window.__DIS_EXECUTE_TRADE__ ready");
+        }
+    }, [addDiscussion, executeTrade]);
+
+    // [VERIFICATION ONLY] One-time Manual SELL test to trigger Signature UI
+    useEffect(() => {
+        const IS_PROD = process.env.NODE_ENV === "production";
+        if (IS_PROD) return; // Production縺ｧ縺ｯ螳悟・蛛懈ｭ｢
+
+        // shouldFireOnceRef 縺・true 縺ｮ蝣ｴ蜷医・縺ｿ縲∵磁邯夂峩蠕後↓ SELL 繧偵ヨ繝ｪ繧ｬ繝ｼ縺吶ｋ
+        if (effectiveIsConnected && !isDemoMode && effectiveAddress && effectiveChainId && shouldFireOnceRef.current && executeTrade) {
+            console.log('[DEBUG] Immediate one-time SELL test triggered on connection');
+            const bnbPrice = allMarketPrices["BNB"]?.price || 600;
+            // Execute a small sell trade for verification
+            executeTrade("BNB", "SELL", 0.005, bnbPrice, "IMMEDIATE_TEST_TRIGGER").catch(err => {
+                console.log('[DEBUG] Immediate test SELL error (expected/ignored):', err.message);
+            });
+        }
+    }, [effectiveIsConnected, isDemoMode, effectiveAddress, effectiveChainId, executeTrade, allMarketPrices]);
+
+    return (
+        <SimulationContext.Provider value={{
+            messages, isAuthenticated, setIsAuthenticated, isSimulating, toggleSimulation,
+            marketData, allMarketData: allMarketPrices, portfolio, agents, activeStrategies,
+            riskTolerance, setRiskTolerance, stopLossThreshold, setStopLossThreshold,
+            takeProfitThreshold, setTakeProfitThreshold, isFlashEnabled, setIsFlashEnabled,
+            transactions, priceHistory, strategyProposals, updateProposalStatus,
+            deleteProposal, addUserMessage, aiPopupMessage, closePopup: () => setAiPopupMessage(null),
+            selectedCurrency, setSelectedCurrency, proposalFrequency, setProposalFrequency,
+            activeChains, toggleChain, targetTop100, setTargetTop100,
+            targetAllCurrencies, setTargetAllCurrencies, targetMemeCoins, setTargetMemeCoins,
+            requestProposal, nickname, setNickname, favorites, toggleFavorite,
+            discussionHistory, addDiscussion, tradeNotifications, dismissNotification, clearNotifications,
+            isWalletConnected: isConnected || isDemoMode, executeTrade, latestDiscussion, riskStatus, atmosphere,
+            tradingPipelines, addPipeline, removePipeline, togglePipeline, latestNews,
+            awardExp, disPoints, addDisPoints, leaderboard, isSoundEnabled, setIsSoundEnabled,
+            achievements, unlockAchievement, updateAchievementProgress, resetSimulation,
+            clearMessages: () => setMessages([]),
+            isMockConnected, mockAddress, toggleMockConnection,
+            convertJPY,
+            isDemoMode, setIsDemoMode, demoBalance, setDemoBalance, demoStrategy, setDemoStrategy, demoAddress,
+            initialTradeSymbol, setInitialTradeSymbol,
+            allowedStartTokens,
+            setAllowedStartTokens,
+            startFixedDemo,
+            showDemoModal,
+            setShowDemoModal,
+            learningParams,
+            provideTradeFeedback,
+            marketRegime,
+            addMessage,
+            liveInitialBalance,
+            isAutoPilotEnabled, setIsAutoPilotEnabled,
+            isPricingPaused, resumePricing,
+            dailyTradePlan,
+            refreshDailyTradePlan,
+        }}>
+            {children}
+        </SimulationContext.Provider>
+    );
+}
+
+export function useSimulation() {
+    const context = useContext(SimulationContext);
+    if (context === undefined) {
+        throw new Error("useSimulation must be used within a SimulationProvider");
+    }
+    return context;
+}

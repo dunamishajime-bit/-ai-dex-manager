@@ -296,7 +296,7 @@ export const SUPPORTED_CHAINS = [
     explorerUrl: 'https://polygonscan.com',
     tokens: [
       // Polygonで取引可能な主要通貨
-      { symbol: 'MATIC', address: '0x...', decimals: 18, name: 'Matic Token' },
+      { symbol: 'POL', address: '0x...', decimals: 18, name: 'POL Token' },
       { symbol: 'USDT', address: '0x...', decimals: 6, name: 'Tether USD' },
       { symbol: 'USDC', address: '0x...', decimals: 6, name: 'USD Coin' },
       //

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
@@ -42,7 +42,6 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     // No external direct API calls allowed here.
     const syncJpyRate = useCallback(async () => {
         try {
-            console.log("[CurrencyContext] Syncing JPY rate via internal dashboard...");
             const res = await fetch("/api/market/dashboard");
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
@@ -76,22 +75,23 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     const symbol = currency === "JPY" ? "¥" : "$";
 
     const formatPrice = (usdPrice: number) => {
+        const safeUsd = Number.isFinite(Number(usdPrice)) ? Number(usdPrice) : 0;
         if (currency === "JPY") {
-            const jpyPrice = usdPrice * jpyRate;
+            const jpyPrice = safeUsd * jpyRate;
             if (jpyPrice < 1) {
                 return `¥${jpyPrice.toLocaleString("ja-JP", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
             }
             return `¥${Math.round(jpyPrice).toLocaleString("ja-JP")}`;
-        } else {
-            if (usdPrice < 1) {
-                return `$${usdPrice.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
-            }
-            return `$${usdPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
+        if (safeUsd < 1) {
+            return `$${safeUsd.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
+        }
+        return `$${safeUsd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
     const formatLarge = (usdValue: number) => {
-        const val = currency === "JPY" ? usdValue * jpyRate : usdValue;
+        const safeUsd = Number.isFinite(Number(usdValue)) ? Number(usdValue) : 0;
+        const val = currency === "JPY" ? safeUsd * jpyRate : safeUsd;
         const prefix = currency === "JPY" ? "¥" : "$";
 
         if (val >= 1e12) return `${prefix}${(val / 1e12).toFixed(2)}T`;
@@ -121,3 +121,5 @@ export const useCurrency = () => {
     if (!ctx) throw new Error("useCurrency must be used within CurrencyProvider");
     return ctx;
 }
+
+

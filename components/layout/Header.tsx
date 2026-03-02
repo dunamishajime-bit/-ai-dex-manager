@@ -159,7 +159,7 @@ export function Header() {
                             className="bg-white/5 border border-white/10 hover:bg-white/10 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-2"
                         >
                             <span className="w-2 h-2 rounded-full bg-gold-500 animate-pulse" />
-                            EXIT DEMO
+                            デモ終了
                         </button>
                     )}
 

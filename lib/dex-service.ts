@@ -302,7 +302,7 @@ function detectChain(id: string): ChainId {
     if (id.includes("binance") || id === "bnb") return "bsc";
     if (id.includes("solana") || id === "sol") return "solana";
     if (id.includes("arbitrum")) return "arbitrum";
-    if (id.includes("matic") || id.includes("polygon")) return "polygon";
+    if (id.includes("pol") || id.includes("polygon")) return "polygon";
     if (id.includes("avalanche")) return "avalanche";
     if (id.includes("optimism")) return "optimism";
     return "ethereum";
@@ -393,7 +393,9 @@ export async function getCryptoNews(): Promise<CryptoNews[]> {
                 title: item.title,
                 source: item.source,
                 url: item.link,
-                published_at: item.pubDate
+                published_at: item.pubDate,
+                description: item.content || "",
+                content: item.content || "",
             }));
         }
     } catch (e) { }

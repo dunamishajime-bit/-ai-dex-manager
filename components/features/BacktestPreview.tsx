@@ -81,7 +81,7 @@ export function BacktestPreview({ result }: Props) {
 
             {/* Chart */}
             <div className="h-[120px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={220} minWidth={240} minHeight={180}>
                     <AreaChart data={isPlaying || progress > 0 ? currentData : result.chartData}>
                         <defs>
                             <linearGradient id="backtestGrad" x1="0" y1="0" x2="0" y2="1">

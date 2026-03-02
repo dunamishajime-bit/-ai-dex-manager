@@ -1,456 +1,465 @@
+// AUTO_CONTINUE: enabled
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { Wallet, Search, Bell, Menu, X, ChevronDown, User, LogOut, Shield, Zap, Edit3, Check, Camera, Settings, Trophy, Play, ShieldAlert, Unplug } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useMemo, useState } from "react";
+import {
+    Bell,
+    Camera,
+    Check,
+    Edit3,
+    LogOut,
+    Play,
+    Settings,
+    Trophy,
+    User,
+    Wallet,
+    X,
+} from "lucide-react";
 import Link from "next/link";
-import { useSimulation } from "@/context/SimulationContext";
+import { usePathname } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useBalance } from "wagmi";
-import { cn } from "@/lib/utils";
+import { useAccount } from "wagmi";
+import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useSimulation } from "@/context/SimulationContext";
+import { cn } from "@/lib/utils";
 
 const pageTitles: Record<string, string> = {
-    "/": "DEX Tracker",
+    "/": "DEXトラッカー",
     "/ai-council": "AI評議会",
-    "/positions": "ポジション管理",
-    "/strategy": "ストラテジープラン",
+    "/positions": "ポジション",
+    "/strategy": "ストラテジー",
     "/performance": "パフォーマンス",
     "/history": "トレード履歴",
     "/watchlist": "ウォッチリスト",
     "/chain-settings": "チェーン設定",
-    "/risk-settings": "リスク管理",
+    "/risk-settings": "リスク設定",
     "/settings": "設定",
-    "/analysis": "市場分析",
+    "/analysis": "分析",
     "/ai-agents": "AIエージェント",
     "/admin": "管理者ページ",
+    "/notifications": "通知履歴",
+    "/news": "ニュース",
+    "/trader-chat": "TraderBrain",
+    "/trader-brain": "TraderBrain",
 };
+
+function formatWalletTotalJpy(usdValue: number, jpyRate: number) {
+    const amount = Number.isFinite(Number(usdValue)) ? Number(usdValue) : 0;
+    return `¥${Math.round(amount * jpyRate).toLocaleString("ja-JP")}`;
+}
 
 export function TopBar() {
     const pathname = usePathname();
     const { user, logout, updateAvatar, updateNickname } = useAuth();
     const {
-        portfolio, disPoints, isDemoMode, setIsDemoMode, startFixedDemo, demoStrategy, setDemoStrategy, initialTradeSymbol, setInitialTradeSymbol,
-        isMockConnected, mockAddress, toggleMockConnection, isAutoPilotEnabled, setIsAutoPilotEnabled,
-        isPricingPaused, resumePricing
+        portfolio,
+        disPoints,
+        isDemoMode,
+        setIsDemoMode,
+        isMockConnected,
+        mockAddress,
+        toggleMockConnection,
+        isAutoPilotEnabled,
+        setIsAutoPilotEnabled,
+        isPricingPaused,
+        resumePricing,
     } = useSimulation();
-    const { currency, toggleCurrency, formatLarge } = useCurrency();
-    const title = pageTitles[pathname] || "DIS-DEX";
+    const { currency, toggleCurrency, jpyRate } = useCurrency();
+    const { isConnected } = useAccount();
 
+    const title = pageTitles[pathname] || "DIS TERMINAL";
+    const walletTotalLabel = isDemoMode && !isMockConnected ? "(DEMO)" : "(JPY)";
+    const walletTotalDisplay = formatWalletTotalJpy(portfolio?.totalValue || 0, jpyRate);
 
-    // Wagmi hooks
-    const { isConnected, address } = useAccount();
-    const { data: balanceData } = useBalance({
-        address: address,
-    });
-
-    // Exchange rate を CurrencyContext で管理するため除去済み
-    const walletBalanceJPY = 0; // Legacy - unused
+    const notifications = useMemo(
+        () => [
+            { id: 1, text: "自動トレードの監視ペアを更新しました", time: "2分前", read: false },
+            { id: 2, text: "ETH ポジションの変動を検知", time: "15分前", read: false },
+            { id: 3, text: "仮想通貨ニュースを更新しました", time: "1時間前", read: true },
+        ],
+        []
+    );
 
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [editingNickname, setEditingNickname] = useState(false);
     const [nicknameInput, setNicknameInput] = useState(user?.nickname || "");
-    const [showNotifications, setShowNotifications] = useState(false);
-
-    const [notifications] = useState([
-        { id: 1, text: "BTC/USDT 分析完了 - BUYシグナル", time: "2分前", read: false },
-        { id: 2, text: "ETH ポジション +2.3% 利益", time: "15分前", read: false },
-        { id: 3, text: "SOL 新戦略提案あり", time: "1時間前", read: true },
-    ]);
 
     const handleSaveNickname = () => {
-        if (nicknameInput.trim()) {
-            updateNickname(nicknameInput.trim());
-            setEditingNickname(false);
-        }
+        const nextName = nicknameInput.trim();
+        if (!nextName) return;
+        updateNickname(nextName);
+        setEditingNickname(false);
     };
 
-
     return (
-        <div className="h-14 border-b border-gold-500/10 bg-black/40 backdrop-blur-xl flex items-center justify-between px-4 md:px-6 shrink-0 relative z-30">
+        <div className="relative z-30 flex h-14 shrink-0 items-center justify-between border-b border-gold-500/10 bg-black/40 px-4 backdrop-blur-xl md:px-6">
+            <div className="absolute left-1/4 right-1/4 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
 
-            {/* Subtle top glow */}
-            <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
-
-            {/* Left: Page title */}
-            <div className="flex items-center gap-3 ml-10 md:ml-0">
-                <h1 className="text-sm md:text-base font-bold text-white truncate max-w-[120px] sm:max-w-none">{title}</h1>
+            <div className="ml-10 flex items-center gap-3 md:ml-0">
+                <h1 className="max-w-[140px] truncate text-sm font-bold text-white sm:max-w-none md:text-base">
+                    {title}
+                </h1>
             </div>
 
-            {/* Right: Controls */}
             <div className="flex items-center gap-2 md:gap-3">
-                {/* DIS Points */}
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold-500/10 border border-gold-500/30 hover-lift transition-all group cursor-pointer shadow-[0_0_15px_rgba(255,215,0,0.1)]">
-                    <Trophy className="w-3.5 h-3.5 text-gold-400 animate-bounce-slow" />
-                    <span className="text-[10px] text-gold-300 font-black font-mono">DIS: {disPoints.toLocaleString()}</span>
+                <div className="group flex cursor-pointer items-center gap-2 rounded-full border border-gold-500/30 bg-gold-500/10 px-3 py-1.5 shadow-[0_0_15px_rgba(255,215,0,0.1)] transition-all hover-lift">
+                    <Trophy className="h-3.5 w-3.5 animate-bounce-slow text-gold-400" />
+                    <span className="font-mono text-[10px] font-black text-gold-300">
+                        DIS: {disPoints.toLocaleString()}
+                    </span>
                 </div>
 
-                {/* Currency Toggle USD/JPY */}
                 <button
                     onClick={toggleCurrency}
-                    title="通貨表示を切り替え"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-bold font-mono transition-all
-                        border-gold-500/40 hover:border-gold-400 bg-black/30 hover:bg-gold-500/10 text-gold-300 hover:text-gold-200 shadow-sm"
+                    title="表示通貨を切り替え"
+                    className="flex items-center gap-1 rounded-full border border-gold-500/40 bg-black/30 px-2.5 py-1 text-[11px] font-bold font-mono text-gold-300 shadow-sm transition-all hover:border-gold-400 hover:bg-gold-500/10 hover:text-gold-200"
                 >
-                    <span className={currency === 'USD' ? 'text-gold-400' : 'text-gray-500'}>$</span>
+                    <span className={currency === "USD" ? "text-gold-400" : "text-gray-500"}>$</span>
                     <span className="text-gray-600">/</span>
-                    <span className={currency === 'JPY' ? 'text-gold-400' : 'text-gray-500'}>¥</span>
+                    <span className={currency === "JPY" ? "text-gold-400" : "text-gray-500"}>¥</span>
                 </button>
 
-                <div className="hidden sm:flex items-center gap-3 px-4 py-1.5 rounded-full bg-gold-500/5 border border-gold-500/10 hover-lift transition-all hover:bg-gold-500/10 group cursor-default">
-                    <span className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter group-hover:text-gold-300 transition-colors">
-                        運用資産 {(isDemoMode && !isMockConnected) ? "(DEMO)" : `(${currency})`}
+                <div className="group hidden cursor-default items-center gap-3 rounded-full border border-gold-500/10 bg-gold-500/5 px-4 py-1.5 transition-all hover:bg-gold-500/10 hover-lift sm:flex">
+                    <span className="font-mono text-[10px] tracking-tight text-gray-400 transition-colors group-hover:text-gold-300">
+                        ウォレット総資産 {walletTotalLabel}
                     </span>
-                    <span className={cn(
-                        "text-sm font-bold font-mono shadow-gold-500/20 drop-shadow-sm",
-                        isPricingPaused ? "text-gray-500 italic" : "text-gold-400"
-                    )}>
-                        {isPricingPaused ? "N/A" : formatLarge(portfolio?.totalValue || 0)}
+                    <span
+                        className={cn(
+                            "text-sm font-bold font-mono drop-shadow-sm shadow-gold-500/20",
+                            isPricingPaused ? "italic text-gray-500" : "text-gold-400"
+                        )}
+                    >
+                        {isPricingPaused ? "N/A" : walletTotalDisplay}
                     </span>
-                    {isPricingPaused && (
+                    {isPricingPaused ? (
                         <button
                             onClick={resumePricing}
-                            className="ml-1 px-2 py-0.5 bg-gold-500 text-black text-[9px] font-black rounded hover:bg-gold-400 transition-colors flex items-center gap-1"
+                            className="ml-1 flex items-center gap-1 rounded bg-gold-500 px-2 py-0.5 text-[9px] font-black text-black transition-colors hover:bg-gold-400"
                             title="価格更新を再開"
                         >
-                            <Play className="w-2.5 h-2.5" />
+                            <Play className="h-2.5 w-2.5" />
                             再開
                         </button>
-                    )}
+                    ) : null}
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <ConnectButton.Custom>
-                        {({
-                            account,
-                            chain,
-                            openAccountModal,
-                            openChainModal,
-                            openConnectModal,
-                            authenticationStatus,
-                            mounted,
-                        }) => {
-                            const ready = mounted && authenticationStatus !== 'loading';
-                            const connected =
-                                ready &&
-                                account &&
-                                chain &&
-                                (!authenticationStatus ||
-                                    authenticationStatus === 'authenticated');
+                <ConnectButton.Custom>
+                    {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
+                        const ready = mounted && authenticationStatus !== "loading";
+                        const connected =
+                            ready &&
+                            account &&
+                            chain &&
+                            (!authenticationStatus || authenticationStatus === "authenticated");
 
-                            return (
-                                <div
-                                    {...(!ready && {
-                                        'aria-hidden': true,
-                                        'style': {
-                                            opacity: 0,
-                                            pointerEvents: 'none',
-                                            userSelect: 'none',
-                                        },
-                                    })}
-                                >
-                                    {(() => {
-                                        if (isMockConnected) {
-                                            return (
-                                                <div className="flex items-center gap-2">
-                                                    {/* Auto Trade Indicator */}
-                                                    <div
-                                                        onClick={() => setIsAutoPilotEnabled(!isAutoPilotEnabled)}
-                                                        className={cn(
-                                                            "hidden md:flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer transition-all border",
-                                                            isAutoPilotEnabled
-                                                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                                                                : "bg-gray-500/10 border-gray-500/20 text-gray-400 opacity-50"
-                                                        )}
-                                                        title={isAutoPilotEnabled ? "Auto-Pilot: ON (Click to Disable)" : "Auto-Pilot: OFF (Click to Enable)"}
-                                                    >
-                                                        <div className={cn("w-2 h-2 rounded-full", isAutoPilotEnabled ? "bg-emerald-500 animate-pulse" : "bg-gray-500")} />
-                                                        <span className="text-[10px] font-mono">{isAutoPilotEnabled ? "AUTO ON" : "AUTO OFF"}</span>
-                                                    </div>
-
-                                                    <button
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all text-xs font-mono group"
-                                                    >
-                                                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                                        <span className="hidden sm:inline">
-                                                            {mockAddress.slice(0, 6)}...{mockAddress.slice(-4)}
-                                                        </span>
-                                                    </button>
-                                                </div>
-                                            );
-                                        }
-
-                                        if (!connected) {
-                                            return (
-                                                <button
-                                                    onClick={async () => {
-                                                        openConnectModal();
-                                                        // モーダルは非同期で完了するため、接続完了の検知は
-                                                        // SimulationContext 側の useAccount() 監視に委譲する。
-                                                        // ここでは openConnectModal() の呼び出しのみ行う（副作用なし）。
-                                                    }}
-                                                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-gold-500/10 border border-gold-500/30 text-gold-400 hover:bg-gold-500/20 transition-all text-[10px] sm:text-xs font-mono shadow-[0_0_10px_rgba(255,215,0,0.1)]"
-                                                >
-                                                    <Wallet className="w-3.5 h-3.5" />
-                                                    <span className="hidden xs:inline sm:inline">接続</span>
-                                                </button>
-                                            );
-                                        }
-
-                                        if (chain.unsupported) {
-                                            return (
-                                                <button
-                                                    onClick={openChainModal}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all text-xs font-mono"
-                                                >
-                                                    Wrong network
-                                                </button>
-                                            );
-                                        }
-
+                        return (
+                            <div
+                                {...(!ready && {
+                                    "aria-hidden": true,
+                                    style: {
+                                        opacity: 0,
+                                        pointerEvents: "none",
+                                        userSelect: "none",
+                                    },
+                                })}
+                            >
+                                {(() => {
+                                    if (isMockConnected) {
                                         return (
                                             <div className="flex items-center gap-2">
-                                                {/* Auto Trade Indicator (Only when connected) */}
                                                 <div
                                                     onClick={() => setIsAutoPilotEnabled(!isAutoPilotEnabled)}
                                                     className={cn(
-                                                        "hidden md:flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer transition-all border",
+                                                        "hidden cursor-pointer items-center gap-1.5 rounded border px-2 py-1 transition-all md:flex",
                                                         isAutoPilotEnabled
-                                                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                                                            : "bg-gray-500/10 border-gray-500/20 text-gray-400 opacity-50"
+                                                            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                                                            : "border-gray-500/20 bg-gray-500/10 text-gray-400 opacity-50"
                                                     )}
-                                                    title={isAutoPilotEnabled ? "Auto-Pilot: ON (Click to Disable)" : "Auto-Pilot: OFF (Click to Enable)"}
+                                                    title={isAutoPilotEnabled ? "自動トレード: ON" : "自動トレード: OFF"}
                                                 >
-                                                    <div className={cn("w-2 h-2 rounded-full", isAutoPilotEnabled ? "bg-emerald-500 animate-pulse" : "bg-gray-500")} />
-                                                    <span className="text-[10px] font-mono">{isAutoPilotEnabled ? "AUTO ON" : "AUTO OFF"}</span>
+                                                    <div
+                                                        className={cn(
+                                                            "h-2 w-2 rounded-full",
+                                                            isAutoPilotEnabled ? "animate-pulse bg-emerald-500" : "bg-gray-500"
+                                                        )}
+                                                    />
+                                                    <span className="font-mono text-[10px]">
+                                                        {isAutoPilotEnabled ? "AUTO ON" : "AUTO OFF"}
+                                                    </span>
                                                 </div>
 
-                                                <button
-                                                    onClick={openAccountModal}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all text-xs font-mono group"
-                                                >
-                                                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                                <button className="group flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-mono text-emerald-400 transition-all hover:bg-emerald-500/20">
+                                                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
                                                     <span className="hidden sm:inline">
-                                                        {account.displayName}
+                                                        {mockAddress.slice(0, 6)}...{mockAddress.slice(-4)}
                                                     </span>
-                                                    {account.displayBalance && (
-                                                        <span className="hidden lg:inline text-gray-500 ml-1">
-                                                            ({account.displayBalance})
-                                                        </span>
-                                                    )}
                                                 </button>
                                             </div>
                                         );
-                                    })()}
-                                </div>
-                            )
-                        }}
-                    </ConnectButton.Custom>
-                </div>
+                                    }
 
-                {/* DEMO / WALLET Toggle */}
-                <div className="flex items-center gap-2">
-                    {isDemoMode && !isMockConnected && (
-                        <button
-                            onClick={() => setIsDemoMode(false)}
-                            className="bg-white/5 border border-white/10 hover:bg-white/10 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-2"
-                        >
-                            <span className="w-2 h-2 rounded-full bg-gold-500 animate-pulse" />
-                            <span className="hidden xs:inline font-mono">EXIT DEMO</span>
-                        </button>
-                    )}
-                </div>
+                                    if (!connected) {
+                                        return (
+                                            <button
+                                                onClick={openConnectModal}
+                                                className="flex items-center gap-1.5 rounded-lg border border-gold-500/30 bg-gold-500/10 px-2 py-1.5 text-[10px] font-mono text-gold-400 shadow-[0_0_10px_rgba(255,215,0,0.1)] transition-all hover:bg-gold-500/20 sm:text-xs"
+                                            >
+                                                <Wallet className="h-3.5 w-3.5" />
+                                                <span className="hidden xs:inline sm:inline">接続</span>
+                                            </button>
+                                        );
+                                    }
 
+                                    if (chain.unsupported) {
+                                        return (
+                                            <button
+                                                onClick={openChainModal}
+                                                className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-mono text-red-400 transition-all hover:bg-red-500/20"
+                                            >
+                                                未対応ネットワーク
+                                            </button>
+                                        );
+                                    }
 
-                {/* Notifications */}
+                                    return (
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                onClick={() => setIsAutoPilotEnabled(!isAutoPilotEnabled)}
+                                                className={cn(
+                                                    "hidden cursor-pointer items-center gap-1.5 rounded border px-2 py-1 transition-all md:flex",
+                                                    isAutoPilotEnabled
+                                                        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                                                        : "border-gray-500/20 bg-gray-500/10 text-gray-400 opacity-50"
+                                                )}
+                                                title={isAutoPilotEnabled ? "自動トレード: ON" : "自動トレード: OFF"}
+                                            >
+                                                <div
+                                                    className={cn(
+                                                        "h-2 w-2 rounded-full",
+                                                        isAutoPilotEnabled ? "animate-pulse bg-emerald-500" : "bg-gray-500"
+                                                    )}
+                                                />
+                                                <span className="font-mono text-[10px]">
+                                                    {isAutoPilotEnabled ? "AUTO ON" : "AUTO OFF"}
+                                                </span>
+                                            </div>
+
+                                            <button
+                                                onClick={openAccountModal}
+                                                className="group flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-mono text-emerald-400 transition-all hover:bg-emerald-500/20"
+                                            >
+                                                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                                                <span className="hidden sm:inline">{account.displayName}</span>
+                                                {account.displayBalance ? (
+                                                    <span className="ml-1 hidden text-gray-500 lg:inline">
+                                                        ({account.displayBalance})
+                                                    </span>
+                                                ) : null}
+                                            </button>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        );
+                    }}
+                </ConnectButton.Custom>
+
+                {isDemoMode && !isMockConnected ? (
+                    <button
+                        onClick={() => setIsDemoMode(false)}
+                        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-bold text-white transition-all hover:bg-white/10"
+                    >
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-gold-500" />
+                        <span className="hidden font-mono xs:inline">デモ終了</span>
+                    </button>
+                ) : null}
+
                 <div className="relative">
                     <Link href="/notifications">
-                        <button
-                            className="p-2 rounded-lg hover:bg-gold-500/10 transition-all hover-lift group relative"
-                        >
-                            <Bell className="w-4 h-4 text-gray-400 group-hover:text-gold-400 transition-colors" />
-                            {notifications.filter(n => !n.read).length > 0 && (
-                                <div className="absolute top-1 right-1 w-2 h-2 bg-gold-500 rounded-full" />
-                            )}
+                        <button className="group relative rounded-lg p-2 transition-all hover:bg-gold-500/10 hover-lift">
+                            <Bell className="h-4 w-4 text-gray-400 transition-colors group-hover:text-gold-400" />
+                            {notifications.some((item) => !item.read) ? (
+                                <div className="absolute right-1 top-1 h-2 w-2 rounded-full bg-gold-500" />
+                            ) : null}
                         </button>
                     </Link>
-
-                    {showNotifications && (
-                        <div className="absolute right-0 top-12 w-72 glass-panel rounded-lg border border-gold-500/20 shadow-xl p-2 z-50">
-                            <p className="text-xs text-gold-400 font-mono px-2 py-1 border-b border-gold-500/10 mb-1">通知</p>
-                            {notifications.map(n => (
-                                <div key={n.id} className={`px-2 py-2 rounded text-xs ${n.read ? 'text-gray-500' : 'text-white bg-gold-500/5'} hover:bg-white/5 transition-colors cursor-pointer`}>
-                                    <p className="truncate">{n.text}</p>
-                                    <p className="text-[10px] text-gray-600 mt-0.5">{n.time}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
-                {/* User Menu */}
                 <div className="relative flex items-center gap-2">
                     <button
                         onClick={() => setShowUserMenu(!showUserMenu)}
-                        className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                        className="flex items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-white/5"
                     >
                         {user?.avatarUrl ? (
-                            <img src={user.avatarUrl} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-gold-500/20" />
+                            <img
+                                src={user.avatarUrl}
+                                alt="avatar"
+                                className="h-7 w-7 rounded-full border border-gold-500/20 object-cover"
+                            />
                         ) : (
-                            <div className="w-7 h-7 rounded-full bg-gold-500/10 border border-gold-500/20 flex items-center justify-center">
-                                <User className="w-3.5 h-3.5 text-gold-400" />
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-gold-500/20 bg-gold-500/10">
+                                <User className="h-3.5 w-3.5 text-gold-400" />
                             </div>
                         )}
                     </button>
 
                     <button
                         onClick={logout}
-                        className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all text-xs font-mono"
+                        className="hidden items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-mono text-red-400 transition-all hover:bg-red-500/20 md:flex"
                         title="ログアウト"
                     >
-                        <LogOut className="w-3.5 h-3.5" />
+                        <LogOut className="h-3.5 w-3.5" />
                         <span className="hidden lg:inline">ログアウト</span>
                     </button>
 
-                    {/* Profile Popup Overlay */}
-                    {showUserMenu && (
+                    {showUserMenu ? (
                         <>
-                            {/* Backdrop */}
                             <div
                                 className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm"
                                 onClick={() => setShowUserMenu(false)}
                             />
-                            {/* Popup */}
-                            <div className="fixed top-16 right-4 w-80 bg-[#060c14] backdrop-blur-2xl rounded-2xl border border-gold-500/40 shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(255,215,0,0.15)] p-5 z-[100] animate-in fade-in zoom-in-95 duration-200">
-                                {/* Decorative gradient */}
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/8 blur-3xl pointer-events-none rounded-full" />
-                                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-gold-500/60 to-transparent rounded-t-2xl" />
+                            <div className="fixed right-4 top-16 z-[100] w-80 animate-in zoom-in-95 rounded-2xl border border-gold-500/40 bg-[#060c14] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(255,215,0,0.15)] backdrop-blur-2xl duration-200 fade-in">
+                                <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-gold-500/8 blur-3xl" />
+                                <div className="absolute left-0 top-0 h-[2px] w-full rounded-t-2xl bg-gradient-to-r from-transparent via-gold-500/60 to-transparent" />
 
                                 <div className="relative space-y-4">
-                                    {/* Profile Header */}
-                                    <div className="flex items-center gap-4 pb-4 border-b border-white/10">
-                                        <div className="relative group/avatar">
+                                    <div className="flex items-center gap-4 border-b border-white/10 pb-4">
+                                        <div className="group/avatar relative">
                                             {user?.avatarUrl ? (
-                                                <img src={user.avatarUrl} alt="avatar" className="w-14 h-14 rounded-2xl object-cover border-2 border-gold-500/50 shadow-[0_0_15px_rgba(255,215,0,0.2)]" />
+                                                <img
+                                                    src={user.avatarUrl}
+                                                    alt="avatar"
+                                                    className="h-14 w-14 rounded-2xl border-2 border-gold-500/50 object-cover shadow-[0_0_15px_rgba(255,215,0,0.2)]"
+                                                />
                                             ) : (
-                                                <div className="w-14 h-14 rounded-2xl bg-gold-500/20 border-2 border-gold-500/40 flex items-center justify-center">
-                                                    <User className="w-7 h-7 text-gold-400" />
+                                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-gold-500/40 bg-gold-500/20">
+                                                    <User className="h-7 w-7 text-gold-400" />
                                                 </div>
                                             )}
-                                            <label className="absolute -bottom-1 -right-1 w-6 h-6 bg-gold-500 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gold-400 transition-all hover:scale-110 shadow-lg">
-                                                <Camera className="w-3 h-3 text-black" />
+                                            <label className="absolute -bottom-1 -right-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg bg-gold-500 shadow-lg transition-all hover:scale-110 hover:bg-gold-400">
+                                                <Camera className="h-3 w-3 text-black" />
                                                 <input
                                                     type="file"
                                                     accept="image/*"
                                                     className="hidden"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) {
-                                                            const reader = new FileReader();
-                                                            reader.onload = (ev) => {
-                                                                if (ev.target?.result) {
-                                                                    updateAvatar(ev.target.result as string);
-                                                                }
-                                                            };
-                                                            reader.readAsDataURL(file);
-                                                        }
+                                                    onChange={(event) => {
+                                                        const file = event.target.files?.[0];
+                                                        if (!file) return;
+                                                        const reader = new FileReader();
+                                                        reader.onload = (loadEvent) => {
+                                                            if (loadEvent.target?.result) {
+                                                                updateAvatar(loadEvent.target.result as string);
+                                                            }
+                                                        };
+                                                        reader.readAsDataURL(file);
                                                     }}
                                                 />
                                             </label>
                                         </div>
 
-                                        <div className="flex-1 min-w-0">
+                                        <div className="min-w-0 flex-1">
                                             {editingNickname ? (
                                                 <div className="flex items-center gap-2">
                                                     <input
                                                         type="text"
                                                         value={nicknameInput}
-                                                        onChange={(e) => setNicknameInput(e.target.value)}
-                                                        className="w-full bg-white/10 border border-gold-500/50 rounded-lg px-2 py-1.5 text-sm text-white font-mono focus:ring-1 focus:ring-gold-500 outline-none"
+                                                        onChange={(event) => setNicknameInput(event.target.value)}
+                                                        className="w-full rounded-lg border border-gold-500/50 bg-white/10 px-2 py-1.5 text-sm font-mono text-white outline-none focus:ring-1 focus:ring-gold-500"
                                                         autoFocus
-                                                        onKeyDown={(e) => e.key === "Enter" && handleSaveNickname()}
+                                                        onKeyDown={(event) => event.key === "Enter" && handleSaveNickname()}
                                                     />
                                                     <div className="flex flex-col gap-1">
-                                                        <button onClick={handleSaveNickname} className="p-1 text-emerald-400 hover:bg-emerald-500/10 rounded transition-colors">
-                                                            <Check className="w-4 h-4" />
+                                                        <button
+                                                            onClick={handleSaveNickname}
+                                                            className="rounded p-1 text-emerald-400 transition-colors hover:bg-emerald-500/10"
+                                                        >
+                                                            <Check className="h-4 w-4" />
                                                         </button>
-                                                        <button onClick={() => setEditingNickname(false)} className="p-1 text-red-400 hover:bg-red-500/10 rounded transition-colors">
-                                                            <X className="w-4 h-4" />
+                                                        <button
+                                                            onClick={() => setEditingNickname(false)}
+                                                            className="rounded p-1 text-red-400 transition-colors hover:bg-red-500/10"
+                                                        >
+                                                            <X className="h-4 w-4" />
                                                         </button>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-2 group/nick">
-                                                    <p className="text-base font-black text-white truncate">
-                                                        {user?.nickname}
+                                                <div className="group/nick flex items-center gap-2">
+                                                    <p className="truncate text-base font-black text-white">
+                                                        {user?.nickname || "DIS Operator"}
                                                     </p>
                                                     <button
-                                                        onClick={() => { setEditingNickname(true); setNicknameInput(user?.nickname || ""); }}
-                                                        className="opacity-0 group-hover/nick:opacity-100 p-1 text-gray-400 hover:text-gold-400 transition-all"
+                                                        onClick={() => {
+                                                            setEditingNickname(true);
+                                                            setNicknameInput(user?.nickname || "");
+                                                        }}
+                                                        className="p-1 text-gray-400 opacity-0 transition-all hover:text-gold-400 group-hover/nick:opacity-100"
                                                     >
-                                                        <Edit3 className="w-3.5 h-3.5" />
+                                                        <Edit3 className="h-3.5 w-3.5" />
                                                     </button>
                                                 </div>
                                             )}
-                                            <p className="text-[10px] text-gold-400/70 font-mono truncate mt-0.5">{user?.email}</p>
+                                            <p className="mt-0.5 truncate font-mono text-[10px] text-gold-400/70">
+                                                {user?.email}
+                                            </p>
                                         </div>
                                     </div>
 
-                                    {/* Menu Items */}
                                     <div className="space-y-1">
                                         <Link href="/settings" onClick={() => setShowUserMenu(false)}>
-                                            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-300 hover:text-gold-400 hover:bg-gold-500/10 transition-all group">
-                                                <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
-                                                <span>プロファイル設定</span>
+                                            <button className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-gray-300 transition-all hover:bg-gold-500/10 hover:text-gold-400">
+                                                <Settings className="h-4 w-4 transition-transform duration-500 group-hover:rotate-90" />
+                                                <span>プロフィール設定</span>
                                             </button>
                                         </Link>
                                     </div>
 
-                                    {/* Assets mini card */}
-                                    <div className="bg-white/5 rounded-xl p-3 border border-gold-500/20">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-[10px] text-gray-400 uppercase font-black">Total Assets</span>
-                                            <span className="text-xs text-gold-500 font-mono">LIVE</span>
+                                    <div className="rounded-xl border border-gold-500/20 bg-white/5 p-3">
+                                        <div className="flex items-end justify-between">
+                                            <span className="text-[10px] font-black text-gray-400">運用資産</span>
+                                            <span className="font-mono text-xs text-gold-500">
+                                                {isConnected || isMockConnected ? "LIVE" : "OFFLINE"}
+                                            </span>
                                         </div>
-                                        <div className="text-xl font-black text-gold-400 font-mono mt-1">
-                                            ¥{(portfolio?.totalValue || 0).toLocaleString()}
+                                        <div className="mt-1 font-mono text-xl font-black text-gold-400">
+                                            {walletTotalDisplay}
                                         </div>
                                     </div>
 
-                                    {/* Mock Toggle - Visible for dev testing */}
                                     <div className="pt-2">
                                         <button
                                             onClick={toggleMockConnection}
                                             className={cn(
-                                                "w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border",
+                                                "flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold transition-all",
                                                 isMockConnected
-                                                    ? "bg-neon-green/10 text-neon-green border-neon-green/30 hover:bg-neon-green/20"
-                                                    : "bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white"
+                                                    ? "border-neon-green/30 bg-neon-green/10 text-neon-green hover:bg-neon-green/20"
+                                                    : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
                                             )}
                                         >
-                                            <Wallet className="w-3.5 h-3.5" />
-                                            {isMockConnected ? "Mock Connection Disconnect" : "Mock Connection (Dev)"}
+                                            <Wallet className="h-3.5 w-3.5" />
+                                            {isMockConnected ? "モック接続を解除" : "モック接続を有効化"}
                                         </button>
                                     </div>
 
-                                    {/* Logout */}
                                     <div className="pt-1">
                                         <button
-                                            onClick={() => { logout(); setShowUserMenu(false); }}
-                                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25 transition-all font-bold text-sm group"
+                                            onClick={() => {
+                                                logout();
+                                                setShowUserMenu(false);
+                                            }}
+                                            className="group flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/15 px-4 py-3 text-sm font-bold text-red-300 transition-all hover:bg-red-500/25"
                                         >
-                                            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                                            <LogOut className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                                             ログアウト
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>
     );
 }
-

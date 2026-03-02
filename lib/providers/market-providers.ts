@@ -59,6 +59,34 @@ export async function fetchPricesBatch(tokens: TokenRef[]): Promise<Record<strin
         } catch (e) {
             console.error("[CoinCap] Batch fetch failed:", e);
         }
+
+        // Fallback: CoinPaprika by symbol when CoinCap is unavailable/incomplete.
+        const unresolved = byProvider.coincap.filter((t) => !out[t.providerId]);
+        if (unresolved.length > 0) {
+            try {
+                const res = await fetch("https://api.coinpaprika.com/v1/tickers", { cache: "no-store" });
+                const json = await res.json();
+                const list = Array.isArray(json) ? json : [];
+
+                const bySymbol: Record<string, any> = {};
+                for (const item of list) {
+                    const sym = String(item?.symbol || "").toUpperCase();
+                    if (sym && !bySymbol[sym]) bySymbol[sym] = item;
+                }
+
+                for (const t of unresolved) {
+                    const p = bySymbol[t.symbol.toUpperCase()];
+                    const usd = Number(p?.quotes?.USD?.price);
+                    if (!usd) continue;
+                    out[t.providerId] = {
+                        usd,
+                        change24hPct: Number(p?.quotes?.USD?.percent_change_24h ?? 0),
+                    };
+                }
+            } catch (e) {
+                console.error("[CoinPaprika] Fallback fetch failed:", e);
+            }
+        }
     }
 
     // Note: Future providers like DexScreener or CoinPaprika can be added here

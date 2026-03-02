@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Award, Target, Zap, TrendingUp, ShieldCheck, Flame, Star } from "lucide-react";
+import { Trophy, Award, Target, Zap, TrendingUp, ShieldCheck, Flame, Star, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSimulation } from "@/context/SimulationContext";
 
@@ -17,9 +17,10 @@ export interface Achievement {
     target?: number;
 }
 
-const INITIAL_ACHIEVEMENTS: Achievement[] = [
-    { id: "first-trade", title: "初陣の証", description: "最初の自動トレードを実行する", icon: Zap, unlocked: true, rarity: "COMMON" },
-    { id: "profit-100", title: "利益の芽", description: "累計利益 ¥100 を達成する", icon: TrendingUp, unlocked: true, rarity: "COMMON", progress: 100, target: 100 },
+export const INITIAL_ACHIEVEMENTS: Achievement[] = [
+    { id: "first-trade", title: "初陣の証", description: "最初の自動トレードを実行する", icon: Zap, unlocked: false, rarity: "COMMON" },
+    { id: "profit-100", title: "利益の芽", description: "累計利益 ¥100 を達成する", icon: TrendingUp, unlocked: false, rarity: "COMMON", progress: 0, target: 100 },
+    { id: "trade-activity", title: "トレード活動家", description: "累計100トレードを実行する", icon: Activity, unlocked: false, rarity: "RARE", progress: 0, target: 100 },
     { id: "risk-setup-done", title: "自己分析の第一歩", description: "リスク許容度診断を完了する", icon: ShieldCheck, unlocked: false, rarity: "COMMON" },
     { id: "win-streak-3", title: "連勝街道", description: "3回連続でプラスの取引を完了する", icon: Flame, unlocked: false, rarity: "RARE", progress: 1, target: 3 },
     { id: "alpha-level-up", title: "技術の進化", description: "TechnicalエージェントをLv.5に上げる", icon: Star, unlocked: false, rarity: "RARE", progress: 2, target: 5 },

@@ -1,0 +1,100 @@
+warning: in the working copy of 'app/api/agents/refresh-universe/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/market/chart/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/market/dashboard/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/market/prices/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/market/refresh/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/news/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/tokens/search/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/trade/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/chain-settings/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/history/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/layout.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/login/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/strategy/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/trader-chat/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/watchlist/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/AchievementHub.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/AgentTicker.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/AutoTradeSimulator.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/BacktestPreview.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/GoalBasedPortfolio.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/LearningDashboard.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/LiveAgentChat.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/MarketOverview.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/OneClickPortfolio.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/PerformanceAnalytics.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/PriceChart.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/RiskManagement.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/TerminalView.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/TradableTokensTable.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/TradeNotificationToast.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/TradingPipelineManager.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/features/WalletPortfolio.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/layout/Header.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/layout/Sidebar.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/layout/TopBar.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/ui/NewsTicker.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'config/allTokensDisplay.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'config/tradeConfig.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'context/AgentContext.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'context/AuthContext.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'context/CurrencyContext.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'discord-sync.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/chains.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/dex-service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/news-service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/providers/market-providers.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/tokens.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package-lock.json', LF will be replaced by CRLF the next time Git touches it
+app/api/agents/refresh-universe/route.ts
+app/api/market/chart/route.ts
+app/api/market/dashboard/route.ts
+app/api/market/prices/route.ts
+app/api/market/refresh/route.ts
+app/api/news/route.ts
+app/api/tokens/search/route.ts
+app/api/trade/route.ts
+app/chain-settings/page.tsx
+app/history/page.tsx
+app/layout.tsx
+app/login/page.tsx
+app/page.tsx
+app/strategy/page.tsx
+app/trader-chat/page.tsx
+app/watchlist/page.tsx
+components/features/AchievementHub.tsx
+components/features/AgentTicker.tsx
+components/features/AutoTradeSimulator.tsx
+components/features/BacktestPreview.tsx
+components/features/GoalBasedPortfolio.tsx
+components/features/LearningDashboard.tsx
+components/features/LiveAgentChat.tsx
+components/features/MarketOverview.tsx
+components/features/OneClickPortfolio.tsx
+components/features/PerformanceAnalytics.tsx
+components/features/PriceChart.tsx
+components/features/RiskManagement.tsx
+components/features/TerminalView.tsx
+components/features/TradableTokensTable.tsx
+components/features/TradeNotificationToast.tsx
+components/features/TradingPipelineManager.tsx
+components/features/WalletPortfolio.tsx
+components/layout/Header.tsx
+components/layout/Sidebar.tsx
+components/layout/TopBar.tsx
+components/ui/NewsTicker.tsx
+config/allTokensDisplay.ts
+config/tradeConfig.ts
+context/AgentContext.tsx
+context/AuthContext.tsx
+context/CurrencyContext.tsx
+context/SimulationContext.tsx
+discord-sync.md
+lib/chains.ts
+lib/dex-service.ts
+lib/news-service.ts
+lib/providers/market-providers.ts
+lib/tokens.ts
+package-lock.json
+package.json

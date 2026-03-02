@@ -5,14 +5,14 @@ import { MarketOverview } from "@/components/features/MarketOverview";
 import { TradableTokensTable } from "@/components/features/TradableTokensTable";
 import { ChainFilter } from "@/components/features/ChainFilter";
 import { AgentTicker } from "@/components/features/AgentTicker";
-import { TradingPipelineManager } from "@/components/features/TradingPipelineManager";
 import { AchievementHub } from "@/components/features/AchievementHub";
 import { LearningDashboard } from "@/components/features/LearningDashboard";
 import { PerformanceAnalytics } from "@/components/features/PerformanceAnalytics";
 import { Leaderboard } from "@/components/features/Leaderboard";
-import { Search, Activity, Zap, Trophy, BarChart3 } from "lucide-react";
+import { Search, Trophy } from "lucide-react";
 import { ChainId } from "@/lib/dex-service";
 import { TerminalView } from "@/components/features/TerminalView";
+import { LiveAgentChat } from "@/components/features/LiveAgentChat";
 
 export default function Home() {
     const [selectedChain, setSelectedChain] = useState<ChainId>("all");
@@ -32,8 +32,8 @@ export default function Home() {
                             <h1 className="text-2xl font-black text-white italic tracking-tighter uppercase">
                                 DIS <span className="text-gold-500">TERMINAL</span>
                             </h1>
-                            <p className="text-gray-500 text-[10px] font-mono mt-1 uppercase">
-                                5 AGENT SYNERGY • AI-POWERED MARKET INTELLIGENCE
+                            <p className="mt-2 text-[11px] md:text-xs lg:text-sm font-mono font-medium tracking-[0.18em] text-sky-200/50 uppercase">
+                                5 AGENT SYNERGY - AI-POWERED MARKET INTELLIGENCE
                             </p>
                         </div>
                         <div className="flex items-center gap-4">
@@ -49,17 +49,13 @@ export default function Home() {
                         <MarketOverview />
                     </section>
 
-                    {/* Middle Section: Pipeline & Achievements */}
-                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="bg-[#0b0f15] rounded-xl border border-gold-500/10 p-4 h-[400px] flex flex-col relative overflow-hidden">
-                            <div className="flex items-center gap-2 mb-4 text-gold-400">
-                                <Zap className="w-4 h-4" />
-                                <h3 className="text-xs font-bold uppercase tracking-wider">Trading Pipeline Manager</h3>
-                            </div>
-                            <div className="flex-1 overflow-hidden">
-                                <TradingPipelineManager />
-                            </div>
-                        </div>
+                    {/* Live AI Intelligence: placed directly under trend cards */}
+                    <section className="h-[360px]">
+                        <LiveAgentChat />
+                    </section>
+
+                    {/* Middle Section: Achievements & Learning */}
+                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="bg-[#0b0f15] rounded-xl border border-gold-500/10 p-4 h-[400px] flex flex-col relative overflow-hidden">
                             <div className="flex items-center gap-2 mb-4 text-gold-400">
                                 <Trophy className="w-4 h-4" />

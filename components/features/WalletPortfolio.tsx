@@ -27,7 +27,7 @@ function ChainBalanceCard({ chainItem, address }: { chainItem: typeof SUPPORTED_
 
     // Mock price (In real app, fetch from Market Data or use Oracle)
     const mockPrice = chain.id === 56 ? 500 : // BNB
-        chain.id === 137 ? 0.8 : // MATIC
+        chain.id === 137 ? 0.8 : // POL
             0;
 
     // Convert price for demo (if necessary)

@@ -10,6 +10,7 @@ export interface MarketNews {
     timestamp: number;
     source?: string;
     url?: string;
+    content?: string;
 }
 
 const NEWS_TEMPLATES = [
@@ -39,6 +40,8 @@ export function generateRandomNews(symbol: string): MarketNews {
         impact: template.impact as MarketNews["impact"],
         category: template.category as MarketNews["category"],
         timestamp: Date.now(),
+        source: "Internal Market Intelligence",
+        url: "https://dis-dex-manager.vercel.app/news",
     };
 }
 
@@ -62,6 +65,7 @@ export function convertRealToMarketNews(realNews: any): MarketNews {
         category: "REAL",
         timestamp: new Date(realNews.published_at).getTime() || Date.now(),
         source: realNews.source,
-        url: realNews.url
+        url: realNews.url,
+        content: realNews.description || realNews.content || "",
     };
 }

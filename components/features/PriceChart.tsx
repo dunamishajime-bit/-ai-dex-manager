@@ -27,10 +27,10 @@ const TIMEFRAMES: TimeframeOption[] = [
 const PAIR_OPTIONS = [
     { label: "BTC/USDT", coinId: "bitcoin" },
     { label: "ETH/USDT", coinId: "ethereum" },
-    { label: "BNB/USDT", coinId: "binancecoin" },
+    { label: "BNB/USDT", coinId: "binance-coin" },
     { label: "SOL/USDT", coinId: "solana" },
-    { label: "AVAX/USDT", coinId: "avalanche-2" },
-    { label: "MATIC/USDT", coinId: "matic-network" },
+    { label: "AVAX/USDT", coinId: "avalanche" },
+    { label: "POL/USDT", coinId: "polygon" },
     { label: "LINK/USDT", coinId: "chainlink" },
     { label: "ARB/USDT", coinId: "arbitrum" },
     { label: "OP/USDT", coinId: "optimism" },
@@ -94,11 +94,20 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
     const [lastPrice, setLastPrice] = useState<number | null>(null);
     const [priceChange, setPriceChange] = useState<number | null>(null);
 
+    useEffect(() => {
+        if (!initialCoinId) return;
+        const nextPair = PAIR_OPTIONS.find((p) => p.coinId === initialCoinId);
+        if (nextPair) setSelectedPair(nextPair);
+    }, [initialCoinId]);
+
     // === Build & Destroy Chart ===
     useEffect(() => {
         if (!chartContainerRef.current) return;
+        const container = chartContainerRef.current;
+        const initialWidth = Math.max(container.clientWidth || 0, 320);
+        const initialHeight = Math.max(container.clientHeight || 0, 220);
 
-        const chart = createChart(chartContainerRef.current, {
+        const chart = createChart(container, {
             layout: {
                 background: { type: ColorType.Solid, color: "transparent" },
                 textColor: "#a1a1aa",
@@ -107,8 +116,8 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
                 vertLines: { color: "rgba(255,255,255,0.04)" },
                 horzLines: { color: "rgba(255,255,255,0.04)" },
             },
-            width: chartContainerRef.current.clientWidth,
-            height: chartContainerRef.current.clientHeight || 280,
+            width: initialWidth,
+            height: initialHeight,
             timeScale: {
                 borderColor: "rgba(255,255,255,0.1)",
                 timeVisible: true,
@@ -137,7 +146,10 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
         const resizeObserver = new ResizeObserver((entries) => {
             if (entries[0] && chartRef.current) {
                 const { width, height } = entries[0].contentRect;
-                chartRef.current.applyOptions({ width, height: height || 280 });
+                chartRef.current.applyOptions({
+                    width: Math.max(Math.floor(width), 320),
+                    height: Math.max(Math.floor(height || 0), 220),
+                });
             }
         });
 
@@ -179,6 +191,14 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
 
     useEffect(() => {
         loadData();
+    }, [loadData]);
+
+    // Slow refresh to avoid hitting provider/API limits.
+    useEffect(() => {
+        const interval = setInterval(() => {
+            loadData();
+        }, 5 * 60 * 1000);
+        return () => clearInterval(interval);
     }, [loadData]);
 
     // === Push Data to Chart ===

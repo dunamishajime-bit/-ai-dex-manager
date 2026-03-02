@@ -1,8 +1,6 @@
 export const SUPPORTED_CHAINS = {
     56: "BNB Chain",
-    137: "Polygon",
-    42161: "Arbitrum",
-    8453: "Base"
+    137: "Polygon"
 } as const;
 
 export type SupportedChainId = keyof typeof SUPPORTED_CHAINS;

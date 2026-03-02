@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kvSet, kvGet } from "@/lib/kv";
-import { TokenRef, Universe } from "@/lib/types/market";
-import { fetchPricesBatch, fetchUsdJpy } from "@/lib/providers/market-providers";
+import { TokenRef, Universe, PricePoint } from "@/lib/types/market";
+import { fetchPricesBatch, fetchUsdJpy, priceKey, toJpy } from "@/lib/providers/market-providers";
 
 export const runtime = "nodejs";
 
@@ -20,6 +20,7 @@ const STATIC_MAJORS: TokenRef[] = [
 
 const STATIC_BNB: TokenRef[] = [
     { symbol: "CAKE", name: "PancakeSwap", chain: "BNB", provider: "coincap", providerId: "pancakeswap" },
+    { symbol: "SHIB", name: "Shiba Inu", chain: "BNB", provider: "coincap", providerId: "shiba-inu" },
     { symbol: "XVS", name: "Venus", chain: "BNB", provider: "coincap", providerId: "venus" },
     { symbol: "ALPACA", name: "Alpaca Finance", chain: "BNB", provider: "coincap", providerId: "alpaca-finance" },
     { symbol: "ASTR", name: "AstarNetwork", chain: "BNB", provider: "coincap", providerId: "astar" },
@@ -29,7 +30,7 @@ const STATIC_BNB: TokenRef[] = [
 const STATIC_POLYGON: TokenRef[] = [
     { symbol: "POL", name: "Polygon Ecosystem Token", chain: "POLYGON", provider: "coincap", providerId: "polygon" },
     { symbol: "QUICK", name: "QuickSwap", chain: "POLYGON", provider: "coincap", providerId: "quickswap" },
-    { symbol: "WMATIC", name: "Wrapped Matic", chain: "POLYGON", provider: "coincap", providerId: "wrapped-matic" },
+    { symbol: "WPOL", name: "Wrapped POL", chain: "POLYGON", provider: "coincap", providerId: "wrapped-matic" },
 ];
 
 export async function POST(req: Request) {
@@ -49,18 +50,31 @@ export async function POST(req: Request) {
         await kvSet("universe:v1", universe);
         console.log("[Refresh] Universe v1 saved to Redis");
 
-        // 2. Populate Prices
-        const allTokens = [...STATIC_MAJORS, ...STATIC_BNB, ...STATIC_POLYGON];
-        const prices = await fetchPricesBatch(allTokens);
-        if (Object.keys(prices).length > 0) {
-            await kvSet("prices:v1", prices);
-            console.log("[Refresh] Prices v1 saved to Redis");
-        }
-
-        // 3. Populate FX
+        // 2. Populate FX
         const fx = await fetchUsdJpy();
         await kvSet("fx:usd_jpy", fx);
         console.log("[Refresh] FX usd_jpy saved to Redis");
+
+        // 3. Populate Prices
+        const allTokens = [...STATIC_MAJORS, ...STATIC_BNB, ...STATIC_POLYGON];
+        const rawPrices = await fetchPricesBatch(allTokens);
+        const pricePoints: Record<string, PricePoint> = {};
+        const now = Date.now();
+        for (const t of allTokens) {
+            const raw = rawPrices[t.providerId];
+            if (!raw?.usd) continue;
+            pricePoints[priceKey(t)] = {
+                usd: raw.usd,
+                jpy: toJpy(raw.usd, fx.rate),
+                change24hPct: raw.change24hPct,
+                updatedAt: now,
+                source: t.provider,
+            };
+        }
+        if (Object.keys(pricePoints).length > 0) {
+            await kvSet("prices:v1", pricePoints);
+            console.log("[Refresh] Prices v1 saved to Redis");
+        }
 
         return NextResponse.json({
             ok: true,

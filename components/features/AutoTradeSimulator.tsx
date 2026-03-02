@@ -352,7 +352,7 @@ export const AutoTradeSimulator: React.FC<AutoTradeSimulatorProps> = ({ marketDa
                         </h3>
 
                         <div className="w-full h-[300px] min-h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={320} minWidth={240} minHeight={220}>
                                 <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">

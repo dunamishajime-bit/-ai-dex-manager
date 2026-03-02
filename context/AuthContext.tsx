@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -70,14 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             // 2. Load local users
             const localData = localStorage.getItem("jdex_users");
-            const localUsers = localData ? JSON.parse(localData) : [];
-            const merged = serverData.success && serverData.users ? [...serverData.users] : [];
+            let localUsers: any[] = [];
+            try {
+                const parsed = localData ? JSON.parse(localData) : [];
+                localUsers = Array.isArray(parsed) ? parsed : [];
+            } catch {
+                localUsers = [];
+            }
+            const merged = serverData.success && Array.isArray(serverData.users) ? [...serverData.users] : [];
 
             // 3. Identify local-only users to push to server
             const localOnly = localUsers.filter((lu: any) => !merged.find(su => su.id === lu.id));
 
             if (localOnly.length > 0) {
-                console.log(`Syncing ${localOnly.length} local-only users to server...`);
                 await fetch("/api/auth/users", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -87,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             // 4. Update local storage with full merged set
             // Merge servers users with local storage to preserve fields not sent by server (like passwordHash)
-            const mergedServerUsers = serverData.success && serverData.users ? [...serverData.users] : [];
+            const mergedServerUsers = serverData.success && Array.isArray(serverData.users) ? [...serverData.users] : [];
             const finalMerged = mergedServerUsers.map((su: any) => {
                 const lu = localUsers.find((x: any) => x.id === su.id);
                 return lu ? { ...lu, ...su } : su;
@@ -179,11 +184,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (data.simulated) {
                 // If API key is missing/simulated, show alert as fallback
-                alert(`【メール送信シミュレーション】\nTo: ${email}\nCode: ${code}`);
+                alert(`メール送信シミュレーション\nTo: ${email}\nCode: ${code}`);
             }
         } catch (e) {
             console.error("Email send failed:", e);
-            alert("メール送信に失敗しました。コンソールを確認してください。");
+            alert("メール送信に失敗しました。時間を置いて再度お試しください。");
         }
     };
 
@@ -219,7 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (user) {
             if (!user.isApproved) {
-                return { success: false, error: "管理者による承認待ちです。承認されるまでログインできません。" };
+                return { success: false, error: "このアカウントは管理者の承認待ちです。" };
             }
 
             const global2FA = localStorage.getItem("jdex_config_2fa");
@@ -249,11 +254,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { success: true, requires2FA: true, code };
         }
 
-        return { success: false, error: "メールアドレスまたはパスワードが正しくありません" };
+        return { success: false, error: "メールアドレスまたはパスワードが正しくありません。" };
     }, []);
 
     const verifyTOTP = useCallback(async (token: string): Promise<{ success: boolean; error?: string }> => {
-        if (!pendingTotpUser) return { success: false, error: "No pending TOTP session" };
+        if (!pendingTotpUser) return { success: false, error: "確認待ちの TOTP セッションがありません。" };
         try {
             const res = await fetch("/api/settings/totp/verify", {
                 method: "POST",
@@ -279,16 +284,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setPendingTotpUser(null);
                 return { success: true };
             } else {
-                return { success: false, error: "認証コードが正しくありません" };
+                return { success: false, error: "確認コードが正しくありません。" };
             }
         } catch (e) {
-            return { success: false, error: "検証に失敗しました" };
+            return { success: false, error: "認証に失敗しました。" };
         }
     }, [pendingTotpUser]);
 
     const verify2FA = useCallback(async (code: string): Promise<{ success: boolean; error?: string }> => {
         if (code !== pending2FACode) {
-            return { success: false, error: "認証コードが正しくありません" };
+            return { success: false, error: "確認コードが正しくありません。" };
         }
 
         const users = getAllUsers();
@@ -303,11 +308,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (!found) {
-            return { success: false, error: "ユーザーが見つかりません" };
+            return { success: false, error: "ユーザーが見つかりません。" };
         }
 
         if (!found.isApproved) {
-            return { success: false, error: "管理者による承認待ちです。承認されるまでログインできません。" };
+            return { success: false, error: "このアカウントは管理者の承認待ちです。" };
         }
 
         found.lastLogin = Date.now();
@@ -387,11 +392,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 });
                 return { success: true };
             } else {
-                return { success: false, error: "Passkey verification failed" };
+                return { success: false, error: "パスキー認証に失敗しました。" };
             }
         } catch (error: any) {
             console.error("Passkey login error:", error);
-            return { success: false, error: error.message || "Passkey login failed" };
+            return { success: false, error: error.message || "パスキーログインに失敗しました。" };
         }
     }, []);
 
@@ -406,7 +411,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const data = await res.json();
 
             if (!data.success || !data.user) {
-                return { success: false, error: data.error || "登録に失敗しました" };
+                return { success: false, error: data.error || "登録に失敗しました。" };
             }
 
             const resultUser = {
@@ -453,7 +458,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { success: true, code };
         } catch (e) {
             console.error("Registration failed:", e);
-            return { success: false, error: "予期せぬエラーが発生しました" };
+            return { success: false, error: "新規ユーザーの作成に失敗しました。" };
         }
     }, []);
 
@@ -517,7 +522,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { success: true };
         } catch (e) {
             console.error("Delete user failed:", e);
-            return { success: false, error: "通信エラーが発生しました" };
+            return { success: false, error: "ユーザー削除に失敗しました。" };
         }
     }, []);
 
@@ -632,3 +637,4 @@ export function approveUser(userId: string): boolean {
     }
     return false;
 }
+
