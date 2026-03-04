@@ -12,6 +12,7 @@ export function TradeNotificationToast() {
     useEffect(() => {
         if (tradeNotifications.length === 0) return;
         const latest = tradeNotifications[0];
+        if (!latest) return;
         const timer = setTimeout(() => {
             dismissNotification(latest.id);
         }, 8000);

@@ -113,7 +113,7 @@ export function PriceChart({ headless = false, initialCoinId }: PriceChartProps)
         chartRef.current = chart;
 
         const resizeObserver = new ResizeObserver((entries) => {
-            const entry = entries[0];
+            const entry = Array.isArray(entries) && entries.length > 0 ? entries[0] : null;
             if (!entry || !chartRef.current) return;
             const width = Math.max(entry.contentRect.width, 320);
             const height = Math.max(entry.contentRect.height, 220);

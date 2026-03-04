@@ -12,6 +12,7 @@ export default function LearningIndicator() {
     useEffect(() => {
         if (learningEvents.length > 0) {
             const latest = learningEvents[0];
+            if (!latest) return;
             // Only show if it's within the last 10 seconds
             if (Date.now() - latest.timestamp < 10000) {
                 setVisibleEvent(latest);

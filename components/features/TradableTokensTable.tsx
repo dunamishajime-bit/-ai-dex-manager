@@ -378,6 +378,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
     const renderSparkline = (data: number[]) => {
         if (!data || data.length === 0) return null;
         const sampled = data.filter((_, i) => i % Math.max(1, Math.floor(data.length / 30)) === 0);
+        if (sampled.length < 2) return null;
         const min = Math.min(...sampled);
         const max = Math.max(...sampled);
         const range = max - min || 1;
@@ -386,7 +387,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
         const isUp = sampled[sampled.length - 1] >= sampled[0];
 
         const points = sampled.map((v, i) => {
-            const x = (i / (sampled.length - 1)) * w;
+            const x = sampled.length > 1 ? (i / (sampled.length - 1)) * w : 0;
             const y = h - ((v - min) / range) * h;
             return `${x},${y}`;
         }).join(" ");

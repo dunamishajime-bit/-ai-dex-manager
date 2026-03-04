@@ -13,6 +13,7 @@ export function FlashEffect() {
 
         if (transactions.length > 0) {
             const latest = transactions[0];
+            if (!latest) return;
             if (latest.id !== lastTxId) {
                 setFlash(true);
                 setLastTxId(latest.id);

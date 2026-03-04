@@ -1920,7 +1920,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         if (initialTradeSymbol !== targetSymbol) {
                             setInitialTradeSymbol(targetSymbol);
                         }
-                    } else if (rankedCandidates.length > 0) {
+                    } else if (rankedCandidates.length > 0 && rankedCandidates[0]?.symbol) {
                         targetSymbol = rankedCandidates[0].symbol as Currency;
                     }
 
@@ -1934,8 +1934,14 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     const volatility = Math.abs(currentTokenPrice - previousPrice) / currentTokenPrice;
 
                     if (priceHistory.length > 5 && targetSymbol === selectedCurrency) {
-                        const startP = priceHistory[0].price;
-                        const endP = priceHistory[priceHistory.length - 1].price;
+                        const firstPoint = priceHistory[0];
+                        const lastPoint = priceHistory[priceHistory.length - 1];
+                        if (!firstPoint || !lastPoint) {
+                            if (isActiveRef.current) timeoutId = setTimeout(loop, Math.random() * 3000 + 1000);
+                            return;
+                        }
+                        const startP = firstPoint.price;
+                        const endP = lastPoint.price;
                         const chg = (endP - startP) / startP;
                         if (volatility > 0.03) {
                             setMarketRegime(prev => (prev !== "VOLATILE" ? "VOLATILE" : prev));
