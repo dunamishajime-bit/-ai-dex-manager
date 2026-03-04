@@ -1,100 +1,82 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { createChart, ColorType, ISeriesApi, AreaSeries, LineSeries } from "lightweight-charts";
-import { RefreshCw, ChevronDown } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createChart, ColorType, AreaSeries, LineSeries, ISeriesApi } from "lightweight-charts";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ===== Types =====
 type Timeframe = "1" | "5" | "15" | "60" | "240" | "1D";
 
-interface TimeframeOption {
-    label: string;
-    value: Timeframe;
-    days: number; // how many days back to fetch
-}
-
-const TIMEFRAMES: TimeframeOption[] = [
-    { label: "1m", value: "1", days: 1 },
-    { label: "5m", value: "5", days: 2 },
-    { label: "15m", value: "15", days: 5 },
-    { label: "1H", value: "60", days: 14 },
-    { label: "4H", value: "240", days: 60 },
-    { label: "1D", value: "1D", days: 365 },
+const TIMEFRAMES = [
+    { label: "1m", value: "1" as Timeframe, days: 1 },
+    { label: "5m", value: "5" as Timeframe, days: 2 },
+    { label: "15m", value: "15" as Timeframe, days: 5 },
+    { label: "1H", value: "60" as Timeframe, days: 14 },
+    { label: "4H", value: "240" as Timeframe, days: 60 },
+    { label: "1D", value: "1D" as Timeframe, days: 365 },
 ];
 
-// Popular tradable pairs (non-stablecoin base)
 const PAIR_OPTIONS = [
     { label: "BTC/USDT", coinId: "bitcoin" },
     { label: "ETH/USDT", coinId: "ethereum" },
     { label: "BNB/USDT", coinId: "binancecoin" },
     { label: "SOL/USDT", coinId: "solana" },
     { label: "AVAX/USDT", coinId: "avalanche-2" },
-    { label: "MATIC/USDT", coinId: "matic-network" },
+    { label: "POL/USDT", coinId: "polygon" },
     { label: "LINK/USDT", coinId: "chainlink" },
     { label: "ARB/USDT", coinId: "arbitrum" },
     { label: "OP/USDT", coinId: "optimism" },
-    { label: "ASTR/USDT", coinId: "astar" },
+    { label: "ASTER/USDT", coinId: "astar" },
     { label: "WLFI/USDT", coinId: "world-liberty-financial" },
 ];
 
-interface OHLCV {
-    time: number; // unix seconds
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-}
+type ChartPoint = { time: number; value: number };
 
-// ===== Fetch Data from Terminal API =====
-async function fetchChartData(coinId: string, days: number): Promise<any[]> {
-    try {
-        const res = await fetch(`/api/market/chart?id=${coinId}&days=${days}`);
-        const data = await res.json();
-        if (!data.ok || !data.prices) return [];
+async function fetchChartData(coinId: string, days: number): Promise<ChartPoint[]> {
+    const response = await fetch(`/api/market/chart?id=${coinId}&days=${days}`);
+    const payload = await response.json();
+    if (!payload.ok || !Array.isArray(payload.prices)) return [];
 
-        return data.prices.map(([time, price]: [number, number]) => ({
+    return payload.prices
+        .map(([time, price]: [number, number]) => ({
             time: Math.floor(time / 1000),
-            value: price
-        })).sort((a: any, b: any) => a.time - b.time);
-    } catch (e) {
-        console.error("Chart fetch failed:", e);
-        return [];
-    }
+            value: Number(price),
+        }))
+        .filter((point: ChartPoint) => Number.isFinite(point.value))
+        .sort((left: ChartPoint, right: ChartPoint) => left.time - right.time);
 }
 
-// ===== Stable coin warning =====
 const STABLECOINS = ["USDT", "USDC", "BUSD", "DAI", "TUSD", "USD1", "FDUSD", "USDP"];
+
 function isStablePair(label: string): boolean {
     const [base, quote] = label.split("/");
     return STABLECOINS.includes(base?.toUpperCase()) && STABLECOINS.includes(quote?.toUpperCase());
 }
 
-// ===== Props =====
 interface PriceChartProps {
     headless?: boolean;
     initialCoinId?: string;
     initialPairLabel?: string;
 }
 
-export function PriceChart({ headless = false, initialCoinId, initialPairLabel }: PriceChartProps) {
+export function PriceChart({ headless = false, initialCoinId }: PriceChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<any>(null);
-    const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-    const emaSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+    const areaSeriesRef = useRef<ISeriesApi<"Area"> | null>(null);
+    const maSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
 
-    // State
-    const initialPair = PAIR_OPTIONS.find(p => p.coinId === initialCoinId) ?? PAIR_OPTIONS[1]; // default ETH/USDT
+    const initialPair = PAIR_OPTIONS.find((pair) => pair.coinId === initialCoinId) ?? PAIR_OPTIONS[1];
     const [selectedPair, setSelectedPair] = useState(initialPair);
-    const [selectedTF, setSelectedTF] = useState<TimeframeOption>(TIMEFRAMES[0]); // default 1min
-    const [chartData, setChartData] = useState<any[]>([]);
+    const [selectedTF, setSelectedTF] = useState(TIMEFRAMES[0]);
+    const [chartData, setChartData] = useState<ChartPoint[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showPairDropdown, setShowPairDropdown] = useState(false);
-    const [lastPrice, setLastPrice] = useState<number | null>(null);
-    const [priceChange, setPriceChange] = useState<number | null>(null);
 
-    // === Build & Destroy Chart ===
+    const lastPrice = chartData.length ? chartData[chartData.length - 1].value : null;
+    const firstPrice = chartData.length ? chartData[0].value : null;
+    const priceChange = lastPrice !== null && firstPrice ? ((lastPrice - firstPrice) / firstPrice) * 100 : null;
+
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
@@ -115,63 +97,54 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
                 secondsVisible: selectedTF.value === "1" || selectedTF.value === "5",
             },
             rightPriceScale: { borderColor: "rgba(255,255,255,0.1)" },
-            crosshair: { mode: 1 },
         });
 
-        const areaSeries = chart.addSeries(AreaSeries, {
-            lineColor: "#3b82f6",
-            topColor: "rgba(59, 130, 246, 0.3)",
-            bottomColor: "rgba(59, 130, 246, 0.0)",
+        areaSeriesRef.current = chart.addSeries(AreaSeries, {
+            lineColor: "#38bdf8",
+            topColor: "rgba(56,189,248,0.28)",
+            bottomColor: "rgba(56,189,248,0.02)",
             lineWidth: 2,
-        });
-        const emaSeries = chart.addSeries(LineSeries, {
+        }) as any;
+        maSeriesRef.current = chart.addSeries(LineSeries, {
             color: "#fbbf24",
             lineWidth: 2,
             priceLineVisible: false,
         });
-
         chartRef.current = chart;
-        candleSeriesRef.current = areaSeries as any;
-        emaSeriesRef.current = emaSeries;
 
         const resizeObserver = new ResizeObserver((entries) => {
-            if (entries[0] && chartRef.current) {
-                const { width, height } = entries[0].contentRect;
-                chartRef.current.applyOptions({ width, height: height || 280 });
-            }
+            const entry = entries[0];
+            if (!entry || !chartRef.current) return;
+            const width = Math.max(entry.contentRect.width, 320);
+            const height = Math.max(entry.contentRect.height, 220);
+            chartRef.current.applyOptions({ width, height });
         });
 
-        if (chartContainerRef.current) {
-            resizeObserver.observe(chartContainerRef.current);
-        }
+        resizeObserver.observe(chartContainerRef.current);
 
         return () => {
             resizeObserver.disconnect();
             chart.remove();
             chartRef.current = null;
-            candleSeriesRef.current = null;
-            emaSeriesRef.current = null;
+            areaSeriesRef.current = null;
+            maSeriesRef.current = null;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [selectedTF.value]);
 
-    // === Load Chart Data ===
     const loadData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             const data = await fetchChartData(selectedPair.coinId, selectedTF.days);
             if (!data.length) {
-                setError("データの取得に失敗しました");
+                setChartData([]);
+                setError("チャートデータの取得に失敗しました");
                 return;
             }
             setChartData(data);
-            const last = data[data.length - 1];
-            const first = data[0];
-            setLastPrice(last.value);
-            setPriceChange(((last.value - first.value) / first.value) * 100);
         } catch (e) {
-            setError("価格データの取得に失敗しました");
+            setChartData([]);
+            setError("チャートデータの取得に失敗しました");
         } finally {
             setLoading(false);
         }
@@ -181,136 +154,126 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
         loadData();
     }, [loadData]);
 
-    // === Push Data to Chart ===
     useEffect(() => {
-        if (!candleSeriesRef.current || !emaSeriesRef.current || chartData.length === 0) return;
+        if (!areaSeriesRef.current || !maSeriesRef.current || !chartData.length) return;
 
-        candleSeriesRef.current.setData(chartData);
-
-        // Simple MA (14)
-        const period = 14;
-        const maData = chartData.map((d, i) => {
-            const subset = chartData.slice(Math.max(0, i - period + 1), i + 1);
-            const avg = subset.reduce((s, o) => s + o.value, 0) / subset.length;
-            return { time: d.time as any, value: avg };
+        areaSeriesRef.current.setData(chartData as any);
+        const maPeriod = 14;
+        const movingAverage = chartData.map((point, index) => {
+            const subset = chartData.slice(Math.max(0, index - maPeriod + 1), index + 1);
+            const average = subset.reduce((sum, item) => sum + item.value, 0) / subset.length;
+            return { time: point.time as any, value: average };
         });
-
-        emaSeriesRef.current.setData(maData);
+        maSeriesRef.current.setData(movingAverage as any);
         chartRef.current?.timeScale().fitContent();
     }, [chartData]);
 
-    const isStable = isStablePair(selectedPair.label);
-    const changePositive = (priceChange ?? 0) >= 0;
-
     const controls = (
-        <div className="flex items-center justify-between gap-2 px-2 py-2 border-b border-white/5 flex-wrap">
-            {/* Pair Selector */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-2 py-2">
             <div className="relative">
                 <button
-                    onClick={() => setShowPairDropdown(!showPairDropdown)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-gold-500/40 text-white text-xs font-mono font-bold transition-colors"
+                    onClick={() => setShowPairDropdown((prev) => !prev)}
+                    className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:border-gold-500/40"
                 >
                     {selectedPair.label}
-                    <ChevronDown className="w-3 h-3 text-gray-400" />
+                    <ChevronDown className="h-3 w-3 text-gray-400" />
                 </button>
-                {showPairDropdown && (
-                    <div className="absolute left-0 top-full mt-1 z-50 w-40 bg-[#0d1117] border border-gold-500/20 rounded-lg shadow-2xl overflow-hidden">
-                        {PAIR_OPTIONS.map(p => (
+                {showPairDropdown ? (
+                    <div className="absolute left-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-lg border border-gold-500/20 bg-[#0d1117] shadow-2xl">
+                        {PAIR_OPTIONS.map((pair) => (
                             <button
-                                key={p.coinId}
-                                onClick={() => { setSelectedPair(p); setShowPairDropdown(false); }}
+                                key={pair.coinId}
+                                onClick={() => {
+                                    setSelectedPair(pair);
+                                    setShowPairDropdown(false);
+                                }}
                                 className={cn(
-                                    "w-full text-left px-3 py-2 text-xs font-mono hover:bg-gold-500/10 hover:text-gold-400 transition-colors",
-                                    selectedPair.coinId === p.coinId ? "text-gold-400 bg-gold-500/10" : "text-gray-400"
+                                    "w-full px-3 py-2 text-left text-xs transition-colors hover:bg-gold-500/10 hover:text-gold-400",
+                                    selectedPair.coinId === pair.coinId ? "bg-gold-500/10 text-gold-400" : "text-gray-400"
                                 )}
                             >
-                                {p.label}
+                                {pair.label}
                             </button>
                         ))}
                     </div>
-                )}
+                ) : null}
             </div>
 
-            {/* Price display */}
-            {lastPrice !== null && (
+            {lastPrice !== null ? (
                 <div className="flex items-center gap-2">
-                    <span className="text-white font-mono font-bold text-sm">
-                        ${lastPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: lastPrice >= 1 ? 2 : 6 })}
+                    <span className="text-sm font-bold text-white">
+                        ${lastPrice.toLocaleString(undefined, { minimumFractionDigits: lastPrice >= 1 ? 2 : 4, maximumFractionDigits: lastPrice >= 1 ? 2 : 6 })}
                     </span>
-                    {priceChange !== null && (
-                        <span className={cn("text-xs font-mono", changePositive ? "text-emerald-400" : "text-red-400")}>
-                            {changePositive ? "+" : ""}{priceChange.toFixed(2)}%
+                    {priceChange !== null ? (
+                        <span className={cn("text-xs font-mono", priceChange >= 0 ? "text-emerald-400" : "text-red-400")}>
+                            {priceChange >= 0 ? "+" : ""}{priceChange.toFixed(2)}%
                         </span>
-                    )}
+                    ) : null}
                 </div>
-            )}
+            ) : null}
 
-            {/* Timeframe buttons */}
             <div className="flex items-center gap-1">
-                {TIMEFRAMES.map(tf => (
+                {TIMEFRAMES.map((timeframe) => (
                     <button
-                        key={tf.value}
-                        onClick={() => setSelectedTF(tf)}
+                        key={timeframe.value}
+                        onClick={() => setSelectedTF(timeframe)}
                         className={cn(
-                            "px-2 py-1 rounded text-[10px] font-mono font-bold transition-all",
-                            selectedTF.value === tf.value
-                                ? "bg-gold-500/20 text-gold-400 border border-gold-500/50"
-                                : "text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                            "rounded px-2 py-1 text-[10px] font-bold transition-all",
+                            selectedTF.value === timeframe.value
+                                ? "border border-gold-500/50 bg-gold-500/20 text-gold-400"
+                                : "text-gray-500 hover:bg-white/5 hover:text-gray-300"
                         )}
                     >
-                        {tf.label}
+                        {timeframe.label}
                     </button>
                 ))}
                 <button
                     onClick={loadData}
                     disabled={loading}
-                    className="p-1.5 rounded text-gray-500 hover:text-gold-400 hover:bg-gold-500/10 transition-colors"
+                    className="rounded p-1.5 text-gray-500 transition-colors hover:bg-gold-500/10 hover:text-gold-400"
                     title="更新"
                 >
-                    <RefreshCw className={cn("w-3 h-3", loading && "animate-spin text-gold-400")} />
+                    <RefreshCw className={cn("h-3 w-3", loading && "animate-spin text-gold-400")} />
                 </button>
             </div>
         </div>
     );
 
     const chartBody = (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex h-full flex-col overflow-hidden">
             {controls}
-            {isStable && (
-                <div className="mx-2 mt-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400 text-[10px] font-mono">
-                    ⚠️ ステーブルコイン同士のペアは価格変動がほぼありません（常に約$1.00）
+            {isStablePair(selectedPair.label) ? (
+                <div className="mx-2 mt-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-[10px] text-amber-400">
+                    ステーブル同士のペアは値動きが小さいため、通常は 1.00 付近で推移します。
                 </div>
-            )}
-            {error && (
-                <div className="mx-2 mt-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-[10px] font-mono">
+            ) : null}
+            {error ? (
+                <div className="mx-2 mt-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[10px] text-red-400">
                     {error}
                 </div>
-            )}
-            <div
-                ref={chartContainerRef}
-                className="w-full flex-1 min-h-[200px] relative"
-            >
-                {loading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-10 rounded-lg">
+            ) : null}
+            <div ref={chartContainerRef} className="relative min-h-[220px] w-full flex-1">
+                {loading ? (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/20 backdrop-blur-sm">
                         <div className="flex items-center gap-2">
-                            <RefreshCw className="w-4 h-4 text-gold-400 animate-spin" />
-                            <span className="text-gray-400 text-xs font-mono">OHLCVデータを取得中...</span>
+                            <RefreshCw className="h-4 w-4 animate-spin text-gold-400" />
+                            <span className="text-xs text-gray-400">チャートデータを取得中...</span>
                         </div>
                     </div>
-                )}
+                ) : null}
             </div>
-            <div className="flex justify-between items-center px-3 py-1.5 border-t border-white/5">
+            <div className="flex items-center justify-between border-t border-white/5 px-3 py-1.5">
                 <div className="flex gap-4">
                     <div className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                        <span className="text-[10px] text-gray-400 font-mono">LIVE OHLCV</span>
+                        <span className="h-2 w-2 rounded-full bg-sky-400" />
+                        <span className="text-[10px] text-gray-400">PRICE</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-amber-400" />
-                        <span className="text-[10px] text-gray-400 font-mono">EMA(14)</span>
+                        <span className="h-2 w-2 rounded-full bg-amber-400" />
+                        <span className="text-[10px] text-gray-400">MA(14)</span>
                     </div>
                 </div>
-                <div className="text-[10px] text-gray-600 font-mono">CoinCap</div>
+                <div className="text-[10px] text-gray-600">CoinCap / CoinGecko</div>
             </div>
         </div>
     );
@@ -318,15 +281,13 @@ export function PriceChart({ headless = false, initialCoinId, initialPairLabel }
     if (headless) return chartBody;
 
     return (
-        <div className="bg-[#0d1117] rounded-xl border border-gold-500/10 h-full overflow-hidden">
-            <div className="px-4 py-3 border-b border-gold-500/10 flex items-center justify-between">
+        <div className="h-full overflow-hidden rounded-xl border border-gold-500/10 bg-[#0d1117]">
+            <div className="flex items-center justify-between border-b border-gold-500/10 px-4 py-3">
                 <h3 className="text-sm font-bold text-white">
-                    {selectedPair.label} <span className="text-gray-500 text-xs font-mono">ターミナル・チャート</span>
+                    {selectedPair.label} <span className="text-xs text-gray-500">ターミナル・チャート</span>
                 </h3>
             </div>
-            <div className="h-[calc(100%-52px)]">
-                {chartBody}
-            </div>
+            <div className="h-[calc(100%-52px)]">{chartBody}</div>
         </div>
     );
 }

@@ -15,37 +15,31 @@ const STATIC_MAJORS: TokenRef[] = [
     { symbol: "DOGE", name: "Dogecoin", chain: "MAJOR", provider: "coincap", providerId: "dogecoin" },
     { symbol: "TRX", name: "TRON", chain: "MAJOR", provider: "coincap", providerId: "tron" },
     { symbol: "LINK", name: "Chainlink", chain: "MAJOR", provider: "coincap", providerId: "chainlink" },
+    { symbol: "ARB", name: "Arbitrum", chain: "MAJOR", provider: "coincap", providerId: "arbitrum" },
+    { symbol: "OP", name: "Optimism", chain: "MAJOR", provider: "coincap", providerId: "optimism" },
 ];
 
 const STATIC_BNB: TokenRef[] = [
     { symbol: "CAKE", name: "PancakeSwap", chain: "BNB", provider: "coincap", providerId: "pancakeswap" },
     { symbol: "XVS", name: "Venus", chain: "BNB", provider: "coincap", providerId: "venus" },
     { symbol: "ALPACA", name: "Alpaca Finance", chain: "BNB", provider: "coincap", providerId: "alpaca-finance" },
-    { symbol: "ASTR", name: "AstarNetwork", chain: "BNB", provider: "coincap", providerId: "astar" },
+    { symbol: "ASTER", name: "Aster", chain: "BNB", provider: "coincap", providerId: "astar" },
+    { symbol: "WLFI", name: "World Liberty Financial", chain: "BNB", provider: "coincap", providerId: "world-liberty-financial" },
     { symbol: "TWT", name: "Trust Wallet Token", chain: "BNB", provider: "coincap", providerId: "trust-wallet-token" },
 ];
 
 const STATIC_POLYGON: TokenRef[] = [
     { symbol: "POL", name: "Polygon Ecosystem Token", chain: "POLYGON", provider: "coincap", providerId: "polygon" },
     { symbol: "QUICK", name: "QuickSwap", chain: "POLYGON", provider: "coincap", providerId: "quickswap" },
-    { symbol: "WMATIC", name: "Wrapped Matic", chain: "POLYGON", provider: "coincap", providerId: "wrapped-matic" },
 ];
 
 export async function POST() {
     try {
-        // 1. Rankings Determination
-        // CMC reference would go here if API key is in env.
-        // For now, we prioritize absolute stability with 0 external ranking calls.
-
-        const majorsTop10 = [...STATIC_MAJORS];
-        const bnbTop15 = [...STATIC_BNB];
-        const polygonTop15 = [...STATIC_POLYGON];
-
         const existingUniverse = await kvGet<Universe>("universe:v1");
         const universe: Universe = {
-            majorsTop10,
-            bnbTop15,
-            polygonTop15,
+            majorsTop10: [...STATIC_MAJORS],
+            bnbTop15: [...STATIC_BNB],
+            polygonTop15: [...STATIC_POLYGON],
             favoritesByUser: existingUniverse?.favoritesByUser || {},
             updatedAt: Date.now(),
         };
@@ -55,11 +49,11 @@ export async function POST() {
         return NextResponse.json({
             ok: true,
             counts: {
-                majors: majorsTop10.length,
-                bnb: bnbTop15.length,
-                polygon: polygonTop15.length
+                majors: universe.majorsTop10.length,
+                bnb: universe.bnbTop15.length,
+                polygon: universe.polygonTop15.length,
             },
-            source: "static-fallback"
+            source: "static-fallback",
         });
     } catch (error: any) {
         console.error("[RefreshUniverse] Failed:", error);

@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
+import { Flame, ShieldCheck, TrendingUp, Zap } from "lucide-react";
 import { fetchMarketPrices } from "@/lib/market-service";
 
 import { useAccount } from "wagmi";
@@ -92,6 +93,12 @@ export interface Transaction {
     dex?: string; // New: e.g. Uniswap
     chain?: string; // New: e.g. Ethereum, Polygon
     feedback?: "GOOD" | "BAD";
+    reason?: string;
+    entryPrice?: number;
+    plannedTakeProfit?: number;
+    plannedStopLoss?: number;
+    decisionSummary?: string;
+    newsTitle?: string;
 }
 
 export interface PricePoint {
@@ -248,6 +255,13 @@ interface SimulationContextType {
 
 const SimulationContext = createContext<SimulationContextType | undefined>(undefined);
 
+const DEFAULT_ACHIEVEMENTS: Achievement[] = [
+    { id: "first-trade", title: "初回トレード", description: "最初のトレードを完了する", icon: Zap, unlocked: false, rarity: "COMMON" },
+    { id: "profit-100", title: "利益達成", description: "累計利益 100 円以上を達成する", icon: TrendingUp, unlocked: false, rarity: "COMMON", progress: 0, target: 100 },
+    { id: "risk-setup-done", title: "リスク設定完了", description: "リスク管理設定を反映する", icon: ShieldCheck, unlocked: false, rarity: "COMMON" },
+    { id: "win-streak-3", title: "3連勝", description: "3 回連続で利益決済する", icon: Flame, unlocked: false, rarity: "RARE", progress: 0, target: 3 },
+];
+
 export function SimulationProvider({ children }: { children: ReactNode }) {
     // Wagmi Connection hook
     const { isConnected, address, chainId } = useAccount();
@@ -257,12 +271,12 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticatedState] = useState(false);
 
     /**
-     * ウォレット接続を監視し、接続直後にシミュレーションループを起動する。
-     * isConnected が false→true に変化した瞬間のみ実行（冪等性確保）。
+     * 繧ｦ繧ｩ繝ｬ繝・ヨ謗･邯壹ｒ逶｣隕悶＠縲∵磁邯夂峩蠕後↓繧ｷ繝溘Η繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ繝ｫ繝ｼ繝励ｒ襍ｷ蜍輔☆繧九・
+     * isConnected 縺・false竊稚rue 縺ｫ螟牙喧縺励◆迸ｬ髢薙・縺ｿ螳溯｡鯉ｼ亥・遲画ｧ遒ｺ菫晢ｼ峨・
      */
     const prevConnectedRef = useRef<boolean>(false);
     const manualTestDoneRef = useRef<boolean>(false);
-    // 一時フラグ（本番でのテスト完了後に削除する）
+    // 荳譎ゅヵ繝ｩ繧ｰ・域悽逡ｪ縺ｧ縺ｮ繝・せ繝亥ｮ御ｺ・ｾ後↓蜑企勁縺吶ｋ・・
     const shouldFireOnceRef = useRef(true);
 
     const [isSimulating, setIsSimulatingState] = useState(true);
@@ -299,9 +313,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         const IS_PROD = process.env.NODE_ENV === "production";
 
-        // 実トレードを有効化
+        // 螳溘ヨ繝ｬ繝ｼ繝峨ｒ譛牙柑蛹・
         setIsDemoMode(false);
-        localStorage.removeItem("jdex_demo_mode"); // 整合性確保のため確実に削除
+        localStorage.removeItem("jdex_demo_mode"); // 謨ｴ蜷域ｧ遒ｺ菫昴・縺溘ａ遒ｺ螳溘↓蜑企勁
 
         console.log('[TRADE MODE]', {
             isConnected,
@@ -312,14 +326,14 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             setIsAutoPilotEnabled(true);
         }
 
-        // ループが未起動なら起動
+        // 繝ｫ繝ｼ繝励′譛ｪ襍ｷ蜍輔↑繧芽ｵｷ蜍・
         if (!isSimulating) {
             setIsSimulating(true);
         }
     }, [isConnected, isSimulating]);
 
 
-    // アンマウント時・切断時のクリーンアップ
+    // 繧｢繝ｳ繝槭え繝ｳ繝域凾繝ｻ蛻・妙譎ゅ・繧ｯ繝ｪ繝ｼ繝ｳ繧｢繝・・
     useEffect(() => {
         if (!isConnected && isSimulating) {
             setIsSimulating(false);
@@ -396,10 +410,10 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
             const normalizedPair = normalizeToUSDTPair(entry.pair);
             const proposal: StrategyProposal = {
-                id: `strat-${entry.id}`,
+                id: "strat-" + entry.id,
                 agentId: "coordinator",
-                title: `AI評議会提案: ${normalizedPair}`,
-                description: `${normalizedPair}の分析に基づく${entry.result.action}戦略。`,
+                title: "AI 戦略提案: " + normalizedPair,
+                description: normalizedPair + " の分析に基づく " + entry.result.action + " 戦略です。",
                 status: "PENDING",
                 timestamp: Date.now(),
                 durationBlock: block as any,
@@ -426,15 +440,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const [latestNews, setLatestNews] = useState<MarketNews | null>(null);
     const [isSoundEnabled, setIsSoundEnabled] = useState(false);
     const [atmosphere, setAtmosphere] = useState<"NEUTRAL" | "POSITIVE" | "NEGATIVE" | "ALERT">("NEUTRAL");
-    const [achievements, setAchievements] = useState<Achievement[]>([]);
+    const [achievements, setAchievements] = useState<Achievement[]>(DEFAULT_ACHIEVEMENTS);
     const [disPoints, setDisPoints] = useState(0);
-    const [leaderboard, setLeaderboard] = useState([
-        { name: "Global Whale", score: 1250000, dailyProfit: 45000, dailyChange: 3.6, rank: 1 },
-        { name: "AI Master", score: 854000, dailyProfit: 12000, dailyChange: 1.4, rank: 2 },
-        { name: "Crypto King", score: 621000, dailyProfit: -5000, dailyChange: -0.8, rank: 3 },
-        { name: "DIS Fan", score: 450000, dailyProfit: 8000, dailyChange: 1.8, rank: 4 },
-        { name: "Anonymous", score: 320000, dailyProfit: 2500, dailyChange: 0.8, rank: 5 },
-    ]);
+    const [leaderboard, setLeaderboard] = useState<{ name: string; score: number; dailyProfit: number; dailyChange: number; rank: number }[]>([]);
 
     // Demo Mode State
     const [isDemoMode, setIsDemoModeState] = useState(false);
@@ -502,43 +510,39 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const effectiveIsConnected = isConnected || isMockConnected;
     const effectiveAddress = address || (isMockConnected ? mockAddress : undefined);
     const effectiveChainId = chainId || (isMockConnected ? 56 : undefined); // Default to BSC for mock
+    const liveTransactionsStorageKey = effectiveAddress ? `jdex_live_transactions_${effectiveAddress.toLowerCase()}` : null;
 
     const startFixedDemo = (startingSymbol: string = "BNB", jpyPricePerUnit?: number) => {
-        // Find matching config from TRADE_CONFIG.DEMO_FUNDS
-        // Find a demo fund key that matches the requested startingSymbol
-        const demoFundKey = Object.keys(TRADE_CONFIG.DEMO_FUNDS).find(key =>
-            (TRADE_CONFIG.DEMO_FUNDS as any)[key].symbol === startingSymbol
+        const demoFundKey = Object.keys(TRADE_CONFIG.DEMO_FUNDS).find(
+            (key) => (TRADE_CONFIG.DEMO_FUNDS as any)[key].symbol === startingSymbol
         );
-        const demoFundConfig = demoFundKey ? (TRADE_CONFIG.DEMO_FUNDS as any)[demoFundKey] : { symbol: startingSymbol, amount: 100 };
+        const demoFundConfig = demoFundKey
+            ? (TRADE_CONFIG.DEMO_FUNDS as any)[demoFundKey]
+            : { symbol: startingSymbol, amount: 100 };
 
         const amount = demoFundConfig.amount;
-
-        // Use passed-in market price if available, otherwise fall back to allMarketPrices
-        let usdPrice: number;
-        if (jpyPricePerUnit && jpyPricePerUnit > 0) {
-            usdPrice = jpyPricePerUnit / 155; // Approximation to get USD value
-        } else {
-            const priceData = allMarketPrices[startingSymbol] || initialData[startingSymbol];
-            usdPrice = priceData ? priceData.price : (TRADE_CONFIG.STABLECOINS.includes(startingSymbol) ? 1 : 0);
-        }
+        const fallbackPriceData = allMarketPrices[startingSymbol] || initialData[startingSymbol];
+        const usdPrice =
+            jpyPricePerUnit && jpyPricePerUnit > 0
+                ? jpyPricePerUnit / 155
+                : fallbackPriceData
+                    ? fallbackPriceData.price
+                    : TRADE_CONFIG.STABLECOINS.includes(startingSymbol)
+                        ? 1
+                        : 0;
 
         const totalValUSD = usdPrice * amount;
-        const totalValJPY = convertJPY(totalValUSD);
-        const jpyPrice = convertJPY(usdPrice);
-
-        // Stablecoins go to cashbalance; volatile crypto goes to positions
         const isStable = TRADE_CONFIG.STABLECOINS.includes(startingSymbol);
-
-        const initialPositions = isStable ? [] : [{
-            symbol: startingSymbol,
-            amount: amount,
-            entryPrice: usdPrice,
-            highestPrice: usdPrice
-        }];
-
+        const initialPositions = isStable
+            ? []
+            : [{
+                symbol: startingSymbol,
+                amount,
+                entryPrice: usdPrice,
+                highestPrice: usdPrice,
+            }];
         const initialCash = isStable ? totalValUSD : 0;
 
-        // Set Demo Mode
         setIsDemoModeState(true);
         localStorage.setItem("jdex_demo_mode", "true");
 
@@ -546,7 +550,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             totalValue: totalValUSD,
             pnl24h: 0,
             cashbalance: initialCash,
-            positions: initialPositions
+            positions: initialPositions,
         };
 
         setPortfolio(newPortfolio);
@@ -554,35 +558,28 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         setDemoBalanceState(newPortfolio.totalValue);
         localStorage.setItem("jdex_demo_balance", newPortfolio.totalValue.toString());
 
-        // Reset Simulation State
         setTransactions([]);
         setMessages([]);
         setTradeNotifications([]);
         setDiscussionHistory([]);
         setPriceHistory([]);
-
         setHasInitialTradeExecuted(true);
 
-        // Set Allowed Start Tokens
         const tokens = TRADE_CONFIG.ALLOWED_START_FUNDS;
         setAllowedStartTokensState(tokens);
         localStorage.setItem("jdex_allowed_start_tokens", JSON.stringify(tokens));
-
-        // Clear other persistence
         localStorage.removeItem("jdex_transactions");
         localStorage.removeItem("jdex_chat_history");
         localStorage.removeItem("jdex_price_history");
 
-        addMessage("coordinator", `🚀 固定資産デモモードを開始しました。初期資産: ${amount} ${startingSymbol}`, "SYSTEM");
+        addMessage("coordinator", "固定資産デモモードを開始しました。初期資産: " + amount + " " + startingSymbol, "SYSTEM");
 
-        // Sync Market Data & Selection
         setSelectedCurrency(startingSymbol as Currency);
-        const priceData = allMarketPrices[startingSymbol] || initialData[startingSymbol];
-        if (priceData) {
-            setMarketData(prev => ({
+        if (fallbackPriceData) {
+            setMarketData((prev) => ({
                 ...prev,
-                price: priceData.price,
-                volume: priceData.volume
+                price: fallbackPriceData.price,
+                volume: fallbackPriceData.volume,
             }));
         }
     };
@@ -631,7 +628,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         };
         const next = [...tradingPipelines, newPipeline];
         savePipelines(next);
-        addMessage("SYSTEM", `パイプライン追加: ${newPipeline.baseToken}/${newPipeline.targetToken} (${dexs.join(", ")})`, "SYSTEM");
+        addMessage("SYSTEM", "パイプライン追加: " + newPipeline.baseToken + "/" + newPipeline.targetToken + " (" + dexs.join(", ") + ")", "SYSTEM");
     };
 
     const removePipeline = (id: string) => {
@@ -655,7 +652,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         if (newExp >= nextLevelExp) {
             newLevel += 1;
-            addMessage("coordinator", `🎉 ${agent.name} がレベルアップ！ Lv.${newLevel} に到達し、新たな知見を獲得しました。`, "SYSTEM");
+            addMessage("coordinator", agent.name + " がレベルアップしました。Lv." + newLevel + " に到達し、新たな知見を獲得しました。", "SYSTEM");
 
             // Trigger Evolution
             const newsArr = latestNews ? [latestNews] : [];
@@ -674,13 +671,15 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             else if (news.category === "SECURITY") agentId = "security";
         }
 
-        const topics = ["市場構造の再理解", "アルゴリズムの最適化", "ナラティブの深掘り", "リスク管理モデルの更新"];
+        const topics = ["市場構造の理解", "アルゴリズム最適化", "ナラティブ分析", "リスク管理の更新"];
         const topic = topics[Math.floor(Math.random() * topics.length)];
 
         addLearningEvent({
             agentId,
             topic,
-            content: news ? `${news.title} に基づき、専門領域の知識をアップデートしました。` : "非構造化データから新しいパターンを抽出しました。"
+            content: news
+                ? news.title + " をもとに、関連知識をアップデートしました。"
+                : "市場データから新しいパターンを抽出しました。",
         });
 
         awardExp(agentId, 25);
@@ -729,7 +728,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         trend: "SIDEWAYS",
     });
 
-    // Initial fund: ¥30,000 (Demo requirement)
+    // Initial fund: ﾂ･30,000 (Demo requirement)
     // Base currency for calculations is USD. 
     // Formatters in CurrencyContext will handle the conversion to JPY if selected.
     const INITIAL_CASH_USD = 200; // Approx 30,000 JPY
@@ -763,7 +762,20 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     }, [jpyRate]);
 
     const [initialTradeSymbol, setInitialTradeSymbol] = useState("BNB");
-    const [hasInitialTradeExecuted, setHasInitialTradeExecuted] = useState(false);
+    const [hasInitialTradeExecutedState, setHasInitialTradeExecutedState] = useState(() => {
+        if (typeof window === "undefined") return false;
+        return localStorage.getItem("jdex_initial_trade_done") === "true";
+    });
+    const setHasInitialTradeExecuted = useCallback((next: boolean) => {
+        setHasInitialTradeExecutedState(next);
+        if (typeof window === "undefined") return;
+        if (next) {
+            localStorage.setItem("jdex_initial_trade_done", "true");
+        } else {
+            localStorage.removeItem("jdex_initial_trade_done");
+        }
+    }, []);
+    const hasInitialTradeExecuted = hasInitialTradeExecutedState;
 
     const addMessage = useCallback((agentId: string, content: string, type: Message["type"] | "NORMAL" = "OPINION") => {
         const actualType = type === "NORMAL" ? "OPINION" : type;
@@ -794,7 +806,6 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const resumerRef = useRef<(() => void) | null>(null);
     const [isPricingPaused, setIsPricingPaused] = useState(false);
 
-    /** 通貨ペア価格取得の再開 */
     const resumePricing = useCallback(() => {
         addMessage("SYSTEM", "価格更新を再開しました。", "SYSTEM");
     }, [addMessage]);
@@ -818,6 +829,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const agentsRef = useRef(agents);
     const isActiveRef = useRef(false);
     const lastTradeRef = useRef(0); // Cooldown for demo trades
+    const lastInitialCandidateRef = useRef<string | null>(null);
 
     useEffect(() => {
         marketDataRef.current = marketData;
@@ -874,7 +886,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             totalTrades: prev.totalTrades + 1,
         }));
 
-        addMessage("manager", `学習フィードバック: ${feedback} - パラメータ自動調整完了`, "SYSTEM");
+        addMessage("manager", "学習フィードバック: " + feedback + " - パラメータ自動調整を反映しました。", "SYSTEM");
     }, [addMessage]);
 
     const executeTrade = useCallback(async (tokenSymbol: string, action: "BUY" | "SELL", amount: number, price: number, reason?: string, dex?: string): Promise<boolean> => {
@@ -900,7 +912,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         if (HARD_STOP_TRADING) {
             console.warn("[TRADE_BLOCKED] HARD_STOP_TRADING is enabled. No request will be sent.");
-            addMessage("SYSTEM", "⚠️ [安全ガード] 現在取引機能はメンテナンスのため停止されています。", "ALERT");
+            addMessage("SYSTEM", "[取引制限] 自動トレードは現在メンテナンス中のため停止しています。", "ALERT");
             return false;
         }
 
@@ -917,14 +929,14 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         setTradeInProgress(true);
         lastTradeRef.current = Date.now();
 
-        if (IS_PROD && (reason === "AI technical signal" || reason?.startsWith("IMMEDIATE_TEST_TRIGGER") || reason?.includes("戦略:"))) {
-            console.log(`[SAFEGUARD] Automated trade ${action} ${tokenSymbol} blocked in Production.`);
+        if (IS_PROD && reason?.startsWith("IMMEDIATE_TEST_TRIGGER")) {
+            console.log("[SAFEGUARD] Immediate test trade " + action + " " + tokenSymbol + " blocked in Production.");
             setTradeInProgress(false);
             return false;
         }
 
         if (!effectiveIsConnected && !currentDemoMode) {
-            addMessage("SYSTEM", "⚠️ ウォレットが接続されていません。取引を実行するにはウォレットを接続してください。", "ALERT");
+            addMessage("SYSTEM", "[警告] ウォレット未接続です。トレードを開始するにはウォレットを接続してください。", "ALERT");
             console.log('[DEBUG] executeTrade: Stopped - Wallet not connected.');
             setTradeInProgress(false);
             return false;
@@ -933,7 +945,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         const now = Date.now();
         if (now - lastTradeErrorTime.current < 5000) {
             const remaining = Math.ceil((5000 - (now - lastTradeErrorTime.current)) / 1000);
-            addMessage("SYSTEM", `⚠️ クールダウン中... あと ${remaining}秒待ってください。`, "ALERT");
+            addMessage("SYSTEM", "[制限中] 連続発注を抑制しています。あと " + remaining + " 秒待ってください。", "ALERT");
             setTradeInProgress(false);
             return false;
         }
@@ -943,7 +955,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             setTradeInProgress(true);
             try {
                 if (!isSupportedChain(effectiveChainId)) {
-                    throw new Error(`Chain ${effectiveChainId} is not supported by our implementation.`);
+                    throw new Error("Chain " + effectiveChainId + " is not supported by our implementation.");
                 }
 
                 // Resolve Addresses & Decimals through Registry
@@ -956,7 +968,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 const amountInWei = parseUnits(srcAmountNumber.toFixed(srcTokenInfo.decimals), srcTokenInfo.decimals).toString();
 
                 setTradeInProgress(true);
-                addMessage("SYSTEM", `🔄 ParaSwapで${action === "BUY" ? "購入" : "売却"}プロセスを開始中...`, "SYSTEM");
+                addMessage("SYSTEM", "ParaSwap で " + (action === "BUY" ? "購入" : "売却") + " を開始します。", "SYSTEM");
 
                 console.warn("[TRADE_CALL]", {
                     chainId: effectiveChainId,
@@ -965,7 +977,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     amountWei: amountInWei,
                     fromAddress: effectiveAddress,
                     mode: currentDemoMode ? "demo" : "real",
-                    auto: (reason === "AI technical signal" || reason?.includes("戦略:"))
+                    auto: (reason === "AI technical signal" || reason?.includes("謌ｦ逡･:"))
                 });
 
                 const tradeRes = await fetch("/api/trade", {
@@ -985,21 +997,57 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 try {
                     tradeData = JSON.parse(tradeResText);
                 } catch (e) {
-                    throw new Error(`Trade API Non-JSON response (Status:${tradeRes.status}): ${tradeResText.slice(0, 200)}`);
+                    throw new Error("Trade API Non-JSON response (Status:" + tradeRes.status + "): " + tradeResText.slice(0, 200));
                 }
 
                 if (!tradeRes.ok || !tradeData.ok) {
-                    throw new Error(tradeData.error || `Trade API failed (Status:${tradeRes.status})`);
+                    throw new Error(tradeData.error || ("Trade API failed (Status:" + tradeRes.status + ")"));
                 }
 
                 const txHash = tradeData.txHash;
+                const livePosition = portfolioRef.current.positions.find((position) => position.symbol === tokenSymbol);
+                const estimatedFeeUsd = action === "BUY" ? (amount * price * 0.003) : Math.max(amount * price * 0.003, 0);
+                const realizedPnl = action === "SELL" && livePosition
+                    ? ((price - livePosition.entryPrice) * amount) - estimatedFeeUsd
+                    : undefined;
                 setLastAction(action);
-                addMessage("SYSTEM", `🚀 トレード実行完了！ (Tx: ${txHash.slice(0, 10)}...)`, "SYSTEM");
+                addMessage("SYSTEM", "トレード送信完了 (Tx: " + txHash.slice(0, 10) + "...)", "SYSTEM");
 
                 if (publicClient) {
-                    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash as `0x${string}` });
+                    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash as any });
                     if (receipt.status === 'success') {
-                        addMessage("manager", `✅ ParaSwapでの取引が成功しました！`, "EXECUTION");
+                        const chainName = effectiveChainId === 137 ? "Polygon" : "BNB Chain";
+                        const txPair = action === "BUY" ? `${tokenSymbol}/USDT` : `${tokenSymbol}/USDT`;
+                        const liveTx: Transaction = {
+                            id: Math.random().toString(36).substring(7),
+                            agentId: "manager",
+                            type: action,
+                            symbol: tokenSymbol,
+                            amount,
+                            price,
+                            timestamp: Date.now(),
+                            txHash,
+                            fee: estimatedFeeUsd,
+                            pnl: realizedPnl,
+                            pair: txPair,
+                            dex: "ParaSwap",
+                            chain: chainName,
+                            reason,
+                            entryPrice: livePosition?.entryPrice,
+                            plannedTakeProfit: action === "BUY" ? price * (1 + takeProfitThreshold / 100) : undefined,
+                            plannedStopLoss: action === "BUY" ? price * (1 + stopLossThreshold / 100) : undefined,
+                            decisionSummary: action === "BUY"
+                                ? "短期モメンタムと候補ランキングに基づいてエントリーしました。"
+                                : (reason || "利益確定またはリスク管理条件に基づいて決済しました。"),
+                            newsTitle: latestNews?.title,
+                        };
+
+                        setTransactions(prev => [liveTx, ...prev].slice(0, 200));
+                        addDisPoints(1);
+                        if (action === "SELL") {
+                            addDisPoints((realizedPnl || 0) > 0 ? 5 : -3);
+                        }
+                        addMessage("manager", "ParaSwap の取引が約定しました。", "EXECUTION");
                         if (isSoundEnabled) playTrade();
                         unlockAchievement("first-trade");
                     } else {
@@ -1014,7 +1062,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 lastTradeErrorTime.current = Date.now();
                 console.error("ParaSwap trade error:", error);
                 let errorMsg = error.message.substring(0, 150);
-                addMessage("SYSTEM", `❌ [取引失敗] ${errorMsg}`, "ALERT");
+                addMessage("SYSTEM", "取引失敗: " + errorMsg, "ALERT");
                 return false;
             }
         }
@@ -1032,10 +1080,10 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         // Gas Fee Calculation based on DEX (Chain approximation)
         let gasFee = 50; // Default Low
-        if (selectedDex.includes("Uniswap")) gasFee = 400 + Math.random() * 400; // Ethereum: ¥400-800
-        else if (selectedDex.includes("PancakeSwap")) gasFee = 10 + Math.random() * 20; // BSC: ¥10-30
-        else if (selectedDex.includes("QuickSwap")) gasFee = 1 + Math.random() * 5; // Polygon: ¥1-6
-        else if (selectedDex.includes("SushiSwap")) gasFee = 50 + Math.random() * 50; // Mixed: ¥50-100
+        if (selectedDex.includes("Uniswap")) gasFee = 400 + Math.random() * 400; // Ethereum: ﾂ･400-800
+        else if (selectedDex.includes("PancakeSwap")) gasFee = 10 + Math.random() * 20; // BSC: ﾂ･10-30
+        else if (selectedDex.includes("QuickSwap")) gasFee = 1 + Math.random() * 5; // Polygon: ﾂ･1-6
+        else if (selectedDex.includes("SushiSwap")) gasFee = 50 + Math.random() * 50; // Mixed: ﾂ･50-100
 
         const totalFee = swapFee + slippage + gasFee;
 
@@ -1044,14 +1092,14 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         if (action === "BUY") {
             if (portfolioRef.current.cashbalance < (totalValue + totalFee)) {
-                addMessage("SYSTEM", `⚠️ 残高不足: 必要 ¥${(totalValue + totalFee).toLocaleString()} / 保有 ¥${portfolioRef.current.cashbalance.toLocaleString()}`, "ALERT");
+                addMessage("SYSTEM", "残高不足: 必要 " + (totalValue + totalFee).toFixed(4) + " USD / 保有 " + portfolioRef.current.cashbalance.toFixed(4) + " USD", "ALERT");
                 setTradeInProgress(false);
                 return false;
             }
         } else {
             const pos = portfolioRef.current.positions.find(p => p.symbol === tokenSymbol);
             if (!pos || pos.amount < amount) {
-                addMessage("SYSTEM", `⚠️ 保有トークン不足: ${tokenSymbol}`, "ALERT");
+                addMessage("SYSTEM", "保有トークン不足: " + tokenSymbol, "ALERT");
                 setTradeInProgress(false);
                 return false;
             }
@@ -1104,7 +1152,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         // Ensure pair display format - use proper stablecoin pairs usually (Demo fallback)
         const stablePair = "USDT";
-        const pairDisplay = `${tokenSymbol}/${stablePair}`;
+        const pairDisplay = tokenSymbol + "/" + stablePair;
 
         const chain = tokenSymbol === "POL" || tokenSymbol === "MATIC" ? "Polygon" : "BNB Chain";
 
@@ -1131,35 +1179,38 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             id: Math.random().toString(36).substring(7),
             agentId: "manager",
             agentName: "AI Trading Manager",
-            title: action === "BUY" ? "購入注文実行" : "売却注文実行",
-            message: `${selectedDex} で ${amount.toFixed(4)} ${tokenSymbol} を ¥${(totalValue).toLocaleString()} で${action === "BUY" ? "購入" : "売却"}しました。 (手数料: ¥${totalFee.toFixed(0)})`,
+            title: action === "BUY" ? "購入注文を実行" : "売却注文を実行",
+            message: selectedDex + " で " + amount.toFixed(4) + " " + tokenSymbol + " を ¥" + convertJPY(totalValue).toLocaleString("ja-JP", { maximumFractionDigits: 0 }) + " で" + (action === "BUY" ? "購入" : "売却") + "しました。",
             type: action,
             symbol: tokenSymbol,
             timestamp: Date.now(),
         };
-        setTradeNotifications(prev => [notification, ...prev]);
+        setTradeNotifications(prev => [notification, ...prev].slice(0, 50));
 
+        addDisPoints(1);
         if (action === "SELL" && tradePnl > 0) {
-            const pointsToAdd = Math.floor(tradePnl / 100);
-            if (pointsToAdd > 0) {
-                addDisPoints(pointsToAdd);
-                addMessage("manager", `💰 利益確定ボーナス獲得: +${pointsToAdd} DISポイント`, "ALERT");
-            }
+            addDisPoints(5);
+            addMessage("manager", "利益決済ボーナス: +5 DIS POINTS", "ALERT");
             agents.forEach(a => awardExp(a.id, 50));
-            updateAchievementProgress("profit-100", tradePnl);
+            updateAchievementProgress("profit-100", convertJPY(tradePnl));
         } else if (action === "SELL") {
+            addDisPoints(-3);
             agents.forEach(a => awardExp(a.id, 10));
         } else {
             agents.forEach(a => awardExp(a.id, 5));
         }
 
-        addMessage("manager", `[実行完了] ${action === "BUY" ? "購 入" : "売 却"}完了: ${amount} ${tokenSymbol} @ ¥${price.toLocaleString()}${action === "SELL" ? ` (損益: ¥${tradePnl.toLocaleString()})` : ""}`, "EXECUTION");
+        addMessage(
+            "manager",
+            "[実行完了] " + (action === "BUY" ? "購入" : "売却") + ": " + amount.toFixed(6) + " " + tokenSymbol + " @ " + price.toFixed(6) + " USD" + (action === "SELL" ? " (実現損益: " + tradePnl.toFixed(4) + " USD)" : ""),
+            "EXECUTION"
+        );
         if (isSoundEnabled) playSuccess();
         unlockAchievement("first-trade");
 
         setTradeInProgress(false);
         return true;
-    }, [isConnected, isDemoMode, addMessage, isSoundEnabled, playTrade, playSuccess, takeProfitThreshold, agents, awardExp, updateAchievementProgress, addDisPoints, unlockAchievement]);
+    }, [isConnected, isDemoMode, addMessage, isSoundEnabled, playTrade, playSuccess, takeProfitThreshold, stopLossThreshold, agents, awardExp, updateAchievementProgress, addDisPoints, unlockAchievement, latestNews]);
 
     const updateProposalStatus = (id: string, status: "APPROVED" | "REJECTED" | "ACTIVE" | "PENDING") => {
         setStrategyProposals(prev => prev.map(p => {
@@ -1176,7 +1227,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         setTakeProfitThreshold(updated.proposedSettings.takeProfit);
                     }
 
-                    addMessage("SYSTEM", `戦略適応: ${updated.title} (ブロック: ${updated.durationBlock || "N/A"})`, "SYSTEM");
+                    addMessage("SYSTEM", "戦略を有効化: " + updated.title + " (ブロック: " + (updated.durationBlock || "N/A") + ")", "SYSTEM");
                 }
                 return updated;
             }
@@ -1208,7 +1259,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("jdex_favorites");
         localStorage.removeItem("jdex_risk_settings");
         localStorage.removeItem("jdex_last_active");
-        addMessage("manager", "【デモ口座リセット】すべての取引データが初期化されました。運用資産をリセットし、接続を再開します。", "SYSTEM");
+        addMessage("manager", "デモ口座をリセットしました。運用資産を初期化し、接続状態を再同期します。", "SYSTEM");
         window.location.reload();
     };
 
@@ -1221,6 +1272,10 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const storedSim = localStorage.getItem("jdex_simulating");
         if (storedSim !== null) setIsSimulatingState(storedSim === "true");
+        const storedInitialDone = localStorage.getItem("jdex_initial_trade_done");
+        if (storedInitialDone !== null) {
+            setHasInitialTradeExecutedState(storedInitialDone === "true");
+        }
 
         const storedPipelines = localStorage.getItem("jdex_pipelines");
         if (storedPipelines) {
@@ -1269,7 +1324,20 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 cashbalance: 0,
                 positions: []
             });
-            setTransactions([]);
+            if (liveTransactionsStorageKey) {
+                const storedLiveTx = localStorage.getItem(liveTransactionsStorageKey);
+                if (storedLiveTx) {
+                    try {
+                        setTransactions(JSON.parse(storedLiveTx));
+                    } catch (e) {
+                        setTransactions([]);
+                    }
+                } else {
+                    setTransactions([]);
+                }
+            } else {
+                setTransactions([]);
+            }
             setIsDemoModeState(false);
             localStorage.setItem("jdex_demo_mode", "false");
             localStorage.removeItem("jdex_portfolio"); // Ensure demo data is wiped on fresh load for live users
@@ -1300,7 +1368,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         if (storedStartTokens) {
             try { setAllowedStartTokensState(JSON.parse(storedStartTokens)); } catch (e) { }
         }
-    }, []);
+    }, [liveTransactionsStorageKey]);
 
     // Save state on changes (only if in demo mode to protect live state isolation)
     useEffect(() => {
@@ -1314,6 +1382,12 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             localStorage.setItem("jdex_transactions", JSON.stringify(transactions));
         }
     }, [transactions, isDemoMode]);
+
+    useEffect(() => {
+        if (!isDemoMode && liveTransactionsStorageKey) {
+            localStorage.setItem(liveTransactionsStorageKey, JSON.stringify(transactions));
+        }
+    }, [transactions, isDemoMode, liveTransactionsStorageKey]);
 
     useEffect(() => {
         localStorage.setItem("jdex_risk_settings", JSON.stringify({
@@ -1370,13 +1444,26 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem("jdex_live_initial_balance"); // Force clear on switch
 
 
-            // Wipe demo transaction history
-            setTransactions([]);
+            // Wipe demo transaction history and restore live history for this wallet
             localStorage.removeItem("jdex_transactions");
+            if (liveTransactionsStorageKey) {
+                const storedLiveTx = localStorage.getItem(liveTransactionsStorageKey);
+                if (storedLiveTx) {
+                    try {
+                        setTransactions(JSON.parse(storedLiveTx));
+                    } catch (e) {
+                        setTransactions([]);
+                    }
+                } else {
+                    setTransactions([]);
+                }
+            } else {
+                setTransactions([]);
+            }
 
-            addMessage("manager", "✅ ウォレット接続を検知しました。デモモードを解除し、残高を同期します。", "SYSTEM");
+            addMessage("manager", "ウォレット接続を検知しました。デモモードを解除し、残高を同期します。", "SYSTEM");
         }
-    }, [isConnected, isDemoMode, addMessage]);
+    }, [isConnected, isDemoMode, addMessage, liveTransactionsStorageKey]);
 
     // Sync Wallet Balance to Portfolio Cash when Connected
     useEffect(() => {
@@ -1391,7 +1478,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             const usdPriceTotal = usdPrice * Number(balanceData.formatted);
 
             // TELEMETRY: Help debug why the user sees 340k
-            console.log(`[J-DEX SYNC] Symbol: ${nativeSymbol}, USD Price: ${usdPrice}, Formatted: ${balanceData.formatted}, USD Result: ${usdPriceTotal}`);
+            console.log("[J-DEX SYNC] Symbol: " + nativeSymbol + ", USD Price: " + usdPrice + ", Formatted: " + balanceData.formatted + ", USD Result: " + usdPriceTotal);
 
             setPortfolio((prev) => {
                 // Prevent ghost calculations by enforcing 0 positions on live initial load hook
@@ -1406,7 +1493,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     // If it's a major asset and we aren't explicitly tracking a LIVE trade for it, skip.
                     if (["BNB", "BTC", "ETH", "SOL", "MATIC"].includes(symbol)) {
                         if (!localStorage.getItem("jdex_live_active_trade_" + symbol)) {
-                            console.log(`[J-DEX] Filtering ghost position: ${symbol} (${pos.amount})`);
+                            console.log("[J-DEX] Filtering ghost position: " + symbol + " (" + pos.amount + ")");
                             return acc;
                         }
                     }
@@ -1418,7 +1505,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 const newTotalValue = usdPriceTotal + trackedPositionsValue;
 
                 if (Math.abs(newTotalValue - prev.totalValue) > 1) {
-                    console.log(`[J-DEX] Portfolio Updated: USD ${newTotalValue.toLocaleString()}`);
+                    console.log("[J-DEX] Portfolio Updated: USD " + newTotalValue.toLocaleString());
                 }
 
                 // Strictly sync the initial balance if it deviates significantly from the newly established true balance
@@ -1432,7 +1519,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     // Only set warning if no realistic live balance was previously tracked
                     if (usdPrice > 0 && Number(balanceData.formatted) * usdPrice < 1.0) {
                         setTimeout(() => {
-                            addMessage("manager", `⚠️ [残高警告] 口座残高が極めて少額です（${balanceData.formatted} ${nativeSymbol}）。DEXの最低注文ルールやガス代不足により、リアルトレードがエラーになる可能性が高いです。最低 1 USD相当（約150円）以上の入金を推奨します。`, "ALERT");
+                            addMessage("manager", "残高警告: ネイティブ残高 " + balanceData.formatted + " " + nativeSymbol + " は小さすぎます。DEX の最低注文やガス代不足で失敗しやすい状態です。", "ALERT");
                         }, 3000);
                     }
 
@@ -1464,7 +1551,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
             if (elapsedMinutes < 5) return; // Only catch up if away for > 5 mins
 
-            addMessage("manager", `【システム復帰】おかえりなさい！不在の${elapsedMinutes}分間の市場動向を分析し、自動トレードを同期しています...`, "SYSTEM");
+            addMessage("manager", "システム復帰: 不在の " + elapsedMinutes + " 分間の市場動向を分析し、取引状態を同期しています。", "SYSTEM");
 
             // Simplified Catch-up: Simulate a few potential trades
             const numPotentialTrades = Math.min(5, Math.floor(elapsedMinutes / 60));
@@ -1478,7 +1565,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         pnlGained += pnl;
 
                         const mockTx: Transaction = {
-                            id: `offline-${Date.now()}-${i}`,
+                            id: "offline-" + Date.now() + "-" + i,
                             agentId: "technical",
                             type: isWin ? "SELL" : "SELL",
                             symbol: selectedCurrency,
@@ -1488,7 +1575,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                             txHash: "0x_offline_processed_" + i,
                             fee: 50,
                             pnl: pnl,
-                            pair: `USDT-${selectedCurrency}`
+                            pair: "USDT-" + selectedCurrency
                         };
                         setTransactions(prev => [mockTx, ...prev].slice(0, 50));
                     }
@@ -1499,7 +1586,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         totalValue: prev.totalValue + pnlGained
                     }));
 
-                    addMessage("manager", `不在期間の同期完了：AIが${numPotentialTrades}件の取引を処理しました。損益合計: ¥${pnlGained.toLocaleString()}`, "EXECUTION");
+                    addMessage("manager", "不在期間の同期完了: " + numPotentialTrades + " 件の取引を処理しました。損益合計: ¥" + pnlGained.toLocaleString(), "EXECUTION");
                 }, 3000);
             }
 
@@ -1545,7 +1632,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             const currentMarketData = marketDataRef.current;
             const currentPortfolio = portfolioRef.current;
             const currentAgents = agentsRef.current;
-            const isBuyActuallyAllowed = isDemoMode; // Strictly disable BUY in Real Mode test phase
+            const isBuyActuallyAllowed = isDemoMode || (!!effectiveIsConnected && !tradeInProgress);
 
 
             let newPrice = currentMarketData.price;
@@ -1641,35 +1728,30 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 const priceChangePct = (newPrice - currentMarketData.price) / currentMarketData.price * 100;
 
                 if (Math.abs(priceChangePct) > 0.2) {
-                    // Reactions to price moves
                     if (agent.id === "technical") {
-                        content = `${selectedCurrency} が動きましたね。短期的には ${priceChangePct > 0 ? "上昇ウェッジ" : "サポートライン"} の攻防になりそうです。`;
+                        content = selectedCurrency + " は短期で " + (priceChangePct > 0 ? "上昇" : "下落") + " に傾いています。1分足と5分足の勢いを確認します。";
                     } else if (agent.id === "sentiment") {
-                        content = `${selectedCurrency} のボラティリティに反応してSNSも盛り上がってきました。ポジティブなナラティブが形成されています。`;
+                        content = selectedCurrency + " に対する市場反応を監視中です。短期資金の流入変化を確認します。";
                     } else if (agent.id === "security") {
-                        content = `急激な動きはフラッシュローン攻撃の予兆である場合もあります。コントラクトの状態に異常はありませんが、警戒が必要です。`;
+                        content = "急変時は逆行リスクが高まります。" + selectedCurrency + " の出来高と値動きの歪みを確認します。";
                     } else if (agent.id === "fundamental") {
-                        content = `価格の変動はありますが、${selectedCurrency} の本質的な価値（ユースケース）に揺るぎはありません。ホールドが賢明でしょう。`;
+                        content = selectedCurrency + " の短期変動はありますが、ニュースと市場構造をあわせて評価します。";
                     }
                 } else if (Math.random() > 0.7) {
-                    // "Interesting coins to trade" - Pick a random coin from allMarketPrices (Filter out stables)
-                    const allSymbols = Object.keys(allMarketPrices).filter(s => isInterestingToken(s));
+                    const allSymbols = Object.keys(allMarketPrices).filter((s) => isInterestingToken(s) && s !== selectedCurrency);
                     const randomCoin = allSymbols[Math.floor(Math.random() * allSymbols.length)];
                     const coinData = allMarketPrices[randomCoin] as any;
-
-                    // Note: allMarketPrices items might be CoinDetails or simple {price, volume}
-                    // Let's use current_price and price_change_percentage_24h if they exist.
                     const timeframe = ["15m", "1h", "4h"][Math.floor(Math.random() * 3)];
                     const change = coinData.price_change_percentage_24h || coinData.change24h || 0;
 
                     if (agent.id === "technical" && change > 5) {
-                        content = `【テクニカル分析/ ${randomCoin}-JPY (${timeframe})】MACDがゴールデンクロスへ向かっています。24hで +${change.toFixed(1)}% です。押し目買いの好機。`;
+                        content = "【テクニカル分析/" + randomCoin + "-JPY (" + timeframe + ")】短期モメンタムが強く、順張り候補として監視します。24h変動率は +" + change.toFixed(1) + "% です。";
                     } else if (agent.id === "sentiment" && Math.random() > 0.5) {
-                        content = `【センチメント/ ${randomCoin}-JPY (${timeframe})】著名アカウントがこのペアについてポジティブな言及をしています。コミュニティの勢いが加速中。`;
+                        content = "【センチメント/" + randomCoin + "-JPY (" + timeframe + ")】コミュニティの関心が高まっています。短期の資金流入に注意します。";
                     } else if (agent.id === "fundamental" && change < -10) {
-                        content = `【ファンダメンタル/ ${randomCoin}-JPY (${timeframe})】現在の急落は開発進捗に影響しません。長期的なファンダメンタルは健全、買い場と判断。`;
-                    } else if (agent.id === "coordinator") {
-                        content = `【戦略提案/ ${selectedCurrency}/${randomCoin}】現在の市場環境では ${selectedCurrency} 以外の ${randomCoin} ペアもチャンスがあります。分散投資を推奨。`;
+                        content = "【ファンダメンタル/" + randomCoin + "-JPY (" + timeframe + ")】急落していますが、ニュース次第では逆張り候補として再評価します。";
+                    } else if (agent.id === "coordinator" && randomCoin && randomCoin !== selectedCurrency) {
+                        content = "【ローテーション監視】" + selectedCurrency + " と " + randomCoin + " の候補を比較し、材料と値動きが揃った通貨だけ執行します。";
                     }
                 }
 
@@ -1696,13 +1778,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         if (action === "BUY" && currentPositions < 3 && isBuyActuallyAllowed) {
                             type = "EXECUTION";
                             const jpyPrice = convertJPY(newPrice);
-                            content = `${action === "BUY" ? "購入実行" : "売却実行"}: ${amount} ${selectedCurrency} @ ¥${jpyPrice.toLocaleString()}`;
+                            content = (action === "BUY" ? "購入" : "売却") + "シグナル: " + amount + " " + selectedCurrency + " @ ¥" + jpyPrice.toLocaleString();
                             executeTrade(selectedCurrency, action, amount, newPrice, "AI technical signal"); // Use USD price for logic
                             addMessage(agent.id, content, type);
                         } else if (action === "SELL" && hasInventory) {
                             type = "EXECUTION";
                             const jpyPrice = convertJPY(newPrice);
-                            content = `${action === "SELL" ? "売却実行" : "購入実行"}: ${amount} ${selectedCurrency} @ ¥${jpyPrice.toLocaleString()}`;
+                            content = (action === "SELL" ? "売却" : "購入") + "シグナル: " + amount + " " + selectedCurrency + " @ ¥" + jpyPrice.toLocaleString();
                             executeTrade(selectedCurrency, action, amount, newPrice, "AI technical signal"); // Use USD price for logic
                             addMessage(agent.id, content, type);
                         }
@@ -1728,11 +1810,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 triggerLearningPulse(news);
 
                 const reactingAgent = currentAgents[Math.floor(Math.random() * currentAgents.length)];
-                let reactionPrefix = news.category === "REAL" ? `【⚠️ REAL-TIME NEWS from ${news.source}】` : `【Market Intelligence】`;
+                const reactionPrefix = news.category === "REAL"
+                    ? ("【REAL-TIME NEWS from " + news.source + "】")
+                    : "【Market Intelligence】";
                 if (news.impact === "BULLISH") {
-                    addMessage(reactingAgent.id, `${reactionPrefix} ${news.title} - ポジティブなニュースを検知。${selectedCurrency}は上昇傾向と予測。`, "OPINION");
+                    addMessage(reactingAgent.id, reactionPrefix + " " + news.title + " - ポジティブ材料です。" + selectedCurrency + " は上昇継続に注意します。", "OPINION");
                 } else if (news.impact === "BEARISH") {
-                    addMessage(reactingAgent.id, `${reactionPrefix} ${news.title} - ネガティブなニュースを検知。警戒が必要です。`, "ALERT");
+                    addMessage(reactingAgent.id, reactionPrefix + " " + news.title + " - ネガティブ材料です。慎重な執行が必要です。", "ALERT");
                 }
             }
 
@@ -1749,13 +1833,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
                     // Stop Loss Check
                     if (pnlPct <= stopLossThreshold) {
-                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `⚠️ ストップロス発動 (${stopLossThreshold}%)`);
-                        addMessage("security", `⚠️ [緊急決済] ${pos.symbol} がストップロス（${stopLossThreshold}%）に達したため売却しました。`, "ALERT");
+                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, "ストップロス発動 (" + stopLossThreshold + "%)");
+                        addMessage("security", "[緊急決済] " + pos.symbol + " がストップロス (" + stopLossThreshold + "%) に達したため売却しました。", "ALERT");
                     }
                     // Take Profit Check
                     else if (pnlPct >= takeProfitThreshold) {
-                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `💰 利益確定注文実行 (+${takeProfitThreshold}%)`);
-                        addMessage("manager", `💰 [利確完了] ${pos.symbol} が目標利益（${takeProfitThreshold}%）に到達しました。`, "EXECUTION");
+                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, "利益確定注文実行 (+" + takeProfitThreshold + "%)");
+                        addMessage("manager", "[利確完了] " + pos.symbol + " が目標利益 (" + takeProfitThreshold + "%) に到達しました。", "EXECUTION");
                     }
 
                     // --- NEW RISK MANAGEMENT ---
@@ -1769,15 +1853,15 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     const highest = pos.highestPrice || posPrice;
                     if (highest > 0 && posPrice < highest * (1 - trailingThreshold / 100)) {
                         if (posPrice > pos.entryPrice * 1.02) { // Secure at least 2% profit
-                            executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `📉 トレーリングストップ決済 (最高値 $${highest.toLocaleString()} から -${trailingThreshold}%)`);
-                            addMessage("manager", `📉 [利益確保] ${pos.symbol} が最高値から反落したため、利益確定しました。`, "EXECUTION");
+                            executeTrade(pos.symbol, "SELL", pos.amount, posPrice, "トレーリングストップ決済 (最高値 $" + highest.toLocaleString() + " から -" + trailingThreshold + "%)");
+                            addMessage("manager", "[利益確保] " + pos.symbol + " が最高値から反落したため決済しました。", "EXECUTION");
                         }
                     }
 
                     // 3. Smart Stop-Loss (Emergency)
                     if (riskStatus === "CRITICAL" && pnlPct < -2) {
-                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, `🛡️ 緊急回避: 市場リスク高騰に伴う早期損切り`);
-                        addMessage("security", `🛡️ [緊急回避] 市場リスクレベル「CRITICAL」検知。${pos.symbol} を早期損切りしました。`, "ALERT");
+                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, "緊急回避: 市場リスク高騰に伴う早期損切り");
+                        addMessage("security", "[緊急回避] 市場リスクが高騰したため " + pos.symbol + " を早期損切りしました。", "ALERT");
                     }
                     // ---------------------------
                 }
@@ -1790,56 +1874,54 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                             const priceData = allMarketPrices[topPos.symbol] || initialData[topPos.symbol];
                             if (priceData) {
                                 const hedgeAmount = topPos.amount * 0.3; // Move 30% to cash
-                                executeTrade(topPos.symbol, "SELL", hedgeAmount, priceData.price, `🛡️ リスクヘッジ: 市場センチメント悪化に伴う資金待避`);
+                                executeTrade(topPos.symbol, "SELL", hedgeAmount, priceData.price, "リスクヘッジ: 市場センチメント悪化に伴う資金待避");
                             }
                         }
                     }
                 }
 
-                // 2. Fund Validation Logic (Real Wallet only)
-                if (!isDemoMode && isConnected) {
-                    const availableFundSymbols = currentPortfolio.positions
-                        .filter(p => p.amount > 0)
-                        .map(p => p.symbol);
-
-                    const hasRequiredFunds = allowedStartTokens.some(token => availableFundSymbols.includes(token));
-
-                    if (!hasRequiredFunds && allowedStartTokens.length > 0) {
-                        // Trigger AI Warning every 30 seconds or so to not spam
-                        if (Math.random() > 0.95) {
-                            const warningTokenStr = allowedStartTokens.join(", ");
-                            addMessage("manager", `⚠️ [Warning] ウォレット内に指定された開始資金（${warningTokenStr}）が見つかりません。自動トレードを開始するには、これらのいずれかを準備してください。`, "ALERT");
-                        }
-                    }
-                }
-
-                // 3. Demo/Auto Automation Logic
                 if (isDemoMode || isAutoPilotEnabled) {
-                    const baseBalance = isDemoMode ? demoBalance : (portfolioRef.current.cashbalance);
+                    if (!isDemoMode && (!effectiveIsConnected || !effectiveAddress || !effectiveChainId)) {
+                        if (isActiveRef.current) {
+                            timeoutId = setTimeout(loop, Math.random() * 3000 + 1000);
+                        }
+                        return;
+                    }
+
+                    const baseBalance = isDemoMode ? demoBalance : portfolioRef.current.cashbalance;
                     let targetSymbol = selectedCurrency;
 
-                    // MARKET SCANNING (Multi-currency)
-                    if (hasInitialTradeExecuted && Math.random() > 0.6) {
-                        const otherSymbols = Object.keys(allMarketPrices).filter(s => s !== selectedCurrency && isInterestingToken(s));
-                        const opportunity = otherSymbols.find(s => {
-                            const p = allMarketPrices[s] as any;
-                            return p && Math.abs(p.change24h || p.price_change_percentage_24h || 0) > 3;
-                        });
+                    const rankedCandidates = Object.keys(allMarketPrices)
+                        .filter((symbol) => isInterestingToken(symbol) && !TRADE_CONFIG.STABLECOINS.includes(symbol.toUpperCase()))
+                        .map((symbol) => {
+                            const data = allMarketPrices[symbol] as any;
+                            const change24h = Math.abs(data?.change24h || data?.price_change_percentage_24h || 0);
+                            const alreadyHeld = currentPortfolio.positions.some((position) => position.symbol === symbol);
+                            const selectedPenalty = symbol === selectedCurrency ? 5 : 0;
+                            const heldPenalty = alreadyHeld ? 20 : 0;
+                            return {
+                                symbol,
+                                score: change24h - heldPenalty - selectedPenalty,
+                            };
+                        })
+                        .sort((left, right) => right.score - left.score);
 
-                        if (opportunity) {
-                            targetSymbol = opportunity as Currency;
-                        } else {
-                            if (otherSymbols.length > 0) {
-                                targetSymbol = otherSymbols[Math.floor(Math.random() * otherSymbols.length)] as Currency;
-                            }
+                    if (!hasInitialTradeExecuted) {
+                        const preferredInitialCandidate =
+                            rankedCandidates.find((candidate) =>
+                                candidate.symbol !== selectedCurrency &&
+                                candidate.symbol !== initialTradeSymbol &&
+                                !currentPortfolio.positions.some((position) => position.symbol === candidate.symbol)
+                            ) ||
+                            rankedCandidates.find((candidate) => candidate.symbol !== selectedCurrency) ||
+                            rankedCandidates[0];
+
+                        targetSymbol = (preferredInitialCandidate?.symbol || initialTradeSymbol || selectedCurrency) as Currency;
+                        if (initialTradeSymbol !== targetSymbol) {
+                            setInitialTradeSymbol(targetSymbol);
                         }
-                    }
-
-                    // Strict Stablecoin Prevention during Automated Trading
-                    const isTargetStable = TRADE_CONFIG.STABLECOINS.includes(targetSymbol.toUpperCase());
-                    if (isTargetStable && hasInitialTradeExecuted) {
-                        targetSymbol = "BNB" as Currency;
-                        addMessage("manager", `🔄 ステーブルコインが選択されたため、対取引通貨を強制的に BNB に変更して取引機会を確保します。`, "SYSTEM");
+                    } else if (rankedCandidates.length > 0) {
+                        targetSymbol = rankedCandidates[0].symbol as Currency;
                     }
 
                     const currentTokenPrice = allMarketPrices[targetSymbol]?.price || initialData[targetSymbol]?.price || 0;
@@ -1848,9 +1930,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         return;
                     }
 
-                    const volatility = Math.abs(currentTokenPrice - (priceHistory[priceHistory.length - 2]?.price || currentTokenPrice)) / currentTokenPrice;
+                    const previousPrice = priceHistory[priceHistory.length - 2]?.price || currentTokenPrice;
+                    const volatility = Math.abs(currentTokenPrice - previousPrice) / currentTokenPrice;
 
-                    // --- NEW: Regime Detection ---
                     if (priceHistory.length > 5 && targetSymbol === selectedCurrency) {
                         const startP = priceHistory[0].price;
                         const endP = priceHistory[priceHistory.length - 1].price;
@@ -1865,119 +1947,95 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                             setMarketRegime(prev => (prev !== "RANGE" ? "RANGE" : prev));
                         }
                     }
-                    // -----------------------------
 
                     let shouldBuy = false;
                     let shouldSell = false;
-
-                    // Ensure we trade within our cash limits. 
-                    // To prevent exceeding the 100 USDT (or whatever) starting balance, we cap amountInJPY.
                     let amountInJPY = baseBalance * (TRADE_CONFIG.MAX_TRADE_SIZE_PERCENT / 100);
-
-
-                    // RISK HEDGING: Volatility scaling
                     if (volatility > 0.03) {
-                        amountInJPY *= 0.5; // Reduce size by 50% in high volatility
+                        amountInJPY *= 0.5;
                     }
-
                     let amountToTrade = amountInJPY / currentTokenPrice;
 
-                    // STRICT INITIAL ENFORCEMENT: 
-                    // If no trade has happened yet, we MUST use one of the allowed start tokens.
                     if (!hasInitialTradeExecuted) {
-                        if (!allowedStartTokens.includes(targetSymbol)) {
-                            // If user selected a coin not in start funds, pick one from allowed list
-                            if (allowedStartTokens.length > 0) {
-                                targetSymbol = allowedStartTokens[0] as Currency;
-                            } else {
-                                targetSymbol = "BNB" as Currency; // Default fallback
-                            }
-                        }
-                    }
-
-                    // Initial Trade Logic (Story-telling)
-                    if (!hasInitialTradeExecuted) {
-                        const isInitialSymbolStable = TRADE_CONFIG.STABLECOINS.includes(initialTradeSymbol.toUpperCase());
-
-                        // If user chose a non-stablecoin as initial (like ETH), we buy it.
-                        // If user chose a stablecoin (like USDT), we SHOULD NOT buy it because it does nothing.
-                        // Instead, we just mark the trade as executed and pick a random highly volatile coin to start the story.
-
-                        if (isInitialSymbolStable) {
-                            // Skip the initial buy trade of stablecoins
-                            setHasInitialTradeExecuted(true);
-                            addMessage("coordinator", `🚀 シミュレーション開始: 初期資金 ${initialTradeSymbol} の運用をスタートします。`, "SYSTEM");
-                        } else {
-                            targetSymbol = initialTradeSymbol as Currency;
-                            shouldBuy = true;
-                            setHasInitialTradeExecuted(true);
-                            addMessage("coordinator", `🚀 トレードを開始します。設定通貨 ${targetSymbol} のポジションを構築します。`, "SYSTEM");
-
-                            // Multi-chain bridging simulation after 5 seconds for visual flavor
-                            setTimeout(() => {
-                                addMessage("security", `🌐 [Bridge] ${targetSymbol} から レイヤー2ネットワークへの資産ブリッジを検知。運用効率を最大化します。`, "OPINION");
-                            }, 5000);
+                        shouldBuy = true;
+                        if (lastInitialCandidateRef.current !== targetSymbol) {
+                            lastInitialCandidateRef.current = targetSymbol;
+                            addMessage(
+                                "coordinator",
+                                "初回候補 " + targetSymbol + ": 1分 / 3分 / 5分の短期モメンタムと 24h 変動率を確認し、買い目安 " + currentTokenPrice.toFixed(4) + " USD を基準に監視します。",
+                                "SYSTEM"
+                            );
                         }
                     } else {
-                        // --- REALISTIC FREQUENCY CHECK (Cooldown) ---
-                        // Aggressive: 5 mins, Moderate: 15 mins, Conservative: 30 mins
                         const aggressiveCooldown = 5 * 60 * 1000;
                         const moderateCooldown = 15 * 60 * 1000;
                         const conservativeCooldown = 30 * 60 * 1000;
-
                         const now = Date.now();
 
-                        // Standard Strategy Logic
-                        if (demoStrategy === "AGGRESSIVE" && (now - lastTradeRef.current) > aggressiveCooldown) {
+                        if (demoStrategy === "AGGRESSIVE" && now - lastTradeRef.current > aggressiveCooldown) {
                             if (volatility > 0.005) {
-                                if (newPrice < (priceHistory[priceHistory.length - 2]?.price || newPrice)) shouldBuy = true;
-                                else shouldSell = true;
+                                shouldBuy = currentTokenPrice < previousPrice;
+                                shouldSell = !shouldBuy;
                                 amountInJPY = baseBalance * 0.2;
-                                amountToTrade = amountInJPY / newPrice;
+                                amountToTrade = amountInJPY / currentTokenPrice;
                             }
-                        } else if (demoStrategy === "MODERATE" && (now - lastTradeRef.current) > moderateCooldown) {
+                        } else if (demoStrategy === "MODERATE" && now - lastTradeRef.current > moderateCooldown) {
                             if (volatility > 0.01) {
-                                if (newPrice < (priceHistory[priceHistory.length - 2]?.price || newPrice)) shouldBuy = true;
-                                else shouldSell = true;
+                                shouldBuy = currentTokenPrice < previousPrice;
+                                shouldSell = !shouldBuy;
                             }
-                        } else if (demoStrategy === "CONSERVATIVE" && (now - lastTradeRef.current) > conservativeCooldown) { // CONSERVATIVE
+                        } else if (demoStrategy === "CONSERVATIVE" && now - lastTradeRef.current > conservativeCooldown) {
                             if (volatility > 0.02) {
-                                if (newPrice < (priceHistory[priceHistory.length - 2]?.price || newPrice)) shouldBuy = true;
-                                else shouldSell = true;
+                                shouldBuy = currentTokenPrice < previousPrice;
+                                shouldSell = !shouldBuy;
                                 amountInJPY = Math.min(baseBalance * 0.05, baseBalance);
-                                amountToTrade = amountInJPY / newPrice;
+                                amountToTrade = amountInJPY / currentTokenPrice;
                             }
                         }
                     }
 
-
-                    if (shouldBuy && currentPortfolio.cashbalance >= (amountInJPY + (amountInJPY * 0.003)) && isBuyActuallyAllowed) {
-                        // CONCENTRATION LIMIT & POSITION COUNT CHECK
+                    if (shouldBuy && currentPortfolio.cashbalance >= amountInJPY * 1.003 && isBuyActuallyAllowed) {
                         const existingPosCount = currentPortfolio.positions.length;
                         const existingPos = currentPortfolio.positions.find(p => p.symbol === targetSymbol);
                         const totalPortfolioValue = currentPortfolio.totalValue || baseBalance;
                         const hypotheticalNewValue = (existingPos ? existingPos.amount * currentTokenPrice : 0) + amountInJPY;
+                        const concentrationLimit = hasInitialTradeExecuted ? 0.4 : 0.85;
 
                         if (existingPosCount < 5 || existingPos) {
-                            if (hypotheticalNewValue <= totalPortfolioValue * 0.4) {
-                                executeTrade(targetSymbol as Currency, "BUY", amountToTrade, currentTokenPrice, `${demoStrategy}戦略: 分散投資実行`);
-                                lastTradeRef.current = Date.now();
-                            } else {
-                                if (Math.random() > 0.95) {
-                                    addMessage("manager", `⚠️ [資金集中警告] ${targetSymbol} の保有比率が 40% を超えるため、購入を制限しました。`, "ALERT");
+                            if (hypotheticalNewValue <= totalPortfolioValue * concentrationLimit) {
+                                const executed = await executeTrade(
+                                    targetSymbol as Currency,
+                                    "BUY",
+                                    amountToTrade,
+                                    currentTokenPrice,
+                                    demoStrategy + "戦略: 短期モメンタム買い"
+                                );
+                                if (executed) {
+                                    lastTradeRef.current = Date.now();
+                                    if (!hasInitialTradeExecuted) {
+                                        setHasInitialTradeExecuted(true);
+                                        addMessage("coordinator", "初回トレード完了: " + targetSymbol + " を自動売買対象として監視に移行します。", "SYSTEM");
+                                    }
                                 }
+                            } else if (Math.random() > 0.95) {
+                                addMessage("manager", "保有比率上限により " + targetSymbol + " の追加購入を見送りました。", "ALERT");
                             }
-                        } else {
-                            if (Math.random() > 0.95) {
-                                addMessage("manager", `⚠️ [分散制限] 最大保有銘柄数（5）に達しています。新規銘柄の追加を控えます。`, "ALERT");
-                            }
+                        } else if (Math.random() > 0.95) {
+                            addMessage("manager", "保有銘柄数の上限に達しているため、新規買いを見送りました。", "ALERT");
                         }
-
                     } else if (shouldSell) {
                         const pos = currentPortfolio.positions.find(p => p.symbol === targetSymbol);
-                        if (pos && pos.amount >= (amountToTrade)) {
-                            executeTrade(targetSymbol as Currency, "SELL", amountToTrade, currentTokenPrice, `${demoStrategy}戦略: リバランス売却`);
-                            lastTradeRef.current = Date.now();
+                        if (pos && pos.amount >= amountToTrade) {
+                            const executed = await executeTrade(
+                                targetSymbol as Currency,
+                                "SELL",
+                                amountToTrade,
+                                currentTokenPrice,
+                                demoStrategy + "戦略: リバランス売り"
+                            );
+                            if (executed) {
+                                lastTradeRef.current = Date.now();
+                            }
                         }
                     }
                 }
@@ -2009,9 +2067,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     // [VERIFICATION ONLY] One-time Manual SELL test to trigger Signature UI
     useEffect(() => {
         const IS_PROD = process.env.NODE_ENV === "production";
-        if (IS_PROD) return; // Productionでは完全停止
+        if (IS_PROD) return; // Production縺ｧ縺ｯ螳悟・蛛懈ｭ｢
 
-        // shouldFireOnceRef が true の場合のみ、接続直後に SELL をトリガーする
+        // shouldFireOnceRef 縺・true 縺ｮ蝣ｴ蜷医・縺ｿ縲∵磁邯夂峩蠕後↓ SELL 繧偵ヨ繝ｪ繧ｬ繝ｼ縺吶ｋ
         if (effectiveIsConnected && !isDemoMode && effectiveAddress && effectiveChainId && shouldFireOnceRef.current && executeTrade) {
             console.log('[DEBUG] Immediate one-time SELL test triggered on connection');
             const bnbPrice = allMarketPrices["BNB"]?.price || 600;
@@ -2069,3 +2127,6 @@ export function useSimulation() {
     }
     return context;
 }
+
+
+
