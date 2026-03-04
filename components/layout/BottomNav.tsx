@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, BrainCircuit, Crosshair, Settings, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
 
 const NAV_ITEMS = [
     { icon: LayoutDashboard, label: "ホーム", href: "/" },
