@@ -22,6 +22,7 @@ import LearningIndicator from '@/components/features/LearningIndicator';
 import { usePathname } from 'next/navigation';
 import { UserLearningProvider } from '@/context/UserLearningContext';
 import { CurrencyProvider } from '@/context/CurrencyContext';
+import { ClientErrorBoundary } from '@/components/ui/ClientErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const robotoMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-roboto-mono' });
@@ -87,18 +88,31 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     return (
         <AuthGuard>
             <div className="flex h-screen bg-cyber-black text-white overflow-hidden">
-                <Sidebar />
+                <ClientErrorBoundary label="Sidebar">
+                    <Sidebar />
+                </ClientErrorBoundary>
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <TopBar />
-                    <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar pb-16 md:pb-4">
-                        {children}
-                    </main>
+                    <ClientErrorBoundary label="TopBar">
+                        <TopBar />
+                    </ClientErrorBoundary>
+                    <ClientErrorBoundary label="MainContent">
+                        <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar pb-16 md:pb-4">
+                            {children}
+                        </main>
+                    </ClientErrorBoundary>
                 </div>
-                <FlashEffect />
-                <TradeNotificationToast />
-                <LearningIndicator />
-                {/* Phase 7: Mobile bottom navigation */}
-                <BottomNav />
+                <ClientErrorBoundary label="FlashEffect">
+                    <FlashEffect />
+                </ClientErrorBoundary>
+                <ClientErrorBoundary label="TradeNotificationToast">
+                    <TradeNotificationToast />
+                </ClientErrorBoundary>
+                <ClientErrorBoundary label="LearningIndicator">
+                    <LearningIndicator />
+                </ClientErrorBoundary>
+                <ClientErrorBoundary label="BottomNav">
+                    <BottomNav />
+                </ClientErrorBoundary>
             </div>
         </AuthGuard>
     );
@@ -151,22 +165,28 @@ export default function RootLayout({
                 ` }} />
             </head>
             <body className={`${inter.className} antialiased bg-cyber-black`}>
-                <AuthProvider>
-                    <Web3Provider>
-                        <AgentProvider>
-                            <CurrencyProvider>
-                                <SimulationProvider>
-                                    <UserLearningProvider>
-                                        <ParticleBackground />
-                                        <AppLayout>
-                                            {children}
-                                        </AppLayout>
-                                    </UserLearningProvider>
-                                </SimulationProvider>
-                            </CurrencyProvider>
-                        </AgentProvider>
-                    </Web3Provider>
-                </AuthProvider>
+                <ClientErrorBoundary label="ProviderTree">
+                    <AuthProvider>
+                        <Web3Provider>
+                            <AgentProvider>
+                                <CurrencyProvider>
+                                    <SimulationProvider>
+                                        <UserLearningProvider>
+                                            <ClientErrorBoundary label="ParticleBackground">
+                                                <ParticleBackground />
+                                            </ClientErrorBoundary>
+                                            <ClientErrorBoundary label="AppShell">
+                                                <AppLayout>
+                                                    {children}
+                                                </AppLayout>
+                                            </ClientErrorBoundary>
+                                        </UserLearningProvider>
+                                    </SimulationProvider>
+                                </CurrencyProvider>
+                            </AgentProvider>
+                        </Web3Provider>
+                    </AuthProvider>
+                </ClientErrorBoundary>
                 <div className="cyber-overlay" />
             </body>
         </html>
