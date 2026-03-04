@@ -558,7 +558,19 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                 </td>
                             </tr>
                         ) : paginatedTokens.length > 0 ? (
-                            paginatedTokens.map((token, idx) => (
+                            paginatedTokens.map((token, idx) => {
+                                const safePriceChange24h =
+                                    typeof token.priceChange24h === "number" && Number.isFinite(token.priceChange24h)
+                                        ? token.priceChange24h
+                                        : 0;
+                                const safeRank =
+                                    typeof token.marketCapRank === "number" && Number.isFinite(token.marketCapRank) && token.marketCapRank > 0
+                                        ? token.marketCapRank
+                                        : (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
+                                const safeAvailableDexs = Array.isArray(token.availableDEXs) ? token.availableDEXs : [];
+                                const safeSymbol = typeof token.symbol === "string" && token.symbol.length > 0 ? token.symbol : "??";
+
+                                return (
                                 <tr
                                     key={token.id}
                                     className={cn(
@@ -576,7 +588,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                         </button>
                                     </td>
                                     <td className="px-3 py-3 text-gray-500 font-mono text-xs">
-                                        {token.marketCapRank || (currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                                        {safeRank}
                                     </td>
                                     <td className="px-3 py-3">
                                         <div className="flex items-center gap-2.5">
@@ -584,7 +596,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                                 <img src={token.image} alt={token.symbol} className="w-7 h-7 rounded-full" />
                                             ) : (
                                                 <div className="w-7 h-7 rounded-full bg-gold-500/20 flex items-center justify-center text-xs font-bold text-gold-400">
-                                                    {token.symbol.slice(0, 2)}
+                                                    {safeSymbol.slice(0, 2)}
                                                 </div>
                                             )}
                                             <div>
@@ -601,14 +613,14 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                     <td className="px-3 py-3 text-right">
                                         <span className={cn(
                                             "text-sm font-mono flex items-center gap-0.5 justify-end",
-                                            token.priceChange24h >= 0 ? "text-emerald-400" : "text-red-400"
+                                            safePriceChange24h >= 0 ? "text-emerald-400" : "text-red-400"
                                         )}>
-                                            {token.priceChange24h >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                            {token.priceChange24h >= 0 ? "+" : ""}{token.priceChange24h.toFixed(2)}%
+                                            {safePriceChange24h >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                            {safePriceChange24h >= 0 ? "+" : ""}{safePriceChange24h.toFixed(2)}%
                                         </span>
                                     </td>
                                     <td className="px-3 py-3 hidden lg:table-cell">
-                                        {renderSparkline(token.sparkline)}
+                                        {renderSparkline(Array.isArray(token.sparkline) ? token.sparkline : [])}
                                     </td>
                                     <td className="px-3 py-3 text-right text-gray-300 font-mono text-sm">
                                         {formatLarge(token.volume24h)}
@@ -618,14 +630,14 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                     </td>
                                     <td className="px-3 py-3 hidden xl:table-cell">
                                         <div className="flex flex-wrap gap-1 max-w-[200px]">
-                                            {token.availableDEXs.slice(0, 3).map(dex => (
+                                            {safeAvailableDexs.slice(0, 3).map(dex => (
                                                 <span key={dex} className={cn("text-[9px] px-1.5 py-0.5 rounded border", getDEXColor(dex))}>
                                                     {dex}
                                                 </span>
                                             ))}
-                                            {token.availableDEXs.length > 3 && (
+                                            {safeAvailableDexs.length > 3 && (
                                                 <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-gray-500 border border-white/10">
-                                                    +{token.availableDEXs.length - 3}
+                                                    +{safeAvailableDexs.length - 3}
                                                 </span>
                                             )}
                                         </div>
@@ -652,7 +664,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                         </div>
                                     </td>
                                 </tr>
-                            ))
+                            )})
                         ) : (
                             <tr>
                                 <td colSpan={10} className="px-4 py-12 text-center text-gray-700 italic">

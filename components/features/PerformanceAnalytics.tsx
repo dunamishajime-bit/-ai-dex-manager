@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSimulation } from "@/context/SimulationContext";
 import {
     LineChart,
@@ -18,9 +18,45 @@ import { TrendingUp, AlertCircle } from "lucide-react";
 export function PerformanceAnalytics() {
     const { transactions } = useSimulation();
     const [chartsReady, setChartsReady] = useState(false);
+    const pnlChartHostRef = useRef<HTMLDivElement>(null);
+    const tokenChartHostRef = useRef<HTMLDivElement>(null);
+    const [pnlChartHostReady, setPnlChartHostReady] = useState(false);
+    const [tokenChartHostReady, setTokenChartHostReady] = useState(false);
 
     useEffect(() => {
         setChartsReady(true);
+    }, []);
+
+    useEffect(() => {
+        const node = pnlChartHostRef.current;
+        if (!node) return;
+
+        const update = () => {
+            setPnlChartHostReady(node.clientWidth > 0 && node.clientHeight > 0);
+        };
+
+        update();
+
+        const resizeObserver = new ResizeObserver(update);
+        resizeObserver.observe(node);
+
+        return () => resizeObserver.disconnect();
+    }, []);
+
+    useEffect(() => {
+        const node = tokenChartHostRef.current;
+        if (!node) return;
+
+        const update = () => {
+            setTokenChartHostReady(node.clientWidth > 0 && node.clientHeight > 0);
+        };
+
+        update();
+
+        const resizeObserver = new ResizeObserver(update);
+        resizeObserver.observe(node);
+
+        return () => resizeObserver.disconnect();
     }, []);
 
     const pnlData = useMemo(() => {
@@ -73,13 +109,13 @@ export function PerformanceAnalytics() {
     }, [transactions]);
 
     const weakness = tokenStats.length > 0 ? tokenStats[0] : null;
-    const canRenderPnlChart = chartsReady && pnlData.length > 0;
-    const canRenderTokenStatsChart = chartsReady && tokenStats.length > 0;
+    const canRenderPnlChart = chartsReady && pnlChartHostReady && pnlData.length > 0;
+    const canRenderTokenStatsChart = chartsReady && tokenChartHostReady && tokenStats.length > 0;
 
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <Card title="Performance Trend" className="lg:col-span-2 h-[350px]">
-                <div className="h-[280px] w-full min-h-[280px] pt-4">
+                <div ref={pnlChartHostRef} className="h-[280px] w-full min-h-[280px] pt-4">
                     {canRenderPnlChart ? (
                         <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220}>
                             <LineChart data={pnlData}>
@@ -103,11 +139,11 @@ export function PerformanceAnalytics() {
                             </LineChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="flex h-full items-center justify-center text-sm text-gray-500">
-                            No realized PnL yet
-                        </div>
-                    )}
-                </div>
+                            <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                                {pnlData.length > 0 ? "Loading chart..." : "No realized PnL yet"}
+                            </div>
+                        )}
+                    </div>
             </Card>
 
             <Card title="Weakness Analysis" className="h-[300px]">
@@ -136,7 +172,7 @@ export function PerformanceAnalytics() {
                         </div>
                     )}
 
-                    <div className="h-[150px] w-full flex-1 min-h-[150px] text-xs">
+                    <div ref={tokenChartHostRef} className="h-[150px] w-full flex-1 min-h-[150px] text-xs">
                         <h4 className="mb-2 uppercase tracking-wider text-gray-400">Token win rate</h4>
                         {canRenderTokenStatsChart ? (
                             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={120}>
@@ -168,7 +204,7 @@ export function PerformanceAnalytics() {
                             </ResponsiveContainer>
                         ) : (
                             <div className="flex h-full items-center justify-center text-gray-500">
-                                No token stats yet
+                                {tokenStats.length > 0 ? "Loading chart..." : "No token stats yet"}
                             </div>
                         )}
                     </div>

@@ -89,8 +89,8 @@ export function PriceChart({ headless = false, initialCoinId }: PriceChartProps)
                 vertLines: { color: "rgba(255,255,255,0.04)" },
                 horzLines: { color: "rgba(255,255,255,0.04)" },
             },
-            width: chartContainerRef.current.clientWidth,
-            height: chartContainerRef.current.clientHeight || 280,
+            width: Math.max(chartContainerRef.current.clientWidth, 320),
+            height: Math.max(chartContainerRef.current.clientHeight || 280, 220),
             timeScale: {
                 borderColor: "rgba(255,255,255,0.1)",
                 timeVisible: true,

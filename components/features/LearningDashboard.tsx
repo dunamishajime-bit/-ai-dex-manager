@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSimulation } from "@/context/SimulationContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,19 +17,39 @@ export function LearningDashboard() {
     const { learningParams, transactions, provideTradeFeedback } = useSimulation();
     const [feedbackState, setFeedbackState] = useState<Record<string, "GOOD" | "BAD" | undefined>>({});
     const [chartsReady, setChartsReady] = useState(false);
+    const chartHostRef = useRef<HTMLDivElement>(null);
+    const [chartHostReady, setChartHostReady] = useState(false);
 
     useEffect(() => {
         setChartsReady(true);
     }, []);
 
+    useEffect(() => {
+        const node = chartHostRef.current;
+        if (!node) return;
+
+        const update = () => {
+            setChartHostReady(node.clientWidth > 0 && node.clientHeight > 0);
+        };
+
+        update();
+
+        const resizeObserver = new ResizeObserver(update);
+        resizeObserver.observe(node);
+
+        return () => resizeObserver.disconnect();
+    }, []);
+
     const recentTrades = transactions.slice(0, 10);
+    const safeWinRate = Number.isFinite(learningParams.winRate) ? learningParams.winRate : 0;
+    const safeTotalTrades = Number.isFinite(learningParams.totalTrades) ? learningParams.totalTrades : 0;
 
     const data = [
-        { subject: "RSI", A: learningParams.rsiWeight, fullMark: 2.0 },
-        { subject: "MACD", A: learningParams.macdWeight, fullMark: 2.0 },
-        { subject: "Sentiment", A: learningParams.sentimentWeight, fullMark: 2.0 },
-        { subject: "Fundamental", A: learningParams.fundamentalWeight, fullMark: 2.0 },
-        { subject: "Security", A: learningParams.securityWeight, fullMark: 2.0 },
+        { subject: "RSI", A: Number.isFinite(learningParams.rsiWeight) ? learningParams.rsiWeight : 0, fullMark: 2.0 },
+        { subject: "MACD", A: Number.isFinite(learningParams.macdWeight) ? learningParams.macdWeight : 0, fullMark: 2.0 },
+        { subject: "Sentiment", A: Number.isFinite(learningParams.sentimentWeight) ? learningParams.sentimentWeight : 0, fullMark: 2.0 },
+        { subject: "Fundamental", A: Number.isFinite(learningParams.fundamentalWeight) ? learningParams.fundamentalWeight : 0, fullMark: 2.0 },
+        { subject: "Security", A: Number.isFinite(learningParams.securityWeight) ? learningParams.securityWeight : 0, fullMark: 2.0 },
     ];
 
     const handleFeedback = (txId: string, type: "GOOD" | "BAD") => {
@@ -46,8 +66,8 @@ export function LearningDashboard() {
                         <span>Current model weighting</span>
                     </div>
 
-                    <div className="relative h-[200px] w-full min-h-[200px] flex-1">
-                        {chartsReady ? (
+                    <div ref={chartHostRef} className="relative h-[200px] w-full min-h-[200px] flex-1">
+                        {chartsReady && chartHostReady ? (
                             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={180}>
                                 <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
                                     <PolarGrid stroke="#334155" />
@@ -82,17 +102,17 @@ export function LearningDashboard() {
                         <div className="rounded border border-white/5 bg-cyber-black/50 p-2">
                             <div className="text-[10px] uppercase text-gray-500">Win Rate</div>
                             <div className="text-lg font-bold text-green-400">
-                                {(learningParams.winRate * 100).toFixed(0)}%
+                                {(safeWinRate * 100).toFixed(0)}%
                             </div>
                         </div>
                         <div className="rounded border border-white/5 bg-cyber-black/50 p-2">
                             <div className="text-[10px] uppercase text-gray-500">Trades</div>
-                            <div className="text-lg font-bold text-white">{learningParams.totalTrades}</div>
+                            <div className="text-lg font-bold text-white">{safeTotalTrades}</div>
                         </div>
                         <div className="rounded border border-white/5 bg-cyber-black/50 p-2">
                             <div className="text-[10px] uppercase text-gray-500">AI Level</div>
                             <div className="text-lg font-bold text-gold-400">
-                                Lv.{Math.floor(learningParams.totalTrades / 5) + 1}
+                                Lv.{Math.floor(safeTotalTrades / 5) + 1}
                             </div>
                         </div>
                     </div>
@@ -130,7 +150,7 @@ export function LearningDashboard() {
                                             </span>
                                         </div>
                                         <div className="mt-1 text-[10px] text-gray-400">
-                                            {tx.dex} - ¥{tx.price.toLocaleString()}
+                                            {tx.dex || "Unknown DEX"} - {Number.isFinite(tx.price) ? `¥${tx.price.toLocaleString()}` : "Price unavailable"}
                                         </div>
                                     </div>
 
