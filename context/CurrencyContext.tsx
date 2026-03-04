@@ -16,8 +16,8 @@ interface CurrencyContextType {
     setJpyRate: (rate: number) => void;
     symbol: string;
     toggleCurrency: () => void;
-    formatPrice: (usdPrice: number) => string;
-    formatLarge: (usdValue: number) => string;
+    formatPrice: (usdPrice: number | null | undefined) => string;
+    formatLarge: (usdValue: number | null | undefined) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -29,7 +29,6 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     const [currency, setCurrencyState] = useState<CurrencyCode>(() => {
         if (typeof window === "undefined") return "JPY";
         const stored = localStorage.getItem(STORAGE_KEY);
-        // Default to JPY for this platform
         return (stored as CurrencyCode) || "JPY";
     });
 
@@ -38,8 +37,6 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
         return parseFloat(localStorage.getItem(JPY_RATE_LS) || "150");
     });
 
-    // Sync JPY rate from Dashboard API (Internal source ONLY)
-    // No external direct API calls allowed here.
     const syncJpyRate = useCallback(async () => {
         try {
             console.log("[CurrencyContext] Syncing JPY rate via internal dashboard...");
@@ -54,13 +51,12 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
             }
         } catch (err) {
             console.warn("[CurrencyContext] Failed to sync JPY rate from dashboard, using fallback:", err);
-            // Keeping current rate or default 150
         }
     }, []);
 
     useEffect(() => {
         syncJpyRate();
-        const interval = setInterval(syncJpyRate, 600000); // Sync every 10 mins
+        const interval = setInterval(syncJpyRate, 600000);
         return () => clearInterval(interval);
     }, [syncJpyRate]);
 
@@ -73,26 +69,36 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
         setCurrency(currency === "USD" ? "JPY" : "USD");
     };
 
-    const symbol = currency === "JPY" ? "¥" : "$";
+    const symbol = currency === "JPY" ? "ﾂ･" : "$";
 
-    const formatPrice = (usdPrice: number) => {
-        if (currency === "JPY") {
-            const jpyPrice = usdPrice * jpyRate;
-            if (jpyPrice < 1) {
-                return `¥${jpyPrice.toLocaleString("ja-JP", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
-            }
-            return `¥${Math.round(jpyPrice).toLocaleString("ja-JP")}`;
-        } else {
-            if (usdPrice < 1) {
-                return `$${usdPrice.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
-            }
-            return `$${usdPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const formatPrice = (usdPrice: number | null | undefined) => {
+        const safeUsdPrice = Number(usdPrice);
+        if (!Number.isFinite(safeUsdPrice)) {
+            return currency === "JPY" ? "ﾂ･-" : "$-";
         }
+
+        if (currency === "JPY") {
+            const jpyPrice = safeUsdPrice * jpyRate;
+            if (jpyPrice < 1) {
+                return `ﾂ･${jpyPrice.toLocaleString("ja-JP", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
+            }
+            return `ﾂ･${Math.round(jpyPrice).toLocaleString("ja-JP")}`;
+        }
+
+        if (safeUsdPrice < 1) {
+            return `$${safeUsdPrice.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
+        }
+        return `$${safeUsdPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
-    const formatLarge = (usdValue: number) => {
-        const val = currency === "JPY" ? usdValue * jpyRate : usdValue;
-        const prefix = currency === "JPY" ? "¥" : "$";
+    const formatLarge = (usdValue: number | null | undefined) => {
+        const safeUsdValue = Number(usdValue);
+        if (!Number.isFinite(safeUsdValue)) {
+            return currency === "JPY" ? "ﾂ･-" : "$-";
+        }
+
+        const val = currency === "JPY" ? safeUsdValue * jpyRate : safeUsdValue;
+        const prefix = currency === "JPY" ? "ﾂ･" : "$";
 
         if (val >= 1e12) return `${prefix}${(val / 1e12).toFixed(2)}T`;
         if (val >= 1e9) return `${prefix}${(val / 1e9).toFixed(2)}B`;
@@ -101,16 +107,18 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     };
 
     return (
-        <CurrencyContext.Provider value={{
-            currency,
-            setCurrency,
-            toggleCurrency,
-            jpyRate,
-            setJpyRate,
-            symbol,
-            formatPrice,
-            formatLarge
-        }}>
+        <CurrencyContext.Provider
+            value={{
+                currency,
+                setCurrency,
+                toggleCurrency,
+                jpyRate,
+                setJpyRate,
+                symbol,
+                formatPrice,
+                formatLarge,
+            }}
+        >
             {children}
         </CurrencyContext.Provider>
     );
@@ -120,4 +128,4 @@ export const useCurrency = () => {
     const ctx = useContext(CurrencyContext);
     if (!ctx) throw new Error("useCurrency must be used within CurrencyProvider");
     return ctx;
-}
+};

@@ -48,6 +48,7 @@ export function MarketOverview() {
     const profit = currentTotal - initialBalance;
     const profitColor = profit >= 0 ? "text-emerald-400" : "text-red-400";
     const profitSign = profit >= 0 ? "+" : "";
+    const getDisplayPrice = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : undefined);
 
     if (loading) return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
@@ -72,7 +73,7 @@ export function MarketOverview() {
                                 <div>
                                     <div className="text-xs font-bold text-white">{coin.symbol}</div>
                                     <div className="text-[10px] text-gray-400">
-                                        {formatPrice(coin.currentPrice || coin.price)}
+                                        {formatPrice(getDisplayPrice(coin.currentPrice) ?? getDisplayPrice(coin.price))}
                                     </div>
                                 </div>
                             </div>
@@ -97,7 +98,7 @@ export function MarketOverview() {
                                 <div>
                                     <div className="text-xs font-bold text-white">{coin.symbol}</div>
                                     <div className="text-[10px] text-gray-400">
-                                        {formatPrice(coin.currentPrice || coin.price)}
+                                        {formatPrice(getDisplayPrice(coin.currentPrice) ?? getDisplayPrice(coin.price))}
                                     </div>
                                 </div>
                             </div>

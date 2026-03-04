@@ -596,7 +596,7 @@ export function TradableTokensTable({ onSelectToken, selectedChain = "all", init
                                         </div>
                                     </td>
                                     <td className="px-3 py-3 text-right text-white font-mono text-sm font-medium">
-                                        {formatPrice(token.currentPrice)}
+                                        {formatPrice(typeof token.currentPrice === "number" && Number.isFinite(token.currentPrice) ? token.currentPrice : undefined)}
                                     </td>
                                     <td className="px-3 py-3 text-right">
                                         <span className={cn(
