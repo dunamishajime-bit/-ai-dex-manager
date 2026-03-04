@@ -126,13 +126,28 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="DIS TERMINAL" />
                 <script dangerouslySetInnerHTML={{
                     __html: `
-                    if ('serviceWorker' in navigator) {
+                    (function() {
+                        if (!('serviceWorker' in navigator)) return;
                         window.addEventListener('load', function() {
-                            navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                                console.log('SW registration failed:', err);
-                            });
+                            navigator.serviceWorker.getRegistrations()
+                                .then(function(registrations) {
+                                    return Promise.all(registrations.map(function(registration) {
+                                        return registration.unregister();
+                                    }));
+                                })
+                                .then(function() {
+                                    if (!window.caches) return;
+                                    return caches.keys().then(function(keys) {
+                                        return Promise.all(keys.map(function(key) {
+                                            return caches.delete(key);
+                                        }));
+                                    });
+                                })
+                                .catch(function(err) {
+                                    console.log('SW cleanup failed:', err);
+                                });
                         });
-                    }
+                    })();
                 ` }} />
             </head>
             <body className={`${inter.className} antialiased bg-cyber-black`}>
