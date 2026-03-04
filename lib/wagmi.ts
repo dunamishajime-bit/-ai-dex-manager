@@ -20,10 +20,7 @@ export const wagmiConfig = getDefaultConfig({
     transports: {
         [bsc.id]: fallback([
             http('/api/rpcProxy?target=' + encodeURIComponent('https://bsc-dataseed.binance.org'), { timeout: 120000, retryCount: 5 }),
-            http('/api/rpcProxy?target=' + encodeURIComponent('https://bsc-dataseed1.defibit.io'), { timeout: 120000, retryCount: 5 }),
-            http('/api/rpcProxy?target=' + encodeURIComponent('https://bsc-dataseed1.ninicoin.io'), { timeout: 120000, retryCount: 5 }),
             http('/api/rpcProxy?target=' + encodeURIComponent('https://rpc.ankr.com/bsc'), { timeout: 120000, retryCount: 5 }),
-            http('/api/rpcProxy?target=' + encodeURIComponent('https://binance.llamarpc.com'), { timeout: 120000, retryCount: 5 }),
         ], {
             rank: {
                 interval: 30000,

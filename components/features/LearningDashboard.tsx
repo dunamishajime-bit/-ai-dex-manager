@@ -48,7 +48,7 @@ export function LearningDashboard() {
 
                     <div className="relative h-[200px] w-full min-h-[200px] flex-1">
                         {chartsReady ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={180}>
                                 <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
                                     <PolarGrid stroke="#334155" />
                                     <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 10 }} />

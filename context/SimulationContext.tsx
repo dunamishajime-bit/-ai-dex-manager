@@ -2066,7 +2066,6 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         if (typeof window !== 'undefined') {
             (window as any).jdex_addDiscussion = addDiscussion;
             (window as any).__DIS_EXECUTE_TRADE__ = executeTrade;
-            console.warn("[DEBUG] window.__DIS_EXECUTE_TRADE__ ready");
         }
     }, [addDiscussion, executeTrade]);
 

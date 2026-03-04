@@ -81,7 +81,7 @@ export function PerformanceAnalytics() {
             <Card title="Performance Trend" className="lg:col-span-2 h-[350px]">
                 <div className="h-[280px] w-full min-h-[280px] pt-4">
                     {canRenderPnlChart ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220}>
                             <LineChart data={pnlData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                                 <XAxis dataKey="time" stroke="#94a3b8" fontSize={12} />
@@ -139,7 +139,7 @@ export function PerformanceAnalytics() {
                     <div className="h-[150px] w-full flex-1 min-h-[150px] text-xs">
                         <h4 className="mb-2 uppercase tracking-wider text-gray-400">Token win rate</h4>
                         {canRenderTokenStatsChart ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={120}>
                                 <BarChart data={tokenStats} layout="vertical">
                                     <XAxis type="number" domain={[0, 100]} hide />
                                     <YAxis

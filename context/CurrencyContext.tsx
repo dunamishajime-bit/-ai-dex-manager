@@ -39,7 +39,6 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     const syncJpyRate = useCallback(async () => {
         try {
-            console.log("[CurrencyContext] Syncing JPY rate via internal dashboard...");
             const res = await fetch("/api/market/dashboard");
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 

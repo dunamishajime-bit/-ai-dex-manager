@@ -77,7 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const localOnly = localUsers.filter((lu: any) => !merged.find(su => su.id === lu.id));
 
             if (localOnly.length > 0) {
-                console.log(`Syncing ${localOnly.length} local-only users to server...`);
                 await fetch("/api/auth/users", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

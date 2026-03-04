@@ -69,7 +69,13 @@ export function MarketOverview() {
                     {gainers.map((coin: any) => (
                         <div key={coin.providerId || coin.id} className="flex items-center justify-between p-2 bg-emerald-500/5 rounded border border-emerald-500/10 hover:bg-emerald-500/10 transition-colors">
                             <div className="flex items-center gap-2">
-                                <img src={coin.image || coin.thumb || "/placeholder.png"} alt={coin.name} className="w-6 h-6 rounded-full" />
+                                {coin.image || coin.thumb ? (
+                                    <img src={coin.image || coin.thumb} alt={coin.name} className="w-6 h-6 rounded-full" />
+                                ) : (
+                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold-500/10 text-[9px] font-bold text-gold-400">
+                                        {(coin.symbol || coin.name || "?").slice(0, 2).toUpperCase()}
+                                    </div>
+                                )}
                                 <div>
                                     <div className="text-xs font-bold text-white">{coin.symbol}</div>
                                     <div className="text-[10px] text-gray-400">
@@ -94,7 +100,13 @@ export function MarketOverview() {
                     {losers.map((coin: any) => (
                         <div key={coin.providerId || coin.id} className="flex items-center justify-between p-2 bg-red-500/5 rounded border border-red-500/10 hover:bg-red-500/10 transition-colors">
                             <div className="flex items-center gap-2">
-                                <img src={coin.image || coin.thumb || "/placeholder.png"} alt={coin.name} className="w-6 h-6 rounded-full" />
+                                {coin.image || coin.thumb ? (
+                                    <img src={coin.image || coin.thumb} alt={coin.name} className="w-6 h-6 rounded-full" />
+                                ) : (
+                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gold-500/10 text-[9px] font-bold text-gold-400">
+                                        {(coin.symbol || coin.name || "?").slice(0, 2).toUpperCase()}
+                                    </div>
+                                )}
                                 <div>
                                     <div className="text-xs font-bold text-white">{coin.symbol}</div>
                                     <div className="text-[10px] text-gray-400">
