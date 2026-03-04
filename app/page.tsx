@@ -1,85 +1,107 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowRight, BrainCircuit, CandlestickChart, LayoutDashboard, Newspaper, Settings, Trophy } from "lucide-react";
-
-const quickLinks = [
-    {
-        href: "/trader-brain",
-        title: "TraderBrain",
-        description: "Review trades, entry logic, and exit outcomes.",
-        icon: BrainCircuit,
-    },
-    {
-        href: "/ai-agents",
-        title: "AI Council",
-        description: "Open the agent workflow and decision panels.",
-        icon: Trophy,
-    },
-    {
-        href: "/strategy",
-        title: "Strategy",
-        description: "Inspect proposals and active trading settings.",
-        icon: CandlestickChart,
-    },
-    {
-        href: "/news",
-        title: "News",
-        description: "Check the latest market and ecosystem headlines.",
-        icon: Newspaper,
-    },
-    {
-        href: "/positions",
-        title: "Positions",
-        description: "See open positions and current portfolio state.",
-        icon: LayoutDashboard,
-    },
-    {
-        href: "/settings",
-        title: "Settings",
-        description: "Adjust account, demo, and application options.",
-        icon: Settings,
-    },
-];
+import { useState } from "react";
+import { Search, Zap, Trophy } from "lucide-react";
+import { MarketOverview } from "@/components/features/MarketOverview";
+import { TradableTokensTable } from "@/components/features/TradableTokensTable";
+import { ChainFilter } from "@/components/features/ChainFilter";
+import { AgentTicker } from "@/components/features/AgentTicker";
+import { TradingPipelineManager } from "@/components/features/TradingPipelineManager";
+import { AchievementHub } from "@/components/features/AchievementHub";
+import { LearningDashboard } from "@/components/features/LearningDashboard";
+import { PerformanceAnalytics } from "@/components/features/PerformanceAnalytics";
+import { Leaderboard } from "@/components/features/Leaderboard";
+import { TerminalView } from "@/components/features/TerminalView";
+import { ChainId } from "@/lib/dex-service";
+import { useSimulation } from "@/context/SimulationContext";
 
 export default function Home() {
+    const [selectedChain, setSelectedChain] = useState<ChainId>("all");
+    const { leaderboard } = useSimulation();
+
     return (
-        <main className="relative flex min-h-full flex-1 flex-col overflow-hidden bg-cyber-black">
-            <div className="pointer-events-none absolute inset-0 bg-grid-pattern bg-[size:40px_40px] opacity-[0.03]" />
+        <main className="relative flex flex-1 flex-col overflow-hidden bg-cyber-black">
+            <div className="pointer-events-none absolute inset-0 bg-grid-pattern bg-[size:40px_40px] opacity-[0.02]" />
 
-            <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-4 md:p-6">
-                <section className="rounded-2xl border border-gold-500/15 bg-[#0d1117]/90 p-6 shadow-2xl shadow-black/40">
-                    <div className="max-w-2xl">
-                        <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-gold-400/80">
-                            DIS TERMINAL
+            <AgentTicker />
+
+            <div className="relative z-10 flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+                <div className="mx-auto max-w-[1600px] space-y-8">
+                    <div className="flex flex-col items-start justify-between gap-4 border-b border-gold-500/10 pb-4 md:flex-row md:items-center">
+                        <div>
+                            <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">
+                                DIS <span className="text-gold-500">TERMINAL</span>
+                            </h1>
+                            <p className="mt-1 text-[10px] font-mono uppercase text-gray-500">
+                                5 AGENT SYNERGY - AI-POWERED MARKET INTELLIGENCE
+                            </p>
                         </div>
-                        <h1 className="mt-3 text-3xl font-black uppercase tracking-tight text-white md:text-5xl">
-                            Operations Hub
-                        </h1>
-                        <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                            The homepage has been switched to a stable shell so the application stays usable while the larger dashboard widgets are being isolated.
-                        </p>
-                    </div>
-                </section>
-
-                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    {quickLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className="group rounded-2xl border border-gold-500/10 bg-[#0b0f15] p-5 transition-all duration-200 hover:border-gold-500/30 hover:bg-[#111722]"
-                        >
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="rounded-xl border border-gold-500/20 bg-gold-500/10 p-3">
-                                    <link.icon className="h-5 w-5 text-gold-400" />
-                                </div>
-                                <ArrowRight className="h-5 w-5 text-gray-600 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-gold-400" />
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 rounded border border-gold-500/20 bg-gold-500/5 px-3 py-1 text-[10px] font-mono text-gold-500">
+                                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-500" />
+                                CORE_SYSTEMS_OPTIMAL
                             </div>
-                            <h2 className="mt-5 text-lg font-bold text-white">{link.title}</h2>
-                            <p className="mt-2 text-sm leading-6 text-gray-400">{link.description}</p>
-                        </Link>
-                    ))}
-                </section>
+                        </div>
+                    </div>
+
+                    <section>
+                        <MarketOverview />
+                    </section>
+
+                    <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        <div className="relative flex h-[400px] flex-col overflow-hidden rounded-xl border border-gold-500/10 bg-[#0b0f15] p-4">
+                            <div className="mb-4 flex items-center gap-2 text-gold-400">
+                                <Zap className="h-4 w-4" />
+                                <h3 className="text-xs font-bold uppercase tracking-wider">Trading Pipeline Manager</h3>
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                                <TradingPipelineManager />
+                            </div>
+                        </div>
+                        <div className="relative flex h-[400px] flex-col overflow-hidden rounded-xl border border-gold-500/10 bg-[#0b0f15] p-4">
+                            <div className="mb-4 flex items-center gap-2 text-gold-400">
+                                <Trophy className="h-4 w-4" />
+                                <h3 className="text-xs font-bold uppercase tracking-wider">Achievement Gallery</h3>
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                                <AchievementHub />
+                            </div>
+                        </div>
+                        <div className="h-[400px]">
+                            <LearningDashboard />
+                        </div>
+                    </section>
+
+                    <section>
+                        <PerformanceAnalytics />
+                    </section>
+
+                    {leaderboard.length > 0 ? (
+                        <section className="h-[400px]">
+                            <Leaderboard />
+                        </section>
+                    ) : null}
+
+                    <section className="grid grid-cols-1 gap-6">
+                        <TerminalView />
+                    </section>
+
+                    <section className="space-y-4">
+                        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                            <div className="flex items-center gap-2 text-gold-400">
+                                <Search className="h-4 w-4" />
+                                <h2 className="text-sm font-bold uppercase tracking-wider">Currency Search & Global Rankings</h2>
+                            </div>
+                            <div className="max-w-full overflow-x-auto">
+                                <ChainFilter selectedChain={selectedChain} onSelectChain={setSelectedChain} />
+                            </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-xl border border-gold-500/20 bg-[#0d1117] shadow-2xl shadow-black/50">
+                            <TradableTokensTable selectedChain={selectedChain} />
+                        </div>
+                    </section>
+                </div>
             </div>
         </main>
     );
