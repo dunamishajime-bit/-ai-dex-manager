@@ -43,7 +43,7 @@ export function AchievementHub() {
                         <Trophy className="h-5 w-5 text-gold-500" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold text-white">Achievement Gallery</h2>
+                        <h2 className="text-lg font-bold text-white">実績ギャラリー</h2>
                         <p className="text-[10px] uppercase tracking-widest text-gray-500">Achievement Gallery</p>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Zap, Trophy } from "lucide-react";
+import { Search } from "lucide-react";
 import { MarketOverview } from "@/components/features/MarketOverview";
 import { TradableTokensTable } from "@/components/features/TradableTokensTable";
 import { ChainFilter } from "@/components/features/ChainFilter";
@@ -12,6 +12,7 @@ import { LearningDashboard } from "@/components/features/LearningDashboard";
 import { PerformanceAnalytics } from "@/components/features/PerformanceAnalytics";
 import { Leaderboard } from "@/components/features/Leaderboard";
 import { TerminalView } from "@/components/features/TerminalView";
+import { LiveAgentChat } from "@/components/features/LiveAgentChat";
 import { ChainId } from "@/lib/dex-service";
 import { useSimulation } from "@/context/SimulationContext";
 
@@ -48,32 +49,30 @@ export default function Home() {
                         <MarketOverview />
                     </section>
 
-                    <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                        <div className="relative flex h-[400px] flex-col overflow-hidden rounded-xl border border-gold-500/10 bg-[#0b0f15] p-4">
-                            <div className="mb-4 flex items-center gap-2 text-gold-400">
-                                <Zap className="h-4 w-4" />
-                                <h3 className="text-xs font-bold uppercase tracking-wider">Trading Pipeline Manager</h3>
-                            </div>
-                            <div className="flex-1 overflow-hidden">
-                                <TradingPipelineManager />
+                    <section>
+                        <div className="overflow-hidden rounded-xl border border-gold-500/10 bg-[#0d1117]">
+                            <div className="h-[360px]">
+                                <LiveAgentChat />
                             </div>
                         </div>
-                        <div className="relative flex h-[400px] flex-col overflow-hidden rounded-xl border border-gold-500/10 bg-[#0b0f15] p-4">
-                            <div className="mb-4 flex items-center gap-2 text-gold-400">
-                                <Trophy className="h-4 w-4" />
-                                <h3 className="text-xs font-bold uppercase tracking-wider">Achievement Gallery</h3>
-                            </div>
-                            <div className="flex-1 overflow-hidden">
-                                <AchievementHub />
-                            </div>
+                    </section>
+
+                    <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                        <div className="h-[420px]">
+                            <AchievementHub />
                         </div>
-                        <div className="h-[400px]">
+                        <div className="h-[420px]">
                             <LearningDashboard />
                         </div>
                     </section>
 
-                    <section>
-                        <PerformanceAnalytics />
+                    <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                        <div className="h-[420px]">
+                            <TradingPipelineManager />
+                        </div>
+                        <div>
+                            <PerformanceAnalytics />
+                        </div>
                     </section>
 
                     {leaderboard.length > 0 ? (

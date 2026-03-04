@@ -58,7 +58,7 @@ export function LearningDashboard() {
     };
 
     return (
-        <Card title="AI Learning Status" className="flex h-full flex-col">
+        <Card title="AI学習ステータス" className="flex h-full flex-col">
             <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="flex h-full min-h-[300px] flex-col">
                     <div className="mb-2 flex items-center gap-2 text-xs text-gray-400">

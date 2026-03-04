@@ -393,7 +393,15 @@ export async function getCryptoNews(): Promise<CryptoNews[]> {
                 title: item.title,
                 source: item.source,
                 url: item.link,
-                published_at: item.pubDate
+                published_at: new Date(item.pubDate).toLocaleString("ja-JP", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                }),
             }));
         }
     } catch (e) { }
