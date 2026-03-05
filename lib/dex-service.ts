@@ -216,8 +216,12 @@ export async function fetchCoinDetails(id: string): Promise<CoinDetails | null> 
     try {
         const res = await fetch(`/api/market/prices?symbols=${id.toUpperCase()}`);
         const data = await res.json();
+        const normalizedKey = id.toLowerCase();
+        const directPrice = data?.[normalizedKey];
+        const wrappedPrice = data?.prices?.[normalizedKey];
+        const resolvedPrice = directPrice || wrappedPrice;
 
-        if (!data.ok || !data.prices || !data.prices[id.toUpperCase()]) {
+        if (!resolvedPrice) {
             const dRes = await fetch("/api/market/dashboard");
             const dData = await dRes.json();
             const allTokens = [
@@ -259,7 +263,7 @@ export async function fetchCoinDetails(id: string): Promise<CoinDetails | null> 
             };
         }
 
-        const priceData = data.prices[id.toUpperCase()];
+        const priceData = resolvedPrice;
         return {
             id,
             symbol: id.toUpperCase(),
@@ -269,12 +273,12 @@ export async function fetchCoinDetails(id: string): Promise<CoinDetails | null> 
             image: "",
             genesis_date: "",
             market_cap_rank: 1,
-            current_price: priceData.price,
+            current_price: priceData.usd,
             market_cap: 1000000000,
             total_volume: 100000000,
-            high_24h: priceData.price * 1.05,
-            low_24h: priceData.price * 0.95,
-            price_change_percentage_24h: priceData.change24h || 0,
+            high_24h: priceData.usd * 1.05,
+            low_24h: priceData.usd * 0.95,
+            price_change_percentage_24h: priceData.usd_24h_change || 0,
             circulating_supply: 0,
             total_supply: 0,
             max_supply: 0,
@@ -284,8 +288,8 @@ export async function fetchCoinDetails(id: string): Promise<CoinDetails | null> 
             community_score: 80,
             liquidity_score: 80,
             public_interest_score: 80,
-            ath: priceData.price * 1.2,
-            atl: priceData.price * 0.5,
+            ath: priceData.usd * 1.2,
+            atl: priceData.usd * 0.5,
             price_change_percentage_1h_in_currency: 0,
             price_change_percentage_7d_in_currency: 0,
         };

@@ -87,7 +87,7 @@ export default function RiskSettingsPage() {
                             </div>
                             <input
                                 type="range"
-                                min="-20" max="-1" step="0.5"
+                                min="-5" max="-0.5" step="0.5"
                                 value={localSL}
                                 onChange={(e) => setLocalSL(parseFloat(e.target.value))}
                                 className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-500"
@@ -109,7 +109,7 @@ export default function RiskSettingsPage() {
                             </div>
                             <input
                                 type="range"
-                                min="1" max="50" step="0.5"
+                                min="0.5" max="10" step="0.5"
                                 value={localTP}
                                 onChange={(e) => setLocalTP(parseFloat(e.target.value))}
                                 className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-neon-green"

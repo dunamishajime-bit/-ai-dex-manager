@@ -1,32 +1,47 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { PriceChart } from "./PriceChart";
-import { LiveAgentChat } from "./LiveAgentChat";
 import { useSimulation } from "@/context/SimulationContext";
-import { useMediaQuery } from "@/hooks/use-media-query";
+
+const TERMINAL_PAIR_BY_SYMBOL: Record<string, string> = {
+    BTC: "BTC/USDT",
+    ETH: "ETH/USDT",
+    SOL: "SOL/USDT",
+    BNB: "BNB/USDT",
+    MATIC: "POL/USDT",
+    DOGE: "DOGE/USDT",
+    LINK: "LINK/USDT",
+    SHIB: "SHIB/USDT",
+};
 
 export function TerminalView() {
     const { marketData, selectedCurrency } = useSimulation();
-    const isDesktop = useMediaQuery("(min-width: 1024px)");
+    const defaultPairLabel = useMemo(
+        () => TERMINAL_PAIR_BY_SYMBOL[selectedCurrency] || "BNB/USDT",
+        [selectedCurrency],
+    );
+    const [activePairLabel, setActivePairLabel] = useState(defaultPairLabel);
+
+    useEffect(() => {
+        setActivePairLabel(defaultPairLabel);
+    }, [defaultPairLabel]);
 
     return (
         <Card
-            title={`${selectedCurrency}/USDC ターミナル`}
+            title={`${activePairLabel} Terminal`}
             glow={marketData.trend === "BULL" ? "success" : "danger"}
-            className="w-full h-auto min-h-[500px] lg:h-[450px] overflow-hidden"
+            className="h-auto min-h-[500px] w-full overflow-hidden lg:h-[450px]"
         >
-            <div className="h-full flex flex-col lg:flex-row gap-4 mt-2">
-                {/* Left Side: Live Agent Conversations */}
-                <div className="w-full lg:w-[40%] h-[250px] lg:h-full">
-                    <LiveAgentChat />
-                </div>
-
-                {/* Right Side: Price Chart */}
-                <div className="w-full lg:w-[60%] h-[300px] lg:h-full flex flex-col">
-                    <div className="flex-1 min-h-0">
-                        <PriceChart headless />
+            <div className="mt-2 h-full">
+                <div className="h-[420px] min-h-[320px] w-full">
+                    <div className="h-full min-h-0">
+                        <PriceChart
+                            headless
+                            initialPairLabel={activePairLabel}
+                            onPairChange={setActivePairLabel}
+                        />
                     </div>
                 </div>
             </div>

@@ -10,17 +10,13 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { TradeNotificationToast } from '@/components/features/TradeNotificationToast';
-import { TradingPipelineManager } from "@/components/features/TradingPipelineManager";
-import { useSimulation } from '@/context/SimulationContext';
 import ParticleBackground from '@/components/layout/ParticleBackground';
 import { BottomNav } from '@/components/layout/BottomNav';
 
 import { LoginPage } from '@/components/features/LoginPage';
 import { TutorialPopup } from '@/components/features/TutorialPopup';
-import { AgentTicker } from '@/components/features/AgentTicker';
 import LearningIndicator from '@/components/features/LearningIndicator';
 import { usePathname } from 'next/navigation';
-import { UserLearningProvider } from '@/context/UserLearningContext';
 import { CurrencyProvider } from '@/context/CurrencyContext';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -29,7 +25,7 @@ const robotoMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-roboto-mo
 const PUBLIC_PATHS = ['/reset-password', '/login', '/register'];
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isLoading, user } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const pathname = usePathname();
 
     // Don't guard admin page
@@ -155,12 +151,10 @@ export default function RootLayout({
                         <AgentProvider>
                             <CurrencyProvider>
                                 <SimulationProvider>
-                                    <UserLearningProvider>
-                                        <ParticleBackground />
-                                        <AppLayout>
-                                            {children}
-                                        </AppLayout>
-                                    </UserLearningProvider>
+                                    <ParticleBackground />
+                                    <AppLayout>
+                                        {children}
+                                    </AppLayout>
                                 </SimulationProvider>
                             </CurrencyProvider>
                         </AgentProvider>

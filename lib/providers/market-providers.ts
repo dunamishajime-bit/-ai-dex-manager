@@ -1,5 +1,28 @@
 import { TokenRef } from "../types/market";
 
+const COINGECKO_ID_MAP: Record<string, string> = {
+    "bitcoin": "bitcoin",
+    "ethereum": "ethereum",
+    "solana": "solana",
+    "binance-coin": "binancecoin",
+    "xrp": "ripple",
+    "cardano": "cardano",
+    "avalanche": "avalanche-2",
+    "dogecoin": "dogecoin",
+    "tron": "tron",
+    "chainlink": "chainlink",
+    "arbitrum": "arbitrum",
+    "optimism": "optimism",
+    "polygon": "polygon-ecosystem-token",
+    "pancakeswap": "pancakeswap-token",
+    "venus": "venus",
+    "alpaca-finance": "alpaca-finance",
+    "astar": "astar",
+    "world-liberty-financial": "world-liberty-financial",
+    "trust-wallet-token": "trust-wallet-token",
+    "shiba-inu": "shiba-inu",
+};
+
 export function priceKey(t: TokenRef): string {
     return `${t.symbol.toUpperCase()}@${t.chain}`;
 }
@@ -58,6 +81,40 @@ export async function fetchPricesBatch(tokens: TokenRef[]): Promise<Record<strin
             }
         } catch (e) {
             console.error("[CoinCap] Batch fetch failed:", e);
+        }
+
+        const unresolved = byProvider.coincap.filter((token) => !out[token.providerId]);
+        if (unresolved.length) {
+            try {
+                const geckoIdToProviderIds = unresolved.reduce<Record<string, string[]>>((acc, token) => {
+                    const geckoId = COINGECKO_ID_MAP[token.providerId] || token.providerId;
+                    acc[geckoId] ??= [];
+                    acc[geckoId].push(token.providerId);
+                    return acc;
+                }, {});
+
+                const geckoIds = Object.keys(geckoIdToProviderIds);
+                const res = await fetch(
+                    `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(geckoIds.join(","))}&vs_currencies=usd&include_24hr_change=true`,
+                    { cache: "no-store" },
+                );
+                const json = await res.json();
+
+                geckoIds.forEach((geckoId) => {
+                    const payload = json?.[geckoId];
+                    const usd = Number(payload?.usd);
+                    if (!usd) return;
+
+                    geckoIdToProviderIds[geckoId].forEach((providerId) => {
+                        out[providerId] = {
+                            usd,
+                            change24hPct: Number(payload?.usd_24h_change) || 0,
+                        };
+                    });
+                });
+            } catch (e) {
+                console.error("[CoinGecko] Batch fallback failed:", e);
+            }
         }
     }
 

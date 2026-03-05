@@ -1,44 +1,45 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
-import { useSimulation } from "@/context/SimulationContext";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-    Radar,
-    RadarChart,
-    PolarGrid,
-    PolarAngleAxis,
-    PolarRadiusAxis,
-    ResponsiveContainer,
-    Tooltip,
-} from "recharts";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip } from "recharts";
 import { ThumbsUp, ThumbsDown, Activity, BrainCircuit } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { useSimulation } from "@/context/SimulationContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
-export function LearningDashboard() {
-    const { learningParams, transactions, provideTradeFeedback } = useSimulation();
-    const [feedbackState, setFeedbackState] = useState<Record<string, "GOOD" | "BAD" | undefined>>({});
-    const [chartsReady, setChartsReady] = useState(false);
-    const chartHostRef = useRef<HTMLDivElement>(null);
-    const [chartHostReady, setChartHostReady] = useState(false);
+type ChartSize = { width: number; height: number };
 
-    useEffect(() => {
-        setChartsReady(true);
-    }, []);
+function useChartSize(ref: React.RefObject<HTMLDivElement>, minimumHeight: number) {
+    const [size, setSize] = useState<ChartSize>({ width: 0, height: minimumHeight });
 
     useEffect(() => {
-        const node = chartHostRef.current;
+        const node = ref.current;
         if (!node) return;
 
         const update = () => {
-            setChartHostReady(node.clientWidth > 0 && node.clientHeight > 0);
+            setSize({
+                width: Math.max(node.clientWidth, 280),
+                height: Math.max(node.clientHeight, minimumHeight),
+            });
         };
 
         update();
-
         const resizeObserver = new ResizeObserver(update);
         resizeObserver.observe(node);
 
         return () => resizeObserver.disconnect();
-    }, []);
+    }, [minimumHeight, ref]);
+
+    return size;
+}
+
+export function LearningDashboard() {
+    const { learningParams, transactions, provideTradeFeedback } = useSimulation();
+    const { formatPrice } = useCurrency();
+    const [feedbackState, setFeedbackState] = useState<Record<string, "GOOD" | "BAD" | undefined>>({});
+    const chartHostRef = useRef<HTMLDivElement>(null);
+    const chartSize = useChartSize(chartHostRef, 180);
 
     const recentTrades = transactions.slice(0, 10);
     const safeWinRate = Number.isFinite(learningParams.winRate) ? learningParams.winRate : 0;
@@ -47,9 +48,9 @@ export function LearningDashboard() {
     const data = [
         { subject: "RSI", A: Number.isFinite(learningParams.rsiWeight) ? learningParams.rsiWeight : 0, fullMark: 2.0 },
         { subject: "MACD", A: Number.isFinite(learningParams.macdWeight) ? learningParams.macdWeight : 0, fullMark: 2.0 },
-        { subject: "Sentiment", A: Number.isFinite(learningParams.sentimentWeight) ? learningParams.sentimentWeight : 0, fullMark: 2.0 },
-        { subject: "Fundamental", A: Number.isFinite(learningParams.fundamentalWeight) ? learningParams.fundamentalWeight : 0, fullMark: 2.0 },
-        { subject: "Security", A: Number.isFinite(learningParams.securityWeight) ? learningParams.securityWeight : 0, fullMark: 2.0 },
+        { subject: "SENTIMENT", A: Number.isFinite(learningParams.sentimentWeight) ? learningParams.sentimentWeight : 0, fullMark: 2.0 },
+        { subject: "FUNDAMENTAL", A: Number.isFinite(learningParams.fundamentalWeight) ? learningParams.fundamentalWeight : 0, fullMark: 2.0 },
+        { subject: "SECURITY", A: Number.isFinite(learningParams.securityWeight) ? learningParams.securityWeight : 0, fullMark: 2.0 },
     ];
 
     const handleFeedback = (txId: string, type: "GOOD" | "BAD") => {
@@ -57,63 +58,59 @@ export function LearningDashboard() {
         setFeedbackState((prev) => ({ ...prev, [txId]: type }));
     };
 
+    const canRenderChart = chartSize.width > 0 && chartSize.height > 0;
+
     return (
         <Card title="AI学習ステータス" className="flex h-full flex-col">
             <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="flex h-full min-h-[300px] flex-col">
                     <div className="mb-2 flex items-center gap-2 text-xs text-gray-400">
                         <BrainCircuit className="h-4 w-4 text-cyan-400" />
-                        <span>Current model weighting</span>
+                        <span>モデル重みの可視化</span>
                     </div>
 
-                    <div ref={chartHostRef} className="relative h-[200px] w-full min-h-[200px] flex-1">
-                        {chartsReady && chartHostReady ? (
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={180}>
-                                <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
-                                    <PolarGrid stroke="#334155" />
-                                    <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                                    <PolarRadiusAxis angle={30} domain={[0, 2.0]} tick={false} axisLine={false} />
-                                    <Radar
-                                        name="Weight"
-                                        dataKey="A"
-                                        stroke="#ec4899"
-                                        strokeWidth={2}
-                                        fill="#ec4899"
-                                        fillOpacity={0.3}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: "#0f172a",
-                                            borderColor: "#334155",
-                                            color: "#f8fafc",
-                                        }}
-                                        itemStyle={{ color: "#ec4899" }}
-                                    />
-                                </RadarChart>
-                            </ResponsiveContainer>
+                    <div ref={chartHostRef} className="relative h-[200px] min-h-[200px] w-full flex-1">
+                        {canRenderChart ? (
+                            <RadarChart width={chartSize.width} height={chartSize.height} cx="50%" cy="50%" outerRadius="60%" data={data}>
+                                <PolarGrid stroke="#334155" />
+                                <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 10 }} />
+                                <PolarRadiusAxis angle={30} domain={[0, 2.0]} tick={false} axisLine={false} />
+                                <Radar
+                                    name="Weight"
+                                    dataKey="A"
+                                    stroke="#ec4899"
+                                    strokeWidth={2}
+                                    fill="#ec4899"
+                                    fillOpacity={0.3}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "#0f172a",
+                                        borderColor: "#334155",
+                                        color: "#f8fafc",
+                                    }}
+                                    itemStyle={{ color: "#ec4899" }}
+                                />
+                            </RadarChart>
                         ) : (
                             <div className="flex h-full items-center justify-center text-xs text-gray-500">
-                                Loading chart...
+                                チャートを読み込み中...
                             </div>
                         )}
                     </div>
 
                     <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                         <div className="rounded border border-white/5 bg-cyber-black/50 p-2">
-                            <div className="text-[10px] uppercase text-gray-500">Win Rate</div>
-                            <div className="text-lg font-bold text-green-400">
-                                {(safeWinRate * 100).toFixed(0)}%
-                            </div>
+                            <div className="text-[10px] uppercase text-gray-500">勝率</div>
+                            <div className="text-lg font-bold text-green-400">{(safeWinRate * 100).toFixed(0)}%</div>
                         </div>
                         <div className="rounded border border-white/5 bg-cyber-black/50 p-2">
-                            <div className="text-[10px] uppercase text-gray-500">Trades</div>
+                            <div className="text-[10px] uppercase text-gray-500">取引数</div>
                             <div className="text-lg font-bold text-white">{safeTotalTrades}</div>
                         </div>
                         <div className="rounded border border-white/5 bg-cyber-black/50 p-2">
-                            <div className="text-[10px] uppercase text-gray-500">AI Level</div>
-                            <div className="text-lg font-bold text-gold-400">
-                                Lv.{Math.floor(safeTotalTrades / 5) + 1}
-                            </div>
+                            <div className="text-[10px] uppercase text-gray-500">AIレベル</div>
+                            <div className="text-lg font-bold text-gold-400">Lv.{Math.floor(safeTotalTrades / 5) + 1}</div>
                         </div>
                     </div>
                 </div>
@@ -121,15 +118,14 @@ export function LearningDashboard() {
                 <div className="flex h-full flex-col overflow-hidden border-t border-white/5 pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
                     <div className="mb-3 flex items-center gap-2 text-xs text-gray-400">
                         <Activity className="h-4 w-4 text-gold-400" />
-                        <span>Recent trade feedback</span>
+                        <span>直近シグナルのレビュー</span>
                     </div>
 
                     <div className="custom-scrollbar flex-1 space-y-2 overflow-y-auto pr-2">
                         {recentTrades.length === 0 ? (
-                            <div className="py-10 text-center text-xs italic text-gray-600">
-                                No executed trades yet
-                            </div>
+                            <div className="py-10 text-center text-xs italic text-gray-600">まだ約定履歴がありません</div>
                         ) : null}
+
                         <AnimatePresence>
                             {recentTrades.map((tx) => (
                                 <motion.div
@@ -140,17 +136,15 @@ export function LearningDashboard() {
                                 >
                                     <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
-                                            <span
-                                                className={`text-xs font-bold ${tx.type === "BUY" ? "text-green-400" : "text-red-400"}`}
-                                            >
+                                            <span className={`text-xs font-bold ${tx.type === "BUY" ? "text-green-400" : "text-red-400"}`}>
                                                 {tx.type} {tx.symbol}
                                             </span>
                                             <span className="text-[10px] text-gray-500">
-                                                {new Date(tx.timestamp).toLocaleTimeString()}
+                                                {new Date(tx.timestamp).toLocaleTimeString("ja-JP")}
                                             </span>
                                         </div>
                                         <div className="mt-1 text-[10px] text-gray-400">
-                                            {tx.dex || "Unknown DEX"} - {Number.isFinite(tx.price) ? `¥${tx.price.toLocaleString()}` : "Price unavailable"}
+                                            {tx.dex || "Unknown DEX"} - {Number.isFinite(tx.price) ? formatPrice(tx.price) : "価格未取得"}
                                         </div>
                                     </div>
 

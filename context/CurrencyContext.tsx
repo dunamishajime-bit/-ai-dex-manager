@@ -2,11 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
-/**
- * [IMPORTANT] This file MUST NOT call external market data providers directly.
- * All FX rates should come from internal /api/market/dashboard or be hardcoded.
- */
-
 type CurrencyCode = "USD" | "JPY";
 
 interface CurrencyContextType {
@@ -39,23 +34,23 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     const syncJpyRate = useCallback(async () => {
         try {
-            const res = await fetch("/api/market/dashboard");
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const response = await fetch("/api/market/dashboard");
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-            const data = await res.json();
-            if (data.ok && data.fxRate) {
-                const newRate = Number(data.fxRate);
-                setJpyRate(newRate);
-                localStorage.setItem(JPY_RATE_LS, String(newRate));
+            const payload = await response.json();
+            if (payload.ok && payload.fxRate) {
+                const nextRate = Number(payload.fxRate);
+                setJpyRate(nextRate);
+                localStorage.setItem(JPY_RATE_LS, String(nextRate));
             }
-        } catch (err) {
-            console.warn("[CurrencyContext] Failed to sync JPY rate from dashboard, using fallback:", err);
+        } catch (error) {
+            console.warn("[CurrencyContext] Failed to sync JPY rate from dashboard, using fallback:", error);
         }
     }, []);
 
     useEffect(() => {
         syncJpyRate();
-        const interval = setInterval(syncJpyRate, 600000);
+        const interval = setInterval(syncJpyRate, 600_000);
         return () => clearInterval(interval);
     }, [syncJpyRate]);
 
@@ -68,41 +63,42 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
         setCurrency(currency === "USD" ? "JPY" : "USD");
     };
 
-    const symbol = currency === "JPY" ? "ﾂ･" : "$";
+    const symbol = currency === "JPY" ? "¥" : "$";
 
     const formatPrice = (usdPrice: number | null | undefined) => {
         const safeUsdPrice = Number(usdPrice);
         if (!Number.isFinite(safeUsdPrice)) {
-            return currency === "JPY" ? "ﾂ･-" : "$-";
+            return currency === "JPY" ? "¥-" : "$-";
         }
 
         if (currency === "JPY") {
             const jpyPrice = safeUsdPrice * jpyRate;
             if (jpyPrice < 1) {
-                return `ﾂ･${jpyPrice.toLocaleString("ja-JP", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
+                return `¥${jpyPrice.toLocaleString("ja-JP", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
             }
-            return `ﾂ･${Math.round(jpyPrice).toLocaleString("ja-JP")}`;
+            return `¥${Math.round(jpyPrice).toLocaleString("ja-JP")}`;
         }
 
         if (safeUsdPrice < 1) {
             return `$${safeUsdPrice.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`;
         }
+
         return `$${safeUsdPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
     const formatLarge = (usdValue: number | null | undefined) => {
         const safeUsdValue = Number(usdValue);
         if (!Number.isFinite(safeUsdValue)) {
-            return currency === "JPY" ? "ﾂ･-" : "$-";
+            return currency === "JPY" ? "¥-" : "$-";
         }
 
-        const val = currency === "JPY" ? safeUsdValue * jpyRate : safeUsdValue;
-        const prefix = currency === "JPY" ? "ﾂ･" : "$";
+        const convertedValue = currency === "JPY" ? safeUsdValue * jpyRate : safeUsdValue;
+        const prefix = currency === "JPY" ? "¥" : "$";
 
-        if (val >= 1e12) return `${prefix}${(val / 1e12).toFixed(2)}T`;
-        if (val >= 1e9) return `${prefix}${(val / 1e9).toFixed(2)}B`;
-        if (val >= 1e6) return `${prefix}${(val / 1e6).toFixed(2)}M`;
-        return `${prefix}${val.toLocaleString()}`;
+        if (convertedValue >= 1e12) return `${prefix}${(convertedValue / 1e12).toFixed(2)}T`;
+        if (convertedValue >= 1e9) return `${prefix}${(convertedValue / 1e9).toFixed(2)}B`;
+        if (convertedValue >= 1e6) return `${prefix}${(convertedValue / 1e6).toFixed(2)}M`;
+        return `${prefix}${convertedValue.toLocaleString()}`;
     };
 
     return (

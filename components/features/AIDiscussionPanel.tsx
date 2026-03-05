@@ -8,9 +8,6 @@ import { cn } from "@/lib/utils";
 import { useSimulation } from "@/context/SimulationContext";
 import { useAgents } from "@/context/AgentContext";
 import { fetchCoinDetails, CoinDetails } from "@/lib/dex-service";
-import { useUserLearning } from "@/context/UserLearningContext";
-import { generateAgentReply } from "@/lib/gemini-service";
-import { Send, User } from "lucide-react";
 
 interface Props {
     pair: string;
@@ -358,13 +355,10 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
 
     // Track when current message finishes typing
     const [isTypingComplete, setIsTypingComplete] = useState(true);
-    const [userInput, setUserInput] = useState("");
-    const [isAILoading, setIsAILoading] = useState(false);
 
     // Hooks
-    const { addDiscussion, executeTrade, isWalletConnected, latestNews } = useSimulation();
+    const { addDiscussion, executeTrade, latestNews, portfolio, convertJPY } = useSimulation();
     const { agents } = useAgents();
-    const { userState, addInteraction } = useUserLearning();
 
     // Phase 3: Short-term memory key per pair
     const memoryKey = `dis_memory_${pair.replace('/', '_')}`;
@@ -578,18 +572,6 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
         }
     }, [visibleCount, messages.length]);
 
-    // Unified messages for display (Discussion + Chat Interaction)
-    const chatMessages = userState.interactionHistory.map(m => ({
-        id: `chat-${m.timestamp}`,
-        agentId: m.agentId || (m.role === "user" ? "USER" : "coordinator"),
-        content: m.content,
-        timestamp: m.timestamp,
-        type: "OPINION",
-        round: undefined
-    }));
-
-    const allMessages = [...messages, ...chatMessages];
-
     const getAgent = (agentId: string) => agents.find(a => a.id === agentId);
 
     const getAvatarState = (msg: AgentMessage, index: number): "idle" | "speaking" | "thinking" | "alert" | "final" => {
@@ -603,7 +585,6 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
         return "idle";
     };
 
-    const visibleMessages = messages.slice(0, visibleCount);
     const discussionComplete = result && !isRunning && visibleCount >= messages.length;
 
     const handleAgree = () => {
@@ -614,8 +595,25 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
         if (!result || result.action === "HOLD") return;
 
         // Suggested amount from AI or fixed demo amount (e.g. ¥50,000)
-        const targetValueJPY = 50000;
-        const amount = result.autoTradeProposal?.amount || parseFloat((targetValueJPY / currentPrice).toPrecision(4));
+        const proposalAmount = result.autoTradeProposal?.amount;
+        const jpyPerUsd = Math.max(convertJPY(1), 1);
+        const fallbackUsd = 50000 / jpyPerUsd;
+
+        let targetValueUsd = 0;
+        if (typeof proposalAmount === "number" && Number.isFinite(proposalAmount) && proposalAmount > 0) {
+            if (proposalAmount <= 1) {
+                targetValueUsd = portfolio.cashbalance * proposalAmount;
+            } else {
+                targetValueUsd = proposalAmount;
+            }
+        }
+        if (targetValueUsd <= 0) {
+            targetValueUsd = fallbackUsd;
+        }
+
+        const safeUsd = Math.max(0, Math.min(targetValueUsd, Math.max(0, portfolio.cashbalance - 0.2)));
+        const amount = currentPrice > 0 ? parseFloat((safeUsd / currentPrice).toFixed(6)) : 0;
+        if (amount <= 0) return;
 
         console.warn("[UI_TRADE_CLICK]", {
             mode: "AI-PANEL-REQUEST",
@@ -641,61 +639,6 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
             }
         } catch (e) {
             console.error("Trade execution encountered hard error", e);
-        }
-    };
-
-    const handleSendMessage = async () => {
-        if (!userInput.trim() || isAILoading) return;
-
-        // Add to history (UI)
-        const userMsg: AgentMessage = {
-            id: `user-${Date.now()}`,
-            agentId: "USER",
-            content: userInput,
-            timestamp: Date.now(),
-            type: "OPINION"
-        };
-
-        setMessages(prev => [...prev, userMsg]);
-        setVisibleCount(prev => prev + 1); // Ensure USER message is counted as visible
-        setUserInput("");
-        setIsAILoading(true);
-
-        // Add to learning context
-        await addInteraction("user", userMsg.content);
-
-        try {
-            // Get reply via server-side proxy
-            const reply = await generateAgentReply(
-                userMsg.content,
-                pair,
-                currentPrice, // Assuming 'price' was meant to be 'currentPrice'
-                agents,
-                userState,
-                marketData
-            );
-
-            const aiAgentMsg: AgentMessage = {
-                id: `ai-${Date.now()}`,
-                agentId: reply.agentId,
-                content: reply.content,
-                timestamp: Date.now(),
-                type: "OPINION"
-            };
-
-            setActiveAgentId(reply.agentId);
-            setMessages(prev => [...prev, aiAgentMsg]);
-            setVisibleCount(prev => prev + 1);
-            setIsTypingComplete(false);
-            setIsRunning(true); // Restart auto-advance/typewriter if needed
-
-            // Add to learning context
-            await addInteraction("assistant", reply.content, reply.agentId);
-
-        } catch (error) {
-            console.error("Chat Error:", error);
-        } finally {
-            setIsAILoading(false);
         }
     };
 
@@ -778,14 +721,13 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
                 )}
 
                 <AnimatePresence mode="popLayout">
-                    {allMessages.map((msg, i) => {
-                        const isUser = msg.agentId === "USER";
+                    {messages.map((msg, i) => {
                         // Discussion messages obey visibleCount, Chat messages are always visible
-                        const isVisible = i < visibleCount || i >= messages.length;
+                        const isVisible = i < visibleCount;
                         if (!isVisible) return null;
 
                         const agent = getAgent(msg.agentId);
-                        const isLeft = msg.agentId !== "coordinator" && !isUser;
+                        const isLeft = msg.agentId !== "coordinator";
                         const isCoordFinal = msg.agentId === "coordinator" && msg.type === "PROPOSAL";
                         const isSecAlert = msg.agentId === "security" && msg.type === "ALERT";
                         const isLatest = i === visibleCount - 1;
@@ -801,33 +743,26 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
                                 animate="visible"
                                 className={cn(
                                     "flex gap-2 md:gap-3 max-w-[98%] sm:max-w-[90%] md:max-w-[75%]",
-                                    isLeft ? "mr-auto" : "ml-auto flex-row-reverse",
-                                    msg.agentId === "USER" && "ml-auto flex-row-reverse max-w-[95%]"
+                                    isLeft ? "mr-auto" : "ml-auto flex-row-reverse"
                                 )}
                             >
                                 <div className="shrink-0 mt-1">
-                                    {msg.agentId === "USER" ? (
-                                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center border-2 border-blue-400/50">
-                                            <User className="w-5 h-5 text-white" />
-                                        </div>
-                                    ) : (
-                                        agent && <AnimatedAvatar agent={agent} state={avatarState} />
-                                    )}
+                                    {agent && <AnimatedAvatar agent={agent} state={avatarState} />}
                                 </div>
 
                                 <div className={cn(
                                     "flex-1 min-w-0 flex flex-col",
-                                    isLeft && msg.agentId !== "USER" ? "items-start" : "items-end"
+                                    isLeft ? "items-start" : "items-end"
                                 )}>
                                     <div className={cn(
                                         "flex items-center gap-2 mb-1",
-                                        isLeft && msg.agentId !== "USER" ? "flex-row" : "flex-row-reverse"
+                                        isLeft ? "flex-row" : "flex-row-reverse"
                                     )}>
                                         <span className={cn(
                                             "text-[10px] font-bold",
-                                            msg.agentId === "USER" ? "text-blue-400" : (agent?.color || "text-gold-400")
+                                            agent?.color || "text-gold-400"
                                         )}>
-                                            {msg.agentId === "USER" ? userState.userName : (agent?.shortName || "SYSTEM")}
+                                            {agent?.shortName || "SYSTEM"}
                                         </span>
                                         {msg.round && (
                                             <span className="text-[8px] px-1 py-0.5 rounded bg-white/10 text-gray-400 font-mono">
@@ -839,10 +774,9 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
                                     {/* Speech Bubble Style */}
                                     <div className={cn(
                                         "relative px-4 py-3 rounded-2xl shadow-lg",
-                                        isLeft && !isUser
+                                        isLeft
                                             ? "bg-[#182533] text-white rounded-tl-none border border-white/5"
                                             : "bg-[#2b5278] text-white rounded-tr-none border border-white/5",
-                                        isUser && "bg-blue-600/30 border-blue-500/50 ml-auto",
                                         isCoordFinal && "border-gold-500/50 shadow-[0_0_15px_rgba(255,215,0,0.2)]",
                                         isSecAlert && "border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
                                     )}>
@@ -994,11 +928,11 @@ export function AIDiscussionPanel({ pair, coinId: initialCoinId, price, autoStar
                         </div>
                         <div className="p-1.5 bg-black/30 rounded">
                             <div className="text-[10px] text-gray-500">ターゲット</div>
-                            <div className="text-sm font-bold text-white font-mono">¥{result.takeProfit?.toLocaleString()}</div>
+                            <div className="text-sm font-bold text-white font-mono">¥{Math.round(convertJPY(result.takeProfit || 0)).toLocaleString("ja-JP")}</div>
                         </div>
                         <div className="p-1.5 bg-black/30 rounded">
                             <div className="text-[10px] text-gray-500">ストップ</div>
-                            <div className="text-sm font-bold text-red-400 font-mono">¥{result.stopLoss?.toLocaleString()}</div>
+                            <div className="text-sm font-bold text-red-400 font-mono">¥{Math.round(convertJPY(result.stopLoss || 0)).toLocaleString("ja-JP")}</div>
                         </div>
                     </div>
 

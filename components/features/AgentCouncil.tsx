@@ -20,7 +20,7 @@ interface AgentCouncilProps {
 
 export function AgentCouncil({ messages, result, symbol, onComplete, isAutoPlay = true }: AgentCouncilProps) {
     const { getAgent, setIsCouncilActive } = useAgents();
-    const { portfolio, clearMessages, executeTrade, setIsDemoMode } = useSimulation();
+    const { portfolio, clearMessages, executeTrade, setIsDemoMode, convertJPY } = useSimulation();
     const [tradeRequested, setTradeRequested] = useState(false);
 
     // Determine Aura color based on portfolio PnL
@@ -136,8 +136,24 @@ export function AgentCouncil({ messages, result, symbol, onComplete, isAutoPlay 
         });
 
         try {
-            const amount = result.autoTradeProposal?.amount || 0.1;
-            const price = result.autoTradeProposal?.entryPrice || 0; // Fallback or handle
+            const price = result.autoTradeProposal?.entryPrice || 0;
+            const proposalAmount = result.autoTradeProposal?.amount;
+            const maxAvailableUsd = Math.max(0, portfolio.cashbalance - 0.2);
+
+            let targetUsd = 0;
+            if (typeof proposalAmount === "number" && Number.isFinite(proposalAmount) && proposalAmount > 0) {
+                targetUsd = proposalAmount <= 1 ? maxAvailableUsd * proposalAmount : proposalAmount;
+            }
+            if (targetUsd <= 0) {
+                targetUsd = Math.min(maxAvailableUsd, 50);
+            }
+
+            let amount = price > 0 ? parseFloat((targetUsd / price).toFixed(6)) : 0;
+            if (result.action === "SELL") {
+                const held = portfolio.positions.find((position) => position.symbol === symbol)?.amount || 0;
+                amount = Math.min(amount, held);
+            }
+            if (amount <= 0) return;
 
             const success = await executeTrade(
                 symbol,
@@ -445,15 +461,15 @@ export function AgentCouncil({ messages, result, symbol, onComplete, isAutoPlay 
                                         <div className="result-grid-3">
                                             <div className="bg-black/40 p-2 rounded border border-white/5 text-center">
                                                 <div className="text-[10px] text-gray-500 uppercase">エントリー</div>
-                                                <div className="text-sm font-mono text-white">¥{result.autoTradeProposal.entryPrice.toLocaleString()}</div>
+                                                <div className="text-sm font-mono text-white">¥{Math.round(convertJPY(result.autoTradeProposal.entryPrice)).toLocaleString("ja-JP")}</div>
                                             </div>
                                             <div className="bg-emerald-500/10 p-2 rounded border border-emerald-500/20 text-center">
                                                 <div className="text-[10px] text-emerald-400 uppercase">利確目標</div>
-                                                <div className="text-sm font-mono text-emerald-400">¥{result.autoTradeProposal.targetPrice.toLocaleString()}</div>
+                                                <div className="text-sm font-mono text-emerald-400">¥{Math.round(convertJPY(result.autoTradeProposal.targetPrice)).toLocaleString("ja-JP")}</div>
                                             </div>
                                             <div className="bg-red-500/10 p-2 rounded border border-red-500/20 text-center">
                                                 <div className="text-[10px] text-red-400 uppercase">損切ライン</div>
-                                                <div className="text-sm font-mono text-red-400">¥{result.autoTradeProposal.stopLoss.toLocaleString()}</div>
+                                                <div className="text-sm font-mono text-red-400">¥{Math.round(convertJPY(result.autoTradeProposal.stopLoss)).toLocaleString("ja-JP")}</div>
                                             </div>
                                         </div>
                                         <div className="text-xs text-gray-400 italic">

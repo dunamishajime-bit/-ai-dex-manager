@@ -34,6 +34,7 @@ export function AchievementHub() {
     const unlockedCount = achievements.filter((achievement) => achievement.unlocked).length;
     const level = Math.max(1, Math.floor(disPoints / 100) + 1);
     const progress = disPoints % 100;
+    const achievementGridClass = recentUnlock ? "h-[calc(100%-220px)]" : "h-[calc(100%-170px)]";
 
     return (
         <div className="relative h-full rounded-xl border border-gold-500/10 bg-cyber-darker/60 p-5 backdrop-blur-xl">
@@ -67,7 +68,7 @@ export function AchievementHub() {
                 <div className="mt-1 text-right text-[9px] text-gray-600">Next level in {100 - progress} pt</div>
             </div>
 
-            <div className="grid h-[calc(100%-170px)] grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar">
+            <div className={cn("grid grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar", achievementGridClass)}>
                 {achievements.map((achievement) => (
                     <div
                         key={achievement.id}
@@ -75,7 +76,7 @@ export function AchievementHub() {
                             "rounded-lg border p-3 transition-all",
                             achievement.unlocked
                                 ? "border-gold-500/20 bg-gold-500/5"
-                                : "border-white/5 bg-black/20 opacity-70"
+                                : "border-white/5 bg-black/20 opacity-70",
                         )}
                     >
                         <div className="mb-2 flex items-start justify-between gap-2">
@@ -116,7 +117,7 @@ export function AchievementHub() {
             </div>
 
             {recentUnlock ? (
-                <div className="pointer-events-none absolute bottom-5 left-5 right-5 rounded-lg bg-gradient-to-r from-gold-500 to-amber-300 px-4 py-3 text-black shadow-[0_0_20px_rgba(255,215,0,0.35)]">
+                <div className="pointer-events-none absolute bottom-4 left-4 right-4 rounded-lg bg-gradient-to-r from-gold-500 to-amber-300 px-4 py-3 text-black shadow-[0_0_20px_rgba(255,215,0,0.35)]">
                     <div className="text-[10px] font-black uppercase tracking-widest text-black/70">Achievement Unlocked</div>
                     <div className="text-sm font-black">{recentUnlock.title}</div>
                 </div>

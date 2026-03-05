@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { AreaChart, Area, ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis } from "recharts";
-import { Play, Pause, SkipForward, Download, Share2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AreaChart, Area, Tooltip, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Play, Pause, Download, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BacktestResult {
@@ -20,19 +20,49 @@ interface Props {
     result: BacktestResult;
 }
 
+type ChartSize = { width: number; height: number };
+
+function useChartSize(ref: React.RefObject<HTMLDivElement>, minimumHeight: number) {
+    const [size, setSize] = useState<ChartSize>({ width: 0, height: minimumHeight });
+
+    useEffect(() => {
+        const node = ref.current;
+        if (!node) return;
+
+        const update = () => {
+            setSize({
+                width: Math.max(node.clientWidth, 260),
+                height: Math.max(node.clientHeight, minimumHeight),
+            });
+        };
+
+        update();
+        const resizeObserver = new ResizeObserver(update);
+        resizeObserver.observe(node);
+
+        return () => resizeObserver.disconnect();
+    }, [minimumHeight, ref]);
+
+    return size;
+}
+
 export function BacktestPreview({ result }: Props) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [currentData, setCurrentData] = useState<typeof result.chartData>([]);
+    const chartHostRef = useRef<HTMLDivElement>(null);
+    const chartSize = useChartSize(chartHostRef, 120);
 
     useEffect(() => {
         if (isPlaying && progress < result.chartData.length) {
             const timer = setTimeout(() => {
-                setProgress(prev => prev + 1);
+                setProgress((prev) => prev + 1);
                 setCurrentData(result.chartData.slice(0, progress + 1));
             }, 100);
             return () => clearTimeout(timer);
-        } else if (progress >= result.chartData.length) {
+        }
+
+        if (progress >= result.chartData.length) {
             setIsPlaying(false);
         }
     }, [isPlaying, progress, result.chartData]);
@@ -45,44 +75,44 @@ export function BacktestPreview({ result }: Props) {
         setIsPlaying(true);
     };
 
+    const canRenderChart = chartSize.width > 0 && chartSize.height > 0;
+
     return (
-        <div className="bg-black/40 rounded-lg border border-gold-500/10 p-3 space-y-3">
+        <div className="space-y-3 rounded-lg border border-gold-500/10 bg-black/40 p-3">
             <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-gold-400">📈 バックテストプレビュー</h4>
+                <h4 className="text-xs font-bold text-gold-400">バックテストレビュー</h4>
                 <div className="flex items-center gap-1">
-                    <button onClick={() => { }} className="p-1 text-gray-500 hover:text-gold-400 transition-colors">
-                        <Download className="w-3 h-3" />
+                    <button onClick={() => {}} className="p-1 text-gray-500 transition-colors hover:text-gold-400">
+                        <Download className="h-3 w-3" />
                     </button>
-                    <button onClick={() => { }} className="p-1 text-gray-500 hover:text-gold-400 transition-colors">
-                        <Share2 className="w-3 h-3" />
+                    <button onClick={() => {}} className="p-1 text-gray-500 transition-colors hover:text-gold-400">
+                        <Share2 className="h-3 w-3" />
                     </button>
                 </div>
             </div>
 
-            {/* KPIs */}
             <div className="grid grid-cols-3 gap-2">
-                <div className="text-center p-2 bg-white/5 rounded">
+                <div className="rounded bg-white/5 p-2 text-center">
                     <div className="text-[10px] text-gray-500">損益</div>
                     <div className={cn("text-sm font-bold font-mono", result.pnl >= 0 ? "text-emerald-400" : "text-red-400")}>
                         {result.pnl >= 0 ? "+" : ""}¥{result.pnl.toLocaleString("ja-JP")}
                     </div>
                 </div>
-                <div className="text-center p-2 bg-white/5 rounded">
-                    <div className="text-[10px] text-gray-500">変動率</div>
+                <div className="rounded bg-white/5 p-2 text-center">
+                    <div className="text-[10px] text-gray-500">騰落率</div>
                     <div className={cn("text-sm font-bold font-mono", result.pnlPercent >= 0 ? "text-emerald-400" : "text-red-400")}>
                         {result.pnlPercent >= 0 ? "+" : ""}{result.pnlPercent.toFixed(1)}%
                     </div>
                 </div>
-                <div className="text-center p-2 bg-white/5 rounded">
-                    <div className="text-[10px] text-gray-500">期間</div>
-                    <div className="text-sm font-bold text-white font-mono">{result.duration}</div>
+                <div className="rounded bg-white/5 p-2 text-center">
+                    <div className="text-[10px] text-gray-500">保有時間</div>
+                    <div className="text-sm font-bold font-mono text-white">{result.duration}</div>
                 </div>
             </div>
 
-            {/* Chart */}
-            <div className="h-[120px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={isPlaying || progress > 0 ? currentData : result.chartData}>
+            <div ref={chartHostRef} className="h-[120px] min-h-[120px]">
+                {canRenderChart ? (
+                    <AreaChart width={chartSize.width} height={chartSize.height} data={isPlaying || progress > 0 ? currentData : result.chartData}>
                         <defs>
                             <linearGradient id="backtestGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor={result.pnl >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0.3} />
@@ -91,10 +121,10 @@ export function BacktestPreview({ result }: Props) {
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                         <XAxis dataKey="time" tick={{ fontSize: 8, fill: "#6b7280" }} tickLine={false} />
-                        <YAxis tick={{ fontSize: 8, fill: "#6b7280" }} tickLine={false} domain={['auto', 'auto']} />
+                        <YAxis tick={{ fontSize: 8, fill: "#6b7280" }} tickLine={false} domain={["auto", "auto"]} />
                         <Tooltip
                             contentStyle={{ backgroundColor: "#0d1117", borderColor: "#B8860B", borderRadius: "6px", fontSize: "10px" }}
-                            formatter={(value: any) => [`¥${Number(value).toLocaleString("ja-JP")}`, "価格"]}
+                            formatter={(value: number | string | undefined) => [`¥${Number(value || 0).toLocaleString("ja-JP")}`, "価格"]}
                         />
                         <Area
                             type="monotone"
@@ -105,24 +135,25 @@ export function BacktestPreview({ result }: Props) {
                             fill="url(#backtestGrad)"
                         />
                     </AreaChart>
-                </ResponsiveContainer>
+                ) : (
+                    <div className="flex h-full items-center justify-center text-xs text-gray-500">チャートを読み込み中...</div>
+                )}
             </div>
 
-            {/* Controls */}
             <div className="flex items-center gap-2">
                 <button
                     onClick={isPlaying ? () => setIsPlaying(false) : handlePlay}
-                    className="p-1.5 bg-gold-500/10 text-gold-400 border border-gold-500/30 rounded hover:bg-gold-500/20 transition-colors"
+                    className="rounded border border-gold-500/30 bg-gold-500/10 p-1.5 text-gold-400 transition-colors hover:bg-gold-500/20"
                 >
-                    {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                    {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
                 </button>
-                <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-gray-800">
                     <div
                         className="h-full bg-gold-500 transition-all"
                         style={{ width: `${(progress / Math.max(1, result.chartData.length)) * 100}%` }}
                     />
                 </div>
-                <span className="text-[10px] text-gray-500 font-mono">
+                <span className="font-mono text-[10px] text-gray-500">
                     {progress}/{result.chartData.length}
                 </span>
             </div>

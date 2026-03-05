@@ -34,6 +34,8 @@ const SYMBOL_MAP: Record<string, string> = {
     astar: "astar",
     WLFI: "world-liberty-financial",
     "world-liberty-financial": "world-liberty-financial",
+    SHIB: "shiba-inu",
+    "shiba-inu": "shiba-inu",
 };
 
 const COINGECKO_ID_MAP: Record<string, string> = {
@@ -46,6 +48,7 @@ const COINGECKO_ID_MAP: Record<string, string> = {
     optimism: "optimism",
     astar: "astar",
     "world-liberty-financial": "world-liberty-financial",
+    "shiba-inu": "shiba-inu",
     bitcoin: "bitcoin",
     ethereum: "ethereum",
     solana: "solana",

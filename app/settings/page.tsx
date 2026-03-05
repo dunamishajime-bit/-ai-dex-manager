@@ -470,7 +470,7 @@ export default function SettingsPage() {
                                 </div>
                                 <select className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white outline-none focus:border-gold-500/50">
                                     <option>2.5-Flash</option>
-                                    <option>1.5-Pro</option>
+                                    <option>2.5-Pro</option>
                                 </select>
                             </div>
                         </div>

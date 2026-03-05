@@ -96,7 +96,7 @@ export function ControlPanel() {
                         <span className="text-xs font-mono text-gray-400">{stopLossThreshold}%</span>
                         <input
                             type="range"
-                            min="-20"
+                            min="-5"
                             max="-1"
                             value={stopLossThreshold}
                             onChange={(e) => setStopLossThreshold(parseInt(e.target.value))}
@@ -123,7 +123,7 @@ export function ControlPanel() {
                         <input
                             type="range"
                             min="1"
-                            max="50"
+                            max="10"
                             value={takeProfitThreshold}
                             onChange={(e) => setTakeProfitThreshold(parseInt(e.target.value))}
                             className="w-24 accent-gold-500 cursor-pointer"

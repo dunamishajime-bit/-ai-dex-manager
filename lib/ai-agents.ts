@@ -523,8 +523,8 @@ export function generateMockDiscussion(
 
     // Target Setting: Aim for 10x growth (Demo Goal)
     // Buy Targets: Broad range for swing
-    const tpPercent = 0.30 + Math.random() * 0.20; // +30% to +50%
-    const slPercent = 0.10; // -10%
+    const tpPercent = 0.012 + Math.random() * 0.018; // +1.2% to +3.0%
+    const slPercent = 0.008; // -0.8%
 
     // Calculate Prices
     const entryMin = price * 0.98;
@@ -674,8 +674,8 @@ export async function generateDiscussion(
                 `│  判定: **${data.result.action}**  │  信頼度: ${data.result.confidence}%\n` +
                 `├──────────────────────────────┤\n` +
                 `│  エントリー: ¥${Number((price * 0.97).toFixed(0)).toLocaleString()} 〜 ¥${Number((price * 1.01).toFixed(0)).toLocaleString()}\n` +
-                `│  TP (利確): ¥${Number((price * 1.08).toFixed(0)).toLocaleString()} (+8%)\n` +
-                `│  SL (損切り): ¥${Number((price * 0.95).toFixed(0)).toLocaleString()} (-5%)\n` +
+                `│  TP (利確): ¥${Number((price * 1.02).toFixed(0)).toLocaleString()} (+2%)\n` +
+                `│  SL (損切り): ¥${Number((price * 0.99).toFixed(0)).toLocaleString()} (-1%)\n` +
                 `└──────────────────────────────┘\n\n` +
                 `理由: ${data.result.reasoning}`,
             timestamp: Date.now() + messages.length * 2000,
@@ -690,8 +690,8 @@ export async function generateDiscussion(
             reasoning: data.result.reasoning,
             riskLevel: "MEDIUM",
             entryPrice: { min: price * 0.97, max: price * 1.01 },
-            takeProfit: data.result.action === "BUY" ? price * 1.10 : price * 0.90,
-            stopLoss: data.result.action === "BUY" ? price * 0.95 : price * 1.05,
+            takeProfit: data.result.action === "BUY" ? price * 1.02 : price * 0.98,
+            stopLoss: data.result.action === "BUY" ? price * 0.99 : price * 1.01,
             mvpAgent: data.result.mvpAgent,
             agentVotes: messages
                 .filter(m => m.agentId !== "coordinator")

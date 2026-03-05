@@ -29,7 +29,7 @@ const navItems = [
     { icon: LayoutDashboard, label: "DIS TERMINAL", href: "/" },
     { icon: BrainCircuit, label: "AI評議会", href: "/ai-agents" },
     { icon: Clock, label: "評議会履歴", href: "/ai-agents/history" },
-    { icon: Bot, label: "TraderBrain", href: "/trader-brain" },
+    { icon: Bot, label: "トレーダーブレイン", href: "/trader-brain" },
     { icon: Newspaper, label: "ニュース", href: "/news" },
     { icon: Bell, label: "通知履歴", href: "/notifications" },
     { icon: Crosshair, label: "ポジション", href: "/positions" },
@@ -49,7 +49,7 @@ export function Sidebar() {
         <>
             <button
                 onClick={() => setMobileOpen(true)}
-                className="fixed top-3 left-3 z-50 rounded-lg border border-gold-500/20 bg-cyber-darker/90 p-2 text-gold-400 md:hidden"
+                className="fixed left-3 top-3 z-50 rounded-lg border border-gold-500/20 bg-cyber-darker/90 p-2 text-gold-400 md:hidden"
             >
                 <Menu className="h-5 w-5" />
             </button>
@@ -64,10 +64,12 @@ export function Sidebar() {
             <div
                 className={cn(
                     "fixed z-50 flex h-screen w-56 shrink-0 flex-col border-r border-gold-500/10 bg-black/50 shadow-[4px_0_30px_rgba(0,0,0,0.5)] backdrop-blur-2xl transition-all duration-500 md:relative",
-                    mobileOpen ? "translate-x-0" : "-translate-x-full shadow-none md:translate-x-0 md:shadow-[4px_0_30px_rgba(0,0,0,0.5)]"
+                    mobileOpen
+                        ? "translate-x-0"
+                        : "-translate-x-full shadow-none md:translate-x-0 md:shadow-[4px_0_30px_rgba(0,0,0,0.5)]",
                 )}
             >
-                <div className="pointer-events-none absolute top-0 left-0 h-32 w-full bg-gold-500/5 blur-[50px]" />
+                <div className="pointer-events-none absolute left-0 top-0 h-32 w-full bg-gold-500/5 blur-[50px]" />
 
                 <div className="relative flex items-center gap-2 border-b border-gold-500/10 px-3 py-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 text-xs font-bold text-black shadow-[0_0_15px_rgba(255,215,0,0.4)]">
@@ -88,7 +90,7 @@ export function Sidebar() {
                     </button>
                 </div>
 
-                <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2 scrollbar-thin scrollbar-thumb-gold-500/10">
+                <nav className="scrollbar-thin scrollbar-thumb-gold-500/10 flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
                     {navItems.map((item, idx) => {
                         const isActive = pathname === item.href;
                         return (
@@ -100,21 +102,23 @@ export function Sidebar() {
                                     "group relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-1.5 text-xs transition-all duration-200 stagger-item btn-micro",
                                     isActive
                                         ? "neon-border-anim border border-gold-500/20 bg-gold-500/10 text-gold-400 shadow-[0_0_15px_rgba(255,215,0,0.05)]"
-                                        : "text-gray-500 hover:bg-gold-500/5 hover:text-gray-300"
+                                        : "text-gray-500 hover:bg-gold-500/5 hover:text-gray-300",
                                 )}
                                 style={{ animationDelay: `${idx * 0.04}s` }}
                             >
                                 {isActive ? (
-                                    <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-gold-500 to-transparent" />
+                                    <div className="absolute bottom-0 left-0 top-0 w-[2px] bg-gradient-to-b from-transparent via-gold-500 to-transparent" />
                                 ) : null}
                                 <item.icon
                                     className={cn(
                                         "h-4 w-4 transition-colors",
-                                        isActive ? "text-gold-500" : "text-gray-600 group-hover:text-gray-400"
+                                        isActive ? "text-gold-500" : "text-gray-600 group-hover:text-gray-400",
                                     )}
                                 />
                                 <span className="truncate">{item.label}</span>
-                                {isActive ? <div className="ml-auto h-1.5 w-1.5 rounded-full bg-gold-500 shadow-[0_0_5px_rgba(255,215,0,0.5)]" /> : null}
+                                {isActive ? (
+                                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-gold-500 shadow-[0_0_5px_rgba(255,215,0,0.5)]" />
+                                ) : null}
                             </Link>
                         );
                     })}

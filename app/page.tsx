@@ -5,14 +5,12 @@ import { Search } from "lucide-react";
 import { MarketOverview } from "@/components/features/MarketOverview";
 import { TradableTokensTable } from "@/components/features/TradableTokensTable";
 import { ChainFilter } from "@/components/features/ChainFilter";
-import { AgentTicker } from "@/components/features/AgentTicker";
 import { TradingPipelineManager } from "@/components/features/TradingPipelineManager";
 import { AchievementHub } from "@/components/features/AchievementHub";
 import { LearningDashboard } from "@/components/features/LearningDashboard";
 import { PerformanceAnalytics } from "@/components/features/PerformanceAnalytics";
 import { Leaderboard } from "@/components/features/Leaderboard";
 import { TerminalView } from "@/components/features/TerminalView";
-import { LiveAgentChat } from "@/components/features/LiveAgentChat";
 import { ChainId } from "@/lib/dex-service";
 import { useSimulation } from "@/context/SimulationContext";
 
@@ -23,8 +21,6 @@ export default function Home() {
     return (
         <main className="relative flex flex-1 flex-col overflow-hidden bg-cyber-black">
             <div className="pointer-events-none absolute inset-0 bg-grid-pattern bg-[size:40px_40px] opacity-[0.02]" />
-
-            <AgentTicker />
 
             <div className="relative z-10 flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
                 <div className="mx-auto max-w-[1600px] space-y-8">
@@ -49,14 +45,6 @@ export default function Home() {
                         <MarketOverview />
                     </section>
 
-                    <section>
-                        <div className="overflow-hidden rounded-xl border border-gold-500/10 bg-[#0d1117]">
-                            <div className="h-[360px]">
-                                <LiveAgentChat />
-                            </div>
-                        </div>
-                    </section>
-
                     <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                         <div className="h-[420px]">
                             <AchievementHub />
@@ -66,11 +54,11 @@ export default function Home() {
                         </div>
                     </section>
 
-                    <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-                        <div className="h-[420px]">
+                    <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                        <div className="h-[360px] xl:h-[350px]">
                             <TradingPipelineManager />
                         </div>
-                        <div>
+                        <div className="h-[360px] xl:h-[350px]">
                             <PerformanceAnalytics />
                         </div>
                     </section>

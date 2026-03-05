@@ -13,7 +13,7 @@ const STATIC_MAJORS: TokenRef[] = [
     { symbol: "XRP", name: "XRP", chain: "MAJOR", provider: "coincap", providerId: "xrp", image: "https://assets.coincap.io/assets/icons/xrp@2x.png" },
     { symbol: "ADA", name: "Cardano", chain: "MAJOR", provider: "coincap", providerId: "cardano" },
     { symbol: "AVAX", name: "Avalanche", chain: "MAJOR", provider: "coincap", providerId: "avalanche" },
-    { symbol: "DOGE", name: "Dogecoin", chain: "MAJOR", provider: "coincap", providerId: "dogecoin" },
+    { symbol: "SHIB", name: "Shiba Inu", chain: "MAJOR", provider: "coincap", providerId: "shiba-inu" },
     { symbol: "TRX", name: "TRON", chain: "MAJOR", provider: "coincap", providerId: "tron" },
     { symbol: "LINK", name: "Chainlink", chain: "MAJOR", provider: "coincap", providerId: "chainlink" },
     { symbol: "ARB", name: "Arbitrum", chain: "MAJOR", provider: "coincap", providerId: "arbitrum" },

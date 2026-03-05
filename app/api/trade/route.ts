@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveToken, NATIVE_TOKEN_ADDRESS } from "@/lib/tokens";
 import { isSupportedChain } from "@/lib/chains";
-import { createWalletClient, http, publicActions, parseUnits, erc20Abi } from "viem";
+import { createWalletClient, http, publicActions, parseUnits, formatUnits, erc20Abi } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { bsc, polygon, arbitrum, base } from "viem/chains";
+import { BOT_CONFIG } from "@/config/botConfig";
 
 export const runtime = "nodejs";
 
 const PARASWAP_API_URL = "https://api.paraswap.io";
+const TRADE_COOLDOWN_SEC = 12;
 
 // --- Module Scope Cooldown (Memory-based for minimal config reliance) ---
 const localCooldown = new Map<string, number>();
-function checkLocalCooldown(key: string, sec = 30): boolean {
+function checkLocalCooldown(key: string, sec = TRADE_COOLDOWN_SEC): boolean {
     const now = Date.now();
     const last = localCooldown.get(key) ?? 0;
     if (now - last < sec * 1000) return true;
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
         // --- 1. Payload Logging (Safety first, no secrets) ---
         console.log(`[TRADE-REQ] Received. Chain:${chainId}, Pair:${srcSymbol}->${destSymbol}, AmountWei:${amountWei}, From:${fromAddress}`);
 
-        // --- 2. Cooldown Guard (30s per fromAddress+pair) ---
+        // --- 2. Cooldown Guard (per fromAddress+pair) ---
         const cooldownKey = `cooldown:trade:${fromAddress}:${chainId}:${srcSymbol}:${destSymbol}`;
         let isDuringCooldown = false;
         const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
                 if (existing) {
                     isDuringCooldown = true;
                 } else {
-                    await redis.set(cooldownKey, "active", { ex: 30 }); // 30s expiration
+                    await redis.set(cooldownKey, "active", { ex: TRADE_COOLDOWN_SEC });
                 }
             } catch (redisErr) {
                 console.warn("[TRADE] Redis cooldown check failed, bypassing...", redisErr);
@@ -53,14 +55,17 @@ export async function POST(req: NextRequest) {
 
         if (isDuringCooldown) {
             console.warn(`[TRADE-STEP] Blocked: Redis Cooldown active for ${fromAddress}`);
-            return NextResponse.json({ ok: false, error: "Trade execution restricted. 30s cooldown in progress." }, { status: 200 });
+            return NextResponse.json(
+                { ok: false, error: `Trade execution restricted. ${TRADE_COOLDOWN_SEC}s cooldown in progress.` },
+                { status: 200 },
+            );
         }
 
         // --- 2b. Local Memory Cooldown (Fallback & Forced UI rate limit) ---
         const localKey = `${chainId}-${fromAddress}-${srcSymbol}-${destSymbol}`;
-        if (checkLocalCooldown(localKey, 30)) {
+        if (checkLocalCooldown(localKey, TRADE_COOLDOWN_SEC)) {
             console.warn(`[TRADE-STEP] Blocked: Local Cooldown hit for ${fromAddress}`);
-            return NextResponse.json({ ok: false, error: "cooldown(30s)" }, { status: 200 });
+            return NextResponse.json({ ok: false, error: `cooldown(${TRADE_COOLDOWN_SEC}s)` }, { status: 200 });
         }
         console.log(`[TRADE-STEP] Cooldown check passed.`);
 
@@ -110,6 +115,38 @@ export async function POST(req: NextRequest) {
             chain,
             transport: http(rpcUrl, { timeout: 30000 })
         }).extend(publicActions);
+
+        // --- 5b. Source Token Balance Precheck ---
+        const requiredAmount = BigInt(amountWei);
+        const isSourceNative = srcTokenInfo.address.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase();
+        if (isSourceNative) {
+            const nativeBalance = await client.getBalance({ address: account.address });
+            if (nativeBalance < requiredAmount) {
+                const required = Number(formatUnits(requiredAmount, srcTokenInfo.decimals)).toFixed(6);
+                const available = Number(formatUnits(nativeBalance, srcTokenInfo.decimals)).toFixed(6);
+                console.warn(`[TRADE-STEP] Blocked: native balance insufficient. need=${required}, have=${available}`);
+                return NextResponse.json(
+                    { ok: false, error: `Insufficient ${srcSymbol} balance`, details: `need=${required}, have=${available}` },
+                    { status: 200 },
+                );
+            }
+        } else {
+            const tokenBalance = await client.readContract({
+                address: srcTokenInfo.address as `0x${string}`,
+                abi: erc20Abi,
+                functionName: "balanceOf",
+                args: [account.address],
+            });
+            if (tokenBalance < requiredAmount) {
+                const required = Number(formatUnits(requiredAmount, srcTokenInfo.decimals)).toFixed(6);
+                const available = Number(formatUnits(tokenBalance, srcTokenInfo.decimals)).toFixed(6);
+                console.warn(`[TRADE-STEP] Blocked: token balance insufficient. need=${required}, have=${available}`);
+                return NextResponse.json(
+                    { ok: false, error: `Insufficient ${srcSymbol} balance`, details: `need=${required}, have=${available}` },
+                    { status: 200 },
+                );
+            }
+        }
 
         // --- 6. ParaSwap Price Fetch ---
         const priceUrl = `${PARASWAP_API_URL}/prices?srcToken=${srcTokenInfo.address}&destToken=${destTokenInfo.address}&amount=${amountWei}&network=${chainId}&side=SELL&srcDecimals=${srcTokenInfo.decimals}&destDecimals=${destTokenInfo.decimals}`;
@@ -161,13 +198,18 @@ export async function POST(req: NextRequest) {
 
         // --- 8. ParaSwap Transaction Build ---
         const txUrl = `${PARASWAP_API_URL}/transactions/${chainId}`;
+        const pairKey = [srcSymbol, destSymbol].sort().join("_") as keyof typeof BOT_CONFIG.SLIPPAGE;
+        const slippageBps = BOT_CONFIG.SLIPPAGE[pairKey] ?? 100;
         const txBody: any = {
             srcToken: srcTokenInfo.address,
             destToken: destTokenInfo.address,
             srcAmount: amountWei,
             userAddress: account.address,
             priceRoute: priceRoute,
-            slippage: 100, // 1% is standard. Increased only if specifically needed.
+            srcDecimals: srcTokenInfo.decimals,
+            destDecimals: destTokenInfo.decimals,
+            slippage: slippageBps,
+            partner: "dis-terminal",
         };
 
         // --- 8b. Re-entrancy / Conflict Guard (As requested: ensure slippage/destAmount don't coexist) ---
@@ -179,18 +221,39 @@ export async function POST(req: NextRequest) {
             }, { status: 200 });
         }
 
+        const buildTransaction = async (url: string, body: Record<string, unknown>) => {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+            const rawText = await response.text();
+            return { response, rawText };
+        };
+
         console.log(`[TRADE-STEP] ParaSwap Build Req: ${txUrl}`);
-        const txRes = await fetch(txUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(txBody),
-        });
-        const txJsonText = await txRes.text();
+        let { response: txRes, rawText: txJsonText } = await buildTransaction(txUrl, txBody);
+
+        if (!txRes.ok) {
+            const retryUrl = `${txUrl}?ignoreChecks=true&ignoreGasEstimate=true`;
+            console.warn(`[TRADE-STEP] ParaSwap Build retry with relaxed checks: ${retryUrl}`);
+            const retryResult = await buildTransaction(retryUrl, txBody);
+            txRes = retryResult.response;
+            txJsonText = retryResult.rawText;
+        }
 
         if (!txRes.ok) {
             console.error(`[TRADE-STEP] Error: ParaSwap Build Failed (${txRes.status})`);
-            return NextResponse.json({ ok: false, error: `ParaSwap Build Failed (${txRes.status})`, details: txJsonText.slice(0, 200) }, { status: 200 });
+            return NextResponse.json(
+                {
+                    ok: false,
+                    error: `ParaSwap Build Failed (${txRes.status})`,
+                    details: txJsonText.slice(0, 600),
+                },
+                { status: 200 },
+            );
         }
+
         const txData = JSON.parse(txJsonText);
         console.log(`[TRADE-STEP] ParaSwap Build OK. Tx Data ready.`);
 

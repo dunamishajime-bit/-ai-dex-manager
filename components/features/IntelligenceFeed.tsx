@@ -18,7 +18,7 @@ const INTELLIGENCE_LOGS = [
     "Sentiment scan: Fear & Greed Index at 64 (Greed)",
     "Whale alert: 500 BTC moved to cold storage",
     "Technical: RSI(14) in neutral territory at 52",
-    "Processing agent messages via Gemini-1.5-Pro flash...",
+    "Processing agent messages via Gemini-2.5-Flash...",
     "Auto-trade pipeline: Monitoring gas prices (Current: 12 gwei)",
     "Sentiment update: Influencer 'vitalik.eth' mentioned L2 scaling",
 ];

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { AIAgent, AI_AGENTS } from "@/lib/ai-agents";
 
 export interface LearningEvent {
@@ -29,34 +29,32 @@ const AgentContext = createContext<AgentContextType | undefined>(undefined);
 export function AgentProvider({ children }: { children: ReactNode }) {
     const [agents, setAgents] = useState<AIAgent[]>(AI_AGENTS);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [latestMessage, setLatestMessage] = useState<{ agentId: string; text: string; timestamp: number } | null>(null);
+    const [isCouncilActive, setIsCouncilActive] = useState(false);
+    const [learningEvents, setLearningEvents] = useState<LearningEvent[]>([]);
 
-    // Initialize from localStorage
     useEffect(() => {
         const stored = localStorage.getItem("jdex_agents");
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
-                // Merge with default ensuring new fields/agents are handled if structure changes
-                // For now, simple replacement, but fallback to ID matching is safer
-                const merged = AI_AGENTS.map(defaultAgent => {
-                    const found = parsed.find((p: AIAgent) => p.id === defaultAgent.id);
+                const merged = AI_AGENTS.map((defaultAgent) => {
+                    const found = parsed.find((entry: AIAgent) => entry.id === defaultAgent.id);
                     return found ? { ...defaultAgent, ...found } : defaultAgent;
                 });
                 setAgents(merged);
-            } catch (e) {
-                console.error("Failed to parse stored agents", e);
+            } catch (error) {
+                console.error("Failed to parse stored agents", error);
             }
         }
         setIsLoaded(true);
     }, []);
 
     const updateAgent = (id: string, updates: Partial<AIAgent>) => {
-        setAgents(prev => {
-            const newAgents = prev.map(agent =>
-                agent.id === id ? { ...agent, ...updates } : agent
-            );
-            localStorage.setItem("jdex_agents", JSON.stringify(newAgents));
-            return newAgents;
+        setAgents((prev) => {
+            const next = prev.map((agent) => (agent.id === id ? { ...agent, ...updates } : agent));
+            localStorage.setItem("jdex_agents", JSON.stringify(next));
+            return next;
         });
     };
 
@@ -65,22 +63,17 @@ export function AgentProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("jdex_agents");
     };
 
-    const getAgent = (id: string) => agents.find(a => a.id === id);
-
-    // Autonomous Chat Logic hooks (Must be before any conditional return)
-    const [latestMessage, setLatestMessage] = useState<{ agentId: string; text: string; timestamp: number } | null>(null);
-    const [isCouncilActive, setIsCouncilActive] = useState(false);
-    const [learningEvents, setLearningEvents] = useState<LearningEvent[]>([]);
+    const getAgent = (id: string) => agents.find((agent) => agent.id === id);
 
     const addLearningEvent = (event: Omit<LearningEvent, "id" | "timestamp">) => {
-        const newEvent = {
+        const newEvent: LearningEvent = {
             ...event,
-            id: `learn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            timestamp: Date.now()
+            id: `learn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+            timestamp: Date.now(),
         };
-        setLearningEvents(prev => [newEvent, ...prev].slice(0, 50)); // Keep last 50
 
-        // Also update agent's knowledge
+        setLearningEvents((prev) => [newEvent, ...prev].slice(0, 50));
+
         updateAgent(event.agentId, {
             knowledge: [
                 ...(getAgent(event.agentId)?.knowledge || []),
@@ -89,9 +82,9 @@ export function AgentProvider({ children }: { children: ReactNode }) {
                     topic: event.topic,
                     content: event.content,
                     timestamp: newEvent.timestamp,
-                    importance: 5
-                }
-            ].slice(-10) // Keep last 10 knowledge items per agent
+                    importance: 5,
+                },
+            ].slice(-10),
         });
     };
 
@@ -106,80 +99,38 @@ export function AgentProvider({ children }: { children: ReactNode }) {
             updateAgent(id, {
                 personality: result.personality,
                 personalityMatrix: result.personalityMatrix,
-                rolePrompt: result.rolePrompt
+                rolePrompt: result.rolePrompt,
             });
 
-            // The notification will be handled by SimulationContext or here
             setLatestMessage({
                 agentId: "coordinator",
-                text: `[進化したAI] ${agent.name}が最新情報を学び、能力が強化されました: ${result.evolutionMessage}`,
-                timestamp: Date.now()
+                text: `${agent.name} updated its analysis profile based on the latest market information.`,
+                timestamp: Date.now(),
             });
-
-        } catch (e) {
-            console.error("Evolution failed", e);
+        } catch (error) {
+            console.error("Evolution failed", error);
         }
     };
 
-    useEffect(() => {
-        if (!isLoaded) return;
-
-        // Skip welcome and auto-chat if Council is active
-        if (isCouncilActive) return;
-
-        // Initial welcome message (only if not active)
-        const welcomeTimer = setTimeout(() => {
-            if (!isCouncilActive) {
-                setLatestMessage({
-                    agentId: "coordinator",
-                    text: "DIS-DEXへようこそ。市場の監視を開始します。",
-                    timestamp: Date.now()
-                });
-            }
-        }, 2000);
-
-        // Auto-chat loop
-        const intervalId = setInterval(async () => {
-            if (isCouncilActive) return; // Don't chat during council
-            try {
-                const { generateIdleChat } = await import("@/lib/gemini-service");
-                const result = await generateIdleChat(agents);
-                setLatestMessage({
-                    agentId: result.agentId,
-                    text: result.text,
-                    timestamp: Date.now()
-                });
-
-                // Random learning event simulation (10% chance)
-                if (Math.random() > 0.9) {
-                    const topics = ["MACDゴールデンクロス", "SNSセンチメント急騰", "ラグプル危機の回避", "長期ファンダメンタル指標"];
-                    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-                    addLearningEvent({
-                        agentId: result.agentId,
-                        topic: randomTopic,
-                        content: `市場の特定の挙動から、新しい${randomTopic}のパターンを学習しました。今後の提案に反映します。`
-                    });
-                }
-            } catch (e) {
-                console.error("Auto chat error", e);
-            }
-        }, 45000);
-
-        return () => {
-            clearTimeout(welcomeTimer);
-            clearInterval(intervalId);
-        };
-    }, [isLoaded, agents, isCouncilActive]);
-
     if (!isLoaded) {
-        return null; // Hook calling order is now safe
+        return null;
     }
 
     return (
-        <AgentContext.Provider value={{
-            agents, updateAgent, resetAgents, getAgent, latestMessage, isCouncilActive, setIsCouncilActive,
-            learningEvents, addLearningEvent, evolveAgent
-        }}>
+        <AgentContext.Provider
+            value={{
+                agents,
+                updateAgent,
+                resetAgents,
+                getAgent,
+                latestMessage,
+                isCouncilActive,
+                setIsCouncilActive,
+                learningEvents,
+                addLearningEvent,
+                evolveAgent,
+            }}
+        >
             {children}
         </AgentContext.Provider>
     );

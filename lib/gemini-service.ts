@@ -13,6 +13,7 @@ function formatUSD(value: number): string {
 
 
 const API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 export interface GeminiDiscussionResult {
     messages: { agentId: string; content: string; round?: number; type?: string }[];
@@ -67,7 +68,7 @@ export async function generateGeminiDiscussion(
 
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
         const agentDescription = customAgents && customAgents.length > 0
             ? formatAgentsForPrompt(customAgents)
@@ -509,7 +510,7 @@ export async function generateIdleChat(
 
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
         const prompt = `
         あなたは暗号通貨AIエージェントの「${randomAgent.name}」です。
@@ -638,7 +639,7 @@ export async function evolveAgent(
 
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
         const prompt = `あなたはAIエージェントの進化を司る『エボリューション・エンジン』です。
 エージェント「${agent.name}」が現在、以下の情報を取得し学びを終えました。
