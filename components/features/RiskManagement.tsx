@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSimulation } from "@/context/SimulationContext";
 import { ShieldAlert, TrendingUp, Zap, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ export function RiskManagement() {
         isFlashEnabled, setIsFlashEnabled,
         addMessage,
     } = useSimulation();
+    const [saveNotice, setSaveNotice] = useState<"saved" | "error" | null>(null);
 
     const handleSave = () => {
         const payload = {
@@ -22,10 +24,18 @@ export function RiskManagement() {
         try {
             localStorage.setItem("jdex_risk_settings", JSON.stringify(payload));
             addMessage("SYSTEM", "リスク設定を保存しました。", "SYSTEM");
+            setSaveNotice("saved");
         } catch (e) {
             addMessage("SYSTEM", "リスク設定の保存に失敗しました。", "ALERT");
+            setSaveNotice("error");
         }
     };
+
+    useEffect(() => {
+        if (!saveNotice) return;
+        const timer = window.setTimeout(() => setSaveNotice(null), 2200);
+        return () => window.clearTimeout(timer);
+    }, [saveNotice]);
 
     return (
         <div className="px-3 py-2 space-y-3">
@@ -138,6 +148,12 @@ export function RiskManagement() {
                 >
                     設定を保存
                 </button>
+                {saveNotice === "saved" ? (
+                    <p className="mt-1 text-center text-[10px] font-bold text-emerald-400">保存しました</p>
+                ) : null}
+                {saveNotice === "error" ? (
+                    <p className="mt-1 text-center text-[10px] font-bold text-rose-400">保存に失敗しました</p>
+                ) : null}
             </div>
         </div>
     );

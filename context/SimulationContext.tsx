@@ -33,18 +33,21 @@ const DAILY_COMPOUND_TARGET_PCT = 10;
 const LIVE_MIN_ORDER_USD = 3.5;
 const LIVE_TARGET_ORDER_USD = 3.7;
 const BNB_GAS_RESERVE_USD = 1.0;
+const DEFAULT_RISK_TOLERANCE = 4; // Aggressive
+const DEFAULT_STOP_LOSS_THRESHOLD = -5;
+const DEFAULT_TAKE_PROFIT_THRESHOLD = 8;
 const LIVE_EXECUTION_PREFERRED_SYMBOLS: Record<number, Set<string>> = {
     56: new Set(["BNB", "ETH", "LINK", "SHIB"]),
     137: new Set(["MATIC"]),
 };
 
 function clampScalpStopLoss(value: number) {
-    const abs = Math.max(1, Math.min(3, Math.abs(Number(value) || 1)));
+    const abs = Math.max(1, Math.min(5, Math.abs(Number(value) || Math.abs(DEFAULT_STOP_LOSS_THRESHOLD))));
     return -abs;
 }
 
 function clampScalpTakeProfit(value: number) {
-    return Math.max(1, Math.min(4, Number(value) || 2));
+    return Math.max(1, Math.min(10, Number(value) || DEFAULT_TAKE_PROFIT_THRESHOLD));
 }
 
 function normalizeTrackedSymbol(symbol: string): string {
@@ -859,9 +862,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     } : INITIAL_PORTFOLIO);
 
     // Strategy Management
-    const [riskTolerance, setRiskTolerance] = useState(5); // 1-5 (default Aggressive)
-    const [stopLossThreshold, setStopLossThreshold] = useState(-5);
-    const [takeProfitThreshold, setTakeProfitThreshold] = useState(8);
+    const [riskTolerance, setRiskTolerance] = useState(DEFAULT_RISK_TOLERANCE); // 1-5 (default Aggressive)
+    const [stopLossThreshold, setStopLossThreshold] = useState(DEFAULT_STOP_LOSS_THRESHOLD);
+    const [takeProfitThreshold, setTakeProfitThreshold] = useState(DEFAULT_TAKE_PROFIT_THRESHOLD);
     const [isFlashEnabled, setIsFlashEnabled] = useState(true);
 
     const { jpyRate } = useCurrency();
@@ -2024,13 +2027,6 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         return [...filtered, updated];
                     });
 
-                    // Apply settings if present
-                    if (updated.proposedSettings) {
-                        setRiskTolerance(updated.proposedSettings.riskTolerance);
-                        setStopLossThreshold(clampScalpStopLoss(updated.proposedSettings.stopLoss));
-                        setTakeProfitThreshold(clampScalpTakeProfit(updated.proposedSettings.takeProfit));
-                    }
-
                     addMessage("SYSTEM", "戦略を有効化: " + updated.title + " (ブロック: " + (updated.durationBlock || "N/A") + ")", "SYSTEM");
                 }
                 return updated;
@@ -2153,10 +2149,21 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         if (storedRisk) {
             try {
                 const r = JSON.parse(storedRisk);
-                setRiskTolerance(r.tolerance);
-                setStopLossThreshold(clampScalpStopLoss(r.stopLoss));
-                setTakeProfitThreshold(clampScalpTakeProfit(r.takeProfit));
-            } catch (e) { }
+                const nextTolerance = Math.max(1, Math.min(5, Number(r.tolerance) || DEFAULT_RISK_TOLERANCE));
+                const nextStopLoss = clampScalpStopLoss(r.stopLoss);
+                const nextTakeProfit = clampScalpTakeProfit(r.takeProfit);
+                setRiskTolerance(nextTolerance);
+                setStopLossThreshold(nextStopLoss);
+                setTakeProfitThreshold(nextTakeProfit);
+            } catch (e) {
+                setRiskTolerance(DEFAULT_RISK_TOLERANCE);
+                setStopLossThreshold(DEFAULT_STOP_LOSS_THRESHOLD);
+                setTakeProfitThreshold(DEFAULT_TAKE_PROFIT_THRESHOLD);
+            }
+        } else {
+            setRiskTolerance(DEFAULT_RISK_TOLERANCE);
+            setStopLossThreshold(DEFAULT_STOP_LOSS_THRESHOLD);
+            setTakeProfitThreshold(DEFAULT_TAKE_PROFIT_THRESHOLD);
         }
 
         const storedDemoBalance = localStorage.getItem("jdex_demo_balance");
