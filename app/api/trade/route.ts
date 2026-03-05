@@ -10,6 +10,7 @@ export const runtime = "nodejs";
 
 const PARASWAP_API_URL = "https://api.paraswap.io";
 const TRADE_COOLDOWN_SEC = 12;
+const DEFAULT_GAS_LIMIT = 350000n;
 
 // --- Module Scope Execution Guards ---
 const localSuccessCooldown = new Map<string, number>();
@@ -127,6 +128,13 @@ export async function POST(req: NextRequest) {
         // --- 5. Client Setup ---
         const chainMapping: Record<number, any> = { 56: bsc, 137: polygon, 42161: arbitrum, 8453: base };
         const chain = chainMapping[chainId];
+        const nativeSymbolByChain: Record<number, string> = {
+            56: "BNB",
+            137: "POL",
+            42161: "ETH",
+            8453: "ETH",
+        };
+        const nativeSymbol = nativeSymbolByChain[chainId] || "ETH";
 
         const client = createWalletClient({
             account,
@@ -276,14 +284,41 @@ export async function POST(req: NextRequest) {
         console.log(`[TRADE-STEP] ParaSwap Build OK. Tx Data ready.`);
 
         // --- 9. Send Final Swap Transaction ---
+        const nativeBalanceBeforeSend = await client.getBalance({ address: account.address });
+        const txValue = BigInt(txData.value || "0");
+        const gasLimit = txData.gas ? BigInt(Math.floor(Number(txData.gas) * 1.5)) : DEFAULT_GAS_LIMIT;
+        let gasPrice: bigint;
+        try {
+            gasPrice = txData.gasPrice ? BigInt(txData.gasPrice) : await client.getGasPrice();
+        } catch {
+            gasPrice = await client.getGasPrice();
+        }
+        const estimatedNativeRequired = txValue + (gasLimit * gasPrice);
+
+        if (nativeBalanceBeforeSend < estimatedNativeRequired) {
+            const required = Number(formatUnits(estimatedNativeRequired, 18));
+            const available = Number(formatUnits(nativeBalanceBeforeSend, 18));
+            console.warn(
+                `[TRADE-STEP] Blocked: native gas balance insufficient. need=${required.toFixed(6)} ${nativeSymbol}, have=${available.toFixed(6)} ${nativeSymbol}`,
+            );
+            return NextResponse.json(
+                {
+                    ok: false,
+                    error: `Insufficient ${nativeSymbol} for gas`,
+                    details: `need=${required.toFixed(6)} ${nativeSymbol}, have=${available.toFixed(6)} ${nativeSymbol}`,
+                },
+                { status: 200 },
+            );
+        }
+
         console.log(`[TRADE-STEP] Final Swap Tx sending to ${txData.to}...`);
         const hash = await client.sendTransaction({
             account,
             chain,
             to: txData.to as `0x${string}`,
             data: txData.data as `0x${string}`,
-            value: BigInt(txData.value),
-            gas: txData.gas ? BigInt(Math.floor(Number(txData.gas) * 1.5)) : undefined,
+            value: txValue,
+            gas: gasLimit,
         });
 
         markLocalSuccessCooldown(localExecutionKey);
