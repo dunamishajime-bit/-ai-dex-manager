@@ -39,7 +39,7 @@ function TokenAvatar({ symbol, name, image }: { symbol?: string; name?: string; 
 }
 
 export function MarketOverview() {
-    const { portfolio, isDemoMode, demoBalance, marketRegime, liveInitialBalance } = useSimulation();
+    const { portfolio, isDemoMode, demoBalance, marketRegime } = useSimulation();
     const { formatPrice, currency, setJpyRate } = useCurrency();
     const { isConnected } = useAccount();
 
@@ -83,9 +83,9 @@ export function MarketOverview() {
 
     const principal = useMemo(() => {
         if (isDemoMode) return Number.isFinite(demoBalance) ? demoBalance : currentTotal;
-        if (Number.isFinite(liveInitialBalance) && liveInitialBalance > 0) return liveInitialBalance;
+        // Live mode: keep displayed principal aligned with synced wallet total to avoid false PnL drift.
         return currentTotal;
-    }, [currentTotal, demoBalance, isDemoMode, liveInitialBalance]);
+    }, [currentTotal, demoBalance, isDemoMode]);
 
     const dailyPnl = currentTotal - principal;
     const pnlColor = dailyPnl >= 0 ? "text-emerald-400" : "text-red-400";

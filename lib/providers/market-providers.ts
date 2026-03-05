@@ -28,24 +28,47 @@ export function priceKey(t: TokenRef): string {
 }
 
 export async function fetchUsdJpy(): Promise<{ rate: number; updatedAt: number }> {
+    const parseRate = (value: unknown) => {
+        const rate = Number(value);
+        return Number.isFinite(rate) && rate > 50 && rate < 300 ? rate : 0;
+    };
+
     try {
-        // Using a reliable free FX API
         const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=JPY", {
             cache: "no-store",
             next: { revalidate: 0 } // App Router cache bypass
         });
         const j = await res.json();
-        const rate = Number(j?.rates?.JPY);
-
-        if (!rate || rate < 50) {
+        const rate = parseRate(j?.rates?.JPY);
+        if (!rate) {
             throw new Error("Invalid rate from primary FX source");
         }
         return { rate, updatedAt: Date.now() };
     } catch (e) {
-        console.warn("[FX] Primary fetch failed, using fallback:", e);
-        // Fallback to a secondary source or static approximate
-        return { rate: 150.0, updatedAt: Date.now() }; // Safe approximation for JPY
+        console.warn("[FX] Primary fetch failed, trying secondary source:", e);
     }
+
+    try {
+        const res = await fetch("https://open.er-api.com/v6/latest/USD", { cache: "no-store" });
+        const j = await res.json();
+        const rate = parseRate(j?.rates?.JPY);
+        if (!rate) throw new Error("Invalid rate from ER API");
+        return { rate, updatedAt: Date.now() };
+    } catch (e) {
+        console.warn("[FX] Secondary fetch failed, trying tertiary source:", e);
+    }
+
+    try {
+        const res = await fetch("https://api.frankfurter.app/latest?from=USD&to=JPY", { cache: "no-store" });
+        const j = await res.json();
+        const rate = parseRate(j?.rates?.JPY);
+        if (!rate) throw new Error("Invalid rate from Frankfurter");
+        return { rate, updatedAt: Date.now() };
+    } catch (e) {
+        console.warn("[FX] Tertiary fetch failed, using fallback:", e);
+    }
+
+    return { rate: 155.0, updatedAt: Date.now() };
 }
 
 export function toJpy(usd: number, usdJpy: number): number {

@@ -428,11 +428,18 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const [aiPopupMessage, setAiPopupMessage] = useState<Message | null>(null);
     const [selectedCurrency, setSelectedCurrency] = useState<Currency>("BNB");
     const [tradeInProgress, setTradeInProgress] = useState(false);
+    const tradeExecutionLockRef = useRef(false);
     const lastTradeErrorTime = useRef<number>(0);
     const nextTradeAllowedAtRef = useRef<number>(0);
     const symbolCooldownRef = useRef<Record<string, number>>({});
     const [news, setNews] = useState<MarketNews[]>([]);
     const [lastAction, setLastAction] = useState<"BUY" | "SELL" | null>(null);
+
+    useEffect(() => {
+        if (!tradeInProgress) {
+            tradeExecutionLockRef.current = false;
+        }
+    }, [tradeInProgress]);
 
     // Persist isSimulating
     const setIsSimulating = (val: boolean) => {
@@ -1301,7 +1308,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         // Mitigation: Setting to false as we are implementing robust locks
         const HARD_STOP_TRADING = false;
 
-        if (tradeInProgress) {
+        if (tradeExecutionLockRef.current || tradeInProgress) {
             console.warn("[TRADE_BLOCKED] Trade already in progress. Skipping duplicate request.", { tokenSymbol, action });
             return false;
         }
@@ -1328,12 +1335,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         const IS_PROD = process.env.NODE_ENV === "production";
 
         // [LOCK GUARD] Prevent concurrent trades
-        if (tradeInProgress) {
+        if (tradeExecutionLockRef.current || tradeInProgress) {
             console.warn("[TRADE_BLOCKED] Trade already in progress.");
             return false;
         }
 
         // Set lock early
+        tradeExecutionLockRef.current = true;
         setTradeInProgress(true);
         lastTradeRef.current = Date.now();
 
@@ -2691,7 +2699,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     // [REFINED GUARD] Autonomous execution must respect locks and cooldown
                     const now = Date.now();
                     const autonomousCooldown = isDemoMode ? 20000 : 12000; // live is faster for short-term scalping
-                    const canExecuteAutonomous = isAutoPilotEnabled &&
+                    const canExecuteAutonomous = isDemoMode &&
+                        isAutoPilotEnabled &&
                         !tradeInProgress &&
                         (now - lastTradeRef.current > autonomousCooldown);
 
@@ -2793,7 +2802,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 }
             }
 
-            if (isSimulating && (isDemoMode || isAutoPilotEnabled)) {
+            if (isSimulating && isDemoMode) {
                 // 1. Risk Management Check (Positions level)
                 const currentPortfolio = portfolioRef.current;
                 for (const pos of currentPortfolio.positions) {
@@ -2855,14 +2864,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     }
                 }
 
-                if (isDemoMode || isAutoPilotEnabled) {
-                    if (!isDemoMode && (!effectiveIsConnected || !effectiveAddress || !effectiveChainId || !publicClient)) {
-                        if (isActiveRef.current) {
-                            timeoutId = setTimeout(loop, Math.random() * 3000 + 1000);
-                        }
-                        return;
-                    }
-
+                if (isDemoMode) {
                     const baseBalance = isDemoMode ? demoBalance : portfolioRef.current.cashbalance;
                     let targetSymbol = selectedCurrency;
 
@@ -3136,7 +3138,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         };
 
         const runLiveAutoTick = async () => {
-            if (cancelled || tradeInProgress) {
+            if (cancelled || tradeExecutionLockRef.current || tradeInProgress) {
                 emitLiveAutoStatus("skip: tradeInProgress or cancelled");
                 return;
             }

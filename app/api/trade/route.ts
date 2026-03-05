@@ -11,19 +11,24 @@ export const runtime = "nodejs";
 const PARASWAP_API_URL = "https://api.paraswap.io";
 const TRADE_COOLDOWN_SEC = 12;
 
-// --- Module Scope Cooldown (Memory-based for minimal config reliance) ---
-const localCooldown = new Map<string, number>();
-function checkLocalCooldown(key: string, sec = TRADE_COOLDOWN_SEC): boolean {
+// --- Module Scope Execution Guards ---
+const localSuccessCooldown = new Map<string, number>();
+const localInFlightTrades = new Set<string>();
+function isLocalSuccessCooldownActive(key: string, sec = TRADE_COOLDOWN_SEC): boolean {
     const now = Date.now();
-    const last = localCooldown.get(key) ?? 0;
+    const last = localSuccessCooldown.get(key) ?? 0;
     if (now - last < sec * 1000) return true;
-    localCooldown.set(key, now);
     return false;
+}
+function markLocalSuccessCooldown(key: string) {
+    localSuccessCooldown.set(key, Date.now());
 }
 
 export async function POST(req: NextRequest) {
     const startTime = Date.now();
     let requestPayload: any = {};
+    let acquiredExecutionSlot = false;
+    let localExecutionKey = "";
 
     try {
         requestPayload = await req.json();
@@ -34,19 +39,39 @@ export async function POST(req: NextRequest) {
 
         // --- 2. Cooldown Guard (per fromAddress+pair) ---
         const cooldownKey = `cooldown:trade:${fromAddress}:${chainId}:${srcSymbol}:${destSymbol}`;
+        localExecutionKey = `${chainId}-${fromAddress}-${srcSymbol}-${destSymbol}`;
+
+        if (localInFlightTrades.has(localExecutionKey)) {
+            console.warn(`[TRADE-STEP] Blocked: Local in-flight guard for ${fromAddress}`);
+            return NextResponse.json(
+                { ok: false, error: "Trade execution already in progress. Please wait a few seconds." },
+                { status: 200 },
+            );
+        }
+
+        if (isLocalSuccessCooldownActive(localExecutionKey, TRADE_COOLDOWN_SEC)) {
+            console.warn(`[TRADE-STEP] Blocked: Local success cooldown hit for ${fromAddress}`);
+            return NextResponse.json(
+                { ok: false, error: `Trade execution restricted. ${TRADE_COOLDOWN_SEC}s cooldown in progress.` },
+                { status: 200 },
+            );
+        }
+
+        localInFlightTrades.add(localExecutionKey);
+        acquiredExecutionSlot = true;
+
         let isDuringCooldown = false;
+        let redis: any = null;
         const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
         const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
         if (KV_URL && KV_TOKEN) {
             try {
                 const { Redis } = await import('@upstash/redis');
-                const redis = new Redis({ url: KV_URL, token: KV_TOKEN });
+                redis = new Redis({ url: KV_URL, token: KV_TOKEN });
                 const existing = await redis.get(cooldownKey);
                 if (existing) {
                     isDuringCooldown = true;
-                } else {
-                    await redis.set(cooldownKey, "active", { ex: TRADE_COOLDOWN_SEC });
                 }
             } catch (redisErr) {
                 console.warn("[TRADE] Redis cooldown check failed, bypassing...", redisErr);
@@ -59,13 +84,6 @@ export async function POST(req: NextRequest) {
                 { ok: false, error: `Trade execution restricted. ${TRADE_COOLDOWN_SEC}s cooldown in progress.` },
                 { status: 200 },
             );
-        }
-
-        // --- 2b. Local Memory Cooldown (Fallback & Forced UI rate limit) ---
-        const localKey = `${chainId}-${fromAddress}-${srcSymbol}-${destSymbol}`;
-        if (checkLocalCooldown(localKey, TRADE_COOLDOWN_SEC)) {
-            console.warn(`[TRADE-STEP] Blocked: Local Cooldown hit for ${fromAddress}`);
-            return NextResponse.json({ ok: false, error: `cooldown(${TRADE_COOLDOWN_SEC}s)` }, { status: 200 });
         }
         console.log(`[TRADE-STEP] Cooldown check passed.`);
 
@@ -268,6 +286,15 @@ export async function POST(req: NextRequest) {
             gas: txData.gas ? BigInt(Math.floor(Number(txData.gas) * 1.5)) : undefined,
         });
 
+        markLocalSuccessCooldown(localExecutionKey);
+        if (redis) {
+            try {
+                await redis.set(cooldownKey, "active", { ex: TRADE_COOLDOWN_SEC });
+            } catch (redisErr) {
+                console.warn("[TRADE] Failed to persist Redis cooldown after successful trade:", redisErr);
+            }
+        }
+
         console.log(`[TRADE-STEP] SUCCESS. TxHash: ${hash}. Duration: ${Date.now() - startTime}ms`);
         return NextResponse.json({ ok: true, txHash: hash });
 
@@ -283,5 +310,9 @@ export async function POST(req: NextRequest) {
             error: safeMessage,
             details: "Check server logs for full trace."
         }, { status: 200 });
+    } finally {
+        if (acquiredExecutionSlot && localExecutionKey) {
+            localInFlightTrades.delete(localExecutionKey);
+        }
     }
 }
