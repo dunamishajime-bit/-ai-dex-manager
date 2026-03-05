@@ -11,6 +11,15 @@ function explorerUrl(chain?: string, hash?: string) {
 }
 
 function formatJPY(value: number) {
+    if (!Number.isFinite(value)) return "-";
+    const abs = Math.abs(value);
+    if (abs === 0) return "¥0";
+    if (abs < 1) {
+        return `¥${value.toLocaleString("ja-JP", { minimumFractionDigits: 6, maximumFractionDigits: 6 })}`;
+    }
+    if (abs < 1000) {
+        return `¥${value.toLocaleString("ja-JP", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
     return `¥${Math.round(value).toLocaleString("ja-JP")}`;
 }
 
@@ -19,56 +28,70 @@ function formatAmount(value: number) {
 }
 
 export default function TraderBrainPage() {
-    const { transactions, stopLossThreshold, takeProfitThreshold, convertJPY } = useSimulation();
+    const { transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData } = useSimulation();
 
     const reviewedTrades = useMemo(() => {
         return transactions.map((tx, index) => {
-            const entryPriceUsd = tx.entryPrice || tx.price;
+            const marketPriceUsd = allMarketData[tx.symbol]?.price || 0;
+            const entryPriceUsd = tx.entryPrice && tx.entryPrice > 0
+                ? tx.entryPrice
+                : tx.price && tx.price > 0
+                    ? tx.price
+                    : marketPriceUsd;
+            const currentPriceUsd = tx.price && tx.price > 0 ? tx.price : (marketPriceUsd || entryPriceUsd);
             const scalpTpPct = Math.max(1, Math.min(4, takeProfitThreshold));
             const scalpSlPct = Math.max(1, Math.min(3, Math.abs(stopLossThreshold)));
             const fallbackTakeProfitUsd = entryPriceUsd * (1 + scalpTpPct / 100);
             const fallbackStopLossUsd = entryPriceUsd * (1 - scalpSlPct / 100);
             const plannedTakeProfitUsd = Math.min(tx.plannedTakeProfit || fallbackTakeProfitUsd, entryPriceUsd * 1.04);
             const plannedStopLossUsd = Math.max(tx.plannedStopLoss || fallbackStopLossUsd, entryPriceUsd * 0.97);
+            const pnlUsd =
+                tx.pnl !== undefined
+                    ? tx.pnl
+                    : tx.type === "BUY" && entryPriceUsd > 0 && currentPriceUsd > 0
+                        ? (currentPriceUsd - entryPriceUsd) * tx.amount
+                        : undefined;
 
             const resultLabel =
                 tx.type === "SELL"
-                    ? (tx.pnl || 0) > 0
+                    ? (pnlUsd || 0) > 0
                         ? "利確"
-                        : (tx.pnl || 0) < 0
+                        : (pnlUsd || 0) < 0
                             ? "損切り"
                             : "建値決済"
                     : "新規エントリー";
 
             const resultClass =
                 tx.type === "SELL"
-                    ? (tx.pnl || 0) > 0
+                    ? (pnlUsd || 0) > 0
                         ? "border-emerald-500/30 text-emerald-400"
-                        : (tx.pnl || 0) < 0
+                        : (pnlUsd || 0) < 0
                             ? "border-rose-500/30 text-rose-400"
                             : "border-gray-500/20 text-gray-300"
                     : "border-sky-500/30 text-sky-400";
 
             const summary =
                 tx.type === "SELL"
-                    ? (tx.pnl || 0) < 0
-                        ? `エントリー価格 ${formatJPY(convertJPY(entryPriceUsd))} に対して、決済価格 ${formatJPY(convertJPY(tx.price))} で損失確定しました。予定していた損切り目安 ${formatJPY(convertJPY(plannedStopLossUsd))} 付近で下振れを抑えています。`
-                        : `エントリー価格 ${formatJPY(convertJPY(entryPriceUsd))} に対して、決済価格 ${formatJPY(convertJPY(tx.price))} で利益確定しました。予定していた利確目安 ${formatJPY(convertJPY(plannedTakeProfitUsd))} に沿った決済です。`
-                    : `新規エントリー価格は ${formatJPY(convertJPY(tx.price))} です。利確候補は ${formatJPY(convertJPY(plannedTakeProfitUsd))}、損切り候補は ${formatJPY(convertJPY(plannedStopLossUsd))} として計画されています。`;
+                    ? (pnlUsd || 0) < 0
+                        ? `エントリー価格 ${formatJPY(convertJPY(entryPriceUsd))} に対して、決済価格 ${formatJPY(convertJPY(currentPriceUsd))} で損失確定しました。予定していた損切り目安 ${formatJPY(convertJPY(plannedStopLossUsd))} 付近で下振れを抑えています。`
+                        : `エントリー価格 ${formatJPY(convertJPY(entryPriceUsd))} に対して、決済価格 ${formatJPY(convertJPY(currentPriceUsd))} で利益確定しました。予定していた利確目安 ${formatJPY(convertJPY(plannedTakeProfitUsd))} に沿った決済です。`
+                    : `新規エントリー価格は ${formatJPY(convertJPY(currentPriceUsd))} です。利確候補は ${formatJPY(convertJPY(plannedTakeProfitUsd))}、損切り候補は ${formatJPY(convertJPY(plannedStopLossUsd))} として計画されています。`;
 
             return {
                 ...tx,
                 key: `${tx.id}-${index}`,
                 entryPriceUsd,
+                currentPriceUsd,
                 plannedTakeProfitUsd,
                 plannedStopLossUsd,
+                pnlUsd,
                 resultLabel,
                 resultClass,
                 summary,
                 triggerReason: tx.reason || "市場データ、ニュース、シグナルの総合判断に基づくトレードです。",
             };
         });
-    }, [transactions, stopLossThreshold, takeProfitThreshold, convertJPY]);
+    }, [transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData]);
 
     return (
         <div className="space-y-6 p-6">
@@ -124,7 +147,7 @@ export default function TraderBrainPage() {
                                 <div className="rounded-lg border border-white/5 bg-black/20 p-4">
                                     <div className="text-xs text-gray-500">{tx.type === "SELL" ? "決済価格" : "現在価格"}</div>
                                     <div className="mt-2 text-3xl font-bold text-white">
-                                        {formatJPY(convertJPY(tx.price))}
+                                        {tx.currentPriceUsd > 0 ? formatJPY(convertJPY(tx.currentPriceUsd)) : "価格取得中"}
                                     </div>
                                 </div>
 
@@ -139,10 +162,10 @@ export default function TraderBrainPage() {
                                     <div className="text-xs text-gray-500">損益</div>
                                     <div
                                         className={`mt-2 text-3xl font-bold ${
-                                            (tx.pnl || 0) > 0 ? "text-emerald-400" : (tx.pnl || 0) < 0 ? "text-rose-400" : "text-white"
+                                            (tx.pnlUsd || 0) > 0 ? "text-emerald-400" : (tx.pnlUsd || 0) < 0 ? "text-rose-400" : "text-white"
                                         }`}
                                     >
-                                        {tx.pnl !== undefined ? formatJPY(convertJPY(tx.pnl || 0)) : "計算中"}
+                                        {tx.pnlUsd !== undefined ? formatJPY(convertJPY(tx.pnlUsd || 0)) : "計算中"}
                                     </div>
                                 </div>
                             </div>
