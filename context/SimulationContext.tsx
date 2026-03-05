@@ -30,6 +30,8 @@ export type Chain = "BNB" | "POLYGON";
 const isInterestingToken = (symbol: string) => TRADE_CONFIG.isTradeableVolatilityToken(symbol);
 const DAILY_STRATEGY_BLOCKS = ["0:00-6:00", "6:00-12:00", "12:00-18:00", "18:00-24:00"] as const;
 const DAILY_COMPOUND_TARGET_PCT = 10;
+const LIVE_MIN_ORDER_USD = 3.5;
+const LIVE_TARGET_ORDER_USD = 3.7;
 const LIVE_EXECUTION_PREFERRED_SYMBOLS: Record<number, Set<string>> = {
     56: new Set(["BNB", "ETH", "LINK", "SHIB"]),
     137: new Set(["MATIC"]),
@@ -1124,7 +1126,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         if (nonStableFunding.length === 0) {
             const stableOnlyBudget = Math.min(safeDesiredUsd, stableUsd);
-            if (stableOnlyBudget < 3) {
+            if (stableOnlyBudget < LIVE_MIN_ORDER_USD) {
                 return { sourceSymbol: undefined, budgetUsd: 0 };
             }
             return { sourceSymbol: undefined, budgetUsd: stableOnlyBudget };
@@ -1132,7 +1134,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         const chosen = nonStableFunding[0];
         const budgetFromToken = Math.min(chosen.usdValue * 0.35, Math.max(5, safeDesiredUsd));
-        if (budgetFromToken < 3) {
+        if (budgetFromToken < LIVE_MIN_ORDER_USD) {
             return { sourceSymbol: undefined, budgetUsd: 0 };
         }
         return {
@@ -1525,7 +1527,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         if (onchainAmount === null || onchainAmount <= 0) continue;
                         const safeAmount = onchainAmount * 0.985;
                         const usdValue = safeAmount * candidate.usdPrice;
-                        if (usdValue >= Math.max(3, requiredUsd * 0.35)) {
+                        if (usdValue >= Math.max(LIVE_MIN_ORDER_USD, requiredUsd * 0.35)) {
                             verified.push({
                                 symbol: candidate.symbol,
                                 amount: safeAmount,
@@ -1671,7 +1673,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     : srcAmountNumber * Math.max(getUsdPrice(tradeSourceSymbol), 0);
                 const minLiveNotionalUsd = action === "SELL"
                     ? 2.0
-                    : (isAutoTriggeredOrder ? 3 : 1.5);
+                    : LIVE_MIN_ORDER_USD;
                 if (!currentDemoMode && sourceUsdNotional < minLiveNotionalUsd) {
                     throw new Error(`発注額が小さすぎます (${sourceUsdNotional.toFixed(3)} USD / 最低 ${minLiveNotionalUsd.toFixed(1)} USD)`);
                 }
@@ -3177,7 +3179,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             });
             const stableLiquidityUsd = Number(currentPortfolio.cashbalance || 0);
 
-            if (!hasAnySellableInventory && stableLiquidityUsd >= 3) {
+            if (!hasAnySellableInventory && stableLiquidityUsd >= LIVE_MIN_ORDER_USD) {
                 const bootstrapSymbol = candidate.symbol;
                 const bootstrapPrice = candidate.price || getUsdPrice(bootstrapSymbol);
                 if (!Number.isFinite(bootstrapPrice) || bootstrapPrice <= 0) {
@@ -3186,11 +3188,11 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 }
 
                 const requestedBudget = Math.min(
-                    Math.max(3, currentPortfolio.totalValue * 0.08),
-                    Math.max(3, Math.min(stableLiquidityUsd * 0.45, 8)),
+                    Math.max(LIVE_TARGET_ORDER_USD, currentPortfolio.totalValue * 0.08),
+                    Math.max(LIVE_TARGET_ORDER_USD, Math.min(stableLiquidityUsd * 0.45, 8)),
                 );
                 const bootstrapFunding = pickFundingSourceForBuy(bootstrapSymbol, requestedBudget, currentPortfolio);
-                if (bootstrapFunding.budgetUsd < 3) {
+                if (bootstrapFunding.budgetUsd < LIVE_MIN_ORDER_USD) {
                     emitLiveAutoStatus("skip: bootstrap budget too small", {
                         stableLiquidityUsd,
                         requestedBudget,
@@ -3265,8 +3267,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            const funding = pickFundingSourceForBuy(symbol, Math.max(3, currentPortfolio.totalValue * 0.08), currentPortfolio);
-            if (funding.budgetUsd < 3) {
+            const funding = pickFundingSourceForBuy(symbol, Math.max(LIVE_TARGET_ORDER_USD, currentPortfolio.totalValue * 0.08), currentPortfolio);
+            if (funding.budgetUsd < LIVE_MIN_ORDER_USD) {
                 emitLiveAutoStatus("skip: budget too small", {
                     symbol,
                     budgetUsd: funding.budgetUsd,
