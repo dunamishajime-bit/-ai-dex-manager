@@ -416,11 +416,11 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     }, [isConnected, isSimulating]);
 
 
-    // 繧｢繝ｳ繝槭え繝ｳ繝域凾繝ｻ蛻・妙譎ゅ・繧ｯ繝ｪ繝ｼ繝ｳ繧｢繝・・
+    // On disconnect, stop simulation loop only.
+    // Keep Auto-Pilot preference unchanged to avoid route-change flicker forcing OFF.
     useEffect(() => {
         if (!isConnected && isSimulating) {
             setIsSimulating(false);
-            setIsAutoPilotEnabled(false);
         }
     }, [isConnected, isSimulating]);
 
