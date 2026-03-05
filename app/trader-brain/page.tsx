@@ -30,11 +30,13 @@ function formatAmount(value: number) {
 const STABLE_QUOTES = new Set(["USDT", "USDC", "BUSD", "FDUSD", "DAI", "USD1", "USDC.E"]);
 
 export default function TraderBrainPage() {
-    const { transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData } = useSimulation();
+    const { transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData, portfolio } = useSimulation();
 
     const reviewedTrades = useMemo(() => {
         return transactions.map((tx, index) => {
-            const marketPriceUsd = allMarketData[tx.symbol]?.price || 0;
+            const positionFallbackPriceUsd =
+                portfolio.positions.find((position) => position.symbol === tx.symbol)?.entryPrice || 0;
+            const marketPriceUsd = allMarketData[tx.symbol]?.price || positionFallbackPriceUsd || 0;
             const entryPriceUsd = tx.entryPrice && tx.entryPrice > 0
                 ? tx.entryPrice
                 : tx.price && tx.price > 0
@@ -107,7 +109,7 @@ export default function TraderBrainPage() {
                 triggerReason,
             };
         });
-    }, [transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData]);
+    }, [transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData, portfolio.positions]);
 
     return (
         <div className="space-y-6 p-6">

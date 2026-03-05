@@ -31,7 +31,8 @@ const isInterestingToken = (symbol: string) => TRADE_CONFIG.isTradeableVolatilit
 const DAILY_STRATEGY_BLOCKS = ["0:00-6:00", "6:00-12:00", "12:00-18:00", "18:00-24:00"] as const;
 const DAILY_COMPOUND_TARGET_PCT = 10;
 const LIVE_MIN_ORDER_USD = 3.5;
-const LIVE_TARGET_ORDER_USD = 3.7;
+const LIVE_ORDER_JPY_SCALE = 3.5 / 2000; // 2,000円->3.5USD, 4,000円->7USD, 20,000円->35USD
+const LIVE_TARGET_ORDER_MULTIPLIER = 1.06;
 const BNB_GAS_RESERVE_USD = 1.0;
 const DEFAULT_RISK_TOLERANCE = 4; // Aggressive
 const DEFAULT_STOP_LOSS_THRESHOLD = -5;
@@ -83,6 +84,16 @@ function getStrategyBlockDescription(
         default:
             return `${symbol} を対象に、市場の変化へ柔軟に対応する戦略です。${scalpTarget}`;
     }
+}
+
+function getLiveOrderTargets(totalUsd: number, usdJpy: number) {
+    const safeTotalUsd = Number.isFinite(totalUsd) && totalUsd > 0 ? totalUsd : 0;
+    const safeUsdJpy = Number.isFinite(usdJpy) && usdJpy > 0 ? usdJpy : 155;
+    const walletJpy = safeTotalUsd * safeUsdJpy;
+    const scaledMinUsd = walletJpy * LIVE_ORDER_JPY_SCALE;
+    const minOrderUsd = Math.max(LIVE_MIN_ORDER_USD, Number(scaledMinUsd.toFixed(2)));
+    const targetOrderUsd = Math.max(minOrderUsd, Number((minOrderUsd * LIVE_TARGET_ORDER_MULTIPLIER).toFixed(2)));
+    return { walletJpy, minOrderUsd, targetOrderUsd };
 }
 
 export interface DiscussionEntry {
@@ -1085,8 +1096,10 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const pickFundingSourceForBuy = useCallback((
         targetSymbol: string,
         desiredUsd: number,
-    currentPortfolio: Portfolio,
+        currentPortfolio: Portfolio,
+        options?: { minOrderUsd?: number },
     ): { sourceSymbol?: string; budgetUsd: number } => {
+        const minOrderUsd = Math.max(LIVE_MIN_ORDER_USD, Number(options?.minOrderUsd || LIVE_MIN_ORDER_USD));
         const supportedSymbols = getExecutionSupportedSymbols();
         const preferredSymbols = (!isDemoMode && effectiveChainId && isSupportedChain(effectiveChainId))
             ? LIVE_EXECUTION_PREFERRED_SYMBOLS[effectiveChainId]
@@ -1115,7 +1128,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             )
             .filter((entry) => {
                 if (!(!isDemoMode && effectiveChainId === 56 && entry.symbol === "BNB")) return true;
-                return entry.usdValue > (BNB_GAS_RESERVE_USD + LIVE_MIN_ORDER_USD);
+                return entry.usdValue > (BNB_GAS_RESERVE_USD + minOrderUsd);
             })
             .filter((entry) => !preferredSymbols || preferredSymbols.has(entry.symbol))
             .sort((left, right) => {
@@ -1134,15 +1147,15 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         if (nonStableFunding.length === 0) {
             const stableOnlyBudget = Math.min(safeDesiredUsd, stableUsd);
-            if (stableOnlyBudget < LIVE_MIN_ORDER_USD) {
+            if (stableOnlyBudget < minOrderUsd) {
                 return { sourceSymbol: undefined, budgetUsd: 0 };
             }
             return { sourceSymbol: undefined, budgetUsd: stableOnlyBudget };
         }
 
         const chosen = nonStableFunding[0];
-        const budgetFromToken = Math.min(chosen.usdValue * 0.35, Math.max(5, safeDesiredUsd));
-        if (budgetFromToken < LIVE_MIN_ORDER_USD) {
+        const budgetFromToken = Math.min(chosen.usdValue * 0.35, Math.max(minOrderUsd + 0.2, safeDesiredUsd));
+        if (budgetFromToken < minOrderUsd) {
             return { sourceSymbol: undefined, budgetUsd: 0 };
         }
         return {
@@ -1384,6 +1397,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         const normalizedTokenSymbol = normalizeTrackedSymbol(tokenSymbol);
         const normalizedFundingSymbol = fundingSymbol ? normalizeTrackedSymbol(fundingSymbol) : undefined;
+        const liveOrderTargets = getLiveOrderTargets(portfolioRef.current.totalValue || 0, jpyRate);
+        const dynamicLiveMinOrderUsd = liveOrderTargets.minOrderUsd;
         const isAutoTriggeredOrder =
             (reason?.includes("AI technical signal") ?? false)
             || (reason?.includes("戦略") ?? false)
@@ -1535,7 +1550,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                         if (onchainAmount === null || onchainAmount <= 0) continue;
                         const safeAmount = onchainAmount * 0.985;
                         const usdValue = safeAmount * candidate.usdPrice;
-                        if (usdValue >= Math.max(LIVE_MIN_ORDER_USD, requiredUsd * 0.35)) {
+                        if (usdValue >= Math.max(dynamicLiveMinOrderUsd, requiredUsd * 0.35)) {
                             verified.push({
                                 symbol: candidate.symbol,
                                 amount: safeAmount,
@@ -1717,9 +1732,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     ? srcAmountNumber
                     : srcAmountNumber * Math.max(getUsdPrice(tradeSourceSymbol), 0);
                 const minLiveNotionalUsd = action === "SELL"
-                    ? 2.0
-                    : LIVE_MIN_ORDER_USD;
-                if (!currentDemoMode && sourceUsdNotional < minLiveNotionalUsd) {
+                    ? Math.max(2.0, dynamicLiveMinOrderUsd * 0.55)
+                    : dynamicLiveMinOrderUsd;
+                if (!currentDemoMode && sourceUsdNotional + 0.000001 < minLiveNotionalUsd) {
                     throw new Error(`発注額が小さすぎます (${sourceUsdNotional.toFixed(3)} USD / 最低 ${minLiveNotionalUsd.toFixed(1)} USD)`);
                 }
 
@@ -2042,6 +2057,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         allMarketPrices,
         getUsdPrice,
         tradeInProgress,
+        jpyRate,
     ]);
 
     const updateProposalStatus = (id: string, status: "APPROVED" | "REJECTED" | "ACTIVE" | "PENDING") => {
@@ -2356,6 +2372,85 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 });
             }
 
+            const fetchContractTokenUsdPrices = async (symbols: string[]): Promise<Record<string, number>> => {
+                const chainPlatform = chainId === 56 ? "binance-smart-chain" : chainId === 137 ? "polygon-pos" : null;
+                const chainKey = chainId === 56 ? "bsc" : chainId === 137 ? "polygon" : null;
+                if (!chainPlatform || !chainKey) return {};
+
+                const symbolByAddress = new Map<string, string>();
+                symbols.forEach((symbol) => {
+                    const tokenInfo = registry[symbol];
+                    if (!tokenInfo) return;
+                    const addressLower = tokenInfo.address.toLowerCase();
+                    if (addressLower === NATIVE_TOKEN_ADDRESS.toLowerCase()) return;
+                    symbolByAddress.set(addressLower, symbol);
+                });
+
+                const addresses = Array.from(symbolByAddress.keys());
+                if (addresses.length === 0) return {};
+
+                const out: Record<string, number> = {};
+                try {
+                    const geckoUrl =
+                        `https://api.coingecko.com/api/v3/simple/token_price/${chainPlatform}`
+                        + `?contract_addresses=${encodeURIComponent(addresses.join(","))}&vs_currencies=usd`;
+                    const geckoRes = await fetch(geckoUrl, { cache: "no-store" });
+                    if (geckoRes.ok) {
+                        const geckoJson = await geckoRes.json();
+                        addresses.forEach((addr) => {
+                            const usd = Number(geckoJson?.[addr]?.usd);
+                            const symbol = symbolByAddress.get(addr);
+                            if (symbol && Number.isFinite(usd) && usd > 0) {
+                                out[symbol] = usd;
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.warn("[J-DEX] CoinGecko contract price fetch failed:", error);
+                }
+
+                const unresolvedAddresses = addresses.filter((addr) => {
+                    const symbol = symbolByAddress.get(addr);
+                    return symbol ? !out[symbol] : false;
+                });
+                if (unresolvedAddresses.length === 0) return out;
+
+                try {
+                    for (let index = 0; index < unresolvedAddresses.length; index += 20) {
+                        const chunk = unresolvedAddresses.slice(index, index + 20);
+                        const dexUrl = `https://api.dexscreener.com/latest/dex/tokens/${chunk.join(",")}`;
+                        const dexRes = await fetch(dexUrl, { cache: "no-store" });
+                        if (!dexRes.ok) continue;
+
+                        const dexJson = await dexRes.json();
+                        const pairs = Array.isArray(dexJson?.pairs) ? dexJson.pairs : [];
+
+                        chunk.forEach((addressLower) => {
+                            const symbol = symbolByAddress.get(addressLower);
+                            if (!symbol) return;
+                            const related = pairs
+                                .filter((pair: any) =>
+                                    String(pair?.chainId || "").toLowerCase() === chainKey
+                                    && String(pair?.baseToken?.address || "").toLowerCase() === addressLower,
+                                )
+                                .sort((left: any, right: any) =>
+                                    Number(right?.liquidity?.usd || 0) - Number(left?.liquidity?.usd || 0),
+                                );
+                            if (related.length === 0) return;
+
+                            const usd = Number(related[0]?.priceUsd);
+                            if (Number.isFinite(usd) && usd > 0) {
+                                out[symbol] = usd;
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.warn("[J-DEX] DexScreener contract price fetch failed:", error);
+                }
+
+                return out;
+            };
+
             if (cancelled) return;
 
             const heldSymbolsNeedingPrices = Array.from(new Set([
@@ -2369,25 +2464,66 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 return !(typeof livePrice === "number" && livePrice > 0) && !(typeof fallbackPrice === "number" && fallbackPrice > 0);
             });
 
-            let priceSnapshot = allMarketPrices;
+            let priceSnapshot = { ...allMarketPrices };
+
+            const mergePricesIntoSnapshot = (priceMap: Record<string, number>) => {
+                Object.entries(priceMap).forEach(([symbol, price]) => {
+                    if (!Number.isFinite(price) || price <= 0) return;
+                    priceSnapshot[symbol] = {
+                        price,
+                        volume: priceSnapshot[symbol]?.volume || initialData[symbol]?.volume || 0,
+                    };
+                });
+            };
+
             if (missingPriceSymbols.length > 0) {
                 try {
                     const fetchedPrices = await fetchMarketPrices(missingPriceSymbols);
-                    if (Object.keys(fetchedPrices).length > 0) {
+                    const nextPrices: Record<string, number> = {};
+                    Object.entries(fetchedPrices).forEach(([symbol, data]) => {
+                        const usd = Number(data?.price);
+                        if (Number.isFinite(usd) && usd > 0) {
+                            nextPrices[symbol] = usd;
+                        }
+                    });
+
+                    if (Object.keys(nextPrices).length > 0) {
+                        mergePricesIntoSnapshot(nextPrices);
                         setAllMarketPrices((prev) => {
                             const updated = { ...prev };
-                            Object.entries(fetchedPrices).forEach(([symbol, data]) => {
+                            Object.entries(nextPrices).forEach(([symbol, usd]) => {
                                 updated[symbol] = {
-                                    price: data.price,
-                                    volume: prev[symbol]?.volume || 0,
+                                    price: usd,
+                                    volume: prev[symbol]?.volume || initialData[symbol]?.volume || 0,
                                 };
                             });
-                            priceSnapshot = updated;
                             return updated;
                         });
                     }
                 } catch (error) {
                     console.warn("[J-DEX] Failed to fetch missing wallet prices:", error);
+                }
+            }
+
+            const contractPriceSymbols = Array.from(new Set(
+                tokenBalances
+                    .map((token) => token.symbol)
+                    .filter((symbol) => !TRADE_CONFIG.STABLECOINS.includes(symbol)),
+            ));
+            if (contractPriceSymbols.length > 0) {
+                const contractPrices = await fetchContractTokenUsdPrices(contractPriceSymbols);
+                if (Object.keys(contractPrices).length > 0) {
+                    mergePricesIntoSnapshot(contractPrices);
+                    setAllMarketPrices((prev) => {
+                        const updated = { ...prev };
+                        Object.entries(contractPrices).forEach(([symbol, usd]) => {
+                            updated[symbol] = {
+                                price: usd,
+                                volume: prev[symbol]?.volume || initialData[symbol]?.volume || 0,
+                            };
+                        });
+                        return updated;
+                    });
                 }
             }
 
@@ -3233,6 +3369,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
+            const { minOrderUsd, targetOrderUsd } = getLiveOrderTargets(currentPortfolio.totalValue || 0, jpyRate);
+
             const hasAnySellableInventory = currentPortfolio.positions.some((entry) => {
                 const normalized = normalizeTrackedSymbol(entry.symbol);
                 const usd = entry.amount * Math.max(getUsdPrice(normalized), 0);
@@ -3240,7 +3378,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             });
             const stableLiquidityUsd = Number(currentPortfolio.cashbalance || 0);
 
-            if (!hasAnySellableInventory && stableLiquidityUsd >= LIVE_MIN_ORDER_USD) {
+            if (!hasAnySellableInventory && stableLiquidityUsd >= minOrderUsd) {
                 const bootstrapSymbol = candidate.symbol;
                 const bootstrapPrice = candidate.price || getUsdPrice(bootstrapSymbol);
                 if (!Number.isFinite(bootstrapPrice) || bootstrapPrice <= 0) {
@@ -3248,16 +3386,19 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     return;
                 }
 
-                const requestedBudget = Math.min(
-                    Math.max(LIVE_TARGET_ORDER_USD, currentPortfolio.totalValue * 0.08),
-                    Math.max(LIVE_TARGET_ORDER_USD, Math.min(stableLiquidityUsd * 0.45, 8)),
+                const requestedBudget = Math.max(targetOrderUsd, currentPortfolio.totalValue * 0.08);
+                const bootstrapFunding = pickFundingSourceForBuy(
+                    bootstrapSymbol,
+                    requestedBudget,
+                    currentPortfolio,
+                    { minOrderUsd },
                 );
-                const bootstrapFunding = pickFundingSourceForBuy(bootstrapSymbol, requestedBudget, currentPortfolio);
-                if (bootstrapFunding.budgetUsd < LIVE_MIN_ORDER_USD) {
+                if (bootstrapFunding.budgetUsd + 0.000001 < minOrderUsd) {
                     emitLiveAutoStatus("skip: bootstrap budget too small", {
                         stableLiquidityUsd,
                         requestedBudget,
                         budgetUsd: bootstrapFunding.budgetUsd,
+                        minOrderUsd,
                     });
                     return;
                 }
@@ -3352,12 +3493,18 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            const funding = pickFundingSourceForBuy(symbol, Math.max(LIVE_TARGET_ORDER_USD, currentPortfolio.totalValue * 0.08), currentPortfolio);
-            if (funding.budgetUsd < LIVE_MIN_ORDER_USD) {
+            const funding = pickFundingSourceForBuy(
+                symbol,
+                Math.max(targetOrderUsd, currentPortfolio.totalValue * 0.08),
+                currentPortfolio,
+                { minOrderUsd },
+            );
+            if (funding.budgetUsd + 0.000001 < minOrderUsd) {
                 emitLiveAutoStatus("skip: budget too small", {
                     symbol,
                     budgetUsd: funding.budgetUsd,
                     stableLiquidityUsd,
+                    minOrderUsd,
                 });
                 return;
             }
@@ -3423,6 +3570,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         getShortMomentumSignal,
         pickFundingSourceForBuy,
         executeTrade,
+        jpyRate,
     ]);
 
     // Expose addDiscussion to window for background tasks (like TraderChat's auto-council)
