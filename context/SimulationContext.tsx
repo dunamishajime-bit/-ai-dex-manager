@@ -1690,7 +1690,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 let finalSizeFactor = executedSizeFactor;
                 const retrySizeFactors = [1, 0.72, 0.5];
                 const isNonRetryableTradeError = (message: string) =>
-                    /cooldown|unsupported|wallet address mismatch|security check failed|chain .* not supported|invalid|exceeds the balance of the account|insufficient funds|gas fee|total cost/i.test(message);
+                    /cooldown|unsupported|wallet address mismatch|security check failed|chain .* not supported|invalid|exceeds the balance of the account|insufficient|gas fee|total cost/i.test(message);
 
                 for (const retryFactor of retrySizeFactors) {
                     const attemptSrcAmount = srcAmountNumber * retryFactor;
