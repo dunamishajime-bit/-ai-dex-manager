@@ -32,6 +32,7 @@ const DAILY_STRATEGY_BLOCKS = ["0:00-6:00", "6:00-12:00", "12:00-18:00", "18:00-
 const DAILY_COMPOUND_TARGET_PCT = 10;
 const LIVE_MIN_ORDER_USD = 3.5;
 const LIVE_TARGET_ORDER_USD = 3.7;
+const BNB_GAS_RESERVE_USD = 1.0;
 const LIVE_EXECUTION_PREFERRED_SYMBOLS: Record<number, Set<string>> = {
     56: new Set(["BNB", "ETH", "LINK", "SHIB"]),
     137: new Set(["MATIC"]),
@@ -1109,6 +1110,10 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 entry.usdValue > 5 &&
                 supportedSymbols.has(entry.symbol),
             )
+            .filter((entry) => {
+                if (!(!isDemoMode && effectiveChainId === 56 && entry.symbol === "BNB")) return true;
+                return entry.usdValue > (BNB_GAS_RESERVE_USD + LIVE_MIN_ORDER_USD);
+            })
             .filter((entry) => !preferredSymbols || preferredSymbols.has(entry.symbol))
             .sort((left, right) => {
                 const leftPriority = left.symbol === "BNB" ? 1 : 0;
@@ -1628,12 +1633,26 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     throw new Error(`${tradeSourceSymbol} 残高が不足しているため発注できません。`);
                 }
                 const safeAvailable = onchainSourceBalance * 0.985;
+                const shouldKeepBnbReserve =
+                    !currentDemoMode
+                    && effectiveChainId === 56
+                    && tradeSourceSymbol === "BNB";
+                const bnbUsd = shouldKeepBnbReserve ? Math.max(getUsdPrice("BNB"), 0) : 0;
+                const gasReserveAmount = shouldKeepBnbReserve && bnbUsd > 0
+                    ? (BNB_GAS_RESERVE_USD / bnbUsd)
+                    : 0;
+                const availableAfterReserve = shouldKeepBnbReserve
+                    ? Math.max(0, safeAvailable - gasReserveAmount)
+                    : safeAvailable;
                 if (safeAvailable <= 0) {
                     throw new Error(`${tradeSourceSymbol} 残高が不足しているため発注できません。`);
                 }
-                if (srcAmountNumber > safeAvailable) {
+                if (availableAfterReserve <= 0) {
+                    throw new Error(`BNBガス保護: 最低 ${BNB_GAS_RESERVE_USD.toFixed(1)} USD 相当の BNB を残すため発注をスキップしました。`);
+                }
+                if (srcAmountNumber > availableAfterReserve) {
                     const requestedBeforeClamp = srcAmountNumber;
-                    srcAmountNumber = safeAvailable;
+                    srcAmountNumber = availableAfterReserve;
                     executedSizeFactor = requestedBeforeClamp > 0 ? srcAmountNumber / requestedBeforeClamp : 0;
                     executedSizeFactor = Math.max(0.05, Math.min(1, executedSizeFactor));
                     executedTokenAmount = amount * executedSizeFactor;

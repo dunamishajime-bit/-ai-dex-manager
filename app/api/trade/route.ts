@@ -11,6 +11,24 @@ export const runtime = "nodejs";
 const PARASWAP_API_URL = "https://api.paraswap.io";
 const TRADE_COOLDOWN_SEC = 12;
 const DEFAULT_GAS_LIMIT = 350000n;
+const BNB_GAS_RESERVE_USD = 1.0;
+
+async function getBnbGasReserveWei(): Promise<bigint> {
+    try {
+        const priceRes = await fetch(
+            "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd",
+            { cache: "no-store" },
+        );
+        const priceJson = await priceRes.json();
+        const bnbUsd = Number(priceJson?.binancecoin?.usd);
+        if (!Number.isFinite(bnbUsd) || bnbUsd <= 0) throw new Error("invalid bnb usd");
+
+        const reserveBnb = Math.max(0.0005, (BNB_GAS_RESERVE_USD / bnbUsd) * 1.02);
+        return parseUnits(reserveBnb.toFixed(8), 18);
+    } catch {
+        return parseUnits("0.00200000", 18);
+    }
+}
 
 // --- Module Scope Execution Guards ---
 const localSuccessCooldown = new Map<string, number>();
@@ -147,12 +165,26 @@ export async function POST(req: NextRequest) {
         const isSourceNative = srcTokenInfo.address.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase();
         if (isSourceNative) {
             const nativeBalance = await client.getBalance({ address: account.address });
-            if (nativeBalance < requiredAmount) {
+            let tradableNativeBalance = nativeBalance;
+            if (chainId === 56 && srcSymbol?.toUpperCase() === "BNB") {
+                const reserveWei = await getBnbGasReserveWei();
+                tradableNativeBalance = nativeBalance > reserveWei ? nativeBalance - reserveWei : 0n;
+            }
+
+            if (tradableNativeBalance < requiredAmount) {
                 const required = Number(formatUnits(requiredAmount, srcTokenInfo.decimals)).toFixed(6);
-                const available = Number(formatUnits(nativeBalance, srcTokenInfo.decimals)).toFixed(6);
+                const available = Number(formatUnits(tradableNativeBalance, srcTokenInfo.decimals)).toFixed(6);
                 console.warn(`[TRADE-STEP] Blocked: native balance insufficient. need=${required}, have=${available}`);
                 return NextResponse.json(
-                    { ok: false, error: `Insufficient ${srcSymbol} balance`, details: `need=${required}, have=${available}` },
+                    {
+                        ok: false,
+                        error: chainId === 56 && srcSymbol?.toUpperCase() === "BNB"
+                            ? "Insufficient BNB balance after gas reserve"
+                            : `Insufficient ${srcSymbol} balance`,
+                        details: chainId === 56 && srcSymbol?.toUpperCase() === "BNB"
+                            ? `need=${required}, tradeable=${available}, reserve≈$${BNB_GAS_RESERVE_USD.toFixed(1)}`
+                            : `need=${required}, have=${available}`,
+                    },
                     { status: 200 },
                 );
             }
