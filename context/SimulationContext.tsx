@@ -931,6 +931,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     const lastInitialCandidateRef = useRef<string | null>(null);
     const autoTradeRotationIndexRef = useRef(0);
     const lastAutoTradeSymbolRef = useRef<string | null>(null);
+    const lastLiveAutoStatusRef = useRef(0);
     const lastStrategyRefreshRef = useRef(0);
     const lastStrategyCurrencyRef = useRef<string | null>(null);
     const symbolPriceHistoryRef = useRef<Record<string, SymbolPriceSample[]>>({});
@@ -3127,22 +3128,103 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
         let cancelled = false;
 
+        const emitLiveAutoStatus = (message: string, payload?: Record<string, unknown>) => {
+            const now = Date.now();
+            if (now - lastLiveAutoStatusRef.current < 30_000) return;
+            lastLiveAutoStatusRef.current = now;
+            console.warn("[AUTO_LIVE]", message, payload || {});
+        };
+
         const runLiveAutoTick = async () => {
-            if (cancelled || tradeInProgress) return;
+            if (cancelled || tradeInProgress) {
+                emitLiveAutoStatus("skip: tradeInProgress or cancelled");
+                return;
+            }
 
             const now = Date.now();
-            if (now - lastTradeRef.current < 18_000) return;
+            if (now - lastTradeRef.current < 18_000) {
+                emitLiveAutoStatus("skip: global cooldown", { remainingMs: 18_000 - (now - lastTradeRef.current) });
+                return;
+            }
 
             const currentPortfolio = portfolioRef.current;
             const candidates = buildRankedAutoCandidates();
-            if (candidates.length === 0) return;
+            if (candidates.length === 0) {
+                emitLiveAutoStatus("skip: no ranked candidates", {
+                    auto: isAutoPilotEnabled,
+                    chainId: effectiveChainId,
+                    positions: currentPortfolio.positions.length,
+                });
+                return;
+            }
 
             const candidate =
                 candidates.find((item) => item.symbol !== lastAutoTradeSymbolRef.current)
                 || candidates[0];
             const symbol = candidate.symbol;
             const price = candidate.price || getUsdPrice(symbol);
-            if (!Number.isFinite(price) || price <= 0) return;
+            if (!Number.isFinite(price) || price <= 0) {
+                emitLiveAutoStatus("skip: invalid price", { symbol, price });
+                return;
+            }
+
+            const hasAnySellableInventory = currentPortfolio.positions.some((entry) => {
+                const normalized = normalizeTrackedSymbol(entry.symbol);
+                const usd = entry.amount * Math.max(getUsdPrice(normalized), 0);
+                return usd >= 2;
+            });
+            const stableLiquidityUsd = Number(currentPortfolio.cashbalance || 0);
+
+            if (!hasAnySellableInventory && stableLiquidityUsd >= 3) {
+                const bootstrapSymbol = candidate.symbol;
+                const bootstrapPrice = candidate.price || getUsdPrice(bootstrapSymbol);
+                if (!Number.isFinite(bootstrapPrice) || bootstrapPrice <= 0) {
+                    emitLiveAutoStatus("skip: bootstrap invalid price", { bootstrapSymbol, bootstrapPrice });
+                    return;
+                }
+
+                const requestedBudget = Math.min(
+                    Math.max(3, currentPortfolio.totalValue * 0.08),
+                    Math.max(3, Math.min(stableLiquidityUsd * 0.45, 8)),
+                );
+                const bootstrapFunding = pickFundingSourceForBuy(bootstrapSymbol, requestedBudget, currentPortfolio);
+                if (bootstrapFunding.budgetUsd < 3) {
+                    emitLiveAutoStatus("skip: bootstrap budget too small", {
+                        stableLiquidityUsd,
+                        requestedBudget,
+                        budgetUsd: bootstrapFunding.budgetUsd,
+                    });
+                    return;
+                }
+
+                const bootstrapAmount = bootstrapFunding.budgetUsd / bootstrapPrice;
+                if (!Number.isFinite(bootstrapAmount) || bootstrapAmount <= 0) {
+                    emitLiveAutoStatus("skip: bootstrap amount invalid", { bootstrapAmount, bootstrapPrice });
+                    return;
+                }
+
+                const executed = await executeTrade(
+                    bootstrapSymbol,
+                    "BUY",
+                    bootstrapAmount,
+                    bootstrapPrice,
+                    "自動戦略: 初回エントリー",
+                    undefined,
+                    bootstrapFunding.sourceSymbol,
+                );
+                if (executed) {
+                    lastTradeRef.current = Date.now();
+                    lastAutoTradeSymbolRef.current = bootstrapSymbol;
+                    emitLiveAutoStatus("executed: bootstrap BUY", {
+                        symbol: bootstrapSymbol,
+                        budgetUsd: bootstrapFunding.budgetUsd,
+                        source: bootstrapFunding.sourceSymbol || "USDT",
+                    });
+                } else {
+                    emitLiveAutoStatus("skip: bootstrap BUY execution failed", { symbol: bootstrapSymbol });
+                }
+                return;
+            }
 
             const signal = getShortMomentumSignal(symbol, price);
             const bullish = signal.score > 0.00008 && signal.r1 > -0.0002 && signal.r5 > 0;
@@ -3164,18 +3246,38 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     if (executed) {
                         lastTradeRef.current = Date.now();
                         lastAutoTradeSymbolRef.current = symbol;
+                        emitLiveAutoStatus("executed: momentum SELL", { symbol, sellUsd });
                     }
                 }
                 return;
             }
 
-            if (!bullish) return;
+            if (!bullish) {
+                emitLiveAutoStatus("skip: no bullish signal", {
+                    symbol,
+                    r1: signal.r1,
+                    r5: signal.r5,
+                    r15: signal.r15,
+                    score: signal.score,
+                });
+                return;
+            }
 
             const funding = pickFundingSourceForBuy(symbol, Math.max(3, currentPortfolio.totalValue * 0.08), currentPortfolio);
-            if (funding.budgetUsd < 3) return;
+            if (funding.budgetUsd < 3) {
+                emitLiveAutoStatus("skip: budget too small", {
+                    symbol,
+                    budgetUsd: funding.budgetUsd,
+                    stableLiquidityUsd,
+                });
+                return;
+            }
 
             const amount = funding.budgetUsd / price;
-            if (!Number.isFinite(amount) || amount <= 0) return;
+            if (!Number.isFinite(amount) || amount <= 0) {
+                emitLiveAutoStatus("skip: invalid amount", { symbol, amount, price });
+                return;
+            }
 
             const executed = await executeTrade(
                 symbol,
@@ -3189,6 +3291,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             if (executed) {
                 lastTradeRef.current = Date.now();
                 lastAutoTradeSymbolRef.current = symbol;
+                emitLiveAutoStatus("executed: momentum BUY", {
+                    symbol,
+                    budgetUsd: funding.budgetUsd,
+                    source: funding.sourceSymbol || "USDT",
+                });
+            } else {
+                emitLiveAutoStatus("skip: momentum BUY execution failed", { symbol });
             }
         };
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kvGet } from "@/lib/kv";
 import { Universe, PricePoint, TokenRef } from "@/lib/types/market";
-import { priceKey } from "@/lib/providers/market-providers";
+import { fetchPricesBatch, fetchUsdJpy, priceKey, toJpy } from "@/lib/providers/market-providers";
 
 export const runtime = "nodejs";
 
@@ -36,8 +36,36 @@ export async function GET() {
             return NextResponse.json({ ok: false, error: "Universe not ready. Initializing, please refresh in a moment." }, { status: 503 });
         }
 
-        const prices = (await kvGet<Record<string, PricePoint>>("prices:v1")) ?? {};
-        const fx = await kvGet<{ rate: number }>("fx:usd_jpy");
+        let prices = (await kvGet<Record<string, PricePoint>>("prices:v1")) ?? {};
+        let fx = await kvGet<{ rate: number }>("fx:usd_jpy");
+        if (!fx || !Number.isFinite(fx.rate) || fx.rate <= 0) {
+            fx = await fetchUsdJpy();
+        }
+
+        const allTokens = [...universe.majorsTop10, ...universe.bnbTop15, ...universe.polygonTop15];
+        const hasAnyPrice = allTokens.some((token) => {
+            const p = prices[priceKey(token)];
+            return !!p && Number.isFinite(p.usd) && p.usd > 0;
+        });
+
+        if (!hasAnyPrice) {
+            const latest = await fetchPricesBatch(allTokens);
+            const normalized: Record<string, PricePoint> = {};
+            allTokens.forEach((token) => {
+                const p = latest[token.providerId];
+                if (!p || !Number.isFinite(p.usd) || p.usd <= 0) return;
+                normalized[priceKey(token)] = {
+                    usd: p.usd,
+                    jpy: toJpy(p.usd, fx!.rate),
+                    change24hPct: Number(p.change24hPct || 0),
+                    updatedAt: Date.now(),
+                    source: token.provider,
+                };
+            });
+            if (Object.keys(normalized).length > 0) {
+                prices = normalized;
+            }
+        }
 
         const majors = attachPrice(universe.majorsTop10, prices);
         const bnb = attachPrice(universe.bnbTop15, prices);

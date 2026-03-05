@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kvSet, kvGet } from "@/lib/kv";
-import { TokenRef, Universe } from "@/lib/types/market";
-import { fetchPricesBatch, fetchUsdJpy } from "@/lib/providers/market-providers";
+import { TokenRef, Universe, PricePoint } from "@/lib/types/market";
+import { fetchPricesBatch, fetchUsdJpy, priceKey, toJpy } from "@/lib/providers/market-providers";
 
 export const runtime = "nodejs";
 
@@ -47,12 +47,24 @@ export async function POST(req: Request) {
         await kvSet("universe:v1", universe);
 
         const allTokens = [...STATIC_MAJORS, ...STATIC_BNB, ...STATIC_POLYGON];
+        const fx = await fetchUsdJpy();
         const prices = await fetchPricesBatch(allTokens);
         if (Object.keys(prices).length > 0) {
-            await kvSet("prices:v1", prices);
+            const normalizedPrices: Record<string, PricePoint> = {};
+            allTokens.forEach((token) => {
+                const price = prices[token.providerId];
+                if (!price || !Number.isFinite(price.usd) || price.usd <= 0) return;
+                normalizedPrices[priceKey(token)] = {
+                    usd: price.usd,
+                    jpy: toJpy(price.usd, fx.rate),
+                    change24hPct: Number(price.change24hPct || 0),
+                    updatedAt: Date.now(),
+                    source: token.provider,
+                };
+            });
+            await kvSet("prices:v1", normalizedPrices);
         }
 
-        const fx = await fetchUsdJpy();
         await kvSet("fx:usd_jpy", fx);
 
         return NextResponse.json({
