@@ -1613,6 +1613,29 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
                 const srcTokenInfo = resolveToken(tradeSourceSymbol, effectiveChainId);
                 const destTokenInfo = resolveToken(tradeDestSymbol, effectiveChainId);
+                const baseReason = (reason || "").trim() || (action === "BUY" ? "手動買い" : "手動売り");
+                const sourceIsStable = TRADE_CONFIG.STABLECOINS.includes(tradeSourceSymbol);
+                const crossAssetReallocation =
+                    action === "BUY"
+                    && !sourceIsStable
+                    && tradeSourceSymbol !== normalizedTokenSymbol;
+                let detailedReason = baseReason;
+                if (crossAssetReallocation) {
+                    const sourcePosition = portfolioRef.current.positions.find(
+                        (position) => normalizeTrackedSymbol(position.symbol) === tradeSourceSymbol,
+                    );
+                    const sourcePrice = getUsdPrice(tradeSourceSymbol);
+                    const sourcePnlPct =
+                        sourcePosition && sourcePosition.entryPrice > 0 && sourcePrice > 0
+                            ? ((sourcePrice - sourcePosition.entryPrice) / sourcePosition.entryPrice) * 100
+                            : undefined;
+                    const sourcePnlText = sourcePnlPct === undefined ? "評価率 N/A" : `評価率 ${sourcePnlPct.toFixed(2)}%`;
+                    detailedReason =
+                        `${baseReason}｜資金再配分: ${tradeSourceSymbol}→${normalizedTokenSymbol}｜`
+                        + `${sourcePnlText} / ${normalizedTokenSymbol} の短期優位シグナルを優先`;
+                } else if (action === "SELL" && !baseReason.includes("ストップロス")) {
+                    detailedReason = `${baseReason}｜注記: ストップロス未到達時は短期反転シグナルに基づく戦略売却`;
+                }
 
                 // Amount in Wei
                 let srcAmountNumber = action === "BUY"
@@ -1805,13 +1828,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                             pair: txPair,
                             dex: "ParaSwap",
                             chain: chainName,
-                            reason,
+                            reason: detailedReason,
                             entryPrice: livePosition?.entryPrice,
                             plannedTakeProfit: action === "BUY" ? price * (1 + takeProfitThreshold / 100) : undefined,
                             plannedStopLoss: action === "BUY" ? price * (1 + stopLossThreshold / 100) : undefined,
                             decisionSummary: action === "BUY"
-                                ? "短期モメンタムと候補ランキングに基づいてエントリーしました。"
-                                : (reason || "利益確定またはリスク管理条件に基づいて決済しました。"),
+                                ? detailedReason
+                                : (detailedReason || "利益確定またはリスク管理条件に基づいて決済しました。"),
                             newsTitle: latestNews?.title,
                         };
 
@@ -1953,7 +1976,12 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             pair: pairDisplay,
             targetPrice: action === "BUY" ? price * (1 + takeProfitThreshold / 100) : undefined, // Integration of TP
             dex: selectedDex,
-            chain: chain
+            chain: chain,
+            reason: reason || (action === "BUY" ? "デモ買い" : "デモ売り"),
+            entryPrice: action === "BUY" ? effectivePrice : undefined,
+            plannedTakeProfit: action === "BUY" ? effectivePrice * (1 + takeProfitThreshold / 100) : undefined,
+            plannedStopLoss: action === "BUY" ? effectivePrice * (1 + stopLossThreshold / 100) : undefined,
+            decisionSummary: reason || (action === "BUY" ? "デモモードの戦略エントリー" : "デモモードの戦略決済"),
         };
         setTransactions(prev => [newTx, ...prev].slice(0, 100));
 
@@ -2840,8 +2868,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     const posUsd = posPrice * pos.amount;
                     if (posUsd < 2) continue;
 
-                    const currentPriceJPY = convertJPY(posPrice);
-                    const pnlPct = ((currentPriceJPY - pos.entryPrice) / pos.entryPrice) * 100;
+                    const pnlPct = pos.entryPrice > 0
+                        ? ((posPrice - pos.entryPrice) / pos.entryPrice) * 100
+                        : 0;
 
                     // Stop Loss Check
                     if (pnlPct <= stopLossThreshold) {
@@ -2861,18 +2890,19 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     }
 
                     // 2. Trailing Stop
-                    const trailingThreshold = 3; // 3%
+                    const trailingThreshold = 4; // 4%
                     const highest = pos.highestPrice || posPrice;
                     if (highest > 0 && posPrice < highest * (1 - trailingThreshold / 100)) {
-                        if (posPrice > pos.entryPrice * 1.02) { // Secure at least 2% profit
+                        if (posPrice > pos.entryPrice * 1.04) { // Secure at least 4% profit
                             executeTrade(pos.symbol, "SELL", pos.amount, posPrice, "トレーリングストップ決済 (最高値 $" + highest.toLocaleString() + " から -" + trailingThreshold + "%)");
                             addMessage("manager", "[利益確保] " + pos.symbol + " が最高値から反落したため決済しました。", "EXECUTION");
                         }
                     }
 
                     // 3. Smart Stop-Loss (Emergency)
-                    if (riskStatus === "CRITICAL" && pnlPct < -2) {
-                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, "緊急回避: 市場リスク高騰に伴う早期損切り");
+                    const emergencyCutoff = Math.min(stopLossThreshold - 1, -6);
+                    if (riskStatus === "CRITICAL" && pnlPct <= emergencyCutoff) {
+                        executeTrade(pos.symbol, "SELL", pos.amount, posPrice, "緊急回避: 市場リスク高騰に伴う防御損切り");
                         addMessage("security", "[緊急回避] 市場リスクが高騰したため " + pos.symbol + " を早期損切りしました。", "ALERT");
                     }
                     // ---------------------------
@@ -3057,12 +3087,17 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
                         if (existingPosCount < 5 || existingPos) {
                             if (hypotheticalNewValue <= totalPortfolioValue * concentrationLimit) {
+                                const demoBuyReason =
+                                    fundingSymbolForBuy && !TRADE_CONFIG.STABLECOINS.includes(fundingSymbolForBuy)
+                                        ? `${demoStrategy}戦略: 短期モメンタム買い（資金再配分 ${fundingSymbolForBuy}→${targetSymbol}）`
+                                        : `${demoStrategy}戦略: 短期モメンタム買い`;
+
                                 const executed = await executeTrade(
                                     targetSymbol,
                                     "BUY",
                                     effectiveBuyAmount,
                                     currentTokenPrice,
-                                    demoStrategy + "戦略: 短期モメンタム買い",
+                                    demoBuyReason,
                                     undefined,
                                     fundingSymbolForBuy,
                                 );
@@ -3233,12 +3268,17 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     return;
                 }
 
+                const bootstrapReason =
+                    bootstrapFunding.sourceSymbol && !TRADE_CONFIG.STABLECOINS.includes(bootstrapFunding.sourceSymbol)
+                        ? `自動戦略: 初回エントリー（資金再配分 ${bootstrapFunding.sourceSymbol}→${bootstrapSymbol}。初期分散のため）`
+                        : "自動戦略: 初回エントリー";
+
                 const executed = await executeTrade(
                     bootstrapSymbol,
                     "BUY",
                     bootstrapAmount,
                     bootstrapPrice,
-                    "自動戦略: 初回エントリー",
+                    bootstrapReason,
                     undefined,
                     bootstrapFunding.sourceSymbol,
                 );
@@ -3258,25 +3298,44 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
             const signal = getShortMomentumSignal(symbol, price);
             const bullish = signal.score > 0.00008 && signal.r1 > -0.0002 && signal.r5 > 0;
-            const bearish = signal.score < -0.00008 && signal.r1 < 0;
+            const bearish =
+                signal.score < -0.00025
+                && signal.r1 < -0.00012
+                && signal.r5 < -0.00005;
 
             const position = currentPortfolio.positions.find((entry) => normalizeTrackedSymbol(entry.symbol) === symbol);
+            const positionPnlPct =
+                position && position.entryPrice > 0
+                    ? ((price - position.entryPrice) / position.entryPrice) * 100
+                    : 0;
+            const shouldStopLossExit = !!position && positionPnlPct <= stopLossThreshold;
+            const shouldMomentumExit = !!position && bearish && positionPnlPct >= 1.2;
 
-            if (bearish && position && position.amount > 0) {
-                const sellAmount = Math.min(position.amount, Math.max(position.amount * 0.25, 0.0001));
+            if ((shouldStopLossExit || shouldMomentumExit) && position && position.amount > 0) {
+                const sellAmount = shouldStopLossExit
+                    ? Math.min(position.amount, Math.max(position.amount * 0.5, 0.0001))
+                    : Math.min(position.amount, Math.max(position.amount * 0.25, 0.0001));
                 const sellUsd = sellAmount * price;
                 if (sellUsd >= 2) {
+                    const sellReason = shouldStopLossExit
+                        ? `自動戦略: ストップロス発動 (${positionPnlPct.toFixed(2)}% <= ${stopLossThreshold}%)`
+                        : `自動戦略: 逆行警戒の資金再配分売り（ストップロス未到達 ${positionPnlPct.toFixed(2)}% / 短期反転シグナル）`;
                     const executed = await executeTrade(
                         symbol,
                         "SELL",
                         sellAmount,
                         price,
-                        "自動戦略: 短期モメンタム売り",
+                        sellReason,
                     );
                     if (executed) {
                         lastTradeRef.current = Date.now();
                         lastAutoTradeSymbolRef.current = symbol;
-                        emitLiveAutoStatus("executed: momentum SELL", { symbol, sellUsd });
+                        emitLiveAutoStatus("executed: momentum SELL", {
+                            symbol,
+                            sellUsd,
+                            pnlPct: positionPnlPct,
+                            exitType: shouldStopLossExit ? "stop-loss" : "reallocation",
+                        });
                     }
                 }
                 return;
@@ -3309,12 +3368,17 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
+            const buyReason =
+                funding.sourceSymbol && !TRADE_CONFIG.STABLECOINS.includes(funding.sourceSymbol)
+                    ? `自動戦略: 短期モメンタム買い（資金再配分 ${funding.sourceSymbol}→${symbol}。短期上昇シグナル優位のため）`
+                    : "自動戦略: 短期モメンタム買い（短期上昇シグナル優位）";
+
             const executed = await executeTrade(
                 symbol,
                 "BUY",
                 amount,
                 price,
-                "自動戦略: 短期モメンタム買い",
+                buyReason,
                 undefined,
                 funding.sourceSymbol,
             );

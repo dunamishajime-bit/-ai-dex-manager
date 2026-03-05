@@ -27,6 +27,8 @@ function formatAmount(value: number) {
     return Number.isFinite(value) ? value.toLocaleString("ja-JP", { maximumFractionDigits: 6 }) : "-";
 }
 
+const STABLE_QUOTES = new Set(["USDT", "USDC", "BUSD", "FDUSD", "DAI", "USD1", "USDC.E"]);
+
 export default function TraderBrainPage() {
     const { transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData } = useSimulation();
 
@@ -76,6 +78,20 @@ export default function TraderBrainPage() {
                         ? `エントリー価格 ${formatJPY(convertJPY(entryPriceUsd))} に対して、決済価格 ${formatJPY(convertJPY(currentPriceUsd))} で損失確定しました。予定していた損切り目安 ${formatJPY(convertJPY(plannedStopLossUsd))} 付近で下振れを抑えています。`
                         : `エントリー価格 ${formatJPY(convertJPY(entryPriceUsd))} に対して、決済価格 ${formatJPY(convertJPY(currentPriceUsd))} で利益確定しました。予定していた利確目安 ${formatJPY(convertJPY(plannedTakeProfitUsd))} に沿った決済です。`
                     : `新規エントリー価格は ${formatJPY(convertJPY(currentPriceUsd))} です。利確候補は ${formatJPY(convertJPY(plannedTakeProfitUsd))}、損切り候補は ${formatJPY(convertJPY(plannedStopLossUsd))} として計画されています。`;
+            const pairParts = (tx.pair || "").split("/");
+            const sourceSymbol = (pairParts[0] || "").toUpperCase();
+            const destinationSymbol = (pairParts[1] || tx.symbol || "").toUpperCase();
+            const isReallocationBuy =
+                tx.type === "BUY"
+                && sourceSymbol.length > 0
+                && destinationSymbol.length > 0
+                && sourceSymbol !== destinationSymbol
+                && !STABLE_QUOTES.has(sourceSymbol);
+            const baseTriggerReason = tx.reason || "市場データ、ニュース、シグナルの総合判断に基づくトレードです。";
+            const triggerReason =
+                isReallocationBuy && !baseTriggerReason.includes("資金再配分")
+                    ? `${baseTriggerReason}\n資金再配分理由: ${sourceSymbol} の比率を下げ、${tx.symbol.toUpperCase()} の短期優位シグナルを優先しました。`
+                    : baseTriggerReason;
 
             return {
                 ...tx,
@@ -88,7 +104,7 @@ export default function TraderBrainPage() {
                 resultLabel,
                 resultClass,
                 summary,
-                triggerReason: tx.reason || "市場データ、ニュース、シグナルの総合判断に基づくトレードです。",
+                triggerReason,
             };
         });
     }, [transactions, stopLossThreshold, takeProfitThreshold, convertJPY, allMarketData]);
