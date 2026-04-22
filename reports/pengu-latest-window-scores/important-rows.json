@@ -1,0 +1,110 @@
+[
+  {
+    "iso_time": "2026-02-15T00:00:00.000Z",
+    "base_desired": "USDT",
+    "once_desired": "USDT",
+    "eth_score": -2.66,
+    "sol_score": -3.32,
+    "avax_score": 6.06,
+    "pengu_score": 21.18,
+    "pengu_gap_vs_best_normal": 15.12,
+    "pengu_eligible": false,
+    "reason": "reserve-wait"
+  },
+  {
+    "iso_time": "2026-02-17T00:00:00.000Z",
+    "base_desired": "USDT",
+    "once_desired": "USDT",
+    "eth_score": -3.78,
+    "sol_score": 0.24,
+    "avax_score": 4.74,
+    "pengu_score": 15.79,
+    "pengu_gap_vs_best_normal": 11.05,
+    "pengu_eligible": false,
+    "reason": "reserve-wait"
+  },
+  {
+    "iso_time": "2026-02-17T12:00:00.000Z",
+    "base_desired": "USDT",
+    "once_desired": "USDT",
+    "eth_score": -3.56,
+    "sol_score": 0.93,
+    "avax_score": 5.27,
+    "pengu_score": 17.18,
+    "pengu_gap_vs_best_normal": 11.91,
+    "pengu_eligible": false,
+    "reason": "reserve-wait"
+  },
+  {
+    "iso_time": "2026-02-18T00:00:00.000Z",
+    "base_desired": "USDT",
+    "once_desired": "USDT",
+    "eth_score": -3.66,
+    "sol_score": -1.41,
+    "avax_score": 3.82,
+    "pengu_score": 14.28,
+    "pengu_gap_vs_best_normal": 10.46,
+    "pengu_eligible": false,
+    "reason": "reserve-wait"
+  },
+  {
+    "iso_time": "2026-02-18T12:00:00.000Z",
+    "base_desired": "USDT",
+    "once_desired": "USDT",
+    "eth_score": -5.84,
+    "sol_score": -6.29,
+    "avax_score": 1.95,
+    "pengu_score": 13.41,
+    "pengu_gap_vs_best_normal": 11.46,
+    "pengu_eligible": false,
+    "reason": "reserve-wait"
+  },
+  {
+    "iso_time": "2026-02-21T12:00:00.000Z",
+    "base_desired": "USDT",
+    "once_desired": "USDT",
+    "eth_score": 6.26,
+    "sol_score": 11.45,
+    "avax_score": 15.9,
+    "pengu_score": 26.28,
+    "pengu_gap_vs_best_normal": 10.37,
+    "pengu_eligible": false,
+    "reason": "reserve-wait"
+  },
+  {
+    "iso_time": "2026-04-17T00:00:00.000Z",
+    "base_desired": "SOL",
+    "once_desired": "SOL",
+    "eth_score": 26.25,
+    "sol_score": 23.82,
+    "avax_score": 20.85,
+    "pengu_score": 52.25,
+    "pengu_gap_vs_best_normal": 26.01,
+    "pengu_eligible": true,
+    "reason": "trend:close>sma40|mom20-ok|sol-ok|eff-ok|retq22-off"
+  },
+  {
+    "iso_time": "2026-04-17T12:00:00.000Z",
+    "base_desired": "SOL",
+    "once_desired": "SOL",
+    "eth_score": 27.38,
+    "sol_score": 22.98,
+    "avax_score": 22.69,
+    "pengu_score": 46.38,
+    "pengu_gap_vs_best_normal": 19,
+    "pengu_eligible": true,
+    "reason": "trend:close>sma40|mom20-ok|sol-ok|eff-ok|retq22-off"
+  },
+  {
+    "iso_time": "2026-04-18T00:00:00.000Z",
+    "base_desired": "ETH",
+    "once_desired": "ETH",
+    "eth_score": 19.49,
+    "sol_score": 14.68,
+    "avax_score": 13.22,
+    "pengu_score": 39.85,
+    "pengu_gap_vs_best_normal": 20.36,
+    "pengu_eligible": true,
+    "reason": "trend:close>sma40|mom20-ok|eff-ok|retq22-off"
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "rows": [
+    {
+      "key": "legacy_base",
+      "thesis": "Original strongest profile before PENGU trailing was added.",
+      "end_equity": 206790.86,
+      "cagr_pct": 186.47,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 95169.16,
+      "pengu_risk_exit_count": 0,
+      "rotate_count": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 206790.86\n- CAGR: 186.47%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.74\n- Trades: 60"
+    },
+    {
+      "key": "trailing_base",
+      "thesis": "Production candidate with PENGU-only trailing protection.",
+      "end_equity": 241345.05,
+      "cagr_pct": 202.28,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.924,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 125308.66,
+      "pengu_risk_exit_count": 3,
+      "rotate_count": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 241345.05\n- CAGR: 202.28%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.92\n- Trades: 60"
+    },
+    {
+      "key": "trailing_plus_rotate_gap10_once",
+      "thesis": "PENGU trailing plus rotation from stalled normal trend into PENGU on a single 12H lead.",
+      "end_equity": 288470.92,
+      "cagr_pct": 221.6,
+      "max_drawdown_pct": -32.57,
+      "profit_factor": 2.468,
+      "win_rate_pct": 55.56,
+      "trade_count": 63,
+      "pengu_contribution": 135442.5,
+      "pengu_risk_exit_count": 3,
+      "rotate_count": 4,
+      "summary": "- mode: RETQ22\n- end_equity: 288470.92\n- CAGR: 221.60%\n- MaxDD: -32.57%\n- WinRate: 55.56%\n- PF: 2.47\n- Trades: 63"
+    },
+    {
+      "key": "trailing_plus_rotate_gap10_twice",
+      "thesis": "PENGU trailing plus rotation only after the 10-point lead persists for 2 consecutive 12H bars.",
+      "end_equity": 244914.54,
+      "cagr_pct": 203.82,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.721,
+      "win_rate_pct": 57.38,
+      "trade_count": 61,
+      "pengu_contribution": 109590.15,
+      "pengu_risk_exit_count": 3,
+      "rotate_count": 1,
+      "summary": "- mode: RETQ22\n- end_equity: 244914.54\n- CAGR: 203.82%\n- MaxDD: -31.04%\n- WinRate: 57.38%\n- PF: 2.72\n- Trades: 61"
+    }
+  ]
+}

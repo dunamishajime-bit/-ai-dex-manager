@@ -1,0 +1,52 @@
+{
+  "rows": [
+    {
+      "key": "base",
+      "thesis": "Current strongest profile.",
+      "end_equity": 206790.86,
+      "cagr_pct": 186.47,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 95169.16,
+      "summary": "- mode: RETQ22\n- end_equity: 206790.86\n- CAGR: 186.47%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.74\n- Trades: 60"
+    },
+    {
+      "key": "pengu_fast_exit_only",
+      "thesis": "Only PENGU exits faster using 6H checks.",
+      "end_equity": 85843.32,
+      "cagr_pct": 111.07,
+      "max_drawdown_pct": -41.91,
+      "profit_factor": 1.719,
+      "win_rate_pct": 48.33,
+      "trade_count": 60,
+      "pengu_contribution": 4515.19,
+      "summary": "- mode: RETQ22\n- end_equity: 85843.32\n- CAGR: 111.07%\n- MaxDD: -41.91%\n- WinRate: 48.33%\n- PF: 1.72\n- Trades: 60"
+    },
+    {
+      "key": "pengu_fast_exit_trailing",
+      "thesis": "PENGU exits faster and protects gains with trailing logic.",
+      "end_equity": 99476.93,
+      "cagr_pct": 122.16,
+      "max_drawdown_pct": -41.91,
+      "profit_factor": 1.81,
+      "win_rate_pct": 48.33,
+      "trade_count": 60,
+      "pengu_contribution": 16629.45,
+      "summary": "- mode: RETQ22\n- end_equity: 99476.93\n- CAGR: 122.16%\n- MaxDD: -41.91%\n- WinRate: 48.33%\n- PF: 1.81\n- Trades: 60"
+    },
+    {
+      "key": "pengu_light_early_entry_fast_exit",
+      "thesis": "PENGU gets lighter 6H early entry plus 6H exits.",
+      "end_equity": 128877.23,
+      "cagr_pct": 143.07,
+      "max_drawdown_pct": -41.91,
+      "profit_factor": 2.097,
+      "win_rate_pct": 50,
+      "trade_count": 58,
+      "pengu_contribution": 10190.03,
+      "summary": "- mode: RETQ22\n- end_equity: 128877.23\n- CAGR: 143.07%\n- MaxDD: -41.91%\n- WinRate: 50.00%\n- PF: 2.10\n- Trades: 58"
+    }
+  ]
+}

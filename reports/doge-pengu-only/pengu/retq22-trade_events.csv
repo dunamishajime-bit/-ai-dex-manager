@@ -1,0 +1,11 @@
+time,symbol,action,strategy_type,sub_variant,alloc,price,qty,reason,trade_id
+2025-04-21T00:00:00.000Z,PENGU,enter,trend,strict6,1,0.004972,2011263.073,trend-close>sma40|mom20-ok|retq22-off,retq22-0001
+2025-05-18T00:00:00.000Z,PENGU,exit,trend,trend,1,0.012041,2011263.073,sma-break,retq22-0001
+2025-07-07T00:00:00.000Z,PENGU,enter,trend,strict6,1,0.01592,1514759.158,trend-close>sma40|mom20-ok|retq22-off,retq22-0002
+2025-08-02T00:00:00.000Z,PENGU,exit,trend,trend,1,0.034243,1514759.158,sma-break,retq22-0002
+2025-09-16T12:00:00.000Z,PENGU,enter,trend,strict6,1,0.033127,1558907.938,trend-close>sma40|mom20-ok|retq22-off,retq22-0003
+2025-09-22T12:00:00.000Z,PENGU,exit,trend,trend,1,0.030132,1558907.938,risk-off,retq22-0003
+2025-10-03T00:00:00.000Z,PENGU,enter,trend,strict6,1,0.031834,1466267.799,trend-close>sma40|mom20-ok|retq22-off,retq22-0004
+2025-10-03T12:00:00.000Z,PENGU,exit,trend,trend,1,0.030767,1466267.799,sma-break,retq22-0004
+2025-10-08T12:00:00.000Z,PENGU,enter,trend,strict6,1,0.030982,1447204.566,trend-close>sma40|mom20-ok|retq22-off,retq22-0005
+2025-10-09T12:00:00.000Z,PENGU,exit,trend,trend,1,0.030811,1447204.566,sma-break,retq22-0005

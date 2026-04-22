@@ -1,0 +1,1002 @@
+[
+  {
+    "symbol": "0G",
+    "id": "zero-gravity",
+    "address": "0x4b948d64de1f71fcd12fb586f4c776421a35b3ee"
+  },
+  {
+    "symbol": "1INCH",
+    "id": "1inch",
+    "address": "0x111111111117dc0aa78b770fa6a738034120c302"
+  },
+  {
+    "symbol": "AAVE",
+    "id": "aave",
+    "address": "0xfb6115445bff7b52feb98650c87f44907e58f802"
+  },
+  {
+    "symbol": "ACE",
+    "id": "endurance",
+    "address": "0xc27a719105a987b4c34116223cae8bd8f4b5def4"
+  },
+  {
+    "symbol": "ACH",
+    "id": "alchemy-pay",
+    "address": "0xbc7d6b50616989655afd682fb42743507003056d"
+  },
+  {
+    "symbol": "ACT",
+    "id": "acet-token",
+    "address": "0x9f3bcbe48e8b754f331dfc694a894e8e686ac31d"
+  },
+  {
+    "symbol": "ADA",
+    "id": "binance-peg-cardano",
+    "address": "0x3ee2200efb3400fabb9aacf31297cbdd1d435d47"
+  },
+  {
+    "symbol": "ADX",
+    "id": "adex",
+    "address": "0x6bff4fb161347ad7de4a625ae5aa3a1ca7077819"
+  },
+  {
+    "symbol": "AEUR",
+    "id": "anchored-coins-eur",
+    "address": "0xa40640458fbc27b6eefedea1e9c9e17d4cee7a21"
+  },
+  {
+    "symbol": "AI",
+    "id": "any-inu",
+    "address": "0x2598c30330d5771ae9f983979209486ae26de875"
+  },
+  {
+    "symbol": "ALICE",
+    "id": "my-neighbor-alice",
+    "address": "0xac51066d7bec65dc4589368da368b212745d63e8"
+  },
+  {
+    "symbol": "ALLO",
+    "id": "allora",
+    "address": "0xcce5f304fd043d6a4e8ccb5376a4a4fb583b98d5"
+  },
+  {
+    "symbol": "ALPINE",
+    "id": "alpine-f1-team-fan-token",
+    "address": "0x287880ea252b52b63cc5f40a2d3e5a44aa665a76"
+  },
+  {
+    "symbol": "ALT",
+    "id": "alitas",
+    "address": "0x5ca09af27b8a4f1d636380909087536bc7e2d94d"
+  },
+  {
+    "symbol": "ANKR",
+    "id": "ankr",
+    "address": "0xf307910a4c7bbc79691fd374889b36d8531b08e3"
+  },
+  {
+    "symbol": "ARK",
+    "id": "ark-3",
+    "address": "0xcae117ca6bc8a341d2e7207f30e180f0e5618b9d"
+  },
+  {
+    "symbol": "ARPA",
+    "id": "arpa",
+    "address": "0x6f769e65c14ebd1f68817f5f1dcdb61cfa2d6f7e"
+  },
+  {
+    "symbol": "ASTER",
+    "id": "aster-2",
+    "address": "0x000ae314e2a2172a039b26378814c252734f556a"
+  },
+  {
+    "symbol": "AT",
+    "id": "apro",
+    "address": "0x9be61a38725b265bc3eb7bfdf17afdfc9d26c130"
+  },
+  {
+    "symbol": "ATA",
+    "id": "automata",
+    "address": "0xa2120b9e674d3fc3875f415a7df52e382f141225"
+  },
+  {
+    "symbol": "ATOM",
+    "id": "cosmos",
+    "address": "0x0eb3a705fc54725037cc9e008bdede697f62f335"
+  },
+  {
+    "symbol": "AVA",
+    "id": "ava-foundation-bridged-ava-bsc",
+    "address": "0xd9483ea7214fcfd89b4fb8f513b544920e315a52"
+  },
+  {
+    "symbol": "AVAX",
+    "id": "avalanche-wormhole",
+    "address": "0x96412902aa9aff61e13f085e70d3152c6ef2a817"
+  },
+  {
+    "symbol": "AXL",
+    "id": "axelar",
+    "address": "0x8b1f4432f943c465a973fedc6d7aa50fc96f1f65"
+  },
+  {
+    "symbol": "AXS",
+    "id": "axie-infinity",
+    "address": "0x715d400f88c167884bbcc41c5fea407ed4d2f8a0"
+  },
+  {
+    "symbol": "BABY",
+    "id": "babyswap",
+    "address": "0x53e562b9b7e5e94b81f10e96ee70ad06df3d2657"
+  },
+  {
+    "symbol": "BANANA",
+    "id": "apeswap-finance",
+    "address": "0x603c7f932ed1fc6575303d8fb018fdcbb0f39a95"
+  },
+  {
+    "symbol": "BANANAS31",
+    "id": "banana-for-scale-2",
+    "address": "0x3d4f0513e8a29669b960f9dbca61861548a9a760"
+  },
+  {
+    "symbol": "BANK",
+    "id": "lorenzo-protocol",
+    "address": "0x3aee7602b612de36088f3ffed8c8f10e86ebf2bf"
+  },
+  {
+    "symbol": "BARD",
+    "id": "lombard-protocol",
+    "address": "0xd23a186a78c0b3b805505e5f8ea4083295ef9f3a"
+  },
+  {
+    "symbol": "BB",
+    "id": "baby-bali",
+    "address": "0x16f9cc3c6f8d8006cfc0ee693cef9d76b0d44c36"
+  },
+  {
+    "symbol": "BCH",
+    "id": "binance-peg-bitcoin-cash",
+    "address": "0x8ff795a6f4d97e7887c79bea79aba5cc76444adf"
+  },
+  {
+    "symbol": "BEL",
+    "id": "bella-protocol",
+    "address": "0x8443f091997f06a61670b735ed92734f5628692f"
+  },
+  {
+    "symbol": "BIO",
+    "id": "bio-protocol",
+    "address": "0x226a2fa2556c48245e57cd1cba4c6c9e67077dd2"
+  },
+  {
+    "symbol": "BMT",
+    "id": "bubblemaps",
+    "address": "0x7d814b9ed370ec0a502edc3267393bf62d891b62"
+  },
+  {
+    "symbol": "BONK",
+    "id": "bonk",
+    "address": "0xa697e272a73744b343528c3bc4702f2565b2f422"
+  },
+  {
+    "symbol": "BREV",
+    "id": "brevis",
+    "address": "0x086f405146ce90135750bbec9a063a8b20a8bffb"
+  },
+  {
+    "symbol": "BTC",
+    "id": "bitcoin-ai-2",
+    "address": "0xf22aac87e08d7fc60aa89eb21110ddfe59c20854"
+  },
+  {
+    "symbol": "C",
+    "id": "c",
+    "address": "0x52c5f209795451cbdcf1d418c508af4525304444"
+  },
+  {
+    "symbol": "C98",
+    "id": "coin98",
+    "address": "0xaec945e04baf28b135fa7c640f624f8d90f1c3a6"
+  },
+  {
+    "symbol": "CAKE",
+    "id": "pancakeswap-token",
+    "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82"
+  },
+  {
+    "symbol": "CFX",
+    "id": "cosmic-force-token-v2",
+    "address": "0xdf5ba79f0fd70c6609666d5ed603710609a530ab"
+  },
+  {
+    "symbol": "CGPT",
+    "id": "chaingpt",
+    "address": "0x9840652dc04fb9db2c43853633f0f62be6f00f98"
+  },
+  {
+    "symbol": "CHR",
+    "id": "chromaway",
+    "address": "0xf9cec8d50f6c8ad3fb6dccec577e05aa32b224fe"
+  },
+  {
+    "symbol": "COMP",
+    "id": "compound-governance-token",
+    "address": "0x52ce071bd9b1c4b00a0b92d298c512478cad67e8"
+  },
+  {
+    "symbol": "COOKIE",
+    "id": "cookie",
+    "address": "0xc0041ef357b183448b235a8ea73ce4e4ec8c265f"
+  },
+  {
+    "symbol": "COW",
+    "id": "cowcoin-2",
+    "address": "0x7aaaa5b10f97321345acd76945083141be1c5631"
+  },
+  {
+    "symbol": "CTSI",
+    "id": "cartesi",
+    "address": "0x8da443f84fea710266c8eb6bc34b71702d033ef2"
+  },
+  {
+    "symbol": "CYBER",
+    "id": "cyberconnect",
+    "address": "0x14778860e937f509e651192a90589de711fb88a9"
+  },
+  {
+    "symbol": "D",
+    "id": "dar-open-network",
+    "address": "0x8fb238058e71f828f505582e65b1d14f8cf52067"
+  },
+  {
+    "symbol": "DEGO",
+    "id": "dego-finance",
+    "address": "0x3da932456d082cba208feb0b096d49b202bf89c8"
+  },
+  {
+    "symbol": "DEXE",
+    "id": "dexe",
+    "address": "0x6e88056e8376ae7709496ba64d37fa2f8015ce3e"
+  },
+  {
+    "symbol": "DIA",
+    "id": "dia-data",
+    "address": "0x99956d38059cf7beda96ec91aa7bb2477e0901dd"
+  },
+  {
+    "symbol": "DODO",
+    "id": "dodo",
+    "address": "0x67ee3cb086f8a16f34bee3ca72fad36f7db929e2"
+  },
+  {
+    "symbol": "DOGE",
+    "id": "binance-peg-dogecoin",
+    "address": "0xba2ae424d960c26247dd6c32edc70b295c744c43"
+  },
+  {
+    "symbol": "DOT",
+    "id": "binance-peg-polkadot",
+    "address": "0x7083609fce4d1d8dc0c979aab8c869ea2c873402"
+  },
+  {
+    "symbol": "DUSK",
+    "id": "dusk-network",
+    "address": "0xb2bd0749dbe21f623d9baba856d3b0f0e1bfec9c"
+  },
+  {
+    "symbol": "EDEN",
+    "id": "openeden",
+    "address": "0x235b6fe22b4642ada16d311855c49ce7de260841"
+  },
+  {
+    "symbol": "EDU",
+    "id": "edu-coin",
+    "address": "0xbdeae1ca48894a1759a8374d63925f21f2ee2639"
+  },
+  {
+    "symbol": "ENSO",
+    "id": "enso",
+    "address": "0xfeb339236d25d3e415f280189bc7c2fbab6ae9ef"
+  },
+  {
+    "symbol": "ERA",
+    "id": "caldera",
+    "address": "0x00312400303d02c323295f6e8b7309bc30fb6bce"
+  },
+  {
+    "symbol": "ETH",
+    "id": "ethereum-wormhole",
+    "address": "0x4db5a66e937a9f4473fa95b1caf1d1e1d62e29ea"
+  },
+  {
+    "symbol": "EUL",
+    "id": "euler",
+    "address": "0x2117e8b79e8e176a670c9fcf945d4348556bffad"
+  },
+  {
+    "symbol": "EURI",
+    "id": "eurite",
+    "address": "0x9d1a7a3191102e9f900faa10540837ba84dcbae7"
+  },
+  {
+    "symbol": "F",
+    "id": "f",
+    "address": "0xd6a8dc25b26beb85cd0eef63e5d8d32048113b51"
+  },
+  {
+    "symbol": "FARM",
+    "id": "harvest-finance",
+    "address": "0x4b5c23cac08a567ecf0c1ffca8372a45a5d33743"
+  },
+  {
+    "symbol": "FDUSD",
+    "id": "first-digital-usd",
+    "address": "0xc5f0f7b66764f6ec8c8dff7ba683102295e16409"
+  },
+  {
+    "symbol": "FET",
+    "id": "fetch-ai",
+    "address": "0x031b41e504677879370e9dbcf937283a8691fa7f"
+  },
+  {
+    "symbol": "FF",
+    "id": "falcon-finance-ff",
+    "address": "0xac23b90a79504865d52b49b327328411a23d4db2"
+  },
+  {
+    "symbol": "FIL",
+    "id": "binance-peg-filecoin",
+    "address": "0x0d8ce2a99bb6e3b7db580ed848240e4a0f9ae153"
+  },
+  {
+    "symbol": "FLOKI",
+    "id": "floki",
+    "address": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e"
+  },
+  {
+    "symbol": "FLOW",
+    "id": "stake-flow",
+    "address": "0x7dc31152f557f0a21897cab58b0d2d213a6d4444"
+  },
+  {
+    "symbol": "FORM",
+    "id": "four",
+    "address": "0x5b73a93b4e5e4f1fd27d8b3f8c97d69908b5e284"
+  },
+  {
+    "symbol": "FRAX",
+    "id": "frax",
+    "address": "0x90c97f71e18723b0cf0dfa30ee176ab653e89f40"
+  },
+  {
+    "symbol": "G",
+    "id": "g-token",
+    "address": "0x9c7beba8f6ef6643abd725e45a4e8387ef260649"
+  },
+  {
+    "symbol": "GIGGLE",
+    "id": "giggle-fund",
+    "address": "0x20d6015660b3fe52e6690a889b5c51f69902ce0e"
+  },
+  {
+    "symbol": "GMT",
+    "id": "gamem-token",
+    "address": "0xe2b16f618eb6016bc2625e98335f1844ee90236a"
+  },
+  {
+    "symbol": "GPS",
+    "id": "goplus-security",
+    "address": "0x9a4a67721573f2c9209dfff972c52be4e3f6642e"
+  },
+  {
+    "symbol": "GTC",
+    "id": "global-trust-coin",
+    "address": "0x6cd871fb811224aa23b6bf1646177cdfe5106416"
+  },
+  {
+    "symbol": "HAEDAL",
+    "id": "haedal",
+    "address": "0x3d9be0ac1001cd81c32464276d863d2ffdca4967"
+  },
+  {
+    "symbol": "HEI",
+    "id": "heima",
+    "address": "0xf8f173e20e15f3b6cb686fb64724d370689de083"
+  },
+  {
+    "symbol": "HEMI",
+    "id": "hemi",
+    "address": "0x5ffd0eadc186af9512542d0d5e5eafc65d5afc5b"
+  },
+  {
+    "symbol": "HFT",
+    "id": "hashflow",
+    "address": "0x44ec807ce2f4a6f2737a92e985f318d035883e47"
+  },
+  {
+    "symbol": "HIGH",
+    "id": "highstreet",
+    "address": "0x5f4bde007dc06b867f86ebfe4802e34a1ffeed63"
+  },
+  {
+    "symbol": "HIVE",
+    "id": "hive-token",
+    "address": "0x8fb024a51841e45891579bdc924550996b72b0fd"
+  },
+  {
+    "symbol": "HOLO",
+    "id": "holoworld",
+    "address": "0x1a5d7e4c3a7f940b240b7357a4bfed30d17f9497"
+  },
+  {
+    "symbol": "HOME",
+    "id": "home",
+    "address": "0x4bfaa776991e85e5f8b1255461cbbd216cfc714f"
+  },
+  {
+    "symbol": "HUMA",
+    "id": "huma-finance",
+    "address": "0x92516e0ddf1ddbf7fab1b79cac26689fdc5ba8e6"
+  },
+  {
+    "symbol": "HYPER",
+    "id": "hyperlane",
+    "address": "0xc9d23ed2adb0f551369946bd377f8644ce1ca5c4"
+  },
+  {
+    "symbol": "ID",
+    "id": "space-id",
+    "address": "0x2dff88a56767223a5529ea5960da7a3f5f766406"
+  },
+  {
+    "symbol": "INJ",
+    "id": "injective-protocol",
+    "address": "0xa2b726b1145a4773f68593cf171187d8ebe4d495"
+  },
+  {
+    "symbol": "IOST",
+    "id": "iostoken",
+    "address": "0xaf48b7e315a52518cfbf7d96c455d9dfad94cb48"
+  },
+  {
+    "symbol": "IOTX",
+    "id": "binance-peg-iotex",
+    "address": "0x9678e42cebeb63f23197d726b29b1cb20d0064e5"
+  },
+  {
+    "symbol": "IQ",
+    "id": "everipedia",
+    "address": "0x0e37d70b51ffa2b98b4d34a5712c5291115464e3"
+  },
+  {
+    "symbol": "JOE",
+    "id": "joe",
+    "address": "0x371c7ec6d8039ff7933a2aa28eb827ffe1f52f07"
+  },
+  {
+    "symbol": "JUP",
+    "id": "jupiter",
+    "address": "0x0231f91e02debd20345ae8ab7d71a41f8e140ce7"
+  },
+  {
+    "symbol": "KAT",
+    "id": "kambria",
+    "address": "0x3a9eed92422abdd7566fba8c34bb74b3f656dbb3"
+  },
+  {
+    "symbol": "KAVA",
+    "id": "kava",
+    "address": "0x9bafc8d4b487cebff201721702507a3e2c67ad79"
+  },
+  {
+    "symbol": "KERNEL",
+    "id": "kernel-2",
+    "address": "0x9ecaf80c1303cca8791afbc0ad405c8a35e8d9f1"
+  },
+  {
+    "symbol": "KGST",
+    "id": "kyrgyz-som-stablecoin",
+    "address": "0x94be0bba8e1e303fe998c9360b57b826f1a4f828"
+  },
+  {
+    "symbol": "KITE",
+    "id": "kite-2",
+    "address": "0x904567252d8f48555b7447c67dca23f0372e16be"
+  },
+  {
+    "symbol": "KNC",
+    "id": "kyber-network-crystal",
+    "address": "0xfe56d5892bdffc7bf58f2e84be1b2c32d21c308b"
+  },
+  {
+    "symbol": "LA",
+    "id": "lagrange",
+    "address": "0x389ad4bb96d0d6ee5b6ef0efaf4b7db0ba2e02a0"
+  },
+  {
+    "symbol": "LAYER",
+    "id": "unilayer",
+    "address": "0xc2c23a86def9e9f5972a633b3d25f7ecbfa5e575"
+  },
+  {
+    "symbol": "LAZIO",
+    "id": "lazio-fan-token",
+    "address": "0x77d547256a2cd95f32f67ae0313e450ac200648d"
+  },
+  {
+    "symbol": "LDO",
+    "id": "lido-dao-wormhole",
+    "address": "0x986854779804799c1d68867f5e03e601e781e41b"
+  },
+  {
+    "symbol": "LINK",
+    "id": "chainlink",
+    "address": "0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd"
+  },
+  {
+    "symbol": "LISTA",
+    "id": "lista",
+    "address": "0xfceb31a79f71ac9cbdcf853519c1b12d379edc46"
+  },
+  {
+    "symbol": "LTC",
+    "id": "binance-peg-litecoin",
+    "address": "0x4338665cbb7b2485a8855a139b75d5e34ab0db94"
+  },
+  {
+    "symbol": "LUMIA",
+    "id": "lumia",
+    "address": "0x7f39bcdca8e0e581c1d43aaa1cb862aa1c8c2047"
+  },
+  {
+    "symbol": "LUNC",
+    "id": "luna-wormhole",
+    "address": "0x156ab3346823b651294766e23e6cf87254d68962"
+  },
+  {
+    "symbol": "MASK",
+    "id": "mask-network",
+    "address": "0x2ed9a5c8c13b93955103b9a7c167b67ef4d568a3"
+  },
+  {
+    "symbol": "MAV",
+    "id": "maverick-protocol",
+    "address": "0xd691d9a68c887bdf34da8c36f63487333acfd103"
+  },
+  {
+    "symbol": "MBOX",
+    "id": "mobox",
+    "address": "0x3203c9e46ca618c8c1ce5dc67e7e9d75f5da2377"
+  },
+  {
+    "symbol": "MEME",
+    "id": "memetoon",
+    "address": "0x193397bb76868c6873e733ad60d5953843ebc84e"
+  },
+  {
+    "symbol": "MIRA",
+    "id": "chains-of-war",
+    "address": "0x7ce4bfc3a66d0fcf5d91dd846911c15c3ff82ecc"
+  },
+  {
+    "symbol": "MITO",
+    "id": "mitosis",
+    "address": "0x8e1e6bf7e13c400269987b65ab2b5724b016caef"
+  },
+  {
+    "symbol": "MOVE",
+    "id": "moveapp",
+    "address": "0x95ca12cd249d27008a482009e101a8501cf3a64f"
+  },
+  {
+    "symbol": "MUBARAK",
+    "id": "mubarak",
+    "address": "0x5c85d6c6825ab4032337f11ee92a72df936b46f6"
+  },
+  {
+    "symbol": "NEAR",
+    "id": "binance-peg-near-protocol",
+    "address": "0x1fa4a73a3f0133f0025378af00236f3abdee5d63"
+  },
+  {
+    "symbol": "NEIRO",
+    "id": "neiro-3",
+    "address": "0x94162acc63812d53ac2bcf1f4aef65863273e63b"
+  },
+  {
+    "symbol": "NEWT",
+    "id": "newton-protocol",
+    "address": "0xb8a677e6d805c8d743e6f14c8bc9c19305b5defc"
+  },
+  {
+    "symbol": "NFP",
+    "id": "nfprompt-token",
+    "address": "0x551897f8203bd131b350601d3ac0679ba0fc0136"
+  },
+  {
+    "symbol": "NIGHT",
+    "id": "midnight-3",
+    "address": "0xfe930c2d63aed9b82fc4dbc801920dd2c1a3224f"
+  },
+  {
+    "symbol": "NXPC",
+    "id": "bridged-nxpc",
+    "address": "0xf2b51cc1850fed939658317a22d73d3482767591"
+  },
+  {
+    "symbol": "ONE",
+    "id": "crypto-one",
+    "address": "0x30f5d258e9d1323c05b185ced2d9b2ead9ac10a4"
+  },
+  {
+    "symbol": "ONT",
+    "id": "binance-peg-ontology",
+    "address": "0xfd7b3a77848f1c2d67e05e54d78d174a0c850335"
+  },
+  {
+    "symbol": "OPEN",
+    "id": "openledger-2",
+    "address": "0xa227cc36938f0c9e09ce0e64dfab226cad739447"
+  },
+  {
+    "symbol": "OPN",
+    "id": "opinion",
+    "address": "0x7977bf3e7e0c954d12cdca3e013adaf57e0b06e0"
+  },
+  {
+    "symbol": "PARTI",
+    "id": "particle-network",
+    "address": "0x59264f02d301281f3393e1385c0aefd446eb0f00"
+  },
+  {
+    "symbol": "PENDLE",
+    "id": "pendle",
+    "address": "0xb3ed0a426155b79b898849803e3b36552f7ed507"
+  },
+  {
+    "symbol": "PENGU",
+    "id": "pudgy-penguins",
+    "address": "0x6418c0dd099a9fda397c766304cdd918233e8847"
+  },
+  {
+    "symbol": "PEPE",
+    "id": "pepe",
+    "address": "0x25d887ce7a35172c62febfd67a1856f20faebb00"
+  },
+  {
+    "symbol": "PHB",
+    "id": "phoenix-global",
+    "address": "0x0409633a72d846fc5bbe2f98d88564d35987904d"
+  },
+  {
+    "symbol": "PLUME",
+    "id": "plume",
+    "address": "0x5afadcd1e8e3ca78ee2d37100102f2aec8bc0aa8"
+  },
+  {
+    "symbol": "PORTO",
+    "id": "fc-porto",
+    "address": "0x49f2145d6366099e13b10fbf80646c0f377ee7f6"
+  },
+  {
+    "symbol": "PROM",
+    "id": "prometeus",
+    "address": "0xaf53d56ff99f1322515e54fdde93ff8b3b7dafd5"
+  },
+  {
+    "symbol": "PROVE",
+    "id": "succinct",
+    "address": "0x7ddf164cecfddd0f992299d033b5a11279a15929"
+  },
+  {
+    "symbol": "PUMP",
+    "id": "big-pump",
+    "address": "0x22b4fa9a13a0d303ad258ee6d62a6ac60364b0c9"
+  },
+  {
+    "symbol": "RESOLV",
+    "id": "resolv",
+    "address": "0xda6cef7f667d992a60eb823ab215493aa0c6b360"
+  },
+  {
+    "symbol": "ROBO",
+    "id": "robo-token-2",
+    "address": "0x475cbf5919608e0c6af00e7bf87fab83bf3ef6e2"
+  },
+  {
+    "symbol": "ROSE",
+    "id": "oasis-network",
+    "address": "0xf00600ebc7633462bc4f9c61ea2ce99f5aaebd4a"
+  },
+  {
+    "symbol": "SAHARA",
+    "id": "sahara-ai",
+    "address": "0xfdffb411c4a70aa7c95d5c981a6fb4da867e1111"
+  },
+  {
+    "symbol": "SANTOS",
+    "id": "santos-fc-fan-token",
+    "address": "0xa64455a4553c9034236734faddaddbb64ace4cc7"
+  },
+  {
+    "symbol": "SCR",
+    "id": "score11",
+    "address": "0xad96b68940b50fd539e23d198fff2c7e9b46be9c"
+  },
+  {
+    "symbol": "SFP",
+    "id": "safepal",
+    "address": "0xd41fdb03ba84762dd66a0af1a6c8540ff1ba5dfb"
+  },
+  {
+    "symbol": "SHELL",
+    "id": "myshell",
+    "address": "0xf2c88757f8d03634671208935974b60a2a28bdb3"
+  },
+  {
+    "symbol": "SHIB",
+    "id": "binance-peg-shib",
+    "address": "0x2859e4544c4bb03966803b044a93563bd2d0dd4d"
+  },
+  {
+    "symbol": "SIGN",
+    "id": "sign-global",
+    "address": "0x868fced65edbf0056c4163515dd840e9f287a4c3"
+  },
+  {
+    "symbol": "SOL",
+    "id": "binance-peg-sol",
+    "address": "0x570a5d26f7765ecb712c0924e4de545b89fd43df"
+  },
+  {
+    "symbol": "SOLV",
+    "id": "solv-protocol",
+    "address": "0xabe8e5cabe24cb36df9540088fd7ce1175b9bc52"
+  },
+  {
+    "symbol": "SOPH",
+    "id": "sophiaverse",
+    "address": "0x73fbd93bfda83b111ddc092aa3a4ca77fd30d380"
+  },
+  {
+    "symbol": "STG",
+    "id": "stargate-finance",
+    "address": "0xb0d502e938ed5f4df2e681fe6e419ff29631d62b"
+  },
+  {
+    "symbol": "STO",
+    "id": "stakestone",
+    "address": "0xdaf1695c41327b61b9b9965ac6a5843a3198cf07"
+  },
+  {
+    "symbol": "SUSHI",
+    "id": "sushi",
+    "address": "0x947950bcc74888a40ffa2593c5798f11fc9124c4"
+  },
+  {
+    "symbol": "SYN",
+    "id": "synapse-2",
+    "address": "0xa4080f1778e69467e905b8d6f72f6e441f9e9484"
+  },
+  {
+    "symbol": "THE",
+    "id": "thena",
+    "address": "0xf4c8e32eadec4bfe97e0f595add0f4450a863a11"
+  },
+  {
+    "symbol": "TKO",
+    "id": "tokocrypto",
+    "address": "0x9f589e3eabe42ebc94a44727b3f3531c0c877809"
+  },
+  {
+    "symbol": "TLM",
+    "id": "alien-worlds",
+    "address": "0x2222227e22102fe3322098e4cbfe18cfebd57c95"
+  },
+  {
+    "symbol": "TON",
+    "id": "atnt-ondo-tokenized-stock",
+    "address": "0x4255279af47cf10efb9a5c8839f90170f4ef759f"
+  },
+  {
+    "symbol": "TOWNS",
+    "id": "towns",
+    "address": "0x00000000bca93b25a6694ca3d2109d545988b13b"
+  },
+  {
+    "symbol": "TREE",
+    "id": "treehouse",
+    "address": "0x77146784315ba81904d654466968e3a7c196d1f3"
+  },
+  {
+    "symbol": "TRUMP",
+    "id": "maga",
+    "address": "0x4ea98c1999575aaadfb38237dd015c5e773f75a2"
+  },
+  {
+    "symbol": "TRX",
+    "id": "tron-bsc",
+    "address": "0xce7de646e7208a4ef112cb6ed5038fa6cc6b12e3"
+  },
+  {
+    "symbol": "TST",
+    "id": "test-3",
+    "address": "0x86bb94ddd16efc8bc58e6b056e8df71d9e666429"
+  },
+  {
+    "symbol": "TURBO",
+    "id": "turbodex",
+    "address": "0x9d0211c1b1a217a574cb55b0e9c367e56debeae0"
+  },
+  {
+    "symbol": "TURTLE",
+    "id": "turtle-4",
+    "address": "0x66fd8de541c0594b4dccdfc13bf3a390e50d3afd"
+  },
+  {
+    "symbol": "TUSD",
+    "id": "bridged-trueusd",
+    "address": "0x14016e85a25aeb13065688cafb43044c2ef86784"
+  },
+  {
+    "symbol": "TUT",
+    "id": "tutorial",
+    "address": "0xcaae2a2f939f51d97cdfa9a86e79e3f085b799f3"
+  },
+  {
+    "symbol": "TWT",
+    "id": "trust-wallet-token",
+    "address": "0x4b0f1812e5df2a09796481ff14017e6005508003"
+  },
+  {
+    "symbol": "U",
+    "id": "u",
+    "address": "0x6f88dbed8f178f71f6a0c27df10d4f0b8ddf4444"
+  },
+  {
+    "symbol": "UNI",
+    "id": "uniswap",
+    "address": "0xbf5140a22578168fd562dccf235e5d43a02ce9b1"
+  },
+  {
+    "symbol": "USD1",
+    "id": "usd1-wlfi",
+    "address": "0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d"
+  },
+  {
+    "symbol": "USDC",
+    "id": "binance-bridged-usdc-bnb-smart-chain",
+    "address": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"
+  },
+  {
+    "symbol": "USDE",
+    "id": "ethena-usde",
+    "address": "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34"
+  },
+  {
+    "symbol": "USTC",
+    "id": "wrapped-ust",
+    "address": "0x23396cf899ca06c4472205fc903bdb4de249d6fc"
+  },
+  {
+    "symbol": "USUAL",
+    "id": "usual",
+    "address": "0x4acd4d03af6f9cc0fb7c5f0868b7b6287d7969c5"
+  },
+  {
+    "symbol": "VANA",
+    "id": "vana",
+    "address": "0x7ff7fa94b8b66ef313f7970d4eebd2cb3103a2c0"
+  },
+  {
+    "symbol": "W",
+    "id": "w",
+    "address": "0x380bf199b3173cf7b3b321848ae1c5014a124444"
+  },
+  {
+    "symbol": "WBETH",
+    "id": "wrapped-beacon-eth",
+    "address": "0xa2e3356610840701bdf5611a53974510ae27e2e1"
+  },
+  {
+    "symbol": "WBTC",
+    "id": "wrapped-bitcoin",
+    "address": "0x0555e30da8f98308edb960aa94c0db47230d2b9c"
+  },
+  {
+    "symbol": "WIN",
+    "id": "winklink-bsc",
+    "address": "0xaef0d72a118ce24fee3cd1d43d383897d05b4e99"
+  },
+  {
+    "symbol": "WLFI",
+    "id": "world-liberty-financial",
+    "address": "0x47474747477b199288bf72a1d702f7fe0fb1deea"
+  },
+  {
+    "symbol": "WOO",
+    "id": "woo-network",
+    "address": "0x4691937a7508860f876c9c0a2a617e7d9e945d4b"
+  },
+  {
+    "symbol": "XPL",
+    "id": "pulse-2",
+    "address": "0xf84dd1ac34c0043d109f6600f98302cdd3e5a6eb"
+  },
+  {
+    "symbol": "XRP",
+    "id": "binance-peg-xrp",
+    "address": "0x1d2f0da169ceb9fc7b3144628db156f3f6c60dbe"
+  },
+  {
+    "symbol": "XTZ",
+    "id": "binance-peg-tezos-token",
+    "address": "0x16939ef78684453bfdfb47825f8a5f714f12623a"
+  },
+  {
+    "symbol": "XUSD",
+    "id": "straitsx-xusd",
+    "address": "0xf81ac2e1a0373dde1bce01e2fe694a9b7e3bfcb9"
+  },
+  {
+    "symbol": "XVS",
+    "id": "venus",
+    "address": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63"
+  },
+  {
+    "symbol": "YB",
+    "id": "yield-basis",
+    "address": "0xfb93ee8152dd0a0e6f4b49c66c06d800cf1db72d"
+  },
+  {
+    "symbol": "YFI",
+    "id": "yfi",
+    "address": "0x0affe50d637114656f6ba27fa94abf0de260f918"
+  },
+  {
+    "symbol": "YGG",
+    "id": "yield-guild-games",
+    "address": "0x13ab6739368a4e4abf24695bf52959224367391f"
+  },
+  {
+    "symbol": "ZAMA",
+    "id": "zama",
+    "address": "0x6907a5986c4950bdaf2f81828ec0737ce787519f"
+  },
+  {
+    "symbol": "ZBT",
+    "id": "zerobase",
+    "address": "0xfab99fcf605fd8f4593edb70a43ba56542777777"
+  },
+  {
+    "symbol": "ZEC",
+    "id": "binance-peg-zcash-token",
+    "address": "0x1ba42e5193dfa8b03d15dd1b86a3113bbbef8eeb"
+  },
+  {
+    "symbol": "ZIL",
+    "id": "zilliqa",
+    "address": "0xb86abcb37c3a4b64f74f59301aff131a1becc787"
+  },
+  {
+    "symbol": "ZKC",
+    "id": "boundless",
+    "address": "0x15247e6e23d3923a853ccf15940a20ccdf16e94a"
+  },
+  {
+    "symbol": "ZKP",
+    "id": "zkpass",
+    "address": "0xd89b7dd376e671c124352267516bef1c2cc231a3"
+  },
+  {
+    "symbol": "ZRO",
+    "id": "layerzero",
+    "address": "0x6985884c4392d348587b19cb9eaaf157f13271cd"
+  },
+  {
+    "symbol": "币安人生",
+    "id": "bianrensheng",
+    "address": "0x924fa68a0fc644485b8df8abfa0a41c2e7744444"
+  }
+]

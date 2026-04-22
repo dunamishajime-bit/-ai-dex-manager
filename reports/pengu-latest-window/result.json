@@ -1,0 +1,60 @@
+{
+  "rows": [
+    {
+      "key": "legacy_base",
+      "thesis": "Original strongest profile before PENGU trailing, limited to 2025-12-31 through 2026-04-17.",
+      "start_iso": "2025-12-31T00:00:00.000Z",
+      "end_iso": "2026-04-17T23:59:59.999Z",
+      "end_equity": 9967.38,
+      "cagr_pct": -1.89,
+      "max_drawdown_pct": -17.25,
+      "profit_factor": 0.943,
+      "win_rate_pct": 33.33,
+      "trade_count": 3,
+      "pengu_contribution": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 9967.38\n- CAGR: -1.89%\n- MaxDD: -17.25%\n- WinRate: 33.33%\n- PF: 0.94\n- Trades: 3"
+    },
+    {
+      "key": "trailing_base",
+      "thesis": "PENGU-only trailing protection, limited to 2025-12-31 through 2026-04-17.",
+      "start_iso": "2025-12-31T00:00:00.000Z",
+      "end_iso": "2026-04-17T23:59:59.999Z",
+      "end_equity": 9967.38,
+      "cagr_pct": -1.89,
+      "max_drawdown_pct": -17.25,
+      "profit_factor": 0.943,
+      "win_rate_pct": 33.33,
+      "trade_count": 3,
+      "pengu_contribution": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 9967.38\n- CAGR: -1.89%\n- MaxDD: -17.25%\n- WinRate: 33.33%\n- PF: 0.94\n- Trades: 3"
+    },
+    {
+      "key": "trailing_plus_rotate_gap10_once",
+      "thesis": "PENGU trailing plus single-bar gap10 rotation in the latest-window test.",
+      "start_iso": "2025-12-31T00:00:00.000Z",
+      "end_iso": "2026-04-17T23:59:59.999Z",
+      "end_equity": 10099.33,
+      "cagr_pct": 5.94,
+      "max_drawdown_pct": -17.25,
+      "profit_factor": 1.173,
+      "win_rate_pct": 50,
+      "trade_count": 4,
+      "pengu_contribution": 137.55,
+      "summary": "- mode: RETQ22\n- end_equity: 10099.33\n- CAGR: 5.94%\n- MaxDD: -17.25%\n- WinRate: 50.00%\n- PF: 1.17\n- Trades: 4"
+    },
+    {
+      "key": "trailing_plus_rotate_gap10_twice",
+      "thesis": "PENGU trailing plus two-bar gap10 rotation in the latest-window test.",
+      "start_iso": "2025-12-31T00:00:00.000Z",
+      "end_iso": "2026-04-17T23:59:59.999Z",
+      "end_equity": 9967.38,
+      "cagr_pct": -1.89,
+      "max_drawdown_pct": -17.25,
+      "profit_factor": 0.943,
+      "win_rate_pct": 33.33,
+      "trade_count": 3,
+      "pengu_contribution": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 9967.38\n- CAGR: -1.89%\n- MaxDD: -17.25%\n- WinRate: 33.33%\n- PF: 0.94\n- Trades: 3"
+    }
+  ]
+}

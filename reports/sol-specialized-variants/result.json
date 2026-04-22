@@ -1,0 +1,58 @@
+[
+  {
+    "key": "sol_score_demotion",
+    "thesis": "SOL only: keep current entry shape but lower ranking priority unless SOL is clearly stronger.",
+    "endEquity": 733310,
+    "cagrPct": 287.43,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.102,
+    "tradeCount": 95,
+    "solTradeCount": 24,
+    "solLossCount": 12,
+    "solPnl": 29143.67,
+    "topSolLossReason": "sma-break",
+    "topSolLossReasonCount": 6
+  },
+  {
+    "key": "base",
+    "thesis": "Current production logic.",
+    "endEquity": 640293.35,
+    "cagrPct": 271.21,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.099,
+    "tradeCount": 92,
+    "solTradeCount": 31,
+    "solLossCount": 18,
+    "solPnl": -49288.4,
+    "topSolLossReason": "sma-break",
+    "topSolLossReasonCount": 10
+  },
+  {
+    "key": "sol_breakout_plus_weak_exit",
+    "thesis": "SOL only: breakout entry plus early failure cut when momentum quickly weakens.",
+    "endEquity": 179403.01,
+    "cagrPct": 148.53,
+    "maxDrawdownPct": -42.7,
+    "profitFactor": 1.82,
+    "tradeCount": 86,
+    "solTradeCount": 5,
+    "solLossCount": 1,
+    "solPnl": 15086.91,
+    "topSolLossReason": "symbol-weak-exit",
+    "topSolLossReasonCount": 1
+  },
+  {
+    "key": "sol_breakout_entry",
+    "thesis": "SOL only: require clearer breakout and stronger internal trend quality before entry.",
+    "endEquity": 170973.93,
+    "cagrPct": 144.79,
+    "maxDrawdownPct": -42.7,
+    "profitFactor": 1.752,
+    "tradeCount": 86,
+    "solTradeCount": 5,
+    "solLossCount": 1,
+    "solPnl": 5273.5,
+    "topSolLossReason": "sma-break",
+    "topSolLossReasonCount": 1
+  }
+]

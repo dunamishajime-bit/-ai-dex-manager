@@ -1,0 +1,65 @@
+[
+  {
+    "key": "latest_baseline",
+    "thesis": "Latest accepted setup: cash-only UNI/TWT with TWT priority rotation.",
+    "endEquity": 1239991.68,
+    "cagrPct": 357.22,
+    "maxDrawdownPct": -44.8,
+    "profitFactor": 1.735,
+    "winRatePct": 55.64,
+    "tradeCount": 133,
+    "exposurePct": 39.58,
+    "bySymbol": {
+      "INJ": -151472.83,
+      "ETH": -36900.06,
+      "SOL": -2099.83,
+      "DOGE": 367849.22,
+      "TWT": 109713.9,
+      "AVAX": 110004.17,
+      "UNI": 8944.25,
+      "PENGU": 823952.87
+    }
+  },
+  {
+    "key": "latest_plus_extra_over_sol_gap8_mom_eff",
+    "thesis": "Latest baseline plus prefer DOGE/PENGU over SOL when score leads by 8 and both mom20 / efficiency are stronger.",
+    "endEquity": 1098645.14,
+    "cagrPct": 340.1,
+    "maxDrawdownPct": -45.01,
+    "profitFactor": 1.681,
+    "winRatePct": 55.04,
+    "tradeCount": 129,
+    "exposurePct": 39.58,
+    "bySymbol": {
+      "INJ": -150459.7,
+      "ETH": 4133.66,
+      "SOL": -72746.1,
+      "DOGE": 334235.9,
+      "TWT": 115784.71,
+      "AVAX": 53254.36,
+      "UNI": 8944.25,
+      "PENGU": 795498.05
+    }
+  },
+  {
+    "key": "latest_plus_extra_over_sol_gap10_mom_eff",
+    "thesis": "Latest baseline plus prefer DOGE/PENGU over SOL when score leads by 10 and both mom20 / efficiency are stronger.",
+    "endEquity": 1098645.14,
+    "cagrPct": 340.1,
+    "maxDrawdownPct": -45.01,
+    "profitFactor": 1.681,
+    "winRatePct": 55.04,
+    "tradeCount": 129,
+    "exposurePct": 39.58,
+    "bySymbol": {
+      "INJ": -150459.7,
+      "ETH": 4133.66,
+      "SOL": -72746.1,
+      "DOGE": 334235.9,
+      "TWT": 115784.71,
+      "AVAX": 53254.36,
+      "UNI": 8944.25,
+      "PENGU": 795498.05
+    }
+  }
+]

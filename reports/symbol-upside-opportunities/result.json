@@ -1,0 +1,761 @@
+[
+  {
+    "symbol": "INJ",
+    "rawOpportunityCount": 215,
+    "rawTotalGrossPct": 5516.14,
+    "rawAvgGainPct": 25.66,
+    "rawMedianGainPct": 21.73,
+    "rawBestGainPct": 354.01,
+    "rawCompoundedEquity": 3.754885476141788e+24,
+    "opportunityCount": 185,
+    "totalGrossPct": 4538.94,
+    "avgGainPct": 24.53,
+    "medianGainPct": 22.16,
+    "bestGainPct": 49.06,
+    "worstQualifiedGainPct": 15.1,
+    "compoundedEquity": 3.1085128108444636e+21,
+    "avgBars": 6.37,
+    "topWindows": [
+      {
+        "startTs": 1730764800000,
+        "endTs": 1731196800000,
+        "startIso": "2024-11-05T00:00:00.000Z",
+        "endIso": "2024-11-10T00:00:00.000Z",
+        "bars": 11,
+        "entryPrice": 16,
+        "peakPrice": 23.85,
+        "gainPct": 49.06
+      },
+      {
+        "startTs": 1762300800000,
+        "endTs": 1762603200000,
+        "startIso": "2025-11-05T00:00:00.000Z",
+        "endIso": "2025-11-08T12:00:00.000Z",
+        "bars": 8,
+        "entryPrice": 6.02,
+        "peakPrice": 8.92,
+        "gainPct": 48.17
+      },
+      {
+        "startTs": 1678665600000,
+        "endTs": 1678752000000,
+        "startIso": "2023-03-13T00:00:00.000Z",
+        "endIso": "2023-03-14T00:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 2.964,
+        "peakPrice": 4.381,
+        "gainPct": 47.81
+      },
+      {
+        "startTs": 1720785600000,
+        "endTs": 1721476800000,
+        "startIso": "2024-07-12T12:00:00.000Z",
+        "endIso": "2024-07-20T12:00:00.000Z",
+        "bars": 17,
+        "entryPrice": 19.08,
+        "peakPrice": 28.11,
+        "gainPct": 47.33
+      },
+      {
+        "startTs": 1702296000000,
+        "endTs": 1702382400000,
+        "startIso": "2023-12-11T12:00:00.000Z",
+        "endIso": "2023-12-12T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 18.979,
+        "peakPrice": 27.6,
+        "gainPct": 45.42
+      }
+    ]
+  },
+  {
+    "symbol": "NEAR",
+    "rawOpportunityCount": 167,
+    "rawTotalGrossPct": 4118.03,
+    "rawAvgGainPct": 24.66,
+    "rawMedianGainPct": 21.85,
+    "rawBestGainPct": 108.26,
+    "rawCompoundedEquity": 60203234838358120000,
+    "opportunityCount": 143,
+    "totalGrossPct": 3516.96,
+    "avgGainPct": 24.59,
+    "medianGainPct": 22.54,
+    "bestGainPct": 62.31,
+    "worstQualifiedGainPct": 15.01,
+    "compoundedEquity": 343167091047531700,
+    "avgBars": 7.43,
+    "topWindows": [
+      {
+        "startTs": 1697760000000,
+        "endTs": 1698883200000,
+        "startIso": "2023-10-20T00:00:00.000Z",
+        "endIso": "2023-11-02T00:00:00.000Z",
+        "bars": 27,
+        "entryPrice": 0.971,
+        "peakPrice": 1.576,
+        "gainPct": 62.31
+      },
+      {
+        "startTs": 1709726400000,
+        "endTs": 1709812800000,
+        "startIso": "2024-03-06T12:00:00.000Z",
+        "endIso": "2024-03-07T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 4,
+        "peakPrice": 6.195,
+        "gainPct": 54.88
+      },
+      {
+        "startTs": 1762516800000,
+        "endTs": 1762603200000,
+        "startIso": "2025-11-07T12:00:00.000Z",
+        "endIso": "2025-11-08T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 2.078,
+        "peakPrice": 3.185,
+        "gainPct": 53.27
+      },
+      {
+        "startTs": 1702900800000,
+        "endTs": 1703073600000,
+        "startIso": "2023-12-18T12:00:00.000Z",
+        "endIso": "2023-12-20T12:00:00.000Z",
+        "bars": 5,
+        "entryPrice": 2.067,
+        "peakPrice": 2.937,
+        "gainPct": 42.09
+      },
+      {
+        "startTs": 1738584000000,
+        "endTs": 1738670400000,
+        "startIso": "2025-02-03T12:00:00.000Z",
+        "endIso": "2025-02-04T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 2.701,
+        "peakPrice": 3.799,
+        "gainPct": 40.65
+      }
+    ]
+  },
+  {
+    "symbol": "AAVE",
+    "rawOpportunityCount": 152,
+    "rawTotalGrossPct": 3819.24,
+    "rawAvgGainPct": 25.13,
+    "rawMedianGainPct": 21.3,
+    "rawBestGainPct": 252.16,
+    "rawCompoundedEquity": 2127796982196931000,
+    "opportunityCount": 131,
+    "totalGrossPct": 3150.85,
+    "avgGainPct": 24.05,
+    "medianGainPct": 21.67,
+    "bestGainPct": 56.94,
+    "worstQualifiedGainPct": 15.1,
+    "compoundedEquity": 14216651840073716,
+    "avgBars": 8.24,
+    "topWindows": [
+      {
+        "startTs": 1686830400000,
+        "endTs": 1687694400000,
+        "startIso": "2023-06-15T12:00:00.000Z",
+        "endIso": "2023-06-25T12:00:00.000Z",
+        "bars": 21,
+        "entryPrice": 49,
+        "peakPrice": 76.9,
+        "gainPct": 56.94
+      },
+      {
+        "startTs": 1738584000000,
+        "endTs": 1738627200000,
+        "startIso": "2025-02-03T12:00:00.000Z",
+        "endIso": "2025-02-04T00:00:00.000Z",
+        "bars": 2,
+        "entryPrice": 192.63,
+        "peakPrice": 284.98,
+        "gainPct": 47.94
+      },
+      {
+        "startTs": 1672574400000,
+        "endTs": 1673654400000,
+        "startIso": "2023-01-01T12:00:00.000Z",
+        "endIso": "2023-01-14T00:00:00.000Z",
+        "bars": 26,
+        "entryPrice": 51.1,
+        "peakPrice": 73.2,
+        "gainPct": 43.25
+      },
+      {
+        "startTs": 1733918400000,
+        "endTs": 1734004800000,
+        "startIso": "2024-12-11T12:00:00.000Z",
+        "endIso": "2024-12-12T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 259.81,
+        "peakPrice": 370,
+        "gainPct": 42.41
+      },
+      {
+        "startTs": 1720440000000,
+        "endTs": 1721131200000,
+        "startIso": "2024-07-08T12:00:00.000Z",
+        "endIso": "2024-07-16T12:00:00.000Z",
+        "bars": 17,
+        "entryPrice": 75.46,
+        "peakPrice": 106.82,
+        "gainPct": 41.56
+      }
+    ]
+  },
+  {
+    "symbol": "SOL",
+    "rawOpportunityCount": 136,
+    "rawTotalGrossPct": 3326.65,
+    "rawAvgGainPct": 24.46,
+    "rawMedianGainPct": 22.1,
+    "rawBestGainPct": 61.91,
+    "rawCompoundedEquity": 61988428633262730,
+    "opportunityCount": 119,
+    "totalGrossPct": 2944.91,
+    "avgGainPct": 24.75,
+    "medianGainPct": 22.55,
+    "bestGainPct": 61.91,
+    "worstQualifiedGainPct": 15.13,
+    "compoundedEquity": 2037141459293614,
+    "avgBars": 10.17,
+    "topWindows": [
+      {
+        "startTs": 1673481600000,
+        "endTs": 1673697600000,
+        "startIso": "2023-01-12T00:00:00.000Z",
+        "endIso": "2023-01-14T12:00:00.000Z",
+        "bars": 6,
+        "entryPrice": 15.28,
+        "peakPrice": 24.74,
+        "gainPct": 61.91
+      },
+      {
+        "startTs": 1688990400000,
+        "endTs": 1689336000000,
+        "startIso": "2023-07-10T12:00:00.000Z",
+        "endIso": "2023-07-14T12:00:00.000Z",
+        "bars": 9,
+        "entryPrice": 20.47,
+        "peakPrice": 32.13,
+        "gainPct": 56.96
+      },
+      {
+        "startTs": 1698364800000,
+        "endTs": 1698883200000,
+        "startIso": "2023-10-27T00:00:00.000Z",
+        "endIso": "2023-11-02T00:00:00.000Z",
+        "bars": 13,
+        "entryPrice": 30.73,
+        "peakPrice": 46.9,
+        "gainPct": 52.62
+      },
+      {
+        "startTs": 1730764800000,
+        "endTs": 1731412800000,
+        "startIso": "2024-11-05T00:00:00.000Z",
+        "endIso": "2024-11-12T12:00:00.000Z",
+        "bars": 16,
+        "entryPrice": 155.11,
+        "peakPrice": 225.21,
+        "gainPct": 45.19
+      },
+      {
+        "startTs": 1736812800000,
+        "endTs": 1737201600000,
+        "startIso": "2025-01-14T00:00:00.000Z",
+        "endIso": "2025-01-18T12:00:00.000Z",
+        "bars": 10,
+        "entryPrice": 168.88,
+        "peakPrice": 245,
+        "gainPct": 45.07
+      }
+    ]
+  },
+  {
+    "symbol": "UNI",
+    "rawOpportunityCount": 141,
+    "rawTotalGrossPct": 3696.53,
+    "rawAvgGainPct": 26.22,
+    "rawMedianGainPct": 21.45,
+    "rawBestGainPct": 315.7,
+    "rawCompoundedEquity": 403806057817688260,
+    "opportunityCount": 118,
+    "totalGrossPct": 2925.22,
+    "avgGainPct": 24.79,
+    "medianGainPct": 21.97,
+    "bestGainPct": 84.68,
+    "worstQualifiedGainPct": 15.08,
+    "compoundedEquity": 1596916599520952.2,
+    "avgBars": 8.96,
+    "topWindows": [
+      {
+        "startTs": 1708689600000,
+        "endTs": 1708776000000,
+        "startIso": "2024-02-23T12:00:00.000Z",
+        "endIso": "2024-02-24T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 6.963,
+        "peakPrice": 12.859,
+        "gainPct": 84.68
+      },
+      {
+        "startTs": 1762776000000,
+        "endTs": 1762862400000,
+        "startIso": "2025-11-10T12:00:00.000Z",
+        "endIso": "2025-11-11T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 6.547,
+        "peakPrice": 10.3,
+        "gainPct": 57.32
+      },
+      {
+        "startTs": 1738584000000,
+        "endTs": 1738627200000,
+        "startIso": "2025-02-03T12:00:00.000Z",
+        "endIso": "2025-02-04T00:00:00.000Z",
+        "bars": 2,
+        "entryPrice": 6.884,
+        "peakPrice": 10.213,
+        "gainPct": 48.36
+      },
+      {
+        "startTs": 1730764800000,
+        "endTs": 1730937600000,
+        "startIso": "2024-11-05T00:00:00.000Z",
+        "endIso": "2024-11-07T00:00:00.000Z",
+        "bars": 5,
+        "entryPrice": 6.621,
+        "peakPrice": 9.7,
+        "gainPct": 46.5
+      },
+      {
+        "startTs": 1706054400000,
+        "endTs": 1708257600000,
+        "startIso": "2024-01-24T00:00:00.000Z",
+        "endIso": "2024-02-18T12:00:00.000Z",
+        "bars": 52,
+        "entryPrice": 5.535,
+        "peakPrice": 7.976,
+        "gainPct": 44.1
+      }
+    ]
+  },
+  {
+    "symbol": "ADA",
+    "rawOpportunityCount": 113,
+    "rawTotalGrossPct": 3084,
+    "rawAvgGainPct": 27.29,
+    "rawMedianGainPct": 22.58,
+    "rawBestGainPct": 201.13,
+    "rawCompoundedEquity": 2653959485192325,
+    "opportunityCount": 99,
+    "totalGrossPct": 2603.63,
+    "avgGainPct": 26.3,
+    "medianGainPct": 22.74,
+    "bestGainPct": 98.03,
+    "worstQualifiedGainPct": 15.05,
+    "compoundedEquity": 71460490278675.22,
+    "avgBars": 10.65,
+    "topWindows": [
+      {
+        "startTs": 1740744000000,
+        "endTs": 1740960000000,
+        "startIso": "2025-02-28T12:00:00.000Z",
+        "endIso": "2025-03-03T00:00:00.000Z",
+        "bars": 6,
+        "entryPrice": 0.5801,
+        "peakPrice": 1.1488,
+        "gainPct": 98.03
+      },
+      {
+        "startTs": 1740960000000,
+        "endTs": 1741003200000,
+        "startIso": "2025-03-03T00:00:00.000Z",
+        "endIso": "2025-03-03T12:00:00.000Z",
+        "bars": 2,
+        "entryPrice": 0.645,
+        "peakPrice": 1.1747,
+        "gainPct": 82.12
+      },
+      {
+        "startTs": 1738584000000,
+        "endTs": 1738627200000,
+        "startIso": "2025-02-03T12:00:00.000Z",
+        "endIso": "2025-02-04T00:00:00.000Z",
+        "bars": 2,
+        "entryPrice": 0.506,
+        "peakPrice": 0.8245,
+        "gainPct": 62.94
+      },
+      {
+        "startTs": 1731196800000,
+        "endTs": 1731283200000,
+        "startIso": "2024-11-10T00:00:00.000Z",
+        "endIso": "2024-11-11T00:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 0.4313,
+        "peakPrice": 0.6599,
+        "gainPct": 53
+      },
+      {
+        "startTs": 1700308800000,
+        "endTs": 1702036800000,
+        "startIso": "2023-11-18T12:00:00.000Z",
+        "endIso": "2023-12-08T12:00:00.000Z",
+        "bars": 41,
+        "entryPrice": 0.3488,
+        "peakPrice": 0.5292,
+        "gainPct": 51.72
+      }
+    ]
+  },
+  {
+    "symbol": "LINK",
+    "rawOpportunityCount": 126,
+    "rawTotalGrossPct": 3103.54,
+    "rawAvgGainPct": 24.63,
+    "rawMedianGainPct": 21.87,
+    "rawBestGainPct": 188.35,
+    "rawCompoundedEquity": 5508828283756690,
+    "opportunityCount": 107,
+    "totalGrossPct": 2522.76,
+    "avgGainPct": 23.58,
+    "medianGainPct": 21.96,
+    "bestGainPct": 47.47,
+    "worstQualifiedGainPct": 15.11,
+    "compoundedEquity": 56340403657251.7,
+    "avgBars": 10.79,
+    "topWindows": [
+      {
+        "startTs": 1730764800000,
+        "endTs": 1731283200000,
+        "startIso": "2024-11-05T00:00:00.000Z",
+        "endIso": "2024-11-11T00:00:00.000Z",
+        "bars": 13,
+        "entryPrice": 10.07,
+        "peakPrice": 14.85,
+        "gainPct": 47.47
+      },
+      {
+        "startTs": 1754179200000,
+        "endTs": 1754827200000,
+        "startIso": "2025-08-03T00:00:00.000Z",
+        "endIso": "2025-08-10T12:00:00.000Z",
+        "bars": 16,
+        "entryPrice": 15.43,
+        "peakPrice": 22.7,
+        "gainPct": 47.12
+      },
+      {
+        "startTs": 1733875200000,
+        "endTs": 1734004800000,
+        "startIso": "2024-12-11T00:00:00.000Z",
+        "endIso": "2024-12-12T12:00:00.000Z",
+        "bars": 4,
+        "entryPrice": 20.27,
+        "peakPrice": 29.45,
+        "gainPct": 45.29
+      },
+      {
+        "startTs": 1733140800000,
+        "endTs": 1733184000000,
+        "startIso": "2024-12-02T12:00:00.000Z",
+        "endIso": "2024-12-03T00:00:00.000Z",
+        "bars": 2,
+        "entryPrice": 18.57,
+        "peakPrice": 26.9,
+        "gainPct": 44.86
+      },
+      {
+        "startTs": 1693526400000,
+        "endTs": 1696075200000,
+        "startIso": "2023-09-01T00:00:00.000Z",
+        "endIso": "2023-09-30T12:00:00.000Z",
+        "bars": 60,
+        "entryPrice": 5.73,
+        "peakPrice": 8.276,
+        "gainPct": 44.43
+      }
+    ]
+  },
+  {
+    "symbol": "XRP",
+    "rawOpportunityCount": 101,
+    "rawTotalGrossPct": 2745.39,
+    "rawAvgGainPct": 27.18,
+    "rawMedianGainPct": 22.54,
+    "rawBestGainPct": 126.2,
+    "rawCompoundedEquity": 190778579986084.25,
+    "opportunityCount": 87,
+    "totalGrossPct": 2322.44,
+    "avgGainPct": 26.69,
+    "medianGainPct": 23.13,
+    "bestGainPct": 108.77,
+    "worstQualifiedGainPct": 15.04,
+    "compoundedEquity": 5926809804305.13,
+    "avgBars": 11.53,
+    "topWindows": [
+      {
+        "startTs": 1687996800000,
+        "endTs": 1689292800000,
+        "startIso": "2023-06-29T00:00:00.000Z",
+        "endIso": "2023-07-14T00:00:00.000Z",
+        "bars": 31,
+        "entryPrice": 0.4493,
+        "peakPrice": 0.938,
+        "gainPct": 108.77
+      },
+      {
+        "startTs": 1738584000000,
+        "endTs": 1738670400000,
+        "startIso": "2025-02-03T12:00:00.000Z",
+        "endIso": "2025-02-04T12:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 1.7711,
+        "peakPrice": 2.7874,
+        "gainPct": 57.38
+      },
+      {
+        "startTs": 1750636800000,
+        "endTs": 1752278400000,
+        "startIso": "2025-06-23T00:00:00.000Z",
+        "endIso": "2025-07-12T00:00:00.000Z",
+        "bars": 39,
+        "entryPrice": 1.9083,
+        "peakPrice": 2.975,
+        "gainPct": 55.9
+      },
+      {
+        "startTs": 1740744000000,
+        "endTs": 1740960000000,
+        "startIso": "2025-02-28T12:00:00.000Z",
+        "endIso": "2025-03-03T00:00:00.000Z",
+        "bars": 6,
+        "entryPrice": 1.951,
+        "peakPrice": 2.999,
+        "gainPct": 53.72
+      },
+      {
+        "startTs": 1722902400000,
+        "endTs": 1723075200000,
+        "startIso": "2024-08-06T00:00:00.000Z",
+        "endIso": "2024-08-08T00:00:00.000Z",
+        "bars": 5,
+        "entryPrice": 0.4319,
+        "peakPrice": 0.6434,
+        "gainPct": 48.97
+      }
+    ]
+  },
+  {
+    "symbol": "LTC",
+    "rawOpportunityCount": 92,
+    "rawTotalGrossPct": 2221.84,
+    "rawAvgGainPct": 24.15,
+    "rawMedianGainPct": 22.11,
+    "rawBestGainPct": 94.97,
+    "rawCompoundedEquity": 3372591237624.84,
+    "opportunityCount": 80,
+    "totalGrossPct": 1926.96,
+    "avgGainPct": 24.09,
+    "medianGainPct": 21.77,
+    "bestGainPct": 94.97,
+    "worstQualifiedGainPct": 15.07,
+    "compoundedEquity": 244852488558.65,
+    "avgBars": 13.83,
+    "topWindows": [
+      {
+        "startTs": 1760140800000,
+        "endTs": 1760184000000,
+        "startIso": "2025-10-11T00:00:00.000Z",
+        "endIso": "2025-10-11T12:00:00.000Z",
+        "bars": 2,
+        "entryPrice": 52.71,
+        "peakPrice": 102.77,
+        "gainPct": 94.97
+      },
+      {
+        "startTs": 1750636800000,
+        "endTs": 1752840000000,
+        "startIso": "2025-06-23T00:00:00.000Z",
+        "endIso": "2025-07-18T12:00:00.000Z",
+        "bars": 52,
+        "entryPrice": 76.17,
+        "peakPrice": 112.39,
+        "gainPct": 47.55
+      },
+      {
+        "startTs": 1736812800000,
+        "endTs": 1737072000000,
+        "startIso": "2025-01-14T00:00:00.000Z",
+        "endIso": "2025-01-17T00:00:00.000Z",
+        "bars": 7,
+        "entryPrice": 92.57,
+        "peakPrice": 130.49,
+        "gainPct": 40.96
+      },
+      {
+        "startTs": 1732622400000,
+        "endTs": 1733097600000,
+        "startIso": "2024-11-26T12:00:00.000Z",
+        "endIso": "2024-12-02T00:00:00.000Z",
+        "bars": 12,
+        "entryPrice": 87.95,
+        "peakPrice": 122.25,
+        "gainPct": 39
+      },
+      {
+        "startTs": 1733097600000,
+        "endTs": 1733184000000,
+        "startIso": "2024-12-02T00:00:00.000Z",
+        "endIso": "2024-12-03T00:00:00.000Z",
+        "bars": 3,
+        "entryPrice": 100.65,
+        "peakPrice": 139.74,
+        "gainPct": 38.84
+      }
+    ]
+  },
+  {
+    "symbol": "ATOM",
+    "rawOpportunityCount": 94,
+    "rawTotalGrossPct": 420875.54,
+    "rawAvgGainPct": 4477.4,
+    "rawMedianGainPct": 21.71,
+    "rawBestGainPct": 418700,
+    "rawCompoundedEquity": 11271716234980296,
+    "opportunityCount": 80,
+    "totalGrossPct": 1894.46,
+    "avgGainPct": 23.68,
+    "medianGainPct": 21.78,
+    "bestGainPct": 49.03,
+    "worstQualifiedGainPct": 15.08,
+    "compoundedEquity": 213442000427.07,
+    "avgBars": 12.24,
+    "topWindows": [
+      {
+        "startTs": 1741694400000,
+        "endTs": 1742688000000,
+        "startIso": "2025-03-11T12:00:00.000Z",
+        "endIso": "2025-03-23T00:00:00.000Z",
+        "bars": 24,
+        "entryPrice": 3.386,
+        "peakPrice": 5.046,
+        "gainPct": 49.03
+      },
+      {
+        "startTs": 1672574400000,
+        "endTs": 1673697600000,
+        "startIso": "2023-01-01T12:00:00.000Z",
+        "endIso": "2023-01-14T12:00:00.000Z",
+        "bars": 27,
+        "entryPrice": 9.302,
+        "peakPrice": 13.434,
+        "gainPct": 44.42
+      },
+      {
+        "startTs": 1767225600000,
+        "endTs": 1768392000000,
+        "startIso": "2026-01-01T00:00:00.000Z",
+        "endIso": "2026-01-14T12:00:00.000Z",
+        "bars": 28,
+        "entryPrice": 1.907,
+        "peakPrice": 2.697,
+        "gainPct": 41.43
+      },
+      {
+        "startTs": 1730764800000,
+        "endTs": 1731240000000,
+        "startIso": "2024-11-05T00:00:00.000Z",
+        "endIso": "2024-11-10T12:00:00.000Z",
+        "bars": 12,
+        "entryPrice": 3.829,
+        "peakPrice": 5.307,
+        "gainPct": 38.6
+      },
+      {
+        "startTs": 1750636800000,
+        "endTs": 1752494400000,
+        "startIso": "2025-06-23T00:00:00.000Z",
+        "endIso": "2025-07-14T12:00:00.000Z",
+        "bars": 44,
+        "entryPrice": 3.55,
+        "peakPrice": 4.854,
+        "gainPct": 36.73
+      }
+    ]
+  },
+  {
+    "symbol": "TRX",
+    "rawOpportunityCount": 35,
+    "rawTotalGrossPct": 1067.1,
+    "rawAvgGainPct": 30.49,
+    "rawMedianGainPct": 23.57,
+    "rawBestGainPct": 141.28,
+    "rawCompoundedEquity": 70355684.84,
+    "opportunityCount": 33,
+    "totalGrossPct": 1024.63,
+    "avgGainPct": 31.05,
+    "medianGainPct": 23.57,
+    "bestGainPct": 141.28,
+    "worstQualifiedGainPct": 15.49,
+    "compoundedEquity": 47934543.64,
+    "avgBars": 47.58,
+    "topWindows": [
+      {
+        "startTs": 1732622400000,
+        "endTs": 1733270400000,
+        "startIso": "2024-11-26T12:00:00.000Z",
+        "endIso": "2024-12-04T00:00:00.000Z",
+        "bars": 16,
+        "entryPrice": 0.1863,
+        "peakPrice": 0.4495,
+        "gainPct": 141.28
+      },
+      {
+        "startTs": 1733270400000,
+        "endTs": 1733313600000,
+        "startIso": "2024-12-04T00:00:00.000Z",
+        "endIso": "2024-12-04T12:00:00.000Z",
+        "bars": 2,
+        "entryPrice": 0.2264,
+        "peakPrice": 0.45,
+        "gainPct": 98.76
+      },
+      {
+        "startTs": 1692316800000,
+        "endTs": 1699617600000,
+        "startIso": "2023-08-18T00:00:00.000Z",
+        "endIso": "2023-11-10T12:00:00.000Z",
+        "bars": 170,
+        "entryPrice": 0.07188,
+        "peakPrice": 0.11313,
+        "gainPct": 57.39
+      },
+      {
+        "startTs": 1686398400000,
+        "endTs": 1690027200000,
+        "startIso": "2023-06-10T12:00:00.000Z",
+        "endIso": "2023-07-22T12:00:00.000Z",
+        "bars": 85,
+        "entryPrice": 0.06445,
+        "peakPrice": 0.09439,
+        "gainPct": 46.45
+      },
+      {
+        "startTs": 1722859200000,
+        "endTs": 1724198400000,
+        "startIso": "2024-08-05T12:00:00.000Z",
+        "endIso": "2024-08-21T00:00:00.000Z",
+        "bars": 32,
+        "entryPrice": 0.117,
+        "peakPrice": 0.1618,
+        "gainPct": 38.29
+      }
+    ]
+  }
+]

@@ -1,0 +1,97 @@
+[
+  {
+    "key": "base_v7_style",
+    "thesis": "Current V7-style baseline with SOL still chosen by normal trend priority.",
+    "endEquity": 858715.57,
+    "cagrPct": 307.2,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.105,
+    "winRatePct": 52.58,
+    "tradeCount": 97,
+    "exposurePct": 39.66,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 153860.99,
+      "DOGE": 237263.13,
+      "SOL": -49940.8,
+      "AVAX": 42135.05,
+      "PENGU": 458423.62
+    }
+  },
+  {
+    "key": "extra_over_sol_gap8_mom_eff",
+    "thesis": "Prefer DOGE/PENGU over SOL when score leads by 8 and both mom20 / efficiency are stronger.",
+    "endEquity": 779347.26,
+    "cagrPct": 294.94,
+    "maxDrawdownPct": -41.71,
+    "profitFactor": 2.116,
+    "winRatePct": 52.69,
+    "tradeCount": 93,
+    "exposurePct": 39.58,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 151929.48,
+      "DOGE": 190986.4,
+      "SOL": -70393.47,
+      "AVAX": 74528.86,
+      "PENGU": 415322.4
+    }
+  },
+  {
+    "key": "extra_over_sol_gap10_mom_eff",
+    "thesis": "Prefer DOGE/PENGU over SOL when score leads by 10 and both mom20 / efficiency are stronger.",
+    "endEquity": 779347.26,
+    "cagrPct": 294.94,
+    "maxDrawdownPct": -41.71,
+    "profitFactor": 2.116,
+    "winRatePct": 52.69,
+    "tradeCount": 93,
+    "exposurePct": 39.58,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 151929.48,
+      "DOGE": 190986.4,
+      "SOL": -70393.47,
+      "AVAX": 74528.86,
+      "PENGU": 415322.4
+    }
+  },
+  {
+    "key": "extra_over_sol_gap10",
+    "thesis": "Prefer DOGE/PENGU over SOL when strict-extra score leads by 10.",
+    "endEquity": 650315.32,
+    "cagrPct": 273.03,
+    "maxDrawdownPct": -41.71,
+    "profitFactor": 2.003,
+    "winRatePct": 51.61,
+    "tradeCount": 93,
+    "exposurePct": 39.02,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 132207.94,
+      "DOGE": 161112.09,
+      "SOL": -65321.52,
+      "AVAX": 58783.26,
+      "PENGU": 346559.96
+    }
+  },
+  {
+    "key": "extra_over_sol_gap8",
+    "thesis": "Prefer DOGE/PENGU over SOL when strict-extra score leads by 8.",
+    "endEquity": 647507.83,
+    "cagrPct": 272.52,
+    "maxDrawdownPct": -41.71,
+    "profitFactor": 1.995,
+    "winRatePct": 51.61,
+    "tradeCount": 93,
+    "exposurePct": 38.97,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 132593.5,
+      "DOGE": 161112.09,
+      "SOL": -59948.22,
+      "AVAX": 58783.26,
+      "PENGU": 337993.62
+    }
+  }
+]

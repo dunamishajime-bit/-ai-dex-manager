@@ -1,0 +1,471 @@
+{
+  "idleWindows": [
+    {
+      "startTs": 1677283200000,
+      "endTs": 1678190400000,
+      "bars": 252
+    },
+    {
+      "startTs": 1678881600000,
+      "endTs": 1679140800000,
+      "bars": 72
+    },
+    {
+      "startTs": 1682078400000,
+      "endTs": 1685318400000,
+      "bars": 900
+    },
+    {
+      "startTs": 1685361600000,
+      "endTs": 1686268800000,
+      "bars": 252
+    },
+    {
+      "startTs": 1686960000000,
+      "endTs": 1687694400000,
+      "bars": 204
+    },
+    {
+      "startTs": 1690200000000,
+      "endTs": 1691020800000,
+      "bars": 228
+    },
+    {
+      "startTs": 1691582400000,
+      "endTs": 1696248000000,
+      "bars": 1296
+    },
+    {
+      "startTs": 1697155200000,
+      "endTs": 1697673600000,
+      "bars": 144
+    },
+    {
+      "startTs": 1703592000000,
+      "endTs": 1703851200000,
+      "bars": 72
+    },
+    {
+      "startTs": 1704542400000,
+      "endTs": 1704801600000,
+      "bars": 72
+    },
+    {
+      "startTs": 1705104000000,
+      "endTs": 1707652800000,
+      "bars": 708
+    },
+    {
+      "startTs": 1712059200000,
+      "endTs": 1715731200000,
+      "bars": 1020
+    },
+    {
+      "startTs": 1715990400000,
+      "endTs": 1716206400000,
+      "bars": 60
+    },
+    {
+      "startTs": 1717891200000,
+      "endTs": 1718582400000,
+      "bars": 192
+    },
+    {
+      "startTs": 1719273600000,
+      "endTs": 1721433600000,
+      "bars": 600
+    },
+    {
+      "startTs": 1722600000000,
+      "endTs": 1724760000000,
+      "bars": 600
+    },
+    {
+      "startTs": 1724803200000,
+      "endTs": 1727136000000,
+      "bars": 648
+    },
+    {
+      "startTs": 1727913600000,
+      "endTs": 1729036800000,
+      "bars": 312
+    },
+    {
+      "startTs": 1730635200000,
+      "endTs": 1730937600000,
+      "bars": 84
+    },
+    {
+      "startTs": 1734566400000,
+      "endTs": 1736164800000,
+      "bars": 444
+    },
+    {
+      "startTs": 1736294400000,
+      "endTs": 1737115200000,
+      "bars": 228
+    },
+    {
+      "startTs": 1737979200000,
+      "endTs": 1738540800000,
+      "bars": 156
+    },
+    {
+      "startTs": 1739232000000,
+      "endTs": 1739491200000,
+      "bars": 72
+    },
+    {
+      "startTs": 1740182400000,
+      "endTs": 1743768000000,
+      "bars": 996
+    },
+    {
+      "startTs": 1744459200000,
+      "endTs": 1744718400000,
+      "bars": 72
+    },
+    {
+      "startTs": 1744761600000,
+      "endTs": 1745193600000,
+      "bars": 120
+    },
+    {
+      "startTs": 1748649600000,
+      "endTs": 1748995200000,
+      "bars": 96
+    },
+    {
+      "startTs": 1749168000000,
+      "endTs": 1751846400000,
+      "bars": 744
+    },
+    {
+      "startTs": 1754092800000,
+      "endTs": 1754697600000,
+      "bars": 168
+    },
+    {
+      "startTs": 1755518400000,
+      "endTs": 1758024000000,
+      "bars": 696
+    },
+    {
+      "startTs": 1758542400000,
+      "endTs": 1759449600000,
+      "bars": 252
+    },
+    {
+      "startTs": 1759881600000,
+      "endTs": 1759924800000,
+      "bars": 12
+    },
+    {
+      "startTs": 1760140800000,
+      "endTs": 1762300800000,
+      "bars": 600
+    },
+    {
+      "startTs": 1762992000000,
+      "endTs": 1766102400000,
+      "bars": 864
+    },
+    {
+      "startTs": 1766793600000,
+      "endTs": 1767222000000,
+      "bars": 119
+    }
+  ],
+  "results": [
+    {
+      "symbol": "ZEC",
+      "ethCorr12h": 0.487,
+      "idleEthCorr12h": 0.48,
+      "idleCompoundedPct": 548.16,
+      "positiveIdleWindows": 18,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 185.06,
+      "worstIdleWindowPct": -25.38
+    },
+    {
+      "symbol": "DASH",
+      "ethCorr12h": 0.561,
+      "idleEthCorr12h": 0.558,
+      "idleCompoundedPct": 55.05,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 210.32,
+      "worstIdleWindowPct": -47.12
+    },
+    {
+      "symbol": "BAT",
+      "ethCorr12h": 0.672,
+      "idleEthCorr12h": 0.685,
+      "idleCompoundedPct": -9.89,
+      "positiveIdleWindows": 20,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 40.52,
+      "worstIdleWindowPct": -27.17
+    },
+    {
+      "symbol": "STORJ",
+      "ethCorr12h": 0.571,
+      "idleEthCorr12h": 0.628,
+      "idleCompoundedPct": -14.07,
+      "positiveIdleWindows": 19,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 63.65,
+      "worstIdleWindowPct": -34.19
+    },
+    {
+      "symbol": "QTUM",
+      "ethCorr12h": 0.667,
+      "idleEthCorr12h": 0.698,
+      "idleCompoundedPct": -25.02,
+      "positiveIdleWindows": 23,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 17.34,
+      "worstIdleWindowPct": -39.8
+    },
+    {
+      "symbol": "ONG",
+      "ethCorr12h": 0.521,
+      "idleEthCorr12h": 0.564,
+      "idleCompoundedPct": -50.59,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 27.23,
+      "worstIdleWindowPct": -34.81
+    },
+    {
+      "symbol": "ARPA",
+      "ethCorr12h": 0.567,
+      "idleEthCorr12h": 0.559,
+      "idleCompoundedPct": -46.72,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 101.45,
+      "worstIdleWindowPct": -36.23
+    },
+    {
+      "symbol": "ONT",
+      "ethCorr12h": 0.623,
+      "idleEthCorr12h": 0.607,
+      "idleCompoundedPct": -47.9,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 20,
+      "worstIdleWindowPct": -37.34
+    },
+    {
+      "symbol": "IOTX",
+      "ethCorr12h": 0.588,
+      "idleEthCorr12h": 0.648,
+      "idleCompoundedPct": -62.21,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 29.82,
+      "worstIdleWindowPct": -34.78
+    },
+    {
+      "symbol": "CVC",
+      "ethCorr12h": 0.49,
+      "idleEthCorr12h": 0.555,
+      "idleCompoundedPct": -71.5,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 34.2,
+      "worstIdleWindowPct": -32.11
+    },
+    {
+      "symbol": "SUPER",
+      "ethCorr12h": 0.6,
+      "idleEthCorr12h": 0.641,
+      "idleCompoundedPct": -62.14,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 68.34,
+      "worstIdleWindowPct": -32.53
+    },
+    {
+      "symbol": "IOST",
+      "ethCorr12h": 0.654,
+      "idleEthCorr12h": 0.632,
+      "idleCompoundedPct": -62.51,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 19.03,
+      "worstIdleWindowPct": -30.47
+    },
+    {
+      "symbol": "XTZ",
+      "ethCorr12h": 0.678,
+      "idleEthCorr12h": 0.786,
+      "idleCompoundedPct": -71.47,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 15.92,
+      "worstIdleWindowPct": -29.94
+    },
+    {
+      "symbol": "ACH",
+      "ethCorr12h": 0.571,
+      "idleEthCorr12h": 0.633,
+      "idleCompoundedPct": -74.42,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 26.01,
+      "worstIdleWindowPct": -38.57
+    },
+    {
+      "symbol": "NEO",
+      "ethCorr12h": 0.679,
+      "idleEthCorr12h": 0.725,
+      "idleCompoundedPct": -59.27,
+      "positiveIdleWindows": 17,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 17.72,
+      "worstIdleWindowPct": -56.37
+    },
+    {
+      "symbol": "HOT",
+      "ethCorr12h": 0.709,
+      "idleEthCorr12h": 0.773,
+      "idleCompoundedPct": -72.77,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 28.18,
+      "worstIdleWindowPct": -38.87
+    },
+    {
+      "symbol": "ANKR",
+      "ethCorr12h": 0.673,
+      "idleEthCorr12h": 0.754,
+      "idleCompoundedPct": -79.77,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 26.68,
+      "worstIdleWindowPct": -35.16
+    },
+    {
+      "symbol": "LRC",
+      "ethCorr12h": 0.687,
+      "idleEthCorr12h": 0.721,
+      "idleCompoundedPct": -82.64,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 13.69,
+      "worstIdleWindowPct": -29.22
+    },
+    {
+      "symbol": "RVN",
+      "ethCorr12h": 0.651,
+      "idleEthCorr12h": 0.732,
+      "idleCompoundedPct": -81.35,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 19.28,
+      "worstIdleWindowPct": -42.29
+    },
+    {
+      "symbol": "CELO",
+      "ethCorr12h": 0.677,
+      "idleEthCorr12h": 0.755,
+      "idleCompoundedPct": -74.92,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 29.46,
+      "worstIdleWindowPct": -46.62
+    },
+    {
+      "symbol": "COTI",
+      "ethCorr12h": 0.652,
+      "idleEthCorr12h": 0.724,
+      "idleCompoundedPct": -78.15,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 55.17,
+      "worstIdleWindowPct": -46.92
+    },
+    {
+      "symbol": "SKL",
+      "ethCorr12h": 0.588,
+      "idleEthCorr12h": 0.662,
+      "idleCompoundedPct": -93.5,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 20.05,
+      "worstIdleWindowPct": -41.68
+    },
+    {
+      "symbol": "YGG",
+      "ethCorr12h": 0.594,
+      "idleEthCorr12h": 0.684,
+      "idleCompoundedPct": -88.65,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 24.67,
+      "worstIdleWindowPct": -51.18
+    },
+    {
+      "symbol": "ENJ",
+      "ethCorr12h": 0.702,
+      "idleEthCorr12h": 0.751,
+      "idleCompoundedPct": -86.66,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 42.04,
+      "worstIdleWindowPct": -39.04
+    },
+    {
+      "symbol": "WOO",
+      "ethCorr12h": 0.707,
+      "idleEthCorr12h": 0.773,
+      "idleCompoundedPct": -85.43,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 19.25,
+      "worstIdleWindowPct": -43.54
+    },
+    {
+      "symbol": "ROSE",
+      "ethCorr12h": 0.707,
+      "idleEthCorr12h": 0.756,
+      "idleCompoundedPct": -88.32,
+      "positiveIdleWindows": 17,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 26.39,
+      "worstIdleWindowPct": -50.17
+    },
+    {
+      "symbol": "JASMY",
+      "ethCorr12h": 0.626,
+      "idleEthCorr12h": 0.723,
+      "idleCompoundedPct": -87.4,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 25.64,
+      "worstIdleWindowPct": -51.31
+    },
+    {
+      "symbol": "MAGIC",
+      "ethCorr12h": 0.588,
+      "idleEthCorr12h": 0.613,
+      "idleCompoundedPct": -81.63,
+      "positiveIdleWindows": 12,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 168.03,
+      "worstIdleWindowPct": -66.1
+    },
+    {
+      "symbol": "GLMR",
+      "ethCorr12h": 0.66,
+      "idleEthCorr12h": 0.667,
+      "idleCompoundedPct": -92.99,
+      "positiveIdleWindows": 10,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 29.42,
+      "worstIdleWindowPct": -49.85
+    }
+  ]
+}

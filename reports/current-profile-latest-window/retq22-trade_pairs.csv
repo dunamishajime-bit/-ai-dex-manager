@@ -1,0 +1,5 @@
+trade_id,strategy_type,sub_variant,symbol,entry_time,exit_time,entry_price,exit_price,qty,gross_pnl,fee,net_pnl,holding_bars,entry_reason,exit_reason
+retq22-0001,trend,trend,ETH,2026-03-14T00:00:00.000Z,2026-03-22T12:00:00.000Z,2092.21,2069.97,4.779,-106.28496000000086,59.67317466,-165.95813466000087,17,trend-close>sma40|mom20-ok|eff-ok|retq22-off,risk-off
+retq22-0002,trend,trend,ETH,2026-03-25T00:00:00.000Z,2026-03-26T12:00:00.000Z,2156.22,2068.45,4.5600000000000005,-400.2312000000002,57.7934856,-458.02468560000017,3,trend-close>sma40|mom20-ok|eff-ok|retq22-off,sma-break
+retq22-0003,trend,trend,ETH,2026-04-10T12:00:00.000Z,2026-04-18T00:00:00.000Z,2215.66,2355,4.231,589.5475399999996,58.01538737999999,531.5321526199996,15,trend-close>sma40|mom20-ok|eff-ok|retq22-off,strict-extra-rotate
+retq22-0004,trend,trend,PENGU,2026-04-18T00:00:00.000Z,2026-04-18T00:00:00.000Z,0.007701,0.007854,1286527.636,196.8387283079992,60.03581213394,136.8029161740592,1,strict-extra-rotate-close>sma40|mom20-ok|eff-ok|retq22-off|idle-extra,end-of-test

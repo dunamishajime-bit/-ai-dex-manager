@@ -1,0 +1,13 @@
+time,symbol,action,strategy_type,sub_variant,alloc,price,qty,reason,trade_id
+2023-03-18T12:00:00.000Z,SOL,enter,trend,strict6,1,22.48,444.83,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0001
+2023-03-23T00:00:00.000Z,SOL,exit,trend,trend,1,21.41,444.83,symbol-weak-exit,retq22-0001
+2024-05-20T12:00:00.000Z,SOL,enter,trend,strict6,1,177.72,53.26,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0002
+2024-05-26T00:00:00.000Z,SOL,exit,trend,trend,1,168.35,53.26,symbol-weak-exit,retq22-0002
+2024-07-20T00:00:00.000Z,SOL,enter,trend,strict6,1,169.12,52.69,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0003
+2024-07-26T00:00:00.000Z,SOL,exit,trend,trend,1,171.86,52.69,symbol-weak-exit,retq22-0003
+2025-10-03T00:00:00.000Z,SOL,enter,trend,strict6,1,234.74,38.34,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0004
+2025-10-03T12:00:00.000Z,SOL,exit,trend,trend,1,230.79,38.34,symbol-weak-exit,retq22-0004
+2026-03-17T00:00:00.000Z,SOL,enter,trend,strict6,1,96.19,91.45,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0005
+2026-03-19T12:00:00.000Z,SOL,exit,trend,trend,1,89.62,91.45,symbol-weak-exit,retq22-0005
+2026-04-08T00:00:00.000Z,SOL,enter,trend,strict6,1,85.56,95.19,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0006
+2026-04-08T12:00:00.000Z,SOL,exit,trend,trend,1,84.46,95.19,symbol-weak-exit,retq22-0006

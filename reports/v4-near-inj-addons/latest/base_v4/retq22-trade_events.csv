@@ -1,0 +1,9 @@
+time,symbol,action,strategy_type,sub_variant,alloc,price,qty,reason,trade_id
+2026-03-14T00:00:00.000Z,ETH,enter,trend,strict6,1,2092.21,4.779,trend-close>sma40|mom20-ok|eff-ok|retq22-off,retq22-0001
+2026-03-22T12:00:00.000Z,ETH,exit,trend,trend,1,2069.97,4.779,risk-off,retq22-0001
+2026-03-25T00:00:00.000Z,ETH,enter,trend,strict6,1,2156.22,4.5600000000000005,trend-close>sma40|mom20-ok|eff-ok|retq22-off,retq22-0002
+2026-03-26T12:00:00.000Z,ETH,exit,trend,trend,1,2068.45,4.5600000000000005,sma-break,retq22-0002
+2026-04-10T12:00:00.000Z,ETH,enter,trend,strict6,1,2215.66,4.231,trend-close>sma40|mom20-ok|eff-ok|retq22-off,retq22-0003
+2026-04-18T00:00:00.000Z,ETH,exit,trend,trend,1,2355,4.231,strict-extra-rotate,retq22-0003
+2026-04-18T00:00:00.000Z,PENGU,enter,trend,strict6,1,0.007701,1286527.636,strict-extra-rotate-close>sma40|mom20-ok|eff-ok|retq22-off|idle-extra,retq22-0004
+2026-04-18T00:00:00.000Z,PENGU,exit,trend,trend,1,0.007854,1286527.636,end-of-test,retq22-0004

@@ -1,0 +1,82 @@
+[
+  {
+    "key": "sol_gap5_twice",
+    "thesis": "Rotate out of SOL after 2 consecutive bars with 5-point lead.",
+    "endEquity": 1041047.05,
+    "cagrPct": 332.69,
+    "maxDrawdownPct": -33.1,
+    "profitFactor": 2.22,
+    "winRatePct": 54.64,
+    "tradeCount": 97,
+    "exposurePct": 39.66,
+    "solNetPnl": -35524.66,
+    "bySymbol": {
+      "INJ": 9071.42,
+      "ETH": 162862.66,
+      "DOGE": 278752.02,
+      "SOL": -35524.66,
+      "AVAX": 89482.35,
+      "PENGU": 526403.27
+    }
+  },
+  {
+    "key": "sol_gap10_once",
+    "thesis": "Rotate out of SOL immediately on a 10-point lead.",
+    "endEquity": 1038443.54,
+    "cagrPct": 332.35,
+    "maxDrawdownPct": -31.56,
+    "profitFactor": 2.239,
+    "winRatePct": 54.55,
+    "tradeCount": 99,
+    "exposurePct": 39.66,
+    "solNetPnl": -39580.44,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 154513.54,
+      "DOGE": 270786.88,
+      "SOL": -39580.44,
+      "AVAX": 122990.65,
+      "PENGU": 512759.33
+    }
+  },
+  {
+    "key": "sol_gap10_once_or_gap5_twice",
+    "thesis": "Rotate out of SOL on either 10-point immediate lead or 5-point lead held for 2 bars.",
+    "endEquity": 1038443.54,
+    "cagrPct": 332.35,
+    "maxDrawdownPct": -31.56,
+    "profitFactor": 2.239,
+    "winRatePct": 54.55,
+    "tradeCount": 99,
+    "exposurePct": 39.66,
+    "solNetPnl": -39580.44,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 154513.54,
+      "DOGE": 270786.88,
+      "SOL": -39580.44,
+      "AVAX": 122990.65,
+      "PENGU": 512759.33
+    }
+  },
+  {
+    "key": "base_v6",
+    "thesis": "Current production v6.",
+    "endEquity": 981154.22,
+    "cagrPct": 324.68,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.109,
+    "winRatePct": 53.68,
+    "tradeCount": 95,
+    "exposurePct": 39.66,
+    "solNetPnl": -63433.96,
+    "bySymbol": {
+      "INJ": 9071.42,
+      "ETH": 177092.19,
+      "DOGE": 234032.3,
+      "SOL": -63433.96,
+      "AVAX": 88373.76,
+      "PENGU": 526018.51
+    }
+  }
+]

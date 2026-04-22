@@ -1,0 +1,7 @@
+time,symbol,action,strategy_type,sub_variant,alloc,price,qty,reason,trade_id
+2023-10-24T12:00:00.000Z,TRX,enter,trend,strict6,1,0.09351,106940,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0001
+2023-10-30T12:00:00.000Z,TRX,exit,trend,trend,1,0.09495,106940,symbol-weak-exit,retq22-0001
+2024-11-12T12:00:00.000Z,TRX,enter,trend,strict6,1,0.1766,57154,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0002
+2024-11-26T00:00:00.000Z,TRX,exit,trend,trend,1,0.1959,57154,symbol-weak-exit,retq22-0002
+2025-08-14T12:00:00.000Z,TRX,enter,trend,strict6,1,0.3683,30227,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0003
+2025-08-17T00:00:00.000Z,TRX,exit,trend,trend,1,0.3478,30227,symbol-weak-exit,retq22-0003

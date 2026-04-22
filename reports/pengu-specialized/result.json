@@ -1,0 +1,54 @@
+{
+  "meme_symbols": [
+    "PENGU"
+  ],
+  "base": {
+    "end_equity": 206790.86074817946,
+    "cagr_pct": 186.47458027894172,
+    "max_drawdown_pct": -31.041798678316155,
+    "profit_factor": 2.739249243820635,
+    "trade_count": 60,
+    "win_rate_pct": 58.333333333333336
+  },
+  "results": {
+    "fast-exit": {
+      "summary": {
+        "end_equity": 271187.26590756787,
+        "cagr_pct": 214.7708930393852,
+        "max_drawdown_pct": -37.061187140528475,
+        "profit_factor": 1.4270247104974325,
+        "trade_count": 73,
+        "win_rate_pct": 50.68493150684932
+      },
+      "meme_contribution": {
+        "PENGU": -6609.78324718904
+      }
+    },
+    "fast-exit-trailing": {
+      "summary": {
+        "end_equity": 272225.0911841796,
+        "cagr_pct": 215.18892053830623,
+        "max_drawdown_pct": -35.13479329203296,
+        "profit_factor": 1.3620466447242854,
+        "trade_count": 77,
+        "win_rate_pct": 51.94805194805194
+      },
+      "meme_contribution": {
+        "PENGU": -6425.924552409111
+      }
+    },
+    "early-entry-fast-exit": {
+      "summary": {
+        "end_equity": 313072.7701444803,
+        "cagr_pct": 230.87757392772943,
+        "max_drawdown_pct": -28.691966254787616,
+        "profit_factor": 1.3867237258395395,
+        "trade_count": 78,
+        "win_rate_pct": 51.28205128205128
+      },
+      "meme_contribution": {
+        "PENGU": 1006.6878210272334
+      }
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "baseline": {
+    "endEquity": 858715.57,
+    "cagrPct": 307.2,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.105,
+    "tradeCount": 97,
+    "cashWindowCount": 153
+  },
+  "results": [
+    {
+      "key": "twt_idle_rescue_v2_confirmed",
+      "thesis": "More confirmed rescue entry with slightly stronger breakout quality and tighter time stop.",
+      "endEquity": 598528.55,
+      "deltaEndEquity": -260187.02,
+      "cagrPct": 263.39,
+      "maxDrawdownPct": -44.31,
+      "profitFactor": 1.936,
+      "winRatePct": 49.54,
+      "tradeCount": 109,
+      "twtTradeCount": 10,
+      "twtWins": 4,
+      "twtLosses": 6,
+      "twtPnl": -37164.6,
+      "idleBreakoutTradeCount": 10,
+      "exposurePct": 38.47
+    },
+    {
+      "key": "twt_idle_rescue_v2_fast",
+      "thesis": "Fast breakout rescue with shallow trail and short max hold to mimic quick TWT bursts.",
+      "endEquity": 592825.65,
+      "deltaEndEquity": -265889.92,
+      "cagrPct": 262.3,
+      "maxDrawdownPct": -44.31,
+      "profitFactor": 1.935,
+      "winRatePct": 49.09,
+      "tradeCount": 110,
+      "twtTradeCount": 11,
+      "twtWins": 4,
+      "twtLosses": 7,
+      "twtPnl": -37291.16,
+      "idleBreakoutTradeCount": 11,
+      "exposurePct": 38.54
+    },
+    {
+      "key": "twt_idle_rescue_v2_balanced",
+      "thesis": "6H rescue breakout for TWT during cash-only windows with light gate bypass and short hold.",
+      "endEquity": 586739.57,
+      "deltaEndEquity": -271976,
+      "cagrPct": 261.12,
+      "maxDrawdownPct": -45.63,
+      "profitFactor": 1.926,
+      "winRatePct": 48.18,
+      "tradeCount": 110,
+      "twtTradeCount": 11,
+      "twtWins": 3,
+      "twtLosses": 8,
+      "twtPnl": -44206.73,
+      "idleBreakoutTradeCount": 11,
+      "exposurePct": 38.67
+    },
+    {
+      "key": "twt_idle_rescue_v2_soft",
+      "thesis": "More permissive TWT rescue that prioritizes capturing short cash-window breakouts.",
+      "endEquity": 586739.57,
+      "deltaEndEquity": -271976,
+      "cagrPct": 261.12,
+      "maxDrawdownPct": -45.63,
+      "profitFactor": 1.926,
+      "winRatePct": 48.18,
+      "tradeCount": 110,
+      "twtTradeCount": 11,
+      "twtWins": 3,
+      "twtLosses": 8,
+      "twtPnl": -44206.73,
+      "idleBreakoutTradeCount": 11,
+      "exposurePct": 38.67
+    }
+  ]
+}

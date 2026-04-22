@@ -1,0 +1,642 @@
+{
+  "rows": [
+    {
+      "key": "base",
+      "thesis": "Current live implementation.",
+      "end_equity": 259715.64,
+      "cagr_pct": 179.28,
+      "max_drawdown_pct": -36.47,
+      "profit_factor": 2.041,
+      "trade_count": 69,
+      "loss_count": 32,
+      "sma_break_losses": 15,
+      "risk_off_losses": 6,
+      "strict_extra_rotate_losses": 2,
+      "exposure_pct": 38.41,
+      "pengu_contribution": 125486.2,
+      "summary": "- mode: RETQ22\n- end_equity: 259715.64\n- CAGR: 179.28%\n- MaxDD: -36.47%\n- WinRate: 53.62%\n- PF: 2.04\n- Trades: 69"
+    },
+    {
+      "key": "eth_sol_weak_exit",
+      "thesis": "Add earlier weak exit for ETH and SOL when both momentum and momentum acceleration deteriorate.",
+      "end_equity": 179506.64,
+      "cagr_pct": 148.57,
+      "max_drawdown_pct": -46.29,
+      "profit_factor": 2.227,
+      "trade_count": 80,
+      "loss_count": 44,
+      "sma_break_losses": 2,
+      "risk_off_losses": 4,
+      "strict_extra_rotate_losses": 0,
+      "exposure_pct": 26.77,
+      "pengu_contribution": 106459.29,
+      "summary": "- mode: RETQ22\n- end_equity: 179506.64\n- CAGR: 148.57%\n- MaxDD: -46.29%\n- WinRate: 45.00%\n- PF: 2.23\n- Trades: 80"
+    },
+    {
+      "key": "pengu_rotate_volume_filter",
+      "thesis": "Keep current logic but require stronger volume when PENGU enters as strict-extra candidate.",
+      "end_equity": 194737.17,
+      "cagr_pct": 155.04,
+      "max_drawdown_pct": -36.47,
+      "profit_factor": 2.138,
+      "trade_count": 65,
+      "loss_count": 29,
+      "sma_break_losses": 14,
+      "risk_off_losses": 6,
+      "strict_extra_rotate_losses": 1,
+      "exposure_pct": 37.94,
+      "pengu_contribution": 99857.76,
+      "summary": "- mode: RETQ22\n- end_equity: 194737.17\n- CAGR: 155.04%\n- MaxDD: -36.47%\n- WinRate: 55.38%\n- PF: 2.14\n- Trades: 65"
+    },
+    {
+      "key": "combo",
+      "thesis": "Combine ETH/SOL weak exit and PENGU strict-extra volume filter.",
+      "end_equity": 102855.31,
+      "cagr_pct": 108.54,
+      "max_drawdown_pct": -46.29,
+      "profit_factor": 1.881,
+      "trade_count": 78,
+      "loss_count": 44,
+      "sma_break_losses": 2,
+      "risk_off_losses": 4,
+      "strict_extra_rotate_losses": 0,
+      "exposure_pct": 25.86,
+      "pengu_contribution": 36504.6,
+      "summary": "- mode: RETQ22\n- end_equity: 102855.31\n- CAGR: 108.54%\n- MaxDD: -46.29%\n- WinRate: 43.59%\n- PF: 1.88\n- Trades: 78"
+    }
+  ],
+  "topIdleAnalyses": [
+    {
+      "startIso": "2025-10-10T00:00:00.000Z",
+      "endIso": "2026-01-04T00:00:00.000Z",
+      "days": 86.5,
+      "bars": 173,
+      "reserveWaitCount": 164,
+      "trendEligibleCount": 9,
+      "penguEligibleCount": 4,
+      "maxTopScore": 50.46,
+      "maxPenguScore": 50.46,
+      "topSymbolFrequency": [
+        [
+          "ETH",
+          88
+        ],
+        [
+          "SOL",
+          38
+        ],
+        [
+          "AVAX",
+          37
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2025-10-11T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -12.85,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-10-11T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -14.94,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-10-12T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -19.51,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-10-12T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -16.16,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-10-13T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -3.08,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-low|retq22-off"
+          }
+        }
+      ]
+    },
+    {
+      "startIso": "2026-01-19T12:00:00.000Z",
+      "endIso": "2026-03-16T12:00:00.000Z",
+      "days": 56.5,
+      "bars": 113,
+      "reserveWaitCount": 106,
+      "trendEligibleCount": 7,
+      "penguEligibleCount": 1,
+      "maxTopScore": 31.59,
+      "maxPenguScore": 31.59,
+      "topSymbolFrequency": [
+        [
+          "AVAX",
+          41
+        ],
+        [
+          "ETH",
+          31
+        ],
+        [
+          "PENGU",
+          22
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2026-01-20T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 5.9,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2026-01-21T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -4.72,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2026-01-21T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -5.16,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2026-01-22T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -3.51,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2026-01-22T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -3.22,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        }
+      ]
+    },
+    {
+      "startIso": "2024-08-02T12:00:00.000Z",
+      "endIso": "2024-09-23T12:00:00.000Z",
+      "days": 52.5,
+      "bars": 105,
+      "reserveWaitCount": 86,
+      "trendEligibleCount": 19,
+      "penguEligibleCount": 0,
+      "maxTopScore": 62.54,
+      "maxPenguScore": null,
+      "topSymbolFrequency": [
+        [
+          "AVAX",
+          57
+        ],
+        [
+          "ETH",
+          28
+        ],
+        [
+          "SOL",
+          20
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2024-08-02T12:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": -5.07,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|sol-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-08-03T00:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": -17.14,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|sol-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-08-03T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -18.15,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-08-04T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -19.86,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-08-04T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -14.02,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        }
+      ]
+    },
+    {
+      "startIso": "2023-08-10T00:00:00.000Z",
+      "endIso": "2023-09-26T12:00:00.000Z",
+      "days": 48,
+      "bars": 96,
+      "reserveWaitCount": 91,
+      "trendEligibleCount": 5,
+      "penguEligibleCount": 0,
+      "maxTopScore": 21.02,
+      "maxPenguScore": null,
+      "topSymbolFrequency": [
+        [
+          "ETH",
+          62
+        ],
+        [
+          "SOL",
+          34
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2023-08-10T00:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": 5.55,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|sol-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-08-10T12:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": 4.96,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|sol-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-08-11T00:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": 10.05,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|sol-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-08-11T12:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": 11.28,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|sol-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-08-12T00:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": 8.93,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|sol-ok|eff-ok|retq22-off"
+          }
+        }
+      ]
+    },
+    {
+      "startIso": "2025-02-21T12:00:00.000Z",
+      "endIso": "2025-04-09T12:00:00.000Z",
+      "days": 47.5,
+      "bars": 95,
+      "reserveWaitCount": 94,
+      "trendEligibleCount": 0,
+      "penguEligibleCount": 0,
+      "maxTopScore": 46.58,
+      "maxPenguScore": 28.81,
+      "topSymbolFrequency": [
+        [
+          "AVAX",
+          36
+        ],
+        [
+          "ETH",
+          24
+        ],
+        [
+          "PENGU",
+          18
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2025-02-22T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 4.46,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-ok|trend-gate-off|eff-low|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-02-22T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 8.91,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|eff-low|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-02-23T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 6.75,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|eff-low|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-02-23T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 12.02,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|eff-low|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2025-02-24T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 12.82,
+            "eligible": false,
+            "reasons": "close>sma40|mom20-ok|trend-gate-off|eff-ok|retq22-off"
+          }
+        }
+      ]
+    },
+    {
+      "startIso": "2024-04-08T12:00:00.000Z",
+      "endIso": "2024-05-20T00:00:00.000Z",
+      "days": 42,
+      "bars": 84,
+      "reserveWaitCount": 67,
+      "trendEligibleCount": 14,
+      "penguEligibleCount": 0,
+      "maxTopScore": 42.89,
+      "maxPenguScore": null,
+      "topSymbolFrequency": [
+        [
+          "ETH",
+          46
+        ],
+        [
+          "SOL",
+          34
+        ],
+        [
+          "AVAX",
+          4
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2024-04-11T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 4.8,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-04-12T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 4.26,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-04-13T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -4.53,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-04-14T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -17.92,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-04-14T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -16.84,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        }
+      ]
+    },
+    {
+      "startIso": "2024-06-09T00:00:00.000Z",
+      "endIso": "2024-07-19T12:00:00.000Z",
+      "days": 41,
+      "bars": 82,
+      "reserveWaitCount": 69,
+      "trendEligibleCount": 7,
+      "penguEligibleCount": 0,
+      "maxTopScore": 34.28,
+      "maxPenguScore": null,
+      "topSymbolFrequency": [
+        [
+          "ETH",
+          38
+        ],
+        [
+          "SOL",
+          34
+        ],
+        [
+          "AVAX",
+          10
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2024-06-09T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": 0.55,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-06-10T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -1.16,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-06-11T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -0.52,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-low|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-06-11T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -8.16,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2024-06-12T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -10.06,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        }
+      ]
+    },
+    {
+      "startIso": "2023-04-21T12:00:00.000Z",
+      "endIso": "2023-05-28T12:00:00.000Z",
+      "days": 37.5,
+      "bars": 75,
+      "reserveWaitCount": 70,
+      "trendEligibleCount": 5,
+      "penguEligibleCount": 0,
+      "maxTopScore": 14.52,
+      "maxPenguScore": null,
+      "topSymbolFrequency": [
+        [
+          "ETH",
+          56
+        ],
+        [
+          "SOL",
+          18
+        ],
+        [
+          "AVAX",
+          1
+        ]
+      ],
+      "blockedExamples": [
+        {
+          "isoTime": "2023-04-21T12:00:00.000Z",
+          "top": {
+            "symbol": "SOL",
+            "score": 4.12,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|sol-ok|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-04-22T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -1.43,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-04-22T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -0.35,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|trend-gate-off|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-04-23T00:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -0.68,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        },
+        {
+          "isoTime": "2023-04-23T12:00:00.000Z",
+          "top": {
+            "symbol": "ETH",
+            "score": -4.28,
+            "eligible": false,
+            "reasons": "close<=sma40|mom20-low|eff-ok|retq22-off"
+          }
+        }
+      ]
+    }
+  ]
+}

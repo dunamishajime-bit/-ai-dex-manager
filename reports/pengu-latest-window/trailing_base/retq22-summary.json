@@ -1,0 +1,43 @@
+{
+  "mode": "RETQ22",
+  "start_equity": 10000,
+  "end_equity": 9967.380234580005,
+  "cagr_pct": -1.8900189508021081,
+  "max_drawdown_pct": -17.252533319877383,
+  "win_rate_pct": 33.33333333333333,
+  "profit_factor": 0.9430361535990718,
+  "trade_count": 3,
+  "exposure_pct": 28.346456692913385,
+  "annual_returns": [
+    {
+      "period": "2026",
+      "start_equity": 10000,
+      "end_equity": 9967.380234580005,
+      "return_pct": -0.3261976541999556
+    }
+  ],
+  "monthly_returns": [
+    {
+      "period": "2026-02",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2026-03",
+      "start_equity": 10000,
+      "end_equity": 9427.360203340002,
+      "return_pct": -5.726397966599983
+    },
+    {
+      "period": "2026-04",
+      "start_equity": 9427.360203340002,
+      "end_equity": 9967.380234580005,
+      "return_pct": 5.728221045894477
+    }
+  ],
+  "symbol_contribution": {
+    "ETH": 374.0618965800014,
+    "SOL": -406.68166200000053
+  }
+}

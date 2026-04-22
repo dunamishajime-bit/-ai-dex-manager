@@ -1,0 +1,276 @@
+{
+  "mode": "RETQ22",
+  "start_equity": 10000,
+  "end_equity": 12204.900646900018,
+  "cagr_pct": 6.484711257094533,
+  "max_drawdown_pct": -38.19475931485977,
+  "win_rate_pct": 50,
+  "profit_factor": 1.2824175753316658,
+  "trade_count": 8,
+  "exposure_pct": 6.90846286701209,
+  "annual_returns": [
+    {
+      "period": "2023",
+      "start_equity": 10000,
+      "end_equity": 13471.5092788,
+      "return_pct": 34.715092788
+    },
+    {
+      "period": "2024",
+      "start_equity": 13471.5092788,
+      "end_equity": 15375.188635000017,
+      "return_pct": 14.131151282327515
+    },
+    {
+      "period": "2025",
+      "start_equity": 15375.188635000017,
+      "end_equity": 14298.507423700019,
+      "return_pct": -7.002718710384115
+    },
+    {
+      "period": "2026",
+      "start_equity": 14298.507423700019,
+      "end_equity": 12204.900646900018,
+      "return_pct": -14.642135117752309
+    }
+  ],
+  "monthly_returns": [
+    {
+      "period": "2023-02",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-03",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-04",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-05",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-06",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-07",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-08",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-09",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023-10",
+      "start_equity": 10000,
+      "end_equity": 11502.396766000003,
+      "return_pct": 15.023967660000025
+    },
+    {
+      "period": "2023-11",
+      "start_equity": 11951.262117999999,
+      "end_equity": 12943.945108,
+      "return_pct": 8.306093366531586
+    },
+    {
+      "period": "2023-12",
+      "start_equity": 12943.945108,
+      "end_equity": 13471.5092788,
+      "return_pct": 4.0757602600921095
+    },
+    {
+      "period": "2024-01",
+      "start_equity": 13471.5092788,
+      "end_equity": 13471.5092788,
+      "return_pct": 0
+    },
+    {
+      "period": "2024-02",
+      "start_equity": 13471.5092788,
+      "end_equity": 16619.669275600005,
+      "return_pct": 23.36902222050381
+    },
+    {
+      "period": "2024-03",
+      "start_equity": 16957.341211600004,
+      "end_equity": 18282.703560400005,
+      "return_pct": 7.81586176902167
+    },
+    {
+      "period": "2024-04",
+      "start_equity": 18282.703560400005,
+      "end_equity": 18282.703560400005,
+      "return_pct": 0
+    },
+    {
+      "period": "2024-05",
+      "start_equity": 18282.703560400005,
+      "end_equity": 18282.703560400005,
+      "return_pct": 0
+    },
+    {
+      "period": "2024-06",
+      "start_equity": 18282.703560400005,
+      "end_equity": 18282.703560400005,
+      "return_pct": 0
+    },
+    {
+      "period": "2024-07",
+      "start_equity": 18282.703560400005,
+      "end_equity": 15368.75775640001,
+      "return_pct": -15.938265335721724
+    },
+    {
+      "period": "2024-08",
+      "start_equity": 15368.75775640001,
+      "end_equity": 15368.75775640001,
+      "return_pct": 0
+    },
+    {
+      "period": "2024-09",
+      "start_equity": 15368.75775640001,
+      "end_equity": 15853.687472200012,
+      "return_pct": 3.1552954603508043
+    },
+    {
+      "period": "2024-10",
+      "start_equity": 16075.664537200013,
+      "end_equity": 13645.755599000013,
+      "return_pct": -15.115449396054837
+    },
+    {
+      "period": "2024-11",
+      "start_equity": 13645.755599000013,
+      "end_equity": 15124.827977000015,
+      "return_pct": 10.839065431513317
+    },
+    {
+      "period": "2024-12",
+      "start_equity": 15018.152566200017,
+      "end_equity": 15375.188635000017,
+      "return_pct": 2.37736344218229
+    },
+    {
+      "period": "2025-01",
+      "start_equity": 15375.188635000017,
+      "end_equity": 15375.188635000017,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-02",
+      "start_equity": 15375.188635000017,
+      "end_equity": 15375.188635000017,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-03",
+      "start_equity": 15375.188635000017,
+      "end_equity": 15375.188635000017,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-04",
+      "start_equity": 15375.188635000017,
+      "end_equity": 15375.188635000017,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-05",
+      "start_equity": 15375.188635000017,
+      "end_equity": 14298.507423700019,
+      "return_pct": -7.002718710384115
+    },
+    {
+      "period": "2025-06",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-07",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-08",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-09",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-10",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-11",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2025-12",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2026-01",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2026-02",
+      "start_equity": 14298.507423700019,
+      "end_equity": 14298.507423700019,
+      "return_pct": 0
+    },
+    {
+      "period": "2026-03",
+      "start_equity": 14298.507423700019,
+      "end_equity": 12204.900646900018,
+      "return_pct": -14.642135117752309
+    },
+    {
+      "period": "2026-04",
+      "start_equity": 12204.900646900018,
+      "end_equity": 12204.900646900018,
+      "return_pct": 0
+    }
+  ],
+  "symbol_contribution": {
+    "NEAR": 2204.900646900005
+  }
+}

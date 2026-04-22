@@ -1,0 +1,41 @@
+{
+  "setup": {
+    "startUtc": "2022-01-01T00:00:00.000Z",
+    "endUtc": "2026-04-18T23:59:59.999Z",
+    "strategyId": "reclaim_plus_avax_aux_alloc100_pengu_doge_injdedicated_idle_solminus8_v6"
+  },
+  "base": {
+    "endEquity": 981154.22,
+    "cagrPct": 324.68,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.109,
+    "winRatePct": 53.68,
+    "tradeCount": 95,
+    "exposurePct": 39.66,
+    "bySymbol": {
+      "INJ": 9071.42,
+      "ETH": 177092.19,
+      "DOGE": 234032.3,
+      "SOL": -63433.96,
+      "AVAX": 88373.76,
+      "PENGU": 526018.51
+    }
+  },
+  "sol5": {
+    "endEquity": 851790.12,
+    "cagrPct": 306.16,
+    "maxDrawdownPct": -31.66,
+    "profitFactor": 2.372,
+    "winRatePct": 53.68,
+    "tradeCount": 95,
+    "exposurePct": 39.66,
+    "bySymbol": {
+      "INJ": 7370.08,
+      "ETH": 138213.02,
+      "DOGE": 197460.06,
+      "SOL": -2193.93,
+      "AVAX": 64440.42,
+      "PENGU": 436500.47
+    }
+  }
+}

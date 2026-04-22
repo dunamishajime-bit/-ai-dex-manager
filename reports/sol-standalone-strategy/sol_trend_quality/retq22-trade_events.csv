@@ -1,0 +1,9 @@
+time,symbol,action,strategy_type,sub_variant,alloc,price,qty,reason,trade_id
+2024-07-20T00:00:00.000Z,SOL,enter,trend,strict6,1,169.12,59.120000000000005,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0001
+2024-08-02T00:00:00.000Z,SOL,exit,trend,trend,1,167.37,59.120000000000005,sma40-break,retq22-0001
+2025-10-03T00:00:00.000Z,SOL,enter,trend,strict6,1,234.74,41.9,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0002
+2025-10-08T00:00:00.000Z,SOL,exit,trend,trend,1,219.98,41.9,sma40-break,retq22-0002
+2026-03-17T00:00:00.000Z,SOL,enter,trend,strict6,1,96.19,95.24,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0003
+2026-03-22T00:00:00.000Z,SOL,exit,trend,trend,1,87.55,95.24,sma40-break,retq22-0003
+2026-04-08T00:00:00.000Z,SOL,enter,trend,strict6,1,85.56,96.84,trend-close>sma40|mom20-ok|sol-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0004
+2026-04-08T12:00:00.000Z,SOL,exit,trend,trend,1,84.46,96.84,sma40-break,retq22-0004

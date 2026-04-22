@@ -1,0 +1,293 @@
+{
+  "setup": {
+    "startUtc": "2022-01-01T00:00:00.000Z",
+    "endUtc": "2026-04-18T23:59:59.999Z",
+    "strategyId": "reclaim_plus_avax_aux_alloc100_pengu_doge_injdedicated_idle_solminus8_v6"
+  },
+  "base": {
+    "endEquity": 981154.22,
+    "cagrPct": 324.68,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.109,
+    "bySymbol": {
+      "ETH": {
+        "tradeCount": 36,
+        "wins": 18,
+        "losses": 18,
+        "totalNetPnl": 177092.19
+      },
+      "SOL": {
+        "tradeCount": 18,
+        "wins": 7,
+        "losses": 11,
+        "totalNetPnl": -63433.96
+      },
+      "AVAX": {
+        "tradeCount": 10,
+        "wins": 9,
+        "losses": 1,
+        "totalNetPnl": 88373.76
+      },
+      "PENGU": {
+        "tradeCount": 8,
+        "wins": 4,
+        "losses": 4,
+        "totalNetPnl": 526018.51
+      },
+      "DOGE": {
+        "tradeCount": 17,
+        "wins": 10,
+        "losses": 7,
+        "totalNetPnl": 234032.3
+      },
+      "INJ": {
+        "tradeCount": 6,
+        "wins": 3,
+        "losses": 3,
+        "totalNetPnl": 9071.42
+      }
+    }
+  },
+  "variant": {
+    "endEquity": 743159.37,
+    "cagrPct": 289.06,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.097,
+    "bySymbol": {
+      "ETH": {
+        "tradeCount": 38,
+        "wins": 18,
+        "losses": 20,
+        "totalNetPnl": 131603.56
+      },
+      "SOL": {
+        "tradeCount": 14,
+        "wins": 6,
+        "losses": 8,
+        "totalNetPnl": 12040.76
+      },
+      "AVAX": {
+        "tradeCount": 10,
+        "wins": 9,
+        "losses": 1,
+        "totalNetPnl": 68793.35
+      },
+      "PENGU": {
+        "tradeCount": 8,
+        "wins": 4,
+        "losses": 4,
+        "totalNetPnl": 409094.51
+      },
+      "DOGE": {
+        "tradeCount": 17,
+        "wins": 10,
+        "losses": 7,
+        "totalNetPnl": 105214.21
+      },
+      "INJ": {
+        "tradeCount": 6,
+        "wins": 3,
+        "losses": 3,
+        "totalNetPnl": 6412.98
+      }
+    }
+  },
+  "deltas": {
+    "bySymbol": {
+      "ETH": {
+        "tradeCountDelta": 2,
+        "totalNetPnlDelta": -45488.63
+      },
+      "SOL": {
+        "tradeCountDelta": -4,
+        "totalNetPnlDelta": 75474.72
+      },
+      "AVAX": {
+        "tradeCountDelta": 0,
+        "totalNetPnlDelta": -19580.4
+      },
+      "PENGU": {
+        "tradeCountDelta": 0,
+        "totalNetPnlDelta": -116924
+      },
+      "DOGE": {
+        "tradeCountDelta": 0,
+        "totalNetPnlDelta": -128818.09
+      },
+      "INJ": {
+        "tradeCountDelta": 0,
+        "totalNetPnlDelta": -2658.44
+      }
+    },
+    "worstMonths": [
+      {
+        "month": "2025-07",
+        "baseNetPnl": 509997.74,
+        "variantNetPnl": 397108.37,
+        "deltaNetPnl": -112889.37,
+        "symbolDelta": {
+          "ETH": -62726.65,
+          "SOL": 0,
+          "AVAX": 0,
+          "PENGU": -50162.71,
+          "DOGE": 0,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2024-11",
+        "baseNetPnl": 274192.09,
+        "variantNetPnl": 202488.46,
+        "deltaNetPnl": -71703.63,
+        "symbolDelta": {
+          "ETH": -2437.31,
+          "SOL": 1159.39,
+          "AVAX": -692.41,
+          "PENGU": 0,
+          "DOGE": -69733.3,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2025-04",
+        "baseNetPnl": 241750.27,
+        "variantNetPnl": 200506.93,
+        "deltaNetPnl": -41243.34,
+        "symbolDelta": {
+          "ETH": 0,
+          "SOL": 11422.61,
+          "AVAX": -2501.28,
+          "PENGU": -50164.67,
+          "DOGE": 0,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2025-05",
+        "baseNetPnl": 158323.38,
+        "variantNetPnl": 123278.12,
+        "deltaNetPnl": -35045.26,
+        "symbolDelta": {
+          "ETH": 3916.36,
+          "SOL": 0,
+          "AVAX": 0,
+          "PENGU": -38961.62,
+          "DOGE": 0,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2024-03",
+        "baseNetPnl": 73116.08,
+        "variantNetPnl": 53995.81,
+        "deltaNetPnl": -19120.27,
+        "symbolDelta": {
+          "ETH": -7757.36,
+          "SOL": -3863.78,
+          "AVAX": 0,
+          "PENGU": 0,
+          "DOGE": -7499.14,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2026-04",
+        "baseNetPnl": 68867.23,
+        "variantNetPnl": 52162.31,
+        "deltaNetPnl": -16704.92,
+        "symbolDelta": {
+          "ETH": -18563.04,
+          "SOL": 0,
+          "AVAX": 0,
+          "PENGU": 1858.12,
+          "DOGE": 0,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2023-12",
+        "baseNetPnl": 29184.94,
+        "variantNetPnl": 21552.84,
+        "deltaNetPnl": -7632.1,
+        "symbolDelta": {
+          "ETH": 548.86,
+          "SOL": 0,
+          "AVAX": -7217.11,
+          "PENGU": 0,
+          "DOGE": -963.85,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2025-02",
+        "baseNetPnl": 17863.57,
+        "variantNetPnl": 13192.08,
+        "deltaNetPnl": -4671.49,
+        "symbolDelta": {
+          "ETH": 0,
+          "SOL": 0,
+          "AVAX": -4671.49,
+          "PENGU": 0,
+          "DOGE": 0,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2023-07",
+        "baseNetPnl": 4221,
+        "variantNetPnl": 20.08,
+        "deltaNetPnl": -4200.92,
+        "symbolDelta": {
+          "ETH": -364.14,
+          "SOL": -3836.78,
+          "AVAX": 0,
+          "PENGU": 0,
+          "DOGE": 0,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2023-10",
+        "baseNetPnl": 8343.94,
+        "variantNetPnl": 6161.9,
+        "deltaNetPnl": -2182.04,
+        "symbolDelta": {
+          "ETH": 0,
+          "SOL": 476.41,
+          "AVAX": 0,
+          "PENGU": 0,
+          "DOGE": 0,
+          "INJ": -2658.44
+        }
+      },
+      {
+        "month": "2024-09",
+        "baseNetPnl": 6087.94,
+        "variantNetPnl": 4495.9,
+        "deltaNetPnl": -1592.04,
+        "symbolDelta": {
+          "ETH": -128.14,
+          "SOL": 0,
+          "AVAX": 0,
+          "PENGU": 0,
+          "DOGE": -1463.9,
+          "INJ": 0
+        }
+      },
+      {
+        "month": "2023-11",
+        "baseNetPnl": 6083.09,
+        "variantNetPnl": 4492.3,
+        "deltaNetPnl": -1590.79,
+        "symbolDelta": {
+          "ETH": -615.35,
+          "SOL": -2780.99,
+          "AVAX": 0,
+          "PENGU": 0,
+          "DOGE": 1805.55,
+          "INJ": 0
+        }
+      }
+    ]
+  }
+}

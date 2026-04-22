@@ -1,0 +1,62 @@
+[
+  {
+    "key": "base_v4",
+    "thesis": "Current production v4.",
+    "endEquity": 744852.64,
+    "cagrPct": 289.34,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.101,
+    "tradeCount": 94,
+    "solTradeCount": 20,
+    "solLossCount": 12,
+    "solWinCount": 8,
+    "solPnl": -43722.34,
+    "topSolLossReason": "sma-break",
+    "topSolLossReasonCount": 6
+  },
+  {
+    "key": "sol_standalone_idle",
+    "thesis": "Remove SOL from the shared trend pool and only allow it as an idle-only standalone candidate.",
+    "endEquity": 184025.98,
+    "cagrPct": 150.53,
+    "maxDrawdownPct": -40.89,
+    "profitFactor": 1.848,
+    "tradeCount": 86,
+    "solTradeCount": 1,
+    "solLossCount": 1,
+    "solWinCount": 0,
+    "solPnl": -243.66,
+    "topSolLossReason": "trend-switch",
+    "topSolLossReasonCount": 1
+  },
+  {
+    "key": "sol_standalone_idle_failcut",
+    "thesis": "Standalone idle-only SOL plus early failure cut if the move loses momentum quickly.",
+    "endEquity": 184025.98,
+    "cagrPct": 150.53,
+    "maxDrawdownPct": -40.89,
+    "profitFactor": 1.848,
+    "tradeCount": 86,
+    "solTradeCount": 1,
+    "solLossCount": 1,
+    "solWinCount": 0,
+    "solPnl": -243.66,
+    "topSolLossReason": "trend-switch",
+    "topSolLossReasonCount": 1
+  },
+  {
+    "key": "sol_standalone_idle_strict",
+    "thesis": "Standalone idle-only SOL with stricter breakout quality so only stronger SOL waves are taken.",
+    "endEquity": 184025.98,
+    "cagrPct": 150.53,
+    "maxDrawdownPct": -40.89,
+    "profitFactor": 1.848,
+    "tradeCount": 86,
+    "solTradeCount": 1,
+    "solLossCount": 1,
+    "solWinCount": 0,
+    "solPnl": -243.66,
+    "topSolLossReason": "trend-switch",
+    "topSolLossReasonCount": 1
+  }
+]

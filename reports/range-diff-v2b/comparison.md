@@ -1,0 +1,175 @@
+# v2b Early Entry Diff
+
+## Summary
+- Baseline: baseline_weak_guard_exact = 95033.95
+- Variant: eth_range_box_rebound_regime_v2e_earlier_entry = 95233.18
+- Delta: 199.22
+- Base Trades: 48
+- Variant Trades: 50
+
+## Monthly Returns
+| Month | Base | Variant | Delta |
+| --- | ---: | ---: | ---: |
+| 2023-02 | -6.71% | -6.71% | 0.00% |
+| 2023-03 | -0.07% | -0.07% | 0.00% |
+| 2023-04 | 1.79% | 1.79% | 0.00% |
+| 2023-05 | -0.88% | -0.88% | 0.00% |
+| 2023-06 | -1.09% | -1.09% | 0.00% |
+| 2023-07 | 28.32% | 28.41% | 0.09% |
+| 2023-08 | 0.00% | 0.14% | 0.14% |
+| 2023-09 | 0.00% | 0.00% | 0.00% |
+| 2023-10 | 45.78% | 45.78% | -0.00% |
+| 2023-11 | 74.58% | 74.58% | -0.00% |
+| 2023-12 | 75.19% | 75.19% | 0.00% |
+| 2024-01 | -1.67% | -1.67% | 0.00% |
+| 2024-02 | 19.87% | 19.87% | -0.00% |
+| 2024-03 | 55.27% | 55.27% | -0.00% |
+| 2024-04 | -8.68% | -8.68% | 0.00% |
+| 2024-05 | -6.05% | -6.05% | -0.00% |
+| 2024-06 | -3.02% | -3.02% | -0.00% |
+| 2024-07 | 1.10% | 1.10% | -0.00% |
+| 2024-08 | -9.14% | -9.14% | 0.00% |
+| 2024-09 | -2.63% | -2.63% | -0.00% |
+| 2024-10 | -2.46% | -2.46% | 0.00% |
+| 2024-11 | 20.10% | 20.10% | 0.00% |
+| 2024-12 | -18.45% | -18.45% | 0.00% |
+| 2025-01 | -4.66% | -4.66% | -0.00% |
+| 2025-02 | 0.00% | 0.00% | 0.00% |
+| 2025-03 | 0.00% | 0.00% | 0.00% |
+| 2025-04 | 1.21% | 1.21% | 0.00% |
+| 2025-05 | 35.90% | 35.90% | -0.00% |
+| 2025-06 | -7.49% | -7.49% | -0.00% |
+| 2025-07 | 30.76% | 30.76% | -0.00% |
+| 2025-08 | 0.91% | 0.91% | 0.00% |
+| 2025-09 | 0.58% | 0.58% | -0.00% |
+| 2025-10 | -21.03% | -21.03% | 0.00% |
+| 2025-11 | 0.00% | 0.00% | 0.00% |
+| 2025-12 | 0.00% | 0.00% | 0.00% |
+
+## Trade Summary By Year
+| Year | Base Count | Variant Count | Base PnL | Variant PnL | Delta PnL |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 2023 | 17 | 19 | 40401.98 | 40507.65 | 105.67 |
+| 2024 | 18 | 18 | 22707.42 | 22755.03 | 47.61 |
+| 2025 | 13 | 13 | 21924.55 | 21970.50 | 45.95 |
+
+## 2023 Sanity Check
+- Baseline 2023 trades: 17
+- Variant 2023 trades: 19
+- Matched 2023 trades: 7
+- Baseline 2024 trades: 18
+- Variant 2024 trades: 18
+- Baseline 2025 trades: 13
+- Variant 2025 trades: 13
+
+## Matched Trade Diff
+status,symbol,entry_time,exit_time,baseline_net_pnl,variant_net_pnl,delta_net_pnl,baseline_holding_bars,variant_holding_bars,baseline_reason,variant_reason
+"variant_only","ETH","2023-07-28T12:00:00.000Z","2023-07-30T00:00:00.000Z","",8.130830279999813,"","",3,"","range-close<sma45|mom20-ok|pullback-ok|box-rebound|range-fallback"
+"variant_only","ETH","2023-08-08T12:00:00.000Z","2023-08-10T00:00:00.000Z","",16.6397693599992,"","",3,"","range-close<sma45|mom20-ok|pullback-ok|box-rebound|range-fallback"
+"baseline_only","AVAX","2023-11-15T12:00:00.000Z","2023-11-26T12:00:00.000Z",1920.8316813000001,"","",22,"","baseline-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off",""
+"variant_only","AVAX","2023-11-15T12:00:00.000Z","2023-11-26T12:00:00.000Z","",1924.8500228999999,"","",22,"","trend-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off"
+"baseline_only","AVAX","2023-12-07T12:00:00.000Z","2023-12-24T00:00:00.000Z",26643.6129888,"","",33,"","baseline-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off",""
+"variant_only","AVAX","2023-12-07T12:00:00.000Z","2023-12-24T00:00:00.000Z","",26699.409347200002,"","",33,"","trend-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off"
+"baseline_only","AVAX","2024-11-12T12:00:00.000Z","2024-11-18T00:00:00.000Z",194.4927530000022,"","",11,"","baseline-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off",""
+"variant_only","AVAX","2024-11-12T12:00:00.000Z","2024-11-18T00:00:00.000Z","",194.8997244999955,"","",11,"","trend-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off"
+"baseline_only","AVAX","2024-11-23T12:00:00.000Z","2024-11-29T00:00:00.000Z",442.53276239999695,"","",11,"","baseline-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off",""
+"variant_only","AVAX","2024-11-23T12:00:00.000Z","2024-11-29T00:00:00.000Z","",443.4603960000003,"","",11,"","trend-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off"
+"baseline_only","AVAX","2024-12-04T12:00:00.000Z","2024-12-10T00:00:00.000Z",-15498.166810499986,"","",11,"","baseline-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off",""
+"variant_only","AVAX","2024-12-04T12:00:00.000Z","2024-12-10T00:00:00.000Z","",-15530.574922499993,"","",11,"","trend-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off"
+"baseline_only","AVAX","2025-09-16T12:00:00.000Z","2025-09-22T00:00:00.000Z",9467.961584999997,"","",11,"","baseline-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off",""
+"variant_only","AVAX","2025-09-16T12:00:00.000Z","2025-09-22T00:00:00.000Z","",9487.815864999995,"","",11,"","trend-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|retq22-off"
+"matched","ETH","2023-02-19T00:00:00.000Z","2023-02-24T12:00:00.000Z",-320.41846364999986,-320.41846364999986,0,11,11,"baseline-close>sma40|mom20-ok|retq22-off","trend-close>sma40|mom20-ok|retq22-off"
+"matched","ETH","2023-03-18T12:00:00.000Z","2023-04-15T00:00:00.000Z",1415.3408797499983,1415.3408797499983,0,55,55,"baseline-close>sma40|mom20-ok|retq22-off","trend-close>sma40|mom20-ok|retq22-off"
+"matched","ETH","2023-05-29T00:00:00.000Z","2023-05-29T12:00:00.000Z",-83.7758174000013,-83.7758174000013,0,1,1,"baseline-close>sma40|mom20-ok|retq22-off","trend-close>sma40|mom20-ok|retq22-off"
+"matched","ETH","2023-06-25T12:00:00.000Z","2023-07-01T00:00:00.000Z",19.030456370000337,19.030456370000337,0,11,11,"baseline-close>sma40|mom20-ok|retq22-off","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2023-11-04T12:00:00.000Z","2023-11-10T00:00:00.000Z",2730.24197806,"","",11,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2023-11-04T12:00:00.000Z","2023-11-10T00:00:00.000Z","",2735.9532123999975,"","",11,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2023-11-26T12:00:00.000Z","2023-12-02T00:00:00.000Z",-148.60713124000296,"","",11,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2023-11-26T12:00:00.000Z","2023-12-02T00:00:00.000Z","",-148.91482701000493,"","",11,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2023-12-24T00:00:00.000Z","2023-12-26T12:00:00.000Z",-2053.9844507999937,"","",5,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2023-12-24T00:00:00.000Z","2023-12-26T12:00:00.000Z","",-2058.2640803999993,"","",5,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2024-01-09T12:00:00.000Z","2024-01-13T00:00:00.000Z",4589.254176999999,"","",7,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2024-01-09T12:00:00.000Z","2024-01-13T00:00:00.000Z","",4598.882714840003,"","",7,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2024-02-17T00:00:00.000Z","2024-03-04T12:00:00.000Z",13461.553984580007,"","",33,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2024-02-17T00:00:00.000Z","2024-03-04T12:00:00.000Z","",13489.687520790003,"","",33,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2024-05-26T00:00:00.000Z","2024-06-09T00:00:00.000Z",-2085.960255629995,"","",28,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2024-05-26T00:00:00.000Z","2024-06-09T00:00:00.000Z","",-2090.3684176400016,"","",28,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2024-09-24T00:00:00.000Z","2024-09-29T12:00:00.000Z",-304.17264479999625,"","",11,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2024-09-24T00:00:00.000Z","2024-09-29T12:00:00.000Z","",-304.8167262200043,"","",11,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2024-11-29T00:00:00.000Z","2024-12-04T12:00:00.000Z",3143.4346890400084,"","",11,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2024-11-29T00:00:00.000Z","2024-12-04T12:00:00.000Z","",3149.9813718700034,"","",11,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2024-12-10T00:00:00.000Z","2024-12-19T00:00:00.000Z",-2174.455808400001,"","",18,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2024-12-10T00:00:00.000Z","2024-12-19T00:00:00.000Z","",-2178.958897199985,"","",18,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2025-05-02T00:00:00.000Z","2025-05-31T00:00:00.000Z",26612.58248119999,"","",58,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2025-05-02T00:00:00.000Z","2025-05-31T00:00:00.000Z","",26668.354096500003,"","",58,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2025-06-04T00:00:00.000Z","2025-06-06T00:00:00.000Z",-7384.214067339999,"","",4,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2025-06-04T00:00:00.000Z","2025-06-06T00:00:00.000Z","",-7399.7622361399945,"","",4,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2025-07-12T12:00:00.000Z","2025-08-02T00:00:00.000Z",16450.364934,"","",41,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2025-07-12T12:00:00.000Z","2025-08-02T00:00:00.000Z","",16484.736567600004,"","",41,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2025-08-09T00:00:00.000Z","2025-08-18T12:00:00.000Z",6757.394668839979,"","",19,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2025-08-09T00:00:00.000Z","2025-08-18T12:00:00.000Z","",6771.554573849976,"","",19,"","trend-close>sma40|mom20-ok|retq22-off"
+"baseline_only","ETH","2025-10-08T12:00:00.000Z","2025-10-11T00:00:00.000Z",-17047.578285620006,"","",5,"","baseline-close>sma40|mom20-ok|retq22-off",""
+"variant_only","ETH","2025-10-08T12:00:00.000Z","2025-10-11T00:00:00.000Z","",-17083.069900740004,"","",5,"","trend-close>sma40|mom20-ok|retq22-off"
+"matched","SOL","2023-02-24T12:00:00.000Z","2023-02-25T00:00:00.000Z",-350.1441845999989,-350.1441845999989,0,1,1,"baseline-close>sma40|mom20-ok|sol-ok|retq22-off","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"matched","SOL","2023-04-15T00:00:00.000Z","2023-04-21T12:00:00.000Z",-1234.5016230000003,-1234.5016230000003,0,13,13,"baseline-close>sma40|mom20-ok|sol-ok|retq22-off","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"matched","SOL","2023-07-01T00:00:00.000Z","2023-07-24T12:00:00.000Z",2326.3089971999993,2326.3089971999993,0,47,47,"baseline-close>sma40|mom20-ok|sol-ok|retq22-off","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2023-10-02T12:00:00.000Z","2023-10-13T00:00:00.000Z",-1321.6010863999998,"","",21,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2023-10-02T12:00:00.000Z","2023-10-13T00:00:00.000Z","",-1324.3834607999988,"","",21,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2023-10-19T00:00:00.000Z","2023-11-04T12:00:00.000Z",7997.349744000002,"","",33,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2023-10-19T00:00:00.000Z","2023-11-04T12:00:00.000Z","",8014.010889299999,"","",33,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2023-11-10T00:00:00.000Z","2023-11-15T12:00:00.000Z",8113.537299999998,"","",11,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2023-11-10T00:00:00.000Z","2023-11-15T12:00:00.000Z","",8130.545356799999,"","",11,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2023-12-02T00:00:00.000Z","2023-12-07T12:00:00.000Z",2115.3627528000025,"","",11,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2023-12-02T00:00:00.000Z","2023-12-07T12:00:00.000Z","",2119.797134400002,"","",11,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2023-12-29T12:00:00.000Z","2024-01-06T12:00:00.000Z",-7366.605392399997,"","",16,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2023-12-29T12:00:00.000Z","2024-01-06T12:00:00.000Z","",-7381.967346000003,"","",16,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-02-11T12:00:00.000Z","2024-02-17T00:00:00.000Z",-25.107111600001645,"","",11,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-02-11T12:00:00.000Z","2024-02-17T00:00:00.000Z","",-25.159706100000278,"","",11,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-03-04T12:00:00.000Z","2024-04-02T12:00:00.000Z",23916.499329600007,"","",58,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-03-04T12:00:00.000Z","2024-04-02T12:00:00.000Z","",23966.549359200002,"","",58,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-05-20T12:00:00.000Z","2024-05-26T00:00:00.000Z",-5408.105916000002,"","",11,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-05-20T12:00:00.000Z","2024-05-26T00:00:00.000Z","",-5419.450864900005,"","",11,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-07-20T00:00:00.000Z","2024-08-02T12:00:00.000Z",-2890.070352399995,"","",27,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-07-20T00:00:00.000Z","2024-08-02T12:00:00.000Z","",-2896.1188144000016,"","",27,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-08-27T12:00:00.000Z","2024-08-28T00:00:00.000Z",-4454.035487199998,"","",1,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-08-27T12:00:00.000Z","2024-08-28T00:00:00.000Z","",-4463.340750400003,"","",1,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-09-29T12:00:00.000Z","2024-10-03T00:00:00.000Z",-8604.02943359999,"","",7,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-09-29T12:00:00.000Z","2024-10-03T00:00:00.000Z","",-8622.024378199983,"","",7,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-10-16T00:00:00.000Z","2024-11-03T12:00:00.000Z",3503.829195000007,"","",37,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-10-16T00:00:00.000Z","2024-11-03T12:00:00.000Z","",3511.1807148000025,"","",37,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-11-07T00:00:00.000Z","2024-11-12T12:00:00.000Z",9017.599936700002,"","",11,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-11-07T00:00:00.000Z","2024-11-12T12:00:00.000Z","",9036.502801399993,"","",11,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2024-11-18T00:00:00.000Z","2024-11-23T12:00:00.000Z",5882.329871999995,"","",11,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2024-11-18T00:00:00.000Z","2024-11-23T12:00:00.000Z","",5894.698896000002,"","",11,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2025-01-06T12:00:00.000Z","2025-01-08T00:00:00.000Z",-5187.628737400004,"","",3,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2025-01-06T12:00:00.000Z","2025-01-08T00:00:00.000Z","",-5198.5238933,"","",3,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2025-01-17T12:00:00.000Z","2025-01-27T12:00:00.000Z",1780.9086998999962,"","",20,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2025-01-17T12:00:00.000Z","2025-01-27T12:00:00.000Z","",1784.6372104000066,"","",20,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2025-04-15T12:00:00.000Z","2025-04-16T00:00:00.000Z",-3594.6966527999894,"","",1,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2025-04-15T12:00:00.000Z","2025-04-16T00:00:00.000Z","",-3602.1928447999894,"","",1,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2025-04-21T00:00:00.000Z","2025-05-02T00:00:00.000Z",5813.638142399987,"","",22,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2025-04-21T00:00:00.000Z","2025-05-02T00:00:00.000Z","",5825.883251099992,"","",22,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2025-07-07T00:00:00.000Z","2025-07-12T12:00:00.000Z",5293.676303199993,"","",11,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2025-07-07T00:00:00.000Z","2025-07-12T12:00:00.000Z","",5304.788948799983,"","",11,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2025-09-22T00:00:00.000Z","2025-09-22T12:00:00.000Z",-8771.322482999998,"","",1,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2025-09-22T00:00:00.000Z","2025-09-22T12:00:00.000Z","",-8789.771875499988,"","",1,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+"baseline_only","SOL","2025-10-03T00:00:00.000Z","2025-10-08T00:00:00.000Z",-8266.53434880001,"","",10,"","baseline-close>sma40|mom20-ok|sol-ok|retq22-off",""
+"variant_only","SOL","2025-10-03T00:00:00.000Z","2025-10-08T00:00:00.000Z","",-8283.948441600009,"","",10,"","trend-close>sma40|mom20-ok|sol-ok|retq22-off"
+
+## Artifacts
+- Baseline artifacts: {
+  "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\baseline\\baseline-trade_events.csv",
+  "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\baseline\\baseline-trade_pairs.csv",
+  "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\baseline\\baseline-equity_curve.csv",
+  "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\baseline\\baseline-monthly_returns.csv",
+  "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\baseline\\baseline-annual_returns.csv",
+  "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\baseline\\baseline-summary.json"
+}
+- Variant artifacts: {
+  "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\variant\\retq22-trade_events.csv",
+  "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\variant\\retq22-trade_pairs.csv",
+  "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\variant\\retq22-equity_curve.csv",
+  "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\variant\\retq22-monthly_returns.csv",
+  "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\variant\\retq22-annual_returns.csv",
+  "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\range-diff-v2b\\variant\\retq22-summary.json"
+}

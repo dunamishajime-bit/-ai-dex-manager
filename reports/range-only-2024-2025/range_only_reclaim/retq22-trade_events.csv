@@ -1,0 +1,9 @@
+time,symbol,action,strategy_type,sub_variant,alloc,price,qty,reason,trade_id
+2024-10-10T12:00:00.000Z,ETH,enter,range,range-overlay,0.35,2406.56,1.454,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,retq22-0001
+2024-10-12T00:00:00.000Z,ETH,exit,range,range,0.35,2439.49,1.454,range-time,retq22-0001
+2025-01-12T00:00:00.000Z,ETH,enter,range,range-overlay,0.35,3282.83,1.069,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,retq22-0002
+2025-01-13T12:00:00.000Z,ETH,exit,range,range,0.35,3057.15,1.069,range-time,retq22-0002
+2025-02-14T00:00:00.000Z,ETH,enter,range,range-overlay,0.35,2675.87,1.2770000000000001,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,retq22-0003
+2025-02-15T12:00:00.000Z,ETH,exit,range,range,0.35,2708.37,1.2770000000000001,range-time,retq22-0003
+2025-06-20T12:00:00.000Z,ETH,enter,range,range-overlay,0.35,2549.64,1.343,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,retq22-0004
+2025-06-22T00:00:00.000Z,ETH,exit,range,range,0.35,2295.72,1.343,range-time,retq22-0004

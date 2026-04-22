@@ -1,0 +1,42 @@
+{
+  "strategy": "RETQ22_STRICT_PLUS_BEARREPLACE_V1",
+  "source_label": "off22_strong_proxy_source",
+  "source_trade_count_total": 58,
+  "source_trade_count_trend_only": 48,
+  "note": "Repository has no year_type column, so this run uses calendar-year proxy labels. Source trades are RETQ22 trend trades regenerated over 2022-2025.",
+  "start_equity": 10000,
+  "end_equity": 72711.56489306949,
+  "cagr_pct": 64.15474432983332,
+  "max_drawdown_pct": -27.179504956985024,
+  "win_rate_pct": 53.84615384615385,
+  "profit_factor": 3.2622822783600474,
+  "trade_count_total": 48,
+  "trade_count_executed": 39,
+  "skipped_trades": 9,
+  "annual_returns": [
+    {
+      "period": "2022",
+      "start_equity": 10000,
+      "end_equity": 10000,
+      "return_pct": 0
+    },
+    {
+      "period": "2023",
+      "start_equity": 10000,
+      "end_equity": 57769.52958507128,
+      "return_pct": 477.69529585071274
+    },
+    {
+      "period": "2024",
+      "start_equity": 57769.52958507128,
+      "end_equity": 55936.98889806944,
+      "return_pct": -3.172157883514082
+    },
+    {
+      "period": "2025",
+      "start_equity": 55936.98889806944,
+      "end_equity": 72711.56489306949,
+      "return_pct": 29.98834282189793
+    }
+  ]
+}

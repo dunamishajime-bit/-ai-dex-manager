@@ -1,0 +1,48 @@
+{
+  "startIso": "2025-12-31T00:00:00.000Z",
+  "endIso": "2026-04-17T23:59:59.999Z",
+  "strategyId": "reclaim_plus_avax_aux_alloc100_pengu_doge_idle_solminus8_v4",
+  "summary": {
+    "mode": "RETQ22",
+    "start_equity": 10000,
+    "end_equity": 10044.352248534062,
+    "cagr_pct": 2.6181305816831646,
+    "max_drawdown_pct": -17.703245175118,
+    "win_rate_pct": 50,
+    "profit_factor": 1.071079278297401,
+    "trade_count": 4,
+    "exposure_pct": 28.346456692913385,
+    "annual_returns": [
+      {
+        "period": "2026",
+        "start_equity": 10000,
+        "end_equity": 10044.352248534062,
+        "return_pct": 0.44352248534060834
+      }
+    ],
+    "monthly_returns": [
+      {
+        "period": "2026-02",
+        "start_equity": 10000,
+        "end_equity": 10000,
+        "return_pct": 0
+      },
+      {
+        "period": "2026-03",
+        "start_equity": 10000,
+        "end_equity": 9376.017179740002,
+        "return_pct": -6.239828202599984
+      },
+      {
+        "period": "2026-04",
+        "start_equity": 9376.017179740002,
+        "end_equity": 10044.352248534062,
+        "return_pct": 7.128134003830744
+      }
+    ],
+    "symbol_contribution": {
+      "ETH": -92.45066764000148,
+      "PENGU": 136.8029161740592
+    }
+  }
+}

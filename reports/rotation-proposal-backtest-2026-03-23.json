@@ -1,0 +1,590 @@
+{
+  "selectedSymbols": [
+    {
+      "symbol": "ETH",
+      "chain": "BNB",
+      "providerId": "ethereum",
+      "group": "core"
+    },
+    {
+      "symbol": "XRP",
+      "chain": "BNB",
+      "providerId": "xrp",
+      "group": "core"
+    },
+    {
+      "symbol": "ADA",
+      "chain": "BNB",
+      "providerId": "cardano",
+      "group": "core"
+    },
+    {
+      "symbol": "LINK",
+      "chain": "BNB",
+      "providerId": "chainlink",
+      "group": "core"
+    },
+    {
+      "symbol": "AVAX",
+      "chain": "BNB",
+      "providerId": "avalanche",
+      "group": "core"
+    },
+    {
+      "symbol": "UNI",
+      "chain": "BNB",
+      "providerId": "uniswap",
+      "group": "core"
+    },
+    {
+      "symbol": "AAVE",
+      "chain": "BNB",
+      "providerId": "aave",
+      "group": "core"
+    },
+    {
+      "symbol": "SOL",
+      "chain": "SOLANA",
+      "providerId": "solana",
+      "group": "core"
+    },
+    {
+      "symbol": "JUP",
+      "chain": "SOLANA",
+      "providerId": "jupiter-exchange-solana",
+      "group": "satellite"
+    },
+    {
+      "symbol": "PYTH",
+      "chain": "SOLANA",
+      "providerId": "pyth-network",
+      "group": "satellite"
+    },
+    {
+      "symbol": "RAY",
+      "chain": "SOLANA",
+      "providerId": "raydium",
+      "group": "satellite"
+    },
+    {
+      "symbol": "BONK",
+      "chain": "SOLANA",
+      "providerId": "bonk",
+      "group": "highbeta"
+    }
+  ],
+  "metrics": {
+    "ETH": {
+      "symbol": "ETH",
+      "chain": "BNB",
+      "price": 2048.43,
+      "liquidity": 1273413.88,
+      "spreadBps": 41.48,
+      "volume": 8552458.31,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "XRP": {
+      "symbol": "XRP",
+      "chain": "BNB",
+      "price": 1.38,
+      "liquidity": 1271991.02,
+      "spreadBps": 94.53,
+      "volume": 171836.79,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "ADA": {
+      "symbol": "ADA",
+      "chain": "BNB",
+      "price": 0.2511,
+      "liquidity": 372658.88,
+      "spreadBps": 121.58,
+      "volume": 106999.36,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "LINK": {
+      "symbol": "LINK",
+      "chain": "BNB",
+      "price": 8.71,
+      "liquidity": 760350.51,
+      "spreadBps": 103.9,
+      "volume": 76314.43,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "AVAX": {
+      "symbol": "AVAX",
+      "chain": "BNB",
+      "price": 9.038,
+      "liquidity": 113714.45,
+      "spreadBps": 143.11,
+      "volume": 23452.6,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "UNI": {
+      "symbol": "UNI",
+      "chain": "BNB",
+      "price": 3.47,
+      "liquidity": 61500.67,
+      "spreadBps": 143.11,
+      "volume": 163849.27,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "AAVE": {
+      "symbol": "AAVE",
+      "chain": "BNB",
+      "price": 106.45,
+      "liquidity": 49815.75,
+      "spreadBps": 143.11,
+      "volume": 7683.7,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "SOL": {
+      "symbol": "SOL",
+      "chain": "SOLANA",
+      "price": 85.97,
+      "liquidity": 1361375.37,
+      "spreadBps": 56.97,
+      "volume": 1149897.81,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    },
+    "JUP": {
+      "symbol": "JUP",
+      "chain": "SOLANA",
+      "price": 0,
+      "liquidity": 0,
+      "spreadBps": 0,
+      "volume": 0,
+      "dexPairFound": false,
+      "executionSupported": false
+    },
+    "PYTH": {
+      "symbol": "PYTH",
+      "chain": "SOLANA",
+      "price": 0,
+      "liquidity": 0,
+      "spreadBps": 0,
+      "volume": 0,
+      "dexPairFound": false,
+      "executionSupported": false
+    },
+    "RAY": {
+      "symbol": "RAY",
+      "chain": "SOLANA",
+      "price": 0,
+      "liquidity": 0,
+      "spreadBps": 0,
+      "volume": 0,
+      "dexPairFound": false,
+      "executionSupported": false
+    },
+    "BONK": {
+      "symbol": "BONK",
+      "chain": "SOLANA",
+      "price": 0,
+      "liquidity": 0,
+      "spreadBps": 0,
+      "volume": 0,
+      "dexPairFound": false,
+      "executionSupported": false
+    },
+    "BTC": {
+      "symbol": "BTC",
+      "chain": "BNB",
+      "price": 67855.93,
+      "liquidity": 17392799.14,
+      "spreadBps": 14.97,
+      "volume": 19492430.26,
+      "dexPairFound": true,
+      "executionSupported": true,
+      "executionChain": "BNB"
+    }
+  },
+  "summaries": {
+    "stable": {
+      "trades": [
+        {
+          "symbol": "PYTH",
+          "chain": "SOLANA",
+          "variant": "stable",
+          "group": "satellite",
+          "entryTs": 1774096598724,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.33935013681318965,
+          "score": 75.87002736263793,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.6060060090420879,
+          "holdMinutes": 2100
+        },
+        {
+          "symbol": "RAY",
+          "chain": "SOLANA",
+          "variant": "stable",
+          "group": "satellite",
+          "entryTs": 1774096598724,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.34,
+          "score": 79.20336069597127,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.6071665242549611,
+          "holdMinutes": 2100
+        }
+      ],
+      "metrics": {
+        "tradeCount": 2,
+        "winCount": 0,
+        "lossCount": 2,
+        "winRate": 0,
+        "profitFactor": 0,
+        "cumulativeReturnPct": -1.2094930676751756,
+        "annualizedReturnPct": -95.24339231859022,
+        "monthlyEquivalentReturnPct": -22.145322098288112,
+        "averageTradeReturnPct": -0.6065862666485244,
+        "medianTradeReturnPct": -0.6065862666485244,
+        "averageHoldMinutes": 2100,
+        "maxDrawdownPct": 1.2094930676751756,
+        "endEquity": 9879.050693232482
+      }
+    },
+    "balanced": {
+      "trades": [
+        {
+          "symbol": "BONK",
+          "chain": "SOLANA",
+          "variant": "balanced",
+          "group": "highbeta",
+          "entryTs": 1774096598724,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.38,
+          "score": 88.53669402930458,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.6785978800496624,
+          "holdMinutes": 2100
+        },
+        {
+          "symbol": "XRP",
+          "chain": "BNB",
+          "variant": "balanced",
+          "group": "core",
+          "entryTs": 1774092998756,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.32915132483860987,
+          "score": 65.83026496772197,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.5877931348711012,
+          "holdMinutes": 2160
+        },
+        {
+          "symbol": "ETH",
+          "chain": "BNB",
+          "variant": "balanced",
+          "group": "core",
+          "entryTs": 1774092998724,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.361019224191932,
+          "score": 72.2038448383864,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.6447023162995232,
+          "holdMinutes": 2160
+        }
+      ],
+      "metrics": {
+        "tradeCount": 3,
+        "winCount": 0,
+        "lossCount": 3,
+        "winRate": 0,
+        "profitFactor": 0,
+        "cumulativeReturnPct": -1.8989658428362963,
+        "annualizedReturnPct": -99.17581750478942,
+        "monthlyEquivalentReturnPct": -32.59156398335037,
+        "averageTradeReturnPct": -0.6370311104067623,
+        "medianTradeReturnPct": -0.6447023162995232,
+        "averageHoldMinutes": 2140,
+        "maxDrawdownPct": 1.8989658428362963,
+        "endEquity": 9810.10341571637
+      }
+    },
+    "aggressive": {
+      "trades": [
+        {
+          "symbol": "RAY",
+          "chain": "SOLANA",
+          "variant": "aggressive",
+          "group": "satellite",
+          "entryTs": 1774096598724,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.42,
+          "score": 79.20336069597127,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.7500292358443637,
+          "holdMinutes": 2100
+        },
+        {
+          "symbol": "BONK",
+          "chain": "SOLANA",
+          "variant": "aggressive",
+          "group": "highbeta",
+          "entryTs": 1774096598724,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.42,
+          "score": 88.53669402930458,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.7500292358443637,
+          "holdMinutes": 2100
+        },
+        {
+          "symbol": "XRP",
+          "chain": "BNB",
+          "variant": "aggressive",
+          "group": "core",
+          "entryTs": 1774092998756,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.3691513248386099,
+          "score": 65.83026496772197,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.6592244906658026,
+          "holdMinutes": 2160
+        },
+        {
+          "symbol": "ETH",
+          "chain": "BNB",
+          "variant": "aggressive",
+          "group": "core",
+          "entryTs": 1774092998724,
+          "exitTs": 1774222599084,
+          "entryPrice": 1.00818022,
+          "exitPrice": 0.9901763,
+          "positionWeight": 0.40101922419193203,
+          "score": 72.2038448383864,
+          "tp1Hit": false,
+          "tp2Hit": false,
+          "exitReason": "TIME",
+          "pnlPct": -1.7857838948675326,
+          "weightedReturnPct": -0.7161336720942246,
+          "holdMinutes": 2160
+        }
+      ],
+      "metrics": {
+        "tradeCount": 4,
+        "winCount": 0,
+        "lossCount": 4,
+        "winRate": 0,
+        "profitFactor": 0,
+        "cumulativeReturnPct": -2.8445870117576306,
+        "annualizedReturnPct": -99.92702423456188,
+        "monthlyEquivalentReturnPct": -44.769488177406735,
+        "averageTradeReturnPct": -0.7188541586121886,
+        "medianTradeReturnPct": -0.7330814539692941,
+        "averageHoldMinutes": 2130,
+        "maxDrawdownPct": 2.8445870117576306,
+        "endEquity": 9715.541298824237
+      }
+    }
+  },
+  "byVariantChain": {
+    "stable": {
+      "BNB": {
+        "trades": 0,
+        "winRate": 0,
+        "cumulativeReturnPct": 0,
+        "averageTradeReturnPct": 0,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": 0,
+        "maxDrawdownPct": 0
+      },
+      "SOLANA": {
+        "trades": 2,
+        "winRate": 0,
+        "cumulativeReturnPct": -1.2094930676751756,
+        "averageTradeReturnPct": -0.6065862666485244,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -22.145322098288112,
+        "maxDrawdownPct": 1.2094930676751756
+      }
+    },
+    "balanced": {
+      "BNB": {
+        "trades": 2,
+        "winRate": 0,
+        "cumulativeReturnPct": -1.228705935215057,
+        "averageTradeReturnPct": -0.6162477255853123,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -21.90645330404859,
+        "maxDrawdownPct": 1.228705935215057
+      },
+      "SOLANA": {
+        "trades": 1,
+        "winRate": 0,
+        "cumulativeReturnPct": -0.6785978800496559,
+        "averageTradeReturnPct": -0.6785978800496624,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -13.070495058214993,
+        "maxDrawdownPct": 0.6785978800496559
+      }
+    },
+    "aggressive": {
+      "BNB": {
+        "trades": 2,
+        "winRate": 0,
+        "cumulativeReturnPct": -1.3706372342076794,
+        "averageTradeReturnPct": -0.6876790813800135,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -24.12043239942221,
+        "maxDrawdownPct": 1.3706372342076794
+      },
+      "SOLANA": {
+        "trades": 2,
+        "winRate": 0,
+        "cumulativeReturnPct": -1.4944330331425044,
+        "averageTradeReturnPct": -0.7500292358443637,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -26.63664489283096,
+        "maxDrawdownPct": 1.4944330331425044
+      }
+    }
+  },
+  "byVariantGroup": {
+    "stable": {
+      "core": {
+        "trades": 0,
+        "winRate": 0,
+        "cumulativeReturnPct": 0,
+        "averageTradeReturnPct": 0,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": 0,
+        "maxDrawdownPct": 0
+      },
+      "satellite": {
+        "trades": 2,
+        "winRate": 0,
+        "cumulativeReturnPct": -1.2094930676751756,
+        "averageTradeReturnPct": -0.6065862666485244,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -22.145322098288112,
+        "maxDrawdownPct": 1.2094930676751756
+      },
+      "highbeta": {
+        "trades": 0,
+        "winRate": 0,
+        "cumulativeReturnPct": 0,
+        "averageTradeReturnPct": 0,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": 0,
+        "maxDrawdownPct": 0
+      }
+    },
+    "balanced": {
+      "core": {
+        "trades": 2,
+        "winRate": 0,
+        "cumulativeReturnPct": -1.228705935215057,
+        "averageTradeReturnPct": -0.6162477255853123,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -21.90645330404859,
+        "maxDrawdownPct": 1.228705935215057
+      },
+      "satellite": {
+        "trades": 0,
+        "winRate": 0,
+        "cumulativeReturnPct": 0,
+        "averageTradeReturnPct": 0,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": 0,
+        "maxDrawdownPct": 0
+      },
+      "highbeta": {
+        "trades": 1,
+        "winRate": 0,
+        "cumulativeReturnPct": -0.6785978800496559,
+        "averageTradeReturnPct": -0.6785978800496624,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -13.070495058214993,
+        "maxDrawdownPct": 0.6785978800496559
+      }
+    },
+    "aggressive": {
+      "core": {
+        "trades": 2,
+        "winRate": 0,
+        "cumulativeReturnPct": -1.3706372342076794,
+        "averageTradeReturnPct": -0.6876790813800135,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -24.12043239942221,
+        "maxDrawdownPct": 1.3706372342076794
+      },
+      "satellite": {
+        "trades": 1,
+        "winRate": 0,
+        "cumulativeReturnPct": -0.7500292358443585,
+        "averageTradeReturnPct": -0.7500292358443637,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -14.34758899647428,
+        "maxDrawdownPct": 0.7500292358443585
+      },
+      "highbeta": {
+        "trades": 1,
+        "winRate": 0,
+        "cumulativeReturnPct": -0.7500292358443585,
+        "averageTradeReturnPct": -0.7500292358443637,
+        "profitFactor": 0,
+        "monthlyEquivalentReturnPct": -14.34758899647428,
+        "maxDrawdownPct": 0.7500292358443585
+      }
+    }
+  },
+  "universeMode": "BNB/SOL core + JUP/RAY/PYTH satellite + BONK high-beta"
+}

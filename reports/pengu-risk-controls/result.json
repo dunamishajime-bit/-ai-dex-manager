@@ -1,0 +1,69 @@
+{
+  "rows": [
+    {
+      "key": "base",
+      "thesis": "Current strongest profile.",
+      "end_equity": 206790.86,
+      "cagr_pct": 186.47,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 95169.16,
+      "pengu_risk_exit_count": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 206790.86\n- CAGR: 186.47%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.74\n- Trades: 60"
+    },
+    {
+      "key": "pengu_tighter_trailing",
+      "thesis": "Keep base logic but tighten PENGU trailing protection once profit is on the table.",
+      "end_equity": 241345.05,
+      "cagr_pct": 202.28,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.924,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 125308.66,
+      "pengu_risk_exit_count": 3,
+      "summary": "- mode: RETQ22\n- end_equity: 241345.05\n- CAGR: 202.28%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.92\n- Trades: 60"
+    },
+    {
+      "key": "pengu_hard_stop_12pct",
+      "thesis": "Keep base logic but cut PENGU if it falls 12% below entry.",
+      "end_equity": 206790.86,
+      "cagr_pct": 186.47,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 95169.16,
+      "pengu_risk_exit_count": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 206790.86\n- CAGR: 186.47%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.74\n- Trades: 60"
+    },
+    {
+      "key": "pengu_max_hold_12bars",
+      "thesis": "Keep base logic but cap PENGU holding time to 12 bars.",
+      "end_equity": 206790.86,
+      "cagr_pct": 186.47,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 95169.16,
+      "pengu_risk_exit_count": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 206790.86\n- CAGR: 186.47%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.74\n- Trades: 60"
+    },
+    {
+      "key": "pengu_hard_stop_and_trailing",
+      "thesis": "Combine PENGU hard stop and tighter trailing protection.",
+      "end_equity": 241345.05,
+      "cagr_pct": 202.28,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.924,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 125308.66,
+      "pengu_risk_exit_count": 3,
+      "summary": "- mode: RETQ22\n- end_equity: 241345.05\n- CAGR: 202.28%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.92\n- Trades: 60"
+    }
+  ]
+}

@@ -1,0 +1,922 @@
+{
+  "idleWindows": [
+    {
+      "startTs": 1760054400000,
+      "endTs": 1767528000000,
+      "startIso": "2025-10-10T00:00:00.000Z",
+      "endIso": "2026-01-04T12:00:00.000Z",
+      "bars": 173
+    },
+    {
+      "startTs": 1768910400000,
+      "endTs": 1773705600000,
+      "startIso": "2026-01-20T12:00:00.000Z",
+      "endIso": "2026-03-17T00:00:00.000Z",
+      "bars": 111
+    },
+    {
+      "startTs": 1691625600000,
+      "endTs": 1695772800000,
+      "startIso": "2023-08-10T00:00:00.000Z",
+      "endIso": "2023-09-27T00:00:00.000Z",
+      "bars": 96
+    },
+    {
+      "startTs": 1740139200000,
+      "endTs": 1744243200000,
+      "startIso": "2025-02-21T12:00:00.000Z",
+      "endIso": "2025-04-10T00:00:00.000Z",
+      "bars": 95
+    },
+    {
+      "startTs": 1722600000000,
+      "endTs": 1726660800000,
+      "startIso": "2024-08-02T12:00:00.000Z",
+      "endIso": "2024-09-18T12:00:00.000Z",
+      "bars": 94
+    },
+    {
+      "startTs": 1712577600000,
+      "endTs": 1716206400000,
+      "startIso": "2024-04-08T12:00:00.000Z",
+      "endIso": "2024-05-20T12:00:00.000Z",
+      "bars": 84
+    },
+    {
+      "startTs": 1717891200000,
+      "endTs": 1721433600000,
+      "startIso": "2024-06-09T00:00:00.000Z",
+      "endIso": "2024-07-20T00:00:00.000Z",
+      "bars": 82
+    },
+    {
+      "startTs": 1682510400000,
+      "endTs": 1685318400000,
+      "startIso": "2023-04-26T12:00:00.000Z",
+      "endIso": "2023-05-29T00:00:00.000Z",
+      "bars": 65
+    },
+    {
+      "startTs": 1705104000000,
+      "endTs": 1707652800000,
+      "startIso": "2024-01-13T00:00:00.000Z",
+      "endIso": "2024-02-11T12:00:00.000Z",
+      "bars": 59
+    },
+    {
+      "startTs": 1755518400000,
+      "endTs": 1758024000000,
+      "startIso": "2025-08-18T12:00:00.000Z",
+      "endIso": "2025-09-16T12:00:00.000Z",
+      "bars": 58
+    },
+    {
+      "startTs": 1685361600000,
+      "endTs": 1687694400000,
+      "startIso": "2023-05-29T12:00:00.000Z",
+      "endIso": "2023-06-25T12:00:00.000Z",
+      "bars": 54
+    },
+    {
+      "startTs": 1749513600000,
+      "endTs": 1751846400000,
+      "startIso": "2025-06-10T00:00:00.000Z",
+      "endIso": "2025-07-07T00:00:00.000Z",
+      "bars": 54
+    },
+    {
+      "startTs": 1737979200000,
+      "endTs": 1739966400000,
+      "startIso": "2025-01-27T12:00:00.000Z",
+      "endIso": "2025-02-19T12:00:00.000Z",
+      "bars": 46
+    },
+    {
+      "startTs": 1677283200000,
+      "endTs": 1679140800000,
+      "startIso": "2023-02-25T00:00:00.000Z",
+      "endIso": "2023-03-18T12:00:00.000Z",
+      "bars": 43
+    },
+    {
+      "startTs": 1734566400000,
+      "endTs": 1736164800000,
+      "startIso": "2024-12-19T00:00:00.000Z",
+      "endIso": "2025-01-06T12:00:00.000Z",
+      "bars": 37
+    },
+    {
+      "startTs": 1774180800000,
+      "endTs": 1775606400000,
+      "startIso": "2026-03-22T12:00:00.000Z",
+      "endIso": "2026-04-08T00:00:00.000Z",
+      "bars": 33
+    },
+    {
+      "startTs": 1758542400000,
+      "endTs": 1759449600000,
+      "startIso": "2025-09-22T12:00:00.000Z",
+      "endIso": "2025-10-03T00:00:00.000Z",
+      "bars": 21
+    },
+    {
+      "startTs": 1736294400000,
+      "endTs": 1737115200000,
+      "startIso": "2025-01-08T00:00:00.000Z",
+      "endIso": "2025-01-17T12:00:00.000Z",
+      "bars": 19
+    },
+    {
+      "startTs": 1728259200000,
+      "endTs": 1729036800000,
+      "startIso": "2024-10-07T00:00:00.000Z",
+      "endIso": "2024-10-16T00:00:00.000Z",
+      "bars": 18
+    },
+    {
+      "startTs": 1697155200000,
+      "endTs": 1697673600000,
+      "startIso": "2023-10-13T00:00:00.000Z",
+      "endIso": "2023-10-19T00:00:00.000Z",
+      "bars": 12
+    },
+    {
+      "startTs": 1695816000000,
+      "endTs": 1696248000000,
+      "startIso": "2023-09-27T12:00:00.000Z",
+      "endIso": "2023-10-02T12:00:00.000Z",
+      "bars": 10
+    },
+    {
+      "startTs": 1744761600000,
+      "endTs": 1745193600000,
+      "startIso": "2025-04-16T00:00:00.000Z",
+      "endIso": "2025-04-21T00:00:00.000Z",
+      "bars": 10
+    },
+    {
+      "startTs": 1682078400000,
+      "endTs": 1682467200000,
+      "startIso": "2023-04-21T12:00:00.000Z",
+      "endIso": "2023-04-26T00:00:00.000Z",
+      "bars": 9
+    },
+    {
+      "startTs": 1689681600000,
+      "endTs": 1690070400000,
+      "startIso": "2023-07-18T12:00:00.000Z",
+      "endIso": "2023-07-23T00:00:00.000Z",
+      "bars": 9
+    },
+    {
+      "startTs": 1700611200000,
+      "endTs": 1701000000000,
+      "startIso": "2023-11-22T00:00:00.000Z",
+      "endIso": "2023-11-26T12:00:00.000Z",
+      "bars": 9
+    },
+    {
+      "startTs": 1690200000000,
+      "endTs": 1690545600000,
+      "startIso": "2023-07-24T12:00:00.000Z",
+      "endIso": "2023-07-28T12:00:00.000Z",
+      "bars": 8
+    },
+    {
+      "startTs": 1690675200000,
+      "endTs": 1691020800000,
+      "startIso": "2023-07-30T00:00:00.000Z",
+      "endIso": "2023-08-03T00:00:00.000Z",
+      "bars": 8
+    },
+    {
+      "startTs": 1691150400000,
+      "endTs": 1691496000000,
+      "startIso": "2023-08-04T12:00:00.000Z",
+      "endIso": "2023-08-08T12:00:00.000Z",
+      "bars": 8
+    },
+    {
+      "startTs": 1712059200000,
+      "endTs": 1712404800000,
+      "startIso": "2024-04-02T12:00:00.000Z",
+      "endIso": "2024-04-06T12:00:00.000Z",
+      "bars": 8
+    },
+    {
+      "startTs": 1748649600000,
+      "endTs": 1748995200000,
+      "startIso": "2025-05-31T00:00:00.000Z",
+      "endIso": "2025-06-04T00:00:00.000Z",
+      "bars": 8
+    },
+    {
+      "startTs": 1676462400000,
+      "endTs": 1676764800000,
+      "startIso": "2023-02-15T12:00:00.000Z",
+      "endIso": "2023-02-19T00:00:00.000Z",
+      "bars": 7
+    },
+    {
+      "startTs": 1744416000000,
+      "endTs": 1744718400000,
+      "startIso": "2025-04-12T00:00:00.000Z",
+      "endIso": "2025-04-15T12:00:00.000Z",
+      "bars": 7
+    },
+    {
+      "startTs": 1749168000000,
+      "endTs": 1749470400000,
+      "startIso": "2025-06-06T00:00:00.000Z",
+      "endIso": "2025-06-09T12:00:00.000Z",
+      "bars": 7
+    },
+    {
+      "startTs": 1754395200000,
+      "endTs": 1754697600000,
+      "startIso": "2025-08-05T12:00:00.000Z",
+      "endIso": "2025-08-09T00:00:00.000Z",
+      "bars": 7
+    },
+    {
+      "startTs": 1703592000000,
+      "endTs": 1703851200000,
+      "startIso": "2023-12-26T12:00:00.000Z",
+      "endIso": "2023-12-29T12:00:00.000Z",
+      "bars": 6
+    },
+    {
+      "startTs": 1704542400000,
+      "endTs": 1704801600000,
+      "startIso": "2024-01-06T12:00:00.000Z",
+      "endIso": "2024-01-09T12:00:00.000Z",
+      "bars": 6
+    },
+    {
+      "startTs": 1745884800000,
+      "endTs": 1746144000000,
+      "startIso": "2025-04-29T00:00:00.000Z",
+      "endIso": "2025-05-02T00:00:00.000Z",
+      "bars": 6
+    },
+    {
+      "startTs": 1727913600000,
+      "endTs": 1728086400000,
+      "startIso": "2024-10-03T00:00:00.000Z",
+      "endIso": "2024-10-05T00:00:00.000Z",
+      "bars": 4
+    },
+    {
+      "startTs": 1754092800000,
+      "endTs": 1754222400000,
+      "startIso": "2025-08-02T00:00:00.000Z",
+      "endIso": "2025-08-03T12:00:00.000Z",
+      "bars": 3
+    },
+    {
+      "startTs": 1711843200000,
+      "endTs": 1711929600000,
+      "startIso": "2024-03-31T00:00:00.000Z",
+      "endIso": "2024-04-01T00:00:00.000Z",
+      "bars": 2
+    },
+    {
+      "startTs": 1776470400000,
+      "endTs": 1776556799999,
+      "startIso": "2026-04-18T00:00:00.000Z",
+      "endIso": "2026-04-18T23:59:59.999Z",
+      "bars": 2
+    }
+  ],
+  "results": [
+    {
+      "symbol": "ZEC",
+      "compoundedReturnPct": 418.14,
+      "avgWindowReturnPct": 7.99,
+      "positiveWindows": 23,
+      "totalWindows": 41,
+      "bestWindowPct": 185.06,
+      "worstWindowPct": -24.09,
+      "positiveRatePct": 56.1,
+      "bestWindows": [
+        {
+          "startIso": "2025-09-22T12:00:00.000Z",
+          "endIso": "2025-10-03T00:00:00.000Z",
+          "returnPct": 185.06
+        },
+        {
+          "startIso": "2025-10-10T00:00:00.000Z",
+          "endIso": "2026-01-04T12:00:00.000Z",
+          "returnPct": 119.21
+        },
+        {
+          "startIso": "2026-03-22T12:00:00.000Z",
+          "endIso": "2026-04-08T00:00:00.000Z",
+          "returnPct": 44.88
+        },
+        {
+          "startIso": "2025-08-18T12:00:00.000Z",
+          "endIso": "2025-09-16T12:00:00.000Z",
+          "returnPct": 41.2
+        },
+        {
+          "startIso": "2024-06-09T00:00:00.000Z",
+          "endIso": "2024-07-20T00:00:00.000Z",
+          "returnPct": 27.61
+        }
+      ]
+    },
+    {
+      "symbol": "TRX",
+      "compoundedReturnPct": 112.24,
+      "avgWindowReturnPct": 2.05,
+      "positiveWindows": 26,
+      "totalWindows": 41,
+      "bestWindowPct": 18.78,
+      "worstWindowPct": -12.6,
+      "positiveRatePct": 63.41,
+      "bestWindows": [
+        {
+          "startIso": "2024-08-02T12:00:00.000Z",
+          "endIso": "2024-09-18T12:00:00.000Z",
+          "returnPct": 18.78
+        },
+        {
+          "startIso": "2024-06-09T00:00:00.000Z",
+          "endIso": "2024-07-20T00:00:00.000Z",
+          "returnPct": 17.07
+        },
+        {
+          "startIso": "2024-01-13T00:00:00.000Z",
+          "endIso": "2024-02-11T12:00:00.000Z",
+          "returnPct": 16.77
+        },
+        {
+          "startIso": "2023-04-26T12:00:00.000Z",
+          "endIso": "2023-05-29T00:00:00.000Z",
+          "returnPct": 15.99
+        },
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 11.76
+        }
+      ]
+    },
+    {
+      "symbol": "BCH",
+      "compoundedReturnPct": 67.33,
+      "avgWindowReturnPct": 2.31,
+      "positiveWindows": 26,
+      "totalWindows": 41,
+      "bestWindowPct": 73.16,
+      "worstWindowPct": -30.08,
+      "positiveRatePct": 63.41,
+      "bestWindows": [
+        {
+          "startIso": "2023-05-29T12:00:00.000Z",
+          "endIso": "2023-06-25T12:00:00.000Z",
+          "returnPct": 73.16
+        },
+        {
+          "startIso": "2024-04-02T12:00:00.000Z",
+          "endIso": "2024-04-06T12:00:00.000Z",
+          "returnPct": 16.57
+        },
+        {
+          "startIso": "2025-06-10T00:00:00.000Z",
+          "endIso": "2025-07-07T00:00:00.000Z",
+          "returnPct": 16.1
+        },
+        {
+          "startIso": "2024-03-31T00:00:00.000Z",
+          "endIso": "2024-04-01T00:00:00.000Z",
+          "returnPct": 14.72
+        },
+        {
+          "startIso": "2023-12-26T12:00:00.000Z",
+          "endIso": "2023-12-29T12:00:00.000Z",
+          "returnPct": 14.07
+        }
+      ]
+    },
+    {
+      "symbol": "SFP",
+      "compoundedReturnPct": -21.16,
+      "avgWindowReturnPct": -0.05,
+      "positiveWindows": 22,
+      "totalWindows": 41,
+      "bestWindowPct": 25.69,
+      "worstWindowPct": -32.14,
+      "positiveRatePct": 53.66,
+      "bestWindows": [
+        {
+          "startIso": "2023-08-10T00:00:00.000Z",
+          "endIso": "2023-09-27T00:00:00.000Z",
+          "returnPct": 25.69
+        },
+        {
+          "startIso": "2024-12-19T00:00:00.000Z",
+          "endIso": "2025-01-06T12:00:00.000Z",
+          "returnPct": 16.24
+        },
+        {
+          "startIso": "2025-09-22T12:00:00.000Z",
+          "endIso": "2025-10-03T00:00:00.000Z",
+          "returnPct": 14.53
+        },
+        {
+          "startIso": "2023-05-29T12:00:00.000Z",
+          "endIso": "2023-06-25T12:00:00.000Z",
+          "returnPct": 11.15
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 7.69
+        }
+      ]
+    },
+    {
+      "symbol": "XRP",
+      "compoundedReturnPct": -43.91,
+      "avgWindowReturnPct": -0.82,
+      "positiveWindows": 22,
+      "totalWindows": 41,
+      "bestWindowPct": 38.91,
+      "worstWindowPct": -24.66,
+      "positiveRatePct": 53.66,
+      "bestWindows": [
+        {
+          "startIso": "2025-01-08T00:00:00.000Z",
+          "endIso": "2025-01-17T12:00:00.000Z",
+          "returnPct": 38.91
+        },
+        {
+          "startIso": "2024-06-09T00:00:00.000Z",
+          "endIso": "2024-07-20T00:00:00.000Z",
+          "returnPct": 17.57
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 8.96
+        },
+        {
+          "startIso": "2025-06-06T00:00:00.000Z",
+          "endIso": "2025-06-09T12:00:00.000Z",
+          "returnPct": 8.07
+        },
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 7.94
+        }
+      ]
+    },
+    {
+      "symbol": "BNB",
+      "compoundedReturnPct": -49.81,
+      "avgWindowReturnPct": -1.2,
+      "positiveWindows": 24,
+      "totalWindows": 41,
+      "bestWindowPct": 13.98,
+      "worstWindowPct": -29.46,
+      "positiveRatePct": 58.54,
+      "bestWindows": [
+        {
+          "startIso": "2023-02-25T00:00:00.000Z",
+          "endIso": "2023-03-18T12:00:00.000Z",
+          "returnPct": 13.98
+        },
+        {
+          "startIso": "2025-08-18T12:00:00.000Z",
+          "endIso": "2025-09-16T12:00:00.000Z",
+          "returnPct": 10.57
+        },
+        {
+          "startIso": "2023-12-26T12:00:00.000Z",
+          "endIso": "2023-12-29T12:00:00.000Z",
+          "returnPct": 9.75
+        },
+        {
+          "startIso": "2024-01-13T00:00:00.000Z",
+          "endIso": "2024-02-11T12:00:00.000Z",
+          "returnPct": 9.69
+        },
+        {
+          "startIso": "2025-09-22T12:00:00.000Z",
+          "endIso": "2025-10-03T00:00:00.000Z",
+          "returnPct": 6.32
+        }
+      ]
+    },
+    {
+      "symbol": "LINK",
+      "compoundedReturnPct": -59.38,
+      "avgWindowReturnPct": -1.15,
+      "positiveWindows": 20,
+      "totalWindows": 41,
+      "bestWindowPct": 45.87,
+      "worstWindowPct": -39.23,
+      "positiveRatePct": 48.78,
+      "bestWindows": [
+        {
+          "startIso": "2024-01-13T00:00:00.000Z",
+          "endIso": "2024-02-11T12:00:00.000Z",
+          "returnPct": 45.87
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 19.95
+        },
+        {
+          "startIso": "2023-02-15T12:00:00.000Z",
+          "endIso": "2023-02-19T00:00:00.000Z",
+          "returnPct": 16.51
+        },
+        {
+          "startIso": "2023-07-18T12:00:00.000Z",
+          "endIso": "2023-07-23T00:00:00.000Z",
+          "returnPct": 13.6
+        },
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 11.22
+        }
+      ]
+    },
+    {
+      "symbol": "LTC",
+      "compoundedReturnPct": -61.93,
+      "avgWindowReturnPct": -1.41,
+      "positiveWindows": 23,
+      "totalWindows": 41,
+      "bestWindowPct": 29.52,
+      "worstWindowPct": -43.97,
+      "positiveRatePct": 56.1,
+      "bestWindows": [
+        {
+          "startIso": "2025-01-08T00:00:00.000Z",
+          "endIso": "2025-01-17T12:00:00.000Z",
+          "returnPct": 29.52
+        },
+        {
+          "startIso": "2025-01-27T12:00:00.000Z",
+          "endIso": "2025-02-19T12:00:00.000Z",
+          "returnPct": 23.46
+        },
+        {
+          "startIso": "2025-09-22T12:00:00.000Z",
+          "endIso": "2025-10-03T00:00:00.000Z",
+          "returnPct": 11.43
+        },
+        {
+          "startIso": "2025-05-31T00:00:00.000Z",
+          "endIso": "2025-06-04T00:00:00.000Z",
+          "returnPct": 7.02
+        },
+        {
+          "startIso": "2024-10-07T00:00:00.000Z",
+          "endIso": "2024-10-16T00:00:00.000Z",
+          "returnPct": 6.42
+        }
+      ]
+    },
+    {
+      "symbol": "AAVE",
+      "compoundedReturnPct": -68.83,
+      "avgWindowReturnPct": -1.65,
+      "positiveWindows": 24,
+      "totalWindows": 41,
+      "bestWindowPct": 17.9,
+      "worstWindowPct": -46.46,
+      "positiveRatePct": 58.54,
+      "bestWindows": [
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 17.9
+        },
+        {
+          "startIso": "2024-08-02T12:00:00.000Z",
+          "endIso": "2024-09-18T12:00:00.000Z",
+          "returnPct": 15.91
+        },
+        {
+          "startIso": "2023-09-27T12:00:00.000Z",
+          "endIso": "2023-10-02T12:00:00.000Z",
+          "returnPct": 12.57
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 11.67
+        },
+        {
+          "startIso": "2023-05-29T12:00:00.000Z",
+          "endIso": "2023-06-25T12:00:00.000Z",
+          "returnPct": 10.65
+        }
+      ]
+    },
+    {
+      "symbol": "MATIC",
+      "compoundedReturnPct": -70.72,
+      "avgWindowReturnPct": -4.82,
+      "positiveWindows": 7,
+      "totalWindows": 21,
+      "bestWindowPct": 17.74,
+      "worstWindowPct": -27.49,
+      "positiveRatePct": 33.33,
+      "bestWindows": [
+        {
+          "startIso": "2023-02-15T12:00:00.000Z",
+          "endIso": "2023-02-19T00:00:00.000Z",
+          "returnPct": 17.74
+        },
+        {
+          "startIso": "2023-12-26T12:00:00.000Z",
+          "endIso": "2023-12-29T12:00:00.000Z",
+          "returnPct": 12.59
+        },
+        {
+          "startIso": "2023-09-27T12:00:00.000Z",
+          "endIso": "2023-10-02T12:00:00.000Z",
+          "returnPct": 10.48
+        },
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 4.57
+        },
+        {
+          "startIso": "2024-03-31T00:00:00.000Z",
+          "endIso": "2024-04-01T00:00:00.000Z",
+          "returnPct": 2.03
+        }
+      ]
+    },
+    {
+      "symbol": "DASH",
+      "compoundedReturnPct": -71.93,
+      "avgWindowReturnPct": -1.81,
+      "positiveWindows": 23,
+      "totalWindows": 41,
+      "bestWindowPct": 55.14,
+      "worstWindowPct": -50.1,
+      "positiveRatePct": 56.1,
+      "bestWindows": [
+        {
+          "startIso": "2025-09-22T12:00:00.000Z",
+          "endIso": "2025-10-03T00:00:00.000Z",
+          "returnPct": 55.14
+        },
+        {
+          "startIso": "2025-10-10T00:00:00.000Z",
+          "endIso": "2026-01-04T12:00:00.000Z",
+          "returnPct": 15.09
+        },
+        {
+          "startIso": "2024-12-19T00:00:00.000Z",
+          "endIso": "2025-01-06T12:00:00.000Z",
+          "returnPct": 10.85
+        },
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 9.52
+        },
+        {
+          "startIso": "2025-01-08T00:00:00.000Z",
+          "endIso": "2025-01-17T12:00:00.000Z",
+          "returnPct": 9.31
+        }
+      ]
+    },
+    {
+      "symbol": "UNI",
+      "compoundedReturnPct": -83.24,
+      "avgWindowReturnPct": -3.29,
+      "positiveWindows": 21,
+      "totalWindows": 41,
+      "bestWindowPct": 22.09,
+      "worstWindowPct": -43.71,
+      "positiveRatePct": 51.22,
+      "bestWindows": [
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 22.09
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 11.25
+        },
+        {
+          "startIso": "2025-06-06T00:00:00.000Z",
+          "endIso": "2025-06-09T12:00:00.000Z",
+          "returnPct": 10.85
+        },
+        {
+          "startIso": "2025-05-31T00:00:00.000Z",
+          "endIso": "2025-06-04T00:00:00.000Z",
+          "returnPct": 9.49
+        },
+        {
+          "startIso": "2024-10-07T00:00:00.000Z",
+          "endIso": "2024-10-16T00:00:00.000Z",
+          "returnPct": 7.53
+        }
+      ]
+    },
+    {
+      "symbol": "NEAR",
+      "compoundedReturnPct": -84.95,
+      "avgWindowReturnPct": -3.56,
+      "positiveWindows": 18,
+      "totalWindows": 41,
+      "bestWindowPct": 13.36,
+      "worstWindowPct": -42.22,
+      "positiveRatePct": 43.9,
+      "bestWindows": [
+        {
+          "startIso": "2025-04-16T00:00:00.000Z",
+          "endIso": "2025-04-21T00:00:00.000Z",
+          "returnPct": 13.36
+        },
+        {
+          "startIso": "2024-04-02T12:00:00.000Z",
+          "endIso": "2024-04-06T12:00:00.000Z",
+          "returnPct": 12.58
+        },
+        {
+          "startIso": "2023-02-15T12:00:00.000Z",
+          "endIso": "2023-02-19T00:00:00.000Z",
+          "returnPct": 11.16
+        },
+        {
+          "startIso": "2025-06-06T00:00:00.000Z",
+          "endIso": "2025-06-09T12:00:00.000Z",
+          "returnPct": 8.47
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 8.26
+        }
+      ]
+    },
+    {
+      "symbol": "ADA",
+      "compoundedReturnPct": -85.41,
+      "avgWindowReturnPct": -3.71,
+      "positiveWindows": 21,
+      "totalWindows": 41,
+      "bestWindowPct": 10.25,
+      "worstWindowPct": -50.78,
+      "positiveRatePct": 51.22,
+      "bestWindows": [
+        {
+          "startIso": "2024-12-19T00:00:00.000Z",
+          "endIso": "2025-01-06T12:00:00.000Z",
+          "returnPct": 10.25
+        },
+        {
+          "startIso": "2025-01-08T00:00:00.000Z",
+          "endIso": "2025-01-17T12:00:00.000Z",
+          "returnPct": 9.23
+        },
+        {
+          "startIso": "2023-09-27T12:00:00.000Z",
+          "endIso": "2023-10-02T12:00:00.000Z",
+          "returnPct": 8.52
+        },
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 8.37
+        },
+        {
+          "startIso": "2025-06-06T00:00:00.000Z",
+          "endIso": "2025-06-09T12:00:00.000Z",
+          "returnPct": 7.3
+        }
+      ]
+    },
+    {
+      "symbol": "DOT",
+      "compoundedReturnPct": -86.66,
+      "avgWindowReturnPct": -3.91,
+      "positiveWindows": 18,
+      "totalWindows": 41,
+      "bestWindowPct": 15.25,
+      "worstWindowPct": -47.1,
+      "positiveRatePct": 43.9,
+      "bestWindows": [
+        {
+          "startIso": "2023-02-15T12:00:00.000Z",
+          "endIso": "2023-02-19T00:00:00.000Z",
+          "returnPct": 15.25
+        },
+        {
+          "startIso": "2025-04-16T00:00:00.000Z",
+          "endIso": "2025-04-21T00:00:00.000Z",
+          "returnPct": 11.86
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 9.12
+        },
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 8.6
+        },
+        {
+          "startIso": "2025-09-22T12:00:00.000Z",
+          "endIso": "2025-10-03T00:00:00.000Z",
+          "returnPct": 6.51
+        }
+      ]
+    },
+    {
+      "symbol": "ATOM",
+      "compoundedReturnPct": -86.91,
+      "avgWindowReturnPct": -4.13,
+      "positiveWindows": 16,
+      "totalWindows": 41,
+      "bestWindowPct": 15.67,
+      "worstWindowPct": -43.25,
+      "positiveRatePct": 39.02,
+      "bestWindows": [
+        {
+          "startIso": "2023-11-22T00:00:00.000Z",
+          "endIso": "2023-11-26T12:00:00.000Z",
+          "returnPct": 15.67
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 8.67
+        },
+        {
+          "startIso": "2023-02-15T12:00:00.000Z",
+          "endIso": "2023-02-19T00:00:00.000Z",
+          "returnPct": 6.69
+        },
+        {
+          "startIso": "2023-09-27T12:00:00.000Z",
+          "endIso": "2023-10-02T12:00:00.000Z",
+          "returnPct": 6.16
+        },
+        {
+          "startIso": "2025-04-16T00:00:00.000Z",
+          "endIso": "2025-04-21T00:00:00.000Z",
+          "returnPct": 5.58
+        }
+      ]
+    },
+    {
+      "symbol": "CAKE",
+      "compoundedReturnPct": -92.63,
+      "avgWindowReturnPct": -4.92,
+      "positiveWindows": 16,
+      "totalWindows": 41,
+      "bestWindowPct": 32.42,
+      "worstWindowPct": -44.9,
+      "positiveRatePct": 39.02,
+      "bestWindows": [
+        {
+          "startIso": "2025-01-27T12:00:00.000Z",
+          "endIso": "2025-02-19T12:00:00.000Z",
+          "returnPct": 32.42
+        },
+        {
+          "startIso": "2026-03-22T12:00:00.000Z",
+          "endIso": "2026-04-08T00:00:00.000Z",
+          "returnPct": 10.65
+        },
+        {
+          "startIso": "2025-09-22T12:00:00.000Z",
+          "endIso": "2025-10-03T00:00:00.000Z",
+          "returnPct": 10.62
+        },
+        {
+          "startIso": "2025-04-16T00:00:00.000Z",
+          "endIso": "2025-04-21T00:00:00.000Z",
+          "returnPct": 9.4
+        },
+        {
+          "startIso": "2025-08-05T12:00:00.000Z",
+          "endIso": "2025-08-09T00:00:00.000Z",
+          "returnPct": 7
+        }
+      ]
+    }
+  ]
+}

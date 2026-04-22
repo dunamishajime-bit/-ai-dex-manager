@@ -1,0 +1,17 @@
+time,symbol,action,strategy_type,sub_variant,alloc,price,qty,reason,trade_id
+2023-10-24T12:00:00.000Z,NEAR,enter,trend,strict6,1,1.155,8658,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0001
+2023-11-12T00:00:00.000Z,NEAR,exit,trend,trend,1,1.598,8658,symbol-weak-exit,retq22-0001
+2023-12-24T00:00:00.000Z,NEAR,enter,trend,strict6,1,3.902,3527.4,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0002
+2024-01-01T00:00:00.000Z,NEAR,exit,trend,trend,1,3.651,3527.4,symbol-weak-exit,retq22-0002
+2024-02-11T12:00:00.000Z,NEAR,enter,trend,strict6,1,3.182,4022.2000000000003,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0003
+2024-02-21T12:00:00.000Z,NEAR,exit,trend,trend,1,3.176,4022.2000000000003,symbol-weak-exit,retq22-0003
+2024-07-20T00:00:00.000Z,NEAR,enter,trend,strict6,1,6.435,1973.2,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0004
+2024-07-25T00:00:00.000Z,NEAR,exit,trend,trend,1,5.62,1973.2,symbol-weak-exit,retq22-0004
+2024-09-24T00:00:00.000Z,NEAR,enter,trend,strict6,1,5.177,2128.3,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0005
+2024-10-02T00:00:00.000Z,NEAR,exit,trend,trend,1,4.839,2128.3,symbol-weak-exit,retq22-0005
+2024-11-23T12:00:00.000Z,NEAR,enter,trend,strict6,1,6.249,1637.8000000000002,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0006
+2024-11-26T12:00:00.000Z,NEAR,exit,trend,trend,1,6.124,1637.8000000000002,symbol-weak-exit,retq22-0006
+2025-05-29T12:00:00.000Z,NEAR,enter,trend,strict6,1,2.943,3387.5,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0007
+2025-05-30T00:00:00.000Z,NEAR,exit,trend,trend,1,2.754,3387.5,symbol-weak-exit,retq22-0007
+2026-03-17T00:00:00.000Z,NEAR,enter,trend,strict6,1,1.491,6218.200000000001,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,retq22-0008
+2026-03-20T12:00:00.000Z,NEAR,exit,trend,trend,1,1.334,6218.200000000001,symbol-weak-exit,retq22-0008

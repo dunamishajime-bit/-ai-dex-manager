@@ -1,0 +1,80 @@
+[
+  {
+    "key": "current_v3",
+    "thesis": "Current v3 profile with DOGE eff018 and SOL score -8.",
+    "endEquity": 11504.4,
+    "cagrPct": 12.74,
+    "maxDrawdownPct": -48.22,
+    "profitFactor": 1.091,
+    "tradeCount": 31,
+    "dogeTrades": 2,
+    "dogePnl": -2982.77,
+    "solTrades": 7,
+    "solPnl": -252.47
+  },
+  {
+    "key": "doge_eff016",
+    "thesis": "DOGE only looser idle efficiency gate at 0.16.",
+    "endEquity": 11504.4,
+    "cagrPct": 12.74,
+    "maxDrawdownPct": -48.22,
+    "profitFactor": 1.091,
+    "tradeCount": 31,
+    "dogeTrades": 2,
+    "dogePnl": -2982.77,
+    "solTrades": 7,
+    "solPnl": -252.47
+  },
+  {
+    "key": "doge_eff020",
+    "thesis": "DOGE only stricter idle efficiency gate at 0.20.",
+    "endEquity": 11504.4,
+    "cagrPct": 12.74,
+    "maxDrawdownPct": -48.22,
+    "profitFactor": 1.091,
+    "tradeCount": 31,
+    "dogeTrades": 2,
+    "dogePnl": -2982.77,
+    "solTrades": 7,
+    "solPnl": -252.47
+  },
+  {
+    "key": "sol_minus6",
+    "thesis": "SOL demotion eased to -6.",
+    "endEquity": 11504.4,
+    "cagrPct": 12.74,
+    "maxDrawdownPct": -48.22,
+    "profitFactor": 1.091,
+    "tradeCount": 31,
+    "dogeTrades": 2,
+    "dogePnl": -2982.77,
+    "solTrades": 7,
+    "solPnl": -252.47
+  },
+  {
+    "key": "sol_minus10",
+    "thesis": "SOL demotion tightened to -10.",
+    "endEquity": 11504.4,
+    "cagrPct": 12.74,
+    "maxDrawdownPct": -48.22,
+    "profitFactor": 1.091,
+    "tradeCount": 31,
+    "dogeTrades": 2,
+    "dogePnl": -2982.77,
+    "solTrades": 7,
+    "solPnl": -252.47
+  },
+  {
+    "key": "sol_minus8_doge_eff016",
+    "thesis": "Combine SOL -8 with looser DOGE 0.16.",
+    "endEquity": 11504.4,
+    "cagrPct": 12.74,
+    "maxDrawdownPct": -48.22,
+    "profitFactor": 1.091,
+    "tradeCount": 31,
+    "dogeTrades": 2,
+    "dogePnl": -2982.77,
+    "solTrades": 7,
+    "solPnl": -252.47
+  }
+]

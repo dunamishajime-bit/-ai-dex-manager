@@ -1,0 +1,56 @@
+{
+  "rows": [
+    {
+      "key": "base",
+      "thesis": "Current strongest profile without mid-hold PENGU rotation.",
+      "end_equity": 206790.86,
+      "cagr_pct": 186.47,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "pengu_contribution": 95169.16,
+      "strict_extra_rotate_count": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 206790.86\n- CAGR: 186.47%\n- MaxDD: -31.04%\n- WinRate: 58.33%\n- PF: 2.74\n- Trades: 60"
+    },
+    {
+      "key": "pengu_rotate_gap10_once",
+      "thesis": "Rotate full position into PENGU when current trend stalls and PENGU leads by 10 score points once.",
+      "end_equity": 247182.78,
+      "cagr_pct": 204.8,
+      "max_drawdown_pct": -32.57,
+      "profit_factor": 2.373,
+      "win_rate_pct": 55.56,
+      "trade_count": 63,
+      "pengu_contribution": 103944.72,
+      "strict_extra_rotate_count": 4,
+      "summary": "- mode: RETQ22\n- end_equity: 247182.78\n- CAGR: 204.80%\n- MaxDD: -32.57%\n- WinRate: 55.56%\n- PF: 2.37\n- Trades: 63"
+    },
+    {
+      "key": "pengu_rotate_gap10_twice",
+      "thesis": "Rotate only after the same 10-point PENGU lead persists for 2 consecutive 12H bars.",
+      "end_equity": 209849.27,
+      "cagr_pct": 187.94,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.572,
+      "win_rate_pct": 57.38,
+      "trade_count": 61,
+      "pengu_contribution": 81701.13,
+      "strict_extra_rotate_count": 1,
+      "summary": "- mode: RETQ22\n- end_equity: 209849.27\n- CAGR: 187.94%\n- MaxDD: -31.04%\n- WinRate: 57.38%\n- PF: 2.57\n- Trades: 61"
+    },
+    {
+      "key": "pengu_rotate_gap15_twice",
+      "thesis": "Rotate only after a stronger 15-point PENGU lead persists for 2 consecutive 12H bars.",
+      "end_equity": 209849.27,
+      "cagr_pct": 187.94,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.572,
+      "win_rate_pct": 57.38,
+      "trade_count": 61,
+      "pengu_contribution": 81701.13,
+      "strict_extra_rotate_count": 1,
+      "summary": "- mode: RETQ22\n- end_equity: 209849.27\n- CAGR: 187.94%\n- MaxDD: -31.04%\n- WinRate: 57.38%\n- PF: 2.57\n- Trades: 61"
+    }
+  ]
+}

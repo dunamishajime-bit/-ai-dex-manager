@@ -1,0 +1,630 @@
+{
+  "rows": [
+    {
+      "key": "reclaim-aux-alloc100-pengu-idle",
+      "thesis": "Full aux range plus PENGU idle-only candidate.",
+      "end_equity": 205620.37,
+      "cagr_pct": 185.91,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "exposure_pct": 39.72,
+      "y2023": 451.07,
+      "y2024": 52.23,
+      "y2025": 138.54,
+      "symbol_contribution": {
+        "SOL": 23320.314686400045,
+        "ETH": 54566.122687239986,
+        "AVAX": 23103.319524700008,
+        "PENGU": 94630.61451229766
+      }
+    },
+    {
+      "key": "reclaim-aux-relaxed-pengu-idle",
+      "thesis": "Use PENGU only when normal candidates are absent.",
+      "end_equity": 176284.17,
+      "cagr_pct": 171.02,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.588,
+      "win_rate_pct": 58.33,
+      "trade_count": 60,
+      "exposure_pct": 39.72,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 115.11,
+      "symbol_contribution": {
+        "SOL": 14835.892461099971,
+        "ETH": 50061.67412762994,
+        "AVAX": 15612.576411499987,
+        "PENGU": 85774.02564134395
+      }
+    },
+    {
+      "key": "reclaim-aux-alloc100-pengu-top-removed",
+      "thesis": "Stress test: full aux plus PENGU, but largest PENGU trade is blocked.",
+      "end_equity": 145453.35,
+      "cagr_pct": 153.51,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.314,
+      "win_rate_pct": 57.63,
+      "trade_count": 59,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 52.23,
+      "y2025": 68.74,
+      "symbol_contribution": {
+        "SOL": 29478.41230389999,
+        "ETH": 41544.82649537003,
+        "AVAX": 23103.319524700008,
+        "PENGU": 41326.786751274165
+      }
+    },
+    {
+      "key": "reclaim-aux-alloc100",
+      "thesis": "Use full available cash for aux range when no trend candidate exists.",
+      "end_equity": 135769.39,
+      "cagr_pct": 147.51,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.255,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 52.23,
+      "y2025": 57.51,
+      "symbol_contribution": {
+        "SOL": 31390.868239499996,
+        "ETH": 71646.22305363002,
+        "AVAX": 22732.29723830001
+      }
+    },
+    {
+      "key": "reclaim-aux-alloc060",
+      "thesis": "Push aux range allocation higher while watching drawdown.",
+      "end_equity": 122586.24,
+      "cagr_pct": 138.88,
+      "max_drawdown_pct": -32.59,
+      "profit_factor": 2.172,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 47.21,
+      "y2025": 47.06,
+      "symbol_contribution": {
+        "SOL": 26275.81722469996,
+        "ETH": 68468.64192035995,
+        "AVAX": 17841.780249400003
+      }
+    },
+    {
+      "key": "reclaim-aux-alloc050",
+      "thesis": "Increase aux range allocation if its edge is real.",
+      "end_equity": 119459.98,
+      "cagr_pct": 136.75,
+      "max_drawdown_pct": -33.34,
+      "profit_factor": 2.152,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 45.96,
+      "y2025": 44.53,
+      "symbol_contribution": {
+        "SOL": 25102.846462699992,
+        "ETH": 67705.70874296999,
+        "AVAX": 16651.427311299994
+      }
+    },
+    {
+      "key": "reclaim-aux-no-sol",
+      "thesis": "Remove SOL aux to test if it is signal or noise.",
+      "end_equity": 117153.05,
+      "cagr_pct": 135.15,
+      "max_drawdown_pct": -33.53,
+      "profit_factor": 2.134,
+      "win_rate_pct": 56.36,
+      "trade_count": 55,
+      "exposure_pct": 39.11,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.96,
+      "symbol_contribution": {
+        "SOL": 18360.676994799964,
+        "ETH": 67688.83602793996,
+        "AVAX": 21103.537080799986
+      }
+    },
+    {
+      "key": "reclaim-aux-relaxed",
+      "thesis": "Reduce idle USDT with ETH reclaim plus AVAX/SOL ATR snapback.",
+      "end_equity": 116398.82,
+      "cagr_pct": 134.62,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.131,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23970.933831299964,
+        "ETH": 66954.19144907995,
+        "AVAX": 15473.69594269999
+      }
+    },
+    {
+      "key": "reclaim-aux-exit006",
+      "thesis": "Exit aux range earlier before rebound fades.",
+      "end_equity": 116398.82,
+      "cagr_pct": 134.62,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.131,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23970.933831299964,
+        "ETH": 66954.19144907995,
+        "AVAX": 15473.69594269999
+      }
+    },
+    {
+      "key": "reclaim-aux-entry080",
+      "thesis": "Widen aux range entry to reduce missed rebounds.",
+      "end_equity": 116398.82,
+      "cagr_pct": 134.62,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.131,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23970.933831299964,
+        "ETH": 66954.19144907995,
+        "AVAX": 15473.69594269999
+      }
+    },
+    {
+      "key": "reclaim-aux-entry040",
+      "thesis": "Tighten aux range entry to reduce shallow rebound noise.",
+      "end_equity": 116398.82,
+      "cagr_pct": 134.62,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.131,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23970.933831299964,
+        "ETH": 66954.19144907995,
+        "AVAX": 15473.69594269999
+      }
+    },
+    {
+      "key": "weak-exit-loose",
+      "thesis": "Loosen weak-exit gates to avoid exiting trends too early.",
+      "end_equity": 116398.82,
+      "cagr_pct": 134.62,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.131,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23970.933831299964,
+        "ETH": 66954.19144907995,
+        "AVAX": 15473.69594269999
+      }
+    },
+    {
+      "key": "weak-exit-tight",
+      "thesis": "Tighten weak-exit gates to reduce late exits.",
+      "end_equity": 116398.82,
+      "cagr_pct": 134.62,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.131,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23970.933831299964,
+        "ETH": 66954.19144907995,
+        "AVAX": 15473.69594269999
+      }
+    },
+    {
+      "key": "reclaim-primary-early",
+      "thesis": "Loosen primary ETH reclaim entry.",
+      "end_equity": 116398.82,
+      "cagr_pct": 134.62,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.131,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "exposure_pct": 39.2,
+      "y2023": 451.07,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23970.933831299964,
+        "ETH": 66954.19144907995,
+        "AVAX": 15473.69594269999
+      }
+    },
+    {
+      "key": "reclaim-primary-strict",
+      "thesis": "Tighten primary ETH reclaim entry to improve PF.",
+      "end_equity": 115218.81,
+      "cagr_pct": 133.79,
+      "max_drawdown_pct": -34.08,
+      "profit_factor": 2.13,
+      "win_rate_pct": 54.72,
+      "trade_count": 53,
+      "exposure_pct": 38.87,
+      "y2023": 445.48,
+      "y2024": 44.72,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 23747.987893400008,
+        "ETH": 66154.14602276999,
+        "AVAX": 15316.676274699992
+      }
+    },
+    {
+      "key": "reclaim-aux-hold5",
+      "thesis": "Hold aux range longer in case exits are too early.",
+      "end_equity": 112994.07,
+      "cagr_pct": 132.21,
+      "max_drawdown_pct": -34.94,
+      "profit_factor": 2.093,
+      "win_rate_pct": 55.36,
+      "trade_count": 56,
+      "exposure_pct": 39.39,
+      "y2023": 451.07,
+      "y2024": 44.05,
+      "y2025": 38.52,
+      "symbol_contribution": {
+        "SOL": 21668.186280400005,
+        "ETH": 66258.46086017997,
+        "AVAX": 15067.421141799994
+      }
+    },
+    {
+      "key": "reclaim-aux-no-avax",
+      "thesis": "Remove AVAX aux to test if it is signal or noise.",
+      "end_equity": 110331.06,
+      "cagr_pct": 130.3,
+      "max_drawdown_pct": -36.33,
+      "profit_factor": 2.1,
+      "win_rate_pct": 54.72,
+      "trade_count": 53,
+      "exposure_pct": 38.77,
+      "y2023": 451.07,
+      "y2024": 39.79,
+      "y2025": 39.38,
+      "symbol_contribution": {
+        "SOL": 24275.008352699995,
+        "ETH": 65168.33629443998,
+        "AVAX": 10887.71692839999
+      }
+    },
+    {
+      "key": "trend-eff018",
+      "thesis": "Loosen trend efficiency to reduce late entries.",
+      "end_equity": 107571.77,
+      "cagr_pct": 128.28,
+      "max_drawdown_pct": -37.66,
+      "profit_factor": 2.046,
+      "win_rate_pct": 56.14,
+      "trade_count": 57,
+      "exposure_pct": 39.25,
+      "y2023": 451.07,
+      "y2024": 33.75,
+      "y2025": 42.04,
+      "symbol_contribution": {
+        "SOL": 25082.381201800006,
+        "ETH": 56003.76788162,
+        "AVAX": 16485.623513299994
+      }
+    },
+    {
+      "key": "current-retq22",
+      "thesis": "Current RETQ22 baseline.",
+      "end_equity": 82553.59,
+      "cagr_pct": 108.22,
+      "max_drawdown_pct": -45.27,
+      "profit_factor": 1.685,
+      "win_rate_pct": 51.72,
+      "trade_count": 58,
+      "exposure_pct": 46.67,
+      "y2023": 410.04,
+      "y2024": 26.25,
+      "y2025": 24.77,
+      "symbol_contribution": {
+        "ETH": 41967.41221077,
+        "SOL": 9040.551491600034,
+        "AVAX": 21545.628078600002
+      }
+    },
+    {
+      "key": "decision-12-exit-6",
+      "thesis": "Keep 12H entries but check trend exits on 6H.",
+      "end_equity": 71035.09,
+      "cagr_pct": 97.63,
+      "max_drawdown_pct": -48.66,
+      "profit_factor": 1.724,
+      "win_rate_pct": 41.18,
+      "trade_count": 68,
+      "exposure_pct": 29.03,
+      "y2023": 441.11,
+      "y2024": 31.6,
+      "y2025": -0.25,
+      "symbol_contribution": {
+        "SOL": 16611.630661900064,
+        "ETH": 23539.39272148,
+        "AVAX": 20884.062411299972
+      }
+    },
+    {
+      "key": "trend-eff026",
+      "thesis": "Tighten trend efficiency to remove false breakouts.",
+      "end_equity": 59143.06,
+      "cagr_pct": 85.44,
+      "max_drawdown_pct": -34.5,
+      "profit_factor": 1.879,
+      "win_rate_pct": 55.56,
+      "trade_count": 54,
+      "exposure_pct": 37.68,
+      "y2023": 272.43,
+      "y2024": 44.72,
+      "y2025": 6.79,
+      "symbol_contribution": {
+        "SOL": 14203.484795800003,
+        "ETH": 24808.72487949999,
+        "AVAX": 10130.853445000004
+      }
+    },
+    {
+      "key": "top2-trend",
+      "thesis": "Hold top 2 trend symbols if single-symbol rotation misses upside.",
+      "end_equity": 31972.13,
+      "cagr_pct": 49.76,
+      "max_drawdown_pct": -27.42,
+      "profit_factor": 1.508,
+      "win_rate_pct": 42.71,
+      "trade_count": 96,
+      "exposure_pct": 37.39,
+      "y2023": 144.35,
+      "y2024": 35.49,
+      "y2025": -4.86,
+      "symbol_contribution": {
+        "ETH": 9105.50015062001,
+        "SOL": 8687.144776100005,
+        "AVAX": 4179.486962399998
+      }
+    },
+    {
+      "key": "decision-6-reclaim",
+      "thesis": "Try 6H decisions on the reclaim base.",
+      "end_equity": 27629.01,
+      "cagr_pct": 41.29,
+      "max_drawdown_pct": -43.7,
+      "profit_factor": 1.387,
+      "win_rate_pct": 40.82,
+      "trade_count": 98,
+      "exposure_pct": 35.84,
+      "y2023": 122.6,
+      "y2024": 17.21,
+      "y2025": 5.9,
+      "symbol_contribution": {
+        "SOL": 13843.689581499977,
+        "ETH": -1824.7876602200147,
+        "AVAX": 5610.104755500001
+      }
+    }
+  ],
+  "artifacts": {
+    "current-retq22": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\current-retq22\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\current-retq22\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\current-retq22\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\current-retq22\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\current-retq22\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\current-retq22\\retq22-summary.json"
+    },
+    "reclaim-aux-relaxed": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed\\retq22-summary.json"
+    },
+    "reclaim-aux-relaxed-pengu-idle": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed-pengu-idle\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed-pengu-idle\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed-pengu-idle\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed-pengu-idle\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed-pengu-idle\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-relaxed-pengu-idle\\retq22-summary.json"
+    },
+    "reclaim-aux-no-sol": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-sol\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-sol\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-sol\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-sol\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-sol\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-sol\\retq22-summary.json"
+    },
+    "reclaim-aux-no-avax": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-avax\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-avax\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-avax\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-avax\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-avax\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-no-avax\\retq22-summary.json"
+    },
+    "reclaim-aux-alloc050": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc050\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc050\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc050\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc050\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc050\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc050\\retq22-summary.json"
+    },
+    "reclaim-aux-alloc060": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc060\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc060\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc060\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc060\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc060\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc060\\retq22-summary.json"
+    },
+    "reclaim-aux-alloc100": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100\\retq22-summary.json"
+    },
+    "reclaim-aux-alloc100-pengu-idle": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-idle\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-idle\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-idle\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-idle\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-idle\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-idle\\retq22-summary.json"
+    },
+    "reclaim-aux-alloc100-pengu-top-removed": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-top-removed\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-top-removed\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-top-removed\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-top-removed\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-top-removed\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-alloc100-pengu-top-removed\\retq22-summary.json"
+    },
+    "reclaim-aux-hold5": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-hold5\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-hold5\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-hold5\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-hold5\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-hold5\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-hold5\\retq22-summary.json"
+    },
+    "reclaim-aux-exit006": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-exit006\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-exit006\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-exit006\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-exit006\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-exit006\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-exit006\\retq22-summary.json"
+    },
+    "reclaim-aux-entry080": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry080\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry080\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry080\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry080\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry080\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry080\\retq22-summary.json"
+    },
+    "reclaim-aux-entry040": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry040\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry040\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry040\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry040\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry040\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-aux-entry040\\retq22-summary.json"
+    },
+    "trend-eff018": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff018\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff018\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff018\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff018\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff018\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff018\\retq22-summary.json"
+    },
+    "trend-eff026": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff026\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff026\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff026\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff026\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff026\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\trend-eff026\\retq22-summary.json"
+    },
+    "weak-exit-loose": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-loose\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-loose\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-loose\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-loose\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-loose\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-loose\\retq22-summary.json"
+    },
+    "weak-exit-tight": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-tight\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-tight\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-tight\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-tight\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-tight\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\weak-exit-tight\\retq22-summary.json"
+    },
+    "reclaim-primary-early": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-early\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-early\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-early\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-early\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-early\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-early\\retq22-summary.json"
+    },
+    "reclaim-primary-strict": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-strict\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-strict\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-strict\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-strict\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-strict\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\reclaim-primary-strict\\retq22-summary.json"
+    },
+    "decision-12-exit-6": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-12-exit-6\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-12-exit-6\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-12-exit-6\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-12-exit-6\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-12-exit-6\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-12-exit-6\\retq22-summary.json"
+    },
+    "decision-6-reclaim": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-6-reclaim\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-6-reclaim\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-6-reclaim\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-6-reclaim\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-6-reclaim\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\decision-6-reclaim\\retq22-summary.json"
+    },
+    "top2-trend": {
+      "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\top2-trend\\retq22-trade_events.csv",
+      "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\top2-trend\\retq22-trade_pairs.csv",
+      "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\top2-trend\\retq22-equity_curve.csv",
+      "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\top2-trend\\retq22-monthly_returns.csv",
+      "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\top2-trend\\retq22-annual_returns.csv",
+      "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\self-critique-variants\\top2-trend\\retq22-summary.json"
+    }
+  }
+}

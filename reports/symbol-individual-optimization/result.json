@@ -1,0 +1,289 @@
+{
+  "SOL": [
+    {
+      "key": "sol_base_only",
+      "thesis": "SOL only with current production logic.",
+      "end_equity": 97418.02,
+      "cagr_pct": 105,
+      "max_drawdown_pct": -37,
+      "profit_factor": 1.845,
+      "win_rate_pct": 47.92,
+      "trade_count": 48,
+      "loss_count": 25,
+      "symbol_pnl": 18897.42,
+      "exposure_pct": 36.81,
+      "top_loss_reason": {
+        "sma-break": 14,
+        "risk-off": 6,
+        "off22-strong": 1,
+        "trend-switch": 4
+      }
+    },
+    {
+      "key": "sol_weak_exit",
+      "thesis": "SOL only with symbol-specific weak exit.",
+      "end_equity": 91917.03,
+      "cagr_pct": 101.28,
+      "max_drawdown_pct": -49.05,
+      "profit_factor": 1.737,
+      "win_rate_pct": 45.45,
+      "trade_count": 55,
+      "loss_count": 30,
+      "symbol_pnl": 6929.12,
+      "exposure_pct": 32.2,
+      "top_loss_reason": {
+        "symbol-weak-exit": 16,
+        "risk-off": 6,
+        "sma-break": 6,
+        "trend-switch": 2
+      }
+    },
+    {
+      "key": "sol_quality_bonus",
+      "thesis": "SOL only with smooth-trend score bonus and overheat penalty.",
+      "end_equity": 90971.77,
+      "cagr_pct": 100.62,
+      "max_drawdown_pct": -40.96,
+      "profit_factor": 1.73,
+      "win_rate_pct": 49.02,
+      "trade_count": 51,
+      "loss_count": 26,
+      "symbol_pnl": 14980.79,
+      "exposure_pct": 36.81,
+      "top_loss_reason": {
+        "sma-break": 15,
+        "risk-off": 6,
+        "off22-strong": 1,
+        "trend-switch": 4
+      }
+    },
+    {
+      "key": "sol_sma40",
+      "thesis": "SOL only with faster SMA40 trend exit.",
+      "end_equity": 82622.65,
+      "cagr_pct": 94.62,
+      "max_drawdown_pct": -43.5,
+      "profit_factor": 1.637,
+      "win_rate_pct": 46.94,
+      "trade_count": 49,
+      "loss_count": 26,
+      "symbol_pnl": 5438.53,
+      "exposure_pct": 36.51,
+      "top_loss_reason": {
+        "sma40-break": 17,
+        "risk-off": 6,
+        "trend-switch": 3
+      }
+    },
+    {
+      "key": "sol_trailing",
+      "thesis": "SOL only with profit-protection trailing on normal trends.",
+      "end_equity": 58493.07,
+      "cagr_pct": 74.54,
+      "max_drawdown_pct": -41.76,
+      "profit_factor": 1.653,
+      "win_rate_pct": 47.06,
+      "trade_count": 51,
+      "loss_count": 27,
+      "symbol_pnl": 12897.45,
+      "exposure_pct": 33.66,
+      "top_loss_reason": {
+        "sma-break": 16,
+        "risk-off": 6,
+        "off22-strong": 1,
+        "trend-switch": 4
+      }
+    }
+  ],
+  "AVAX": [
+    {
+      "key": "avax_base_only",
+      "thesis": "AVAX only with current production logic.",
+      "end_equity": 97418.02,
+      "cagr_pct": 105,
+      "max_drawdown_pct": -37,
+      "profit_factor": 1.845,
+      "win_rate_pct": 47.92,
+      "trade_count": 48,
+      "loss_count": 25,
+      "symbol_pnl": 10825.2,
+      "exposure_pct": 36.81,
+      "top_loss_reason": {
+        "sma-break": 14,
+        "risk-off": 6,
+        "off22-strong": 1,
+        "trend-switch": 4
+      }
+    },
+    {
+      "key": "avax_looser_eff",
+      "thesis": "AVAX only with slightly looser efficiency gate for earlier trend capture.",
+      "end_equity": 90029.83,
+      "cagr_pct": 99.96,
+      "max_drawdown_pct": -40.42,
+      "profit_factor": 1.786,
+      "win_rate_pct": 46.94,
+      "trade_count": 49,
+      "loss_count": 26,
+      "symbol_pnl": 12038.41,
+      "exposure_pct": 36.86,
+      "top_loss_reason": {
+        "sma-break": 14,
+        "risk-off": 7,
+        "off22-strong": 1,
+        "trend-switch": 4
+      }
+    },
+    {
+      "key": "avax_sma40",
+      "thesis": "AVAX only with faster SMA40 trend exit.",
+      "end_equity": 82622.65,
+      "cagr_pct": 94.62,
+      "max_drawdown_pct": -43.5,
+      "profit_factor": 1.637,
+      "win_rate_pct": 46.94,
+      "trade_count": 49,
+      "loss_count": 26,
+      "symbol_pnl": 10238.4,
+      "exposure_pct": 36.51,
+      "top_loss_reason": {
+        "sma40-break": 17,
+        "risk-off": 6,
+        "trend-switch": 3
+      }
+    },
+    {
+      "key": "avax_trailing",
+      "thesis": "AVAX only with profit-protection trailing on normal trends.",
+      "end_equity": 58493.07,
+      "cagr_pct": 74.54,
+      "max_drawdown_pct": -41.76,
+      "profit_factor": 1.653,
+      "win_rate_pct": 47.06,
+      "trade_count": 51,
+      "loss_count": 27,
+      "symbol_pnl": 2210.39,
+      "exposure_pct": 33.66,
+      "top_loss_reason": {
+        "sma-break": 16,
+        "risk-off": 6,
+        "off22-strong": 1,
+        "trend-switch": 4
+      }
+    },
+    {
+      "key": "avax_entry_quality",
+      "thesis": "AVAX only with stronger acceleration requirement and smoother score bias.",
+      "end_equity": 18860.79,
+      "cagr_pct": 22.15,
+      "max_drawdown_pct": -47.04,
+      "profit_factor": 1.411,
+      "win_rate_pct": 46.88,
+      "trade_count": 32,
+      "loss_count": 17,
+      "symbol_pnl": 7417.91,
+      "exposure_pct": 30.77,
+      "top_loss_reason": {
+        "risk-off": 6,
+        "trend-switch": 1,
+        "sma-break": 10
+      }
+    }
+  ],
+  "DOGE": [
+    {
+      "key": "doge_eff018",
+      "thesis": "DOGE only with looser strict-extra efficiency gate for earlier entry.",
+      "end_equity": 122235.57,
+      "cagr_pct": 120.21,
+      "max_drawdown_pct": -34.2,
+      "profit_factor": 1.927,
+      "win_rate_pct": 48.15,
+      "trade_count": 54,
+      "loss_count": 28,
+      "symbol_pnl": 22171.6,
+      "exposure_pct": 37.59,
+      "top_loss_reason": {
+        "sma-break": 14,
+        "trend-switch": 7,
+        "risk-off": 6,
+        "off22-strong": 1
+      }
+    },
+    {
+      "key": "doge_6h_entry_exit",
+      "thesis": "DOGE only with 6H strict-extra decision and exit checks.",
+      "end_equity": 96708.18,
+      "cagr_pct": 104.53,
+      "max_drawdown_pct": -43.92,
+      "profit_factor": 1.852,
+      "win_rate_pct": 46.3,
+      "trade_count": 54,
+      "loss_count": 29,
+      "symbol_pnl": 2595.77,
+      "exposure_pct": 37.11,
+      "top_loss_reason": {
+        "sma-break": 17,
+        "trend-switch": 5,
+        "risk-off": 6,
+        "off22-strong": 1
+      }
+    },
+    {
+      "key": "doge_base_only",
+      "thesis": "DOGE only as idle strict-extra candidate with current baseline-style settings.",
+      "end_equity": 78536.53,
+      "cagr_pct": 91.53,
+      "max_drawdown_pct": -34.2,
+      "profit_factor": 1.819,
+      "win_rate_pct": 47.06,
+      "trade_count": 51,
+      "loss_count": 27,
+      "symbol_pnl": 2139.01,
+      "exposure_pct": 37.29,
+      "top_loss_reason": {
+        "sma-break": 14,
+        "risk-off": 6,
+        "off22-strong": 1,
+        "trend-switch": 6
+      }
+    },
+    {
+      "key": "doge_trailing",
+      "thesis": "DOGE only with dedicated strict-extra trailing protection.",
+      "end_equity": 78536.53,
+      "cagr_pct": 91.53,
+      "max_drawdown_pct": -34.2,
+      "profit_factor": 1.819,
+      "win_rate_pct": 47.06,
+      "trade_count": 51,
+      "loss_count": 27,
+      "symbol_pnl": 2139.01,
+      "exposure_pct": 37.29,
+      "top_loss_reason": {
+        "sma-break": 14,
+        "risk-off": 6,
+        "off22-strong": 1,
+        "trend-switch": 6
+      }
+    },
+    {
+      "key": "doge_sma40",
+      "thesis": "DOGE only with faster SMA40 exit.",
+      "end_equity": 66607.63,
+      "cagr_pct": 81.84,
+      "max_drawdown_pct": -43.5,
+      "profit_factor": 1.614,
+      "win_rate_pct": 46.15,
+      "trade_count": 52,
+      "loss_count": 28,
+      "symbol_pnl": 2072.6,
+      "exposure_pct": 36.99,
+      "top_loss_reason": {
+        "sma40-break": 17,
+        "risk-off": 6,
+        "trend-switch": 5
+      }
+    }
+  ]
+}

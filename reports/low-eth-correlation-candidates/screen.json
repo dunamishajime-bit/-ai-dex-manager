@@ -1,0 +1,541 @@
+{
+  "idleWindows": [
+    {
+      "startTs": 1677283200000,
+      "endTs": 1678190400000,
+      "bars": 252
+    },
+    {
+      "startTs": 1678881600000,
+      "endTs": 1679140800000,
+      "bars": 72
+    },
+    {
+      "startTs": 1682078400000,
+      "endTs": 1685318400000,
+      "bars": 900
+    },
+    {
+      "startTs": 1685361600000,
+      "endTs": 1686268800000,
+      "bars": 252
+    },
+    {
+      "startTs": 1686960000000,
+      "endTs": 1687694400000,
+      "bars": 204
+    },
+    {
+      "startTs": 1690200000000,
+      "endTs": 1691020800000,
+      "bars": 228
+    },
+    {
+      "startTs": 1691582400000,
+      "endTs": 1696248000000,
+      "bars": 1296
+    },
+    {
+      "startTs": 1697155200000,
+      "endTs": 1697673600000,
+      "bars": 144
+    },
+    {
+      "startTs": 1703592000000,
+      "endTs": 1703851200000,
+      "bars": 72
+    },
+    {
+      "startTs": 1704542400000,
+      "endTs": 1704801600000,
+      "bars": 72
+    },
+    {
+      "startTs": 1705104000000,
+      "endTs": 1707652800000,
+      "bars": 708
+    },
+    {
+      "startTs": 1712059200000,
+      "endTs": 1715731200000,
+      "bars": 1020
+    },
+    {
+      "startTs": 1715990400000,
+      "endTs": 1716206400000,
+      "bars": 60
+    },
+    {
+      "startTs": 1717891200000,
+      "endTs": 1718582400000,
+      "bars": 192
+    },
+    {
+      "startTs": 1719273600000,
+      "endTs": 1721433600000,
+      "bars": 600
+    },
+    {
+      "startTs": 1722600000000,
+      "endTs": 1724760000000,
+      "bars": 600
+    },
+    {
+      "startTs": 1724803200000,
+      "endTs": 1727136000000,
+      "bars": 648
+    },
+    {
+      "startTs": 1727913600000,
+      "endTs": 1729036800000,
+      "bars": 312
+    },
+    {
+      "startTs": 1730635200000,
+      "endTs": 1730937600000,
+      "bars": 84
+    },
+    {
+      "startTs": 1734566400000,
+      "endTs": 1736164800000,
+      "bars": 444
+    },
+    {
+      "startTs": 1736294400000,
+      "endTs": 1737115200000,
+      "bars": 228
+    },
+    {
+      "startTs": 1737979200000,
+      "endTs": 1738540800000,
+      "bars": 156
+    },
+    {
+      "startTs": 1739232000000,
+      "endTs": 1739491200000,
+      "bars": 72
+    },
+    {
+      "startTs": 1740182400000,
+      "endTs": 1743768000000,
+      "bars": 996
+    },
+    {
+      "startTs": 1744459200000,
+      "endTs": 1744718400000,
+      "bars": 72
+    },
+    {
+      "startTs": 1744761600000,
+      "endTs": 1745193600000,
+      "bars": 120
+    },
+    {
+      "startTs": 1748649600000,
+      "endTs": 1748995200000,
+      "bars": 96
+    },
+    {
+      "startTs": 1749168000000,
+      "endTs": 1751846400000,
+      "bars": 744
+    },
+    {
+      "startTs": 1754092800000,
+      "endTs": 1754697600000,
+      "bars": 168
+    },
+    {
+      "startTs": 1755518400000,
+      "endTs": 1758024000000,
+      "bars": 696
+    },
+    {
+      "startTs": 1758542400000,
+      "endTs": 1759449600000,
+      "bars": 252
+    },
+    {
+      "startTs": 1759881600000,
+      "endTs": 1759924800000,
+      "bars": 12
+    },
+    {
+      "startTs": 1760140800000,
+      "endTs": 1762300800000,
+      "bars": 600
+    },
+    {
+      "startTs": 1762992000000,
+      "endTs": 1766102400000,
+      "bars": 864
+    },
+    {
+      "startTs": 1766793600000,
+      "endTs": 1767222000000,
+      "bars": 119
+    }
+  ],
+  "results": [
+    {
+      "symbol": "BCH",
+      "ethCorr12h": 0.615,
+      "idleEthCorr12h": 0.65,
+      "idleCompoundedPct": 151.65,
+      "positiveIdleWindows": 23,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 88.52,
+      "worstIdleWindowPct": -28.89
+    },
+    {
+      "symbol": "TRX",
+      "ethCorr12h": 0.428,
+      "idleEthCorr12h": 0.505,
+      "idleCompoundedPct": 99.55,
+      "positiveIdleWindows": 20,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 27.58,
+      "worstIdleWindowPct": -11.27
+    },
+    {
+      "symbol": "SFP",
+      "ethCorr12h": 0.55,
+      "idleEthCorr12h": 0.516,
+      "idleCompoundedPct": 46.93,
+      "positiveIdleWindows": 18,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 33.17,
+      "worstIdleWindowPct": -21.1
+    },
+    {
+      "symbol": "BNB",
+      "ethCorr12h": 0.691,
+      "idleEthCorr12h": 0.742,
+      "idleCompoundedPct": 2.52,
+      "positiveIdleWindows": 21,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 13.09,
+      "worstIdleWindowPct": -17.37
+    },
+    {
+      "symbol": "XRP",
+      "ethCorr12h": 0.605,
+      "idleEthCorr12h": 0.714,
+      "idleCompoundedPct": 1.31,
+      "positiveIdleWindows": 21,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 38.91,
+      "worstIdleWindowPct": -25.03
+    },
+    {
+      "symbol": "EOS",
+      "ethCorr12h": 0.643,
+      "idleEthCorr12h": 0.702,
+      "idleCompoundedPct": -2.78,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 27.75,
+      "worstIdleWindowPct": -22.26
+    },
+    {
+      "symbol": "CHZ",
+      "ethCorr12h": 0.688,
+      "idleEthCorr12h": 0.715,
+      "idleCompoundedPct": -27.11,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 36.49,
+      "worstIdleWindowPct": -19.94
+    },
+    {
+      "symbol": "AAVE",
+      "ethCorr12h": 0.754,
+      "idleEthCorr12h": 0.781,
+      "idleCompoundedPct": -5.42,
+      "positiveIdleWindows": 18,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 48.55,
+      "worstIdleWindowPct": -39.86
+    },
+    {
+      "symbol": "LTC",
+      "ethCorr12h": 0.683,
+      "idleEthCorr12h": 0.731,
+      "idleCompoundedPct": -30.18,
+      "positiveIdleWindows": 17,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 29.52,
+      "worstIdleWindowPct": -35.64
+    },
+    {
+      "symbol": "LINK",
+      "ethCorr12h": 0.756,
+      "idleEthCorr12h": 0.831,
+      "idleCompoundedPct": -37.26,
+      "positiveIdleWindows": 20,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 45.87,
+      "worstIdleWindowPct": -28.19
+    },
+    {
+      "symbol": "COMP",
+      "ethCorr12h": 0.647,
+      "idleEthCorr12h": 0.668,
+      "idleCompoundedPct": -50.91,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 48.98,
+      "worstIdleWindowPct": -26.04
+    },
+    {
+      "symbol": "ALPACA",
+      "ethCorr12h": 0.309,
+      "idleEthCorr12h": 0.418,
+      "idleCompoundedPct": -53.82,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 91.28,
+      "worstIdleWindowPct": -65.82
+    },
+    {
+      "symbol": "XVS",
+      "ethCorr12h": 0.578,
+      "idleEthCorr12h": 0.627,
+      "idleCompoundedPct": -64.89,
+      "positiveIdleWindows": 19,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 32.47,
+      "worstIdleWindowPct": -40.29
+    },
+    {
+      "symbol": "RUNE",
+      "ethCorr12h": 0.64,
+      "idleEthCorr12h": 0.666,
+      "idleCompoundedPct": -49.99,
+      "positiveIdleWindows": 17,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 113.27,
+      "worstIdleWindowPct": -45.1
+    },
+    {
+      "symbol": "CHR",
+      "ethCorr12h": 0.659,
+      "idleEthCorr12h": 0.711,
+      "idleCompoundedPct": -53.08,
+      "positiveIdleWindows": 18,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 42.83,
+      "worstIdleWindowPct": -46.11
+    },
+    {
+      "symbol": "UNI",
+      "ethCorr12h": 0.721,
+      "idleEthCorr12h": 0.799,
+      "idleCompoundedPct": -65.95,
+      "positiveIdleWindows": 20,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 30.35,
+      "worstIdleWindowPct": -40.45
+    },
+    {
+      "symbol": "KAVA",
+      "ethCorr12h": 0.556,
+      "idleEthCorr12h": 0.57,
+      "idleCompoundedPct": -70.06,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 47.12,
+      "worstIdleWindowPct": -48.4
+    },
+    {
+      "symbol": "MANA",
+      "ethCorr12h": 0.713,
+      "idleEthCorr12h": 0.783,
+      "idleCompoundedPct": -65.45,
+      "positiveIdleWindows": 17,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 19.94,
+      "worstIdleWindowPct": -44.81
+    },
+    {
+      "symbol": "ADA",
+      "ethCorr12h": 0.733,
+      "idleEthCorr12h": 0.777,
+      "idleCompoundedPct": -68.81,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 14.48,
+      "worstIdleWindowPct": -36.12
+    },
+    {
+      "symbol": "NEAR",
+      "ethCorr12h": 0.694,
+      "idleEthCorr12h": 0.78,
+      "idleCompoundedPct": -74.33,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 19.21,
+      "worstIdleWindowPct": -43.39
+    },
+    {
+      "symbol": "INJ",
+      "ethCorr12h": 0.666,
+      "idleEthCorr12h": 0.761,
+      "idleCompoundedPct": -75.05,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 23.54,
+      "worstIdleWindowPct": -46.12
+    },
+    {
+      "symbol": "MATIC",
+      "ethCorr12h": 0.735,
+      "idleEthCorr12h": 0.765,
+      "idleCompoundedPct": -64.75,
+      "positiveIdleWindows": 5,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 14.58,
+      "worstIdleWindowPct": -28.07
+    },
+    {
+      "symbol": "FET",
+      "ethCorr12h": 0.613,
+      "idleEthCorr12h": 0.705,
+      "idleCompoundedPct": -84.48,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 33.04,
+      "worstIdleWindowPct": -43.53
+    },
+    {
+      "symbol": "DOT",
+      "ethCorr12h": 0.747,
+      "idleEthCorr12h": 0.798,
+      "idleCompoundedPct": -73.55,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 17.37,
+      "worstIdleWindowPct": -39.93
+    },
+    {
+      "symbol": "GMT",
+      "ethCorr12h": 0.641,
+      "idleEthCorr12h": 0.674,
+      "idleCompoundedPct": -83.39,
+      "positiveIdleWindows": 15,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 29.89,
+      "worstIdleWindowPct": -41.25
+    },
+    {
+      "symbol": "CRV",
+      "ethCorr12h": 0.67,
+      "idleEthCorr12h": 0.692,
+      "idleCompoundedPct": -86.88,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 18.55,
+      "worstIdleWindowPct": -34.1
+    },
+    {
+      "symbol": "ZIL",
+      "ethCorr12h": 0.73,
+      "idleEthCorr12h": 0.797,
+      "idleCompoundedPct": -81.55,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 21.25,
+      "worstIdleWindowPct": -40.33
+    },
+    {
+      "symbol": "MASK",
+      "ethCorr12h": 0.519,
+      "idleEthCorr12h": 0.506,
+      "idleCompoundedPct": -85.54,
+      "positiveIdleWindows": 16,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 53.41,
+      "worstIdleWindowPct": -57.47
+    },
+    {
+      "symbol": "DODO",
+      "ethCorr12h": 0.648,
+      "idleEthCorr12h": 0.689,
+      "idleCompoundedPct": -87.86,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 26.42,
+      "worstIdleWindowPct": -38.86
+    },
+    {
+      "symbol": "ATOM",
+      "ethCorr12h": 0.706,
+      "idleEthCorr12h": 0.748,
+      "idleCompoundedPct": -80.71,
+      "positiveIdleWindows": 10,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 13.61,
+      "worstIdleWindowPct": -35.78
+    },
+    {
+      "symbol": "SAND",
+      "ethCorr12h": 0.716,
+      "idleEthCorr12h": 0.82,
+      "idleCompoundedPct": -82.37,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 17.27,
+      "worstIdleWindowPct": -43.5
+    },
+    {
+      "symbol": "ONE",
+      "ethCorr12h": 0.739,
+      "idleEthCorr12h": 0.793,
+      "idleCompoundedPct": -86.42,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 19.95,
+      "worstIdleWindowPct": -38.99
+    },
+    {
+      "symbol": "DYDX",
+      "ethCorr12h": 0.679,
+      "idleEthCorr12h": 0.735,
+      "idleCompoundedPct": -84.01,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 23.31,
+      "worstIdleWindowPct": -47.73
+    },
+    {
+      "symbol": "GALA",
+      "ethCorr12h": 0.685,
+      "idleEthCorr12h": 0.792,
+      "idleCompoundedPct": -89.43,
+      "positiveIdleWindows": 12,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 22.98,
+      "worstIdleWindowPct": -39.03
+    },
+    {
+      "symbol": "FIL",
+      "ethCorr12h": 0.676,
+      "idleEthCorr12h": 0.775,
+      "idleCompoundedPct": -88.52,
+      "positiveIdleWindows": 14,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 11.75,
+      "worstIdleWindowPct": -45.57
+    },
+    {
+      "symbol": "AXS",
+      "ethCorr12h": 0.727,
+      "idleEthCorr12h": 0.796,
+      "idleCompoundedPct": -88.31,
+      "positiveIdleWindows": 13,
+      "totalIdleWindows": 35,
+      "bestIdleWindowPct": 23.81,
+      "worstIdleWindowPct": -39.29
+    }
+  ]
+}

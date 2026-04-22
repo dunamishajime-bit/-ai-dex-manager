@@ -1,0 +1,79 @@
+{
+  "baseline": {
+    "endEquity": 858715.57,
+    "cagrPct": 307.2,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.105,
+    "tradeCount": 97
+  },
+  "results": [
+    {
+      "key": "uni_plus_uni_logic",
+      "symbol": "UNI",
+      "logic": "uni_logic",
+      "endEquity": 519783.37,
+      "deltaEndEquity": -338932.2,
+      "cagrPct": 247.58,
+      "maxDrawdownPct": -39.98,
+      "profitFactor": 2.108,
+      "winRatePct": 54,
+      "tradeCount": 100,
+      "symbolTradeCount": 1,
+      "symbolWins": 1,
+      "symbolLosses": 0,
+      "symbolPnl": 1789.22,
+      "exposurePct": 37.03
+    },
+    {
+      "key": "uni_plus_trx_logic",
+      "symbol": "UNI",
+      "logic": "trx_logic",
+      "endEquity": 894482.97,
+      "deltaEndEquity": 35767.4,
+      "cagrPct": 312.48,
+      "maxDrawdownPct": -38.41,
+      "profitFactor": 2.11,
+      "winRatePct": 53.06,
+      "tradeCount": 98,
+      "symbolTradeCount": 1,
+      "symbolWins": 1,
+      "symbolLosses": 0,
+      "symbolPnl": 3442.19,
+      "exposurePct": 39.71
+    },
+    {
+      "key": "trx_plus_uni_logic",
+      "symbol": "TRX",
+      "logic": "uni_logic",
+      "endEquity": 498997.75,
+      "deltaEndEquity": -359717.82,
+      "cagrPct": 243.14,
+      "maxDrawdownPct": -39.98,
+      "profitFactor": 2.102,
+      "winRatePct": 53.54,
+      "tradeCount": 99,
+      "symbolTradeCount": 0,
+      "symbolWins": 0,
+      "symbolLosses": 0,
+      "symbolPnl": 0,
+      "exposurePct": 36.99
+    },
+    {
+      "key": "trx_plus_trx_logic",
+      "symbol": "TRX",
+      "logic": "trx_logic",
+      "endEquity": 858715.57,
+      "deltaEndEquity": 0,
+      "cagrPct": 307.2,
+      "maxDrawdownPct": -38.41,
+      "profitFactor": 2.105,
+      "winRatePct": 52.58,
+      "tradeCount": 97,
+      "symbolTradeCount": 0,
+      "symbolWins": 0,
+      "symbolLosses": 0,
+      "symbolPnl": 0,
+      "exposurePct": 39.66
+    }
+  ]
+}

@@ -1,0 +1,444 @@
+[
+  {
+    "window": {
+      "key": "full",
+      "startTs": 1640995200000,
+      "endTs": 1776556799999,
+      "title": "Full Window"
+    },
+    "baseline": {
+      "label": "baseline_v4",
+      "replacement": "SOL",
+      "endEquity": 744852.64,
+      "cagrPct": 289.34,
+      "maxDrawdownPct": -38.41,
+      "profitFactor": 2.101,
+      "tradeCount": 94,
+      "winRatePct": 53.19,
+      "exposurePct": 39.15,
+      "replacementPnl": -43722.34,
+      "symbolContribution": {
+        "ETH": 135218.01,
+        "DOGE": 176935.27,
+        "SOL": -43722.34,
+        "AVAX": 67089.7,
+        "PENGU": 399332
+      }
+    },
+    "rows": [
+      {
+        "label": "baseline_v4",
+        "replacement": "SOL",
+        "endEquity": 744852.64,
+        "cagrPct": 289.34,
+        "maxDrawdownPct": -38.41,
+        "profitFactor": 2.101,
+        "tradeCount": 94,
+        "winRatePct": 53.19,
+        "exposurePct": 39.15,
+        "replacementPnl": -43722.34,
+        "symbolContribution": {
+          "ETH": 135218.01,
+          "DOGE": 176935.27,
+          "SOL": -43722.34,
+          "AVAX": 67089.7,
+          "PENGU": 399332
+        }
+      },
+      {
+        "label": "replace_SOL_with_LINK",
+        "replacement": "LINK",
+        "endEquity": 337145.61,
+        "cagrPct": 203.23,
+        "maxDrawdownPct": -38.44,
+        "profitFactor": 2.063,
+        "tradeCount": 93,
+        "winRatePct": 49.46,
+        "exposurePct": 35.91,
+        "replacementPnl": 61928.3,
+        "symbolContribution": {
+          "LINK": 61928.3,
+          "ETH": 8629.95,
+          "DOGE": 29296.58,
+          "AVAX": 47126.77,
+          "PENGU": 180164.01
+        }
+      },
+      {
+        "label": "replace_SOL_with_INJ",
+        "replacement": "INJ",
+        "endEquity": 203231.67,
+        "cagrPct": 158.5,
+        "maxDrawdownPct": -40.63,
+        "profitFactor": 1.532,
+        "tradeCount": 92,
+        "winRatePct": 47.83,
+        "exposurePct": 38.28,
+        "replacementPnl": -34243.71,
+        "symbolContribution": {
+          "INJ": -34243.71,
+          "ETH": 17815.23,
+          "DOGE": 52647.2,
+          "AVAX": 15615.52,
+          "PENGU": 141397.43
+        }
+      },
+      {
+        "label": "replace_SOL_with_ATOM",
+        "replacement": "ATOM",
+        "endEquity": 174951.59,
+        "cagrPct": 146.57,
+        "maxDrawdownPct": -40.72,
+        "profitFactor": 1.78,
+        "tradeCount": 90,
+        "winRatePct": 46.67,
+        "exposurePct": 34.1,
+        "replacementPnl": 41697.59,
+        "symbolContribution": {
+          "ETH": 15153.07,
+          "DOGE": 10749.73,
+          "ATOM": 41697.59,
+          "AVAX": 8119.17,
+          "PENGU": 89232.03
+        }
+      },
+      {
+        "label": "replace_SOL_with_XRP",
+        "replacement": "XRP",
+        "endEquity": 135548.9,
+        "cagrPct": 127.5,
+        "maxDrawdownPct": -56.27,
+        "profitFactor": 1.779,
+        "tradeCount": 92,
+        "winRatePct": 43.48,
+        "exposurePct": 35.78,
+        "replacementPnl": 60481.31,
+        "symbolContribution": {
+          "ETH": -19820.72,
+          "XRP": 60481.31,
+          "DOGE": 2738.68,
+          "AVAX": 22131.82,
+          "PENGU": 60017.81
+        }
+      },
+      {
+        "label": "replace_SOL_with_AAVE",
+        "replacement": "AAVE",
+        "endEquity": 114047.46,
+        "cagrPct": 115.44,
+        "maxDrawdownPct": -51.92,
+        "profitFactor": 1.771,
+        "tradeCount": 84,
+        "winRatePct": 48.81,
+        "exposurePct": 36.56,
+        "replacementPnl": 7931.87,
+        "symbolContribution": {
+          "ETH": 30550.95,
+          "DOGE": -11047.4,
+          "AAVE": 7931.87,
+          "AVAX": 19512.18,
+          "PENGU": 57099.86
+        }
+      },
+      {
+        "label": "replace_SOL_with_UNI",
+        "replacement": "UNI",
+        "endEquity": 108533.87,
+        "cagrPct": 112.1,
+        "maxDrawdownPct": -44.27,
+        "profitFactor": 1.702,
+        "tradeCount": 92,
+        "winRatePct": 45.65,
+        "exposurePct": 34.57,
+        "replacementPnl": -10317.81,
+        "symbolContribution": {
+          "UNI": -10317.81,
+          "ETH": 21278.07,
+          "DOGE": 19997.89,
+          "AVAX": 24626.59,
+          "PENGU": 42949.13
+        }
+      },
+      {
+        "label": "replace_SOL_with_ADA",
+        "replacement": "ADA",
+        "endEquity": 107276.19,
+        "cagrPct": 111.33,
+        "maxDrawdownPct": -42,
+        "profitFactor": 1.675,
+        "tradeCount": 90,
+        "winRatePct": 42.22,
+        "exposurePct": 34.53,
+        "replacementPnl": 69507.29,
+        "symbolContribution": {
+          "ETH": -15138.41,
+          "ADA": 69507.29,
+          "DOGE": -605.82,
+          "AVAX": 4695.88,
+          "PENGU": 38817.25
+        }
+      },
+      {
+        "label": "replace_SOL_with_TRX",
+        "replacement": "TRX",
+        "endEquity": 93025.24,
+        "cagrPct": 102.04,
+        "maxDrawdownPct": -54.95,
+        "profitFactor": 1.537,
+        "tradeCount": 106,
+        "winRatePct": 45.28,
+        "exposurePct": 37.51,
+        "replacementPnl": -36227.76,
+        "symbolContribution": {
+          "TRX": -36227.76,
+          "ETH": 9658.17,
+          "DOGE": 17870.7,
+          "AVAX": 17822.42,
+          "PENGU": 73901.72
+        }
+      },
+      {
+        "label": "replace_SOL_with_NEAR",
+        "replacement": "NEAR",
+        "endEquity": 79869.4,
+        "cagrPct": 92.55,
+        "maxDrawdownPct": -48.74,
+        "profitFactor": 1.466,
+        "tradeCount": 98,
+        "winRatePct": 42.86,
+        "exposurePct": 35.56,
+        "replacementPnl": -16249.51,
+        "symbolContribution": {
+          "NEAR": -16249.51,
+          "ETH": 19399.72,
+          "DOGE": 31802.11,
+          "AVAX": 7061.82,
+          "PENGU": 27855.27
+        }
+      },
+      {
+        "label": "replace_SOL_with_LTC",
+        "replacement": "LTC",
+        "endEquity": 71884.81,
+        "cagrPct": 86.26,
+        "maxDrawdownPct": -53.85,
+        "profitFactor": 1.329,
+        "tradeCount": 96,
+        "winRatePct": 44.79,
+        "exposurePct": 37.25,
+        "replacementPnl": -55929.39,
+        "symbolContribution": {
+          "LTC": -55929.39,
+          "ETH": 14295.23,
+          "DOGE": 53454.28,
+          "AVAX": 21316.63,
+          "PENGU": 28748.07
+        }
+      }
+    ]
+  },
+  {
+    "window": {
+      "key": "latest",
+      "startTs": 1767139200000,
+      "endTs": 1776470399999,
+      "title": "Latest Window"
+    },
+    "baseline": {
+      "label": "baseline_v4",
+      "replacement": "SOL",
+      "endEquity": 10044.35,
+      "cagrPct": 2.62,
+      "maxDrawdownPct": -17.7,
+      "profitFactor": 1.071,
+      "tradeCount": 4,
+      "winRatePct": 50,
+      "exposurePct": 28.35,
+      "replacementPnl": 0,
+      "symbolContribution": {
+        "ETH": -92.45,
+        "PENGU": 136.8
+      }
+    },
+    "rows": [
+      {
+        "label": "replace_SOL_with_TRX",
+        "replacement": "TRX",
+        "endEquity": 10677.79,
+        "cagrPct": 46.67,
+        "maxDrawdownPct": -12.73,
+        "profitFactor": 5.084,
+        "tradeCount": 4,
+        "winRatePct": 75,
+        "exposurePct": 28.35,
+        "replacementPnl": 133.24,
+        "symbolContribution": {
+          "ETH": 399.12,
+          "TRX": 133.24,
+          "PENGU": 145.43
+        }
+      },
+      {
+        "label": "replace_SOL_with_INJ",
+        "replacement": "INJ",
+        "endEquity": 10222.23,
+        "cagrPct": 13.7,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.356,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 293.84,
+        "symbolContribution": {
+          "ETH": -71.61,
+          "INJ": 293.84
+        }
+      },
+      {
+        "label": "baseline_v4",
+        "replacement": "SOL",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_LINK",
+        "replacement": "LINK",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_LTC",
+        "replacement": "LTC",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_XRP",
+        "replacement": "XRP",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_ATOM",
+        "replacement": "ATOM",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_AAVE",
+        "replacement": "AAVE",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_UNI",
+        "replacement": "UNI",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_ADA",
+        "replacement": "ADA",
+        "endEquity": 10044.35,
+        "cagrPct": 2.62,
+        "maxDrawdownPct": -17.7,
+        "profitFactor": 1.071,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 0,
+        "symbolContribution": {
+          "ETH": -92.45,
+          "PENGU": 136.8
+        }
+      },
+      {
+        "label": "replace_SOL_with_NEAR",
+        "replacement": "NEAR",
+        "endEquity": 9663.83,
+        "cagrPct": -18.1,
+        "maxDrawdownPct": -18.78,
+        "profitFactor": 0.461,
+        "tradeCount": 4,
+        "winRatePct": 50,
+        "exposurePct": 28.35,
+        "replacementPnl": 156.2,
+        "symbolContribution": {
+          "ETH": -623.98,
+          "NEAR": 156.2,
+          "PENGU": 131.62
+        }
+      }
+    ]
+  }
+]

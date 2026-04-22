@@ -1,0 +1,158 @@
+{
+  "full": [
+    {
+      "key": "v4_plus_inj",
+      "thesis": "Add INJ with breakout-surge logic and fast failure exit.",
+      "endEquity": 981154.22,
+      "cagrPct": 324.68,
+      "maxDrawdownPct": -38.41,
+      "profitFactor": 2.109,
+      "winRatePct": 53.68,
+      "tradeCount": 95,
+      "exposurePct": 39.66,
+      "nearPnl": 0,
+      "injPnl": 9071.42,
+      "symbolContribution": {
+        "INJ": 9071.42,
+        "ETH": 177092.19,
+        "DOGE": 234032.3,
+        "SOL": -63433.96,
+        "AVAX": 88373.76,
+        "PENGU": 526018.51
+      }
+    },
+    {
+      "key": "v4_plus_near_inj",
+      "thesis": "Add both NEAR smooth-trend and INJ breakout-surge logic.",
+      "endEquity": 802847.27,
+      "cagrPct": 298.65,
+      "maxDrawdownPct": -45.65,
+      "profitFactor": 2.025,
+      "winRatePct": 53.61,
+      "tradeCount": 97,
+      "exposurePct": 39.88,
+      "nearPnl": -132159.6,
+      "injPnl": 9071.42,
+      "symbolContribution": {
+        "INJ": 9071.42,
+        "ETH": 256843.71,
+        "DOGE": 191780.15,
+        "SOL": -53008.45,
+        "AVAX": 79402.8,
+        "NEAR": -132159.6,
+        "PENGU": 440917.25
+      }
+    },
+    {
+      "key": "base_v4",
+      "thesis": "Current production v4.",
+      "endEquity": 744852.64,
+      "cagrPct": 289.34,
+      "maxDrawdownPct": -38.41,
+      "profitFactor": 2.101,
+      "winRatePct": 53.19,
+      "tradeCount": 94,
+      "exposurePct": 39.15,
+      "nearPnl": 0,
+      "injPnl": 0,
+      "symbolContribution": {
+        "ETH": 135218.01,
+        "DOGE": 176935.27,
+        "SOL": -43722.34,
+        "AVAX": 67089.7,
+        "PENGU": 399332
+      }
+    },
+    {
+      "key": "v4_plus_near",
+      "thesis": "Add NEAR with smooth medium-term trend logic.",
+      "endEquity": 609481.13,
+      "cagrPct": 265.48,
+      "maxDrawdownPct": -45.65,
+      "profitFactor": 2.017,
+      "winRatePct": 53.13,
+      "tradeCount": 96,
+      "exposurePct": 39.36,
+      "nearPnl": -100328.94,
+      "injPnl": 0,
+      "symbolContribution": {
+        "ETH": 195758.89,
+        "DOGE": 144857.16,
+        "SOL": -35806.98,
+        "AVAX": 60278.77,
+        "NEAR": -100328.94,
+        "PENGU": 334722.24
+      }
+    }
+  ],
+  "latest": [
+    {
+      "key": "v4_plus_inj",
+      "thesis": "Add INJ with breakout-surge logic and fast failure exit.",
+      "endEquity": 10222.23,
+      "cagrPct": 13.7,
+      "maxDrawdownPct": -17.7,
+      "profitFactor": 1.356,
+      "winRatePct": 50,
+      "tradeCount": 4,
+      "exposurePct": 28.35,
+      "nearPnl": 0,
+      "injPnl": 293.84,
+      "symbolContribution": {
+        "ETH": -71.61,
+        "INJ": 293.84
+      }
+    },
+    {
+      "key": "v4_plus_near_inj",
+      "thesis": "Add both NEAR smooth-trend and INJ breakout-surge logic.",
+      "endEquity": 10222.23,
+      "cagrPct": 13.7,
+      "maxDrawdownPct": -17.7,
+      "profitFactor": 1.356,
+      "winRatePct": 50,
+      "tradeCount": 4,
+      "exposurePct": 28.35,
+      "nearPnl": 0,
+      "injPnl": 293.84,
+      "symbolContribution": {
+        "ETH": -71.61,
+        "INJ": 293.84
+      }
+    },
+    {
+      "key": "base_v4",
+      "thesis": "Current production v4.",
+      "endEquity": 10044.35,
+      "cagrPct": 2.62,
+      "maxDrawdownPct": -17.7,
+      "profitFactor": 1.071,
+      "winRatePct": 50,
+      "tradeCount": 4,
+      "exposurePct": 28.35,
+      "nearPnl": 0,
+      "injPnl": 0,
+      "symbolContribution": {
+        "ETH": -92.45,
+        "PENGU": 136.8
+      }
+    },
+    {
+      "key": "v4_plus_near",
+      "thesis": "Add NEAR with smooth medium-term trend logic.",
+      "endEquity": 10044.35,
+      "cagrPct": 2.62,
+      "maxDrawdownPct": -17.7,
+      "profitFactor": 1.071,
+      "winRatePct": 50,
+      "tradeCount": 4,
+      "exposurePct": 28.35,
+      "nearPnl": 0,
+      "injPnl": 0,
+      "symbolContribution": {
+        "ETH": -92.45,
+        "PENGU": 136.8
+      }
+    }
+  ]
+}

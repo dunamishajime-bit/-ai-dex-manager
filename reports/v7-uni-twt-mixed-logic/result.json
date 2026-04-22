@@ -1,0 +1,54 @@
+[
+  {
+    "key": "base_v7",
+    "thesis": "Current production v7 baseline.",
+    "endEquity": 858715.57,
+    "cagrPct": 307.2,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.105,
+    "winRatePct": 52.58,
+    "tradeCount": 97,
+    "exposurePct": 39.66,
+    "twtTrades": 0,
+    "twtPnl": 0,
+    "twtStructureBreakEntries": 0,
+    "uniTrades": 0,
+    "uniPnl": 0,
+    "uniStructureBreakEntries": 0,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 153860.99,
+      "DOGE": 237263.13,
+      "SOL": -49940.8,
+      "AVAX": 42135.05,
+      "PENGU": 458423.62
+    }
+  },
+  {
+    "key": "v7_plus_uni_twt_mixed_logic",
+    "thesis": "Add TWT and UNI as normal trend symbols, but use TRX-style trend thresholds only during base-v7 cash windows.",
+    "endEquity": 263246.49,
+    "cagrPct": 180.47,
+    "maxDrawdownPct": -47.9,
+    "profitFactor": 1.623,
+    "winRatePct": 48.6,
+    "tradeCount": 107,
+    "exposurePct": 39.92,
+    "twtTrades": 11,
+    "twtPnl": -55370.77,
+    "twtStructureBreakEntries": 1,
+    "uniTrades": 18,
+    "uniPnl": -51991.34,
+    "uniStructureBreakEntries": 1,
+    "bySymbol": {
+      "INJ": 6893.86,
+      "UNI": -51991.34,
+      "ETH": 84904.92,
+      "DOGE": 91144.37,
+      "TWT": -55370.77,
+      "SOL": 14630.65,
+      "AVAX": 69533.29,
+      "PENGU": 93501.51
+    }
+  }
+]

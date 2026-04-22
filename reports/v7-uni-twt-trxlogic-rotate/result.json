@@ -1,0 +1,78 @@
+[
+  {
+    "key": "base_v7",
+    "thesis": "Current production v7 baseline.",
+    "endEquity": 858715.57,
+    "cagrPct": 307.2,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.105,
+    "winRatePct": 52.58,
+    "tradeCount": 97,
+    "exposurePct": 39.66,
+    "twtTrades": 0,
+    "twtPnl": 0,
+    "uniTrades": 0,
+    "uniPnl": 0,
+    "twtRotateEntries": 0,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 153860.99,
+      "DOGE": 237263.13,
+      "SOL": -49940.8,
+      "AVAX": 42135.05,
+      "PENGU": 458423.62
+    }
+  },
+  {
+    "key": "v7_plus_uni_twt_trxlogic",
+    "thesis": "Add UNI and TWT using TRX-style smooth trend logic, but only during base-v7 cash-only windows.",
+    "endEquity": 1025504.33,
+    "cagrPct": 330.64,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.114,
+    "winRatePct": 53.54,
+    "tradeCount": 99,
+    "exposurePct": 40.22,
+    "twtTrades": 1,
+    "twtPnl": 655.28,
+    "uniTrades": 1,
+    "uniPnl": 3946.39,
+    "twtRotateEntries": 0,
+    "bySymbol": {
+      "INJ": 8270.93,
+      "ETH": 182303.21,
+      "DOGE": 282025.55,
+      "SOL": -57929.7,
+      "TWT": 655.28,
+      "AVAX": 48769.09,
+      "UNI": 3946.39,
+      "PENGU": 547463.59
+    }
+  },
+  {
+    "key": "v7_plus_uni_twt_trxlogic_twt_rotate",
+    "thesis": "Same cash-only UNI/TWT setup, plus TWT-priority trend rotation while holding other trend symbols.",
+    "endEquity": 1239991.68,
+    "cagrPct": 357.22,
+    "maxDrawdownPct": -44.8,
+    "profitFactor": 1.735,
+    "winRatePct": 55.64,
+    "tradeCount": 133,
+    "exposurePct": 39.58,
+    "twtTrades": 4,
+    "twtPnl": 109713.9,
+    "uniTrades": 2,
+    "uniPnl": 8944.25,
+    "twtRotateEntries": 4,
+    "bySymbol": {
+      "INJ": -151472.83,
+      "ETH": -36900.06,
+      "SOL": -2099.83,
+      "DOGE": 367849.22,
+      "TWT": 109713.9,
+      "AVAX": 110004.17,
+      "UNI": 8944.25,
+      "PENGU": 823952.87
+    }
+  }
+]

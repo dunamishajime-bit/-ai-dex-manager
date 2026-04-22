@@ -1,0 +1,973 @@
+[
+  {
+    "key": "v5_inj_dedicated",
+    "thesis": "Keep v5, but add the dedicated INJ breakout-surge conditions that previously tested well.",
+    "summary": {
+      "endEquity": 981154.22,
+      "cagrPct": 324.68,
+      "maxDrawdownPct": -38.41,
+      "profitFactor": 2.109,
+      "winRatePct": 53.68,
+      "tradeCount": 95,
+      "exposurePct": 39.66
+    },
+    "symbolStats": {
+      "ETH": {
+        "tradeCount": 36,
+        "wins": 18,
+        "losses": 18,
+        "totalNetPnl": 177092.19,
+        "avgNetPnl": 4919.23
+      },
+      "SOL": {
+        "tradeCount": 18,
+        "wins": 7,
+        "losses": 11,
+        "totalNetPnl": -63433.96,
+        "avgNetPnl": -3524.11
+      },
+      "AVAX": {
+        "tradeCount": 10,
+        "wins": 9,
+        "losses": 1,
+        "totalNetPnl": 88373.76,
+        "avgNetPnl": 8837.38
+      },
+      "PENGU": {
+        "tradeCount": 8,
+        "wins": 4,
+        "losses": 4,
+        "totalNetPnl": 526018.51,
+        "avgNetPnl": 65752.31
+      },
+      "DOGE": {
+        "tradeCount": 17,
+        "wins": 10,
+        "losses": 7,
+        "totalNetPnl": 234032.3,
+        "avgNetPnl": 13766.61
+      },
+      "INJ": {
+        "tradeCount": 6,
+        "wins": 3,
+        "losses": 3,
+        "totalNetPnl": 9071.42,
+        "avgNetPnl": 1511.9
+      }
+    },
+    "lossReasons": {
+      "INJ": [
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -1901.79
+        }
+      ],
+      "ETH": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -184294.01
+        },
+        {
+          "reason": "sma-break",
+          "count": 7,
+          "totalNetPnl": -103888.39
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 6,
+          "totalNetPnl": -41148.72
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -5874.52
+        },
+        {
+          "reason": "range-time",
+          "count": 1,
+          "totalNetPnl": -142.5
+        }
+      ],
+      "SOL": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -95550.25
+        },
+        {
+          "reason": "sma-break",
+          "count": 6,
+          "totalNetPnl": -47659.67
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 2,
+          "totalNetPnl": -11619.69
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -713.69
+        }
+      ],
+      "DOGE": [
+        {
+          "reason": "trend-switch",
+          "count": 5,
+          "totalNetPnl": -58245.45
+        },
+        {
+          "reason": "risk-off",
+          "count": 1,
+          "totalNetPnl": -31872.59
+        },
+        {
+          "reason": "sma-break",
+          "count": 1,
+          "totalNetPnl": -6513.18
+        }
+      ],
+      "AVAX": [
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -66857.01
+        }
+      ],
+      "PENGU": [
+        {
+          "reason": "sma-break",
+          "count": 1,
+          "totalNetPnl": -126275.94
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -85850.3
+        },
+        {
+          "reason": "end-of-test",
+          "count": 1,
+          "totalNetPnl": -7660.28
+        }
+      ]
+    }
+  },
+  {
+    "key": "v5_combo",
+    "thesis": "Combine dedicated INJ logic, better ETH quality, and stronger SOL suppression.",
+    "summary": {
+      "endEquity": 495412.85,
+      "cagrPct": 242.36,
+      "maxDrawdownPct": -35.14,
+      "profitFactor": 1.721,
+      "winRatePct": 54.35,
+      "tradeCount": 92,
+      "exposurePct": 37.94
+    },
+    "symbolStats": {
+      "ETH": {
+        "tradeCount": 22,
+        "wins": 13,
+        "losses": 9,
+        "totalNetPnl": 59113.37,
+        "avgNetPnl": 2686.97
+      },
+      "SOL": {
+        "tradeCount": 25,
+        "wins": 8,
+        "losses": 17,
+        "totalNetPnl": -208570.02,
+        "avgNetPnl": -8342.8
+      },
+      "AVAX": {
+        "tradeCount": 11,
+        "wins": 10,
+        "losses": 1,
+        "totalNetPnl": 43005.88,
+        "avgNetPnl": 3909.63
+      },
+      "PENGU": {
+        "tradeCount": 7,
+        "wins": 5,
+        "losses": 2,
+        "totalNetPnl": 503021.27,
+        "avgNetPnl": 71860.18
+      },
+      "DOGE": {
+        "tradeCount": 21,
+        "wins": 11,
+        "losses": 10,
+        "totalNetPnl": 81282.37,
+        "avgNetPnl": 3870.59
+      },
+      "INJ": {
+        "tradeCount": 6,
+        "wins": 3,
+        "losses": 3,
+        "totalNetPnl": 7560,
+        "avgNetPnl": 1260
+      }
+    },
+    "lossReasons": {
+      "INJ": [
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -1886.73
+        }
+      ],
+      "SOL": [
+        {
+          "reason": "risk-off",
+          "count": 3,
+          "totalNetPnl": -131378.95
+        },
+        {
+          "reason": "sma-break",
+          "count": 8,
+          "totalNetPnl": -78270.84
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 6,
+          "totalNetPnl": -61486.26
+        }
+      ],
+      "ETH": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -97653.6
+        },
+        {
+          "reason": "sma-break",
+          "count": 3,
+          "totalNetPnl": -37067.72
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -2991.32
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 1,
+          "totalNetPnl": -321.86
+        },
+        {
+          "reason": "range-time",
+          "count": 1,
+          "totalNetPnl": -121.92
+        }
+      ],
+      "DOGE": [
+        {
+          "reason": "sma-break",
+          "count": 5,
+          "totalNetPnl": -134586.53
+        },
+        {
+          "reason": "trend-switch",
+          "count": 4,
+          "totalNetPnl": -28357
+        },
+        {
+          "reason": "risk-off",
+          "count": 1,
+          "totalNetPnl": -26407.04
+        }
+      ],
+      "AVAX": [
+        {
+          "reason": "sma-break",
+          "count": 1,
+          "totalNetPnl": -54155.3
+        }
+      ],
+      "PENGU": [
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -14989.77
+        },
+        {
+          "reason": "end-of-test",
+          "count": 1,
+          "totalNetPnl": -3867.89
+        }
+      ]
+    }
+  },
+  {
+    "key": "base_v5",
+    "thesis": "Current production v5 as deployed.",
+    "summary": {
+      "endEquity": 300741.37,
+      "cagrPct": 192.5,
+      "maxDrawdownPct": -40.63,
+      "profitFactor": 1.554,
+      "winRatePct": 47.96,
+      "tradeCount": 98,
+      "exposurePct": 40.14
+    },
+    "symbolStats": {
+      "ETH": {
+        "tradeCount": 26,
+        "wins": 10,
+        "losses": 16,
+        "totalNetPnl": 19840.73,
+        "avgNetPnl": 763.11
+      },
+      "SOL": {
+        "tradeCount": 16,
+        "wins": 6,
+        "losses": 10,
+        "totalNetPnl": -16530.27,
+        "avgNetPnl": -1033.14
+      },
+      "AVAX": {
+        "tradeCount": 10,
+        "wins": 9,
+        "losses": 1,
+        "totalNetPnl": 30858.18,
+        "avgNetPnl": 3085.82
+      },
+      "PENGU": {
+        "tradeCount": 9,
+        "wins": 5,
+        "losses": 4,
+        "totalNetPnl": 185301.32,
+        "avgNetPnl": 20589.04
+      },
+      "DOGE": {
+        "tradeCount": 14,
+        "wins": 8,
+        "losses": 6,
+        "totalNetPnl": 148772.05,
+        "avgNetPnl": 10626.58
+      },
+      "INJ": {
+        "tradeCount": 23,
+        "wins": 9,
+        "losses": 14,
+        "totalNetPnl": -77500.64,
+        "avgNetPnl": -3369.59
+      }
+    },
+    "lossReasons": {
+      "INJ": [
+        {
+          "reason": "strict-extra-rotate",
+          "count": 4,
+          "totalNetPnl": -61600.88
+        },
+        {
+          "reason": "sma-break",
+          "count": 5,
+          "totalNetPnl": -57200.32
+        },
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -24008.63
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -9331.49
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -669.57
+        }
+      ],
+      "ETH": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -55578.44
+        },
+        {
+          "reason": "sma-break",
+          "count": 4,
+          "totalNetPnl": -34479.42
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 5,
+          "totalNetPnl": -17652.77
+        },
+        {
+          "reason": "trend-switch",
+          "count": 4,
+          "totalNetPnl": -9984.15
+        },
+        {
+          "reason": "range-time",
+          "count": 1,
+          "totalNetPnl": -128.91
+        }
+      ],
+      "SOL": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -36794.96
+        },
+        {
+          "reason": "sma-break",
+          "count": 4,
+          "totalNetPnl": -20879.09
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 2,
+          "totalNetPnl": -7611.84
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -645.57
+        },
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -419.66
+        }
+      ],
+      "DOGE": [
+        {
+          "reason": "sma-break",
+          "count": 3,
+          "totalNetPnl": -35013.61
+        },
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -24129.94
+        }
+      ],
+      "AVAX": [
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -47100.68
+        }
+      ],
+      "PENGU": [
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -41622.18
+        },
+        {
+          "reason": "sma-break",
+          "count": 1,
+          "totalNetPnl": -39840.24
+        }
+      ]
+    }
+  },
+  {
+    "key": "v5_sol_minus10",
+    "thesis": "Push SOL priority a bit lower to suppress weak SOL participation further.",
+    "summary": {
+      "endEquity": 300741.37,
+      "cagrPct": 192.5,
+      "maxDrawdownPct": -40.63,
+      "profitFactor": 1.554,
+      "winRatePct": 47.96,
+      "tradeCount": 98,
+      "exposurePct": 40.14
+    },
+    "symbolStats": {
+      "ETH": {
+        "tradeCount": 26,
+        "wins": 10,
+        "losses": 16,
+        "totalNetPnl": 19840.73,
+        "avgNetPnl": 763.11
+      },
+      "SOL": {
+        "tradeCount": 16,
+        "wins": 6,
+        "losses": 10,
+        "totalNetPnl": -16530.27,
+        "avgNetPnl": -1033.14
+      },
+      "AVAX": {
+        "tradeCount": 10,
+        "wins": 9,
+        "losses": 1,
+        "totalNetPnl": 30858.18,
+        "avgNetPnl": 3085.82
+      },
+      "PENGU": {
+        "tradeCount": 9,
+        "wins": 5,
+        "losses": 4,
+        "totalNetPnl": 185301.32,
+        "avgNetPnl": 20589.04
+      },
+      "DOGE": {
+        "tradeCount": 14,
+        "wins": 8,
+        "losses": 6,
+        "totalNetPnl": 148772.05,
+        "avgNetPnl": 10626.58
+      },
+      "INJ": {
+        "tradeCount": 23,
+        "wins": 9,
+        "losses": 14,
+        "totalNetPnl": -77500.64,
+        "avgNetPnl": -3369.59
+      }
+    },
+    "lossReasons": {
+      "INJ": [
+        {
+          "reason": "strict-extra-rotate",
+          "count": 4,
+          "totalNetPnl": -61600.88
+        },
+        {
+          "reason": "sma-break",
+          "count": 5,
+          "totalNetPnl": -57200.32
+        },
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -24008.63
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -9331.49
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -669.57
+        }
+      ],
+      "ETH": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -55578.44
+        },
+        {
+          "reason": "sma-break",
+          "count": 4,
+          "totalNetPnl": -34479.42
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 5,
+          "totalNetPnl": -17652.77
+        },
+        {
+          "reason": "trend-switch",
+          "count": 4,
+          "totalNetPnl": -9984.15
+        },
+        {
+          "reason": "range-time",
+          "count": 1,
+          "totalNetPnl": -128.91
+        }
+      ],
+      "SOL": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -36794.96
+        },
+        {
+          "reason": "sma-break",
+          "count": 4,
+          "totalNetPnl": -20879.09
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 2,
+          "totalNetPnl": -7611.84
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -645.57
+        },
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -419.66
+        }
+      ],
+      "DOGE": [
+        {
+          "reason": "sma-break",
+          "count": 3,
+          "totalNetPnl": -35013.61
+        },
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -24129.94
+        }
+      ],
+      "AVAX": [
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -47100.68
+        }
+      ],
+      "PENGU": [
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -41622.18
+        },
+        {
+          "reason": "sma-break",
+          "count": 1,
+          "totalNetPnl": -39840.24
+        }
+      ]
+    }
+  },
+  {
+    "key": "v5_no_sol_specific",
+    "thesis": "Remove SOL score demotion and re-enable SOL aux range to verify SOL-specific logic actually matters.",
+    "summary": {
+      "endEquity": 269479.85,
+      "cagrPct": 182.55,
+      "maxDrawdownPct": -39.88,
+      "profitFactor": 1.531,
+      "winRatePct": 49.49,
+      "tradeCount": 99,
+      "exposurePct": 40.09
+    },
+    "symbolStats": {
+      "ETH": {
+        "tradeCount": 22,
+        "wins": 10,
+        "losses": 12,
+        "totalNetPnl": 45261.25,
+        "avgNetPnl": 2057.33
+      },
+      "SOL": {
+        "tradeCount": 26,
+        "wins": 11,
+        "losses": 15,
+        "totalNetPnl": -31345.87,
+        "avgNetPnl": -1205.61
+      },
+      "AVAX": {
+        "tradeCount": 7,
+        "wins": 6,
+        "losses": 1,
+        "totalNetPnl": -6252.64,
+        "avgNetPnl": -893.23
+      },
+      "PENGU": {
+        "tradeCount": 9,
+        "wins": 5,
+        "losses": 4,
+        "totalNetPnl": 166307.96,
+        "avgNetPnl": 18478.66
+      },
+      "DOGE": {
+        "tradeCount": 13,
+        "wins": 8,
+        "losses": 5,
+        "totalNetPnl": 152929.55,
+        "avgNetPnl": 11763.81
+      },
+      "INJ": {
+        "tradeCount": 22,
+        "wins": 9,
+        "losses": 13,
+        "totalNetPnl": -67420.41,
+        "avgNetPnl": -3064.56
+      }
+    },
+    "lossReasons": {
+      "INJ": [
+        {
+          "reason": "strict-extra-rotate",
+          "count": 3,
+          "totalNetPnl": -54733.02
+        },
+        {
+          "reason": "sma-break",
+          "count": 5,
+          "totalNetPnl": -51879.61
+        },
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -22530.29
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -8534.85
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -669.57
+        }
+      ],
+      "ETH": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -49664.53
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 3,
+          "totalNetPnl": -13420.19
+        },
+        {
+          "reason": "sma-break",
+          "count": 3,
+          "totalNetPnl": -8196.57
+        },
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -7323.13
+        },
+        {
+          "reason": "range-time",
+          "count": 1,
+          "totalNetPnl": -128.91
+        }
+      ],
+      "SOL": [
+        {
+          "reason": "sma-break",
+          "count": 6,
+          "totalNetPnl": -65994.93
+        },
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -33156.74
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 4,
+          "totalNetPnl": -7902.35
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -645.57
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -436.85
+        }
+      ],
+      "DOGE": [
+        {
+          "reason": "sma-break",
+          "count": 3,
+          "totalNetPnl": -32014.68
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -11831.68
+        }
+      ],
+      "AVAX": [
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -44612.53
+        }
+      ],
+      "PENGU": [
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -37860.89
+        },
+        {
+          "reason": "sma-break",
+          "count": 1,
+          "totalNetPnl": -37188.33
+        }
+      ]
+    }
+  },
+  {
+    "key": "v5_eth_quality",
+    "thesis": "Raise ETH entry quality slightly to reduce risk-off and weak entries.",
+    "summary": {
+      "endEquity": 164861.56,
+      "cagrPct": 141.99,
+      "maxDrawdownPct": -43.23,
+      "profitFactor": 1.399,
+      "winRatePct": 50.52,
+      "tradeCount": 97,
+      "exposurePct": 38.45
+    },
+    "symbolStats": {
+      "ETH": {
+        "tradeCount": 15,
+        "wins": 9,
+        "losses": 6,
+        "totalNetPnl": 19007.13,
+        "avgNetPnl": 1267.14
+      },
+      "SOL": {
+        "tradeCount": 21,
+        "wins": 7,
+        "losses": 14,
+        "totalNetPnl": -66860.57,
+        "avgNetPnl": -3183.84
+      },
+      "AVAX": {
+        "tradeCount": 10,
+        "wins": 9,
+        "losses": 1,
+        "totalNetPnl": 15263.98,
+        "avgNetPnl": 1526.4
+      },
+      "PENGU": {
+        "tradeCount": 8,
+        "wins": 6,
+        "losses": 2,
+        "totalNetPnl": 164267.79,
+        "avgNetPnl": 20533.47
+      },
+      "DOGE": {
+        "tradeCount": 17,
+        "wins": 8,
+        "losses": 9,
+        "totalNetPnl": 79437.47,
+        "avgNetPnl": 4672.79
+      },
+      "INJ": {
+        "tradeCount": 26,
+        "wins": 10,
+        "losses": 16,
+        "totalNetPnl": -56254.24,
+        "avgNetPnl": -2163.62
+      }
+    },
+    "lossReasons": {
+      "INJ": [
+        {
+          "reason": "strict-extra-rotate",
+          "count": 6,
+          "totalNetPnl": -46856.87
+        },
+        {
+          "reason": "sma-break",
+          "count": 6,
+          "totalNetPnl": -41832.4
+        },
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -18221.51
+        },
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -6000
+        },
+        {
+          "reason": "off22-strong",
+          "count": 1,
+          "totalNetPnl": -645.39
+        }
+      ],
+      "ETH": [
+        {
+          "reason": "risk-off",
+          "count": 2,
+          "totalNetPnl": -32269.63
+        },
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -5366.92
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 1,
+          "totalNetPnl": -204.07
+        },
+        {
+          "reason": "range-time",
+          "count": 1,
+          "totalNetPnl": -114.54
+        }
+      ],
+      "SOL": [
+        {
+          "reason": "risk-off",
+          "count": 3,
+          "totalNetPnl": -49639.84
+        },
+        {
+          "reason": "sma-break",
+          "count": 5,
+          "totalNetPnl": -30739.81
+        },
+        {
+          "reason": "strict-extra-rotate",
+          "count": 5,
+          "totalNetPnl": -24559.29
+        },
+        {
+          "reason": "trend-switch",
+          "count": 1,
+          "totalNetPnl": -372.92
+        }
+      ],
+      "DOGE": [
+        {
+          "reason": "sma-break",
+          "count": 6,
+          "totalNetPnl": -65850.31
+        },
+        {
+          "reason": "trend-switch",
+          "count": 3,
+          "totalNetPnl": -12425.12
+        }
+      ],
+      "AVAX": [
+        {
+          "reason": "sma-break",
+          "count": 1,
+          "totalNetPnl": -37156.7
+        }
+      ],
+      "PENGU": [
+        {
+          "reason": "trend-switch",
+          "count": 2,
+          "totalNetPnl": -16338.19
+        }
+      ]
+    }
+  }
+]

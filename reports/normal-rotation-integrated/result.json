@@ -1,0 +1,64 @@
+{
+  "rows": [
+    {
+      "key": "base_no_pengu",
+      "thesis": "Current strongest profile with PENGU disabled, using only ETH/SOL/AVAX normal switching.",
+      "end_equity": 136541.46,
+      "cagr_pct": 148,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.255,
+      "win_rate_pct": 57.14,
+      "trade_count": 56,
+      "eth_contribution": 72121.5,
+      "sol_contribution": 31558.37,
+      "avax_contribution": 22861.6,
+      "rotate_count": 0,
+      "summary": "- mode: RETQ22\n- end_equity: 136541.46\n- CAGR: 148.00%\n- MaxDD: -31.04%\n- WinRate: 57.14%\n- PF: 2.26\n- Trades: 56"
+    },
+    {
+      "key": "normal_rotate_gap10_once",
+      "thesis": "Rotate between ETH/SOL/AVAX when current trend stalls and a normal candidate leads by 10 score points once.",
+      "end_equity": 121243.59,
+      "cagr_pct": 137.97,
+      "max_drawdown_pct": -33.17,
+      "profit_factor": 2.113,
+      "win_rate_pct": 55,
+      "trade_count": 60,
+      "eth_contribution": 62296.62,
+      "sol_contribution": 38451.21,
+      "avax_contribution": 10495.76,
+      "rotate_count": 8,
+      "summary": "- mode: RETQ22\n- end_equity: 121243.59\n- CAGR: 137.97%\n- MaxDD: -33.17%\n- WinRate: 55.00%\n- PF: 2.11\n- Trades: 60"
+    },
+    {
+      "key": "normal_rotate_gap10_twice",
+      "thesis": "Rotate between ETH/SOL/AVAX only after the same 10-point lead persists for 2 consecutive 12H bars.",
+      "end_equity": 125863.12,
+      "cagr_pct": 141.08,
+      "max_drawdown_pct": -30.81,
+      "profit_factor": 2.249,
+      "win_rate_pct": 56.14,
+      "trade_count": 57,
+      "eth_contribution": 67832.51,
+      "sol_contribution": 27063.2,
+      "avax_contribution": 20967.4,
+      "rotate_count": 3,
+      "summary": "- mode: RETQ22\n- end_equity: 125863.12\n- CAGR: 141.08%\n- MaxDD: -30.81%\n- WinRate: 56.14%\n- PF: 2.25\n- Trades: 57"
+    },
+    {
+      "key": "normal_rotate_gap15_twice",
+      "thesis": "Rotate between ETH/SOL/AVAX only after a stronger 15-point lead persists for 2 consecutive 12H bars.",
+      "end_equity": 134194.88,
+      "cagr_pct": 146.51,
+      "max_drawdown_pct": -30.81,
+      "profit_factor": 2.249,
+      "win_rate_pct": 56.14,
+      "trade_count": 57,
+      "eth_contribution": 73510.99,
+      "sol_contribution": 28328.54,
+      "avax_contribution": 22355.35,
+      "rotate_count": 2,
+      "summary": "- mode: RETQ22\n- end_equity: 134194.88\n- CAGR: 146.51%\n- MaxDD: -30.81%\n- WinRate: 56.14%\n- PF: 2.25\n- Trades: 57"
+    }
+  ]
+}

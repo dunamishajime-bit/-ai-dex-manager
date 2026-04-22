@@ -1,0 +1,143 @@
+{
+  "rows": [
+    {
+      "key": "base_pengu_idle",
+      "thesis": "Strongest reference: aux 100% + PENGU idle-only.",
+      "end_equity": 206790.86,
+      "cagr_pct": 186.47,
+      "max_drawdown_pct": -31.04,
+      "profit_factor": 2.739,
+      "trade_count": 60,
+      "win_rate_pct": 58.33,
+      "symbol_contribution": {
+        "SOL": 23441.845586899995,
+        "ETH": 54945.10183618992,
+        "AVAX": 23234.749545400005,
+        "PENGU": 95169.16377968896
+      },
+      "meme_breakdown": {
+        "DOGE": {
+          "symbol": "DOGE",
+          "trade_count": 0,
+          "pnl": 0,
+          "loss_count": 0,
+          "quick_loss_count": 0,
+          "late_exit_like_count": 0
+        },
+        "PENGU": {
+          "symbol": "PENGU",
+          "trade_count": 3,
+          "pnl": 95169.16,
+          "loss_count": 0,
+          "quick_loss_count": 0,
+          "late_exit_like_count": 0
+        }
+      }
+    },
+    {
+      "key": "doge_pengu_idle",
+      "thesis": "Add DOGE together with PENGU as idle-only extra trend symbols.",
+      "end_equity": 165531.31,
+      "cagr_pct": 165.16,
+      "max_drawdown_pct": -28.96,
+      "profit_factor": 2.701,
+      "trade_count": 63,
+      "win_rate_pct": 57.14,
+      "symbol_contribution": {
+        "SOL": 15966.570449999926,
+        "ETH": 44125.41866288998,
+        "DOGE": 2475.184040772421,
+        "AVAX": 16783.270760999992,
+        "PENGU": 76180.86681274741
+      },
+      "meme_breakdown": {
+        "DOGE": {
+          "symbol": "DOGE",
+          "trade_count": 3,
+          "pnl": 2475.18,
+          "loss_count": 2,
+          "quick_loss_count": 1,
+          "late_exit_like_count": 1
+        },
+        "PENGU": {
+          "symbol": "PENGU",
+          "trade_count": 3,
+          "pnl": 76180.87,
+          "loss_count": 0,
+          "quick_loss_count": 0,
+          "late_exit_like_count": 0
+        }
+      }
+    },
+    {
+      "key": "doge_pengu_idle_sma40_exit",
+      "thesis": "Add DOGE idle-only and speed up exits with SMA40 trend exits.",
+      "end_equity": 139386.51,
+      "cagr_pct": 149.78,
+      "max_drawdown_pct": -33.21,
+      "profit_factor": 2.137,
+      "trade_count": 64,
+      "win_rate_pct": 56.25,
+      "symbol_contribution": {
+        "SOL": -6893.628367100024,
+        "ETH": 42472.61819501998,
+        "DOGE": 2404.2553704737634,
+        "AVAX": 16151.575630500003,
+        "PENGU": 75251.68473246612
+      },
+      "meme_breakdown": {
+        "DOGE": {
+          "symbol": "DOGE",
+          "trade_count": 3,
+          "pnl": 2404.26,
+          "loss_count": 2,
+          "quick_loss_count": 1,
+          "late_exit_like_count": 1
+        },
+        "PENGU": {
+          "symbol": "PENGU",
+          "trade_count": 3,
+          "pnl": 75251.68,
+          "loss_count": 0,
+          "quick_loss_count": 0,
+          "late_exit_like_count": 0
+        }
+      }
+    },
+    {
+      "key": "doge_pengu_idle_sma40_exit_eff018",
+      "thesis": "Add DOGE idle-only, use SMA40 exits, and loosen efficiency slightly for earlier entries.",
+      "end_equity": 132192.21,
+      "cagr_pct": 145.23,
+      "max_drawdown_pct": -33.21,
+      "profit_factor": 2.041,
+      "trade_count": 65,
+      "win_rate_pct": 55.38,
+      "symbol_contribution": {
+        "SOL": 1701.6614671999669,
+        "ETH": 34657.79018533994,
+        "DOGE": 15757.080940857337,
+        "AVAX": 13616.24455269998,
+        "PENGU": 56459.43223655294
+      },
+      "meme_breakdown": {
+        "DOGE": {
+          "symbol": "DOGE",
+          "trade_count": 4,
+          "pnl": 15757.08,
+          "loss_count": 2,
+          "quick_loss_count": 1,
+          "late_exit_like_count": 1
+        },
+        "PENGU": {
+          "symbol": "PENGU",
+          "trade_count": 2,
+          "pnl": 56459.43,
+          "loss_count": 0,
+          "quick_loss_count": 0,
+          "late_exit_like_count": 0
+        }
+      }
+    }
+  ]
+}

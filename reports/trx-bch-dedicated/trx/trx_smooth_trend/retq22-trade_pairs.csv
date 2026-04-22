@@ -1,0 +1,4 @@
+trade_id,strategy_type,sub_variant,symbol,entry_time,exit_time,entry_price,exit_price,qty,gross_pnl,fee,net_pnl,holding_bars,entry_reason,exit_reason
+retq22-0001,trend,trend,TRX,2023-10-24T12:00:00.000Z,2023-11-21T00:00:00.000Z,0.09351,0.10097,106940,797.7723999999998,62.393073599999994,735.3793263999999,55,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,sma-break
+retq22-0002,trend,trend,TRX,2024-11-12T12:00:00.000Z,2024-12-19T00:00:00.000Z,0.1766,0.258,60789,4948.2246,79.2566982,4868.9679018,73,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,sma-break
+retq22-0003,trend,trend,TRX,2025-08-14T12:00:00.000Z,2025-08-18T12:00:00.000Z,0.3683,0.3462,42368,-936.3328000000001,90.815808,-1027.1486080000002,8,trend-close>sma40|mom20-ok|structure-break|volume-ok|accel-ok|eff-ok|retq22-off,risk-off

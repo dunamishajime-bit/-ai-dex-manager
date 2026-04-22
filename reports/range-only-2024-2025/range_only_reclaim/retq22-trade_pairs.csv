@@ -1,0 +1,5 @@
+trade_id,strategy_type,sub_variant,symbol,entry_time,exit_time,entry_price,exit_price,qty,gross_pnl,fee,net_pnl,holding_bars,entry_reason,exit_reason
+retq22-0001,range,range,ETH,2024-10-10T12:00:00.000Z,2024-10-12T00:00:00.000Z,2406.56,2439.49,1.454,47.88022000000001,21.1384701,26.74174990000001,3,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,range-time
+retq22-0002,range,range,ETH,2025-01-12T00:00:00.000Z,2025-01-13T12:00:00.000Z,3282.83,3057.15,1.069,-241.2519199999997,20.33231586,-261.5842358599997,3,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,range-time
+retq22-0003,range,range,ETH,2025-02-14T00:00:00.000Z,2025-02-15T12:00:00.000Z,2675.87,2708.37,1.2770000000000001,41.502500000000055,20.627023440000002,20.875476560000052,3,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,range-time
+retq22-0004,range,range,ETH,2025-06-20T12:00:00.000Z,2025-06-22T00:00:00.000Z,2549.64,2295.72,1.343,-341.0145600000001,19.52195544,-360.5365154400001,3,range-close<sma45|mom20-ok|pullback-ok|box-reclaim|range-fallback,range-time

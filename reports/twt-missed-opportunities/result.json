@@ -1,0 +1,844 @@
+{
+  "totalPriceOpportunities": 43,
+  "selectedCount": 4,
+  "eligibleNotSelectedCount": 0,
+  "neverEligibleCount": 39,
+  "topReasonCounts": [
+    [
+      "retq22-off",
+      272
+    ],
+    [
+      "trend-gate-off",
+      254
+    ],
+    [
+      "structure-flat",
+      234
+    ],
+    [
+      "close<=sma40",
+      210
+    ],
+    [
+      "eff-ok",
+      200
+    ],
+    [
+      "mom20-low",
+      184
+    ],
+    [
+      "accel-ok",
+      174
+    ],
+    [
+      "volume-low",
+      172
+    ],
+    [
+      "volume-ok",
+      101
+    ],
+    [
+      "accel-low",
+      99
+    ],
+    [
+      "mom20-ok",
+      89
+    ],
+    [
+      "eff-low",
+      73
+    ],
+    [
+      "close>sma40",
+      63
+    ],
+    [
+      "structure-break",
+      39
+    ],
+    [
+      "retq22-pass",
+      1
+    ]
+  ],
+  "opportunities": [
+    {
+      "startIso": "2023-03-03T12:00:00.000Z",
+      "endIso": "2023-03-05T00:00:00.000Z",
+      "gainPct": 18.78,
+      "bars": 4,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -2.33,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2023-03-10T12:00:00.000Z",
+      "endIso": "2023-03-12T00:00:00.000Z",
+      "gainPct": 28.71,
+      "bars": 4,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -12.9,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2023-03-12T00:00:00.000Z",
+      "endIso": "2023-03-13T12:00:00.000Z",
+      "gainPct": 16.9,
+      "bars": 4,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -2.92,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2023-06-11T00:00:00.000Z",
+      "endIso": "2023-06-15T00:00:00.000Z",
+      "gainPct": 27.86,
+      "bars": 9,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -26.64,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2023-06-15T12:00:00.000Z",
+      "endIso": "2023-06-17T12:00:00.000Z",
+      "gainPct": 21.67,
+      "bars": 5,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 4.66,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2023-09-12T00:00:00.000Z",
+      "endIso": "2023-09-12T12:00:00.000Z",
+      "gainPct": 15.99,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 0.59,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2023-10-08T00:00:00.000Z",
+      "endIso": "2023-10-08T12:00:00.000Z",
+      "gainPct": 18.83,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": true,
+      "selected": true,
+      "bestScore": 65.12,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "structure-break",
+        "volume-ok",
+        "accel-ok",
+        "eff-ok"
+      ]
+    },
+    {
+      "startIso": "2023-10-12T12:00:00.000Z",
+      "endIso": "2023-10-15T00:00:00.000Z",
+      "gainPct": 28.41,
+      "bars": 6,
+      "twtSeen": true,
+      "eligible": true,
+      "selected": true,
+      "bestScore": 50.04,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "structure-break",
+        "volume-ok",
+        "accel-ok",
+        "eff-ok"
+      ]
+    },
+    {
+      "startIso": "2023-11-03T00:00:00.000Z",
+      "endIso": "2023-11-03T12:00:00.000Z",
+      "gainPct": 24.25,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": true,
+      "selected": true,
+      "bestScore": 33.58,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "structure-break",
+        "volume-ok",
+        "accel-ok",
+        "eff-ok"
+      ]
+    },
+    {
+      "startIso": "2024-04-14T00:00:00.000Z",
+      "endIso": "2024-04-15T00:00:00.000Z",
+      "gainPct": 37.04,
+      "bars": 3,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -21.95,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-04-15T00:00:00.000Z",
+      "endIso": "2024-04-15T12:00:00.000Z",
+      "gainPct": 16.4,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -21.95,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-04-17T00:00:00.000Z",
+      "endIso": "2024-04-17T12:00:00.000Z",
+      "gainPct": 15.13,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -32.97,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-04-18T00:00:00.000Z",
+      "endIso": "2024-04-23T12:00:00.000Z",
+      "gainPct": 23.88,
+      "bars": 12,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 13.87,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-05-01T12:00:00.000Z",
+      "endIso": "2024-05-04T00:00:00.000Z",
+      "gainPct": 32.38,
+      "bars": 6,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 20.73,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-05-04T00:00:00.000Z",
+      "endIso": "2024-05-05T00:00:00.000Z",
+      "gainPct": 18.59,
+      "bars": 3,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 23.89,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-06-24T12:00:00.000Z",
+      "endIso": "2024-07-03T00:00:00.000Z",
+      "gainPct": 18.06,
+      "bars": 18,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 20.41,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-07-05T12:00:00.000Z",
+      "endIso": "2024-07-07T12:00:00.000Z",
+      "gainPct": 28.11,
+      "bars": 5,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 7.92,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-07-08T12:00:00.000Z",
+      "endIso": "2024-07-15T12:00:00.000Z",
+      "gainPct": 15.32,
+      "bars": 15,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 19.04,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-08-06T00:00:00.000Z",
+      "endIso": "2024-08-07T12:00:00.000Z",
+      "gainPct": 22.89,
+      "bars": 4,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -19.31,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-08-08T12:00:00.000Z",
+      "endIso": "2024-08-23T12:00:00.000Z",
+      "gainPct": 17.46,
+      "bars": 31,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 20.19,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-09-04T12:00:00.000Z",
+      "endIso": "2024-09-13T00:00:00.000Z",
+      "gainPct": 27.39,
+      "bars": 18,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 34.69,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2024-12-20T12:00:00.000Z",
+      "endIso": "2024-12-21T00:00:00.000Z",
+      "gainPct": 18.59,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -8.24,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok",
+        "eff-ok"
+      ]
+    },
+    {
+      "startIso": "2024-12-21T00:00:00.000Z",
+      "endIso": "2024-12-21T12:00:00.000Z",
+      "gainPct": 36.89,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 9.47,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok",
+        "eff-low"
+      ]
+    },
+    {
+      "startIso": "2025-02-03T12:00:00.000Z",
+      "endIso": "2025-02-04T00:00:00.000Z",
+      "gainPct": 44.49,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -24.55,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok",
+        "eff-ok"
+      ]
+    },
+    {
+      "startIso": "2025-02-04T12:00:00.000Z",
+      "endIso": "2025-02-06T00:00:00.000Z",
+      "gainPct": 16.4,
+      "bars": 4,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -21.93,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-03-01T00:00:00.000Z",
+      "endIso": "2025-03-03T12:00:00.000Z",
+      "gainPct": 17.97,
+      "bars": 6,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 12.73,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-low"
+      ]
+    },
+    {
+      "startIso": "2025-03-05T00:00:00.000Z",
+      "endIso": "2025-03-06T00:00:00.000Z",
+      "gainPct": 15.27,
+      "bars": 3,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 8.13,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-03-12T00:00:00.000Z",
+      "endIso": "2025-03-27T12:00:00.000Z",
+      "gainPct": 16.48,
+      "bars": 32,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 15.8,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-04-07T12:00:00.000Z",
+      "endIso": "2025-04-09T00:00:00.000Z",
+      "gainPct": 18.2,
+      "bars": 4,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -12.95,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-09-20T00:00:00.000Z",
+      "endIso": "2025-09-20T12:00:00.000Z",
+      "gainPct": 16.72,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": true,
+      "selected": true,
+      "bestScore": 127.82,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "structure-break",
+        "volume-ok",
+        "accel-ok",
+        "eff-ok"
+      ]
+    },
+    {
+      "startIso": "2025-09-22T12:00:00.000Z",
+      "endIso": "2025-09-24T12:00:00.000Z",
+      "gainPct": 27.25,
+      "bars": 5,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 121.79,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-09-26T00:00:00.000Z",
+      "endIso": "2025-09-30T12:00:00.000Z",
+      "gainPct": 16.88,
+      "bars": 10,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 106.35,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-10-11T00:00:00.000Z",
+      "endIso": "2025-10-11T12:00:00.000Z",
+      "gainPct": 41.42,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 23.28,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-10-12T12:00:00.000Z",
+      "endIso": "2025-10-13T00:00:00.000Z",
+      "gainPct": 20.35,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 26.84,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok",
+        "eff-low"
+      ]
+    },
+    {
+      "startIso": "2025-10-17T12:00:00.000Z",
+      "endIso": "2025-10-20T00:00:00.000Z",
+      "gainPct": 15.82,
+      "bars": 6,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -5.87,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-11-05T00:00:00.000Z",
+      "endIso": "2025-11-08T00:00:00.000Z",
+      "gainPct": 22.98,
+      "bars": 7,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 12.99,
+      "topReasons": [
+        "close>sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-12-02T00:00:00.000Z",
+      "endIso": "2025-12-04T00:00:00.000Z",
+      "gainPct": 19.69,
+      "bars": 5,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 9.74,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2025-12-26T00:00:00.000Z",
+      "endIso": "2025-12-31T00:00:00.000Z",
+      "gainPct": 17.53,
+      "bars": 11,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 9.87,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-low",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2026-02-04T00:00:00.000Z",
+      "endIso": "2026-02-05T00:00:00.000Z",
+      "gainPct": 16.8,
+      "bars": 3,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -22.82,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2026-02-06T12:00:00.000Z",
+      "endIso": "2026-02-07T00:00:00.000Z",
+      "gainPct": 17.82,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -57.05,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-low"
+      ]
+    },
+    {
+      "startIso": "2026-02-11T12:00:00.000Z",
+      "endIso": "2026-02-12T12:00:00.000Z",
+      "gainPct": 25.18,
+      "bars": 3,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -32.55,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2026-02-16T00:00:00.000Z",
+      "endIso": "2026-02-18T00:00:00.000Z",
+      "gainPct": 17.06,
+      "bars": 5,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": 7.85,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-ok",
+        "trend-gate-off",
+        "structure-break",
+        "volume-ok",
+        "accel-ok"
+      ]
+    },
+    {
+      "startIso": "2026-04-01T12:00:00.000Z",
+      "endIso": "2026-04-02T00:00:00.000Z",
+      "gainPct": 19.91,
+      "bars": 2,
+      "twtSeen": true,
+      "eligible": false,
+      "selected": false,
+      "bestScore": -30.6,
+      "topReasons": [
+        "close<=sma40",
+        "mom20-low",
+        "trend-gate-off",
+        "structure-flat",
+        "volume-ok",
+        "accel-ok"
+      ]
+    }
+  ]
+}

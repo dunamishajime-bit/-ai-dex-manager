@@ -1,0 +1,107 @@
+[
+  {
+    "key": "sol_rotate_gap5_twice",
+    "thesis": "Rotate out of SOL after 2 consecutive bars where another candidate leads by 5.",
+    "endEquity": 1041047.05,
+    "cagrPct": 332.69,
+    "maxDrawdownPct": -33.1,
+    "profitFactor": 2.22,
+    "winRatePct": 54.64,
+    "tradeCount": 97,
+    "exposurePct": 39.66,
+    "solTradeCount": 19,
+    "solNetPnl": -35524.66,
+    "bySymbol": {
+      "INJ": 9071.42,
+      "ETH": 162862.66,
+      "DOGE": 278752.02,
+      "SOL": -35524.66,
+      "AVAX": 89482.35,
+      "PENGU": 526403.27
+    }
+  },
+  {
+    "key": "sol_rotate_gap10_once",
+    "thesis": "Rotate out of SOL when another trend candidate leads by 10 points.",
+    "endEquity": 1038443.54,
+    "cagrPct": 332.35,
+    "maxDrawdownPct": -31.56,
+    "profitFactor": 2.239,
+    "winRatePct": 54.55,
+    "tradeCount": 99,
+    "exposurePct": 39.66,
+    "solTradeCount": 20,
+    "solNetPnl": -39580.44,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 154513.54,
+      "DOGE": 270786.88,
+      "SOL": -39580.44,
+      "AVAX": 122990.65,
+      "PENGU": 512759.33
+    }
+  },
+  {
+    "key": "sol_rotate_gap0_once",
+    "thesis": "If SOL is held and another trend candidate becomes eligible, rotate immediately.",
+    "endEquity": 984424.36,
+    "cagrPct": 325.13,
+    "maxDrawdownPct": -37.56,
+    "profitFactor": 1.955,
+    "winRatePct": 54.37,
+    "tradeCount": 103,
+    "exposurePct": 39.66,
+    "solTradeCount": 20,
+    "solNetPnl": -14871.8,
+    "bySymbol": {
+      "INJ": 4946.48,
+      "ETH": 19833.91,
+      "DOGE": 292195,
+      "SOL": -14871.8,
+      "AVAX": 122416.51,
+      "PENGU": 549904.25
+    }
+  },
+  {
+    "key": "base_v6",
+    "thesis": "Current production v6.",
+    "endEquity": 981154.22,
+    "cagrPct": 324.68,
+    "maxDrawdownPct": -38.41,
+    "profitFactor": 2.109,
+    "winRatePct": 53.68,
+    "tradeCount": 95,
+    "exposurePct": 39.66,
+    "solTradeCount": 18,
+    "solNetPnl": -63433.96,
+    "bySymbol": {
+      "INJ": 9071.42,
+      "ETH": 177092.19,
+      "DOGE": 234032.3,
+      "SOL": -63433.96,
+      "AVAX": 88373.76,
+      "PENGU": 526018.51
+    }
+  },
+  {
+    "key": "sol_rotate_gap5_once",
+    "thesis": "Rotate out of SOL when another trend candidate leads by 5 points.",
+    "endEquity": 879027.86,
+    "cagrPct": 310.22,
+    "maxDrawdownPct": -37.56,
+    "profitFactor": 1.949,
+    "winRatePct": 54.46,
+    "tradeCount": 101,
+    "exposurePct": 39.75,
+    "solTradeCount": 20,
+    "solNetPnl": -21665.89,
+    "bySymbol": {
+      "INJ": 6973.58,
+      "ETH": 22970.1,
+      "DOGE": 261411.26,
+      "SOL": -21665.89,
+      "AVAX": 108309.55,
+      "PENGU": 491029.26
+    }
+  }
+]

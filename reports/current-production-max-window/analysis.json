@@ -1,0 +1,578 @@
+{
+  "setup": {
+    "start_utc": "2022-01-01T00:00:00.000Z",
+    "end_utc": "2026-04-18T23:59:59.999Z",
+    "strategy_id": "reclaim_plus_avax_aux_alloc100_pengu_doge_injdedicated_idle_solminus8_v6",
+    "tradable_symbols": [
+      "ETH",
+      "SOL",
+      "AVAX",
+      "PENGU",
+      "DOGE",
+      "INJ"
+    ],
+    "strict_extra_symbols": [
+      "PENGU",
+      "DOGE"
+    ]
+  },
+  "summary": {
+    "mode": "RETQ22",
+    "start_equity": 10000,
+    "end_equity": 981154.2195811942,
+    "cagr_pct": 324.6821645328531,
+    "max_drawdown_pct": -38.40939759033412,
+    "win_rate_pct": 53.68421052631579,
+    "profit_factor": 2.108537517896673,
+    "trade_count": 95,
+    "exposure_pct": 39.663357790246,
+    "annual_returns": [
+      {
+        "period": "2023",
+        "start_equity": 10000,
+        "end_equity": 56373.247128072835,
+        "return_pct": 463.73247128072836
+      },
+      {
+        "period": "2024",
+        "start_equity": 57926.27004007284,
+        "end_equity": 315384.00553997443,
+        "return_pct": 444.4576447297483
+      },
+      {
+        "period": "2025",
+        "start_equity": 315384.00553997443,
+        "end_equity": 1074418.9284142156,
+        "return_pct": 240.6700750644232
+      },
+      {
+        "period": "2026",
+        "start_equity": 1074418.9284142156,
+        "end_equity": 981154.2195811942,
+        "return_pct": -8.680478942294423
+      }
+    ],
+    "monthly_returns": [
+      {
+        "period": "2023-02",
+        "start_equity": 10000,
+        "end_equity": 8481.547403410004,
+        "return_pct": -15.184525965899953
+      },
+      {
+        "period": "2023-03",
+        "start_equity": 8481.547403410004,
+        "end_equity": 8495.978214968278,
+        "return_pct": 0.17014361733651562
+      },
+      {
+        "period": "2023-04",
+        "start_equity": 8456.205784767837,
+        "end_equity": 11186.0853748258,
+        "return_pct": 32.282558626651394
+      },
+      {
+        "period": "2023-05",
+        "start_equity": 11186.0853748258,
+        "end_equity": 11843.0564872258,
+        "return_pct": 5.873110121960168
+      },
+      {
+        "period": "2023-06",
+        "start_equity": 11843.0564872258,
+        "end_equity": 11714.171887595805,
+        "return_pct": -1.0882714252778647
+      },
+      {
+        "period": "2023-07",
+        "start_equity": 11525.876473595807,
+        "end_equity": 16064.052552555813,
+        "return_pct": 39.3738045809908
+      },
+      {
+        "period": "2023-08",
+        "start_equity": 16064.052552555813,
+        "end_equity": 15966.536056315814,
+        "return_pct": -0.6070479159661635
+      },
+      {
+        "period": "2023-09",
+        "start_equity": 15966.536056315814,
+        "end_equity": 16226.341581115817,
+        "return_pct": 1.6271877875303709
+      },
+      {
+        "period": "2023-10",
+        "start_equity": 16226.341581115817,
+        "end_equity": 23942.539229433747,
+        "return_pct": 47.55352652811169
+      },
+      {
+        "period": "2023-11",
+        "start_equity": 23723.5675380631,
+        "end_equity": 29958.567358345725,
+        "return_pct": 26.2818811305632
+      },
+      {
+        "period": "2023-12",
+        "start_equity": 30509.192751625724,
+        "end_equity": 56373.247128072835,
+        "return_pct": 84.77462706734156
+      },
+      {
+        "period": "2024-01",
+        "start_equity": 57926.27004007284,
+        "end_equity": 56961.59440211285,
+        "return_pct": -1.6653508629032032
+      },
+      {
+        "period": "2024-02",
+        "start_equity": 56961.59440211285,
+        "end_equity": 75714.29108107177,
+        "return_pct": 32.921649886723216
+      },
+      {
+        "period": "2024-03",
+        "start_equity": 77359.88126276045,
+        "end_equity": 129002.54695321112,
+        "return_pct": 66.75639213436907
+      },
+      {
+        "period": "2024-04",
+        "start_equity": 125761.1996550111,
+        "end_equity": 122708.50572631112,
+        "return_pct": -2.4273734165021876
+      },
+      {
+        "period": "2024-05",
+        "start_equity": 122708.50572631112,
+        "end_equity": 104431.51377224369,
+        "return_pct": -14.8946414479469
+      },
+      {
+        "period": "2024-06",
+        "start_equity": 105309.77378408368,
+        "end_equity": 102133.7340137637,
+        "return_pct": -3.0159021866591473
+      },
+      {
+        "period": "2024-07",
+        "start_equity": 102133.7340137637,
+        "end_equity": 103254.9774761637,
+        "return_pct": 1.0978189265545613
+      },
+      {
+        "period": "2024-08",
+        "start_equity": 102676.96313696369,
+        "end_equity": 98654.9466933637,
+        "return_pct": -3.917155631331737
+      },
+      {
+        "period": "2024-09",
+        "start_equity": 98654.9466933637,
+        "end_equity": 102389.0679372333,
+        "return_pct": 3.7850319411512956
+      },
+      {
+        "period": "2024-10",
+        "start_equity": 103654.7823682333,
+        "end_equity": 120747.2730965919,
+        "return_pct": 16.489823564182092
+      },
+      {
+        "period": "2024-11",
+        "start_equity": 119433.77948160881,
+        "end_equity": 387350.57228132436,
+        "return_pct": 224.32246049868257
+      },
+      {
+        "period": "2024-12",
+        "start_equity": 386727.0655499644,
+        "end_equity": 315384.00553997443,
+        "return_pct": -18.447909744442892
+      },
+      {
+        "period": "2025-01",
+        "start_equity": 315384.00553997443,
+        "end_equity": 287658.4431106487,
+        "return_pct": -8.791048988630957
+      },
+      {
+        "period": "2025-02",
+        "start_equity": 287658.4431106487,
+        "end_equity": 305522.0107960487,
+        "return_pct": 6.2099924800499195
+      },
+      {
+        "period": "2025-03",
+        "start_equity": 305522.0107960487,
+        "end_equity": 305522.0107960487,
+        "return_pct": 0
+      },
+      {
+        "period": "2025-04",
+        "start_equity": 305522.0107960487,
+        "end_equity": 547272.2834004825,
+        "return_pct": 79.12695781706356
+      },
+      {
+        "period": "2025-05",
+        "start_equity": 547272.2834004825,
+        "end_equity": 705595.6669401138,
+        "return_pct": 28.929545372896847
+      },
+      {
+        "period": "2025-06",
+        "start_equity": 705595.6669401138,
+        "end_equity": 683807.6117467339,
+        "return_pct": -3.0878952655514436
+      },
+      {
+        "period": "2025-07",
+        "start_equity": 683807.6117467339,
+        "end_equity": 1044538.8381987632,
+        "return_pct": 52.75332129318788
+      },
+      {
+        "period": "2025-08",
+        "start_equity": 1068811.8869427084,
+        "end_equity": 1191646.750857644,
+        "return_pct": 11.492655107560568
+      },
+      {
+        "period": "2025-09",
+        "start_equity": 1191646.750857644,
+        "end_equity": 1088043.9541643653,
+        "return_pct": -8.694086281753755
+      },
+      {
+        "period": "2025-10",
+        "start_equity": 1088043.9541643653,
+        "end_equity": 1074418.9284142156,
+        "return_pct": -1.252249571168651
+      },
+      {
+        "period": "2025-11",
+        "start_equity": 1074418.9284142156,
+        "end_equity": 1074418.9284142156,
+        "return_pct": 0
+      },
+      {
+        "period": "2025-12",
+        "start_equity": 1074418.9284142156,
+        "end_equity": 1074418.9284142156,
+        "return_pct": 0
+      },
+      {
+        "period": "2026-01",
+        "start_equity": 1074418.9284142156,
+        "end_equity": 1043702.0607718452,
+        "return_pct": -2.858928377937908
+      },
+      {
+        "period": "2026-02",
+        "start_equity": 1043702.0607718452,
+        "end_equity": 1043702.0607718452,
+        "return_pct": 0
+      },
+      {
+        "period": "2026-03",
+        "start_equity": 1043702.0607718452,
+        "end_equity": 912286.9890909053,
+        "return_pct": -12.591243863574919
+      },
+      {
+        "period": "2026-04",
+        "start_equity": 912286.9890909053,
+        "end_equity": 981154.2195811942,
+        "return_pct": 7.548855931718945
+      }
+    ],
+    "symbol_contribution": {
+      "INJ": 9071.41953079,
+      "ETH": 177092.1891486108,
+      "DOGE": 234032.30351363897,
+      "SOL": -63433.96240640018,
+      "AVAX": 88373.75554319983,
+      "PENGU": 526018.5142513512
+    }
+  },
+  "idle": {
+    "totalBars": 2317,
+    "inferredBarHours": 12,
+    "idleBars": 1398,
+    "idlePct": 60.34,
+    "idleDays": 699,
+    "exposureDays": 459.5,
+    "idleWindowCount": 42,
+    "longestWindows": [
+      {
+        "startIso": "2025-10-10T00:00:00.000Z",
+        "endIso": "2026-01-04T00:00:00.000Z",
+        "bars": 173,
+        "days": 86.5
+      },
+      {
+        "startIso": "2026-01-20T12:00:00.000Z",
+        "endIso": "2026-03-16T12:00:00.000Z",
+        "bars": 111,
+        "days": 55.5
+      },
+      {
+        "startIso": "2023-08-10T00:00:00.000Z",
+        "endIso": "2023-09-26T12:00:00.000Z",
+        "bars": 96,
+        "days": 48
+      },
+      {
+        "startIso": "2025-02-21T12:00:00.000Z",
+        "endIso": "2025-04-09T12:00:00.000Z",
+        "bars": 95,
+        "days": 47.5
+      },
+      {
+        "startIso": "2024-08-02T12:00:00.000Z",
+        "endIso": "2024-09-18T00:00:00.000Z",
+        "bars": 94,
+        "days": 47
+      },
+      {
+        "startIso": "2024-04-08T12:00:00.000Z",
+        "endIso": "2024-05-20T00:00:00.000Z",
+        "bars": 84,
+        "days": 42
+      },
+      {
+        "startIso": "2024-06-09T00:00:00.000Z",
+        "endIso": "2024-07-19T12:00:00.000Z",
+        "bars": 82,
+        "days": 41
+      },
+      {
+        "startIso": "2023-04-26T12:00:00.000Z",
+        "endIso": "2023-05-28T12:00:00.000Z",
+        "bars": 65,
+        "days": 32.5
+      },
+      {
+        "startIso": "2024-01-13T00:00:00.000Z",
+        "endIso": "2024-02-11T00:00:00.000Z",
+        "bars": 59,
+        "days": 29.5
+      },
+      {
+        "startIso": "2025-08-18T12:00:00.000Z",
+        "endIso": "2025-09-16T00:00:00.000Z",
+        "bars": 58,
+        "days": 29
+      }
+    ]
+  },
+  "losses": {
+    "count": 44,
+    "winCount": 51,
+    "lossRatioPct": 46.32,
+    "totalLossPnl": -876067.98,
+    "byExitReason": [
+      {
+        "reason": "sma-break",
+        "count": 15,
+        "totalNetPnl": -284337.18,
+        "avgNetPnl": -18955.81,
+        "worstNetPnl": -126275.94
+      },
+      {
+        "reason": "trend-switch",
+        "count": 13,
+        "totalNetPnl": -218729.07,
+        "avgNetPnl": -16825.31,
+        "worstNetPnl": -66857.01
+      },
+      {
+        "reason": "strict-extra-rotate",
+        "count": 8,
+        "totalNetPnl": -52768.41,
+        "avgNetPnl": -6596.05,
+        "worstNetPnl": -23522.51
+      },
+      {
+        "reason": "risk-off",
+        "count": 5,
+        "totalNetPnl": -311716.85,
+        "avgNetPnl": -62343.37,
+        "worstNetPnl": -131415.07
+      },
+      {
+        "reason": "end-of-test",
+        "count": 1,
+        "totalNetPnl": -7660.28,
+        "avgNetPnl": -7660.28,
+        "worstNetPnl": -7660.28
+      },
+      {
+        "reason": "off22-strong",
+        "count": 1,
+        "totalNetPnl": -713.69,
+        "avgNetPnl": -713.69,
+        "worstNetPnl": -713.69
+      },
+      {
+        "reason": "range-time",
+        "count": 1,
+        "totalNetPnl": -142.5,
+        "avgNetPnl": -142.5,
+        "worstNetPnl": -142.5
+      }
+    ],
+    "bySymbol": [
+      {
+        "symbol": "ETH",
+        "count": 18,
+        "totalNetPnl": -335348.13,
+        "avgNetPnl": -18630.45,
+        "worstNetPnl": -131415.07
+      },
+      {
+        "symbol": "SOL",
+        "count": 11,
+        "totalNetPnl": -155543.31,
+        "avgNetPnl": -14140.3,
+        "worstNetPnl": -79300.62
+      },
+      {
+        "symbol": "DOGE",
+        "count": 7,
+        "totalNetPnl": -96631.22,
+        "avgNetPnl": -13804.46,
+        "worstNetPnl": -37949.6
+      },
+      {
+        "symbol": "PENGU",
+        "count": 4,
+        "totalNetPnl": -219786.51,
+        "avgNetPnl": -54946.63,
+        "worstNetPnl": -126275.94
+      },
+      {
+        "symbol": "INJ",
+        "count": 3,
+        "totalNetPnl": -1901.79,
+        "avgNetPnl": -633.93,
+        "worstNetPnl": -1256.31
+      },
+      {
+        "symbol": "AVAX",
+        "count": 1,
+        "totalNetPnl": -66857.01,
+        "avgNetPnl": -66857.01,
+        "worstNetPnl": -66857.01
+      }
+    ],
+    "worstTrades": [
+      {
+        "symbol": "ETH",
+        "entry_time": "2026-03-17T00:00:00.000Z",
+        "exit_time": "2026-03-22T12:00:00.000Z",
+        "net_pnl": -131415.07,
+        "holding_bars": 11,
+        "entry_reason": "trend-close>sma40|mom20-ok|eff-ok|retq22-off",
+        "exit_reason": "risk-off"
+      },
+      {
+        "symbol": "PENGU",
+        "entry_time": "2025-07-30T00:00:00.000Z",
+        "exit_time": "2025-08-02T00:00:00.000Z",
+        "net_pnl": -126275.94,
+        "holding_bars": 6,
+        "entry_reason": "strict-extra-rotate-close>sma40|mom20-ok|eff-ok|retq22-off|idle-extra",
+        "exit_reason": "sma-break"
+      },
+      {
+        "symbol": "ETH",
+        "entry_time": "2026-01-15T12:00:00.000Z",
+        "exit_time": "2026-01-20T12:00:00.000Z",
+        "net_pnl": -87622.59,
+        "holding_bars": 10,
+        "entry_reason": "trend-close>sma40|mom20-ok|eff-ok|retq22-off",
+        "exit_reason": "sma-break"
+      },
+      {
+        "symbol": "SOL",
+        "entry_time": "2025-09-22T00:00:00.000Z",
+        "exit_time": "2025-09-22T12:00:00.000Z",
+        "net_pnl": -79300.62,
+        "holding_bars": 1,
+        "entry_reason": "trend-close>sma40|mom20-ok|sol-ok|eff-ok|retq22-off",
+        "exit_reason": "risk-off"
+      },
+      {
+        "symbol": "AVAX",
+        "entry_time": "2024-12-04T12:00:00.000Z",
+        "exit_time": "2024-12-10T00:00:00.000Z",
+        "net_pnl": -66857.01,
+        "holding_bars": 11,
+        "entry_reason": "trend-close>sma40|mom20-ok|avax-mom-ok|avax-vol-ok|eff-ok|retq22-off",
+        "exit_reason": "trend-switch"
+      },
+      {
+        "symbol": "PENGU",
+        "entry_time": "2025-07-28T12:00:00.000Z",
+        "exit_time": "2025-07-29T00:00:00.000Z",
+        "net_pnl": -56240.73,
+        "holding_bars": 1,
+        "entry_reason": "strict-extra-rotate-close>sma40|mom20-ok|eff-ok|retq22-off|idle-extra",
+        "exit_reason": "trend-switch"
+      },
+      {
+        "symbol": "ETH",
+        "entry_time": "2025-06-04T00:00:00.000Z",
+        "exit_time": "2025-06-06T00:00:00.000Z",
+        "net_pnl": -52878.93,
+        "holding_bars": 4,
+        "entry_reason": "trend-close>sma40|mom20-ok|eff-ok|retq22-off",
+        "exit_reason": "risk-off"
+      },
+      {
+        "symbol": "DOGE",
+        "entry_time": "2025-09-21T00:00:00.000Z",
+        "exit_time": "2025-09-22T00:00:00.000Z",
+        "net_pnl": -37949.6,
+        "holding_bars": 2,
+        "entry_reason": "strict-extra-rotate-close>sma40|mom20-ok|eff-ok|retq22-off|idle-extra",
+        "exit_reason": "trend-switch"
+      },
+      {
+        "symbol": "DOGE",
+        "entry_time": "2025-01-07T12:00:00.000Z",
+        "exit_time": "2025-01-08T00:00:00.000Z",
+        "net_pnl": -31872.59,
+        "holding_bars": 1,
+        "entry_reason": "strict-extra-rotate-close>sma40|mom20-ok|eff-ok|retq22-off|idle-extra",
+        "exit_reason": "risk-off"
+      },
+      {
+        "symbol": "PENGU",
+        "entry_time": "2026-01-05T12:00:00.000Z",
+        "exit_time": "2026-01-10T00:00:00.000Z",
+        "net_pnl": -29609.56,
+        "holding_bars": 9,
+        "entry_reason": "strict-extra-rotate-close>sma40|mom20-ok|eff-ok|retq22-off|idle-extra",
+        "exit_reason": "trend-switch"
+      }
+    ]
+  },
+  "insights": [
+    "USDT待機が長いです。特に最長 86.5 日の待機があり、候補通貨不足またはエントリー条件が厳しすぎる可能性があります。",
+    "決済の遅れで含み益を削っている可能性が高いです。SMA割れまで待つ出口が重いかもしれません。",
+    "ETH の負けが目立ちます。この銘柄だけ出口や採用条件を個別調整する余地があります。"
+  ],
+  "files": {
+    "tradeEventsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\current-production-max-window\\retq22-trade_events.csv",
+    "tradePairsPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\current-production-max-window\\retq22-trade_pairs.csv",
+    "equityCurvePath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\current-production-max-window\\retq22-equity_curve.csv",
+    "monthlyPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\current-production-max-window\\retq22-monthly_returns.csv",
+    "annualPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\current-production-max-window\\retq22-annual_returns.csv",
+    "summaryPath": "C:\\Users\\dis\\-ai-dex-manager\\reports\\current-production-max-window\\retq22-summary.json",
+    "report": "C:\\Users\\dis\\-ai-dex-manager\\reports\\current-production-max-window\\analysis.md"
+  }
+}

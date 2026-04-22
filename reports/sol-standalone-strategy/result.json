@@ -1,0 +1,58 @@
+[
+  {
+    "key": "sol_only_base",
+    "thesis": "SOL only with the base shared trend logic and no range sleeves.",
+    "endEquity": 25423.66,
+    "cagrPct": 34.21,
+    "maxDrawdownPct": -44.11,
+    "profitFactor": 1.499,
+    "winRatePct": 30.77,
+    "tradeCount": 26,
+    "solTradeCount": 26,
+    "solLossCount": 18,
+    "solWinCount": 8,
+    "solPnl": 15423.66
+  },
+  {
+    "key": "sol_breakout_failcut",
+    "thesis": "SOL only breakout entry with moderate quality filters and early failure cut.",
+    "endEquity": 8492.34,
+    "cagrPct": -5.02,
+    "maxDrawdownPct": -24.7,
+    "profitFactor": 0.314,
+    "winRatePct": 28.57,
+    "tradeCount": 7,
+    "solTradeCount": 7,
+    "solLossCount": 5,
+    "solWinCount": 2,
+    "solPnl": -1507.66
+  },
+  {
+    "key": "sol_trend_quality",
+    "thesis": "SOL only smoother trend strategy with stronger efficiency and volume confirmation.",
+    "endEquity": 8129.97,
+    "cagrPct": -6.32,
+    "maxDrawdownPct": -28.16,
+    "profitFactor": 0,
+    "winRatePct": 0,
+    "tradeCount": 4,
+    "solTradeCount": 4,
+    "solLossCount": 4,
+    "solWinCount": 0,
+    "solPnl": -1870.03
+  },
+  {
+    "key": "sol_breakout_failcut_trail",
+    "thesis": "SOL only breakout entry plus failure cut and profit protection trailing.",
+    "endEquity": 7991.54,
+    "cagrPct": -6.83,
+    "maxDrawdownPct": -23.88,
+    "profitFactor": 0.043,
+    "winRatePct": 16.67,
+    "tradeCount": 6,
+    "solTradeCount": 6,
+    "solLossCount": 5,
+    "solWinCount": 1,
+    "solPnl": -2008.46
+  }
+]
