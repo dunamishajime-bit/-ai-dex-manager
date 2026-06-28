@@ -1,0 +1,37 @@
+{
+  "snapshotIso": "2026-06-28T12:00:00Z",
+  "source": "mock-rule-engine",
+  "markets": [
+    {
+      "marketId": "sample-entry-001",
+      "title": "Will a major company announce an AI partnership by June 30?",
+      "category": "business",
+      "deadlineIso": "2026-06-30T23:59:59Z",
+      "currentYesPrice": 0.42,
+      "currentNoPrice": 0.58,
+      "recommendedSide": "YES",
+      "estimatedProbability": 0.64,
+      "edge": 0.22,
+      "expectedReturn": 0.52,
+      "liquidityUsd": 32000,
+      "spread": 0.02,
+      "volume24h": 16000,
+      "evidenceStrength": 0.9,
+      "sourceCount": 8,
+      "primarySources": true,
+      "xSignalStrength": 0.82,
+      "newsSignalStrength": 0.88,
+      "ruleClarity": 0.91,
+      "resolutionRisk": "low",
+      "negativeNews": false,
+      "strongOpposition": false,
+      "liquidityOk": true,
+      "actualResolutionSide": "YES",
+      "finalYesPrice": 1,
+      "finalNoPrice": 0,
+      "maxYesPriceAfterEntry": 0.62,
+      "minYesPriceAfterEntry": 0.39,
+      "notes": ["Primary source supports YES", "Market price appears behind latest information"]
+    }
+  ]
+}
