@@ -1,4 +1,4 @@
-import { getSamplePolymarketBacktest } from "@/lib/goldcat/polymarket";
+import { getSamplePolymarketBacktest, getSamplePolymarketBacktestWindows } from "@/lib/goldcat/polymarket";
 
 function MetricCard({ title, value, text }: { title: string; value: string; text?: string }) {
   return (
@@ -14,8 +14,27 @@ function fmtPct(value: number) {
   return `${(value * 100).toFixed(1)}%`;
 }
 
+function WindowSummary({ label, summary }: { label: string; summary: ReturnType<typeof getSamplePolymarketBacktest> }) {
+  return (
+    <div className="rounded-2xl border border-gold-400/15 bg-black/20 p-3">
+      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-100/70">{label}</div>
+      <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-white/72 md:grid-cols-4">
+        <div><span className="text-white/45">Markets</span><br /><b className="text-white">{summary.totalMarkets}</b></div>
+        <div><span className="text-white/45">Trades</span><br /><b className="text-white">{summary.totalTrades}</b></div>
+        <div><span className="text-white/45">Win</span><br /><b className="text-white">{summary.winRate.toFixed(1)}%</b></div>
+        <div><span className="text-white/45">ROI</span><br /><b className={summary.roi >= 0 ? "text-profit" : "text-loss"}>{fmtPct(summary.roi)}</b></div>
+        <div><span className="text-white/45">PnL</span><br /><b className={summary.totalPnL >= 0 ? "text-profit" : "text-loss"}>${summary.totalPnL.toFixed(2)}</b></div>
+        <div><span className="text-white/45">Max DD</span><br /><b className="text-white">${summary.maxDrawdown.toFixed(2)}</b></div>
+        <div><span className="text-white/45">Entry</span><br /><b className="text-white">{summary.entryCount}</b></div>
+        <div><span className="text-white/45">AI Use</span><br /><b className="text-white">{summary.aiUsagePct.toFixed(1)}%</b></div>
+      </div>
+    </div>
+  );
+}
+
 export function PolymarketBacktestPanel() {
   const summary = getSamplePolymarketBacktest();
+  const windows = getSamplePolymarketBacktestWindows();
   const topScores = [...summary.scores].sort((a, b) => b.finalScore - a.finalScore).slice(0, 6);
 
   return (
@@ -34,6 +53,11 @@ export function PolymarketBacktestPanel() {
         <div className="rounded-full border border-gold-400/20 px-3 py-1 text-[11px] font-bold text-gold-50">
           {summary.snapshotPeriod}
         </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <WindowSummary label="7 Days Simulated" summary={windows.d7} />
+        <WindowSummary label="14 Days Simulated" summary={windows.d14} />
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
