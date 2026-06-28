@@ -12,6 +12,7 @@ PolyMarket市場を対象に、JSON snapshotを入力として以下を行いま
 - Entry市場の想定トレード生成
 - Resolution / Take Profit / Stop Loss の想定Exit
 - ROI、PnL、Win Rate、Max Drawdown等の集計
+- 7日 / 14日 の期間別想定バックテスト
 - HP上での確認
 
 ## 重要方針
@@ -33,6 +34,17 @@ PolyMarket市場を対象に、JSON snapshotを入力として以下を行いま
 - lib/goldcat/polymarket/sampleData.ts
 - lib/goldcat/polymarket/index.ts
 - components/features/polymarket/PolymarketBacktestPanel.tsx
+
+## 7日 / 14日 想定バックテスト
+
+`getSamplePolymarketBacktestWindows()` で以下を返します。
+
+- `d7`: 最新snapshotから過去7日分
+- `d14`: 最新snapshotから過去14日分
+
+HPの `PolyMarket Simulated Backtest` パネルでは、7日と14日の想定成績を並べて表示します。
+
+現在はサンプルsnapshotが1日分だけなので、7日/14日の表示値は同じになります。Telegram GPT-5.4やPolyMarket APIから7日以上のsnapshotが保存されれば、期間別に正しく差が出ます。
 
 ## 入力データ
 
