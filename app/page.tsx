@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";
 
 import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
+import { PolymarketBacktestPanel } from "@/components/features/polymarket/PolymarketBacktestPanel";
 import { useSimulation } from "@/context/SimulationContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 
@@ -132,6 +133,7 @@ export default function HomePage() {
         </section>
 
         <LiveDecisionPanel compact />
+        <PolymarketBacktestPanel />
       </div>
     </main>
   );
