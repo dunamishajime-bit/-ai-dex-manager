@@ -1,0 +1,28 @@
+import type { PolymarketConfig } from "./types";
+
+export const defaultPolymarketConfig: PolymarketConfig = {
+  minFinalScoreForEntry: 85,
+  watchScoreMin: 70,
+  minEdge: 0.08,
+  minExpectedReturn: 0.15,
+  minLiquidityUsd: 1000,
+  maxSpread: 0.08,
+  stakeUsd: 10,
+  maxEntriesPerSnapshot: 3,
+  duplicateEntryPolicy: "skip",
+  takeProfitPct: 0.3,
+  stopLossPct: 0.25,
+  aiEscalationEnabled: true,
+  aiEscalationScoreMin: 80,
+  aiEscalationScoreMax: 89,
+  targetAiUsagePct: 5,
+  weights: {
+    evidence: 20,
+    mispricing: 20,
+    expectedReturn: 20,
+    liquidity: 10,
+    timeEdge: 10,
+    ruleClarity: 10,
+    risk: 10
+  }
+};
