@@ -34,13 +34,13 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade pip pandas numpy requests
 
-      - name: Restore 15-minute and funding cache
+      - name: Restore corrected 15-minute and funding cache
         uses: actions/cache@v4
         with:
           path: |
-            .cache/range_15m
+            .cache/range_15m_v2
             .cache/range_funding
-          key: multi-asset-range-202101-202606-v1
+          key: multi-asset-range-202101-202606-v2-header-normalized
 
       - name: Assemble research script
         run: cat research/multi_asset_range_parts/*.part > research/multi_asset_range_leverage.py
