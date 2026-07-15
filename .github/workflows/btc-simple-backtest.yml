@@ -67,8 +67,8 @@ jobs:
           original_align = m.align_funding
           def normalized_align(frame, index, name):
               normalized = frame.copy()
-              normalized.index = pd.to_datetime(normalized.index, utc=True)
-              normalized_index = pd.DatetimeIndex(pd.to_datetime(index, utc=True))
+              normalized.index = pd.to_datetime(normalized.index, utc=True, format="mixed")
+              normalized_index = pd.DatetimeIndex(pd.to_datetime(index, utc=True, format="mixed"))
               return original_align(normalized, normalized_index, name)
           m.align_funding = normalized_align
           from research import microstructure_validation as validation
