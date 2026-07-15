@@ -1,0 +1,150 @@
+        "https://data.binance.vision/data/futures/um/monthly/fundingRate/"
+        f"{symbol}/{symbol}-fundingRate-{stamp}.zip"
+    )
+    session = requests.Session()
+    session.headers.update({"User-Agent": "disdex-integrated-profit-research/1.0"})
+    for attempt in range(3):
+        try:
+            response = session.get(url, timeout=75)
+            if response.status_code == 404:
+                return symbol, None
+            response.raise_for_status()
+            with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+                names = [n for n in archive.namelist() if n.lower().endswith(".csv")]
+                if not names:
+                    return symbol, None
+                frame = parse_funding_csv(archive.read(names[0]))
+                if not frame.empty:
+                    frame.to_csv(cached, index=False)
+                return symbol, frame
+        except Exception as exc:
+            if attempt == 2:
+                print(f"WARN funding {symbol} {stamp}: {exc}")
+                return symbol, None
+            time.sleep(0.75 * (attempt + 1))
+    return symbol, None
+
+
+def load_funding(index: pd.DatetimeIndex, symbols: list[str]) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    jobs = [(symbol, period) for symbol in symbols for period in periods()]
+    collected: dict[str, list[pd.DataFrame]] = {s: [] for s in symbols}
+    with ThreadPoolExecutor(max_workers=24) as pool:
+        futures = [pool.submit(funding_one, symbol, period) for symbol, period in jobs]
+        for n, future in enumerate(as_completed(futures), start=1):
+            symbol, frame = future.result()
+            if frame is not None and not frame.empty:
+                collected[symbol].append(frame)
+            if n % 250 == 0:
+                print(f"Funding checked {n}/{len(jobs)}")
+    event = pd.DataFrame(0.0, index=index, columns=symbols)
+    latest = pd.DataFrame(0.0, index=index, columns=symbols)
+    coverage = {}
+    for symbol in symbols:
+        frames = collected[symbol]
+        if not frames:
+            coverage[symbol] = 0
+            continue
+        frame = pd.concat(frames, ignore_index=True)
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+        series = (
+            frame.drop_duplicates("timestamp", keep="last")
+            .sort_values("timestamp")
+            .set_index("timestamp")["funding_rate"]
+            .astype(float)
+        )
+        coverage[symbol] = int(len(series))
+        grouped = series.groupby(series.index.floor("4h")).sum()
+        event[symbol] = grouped.reindex(index, fill_value=0.0)
+        latest[symbol] = series.reindex(index, method="ffill").fillna(0.0)
+    return event, latest, coverage
+
+
+def build_panel(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    index = pd.date_range(
+        min(frame.index.min() for frame in data.values()),
+        max(frame.index.max() for frame in data.values()),
+        freq="4h", tz="UTC",
+    )
+    panel = {}
+    for field in ["open", "high", "low", "close", "quote_volume"]:
+        panel[field] = pd.DataFrame(
+            {symbol: frame[field].reindex(index) for symbol, frame in data.items()}, index=index
+        )
+    panel["asset_return"] = panel["open"].shift(-1) / panel["open"] - 1.0
+    return panel
+
+
+def rolling_z(frame: pd.DataFrame, window: int, min_periods: int) -> pd.DataFrame:
+    mean = frame.rolling(window, min_periods=min_periods).mean()
+    std = frame.rolling(window, min_periods=min_periods).std()
+    return (frame - mean) / std.replace(0, np.nan)
+
+
+def build_features(panel: dict[str, pd.DataFrame], funding_latest: pd.DataFrame) -> dict:
+    close = panel["close"]
+    logret = np.log(close).diff()
+    rv21 = logret.rolling(21 * 6, min_periods=14 * 6).std() * math.sqrt(ANNUAL_BARS)
+    liquidity = panel["quote_volume"].rolling(30 * 6, min_periods=10 * 6).median()
+    available = close.notna().rolling(180 * 6, min_periods=1).sum() >= 150 * 6
+    btc = close["BTCUSDT"]
+    ema60 = btc.ewm(span=60 * 6, adjust=False, min_periods=60 * 6).mean()
+    ema200 = btc.ewm(span=200 * 6, adjust=False, min_periods=200 * 6).mean()
+    mom90 = btc / btc.shift(90 * 6) - 1.0
+    regime = pd.Series("neutral", index=close.index, dtype="object")
+    regime.loc[(btc > ema200) & (ema60 > ema200) & (mom90 > 0)] = "bull"
+    regime.loc[(btc < ema200) & (ema60 < ema200) & (mom90 < 0)] = "bear"
+    volume_log = np.log1p(panel["quote_volume"])
+    volume_z = rolling_z(volume_log, 30 * 6, 10 * 6)
+    bar_range = (panel["high"] - panel["low"]) / panel["close"]
+    range_z = rolling_z(bar_range, 30 * 6, 10 * 6)
+    funding_z = rolling_z(funding_latest, 90 * 6, 30 * 6)
+    return {
+        "close": close,
+        "high": panel["high"],
+        "low": panel["low"],
+        "asset_return": panel["asset_return"].fillna(0.0),
+        "rv21": rv21,
+        "liquidity": liquidity,
+        "available": available,
+        "regime": regime,
+        "volume_z": volume_z,
+        "range_z": range_z,
+        "funding_z": funding_z,
+    }
+
+
+def momentum_score(close: pd.DataFrame, rv: pd.DataFrame, horizons: tuple[int, int, int]) -> pd.DataFrame:
+    sleeves = []
+    for days in horizons:
+        lr = np.log(close / close.shift(days * 6))
+        hvol = rv.clip(lower=0.10) * math.sqrt(days / 365.25)
+        sleeves.append(np.tanh(lr / hvol.replace(0, np.nan) / 1.75))
+    return sum(sleeves) / len(sleeves)
+
+
+def inverse_vol_weights(selected: list[str], side: float, rv: pd.Series, gross: float, cap: float) -> pd.Series:
+    if not selected or gross <= 0:
+        return pd.Series(dtype=float)
+    vols = rv[selected].replace([np.inf, -np.inf], np.nan).dropna().clip(lower=0.15)
+    if vols.empty:
+        return pd.Series(dtype=float)
+    w = (1.0 / vols)
+    w = w / w.sum() * gross
+    w = w.clip(upper=cap)
+    if w.sum() > 0:
+        w = w / w.sum() * min(gross, cap * len(w))
+    return side * w
+
+
+def valid_liquid_symbols(fx: dict, i: int, limit: int = 12) -> list[str]:
+    valid = (
+        fx["available"].iloc[i]
+        & fx["close"].iloc[i].notna()
+        & fx["rv21"].iloc[i].notna()
+        & fx["liquidity"].iloc[i].notna()
+    )
+    symbols = list(fx["close"].columns[valid])
+    if not symbols:
+        return []
+    return list(fx["liquidity"].iloc[i][symbols].sort_values(ascending=False).head(limit).index)
+
