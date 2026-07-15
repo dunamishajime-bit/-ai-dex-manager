@@ -1,0 +1,14 @@
+## Interpretation
+
+The 10x-20x exchange leverage value is only a margin ceiling. Account risk is
+set from the ATR stop, and the simulator blocks martingale/averaging down. A
+high displayed leverage therefore does not automatically create high account
+returns. The strategy must earn its return from multi-symbol selection and
+range-edge mean reversion after costs.
+"""
+    (OUT / "report.md").write_text(report)
+    print(report)
+
+
+if __name__ == "__main__":
+    main()
