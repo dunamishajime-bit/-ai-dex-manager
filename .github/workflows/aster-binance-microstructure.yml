@@ -1,0 +1,46 @@
+name: Aster-Binance microstructure backtest
+
+on:
+  push:
+    branches:
+      - analysis/aster-binance-microstructure-20260715
+    paths:
+      - "research/microstructure_parts/**"
+      - ".github/workflows/aster-binance-microstructure.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/microstructure_parts/**"
+      - ".github/workflows/aster-binance-microstructure.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+      - name: Assemble research script
+        run: cat research/microstructure_parts/*.part > research/aster_binance_microstructure.py
+      - name: Validate syntax
+        run: python -m py_compile research/aster_binance_microstructure.py
+      - name: Run holdout backtest
+        run: python research/aster_binance_microstructure.py
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aster-binance-microstructure-report
+          path: backtest_output_microstructure/
+          if-no-files-found: warn
