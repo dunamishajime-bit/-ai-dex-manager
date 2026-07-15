@@ -1,5 +1,5 @@
-symbol,aster_bars,binance_bars,aster_mark_bars,binance_mark_bars,aster_funding_rows,binance_funding_rows,metrics_rows,liquidation_rows,status
-BTCUSDT,78624,0,78623,0,819,0,0,0,missing_core_price_data
-ETHUSDT,78624,0,78623,0,819,0,0,0,missing_core_price_data
-SOLUSDT,78624,0,78623,0,819,0,0,0,missing_core_price_data
-PENGUUSDT,78624,0,78623,0,1637,0,0,0,missing_core_price_data
+symbol,aster_bars,binance_bars,aster_mark_bars,binance_mark_bars,aster_funding_rows,binance_funding_rows,metrics_rows,liquidation_rows,start,end,status
+BTCUSDT,78624,78624,78623,0,819,819,0,0,2025-10-01 00:00:00+00:00,2026-06-30 23:55:00+00:00,ok
+ETHUSDT,78624,78624,78623,0,819,819,0,0,2025-10-01 00:00:00+00:00,2026-06-30 23:55:00+00:00,ok
+SOLUSDT,78624,78624,78623,0,819,819,0,0,2025-10-01 00:00:00+00:00,2026-06-30 23:55:00+00:00,ok
+PENGUUSDT,78624,78624,78623,0,1637,1637,0,0,2025-10-01 00:00:00+00:00,2026-06-30 23:55:00+00:00,ok
