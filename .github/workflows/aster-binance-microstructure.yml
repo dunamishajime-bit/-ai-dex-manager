@@ -10,6 +10,7 @@ on:
   pull_request:
     branches:
       - master
+      - analysis/aster-binance-microstructure-20260715
     paths:
       - "research/microstructure_parts/**"
       - ".github/workflows/aster-binance-microstructure.yml"
