@@ -8,6 +8,7 @@ on:
       - "research/microstructure_parts/**"
       - "research/trading_committee_basis.py"
       - "research/trading_committee_tail.py"
+      - "research/trading_committee_tail_runner.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   pull_request:
@@ -17,6 +18,7 @@ on:
       - "research/microstructure_parts/**"
       - "research/trading_committee_basis.py"
       - "research/trading_committee_tail.py"
+      - "research/trading_committee_tail_runner.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   workflow_dispatch:
@@ -54,8 +56,11 @@ jobs:
           python -m py_compile research/aster_binance_microstructure.py
           python -m py_compile research/trading_committee_basis.py
           python -m py_compile research/trading_committee_tail.py
+          python -m py_compile research/trading_committee_tail_runner.py
       - name: Run tail-basis committee test
-        run: python -m research.trading_committee_tail 2>&1 | tee trading_committee_tail.log
+        run: |
+          set -o pipefail
+          python -m research.trading_committee_tail_runner 2>&1 | tee trading_committee_tail.log
       - name: Upload research report
         if: always()
         uses: actions/upload-artifact@v4
