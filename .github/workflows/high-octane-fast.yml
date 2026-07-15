@@ -44,6 +44,8 @@ jobs:
           key: integrated-profit-202101-202606-v1
       - name: Assemble dependency
         run: cat research/integrated_profit_parts/*.part > research/integrated_profit_portfolio.py
+      - name: Normalize mixed cached timestamps
+        run: sed -i 's/pd.to_datetime(frame\["timestamp"\], utc=True)/pd.to_datetime(frame["timestamp"], utc=True, format="mixed")/' research/integrated_profit_portfolio.py
       - name: Validate syntax
         run: python -m py_compile research/integrated_profit_portfolio.py research/high_octane_iterative.py research/high_octane_fast.py
       - name: Run representative five rounds
