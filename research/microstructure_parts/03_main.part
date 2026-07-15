@@ -1,0 +1,57 @@
+
+def rule_grid(has_liq):
+    fam=["basis_revert","funding_revert","oi_imb_cont","oi_imb_revert","liquidity_revert"]
+    if has_liq:fam += ["liquidation_revert","liquidation_cont"]
+    out=[]
+    for family in fam:
+        for t in [1.5,2.0,2.5,3.0]:
+            for h in [3,12,48]:
+                out.append(Rule(f"{family}_z{t}_h{h}",family,t,h,"event"))
+    return out
+
+def score(s):
+    if s["events"]<20:return -999
+    return s["cagr"]+0.15*s["sharpe"]+0.8*s["max_dd"]
+
+def fmt(x):return f"{100*x:.2f}%"
+def main():
+    OUT.mkdir(parents=True,exist_ok=True)
+    all_rows=[]; chosen=[]; availability=[]; holdout_parts=[]
+    for symbol in SYMBOLS:
+        print("Loading",symbol)
+        f=make_features(load_symbol(symbol))
+        avail={"symbol":symbol,"basis":bool(f["basis"].notna().sum()),"funding":bool(f["funding"].notna().sum()),"open_interest":bool(f["oi_z"].notna().sum()),"taker_imbalance":bool(f["imb_z"].notna().sum()),"liquidations":bool(f["liq_z"].notna().sum()),"historical_book_depth":False,"aster_cross_exchange_history":False}
+        availability.append(avail)
+        grid=rule_grid(avail["liquidations"])
+        rows=[]
+        for rule in grid:
+            sim=simulate(f,rule); tr=stats(sim,f.index.min(),TRAIN_END)
+            rows.append({"symbol":symbol,**asdict(rule),**tr,"selection_score":score(tr)})
+        rank=pd.DataFrame(rows).sort_values("selection_score",ascending=False)
+        all_rows.extend(rows)
+        best=None
+        for row in rank.itertuples(index=False):
+            if row.selection_score<=-900:continue
+            best=Rule(row.name,row.family,row.threshold,row.hold_bars,row.mode); break
+        if best is None:continue
+        sim=simulate(f,best); ho=stats(sim,TRAIN_END,END_TS)
+        chosen.append({"symbol":symbol,**asdict(best),**ho})
+        holdout_parts.append(sim.returns.loc[(sim.returns.index>=TRAIN_END)&(sim.returns.index<END_TS)].rename(symbol))
+        print(symbol,best.name,ho)
+    pd.DataFrame(all_rows).to_csv(OUT/"candidate_selection.csv",index=False)
+    pd.DataFrame(chosen).to_csv(OUT/"selected_holdout.csv",index=False)
+    pd.DataFrame(availability).to_csv(OUT/"data_availability.csv",index=False)
+    if holdout_parts:
+        panel=pd.concat(holdout_parts,axis=1).fillna(0)
+        ensemble=panel.mean(axis=1)
+        fake=Sim(ensemble,pd.Series(0,index=ensemble.index),pd.Series(0,index=ensemble.index))
+        ens=stats(fake,TRAIN_END,END_TS)
+        monthly=(1+ensemble).resample("ME").prod()-1
+        monthly.to_csv(OUT/"ensemble_monthly.csv",header=["return"])
+    else:ens={"total_return":0,"cagr":0,"max_dd":0,"sharpe":0,"events":0,"hit_rate":0}
+    avdf=pd.DataFrame(availability); cdf=pd.DataFrame(chosen)
+    lines=["# Perpetual Microstructure Event Backtest","","## Design","","- Historical source: Binance USD-M public archives","- Symbols: BTCUSDT, ETHUSDT, SOLUSDT","- Selection: 2023-01 through 2024-12","- Untouched holdout: 2025-01 through 2026-06","- Execution: signal at completed 5m bar, position from next bar","- Cost: 6 bps per side","- No synthetic Aster history","","## Data availability","",avdf.to_markdown(index=False),"","## Selected rules and holdout","",cdf.to_markdown(index=False) if len(cdf) else "No eligible rules.","","## Equal-weight holdout ensemble","",f"- Total return: {fmt(ens['total_return'])}",f"- CAGR: {fmt(ens['cagr'])}",f"- Max drawdown: {fmt(ens['max_dd'])}",f"- Sharpe: {ens['sharpe']:.2f}","","## Scope limits","","Aster does publish real-time trades, mark/funding, book ticker, depth and liquidation streams, but no public long-horizon archive was found. Therefore Aster-vs-Binance basis, cross-exchange lead/lag, and historical Aster order-book thinning cannot be honestly backtested here. The included live collector is required to build that dataset prospectively."]
+    (OUT/"report.md").write_text("\n".join(lines),encoding="utf-8")
+    (OUT/"metrics.json").write_text(json.dumps({"ensemble":ens,"availability":availability,"selected":chosen},indent=2,default=str),encoding="utf-8")
+    print("\n".join(lines))
+if __name__=="__main__":main()
