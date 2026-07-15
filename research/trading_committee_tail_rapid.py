@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Representative pre-screen for the full tail-basis grid."""
+"""Representative tail pre-screen using only required cached datasets."""
+import numpy as np
 import pandas as pd
 from research import aster_binance_microstructure as m
 
@@ -12,6 +13,46 @@ def normalized_align(frame, index, name):
     return _original_align(normalized, normalized_index, name)
 
 m.align_funding = normalized_align
+
+
+def price_funding_only_loader(symbol):
+    coverage = {"symbol": symbol}
+    a = m.fetch_klines(m.ASTER, "/fapi/v1/klines", symbol, m.START, m.END)
+    am = m.fetch_klines(m.ASTER, "/fapi/v1/markPriceKlines", symbol, m.START, m.END)
+    b = m.fetch_klines(m.BINANCE, "/fapi/v1/klines", symbol, m.START, m.END)
+    bm = m.fetch_klines(m.BINANCE, "/fapi/v1/markPriceKlines", symbol, m.START, m.END)
+    af = m.fetch_funding(m.ASTER, symbol, m.START, m.END)
+    bf = m.fetch_funding(m.BINANCE, symbol, m.START, m.END)
+    coverage.update({
+        "aster_bars": len(a), "binance_bars": len(b),
+        "aster_mark_bars": len(am), "binance_mark_bars": len(bm),
+        "aster_funding_rows": len(af), "binance_funding_rows": len(bf),
+        "metrics_rows": 0, "liquidation_rows": 0,
+    })
+    if a.empty or b.empty:
+        coverage["status"] = "missing_core_price_data"
+        return pd.DataFrame(), coverage
+    index = a.index.intersection(b.index)
+    index = index[(index >= m.START) & (index < m.END)]
+    if len(index) < 30 * 24 * 12:
+        coverage["status"] = "insufficient_overlap"
+        return pd.DataFrame(), coverage
+    df = pd.DataFrame(index=index)
+    for prefix, frame in [("a", a), ("b", b)]:
+        for column in ["open", "high", "low", "close", "quote_volume", "trades", "taker_buy_quote"]:
+            if column in frame:
+                df[f"{prefix}_{column}"] = frame[column].reindex(index)
+        df[f"{prefix}_flow"] = m.safe_flow(frame).reindex(index)
+    df["a_mark"] = am["close"].reindex(index).ffill() if not am.empty else np.nan
+    df["b_mark"] = bm["close"].reindex(index).ffill() if not bm.empty else np.nan
+    df["a_funding"] = m.align_funding(af, index, "a_funding")
+    df["b_funding"] = m.align_funding(bf, index, "b_funding")
+    df["long_liq"] = np.nan
+    df["short_liq"] = np.nan
+    coverage.update({"start": str(index.min()), "end": str(index.max()), "status": "ok"})
+    return m.build_features(df), coverage
+
+m.load_symbol = price_funding_only_loader
 
 from research import trading_committee_tail as tail
 
