@@ -1,0 +1,66 @@
+
+=== Loading BTCUSDT ===
+aster BTCUSDT fapi_v1_klines: 15,000 bars
+aster BTCUSDT fapi_v1_klines: 30,000 bars
+aster BTCUSDT fapi_v1_klines: 45,000 bars
+aster BTCUSDT fapi_v1_klines: 60,000 bars
+aster BTCUSDT fapi_v1_klines: 75,000 bars
+aster BTCUSDT fapi_v1_markPriceKlines: 15,000 bars
+aster BTCUSDT fapi_v1_markPriceKlines: 30,000 bars
+aster BTCUSDT fapi_v1_markPriceKlines: 45,000 bars
+aster BTCUSDT fapi_v1_markPriceKlines: 60,000 bars
+aster BTCUSDT fapi_v1_markPriceKlines: 75,000 bars
+WARN request failed https://fapi.binance.com/fapi/v1/klines {'symbol': 'BTCUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/markPriceKlines {'symbol': 'BTCUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/markPriceKlines?symbol=BTCUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/fundingRate {'symbol': 'BTCUSDT', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1000}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&startTime=1759276800000&endTime=1782863999999&limit=1000
+
+=== Loading ETHUSDT ===
+aster ETHUSDT fapi_v1_klines: 15,000 bars
+aster ETHUSDT fapi_v1_klines: 30,000 bars
+aster ETHUSDT fapi_v1_klines: 45,000 bars
+aster ETHUSDT fapi_v1_klines: 60,000 bars
+aster ETHUSDT fapi_v1_klines: 75,000 bars
+aster ETHUSDT fapi_v1_markPriceKlines: 15,000 bars
+aster ETHUSDT fapi_v1_markPriceKlines: 30,000 bars
+aster ETHUSDT fapi_v1_markPriceKlines: 45,000 bars
+aster ETHUSDT fapi_v1_markPriceKlines: 60,000 bars
+aster ETHUSDT fapi_v1_markPriceKlines: 75,000 bars
+WARN request failed https://fapi.binance.com/fapi/v1/klines {'symbol': 'ETHUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/klines?symbol=ETHUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/markPriceKlines {'symbol': 'ETHUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/markPriceKlines?symbol=ETHUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/fundingRate {'symbol': 'ETHUSDT', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1000}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/fundingRate?symbol=ETHUSDT&startTime=1759276800000&endTime=1782863999999&limit=1000
+
+=== Loading SOLUSDT ===
+aster SOLUSDT fapi_v1_klines: 15,000 bars
+aster SOLUSDT fapi_v1_klines: 30,000 bars
+aster SOLUSDT fapi_v1_klines: 45,000 bars
+aster SOLUSDT fapi_v1_klines: 60,000 bars
+aster SOLUSDT fapi_v1_klines: 75,000 bars
+aster SOLUSDT fapi_v1_markPriceKlines: 15,000 bars
+aster SOLUSDT fapi_v1_markPriceKlines: 30,000 bars
+aster SOLUSDT fapi_v1_markPriceKlines: 45,000 bars
+aster SOLUSDT fapi_v1_markPriceKlines: 60,000 bars
+aster SOLUSDT fapi_v1_markPriceKlines: 75,000 bars
+WARN request failed https://fapi.binance.com/fapi/v1/klines {'symbol': 'SOLUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/klines?symbol=SOLUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/markPriceKlines {'symbol': 'SOLUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/markPriceKlines?symbol=SOLUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/fundingRate {'symbol': 'SOLUSDT', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1000}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/fundingRate?symbol=SOLUSDT&startTime=1759276800000&endTime=1782863999999&limit=1000
+
+=== Loading PENGUUSDT ===
+aster PENGUUSDT fapi_v1_klines: 15,000 bars
+aster PENGUUSDT fapi_v1_klines: 30,000 bars
+aster PENGUUSDT fapi_v1_klines: 45,000 bars
+aster PENGUUSDT fapi_v1_klines: 60,000 bars
+aster PENGUUSDT fapi_v1_klines: 75,000 bars
+aster PENGUUSDT fapi_v1_markPriceKlines: 15,000 bars
+aster PENGUUSDT fapi_v1_markPriceKlines: 30,000 bars
+aster PENGUUSDT fapi_v1_markPriceKlines: 45,000 bars
+aster PENGUUSDT fapi_v1_markPriceKlines: 60,000 bars
+aster PENGUUSDT fapi_v1_markPriceKlines: 75,000 bars
+WARN request failed https://fapi.binance.com/fapi/v1/klines {'symbol': 'PENGUUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/klines?symbol=PENGUUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/markPriceKlines {'symbol': 'PENGUUSDT', 'interval': '5m', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1500}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/markPriceKlines?symbol=PENGUUSDT&interval=5m&startTime=1759276800000&endTime=1782863999999&limit=1500
+WARN request failed https://fapi.binance.com/fapi/v1/fundingRate {'symbol': 'PENGUUSDT', 'startTime': 1759276800000, 'endTime': 1782863999999, 'limit': 1000}: 451 Client Error:  for url: https://fapi.binance.com/fapi/v1/fundingRate?symbol=PENGUUSDT&startTime=1759276800000&endTime=1782863999999&limit=1000
+Traceback (most recent call last):
+  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/aster_binance_microstructure.py", line 826, in <module>
+    main()
+  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/aster_binance_microstructure.py", line 672, in main
+    raise RuntimeError("No usable symbol data")
+RuntimeError: No usable symbol data

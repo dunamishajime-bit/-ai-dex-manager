@@ -1,0 +1,5 @@
+symbol,aster_bars,binance_bars,aster_mark_bars,binance_mark_bars,aster_funding_rows,binance_funding_rows,metrics_rows,liquidation_rows,status
+BTCUSDT,78624,0,78623,0,819,0,0,0,missing_core_price_data
+ETHUSDT,78624,0,78623,0,819,0,0,0,missing_core_price_data
+SOLUSDT,78624,0,78623,0,819,0,0,0,missing_core_price_data
+PENGUUSDT,78624,0,78623,0,1637,0,0,0,missing_core_price_data
