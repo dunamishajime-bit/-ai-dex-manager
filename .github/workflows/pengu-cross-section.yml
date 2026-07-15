@@ -8,6 +8,13 @@ on:
       - "research/pengu_cross_section_ablation.py"
       - "research/multiperp_cross_section.py"
       - ".github/workflows/pengu-cross-section.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/pengu_cross_section_ablation.py"
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/pengu-cross-section.yml"
   workflow_dispatch:
 
 permissions:
