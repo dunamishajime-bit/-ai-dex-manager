@@ -20,12 +20,15 @@ def price_funding_only_loader(symbol):
     a = m.fetch_klines(m.ASTER, "/fapi/v1/klines", symbol, m.START, m.END)
     am = m.fetch_klines(m.ASTER, "/fapi/v1/markPriceKlines", symbol, m.START, m.END)
     b = m.fetch_klines(m.BINANCE, "/fapi/v1/klines", symbol, m.START, m.END)
-    bm = m.fetch_klines(m.BINANCE, "/fapi/v1/markPriceKlines", symbol, m.START, m.END)
+    # The audited extended run found zero Binance mark-price archive rows.
+    # Avoid repeating 18 months of known 404 checks; contract price is the
+    # explicitly documented fallback in resample_symbol().
+    bm = pd.DataFrame()
     af = m.fetch_funding(m.ASTER, symbol, m.START, m.END)
     bf = m.fetch_funding(m.BINANCE, symbol, m.START, m.END)
     coverage.update({
         "aster_bars": len(a), "binance_bars": len(b),
-        "aster_mark_bars": len(am), "binance_mark_bars": len(bm),
+        "aster_mark_bars": len(am), "binance_mark_bars": 0,
         "aster_funding_rows": len(af), "binance_funding_rows": len(bf),
         "metrics_rows": 0, "liquidation_rows": 0,
     })
@@ -44,7 +47,7 @@ def price_funding_only_loader(symbol):
                 df[f"{prefix}_{column}"] = frame[column].reindex(index)
         df[f"{prefix}_flow"] = m.safe_flow(frame).reindex(index)
     df["a_mark"] = am["close"].reindex(index).ffill() if not am.empty else np.nan
-    df["b_mark"] = bm["close"].reindex(index).ffill() if not bm.empty else np.nan
+    df["b_mark"] = np.nan
     df["a_funding"] = m.align_funding(af, index, "a_funding")
     df["b_funding"] = m.align_funding(bf, index, "b_funding")
     df["long_liq"] = np.nan
