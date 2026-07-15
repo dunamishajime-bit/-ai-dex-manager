@@ -9,6 +9,7 @@ on:
       - "research/trading_committee_basis.py"
       - "research/trading_committee_tail.py"
       - "research/trading_committee_tail_rapid.py"
+      - "research/trading_committee_tail_fullfast.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   pull_request:
@@ -19,6 +20,7 @@ on:
       - "research/trading_committee_basis.py"
       - "research/trading_committee_tail.py"
       - "research/trading_committee_tail_rapid.py"
+      - "research/trading_committee_tail_fullfast.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   workflow_dispatch:
@@ -57,10 +59,11 @@ jobs:
           python -m py_compile research/trading_committee_basis.py
           python -m py_compile research/trading_committee_tail.py
           python -m py_compile research/trading_committee_tail_rapid.py
-      - name: Run representative tail pre-screen
+          python -m py_compile research/trading_committee_tail_fullfast.py
+      - name: Run full event-first tail grid
         run: |
           set -o pipefail
-          python -m research.trading_committee_tail_rapid 2>&1 | tee trading_committee_tail.log
+          python -m research.trading_committee_tail_fullfast 2>&1 | tee trading_committee_tail.log
       - name: Upload research report
         if: always()
         uses: actions/upload-artifact@v4
