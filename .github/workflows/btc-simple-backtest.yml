@@ -56,7 +56,7 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: |
           set -o pipefail
-          python research/microstructure_validation.py 2>&1 | tee microstructure_validation.log
+          python -m research.microstructure_validation 2>&1 | tee microstructure_validation.log
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
