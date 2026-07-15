@@ -35,6 +35,11 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: python -m pip install --upgrade pip pandas numpy requests
+      - name: Restore market-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster_binance_microstructure
+          key: aster-binance-microstructure-202510-202606-v1
       - name: Assemble research script
         run: cat research/microstructure_parts/*.part > research/aster_binance_microstructure.py
       - name: Validate syntax
@@ -56,7 +61,19 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: |
           set -o pipefail
-          python -m research.microstructure_validation 2>&1 | tee microstructure_validation.log
+          python - <<'PY' 2>&1 | tee microstructure_validation.log
+          import pandas as pd
+          from research import aster_binance_microstructure as m
+          original_align = m.align_funding
+          def normalized_align(frame, index, name):
+              normalized = frame.copy()
+              normalized.index = pd.to_datetime(normalized.index, utc=True)
+              normalized_index = pd.DatetimeIndex(pd.to_datetime(index, utc=True))
+              return original_align(normalized, normalized_index, name)
+          m.align_funding = normalized_align
+          from research import microstructure_validation as validation
+          validation.main()
+          PY
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
