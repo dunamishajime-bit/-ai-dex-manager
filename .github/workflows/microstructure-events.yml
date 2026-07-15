@@ -8,6 +8,13 @@ on:
       - "research/microstructure_parts/**"
       - "research/aster_binance_live_collector.py"
       - ".github/workflows/microstructure-events.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/microstructure_parts/**"
+      - "research/aster_binance_live_collector.py"
+      - ".github/workflows/microstructure-events.yml"
   workflow_dispatch:
 
 permissions:
