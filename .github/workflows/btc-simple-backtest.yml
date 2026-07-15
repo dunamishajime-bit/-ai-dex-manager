@@ -7,6 +7,7 @@ on:
     paths:
       - "research/microstructure_parts/**"
       - "research/trading_committee_basis.py"
+      - "research/trading_committee_basis_fast.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   pull_request:
@@ -15,6 +16,7 @@ on:
     paths:
       - "research/microstructure_parts/**"
       - "research/trading_committee_basis.py"
+      - "research/trading_committee_basis_fast.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   workflow_dispatch:
@@ -51,8 +53,9 @@ jobs:
         run: |
           python -m py_compile research/aster_binance_microstructure.py
           python -m py_compile research/trading_committee_basis.py
+          python -m py_compile research/trading_committee_basis_fast.py
       - name: Run committee backtest
-        run: python -m research.trading_committee_basis 2>&1 | tee trading_committee_basis.log
+        run: python -m research.trading_committee_basis_fast 2>&1 | tee trading_committee_basis.log
       - name: Upload research report
         if: always()
         uses: actions/upload-artifact@v4
