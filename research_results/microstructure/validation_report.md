@@ -19,4 +19,3 @@ Full ablations are in `robustness_ablations.csv`; market-neutral comparisons are
 Aster-only PENGU profitability without profitability in the hedged spread can reflect directional market exposure rather than convergence of the cross-venue dislocation. Conversely, a positive hedged result is stronger evidence that the price ratio itself mean-reverts after costs.
 
 The validation period is only three months. Even a robustness pass permits prospective paper trading only, not capital deployment.
-
