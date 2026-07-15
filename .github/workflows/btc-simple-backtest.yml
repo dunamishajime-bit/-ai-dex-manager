@@ -7,8 +7,7 @@ on:
     paths:
       - "research/microstructure_parts/**"
       - "research/trading_committee_basis.py"
-      - "research/trading_committee_basis_fast.py"
-      - "research/trading_committee_basis_rapid.py"
+      - "research/trading_committee_tail.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   pull_request:
@@ -17,8 +16,7 @@ on:
     paths:
       - "research/microstructure_parts/**"
       - "research/trading_committee_basis.py"
-      - "research/trading_committee_basis_fast.py"
-      - "research/trading_committee_basis_rapid.py"
+      - "research/trading_committee_tail.py"
       - "research/TRADING_COMMITTEE_BASIS.md"
       - ".github/workflows/btc-simple-backtest.yml"
   workflow_dispatch:
@@ -29,11 +27,11 @@ permissions:
 jobs:
   backtest:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       PYTHONUNBUFFERED: "1"
-      MICRO_START: "2025-10-01"
-      MICRO_HOLDOUT: "2026-04-01"
+      MICRO_START: "2025-01-01"
+      MICRO_HOLDOUT: "2026-01-01"
       MICRO_END: "2026-07-01"
     steps:
       - name: Check out repository
@@ -44,27 +42,26 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: python -m pip install --upgrade pip pandas numpy requests
-      - name: Restore audited market-data cache
+      - name: Restore extended market-data cache
         uses: actions/cache@v4
         with:
           path: .cache/aster_binance_microstructure
-          key: aster-binance-microstructure-202510-202606-v1
+          key: trading-committee-basis-202501-202606-v1
       - name: Assemble market-data module
         run: cat research/microstructure_parts/*.part > research/aster_binance_microstructure.py
       - name: Validate syntax
         run: |
           python -m py_compile research/aster_binance_microstructure.py
           python -m py_compile research/trading_committee_basis.py
-          python -m py_compile research/trading_committee_basis_fast.py
-          python -m py_compile research/trading_committee_basis_rapid.py
-      - name: Run committee pre-screen
-        run: python -m research.trading_committee_basis_rapid 2>&1 | tee trading_committee_basis.log
+          python -m py_compile research/trading_committee_tail.py
+      - name: Run tail-basis committee test
+        run: python -m research.trading_committee_tail 2>&1 | tee trading_committee_tail.log
       - name: Upload research report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: trading-committee-basis-report
+          name: trading-committee-tail-report
           path: |
-            backtest_output_trading_committee/
-            trading_committee_basis.log
+            backtest_output_trading_committee_tail/
+            trading_committee_tail.log
           if-no-files-found: warn
