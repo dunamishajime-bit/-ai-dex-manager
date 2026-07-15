@@ -7,6 +7,12 @@ on:
     paths:
       - "research/residual_parts/**"
       - ".github/workflows/residual-neutral-backtest.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/residual_parts/**"
+      - ".github/workflows/residual-neutral-backtest.yml"
   workflow_dispatch:
 
 permissions:
