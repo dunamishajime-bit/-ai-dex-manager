@@ -1,37 +1,25 @@
 Traceback (most recent call last):
-  File "<frozen runpy>", line 198, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/microstructure_validation.py", line 293, in <module>
-    main()
+  File "<stdin>", line 11, in <module>
   File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/microstructure_validation.py", line 184, in main
     data = {symbol: frame for symbol in m.SYMBOLS if not (frame := load_core(symbol)).empty}
                                                                    ^^^^^^^^^^^^^^^^^
   File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/microstructure_validation.py", line 44, in load_core
     df["a_funding"] = m.align_funding(af, index, "a_funding")
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/aster_binance_microstructure.py", line 404, in align_funding
-    s = frame["funding_rate"].sort_index().reindex(index, method="ffill", tolerance=pd.Timedelta("12h"))
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/series.py", line 5525, in reindex
-    return super().reindex(
-           ^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/generic.py", line 5476, in reindex
-    return self._reindex_axes(
-           ^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/generic.py", line 5498, in _reindex_axes
-    new_index, indexer = ax.reindex(
-                         ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 4246, in reindex
-    indexer = self.get_indexer(
-              ^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3792, in get_indexer
-    return this._get_indexer(
-           ^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3809, in _get_indexer
-    indexer = self._get_fill_indexer(target, method, limit, tolerance)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3926, in _get_fill_indexer
-    indexer = libalgos.pad(own_values, target_values, limit=limit)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "pandas/_libs/algos.pyx", line 585, in pandas._libs.algos.pad
-TypeError: '<' not supported between instances of 'Timestamp' and 'str'
+  File "<stdin>", line 6, in normalized_align
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/tools/datetimes.py", line 1049, in to_datetime
+    result = convert_listlike(arg, format, name=arg.name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/tools/datetimes.py", line 435, in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/tools/datetimes.py", line 470, in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/strptime.pyx", line 563, in pandas._libs.tslibs.strptime.array_strptime
+  File "pandas/_libs/tslibs/strptime.pyx", line 511, in pandas._libs.tslibs.strptime.array_strptime
+  File "pandas/_libs/tslibs/strptime.pyx", line 617, in pandas._libs.tslibs.strptime._parse_with_format
+ValueError: time data "2025-10-01 16:00:00.002000+00:00" doesn't match format "%Y-%m-%d %H:%M:%S%z". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
