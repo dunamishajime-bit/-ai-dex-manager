@@ -8,6 +8,7 @@ on:
     paths:
       - "research/microstructure_parts/**"
       - "research/microstructure_validation.py"
+      - "research/microstructure_execution_stress.py"
       - ".github/workflows/btc-simple-backtest.yml"
   pull_request:
     branches:
@@ -16,6 +17,7 @@ on:
     paths:
       - "research/microstructure_parts/**"
       - "research/microstructure_validation.py"
+      - "research/microstructure_execution_stress.py"
       - ".github/workflows/btc-simple-backtest.yml"
   workflow_dispatch:
 
@@ -46,6 +48,7 @@ jobs:
         run: |
           python -m py_compile research/aster_binance_microstructure.py
           python -m py_compile research/microstructure_validation.py
+          python -m py_compile research/microstructure_execution_stress.py
       - name: Run holdout backtest
         id: research
         continue-on-error: true
@@ -74,6 +77,14 @@ jobs:
           from research import microstructure_validation as validation
           validation.main()
           PY
+      - name: Run execution stress
+        id: stress
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -o pipefail
+          python -m research.microstructure_execution_stress 2>&1 | tee microstructure_execution_stress.log
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
@@ -83,6 +94,7 @@ jobs:
             backtest_output_microstructure/
             microstructure_run.log
             microstructure_validation.log
+            microstructure_execution_stress.log
           if-no-files-found: warn
       - name: Commit research outputs
         if: always() && github.event_name == 'push'
@@ -90,8 +102,9 @@ jobs:
           mkdir -p research_results/microstructure
           cp -f microstructure_run.log research_results/microstructure/ || true
           cp -f microstructure_validation.log research_results/microstructure/ || true
+          cp -f microstructure_execution_stress.log research_results/microstructure/ || true
           if [ -d backtest_output_microstructure ]; then
-            for f in report.md validation_report.md strategy_results.csv event_studies.csv data_coverage.csv feature_availability.csv variant_selection.csv live_depth_probe.csv holdout_monthly_returns.csv ridge_model.json robustness_ablations.csv spread_construction_results.csv gap_alignment_diagnostics.csv; do
+            for f in report.md validation_report.md execution_stress_report.md strategy_results.csv event_studies.csv data_coverage.csv feature_availability.csv variant_selection.csv live_depth_probe.csv holdout_monthly_returns.csv ridge_model.json robustness_ablations.csv spread_construction_results.csv gap_alignment_diagnostics.csv pengu_execution_diagnostics.csv pengu_execution_stress.csv; do
               cp -f "backtest_output_microstructure/$f" research_results/microstructure/ 2>/dev/null || true
             done
           fi
@@ -103,5 +116,5 @@ jobs:
             git push origin HEAD:${GITHUB_REF_NAME}
           fi
       - name: Preserve failure status
-        if: steps.research.outcome == 'failure' || steps.validation.outcome == 'failure'
+        if: steps.research.outcome == 'failure' || steps.validation.outcome == 'failure' || steps.stress.outcome == 'failure'
         run: exit 1
