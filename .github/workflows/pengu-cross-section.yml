@@ -1,0 +1,42 @@
+name: PENGU cross-sectional ablation
+
+on:
+  push:
+    branches:
+      - analysis/pengu-ablation-20260715
+    paths:
+      - "research/pengu_cross_section_ablation.py"
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/pengu-cross-section.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+
+      - name: Run PENGU ablation
+        run: python research/pengu_cross_section_ablation.py
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-cross-sectional-ablation
+          path: backtest_output_pengu_ablation/
+          if-no-files-found: warn
