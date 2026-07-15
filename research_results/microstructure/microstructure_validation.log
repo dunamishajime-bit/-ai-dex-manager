@@ -1,4 +1,37 @@
 Traceback (most recent call last):
-  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/microstructure_validation.py", line 17, in <module>
-    from research import aster_binance_microstructure as m
-ModuleNotFoundError: No module named 'research'
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/microstructure_validation.py", line 293, in <module>
+    main()
+  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/microstructure_validation.py", line 184, in main
+    data = {symbol: frame for symbol in m.SYMBOLS if not (frame := load_core(symbol)).empty}
+                                                                   ^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/microstructure_validation.py", line 44, in load_core
+    df["a_funding"] = m.align_funding(af, index, "a_funding")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/-ai-dex-manager/-ai-dex-manager/research/aster_binance_microstructure.py", line 404, in align_funding
+    s = frame["funding_rate"].sort_index().reindex(index, method="ffill", tolerance=pd.Timedelta("12h"))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/series.py", line 5525, in reindex
+    return super().reindex(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/generic.py", line 5476, in reindex
+    return self._reindex_axes(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/generic.py", line 5498, in _reindex_axes
+    new_index, indexer = ax.reindex(
+                         ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 4246, in reindex
+    indexer = self.get_indexer(
+              ^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3792, in get_indexer
+    return this._get_indexer(
+           ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3809, in _get_indexer
+    indexer = self._get_fill_indexer(target, method, limit, tolerance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3926, in _get_fill_indexer
+    indexer = libalgos.pad(own_values, target_values, limit=limit)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/algos.pyx", line 585, in pandas._libs.algos.pad
+TypeError: '<' not supported between instances of 'Timestamp' and 'str'

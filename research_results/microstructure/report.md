@@ -63,7 +63,7 @@ The deployment gate is deliberately demanding: holdout CAGR at least 40%, maximu
 
 | Venue | Samples | Avg spread bps | Median top-20 depth USD | Depth imbalance |
 | --- | --- | --- | --- | --- |
-| aster | 20 | 0.02 | 3482065.60 | 0.18 |
+| aster | 20 | 0.06 | 3356076.88 | 0.01 |
 
 This short probe confirms endpoint accessibility only. It is not enough observations to establish a tradable spread/depth edge.
 
