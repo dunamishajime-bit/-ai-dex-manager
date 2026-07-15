@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   backtest:
@@ -38,13 +38,45 @@ jobs:
       - name: Validate syntax
         run: python -m py_compile research/aster_binance_microstructure.py
       - name: Run holdout backtest
+        id: research
+        continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
-        run: python research/aster_binance_microstructure.py
+        run: |
+          set -o pipefail
+          python research/aster_binance_microstructure.py 2>&1 | tee microstructure_run.log
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: aster-binance-microstructure-report
-          path: backtest_output_microstructure/
+          path: |
+            backtest_output_microstructure/
+            microstructure_run.log
           if-no-files-found: warn
+      - name: Commit research outputs
+        if: always() && github.event_name == 'push'
+        run: |
+          mkdir -p research_results/microstructure
+          cp -f microstructure_run.log research_results/microstructure/ || true
+          if [ -d backtest_output_microstructure ]; then
+            cp -f backtest_output_microstructure/report.md research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/strategy_results.csv research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/event_studies.csv research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/data_coverage.csv research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/feature_availability.csv research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/variant_selection.csv research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/live_depth_probe.csv research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/holdout_monthly_returns.csv research_results/microstructure/ 2>/dev/null || true
+            cp -f backtest_output_microstructure/ridge_model.json research_results/microstructure/ 2>/dev/null || true
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f research_results/microstructure
+          if ! git diff --cached --quiet; then
+            git commit -m "research: publish microstructure backtest outputs"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
+      - name: Preserve failure status
+        if: steps.research.outcome == 'failure'
+        run: exit 1
