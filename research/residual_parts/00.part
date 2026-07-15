@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from research import multiperp_cross_section as base
+import multiperp_cross_section as base
 
 SYMBOLS = base.SYMBOLS
 HEDGES = ["BTCUSDT", "ETHUSDT"]
