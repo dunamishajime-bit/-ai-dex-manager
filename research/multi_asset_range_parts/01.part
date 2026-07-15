@@ -1,0 +1,250 @@
+    url = (
+        "https://data.binance.vision/data/futures/um/monthly/fundingRate/"
+        f"{symbol}/{symbol}-fundingRate-{stamp}.zip"
+    )
+    session = requests.Session()
+    session.headers.update({"User-Agent": "disdex-range-research/1.0"})
+    for attempt in range(3):
+        try:
+            response = session.get(url, timeout=75)
+            if response.status_code == 404:
+                return symbol, None
+            response.raise_for_status()
+            content = read_zip_csv(response.content)
+            if content is None:
+                return symbol, None
+            frame = parse_funding(content)
+            if not frame.empty:
+                frame.to_csv(cached, index=False)
+            return symbol, frame
+        except Exception as exc:
+            if attempt == 2:
+                print(f"WARN funding {symbol} {stamp}: {exc}")
+                return symbol, None
+            time.sleep(0.75 * (attempt + 1))
+    return symbol, None
+
+
+def load_data() -> tuple[dict[str, pd.DataFrame], pd.DataFrame]:
+    jobs = [(s, p) for s in UNIVERSE for p in months()]
+    prices: dict[str, list[pd.DataFrame]] = {s: [] for s in UNIVERSE}
+    funding_raw: dict[str, list[pd.DataFrame]] = {s: [] for s in UNIVERSE}
+    with ThreadPoolExecutor(max_workers=24) as pool:
+        futures = [pool.submit(download_kline, *job) for job in jobs]
+        futures += [pool.submit(download_funding, *job) for job in jobs]
+        for n, future in enumerate(as_completed(futures), start=1):
+            symbol, frame = future.result()
+            if frame is not None and not frame.empty:
+                if "funding_rate" in frame:
+                    funding_raw[symbol].append(frame)
+                else:
+                    prices[symbol].append(frame)
+            if n % 300 == 0:
+                print(f"Downloaded/checked {n}/{len(futures)} archives")
+    data: dict[str, pd.DataFrame] = {}
+    for symbol, frames in prices.items():
+        if not frames:
+            continue
+        frame = pd.concat(frames, ignore_index=True)
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, format="mixed")
+        frame = frame.drop_duplicates("timestamp", keep="last").sort_values("timestamp")
+        frame = frame.loc[(frame["timestamp"] >= START) & (frame["timestamp"] < FINAL_END)]
+        if len(frame) >= 365 * BARS_PER_DAY:
+            data[symbol] = frame.set_index("timestamp")
+            print(f"{symbol}: {len(frame):,} bars {frame['timestamp'].min()} -> {frame['timestamp'].max()}")
+    if len(data) < 8 or "BTCUSDT" not in data:
+        raise RuntimeError("Insufficient point-in-time universe coverage")
+    index = pd.date_range(START, FINAL_END - pd.Timedelta(minutes=15), freq="15min", tz="UTC")
+    funding = pd.DataFrame(0.0, index=index, columns=list(data))
+    for symbol in data:
+        frames = funding_raw.get(symbol, [])
+        if not frames:
+            continue
+        frame = pd.concat(frames, ignore_index=True)
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, format="mixed")
+        series = frame.drop_duplicates("timestamp", keep="last").set_index("timestamp")["funding_rate"].astype(float)
+        grouped = series.groupby(series.index.floor("15min")).sum()
+        funding[symbol] = grouped.reindex(index, fill_value=0.0)
+    return data, funding
+
+
+def aligned_panel(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    index = pd.date_range(START, FINAL_END - pd.Timedelta(minutes=15), freq="15min", tz="UTC")
+    panel: dict[str, pd.DataFrame] = {}
+    for field in ["open", "high", "low", "close", "quote_volume", "taker_buy_quote"]:
+        panel[field] = pd.DataFrame(
+            {symbol: frame[field].reindex(index) for symbol, frame in data.items()}, index=index
+        )
+    return panel
+
+
+def true_range(high: pd.DataFrame, low: pd.DataFrame, close: pd.DataFrame) -> pd.DataFrame:
+    prev = close.shift(1)
+    return pd.concat(
+        [(high - low), (high - prev).abs(), (low - prev).abs()], axis=0, keys=["a", "b", "c"]
+    ).groupby(level=1).max()
+
+
+def adx(high: pd.DataFrame, low: pd.DataFrame, close: pd.DataFrame, window: int = 56) -> pd.DataFrame:
+    up = high.diff()
+    down = -low.diff()
+    plus_dm = up.where((up > down) & (up > 0), 0.0)
+    minus_dm = down.where((down > up) & (down > 0), 0.0)
+    tr = true_range(high, low, close)
+    atr = tr.ewm(alpha=1 / window, adjust=False, min_periods=window).mean()
+    plus_di = 100 * plus_dm.ewm(alpha=1 / window, adjust=False, min_periods=window).mean() / atr
+    minus_di = 100 * minus_dm.ewm(alpha=1 / window, adjust=False, min_periods=window).mean() / atr
+    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan)
+    return dx.ewm(alpha=1 / window, adjust=False, min_periods=window).mean()
+
+
+def build_features(panel: dict[str, pd.DataFrame]) -> dict[str, object]:
+    close, high, low, open_ = panel["close"], panel["high"], panel["low"], panel["open"]
+    qv = panel["quote_volume"]
+    taker = panel["taker_buy_quote"]
+    tr = true_range(high, low, close)
+    atr = tr.ewm(span=56, adjust=False, min_periods=56).mean()
+    adx56 = adx(high, low, close, 56)
+    imbalance = (2 * taker / qv - 1).clip(-1, 1)
+    imbalance = imbalance.replace([np.inf, -np.inf], np.nan)
+    logret = np.log(close).diff()
+    short_vol = logret.rolling(16, min_periods=12).std()
+    long_vol = logret.rolling(96, min_periods=64).std()
+    vol_ratio = short_vol / long_vol.replace(0, np.nan)
+    liquidity = qv.rolling(7 * BARS_PER_DAY, min_periods=3 * BARS_PER_DAY).median()
+    volume_z = (
+        np.log1p(qv) - np.log1p(qv).rolling(30 * BARS_PER_DAY, min_periods=10 * BARS_PER_DAY).mean()
+    ) / np.log1p(qv).rolling(30 * BARS_PER_DAY, min_periods=10 * BARS_PER_DAY).std().replace(0, np.nan)
+    candle_range = (high - low) / close
+    range_z = (candle_range - candle_range.rolling(30 * BARS_PER_DAY, min_periods=10 * BARS_PER_DAY).mean()) / candle_range.rolling(30 * BARS_PER_DAY, min_periods=10 * BARS_PER_DAY).std().replace(0, np.nan)
+    valid_history = close.notna().rolling(30 * BARS_PER_DAY, min_periods=1).sum() >= 20 * BARS_PER_DAY
+    # BTC breakout state blocks fading the broader market impulse.
+    btc = close["BTCUSDT"]
+    btc_ema = btc.ewm(span=7 * BARS_PER_DAY, adjust=False, min_periods=3 * BARS_PER_DAY).mean()
+    btc_atr = atr["BTCUSDT"]
+    btc_impulse = ((btc - btc_ema).abs() / btc_atr.replace(0, np.nan) > 3.0) | (range_z["BTCUSDT"] > 2.5)
+    return {
+        "open": open_, "high": high, "low": low, "close": close,
+        "atr": atr, "adx": adx56, "imbalance": imbalance,
+        "vol_ratio": vol_ratio, "liquidity": liquidity,
+        "volume_z": volume_z, "range_z": range_z,
+        "valid_history": valid_history, "btc_impulse": btc_impulse.fillna(False),
+    }
+
+
+def signal_specs() -> list[SignalSpec]:
+    return [
+        SignalSpec("S1", 24, 1.5, 22, 0.16, 1.10, 0.02, 1.15),
+        SignalSpec("S2", 24, 2.0, 18, 0.12, 0.95, 0.08, 1.00),
+        SignalSpec("S3", 48, 1.6, 22, 0.15, 1.05, 0.03, 1.10),
+        SignalSpec("S4", 48, 2.1, 19, 0.11, 0.90, 0.08, 0.98),
+        SignalSpec("S5", 72, 1.8, 21, 0.14, 1.00, 0.04, 1.05),
+        SignalSpec("S6", 72, 2.3, 18, 0.10, 0.88, 0.10, 0.95),
+    ]
+
+
+def exit_specs() -> list[ExitSpec]:
+    return [
+        ExitSpec("E1", 0.65, 8, 1.15, 0.85),
+        ExitSpec("E2", 0.80, 16, 1.25, 0.90),
+        ExitSpec("E3", 0.95, 24, 1.35, 0.95),
+        ExitSpec("E4", 1.10, 32, 1.50, 1.00),
+    ]
+
+
+def risk_specs() -> list[RiskSpec]:
+    return [
+        RiskSpec("R10", 10, 0.0050, 0.15, 3, 3.0),
+        RiskSpec("R15", 15, 0.0075, 0.12, 3, 3.6),
+        RiskSpec("R20", 20, 0.0100, 0.10, 3, 4.0),
+    ]
+
+
+def build_candidates() -> list[Candidate]:
+    out = []
+    n = 1
+    for sig in signal_specs():
+        for ex in exit_specs():
+            for risk in risk_specs():
+                out.append(Candidate(f"MR{n:03d}", sig.name, ex.name, risk.name))
+                n += 1
+    return out
+
+
+def precompute_signal(fx: dict[str, object], spec: SignalSpec) -> dict[str, pd.DataFrame]:
+    close: pd.DataFrame = fx["close"]
+    high: pd.DataFrame = fx["high"]
+    low: pd.DataFrame = fx["low"]
+    open_: pd.DataFrame = fx["open"]
+    bars = spec.range_hours * 4
+    mid = close.rolling(bars, min_periods=int(bars * 0.75)).mean()
+    sd = close.rolling(bars, min_periods=int(bars * 0.75)).std()
+    z = (close - mid) / sd.replace(0, np.nan)
+    rhi = high.rolling(bars, min_periods=int(bars * 0.75)).max().shift(1)
+    rlo = low.rolling(bars, min_periods=int(bars * 0.75)).min().shift(1)
+    width = (rhi - rlo) / mid
+    width_med = width.rolling(30 * BARS_PER_DAY, min_periods=10 * BARS_PER_DAY).median()
+    width_ratio = width / width_med.replace(0, np.nan)
+    edge = (rhi - rlo).replace(0, np.nan)
+    long_edge = close <= rlo + spec.edge_fraction * edge
+    short_edge = close >= rhi - spec.edge_fraction * edge
+    imb: pd.DataFrame = fx["imbalance"]
+    # Reversal confirmation: directionally positive candle/flow after touching edge.
+    long_reversal = (close > open_) & (imb > spec.taker_threshold) & (imb > imb.shift(1))
+    short_reversal = (close < open_) & (imb < -spec.taker_threshold) & (imb < imb.shift(1))
+    range_ok = (
+        (fx["adx"] <= spec.adx_max)
+        & (fx["vol_ratio"] <= spec.max_vol_ratio)
+        & (width_ratio <= spec.width_ratio_max)
+        & (fx["volume_z"] < 2.5)
+        & (fx["range_z"] < 2.5)
+        & fx["valid_history"]
+    )
+    # A recent repeated boundary attack is a breakout warning.
+    upper_attack = (close >= rhi - 0.08 * edge).rolling(16, min_periods=8).sum()
+    lower_attack = (close <= rlo + 0.08 * edge).rolling(16, min_periods=8).sum()
+    long_ok = range_ok & long_edge & (z <= -spec.z_entry) & long_reversal & (lower_attack <= 3)
+    short_ok = range_ok & short_edge & (z >= spec.z_entry) & short_reversal & (upper_attack <= 3)
+    btc_impulse: pd.Series = fx["btc_impulse"]
+    long_ok = long_ok & ~btc_impulse.to_numpy()[:, None]
+    short_ok = short_ok & ~btc_impulse.to_numpy()[:, None]
+    direction = long_ok.astype(np.int8) - short_ok.astype(np.int8)
+    score = z.abs() + 0.5 * imb.abs() + 0.25 * (spec.adx_max - fx["adx"]).clip(lower=0) / spec.adx_max
+    score = score.where(direction != 0)
+    # Use median quote volume rank point-in-time to avoid illiquid tails.
+    liq_rank = fx["liquidity"].rank(axis=1, pct=True)
+    direction = direction.where(liq_rank >= 0.35, 0)
+    score = score.where(direction != 0)
+    return {"direction": direction, "score": score, "mid": mid, "rhi": rhi, "rlo": rlo}
+
+
+def period_mask(index: pd.DatetimeIndex, start: pd.Timestamp, end: pd.Timestamp | None) -> np.ndarray:
+    mask = index >= start
+    if end is not None:
+        mask &= index < end
+    return np.asarray(mask)
+
+
+def simulate(
+    fx: dict[str, object],
+    funding: pd.DataFrame,
+    signal: dict[str, pd.DataFrame],
+    ex: ExitSpec,
+    risk: RiskSpec,
+    one_way_cost: float = BASE_COST,
+    entry_delay_bars: int = 1,
+    funding_multiplier: float = 1.0,
+    risk_multiplier: float = 1.0,
+) -> Simulation:
+    index = fx["close"].index
+    symbols = list(fx["close"].columns)
+    col = {s: j for j, s in enumerate(symbols)}
+    open_a = fx["open"].to_numpy(float)
+    high_a = fx["high"].to_numpy(float)
+    low_a = fx["low"].to_numpy(float)
+    close_a = fx["close"].to_numpy(float)
+    atr_a = fx["atr"].to_numpy(float)
+    dir_a = signal["direction"].to_numpy(np.int8)
+    score_a = signal["score"].to_numpy(float)
+    mid_a = signal["mid"].to_numpy(float)
+    fund_a = funding[symbols].to_numpy(float) * funding_multiplier
