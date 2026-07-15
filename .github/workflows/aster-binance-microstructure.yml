@@ -36,6 +36,8 @@ jobs:
       - name: Validate syntax
         run: python -m py_compile research/aster_binance_microstructure.py
       - name: Run holdout backtest
+        env:
+          PYTHONUNBUFFERED: "1"
         run: python research/aster_binance_microstructure.py
       - name: Upload report
         if: always()
