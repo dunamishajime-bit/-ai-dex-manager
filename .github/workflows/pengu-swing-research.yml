@@ -8,6 +8,12 @@ on:
     paths:
       - "research/pengu_swing_robot/**"
       - ".github/workflows/pengu-swing-research.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/pengu_swing_robot/**"
+      - ".github/workflows/pengu-swing-research.yml"
 
 permissions:
   contents: read
