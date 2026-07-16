@@ -5,6 +5,7 @@ import type {
   ResearchDashboardPayload,
   ResearchEliteSummary,
 } from "@/lib/research-lab/dashboard-types";
+import type { ResearchDiscussionIndex, ResearchDiscussionIndexEntry } from "@/lib/research-lab/discussion-types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -110,6 +111,31 @@ function normalizeElites(value: unknown): ResearchEliteSummary[] {
   }).slice(0, 8);
 }
 
+function normalizeDiscussionEntry(value: unknown): ResearchDiscussionIndexEntry | null {
+  if (!value || typeof value !== "object") return null;
+  const item = value as Record<string, unknown>;
+  const id = stringValue(item.id);
+  const discussionPath = stringValue(item.path);
+  const completedAt = stringValue(item.completedAt);
+  if (!id || !discussionPath || !completedAt) return null;
+  return {
+    id,
+    path: discussionPath,
+    cycle: finiteNumber(item.cycle),
+    completedAt,
+    profile: profile(item.profile),
+    title: stringValue(item.title, `Cycle ${finiteNumber(item.cycle)} 研究会議`),
+    summary: stringValue(item.summary),
+    decision: stringValue(item.decision),
+    messageCount: finiteNumber(item.messageCount),
+    finalCandidates: finiteNumber(item.finalCandidates),
+    bestOosMonthlyPct: nullableFiniteNumber(item.bestOosMonthlyPct),
+    bestOosDrawdownPct: nullableFiniteNumber(item.bestOosDrawdownPct),
+    bestWorstStressMonthlyPct: nullableFiniteNumber(item.bestWorstStressMonthlyPct),
+    topStrategyIds: stringArray(item.topStrategyIds),
+  };
+}
+
 async function fetchJson<T>(name: string): Promise<T> {
   const response = await fetch(`${RAW_BASE}/${name}`, {
     cache: "no-store",
@@ -144,13 +170,16 @@ export async function GET() {
   }
 
   try {
-    const [state, deduplication] = await Promise.all([
+    const [state, deduplication, discussionIndex] = await Promise.all([
       fetchJson<RawAutonomousState>("autonomous-state.json"),
       fetchJson<RawDeduplicationStats>("deduplication-stats.json")
         .catch((): RawDeduplicationStats => ({})),
+      fetchJson<ResearchDiscussionIndex>("discussions/index.json")
+        .catch((): ResearchDiscussionIndex => ({ version: 1, updatedAt: new Date(0).toISOString(), items: [] })),
     ]);
     const history = normalizeHistory(state.history);
     const lastRunAt = typeof state.lastRunAt === "string" ? state.lastRunAt : history.at(-1)?.completedAt ?? null;
+    const latestDiscussion = normalizeDiscussionEntry(discussionIndex.items?.[0]);
     const payload: ResearchDashboardPayload = {
       generatedAt: new Date().toISOString(),
       lastRunAt,
@@ -167,6 +196,7 @@ export async function GET() {
       history,
       elites: normalizeElites(state.eliteGenomes),
       nextPlan: stringArray(state.nextPlan),
+      latestDiscussion,
       deduplication: {
         historicalFingerprintsLoaded: finiteNumber(deduplication.historicalFingerprintsLoaded),
         newUniqueLogicTested: finiteNumber(deduplication.newUniqueLogicTested),
@@ -182,6 +212,8 @@ export async function GET() {
       links: {
         actions: `${GITHUB_BASE}/actions/workflows/research-lab-autonomous.yml`,
         latestReport: `${GITHUB_BASE}/blob/${STATE_BRANCH}/.research-state/latest-report.md`,
+        latestDiscussion: `${GITHUB_BASE}/blob/${STATE_BRANCH}/.research-state/latest-discussion.md`,
+        discussions: "/research-lab/discussions",
         state: `${GITHUB_BASE}/tree/${STATE_BRANCH}/.research-state`,
         issues: `${GITHUB_BASE}/issues`,
       },
