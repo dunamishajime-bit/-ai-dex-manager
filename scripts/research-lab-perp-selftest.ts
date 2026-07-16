@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 
 import type { Candle1h } from "../lib/backtest/types";
 import { runPerpBacktest } from "../lib/research-lab/perp/engine";
-import { runPerpResearch } from "../lib/research-lab/perp/orchestrator";
+import { perpStrategyLogicFingerprint } from "../lib/research-lab/perp/fingerprint";
+import {
+  runPerpResearch,
+  type PerpResearchDeduplicationStats,
+} from "../lib/research-lab/perp/orchestrator";
 import type {
   PerpFundingPoint,
   PerpMarketData,
@@ -127,6 +131,14 @@ const execution = {
   maintenanceMarginRate: 0.005,
 };
 
+function emptyDeduplicationStats(): PerpResearchDeduplicationStats {
+  return {
+    duplicateStrategiesSkipped: 0,
+    replacementCandidatesGenerated: 0,
+    exhaustedPopulationSlots: 0,
+  };
+}
+
 async function main() {
   const data = marketData();
   const evaluationWindow = {
@@ -158,6 +170,28 @@ async function main() {
   assert.ok(result.trades.every((trade) => trade.exitTs < evaluationWindow.endTs));
   assert.ok(result.equityCurve.every((point) => point.ts >= evaluationWindow.startTs));
   assert.equal(result.equityCurve[0]?.ts, evaluationWindow.startTs);
+
+  const reorderedNearDuplicate: PerpStrategyGenome = {
+    ...genome,
+    id: "different-id",
+    symbols: [...genome.symbols].reverse(),
+    parameters: { ...genome.parameters, leverage: genome.parameters.leverage + 0.04 },
+  };
+  const materialChange: PerpStrategyGenome = {
+    ...genome,
+    id: "material-change",
+    parameters: { ...genome.parameters, leverage: genome.parameters.leverage + 0.2 },
+  };
+  assert.equal(
+    perpStrategyLogicFingerprint(genome),
+    perpStrategyLogicFingerprint(reorderedNearDuplicate),
+    "ID・銘柄順・丸め範囲内の微差は同一ロジックとして扱うこと",
+  );
+  assert.notEqual(
+    perpStrategyLogicFingerprint(genome),
+    perpStrategyLogicFingerprint(materialChange),
+    "実質的なパラメータ変更は新規ロジックとして扱うこと",
+  );
 
   const config: PerpResearchConfig = {
     profile: "balanced",
@@ -204,15 +238,37 @@ async function main() {
     },
   };
 
-  const research = await runPerpResearch(config, data);
+  const firstFingerprints = new Set<string>();
+  const firstDeduplicationStats = emptyDeduplicationStats();
+  const research = await runPerpResearch(config, data, {
+    evaluatedLogicFingerprints: firstFingerprints,
+    deduplicationStats: firstDeduplicationStats,
+  });
   assert.equal(research.rounds.length, 2);
   assert.equal(research.totalEvaluations, 6);
+  assert.equal(firstFingerprints.size, 6);
   assert.ok(research.leaderboard.length > 0);
   assert.ok(research.validatedStrategies > 0);
   assert.ok(research.leaderboard.every((item) => Number.isFinite(item.score)));
 
+  const secondFingerprints = new Set<string>();
+  const secondDeduplicationStats = emptyDeduplicationStats();
+  const repeatedSeedResearch = await runPerpResearch(config, data, {
+    excludedLogicFingerprints: firstFingerprints,
+    evaluatedLogicFingerprints: secondFingerprints,
+    deduplicationStats: secondDeduplicationStats,
+  });
+  assert.equal(repeatedSeedResearch.totalEvaluations, 6);
+  assert.equal(secondFingerprints.size, 6);
+  assert.ok(secondDeduplicationStats.duplicateStrategiesSkipped > 0, "過去ロジックが検証前に除外されること");
+  assert.ok(
+    [...secondFingerprints].every((fingerprint) => !firstFingerprints.has(fingerprint)),
+    "同じSeedの再実行でも過去ロジックを再検証しないこと",
+  );
+  assert.equal(secondDeduplicationStats.exhaustedPopulationSlots, 0);
+
   console.log(
-    `Perp Research self-test passed: trades=${result.trades.length} long=${result.risk.longTrades} short=${result.risk.shortTrades} funding=${result.risk.totalFundingCost.toFixed(2)}`,
+    `Perp Research self-test passed: trades=${result.trades.length} long=${result.risk.longTrades} short=${result.risk.shortTrades} funding=${result.risk.totalFundingCost.toFixed(2)} duplicateSkipped=${secondDeduplicationStats.duplicateStrategiesSkipped}`,
   );
 }
 
