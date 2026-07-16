@@ -11,7 +11,8 @@
     "research:lab": "tsx scripts/research-lab-runner.ts",
     "research:lab:selftest": "tsx scripts/research-lab-selftest.ts",
     "research:perp": "tsx scripts/research-lab-perp-runner.ts",
-    "research:perp:selftest": "tsx scripts/research-lab-perp-selftest.ts"
+    "research:perp:selftest": "tsx scripts/research-lab-perp-selftest.ts",
+    "research:perp:autonomous": "tsx scripts/research-lab-autonomous-runner.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
