@@ -1,3 +1,5 @@
+import type { ResearchDiscussionIndexEntry } from "./discussion-types";
+
 export interface ResearchCycleHistoryPoint {
   cycle: number;
   completedAt: string;
@@ -42,6 +44,7 @@ export interface ResearchDashboardPayload {
   history: ResearchCycleHistoryPoint[];
   elites: ResearchEliteSummary[];
   nextPlan: string[];
+  latestDiscussion: ResearchDiscussionIndexEntry | null;
   deduplication: {
     historicalFingerprintsLoaded: number;
     newUniqueLogicTested: number;
@@ -57,6 +60,8 @@ export interface ResearchDashboardPayload {
   links: {
     actions: string;
     latestReport: string;
+    latestDiscussion: string;
+    discussions: string;
     state: string;
     issues: string;
   };

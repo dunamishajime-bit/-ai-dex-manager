@@ -3,7 +3,9 @@ name: Research Lab CI
 on:
   pull_request:
     paths:
+      - "app/api/research-lab/**"
       - "app/research-lab/**"
+      - "components/research-lab/**"
       - "lib/research-lab/**"
       - "scripts/research-lab-*.ts"
       - "components/layout/Sidebar.tsx"
@@ -32,3 +34,5 @@ jobs:
         run: npm run research:lab:selftest
       - name: Perpetual Research Lab self-test
         run: npm run research:perp:selftest
+      - name: Research discussion self-test
+        run: npm run research:discussion:selftest

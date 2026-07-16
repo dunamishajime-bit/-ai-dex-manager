@@ -8,6 +8,9 @@ on:
       - master
     paths:
       - ".github/workflows/research-lab-autonomous.yml"
+      - "scripts/research-lab-autonomous-runner.ts"
+      - "lib/research-lab/perp/discussion.ts"
+      - "lib/research-lab/discussion-types.ts"
   workflow_dispatch:
     inputs:
       profile:
@@ -131,6 +134,10 @@ jobs:
       - name: Funding and temporal self-test
         working-directory: source
         run: npm run research:perp:selftest
+
+      - name: Research discussion self-test
+        working-directory: source
+        run: npm run research:discussion:selftest
 
       - name: Run autonomous research cycle
         id: research
