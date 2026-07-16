@@ -2,7 +2,12 @@ name: Autonomous Research Lab
 
 on:
   schedule:
-    - cron: "17 0,6,12,18 * * *"
+    - cron: "17 * * * *"
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/research-lab-autonomous.yml"
   workflow_dispatch:
     inputs:
       profile:
@@ -17,7 +22,7 @@ on:
       rounds:
         description: Evolution rounds
         required: true
-        default: "20"
+        default: "5"
       population:
         description: Strategies per round
         required: true
@@ -25,7 +30,7 @@ on:
       finalists:
         description: Strategies sent to OOS and stress validation
         required: true
-        default: "8"
+        default: "6"
       start_date:
         description: Research start date
         required: true
@@ -84,9 +89,9 @@ jobs:
               echo "PERP_RESEARCH_PROFILE=${{ inputs.profile }}" >> "$GITHUB_ENV"
             fi
           else
-            echo "PERP_RESEARCH_ROUNDS=20" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_ROUNDS=5" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_POPULATION=5" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_FINALISTS=8" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_FINALISTS=6" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_START_DATE=2023-01-01" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_END_DATE=2026-07-01" >> "$GITHUB_ENV"
           fi
