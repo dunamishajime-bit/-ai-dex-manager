@@ -308,17 +308,9 @@ export function runPerpBacktest(input: {
   const feeRate = execution.feeBpsPerSide / 10_000;
   const slippageRate = execution.slippageBpsPerSide / 10_000;
   const fundingRatePerBar = (execution.adverseFundingBpsPer8h / 10_000) * (parameters.timeframeHours / 8);
-  const maximumLookback = Math.max(
-    parameters.btcRegimeSmaBars,
-    parameters.btcRegimeMomentumBars,
-    parameters.momentumBars,
-    parameters.breakoutBars,
-    parameters.volatilityLookbackBars,
-    parameters.atrBars,
-    25,
-  );
-  const warmupStart = window.startTs - maximumLookback * parameters.timeframeHours * HOUR_MS;
-  const timeline = prepared.timeline.filter((ts) => ts >= warmupStart && ts < window.endTs);
+  // Indicator functions may read earlier bars by index, but every temporal segment starts
+  // from cash and never trades inside its warm-up history.
+  const timeline = prepared.timeline.filter((ts) => ts >= window.startTs && ts < window.endTs);
   const trades: PerpTrade[] = [];
   const equityCurve: PerpEquityPoint[] = [];
   let balance = STARTING_EQUITY;
@@ -434,7 +426,7 @@ export function runPerpBacktest(input: {
       const positionBarIndex = prepared.indexBySymbolAndTs[position.symbol]?.get(ts);
       const bar = positionBarIndex == null ? null : prepared.bySymbol[position.symbol]?.[positionBarIndex];
       if (bar) {
-        exposureBars += ts >= window.startTs ? 1 : 0;
+        exposureBars += 1;
         position.holdingBars += 1;
         const fundingCost = position.notional * fundingRatePerBar;
         position.fundingCost += fundingCost;
@@ -481,21 +473,19 @@ export function runPerpBacktest(input: {
     const btcBar = btcBarIndex == null ? null : prepared.bySymbol.BTC?.[btcBarIndex];
     if (!btcBar) continue;
 
-    if (ts >= window.startTs) {
-      const markBarIndex = position ? prepared.indexBySymbolAndTs[position.symbol]?.get(ts) : null;
-      const markBar = position && markBarIndex != null ? prepared.bySymbol[position.symbol]?.[markBarIndex] : null;
-      const markPrice = markBar?.close ?? btcBar.close;
-      const unrealized = position ? unrealizedPnl(position, markPrice) : 0;
-      equityCurve.push({
-        ts,
-        equity: currentEquity(balance, position, markPrice, feeRate),
-        balance,
-        unrealizedPnl: unrealized,
-        symbol: position?.symbol ?? "",
-        side: position?.side ?? "cash",
-        effectiveLeverage: position?.effectiveLeverage ?? 0,
-      });
-    }
+    const markBarIndex = position ? prepared.indexBySymbolAndTs[position.symbol]?.get(ts) : null;
+    const markBar = position && markBarIndex != null ? prepared.bySymbol[position.symbol]?.[markBarIndex] : null;
+    const markPrice = markBar?.close ?? btcBar.close;
+    const unrealized = position ? unrealizedPnl(position, markPrice) : 0;
+    equityCurve.push({
+      ts,
+      equity: currentEquity(balance, position, markPrice, feeRate),
+      balance,
+      unrealizedPnl: unrealized,
+      symbol: position?.symbol ?? "",
+      side: position?.side ?? "cash",
+      effectiveLeverage: position?.effectiveLeverage ?? 0,
+    });
 
     if (balance <= 0) {
       stopped = true;
@@ -542,9 +532,7 @@ export function runPerpBacktest(input: {
   const grossLoss = Math.abs(trades.filter((trade) => trade.netPnl < 0).reduce((sum, trade) => sum + trade.netPnl, 0));
   const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 99 : 0;
   const winningTrades = trades.filter((trade) => trade.netPnl > 0).length;
-  const exposurePct = timeline.filter((ts) => ts >= window.startTs && ts < window.endTs).length
-    ? (exposureBars / timeline.filter((ts) => ts >= window.startTs && ts < window.endTs).length) * 100
-    : 0;
+  const exposurePct = timeline.length ? (exposureBars / timeline.length) * 100 : 0;
   const endingEquity = equityCurve.at(-1)?.equity ?? balance;
   const metrics = researchMetricsFromSeries({
     monthlyReturnsPct: returns.monthly,
