@@ -41,7 +41,9 @@ jobs:
           python -m py_compile research/pengu_swing_robot/run_compact_research.py
 
       - name: Run chronological PENGU backtest
+        shell: bash
         run: |
+          set -o pipefail
           python research/pengu_swing_robot/run_compact_research.py \
             --output research_outputs/pengu_swing_v1 \
             --cache .cache/pengu_swing_v1 | tee pengu_swing_run.log
@@ -62,6 +64,8 @@ jobs:
           name: pengu-swing-research-v1
           path: |
             research_outputs/pengu_swing_v1
+            .cache/pengu_swing_v1
             pengu_swing_run.log
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 30
