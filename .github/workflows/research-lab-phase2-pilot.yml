@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
+      BINANCE_PUBLIC_ARCHIVE_ONLY: "true"
       RESEARCH_PROFILE: production
       RESEARCH_ROUNDS: "10"
       RESEARCH_POPULATION: "5"
@@ -48,6 +49,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Restore market data cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/hybrid-retq22
+            .cache/hybrid-universe
+          key: research-market-data-v4-2023-2026
       - name: Install dependencies
         run: npm ci
       - name: TypeScript check
