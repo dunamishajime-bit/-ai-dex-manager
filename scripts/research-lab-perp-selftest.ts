@@ -4,6 +4,7 @@ import type { Candle1h } from "../lib/backtest/types";
 import { runPerpBacktest } from "../lib/research-lab/perp/engine";
 import { runPerpResearch } from "../lib/research-lab/perp/orchestrator";
 import type {
+  PerpFundingPoint,
   PerpMarketData,
   PerpResearchConfig,
   PerpStrategyGenome,
@@ -49,14 +50,34 @@ function syntheticCandles(input: {
   return candles;
 }
 
+function syntheticFunding(phase: number): PerpFundingPoint[] {
+  const points: PerpFundingPoint[] = [];
+  for (let hour = 8; hour < HOURS; hour += 8) {
+    const regimeBlock = Math.floor(hour / (24 * 45));
+    const direction = regimeBlock % 2 === 0 ? 1 : -1;
+    const cycle = Math.sin((hour + phase) / 48) * 0.00002;
+    points.push({
+      ts: START_TS + hour * HOUR_MS,
+      rate: direction * 0.00008 + cycle,
+    });
+  }
+  return points;
+}
+
 function marketData(): PerpMarketData {
   return {
     startTs: START_TS,
     endTs: START_TS + HOURS * HOUR_MS,
+    source: "synthetic",
     bySymbol: {
       BTC: syntheticCandles({ startPrice: 20_000, trendMultiplier: 1, phase: 0 }),
       ETH: syntheticCandles({ startPrice: 1_500, trendMultiplier: 1.35, phase: 4 }),
       SOL: syntheticCandles({ startPrice: 30, trendMultiplier: 1.75, phase: 11 }),
+    },
+    fundingBySymbol: {
+      BTC: syntheticFunding(0),
+      ETH: syntheticFunding(4),
+      SOL: syntheticFunding(11),
     },
   };
 }
@@ -67,7 +88,7 @@ const genome: PerpStrategyGenome = {
   parentIds: [],
   createdBy: "quant-regime",
   family: "dual_direction",
-  thesis: "合成相場でLong/Short・コスト・清算計算を確認する",
+  thesis: "合成相場でLong/Short・実Funding・コスト・清算計算を確認する",
   symbols: ["ETH", "SOL"],
   parameters: {
     timeframeHours: 4,
@@ -82,6 +103,7 @@ const genome: PerpStrategyGenome = {
     breakoutBufferPct: 0,
     minimumMomentumPct: 0.002,
     minimumVolumeRatio: 0.5,
+    minimumEdgeToCostRatio: 0.5,
     volatilityLookbackBars: 8,
     volatilityPenalty: 0.25,
     atrBars: 8,
@@ -126,6 +148,8 @@ async function main() {
   assert.ok(Number.isFinite(result.metrics.cagrPct));
   assert.ok(Number.isFinite(result.metrics.averageMonthlyReturnPct));
   assert.ok(Number.isFinite(result.metrics.maxDrawdownPct));
+  assert.ok(Number.isFinite(result.risk.totalFundingCost));
+  assert.ok(result.trades.some((trade) => Math.abs(trade.fundingCost) > 0), "Fundingが損益へ反映されること");
   assert.ok(result.risk.endingEquity >= 0);
   assert.ok(result.risk.maximumEffectiveLeverage <= genome.parameters.leverage + 0.0001);
   assert.ok(result.trades.every((trade) => Number.isFinite(trade.netPnl)));
@@ -136,6 +160,7 @@ async function main() {
   assert.equal(result.equityCurve[0]?.ts, evaluationWindow.startTs);
 
   const config: PerpResearchConfig = {
+    profile: "balanced",
     rounds: 2,
     populationPerRound: 3,
     eliteCount: 2,
@@ -165,6 +190,7 @@ async function main() {
       discoveryMinSharpe: -10,
       discoveryMinProfitFactor: 0,
       discoveryMinTrades: 0,
+      targetAverageEffectiveLeverage: 0.5,
       finalMinOosAverageMonthlyReturnPct: -100,
       finalMaxOosDrawdownPct: 100,
       finalMinOosTrades: 0,
@@ -186,7 +212,7 @@ async function main() {
   assert.ok(research.leaderboard.every((item) => Number.isFinite(item.score)));
 
   console.log(
-    `Perp Research self-test passed: trades=${result.trades.length} long=${result.risk.longTrades} short=${result.risk.shortTrades}`,
+    `Perp Research self-test passed: trades=${result.trades.length} long=${result.risk.longTrades} short=${result.risk.shortTrades} funding=${result.risk.totalFundingCost.toFixed(2)}`,
   );
 }
 
