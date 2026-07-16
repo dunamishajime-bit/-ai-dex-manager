@@ -1,0 +1,36 @@
+name: Research Lab Dashboard Smoke
+
+on:
+  pull_request:
+    paths:
+      - "app/api/research-lab/latest/**"
+      - "app/research-lab/**"
+      - "components/research-lab/**"
+      - "lib/research-lab/dashboard-types.ts"
+      - "docs/research-lab-dashboard.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
