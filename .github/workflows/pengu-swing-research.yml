@@ -1,0 +1,60 @@
+name: PENGU Swing Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-2d3d-swing-v1
+    paths:
+      - "research/pengu_swing_robot/**"
+      - ".github/workflows/pengu-swing-research.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install research dependencies
+        run: python -m pip install --upgrade numpy pandas requests
+
+      - name: Compile robot
+        run: python -m py_compile research/pengu_swing_robot/run_pengu_swing_research.py
+
+      - name: Run chronological PENGU backtest
+        run: |
+          python research/pengu_swing_robot/run_pengu_swing_research.py \
+            --output research_outputs/pengu_swing_v1 \
+            --cache .cache/pengu_swing_v1 | tee pengu_swing_run.log
+
+      - name: Publish summary
+        if: always()
+        run: |
+          if [ -f research_outputs/pengu_swing_v1/REPORT.md ]; then
+            cat research_outputs/pengu_swing_v1/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "PENGU research report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload research artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-swing-research-v1
+          path: |
+            research_outputs/pengu_swing_v1
+            pengu_swing_run.log
+          if-no-files-found: warn
+          retention-days: 30
