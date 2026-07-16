@@ -1,4 +1,4 @@
-name: PENGU Swing Research
+name: PENGU Adaptive 72h Research
 
 on:
   workflow_dispatch:
@@ -38,34 +38,34 @@ jobs:
       - name: Compile robot
         run: |
           python -m py_compile research/pengu_swing_robot/run_pengu_swing_research.py
-          python -m py_compile research/pengu_swing_robot/run_compact_research.py
+          python -m py_compile research/pengu_swing_robot/run_pengu_adaptive_72h_v2.py
 
-      - name: Run chronological PENGU backtest
+      - name: Run adaptive chronological PENGU backtest
         shell: bash
         run: |
           set -o pipefail
-          python research/pengu_swing_robot/run_compact_research.py \
-            --output research_outputs/pengu_swing_v1 \
-            --cache .cache/pengu_swing_v1 | tee pengu_swing_run.log
+          python research/pengu_swing_robot/run_pengu_adaptive_72h_v2.py \
+            --output research_outputs/pengu_adaptive_72h_v2 \
+            --cache .cache/pengu_swing_v1 | tee pengu_adaptive_72h_run.log
 
       - name: Publish summary
         if: always()
         run: |
-          if [ -f research_outputs/pengu_swing_v1/REPORT.md ]; then
-            cat research_outputs/pengu_swing_v1/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          if [ -f research_outputs/pengu_adaptive_72h_v2/REPORT.md ]; then
+            cat research_outputs/pengu_adaptive_72h_v2/REPORT.md >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "PENGU research report was not generated." >> "$GITHUB_STEP_SUMMARY"
+            echo "PENGU adaptive research report was not generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload research artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pengu-swing-research-v1
+          name: pengu-adaptive-72h-v2
           path: |
-            research_outputs/pengu_swing_v1
+            research_outputs/pengu_adaptive_72h_v2
             .cache/pengu_swing_v1
-            pengu_swing_run.log
+            pengu_adaptive_72h_run.log
           if-no-files-found: warn
           include-hidden-files: true
           retention-days: 30
