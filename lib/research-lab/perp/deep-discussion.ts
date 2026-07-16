@@ -9,6 +9,7 @@ import type {
   ChampionExperimentResult,
   ChampionMetricSnapshot,
   ChampionRecord,
+  ChampionSlot,
 } from "./deep-research";
 
 function pct(value: number) {
@@ -60,6 +61,17 @@ function experimentsFor(result: ChampionDeepResearchResult, champion: ChampionRe
   return result.experiments.filter((item) => item.plan.championSlot === champion.slot);
 }
 
+function inheritedWinners(experiments: ChampionExperimentResult[]) {
+  const winners = new Map<ChampionSlot, ChampionExperimentResult>();
+  for (const experiment of experiments.filter((item) => item.accepted)) {
+    const current = winners.get(experiment.plan.championSlot);
+    if (!current || experiment.comparison.compositeImprovement > current.comparison.compositeImprovement) {
+      winners.set(experiment.plan.championSlot, experiment);
+    }
+  }
+  return winners;
+}
+
 function experimentSummary(experiments: ChampionExperimentResult[]) {
   if (!experiments.length) return "重複済みロジックを除外した結果、新しい単一変更案を生成できませんでした。";
   return experiments.map((item) => (
@@ -81,7 +93,9 @@ export function buildChampionDeepDiscussion(result: ChampionDeepResearchResult):
   const baseTime = Date.parse(result.startedAt);
   const messages: ResearchDiscussionMessage[] = [];
   let sequence = 1;
-  const acceptedCount = result.experiments.filter((item) => item.accepted).length;
+  const passingCount = result.experiments.filter((item) => item.accepted).length;
+  const winners = inheritedWinners(result.experiments);
+  const inheritedCount = winners.size;
 
   messages.push(message({
     sequence: sequence++,
@@ -91,7 +105,7 @@ export function buildChampionDeepDiscussion(result: ChampionDeepResearchResult):
     role: "moderator",
     stance: "context",
     strategyId: null,
-    content: `Champion Deep Research Cycle ${result.cycle}を開始します。新規ロジックの大量生成は行わず、OOS・Stress・安定性の3 Championを親として再評価し、各Championに最大2件の単一パラメータ変更だけを検証します。親を上回らない子は継承しません。`,
+    content: `Champion Deep Research Cycle ${result.cycle}を開始します。新規ロジックの大量生成は行わず、OOS・Stress・安定性の3 Championを親として再評価し、各Championに最大2件の単一パラメータ変更だけを検証します。同じChampionで複数案が改善基準を通っても、総合改善Scoreが最も高い子1件だけを継承します。`,
     evidence: [
       evidence("Champion数", String(result.championsBefore.length), "positive"),
       evidence("親の再評価", String(result.baselineEvaluations.length), "positive"),
@@ -161,8 +175,8 @@ export function buildChampionDeepDiscussion(result: ChampionDeepResearchResult):
       ],
     }));
 
-    const accepted = experiments.filter((item) => item.accepted).sort((left, right) => right.comparison.compositeImprovement - left.comparison.compositeImprovement)[0];
-    const best = accepted ?? [...experiments].sort((left, right) => right.comparison.compositeImprovement - left.comparison.compositeImprovement)[0];
+    const inherited = winners.get(champion.slot);
+    const best = inherited ?? [...experiments].sort((left, right) => right.comparison.compositeImprovement - left.comparison.compositeImprovement)[0];
     messages.push(message({
       sequence: sequence++,
       baseTime,
@@ -171,9 +185,9 @@ export function buildChampionDeepDiscussion(result: ChampionDeepResearchResult):
       role: "cio",
       stance: "decision",
       strategyId: best?.plan.childStrategyId ?? champion.genome.id,
-      content: accepted
-        ? `${champion.slot.toUpperCase()} Championでは${String(accepted.plan.changedParameter)}の単一変更を採用します。OOS差${accepted.comparison.deltaOosMonthlyPct >= 0 ? "+" : ""}${pct(accepted.comparison.deltaOosMonthlyPct)}、Stress差${accepted.comparison.deltaWorstStressMonthlyPct >= 0 ? "+" : ""}${pct(accepted.comparison.deltaWorstStressMonthlyPct)}、DD改善${accepted.comparison.deltaDrawdownImprovementPct >= 0 ? "+" : ""}${pct(accepted.comparison.deltaDrawdownImprovementPct)}。次Cycleはこの子を新しい親として別の単一仮説を検証します。`
-        : `${champion.slot.toUpperCase()} Championの子は採用しません。親${champion.genome.id}を維持します。${best ? best.reasons.join(" / ") : "新しい重複なし仮説を生成できませんでした。"}`,
+      content: inherited
+        ? `${champion.slot.toUpperCase()} Championでは${String(inherited.plan.changedParameter)}の単一変更を継承採用します。OOS差${inherited.comparison.deltaOosMonthlyPct >= 0 ? "+" : ""}${pct(inherited.comparison.deltaOosMonthlyPct)}、Stress差${inherited.comparison.deltaWorstStressMonthlyPct >= 0 ? "+" : ""}${pct(inherited.comparison.deltaWorstStressMonthlyPct)}、DD改善${inherited.comparison.deltaDrawdownImprovementPct >= 0 ? "+" : ""}${pct(inherited.comparison.deltaDrawdownImprovementPct)}。同じChampion内で他案も基準を通った場合でも、この最上位子だけを次Cycleの親にします。`
+        : `${champion.slot.toUpperCase()} Championの子は継承しません。親${champion.genome.id}を維持します。${best ? best.reasons.join(" / ") : "新しい重複なし仮説を生成できませんでした。"}`,
       evidence: best ? comparisonEvidence(best) : metricEvidence(champion.metrics),
     }));
   }
@@ -186,11 +200,12 @@ export function buildChampionDeepDiscussion(result: ChampionDeepResearchResult):
     role: "cio",
     stance: "decision",
     strategyId: null,
-    content: `Cycle ${result.cycle}は${result.experiments.length}件の単一変更を親子比較し、${acceptedCount}件を改善として継承しました。採用されなかったChampionは親を維持します。目標30%に届かなくても、親より再現性を保って改善した変更だけを累積し、改善履歴が追跡できない広範囲変異は行いません。次回方針: ${result.nextPlan.join(" / ")}`,
+    content: `Cycle ${result.cycle}は${result.experiments.length}件の単一変更を親子比較し、${passingCount}件が改善基準を通過、Championごとの最上位${inheritedCount}件を次の親として継承しました。残りのChampionは親を維持します。目標30%に届かなくても、親より再現性を保って改善した変更だけを累積し、改善履歴が追跡できない広範囲変異は行いません。次回方針: ${result.nextPlan.join(" / ")}`,
     evidence: [
       evidence("単一変更実験", String(result.experiments.length), "positive"),
-      evidence("改善採用", String(acceptedCount), acceptedCount ? "positive" : "neutral"),
-      evidence("親維持", String(result.championsAfter.length - acceptedCount), "neutral"),
+      evidence("改善基準通過", String(passingCount), passingCount ? "positive" : "neutral"),
+      evidence("継承採用", String(inheritedCount), inheritedCount ? "positive" : "neutral"),
+      evidence("親維持", String(result.championsAfter.length - inheritedCount), "neutral"),
       evidence("最終候補", String(result.researchResult.finalCandidates.length), result.researchResult.finalCandidates.length ? "positive" : "neutral"),
     ],
   }));
@@ -207,11 +222,11 @@ export function buildChampionDeepDiscussion(result: ChampionDeepResearchResult):
     completedAt: result.completedAt,
     profile: result.profile,
     title: `Cycle ${result.cycle} Champion深掘り会議`,
-    summary: `3 Championを親として${result.experiments.length}件の単一変更を比較し、${acceptedCount}件を改善として継承。Best OOS月利${pct(bestOos)}、Best Stress月利${pct(bestStress)}。`,
-    decision: acceptedCount
-      ? `${acceptedCount}件の改善子を次Cycleの親として採用し、残りは親ロジックを維持する。`
+    summary: `3 Championを親として${result.experiments.length}件の単一変更を比較し、${passingCount}件が改善基準を通過、最上位${inheritedCount}件を継承。Best OOS月利${pct(bestOos)}、Best Stress月利${pct(bestStress)}。`,
+    decision: inheritedCount
+      ? `${inheritedCount}件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。`
       : "全ての子を却下し、3 Championの親ロジックを維持して別仮説を再検証する。",
-    methodology: "新規ロジックの大量生成ではなく、OOS・Cost Stress・安定性で選んだ上位3 Championを毎回同条件で再評価する。各実験は1パラメータだけを変更し、親とのOOS・Stress・MaxDD・Walk-forward・取引数差を比較する。改善基準を満たした子だけを次Cycleへ継承する決定論的なEvidence付き研究会議です。",
+    methodology: "新規ロジックの大量生成ではなく、OOS・Cost Stress・安定性で選んだ上位3 Championを毎回同条件で再評価する。各実験は1パラメータだけを変更し、親とのOOS・Stress・MaxDD・Walk-forward・取引数差を比較する。改善基準を通過した案が複数あっても、各Championで総合改善Scoreが最も高い子1件だけを次Cycleへ継承する決定論的なEvidence付き研究会議です。",
     finalCandidates: result.researchResult.finalCandidates.length,
     bestTrainMonthlyPct: Math.max(...result.championsAfter.map((item) => item.metrics.trainMonthlyPct)),
     bestOosMonthlyPct: bestOos,
