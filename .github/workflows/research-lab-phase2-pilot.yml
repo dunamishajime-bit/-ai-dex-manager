@@ -1,0 +1,54 @@
+name: Research Lab Phase 2 Pilot
+
+on:
+  push:
+    branches:
+      - research/run-20260716-phase2-pilot
+    paths:
+      - ".github/workflows/research-lab-phase2-pilot.yml"
+      - "research-runs/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      RESEARCH_PROFILE: production
+      RESEARCH_ROUNDS: "10"
+      RESEARCH_POPULATION: "5"
+      RESEARCH_ELITES: "2"
+      RESEARCH_FINALISTS: "5"
+      RESEARCH_CONCURRENCY: "1"
+      RESEARCH_WALK_FORWARD_FOLDS: "3"
+      RESEARCH_STRESS_COST_BPS: "20,50,100"
+      RESEARCH_TARGET_MONTHLY_PCT: "30"
+      RESEARCH_FINAL_OOS_MONTHLY_PCT: "30"
+      RESEARCH_FINAL_STRESS_MONTHLY_PCT: "20"
+      RESEARCH_START_DATE: "2023-01-01"
+      RESEARCH_END_DATE: "2026-07-01"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript check
+        run: npm run typecheck
+      - name: Run real-data research pilot
+        run: npm run research:lab
+      - name: Upload research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-lab-phase2-pilot
+          path: reports/research-lab
+          if-no-files-found: warn
+          retention-days: 30
