@@ -1,23 +1,28 @@
 name: Research Lab Phase 2 Pilot
 
 on:
-  push:
-    branches:
-      - research/run-20260716-phase2-pilot
-    paths:
-      - ".github/workflows/research-lab-phase2-pilot.yml"
-      - "lib/backtest/binance-source.ts"
-      - "lib/research-lab/**"
-      - "research-runs/**"
-  pull_request:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/research-lab-phase2-pilot.yml"
-      - "lib/backtest/binance-source.ts"
-      - "lib/research-lab/**"
-      - "research-runs/**"
   workflow_dispatch:
+    inputs:
+      rounds:
+        description: Discovery rounds
+        required: true
+        default: "10"
+      population:
+        description: Strategies per round
+        required: true
+        default: "5"
+      finalists:
+        description: Strategies sent to Validation and OOS
+        required: true
+        default: "5"
+      start_date:
+        description: Research start date
+        required: true
+        default: "2023-01-01"
+      end_date:
+        description: Research end date
+        required: true
+        default: "2026-07-01"
 
 permissions:
   contents: read
@@ -29,18 +34,18 @@ jobs:
     env:
       BINANCE_PUBLIC_ARCHIVE_ONLY: "true"
       RESEARCH_PROFILE: production
-      RESEARCH_ROUNDS: "10"
-      RESEARCH_POPULATION: "5"
+      RESEARCH_ROUNDS: ${{ inputs.rounds }}
+      RESEARCH_POPULATION: ${{ inputs.population }}
       RESEARCH_ELITES: "2"
-      RESEARCH_FINALISTS: "5"
+      RESEARCH_FINALISTS: ${{ inputs.finalists }}
       RESEARCH_CONCURRENCY: "1"
       RESEARCH_WALK_FORWARD_FOLDS: "3"
       RESEARCH_STRESS_COST_BPS: "20,50,100"
       RESEARCH_TARGET_MONTHLY_PCT: "30"
       RESEARCH_FINAL_OOS_MONTHLY_PCT: "30"
       RESEARCH_FINAL_STRESS_MONTHLY_PCT: "20"
-      RESEARCH_START_DATE: "2023-01-01"
-      RESEARCH_END_DATE: "2026-07-01"
+      RESEARCH_START_DATE: ${{ inputs.start_date }}
+      RESEARCH_END_DATE: ${{ inputs.end_date }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,7 +60,9 @@ jobs:
           path: |
             .cache/hybrid-retq22
             .cache/hybrid-universe
-          key: research-market-data-v4-2023-2026
+          key: research-market-data-v4-${{ inputs.start_date }}-${{ inputs.end_date }}
+          restore-keys: |
+            research-market-data-v4-
       - name: Install dependencies
         run: npm ci
       - name: TypeScript check
