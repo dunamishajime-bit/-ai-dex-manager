@@ -1,0 +1,83 @@
+name: Promote Win80 Ultra90 Main Strategy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/win80-ultra90-main-strategy-v2
+    paths:
+      - "lib/win80-ultra90-main-strategy.ts"
+      - "scripts/win80-ultra90-main-selftest.ts"
+      - "scripts/promote-win80-main.py"
+      - ".github/workflows/promote-win80-main.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "lib/win80-ultra90-main-strategy.ts"
+      - "scripts/win80-ultra90-main-selftest.ts"
+      - "scripts/promote-win80-main.py"
+      - ".github/workflows/promote-win80-main.yml"
+      - "config/strategyConfig.ts"
+      - "lib/cycle-strategy.ts"
+      - "context/SimulationContext.tsx"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: win80-ultra90-main-promotion
+  cancel-in-progress: true
+
+jobs:
+  promote-and-verify:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout strategy branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/win80-ultra90-main-strategy-v2
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Patch production strategy path
+        run: python scripts/promote-win80-main.py
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run main strategy self-test
+        run: npm run strategy:main:selftest
+
+      - name: Run TypeScript checks
+        run: npm run typecheck
+
+      - name: Run production build
+        run: npm run build
+
+      - name: Commit promoted main logic
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No patch changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json config/strategyConfig.ts lib/cycle-strategy.ts context/SimulationContext.tsx
+          git commit -m "Promote Win80 Ultra90 router to main logic [win80-main-patched]"
+          git push origin HEAD:feature/win80-ultra90-main-strategy-v2
