@@ -11,6 +11,7 @@ import {
   Waves,
 } from "lucide-react";
 
+import ChampionDeepResearchPanel from "@/components/research-lab/ChampionDeepResearchPanel";
 import LatestDiscussionSummary from "@/components/research-lab/LatestDiscussionSummary";
 import LiveResearchDashboard from "@/components/research-lab/LiveResearchDashboard";
 import ResearchLabSubnav from "@/components/research-lab/ResearchLabSubnav";
@@ -41,21 +42,24 @@ function StatCard({
 }
 
 const PIPELINE = [
-  "前回Elite・State読込",
-  "過去検証済みロジックを除外",
-  "Long / Short戦略生成",
-  "Train期間で進化探索",
-  "Validation・完全未使用OOS",
-  "Walk-forward・Cost Stress",
-  "失敗理由の自動分類・反省",
-  "次世代Elite・研究計画を保存",
+  "OOS・Stress・安定性の上位3 Championを選定",
+  "3つの親ロジックを同条件で再評価",
+  "失敗原因をChampionごとに分解",
+  "各Championへ最大2つの改善仮説を提案",
+  "1実験につき1パラメータだけ変更",
+  "全親子をOOS・Walk-forward・Cost Stress検証",
+  "OOS・Stress・DD・取引数を親子比較",
+  "改善した子だけ継承し、悪化した子は破棄",
 ];
 
 export default function ResearchLabPage() {
   const config = DEFAULT_PERP_RESEARCH_CONFIG;
   const thresholds = config.thresholds;
-  const hourlyEvaluations = 5 * 5;
-  const dailyEvaluations = 24 * hourlyEvaluations;
+  const cyclesPerDay = 6;
+  const champions = 3;
+  const experimentsPerChampion = 2;
+  const experimentsPerCycle = champions * experimentsPerChampion;
+  const fullValidationsPerCycle = champions + experimentsPerCycle;
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
@@ -70,38 +74,39 @@ export default function ResearchLabPage() {
               </div>
               <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">AI Hedge Fund Research Lab</h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-white/76">
-                平均月利30%超を研究目標に、USD-M FuturesのLong / Short戦略を完全自動で生成・検証・反省・進化させます。
-                前回のEliteを次回へ引き継ぎ、過去に検証済みの同一ロジック、OOSで再現しない高収益値、清算を伴う戦略は採用しません。
+                平均月利30%超を研究目標に、上位ロジックを何度も深掘りして育てます。大量の一発提案を繰り返す方式は停止し、
+                OOS・Stress・安定性の3 Championについて原因分析、単一変更、親子比較、改善継承を繰り返します。
               </p>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-100">
+            <div className="flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-xs font-bold text-violet-100">
               <Bot className="h-4 w-4" />
-              Hourly Autonomous
+              Champion Deep Loop
             </div>
           </div>
         </section>
 
         <ResearchLabSubnav />
         <LiveResearchDashboard />
+        <ChampionDeepResearchPanel />
         <LatestDiscussionSummary />
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard label="Monthly Target" value={`${thresholds.targetAverageMonthlyReturnPct}%+`} note="完全未使用OOSで平均月利を判定" icon={Target} />
-          <StatCard label="Daily Research" value={`${dailyEvaluations}`} note={`毎時${hourlyEvaluations}件 × 24 cycle`} icon={RefreshCw} />
-          <StatCard label="Directions" value="Long / Short" note="下落相場も独立した収益源として研究" icon={Waves} />
-          <StatCard label="AI Researchers" value={`${RESEARCHERS.length}`} note="専門分野別に戦略を生成・変異" icon={Users} />
-          <StatCard label="AI Critics" value={`${CRITICS.length}`} note="過学習・テールリスク・約定面を反証" icon={Shield} />
+          <StatCard label="Deep Cycles" value={`${cyclesPerDay}/日`} note="4時間ごとに原因分析と親子比較" icon={RefreshCw} />
+          <StatCard label="Daily Experiments" value={`${cyclesPerDay * experimentsPerCycle}`} note={`1 cycle ${experimentsPerCycle}件の単一変更`} icon={Waves} />
+          <StatCard label="Full Validation" value={`${cyclesPerDay * fullValidationsPerCycle}`} note="親も含め全てOOS・WF・Stress検証" icon={Users} />
+          <StatCard label="AI Critics" value={`${CRITICS.length}`} note={`${RESEARCHERS.length}研究役を過学習・Risk・Execution面から反証`} icon={Shield} />
         </section>
 
-        <section className="rounded-[24px] border border-emerald-400/20 bg-emerald-500/[0.055] p-4 md:p-5">
+        <section className="rounded-[24px] border border-violet-400/20 bg-violet-500/[0.055] p-4 md:p-5">
           <div className="flex items-start gap-3">
-            <Bot className="mt-0.5 h-5 w-5 shrink-0 text-emerald-200" />
+            <Bot className="mt-0.5 h-5 w-5 shrink-0 text-violet-200" />
             <div>
-              <h2 className="font-bold text-emerald-50">1時間ごとの完全自動研究</h2>
-              <p className="mt-2 text-sm leading-6 text-emerald-50/76">
-                毎時17分（JST）に自動起動し、各cycleで25件、1日最大600件の新規ロジックを評価します。
-                小さなcycleごとにEliteと失敗理由を保存するため、以前の4回／日構成より改善内容を早く次世代へ反映できます。
-                実行中のcycleは中断せず、同時書込みを禁止します。
+              <h2 className="font-bold text-violet-50">4時間ごとのChampion深掘り研究</h2>
+              <p className="mt-2 text-sm leading-6 text-violet-50/76">
+                1Cycleは3つの親ロジックを再評価し、各Championへ最大2件、合計6件の単一変更だけを試します。
+                親3件と子6件の合計9件を完全OOS・Walk-forward・Cost Stressまで通し、親より改善した子だけを次Cycleへ継承します。
+                目標未達でも改善方向が再現できれば育成を続け、Trainだけ上がった子やDD・Stressが悪化した子は破棄します。
               </p>
             </div>
           </div>
@@ -111,11 +116,10 @@ export default function ResearchLabPage() {
           <div className="flex items-start gap-3">
             <RefreshCw className="mt-0.5 h-5 w-5 shrink-0 text-rose-200" />
             <div>
-              <h2 className="font-bold text-rose-50">Phase 2 Spot研究の採用判断</h2>
+              <h2 className="font-bold text-rose-50">大量探索を主役から外した理由</h2>
               <p className="mt-2 text-sm leading-6 text-rose-50/76">
-                2023年1月〜2026年7月の公式1時間足で50戦略を検証しました。最高Train平均月利は5.60%でしたが取引5回のみで、
-                Validation平均月利-3.84%、OOS取引0回。取引数とのバランスが良い戦略もOOS平均月利-1.66%でした。
-                最終候補は0件、実売買とForward Paperへの昇格はありません。
+                初回提案を大量に作っても、高月利とOOS再現性を同時に満たす可能性は低いためです。新規Seed探索はChampionが存在しない場合の補助に限定し、
+                通常運用では上位3本の失敗原因、Entry・Exit・コスト・レジーム・方向偏りを分解して改善履歴を積み上げます。
               </p>
             </div>
           </div>
@@ -125,7 +129,7 @@ export default function ResearchLabPage() {
           <div className="rounded-[24px] border border-gold-400/16 bg-white/[0.035] p-4 md:p-5">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-gold-100" />
-              <h2 className="font-bold">完全自動研究パイプライン</h2>
+              <h2 className="font-bold">Champion Deep Research Pipeline</h2>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               {PIPELINE.map((item, index) => (
