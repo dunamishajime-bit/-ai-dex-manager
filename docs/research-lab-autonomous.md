@@ -8,16 +8,15 @@ The target is a research objective, not a guaranteed return.
 
 ## Schedule
 
-GitHub Actions runs four times per day:
+GitHub Actions runs once every hour at minute 17.
 
-- 03:17 JST
-- 09:17 JST
-- 15:17 JST
-- 21:17 JST
+Each scheduled cycle uses 5 rounds and 5 strategies per round, producing 25 unique evaluations. The daily target is therefore 600 unique strategy evaluations.
 
-Each scheduled cycle uses 20 rounds and 5 strategies per round, producing 100 evaluations. The daily target is therefore 400 strategy evaluations.
+The previous four-times-per-day schedule used 100 evaluations per cycle. Hourly smaller batches improve feedback speed because each cycle can persist its Elite strategies, failure analysis and tested-logic registry before the next cycle starts.
 
-The concurrency group permits only one active cycle. A slow cycle is not cancelled by the next scheduled event.
+The concurrency group permits only one active cycle and does not cancel an active run. If an hourly event arrives while research is still running, overlapping account-state writes are prevented.
+
+A push that changes `.github/workflows/research-lab-autonomous.yml` on `master` also triggers one immediate cycle. This is used to start the first hourly cycle immediately after a schedule change rather than waiting for the next cron boundary.
 
 ## Autonomous cycle
 
