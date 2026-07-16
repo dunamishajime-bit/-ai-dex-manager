@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "updatedAt": "2026-07-16T15:13:28.851Z",
+  "items": [
+    {
+      "id": "cycle-000004-2026-07-16T15-13-28-851Z",
+      "path": "discussions/2026/07/16/cycle-000004-2026-07-16T15-13-28-851Z.json",
+      "cycle": 4,
+      "completedAt": "2026-07-16T15:13:28.851Z",
+      "profile": "attack",
+      "title": "Cycle 4 研究会議",
+      "summary": "Cycle 4の最有力はunique-g18-0002（breakout）。Train月利5.31%、OOS月利9.33%で、最終候補なし。最多の反対理由は月利不足（67件）です。",
+      "decision": "全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。",
+      "messageCount": 14,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": 9.327292663094783,
+      "bestOosDrawdownPct": 5.198425996110929,
+      "bestWorstStressMonthlyPct": 2.738313376701389,
+      "topStrategyIds": [
+        "unique-g18-0002",
+        "unique-g15-0002",
+        "unique-g16-0005"
+      ]
+    }
+  ]
+}

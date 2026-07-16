@@ -1,14 +1,14 @@
-# Autonomous Research Cycle 3
+# Autonomous Research Cycle 4
 
 - Profile: attack
 - Evaluations: 25
 - Validated: 6
 - Final candidates: 0
-- Best Train average monthly: 11.44%
-- Best OOS average monthly: 3.61%
-- Best OOS MaxDD: 7.24%
-- Worst stress monthly: -2.27%
-- Next profile: attack
+- Best Train average monthly: 6.30%
+- Best OOS average monthly: 9.33%
+- Best OOS MaxDD: 5.20%
+- Worst stress monthly: 2.74%
+- Next profile: balanced
 
 ## Automatic Reflection
 
@@ -24,13 +24,19 @@
 - Real orders, wallets and API keys remain disconnected
 - Any liquidation rejects the strategy
 
+## Discussion Summary
+
+Cycle 4の最有力はunique-g18-0002（breakout）。Train月利5.31%、OOS月利9.33%で、最終候補なし。最多の反対理由は月利不足（67件）です。
+
+**CIO Decision:** 全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。
+
 ## Tested Logic Deduplication
 
-- Historical fingerprints loaded: 50
+- Historical fingerprints loaded: 75
 - New unique logic tested this cycle: 25
 - Duplicate or near-identical logic skipped: 0
 - Replacement candidates generated: 0
-- Total unique logic in registry: 75
+- Total unique logic in registry: 100
 - Exhausted population slots: 0
 
 A strategy ID change or symbol-order change does not create a new logic. Family, symbols and normalized parameters must differ.

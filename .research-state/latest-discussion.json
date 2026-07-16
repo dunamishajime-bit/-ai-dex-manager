@@ -1,0 +1,511 @@
+{
+  "version": 1,
+  "id": "cycle-000004-2026-07-16T15-13-28-851Z",
+  "cycle": 4,
+  "startedAt": "2026-07-16T15:13:22.768Z",
+  "completedAt": "2026-07-16T15:13:28.851Z",
+  "profile": "attack",
+  "title": "Cycle 4 研究会議",
+  "summary": "Cycle 4の最有力はunique-g18-0002（breakout）。Train月利5.31%、OOS月利9.33%で、最終候補なし。最多の反対理由は月利不足（67件）です。",
+  "decision": "全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。",
+  "methodology": "外部LLM同士の自由会話ではなく、Researcher・3種類のCritic・CIOという役割が、同一Cycleの実測バックテスト、OOS、Walk-forward、Cost Stress、不合格理由を根拠に発言する決定論的な議論ログです。数値のない主張は採用判断に使用しません。",
+  "finalCandidates": 0,
+  "bestTrainMonthlyPct": 6.299903403928803,
+  "bestOosMonthlyPct": 9.327292663094783,
+  "bestOosDrawdownPct": 5.198425996110929,
+  "bestWorstStressMonthlyPct": 2.738313376701389,
+  "topStrategyIds": [
+    "unique-g18-0002",
+    "unique-g15-0002",
+    "unique-g16-0005"
+  ],
+  "messages": [
+    {
+      "id": "m-001",
+      "sequence": 1,
+      "createdAt": "2026-07-16T15:13:23.768Z",
+      "speakerId": "research-moderator",
+      "speakerName": "Research Moderator",
+      "role": "moderator",
+      "stance": "context",
+      "strategyId": null,
+      "content": "Cycle 4の研究会議を開始します。Profile=attack、評価25件、OOS検証6件、最終候補0件です。数値証拠のない主張はCIO判断から除外します。",
+      "evidence": [
+        {
+          "label": "評価数",
+          "value": "25",
+          "assessment": "neutral"
+        },
+        {
+          "label": "OOS検証数",
+          "value": "6",
+          "assessment": "positive"
+        },
+        {
+          "label": "最終候補",
+          "value": "0",
+          "assessment": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "m-002",
+      "sequence": 2,
+      "createdAt": "2026-07-16T15:13:24.768Z",
+      "speakerId": "wildcard-innovation",
+      "speakerName": "Wildcard Researcher",
+      "role": "researcher",
+      "stance": "proposal",
+      "strategyId": "unique-g18-0002",
+      "content": "unique-g18-0002を提案します。仮説は「出来高を伴う高値・安値ブレイクを先物両方向で追随する。Profile=attack、担当=wildcard-innovation」。対象はBTC, ETH, BNB, SOL, XRP, ADA, AVAX, LINK, LTC, ATOM, AAVE, NEAR, INJ、2時間足、レバレッジ3.58倍、1取引リスク5.00%。TrainだけでなくOOSとStressを前提に評価してください。現在の判定はrejected、Score=53.48です。",
+      "evidence": [
+        {
+          "label": "Train平均月利",
+          "value": "5.31%",
+          "assessment": "neutral"
+        },
+        {
+          "label": "Train MaxDD",
+          "value": "11.46%",
+          "assessment": "positive"
+        },
+        {
+          "label": "OOS平均月利",
+          "value": "9.33%",
+          "assessment": "negative"
+        },
+        {
+          "label": "Score",
+          "value": "53.48",
+          "assessment": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "m-003",
+      "sequence": 3,
+      "createdAt": "2026-07-16T15:13:25.768Z",
+      "speakerId": "overfit-critic",
+      "speakerName": "AI反対派 / Overfit",
+      "role": "overfit_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g18-0002",
+      "content": "Train平均月利5.31%に対しOOS平均月利は9.33%、収益維持率は175.57%です。Walk-forward通過率は100.00%。期間依存と過学習を否定できるかを重視します。最終Gate: OOS平均月利 9.33% < 30% / moderate-cost: 平均月利 7.84% < 20% / severe-cost: 平均月利 5.45% < 20% / extreme-cost: 平均月利 2.74% < 20% / Stress維持率 29.4% < 50.0%",
+      "evidence": [
+        {
+          "label": "Train平均月利",
+          "value": "5.31%",
+          "assessment": "neutral"
+        },
+        {
+          "label": "OOS平均月利",
+          "value": "9.33%",
+          "assessment": "negative"
+        },
+        {
+          "label": "OOS維持率",
+          "value": "175.57%",
+          "assessment": "positive"
+        },
+        {
+          "label": "Walk-forward",
+          "value": "100.00%",
+          "assessment": "positive"
+        },
+        {
+          "label": "OOS取引数",
+          "value": "63",
+          "assessment": "positive"
+        }
+      ]
+    },
+    {
+      "id": "m-004",
+      "sequence": 4,
+      "createdAt": "2026-07-16T15:13:26.768Z",
+      "speakerId": "tail-risk-critic",
+      "speakerName": "AI反対派 / Tail Risk",
+      "role": "tail_risk_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g18-0002",
+      "content": "最大DDは5.20%、清算0件、最大連敗4回です。 最悪Cost Stress月利は2.74%。 Stress指摘: moderate-cost: 平均月利 7.84% < 20% / severe-cost: 平均月利 5.45% < 20% / extreme-cost: 平均月利 2.74% < 20% 清算0は維持されています。",
+      "evidence": [
+        {
+          "label": "OOS/Train MaxDD",
+          "value": "5.20%",
+          "assessment": "positive"
+        },
+        {
+          "label": "清算",
+          "value": "0件",
+          "assessment": "positive"
+        },
+        {
+          "label": "最大連敗",
+          "value": "4回",
+          "assessment": "positive"
+        },
+        {
+          "label": "最悪Stress月利",
+          "value": "2.74%",
+          "assessment": "negative"
+        }
+      ]
+    },
+    {
+      "id": "m-005",
+      "sequence": 5,
+      "createdAt": "2026-07-16T15:13:27.768Z",
+      "speakerId": "execution-critic",
+      "speakerName": "AI反対派 / Execution",
+      "role": "execution_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g18-0002",
+      "content": "利益率だけでなく実運用再現性を確認します。Profit Factor 5.39、取引数63、平均実効レバレッジ1.05倍、Funding合計-19.6542、最小Edge/Cost比4.84です。最悪Stress月利2.74%。コスト指摘: moderate-cost: 平均月利 7.84% < 20% / severe-cost: 平均月利 5.45% < 20% / extreme-cost: 平均月利 2.74% < 20% / Stress維持率 29.4% < 50.0% / moderate-cost: 平均月利 7.84% < 20% / severe-cost: 平均月利 5.45% < 20% / extreme-cost: 平均月利 2.74% < 20%",
+      "evidence": [
+        {
+          "label": "Profit Factor",
+          "value": "5.39",
+          "assessment": "positive"
+        },
+        {
+          "label": "取引数",
+          "value": "63",
+          "assessment": "positive"
+        },
+        {
+          "label": "平均実効レバレッジ",
+          "value": "1.05x",
+          "assessment": "positive"
+        },
+        {
+          "label": "Edge / Cost",
+          "value": "4.84",
+          "assessment": "positive"
+        },
+        {
+          "label": "Funding合計",
+          "value": "-19.6542",
+          "assessment": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "m-006",
+      "sequence": 6,
+      "createdAt": "2026-07-16T15:13:28.768Z",
+      "speakerId": "alpha-mean-reversion",
+      "speakerName": "Alpha Researcher / Mean Reversion",
+      "role": "researcher",
+      "stance": "proposal",
+      "strategyId": "unique-g15-0002",
+      "content": "unique-g15-0002を提案します。仮説は「出来高を伴う高値・安値ブレイクを先物両方向で追随する。Profile=attack、担当=alpha-mean-reversion」。対象はBTC, ETH, BNB, SOL, XRP, ADA, AVAX, LINK, LTC, ATOM, AAVE, NEAR, INJ、4時間足、レバレッジ2.89倍、1取引リスク3.22%。TrainだけでなくOOSとStressを前提に評価してください。現在の判定はrejected、Score=52.99です。",
+      "evidence": [
+        {
+          "label": "Train平均月利",
+          "value": "4.50%",
+          "assessment": "neutral"
+        },
+        {
+          "label": "Train MaxDD",
+          "value": "6.59%",
+          "assessment": "positive"
+        },
+        {
+          "label": "OOS平均月利",
+          "value": "3.22%",
+          "assessment": "negative"
+        },
+        {
+          "label": "Score",
+          "value": "52.99",
+          "assessment": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "m-007",
+      "sequence": 7,
+      "createdAt": "2026-07-16T15:13:29.768Z",
+      "speakerId": "overfit-critic",
+      "speakerName": "AI反対派 / Overfit",
+      "role": "overfit_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g15-0002",
+      "content": "Train平均月利4.50%に対しOOS平均月利は3.22%、収益維持率は71.50%です。Walk-forward通過率は100.00%。期間依存と過学習を否定できるかを重視します。最終Gate: OOS平均月利 3.22% < 30% / moderate-cost: 平均月利 1.43% < 20% / severe-cost: 平均月利 -0.95% < 20% / PF不足 / extreme-cost: 平均月利 -1.96% < 20% / PF不足 / Stress維持率 0.0% < 50.0%",
+      "evidence": [
+        {
+          "label": "Train平均月利",
+          "value": "4.50%",
+          "assessment": "neutral"
+        },
+        {
+          "label": "OOS平均月利",
+          "value": "3.22%",
+          "assessment": "negative"
+        },
+        {
+          "label": "OOS維持率",
+          "value": "71.50%",
+          "assessment": "positive"
+        },
+        {
+          "label": "Walk-forward",
+          "value": "100.00%",
+          "assessment": "positive"
+        },
+        {
+          "label": "OOS取引数",
+          "value": "69",
+          "assessment": "positive"
+        }
+      ]
+    },
+    {
+      "id": "m-008",
+      "sequence": 8,
+      "createdAt": "2026-07-16T15:13:30.768Z",
+      "speakerId": "tail-risk-critic",
+      "speakerName": "AI反対派 / Tail Risk",
+      "role": "tail_risk_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g15-0002",
+      "content": "最大DDは5.27%、清算0件、最大連敗5回です。 最悪Cost Stress月利は-1.96%。 Stress指摘: moderate-cost: 平均月利 1.43% < 20% / severe-cost: 平均月利 -0.95% < 20% / severe-cost: PF不足 / extreme-cost: 平均月利 -1.96% < 20% / extreme-cost: PF不足 清算0は維持されています。",
+      "evidence": [
+        {
+          "label": "OOS/Train MaxDD",
+          "value": "5.27%",
+          "assessment": "positive"
+        },
+        {
+          "label": "清算",
+          "value": "0件",
+          "assessment": "positive"
+        },
+        {
+          "label": "最大連敗",
+          "value": "5回",
+          "assessment": "positive"
+        },
+        {
+          "label": "最悪Stress月利",
+          "value": "-1.96%",
+          "assessment": "negative"
+        }
+      ]
+    },
+    {
+      "id": "m-009",
+      "sequence": 9,
+      "createdAt": "2026-07-16T15:13:31.768Z",
+      "speakerId": "execution-critic",
+      "speakerName": "AI反対派 / Execution",
+      "role": "execution_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g15-0002",
+      "content": "利益率だけでなく実運用再現性を確認します。Profit Factor 2.41、取引数69、平均実効レバレッジ0.98倍、Funding合計75.1469、最小Edge/Cost比4.31です。最悪Stress月利-1.96%。コスト指摘: moderate-cost: 平均月利 1.43% < 20% / severe-cost: 平均月利 -0.95% < 20% / PF不足 / extreme-cost: 平均月利 -1.96% < 20% / PF不足 / Stress維持率 0.0% < 50.0% / moderate-cost: 平均月利 1.43% < 20% / severe-cost: 平均月利 -0.95% < 20% / severe-cost: PF不足 / extreme-cost: 平均月利 -1.96% < 20% / extreme-cost: PF不足",
+      "evidence": [
+        {
+          "label": "Profit Factor",
+          "value": "2.41",
+          "assessment": "positive"
+        },
+        {
+          "label": "取引数",
+          "value": "69",
+          "assessment": "positive"
+        },
+        {
+          "label": "平均実効レバレッジ",
+          "value": "0.98x",
+          "assessment": "positive"
+        },
+        {
+          "label": "Edge / Cost",
+          "value": "4.31",
+          "assessment": "positive"
+        },
+        {
+          "label": "Funding合計",
+          "value": "75.1469",
+          "assessment": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "m-010",
+      "sequence": 10,
+      "createdAt": "2026-07-16T15:13:32.768Z",
+      "speakerId": "alpha-trend",
+      "speakerName": "Alpha Researcher / Trend",
+      "role": "researcher",
+      "stance": "proposal",
+      "strategyId": "unique-g16-0005",
+      "content": "unique-g16-0005を提案します。仮説は「出来高を伴う高値・安値ブレイクを先物両方向で追随する。Profile=attack、担当=alpha-trend」。対象はBTC, ETH, BNB, SOL, XRP, ADA, AVAX, LINK, LTC, ATOM, AAVE, NEAR, INJ、4時間足、レバレッジ3.18倍、1取引リスク3.03%。TrainだけでなくOOSとStressを前提に評価してください。現在の判定はrejected、Score=51.45です。",
+      "evidence": [
+        {
+          "label": "Train平均月利",
+          "value": "6.30%",
+          "assessment": "neutral"
+        },
+        {
+          "label": "Train MaxDD",
+          "value": "8.38%",
+          "assessment": "positive"
+        },
+        {
+          "label": "OOS平均月利",
+          "value": "4.46%",
+          "assessment": "negative"
+        },
+        {
+          "label": "Score",
+          "value": "51.45",
+          "assessment": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "m-011",
+      "sequence": 11,
+      "createdAt": "2026-07-16T15:13:33.768Z",
+      "speakerId": "overfit-critic",
+      "speakerName": "AI反対派 / Overfit",
+      "role": "overfit_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g16-0005",
+      "content": "Train平均月利6.30%に対しOOS平均月利は4.46%、収益維持率は70.81%です。Walk-forward通過率は100.00%。期間依存と過学習を否定できるかを重視します。最終Gate: OOS平均月利 4.46% < 30% / moderate-cost: 平均月利 2.60% < 20% / severe-cost: 平均月利 0.29% < 20% / extreme-cost: 平均月利 -1.78% < 20% / PF不足 / Stress維持率 0.0% < 50.0%",
+      "evidence": [
+        {
+          "label": "Train平均月利",
+          "value": "6.30%",
+          "assessment": "neutral"
+        },
+        {
+          "label": "OOS平均月利",
+          "value": "4.46%",
+          "assessment": "negative"
+        },
+        {
+          "label": "OOS維持率",
+          "value": "70.81%",
+          "assessment": "positive"
+        },
+        {
+          "label": "Walk-forward",
+          "value": "100.00%",
+          "assessment": "positive"
+        },
+        {
+          "label": "OOS取引数",
+          "value": "97",
+          "assessment": "positive"
+        }
+      ]
+    },
+    {
+      "id": "m-012",
+      "sequence": 12,
+      "createdAt": "2026-07-16T15:13:34.768Z",
+      "speakerId": "tail-risk-critic",
+      "speakerName": "AI反対派 / Tail Risk",
+      "role": "tail_risk_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g16-0005",
+      "content": "最大DDは9.17%、清算0件、最大連敗5回です。 最悪Cost Stress月利は-1.78%。 Stress指摘: moderate-cost: 平均月利 2.60% < 20% / severe-cost: 平均月利 0.29% < 20% / extreme-cost: 平均月利 -1.78% < 20% / extreme-cost: PF不足 清算0は維持されています。",
+      "evidence": [
+        {
+          "label": "OOS/Train MaxDD",
+          "value": "9.17%",
+          "assessment": "positive"
+        },
+        {
+          "label": "清算",
+          "value": "0件",
+          "assessment": "positive"
+        },
+        {
+          "label": "最大連敗",
+          "value": "5回",
+          "assessment": "positive"
+        },
+        {
+          "label": "最悪Stress月利",
+          "value": "-1.78%",
+          "assessment": "negative"
+        }
+      ]
+    },
+    {
+      "id": "m-013",
+      "sequence": 13,
+      "createdAt": "2026-07-16T15:13:35.768Z",
+      "speakerId": "execution-critic",
+      "speakerName": "AI反対派 / Execution",
+      "role": "execution_critic",
+      "stance": "challenge",
+      "strategyId": "unique-g16-0005",
+      "content": "利益率だけでなく実運用再現性を確認します。Profit Factor 2.19、取引数97、平均実効レバレッジ0.89倍、Funding合計84.4435、最小Edge/Cost比4.31です。最悪Stress月利-1.78%。コスト指摘: moderate-cost: 平均月利 2.60% < 20% / severe-cost: 平均月利 0.29% < 20% / extreme-cost: 平均月利 -1.78% < 20% / PF不足 / Stress維持率 0.0% < 50.0% / moderate-cost: 平均月利 2.60% < 20% / severe-cost: 平均月利 0.29% < 20% / extreme-cost: 平均月利 -1.78% < 20% / extreme-cost: PF不足",
+      "evidence": [
+        {
+          "label": "Profit Factor",
+          "value": "2.19",
+          "assessment": "positive"
+        },
+        {
+          "label": "取引数",
+          "value": "97",
+          "assessment": "positive"
+        },
+        {
+          "label": "平均実効レバレッジ",
+          "value": "0.89x",
+          "assessment": "positive"
+        },
+        {
+          "label": "Edge / Cost",
+          "value": "4.31",
+          "assessment": "positive"
+        },
+        {
+          "label": "Funding合計",
+          "value": "84.4435",
+          "assessment": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "m-014",
+      "sequence": 14,
+      "createdAt": "2026-07-16T15:13:36.768Z",
+      "speakerId": "research-cio",
+      "speakerName": "Research CIO",
+      "role": "cio",
+      "stance": "decision",
+      "strategyId": null,
+      "content": "全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。 主な反対理由は月利不足67件、コスト耐性不足52件、OOS劣化9件、Long/Short偏り3件、Walk-forward不安定2件、DD超過2件。次Cycleの改善方針は「Edge/Cost比率を上げ、回転頻度を下げる」「清算0を維持しながら実効レバレッジと利幅を段階的に上げる」「リスク率・証拠金使用率・レバレッジを縮小する」「Neutral Entryを止め、BTCレジーム確認を強化する」「Long/Short両方向を必須化する」です。",
+      "evidence": [
+        {
+          "label": "最終候補",
+          "value": "0",
+          "assessment": "neutral"
+        },
+        {
+          "label": "Best OOS月利",
+          "value": "9.33%",
+          "assessment": "negative"
+        },
+        {
+          "label": "Best OOS MaxDD",
+          "value": "5.20%",
+          "assessment": "positive"
+        },
+        {
+          "label": "Worst Stress月利",
+          "value": "2.74%",
+          "assessment": "negative"
+        }
+      ]
+    }
+  ]
+}
