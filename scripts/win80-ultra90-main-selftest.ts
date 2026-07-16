@@ -62,7 +62,7 @@ const ultraSwitch = resolveWin80Ultra90Overlap({
 });
 assert.equal(ultraSwitch.action, "SWITCH_70");
 assert.equal(ultraSwitch.sourceSellFraction, 0.7);
-assert.equal(ultraSwitch.retainedAllocation, 0.3);
+assert.ok(Math.abs(ultraSwitch.retainedAllocation - 0.3) < 1e-12);
 
 const sameSymbol = resolveWin80Ultra90Overlap({
     current: { symbol: "PENGU", pnlPct: 5, usdValue: 100 },
