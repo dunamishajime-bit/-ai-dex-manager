@@ -3,10 +3,11 @@ name: Research Lab Dashboard Smoke
 on:
   pull_request:
     paths:
-      - "app/api/research-lab/latest/**"
+      - "app/api/research-lab/**"
       - "app/research-lab/**"
       - "components/research-lab/**"
       - "lib/research-lab/dashboard-types.ts"
+      - "lib/research-lab/discussion-types.ts"
       - "docs/research-lab-dashboard.md"
   workflow_dispatch:
 
@@ -31,6 +32,9 @@ jobs:
 
       - name: TypeScript check
         run: npm run typecheck
+
+      - name: Research discussion self-test
+        run: npm run research:discussion:selftest
 
       - name: Production build
         run: npm run build
