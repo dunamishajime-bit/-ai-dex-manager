@@ -11,7 +11,16 @@ import {
 import { perpResearchConfigFromEnvironment } from "../lib/research-lab/perp/config";
 import { loadPerpMarketData } from "../lib/research-lab/perp/data-store";
 import { compactPerpBacktestResult } from "../lib/research-lab/perp/evidence";
-import { runPerpResearch } from "../lib/research-lab/perp/orchestrator";
+import {
+  createEmptyPerpLogicRegistry,
+  mergePerpLogicRegistry,
+  normalizePerpLogicRegistry,
+  type PerpLogicRegistry,
+} from "../lib/research-lab/perp/logic-registry";
+import {
+  runPerpResearch,
+  type PerpResearchDeduplicationStats,
+} from "../lib/research-lab/perp/orchestrator";
 import type {
   PerpResearchResult,
   PerpStrategyEvaluation,
@@ -30,6 +39,17 @@ async function readState(filePath: string): Promise<PerpAutonomousState> {
       console.warn(`[AutonomousResearch] invalid state ignored: ${error instanceof Error ? error.message : String(error)}`);
     }
     return createDefaultAutonomousState();
+  }
+}
+
+async function readLogicRegistry(filePath: string): Promise<PerpLogicRegistry> {
+  try {
+    return normalizePerpLogicRegistry(JSON.parse(await fs.readFile(filePath, "utf8")));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.warn(`[AutonomousResearch] invalid logic registry ignored: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    return createEmptyPerpLogicRegistry();
   }
 }
 
@@ -111,18 +131,47 @@ function candidateMarkdown(result: PerpResearchResult) {
   ].join("\n");
 }
 
+function deduplicationMarkdown(input: {
+  stats: PerpResearchDeduplicationStats;
+  registryBefore: PerpLogicRegistry;
+  registryAfter: PerpLogicRegistry;
+  added: number;
+}) {
+  return [
+    "## Tested Logic Deduplication",
+    "",
+    `- Historical fingerprints loaded: ${input.registryBefore.fingerprints.length}`,
+    `- New unique logic tested this cycle: ${input.added}`,
+    `- Duplicate or near-identical logic skipped: ${input.stats.duplicateStrategiesSkipped}`,
+    `- Replacement candidates generated: ${input.stats.replacementCandidatesGenerated}`,
+    `- Total unique logic in registry: ${input.registryAfter.fingerprints.length}`,
+    `- Exhausted population slots: ${input.stats.exhaustedPopulationSlots}`,
+    "",
+    "A strategy ID change or symbol-order change does not create a new logic. Family, symbols and normalized parameters must differ.",
+    "",
+  ].join("\n");
+}
+
 async function main() {
   const stateDir = path.resolve(process.env.RESEARCH_AUTONOMOUS_STATE_DIR ?? ".research-state");
   const statePath = path.join(stateDir, "autonomous-state.json");
+  const logicRegistryPath = path.join(stateDir, "tested-logic-fingerprints.json");
   const previous = await readState(statePath);
+  const previousLogicRegistry = await readLogicRegistry(logicRegistryPath);
   process.env.PERP_RESEARCH_PROFILE ??= previous.nextProfile;
 
   const config = perpResearchConfigFromEnvironment();
   config.seed = previous.seed;
   const initialPopulation = buildAutonomousInitialPopulation(previous, config);
+  const evaluatedLogicFingerprints = new Set<string>();
+  const deduplicationStats: PerpResearchDeduplicationStats = {
+    duplicateStrategiesSkipped: 0,
+    replacementCandidatesGenerated: 0,
+    exhaustedPopulationSlots: 0,
+  };
 
   console.log(
-    `[AutonomousResearch] cycle=${previous.cycle + 1} profile=${config.profile} rounds=${config.rounds} population=${config.populationPerRound} seed=${config.seed}`,
+    `[AutonomousResearch] cycle=${previous.cycle + 1} profile=${config.profile} rounds=${config.rounds} population=${config.populationPerRound} seed=${config.seed} historicalLogic=${previousLogicRegistry.fingerprints.length}`,
   );
 
   const data = await loadPerpMarketData({
@@ -144,8 +193,24 @@ async function main() {
   const result = await runPerpResearch(config, data, {
     initialPopulation,
     generationOffset: previous.generationOffset,
+    excludedLogicFingerprints: previousLogicRegistry.fingerprints,
+    evaluatedLogicFingerprints,
+    deduplicationStats,
   });
   const reflection = reflectAutonomousRun(previous, result);
+  const registryMerge = mergePerpLogicRegistry({
+    previous: previousLogicRegistry,
+    evaluatedFingerprints: evaluatedLogicFingerprints,
+    duplicateStrategiesSkipped: deduplicationStats.duplicateStrategiesSkipped,
+    updatedAt: result.completedAt,
+  });
+  const dedupReport = deduplicationMarkdown({
+    stats: deduplicationStats,
+    registryBefore: previousLogicRegistry,
+    registryAfter: registryMerge.registry,
+    added: registryMerge.added,
+  });
+  const reportMarkdown = `${reflection.markdown}\n${dedupReport}`;
   const compact = compactResult(result);
   const timestamp = safeTimestamp(result.startedAt);
   const reportDir = path.resolve("reports", "research-lab-autonomous", timestamp);
@@ -153,16 +218,28 @@ async function main() {
   await fs.mkdir(stateDir, { recursive: true });
   await fs.mkdir(reportDir, { recursive: true });
   await fs.writeFile(statePath, JSON.stringify(reflection.state, null, 2), "utf8");
-  await fs.writeFile(path.join(stateDir, "latest-report.md"), reflection.markdown, "utf8");
+  await fs.writeFile(logicRegistryPath, JSON.stringify(registryMerge.registry, null, 2), "utf8");
+  await fs.writeFile(path.join(stateDir, "latest-report.md"), reportMarkdown, "utf8");
   await fs.writeFile(path.join(stateDir, "latest-result.json"), JSON.stringify(compact, null, 2), "utf8");
   await fs.writeFile(path.join(stateDir, "funding-coverage.json"), JSON.stringify(coverage, null, 2), "utf8");
+  await fs.writeFile(
+    path.join(stateDir, "deduplication-stats.json"),
+    JSON.stringify({
+      cycle: reflection.state.cycle,
+      ...deduplicationStats,
+      historicalFingerprintsLoaded: previousLogicRegistry.fingerprints.length,
+      newUniqueLogicTested: registryMerge.added,
+      totalUniqueLogic: registryMerge.registry.fingerprints.length,
+    }, null, 2),
+    "utf8",
+  );
   await fs.writeFile(
     path.join(stateDir, "forward-paper-candidates.json"),
     JSON.stringify(compact.finalCandidates, null, 2),
     "utf8",
   );
   await fs.writeFile(path.join(stateDir, "forward-paper-candidates.md"), candidateMarkdown(compact), "utf8");
-  await fs.writeFile(path.join(reportDir, "cycle-report.md"), reflection.markdown, "utf8");
+  await fs.writeFile(path.join(reportDir, "cycle-report.md"), reportMarkdown, "utf8");
   await fs.writeFile(path.join(reportDir, "result.json"), JSON.stringify(compact, null, 2), "utf8");
 
   const bestOos = reflection.summary.bestOosMonthlyPct ?? -100;
@@ -173,10 +250,12 @@ async function main() {
     final_candidates: result.finalCandidates.length,
     best_oos_monthly: bestOos.toFixed(4),
     consecutive_no_candidate: reflection.state.consecutiveNoCandidate,
+    duplicate_logic_skipped: deduplicationStats.duplicateStrategiesSkipped,
+    total_unique_logic: registryMerge.registry.fingerprints.length,
   });
 
   console.log(
-    `[AutonomousResearch] completed cycle=${reflection.state.cycle} evaluations=${result.totalEvaluations} finalCandidates=${result.finalCandidates.length} bestOos=${bestOos.toFixed(2)}%`,
+    `[AutonomousResearch] completed cycle=${reflection.state.cycle} evaluations=${result.totalEvaluations} uniqueAdded=${registryMerge.added} duplicateSkipped=${deduplicationStats.duplicateStrategiesSkipped} registry=${registryMerge.registry.fingerprints.length} finalCandidates=${result.finalCandidates.length} bestOos=${bestOos.toFixed(2)}%`,
   );
 }
 
