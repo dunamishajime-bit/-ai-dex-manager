@@ -6,7 +6,7 @@
   "include": [
     "next-env.d.ts",
     "lib/research-lab/**/*.ts",
-    "scripts/research-lab-runner.ts",
+    "scripts/research-lab-*.ts",
     "lib/backtest/**/*.ts",
     "config/**/*.ts"
   ],
