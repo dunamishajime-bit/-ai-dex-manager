@@ -3,15 +3,21 @@ import path from "path";
 
 import type { ResearchDiscussionIndex, ResearchDiscussionLog } from "../lib/research-lab/discussion-types";
 import {
-  buildAutonomousInitialPopulation,
   createDefaultAutonomousState,
   normalizeAutonomousState,
-  reflectAutonomousRun,
   type PerpAutonomousState,
 } from "../lib/research-lab/perp/autonomous";
 import { perpResearchConfigFromEnvironment } from "../lib/research-lab/perp/config";
 import { loadPerpMarketData } from "../lib/research-lab/perp/data-store";
-import { buildResearchDiscussion, discussionIndexEntry } from "../lib/research-lab/perp/discussion";
+import { reflectChampionDeepResearchRun } from "../lib/research-lab/perp/deep-autonomous";
+import {
+  createEmptyChampionDeepState,
+  normalizeChampionDeepState,
+  runChampionDeepResearch,
+  type ChampionDeepResearchState,
+} from "../lib/research-lab/perp/deep-research";
+import { buildChampionDeepDiscussion } from "../lib/research-lab/perp/deep-discussion";
+import { discussionIndexEntry } from "../lib/research-lab/perp/discussion";
 import { compactPerpBacktestResult } from "../lib/research-lab/perp/evidence";
 import {
   createEmptyPerpLogicRegistry,
@@ -19,10 +25,7 @@ import {
   normalizePerpLogicRegistry,
   type PerpLogicRegistry,
 } from "../lib/research-lab/perp/logic-registry";
-import {
-  runPerpResearch,
-  type PerpResearchDeduplicationStats,
-} from "../lib/research-lab/perp/orchestrator";
+import type { PerpResearchDeduplicationStats } from "../lib/research-lab/perp/orchestrator";
 import type {
   PerpResearchResult,
   PerpStrategyEvaluation,
@@ -33,14 +36,42 @@ function safeTimestamp(value: string) {
   return value.replace(/[:.]/g, "-");
 }
 
+function integerEnv(name: string, fallback: number, min: number, max: number) {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) ? Math.min(max, Math.max(min, Math.floor(value))) : fallback;
+}
+
 async function readState(filePath: string): Promise<PerpAutonomousState> {
   try {
     return normalizeAutonomousState(JSON.parse(await fs.readFile(filePath, "utf8")));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.warn(`[AutonomousResearch] invalid state ignored: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(`[ChampionDeepResearch] invalid autonomous state ignored: ${error instanceof Error ? error.message : String(error)}`);
     }
     return createDefaultAutonomousState();
+  }
+}
+
+async function readDeepState(filePath: string): Promise<ChampionDeepResearchState> {
+  try {
+    return normalizeChampionDeepState(JSON.parse(await fs.readFile(filePath, "utf8")));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.warn(`[ChampionDeepResearch] invalid deep state ignored: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    return createEmptyChampionDeepState();
+  }
+}
+
+async function readPreviousResult(filePath: string): Promise<PerpResearchResult | null> {
+  try {
+    const value = JSON.parse(await fs.readFile(filePath, "utf8")) as PerpResearchResult;
+    return value && Array.isArray(value.leaderboard) && typeof value.completedAt === "string" ? value : null;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.warn(`[ChampionDeepResearch] invalid previous result ignored: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    return null;
   }
 }
 
@@ -49,7 +80,7 @@ async function readLogicRegistry(filePath: string): Promise<PerpLogicRegistry> {
     return normalizePerpLogicRegistry(JSON.parse(await fs.readFile(filePath, "utf8")));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.warn(`[AutonomousResearch] invalid logic registry ignored: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(`[ChampionDeepResearch] invalid logic registry ignored: ${error instanceof Error ? error.message : String(error)}`);
     }
     return createEmptyPerpLogicRegistry();
   }
@@ -67,7 +98,7 @@ async function readDiscussionIndex(filePath: string): Promise<ResearchDiscussion
     };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.warn(`[AutonomousResearch] invalid discussion index ignored: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(`[ChampionDeepResearch] invalid discussion index ignored: ${error instanceof Error ? error.message : String(error)}`);
     }
     return { version: 1, updatedAt: new Date(0).toISOString(), items: [] };
   }
@@ -161,13 +192,13 @@ function deduplicationMarkdown(input: {
     "## Tested Logic Deduplication",
     "",
     `- Historical fingerprints loaded: ${input.registryBefore.fingerprints.length}`,
-    `- New unique logic tested this cycle: ${input.added}`,
-    `- Duplicate or near-identical logic skipped: ${input.stats.duplicateStrategiesSkipped}`,
-    `- Replacement candidates generated: ${input.stats.replacementCandidatesGenerated}`,
+    `- New unique child logic tested this cycle: ${input.added}`,
+    `- Duplicate or near-identical child logic skipped: ${input.stats.duplicateStrategiesSkipped}`,
+    `- Alternative hypotheses considered: ${input.stats.replacementCandidatesGenerated}`,
     `- Total unique logic in registry: ${input.registryAfter.fingerprints.length}`,
-    `- Exhausted population slots: ${input.stats.exhaustedPopulationSlots}`,
+    `- Unfilled experiment slots: ${input.stats.exhaustedPopulationSlots}`,
     "",
-    "A strategy ID change or symbol-order change does not create a new logic. Family, symbols and normalized parameters must differ.",
+    "Parent baselines are deliberately re-evaluated for a fair same-cycle comparison but are not counted as new logic.",
     "",
   ].join("\n");
 }
@@ -189,7 +220,7 @@ function discussionMarkdown(log: ResearchDiscussionLog) {
     `- Final candidates: ${log.finalCandidates}`,
     `- Best OOS monthly: ${log.bestOosMonthlyPct == null ? "none" : `${log.bestOosMonthlyPct.toFixed(2)}%`}`,
     `- Best OOS MaxDD: ${log.bestOosDrawdownPct == null ? "none" : `${log.bestOosDrawdownPct.toFixed(2)}%`}`,
-    `- Worst Stress monthly: ${log.bestWorstStressMonthlyPct == null ? "none" : `${log.bestWorstStressMonthlyPct.toFixed(2)}%`}`,
+    `- Best Stress monthly: ${log.bestWorstStressMonthlyPct == null ? "none" : `${log.bestWorstStressMonthlyPct.toFixed(2)}%`}`,
     "",
     "## Methodology",
     "",
@@ -224,16 +255,22 @@ function discussionMarkdown(log: ResearchDiscussionLog) {
 async function main() {
   const stateDir = path.resolve(process.env.RESEARCH_AUTONOMOUS_STATE_DIR ?? ".research-state");
   const statePath = path.join(stateDir, "autonomous-state.json");
+  const deepStatePath = path.join(stateDir, "champion-deep-state.json");
+  const previousResultPath = path.join(stateDir, "latest-result.json");
   const logicRegistryPath = path.join(stateDir, "tested-logic-fingerprints.json");
   const discussionIndexPath = path.join(stateDir, "discussions", "index.json");
   const previous = await readState(statePath);
+  const previousDeepState = await readDeepState(deepStatePath);
+  const previousResult = await readPreviousResult(previousResultPath);
   const previousLogicRegistry = await readLogicRegistry(logicRegistryPath);
   const previousDiscussionIndex = await readDiscussionIndex(discussionIndexPath);
   process.env.PERP_RESEARCH_PROFILE ??= previous.nextProfile;
 
   const config = perpResearchConfigFromEnvironment();
   config.seed = previous.seed;
-  const initialPopulation = buildAutonomousInitialPopulation(previous, config);
+  config.rounds = 1;
+  const championCount = integerEnv("PERP_DEEP_CHAMPIONS", 3, 1, 3);
+  const experimentsPerChampion = integerEnv("PERP_DEEP_EXPERIMENTS_PER_CHAMPION", 2, 1, 3);
   const evaluatedLogicFingerprints = new Set<string>();
   const deduplicationStats: PerpResearchDeduplicationStats = {
     duplicateStrategiesSkipped: 0,
@@ -242,7 +279,7 @@ async function main() {
   };
 
   console.log(
-    `[AutonomousResearch] cycle=${previous.cycle + 1} profile=${config.profile} rounds=${config.rounds} population=${config.populationPerRound} seed=${config.seed} historicalLogic=${previousLogicRegistry.fingerprints.length}`,
+    `[ChampionDeepResearch] cycle=${previous.cycle + 1} profile=${config.profile} champions=${championCount} experimentsPerChampion=${experimentsPerChampion} historicalLogic=${previousLogicRegistry.fingerprints.length}`,
   );
 
   const data = await loadPerpMarketData({
@@ -251,7 +288,7 @@ async function main() {
     endTs: config.endTs,
   });
   if (data.source !== "binance-usdm-futures") {
-    throw new Error(`Autonomous research requires Binance USD-M Futures data, received ${data.source}`);
+    throw new Error(`Champion deep research requires Binance USD-M Futures data, received ${data.source}`);
   }
   const coverage = fundingCoverage(config.symbols, data.fundingBySymbol);
   if ((data.fundingBySymbol.BTC?.length ?? 0) < 100) {
@@ -261,20 +298,22 @@ async function main() {
     throw new Error(`Funding coverage is insufficient: ${(coverage.ratio * 100).toFixed(1)}%`);
   }
 
-  const result = await runPerpResearch(config, data, {
-    initialPopulation,
-    generationOffset: previous.generationOffset,
+  const deep = await runChampionDeepResearch({
+    cycle: previous.cycle + 1,
+    previousState: previousDeepState,
+    previousResult,
+    fallbackGenomes: previous.eliteGenomes,
+    data,
+    config,
+    championCount,
+    experimentsPerChampion,
     excludedLogicFingerprints: previousLogicRegistry.fingerprints,
     evaluatedLogicFingerprints,
     deduplicationStats,
   });
-  const reflection = reflectAutonomousRun(previous, result);
-  const discussion = buildResearchDiscussion({
-    result,
-    summary: reflection.summary,
-    failures: reflection.state.failureProfile,
-    nextPlan: reflection.state.nextPlan,
-  });
+  const result = deep.researchResult;
+  const reflection = reflectChampionDeepResearchRun(previous, deep);
+  const discussion = buildChampionDeepDiscussion(deep);
   const discussionPath = discussionRelativePath(discussion);
   const discussionIndex: ResearchDiscussionIndex = {
     version: 1,
@@ -296,8 +335,19 @@ async function main() {
     registryAfter: registryMerge.registry,
     added: registryMerge.added,
   });
-  const reportMarkdown = `${reflection.markdown}\n## Discussion Summary\n\n${discussion.summary}\n\n**CIO Decision:** ${discussion.decision}\n\n${dedupReport}`;
+  const reportMarkdown = `${reflection.markdown}\n## Deep Discussion Summary\n\n${discussion.summary}\n\n**CIO Decision:** ${discussion.decision}\n\n${dedupReport}`;
   const compact = compactResult(result);
+  const latestDeepEvidence = {
+    version: 1,
+    cycle: deep.cycle,
+    startedAt: deep.startedAt,
+    completedAt: deep.completedAt,
+    profile: deep.profile,
+    championsBefore: deep.championsBefore,
+    championsAfter: deep.championsAfter,
+    experiments: deep.experiments,
+    nextPlan: deep.nextPlan,
+  };
   const timestamp = safeTimestamp(result.startedAt);
   const reportDir = path.resolve("reports", "research-lab-autonomous", timestamp);
   const archivedDiscussionPath = path.join(stateDir, ...discussionPath.split("/"));
@@ -307,9 +357,11 @@ async function main() {
   await fs.mkdir(path.dirname(archivedDiscussionPath), { recursive: true });
   await fs.mkdir(path.dirname(discussionIndexPath), { recursive: true });
   await fs.writeFile(statePath, JSON.stringify(reflection.state, null, 2), "utf8");
+  await fs.writeFile(deepStatePath, JSON.stringify(deep.state, null, 2), "utf8");
   await fs.writeFile(logicRegistryPath, JSON.stringify(registryMerge.registry, null, 2), "utf8");
   await fs.writeFile(path.join(stateDir, "latest-report.md"), reportMarkdown, "utf8");
   await fs.writeFile(path.join(stateDir, "latest-result.json"), JSON.stringify(compact, null, 2), "utf8");
+  await fs.writeFile(path.join(stateDir, "latest-deep-research.json"), JSON.stringify(latestDeepEvidence, null, 2), "utf8");
   await fs.writeFile(path.join(stateDir, "latest-discussion.json"), JSON.stringify(discussion, null, 2), "utf8");
   await fs.writeFile(path.join(stateDir, "latest-discussion.md"), discussionMarkdown(discussion), "utf8");
   await fs.writeFile(archivedDiscussionPath, JSON.stringify(discussion, null, 2), "utf8");
@@ -319,6 +371,10 @@ async function main() {
     path.join(stateDir, "deduplication-stats.json"),
     JSON.stringify({
       cycle: reflection.state.cycle,
+      mode: "champion_deep",
+      parentBaselinesReevaluated: deep.baselineEvaluations.length,
+      experiments: deep.experiments.length,
+      acceptedExperiments: deep.experiments.filter((item) => item.accepted).length,
       ...deduplicationStats,
       historicalFingerprintsLoaded: previousLogicRegistry.fingerprints.length,
       newUniqueLogicTested: registryMerge.added,
@@ -334,14 +390,20 @@ async function main() {
   await fs.writeFile(path.join(stateDir, "forward-paper-candidates.md"), candidateMarkdown(compact), "utf8");
   await fs.writeFile(path.join(reportDir, "cycle-report.md"), reportMarkdown, "utf8");
   await fs.writeFile(path.join(reportDir, "result.json"), JSON.stringify(compact, null, 2), "utf8");
+  await fs.writeFile(path.join(reportDir, "deep-research.json"), JSON.stringify(latestDeepEvidence, null, 2), "utf8");
   await fs.writeFile(path.join(reportDir, "discussion.json"), JSON.stringify(discussion, null, 2), "utf8");
   await fs.writeFile(path.join(reportDir, "discussion.md"), discussionMarkdown(discussion), "utf8");
 
   const bestOos = reflection.summary.bestOosMonthlyPct ?? -100;
+  const acceptedExperiments = deep.experiments.filter((item) => item.accepted).length;
   await writeGithubOutput({
     run_status: "success",
     cycle: reflection.state.cycle,
     profile: config.profile,
+    research_mode: "champion_deep",
+    champions: deep.championsAfter.length,
+    experiments: deep.experiments.length,
+    accepted_experiments: acceptedExperiments,
     final_candidates: result.finalCandidates.length,
     best_oos_monthly: bestOos.toFixed(4),
     consecutive_no_candidate: reflection.state.consecutiveNoCandidate,
@@ -351,18 +413,18 @@ async function main() {
   });
 
   console.log(
-    `[AutonomousResearch] completed cycle=${reflection.state.cycle} evaluations=${result.totalEvaluations} uniqueAdded=${registryMerge.added} duplicateSkipped=${deduplicationStats.duplicateStrategiesSkipped} registry=${registryMerge.registry.fingerprints.length} finalCandidates=${result.finalCandidates.length} bestOos=${bestOos.toFixed(2)}% discussionMessages=${discussion.messages.length}`,
+    `[ChampionDeepResearch] completed cycle=${reflection.state.cycle} baselines=${deep.baselineEvaluations.length} experiments=${deep.experiments.length} accepted=${acceptedExperiments} uniqueAdded=${registryMerge.added} duplicateSkipped=${deduplicationStats.duplicateStrategiesSkipped} finalCandidates=${result.finalCandidates.length} bestOos=${bestOos.toFixed(2)}% discussionMessages=${discussion.messages.length}`,
   );
 }
 
 main().catch(async (error) => {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);
-  console.error("[AutonomousResearch] failed", message);
+  console.error("[ChampionDeepResearch] failed", message);
   const stateDir = path.resolve(process.env.RESEARCH_AUTONOMOUS_STATE_DIR ?? ".research-state");
   await fs.mkdir(stateDir, { recursive: true });
   await fs.writeFile(
     path.join(stateDir, "last-error.json"),
-    JSON.stringify({ failedAt: new Date().toISOString(), message }, null, 2),
+    JSON.stringify({ failedAt: new Date().toISOString(), mode: "champion_deep", message }, null, 2),
     "utf8",
   );
   await writeGithubOutput({ run_status: "failed", final_candidates: 0 });
