@@ -1,6 +1,14 @@
 name: Research Lab Perpetual Pilot
 
 on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "lib/research-lab/perp/**"
+      - "scripts/research-lab-perp-*.ts"
+      - ".github/workflows/research-lab-perp-pilot.yml"
+      - "package.json"
   workflow_dispatch:
     inputs:
       rounds:
@@ -37,18 +45,18 @@ jobs:
     timeout-minutes: 360
     env:
       BINANCE_PUBLIC_ARCHIVE_ONLY: "true"
-      PERP_RESEARCH_ROUNDS: ${{ inputs.rounds }}
-      PERP_RESEARCH_POPULATION: ${{ inputs.population }}
+      PERP_RESEARCH_ROUNDS: ${{ github.event_name == 'workflow_dispatch' && inputs.rounds || '10' }}
+      PERP_RESEARCH_POPULATION: ${{ github.event_name == 'workflow_dispatch' && inputs.population || '5' }}
       PERP_RESEARCH_ELITES: "2"
-      PERP_RESEARCH_FINALISTS: ${{ inputs.finalists }}
+      PERP_RESEARCH_FINALISTS: ${{ github.event_name == 'workflow_dispatch' && inputs.finalists || '5' }}
       PERP_RESEARCH_CONCURRENCY: "1"
       PERP_RESEARCH_WALK_FORWARD_FOLDS: "3"
       PERP_RESEARCH_TARGET_MONTHLY_PCT: "30"
       PERP_RESEARCH_FINAL_OOS_MONTHLY_PCT: "30"
       PERP_RESEARCH_FINAL_STRESS_MONTHLY_PCT: "20"
-      PERP_RESEARCH_SYMBOLS: ${{ inputs.symbols }}
-      PERP_RESEARCH_START_DATE: ${{ inputs.start_date }}
-      PERP_RESEARCH_END_DATE: ${{ inputs.end_date }}
+      PERP_RESEARCH_SYMBOLS: ${{ github.event_name == 'workflow_dispatch' && inputs.symbols || 'BTC,ETH,BNB,SOL,XRP,ADA,AVAX,LINK,LTC,ATOM,AAVE,NEAR,INJ' }}
+      PERP_RESEARCH_START_DATE: ${{ github.event_name == 'workflow_dispatch' && inputs.start_date || '2023-01-01' }}
+      PERP_RESEARCH_END_DATE: ${{ github.event_name == 'workflow_dispatch' && inputs.end_date || '2026-07-01' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,7 +69,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache/perp-research
-          key: perp-market-data-v1-${{ inputs.start_date }}-${{ inputs.end_date }}-${{ hashFiles('lib/research-lab/perp/data-store.ts', 'lib/backtest/binance-source.ts') }}
+          key: perp-market-data-v1-${{ env.PERP_RESEARCH_START_DATE }}-${{ env.PERP_RESEARCH_END_DATE }}-${{ hashFiles('lib/research-lab/perp/data-store.ts', 'lib/backtest/binance-source.ts') }}
           restore-keys: |
             perp-market-data-v1-
       - name: Install dependencies
