@@ -40,7 +40,7 @@ function BottomNavItem({ icon: Icon, label, href }: (typeof NAV_ITEMS)[number]) 
       )}
     >
       {isActive ? <div className="absolute left-1/2 top-0 h-0.5 w-7 -translate-x-1/2 rounded-full bg-[#d4b45a]" /> : null}
-      <Icon className="h-4.5 w-4.5" />
+      <Icon className="h-4 w-4" />
       <span className="truncate text-[8px] leading-none">{label}</span>
     </Link>
   );
