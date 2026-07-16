@@ -1,136 +1,135 @@
-# DisdexManager Autonomous Research Lab
+# DisdexManager Champion Deep Research Lab
 
 ## Purpose
 
-The autonomous loop searches for USD-M Futures Long / Short strategies targeting an OOS average monthly return above 30% without relaxing liquidation, drawdown, sample-size or execution-cost gates.
+The autonomous research loop now develops a small number of promising USD-M Futures Long / Short strategies instead of treating mass generation as the primary research method.
 
-The target is a research objective, not a guaranteed return.
+The target remains an OOS average monthly return above 30% without relaxing liquidation, drawdown, sample-size, Walk-forward or execution-cost gates. The target is a research objective, not a guaranteed return.
 
 ## Schedule
 
-GitHub Actions runs once every hour at minute 17.
+GitHub Actions runs six deep cycles per day at minute 17, once every four hours.
 
-Each scheduled cycle uses 5 rounds and 5 strategies per round, producing 25 unique evaluations. The daily target is therefore 600 unique strategy evaluations.
+Each normal cycle performs:
 
-The previous four-times-per-day schedule used 100 evaluations per cycle. Hourly smaller batches improve feedback speed because each cycle can persist its Elite strategies, failure analysis and tested-logic registry before the next cycle starts.
+- 3 parent Champion re-evaluations.
+- Up to 2 single-parameter child experiments per Champion.
+- Up to 6 new child logics.
+- Up to 9 complete Validation, untouched OOS, Walk-forward and Cost Stress evaluations including the parents.
 
-The concurrency group permits only one active cycle and does not cancel an active run. If an hourly event arrives while research is still running, overlapping account-state writes are prevented.
+This replaces the previous hourly 25-strategy mass-search schedule. The concurrency group still permits only one active cycle and never cancels an active run.
 
-A push that changes `.github/workflows/research-lab-autonomous.yml` on `master` also triggers one immediate cycle. This is used to start the first hourly cycle immediately after a schedule change rather than waiting for the next cron boundary.
+## Champion selection
 
-## Autonomous cycle
+The loop preserves three complementary parent strategies:
 
-1. Read the previous state from `research-autonomous-state`.
-2. Read the persistent tested-logic fingerprint registry.
-3. Load Binance USD-M Futures one-hour Klines and settled funding history.
-4. Reject the run when the Futures source or Funding coverage is insufficient.
-5. Combine previous Elite genomes with fresh strategies.
-6. Remove historically tested and current-batch duplicate logic before backtesting.
-7. Generate replacements with a different deterministic seed until every evaluation slot is unique.
-8. Run Train discovery.
-9. Validate top strategies on Validation and untouched OOS windows.
-10. Run Walk-forward tests.
-11. Run Fee, Slippage and adverse Funding stress scenarios.
-12. Reject strategies with liquidation, excessive drawdown, weak samples or directional imbalance.
-13. Classify failure causes.
-14. Mutate the next Elite population according to the failure profile.
-15. Persist the next state, tested-logic registry and report.
+1. **OOS Champion** — highest untouched OOS average monthly return.
+2. **Stress Champion** — highest worst-case execution-cost Stress monthly return.
+3. **Stability Champion** — strongest combination of OOS return, low OOS MaxDD and Walk-forward pass rate.
+
+When no Champion state exists, the loop migrates from validated results in `latest-result.json`, then falls back to saved Elite genomes. Fresh random seeds are used only when no usable historical strategy exists.
+
+## Deep research cycle
+
+1. Read autonomous state, Champion state, the previous compact result and the tested-logic registry.
+2. Load Binance USD-M Futures one-hour Klines and settled Funding history.
+3. Re-evaluate all three parent Champions under the same current configuration.
+4. Diagnose each parent separately for low return, OOS decay, cost fragility, drawdown risk, direction bias and low sample size.
+5. Propose up to two targeted hypotheses per parent.
+6. Change exactly one parameter per child experiment.
+7. Skip historically tested or current-cycle duplicate child logic.
+8. Run full Train, Validation, untouched OOS, Walk-forward and Fee/Slippage/Funding Stress evaluation for every parent and child.
+9. Compare each child only with its own parent.
+10. Accept a child only when it produces meaningful improvement without liquidation, material OOS decay, material Stress decay, excessive DD deterioration or insufficient OOS trades.
+11. Promote the best accepted child into that Champion slot.
+12. Retain the parent unchanged when no child passes.
+13. Persist parent-child evidence, hypotheses, decisions and the next deep-research plan.
+
+## Single-change experiments
+
+Examples of approved one-variable experiments include:
+
+- Increase only `minimumEdgeToCostRatio` to remove low-edge entries.
+- Increase only `rebalanceBars` to reduce turnover.
+- Disable only `allowNeutralRegime` to remove directionless entries.
+- Increase only `btcRegimeSmaBars` to reduce regime noise.
+- Increase only `takeProfitAtr` to test larger profit capture.
+- Increase only `maxHoldBars` to allow winning trades more time.
+- Reduce only `leverage` or `riskPerTradePct` when risk is excessive.
+
+Changing several parameters together is prohibited because the improvement source would become unidentifiable.
+
+## Parent-child acceptance
+
+The comparison records:
+
+- OOS average monthly return delta.
+- Worst Stress monthly return delta.
+- OOS MaxDD improvement or deterioration.
+- Walk-forward pass-rate delta.
+- OOS trade-count delta.
+- A composite improvement score.
+
+A child is rejected when any of the following applies:
+
+- No meaningful improvement relative to its parent.
+- Liquidation occurs.
+- OOS monthly return falls materially below the parent.
+- Cost Stress falls materially below the parent.
+- OOS MaxDD exceeds the parent-relative risk limit.
+- OOS trade count falls below 12.
+- Train improves while OOS and Stress deteriorate.
+
+The absolute Forward Paper gates remain stricter than the parent-child development gate. A child can become the next research parent before reaching 30% only when it demonstrates a safe, reproducible improvement over its parent.
 
 ## Tested-logic deduplication
 
-Every strategy receives a deterministic logic fingerprint built from:
+Parent baselines are deliberately re-evaluated every cycle for a fair same-cycle comparison and are not counted as new logic.
 
-- Strategy family.
-- Sorted unique symbol set.
-- Timeframe and direction permissions.
-- Regime, momentum, breakout, volume and volatility parameters.
-- Leverage, position-risk and margin-usage parameters.
-- ATR stop, take-profit, trailing, holding, rotation and cooldown parameters.
-- Edge / Cost entry threshold.
+Child strategies receive deterministic fingerprints built from family, sorted symbols, timeframe, direction permissions, regime, momentum, breakout, volume, volatility, leverage, risk, allocation, ATR exits, holding, rotation, cooldown and Edge / Cost parameters.
 
-The fingerprint intentionally excludes strategy ID, generation, parent IDs, researcher name and thesis text. Renaming or re-parenting a strategy therefore does not make it eligible for another backtest.
+Strategy ID, generation, parent ID, researcher name and thesis text do not create a new logic. A duplicate child is skipped and an alternative single-parameter hypothesis is attempted.
 
-Small parameter differences inside the configured normalization step are treated as near-identical logic and are skipped. A material parameter change creates a new fingerprint.
+## Evidence and discussions
 
-Duplicate checks are applied:
+Every cycle stores a full Champion discussion transcript containing:
 
-1. Against every fingerprint stored from previous autonomous cycles.
-2. Inside the current population before evaluation.
-3. Between generations inside the same cycle.
+- Moderator research constraints.
+- Champion-specific root-cause diagnosis.
+- Researcher hypotheses.
+- Overfit criticism.
+- Tail-risk criticism.
+- Execution-cost criticism.
+- Parent-child metric deltas.
+- CIO acceptance or rejection for each Champion.
+- Final CIO cycle decision and next plan.
 
-A duplicate never consumes one of the scheduled evaluation slots. The generator creates a replacement candidate with a different seed. If it cannot fill all slots with unique logic after the retry limit, the cycle fails instead of repeating an old test.
-
-The registry stores compact SHA-256-derived fingerprints rather than full genomes, allowing long-running history without coupling the registry to generated strategy IDs.
-
-## Automatic reflection rules
-
-### Cost fragility
-
-- Increase the minimum Edge / Cost ratio.
-- Increase the momentum threshold.
-- Reduce rotation frequency.
-- Allow positions to capture a larger move before rotation.
-
-### Return too low with controlled risk
-
-- Increase requested leverage gradually.
-- Increase risk per trade gradually.
-- Increase maximum margin usage gradually.
-- Increase the take-profit distance.
-
-All values remain inside the configured hard limits.
-
-### Drawdown or liquidation
-
-- Reduce requested leverage.
-- Reduce risk per trade.
-- Reduce margin usage.
-- Increase stop distance while preserving account-risk sizing.
-- Increase cooldown.
-
-### Too few trades
-
-- Slightly reduce momentum and volume thresholds.
-- Slightly relax the regime threshold.
-- Keep the Edge / Cost gate active.
-
-### OOS decay or weak Walk-forward performance
-
-- Disable neutral-regime entries.
-- Strengthen the BTC regime requirement.
-- Increase the regime lookback.
-
-### Direction imbalance
-
-- Re-enable both Long and Short.
+The transcript is deterministic and evidence-based. It is not presented as an external LLM free-form conversation.
 
 ## Persistent state
 
 The workflow writes only to the dedicated `research-autonomous-state` branch:
 
 - `.research-state/autonomous-state.json`
+- `.research-state/champion-deep-state.json`
+- `.research-state/latest-deep-research.json`
 - `.research-state/tested-logic-fingerprints.json`
 - `.research-state/deduplication-stats.json`
 - `.research-state/latest-report.md`
 - `.research-state/latest-result.json`
+- `.research-state/latest-discussion.json`
+- `.research-state/latest-discussion.md`
+- `.research-state/discussions/YYYY/MM/DD/*.json`
+- `.research-state/discussions/index.json`
 - `.research-state/funding-coverage.json`
 - `.research-state/forward-paper-candidates.json`
 - `.research-state/forward-paper-candidates.md`
 
-The state branch is isolated from the application deployment branch. Scheduled research does not commit generated results to `master`.
+Scheduled research never writes generated evidence to `master`.
 
-The report records historical fingerprints loaded, new unique logic tested, duplicates skipped, replacement candidates generated and the cumulative registry size.
+## Forward Paper promotion policy
 
-## Notifications
-
-- A Forward Paper candidate creates a GitHub Issue automatically.
-- A failed scheduled cycle creates or updates one failure Issue.
-- A later successful cycle closes the failure Issue automatically.
-- Every cycle uploads an Actions Artifact for 30 days.
-
-## Promotion policy
-
-A strategy can be written to the Forward Paper candidate file only after passing all configured final gates, including:
+A strategy can be written to the Forward Paper candidate file only after passing all configured final gates:
 
 - OOS average monthly return at least 30%.
 - OOS maximum drawdown within the active profile limit.
@@ -143,12 +142,4 @@ A strategy can be written to the Forward Paper candidate file only after passing
 
 ## Safety boundary
 
-The autonomous workflow does not have access to:
-
-- AsterDEX order execution.
-- Wallet signing.
-- Trading API keys.
-- Real account balances.
-- Existing live positions.
-
-Automation stops at research evidence and Forward Paper candidate creation. Real trading remains disabled.
+The workflow cannot access AsterDEX order execution, wallet signing, trading API keys, real account balances or existing live positions. Automation stops at research evidence and Forward Paper candidate creation. Real trading remains disabled.
