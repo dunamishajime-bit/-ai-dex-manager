@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.research.json",
+    "research:lab": "tsx scripts/research-lab-runner.ts",
+    "research:lab:selftest": "tsx scripts/research-lab-selftest.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

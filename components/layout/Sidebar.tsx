@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
+import { Activity, BarChart3, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
@@ -10,6 +10,7 @@ import { SITE_BRAND_NAME } from "@/lib/site-access";
 const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
+  { href: "/research-lab", label: "AI研究所", icon: Activity },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/history", label: "トレード履歴", icon: FileText },
   { href: "/settings", label: "設定", icon: Settings },
@@ -60,7 +61,7 @@ export function Sidebar() {
 
       <div className="mt-auto rounded-[18px] border border-[#8a8a8a] bg-[linear-gradient(180deg,rgba(17,20,23,0.96),rgba(9,11,14,0.98))] px-4 py-4 text-[11px] leading-6 text-white/78">
         <div className="mb-2 text-[11px] font-bold text-white">運用メモ</div>
-        <p>運用ウォレットの作成と入金確認は、このサイト内で順番に進められます。</p>
+        <p>AI研究所は実売買から分離し、新戦略の生成・検証・反証を行います。</p>
         <p>売買の状況と履歴は、ダッシュボードとトレード履歴で確認できます。</p>
         <p>認証や基本設定の見直しは、設定ページから進めてください。</p>
       </div>
