@@ -1,0 +1,32 @@
+name: Research Lab CI
+
+on:
+  push:
+    branches:
+      - feature/ai-hedge-fund-research-lab-v2
+  pull_request:
+    paths:
+      - "app/research-lab/**"
+      - "lib/research-lab/**"
+      - "scripts/research-lab-runner.ts"
+      - "components/layout/Sidebar.tsx"
+      - "components/layout/BottomNav.tsx"
+      - "package.json"
+      - ".github/workflows/research-lab-ci.yml"
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript check
+        run: npm run typecheck
