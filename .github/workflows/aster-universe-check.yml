@@ -1,0 +1,67 @@
+name: Aster Universe Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-2d3d-swing-v1
+    paths:
+      - ".github/workflows/aster-universe-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query current Aster perpetual universe
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.request
+
+          wanted = [
+              "PENGUUSDT", "1000PEPEUSDT", "WIFUSDT", "1000BONKUSDT",
+              "DOGEUSDT", "SUIUSDT", "SEIUSDT", "APTUSDT", "OPUSDT", "ARBUSDT"
+          ]
+          endpoint = "https://fapi.asterdex.com/fapi/v1/exchangeInfo"
+          result = {"endpoint": endpoint, "wanted": wanted}
+          try:
+              with urllib.request.urlopen(endpoint, timeout=30) as response:
+                  payload = json.load(response)
+              active = {
+                  row.get("symbol")
+                  for row in payload.get("symbols", [])
+                  if row.get("status") == "TRADING" and row.get("contractType") == "PERPETUAL"
+              }
+              result.update({
+                  "endpoint_ok": True,
+                  "tradable": [symbol for symbol in wanted if symbol in active],
+                  "not_tradable": [symbol for symbol in wanted if symbol not in active],
+                  "active_perpetual_count": len(active),
+              })
+          except Exception as exc:
+              result.update({"endpoint_ok": False, "error": f"{type(exc).__name__}: {exc}"})
+          with open("aster_symbol_check.json", "w", encoding="utf-8") as handle:
+              json.dump(result, handle, indent=2)
+          print(json.dumps(result, indent=2))
+          PY
+
+      - name: Publish summary
+        if: always()
+        run: |
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat aster_symbol_check.json >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aster-universe-check
+          path: aster_symbol_check.json
+          if-no-files-found: warn
+          retention-days: 30
