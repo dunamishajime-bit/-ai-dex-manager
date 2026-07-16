@@ -5,7 +5,7 @@ import { execFileSync } from "child_process";
 import type { Candle1h } from "./types";
 
 const REMOTE_START_2023 = Date.UTC(2023, 0, 1, 0, 0, 0);
-const REMOTE_CACHE_VERSION = "v3";
+const REMOTE_CACHE_VERSION = "v4";
 const PUBLIC_ARCHIVE_ROOT = "https://data.binance.vision/data/spot/monthly/klines";
 const BINANCE_SPOT_API_BASES = [
     "https://api.binance.com",
@@ -250,11 +250,16 @@ export async function loadHistoricalCandles(input: {
         if (await exists(cacheFile)) {
             remoteCandles = JSON.parse(await fs.readFile(cacheFile, "utf8")) as Candle1h[];
         } else {
+            const archiveOnly = process.env.BINANCE_PUBLIC_ARCHIVE_ONLY === "true";
             let apiError: unknown = null;
-            try {
-                remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs);
-            } catch (error) {
-                apiError = error;
+            if (!archiveOnly) {
+                try {
+                    remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs);
+                } catch (error) {
+                    apiError = error;
+                }
+            }
+            if (!remoteCandles.length) {
                 remoteCandles = await loadPublicArchiveCandles({
                     symbol,
                     cacheRoot,
@@ -263,8 +268,12 @@ export async function loadHistoricalCandles(input: {
                 });
             }
             if (!remoteCandles.length) {
-                const message = apiError instanceof Error ? apiError.message : String(apiError ?? "no API data");
-                throw new Error(`${message}; Binance public archive also returned no candles for ${symbol}`);
+                const message = archiveOnly
+                    ? "Binance public archive returned no candles"
+                    : apiError instanceof Error
+                        ? apiError.message
+                        : String(apiError ?? "no API data");
+                throw new Error(`${message}; no historical candles for ${symbol}`);
             }
             await fs.mkdir(path.dirname(cacheFile), { recursive: true });
             await fs.writeFile(cacheFile, JSON.stringify(remoteCandles), "utf8");
