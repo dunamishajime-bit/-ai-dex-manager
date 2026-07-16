@@ -42,7 +42,7 @@ async function ensureExpanded(zipPath: string, targetDir: string) {
     const escapedZip = zipPath.replace(/'/g, "''");
     const escapedTarget = targetDir.replace(/'/g, "''");
     const command = `Expand-Archive -LiteralPath '${escapedZip}' -DestinationPath '${escapedTarget}' -Force`;
-    execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command,], { stdio: "ignore" });
+    execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], { stdio: "ignore" });
   } else {
     execFileSync("unzip", ["-o", zipPath, "-d", targetDir], { stdio: "ignore" });
   }
@@ -100,7 +100,7 @@ function parseKlineCsvLine(line: string): Candle1h | null {
 }
 
 function parseFundingCsvLine(line: string): PerpFundingPoint | null {
-  const parts = line.split(").map((part) => part.trim());
+  const parts = line.split(",").map((part) => part.trim());
   if (parts.length < 2) return null;
   const numeric = parts.map((part) => Number(part));
   const ts = normalizeTimestamp(numeric[0]);
