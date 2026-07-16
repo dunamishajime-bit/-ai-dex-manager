@@ -219,7 +219,7 @@ export default function LiveResearchDashboard() {
                   <Tooltip
                     contentStyle={{ background: "#080b11", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}
                     labelStyle={{ color: "white" }}
-                    formatter={(value) => [`${Number(value).toFixed(2)}%`]}
+                    formatter={(value) => `${Number(value).toFixed(2)}%`}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <ReferenceLine y={payload.targets.oosMonthlyPct} stroke="rgba(250,204,21,0.7)" strokeDasharray="5 5" label="OOS目標30%" />
