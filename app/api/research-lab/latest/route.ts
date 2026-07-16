@@ -146,7 +146,8 @@ export async function GET() {
   try {
     const [state, deduplication] = await Promise.all([
       fetchJson<RawAutonomousState>("autonomous-state.json"),
-      fetchJson<RawDeduplicationStats>("deduplication-stats.json").catch(() => ({})),
+      fetchJson<RawDeduplicationStats>("deduplication-stats.json")
+        .catch((): RawDeduplicationStats => ({})),
     ]);
     const history = normalizeHistory(state.history);
     const lastRunAt = typeof state.lastRunAt === "string" ? state.lastRunAt : history.at(-1)?.completedAt ?? null;
