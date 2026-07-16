@@ -23,17 +23,18 @@ export function normalizePerpLogicRegistry(value: unknown): PerpLogicRegistry {
   const fingerprints = Array.isArray(input.fingerprints)
     ? [...new Set(input.fingerprints.filter((item): item is string => typeof item === "string" && item.length > 0))]
     : [];
+  const storedUnique = typeof input.totalUniqueEvaluated === "number" && Number.isFinite(input.totalUniqueEvaluated)
+    ? input.totalUniqueEvaluated
+    : 0;
+  const storedDuplicates = typeof input.totalDuplicateSkipped === "number" && Number.isFinite(input.totalDuplicateSkipped)
+    ? input.totalDuplicateSkipped
+    : 0;
 
   return {
     version: 1,
     fingerprints,
-    totalUniqueEvaluated: Math.max(
-      fingerprints.length,
-      Number.isFinite(input.totalUniqueEvaluated) ? Number(input.totalUniqueEvaluated) : 0,
-    ),
-    totalDuplicateSkipped: Number.isFinite(input.totalDuplicateSkipped)
-      ? Math.max(0, Number(input.totalDuplicateSkipped))
-      : 0,
+    totalUniqueEvaluated: Math.max(fingerprints.length, storedUnique),
+    totalDuplicateSkipped: Math.max(0, storedDuplicates),
     updatedAt: typeof input.updatedAt === "string" ? input.updatedAt : null,
   };
 }
