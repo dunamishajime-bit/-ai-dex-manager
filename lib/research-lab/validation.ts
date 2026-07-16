@@ -98,9 +98,17 @@ export function completeValidationReport(
     : 0;
 
   const temporalReasons: string[] = [];
+  const minimumValidationTrades = Math.max(4, Math.ceil(thresholds.minTradeCount * 0.15));
+  const minimumOosTrades = Math.max(8, Math.ceil(thresholds.minTradeCount * 0.25));
   if (report.validation.metrics.averageMonthlyReturnPct <= 0) temporalReasons.push("Validation平均月利がプラスではない");
+  if (report.validation.metrics.tradeCount < minimumValidationTrades) {
+    temporalReasons.push(`Validation取引数 ${report.validation.metrics.tradeCount} < ${minimumValidationTrades}`);
+  }
   if (oosAverage < thresholds.finalMinOosAverageMonthlyReturnPct) {
     temporalReasons.push(`OOS平均月利 ${oosAverage.toFixed(2)}% < ${thresholds.finalMinOosAverageMonthlyReturnPct}%`);
+  }
+  if (report.oos.metrics.tradeCount < minimumOosTrades) {
+    temporalReasons.push(`OOS取引数 ${report.oos.metrics.tradeCount} < ${minimumOosTrades}`);
   }
   if (report.oos.metrics.medianMonthlyReturnPct < thresholds.minMedianMonthlyReturnPct) {
     temporalReasons.push(`OOS中央値月利 ${report.oos.metrics.medianMonthlyReturnPct.toFixed(2)}% < ${thresholds.minMedianMonthlyReturnPct}%`);
