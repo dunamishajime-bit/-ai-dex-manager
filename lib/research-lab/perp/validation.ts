@@ -1,4 +1,5 @@
 import type { TemporalValidationPlan, TemporalWindow } from "../types";
+import { compactPerpBacktestResult } from "./evidence";
 import { runPerpBacktest } from "./engine";
 import type {
   PerpBacktestResult,
@@ -82,14 +83,14 @@ export async function validatePerpStrategy(input: {
   const { genome, train, data, config } = input;
   const plan = buildPerpValidationPlan(config);
   const target = config.thresholds.targetAverageMonthlyReturnPct;
-  const validation = runPerpBacktest({
+  const validationFull = runPerpBacktest({
     genome,
     data,
     window: plan.validation,
     execution: config.baseExecution,
     targetMonthlyReturnPct: target,
   });
-  const oos = runPerpBacktest({
+  const oosFull = runPerpBacktest({
     genome,
     data,
     window: plan.oos,
@@ -97,76 +98,76 @@ export async function validatePerpStrategy(input: {
     targetMonthlyReturnPct: target,
   });
   const walkForward = plan.walkForward.map((fold) => {
-    const result = runPerpBacktest({
+    const fullResult = runPerpBacktest({
       genome,
       data,
       window: fold.test,
       execution: config.baseExecution,
       targetMonthlyReturnPct: target,
     });
-    const reasons = walkForwardReasons(result, config);
+    const reasons = walkForwardReasons(fullResult, config);
     return {
       label: fold.label,
       window: fold.test,
-      result,
+      result: compactPerpBacktestResult(fullResult, 50),
       passed: reasons.length === 0,
       reasons,
     };
   });
   const stress = config.stressExecutions.map((scenario) => {
-    const result = runPerpBacktest({
+    const fullResult = runPerpBacktest({
       genome,
       data,
       window: plan.oos,
       execution: scenario.execution,
       targetMonthlyReturnPct: target,
     });
-    const reasons = stressReasons(result, config);
+    const reasons = stressReasons(fullResult, config);
     return {
       label: scenario.label,
       execution: scenario.execution,
-      result,
+      result: compactPerpBacktestResult(fullResult, 50),
       passed: reasons.length === 0,
       reasons,
     };
   });
 
   const oosReturnRetentionRatio = retentionRatio(
-    oos.metrics.averageMonthlyReturnPct,
+    oosFull.metrics.averageMonthlyReturnPct,
     train.metrics.averageMonthlyReturnPct,
   );
   const worstStressAverage = stress.length
     ? Math.min(...stress.map((item) => item.result.metrics.averageMonthlyReturnPct))
     : Number.NEGATIVE_INFINITY;
-  const stressReturnRetentionRatio = retentionRatio(worstStressAverage, oos.metrics.averageMonthlyReturnPct);
+  const stressReturnRetentionRatio = retentionRatio(worstStressAverage, oosFull.metrics.averageMonthlyReturnPct);
   const walkForwardPassRatePct = walkForward.length
     ? (walkForward.filter((item) => item.passed).length / walkForward.length) * 100
     : 0;
   const reasons: string[] = [];
   const thresholds = config.thresholds;
 
-  if (validation.metrics.averageMonthlyReturnPct <= 0) reasons.push("Validation平均月利がプラスではない");
-  if (validation.metrics.tradeCount < Math.max(5, Math.ceil(thresholds.finalMinOosTrades * 0.4))) {
+  if (validationFull.metrics.averageMonthlyReturnPct <= 0) reasons.push("Validation平均月利がプラスではない");
+  if (validationFull.metrics.tradeCount < Math.max(5, Math.ceil(thresholds.finalMinOosTrades * 0.4))) {
     reasons.push("Validation取引数不足");
   }
-  if (thresholds.requireZeroLiquidations && validation.risk.liquidationCount > 0) reasons.push("Validation清算発生");
-  if (oos.metrics.averageMonthlyReturnPct < thresholds.finalMinOosAverageMonthlyReturnPct) {
-    reasons.push(`OOS平均月利 ${oos.metrics.averageMonthlyReturnPct.toFixed(2)}% < ${thresholds.finalMinOosAverageMonthlyReturnPct}%`);
+  if (thresholds.requireZeroLiquidations && validationFull.risk.liquidationCount > 0) reasons.push("Validation清算発生");
+  if (oosFull.metrics.averageMonthlyReturnPct < thresholds.finalMinOosAverageMonthlyReturnPct) {
+    reasons.push(`OOS平均月利 ${oosFull.metrics.averageMonthlyReturnPct.toFixed(2)}% < ${thresholds.finalMinOosAverageMonthlyReturnPct}%`);
   }
-  if (oos.metrics.maxDrawdownPct > thresholds.finalMaxOosDrawdownPct) {
-    reasons.push(`OOS MaxDD ${oos.metrics.maxDrawdownPct.toFixed(2)}% > ${thresholds.finalMaxOosDrawdownPct}%`);
+  if (oosFull.metrics.maxDrawdownPct > thresholds.finalMaxOosDrawdownPct) {
+    reasons.push(`OOS MaxDD ${oosFull.metrics.maxDrawdownPct.toFixed(2)}% > ${thresholds.finalMaxOosDrawdownPct}%`);
   }
-  if (oos.metrics.tradeCount < thresholds.finalMinOosTrades) {
-    reasons.push(`OOS Trades ${oos.metrics.tradeCount} < ${thresholds.finalMinOosTrades}`);
+  if (oosFull.metrics.tradeCount < thresholds.finalMinOosTrades) {
+    reasons.push(`OOS Trades ${oosFull.metrics.tradeCount} < ${thresholds.finalMinOosTrades}`);
   }
-  if (thresholds.requireZeroLiquidations && oos.risk.liquidationCount > 0) {
-    reasons.push(`OOS Liquidations ${oos.risk.liquidationCount} > 0`);
+  if (thresholds.requireZeroLiquidations && oosFull.risk.liquidationCount > 0) {
+    reasons.push(`OOS Liquidations ${oosFull.risk.liquidationCount} > 0`);
   }
-  if (thresholds.requireBothDirections && (oos.risk.longTrades === 0 || oos.risk.shortTrades === 0)) {
-    reasons.push(`OOS方向偏り Long=${oos.risk.longTrades} Short=${oos.risk.shortTrades}`);
+  if (thresholds.requireBothDirections && (oosFull.risk.longTrades === 0 || oosFull.risk.shortTrades === 0)) {
+    reasons.push(`OOS方向偏り Long=${oosFull.risk.longTrades} Short=${oosFull.risk.shortTrades}`);
   }
-  if (oos.risk.maxConsecutiveLosses > thresholds.finalMaxConsecutiveLosses) {
-    reasons.push(`OOS最大連敗 ${oos.risk.maxConsecutiveLosses} > ${thresholds.finalMaxConsecutiveLosses}`);
+  if (oosFull.risk.maxConsecutiveLosses > thresholds.finalMaxConsecutiveLosses) {
+    reasons.push(`OOS最大連敗 ${oosFull.risk.maxConsecutiveLosses} > ${thresholds.finalMaxConsecutiveLosses}`);
   }
   if (oosReturnRetentionRatio < thresholds.finalMinOosRetentionRatio) {
     reasons.push(`OOS維持率 ${(oosReturnRetentionRatio * 100).toFixed(1)}% < ${(thresholds.finalMinOosRetentionRatio * 100).toFixed(1)}%`);
@@ -184,8 +185,8 @@ export async function validatePerpStrategy(input: {
   return {
     plan,
     train,
-    validation,
-    oos,
+    validation: compactPerpBacktestResult(validationFull, 100),
+    oos: compactPerpBacktestResult(oosFull, 100),
     walkForward,
     stress,
     oosReturnRetentionRatio,
