@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/research-lab-phase2-pilot.yml"
       - "lib/backtest/binance-source.ts"
+      - "lib/research-lab/**"
       - "research-runs/**"
   pull_request:
     branches:
@@ -14,6 +15,7 @@ on:
     paths:
       - ".github/workflows/research-lab-phase2-pilot.yml"
       - "lib/backtest/binance-source.ts"
+      - "lib/research-lab/**"
       - "research-runs/**"
   workflow_dispatch:
 
