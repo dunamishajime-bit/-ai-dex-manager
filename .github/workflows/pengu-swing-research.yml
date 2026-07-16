@@ -36,11 +36,13 @@ jobs:
         run: python -m pip install --upgrade numpy pandas requests
 
       - name: Compile robot
-        run: python -m py_compile research/pengu_swing_robot/run_pengu_swing_research.py
+        run: |
+          python -m py_compile research/pengu_swing_robot/run_pengu_swing_research.py
+          python -m py_compile research/pengu_swing_robot/run_compact_research.py
 
       - name: Run chronological PENGU backtest
         run: |
-          python research/pengu_swing_robot/run_pengu_swing_research.py \
+          python research/pengu_swing_robot/run_compact_research.py \
             --output research_outputs/pengu_swing_v1 \
             --cache .cache/pengu_swing_v1 | tee pengu_swing_run.log
 
