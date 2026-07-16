@@ -37,6 +37,12 @@ export function researchConfigFromEnvironment(): ResearchLabConfig {
     const parsed = Number(process.env[name]);
     return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.floor(parsed))) : fallback;
   };
+  const dateFromEnv = (name: string, fallback?: number) => {
+    const raw = process.env[name];
+    if (!raw) return fallback;
+    const parsed = Date.parse(raw);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
 
   return {
     ...base,
@@ -45,7 +51,7 @@ export function researchConfigFromEnvironment(): ResearchLabConfig {
     eliteCount: numberFromEnv("RESEARCH_ELITES", base.eliteCount, 1, 50),
     maxConcurrency: numberFromEnv("RESEARCH_CONCURRENCY", base.maxConcurrency, 1, 4),
     seed: numberFromEnv("RESEARCH_SEED", base.seed, 1, 2_147_483_647),
-    startTs: process.env.RESEARCH_START_DATE ? Date.parse(process.env.RESEARCH_START_DATE) : base.startTs,
-    endTs: process.env.RESEARCH_END_DATE ? Date.parse(process.env.RESEARCH_END_DATE) : base.endTs,
+    startTs: dateFromEnv("RESEARCH_START_DATE", base.startTs),
+    endTs: dateFromEnv("RESEARCH_END_DATE", base.endTs),
   };
 }
