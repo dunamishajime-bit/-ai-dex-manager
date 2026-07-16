@@ -1,6 +1,7 @@
 import { compactPerpBacktestResult } from "./evidence";
 import { createInitialPerpPopulation, createNextPerpPopulation } from "./evolution";
 import { runPerpBacktest } from "./engine";
+import { perpStrategyLogicFingerprint } from "./fingerprint";
 import { evaluatePerpStrategy } from "./scoring";
 import type {
   PerpBacktestResult,
@@ -14,9 +15,20 @@ import type {
 } from "./types";
 import { buildPerpValidationPlan, validatePerpStrategy } from "./validation";
 
+const MAX_UNIQUE_GENERATION_ATTEMPTS = 80;
+
+export interface PerpResearchDeduplicationStats {
+  duplicateStrategiesSkipped: number;
+  replacementCandidatesGenerated: number;
+  exhaustedPopulationSlots: number;
+}
+
 export interface PerpResearchRunOptions {
   initialPopulation?: PerpStrategyGenome[];
   generationOffset?: number;
+  excludedLogicFingerprints?: Iterable<string>;
+  evaluatedLogicFingerprints?: Set<string>;
+  deduplicationStats?: PerpResearchDeduplicationStats;
 }
 
 async function mapWithConcurrency<T, R>(
@@ -226,28 +238,105 @@ async function validateFinalists(
   };
 }
 
+function copyGenome(genome: PerpStrategyGenome, id: string) {
+  return {
+    ...genome,
+    id,
+    parentIds: [...genome.parentIds],
+    symbols: [...genome.symbols],
+    parameters: { ...genome.parameters },
+  };
+}
+
+function fillUniquePopulation(input: {
+  count: number;
+  generation: number;
+  idPrefix: string;
+  blocked: ReadonlySet<string>;
+  stats: PerpResearchDeduplicationStats;
+  candidateFactory: (attempt: number, remaining: number) => PerpStrategyGenome[];
+}) {
+  const accepted: PerpStrategyGenome[] = [];
+  const reserved = new Set<string>();
+
+  for (let attempt = 0; attempt < MAX_UNIQUE_GENERATION_ATTEMPTS && accepted.length < input.count; attempt += 1) {
+    const remaining = input.count - accepted.length;
+    const candidates = input.candidateFactory(attempt, remaining);
+    if (attempt > 0) input.stats.replacementCandidatesGenerated += candidates.length;
+
+    for (const candidate of candidates) {
+      const fingerprint = perpStrategyLogicFingerprint(candidate);
+      if (input.blocked.has(fingerprint) || reserved.has(fingerprint)) {
+        input.stats.duplicateStrategiesSkipped += 1;
+        continue;
+      }
+      reserved.add(fingerprint);
+      accepted.push(copyGenome(
+        candidate,
+        `${input.idPrefix}-${String(accepted.length + 1).padStart(4, "0")}`,
+      ));
+      if (accepted.length >= input.count) break;
+    }
+  }
+
+  if (accepted.length < input.count) {
+    input.stats.exhaustedPopulationSlots += input.count - accepted.length;
+    throw new Error(
+      `Unique strategy generation exhausted: generation=${input.generation} requested=${input.count} generated=${accepted.length}`,
+    );
+  }
+
+  return accepted;
+}
+
 function prepareInitialPopulation(
   config: PerpResearchConfig,
   options: PerpResearchRunOptions,
+  blocked: ReadonlySet<string>,
+  stats: PerpResearchDeduplicationStats,
 ) {
   const supplied = (options.initialPopulation ?? [])
     .filter((genome) => genome && genome.parameters)
-    .slice(0, config.populationPerRound)
-    .map((genome) => ({
-      ...genome,
-      symbols: [...genome.symbols],
-      parameters: { ...genome.parameters },
-    }));
-  if (supplied.length >= config.populationPerRound) return supplied;
-  const fresh = createInitialPerpPopulation(
-    config.populationPerRound - supplied.length,
-    config.seed + supplied.length * 97,
-    config.profile,
-  ).map((genome, index) => ({
-    ...genome,
-    id: `resume-fill-${String(index + 1).padStart(3, "0")}-${genome.id}`,
-  }));
-  return [...supplied, ...fresh];
+    .map((genome) => copyGenome(genome, genome.id));
+
+  return fillUniquePopulation({
+    count: config.populationPerRound,
+    generation: Math.max(0, options.generationOffset ?? 0),
+    idPrefix: `unique-g${Math.max(0, options.generationOffset ?? 0)}`,
+    blocked,
+    stats,
+    candidateFactory: (attempt, remaining) => {
+      const fresh = createInitialPerpPopulation(
+        Math.max(remaining * 6, config.populationPerRound * 3),
+        config.seed + attempt * 1_000_003 + supplied.length * 97,
+        config.profile,
+      );
+      return attempt === 0 ? [...supplied, ...fresh] : fresh;
+    },
+  });
+}
+
+function prepareNextPopulation(input: {
+  elites: PerpStrategyGenome[];
+  config: PerpResearchConfig;
+  generation: number;
+  blocked: ReadonlySet<string>;
+  stats: PerpResearchDeduplicationStats;
+}) {
+  return fillUniquePopulation({
+    count: input.config.populationPerRound,
+    generation: input.generation,
+    idPrefix: `unique-g${input.generation}`,
+    blocked: input.blocked,
+    stats: input.stats,
+    candidateFactory: (attempt, remaining) => createNextPerpPopulation({
+      elites: input.elites,
+      count: Math.max(remaining * 8, input.config.populationPerRound * 4),
+      generation: input.generation,
+      seed: input.config.seed + attempt * 1_000_003,
+      profile: input.config.profile,
+    }),
+  });
 }
 
 export async function runPerpResearch(
@@ -258,22 +347,34 @@ export async function runPerpResearch(
   const startedAt = new Date().toISOString();
   const rounds: PerpResearchRound[] = [];
   const generationOffset = Math.max(0, options.generationOffset ?? 0);
+  const blockedLogicFingerprints = new Set(options.excludedLogicFingerprints ?? []);
+  const evaluatedLogicFingerprints = options.evaluatedLogicFingerprints ?? new Set<string>();
+  const deduplicationStats = options.deduplicationStats ?? {
+    duplicateStrategiesSkipped: 0,
+    replacementCandidatesGenerated: 0,
+    exhaustedPopulationSlots: 0,
+  };
   let totalEvaluations = 0;
   let leaderboard: PerpStrategyEvaluation[] = [];
-  let population = prepareInitialPopulation(config, options);
+  let population = prepareInitialPopulation(config, options, blockedLogicFingerprints, deduplicationStats);
 
   for (let round = 1; round <= config.rounds; round += 1) {
     const evaluations = await evaluatePopulation(population, data, config);
+    for (const item of evaluations) {
+      const fingerprint = perpStrategyLogicFingerprint(item.genome);
+      blockedLogicFingerprints.add(fingerprint);
+      evaluatedLogicFingerprints.add(fingerprint);
+    }
     totalEvaluations += evaluations.length;
     leaderboard = mergeLeaderboard(leaderboard, evaluations);
     rounds.push(roundSummary(round, evaluations));
     const elites = selectFrontierElites(evaluations, config);
-    population = createNextPerpPopulation({
+    population = prepareNextPopulation({
       elites,
-      count: config.populationPerRound,
+      config,
       generation: generationOffset + round,
-      seed: config.seed,
-      profile: config.profile,
+      blocked: blockedLogicFingerprints,
+      stats: deduplicationStats,
     });
   }
 
