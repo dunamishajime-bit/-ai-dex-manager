@@ -1,13 +1,13 @@
-# Autonomous Research Cycle 1
+# Autonomous Research Cycle 2
 
 - Profile: attack
 - Evaluations: 25
 - Validated: 6
 - Final candidates: 0
-- Best Train average monthly: 7.86%
-- Best OOS average monthly: 4.47%
-- Best OOS MaxDD: 9.19%
-- Worst stress monthly: -8.01%
+- Best Train average monthly: 6.39%
+- Best OOS average monthly: 5.27%
+- Best OOS MaxDD: 5.09%
+- Worst stress monthly: -2.54%
 - Next profile: attack
 
 ## Automatic Reflection
@@ -26,11 +26,11 @@
 
 ## Tested Logic Deduplication
 
-- Historical fingerprints loaded: 0
+- Historical fingerprints loaded: 25
 - New unique logic tested this cycle: 25
 - Duplicate or near-identical logic skipped: 0
 - Replacement candidates generated: 0
-- Total unique logic in registry: 25
+- Total unique logic in registry: 50
 - Exhausted population slots: 0
 
 A strategy ID change or symbol-order change does not create a new logic. Family, symbols and normalized parameters must differ.

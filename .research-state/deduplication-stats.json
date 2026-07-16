@@ -1,9 +1,9 @@
 {
-  "cycle": 1,
+  "cycle": 2,
   "duplicateStrategiesSkipped": 0,
   "replacementCandidatesGenerated": 0,
   "exhaustedPopulationSlots": 0,
-  "historicalFingerprintsLoaded": 0,
+  "historicalFingerprintsLoaded": 25,
   "newUniqueLogicTested": 25,
-  "totalUniqueLogic": 25
+  "totalUniqueLogic": 50
 }
