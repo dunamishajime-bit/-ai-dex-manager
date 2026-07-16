@@ -1,23 +1,23 @@
 {
   "version": 1,
-  "cycle": 7,
-  "seed": 738716,
-  "generationOffset": 31,
+  "cycle": 8,
+  "seed": 843445,
+  "generationOffset": 32,
   "nextProfile": "attack",
-  "consecutiveNoCandidate": 7,
+  "consecutiveNoCandidate": 8,
   "bestTrainMonthlyPct": 11.440831879914752,
   "bestOosMonthlyPct": 9.327292663094783,
   "bestScore": 59.76,
   "eliteGenomes": [
     {
-      "id": "deep-c7-baseline-1",
-      "generation": 25,
+      "id": "deep-c8-oos-e2",
+      "generation": 26,
       "parentIds": [
-        "unique-g25-0001"
+        "deep-c8-baseline-1"
       ],
       "createdBy": "alpha-mean-reversion",
       "family": "breakout",
-      "thesis": "出来高を伴う高値・安値ブレイクを先物両方向で追随する。Profile=attack、担当=alpha-mean-reversion",
+      "thesis": "出来高を伴う高値・安値ブレイクを先物両方向で追随する。Profile=attack、担当=alpha-mean-reversion／Deep hypothesis: BTCレジーム判定を少し長期化すれば期間依存のノイズを減らせる",
       "symbols": [
         "BTC",
         "ETH",
@@ -38,7 +38,7 @@
         "leverage": 2.58,
         "riskPerTradePct": 2.4,
         "maxMarginUsagePct": 66.5,
-        "btcRegimeSmaBars": 29,
+        "btcRegimeSmaBars": 33,
         "btcRegimeMomentumBars": 20,
         "regimeThresholdPct": 0.024,
         "momentumBars": 39,
@@ -63,14 +63,14 @@
       }
     },
     {
-      "id": "deep-c7-baseline-2",
-      "generation": 27,
+      "id": "deep-c8-stress-e1",
+      "generation": 28,
       "parentIds": [
-        "unique-g27-0002"
+        "deep-c8-baseline-2"
       ],
       "createdBy": "portfolio-construction",
       "family": "dual_direction",
-      "thesis": "上昇・下落レジームを対称に扱い、方向転換時にポジションを反転する。Profile=attack、担当=portfolio-construction",
+      "thesis": "上昇・下落レジームを対称に扱い、方向転換時にポジションを反転する。Profile=attack、担当=portfolio-construction／Deep hypothesis: 連続Entryを抑制すればダマシと往復コストを減らせる",
       "symbols": [
         "BTC",
         "ETH",
@@ -108,7 +108,7 @@
         "trailingAtr": 0.4,
         "maxHoldBars": 62,
         "rebalanceBars": 30,
-        "cooldownBars": 3,
+        "cooldownBars": 4,
         "allowLong": true,
         "allowShort": true,
         "allowNeutralRegime": false,
@@ -116,14 +116,14 @@
       }
     },
     {
-      "id": "deep-c7-stability-e1",
-      "generation": 26,
+      "id": "deep-c8-stability-e1",
+      "generation": 27,
       "parentIds": [
-        "deep-c7-baseline-3"
+        "deep-c8-baseline-3"
       ],
       "createdBy": "alpha-range",
       "family": "breakout",
-      "thesis": "出来高を伴う高値・安値ブレイクを先物両方向で追随する。Profile=balanced、担当=alpha-range／Deep hypothesis: 低期待値Entryを減らせば、取引回数を大きく失わずCost Stressが改善する",
+      "thesis": "出来高を伴う高値・安値ブレイクを先物両方向で追随する。Profile=balanced、担当=alpha-range／Deep hypothesis: 低期待値Entryを減らせば、取引回数を大きく失わずCost Stressが改善する／Deep hypothesis: 低期待値Entryを減らせば、取引回数を大きく失わずCost Stressが改善する",
       "symbols": [
         "BTC",
         "ETH",
@@ -152,7 +152,7 @@
         "breakoutBufferPct": 0.0142,
         "minimumMomentumPct": 0.0331,
         "minimumVolumeRatio": 0.9264,
-        "minimumEdgeToCostRatio": 6.56,
+        "minimumEdgeToCostRatio": 7.54,
         "volatilityLookbackBars": 21,
         "volatilityPenalty": 0.4335,
         "atrBars": 9,
@@ -177,16 +177,16 @@
     "liquidation": 0,
     "directionBias": 0,
     "oosDecay": 12,
-    "costFragility": 71,
+    "costFragility": 73,
     "walkForward": 9,
     "executionFailure": 0
   },
   "nextPlan": [
-    "stability ChampionでminimumEdgeToCostRatio変更を継承し、別の単一変更を追加検証する",
-    "oos Championは親を維持し、low_return・stable_but_low_returnを別仮説で再検証する",
-    "stress Championは親を維持し、low_return・stable_but_low_returnを別仮説で再検証する"
+    "oos ChampionでbtcRegimeSmaBars変更を継承し、別の単一変更を追加検証する",
+    "stress ChampionでcooldownBars変更を継承し、別の単一変更を追加検証する",
+    "stability ChampionでminimumEdgeToCostRatio変更を継承し、別の単一変更を追加検証する"
   ],
-  "lastRunAt": "2026-07-16T16:38:33.026Z",
+  "lastRunAt": "2026-07-16T21:19:38.762Z",
   "history": [
     {
       "cycle": 1,
@@ -345,6 +345,29 @@
         "directionBias": 0,
         "oosDecay": 12,
         "costFragility": 71,
+        "walkForward": 9,
+        "executionFailure": 0
+      }
+    },
+    {
+      "cycle": 8,
+      "completedAt": "2026-07-16T21:19:38.762Z",
+      "profile": "attack",
+      "evaluations": 9,
+      "validated": 9,
+      "finalCandidates": 0,
+      "bestTrainMonthlyPct": 3.5164707609153734,
+      "bestOosMonthlyPct": 2.853298395585818,
+      "bestOosDrawdownPct": 2.440762350796354,
+      "bestWorstStressMonthlyPct": 0.22558579313444183,
+      "failureProfile": {
+        "lowReturn": 72,
+        "drawdown": 0,
+        "lowSample": 0,
+        "liquidation": 0,
+        "directionBias": 0,
+        "oosDecay": 12,
+        "costFragility": 73,
         "walkForward": 9,
         "executionFailure": 0
       }

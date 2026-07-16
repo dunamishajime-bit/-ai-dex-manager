@@ -1,7 +1,27 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-16T16:38:33.026Z",
+  "updatedAt": "2026-07-16T21:19:38.762Z",
   "items": [
+    {
+      "id": "cycle-000008-2026-07-16T21-19-38-762Z",
+      "path": "discussions/2026/07/16/cycle-000008-2026-07-16T21-19-38-762Z.json",
+      "cycle": 8,
+      "completedAt": "2026-07-16T21:19:38.762Z",
+      "profile": "attack",
+      "title": "Cycle 8 Champion深掘り会議",
+      "summary": "3 Championを親として6件の単一変更を比較し、3件が改善基準を通過、最上位3件を継承。Best OOS月利2.85%、Best Stress月利0.23%。",
+      "decision": "3件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。",
+      "messageCount": 17,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": 2.853298395585818,
+      "bestOosDrawdownPct": 2.440762350796354,
+      "bestWorstStressMonthlyPct": 0.22558579313444183,
+      "topStrategyIds": [
+        "deep-c8-oos-e2",
+        "deep-c8-stress-e1",
+        "deep-c8-stability-e1"
+      ]
+    },
     {
       "id": "cycle-000007-2026-07-16T16-38-33-026Z",
       "path": "discussions/2026/07/16/cycle-000007-2026-07-16T16-38-33-026Z.json",
