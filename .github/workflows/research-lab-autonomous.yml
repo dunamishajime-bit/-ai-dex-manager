@@ -1,5 +1,6 @@
 name: Autonomous Research Lab
 
+# A workflow-only push is also an intentional immediate research kickoff.
 on:
   schedule:
     - cron: "17 * * * *"
