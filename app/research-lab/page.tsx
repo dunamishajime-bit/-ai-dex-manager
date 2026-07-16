@@ -5,6 +5,7 @@ import {
   Database,
   RefreshCw,
   Shield,
+  Target,
   Trophy,
   Users,
 } from "lucide-react";
@@ -37,16 +38,19 @@ function StatCard({
 
 const PIPELINE = [
   "新戦略生成",
-  "既存Hybrid EngineでBT",
-  "統計評価",
-  "3人の反対派レビュー",
-  "CIO採用判定",
+  "Train期間で高速探索",
+  "統計評価・反対派レビュー",
   "上位戦略を交配・突然変異",
+  "Validation期間で再検証",
+  "完全未使用OOSで検証",
+  "Walk-forward検証",
+  "20〜100bpsコストストレス",
 ];
 
 export default function ResearchLabPage() {
-  const thresholds = PRODUCTION_RESEARCH_CONFIG.thresholds;
-  const evaluations = PRODUCTION_RESEARCH_CONFIG.rounds * PRODUCTION_RESEARCH_CONFIG.populationPerRound;
+  const config = PRODUCTION_RESEARCH_CONFIG;
+  const thresholds = config.thresholds;
+  const evaluations = config.rounds * config.populationPerRound;
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
@@ -61,28 +65,29 @@ export default function ResearchLabPage() {
               </div>
               <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">AI Hedge Fund Research Lab</h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-white/76">
-                トレードBotではなく、戦略生成・バックテスト・反省・改善・再検証を自動反復する研究所です。
-                研究結果は実売買から分離し、独立期間検証とストレス検証を通過するまで採用しません。
+                平均月利30%超を研究目標に、戦略生成・バックテスト・反省・改善・再検証を自動反復します。
+                高収益でも、OOS・Walk-forward・追加コスト検証を通過しない戦略は最終候補にしません。
               </p>
             </div>
             <div className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-100">
-              Phase 1 Core Implemented
+              Phase 2 OOS Validation
             </div>
           </div>
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <StatCard label="Monthly Target" value={`${thresholds.targetAverageMonthlyReturnPct}%+`} note="最終OOSで平均月利を確認" icon={Target} />
           <StatCard label="AI Researchers" value={`${RESEARCHERS.length}`} note="専門分野別に戦略を生成・変異" icon={Users} />
           <StatCard label="AI Critics" value={`${CRITICS.length}`} note="過学習・テールリスク・約定面を反証" icon={Shield} />
-          <StatCard label="Research Rounds" value={`${PRODUCTION_RESEARCH_CONFIG.rounds}`} note="上位戦略を残して再生成" icon={RefreshCw} />
-          <StatCard label="Evaluations / Run" value={`${evaluations}`} note="100ラウンド×5戦略" icon={Database} />
+          <StatCard label="Research Rounds" value={`${config.rounds}`} note="上位戦略を残して再生成" icon={RefreshCw} />
+          <StatCard label="Discovery Tests" value={`${evaluations}`} note="上位のみ最終検証へ進む" icon={Database} />
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-[24px] border border-gold-400/16 bg-white/[0.035] p-4 md:p-5">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-gold-100" />
-              <h2 className="font-bold">自動研究パイプライン</h2>
+              <h2 className="font-bold">自動研究・最終検証パイプライン</h2>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               {PIPELINE.map((item, index) => (
@@ -99,15 +104,15 @@ export default function ResearchLabPage() {
           <div className="rounded-[24px] border border-gold-400/16 bg-white/[0.035] p-4 md:p-5">
             <div className="flex items-center gap-2">
               <Trophy className="h-4 w-4 text-gold-100" />
-              <h2 className="font-bold">CIO候補基準</h2>
+              <h2 className="font-bold">CIO最終候補基準</h2>
             </div>
             <div className="mt-4 space-y-2 text-sm text-white/78">
-              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>CAGR</span><b>{thresholds.minCagrPct}%以上</b></div>
-              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>MaxDD</span><b>{thresholds.maxDrawdownPct}%以下</b></div>
-              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>Sharpe</span><b>{thresholds.minSharpe}以上</b></div>
-              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>Sortino</span><b>{thresholds.minSortino}以上</b></div>
-              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>Profit Factor</span><b>{thresholds.minProfitFactor}以上</b></div>
-              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>最低取引数</span><b>{thresholds.minTradeCount}</b></div>
+              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>OOS平均月利</span><b>{thresholds.finalMinOosAverageMonthlyReturnPct}%以上</b></div>
+              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>ストレス後平均月利</span><b>{thresholds.finalMinStressAverageMonthlyReturnPct}%以上</b></div>
+              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>OOS MaxDD</span><b>{thresholds.maxOosDrawdownPct}%以下</b></div>
+              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>Walk-forward</span><b>{thresholds.minWalkForwardPassRatePct}%以上通過</b></div>
+              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>OOS維持率</span><b>{thresholds.minOosRetentionRatio * 100}%以上</b></div>
+              <div className="flex justify-between rounded-xl border border-white/8 px-3 py-2"><span>最大追加コスト</span><b>{Math.max(...config.stressExtraRoundTripCostBps)}bps</b></div>
             </div>
           </div>
         </section>
@@ -116,10 +121,11 @@ export default function ResearchLabPage() {
           <div className="flex items-start gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-sky-200" />
             <div>
-              <h2 className="font-bold text-sky-50">安全分離</h2>
+              <h2 className="font-bold text-sky-50">収益目標と安全性を分離</h2>
               <p className="mt-2 text-sm leading-6 text-sky-50/75">
-                Research Labは戦略研究とレポート作成のみです。既存の実売買開始条件、ウォレット、注文実行には接続しません。
-                単発BT合格は「候補」に留め、時系列検証・手数料・スリッページ・銘柄分割検証を通過した戦略だけを最終候補にします。
+                月利30%は研究目標であり、保証値ではありません。Trainだけで30%を超えても採用せず、完全未使用OOSでも平均30%以上、
+                最大DD制限、Walk-forward、手数料・スリッページ相当のストレスをすべて通過した場合だけ最終候補へ昇格します。
+                Research Labは既存の実売買、ウォレット、注文実行には接続しません。
               </p>
               <code className="mt-3 block overflow-x-auto rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-xs text-white/80">
                 RESEARCH_PROFILE=production npm run research:lab
