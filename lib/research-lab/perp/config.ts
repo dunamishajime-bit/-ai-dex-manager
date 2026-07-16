@@ -1,4 +1,8 @@
-import type { PerpResearchConfig, PerpResearchThresholds } from "./types";
+import type {
+  PerpResearchConfig,
+  PerpResearchProfile,
+  PerpResearchThresholds,
+} from "./types";
 
 export const DEFAULT_PERP_SYMBOLS = [
   "BTC",
@@ -16,15 +20,16 @@ export const DEFAULT_PERP_SYMBOLS = [
   "INJ",
 ];
 
-export const DEFAULT_PERP_THRESHOLDS: PerpResearchThresholds = {
+export const BALANCED_PERP_THRESHOLDS: PerpResearchThresholds = {
   targetAverageMonthlyReturnPct: 30,
   discoveryMinAverageMonthlyReturnPct: 5,
-  discoveryMaxDrawdownPct: 35,
-  discoveryMinSharpe: 1,
-  discoveryMinProfitFactor: 1.2,
+  discoveryMaxDrawdownPct: 25,
+  discoveryMinSharpe: 1.1,
+  discoveryMinProfitFactor: 1.25,
   discoveryMinTrades: 20,
+  targetAverageEffectiveLeverage: 0.75,
   finalMinOosAverageMonthlyReturnPct: 30,
-  finalMaxOosDrawdownPct: 35,
+  finalMaxOosDrawdownPct: 25,
   finalMinOosTrades: 12,
   finalMinWalkForwardPassRatePct: 60,
   finalMinOosRetentionRatio: 0.5,
@@ -35,54 +40,84 @@ export const DEFAULT_PERP_THRESHOLDS: PerpResearchThresholds = {
   requireZeroLiquidations: true,
 };
 
-export const DEFAULT_PERP_RESEARCH_CONFIG: PerpResearchConfig = {
+export const ATTACK_PERP_THRESHOLDS: PerpResearchThresholds = {
+  ...BALANCED_PERP_THRESHOLDS,
+  discoveryMinAverageMonthlyReturnPct: 8,
+  discoveryMaxDrawdownPct: 35,
+  discoveryMinSharpe: 0.8,
+  discoveryMinProfitFactor: 1.1,
+  discoveryMinTrades: 30,
+  targetAverageEffectiveLeverage: 1.75,
+  finalMaxOosDrawdownPct: 35,
+  finalMaxConsecutiveLosses: 10,
+};
+
+const BASE_EXECUTION = {
+  feeBpsPerSide: 6,
+  slippageBpsPerSide: 5,
+  adverseFundingBpsPer8h: 0.5,
+  maintenanceMarginRate: 0.005,
+};
+
+const STRESS_EXECUTIONS: PerpResearchConfig["stressExecutions"] = [
+  {
+    label: "moderate-cost",
+    execution: {
+      feeBpsPerSide: 10,
+      slippageBpsPerSide: 10,
+      adverseFundingBpsPer8h: 2,
+      maintenanceMarginRate: 0.005,
+    },
+  },
+  {
+    label: "severe-cost",
+    execution: {
+      feeBpsPerSide: 15,
+      slippageBpsPerSide: 20,
+      adverseFundingBpsPer8h: 4,
+      maintenanceMarginRate: 0.005,
+    },
+  },
+  {
+    label: "extreme-cost",
+    execution: {
+      feeBpsPerSide: 20,
+      slippageBpsPerSide: 30,
+      adverseFundingBpsPer8h: 8,
+      maintenanceMarginRate: 0.0075,
+    },
+  },
+];
+
+export const BALANCED_PERP_RESEARCH_CONFIG: PerpResearchConfig = {
+  profile: "balanced",
   rounds: 20,
   populationPerRound: 5,
-  eliteCount: 2,
+  eliteCount: 3,
   finalistCount: 5,
   seed: 5603,
   maxConcurrency: 1,
   startTs: Date.UTC(2023, 0, 1),
   endTs: Date.UTC(2026, 6, 1),
   symbols: DEFAULT_PERP_SYMBOLS,
-  baseExecution: {
-    feeBpsPerSide: 6,
-    slippageBpsPerSide: 5,
-    adverseFundingBpsPer8h: 1,
-    maintenanceMarginRate: 0.005,
-  },
-  stressExecutions: [
-    {
-      label: "moderate-cost",
-      execution: {
-        feeBpsPerSide: 10,
-        slippageBpsPerSide: 10,
-        adverseFundingBpsPer8h: 2,
-        maintenanceMarginRate: 0.005,
-      },
-    },
-    {
-      label: "severe-cost",
-      execution: {
-        feeBpsPerSide: 15,
-        slippageBpsPerSide: 20,
-        adverseFundingBpsPer8h: 4,
-        maintenanceMarginRate: 0.005,
-      },
-    },
-    {
-      label: "extreme-cost",
-      execution: {
-        feeBpsPerSide: 20,
-        slippageBpsPerSide: 30,
-        adverseFundingBpsPer8h: 8,
-        maintenanceMarginRate: 0.0075,
-      },
-    },
-  ],
+  baseExecution: BASE_EXECUTION,
+  stressExecutions: STRESS_EXECUTIONS,
   walkForwardFolds: 3,
-  thresholds: DEFAULT_PERP_THRESHOLDS,
+  thresholds: BALANCED_PERP_THRESHOLDS,
 };
+
+export const ATTACK_PERP_RESEARCH_CONFIG: PerpResearchConfig = {
+  ...BALANCED_PERP_RESEARCH_CONFIG,
+  profile: "attack",
+  rounds: 30,
+  eliteCount: 4,
+  finalistCount: 8,
+  seed: 5613,
+  thresholds: ATTACK_PERP_THRESHOLDS,
+};
+
+export const DEFAULT_PERP_RESEARCH_CONFIG = BALANCED_PERP_RESEARCH_CONFIG;
+export const DEFAULT_PERP_THRESHOLDS = BALANCED_PERP_THRESHOLDS;
 
 function integerEnv(name: string, fallback: number, min: number, max: number) {
   const value = Number(process.env[name]);
@@ -101,8 +136,13 @@ function dateEnv(name: string, fallback: number) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function profileEnv(): PerpResearchProfile {
+  return process.env.PERP_RESEARCH_PROFILE === "attack" ? "attack" : "balanced";
+}
+
 export function perpResearchConfigFromEnvironment(): PerpResearchConfig {
-  const base = DEFAULT_PERP_RESEARCH_CONFIG;
+  const profile = profileEnv();
+  const base = profile === "attack" ? ATTACK_PERP_RESEARCH_CONFIG : BALANCED_PERP_RESEARCH_CONFIG;
   const symbols = process.env.PERP_RESEARCH_SYMBOLS
     ?.split(",")
     .map((value) => value.trim().toUpperCase())
@@ -110,6 +150,7 @@ export function perpResearchConfigFromEnvironment(): PerpResearchConfig {
 
   return {
     ...base,
+    profile,
     rounds: integerEnv("PERP_RESEARCH_ROUNDS", base.rounds, 1, 1000),
     populationPerRound: integerEnv("PERP_RESEARCH_POPULATION", base.populationPerRound, 1, 200),
     eliteCount: integerEnv("PERP_RESEARCH_ELITES", base.eliteCount, 1, 20),
@@ -127,6 +168,12 @@ export function perpResearchConfigFromEnvironment(): PerpResearchConfig {
         base.thresholds.targetAverageMonthlyReturnPct,
         1,
         200,
+      ),
+      targetAverageEffectiveLeverage: decimalEnv(
+        "PERP_RESEARCH_TARGET_EFFECTIVE_LEVERAGE",
+        base.thresholds.targetAverageEffectiveLeverage,
+        0.1,
+        5,
       ),
       finalMinOosAverageMonthlyReturnPct: decimalEnv(
         "PERP_RESEARCH_FINAL_OOS_MONTHLY_PCT",
