@@ -5,6 +5,7 @@ import type {
   ResearchVerdict,
   StrategyEvaluation,
   StrategyGenome,
+  StrategyValidationReport,
   ValidationLevel,
 } from "./types";
 
@@ -18,26 +19,28 @@ function finite(value: number, fallback = 0) {
 
 export function calculateResearchScore(metrics: ResearchMetrics, thresholds: ResearchLabThresholds) {
   const drawdown = Math.abs(finite(metrics.maxDrawdownPct, 100));
-  const returnScore = clamp01(metrics.cagrPct / Math.max(1, thresholds.minCagrPct * 1.75));
+  const monthlyTargetScore = clamp01(metrics.averageMonthlyReturnPct / Math.max(1, thresholds.targetAverageMonthlyReturnPct));
+  const targetHitScore = clamp01(metrics.targetMonthlyHitRatePct / Math.max(1, thresholds.minTargetMonthlyHitRatePct * 2));
+  const returnScore = clamp01(metrics.cagrPct / Math.max(1, thresholds.minCagrPct * 2));
   const drawdownScore = clamp01(1 - drawdown / Math.max(1, thresholds.maxDrawdownPct * 2));
   const sharpeScore = clamp01(metrics.sharpe / Math.max(0.1, thresholds.minSharpe * 1.6));
   const sortinoScore = clamp01(metrics.sortino / Math.max(0.1, thresholds.minSortino * 1.6));
   const profitFactorScore = clamp01((metrics.profitFactor - 1) / Math.max(0.1, thresholds.minProfitFactor));
   const sampleScore = clamp01(metrics.tradeCount / Math.max(1, thresholds.minTradeCount * 2));
-  const monthlyScore = clamp01(metrics.positiveMonthPct / 75);
   const stabilityScore = clamp01(metrics.temporalStabilityScore);
   const recentScore = clamp01(metrics.recentPeriodScore);
 
   return Math.round(
     (
-      returnScore * 0.19 +
-      drawdownScore * 0.19 +
-      sharpeScore * 0.15 +
-      sortinoScore * 0.1 +
-      profitFactorScore * 0.09 +
-      sampleScore * 0.07 +
-      monthlyScore * 0.06 +
-      stabilityScore * 0.09 +
+      monthlyTargetScore * 0.16 +
+      targetHitScore * 0.08 +
+      returnScore * 0.1 +
+      drawdownScore * 0.18 +
+      sharpeScore * 0.12 +
+      sortinoScore * 0.08 +
+      profitFactorScore * 0.08 +
+      sampleScore * 0.06 +
+      stabilityScore * 0.08 +
       recentScore * 0.06
     ) * 10000,
   ) / 100;
@@ -53,6 +56,12 @@ export function collectRejectionReasons(metrics: ResearchMetrics, thresholds: Re
   if (metrics.sortino < thresholds.minSortino) reasons.push(`Sortino ${metrics.sortino.toFixed(2)} < ${thresholds.minSortino}`);
   if (metrics.profitFactor < thresholds.minProfitFactor) reasons.push(`PF ${metrics.profitFactor.toFixed(2)} < ${thresholds.minProfitFactor}`);
   if (metrics.tradeCount < thresholds.minTradeCount) reasons.push(`Trades ${metrics.tradeCount} < ${thresholds.minTradeCount}`);
+  if (metrics.averageMonthlyReturnPct < thresholds.minAverageMonthlyReturnPct) {
+    reasons.push(`平均月利 ${metrics.averageMonthlyReturnPct.toFixed(2)}% < ${thresholds.minAverageMonthlyReturnPct}%`);
+  }
+  if (metrics.medianMonthlyReturnPct < thresholds.minMedianMonthlyReturnPct) {
+    reasons.push(`中央値月利 ${metrics.medianMonthlyReturnPct.toFixed(2)}% < ${thresholds.minMedianMonthlyReturnPct}%`);
+  }
   if (metrics.positiveMonthPct < thresholds.minPositiveMonthPct) reasons.push(`Positive months ${metrics.positiveMonthPct.toFixed(1)}% < ${thresholds.minPositiveMonthPct}%`);
   if (metrics.temporalStabilityScore < thresholds.minTemporalStabilityScore) reasons.push("期間安定性が基準未達");
   if (metrics.recentPeriodScore < thresholds.minRecentPeriodScore) reasons.push("直近期間の再現性が基準未達");
@@ -60,7 +69,11 @@ export function collectRejectionReasons(metrics: ResearchMetrics, thresholds: Re
   return reasons;
 }
 
-export function buildCritiques(metrics: ResearchMetrics, thresholds: ResearchLabThresholds): Critique[] {
+export function buildCritiques(
+  metrics: ResearchMetrics,
+  thresholds: ResearchLabThresholds,
+  validation?: StrategyValidationReport,
+): Critique[] {
   const critiques: Critique[] = [];
   const drawdown = Math.abs(metrics.maxDrawdownPct);
 
@@ -80,6 +93,14 @@ export function buildCritiques(metrics: ResearchMetrics, thresholds: ResearchLab
     });
   }
 
+  if (metrics.averageMonthlyReturnPct < thresholds.targetAverageMonthlyReturnPct) {
+    critiques.push({
+      critic: "overfit-critic",
+      severity: metrics.averageMonthlyReturnPct < thresholds.targetAverageMonthlyReturnPct * 0.5 ? "medium" : "low",
+      message: `研究目標の平均月利${thresholds.targetAverageMonthlyReturnPct}%には未達。現在=${metrics.averageMonthlyReturnPct.toFixed(2)}%。`,
+    });
+  }
+
   if (metrics.tradeCount > 450 || metrics.profitFactor < thresholds.minProfitFactor + 0.15) {
     critiques.push({
       critic: "execution-critic",
@@ -88,20 +109,40 @@ export function buildCritiques(metrics: ResearchMetrics, thresholds: ResearchLab
     });
   }
 
+  if (validation && validation.finalGateReasons.length) {
+    critiques.push({
+      critic: validation.passedTemporalValidation ? "execution-critic" : "overfit-critic",
+      severity: "high",
+      message: `最終検証未通過: ${validation.finalGateReasons.slice(0, 3).join(" / ")}`,
+    });
+  }
+
   if (!critiques.length) {
     critiques.push({
       critic: "overfit-critic",
       severity: "low",
-      message: "重大な欠陥は未検出。ただし最終採用前に独立期間とコストストレス検証が必要。",
+      message: "重大な欠陥は未検出。独立期間とコストストレスの継続監視は必要。",
     });
   }
 
   return critiques;
 }
 
-export function decideVerdict(rejectionReasons: string[], validationLevel: ValidationLevel): ResearchVerdict {
+export function decideVerdict(
+  rejectionReasons: string[],
+  validationLevel: ValidationLevel,
+  validation?: StrategyValidationReport,
+): ResearchVerdict {
   if (rejectionReasons.length) return "rejected";
-  return validationLevel === "stress_tested" ? "final_candidate" : "candidate";
+  if (
+    validationLevel === "stress_tested" &&
+    validation?.passedTemporalValidation &&
+    validation.passedStressTest &&
+    validation.finalGateReasons.length === 0
+  ) {
+    return "final_candidate";
+  }
+  return "candidate";
 }
 
 export function evaluateStrategy(input: {
@@ -109,16 +150,25 @@ export function evaluateStrategy(input: {
   metrics: ResearchMetrics;
   thresholds: ResearchLabThresholds;
   validationLevel: ValidationLevel;
+  validation?: StrategyValidationReport;
 }): StrategyEvaluation {
   const rejectionReasons = collectRejectionReasons(input.metrics, input.thresholds);
-  const score = calculateResearchScore(input.metrics, input.thresholds);
-  const critiques = buildCritiques(input.metrics, input.thresholds);
+  const baseScore = calculateResearchScore(input.metrics, input.thresholds);
+  const validationAdjustment = input.validation
+    ? input.validation.oosRetentionRatio * 2 +
+      input.validation.stressRetentionRatio * 2 +
+      (input.validation.walkForwardPassRatePct / 100) * 2 -
+      input.validation.finalGateReasons.length * 0.5
+    : 0;
+  const score = Math.round(Math.max(0, Math.min(100, baseScore + validationAdjustment)) * 100) / 100;
+  const critiques = buildCritiques(input.metrics, input.thresholds, input.validation);
   return {
     genome: input.genome,
     metrics: input.metrics,
     validationLevel: input.validationLevel,
+    validation: input.validation,
     score,
-    verdict: decideVerdict(rejectionReasons, input.validationLevel),
+    verdict: decideVerdict(rejectionReasons, input.validationLevel, input.validation),
     rejectionReasons,
     critiques,
     evaluatedAt: new Date().toISOString(),
