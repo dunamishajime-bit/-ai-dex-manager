@@ -3,7 +3,6 @@ import {
   BarChart3,
   Bot,
   CheckCircle2,
-  Database,
   RefreshCw,
   Shield,
   Target,
@@ -52,7 +51,6 @@ const PIPELINE = [
 export default function ResearchLabPage() {
   const config = DEFAULT_PERP_RESEARCH_CONFIG;
   const thresholds = config.thresholds;
-  const evaluations = config.rounds * config.populationPerRound;
   const dailyEvaluations = 4 * 20 * 5;
 
   return (
@@ -162,11 +160,6 @@ export default function ResearchLabPage() {
               </code>
             </div>
           </div>
-        </section>
-
-        <section className="hidden">
-          <Database className="h-4 w-4" />
-          <span>{evaluations}</span>
         </section>
       </div>
     </main>
