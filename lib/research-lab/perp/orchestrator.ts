@@ -1,3 +1,4 @@
+import { compactPerpBacktestResult } from "./evidence";
 import { createInitialPerpPopulation, createNextPerpPopulation } from "./evolution";
 import { runPerpBacktest } from "./engine";
 import { evaluatePerpStrategy } from "./scoring";
@@ -118,13 +119,13 @@ async function evaluatePopulation(
   const trainWindow = buildPerpValidationPlan(config).train;
   return mapWithConcurrency(population, config.maxConcurrency, async (genome) => {
     try {
-      const train = runPerpBacktest({
+      const train = compactPerpBacktestResult(runPerpBacktest({
         genome,
         data,
         window: trainWindow,
         execution: config.baseExecution,
         targetMonthlyReturnPct: config.thresholds.targetAverageMonthlyReturnPct,
-      });
+      }));
       return evaluatePerpStrategy({ genome, train, thresholds: config.thresholds });
     } catch (error) {
       const train = failedBacktest(genome, config, error);
