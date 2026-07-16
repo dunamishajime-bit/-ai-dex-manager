@@ -5,14 +5,22 @@ import { execFileSync } from "child_process";
 import type { Candle1h } from "./types";
 
 const REMOTE_START_2023 = Date.UTC(2023, 0, 1, 0, 0, 0);
-const REMOTE_CACHE_VERSION = "v1";
+const REMOTE_CACHE_VERSION = "v2";
+const BINANCE_SPOT_API_BASES = [
+    "https://api.binance.com",
+    "https://api-gcp.binance.com",
+    "https://api1.binance.com",
+    "https://api2.binance.com",
+    "https://api3.binance.com",
+    "https://api4.binance.com",
+] as const;
 
 function psQuote(value: string) {
     return `'${value.replace(/'/g, "''")}'`;
 }
 
-function asUrl(symbol: string, startMs: number, endMs: number) {
-    return `https://api.binance.com/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1h&startTime=${startMs}&endTime=${endMs}&limit=1000`;
+function asUrl(baseUrl: string, symbol: string, startMs: number, endMs: number) {
+    return `${baseUrl}/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1h&startTime=${startMs}&endTime=${endMs}&limit=1000`;
 }
 
 async function exists(filePath: string) {
@@ -48,11 +56,16 @@ async function ensureExpanded(zipPath: string, targetDir: string) {
     await fs.writeFile(marker, new Date().toISOString(), "utf8");
 }
 
+function normalizeTimestamp(value: number) {
+    if (!Number.isFinite(value)) return value;
+    return value > 10_000_000_000_000 ? Math.floor(value / 1000) : value;
+}
+
 function parseCsvLine(line: string): Candle1h | null {
     const parts = line.split(",");
     if (parts.length < 6) return null;
     const candle = {
-        ts: Number(parts[0]),
+        ts: normalizeTimestamp(Number(parts[0])),
         open: Number(parts[1]),
         high: Number(parts[2]),
         low: Number(parts[3]),
@@ -69,7 +82,8 @@ async function readCsv(filePath: string): Promise<Candle1h[]> {
     const raw = await fs.readFile(filePath, "utf8");
     const rows = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
     const candles: Candle1h[] = [];
-    for (const row of rows.slice(1)) {
+    const startIndex = rows[0]?.toLowerCase().includes("open") ? 1 : 0;
+    for (const row of rows.slice(startIndex)) {
         const candle = parseCsvLine(row);
         if (candle) candles.push(candle);
     }
@@ -96,25 +110,41 @@ export async function loadLocalBinanceCandles(zipPath: string, cacheRoot: string
     return candles.flat().sort((left, right) => left.ts - right.ts);
 }
 
+async function fetchKlineRows(symbol: string, startMs: number, endMs: number) {
+    const failures: string[] = [];
+    for (const baseUrl of BINANCE_SPOT_API_BASES) {
+        const url = asUrl(baseUrl, symbol, startMs, endMs);
+        try {
+            const response = await fetch(url, { cache: "no-store" });
+            if (!response.ok) {
+                failures.push(`${new URL(baseUrl).hostname}:${response.status}`);
+                continue;
+            }
+            const json = await response.json();
+            if (!Array.isArray(json)) {
+                failures.push(`${new URL(baseUrl).hostname}:invalid-json`);
+                continue;
+            }
+            return json;
+        } catch (error) {
+            failures.push(`${new URL(baseUrl).hostname}:${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+    throw new Error(`Binance klines request failed for ${symbol}: ${failures.join(", ")}`);
+}
+
 export async function fetchBinanceKlines(symbol: string, startMs: number, endMs: number): Promise<Candle1h[]> {
     const all: Candle1h[] = [];
     let cursor = startMs;
 
     while (cursor < endMs) {
-        const url = asUrl(symbol, cursor, endMs);
-        const response = await fetch(url, { cache: "no-store" });
-        if (!response.ok) {
-            throw new Error(`Binance klines request failed for ${symbol}: ${response.status}`);
-        }
-
-        const json = await response.json();
-        const rows = Array.isArray(json) ? json : [];
+        const rows = await fetchKlineRows(symbol, cursor, endMs);
         if (!rows.length) break;
 
         for (const row of rows) {
             if (!Array.isArray(row) || row.length < 6) continue;
             const candle = {
-                ts: Number(row[0]),
+                ts: normalizeTimestamp(Number(row[0])),
                 open: Number(row[1]),
                 high: Number(row[2]),
                 low: Number(row[3]),
@@ -127,7 +157,8 @@ export async function fetchBinanceKlines(symbol: string, startMs: number, endMs:
         }
 
         const last = rows.at(-1);
-        const nextTs = Number(Array.isArray(last) ? last[6] : 0) + 1;
+        const closeTime = normalizeTimestamp(Number(Array.isArray(last) ? last[6] : 0));
+        const nextTs = closeTime + 1;
         if (!Number.isFinite(nextTs) || nextTs <= cursor) break;
         cursor = nextTs;
     }
