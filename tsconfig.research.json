@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "lib/research-lab/**/*.ts",
+    "scripts/research-lab-runner.ts",
+    "lib/backtest/**/*.ts",
+    "config/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "backups",
+    "restoretmp"
+  ]
+}
