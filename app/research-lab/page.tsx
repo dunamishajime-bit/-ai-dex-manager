@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import LiveResearchDashboard from "@/components/research-lab/LiveResearchDashboard";
+import ResearchLabSubnav from "@/components/research-lab/ResearchLabSubnav";
 import { DEFAULT_PERP_RESEARCH_CONFIG } from "@/lib/research-lab/perp/config";
 import { CRITICS, RESEARCHERS } from "@/lib/research-lab/roles";
 
@@ -79,6 +80,7 @@ export default function ResearchLabPage() {
           </div>
         </section>
 
+        <ResearchLabSubnav />
         <LiveResearchDashboard />
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
