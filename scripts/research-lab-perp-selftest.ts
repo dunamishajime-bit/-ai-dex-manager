@@ -107,14 +107,15 @@ const execution = {
 
 async function main() {
   const data = marketData();
+  const evaluationWindow = {
+    label: "selftest",
+    startTs: START_TS + 120 * 24 * HOUR_MS,
+    endTs: data.endTs,
+  };
   const result = runPerpBacktest({
     genome,
     data,
-    window: {
-      label: "selftest",
-      startTs: START_TS + 120 * 24 * HOUR_MS,
-      endTs: data.endTs,
-    },
+    window: evaluationWindow,
     execution,
     targetMonthlyReturnPct: 30,
   });
@@ -129,6 +130,10 @@ async function main() {
   assert.ok(result.risk.maximumEffectiveLeverage <= genome.parameters.leverage + 0.0001);
   assert.ok(result.trades.every((trade) => Number.isFinite(trade.netPnl)));
   assert.ok(result.trades.every((trade) => trade.entryTs <= trade.exitTs));
+  assert.ok(result.trades.every((trade) => trade.entryTs >= evaluationWindow.startTs));
+  assert.ok(result.trades.every((trade) => trade.exitTs < evaluationWindow.endTs));
+  assert.ok(result.equityCurve.every((point) => point.ts >= evaluationWindow.startTs));
+  assert.equal(result.equityCurve[0]?.ts, evaluationWindow.startTs);
 
   const config: PerpResearchConfig = {
     rounds: 2,
