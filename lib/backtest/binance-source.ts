@@ -5,7 +5,8 @@ import { execFileSync } from "child_process";
 import type { Candle1h } from "./types";
 
 const REMOTE_START_2023 = Date.UTC(2023, 0, 1, 0, 0, 0);
-const REMOTE_CACHE_VERSION = "v2";
+const REMOTE_CACHE_VERSION = "v3";
+const PUBLIC_ARCHIVE_ROOT = "https://data.binance.vision/data/spot/monthly/klines";
 const BINANCE_SPOT_API_BASES = [
     "https://api.binance.com",
     "https://api-gcp.binance.com",
@@ -51,8 +52,12 @@ async function ensureExpanded(zipPath: string, targetDir: string) {
     const marker = path.join(targetDir, ".expanded.ok");
     if (await exists(marker)) return;
 
-    const command = `Expand-Archive -LiteralPath ${psQuote(zipPath)} -DestinationPath ${psQuote(targetDir)} -Force`;
-    execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], { stdio: "ignore" });
+    if (process.platform === "win32") {
+        const command = `Expand-Archive -LiteralPath ${psQuote(zipPath)} -DestinationPath ${psQuote(targetDir)} -Force`;
+        execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], { stdio: "ignore" });
+    } else {
+        execFileSync("unzip", ["-o", zipPath, "-d", targetDir], { stdio: "ignore" });
+    }
     await fs.writeFile(marker, new Date().toISOString(), "utf8");
 }
 
@@ -99,10 +104,7 @@ export async function loadLocalBinanceCandles(zipPath: string, cacheRoot: string
     const innerZips = (await listFilesRecursive(targetDir)).filter((filePath) => filePath.toLowerCase().endsWith(".zip"));
     for (const innerZip of innerZips) {
         const innerDir = innerZip.replace(/\.zip$/i, "");
-        if (!(await exists(innerDir))) {
-            const command = `Expand-Archive -LiteralPath ${psQuote(innerZip)} -DestinationPath ${psQuote(innerDir)} -Force`;
-            execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], { stdio: "ignore" });
-        }
+        await ensureExpanded(innerZip, innerDir);
     }
 
     const csvFiles = (await listFilesRecursive(targetDir)).filter((filePath) => filePath.toLowerCase().endsWith(".csv"));
@@ -166,6 +168,61 @@ export async function fetchBinanceKlines(symbol: string, startMs: number, endMs:
     return all.sort((left, right) => left.ts - right.ts);
 }
 
+function monthKeys(startMs: number, endMs: number) {
+    const start = new Date(startMs);
+    let cursor = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1);
+    const keys: string[] = [];
+    while (cursor < endMs) {
+        const date = new Date(cursor);
+        const nextMonth = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1);
+        if (nextMonth > endMs) break;
+        keys.push(`${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`);
+        cursor = nextMonth;
+    }
+    return keys;
+}
+
+async function downloadPublicArchive(url: string, zipPath: string) {
+    if (await exists(zipPath)) return true;
+    const response = await fetch(url, { cache: "no-store" });
+    if (response.status === 404) return false;
+    if (!response.ok) throw new Error(`Binance public archive request failed: ${response.status} ${url}`);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length < 100) throw new Error(`Binance public archive was unexpectedly small: ${url}`);
+    await fs.mkdir(path.dirname(zipPath), { recursive: true });
+    await fs.writeFile(zipPath, bytes);
+    return true;
+}
+
+async function loadPublicArchiveCandles(input: {
+    symbol: string;
+    cacheRoot: string;
+    startMs: number;
+    endMs: number;
+}) {
+    const { symbol, cacheRoot, startMs, endMs } = input;
+    const monthlyRoot = path.join(cacheRoot, "public-data", symbol, "1h");
+    const all: Candle1h[] = [];
+
+    for (const monthKey of monthKeys(startMs, endMs)) {
+        const archiveName = `${symbol}-1h-${monthKey}.zip`;
+        const zipPath = path.join(monthlyRoot, archiveName);
+        const extractedDir = path.join(monthlyRoot, archiveName.replace(/\.zip$/i, ""));
+        const url = `${PUBLIC_ARCHIVE_ROOT}/${encodeURIComponent(symbol)}/1h/${archiveName}`;
+        const available = await downloadPublicArchive(url, zipPath);
+        if (!available) continue;
+        await ensureExpanded(zipPath, extractedDir);
+        const csvFiles = (await listFilesRecursive(extractedDir)).filter((filePath) => filePath.toLowerCase().endsWith(".csv"));
+        for (const csvFile of csvFiles) {
+            all.push(...await readCsv(csvFile));
+        }
+    }
+
+    return all
+        .filter((candle) => candle.ts >= startMs && candle.ts < endMs)
+        .sort((left, right) => left.ts - right.ts);
+}
+
 function remoteCacheFile(cacheRoot: string, symbol: string, startMs: number, endMs: number) {
     const fileName = `${symbol}-${startMs}-${endMs}-${REMOTE_CACHE_VERSION}.json`;
     return path.join(cacheRoot, "remote", fileName);
@@ -193,7 +250,22 @@ export async function loadHistoricalCandles(input: {
         if (await exists(cacheFile)) {
             remoteCandles = JSON.parse(await fs.readFile(cacheFile, "utf8")) as Candle1h[];
         } else {
-            remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs);
+            let apiError: unknown = null;
+            try {
+                remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs);
+            } catch (error) {
+                apiError = error;
+                remoteCandles = await loadPublicArchiveCandles({
+                    symbol,
+                    cacheRoot,
+                    startMs: remoteStart,
+                    endMs,
+                });
+            }
+            if (!remoteCandles.length) {
+                const message = apiError instanceof Error ? apiError.message : String(apiError ?? "no API data");
+                throw new Error(`${message}; Binance public archive also returned no candles for ${symbol}`);
+            }
             await fs.mkdir(path.dirname(cacheFile), { recursive: true });
             await fs.writeFile(cacheFile, JSON.stringify(remoteCandles), "utf8");
         }
