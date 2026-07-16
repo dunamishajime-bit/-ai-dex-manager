@@ -4,6 +4,7 @@ import { runPerpBacktest } from "./engine";
 import { evaluatePerpStrategy } from "./scoring";
 import type {
   PerpBacktestResult,
+  PerpFamily,
   PerpMarketData,
   PerpResearchConfig,
   PerpResearchResult,
@@ -67,6 +68,7 @@ function failedBacktest(genome: PerpStrategyGenome, config: PerpResearchConfig, 
       averageHoldingBars: 0,
       averageEffectiveLeverage: 0,
       maximumEffectiveLeverage: 0,
+      totalFundingCost: 0,
       exposurePct: 0,
       endingEquity: 0,
     },
@@ -109,6 +111,50 @@ function roundSummary(round: number, evaluations: PerpStrategyEvaluation[]): Per
     survivors: evaluations.filter((item) => item.verdict !== "rejected").length,
     best: sorted[0] ?? null,
   };
+}
+
+function healthyForElite(item: PerpStrategyEvaluation, config: PerpResearchConfig) {
+  return (
+    item.train.risk.endingEquity > 0 &&
+    item.train.risk.liquidationCount === 0 &&
+    item.train.metrics.tradeCount > 0 &&
+    item.train.metrics.maxDrawdownPct <= config.thresholds.discoveryMaxDrawdownPct * 1.4
+  );
+}
+
+function selectFrontierElites(
+  evaluations: PerpStrategyEvaluation[],
+  config: PerpResearchConfig,
+): PerpStrategyGenome[] {
+  const eligible = evaluations.filter((item) => healthyForElite(item, config));
+  const fallback = eligible.length ? eligible : evaluations.filter((item) => item.train.risk.endingEquity > 0);
+  const selected = new Map<string, PerpStrategyEvaluation>();
+  const add = (item?: PerpStrategyEvaluation | null) => {
+    if (item) selected.set(item.genome.id, item);
+  };
+  const bestBy = (getter: (item: PerpStrategyEvaluation) => number) =>
+    [...fallback].sort((left, right) => getter(right) - getter(left))[0] ?? null;
+
+  add(sortEvaluations(fallback)[0]);
+  add(bestBy((item) => item.train.metrics.averageMonthlyReturnPct));
+  add(bestBy((item) => item.train.risk.averageEffectiveLeverage));
+  add(bestBy((item) => item.train.metrics.sharpe));
+  add(bestBy((item) => item.train.metrics.profitFactor));
+  add(bestBy((item) => item.train.metrics.targetMonthlyHitRatePct));
+
+  const families: PerpFamily[] = ["regime_momentum", "breakout", "relative_strength", "dual_direction"];
+  for (const family of families) {
+    add(sortEvaluations(fallback.filter((item) => item.genome.family === family))[0]);
+  }
+
+  for (const item of sortEvaluations(fallback)) {
+    if (selected.size >= config.eliteCount) break;
+    add(item);
+  }
+
+  return [...selected.values()]
+    .slice(0, Math.max(1, config.eliteCount))
+    .map((item) => item.genome);
 }
 
 async function evaluatePopulation(
@@ -183,21 +229,20 @@ export async function runPerpResearch(
   const rounds: PerpResearchRound[] = [];
   let totalEvaluations = 0;
   let leaderboard: PerpStrategyEvaluation[] = [];
-  let population = createInitialPerpPopulation(config.populationPerRound, config.seed);
+  let population = createInitialPerpPopulation(config.populationPerRound, config.seed, config.profile);
 
   for (let round = 1; round <= config.rounds; round += 1) {
     const evaluations = await evaluatePopulation(population, data, config);
     totalEvaluations += evaluations.length;
     leaderboard = mergeLeaderboard(leaderboard, evaluations);
     rounds.push(roundSummary(round, evaluations));
-    const elites = sortEvaluations(evaluations)
-      .slice(0, Math.max(1, config.eliteCount))
-      .map((item) => item.genome);
+    const elites = selectFrontierElites(evaluations, config);
     population = createNextPerpPopulation({
       elites,
       count: config.populationPerRound,
       generation: round,
       seed: config.seed,
+      profile: config.profile,
     });
   }
 
