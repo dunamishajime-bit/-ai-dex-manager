@@ -8,10 +8,11 @@ on:
     paths:
       - "app/research-lab/**"
       - "lib/research-lab/**"
-      - "scripts/research-lab-runner.ts"
+      - "scripts/research-lab-*.ts"
       - "components/layout/Sidebar.tsx"
       - "components/layout/BottomNav.tsx"
       - "package.json"
+      - "tsconfig.research.json"
       - ".github/workflows/research-lab-ci.yml"
 
 jobs:
@@ -30,3 +31,5 @@ jobs:
         run: npm ci
       - name: TypeScript check
         run: npm run typecheck
+      - name: Research Lab self-test
+        run: npm run research:lab:selftest
