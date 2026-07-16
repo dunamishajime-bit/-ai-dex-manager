@@ -1,0 +1,95 @@
+name: PENGU and 30-Symbol High-Vol Scanner Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-2d3d-swing-v1
+    paths:
+      - "research/pengu_swing_robot/**"
+      - ".github/workflows/pengu-swing-research.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/pengu_swing_robot/**"
+      - ".github/workflows/pengu-swing-research.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install research dependencies
+        run: python -m pip install --upgrade numpy pandas requests
+
+      - name: Compile robots
+        run: |
+          python -m py_compile research/pengu_swing_robot/run_pengu_swing_research.py
+          python -m py_compile research/pengu_swing_robot/run_pengu_adaptive_72h_v2.py
+          python -m py_compile research/pengu_swing_robot/run_high_vol_scanner_portfolio_v1.py
+          python -m py_compile research/pengu_swing_robot/run_high_vol_scanner_portfolio_v2.py
+          python -m py_compile research/pengu_swing_robot/run_high_vol_scanner_30.py
+
+      - name: Run PENGU standalone backtest
+        shell: bash
+        run: |
+          set -o pipefail
+          python research/pengu_swing_robot/run_pengu_adaptive_72h_v2.py \
+            --output research_outputs/pengu_adaptive_72h_v2 \
+            --cache .cache/high_vol_scanner_30 2>&1 | tee pengu_adaptive_72h_run.log
+
+      - name: Run PENGU 15% plus 30-symbol scanner 10% backtest
+        shell: bash
+        run: |
+          set -o pipefail
+          python research/pengu_swing_robot/run_high_vol_scanner_30.py \
+            --output research_outputs/high_vol_scanner_30 \
+            --cache .cache/high_vol_scanner_30 2>&1 | tee high_vol_scanner_30_run.log
+
+      - name: Publish summary
+        if: always()
+        run: |
+          if [ -f research_outputs/pengu_adaptive_72h_v2/REPORT.md ]; then
+            cat research_outputs/pengu_adaptive_72h_v2/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f research_outputs/high_vol_scanner_30/REPORT.md ]; then
+            cat research_outputs/high_vol_scanner_30/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "30-symbol scanner report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f research_outputs/high_vol_scanner_30/universe_selection.json ]; then
+            echo "## Selected monitor universe" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat research_outputs/high_vol_scanner_30/universe_selection.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload research artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-high-vol-scanner-30
+          path: |
+            research_outputs/pengu_adaptive_72h_v2
+            research_outputs/high_vol_scanner_30
+            .cache/high_vol_scanner_30
+            pengu_adaptive_72h_run.log
+            high_vol_scanner_30_run.log
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 30

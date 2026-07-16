@@ -1,0 +1,59 @@
+{
+  "robotId": "PENGU_ADAPTIVE_72H_V2",
+  "status": "RESEARCH_ONLY_DISABLED",
+  "realTradingEnabled": false,
+  "paperTradingEnabled": false,
+  "symbol": "PENGUUSDT",
+  "timeframe": "1h",
+  "holdingObjectiveHours": [48, 72],
+  "entryExecution": "NEXT_BAR_OPEN",
+  "selection": {
+    "method": "MONTHLY_TRAILING_180D",
+    "predeclaredRuleCount": 288,
+    "futureDataAllowed": false
+  },
+  "baseCostPerSide": 0.0006,
+  "stressCostPerSide": 0.001,
+  "fundingReservePerDay": 0.0002,
+  "stressFundingReservePerDay": 0.0005,
+  "historicalResearchSnapshot": {
+    "period": "2025-07-01/2026-06-30",
+    "trades": 17,
+    "winRate": 0.7647058824,
+    "profitFactor": 3.33,
+    "averageHoldHours": 67.5,
+    "fullNotionalResearchReturn": 1.2909,
+    "fullNotionalMaxDrawdown": -0.1662,
+    "standard15PctNotionalReturn": 0.1491,
+    "standard15PctNotionalMaxDrawdown": -0.0248,
+    "attack30PctNotionalReturn": 0.3132,
+    "attack30PctNotionalMaxDrawdown": -0.0494,
+    "holdoutTrades2026H1": 4,
+    "evidenceBlocker": "INSUFFICIENT_FINAL_SAMPLE"
+  },
+  "risk": {
+    "standardNotionalFraction": 0.15,
+    "attackNotionalCap": 0.30,
+    "accountRiskPerTrade": 0.006,
+    "maxConcurrentPositions": 1,
+    "consecutiveLossCooldownCount": 3,
+    "cooldownHours": 72,
+    "monthlySleeveLossStop": -0.04
+  },
+  "forwardApproval": {
+    "minimumFinalOrForwardTrades": 12,
+    "minimumWinRate": 0.58,
+    "minimumProfitFactor": 1.30,
+    "minimumAverageHoldHours": 48,
+    "maximumAverageHoldHours": 72,
+    "maximumDrawdown": -0.20,
+    "minimumBootstrapPositiveProbability": 0.90,
+    "stressResultMustBePositive": true
+  },
+  "notes": [
+    "v1 close-TP/SL trend robot was rejected because average holding time was only approximately 3-4 hours.",
+    "Do not reuse rejected PENGU stale-price or Aster-Binance basis logic.",
+    "Do not enable real or automatic paper trading until every forward evidence gate passes.",
+    "Existing Monthly Boost v4 and portfolio gross/correlation limits remain unchanged and binding."
+  ]
+}
