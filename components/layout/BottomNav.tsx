@@ -7,12 +7,12 @@ import { Activity, BarChart3, FileText, Home, Settings, Wallet } from "lucide-re
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { icon: Home, label: "ホーム", href: "/" },
-  { icon: BarChart3, label: "ダッシュ", href: "/positions" },
-  { icon: Activity, label: "AI研究", href: "/research-lab" },
-  { icon: Wallet, label: "ウォレット", href: "/wallets" },
-  { icon: FileText, label: "履歴", href: "/history" },
-  { icon: Settings, label: "設定", href: "/settings" },
+  { icon: Home, label: "ホーム", href: "/", matchPrefix: false },
+  { icon: BarChart3, label: "ダッシュ", href: "/positions", matchPrefix: false },
+  { icon: Activity, label: "AIラボ", href: "/research-lab", matchPrefix: true },
+  { icon: Wallet, label: "ウォレット", href: "/wallets", matchPrefix: false },
+  { icon: FileText, label: "履歴", href: "/history", matchPrefix: false },
+  { icon: Settings, label: "設定", href: "/settings", matchPrefix: false },
 ] as const;
 
 export function BottomNav() {
@@ -27,9 +27,9 @@ export function BottomNav() {
   );
 }
 
-function BottomNavItem({ icon: Icon, label, href }: (typeof NAV_ITEMS)[number]) {
+function BottomNavItem({ icon: Icon, label, href, matchPrefix }: (typeof NAV_ITEMS)[number]) {
   const pathname = usePathname();
-  const isActive = pathname === href;
+  const isActive = matchPrefix ? pathname === href || pathname.startsWith(`${href}/`) : pathname === href;
 
   return (
     <Link
