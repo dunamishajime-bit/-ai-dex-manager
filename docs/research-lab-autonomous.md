@@ -22,17 +22,46 @@ The concurrency group permits only one active cycle. A slow cycle is not cancell
 ## Autonomous cycle
 
 1. Read the previous state from `research-autonomous-state`.
-2. Load Binance USD-M Futures one-hour Klines and settled funding history.
-3. Reject the run when the Futures source or Funding coverage is insufficient.
-4. Combine previous Elite genomes with fresh strategies.
-5. Run Train discovery.
-6. Validate top strategies on Validation and untouched OOS windows.
-7. Run Walk-forward tests.
-8. Run Fee, Slippage and adverse Funding stress scenarios.
-9. Reject strategies with liquidation, excessive drawdown, weak samples or directional imbalance.
-10. Classify failure causes.
-11. Mutate the next Elite population according to the failure profile.
-12. Persist the next state and report.
+2. Read the persistent tested-logic fingerprint registry.
+3. Load Binance USD-M Futures one-hour Klines and settled funding history.
+4. Reject the run when the Futures source or Funding coverage is insufficient.
+5. Combine previous Elite genomes with fresh strategies.
+6. Remove historically tested and current-batch duplicate logic before backtesting.
+7. Generate replacements with a different deterministic seed until every evaluation slot is unique.
+8. Run Train discovery.
+9. Validate top strategies on Validation and untouched OOS windows.
+10. Run Walk-forward tests.
+11. Run Fee, Slippage and adverse Funding stress scenarios.
+12. Reject strategies with liquidation, excessive drawdown, weak samples or directional imbalance.
+13. Classify failure causes.
+14. Mutate the next Elite population according to the failure profile.
+15. Persist the next state, tested-logic registry and report.
+
+## Tested-logic deduplication
+
+Every strategy receives a deterministic logic fingerprint built from:
+
+- Strategy family.
+- Sorted unique symbol set.
+- Timeframe and direction permissions.
+- Regime, momentum, breakout, volume and volatility parameters.
+- Leverage, position-risk and margin-usage parameters.
+- ATR stop, take-profit, trailing, holding, rotation and cooldown parameters.
+- Edge / Cost entry threshold.
+
+The fingerprint intentionally excludes strategy ID, generation, parent IDs, researcher name and thesis text. Renaming or re-parenting a strategy therefore does not make it eligible for another backtest.
+
+Small parameter differences inside the configured normalization step are treated as near-identical logic and are skipped. A material parameter change creates a new fingerprint.
+
+Duplicate checks are applied:
+
+1. Against every fingerprint stored from previous autonomous cycles.
+2. Inside the current population before evaluation.
+3. Between generations inside the same cycle.
+
+A duplicate never consumes one of the scheduled evaluation slots. The generator creates a replacement candidate with a different seed. If it cannot fill all slots with unique logic after the retry limit, the cycle fails instead of repeating an old test.
+
+The registry stores compact SHA-256-derived fingerprints rather than full genomes, allowing long-running history without coupling the registry to generated strategy IDs.
 
 ## Automatic reflection rules
 
@@ -81,6 +110,8 @@ All values remain inside the configured hard limits.
 The workflow writes only to the dedicated `research-autonomous-state` branch:
 
 - `.research-state/autonomous-state.json`
+- `.research-state/tested-logic-fingerprints.json`
+- `.research-state/deduplication-stats.json`
 - `.research-state/latest-report.md`
 - `.research-state/latest-result.json`
 - `.research-state/funding-coverage.json`
@@ -88,6 +119,8 @@ The workflow writes only to the dedicated `research-autonomous-state` branch:
 - `.research-state/forward-paper-candidates.md`
 
 The state branch is isolated from the application deployment branch. Scheduled research does not commit generated results to `master`.
+
+The report records historical fingerprints loaded, new unique logic tested, duplicates skipped, replacement candidates generated and the cumulative registry size.
 
 ## Notifications
 
