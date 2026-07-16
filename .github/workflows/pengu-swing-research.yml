@@ -1,4 +1,4 @@
-name: PENGU and Multi-Asset 72h Research
+name: PENGU and High-Vol Scanner Research
 
 on:
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
         run: |
           python -m py_compile research/pengu_swing_robot/run_pengu_swing_research.py
           python -m py_compile research/pengu_swing_robot/run_pengu_adaptive_72h_v2.py
-          python -m py_compile research/pengu_swing_robot/run_multiasset_scanner_v1.py
+          python -m py_compile research/pengu_swing_robot/run_high_vol_scanner_portfolio_v1.py
 
       - name: Run PENGU standalone backtest
         shell: bash
@@ -47,15 +47,15 @@ jobs:
           set -o pipefail
           python research/pengu_swing_robot/run_pengu_adaptive_72h_v2.py \
             --output research_outputs/pengu_adaptive_72h_v2 \
-            --cache .cache/multiasset_scanner_v1 | tee pengu_adaptive_72h_run.log
+            --cache .cache/high_vol_scanner_v1 | tee pengu_adaptive_72h_run.log
 
-      - name: Run PENGU plus multi-asset scanner backtest
+      - name: Run PENGU plus high-vol scanner portfolio backtest
         shell: bash
         run: |
           set -o pipefail
-          python research/pengu_swing_robot/run_multiasset_scanner_v1.py \
-            --output research_outputs/multiasset_scanner_v1 \
-            --cache .cache/multiasset_scanner_v1 | tee multiasset_scanner_run.log
+          python research/pengu_swing_robot/run_high_vol_scanner_portfolio_v1.py \
+            --output research_outputs/high_vol_scanner_portfolio_v1 \
+            --cache .cache/high_vol_scanner_v1 | tee high_vol_scanner_run.log
 
       - name: Publish summary
         if: always()
@@ -64,23 +64,23 @@ jobs:
             cat research_outputs/pengu_adaptive_72h_v2/REPORT.md >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f research_outputs/multiasset_scanner_v1/REPORT.md ]; then
-            cat research_outputs/multiasset_scanner_v1/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          if [ -f research_outputs/high_vol_scanner_portfolio_v1/REPORT.md ]; then
+            cat research_outputs/high_vol_scanner_portfolio_v1/REPORT.md >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Multi-asset scanner report was not generated." >> "$GITHUB_STEP_SUMMARY"
+            echo "High-vol scanner report was not generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload research artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pengu-multiasset-scanner-v1
+          name: pengu-high-vol-scanner-v1
           path: |
             research_outputs/pengu_adaptive_72h_v2
-            research_outputs/multiasset_scanner_v1
-            .cache/multiasset_scanner_v1
+            research_outputs/high_vol_scanner_portfolio_v1
+            .cache/high_vol_scanner_v1
             pengu_adaptive_72h_run.log
-            multiasset_scanner_run.log
+            high_vol_scanner_run.log
           if-no-files-found: warn
           include-hidden-files: true
           retention-days: 30
