@@ -13,6 +13,10 @@ const REPOSITORY = "dunamishajime-bit/-ai-dex-manager";
 const STATE_BRANCH = "research-autonomous-state";
 const RAW_BASE = `https://raw.githubusercontent.com/${REPOSITORY}/${STATE_BRANCH}/.research-state`;
 const GITHUB_BASE = `https://github.com/${REPOSITORY}`;
+const SERVER_CACHE_MS = 60_000;
+
+let cachedPayload: ResearchDashboardPayload | null = null;
+let cachedAt = 0;
 
 interface RawAutonomousState {
   cycle?: unknown;
@@ -108,8 +112,9 @@ function normalizeElites(value: unknown): ResearchEliteSummary[] {
 
 async function fetchJson<T>(name: string): Promise<T> {
   const response = await fetch(`${RAW_BASE}/${name}`, {
+    cache: "no-store",
     headers: { Accept: "application/json" },
-    next: { revalidate: 60 },
+    signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) throw new Error(`${name} fetch failed: ${response.status}`);
   return response.json() as Promise<T>;
@@ -124,7 +129,20 @@ function freshness(lastRunAt: string | null): ResearchDashboardPayload["freshnes
   return "stale";
 }
 
+function response(payload: ResearchDashboardPayload, cacheState: "fresh" | "stale") {
+  return NextResponse.json(payload, {
+    headers: {
+      "Cache-Control": "public, max-age=30, stale-while-revalidate=120",
+      "X-Research-Cache": cacheState,
+    },
+  });
+}
+
 export async function GET() {
+  if (cachedPayload && Date.now() - cachedAt < SERVER_CACHE_MS) {
+    return response(cachedPayload, "fresh");
+  }
+
   try {
     const [state, deduplication] = await Promise.all([
       fetchJson<RawAutonomousState>("autonomous-state.json"),
@@ -168,12 +186,13 @@ export async function GET() {
       },
     };
 
-    return NextResponse.json(payload, {
-      headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-      },
-    });
+    cachedPayload = payload;
+    cachedAt = Date.now();
+    return response(payload, "fresh");
   } catch (error) {
+    if (cachedPayload) {
+      return response({ ...cachedPayload, freshness: "stale" }, "stale");
+    }
     return NextResponse.json(
       {
         error: "Research state could not be loaded.",
