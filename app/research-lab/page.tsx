@@ -39,11 +39,11 @@ function StatCard({
 
 const PIPELINE = [
   "前回Elite・State読込",
+  "過去検証済みロジックを除外",
   "Long / Short戦略生成",
   "Train期間で進化探索",
   "Validation・完全未使用OOS",
-  "Walk-forward検証",
-  "Fee・Slippage・Funding Stress",
+  "Walk-forward・Cost Stress",
   "失敗理由の自動分類・反省",
   "次世代Elite・研究計画を保存",
 ];
@@ -51,7 +51,8 @@ const PIPELINE = [
 export default function ResearchLabPage() {
   const config = DEFAULT_PERP_RESEARCH_CONFIG;
   const thresholds = config.thresholds;
-  const dailyEvaluations = 4 * 20 * 5;
+  const hourlyEvaluations = 5 * 5;
+  const dailyEvaluations = 24 * hourlyEvaluations;
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
@@ -67,19 +68,19 @@ export default function ResearchLabPage() {
               <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">AI Hedge Fund Research Lab</h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-white/76">
                 平均月利30%超を研究目標に、USD-M FuturesのLong / Short戦略を完全自動で生成・検証・反省・進化させます。
-                前回のEliteを次回へ引き継ぎ、OOSで再現しない高収益値や清算を伴う戦略は採用しません。
+                前回のEliteを次回へ引き継ぎ、過去に検証済みの同一ロジック、OOSで再現しない高収益値、清算を伴う戦略は採用しません。
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-100">
               <Bot className="h-4 w-4" />
-              Autonomous 24 / 7
+              Hourly Autonomous
             </div>
           </div>
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard label="Monthly Target" value={`${thresholds.targetAverageMonthlyReturnPct}%+`} note="完全未使用OOSで平均月利を判定" icon={Target} />
-          <StatCard label="Daily Research" value={`${dailyEvaluations}`} note="1日4 cycle × 100 strategies" icon={RefreshCw} />
+          <StatCard label="Daily Research" value={`${dailyEvaluations}`} note={`毎時${hourlyEvaluations}件 × 24 cycle`} icon={RefreshCw} />
           <StatCard label="Directions" value="Long / Short" note="下落相場も独立した収益源として研究" icon={Waves} />
           <StatCard label="AI Researchers" value={`${RESEARCHERS.length}`} note="専門分野別に戦略を生成・変異" icon={Users} />
           <StatCard label="AI Critics" value={`${CRITICS.length}`} note="過学習・テールリスク・約定面を反証" icon={Shield} />
@@ -89,10 +90,11 @@ export default function ResearchLabPage() {
           <div className="flex items-start gap-3">
             <Bot className="mt-0.5 h-5 w-5 shrink-0 text-emerald-200" />
             <div>
-              <h2 className="font-bold text-emerald-50">完全自動研究スケジュール</h2>
+              <h2 className="font-bold text-emerald-50">1時間ごとの完全自動研究</h2>
               <p className="mt-2 text-sm leading-6 text-emerald-50/76">
-                毎日03:17・09:17・15:17・21:17（JST）に自動起動します。各cycleで100戦略を評価し、失敗理由に応じて
-                Edge / Cost、レバレッジ、リスク率、Entry閾値、レジーム判定を自動調整します。Final CandidateだけをForward Paper候補として保存します。
+                毎時17分（JST）に自動起動し、各cycleで25件、1日最大600件の新規ロジックを評価します。
+                小さなcycleごとにEliteと失敗理由を保存するため、以前の4回／日構成より改善内容を早く次世代へ反映できます。
+                実行中のcycleは中断せず、同時書込みを禁止します。
               </p>
             </div>
           </div>
