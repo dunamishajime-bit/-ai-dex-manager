@@ -1,0 +1,90 @@
+name: Research Lab Perpetual Pilot
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "lib/research-lab/perp/**"
+      - "scripts/research-lab-perp-*.ts"
+      - ".github/workflows/research-lab-perp-pilot.yml"
+      - "package.json"
+  workflow_dispatch:
+    inputs:
+      rounds:
+        description: Discovery rounds
+        required: true
+        default: "20"
+      population:
+        description: Strategies per round
+        required: true
+        default: "5"
+      finalists:
+        description: Strategies sent to Validation and OOS
+        required: true
+        default: "5"
+      symbols:
+        description: Comma-separated symbols
+        required: true
+        default: "BTC,ETH,BNB,SOL,XRP,ADA,AVAX,LINK,LTC,ATOM,AAVE,NEAR,INJ"
+      start_date:
+        description: Research start date
+        required: true
+        default: "2023-01-01"
+      end_date:
+        description: Research end date
+        required: true
+        default: "2026-07-01"
+
+permissions:
+  contents: read
+
+jobs:
+  perpetual-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      BINANCE_PUBLIC_ARCHIVE_ONLY: "true"
+      PERP_RESEARCH_ROUNDS: ${{ github.event_name == 'workflow_dispatch' && inputs.rounds || '10' }}
+      PERP_RESEARCH_POPULATION: ${{ github.event_name == 'workflow_dispatch' && inputs.population || '5' }}
+      PERP_RESEARCH_ELITES: "2"
+      PERP_RESEARCH_FINALISTS: ${{ github.event_name == 'workflow_dispatch' && inputs.finalists || '5' }}
+      PERP_RESEARCH_CONCURRENCY: "1"
+      PERP_RESEARCH_WALK_FORWARD_FOLDS: "3"
+      PERP_RESEARCH_TARGET_MONTHLY_PCT: "30"
+      PERP_RESEARCH_FINAL_OOS_MONTHLY_PCT: "30"
+      PERP_RESEARCH_FINAL_STRESS_MONTHLY_PCT: "20"
+      PERP_RESEARCH_SYMBOLS: ${{ github.event_name == 'workflow_dispatch' && inputs.symbols || 'BTC,ETH,BNB,SOL,XRP,ADA,AVAX,LINK,LTC,ATOM,AAVE,NEAR,INJ' }}
+      PERP_RESEARCH_START_DATE: ${{ github.event_name == 'workflow_dispatch' && inputs.start_date || '2023-01-01' }}
+      PERP_RESEARCH_END_DATE: ${{ github.event_name == 'workflow_dispatch' && inputs.end_date || '2026-07-01' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Restore perpetual market data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research
+          key: perp-market-data-v1-${{ env.PERP_RESEARCH_START_DATE }}-${{ env.PERP_RESEARCH_END_DATE }}-${{ hashFiles('lib/research-lab/perp/data-store.ts', 'lib/backtest/binance-source.ts') }}
+          restore-keys: |
+            perp-market-data-v1-
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript check
+        run: npm run typecheck
+      - name: Perpetual engine self-test
+        run: npm run research:perp:selftest
+      - name: Run real-data perpetual research
+        run: npm run research:perp
+      - name: Upload perpetual research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-lab-perpetual-pilot
+          path: reports/research-lab-perp
+          if-no-files-found: warn
+          retention-days: 30
