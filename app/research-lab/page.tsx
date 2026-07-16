@@ -11,6 +11,7 @@ import {
   Waves,
 } from "lucide-react";
 
+import LatestDiscussionSummary from "@/components/research-lab/LatestDiscussionSummary";
 import LiveResearchDashboard from "@/components/research-lab/LiveResearchDashboard";
 import ResearchLabSubnav from "@/components/research-lab/ResearchLabSubnav";
 import { DEFAULT_PERP_RESEARCH_CONFIG } from "@/lib/research-lab/perp/config";
@@ -82,6 +83,7 @@ export default function ResearchLabPage() {
 
         <ResearchLabSubnav />
         <LiveResearchDashboard />
+        <LatestDiscussionSummary />
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard label="Monthly Target" value={`${thresholds.targetAverageMonthlyReturnPct}%+`} note="完全未使用OOSで平均月利を判定" icon={Target} />
