@@ -13,6 +13,7 @@
     "research:perp": "tsx scripts/research-lab-perp-runner.ts",
     "research:perp:selftest": "tsx scripts/research-lab-perp-selftest.ts",
     "research:discussion:selftest": "tsx scripts/research-lab-discussion-selftest.ts",
+    "research:champion:selftest": "tsx scripts/research-lab-champion-deep-selftest.ts",
     "research:perp:autonomous": "tsx scripts/research-lab-autonomous-runner.ts"
   },
   "dependencies": {

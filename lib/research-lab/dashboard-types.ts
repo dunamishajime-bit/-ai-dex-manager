@@ -28,6 +28,55 @@ export interface ResearchEliteSummary {
   allowNeutralRegime: boolean;
 }
 
+export interface ChampionDashboardMetric {
+  trainMonthlyPct: number;
+  oosMonthlyPct: number;
+  oosMaxDrawdownPct: number;
+  worstStressMonthlyPct: number;
+  walkForwardPassRatePct: number;
+  oosTrades: number;
+  profitFactor: number;
+  liquidationCount: number;
+}
+
+export interface ChampionDashboardItem {
+  slot: "oos" | "stress" | "stability";
+  id: string;
+  family: string;
+  rootCauses: string[];
+  noImprovementCycles: number;
+  metrics: ChampionDashboardMetric;
+}
+
+export interface ChampionExperimentDashboardItem {
+  id: string;
+  championSlot: "oos" | "stress" | "stability";
+  parentStrategyId: string;
+  childStrategyId: string;
+  hypothesis: string;
+  changedParameter: string;
+  beforeValue: string;
+  afterValue: string;
+  accepted: boolean;
+  deltaOosMonthlyPct: number;
+  deltaWorstStressMonthlyPct: number;
+  deltaDrawdownImprovementPct: number;
+  compositeImprovement: number;
+  reasons: string[];
+}
+
+export interface ChampionDeepDashboardSummary {
+  mode: "champion_deep";
+  cycle: number;
+  updatedAt: string | null;
+  championCount: number;
+  experimentCount: number;
+  acceptedExperiments: number;
+  champions: ChampionDashboardItem[];
+  experiments: ChampionExperimentDashboardItem[];
+  nextPlan: string[];
+}
+
 export interface ResearchDashboardPayload {
   generatedAt: string;
   lastRunAt: string | null;
@@ -45,6 +94,7 @@ export interface ResearchDashboardPayload {
   elites: ResearchEliteSummary[];
   nextPlan: string[];
   latestDiscussion: ResearchDiscussionIndexEntry | null;
+  deepResearch: ChampionDeepDashboardSummary | null;
   deduplication: {
     historicalFingerprintsLoaded: number;
     newUniqueLogicTested: number;

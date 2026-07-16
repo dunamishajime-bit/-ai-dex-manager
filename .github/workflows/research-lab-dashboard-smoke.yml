@@ -8,6 +8,7 @@ on:
       - "components/research-lab/**"
       - "lib/research-lab/dashboard-types.ts"
       - "lib/research-lab/discussion-types.ts"
+      - "lib/research-lab/perp/deep-research.ts"
       - "docs/research-lab-dashboard.md"
   workflow_dispatch:
 
@@ -32,6 +33,9 @@ jobs:
 
       - name: TypeScript check
         run: npm run typecheck
+
+      - name: Champion deep research self-test
+        run: npm run research:champion:selftest
 
       - name: Research discussion self-test
         run: npm run research:discussion:selftest

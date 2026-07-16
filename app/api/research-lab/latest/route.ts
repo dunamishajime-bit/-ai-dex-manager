@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
 import type {
+  ChampionDeepDashboardSummary,
+  ChampionDashboardItem,
+  ChampionExperimentDashboardItem,
   ResearchCycleHistoryPoint,
   ResearchDashboardPayload,
   ResearchEliteSummary,
@@ -41,6 +44,14 @@ interface RawDeduplicationStats {
   totalUniqueLogic?: unknown;
 }
 
+interface RawChampionDeepState {
+  cycle?: unknown;
+  updatedAt?: unknown;
+  champions?: unknown;
+  latestExperiments?: unknown;
+  nextPlan?: unknown;
+}
+
 function finiteNumber(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
@@ -51,6 +62,11 @@ function nullableFiniteNumber(value: unknown) {
 
 function profile(value: unknown): "attack" | "balanced" {
   return value === "balanced" ? "balanced" : "attack";
+}
+
+function championSlot(value: unknown): "oos" | "stress" | "stability" {
+  if (value === "stress" || value === "stability") return value;
+  return "oos";
 }
 
 function stringValue(value: unknown, fallback = "") {
@@ -136,6 +152,79 @@ function normalizeDiscussionEntry(value: unknown): ResearchDiscussionIndexEntry 
   };
 }
 
+function normalizeChampion(value: unknown): ChampionDashboardItem | null {
+  if (!value || typeof value !== "object") return null;
+  const item = value as Record<string, unknown>;
+  const genome = item.genome && typeof item.genome === "object" ? item.genome as Record<string, unknown> : {};
+  const metrics = item.metrics && typeof item.metrics === "object" ? item.metrics as Record<string, unknown> : {};
+  const id = stringValue(genome.id);
+  if (!id) return null;
+  return {
+    slot: championSlot(item.slot),
+    id,
+    family: stringValue(genome.family, "unknown"),
+    rootCauses: stringArray(item.rootCauses),
+    noImprovementCycles: finiteNumber(item.noImprovementCycles),
+    metrics: {
+      trainMonthlyPct: finiteNumber(metrics.trainMonthlyPct, -100),
+      oosMonthlyPct: finiteNumber(metrics.oosMonthlyPct, -100),
+      oosMaxDrawdownPct: finiteNumber(metrics.oosMaxDrawdownPct, 100),
+      worstStressMonthlyPct: finiteNumber(metrics.worstStressMonthlyPct, -100),
+      walkForwardPassRatePct: finiteNumber(metrics.walkForwardPassRatePct),
+      oosTrades: finiteNumber(metrics.oosTrades),
+      profitFactor: finiteNumber(metrics.profitFactor),
+      liquidationCount: finiteNumber(metrics.liquidationCount),
+    },
+  };
+}
+
+function normalizeExperiment(value: unknown): ChampionExperimentDashboardItem | null {
+  if (!value || typeof value !== "object") return null;
+  const item = value as Record<string, unknown>;
+  const plan = item.plan && typeof item.plan === "object" ? item.plan as Record<string, unknown> : {};
+  const comparison = item.comparison && typeof item.comparison === "object" ? item.comparison as Record<string, unknown> : {};
+  const id = stringValue(plan.id);
+  if (!id) return null;
+  return {
+    id,
+    championSlot: championSlot(plan.championSlot),
+    parentStrategyId: stringValue(plan.parentStrategyId),
+    childStrategyId: stringValue(plan.childStrategyId),
+    hypothesis: stringValue(plan.hypothesis),
+    changedParameter: stringValue(plan.changedParameter),
+    beforeValue: String(plan.beforeValue ?? ""),
+    afterValue: String(plan.afterValue ?? ""),
+    accepted: item.accepted === true,
+    deltaOosMonthlyPct: finiteNumber(comparison.deltaOosMonthlyPct),
+    deltaWorstStressMonthlyPct: finiteNumber(comparison.deltaWorstStressMonthlyPct),
+    deltaDrawdownImprovementPct: finiteNumber(comparison.deltaDrawdownImprovementPct),
+    compositeImprovement: finiteNumber(comparison.compositeImprovement),
+    reasons: stringArray(item.reasons),
+  };
+}
+
+function normalizeDeepResearch(value: RawChampionDeepState | null): ChampionDeepDashboardSummary | null {
+  if (!value) return null;
+  const champions = (Array.isArray(value.champions) ? value.champions : [])
+    .map(normalizeChampion)
+    .filter((item): item is ChampionDashboardItem => item != null);
+  const experiments = (Array.isArray(value.latestExperiments) ? value.latestExperiments : [])
+    .map(normalizeExperiment)
+    .filter((item): item is ChampionExperimentDashboardItem => item != null);
+  if (!champions.length && !experiments.length) return null;
+  return {
+    mode: "champion_deep",
+    cycle: finiteNumber(value.cycle),
+    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : null,
+    championCount: champions.length,
+    experimentCount: experiments.length,
+    acceptedExperiments: experiments.filter((item) => item.accepted).length,
+    champions,
+    experiments,
+    nextPlan: stringArray(value.nextPlan),
+  };
+}
+
 async function fetchJson<T>(name: string): Promise<T> {
   const response = await fetch(`${RAW_BASE}/${name}`, {
     cache: "no-store",
@@ -150,8 +239,8 @@ function freshness(lastRunAt: string | null): ResearchDashboardPayload["freshnes
   if (!lastRunAt) return "unknown";
   const ageMs = Date.now() - Date.parse(lastRunAt);
   if (!Number.isFinite(ageMs)) return "unknown";
-  if (ageMs <= 2 * 60 * 60 * 1000) return "fresh";
-  if (ageMs <= 4 * 60 * 60 * 1000) return "delayed";
+  if (ageMs <= 5 * 60 * 60 * 1000) return "fresh";
+  if (ageMs <= 8 * 60 * 60 * 1000) return "delayed";
   return "stale";
 }
 
@@ -170,12 +259,13 @@ export async function GET() {
   }
 
   try {
-    const [state, deduplication, discussionIndex] = await Promise.all([
+    const [state, deduplication, discussionIndex, deepState] = await Promise.all([
       fetchJson<RawAutonomousState>("autonomous-state.json"),
       fetchJson<RawDeduplicationStats>("deduplication-stats.json")
         .catch((): RawDeduplicationStats => ({})),
       fetchJson<ResearchDiscussionIndex>("discussions/index.json")
         .catch((): ResearchDiscussionIndex => ({ version: 1, updatedAt: new Date(0).toISOString(), items: [] })),
+      fetchJson<RawChampionDeepState>("champion-deep-state.json").catch((): RawChampionDeepState | null => null),
     ]);
     const history = normalizeHistory(state.history);
     const lastRunAt = typeof state.lastRunAt === "string" ? state.lastRunAt : history.at(-1)?.completedAt ?? null;
@@ -197,6 +287,7 @@ export async function GET() {
       elites: normalizeElites(state.eliteGenomes),
       nextPlan: stringArray(state.nextPlan),
       latestDiscussion,
+      deepResearch: normalizeDeepResearch(deepState),
       deduplication: {
         historicalFingerprintsLoaded: finiteNumber(deduplication.historicalFingerprintsLoaded),
         newUniqueLogicTested: finiteNumber(deduplication.newUniqueLogicTested),

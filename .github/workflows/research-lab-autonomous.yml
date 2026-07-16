@@ -1,21 +1,22 @@
-name: Autonomous Research Lab
+name: Champion Deep Research Lab
 
 # A workflow-only push is also an intentional immediate research kickoff.
 on:
   schedule:
-    - cron: "17 * * * *"
+    - cron: "17 0,4,8,12,16,20 * * *"
   push:
     branches:
       - master
     paths:
       - ".github/workflows/research-lab-autonomous.yml"
       - "scripts/research-lab-autonomous-runner.ts"
-      - "lib/research-lab/perp/discussion.ts"
-      - "lib/research-lab/discussion-types.ts"
+      - "lib/research-lab/perp/deep-research.ts"
+      - "lib/research-lab/perp/deep-autonomous.ts"
+      - "lib/research-lab/perp/deep-discussion.ts"
   workflow_dispatch:
     inputs:
       profile:
-        description: Research profile (auto follows saved state)
+        description: Research profile (auto follows saved Champion state)
         type: choice
         required: true
         default: auto
@@ -23,18 +24,14 @@ on:
           - auto
           - attack
           - balanced
-      rounds:
-        description: Evolution rounds
+      champions:
+        description: Parent Champion strategies (maximum 3)
         required: true
-        default: "5"
-      population:
-        description: Strategies per round
+        default: "3"
+      experiments_per_champion:
+        description: Single-parameter child experiments per Champion
         required: true
-        default: "5"
-      finalists:
-        description: Strategies sent to OOS and stress validation
-        required: true
-        default: "6"
+        default: "2"
       start_date:
         description: Research start date
         required: true
@@ -79,27 +76,28 @@ jobs:
           cache: npm
           cache-dependency-path: source/package-lock.json
 
-      - name: Resolve autonomous configuration
+      - name: Resolve Champion Deep configuration
         shell: bash
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "PERP_RESEARCH_ROUNDS=${{ inputs.rounds }}" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_POPULATION=${{ inputs.population }}" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_FINALISTS=${{ inputs.finalists }}" >> "$GITHUB_ENV"
+            echo "PERP_DEEP_CHAMPIONS=${{ inputs.champions }}" >> "$GITHUB_ENV"
+            echo "PERP_DEEP_EXPERIMENTS_PER_CHAMPION=${{ inputs.experiments_per_champion }}" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_START_DATE=${{ inputs.start_date }}" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_END_DATE=${{ inputs.end_date }}" >> "$GITHUB_ENV"
             if [[ "${{ inputs.profile }}" != "auto" ]]; then
               echo "PERP_RESEARCH_PROFILE=${{ inputs.profile }}" >> "$GITHUB_ENV"
             fi
           else
-            echo "PERP_RESEARCH_ROUNDS=5" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_POPULATION=5" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_FINALISTS=6" >> "$GITHUB_ENV"
+            echo "PERP_DEEP_CHAMPIONS=3" >> "$GITHUB_ENV"
+            echo "PERP_DEEP_EXPERIMENTS_PER_CHAMPION=2" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_START_DATE=2023-01-01" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_END_DATE=2026-07-01" >> "$GITHUB_ENV"
           fi
-          echo "PERP_RESEARCH_ELITES=4" >> "$GITHUB_ENV"
+          echo "PERP_RESEARCH_ROUNDS=1" >> "$GITHUB_ENV"
+          echo "PERP_RESEARCH_POPULATION=9" >> "$GITHUB_ENV"
+          echo "PERP_RESEARCH_FINALISTS=9" >> "$GITHUB_ENV"
+          echo "PERP_RESEARCH_ELITES=3" >> "$GITHUB_ENV"
           echo "PERP_RESEARCH_CONCURRENCY=1" >> "$GITHUB_ENV"
           echo "PERP_RESEARCH_WALK_FORWARD_FOLDS=3" >> "$GITHUB_ENV"
           echo "PERP_RESEARCH_TARGET_MONTHLY_PCT=30" >> "$GITHUB_ENV"
@@ -120,8 +118,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: source/.cache/perp-research-usdm
-          key: autonomous-usdm-v2-${{ env.PERP_RESEARCH_START_DATE }}-${{ env.PERP_RESEARCH_END_DATE }}-${{ hashFiles('source/lib/research-lab/perp/futures-data-source.ts') }}
+          key: champion-deep-usdm-v1-${{ env.PERP_RESEARCH_START_DATE }}-${{ env.PERP_RESEARCH_END_DATE }}-${{ hashFiles('source/lib/research-lab/perp/futures-data-source.ts') }}
           restore-keys: |
+            champion-deep-usdm-v1-
             autonomous-usdm-v2-
 
       - name: Install dependencies
@@ -136,11 +135,15 @@ jobs:
         working-directory: source
         run: npm run research:perp:selftest
 
+      - name: Champion deep research self-test
+        working-directory: source
+        run: npm run research:champion:selftest
+
       - name: Research discussion self-test
         working-directory: source
         run: npm run research:discussion:selftest
 
-      - name: Run autonomous research cycle
+      - name: Run Champion Deep Research cycle
         id: research
         working-directory: source
         run: npm run research:perp:autonomous
@@ -176,15 +179,15 @@ jobs:
           if git diff --cached --quiet; then
             echo "No state changes"
           else
-            git commit -m "research: autonomous cycle ${GITHUB_RUN_NUMBER}"
+            git commit -m "research: champion deep cycle ${GITHUB_RUN_NUMBER}"
             git push origin research-autonomous-state
           fi
 
-      - name: Upload autonomous research evidence
+      - name: Upload Champion Deep Research evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: autonomous-research-cycle-${{ github.run_number }}
+          name: champion-deep-research-cycle-${{ github.run_number }}
           path: |
             source/.research-state
             source/reports/research-lab-autonomous
@@ -199,7 +202,7 @@ jobs:
         run: |
           gh issue create \
             --repo "${{ github.repository }}" \
-            --title "Autonomous Research: Forward Paper candidate cycle ${{ steps.research.outputs.cycle }}" \
+            --title "Champion Deep Research: Forward Paper candidate cycle ${{ steps.research.outputs.cycle }}" \
             --body-file source/.research-state/forward-paper-candidates.md
 
       - name: Report or update autonomous failure issue
@@ -209,9 +212,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          title="Autonomous Research Lab failure"
+          title="Champion Deep Research Lab failure"
           existing=$(gh issue list --repo "${{ github.repository }}" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
-          body="Scheduled autonomous research failed in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. The next scheduled cycle will retry automatically."
+          body="Champion Deep Research failed in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. The next scheduled cycle will retry without replacing the current Champions."
           if [[ -n "$existing" ]]; then
             gh issue comment "$existing" --repo "${{ github.repository }}" --body "$body"
           else
@@ -224,8 +227,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          title="Autonomous Research Lab failure"
+          title="Champion Deep Research Lab failure"
           existing=$(gh issue list --repo "${{ github.repository }}" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
           if [[ -n "$existing" ]]; then
-            gh issue close "$existing" --repo "${{ github.repository }}" --comment "Research recovered automatically in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+            gh issue close "$existing" --repo "${{ github.repository }}" --comment "Champion Deep Research recovered automatically in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
           fi

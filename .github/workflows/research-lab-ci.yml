@@ -34,5 +34,7 @@ jobs:
         run: npm run research:lab:selftest
       - name: Perpetual Research Lab self-test
         run: npm run research:perp:selftest
+      - name: Champion deep research self-test
+        run: npm run research:champion:selftest
       - name: Research discussion self-test
         run: npm run research:discussion:selftest
