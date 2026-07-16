@@ -6,12 +6,14 @@ on:
       - research/run-20260716-phase2-pilot
     paths:
       - ".github/workflows/research-lab-phase2-pilot.yml"
+      - "lib/backtest/binance-source.ts"
       - "research-runs/**"
   pull_request:
     branches:
       - master
     paths:
       - ".github/workflows/research-lab-phase2-pilot.yml"
+      - "lib/backtest/binance-source.ts"
       - "research-runs/**"
   workflow_dispatch:
 
