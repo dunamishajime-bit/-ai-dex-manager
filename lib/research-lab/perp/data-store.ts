@@ -1,13 +1,12 @@
 import path from "path";
 
-import { loadHistoricalCandles } from "@/lib/backtest/binance-source";
-
+import { loadUsdMFuturesSymbol } from "./futures-data-source";
 import type { PerpMarketData } from "./types";
 
 const dataPromises = new Map<string, Promise<PerpMarketData>>();
 
 function dataKey(symbols: string[], startTs: number, endTs: number) {
-  return `${[...symbols].sort().join(",")}:${startTs}:${endTs}`;
+  return `${[...symbols].sort().join(",")}:${startTs}:${endTs}:usdm-v1`;
 }
 
 export async function loadPerpMarketData(input: {
@@ -21,24 +20,28 @@ export async function loadPerpMarketData(input: {
   if (existing) return existing;
 
   const promise = (async () => {
-    const cacheRoot = path.join(process.cwd(), ".cache", "perp-research");
-    const bySymbol: Record<string, Awaited<ReturnType<typeof loadHistoricalCandles>>> = {};
+    const cacheRoot = path.join(process.cwd(), ".cache", "perp-research-usdm");
+    const bySymbol: PerpMarketData["bySymbol"] = {};
+    const fundingBySymbol: PerpMarketData["fundingBySymbol"] = {};
 
-    for (const symbol of symbols) {
-      const candles = await loadHistoricalCandles({
-        symbol: `${symbol}USDT`,
+    for (const baseSymbol of symbols) {
+      const symbol = `${baseSymbol}USDT`;
+      const result = await loadUsdMFuturesSymbol({
+        symbol,
         cacheRoot,
-        startMs: input.startTs,
-        endMs: input.endTs,
+        startTs: input.startTs,
+        endTs: input.endTs,
       });
-      if (!candles.length) throw new Error(`Perp research data missing for ${symbol}`);
-      bySymbol[symbol] = candles;
+      bySymbol[baseSymbol] = result.candles;
+      fundingBySymbol[baseSymbol] = result.funding;
     }
 
     return {
       startTs: input.startTs,
       endTs: input.endTs,
+      source: "binance-usdm-futures",
       bySymbol,
+      fundingBySymbol,
     } satisfies PerpMarketData;
   })();
 

@@ -4,6 +4,7 @@ import type { ResearchMetrics, ResearcherId, TemporalValidationPlan, TemporalWin
 export type PerpSide = "long" | "short";
 export type PerpFamily = "regime_momentum" | "breakout" | "relative_strength" | "dual_direction";
 export type PerpTimeframeHours = 2 | 4 | 6 | 8 | 12;
+export type PerpResearchProfile = "balanced" | "attack";
 
 export interface PerpStrategyParameters {
   timeframeHours: PerpTimeframeHours;
@@ -18,6 +19,7 @@ export interface PerpStrategyParameters {
   breakoutBufferPct: number;
   minimumMomentumPct: number;
   minimumVolumeRatio: number;
+  minimumEdgeToCostRatio: number;
   volatilityLookbackBars: number;
   volatilityPenalty: number;
   atrBars: number;
@@ -53,10 +55,17 @@ export interface PerpExecutionAssumptions {
 
 export interface PerpBar extends Candle1h {}
 
+export interface PerpFundingPoint {
+  ts: number;
+  rate: number;
+}
+
 export interface PerpMarketData {
   startTs: number;
   endTs: number;
+  source: "binance-usdm-futures" | "synthetic";
   bySymbol: Record<string, Candle1h[]>;
+  fundingBySymbol: Record<string, PerpFundingPoint[]>;
 }
 
 export interface PerpTrade {
@@ -100,6 +109,7 @@ export interface PerpRiskMetrics {
   averageHoldingBars: number;
   averageEffectiveLeverage: number;
   maximumEffectiveLeverage: number;
+  totalFundingCost: number;
   exposurePct: number;
   endingEquity: number;
 }
@@ -165,6 +175,7 @@ export interface PerpResearchThresholds {
   discoveryMinSharpe: number;
   discoveryMinProfitFactor: number;
   discoveryMinTrades: number;
+  targetAverageEffectiveLeverage: number;
   finalMinOosAverageMonthlyReturnPct: number;
   finalMaxOosDrawdownPct: number;
   finalMinOosTrades: number;
@@ -178,6 +189,7 @@ export interface PerpResearchThresholds {
 }
 
 export interface PerpResearchConfig {
+  profile: PerpResearchProfile;
   rounds: number;
   populationPerRound: number;
   eliteCount: number;

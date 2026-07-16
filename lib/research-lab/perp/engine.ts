@@ -6,6 +6,7 @@ import type {
   PerpBar,
   PerpEquityPoint,
   PerpExecutionAssumptions,
+  PerpFundingPoint,
   PerpMarketData,
   PerpSide,
   PerpStrategyGenome,
@@ -41,6 +42,7 @@ interface OpenPosition {
   effectiveLeverage: number;
   entryFee: number;
   fundingCost: number;
+  lastFundingTs: number;
   initialStopPrice: number;
   trailingStopPrice: number;
   takeProfitPrice: number;
@@ -162,10 +164,22 @@ function priorHighLow(bars: PerpBar[], index: number, lookback: number) {
   };
 }
 
+function estimatedRoundTripCostPct(
+  execution: PerpExecutionAssumptions,
+  genome: PerpStrategyGenome,
+) {
+  const fixedCostPct = ((execution.feeBpsPerSide + execution.slippageBpsPerSide) * 2) / 10_000;
+  const expectedHoldBars = Math.max(1, Math.min(genome.parameters.maxHoldBars, 24));
+  const expectedHoldHours = expectedHoldBars * genome.parameters.timeframeHours;
+  const fundingBufferPct = (execution.adverseFundingBpsPer8h / 10_000) * (expectedHoldHours / 8);
+  return fixedCostPct + fundingBufferPct;
+}
+
 function signalForTimestamp(
   prepared: PreparedMarketData,
   genome: PerpStrategyGenome,
   ts: number,
+  execution: PerpExecutionAssumptions,
 ): SignalCandidate | null {
   const parameters = genome.parameters;
   const btcBars = prepared.bySymbol.BTC;
@@ -182,6 +196,7 @@ function signalForTimestamp(
   const shortRegime = btcDistance <= -parameters.regimeThresholdPct && btcMomentum < 0;
   const neutralRegime = !longRegime && !shortRegime;
   const candidates: SignalCandidate[] = [];
+  const minimumExpectedMove = estimatedRoundTripCostPct(execution, genome) * parameters.minimumEdgeToCostRatio;
 
   for (const symbol of genome.symbols) {
     const bars = prepared.bySymbol[symbol];
@@ -196,6 +211,7 @@ function signalForTimestamp(
     const levels = priorHighLow(bars, index, parameters.breakoutBars);
     if (!bar || assetMomentum == null || volatility == null || atr == null || volume == null || !levels || bar.close <= 0) continue;
     if (volume < parameters.minimumVolumeRatio) continue;
+    if (Math.abs(assetMomentum) < minimumExpectedMove) continue;
 
     const longBreakout = bar.close >= levels.high * (1 + parameters.breakoutBufferPct);
     const shortBreakout = bar.close <= levels.low * (1 - parameters.breakoutBufferPct);
@@ -241,6 +257,47 @@ function currentEquity(balance: number, position: OpenPosition | null, markPrice
   if (!position) return Math.max(0, balance);
   const exitFee = position.quantity * markPrice * feeRate;
   return Math.max(0, balance + unrealizedPnl(position, markPrice) - exitFee);
+}
+
+function firstFundingIndexAfter(points: PerpFundingPoint[], ts: number) {
+  let low = 0;
+  let high = points.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if ((points[middle]?.ts ?? Number.POSITIVE_INFINITY) <= ts) low = middle + 1;
+    else high = middle;
+  }
+  return low;
+}
+
+function fundingRateBetween(points: PerpFundingPoint[], fromExclusive: number, toInclusive: number) {
+  let index = firstFundingIndexAfter(points, fromExclusive);
+  let total = 0;
+  while (index < points.length) {
+    const point = points[index];
+    if (!point || point.ts > toInclusive) break;
+    total += point.rate;
+    index += 1;
+  }
+  return total;
+}
+
+function fundingCharge(input: {
+  position: OpenPosition;
+  fundingPoints: PerpFundingPoint[];
+  toTs: number;
+  execution: PerpExecutionAssumptions;
+  timeframeHours: number;
+}) {
+  const { position, fundingPoints, toTs, execution, timeframeHours } = input;
+  const actualRate = fundingRateBetween(fundingPoints, position.lastFundingTs, toTs);
+  const sideMultiplier = position.side === "long" ? 1 : -1;
+  const actualFundingCost = position.notional * actualRate * sideMultiplier;
+  const adverseBufferCost =
+    position.notional *
+    (execution.adverseFundingBpsPer8h / 10_000) *
+    (timeframeHours / 8);
+  return actualFundingCost + adverseBufferCost;
 }
 
 function monthlyAndAnnualReturns(points: PerpEquityPoint[]) {
@@ -307,9 +364,6 @@ export function runPerpBacktest(input: {
   const prepared = prepareMarketData(data, parameters.timeframeHours);
   const feeRate = execution.feeBpsPerSide / 10_000;
   const slippageRate = execution.slippageBpsPerSide / 10_000;
-  const fundingRatePerBar = (execution.adverseFundingBpsPer8h / 10_000) * (parameters.timeframeHours / 8);
-  // Indicator functions may read earlier bars by index, but every temporal segment starts
-  // from cash and never trades inside its warm-up history.
   const timeline = prepared.timeline.filter((ts) => ts >= window.startTs && ts < window.endTs);
   const trades: PerpTrade[] = [];
   const equityCurve: PerpEquityPoint[] = [];
@@ -356,8 +410,7 @@ export function runPerpBacktest(input: {
     position = null;
   };
 
-  for (let timelineIndex = 0; timelineIndex < timeline.length; timelineIndex += 1) {
-    const ts = timeline[timelineIndex];
+  for (const ts of timeline) {
     if (stopped) break;
 
     if (pendingExitReason && position) {
@@ -408,6 +461,7 @@ export function runPerpBacktest(input: {
             effectiveLeverage,
             entryFee,
             fundingCost: 0,
+            lastFundingTs: ts,
             initialStopPrice,
             trailingStopPrice: initialStopPrice,
             takeProfitPrice,
@@ -428,9 +482,16 @@ export function runPerpBacktest(input: {
       if (bar) {
         exposureBars += 1;
         position.holdingBars += 1;
-        const fundingCost = position.notional * fundingRatePerBar;
-        position.fundingCost += fundingCost;
-        balance = Math.max(0, balance - fundingCost);
+        const charge = fundingCharge({
+          position,
+          fundingPoints: data.fundingBySymbol[position.symbol] ?? [],
+          toTs: ts,
+          execution,
+          timeframeHours: parameters.timeframeHours,
+        });
+        position.fundingCost += charge;
+        position.lastFundingTs = ts;
+        balance = Math.max(0, balance - charge);
 
         const stopPrice = position.trailingStopPrice;
         if (position.side === "long") {
@@ -492,7 +553,7 @@ export function runPerpBacktest(input: {
       break;
     }
 
-    const nextSignal = signalForTimestamp(prepared, genome, ts);
+    const nextSignal = signalForTimestamp(prepared, genome, ts, execution);
     if (position) {
       const maxHoldReached = position.holdingBars >= parameters.maxHoldBars;
       const rebalanceReached = position.holdingBars >= parameters.rebalanceBars;
@@ -559,6 +620,7 @@ export function runPerpBacktest(input: {
       averageHoldingBars: mean(trades.map((trade) => trade.holdingBars)),
       averageEffectiveLeverage: mean(trades.map((trade) => trade.effectiveLeverage)),
       maximumEffectiveLeverage: trades.length ? Math.max(...trades.map((trade) => trade.effectiveLeverage)) : 0,
+      totalFundingCost: trades.reduce((sum, trade) => sum + trade.fundingCost, 0),
       exposurePct,
       endingEquity,
     },
