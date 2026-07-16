@@ -3,6 +3,7 @@ import { BOT_CONFIG } from "@/config/botConfig";
 import { STRATEGY_UNIVERSE_SEEDS, type StrategyUniverseChain, type StrategyUniverseSeed } from "@/config/strategyUniverse";
 import { TRADE_CONFIG } from "@/config/tradeConfig";
 import { isAutoTradeExcludedExecutionTarget } from "@/lib/proxy-assets";
+import { applyWin80Ultra90Top1Selection } from "@/lib/win80-ultra90-main-strategy";
 
 function normalizeTrackedSymbol(symbol: string): string {
     return String(symbol || "").trim().toUpperCase();
@@ -4454,11 +4455,13 @@ export function buildContinuousStrategyMonitor(
         prefilterMode,
         prefilterPassCount: effectivePrefilterUniverse.length,
     });
-    let selected = selectContinuousCandidatesV2(
-        enriched,
-        correlations,
-        { prefilterMode, prefilterPassCount: effectivePrefilterUniverse.length },
-    );
+    let selected = STRATEGY_CONFIG.MAIN_STRATEGY_ENABLED
+        ? applyWin80Ultra90Top1Selection(enriched)
+        : selectContinuousCandidatesV2(
+            enriched,
+            correlations,
+            { prefilterMode, prefilterPassCount: effectivePrefilterUniverse.length },
+        );
     const minimumTargetSelected = deriveMinimumLiveSelectionTarget(
         selectedBasketCap,
         effectivePrefilterUniverse.length,
@@ -4468,7 +4471,7 @@ export function buildContinuousStrategyMonitor(
             && candidate.selectionEligible,
         ).length,
     );
-    if (selected.length < minimumTargetSelected) {
+    if (!STRATEGY_CONFIG.MAIN_STRATEGY_DISABLE_EMERGENCY_TOPUP && selected.length < minimumTargetSelected) {
         const emergencySizePlan = [
             STRATEGY_CONFIG.FULL_SIZE_POSITION_MULTIPLIER,
             STRATEGY_CONFIG.HALF_SIZE_POSITION_MULTIPLIER,

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo, ReactNode } from "react";
 import { Flame, ShieldCheck, TrendingUp, Zap } from "lucide-react";
@@ -63,6 +63,10 @@ import {
     getProxyExecutionAssetLabel,
     normalizeExecutionTarget,
 } from "@/lib/proxy-assets";
+import {
+    classifyMainStrategyCandidate,
+    resolveWin80Ultra90Overlap,
+} from "@/lib/win80-ultra90-main-strategy";
 
 export type { Message };
 
@@ -8489,6 +8493,17 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         };
 
         const runLiveAutoTick = async () => {
+            if (
+                STRATEGY_CONFIG.MAIN_STRATEGY_ENABLED
+                && !STRATEGY_CONFIG.MAIN_STRATEGY_REAL_TRADING_ENABLED
+                && !isDemoMode
+            ) {
+                emitLiveAutoStatus("hold: Win80/Ultra90 main strategy live trading disabled", {
+                    strategyId: STRATEGY_CONFIG.MAIN_STRATEGY_ID,
+                    paperOnly: true,
+                });
+                return;
+            }
             if (cancelled || tradeExecutionLockRef.current || tradeInProgress) {
                 emitLiveAutoStatus("skip: tradeInProgress or cancelled");
                 return;
@@ -8706,19 +8721,21 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 prefilterMode: liveMonitor.stats.prefilterMode,
                 prefilterPassCount: liveMonitor.stats.prefilterPassCount,
             });
-            const desiredBasketSlots = Math.min(
-                STRATEGY_CONFIG.MAX_SELECTED_CANDIDATES + 4,
-                Math.max(
-                    liveMonitor.selected.length,
-                    selectedBasketCap + (liveMonitor.stats.prefilterMode === "Range" ? 2 : 1),
-                ),
-            );
+            const desiredBasketSlots = STRATEGY_CONFIG.MAIN_STRATEGY_ENABLED
+                ? STRATEGY_CONFIG.MAIN_STRATEGY_MAX_CONCURRENT_POSITIONS
+                : Math.min(
+                    STRATEGY_CONFIG.MAX_SELECTED_CANDIDATES + 4,
+                    Math.max(
+                        liveMonitor.selected.length,
+                        selectedBasketCap + (liveMonitor.stats.prefilterMode === "Range" ? 2 : 1),
+                    ),
+                );
             const activeManagedSlots = new Set([
                 ...managedExposureComparables,
                 ...pendingComparableSymbols,
             ]).size;
             const freeEntrySlots = Math.max(0, desiredBasketSlots - activeManagedSlots);
-            const supplementalPlans = freeEntrySlots > 0
+            const supplementalPlans = !STRATEGY_CONFIG.MAIN_STRATEGY_ENABLED && freeEntrySlots > 0
                 ? liveMonitor.candidates
                     .filter((candidate) =>
                         (candidate.orderArmEligible || candidate.triggerState === "Triggered")
@@ -9573,6 +9590,28 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     continue;
                 }
 
+                const incomingMainCandidate = STRATEGY_CONFIG.MAIN_STRATEGY_ENABLED
+                    ? basketPlans
+                        .map((incomingPlan) => candidateMap.get(normalizeTrackedSymbol(incomingPlan.symbol)))
+                        .find((incoming): incoming is ContinuousStrategyCandidate => Boolean(incoming) && comparableTradeSymbol(incoming!.symbol) !== comparableTradeSymbol(symbol))
+                    : undefined;
+                if (incomingMainCandidate) {
+                    const overlapDecision = resolveWin80Ultra90Overlap({
+                        current: { symbol, pnlPct, usdValue },
+                        incoming: incomingMainCandidate,
+                    });
+                    if (overlapDecision.action === "SPLIT_50" || overlapDecision.action === "SWITCH_70" || overlapDecision.action === "REJECT") {
+                        emitLiveAutoStatus("hold: main strategy overlap handled by direct rotation", {
+                            symbol,
+                            incoming: incomingMainCandidate.symbol,
+                            action: overlapDecision.action,
+                            incomingTier: classifyMainStrategyCandidate(incomingMainCandidate),
+                            pnlPct,
+                        });
+                        continue;
+                    }
+                }
+
                 const shouldConsolidate =
                     (latestBuyTs > 0 && now >= latestBuyTs + (STRATEGY_CONFIG.AUTO_TRADE_BASKET_EXIT_MIN_HOLD_MINUTES * 60_000) && pnlPct >= STRATEGY_CONFIG.AUTO_TRADE_BASKET_EXIT_MIN_PROFIT_PCT)
                     || signal.score <= STRATEGY_CONFIG.AUTO_TRADE_BASKET_EXIT_NEGATIVE_SCORE
@@ -9636,6 +9675,22 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             const readyPlans = basketPlans
                 .filter((plan) => plan.orderArmEligible || plan.triggerState === "Triggered")
                 .sort((left, right) => scoreLiveOrderPlan(right) - scoreLiveOrderPlan(left));
+            const resolveMainStrategyRotation = (plan: ReturnType<typeof buildOrderPlan>) => {
+                if (!STRATEGY_CONFIG.MAIN_STRATEGY_ENABLED) return null;
+                const incoming = candidateMap.get(normalizeTrackedSymbol(plan.symbol));
+                if (!incoming) return null;
+                const current = [...reviewOpenPositions]
+                    .filter((position) => position.comparableSymbol !== comparableTradeSymbol(plan.symbol))
+                    .sort((left, right) => right.usdValue - left.usdValue)[0];
+                return resolveWin80Ultra90Overlap({
+                    current: current ? {
+                        symbol: current.symbol,
+                        pnlPct: current.pnlPct,
+                        usdValue: current.usdValue,
+                    } : null,
+                    incoming,
+                });
+            };
 
             if (readyPlans.length === 0) {
                 syncLiveOrderMonitor();
@@ -9714,7 +9769,31 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                     );
                     continue;
                 }
-                const funding = pickFundingSourceForBuy(symbol, desiredUsd, currentPortfolio, { minOrderUsd });
+                const baseFunding = pickFundingSourceForBuy(symbol, desiredUsd, currentPortfolio, { minOrderUsd });
+                const overlapDecision = resolveMainStrategyRotation(plan);
+                const rotationPosition = overlapDecision && (overlapDecision.action === "SPLIT_50" || overlapDecision.action === "SWITCH_70")
+                    ? [...reviewOpenPositions]
+                        .filter((position) => position.comparableSymbol !== comparableSymbol)
+                        .sort((left, right) => right.usdValue - left.usdValue)[0]
+                    : undefined;
+                if (overlapDecision?.action === "REJECT") {
+                    setOrderDiagnostic(symbol, "blocked", "Win80 overlap rejected", overlapDecision.reason);
+                    continue;
+                }
+                if (overlapDecision?.action === "HOLD_SAME") {
+                    setOrderDiagnostic(symbol, "blocked", "Same symbol already managed", overlapDecision.reason);
+                    continue;
+                }
+                const funding = rotationPosition && overlapDecision
+                    ? {
+                        ...baseFunding,
+                        sourceSymbol: rotationPosition.symbol,
+                        budgetUsd: Math.max(
+                            minOrderUsd,
+                            Math.min(desiredUsd, rotationPosition.usdValue * overlapDecision.sourceSellFraction),
+                        ),
+                    }
+                    : baseFunding;
                 if (funding.budgetUsd + 0.000001 < minOrderUsd) {
                     setOrderDiagnostic(
                         symbol,
@@ -9758,10 +9837,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
                 const modeLabel = plan.mode === "TREND" ? "順張り" : "逆張り";
                 const basketLabel = basketPlans.map((item) => `${displayStrategySymbol(item)} ${item.positionSizeLabel}`).join(" / ");
+                const overlapLabel = overlapDecision
+                    ? ` / ${overlapDecision.action}: ${overlapDecision.reason}`
+                    : "";
                 const buyReason =
                     funding.sourceSymbol && !TRADE_CONFIG.STABLECOINS.includes(funding.sourceSymbol)
-                        ? `常時監視: ${plan.triggerType} 発火で ${basketLabel} を基準に ${symbol} を${modeLabel}で買い。資金再配分 ${funding.sourceSymbol}→${symbol}${plan.orderSource === "supplemental" ? " / free slot promotion" : ""} / ${preTradeReview.strategy || "AIレビュー反映"}`
-                        : `常時監視: ${plan.triggerType} 発火で ${basketLabel} を基準に ${symbol} を${modeLabel}で買い${plan.orderSource === "supplemental" ? " / free slot promotion" : ""} / ${preTradeReview.strategy || "AIレビュー反映"}`;
+                        ? `常時監視: ${plan.triggerType} 発火で ${basketLabel} を基準に ${symbol} を${modeLabel}で買い。資金再配分 ${funding.sourceSymbol}→${symbol}${plan.orderSource === "supplemental" ? " / free slot promotion" : ""}${overlapLabel} / ${preTradeReview.strategy || "AIレビュー反映"}`
+                        : `常時監視: ${plan.triggerType} 発火で ${basketLabel} を基準に ${symbol} を${modeLabel}で買い${plan.orderSource === "supplemental" ? " / free slot promotion" : ""}${overlapLabel} / ${preTradeReview.strategy || "AIレビュー反映"}`;
 
                 const planExecutionOverride = plan.executionAddress ? {
                     chain: plan.executionChain,
