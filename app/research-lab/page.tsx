@@ -11,6 +11,7 @@ import {
   Waves,
 } from "lucide-react";
 
+import LiveResearchDashboard from "@/components/research-lab/LiveResearchDashboard";
 import { DEFAULT_PERP_RESEARCH_CONFIG } from "@/lib/research-lab/perp/config";
 import { CRITICS, RESEARCHERS } from "@/lib/research-lab/roles";
 
@@ -77,6 +78,8 @@ export default function ResearchLabPage() {
             </div>
           </div>
         </section>
+
+        <LiveResearchDashboard />
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <StatCard label="Monthly Target" value={`${thresholds.targetAverageMonthlyReturnPct}%+`} note="完全未使用OOSで平均月利を判定" icon={Target} />
