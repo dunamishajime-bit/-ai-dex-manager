@@ -1,41 +1,52 @@
-# Autonomous Research Cycle 6
+# Champion Deep Research Cycle 7
 
 - Profile: attack
-- Evaluations: 25
-- Validated: 6
+- Champions re-evaluated: 3
+- Single-parameter experiments: 6
+- Accepted improvements: 1
+- Parent strategies retained: 2
+- Total full validations: 9
 - Final candidates: 0
 - Best Train average monthly: 3.29%
 - Best OOS average monthly: 1.97%
 - Best OOS MaxDD: 2.44%
-- Worst stress monthly: 0.08%
-- Next profile: attack
+- Worst stress monthly of best OOS: 0.16%
 
-## Automatic Reflection
+## Parent / Child Decisions
 
-- Edge/Cost比率を上げ、回転頻度を下げる
-- 清算0を維持しながら実効レバレッジと利幅を段階的に上げる
-- Neutral Entryを止め、BTCレジーム確認を強化する
-- Long/Short両方向を必須化する
+- oos / minimumEdgeToCostRatio 5.7 → 6.56: REJECT; OOS +0.00pt, Stress +0.08pt, DD improvement 0.00pt
+- oos / rebalanceBars 22 → 24: REJECT; OOS +0.00pt, Stress +0.00pt, DD improvement 0.00pt
+- stress / minimumEdgeToCostRatio 7.47 → 8.59: REJECT; OOS +0.00pt, Stress +0.18pt, DD improvement 0.00pt
+- stress / rebalanceBars 30 → 32: REJECT; OOS +0.00pt, Stress +0.00pt, DD improvement 0.00pt
+- stability / minimumEdgeToCostRatio 5.7 → 6.56: ACCEPT; OOS +0.00pt, Stress +0.26pt, DD improvement 0.00pt
+- stability / rebalanceBars 22 → 24: REJECT; OOS +0.00pt, Stress +0.00pt, DD improvement 0.00pt
+
+## Next Deep Research Plan
+
+- stability ChampionでminimumEdgeToCostRatio変更を継承し、別の単一変更を追加検証する
+- oos Championは親を維持し、low_return・stable_but_low_returnを別仮説で再検証する
+- stress Championは親を維持し、low_return・stable_but_low_returnを別仮説で再検証する
 
 ## Safety
 
 - Research and Forward Paper candidates only
 - Real orders, wallets and API keys remain disconnected
-- Any liquidation rejects the strategy
+- Any liquidation rejects the child strategy
+- A child is inherited only when it improves its own parent
 
-## Discussion Summary
+## Deep Discussion Summary
 
-Cycle 6の最有力はunique-g25-0001（breakout）。Train月利2.39%、OOS月利1.97%で、最終候補なし。最多の反対理由は月利不足（67件）です。
+3 Championを親として6件の単一変更を比較し、1件が改善基準を通過、最上位1件を継承。Best OOS月利1.97%、Best Stress月利0.18%。
 
-**CIO Decision:** 全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。
+**CIO Decision:** 1件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。
 
 ## Tested Logic Deduplication
 
-- Historical fingerprints loaded: 125
-- New unique logic tested this cycle: 25
-- Duplicate or near-identical logic skipped: 0
-- Replacement candidates generated: 0
-- Total unique logic in registry: 150
-- Exhausted population slots: 0
+- Historical fingerprints loaded: 150
+- New unique child logic tested this cycle: 6
+- Duplicate or near-identical child logic skipped: 0
+- Alternative hypotheses considered: 3
+- Total unique logic in registry: 156
+- Unfilled experiment slots: 0
 
-A strategy ID change or symbol-order change does not create a new logic. Family, symbols and normalized parameters must differ.
+Parent baselines are deliberately re-evaluated for a fair same-cycle comparison but are not counted as new logic.

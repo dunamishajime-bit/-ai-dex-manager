@@ -1,9 +1,13 @@
 {
-  "cycle": 6,
+  "cycle": 7,
+  "mode": "champion_deep",
+  "parentBaselinesReevaluated": 3,
+  "experiments": 6,
+  "acceptedExperiments": 1,
   "duplicateStrategiesSkipped": 0,
-  "replacementCandidatesGenerated": 0,
+  "replacementCandidatesGenerated": 3,
   "exhaustedPopulationSlots": 0,
-  "historicalFingerprintsLoaded": 125,
-  "newUniqueLogicTested": 25,
-  "totalUniqueLogic": 150
+  "historicalFingerprintsLoaded": 150,
+  "newUniqueLogicTested": 6,
+  "totalUniqueLogic": 156
 }
