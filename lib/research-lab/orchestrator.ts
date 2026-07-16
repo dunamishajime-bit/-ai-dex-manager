@@ -120,6 +120,11 @@ function summarizeRound(round: number, evaluations: StrategyEvaluation[]): Resea
   };
 }
 
+function isDiagnosticValidationEligible(item: StrategyEvaluation) {
+  const executionFailed = item.rejectionReasons.some((reason) => reason.startsWith("バックテスト失敗:"));
+  return !executionFailed && item.score > 0 && item.metrics.tradeCount > 0 && item.metrics.cagrPct > 0;
+}
+
 async function validateLeaderboard(
   leaderboard: StrategyEvaluation[],
   config: ResearchLabConfig,
@@ -127,7 +132,7 @@ async function validateLeaderboard(
 ) {
   if (!adapter.validate) return { leaderboard, validatedStrategies: 0 };
   const finalists = leaderboard
-    .filter((item) => item.verdict === "candidate")
+    .filter(isDiagnosticValidationEligible)
     .slice(0, Math.max(1, config.finalValidationCount));
   if (!finalists.length) return { leaderboard, validatedStrategies: 0 };
 
