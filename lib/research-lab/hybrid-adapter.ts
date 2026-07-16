@@ -1,94 +1,33 @@
 import { runHybridBacktest, type HybridVariantOptions } from "@/lib/backtest/hybrid-engine";
-import type { BacktestResult, PeriodReturnRow } from "@/lib/backtest/types";
+import type { BacktestResult } from "@/lib/backtest/types";
 
-import type { ResearchLabConfig, ResearchMetrics, StrategyBacktestAdapter, StrategyGenome } from "./types";
+import { buildExecutionStressMetrics, metricsFromBacktestResult } from "./metrics";
+import type {
+  ResearchCacheStats,
+  ResearchLabConfig,
+  StrategyBacktestAdapter,
+  StrategyGenome,
+  StrategyValidationReport,
+  TemporalWindow,
+  ValidationSegmentResult,
+} from "./types";
+import {
+  buildTemporalValidationPlan,
+  completeValidationReport,
+  stressGateReasons,
+  walkForwardGateReasons,
+} from "./validation";
 
-function clamp01(value: number) {
-  return Math.min(1, Math.max(0, value));
-}
-
-function mean(values: number[]) {
-  if (!values.length) return 0;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function standardDeviation(values: number[], center = mean(values)) {
-  if (values.length < 2) return 0;
-  const variance = values.reduce((sum, value) => sum + (value - center) ** 2, 0) / (values.length - 1);
-  return Math.sqrt(Math.max(0, variance));
-}
-
-function compoundReturnPct(rows: PeriodReturnRow[]) {
-  const multiplier = rows.reduce((value, row) => value * (1 + row.return_pct / 100), 1);
-  return (multiplier - 1) * 100;
-}
-
-function calculateSharpe(monthlyReturnsPct: number[]) {
-  const avg = mean(monthlyReturnsPct);
-  const deviation = standardDeviation(monthlyReturnsPct, avg);
-  if (deviation <= 0) return avg > 0 ? 10 : 0;
-  return (avg / deviation) * Math.sqrt(12);
-}
-
-function calculateSortino(monthlyReturnsPct: number[]) {
-  const avg = mean(monthlyReturnsPct);
-  const downside = monthlyReturnsPct.filter((value) => value < 0);
-  const downsideDeviation = Math.sqrt(mean(downside.map((value) => value ** 2)));
-  if (downsideDeviation <= 0) return avg > 0 ? 10 : 0;
-  return (avg / downsideDeviation) * Math.sqrt(12);
-}
-
-function calculateTemporalStability(result: BacktestResult) {
-  const monthly = result.monthly_returns.map((row) => row.return_pct);
-  const annual = result.annual_returns.map((row) => row.return_pct);
-  const positiveMonthRatio = monthly.length ? monthly.filter((value) => value > 0).length / monthly.length : 0;
-  const positiveYearRatio = annual.length ? annual.filter((value) => value > 0).length / annual.length : 0;
-  const annualAverage = Math.abs(mean(annual));
-  const dispersion = annualAverage > 0 ? standardDeviation(annual) / annualAverage : 2;
-  const dispersionScore = clamp01(1 - dispersion / 2.5);
-  return clamp01(positiveMonthRatio * 0.45 + positiveYearRatio * 0.35 + dispersionScore * 0.2);
-}
-
-function calculateRecentPeriodScore(result: BacktestResult) {
-  const recentRows = result.monthly_returns.slice(-12);
-  if (!recentRows.length) return 0;
-  const recentReturn = compoundReturnPct(recentRows);
-  const benchmark = Math.max(12, Math.abs(result.summary.cagr_pct));
-  return clamp01(0.5 + recentReturn / (benchmark * 2));
-}
-
-function metricsFromResult(result: BacktestResult): ResearchMetrics {
-  const monthlyReturns = result.monthly_returns.map((row) => row.return_pct);
-  const positiveMonthPct = monthlyReturns.length
-    ? (monthlyReturns.filter((value) => value > 0).length / monthlyReturns.length) * 100
-    : 0;
-
-  return {
-    cagrPct: result.summary.cagr_pct,
-    maxDrawdownPct: Math.abs(result.summary.max_drawdown_pct),
-    sharpe: calculateSharpe(monthlyReturns),
-    sortino: calculateSortino(monthlyReturns),
-    profitFactor: result.summary.profit_factor,
-    winRatePct: result.summary.win_rate_pct,
-    tradeCount: result.summary.trade_count,
-    exposurePct: result.summary.exposure_pct,
-    positiveMonthPct,
-    worstMonthPct: monthlyReturns.length ? Math.min(...monthlyReturns) : 0,
-    temporalStabilityScore: calculateTemporalStability(result),
-    recentPeriodScore: calculateRecentPeriodScore(result),
-  };
-}
-
-function optionsFromGenome(genome: StrategyGenome, config: ResearchLabConfig): HybridVariantOptions {
+function optionsFromGenome(genome: StrategyGenome, activeWindow: TemporalWindow): HybridVariantOptions {
   const parameters = genome.parameters;
   const trendOnly = genome.family === "trend" || genome.family === "breakout" || genome.family === "momentum_rotation";
   const rangeOnly = genome.family === "range" || genome.family === "mean_reversion";
   const rangeSymbols = genome.markets.filter((symbol) => ["ETH", "SOL", "AVAX"].includes(symbol));
 
   return {
-    label: `research-lab:${genome.id}`,
-    backtestStartTs: config.startTs,
-    backtestEndTs: config.endTs,
+    label: `research-lab:${genome.id}:${activeWindow.label}`,
+    backtestStartTs: activeWindow.startTs,
+    backtestEndTs: activeWindow.endTs,
     disableTrend: rangeOnly,
     forceRangeOnly: rangeOnly,
     rangeSymbols: (trendOnly ? [] : rangeSymbols.length ? rangeSymbols : ["ETH", "SOL"]) as HybridVariantOptions["rangeSymbols"],
@@ -117,12 +56,115 @@ function optionsFromGenome(genome: StrategyGenome, config: ResearchLabConfig): H
   };
 }
 
+function stableGenomeKey(genome: StrategyGenome, activeWindow: TemporalWindow) {
+  return JSON.stringify({
+    family: genome.family,
+    markets: [...genome.markets].sort(),
+    parameters: genome.parameters,
+    startTs: activeWindow.startTs,
+    endTs: activeWindow.endTs,
+  });
+}
+
+function segment(
+  label: string,
+  activeWindow: TemporalWindow,
+  result: BacktestResult,
+  targetMonthlyReturnPct: number,
+): ValidationSegmentResult {
+  return {
+    label,
+    window: activeWindow,
+    metrics: metricsFromBacktestResult(result, targetMonthlyReturnPct),
+  };
+}
+
 export class HybridBacktestResearchAdapter implements StrategyBacktestAdapter {
-  async evaluate(genome: StrategyGenome, config: ResearchLabConfig) {
-    const result = await runHybridBacktest("RETQ22", optionsFromGenome(genome, config));
+  private readonly resultCache = new Map<string, Promise<BacktestResult>>();
+  private hits = 0;
+  private misses = 0;
+
+  private runCached(genome: StrategyGenome, activeWindow: TemporalWindow) {
+    const key = stableGenomeKey(genome, activeWindow);
+    const cached = this.resultCache.get(key);
+    if (cached) {
+      this.hits += 1;
+      return cached;
+    }
+
+    this.misses += 1;
+    const running = runHybridBacktest("RETQ22", optionsFromGenome(genome, activeWindow));
+    this.resultCache.set(key, running);
+    running.catch(() => this.resultCache.delete(key));
+    return running;
+  }
+
+  getCacheStats(): ResearchCacheStats {
     return {
-      metrics: metricsFromResult(result),
+      hits: this.hits,
+      misses: this.misses,
+      entries: this.resultCache.size,
+    };
+  }
+
+  async evaluate(genome: StrategyGenome, config: ResearchLabConfig) {
+    const plan = buildTemporalValidationPlan(config);
+    const result = await this.runCached(genome, plan.train);
+    return {
+      metrics: metricsFromBacktestResult(result, config.thresholds.targetAverageMonthlyReturnPct),
       validationLevel: "single_pass" as const,
     };
+  }
+
+  async validate(
+    genome: StrategyGenome,
+    config: ResearchLabConfig,
+  ): Promise<StrategyValidationReport> {
+    const plan = buildTemporalValidationPlan(config);
+    const target = config.thresholds.targetAverageMonthlyReturnPct;
+    const [trainResult, validationResult, oosResult, ...walkForwardResults] = await Promise.all([
+      this.runCached(genome, plan.train),
+      this.runCached(genome, plan.validation),
+      this.runCached(genome, plan.oos),
+      ...plan.walkForward.map((fold) => this.runCached(genome, fold.test)),
+    ]);
+
+    const walkForward = plan.walkForward.map((fold, index) => {
+      const result = walkForwardResults[index];
+      if (!result) throw new Error(`Walk-forward result missing for ${fold.label}`);
+      const test = segment(fold.label, fold.test, result, target);
+      const reasons = walkForwardGateReasons(test.metrics, config.thresholds);
+      return {
+        label: fold.label,
+        trainWindow: fold.train,
+        test,
+        passed: reasons.length === 0,
+        reasons,
+      };
+    });
+
+    const stress = config.stressExtraRoundTripCostBps.map((extraRoundTripCostBps) => {
+      const metrics = buildExecutionStressMetrics(oosResult, target, extraRoundTripCostBps);
+      const reasons = stressGateReasons(metrics, config.thresholds);
+      return {
+        label: `oos-extra-cost-${extraRoundTripCostBps}bps`,
+        extraRoundTripCostBps,
+        metrics,
+        passed: reasons.length === 0,
+        reasons,
+      };
+    });
+
+    return completeValidationReport(
+      {
+        plan,
+        train: segment("train", plan.train, trainResult, target),
+        validation: segment("validation", plan.validation, validationResult, target),
+        oos: segment("oos", plan.oos, oosResult, target),
+        walkForward,
+        stress,
+      },
+      config.thresholds,
+    );
   }
 }

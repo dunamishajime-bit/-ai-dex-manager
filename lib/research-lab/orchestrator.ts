@@ -19,7 +19,12 @@ const FAILED_METRICS: ResearchMetrics = {
   winRatePct: 0,
   tradeCount: 0,
   exposurePct: 0,
+  averageMonthlyReturnPct: -100,
+  medianMonthlyReturnPct: -100,
   positiveMonthPct: 0,
+  targetMonthlyHitRatePct: 0,
+  rolling3MonthTargetHitRatePct: 0,
+  bestMonthPct: 0,
   worstMonthPct: -100,
   temporalStabilityScore: 0,
   recentPeriodScore: 0,
@@ -93,7 +98,7 @@ function sortEvaluations(evaluations: StrategyEvaluation[]) {
       const rank = { final_candidate: 3, candidate: 2, rejected: 1 } as const;
       return rank[right.verdict] - rank[left.verdict];
     }
-    return right.score - left.score || right.metrics.cagrPct - left.metrics.cagrPct;
+    return right.score - left.score || right.metrics.averageMonthlyReturnPct - left.metrics.averageMonthlyReturnPct;
   });
 }
 
@@ -112,6 +117,56 @@ function summarizeRound(round: number, evaluations: StrategyEvaluation[]): Resea
     rejected: evaluations.filter((item) => item.verdict === "rejected").length,
     candidates: evaluations.filter((item) => item.verdict !== "rejected").length,
     best: sorted[0] ?? null,
+  };
+}
+
+async function validateLeaderboard(
+  leaderboard: StrategyEvaluation[],
+  config: ResearchLabConfig,
+  adapter: StrategyBacktestAdapter,
+) {
+  if (!adapter.validate) return { leaderboard, validatedStrategies: 0 };
+  const finalists = leaderboard
+    .filter((item) => item.verdict === "candidate")
+    .slice(0, Math.max(1, config.finalValidationCount));
+  if (!finalists.length) return { leaderboard, validatedStrategies: 0 };
+
+  const validated = await mapWithConcurrency(
+    finalists,
+    Math.min(config.maxConcurrency, 2),
+    async (item) => {
+      try {
+        const validation = await adapter.validate!(item.genome, config, item.metrics);
+        return evaluateStrategy({
+          genome: item.genome,
+          metrics: item.metrics,
+          thresholds: config.thresholds,
+          validationLevel: validation.passedStressTest ? "stress_tested" : "temporal_validation",
+          validation,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          ...item,
+          validationLevel: "temporal_validation" as const,
+          critiques: [
+            ...item.critiques,
+            {
+              critic: "execution-critic" as const,
+              severity: "high" as const,
+              message: `最終検証失敗: ${message}`,
+            },
+          ],
+          evaluatedAt: new Date().toISOString(),
+        };
+      }
+    },
+  );
+
+  const replacements = new Map(validated.map((item) => [item.genome.id, item]));
+  return {
+    leaderboard: sortEvaluations(leaderboard.map((item) => replacements.get(item.genome.id) ?? item)),
+    validatedStrategies: validated.length,
   };
 }
 
@@ -143,6 +198,8 @@ export async function runResearchLab(
     });
   }
 
+  const validationResult = await validateLeaderboard(leaderboard, config, adapter);
+  leaderboard = validationResult.leaderboard;
   const completedAt = new Date().toISOString();
   return {
     startedAt,
@@ -152,5 +209,7 @@ export async function runResearchLab(
     leaderboard,
     finalCandidates: leaderboard.filter((item) => item.verdict === "final_candidate"),
     totalEvaluations,
+    validatedStrategies: validationResult.validatedStrategies,
+    cacheStats: adapter.getCacheStats?.(),
   };
 }

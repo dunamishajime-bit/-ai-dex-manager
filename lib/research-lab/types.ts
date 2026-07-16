@@ -79,7 +79,12 @@ export interface ResearchMetrics {
   winRatePct: number;
   tradeCount: number;
   exposurePct: number;
+  averageMonthlyReturnPct: number;
+  medianMonthlyReturnPct: number;
   positiveMonthPct: number;
+  targetMonthlyHitRatePct: number;
+  rolling3MonthTargetHitRatePct: number;
+  bestMonthPct: number;
   worstMonthPct: number;
   temporalStabilityScore: number;
   recentPeriodScore: number;
@@ -91,10 +96,67 @@ export interface Critique {
   message: string;
 }
 
+export interface TemporalWindow {
+  label: string;
+  startTs: number;
+  endTs: number;
+}
+
+export interface WalkForwardWindow {
+  label: string;
+  train: TemporalWindow;
+  test: TemporalWindow;
+}
+
+export interface TemporalValidationPlan {
+  train: TemporalWindow;
+  validation: TemporalWindow;
+  oos: TemporalWindow;
+  walkForward: WalkForwardWindow[];
+}
+
+export interface ValidationSegmentResult {
+  label: string;
+  window: TemporalWindow;
+  metrics: ResearchMetrics;
+}
+
+export interface WalkForwardResult {
+  label: string;
+  trainWindow: TemporalWindow;
+  test: ValidationSegmentResult;
+  passed: boolean;
+  reasons: string[];
+}
+
+export interface StressScenarioResult {
+  label: string;
+  extraRoundTripCostBps: number;
+  metrics: ResearchMetrics;
+  passed: boolean;
+  reasons: string[];
+}
+
+export interface StrategyValidationReport {
+  plan: TemporalValidationPlan;
+  train: ValidationSegmentResult;
+  validation: ValidationSegmentResult;
+  oos: ValidationSegmentResult;
+  walkForward: WalkForwardResult[];
+  stress: StressScenarioResult[];
+  oosRetentionRatio: number;
+  stressRetentionRatio: number;
+  walkForwardPassRatePct: number;
+  passedTemporalValidation: boolean;
+  passedStressTest: boolean;
+  finalGateReasons: string[];
+}
+
 export interface StrategyEvaluation {
   genome: StrategyGenome;
   metrics: ResearchMetrics;
   validationLevel: ValidationLevel;
+  validation?: StrategyValidationReport;
   score: number;
   verdict: ResearchVerdict;
   rejectionReasons: string[];
@@ -118,20 +180,39 @@ export interface ResearchLabThresholds {
   minSortino: number;
   minProfitFactor: number;
   minTradeCount: number;
+  minAverageMonthlyReturnPct: number;
+  minMedianMonthlyReturnPct: number;
   minPositiveMonthPct: number;
   minTemporalStabilityScore: number;
   minRecentPeriodScore: number;
+  targetAverageMonthlyReturnPct: number;
+  finalMinOosAverageMonthlyReturnPct: number;
+  finalMinStressAverageMonthlyReturnPct: number;
+  minTargetMonthlyHitRatePct: number;
+  minOosRetentionRatio: number;
+  minStressRetentionRatio: number;
+  maxOosDrawdownPct: number;
+  minWalkForwardPassRatePct: number;
 }
 
 export interface ResearchLabConfig {
   rounds: number;
   populationPerRound: number;
   eliteCount: number;
+  finalValidationCount: number;
   maxConcurrency: number;
   seed: number;
   startTs?: number;
   endTs?: number;
+  walkForwardFolds: number;
+  stressExtraRoundTripCostBps: number[];
   thresholds: ResearchLabThresholds;
+}
+
+export interface ResearchCacheStats {
+  hits: number;
+  misses: number;
+  entries: number;
 }
 
 export interface ResearchLabResult {
@@ -142,6 +223,8 @@ export interface ResearchLabResult {
   leaderboard: StrategyEvaluation[];
   finalCandidates: StrategyEvaluation[];
   totalEvaluations: number;
+  validatedStrategies: number;
+  cacheStats?: ResearchCacheStats;
 }
 
 export interface StrategyBacktestAdapter {
@@ -149,4 +232,10 @@ export interface StrategyBacktestAdapter {
     metrics: ResearchMetrics;
     validationLevel: ValidationLevel;
   }>;
+  validate?(
+    genome: StrategyGenome,
+    config: ResearchLabConfig,
+    discoveryMetrics: ResearchMetrics,
+  ): Promise<StrategyValidationReport>;
+  getCacheStats?(): ResearchCacheStats;
 }
