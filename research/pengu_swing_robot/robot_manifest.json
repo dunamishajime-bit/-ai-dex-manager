@@ -1,0 +1,36 @@
+{
+  "robotId": "PENGU_SWING_2D3D_V1",
+  "status": "RESEARCH_ONLY",
+  "realTradingEnabled": false,
+  "paperTradingEnabled": false,
+  "symbol": "PENGUUSDT",
+  "timeframe": "1h",
+  "holdingObjectiveHours": [48, 72],
+  "entryExecution": "NEXT_BAR_OPEN",
+  "baseCostPerSide": 0.0006,
+  "stressCostPerSide": 0.001,
+  "fundingReservePerDay": 0.0002,
+  "risk": {
+    "accountRiskPerTrade": 0.006,
+    "maxNotionalFraction": 0.30,
+    "maxConcurrentPositions": 1,
+    "consecutiveLossCooldownCount": 3,
+    "cooldownHours": 72,
+    "monthlySleeveLossStop": -0.04
+  },
+  "forwardApproval": {
+    "minimumHoldoutTrades": 12,
+    "minimumHoldoutWinRate": 0.58,
+    "minimumHoldoutProfitFactor": 1.30,
+    "minimumAverageHoldHours": 24,
+    "maximumAverageHoldHours": 72,
+    "maximumHoldoutDrawdown": -0.15,
+    "minimumBootstrapPositiveProbability": 0.90,
+    "stressHoldoutMustBePositive": true
+  },
+  "notes": [
+    "Do not reuse rejected PENGU stale-price or Aster-Binance basis logic.",
+    "Do not enable real or paper trading until the research workflow passes every gate.",
+    "Existing portfolio gross and correlation limits remain binding."
+  ]
+}
