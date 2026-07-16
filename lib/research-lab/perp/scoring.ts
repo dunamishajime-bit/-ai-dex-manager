@@ -31,6 +31,11 @@ export function perpDiscoveryReasons(result: PerpBacktestResult, thresholds: Per
   if (metrics.tradeCount < thresholds.discoveryMinTrades) {
     reasons.push(`Trades ${metrics.tradeCount} < ${thresholds.discoveryMinTrades}`);
   }
+  if (risk.averageEffectiveLeverage < thresholds.targetAverageEffectiveLeverage * 0.35) {
+    reasons.push(
+      `平均実効レバレッジ ${risk.averageEffectiveLeverage.toFixed(2)}x < ${(thresholds.targetAverageEffectiveLeverage * 0.35).toFixed(2)}x`,
+    );
+  }
   if (thresholds.requireZeroLiquidations && risk.liquidationCount > 0) {
     reasons.push(`Liquidations ${risk.liquidationCount} > 0`);
   }
@@ -46,27 +51,31 @@ export function calculatePerpScore(result: PerpBacktestResult, thresholds: PerpR
   const metrics = result.metrics;
   const risk = result.risk;
   const monthlyScore = clamp01(metrics.averageMonthlyReturnPct / Math.max(1, thresholds.targetAverageMonthlyReturnPct));
-  const medianScore = clamp01((metrics.medianMonthlyReturnPct + 5) / 20);
-  const drawdownScore = clamp01(1 - metrics.maxDrawdownPct / Math.max(1, thresholds.discoveryMaxDrawdownPct * 1.5));
+  const targetHitScore = clamp01(metrics.targetMonthlyHitRatePct / 35);
+  const drawdownScore = clamp01(1 - metrics.maxDrawdownPct / Math.max(1, thresholds.discoveryMaxDrawdownPct * 1.25));
   const sharpeScore = clamp01(metrics.sharpe / 2.5);
   const profitFactorScore = clamp01((metrics.profitFactor - 1) / 2);
   const sampleScore = clamp01(metrics.tradeCount / Math.max(1, thresholds.discoveryMinTrades * 3));
+  const leverageUtilizationScore = clamp01(
+    risk.averageEffectiveLeverage / Math.max(0.1, thresholds.targetAverageEffectiveLeverage),
+  );
   const directionTotal = risk.longTrades + risk.shortTrades;
   const directionBalance = directionTotal
     ? 1 - Math.abs(risk.longTrades - risk.shortTrades) / directionTotal
     : 0;
   const consistencyScore = clamp01(1 - risk.maxConsecutiveLosses / Math.max(1, thresholds.finalMaxConsecutiveLosses * 2));
-  const liquidationPenalty = risk.liquidationCount > 0 ? Math.min(0.8, risk.liquidationCount * 0.25) : 0;
+  const liquidationPenalty = risk.liquidationCount > 0 ? Math.min(0.9, risk.liquidationCount * 0.3) : 0;
 
   const score =
-    monthlyScore * 0.24 +
-    medianScore * 0.08 +
-    drawdownScore * 0.18 +
-    sharpeScore * 0.13 +
-    profitFactorScore * 0.1 +
-    sampleScore * 0.09 +
-    directionBalance * 0.1 +
-    consistencyScore * 0.08 -
+    monthlyScore * 0.36 +
+    targetHitScore * 0.07 +
+    leverageUtilizationScore * 0.13 +
+    drawdownScore * 0.12 +
+    sharpeScore * 0.08 +
+    profitFactorScore * 0.07 +
+    sampleScore * 0.07 +
+    directionBalance * 0.05 +
+    consistencyScore * 0.05 -
     liquidationPenalty;
 
   return Math.round(clamp01(score) * 10000) / 100;
