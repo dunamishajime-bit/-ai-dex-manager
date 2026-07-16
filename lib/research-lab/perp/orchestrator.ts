@@ -14,11 +14,16 @@ import type {
 } from "./types";
 import { buildPerpValidationPlan, validatePerpStrategy } from "./validation";
 
+export interface PerpResearchRunOptions {
+  initialPopulation?: PerpStrategyGenome[];
+  generationOffset?: number;
+}
+
 async function mapWithConcurrency<T, R>(
   items: T[],
   concurrency: number,
   worker: (item: T, index: number) => Promise<R>,
-) {
+): Promise<R[]> {
   const results = new Array<R>(items.length);
   let cursor = 0;
   const workers = Math.max(1, Math.min(items.length, concurrency));
@@ -221,15 +226,41 @@ async function validateFinalists(
   };
 }
 
+function prepareInitialPopulation(
+  config: PerpResearchConfig,
+  options: PerpResearchRunOptions,
+) {
+  const supplied = (options.initialPopulation ?? [])
+    .filter((genome) => genome && genome.parameters)
+    .slice(0, config.populationPerRound)
+    .map((genome) => ({
+      ...genome,
+      symbols: [...genome.symbols],
+      parameters: { ...genome.parameters },
+    }));
+  if (supplied.length >= config.populationPerRound) return supplied;
+  const fresh = createInitialPerpPopulation(
+    config.populationPerRound - supplied.length,
+    config.seed + supplied.length * 97,
+    config.profile,
+  ).map((genome, index) => ({
+    ...genome,
+    id: `resume-fill-${String(index + 1).padStart(3, "0")}-${genome.id}`,
+  }));
+  return [...supplied, ...fresh];
+}
+
 export async function runPerpResearch(
   config: PerpResearchConfig,
   data: PerpMarketData,
+  options: PerpResearchRunOptions = {},
 ): Promise<PerpResearchResult> {
   const startedAt = new Date().toISOString();
   const rounds: PerpResearchRound[] = [];
+  const generationOffset = Math.max(0, options.generationOffset ?? 0);
   let totalEvaluations = 0;
   let leaderboard: PerpStrategyEvaluation[] = [];
-  let population = createInitialPerpPopulation(config.populationPerRound, config.seed, config.profile);
+  let population = prepareInitialPopulation(config, options);
 
   for (let round = 1; round <= config.rounds; round += 1) {
     const evaluations = await evaluatePopulation(population, data, config);
@@ -240,7 +271,7 @@ export async function runPerpResearch(
     population = createNextPerpPopulation({
       elites,
       count: config.populationPerRound,
-      generation: round,
+      generation: generationOffset + round,
       seed: config.seed,
       profile: config.profile,
     });
