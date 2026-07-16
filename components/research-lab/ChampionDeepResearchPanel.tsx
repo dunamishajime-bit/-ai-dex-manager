@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   BrainCircuit,
@@ -67,6 +67,18 @@ export default function ChampionDeepResearchPanel() {
     return () => window.clearInterval(timer);
   }, [load]);
 
+  const inheritedExperimentIds = useMemo(() => {
+    const winners = new Map<string, { id: string; score: number }>();
+    for (const experiment of payload?.deepResearch?.experiments ?? []) {
+      if (!experiment.accepted) continue;
+      const current = winners.get(experiment.championSlot);
+      if (!current || experiment.compositeImprovement > current.score) {
+        winners.set(experiment.championSlot, { id: experiment.id, score: experiment.compositeImprovement });
+      }
+    }
+    return new Set([...winners.values()].map((item) => item.id));
+  }, [payload]);
+
   if (loading && !payload) {
     return (
       <section className="rounded-[24px] border border-violet-400/15 bg-violet-500/[0.04] p-5">
@@ -105,14 +117,15 @@ export default function ChampionDeepResearchPanel() {
             <h2 className="text-xl font-black text-white md:text-2xl">Champion Deep Research Loop</h2>
           </div>
           <p className="mt-2 max-w-3xl text-xs leading-5 text-white/60">
-            上位3ロジックを親として再評価し、各実験は1パラメータだけ変更します。親よりOOS・Stress・DD・Walk-forwardが改善した子だけを次Cycleへ継承します。
+            上位3ロジックを親として再評価し、各実験は1パラメータだけ変更します。改善基準を複数案が通っても、各Championで最も総合改善が大きい子1件だけを次Cycleへ継承します。
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-[11px]">
           <span className="rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-2 text-violet-100">Cycle {deep.cycle}</span>
           <span className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-white/65">Champion {deep.championCount}</span>
           <span className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-white/65">実験 {deep.experimentCount}</span>
-          <span className="rounded-full border border-emerald-300/20 bg-emerald-500/10 px-3 py-2 text-emerald-100">採用 {deep.acceptedExperiments}</span>
+          <span className="rounded-full border border-amber-300/20 bg-amber-500/10 px-3 py-2 text-amber-100">基準通過 {deep.acceptedExperiments}</span>
+          <span className="rounded-full border border-emerald-300/20 bg-emerald-500/10 px-3 py-2 text-emerald-100">継承 {inheritedExperimentIds.size}</span>
         </div>
       </div>
 
@@ -155,42 +168,61 @@ export default function ChampionDeepResearchPanel() {
           <h3 className="font-black text-white">今回の単一変更実験と親子比較</h3>
         </div>
         <div className="mt-4 space-y-3">
-          {deep.experiments.map((experiment) => (
-            <article key={experiment.id} className={`rounded-[18px] border p-4 ${experiment.accepted ? "border-emerald-400/20 bg-emerald-500/[0.055]" : "border-white/8 bg-white/[0.02]"}`}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold tracking-[0.12em] text-white/45">
-                    <span>{slotLabel(experiment.championSlot)}</span>
-                    <span>•</span>
-                    <span>{experiment.changedParameter}</span>
+          {deep.experiments.map((experiment) => {
+            const inherited = inheritedExperimentIds.has(experiment.id);
+            const passedButNotInherited = experiment.accepted && !inherited;
+            const cardClass = inherited
+              ? "border-emerald-400/20 bg-emerald-500/[0.055]"
+              : passedButNotInherited
+                ? "border-amber-400/20 bg-amber-500/[0.045]"
+                : "border-white/8 bg-white/[0.02]";
+            const badgeClass = inherited
+              ? "border-emerald-300/25 bg-emerald-500/10 text-emerald-100"
+              : passedButNotInherited
+                ? "border-amber-300/25 bg-amber-500/10 text-amber-100"
+                : "border-rose-300/20 bg-rose-500/8 text-rose-100";
+            const badgeLabel = inherited
+              ? "継承採用"
+              : passedButNotInherited
+                ? "基準通過・上位子を優先"
+                : "子を却下・親維持";
+            return (
+              <article key={experiment.id} className={`rounded-[18px] border p-4 ${cardClass}`}>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold tracking-[0.12em] text-white/45">
+                      <span>{slotLabel(experiment.championSlot)}</span>
+                      <span>•</span>
+                      <span>{experiment.changedParameter}</span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-white">
+                      <span className="break-all">{experiment.parentStrategyId}</span>
+                      <ArrowRight className="h-3.5 w-3.5 text-white/35" />
+                      <span className="break-all">{experiment.childStrategyId}</span>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-white/60">{experiment.hypothesis}</p>
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-white">
-                    <span className="break-all">{experiment.parentStrategyId}</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-white/35" />
-                    <span className="break-all">{experiment.childStrategyId}</span>
+                  <div className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-black ${badgeClass}`}>
+                    {inherited || passedButNotInherited ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+                    {badgeLabel}
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-white/60">{experiment.hypothesis}</p>
                 </div>
-                <div className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-black ${experiment.accepted ? "border-emerald-300/25 bg-emerald-500/10 text-emerald-100" : "border-rose-300/20 bg-rose-500/8 text-rose-100"}`}>
-                  {experiment.accepted ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
-                  {experiment.accepted ? "改善採用" : "子を却下・親維持"}
+
+                <div className="mt-3 rounded-xl border border-white/8 bg-black/15 px-3 py-2 text-xs text-white/65">
+                  <b className="text-white">変更:</b> {experiment.changedParameter}　{experiment.beforeValue} → {experiment.afterValue}
                 </div>
-              </div>
 
-              <div className="mt-3 rounded-xl border border-white/8 bg-black/15 px-3 py-2 text-xs text-white/65">
-                <b className="text-white">変更:</b> {experiment.changedParameter}　{experiment.beforeValue} → {experiment.afterValue}
-              </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-4">
+                  <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">OOS差</span><b className={experiment.deltaOosMonthlyPct >= 0 ? "text-emerald-200" : "text-rose-200"}>{signedPct(experiment.deltaOosMonthlyPct)}</b></div>
+                  <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">Stress差</span><b className={experiment.deltaWorstStressMonthlyPct >= 0 ? "text-emerald-200" : "text-rose-200"}>{signedPct(experiment.deltaWorstStressMonthlyPct)}</b></div>
+                  <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">DD改善</span><b className={experiment.deltaDrawdownImprovementPct >= 0 ? "text-emerald-200" : "text-rose-200"}>{signedPct(experiment.deltaDrawdownImprovementPct)}</b></div>
+                  <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">総合改善</span><b className="text-white">{experiment.compositeImprovement.toFixed(3)}</b></div>
+                </div>
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-4">
-                <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">OOS差</span><b className={experiment.deltaOosMonthlyPct >= 0 ? "text-emerald-200" : "text-rose-200"}>{signedPct(experiment.deltaOosMonthlyPct)}</b></div>
-                <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">Stress差</span><b className={experiment.deltaWorstStressMonthlyPct >= 0 ? "text-emerald-200" : "text-rose-200"}>{signedPct(experiment.deltaWorstStressMonthlyPct)}</b></div>
-                <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">DD改善</span><b className={experiment.deltaDrawdownImprovementPct >= 0 ? "text-emerald-200" : "text-rose-200"}>{signedPct(experiment.deltaDrawdownImprovementPct)}</b></div>
-                <div className="rounded-xl border border-white/8 px-3 py-2 text-[11px]"><span className="block text-white/35">総合改善</span><b className="text-white">{experiment.compositeImprovement.toFixed(3)}</b></div>
-              </div>
-
-              <div className="mt-3 text-[11px] leading-5 text-white/45">{experiment.reasons.join(" / ")}</div>
-            </article>
-          ))}
+                <div className="mt-3 text-[11px] leading-5 text-white/45">{experiment.reasons.join(" / ")}</div>
+              </article>
+            );
+          })}
         </div>
       </div>
 
