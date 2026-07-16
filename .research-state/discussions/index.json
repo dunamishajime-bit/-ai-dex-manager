@@ -1,7 +1,27 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-16T15:14:54.109Z",
+  "updatedAt": "2026-07-16T15:54:24.092Z",
   "items": [
+    {
+      "id": "cycle-000006-2026-07-16T15-54-24-092Z",
+      "path": "discussions/2026/07/16/cycle-000006-2026-07-16T15-54-24-092Z.json",
+      "cycle": 6,
+      "completedAt": "2026-07-16T15:54:24.092Z",
+      "profile": "attack",
+      "title": "Cycle 6 研究会議",
+      "summary": "Cycle 6の最有力はunique-g25-0001（breakout）。Train月利2.39%、OOS月利1.97%で、最終候補なし。最多の反対理由は月利不足（67件）です。",
+      "decision": "全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。",
+      "messageCount": 14,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": 1.974502383097698,
+      "bestOosDrawdownPct": 2.440762350796333,
+      "bestWorstStressMonthlyPct": 0.07991390142506975,
+      "topStrategyIds": [
+        "unique-g25-0001",
+        "unique-g27-0002",
+        "unique-g26-0005"
+      ]
+    },
     {
       "id": "cycle-000005-2026-07-16T15-14-54-109Z",
       "path": "discussions/2026/07/16/cycle-000005-2026-07-16T15-14-54-109Z.json",
