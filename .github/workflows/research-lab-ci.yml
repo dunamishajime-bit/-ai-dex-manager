@@ -18,7 +18,7 @@ on:
 jobs:
   typecheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,3 +45,5 @@ jobs:
         run: npm run research:main-lineage:selftest
       - name: Research discussion self-test
         run: npm run research:discussion:selftest
+      - name: Production build
+        run: npm run build
