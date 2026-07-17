@@ -1,11 +1,31 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-17T04:46:41.693Z",
+  "updatedAt": "2026-07-17T05:12:55.199Z",
   "items": [
+    {
+      "id": "main-research-0003-2026-07-17T05-12-55-199Z",
+      "path": "discussions/2026/07/17/main-research-0003-2026-07-17T05-12-55-199Z.json",
+      "cycle": 3,
+      "completedAt": "2026-07-17T05:12:55.199Z",
+      "profile": "attack",
+      "title": "Main Strategy Research #3：WIN80_ULTRA90_TOP1_V1 / Top-1順位付け",
+      "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Top-1順位付け」を議論。2件を提案し、最優先はTOP1_COST_ADJUSTED_RANK_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。",
+      "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はTOP1_COST_ADJUSTED_RANK_CHILD_V1で、Top-1 ranking scoreだけを変更した親子リプレイを作成します。TOP1_REGIME_CONFIRM_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。",
+      "messageCount": 7,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": null,
+      "bestOosDrawdownPct": null,
+      "bestWorstStressMonthlyPct": null,
+      "topStrategyIds": [
+        "WIN80_ULTRA90_TOP1_V1",
+        "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
+        "TOP1_REGIME_CONFIRM_CHILD_V1"
+      ]
+    },
     {
       "id": "main-research-0002-2026-07-17T04-46-41-693Z",
       "path": "discussions/2026/07/17/main-research-0002-2026-07-17T04-46-41-693Z.json",
-      "cycle": 9,
+      "cycle": 2,
       "completedAt": "2026-07-17T04:46:41.693Z",
       "profile": "attack",
       "title": "Main Strategy Research #2：WIN80_ULTRA90_TOP1_V1 / 50%分割 / 70%Rotation",
@@ -25,7 +45,7 @@
     {
       "id": "main-research-0001-2026-07-17T04-44-55-877Z",
       "path": "discussions/2026/07/17/main-research-0001-2026-07-17T04-44-55-877Z.json",
-      "cycle": 9,
+      "cycle": 1,
       "completedAt": "2026-07-17T04:44:55.877Z",
       "profile": "attack",
       "title": "Main Strategy Research #1：WIN80_ULTRA90_TOP1_V1 / Win80 / Ultra90 Entry品質",
@@ -58,126 +78,6 @@
       "bestWorstStressMonthlyPct": null,
       "topStrategyIds": [
         "WIN80_ULTRA90_TOP1_V1"
-      ]
-    },
-    {
-      "id": "cycle-000009-2026-07-17T00-35-47-682Z",
-      "path": "discussions/2026/07/17/cycle-000009-2026-07-17T00-35-47-682Z.json",
-      "cycle": 9,
-      "completedAt": "2026-07-17T00:35:47.682Z",
-      "profile": "attack",
-      "title": "Cycle 9 Champion深掘り会議",
-      "summary": "3 Championを親として6件の単一変更を比較し、3件が改善基準を通過、最上位2件を継承。Best OOS月利1.41%、Best Stress月利-3.69%。",
-      "decision": "2件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。",
-      "messageCount": 17,
-      "finalCandidates": 0,
-      "bestOosMonthlyPct": 1.4148069255504305,
-      "bestOosDrawdownPct": 10.508996054700136,
-      "bestWorstStressMonthlyPct": -3.69367850892617,
-      "topStrategyIds": [
-        "deep-c9-oos-e2",
-        "deep-c9-baseline-2",
-        "deep-c9-stability-e1"
-      ]
-    },
-    {
-      "id": "cycle-000008-2026-07-16T21-19-38-762Z",
-      "path": "discussions/2026/07/16/cycle-000008-2026-07-16T21-19-38-762Z.json",
-      "cycle": 8,
-      "completedAt": "2026-07-16T21:19:38.762Z",
-      "profile": "attack",
-      "title": "Cycle 8 Champion深掘り会議",
-      "summary": "3 Championを親として6件の単一変更を比較し、3件が改善基準を通過、最上位3件を継承。Best OOS月利2.85%、Best Stress月利0.23%。",
-      "decision": "3件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。",
-      "messageCount": 17,
-      "finalCandidates": 0,
-      "bestOosMonthlyPct": 2.853298395585818,
-      "bestOosDrawdownPct": 2.440762350796354,
-      "bestWorstStressMonthlyPct": 0.22558579313444183,
-      "topStrategyIds": [
-        "deep-c8-oos-e2",
-        "deep-c8-stress-e1",
-        "deep-c8-stability-e1"
-      ]
-    },
-    {
-      "id": "cycle-000007-2026-07-16T16-38-33-026Z",
-      "path": "discussions/2026/07/16/cycle-000007-2026-07-16T16-38-33-026Z.json",
-      "cycle": 7,
-      "completedAt": "2026-07-16T16:38:33.026Z",
-      "profile": "attack",
-      "title": "Cycle 7 Champion深掘り会議",
-      "summary": "3 Championを親として6件の単一変更を比較し、1件が改善基準を通過、最上位1件を継承。Best OOS月利1.97%、Best Stress月利0.18%。",
-      "decision": "1件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。",
-      "messageCount": 17,
-      "finalCandidates": 0,
-      "bestOosMonthlyPct": 1.974502383097698,
-      "bestOosDrawdownPct": 2.440762350796333,
-      "bestWorstStressMonthlyPct": 0.17579921288557454,
-      "topStrategyIds": [
-        "deep-c7-baseline-1",
-        "deep-c7-baseline-2",
-        "deep-c7-stability-e1"
-      ]
-    },
-    {
-      "id": "cycle-000006-2026-07-16T15-54-24-092Z",
-      "path": "discussions/2026/07/16/cycle-000006-2026-07-16T15-54-24-092Z.json",
-      "cycle": 6,
-      "completedAt": "2026-07-16T15:54:24.092Z",
-      "profile": "attack",
-      "title": "Cycle 6 研究会議",
-      "summary": "Cycle 6の最有力はunique-g25-0001（breakout）。Train月利2.39%、OOS月利1.97%で、最終候補なし。最多の反対理由は月利不足（67件）です。",
-      "decision": "全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。",
-      "messageCount": 14,
-      "finalCandidates": 0,
-      "bestOosMonthlyPct": 1.974502383097698,
-      "bestOosDrawdownPct": 2.440762350796333,
-      "bestWorstStressMonthlyPct": 0.07991390142506975,
-      "topStrategyIds": [
-        "unique-g25-0001",
-        "unique-g27-0002",
-        "unique-g26-0005"
-      ]
-    },
-    {
-      "id": "cycle-000005-2026-07-16T15-14-54-109Z",
-      "path": "discussions/2026/07/16/cycle-000005-2026-07-16T15-14-54-109Z.json",
-      "cycle": 5,
-      "completedAt": "2026-07-16T15:14:54.109Z",
-      "profile": "balanced",
-      "title": "Cycle 5 研究会議",
-      "summary": "Cycle 5の最有力はunique-g22-0001（breakout）。Train月利4.28%、OOS月利2.46%で、最終候補なし。最多の反対理由は月利不足（67件）です。",
-      "decision": "全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。",
-      "messageCount": 14,
-      "finalCandidates": 0,
-      "bestOosMonthlyPct": 2.4829637447591355,
-      "bestOosDrawdownPct": 3.013439823390747,
-      "bestWorstStressMonthlyPct": -0.7445905145268129,
-      "topStrategyIds": [
-        "unique-g22-0001",
-        "unique-g21-0005",
-        "unique-g20-0003"
-      ]
-    },
-    {
-      "id": "cycle-000004-2026-07-16T15-13-28-851Z",
-      "path": "discussions/2026/07/16/cycle-000004-2026-07-16T15-13-28-851Z.json",
-      "cycle": 4,
-      "completedAt": "2026-07-16T15:13:28.851Z",
-      "profile": "attack",
-      "title": "Cycle 4 研究会議",
-      "summary": "Cycle 4の最有力はunique-g18-0002（breakout）。Train月利5.31%、OOS月利9.33%で、最終候補なし。最多の反対理由は月利不足（67件）です。",
-      "decision": "全戦略を実売買・Forward Paper候補への昇格見送り。改善後に新しいロジックとして再検証する。",
-      "messageCount": 14,
-      "finalCandidates": 0,
-      "bestOosMonthlyPct": 9.327292663094783,
-      "bestOosDrawdownPct": 5.198425996110929,
-      "bestWorstStressMonthlyPct": 2.738313376701389,
-      "topStrategyIds": [
-        "unique-g18-0002",
-        "unique-g15-0002",
-        "unique-g16-0005"
       ]
     }
   ]

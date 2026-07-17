@@ -2,7 +2,12 @@
   "version": 1,
   "programId": "win80_ultra90_direct_v2",
   "mainStrategyId": "WIN80_ULTRA90_TOP1_V1",
-  "activatedAt": "2026-07-17T04:46:41.693Z",
+  "activatedAt": "2026-07-17T05:12:55.199Z",
   "oldChampionStateInherited": false,
-  "legacyChampionState": "ARCHIVED_NOT_PRIMARY"
+  "legacyChampionState": "DELETED_RESULTS_SOURCE_DATA_PRESERVED",
+  "legacyChampionCleanup": {
+    "removedStateFiles": 10,
+    "removedDiscussionFiles": 6,
+    "removedReportsDirectory": false
+  }
 }
