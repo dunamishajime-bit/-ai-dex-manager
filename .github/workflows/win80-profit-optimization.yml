@@ -12,6 +12,7 @@ on:
       - "scripts/research-lab-stability-consensus-rotation-v2.ts"
       - "scripts/research-lab-multi-horizon-rotation-v3.ts"
       - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_asymmetric_bear_hedge_v5.py"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -28,6 +29,7 @@ on:
       - "scripts/research-lab-stability-consensus-rotation-v2.ts"
       - "scripts/research-lab-multi-horizon-rotation-v3.ts"
       - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_asymmetric_bear_hedge_v5.py"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -121,6 +123,11 @@ jobs:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         run: python scripts/research_lab_parameter_bagged_rotation_v4.py
 
+      - name: Run asymmetric bear hedge V5 research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_asymmetric_bear_hedge_v5.py
+
       - name: Upload optimization evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -139,5 +146,7 @@ jobs:
             .research-state/multi-horizon-regime-rotation-v3.md
             .research-state/parameter-bagged-rotation-v4.json
             .research-state/parameter-bagged-rotation-v4.md
+            .research-state/asymmetric-bear-hedge-rotation-v5.json
+            .research-state/asymmetric-bear-hedge-rotation-v5.md
           if-no-files-found: warn
           retention-days: 30
