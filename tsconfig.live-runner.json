@@ -15,6 +15,7 @@
     "scripts/win80-ultra90-live-runner.ts",
     "scripts/win80-ultra90-live-runner-selftest.ts",
     "scripts/aster-direct-trade-executor-selftest.ts",
+    "scripts/aster-market-data-provider-selftest.ts",
     "config/**/*.ts"
   ],
   "exclude": [
