@@ -13,9 +13,16 @@ on:
       - "scripts/research-lab-main-strategy-research-selftest.ts"
       - "scripts/research-lab-main-strategy-audit-runner.ts"
       - "scripts/research-lab-main-strategy-audit-selftest.ts"
+      - "lib/backtest/types.ts"
+      - "lib/research-lab/discussion-types.ts"
+      - "lib/research-lab/perp/futures-data-source.ts"
+      - "lib/research-lab/perp/data-store.ts"
       - "lib/research-lab/perp/main-strategy-research-program.ts"
+      - "lib/research-lab/perp/main-strategy-snapshot-replay.ts"
+      - "lib/research-lab/perp/main-strategy-snapshot-discussion.ts"
       - "lib/research-lab/perp/main-strategy-audit-discussion.ts"
       - "lib/win80-ultra90-main-strategy.ts"
+      - "lib/cycle-strategy.ts"
       - "config/strategyConfig.ts"
   workflow_dispatch:
     inputs:
@@ -105,6 +112,11 @@ jobs:
           echo "RESEARCH_DISCUSSION_MODE=$mode" >> "$GITHUB_ENV"
           echo "RESEARCH_AUTONOMOUS_STATE_DIR=.research-state" >> "$GITHUB_ENV"
 
+          if [[ "$mode" == "main_strategy_research" ]]; then
+            echo "PERP_RESEARCH_START_DATE=2025-06-01" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_END_DATE=2026-05-01" >> "$GITHUB_ENV"
+          fi
+
           if [[ "$mode" == "related_logic_exploration" ]]; then
             echo "PERP_DEEP_CHAMPIONS=${{ inputs.champions }}" >> "$GITHUB_ENV"
             echo "PERP_DEEP_EXPERIMENTS_PER_CHAMPION=${{ inputs.experiments_per_champion }}" >> "$GITHUB_ENV"
@@ -135,12 +147,14 @@ jobs:
           fi
 
       - name: Restore USD-M market data cache
-        if: ${{ env.RESEARCH_DISCUSSION_MODE == 'related_logic_exploration' }}
+        if: ${{ env.RESEARCH_DISCUSSION_MODE != 'main_strategy_audit' }}
         uses: actions/cache@v4
         with:
           path: source/.cache/perp-research-usdm
-          key: related-logic-usdm-v1-${{ env.PERP_RESEARCH_START_DATE }}-${{ env.PERP_RESEARCH_END_DATE }}-${{ hashFiles('source/lib/research-lab/perp/futures-data-source.ts') }}
+          key: usdm-snapshot-v2-${{ env.RESEARCH_DISCUSSION_MODE }}-${{ env.PERP_RESEARCH_START_DATE }}-${{ env.PERP_RESEARCH_END_DATE }}-${{ hashFiles('source/lib/research-lab/perp/futures-data-source.ts') }}
           restore-keys: |
+            usdm-snapshot-v2-${{ env.RESEARCH_DISCUSSION_MODE }}-
+            usdm-snapshot-v2-
             related-logic-usdm-v1-
             champion-deep-usdm-v1-
             autonomous-usdm-v2-
@@ -170,7 +184,7 @@ jobs:
         run: npm run research:main-lineage:selftest
 
       - name: Funding and temporal self-test
-        if: ${{ env.RESEARCH_DISCUSSION_MODE == 'related_logic_exploration' }}
+        if: ${{ env.RESEARCH_DISCUSSION_MODE != 'main_strategy_audit' }}
         working-directory: source
         run: npm run research:perp:selftest
 
