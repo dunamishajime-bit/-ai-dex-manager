@@ -1,4 +1,3 @@
-# Re-trigger after workflow registration.
 name: Win80 Ultra90 Live Runner CI
 
 on:
@@ -64,10 +63,31 @@ jobs:
         run: npm run strategy:live:selftest
 
       - name: Live runner TypeScript check
-        run: npm run strategy:live:typecheck
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run strategy:live:typecheck 2>&1 | tee live-runner-typecheck.log
 
       - name: Repository TypeScript checks
-        run: npm run typecheck
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run typecheck 2>&1 | tee repository-typecheck.log
 
       - name: Production build
-        run: npm run build
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee production-build.log
+
+      - name: Upload verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: win80-live-runner-ci-logs
+          path: |
+            live-runner-typecheck.log
+            repository-typecheck.log
+            production-build.log
+          if-no-files-found: ignore
+          retention-days: 7
