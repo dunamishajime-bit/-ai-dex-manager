@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import datetime
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
-from typing import Dict, List
 
 import research_lab_parameter_bagged_rotation_v4 as v4
 import research_lab_asymmetric_bear_hedge_v5 as v5
@@ -13,7 +14,6 @@ import research_lab_fixed_candidate_robustness_v7 as v7
 
 DATA_START = 1767225600000  # 2026-01-01 UTC
 FORWARD_START = 1782864000000  # 2026-07-01 UTC
-FORWARD_END = 1784332800000  # 2026-07-18 UTC
 SYMBOLS = ["BTC", "ETH", "BNB", "SOL", "LINK", "AVAX"]
 
 COMPONENTS = [
@@ -33,14 +33,17 @@ HEDGE = v5.Hedge("H_BTC_S60_M30_G0.4", 60, 30, 0.4, "BTC")
 CONFIRM_BARS = 4
 
 
-def load_symbol(cache_root: Path, symbol: str) -> dict:
-    exact = cache_root / "consolidated" / f"{symbol}USDT-{DATA_START}-{FORWARD_END}-v2.json"
-    if exact.exists():
-        return json.loads(exact.read_text(encoding="utf-8"))
-    matches = sorted((cache_root / "consolidated").glob(f"{symbol}USDT-{DATA_START}-{FORWARD_END}-*.json"))
-    if not matches:
-        raise FileNotFoundError(f"fresh forward cache missing: {exact}")
-    return json.loads(matches[-1].read_text(encoding="utf-8"))
+def load_latest_symbol(cache_root: Path, symbol: str) -> tuple[dict, int]:
+    pattern = re.compile(rf"^{symbol}USDT-{DATA_START}-(\d+)-v\d+\.json$")
+    candidates: list[tuple[int, Path]] = []
+    for target in (cache_root / "consolidated").glob(f"{symbol}USDT-{DATA_START}-*-v*.json"):
+        match = pattern.match(target.name)
+        if match:
+            candidates.append((int(match.group(1)), target))
+    if not candidates:
+        raise FileNotFoundError(f"fresh forward cache missing for {symbol}")
+    end_ts, target = max(candidates, key=lambda item: item[0])
+    return json.loads(target.read_text(encoding="utf-8")), end_ts
 
 
 def rounded(value):
@@ -56,15 +59,18 @@ def rounded(value):
 def main() -> None:
     state_dir = Path(os.environ.get("RESEARCH_AUTONOMOUS_STATE_DIR", ".research-state")).resolve()
     cache_root = Path.cwd() / ".cache" / "perp-research-usdm"
-    raw = {symbol: load_symbol(cache_root, symbol) for symbol in SYMBOLS}
+    loaded = {symbol: load_latest_symbol(cache_root, symbol) for symbol in SYMBOLS}
+    raw = {symbol: loaded[symbol][0] for symbol in SYMBOLS}
+    forward_end = min(loaded[symbol][1] for symbol in SYMBOLS)
     bars = {symbol: v4.resample_12h(raw[symbol]["candles"]) for symbol in SYMBOLS}
     indexes = {symbol: {int(bar["ts"]): index for index, bar in enumerate(rows)} for symbol, rows in bars.items()}
     funding = v6.funding_buckets({symbol: raw[symbol]["funding"] for symbol in SYMBOLS})
-    times = [int(bar["ts"]) for bar in bars["BTC"] if DATA_START <= int(bar["ts"]) < FORWARD_END]
+    times = [int(bar["ts"]) for bar in bars["BTC"] if DATA_START <= int(bar["ts"]) < forward_end]
     projected = v6.precompute_projected_members(COMPONENTS, times, bars, indexes)
     base_targets = v6.precompute_base_targets([OVERLAY], times, projected, bars, indexes)
     bear_targets = v6.precompute_bear_targets([HEDGE], times, bars, indexes)
     targets = v7.desired_targets(OVERLAY, HEDGE, CONFIRM_BARS, times, base_targets, bear_targets)
+    forward_signal_bars = sum(1 for ts in times if ts >= FORWARD_START and v4.gross_exposure(targets.get(ts, {})) > 0)
     scenarios = [
         v7.ExecutionScenario("NORMAL_10BPS", 10, 0, 0),
         v7.ExecutionScenario("STRESS_30BPS", 30, 0, 0),
@@ -72,27 +78,34 @@ def main() -> None:
     ]
     results = {
         scenario.scenario_id: v7.simulate_scenario(
-            scenario, targets, times, bars, indexes, funding, FORWARD_START, FORWARD_END,
+            scenario, targets, times, bars, indexes, funding, FORWARD_START, forward_end,
         )
         for scenario in scenarios
     }
     normal = results["NORMAL_10BPS"]
     stress = results["STRESS_30BPS"]
     severe = results["SEVERE_50BPS_DELAY12H_FUND3"]
-    positive = (
+    cycles = normal["cycles"]
+    positive = cycles > 0 and (
         normal["compoundedReturnPct"] > 0
         and stress["compoundedReturnPct"] > 0
         and (normal["profitFactor"] or 0) >= 1
         and (stress["profitFactor"] or 0) >= 1
         and severe["compoundedReturnPct"] >= -3
     )
-    cycles = normal["cycles"]
-    status = "FRESH_FORWARD_POSITIVE_PRELIMINARY" if positive else "FRESH_FORWARD_NEGATIVE"
+    if cycles == 0:
+        status = "NO_FORWARD_SIGNAL"
+    elif positive:
+        status = "FRESH_FORWARD_POSITIVE_PRELIMINARY"
+    else:
+        status = "FRESH_FORWARD_NEGATIVE"
     sample_status = "FORWARD_SAMPLE_BUILDING" if cycles < 30 else ("PAPER_REVIEW_ELIGIBLE" if positive else "FORWARD_REJECTED")
+    start_label = datetime.datetime.fromtimestamp(FORWARD_START / 1000, tz=datetime.timezone.utc).date().isoformat()
+    end_label = datetime.datetime.fromtimestamp(forward_end / 1000, tz=datetime.timezone.utc).date().isoformat()
     result = rounded({
         "version": 9,
         "strategyId": "FROZEN_V6_FRESH_FORWARD_V9",
-        "generatedAt": __import__("datetime").datetime.utcnow().isoformat() + "Z",
+        "generatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "status": status,
         "sampleStatus": sample_status,
         "frozenBeforeForward": True,
@@ -102,7 +115,8 @@ def main() -> None:
             "hedge": HEDGE.__dict__,
             "confirmBars": CONFIRM_BARS,
         },
-        "period": {"start": FORWARD_START, "end": FORWARD_END},
+        "period": {"start": FORWARD_START, "end": forward_end},
+        "forwardSignalBars": forward_signal_bars,
         "scenarios": results,
         "positivePreliminary": positive,
         "paperEligible": positive and cycles >= 30,
@@ -120,22 +134,29 @@ def main() -> None:
             "overlay": OVERLAY.__dict__,
             "hedge": HEDGE.__dict__,
             "confirm": CONFIRM_BARS,
-            "period": [FORWARD_START, FORWARD_END],
+            "period": [FORWARD_START, forward_end],
             "scenarios": [scenario.__dict__ for scenario in scenarios],
         }, sort_keys=True).encode()).hexdigest(),
         "limitations": [
             "2026-07-01以降のみを、6月30日以前に固定したV6条件で評価する。",
-            "17日間のためサンプルは小さく、正の結果でもロジック確定ではない。",
+            "サンプルが小さい間は正負どちらでもロジック確定とは判定しない。",
             "Forward 30 cyclesまではPaper審査対象にせず、100 cyclesまではLive禁止。",
             "本番コード、VPS、.env、実売買runnerは変更していない。",
         ],
     })
+    if cycles == 0:
+        verdict = "Fresh Forward期間はEntry条件が成立せず、現金待機でした。条件を変更せずサンプルを継続します。"
+    elif positive:
+        verdict = "Fresh Forwardは暫定プラスです。条件を変更せずサンプルを継続します。"
+    else:
+        verdict = "Fresh Forwardでマイナスとなりました。候補は採用せず監視を継続します。"
     report = [
         "# Frozen V6 Fresh Forward V9",
         "",
         f"- Status: **{status}**",
         f"- Sample status: **{sample_status}**",
-        f"- Period: 2026-07-01 through 2026-07-18 UTC",
+        f"- Period: {start_label} through {end_label} UTC",
+        f"- Forward signal bars: {forward_signal_bars}",
         f"- Forward cycles: {cycles}",
         f"- Paper eligible: **{'YES' if result['paperEligible'] else 'NO'}**",
         "- Production changed: NO",
@@ -150,7 +171,7 @@ def main() -> None:
         "",
         "## Verdict",
         "",
-        "Fresh Forwardは暫定プラスです。条件を変更せずサンプルを継続します。" if positive else "Fresh Forwardでプラスを確認できず、候補を採用しません。",
+        verdict,
         "",
         "## Limitations",
         "",
