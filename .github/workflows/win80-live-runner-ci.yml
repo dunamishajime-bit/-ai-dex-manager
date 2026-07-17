@@ -1,3 +1,4 @@
+# Re-trigger after workflow registration.
 name: Win80 Ultra90 Live Runner CI
 
 on:
