@@ -1,7 +1,8 @@
 import { loadPerpMarketData } from "../lib/research-lab/perp/data-store";
 
 const START_TS = Date.UTC(2026, 0, 1);
-const END_TS = Date.UTC(2026, 6, 18);
+const now = new Date();
+const END_TS = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
 const SYMBOLS = ["BTC", "ETH", "BNB", "SOL", "LINK", "AVAX"];
 
 async function main() {
