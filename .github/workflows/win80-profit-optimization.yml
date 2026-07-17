@@ -8,6 +8,7 @@ on:
     paths:
       - "scripts/research-lab-main-strategy-profit-optimizer.ts"
       - "scripts/research-lab-main-strategy-regime-router.ts"
+      - "scripts/research-lab-regime-native-entry-v1.ts"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -20,6 +21,7 @@ on:
     paths:
       - "scripts/research-lab-main-strategy-profit-optimizer.ts"
       - "scripts/research-lab-main-strategy-regime-router.ts"
+      - "scripts/research-lab-regime-native-entry-v1.ts"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -92,6 +94,11 @@ jobs:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         run: npx tsx scripts/research-lab-main-strategy-regime-router.ts
 
+      - name: Run independent regime-native entry research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: npx tsx scripts/research-lab-regime-native-entry-v1.ts
+
       - name: Upload optimization evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -102,5 +109,7 @@ jobs:
             .research-state/win80-profit-optimization-v1.md
             .research-state/win80-regime-router-v1.json
             .research-state/win80-regime-router-v1.md
+            .research-state/regime-native-entry-v1.json
+            .research-state/regime-native-entry-v1.md
           if-no-files-found: warn
           retention-days: 30
