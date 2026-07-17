@@ -4,16 +4,19 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - feature/win80-ultra90-live-runner-v1
+      - fix/win80-aster-market-freshness
     paths:
       - "lib/aster-v3-client.ts"
+      - "lib/aster-realtime-market-data-provider.ts"
       - "lib/direct-trade-executor.ts"
       - "lib/live-runner-state.ts"
+      - "lib/one-way-long-direct-trade-executor.ts"
       - "lib/paper-direct-trade-executor.ts"
       - "lib/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner-selftest.ts"
       - "scripts/aster-direct-trade-executor-selftest.ts"
+      - "scripts/aster-market-data-provider-selftest.ts"
       - "tsconfig.live-runner.json"
       - "package.json"
       - ".github/workflows/win80-live-runner-ci.yml"
@@ -22,13 +25,16 @@ on:
       - master
     paths:
       - "lib/aster-v3-client.ts"
+      - "lib/aster-realtime-market-data-provider.ts"
       - "lib/direct-trade-executor.ts"
       - "lib/live-runner-state.ts"
+      - "lib/one-way-long-direct-trade-executor.ts"
       - "lib/paper-direct-trade-executor.ts"
       - "lib/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner-selftest.ts"
       - "scripts/aster-direct-trade-executor-selftest.ts"
+      - "scripts/aster-market-data-provider-selftest.ts"
       - "tsconfig.live-runner.json"
       - "package.json"
       - "config/strategyConfig.ts"
@@ -38,7 +44,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: win80-live-runner-${{ github.event_name }}-${{ github.ref }}
+  group: win80-market-freshness-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -61,8 +67,11 @@ jobs:
       - name: Main strategy policy self-test
         run: npm run strategy:main:selftest
 
-      - name: Live runner state and failure self-test
-        run: npm run strategy:live:selftest
+      - name: Live runner and market freshness self-tests
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run strategy:live:selftest 2>&1 | tee live-runner-selftest.log
 
       - name: Aster direct executor protocol self-test
         shell: bash
@@ -92,8 +101,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: win80-live-runner-ci-logs
+          name: win80-market-freshness-ci-logs
           path: |
+            live-runner-selftest.log
             executor-selftest.log
             live-runner-typecheck.log
             repository-typecheck.log

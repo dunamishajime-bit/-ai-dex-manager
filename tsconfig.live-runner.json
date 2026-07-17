@@ -6,8 +6,10 @@
   "include": [
     "next-env.d.ts",
     "lib/aster-v3-client.ts",
+    "lib/aster-realtime-market-data-provider.ts",
     "lib/direct-trade-executor.ts",
     "lib/live-runner-state.ts",
+    "lib/one-way-long-direct-trade-executor.ts",
     "lib/paper-direct-trade-executor.ts",
     "lib/win80-ultra90-live-runner.ts",
     "lib/win80-ultra90-main-strategy.ts",
@@ -15,6 +17,7 @@
     "scripts/win80-ultra90-live-runner.ts",
     "scripts/win80-ultra90-live-runner-selftest.ts",
     "scripts/aster-direct-trade-executor-selftest.ts",
+    "scripts/aster-market-data-provider-selftest.ts",
     "config/**/*.ts"
   ],
   "exclude": [
