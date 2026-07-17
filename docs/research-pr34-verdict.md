@@ -44,7 +44,7 @@ The V6 conditions were frozen before the new period.
 - Current result through 2026-07-18: 0 signal bars / 0 cycles
 - Status: `NO_FORWARD_SIGNAL`
 - Interpretation: cash waiting, not a loss and not a pass
-- Continue without changing conditions
+- Continue without changing conditions through the daily condition watch
 
 ## Promotion gates
 
