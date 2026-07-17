@@ -17,6 +17,14 @@ import {
   type ChampionDeepResearchState,
 } from "../lib/research-lab/perp/deep-research";
 import { buildChampionDeepDiscussion } from "../lib/research-lab/perp/deep-discussion";
+import {
+  buildMainStrategyResearchAnchors,
+  focusChampionStateOnMainStrategyLineage,
+  focusPreviousResultOnMainStrategyLineage,
+  isMainStrategyLineageGenome,
+  MAIN_STRATEGY_RESEARCH_POLICY,
+  mainStrategyResearchPolicyMarkdown,
+} from "../lib/research-lab/perp/main-strategy-research-policy";
 import { discussionIndexEntry } from "../lib/research-lab/perp/discussion";
 import { compactPerpBacktestResult } from "../lib/research-lab/perp/evidence";
 import {
@@ -269,6 +277,10 @@ async function main() {
   const config = perpResearchConfigFromEnvironment();
   config.seed = previous.seed;
   config.rounds = 1;
+  const mainStrategyAnchors = buildMainStrategyResearchAnchors(config);
+  const focusedDeepState = focusChampionStateOnMainStrategyLineage(previousDeepState);
+  const focusedPreviousResult = focusPreviousResultOnMainStrategyLineage(previousResult);
+  const previousLineageElites = previous.eliteGenomes.filter(isMainStrategyLineageGenome);
   const championCount = integerEnv("PERP_DEEP_CHAMPIONS", 3, 1, 3);
   const experimentsPerChampion = integerEnv("PERP_DEEP_EXPERIMENTS_PER_CHAMPION", 2, 1, 3);
   const evaluatedLogicFingerprints = new Set<string>();
@@ -279,7 +291,7 @@ async function main() {
   };
 
   console.log(
-    `[ChampionDeepResearch] cycle=${previous.cycle + 1} profile=${config.profile} champions=${championCount} experimentsPerChampion=${experimentsPerChampion} historicalLogic=${previousLogicRegistry.fingerprints.length}`,
+    `[MainLineageResearch] cycle=${previous.cycle + 1} main=${MAIN_STRATEGY_RESEARCH_POLICY.mainStrategyId} profile=${config.profile} champions=${championCount} experimentsPerChampion=${experimentsPerChampion} previousLineageChampions=${focusedDeepState.champions.length} historicalLogic=${previousLogicRegistry.fingerprints.length}`,
   );
 
   const data = await loadPerpMarketData({
@@ -300,9 +312,9 @@ async function main() {
 
   const deep = await runChampionDeepResearch({
     cycle: previous.cycle + 1,
-    previousState: previousDeepState,
-    previousResult,
-    fallbackGenomes: previous.eliteGenomes,
+    previousState: focusedDeepState,
+    previousResult: focusedPreviousResult,
+    fallbackGenomes: [...mainStrategyAnchors, ...previousLineageElites],
     data,
     config,
     championCount,
@@ -335,7 +347,7 @@ async function main() {
     registryAfter: registryMerge.registry,
     added: registryMerge.added,
   });
-  const reportMarkdown = `${reflection.markdown}\n## Deep Discussion Summary\n\n${discussion.summary}\n\n**CIO Decision:** ${discussion.decision}\n\n${dedupReport}`;
+  const reportMarkdown = `${mainStrategyResearchPolicyMarkdown()}\n\n${reflection.markdown}\n## Deep Discussion Summary\n\n${discussion.summary}\n\n**CIO Decision:** ${discussion.decision}\n\n${dedupReport}`;
   const compact = compactResult(result);
   const latestDeepEvidence = {
     version: 1,
@@ -343,6 +355,7 @@ async function main() {
     startedAt: deep.startedAt,
     completedAt: deep.completedAt,
     profile: deep.profile,
+    researchFocus: MAIN_STRATEGY_RESEARCH_POLICY,
     championsBefore: deep.championsBefore,
     championsAfter: deep.championsAfter,
     experiments: deep.experiments,
@@ -357,7 +370,11 @@ async function main() {
   await fs.mkdir(path.dirname(archivedDiscussionPath), { recursive: true });
   await fs.mkdir(path.dirname(discussionIndexPath), { recursive: true });
   await fs.writeFile(statePath, JSON.stringify(reflection.state, null, 2), "utf8");
-  await fs.writeFile(deepStatePath, JSON.stringify(deep.state, null, 2), "utf8");
+  await fs.writeFile(
+    deepStatePath,
+    JSON.stringify({ ...deep.state, researchFocus: MAIN_STRATEGY_RESEARCH_POLICY }, null, 2),
+    "utf8",
+  );
   await fs.writeFile(logicRegistryPath, JSON.stringify(registryMerge.registry, null, 2), "utf8");
   await fs.writeFile(path.join(stateDir, "latest-report.md"), reportMarkdown, "utf8");
   await fs.writeFile(path.join(stateDir, "latest-result.json"), JSON.stringify(compact, null, 2), "utf8");
@@ -371,7 +388,7 @@ async function main() {
     path.join(stateDir, "deduplication-stats.json"),
     JSON.stringify({
       cycle: reflection.state.cycle,
-      mode: "champion_deep",
+      mode: "win80_ultra90_lineage",
       parentBaselinesReevaluated: deep.baselineEvaluations.length,
       experiments: deep.experiments.length,
       acceptedExperiments: deep.experiments.filter((item) => item.accepted).length,
@@ -400,7 +417,7 @@ async function main() {
     run_status: "success",
     cycle: reflection.state.cycle,
     profile: config.profile,
-    research_mode: "champion_deep",
+    research_mode: "win80_ultra90_lineage",
     champions: deep.championsAfter.length,
     experiments: deep.experiments.length,
     accepted_experiments: acceptedExperiments,
@@ -413,18 +430,18 @@ async function main() {
   });
 
   console.log(
-    `[ChampionDeepResearch] completed cycle=${reflection.state.cycle} baselines=${deep.baselineEvaluations.length} experiments=${deep.experiments.length} accepted=${acceptedExperiments} uniqueAdded=${registryMerge.added} duplicateSkipped=${deduplicationStats.duplicateStrategiesSkipped} finalCandidates=${result.finalCandidates.length} bestOos=${bestOos.toFixed(2)}% discussionMessages=${discussion.messages.length}`,
+    `[MainLineageResearch] completed cycle=${reflection.state.cycle} baselines=${deep.baselineEvaluations.length} experiments=${deep.experiments.length} accepted=${acceptedExperiments} uniqueAdded=${registryMerge.added} duplicateSkipped=${deduplicationStats.duplicateStrategiesSkipped} finalCandidates=${result.finalCandidates.length} bestOos=${bestOos.toFixed(2)}% discussionMessages=${discussion.messages.length}`,
   );
 }
 
 main().catch(async (error) => {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);
-  console.error("[ChampionDeepResearch] failed", message);
+  console.error("[MainLineageResearch] failed", message);
   const stateDir = path.resolve(process.env.RESEARCH_AUTONOMOUS_STATE_DIR ?? ".research-state");
   await fs.mkdir(stateDir, { recursive: true });
   await fs.writeFile(
     path.join(stateDir, "last-error.json"),
-    JSON.stringify({ failedAt: new Date().toISOString(), mode: "champion_deep", message }, null, 2),
+    JSON.stringify({ failedAt: new Date().toISOString(), mode: "win80_ultra90_lineage", message }, null, 2),
     "utf8",
   );
   await writeGithubOutput({ run_status: "failed", final_candidates: 0 });

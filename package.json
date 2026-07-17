@@ -15,7 +15,8 @@
     "research:discussion:selftest": "tsx scripts/research-lab-discussion-selftest.ts",
     "research:champion:selftest": "tsx scripts/research-lab-champion-deep-selftest.ts",
     "research:perp:autonomous": "tsx scripts/research-lab-autonomous-runner.ts",
-    "strategy:main:selftest": "tsx scripts/win80-ultra90-main-selftest.ts"
+    "strategy:main:selftest": "tsx scripts/win80-ultra90-main-selftest.ts",
+    "research:main-lineage:selftest": "tsx scripts/research-lab-main-strategy-policy-selftest.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

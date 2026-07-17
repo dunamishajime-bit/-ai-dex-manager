@@ -114,10 +114,14 @@ export default function ChampionDeepResearchPanel() {
         <div>
           <div className="flex items-center gap-2">
             <BrainCircuit className="h-5 w-5 text-violet-200" />
-            <h2 className="text-xl font-black text-white md:text-2xl">Champion Deep Research Loop</h2>
+            <h2 className="text-xl font-black text-white md:text-2xl">
+              {deep.mode === "win80_ultra90_lineage" ? "Win80 / Ultra90 Main-Lineage Research" : "Champion Deep Research Loop"}
+            </h2>
           </div>
           <p className="mt-2 max-w-3xl text-xs leading-5 text-white/60">
-            上位3ロジックを親として再評価し、各実験は1パラメータだけ変更します。改善基準を複数案が通っても、各Championで最も総合改善が大きい子1件だけを次Cycleへ継承します。
+            {deep.mode === "win80_ultra90_lineage"
+              ? "現在のメイン戦略を固定したまま、厳選Top-1・Ultra90級シグナル・低回転Rotationの近縁ロジックだけを親子比較します。研究結果は自動で本番へ昇格しません。"
+              : "上位3ロジックを親として再評価し、各実験は1パラメータだけ変更します。改善基準を複数案が通っても、各Championで最も総合改善が大きい子1件だけを次Cycleへ継承します。"}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-[11px]">
@@ -128,6 +132,28 @@ export default function ChampionDeepResearchPanel() {
           <span className="rounded-full border border-emerald-300/20 bg-emerald-500/10 px-3 py-2 text-emerald-100">継承 {inheritedExperimentIds.size}</span>
         </div>
       </div>
+
+      {deep.researchFocus ? (
+        <div className="rounded-[20px] border border-emerald-300/20 bg-emerald-500/[0.055] p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-black tracking-[0.16em] text-emerald-200/80">PRODUCTION MAIN LOCKED</div>
+              <div className="mt-1 text-sm font-black text-white">{deep.researchFocus.mainStrategyId}</div>
+              <p className="mt-2 text-xs leading-5 text-white/60">
+                メインロジックは変更せず、研究系統だけを改善します。採用された子もForward Paper候補までで、自動昇格は無効です。
+              </p>
+            </div>
+            <span className="rounded-full border border-emerald-300/25 bg-emerald-500/10 px-3 py-2 text-[10px] font-black text-emerald-100">
+              MAIN FIXED / AUTO PROMOTION OFF
+            </span>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-3">
+            {deep.researchFocus.researchTracks.map((track) => (
+              <div key={track} className="rounded-xl border border-white/8 bg-black/15 px-3 py-2 text-[11px] leading-5 text-white/60">{track}</div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-3 xl:grid-cols-3">
         {deep.champions.map((champion) => (

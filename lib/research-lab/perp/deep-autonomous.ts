@@ -104,8 +104,10 @@ export function reflectChampionDeepResearchRun(
     history: [...previous.history, summary].slice(-30),
   };
   const markdown = [
-    `# Champion Deep Research Cycle ${summary.cycle}`,
+    `# Win80 / Ultra90 Main-Lineage Research Cycle ${summary.cycle}`,
     "",
+    `- Fixed production main: WIN80_ULTRA90_TOP1_V1`,
+    `- Production auto-promotion: disabled`,
     `- Profile: ${summary.profile}`,
     `- Champions re-evaluated: ${deep.baselineEvaluations.length}`,
     `- Single-parameter experiments: ${deep.experiments.length}`,
@@ -134,6 +136,7 @@ export function reflectChampionDeepResearchRun(
     "- Real orders, wallets and API keys remain disconnected",
     "- Any liquidation rejects the child strategy",
     "- A child is inherited only when it improves its own parent",
+    "- Inheritance applies to the research lineage only and never replaces the production main strategy",
     "",
   ].join("\n");
   return { state, summary, markdown };

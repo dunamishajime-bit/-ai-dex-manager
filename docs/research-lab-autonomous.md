@@ -143,3 +143,23 @@ A strategy can be written to the Forward Paper candidate file only after passing
 ## Safety boundary
 
 The workflow cannot access AsterDEX order execution, wallet signing, trading API keys, real account balances or existing live positions. Automation stops at research evidence and Forward Paper candidate creation. Real trading remains disabled.
+
+
+## Win80 / Ultra90 Main-Lineage Researchへの方向転換
+
+2026-07-17以降、AI研究ラボの主目的をランダムな上位Champion探索から、既存メイン戦略`WIN80_ULTRA90_TOP1_V1`の深掘りと近縁ロジック開発へ変更する。
+
+### 固定するもの
+
+- 本番メイン戦略は`WIN80_ULTRA90_TOP1_V1`のまま変更しない。
+- 研究結果からメイン戦略を自動置換しない。
+- 実売買、Wallet、API Key、注文経路へ研究コードを接続しない。
+- 同一期間で損失分析後に条件追加した歴史値を、完全未使用OOSと表現しない。
+
+### 新しい3研究系統
+
+1. Win80厳選Top-1: 相対強度、BTCレジーム、Edge/Cost、出来高、時間足の深掘り。
+2. Ultra90近縁: 強いBreakoutとVolumeを使い、Score90級の高選別思想を別Familyで再現。
+3. Rotation近縁: 利益中50%分割とUltra90優先70%移動の思想を、低回転・高Cost耐性の先物研究Proxyで検証。
+
+旧ChampionがこのLineageに属さない場合は次Cycleの親から外す。以後はLineage内の親と、1パラメータだけ変更した子を比較する。合格した子もForward Paper候補までであり、本番メインへの採用は別途手動承認を必要とする。

@@ -50,6 +50,7 @@ interface RawChampionDeepState {
   champions?: unknown;
   latestExperiments?: unknown;
   nextPlan?: unknown;
+  researchFocus?: unknown;
 }
 
 function finiteNumber(value: unknown, fallback = 0) {
@@ -203,6 +204,22 @@ function normalizeExperiment(value: unknown): ChampionExperimentDashboardItem | 
   };
 }
 
+function normalizeResearchFocus(value: unknown): ChampionDeepDashboardSummary["researchFocus"] {
+  if (!value || typeof value !== "object") return null;
+  const item = value as Record<string, unknown>;
+  if (item.mode !== "win80_ultra90_lineage") return null;
+  return {
+    mode: "win80_ultra90_lineage",
+    title: stringValue(item.title, "Win80 / Ultra90 Main-Lineage Research"),
+    mainStrategyId: stringValue(item.mainStrategyId, "WIN80_ULTRA90_TOP1_V1"),
+    mainStrategyLocked: item.mainStrategyLocked === true,
+    autoPromotionToMain: item.autoPromotionToMain === true,
+    productionLogicMutable: item.productionLogicMutable === true,
+    researchTracks: stringArray(item.researchTracks),
+    guardrails: stringArray(item.guardrails),
+  };
+}
+
 function normalizeDeepResearch(value: RawChampionDeepState | null): ChampionDeepDashboardSummary | null {
   if (!value) return null;
   const champions = (Array.isArray(value.champions) ? value.champions : [])
@@ -212,8 +229,9 @@ function normalizeDeepResearch(value: RawChampionDeepState | null): ChampionDeep
     .map(normalizeExperiment)
     .filter((item): item is ChampionExperimentDashboardItem => item != null);
   if (!champions.length && !experiments.length) return null;
+  const researchFocus = normalizeResearchFocus(value.researchFocus);
   return {
-    mode: "champion_deep",
+    mode: researchFocus?.mode ?? "champion_deep",
     cycle: finiteNumber(value.cycle),
     updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : null,
     championCount: champions.length,
@@ -222,6 +240,7 @@ function normalizeDeepResearch(value: RawChampionDeepState | null): ChampionDeep
     champions,
     experiments,
     nextPlan: stringArray(value.nextPlan),
+    researchFocus,
   };
 }
 

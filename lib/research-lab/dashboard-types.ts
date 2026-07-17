@@ -65,8 +65,19 @@ export interface ChampionExperimentDashboardItem {
   reasons: string[];
 }
 
+export interface MainStrategyResearchFocusSummary {
+  mode: "win80_ultra90_lineage";
+  title: string;
+  mainStrategyId: string;
+  mainStrategyLocked: boolean;
+  autoPromotionToMain: boolean;
+  productionLogicMutable: boolean;
+  researchTracks: string[];
+  guardrails: string[];
+}
+
 export interface ChampionDeepDashboardSummary {
-  mode: "champion_deep";
+  mode: "champion_deep" | "win80_ultra90_lineage";
   cycle: number;
   updatedAt: string | null;
   championCount: number;
@@ -75,6 +86,7 @@ export interface ChampionDeepDashboardSummary {
   champions: ChampionDashboardItem[];
   experiments: ChampionExperimentDashboardItem[];
   nextPlan: string[];
+  researchFocus: MainStrategyResearchFocusSummary | null;
 }
 
 export interface ResearchDashboardPayload {
