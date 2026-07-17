@@ -86,33 +86,6 @@ jobs:
           target.write_text(text.replace(old, new), encoding="utf-8")
           PY
 
-      - name: Preserve best exit per model
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          target = Path("scripts/research-lab-stability-consensus-rotation-v2.ts")
-          lines = target.read_text(encoding="utf-8").splitlines()
-          start = next((index for index, line in enumerate(lines) if "const bestPerModel = [...new Map(" in line), None)
-          if start is None:
-              raise SystemExit("best-per-model start not found")
-          end = start
-          while end < len(lines) and ".slice(0, 8);" not in lines[end]:
-              end += 1
-          if end >= len(lines):
-              raise SystemExit("best-per-model end not found")
-          replacement = [
-              "  const bestByModel = new Map<string, StabilityEvaluation>();",
-              "  for (const item of developmentStable) {",
-              "    if (!bestByModel.has(item.aggregate.modelId)) bestByModel.set(item.aggregate.modelId, item);",
-              "  }",
-              "  const bestPerModel = [...bestByModel.values()]",
-              "    .sort((left, right) => right.score - left.score)",
-              "    .slice(0, 8);",
-          ]
-          target.write_text("\n".join(lines[:start] + replacement + lines[end + 1:]) + "\n", encoding="utf-8")
-          PY
-
       - name: Run chronological profit optimization
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
