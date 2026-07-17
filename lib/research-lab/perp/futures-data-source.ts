@@ -7,7 +7,7 @@ import type { PerpFundingPoint } from "./types";
 
 const FUTURES_KLINE_ROOT = "https://data.binance.vision/data/futures/um/monthly/klines";
 const FUTURES_FUNDING_ROOT = "https://data.binance.vision/data/futures/um/monthly/fundingRate";
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 
 function normalizeTimestamp(value: number) {
   if (!Number.isFinite(value)) return value;
@@ -85,17 +85,21 @@ function parseKlineCsvLine(line: string): Candle1h | null {
     low: Number(parts[3]),
     close: Number(parts[4]),
     volume: Number(parts[5]),
+    quoteVolume: parts.length > 7 ? Number(parts[7]) : undefined,
+    trades: parts.length > 8 ? Number(parts[8]) : undefined,
   };
   if (
-    !Number.isFinite(candle.ts) ||
-    !Number.isFinite(candle.open) ||
-    !Number.isFinite(candle.high) ||
-    !Number.isFinite(candle.low) ||
-    !Number.isFinite(candle.close) ||
-    candle.close <= 0
+    !Number.isFinite(candle.ts)
+    || !Number.isFinite(candle.open)
+    || !Number.isFinite(candle.high)
+    || !Number.isFinite(candle.low)
+    || !Number.isFinite(candle.close)
+    || candle.close <= 0
   ) {
     return null;
   }
+  if (!Number.isFinite(candle.quoteVolume)) candle.quoteVolume = undefined;
+  if (!Number.isFinite(candle.trades)) candle.trades = undefined;
   return candle;
 }
 
