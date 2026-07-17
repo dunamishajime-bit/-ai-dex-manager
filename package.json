@@ -19,7 +19,7 @@
     "research:main-lineage:selftest": "tsx scripts/research-lab-main-strategy-policy-selftest.ts",
     "strategy:live:once": "tsx scripts/win80-ultra90-live-runner.ts --once",
     "strategy:live:daemon": "tsx scripts/win80-ultra90-live-runner.ts --daemon",
-    "strategy:live:selftest": "tsx scripts/win80-ultra90-live-runner-selftest.ts",
+    "strategy:live:selftest": "tsx scripts/win80-ultra90-live-runner-selftest.ts && tsx scripts/aster-market-data-provider-selftest.ts",
     "strategy:executor:selftest": "tsx scripts/aster-direct-trade-executor-selftest.ts",
     "strategy:market:selftest": "tsx scripts/aster-market-data-provider-selftest.ts",
     "strategy:live:typecheck": "tsc --noEmit -p tsconfig.live-runner.json"
