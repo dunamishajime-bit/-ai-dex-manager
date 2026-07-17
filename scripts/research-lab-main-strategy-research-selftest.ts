@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 
+// Updating this self-test intentionally requests the initial Direct Main Strategy Research cycle.
 import { WIN80_ULTRA90_MAIN_STRATEGY } from "../lib/win80-ultra90-main-strategy";
 import {
   MAIN_STRATEGY_RESEARCH_PROGRAM_ID,
