@@ -26,6 +26,12 @@ import type {
 import { cn } from "@/lib/utils";
 
 const REFRESH_INTERVAL_MS = 60_000;
+const MAIN_STRATEGY_ID = "WIN80_ULTRA90_TOP1_V1";
+
+function isMainStrategyDiscussion(item: Pick<ResearchDiscussionIndexEntry, "title" | "topStrategyIds">) {
+  return item.topStrategyIds.includes(MAIN_STRATEGY_ID)
+    && !item.title.includes("Champion深掘り");
+}
 
 function formatDateTime(value: string) {
   const date = new Date(value);
@@ -128,6 +134,7 @@ export default function DiscussionLogViewer() {
   const [error, setError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState("");
   const [query, setQuery] = useState("");
+  const [showLegacy, setShowLegacy] = useState(false);
 
   const loadList = useCallback(async () => {
     try {
@@ -135,7 +142,11 @@ export default function DiscussionLogViewer() {
       const body = await response.json() as ResearchDiscussionListPayload & { error?: string; detail?: string };
       if (!response.ok) throw new Error(body.detail || body.error || `HTTP ${response.status}`);
       setItems(body.items);
-      setSelectedPath((current) => current ?? body.latest?.path ?? null);
+      setSelectedPath((current) => {
+        if (current && body.items.some((item) => item.path === current)) return current;
+        const latestMain = body.items.find(isMainStrategyDiscussion);
+        return latestMain?.path ?? body.latest?.path ?? null;
+      });
       setError(null);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : String(loadError));
@@ -172,6 +183,7 @@ export default function DiscussionLogViewer() {
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return items.filter((item) => {
+      if (!showLegacy && !isMainStrategyDiscussion(item)) return false;
       if (dateFilter && dateKey(item.completedAt) !== dateFilter) return false;
       if (!normalizedQuery) return true;
       return [item.title, item.summary, item.decision, ...item.topStrategyIds]
@@ -179,7 +191,7 @@ export default function DiscussionLogViewer() {
         .toLowerCase()
         .includes(normalizedQuery);
     });
-  }, [dateFilter, items, query]);
+  }, [dateFilter, items, query, showLegacy]);
 
   return (
     <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
@@ -187,7 +199,7 @@ export default function DiscussionLogViewer() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="font-black text-white">日時別ログ</h2>
-            <p className="mt-1 text-[11px] text-white/45">各Cycleの議論全文を保存</p>
+            <p className="mt-1 text-[11px] text-white/45">現行メイン研究を優先表示</p>
           </div>
           <button
             type="button"
@@ -197,6 +209,37 @@ export default function DiscussionLogViewer() {
           >
             <RefreshCw className={cn("h-4 w-4", loadingList && "animate-spin")} />
           </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setShowLegacy(false)}
+            className={cn(
+              "rounded-xl border px-3 py-2 text-[10px] font-bold",
+              !showLegacy
+                ? "border-gold-400/30 bg-gold-400/10 text-gold-50"
+                : "border-white/10 bg-black/20 text-white/45",
+            )}
+          >
+            メイン研究
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowLegacy(true)}
+            className={cn(
+              "rounded-xl border px-3 py-2 text-[10px] font-bold",
+              showLegacy
+                ? "border-white/20 bg-white/[0.06] text-white/75"
+                : "border-white/10 bg-black/20 text-white/45",
+            )}
+          >
+            旧ログも表示
+          </button>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-sky-400/15 bg-sky-500/[0.055] px-3 py-2 text-[10px] leading-5 text-sky-50/65">
+          既定表示は{MAIN_STRATEGY_ID}を直接扱う会議です。旧Champion Deepはアーカイブとしてのみ表示します。
         </div>
 
         <div className="mt-4 space-y-2">
@@ -220,7 +263,7 @@ export default function DiscussionLogViewer() {
           </label>
         </div>
 
-        <div className="mt-4 space-y-2 xl:max-h-[calc(100vh-300px)] xl:overflow-y-auto xl:pr-1">
+        <div className="mt-4 space-y-2 xl:max-h-[calc(100vh-350px)] xl:overflow-y-auto xl:pr-1">
           {loadingList && !items.length ? (
             <div className="flex items-center justify-center gap-2 rounded-xl border border-white/8 p-5 text-xs text-white/50">
               <Loader2 className="h-4 w-4 animate-spin" /> 読み込み中
@@ -228,11 +271,12 @@ export default function DiscussionLogViewer() {
           ) : null}
           {!loadingList && !filteredItems.length ? (
             <div className="rounded-xl border border-dashed border-white/10 p-5 text-center text-xs leading-6 text-white/45">
-              議論ログはまだありません。次の自動研究Cycle完了後に生成されます。
+              現行メイン研究ログはまだありません。次のMain Strategy Research完了後に生成されます。
             </div>
           ) : null}
           {filteredItems.map((item) => {
             const active = selectedPath === item.path;
+            const mainDiscussion = isMainStrategyDiscussion(item);
             return (
               <button
                 key={item.id}
@@ -246,7 +290,17 @@ export default function DiscussionLogViewer() {
                 )}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">Cycle {item.cycle}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">Cycle {item.cycle}</span>
+                    <span className={cn(
+                      "rounded-md border px-1.5 py-0.5 text-[8px] font-black",
+                      mainDiscussion
+                        ? "border-sky-400/25 bg-sky-500/10 text-sky-100"
+                        : "border-white/10 bg-white/[0.03] text-white/35",
+                    )}>
+                      {mainDiscussion ? "MAIN" : "LEGACY"}
+                    </span>
+                  </div>
                   <ChevronRight className={cn("h-4 w-4", active ? "text-gold-100" : "text-white/25")} />
                 </div>
                 <div className="mt-2 text-xs font-black text-white">{formatDateTime(item.completedAt)} JST</div>
@@ -277,7 +331,7 @@ export default function DiscussionLogViewer() {
 
         {!loadingLog && !log ? (
           <div className="flex min-h-72 flex-col items-center justify-center text-center">
-            <MessageSquareText className="h-10 w-10 text-white/20" />
+            <MessageSquareText className="h-9 w-9 text-white/20" />
             <h2 className="mt-4 font-black text-white/75">表示する議論を選択してください</h2>
             <p className="mt-2 text-xs leading-6 text-white/40">左側の日時別ログからCycleを選択すると全文を表示します。</p>
           </div>
@@ -288,7 +342,14 @@ export default function DiscussionLogViewer() {
             <div className="rounded-[20px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(35,29,14,0.45),rgba(8,10,14,0.6))] p-4 md:p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-100/65">Full Research Debate</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-100/65">Full Research Debate</div>
+                    {log.topStrategyIds.includes(MAIN_STRATEGY_ID) && !log.title.includes("Champion深掘り") ? (
+                      <span className="rounded-md border border-sky-400/25 bg-sky-500/10 px-2 py-1 text-[9px] font-black text-sky-100">CURRENT MAIN</span>
+                    ) : (
+                      <span className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-[9px] font-black text-white/35">LEGACY / RELATED</span>
+                    )}
+                  </div>
                   <h1 className="mt-2 text-2xl font-black text-white">{log.title}</h1>
                   <p className="mt-2 text-xs text-white/50">{formatDateTime(log.completedAt)} JST・{log.profile.toUpperCase()}・{log.messages.length}発言</p>
                 </div>

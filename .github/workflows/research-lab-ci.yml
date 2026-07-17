@@ -33,6 +33,8 @@ jobs:
         run: npm run typecheck
       - name: Production main strategy rule self-test
         run: npm run strategy:main:selftest
+      - name: Direct main strategy research program self-test
+        run: npm run research:main-strategy:program:selftest
       - name: Current main strategy audit discussion self-test
         run: npm run research:main-strategy:audit:selftest
       - name: Spot Research Lab self-test
