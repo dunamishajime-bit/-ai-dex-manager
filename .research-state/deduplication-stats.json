@@ -1,13 +1,13 @@
 {
-  "cycle": 8,
-  "mode": "champion_deep",
+  "cycle": 9,
+  "mode": "win80_ultra90_lineage",
   "parentBaselinesReevaluated": 3,
   "experiments": 6,
   "acceptedExperiments": 3,
-  "duplicateStrategiesSkipped": 4,
+  "duplicateStrategiesSkipped": 0,
   "replacementCandidatesGenerated": 3,
   "exhaustedPopulationSlots": 0,
-  "historicalFingerprintsLoaded": 156,
+  "historicalFingerprintsLoaded": 162,
   "newUniqueLogicTested": 6,
-  "totalUniqueLogic": 162
+  "totalUniqueLogic": 168
 }

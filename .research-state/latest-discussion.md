@@ -1,11 +1,11 @@
-# Cycle 8 Champion深掘り会議
+# Cycle 9 Champion深掘り会議
 
-- Completed: 2026-07-16T21:19:38.762Z
+- Completed: 2026-07-17T00:35:47.682Z
 - Profile: attack
 - Final candidates: 0
-- Best OOS monthly: 2.85%
-- Best OOS MaxDD: 2.44%
-- Best Stress monthly: 0.23%
+- Best OOS monthly: 1.41%
+- Best OOS MaxDD: 10.51%
+- Best Stress monthly: -3.69%
 
 ## Methodology
 
@@ -13,248 +13,248 @@
 
 ## Summary
 
-3 Championを親として6件の単一変更を比較し、3件が改善基準を通過、最上位3件を継承。Best OOS月利2.85%、Best Stress月利0.23%。
+3 Championを親として6件の単一変更を比較し、3件が改善基準を通過、最上位2件を継承。Best OOS月利1.41%、Best Stress月利-3.69%。
 
 ## Decision
 
-3件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。
+2件の最上位改善子を次Cycleの親として継承し、残りは親ロジックを維持する。
 
 ## Full Transcript
 
 ### 1. Research Moderator (moderator)
 
-- Time: 2026-07-16T21:19:34.557Z
+- Time: 2026-07-17T00:35:45.752Z
 - Strategy: cycle-wide
 - Stance: context
 
-Champion Deep Research Cycle 8を開始します。新規ロジックの大量生成は行わず、OOS・Stress・安定性の3 Championを親として再評価し、各Championに最大2件の単一パラメータ変更だけを検証します。同じChampionで複数案が改善基準を通っても、総合改善Scoreが最も高い子1件だけを継承します。
+Champion Deep Research Cycle 9を開始します。新規ロジックの大量生成は行わず、OOS・Stress・安定性の3 Championを親として再評価し、各Championに最大2件の単一パラメータ変更だけを検証します。同じChampionで複数案が改善基準を通っても、総合改善Scoreが最も高い子1件だけを継承します。
 
 Evidence:
 - Champion数: 3 [positive]
 - 親の再評価: 3 [positive]
 - 単一変更実験: 6 [positive]
 
-### 2. Alpha Researcher / Mean Reversion (researcher)
+### 2. Execution Researcher (researcher)
 
-- Time: 2026-07-16T21:19:35.557Z
-- Strategy: deep-c8-baseline-1
+- Time: 2026-07-17T00:35:46.752Z
+- Strategy: deep-c9-baseline-3
 - Stance: proposal
 
-OOS Champion deep-c8-baseline-1を深掘りします。根本原因はlow_return・stable_but_low_return・oos_decay・cost_fragilityです。今回の仮説は cooldownBars: 6→7（連続Entryを抑制すればダマシと往復コストを減らせる） / btcRegimeSmaBars: 29→33（BTCレジーム判定を少し長期化すれば期間依存のノイズを減らせる）。複数パラメータを同時に動かさず、何が効いたかを親子比較で特定します。
+OOS Champion deep-c9-baseline-3を深掘りします。根本原因はlow_return・oos_decay・cost_fragilityです。今回の仮説は minimumEdgeToCostRatio: 3.8→4.37（低期待値Entryを減らせば、取引回数を大きく失わずCost Stressが改善する） / rebalanceBars: 8→10（再評価間隔を延ばせば不要な回転が減り、手数料とSlippage耐性が改善する）。複数パラメータを同時に動かさず、何が効いたかを親子比較で特定します。
 
 Evidence:
-- Train平均月利: 2.39% [neutral]
-- OOS平均月利: 1.97% [negative]
-- OOS MaxDD: 2.44% [positive]
-- 最悪Stress月利: 0.08% [negative]
-- Walk-forward: 33.33% [negative]
-- OOS取引数: 58 [positive]
+- Train平均月利: -0.16% [neutral]
+- OOS平均月利: 0.59% [negative]
+- OOS MaxDD: 13.66% [positive]
+- 最悪Stress月利: -3.71% [negative]
+- Walk-forward: 0.00% [negative]
+- OOS取引数: 90 [positive]
 
 ### 3. AI反対派 / Overfit (overfit_critic)
 
-- Time: 2026-07-16T21:19:36.557Z
-- Strategy: deep-c8-baseline-1
+- Time: 2026-07-17T00:35:47.752Z
+- Strategy: deep-c9-baseline-3
 - Stance: challenge
 
-Train月利2.39%に対しOOS月利1.97%、OOS維持率82.65%、Walk-forward33.33%です。子ロジックはTrainの上昇ではなく、親に対するOOS・Walk-forwardの実改善で判断してください。
+Train月利-0.16%に対しOOS月利0.59%、OOS維持率100.00%、Walk-forward0.00%です。子ロジックはTrainの上昇ではなく、親に対するOOS・Walk-forwardの実改善で判断してください。
 
 Evidence:
-- OOS維持率: 82.65% [positive]
-- Walk-forward: 33.33% [negative]
+- OOS維持率: 100.00% [positive]
+- Walk-forward: 0.00% [negative]
 - 変更パラメータ数/実験: 1 [positive]
 
 ### 4. AI反対派 / Tail Risk (tail_risk_critic)
 
-- Time: 2026-07-16T21:19:37.557Z
-- Strategy: deep-c8-baseline-1
+- Time: 2026-07-17T00:35:48.752Z
+- Strategy: deep-c9-baseline-3
 - Stance: challenge
 
-親のOOS MaxDDは2.44%、清算0件、最大連敗5回、最悪Stress月利0.08%です。月利改善と引き換えにDD・清算・Stressが悪化する子は拒否します。
+親のOOS MaxDDは13.66%、清算0件、最大連敗6回、最悪Stress月利-3.71%です。月利改善と引き換えにDD・清算・Stressが悪化する子は拒否します。
 
 Evidence:
-- OOS MaxDD: 2.44% [positive]
+- OOS MaxDD: 13.66% [positive]
 - 清算: 0件 [positive]
-- 最悪Stress月利: 0.08% [negative]
+- 最悪Stress月利: -3.71% [negative]
 
 ### 5. AI反対派 / Execution (execution_critic)
 
-- Time: 2026-07-16T21:19:38.557Z
-- Strategy: deep-c8-baseline-1
+- Time: 2026-07-17T00:35:49.752Z
+- Strategy: deep-c9-baseline-3
 - Stance: challenge
 
-親のOOS取引数58、PF 3.01、Funding合計42.4367、平均実効レバレッジ0.63倍です。単に取引数を消して見かけのStressを改善した子や、12取引未満の子は拒否します。
+親のOOS取引数90、PF 1.12、Funding合計93.1056、平均実効レバレッジ0.52倍です。単に取引数を消して見かけのStressを改善した子や、12取引未満の子は拒否します。
 
 Evidence:
-- OOS取引数: 58 [positive]
-- Profit Factor: 3.01 [positive]
-- Funding合計: 42.4367 [neutral]
+- OOS取引数: 90 [positive]
+- Profit Factor: 1.12 [negative]
+- Funding合計: 93.1056 [neutral]
 
 ### 6. Research CIO (cio)
 
-- Time: 2026-07-16T21:19:39.557Z
-- Strategy: deep-c8-oos-e2
+- Time: 2026-07-17T00:35:50.752Z
+- Strategy: deep-c9-oos-e2
 - Stance: decision
 
-OOS ChampionではbtcRegimeSmaBarsの単一変更を継承採用します。OOS差+0.88%、Stress差+0.15%、DD改善+0.00%。同じChampion内で他案も基準を通った場合でも、この最上位子だけを次Cycleの親にします。
+OOS ChampionではrebalanceBarsの単一変更を継承採用します。OOS差+0.82%、Stress差+0.00%、DD改善+3.15%。同じChampion内で他案も基準を通った場合でも、この最上位子だけを次Cycleの親にします。
 
 Evidence:
-- OOS月利差: +0.88% [positive]
-- Stress月利差: +0.15% [positive]
-- DD改善量: +0.00% [negative]
-- Walk-forward差: -33.33% [negative]
-- 総合改善Score: 0.768 [positive]
+- OOS月利差: +0.82% [positive]
+- Stress月利差: +0.00% [negative]
+- DD改善量: +3.15% [positive]
+- Walk-forward差: +0.00% [negative]
+- 総合改善Score: 2.021 [positive]
 
-### 7. Portfolio Researcher (researcher)
+### 7. Alpha Researcher / Breakout (researcher)
 
-- Time: 2026-07-16T21:19:40.557Z
-- Strategy: deep-c8-baseline-2
+- Time: 2026-07-17T00:35:51.752Z
+- Strategy: deep-c9-baseline-2
 - Stance: proposal
 
-STRESS Champion deep-c8-baseline-2を深掘りします。根本原因はlow_return・stable_but_low_return・oos_decay・cost_fragilityです。今回の仮説は cooldownBars: 3→4（連続Entryを抑制すればダマシと往復コストを減らせる） / btcRegimeSmaBars: 29→33（BTCレジーム判定を少し長期化すれば期間依存のノイズを減らせる）。複数パラメータを同時に動かさず、何が効いたかを親子比較で特定します。
+STRESS Champion deep-c9-baseline-2を深掘りします。根本原因はlow_return・oos_decay・cost_fragility・drawdown_riskです。今回の仮説は minimumEdgeToCostRatio: 4.8→5.52（低期待値Entryを減らせば、取引回数を大きく失わずCost Stressが改善する） / rebalanceBars: 4→6（再評価間隔を延ばせば不要な回転が減り、手数料とSlippage耐性が改善する）。複数パラメータを同時に動かさず、何が効いたかを親子比較で特定します。
 
 Evidence:
-- Train平均月利: 3.29% [neutral]
-- OOS平均月利: 1.26% [negative]
-- OOS MaxDD: 5.05% [positive]
-- 最悪Stress月利: 0.18% [negative]
+- Train平均月利: 0.17% [neutral]
+- OOS平均月利: 0.34% [negative]
+- OOS MaxDD: 31.26% [negative]
+- 最悪Stress月利: -4.23% [negative]
 - Walk-forward: 0.00% [negative]
-- OOS取引数: 62 [positive]
+- OOS取引数: 98 [positive]
 
 ### 8. AI反対派 / Overfit (overfit_critic)
 
-- Time: 2026-07-16T21:19:41.557Z
-- Strategy: deep-c8-baseline-2
+- Time: 2026-07-17T00:35:52.752Z
+- Strategy: deep-c9-baseline-2
 - Stance: challenge
 
-Train月利3.29%に対しOOS月利1.26%、OOS維持率38.31%、Walk-forward0.00%です。子ロジックはTrainの上昇ではなく、親に対するOOS・Walk-forwardの実改善で判断してください。
+Train月利0.17%に対しOOS月利0.34%、OOS維持率196.82%、Walk-forward0.00%です。子ロジックはTrainの上昇ではなく、親に対するOOS・Walk-forwardの実改善で判断してください。
 
 Evidence:
-- OOS維持率: 38.31% [negative]
+- OOS維持率: 196.82% [positive]
 - Walk-forward: 0.00% [negative]
 - 変更パラメータ数/実験: 1 [positive]
 
 ### 9. AI反対派 / Tail Risk (tail_risk_critic)
 
-- Time: 2026-07-16T21:19:42.557Z
-- Strategy: deep-c8-baseline-2
+- Time: 2026-07-17T00:35:53.752Z
+- Strategy: deep-c9-baseline-2
 - Stance: challenge
 
-親のOOS MaxDDは5.05%、清算0件、最大連敗8回、最悪Stress月利0.18%です。月利改善と引き換えにDD・清算・Stressが悪化する子は拒否します。
+親のOOS MaxDDは31.26%、清算0件、最大連敗8回、最悪Stress月利-4.23%です。月利改善と引き換えにDD・清算・Stressが悪化する子は拒否します。
 
 Evidence:
-- OOS MaxDD: 5.05% [positive]
+- OOS MaxDD: 31.26% [negative]
 - 清算: 0件 [positive]
-- 最悪Stress月利: 0.18% [negative]
+- 最悪Stress月利: -4.23% [negative]
 
 ### 10. AI反対派 / Execution (execution_critic)
 
-- Time: 2026-07-16T21:19:43.557Z
-- Strategy: deep-c8-baseline-2
+- Time: 2026-07-17T00:35:54.752Z
+- Strategy: deep-c9-baseline-2
 - Stance: challenge
 
-親のOOS取引数62、PF 1.80、Funding合計31.7756、平均実効レバレッジ0.58倍です。単に取引数を消して見かけのStressを改善した子や、12取引未満の子は拒否します。
+親のOOS取引数98、PF 0.99、Funding合計148.7525、平均実効レバレッジ1.12倍です。単に取引数を消して見かけのStressを改善した子や、12取引未満の子は拒否します。
 
 Evidence:
-- OOS取引数: 62 [positive]
-- Profit Factor: 1.80 [positive]
-- Funding合計: 31.7756 [neutral]
+- OOS取引数: 98 [positive]
+- Profit Factor: 0.99 [negative]
+- Funding合計: 148.7525 [neutral]
 
 ### 11. Research CIO (cio)
 
-- Time: 2026-07-16T21:19:44.557Z
-- Strategy: deep-c8-stress-e1
+- Time: 2026-07-17T00:35:55.752Z
+- Strategy: deep-c9-stress-e1
 - Stance: decision
 
-STRESS ChampionではcooldownBarsの単一変更を継承採用します。OOS差+0.11%、Stress差-0.16%、DD改善+1.64%。同じChampion内で他案も基準を通った場合でも、この最上位子だけを次Cycleの親にします。
+STRESS Championの子は継承しません。親deep-c9-baseline-2を維持します。親ロジックに対する有意な改善量が不足 / OOS・Stress・DD・Walk-forwardの総合改善が不足 / Cost Stressが親より大幅に悪化
 
 Evidence:
-- OOS月利差: +0.11% [positive]
-- Stress月利差: -0.16% [negative]
-- DD改善量: +1.64% [positive]
+- OOS月利差: +0.00% [negative]
+- Stress月利差: -1.50% [negative]
+- DD改善量: +0.00% [negative]
 - Walk-forward差: +0.00% [negative]
-- 総合改善Score: 0.442 [positive]
+- 総合改善Score: -1.202 [negative]
 
-### 12. Alpha Researcher / Range (researcher)
+### 12. Quant Researcher / Regime (researcher)
 
-- Time: 2026-07-16T21:19:45.557Z
-- Strategy: deep-c8-baseline-3
+- Time: 2026-07-17T00:35:56.752Z
+- Strategy: deep-c9-baseline-1
 - Stance: proposal
 
-STABILITY Champion deep-c8-baseline-3を深掘りします。根本原因はlow_return・stable_but_low_return・oos_decay・cost_fragilityです。今回の仮説は minimumEdgeToCostRatio: 6.56→7.54（低期待値Entryを減らせば、取引回数を大きく失わずCost Stressが改善する） / rebalanceBars: 22→24（再評価間隔を延ばせば不要な回転が減り、手数料とSlippage耐性が改善する）。複数パラメータを同時に動かさず、何が効いたかを親子比較で特定します。
+STABILITY Champion deep-c9-baseline-1を深掘りします。根本原因はlow_return・oos_decay・cost_fragility・drawdown_riskです。今回の仮説は minimumEdgeToCostRatio: 4.2→4.83（低期待値Entryを減らせば、取引回数を大きく失わずCost Stressが改善する） / rebalanceBars: 6→8（再評価間隔を延ばせば不要な回転が減り、手数料とSlippage耐性が改善する）。複数パラメータを同時に動かさず、何が効いたかを親子比較で特定します。
 
 Evidence:
-- Train平均月利: 2.49% [neutral]
-- OOS平均月利: 1.66% [negative]
-- OOS MaxDD: 3.91% [positive]
-- 最悪Stress月利: -0.73% [negative]
+- Train平均月利: -0.88% [neutral]
+- OOS平均月利: -2.45% [negative]
+- OOS MaxDD: 25.71% [negative]
+- 最悪Stress月利: -4.68% [negative]
 - Walk-forward: 0.00% [negative]
-- OOS取引数: 53 [positive]
+- OOS取引数: 115 [positive]
 
 ### 13. AI反対派 / Overfit (overfit_critic)
 
-- Time: 2026-07-16T21:19:46.557Z
-- Strategy: deep-c8-baseline-3
+- Time: 2026-07-17T00:35:57.752Z
+- Strategy: deep-c9-baseline-1
 - Stance: challenge
 
-Train月利2.49%に対しOOS月利1.66%、OOS維持率66.57%、Walk-forward0.00%です。子ロジックはTrainの上昇ではなく、親に対するOOS・Walk-forwardの実改善で判断してください。
+Train月利-0.88%に対しOOS月利-2.45%、OOS維持率0.00%、Walk-forward0.00%です。子ロジックはTrainの上昇ではなく、親に対するOOS・Walk-forwardの実改善で判断してください。
 
 Evidence:
-- OOS維持率: 66.57% [positive]
+- OOS維持率: 0.00% [negative]
 - Walk-forward: 0.00% [negative]
 - 変更パラメータ数/実験: 1 [positive]
 
 ### 14. AI反対派 / Tail Risk (tail_risk_critic)
 
-- Time: 2026-07-16T21:19:47.557Z
-- Strategy: deep-c8-baseline-3
+- Time: 2026-07-17T00:35:58.752Z
+- Strategy: deep-c9-baseline-1
 - Stance: challenge
 
-親のOOS MaxDDは3.91%、清算0件、最大連敗5回、最悪Stress月利-0.73%です。月利改善と引き換えにDD・清算・Stressが悪化する子は拒否します。
+親のOOS MaxDDは25.71%、清算0件、最大連敗10回、最悪Stress月利-4.68%です。月利改善と引き換えにDD・清算・Stressが悪化する子は拒否します。
 
 Evidence:
-- OOS MaxDD: 3.91% [positive]
+- OOS MaxDD: 25.71% [negative]
 - 清算: 0件 [positive]
-- 最悪Stress月利: -0.73% [negative]
+- 最悪Stress月利: -4.68% [negative]
 
 ### 15. AI反対派 / Execution (execution_critic)
 
-- Time: 2026-07-16T21:19:48.557Z
-- Strategy: deep-c8-baseline-3
+- Time: 2026-07-17T00:35:59.752Z
+- Strategy: deep-c9-baseline-1
 - Stance: challenge
 
-親のOOS取引数53、PF 2.40、Funding合計35.7011、平均実効レバレッジ0.63倍です。単に取引数を消して見かけのStressを改善した子や、12取引未満の子は拒否します。
+親のOOS取引数115、PF 0.77、Funding合計103.5572、平均実効レバレッジ0.74倍です。単に取引数を消して見かけのStressを改善した子や、12取引未満の子は拒否します。
 
 Evidence:
-- OOS取引数: 53 [positive]
-- Profit Factor: 2.40 [positive]
-- Funding合計: 35.7011 [neutral]
+- OOS取引数: 115 [positive]
+- Profit Factor: 0.77 [negative]
+- Funding合計: 103.5572 [neutral]
 
 ### 16. Research CIO (cio)
 
-- Time: 2026-07-16T21:19:49.557Z
-- Strategy: deep-c8-stability-e1
+- Time: 2026-07-17T00:36:00.752Z
+- Strategy: deep-c9-stability-e1
 - Stance: decision
 
-STABILITY ChampionではminimumEdgeToCostRatioの単一変更を継承採用します。OOS差+0.00%、Stress差+0.81%、DD改善+0.00%。同じChampion内で他案も基準を通った場合でも、この最上位子だけを次Cycleの親にします。
+STABILITY ChampionではminimumEdgeToCostRatioの単一変更を継承採用します。OOS差+0.00%、Stress差+0.99%、DD改善+0.00%。同じChampion内で他案も基準を通った場合でも、この最上位子だけを次Cycleの親にします。
 
 Evidence:
 - OOS月利差: +0.00% [negative]
-- Stress月利差: +0.81% [positive]
+- Stress月利差: +0.99% [positive]
 - DD改善量: +0.00% [negative]
 - Walk-forward差: +0.00% [negative]
-- 総合改善Score: 0.648 [positive]
+- 総合改善Score: 0.792 [positive]
 
 ### 17. Research CIO (cio)
 
-- Time: 2026-07-16T21:19:50.557Z
+- Time: 2026-07-17T00:36:01.752Z
 - Strategy: cycle-wide
 - Stance: decision
 
-Cycle 8は6件の単一変更を親子比較し、3件が改善基準を通過、Championごとの最上位3件を次の親として継承しました。残りのChampionは親を維持します。目標30%に届かなくても、親より再現性を保って改善した変更だけを累積し、改善履歴が追跡できない広範囲変異は行いません。次回方針: oos ChampionでbtcRegimeSmaBars変更を継承し、別の単一変更を追加検証する / stress ChampionでcooldownBars変更を継承し、別の単一変更を追加検証する / stability ChampionでminimumEdgeToCostRatio変更を継承し、別の単一変更を追加検証する
+Cycle 9は6件の単一変更を親子比較し、3件が改善基準を通過、Championごとの最上位2件を次の親として継承しました。残りのChampionは親を維持します。目標30%に届かなくても、親より再現性を保って改善した変更だけを累積し、改善履歴が追跡できない広範囲変異は行いません。次回方針: oos ChampionでminimumEdgeToCostRatio変更を継承し、別の単一変更を追加検証する / oos ChampionでrebalanceBars変更を継承し、別の単一変更を追加検証する / stability ChampionでminimumEdgeToCostRatio変更を継承し、別の単一変更を追加検証する / stress Championは親を維持し、low_return・oos_decayを別仮説で再検証する
 
 Evidence:
 - 単一変更実験: 6 [positive]
 - 改善基準通過: 3 [positive]
-- 継承採用: 3 [positive]
-- 親維持: 0 [neutral]
+- 継承採用: 2 [positive]
+- 親維持: 1 [neutral]
 - 最終候補: 0 [neutral]
