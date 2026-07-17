@@ -1,7 +1,27 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-17T03:44:24.000Z",
+  "updatedAt": "2026-07-17T04:44:55.877Z",
   "items": [
+    {
+      "id": "main-research-0001-2026-07-17T04-44-55-877Z",
+      "path": "discussions/2026/07/17/main-research-0001-2026-07-17T04-44-55-877Z.json",
+      "cycle": 9,
+      "completedAt": "2026-07-17T04:44:55.877Z",
+      "profile": "attack",
+      "title": "Main Strategy Research #1：WIN80_ULTRA90_TOP1_V1 / Win80 / Ultra90 Entry品質",
+      "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Win80 / Ultra90 Entry品質」を議論。2件を提案し、最優先はWIN80_SCORE_82_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。",
+      "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN80_SCORE_82_CHILD_V1で、Win80 minimum scoreだけを変更した親子リプレイを作成します。WIN80_TRIGGER_80_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。",
+      "messageCount": 7,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": null,
+      "bestOosDrawdownPct": null,
+      "bestWorstStressMonthlyPct": null,
+      "topStrategyIds": [
+        "WIN80_ULTRA90_TOP1_V1",
+        "WIN80_SCORE_82_CHILD_V1",
+        "WIN80_TRIGGER_80_CHILD_V1"
+      ]
+    },
     {
       "id": "main-audit-win80_ultra90_top1_v1-2026-07-17T03-44-24-000Z",
       "path": "discussions/2026/07/17/main-audit-win80_ultra90_top1_v1-2026-07-17T03-44-24-000Z.json",
