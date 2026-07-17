@@ -1,7 +1,27 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-17T04:44:55.877Z",
+  "updatedAt": "2026-07-17T04:46:41.693Z",
   "items": [
+    {
+      "id": "main-research-0002-2026-07-17T04-46-41-693Z",
+      "path": "discussions/2026/07/17/main-research-0002-2026-07-17T04-46-41-693Z.json",
+      "cycle": 9,
+      "completedAt": "2026-07-17T04:46:41.693Z",
+      "profile": "attack",
+      "title": "Main Strategy Research #2：WIN80_ULTRA90_TOP1_V1 / 50%分割 / 70%Rotation",
+      "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「50%分割 / 70%Rotation」を議論。2件を提案し、最優先はULTRA90_ROTATION_60_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。",
+      "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はULTRA90_ROTATION_60_CHILD_V1で、Ultra90 switch fractionだけを変更した親子リプレイを作成します。WIN80_SPLIT_40_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。",
+      "messageCount": 7,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": null,
+      "bestOosDrawdownPct": null,
+      "bestWorstStressMonthlyPct": null,
+      "topStrategyIds": [
+        "WIN80_ULTRA90_TOP1_V1",
+        "ULTRA90_ROTATION_60_CHILD_V1",
+        "WIN80_SPLIT_40_CHILD_V1"
+      ]
+    },
     {
       "id": "main-research-0001-2026-07-17T04-44-55-877Z",
       "path": "discussions/2026/07/17/main-research-0001-2026-07-17T04-44-55-877Z.json",
