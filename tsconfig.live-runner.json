@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "lib/aster-v3-client.ts",
+    "lib/direct-trade-executor.ts",
+    "lib/live-runner-state.ts",
+    "lib/paper-direct-trade-executor.ts",
+    "lib/win80-ultra90-live-runner.ts",
+    "lib/win80-ultra90-main-strategy.ts",
+    "lib/cycle-strategy.ts",
+    "scripts/win80-ultra90-live-runner.ts",
+    "scripts/win80-ultra90-live-runner-selftest.ts",
+    "scripts/aster-direct-trade-executor-selftest.ts",
+    "config/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "backups",
+    "restoretmp"
+  ]
+}

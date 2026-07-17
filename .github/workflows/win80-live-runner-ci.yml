@@ -1,0 +1,102 @@
+name: Win80 Ultra90 Live Runner CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/win80-ultra90-live-runner-v1
+    paths:
+      - "lib/aster-v3-client.ts"
+      - "lib/direct-trade-executor.ts"
+      - "lib/live-runner-state.ts"
+      - "lib/paper-direct-trade-executor.ts"
+      - "lib/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner-selftest.ts"
+      - "scripts/aster-direct-trade-executor-selftest.ts"
+      - "tsconfig.live-runner.json"
+      - "package.json"
+      - ".github/workflows/win80-live-runner-ci.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "lib/aster-v3-client.ts"
+      - "lib/direct-trade-executor.ts"
+      - "lib/live-runner-state.ts"
+      - "lib/paper-direct-trade-executor.ts"
+      - "lib/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner-selftest.ts"
+      - "scripts/aster-direct-trade-executor-selftest.ts"
+      - "tsconfig.live-runner.json"
+      - "package.json"
+      - "config/strategyConfig.ts"
+      - ".github/workflows/win80-live-runner-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: win80-live-runner-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Main strategy policy self-test
+        run: npm run strategy:main:selftest
+
+      - name: Live runner state and failure self-test
+        run: npm run strategy:live:selftest
+
+      - name: Aster direct executor protocol self-test
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run strategy:executor:selftest 2>&1 | tee executor-selftest.log
+
+      - name: Live runner TypeScript check
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run strategy:live:typecheck 2>&1 | tee live-runner-typecheck.log
+
+      - name: Repository TypeScript checks
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run typecheck 2>&1 | tee repository-typecheck.log
+
+      - name: Production build
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee production-build.log
+
+      - name: Upload verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: win80-live-runner-ci-logs
+          path: |
+            executor-selftest.log
+            live-runner-typecheck.log
+            repository-typecheck.log
+            production-build.log
+          if-no-files-found: ignore
+          retention-days: 7
