@@ -11,13 +11,25 @@ on:
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
       - "config/**"
+      - "package.json"
+      - ".github/workflows/win80-profit-optimization.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research-lab-main-strategy-profit-optimizer.ts"
+      - "lib/research-lab/perp/**"
+      - "lib/cycle-strategy.ts"
+      - "lib/win80-ultra90-main-strategy.ts"
+      - "config/**"
+      - "package.json"
       - ".github/workflows/win80-profit-optimization.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: win80-profit-optimization-${{ github.ref }}
+  group: win80-profit-optimization-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -57,7 +69,7 @@ jobs:
       - name: Run chronological profit optimization
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
-        run: npx tsx scripts/research-lab-main-strategy-profit-optimizer.ts
+        run: npm run research:main-strategy:profit-optimize
 
       - name: Upload optimization evidence
         if: always()
