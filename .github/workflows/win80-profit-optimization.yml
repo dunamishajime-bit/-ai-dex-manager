@@ -66,6 +66,20 @@ jobs:
       - name: Main strategy policy self-test
         run: npm run strategy:main:selftest
 
+      - name: Optimize entry timestamp lookup
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          target = Path("scripts/research-lab-main-strategy-profit-optimizer.ts")
+          text = target.read_text(encoding="utf-8")
+          old = 'const entryIndex = candles.findIndex((candle) => candle.ts === event.entryTs);'
+          new = 'const entryIndex = indexAtOrBefore(candles, event.entryTs);'
+          if old not in text:
+              raise SystemExit("entry lookup patch target not found")
+          target.write_text(text.replace(old, new), encoding="utf-8")
+          PY
+
       - name: Run chronological profit optimization
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
