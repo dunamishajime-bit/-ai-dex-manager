@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "id": "main-research-0003-2026-07-17T05-12-55-199Z",
-  "cycle": 3,
-  "startedAt": "2026-07-17T05:12:45.199Z",
-  "completedAt": "2026-07-17T05:12:55.199Z",
+  "id": "main-research-0004-2026-07-17T07-07-12-996Z",
+  "cycle": 4,
+  "startedAt": "2026-07-17T07:07:02.996Z",
+  "completedAt": "2026-07-17T07:07:12.996Z",
   "profile": "attack",
-  "title": "Main Strategy Research #3：WIN80_ULTRA90_TOP1_V1 / Top-1順位付け",
-  "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Top-1順位付け」を議論。2件を提案し、最優先はTOP1_COST_ADJUSTED_RANK_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。",
-  "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はTOP1_COST_ADJUSTED_RANK_CHILD_V1で、Top-1 ranking scoreだけを変更した親子リプレイを作成します。TOP1_REGIME_CONFIRM_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。",
-  "methodology": "研究Program win80_ultra90_direct_v2。親はproduction main WIN80_ULTRA90_TOP1_V1だけです。旧Champion Deep Stateは読み込まず、実コード定数、歴史参考値、Critic反論、実パラメータ変更案から議論を生成します。再現可能なリプレイ結果がない案はREPLAY_REQUIREDとし、OOSや月利を捏造しません。",
+  "title": "Main Strategy Research #4：WIN80_ULTRA90_TOP1_V1 / 初回100%・最大2通貨",
+  "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「初回100%・最大2通貨」を議論。2件を提案し、最優先はINITIAL_NOTIONAL_80_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。",
+  "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。",
+  "methodology": "研究Program win80_ultra90_direct_v2。親はproduction main WIN80_ULTRA90_TOP1_V1だけです。旧Champion Deep Stateは読み込まず、実コード定数、歴史参考値、Critic反論、実パラメータ変更案から議論を生成します。再現可能なリプレイ結果がない案はREPLAY_REQUIREDとし、OOSや月利を捏造しません。 追加Evidence: binance-usdm-futuresの1h OHLCV/FundingキャッシュからStrategyEngineInputを6時間ごとに再構築し、次1h足始値Entry・固定24h/72h/168h Outcome・Fee/Slippage/Funding控除で検証。Artifact fingerprint=251058c8a001971f985f20b71d51154fee32ea07eebf3f6113378f8e15765f2d。",
   "finalCandidates": 0,
   "bestTrainMonthlyPct": null,
   "bestOosMonthlyPct": null,
@@ -16,20 +16,20 @@
   "bestWorstStressMonthlyPct": null,
   "topStrategyIds": [
     "WIN80_ULTRA90_TOP1_V1",
-    "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
-    "TOP1_REGIME_CONFIRM_CHILD_V1"
+    "INITIAL_NOTIONAL_80_CHILD_V1",
+    "MAX_POSITION_1_CHILD_V1"
   ],
   "messages": [
     {
       "id": "m-001",
       "sequence": 1,
-      "createdAt": "2026-07-17T05:12:46.199Z",
+      "createdAt": "2026-07-17T07:07:03.996Z",
       "speakerId": "research-moderator",
       "speakerName": "Research Moderator",
       "role": "moderator",
       "stance": "context",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "Main Strategy Research #3を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「Top-1順位付け」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。",
+      "content": "Main Strategy Research #4を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「初回100%・最大2通貨」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。",
       "evidence": [
         {
           "label": "固定親",
@@ -48,7 +48,7 @@
         },
         {
           "label": "今回の焦点",
-          "value": "Top-1順位付け",
+          "value": "初回100%・最大2通貨",
           "assessment": "neutral"
         }
       ]
@@ -56,13 +56,13 @@
     {
       "id": "m-002",
       "sequence": 2,
-      "createdAt": "2026-07-17T05:12:47.199Z",
+      "createdAt": "2026-07-17T07:07:04.996Z",
       "speakerId": "main-strategy-researcher",
       "speakerName": "Main Strategy Researcher",
       "role": "researcher",
       "stance": "support",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "現行メインはWin80: Score80 / Confidence80.00% / Trigger76.00% / RR1.18 / Volume0.72、Ultra90: Score90 / Confidence90.00% / Trigger88.00% / RR1.45 / Volume0.90です。Top-1へ初回100.00%、含み益Win80は50.00%分割、Ultra90は70.00%移動です。",
+      "content": "現行メインはWin80: Score80 / Confidence80.00% / Trigger76.00% / RR1.18 / Volume0.72、Ultra90: Score90 / Confidence90.00% / Trigger88.00% / RR1.45 / Volume0.90です。Top-1へ初回100.00%、含み益Win80は50.00%分割、Ultra90は70.00%移動です。\n\n保存済みBT元データからStrategyEngineInputを時系列復元しました。2025-07-01〜2026-04-07 / 5銘柄 / 6時間間隔。EntryはSnapshot確定後の次1時間足始値で、24h・72h・7日後を固定評価しています。1084 Snapshot、86 Signal、72h勝率46.51%、72h平均-0.84%、PF0.74。",
       "evidence": [
         {
           "label": "歴史複利月利",
@@ -83,27 +83,52 @@
           "label": "完全未使用OOS",
           "value": "NO",
           "assessment": "negative"
+        },
+        {
+          "label": "Snapshotデータ",
+          "value": "WIN80_USDM_1H_REFERENCE_2025H2_2026Q1_V1",
+          "assessment": "positive"
+        },
+        {
+          "label": "Snapshot数",
+          "value": "1084",
+          "assessment": "positive"
+        },
+        {
+          "label": "選定Signal",
+          "value": "86",
+          "assessment": "positive"
+        },
+        {
+          "label": "72h勝率",
+          "value": "46.51%",
+          "assessment": "negative"
+        },
+        {
+          "label": "72h平均",
+          "value": "-0.84%",
+          "assessment": "negative"
         }
       ]
     },
     {
       "id": "m-003",
       "sequence": 3,
-      "createdAt": "2026-07-17T05:12:48.199Z",
+      "createdAt": "2026-07-17T07:07:05.996Z",
       "speakerId": "hypothesis-researcher",
       "speakerName": "Hypothesis Researcher",
       "role": "researcher",
       "stance": "proposal",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "1. TOP1_COST_ADJUSTED_RANK_CHILD_V1: Top-1 ranking scoreを「Tier + Score + Confidence + Trigger + RR + Volume + EventPriority」から「Current ranking - estimated round-trip cost penalty」へ変更。高ScoreでもSpread・Slippage負けする銘柄をTop-1から外せるかを検証する。 期待効果: 約定後期待値とStress耐性の改善。\n2. TOP1_REGIME_CONFIRM_CHILD_V1: Top-1 tie breakerを「Trend agreement bonus」から「BTC regime agreement as final tie breaker」へ変更。僅差候補ではBTC地合い一致を優先し、逆行Entryを減らす。 期待効果: 勝率改善と候補減少。",
+      "content": "1. INITIAL_NOTIONAL_80_CHILD_V1: Initial notional fractionを「100.00%」から「80.00%」へ変更。初回100%集中を抑え、次のUltra90または急変時の余力を残す。 期待効果: DD低下と月利低下の比較。\n2. MAX_POSITION_1_CHILD_V1: Maximum concurrent positionsを「2」から「1」へ変更。Top-1思想を完全単一保有にした場合の集中収益と相関リスクを比較する。 期待効果: 管理単純化と分散効果消失の比較。",
       "evidence": [
         {
-          "label": "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
+          "label": "INITIAL_NOTIONAL_80_CHILD_V1",
           "value": "REPLAY_REQUIRED",
           "assessment": "neutral"
         },
         {
-          "label": "TOP1_REGIME_CONFIRM_CHILD_V1",
+          "label": "MAX_POSITION_1_CHILD_V1",
           "value": "REPLAY_REQUIRED",
           "assessment": "neutral"
         }
@@ -112,7 +137,7 @@
     {
       "id": "m-004",
       "sequence": 4,
-      "createdAt": "2026-07-17T05:12:49.199Z",
+      "createdAt": "2026-07-17T07:07:06.996Z",
       "speakerId": "overfit-critic",
       "speakerName": "AI反対派 / Overfit",
       "role": "overfit_critic",
@@ -140,7 +165,7 @@
     {
       "id": "m-005",
       "sequence": 5,
-      "createdAt": "2026-07-17T05:12:50.199Z",
+      "createdAt": "2026-07-17T07:07:07.996Z",
       "speakerId": "tail-risk-critic",
       "speakerName": "AI反対派 / Tail Risk",
       "role": "tail_risk_critic",
@@ -168,41 +193,51 @@
     {
       "id": "m-006",
       "sequence": 6,
-      "createdAt": "2026-07-17T05:12:51.199Z",
+      "createdAt": "2026-07-17T07:07:08.996Z",
       "speakerId": "execution-critic",
       "speakerName": "AI反対派 / Execution",
       "role": "execution_critic",
       "stance": "challenge",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "今回の案は現行メインの実パラメータに直接紐づいています。ただし現時点のRepositoryには月利16.81%を再計算する完全な取引ログと固定リプレイ入力が保存されていません。よって汎用Perpetual GenomeのOOS数値を代用せず、StrategyEngineInputの時系列Snapshotまたは再現可能なBT Artifactを作ることが先です。",
+      "content": "再現可能なBT Snapshot Artifactを確認しました。2025-07-01〜2026-04-07 / 5銘柄 / 6時間間隔、Fingerprint 251058c8a001971f…。1084 Snapshot、86 Signal、72h勝率46.51%、72h平均-0.84%、PF0.74、Stress 72h平均-1.00%、Event列DD-81.51%、72h最悪-21.27%です。これで現行ロジックの過去時点における選定理由とForward Outcomeを議論できます。ただしAster過去Order BookではなくBinance USD-M 1h OHLCV/Fundingを変換した証拠であり、固定72h Outcomeは現行runnerの全決済ライフサイクル月利ではありません。子案の採否には同一Snapshot上の親子比較とForward Paperが必要です。",
       "evidence": [
         {
-          "label": "汎用Genome代用",
-          "value": "禁止",
+          "label": "再現BT Artifact",
+          "value": "LOADED",
           "assessment": "positive"
         },
         {
-          "label": "再現BT Artifact",
-          "value": "未確認",
+          "label": "Fingerprint",
+          "value": "251058c8a001971f985f",
+          "assessment": "positive"
+        },
+        {
+          "label": "72h Stress平均",
+          "value": "-1.00%",
           "assessment": "negative"
         },
         {
-          "label": "実コード親",
-          "value": "WIN80_ULTRA90_TOP1_V1",
-          "assessment": "positive"
+          "label": "Aster過去Order Book",
+          "value": "未収録",
+          "assessment": "negative"
+        },
+        {
+          "label": "全決済Portfolio BT",
+          "value": "別途必要",
+          "assessment": "neutral"
         }
       ]
     },
     {
       "id": "m-007",
       "sequence": 7,
-      "createdAt": "2026-07-17T05:12:52.199Z",
+      "createdAt": "2026-07-17T07:07:09.996Z",
       "speakerId": "research-cio",
       "speakerName": "Research CIO",
       "role": "cio",
       "stance": "decision",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はTOP1_COST_ADJUSTED_RANK_CHILD_V1で、Top-1 ranking scoreだけを変更した親子リプレイを作成します。TOP1_REGIME_CONFIRM_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。",
+      "content": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。\n\n現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。",
       "evidence": [
         {
           "label": "メイン維持",
@@ -211,7 +246,7 @@
         },
         {
           "label": "最優先実験",
-          "value": "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
+          "value": "INITIAL_NOTIONAL_80_CHILD_V1",
           "assessment": "neutral"
         },
         {
@@ -223,8 +258,248 @@
           "label": "自動メイン変更",
           "value": "禁止",
           "assessment": "positive"
+        },
+        {
+          "label": "親Snapshot Replay",
+          "value": "READY",
+          "assessment": "positive"
+        },
+        {
+          "label": "子案親子比較",
+          "value": "REPLAY_REQUIRED",
+          "assessment": "neutral"
+        },
+        {
+          "label": "実売買自動反映",
+          "value": "禁止",
+          "assessment": "positive"
         }
       ]
     }
-  ]
+  ],
+  "snapshotReplay": {
+    "datasetId": "WIN80_USDM_1H_REFERENCE_2025H2_2026Q1_V1",
+    "strategyId": "WIN80_ULTRA90_TOP1_V1",
+    "source": "binance-usdm-futures",
+    "generatedAt": "2026-07-17T07:07:02.995Z",
+    "period": {
+      "startIso": "2025-07-01T00:00:00.000Z",
+      "endIso": "2026-04-07T00:00:00.000Z"
+    },
+    "symbols": [
+      "ETH",
+      "BNB",
+      "SOL",
+      "AVAX",
+      "LINK"
+    ],
+    "intervalHours": 6,
+    "snapshotCount": 1084,
+    "selectedSignalCount": 86,
+    "noSignalSnapshotCount": 979,
+    "costs": {
+      "feeBpsPerSide": 6,
+      "slippageBpsPerSide": 4,
+      "stressSlippageBpsPerSide": 12
+    },
+    "metrics": {
+      "sampleCount": 86,
+      "winRate24hPct": 44.19,
+      "winRate72hPct": 46.51,
+      "winRate168hPct": 47.67,
+      "average24hPct": -0.1366,
+      "average72hPct": -0.8391,
+      "average168hPct": -0.5478,
+      "median72hPct": -0.638,
+      "profitFactor72h": 0.737,
+      "stressAverage72hPct": -0.9991,
+      "eventSequenceMaxDrawdownPct": -81.5122,
+      "best72hPct": 17.9463,
+      "worst72hPct": -21.2654,
+      "averageMfe72hPct": 5.0928,
+      "averageMae72hPct": -5.6966
+    },
+    "signalCountsBySymbol": {
+      "ETH": 45,
+      "SOL": 39,
+      "BNB": 2
+    },
+    "limitations": [
+      "Binance USD-M 1h OHLCV/FundingをStrategyEngineInputへ変換した再現Snapshotであり、Asterの過去Order Bookそのものではありません。",
+      "EntryはSnapshot確定後の次1時間足始値。24h/72h/168hは固定Forward Outcomeで、現行runnerの全決済ライフサイクル月利ではありません。",
+      "Historical spreadは保存されていないため、fee/slippageは固定仮定を使用します。",
+      "同一期間は既に分析済みであり、完全未使用OOSではありません。"
+    ],
+    "fingerprint": "251058c8a001971f985f20b71d51154fee32ea07eebf3f6113378f8e15765f2d",
+    "events": [
+      {
+        "snapshotIso": "2025-07-03T18:59:59.999Z",
+        "symbol": "ETH",
+        "tier": "WIN80",
+        "score": 82,
+        "triggerProgressPct": 80,
+        "forward24hPct": -4.1044,
+        "forward72hPct": -2.295,
+        "forward168hPct": 8.4253,
+        "stress72hPct": -2.455,
+        "mfe72hPct": 0.7202,
+        "mae72hPct": -4.2985,
+        "snapshotFingerprint": "dd520f76122e73726dba"
+      },
+      {
+        "snapshotIso": "2025-07-10T12:59:59.999Z",
+        "symbol": "ETH",
+        "tier": "WIN80",
+        "score": 84,
+        "triggerProgressPct": 80,
+        "forward24hPct": 7.2717,
+        "forward72hPct": 7.2176,
+        "forward168hPct": 23.0129,
+        "stress72hPct": 7.0576,
+        "mfe72hPct": 9.4954,
+        "mae72hPct": -0.7389,
+        "snapshotFingerprint": "79d7fd5cefa0c4360d90"
+      },
+      {
+        "snapshotIso": "2025-07-15T00:59:59.999Z",
+        "symbol": "ETH",
+        "tier": "WIN80",
+        "score": 81,
+        "triggerProgressPct": 80,
+        "forward24hPct": 4.7991,
+        "forward72hPct": 17.9463,
+        "forward168hPct": 24.6473,
+        "stress72hPct": 17.7863,
+        "mfe72hPct": 18.3242,
+        "mae72hPct": -2.0319,
+        "snapshotFingerprint": "b55a8f8ae3c1dfd1fcd6"
+      },
+      {
+        "snapshotIso": "2025-07-19T00:59:59.999Z",
+        "symbol": "ETH",
+        "tier": "WIN80",
+        "score": 80,
+        "triggerProgressPct": 80,
+        "forward24hPct": 1.7194,
+        "forward72hPct": 5.9517,
+        "forward168hPct": 5.3578,
+        "stress72hPct": 5.7917,
+        "mfe72hPct": 9.5464,
+        "mae72hPct": -0.4722,
+        "snapshotFingerprint": "69adbfc9c2269e2c2f63"
+      },
+      {
+        "snapshotIso": "2025-07-21T00:59:59.999Z",
+        "symbol": "ETH",
+        "tier": "WIN80",
+        "score": 80,
+        "triggerProgressPct": 80,
+        "forward24hPct": -0.3552,
+        "forward72hPct": -2.9923,
+        "forward168hPct": 2.6381,
+        "stress72hPct": -3.1523,
+        "mfe72hPct": 2.9815,
+        "mae72hPct": -5.8629,
+        "snapshotFingerprint": "c7c5344981add205cb0e"
+      },
+      {
+        "snapshotIso": "2025-07-22T06:59:59.999Z",
+        "symbol": "SOL",
+        "tier": "WIN80",
+        "score": 88,
+        "triggerProgressPct": 80,
+        "forward24hPct": 0.5839,
+        "forward72hPct": -10.8351,
+        "forward168hPct": -7.595,
+        "stress72hPct": -10.9951,
+        "mfe72hPct": 3.7126,
+        "mae72hPct": -11.8312,
+        "snapshotFingerprint": "c8fb0401f93b5814e98e"
+      },
+      {
+        "snapshotIso": "2025-07-25T06:59:59.999Z",
+        "symbol": "ETH",
+        "tier": "WIN80",
+        "score": 84,
+        "triggerProgressPct": 80,
+        "forward24hPct": 2.7574,
+        "forward72hPct": 7.4775,
+        "forward168hPct": 0.5014,
+        "stress72hPct": 7.3175,
+        "mfe72hPct": 8.5647,
+        "mae72hPct": -0.8904,
+        "snapshotFingerprint": "2adbcf83d1f016502329"
+      },
+      {
+        "snapshotIso": "2025-07-26T12:59:59.999Z",
+        "symbol": "SOL",
+        "tier": "WIN80",
+        "score": 88,
+        "triggerProgressPct": 80,
+        "forward24hPct": -1.0232,
+        "forward72hPct": -2.4212,
+        "forward168hPct": -12.8304,
+        "stress72hPct": -2.5812,
+        "mfe72hPct": 3.9821,
+        "mae72hPct": -3.9076,
+        "snapshotFingerprint": "47e11d41b7dedf925ddc"
+      },
+      {
+        "snapshotIso": "2025-08-05T06:59:59.999Z",
+        "symbol": "SOL",
+        "tier": "WIN80",
+        "score": 85,
+        "triggerProgressPct": 80,
+        "forward24hPct": -2.4416,
+        "forward72hPct": 4.2027,
+        "forward168hPct": 3.8411,
+        "stress72hPct": 4.0427,
+        "mfe72hPct": 4.9403,
+        "mae72hPct": -3.9141,
+        "snapshotFingerprint": "23c75d939835e539db63"
+      },
+      {
+        "snapshotIso": "2025-08-08T12:59:59.999Z",
+        "symbol": "SOL",
+        "tier": "WIN80",
+        "score": 84,
+        "triggerProgressPct": 80,
+        "forward24hPct": 3.039,
+        "forward72hPct": 1.0621,
+        "forward168hPct": 9.2616,
+        "stress72hPct": 0.9021,
+        "mfe72hPct": 5.897,
+        "mae72hPct": -1.2701,
+        "snapshotFingerprint": "eb692ed5f93ea398f811"
+      },
+      {
+        "snapshotIso": "2025-08-10T18:59:59.999Z",
+        "symbol": "SOL",
+        "tier": "WIN80",
+        "score": 82,
+        "triggerProgressPct": 80,
+        "forward24hPct": -2.6945,
+        "forward72hPct": 8.9539,
+        "forward168hPct": 4.7987,
+        "stress72hPct": 8.7939,
+        "mfe72hPct": 12.2748,
+        "mae72hPct": -5.0972,
+        "snapshotFingerprint": "d5d267c9dc696cb90d3e"
+      },
+      {
+        "snapshotIso": "2025-08-11T18:59:59.999Z",
+        "symbol": "ETH",
+        "tier": "WIN80",
+        "score": 88,
+        "triggerProgressPct": 80,
+        "forward24hPct": 4.3313,
+        "forward72hPct": 5.3921,
+        "forward168hPct": 1.327,
+        "stress72hPct": 5.2321,
+        "mfe72hPct": 11.6608,
+        "mae72hPct": -2.5099,
+        "snapshotFingerprint": "8fcd65c6a1d256d53864"
+      }
+    ]
+  }
 }

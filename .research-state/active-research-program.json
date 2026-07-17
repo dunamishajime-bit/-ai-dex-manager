@@ -2,12 +2,19 @@
   "version": 1,
   "programId": "win80_ultra90_direct_v2",
   "mainStrategyId": "WIN80_ULTRA90_TOP1_V1",
-  "activatedAt": "2026-07-17T05:12:55.199Z",
+  "activatedAt": "2026-07-17T07:07:12.996Z",
   "oldChampionStateInherited": false,
   "legacyChampionState": "DELETED_RESULTS_SOURCE_DATA_PRESERVED",
+  "snapshotReplay": {
+    "status": "READY",
+    "datasetId": "WIN80_USDM_1H_REFERENCE_2025H2_2026Q1_V1",
+    "fingerprint": "251058c8a001971f985f20b71d51154fee32ea07eebf3f6113378f8e15765f2d",
+    "snapshotCount": 1084,
+    "selectedSignalCount": 86
+  },
   "legacyChampionCleanup": {
-    "removedStateFiles": 10,
-    "removedDiscussionFiles": 6,
+    "removedStateFiles": 0,
+    "removedDiscussionFiles": 0,
     "removedReportsDirectory": false
   }
 }
