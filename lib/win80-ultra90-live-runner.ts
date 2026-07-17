@@ -493,13 +493,13 @@ export class Win80Ultra90LiveRunner {
             if (pending.phase === "source_sell_submitted") {
                 const resolved = await this.reconcileSubmittedLeg(state, pending, "source");
                 if (!resolved) {
-                    return { status: pending.phase === "manual_review" ? "manual-review" : "held", message: "Source sell status is still unknown.", idempotencyKey: pending.idempotencyKey };
+                    return { status: state.pending?.phase === "manual_review" ? "manual-review" : "held", message: "Source sell status is still unknown.", idempotencyKey: pending.idempotencyKey };
                 }
             }
             if (pending.phase === "target_buy_submitted") {
                 const resolved = await this.reconcileSubmittedLeg(state, pending, "target");
                 if (!resolved) {
-                    return { status: pending.phase === "manual_review" ? "manual-review" : "held", message: "Target buy status is still unknown.", idempotencyKey: pending.idempotencyKey };
+                    return { status: state.pending?.phase === "manual_review" ? "manual-review" : "held", message: "Target buy status is still unknown.", idempotencyKey: pending.idempotencyKey };
                 }
                 if (!state.pending) {
                     return { status: "completed", message: "Target buy reconciled and transaction completed.", idempotencyKey: pending.idempotencyKey };
