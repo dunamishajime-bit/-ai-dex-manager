@@ -13,11 +13,12 @@ on:
       - "package.json"
       - "tsconfig.research.json"
       - ".github/workflows/research-lab-ci.yml"
+      - ".github/workflows/research-lab-autonomous.yml"
 
 jobs:
   typecheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,6 +31,10 @@ jobs:
         run: npm ci
       - name: TypeScript check
         run: npm run typecheck
+      - name: Production main strategy rule self-test
+        run: npm run strategy:main:selftest
+      - name: Current main strategy audit discussion self-test
+        run: npm run research:main-strategy:audit:selftest
       - name: Spot Research Lab self-test
         run: npm run research:lab:selftest
       - name: Perpetual Research Lab self-test
