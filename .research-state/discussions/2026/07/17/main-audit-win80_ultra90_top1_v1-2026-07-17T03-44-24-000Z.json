@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "id": "main-audit-win80_ultra90_top1_v1-2026-07-17T03-44-24-000Z",
+  "cycle": 9,
+  "startedAt": "2026-07-17T03:44:16.000Z",
+  "completedAt": "2026-07-17T03:44:24.000Z",
+  "profile": "attack",
+  "title": "手動監査：WIN80_ULTRA90_TOP1_V1 現行メインロジック会議",
+  "summary": "研究Proxyではなく現行WIN80_ULTRA90_TOP1_V1本体を直接監査。Win80/Ultra90分類、Top-1、100%初回配分、50%分割、70%Rotation、含み損時拒否は実コードで確認。歴史複利月利16.81%は有望だが完全未使用OOSではなく、再現性はForward Paper待ち。",
+  "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定し、Proxyで置換しません。実コード動作は確認済みですが収益再現性は未確定です。現行コードを凍結したForward Paper、未使用OOS、Score80/90・50%・70%の個別Ablation、コスト・Gap Stressを優先します。",
+  "methodology": "現在のproduction main strategyコード、strategyConfig、実関数Probe、歴史参考値を直接読み取る決定論的な監査会議です。Perpetual Research Genomeへ写像したProxy成績は、この手動監査の主評価には使用しません。歴史参考値は損失分析後の同一期間調整値であり、完全未使用OOSとは扱いません。",
+  "finalCandidates": 0,
+  "bestTrainMonthlyPct": null,
+  "bestOosMonthlyPct": null,
+  "bestOosDrawdownPct": null,
+  "bestWorstStressMonthlyPct": null,
+  "topStrategyIds": [
+    "WIN80_ULTRA90_TOP1_V1"
+  ],
+  "messages": [
+    {
+      "id": "m-001",
+      "sequence": 1,
+      "createdAt": "2026-07-17T03:44:17.000Z",
+      "speakerId": "research-moderator",
+      "speakerName": "Research Moderator",
+      "role": "moderator",
+      "stance": "context",
+      "strategyId": "WIN80_ULTRA90_TOP1_V1",
+      "content": "研究Proxyではなく、masterの現行メインWIN80_ULTRA90_TOP1_V1本体を直接監査します。Entry閾値、Top-1、配分、Rotation、安全設定を実関数Probeで確認します。",
+      "evidence": [
+        { "label": "監査対象", "value": "WIN80_ULTRA90_TOP1_V1", "assessment": "positive" },
+        { "label": "研究Proxy", "value": "対象外", "assessment": "positive" }
+      ]
+    },
+    {
+      "id": "m-002",
+      "sequence": 2,
+      "createdAt": "2026-07-17T03:44:18.000Z",
+      "speakerId": "alpha-main-entry",
+      "speakerName": "Main Strategy Researcher / Entry",
+      "role": "researcher",
+      "stance": "proposal",
+      "strategyId": "WIN80_ULTRA90_TOP1_V1",
+      "content": "Win80はScore80・Confidence80%・Trigger76%・RR1.18・Volume0.72以上、Ultra90はScore90・Confidence90%・Trigger88%・RR1.45・Volume0.90以上です。ProbeはWIN80/ULTRA90を分類し、Ultra90をTop-1、初回100%で選択しました。",
+      "evidence": [
+        { "label": "Win80 Probe", "value": "WIN80", "assessment": "positive" },
+        { "label": "Ultra90 Probe", "value": "ULTRA90", "assessment": "positive" },
+        { "label": "Top-1 / 初回", "value": "Ultra90 / 100%", "assessment": "positive" }
+      ]
+    },
+    {
+      "id": "m-003",
+      "sequence": 3,
+      "createdAt": "2026-07-17T03:44:19.000Z",
+      "speakerId": "portfolio-construction",
+      "speakerName": "Portfolio Researcher / Rotation",
+      "role": "researcher",
+      "stance": "proposal",
+      "strategyId": "WIN80_ULTRA90_TOP1_V1",
+      "content": "同一通貨は追加禁止。含み益中の通常Win80は50%分割、含み損中の通常Win80は拒否、Ultra90は損益を問わず70%移動・30%維持です。ProbeでSPLIT_50、REJECT、SWITCH_70を確認しました。",
+      "evidence": [
+        { "label": "含み益Win80", "value": "SPLIT_50", "assessment": "positive" },
+        { "label": "含み損Win80", "value": "REJECT", "assessment": "positive" },
+        { "label": "Ultra90", "value": "SWITCH_70", "assessment": "positive" }
+      ]
+    },
+    {
+      "id": "m-004",
+      "sequence": 4,
+      "createdAt": "2026-07-17T03:44:20.000Z",
+      "speakerId": "overfit-critic",
+      "speakerName": "AI反対派 / Overfit",
+      "role": "overfit_critic",
+      "stance": "challenge",
+      "strategyId": "WIN80_ULTRA90_TOP1_V1",
+      "content": "歴史値は33取引、勝率90.91%、複利月利16.81%、MaxDD -9.51%、PF16.51で有望ですが、損失分析後に同一期間へ条件を追加した結果で完全未使用OOSではありません。固定条件の未使用期間とForward Paperが必要です。",
+      "evidence": [
+        { "label": "歴史複利月利", "value": "16.81%", "assessment": "positive" },
+        { "label": "取引数", "value": "33", "assessment": "negative" },
+        { "label": "完全未使用OOS", "value": "NO", "assessment": "negative" }
+      ]
+    },
+    {
+      "id": "m-005",
+      "sequence": 5,
+      "createdAt": "2026-07-17T03:44:21.000Z",
+      "speakerId": "tail-risk-critic",
+      "speakerName": "AI反対派 / Tail Risk",
+      "role": "tail_risk_critic",
+      "stance": "challenge",
+      "strategyId": "WIN80_ULTRA90_TOP1_V1",
+      "content": "初回100%は集中リスクがあります。含み損中Win80の拒否は安全側ですが、含み損中でもUltra90へ70%移動するため、Gap・Slippage・連続シグナルStressと50%/70%のAblationが必要です。",
+      "evidence": [
+        { "label": "初回集中", "value": "100%", "assessment": "negative" },
+        { "label": "含み損Win80", "value": "REJECT", "assessment": "positive" },
+        { "label": "含み損Ultra90移動", "value": "70%", "assessment": "negative" }
+      ]
+    },
+    {
+      "id": "m-006",
+      "sequence": 6,
+      "createdAt": "2026-07-17T03:44:22.000Z",
+      "speakerId": "execution-critic",
+      "speakerName": "AI反対派 / Execution",
+      "role": "execution_critic",
+      "stance": "challenge",
+      "strategyId": "WIN80_ULTRA90_TOP1_V1",
+      "content": "production定数とstrategyConfigは整合し、Emergency Top-up停止、最大2通貨、実売買停止を確認しました。ただし実配分1.0xに対し表示ラベルが0.5xで、表示上の修正が必要です。",
+      "evidence": [
+        { "label": "設定整合", "value": "PASS", "assessment": "positive" },
+        { "label": "実売買", "value": "DISABLED", "assessment": "positive" },
+        { "label": "配分表示", "value": "1.0x / label 0.5x", "assessment": "negative" }
+      ]
+    },
+    {
+      "id": "m-007",
+      "sequence": 7,
+      "createdAt": "2026-07-17T03:44:23.000Z",
+      "speakerId": "research-cio",
+      "speakerName": "Research CIO",
+      "role": "cio",
+      "stance": "decision",
+      "strategyId": "WIN80_ULTRA90_TOP1_V1",
+      "content": "WIN80_ULTRA90_TOP1_V1はメインのまま固定し、Proxyで置換しません。実コード動作は確認済みですが収益再現性は未確定です。現行コードを凍結したForward Paper、未使用OOS、Score80/90・50%・70%の個別Ablation、コスト・Gap Stressを優先します。",
+      "evidence": [
+        { "label": "メイン維持", "value": "WIN80_ULTRA90_TOP1_V1", "assessment": "positive" },
+        { "label": "コード動作", "value": "PASS", "assessment": "positive" },
+        { "label": "収益再現性", "value": "未確認", "assessment": "negative" },
+        { "label": "自動変更", "value": "禁止", "assessment": "positive" }
+      ]
+    }
+  ]
+}
