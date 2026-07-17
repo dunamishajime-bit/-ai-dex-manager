@@ -13,6 +13,7 @@ on:
       - "lib/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner-selftest.ts"
+      - "scripts/patch-win80-live-runner-type-narrowing.py"
       - "tsconfig.live-runner.json"
       - "package.json"
       - ".github/workflows/win80-live-runner-ci.yml"
@@ -27,31 +28,39 @@ on:
       - "lib/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner-selftest.ts"
+      - "scripts/patch-win80-live-runner-type-narrowing.py"
       - "tsconfig.live-runner.json"
       - "package.json"
       - "config/strategyConfig.ts"
       - ".github/workflows/win80-live-runner-ci.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: win80-live-runner-${{ github.ref }}
+  group: win80-live-runner-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
+    if: ${{ github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[live-runner-patched]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Checkout
+      - name: Checkout runner branch
         uses: actions/checkout@v4
+        with:
+          ref: feature/win80-ultra90-live-runner-v1
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
+
+      - name: Apply idempotent source patch
+        run: python scripts/patch-win80-live-runner-type-narrowing.py
 
       - name: Install dependencies
         run: npm ci
@@ -79,6 +88,20 @@ jobs:
         run: |
           set -o pipefail
           npm run build 2>&1 | tee production-build.log
+
+      - name: Commit verified source patch
+        if: ${{ github.event_name == 'push' }}
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No source patch changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/win80-ultra90-live-runner.ts
+          git commit -m "Fix live runner reconciliation narrowing [live-runner-patched]"
+          git push origin HEAD:feature/win80-ultra90-live-runner-v1
 
       - name: Upload verification logs
         if: always()
