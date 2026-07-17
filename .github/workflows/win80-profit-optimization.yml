@@ -10,6 +10,7 @@ on:
       - "scripts/research-lab-main-strategy-regime-router.ts"
       - "scripts/research-lab-regime-native-entry-v1.ts"
       - "scripts/research-lab-stability-consensus-rotation-v2.ts"
+      - "scripts/research-lab-multi-horizon-rotation-v3.ts"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -24,6 +25,7 @@ on:
       - "scripts/research-lab-main-strategy-regime-router.ts"
       - "scripts/research-lab-regime-native-entry-v1.ts"
       - "scripts/research-lab-stability-consensus-rotation-v2.ts"
+      - "scripts/research-lab-multi-horizon-rotation-v3.ts"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -56,8 +58,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache/perp-research-usdm
-          key: win80-profit-v1-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
           restore-keys: |
+            win80-profit-v1-usdm-
             usdm-snapshot-v2-
             autonomous-usdm-v2-
             champion-deep-usdm-v1-
@@ -106,6 +109,11 @@ jobs:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         run: npx tsx scripts/research-lab-stability-consensus-rotation-v2.ts
 
+      - name: Run multi-horizon regime rotation V3 research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: npx tsx scripts/research-lab-multi-horizon-rotation-v3.ts
+
       - name: Upload optimization evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -120,5 +128,7 @@ jobs:
             .research-state/regime-native-entry-v1.md
             .research-state/stability-consensus-rotation-v2.json
             .research-state/stability-consensus-rotation-v2.md
+            .research-state/multi-horizon-regime-rotation-v3.json
+            .research-state/multi-horizon-regime-rotation-v3.md
           if-no-files-found: warn
           retention-days: 30
