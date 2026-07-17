@@ -1,6 +1,6 @@
-name: Win80 Ultra90 Main-Lineage Research Lab
+name: Win80 Main Audit and Lineage Research Lab
 
-# A workflow-only push is also an intentional immediate research kickoff.
+# Scheduled runs deepen related research logic. Manual runs default to auditing the actual production main strategy.
 on:
   schedule:
     - cron: "17 0,4,8,12,16,20 * * *"
@@ -10,15 +10,25 @@ on:
     paths:
       - ".github/workflows/research-lab-autonomous.yml"
       - "scripts/research-lab-autonomous-runner.ts"
+      - "scripts/research-lab-main-strategy-audit-runner.ts"
+      - "scripts/research-lab-main-strategy-audit-selftest.ts"
       - "lib/research-lab/perp/deep-research.ts"
       - "lib/research-lab/perp/deep-autonomous.ts"
       - "lib/research-lab/perp/deep-discussion.ts"
       - "lib/research-lab/perp/main-strategy-research-policy.ts"
-      - "scripts/research-lab-main-strategy-policy-selftest.ts"
+      - "lib/research-lab/perp/main-strategy-audit-discussion.ts"
   workflow_dispatch:
     inputs:
+      discussion_mode:
+        description: Manual action: audit current main logic or run related deep research
+        type: choice
+        required: true
+        default: main_strategy_audit
+        options:
+          - main_strategy_audit
+          - lineage_deep_research
       profile:
-        description: Research profile (auto follows saved Champion state)
+        description: Research profile used only for lineage deep research
         type: choice
         required: true
         default: auto
@@ -27,19 +37,19 @@ on:
           - attack
           - balanced
       champions:
-        description: Parent Champion strategies (maximum 3)
+        description: Parent lineage strategies used only for lineage deep research
         required: true
         default: "3"
       experiments_per_champion:
-        description: Single-parameter child experiments per Champion
+        description: Single-parameter child experiments used only for lineage deep research
         required: true
         default: "2"
       start_date:
-        description: Research start date
+        description: Research start date used only for lineage deep research
         required: true
         default: "2023-01-01"
       end_date:
-        description: Research end date
+        description: Research end date used only for lineage deep research
         required: true
         default: "2026-07-01"
 
@@ -78,35 +88,44 @@ jobs:
           cache: npm
           cache-dependency-path: source/package-lock.json
 
-      - name: Resolve Champion Deep configuration
+      - name: Resolve research mode and configuration
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "PERP_DEEP_CHAMPIONS=${{ inputs.champions }}" >> "$GITHUB_ENV"
-            echo "PERP_DEEP_EXPERIMENTS_PER_CHAMPION=${{ inputs.experiments_per_champion }}" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_START_DATE=${{ inputs.start_date }}" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_END_DATE=${{ inputs.end_date }}" >> "$GITHUB_ENV"
-            if [[ "${{ inputs.profile }}" != "auto" ]]; then
-              echo "PERP_RESEARCH_PROFILE=${{ inputs.profile }}" >> "$GITHUB_ENV"
-            fi
-          else
-            echo "PERP_DEEP_CHAMPIONS=3" >> "$GITHUB_ENV"
-            echo "PERP_DEEP_EXPERIMENTS_PER_CHAMPION=2" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_START_DATE=2023-01-01" >> "$GITHUB_ENV"
-            echo "PERP_RESEARCH_END_DATE=2026-07-01" >> "$GITHUB_ENV"
+          event="${{ github.event_name }}"
+          manual_mode="${{ inputs.discussion_mode }}"
+          if [[ -z "$manual_mode" ]]; then
+            manual_mode="main_strategy_audit"
           fi
-          echo "PERP_RESEARCH_MODE=win80_ultra90_lineage" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_ROUNDS=1" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_POPULATION=9" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_FINALISTS=9" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_ELITES=3" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_CONCURRENCY=1" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_WALK_FORWARD_FOLDS=3" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_TARGET_MONTHLY_PCT=30" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_FINAL_OOS_MONTHLY_PCT=30" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_FINAL_STRESS_MONTHLY_PCT=20" >> "$GITHUB_ENV"
-          echo "PERP_RESEARCH_SYMBOLS=BTC,ETH,BNB,SOL,XRP,ADA,AVAX,LINK,LTC,ATOM,AAVE,NEAR,INJ" >> "$GITHUB_ENV"
+          echo "RESEARCH_MANUAL_DISCUSSION_MODE=$manual_mode" >> "$GITHUB_ENV"
+
+          if [[ "$event" == "schedule" || ( "$event" == "workflow_dispatch" && "$manual_mode" == "lineage_deep_research" ) ]]; then
+            if [[ "$event" == "workflow_dispatch" ]]; then
+              echo "PERP_DEEP_CHAMPIONS=${{ inputs.champions }}" >> "$GITHUB_ENV"
+              echo "PERP_DEEP_EXPERIMENTS_PER_CHAMPION=${{ inputs.experiments_per_champion }}" >> "$GITHUB_ENV"
+              echo "PERP_RESEARCH_START_DATE=${{ inputs.start_date }}" >> "$GITHUB_ENV"
+              echo "PERP_RESEARCH_END_DATE=${{ inputs.end_date }}" >> "$GITHUB_ENV"
+              if [[ "${{ inputs.profile }}" != "auto" ]]; then
+                echo "PERP_RESEARCH_PROFILE=${{ inputs.profile }}" >> "$GITHUB_ENV"
+              fi
+            else
+              echo "PERP_DEEP_CHAMPIONS=3" >> "$GITHUB_ENV"
+              echo "PERP_DEEP_EXPERIMENTS_PER_CHAMPION=2" >> "$GITHUB_ENV"
+              echo "PERP_RESEARCH_START_DATE=2023-01-01" >> "$GITHUB_ENV"
+              echo "PERP_RESEARCH_END_DATE=2026-07-01" >> "$GITHUB_ENV"
+            fi
+            echo "PERP_RESEARCH_MODE=win80_ultra90_lineage" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_ROUNDS=1" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_POPULATION=9" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_FINALISTS=9" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_ELITES=3" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_CONCURRENCY=1" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_WALK_FORWARD_FOLDS=3" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_TARGET_MONTHLY_PCT=30" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_FINAL_OOS_MONTHLY_PCT=30" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_FINAL_STRESS_MONTHLY_PCT=20" >> "$GITHUB_ENV"
+            echo "PERP_RESEARCH_SYMBOLS=BTC,ETH,BNB,SOL,XRP,ADA,AVAX,LINK,LTC,ATOM,AAVE,NEAR,INJ" >> "$GITHUB_ENV"
+          fi
           echo "RESEARCH_AUTONOMOUS_STATE_DIR=.research-state" >> "$GITHUB_ENV"
 
       - name: Restore previous autonomous state
@@ -118,6 +137,7 @@ jobs:
           fi
 
       - name: Restore USD-M market data cache
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.discussion_mode == 'lineage_deep_research') }}
         uses: actions/cache@v4
         with:
           path: source/.cache/perp-research-usdm
@@ -134,28 +154,46 @@ jobs:
         working-directory: source
         run: npm run typecheck
 
+      - name: Production main strategy rule self-test
+        working-directory: source
+        run: npm run strategy:main:selftest
+
+      - name: Current main strategy audit self-test
+        working-directory: source
+        run: npm run research:main-strategy:audit:selftest
+
+      - name: Main-lineage policy self-test
+        working-directory: source
+        run: npm run research:main-lineage:selftest
+
       - name: Funding and temporal self-test
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.discussion_mode == 'lineage_deep_research') }}
         working-directory: source
         run: npm run research:perp:selftest
 
       - name: Champion deep research self-test
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.discussion_mode == 'lineage_deep_research') }}
         working-directory: source
         run: npm run research:champion:selftest
 
-      - name: Main strategy lineage policy self-test
-        working-directory: source
-        run: npm run research:main-lineage:selftest
-
       - name: Research discussion self-test
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.discussion_mode == 'lineage_deep_research') }}
         working-directory: source
         run: npm run research:discussion:selftest
 
-      - name: Run Win80 Ultra90 Main-Lineage Research cycle
+      - name: Run current production main strategy audit discussion
+        id: main_audit
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.discussion_mode != 'lineage_deep_research') }}
+        working-directory: source
+        run: npm run research:main-strategy:audit
+
+      - name: Run Win80 Ultra90 lineage deep research cycle
         id: research
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.discussion_mode == 'lineage_deep_research') }}
         working-directory: source
         run: npm run research:perp:autonomous
 
-      - name: Publish cycle summary
+      - name: Publish cycle or audit summary
         if: always()
         shell: bash
         run: |
@@ -169,7 +207,7 @@ jobs:
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Persist autonomous state
+      - name: Persist autonomous research state
         if: always()
         shell: bash
         run: |
@@ -186,15 +224,15 @@ jobs:
           if git diff --cached --quiet; then
             echo "No state changes"
           else
-            git commit -m "research: win80 ultra90 lineage cycle ${GITHUB_RUN_NUMBER}"
+            git commit -m "research: state update run ${GITHUB_RUN_NUMBER}"
             git push origin research-autonomous-state
           fi
 
-      - name: Upload Champion Deep Research evidence
+      - name: Upload research evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: win80-ultra90-lineage-cycle-${{ github.run_number }}
+          name: research-lab-evidence-${{ github.run_number }}
           path: |
             source/.research-state
             source/reports/research-lab-autonomous
@@ -209,7 +247,7 @@ jobs:
         run: |
           gh issue create \
             --repo "${{ github.repository }}" \
-            --title "Win80 Ultra90 Lineage: Forward Paper candidate cycle ${{ steps.research.outputs.cycle }}" \
+            --title "Win80 Lineage Research: Forward Paper candidate cycle ${{ steps.research.outputs.cycle }}" \
             --body-file source/.research-state/forward-paper-candidates.md
 
       - name: Report or update autonomous failure issue
@@ -219,9 +257,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          title="Win80 Ultra90 Main-Lineage Research failure"
+          title="Win80 Main Audit and Lineage Research failure"
           existing=$(gh issue list --repo "${{ github.repository }}" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
-          body="Win80 Ultra90 Main-Lineage Research failed in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. The next scheduled cycle will retry without replacing the fixed production main strategy."
+          body="Research workflow failed in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Current production main strategy remains unchanged and real trading stays disabled."
           if [[ -n "$existing" ]]; then
             gh issue comment "$existing" --repo "${{ github.repository }}" --body "$body"
           else
@@ -234,8 +272,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          title="Win80 Ultra90 Main-Lineage Research failure"
+          title="Win80 Main Audit and Lineage Research failure"
           existing=$(gh issue list --repo "${{ github.repository }}" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
           if [[ -n "$existing" ]]; then
-            gh issue close "$existing" --repo "${{ github.repository }}" --comment "Win80 Ultra90 Main-Lineage Research recovered automatically in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+            gh issue close "$existing" --repo "${{ github.repository }}" --comment "Research workflow recovered automatically in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
           fi
