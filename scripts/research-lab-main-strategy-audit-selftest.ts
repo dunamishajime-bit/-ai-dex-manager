@@ -4,6 +4,7 @@ import { STRATEGY_CONFIG } from "../config/strategyConfig";
 import { WIN80_ULTRA90_MAIN_STRATEGY } from "../lib/win80-ultra90-main-strategy";
 import { buildCurrentMainStrategyAuditDiscussion } from "../lib/research-lab/perp/main-strategy-audit-discussion";
 
+// Updating this audited path intentionally triggers one immediate current-main audit after deployment.
 const log = buildCurrentMainStrategyAuditDiscussion({
   cycle: 9,
   profile: "attack",
