@@ -3,11 +3,13 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import type { Candle1h } from "../lib/backtest/types";
 import type { ResearchDiscussionIndex } from "../lib/research-lab/discussion-types";
 import {
   LEGACY_CHAMPION_RESULT_FILES,
   purgeLegacyChampionResults,
 } from "../lib/research-lab/perp/legacy-champion-cleanup";
+import type { PerpMarketData } from "../lib/research-lab/perp/types";
 import { WIN80_ULTRA90_MAIN_STRATEGY } from "../lib/win80-ultra90-main-strategy";
 import {
   MAIN_STRATEGY_RESEARCH_PROGRAM_ID,
@@ -15,6 +17,46 @@ import {
   createMainStrategyResearchProgramState,
   normalizeMainStrategyResearchProgramState,
 } from "../lib/research-lab/perp/main-strategy-research-program";
+import { attachMainStrategySnapshotReplay } from "../lib/research-lab/perp/main-strategy-snapshot-discussion";
+import { buildMainStrategySnapshotReplay } from "../lib/research-lab/perp/main-strategy-snapshot-replay";
+
+const HOUR_MS = 60 * 60 * 1000;
+
+function syntheticCandles(startTs: number, count: number, seed: number): Candle1h[] {
+  let price = 20 + seed * 7;
+  return Array.from({ length: count }, (_value, index) => {
+    const seasonal = Math.sin((index + seed * 11) / 18) * 0.006;
+    const impulse = index % (72 + seed) < 9 ? 0.004 : -0.0004;
+    const change = 0.00035 + seasonal + impulse;
+    const open = price;
+    const close = Math.max(0.1, open * (1 + change));
+    const high = Math.max(open, close) * 1.004;
+    const low = Math.min(open, close) * 0.996;
+    price = close;
+    return {
+      ts: startTs + index * HOUR_MS,
+      open,
+      high,
+      low,
+      close,
+      volume: 100_000 + index * 10 + seed * 500,
+      quoteVolume: (100_000 + index * 10 + seed * 500) * close,
+      trades: 180 + ((index + seed) % 40),
+    };
+  });
+}
+
+function syntheticReplayData(): PerpMarketData {
+  const startTs = Date.UTC(2025, 5, 1);
+  const symbols = ["BTC", "BNB", "ETH", "SOL", "LINK", "AVAX"];
+  return {
+    startTs,
+    endTs: startTs + 1_500 * HOUR_MS,
+    source: "synthetic",
+    bySymbol: Object.fromEntries(symbols.map((symbol, index) => [symbol, syntheticCandles(startTs, 1_500, index + 1)])),
+    fundingBySymbol: Object.fromEntries(symbols.map((symbol) => [symbol, []])),
+  };
+}
 
 async function main() {
   const reset = normalizeMainStrategyResearchProgramState({
@@ -60,6 +102,44 @@ async function main() {
   assert.ok(transcript.includes("完全未使用OOS"));
   assert.ok(!transcript.includes("deep-c12-baseline"));
   assert.ok(!transcript.includes("Best OOS月利1.19%"));
+
+  const replayData = syntheticReplayData();
+  const replay = buildMainStrategySnapshotReplay({
+    data: replayData,
+    generatedAt: "2026-07-17T01:05:00.000Z",
+    config: {
+      datasetId: "SELFTEST_MAIN_SNAPSHOT_V1",
+      symbols: ["BNB", "ETH", "SOL", "LINK", "AVAX"],
+      startTs: replayData.startTs + 30 * 24 * HOUR_MS,
+      endTs: replayData.endTs - 8 * 24 * HOUR_MS,
+      intervalHours: 6,
+      warmupHours: 48,
+      sameSymbolCooldownHours: 24,
+      feeBpsPerSide: 6,
+      slippageBpsPerSide: 4,
+      stressSlippageBpsPerSide: 12,
+      historyHours: 30 * 24,
+      maxEventsStored: 100,
+    },
+  });
+  assert.equal(replay.strategyId, WIN80_ULTRA90_MAIN_STRATEGY.id);
+  assert.equal(replay.datasetId, "SELFTEST_MAIN_SNAPSHOT_V1");
+  assert.ok(replay.snapshotCount > 0);
+  assert.equal(replay.fingerprint.length, 64);
+  assert.ok(replay.symbols.length >= 3);
+  assert.ok(replay.events.every((event) => event.snapshotFingerprint.length === 20));
+
+  const attached = attachMainStrategySnapshotReplay(first.discussion, replay);
+  assert.equal(attached.snapshotReplay?.datasetId, replay.datasetId);
+  assert.equal(attached.snapshotReplay?.snapshotCount, replay.snapshotCount);
+  assert.ok(attached.summary.includes("StrategyEngineInput Snapshot"));
+  assert.ok(attached.methodology.includes(replay.fingerprint));
+  const attachedTranscript = attached.messages
+    .map((item) => `${item.content}\n${item.evidence.map((entry) => `${entry.label}:${entry.value}`).join("\n")}`)
+    .join("\n");
+  assert.ok(attachedTranscript.includes("再現BT Artifact"));
+  assert.ok(attachedTranscript.includes("LOADED"));
+  assert.ok(attachedTranscript.includes("親Snapshot Replay"));
 
   let state = first.nextState;
   for (let index = 0; index < 4; index += 1) {
