@@ -21,6 +21,7 @@
     "strategy:live:daemon": "tsx scripts/win80-ultra90-live-runner.ts --daemon",
     "strategy:live:selftest": "tsx scripts/win80-ultra90-live-runner-selftest.ts",
     "strategy:executor:selftest": "tsx scripts/aster-direct-trade-executor-selftest.ts",
+    "strategy:market:selftest": "tsx scripts/aster-market-data-provider-selftest.ts",
     "strategy:live:typecheck": "tsc --noEmit -p tsconfig.live-runner.json"
   },
   "dependencies": {
