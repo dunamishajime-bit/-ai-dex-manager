@@ -1,5 +1,6 @@
-import fs from "fs/promises";
-import path from "path";
+import type { Dirent } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 import type { ResearchDiscussionIndex, ResearchDiscussionIndexEntry } from "../discussion-types";
 
@@ -45,17 +46,18 @@ export function sanitizeDiscussionIndex(index: ResearchDiscussionIndex): Researc
 
 async function removeIfExists(filePath: string) {
   try {
-    await fs.rm(filePath, { force: true, recursive: true });
-    return true;
+    await fs.access(filePath);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
     throw error;
   }
+  await fs.rm(filePath, { force: true, recursive: true });
+  return true;
 }
 
 async function removeLegacyDiscussionFiles(directory: string): Promise<number> {
   let removed = 0;
-  let entries: Awaited<ReturnType<typeof fs.readdir>>;
+  let entries: Dirent[];
   try {
     entries = await fs.readdir(directory, { withFileTypes: true });
   } catch (error) {
@@ -66,8 +68,8 @@ async function removeLegacyDiscussionFiles(directory: string): Promise<number> {
     const target = path.join(directory, entry.name);
     if (entry.isDirectory()) {
       removed += await removeLegacyDiscussionFiles(target);
-      const remaining = await fs.readdir(target).catch(() => []);
-      if (remaining.length === 0) await fs.rmdir(target).catch(() => undefined);
+      const remaining = await fs.readdir(target).catch(() => [] as string[]);
+      if (remaining.length === 0) await fs.rm(target, { force: true, recursive: true });
       continue;
     }
     if (/^cycle-\d{6}-.*\.json$/i.test(entry.name)) {
