@@ -8,6 +8,8 @@ export interface Candle1h {
     low: number;
     close: number;
     volume: number;
+    quoteVolume?: number;
+    trades?: number;
 }
 
 export interface Candle12h extends Candle1h {}
