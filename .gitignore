@@ -44,6 +44,7 @@ test-*.js
 debug-*.js
 check_scores.js
 .cache/
+.runtime-state/
 backups/
 restoretmp/
 data/users.json
