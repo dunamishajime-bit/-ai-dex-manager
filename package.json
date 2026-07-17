@@ -15,6 +15,8 @@
     "research:discussion:selftest": "tsx scripts/research-lab-discussion-selftest.ts",
     "research:champion:selftest": "tsx scripts/research-lab-champion-deep-selftest.ts",
     "research:perp:autonomous": "tsx scripts/research-lab-autonomous-runner.ts",
+    "research:main-strategy:audit": "tsx scripts/research-lab-main-strategy-audit-runner.ts",
+    "research:main-strategy:audit:selftest": "tsx scripts/research-lab-main-strategy-audit-selftest.ts",
     "strategy:main:selftest": "tsx scripts/win80-ultra90-main-selftest.ts",
     "research:main-lineage:selftest": "tsx scripts/research-lab-main-strategy-policy-selftest.ts",
     "strategy:live:once": "tsx scripts/win80-ultra90-live-runner.ts --once",
