@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Re-triggered after workflow registration.
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
