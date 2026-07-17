@@ -68,21 +68,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet; then
-            echo "No generated changes to commit."
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
             package.json \
-            .github/workflows/research-lab-ci.yml \
-            .github/workflows/research-lab-autonomous.yml \
             app/api/research-lab/latest/route.ts \
             components/research-lab/ChampionDeepResearchPanel.tsx \
             docs/research-lab-autonomous.md \
             lib/research-lab/dashboard-types.ts \
             lib/research-lab/perp/deep-autonomous.ts \
             scripts/research-lab-autonomous-runner.ts
+          if git diff --cached --quiet; then
+            echo "No generated integration changes to commit."
+            exit 0
+          fi
           git commit -m "Research Lab: focus on Win80 Ultra90 main lineage [generated]"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
