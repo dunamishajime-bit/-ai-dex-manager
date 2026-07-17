@@ -4,15 +4,24 @@ import { execFileSync } from "child_process";
 
 import type { Candle1h } from "./types";
 
-const REMOTE_START_2023 = Date.UTC(2023, 0, 1, 0, 0, 0);
+const REMOTE_START_2022 = Date.UTC(2022, 0, 1, 0, 0, 0);
 const REMOTE_CACHE_VERSION = "v1";
+const BINANCE_RETRY_DELAYS_MS = [1500, 4000, 8000];
+const INTERVAL_MS: Record<string, number> = {
+    "15m": 15 * 60 * 1000,
+    "1h": 60 * 60 * 1000,
+};
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function psQuote(value: string) {
     return `'${value.replace(/'/g, "''")}'`;
 }
 
-function asUrl(symbol: string, startMs: number, endMs: number) {
-    return `https://api.binance.com/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1h&startTime=${startMs}&endTime=${endMs}&limit=1000`;
+function asUrl(symbol: string, startMs: number, endMs: number, interval: string) {
+    return `https://api.binance.com/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&startTime=${startMs}&endTime=${endMs}&limit=1000`;
 }
 
 async function exists(filePath: string) {
@@ -96,15 +105,23 @@ export async function loadLocalBinanceCandles(zipPath: string, cacheRoot: string
     return candles.flat().sort((left, right) => left.ts - right.ts);
 }
 
-export async function fetchBinanceKlines(symbol: string, startMs: number, endMs: number): Promise<Candle1h[]> {
+export async function fetchBinanceKlines(symbol: string, startMs: number, endMs: number, interval = "1h"): Promise<Candle1h[]> {
     const all: Candle1h[] = [];
     let cursor = startMs;
 
     while (cursor < endMs) {
-        const url = asUrl(symbol, cursor, endMs);
-        const response = await fetch(url, { cache: "no-store" });
-        if (!response.ok) {
-            throw new Error(`Binance klines request failed for ${symbol}: ${response.status}`);
+        const url = asUrl(symbol, cursor, endMs, interval);
+        let response: Response | null = null;
+        let lastStatus = 0;
+        for (let attempt = 0; attempt <= BINANCE_RETRY_DELAYS_MS.length; attempt += 1) {
+            response = await fetch(url, { cache: "no-store" });
+            lastStatus = response.status;
+            if (response.ok) break;
+            if (response.status !== 429 || attempt === BINANCE_RETRY_DELAYS_MS.length) break;
+            await sleep(BINANCE_RETRY_DELAYS_MS[attempt]);
+        }
+        if (!response?.ok) {
+            throw new Error(`Binance klines request failed for ${symbol}: ${lastStatus}`);
         }
 
         const json = await response.json();
@@ -135,8 +152,26 @@ export async function fetchBinanceKlines(symbol: string, startMs: number, endMs:
     return all.sort((left, right) => left.ts - right.ts);
 }
 
-function remoteCacheFile(cacheRoot: string, symbol: string, startMs: number, endMs: number) {
-    const fileName = `${symbol}-${startMs}-${endMs}-${REMOTE_CACHE_VERSION}.json`;
+function normalizeRemoteEndMs(endMs: number, interval: string) {
+    const intervalMs = INTERVAL_MS[interval] || 60 * 60 * 1000;
+    const now = Date.now();
+    const isLiveLikeEnd = Math.abs(now - endMs) <= intervalMs * 2;
+    if (!isLiveLikeEnd) return endMs;
+    return Math.floor(endMs / intervalMs) * intervalMs;
+}
+
+function normalizeRemoteStartMs(startMs: number, endMs: number, interval: string) {
+    const intervalMs = INTERVAL_MS[interval] || 60 * 60 * 1000;
+    const now = Date.now();
+    const isLiveLikeEnd = Math.abs(now - endMs) <= intervalMs * 2;
+    if (!isLiveLikeEnd) return startMs;
+    return Math.floor(startMs / intervalMs) * intervalMs;
+}
+
+function remoteCacheFile(cacheRoot: string, symbol: string, startMs: number, endMs: number, interval: string) {
+    const normalizedStartMs = normalizeRemoteStartMs(startMs, endMs, interval);
+    const normalizedEndMs = normalizeRemoteEndMs(endMs, interval);
+    const fileName = `${symbol}-${interval}-${normalizedStartMs}-${normalizedEndMs}-${REMOTE_CACHE_VERSION}.json`;
     return path.join(cacheRoot, "remote", fileName);
 }
 
@@ -146,27 +181,34 @@ export async function loadHistoricalCandles(input: {
     cacheRoot: string;
     startMs: number;
     endMs: number;
+    interval?: "1h" | "15m";
 }) {
-    const { symbol, localZipPath, cacheRoot, startMs, endMs } = input;
+    const { symbol, localZipPath, cacheRoot, startMs, endMs, interval = "1h" } = input;
     const out: Candle1h[] = [];
 
-    if (localZipPath && startMs < REMOTE_START_2023) {
+    if (interval === "1h" && localZipPath && startMs < REMOTE_START_2022) {
         const localCandles = await loadLocalBinanceCandles(localZipPath, cacheRoot);
-        out.push(...localCandles.filter((candle) => candle.ts >= startMs && candle.ts < Math.min(endMs, REMOTE_START_2023)));
+        for (const candle of localCandles) {
+            if (candle.ts >= startMs && candle.ts < Math.min(endMs, REMOTE_START_2022)) {
+                out.push(candle);
+            }
+        }
     }
 
-    if (endMs > REMOTE_START_2023) {
-        const remoteStart = Math.max(startMs, REMOTE_START_2023);
-        const cacheFile = remoteCacheFile(cacheRoot, symbol, remoteStart, endMs);
+    if (endMs > REMOTE_START_2022) {
+        const remoteStart = Math.max(startMs, REMOTE_START_2022);
+        const cacheFile = remoteCacheFile(cacheRoot, symbol, remoteStart, endMs, interval);
         let remoteCandles: Candle1h[] = [];
         if (await exists(cacheFile)) {
             remoteCandles = JSON.parse(await fs.readFile(cacheFile, "utf8")) as Candle1h[];
         } else {
-            remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs);
+            remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs, interval);
             await fs.mkdir(path.dirname(cacheFile), { recursive: true });
             await fs.writeFile(cacheFile, JSON.stringify(remoteCandles), "utf8");
         }
-        out.push(...remoteCandles);
+        for (const candle of remoteCandles) {
+            out.push(candle);
+        }
     }
 
     const dedup = new Map<number, Candle1h>();

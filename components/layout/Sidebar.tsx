@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
+import { BarChart3, CalendarDays, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
+  { href: "/performance", label: "成績", icon: CalendarDays },
   { href: "/history", label: "トレード履歴", icon: FileText },
   { href: "/settings", label: "設定", icon: Settings },
 ] as const;

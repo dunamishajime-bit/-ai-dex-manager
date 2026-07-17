@@ -27,9 +27,9 @@ type ManualRunResponse = {
 };
 
 function sideLabel(side?: "trend" | "range" | "cash") {
-  if (side === "trend") return "トレンド";
-  if (side === "range") return "レンジ";
-  if (side === "cash") return "待機";
+  if (side === "trend") return "trend";
+  if (side === "range") return "range";
+  if (side === "cash") return "cash";
   return "-";
 }
 
@@ -61,7 +61,7 @@ export function ManualTradeRunPanel() {
         cache: "no-store",
       });
       const json = (await res.json().catch(() => null)) as ManualRunResponse | null;
-      const next = json || { ok: false, error: "手動トレード判定の結果を読み取れませんでした。" };
+      const next = json || { ok: false, error: "manual run の結果を読み込めませんでした。" };
       setResult(next);
 
       if (next.ok) {
@@ -71,7 +71,7 @@ export function ManualTradeRunPanel() {
     } catch (error) {
       setResult({
         ok: false,
-        error: error instanceof Error ? error.message : "手動トレード判定の実行に失敗しました。",
+        error: error instanceof Error ? error.message : "manual run の実行に失敗しました。",
       });
     } finally {
       setRunning(false);
@@ -86,14 +86,11 @@ export function ManualTradeRunPanel() {
         <div>
           <div className="flex items-center gap-2 text-sm font-bold text-white">
             <Zap className="h-4 w-4 text-gold-100" />
-            手動トレード判定
+            combined manual run
           </div>
           <p className="mt-2 max-w-3xl text-[12px] leading-6 text-white/76">
-            12Hの自動売買ロジックを、今このタイミングで1回だけ実行します。条件が揃っていればそのまま発注し、
-            結果は自動売買実行履歴に「手動トレード判定」として残します。
-          </p>
-          <p className="mt-1 text-[11px] leading-5 text-white/58">
-            手動でエントリーしたポジションも、次回の12H定期判定では通常の12Hエントリーポジションとして扱います。
+            BTC 15m GoldCat シグナルと PENGU 15m サイズ調整を使った combined を、
+            このタイミングで 1 回だけ実行します。runtime control が live のときは AsterDex へ実注文します。
           </p>
         </div>
         <button
@@ -108,7 +105,7 @@ export function ManualTradeRunPanel() {
           )}
         >
           {running ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-          {running ? "判定中..." : "今すぐ12H判定を実行"}
+          {running ? "実行中..." : "いま combined を実行"}
         </button>
       </div>
 
@@ -123,25 +120,25 @@ export function ManualTradeRunPanel() {
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-2.5 py-1 text-[10px] font-bold text-gold-100">
-                  {result.summary.triggerLabel || "手動トレード判定"}
+                  {result.summary.triggerLabel || "combined manual run"}
                 </span>
                 <span className="font-bold text-white">
                   {result.summary.desiredSymbol} / {sideLabel(result.summary.desiredSide)}
                 </span>
                 <span className="text-white/70">
-                  発注 {counts.traded} / 維持 {counts.noop} / 見送り {counts.skipped} / エラー {counts.error}
+                  実行 {counts.traded} / 維持 {counts.noop} / 見送り {counts.skipped} / エラー {counts.error}
                 </span>
               </div>
               <div className="text-[12px] leading-6 text-white/78">
                 判定時刻: {new Date(result.summary.decisionTime).toLocaleString("ja-JP")} / 実行時刻:{" "}
                 {new Date(result.summary.executedAt).toLocaleString("ja-JP")}
               </div>
-              {result.summary.walletResults[0]?.reason ? (
-                <div className="text-[12px] leading-6 text-white/78">結果: {result.summary.walletResults[0].reason}</div>
-              ) : null}
+              <div className="text-[12px] leading-6 text-white/78">
+                理由: {result.summary.walletResults[0]?.reason || result.summary.reason}
+              </div>
             </div>
           ) : (
-            <div>{result.error || "手動トレード判定の実行に失敗しました。"}</div>
+            <div>{result.error || "manual run の実行に失敗しました。"}</div>
           )}
         </div>
       ) : null}

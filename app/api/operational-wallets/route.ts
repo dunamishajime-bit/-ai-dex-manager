@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createPublicClient, erc20Abi, formatEther, formatUnits, http } from "viem";
-import { bsc } from "viem/chains";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { RECLAIM_HYBRID_EXECUTION_PROFILE } from "@/config/reclaimHybridStrategy";
 import { findUserByEmail, findUserById, upsertUser } from "@/lib/server/user-db";
-import { fetchPricesBatch } from "@/lib/providers/market-providers";
-import { OPERATIONAL_WALLET_TRACKED_ASSETS } from "@/lib/operational-wallet-assets";
 import {
   findOperationalWalletByEmail,
   findOperationalWalletByUser,
   normalizeOperationalWalletStatus,
   upsertOperationalWallet,
 } from "@/lib/server/operational-wallet-db";
+import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
+import { appendPortfolioSnapshot } from "@/lib/server/portfolio-snapshot-db";
 import { encryptVaultSecret } from "@/lib/server/wallet-vault";
-import type { TokenRef } from "@/lib/types/market";
 import type {
   OperationalWalletHolding,
   OperationalWalletRecord,
@@ -41,130 +38,152 @@ function isValidAddress(value?: string) {
   return typeof value === "string" && /^0x[a-fA-F0-9]{40}$/.test(value.trim());
 }
 
-function encodeErc20BalanceOf(address: string) {
-  const normalized = address.trim().toLowerCase().replace(/^0x/, "");
-  return `0x70a08231${normalized.padStart(64, "0")}`;
+type AsterBalanceAsset = {
+  asset?: string;
+  balance?: string;
+  crossWalletBalance?: string;
+  crossUnPnl?: string;
+  availableBalance?: string;
+  maxWithdrawAmount?: string;
+  marginAvailable?: boolean;
+  updateTime?: number;
+};
+
+type AsterAccountAsset = {
+  asset?: string;
+  walletBalance?: string;
+  unrealizedProfit?: string;
+  marginBalance?: string;
+  maxWithdrawAmount?: string;
+  crossWalletBalance?: string;
+  crossUnPnl?: string;
+  availableBalance?: string;
+  marginAvailable?: boolean;
+  updateTime?: number;
+};
+
+type AsterAccountSummary = {
+  totalWalletBalance?: string;
+  totalMarginBalance?: string;
+  availableBalance?: string;
+  assets?: AsterAccountAsset[];
+};
+
+const ASTER_STABLE_ASSET_SYMBOLS = new Set(["USDT", "USDF", "USDC", "USDC.E", "USDE", "USDCE", "USDBC", "FDUSD", "DAI", "U"]);
+
+function toFiniteNumber(value: unknown) {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
-async function readErc20BalanceRaw(rpcUrl: string, tokenAddress: string, walletAddress: string) {
-  const response = await fetch(rpcUrl, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "eth_call",
-      params: [
-        {
-          to: tokenAddress,
-          data: encodeErc20BalanceOf(walletAddress),
-        },
-        "latest",
-      ],
-      id: 1,
-    }),
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error(`ERC20 balanceOf failed with status ${response.status}`);
-  }
-
-  const payload = (await response.json()) as { result?: string; error?: { message?: string } };
-  if (payload.error) {
-    throw new Error(payload.error.message || "ERC20 balanceOf returned RPC error");
-  }
-
-  const hex = payload.result || "0x0";
-  return BigInt(hex);
+function formatAsterAmount(value: number) {
+  return value.toFixed(8);
 }
 
-async function fetchOperationalWalletPrices() {
-  const emptyPriceMap: Record<string, { usd: number; change24hPct?: number }> = {
-    "binance-coin": { usd: 0, change24hPct: 0 },
-    tether: { usd: 1, change24hPct: 0 },
-    ethereum: { usd: 0, change24hPct: 0 },
-    solana: { usd: 0, change24hPct: 0 },
-    chainlink: { usd: 0, change24hPct: 0 },
-    avalanche: { usd: 0, change24hPct: 0 },
-    "pudgy-penguins": { usd: 0, change24hPct: 0 },
+function toAsterBalanceWei(amount: number) {
+  return `${BigInt(Math.round(amount * 1e8)) * 10n ** 10n}`;
+}
+
+function toHoldingFromAsterAsset(
+  symbol: string,
+  amount: number,
+  marginBalance: number,
+): OperationalWalletHolding {
+  const usdPrice = ASTER_STABLE_ASSET_SYMBOLS.has(symbol)
+    ? 1
+    : amount > 0 && marginBalance > 0
+      ? Number((marginBalance / amount).toFixed(6))
+      : 0;
+  const usdValue = ASTER_STABLE_ASSET_SYMBOLS.has(symbol)
+    ? Number(amount.toFixed(6))
+    : Number((marginBalance || amount * usdPrice).toFixed(6));
+
+  return {
+    symbol,
+    name: `${symbol} (Aster)`,
+    address: `aster:${symbol.toLowerCase()}`,
+    decimals: 18,
+    balanceWei: toAsterBalanceWei(amount).toString(),
+    amount: formatAsterAmount(amount),
+    usdPrice,
+    usdValue,
+    isNative: false,
   };
+}
 
-  try {
-    const primary = await fetchPricesBatch(
-      OPERATIONAL_WALLET_TRACKED_ASSETS.map(
-        (asset) =>
-          ({
-            symbol: asset.symbol,
-            provider: "coincap",
-            providerId: asset.providerId,
-            chain: "MAJOR",
-          }) satisfies TokenRef,
-      ),
-    );
+async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
+  const config = loadAsterDexClientConfig();
+  if (!config) return null;
 
-    if (Object.values(primary).some((entry) => Number(entry?.usd || 0) > 0)) {
-      return { ...emptyPriceMap, ...primary };
-    }
-  } catch (error) {
-    console.warn("Primary operational wallet pricing failed. Falling back to CoinGecko:", error);
-  }
+  const client = new AsterDexClient(config);
+  const [account, balances] = await Promise.all([
+    client.getAccount() as Promise<AsterAccountSummary>,
+    client.getBalance() as Promise<AsterBalanceAsset[]>,
+  ]);
 
-  try {
-    const response = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin,ethereum,solana,chainlink,avalanche-2,pudgy-penguins&vs_currencies=usd&include_24hr_change=true",
-      {
-        cache: "no-store",
-        signal: AbortSignal.timeout(5000),
-      },
-    );
-    if (!response.ok) {
-      throw new Error(`CoinGecko fallback failed with status ${response.status}`);
-    }
+  const accountAssets = Array.isArray(account?.assets) ? account.assets : [];
+  const balanceBySymbol = new Map(
+    (Array.isArray(balances) ? balances : []).map((entry) => [
+      String(entry?.asset || "").toUpperCase(),
+      entry,
+    ]),
+  );
 
-    const json = await response.json();
-    return {
-      "binance-coin": {
-        usd: Number(json?.binancecoin?.usd || 0),
-        change24hPct: Number(json?.binancecoin?.usd_24h_change || 0),
-      },
-      tether: {
-        usd: 1,
-        change24hPct: 0,
-      },
-      ethereum: {
-        usd: Number(json?.ethereum?.usd || 0),
-        change24hPct: Number(json?.ethereum?.usd_24h_change || 0),
-      },
-      solana: {
-        usd: Number(json?.solana?.usd || 0),
-        change24hPct: Number(json?.solana?.usd_24h_change || 0),
-      },
-      chainlink: {
-        usd: Number(json?.chainlink?.usd || 0),
-        change24hPct: Number(json?.chainlink?.usd_24h_change || 0),
-      },
-      avalanche: {
-        usd: Number(json?.["avalanche-2"]?.usd || 0),
-        change24hPct: Number(json?.["avalanche-2"]?.usd_24h_change || 0),
-      },
-      "pudgy-penguins": {
-        usd: Number(json?.["pudgy-penguins"]?.usd || 0),
-        change24hPct: Number(json?.["pudgy-penguins"]?.usd_24h_change || 0),
-      },
-    } satisfies Record<string, { usd: number; change24hPct?: number }>;
-  } catch (error) {
-    console.warn("CoinGecko fallback for operational wallet pricing failed:", error);
-    return emptyPriceMap;
-  }
+  const trackedHoldings = accountAssets
+    .map((entry) => {
+      const symbol = String(entry?.asset || "").toUpperCase();
+      if (!symbol) return null;
+      const walletBalance = toFiniteNumber(entry?.walletBalance);
+      const balanceEntry = balanceBySymbol.get(symbol);
+      const fallbackBalance = toFiniteNumber(balanceEntry?.balance || balanceEntry?.crossWalletBalance);
+      const amount = walletBalance > 0 ? walletBalance : fallbackBalance;
+      if (amount <= 0) return null;
+
+      return toHoldingFromAsterAsset(
+        symbol,
+        amount,
+        toFiniteNumber(entry?.marginBalance),
+      );
+    })
+    .filter((holding): holding is OperationalWalletHolding => Boolean(holding))
+    .sort((left, right) => right.usdValue - left.usdValue);
+
+  const portfolioUsd = Number(
+    trackedHoldings.reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0).toFixed(6),
+  );
+  const availableBalanceUsd = Number(toFiniteNumber(account?.availableBalance).toFixed(8));
+  const previousHighWaterUsd = Number(wallet.lastPortfolioHighWaterUsd || 0);
+  const portfolioHighWaterUsd = portfolioUsd > 0
+    ? Math.max(previousHighWaterUsd, portfolioUsd)
+    : previousHighWaterUsd;
+  const portfolioDrawdownPct = portfolioHighWaterUsd > 0 && portfolioUsd > 0
+    ? Number((((portfolioUsd / portfolioHighWaterUsd) - 1) * 100).toFixed(6))
+    : 0;
+  const hasDepositedBalance = hasOperationalTradeBalance(trackedHoldings);
+  const nextStatus: OperationalWalletStatus = hasDepositedBalance ? "running" : "awaiting_deposit";
+
+  return {
+    ...wallet,
+    lastBalanceWei: toAsterBalanceWei(availableBalanceUsd).toString(),
+    lastBalanceFormatted: availableBalanceUsd.toFixed(8),
+    lastPortfolioUsd: portfolioUsd,
+    lastPortfolioHighWaterUsd: portfolioHighWaterUsd,
+    lastPortfolioDrawdownPct: portfolioDrawdownPct,
+    lastPortfolioDrawdownCheckedAt: new Date().toISOString(),
+    trackedHoldings,
+    depositDetectedAt:
+      hasDepositedBalance && !wallet.depositDetectedAt ? new Date().toISOString() : wallet.depositDetectedAt,
+    status: wallet.status === "paused" ? "paused" : nextStatus,
+  } satisfies OperationalWalletRecord;
 }
 
 function hasOperationalTradeBalance(holdings: OperationalWalletHolding[]) {
   return holdings.some((holding) => {
     if (Number(holding.amount) <= 0) return false;
     return (
-      holding.symbol === RECLAIM_HYBRID_EXECUTION_PROFILE.reserveSymbol
+      holding.symbol === "USDF"
+      || holding.symbol === "USDC"
+      || holding.symbol === RECLAIM_HYBRID_EXECUTION_PROFILE.reserveSymbol
       || RECLAIM_HYBRID_EXECUTION_PROFILE.tradableSymbols.includes(
         holding.symbol as (typeof RECLAIM_HYBRID_EXECUTION_PROFILE.tradableSymbols)[number],
       )
@@ -173,78 +192,16 @@ function hasOperationalTradeBalance(holdings: OperationalWalletHolding[]) {
 }
 
 async function refreshWalletBalance(wallet: OperationalWalletRecord) {
-  const rpcUrl = process.env.RPC_URL_BSC || "https://bsc-dataseed.binance.org";
   try {
-    const client = createPublicClient({
-      chain: bsc,
-      transport: http(rpcUrl),
-    });
-    const walletAddress = wallet.address as `0x${string}`;
-    const trackedTokenAssets = OPERATIONAL_WALLET_TRACKED_ASSETS.filter((asset) => !asset.isNative);
-    const [balanceWei, tokenResults, priceMap] = await Promise.all([
-      client.getBalance({ address: walletAddress }),
-      Promise.all(
-        trackedTokenAssets.map(async (asset) => {
-          try {
-            const result = await readErc20BalanceRaw(rpcUrl, asset.address, walletAddress);
-            return { symbol: asset.symbol, balance: result };
-          } catch (error) {
-            console.warn(`Failed to read ${asset.symbol} balance for operational wallet:`, error);
-            return { symbol: asset.symbol, balance: 0n };
-          }
-        }),
-      ),
-      fetchOperationalWalletPrices(),
-    ]);
-
-    const tokenBalanceBySymbol = new Map<string, bigint>(
-      tokenResults.map((entry) => [entry.symbol, entry.balance]),
-    );
-    OPERATIONAL_WALLET_TRACKED_ASSETS.forEach((asset) => {
-      if (asset.isNative) {
-        tokenBalanceBySymbol.set(asset.symbol, balanceWei);
-      }
-    });
-
-    const trackedHoldings: OperationalWalletHolding[] = OPERATIONAL_WALLET_TRACKED_ASSETS.map((asset) => {
-      const rawBalance = tokenBalanceBySymbol.get(asset.symbol) || 0n;
-      const amount = Number(formatUnits(rawBalance, asset.decimals));
-      const usdPrice = Number(priceMap[asset.providerId]?.usd || 0);
-      const usdValue = Number((amount * usdPrice).toFixed(6));
-
-      return {
-        symbol: asset.symbol,
-        name: asset.name,
-        address: asset.address,
-        decimals: asset.decimals,
-        balanceWei: rawBalance.toString(),
-        amount: amount.toString(),
-        usdPrice,
-        usdValue,
-        isNative: asset.isNative,
-      };
-    });
-
-    const balanceFormatted = formatEther(balanceWei);
-    const portfolioUsd = Number(trackedHoldings.reduce((sum, holding) => sum + holding.usdValue, 0).toFixed(6));
-    const hasDepositedBalance = hasOperationalTradeBalance(trackedHoldings);
-
-    const nextStatus: OperationalWalletStatus = hasDepositedBalance ? "running" : "awaiting_deposit";
-
-    return {
-      ...wallet,
-      lastBalanceWei: balanceWei.toString(),
-      lastBalanceFormatted: balanceFormatted,
-      lastPortfolioUsd: portfolioUsd,
-      trackedHoldings,
-      depositDetectedAt:
-        hasDepositedBalance && !wallet.depositDetectedAt ? new Date().toISOString() : wallet.depositDetectedAt,
-      status: wallet.status === "paused" ? "paused" : nextStatus,
-    } satisfies OperationalWalletRecord;
+    const asterRefreshed = await refreshWalletBalanceFromAster(wallet);
+    if (asterRefreshed) {
+      return asterRefreshed;
+    }
   } catch (error) {
-    console.warn("Failed to refresh operational wallet balance:", error);
-    return wallet;
+    console.warn("Failed to refresh Aster operational wallet balance:", error);
   }
+
+  return wallet;
 }
 
 async function resolveWallet(userId?: string, email?: string) {
@@ -333,6 +290,13 @@ export async function GET(req: NextRequest) {
     const refreshed = await refreshWalletBalance(normalized);
     if (refreshed !== normalized) {
       await upsertOperationalWallet(refreshed);
+    }
+    if (typeof refreshed.lastPortfolioUsd === "number" && refreshed.lastPortfolioUsd > 0) {
+      await appendPortfolioSnapshot({
+        walletId: refreshed.id,
+        capturedAt: new Date().toISOString(),
+        portfolioUsd: Number(refreshed.lastPortfolioUsd),
+      });
     }
     await syncUserWalletMetadata(refreshed, userId, email);
     return NextResponse.json({ ok: true, wallet: sanitizeWallet(refreshed) });

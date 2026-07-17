@@ -19,6 +19,7 @@ export interface AutoTradeHistoryEntry extends LiveHybridRunSummary {
 }
 
 let memoryEntries: AutoTradeHistoryEntry[] | null = null;
+let memoryEntriesMtimeMs = 0;
 
 async function loadFromRedis(): Promise<AutoTradeHistoryEntry[]> {
   const { Redis } = await import("@upstash/redis");
@@ -35,11 +36,13 @@ async function saveToRedis(entries: AutoTradeHistoryEntry[]): Promise<void> {
 
 function loadFromFs(): AutoTradeHistoryEntry[] {
   try {
-    if (memoryEntries) return memoryEntries;
     if (!fs.existsSync(DB_PATH)) return [];
+    const stat = fs.statSync(DB_PATH);
+    if (memoryEntries && memoryEntriesMtimeMs === stat.mtimeMs) return memoryEntries;
     const raw = fs.readFileSync(DB_PATH, "utf8");
     const parsed = JSON.parse(raw);
     memoryEntries = Array.isArray(parsed) ? parsed : [];
+    memoryEntriesMtimeMs = stat.mtimeMs;
     return memoryEntries;
   } catch (error) {
     console.warn("Failed to load auto trade history from filesystem:", error);
@@ -55,6 +58,7 @@ function saveToFs(entries: AutoTradeHistoryEntry[]) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
     fs.writeFileSync(DB_PATH, JSON.stringify(entries, null, 2), "utf8");
+    memoryEntriesMtimeMs = fs.statSync(DB_PATH).mtimeMs;
   } catch (error) {
     console.warn("Failed to save auto trade history to filesystem:", error);
   }

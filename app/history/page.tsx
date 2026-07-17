@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Download, ExternalLink, RefreshCw } from "lucide-react";
@@ -12,6 +12,7 @@ type TradeHistoryEntry = {
   walletAddress: string;
   chainId: number;
   txHash: string;
+  provider?: string;
   action: "BUY" | "SELL";
   sourceSymbol: string;
   destSymbol: string;
@@ -44,6 +45,11 @@ function explorerTxUrl(chainId: number, txHash: string) {
   if (chainId === 137) return `https://polygonscan.com/tx/${txHash}`;
   if (chainId === 1) return `https://etherscan.io/tx/${txHash}`;
   return `https://bscscan.com/tx/${txHash}`;
+}
+
+function hasExplorerTx(entry: Pick<TradeHistoryEntry, "provider" | "txHash">) {
+  if (entry.provider === "AsterDex") return false;
+  return /^0x[a-fA-F0-9]{32,}$/.test(entry.txHash);
 }
 
 export default function HistoryPage() {
@@ -143,7 +149,7 @@ export default function HistoryPage() {
             トレード履歴
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            約定履歴と確定損益を時系列で確認できます。
+            約定履歴と、ローカル ledger ベースの概算損益を時系列で確認できます。
           </p>
         </div>
 
@@ -175,7 +181,7 @@ export default function HistoryPage() {
           <div className="mt-2 text-2xl font-semibold text-white">{summary.totalTrades}</div>
         </Card>
         <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">確定損益</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">概算確定損益</div>
           <div className={`mt-2 text-2xl font-semibold ${summary.realizedPnlUsd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
             {formatUsd(summary.realizedPnlUsd)}
           </div>
@@ -184,6 +190,11 @@ export default function HistoryPage() {
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">勝率</div>
           <div className="mt-2 text-2xl font-semibold text-white">{formatNumber(summary.winRate, 1)}%</div>
         </Card>
+      </div>
+
+      <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+        このページの損益は Aster の公式 net PnL ではなく、ローカル trade ledger の約定価格から再計算した概算値です。
+        手数料、funding、未実現損益、口座残高の増減とは一致しない場合があります。
       </div>
 
       <Card title="約定一覧" glow="gold">
@@ -256,15 +267,21 @@ export default function HistoryPage() {
                     {entry.realizedPnlPct !== undefined ? `${formatNumber(entry.realizedPnlPct, 2)}%` : "-"}
                   </td>
                   <td className="px-3 py-4 font-mono text-xs">
-                    <a
-                      href={explorerTxUrl(entry.chainId, entry.txHash)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-gold-300 hover:text-gold-200"
-                    >
-                      {entry.txHash.slice(0, 8)}...{entry.txHash.slice(-6)}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+                    {hasExplorerTx(entry) ? (
+                      <a
+                        href={explorerTxUrl(entry.chainId, entry.txHash)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-gold-300 hover:text-gold-200"
+                      >
+                        {entry.txHash.slice(0, 8)}...{entry.txHash.slice(-6)}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-white/75">
+                        {entry.provider || "venue"} / {entry.txHash.slice(0, 18)}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, FileText, Home, Settings, Wallet } from "lucide-react";
+import { BarChart3, CalendarDays, FileText, Home, Settings, Wallet } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { icon: Home, label: "ホーム", href: "/" },
   { icon: BarChart3, label: "ダッシュ", href: "/positions" },
   { icon: Wallet, label: "ウォレット", href: "/wallets" },
+  { icon: CalendarDays, label: "成績", href: "/performance" },
   { icon: FileText, label: "履歴", href: "/history" },
   { icon: Settings, label: "設定", href: "/settings" },
 ] as const;

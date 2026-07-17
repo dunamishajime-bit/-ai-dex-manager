@@ -23,6 +23,15 @@ fi
 if [ -f "$APP_DIR/data/trade-ledger.json" ]; then
   cp -a "$APP_DIR/data/trade-ledger.json" /tmp/trade-ledger.json.bak
 fi
+if [ -f "$APP_DIR/data/live-decision-cache.json" ]; then
+  cp -a "$APP_DIR/data/live-decision-cache.json" /tmp/live-decision-cache.json.bak
+fi
+if [ -f "$APP_DIR/data/strategy-bnb-universe.json" ]; then
+  cp -a "$APP_DIR/data/strategy-bnb-universe.json" /tmp/strategy-bnb-universe.json.bak
+fi
+if [ -f "$APP_DIR/data/strategy-solana-universe.json" ]; then
+  cp -a "$APP_DIR/data/strategy-solana-universe.json" /tmp/strategy-solana-universe.json.bak
+fi
 
 rm -rf "${APP_DIR:?}/"*
 rm -rf "$APP_DIR/.next" "$APP_DIR/.vercel"
@@ -47,11 +56,20 @@ fi
 if [ -f /tmp/trade-ledger.json.bak ]; then
   mv /tmp/trade-ledger.json.bak "$APP_DIR/data/trade-ledger.json"
 fi
+if [ -f /tmp/live-decision-cache.json.bak ]; then
+  mv /tmp/live-decision-cache.json.bak "$APP_DIR/data/live-decision-cache.json"
+fi
+if [ -f /tmp/strategy-bnb-universe.json.bak ]; then
+  mv /tmp/strategy-bnb-universe.json.bak "$APP_DIR/data/strategy-bnb-universe.json"
+fi
+if [ -f /tmp/strategy-solana-universe.json.bak ]; then
+  mv /tmp/strategy-solana-universe.json.bak "$APP_DIR/data/strategy-solana-universe.json"
+fi
 chown -R deploy:deploy /home/deploy
 
-su - deploy -c "cd $APP_DIR && npm install"
+su - deploy -c "cd $APP_DIR && npm ci"
 if [ ! -f "$APP_DIR/.next/BUILD_ID" ]; then
-  su - deploy -c "cd $APP_DIR && npx next build"
+  su - deploy -c "cd $APP_DIR && NODE_OPTIONS=--max-old-space-size=3072 npm run build"
 fi
 su - deploy -c "cd $APP_DIR && pm2 delete all || true"
 su - deploy -c "cd $APP_DIR && pm2 start ecosystem.config.cjs"
@@ -85,5 +103,10 @@ ln -sf /etc/nginx/sites-available/dis-dex-manager /etc/nginx/sites-enabled/dis-d
 nginx -t
 systemctl restart nginx
 
-curl -I http://127.0.0.1:3000
+for i in 1 2 3 4 5; do
+  if curl -I http://127.0.0.1:3000; then
+    break
+  fi
+  sleep 3
+done
 curl -I http://127.0.0.1

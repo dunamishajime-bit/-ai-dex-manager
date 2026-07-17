@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { usePathname } from "next/navigation";
 import { Bell, CreditCard, ShieldAlert, Wallet } from "lucide-react";
@@ -14,6 +14,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/": "ホーム",
   "/positions": "ダッシュボード",
   "/wallets": "運用ウォレット",
+  "/performance": "成績",
   "/settings": "設定",
   "/admin": "管理",
   "/history": "トレード履歴",

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";
 
 import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
-import { useSimulation } from "@/context/SimulationContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 
 function SummaryCard({
@@ -62,12 +62,13 @@ function QuickLink({
 }
 
 export default function HomePage() {
-  const { activeStrategies, tradeNotifications } = useSimulation();
   const { wallet } = useOperationalWallet();
+  const { formatPrice } = useCurrency();
   const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);
-  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");
+  const collateralUsd = holdings
+    .filter((holding) => holding.symbol === "USDT" || holding.symbol === "USDF")
+    .reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0);
   const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);
-  const cashUsd = Number(usdtHolding?.usdValue || 0);
   const isWalletRunning = wallet?.status === "running";
 
   return (
@@ -77,28 +78,34 @@ export default function HomePage() {
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />
 
       <div className="relative z-10 space-y-3 p-3 md:p-4">
-        <section className="grid gap-3 xl:grid-cols-[1.06fr_0.94fr]">
+        <section className="grid gap-3 xl:grid-cols-[1.08fr_0.92fr]">
           <div className="panel-gold rounded-[30px] p-4 md:p-5">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">
               <Wallet className="h-3.5 w-3.5" />
               Professional DisManager
             </div>
             <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">
-              運用ウォレットの状況を一画面で確認します。
+              combined を 3 lane で運用
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">
-              実際の運用ウォレット残高、自動売買の状態、判定内容、取引履歴へすぐ移動できます。
-              日々の確認と判断をここから進められる自分専用のホームです。
+              本番戦略は combined 固定です。PENGU は BTC 15m GoldCat、HYPE は freq、
+              ETH は reclaim_balanced を使って別レーンで判定し、AsterDex で実行します。
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                運用ウォレット確認
+                BTC 15m GoldCat
               </span>
               <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                自動売買の状態確認
+                PENGU 15m sizing
               </span>
               <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                履歴と設定の整理
+                HYPE freq lane
+              </span>
+              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
+                ETH reclaim lane
+              </span>
+              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
+                AsterDex execution
               </span>
             </div>
           </div>
@@ -106,29 +113,23 @@ export default function HomePage() {
           <div className="grid gap-3">
             <SummaryCard
               title="Portfolio"
-              value={`$${portfolioUsd.toFixed(2)}`}
-              text={`USDT ${cashUsd.toFixed(2)} / 保有資産 ${holdings.length}`}
+              value={formatPrice(portfolioUsd)}
+              text={`Collateral ${formatPrice(collateralUsd)} / 保有資産 ${holdings.length}`}
             />
             <SummaryCard
-              title="Auto Trade"
+              title="Execution"
               value={isWalletRunning ? "稼働中" : "停止中"}
-              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"
+              text="PENGU / HYPE / ETH の 3 lane を combined で評価します。"
               tone={isWalletRunning ? "profit" : "loss"}
             />
           </div>
         </section>
 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />
-          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />
-          <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />
-          <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />
-        </section>
-
-        <section className="grid gap-3 md:grid-cols-3">
-          <SummaryCard title="Strategies" value={`${activeStrategies.length}`} text="現在読み込み中の戦略数です。" />
-          <SummaryCard title="Notifications" value={`${tradeNotifications.length}`} text="最新の通知件数です。" />
-          <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />
+          <QuickLink href="/wallets" title="運用ウォレット" text="残高、USDT/USDF、運用状態を確認します。" icon={Wallet} />
+          <QuickLink href="/positions" title="ポジション" text="combined の現在ポジションと lane 状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/performance" title="成績" text="取引履歴と期間別のパフォーマンスを確認します。" icon={Coins} />
+          <QuickLink href="/settings" title="設定" text="運用設定と runtime control を確認します。" icon={Settings} />
         </section>
 
         <LiveDecisionPanel compact />

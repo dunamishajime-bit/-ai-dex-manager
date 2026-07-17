@@ -48,13 +48,27 @@ export interface PositionState {
     entryPrice: number;
     entryTs: number;
     entryIndex: number;
+    entryBarMs: number;
     entryStrategy: string | null;
     entryReason: string;
     lotId: string;
     entryAlloc: number;
+    entryMom20: number | null;
+    entryMom80: number | null;
+    entryMomAccel: number | null;
+    entryVolumeRatio: number | null;
+    entryEfficiencyRatio: number | null;
+    entryRecentHighDrawdownPct: number | null;
+    entryLongHighDrawdownPct: number | null;
     rangeExitMom20Above: number | null;
     rangeMaxHoldBars: number | null;
     peakPrice: number;
+    peakTs: number;
+    partialExitTaken: boolean;
+    partialExitQty: number;
+    partialExitTs: number;
+    partialExitPeakPrice: number;
+    buybackDone: boolean;
 }
 
 export interface TradeEventRow {

@@ -1,180 +1,165 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, TrendingUp } from "lucide-react";
+import { Activity, AlertTriangle, Clock3, RefreshCw, TrendingUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-type TrendEvaluation = {
-  symbol: string;
-  eligible: boolean;
-  score: number;
-  reasons: string[];
-  close: number;
-  sma40: number;
-  mom20: number;
-  adx14: number;
-  overheatPct: number;
-  volumeRatio: number;
-  efficiencyRatio: number;
+type LaneId = "pengu_goldcat" | "hype_freq" | "eth_reclaim";
+
+type PositionSummary = {
+  laneId?: LaneId;
+  symbol?: string;
+  side: "long" | "short";
+  quantity: number;
+  entryPrice: number;
+  entryTs: string;
+  sizeMultiplier: number;
+  entryCount?: number;
 };
 
-type LiveDecisionResponse = {
+type CombinedResponse = {
   ok: boolean;
-  details?: {
-    decision: {
-      isoTime: string;
-      desiredSymbol: string;
-      desiredSide: "trend" | "range" | "cash";
-      desiredAlloc: number;
-      reason: string;
-      regime: {
-        regimeLabel: string;
-        trendAllowed: boolean;
-        rangeAllowed: boolean;
-        breadth40: number;
-        bestMom20: number;
-        bestMomAccel: number;
-      };
-      trendCandidate: {
-        symbol: string;
-        score: number;
-        eligible: boolean;
-        reasons: string[];
-      } | null;
-      rangeCandidate: {
-        symbol: string;
-        score: number;
-        eligible: boolean;
-        reasons: string[];
-        subVariant?: string;
-      } | null;
-    };
-    trendEvaluations: TrendEvaluation[];
+  strategyType?: "combined";
+  activeLaneId?: LaneId;
+  checkedAt?: string;
+  runtimeMode?: "dry_run" | "live";
+  signal?: {
+    signalTs: string | null;
+    side: "long" | "short" | "flat";
+    moveBps: number;
+    elapsedSec: number | null;
+    bidSupportRatio: number | null;
+    spreadBps: number | null;
+    accepted: boolean;
+    reason: string;
   };
-  walletDecision?: {
-    currentSymbol: string;
+  sizing?: {
+    laneId?: LaneId;
+    pengu15mAligned: boolean;
+    strongAligned: boolean;
+    moveBps: number;
+    accelBps: number;
+    multiplier: number;
+    reason: string;
+  };
+  execution?: {
+    laneId?: LaneId;
+    executionSymbol?: string;
+    holdMinutes: number;
+    stopLossPct: number;
+    takeProfitPct: number;
+    trailActivationPct: number;
+    trailRetracePct: number;
+  };
+  desiredAction?: "enter" | "exit" | "hold" | "skip";
+  desiredSide?: "long" | "short" | "flat";
+  desiredSymbol?: string;
+  currentPosition?: PositionSummary | null;
+  currentPositions?: PositionSummary[];
+  reason?: string;
+  cachedAt?: number;
+  stale?: boolean;
+  error?: string;
+  runtimeControl?: {
+    tradingPaused: boolean;
+    pausedAt: string | null;
+    pauseReason: string | null;
+    activeStrategy: "legacy_paused" | "combined_dry_run" | "combined_live";
+    updatedAt: string;
+    combined?: {
+      venue: "AsterDex";
+      executionSymbol: string;
+      referenceSignal: string;
+      marketSymbol: string;
+      mode: "dry_run" | "live";
+    };
+  };
+  latestCombinedRun?: {
+    triggerLabel?: string;
+    executedAt: string;
+    decisionTime: string;
     desiredSymbol: string;
     desiredSide: "trend" | "range" | "cash";
-    desiredAlloc: number;
     reason: string;
-    rotation: {
-      fromSymbol: string;
-      toSymbol: string;
-      scoreGap: number;
-    } | null;
+    currentSymbol?: string;
+    tradedCount: number;
+    noopCount: number;
+    skippedCount: number;
+    errorCount: number;
   } | null;
-  error?: string;
 };
 
-function percent(value: number, digits = 2) {
-  return `${(Number(value || 0) * 100).toFixed(digits)}%`;
-}
-
-function fixed(value: number, digits = 2) {
-  return Number(value || 0).toFixed(digits);
-}
-
-function sideLabel(side: "trend" | "range" | "cash") {
-  if (side === "trend") return "Trend";
-  if (side === "range") return "Range";
-  return "Cash";
-}
-
-function regimeLabel(label?: string) {
-  if (label === "trend_strong") return "強い上昇トレンド";
-  if (label === "trend_weak") return "弱い上昇トレンド";
-  if (label === "range_only") return "レンジ中心";
-  if (label === "ambiguous") return "方向感が弱い";
-  return label || "-";
-}
-
-function reasonLabel(reason: string) {
-  switch (reason) {
-    case "close>sma40":
-      return "終値がSMA40を上回っています。";
-    case "close<=sma40":
-      return "終値がSMA40を下回っています。";
-    case "mom20-ok":
-      return "20本モメンタムがプラスです。";
-    case "mom20-low":
-      return "20本モメンタムが弱いです。";
-    case "sol-ok":
-      return "SOLの追加条件を満たしています。";
-    case "sol-overheat":
-      return "SOLは過熱気味です。";
-    case "avax-mom-ok":
-      return "AVAXのモメンタム条件を満たしています。";
-    case "avax-mom-low":
-      return "AVAXのモメンタムが弱いです。";
-    case "avax-vol-ok":
-      return "AVAXの出来高条件を満たしています。";
-    case "avax-vol-low":
-      return "AVAXの出来高が不足しています。";
-    case "structure-break":
-      return "高値更新の流れがあります。";
-    case "structure-flat":
-      return "高値更新の勢いが弱いです。";
-    case "volume-ok":
-      return "出来高の裏付けがあります。";
-    case "volume-low":
-      return "出来高が不足しています。";
-    case "accel-ok":
-      return "上昇加速が維持されています。";
-    case "accel-low":
-      return "上昇加速が弱まっています。";
-    case "eff-ok":
-      return "値動きの効率が良好です。";
-    case "eff-low":
-      return "値動きの効率が弱いです。";
-    case "retq22-pass":
-      return "RETQ22の強気条件を満たしています。";
-    case "retq22-block":
-      return "RETQ22の条件に届いていません。";
-    case "retq22-off":
-      return "この銘柄ではRETQ22追加条件を使っていません。";
-    case "trend-gate-off":
-      return "BTC全体条件がトレンド許可になっていません。";
-    case "priority-pick":
-      return "優先ルールにより採用しています。";
-    case "idle-extra":
-      return "通常候補が弱い待機局面のため、追加候補として評価しています。";
-    case "reserve-wait":
-      return "条件未達のためUSDT待機です。";
-    default:
-      return reason;
-  }
-}
-
-function decisionReasonLabel(reason: string) {
-  if (reason === "reserve-wait") {
-    return "条件が揃っていないため、USDTのまま待機します。";
-  }
-
-  if (reason.startsWith("trend:")) {
-    const parts = reason.replace("trend:", "").split("|").filter(Boolean).map(reasonLabel);
-    return `トレンド条件を満たしたため採用します。${parts.join(" ")}`;
-  }
-
-  if (reason.startsWith("range:")) {
-    const parts = reason.replace("range:", "").split("|").filter(Boolean).map(reasonLabel);
-    return `レンジ条件を使う局面です。${parts.join(" ")}`;
-  }
-
-  return reason;
-}
-
-function uniqueRows(rows: TrendEvaluation[], compact: boolean) {
-  const ordered = [...rows].sort((left, right) => {
-    if (left.symbol === "PENGU") return -1;
-    if (right.symbol === "PENGU") return 1;
-    return Number(right.eligible) - Number(left.eligible) || right.score - left.score;
+function formatDateTime(value?: string | number | null) {
+  if (!value) return "-";
+  const date = typeof value === "number" ? new Date(value) : new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
-  return compact ? ordered.slice(0, 5) : ordered;
+}
+
+function percent(value: number, digits = 2) {
+  return `${(value * 100).toFixed(digits)}%`;
+}
+
+function bps(value: number, digits = 2) {
+  return `${Number(value || 0).toFixed(digits)}bps`;
+}
+
+function sideLabel(side?: "long" | "short" | "flat") {
+  if (side === "long") return "LONG";
+  if (side === "short") return "SHORT";
+  return "WAIT";
+}
+
+function actionLabel(action?: "enter" | "exit" | "hold" | "skip") {
+  if (action === "enter") return "新規";
+  if (action === "exit") return "決済";
+  if (action === "hold") return "保有";
+  return "見送り";
+}
+
+function modeLabel(mode?: "dry_run" | "live") {
+  return mode === "live" ? "LIVE" : "DRY RUN";
+}
+
+function laneLabel(laneId?: LaneId) {
+  if (laneId === "hype_freq") return "HYPE freq";
+  if (laneId === "eth_reclaim") return "ETH reclaim";
+  return "PENGU GoldCat";
+}
+
+function laneExecutionSymbol(position?: { laneId?: LaneId; symbol?: string } | null) {
+  if (position?.symbol) return position.symbol;
+  if (position?.laneId === "hype_freq") return "HYPE/USDT";
+  if (position?.laneId === "eth_reclaim") return "ETH/USDT";
+  return "PENGU/USDT";
+}
+
+function toneClass(ok: boolean, stale?: boolean) {
+  if (!ok) return "border-loss/35 bg-loss/10 text-loss";
+  if (stale) return "border-amber-300/35 bg-amber-300/10 text-amber-100";
+  return "border-profit/35 bg-profit/10 text-profit";
+}
+
+function StatCard({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-3">
+      <div className="text-[10px] uppercase tracking-[0.22em] text-white/55">{label}</div>
+      <div className="mt-1 text-lg font-black text-white">{value}</div>
+      <div className="mt-1 text-[11px] leading-5 text-white/68">{detail}</div>
+    </div>
+  );
 }
 
 export function LiveDecisionPanel({ compact = false }: { compact?: boolean }) {
-  const [response, setResponse] = useState<LiveDecisionResponse | null>(null);
+  const [response, setResponse] = useState<CombinedResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -183,19 +168,20 @@ export function LiveDecisionPanel({ compact = false }: { compact?: boolean }) {
 
     async function load() {
       try {
+        setLoading(true);
         const res = await fetch("/api/system/auto-trade/live-decision", { cache: "no-store" });
-        const json = (await res.json().catch(() => null)) as LiveDecisionResponse | null;
+        const json = (await res.json().catch(() => null)) as CombinedResponse | null;
         if (cancelled) return;
 
-        if (json?.ok && json.details) {
+        if (json?.ok && json.strategyType === "combined") {
           setResponse(json);
           setError(null);
         } else {
-          setError(json?.error || "12H判定データを取得できませんでした。");
+          setError(json?.error || "combined の状態取得に失敗しました。");
         }
-      } catch (err) {
+      } catch (loadError) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "12H判定データを取得できませんでした。");
+          setError(loadError instanceof Error ? loadError.message : "combined の状態取得に失敗しました。");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -203,8 +189,9 @@ export function LiveDecisionPanel({ compact = false }: { compact?: boolean }) {
     }
 
     void load();
-    const timer = window.setInterval(load, 60000);
+    const timer = window.setInterval(load, 60_000);
     window.addEventListener("auto-trade-live-decision-refresh", load);
+
     return () => {
       cancelled = true;
       window.clearInterval(timer);
@@ -212,160 +199,142 @@ export function LiveDecisionPanel({ compact = false }: { compact?: boolean }) {
     };
   }, []);
 
-  const data = response?.details || null;
-  const walletDecision = response?.walletDecision || null;
-  const rows = useMemo(() => uniqueRows(data?.trendEvaluations || [], compact), [compact, data?.trendEvaluations]);
-  const selectedScore = data?.decision.trendCandidate?.score ?? data?.decision.rangeCandidate?.score ?? null;
-  const penguRow = rows.find((row) => row.symbol === "PENGU");
-  const rotation = walletDecision?.rotation || null;
+  const summaryTone = useMemo(
+    () => toneClass(Boolean(response?.signal?.accepted), response?.stale),
+    [response?.signal?.accepted, response?.stale],
+  );
+
+  const currentPositions = useMemo(() => {
+    if (Array.isArray(response?.currentPositions) && response.currentPositions.length > 0) {
+      return response.currentPositions;
+    }
+    return response?.currentPosition ? [response.currentPosition] : [];
+  }, [response?.currentPosition, response?.currentPositions]);
 
   return (
     <section className="panel-gold rounded-[28px] p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-bold text-white">
-          <TrendingUp className="h-4 w-4 text-gold-100" />
-          12H自動トレード判定
+          <TrendingUp className="h-4 w-4 text-white" />
+          combined ライブ判断
         </div>
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-gold-100/70">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-white/70">
           <RefreshCw className="h-3.5 w-3.5" />
-          live
+          {response?.runtimeMode ? modeLabel(response.runtimeMode) : "loading"}
         </div>
       </div>
 
       {loading ? (
         <div className="mt-3 rounded-[18px] border border-dashed border-white/10 px-4 py-6 text-sm text-white/70">
-          現在の12H判定を読み込んでいます。
+          combined の最新状態を読み込んでいます。
         </div>
       ) : error ? (
-        <div className="mt-3 rounded-[18px] border border-loss/30 bg-loss/10 px-4 py-6 text-sm text-loss">
-          {error}
-        </div>
-      ) : data ? (
+        <div className="mt-3 rounded-[18px] border border-loss/35 bg-loss/10 px-4 py-6 text-sm text-loss">{error}</div>
+      ) : response ? (
         <div className="mt-3 space-y-3">
-          <div className="grid gap-3 xl:grid-cols-[1fr_1fr]">
-            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">現在の採用内容</div>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <div className="text-2xl font-black text-white">
-                  {data.decision.desiredSymbol} / {sideLabel(data.decision.desiredSide)}
-                </div>
-                <span
-                  className={cn(
-                    "rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em]",
-                    data.decision.desiredSide === "cash"
-                      ? "border border-white/12 bg-white/[0.03] text-white/70"
-                      : "border border-profit/35 bg-profit/10 text-profit",
-                  )}
-                >
-                  配分 {Math.round(data.decision.desiredAlloc * 100)}%
-                </span>
-                {selectedScore != null ? (
-                  <span className="rounded-full border border-gold-400/25 bg-gold-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold-100">
-                    score {fixed(selectedScore)}
-                  </span>
-                ) : null}
-              </div>
-              <div className="mt-2 text-[12px] leading-6 text-white/82">
-                {decisionReasonLabel(data.decision.reason)}
-              </div>
-              {rotation ? (
-                <div className="mt-3 rounded-[16px] border border-profit/30 bg-profit/10 px-3 py-3 text-[11px] leading-5 text-white/85">
-                  <div className="font-bold text-profit">ローテーション予定</div>
-                  <div className="mt-1">
-                    {rotation.fromSymbol} の勢いが鈍り、{rotation.toSymbol} のScoreが {fixed(rotation.scoreGap)} 点上回っているため、
-                    次回実行では {rotation.fromSymbol} を全額決済して {rotation.toSymbol} へ切り替えます。
-                  </div>
-                </div>
-              ) : null}
-              <div className="mt-3 rounded-[16px] border border-gold-400/15 bg-black/20 px-3 py-3 text-[11px] leading-5 text-white/76">
-                PENGUは通常時の主力ではなく、待機中または保有中通貨の勢いが鈍った時だけ比較対象に入ります。
-              </div>
-              {walletDecision ? (
-                <div className="mt-2 text-[11px] text-white/60">
-                  現在保有 {walletDecision.currentSymbol} / 実行予定 {walletDecision.desiredSymbol}
-                </div>
-              ) : null}
-              <div className="mt-2 text-[11px] text-white/60">
-                判定更新 {new Date(data.decision.isoTime).toLocaleString("ja-JP")}
-              </div>
-            </div>
+          <div className="grid gap-2 lg:grid-cols-4">
+            <StatCard
+              label="Strategy"
+              value={response.runtimeControl?.activeStrategy === "combined_live" ? "combined live" : "combined dry run"}
+              detail={`${laneLabel(response.activeLaneId)} / ${response.execution?.executionSymbol || response.runtimeControl?.combined?.executionSymbol || "PENGU/USDT"} / ${currentPositions.length} position${currentPositions.length === 1 ? "" : "s"}`}
+            />
+            <StatCard
+              label="Signal"
+              value={`${sideLabel(response.signal?.side)} / ${response.signal?.accepted ? "accepted" : "skip"}`}
+              detail={response.signal?.reason || "-"}
+            />
+            <StatCard
+              label="Sizing"
+              value={`${Number(response.sizing?.multiplier || 1).toFixed(2)}x`}
+              detail={response.sizing?.reason || "-"}
+            />
+            <StatCard
+              label="Action"
+              value={actionLabel(response.desiredAction)}
+              detail={response.reason || "-"}
+            />
+          </div>
 
-            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">相場の見立て</div>
-              <div className="mt-2 grid gap-2 text-sm text-white/84 md:grid-cols-2">
-                <div>レジーム: {regimeLabel(data.decision.regime.regimeLabel)}</div>
-                <div>トレンド条件: {data.decision.regime.trendAllowed ? "有効" : "無効"}</div>
-                <div>レンジ条件: {data.decision.regime.rangeAllowed ? "有効" : "無効"}</div>
-                <div>breadth40: {data.decision.regime.breadth40}</div>
-                <div>最良 mom20: {percent(data.decision.regime.bestMom20)}</div>
-                <div>最良 accel: {percent(data.decision.regime.bestMomAccel)}</div>
-              </div>
-              {penguRow ? (
-                <div className="mt-3 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] leading-5 text-white/76">
-                  PENGU score {fixed(penguRow.score)}。{penguRow.eligible ? "条件を満たしています。" : "現時点では条件未達です。"}
-                </div>
-              ) : null}
+          <div className={cn("rounded-[20px] border px-4 py-4", summaryTone)}>
+            <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
+              {response.signal?.accepted ? <Activity className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+              BTC 15m GoldCat シグナル
+              <span className="rounded-full border border-white/12 px-2 py-0.5 text-[10px] font-bold text-white/80">
+                {sideLabel(response.signal?.side)}
+              </span>
+            </div>
+            <div className="mt-2 grid gap-2 text-[12px] text-white/82 md:grid-cols-2 xl:grid-cols-4">
+              <div>判定時刻: {formatDateTime(response.signal?.signalTs || response.checkedAt)}</div>
+              <div>move: {bps(response.signal?.moveBps || 0)}</div>
+              <div>elapsed: {response.signal?.elapsedSec != null ? `${response.signal.elapsedSec}s` : "-"}</div>
+              <div>spread: {response.signal?.spreadBps != null ? bps(response.signal.spreadBps) : "-"}</div>
+              <div>bid support: {response.signal?.bidSupportRatio != null ? Number(response.signal.bidSupportRatio).toFixed(2) : "-"}</div>
+              <div>lane: {laneLabel(response.activeLaneId)}</div>
+              <div>sizing move: {bps(response.sizing?.moveBps || 0)}</div>
+              <div>sizing accel: {bps(response.sizing?.accelBps || 0)}</div>
+              <div>cache: {formatDateTime(response.cachedAt)}</div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-gold-100/80">
-              候補通貨の比較
-            </div>
-            {rows.map((row) => (
-              <div
-                key={row.symbol}
-                className="grid gap-3 rounded-[18px] border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/82 xl:grid-cols-[1fr_1fr_0.85fr]"
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="text-lg font-black text-white">{row.symbol}/USDT</div>
-                    <span
-                      className={cn(
-                        "rounded-full border px-2 py-0.5 text-[10px] font-bold",
-                        row.eligible
-                          ? "border-profit/40 bg-profit/10 text-profit"
-                          : "border-white/15 bg-white/[0.03] text-white/60",
-                      )}
-                    >
-                      {row.eligible ? "採用候補" : "見送り"}
-                    </span>
-                    {row.symbol === "PENGU" ? (
-                      <span className="rounded-full border border-gold-400/25 bg-gold-400/10 px-2 py-0.5 text-[10px] font-bold text-gold-100">
-                        追加候補
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-white/74">
-                    <div>score {fixed(row.score)}</div>
-                    <div>終値 {fixed(row.close, 4)}</div>
-                    <div>SMA40 {fixed(row.sma40, 4)}</div>
-                    <div>mom20 {percent(row.mom20)}</div>
-                    <div>ADX14 {fixed(row.adx14)}</div>
-                    <div>過熱率 {percent(row.overheatPct)}</div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-bold text-gold-100/80">判定理由</div>
-                  <div className="mt-2 space-y-1 text-[11px] leading-5 text-white/76">
-                    {row.reasons.map((reason) => (
-                      <div key={`${row.symbol}-${reason}`}>・{reasonLabel(reason)}</div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid gap-2 text-[11px] text-white/74">
-                  <div className="rounded-[12px] border border-white/8 bg-black/20 px-3 py-2">
-                    出来高比率 {fixed(row.volumeRatio)}
-                  </div>
-                  <div className="rounded-[12px] border border-white/8 bg-black/20 px-3 py-2">
-                    効率比率 {fixed(row.efficiencyRatio)}
-                  </div>
-                </div>
+          <div className="grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-white">
+                <Clock3 className="h-4 w-4 text-gold-100" />
+                Exit 条件
               </div>
-            ))}
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                <StatCard label="Hold" value={`${response.execution?.holdMinutes || 25}m`} detail="最大保有時間" />
+                <StatCard label="Stop Loss" value={percent(response.execution?.stopLossPct || 0)} detail="逆行時の損切り幅" />
+                <StatCard label="Take Profit" value={percent(response.execution?.takeProfitPct || 0)} detail="利確ライン" />
+                <StatCard
+                  label="Trail"
+                  value={`${percent(response.execution?.trailActivationPct || 0)} / ${percent(response.execution?.trailRetracePct || 0)}`}
+                  detail="発動 / 戻し幅"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-white">
+                <Activity className="h-4 w-4 text-gold-100" />
+                現在ポジション
+              </div>
+              {currentPositions.length > 0 ? (
+                <div className="mt-3 space-y-3 text-[12px] text-white/82">
+                  {currentPositions.map((position, index) => (
+                    <div key={`${position.laneId || "lane"}-${position.entryTs}-${index}`} className="rounded-[16px] border border-white/10 bg-white/[0.03] px-3 py-3">
+                      <div className="font-bold text-white">
+                        {laneLabel(position.laneId)} / {position.side.toUpperCase()} / {laneExecutionSymbol(position)} / {Number(position.sizeMultiplier).toFixed(2)}x
+                      </div>
+                      <div>建値: {Number(position.entryPrice || 0).toFixed(6)}</div>
+                      <div>数量: {Number(position.quantity || 0).toFixed(6)}</div>
+                      <div>建玉時刻: {formatDateTime(position.entryTs)}</div>
+                      <div>追加回数: {position.entryCount || 1}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-3 text-[12px] leading-6 text-white/72">
+                  現在はノーポジションです。条件成立までは USDT 待機です。
+                </div>
+              )}
+            </div>
           </div>
+
+          {!compact && response.latestCombinedRun ? (
+            <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
+              <div className="text-sm font-bold text-white">直近実行</div>
+              <div className="mt-2 grid gap-2 text-[12px] text-white/82 md:grid-cols-2 xl:grid-cols-4">
+                <div>実行時刻: {formatDateTime(response.latestCombinedRun.executedAt)}</div>
+                <div>判定時刻: {formatDateTime(response.latestCombinedRun.decisionTime)}</div>
+                <div>約定数: {response.latestCombinedRun.tradedCount}</div>
+                <div>保持: {response.latestCombinedRun.noopCount}</div>
+                <div>見送り: {response.latestCombinedRun.skippedCount}</div>
+                <div>エラー: {response.latestCombinedRun.errorCount}</div>
+                <div className="md:col-span-2 xl:col-span-4">理由: {response.latestCombinedRun.reason}</div>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </section>

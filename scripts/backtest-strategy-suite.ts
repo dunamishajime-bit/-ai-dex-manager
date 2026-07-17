@@ -261,12 +261,27 @@ function createEmptyPosition(): PositionState {
         entryPrice: 0,
         entryTs: 0,
         entryIndex: -1,
+        entryBarMs: 12 * 60 * 60 * 1000,
         entryStrategy: null,
         entryReason: "",
         lotId: "",
         entryAlloc: 0,
+        entryMom20: null,
+        entryMom80: null,
+        entryMomAccel: null,
+        entryVolumeRatio: null,
+        entryEfficiencyRatio: null,
+        entryRecentHighDrawdownPct: null,
+        entryLongHighDrawdownPct: null,
         rangeExitMom20Above: null,
         rangeMaxHoldBars: null,
+        peakPrice: 0,
+        peakTs: 0,
+        partialExitTaken: false,
+        partialExitQty: 0,
+        partialExitTs: 0,
+        partialExitPeakPrice: 0,
+        buybackDone: false,
     };
 }
 
@@ -2323,7 +2338,6 @@ async function main() {
     const results = [] as StrategyResult[];
 
     for (const strategy of strategies) {
-        // eslint-disable-next-line no-await-in-loop
         const result = await runStrategy(strategy, bySymbol, indicators, timeline, rate);
         results.push(result);
     }

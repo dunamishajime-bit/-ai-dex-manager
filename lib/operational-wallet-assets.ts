@@ -1,7 +1,7 @@
 import { NATIVE_TOKEN_ADDRESS } from "@/lib/tokens";
 
 export type OperationalWalletTrackedAsset = {
-  symbol: "BNB" | "USDT" | "ETH" | "SOL" | "LINK" | "AVAX" | "PENGU" | "DOGE" | "INJ" | "UNI" | "TWT";
+  symbol: "BNB" | "USDT" | "ETH" | "SOL" | "LINK" | "AVAX" | "PENGU" | "APE" | "COS" | "MITO" | "DOGE" | "INJ" | "UNI" | "TWT" | "BIO" | "DUSK";
   name: string;
   providerId: string;
   address: string;
@@ -63,6 +63,27 @@ export const OPERATIONAL_WALLET_TRACKED_ASSETS: OperationalWalletTrackedAsset[] 
     decimals: 18,
   },
   {
+    symbol: "APE",
+    name: "ApeCoin (BNB Chain)",
+    providerId: "apecoin",
+    address: "0x8f86A15EC17Cb3369d8b3E666DaDbC11dAA82b79",
+    decimals: 18,
+  },
+  {
+    symbol: "COS",
+    name: "Contentos (BNB Chain)",
+    providerId: "contentos",
+    address: "0x96Dd399F9c3AFda1F194182F71600F1B65946501",
+    decimals: 18,
+  },
+  {
+    symbol: "MITO",
+    name: "Mitosis (BNB Chain)",
+    providerId: "mitosis",
+    address: "0x8e1e6bf7e13c400269987b65ab2b5724b016caef",
+    decimals: 18,
+  },
+  {
     symbol: "DOGE",
     name: "Binance-Peg DOGE",
     providerId: "dogecoin",
@@ -88,6 +109,20 @@ export const OPERATIONAL_WALLET_TRACKED_ASSETS: OperationalWalletTrackedAsset[] 
     name: "Trust Wallet Token (BNB Chain)",
     providerId: "trust-wallet-token",
     address: "0x4B0F1812e5Df2A09796481Ff14017e6005508003",
+    decimals: 18,
+  },
+  {
+    symbol: "BIO",
+    name: "Bio Protocol (BNB Chain)",
+    providerId: "bio-protocol",
+    address: "0x226a2FA2556C48245E57cd1cba4C6c9e67077dd2",
+    decimals: 18,
+  },
+  {
+    symbol: "DUSK",
+    name: "Dusk (BNB Chain)",
+    providerId: "dusk-network",
+    address: "0xB2Bd0749dBE21F623d9BAba856d3B0f0e1BFec9C",
     decimals: 18,
   },
 ];

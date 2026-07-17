@@ -41,6 +41,11 @@ interface OpenPositionRecord {
   costBasisUsd: number;
   openedAt: string;
   lastUpdatedAt: string;
+  entryReason?: string;
+  entryMom80?: number;
+  entryVolumeRatio?: number;
+  partialExitTakenAt?: string;
+  partialExitPeakPriceUsd?: number;
 }
 
 interface TradeLedgerDb {
@@ -55,6 +60,11 @@ export interface TradeLedgerOpenPosition {
   costBasisUsd: number;
   openedAt: string;
   lastUpdatedAt: string;
+  entryReason?: string;
+  entryMom80?: number;
+  entryVolumeRatio?: number;
+  partialExitTakenAt?: string;
+  partialExitPeakPriceUsd?: number;
 }
 
 interface AppendTradeHistoryInput {
@@ -68,6 +78,23 @@ interface AppendTradeHistoryInput {
   beforeHoldings: OperationalWalletHolding[];
   afterHoldings: OperationalWalletHolding[];
   trade: DirectWalletTradeResult;
+  executedAt?: string;
+}
+
+interface AppendVenueTradeHistoryInput {
+  walletId: string;
+  walletAddress: string;
+  chainId: number;
+  provider?: string;
+  txHash: string;
+  action: "BUY" | "SELL";
+  sourceSymbol: string;
+  destSymbol: string;
+  sourceAmount: number;
+  destAmount: number;
+  sourceUsdValue: number;
+  destUsdValue: number;
+  reason: string;
   executedAt?: string;
 }
 
@@ -90,6 +117,13 @@ function getHoldingUsdPrice(holdings: OperationalWalletHolding[], symbol: string
 
 function round6(value: number) {
   return Number(value.toFixed(6));
+}
+
+function parseNumericReasonTag(reason: string, tag: string) {
+  const match = reason.match(new RegExp(`${tag}=(-?\\d+(?:\\.\\d+)?)`));
+  if (!match) return undefined;
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? value : undefined;
 }
 
 function hasMeaningfulTradeAmounts(entry: Pick<TradeHistoryEntry, "sourceAmount" | "destAmount">) {
@@ -172,6 +206,9 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
             costBasisUsd: round6(effectiveBuyUsd),
             openedAt: next.executedAt,
             lastUpdatedAt: next.executedAt,
+            entryReason: next.reason,
+            entryMom80: parseNumericReasonTag(next.reason, "entryMom80"),
+            entryVolumeRatio: parseNumericReasonTag(next.reason, "entryVolumeRatio"),
           });
           next.openedAt = next.executedAt;
         }
@@ -202,11 +239,15 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
         if (remainingQty <= 0.0000001 || remainingCost <= 0.0000001) {
           openPositions.delete(sellKey);
         } else {
-          openPositions.set(sellKey, {
+        openPositions.set(sellKey, {
             ...open,
             quantity: remainingQty,
             costBasisUsd: remainingCost,
             lastUpdatedAt: next.executedAt,
+            partialExitTakenAt: next.reason.includes("半分利確") ? next.executedAt : open.partialExitTakenAt,
+            partialExitPeakPriceUsd: next.reason.includes("半分利確")
+              ? (next.exitPriceUsd || open.partialExitPeakPriceUsd)
+              : open.partialExitPeakPriceUsd,
           });
         }
       }
@@ -352,6 +393,102 @@ export async function appendTradeHistory(input: AppendTradeHistoryInput): Promis
       costBasisUsd: round6(sourceUsdValue),
       openedAt: now,
       lastUpdatedAt: now,
+      entryReason: input.reason,
+      entryMom80: parseNumericReasonTag(input.reason, "entryMom80"),
+      entryVolumeRatio: parseNumericReasonTag(input.reason, "entryVolumeRatio"),
+    };
+    openedAt = now;
+  }
+
+  if (input.action === "SELL" && sourceAmount > 0) {
+    const open = db.openPositions[sourceKey];
+    if (open && open.quantity > 0 && open.costBasisUsd > 0) {
+      const averageCost = open.costBasisUsd / open.quantity;
+      const costForSold = round6(sourceAmount * averageCost);
+      realizedPnlUsd = round6(destUsdValue - costForSold);
+      realizedPnlPct = costForSold > 0 ? round6((realizedPnlUsd / costForSold) * 100) : undefined;
+      openedAt = open.openedAt;
+      closedAt = now;
+
+      const remainingQty = round6(Math.max(0, open.quantity - sourceAmount));
+      const remainingCost = round6(Math.max(0, open.costBasisUsd - costForSold));
+      if (remainingQty <= 0.0000001 || remainingCost <= 0.0000001) {
+        delete db.openPositions[sourceKey];
+      } else {
+        db.openPositions[sourceKey] = {
+          ...open,
+          quantity: remainingQty,
+          costBasisUsd: remainingCost,
+          lastUpdatedAt: now,
+          partialExitTakenAt: input.reason.includes("半分利確") ? now : open.partialExitTakenAt,
+          partialExitPeakPriceUsd: input.reason.includes("半分利確")
+            ? (exitPriceUsd || open.partialExitPeakPriceUsd)
+            : open.partialExitPeakPriceUsd,
+        };
+      }
+    }
+  }
+
+  const entry: TradeHistoryEntry = {
+    id: `trd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    executedAt: now,
+    walletId: input.walletId,
+    walletAddress: input.walletAddress,
+    chainId: input.chainId,
+    txHash: input.trade.txHash,
+    provider: input.trade.provider,
+    action: input.action,
+    sourceSymbol: input.sourceSymbol,
+    destSymbol: input.destSymbol,
+    sourceAmount: round6(sourceAmount),
+    destAmount: round6(destAmount),
+    sourceUsdValue,
+    destUsdValue,
+    entryPriceUsd,
+    exitPriceUsd,
+    realizedPnlUsd,
+    realizedPnlPct,
+    reason: input.reason,
+    openedAt,
+    closedAt,
+  };
+
+  db.entries.unshift(entry);
+  await saveTradeLedger(db);
+  return entry;
+}
+
+export async function appendVenueTradeHistory(input: AppendVenueTradeHistoryInput): Promise<TradeHistoryEntry | null> {
+  if (!input.txHash || !input.action) return null;
+
+  const db = await loadTradeLedger();
+  const now = input.executedAt || new Date().toISOString();
+  const sourceAmount = round6(Number(input.sourceAmount || 0));
+  const destAmount = round6(Number(input.destAmount || 0));
+  const sourceUsdValue = round6(Number(input.sourceUsdValue || 0));
+  const destUsdValue = round6(Number(input.destUsdValue || 0));
+  if (!hasMeaningfulTradeAmounts({ sourceAmount, destAmount })) return null;
+
+  const entryPriceUsd = input.action === "BUY" && destAmount > 0 ? round6(sourceUsdValue / destAmount) : undefined;
+  const exitPriceUsd = input.action === "SELL" && sourceAmount > 0 ? round6(destUsdValue / sourceAmount) : undefined;
+
+  let realizedPnlUsd: number | undefined;
+  let realizedPnlPct: number | undefined;
+  let openedAt: string | undefined;
+  let closedAt: string | undefined;
+
+  const openKey = `${input.walletId}:${input.destSymbol}`;
+  const sourceKey = `${input.walletId}:${input.sourceSymbol}`;
+
+  if (input.action === "BUY" && destAmount > 0 && sourceUsdValue > 0) {
+    db.openPositions[openKey] = {
+      walletId: input.walletId,
+      symbol: input.destSymbol,
+      quantity: destAmount,
+      costBasisUsd: sourceUsdValue,
+      openedAt: now,
+      lastUpdatedAt: now,
+      entryReason: input.reason,
     };
     openedAt = now;
   }
@@ -387,13 +524,13 @@ export async function appendTradeHistory(input: AppendTradeHistoryInput): Promis
     walletId: input.walletId,
     walletAddress: input.walletAddress,
     chainId: input.chainId,
-    txHash: input.trade.txHash,
-    provider: input.trade.provider,
+    txHash: input.txHash,
+    provider: input.provider,
     action: input.action,
     sourceSymbol: input.sourceSymbol,
     destSymbol: input.destSymbol,
-    sourceAmount: round6(sourceAmount),
-    destAmount: round6(destAmount),
+    sourceAmount,
+    destAmount,
     sourceUsdValue,
     destUsdValue,
     entryPriceUsd,
@@ -408,4 +545,29 @@ export async function appendTradeHistory(input: AppendTradeHistoryInput): Promis
   db.entries.unshift(entry);
   await saveTradeLedger(db);
   return entry;
+}
+
+export async function updateOpenPositionPartialExitPeak(
+  walletId: string,
+  symbol: string,
+  peakPriceUsd: number,
+): Promise<TradeLedgerOpenPosition | null> {
+  if (!Number.isFinite(peakPriceUsd) || peakPriceUsd <= 0) return null;
+
+  const db = await loadTradeLedger();
+  const key = `${walletId}:${symbol}`;
+  const open = db.openPositions[key];
+  if (!open) return null;
+
+  const previousPeak = Number(open.partialExitPeakPriceUsd || 0);
+  if (previousPeak >= peakPriceUsd) return { ...open };
+
+  const updated = {
+    ...open,
+    partialExitPeakPriceUsd: round6(peakPriceUsd),
+    lastUpdatedAt: new Date().toISOString(),
+  };
+  db.openPositions[key] = updated;
+  await saveTradeLedger(db);
+  return { ...updated };
 }

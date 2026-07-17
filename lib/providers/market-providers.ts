@@ -33,10 +33,15 @@ const COINGECKO_ID_MAP: Record<string, string> = {
     "shiba-inu": "shiba-inu",
     "pudgy-penguins": "pudgy-penguins",
     "injective-protocol": "injective-protocol",
+    "bio-protocol": "bio-protocol",
+    "dusk-network": "dusk-network",
+    mitosis: "mitosis",
     uniswap: "uniswap",
 };
 
 const PRICE_CACHE_PATH = path.join(process.cwd(), "data", "market-price-cache.json");
+const PRICE_CACHE_TTL_MS = 10 * 60 * 1000;
+const MARKET_PROVIDER_DEBUG = process.env.MARKET_PROVIDER_DEBUG === "1";
 const BINANCE_SYMBOL_MAP: Record<string, string> = {
     "binance-coin": "BNBUSDT",
     tether: "USDTUSDT",
@@ -46,7 +51,7 @@ const BINANCE_SYMBOL_MAP: Record<string, string> = {
     chainlink: "LINKUSDT",
     avalanche: "AVAXUSDT",
     dogecoin: "DOGEUSDT",
-    "polygon-ecosystem-token": "MATICUSDT",
+    "polygon-ecosystem-token": "POLUSDT",
     arbitrum: "ARBUSDT",
     optimism: "OPUSDT",
     cardano: "ADAUSDT",
@@ -58,8 +63,13 @@ const BINANCE_SYMBOL_MAP: Record<string, string> = {
     cosmos: "ATOMUSDT",
     "shiba-inu": "SHIBUSDT",
     "pudgy-penguins": "PENGUUSDT",
+    apecoin: "APEUSDT",
+    contentos: "COSUSDT",
     "injective-protocol": "INJUSDT",
     "trust-wallet-token": "TWTUSDT",
+    "bio-protocol": "BIOUSDT",
+    "dusk-network": "DUSKUSDT",
+    mitosis: "MITOUSDT",
 };
 
 type CachedPriceEntry = { usd: number; change24hPct?: number; updatedAt: number };
@@ -80,16 +90,36 @@ async function loadCachedPrices(): Promise<CachedPriceMap> {
     }
 }
 
+function isFreshCachedPrice(entry: CachedPriceEntry | undefined, now = Date.now()) {
+    return Boolean(
+        entry &&
+        Number(entry.usd || 0) > 0 &&
+        Number(entry.updatedAt || 0) > 0 &&
+        now - Number(entry.updatedAt) <= PRICE_CACHE_TTL_MS,
+    );
+}
+
+function logMarketProviderFallback(message: string) {
+    if (MARKET_PROVIDER_DEBUG) {
+        console.info(message);
+    }
+}
+
 async function saveCachedPrices(prices: Record<string, { usd: number; change24hPct?: number }>) {
     try {
         await fs.mkdir(path.dirname(PRICE_CACHE_PATH), { recursive: true });
+        const existing = await loadCachedPrices();
+        const now = Date.now();
         const cache = {
-            updatedAt: Date.now(),
-            prices: Object.fromEntries(
-                Object.entries(prices)
+            updatedAt: now,
+            prices: {
+                ...existing,
+                ...Object.fromEntries(
+                    Object.entries(prices)
                     .filter(([, value]) => Number(value?.usd || 0) > 0)
-                    .map(([key, value]) => [key, { usd: Number(value.usd), change24hPct: Number(value.change24hPct || 0), updatedAt: Date.now() }]),
-            ) as CachedPriceMap,
+                    .map(([key, value]) => [key, { usd: Number(value.usd), change24hPct: Number(value.change24hPct || 0), updatedAt: now }]),
+                ),
+            } as CachedPriceMap,
         };
         await fs.writeFile(PRICE_CACHE_PATH, JSON.stringify(cache, null, 2), "utf8");
     } catch (error) {
@@ -109,33 +139,33 @@ async function fetchBinanceFallback(providerIds: string[]): Promise<Record<strin
         return {};
     }
 
-    const response = await fetch(
-        `https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(requests.map((entry) => entry.symbol)))}`,
-        {
-            cache: "no-store",
-            signal: AbortSignal.timeout(5000),
-        },
-    );
-
-    if (!response.ok) {
-        throw new Error(`Binance fallback failed with status ${response.status}`);
-    }
-
-    const json = await response.json();
-    const entries = Array.isArray(json) ? json : [];
-    const reverse = Object.fromEntries(requests.map((entry) => [entry.symbol, entry.providerId]));
     const out: Record<string, { usd: number; change24hPct?: number }> = {};
 
-    entries.forEach((item) => {
-        const providerId = reverse[String(item?.symbol || "")];
-        if (!providerId) return;
-        const usd = Number(item?.lastPrice || 0);
-        if (!Number.isFinite(usd) || usd <= 0) return;
-        out[providerId] = {
-            usd,
-            change24hPct: Number(item?.priceChangePercent || 0),
-        };
-    });
+    await Promise.all(requests.map(async (request) => {
+        try {
+            const response = await fetch(
+                `https://api.binance.com/api/v3/ticker/24hr?symbol=${encodeURIComponent(request.symbol)}`,
+                {
+                    cache: "no-store",
+                    signal: AbortSignal.timeout(3500),
+                },
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const item = await response.json();
+            const usd = Number(item?.lastPrice || 0);
+            if (!Number.isFinite(usd) || usd <= 0) return;
+            out[request.providerId] = {
+                usd,
+                change24hPct: Number(item?.priceChangePercent || 0),
+            };
+        } catch {
+            // A single unsupported Binance pair should not make the whole price batch noisy.
+        }
+    }));
 
     return out;
 }
@@ -204,6 +234,7 @@ export function toJpy(usd: number, usdJpy: number): number {
 
 export async function fetchPricesBatch(tokens: TokenRef[]): Promise<Record<string, { usd: number; change24hPct?: number }>> {
     const out: Record<string, { usd: number; change24hPct?: number }> = {};
+    const now = Date.now();
     tokens.forEach((token) => {
         if (token.providerId === "tether") {
             out[token.providerId] = { usd: 1, change24hPct: 0 };
@@ -218,7 +249,18 @@ export async function fetchPricesBatch(tokens: TokenRef[]): Promise<Record<strin
         return chunks;
     };
 
-    const byProvider = tokens.reduce<Record<string, TokenRef[]>>((acc, t) => {
+    tokens.forEach((token) => {
+        const cachedPrice = cached[token.providerId];
+        if (!out[token.providerId] && isFreshCachedPrice(cachedPrice, now)) {
+            out[token.providerId] = {
+                usd: Number(cachedPrice?.usd || 0),
+                change24hPct: Number(cachedPrice?.change24hPct || 0),
+            };
+        }
+    });
+
+    const tokensNeedingFetch = tokens.filter((token) => !out[token.providerId]);
+    const byProvider = tokensNeedingFetch.reduce<Record<string, TokenRef[]>>((acc, t) => {
         acc[t.provider] ??= [];
         acc[t.provider].push(t);
         return acc;
@@ -255,8 +297,8 @@ export async function fetchPricesBatch(tokens: TokenRef[]): Promise<Record<strin
                     });
                 });
             }
-        } catch (e) {
-            console.warn("[CoinGecko] Simple price fetch failed, continuing to CoinCap fallback:", e);
+        } catch {
+            logMarketProviderFallback("[CoinGecko] Simple price fetch skipped or rate-limited; continuing to fallback providers.");
         }
 
         const unresolved = byProvider.coincap.filter((token) => !out[token.providerId]);
@@ -275,11 +317,8 @@ export async function fetchPricesBatch(tokens: TokenRef[]): Promise<Record<strin
                         change24hPct: Number(asset.changePercent24Hr),
                     };
                 }
-            } catch (e) {
-                const message = e instanceof Error ? e.message : String(e);
-                console.warn(
-                    `[CoinCap] Unresolved batch fetch failed; using partial provider data for ${unresolved.length} assets: ${message}`,
-                );
+            } catch {
+                logMarketProviderFallback(`[CoinCap] Batch fetch unavailable; trying Binance/cache for ${unresolved.length} assets.`);
             }
         }
 
@@ -294,8 +333,8 @@ export async function fetchPricesBatch(tokens: TokenRef[]): Promise<Record<strin
                         out[providerId] = priceData;
                     }
                 }
-            } catch (e) {
-                console.warn("[Binance] Fallback fetch failed:", e);
+            } catch {
+                logMarketProviderFallback("[Binance] Fallback fetch unavailable; using cache where possible.");
             }
         }
     }

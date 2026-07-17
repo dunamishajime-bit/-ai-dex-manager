@@ -39,6 +39,9 @@ export type OperationalWalletRecord = {
   lastBalanceWei?: string;
   lastBalanceFormatted?: string;
   lastPortfolioUsd?: number;
+  lastPortfolioHighWaterUsd?: number;
+  lastPortfolioDrawdownPct?: number;
+  lastPortfolioDrawdownCheckedAt?: string;
   trackedHoldings?: OperationalWalletHolding[];
   deletedAt?: string;
   whitelist: OperationalWhitelistEntry[];

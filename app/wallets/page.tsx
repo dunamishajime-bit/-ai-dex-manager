@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Copy, Loader2, Plus, QrCode, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
@@ -399,7 +399,7 @@ export default function WalletsPage() {
 
                   <div className="mt-3 grid gap-2 text-[11px] text-white/72 md:grid-cols-2">
                     <div>総評価額 {formatUsd(totalHoldingsUsd)}</div>
-                    <div>BNB残高 {wallet.lastBalanceFormatted ? `${wallet.lastBalanceFormatted} BNB` : "-"}</div>
+                    <div>Aster利用可能残高 {wallet.lastBalanceFormatted ? `${wallet.lastBalanceFormatted} USD` : "-"}</div>
                     <div>バックアップ確認 {wallet.backupConfirmed ? "済み" : "未確認"}</div>
                     <div>入金検知 {formatDate(wallet.depositDetectedAt)}</div>
                     <div>Owner接続 {formatDate(wallet.ownerReconnectedAt)}</div>

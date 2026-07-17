@@ -3,7 +3,8 @@ import path from "path";
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { runLiveHybridAutotrade } from "@/lib/server/live-hybrid-autotrade";
+import { isAutoTradePaused } from "@/lib/server/auto-trade-runtime-control";
+import { runActiveAutoTrade } from "@/lib/server/auto-trade-runner";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,6 +80,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const runtime = isAutoTradePaused();
+    if (runtime.paused) {
+        return NextResponse.json(
+            { ok: false, error: runtime.reason, paused: true, runtimeControl: runtime.control },
+            { status: 423 },
+        );
+    }
+
     const lockFd = acquireRunLock();
     if (lockFd === null) {
         return NextResponse.json(
@@ -88,7 +97,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const summary = await runLiveHybridAutotrade();
+        const summary = await runActiveAutoTrade("scheduled");
         return NextResponse.json({ ok: true, summary });
     } catch (error) {
         return NextResponse.json(

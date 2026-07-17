@@ -6,6 +6,39 @@ import { fetchPricesBatch, fetchUsdJpy, priceKey, toJpy } from "@/lib/providers/
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const DEFAULT_USD_JPY_RATE = 157;
+const FALLBACK_UNIVERSE: Universe = {
+    majorsTop10: [
+        { symbol: "BTC", name: "Bitcoin", chain: "MAJOR", provider: "coincap", providerId: "bitcoin" },
+        { symbol: "ETH", name: "Ethereum", chain: "MAJOR", provider: "coincap", providerId: "ethereum" },
+        { symbol: "SOL", name: "Solana", chain: "MAJOR", provider: "coincap", providerId: "solana" },
+        { symbol: "BNB", name: "BNB", chain: "MAJOR", provider: "coincap", providerId: "binance-coin" },
+        { symbol: "DOGE", name: "Dogecoin", chain: "MAJOR", provider: "coincap", providerId: "dogecoin" },
+        { symbol: "AVAX", name: "Avalanche", chain: "MAJOR", provider: "coincap", providerId: "avalanche" },
+        { symbol: "INJ", name: "Injective", chain: "MAJOR", provider: "coincap", providerId: "injective-protocol" },
+        { symbol: "TWT", name: "Trust Wallet Token", chain: "MAJOR", provider: "coincap", providerId: "trust-wallet-token" },
+        { symbol: "PENGU", name: "Pudgy Penguins", chain: "MAJOR", provider: "coincap", providerId: "pudgy-penguins" },
+        { symbol: "APE", name: "ApeCoin", chain: "MAJOR", provider: "coincap", providerId: "apecoin" },
+        { symbol: "COS", name: "Contentos", chain: "MAJOR", provider: "coincap", providerId: "contentos" },
+        { symbol: "MITO", name: "Mitosis", chain: "MAJOR", provider: "coincap", providerId: "mitosis" },
+    ],
+    bnbTop15: [
+        { symbol: "PENGU", name: "Pudgy Penguins", chain: "BNB", provider: "coincap", providerId: "pudgy-penguins" },
+        { symbol: "APE", name: "ApeCoin", chain: "BNB", provider: "coincap", providerId: "apecoin" },
+        { symbol: "COS", name: "Contentos", chain: "BNB", provider: "coincap", providerId: "contentos" },
+        { symbol: "MITO", name: "Mitosis", chain: "BNB", provider: "coincap", providerId: "mitosis" },
+        { symbol: "DOGE", name: "Dogecoin", chain: "BNB", provider: "coincap", providerId: "dogecoin" },
+        { symbol: "TWT", name: "Trust Wallet Token", chain: "BNB", provider: "coincap", providerId: "trust-wallet-token" },
+        { symbol: "INJ", name: "Injective", chain: "BNB", provider: "coincap", providerId: "injective-protocol" },
+        { symbol: "AVAX", name: "Avalanche", chain: "BNB", provider: "coincap", providerId: "avalanche" },
+        { symbol: "SOL", name: "Solana", chain: "BNB", provider: "coincap", providerId: "solana" },
+        { symbol: "UNI", name: "Uniswap", chain: "BNB", provider: "coincap", providerId: "uniswap" },
+        { symbol: "BIO", name: "Bio Protocol", chain: "BNB", provider: "coincap", providerId: "bio-protocol" },
+        { symbol: "DUSK", name: "Dusk", chain: "BNB", provider: "coincap", providerId: "dusk-network" },
+    ],
+    polygonTop15: [],
+    favoritesByUser: {},
+    updatedAt: 0,
+};
 
 function attachPrice(list: TokenRef[], prices: Record<string, PricePoint>) {
     return list.map(t => {
@@ -27,15 +60,19 @@ export async function GET() {
 
         // Self-seed if empty
         if (!universe) {
-            console.log("[Dashboard] Universe empty, seeding...");
-            const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/agents/refresh-universe`, { method: "POST" });
-            if (refreshRes.ok) {
-                universe = await kvGet<Universe>("universe:v1");
+            try {
+                const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/agents/refresh-universe`, { method: "POST" });
+                if (refreshRes.ok) {
+                    universe = await kvGet<Universe>("universe:v1");
+                }
+            } catch (error) {
+                console.warn("[Dashboard] Universe seed failed, serving fallback if cache is empty:", error);
             }
         }
 
         if (!universe) {
-            return NextResponse.json({ ok: false, error: "Universe not ready. Initializing, please refresh in a moment." }, { status: 503 });
+            console.warn("[Dashboard] Universe not ready, serving fallback universe.");
+            universe = { ...FALLBACK_UNIVERSE, updatedAt: Date.now() };
         }
 
         let prices = (await kvGet<Record<string, PricePoint>>("prices:v1")) ?? {};

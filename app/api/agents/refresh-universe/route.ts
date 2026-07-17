@@ -41,6 +41,7 @@ const STATIC_BNB: TokenRef[] = [
     { symbol: "ASTER", name: "Aster", chain: "BNB", provider: "coincap", providerId: "astar" },
     { symbol: "WLFI", name: "World Liberty Financial", chain: "BNB", provider: "coincap", providerId: "world-liberty-financial" },
     { symbol: "TWT", name: "Trust Wallet Token", chain: "BNB", provider: "coincap", providerId: "trust-wallet-token" },
+    { symbol: "MITO", name: "Mitosis", chain: "BNB", provider: "coincap", providerId: "mitosis" },
 ];
 
 const STATIC_POLYGON: TokenRef[] = [
