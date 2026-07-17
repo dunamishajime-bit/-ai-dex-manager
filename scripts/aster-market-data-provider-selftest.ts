@@ -14,15 +14,15 @@ function mockClient(bookTimestamp: number) {
         const url = String(input);
         if (url.includes("/exchangeInfo")) {
             return jsonResponse({
-                symbols: [{ symbol: "SUIUSDT", status: "TRADING" }],
+                symbols: [{ symbol: "BTCUSDT", status: "TRADING" }],
             });
         }
         if (url.includes("/ticker/price")) {
-            return jsonResponse([{ symbol: "SUIUSDT", price: "10.00", time: bookTimestamp - 500 }]);
+            return jsonResponse([{ symbol: "BTCUSDT", price: "10.00", time: bookTimestamp - 500 }]);
         }
         if (url.includes("/ticker/bookTicker")) {
             return jsonResponse([{
-                symbol: "SUIUSDT",
+                symbol: "BTCUSDT",
                 bidPrice: "9.99",
                 bidQty: "100",
                 askPrice: "10.01",
@@ -32,7 +32,7 @@ function mockClient(bookTimestamp: number) {
         }
         if (url.includes("/ticker/24hr")) {
             return jsonResponse([{
-                symbol: "SUIUSDT",
+                symbol: "BTCUSDT",
                 lastPrice: "10.00",
                 priceChangePercent: "2.5",
                 quoteVolume: "2400000",
@@ -61,11 +61,11 @@ async function currentBookTimestampTest() {
         historyCacheTtlMs: 60_000,
         maxMarketAgeMs: 30_000,
     });
-    const bundle = await provider.load(["SUIUSDT"]);
+    const bundle = await provider.load(["BTCUSDT"]);
     assert.equal(bundle.latestMarketTimestamp, bookTimestamp);
-    assert.equal(bundle.marketSnapshots.SUI?.price, 10);
-    assert.equal(bundle.marketSnapshots.SUI?.txns1h, 10);
-    assert.equal(bundle.marketSnapshots.SUI?.executionTxns1h, 10);
+    assert.equal(bundle.marketSnapshots.BTC?.price, 10);
+    assert.equal(bundle.marketSnapshots.BTC?.txns1h, 10);
+    assert.equal(bundle.marketSnapshots.BTC?.executionTxns1h, 10);
 }
 
 async function staleBookTimestampTest() {
@@ -76,7 +76,7 @@ async function staleBookTimestampTest() {
         maxMarketAgeMs: 30_000,
     });
     await assert.rejects(
-        () => provider.load(["SUIUSDT"]),
+        () => provider.load(["BTCUSDT"]),
         /did not produce any fresh complete strategy snapshots/,
     );
 }
