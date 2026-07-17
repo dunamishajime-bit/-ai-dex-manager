@@ -36,5 +36,7 @@ jobs:
         run: npm run research:perp:selftest
       - name: Champion deep research self-test
         run: npm run research:champion:selftest
+      - name: Main strategy lineage policy self-test
+        run: npm run research:main-lineage:selftest
       - name: Research discussion self-test
         run: npm run research:discussion:selftest
