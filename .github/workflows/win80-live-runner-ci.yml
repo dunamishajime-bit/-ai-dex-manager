@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - feature/win80-ultra90-live-runner-v1
+      - fix/win80-aster-market-freshness
     paths:
       - "lib/aster-v3-client.ts"
       - "lib/direct-trade-executor.ts"
@@ -14,6 +14,8 @@ on:
       - "scripts/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner-selftest.ts"
       - "scripts/aster-direct-trade-executor-selftest.ts"
+      - "scripts/aster-market-data-provider-selftest.ts"
+      - "scripts/patch-win80-aster-market-freshness.py"
       - "tsconfig.live-runner.json"
       - "package.json"
       - ".github/workflows/win80-live-runner-ci.yml"
@@ -29,31 +31,40 @@ on:
       - "scripts/win80-ultra90-live-runner.ts"
       - "scripts/win80-ultra90-live-runner-selftest.ts"
       - "scripts/aster-direct-trade-executor-selftest.ts"
+      - "scripts/aster-market-data-provider-selftest.ts"
+      - "scripts/patch-win80-aster-market-freshness.py"
       - "tsconfig.live-runner.json"
       - "package.json"
       - "config/strategyConfig.ts"
       - ".github/workflows/win80-live-runner-ci.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: win80-live-runner-${{ github.event_name }}-${{ github.ref }}
+  group: win80-market-freshness-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
+    if: ${{ github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[market-freshness-patched]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Checkout
+      - name: Checkout freshness branch
         uses: actions/checkout@v4
+        with:
+          ref: fix/win80-aster-market-freshness
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
+
+      - name: Apply market freshness patch
+        run: python scripts/patch-win80-aster-market-freshness.py
 
       - name: Install dependencies
         run: npm ci
@@ -69,6 +80,12 @@ jobs:
         run: |
           set -o pipefail
           npm run strategy:executor:selftest 2>&1 | tee executor-selftest.log
+
+      - name: Aster market freshness self-test
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run strategy:market:selftest 2>&1 | tee market-selftest.log
 
       - name: Live runner TypeScript check
         shell: bash
@@ -88,13 +105,28 @@ jobs:
           set -o pipefail
           npm run build 2>&1 | tee production-build.log
 
+      - name: Commit verified market freshness fix
+        if: ${{ github.event_name == 'push' }}
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No market freshness source changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/aster-v3-client.ts lib/win80-ultra90-live-runner.ts scripts/win80-ultra90-live-runner.ts
+          git commit -m "Harden Aster market freshness and position mode guard [market-freshness-patched]"
+          git push origin HEAD:fix/win80-aster-market-freshness
+
       - name: Upload verification logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: win80-live-runner-ci-logs
+          name: win80-market-freshness-ci-logs
           path: |
             executor-selftest.log
+            market-selftest.log
             live-runner-typecheck.log
             repository-typecheck.log
             production-build.log
