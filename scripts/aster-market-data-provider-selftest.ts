@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { AsterV3Client } from "../lib/aster-v3-client";
-import { AsterStrategyMarketDataProvider } from "../lib/win80-ultra90-live-runner";
+import { AsterRealtimeMarketDataProvider } from "../lib/aster-realtime-market-data-provider";
 
 function jsonResponse(payload: unknown) {
     return new Response(JSON.stringify(payload), {
@@ -56,7 +56,7 @@ function mockClient(bookTimestamp: number) {
 
 async function currentBookTimestampTest() {
     const bookTimestamp = Date.now() - 1000;
-    const provider = new AsterStrategyMarketDataProvider(mockClient(bookTimestamp), {
+    const provider = new AsterRealtimeMarketDataProvider(mockClient(bookTimestamp), {
         historyLimit: 100,
         historyCacheTtlMs: 60_000,
         maxMarketAgeMs: 30_000,
@@ -70,14 +70,14 @@ async function currentBookTimestampTest() {
 
 async function staleBookTimestampTest() {
     const bookTimestamp = Date.now() - 120_000;
-    const provider = new AsterStrategyMarketDataProvider(mockClient(bookTimestamp), {
+    const provider = new AsterRealtimeMarketDataProvider(mockClient(bookTimestamp), {
         historyLimit: 100,
         historyCacheTtlMs: 60_000,
         maxMarketAgeMs: 30_000,
     });
     await assert.rejects(
         () => provider.load(["SUIUSDT"]),
-        /did not produce any complete strategy snapshots/,
+        /did not produce any fresh complete strategy snapshots/,
     );
 }
 
