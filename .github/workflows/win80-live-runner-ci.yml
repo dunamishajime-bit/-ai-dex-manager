@@ -1,0 +1,72 @@
+name: Win80 Ultra90 Live Runner CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/win80-ultra90-live-runner-v1
+    paths:
+      - "lib/aster-v3-client.ts"
+      - "lib/direct-trade-executor.ts"
+      - "lib/live-runner-state.ts"
+      - "lib/paper-direct-trade-executor.ts"
+      - "lib/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner-selftest.ts"
+      - "tsconfig.live-runner.json"
+      - "package.json"
+      - ".github/workflows/win80-live-runner-ci.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "lib/aster-v3-client.ts"
+      - "lib/direct-trade-executor.ts"
+      - "lib/live-runner-state.ts"
+      - "lib/paper-direct-trade-executor.ts"
+      - "lib/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner.ts"
+      - "scripts/win80-ultra90-live-runner-selftest.ts"
+      - "tsconfig.live-runner.json"
+      - "package.json"
+      - "config/strategyConfig.ts"
+      - ".github/workflows/win80-live-runner-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: win80-live-runner-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Main strategy policy self-test
+        run: npm run strategy:main:selftest
+
+      - name: Live runner state and failure self-test
+        run: npm run strategy:live:selftest
+
+      - name: Live runner TypeScript check
+        run: npm run strategy:live:typecheck
+
+      - name: Repository TypeScript checks
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
