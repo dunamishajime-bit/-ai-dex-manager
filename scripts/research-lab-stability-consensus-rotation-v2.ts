@@ -692,7 +692,11 @@ async function main() {
   }
 
   const developmentStable = stabilityResults.filter(developmentPass).sort((left, right) => right.score - left.score);
-  const bestPerModel = [...new Map(developmentStable.map((item) => [item.aggregate.modelId, item])).values()]
+  const bestByModel = new Map<string, StabilityEvaluation>();
+  for (const item of developmentStable) {
+    if (!bestByModel.has(item.aggregate.modelId)) bestByModel.set(item.aggregate.modelId, item);
+  }
+  const bestPerModel = [...bestByModel.values()]
     .sort((left, right) => right.score - left.score)
     .slice(0, 8);
   const validationDiagnostics: ValidationEvaluation[] = bestPerModel.map((development) => {
