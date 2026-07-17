@@ -6,6 +6,7 @@ on:
     branches:
       - research/win80-profit-optimization-v1
     paths:
+      - "research/fresh-forward-v9-trigger.txt"
       - "scripts/research-lab-prefetch-forward-v9.ts"
       - "scripts/research_lab_frozen_fresh_forward_v9.py"
       - "scripts/research_lab_parameter_bagged_rotation_v4.py"
