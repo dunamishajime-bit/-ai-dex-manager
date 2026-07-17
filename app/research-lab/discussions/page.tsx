@@ -17,13 +17,13 @@ export default function ResearchDiscussionPage() {
               </div>
               <h1 className="mt-3 text-3xl font-black tracking-tight md:text-4xl">議論内容</h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-white/68">
-                各自動研究Cycleについて、Researcherの提案、Overfit・Tail Risk・Execution Criticの反論、CIOの最終判断を日時別に全文保存します。
-                すべての発言に実測のTrain・OOS・DD・Stress・取引数などを紐づけます。
+                既定表示は現行メインWIN80_ULTRA90_TOP1_V1を直接扱う研究会議です。Score80/90、Confidence、Trigger、RR、Volume、Top-1、50%分割、70%Rotationについて、提案・反論・CIO判断を保存します。
+                旧deep-c* Champion会議は削除せず、アーカイブ切替時だけ表示します。
               </p>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/25 bg-sky-500/10 px-4 py-2 text-xs font-bold text-sky-100">
               <ShieldCheck className="h-4 w-4" />
-              Evidence-backed Log
+              Current Main First
             </div>
           </div>
         </section>
