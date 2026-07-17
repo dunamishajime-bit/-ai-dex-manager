@@ -16,6 +16,7 @@ on:
       - "scripts/research_lab_precomputed_multi_regime_v6.py"
       - "scripts/research_lab_fixed_candidate_robustness_v7.py"
       - "scripts/research_lab_hysteresis_execution_v8.py"
+      - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -36,6 +37,7 @@ on:
       - "scripts/research_lab_precomputed_multi_regime_v6.py"
       - "scripts/research_lab_fixed_candidate_robustness_v7.py"
       - "scripts/research_lab_hysteresis_execution_v8.py"
+      - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -128,6 +130,10 @@ jobs:
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         run: python scripts/research_lab_hysteresis_execution_v8.py
+      - name: Run cross-sectional market-neutral V10
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_cross_sectional_market_neutral_v10.py
       - name: Upload optimization evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -152,5 +158,7 @@ jobs:
             .research-state/fixed-v6-robustness-audit-v7.md
             .research-state/hysteresis-execution-stabilized-v8.json
             .research-state/hysteresis-execution-stabilized-v8.md
+            .research-state/cross-sectional-market-neutral-v10.json
+            .research-state/cross-sectional-market-neutral-v10.md
           if-no-files-found: warn
           retention-days: 30
