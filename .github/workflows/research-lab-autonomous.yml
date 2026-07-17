@@ -1,4 +1,4 @@
-name: Champion Deep Research Lab
+name: Win80 Ultra90 Main-Lineage Research Lab
 
 # A workflow-only push is also an intentional immediate research kickoff.
 on:
@@ -13,6 +13,8 @@ on:
       - "lib/research-lab/perp/deep-research.ts"
       - "lib/research-lab/perp/deep-autonomous.ts"
       - "lib/research-lab/perp/deep-discussion.ts"
+      - "lib/research-lab/perp/main-strategy-research-policy.ts"
+      - "scripts/research-lab-main-strategy-policy-selftest.ts"
   workflow_dispatch:
     inputs:
       profile:
@@ -94,6 +96,7 @@ jobs:
             echo "PERP_RESEARCH_START_DATE=2023-01-01" >> "$GITHUB_ENV"
             echo "PERP_RESEARCH_END_DATE=2026-07-01" >> "$GITHUB_ENV"
           fi
+          echo "PERP_RESEARCH_MODE=win80_ultra90_lineage" >> "$GITHUB_ENV"
           echo "PERP_RESEARCH_ROUNDS=1" >> "$GITHUB_ENV"
           echo "PERP_RESEARCH_POPULATION=9" >> "$GITHUB_ENV"
           echo "PERP_RESEARCH_FINALISTS=9" >> "$GITHUB_ENV"
@@ -139,11 +142,15 @@ jobs:
         working-directory: source
         run: npm run research:champion:selftest
 
+      - name: Main strategy lineage policy self-test
+        working-directory: source
+        run: npm run research:main-lineage:selftest
+
       - name: Research discussion self-test
         working-directory: source
         run: npm run research:discussion:selftest
 
-      - name: Run Champion Deep Research cycle
+      - name: Run Win80 Ultra90 Main-Lineage Research cycle
         id: research
         working-directory: source
         run: npm run research:perp:autonomous
@@ -179,7 +186,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No state changes"
           else
-            git commit -m "research: champion deep cycle ${GITHUB_RUN_NUMBER}"
+            git commit -m "research: win80 ultra90 lineage cycle ${GITHUB_RUN_NUMBER}"
             git push origin research-autonomous-state
           fi
 
@@ -187,7 +194,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: champion-deep-research-cycle-${{ github.run_number }}
+          name: win80-ultra90-lineage-cycle-${{ github.run_number }}
           path: |
             source/.research-state
             source/reports/research-lab-autonomous
@@ -202,7 +209,7 @@ jobs:
         run: |
           gh issue create \
             --repo "${{ github.repository }}" \
-            --title "Champion Deep Research: Forward Paper candidate cycle ${{ steps.research.outputs.cycle }}" \
+            --title "Win80 Ultra90 Lineage: Forward Paper candidate cycle ${{ steps.research.outputs.cycle }}" \
             --body-file source/.research-state/forward-paper-candidates.md
 
       - name: Report or update autonomous failure issue
@@ -212,9 +219,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          title="Champion Deep Research Lab failure"
+          title="Win80 Ultra90 Main-Lineage Research failure"
           existing=$(gh issue list --repo "${{ github.repository }}" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
-          body="Champion Deep Research failed in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. The next scheduled cycle will retry without replacing the current Champions."
+          body="Win80 Ultra90 Main-Lineage Research failed in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. The next scheduled cycle will retry without replacing the fixed production main strategy."
           if [[ -n "$existing" ]]; then
             gh issue comment "$existing" --repo "${{ github.repository }}" --body "$body"
           else
@@ -227,8 +234,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          title="Champion Deep Research Lab failure"
+          title="Win80 Ultra90 Main-Lineage Research failure"
           existing=$(gh issue list --repo "${{ github.repository }}" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
           if [[ -n "$existing" ]]; then
-            gh issue close "$existing" --repo "${{ github.repository }}" --comment "Champion Deep Research recovered automatically in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+            gh issue close "$existing" --repo "${{ github.repository }}" --comment "Win80 Ultra90 Main-Lineage Research recovered automatically in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
           fi
