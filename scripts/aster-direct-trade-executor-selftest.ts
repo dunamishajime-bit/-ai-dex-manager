@@ -179,7 +179,14 @@ async function slippageGuardTest() {
     assert.equal(postCount, 0);
 }
 
-await normalOrderTest();
-await unknownExecutionReconciliationTest();
-await slippageGuardTest();
-console.log("ASTER_DIRECT_TRADE_EXECUTOR_SELFTEST_OK");
+async function run() {
+    await normalOrderTest();
+    await unknownExecutionReconciliationTest();
+    await slippageGuardTest();
+    console.log("ASTER_DIRECT_TRADE_EXECUTOR_SELFTEST_OK");
+}
+
+run().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});
