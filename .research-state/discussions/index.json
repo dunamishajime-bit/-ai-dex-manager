@@ -1,7 +1,25 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-17T00:35:47.682Z",
+  "updatedAt": "2026-07-17T03:44:24.000Z",
   "items": [
+    {
+      "id": "main-audit-win80_ultra90_top1_v1-2026-07-17T03-44-24-000Z",
+      "path": "discussions/2026/07/17/main-audit-win80_ultra90_top1_v1-2026-07-17T03-44-24-000Z.json",
+      "cycle": 9,
+      "completedAt": "2026-07-17T03:44:24.000Z",
+      "profile": "attack",
+      "title": "手動監査：WIN80_ULTRA90_TOP1_V1 現行メインロジック会議",
+      "summary": "研究Proxyではなく現行WIN80_ULTRA90_TOP1_V1本体を直接監査。Win80/Ultra90分類、Top-1、100%初回配分、50%分割、70%Rotation、含み損時拒否は実コードで確認。歴史複利月利16.81%は有望だが完全未使用OOSではなく、再現性はForward Paper待ち。",
+      "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定し、Proxyで置換しません。実コード動作は確認済みですが収益再現性は未確定です。現行コードを凍結したForward Paper、未使用OOS、Score80/90・50%・70%の個別Ablation、コスト・Gap Stressを優先します。",
+      "messageCount": 7,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": null,
+      "bestOosDrawdownPct": null,
+      "bestWorstStressMonthlyPct": null,
+      "topStrategyIds": [
+        "WIN80_ULTRA90_TOP1_V1"
+      ]
+    },
     {
       "id": "cycle-000009-2026-07-17T00-35-47-682Z",
       "path": "discussions/2026/07/17/cycle-000009-2026-07-17T00-35-47-682Z.json",
