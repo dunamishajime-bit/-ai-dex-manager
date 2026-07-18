@@ -102,6 +102,46 @@ def btc_targets(mode: str, times: List[int], bars: Dict[str, List[dict]], indexe
     return result
 
 
+def btc_core_targets(mode: str, times: List[int], bars: Dict[str, List[dict]], indexes: Dict[str, Dict[int, int]]) -> Dict[int, Dict[str, float]]:
+    bull = confirmed_direction(times, bars, indexes)
+    raw_bear = v6.precompute_bear_targets([v20.HEDGE], times, bars, indexes)[v20.HEDGE.hedge_id]
+    bear = v6.confirmed_bear_series(raw_bear, times, v20.CONFIRM_BARS)
+    result: Dict[int, Dict[str, float]] = {}
+    current: Dict[str, float] = {}
+    last_resize = -10_000
+    for position, ts in enumerate(times):
+        if bull.get(ts, 0) > 0:
+            if mode == "BTC_LONG_1X_HEDGE0P4":
+                desired_leverage = 1.0
+            elif mode == "BTC_LONG_2X_HEDGE0P4":
+                desired_leverage = 2.0
+            else:
+                index = indexes["BTC"].get(ts)
+                vol = v4.realized_annual_vol(bars["BTC"], index, 60) if index is not None else None
+                if vol is None or vol <= 0:
+                    result[ts] = dict(current)
+                    continue
+                if mode == "BTC_VOL60_WEEKLY_LONG_CAP3_HEDGE0P4":
+                    desired_leverage = min(3.0, max(0.5, 60.0 / vol))
+                elif mode == "BTC_VOL80_WEEKLY_LONG_CAP3_HEDGE0P4":
+                    desired_leverage = min(3.0, max(1.0, 80.0 / vol))
+                else:
+                    raise ValueError(f"unknown core mode: {mode}")
+            current_leverage = float(current.get("BTC", 0.0)) if float(current.get("BTC", 0.0)) > 0 else 0.0
+            fixed_mode = mode in {"BTC_LONG_1X_HEDGE0P4", "BTC_LONG_2X_HEDGE0P4"}
+            should_resize = current_leverage <= 0 or fixed_mode or (position - last_resize >= 14 and abs(desired_leverage - current_leverage) >= 0.25)
+            if should_resize:
+                current = {"BTC": desired_leverage}
+                last_resize = position
+        else:
+            desired = bear.get(ts, {})
+            if desired != current:
+                current = dict(desired)
+                last_resize = position
+        result[ts] = dict(current)
+    return result
+
+
 def scenarios() -> List[v7.ExecutionScenario]:
     return [
         v7.ExecutionScenario("BASE_10BPS", 10, 0, 0),
@@ -210,6 +250,8 @@ def main() -> None:
     targets_by_strategy = {"V6_CORE3_WITH_BTC_HEDGE": v6_targets(times, bars, indexes)}
     for mode in ["BTC_DIRECTIONAL_1X", "BTC_DIRECTIONAL_2X", "BTC_VOL60_ASYM_0P5_TO_3X", "BTC_VOL80_ASYM_1_TO_3X"]:
         targets_by_strategy[mode] = btc_targets(mode, times, bars, indexes)
+    for mode in ["BTC_LONG_1X_HEDGE0P4", "BTC_LONG_2X_HEDGE0P4", "BTC_VOL60_WEEKLY_LONG_CAP3_HEDGE0P4", "BTC_VOL80_WEEKLY_LONG_CAP3_HEDGE0P4"]:
+        targets_by_strategy[mode] = btc_core_targets(mode, times, bars, indexes)
 
     strategies: Dict[str, dict] = {}
     for strategy_id, targets in targets_by_strategy.items():
@@ -239,6 +281,9 @@ def main() -> None:
             "volatilityLookbackDays": 30,
             "variableLongCap": 3.0,
             "variableShortCap": 2.0,
+            "practicalCoreBearHedgeGross": 0.4,
+            "practicalVariableResizeBars": 14,
+            "practicalResizeThreshold": 0.25,
         },
         "strategies": strategies,
         "eligibleVariableStrategies": eligible,
