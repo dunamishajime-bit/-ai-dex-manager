@@ -8,12 +8,14 @@ on:
       - research/win80-profit-optimization-v1
     paths:
       - "scripts/research_lab_aster_microstructure_v17.py"
+      - "research/aster-microstructure-v17-trigger.txt"
       - ".github/workflows/aster-microstructure-v17.yml"
   pull_request:
     branches:
       - master
     paths:
       - "scripts/research_lab_aster_microstructure_v17.py"
+      - "research/aster-microstructure-v17-trigger.txt"
       - ".github/workflows/aster-microstructure-v17.yml"
 
 permissions:
