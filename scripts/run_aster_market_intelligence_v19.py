@@ -5,6 +5,12 @@ from typing import Optional, Tuple
 import research_lab_aster_market_intelligence_v19 as v19
 
 
+EXTRA_SYMBOLS = ["PENGUUSDT"]
+for symbol in EXTRA_SYMBOLS:
+    if symbol not in v19.SYMBOLS:
+        v19.SYMBOLS.append(symbol)
+
+
 _original_oi_snapshot = v19.oi_snapshot
 
 
