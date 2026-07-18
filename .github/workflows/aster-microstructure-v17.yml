@@ -1,5 +1,6 @@
 name: Aster Microstructure Execution V17
 
+# Public market-data evidence only. No API key or order placement.
 on:
   workflow_dispatch:
   push:
