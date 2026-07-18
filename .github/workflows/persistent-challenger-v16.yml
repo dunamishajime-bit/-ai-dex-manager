@@ -1,0 +1,55 @@
+name: Persistent Challenger Rotation V16
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_persistent_challenger_rotation_v16.py"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_asymmetric_bear_hedge_v5.py"
+      - "scripts/research_lab_precomputed_multi_regime_v6.py"
+      - "scripts/research_lab_fixed_candidate_robustness_v7.py"
+      - "lib/research-lab/perp/**"
+      - ".github/workflows/persistent-challenger-v16.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: persistent-challenger-v16-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_persistent_challenger_rotation_v16.py
+      - name: Run persistent challenger rotation V16
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_persistent_challenger_rotation_v16.py
+      - name: Upload V16 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: persistent-challenger-rotation-v16
+          path: |
+            .research-state/persistent-challenger-rotation-v16.json
+            .research-state/persistent-challenger-rotation-v16.md
+          if-no-files-found: warn
+          retention-days: 30
