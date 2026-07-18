@@ -18,6 +18,7 @@ on:
       - "scripts/research_lab_hysteresis_execution_v8.py"
       - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
       - "scripts/research_lab_cost_aware_conviction_execution_v13.py"
+      - "scripts/research_lab_selective_rotation_gate_v14.py"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -40,6 +41,7 @@ on:
       - "scripts/research_lab_hysteresis_execution_v8.py"
       - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
       - "scripts/research_lab_cost_aware_conviction_execution_v13.py"
+      - "scripts/research_lab_selective_rotation_gate_v14.py"
       - "lib/research-lab/perp/**"
       - "lib/cycle-strategy.ts"
       - "lib/win80-ultra90-main-strategy.ts"
@@ -140,6 +142,10 @@ jobs:
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         run: python scripts/research_lab_cost_aware_conviction_execution_v13.py
+      - name: Run selective rotation gate V14
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_selective_rotation_gate_v14.py
       - name: Upload optimization evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -168,5 +174,7 @@ jobs:
             .research-state/cross-sectional-market-neutral-v10.md
             .research-state/cost-aware-conviction-execution-v13.json
             .research-state/cost-aware-conviction-execution-v13.md
+            .research-state/selective-rotation-gate-v14.json
+            .research-state/selective-rotation-gate-v14.md
           if-no-files-found: warn
           retention-days: 30
