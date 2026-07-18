@@ -1,0 +1,65 @@
+name: Aster Market Intelligence V19
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_aster_market_intelligence_v19.py"
+      - ".github/workflows/aster-market-intelligence-v19.yml"
+      - "research/aster-market-intelligence-v19-trigger.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-market-intelligence-v19-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collect-and-analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public-market-data dependency
+        run: python -m pip install --disable-pip-version-check "websockets==15.0.1"
+      - name: Restore cumulative V19 history
+        uses: actions/cache/restore@v4
+        with:
+          path: .research-state/aster-market-intelligence-v19/history
+          key: aster-market-intelligence-v19-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            aster-market-intelligence-v19-${{ github.ref_name }}-
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_aster_market_intelligence_v19.py
+      - name: Collect Aster public market intelligence
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+          ASTER_V19_DURATION_SECONDS: "120"
+          ASTER_V19_BUCKET_SECONDS: "5"
+          ASTER_V19_DEPTH_LEVELS: "20"
+        run: python scripts/research_lab_aster_market_intelligence_v19.py
+      - name: Save cumulative V19 history
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .research-state/aster-market-intelligence-v19/history
+          key: aster-market-intelligence-v19-${{ github.ref_name }}-${{ github.run_id }}
+      - name: Upload V19 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aster-market-intelligence-v19
+          path: |
+            .research-state/aster-market-intelligence-v19/aster-market-intelligence-v19.json
+            .research-state/aster-market-intelligence-v19/aster-market-intelligence-v19.md
+            .research-state/aster-market-intelligence-v19/history/*.ndjson
+          if-no-files-found: warn
+          retention-days: 30
