@@ -1,0 +1,56 @@
+name: BTC Fast 4H Independent Logic V24
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_btc_fast_4h_independent_v24.py"
+      - "scripts/research_lab_btc_variable_leverage_v21.py"
+      - "scripts/research_lab_pengu_main_currency_v20.py"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_precomputed_multi_regime_v6.py"
+      - "scripts/research_lab_fixed_candidate_robustness_v7.py"
+      - ".github/workflows/btc-fast-4h-independent-v24.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_btc_fast_4h_independent_v24.py"
+      - ".github/workflows/btc-fast-4h-independent-v24.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: btc-fast-4h-independent-v24-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_btc_fast_4h_independent_v24.py
+      - name: Run BTC fast 4h independent backtest
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_btc_fast_4h_independent_v24.py
+      - name: Upload V24 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-fast-4h-independent-v24
+          path: |
+            .research-state/btc-fast-4h-independent-v24.json
+            .research-state/btc-fast-4h-independent-v24.md
+          if-no-files-found: warn
+          retention-days: 30
