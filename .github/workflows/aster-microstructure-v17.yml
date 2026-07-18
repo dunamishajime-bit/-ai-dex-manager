@@ -8,6 +8,7 @@ on:
       - research/win80-profit-optimization-v1
     paths:
       - "scripts/research_lab_aster_microstructure_v17.py"
+      - "scripts/run_aster_microstructure_v17.py"
       - "scripts/research_lab_aster_market_intelligence_v19.py"
       - "scripts/run_aster_market_intelligence_v19.py"
       - "research/aster-microstructure-v17-trigger.txt"
@@ -18,6 +19,7 @@ on:
       - master
     paths:
       - "scripts/research_lab_aster_microstructure_v17.py"
+      - "scripts/run_aster_microstructure_v17.py"
       - "scripts/research_lab_aster_market_intelligence_v19.py"
       - "scripts/run_aster_market_intelligence_v19.py"
       - "research/aster-microstructure-v17-trigger.txt"
@@ -52,13 +54,13 @@ jobs:
           restore-keys: |
             aster-market-intelligence-v19-${{ github.ref_name }}-
       - name: Python syntax check
-        run: python -m py_compile scripts/research_lab_aster_microstructure_v17.py scripts/research_lab_aster_market_intelligence_v19.py scripts/run_aster_market_intelligence_v19.py
+        run: python -m py_compile scripts/research_lab_aster_microstructure_v17.py scripts/run_aster_microstructure_v17.py scripts/research_lab_aster_market_intelligence_v19.py scripts/run_aster_market_intelligence_v19.py
       - name: Capture Aster public order-book evidence
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
           ASTER_MICROSTRUCTURE_SAMPLES: "20"
           ASTER_MICROSTRUCTURE_INTERVAL_SECONDS: "3"
-        run: python scripts/research_lab_aster_microstructure_v17.py
+        run: python scripts/run_aster_microstructure_v17.py
       - name: Collect Aster market intelligence V19 accelerated
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
