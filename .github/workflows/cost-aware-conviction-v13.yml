@@ -1,5 +1,6 @@
 name: Cost-Aware Conviction Execution V13
 
+# Dedicated research-only workflow. Production and live runners are untouched.
 on:
   workflow_dispatch:
   push:
