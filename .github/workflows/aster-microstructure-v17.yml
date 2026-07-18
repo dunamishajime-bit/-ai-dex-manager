@@ -1,0 +1,49 @@
+name: Aster Microstructure Execution V17
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_aster_microstructure_v17.py"
+      - ".github/workflows/aster-microstructure-v17.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_aster_microstructure_v17.py"
+      - ".github/workflows/aster-microstructure-v17.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-microstructure-v17-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_aster_microstructure_v17.py
+      - name: Capture Aster public order-book evidence
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+          ASTER_MICROSTRUCTURE_SAMPLES: "20"
+          ASTER_MICROSTRUCTURE_INTERVAL_SECONDS: "3"
+        run: python scripts/research_lab_aster_microstructure_v17.py
+      - name: Upload V17 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aster-microstructure-execution-v17
+          path: |
+            .research-state/aster-microstructure-execution-v17.json
+            .research-state/aster-microstructure-execution-v17.md
+          if-no-files-found: warn
+          retention-days: 30
