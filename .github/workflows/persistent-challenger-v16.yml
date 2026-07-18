@@ -1,5 +1,6 @@
 name: Persistent Challenger Rotation V16
 
+# Research-only rerun trigger. Production and live runners remain untouched.
 on:
   workflow_dispatch:
   push:
