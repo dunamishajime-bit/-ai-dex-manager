@@ -1,0 +1,12 @@
+{
+  "regime": "BULL",
+  "coreGross": 0.9,
+  "penguSignalActive": true,
+  "features": {
+    "btcCloseAboveSma20d": true,
+    "btcMomentum20dPct": 12.0,
+    "btcMomentum3dPct": 2.0,
+    "btcShock1dPct": 0.5,
+    "coreDownsideVolatilitySkew": 1.1
+  }
+}
