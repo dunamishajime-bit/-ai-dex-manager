@@ -172,7 +172,8 @@ function buildFeatures(input: {
     const penguSma168Then = slopeIndex >= 0 ? sma(pengu, slopeIndex, config.long.regimeSmaHours) : undefined;
     const btcSma168 = sma(btc, btcIndex, config.btcRisk.smaHours);
     const mom6 = momentum(pengu, penguIndex, 6);
-    const mom6Lag = momentum(pengu, penguIndex - config.long.crossoverLagHours, 6);
+    const mom6LagIndex = penguIndex - config.long.crossoverLagHours;
+    const mom6Lag = mom6LagIndex >= 6 ? momentum(pengu, mom6LagIndex, 6) : undefined;
     const mom24 = momentum(pengu, penguIndex, 24);
     const mom48 = momentum(pengu, penguIndex, 48);
     const mom120 = momentum(pengu, penguIndex, 120);
@@ -235,11 +236,11 @@ export function buildDisDexPenguV46Signal(
         evaluatedDecisionBars += 1;
         const decision = evaluateDisDexPenguV46Decision(features);
         if (decision.side === 0) continue;
-        const entry = pengu[penguIndex + 1];
-        const exit = pengu[penguIndex + 1 + config.holdHours];
-        if (!entry) continue;
-        const entryTs = entry.openTime;
-        const exitTs = exit?.openTime ?? entryTs + config.holdHours * HOUR;
+        // The signal becomes actionable immediately after the completed decision
+        // candle closes. Waiting for the next candle to complete adds an unintended
+        // one-hour delay versus the backtest's next-open execution convention.
+        const entryTs = pengu[penguIndex].openTime + HOUR;
+        const exitTs = entryTs + config.holdHours * HOUR;
         nextFreeTs = exitTs;
         if (entryTs <= now && now < exitTs) {
             active = {
