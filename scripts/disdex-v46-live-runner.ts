@@ -4,7 +4,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { DisDexV46AsterMarketDataProvider } from "../lib/disdex-v46-market-data-provider";
 import { DisDexV46PortfolioRunner, buildDefaultDisDexV46RunnerConfig } from "../lib/disdex-v46-portfolio-runner";
-import { FileDisDexV35RunnerStateStore } from "../lib/disdex-v35-runner-state";
+import { FileDisDexV46RunnerStateStore } from "../lib/disdex-v46-runner-state";
 import { FileLiveRunnerLock } from "../lib/live-runner-state";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { DISDEX_V46_RUNTIME } from "../config/disdexV46Runtime";
@@ -70,11 +70,12 @@ async function main() {
         maxTransactionRetries: numberEnv("DISDEX_V46_MAX_TRANSACTION_RETRIES", 5),
         closeUnmanagedPositions: boolEnv("DISDEX_V46_CLOSE_UNMANAGED_POSITIONS", DISDEX_V46_RUNTIME.closeUnmanagedPositions),
     });
+    const durableState = new FileDisDexV46RunnerStateStore(resolve(stateRoot, `runner-${runnerMode}.json`), runnerMode);
     const runner = new DisDexV46PortfolioRunner({
         marketData,
         executor,
         config,
-        stateStore: new FileDisDexV35RunnerStateStore(resolve(stateRoot, `runner-${runnerMode}.json`), runnerMode),
+        stateStore: durableState.asV35CompatibleStore(),
         lock: new FileLiveRunnerLock(resolve(stateRoot, `runner-${runnerMode}.lock`), numberEnv("DISDEX_V46_LOCK_STALE_MS", 10 * 60_000)),
     });
 
