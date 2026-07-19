@@ -18,6 +18,7 @@
     "lib/disdex-v46-market-data-provider.ts",
     "lib/disdex-v46-combined-signal.ts",
     "lib/disdex-v46-portfolio-runner.ts",
+    "lib/disdex-v46-runner-state.ts",
     "lib/pengu-dual-engine-v46.ts",
     "lib/live-runner-state.ts",
     "lib/signed-paper-direct-trade-executor.ts",
