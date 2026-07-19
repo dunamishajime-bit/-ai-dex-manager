@@ -6,6 +6,7 @@ on:
       - research/pengu-dual-engine-v39
     paths:
       - scripts/research_lab_pengu_dual_engine_v39.py
+      - scripts/research_lab_pengu_dual_engine_v39_focus.py
       - research/PENGU_V39_DESIGN.md
       - .github/workflows/pengu-dual-engine-v39.yml
   pull_request:
@@ -13,6 +14,7 @@ on:
       - master
     paths:
       - scripts/research_lab_pengu_dual_engine_v39.py
+      - scripts/research_lab_pengu_dual_engine_v39_focus.py
       - research/PENGU_V39_DESIGN.md
       - .github/workflows/pengu-dual-engine-v39.yml
   workflow_dispatch:
@@ -20,10 +22,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: pengu-dual-engine-v39-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   research:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,11 +38,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_pengu_dual_engine_v39.py
-      - name: Run PENGU dual-engine validation
+        run: python -m py_compile scripts/research_lab_pengu_dual_engine_v39.py scripts/research_lab_pengu_dual_engine_v39_focus.py
+      - name: Run focused PENGU dual-engine validation
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
-        run: python scripts/research_lab_pengu_dual_engine_v39.py
+        run: python scripts/research_lab_pengu_dual_engine_v39_focus.py
       - name: Upload V39 evidence
         if: always()
         uses: actions/upload-artifact@v4
