@@ -55,6 +55,7 @@ async function main() {
         coreLimit: numberEnv("DISDEX_V46_CORE_12H_LIMIT", 400),
         hourlyLimit: numberEnv("DISDEX_V46_HOURLY_LIMIT", 1000),
         fundingLimit: numberEnv("DISDEX_V46_FUNDING_LIMIT", 1000),
+        fundingBaseUrl: process.env.ASTER_PUBLIC_FUTURES_BASE_URL || "https://fapi.asterdex.com",
         cacheTtlMs: numberEnv("DISDEX_V46_HISTORY_CACHE_TTL_MS", 5 * 60_000),
         fundingCacheTtlMs: numberEnv("DISDEX_V46_FUNDING_CACHE_TTL_MS", 5 * 60_000),
     });
