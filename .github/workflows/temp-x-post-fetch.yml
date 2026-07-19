@@ -35,9 +35,10 @@ jobs:
       - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: x-post-2078071671962169402
+          name: x-post-2078071671962169402-video
           path: |
             .research-state/x-post-2078071671962169402.json
             .research-state/x-post-2078071671962169402.md
+            .research-state/x-post-2078071671962169402.mp4
           if-no-files-found: error
           retention-days: 1
