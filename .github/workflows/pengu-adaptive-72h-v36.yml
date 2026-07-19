@@ -1,0 +1,44 @@
+name: PENGU Adaptive 72h V36
+
+on:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - scripts/research_lab_pengu_adaptive_72h_v36.py
+      - .github/workflows/pengu-adaptive-72h-v36.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_pengu_adaptive_72h_v36.py
+
+      - name: Run PENGU adaptive 72h validation
+        run: python scripts/research_lab_pengu_adaptive_72h_v36.py
+
+      - name: Upload V36 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-adaptive-72h-v36
+          path: |
+            .research-state/pengu-adaptive-72h-v36.json
+            .research-state/pengu-adaptive-72h-v36.md
+          retention-days: 30
