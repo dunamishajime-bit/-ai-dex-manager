@@ -1,0 +1,66 @@
+name: Dis-Dex Main V35 CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - research/win80-profit-optimization-v1
+    paths:
+      - "config/mainStrategy.ts"
+      - "lib/disdex-resilient-profit-main-v35.ts"
+      - "scripts/disdex-resilient-profit-main-v35-selftest.ts"
+      - "scripts/disdex-v35-shadow-plan.ts"
+      - "research/DISDEX_V35_EVIDENCE.md"
+      - "research/DISDEX_V35_VPS_HANDOFF.md"
+      - "research/disdex-v35-shadow-snapshot.example.json"
+      - "package.json"
+      - ".github/workflows/disdex-main-v35-ci.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "config/mainStrategy.ts"
+      - "lib/disdex-resilient-profit-main-v35.ts"
+      - "scripts/disdex-resilient-profit-main-v35-selftest.ts"
+      - "scripts/disdex-v35-shadow-plan.ts"
+      - "research/DISDEX_V35_EVIDENCE.md"
+      - "research/DISDEX_V35_VPS_HANDOFF.md"
+      - "research/disdex-v35-shadow-snapshot.example.json"
+      - "package.json"
+      - ".github/workflows/disdex-main-v35-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-main-v35-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: V35 allocation self-test
+        run: npm run strategy:disdex-v35:selftest
+      - name: V35 shadow smoke test
+        run: |
+          npm run strategy:disdex-v35:shadow -- --input research/disdex-v35-shadow-snapshot.example.json | tee /tmp/disdex-v35-shadow.json
+          grep -q '"activeMainStrategyId": "DISDEX_RESILIENT_PROFIT_MAIN_V35"' /tmp/disdex-v35-shadow.json
+          grep -q '"activeMode": "SHADOW"' /tmp/disdex-v35-shadow.json
+          grep -q '"realTradingEnabled": false' /tmp/disdex-v35-shadow.json
+          grep -q '"orderExecutionAttempted": false' /tmp/disdex-v35-shadow.json
+      - name: Live-runner typecheck
+        run: npm run strategy:live:typecheck
+      - name: Production build
+        run: npm run build
