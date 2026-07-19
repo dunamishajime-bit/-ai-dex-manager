@@ -97,9 +97,9 @@ for (let index = 0; index < 240; index += 1) {
     const openTime = baseTs + index * HOUR;
     const btcClose = 100 * (1 + index * 0.0001);
     let penguClose = 1 + index * 0.0006;
-    if (index >= 216 && index <= 227) penguClose = 1.135 - (index - 216) * 0.0007;
-    if (index >= 228 && index <= 233) penguClose = 1.127 + (index - 228) * 0.0002;
-    if (index >= 234) penguClose = 1.128 + (index - 234) * 0.0025;
+    if (index >= 216 && index <= 225) penguClose = 1.14 - (index - 216) * 0.0002;
+    if (index >= 226 && index <= 233) penguClose = 1.138 - (index - 226) * (0.013 / 7);
+    if (index >= 234) penguClose = 1.126 + (index - 234) * (0.014 / 5);
     btc1h.push(candle(openTime, btcClose, 100));
     pengu1h.push(candle(openTime, penguClose, index >= 228 ? 140 : 100));
 }
@@ -119,6 +119,8 @@ const immediateSignal = buildDisDexPenguV46Signal({
 assert.equal(immediateSignal.side, 1);
 assert.equal(immediateSignal.entryTs, latest.openTime + HOUR);
 assert.equal(immediateSignal.exitTs, latest.openTime + 25 * HOUR);
+assert.ok(immediateSignal.features);
+assert.ok(immediateSignal.features!.rsi14 >= 45 && immediateSignal.features!.rsi14 <= 72);
 
 const now = Date.now();
 const reversal = buildDisDexV35RebalanceActions({
