@@ -47,7 +47,7 @@ export class DisDexV46AsterMarketDataProvider {
         const abort = new AbortController();
         const timeout = setTimeout(() => abort.abort(), 10_000);
         try {
-            const url = new URL(`${this.fundingBaseUrl}/fapi/v1/fundingRate`);
+            const url = new URL(`${this.fundingBaseUrl}/fapi/v3/fundingRate`);
             url.searchParams.set("symbol", "PENGUUSDT");
             url.searchParams.set("limit", String(this.fundingLimit));
             const response = await this.fetchImpl(url, {
@@ -56,9 +56,9 @@ export class DisDexV46AsterMarketDataProvider {
                 signal: abort.signal,
                 headers: { "user-agent": "DisDex-PENGU-V46/1.0" },
             });
-            if (!response.ok) throw new Error(`Aster funding history HTTP ${response.status}.`);
+            if (!response.ok) throw new Error(`Aster V3 funding history HTTP ${response.status}.`);
             const payload = await response.json() as unknown;
-            if (!Array.isArray(payload)) throw new Error("Aster funding history payload is not an array.");
+            if (!Array.isArray(payload)) throw new Error("Aster V3 funding history payload is not an array.");
             const points = payload
                 .map((row) => row as AsterFundingRateRow)
                 .map((row) => ({
