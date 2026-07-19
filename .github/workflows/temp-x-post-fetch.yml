@@ -1,0 +1,37 @@
+name: Temporary X Post Fetch
+
+on:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_fetch_x_post_temp.py"
+      - ".github/workflows/temp-x-post-fetch.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch X post
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_fetch_x_post_temp.py
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: x-post-2078071671962169402
+          path: |
+            .research-state/x-post-2078071671962169402.json
+            .research-state/x-post-2078071671962169402.md
+          if-no-files-found: error
+          retention-days: 1
