@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { DISDEX_PENGU_DUAL_ENGINE_V46, DISDEX_V46_RUNTIME } from "../config/disdexV46Runtime";
-import { evaluateDisDexPenguV46Decision, type DisDexPenguV46DecisionFeatures } from "../lib/pengu-dual-engine-v46";
+import {
+    buildDisDexPenguV46Signal,
+    evaluateDisDexPenguV46Decision,
+    type DisDexPenguV46DecisionFeatures,
+} from "../lib/pengu-dual-engine-v46";
 import { buildDisDexV35RebalanceActions } from "../lib/disdex-v35-portfolio-runner";
+import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";
+
+const HOUR = 3_600_000;
 
 const longFeatures: DisDexPenguV46DecisionFeatures = {
     volumeRatio: 1.1,
@@ -70,6 +77,48 @@ const shortBlockedByStrongBtc = evaluateDisDexPenguV46Decision({
     btcMomentum72hPct: 5,
 });
 assert.equal(shortBlockedByStrongBtc.side, 0);
+
+function candle(openTime: number, close: number, volume = 100): DisDexV35Candle {
+    return {
+        openTime,
+        closeTime: openTime + HOUR - 1,
+        open: close,
+        high: close * 1.001,
+        low: close * 0.999,
+        close,
+        volume,
+    };
+}
+
+const btc1h: DisDexV35Candle[] = [];
+const pengu1h: DisDexV35Candle[] = [];
+const baseTs = HOUR;
+for (let index = 0; index < 240; index += 1) {
+    const openTime = baseTs + index * HOUR;
+    const btcClose = 100 * (1 + index * 0.0001);
+    let penguClose = 1 + index * 0.0006;
+    if (index >= 216 && index <= 227) penguClose = 1.135 - (index - 216) * 0.0007;
+    if (index >= 228 && index <= 233) penguClose = 1.127 + (index - 228) * 0.0002;
+    if (index >= 234) penguClose = 1.128 + (index - 234) * 0.0025;
+    btc1h.push(candle(openTime, btcClose, 100));
+    pengu1h.push(candle(openTime, penguClose, index >= 228 ? 140 : 100));
+}
+const latest = pengu1h.at(-1)!;
+assert.equal(Math.floor(latest.openTime / HOUR) % 6, 0);
+const immediateSignal = buildDisDexPenguV46Signal({
+    core12h: {
+        BTCUSDT: [],
+        ETHUSDT: [],
+        BNBUSDT: [],
+        SOLUSDT: [],
+    },
+    btc1h,
+    pengu1h,
+    penguFunding: [{ fundingTime: latest.closeTime, fundingRate: 0.0002 }],
+}, latest.openTime + HOUR + 1_000);
+assert.equal(immediateSignal.side, 1);
+assert.equal(immediateSignal.entryTs, latest.openTime + HOUR);
+assert.equal(immediateSignal.exitTs, latest.openTime + 25 * HOUR);
 
 const now = Date.now();
 const reversal = buildDisDexV35RebalanceActions({
