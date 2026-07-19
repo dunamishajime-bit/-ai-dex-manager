@@ -1,67 +1,101 @@
-# Dis-Dex Manager Resilient Profit Main V35 — Frozen Evidence
+# Dis-Dex Manager V35 Evidence Status
 
-## Status
+## Current status
 
 - Strategy ID: `DISDEX_RESILIENT_PROFIT_MAIN_V35`
-- Frozen candidate: `S140_N120_B35_NEG0_V0_D0_P30`
-- Repository promotion mode: `SHADOW`
-- Real trading default: `false`
-- Paper/live eligibility: not granted
+- Repository mode: `PAPER`
+- Real trading: `false`
+- PENGU sleeve: excluded
+- Robust Aster production candidate: none
+- Dedicated Aster Long/Short runner: implemented
 
-## Frozen logic
+## Deprecated result
 
-The V28 core remains the direction and symbol-selection engine.
-V35 changes only portfolio exposure using signals from the prior completed 12-hour bar.
+The earlier frozen candidate `S140_N120_B35_NEG0_V0_D0_P30` reported:
 
-- Strong Bull core multiplier: `1.40x`
-  - BTC above completed 20-day SMA
-  - BTC completed 20-day momentum >= `+10%`
-  - BTC completed 3-day momentum > `0%`
-- Normal Bull core multiplier: `1.20x`
-- Brake core multiplier: `0.35x`
-  - BTC completed 1-day return <= `-4%`, or
-  - maximum ETH/BNB/SOL downside/upside realized-volatility ratio > `1.35`, or
-  - BTC below completed 20-day SMA
-- Bear core multiplier: `1.00x`
-- PENGU active sleeve: `0.30` gross
-- PENGU sleeve during brake: `0.15` gross
-- Total portfolio gross cap: `2.00`
-- Same-bar information is prohibited; feature decision lag is one completed 12-hour bar.
+- 2023–2025 compounded return: +712.1907%
+- CAGR: +100.9788%
+- MaxDD: -34.2079%
 
-## Backtest evidence
+This result is **not valid production evidence** because the PENGU return stream came from 17 fixed historical trade timestamps. Fixed timestamps do not define a reproducible future signal.
 
-| Period | Return | CAGR | Max DD | Monthly PF |
+Do not use the old +712% result to justify real trading, leverage, capital allocation or VPS live replacement.
+
+## PENGU reproducibility audits
+
+### V36
+
+- 1,539 reproducible one-hour candidates
+- Development passed: 14
+- Validation passed: 1
+- stable neighboring candidates: 0
+- selected: none
+- status: `NO_ROBUST_PENGU_72H_RULE`
+
+### V38
+
+A fixed RSI14 reversal ensemble across SMA72/120/168 was tested with a one-time Frozen Holdout.
+
+No configuration passed Development, Validation and Frozen Holdout together.
+
+PENGU remains disabled.
+
+## Aster V37 core-only evidence
+
+V28 Core plus BTC Bear Short was recalculated directly from Aster public one-hour OHLCV and funding, excluding all PENGU returns.
+
+Current V35 multipliers:
+
+- Strong Bull: 1.40x
+- Normal Bull: 1.20x
+- Brake: 0.35x
+- Bear: 1.00x
+
+Results:
+
+| Period | Return | CAGR | MaxDD | Monthly PF |
 | --- | ---: | ---: | ---: | ---: |
-| 2023–2025 | +712.1907% | +100.9788% | -34.2079% | 3.6949 |
-| 2023–2025 Severe | +118.1794% | +29.6917% | -54.0194% | 1.8436 |
-| 2026 H1 reused confirmation | +22.0712% | +49.5483% | -11.5952% | 5.0410 |
-| 2026 H1 Severe reused | +0.5298% | +1.0720% | -15.4185% | 1.1140 |
-| 2023–2026 H1 full | +891.4507% | +92.7327% | -34.2079% | 3.7580 |
+| 2023–2025 | +319.3915% | +61.2473% | -31.7730% | 3.0540 |
+| 2023–2025 Severe | +10.1149% | — | -49.7769% | — |
+| 2026 H1 reused confirmation | +3.0541% | — | — | — |
+| 2026 H1 Severe reused | -14.4419% | — | -24.8182% | — |
+| Full period | +332.2003% | +51.9917% | — | — |
 
-Annual normal returns in the development window:
+V37 grid result:
 
-- 2023: `+286.7738%`
-- 2024: `+19.5632%`
-- 2025: `+75.6319%`
+- Development passed: 0
+- robust candidates: 0
+- reused-2026 passed: 0
+- status: `NO_RESILIENT_V35_CORE_ONLY`
 
-The configuration was selected by the minimum development-qualified gross/leverage rule. 2026 H1 was excluded from ranking and used only as reused confirmation.
+## Implementation completed
 
-## Known limitations
+The dedicated V35 runner supports:
 
-- 2026 H1 is not a pristine untouched holdout because the project had previously observed this market period.
-- PENGU evidence contains only the frozen 17-trade schedule.
-- Development Severe Max DD is `-54.0194%`; this is not an acceptable live drawdown target.
-- The existing VPS Win80 runner is long-only and cannot execute the BTC Bear Short or PENGU Short components faithfully.
-- V35 therefore remains shadow-only until a separate long/short portfolio runner and fresh forward evidence pass review.
+- V28 ten-member core reconstruction
+- VWM25 ranking tilt
+- downside-volatility-skew scaling
+- four-bar-confirmed BTC Bear Short
+- V35 dynamic multipliers
+- Aster One-way Long/Short target reconciliation
+- reduce-only close before side reversal
+- one order per tick
+- gross cap
+- durable state, execution lock and idempotency
+- unknown-order reconciliation
+- signed Long/Short paper portfolio
+- systemd paper daemon installer
 
-## Live promotion gate
+## Promotion boundary
 
-The immutable production module requires all of the following before a separate reviewed promotion can even be considered:
+V35 may run as a VPS PAPER daemon for fresh forward evidence.
 
-- at least 30 pristine forward days
-- at least 12 completed PENGU trades
-- at least 95% market-data coverage
-- positive Severe forward return
-- Severe forward Max DD no worse than -25%
+Real trading remains blocked until a later strategy version produces:
 
-Even when these evidence checks pass, `liveEligible` remains hard-coded to `false` in V35. Enabling orders requires a separate explicit promotion commit.
+- a robust Aster development cluster
+- positive Validation and Frozen/forward Severe results
+- acceptable Severe drawdown
+- pristine forward evidence
+- an explicit reviewed live-promotion commit
+
+See `research/DISDEX_V35_ASTER_REVALIDATION.md` for the full audit and `research/DISDEX_V35_VPS_HANDOFF.md` for the VPS paper-daemon deployment procedure.
