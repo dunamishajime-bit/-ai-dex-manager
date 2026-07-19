@@ -2,8 +2,8 @@
   "version": 2,
   "programId": "win80_ultra90_direct_v2",
   "mainStrategyId": "WIN80_ULTRA90_TOP1_V1",
-  "iteration": 15,
-  "updatedAt": "2026-07-19T03:54:49.645Z",
+  "iteration": 16,
+  "updatedAt": "2026-07-19T06:44:18.024Z",
   "completedFocuses": [
     "entry_quality",
     "ultra90_rotation",
@@ -19,10 +19,33 @@
     "ultra90_rotation",
     "top1_ranking",
     "position_concentration",
-    "related_logic"
+    "related_logic",
+    "entry_quality"
   ],
-  "lastDiscussionId": "main-research-0015-2026-07-19T03-54-49-645Z",
+  "lastDiscussionId": "main-research-0016-2026-07-19T06-44-18-024Z",
   "experimentQueue": [
+    {
+      "id": "WIN80_SCORE_82_CHILD_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "entry_quality",
+      "parameterGroup": "Win80 minimum score",
+      "currentValue": "80",
+      "proposedValue": "82",
+      "rationale": "Score 80直上の弱いEntryを削り、勝率とコスト耐性が改善するかを切り分ける。",
+      "expectedEffect": "取引数は減るが平均利益とStress耐性が改善する可能性。",
+      "status": "REPLAY_REQUIRED"
+    },
+    {
+      "id": "WIN80_TRIGGER_80_CHILD_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "entry_quality",
+      "parameterGroup": "Win80 trigger progress",
+      "currentValue": "76.00%",
+      "proposedValue": "80.00%",
+      "rationale": "発火途中のEntryを減らし、騙しBreakoutを抑制できるかを確認する。",
+      "expectedEffect": "損失回数低下とEntry遅延のトレードオフ。",
+      "status": "REPLAY_REQUIRED"
+    },
     {
       "id": "WIN85_DUAL_CONFIRM_SIBLING_V1",
       "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
@@ -109,28 +132,6 @@
       "proposedValue": "40.00%",
       "rationale": "勝ちポジションを多く残しながら新候補へ分散する方が複利効率を保てるかを検証する。",
       "expectedEffect": "既存Trend継続利益の維持と新候補取り逃しの比較。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "WIN80_SCORE_82_CHILD_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "entry_quality",
-      "parameterGroup": "Win80 minimum score",
-      "currentValue": "80",
-      "proposedValue": "82",
-      "rationale": "Score 80直上の弱いEntryを削り、勝率とコスト耐性が改善するかを切り分ける。",
-      "expectedEffect": "取引数は減るが平均利益とStress耐性が改善する可能性。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "WIN80_TRIGGER_80_CHILD_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "entry_quality",
-      "parameterGroup": "Win80 trigger progress",
-      "currentValue": "76.00%",
-      "proposedValue": "80.00%",
-      "rationale": "発火途中のEntryを減らし、騙しBreakoutを抑制できるかを確認する。",
-      "expectedEffect": "損失回数低下とEntry遅延のトレードオフ。",
       "status": "REPLAY_REQUIRED"
     }
   ],
