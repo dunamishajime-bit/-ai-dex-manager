@@ -45,10 +45,21 @@ jobs:
       - name: PENGU V46 self-test
         run: npm run strategy:disdex-v46:selftest
       - name: V46 runner typecheck
-        run: npm run strategy:disdex-v46:typecheck
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run strategy:disdex-v46:typecheck 2>&1 | tee /tmp/disdex-v46-typecheck.log
       - name: Existing V35 runner typecheck
         run: npm run strategy:disdex-v35:runner:typecheck
       - name: Existing live runner typecheck
         run: npm run strategy:live:typecheck
       - name: Production build
         run: npm run build
+      - name: Upload V46 diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-v46-ci-diagnostics
+          path: /tmp/disdex-v46-typecheck.log
+          if-no-files-found: warn
+          retention-days: 7
