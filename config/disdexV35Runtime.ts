@@ -1,17 +1,18 @@
 import type { DisDexPenguRule } from "@/lib/disdex-v35-signal-engine";
 
 /**
- * Replaced by the frozen V36 selection after its development/validation/holdout
- * workflow succeeds. Until then PENGU is deliberately disabled.
+ * PENGU V36 and the V38 reversal ensemble both failed the combined
+ * development/validation/frozen-holdout gates. The sleeve is excluded rather
+ * than reproducing the old fixed list of 17 historical trades.
  */
 export const DISDEX_V35_PENGU_RULE: DisDexPenguRule = {
-    id: "PENGU_RULE_PENDING_V36",
-    family: "TREND",
-    fast: 24,
+    id: "PENGU_EXCLUDED_V36_V38",
+    family: "REVERSAL",
+    fast: 14,
     slow: 168,
-    threshold: 2,
-    volumeFloor: 1,
-    btcFilter: "RISK",
+    threshold: 35,
+    volumeFloor: 0,
+    btcFilter: "NONE",
     decisionHours: 6,
     holdHours: 72,
     enabled: false,
@@ -26,4 +27,5 @@ export const DISDEX_V35_RUNTIME = {
     minimumOrderNotionalUsd: 5,
     rebalanceTolerancePct: 1,
     closeUnmanagedPositions: true,
+    paperOnlyReason: "Aster V37 found no resilient core-only candidate and PENGU V36/V38 was rejected.",
 } as const;
