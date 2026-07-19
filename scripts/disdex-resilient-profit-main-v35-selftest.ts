@@ -19,7 +19,9 @@ const strong = resolveDisDexV35Allocation({
 });
 assert.equal(strong.state, "STRONG_BULL");
 assert.equal(strong.coreMultiplier, 1.4);
-assert.ok(Math.abs(strong.finalGross - 1.56) < 1e-12);
+assert.equal(strong.penguGross, 0);
+assert.ok(Math.abs(strong.finalGross - 1.26) < 1e-12);
+assert.ok(strong.reasons.some((reason) => reason.includes("PENGU signal ignored")));
 
 const normal = resolveDisDexV35Allocation({
     regime: "BULL",
@@ -51,8 +53,8 @@ const brake = resolveDisDexV35Allocation({
 });
 assert.equal(brake.state, "BRAKE");
 assert.equal(brake.coreMultiplier, 0.35);
-assert.equal(brake.penguGross, 0.15);
-assert.ok(Math.abs(brake.finalGross - 0.465) < 1e-12);
+assert.equal(brake.penguGross, 0);
+assert.ok(Math.abs(brake.finalGross - 0.315) < 1e-12);
 
 const capped = resolveDisDexV35Allocation({
     regime: "BULL",
@@ -92,8 +94,10 @@ const gate = evaluateDisDexV35LiveGate({
     severeMaxDrawdownPct: -12,
     dataCoveragePct: 99,
 });
-assert.equal(gate.passed, true);
+assert.equal(gate.checks.robustAsterBacktest, false);
+assert.equal(gate.passed, false);
 assert.equal(gate.liveEligible, false);
 assert.equal(DISDEX_RESILIENT_PROFIT_MAIN_V35.realTradingDefaultEnabled, false);
+assert.equal(DISDEX_RESILIENT_PROFIT_MAIN_V35.paperOnly, true);
 
 console.log("DISDEX_RESILIENT_PROFIT_MAIN_V35_SELFTEST_OK");
