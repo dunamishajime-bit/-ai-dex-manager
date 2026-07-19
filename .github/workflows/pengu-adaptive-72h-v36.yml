@@ -3,7 +3,11 @@ name: PENGU Adaptive 72h V36
 on:
   push:
     branches:
-      - research/win80-profit-optimization-v1
+      - research/pengu-adaptive-72h-v36
+    paths:
+      - scripts/research_lab_pengu_adaptive_72h_v36.py
+      - .github/workflows/pengu-adaptive-72h-v36.yml
+  pull_request:
     paths:
       - scripts/research_lab_pengu_adaptive_72h_v36.py
       - .github/workflows/pengu-adaptive-72h-v36.yml
@@ -14,7 +18,7 @@ permissions:
 
 env:
   RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
-  PENGU_V36_TRIGGER: "2026-07-19T14:05:00+09:00"
+  PENGU_V36_TRIGGER: "2026-07-19T14:24:00+09:00"
 
 jobs:
   research:
