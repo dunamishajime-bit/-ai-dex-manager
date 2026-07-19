@@ -71,23 +71,36 @@ const shortBlockedByStrongBtc = evaluateDisDexPenguV46Decision({
 });
 assert.equal(shortBlockedByStrongBtc.side, 0);
 
+const now = Date.now();
 const reversal = buildDisDexV35RebalanceActions({
-    account: { walletBalance: 1000, availableBalance: 1000, unrealizedPnl: 0 },
+    account: {
+        walletBalance: 1000,
+        availableBalance: 1000,
+        asset: "USDT",
+        updatedAt: now,
+    },
     positions: [{
         symbol: "PENGUUSDT",
         quantity: 1000,
         entryPrice: 0.01,
         markPrice: 0.01,
         unrealizedPnl: 0,
+        pnlPct: 0,
+        notionalUsd: 10,
         positionSide: "BOTH",
+        leverage: 1,
+        updatedAt: now,
     }],
     quotes: {
         PENGUUSDT: {
             symbol: "PENGUUSDT",
             bidPrice: 0.0099,
             askPrice: 0.0101,
+            bidQuantity: 1_000_000,
+            askQuantity: 1_000_000,
             midPrice: 0.01,
             spreadBps: 200,
+            updatedAt: now,
         },
     },
     targetWeights: { PENGUUSDT: -0.15 },
