@@ -1,6 +1,10 @@
 export type ResearchDiscussionSpeakerRole =
   | "moderator"
   | "researcher"
+  | "win80_specialist"
+  | "ultra90_specialist"
+  | "synthesis"
+  | "independent_critic"
   | "overfit_critic"
   | "tail_risk_critic"
   | "execution_critic"

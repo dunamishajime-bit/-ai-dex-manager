@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -20,11 +21,11 @@ import { cn } from "@/lib/utils";
 type NavItem = {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   children?: Array<{
     href: string;
     label: string;
-    icon: React.ComponentType<{ className?: string }>;
+    icon: ComponentType<{ className?: string }>;
   }>;
 };
 
@@ -52,9 +53,7 @@ export function Sidebar() {
     <aside className="hidden w-[188px] shrink-0 bg-[#04070c] px-3 py-4 md:flex md:flex-col">
       <div className="rounded-[20px] border border-[#8f8551] bg-[linear-gradient(180deg,rgba(35,35,24,0.92),rgba(16,18,18,0.96))] px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.28)]">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#6d653f] bg-[#11150f] text-sm font-bold text-[#efe8c6]">
-            D
-          </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#6d653f] bg-[#11150f] text-sm font-bold text-[#efe8c6]">D</div>
           <div className="min-w-0">
             <div className="truncate text-[11px] font-bold text-white">{SITE_BRAND_NAME}</div>
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Personal</div>
@@ -72,6 +71,7 @@ export function Sidebar() {
               : item.children?.length
                 ? pathname === item.href || pathname.startsWith(`${item.href}/`)
                 : pathname === item.href;
+
             return (
               <div key={item.href}>
                 <Link
@@ -116,9 +116,9 @@ export function Sidebar() {
 
       <div className="mt-auto rounded-[18px] border border-[#8a8a8a] bg-[linear-gradient(180deg,rgba(17,20,23,0.96),rgba(9,11,14,0.98))] px-4 py-4 text-[11px] leading-6 text-white/78">
         <div className="mb-2 text-[11px] font-bold text-white">運用メモ</div>
-        <p>AI研究ラボは実売買から分離し、新戦略の生成・検証・反証を行います。</p>
-        <p>議論内容では、日時別のResearcher・Critic・CIO発言を数値Evidence付きで確認できます。</p>
-        <p>認証や基本設定の見直しは、設定ページから進めてください。</p>
+        <p>現在の実売買はAsterDEXのV35 Core＋PENGU V46です。</p>
+        <p>AI研究ラボは研究専用で、実売買ロジックとは分離されています。</p>
+        <p>LIVE状態・残高・ポジションは各ページ上部の現行ロジックカードで確認できます。</p>
       </div>
 
       <button
@@ -132,3 +132,4 @@ export function Sidebar() {
     </aside>
   );
 }
+

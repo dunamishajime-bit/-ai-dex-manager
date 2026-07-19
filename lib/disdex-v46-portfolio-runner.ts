@@ -17,6 +17,7 @@ import type {
 } from "@/lib/disdex-v35-runner-state";
 import type { DisDexV46AsterMarketDataProvider } from "@/lib/disdex-v46-market-data-provider";
 import { buildDisDexV46CombinedSignal, type DisDexV46CombinedSignal } from "@/lib/disdex-v46-combined-signal";
+import type { DisDexV46ExecutionRecord } from "./disdex-v46-settlement-analysis";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
 
@@ -74,6 +75,10 @@ function orderFilled(result: DirectTradeResult) {
     return (result.status === "FILLED" || result.status === "PARTIALLY_FILLED") && result.executedQuantity > 0;
 }
 
+
+function availableOrderCapacityUsd(account: { availableBalance: number }, cashReservePct: number) {
+    return Math.max(0, finite(account.availableBalance)) * Math.max(0, 1 - cashReservePct / 100);
+}
 function quotePrice(quote: DirectMarketQuote, side: AsterOrderSide) {
     return side === "BUY" ? quote.askPrice : quote.bidPrice;
 }
@@ -103,6 +108,30 @@ function signedPositionQuantity(position: DirectPosition) {
     if (position.positionSide === "SHORT") return -Math.abs(position.quantity);
     if (position.positionSide === "LONG") return Math.abs(position.quantity);
     return finite(position.quantity);
+}
+
+function recordFilledExecution(state: DisDexV35RunnerState, pending: DisDexV35PendingOrder, result: DirectTradeResult, completedAt: number) {
+    const existing = state.completedExecutions || [];
+    if (existing.some((item) => item.idempotencyKey === pending.idempotencyKey)) return;
+    const record: DisDexV46ExecutionRecord = {
+        idempotencyKey: pending.idempotencyKey,
+        clientOrderId: pending.clientOrderId,
+        orderId: result.orderId,
+        symbol: (result.symbol || pending.symbol).toUpperCase(),
+        side: result.side,
+        reduceOnly: pending.reduceOnly,
+        status: result.status === "PARTIALLY_FILLED" ? "PARTIALLY_FILLED" : "FILLED",
+        requestedQuantity: result.requestedQuantity,
+        executedQuantity: result.executedQuantity,
+        averagePrice: result.averagePrice,
+        quoteQuantity: result.quoteQuantity,
+        completedAt,
+        referenceTs: pending.referenceTs,
+        targetWeight: pending.targetWeight,
+        reason: pending.reason,
+        positionBefore: pending.positionBefore,
+    };
+    state.completedExecutions = [...existing, record].slice(-500);
 }
 
 export class DisDexV46PortfolioRunner {
@@ -154,6 +183,7 @@ export class DisDexV46PortfolioRunner {
             };
         }
         if (!orderFilled(result)) throw new Error(`V46 pending order ended with ${result.status} and no fill.`);
+        recordFilledExecution(state, pending, result, this.now());
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
         state.pending = undefined;
         await this.dependencies.stateStore.save(state);
@@ -191,6 +221,7 @@ export class DisDexV46PortfolioRunner {
                 return { status: "held", message: pending.lastError, idempotencyKey: pending.idempotencyKey };
             }
             if (!orderFilled(result)) throw new Error(`V46 order was not filled (${result.status}).`);
+            recordFilledExecution(state, pending, result, this.now());
             state.lastCompletedIdempotencyKey = pending.idempotencyKey;
             state.pending = undefined;
             await this.dependencies.stateStore.save(state);
@@ -266,6 +297,27 @@ export class DisDexV46PortfolioRunner {
             if (signedQuantity !== 0 && action.targetWeight !== 0 && Math.sign(signedQuantity) !== Math.sign(action.targetWeight) && !action.reduceOnly) {
                 throw new Error("V46 invariant violation: a direction change must close reduce-only before opening the opposite side.");
             }
+            const currentMagnitudeUsd = Math.abs(action.currentNotionalUsd);
+            const targetMagnitudeUsd = Math.abs(action.targetNotionalUsd);
+            const requiredIncreaseUsd = Math.max(0, targetMagnitudeUsd - currentMagnitudeUsd);
+            const availableCapacityUsd = availableOrderCapacityUsd(account, this.dependencies.config.cashReservePct);
+            if (!action.reduceOnly && requiredIncreaseUsd > availableCapacityUsd + 1e-9) {
+                await this.dependencies.stateStore.save(state);
+                this.log.warn("V46 order held: available balance capacity is insufficient", {
+                    symbol: action.symbol,
+                    requiredIncreaseUsd,
+                    availableCapacityUsd,
+                    targetNotionalUsd: action.targetNotionalUsd,
+                    currentNotionalUsd: action.currentNotionalUsd,
+                });
+                return {
+                    status: "held",
+                    message: `Insufficient available balance capacity for ${action.symbol}; no order was sent.`,
+                    signal,
+                    action,
+                    idempotencyKey: key,
+                };
+            }
             const pending: DisDexV35PendingOrder = {
                 idempotencyKey: key,
                 phase: "planned",
@@ -282,6 +334,13 @@ export class DisDexV46PortfolioRunner {
                 updatedAt: this.now(),
                 retryCount: 0,
                 reason: `${signal.strategyId}: ${action.reason} core=${signal.core.allocation.state} pengu=${signal.pengu.side} targetWeight=${action.targetWeight.toFixed(6)}`,
+                positionBefore: position ? {
+                    signedQuantity,
+                    entryPrice: position.entryPrice,
+                    markPrice: position.markPrice,
+                    notionalUsd: position.notionalUsd,
+                    observedAt: position.updatedAt || this.now(),
+                } : undefined,
             };
             state.pending = pending;
             await this.dependencies.stateStore.save(state);

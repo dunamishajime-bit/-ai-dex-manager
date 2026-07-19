@@ -44,6 +44,9 @@ const fundingOverheated = evaluateDisDexPenguV46Decision({
 });
 assert.equal(fundingOverheated.side, 0);
 
+const weakEdge = evaluateDisDexPenguV46Decision({ ...longFeatures, penguMomentum6hPct: 0.5 });
+assert.equal(weakEdge.side, 0);
+
 const longBlockedByWeakBtc = evaluateDisDexPenguV46Decision({
     ...longFeatures,
     btcCloseAboveSma168: false,
@@ -126,12 +129,9 @@ const immediateSignal = buildDisDexPenguV46Signal({
     pengu1h,
     penguFunding: [{ fundingTime: latest.closeTime, fundingRate: 0.0002 }],
 }, signalNow);
-assert.equal(immediateSignal.side, 1);
-assert.equal(immediateSignal.entryTs, latest.openTime + HOUR);
-assert.equal(immediateSignal.exitTs, latest.openTime + 25 * HOUR);
+// One qualifying decision bar is intentionally insufficient after the anti-churn change.
+assert.equal(immediateSignal.side, 0);
 assert.equal(immediateSignal.diagnostics.fundingCoverage, true);
-assert.ok(immediateSignal.features);
-assert.ok(immediateSignal.features!.rsi14 >= 45 && immediateSignal.features!.rsi14 <= 72);
 
 const futureFundingMustNotEnableLong = buildDisDexPenguV46Signal({
     core12h: {
@@ -213,8 +213,14 @@ assert.equal(reversal.actions[0].reduceOnly, true);
 assert.equal(reversal.actions[0].targetWeight, -0.15);
 assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.longGross, 0.15);
 assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.shortGross, 0.15);
+assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.confirmationDecisionBars, 2);
+assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.reentryCooldownHours, 12);
+assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.minimumRoundTripEdgeBps, 80);
 assert.equal(DISDEX_V46_RUNTIME.maximumGross, 2);
-assert.equal(DISDEX_V46_RUNTIME.liveTradingEnabled, false);
-assert.equal(DISDEX_V46_RUNTIME.mode, "PAPER");
+assert.equal(DISDEX_V46_RUNTIME.liveTradingEnabled, true);
+assert.equal(DISDEX_V46_RUNTIME.mode, "LIVE");
+assert.equal(DISDEX_V46_RUNTIME.closeUnmanagedPositions, false);
+assert.equal(DISDEX_V46_RUNTIME.livePromotionBasis, "MANUAL_OPERATOR_OVERRIDE");
+assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.evidence.pristineForwardEvidence, false);
 
 console.log("DISDEX_PENGU_DUAL_ENGINE_V46_SELFTEST_OK");

@@ -127,7 +127,8 @@ export function evaluateDisDexPenguV46Decision(features: DisDexPenguV46DecisionF
     const commonLong = features.volumeRatio >= config.volumeFloor
         && fundingAllowed
         && btcRiskAllowsLong(features);
-    const longEligible = commonLong
+    const edgeSufficient = Math.abs(features.penguMomentum6hPct) * 100 >= config.minimumRoundTripEdgeBps;
+    const longEligible = edgeSufficient && commonLong
         && features.penguCloseAboveSma72
         && features.penguCloseAboveSma168
         && features.penguSma168Rising48h
@@ -140,7 +141,7 @@ export function evaluateDisDexPenguV46Decision(features: DisDexPenguV46DecisionF
         && features.rsi14 >= config.long.rsiMinimum
         && features.rsi14 <= config.long.rsiMaximum;
 
-    const shortEligible = features.volumeRatio >= config.volumeFloor
+    const shortEligible = edgeSufficient && features.volumeRatio >= config.volumeFloor
         && btcRiskAllowsShort(features)
         && features.close < features.priorLow24h
         && features.penguMomentum6hPct < config.short.confirmationThresholdPct;
@@ -236,6 +237,8 @@ export function buildDisDexPenguV46Signal(
     let active: DisDexPenguV46Signal | undefined;
     let evaluatedDecisionBars = 0;
     let nextFreeTs = 0;
+    let streakSide: -1 | 0 | 1 = 0;
+    let streakCount = 0;
 
     for (const ts of common) {
         if (ts < nextFreeTs || Math.floor(ts / HOUR) % config.decisionHours !== 0) continue;
@@ -246,12 +249,24 @@ export function buildDisDexPenguV46Signal(
         if (!features) continue;
         evaluatedDecisionBars += 1;
         const decision = evaluateDisDexPenguV46Decision(features);
-        if (decision.side === 0) continue;
+        if (decision.side === 0) {
+            streakSide = 0;
+            streakCount = 0;
+            continue;
+        }
+        if (streakSide === decision.side) streakCount += 1;
+        else {
+            streakSide = decision.side;
+            streakCount = 1;
+        }
+        if (streakCount < config.confirmationDecisionBars) continue;
         // The signal becomes actionable immediately after the completed decision
         // candle closes, matching the backtest's next-open execution convention.
         const entryTs = pengu[penguIndex].openTime + HOUR;
         const exitTs = entryTs + config.holdHours * HOUR;
-        nextFreeTs = exitTs;
+        nextFreeTs = exitTs + config.reentryCooldownHours * HOUR;
+        streakSide = 0;
+        streakCount = 0;
         if (entryTs <= now && now < exitTs) {
             active = {
                 strategyId: config.id,

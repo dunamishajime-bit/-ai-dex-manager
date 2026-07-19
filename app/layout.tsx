@@ -15,6 +15,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { LoginPage } from "@/components/features/LoginPage";
 import LearningIndicator from "@/components/features/LearningIndicator";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { CurrentStrategyStatus } from "@/components/features/strategy/CurrentStrategyStatus";
 import {
   PUBLIC_ADMIN_ENABLED,
   PUBLIC_REGISTER_ENABLED,
@@ -32,13 +33,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const pathname = usePathname();
 
-  if (pathname === "/admin" && PUBLIC_ADMIN_ENABLED) {
-    return <>{children}</>;
-  }
-
-  if (PUBLIC_PATHS.some((path) => pathname?.startsWith(path))) {
-    return <>{children}</>;
-  }
+  if (pathname === "/admin" && PUBLIC_ADMIN_ENABLED) return <>{children}</>;
+  if (PUBLIC_PATHS.some((path) => pathname?.startsWith(path))) return <>{children}</>;
 
   if (isLoading) {
     return (
@@ -51,27 +47,18 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
+  if (!isAuthenticated) return <LoginPage />;
   return <>{children}</>;
 }
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
-
   const isAdmin = pathname === "/admin" && PUBLIC_ADMIN_ENABLED;
   const isPublicPath = PUBLIC_PATHS.some((path) => pathname?.startsWith(path));
 
-  if (!isAuthenticated && !isAdmin && !isPublicPath) {
-    return <AuthGuard>{children}</AuthGuard>;
-  }
-
-  if (isPublicPath) {
-    return <AuthGuard>{children}</AuthGuard>;
-  }
+  if (!isAuthenticated && !isAdmin && !isPublicPath) return <AuthGuard>{children}</AuthGuard>;
+  if (isPublicPath) return <AuthGuard>{children}</AuthGuard>;
 
   return (
     <AuthGuard>
@@ -79,7 +66,10 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <TopBar />
-          <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>
+          <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">
+            <CurrentStrategyStatus compact />
+            {children}
+          </main>
         </div>
         <FlashEffect />
         <TradeNotificationToast />
@@ -90,17 +80,13 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <title>{SITE_BRAND_NAME}</title>
-        <meta name="description" content="個人用の運用状況とトレード履歴を確認するための非公開サイトです。" />
+        <meta name="description" content="AsterDEXのDis-Dex Manager V35 Core＋PENGU V46の運用状態を確認する管理画面" />
         <meta name="robots" content="noindex, nofollow" />
         <meta name="googlebot" content="noindex, nofollow, noarchive" />
         <meta name="bingbot" content="noindex, nofollow, noarchive" />
@@ -119,21 +105,13 @@ export default function RootLayout({
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.getRegistrations()
                     .then(function(registrations) {
-                      return Promise.all(registrations.map(function(registration) {
-                        return registration.unregister();
-                      }));
+                      return Promise.all(registrations.map(function(registration) { return registration.unregister(); }));
                     })
                     .then(function() {
                       if (!window.caches) return;
-                      return caches.keys().then(function(keys) {
-                        return Promise.all(keys.map(function(key) {
-                          return caches.delete(key);
-                        }));
-                      });
+                      return caches.keys().then(function(keys) { return Promise.all(keys.map(function(key) { return caches.delete(key); })); });
                     })
-                    .catch(function(err) {
-                      console.log('SW cleanup failed:', err);
-                    });
+                    .catch(function(err) { console.log('SW cleanup failed:', err); });
                 });
               })();
             `,
@@ -156,3 +134,4 @@ export default function RootLayout({
     </html>
   );
 }
+

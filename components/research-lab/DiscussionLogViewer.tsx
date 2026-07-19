@@ -25,7 +25,7 @@ import type {
 } from "@/lib/research-lab/discussion-types";
 import { cn } from "@/lib/utils";
 
-const REFRESH_INTERVAL_MS = 60_000;
+const REFRESH_INTERVAL_MS = 10_000;
 const MAIN_STRATEGY_ID = "WIN80_ULTRA90_TOP1_V1";
 
 function isMainStrategyDiscussion(item: Pick<ResearchDiscussionIndexEntry, "title" | "topStrategyIds">) {
@@ -65,6 +65,18 @@ function pct(value: number | null) {
 }
 
 function roleStyle(message: ResearchDiscussionMessage) {
+  if (message.role === "win80_specialist") {
+    return { icon: UserRoundSearch, label: "WIN80 Specialist AI", className: "border-cyan-400/20 bg-cyan-500/[0.07] text-cyan-50" };
+  }
+  if (message.role === "ultra90_specialist") {
+    return { icon: UserRoundSearch, label: "ULTRA90 Specialist AI", className: "border-fuchsia-400/20 bg-fuchsia-500/[0.07] text-fuchsia-50" };
+  }
+  if (message.role === "synthesis") {
+    return { icon: Bot, label: "Synthesis AI", className: "border-blue-400/20 bg-blue-500/[0.07] text-blue-50" };
+  }
+  if (message.role === "independent_critic") {
+    return { icon: ShieldAlert, label: "Independent Critic AI", className: "border-orange-400/20 bg-orange-500/[0.07] text-orange-50" };
+  }
   if (message.role === "researcher") {
     return { icon: UserRoundSearch, label: "Researcher", className: "border-sky-400/20 bg-sky-500/[0.07] text-sky-50" };
   }

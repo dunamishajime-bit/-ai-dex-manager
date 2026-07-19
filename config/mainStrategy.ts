@@ -8,11 +8,12 @@ import { DISDEX_RESILIENT_PROFIT_MAIN_V35 } from "@/lib/disdex-resilient-profit-
  * independent Long/Short profit engine. The combined V46 runner owns target
  * weights, gross-cap enforcement and one-way direction changes.
  *
- * Both engines remain PAPER_FORWARD. Production order execution is blocked
- * until a separate reviewed promotion changes the immutable live flags.
+ * V35 Core plus PENGU V46 is operated LIVE only after explicit manual
+ * operator approval. PENGU pristine Forward Evidence is incomplete and this
+ * promotion does not represent a research pass or a robust holdout result.
  */
 export const ACTIVE_MAIN_STRATEGY = DISDEX_RESILIENT_PROFIT_MAIN_V35;
 export const ACTIVE_PENGU_ENGINE = DISDEX_PENGU_DUAL_ENGINE_V46;
 export const ACTIVE_PORTFOLIO_RUNNER_ID = DISDEX_V46_RUNTIME.strategyId;
-export const ACTIVE_MAIN_STRATEGY_MODE = "PAPER" as const;
-export const ACTIVE_MAIN_STRATEGY_REAL_TRADING_ENABLED = false as const;
+export const ACTIVE_MAIN_STRATEGY_MODE = "LIVE" as const;
+export const ACTIVE_MAIN_STRATEGY_REAL_TRADING_ENABLED = true as const;

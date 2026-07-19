@@ -93,6 +93,15 @@ function finite(value: unknown, fallback = 0) {
     const number = Number(value);
     return Number.isFinite(number) ? number : fallback;
 }
+const CORE_TARGET_CONFIRMATION_BARS = 2;
+
+function coreTargetKey(target: Partial<Record<DisDexV35CoreSymbol, number>>) {
+    return Object.entries(target)
+        .filter(([, value]) => Math.abs(finite(value)) > 0.05)
+        .map(([symbol, value]) => `${symbol}:${Math.sign(finite(value))}`)
+        .sort()
+        .join("|");
+}
 
 function cleanRows(rows: DisDexV35Candle[]) {
     return [...rows]
@@ -331,6 +340,9 @@ function buildCoreSeries(history: DisDexV35MarketHistory) {
     let bearCount = 0;
     let lastTarget: Partial<Record<DisDexV35CoreSymbol, number>> = {};
     let lastBase: Partial<Record<DisDexV35CoreSymbol, number>> = {};
+    let acceptedTargetKey = "";
+    let pendingTargetKey = "";
+    let pendingTargetCount = 0;
     for (const ts of times) {
         current = current.map((value, index) => pending[index] ?? value);
         pending = pending.map(() => undefined);
@@ -350,7 +362,28 @@ function buildCoreSeries(history: DisDexV35MarketHistory) {
         bearCount = gross(bear) > 0 ? bearCount + 1 : 0;
         const confirmedBear = bearCount >= 4 ? bear : {};
         lastBase = base;
-        lastTarget = gross(base) > 0.05 ? base : confirmedBear;
+        const candidateTarget = gross(base) > 0.05 ? base : confirmedBear;
+        const candidateKey = coreTargetKey(candidateTarget);
+        if (!acceptedTargetKey) {
+            acceptedTargetKey = candidateKey;
+            lastTarget = candidateTarget;
+        } else if (candidateKey === acceptedTargetKey) {
+            pendingTargetKey = "";
+            pendingTargetCount = 0;
+            lastTarget = candidateTarget;
+        } else {
+            if (candidateKey === pendingTargetKey) pendingTargetCount += 1;
+            else {
+                pendingTargetKey = candidateKey;
+                pendingTargetCount = 1;
+            }
+            if (pendingTargetCount >= CORE_TARGET_CONFIRMATION_BARS) {
+                acceptedTargetKey = candidateKey;
+                pendingTargetKey = "";
+                pendingTargetCount = 0;
+                lastTarget = candidateTarget;
+            }
+        }
     }
     return { bars, indexes, times, target: lastTarget, base: lastBase, bearCount };
 }

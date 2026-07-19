@@ -5,6 +5,7 @@ import type {
 } from "@/lib/research-lab/discussion-types";
 
 import type { MainStrategySnapshotReplayArtifact } from "./main-strategy-snapshot-replay";
+import { appendMultiRoundDebate } from "./multi-round-debate";
 
 function pct(value: number | null) {
   return value == null || !Number.isFinite(value) ? "—" : `${value.toFixed(2)}%`;
@@ -62,6 +63,7 @@ function compactReplay(artifact: MainStrategySnapshotReplayArtifact): ResearchDi
 export function attachMainStrategySnapshotReplay(
   discussion: ResearchDiscussionLog,
   artifact: MainStrategySnapshotReplayArtifact,
+  priorDiscussion?: ResearchDiscussionLog | null,
 ): ResearchDiscussionLog {
   const metrics = artifact.metrics;
   const datasetSummary = `${artifact.period.startIso.slice(0, 10)}〜${artifact.period.endIso.slice(0, 10)} / ${artifact.symbols.length}銘柄 / ${artifact.intervalHours}時間間隔`;
@@ -111,12 +113,14 @@ export function attachMainStrategySnapshotReplay(
     return item;
   });
 
+  const debateMessages = appendMultiRoundDebate({ ...discussion, messages }, artifact, priorDiscussion);
+  const carryMessage = priorDiscussion ? { id: discussion.id + "-carry-forward", sequence: debateMessages.length + 1, createdAt: new Date().toISOString(), speakerId: "research-continuity", speakerName: "Research Continuity（前回引継ぎ）", role: "moderator" as const, stance: "context" as const, strategyId: priorDiscussion.topStrategyIds[0] ?? null, content: "前回Cycle " + priorDiscussion.cycle + "（" + priorDiscussion.id + ")のCIO判断と候補を引き継ぎます。前回候補：" + priorDiscussion.topStrategyIds.join(", ") + "。前回判断：" + priorDiscussion.decision, evidence: [{ label: "前回Cycle", value: String(priorDiscussion.cycle), assessment: "positive" as const }, { label: "前回候補", value: priorDiscussion.topStrategyIds.join(", "), assessment: "neutral" as const }, { label: "引継ぎ", value: "構造化保存済み", assessment: "positive" as const }] } : null;
   return {
     ...discussion,
     summary: `${discussion.summary} 保存済みBT元データから${artifact.snapshotCount}件のStrategyEngineInput Snapshotを復元し、${artifact.selectedSignalCount}件の選定Signalに24h/72h/168h実績を付与しました。`,
     decision: `${discussion.decision} 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。`,
     methodology: `${discussion.methodology} 追加Evidence: ${artifact.source}の1h OHLCV/FundingキャッシュからStrategyEngineInputを${artifact.intervalHours}時間ごとに再構築し、次1h足始値Entry・固定24h/72h/168h Outcome・Fee/Slippage/Funding控除で検証。Artifact fingerprint=${artifact.fingerprint}。`,
-    messages,
+    messages: carryMessage ? [...debateMessages, carryMessage] : debateMessages,
     snapshotReplay: compactReplay(artifact),
   };
 }
