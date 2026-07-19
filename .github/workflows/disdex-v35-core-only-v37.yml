@@ -1,0 +1,55 @@
+name: Dis-Dex V35 Core Only V37
+
+on:
+  push:
+    branches:
+      - research/v35-core-only-v37
+    paths:
+      - scripts/research_lab_*.py
+      - .github/workflows/disdex-v35-core-only-v37.yml
+  pull_request:
+    paths:
+      - scripts/research_lab_*.py
+      - .github/workflows/disdex-v35-core-only-v37.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore frozen USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_v35_core_only_v37.py
+      - name: Run V35 core-only validation
+        run: python scripts/research_lab_v35_core_only_v37.py
+      - name: Upload V37 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-v35-core-only-v37
+          path: |
+            .research-state/disdex-v35-core-only-v37.json
+            .research-state/disdex-v35-core-only-v37.md
+          if-no-files-found: warn
+          retention-days: 30
