@@ -1,0 +1,49 @@
+name: PENGU Dual-Engine V39
+
+on:
+  push:
+    branches:
+      - research/pengu-dual-engine-v39
+    paths:
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - research/PENGU_V39_DESIGN.md
+      - .github/workflows/pengu-dual-engine-v39.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - research/PENGU_V39_DESIGN.md
+      - .github/workflows/pengu-dual-engine-v39.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_pengu_dual_engine_v39.py
+      - name: Run PENGU dual-engine validation
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_pengu_dual_engine_v39.py
+      - name: Upload V39 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-dual-engine-v39
+          path: |
+            .research-state/pengu-dual-engine-v39.json
+            .research-state/pengu-dual-engine-v39.md
+          if-no-files-found: warn
+          retention-days: 30
