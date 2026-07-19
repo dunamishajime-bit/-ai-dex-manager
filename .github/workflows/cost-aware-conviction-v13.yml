@@ -1,0 +1,65 @@
+name: Cost-Aware Conviction Execution V13
+
+# Dedicated research-only workflow. Production and live runners are untouched.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_cost_aware_conviction_execution_v13.py"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_asymmetric_bear_hedge_v5.py"
+      - "scripts/research_lab_precomputed_multi_regime_v6.py"
+      - "scripts/research_lab_fixed_candidate_robustness_v7.py"
+      - "lib/research-lab/perp/**"
+      - ".github/workflows/cost-aware-conviction-v13.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cost-aware-conviction-v13-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript checks
+        run: npm run typecheck
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_cost_aware_conviction_execution_v13.py
+      - name: Run cost-aware conviction execution V13
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_cost_aware_conviction_execution_v13.py
+      - name: Upload V13 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cost-aware-conviction-execution-v13
+          path: |
+            .research-state/cost-aware-conviction-execution-v13.json
+            .research-state/cost-aware-conviction-execution-v13.md
+          if-no-files-found: warn
+          retention-days: 30

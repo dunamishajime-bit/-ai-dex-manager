@@ -1,0 +1,61 @@
+name: Dis-Dex Frozen Main Candidate V35
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_frozen_main_candidate_v35.py"
+      - "scripts/research_lab_resilient_profit_stack_v34.py"
+      - ".github/workflows/disdex-frozen-main-candidate-v35.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_frozen_main_candidate_v35.py"
+      - ".github/workflows/disdex-frozen-main-candidate-v35.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-frozen-main-candidate-v35-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore frozen USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_frozen_main_candidate_v35.py scripts/research_lab_resilient_profit_stack_v34.py
+      - name: Run frozen main candidate audit
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_frozen_main_candidate_v35.py
+      - name: Upload V35 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-frozen-main-candidate-v35
+          path: |
+            .research-state/disdex-frozen-main-candidate-v35.json
+            .research-state/disdex-frozen-main-candidate-v35.md
+          if-no-files-found: warn
+          retention-days: 30

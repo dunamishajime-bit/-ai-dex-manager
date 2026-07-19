@@ -1,0 +1,196 @@
+name: Win80 Profit Optimization Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research-lab-main-strategy-profit-optimizer.ts"
+      - "scripts/research-lab-main-strategy-regime-router.ts"
+      - "scripts/research-lab-regime-native-entry-v1.ts"
+      - "scripts/research-lab-stability-consensus-rotation-v2.ts"
+      - "scripts/research-lab-multi-horizon-rotation-v3.ts"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_asymmetric_bear_hedge_v5.py"
+      - "scripts/research_lab_precomputed_multi_regime_v6.py"
+      - "scripts/research_lab_fixed_candidate_robustness_v7.py"
+      - "scripts/research_lab_hysteresis_execution_v8.py"
+      - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
+      - "scripts/research_lab_cost_aware_conviction_execution_v13.py"
+      - "scripts/research_lab_selective_rotation_gate_v14.py"
+      - "scripts/research_lab_consensus_gross_governor_v15.py"
+      - "scripts/research_lab_persistent_challenger_rotation_v16.py"
+      - "lib/research-lab/perp/**"
+      - "lib/cycle-strategy.ts"
+      - "lib/win80-ultra90-main-strategy.ts"
+      - "config/**"
+      - "package.json"
+      - ".github/workflows/win80-profit-optimization.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research-lab-main-strategy-profit-optimizer.ts"
+      - "scripts/research-lab-main-strategy-regime-router.ts"
+      - "scripts/research-lab-regime-native-entry-v1.ts"
+      - "scripts/research-lab-stability-consensus-rotation-v2.ts"
+      - "scripts/research-lab-multi-horizon-rotation-v3.ts"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_asymmetric_bear_hedge_v5.py"
+      - "scripts/research_lab_precomputed_multi_regime_v6.py"
+      - "scripts/research_lab_fixed_candidate_robustness_v7.py"
+      - "scripts/research_lab_hysteresis_execution_v8.py"
+      - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
+      - "scripts/research_lab_cost_aware_conviction_execution_v13.py"
+      - "scripts/research_lab_selective_rotation_gate_v14.py"
+      - "scripts/research_lab_consensus_gross_governor_v15.py"
+      - "scripts/research_lab_persistent_challenger_rotation_v16.py"
+      - "lib/research-lab/perp/**"
+      - "lib/cycle-strategy.ts"
+      - "lib/win80-ultra90-main-strategy.ts"
+      - "config/**"
+      - "package.json"
+      - ".github/workflows/win80-profit-optimization.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: win80-profit-optimization-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+            champion-deep-usdm-v1-
+            related-logic-usdm-v1-
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript checks
+        run: npm run typecheck
+      - name: Main strategy policy self-test
+        run: npm run strategy:main:selftest
+      - name: Optimize entry timestamp lookup
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          target = Path("scripts/research-lab-main-strategy-profit-optimizer.ts")
+          text = target.read_text(encoding="utf-8")
+          old = 'const entryIndex = candles.findIndex((candle) => candle.ts === event.entryTs);'
+          new = 'const entryIndex = indexAtOrBefore(candles, event.entryTs);'
+          if old not in text:
+              raise SystemExit("entry lookup patch target not found")
+          target.write_text(text.replace(old, new), encoding="utf-8")
+          PY
+      - name: Run chronological profit optimization
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: npm run research:main-strategy:profit-optimize
+      - name: Run regime direction router research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: npx tsx scripts/research-lab-main-strategy-regime-router.ts
+      - name: Run independent regime-native entry research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: npx tsx scripts/research-lab-regime-native-entry-v1.ts
+      - name: Run stability consensus rotation V2 research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: npx tsx scripts/research-lab-stability-consensus-rotation-v2.ts
+      - name: Run multi-horizon regime rotation V3 research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: npx tsx scripts/research-lab-multi-horizon-rotation-v3.ts
+      - name: Run parameter-bagged rotation V4 research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_parameter_bagged_rotation_v4.py
+      - name: Run precomputed multi-regime V6 research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_precomputed_multi_regime_v6.py
+      - name: Run fixed V6 robustness audit V7
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_fixed_candidate_robustness_v7.py
+      - name: Run hysteresis execution V8
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_hysteresis_execution_v8.py
+      - name: Run cross-sectional market-neutral V10
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_cross_sectional_market_neutral_v10.py
+      - name: Run cost-aware conviction execution V13
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_cost_aware_conviction_execution_v13.py
+      - name: Run selective rotation gate V14
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_selective_rotation_gate_v14.py
+      - name: Run consensus gross governor V15
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_consensus_gross_governor_v15.py
+      - name: Run persistent challenger rotation V16
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_persistent_challenger_rotation_v16.py
+      - name: Upload optimization evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: win80-profit-optimization-v1
+          path: |
+            .research-state/win80-profit-optimization-v1.json
+            .research-state/win80-profit-optimization-v1.md
+            .research-state/win80-regime-router-v1.json
+            .research-state/win80-regime-router-v1.md
+            .research-state/regime-native-entry-v1.json
+            .research-state/regime-native-entry-v1.md
+            .research-state/stability-consensus-rotation-v2.json
+            .research-state/stability-consensus-rotation-v2.md
+            .research-state/multi-horizon-regime-rotation-v3.json
+            .research-state/multi-horizon-regime-rotation-v3.md
+            .research-state/parameter-bagged-rotation-v4.json
+            .research-state/parameter-bagged-rotation-v4.md
+            .research-state/precomputed-multi-regime-rotation-v6.json
+            .research-state/precomputed-multi-regime-rotation-v6.md
+            .research-state/fixed-v6-robustness-audit-v7.json
+            .research-state/fixed-v6-robustness-audit-v7.md
+            .research-state/hysteresis-execution-stabilized-v8.json
+            .research-state/hysteresis-execution-stabilized-v8.md
+            .research-state/cross-sectional-market-neutral-v10.json
+            .research-state/cross-sectional-market-neutral-v10.md
+            .research-state/cost-aware-conviction-execution-v13.json
+            .research-state/cost-aware-conviction-execution-v13.md
+            .research-state/selective-rotation-gate-v14.json
+            .research-state/selective-rotation-gate-v14.md
+            .research-state/consensus-gross-governor-v15.json
+            .research-state/consensus-gross-governor-v15.md
+            .research-state/persistent-challenger-rotation-v16.json
+            .research-state/persistent-challenger-rotation-v16.md
+          if-no-files-found: warn
+          retention-days: 30

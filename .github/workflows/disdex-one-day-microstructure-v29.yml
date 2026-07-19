@@ -1,0 +1,59 @@
+name: Dis-Dex One-Day Microstructure V29
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_disdex_one_day_microstructure_v29.py"
+      - "research/disdex-one-day-microstructure-v29-trigger.txt"
+      - ".github/workflows/disdex-one-day-microstructure-v29.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_disdex_one_day_microstructure_v29.py"
+      - ".github/workflows/disdex-one-day-microstructure-v29.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-one-day-microstructure-v29-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore cumulative V19 history
+        uses: actions/cache/restore@v4
+        with:
+          path: .research-state/aster-market-intelligence-v19/history
+          key: aster-market-intelligence-v19-${{ github.ref_name }}-v29-${{ github.run_id }}
+          restore-keys: |
+            aster-market-intelligence-v19-${{ github.ref_name }}-
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_disdex_one_day_microstructure_v29.py
+      - name: Run one-day microstructure audit
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_disdex_one_day_microstructure_v29.py
+      - name: Upload V29 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-one-day-microstructure-v29
+          path: |
+            .research-state/disdex-one-day-microstructure-v29.json
+            .research-state/disdex-one-day-microstructure-v29.md
+          if-no-files-found: warn
+          retention-days: 30

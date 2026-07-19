@@ -1,0 +1,72 @@
+name: Frozen V6 Fresh Forward V9
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "research/fresh-forward-v9-trigger.txt"
+      - "scripts/research-lab-prefetch-forward-v9.ts"
+      - "scripts/research_lab_frozen_fresh_forward_v9.py"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "scripts/research_lab_asymmetric_bear_hedge_v5.py"
+      - "scripts/research_lab_precomputed_multi_regime_v6.py"
+      - "scripts/research_lab_fixed_candidate_robustness_v7.py"
+      - "lib/research-lab/perp/**"
+      - ".github/workflows/frozen-fresh-forward-v9.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research-lab-prefetch-forward-v9.ts"
+      - "scripts/research_lab_frozen_fresh_forward_v9.py"
+      - ".github/workflows/frozen-fresh-forward-v9.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frozen-v6-fresh-forward-v9-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  forward:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Restore fresh forward cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: frozen-forward-v9-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript checks
+        run: npm run typecheck
+      - name: Fetch frozen forward data
+        run: npx tsx scripts/research-lab-prefetch-forward-v9.ts
+      - name: Run frozen fresh forward V9
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_frozen_fresh_forward_v9.py
+      - name: Upload fresh forward evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frozen-v6-fresh-forward-v9
+          path: |
+            .research-state/frozen-v6-fresh-forward-v9.json
+            .research-state/frozen-v6-fresh-forward-v9.md
+          if-no-files-found: warn
+          retention-days: 30

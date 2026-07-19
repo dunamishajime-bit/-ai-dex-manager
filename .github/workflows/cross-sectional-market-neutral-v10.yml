@@ -1,0 +1,64 @@
+name: Cross-Sectional Market Neutral V10
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
+      - ".github/workflows/cross-sectional-market-neutral-v10.yml"
+      - "lib/research-lab/perp/**"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
+      - ".github/workflows/cross-sectional-market-neutral-v10.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cross-sectional-market-neutral-v10-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: cross-sectional-v10-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript checks
+        run: npm run typecheck
+      - name: Run cross-sectional market-neutral V10
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_cross_sectional_market_neutral_v10.py
+      - name: Upload V10 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-sectional-market-neutral-v10
+          path: |
+            .research-state/cross-sectional-market-neutral-v10.json
+            .research-state/cross-sectional-market-neutral-v10.md
+          if-no-files-found: warn
+          retention-days: 30

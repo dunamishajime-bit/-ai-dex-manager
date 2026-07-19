@@ -1,0 +1,63 @@
+name: Dis-Dex Adaptive Profit Stack V33
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_adaptive_profit_stack_v33.py"
+      - "scripts/research_lab_asymmetric_return_stack_v32.py"
+      - "scripts/research_lab_feature_combo_v28.py"
+      - "scripts/research_lab_feature_overlay_v27.py"
+      - ".github/workflows/disdex-adaptive-profit-stack-v33.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_adaptive_profit_stack_v33.py"
+      - ".github/workflows/disdex-adaptive-profit-stack-v33.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-adaptive-profit-stack-v33-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore frozen USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_adaptive_profit_stack_v33.py scripts/research_lab_asymmetric_return_stack_v32.py scripts/research_lab_feature_combo_v28.py scripts/research_lab_feature_overlay_v27.py
+      - name: Run adaptive profit stack validation
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_adaptive_profit_stack_v33.py
+      - name: Upload V33 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-adaptive-profit-stack-v33
+          path: |
+            .research-state/disdex-adaptive-profit-stack-v33.json
+            .research-state/disdex-adaptive-profit-stack-v33.md
+          if-no-files-found: warn
+          retention-days: 30

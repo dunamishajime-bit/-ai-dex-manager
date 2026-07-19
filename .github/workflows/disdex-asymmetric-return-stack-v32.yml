@@ -1,0 +1,61 @@
+name: Dis-Dex Asymmetric Return Stack V32
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_asymmetric_return_stack_v32.py"
+      - ".github/workflows/disdex-asymmetric-return-stack-v32.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_asymmetric_return_stack_v32.py"
+      - ".github/workflows/disdex-asymmetric-return-stack-v32.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-asymmetric-return-stack-v32-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore frozen USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: multi-horizon-v3-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_asymmetric_return_stack_v32.py
+      - name: Run asymmetric return stack validation
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+          PYTHONPATH: scripts
+        run: python scripts/research_lab_asymmetric_return_stack_v32.py
+      - name: Upload V32 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-asymmetric-return-stack-v32
+          path: |
+            .research-state/disdex-asymmetric-return-stack-v32.json
+            .research-state/disdex-asymmetric-return-stack-v32.md
+          if-no-files-found: warn
+          retention-days: 30

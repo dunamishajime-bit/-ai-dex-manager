@@ -1,0 +1,66 @@
+name: Funding Carry Market Neutral V11
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_funding_carry_market_neutral_v11.py"
+      - "scripts/research_lab_cross_sectional_market_neutral_v10.py"
+      - ".github/workflows/funding-carry-market-neutral-v11.yml"
+      - "lib/research-lab/perp/**"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_funding_carry_market_neutral_v11.py"
+      - ".github/workflows/funding-carry-market-neutral-v11.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: funding-carry-market-neutral-v11-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: funding-carry-v11-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            cross-sectional-v10-usdm-
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript checks
+        run: npm run typecheck
+      - name: Run funding carry market-neutral V11
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_funding_carry_market_neutral_v11.py
+      - name: Upload V11 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: funding-carry-market-neutral-v11
+          path: |
+            .research-state/funding-carry-market-neutral-v11.json
+            .research-state/funding-carry-market-neutral-v11.md
+          if-no-files-found: warn
+          retention-days: 30
