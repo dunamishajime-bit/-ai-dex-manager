@@ -1,0 +1,54 @@
+name: Dis-Dex PENGU Dual Engine V46 CI
+
+on:
+  push:
+    branches:
+      - feature/pengu-dual-engine-v46
+    paths:
+      - config/disdexV46Runtime.ts
+      - lib/pengu-dual-engine-v46.ts
+      - lib/disdex-v46-*.ts
+      - scripts/disdex-v46-*.ts
+      - tsconfig.v46-runner.json
+      - package.json
+      - .github/workflows/disdex-pengu-v46-ci.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - config/disdexV46Runtime.ts
+      - lib/pengu-dual-engine-v46.ts
+      - lib/disdex-v46-*.ts
+      - scripts/disdex-v46-*.ts
+      - tsconfig.v46-runner.json
+      - package.json
+      - .github/workflows/disdex-pengu-v46-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: PENGU V46 self-test
+        run: npm run strategy:disdex-v46:selftest
+      - name: V46 runner typecheck
+        run: npm run strategy:disdex-v46:typecheck
+      - name: Existing V35 runner typecheck
+        run: npm run strategy:disdex-v35:runner:typecheck
+      - name: Existing live runner typecheck
+        run: npm run strategy:live:typecheck
+      - name: Production build
+        run: npm run build
