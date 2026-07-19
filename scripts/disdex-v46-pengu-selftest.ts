@@ -44,6 +44,14 @@ const fundingOverheated = evaluateDisDexPenguV46Decision({
 });
 assert.equal(fundingOverheated.side, 0);
 
+const longBlockedByWeakBtc = evaluateDisDexPenguV46Decision({
+    ...longFeatures,
+    btcCloseAboveSma168: false,
+    btcMomentum72hPct: -2.1,
+});
+assert.equal(longBlockedByWeakBtc.side, 0);
+assert.equal(longBlockedByWeakBtc.longEligible, false);
+
 const shortDecision = evaluateDisDexPenguV46Decision({
     ...longFeatures,
     fundingRate: null,
@@ -63,6 +71,7 @@ const shortDecision = evaluateDisDexPenguV46Decision({
 });
 assert.equal(shortDecision.side, -1);
 assert.equal(shortDecision.shortEligible, true);
+assert.equal(shortDecision.longEligible, false);
 
 const shortBlockedByStrongBtc = evaluateDisDexPenguV46Decision({
     ...longFeatures,
@@ -105,6 +114,7 @@ for (let index = 0; index < 240; index += 1) {
 }
 const latest = pengu1h.at(-1)!;
 assert.equal(Math.floor(latest.openTime / HOUR) % 6, 0);
+const signalNow = latest.openTime + HOUR + 1_000;
 const immediateSignal = buildDisDexPenguV46Signal({
     core12h: {
         BTCUSDT: [],
@@ -115,12 +125,46 @@ const immediateSignal = buildDisDexPenguV46Signal({
     btc1h,
     pengu1h,
     penguFunding: [{ fundingTime: latest.closeTime, fundingRate: 0.0002 }],
-}, latest.openTime + HOUR + 1_000);
+}, signalNow);
 assert.equal(immediateSignal.side, 1);
 assert.equal(immediateSignal.entryTs, latest.openTime + HOUR);
 assert.equal(immediateSignal.exitTs, latest.openTime + 25 * HOUR);
+assert.equal(immediateSignal.diagnostics.fundingCoverage, true);
 assert.ok(immediateSignal.features);
 assert.ok(immediateSignal.features!.rsi14 >= 45 && immediateSignal.features!.rsi14 <= 72);
+
+const futureFundingMustNotEnableLong = buildDisDexPenguV46Signal({
+    core12h: {
+        BTCUSDT: [],
+        ETHUSDT: [],
+        BNBUSDT: [],
+        SOLUSDT: [],
+    },
+    btc1h,
+    pengu1h,
+    penguFunding: [{ fundingTime: latest.closeTime + 1, fundingRate: 0.0002 }],
+}, signalNow);
+assert.equal(futureFundingMustNotEnableLong.side, 0);
+assert.equal(futureFundingMustNotEnableLong.diagnostics.fundingCoverage, false);
+
+const incompleteOpenTime = latest.openTime + HOUR;
+const incompleteBtc = candle(incompleteOpenTime, 10_000, 1_000_000);
+const incompletePengu = candle(incompleteOpenTime, 10, 1_000_000);
+const signalWithIncompleteCandle = buildDisDexPenguV46Signal({
+    core12h: {
+        BTCUSDT: [],
+        ETHUSDT: [],
+        BNBUSDT: [],
+        SOLUSDT: [],
+    },
+    btc1h: [...btc1h, incompleteBtc],
+    pengu1h: [...pengu1h, incompletePengu],
+    penguFunding: [{ fundingTime: latest.closeTime, fundingRate: 0.0002 }],
+}, incompleteOpenTime + 30 * 60_000);
+assert.equal(signalWithIncompleteCandle.side, immediateSignal.side);
+assert.equal(signalWithIncompleteCandle.decisionTs, immediateSignal.decisionTs);
+assert.equal(signalWithIncompleteCandle.diagnostics.latestCompletedPenguTs, latest.openTime);
+assert.equal(signalWithIncompleteCandle.diagnostics.latestCompletedBtcTs, btc1h.at(-1)!.openTime);
 
 const now = Date.now();
 const reversal = buildDisDexV35RebalanceActions({
@@ -167,6 +211,9 @@ assert.equal(reversal.actions.length, 1);
 assert.equal(reversal.actions[0].side, "SELL");
 assert.equal(reversal.actions[0].reduceOnly, true);
 assert.equal(reversal.actions[0].targetWeight, -0.15);
+assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.longGross, 0.15);
+assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.shortGross, 0.15);
+assert.equal(DISDEX_V46_RUNTIME.maximumGross, 2);
 assert.equal(DISDEX_V46_RUNTIME.liveTradingEnabled, false);
 assert.equal(DISDEX_V46_RUNTIME.mode, "PAPER");
 
