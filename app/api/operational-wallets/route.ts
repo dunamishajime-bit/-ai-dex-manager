@@ -3,6 +3,7 @@ import { createPublicClient, erc20Abi, formatEther, formatUnits, http } from "vi
 import { bsc } from "viem/chains";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { RECLAIM_HYBRID_EXECUTION_PROFILE } from "@/config/reclaimHybridStrategy";
+import { AsterV3Client } from "@/lib/aster-v3-client";
 import { findUserByEmail, findUserById, upsertUser } from "@/lib/server/user-db";
 import { fetchPricesBatch } from "@/lib/providers/market-providers";
 import { OPERATIONAL_WALLET_TRACKED_ASSETS } from "@/lib/operational-wallet-assets";
@@ -39,6 +40,38 @@ function walletChainName(chainId = 56) {
 
 function isValidAddress(value?: string) {
   return typeof value === "string" && /^0x[a-fA-F0-9]{40}$/.test(value.trim());
+}
+type AsterAccountBalanceSnapshot = { accountBalanceUsd: number; availableBalanceUsd: number };
+function readAsterNumber(value: unknown) {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+async function refreshAsterAccountBalance(): Promise<AsterAccountBalanceSnapshot | null> {
+  const privateKey = process.env.ASTER_API_PRIVATE_KEY?.trim();
+  const userAddress = process.env.ASTER_USER_ADDRESS?.trim();
+  if (!privateKey || !userAddress) return null;
+  const client = new AsterV3Client({
+    baseUrl: process.env.ASTER_FUTURES_BASE_URL || process.env.ASTER_API_BASE_URL,
+    userAddress,
+    privateKey: privateKey as `0x${string}`,
+  });
+  const balances = await client.getBalances();
+  const stableRows = (Array.isArray(balances) ? balances : []).filter((row) => {
+    const asset = String(row.asset || "").toUpperCase();
+    return asset === "USDT" || asset === "USDF" || asset === "USDC";
+  });
+  const accountBalanceUsd = stableRows.reduce(
+    (sum, row) => sum + readAsterNumber(row.balance ?? row.crossWalletBalance),
+    0,
+  );
+  const preferredAvailableRow = stableRows.find((row) => String(row.asset || "").toUpperCase() === "USDT") || stableRows[0];
+  const availableBalanceUsd = readAsterNumber(
+    preferredAvailableRow?.availableBalance ?? preferredAvailableRow?.balance ?? accountBalanceUsd,
+  );
+  return {
+    accountBalanceUsd: Number(accountBalanceUsd.toFixed(8)),
+    availableBalanceUsd: Number(availableBalanceUsd.toFixed(8)),
+  };
 }
 
 function encodeErc20BalanceOf(address: string) {
@@ -196,7 +229,6 @@ async function refreshWalletBalance(wallet: OperationalWalletRecord) {
       ),
       fetchOperationalWalletPrices(),
     ]);
-
     const tokenBalanceBySymbol = new Map<string, bigint>(
       tokenResults.map((entry) => [entry.symbol, entry.balance]),
     );
@@ -228,6 +260,12 @@ async function refreshWalletBalance(wallet: OperationalWalletRecord) {
     const balanceFormatted = formatEther(balanceWei);
     const portfolioUsd = Number(trackedHoldings.reduce((sum, holding) => sum + holding.usdValue, 0).toFixed(6));
     const hasDepositedBalance = hasOperationalTradeBalance(trackedHoldings);
+    let asterBalance: AsterAccountBalanceSnapshot | null = null;
+    try {
+      asterBalance = await refreshAsterAccountBalance();
+    } catch (error) {
+      console.warn("Failed to refresh Aster account balance for HP:", error);
+    }
 
     const nextStatus: OperationalWalletStatus = hasDepositedBalance ? "running" : "awaiting_deposit";
 
@@ -235,6 +273,11 @@ async function refreshWalletBalance(wallet: OperationalWalletRecord) {
       ...wallet,
       lastBalanceWei: balanceWei.toString(),
       lastBalanceFormatted: balanceFormatted,
+      ...(asterBalance ? {
+        lastAsterAccountBalanceUsd: asterBalance.accountBalanceUsd,
+        lastAsterAvailableBalanceUsd: asterBalance.availableBalanceUsd,
+        lastAsterBalanceUpdatedAt: new Date().toISOString(),
+      } : {}),
       lastPortfolioUsd: portfolioUsd,
       trackedHoldings,
       depositDetectedAt:

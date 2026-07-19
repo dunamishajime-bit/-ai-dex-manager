@@ -38,6 +38,9 @@ export type OperationalWalletRecord = {
   depositDetectedAt?: string;
   lastBalanceWei?: string;
   lastBalanceFormatted?: string;
+  lastAsterAccountBalanceUsd?: number;
+  lastAsterAvailableBalanceUsd?: number;
+  lastAsterBalanceUpdatedAt?: string;
   lastPortfolioUsd?: number;
   trackedHoldings?: OperationalWalletHolding[];
   deletedAt?: string;

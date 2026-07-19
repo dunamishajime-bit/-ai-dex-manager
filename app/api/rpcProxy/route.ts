@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
+const RPC_PROXY_TIMEOUT_MS = 10_000;
+
+function upstreamLabel(target: string) {
+    try {
+        return new URL(target).host;
+    } catch {
+        return "unknown-upstream";
+    }
+}
+
+function logUpstreamUnavailable(method: "GET" | "POST", target: string, error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.info(`[RPC Proxy ${method}] Upstream unavailable host=${upstreamLabel(target)} reason=${message}`);
+}
+
 export async function GET(req: NextRequest) {
     const { searchParams } = req.nextUrl;
     const target = searchParams.get("target");
@@ -23,11 +38,12 @@ export async function GET(req: NextRequest) {
             headers: {
                 "Accept": "application/json",
             },
+            signal: AbortSignal.timeout(RPC_PROXY_TIMEOUT_MS),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`[RPC Proxy GET] Error from ${target}:`, errorText);
+            console.info(`[RPC Proxy GET] Upstream returned status=${response.status} host=${upstreamLabel(target)}`);
             return NextResponse.json(
                 { error: `Target API error: ${response.status}`, details: errorText },
                 { status: response.status }
@@ -37,7 +53,7 @@ export async function GET(req: NextRequest) {
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error: any) {
-        console.error("[RPC Proxy GET] Unexpected Error:", error);
+        logUpstreamUnavailable("GET", target, error);
         return NextResponse.json(
             { error: "Failed to proxy request", details: error.message },
             { status: 502 }
@@ -63,11 +79,12 @@ export async function POST(req: NextRequest) {
                 "Accept": "application/json",
             },
             body: JSON.stringify(body),
+            signal: AbortSignal.timeout(RPC_PROXY_TIMEOUT_MS),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`[RPC Proxy POST] Error from ${target}:`, errorText);
+            console.info(`[RPC Proxy POST] Upstream returned status=${response.status} host=${upstreamLabel(target)}`);
             return NextResponse.json(
                 { error: `Target RPC error: ${response.status}`, details: errorText },
                 { status: response.status }
@@ -77,7 +94,7 @@ export async function POST(req: NextRequest) {
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error: any) {
-        console.error("[RPC Proxy POST] Unexpected Error:", error);
+        logUpstreamUnavailable("POST", target, error);
         return NextResponse.json(
             { error: "Failed to proxy RPC request", details: error.message },
             { status: 502 }

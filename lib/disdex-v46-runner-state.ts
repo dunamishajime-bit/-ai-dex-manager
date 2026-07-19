@@ -6,7 +6,18 @@ import type {
     DisDexV35RunnerMode,
     DisDexV35RunnerState,
     DisDexV35RunnerStateStore,
-} from "@/lib/disdex-v35-runner-state";
+} from "./disdex-v35-runner-state";
+import type { DisDexV46AccountSnapshot, DisDexV46PositionSnapshot } from "./disdex-v46-live-safety";
+import type { DisDexV46ExecutionRecord } from "./disdex-v46-settlement-analysis";
+
+export type DisDexV46RecoveryStatus = "required" | "in_progress" | "complete" | "manual_review";
+
+export interface DisDexV46RecoveryState {
+    status: DisDexV46RecoveryStatus;
+    startedAt?: number;
+    completedAt?: number;
+    reason?: string;
+}
 
 export interface DisDexV46RunnerState {
     version: 1;
@@ -17,7 +28,14 @@ export interface DisDexV46RunnerState {
     lastSignalReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     pending?: DisDexV35PendingOrder;
+    completedExecutions?: DisDexV46ExecutionRecord[];
     failures: DisDexV35RunnerFailure[];
+    bootstrapRequired: boolean;
+    bootstrapCompletedAt?: number;
+    recovery: DisDexV46RecoveryState;
+    positionsSnapshot: DisDexV46PositionSnapshot[];
+    accountSnapshot?: DisDexV46AccountSnapshot;
+    lastOpenOrderClientOrderIds: string[];
 }
 
 function defaultState(mode: DisDexV35RunnerMode): DisDexV46RunnerState {
@@ -26,13 +44,21 @@ function defaultState(mode: DisDexV35RunnerMode): DisDexV46RunnerState {
         strategyId: "DISDEX_V35_CORE_PLUS_PENGU_DUAL_V46",
         mode,
         updatedAt: Date.now(),
+        completedExecutions: [],
         failures: [],
+        bootstrapRequired: true,
+        recovery: { status: "required", startedAt: Date.now(), reason: "Initial LIVE bootstrap is required." },
+        positionsSnapshot: [],
+        lastOpenOrderClientOrderIds: [],
     };
 }
 
 function normalize(value: unknown, mode: DisDexV35RunnerMode): DisDexV46RunnerState {
     if (!value || typeof value !== "object") return defaultState(mode);
     const raw = value as Partial<DisDexV46RunnerState>;
+    const recovery = raw.recovery && typeof raw.recovery === "object"
+        ? raw.recovery as DisDexV46RecoveryState
+        : { status: "required" as const, reason: "Recovery metadata is missing; manual review is required." };
     return {
         version: 1,
         strategyId: "DISDEX_V35_CORE_PLUS_PENGU_DUAL_V46",
@@ -42,22 +68,30 @@ function normalize(value: unknown, mode: DisDexV35RunnerMode): DisDexV46RunnerSt
         lastSignalReferenceTs: Number.isFinite(Number(raw.lastSignalReferenceTs)) ? Number(raw.lastSignalReferenceTs) : undefined,
         lastCompletedIdempotencyKey: typeof raw.lastCompletedIdempotencyKey === "string" ? raw.lastCompletedIdempotencyKey : undefined,
         pending: raw.pending && typeof raw.pending === "object" ? raw.pending as DisDexV35PendingOrder : undefined,
+        completedExecutions: Array.isArray(raw.completedExecutions)
+            ? raw.completedExecutions.filter((item): item is DisDexV46ExecutionRecord => Boolean(item && typeof item.idempotencyKey === "string" && typeof item.symbol === "string" && item.reduceOnly === true)).slice(-500)
+            : [],
         failures: Array.isArray(raw.failures)
             ? raw.failures.filter((item): item is DisDexV35RunnerFailure => Boolean(item && typeof item.message === "string")).slice(-100)
+            : [],
+        bootstrapRequired: typeof raw.bootstrapRequired === "boolean" ? raw.bootstrapRequired : false,
+        bootstrapCompletedAt: Number.isFinite(Number(raw.bootstrapCompletedAt)) ? Number(raw.bootstrapCompletedAt) : undefined,
+        recovery,
+        positionsSnapshot: Array.isArray(raw.positionsSnapshot) ? raw.positionsSnapshot as DisDexV46PositionSnapshot[] : [],
+        accountSnapshot: raw.accountSnapshot && typeof raw.accountSnapshot === "object" ? raw.accountSnapshot as DisDexV46AccountSnapshot : undefined,
+        lastOpenOrderClientOrderIds: Array.isArray(raw.lastOpenOrderClientOrderIds)
+            ? raw.lastOpenOrderClientOrderIds.filter((item): item is string => typeof item === "string")
             : [],
     };
 }
 
 function toV35Compatible(state: DisDexV46RunnerState): DisDexV35RunnerState {
-    return {
-        ...state,
-        strategyId: "DISDEX_RESILIENT_PROFIT_MAIN_V35",
-    };
+    return { ...state, strategyId: "DISDEX_RESILIENT_PROFIT_MAIN_V35" };
 }
 
 function fromV35Compatible(state: DisDexV35RunnerState): DisDexV46RunnerState {
     return {
-        ...state,
+        ...(state as unknown as DisDexV46RunnerState),
         strategyId: "DISDEX_V35_CORE_PLUS_PENGU_DUAL_V46",
     };
 }
@@ -92,18 +126,15 @@ export class FileDisDexV46RunnerStateStore implements DisDexV46RunnerStateStore 
             strategyId: "DISDEX_V35_CORE_PLUS_PENGU_DUAL_V46",
             mode: this.mode,
             updatedAt: Date.now(),
+            completedExecutions: (state.completedExecutions || []).slice(-500),
             failures: state.failures.slice(-100),
+            lastOpenOrderClientOrderIds: state.lastOpenOrderClientOrderIds || [],
         };
         const temporary = `${this.path}.${process.pid}.${Date.now()}.tmp`;
         await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
         await rename(temporary, this.path);
     }
 
-    /**
-     * The shared order/reconciliation machinery still consumes the V35 state
-     * interface. This adapter changes only the compile-time strategy literal;
-     * the file on disk is always normalized back to the V46 composite ID.
-     */
     asV35CompatibleStore(): DisDexV35RunnerStateStore {
         return {
             load: async () => toV35Compatible(await this.load()),
