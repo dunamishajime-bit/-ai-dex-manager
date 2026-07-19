@@ -59,9 +59,13 @@ function mean(values: number[]) {
     return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
 
-function cleanRows(rows: DisDexV35Candle[]) {
+function cleanRows(rows: DisDexV35Candle[], now: number) {
     return [...rows]
-        .filter((row) => row.openTime > 0 && row.closeTime > row.openTime && row.close > 0 && row.volume >= 0)
+        .filter((row) => row.openTime > 0
+            && row.closeTime > row.openTime
+            && row.closeTime < now
+            && row.close > 0
+            && row.volume >= 0)
         .sort((left, right) => left.openTime - right.openTime)
         .filter((row, index, source) => index === 0 || row.openTime !== source[index - 1].openTime);
 }
@@ -214,14 +218,21 @@ export function buildDisDexPenguV46Signal(
     now = Date.now(),
 ): DisDexPenguV46Signal {
     const config = DISDEX_PENGU_DUAL_ENGINE_V46;
-    const pengu = cleanRows(history.pengu1h);
-    const btc = cleanRows(history.btc1h);
+    // The provider already supplies completed candles, but the signal layer repeats
+    // the guard so alternate callers cannot accidentally introduce an open candle.
+    const pengu = cleanRows(history.pengu1h, now);
+    const btc = cleanRows(history.btc1h, now);
     const funding = [...history.penguFunding]
         .filter((point) => point.fundingTime > 0 && Number.isFinite(point.fundingRate))
         .sort((left, right) => left.fundingTime - right.fundingTime);
     const penguIndexes = new Map(pengu.map((row, index) => [row.openTime, index]));
     const btcIndexes = new Map(btc.map((row, index) => [row.openTime, index]));
     const common = [...penguIndexes.keys()].filter((ts) => btcIndexes.has(ts)).sort((a, b) => a - b);
+    const latestPengu = pengu.at(-1);
+    const latestBtc = btc.at(-1);
+    const latestFundingCoverage = latestPengu
+        ? latestFunding(funding, latestPengu.closeTime) !== null
+        : false;
     let active: DisDexPenguV46Signal | undefined;
     let evaluatedDecisionBars = 0;
     let nextFreeTs = 0;
@@ -237,8 +248,7 @@ export function buildDisDexPenguV46Signal(
         const decision = evaluateDisDexPenguV46Decision(features);
         if (decision.side === 0) continue;
         // The signal becomes actionable immediately after the completed decision
-        // candle closes. Waiting for the next candle to complete adds an unintended
-        // one-hour delay versus the backtest's next-open execution convention.
+        // candle closes, matching the backtest's next-open execution convention.
         const entryTs = pengu[penguIndex].openTime + HOUR;
         const exitTs = entryTs + config.holdHours * HOUR;
         nextFreeTs = exitTs;
@@ -254,9 +264,9 @@ export function buildDisDexPenguV46Signal(
                 features,
                 diagnostics: {
                     evaluatedDecisionBars,
-                    fundingCoverage: funding.length > 0,
-                    latestCompletedPenguTs: pengu.at(-1)?.openTime,
-                    latestCompletedBtcTs: btc.at(-1)?.openTime,
+                    fundingCoverage: features.fundingRate !== null,
+                    latestCompletedPenguTs: latestPengu?.openTime,
+                    latestCompletedBtcTs: latestBtc?.openTime,
                 },
             };
         }
@@ -269,9 +279,9 @@ export function buildDisDexPenguV46Signal(
         reason: "PENGU V46 has no active 24-hour position window.",
         diagnostics: {
             evaluatedDecisionBars,
-            fundingCoverage: funding.length > 0,
-            latestCompletedPenguTs: pengu.at(-1)?.openTime,
-            latestCompletedBtcTs: btc.at(-1)?.openTime,
+            fundingCoverage: latestFundingCoverage,
+            latestCompletedPenguTs: latestPengu?.openTime,
+            latestCompletedBtcTs: latestBtc?.openTime,
         },
     };
 }
