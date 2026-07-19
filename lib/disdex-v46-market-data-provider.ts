@@ -13,6 +13,7 @@ interface AsterFundingRateRow {
 export interface DisDexV46MarketDataProviderOptions extends DisDexV35MarketDataProviderOptions {
     fundingLimit?: number;
     fundingCacheTtlMs?: number;
+    fundingBaseUrl?: string;
     fetchImpl?: typeof fetch;
 }
 
@@ -25,16 +26,18 @@ export class DisDexV46AsterMarketDataProvider {
     private readonly core: DisDexV35AsterMarketDataProvider;
     private readonly fundingLimit: number;
     private readonly fundingCacheTtlMs: number;
+    private readonly fundingBaseUrl: string;
     private readonly fetchImpl: typeof fetch;
     private cachedFunding?: { expiresAt: number; points: DisDexPenguFundingPoint[] };
 
     constructor(
-        private readonly client: AsterV3Client,
+        client: AsterV3Client,
         options: DisDexV46MarketDataProviderOptions = {},
     ) {
         this.core = new DisDexV35AsterMarketDataProvider(client, options);
         this.fundingLimit = Math.max(100, Math.min(1000, options.fundingLimit ?? 1000));
         this.fundingCacheTtlMs = Math.max(30_000, options.fundingCacheTtlMs ?? 5 * 60_000);
+        this.fundingBaseUrl = String(options.fundingBaseUrl || "https://fapi.asterdex.com").replace(/\/+$/, "");
         this.fetchImpl = options.fetchImpl ?? fetch;
     }
 
@@ -44,7 +47,7 @@ export class DisDexV46AsterMarketDataProvider {
         const abort = new AbortController();
         const timeout = setTimeout(() => abort.abort(), 10_000);
         try {
-            const url = new URL(`${this.client.baseUrl}/fapi/v3/fundingRate`);
+            const url = new URL(`${this.fundingBaseUrl}/fapi/v1/fundingRate`);
             url.searchParams.set("symbol", "PENGUUSDT");
             url.searchParams.set("limit", String(this.fundingLimit));
             const response = await this.fetchImpl(url, {
