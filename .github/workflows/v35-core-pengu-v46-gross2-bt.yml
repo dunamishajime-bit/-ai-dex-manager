@@ -6,12 +6,14 @@ on:
       - research/v35-pengu-v46-gross2-bt-corebase
     paths:
       - scripts/research_lab_v35_core_pengu_v46_gross2.py
+      - scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
       - .github/workflows/v35-core-pengu-v46-gross2-bt.yml
   pull_request:
     branches:
       - master
     paths:
       - scripts/research_lab_v35_core_pengu_v46_gross2.py
+      - scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
       - .github/workflows/v35-core-pengu-v46-gross2-bt.yml
   workflow_dispatch:
 
@@ -33,13 +35,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_v35_core_pengu_v46_gross2.py
-      - name: Run Gross 2.0 combined backtest
+        run: python -m py_compile scripts/research_lab_v35_core_pengu_v46_gross2.py scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
+      - name: Run corrected Gross 2.0 combined backtest
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_v35_core_pengu_v46_gross2.py 2>&1 | tee .research-state/v35-core-pengu-v46-gross2-bt.log
+          python scripts/research_lab_v35_core_pengu_v46_gross2_v2.py 2>&1 | tee .research-state/v35-core-pengu-v46-gross2-bt.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
