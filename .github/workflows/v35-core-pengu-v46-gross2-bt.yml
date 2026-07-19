@@ -7,6 +7,12 @@ on:
     paths:
       - scripts/research_lab_v35_core_pengu_v46_gross2.py
       - .github/workflows/v35-core-pengu-v46-gross2-bt.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_v35_core_pengu_v46_gross2.py
+      - .github/workflows/v35-core-pengu-v46-gross2-bt.yml
   workflow_dispatch:
 
 permissions:
