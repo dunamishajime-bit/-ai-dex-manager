@@ -7,6 +7,12 @@ on:
     paths:
       - "scripts/research_fetch_x_post_temp.py"
       - ".github/workflows/temp-x-post-fetch.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_fetch_x_post_temp.py"
+      - ".github/workflows/temp-x-post-fetch.yml"
 
 permissions:
   contents: read
