@@ -4,14 +4,14 @@
 
 Update the VPS repository to the promoted Dis-Dex main strategy module `DISDEX_RESILIENT_PROFIT_MAIN_V35` in **shadow-only mode**.
 
-This handoff does not authorize order placement, account changes, leverage changes, process replacement, or stopping the existing A/B-account runners.
+This handoff does not authorize order placement, account changes, leverage changes, process replacement, or stopping any existing production process.
 
 ## Safety boundaries
 
 Do not:
 
 - stop, restart, replace, or reconfigure existing production processes unless a separate explicit instruction identifies the exact process
-- modify `.env`, API keys, wallet addresses, private keys, account assignments, open positions, or orders
+- modify `.env`, API keys, wallet addresses, private keys, account settings, open positions, or orders
 - set `WIN80_RUNNER_MODE=live`
 - set `WIN80_LIVE_EXECUTION_ENABLED=true`
 - set any `MAIN_STRATEGY_REAL_TRADING_ENABLED` value to true
@@ -102,7 +102,7 @@ Report:
 - production build result
 - shadow smoke-test result
 - existing process IDs and commands
-- confirmation that no process, account, `.env`, position, order, or live flag was changed
+- confirmation that no process, account setting, `.env`, position, order, or live flag was changed
 
 ## Later implementation boundary
 
