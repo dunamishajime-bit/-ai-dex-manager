@@ -1,0 +1,59 @@
+name: Dis-Dex V35 Live Runner CI
+
+on:
+  push:
+    branches:
+      - feature/disdex-v35-live-runner
+    paths:
+      - config/disdexV35Runtime.ts
+      - lib/disdex-v35-*.ts
+      - lib/signed-paper-direct-trade-executor.ts
+      - scripts/disdex-v35-live-runner*.ts
+      - tsconfig.v35-runner.json
+      - package.json
+      - .github/workflows/disdex-v35-live-runner-ci.yml
+  pull_request:
+    paths:
+      - config/disdexV35Runtime.ts
+      - lib/disdex-v35-*.ts
+      - lib/signed-paper-direct-trade-executor.ts
+      - scripts/disdex-v35-live-runner*.ts
+      - tsconfig.v35-runner.json
+      - package.json
+      - .github/workflows/disdex-v35-live-runner-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: V35 allocation self-test
+        run: npm run strategy:disdex-v35:selftest
+
+      - name: V35 signal and runner self-test
+        run: npm run strategy:disdex-v35:runner:selftest
+
+      - name: V35 runner typecheck
+        run: npm run strategy:disdex-v35:runner:typecheck
+
+      - name: Existing live runner typecheck
+        run: npm run strategy:live:typecheck
+
+      - name: Production build
+        run: npm run build

@@ -8,10 +8,12 @@ on:
       - research/win80-profit-optimization-v1
     paths:
       - "config/mainStrategy.ts"
+      - "config/disdexV35Runtime.ts"
       - "lib/disdex-resilient-profit-main-v35.ts"
       - "scripts/disdex-resilient-profit-main-v35-selftest.ts"
       - "scripts/disdex-v35-shadow-plan.ts"
       - "research/DISDEX_V35_EVIDENCE.md"
+      - "research/DISDEX_V35_ASTER_REVALIDATION.md"
       - "research/DISDEX_V35_VPS_HANDOFF.md"
       - "research/disdex-v35-shadow-snapshot.example.json"
       - "package.json"
@@ -21,10 +23,12 @@ on:
       - master
     paths:
       - "config/mainStrategy.ts"
+      - "config/disdexV35Runtime.ts"
       - "lib/disdex-resilient-profit-main-v35.ts"
       - "scripts/disdex-resilient-profit-main-v35-selftest.ts"
       - "scripts/disdex-v35-shadow-plan.ts"
       - "research/DISDEX_V35_EVIDENCE.md"
+      - "research/DISDEX_V35_ASTER_REVALIDATION.md"
       - "research/DISDEX_V35_VPS_HANDOFF.md"
       - "research/disdex-v35-shadow-snapshot.example.json"
       - "package.json"
@@ -53,13 +57,14 @@ jobs:
         run: npm ci
       - name: V35 allocation self-test
         run: npm run strategy:disdex-v35:selftest
-      - name: V35 shadow smoke test
+      - name: V35 paper-plan smoke test
         run: |
-          npm run strategy:disdex-v35:shadow -- --input research/disdex-v35-shadow-snapshot.example.json | tee /tmp/disdex-v35-shadow.json
-          grep -q '"activeMainStrategyId": "DISDEX_RESILIENT_PROFIT_MAIN_V35"' /tmp/disdex-v35-shadow.json
-          grep -q '"activeMode": "SHADOW"' /tmp/disdex-v35-shadow.json
-          grep -q '"realTradingEnabled": false' /tmp/disdex-v35-shadow.json
-          grep -q '"orderExecutionAttempted": false' /tmp/disdex-v35-shadow.json
+          npm run strategy:disdex-v35:shadow -- --input research/disdex-v35-shadow-snapshot.example.json | tee /tmp/disdex-v35-plan.json
+          grep -q '"activeMainStrategyId": "DISDEX_RESILIENT_PROFIT_MAIN_V35"' /tmp/disdex-v35-plan.json
+          grep -q '"activeMode": "PAPER"' /tmp/disdex-v35-plan.json
+          grep -q '"realTradingEnabled": false' /tmp/disdex-v35-plan.json
+          grep -q '"orderExecutionAttempted": false' /tmp/disdex-v35-plan.json
+          grep -q '"penguGross": 0' /tmp/disdex-v35-plan.json
       - name: Live-runner typecheck
         run: npm run strategy:live:typecheck
       - name: Production build

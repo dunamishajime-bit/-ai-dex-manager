@@ -1,23 +1,17 @@
 export type DisDexV35Regime = "BULL" | "BEAR" | "FLAT";
 
 export interface DisDexV35FeatureSnapshot {
-    /** BTC close compared with its prior completed 20-day SMA. */
     btcCloseAboveSma20d: boolean;
-    /** BTC return over the prior completed 20 days, in percentage points. */
     btcMomentum20dPct: number;
-    /** BTC return over the prior completed 3 days, in percentage points. */
     btcMomentum3dPct: number;
-    /** BTC return over the prior completed day, in percentage points. */
     btcShock1dPct: number;
-    /** Maximum downside/upside realized-volatility ratio of ETH/BNB/SOL. */
     coreDownsideVolatilitySkew: number;
 }
 
 export interface DisDexV35AllocationInput {
     regime: DisDexV35Regime;
-    /** Gross exposure produced by the frozen V28 core before V35 scaling. */
     coreGross: number;
-    /** Whether the frozen PENGU 72-hour sleeve currently has a signal. */
+    /** Retained for input compatibility; V36/V38 rejected PENGU and it is ignored. */
     penguSignalActive: boolean;
     features: DisDexV35FeatureSnapshot;
 }
@@ -49,44 +43,53 @@ export interface DisDexV35ForwardEvidence {
 export const DISDEX_RESILIENT_PROFIT_MAIN_V35 = {
     id: "DISDEX_RESILIENT_PROFIT_MAIN_V35",
     version: 35,
-    status: "FROZEN_MAIN_SHADOW_CANDIDATE",
+    status: "IMPLEMENTED_PAPER_ONLY_ASTER_REVALIDATION_FAILED",
     coreStrategy: "V28_VWM25_SKEW125",
     coreSymbols: ["BTC", "ETH", "BNB", "SOL"] as const,
-    satelliteStrategy: "PENGU_ADAPTIVE_72H_V2",
+    satelliteStrategy: "PENGU_EXCLUDED_V36_V38",
     satelliteSymbol: "PENGU",
     strongBullMultiplier: 1.4,
     normalBullMultiplier: 1.2,
     brakeMultiplier: 0.35,
     bearMultiplier: 1.0,
-    penguSignalGross: 0.30,
-    penguBrakeGross: 0.15,
+    penguSignalGross: 0,
+    penguBrakeGross: 0,
     grossCap: 2.0,
     strongBullMomentum20dPct: 10,
     brakeShock1dPct: -4,
     brakeSkewRatio: 1.35,
     featureDecisionLagBars12h: 1,
-    shadowOnly: true,
+    shadowOnly: false,
+    paperOnly: true,
     realTradingDefaultEnabled: false,
-    backtestEvidence: {
+    asterRevalidationEvidence: {
+        source: "Aster public 1h OHLCV and funding",
         developmentPeriod: "2023-01-01/2025-12-31",
-        developmentReturnPct: 712.1907,
-        developmentCagrPct: 100.9788,
-        developmentMaxDrawdownPct: -34.2079,
-        developmentMonthlyProfitFactor: 3.6949,
-        developmentSevereReturnPct: 118.1794,
-        developmentSevereMaxDrawdownPct: -54.0194,
-        reused2026H1ReturnPct: 22.0712,
-        reused2026H1SevereReturnPct: 0.5298,
-        reused2026H1SevereMaxDrawdownPct: -15.4185,
-        fullReturnPct: 891.4507,
-        fullCagrPct: 92.7327,
+        developmentReturnPct: 319.3915,
+        developmentCagrPct: 61.2473,
+        developmentMaxDrawdownPct: -31.773,
+        developmentMonthlyProfitFactor: 3.054,
+        developmentSevereReturnPct: 10.1149,
+        developmentSevereMaxDrawdownPct: -49.7769,
+        reused2026H1ReturnPct: 3.0541,
+        reused2026H1SevereReturnPct: -14.4419,
+        reused2026H1SevereMaxDrawdownPct: -24.8182,
+        fullReturnPct: 332.2003,
+        fullCagrPct: 51.9917,
+        robustCandidateFound: false,
+    },
+    rejectedEvidence: {
+        fixedPenguTradesUsedByOldV35: 17,
+        v36StableRuleFound: false,
+        v38FrozenEnsembleFound: false,
+        reason: "Fixed historical PENGU trade timestamps cannot generate future signals and are excluded from production evidence.",
     },
     liveGate: {
         minimumPristineForwardDays: 30,
-        minimumCompletedPenguTrades: 12,
         minimumDataCoveragePct: 95,
         minimumSevereReturnPct: 0,
         maximumSevereDrawdownPct: -25,
+        requiresRobustAsterBacktest: true,
     },
 } as const;
 
@@ -108,7 +111,7 @@ export function resolveDisDexV35Allocation(input: DisDexV35AllocationInput): Dis
     if (input.regime === "BEAR") {
         state = "BEAR";
         coreMultiplier = config.bearMultiplier;
-        reasons.push("Frozen V28 bear hedge remains at 1.0x.");
+        reasons.push("V28 BTC bear hedge remains at 1.0x.");
     } else if (input.regime === "BULL") {
         const strong = features.btcCloseAboveSma20d
             && finite(features.btcMomentum20dPct) >= config.strongBullMomentum20dPct
@@ -133,17 +136,17 @@ export function resolveDisDexV35Allocation(input: DisDexV35AllocationInput): Dis
             reasons.push("Bull regime is valid but does not meet the strong-bull threshold.");
         }
     } else {
-        reasons.push("No frozen core exposure is allowed in a flat regime.");
+        reasons.push("No core exposure is allowed in a flat regime.");
     }
 
+    if (input.penguSignalActive) {
+        reasons.push("PENGU signal ignored: V36 and V38 found no robust reproducible production rule.");
+    }
     const coreGross = nonNegative(input.coreGross) * coreMultiplier;
-    const penguGross = input.penguSignalActive
-        ? state === "BRAKE" ? config.penguBrakeGross : config.penguSignalGross
-        : 0;
-    const rawGross = coreGross + penguGross;
+    const penguGross = 0;
+    const rawGross = coreGross;
     const capScale = rawGross > 0 ? Math.min(1, config.grossCap / rawGross) : 1;
     const finalCoreGross = coreGross * capScale;
-    const finalPenguGross = penguGross * capScale;
 
     return {
         strategyId: config.id,
@@ -154,8 +157,8 @@ export function resolveDisDexV35Allocation(input: DisDexV35AllocationInput): Dis
         rawGross,
         capScale,
         finalCoreGross,
-        finalPenguGross,
-        finalGross: finalCoreGross + finalPenguGross,
+        finalPenguGross: 0,
+        finalGross: finalCoreGross,
         shadowOnly: config.shadowOnly,
         liveEligible: false,
         reasons,
@@ -165,8 +168,8 @@ export function resolveDisDexV35Allocation(input: DisDexV35AllocationInput): Dis
 export function evaluateDisDexV35LiveGate(evidence: DisDexV35ForwardEvidence) {
     const gate = DISDEX_RESILIENT_PROFIT_MAIN_V35.liveGate;
     const checks = {
+        robustAsterBacktest: DISDEX_RESILIENT_PROFIT_MAIN_V35.asterRevalidationEvidence.robustCandidateFound,
         pristineForwardDays: finite(evidence.pristineForwardDays) >= gate.minimumPristineForwardDays,
-        completedPenguTrades: finite(evidence.completedPenguTrades) >= gate.minimumCompletedPenguTrades,
         dataCoverage: finite(evidence.dataCoveragePct) >= gate.minimumDataCoveragePct,
         severeReturn: finite(evidence.severeReturnPct) > gate.minimumSevereReturnPct,
         severeDrawdown: finite(evidence.severeMaxDrawdownPct, -100) >= gate.maximumSevereDrawdownPct,
@@ -175,6 +178,6 @@ export function evaluateDisDexV35LiveGate(evidence: DisDexV35ForwardEvidence) {
         checks,
         passed: Object.values(checks).every(Boolean),
         liveEligible: false as const,
-        reason: "V35 remains shadow-only until a separate reviewed promotion changes the immutable live flag.",
+        reason: "V35 dedicated runner is implemented, but Aster revalidation and PENGU reproducibility gates failed; live execution remains blocked.",
     };
 }
