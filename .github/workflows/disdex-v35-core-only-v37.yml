@@ -7,6 +7,10 @@ on:
     paths:
       - scripts/research_lab_v35_core_only_v37.py
       - .github/workflows/disdex-v35-core-only-v37.yml
+  pull_request:
+    paths:
+      - scripts/research_lab_v35_core_only_v37.py
+      - .github/workflows/disdex-v35-core-only-v37.yml
   workflow_dispatch:
 
 permissions:
@@ -14,7 +18,7 @@ permissions:
 
 env:
   RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
-  V37_TRIGGER: "2026-07-19T14:28:00+09:00"
+  V37_TRIGGER: "2026-07-19T14:30:00+09:00"
 
 jobs:
   research:
