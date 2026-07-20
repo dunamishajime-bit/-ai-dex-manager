@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from dataclasses import asdict
 
 import research_lab_v35_core_pengu_v46_gross2 as core
 
@@ -25,6 +26,7 @@ core.fetch_json = fetch_json_with_retry
 import research_lab_v35_strong_reserved_pengu_v96 as v96
 
 
+v96.asdict = asdict
 _original_reserved_combine = v96.reserved_combine
 
 
