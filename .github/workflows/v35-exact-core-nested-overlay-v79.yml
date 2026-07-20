@@ -6,6 +6,8 @@ on:
       - research/major-core-pengu-balanced-v73
     paths:
       - scripts/research_lab_v35_exact_core_nested_overlay_v79.py
+      - scripts/research_lab_aster_v35_exact_core_v79_runner.py
+      - scripts/research_lab_aster_v35_core_only_v37_runner.py
       - scripts/research_lab_major_core_nested_v73.py
       - scripts/research_lab_parameter_bagged_rotation_v4.py
       - scripts/research_lab_precomputed_multi_regime_v6.py
@@ -19,6 +21,7 @@ on:
       - research/pengu-wave-sleeve-v47
     paths:
       - scripts/research_lab_v35_exact_core_nested_overlay_v79.py
+      - scripts/research_lab_aster_v35_exact_core_v79_runner.py
       - .github/workflows/v35-exact-core-nested-overlay-v79.yml
   workflow_dispatch:
 
@@ -43,6 +46,8 @@ jobs:
         run: |
           python -m py_compile \
             scripts/research_lab_v35_exact_core_nested_overlay_v79.py \
+            scripts/research_lab_aster_v35_exact_core_v79_runner.py \
+            scripts/research_lab_aster_v35_core_only_v37_runner.py \
             scripts/research_lab_major_core_nested_v73.py \
             scripts/research_lab_parameter_bagged_rotation_v4.py \
             scripts/research_lab_precomputed_multi_regime_v6.py \
@@ -55,7 +60,7 @@ jobs:
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_v35_exact_core_nested_overlay_v79.py 2>&1 | tee .research-state/v35-exact-core-nested-overlay-v79.log
+          python scripts/research_lab_aster_v35_exact_core_v79_runner.py 2>&1 | tee .research-state/v35-exact-core-nested-overlay-v79.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
