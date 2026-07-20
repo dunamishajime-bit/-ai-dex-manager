@@ -1,4 +1,4 @@
-name: PENGU V57 Extended Aster Bybit BT
+name: PENGU V57 Binance Archive BT
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v56.py
       - scripts/research_lab_pengu_wave_sleeve_v57.py
       - scripts/research_lab_pengu_v57_extended_bt.py
-      - scripts/research_lab_pengu_v57_extended_bt_v2.py
+      - scripts/research_lab_pengu_v57_extended_bt_v3.py
       - .github/workflows/pengu-v57-extended-bt.yml
   pull_request:
     branches:
@@ -25,7 +25,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v56.py
       - scripts/research_lab_pengu_wave_sleeve_v57.py
       - scripts/research_lab_pengu_v57_extended_bt.py
-      - scripts/research_lab_pengu_v57_extended_bt_v2.py
+      - scripts/research_lab_pengu_v57_extended_bt_v3.py
       - .github/workflows/pengu-v57-extended-bt.yml
   workflow_dispatch:
 
@@ -47,13 +47,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v56.py scripts/research_lab_pengu_wave_sleeve_v57.py scripts/research_lab_pengu_v57_extended_bt.py scripts/research_lab_pengu_v57_extended_bt_v2.py
-      - name: Run fixed Aster Bybit extended backtest
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v56.py scripts/research_lab_pengu_wave_sleeve_v57.py scripts/research_lab_pengu_v57_extended_bt.py scripts/research_lab_pengu_v57_extended_bt_v3.py
+      - name: Run fixed Binance official archive backtest
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_pengu_v57_extended_bt_v2.py 2>&1 | tee .research-state/pengu-v57-extended-bt.log
+          python scripts/research_lab_pengu_v57_extended_bt_v3.py 2>&1 | tee .research-state/pengu-v57-extended-bt.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
