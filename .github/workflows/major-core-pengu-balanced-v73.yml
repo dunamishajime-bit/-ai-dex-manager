@@ -1,4 +1,4 @@
-name: Fixed V35 Risk Validation Plus PENGU Balanced
+name: Confirmed V35 Risk Validation Plus PENGU Balanced
 
 on:
   push:
@@ -6,7 +6,9 @@ on:
       - research/major-core-pengu-balanced-v73
     paths:
       - scripts/research_lab_v35_fixed_signal_nested_risk_v75.py
+      - scripts/research_lab_v35_confirmed_target_nested_risk_v77.py
       - scripts/research_lab_v35_pengu_balanced_v76.py
+      - scripts/research_lab_v35_pengu_balanced_v78.py
       - scripts/research_lab_major_core_nested_v73.py
       - scripts/research_lab_major_pengu_balanced_v74.py
       - scripts/research_lab_parameter_bagged_rotation_v4.py
@@ -37,7 +39,9 @@ on:
       - research/pengu-wave-sleeve-v47
     paths:
       - scripts/research_lab_v35_fixed_signal_nested_risk_v75.py
+      - scripts/research_lab_v35_confirmed_target_nested_risk_v77.py
       - scripts/research_lab_v35_pengu_balanced_v76.py
+      - scripts/research_lab_v35_pengu_balanced_v78.py
       - .github/workflows/major-core-pengu-balanced-v73.yml
       - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
   workflow_dispatch:
@@ -65,7 +69,9 @@ jobs:
         run: |
           python -m py_compile \
             scripts/research_lab_v35_fixed_signal_nested_risk_v75.py \
+            scripts/research_lab_v35_confirmed_target_nested_risk_v77.py \
             scripts/research_lab_v35_pengu_balanced_v76.py \
+            scripts/research_lab_v35_pengu_balanced_v78.py \
             scripts/research_lab_major_core_nested_v73.py \
             scripts/research_lab_major_pengu_balanced_v74.py \
             scripts/research_lab_parameter_bagged_rotation_v4.py \
@@ -90,12 +96,12 @@ jobs:
             scripts/research_lab_pengu_v67_distribution_floor.py \
             scripts/research_lab_pengu_v57_extended_bt_v3.py
 
-      - name: Run fixed V35 signal nested risk validation
+      - name: Run confirmed V35 target nested risk validation
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_v35_fixed_signal_nested_risk_v75.py 2>&1 | tee .research-state/v35-fixed-signal-nested-risk-v75.log
+          python scripts/research_lab_v35_confirmed_target_nested_risk_v77.py 2>&1 | tee .research-state/v35-confirmed-target-nested-risk-v77.log
 
       - name: Reproduce PENGU V57 Long
         shell: bash
@@ -109,22 +115,23 @@ jobs:
           set -o pipefail
           python scripts/research_lab_pengu_v67_distribution_floor.py 2>&1 | tee .research-state/pengu-v67-distribution-floor.log
 
-      - name: Run V35 plus PENGU balanced portfolio
+      - name: Run confirmed V35 plus PENGU balanced portfolio
         shell: bash
         run: |
           set -o pipefail
-          python scripts/research_lab_v35_pengu_balanced_v76.py 2>&1 | tee .research-state/v35-pengu-balanced-v76.log
+          python scripts/research_lab_v35_pengu_balanced_v78.py 2>&1 | tee .research-state/v35-pengu-balanced-v78.log
 
       - name: Upload complete evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v35-fixed-risk-pengu-balanced-v75-v76
+          name: v35-confirmed-risk-pengu-balanced-v77-v78
           path: |
             .research-state/v35-fixed-signal-nested-risk-v75.json
-            .research-state/v35-fixed-signal-nested-risk-v75.md
-            .research-state/v35-fixed-signal-v75-forward-freeze.json
-            .research-state/v35-fixed-signal-nested-risk-v75.log
+            .research-state/v35-confirmed-target-nested-risk-v77.json
+            .research-state/v35-confirmed-target-nested-risk-v77.md
+            .research-state/v35-confirmed-target-v77-forward-freeze.json
+            .research-state/v35-confirmed-target-nested-risk-v77.log
             .research-state/pengu-wave-sleeve-v57.json
             .research-state/pengu-wave-sleeve-v57.md
             .research-state/pengu-wave-sleeve-v57.log
@@ -132,7 +139,8 @@ jobs:
             .research-state/pengu-v67-distribution-floor.md
             .research-state/pengu-v67-distribution-floor.log
             .research-state/v35-pengu-balanced-v76.json
-            .research-state/v35-pengu-balanced-v76.md
-            .research-state/v35-pengu-balanced-v76.log
+            .research-state/v35-pengu-balanced-v78.json
+            .research-state/v35-pengu-balanced-v78.md
+            .research-state/v35-pengu-balanced-v78.log
           if-no-files-found: warn
           retention-days: 30
