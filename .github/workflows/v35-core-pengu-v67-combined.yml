@@ -1,0 +1,47 @@
+name: V35 Core Plus PENGU V67 Combined
+
+on:
+  push:
+    branches:
+      - research/v35-core-pengu-v67-combined
+    paths:
+      - scripts/research_lab_v35_core_pengu_v67_combined.py
+      - .github/workflows/v35-core-pengu-v67-combined.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_parameter_bagged_rotation_v4.py scripts/research_lab_precomputed_multi_regime_v6.py scripts/research_lab_pengu_main_currency_v20.py scripts/research_lab_feature_combo_v28.py scripts/research_lab_asymmetric_return_stack_v32.py scripts/research_lab_resilient_profit_stack_v34.py scripts/research_lab_v35_core_pengu_v46_gross2.py scripts/research_lab_v35_core_pengu_v67_combined.py
+      - name: Run same-timeline combined backtest
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_v35_core_pengu_v67_combined.py 2>&1 | tee .research-state/v35-core-pengu-v67-combined.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v35-core-pengu-v67-combined
+          path: |
+            .research-state/v35-core-pengu-v67-combined.json
+            .research-state/v35-core-pengu-v67-combined.md
+            .research-state/v35-core-pengu-v67-combined.log
+          if-no-files-found: warn
+          retention-days: 30
