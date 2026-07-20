@@ -10,6 +10,7 @@ import research_lab_pengu_wave_sleeve_v47 as v47
 import research_lab_pengu_wave_sleeve_v50 as v50
 
 HOUR = v47.HOUR
+AUDIT_VERSION = 1
 
 
 def prior_boundary(rows: List[dict], index: int, lookback: int, side: int) -> Optional[float]:
@@ -85,6 +86,7 @@ def main() -> None:
                 "window": window,
             })
     result = {
+        "auditVersion": AUDIT_VERSION,
         "generatedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
         "events": events,
         "eventCounts": {"major24": len(major24), "major72": len(major72)},
