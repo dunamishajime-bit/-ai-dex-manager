@@ -5,6 +5,7 @@ on:
     branches:
       - research/v71-dd-v35-growth-v82
     paths:
+      - scripts/research_lab_v71_v35_final_profiles_v94_runner.py
       - .github/workflows/v94-final-isolated.yml
   workflow_dispatch:
 
@@ -28,6 +29,7 @@ jobs:
       - name: Syntax check
         run: |
           python -m py_compile \
+            scripts/research_lab_v71_v35_final_profiles_v94_runner.py \
             scripts/research_lab_v71_v35_final_profiles_v94.py \
             scripts/research_lab_v35_exhaustion_guard_v93.py \
             scripts/research_lab_v35_weight_band_v90.py \
@@ -42,7 +44,7 @@ jobs:
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_v71_v35_final_profiles_v94.py 2>&1 | tee .research-state/v71-v35-final-profiles-v94.log
+          python scripts/research_lab_v71_v35_final_profiles_v94_runner.py 2>&1 | tee .research-state/v71-v35-final-profiles-v94.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
