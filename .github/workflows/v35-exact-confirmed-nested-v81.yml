@@ -1,0 +1,65 @@
+name: V35 Exact Confirmed Nested V81
+
+on:
+  push:
+    branches:
+      - research/major-core-pengu-balanced-v73
+    paths:
+      - scripts/research_lab_v35_exact_core_nested_overlay_v79.py
+      - scripts/research_lab_v35_exact_confirmed_nested_v80.py
+      - scripts/research_lab_v35_exact_confirmed_nested_v81.py
+      - scripts/research_lab_aster_v35_exact_confirmed_v81_runner.py
+      - scripts/research_lab_aster_v35_core_only_v37_runner.py
+      - .github/workflows/v35-exact-confirmed-nested-v81.yml
+  pull_request:
+    branches:
+      - research/pengu-wave-sleeve-v47
+    paths:
+      - scripts/research_lab_v35_exact_confirmed_nested_v81.py
+      - scripts/research_lab_aster_v35_exact_confirmed_v81_runner.py
+      - .github/workflows/v35-exact-confirmed-nested-v81.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: |
+          python -m py_compile \
+            scripts/research_lab_v35_exact_core_nested_overlay_v79.py \
+            scripts/research_lab_v35_exact_confirmed_nested_v80.py \
+            scripts/research_lab_v35_exact_confirmed_nested_v81.py \
+            scripts/research_lab_aster_v35_exact_confirmed_v81_runner.py \
+            scripts/research_lab_aster_v35_core_only_v37_runner.py
+      - name: Run exact confirmed V35 V81
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_aster_v35_exact_confirmed_v81_runner.py 2>&1 | tee .research-state/v35-exact-confirmed-nested-v81.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v35-exact-confirmed-nested-v81
+          path: |
+            .research-state/v35-exact-confirmed-nested-v81.json
+            .research-state/v35-exact-confirmed-nested-v81.md
+            .research-state/v35-exact-confirmed-v81-forward-freeze.json
+            .research-state/v35-exact-confirmed-nested-v81.log
+          if-no-files-found: warn
+          retention-days: 30

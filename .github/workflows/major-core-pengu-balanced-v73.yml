@@ -1,0 +1,146 @@
+name: Confirmed V35 Risk Validation Plus PENGU Balanced
+
+on:
+  push:
+    branches:
+      - research/major-core-pengu-balanced-v73
+    paths:
+      - scripts/research_lab_v35_fixed_signal_nested_risk_v75.py
+      - scripts/research_lab_v35_confirmed_target_nested_risk_v77.py
+      - scripts/research_lab_v35_pengu_balanced_v76.py
+      - scripts/research_lab_v35_pengu_balanced_v78.py
+      - scripts/research_lab_major_core_nested_v73.py
+      - scripts/research_lab_major_pengu_balanced_v74.py
+      - scripts/research_lab_parameter_bagged_rotation_v4.py
+      - scripts/research_lab_precomputed_multi_regime_v6.py
+      - scripts/research_lab_pengu_main_currency_v20.py
+      - scripts/research_lab_feature_combo_v28.py
+      - scripts/research_lab_asymmetric_return_stack_v32.py
+      - scripts/research_lab_resilient_profit_stack_v34.py
+      - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
+      - scripts/research_lab_pengu_wave_sleeve_v50.py
+      - scripts/research_lab_pengu_wave_sleeve_v52.py
+      - scripts/research_lab_pengu_wave_sleeve_v56.py
+      - scripts/research_lab_pengu_wave_sleeve_v57.py
+      - scripts/research_lab_pengu_v60_delayed_exit.py
+      - scripts/research_lab_pengu_v61_confirmed_only.py
+      - scripts/research_lab_pengu_v62_adaptive_sizing.py
+      - scripts/research_lab_pengu_v63_robustness.py
+      - scripts/research_lab_pengu_v64_extended_sizing.py
+      - scripts/research_lab_pengu_v65_conditional_distribution.py
+      - scripts/research_lab_pengu_v66_dual_gate.py
+      - scripts/research_lab_pengu_v67_distribution_floor.py
+      - scripts/research_lab_pengu_v57_extended_bt_v3.py
+      - .github/workflows/major-core-pengu-balanced-v73.yml
+      - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
+  pull_request:
+    branches:
+      - research/pengu-wave-sleeve-v47
+    paths:
+      - scripts/research_lab_v35_fixed_signal_nested_risk_v75.py
+      - scripts/research_lab_v35_confirmed_target_nested_risk_v77.py
+      - scripts/research_lab_v35_pengu_balanced_v76.py
+      - scripts/research_lab_v35_pengu_balanced_v78.py
+      - .github/workflows/major-core-pengu-balanced-v73.yml
+      - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Syntax check
+        run: |
+          python -m py_compile \
+            scripts/research_lab_v35_fixed_signal_nested_risk_v75.py \
+            scripts/research_lab_v35_confirmed_target_nested_risk_v77.py \
+            scripts/research_lab_v35_pengu_balanced_v76.py \
+            scripts/research_lab_v35_pengu_balanced_v78.py \
+            scripts/research_lab_major_core_nested_v73.py \
+            scripts/research_lab_major_pengu_balanced_v74.py \
+            scripts/research_lab_parameter_bagged_rotation_v4.py \
+            scripts/research_lab_precomputed_multi_regime_v6.py \
+            scripts/research_lab_pengu_main_currency_v20.py \
+            scripts/research_lab_feature_combo_v28.py \
+            scripts/research_lab_asymmetric_return_stack_v32.py \
+            scripts/research_lab_resilient_profit_stack_v34.py \
+            scripts/research_lab_pengu_wave_sleeve_v47.py \
+            scripts/research_lab_pengu_wave_sleeve_v49.py \
+            scripts/research_lab_pengu_wave_sleeve_v50.py \
+            scripts/research_lab_pengu_wave_sleeve_v52.py \
+            scripts/research_lab_pengu_wave_sleeve_v56.py \
+            scripts/research_lab_pengu_wave_sleeve_v57.py \
+            scripts/research_lab_pengu_v60_delayed_exit.py \
+            scripts/research_lab_pengu_v61_confirmed_only.py \
+            scripts/research_lab_pengu_v62_adaptive_sizing.py \
+            scripts/research_lab_pengu_v63_robustness.py \
+            scripts/research_lab_pengu_v64_extended_sizing.py \
+            scripts/research_lab_pengu_v65_conditional_distribution.py \
+            scripts/research_lab_pengu_v66_dual_gate.py \
+            scripts/research_lab_pengu_v67_distribution_floor.py \
+            scripts/research_lab_pengu_v57_extended_bt_v3.py
+
+      - name: Run confirmed V35 target nested risk validation
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_v35_confirmed_target_nested_risk_v77.py 2>&1 | tee .research-state/v35-confirmed-target-nested-risk-v77.log
+
+      - name: Reproduce PENGU V57 Long
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_pengu_wave_sleeve_v57.py 2>&1 | tee .research-state/pengu-wave-sleeve-v57.log
+
+      - name: Reproduce PENGU V67 Short
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_pengu_v67_distribution_floor.py 2>&1 | tee .research-state/pengu-v67-distribution-floor.log
+
+      - name: Run confirmed V35 plus PENGU balanced portfolio
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_v35_pengu_balanced_v78.py 2>&1 | tee .research-state/v35-pengu-balanced-v78.log
+
+      - name: Upload complete evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v35-confirmed-risk-pengu-balanced-v77-v78
+          path: |
+            .research-state/v35-fixed-signal-nested-risk-v75.json
+            .research-state/v35-confirmed-target-nested-risk-v77.json
+            .research-state/v35-confirmed-target-nested-risk-v77.md
+            .research-state/v35-confirmed-target-v77-forward-freeze.json
+            .research-state/v35-confirmed-target-nested-risk-v77.log
+            .research-state/pengu-wave-sleeve-v57.json
+            .research-state/pengu-wave-sleeve-v57.md
+            .research-state/pengu-wave-sleeve-v57.log
+            .research-state/pengu-v67-distribution-floor.json
+            .research-state/pengu-v67-distribution-floor.md
+            .research-state/pengu-v67-distribution-floor.log
+            .research-state/v35-pengu-balanced-v76.json
+            .research-state/v35-pengu-balanced-v78.json
+            .research-state/v35-pengu-balanced-v78.md
+            .research-state/v35-pengu-balanced-v78.log
+          if-no-files-found: warn
+          retention-days: 30
