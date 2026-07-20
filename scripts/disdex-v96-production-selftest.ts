@@ -6,6 +6,10 @@ import { normalizeDisDexV96OrderQuantity } from "../lib/disdex-v96-order-quantit
 import { createDisDexV96RunnerState } from "../lib/disdex-v96-runner-state";
 import type { DirectTradeExecutor } from "../lib/direct-trade-executor";
 
+function close(actual: number, expected: number, epsilon = 1e-12) {
+    assert.ok(Math.abs(actual - expected) <= epsilon, `expected ${actual} to be within ${epsilon} of ${expected}`);
+}
+
 assert.equal(DISDEX_V96_STRATEGY_ID, "DISDEX_V35_STRONG_RESERVED_PENGU_V96");
 assert.equal(DISDEX_V96_RUNTIME.liveTradingEnabled, false);
 assert.equal(DISDEX_V96_ALLOCATION.penguTargetGross, 1.15);
@@ -16,23 +20,23 @@ const reserved = allocateDisDexV96ReservedPengu({
     coreWeights: { BTCUSDT: 0.9, ETHUSDT: 0.9 },
     penguSide: 1,
 });
-assert.ok(Math.abs(reserved.coreScale - (1.425 / 1.8)) < 1e-12);
-assert.equal(reserved.penguClip, 0.5);
+close(reserved.coreScale, 1.425 / 1.8);
+close(reserved.penguClip, 0.5);
 assert.ok(reserved.finalGross <= 2 + 1e-12);
 
 const capacityClip = allocateDisDexV96ReservedPengu({
     coreWeights: { BTCUSDT: 1 },
     penguSide: -1,
 });
-assert.ok(Math.abs(capacityClip.penguClip - (1 / 1.15)) < 1e-12);
-assert.ok(Math.abs(capacityClip.targetWeights.PENGUUSDT + 1) < 1e-12);
+close(capacityClip.penguClip, 1 / 1.15);
+close(capacityClip.targetWeights.PENGUUSDT, -1);
 assert.ok(capacityClip.finalGross <= 2 + 1e-12);
 
 const coreOnly = allocateDisDexV96ReservedPengu({
     coreWeights: { BTCUSDT: 1.2, ETHUSDT: 1.2 },
     penguSide: 0,
 });
-assert.ok(Math.abs(coreOnly.finalGross - 2) < 1e-12);
+close(coreOnly.finalGross, 2);
 assert.equal(coreOnly.penguFinalGross, 0);
 
 const blocked = evaluateDisDexV96LiveGates({
@@ -53,13 +57,13 @@ async function main() {
         getMarketQuote: async () => { throw new Error("unused"); },
         normalizeMarketQuantity: async (symbol, requestedQuantity, referencePrice) => ({
             symbol,
-            quantity: Math.floor(requestedQuantity * 10) / 10,
-            quantityText: (Math.floor(requestedQuantity * 10) / 10).toFixed(1),
+            quantity: Math.floor((requestedQuantity * 10) + 1e-9) / 10,
+            quantityText: (Math.floor((requestedQuantity * 10) + 1e-9) / 10).toFixed(1),
             minQuantity: 0.1,
             maxQuantity: 100000,
             stepSize: 0.1,
             minNotional: 5,
-            notional: (Math.floor(requestedQuantity * 10) / 10) * referencePrice,
+            notional: (Math.floor((requestedQuantity * 10) + 1e-9) / 10) * referencePrice,
         }),
         executeMarket: async () => { throw new Error("unused"); },
         reconcileOrder: async () => { throw new Error("unused"); },
@@ -83,8 +87,8 @@ async function main() {
         reduceOnly: false,
     });
     assert.equal(quantity.referencePrice, 10);
-    assert.equal(quantity.requestedQuantity, 10.1);
-    assert.equal(quantity.normalized.quantity, 10.1);
+    close(quantity.requestedQuantity, 10.1);
+    close(quantity.normalized.quantity, 10.1);
     assert.equal(quantity.roundingPolicy, "FLOOR_TO_ASTER_MARKET_STEP");
 
     const state = createDisDexV96RunnerState("paper");
