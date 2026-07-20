@@ -10,6 +10,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v52.py
       - scripts/research_lab_pengu_wave_sleeve_v53.py
+      - scripts/research_lab_pengu_wave_sleeve_v53_fixed.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   pull_request:
     branches:
@@ -20,6 +21,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v52.py
       - scripts/research_lab_pengu_wave_sleeve_v53.py
+      - scripts/research_lab_pengu_wave_sleeve_v53_fixed.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   workflow_dispatch:
 
@@ -41,13 +43,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v53.py
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v53.py scripts/research_lab_pengu_wave_sleeve_v53_fixed.py
       - name: Run V53 ensemble validation
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_pengu_wave_sleeve_v53.py 2>&1 | tee .research-state/pengu-wave-sleeve-v53.log
+          python scripts/research_lab_pengu_wave_sleeve_v53_fixed.py 2>&1 | tee .research-state/pengu-wave-sleeve-v53.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
