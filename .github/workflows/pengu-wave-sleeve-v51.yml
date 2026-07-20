@@ -1,4 +1,4 @@
-name: PENGU Wave Sleeve V56 Research
+name: PENGU Wave Sleeve V57 Fixed Validation
 
 on:
   push:
@@ -10,6 +10,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v52.py
       - scripts/research_lab_pengu_wave_sleeve_v56.py
+      - scripts/research_lab_pengu_wave_sleeve_v57.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   pull_request:
     branches:
@@ -20,6 +21,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v52.py
       - scripts/research_lab_pengu_wave_sleeve_v56.py
+      - scripts/research_lab_pengu_wave_sleeve_v57.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   workflow_dispatch:
 
@@ -32,7 +34,7 @@ env:
 jobs:
   research:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,21 +43,21 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v56.py
-      - name: Run V56 washout scout validation
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v56.py scripts/research_lab_pengu_wave_sleeve_v57.py
+      - name: Run fixed V57 validation
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_pengu_wave_sleeve_v56.py 2>&1 | tee .research-state/pengu-wave-sleeve-v56.log
+          python scripts/research_lab_pengu_wave_sleeve_v57.py 2>&1 | tee .research-state/pengu-wave-sleeve-v57.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pengu-wave-sleeve-v56
+          name: pengu-wave-sleeve-v57
           path: |
-            .research-state/pengu-wave-sleeve-v56.json
-            .research-state/pengu-wave-sleeve-v56.md
-            .research-state/pengu-wave-sleeve-v56.log
+            .research-state/pengu-wave-sleeve-v57.json
+            .research-state/pengu-wave-sleeve-v57.md
+            .research-state/pengu-wave-sleeve-v57.log
           if-no-files-found: warn
           retention-days: 30
