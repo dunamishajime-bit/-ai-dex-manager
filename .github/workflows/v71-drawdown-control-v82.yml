@@ -1,0 +1,65 @@
+name: V71 Drawdown Control V82
+
+on:
+  push:
+    branches:
+      - research/v71-dd-v35-growth-v82
+    paths:
+      - scripts/research_lab_v71_drawdown_control_v82.py
+      - scripts/research_lab_v35_core_pengu_v67_v69_sizing.py
+      - scripts/research_lab_v35_core_pengu_v67_v70_dynamic_cap.py
+      - scripts/research_lab_v35_core_pengu_v67_combined.py
+      - scripts/research_lab_v35_core_pengu_v67_combined_v2.py
+      - scripts/research_lab_v35_core_pengu_v46_gross2.py
+      - .github/workflows/v71-drawdown-control-v82.yml
+  pull_request:
+    branches:
+      - research/major-core-pengu-balanced-v73
+    paths:
+      - scripts/research_lab_v71_drawdown_control_v82.py
+      - .github/workflows/v71-drawdown-control-v82.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: |
+          python -m py_compile \
+            scripts/research_lab_v71_drawdown_control_v82.py \
+            scripts/research_lab_v35_core_pengu_v67_v69_sizing.py \
+            scripts/research_lab_v35_core_pengu_v67_v70_dynamic_cap.py \
+            scripts/research_lab_v35_core_pengu_v67_combined.py \
+            scripts/research_lab_v35_core_pengu_v67_combined_v2.py \
+            scripts/research_lab_v35_core_pengu_v46_gross2.py
+      - name: Run V71 drawdown control research
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_v71_drawdown_control_v82.py 2>&1 | tee .research-state/v71-drawdown-control-v82.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v71-drawdown-control-v82
+          path: |
+            .research-state/v71-drawdown-control-v82.json
+            .research-state/v71-drawdown-control-v82.md
+            .research-state/v71-drawdown-control-v82.log
+          if-no-files-found: warn
+          retention-days: 30
