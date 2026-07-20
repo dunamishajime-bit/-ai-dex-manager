@@ -1,0 +1,57 @@
+name: Dis-Dex V96 Production Contract
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - config/disdexV96Runtime.ts
+      - lib/disdex-v96-*.ts
+      - scripts/disdex-v96-*.ts
+      - scripts/install-disdex-v96-systemd.sh
+      - docs/DISDEX_V96_PRODUCTION_HANDOFF.md
+      - tsconfig.v96-runner.json
+      - package.json
+      - .github/workflows/disdex-v96-production-contract-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: V96 production self-test
+        run: npm run strategy:disdex-v96:selftest
+      - name: V96 TypeScript boundary
+        run: npm run strategy:disdex-v96:typecheck
+      - name: Existing V46 validation
+        run: |
+          npm run strategy:disdex-v46:selftest
+          npm run strategy:disdex-v46:typecheck
+      - name: Existing V35 runner typecheck
+        run: npm run strategy:disdex-v35:runner:typecheck
+      - name: Fail-closed policy audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'strategyId: DISDEX_V96_STRATEGY_ID' config/disdexV96Runtime.ts
+          grep -q 'mode: "PAPER"' config/disdexV96Runtime.ts
+          grep -q 'liveTradingEnabled: false' config/disdexV96Runtime.ts
+          grep -q 'Forward Evidence and execution-parity approval are incomplete' config/disdexV96Runtime.ts
+          grep -q 'V96 repository liveTradingEnabled is false' scripts/install-disdex-v96-systemd.sh
+          grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_NOT_YET_PORTED_TO_TYPESCRIPT' config/disdexV96Runtime.ts
+          grep -q 'Production/LIVE/VPS/orders' docs/DISDEX_V96_PRODUCTION_HANDOFF.md || true
+      - name: Shell syntax
+        run: bash -n scripts/install-disdex-v96-systemd.sh
