@@ -1,0 +1,57 @@
+name: V96 Reserved PENGU Isolated
+
+on:
+  pull_request:
+    branches:
+      - research/v71-dd-v35-growth-v82
+    paths:
+      - scripts/research_lab_v35_strong_reserved_pengu_v96.py
+      - scripts/research_lab_v35_strong_reserved_pengu_v96_runner.py
+      - .github/workflows/v96-isolated.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: |
+          python -m py_compile \
+            scripts/research_lab_v35_strong_reserved_pengu_v96_runner.py \
+            scripts/research_lab_v35_strong_reserved_pengu_v96.py \
+            scripts/research_lab_v35_weight_band_strong_v95.py \
+            scripts/research_lab_v35_weight_band_v90.py \
+            scripts/research_lab_v35_turnover_stabilizer_v89.py \
+            scripts/research_lab_v35_strong_growth_v86.py \
+            scripts/research_lab_v35_core_pengu_v67_v69_sizing.py \
+            scripts/research_lab_v35_core_pengu_v67_combined_v2.py
+      - name: Run isolated V96 reserved-PENGU comparison
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_v35_strong_reserved_pengu_v96_runner.py 2>&1 | tee .research-state/v35-strong-reserved-pengu-v96.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v35-strong-reserved-pengu-v96
+          path: |
+            .research-state/v35-strong-reserved-pengu-v96.json
+            .research-state/v35-strong-reserved-pengu-v96.md
+            .research-state/v35-strong-reserved-pengu-v96.log
+          if-no-files-found: warn
+          retention-days: 30
