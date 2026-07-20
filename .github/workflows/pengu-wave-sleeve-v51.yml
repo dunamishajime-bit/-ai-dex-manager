@@ -9,6 +9,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v49.py
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v51.py
+      - scripts/research_lab_pengu_wave_feature_audit.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   pull_request:
     branches:
@@ -18,6 +19,7 @@ on:
       - scripts/research_lab_pengu_wave_sleeve_v49.py
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v51.py
+      - scripts/research_lab_pengu_wave_feature_audit.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   workflow_dispatch:
 
@@ -28,6 +30,36 @@ env:
   RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
 
 jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check audit
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_feature_audit.py
+      - name: Run feature audit
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_pengu_wave_feature_audit.py 2>&1 | tee .research-state/pengu-wave-feature-audit.log
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-wave-feature-audit
+          path: |
+            .research-state/pengu-wave-feature-audit.json
+            .research-state/pengu-wave-feature-audit.md
+            .research-state/pengu-wave-feature-audit.log
+          if-no-files-found: warn
+          retention-days: 30
+
   research:
     runs-on: ubuntu-latest
     timeout-minutes: 90
