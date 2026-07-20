@@ -6,6 +6,7 @@ on:
       - research/major-core-pengu-balanced-v73
     paths:
       - scripts/research_lab_major_core_nested_v73.py
+      - scripts/research_lab_major_core_nested_v73b.py
       - scripts/research_lab_major_pengu_balanced_v74.py
       - scripts/research_lab_pengu_wave_sleeve_v47.py
       - scripts/research_lab_pengu_wave_sleeve_v49.py
@@ -29,6 +30,7 @@ on:
       - research/pengu-wave-sleeve-v47
     paths:
       - scripts/research_lab_major_core_nested_v73.py
+      - scripts/research_lab_major_core_nested_v73b.py
       - scripts/research_lab_major_pengu_balanced_v74.py
       - .github/workflows/major-core-pengu-balanced-v73.yml
       - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
@@ -57,6 +59,7 @@ jobs:
         run: |
           python -m py_compile \
             scripts/research_lab_major_core_nested_v73.py \
+            scripts/research_lab_major_core_nested_v73b.py \
             scripts/research_lab_major_pengu_balanced_v74.py \
             scripts/research_lab_pengu_wave_sleeve_v47.py \
             scripts/research_lab_pengu_wave_sleeve_v49.py \
@@ -79,7 +82,7 @@ jobs:
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_major_core_nested_v73.py 2>&1 | tee .research-state/major-core-nested-v73.log
+          python scripts/research_lab_major_core_nested_v73b.py 2>&1 | tee .research-state/major-core-nested-v73.log
 
       - name: Reproduce PENGU V57 Long
         shell: bash
