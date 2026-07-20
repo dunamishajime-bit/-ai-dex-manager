@@ -8,7 +8,7 @@ import research_lab_pengu_v57_extended_bt as common
 import research_lab_pengu_v63_robustness as v63
 import research_lab_pengu_wave_sleeve_v50 as v50
 
-CORRECTION_REVISION = 1
+CORRECTION_REVISION = 2
 _original_venue_result = v63.venue_result
 
 
@@ -35,8 +35,7 @@ v63.venue_result = corrected_venue_result
 def main() -> None:
     v63.main()
     state_dir = Path(os.environ.get("RESEARCH_AUTONOMOUS_STATE_DIR", ".research-state")).resolve()
-    source_json = state_dir / "pengu-v63-robustness.json"
-    payload = json.loads(source_json.read_text(encoding="utf-8"))
+    payload = json.loads((state_dir / "pengu-v63-robustness.json").read_text(encoding="utf-8"))
     payload["version"] = "63b"
     payload["strategyId"] = "PENGU_V63B_FIXED_ROBUSTNESS_CORRECTED"
     payload["correction"] = {
