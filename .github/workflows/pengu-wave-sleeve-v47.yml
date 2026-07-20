@@ -1,4 +1,4 @@
-name: PENGU Wave Sleeve V48 Research
+name: PENGU Wave Sleeve V49 Research
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     paths:
       - scripts/research_lab_pengu_wave_sleeve_v47.py
       - scripts/research_lab_pengu_wave_sleeve_v48.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
       - .github/workflows/pengu-wave-sleeve-v47.yml
   pull_request:
     branches:
@@ -14,6 +15,7 @@ on:
     paths:
       - scripts/research_lab_pengu_wave_sleeve_v47.py
       - scripts/research_lab_pengu_wave_sleeve_v48.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
       - .github/workflows/pengu-wave-sleeve-v47.yml
   workflow_dispatch:
 
@@ -35,21 +37,21 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v48.py
-      - name: Run V48 walk-forward research
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v48.py scripts/research_lab_pengu_wave_sleeve_v49.py
+      - name: Run V49 probe-add validation
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_pengu_wave_sleeve_v48.py 2>&1 | tee .research-state/pengu-wave-sleeve-v48.log
+          python scripts/research_lab_pengu_wave_sleeve_v49.py 2>&1 | tee .research-state/pengu-wave-sleeve-v49.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pengu-wave-sleeve-v48
+          name: pengu-wave-sleeve-v49
           path: |
-            .research-state/pengu-wave-sleeve-v48.json
-            .research-state/pengu-wave-sleeve-v48.md
-            .research-state/pengu-wave-sleeve-v48.log
+            .research-state/pengu-wave-sleeve-v49.json
+            .research-state/pengu-wave-sleeve-v49.md
+            .research-state/pengu-wave-sleeve-v49.log
           if-no-files-found: warn
           retention-days: 30
