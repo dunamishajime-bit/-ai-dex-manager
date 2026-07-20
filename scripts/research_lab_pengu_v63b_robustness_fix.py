@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import asdict
 from pathlib import Path
 
 import research_lab_pengu_v57_extended_bt as common
 import research_lab_pengu_v63_robustness as v63
 import research_lab_pengu_wave_sleeve_v50 as v50
 
-
+CORRECTION_REVISION = 1
 _original_venue_result = v63.venue_result
 
 
@@ -37,11 +36,11 @@ def main() -> None:
     v63.main()
     state_dir = Path(os.environ.get("RESEARCH_AUTONOMOUS_STATE_DIR", ".research-state")).resolve()
     source_json = state_dir / "pengu-v63-robustness.json"
-    source_md = state_dir / "pengu-v63-robustness.md"
     payload = json.loads(source_json.read_text(encoding="utf-8"))
     payload["version"] = "63b"
     payload["strategyId"] = "PENGU_V63B_FIXED_ROBUSTNESS_CORRECTED"
     payload["correction"] = {
+        "revision": CORRECTION_REVISION,
         "issue": "Large-wave-excluded cost stress previously recalculated zeroed profitable trades from gross PnL.",
         "fix": "Apply stressed transaction costs first, then zero positive returns overlapping same-direction major wave events.",
         "unaffected": [
