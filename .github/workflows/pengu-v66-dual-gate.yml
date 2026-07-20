@@ -7,6 +7,12 @@ on:
     paths:
       - scripts/research_lab_pengu_v66_dual_gate.py
       - .github/workflows/pengu-v66-dual-gate.yml
+  pull_request:
+    branches:
+      - research/pengu-wave-sleeve-v47
+    paths:
+      - scripts/research_lab_pengu_v66_dual_gate.py
+      - .github/workflows/pengu-v66-dual-gate.yml
   workflow_dispatch:
 
 permissions:
