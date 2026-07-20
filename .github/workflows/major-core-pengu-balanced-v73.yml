@@ -26,7 +26,7 @@ on:
       - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
   pull_request:
     branches:
-      - master
+      - research/pengu-wave-sleeve-v47
     paths:
       - scripts/research_lab_major_core_nested_v73.py
       - scripts/research_lab_major_pengu_balanced_v74.py
