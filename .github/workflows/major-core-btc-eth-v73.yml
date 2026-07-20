@@ -7,6 +7,13 @@ on:
     paths:
       - scripts/research_lab_major_core_btc_eth_v73.py
       - .github/workflows/major-core-btc-eth-v73.yml
+  pull_request:
+    branches:
+      - research/v67-freeze-major-core-stability
+    paths:
+      - research/V73_TRIGGER.txt
+      - scripts/research_lab_major_core_btc_eth_v73.py
+      - .github/workflows/major-core-btc-eth-v73.yml
   workflow_dispatch:
 
 permissions:
