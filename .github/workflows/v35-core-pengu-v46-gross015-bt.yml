@@ -1,4 +1,4 @@
-name: V35 Core Plus PENGU V46 Gross015 BT
+name: V35 Core Plus PENGU V46 PR42 Gross015 BT
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - scripts/research_lab_v35_core_pengu_v46_gross2.py
       - scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
       - scripts/research_lab_v35_core_pengu_v46_gross015.py
+      - scripts/research_lab_v35_core_pengu_v46_pr42_gross015.py
       - .github/workflows/v35-core-pengu-v46-gross015-bt.yml
   pull_request:
     branches:
@@ -16,6 +17,7 @@ on:
       - scripts/research_lab_v35_core_pengu_v46_gross2.py
       - scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
       - scripts/research_lab_v35_core_pengu_v46_gross015.py
+      - scripts/research_lab_v35_core_pengu_v46_pr42_gross015.py
       - .github/workflows/v35-core-pengu-v46-gross015-bt.yml
   workflow_dispatch:
 
@@ -37,21 +39,21 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_v35_core_pengu_v46_gross2.py scripts/research_lab_v35_core_pengu_v46_gross2_v2.py scripts/research_lab_v35_core_pengu_v46_gross015.py
-      - name: Run exact Gross 0.15 combined backtest
+        run: python -m py_compile scripts/research_lab_v35_core_pengu_v46_gross2.py scripts/research_lab_v35_core_pengu_v46_gross2_v2.py scripts/research_lab_v35_core_pengu_v46_pr42_gross015.py
+      - name: Run latest PR42 logic Gross 0.15 backtest
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_v35_core_pengu_v46_gross015.py 2>&1 | tee .research-state/v35-core-pengu-v46-gross015-bt.log
+          python scripts/research_lab_v35_core_pengu_v46_pr42_gross015.py 2>&1 | tee .research-state/v35-core-pengu-v46-pr42-gross015-bt.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v35-core-pengu-v46-gross015-bt
+          name: v35-core-pengu-v46-pr42-gross015-bt
           path: |
-            .research-state/v35-core-pengu-v46-gross015-bt.json
-            .research-state/v35-core-pengu-v46-gross015-bt.md
-            .research-state/v35-core-pengu-v46-gross015-bt.log
+            .research-state/v35-core-pengu-v46-pr42-gross015-bt.json
+            .research-state/v35-core-pengu-v46-pr42-gross015-bt.md
+            .research-state/v35-core-pengu-v46-pr42-gross015-bt.log
           if-no-files-found: warn
           retention-days: 30
