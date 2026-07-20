@@ -1,13 +1,20 @@
-name: Major Core Anti Overfit Plus PENGU Balanced
+name: Fixed V35 Risk Validation Plus PENGU Balanced
 
 on:
   push:
     branches:
       - research/major-core-pengu-balanced-v73
     paths:
+      - scripts/research_lab_v35_fixed_signal_nested_risk_v75.py
+      - scripts/research_lab_v35_pengu_balanced_v76.py
       - scripts/research_lab_major_core_nested_v73.py
-      - scripts/research_lab_major_core_nested_v73b.py
       - scripts/research_lab_major_pengu_balanced_v74.py
+      - scripts/research_lab_parameter_bagged_rotation_v4.py
+      - scripts/research_lab_precomputed_multi_regime_v6.py
+      - scripts/research_lab_pengu_main_currency_v20.py
+      - scripts/research_lab_feature_combo_v28.py
+      - scripts/research_lab_asymmetric_return_stack_v32.py
+      - scripts/research_lab_resilient_profit_stack_v34.py
       - scripts/research_lab_pengu_wave_sleeve_v47.py
       - scripts/research_lab_pengu_wave_sleeve_v49.py
       - scripts/research_lab_pengu_wave_sleeve_v50.py
@@ -29,9 +36,8 @@ on:
     branches:
       - research/pengu-wave-sleeve-v47
     paths:
-      - scripts/research_lab_major_core_nested_v73.py
-      - scripts/research_lab_major_core_nested_v73b.py
-      - scripts/research_lab_major_pengu_balanced_v74.py
+      - scripts/research_lab_v35_fixed_signal_nested_risk_v75.py
+      - scripts/research_lab_v35_pengu_balanced_v76.py
       - .github/workflows/major-core-pengu-balanced-v73.yml
       - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
   workflow_dispatch:
@@ -58,9 +64,16 @@ jobs:
       - name: Syntax check
         run: |
           python -m py_compile \
+            scripts/research_lab_v35_fixed_signal_nested_risk_v75.py \
+            scripts/research_lab_v35_pengu_balanced_v76.py \
             scripts/research_lab_major_core_nested_v73.py \
-            scripts/research_lab_major_core_nested_v73b.py \
             scripts/research_lab_major_pengu_balanced_v74.py \
+            scripts/research_lab_parameter_bagged_rotation_v4.py \
+            scripts/research_lab_precomputed_multi_regime_v6.py \
+            scripts/research_lab_pengu_main_currency_v20.py \
+            scripts/research_lab_feature_combo_v28.py \
+            scripts/research_lab_asymmetric_return_stack_v32.py \
+            scripts/research_lab_resilient_profit_stack_v34.py \
             scripts/research_lab_pengu_wave_sleeve_v47.py \
             scripts/research_lab_pengu_wave_sleeve_v49.py \
             scripts/research_lab_pengu_wave_sleeve_v50.py \
@@ -77,12 +90,12 @@ jobs:
             scripts/research_lab_pengu_v67_distribution_floor.py \
             scripts/research_lab_pengu_v57_extended_bt_v3.py
 
-      - name: Run anti-overfit major core validation
+      - name: Run fixed V35 signal nested risk validation
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_major_core_nested_v73b.py 2>&1 | tee .research-state/major-core-nested-v73.log
+          python scripts/research_lab_v35_fixed_signal_nested_risk_v75.py 2>&1 | tee .research-state/v35-fixed-signal-nested-risk-v75.log
 
       - name: Reproduce PENGU V57 Long
         shell: bash
@@ -96,30 +109,30 @@ jobs:
           set -o pipefail
           python scripts/research_lab_pengu_v67_distribution_floor.py 2>&1 | tee .research-state/pengu-v67-distribution-floor.log
 
-      - name: Run balanced full-period portfolio
+      - name: Run V35 plus PENGU balanced portfolio
         shell: bash
         run: |
           set -o pipefail
-          python scripts/research_lab_major_pengu_balanced_v74.py 2>&1 | tee .research-state/major-pengu-balanced-v74.log
+          python scripts/research_lab_v35_pengu_balanced_v76.py 2>&1 | tee .research-state/v35-pengu-balanced-v76.log
 
       - name: Upload complete evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: major-core-pengu-balanced-v73-v74
+          name: v35-fixed-risk-pengu-balanced-v75-v76
           path: |
-            .research-state/major-core-nested-v73.json
-            .research-state/major-core-nested-v73.md
-            .research-state/major-core-v73-forward-freeze.json
-            .research-state/major-core-nested-v73.log
+            .research-state/v35-fixed-signal-nested-risk-v75.json
+            .research-state/v35-fixed-signal-nested-risk-v75.md
+            .research-state/v35-fixed-signal-v75-forward-freeze.json
+            .research-state/v35-fixed-signal-nested-risk-v75.log
             .research-state/pengu-wave-sleeve-v57.json
             .research-state/pengu-wave-sleeve-v57.md
             .research-state/pengu-wave-sleeve-v57.log
             .research-state/pengu-v67-distribution-floor.json
             .research-state/pengu-v67-distribution-floor.md
             .research-state/pengu-v67-distribution-floor.log
-            .research-state/major-pengu-balanced-v74.json
-            .research-state/major-pengu-balanced-v74.md
-            .research-state/major-pengu-balanced-v74.log
+            .research-state/v35-pengu-balanced-v76.json
+            .research-state/v35-pengu-balanced-v76.md
+            .research-state/v35-pengu-balanced-v76.log
           if-no-files-found: warn
           retention-days: 30
