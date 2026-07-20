@@ -1,0 +1,36 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "config/disdexV35Runtime.ts",
+    "config/disdexV46Runtime.ts",
+    "config/disdexV96Runtime.ts",
+    "lib/aster-v3-client.ts",
+    "lib/direct-trade-executor.ts",
+    "lib/disdex-resilient-profit-main-v35.ts",
+    "lib/disdex-v35-signal-engine.ts",
+    "lib/disdex-v35-market-data-provider.ts",
+    "lib/disdex-v35-portfolio-runner.ts",
+    "lib/disdex-v35-runner-state.ts",
+    "lib/disdex-v46-market-data-provider.ts",
+    "lib/pengu-dual-engine-v46.ts",
+    "lib/live-runner-state.ts",
+    "lib/signed-paper-direct-trade-executor.ts",
+    "lib/disdex-v96-allocation.ts",
+    "lib/disdex-v96-combined-signal.ts",
+    "lib/disdex-v96-live-gates.ts",
+    "lib/disdex-v96-order-quantity.ts",
+    "lib/disdex-v96-portfolio-runner.ts",
+    "lib/disdex-v96-runner-state.ts",
+    "scripts/disdex-v96-live-runner.ts",
+    "scripts/disdex-v96-production-selftest.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "backups",
+    "restoretmp"
+  ]
+}
