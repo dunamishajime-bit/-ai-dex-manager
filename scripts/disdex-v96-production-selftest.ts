@@ -46,7 +46,7 @@ const blocked = evaluateDisDexV96LiveGates({
 });
 assert.equal(blocked.allowed, false);
 assert.ok(blocked.reasons.some((reason) => reason.includes("Forward Evidence")));
-assert.ok(blocked.reasons.some((reason) => reason.includes("execution-parity")));
+assert.ok(blocked.reasons.some((reason) => reason.toLowerCase().includes("execution-parity")));
 assert.ok(blocked.reasons.some((reason) => reason.includes("liveTradingEnabled")));
 
 async function main() {
