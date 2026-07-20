@@ -1,0 +1,122 @@
+name: Major Core Anti Overfit Plus PENGU Balanced
+
+on:
+  push:
+    branches:
+      - research/major-core-pengu-balanced-v73
+    paths:
+      - scripts/research_lab_major_core_nested_v73.py
+      - scripts/research_lab_major_pengu_balanced_v74.py
+      - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
+      - scripts/research_lab_pengu_wave_sleeve_v50.py
+      - scripts/research_lab_pengu_wave_sleeve_v52.py
+      - scripts/research_lab_pengu_wave_sleeve_v56.py
+      - scripts/research_lab_pengu_wave_sleeve_v57.py
+      - scripts/research_lab_pengu_v60_delayed_exit.py
+      - scripts/research_lab_pengu_v61_confirmed_only.py
+      - scripts/research_lab_pengu_v62_adaptive_sizing.py
+      - scripts/research_lab_pengu_v63_robustness.py
+      - scripts/research_lab_pengu_v64_extended_sizing.py
+      - scripts/research_lab_pengu_v65_conditional_distribution.py
+      - scripts/research_lab_pengu_v66_dual_gate.py
+      - scripts/research_lab_pengu_v67_distribution_floor.py
+      - scripts/research_lab_pengu_v57_extended_bt_v3.py
+      - .github/workflows/major-core-pengu-balanced-v73.yml
+      - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_major_core_nested_v73.py
+      - scripts/research_lab_major_pengu_balanced_v74.py
+      - .github/workflows/major-core-pengu-balanced-v73.yml
+      - research/MAJOR_CORE_PENGU_BALANCED_CODEX_HANDOFF.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Syntax check
+        run: |
+          python -m py_compile \
+            scripts/research_lab_major_core_nested_v73.py \
+            scripts/research_lab_major_pengu_balanced_v74.py \
+            scripts/research_lab_pengu_wave_sleeve_v47.py \
+            scripts/research_lab_pengu_wave_sleeve_v49.py \
+            scripts/research_lab_pengu_wave_sleeve_v50.py \
+            scripts/research_lab_pengu_wave_sleeve_v52.py \
+            scripts/research_lab_pengu_wave_sleeve_v56.py \
+            scripts/research_lab_pengu_wave_sleeve_v57.py \
+            scripts/research_lab_pengu_v60_delayed_exit.py \
+            scripts/research_lab_pengu_v61_confirmed_only.py \
+            scripts/research_lab_pengu_v62_adaptive_sizing.py \
+            scripts/research_lab_pengu_v63_robustness.py \
+            scripts/research_lab_pengu_v64_extended_sizing.py \
+            scripts/research_lab_pengu_v65_conditional_distribution.py \
+            scripts/research_lab_pengu_v66_dual_gate.py \
+            scripts/research_lab_pengu_v67_distribution_floor.py \
+            scripts/research_lab_pengu_v57_extended_bt_v3.py
+
+      - name: Run anti-overfit major core validation
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_major_core_nested_v73.py 2>&1 | tee .research-state/major-core-nested-v73.log
+
+      - name: Reproduce PENGU V57 Long
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_pengu_wave_sleeve_v57.py 2>&1 | tee .research-state/pengu-wave-sleeve-v57.log
+
+      - name: Reproduce PENGU V67 Short
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_pengu_v67_distribution_floor.py 2>&1 | tee .research-state/pengu-v67-distribution-floor.log
+
+      - name: Run balanced full-period portfolio
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_major_pengu_balanced_v74.py 2>&1 | tee .research-state/major-pengu-balanced-v74.log
+
+      - name: Upload complete evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: major-core-pengu-balanced-v73-v74
+          path: |
+            .research-state/major-core-nested-v73.json
+            .research-state/major-core-nested-v73.md
+            .research-state/major-core-v73-forward-freeze.json
+            .research-state/major-core-nested-v73.log
+            .research-state/pengu-wave-sleeve-v57.json
+            .research-state/pengu-wave-sleeve-v57.md
+            .research-state/pengu-wave-sleeve-v57.log
+            .research-state/pengu-v67-distribution-floor.json
+            .research-state/pengu-v67-distribution-floor.md
+            .research-state/pengu-v67-distribution-floor.log
+            .research-state/major-pengu-balanced-v74.json
+            .research-state/major-pengu-balanced-v74.md
+            .research-state/major-pengu-balanced-v74.log
+          if-no-files-found: warn
+          retention-days: 30
