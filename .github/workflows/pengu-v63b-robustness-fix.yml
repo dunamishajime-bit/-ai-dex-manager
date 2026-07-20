@@ -1,0 +1,56 @@
+name: PENGU V63b Corrected Robustness
+
+on:
+  push:
+    branches:
+      - research/pengu-wave-sleeve-v47
+    paths:
+      - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
+      - scripts/research_lab_pengu_wave_sleeve_v50.py
+      - scripts/research_lab_pengu_wave_sleeve_v52.py
+      - scripts/research_lab_pengu_v57_extended_bt.py
+      - scripts/research_lab_pengu_v57_extended_bt_v3.py
+      - scripts/research_lab_pengu_v60_delayed_exit.py
+      - scripts/research_lab_pengu_v62_adaptive_sizing.py
+      - scripts/research_lab_pengu_v63_robustness.py
+      - scripts/research_lab_pengu_v63b_robustness_fix.py
+      - .github/workflows/pengu-v63b-robustness-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_v57_extended_bt.py scripts/research_lab_pengu_v57_extended_bt_v3.py scripts/research_lab_pengu_v60_delayed_exit.py scripts/research_lab_pengu_v62_adaptive_sizing.py scripts/research_lab_pengu_v63_robustness.py scripts/research_lab_pengu_v63b_robustness_fix.py
+      - name: Run corrected robustness validation
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_pengu_v63b_robustness_fix.py 2>&1 | tee .research-state/pengu-v63b-robustness.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v63b-robustness
+          path: |
+            .research-state/pengu-v63b-robustness.json
+            .research-state/pengu-v63b-robustness.md
+            .research-state/pengu-v63b-robustness.log
+          if-no-files-found: warn
+          retention-days: 30
