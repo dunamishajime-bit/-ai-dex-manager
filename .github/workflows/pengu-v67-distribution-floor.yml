@@ -14,7 +14,7 @@ permissions:
 
 env:
   RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
-  ISOLATED_PR_RUN: "2"
+  ISOLATED_PR_RUN: "3"
 
 jobs:
   research:
