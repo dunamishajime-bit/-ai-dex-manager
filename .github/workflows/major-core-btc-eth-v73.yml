@@ -1,0 +1,47 @@
+name: Major Core BTC ETH V73
+
+on:
+  push:
+    branches:
+      - research/v67-freeze-major-core-stability
+    paths:
+      - scripts/research_lab_major_core_btc_eth_v73.py
+      - .github/workflows/major-core-btc-eth-v73.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_major_core_btc_eth_v73.py
+      - name: Run constrained BTC ETH nested baseline
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_major_core_btc_eth_v73.py 2>&1 | tee .research-state/major-core-btc-eth-v73.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: major-core-btc-eth-v73
+          path: |
+            .research-state/major-core-btc-eth-v73.json
+            .research-state/major-core-btc-eth-v73.md
+            .research-state/major-core-btc-eth-v73.log
+          if-no-files-found: warn
+          retention-days: 30
