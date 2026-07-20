@@ -1,0 +1,57 @@
+name: PENGU Wave Sleeve V50 Research
+
+on:
+  push:
+    branches:
+      - research/pengu-wave-sleeve-v47
+    paths:
+      - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
+      - scripts/research_lab_pengu_wave_sleeve_v50.py
+      - .github/workflows/pengu-wave-sleeve-v50.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
+      - scripts/research_lab_pengu_wave_sleeve_v50.py
+      - .github/workflows/pengu-wave-sleeve-v50.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py
+      - name: Run V50 separate adaptive validation
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_pengu_wave_sleeve_v50.py 2>&1 | tee .research-state/pengu-wave-sleeve-v50.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-wave-sleeve-v50
+          path: |
+            .research-state/pengu-wave-sleeve-v50.json
+            .research-state/pengu-wave-sleeve-v50.md
+            .research-state/pengu-wave-sleeve-v50.log
+          if-no-files-found: warn
+          retention-days: 30
