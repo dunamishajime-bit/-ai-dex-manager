@@ -18,6 +18,10 @@ import {
 } from "../lib/research-lab/perp/main-strategy-research-program";
 import { attachMainStrategySnapshotReplay } from "../lib/research-lab/perp/main-strategy-snapshot-discussion";
 import {
+  buildMultiAgentResearchCycle,
+  type MultiAgentResearchReport,
+} from "../lib/research-lab/perp/multi-agent-research-pipeline";
+import {
   buildMainStrategySnapshotReplay,
   type MainStrategySnapshotReplayArtifact,
   type MainStrategySnapshotReplayConfig,
@@ -204,6 +208,8 @@ async function main() {
   });
   const previousIndex = cleanup.sanitizedIndex ?? rawPreviousIndex;
   const profile = "attack" as const;
+  const previousDiscussion = await readJson<ResearchDiscussionLog | null>(path.join(stateDir, "latest-discussion.json"), null);
+  const previousMultiAgentReport = await readJson<MultiAgentResearchReport | null>(path.join(stateDir, "multi-agent-research-latest.json"), null);
   const contextCycle = programState.iteration + 1;
   const snapshotArtifact = await buildSnapshotArtifact();
   const programCycle = buildMainStrategyResearchProgramCycle({
@@ -211,7 +217,23 @@ async function main() {
     contextCycle,
     profile,
   });
-  const discussion = attachMainStrategySnapshotReplay(programCycle.discussion, snapshotArtifact);
+  const replayDiscussion = attachMainStrategySnapshotReplay(programCycle.discussion, snapshotArtifact, previousDiscussion);
+  const multiAgentCycle = buildMultiAgentResearchCycle({
+    artifact: snapshotArtifact,
+    cycle: replayDiscussion.cycle,
+    startedAt: replayDiscussion.startedAt,
+    startSequence: replayDiscussion.messages.length + 1,
+    previousDiscussion,
+    previousReport: previousMultiAgentReport,
+  });
+  const discussion: ResearchDiscussionLog = {
+    ...replayDiscussion,
+    messages: [...replayDiscussion.messages, ...multiAgentCycle.messages],
+    summary: `${replayDiscussion.summary} 役割分担BTを実行し、WIN80専門AI・ULTRA90専門AI・統合改善AI・異角度反対検証AIの4候補を同一Snapshotで比較しました。採用候補=${multiAgentCycle.report.selectedCandidateId ?? "なし"}。`,
+    decision: `${replayDiscussion.decision} Multi-agent CIO: ${multiAgentCycle.report.decision}。本番メイン自動昇格は常に禁止です。`,
+    methodology: `${replayDiscussion.methodology} 追加検証: 同じDataset Fingerprint ${snapshotArtifact.fingerprint}に対して、Development 60% / Validation 20% / Holdout 20%の時系列分割を使用。各役割案はEntry前のScore・Confidence・Trigger・RR・Volumeだけをフィルタに使い、Forward Outcomeは評価専用です。手数料・通常Slippage・Stress Slippage込みでPF、期待値、DD、Stressを比較し、PASSでもForward Paperのみとします。`,
+    topStrategyIds: [...replayDiscussion.topStrategyIds, ...multiAgentCycle.report.proposals.map((proposal) => proposal.id)],
+  };
   const nextState = programCycle.nextState;
   const relativePath = discussionRelativePath(discussion);
   const archivedPath = path.join(stateDir, ...relativePath.split("/"));
@@ -230,6 +252,8 @@ async function main() {
   await fs.mkdir(stateDir, { recursive: true });
   await fs.mkdir(path.dirname(archivedPath), { recursive: true });
   await fs.mkdir(path.dirname(discussionIndexPath), { recursive: true });
+  await fs.writeFile(path.join(stateDir, "debate-lineage.json"), JSON.stringify({ version: 1, currentCycle: discussion.cycle, currentDiscussionId: discussion.id, previousCycle: previousDiscussion?.cycle ?? null, previousDiscussionId: previousDiscussion?.id ?? null, previousDecision: previousDiscussion?.decision ?? null, previousTopStrategyIds: previousDiscussion?.topStrategyIds ?? [], currentMessageCount: discussion.messages.length }, null, 2), "utf8");
+  await fs.writeFile(path.join(stateDir, "multi-agent-research-latest.json"), JSON.stringify(multiAgentCycle.report, null, 2), "utf8");
   await fs.writeFile(programStatePath, JSON.stringify(nextState, null, 2), "utf8");
   await fs.writeFile(path.join(stateDir, SNAPSHOT_REPLAY_FILE), JSON.stringify(snapshotArtifact, null, 2), "utf8");
   await fs.writeFile(path.join(stateDir, "active-research-program.json"), JSON.stringify({
@@ -275,6 +299,9 @@ async function main() {
     snapshot_count: snapshotArtifact.snapshotCount,
     snapshot_signals: snapshotArtifact.selectedSignalCount,
     snapshot_fingerprint: snapshotArtifact.fingerprint,
+    multi_agent_decision: multiAgentCycle.report.decision,
+    multi_agent_selected_candidate: multiAgentCycle.report.selectedCandidateId ?? "none",
+    multi_agent_proposals: multiAgentCycle.report.proposals.length,
   });
 
   console.log(

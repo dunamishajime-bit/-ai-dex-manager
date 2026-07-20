@@ -1,0 +1,63 @@
+name: PENGU Wave Sleeve V57 Fixed Validation
+
+on:
+  push:
+    branches:
+      - research/pengu-wave-sleeve-v47
+    paths:
+      - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
+      - scripts/research_lab_pengu_wave_sleeve_v50.py
+      - scripts/research_lab_pengu_wave_sleeve_v52.py
+      - scripts/research_lab_pengu_wave_sleeve_v56.py
+      - scripts/research_lab_pengu_wave_sleeve_v57.py
+      - .github/workflows/pengu-wave-sleeve-v51.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
+      - scripts/research_lab_pengu_wave_sleeve_v50.py
+      - scripts/research_lab_pengu_wave_sleeve_v52.py
+      - scripts/research_lab_pengu_wave_sleeve_v56.py
+      - scripts/research_lab_pengu_wave_sleeve_v57.py
+      - .github/workflows/pengu-wave-sleeve-v51.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v56.py scripts/research_lab_pengu_wave_sleeve_v57.py
+      - name: Run fixed V57 validation
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_pengu_wave_sleeve_v57.py 2>&1 | tee .research-state/pengu-wave-sleeve-v57.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-wave-sleeve-v57
+          path: |
+            .research-state/pengu-wave-sleeve-v57.json
+            .research-state/pengu-wave-sleeve-v57.md
+            .research-state/pengu-wave-sleeve-v57.log
+          if-no-files-found: warn
+          retention-days: 30

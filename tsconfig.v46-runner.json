@@ -10,6 +10,10 @@
     "config/mainStrategy.ts",
     "lib/aster-v3-client.ts",
     "lib/direct-trade-executor.ts",
+    "lib/disdex-v46-account-lock.ts",
+    "lib/disdex-v46-live-execution-safety.ts",
+    "lib/disdex-v46-live-gates.ts",
+    "lib/disdex-v46-live-safety.ts",
     "lib/disdex-resilient-profit-main-v35.ts",
     "lib/disdex-v35-signal-engine.ts",
     "lib/disdex-v35-market-data-provider.ts",
@@ -23,6 +27,8 @@
     "lib/live-runner-state.ts",
     "lib/signed-paper-direct-trade-executor.ts",
     "scripts/disdex-v46-live-runner.ts",
+    "scripts/disdex-v46-live-preflight.ts",
+    "scripts/disdex-v46-live-preflight-selftest.ts",
     "scripts/disdex-v46-pengu-selftest.ts"
   ],
   "exclude": [

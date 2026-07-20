@@ -1,164 +1,38 @@
-import {
-  Activity,
-  Bot,
-  CheckCircle2,
-  FlaskConical,
-  LockKeyhole,
-  RefreshCw,
-  Shield,
-  Target,
-  Trophy,
-  Waves,
-} from "lucide-react";
+import { Activity, CheckCircle2, Clock3, Database, ShieldCheck, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
 
-import LatestDiscussionSummary from "@/components/research-lab/LatestDiscussionSummary";
+import SettlementAnalysisPanel from "@/components/research-lab/SettlementAnalysisPanel";
 import ResearchLabSubnav from "@/components/research-lab/ResearchLabSubnav";
-import { MAIN_STRATEGY_RESEARCH_POLICY } from "@/lib/research-lab/perp/main-strategy-research-policy";
-import { MAIN_STRATEGY_RESEARCH_PROGRAM_ID } from "@/lib/research-lab/perp/main-strategy-research-program";
-import { WIN80_ULTRA90_MAIN_STRATEGY } from "@/lib/win80-ultra90-main-strategy";
+import { CURRENT_DISDEX_STRATEGY } from "@/lib/current-strategy-display";
 
-function StatCard({
-  label,
-  value,
-  note,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  note: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <div className="rounded-[22px] border border-gold-400/16 bg-white/[0.035] p-4">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/70">{label}</span>
-        <Icon className="h-4 w-4 text-gold-100" />
-      </div>
-      <div className="mt-3 text-2xl font-black text-white">{value}</div>
-      <p className="mt-2 text-[11px] leading-5 text-white/68">{note}</p>
-    </div>
-  );
+function StatCard({ label, value, note, icon: Icon }: { label: string; value: string; note: string; icon: React.ComponentType<{ className?: string }> }) {
+  return <div className="rounded-[22px] border border-gold-400/16 bg-white/[0.035] p-4"><div className="flex items-center justify-between gap-3"><span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/70">{label}</span><Icon className="h-4 w-4 text-gold-100" /></div><div className="mt-3 text-xl font-black text-white">{value}</div><p className="mt-2 text-[11px] leading-5 text-white/68">{note}</p></div>;
 }
 
 const PIPELINE = [
-  "現行メインWIN80_ULTRA90_TOP1_V1を唯一の固定親として読み込む",
-  "Score80/90・Confidence・Trigger・RR・Volume・50%/70%を実変数として分解",
-  "毎Cycleは1テーマに絞り、直接子ロジックを最大2件提案",
-  "方向性が近い新ロジックはメインを変更せず独立IDで設計",
-  "Overfit・Tail Risk・Execution Criticが反論",
-  "再現リプレイがない案はREPLAY_REQUIREDのまま維持",
-  "親子BT・凍結Holdout・Forward Paper後にだけ採否判断",
-  "旧deep-c* Championはアーカイブし、主研究へ継承しない",
+  "実約定したreduce-only決済を耐久状態から検知",
+  "Entry／Exit価格・数量・方向・決済理由を紐付け",
+  "決済前の完成済み市場足からMFE／MAEを測定",
+  "利益・損失のどちらでも良かった点／悪かった点を記録",
+  "利益を伸ばせた可能性と具体的な改善仮説を提示",
+  "改善案はBT／OOSで検証し、Liveロジックへ自動変更しない",
 ];
 
 export default function ResearchLabPage() {
-  const strategy = WIN80_ULTRA90_MAIN_STRATEGY;
-  const reference = MAIN_STRATEGY_RESEARCH_POLICY.historicalReference;
-  const cyclesPerDay = 6;
+  return <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.11),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.07),transparent_30%)]" />
+    <div className="relative z-10 space-y-4 p-3 md:p-5">
+      <section className="rounded-[28px] border border-gold-400/18 bg-[linear-gradient(180deg,rgba(17,18,20,0.92),rgba(6,8,12,0.96))] p-5 md:p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/75"><Activity className="h-4 w-4" />AI研究ラボ</div><h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Trade Outcome Research Lab</h1><p className="mt-3 max-w-3xl text-sm leading-7 text-white/76">現在の実売買ロジックで決済された取引を一件ずつ検証し、利益が出た場合も損失が出た場合も、何が良くて何が悪かったか、さらに利益を伸ばせた可能性があったかを分析します。</p></div><div className="flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold text-cyan-100"><Sparkles className="h-4 w-4" />POST_SETTLEMENT_ANALYSIS</div></div></section>
 
-  return (
-    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.11),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.07),transparent_30%)]" />
-      <div className="relative z-10 space-y-4 p-3 md:p-5">
-        <section className="rounded-[28px] border border-gold-400/18 bg-[linear-gradient(180deg,rgba(17,18,20,0.92),rgba(6,8,12,0.96))] p-5 md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/75">
-                <Activity className="h-4 w-4" />
-                DisdexManager V2
-              </div>
-              <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Win80 Direct Main Strategy Research</h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/76">
-                AI研究ラボは、汎用Perpetual Championの継続研究から、現在のメイン
-                <b className="mx-1 text-gold-100">{strategy.id}</b>
-                本体の深掘りへ切り替わりました。旧deep-c*を親にせず、実際のEntry閾値、Top-1、50%分割、70%Rotationを直接議論します。
-              </p>
-            </div>
-            <div className="flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-4 py-2 text-xs font-bold text-sky-100">
-              <Bot className="h-4 w-4" />
-              {MAIN_STRATEGY_RESEARCH_PROGRAM_ID}
-            </div>
-          </div>
-        </section>
+      <section className="rounded-[22px] border border-emerald-400/22 bg-emerald-500/[0.055] p-4 text-sm leading-7 text-emerald-50/82"><div className="flex items-center gap-2 font-bold text-emerald-50"><ShieldCheck className="h-4 w-4" />実売買との境界</div><p className="mt-1">対象は <b>{CURRENT_DISDEX_STRATEGY.name}</b>（最大Gross {CURRENT_DISDEX_STRATEGY.maximumGross.toFixed(1)}）です。分析は研究用の記録であり、APIキー・口座・注文・ポジション・実売買設定を自動変更しません。</p></section>
 
-        <ResearchLabSubnav />
-        <LatestDiscussionSummary />
+      <ResearchLabSubnav />
+      <SettlementAnalysisPanel />
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <StatCard label="Fixed Main" value={strategy.id} note="研究結果による自動置換なし" icon={LockKeyhole} />
-          <StatCard label="Historical Compound" value={`${reference.compoundMonthlyPct.toFixed(2)}%`} note="同一期間調整値・未使用OOSではない" icon={Trophy} />
-          <StatCard label="Historical Trades" value={`${reference.trades}`} note={`勝率 ${reference.winRatePct.toFixed(2)}% / PF ${reference.profitFactor.toFixed(2)}`} icon={Target} />
-          <StatCard label="Research Cycles" value={`${cyclesPerDay}/日`} note="4時間ごとに現行メインを直接研究" icon={RefreshCw} />
-          <StatCard label="Real Trading" value="DISABLED" note="研究・リプレイ・Forward Paperまで" icon={Shield} />
-        </section>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"><StatCard label="Current strategy" value="V35 + PENGU V46" note="AsterDEX実売買の決済を分析" icon={Target} /><StatCard label="Trigger" value="Settlement" note="一定時間ごとではなく決済完了時" icon={Clock3} /><StatCard label="Evidence" value="Fill + candles" note="実約定と完成済み市場足" icon={Database} /><StatCard label="Outcome" value="Profit / Loss" note="プラス・マイナスを同じ基準で評価" icon={TrendingUp} /><StatCard label="Live change" value="禁止" note="改善案は検証後に手動承認" icon={ShieldCheck} /></section>
 
-        <section className="rounded-[24px] border border-sky-400/20 bg-sky-500/[0.055] p-4 md:p-5">
-          <div className="flex items-start gap-3">
-            <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-sky-200" />
-            <div>
-              <h2 className="font-bold text-sky-50">実際に研究するパラメータ</h2>
-              <p className="mt-2 text-sm leading-7 text-sky-50/76">
-                Win80はScore {strategy.win80.minScore}、Confidence {(strategy.win80.minConfidence * 100).toFixed(0)}%、Trigger {(strategy.win80.minTriggerProgress * 100).toFixed(0)}%、RR {strategy.win80.minRr.toFixed(2)}、Volume {strategy.win80.minVolumeRatio.toFixed(2)}。
-                Ultra90はScore {strategy.ultra90.minScore}、Confidence {(strategy.ultra90.minConfidence * 100).toFixed(0)}%、Trigger {(strategy.ultra90.minTriggerProgress * 100).toFixed(0)}%、RR {strategy.ultra90.minRr.toFixed(2)}、Volume {strategy.ultra90.minVolumeRatio.toFixed(2)}です。
-                さらに初回100%、含み益時50%分割、Ultra90時70%移動、最大2通貨を個別に研究します。
-              </p>
-            </div>
-          </div>
-        </section>
+      <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]"><div className="rounded-[24px] border border-gold-400/16 bg-white/[0.035] p-4 md:p-5"><div className="flex items-center gap-2"><Activity className="h-4 w-4 text-gold-100" /><h2 className="font-bold">決済後分析パイプライン</h2></div><div className="mt-4 grid gap-3 md:grid-cols-2">{PIPELINE.map((item, index) => <div key={item} className="flex items-center gap-3 rounded-[18px] border border-white/8 bg-black/20 px-4 py-3"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold-400/24 bg-gold-400/10 text-xs font-black text-gold-50">{index + 1}</div><span className="text-sm font-semibold text-white/86">{item}</span></div>)}</div></div><div className="space-y-4"><div className="rounded-[24px] border border-emerald-400/18 bg-emerald-500/[0.055] p-4 md:p-5"><div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-200" /><h2 className="font-bold text-emerald-50">分析の考え方</h2></div><p className="mt-3 text-sm leading-7 text-emerald-50/75">勝ちでも「もっと伸ばせたか」をMFEと回収率で確認し、負けでも「途中で利益機会があったか」を確認します。反実仮想は証明済みの改善ではなく、次のBT／OOS検証候補として扱います。</p></div><div className="rounded-[24px] border border-rose-400/18 bg-rose-500/[0.055] p-4 md:p-5"><div className="flex items-center gap-2"><TrendingDown className="h-4 w-4 text-rose-200" /><h2 className="font-bold text-rose-50">旧時間駆動研究</h2></div><p className="mt-3 text-sm leading-7 text-rose-50/75">旧Win80／Ultra90の定時研究・旧Championログは現行の決済分析対象から外しました。今後のラボ表示は現行V35＋PENGU V46の決済イベントを基準にします。</p></div></div></section>
 
-        <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-[24px] border border-gold-400/16 bg-white/[0.035] p-4 md:p-5">
-            <div className="flex items-center gap-2">
-              <Waves className="h-4 w-4 text-gold-100" />
-              <h2 className="font-bold">Direct Main Research Pipeline</h2>
-            </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {PIPELINE.map((item, index) => (
-                <div key={item} className="flex items-center gap-3 rounded-[18px] border border-white/8 bg-black/20 px-4 py-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold-400/24 bg-gold-400/10 text-xs font-black text-gold-50">
-                    {index + 1}
-                  </div>
-                  <span className="text-sm font-semibold text-white/86">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-[24px] border border-emerald-400/18 bg-emerald-500/[0.055] p-4 md:p-5">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-200" />
-                <h2 className="font-bold text-emerald-50">採用判断</h2>
-              </div>
-              <p className="mt-3 text-sm leading-7 text-emerald-50/75">
-                議論で良さそうに見えても、再現可能な親子リプレイ、凍結Holdout、コストStress、Forward Paperを通るまでメインへ反映しません。結果がない案は「提案」「REPLAY_REQUIRED」と表示します。
-              </p>
-            </div>
-
-            <div className="rounded-[24px] border border-rose-400/18 bg-rose-500/[0.055] p-4 md:p-5">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-rose-200" />
-                <h2 className="font-bold text-rose-50">旧Champion State</h2>
-              </div>
-              <p className="mt-3 text-sm leading-7 text-rose-50/75">
-                Cycle 7〜12のdeep-c*研究は削除せずアーカイブしますが、現行メイン研究の親・成績・最新表示には使用しません。議論ページでは「旧ログも表示」を選んだ場合だけ確認できます。
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-[24px] border border-white/10 bg-white/[0.025] p-4 md:p-5">
-          <div className="flex items-start gap-3">
-            <Shield className="mt-0.5 h-5 w-5 shrink-0 text-white/55" />
-            <div>
-              <h2 className="font-bold text-white/85">Evidence制限</h2>
-              <p className="mt-2 text-sm leading-7 text-white/60">
-                現在保存されている月利16.81%は歴史参考値です。完全な取引ログと固定StrategyEngineInputリプレイがRepositoryで再現できるまでは、汎用Perpetual GenomeのOOS成績を代用しません。メイン戦略と実売買設定は変更していません。
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
+      <section className="rounded-[24px] border border-white/10 bg-white/[0.025] p-4 md:p-5"><div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-white/55" /><div><h2 className="font-bold text-white/85">Evidenceポリシー</h2><p className="mt-2 text-sm leading-7 text-white/60">手数料・Fundingのincome明細が取得できない場合は概算と明示し、MFE／MAEの足粒度も表示します。分析結果だけで実売買ロジックを変更せず、改善案は別途BT／OOSで再検証します。</p></div></div></section>
+    </div>
+  </main>;
 }

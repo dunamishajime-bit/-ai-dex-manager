@@ -7,6 +7,9 @@ export const DISDEX_PENGU_DUAL_ENGINE_V46 = {
     shortGross: 0.15,
     forwardPromotionGross: 0.30,
     holdHours: 24,
+    confirmationDecisionBars: 2,
+    reentryCooldownHours: 12,
+    minimumRoundTripEdgeBps: 80,
     volumeRecentHours: 12,
     volumeBaseHours: 72,
     volumeFloor: 0.8,
@@ -55,13 +58,14 @@ export const DISDEX_PENGU_DUAL_ENGINE_V46 = {
 
 export const DISDEX_V46_RUNTIME = {
     strategyId: "DISDEX_V35_CORE_PLUS_PENGU_DUAL_V46",
-    mode: "PAPER" as const,
-    liveTradingEnabled: false,
+    mode: "LIVE" as const,
+    liveTradingEnabled: true,
     maximumGross: 2,
     cashReservePct: 2,
     maximumSlippageBps: 35,
     minimumOrderNotionalUsd: 5,
     rebalanceTolerancePct: 1,
-    closeUnmanagedPositions: true,
-    paperOnlyReason: "PENGU V46 passed reused frozen confirmation, but pristine forward Long/Short evidence is not complete.",
+    closeUnmanagedPositions: false,
+    livePromotionBasis: "MANUAL_OPERATOR_OVERRIDE",
+    evidenceNotice: "PENGU V46 pristine forward evidence is incomplete. LIVE execution was enabled by explicit operator approval.",
 } as const;

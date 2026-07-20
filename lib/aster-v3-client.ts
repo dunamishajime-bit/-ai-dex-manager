@@ -422,6 +422,14 @@ export class AsterV3Client {
         });
     }
 
+    getPositionMode() {
+        return this.request<{ dualSidePosition?: boolean | string }>({
+            method: "GET",
+            path: "/fapi/v3/positionSide/dual",
+            signed: true,
+        });
+    }
+
     getOrder(symbol: string, clientOrderId: string) {
         return this.request<AsterOrderResponse>({
             method: "GET",

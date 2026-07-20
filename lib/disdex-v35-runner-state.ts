@@ -1,6 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { AsterOrderSide } from "@/lib/aster-v3-client";
+import type { DisDexV46ExecutionRecord } from "./disdex-v46-settlement-analysis";
 
 export type DisDexV35RunnerMode = "paper" | "live";
 export type DisDexV35PendingPhase = "planned" | "submitted" | "manual_review";
@@ -22,6 +23,7 @@ export interface DisDexV35PendingOrder {
     retryCount: number;
     lastError?: string;
     reason: string;
+    positionBefore?: DisDexV46ExecutionRecord["positionBefore"];
 }
 
 export interface DisDexV35RunnerFailure {
@@ -40,6 +42,7 @@ export interface DisDexV35RunnerState {
     lastSignalReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     pending?: DisDexV35PendingOrder;
+    completedExecutions?: DisDexV46ExecutionRecord[];
     failures: DisDexV35RunnerFailure[];
 }
 
@@ -49,6 +52,7 @@ function defaultState(mode: DisDexV35RunnerMode): DisDexV35RunnerState {
         strategyId: "DISDEX_RESILIENT_PROFIT_MAIN_V35",
         mode,
         updatedAt: Date.now(),
+        completedExecutions: [],
         failures: [],
     };
 }
@@ -65,6 +69,9 @@ function normalize(value: unknown, mode: DisDexV35RunnerMode): DisDexV35RunnerSt
         lastSignalReferenceTs: Number.isFinite(Number(raw.lastSignalReferenceTs)) ? Number(raw.lastSignalReferenceTs) : undefined,
         lastCompletedIdempotencyKey: typeof raw.lastCompletedIdempotencyKey === "string" ? raw.lastCompletedIdempotencyKey : undefined,
         pending: raw.pending && typeof raw.pending === "object" ? raw.pending as DisDexV35PendingOrder : undefined,
+        completedExecutions: Array.isArray(raw.completedExecutions)
+            ? raw.completedExecutions.filter((item): item is DisDexV46ExecutionRecord => Boolean(item && typeof item.idempotencyKey === "string" && typeof item.symbol === "string" && item.reduceOnly === true)).slice(-500)
+            : [],
         failures: Array.isArray(raw.failures)
             ? raw.failures.filter((item): item is DisDexV35RunnerFailure => Boolean(item && typeof item.message === "string")).slice(-100)
             : [],
@@ -101,6 +108,7 @@ export class FileDisDexV35RunnerStateStore implements DisDexV35RunnerStateStore 
             strategyId: "DISDEX_RESILIENT_PROFIT_MAIN_V35",
             mode: this.mode,
             updatedAt: Date.now(),
+            completedExecutions: (state.completedExecutions || []).slice(-500),
             failures: state.failures.slice(-100),
         };
         const temp = `${this.path}.${process.pid}.${Date.now()}.tmp`;
