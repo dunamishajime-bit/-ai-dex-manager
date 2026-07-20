@@ -1,7 +1,7 @@
 name: V35 Core Plus PENGU V67 Combined
 
 on:
-  push:
+  pull_request:
     branches:
       - research/v35-core-pengu-v67-combined
     paths:
