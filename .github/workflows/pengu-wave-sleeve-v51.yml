@@ -1,4 +1,4 @@
-name: PENGU Wave Sleeve V53 Research
+name: PENGU V53 Trade Regime Audit
 
 on:
   push:
@@ -6,22 +6,9 @@ on:
       - research/pengu-wave-sleeve-v47
     paths:
       - scripts/research_lab_pengu_wave_sleeve_v47.py
-      - scripts/research_lab_pengu_wave_sleeve_v49.py
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v52.py
-      - scripts/research_lab_pengu_wave_sleeve_v53.py
-      - scripts/research_lab_pengu_wave_sleeve_v53_fixed.py
-      - .github/workflows/pengu-wave-sleeve-v51.yml
-  pull_request:
-    branches:
-      - master
-    paths:
-      - scripts/research_lab_pengu_wave_sleeve_v47.py
-      - scripts/research_lab_pengu_wave_sleeve_v49.py
-      - scripts/research_lab_pengu_wave_sleeve_v50.py
-      - scripts/research_lab_pengu_wave_sleeve_v52.py
-      - scripts/research_lab_pengu_wave_sleeve_v53.py
-      - scripts/research_lab_pengu_wave_sleeve_v53_fixed.py
+      - scripts/research_lab_pengu_v53_trade_regime_audit.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   workflow_dispatch:
 
@@ -32,9 +19,9 @@ env:
   RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
 
 jobs:
-  research:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,21 +30,22 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v53.py scripts/research_lab_pengu_wave_sleeve_v53_fixed.py
-      - name: Run V53 ensemble validation
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_v53_trade_regime_audit.py
+      - name: Run V53 trade regime audit
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_pengu_wave_sleeve_v53_fixed.py 2>&1 | tee .research-state/pengu-wave-sleeve-v53.log
+          python scripts/research_lab_pengu_v53_trade_regime_audit.py 2>&1 | tee .research-state/pengu-v53-trade-regime-audit.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pengu-wave-sleeve-v53
+          name: pengu-v53-trade-regime-audit
           path: |
-            .research-state/pengu-wave-sleeve-v53.json
-            .research-state/pengu-wave-sleeve-v53.md
-            .research-state/pengu-wave-sleeve-v53.log
+            .research-state/pengu-v53-trade-regime-audit.json
+            .research-state/pengu-v53-trade-regime-audit.csv
+            .research-state/pengu-v53-trade-regime-audit.md
+            .research-state/pengu-v53-trade-regime-audit.log
           if-no-files-found: warn
           retention-days: 30
