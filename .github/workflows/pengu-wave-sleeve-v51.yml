@@ -6,18 +6,22 @@ on:
       - research/pengu-wave-sleeve-v47
     paths:
       - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v52.py
       - scripts/research_lab_pengu_wave_sleeve_v54.py
+      - scripts/research_lab_pengu_wave_sleeve_v54_fixed.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   pull_request:
     branches:
       - master
     paths:
       - scripts/research_lab_pengu_wave_sleeve_v47.py
+      - scripts/research_lab_pengu_wave_sleeve_v49.py
       - scripts/research_lab_pengu_wave_sleeve_v50.py
       - scripts/research_lab_pengu_wave_sleeve_v52.py
       - scripts/research_lab_pengu_wave_sleeve_v54.py
+      - scripts/research_lab_pengu_wave_sleeve_v54_fixed.py
       - .github/workflows/pengu-wave-sleeve-v51.yml
   workflow_dispatch:
 
@@ -39,13 +43,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Syntax check
-        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v54.py
+        run: python -m py_compile scripts/research_lab_pengu_wave_sleeve_v47.py scripts/research_lab_pengu_wave_sleeve_v49.py scripts/research_lab_pengu_wave_sleeve_v50.py scripts/research_lab_pengu_wave_sleeve_v52.py scripts/research_lab_pengu_wave_sleeve_v54.py scripts/research_lab_pengu_wave_sleeve_v54_fixed.py
       - name: Run V54 robust rare scout validation
         shell: bash
         run: |
           mkdir -p .research-state
           set -o pipefail
-          python scripts/research_lab_pengu_wave_sleeve_v54.py 2>&1 | tee .research-state/pengu-wave-sleeve-v54.log
+          python scripts/research_lab_pengu_wave_sleeve_v54_fixed.py 2>&1 | tee .research-state/pengu-wave-sleeve-v54.log
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
