@@ -65,7 +65,7 @@ export function evaluateDisDexV96LiveGates(input: {
     const configFingerprint = disDexV96ConfigFingerprint();
     if (input.runnerMode !== "live") reasons.push("Runner mode is not live.");
     if (!input.environmentLiveExecutionEnabled) reasons.push("DISDEX_V96_LIVE_EXECUTION_ENABLED is not true.");
-    if (DISDEX_V96_RUNTIME.liveTradingEnabled !== true) reasons.push("Production runtime liveTradingEnabled is false.");
+    if (!Boolean(DISDEX_V96_RUNTIME.liveTradingEnabled)) reasons.push("Production runtime liveTradingEnabled is false.");
     if (input.activationAcknowledgement !== "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK") {
         reasons.push("Explicit V96 LIVE activation acknowledgement is missing.");
     }
