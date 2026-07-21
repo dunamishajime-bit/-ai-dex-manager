@@ -1,0 +1,47 @@
+name: V96 ETH SOL Fixed-Family Reality Check
+
+on:
+  push:
+    branches:
+      - research/v96-symbol-missed-profit-attribution
+    paths:
+      - scripts/research_lab_v96_eth_sol_reality_check.py
+      - .github/workflows/v96-eth-sol-reality-check.yml
+  pull_request:
+    branches:
+      - research/v96-core-loss-audit-historical
+    paths:
+      - scripts/research_lab_v96_eth_sol_reality_check.py
+      - .github/workflows/v96-eth-sol-reality-check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reality-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v96_eth_sol_reality_check.py
+      - name: Run fixed-family block bootstrap
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_eth_sol_reality_check.py
+      - name: Upload reality-check evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-eth-sol-reality-check
+          path: |
+            .research-state/v96-eth-sol-reality-check.json
+            .research-state/v96-eth-sol-reality-check.md
+          if-no-files-found: warn
+          retention-days: 90
