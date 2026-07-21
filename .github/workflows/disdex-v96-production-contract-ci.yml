@@ -41,6 +41,14 @@ jobs:
         run: npm ci
       - name: V95 Python to TypeScript golden-vector parity
         run: npm run strategy:disdex-v96:parity
+      - name: Write execution-parity approval manifest
+        env:
+          DISDEX_V96_PRODUCTION_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          DISDEX_V96_PARITY_REVIEWER: github-actions-v96-parity-suite
+        run: |
+          npx tsx scripts/disdex-v96-write-execution-parity-approval.ts \
+            .runtime-state/disdex-v95-golden.json \
+            .runtime-state/disdex-v96-execution-parity-approved.json
       - name: V96 TypeScript boundary
         run: npm run strategy:disdex-v96:typecheck
       - name: Existing V46 validation
@@ -61,13 +69,16 @@ jobs:
           grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS' config/disdexV96Runtime.ts
           grep -q 'buildDisDexV95CoreSignal' lib/disdex-v96-combined-signal.ts
           grep -q 'V96 repository liveTradingEnabled is false' scripts/install-disdex-v96-systemd.sh
+          test -s .runtime-state/disdex-v96-execution-parity-approved.json
       - name: Shell syntax
         run: bash -n scripts/install-disdex-v96-systemd.sh
-      - name: Upload V95 parity evidence
+      - name: Upload V95/V96 parity evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dis-dex-v95-v96-execution-parity
-          path: .runtime-state/disdex-v95-golden.json
+          path: |
+            .runtime-state/disdex-v95-golden.json
+            .runtime-state/disdex-v96-execution-parity-approved.json
           if-no-files-found: warn
           retention-days: 90
