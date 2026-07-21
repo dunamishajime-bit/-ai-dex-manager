@@ -7,6 +7,12 @@ on:
     paths:
       - scripts/research_lab_v96_symbol_role_ablation.py
       - .github/workflows/v96-symbol-role-ablation.yml
+  pull_request:
+    branches:
+      - research/v96-core-loss-audit-historical
+    paths:
+      - scripts/research_lab_v96_symbol_role_ablation.py
+      - .github/workflows/v96-symbol-role-ablation.yml
   workflow_dispatch:
 
 permissions:
