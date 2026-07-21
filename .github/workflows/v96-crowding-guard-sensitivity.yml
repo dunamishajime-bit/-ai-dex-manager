@@ -1,0 +1,44 @@
+name: V96 Crowding Guard Sensitivity
+
+on:
+  pull_request:
+    branches:
+      - research/v71-dd-v35-growth-v82
+    paths:
+      - scripts/research_lab_v96_crowding_guard_sensitivity.py
+      - scripts/research_lab_v96_crowding_guarded_boost_replay.py
+      - scripts/research_lab_v96_basis_alpha_screen.py
+      - scripts/research_lab_v96_core_exact_boost_pyramid.py
+      - .github/workflows/v96-crowding-guard-sensitivity.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sensitivity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v96_crowding_guard_sensitivity.py
+      - name: Run local funding-guard sensitivity
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_crowding_guard_sensitivity.py
+      - name: Upload sensitivity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-crowding-guard-sensitivity
+          path: |
+            .research-state/v96-crowding-guard-sensitivity.json
+            .research-state/v96-crowding-guard-sensitivity.md
+          if-no-files-found: warn
+          retention-days: 90
