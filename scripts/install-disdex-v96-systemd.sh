@@ -104,6 +104,7 @@ if [[ "${DEPLOY_MODE}" == "live" ]]; then
 
   # This performs signed reads only. It must pass before any existing V46 service is stopped.
   sudo -u "${RUN_USER}" env \
+    DOTENV_CONFIG_PATH="${ENV_FILE}" \
     DISDEX_V96_RUNNER_MODE=live \
     DISDEX_V96_LIVE_EXECUTION_ENABLED=true \
     DISDEX_V96_LIVE_ACKNOWLEDGEMENT="${LIVE_ACK}" \
