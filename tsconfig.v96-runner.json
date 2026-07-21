@@ -28,6 +28,7 @@
     "lib/disdex-v96-portfolio-runner.ts",
     "lib/disdex-v96-runner-state.ts",
     "scripts/disdex-v95-golden-parity.ts",
+    "scripts/disdex-v96-write-execution-parity-approval.ts",
     "scripts/disdex-v96-live-runner.ts",
     "scripts/disdex-v96-production-selftest.ts"
   ],
