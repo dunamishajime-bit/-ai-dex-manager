@@ -1,0 +1,44 @@
+name: V96 Beta Neutral Residual Alpha Screen
+
+on:
+  pull_request:
+    branches:
+      - research/v71-dd-v35-growth-v82
+    paths:
+      - scripts/research_lab_v96_residual_alpha_screen.py
+      - scripts/research_lab_v96_funding_alpha_screen.py
+      - scripts/research_lab_v96_independent_alpha_screen.py
+      - scripts/research_lab_v35_weight_band_strong_v95.py
+      - .github/workflows/v96-residual-alpha-screen.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v96_residual_alpha_screen.py
+      - name: Run beta-neutral residual alpha screen
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_residual_alpha_screen.py
+      - name: Upload residual alpha evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-residual-alpha-screen
+          path: |
+            .research-state/v96-residual-alpha-screen.json
+            .research-state/v96-residual-alpha-screen.md
+          if-no-files-found: warn
+          retention-days: 90
