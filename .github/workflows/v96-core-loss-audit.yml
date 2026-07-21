@@ -3,7 +3,7 @@ name: V96 Non-PENGU Core Loss Audit
 on:
   pull_request:
     branches:
-      - research/v94-final-isolated
+      - research/v71-dd-v35-growth-v82
     paths:
       - scripts/research_lab_v96_core_loss_audit.py
       - .github/workflows/v96-core-loss-audit.yml
