@@ -45,6 +45,11 @@ git diff --quiet && git diff --cached --quiet || {
   git status --short >&2
   exit 1
 }
+RUNTIME_COMMIT_SHA="$(git rev-parse HEAD)"
+if [[ ! "${RUNTIME_COMMIT_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "Unable to resolve the exact V96 runtime commit." >&2
+  exit 1
+fi
 
 sudo -u "${RUN_USER}" "${NPM_BIN}" ci
 sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v96:selftest
@@ -96,6 +101,18 @@ if [[ "${DEPLOY_MODE}" == "live" ]]; then
   fi
   LIVE_ENABLED=true
   LIVE_ACK="I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK"
+
+  # This performs signed reads only. It must pass before any existing V46 service is stopped.
+  sudo -u "${RUN_USER}" env \
+    DISDEX_V96_RUNNER_MODE=live \
+    DISDEX_V96_LIVE_EXECUTION_ENABLED=true \
+    DISDEX_V96_LIVE_ACKNOWLEDGEMENT="${LIVE_ACK}" \
+    DISDEX_V96_RUNTIME_COMMIT_SHA="${RUNTIME_COMMIT_SHA}" \
+    DISDEX_V96_FORWARD_EVIDENCE_FILE="${FORWARD_FILE}" \
+    DISDEX_V96_EXECUTION_PARITY_FILE="${PARITY_FILE}" \
+    DISDEX_V96_OPERATOR_OVERRIDE_FILE="${OVERRIDE_FILE}" \
+    DISDEX_V96_KILL_SWITCH_FILE="${KILL_SWITCH_FILE}" \
+    "${NPM_BIN}" run strategy:disdex-v96:preflight
 fi
 
 cat > "${UNIT_PATH}" <<UNIT
@@ -113,6 +130,7 @@ Environment=NODE_ENV=production
 Environment=DISDEX_V96_RUNNER_MODE=${DEPLOY_MODE}
 Environment=DISDEX_V96_LIVE_EXECUTION_ENABLED=${LIVE_ENABLED}
 Environment=DISDEX_V96_LIVE_ACKNOWLEDGEMENT=${LIVE_ACK}
+Environment=DISDEX_V96_RUNTIME_COMMIT_SHA=${RUNTIME_COMMIT_SHA}
 Environment=DISDEX_V96_STATE_DIR=${STATE_DIR}
 Environment=DISDEX_V96_FORWARD_EVIDENCE_FILE=${FORWARD_FILE}
 Environment=DISDEX_V96_EXECUTION_PARITY_FILE=${PARITY_FILE}
@@ -127,7 +145,7 @@ TimeoutStopSec=60
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=${STATE_DIR}
+ReadWritePaths=${STATE_DIR} ${APPROVAL_DIR}
 
 [Install]
 WantedBy=multi-user.target
