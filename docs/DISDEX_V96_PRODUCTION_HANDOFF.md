@@ -22,7 +22,7 @@ V96 historical research is tracked in PR #56. Production implementation is track
 - VPS deployment: **not performed by this PR**
 - Real orders: **not enabled or sent by this PR**
 
-The V96 code and execution-parity implementation are complete. The remaining work is future Forward Evidence, a separate LIVE-promotion decision, and actual VPS deployment.
+The V96 code and execution-parity implementation are complete. PR #58 can leave Draft after the current CI succeeds. Future Forward Evidence, LIVE promotion and actual VPS deployment remain separate operational steps.
 
 ## Frozen V96 contract
 
