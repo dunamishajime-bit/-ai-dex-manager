@@ -1,0 +1,47 @@
+name: V96 Role Evaluation Parity Check
+
+on:
+  push:
+    branches:
+      - research/v96-symbol-missed-profit-attribution
+    paths:
+      - scripts/research_lab_v96_role_evaluation_parity_check.py
+      - .github/workflows/v96-role-evaluation-parity-check.yml
+  pull_request:
+    branches:
+      - research/v96-core-loss-audit-historical
+    paths:
+      - scripts/research_lab_v96_role_evaluation_parity_check.py
+      - .github/workflows/v96-role-evaluation-parity-check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v96_role_evaluation_parity_check.py
+      - name: Verify exact candidate baseline parity
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_role_evaluation_parity_check.py
+      - name: Upload parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-role-evaluation-parity-check
+          path: |
+            .research-state/v96-role-evaluation-parity-check.json
+            .research-state/v96-role-evaluation-parity-check.md
+          if-no-files-found: warn
+          retention-days: 90
