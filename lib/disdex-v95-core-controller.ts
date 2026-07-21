@@ -183,9 +183,7 @@ export function runDisDexV95CoreController(frames: DisDexV95CoreFrame[]): DisDex
                     ignoredWeightChanges += 1;
                 }
             }
-            const proposedTurnover = signature(proposed) === signature(active) && JSON.stringify(proposed) === JSON.stringify(active)
-                ? 0
-                : disDexV95Turnover(active, proposed);
+            const proposedTurnover = changed ? disDexV95Turnover(active, proposed) : 0;
             const forced = index - lastWeightRebalance >= MAXIMUM_STALE_BARS;
             if (changed && (proposedTurnover >= PORTFOLIO_TURNOVER_THRESHOLD || forced)) {
                 active = cleanWeights(proposed);
