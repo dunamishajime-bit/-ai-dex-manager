@@ -1,0 +1,47 @@
+name: V96 Symbol Missed Profit Attribution
+
+on:
+  push:
+    branches:
+      - research/v96-symbol-missed-profit-attribution
+    paths:
+      - scripts/research_lab_v96_symbol_missed_profit_attribution.py
+      - .github/workflows/v96-symbol-missed-profit-attribution.yml
+  pull_request:
+    branches:
+      - research/v96-core-loss-audit-historical
+    paths:
+      - scripts/research_lab_v96_symbol_missed_profit_attribution.py
+      - .github/workflows/v96-symbol-missed-profit-attribution.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  attribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v96_symbol_missed_profit_attribution.py
+      - name: Run symbol missed-profit attribution
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_symbol_missed_profit_attribution.py
+      - name: Upload attribution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-symbol-missed-profit-attribution
+          path: |
+            .research-state/v96-symbol-missed-profit-attribution.json
+            .research-state/v96-symbol-missed-profit-attribution.md
+          if-no-files-found: warn
+          retention-days: 90
