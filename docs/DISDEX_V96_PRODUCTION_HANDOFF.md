@@ -22,7 +22,7 @@ V96 historical research is tracked in PR #56. Production implementation is track
 - VPS deployment: **not performed by this PR**
 - Real orders: **not enabled or sent by this PR**
 
-The V96 code and execution-parity implementation are complete. PR #58 can leave Draft after the current CI succeeds. Future Forward Evidence, LIVE promotion and actual VPS deployment remain separate operational steps.
+The V96 code and execution-parity implementation are complete. PR #58 can leave Draft after CI succeeds. Future Forward Evidence, LIVE promotion and actual VPS deployment remain separate operational steps.
 
 ## Frozen V96 contract
 
@@ -161,7 +161,7 @@ Do not report VPS deployment, service activation or trading unless the command w
 ## Production/LIVE/VPS/orders
 
 - Production code: implemented in PR #58
-- Execution parity: approved when the current CI succeeds
+- Execution parity: approved when CI succeeds
 - Forward Evidence: future-only and not approved
 - LIVE: disabled
 - VPS: not deployed by GitHub changes alone
