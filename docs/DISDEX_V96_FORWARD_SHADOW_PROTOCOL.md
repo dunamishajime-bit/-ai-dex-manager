@@ -87,7 +87,7 @@ Any historical independent Alpha survivor must use:
 ## Current status
 
 - Core Shadow candidate: `HISTORICAL_NEAR_PASS_SHADOW_ONLY_NOT_APPROVED`
-- Independent Alpha: historical screening in progress
+- Independent Alpha: 30 historical candidates screened; 0 approved
 - Production changed: **NO**
 - LIVE changed: **NO**
 - Orders sent by this protocol: **NO**
