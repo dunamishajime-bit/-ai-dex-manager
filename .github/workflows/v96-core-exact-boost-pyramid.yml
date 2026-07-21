@@ -1,0 +1,47 @@
+name: V96 Core Exact Boost Pyramid Replay
+
+on:
+  pull_request:
+    branches:
+      - research/v71-dd-v35-growth-v82
+    paths:
+      - scripts/research_lab_v96_core_exact_boost_pyramid.py
+      - scripts/research_lab_v96_core_profit_capture_screen.py
+      - .github/workflows/v96-core-exact-boost-pyramid.yml
+      - scripts/research_lab_v35_weight_band_strong_v95.py
+      - scripts/research_lab_v35_weight_band_v90.py
+      - scripts/research_lab_v35_strong_growth_v86.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: |
+          python -m py_compile scripts/research_lab_v96_core_profit_capture_screen.py
+          python -m py_compile scripts/research_lab_v96_core_exact_boost_pyramid.py
+      - name: Run exact controller-feedback replay
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_core_exact_boost_pyramid.py
+      - name: Upload exact replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-core-exact-boost-pyramid
+          path: |
+            .research-state/v96-core-exact-boost-pyramid.json
+            .research-state/v96-core-exact-boost-pyramid.md
+          if-no-files-found: warn
+          retention-days: 90
