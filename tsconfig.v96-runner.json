@@ -32,6 +32,7 @@
     "scripts/disdex-v96-write-execution-parity-approval.ts",
     "scripts/disdex-v96-create-operator-override.ts",
     "scripts/disdex-v96-kill-switch.ts",
+    "scripts/disdex-v96-live-preflight.ts",
     "scripts/disdex-v96-live-runner.ts",
     "scripts/disdex-v96-production-selftest.ts"
   ],
