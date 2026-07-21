@@ -154,7 +154,9 @@ def build_audit(raw: dict) -> dict:
                     "entryTs": int(bar["ts"]), "exitTs": int(bar["ts"]), "entryYear": bar["year"],
                     "bars": 0, "netContribution": 0.0, "maxAdverse": 0.0, "maxFavorable": 0.0,
                     "entryBoost": bool(bar["boost"]), "entryWhipsaw": bool(bar["whipsaw"]),
-                    "entryDdStage": int(bar["ddStage"]), "running": 0.0, "byBar": {},
+                    "entryDdStage": int(bar["ddStage"]), "anyBoost": bool(bar["boost"]),
+                    "anyWhipsaw": bool(bar["whipsaw"]), "maxDdStage": int(bar["ddStage"]),
+                    "running": 0.0, "byBar": {},
                 }
                 episodes.append(current)
                 active[symbol] = current
@@ -166,6 +168,9 @@ def build_audit(raw: dict) -> dict:
                 current["running"] += value
                 current["maxAdverse"] = min(current["maxAdverse"], current["running"])
                 current["maxFavorable"] = max(current["maxFavorable"], current["running"])
+                current["anyBoost"] = bool(current["anyBoost"] or bar["boost"])
+                current["anyWhipsaw"] = bool(current["anyWhipsaw"] or bar["whipsaw"])
+                current["maxDdStage"] = max(int(current["maxDdStage"]), int(bar["ddStage"]))
                 current["byBar"][bar_index] = value
 
     def group(key_fn):
@@ -191,11 +196,12 @@ def build_audit(raw: dict) -> dict:
     groups = {
         "symbol": group(lambda row: row["symbol"]),
         "symbolYear": group(lambda row: f"{row['symbol']}:{row['entryYear']}"),
-        "boost": group(lambda row: f"{row['symbol']}:{'BOOST' if row['entryBoost'] else 'NO_BOOST'}"),
+        "boost": group(lambda row: f"{row['symbol']}:{'BOOST' if row['anyBoost'] else 'NO_BOOST'}"),
         "entryState": group(lambda row: f"{row['symbol']}:DD{row['entryDdStage']}:{'WHIP' if row['entryWhipsaw'] else 'CALM'}"),
+        "experiencedState": group(lambda row: f"{row['symbol']}:MAXDD{row['maxDdStage']}:{'WHIP' if row['anyWhipsaw'] else 'CALM'}"),
         "duration": group(lambda row: f"{row['symbol']}:{duration(row)}"),
     }
-    structural = [item for section in (groups["boost"], groups["entryState"], groups["duration"])
+    structural = [item for section in (groups["boost"], groups["entryState"], groups["experiencedState"], groups["duration"])
                   for item in section if item["episodes"] >= 5 and len(item["years"]) >= 2
                   and item["totalNetContributionPct"] < 0 and item["winRatePct"] < 45]
 
@@ -266,6 +272,15 @@ def build_audit(raw: dict) -> dict:
         "annual": annual, "halfYear": half,
         "symbolSummary": symbol_summary,
         "episodeCount": len(episodes),
+        "attribution": {
+            "totalResidualPct": sum(float(bar["attributionResidual"]) for bar in bars) * 100.0,
+            "maxAbsResidualPerBarPct": max((abs(float(bar["attributionResidual"])) for bar in bars), default=0.0) * 100.0,
+        },
+        "bestEpisodes": [{**{key: value for key, value in row.items() if key not in ("running", "byBar")},
+                          "entryIso": dt.datetime.fromtimestamp(row["entryTs"] / 1000, tz=dt.timezone.utc).isoformat(),
+                          "exitIso": dt.datetime.fromtimestamp(row["exitTs"] / 1000, tz=dt.timezone.utc).isoformat(),
+                          "netContributionPct": float(row["netContribution"]) * 100.0}
+                         for row in best[:10]],
         "worstEpisodes": [{**{key: value for key, value in row.items() if key not in ("running", "byBar")},
                            "entryIso": dt.datetime.fromtimestamp(row["entryTs"] / 1000, tz=dt.timezone.utc).isoformat(),
                            "exitIso": dt.datetime.fromtimestamp(row["exitTs"] / 1000, tz=dt.timezone.utc).isoformat(),
@@ -327,7 +342,7 @@ def main() -> None:
     lines.extend(["", "## Worst episodes", "", "| Symbol | Entry | Exit | Bars | Net % | MAE % | Boost | DD | Whipsaw |",
                   "| --- | --- | --- | ---: | ---: | ---: | --- | ---: | --- |"])
     for row in result["worstEpisodes"][:15]:
-        lines.append(f"| {row['symbol']} | {row['entryIso'][:10]} | {row['exitIso'][:10]} | {row['bars']} | {row['netContributionPct']} | {row['maxAdversePct']} | {row['entryBoost']} | {row['entryDdStage']} | {row['entryWhipsaw']} |")
+        lines.append(f"| {row['symbol']} | {row['entryIso'][:10]} | {row['exitIso'][:10]} | {row['bars']} | {row['netContributionPct']} | {row['maxAdversePct']} | {row['anyBoost']} | {row['entryDdStage']} | {row['entryWhipsaw']} |")
     lines.extend(["", "## Structural loss candidates", ""])
     if result["structuralLossCandidates"]:
         lines.extend(["| Group | Episodes | Years | Win % | Total net % |", "| --- | ---: | --- | ---: | ---: |"])
