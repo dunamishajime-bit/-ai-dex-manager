@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import type { AsterOrderSide } from "@/lib/aster-v3-client";
 import { DISDEX_V96_RUNTIME, DISDEX_V96_STRATEGY_ID } from "@/config/disdexV96Runtime";
 import { disDexV96ConfigFingerprint } from "@/lib/disdex-v96-live-gates";
+import type { DisDexV96DailyRiskState } from "@/lib/disdex-v96-live-risk-controls";
 
 export type DisDexV96RunnerMode = "paper" | "live";
 export type DisDexV96PendingPhase = "planned" | "submitted" | "manual_review";
@@ -64,8 +65,29 @@ export interface DisDexV96ForwardEvidenceState {
     lastUpdatedAt?: number;
 }
 
+export interface DisDexV96OperatorOverrideAudit {
+    artifactSha256: string;
+    operator: string;
+    approvedAt: string;
+    expiresAt: string;
+    approvedCommitSha: string;
+    initialPenguGrossCap: number;
+    maximumPortfolioGross: number;
+    maximumDailyLossPct: number;
+    maximumDailyLossUsd?: number;
+}
+
+export interface DisDexV96KillSwitchAudit {
+    active: boolean;
+    action: "FLATTEN_MANAGED";
+    reason: string;
+    operator: string;
+    activatedAt: string;
+    observedAt: number;
+}
+
 export interface DisDexV96RunnerState {
-    version: 1;
+    version: 2;
     strategyId: typeof DISDEX_V96_STRATEGY_ID;
     configFingerprint: string;
     mode: DisDexV96RunnerMode;
@@ -78,6 +100,9 @@ export interface DisDexV96RunnerState {
     completedExecutions: DisDexV96CompletedExecution[];
     failures: DisDexV96Failure[];
     forwardEvidence: DisDexV96ForwardEvidenceState;
+    operatorOverride?: DisDexV96OperatorOverrideAudit;
+    dailyRisk?: DisDexV96DailyRiskState;
+    killSwitch?: DisDexV96KillSwitchAudit;
     bootstrapRequired: boolean;
     manualReviewReason?: string;
 }
@@ -97,7 +122,7 @@ function defaultForwardEvidence(): DisDexV96ForwardEvidenceState {
 export function createDisDexV96RunnerState(mode: DisDexV96RunnerMode): DisDexV96RunnerState {
     const now = Date.now();
     return {
-        version: DISDEX_V96_RUNTIME.stateSchemaVersion,
+        version: 2,
         strategyId: DISDEX_V96_STRATEGY_ID,
         configFingerprint: disDexV96ConfigFingerprint(),
         mode,
@@ -112,11 +137,11 @@ export function createDisDexV96RunnerState(mode: DisDexV96RunnerMode): DisDexV96
 
 function normalize(value: unknown, mode: DisDexV96RunnerMode): DisDexV96RunnerState {
     if (!value || typeof value !== "object") return createDisDexV96RunnerState(mode);
-    const raw = value as Partial<DisDexV96RunnerState>;
+    const raw = value as Partial<DisDexV96RunnerState> & { version?: number };
     if (raw.strategyId && raw.strategyId !== DISDEX_V96_STRATEGY_ID) {
         throw new Error(`V96 state strategyId mismatch: ${String(raw.strategyId)}`);
     }
-    if (raw.version !== undefined && raw.version !== 1) {
+    if (raw.version !== undefined && raw.version !== 1 && raw.version !== 2) {
         throw new Error(`Unsupported V96 state version: ${String(raw.version)}`);
     }
     const expectedFingerprint = disDexV96ConfigFingerprint();
@@ -128,7 +153,7 @@ function normalize(value: unknown, mode: DisDexV96RunnerMode): DisDexV96RunnerSt
         ? raw.forwardEvidence as Partial<DisDexV96ForwardEvidenceState>
         : {};
     return {
-        version: 1,
+        version: 2,
         strategyId: DISDEX_V96_STRATEGY_ID,
         configFingerprint: expectedFingerprint,
         mode,
@@ -155,6 +180,15 @@ function normalize(value: unknown, mode: DisDexV96RunnerMode): DisDexV96RunnerSt
             startedAt: Number.isFinite(Number(forward.startedAt)) ? Number(forward.startedAt) : undefined,
             lastUpdatedAt: Number.isFinite(Number(forward.lastUpdatedAt)) ? Number(forward.lastUpdatedAt) : undefined,
         },
+        operatorOverride: raw.operatorOverride && typeof raw.operatorOverride === "object"
+            ? raw.operatorOverride as DisDexV96OperatorOverrideAudit
+            : undefined,
+        dailyRisk: raw.dailyRisk && typeof raw.dailyRisk === "object"
+            ? raw.dailyRisk as DisDexV96DailyRiskState
+            : undefined,
+        killSwitch: raw.killSwitch && typeof raw.killSwitch === "object"
+            ? raw.killSwitch as DisDexV96KillSwitchAudit
+            : undefined,
         bootstrapRequired: typeof raw.bootstrapRequired === "boolean" ? raw.bootstrapRequired : true,
         manualReviewReason: typeof raw.manualReviewReason === "string" ? raw.manualReviewReason : undefined,
     };
@@ -186,7 +220,7 @@ export class FileDisDexV96RunnerStateStore implements DisDexV96RunnerStateStore 
         await mkdir(dirname(this.path), { recursive: true });
         const value: DisDexV96RunnerState = {
             ...state,
-            version: 1,
+            version: 2,
             strategyId: DISDEX_V96_STRATEGY_ID,
             configFingerprint: disDexV96ConfigFingerprint(),
             mode: this.mode,
