@@ -4,6 +4,7 @@ set -euo pipefail
 DEPLOY_MODE="${DISDEX_V96_DEPLOY_MODE:-paper}"
 SERVICE_NAME="${DISDEX_V96_SERVICE_NAME:-disdex-v96-${DEPLOY_MODE}}"
 OLD_SERVICE_NAME="${DISDEX_V96_OLD_SERVICE_NAME:-}"
+V46_LIVE_SERVICE_NAME="${DISDEX_V96_V46_LIVE_SERVICE_NAME:-disdex-v46-live}"
 REPO_ROOT="${DISDEX_V96_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 ENV_FILE="${DISDEX_V96_ENV_FILE:-${REPO_ROOT}/.env}"
 RUN_USER="${DISDEX_V96_RUN_USER:-${SUDO_USER:-$(id -un)}}"
@@ -11,8 +12,11 @@ NPM_BIN="${DISDEX_V96_NPM_BIN:-$(command -v npm)}"
 SYSTEMD_DIR="${DISDEX_V96_SYSTEMD_DIR:-/etc/systemd/system}"
 UNIT_PATH="${SYSTEMD_DIR}/${SERVICE_NAME}.service"
 STATE_DIR="${DISDEX_V96_STATE_DIR:-${REPO_ROOT}/.runtime-state/disdex-v96}"
-FORWARD_FILE="${DISDEX_V96_FORWARD_EVIDENCE_FILE:-${REPO_ROOT}/.runtime-approval/disdex-v96-forward.json}"
-PARITY_FILE="${DISDEX_V96_EXECUTION_PARITY_FILE:-${REPO_ROOT}/.runtime-approval/disdex-v96-parity.json}"
+APPROVAL_DIR="${DISDEX_V96_APPROVAL_DIR:-${REPO_ROOT}/.runtime-approval}"
+FORWARD_FILE="${DISDEX_V96_FORWARD_EVIDENCE_FILE:-${APPROVAL_DIR}/disdex-v96-forward.json}"
+PARITY_FILE="${DISDEX_V96_EXECUTION_PARITY_FILE:-${APPROVAL_DIR}/disdex-v96-parity.json}"
+OVERRIDE_FILE="${DISDEX_V96_OPERATOR_OVERRIDE_FILE:-${APPROVAL_DIR}/disdex-v96-operator-override.json}"
+KILL_SWITCH_FILE="${DISDEX_V96_KILL_SWITCH_FILE:-${APPROVAL_DIR}/disdex-v96-kill-switch.json}"
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "Run with sudo/root so systemd can be updated." >&2
@@ -50,28 +54,49 @@ sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v46:typecheck
 sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v35:runner:typecheck
 sudo -u "${RUN_USER}" "${NPM_BIN}" run build
 
+mkdir -p "${STATE_DIR}" "${APPROVAL_DIR}"
+chown -R "${RUN_USER}:${RUN_USER}" "${STATE_DIR}" "${APPROVAL_DIR}"
+chmod 700 "${STATE_DIR}" "${APPROVAL_DIR}"
+
+if [[ ! -f "${KILL_SWITCH_FILE}" ]]; then
+  cat > "${KILL_SWITCH_FILE}" <<JSON
+{
+  "active": false,
+  "strategyId": "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+  "action": "FLATTEN_MANAGED",
+  "reason": "Inactive at installation",
+  "operator": "installer",
+  "activatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+JSON
+  chown "${RUN_USER}:${RUN_USER}" "${KILL_SWITCH_FILE}"
+  chmod 600 "${KILL_SWITCH_FILE}"
+fi
+
 LIVE_ENABLED=false
 LIVE_ACK=""
 if [[ "${DEPLOY_MODE}" == "live" ]]; then
   if ! grep -Eq 'liveTradingEnabled:[[:space:]]*true' "${REPO_ROOT}/config/disdexV96Runtime.ts"; then
-    echo "V96 repository liveTradingEnabled is false. Forward and parity approval have not promoted this build." >&2
-    exit 1
-  fi
-  if [[ ! -s "${FORWARD_FILE}" ]]; then
-    echo "V96 Forward Evidence approval file is missing or empty: ${FORWARD_FILE}" >&2
+    echo "V96 repository liveTradingEnabled is false." >&2
     exit 1
   fi
   if [[ ! -s "${PARITY_FILE}" ]]; then
     echo "V96 execution-parity approval file is missing or empty: ${PARITY_FILE}" >&2
     exit 1
   fi
+  if [[ ! -s "${FORWARD_FILE}" && ! -s "${OVERRIDE_FILE}" ]]; then
+    echo "V96 LIVE requires either Forward Evidence or an Operator Override file." >&2
+    exit 1
+  fi
+  if systemctl is-active --quiet "${V46_LIVE_SERVICE_NAME}.service"; then
+    if [[ "${OLD_SERVICE_NAME}" != "${V46_LIVE_SERVICE_NAME}" ]]; then
+      echo "${V46_LIVE_SERVICE_NAME}.service is active. Set DISDEX_V96_OLD_SERVICE_NAME=${V46_LIVE_SERVICE_NAME} for an explicit handoff." >&2
+      exit 1
+    fi
+  fi
   LIVE_ENABLED=true
   LIVE_ACK="I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK"
 fi
-
-mkdir -p "${STATE_DIR}"
-chown -R "${RUN_USER}:${RUN_USER}" "${STATE_DIR}"
-chmod 700 "${STATE_DIR}"
 
 cat > "${UNIT_PATH}" <<UNIT
 [Unit]
@@ -91,6 +116,8 @@ Environment=DISDEX_V96_LIVE_ACKNOWLEDGEMENT=${LIVE_ACK}
 Environment=DISDEX_V96_STATE_DIR=${STATE_DIR}
 Environment=DISDEX_V96_FORWARD_EVIDENCE_FILE=${FORWARD_FILE}
 Environment=DISDEX_V96_EXECUTION_PARITY_FILE=${PARITY_FILE}
+Environment=DISDEX_V96_OPERATOR_OVERRIDE_FILE=${OVERRIDE_FILE}
+Environment=DISDEX_V96_KILL_SWITCH_FILE=${KILL_SWITCH_FILE}
 Environment=DISDEX_V96_CLOSE_UNMANAGED_POSITIONS=false
 ExecStart=${NPM_BIN} run strategy:disdex-v96:daemon
 Restart=on-failure
@@ -109,9 +136,6 @@ UNIT
 systemctl daemon-reload
 systemctl enable "${SERVICE_NAME}.service"
 
-# Another Dis-Dex service is stopped only when its exact unit name is explicitly supplied.
-# This avoids accidental changes to unrelated services while preventing two runners from
-# controlling the same Aster account when the operator intentionally performs a handoff.
 if [[ -n "${OLD_SERVICE_NAME}" ]]; then
   if [[ "${OLD_SERVICE_NAME}" == "${SERVICE_NAME}" ]]; then
     echo "Old and new service names must differ." >&2
