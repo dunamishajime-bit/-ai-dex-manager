@@ -35,6 +35,7 @@ import type { DisDexPenguV46History } from "../lib/pengu-dual-engine-v46";
 const BAR_12H = 12 * 60 * 60_000;
 const CORE_SYMBOLS: DisDexV35CoreSymbol[] = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"];
 const FIXED_NOW = Date.UTC(2026, 6, 21, 5, 0, 0);
+const RUNTIME_COMMIT_SHA = "0a5414cf907b2a0159ff0541de1ccd7b8332a535";
 
 function close(actual: number, expected: number, epsilon = 1e-12) {
     assert.ok(Math.abs(actual - expected) <= epsilon, `expected ${actual} to be within ${epsilon} of ${expected}`);
@@ -88,7 +89,7 @@ function parityApproval(): DisDexV96ExecutionParityApproval {
         strategyId: DISDEX_V96_STRATEGY_ID,
         configFingerprint: disDexV96ConfigFingerprint(),
         researchCommitSha: "70ac1dcf5e8f6fcad43159653a76de0ca42f18a2",
-        productionCommitSha: "0a5414cf907b2a0159ff0541de1ccd7b8332a535",
+        productionCommitSha: RUNTIME_COMMIT_SHA,
         goldenVectorArtifactSha256: "a".repeat(64),
         allocationParityPassed: true,
         signalChronologyParityPassed: true,
@@ -104,7 +105,7 @@ function operatorOverride(overrides: Partial<Omit<DisDexV96OperatorOverrideAppro
         status: "APPROVED",
         strategyId: DISDEX_V96_STRATEGY_ID,
         configFingerprint: disDexV96ConfigFingerprint(),
-        approvedCommitSha: "0a5414cf907b2a0159ff0541de1ccd7b8332a535",
+        approvedCommitSha: RUNTIME_COMMIT_SHA,
         operator: "selftest-operator",
         reason: "Validate the guarded Operator Override route.",
         approvedAt: new Date(FIXED_NOW - 60_000).toISOString(),
@@ -163,6 +164,7 @@ const blocked = evaluateDisDexV96LiveGates({
     environmentLiveExecutionEnabled: true,
     activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
     executionParity: parityApproval(),
+    runtimeCommitSha: RUNTIME_COMMIT_SHA,
     now: FIXED_NOW,
 });
 assert.equal(blocked.allowed, false);
@@ -182,12 +184,25 @@ const allowed = evaluateDisDexV96LiveGates({
     activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
     executionParity: parityApproval(),
     operatorOverride: override,
+    runtimeCommitSha: RUNTIME_COMMIT_SHA,
     now: FIXED_NOW,
 });
 assert.equal(allowed.allowed, true);
 assert.equal(allowed.forwardEvidenceApproved, false);
 assert.equal(allowed.operatorOverrideApproved, true);
 assert.equal(allowed.operatorOverride?.initialPenguGrossCap, 0.15);
+
+const commitMismatch = evaluateDisDexV96LiveGates({
+    runnerMode: "live",
+    environmentLiveExecutionEnabled: true,
+    activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+    executionParity: parityApproval(),
+    operatorOverride: override,
+    runtimeCommitSha: "f".repeat(40),
+    now: FIXED_NOW,
+});
+assert.equal(commitMismatch.allowed, false);
+assert.ok(commitMismatch.reasons.some((reason) => reason.includes("runtime commit")));
 
 const expired = operatorOverride({
     approvedAt: new Date(FIXED_NOW - 48 * 60 * 60_000).toISOString(),
@@ -199,6 +214,7 @@ const expiredGate = evaluateDisDexV96LiveGates({
     activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
     executionParity: parityApproval(),
     operatorOverride: expired,
+    runtimeCommitSha: RUNTIME_COMMIT_SHA,
     now: FIXED_NOW,
 });
 assert.equal(expiredGate.allowed, false);
@@ -364,6 +380,7 @@ async function main() {
         quantityParity: "APPROVED",
         recoveryParity: "APPROVED",
         operatorOverrideRoute: "APPROVED",
+        runtimeCommitBinding: "APPROVED",
         initialPenguGrossCap: override.initialPenguGrossCap,
         maximumDailyLossPct: override.maximumDailyLossPct,
         killSwitchAction: "FLATTEN_MANAGED",
