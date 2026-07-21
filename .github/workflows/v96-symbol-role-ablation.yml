@@ -1,0 +1,41 @@
+name: V96 Symbol Role Ablation
+
+on:
+  push:
+    branches:
+      - research/v96-symbol-role-ablation
+    paths:
+      - scripts/research_lab_v96_symbol_role_ablation.py
+      - .github/workflows/v96-symbol-role-ablation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v96_symbol_role_ablation.py
+      - name: Run fixed symbol-role ablation
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_symbol_role_ablation.py
+      - name: Upload symbol-role evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-symbol-role-ablation
+          path: |
+            .research-state/v96-symbol-role-ablation.json
+            .research-state/v96-symbol-role-ablation.md
+          if-no-files-found: warn
+          retention-days: 90
