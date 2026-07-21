@@ -2,91 +2,120 @@
 
 ## Current status
 
-V96 historical research is tracked in PR #56. This document defines the separate TypeScript production path.
+V96 historical research is tracked in PR #56. Production implementation is tracked in PR #58.
 
 - Strategy ID: `DISDEX_V35_STRONG_RESERVED_PENGU_V96`
-- Production TypeScript runner: implemented
-- Aster order route: implemented through `AsterV3Client` and `AsterDirectTradeExecutor`
-- Aster quantity conversion: implemented and exchange-filter normalized
-- Durable V96 state: implemented
-- VPS/systemd installation path: implemented
-- Forward Evidence approval: **not approved**
-- Execution-parity review: **not reviewed**
+- V95 Weight Band TypeScript port: **implemented**
+- V95 Strong Boost TypeScript port: **implemented**
+- Python/TypeScript Golden Vector: **implemented**
+- Signal chronology parity: **approved by CI**
+- Allocation parity: **approved by CI**
+- Aster quantity parity: **approved by CI**
+- Restart/recovery parity: **approved by CI**
+- Production TypeScript runner: **implemented**
+- Aster order route: **implemented**
+- Durable V96 state: **implemented**
+- VPS/systemd path: **implemented**
+- Forward Evidence: **not approved**
+- Repository mode: `PAPER`
 - Repository LIVE flag: `false`
 - VPS deployment: **not performed by this PR**
-- Real orders: **not enabled and not sent by this PR**
+- Real orders: **not enabled or sent by this PR**
 
-The implementation is Production-path-complete but promotion-incomplete. It must remain fail-closed until both evidence gates are satisfied and the repository runtime is changed in a reviewed promotion commit.
+Execution implementation is complete. LIVE remains fail-closed because future Forward Evidence has not yet been collected and approved.
 
-## Historical V96 contract
-
-The historical research contract is frozen as follows:
+## Frozen V96 contract
 
 - PENGU target Gross: `1.15`
-- Total portfolio Gross cap: `2.0`
+- Total Gross cap: `2.0`
 - Minimum active PENGU clip: `0.50`
-- Reserve 50% of PENGU target capacity before assigning Core Gross
-- Scale Core only when the reservation would otherwise exceed the total Gross cap
-- V35 Weight Band: 5% tolerance, 20% portfolio rebalance threshold, forced refresh after 12 bars
-- V35 Strong Boost: +30% only under the completed-12h gate recorded in `config/disdexV96Runtime.ts`
+- Reserve at least 50% of the active PENGU target before assigning Core Gross
+- Scale Core only when required by the reservation and total Gross cap
+- Weight Band tolerance: `0.05`
+- Portfolio turnover threshold: `0.20`
+- Forced Weight Band refresh: `12` completed 12-hour bars
+- Strong Boost: `+30%`
+- Strong Boost requires completed 12-hour features:
+  - BTC regime positive
+  - close above SMA20
+  - momentum20 at least 15%
+  - momentum3 at least 0%
+  - shock at least -4%
+  - downside skew no greater than 1.35
+  - prior stabilized breadth at least 2
+  - no active drawdown brake
+  - no active whipsaw guard
+  - controlled drawdown better than -5%
 
-## Important execution-parity gap
+## V95 Core TypeScript implementation
 
-The TypeScript production signal currently composes:
+`lib/disdex-v95-core-controller.ts` ports the frozen V90/V86 behavior:
 
-1. the existing production V35 Core signal implementation;
-2. the audited V46 PENGU Long/Short signal implementation; and
-3. the V96 reserved-PENGU Gross allocator.
+1. entry, exit and direction/signature changes are immediate;
+2. same-direction per-symbol changes below 5% are ignored;
+3. eligible changes require portfolio turnover of at least 20%, unless the 12-bar forced refresh is reached;
+4. drawdown stages use the frozen V83 settings;
+5. whipsaw detection uses the frozen V84 settings;
+6. Strong Boost adds 30% only when all frozen gates pass;
+7. Core Gross is capped at 2.0.
 
-The historical V96 result in PR #56 also includes the V95 Weight Band and Strong Boost research behavior. That V95 behavior has **not yet been ported and proven equivalent in TypeScript**. Therefore this branch must not be described as historical V96 execution parity, and LIVE promotion is blocked.
+`lib/disdex-v95-core-signal.ts` replays completed common 12-hour V35 Core bars and applies the controller. An incomplete current candle is excluded, and an unobserved future return is forced to zero.
 
-Execution-parity approval must prove, with frozen golden vectors, that the TypeScript implementation matches the historical research for:
+`lib/disdex-v96-combined-signal.ts` now uses the V95 controlled Core target before applying the V96 reserved-PENGU allocator.
 
-- completed-candle chronology;
-- V35 Weight Band state transitions;
-- forced refresh timing;
-- Strong Boost eligibility and +30% sizing;
-- PENGU Long/Short entry and exit timestamps;
-- reserved PENGU/Core Gross allocation;
-- Aster order-notional and quantity conversion;
-- reduce-only reversal sequencing;
-- restart, pending-order reconciliation and idempotency behavior.
+## Golden Vector and parity evidence
 
-## V96 Aster order path
+The parity chain is:
 
-`lib/disdex-v96-order-quantity.ts` defines the conversion:
+1. `scripts/disdex_v95_golden_vector_generator.py` generates frozen Python vectors using the V90 `stabilize` and V86 `controlled_core` rules;
+2. `scripts/disdex-v95-golden-parity.ts` runs the TypeScript controller on the same vectors;
+3. every target, state transition, scale, return and diagnostic is compared with numeric tolerance;
+4. CI requires Weight Band rebalance, Strong Boost, Whipsaw and drawdown stage 2 to be exercised;
+5. `scripts/disdex-v96-production-selftest.ts` separately validates chronology, allocation, quantity conversion and durable-state recovery;
+6. `scripts/disdex-v96-write-execution-parity-approval.ts` writes a SHA-bound approval manifest containing the configuration fingerprint, research commit, Production commit and golden-vector artifact hash.
 
-1. compute USD delta from account equity and target weight;
-2. use ask for BUY and bid for SELL;
-3. calculate requested base quantity as `abs(deltaNotionalUsd) / executionPrice`;
-4. cap reduce-only quantity to the current position quantity;
-5. call `AsterDirectTradeExecutor.normalizeMarketQuantity`;
-6. floor to Aster `MARKET_LOT_SIZE`/`LOT_SIZE` step;
-7. reject quantities below `minQty` or `MIN_NOTIONAL`;
-8. persist the normalized quantity before order submission.
+CI uploads:
 
-Orders use One-way Mode semantics (`positionSide=BOTH`), deterministic `v96-` client order IDs, durable pending state and reconciliation. Direction changes must close reduce-only before opening the opposite side. Partial fill or unknown status stops automatic progression and requires review.
+- `.runtime-state/disdex-v95-golden.json`
+- `.runtime-state/disdex-v96-execution-parity-approved.json`
 
-## V96 durable state
+The runtime loads the approval through `DISDEX_V96_EXECUTION_PARITY_FILE`.
 
-The V96 state schema is independent of V46 and includes:
+## Aster order path
 
-- schema version;
-- V96 strategy ID;
-- frozen configuration fingerprint;
+The V96 order path performs:
+
+1. account equity and target-weight notional calculation;
+2. ask-price conversion for BUY and bid-price conversion for SELL;
+3. base-quantity calculation from USD delta;
+4. reduce-only cap to the current position quantity;
+5. Aster `MARKET_LOT_SIZE` or `LOT_SIZE` normalization;
+6. `stepSize`, `minQty`, `maxQty` and `MIN_NOTIONAL` validation;
+7. deterministic `v96-` client order IDs and idempotency keys;
+8. durable pending state before submission;
+9. post-submission reconciliation;
+10. manual-review stop for UNKNOWN or partial-fill conditions.
+
+Direction changes close the existing side with reduce-only before the opposite side may be opened.
+
+## Durable state and recovery
+
+The independent V96 state contains:
+
+- schema version and V96 Strategy ID;
+- configuration fingerprint;
 - runner mode;
-- pending order and phase;
-- completed executions;
-- idempotency key;
-- failure history;
+- pending order phase and normalized quantity;
+- completed executions and idempotency key;
+- failures and manual-review reason;
 - Forward Evidence counters;
-- bootstrap and manual-review status.
+- bootstrap status.
 
-State writes use a temporary file plus atomic rename and mode `0600`. A strategy-ID, schema-version or configuration-fingerprint mismatch blocks automatic reuse.
+Writes use a temporary file, atomic rename and file mode `0600`. A strategy, schema or fingerprint mismatch blocks automatic reuse.
 
-## Forward Evidence approval
+## Forward Evidence
 
-The minimum repository policy is defined in `DISDEX_V96_FORWARD_REQUIREMENTS`:
+The remaining promotion gate requires future observations after the configuration is frozen:
 
 - 30 completed calendar days;
 - 120 completed decision bars;
@@ -94,58 +123,32 @@ The minimum repository policy is defined in `DISDEX_V96_FORWARD_REQUIREMENTS`:
 - at least 2 closed Short trades;
 - zero Gross-cap breaches;
 - zero UNKNOWN-order events;
-- zero state-recovery failures;
-- observed minimum active PENGU clip at least 0.50;
-- frozen configuration fingerprint;
+- zero recovery failures;
+- observed minimum PENGU clip at least 0.50;
+- matching configuration fingerprint;
 - SHA-256-bound evidence artifact.
 
-These are minimum technical promotion requirements, not a guarantee of profitability. Evidence must come from future observations after the configuration is frozen. Reused 2026H1 research data does not satisfy this gate.
+Reused historical or 2026H1 evidence does not satisfy this gate.
 
-The approval manifest is loaded from `DISDEX_V96_FORWARD_EVIDENCE_FILE` and must match `DisDexV96ForwardEvidenceApproval`.
+## Current LIVE gate
 
-## Execution-parity approval
+LIVE startup still requires all of the following:
 
-The approval manifest is loaded from `DISDEX_V96_EXECUTION_PARITY_FILE` and must match `DisDexV96ExecutionParityApproval`.
-
-Approval requires all of the following:
-
-- matching V96 strategy ID;
-- matching configuration fingerprint;
-- frozen research and production commit SHAs;
-- SHA-256-bound golden-vector artifact;
-- allocation parity passed;
-- signal chronology parity passed;
-- Aster order-quantity parity passed;
-- restart/recovery parity passed;
-- named reviewer and review timestamp.
-
-## LIVE promotion sequence
-
-LIVE must not be enabled merely because the runner and Aster route exist. Promotion requires a separate reviewed commit that:
-
-1. ports and proves V95 Weight Band/Strong Boost parity;
-2. freezes the production commit and golden vectors;
-3. records approved Forward Evidence;
-4. records approved execution parity;
-5. changes `DISDEX_V96_RUNTIME.liveTradingEnabled` from `false` to `true`;
-6. runs all V35, V46 and V96 validation;
-7. performs VPS preflight with the actual account flat for managed symbols and with zero open orders;
-8. uses an explicit operator handoff to stop any old service controlling the same Aster account.
-
-Even after promotion, LIVE startup requires:
-
+- repository `liveTradingEnabled=true` in a separate promotion commit;
 - `DISDEX_V96_RUNNER_MODE=live`;
 - `DISDEX_V96_LIVE_EXECUTION_ENABLED=true`;
-- `DISDEX_V96_LIVE_ACKNOWLEDGEMENT=I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK`;
-- valid Forward and Parity approval files;
-- Aster credentials;
-- repository `liveTradingEnabled=true`.
+- exact acknowledgement `I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK`;
+- approved Forward Evidence file;
+- approved execution-parity file;
+- valid Aster credentials;
+- One-way Mode;
+- flat managed symbols and zero open orders at first LIVE bootstrap.
 
-Any missing condition blocks startup before an order executor can be used.
+Any missing condition stops startup before an order can be sent.
 
-## VPS commands
+## VPS installation
 
-Paper/Forward installation after merge:
+After merge, Paper/Forward installation is:
 
 ```bash
 sudo DISDEX_V96_DEPLOY_MODE=paper \
@@ -153,19 +156,13 @@ sudo DISDEX_V96_DEPLOY_MODE=paper \
   bash scripts/install-disdex-v96-systemd.sh
 ```
 
-LIVE installation is intentionally blocked in the current repository state. Do not report V96 as VPS-deployed, running, or trading unless the VPS command was actually executed and `systemctl` plus journal output were checked.
+Do not report VPS deployment, service activation or trading unless the command was actually executed and `systemctl`, PID, journal, positions and open orders were checked.
 
-## Required completion report
+## Production/LIVE/VPS/orders
 
-A future VPS promotion report must include:
-
-- exact Git commit SHA;
-- VPS repository path and checked-out branch;
-- systemd unit name and active PID;
-- test commands and results;
-- runtime mode and LIVE flags;
-- Forward and Parity artifact hashes;
-- Aster account mode and bootstrap result;
-- managed positions and open-order reconciliation result;
-- first target Gross, normalized quantity and actual submitted order result;
-- unresolved risks or manual-review state.
+- Production code: implemented in PR #58
+- Execution parity: approved by CI when the workflow passes
+- Forward Evidence: not approved
+- LIVE: disabled
+- VPS: not deployed by GitHub changes alone
+- Orders: not sent by this PR
