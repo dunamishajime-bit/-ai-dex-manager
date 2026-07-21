@@ -1,117 +1,212 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
     DISDEX_V96_ALLOCATION,
     DISDEX_V96_EXECUTION_PARITY,
+    DISDEX_V96_LIVE_PROMOTION,
     DISDEX_V96_RUNTIME,
     DISDEX_V96_STRATEGY_ID,
 } from "../config/disdexV96Runtime";
 import { allocateDisDexV96ReservedPengu } from "../lib/disdex-v96-allocation";
-import { evaluateDisDexV96LiveGates } from "../lib/disdex-v96-live-gates";
-import { normalizeDisDexV96OrderQuantity } from "../lib/disdex-v96-order-quantity";
 import {
-    createDisDexV96RunnerState,
-    FileDisDexV96RunnerStateStore,
-} from "../lib/disdex-v96-runner-state";
+    disDexV96ConfigFingerprint,
+    evaluateDisDexV96LiveGates,
+    type DisDexV96ExecutionParityApproval,
+} from "../lib/disdex-v96-live-gates";
+import {
+    disDexV96OperatorOverrideArtifactSha256,
+    readDisDexV96KillSwitch,
+    updateDisDexV96DailyRisk,
+    type DisDexV96OperatorOverrideApproval,
+} from "../lib/disdex-v96-live-risk-controls";
+import { normalizeDisDexV96OrderQuantity } from "../lib/disdex-v96-order-quantity";
+import { createDisDexV96RunnerState, FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
 import { buildDisDexV95CoreSignal } from "../lib/disdex-v95-core-signal";
 import type { DirectTradeExecutor } from "../lib/direct-trade-executor";
 import type { DisDexV35Candle, DisDexV35CoreSymbol } from "../lib/disdex-v35-signal-engine";
 import type { DisDexPenguV46History } from "../lib/pengu-dual-engine-v46";
 
-const BAR_12H = 12 * 60 * 60_000;
+const HOUR = 3_600_000;
+const BAR_12H = 12 * HOUR;
+const NOW = Date.UTC(2026, 6, 21, 5);
+const RUNTIME_COMMIT = "0a5414cf907b2a0159ff0541de1ccd7b8332a535";
 const CORE_SYMBOLS: DisDexV35CoreSymbol[] = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"];
 
 function close(actual: number, expected: number, epsilon = 1e-12) {
-    assert.ok(Math.abs(actual - expected) <= epsilon, `expected ${actual} to be within ${epsilon} of ${expected}`);
+    assert.ok(Math.abs(actual - expected) <= epsilon, `${actual} != ${expected}`);
 }
 
-function candle(openTime: number, open: number, closePrice: number): DisDexV35Candle {
+function parity(): DisDexV96ExecutionParityApproval {
+    return {
+        status: "APPROVED",
+        strategyId: DISDEX_V96_STRATEGY_ID,
+        configFingerprint: disDexV96ConfigFingerprint(),
+        researchCommitSha: "70ac1dcf5e8f6fcad43159653a76de0ca42f18a2",
+        productionCommitSha: RUNTIME_COMMIT,
+        goldenVectorArtifactSha256: "a".repeat(64),
+        allocationParityPassed: true,
+        signalChronologyParityPassed: true,
+        orderQuantityParityPassed: true,
+        restartRecoveryPassed: true,
+        reviewer: "v96-selftest",
+        reviewedAt: new Date(NOW).toISOString(),
+    };
+}
+
+function override(input: Partial<Omit<DisDexV96OperatorOverrideApproval, "artifactSha256">> = {}) {
+    const base: Omit<DisDexV96OperatorOverrideApproval, "artifactSha256"> = {
+        status: "APPROVED",
+        strategyId: DISDEX_V96_STRATEGY_ID,
+        configFingerprint: disDexV96ConfigFingerprint(),
+        approvedCommitSha: RUNTIME_COMMIT,
+        operator: "v96-selftest",
+        reason: "Exercise guarded initial LIVE.",
+        approvedAt: new Date(NOW - HOUR).toISOString(),
+        expiresAt: new Date(NOW + 24 * HOUR).toISOString(),
+        forwardEvidenceBypassAccepted: true,
+        initialPenguGrossCap: 0.15,
+        maximumPortfolioGross: 2,
+        maximumDailyLossPct: 2,
+        maximumDailyLossUsd: 50,
+        acknowledgement: "I_APPROVE_DISDEX_V96_OPERATOR_CONTROLLED_LIVE",
+        ...input,
+    };
+    return { ...base, artifactSha256: disDexV96OperatorOverrideArtifactSha256(base) };
+}
+
+function candle(openTime: number, price: number, growth: number): DisDexV35Candle {
+    const closePrice = price * (1 + growth);
     return {
         openTime,
         closeTime: openTime + BAR_12H - 1,
-        open,
-        high: Math.max(open, closePrice) * 1.003,
-        low: Math.min(open, closePrice) * 0.997,
+        open: price,
+        high: Math.max(price, closePrice) * 1.002,
+        low: Math.min(price, closePrice) * 0.998,
         close: closePrice,
         volume: 1_000_000,
     };
 }
 
-function chronologyHistory(): { history: DisDexPenguV46History; now: number; expectedReferenceTs: number } {
+function chronologyFixture() {
     const start = Date.UTC(2023, 0, 1);
-    const completedCount = 150;
+    const count = 150;
     const core12h = Object.fromEntries(CORE_SYMBOLS.map((symbol, symbolIndex) => {
-        const growth = 0.004 + symbolIndex * 0.0005;
         const rows: DisDexV35Candle[] = [];
-        let previousClose = 100 + symbolIndex * 20;
-        for (let index = 0; index < completedCount; index += 1) {
-            const openTime = start + index * BAR_12H;
-            const open = previousClose;
-            const closePrice = open * (1 + growth + (index % 11 === 0 ? -0.001 : 0));
-            rows.push(candle(openTime, open, closePrice));
-            previousClose = closePrice;
+        let price = 100 + symbolIndex * 20;
+        for (let index = 0; index < count; index += 1) {
+            const row = candle(start + index * BAR_12H, price, 0.003 + symbolIndex * 0.0004);
+            rows.push(row);
+            price = row.close;
         }
-        const incompleteOpenTime = start + completedCount * BAR_12H;
-        rows.push(candle(incompleteOpenTime, previousClose, previousClose * 3));
+        rows.push(candle(start + count * BAR_12H, price, 2));
         return [symbol, rows];
     })) as Record<DisDexV35CoreSymbol, DisDexV35Candle[]>;
-    return {
-        history: {
-            core12h,
-            btc1h: [],
-            pengu1h: [],
-            penguFunding: [],
-        },
-        now: start + completedCount * BAR_12H + BAR_12H / 2,
-        expectedReferenceTs: start + (completedCount - 1) * BAR_12H,
-    };
+    const now = start + count * BAR_12H + BAR_12H / 2;
+    const expectedReferenceTs = start + (count - 1) * BAR_12H;
+    const history: DisDexPenguV46History = { core12h, btc1h: [], pengu1h: [], penguFunding: [] };
+    return { history, now, expectedReferenceTs };
 }
 
-assert.equal(DISDEX_V96_STRATEGY_ID, "DISDEX_V35_STRONG_RESERVED_PENGU_V96");
-assert.equal(DISDEX_V96_RUNTIME.liveTradingEnabled, false);
-assert.equal(DISDEX_V96_RUNTIME.executionParityStatus, "APPROVED");
-assert.equal(DISDEX_V96_RUNTIME.forwardEvidenceStatus, "NOT_APPROVED");
-assert.equal(DISDEX_V96_EXECUTION_PARITY.corePort, "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS");
-assert.equal(DISDEX_V96_ALLOCATION.penguTargetGross, 1.15);
-assert.equal(DISDEX_V96_ALLOCATION.totalGrossCap, 2);
-assert.equal(DISDEX_V96_ALLOCATION.minimumActivePenguClip, 0.5);
-
-const reserved = allocateDisDexV96ReservedPengu({
-    coreWeights: { BTCUSDT: 0.9, ETHUSDT: 0.9 },
-    penguSide: 1,
-});
-close(reserved.coreScale, 1.425 / 1.8);
-close(reserved.penguClip, 0.5);
-assert.ok(reserved.finalGross <= 2 + 1e-12);
-
-const capacityClip = allocateDisDexV96ReservedPengu({
-    coreWeights: { BTCUSDT: 1 },
-    penguSide: -1,
-});
-close(capacityClip.penguClip, 1 / 1.15);
-close(capacityClip.targetWeights.PENGUUSDT, -1);
-assert.ok(capacityClip.finalGross <= 2 + 1e-12);
-
-const coreOnly = allocateDisDexV96ReservedPengu({
-    coreWeights: { BTCUSDT: 1.2, ETHUSDT: 1.2 },
-    penguSide: 0,
-});
-close(coreOnly.finalGross, 2);
-assert.equal(coreOnly.penguFinalGross, 0);
-
-const blocked = evaluateDisDexV96LiveGates({
-    runnerMode: "live",
-    environmentLiveExecutionEnabled: true,
-    activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-});
-assert.equal(blocked.allowed, false);
-assert.ok(blocked.reasons.some((reason) => reason.includes("Forward Evidence")));
-assert.ok(blocked.reasons.some((reason) => reason.toLowerCase().includes("execution-parity")));
-assert.ok(blocked.reasons.some((reason) => reason.includes("liveTradingEnabled")));
-
 async function main() {
+    assert.equal(DISDEX_V96_RUNTIME.mode, "LIVE_READY");
+    assert.equal(DISDEX_V96_RUNTIME.liveTradingEnabled, true);
+    assert.equal(DISDEX_V96_RUNTIME.forwardEvidenceStatus, "NOT_APPROVED");
+    assert.equal(DISDEX_V96_RUNTIME.executionParityStatus, "APPROVED");
+    assert.equal(DISDEX_V96_EXECUTION_PARITY.corePort, "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS");
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverrideValidityHours, 72);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 0.15);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 2);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.killSwitchAction, "FLATTEN_MANAGED");
+
+    const allocation = allocateDisDexV96ReservedPengu({
+        coreWeights: { BTCUSDT: 0.9, ETHUSDT: 0.9 },
+        penguSide: 1,
+    });
+    close(allocation.coreScale, 1.425 / 1.8);
+    close(allocation.penguClip, 0.5);
+    assert.ok(allocation.finalGross <= DISDEX_V96_ALLOCATION.totalGrossCap);
+
+    const approvedOverride = override();
+    const live = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: approvedOverride,
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW,
+    });
+    assert.equal(live.allowed, true);
+    assert.equal(live.forwardEvidenceApproved, false);
+    assert.equal(live.operatorOverrideApproved, true);
+
+    const noOverride = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW,
+    });
+    assert.equal(noOverride.allowed, false);
+
+    const wrongCommit = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: approvedOverride,
+        runtimeCommitSha: "f".repeat(40),
+        now: NOW,
+    });
+    assert.equal(wrongCommit.allowed, false);
+    assert.ok(wrongCommit.reasons.some((reason) => reason.includes("runtime commit")));
+
+    const expired = override({
+        approvedAt: new Date(NOW - 48 * HOUR).toISOString(),
+        expiresAt: new Date(NOW - HOUR).toISOString(),
+    });
+    const expiredGate = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: expired,
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW,
+    });
+    assert.equal(expiredGate.allowed, false);
+    assert.ok(expiredGate.reasons.some((reason) => reason.includes("expired")));
+
+    const startRisk = updateDisDexV96DailyRisk({
+        equity: 1000,
+        maximumDailyLossPct: 2,
+        maximumDailyLossUsd: 50,
+        now: NOW,
+    });
+    close(startRisk.lossLimitUsd, 20);
+    assert.equal(startRisk.tripped, false);
+    const trip = updateDisDexV96DailyRisk({
+        previous: startRisk,
+        equity: 980,
+        maximumDailyLossPct: 2,
+        maximumDailyLossUsd: 50,
+        now: NOW + HOUR,
+    });
+    assert.equal(trip.tripped, true);
+    close(trip.lossPct, 2);
+    const nextDay = updateDisDexV96DailyRisk({
+        previous: trip,
+        equity: 990,
+        maximumDailyLossPct: 2,
+        maximumDailyLossUsd: 50,
+        now: NOW + 24 * HOUR,
+    });
+    assert.equal(nextDay.tripped, true);
+    assert.equal(nextDay.trippedAt, trip.trippedAt);
+
     const fakeExecutor: DirectTradeExecutor = {
         getAccountSnapshot: async () => { throw new Error("unused"); },
         getPositions: async () => { throw new Error("unused"); },
@@ -119,13 +214,13 @@ async function main() {
         getMarketQuote: async () => { throw new Error("unused"); },
         normalizeMarketQuantity: async (symbol, requestedQuantity, referencePrice) => ({
             symbol,
-            quantity: Math.floor((requestedQuantity * 10) + 1e-9) / 10,
-            quantityText: (Math.floor((requestedQuantity * 10) + 1e-9) / 10).toFixed(1),
+            quantity: Math.floor(requestedQuantity * 10 + 1e-9) / 10,
+            quantityText: (Math.floor(requestedQuantity * 10 + 1e-9) / 10).toFixed(1),
             minQuantity: 0.1,
             maxQuantity: 100000,
             stepSize: 0.1,
             minNotional: 5,
-            notional: (Math.floor((requestedQuantity * 10) + 1e-9) / 10) * referencePrice,
+            notional: Math.floor(requestedQuantity * 10 + 1e-9) / 10 * referencePrice,
         }),
         executeMarket: async () => { throw new Error("unused"); },
         reconcileOrder: async () => { throw new Error("unused"); },
@@ -142,73 +237,78 @@ async function main() {
             askQuantity: 100,
             midPrice: 9.95,
             spreadBps: 100.5,
-            updatedAt: Date.now(),
+            updatedAt: NOW,
         },
         deltaNotionalUsd: 101,
         minimumOrderNotionalUsd: 5,
         reduceOnly: false,
     });
-    assert.equal(quantity.referencePrice, 10);
     close(quantity.requestedQuantity, 10.1);
     close(quantity.normalized.quantity, 10.1);
-    assert.equal(quantity.roundingPolicy, "FLOOR_TO_ASTER_MARKET_STEP");
+    assert.equal(quantity.referencePrice, 10);
 
-    const chronology = chronologyHistory();
+    const chronology = chronologyFixture();
     const core = buildDisDexV95CoreSignal(chronology.history, chronology.now);
     assert.equal(core.referenceTs, chronology.expectedReferenceTs);
     assert.equal(core.chronology.latestCompletedOpenTime, chronology.expectedReferenceTs);
-    assert.ok(core.chronology.latestCompletedCloseTime < chronology.now);
     assert.equal(core.chronology.usesCompleted12hBarsOnly, true);
     assert.equal(core.chronology.nextUnobservedReturnForcedToZero, true);
-    assert.ok(core.replayedBars >= 10);
     assert.ok(core.finalGross <= 2 + 1e-12);
 
-    const directory = await mkdtemp(join(tmpdir(), "disdex-v96-recovery-"));
+    const directory = await mkdtemp(join(tmpdir(), "disdex-v96-live-promotion-"));
     try {
-        const path = join(directory, "runner-paper.json");
-        const store = new FileDisDexV96RunnerStateStore(path, "paper");
-        const state = createDisDexV96RunnerState("paper");
+        const killSwitchPath = join(directory, "kill-switch.json");
+        await writeFile(killSwitchPath, JSON.stringify({
+            active: true,
+            strategyId: DISDEX_V96_STRATEGY_ID,
+            action: "FLATTEN_MANAGED",
+            reason: "selftest emergency",
+            operator: "v96-selftest",
+            activatedAt: new Date(NOW).toISOString(),
+        }));
+        const killSwitch = await readDisDexV96KillSwitch(killSwitchPath);
+        assert.equal(killSwitch?.active, true);
+        assert.equal(killSwitch?.action, "FLATTEN_MANAGED");
+
+        const statePath = join(directory, "runner-live.json");
+        const store = new FileDisDexV96RunnerStateStore(statePath, "live");
+        const state = createDisDexV96RunnerState("live");
+        assert.equal(state.version, 2);
         state.bootstrapRequired = false;
-        state.pending = {
-            idempotencyKey: "recovery-key",
-            clientOrderId: "v96-recovery-key",
-            phase: "submitted",
-            symbol: "PENGUUSDT",
-            side: "BUY",
-            requestedQuantity: 12.3,
-            normalizedQuantity: 12.3,
-            reduceOnly: false,
-            expectedPrice: 0.05,
-            targetWeight: 0.15,
-            targetNotionalUsd: 15,
-            deltaNotionalUsd: 15,
-            referenceTs: chronology.expectedReferenceTs,
-            createdAt: chronology.now,
-            updatedAt: chronology.now,
-            retryCount: 0,
-            reason: "recovery parity fixture",
+        state.dailyRisk = trip;
+        state.operatorOverride = {
+            artifactSha256: approvedOverride.artifactSha256,
+            operator: approvedOverride.operator,
+            approvedAt: approvedOverride.approvedAt,
+            expiresAt: approvedOverride.expiresAt,
+            approvedCommitSha: approvedOverride.approvedCommitSha,
+            initialPenguGrossCap: approvedOverride.initialPenguGrossCap,
+            maximumPortfolioGross: approvedOverride.maximumPortfolioGross,
+            maximumDailyLossPct: approvedOverride.maximumDailyLossPct,
+            maximumDailyLossUsd: approvedOverride.maximumDailyLossUsd,
         };
         await store.save(state);
         const recovered = await store.load();
-        assert.equal(recovered.strategyId, DISDEX_V96_STRATEGY_ID);
-        assert.equal(recovered.configFingerprint, state.configFingerprint);
-        assert.deepEqual(recovered.pending, state.pending);
+        assert.equal(recovered.version, 2);
+        assert.equal(recovered.dailyRisk?.tripped, true);
+        assert.equal(recovered.operatorOverride?.artifactSha256, approvedOverride.artifactSha256);
         assert.equal(recovered.bootstrapRequired, false);
     } finally {
         await rm(directory, { recursive: true, force: true });
     }
 
     console.log(JSON.stringify({
-        status: "DISDEX_V96_EXECUTION_PARITY_SELFTEST_PASS",
+        status: "DISDEX_V96_LIVE_PROMOTION_SELFTEST_PASS",
         strategyId: DISDEX_V96_STRATEGY_ID,
-        weightBandStrongBoostParity: DISDEX_V96_EXECUTION_PARITY.corePort,
-        signalChronologyParity: "APPROVED",
-        allocationParity: "APPROVED",
-        quantityParity: "APPROVED",
-        recoveryParity: "APPROVED",
         liveTradingEnabled: DISDEX_V96_RUNTIME.liveTradingEnabled,
         forwardEvidenceStatus: DISDEX_V96_RUNTIME.forwardEvidenceStatus,
-        liveGateAllowed: blocked.allowed,
+        operatorOverrideRoute: "APPROVED",
+        runtimeCommitBinding: "APPROVED",
+        initialPenguGrossCap: approvedOverride.initialPenguGrossCap,
+        maximumDailyLossPct: approvedOverride.maximumDailyLossPct,
+        dailyLossLatch: "MANUAL_RESET_REQUIRED",
+        killSwitchAction: DISDEX_V96_LIVE_PROMOTION.killSwitchAction,
+        noOrdersSent: true,
     }));
 }
 

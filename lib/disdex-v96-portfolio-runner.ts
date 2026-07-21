@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import type { DirectPosition, DirectTradeCommand, DirectTradeExecutor, DirectTradeResult } from "@/lib/direct-trade-executor";
+import type { DirectAccountSnapshot, DirectPosition, DirectTradeCommand, DirectTradeExecutor, DirectTradeResult } from "@/lib/direct-trade-executor";
 import type { LiveRunnerLock } from "@/lib/live-runner-state";
 import { buildDisDexV35RebalanceActions, type DisDexV35RebalanceAction } from "@/lib/disdex-v35-portfolio-runner";
 import type { DisDexV46AsterMarketDataProvider } from "@/lib/disdex-v46-market-data-provider";
@@ -11,7 +11,12 @@ import type {
     DisDexV96RunnerState,
     DisDexV96RunnerStateStore,
 } from "@/lib/disdex-v96-runner-state";
-import { DISDEX_V96_RUNTIME, DISDEX_V96_STRATEGY_ID } from "@/config/disdexV96Runtime";
+import {
+    readDisDexV96KillSwitch,
+    updateDisDexV96DailyRisk,
+    type DisDexV96OperatorOverrideApproval,
+} from "@/lib/disdex-v96-live-risk-controls";
+import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME, DISDEX_V96_STRATEGY_ID } from "@/config/disdexV96Runtime";
 import { disDexV96ConfigFingerprint } from "@/lib/disdex-v96-live-gates";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
@@ -26,6 +31,11 @@ export interface DisDexV96PortfolioRunnerConfig {
     rebalanceTolerancePct: number;
     maxTransactionRetries: number;
     closeUnmanagedPositions: boolean;
+    penguTargetGrossCap?: number;
+    maximumDailyLossPct: number;
+    maximumDailyLossUsd?: number;
+    killSwitchPath?: string;
+    operatorOverride?: DisDexV96OperatorOverrideApproval;
 }
 
 export interface DisDexV96TickResult {
@@ -71,11 +81,19 @@ function signedPositionQuantity(position: DirectPosition) {
     return finite(position.quantity);
 }
 
+function accountEquity(account: DirectAccountSnapshot, positions: DirectPosition[]) {
+    return Math.max(0, finite(account.walletBalance) + positions.reduce((sum, position) => sum + finite(position.unrealizedPnl), 0));
+}
+
+function managedPositions(positions: DirectPosition[]) {
+    return positions.filter((position) => MANAGED_SYMBOLS.includes(position.symbol.toUpperCase() as typeof MANAGED_SYMBOLS[number]));
+}
+
 function filled(result: DirectTradeResult) {
     return result.status === "FILLED" && result.executedQuantity > 0;
 }
 
-function idempotencyKey(signal: DisDexV96CombinedSignal, action: DisDexV35RebalanceAction) {
+function idempotencyKey(signal: DisDexV96CombinedSignal, action: DisDexV35RebalanceAction, riskReason?: string) {
     return createHash("sha256")
         .update([
             DISDEX_V96_STRATEGY_ID,
@@ -89,6 +107,7 @@ function idempotencyKey(signal: DisDexV96CombinedSignal, action: DisDexV35Rebala
             action.reduceOnly ? "reduce" : "open",
             action.targetWeight.toFixed(8),
             (action.currentNotionalUsd / 5).toFixed(0),
+            riskReason || "normal",
         ].join("|"))
         .digest("hex");
 }
@@ -141,8 +160,57 @@ export class DisDexV96PortfolioRunner {
 
     private ensureExecutionGate() {
         if (this.dependencies.config.mode === "live" && !this.dependencies.config.liveGateAllowed) {
-            throw new Error("V96 LIVE execution is blocked by Forward Evidence or execution-parity gates.");
+            throw new Error("V96 LIVE execution is blocked by Forward Evidence/Operator Override or execution-parity gates.");
         }
+    }
+
+    private async refreshRisk(
+        state: DisDexV96RunnerState,
+        account?: DirectAccountSnapshot,
+        positions?: DirectPosition[],
+    ) {
+        if (this.dependencies.config.mode !== "live") return { flatten: false, reason: undefined as string | undefined };
+        const [resolvedAccount, resolvedPositions, killSwitch] = await Promise.all([
+            account ? Promise.resolve(account) : this.dependencies.executor.getAccountSnapshot(),
+            positions ? Promise.resolve(positions) : this.dependencies.executor.getPositions(),
+            readDisDexV96KillSwitch(this.dependencies.config.killSwitchPath),
+        ]);
+        state.dailyRisk = updateDisDexV96DailyRisk({
+            previous: state.dailyRisk,
+            equity: accountEquity(resolvedAccount, resolvedPositions),
+            maximumDailyLossPct: this.dependencies.config.maximumDailyLossPct,
+            maximumDailyLossUsd: this.dependencies.config.maximumDailyLossUsd,
+            now: this.now(),
+        });
+        const override = this.dependencies.config.operatorOverride;
+        if (override) {
+            state.operatorOverride = {
+                artifactSha256: override.artifactSha256,
+                operator: override.operator,
+                approvedAt: override.approvedAt,
+                expiresAt: override.expiresAt,
+                approvedCommitSha: override.approvedCommitSha,
+                initialPenguGrossCap: override.initialPenguGrossCap,
+                maximumPortfolioGross: override.maximumPortfolioGross,
+                maximumDailyLossPct: override.maximumDailyLossPct,
+                maximumDailyLossUsd: override.maximumDailyLossUsd,
+            };
+        }
+        if (killSwitch) {
+            state.killSwitch = {
+                active: true,
+                action: killSwitch.action,
+                reason: killSwitch.reason,
+                operator: killSwitch.operator,
+                activatedAt: killSwitch.activatedAt,
+                observedAt: this.now(),
+            };
+        } else if (state.killSwitch?.active) {
+            state.killSwitch = { ...state.killSwitch, active: false, observedAt: this.now() };
+        }
+        if (killSwitch) return { flatten: true, reason: `Kill Switch: ${killSwitch.reason}` };
+        if (state.dailyRisk.tripped) return { flatten: true, reason: state.dailyRisk.tripReason || "V96 daily loss limit tripped." };
+        return { flatten: false, reason: undefined as string | undefined };
     }
 
     private async reconcilePending(state: DisDexV96RunnerState): Promise<DisDexV96TickResult> {
@@ -192,6 +260,14 @@ export class DisDexV96PortfolioRunner {
             return { status: "manual-review", message: pending.lastError, idempotencyKey: pending.idempotencyKey };
         }
         try {
+            if (!pending.reduceOnly) {
+                const risk = await this.refreshRisk(state);
+                if (risk.flatten) {
+                    state.pending = undefined;
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message: `${risk.reason} Planned exposure-increasing order was canceled before submission.` };
+                }
+            }
             pending.phase = "submitted";
             pending.updatedAt = this.now();
             await this.dependencies.stateStore.save(state);
@@ -264,10 +340,18 @@ export class DisDexV96PortfolioRunner {
                 this.dependencies.executor.getPositions(),
                 this.dependencies.executor.getOpenOrders(),
             ]);
+            let risk: { flatten: boolean; reason?: string };
+            try {
+                risk = await this.refreshRisk(state, account, positions);
+            } catch (error) {
+                state.manualReviewReason = `V96 risk-control validation failed: ${error instanceof Error ? error.message : String(error)}`;
+                await this.dependencies.stateStore.save(state);
+                return { status: "manual-review", message: state.manualReviewReason };
+            }
             if (state.bootstrapRequired) {
                 if (this.dependencies.config.mode === "live") {
-                    const managedPositions = positions.filter((position) => MANAGED_SYMBOLS.includes(position.symbol.toUpperCase() as typeof MANAGED_SYMBOLS[number]));
-                    if (managedPositions.length || openOrders.length) {
+                    const initialManagedPositions = managedPositions(positions);
+                    if (initialManagedPositions.length || openOrders.length) {
                         state.manualReviewReason = "Initial V96 LIVE bootstrap requires managed symbols to be flat and zero open orders.";
                         await this.dependencies.stateStore.save(state);
                         return { status: "manual-review", message: state.manualReviewReason };
@@ -278,12 +362,19 @@ export class DisDexV96PortfolioRunner {
                 return { status: "held", message: "V96 bootstrap completed; signal evaluation starts on the next tick." };
             }
             if (openOrders.length) {
+                if (risk.flatten) {
+                    state.manualReviewReason = `${risk.reason} Existing open orders prevent automatic emergency flattening.`;
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "manual-review", message: state.manualReviewReason };
+                }
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: `V96 will not rebalance while ${openOrders.length} open order(s) exist.` };
             }
 
-            const signal = buildDisDexV96CombinedSignal(history, this.now());
-            if (signal.allocation.finalGross > this.dependencies.config.maxGross + 1e-9) {
+            const signal = buildDisDexV96CombinedSignal(history, this.now(), {
+                penguTargetGrossCap: this.dependencies.config.penguTargetGrossCap,
+            });
+            if (!risk.flatten && signal.allocation.finalGross > this.dependencies.config.maxGross + 1e-9) {
                 state.forwardEvidence.grossCapBreaches += 1;
                 state.manualReviewReason = `V96 Gross cap breach: ${signal.allocation.finalGross}`;
                 await this.dependencies.stateStore.save(state);
@@ -302,6 +393,11 @@ export class DisDexV96PortfolioRunner {
             }
             state.lastSignalReferenceTs = signal.referenceTs;
 
+            const activeManagedPositions = managedPositions(positions);
+            if (risk.flatten && activeManagedPositions.length === 0) {
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: `${risk.reason} No managed position remains open.`, signal };
+            }
             const quoteSymbols = new Set<string>([
                 ...MANAGED_SYMBOLS,
                 ...(this.dependencies.config.closeUnmanagedPositions ? positions.map((position) => position.symbol.toUpperCase()) : []),
@@ -309,11 +405,12 @@ export class DisDexV96PortfolioRunner {
             const quotes = Object.fromEntries(await Promise.all(
                 [...quoteSymbols].map(async (symbol) => [symbol, await this.dependencies.executor.getMarketQuote(symbol)]),
             ));
+            const targetWeights = risk.flatten ? {} : signal.targetWeights;
             const rebalance = buildDisDexV35RebalanceActions({
                 account,
                 positions,
                 quotes,
-                targetWeights: signal.targetWeights,
+                targetWeights,
                 config: {
                     cashReservePct: this.dependencies.config.cashReservePct,
                     maxGross: this.dependencies.config.maxGross,
@@ -324,10 +421,21 @@ export class DisDexV96PortfolioRunner {
             });
             if (!rebalance.actions.length) {
                 await this.dependencies.stateStore.save(state);
-                return { status: "no-change", message: `V96 portfolio is within ${rebalance.tolerance.toFixed(2)} USD tolerance.`, signal };
+                return {
+                    status: "no-change",
+                    message: risk.flatten
+                        ? `${risk.reason} Emergency flatten target is already satisfied.`
+                        : `V96 portfolio is within ${rebalance.tolerance.toFixed(2)} USD tolerance.`,
+                    signal,
+                };
             }
             const action = rebalance.actions[0];
-            const key = idempotencyKey(signal, action);
+            if (risk.flatten && !action.reduceOnly) {
+                state.manualReviewReason = "V96 risk invariant violation: emergency action was not reduce-only.";
+                await this.dependencies.stateStore.save(state);
+                return { status: "manual-review", message: state.manualReviewReason, signal, action };
+            }
+            const key = idempotencyKey(signal, action, risk.reason);
             if (state.lastCompletedIdempotencyKey === key) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "The same V96 rebalance action was already completed.", signal, action, idempotencyKey: key };
@@ -370,7 +478,7 @@ export class DisDexV96PortfolioRunner {
                 createdAt: this.now(),
                 updatedAt: this.now(),
                 retryCount: 0,
-                reason: `${DISDEX_V96_STRATEGY_ID}: ${action.reason} coreScale=${signal.allocation.coreScale.toFixed(6)} penguSide=${signal.pengu.side} penguClip=${signal.allocation.penguClip.toFixed(6)}`,
+                reason: `${DISDEX_V96_STRATEGY_ID}: ${risk.reason || action.reason} coreScale=${signal.allocation.coreScale.toFixed(6)} penguSide=${signal.pengu.side} penguClip=${signal.allocation.penguClip.toFixed(6)} penguGrossCap=${signal.penguGrossCapApplied.toFixed(6)}`,
             };
             state.pending = pending;
             await this.dependencies.stateStore.save(state);
@@ -384,6 +492,8 @@ export class DisDexV96PortfolioRunner {
                 normalizedQuantity: pending.normalizedQuantity,
                 coreScale: signal.allocation.coreScale,
                 penguClip: signal.allocation.penguClip,
+                penguGrossCap: signal.penguGrossCapApplied,
+                riskReason: risk.reason,
             });
             const result = await this.executePending(state);
             return { ...result, signal, action, idempotencyKey: key };
@@ -410,5 +520,13 @@ export function buildDefaultDisDexV96RunnerConfig(
         rebalanceTolerancePct: Math.min(10, Math.max(0.1, input.rebalanceTolerancePct ?? DISDEX_V96_RUNTIME.rebalanceTolerancePct)),
         maxTransactionRetries: Math.max(1, input.maxTransactionRetries ?? 3),
         closeUnmanagedPositions: input.closeUnmanagedPositions === true,
+        penguTargetGrossCap: input.penguTargetGrossCap,
+        maximumDailyLossPct: Math.min(
+            DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct,
+            Math.max(0.1, input.maximumDailyLossPct ?? DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct),
+        ),
+        maximumDailyLossUsd: input.maximumDailyLossUsd && input.maximumDailyLossUsd > 0 ? input.maximumDailyLossUsd : undefined,
+        killSwitchPath: input.killSwitchPath,
+        operatorOverride: input.operatorOverride,
     };
 }

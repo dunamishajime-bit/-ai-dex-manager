@@ -39,7 +39,7 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: npm ci
-      - name: V95 Python to TypeScript golden-vector parity
+      - name: V95 Python to TypeScript golden-vector parity and V96 safeguards
         run: npm run strategy:disdex-v96:parity
       - name: Write execution-parity approval manifest
         env:
@@ -50,29 +50,41 @@ jobs:
             .runtime-state/disdex-v95-golden.json \
             .runtime-state/disdex-v96-execution-parity-approved.json
       - name: V96 TypeScript boundary
-        run: npm run strategy:disdex-v96:typecheck
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run strategy:disdex-v96:typecheck 2>&1 | tee .runtime-state/disdex-v96-typecheck.log
       - name: Existing V46 validation
         run: |
           npm run strategy:disdex-v46:selftest
           npm run strategy:disdex-v46:typecheck
       - name: Existing V35 runner typecheck
         run: npm run strategy:disdex-v35:runner:typecheck
-      - name: Execution parity policy audit
+      - name: LIVE promotion policy audit
         shell: bash
         run: |
           set -euo pipefail
           grep -q 'strategyId: DISDEX_V96_STRATEGY_ID' config/disdexV96Runtime.ts
-          grep -q 'mode: "PAPER"' config/disdexV96Runtime.ts
-          grep -q 'liveTradingEnabled: false' config/disdexV96Runtime.ts
+          grep -q 'mode: "LIVE_READY"' config/disdexV96Runtime.ts
+          grep -q 'liveTradingEnabled: true' config/disdexV96Runtime.ts
           grep -q 'forwardEvidenceStatus: "NOT_APPROVED"' config/disdexV96Runtime.ts
+          grep -q 'operatorOverrideEnabled: true' config/disdexV96Runtime.ts
+          grep -q 'maximumOverridePenguGross: 0.15' config/disdexV96Runtime.ts
+          grep -q 'maximumDailyLossPct: 2' config/disdexV96Runtime.ts
+          grep -q 'killSwitchAction: "FLATTEN_MANAGED"' config/disdexV96Runtime.ts
           grep -q 'status: "APPROVED"' config/disdexV96Runtime.ts
           grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS' config/disdexV96Runtime.ts
           grep -q 'buildDisDexV95CoreSignal' lib/disdex-v96-combined-signal.ts
-          grep -q 'V96 repository liveTradingEnabled is false' scripts/install-disdex-v96-systemd.sh
+          grep -q 'DISDEX_V96_RUNTIME_COMMIT_SHA' lib/disdex-v96-live-gates.ts
+          grep -q 'DISDEX_V96_OPERATOR_OVERRIDE_FILE' scripts/install-disdex-v96-systemd.sh
+          grep -q 'DISDEX_V96_KILL_SWITCH_FILE' scripts/install-disdex-v96-systemd.sh
+          grep -q 'strategy:disdex-v96:preflight' scripts/install-disdex-v96-systemd.sh
+          grep -q 'before any existing V46 service is stopped' scripts/install-disdex-v96-systemd.sh
+          grep -q 'DISDEX_V96_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT' scripts/disdex-v96-live-preflight.ts
           test -s .runtime-state/disdex-v96-execution-parity-approved.json
       - name: Shell syntax
         run: bash -n scripts/install-disdex-v96-systemd.sh
-      - name: Upload V95/V96 parity evidence
+      - name: Upload V95/V96 parity evidence and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -80,5 +92,6 @@ jobs:
           path: |
             .runtime-state/disdex-v95-golden.json
             .runtime-state/disdex-v96-execution-parity-approved.json
+            .runtime-state/disdex-v96-typecheck.log
           if-no-files-found: warn
           retention-days: 90
