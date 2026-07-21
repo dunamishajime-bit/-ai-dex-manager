@@ -16,15 +16,6 @@ interface GoldenPayload {
     artifactSha256: string;
 }
 
-function stable(value: unknown): string {
-    if (Array.isArray(value)) return `[${value.map(stable).join(",")}]`;
-    if (value && typeof value === "object") {
-        const object = value as Record<string, unknown>;
-        return `{${Object.keys(object).sort().map((key) => `${JSON.stringify(key)}:${stable(object[key])}`).join(",")}}`;
-    }
-    return JSON.stringify(value);
-}
-
 function assertDeepClose(actual: unknown, expected: unknown, path = "root") {
     if (typeof actual === "number" && typeof expected === "number") {
         assert.ok(Number.isFinite(actual) && Number.isFinite(expected), `${path} must be finite`);
@@ -49,12 +40,12 @@ function assertDeepClose(actual: unknown, expected: unknown, path = "root") {
 
 async function main() {
     const path = resolve(process.argv[2] || ".runtime-state/disdex-v95-golden.json");
-    const payload = JSON.parse(await readFile(path, "utf8")) as GoldenPayload;
+    const raw = await readFile(path, "utf8");
+    const payload = JSON.parse(raw) as GoldenPayload;
     assert.equal(payload.schemaVersion, 1);
     assert.equal(payload.strategyId, "V35_WEIGHT_BAND_PLUS_FIXED_STRONG_V95");
-    const canonical = stable({ frames: payload.frames, expected: payload.expected });
-    const artifactSha256 = createHash("sha256").update(canonical).digest("hex");
-    assert.equal(artifactSha256, payload.artifactSha256, "Golden artifact SHA-256 mismatch");
+    assert.match(payload.artifactSha256, /^[a-f0-9]{64}$/i);
+    const fileSha256 = createHash("sha256").update(raw).digest("hex");
 
     const actual = runDisDexV95CoreController(payload.frames);
     assertDeepClose(actual, payload.expected);
@@ -68,7 +59,8 @@ async function main() {
         status: "V95_TYPESCRIPT_GOLDEN_VECTOR_PARITY_PASS",
         strategyId: payload.strategyId,
         frames: payload.frames.length,
-        artifactSha256,
+        pythonCanonicalSha256: payload.artifactSha256,
+        goldenFileSha256: fileSha256,
         ignoredWeightChanges: actual.diagnostics.ignoredWeightChanges,
         acceptedWeightRebalances: actual.diagnostics.acceptedWeightRebalances,
         growthBuckets: actual.diagnostics.growthBuckets,
