@@ -1,0 +1,31 @@
+name: V96 Forward Shadow Contract
+
+on:
+  pull_request:
+    branches:
+      - research/v71-dd-v35-growth-v82
+    paths:
+      - scripts/disdex-v96-core-boost-pyramid-shadow-contract.ts
+      - docs/DISDEX_V96_FORWARD_SHADOW_PROTOCOL.md
+      - .github/workflows/v96-forward-shadow-contract.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Run frozen Shadow contract self-test
+        run: npx tsx scripts/disdex-v96-core-boost-pyramid-shadow-contract.ts --selftest
