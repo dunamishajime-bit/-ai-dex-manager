@@ -51,11 +51,25 @@ export const DISDEX_V96_EXECUTION_PARITY = {
     approvalScope: "ALGORITHM_AND_PRODUCTION_EXECUTION_CONTRACT",
 } as const;
 
+export const DISDEX_V96_LIVE_PROMOTION = {
+    policyVersion: 1,
+    operatorOverrideEnabled: true,
+    maximumOverrideValidityHours: 72,
+    maximumOverridePenguGross: 0.15,
+    maximumPortfolioGross: 2,
+    maximumDailyLossPct: 2,
+    requireAbsoluteOrPercentageDailyLossLimit: true,
+    killSwitchAction: "FLATTEN_MANAGED",
+    killSwitchFailClosed: true,
+    requireExplicitV46ServiceHandoff: true,
+    allowForwardEvidenceBypassOnlyWithOverride: true,
+} as const;
+
 export const DISDEX_V96_RUNTIME = {
     strategyId: DISDEX_V96_STRATEGY_ID,
-    implementationStatus: "PRODUCTION_PATH_IMPLEMENTED_EXECUTION_PARITY_APPROVED",
-    mode: "PAPER" as const,
-    liveTradingEnabled: false,
+    implementationStatus: "LIVE_READY_OPERATOR_CONTROLLED_EXECUTION_PARITY_APPROVED",
+    mode: "LIVE_READY" as const,
+    liveTradingEnabled: true,
     maximumGross: DISDEX_V96_ALLOCATION.totalGrossCap,
     cashReservePct: 2,
     maximumSlippageBps: 35,
@@ -63,10 +77,13 @@ export const DISDEX_V96_RUNTIME = {
     rebalanceTolerancePct: 1,
     closeUnmanagedPositions: false,
     orderClientIdPrefix: "v96-",
-    stateSchemaVersion: 1,
+    stateSchemaVersion: 2,
     stateDirectory: ".runtime-state/disdex-v96",
     forwardEvidenceStatus: "NOT_APPROVED",
     executionParityStatus: DISDEX_V96_EXECUTION_PARITY.status,
     coreExecutionParity: DISDEX_V96_EXECUTION_PARITY.corePort,
-    liveBlockReason: "V96 future Forward Evidence is incomplete. LIVE remains fail-closed until a separately reviewed promotion or operator-controlled override policy is implemented.",
+    operatorOverrideStatus: "IMPLEMENTED_REQUIRED_WHEN_FORWARD_NOT_APPROVED",
+    dailyLossLimitStatus: "IMPLEMENTED_MAX_2_PERCENT",
+    killSwitchStatus: "IMPLEMENTED_FLATTEN_MANAGED_REDUCE_ONLY",
+    liveBlockReason: "LIVE requires execution parity plus either approved Forward Evidence or a valid time-limited Operator Override, daily loss controls, Kill Switch configuration, credentials, and explicit V46 service handoff.",
 } as const;
