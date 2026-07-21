@@ -16,13 +16,13 @@ V96 historical research is tracked in PR #56. Production implementation is track
 - Aster order route: **implemented**
 - Durable V96 state: **implemented**
 - VPS/systemd path: **implemented**
-- Forward Evidence: **not approved**
+- Forward Evidence: **not approved because it requires future observations**
 - Repository mode: `PAPER`
 - Repository LIVE flag: `false`
 - VPS deployment: **not performed by this PR**
 - Real orders: **not enabled or sent by this PR**
 
-Execution implementation is complete. LIVE remains fail-closed because future Forward Evidence has not yet been collected and approved.
+The V96 code and execution-parity implementation are complete. The remaining work is future Forward Evidence, a separate LIVE-promotion decision, and actual VPS deployment.
 
 ## Frozen V96 contract
 
@@ -61,7 +61,7 @@ Execution implementation is complete. LIVE remains fail-closed because future Fo
 
 `lib/disdex-v95-core-signal.ts` replays completed common 12-hour V35 Core bars and applies the controller. An incomplete current candle is excluded, and an unobserved future return is forced to zero.
 
-`lib/disdex-v96-combined-signal.ts` now uses the V95 controlled Core target before applying the V96 reserved-PENGU allocator.
+`lib/disdex-v96-combined-signal.ts` uses the V95 controlled Core target before applying the V96 reserved-PENGU allocator.
 
 ## Golden Vector and parity evidence
 
@@ -115,7 +115,7 @@ Writes use a temporary file, atomic rename and file mode `0600`. A strategy, sch
 
 ## Forward Evidence
 
-The remaining promotion gate requires future observations after the configuration is frozen:
+Forward Evidence cannot be completed by code changes because it requires future observations after the configuration is frozen:
 
 - 30 completed calendar days;
 - 120 completed decision bars;
@@ -161,8 +161,8 @@ Do not report VPS deployment, service activation or trading unless the command w
 ## Production/LIVE/VPS/orders
 
 - Production code: implemented in PR #58
-- Execution parity: approved by CI when the workflow passes
-- Forward Evidence: not approved
+- Execution parity: approved when the current CI succeeds
+- Forward Evidence: future-only and not approved
 - LIVE: disabled
 - VPS: not deployed by GitHub changes alone
 - Orders: not sent by this PR
