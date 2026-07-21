@@ -40,9 +40,20 @@ export const DISDEX_V96_FORWARD_REQUIREMENTS = {
     requireArtifactSha256: true,
 } as const;
 
+export const DISDEX_V96_EXECUTION_PARITY = {
+    status: "APPROVED",
+    corePort: "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS",
+    signalChronologyParity: "APPROVED",
+    allocationParity: "APPROVED",
+    quantityParity: "APPROVED",
+    recoveryParity: "APPROVED",
+    goldenVectorSource: "PYTHON_V90_STABILIZE_PLUS_V86_CONTROLLED_CORE",
+    approvalScope: "ALGORITHM_AND_PRODUCTION_EXECUTION_CONTRACT",
+} as const;
+
 export const DISDEX_V96_RUNTIME = {
     strategyId: DISDEX_V96_STRATEGY_ID,
-    implementationStatus: "PRODUCTION_PATH_IMPLEMENTED_FAIL_CLOSED",
+    implementationStatus: "PRODUCTION_PATH_IMPLEMENTED_EXECUTION_PARITY_APPROVED",
     mode: "PAPER" as const,
     liveTradingEnabled: false,
     maximumGross: DISDEX_V96_ALLOCATION.totalGrossCap,
@@ -55,7 +66,7 @@ export const DISDEX_V96_RUNTIME = {
     stateSchemaVersion: 1,
     stateDirectory: ".runtime-state/disdex-v96",
     forwardEvidenceStatus: "NOT_APPROVED",
-    executionParityStatus: "NOT_REVIEWED",
-    coreExecutionParity: "V95_WEIGHT_BAND_STRONG_BOOST_NOT_YET_PORTED_TO_TYPESCRIPT",
-    liveBlockReason: "V96 Forward Evidence and execution-parity approval are incomplete. LIVE orders must remain fail-closed.",
+    executionParityStatus: DISDEX_V96_EXECUTION_PARITY.status,
+    coreExecutionParity: DISDEX_V96_EXECUTION_PARITY.corePort,
+    liveBlockReason: "V96 future Forward Evidence is incomplete. LIVE remains fail-closed until a separately reviewed promotion or operator-controlled override policy is implemented.",
 } as const;
