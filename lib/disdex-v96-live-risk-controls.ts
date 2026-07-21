@@ -152,6 +152,21 @@ export function updateDisDexV96DailyRisk(input: {
     const now = input.now ?? Date.now();
     const day = utcDay(now);
     const equity = Math.max(0, finite(input.equity));
+    if (input.previous?.tripped) {
+        const lossUsd = Math.max(input.previous.lossUsd, input.previous.dayStartEquity - equity, 0);
+        const lossPct = input.previous.dayStartEquity > 0
+            ? lossUsd / input.previous.dayStartEquity * 100
+            : input.previous.lossPct;
+        return {
+            ...input.previous,
+            lastEquity: equity,
+            lossUsd,
+            lossPct,
+            tripped: true,
+            tripReason: input.previous.tripReason || "V96 daily loss trip remains latched until manual review.",
+            lastCheckedAt: now,
+        };
+    }
     const prior = input.previous?.utcDay === day ? input.previous : undefined;
     const dayStartEquity = prior?.dayStartEquity && prior.dayStartEquity > 0 ? prior.dayStartEquity : equity;
     const percentageLimitUsd = dayStartEquity * Math.max(0, finite(input.maximumDailyLossPct)) / 100;
@@ -161,8 +176,7 @@ export function updateDisDexV96DailyRisk(input: {
     const lossLimitUsd = Math.min(percentageLimitUsd, absoluteLimit);
     const lossUsd = Math.max(0, dayStartEquity - equity);
     const lossPct = dayStartEquity > 0 ? lossUsd / dayStartEquity * 100 : 0;
-    const tripped = Boolean(prior?.tripped) || (lossLimitUsd > 0 && lossUsd + 1e-9 >= lossLimitUsd);
-    const trippedAt = prior?.trippedAt || (tripped ? now : undefined);
+    const tripped = lossLimitUsd > 0 && lossUsd + 1e-9 >= lossLimitUsd;
     return {
         utcDay: day,
         dayStartEquity,
@@ -171,9 +185,9 @@ export function updateDisDexV96DailyRisk(input: {
         lossPct,
         lossLimitUsd,
         tripped,
-        trippedAt,
+        trippedAt: tripped ? now : undefined,
         tripReason: tripped
-            ? prior?.tripReason || `V96 daily equity loss limit reached: ${lossUsd.toFixed(2)} USD / ${lossPct.toFixed(4)}%.`
+            ? `V96 daily equity loss limit reached: ${lossUsd.toFixed(2)} USD / ${lossPct.toFixed(4)}%. Manual reset is required.`
             : undefined,
         lastCheckedAt: now,
     };
