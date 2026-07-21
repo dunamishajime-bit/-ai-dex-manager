@@ -107,6 +107,10 @@ export interface DisDexV96RunnerState {
     manualReviewReason?: string;
 }
 
+type DisDexV96RawRunnerState = Omit<Partial<DisDexV96RunnerState>, "version"> & {
+    version?: number;
+};
+
 function defaultForwardEvidence(): DisDexV96ForwardEvidenceState {
     return {
         completedDecisionBars: 0,
@@ -137,7 +141,7 @@ export function createDisDexV96RunnerState(mode: DisDexV96RunnerMode): DisDexV96
 
 function normalize(value: unknown, mode: DisDexV96RunnerMode): DisDexV96RunnerState {
     if (!value || typeof value !== "object") return createDisDexV96RunnerState(mode);
-    const raw = value as Partial<DisDexV96RunnerState> & { version?: number };
+    const raw = value as DisDexV96RawRunnerState;
     if (raw.strategyId && raw.strategyId !== DISDEX_V96_STRATEGY_ID) {
         throw new Error(`V96 state strategyId mismatch: ${String(raw.strategyId)}`);
     }
