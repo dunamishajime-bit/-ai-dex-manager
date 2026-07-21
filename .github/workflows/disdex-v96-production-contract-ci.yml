@@ -6,7 +6,10 @@ on:
       - master
     paths:
       - config/disdexV96Runtime.ts
+      - lib/disdex-v95-*.ts
       - lib/disdex-v96-*.ts
+      - scripts/disdex-v95-*.ts
+      - scripts/disdex_v95_*.py
       - scripts/disdex-v96-*.ts
       - scripts/install-disdex-v96-systemd.sh
       - docs/DISDEX_V96_PRODUCTION_HANDOFF.md
@@ -21,7 +24,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,10 +33,14 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install
         run: npm ci
-      - name: V96 production self-test
-        run: npm run strategy:disdex-v96:selftest
+      - name: V95 Python to TypeScript golden-vector parity
+        run: npm run strategy:disdex-v96:parity
       - name: V96 TypeScript boundary
         run: npm run strategy:disdex-v96:typecheck
       - name: Existing V46 validation
@@ -42,16 +49,25 @@ jobs:
           npm run strategy:disdex-v46:typecheck
       - name: Existing V35 runner typecheck
         run: npm run strategy:disdex-v35:runner:typecheck
-      - name: Fail-closed policy audit
+      - name: Execution parity policy audit
         shell: bash
         run: |
           set -euo pipefail
           grep -q 'strategyId: DISDEX_V96_STRATEGY_ID' config/disdexV96Runtime.ts
           grep -q 'mode: "PAPER"' config/disdexV96Runtime.ts
           grep -q 'liveTradingEnabled: false' config/disdexV96Runtime.ts
-          grep -q 'Forward Evidence and execution-parity approval are incomplete' config/disdexV96Runtime.ts
+          grep -q 'forwardEvidenceStatus: "NOT_APPROVED"' config/disdexV96Runtime.ts
+          grep -q 'status: "APPROVED"' config/disdexV96Runtime.ts
+          grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS' config/disdexV96Runtime.ts
+          grep -q 'buildDisDexV95CoreSignal' lib/disdex-v96-combined-signal.ts
           grep -q 'V96 repository liveTradingEnabled is false' scripts/install-disdex-v96-systemd.sh
-          grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_NOT_YET_PORTED_TO_TYPESCRIPT' config/disdexV96Runtime.ts
-          grep -q 'Production/LIVE/VPS/orders' docs/DISDEX_V96_PRODUCTION_HANDOFF.md || true
       - name: Shell syntax
         run: bash -n scripts/install-disdex-v96-systemd.sh
+      - name: Upload V95 parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dis-dex-v95-v96-execution-parity
+          path: .runtime-state/disdex-v95-golden.json
+          if-no-files-found: warn
+          retention-days: 90
