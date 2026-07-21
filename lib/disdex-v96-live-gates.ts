@@ -69,6 +69,7 @@ function nonEmpty(value: unknown) {
 function evaluateForwardEvidence(
     forward: DisDexV96ForwardEvidenceApproval | undefined,
     configFingerprint: string,
+    runtimeCommitSha?: string,
 ) {
     const reasons: string[] = [];
     if (!forward || forward.status !== "APPROVED") {
@@ -77,6 +78,7 @@ function evaluateForwardEvidence(
     }
     if (forward.strategyId !== DISDEX_V96_STRATEGY_ID) reasons.push("Forward Evidence strategyId mismatch.");
     if (forward.configFingerprint !== configFingerprint) reasons.push("Forward Evidence config fingerprint mismatch.");
+    if (runtimeCommitSha && forward.approvedCommitSha !== runtimeCommitSha) reasons.push("Forward Evidence approved commit does not match the runtime commit.");
     if (forward.completedCalendarDays < DISDEX_V96_FORWARD_REQUIREMENTS.minimumCalendarDays) reasons.push("Forward Evidence calendar-day requirement is not met.");
     if (forward.completedDecisionBars < DISDEX_V96_FORWARD_REQUIREMENTS.minimumCompletedDecisionBars) reasons.push("Forward Evidence decision-bar requirement is not met.");
     if (forward.closedLongTrades < DISDEX_V96_FORWARD_REQUIREMENTS.minimumClosedLongTrades) reasons.push("Forward Evidence Long-trade requirement is not met.");
@@ -93,6 +95,7 @@ function evaluateForwardEvidence(
 function evaluateParity(
     parity: DisDexV96ExecutionParityApproval | undefined,
     configFingerprint: string,
+    runtimeCommitSha?: string,
 ) {
     const reasons: string[] = [];
     if (!parity || parity.status !== "APPROVED") {
@@ -101,6 +104,7 @@ function evaluateParity(
     }
     if (parity.strategyId !== DISDEX_V96_STRATEGY_ID) reasons.push("Execution-parity strategyId mismatch.");
     if (parity.configFingerprint !== configFingerprint) reasons.push("Execution-parity config fingerprint mismatch.");
+    if (runtimeCommitSha && parity.productionCommitSha !== runtimeCommitSha) reasons.push("Execution-parity production commit does not match the runtime commit.");
     if (!parity.allocationParityPassed) reasons.push("V96 allocation parity did not pass.");
     if (!parity.signalChronologyParityPassed) reasons.push("Signal chronology parity did not pass.");
     if (!parity.orderQuantityParityPassed) reasons.push("Order-quantity parity did not pass.");
@@ -119,27 +123,38 @@ export function evaluateDisDexV96LiveGates(input: {
     forwardEvidence?: DisDexV96ForwardEvidenceApproval;
     executionParity?: DisDexV96ExecutionParityApproval;
     operatorOverride?: DisDexV96OperatorOverrideApproval;
+    runtimeCommitSha?: string;
     now?: number;
 }): DisDexV96LiveGateResult {
     const reasons: string[] = [];
     const configFingerprint = disDexV96ConfigFingerprint();
+    const runtimeCommitSha = String(input.runtimeCommitSha || "").trim();
     if (input.runnerMode !== "live") reasons.push("Runner mode is not live.");
     if (!input.environmentLiveExecutionEnabled) reasons.push("DISDEX_V96_LIVE_EXECUTION_ENABLED is not true.");
     if (!Boolean(DISDEX_V96_RUNTIME.liveTradingEnabled)) reasons.push("Production runtime liveTradingEnabled is false.");
+    if (input.runnerMode === "live" && !runtimeCommitSha) reasons.push("DISDEX_V96_RUNTIME_COMMIT_SHA is missing.");
     if (input.activationAcknowledgement !== "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK") {
         reasons.push("Explicit V96 LIVE activation acknowledgement is missing.");
     }
 
-    const forward = evaluateForwardEvidence(input.forwardEvidence, configFingerprint);
+    const forward = evaluateForwardEvidence(input.forwardEvidence, configFingerprint, runtimeCommitSha || undefined);
     const override = evaluateDisDexV96OperatorOverride({
         approval: input.operatorOverride,
         configFingerprint,
         now: input.now,
     });
+    const overrideCommitApproved = Boolean(
+        override.allowed
+        && runtimeCommitSha
+        && input.operatorOverride?.approvedCommitSha === runtimeCommitSha,
+    );
+    if (override.allowed && !overrideCommitApproved) {
+        reasons.push("Operator Override approved commit does not match the runtime commit.");
+    }
     const evidenceRouteApproved = forward.approved || (
         DISDEX_V96_LIVE_PROMOTION.operatorOverrideEnabled
         && DISDEX_V96_LIVE_PROMOTION.allowForwardEvidenceBypassOnlyWithOverride
-        && override.allowed
+        && overrideCommitApproved
     );
     if (!evidenceRouteApproved) {
         reasons.push(...forward.reasons);
@@ -147,7 +162,7 @@ export function evaluateDisDexV96LiveGates(input: {
         reasons.push("Neither Forward Evidence nor the Operator Override route is approved.");
     }
 
-    const parity = evaluateParity(input.executionParity, configFingerprint);
+    const parity = evaluateParity(input.executionParity, configFingerprint, runtimeCommitSha || undefined);
     reasons.push(...parity.reasons);
 
     return {
@@ -155,8 +170,8 @@ export function evaluateDisDexV96LiveGates(input: {
         reasons,
         configFingerprint,
         forwardEvidenceApproved: forward.approved,
-        operatorOverrideApproved: override.allowed,
-        operatorOverride: override.allowed ? input.operatorOverride : undefined,
+        operatorOverrideApproved: overrideCommitApproved,
+        operatorOverride: overrideCommitApproved ? input.operatorOverride : undefined,
     };
 }
 
