@@ -1,0 +1,139 @@
+name: V96 Three-Day Market Microstructure Collector
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_three_day_market_collector.py"
+      - ".github/workflows/v96-three-day-market-collector.yml"
+  push:
+    branches: [master]
+    paths:
+      - "research/v96_three_day_market_collector.py"
+      - ".github/workflows/v96-three-day-market-collector.yml"
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: v96-three-day-market-microstructure-collector
+  cancel-in-progress: false
+
+env:
+  COLLECTION_START_UTC: "2026-07-22T00:00:00Z"
+  COLLECTION_END_UTC: "2026-07-25T00:00:00Z"
+  DATA_BRANCH: "research-data/v96-market-microstructure-20260722"
+  DATA_DIR: "research-data/v96-market-microstructure-20260722"
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install collector dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Syntax and unit self-test
+        run: |
+          python -m py_compile research/v96_three_day_market_collector.py
+          python research/v96_three_day_market_collector.py \
+            --self-test \
+            --output-dir .research-state/v96-three-day-market-data
+      - name: Public endpoint and websocket probe
+        run: |
+          python research/v96_three_day_market_collector.py \
+            --ignore-window \
+            --duration-seconds 8 \
+            --interval-seconds 3 \
+            --output-dir .research-state/v96-three-day-market-data
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v96-three-day-collector-probe
+          path: .research-state/v96-three-day-market-data
+          retention-days: 14
+
+  collect:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 58
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install collector dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Collect one hourly chunk
+        run: |
+          rm -rf /tmp/v96-three-day-market-data
+          mkdir -p /tmp/v96-three-day-market-data
+          python research/v96_three_day_market_collector.py \
+            --duration-seconds 3000 \
+            --interval-seconds 60 \
+            --output-dir /tmp/v96-three-day-market-data
+      - name: Upload immutable run artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-market-data-${{ github.run_id }}
+          path: /tmp/v96-three-day-market-data
+          retention-days: 90
+          if-no-files-found: warn
+      - name: Persist collected chunk to data branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(tr -d '\r\n' < /tmp/v96-three-day-market-data/run-status.txt)"
+          echo "collector_status=$STATUS"
+          if [[ "$STATUS" != "collected" ]]; then
+            exit 0
+          fi
+          STAGING="$(mktemp -d)"
+          cp -a /tmp/v96-three-day-market-data/. "$STAGING/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin "$DATA_BRANCH"; then
+            git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
+          else
+            git switch -c "$DATA_BRANCH"
+          fi
+          mkdir -p "$DATA_DIR/chunks"
+          cp -a "$STAGING"/* "$DATA_DIR/chunks/"
+          cat > "$DATA_DIR/README.md" <<EOF
+          # V96 three-day market microstructure data
+
+          - Symbols: BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT
+          - Window: 2026-07-22 00:00 UTC through 2026-07-25 00:00 UTC
+          - Snapshot interval: 60 seconds
+          - Contents: Funding/Mark/Index/Premium, Open Interest endpoint result, order-book depth, spread, depth imbalance, last price, and liquidation-stream events
+          - Trading: disabled; this branch contains evidence only
+          EOF
+          git add "$DATA_DIR"
+          if git diff --cached --quiet; then
+            echo "No new evidence to commit"
+            exit 0
+          fi
+          git commit -m "data: append V96 market microstructure chunk $GITHUB_RUN_ID"
+          git push origin "HEAD:$DATA_BRANCH"
+      - name: Disable collector after the three-day window
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(tr -d '\r\n' < /tmp/v96-three-day-market-data/run-status.txt 2>/dev/null || true)"
+          if [[ "$STATUS" == "expired" ]]; then
+            gh api --method PUT \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/v96-three-day-market-collector.yml/disable"
+            echo "Collector workflow disabled after the fixed window."
+          fi
