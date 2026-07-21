@@ -1,0 +1,45 @@
+name: V96 Independent Alpha 4h Screen
+
+on:
+  pull_request:
+    branches:
+      - research/v71-dd-v35-growth-v82
+    paths:
+      - scripts/research_lab_v96_independent_alpha_4h_screen.py
+      - scripts/research_lab_v96_independent_alpha_screen.py
+      - .github/workflows/v96-independent-alpha-4h-screen.yml
+      - scripts/research_lab_v35_weight_band_strong_v95.py
+      - scripts/research_lab_v35_weight_band_v90.py
+      - scripts/research_lab_v35_strong_growth_v86.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v96_independent_alpha_4h_screen.py
+      - name: Run independent 4h alpha screen
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_v96_independent_alpha_4h_screen.py
+      - name: Upload independent 4h alpha evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-independent-alpha-4h-screen
+          path: |
+            .research-state/v96-independent-alpha-4h-screen.json
+            .research-state/v96-independent-alpha-4h-screen.md
+          if-no-files-found: warn
+          retention-days: 90
