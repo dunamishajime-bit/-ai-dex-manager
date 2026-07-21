@@ -50,6 +50,7 @@ async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
 
 async function main() {
     const runnerMode = mode();
+    const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
     const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
         optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
@@ -63,6 +64,7 @@ async function main() {
         forwardEvidence,
         executionParity,
         operatorOverride,
+        runtimeCommitSha,
     } as const;
     const liveGate = runnerMode === "live"
         ? assertDisDexV96LiveGates(liveGateInput)
@@ -136,6 +138,7 @@ async function main() {
         event: "disdex-v96-runner-start",
         strategyId: DISDEX_V96_RUNTIME.strategyId,
         repositoryMode: DISDEX_V96_RUNTIME.mode,
+        runtimeCommitSha,
         runnerMode,
         executor: executor.constructor.name,
         maximumGross: config.maxGross,
