@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 import v96_three_day_market_collector as base
 
+ORIGINAL_SNAPSHOT_SYMBOL = base.snapshot_symbol
 JST = ZoneInfo("Asia/Tokyo")
 NY = ZoneInfo("America/New_York")
 EXECUTION_NOTIONALS = (100.0, 500.0, 1000.0)
@@ -143,7 +144,7 @@ def latest_minute_bar(capture: Dict[str, Any]) -> Optional[dict]:
 
 
 def enhanced_snapshot_symbol(symbol: str, captured_at: dt.datetime) -> Dict[str, Any]:
-    row = base.snapshot_symbol(symbol, captured_at)
+    row = ORIGINAL_SNAPSHOT_SYMBOL(symbol, captured_at)
     ticker24h = base.endpoint_capture("/fapi/v1/ticker/24hr", {"symbol": symbol})
     klines1m = base.endpoint_capture("/fapi/v1/klines", {"symbol": symbol, "interval": "1m", "limit": 2})
     row["schemaVersion"] = 2
