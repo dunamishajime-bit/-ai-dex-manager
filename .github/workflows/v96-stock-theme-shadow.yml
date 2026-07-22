@@ -14,7 +14,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -34,11 +34,31 @@ jobs:
       - name: Run fixed directional theme screen
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state/v96-stock-theme-shadow
-        run: python research/research_lab_v96_stock_theme_shadow.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if python research/research_lab_v96_stock_theme_shadow.py; then
+              exit 0
+            fi
+            echo "Aster data request failed; retry $attempt/3"
+            sleep $((attempt * 10))
+          done
+          exit 1
       - name: Run fixed market-neutral theme screen
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state/v96-stock-theme-shadow
-        run: python research/research_lab_v96_stock_theme_neutral.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if python research/research_lab_v96_stock_theme_neutral.py; then
+              exit 0
+            fi
+            echo "Aster data request failed; retry $attempt/3"
+            sleep $((attempt * 10))
+          done
+          exit 1
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
