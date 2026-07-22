@@ -1,0 +1,381 @@
+{
+  "status": "EXTENDED_FORWARD_DATA_QUALITY_PASS",
+  "extendedDataQualityPass": true,
+  "snapshots": {
+    "total": 44,
+    "schemaV2": 44,
+    "legacy": 0
+  },
+  "endpoints": {
+    "bookTicker": {
+      "attempts": 44,
+      "failures": 0,
+      "successPct": 100.0
+    },
+    "depth": {
+      "attempts": 44,
+      "failures": 0,
+      "successPct": 100.0
+    },
+    "klines1m": {
+      "attempts": 44,
+      "failures": 0,
+      "successPct": 100.0
+    },
+    "lastPrice": {
+      "attempts": 44,
+      "failures": 0,
+      "successPct": 100.0
+    },
+    "openInterest": {
+      "attempts": 44,
+      "failures": 0,
+      "successPct": 100.0
+    },
+    "premium": {
+      "attempts": 44,
+      "failures": 0,
+      "successPct": 100.0
+    },
+    "ticker24h": {
+      "attempts": 44,
+      "failures": 0,
+      "successPct": 100.0
+    }
+  },
+  "latencies": {
+    "bookTicker": {
+      "samples": 44,
+      "p50Ms": 186.423,
+      "p95Ms": 302.07095000000004,
+      "maxMs": 360.216
+    },
+    "depth": {
+      "samples": 44,
+      "p50Ms": 186.151,
+      "p95Ms": 295.18925,
+      "maxMs": 340.83
+    },
+    "klines1m": {
+      "samples": 44,
+      "p50Ms": 188.8305,
+      "p95Ms": 329.98595000000006,
+      "maxMs": 381.195
+    },
+    "lastPrice": {
+      "samples": 44,
+      "p50Ms": 189.565,
+      "p95Ms": 299.9684500000001,
+      "maxMs": 443.731
+    },
+    "openInterest": {
+      "samples": 44,
+      "p50Ms": 210.0135,
+      "p95Ms": 568.0309500000001,
+      "maxMs": 616.388
+    },
+    "premium": {
+      "samples": 44,
+      "p50Ms": 225.071,
+      "p95Ms": 498.10040000000004,
+      "maxMs": 508.383
+    },
+    "ticker24h": {
+      "samples": 44,
+      "p50Ms": 189.164,
+      "p95Ms": 294.40010000000007,
+      "maxMs": 332.541
+    }
+  },
+  "minuteBarCoveragePctV2": 100.0,
+  "marketActivityCoveragePctV2": 100.0,
+  "marketClockCounts": {
+    "stockEntryAllowedByClock": 44,
+    "usRegularSession": 44
+  },
+  "sessionCounts": {
+    "REGULAR_CORE": 44
+  },
+  "executionFillability": {
+    "100": {
+      "buy": {
+        "attempts": 44,
+        "fillable": 44,
+        "fillablePct": 100.0
+      },
+      "sell": {
+        "attempts": 44,
+        "fillable": 44,
+        "fillablePct": 100.0
+      }
+    },
+    "500": {
+      "buy": {
+        "attempts": 44,
+        "fillable": 44,
+        "fillablePct": 100.0
+      },
+      "sell": {
+        "attempts": 44,
+        "fillable": 44,
+        "fillablePct": 100.0
+      }
+    },
+    "1000": {
+      "buy": {
+        "attempts": 44,
+        "fillable": 44,
+        "fillablePct": 100.0
+      },
+      "sell": {
+        "attempts": 44,
+        "fillable": 44,
+        "fillablePct": 100.0
+      }
+    }
+  },
+  "executionSlippage": {
+    "100": {
+      "buy": {
+        "samples": 44,
+        "medianSlippageBps": 5.742138679544206,
+        "p95SlippageBps": 17.195043640441444,
+        "maxSlippageBps": 76.17541905463376
+      },
+      "sell": {
+        "samples": 44,
+        "medianSlippageBps": 5.3682695821077875,
+        "p95SlippageBps": 18.162802762553223,
+        "maxSlippageBps": 76.76014265800113
+      }
+    },
+    "500": {
+      "buy": {
+        "samples": 44,
+        "medianSlippageBps": 6.875714799517985,
+        "p95SlippageBps": 17.195043640441444,
+        "maxSlippageBps": 76.17541905463376
+      },
+      "sell": {
+        "samples": 44,
+        "medianSlippageBps": 5.926987188391575,
+        "p95SlippageBps": 18.162802762553223,
+        "maxSlippageBps": 76.85188120066577
+      }
+    },
+    "1000": {
+      "buy": {
+        "samples": 44,
+        "medianSlippageBps": 7.703158361834772,
+        "p95SlippageBps": 18.12985979884785,
+        "maxSlippageBps": 76.17541905463376
+      },
+      "sell": {
+        "samples": 44,
+        "medianSlippageBps": 6.609813200449954,
+        "p95SlippageBps": 18.162802762553223,
+        "maxSlippageBps": 76.89722744224747
+      }
+    }
+  },
+  "acquisitionGaps": {
+    "symbols": {
+      "ADBEUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "AMATUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "AMDUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "AMZNUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "ARMUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "ASMLUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "AVGOUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "CRMUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "DRAMUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "GOOGLUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "INTCUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "METAUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "MRVLUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "MSFTUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "MUUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "NVDAUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "ORCLUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "PLTRUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "QCOMUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "SNDKUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "TSLAUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      },
+      "TSMUSDT": {
+        "samples": 2,
+        "maxGapSeconds": 60.015,
+        "gapsOver90Seconds": 0,
+        "gapsOver10Minutes": 0
+      }
+    },
+    "globalMaxGapSeconds": 60.015,
+    "globalP95GapSeconds": 60.015,
+    "gapsOver90Seconds": 0,
+    "gapsOver10Minutes": 0
+  },
+  "contracts": {
+    "files": 1,
+    "observedSymbols": [
+      "ADBEUSDT",
+      "AMATUSDT",
+      "AMDUSDT",
+      "AMZNUSDT",
+      "ARMUSDT",
+      "ASMLUSDT",
+      "AVGOUSDT",
+      "CRMUSDT",
+      "DRAMUSDT",
+      "GOOGLUSDT",
+      "INTCUSDT",
+      "METAUSDT",
+      "MRVLUSDT",
+      "MSFTUSDT",
+      "MUUSDT",
+      "NVDAUSDT",
+      "ORCLUSDT",
+      "PLTRUSDT",
+      "QCOMUSDT",
+      "SNDKUSDT",
+      "TSLAUSDT",
+      "TSMUSDT"
+    ],
+    "missingSymbols": [],
+    "statuses": {
+      "TSLAUSDT": "TRADING",
+      "NVDAUSDT": "TRADING",
+      "AMZNUSDT": "TRADING",
+      "METAUSDT": "TRADING",
+      "MSFTUSDT": "TRADING",
+      "MUUSDT": "TRADING",
+      "SNDKUSDT": "TRADING",
+      "INTCUSDT": "TRADING",
+      "GOOGLUSDT": "TRADING",
+      "TSMUSDT": "TRADING",
+      "DRAMUSDT": "TRADING",
+      "PLTRUSDT": "TRADING",
+      "AVGOUSDT": "TRADING",
+      "AMDUSDT": "TRADING",
+      "MRVLUSDT": "TRADING",
+      "ORCLUSDT": "TRADING",
+      "ARMUSDT": "TRADING",
+      "QCOMUSDT": "TRADING",
+      "AMATUSDT": "TRADING",
+      "CRMUSDT": "TRADING",
+      "ASMLUSDT": "TRADING",
+      "ADBEUSDT": "TRADING"
+    },
+    "clockSkewMedianMs": -1407.0,
+    "clockSkewMaxAbsMs": 1407.0,
+    "coveragePass": true
+  },
+  "limitations": [
+    "Legacy schema-v1 snapshots remain valid for core microstructure but do not contain volume, contract metadata, or simulated depth fills.",
+    "GitHub scheduled workflow start times are not guaranteed; acquisition gaps are measured explicitly.",
+    "Clock eligibility is evidence only and does not place orders or alter the current V96 strategy."
+  ]
+}
