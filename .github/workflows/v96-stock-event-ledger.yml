@@ -5,6 +5,7 @@ on:
     paths:
       - "research/v96_stock_event_ledger.py"
       - "research/v96_stock_event_ledger_v2.py"
+      - "research/v96_stock_event_ledger_v3.py"
       - "research/v96_stock_event_ledger_validate.py"
       - ".github/workflows/v96-stock-event-ledger.yml"
   push:
@@ -12,14 +13,12 @@ on:
     paths:
       - "research/v96_stock_event_ledger.py"
       - "research/v96_stock_event_ledger_v2.py"
+      - "research/v96_stock_event_ledger_v3.py"
       - "research/v96_stock_event_ledger_validate.py"
       - ".github/workflows/v96-stock-event-ledger.yml"
   schedule:
-    # Full source snapshot each hour: SEC, earnings, macro, news, halts, Aster status.
     - cron: "7 * * * *"
-    # Extra fast snapshots every 15 minutes during the U.S. session.
     - cron: "22,37,52 13-20 * * 1-5"
-    # Fixed-window finalization attempts after 2026-07-29 01:00 UTC.
     - cron: "5,15,25,35,45,55 1 29 7 *"
   workflow_dispatch:
 
@@ -51,13 +50,14 @@ jobs:
         run: |
           python -m py_compile research/v96_stock_event_ledger.py
           python -m py_compile research/v96_stock_event_ledger_v2.py
+          python -m py_compile research/v96_stock_event_ledger_v3.py
           python -m py_compile research/v96_stock_event_ledger_validate.py
-          python research/v96_stock_event_ledger_v2.py --self-test
+          python research/v96_stock_event_ledger_v3.py --self-test
           python research/v96_stock_event_ledger_validate.py --self-test
-      - name: Probe corrected stock event sources
+      - name: Probe stock event sources and fallbacks
         run: |
           rm -rf .research-state/v96-stock-event-ledger .research-state/v96-stock-event-ledger-report
-          python research/v96_stock_event_ledger_v2.py \
+          python research/v96_stock_event_ledger_v3.py \
             --ignore-window \
             --mode full \
             --output-dir .research-state/v96-stock-event-ledger
@@ -110,12 +110,12 @@ jobs:
       - name: Collect immutable event snapshot
         if: hashFiles('/tmp/v96-stock-event-ledger/run-status.txt') == ''
         run: |
-          python research/v96_stock_event_ledger_v2.py \
+          python research/v96_stock_event_ledger_v3.py \
             --mode "$EVENT_LEDGER_MODE" \
             --start-utc "$EVENT_LEDGER_START_UTC" \
             --end-utc "$EVENT_LEDGER_END_UTC" \
             --output-dir /tmp/v96-stock-event-ledger
-      - name: Validate full source snapshot
+      - name: Validate full snapshot
         if: env.EVENT_LEDGER_MODE == 'full' && success()
         shell: bash
         run: |
@@ -137,7 +137,7 @@ jobs:
           with gzip.open(files[0], 'rt', encoding='utf-8') as handle:
               payload = json.load(handle)
           assert payload['mode'] == 'fast'
-          assert payload['collectorVersion'] == 2
+          assert payload['collectorVersion'] == 3
           assert payload['safety']['mode'] == 'SHADOW_OBSERVATION_ONLY'
           assert payload['safety']['orderSubmissionAllowed'] is False
           assert payload['safety']['entryDecisionChanged'] is False
@@ -159,9 +159,7 @@ jobs:
         run: |
           set -euo pipefail
           STATUS="$(tr -d '\r\n' < /tmp/v96-stock-event-ledger/run-status.txt 2>/dev/null || true)"
-          if [[ "$STATUS" != "collected" ]]; then
-            exit 0
-          fi
+          if [[ "$STATUS" != "collected" ]]; then exit 0; fi
           STAGING="$(mktemp -d)"
           cp -a /tmp/v96-stock-event-ledger/. "$STAGING/"
           cp -a /tmp/v96-stock-event-ledger-report/. "$STAGING/" 2>/dev/null || true
@@ -180,16 +178,15 @@ jobs:
           - Universe: fixed 22 Aster AI / Semiconductor stock perpetuals
           - Window: 2026-07-22 23:00 UTC through 2026-07-29 01:00 UTC
           - Full cadence: hourly
-          - U.S. session fast cadence: every 15 minutes for recent news headlines, trading halts, and Aster contract status
-          - Full sources: fixed-CIK SEC EDGAR submissions, Nasdaq earnings calendar, Nasdaq Trader halt RSS, Google News RSS headlines limited to the prior 36 hours, BLS official calendar with HTML fallback, Federal Reserve FOMC calendar, BEA schedule, Aster exchangeInfo
-          - Stored: headline and timestamps only; article bodies are not stored
+          - U.S. session fast cadence: every 15 minutes for recent headlines, trading halts, and Aster status
+          - Sources: Google News RSS headlines, Nasdaq earnings, Nasdaq Trader halts, Aster exchangeInfo, SEC EDGAR with Nasdaq public fallback, BLS live source with explicit frozen official-schedule fallback, Federal Reserve FOMC, and BEA
+          - Google headlines are limited to the preceding 36 hours; article bodies are not stored
+          - Every live-source failure and every non-live fallback is explicitly recorded
           - Purpose: later Baseline-versus-Event-Overlay Shadow analysis
           - Trading: observation only; no Entry gate, order, LIVE, Production, VPS, or V96 change
           EOF
           git add "$DATA_DIR"
-          if git diff --cached --quiet; then
-            exit 0
-          fi
+          if git diff --cached --quiet; then exit 0; fi
           git commit -m "data: append stock event ledger snapshot $GITHUB_RUN_ID"
           git push origin "HEAD:$DATA_BRANCH"
       - name: Final aggregate report and automatic shutdown
@@ -200,9 +197,7 @@ jobs:
         run: |
           set -euo pipefail
           STATUS="$(tr -d '\r\n' < /tmp/v96-stock-event-ledger/run-status.txt 2>/dev/null || true)"
-          if [[ "$STATUS" != "expired" ]]; then
-            exit 0
-          fi
+          if [[ "$STATUS" != "expired" ]]; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin "$DATA_BRANCH"
