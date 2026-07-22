@@ -1,4 +1,5 @@
 name: V96 Three-Day Market Microstructure Collector
+# Activated at the fixed collection window start: 2026-07-22 00:00 UTC.
 
 on:
   pull_request:
