@@ -138,7 +138,7 @@ def write_report(result: dict, output_dir: Path) -> None:
 
 def self_test() -> None:
     regular = int(dt.datetime(2026, 7, 22, 14, 0, tzinfo=dt.timezone.utc).timestamp() * 1000)
-    closed = int(dt.datetime(2026, 7, 22, 21, 0, tzinfo=dt.timezone.utc).timestamp() * 1000)
+    closed = int(dt.datetime(2026, 7, 23, 1, 0, tzinfo=dt.timezone.utc).timestamp() * 1000)
     assert session_name(regular) == "REGULAR"
     assert session_name(closed) == "CLOSED"
     assert not (set(base.EXPECTED_SYMBOLS) & base.CRYPTO_SYMBOLS)
