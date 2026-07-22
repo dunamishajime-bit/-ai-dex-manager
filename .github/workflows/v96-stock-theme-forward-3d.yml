@@ -3,19 +3,34 @@ name: V96 Stock Theme Seven-Day Forward Collector
 on:
   pull_request:
     paths:
+      - "research/v96_three_day_market_collector.py"
+      - "research/v96_stock_theme_market_collector_v2.py"
       - "research/v96_stock_theme_forward_validate.py"
       - "research/v96_stock_theme_forward_7d_validate.py"
+      - "research/v96_stock_theme_forward_7d_quality_v2.py"
       - "research/v96_stock_theme_forward_7d_pnl.py"
       - ".github/workflows/v96-stock-theme-forward-3d.yml"
   push:
     branches: [master]
     paths:
+      - "research/v96_three_day_market_collector.py"
+      - "research/v96_stock_theme_market_collector_v2.py"
       - "research/v96_stock_theme_forward_validate.py"
       - "research/v96_stock_theme_forward_7d_validate.py"
+      - "research/v96_stock_theme_forward_7d_quality_v2.py"
       - "research/v96_stock_theme_forward_7d_pnl.py"
       - ".github/workflows/v96-stock-theme-forward-3d.yml"
   schedule:
-    - cron: "12 * * * *"
+    # Lightweight off-session sampling every three hours.
+    - cron: "12 */3 * * *"
+    # Multiple start attempts around 13:05-13:50 UTC. The first run that starts
+    # captures continuously through 18:50 UTC, covering the U.S. open and core session.
+    - cron: "5,20,35,50 13 * * 1-5"
+    # Multiple attempts for the late session and close through 20:10 UTC.
+    - cron: "45,55 18 * * 1-5"
+    - cron: "5,20 19 * * 1-5"
+    # Fixed-window shutdown attempts shortly after 2026-07-29 01:00 UTC.
+    - cron: "5,15,25,35,45,55 1 29 7 *"
   workflow_dispatch:
 
 permissions:
@@ -40,7 +55,7 @@ jobs:
   validate:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -51,16 +66,19 @@ jobs:
       - name: Syntax and unit self-tests
         run: |
           python -m py_compile research/v96_three_day_market_collector.py
+          python -m py_compile research/v96_stock_theme_market_collector_v2.py
           python -m py_compile research/v96_stock_theme_forward_validate.py
           python -m py_compile research/v96_stock_theme_forward_7d_validate.py
+          python -m py_compile research/v96_stock_theme_forward_7d_quality_v2.py
           python -m py_compile research/v96_stock_theme_forward_7d_pnl.py
-          python research/v96_stock_theme_forward_7d_validate.py --self-test
+          python research/v96_stock_theme_market_collector_v2.py --self-test
+          python research/v96_stock_theme_forward_7d_quality_v2.py --self-test
           python research/v96_stock_theme_forward_7d_pnl.py --self-test
-      - name: Probe all fixed AI and semiconductor symbols
+      - name: Probe all fixed AI and semiconductor symbols with schema v2
         shell: bash
         run: |
           read -ra SYMBOLS <<< "$STOCK_SYMBOLS"
-          python research/v96_three_day_market_collector.py \
+          python research/v96_stock_theme_market_collector_v2.py \
             --ignore-window \
             --start-utc "$COLLECTION_START_UTC" \
             --end-utc "$COLLECTION_END_UTC" \
@@ -68,15 +86,15 @@ jobs:
             --interval-seconds 10 \
             --symbols "${SYMBOLS[@]}" \
             --output-dir .research-state/v96-stock-theme-forward-data
-      - name: Validate probe quality and isolation
+      - name: Validate extended probe quality and isolation
         run: |
-          python research/v96_stock_theme_forward_7d_validate.py \
+          python research/v96_stock_theme_forward_7d_quality_v2.py \
             --input-dir .research-state/v96-stock-theme-forward-data \
             --output-dir .research-state/v96-stock-theme-forward-report
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v96-stock-theme-forward-7d-probe
+          name: v96-stock-theme-forward-7d-quality-v2-probe
           path: |
             .research-state/v96-stock-theme-forward-data
             .research-state/v96-stock-theme-forward-report
@@ -85,7 +103,7 @@ jobs:
   collect:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
-    timeout-minutes: 59
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,16 +113,72 @@ jobs:
           python-version: "3.12"
       - name: Install collector dependency
         run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
-      - name: Collect one fixed Forward chunk
+      - name: Determine acquisition plan
         shell: bash
         run: |
+          set -euo pipefail
           rm -rf /tmp/v96-stock-theme-forward-data /tmp/v96-stock-theme-forward-report
           mkdir -p /tmp/v96-stock-theme-forward-data /tmp/v96-stock-theme-forward-report
+
+          NOW_EPOCH="$(date -u +%s)"
+          END_EPOCH="$(date -u -d "$COLLECTION_END_UTC" +%s)"
+          DOW="$(date -u +%u)"
+          HHMM="$(date -u +%H%M)"
+          SCHEDULE="${{ github.event.schedule }}"
+          DURATION=3300
+          MODE="OFF_SESSION_SAMPLE"
+          SKIP=0
+
+          if (( NOW_EPOCH >= END_EPOCH )); then
+            DURATION=1
+            MODE="FINALIZE_ONLY"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            DURATION=120
+            MODE="POST_MERGE_SCHEMA_V2_PROBE"
+          elif [[ "$SCHEDULE" == "5,20,35,50 13 * * 1-5" ]]; then
+            TARGET="$(date -u -d "$(date -u +%F) 18:50:00" +%s)"
+            if (( DOW > 5 || NOW_EPOCH >= TARGET || 10#$HHMM < 1300 )); then
+              SKIP=1
+              MODE="STALE_OPEN_TRIGGER"
+            else
+              DURATION=$((TARGET - NOW_EPOCH))
+              MODE="US_OPEN_AND_CORE_CONTINUOUS"
+            fi
+          elif [[ "$SCHEDULE" == "45,55 18 * * 1-5" || "$SCHEDULE" == "5,20 19 * * 1-5" ]]; then
+            TARGET="$(date -u -d "$(date -u +%F) 20:10:00" +%s)"
+            if (( DOW > 5 || NOW_EPOCH >= TARGET || 10#$HHMM < 1840 )); then
+              SKIP=1
+              MODE="STALE_CLOSE_TRIGGER"
+            else
+              DURATION=$((TARGET - NOW_EPOCH))
+              MODE="US_LATE_AND_CLOSE_CONTINUOUS"
+            fi
+          elif [[ "$SCHEDULE" == "5,15,25,35,45,55 1 29 7 *" ]]; then
+            DURATION=1
+            MODE="FINALIZE_ATTEMPT"
+          elif (( DOW <= 5 && 10#$HHMM >= 1300 && 10#$HHMM < 2010 )); then
+            SKIP=1
+            MODE="GENERAL_TRIGGER_SUPPRESSED_DURING_US_SESSION"
+          fi
+
+          echo "ACQUISITION_MODE=$MODE" >> "$GITHUB_ENV"
+          echo "DURATION_SECONDS=$DURATION" >> "$GITHUB_ENV"
+          if (( SKIP == 1 )); then
+            printf 'skipped_stale_trigger\n' > /tmp/v96-stock-theme-forward-data/run-status.txt
+            printf '{"status":"skipped_stale_trigger","mode":"%s","nowUtc":"%s"}\n' \
+              "$MODE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              > /tmp/v96-stock-theme-forward-data/window.json
+          fi
+          echo "mode=$MODE durationSeconds=$DURATION skip=$SKIP"
+      - name: Collect one fixed Forward chunk
+        if: hashFiles('/tmp/v96-stock-theme-forward-data/run-status.txt') == ''
+        shell: bash
+        run: |
           read -ra SYMBOLS <<< "$STOCK_SYMBOLS"
-          python research/v96_three_day_market_collector.py \
+          python research/v96_stock_theme_market_collector_v2.py \
             --start-utc "$COLLECTION_START_UTC" \
             --end-utc "$COLLECTION_END_UTC" \
-            --duration-seconds 3300 \
+            --duration-seconds "$DURATION_SECONDS" \
             --interval-seconds 60 \
             --symbols "${SYMBOLS[@]}" \
             --output-dir /tmp/v96-stock-theme-forward-data
@@ -114,7 +188,7 @@ jobs:
         run: |
           STATUS="$(tr -d '\r\n' < /tmp/v96-stock-theme-forward-data/run-status.txt)"
           if [[ "$STATUS" == "collected" ]]; then
-            python research/v96_stock_theme_forward_7d_validate.py \
+            python research/v96_stock_theme_forward_7d_quality_v2.py \
               --input-dir /tmp/v96-stock-theme-forward-data \
               --output-dir /tmp/v96-stock-theme-forward-report
           fi
@@ -154,8 +228,11 @@ jobs:
           - Fixed universe: 22 Aster stock perpetuals
           - Themes: AI and Semiconductor
           - Window: 2026-07-22 01:00 UTC through 2026-07-29 01:00 UTC
-          - Snapshot interval: 60 seconds during each scheduled chunk
-          - Data: Funding, Mark/Index premium, Open Interest, order book, Spread, price and liquidation events
+          - U.S. regular session: continuous open/core and late/close collection
+          - Off-session: 55-minute sample every three hours
+          - Snapshot interval: 60 seconds
+          - Core data: Funding, Mark/Index premium, Open Interest, order book, Spread, price and liquidation events
+          - Extended data: 1-minute OHLCV, 24-hour activity, contract filters/status, API latency, clock state and simulated depth-fill Slippage
           - Preliminary PnL: frozen directional and same-theme market-neutral Shadow rules only
           - Existing V96 crypto weights: immutable
           - Trading: SHADOW only; order submission disabled
@@ -164,7 +241,7 @@ jobs:
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m "data: append stock-theme seven-day Forward chunk $GITHUB_RUN_ID"
+          git commit -m "data: append stock-theme quality-v2 Forward chunk $GITHUB_RUN_ID"
           git push origin "HEAD:$DATA_BRANCH"
       - name: Final aggregate report and automatic shutdown
         if: always()
@@ -181,14 +258,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin "$DATA_BRANCH"
           git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
-          python research/v96_stock_theme_forward_7d_validate.py \
+          python research/v96_stock_theme_forward_7d_quality_v2.py \
             --input-dir "$DATA_DIR/chunks" \
             --output-dir "$DATA_DIR/final-report" || true
           python research/v96_stock_theme_forward_7d_pnl.py \
             --output-dir "$DATA_DIR/final-report" || true
           git add "$DATA_DIR/final-report"
           if ! git diff --cached --quiet; then
-            git commit -m "data: finalize stock-theme seven-day Forward report"
+            git commit -m "data: finalize stock-theme seven-day Forward quality v2 report"
             git push origin "HEAD:$DATA_BRANCH"
           fi
           gh api --method PUT \
