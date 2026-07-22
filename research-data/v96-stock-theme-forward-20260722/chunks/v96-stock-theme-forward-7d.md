@@ -7,9 +7,9 @@ Profitability: **PRELIMINARY_FORWARD_PNL_EVALUATED_SEPARATELY**
 - REST success: 100.0000%
 - expected / observed symbols: 22 / 22
 - collector errors: 0
-- liquidation events: 0
+- liquidation events: 7
 - crypto overlap: 0
-- regular-session median spread: 9.787817627876745
-- after-hours median spread: None
+- regular-session median spread: 11.206637321469497
+- after-hours median spread: 13.6309580923305
 
 Seven days permits only preliminary Shadow PnL and execution-feasibility review. It cannot approve a trading edge.
