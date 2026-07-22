@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - "research/v96_stock_event_ledger.py"
+      - "research/v96_stock_event_ledger_v2.py"
       - "research/v96_stock_event_ledger_validate.py"
       - ".github/workflows/v96-stock-event-ledger.yml"
   push:
     branches: [master]
     paths:
       - "research/v96_stock_event_ledger.py"
+      - "research/v96_stock_event_ledger_v2.py"
       - "research/v96_stock_event_ledger_validate.py"
       - ".github/workflows/v96-stock-event-ledger.yml"
   schedule:
@@ -48,13 +50,14 @@ jobs:
       - name: Syntax and unit self-tests
         run: |
           python -m py_compile research/v96_stock_event_ledger.py
+          python -m py_compile research/v96_stock_event_ledger_v2.py
           python -m py_compile research/v96_stock_event_ledger_validate.py
-          python research/v96_stock_event_ledger.py --self-test
+          python research/v96_stock_event_ledger_v2.py --self-test
           python research/v96_stock_event_ledger_validate.py --self-test
-      - name: Probe all stock event sources
+      - name: Probe corrected stock event sources
         run: |
           rm -rf .research-state/v96-stock-event-ledger .research-state/v96-stock-event-ledger-report
-          python research/v96_stock_event_ledger.py \
+          python research/v96_stock_event_ledger_v2.py \
             --ignore-window \
             --mode full \
             --output-dir .research-state/v96-stock-event-ledger
@@ -107,7 +110,7 @@ jobs:
       - name: Collect immutable event snapshot
         if: hashFiles('/tmp/v96-stock-event-ledger/run-status.txt') == ''
         run: |
-          python research/v96_stock_event_ledger.py \
+          python research/v96_stock_event_ledger_v2.py \
             --mode "$EVENT_LEDGER_MODE" \
             --start-utc "$EVENT_LEDGER_START_UTC" \
             --end-utc "$EVENT_LEDGER_END_UTC" \
@@ -134,6 +137,7 @@ jobs:
           with gzip.open(files[0], 'rt', encoding='utf-8') as handle:
               payload = json.load(handle)
           assert payload['mode'] == 'fast'
+          assert payload['collectorVersion'] == 2
           assert payload['safety']['mode'] == 'SHADOW_OBSERVATION_ONLY'
           assert payload['safety']['orderSubmissionAllowed'] is False
           assert payload['safety']['entryDecisionChanged'] is False
@@ -176,8 +180,8 @@ jobs:
           - Universe: fixed 22 Aster AI / Semiconductor stock perpetuals
           - Window: 2026-07-22 23:00 UTC through 2026-07-29 01:00 UTC
           - Full cadence: hourly
-          - U.S. session fast cadence: every 15 minutes for news headlines, trading halts, and Aster contract status
-          - Full sources: SEC EDGAR, Nasdaq earnings calendar, Nasdaq Trader halt RSS, Google News RSS headlines, BLS calendar, Federal Reserve FOMC calendar, BEA schedule, Aster exchangeInfo
+          - U.S. session fast cadence: every 15 minutes for recent news headlines, trading halts, and Aster contract status
+          - Full sources: fixed-CIK SEC EDGAR submissions, Nasdaq earnings calendar, Nasdaq Trader halt RSS, Google News RSS headlines limited to the prior 36 hours, BLS official calendar with HTML fallback, Federal Reserve FOMC calendar, BEA schedule, Aster exchangeInfo
           - Stored: headline and timestamps only; article bodies are not stored
           - Purpose: later Baseline-versus-Event-Overlay Shadow analysis
           - Trading: observation only; no Entry gate, order, LIVE, Production, VPS, or V96 change
