@@ -1,0 +1,218 @@
+name: V96 Stock Event Ledger
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_stock_event_ledger.py"
+      - "research/v96_stock_event_ledger_v2.py"
+      - "research/v96_stock_event_ledger_v3.py"
+      - "research/v96_stock_event_ledger_v4.py"
+      - "research/v96_stock_event_ledger_validate.py"
+      - ".github/workflows/v96-stock-event-ledger.yml"
+  push:
+    branches: [master]
+    paths:
+      - "research/v96_stock_event_ledger.py"
+      - "research/v96_stock_event_ledger_v2.py"
+      - "research/v96_stock_event_ledger_v3.py"
+      - "research/v96_stock_event_ledger_v4.py"
+      - "research/v96_stock_event_ledger_validate.py"
+      - ".github/workflows/v96-stock-event-ledger.yml"
+  schedule:
+    - cron: "7 * * * *"
+    - cron: "22,37,52 13-20 * * 1-5"
+    - cron: "5,15,25,35,45,55 1 29 7 *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: v96-stock-event-ledger
+  cancel-in-progress: false
+
+env:
+  EVENT_LEDGER_START_UTC: "2026-07-22T23:00:00Z"
+  EVENT_LEDGER_END_UTC: "2026-07-29T01:00:00Z"
+  DATA_BRANCH: "research-data/v96-stock-event-ledger-20260723"
+  DATA_DIR: "research-data/v96-stock-event-ledger-20260723"
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax and unit self-tests
+        run: |
+          python -m py_compile research/v96_stock_event_ledger.py
+          python -m py_compile research/v96_stock_event_ledger_v2.py
+          python -m py_compile research/v96_stock_event_ledger_v3.py
+          python -m py_compile research/v96_stock_event_ledger_v4.py
+          python -m py_compile research/v96_stock_event_ledger_validate.py
+          python research/v96_stock_event_ledger_v4.py --self-test
+          python research/v96_stock_event_ledger_validate.py --self-test
+      - name: Probe stock event sources and fallbacks
+        run: |
+          rm -rf .research-state/v96-stock-event-ledger .research-state/v96-stock-event-ledger-report
+          python research/v96_stock_event_ledger_v4.py \
+            --ignore-window \
+            --mode full \
+            --output-dir .research-state/v96-stock-event-ledger
+      - name: Validate event chronology and safety
+        run: |
+          python research/v96_stock_event_ledger_validate.py \
+            --input-dir .research-state/v96-stock-event-ledger \
+            --output-dir .research-state/v96-stock-event-ledger-report
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-stock-event-ledger-probe
+          path: |
+            .research-state/v96-stock-event-ledger
+            .research-state/v96-stock-event-ledger-report
+          retention-days: 30
+          if-no-files-found: warn
+
+  collect:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Determine acquisition mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/v96-stock-event-ledger /tmp/v96-stock-event-ledger-report
+          mkdir -p /tmp/v96-stock-event-ledger /tmp/v96-stock-event-ledger-report
+          NOW_EPOCH="$(date -u +%s)"
+          END_EPOCH="$(date -u -d "$EVENT_LEDGER_END_UTC" +%s)"
+          SCHEDULE="${{ github.event.schedule }}"
+          MODE="full"
+          if (( NOW_EPOCH >= END_EPOCH )); then
+            printf 'expired\n' > /tmp/v96-stock-event-ledger/run-status.txt
+            printf '{"status":"expired","nowUtc":"%s","endUtc":"%s"}\n' \
+              "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$EVENT_LEDGER_END_UTC" \
+              > /tmp/v96-stock-event-ledger/window.json
+          elif [[ "$SCHEDULE" == "22,37,52 13-20 * * 1-5" ]]; then
+            MODE="fast"
+          fi
+          echo "EVENT_LEDGER_MODE=$MODE" >> "$GITHUB_ENV"
+          echo "mode=$MODE"
+      - name: Collect immutable event snapshot
+        if: hashFiles('/tmp/v96-stock-event-ledger/run-status.txt') == ''
+        run: |
+          python research/v96_stock_event_ledger_v4.py \
+            --mode "$EVENT_LEDGER_MODE" \
+            --start-utc "$EVENT_LEDGER_START_UTC" \
+            --end-utc "$EVENT_LEDGER_END_UTC" \
+            --output-dir /tmp/v96-stock-event-ledger
+      - name: Validate full snapshot
+        if: env.EVENT_LEDGER_MODE == 'full' && success()
+        shell: bash
+        run: |
+          STATUS="$(tr -d '\r\n' < /tmp/v96-stock-event-ledger/run-status.txt)"
+          if [[ "$STATUS" == "collected" ]]; then
+            python research/v96_stock_event_ledger_validate.py \
+              --input-dir /tmp/v96-stock-event-ledger \
+              --output-dir /tmp/v96-stock-event-ledger-report
+          fi
+      - name: Validate fast snapshot safety
+        if: env.EVENT_LEDGER_MODE == 'fast' && success()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import gzip, json
+          from pathlib import Path
+          files = list(Path('/tmp/v96-stock-event-ledger').glob('event-ledger-*.json.gz'))
+          assert len(files) == 1, files
+          with gzip.open(files[0], 'rt', encoding='utf-8') as handle:
+              payload = json.load(handle)
+          assert payload['mode'] == 'fast'
+          assert payload['collectorVersion'] == 4
+          assert payload['safety']['mode'] == 'SHADOW_OBSERVATION_ONLY'
+          assert payload['safety']['orderSubmissionAllowed'] is False
+          assert payload['safety']['entryDecisionChanged'] is False
+          assert set(payload['sourceResults']) == {'googleNewsRss', 'nasdaqTradeHalts', 'asterExchangeInfo'}
+          print('Fast event snapshot safety: PASS')
+          PY
+      - name: Upload immutable event evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-event-ledger-${{ github.run_id }}
+          path: |
+            /tmp/v96-stock-event-ledger
+            /tmp/v96-stock-event-ledger-report
+          retention-days: 90
+          if-no-files-found: warn
+      - name: Persist snapshot to evidence branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(tr -d '\r\n' < /tmp/v96-stock-event-ledger/run-status.txt 2>/dev/null || true)"
+          if [[ "$STATUS" != "collected" ]]; then exit 0; fi
+          STAGING="$(mktemp -d)"
+          cp -a /tmp/v96-stock-event-ledger/. "$STAGING/"
+          cp -a /tmp/v96-stock-event-ledger-report/. "$STAGING/" 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin "$DATA_BRANCH"; then
+            git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
+          else
+            git switch -c "$DATA_BRANCH"
+          fi
+          mkdir -p "$DATA_DIR/chunks"
+          cp -a "$STAGING"/* "$DATA_DIR/chunks/"
+          cat > "$DATA_DIR/README.md" <<'EOF'
+          # V96 Stock Event Ledger
+
+          - Universe: fixed 22 Aster AI / Semiconductor stock perpetuals
+          - Window: 2026-07-22 23:00 UTC through 2026-07-29 01:00 UTC
+          - Full cadence: hourly
+          - U.S. session fast cadence: every 15 minutes for recent headlines, trading halts, and Aster status
+          - Sources: Google News RSS, Nasdaq earnings, Nasdaq Trader halts, Aster exchangeInfo, SEC EDGAR with Nasdaq public fallback, BLS and BEA live sources with explicit frozen official-schedule fallbacks, and Federal Reserve FOMC
+          - Google headlines are limited to the preceding 36 hours; article bodies are not stored
+          - Every live-source failure and every non-live fallback is explicitly recorded
+          - Purpose: later Baseline-versus-Event-Overlay Shadow analysis
+          - Trading: observation only; no Entry gate, order, LIVE, Production, VPS, or V96 change
+          EOF
+          git add "$DATA_DIR"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "data: append stock event ledger snapshot $GITHUB_RUN_ID"
+          git push origin "HEAD:$DATA_BRANCH"
+      - name: Final aggregate report and automatic shutdown
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(tr -d '\r\n' < /tmp/v96-stock-event-ledger/run-status.txt 2>/dev/null || true)"
+          if [[ "$STATUS" != "expired" ]]; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$DATA_BRANCH"
+          git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
+          python research/v96_stock_event_ledger_validate.py \
+            --input-dir "$DATA_DIR/chunks" \
+            --output-dir "$DATA_DIR/final-report" || true
+          git add "$DATA_DIR/final-report"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: finalize stock event ledger report"
+            git push origin "HEAD:$DATA_BRANCH"
+          fi
+          gh api --method PUT \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/v96-stock-event-ledger.yml/disable"
+          echo "Stock event ledger disabled after fixed window."
