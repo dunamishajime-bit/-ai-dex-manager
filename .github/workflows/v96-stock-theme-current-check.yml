@@ -1,0 +1,53 @@
+name: V96 Stock Theme Current Shadow Check
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/v96-stock-theme-current-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  current-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install collector dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Run frozen current preliminary PnL check
+        run: |
+          python research/v96_stock_theme_forward_7d_pnl.py \
+            --output-dir .research-state/current-check/pnl
+      - name: Capture current microstructure for all fixed symbols
+        shell: bash
+        run: |
+          SYMBOLS=(
+            ADBEUSDT AMATUSDT AMDUSDT AMZNUSDT ARMUSDT ASMLUSDT AVGOUSDT CRMUSDT
+            DRAMUSDT GOOGLUSDT INTCUSDT METAUSDT MRVLUSDT MSFTUSDT MUUSDT NVDAUSDT
+            ORCLUSDT PLTRUSDT QCOMUSDT SNDKUSDT TSLAUSDT TSMUSDT
+          )
+          python research/v96_three_day_market_collector.py \
+            --ignore-window \
+            --start-utc "2026-07-22T01:00:00Z" \
+            --end-utc "2026-07-29T01:00:00Z" \
+            --duration-seconds 35 \
+            --interval-seconds 10 \
+            --symbols "${SYMBOLS[@]}" \
+            --output-dir .research-state/current-check/micro-data
+      - name: Validate current microstructure and isolation
+        run: |
+          python research/v96_stock_theme_forward_7d_validate.py \
+            --input-dir .research-state/current-check/micro-data \
+            --output-dir .research-state/current-check/micro-report
+      - name: Upload one-shot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-theme-current-check
+          path: .research-state/current-check
+          retention-days: 30
