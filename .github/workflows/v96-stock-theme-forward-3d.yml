@@ -1,0 +1,186 @@
+name: V96 Stock Theme Three-Day Forward Collector
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_stock_theme_forward_validate.py"
+      - ".github/workflows/v96-stock-theme-forward-3d.yml"
+  push:
+    branches: [master]
+    paths:
+      - "research/v96_stock_theme_forward_validate.py"
+      - ".github/workflows/v96-stock-theme-forward-3d.yml"
+  schedule:
+    - cron: "12 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: v96-stock-theme-forward-3d
+  cancel-in-progress: false
+
+env:
+  COLLECTION_START_UTC: "2026-07-22T01:00:00Z"
+  COLLECTION_END_UTC: "2026-07-25T01:00:00Z"
+  DATA_BRANCH: "research-data/v96-stock-theme-forward-20260722"
+  DATA_DIR: "research-data/v96-stock-theme-forward-20260722"
+  STOCK_SYMBOLS: >-
+    ADBEUSDT AMATUSDT AMDUSDT AMZNUSDT ARMUSDT ASMLUSDT AVGOUSDT CRMUSDT
+    DRAMUSDT GOOGLUSDT INTCUSDT METAUSDT MRVLUSDT MSFTUSDT MUUSDT NVDAUSDT
+    ORCLUSDT PLTRUSDT QCOMUSDT SNDKUSDT TSLAUSDT TSMUSDT
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install collector dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Syntax and unit self-tests
+        run: |
+          python -m py_compile research/v96_three_day_market_collector.py
+          python -m py_compile research/v96_stock_theme_forward_validate.py
+          python research/v96_stock_theme_forward_validate.py --self-test
+      - name: Probe all fixed AI and semiconductor symbols
+        shell: bash
+        run: |
+          read -ra SYMBOLS <<< "$STOCK_SYMBOLS"
+          python research/v96_three_day_market_collector.py \
+            --ignore-window \
+            --start-utc "$COLLECTION_START_UTC" \
+            --end-utc "$COLLECTION_END_UTC" \
+            --duration-seconds 35 \
+            --interval-seconds 10 \
+            --symbols "${SYMBOLS[@]}" \
+            --output-dir .research-state/v96-stock-theme-forward-data
+      - name: Validate probe quality and isolation
+        run: |
+          python research/v96_stock_theme_forward_validate.py \
+            --input-dir .research-state/v96-stock-theme-forward-data \
+            --output-dir .research-state/v96-stock-theme-forward-report
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-stock-theme-forward-probe
+          path: |
+            .research-state/v96-stock-theme-forward-data
+            .research-state/v96-stock-theme-forward-report
+          retention-days: 30
+
+  collect:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 59
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install collector dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Collect one fixed Forward chunk
+        shell: bash
+        run: |
+          rm -rf /tmp/v96-stock-theme-forward-data /tmp/v96-stock-theme-forward-report
+          mkdir -p /tmp/v96-stock-theme-forward-data /tmp/v96-stock-theme-forward-report
+          read -ra SYMBOLS <<< "$STOCK_SYMBOLS"
+          python research/v96_three_day_market_collector.py \
+            --start-utc "$COLLECTION_START_UTC" \
+            --end-utc "$COLLECTION_END_UTC" \
+            --duration-seconds 3300 \
+            --interval-seconds 60 \
+            --symbols "${SYMBOLS[@]}" \
+            --output-dir /tmp/v96-stock-theme-forward-data
+      - name: Validate collected chunk
+        if: success()
+        shell: bash
+        run: |
+          STATUS="$(tr -d '\r\n' < /tmp/v96-stock-theme-forward-data/run-status.txt)"
+          if [[ "$STATUS" == "collected" ]]; then
+            python research/v96_stock_theme_forward_validate.py \
+              --input-dir /tmp/v96-stock-theme-forward-data \
+              --output-dir /tmp/v96-stock-theme-forward-report
+          fi
+      - name: Upload immutable chunk evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-theme-forward-${{ github.run_id }}
+          path: |
+            /tmp/v96-stock-theme-forward-data
+            /tmp/v96-stock-theme-forward-report
+          retention-days: 90
+          if-no-files-found: warn
+      - name: Persist chunk to evidence branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(tr -d '\r\n' < /tmp/v96-stock-theme-forward-data/run-status.txt)"
+          if [[ "$STATUS" != "collected" ]]; then
+            exit 0
+          fi
+          STAGING="$(mktemp -d)"
+          cp -a /tmp/v96-stock-theme-forward-data/. "$STAGING/"
+          cp -a /tmp/v96-stock-theme-forward-report/. "$STAGING/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin "$DATA_BRANCH"; then
+            git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
+          else
+            git switch -c "$DATA_BRANCH"
+          fi
+          mkdir -p "$DATA_DIR/chunks"
+          cp -a "$STAGING"/* "$DATA_DIR/chunks/"
+          cat > "$DATA_DIR/README.md" <<EOF
+          # V96 AI / Semiconductor three-day Forward evidence
+
+          - Fixed universe: 22 Aster stock perpetuals
+          - Themes: AI and Semiconductor
+          - Window: 2026-07-22 01:00 UTC through 2026-07-25 01:00 UTC
+          - Snapshot interval: 60 seconds during each scheduled chunk
+          - Data: Funding, Mark/Index premium, Open Interest, order book, Spread, price and liquidation events
+          - Existing V96 crypto weights: immutable
+          - Trading: SHADOW only; order submission disabled
+          EOF
+          git add "$DATA_DIR"
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "data: append stock-theme Forward chunk $GITHUB_RUN_ID"
+          git push origin "HEAD:$DATA_BRANCH"
+      - name: Final aggregate report and automatic shutdown
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(tr -d '\r\n' < /tmp/v96-stock-theme-forward-data/run-status.txt 2>/dev/null || true)"
+          if [[ "$STATUS" != "expired" ]]; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$DATA_BRANCH"
+          git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
+          python research/v96_stock_theme_forward_validate.py \
+            --input-dir "$DATA_DIR/chunks" \
+            --output-dir "$DATA_DIR/final-report" || true
+          git add "$DATA_DIR/final-report"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: finalize stock-theme three-day Forward report"
+            git push origin "HEAD:$DATA_BRANCH"
+          fi
+          gh api --method PUT \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/v96-stock-theme-forward-3d.yml/disable"
+          echo "Stock-theme Forward collector disabled after fixed window."
