@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "research/research_lab_v96_stock_theme_shadow.py"
+      - "research/research_lab_v96_stock_theme_neutral.py"
       - ".github/workflows/v96-stock-theme-shadow.yml"
   workflow_dispatch:
 
@@ -13,7 +14,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,14 +22,23 @@ jobs:
           python-version: "3.12"
       - name: Syntax and isolation self-test
         run: |
-          python -m py_compile research/research_lab_v96_stock_theme_shadow.py
+          python -m py_compile \
+            research/research_lab_v96_stock_theme_shadow.py \
+            research/research_lab_v96_stock_theme_neutral.py
           python research/research_lab_v96_stock_theme_shadow.py \
             --self-test \
             --output-dir .research-state/v96-stock-theme-shadow
-      - name: Run fixed historical screen
+          python research/research_lab_v96_stock_theme_neutral.py \
+            --self-test \
+            --output-dir .research-state/v96-stock-theme-shadow
+      - name: Run fixed directional theme screen
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state/v96-stock-theme-shadow
         run: python research/research_lab_v96_stock_theme_shadow.py
+      - name: Run fixed market-neutral theme screen
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state/v96-stock-theme-shadow
+        run: python research/research_lab_v96_stock_theme_neutral.py
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
