@@ -1,14 +1,18 @@
-name: V96 Stock Theme Three-Day Forward Collector
+name: V96 Stock Theme Seven-Day Forward Collector
 
 on:
   pull_request:
     paths:
       - "research/v96_stock_theme_forward_validate.py"
+      - "research/v96_stock_theme_forward_7d_validate.py"
+      - "research/v96_stock_theme_forward_7d_pnl.py"
       - ".github/workflows/v96-stock-theme-forward-3d.yml"
   push:
     branches: [master]
     paths:
       - "research/v96_stock_theme_forward_validate.py"
+      - "research/v96_stock_theme_forward_7d_validate.py"
+      - "research/v96_stock_theme_forward_7d_pnl.py"
       - ".github/workflows/v96-stock-theme-forward-3d.yml"
   schedule:
     - cron: "12 * * * *"
@@ -19,12 +23,12 @@ permissions:
   actions: write
 
 concurrency:
-  group: v96-stock-theme-forward-3d
+  group: v96-stock-theme-forward-7d
   cancel-in-progress: false
 
 env:
   COLLECTION_START_UTC: "2026-07-22T01:00:00Z"
-  COLLECTION_END_UTC: "2026-07-25T01:00:00Z"
+  COLLECTION_END_UTC: "2026-07-29T01:00:00Z"
   DATA_BRANCH: "research-data/v96-stock-theme-forward-20260722"
   DATA_DIR: "research-data/v96-stock-theme-forward-20260722"
   STOCK_SYMBOLS: >-
@@ -48,7 +52,10 @@ jobs:
         run: |
           python -m py_compile research/v96_three_day_market_collector.py
           python -m py_compile research/v96_stock_theme_forward_validate.py
-          python research/v96_stock_theme_forward_validate.py --self-test
+          python -m py_compile research/v96_stock_theme_forward_7d_validate.py
+          python -m py_compile research/v96_stock_theme_forward_7d_pnl.py
+          python research/v96_stock_theme_forward_7d_validate.py --self-test
+          python research/v96_stock_theme_forward_7d_pnl.py --self-test
       - name: Probe all fixed AI and semiconductor symbols
         shell: bash
         run: |
@@ -63,13 +70,13 @@ jobs:
             --output-dir .research-state/v96-stock-theme-forward-data
       - name: Validate probe quality and isolation
         run: |
-          python research/v96_stock_theme_forward_validate.py \
+          python research/v96_stock_theme_forward_7d_validate.py \
             --input-dir .research-state/v96-stock-theme-forward-data \
             --output-dir .research-state/v96-stock-theme-forward-report
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v96-stock-theme-forward-probe
+          name: v96-stock-theme-forward-7d-probe
           path: |
             .research-state/v96-stock-theme-forward-data
             .research-state/v96-stock-theme-forward-report
@@ -107,7 +114,7 @@ jobs:
         run: |
           STATUS="$(tr -d '\r\n' < /tmp/v96-stock-theme-forward-data/run-status.txt)"
           if [[ "$STATUS" == "collected" ]]; then
-            python research/v96_stock_theme_forward_validate.py \
+            python research/v96_stock_theme_forward_7d_validate.py \
               --input-dir /tmp/v96-stock-theme-forward-data \
               --output-dir /tmp/v96-stock-theme-forward-report
           fi
@@ -142,13 +149,14 @@ jobs:
           mkdir -p "$DATA_DIR/chunks"
           cp -a "$STAGING"/* "$DATA_DIR/chunks/"
           cat > "$DATA_DIR/README.md" <<EOF
-          # V96 AI / Semiconductor three-day Forward evidence
+          # V96 AI / Semiconductor seven-day Forward evidence
 
           - Fixed universe: 22 Aster stock perpetuals
           - Themes: AI and Semiconductor
-          - Window: 2026-07-22 01:00 UTC through 2026-07-25 01:00 UTC
+          - Window: 2026-07-22 01:00 UTC through 2026-07-29 01:00 UTC
           - Snapshot interval: 60 seconds during each scheduled chunk
           - Data: Funding, Mark/Index premium, Open Interest, order book, Spread, price and liquidation events
+          - Preliminary PnL: frozen directional and same-theme market-neutral Shadow rules only
           - Existing V96 crypto weights: immutable
           - Trading: SHADOW only; order submission disabled
           EOF
@@ -156,7 +164,7 @@ jobs:
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m "data: append stock-theme Forward chunk $GITHUB_RUN_ID"
+          git commit -m "data: append stock-theme seven-day Forward chunk $GITHUB_RUN_ID"
           git push origin "HEAD:$DATA_BRANCH"
       - name: Final aggregate report and automatic shutdown
         if: always()
@@ -173,14 +181,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin "$DATA_BRANCH"
           git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
-          python research/v96_stock_theme_forward_validate.py \
+          python research/v96_stock_theme_forward_7d_validate.py \
             --input-dir "$DATA_DIR/chunks" \
+            --output-dir "$DATA_DIR/final-report" || true
+          python research/v96_stock_theme_forward_7d_pnl.py \
             --output-dir "$DATA_DIR/final-report" || true
           git add "$DATA_DIR/final-report"
           if ! git diff --cached --quiet; then
-            git commit -m "data: finalize stock-theme three-day Forward report"
+            git commit -m "data: finalize stock-theme seven-day Forward report"
             git push origin "HEAD:$DATA_BRANCH"
           fi
           gh api --method PUT \
             "repos/${GITHUB_REPOSITORY}/actions/workflows/v96-stock-theme-forward-3d.yml/disable"
-          echo "Stock-theme Forward collector disabled after fixed window."
+          echo "Stock-theme Forward collector disabled after seven-day fixed window."
