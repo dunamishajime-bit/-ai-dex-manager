@@ -1,9 +1,10 @@
-name: V96 Stock Walk-Forward Ridge Tournament V8
+name: V96 Stock Walk-Forward Ridge Tournament V8B
 
 on:
   pull_request:
     paths:
       - 'research/v96_stock_walkforward_ridge_tournament_v8.py'
+      - 'research/v96_stock_walkforward_ridge_tournament_v8b.py'
       - 'research/v96_stock_funding_carry_tournament_v4.py'
       - 'research/v96_stock_swing_tournament_v3.py'
       - 'research/v96_stock_intraday_theme_flow_backtest.py'
@@ -29,8 +30,9 @@ jobs:
           path: |
             .cache/v96-stock-intraday-theme-flow
             .cache/v96-stock-funding
-          key: v96-stock-ridge-v8-${{ runner.os }}-${{ hashFiles('research/v96_stock_walkforward_ridge_tournament_v8.py') }}
+          key: v96-stock-ridge-v8b-${{ runner.os }}-${{ hashFiles('research/v96_stock_walkforward_ridge_tournament_v8.py', 'research/v96_stock_walkforward_ridge_tournament_v8b.py') }}
           restore-keys: |
+            v96-stock-ridge-v8b-${{ runner.os }}-
             v96-stock-ridge-v8-${{ runner.os }}-
             v96-stock-funding-v4-${{ runner.os }}-
             v96-stock-intraday-15m-${{ runner.os }}-
@@ -40,25 +42,27 @@ jobs:
           python -m py_compile research/v96_stock_swing_tournament_v3.py
           python -m py_compile research/v96_stock_funding_carry_tournament_v4.py
           python -m py_compile research/v96_stock_walkforward_ridge_tournament_v8.py
+          python -m py_compile research/v96_stock_walkforward_ridge_tournament_v8b.py
           cd research
-          python v96_stock_walkforward_ridge_tournament_v8.py --self-test
-      - name: Run walk-forward tournament
+          python v96_stock_walkforward_ridge_tournament_v8b.py --self-test
+      - name: Run cached walk-forward tournament
         run: |
           cd research
-          python v96_stock_walkforward_ridge_tournament_v8.py \
+          python v96_stock_walkforward_ridge_tournament_v8b.py \
             --price-cache-dir ../.cache/v96-stock-intraday-theme-flow \
             --funding-cache-dir ../.cache/v96-stock-funding \
-            --output-dir ../.research-state/v96-stock-walkforward-ridge-tournament-v8
+            --output-dir ../.research-state/v96-stock-walkforward-ridge-tournament-v8b
       - name: Validate evidence
         run: |
-          test -s .research-state/v96-stock-walkforward-ridge-tournament-v8/v96-stock-walkforward-ridge-tournament-v8.json
-          test -s .research-state/v96-stock-walkforward-ridge-tournament-v8/v96-stock-walkforward-ridge-tournament-v8.md
+          test -s .research-state/v96-stock-walkforward-ridge-tournament-v8b/v96-stock-walkforward-ridge-tournament-v8b.json
+          test -s .research-state/v96-stock-walkforward-ridge-tournament-v8b/v96-stock-walkforward-ridge-tournament-v8b.md
           python - <<'PY'
           import json
           from pathlib import Path
-          p = json.loads(Path('.research-state/v96-stock-walkforward-ridge-tournament-v8/v96-stock-walkforward-ridge-tournament-v8.json').read_text())
+          p = json.loads(Path('.research-state/v96-stock-walkforward-ridge-tournament-v8b/v96-stock-walkforward-ridge-tournament-v8b.json').read_text())
           assert p['candidateCount'] == 12
           assert p['familyCount'] == 4
+          assert p['uniqueModelFits'] == 6
           assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
           assert p['selectionDiscipline']['modelFit'].startswith('expanding walk-forward')
           assert p['status'] in {
@@ -73,6 +77,6 @@ jobs:
       - name: Upload evidence
         uses: actions/upload-artifact@v4
         with:
-          name: v96-stock-walkforward-ridge-tournament-v8
-          path: .research-state/v96-stock-walkforward-ridge-tournament-v8
+          name: v96-stock-walkforward-ridge-tournament-v8b
+          path: .research-state/v96-stock-walkforward-ridge-tournament-v8b
           retention-days: 90
