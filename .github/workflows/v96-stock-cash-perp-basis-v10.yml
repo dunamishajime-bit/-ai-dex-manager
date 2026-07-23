@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'research/v96_stock_cash_perp_basis_v10.py'
+      - 'research/v96_stock_cash_perp_basis_v10b.py'
       - 'research/v96_stock_basis_mature_v9.py'
       - 'research/v96_stock_funding_carry_tournament_v4.py'
       - 'research/v96_stock_intraday_theme_flow_backtest.py'
@@ -30,7 +31,7 @@ jobs:
             .cache/v96-stock-cash-yahoo-v10
             .cache/v96-stock-basis-mature-v9
             .cache/v96-stock-funding
-          key: v96-stock-cash-perp-v10-${{ runner.os }}-${{ hashFiles('research/v96_stock_cash_perp_basis_v10.py') }}
+          key: v96-stock-cash-perp-v10-${{ runner.os }}-${{ hashFiles('research/v96_stock_cash_perp_basis_v10.py', 'research/v96_stock_cash_perp_basis_v10b.py') }}
           restore-keys: |
             v96-stock-cash-perp-v10-${{ runner.os }}-
             v96-stock-basis-v9-${{ runner.os }}-
@@ -41,8 +42,10 @@ jobs:
           python -m py_compile research/v96_stock_funding_carry_tournament_v4.py
           python -m py_compile research/v96_stock_basis_mature_v9.py
           python -m py_compile research/v96_stock_cash_perp_basis_v10.py
+          python -m py_compile research/v96_stock_cash_perp_basis_v10b.py
           cd research
           python v96_stock_cash_perp_basis_v10.py --self-test
+          python v96_stock_cash_perp_basis_v10b.py --self-test
       - name: Run Cash / Perp validation
         run: |
           cd research
@@ -51,16 +54,26 @@ jobs:
             --perp-cache-dir ../.cache/v96-stock-basis-mature-v9 \
             --funding-cache-dir ../.cache/v96-stock-funding \
             --output-dir ../.research-state/v96-stock-cash-perp-basis-v10
+      - name: Run fixed full-period diagnostic
+        run: |
+          cd research
+          python v96_stock_cash_perp_basis_v10b.py \
+            --cash-cache-dir ../.cache/v96-stock-cash-yahoo-v10 \
+            --perp-cache-dir ../.cache/v96-stock-basis-mature-v9 \
+            --funding-cache-dir ../.cache/v96-stock-funding \
+            --output-dir ../.research-state/v96-stock-cash-perp-basis-v10b
       - name: Validate evidence
         run: |
           test -s .research-state/v96-stock-cash-perp-basis-v10/v96-stock-cash-perp-basis-v10.json
           test -s .research-state/v96-stock-cash-perp-basis-v10/v96-stock-cash-perp-basis-v10.md
+          test -s .research-state/v96-stock-cash-perp-basis-v10b/v96-stock-cash-perp-basis-v10b.json
+          test -s .research-state/v96-stock-cash-perp-basis-v10b/v96-stock-cash-perp-basis-v10b.md
           python - <<'PY'
           import json
           from pathlib import Path
           p = json.loads(Path('.research-state/v96-stock-cash-perp-basis-v10/v96-stock-cash-perp-basis-v10.json').read_text())
-          assert p['candidateCount'] == 12
-          assert p['familyCount'] == 4
+          d = json.loads(Path('.research-state/v96-stock-cash-perp-basis-v10b/v96-stock-cash-perp-basis-v10b.json').read_text())
+          assert p['candidateCount'] == 12 and p['familyCount'] == 4
           assert p['status'] in {
               'INSUFFICIENT_ALIGNED_CASH_PERP_HISTORY',
               'CRYPTO_LIKE_CASH_PERP_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
@@ -70,7 +83,16 @@ jobs:
           }
           if p['status'] != 'INSUFFICIENT_ALIGNED_CASH_PERP_HISTORY':
               assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
-          assert p['safety'] == {
+          assert d['candidateCount'] == 12 and d['familyCount'] == 4
+          assert d['status'] in {
+              'INSUFFICIENT_ALIGNED_CASH_PERP_HISTORY',
+              'CASH_PERP_FIXED_DIAGNOSTIC_VALIDATION_PASS_EXISTS',
+              'CASH_PERP_FIXED_DIAGNOSTIC_NO_VALIDATION_PASS',
+          }
+          if d['status'] != 'INSUFFICIENT_ALIGNED_CASH_PERP_HISTORY':
+              assert d['diagnosticPolicy']['thresholdsRetuned'] is False
+              assert d['diagnosticPolicy']['holdoutUsedForSelection'] is False
+          expected = {
               'mode': 'RESEARCH_ONLY',
               'orderSubmissionAllowed': False,
               'productionChanged': False,
@@ -78,10 +100,13 @@ jobs:
               'vpsChanged': False,
               'cryptoV96Changed': False,
           }
+          assert p['safety'] == expected and d['safety'] == expected
           PY
       - name: Upload evidence
         uses: actions/upload-artifact@v4
         with:
           name: v96-stock-cash-perp-basis-v10
-          path: .research-state/v96-stock-cash-perp-basis-v10
+          path: |
+            .research-state/v96-stock-cash-perp-basis-v10
+            .research-state/v96-stock-cash-perp-basis-v10b
           retention-days: 90
