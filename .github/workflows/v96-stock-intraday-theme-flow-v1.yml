@@ -1,0 +1,56 @@
+name: V96 Stock Intraday Theme Flow V1
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_intraday_theme_flow_v1.py'
+      - 'docs/research/V96_STOCK_INTRADAY_THEME_FLOW_V1.md'
+      - '.github/workflows/v96-stock-intraday-theme-flow-v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-intraday-theme-flow-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_v1.py
+          python research/v96_stock_intraday_theme_flow_v1.py
+      - name: Generate frozen manifest
+        run: |
+          mkdir -p .research-state/v96-stock-intraday-theme-flow-v1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from research.v96_stock_intraday_theme_flow_v1 import manifest
+
+          payload = manifest()
+          assert payload['strategyId'] == 'V96_STOCK_INTRADAY_THEME_FLOW_V1'
+          assert payload['config']['stock_gross_cap'] == 1.0
+          assert payload['config']['maximum_spread_bps'] == 15.0
+          assert payload['config']['maximum_book_mid_mismatch_bps'] == 5.0
+          assert payload['executionPolicy']['noOvernightPosition'] is True
+          assert payload['directionPolicy']['newsSelectsDirection'] is False
+          assert payload['safety']['orderSubmissionAllowed'] is False
+          Path('.research-state/v96-stock-intraday-theme-flow-v1/manifest.json').write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8'
+          )
+          PY
+      - name: Safety audit
+        run: |
+          ! grep -R "orderSubmissionAllowed.*True" research/v96_stock_intraday_theme_flow_v1.py
+          ! grep -R "liveTradingEnabled.*true" research/v96_stock_intraday_theme_flow_v1.py docs/research/V96_STOCK_INTRADAY_THEME_FLOW_V1.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-intraday-theme-flow-v1
+          path: .research-state/v96-stock-intraday-theme-flow-v1
+          retention-days: 90
