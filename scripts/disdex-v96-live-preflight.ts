@@ -2,6 +2,7 @@ import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
+import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import {
     assertDisDexV96LiveGates,
     type DisDexV96ExecutionParityApproval,
@@ -11,6 +12,7 @@ import {
     readDisDexV96KillSwitch,
     type DisDexV96OperatorOverrideApproval,
 } from "../lib/disdex-v96-live-risk-controls";
+import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
 
@@ -38,6 +40,7 @@ async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
 
 async function main() {
     const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
+    const configMigrationMode = boolEnv("DISDEX_V96_CONFIG_MIGRATION_MODE", false);
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
         optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
         optionalJson<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE),
@@ -65,7 +68,7 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V96-LIVE-Preflight/1.0",
+        userAgent: "DisDex-V96-LIVE-Preflight/1.1",
     });
     if (!client.hasTradingCredentials()) {
         throw new Error("V96 preflight requires ASTER_USER_ADDRESS and ASTER_API_PRIVATE_KEY.");
@@ -89,12 +92,23 @@ async function main() {
         MANAGED_SYMBOLS.includes(String(row.symbol).toUpperCase() as typeof MANAGED_SYMBOLS[number])
         && Math.abs(Number(row.positionAmt) || 0) > 1e-12,
     );
-    if (managedPositions.length) {
+    if (!Array.isArray(openOrders) || openOrders.length !== 0) {
+        throw new Error(`V96 preflight requires zero open orders; found ${Array.isArray(openOrders) ? openOrders.length : "unknown"}.`);
+    }
+
+    let migratedStateVerified = false;
+    if (configMigrationMode) {
+        const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
+        const state = await new FileDisDexV96RunnerStateStore(resolve(stateRoot, "runner-live.json"), "live").load();
+        if (state.bootstrapRequired) throw new Error("V96 config-migration preflight requires a migrated established state with bootstrapRequired=false.");
+        if (state.pending) throw new Error("V96 config-migration preflight found a pending state order.");
+        if (state.manualReviewReason) throw new Error(`V96 config-migration preflight found manual review: ${state.manualReviewReason}`);
+        if (state.operatorOverride) throw new Error("Migrated V96 state still contains the old Operator Override audit.");
+        migratedStateVerified = true;
+    } else if (managedPositions.length) {
         throw new Error(`V96 initial LIVE bootstrap requires managed positions to be flat; found ${managedPositions.length}.`);
     }
-    if (!Array.isArray(openOrders) || openOrders.length !== 0) {
-        throw new Error(`V96 initial LIVE bootstrap requires zero open orders; found ${Array.isArray(openOrders) ? openOrders.length : "unknown"}.`);
-    }
+
     const usdt = balances.find((row) => String(row.asset).toUpperCase() === "USDT");
     if (!usdt) throw new Error("Aster USDT balance row was not returned.");
     const symbols = new Map(exchangeInfo.symbols.map((row) => [String(row.symbol).toUpperCase(), row]));
@@ -111,6 +125,7 @@ async function main() {
     }
     console.log(JSON.stringify({
         status: "DISDEX_V96_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT",
+        preflightMode: configMigrationMode ? "CONFIG_MIGRATION_WITH_EXISTING_MANAGED_POSITIONS" : "INITIAL_FLAT_BOOTSTRAP",
         runtimeCommitSha,
         configFingerprint: gate.configFingerprint,
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
@@ -121,6 +136,7 @@ async function main() {
         maximumDailyLossUsd: gate.operatorOverride?.maximumDailyLossUsd,
         oneWayMode: true,
         managedPositionCount: managedPositions.length,
+        migratedStateVerified,
         openOrderCount: openOrders.length,
         usdtBalance: Number(usdt.balance ?? usdt.crossWalletBalance ?? 0),
         usdtAvailableBalance: Number(usdt.availableBalance ?? 0),

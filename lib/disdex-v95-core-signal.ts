@@ -5,12 +5,17 @@ import {
     type DisDexV35CoreSymbol,
     type DisDexV35SignalResult,
 } from "@/lib/disdex-v35-signal-engine";
+import {
+    resolveDisDexV35Allocation,
+    type DisDexV35Regime,
+} from "@/lib/disdex-resilient-profit-main-v35";
 import type { DisDexPenguV46History } from "@/lib/pengu-dual-engine-v46";
 import {
     runDisDexV95CoreController,
     type DisDexV95CoreFrame,
     type DisDexV95CoreWeightMap,
 } from "@/lib/disdex-v95-core-controller";
+import { buildDisDexV96CoreTargetSeries } from "@/lib/disdex-v96-core-signal";
 
 const CORE_SYMBOLS: DisDexV35CoreSymbol[] = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"];
 const MINIMUM_CORE_HISTORY_BARS = 140;
@@ -31,6 +36,16 @@ const DISABLED_PENGU_RULE: DisDexPenguRule = {
 function finite(value: unknown, fallback = 0) {
     const number = Number(value);
     return Number.isFinite(number) ? number : fallback;
+}
+
+function gross(weights: DisDexV95CoreWeightMap) {
+    return Object.values(weights).reduce((sum, weight) => sum + Math.abs(finite(weight)), 0);
+}
+
+function regimeFor(weights: DisDexV95CoreWeightMap): DisDexV35Regime {
+    if (Object.values(weights).some((weight) => finite(weight) > 0)) return "BULL";
+    if (Object.values(weights).some((weight) => finite(weight) < 0)) return "BEAR";
+    return "FLAT";
 }
 
 function completedRows(rows: DisDexV35Candle[], now: number) {
@@ -79,6 +94,43 @@ function nextSymbolReturns(
     }));
 }
 
+function withV96CoreTarget(
+    diagnosticCore: DisDexV35SignalResult,
+    target: DisDexV95CoreWeightMap,
+): DisDexV35SignalResult {
+    const coreGross = gross(target);
+    const regime = regimeFor(target);
+    const allocation = resolveDisDexV35Allocation({
+        regime,
+        coreGross,
+        penguSignalActive: false,
+        features: {
+            btcCloseAboveSma20d: diagnosticCore.diagnostics.btcCloseAboveSma20d,
+            btcMomentum20dPct: diagnosticCore.diagnostics.btcMomentum20dPct,
+            btcMomentum3dPct: diagnosticCore.diagnostics.btcMomentum3dPct,
+            btcShock1dPct: diagnosticCore.diagnostics.btcShock1dPct,
+            coreDownsideVolatilitySkew: diagnosticCore.diagnostics.coreDownsideVolatilitySkew,
+        },
+    });
+    const coreScale = coreGross > 0 ? allocation.finalCoreGross / coreGross : 0;
+    const targetWeights = Object.fromEntries(
+        Object.entries(target)
+            .map(([symbol, weight]) => [symbol, finite(weight) * coreScale])
+            .filter(([, weight]) => Math.abs(finite(weight)) > 1e-8),
+    ) as DisDexV35SignalResult["targetWeights"];
+    return {
+        ...diagnosticCore,
+        regime,
+        coreTargetBeforeV35: target,
+        coreGrossBeforeV35: coreGross,
+        penguSide: 0,
+        penguEntryTs: undefined,
+        penguExitTs: undefined,
+        allocation,
+        targetWeights,
+    };
+}
+
 export interface DisDexV95CoreSignal {
     strategyId: "V35_WEIGHT_BAND_PLUS_FIXED_STRONG_V95";
     referenceTs: number;
@@ -103,16 +155,21 @@ export function buildDisDexV95CoreSignal(
     if (common.times.length < MINIMUM_CORE_HISTORY_BARS) {
         throw new Error(`V95 core history is insufficient: ${common.times.length} completed common 12h bars.`);
     }
+    const v96Targets = buildDisDexV96CoreTargetSeries(common.rows).targets;
 
     const frames: DisDexV95CoreFrame[] = [];
     let latestCore: DisDexV35SignalResult | undefined;
     for (let index = MINIMUM_CORE_HISTORY_BARS - 1; index < common.times.length; index += 1) {
         const referenceTs = common.times[index];
-        const core = buildDisDexV35Signal({
+        const diagnosticCore = buildDisDexV35Signal({
             core12h: prefixAt(common.rows, referenceTs),
             btc1h: [],
             pengu1h: [],
         }, DISABLED_PENGU_RULE, now);
+        const core = withV96CoreTarget(
+            diagnosticCore,
+            (v96Targets.get(referenceTs) || {}) as DisDexV95CoreWeightMap,
+        );
         const rawGross = Math.max(0, finite(core.coreGrossBeforeV35));
         const v35Scale = rawGross > 0
             ? Math.max(0, finite(core.allocation.finalCoreGross) / rawGross)

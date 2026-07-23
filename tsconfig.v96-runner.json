@@ -21,6 +21,7 @@
     "lib/signed-paper-direct-trade-executor.ts",
     "lib/disdex-v95-core-controller.ts",
     "lib/disdex-v95-core-signal.ts",
+    "lib/disdex-v96-core-signal.ts",
     "lib/disdex-v96-allocation.ts",
     "lib/disdex-v96-combined-signal.ts",
     "lib/disdex-v96-live-gates.ts",
@@ -34,6 +35,8 @@
     "scripts/disdex-v96-kill-switch.ts",
     "scripts/disdex-v96-live-preflight.ts",
     "scripts/disdex-v96-live-runner.ts",
+    "scripts/disdex-v96-migrate-config-state.ts",
+    "scripts/disdex-v96-frequency-live-selftest.ts",
     "scripts/disdex-v96-production-selftest.ts"
   ],
   "exclude": [
