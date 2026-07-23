@@ -29,7 +29,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: v96-stock-theme-forward-7d
+  group: v96-stock-theme-equal-gross-policy
   cancel-in-progress: false
 
 env:
