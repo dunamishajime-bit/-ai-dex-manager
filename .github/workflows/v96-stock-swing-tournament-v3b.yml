@@ -5,6 +5,7 @@ on:
     paths:
       - 'research/v96_stock_swing_tournament_v3.py'
       - 'research/v96_stock_swing_tournament_v3b.py'
+      - 'research/v96_stock_swing_tournament_v3c.py'
       - 'research/v96_stock_intraday_theme_flow_backtest.py'
       - '.github/workflows/v96-stock-swing-tournament-v3b.yml'
   workflow_dispatch:
@@ -26,7 +27,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache/v96-stock-intraday-theme-flow
-          key: v96-stock-swing-v3b-${{ runner.os }}-${{ hashFiles('research/v96_stock_swing_tournament_v3b.py') }}
+          key: v96-stock-swing-v3b-${{ runner.os }}-${{ hashFiles('research/v96_stock_swing_tournament_v3b.py', 'research/v96_stock_swing_tournament_v3c.py') }}
           restore-keys: |
             v96-stock-swing-v3b-${{ runner.os }}-
             v96-stock-swing-${{ runner.os }}-
@@ -37,27 +38,13 @@ jobs:
           python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
           python -m py_compile research/v96_stock_swing_tournament_v3.py
           python -m py_compile research/v96_stock_swing_tournament_v3b.py
+          python -m py_compile research/v96_stock_swing_tournament_v3c.py
           cd research
-          python - <<'PY'
-          import v96_stock_intraday_theme_flow_backtest as base
-          import v96_stock_swing_tournament_v3 as v3
-          import v96_stock_swing_tournament_v3b as v3b
-          symbol = base.SYMBOLS[0]
-          sample = {
-              symbol: {
-                  f'2026-01-{day:02d}': v3.DailyBar(f'2026-01-{day:02d}', 1, 1, 1, 1, 1, 1)
-                  for day in range(1, 32)
-              }
-          }
-          eligible = v3b.common_history_days(sample, minimum_symbols=1, minimum_sessions=10)
-          assert eligible[0] == '2026-01-10'
-          assert len(v3.CANDIDATES) == 27
-          print('V96 stock swing tournament V3B self-test: PASS')
-          PY
+          python v96_stock_swing_tournament_v3c.py --self-test
       - name: Run corrected swing tournament
         run: |
           cd research
-          python v96_stock_swing_tournament_v3b.py \
+          python v96_stock_swing_tournament_v3c.py \
             --cache-dir ../.cache/v96-stock-intraday-theme-flow \
             --output-dir ../.research-state/v96-stock-swing-tournament-v3b
       - name: Validate evidence
@@ -79,6 +66,7 @@ jobs:
               'NO_VALIDATION_PASSING_SWING_FAMILY',
           }
           assert p['safety']['orderSubmissionAllowed'] is False
+          assert p['safety']['productionChanged'] is False
           PY
       - name: Upload evidence
         uses: actions/upload-artifact@v4
