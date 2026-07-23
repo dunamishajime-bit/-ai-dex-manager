@@ -1,0 +1,72 @@
+name: V96 Stock Mature Universe Tournament V5
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_mature_universe_tournament_v5.py'
+      - 'research/v96_stock_swing_tournament_v3.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
+      - '.github/workflows/v96-stock-mature-universe-tournament-v5.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-mature-universe-v5-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tournament:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Aster price cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/v96-stock-intraday-theme-flow
+          key: v96-stock-mature-v5-${{ runner.os }}-${{ hashFiles('research/v96_stock_mature_universe_tournament_v5.py') }}
+          restore-keys: |
+            v96-stock-mature-v5-${{ runner.os }}-
+            v96-stock-swing-v3b-${{ runner.os }}-
+            v96-stock-intraday-15m-${{ runner.os }}-
+      - name: Compile and self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          python -m py_compile research/v96_stock_swing_tournament_v3.py
+          python -m py_compile research/v96_stock_mature_universe_tournament_v5.py
+          cd research
+          python v96_stock_mature_universe_tournament_v5.py --self-test
+      - name: Run mature-universe tournament
+        run: |
+          cd research
+          python v96_stock_mature_universe_tournament_v5.py \
+            --cache-dir ../.cache/v96-stock-intraday-theme-flow \
+            --output-dir ../.research-state/v96-stock-mature-universe-tournament-v5
+      - name: Validate evidence
+        run: |
+          test -s .research-state/v96-stock-mature-universe-tournament-v5/v96-stock-mature-universe-tournament-v5.json
+          test -s .research-state/v96-stock-mature-universe-tournament-v5/v96-stock-mature-universe-tournament-v5.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-stock-mature-universe-tournament-v5/v96-stock-mature-universe-tournament-v5.json').read_text())
+          assert p['candidateCount'] == 24
+          assert p['familyCount'] == 8
+          assert len(p['universe']) == 5
+          assert p['status'] in {
+              'CRYPTO_LIKE_MATURE_STOCK_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'ROBUST_POSITIVE_MATURE_STOCK_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'MATURE_STOCK_VALIDATION_LEAD_FAILED_REUSED_HOLDOUT',
+              'NO_VALIDATION_PASSING_MATURE_STOCK_FAMILY',
+          }
+          assert p['safety']['orderSubmissionAllowed'] is False
+          assert p['safety']['productionChanged'] is False
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-mature-universe-tournament-v5
+          path: .research-state/v96-stock-mature-universe-tournament-v5
+          retention-days: 90
