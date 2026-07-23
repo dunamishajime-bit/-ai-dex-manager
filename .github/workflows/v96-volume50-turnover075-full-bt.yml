@@ -1,0 +1,81 @@
+name: V96 Volume50 Turnover7.5 full-period backtest
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_volume50_turnover075_full_bt.py'
+      - '.github/workflows/v96-volume50-turnover075-full-bt.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-volume50-turnover075-full-bt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical market-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-volume50-turnover075-full-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_volume50_turnover075_full_bt.py') }}
+          restore-keys: |
+            v96-core-vol50-p10-${{ runner.os }}-
+            v96-core-volume50-exec-${{ runner.os }}-
+            v96-core-volume-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile exact backtest
+        run: python -m py_compile scripts/research_lab_v96_volume50_turnover075_full_bt.py
+      - name: Run Core and combined V96 all-period backtest
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_volume50_turnover075_full_bt.py
+      - name: Validate exact frozen configuration and outputs
+        run: |
+          test -s .research-state/v96-volume50-turnover075-full-bt.json
+          test -s .research-state/v96-volume50-turnover075-full-bt.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('.research-state/v96-volume50-turnover075-full-bt.json').read_text())
+          rules = payload['fixedProductionRules']
+          core = rules['core']
+          assert payload['productionMergeSha'] == 'a4529372a4a331b602a51d36f3287345a89436bb'
+          assert core['volume_floor'] == 0.5
+          assert core['turnover_threshold'] == 0.075
+          assert core['weight_tolerance'] == 0.05
+          assert core['stale_bars'] == 12
+          assert core['bear_confirm_bars'] == 4
+          assert rules['penguTargetGross'] == 1.15
+          assert rules['totalGrossCap'] == 2.0
+          assert rules['minimumPenguClip'] == 0.5
+          assert payload['newV96']['combined']['full']['observedMaxConcurrentGross'] <= 2.0 + 1e-9
+          assert payload['safety'] == {
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'ordersSent': False,
+          }
+          assert payload['status'] in {
+              'V96_VOLUME50_TURNOVER075_FULL_PERIOD_BT_PASS',
+              'V96_VOLUME50_TURNOVER075_FULL_PERIOD_BT_DIAGNOSTIC',
+          }
+          PY
+      - name: Upload exact backtest evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-volume50-turnover075-full-bt
+          path: |
+            .research-state/v96-volume50-turnover075-full-bt.json
+            .research-state/v96-volume50-turnover075-full-bt.md
+          if-no-files-found: warn
+          retention-days: 90
