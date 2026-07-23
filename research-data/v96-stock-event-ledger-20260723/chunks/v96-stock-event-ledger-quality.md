@@ -4,8 +4,8 @@ Status: **STOCK_EVENT_LEDGER_QUALITY_PASS**
 
 - immutable files: 1
 - snapshots: 1
-- event observations: 74
-- unique events: 74
+- event observations: 75
+- unique events: 75
 - fast source coverage: True
 - successful slow sources: 5 / 5
 - forbidden article-body fields: 0
