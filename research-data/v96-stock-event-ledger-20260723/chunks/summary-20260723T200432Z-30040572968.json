@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "collectorId": "V96_STOCK_EVENT_LEDGER_V1",
+  "mode": "fast",
+  "fetchedAt": "2026-07-23T20:04:32.492359Z",
+  "summary": {
+    "eventCount": 61,
+    "eventsBySource": {
+      "GOOGLE_NEWS_RSS": 60,
+      "NASDAQ_TRADER_HALT_RSS": 1
+    },
+    "eventsByType": {
+      "COMPANY_NEWS_HEADLINE": 60,
+      "TRADING_HALT_OR_RESUMPTION": 1
+    },
+    "eventsBySymbol": {
+      "GOOGLUSDT": 6,
+      "INTCUSDT": 30,
+      "NVDAUSDT": 4,
+      "AMATUSDT": 2,
+      "SNDKUSDT": 2,
+      "AVGOUSDT": 2,
+      "MUUSDT": 6,
+      "TSLAUSDT": 5,
+      "DRAMUSDT": 1,
+      "AMDUSDT": 1,
+      "MSFTUSDT": 1,
+      "ASMLUSDT": 1
+    },
+    "sourceFailures": [],
+    "nonLiveFallbacks": []
+  },
+  "sourceResults": {
+    "googleNewsRss": {
+      "ok": true,
+      "groups": [
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 658.46,
+          "bytes": 132379,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "ADBEUSDT",
+            "AMZNUSDT",
+            "CRMUSDT",
+            "GOOGLUSDT",
+            "METAUSDT",
+            "MSFTUSDT",
+            "ORCLUSDT",
+            "PLTRUSDT",
+            "TSLAUSDT"
+          ]
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 576.057,
+          "bytes": 128769,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "AMDUSDT",
+            "ARMUSDT",
+            "AVGOUSDT",
+            "INTCUSDT",
+            "MRVLUSDT",
+            "NVDAUSDT",
+            "QCOMUSDT"
+          ]
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 599.583,
+          "bytes": 132973,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "AMATUSDT",
+            "ASMLUSDT",
+            "MUUSDT",
+            "SNDKUSDT",
+            "TSMUSDT"
+          ]
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 336.794,
+          "bytes": 35826,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "DRAMUSDT"
+          ]
+        }
+      ],
+      "records": 60,
+      "recordsBeforeChronologyFilter": 395,
+      "staleOrInvalidTimeRejected": 294,
+      "noRiskKeywordRejected": 41,
+      "ambiguousMappingRejected": 0,
+      "chronologyWindowHours": 36
+    },
+    "nasdaqTradeHalts": {
+      "ok": true,
+      "status": 200,
+      "latencyMs": 688.505,
+      "bytes": 98420,
+      "contentType": "text/xml",
+      "records": 1
+    },
+    "asterExchangeInfo": {
+      "ok": true,
+      "status": 200,
+      "latencyMs": 1068.273,
+      "bytes": 726289,
+      "contentType": "application/json",
+      "records": 0,
+      "observedSymbols": 22
+    }
+  },
+  "safety": {
+    "mode": "SHADOW_OBSERVATION_ONLY",
+    "orderSubmissionAllowed": false,
+    "entryDecisionChanged": false,
+    "productionStrategyChanged": false,
+    "currentV96WeightsMutable": false,
+    "articleBodiesStored": false,
+    "sentimentUsedForDirection": false
+  },
+  "files": {
+    "eventLedger": "event-ledger-20260723T200432Z-30040572968.json.gz"
+  }
+}
