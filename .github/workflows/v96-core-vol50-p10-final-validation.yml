@@ -1,0 +1,73 @@
+name: V96 Core Volume50 Turnover10 final validation
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_core_vol50_p10_final_validation.py'
+      - 'scripts/research_lab_v96_core_volume_floor_validation.py'
+      - 'scripts/research_lab_v96_frequency_uplift.py'
+      - '.github/workflows/v96-core-vol50-p10-final-validation.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-core-vol50-p10-final-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-core-vol50-p10-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_core_vol50_p10_final_validation.py') }}
+          restore-keys: |
+            v96-core-vol50-p10-${{ runner.os }}-
+            v96-core-volume50-exec-${{ runner.os }}-
+            v96-core-volume-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile scripts
+        run: |
+          python -m py_compile scripts/research_lab_v96_frequency_uplift.py
+          python -m py_compile scripts/research_lab_v96_core_volume_floor_validation.py
+          python -m py_compile scripts/research_lab_v96_core_vol50_p10_final_validation.py
+      - name: Run final validation
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_core_vol50_p10_final_validation.py
+      - name: Validate outputs
+        run: |
+          test -s .research-state/v96-core-vol50-p10-final-validation.json
+          test -s .research-state/v96-core-vol50-p10-final-validation.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('.research-state/v96-core-vol50-p10-final-validation.json').read_text())
+          assert payload['status'] in {
+              'CORE_V50_P10_HISTORICAL_LOCAL_STABLE_LEAD_SHADOW_ONLY',
+              'CORE_V50_P10_NOT_STABLE',
+          }
+          assert len(payload['results']) == 10
+          assert payload['safety'] == {
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'ordersSent': False,
+          }
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-core-vol50-p10-final-validation
+          path: |
+            .research-state/v96-core-vol50-p10-final-validation.json
+            .research-state/v96-core-vol50-p10-final-validation.md
+          retention-days: 30
