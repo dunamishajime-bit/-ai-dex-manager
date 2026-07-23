@@ -97,7 +97,6 @@ def main() -> None:
     state_dir = Path(os.environ.get("RESEARCH_AUTONOMOUS_STATE_DIR", ".research-state")).resolve()
     raw = v89.build_raw()
     current_candidate = freq.CoreCandidate("CURRENT_V70_P20", volume_floor=0.70, turnover_threshold=0.20)
-    lead_candidate = freq.CoreCandidate("LEAD_V50_P10", volume_floor=0.50, turnover_threshold=0.10)
     grid = [
         freq.CoreCandidate(
             f"V{int(round(volume * 100)):02d}_P{int(round(turnover * 1000)):03d}",
@@ -115,7 +114,7 @@ def main() -> None:
         item["eventUpliftPct"] = (
             item["frequency"]["orderEvents"] / current["frequency"]["orderEvents"] - 1.0
         ) * 100.0
-    lead = next(item for item in results if item["candidate"]["candidate_id"] == lead_candidate.candidate_id)
+    lead = next(item for item in results if item["candidate"]["candidate_id"] == "V50_P100")
     immediate_ids = {"V45_P100", "V50_P075", "V50_P100", "V50_P125", "V55_P100"}
     immediate = [item for item in results if item["candidate"]["candidate_id"] in immediate_ids]
     local_stability = len(immediate) == 5 and sum(bool(item["pass"]) for item in immediate) >= 4
