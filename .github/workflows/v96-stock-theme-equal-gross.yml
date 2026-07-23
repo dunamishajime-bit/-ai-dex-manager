@@ -7,6 +7,7 @@ on:
       - "research/v96_stock_theme_equal_gross_report.py"
       - "research/v96_crypto_stock_overlay_policy.py"
       - "research/v96_stock_historical_backtest_policy.py"
+      - "research/v96_stock_historical_backtest_manifest.py"
       - "docs/research/v96-crypto-stock-market-hours-overlay-v1.md"
       - ".github/workflows/v96-stock-theme-equal-gross.yml"
   push:
@@ -16,6 +17,7 @@ on:
       - "research/v96_stock_theme_equal_gross_report.py"
       - "research/v96_crypto_stock_overlay_policy.py"
       - "research/v96_stock_historical_backtest_policy.py"
+      - "research/v96_stock_historical_backtest_manifest.py"
       - "docs/research/v96-crypto-stock-market-hours-overlay-v1.md"
       - ".github/workflows/v96-stock-theme-equal-gross.yml"
   schedule:
@@ -51,17 +53,19 @@ jobs:
           python -m py_compile research/v96_stock_theme_equal_gross_report.py
           python -m py_compile research/v96_crypto_stock_overlay_policy.py
           python -m py_compile research/v96_stock_historical_backtest_policy.py
+          python -m py_compile research/v96_stock_historical_backtest_manifest.py
           python research/v96_stock_theme_equal_gross_config.py
           python research/v96_stock_theme_equal_gross_report.py --self-test
           python research/v96_crypto_stock_overlay_policy.py
           python research/v96_stock_historical_backtest_policy.py
+          python research/v96_stock_historical_backtest_manifest.py
       - name: Verify frozen architecture text
         shell: bash
         run: |
           set -euo pipefail
           grep -q "not a hard time-sliced router" docs/research/v96-crypto-stock-market-hours-overlay-v1.md
-          grep -q "Crypto Gross cap: `1.00`" docs/research/v96-crypto-stock-market-hours-overlay-v1.md
-          grep -q "Stock Gross cap: `1.00`" docs/research/v96-crypto-stock-market-hours-overlay-v1.md
+          grep -q 'Crypto Gross cap: `1.00`' docs/research/v96-crypto-stock-market-hours-overlay-v1.md
+          grep -q 'Stock Gross cap: `1.00`' docs/research/v96-crypto-stock-market-hours-overlay-v1.md
           grep -q "historical profitability" docs/research/v96-crypto-stock-market-hours-overlay-v1.md
       - name: Generate immutable allocation manifest
         run: |
@@ -69,6 +73,7 @@ jobs:
           python research/v96_stock_theme_equal_gross_report.py \
             --allocation-only \
             --output-dir /tmp/v96-equal-gross-allocation
+          cp -a .research-state/v96-stock-historical-backtest-policy/. /tmp/v96-equal-gross-allocation/
       - uses: actions/upload-artifact@v4
         with:
           name: v96-stock-theme-equal-gross-allocation
@@ -95,6 +100,8 @@ jobs:
           python research/v96_stock_theme_equal_gross_report.py \
             --allocation-only \
             --output-dir /tmp/v96-equal-gross-allocation
+          python research/v96_stock_historical_backtest_manifest.py
+          cp -a .research-state/v96-stock-historical-backtest-policy/. /tmp/v96-equal-gross-allocation/
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
