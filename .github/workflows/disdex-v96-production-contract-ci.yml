@@ -10,9 +10,11 @@ on:
       - lib/disdex-v96-*.ts
       - scripts/disdex-v95-*.ts
       - scripts/disdex_v95_*.py
+      - scripts/disdex_v96_*.py
       - scripts/disdex-v96-*.ts
       - scripts/install-disdex-v96-systemd.sh
       - docs/DISDEX_V96_PRODUCTION_HANDOFF.md
+      - docs/DISDEX_V96_VOLUME50_TURNOVER075_LIVE_HANDOFF.md
       - tsconfig.v96-runner.json
       - package.json
       - .github/workflows/disdex-v96-production-contract-ci.yml
@@ -39,7 +41,7 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: npm ci
-      - name: V95 Python to TypeScript golden-vector parity and V96 safeguards
+      - name: V96 Python to TypeScript golden-vector parity and safeguards
         run: npm run strategy:disdex-v96:parity
       - name: Write execution-parity approval manifest
         env:
@@ -65,6 +67,11 @@ jobs:
         run: |
           set -euo pipefail
           grep -q 'strategyId: DISDEX_V96_STRATEGY_ID' config/disdexV96Runtime.ts
+          grep -q 'productionRevision: "CORE_VOLUME50_TURNOVER075_LIVE_R1"' config/disdexV96Runtime.ts
+          grep -q 'componentVolumeFloor: 0.50' config/disdexV96Runtime.ts
+          grep -q 'portfolioRebalanceThresholdPct: 7.5' config/disdexV96Runtime.ts
+          grep -q 'weightBandTolerancePct: 5' config/disdexV96Runtime.ts
+          grep -q 'forcedRefreshBars: 12' config/disdexV96Runtime.ts
           grep -q 'mode: "LIVE_READY"' config/disdexV96Runtime.ts
           grep -q 'liveTradingEnabled: true' config/disdexV96Runtime.ts
           grep -q 'forwardEvidenceStatus: "NOT_APPROVED"' config/disdexV96Runtime.ts
@@ -74,7 +81,10 @@ jobs:
           grep -q 'killSwitchAction: "FLATTEN_MANAGED"' config/disdexV96Runtime.ts
           grep -q 'status: "APPROVED"' config/disdexV96Runtime.ts
           grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS' config/disdexV96Runtime.ts
-          grep -q 'buildDisDexV95CoreSignal' lib/disdex-v96-combined-signal.ts
+          grep -q 'buildDisDexV96CoreTargetSeries' lib/disdex-v95-core-signal.ts
+          grep -q 'componentVolumeFloor' lib/disdex-v96-core-signal.ts
+          grep -q 'DISDEX_V96_CONFIG_MIGRATION_ACKNOWLEDGEMENT' scripts/disdex-v96-migrate-config-state.ts
+          grep -q 'CONFIG_MIGRATION_WITH_EXISTING_MANAGED_POSITIONS' scripts/disdex-v96-live-preflight.ts
           grep -q 'DISDEX_V96_RUNTIME_COMMIT_SHA' lib/disdex-v96-live-gates.ts
           grep -q 'DISDEX_V96_OPERATOR_OVERRIDE_FILE' scripts/install-disdex-v96-systemd.sh
           grep -q 'DISDEX_V96_KILL_SWITCH_FILE' scripts/install-disdex-v96-systemd.sh
