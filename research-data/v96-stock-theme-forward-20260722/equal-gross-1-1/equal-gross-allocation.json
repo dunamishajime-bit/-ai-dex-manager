@@ -1,0 +1,30 @@
+{
+  "allocationId": "V96_CRYPTO_1_STOCK_1_EQUAL_GROSS_V1",
+  "effectiveFromUtc": "2026-07-23T00:00:00Z",
+  "researchAllocation": {
+    "cryptoGrossCap": 1.0,
+    "stockGrossCap": 1.0,
+    "portfolioGrossCap": 2.0,
+    "stockDirectionalGross": 1.0,
+    "stockNeutralLongGross": 0.5,
+    "stockNeutralShortGross": 0.5
+  },
+  "operation": {
+    "cryptoEngineHours": "24H",
+    "stockEngineHours": "US_MARKET_SESSION_ONLY",
+    "capitalTransferBetweenSleeves": false
+  },
+  "safety": {
+    "mode": "SHADOW_RESEARCH_ONLY",
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "currentProductionV96WeightsChanged": false
+  },
+  "legacyAllocation": {
+    "cryptoGross": 1.9,
+    "stockGross": 0.1,
+    "status": "LEGACY_REFERENCE_ONLY"
+  }
+}
