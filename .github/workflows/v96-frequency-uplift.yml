@@ -33,7 +33,7 @@ jobs:
         run: python -m py_compile scripts/research_lab_v96_frequency_uplift.py
       - name: Run frequency uplift backtest
         env:
-          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
         run: |
           cd scripts
           python research_lab_v96_frequency_uplift.py
