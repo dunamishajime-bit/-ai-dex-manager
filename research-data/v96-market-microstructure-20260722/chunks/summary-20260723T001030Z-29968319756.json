@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "status": "collected",
+  "windowStartUtc": "2026-07-22T00:00:00Z",
+  "windowEndUtc": "2026-07-25T00:00:00Z",
+  "durationSecondsRequested": 3000,
+  "durationSecondsActual": 3000.0,
+  "intervalSeconds": 60.0,
+  "stats": {
+    "snapshots": 200,
+    "liquidation_events": 1,
+    "rest_errors": 0,
+    "websocket_connections": 1,
+    "websocket_errors": 0,
+    "started_at": "2026-07-23T00:10:30.531679Z",
+    "finished_at": "2026-07-23T01:00:30.645270Z",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "BNBUSDT",
+      "SOLUSDT"
+    ]
+  },
+  "files": {
+    "snapshots": "snapshots-20260723T001030Z-29968319756.jsonl.gz",
+    "liquidations": "liquidations-20260723T001030Z-29968319756.jsonl.gz",
+    "errors": "errors-20260723T001030Z-29968319756.jsonl.gz"
+  },
+  "safety": {
+    "orderSubmissionAllowed": false,
+    "liveTradingChanged": false,
+    "productionStrategyChanged": false
+  }
+}
