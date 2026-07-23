@@ -1,0 +1,146 @@
+name: V96 Stock Theme Equal Gross Allocation
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_stock_theme_equal_gross_config.py"
+      - "research/v96_stock_theme_equal_gross_report.py"
+      - ".github/workflows/v96-stock-theme-equal-gross.yml"
+  push:
+    branches: [master]
+    paths:
+      - "research/v96_stock_theme_equal_gross_config.py"
+      - "research/v96_stock_theme_equal_gross_report.py"
+      - ".github/workflows/v96-stock-theme-equal-gross.yml"
+  schedule:
+    - cron: "12,22,32,42,52 1 29 7 *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: v96-stock-theme-forward-7d
+  cancel-in-progress: false
+
+env:
+  COLLECTION_END_UTC: "2026-07-29T01:00:00Z"
+  DATA_BRANCH: "research-data/v96-stock-theme-forward-20260722"
+  DATA_DIR: "research-data/v96-stock-theme-forward-20260722"
+  EQUAL_REPORT_DIR: "research-data/v96-stock-theme-forward-20260722/equal-gross-1-1"
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax and equal-gross self-tests
+        run: |
+          python -m py_compile research/v96_stock_theme_equal_gross_config.py
+          python -m py_compile research/v96_stock_theme_equal_gross_report.py
+          python research/v96_stock_theme_equal_gross_config.py
+          python research/v96_stock_theme_equal_gross_report.py --self-test
+      - name: Generate immutable allocation manifest
+        run: |
+          rm -rf /tmp/v96-equal-gross-allocation
+          python research/v96_stock_theme_equal_gross_report.py \
+            --allocation-only \
+            --output-dir /tmp/v96-equal-gross-allocation
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-theme-equal-gross-allocation
+          path: /tmp/v96-equal-gross-allocation
+          retention-days: 90
+
+  persist-allocation:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Write 1.0 / 1.0 allocation to evidence branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/v96-equal-gross-allocation
+          python research/v96_stock_theme_equal_gross_report.py \
+            --allocation-only \
+            --output-dir /tmp/v96-equal-gross-allocation
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$DATA_BRANCH"
+          WORKTREE="$(mktemp -d)"
+          git worktree add -B "$DATA_BRANCH" "$WORKTREE" "origin/$DATA_BRANCH"
+          mkdir -p "$WORKTREE/$EQUAL_REPORT_DIR"
+          cp -a /tmp/v96-equal-gross-allocation/. "$WORKTREE/$EQUAL_REPORT_DIR/"
+          cd "$WORKTREE"
+          git add "$EQUAL_REPORT_DIR"
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "data: set crypto 1.0 and stock 1.0 equal-gross allocation"
+          git push origin "HEAD:$DATA_BRANCH"
+
+  finalize:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check fixed collection window
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW_EPOCH="$(date -u +%s)"
+          END_EPOCH="$(date -u -d "$COLLECTION_END_UTC" +%s)"
+          if (( NOW_EPOCH < END_EPOCH )); then
+            echo "Collection window is still open; equal-gross finalization skipped."
+            echo "SKIP_FINALIZE=1" >> "$GITHUB_ENV"
+          else
+            echo "SKIP_FINALIZE=0" >> "$GITHUB_ENV"
+          fi
+      - name: Build authoritative 1.0 / 1.0 final report
+        if: env.SKIP_FINALIZE == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          MASTER_ROOT="$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$DATA_BRANCH"
+          WORKTREE="$(mktemp -d)"
+          git worktree add -B "$DATA_BRANCH" "$WORKTREE" "origin/$DATA_BRANCH"
+          python "$MASTER_ROOT/research/v96_stock_theme_equal_gross_report.py" \
+            --input-dir "$WORKTREE/$DATA_DIR/chunks" \
+            --output-dir "$WORKTREE/$EQUAL_REPORT_DIR"
+          cd "$WORKTREE"
+          git add "$EQUAL_REPORT_DIR"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: finalize equal-gross 1.0 crypto and 1.0 stock report"
+            git push origin "HEAD:$DATA_BRANCH"
+          fi
+      - name: Disable equal-gross finalizer after completion
+        if: env.SKIP_FINALIZE == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method PUT \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/v96-stock-theme-equal-gross.yml/disable"
