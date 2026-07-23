@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'research/v96_stock_intraday_theme_flow_v1.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
       - 'docs/research/V96_STOCK_INTRADAY_THEME_FLOW_V1.md'
       - '.github/workflows/v96-stock-intraday-theme-flow-v1.yml'
   workflow_dispatch:
@@ -24,7 +25,10 @@ jobs:
       - name: Compile and self-test
         run: |
           python -m py_compile research/v96_stock_intraday_theme_flow_v1.py
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
           python research/v96_stock_intraday_theme_flow_v1.py
+          cd research
+          python v96_stock_intraday_theme_flow_backtest.py --self-test
       - name: Generate frozen manifest
         run: |
           mkdir -p .research-state/v96-stock-intraday-theme-flow-v1
@@ -53,4 +57,64 @@ jobs:
         with:
           name: v96-stock-intraday-theme-flow-v1
           path: .research-state/v96-stock-intraday-theme-flow-v1
+          retention-days: 90
+
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Aster 15m history cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/v96-stock-intraday-theme-flow
+          key: v96-stock-intraday-15m-${{ runner.os }}-${{ hashFiles('research/v96_stock_intraday_theme_flow_backtest.py') }}
+          restore-keys: |
+            v96-stock-intraday-15m-${{ runner.os }}-
+      - name: Compile and offline self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_v1.py
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          cd research
+          python v96_stock_intraday_theme_flow_backtest.py --self-test
+      - name: Run frozen historical backtest
+        run: |
+          cd research
+          python v96_stock_intraday_theme_flow_backtest.py \
+            --cache-dir ../.cache/v96-stock-intraday-theme-flow \
+            --output-dir ../.research-state/v96-stock-intraday-theme-flow-bt
+      - name: Validate result contract
+        run: |
+          test -s .research-state/v96-stock-intraday-theme-flow-bt/v96-stock-intraday-theme-flow-bt.json
+          test -s .research-state/v96-stock-intraday-theme-flow-bt/v96-stock-intraday-theme-flow-bt.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path(
+              '.research-state/v96-stock-intraday-theme-flow-bt/v96-stock-intraday-theme-flow-bt.json'
+          ).read_text())
+          assert payload['strategyId'] == 'V96_STOCK_INTRADAY_THEME_FLOW_V1'
+          assert payload['status'] in {
+              'ROBUST_HISTORICAL_CORE_LEAD_FORWARD_GATES_STILL_REQUIRED',
+              'NO_ROBUST_INTRADAY_THEME_FLOW_EDGE',
+          }
+          assert list(payload['results']) == ['FORWARD_MEDIAN', 'NORMAL', 'FORWARD_P95', 'SEVERE']
+          assert payload['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+          }
+          assert payload['results']['FORWARD_MEDIAN']['metrics']['trades'] == payload['results']['SEVERE']['metrics']['trades']
+          PY
+      - name: Upload backtest evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-intraday-theme-flow-backtest
+          path: .research-state/v96-stock-intraday-theme-flow-bt
           retention-days: 90
