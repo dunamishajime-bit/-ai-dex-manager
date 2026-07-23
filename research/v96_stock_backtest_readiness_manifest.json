@@ -1,0 +1,13 @@
+{
+  "status": "NOT_READY_RULES_STILL_BEING_FROZEN",
+  "entryRulesFrozen": false,
+  "exitRulesFrozen": false,
+  "holdingPeriodFrozen": false,
+  "universeFrozen": true,
+  "sessionRulesFrozen": true,
+  "normalCostModelFrozen": false,
+  "severeCostModelFrozen": false,
+  "forwardExecutionQualityReviewed": false,
+  "lookaheadControlsReady": true,
+  "nextDecision": "Freeze the Stock entry, exit, holding and executable-cost rules after the seven-day Forward collection, then run the historical backtest without retuning the final Holdout."
+}
