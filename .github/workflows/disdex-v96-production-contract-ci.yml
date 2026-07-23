@@ -56,6 +56,62 @@ jobs:
         run: |
           set -o pipefail
           npm run strategy:disdex-v96:typecheck 2>&1 | tee .runtime-state/disdex-v96-typecheck.log
+      - name: Guarded config-state migration self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .runtime-state/migration-selftest
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('.runtime-state/migration-selftest/runner-live.json')
+          path.write_text(json.dumps({
+              'version': 2,
+              'strategyId': 'DISDEX_V35_STRONG_RESERVED_PENGU_V96',
+              'configFingerprint': 'a' * 64,
+              'mode': 'live',
+              'updatedAt': 1,
+              'createdAt': 1,
+              'completedExecutions': [],
+              'failures': [],
+              'forwardEvidence': {
+                  'completedDecisionBars': 99,
+                  'closedLongTrades': 3,
+                  'closedShortTrades': 4,
+                  'grossCapBreaches': 0,
+                  'unknownOrderEvents': 0,
+                  'stateRecoveryFailures': 0,
+                  'minimumObservedPenguClip': 0.5,
+              },
+              'operatorOverride': {
+                  'artifactSha256': 'b' * 64,
+                  'operator': 'old',
+                  'approvedAt': '2026-01-01T00:00:00.000Z',
+                  'expiresAt': '2026-01-02T00:00:00.000Z',
+                  'approvedCommitSha': 'c' * 40,
+                  'initialPenguGrossCap': 0.15,
+                  'maximumPortfolioGross': 2,
+                  'maximumDailyLossPct': 2,
+              },
+              'bootstrapRequired': False,
+          }, indent=2), encoding='utf-8')
+          PY
+          DISDEX_V96_STATE_FILE="$(pwd)/.runtime-state/migration-selftest/runner-live.json" \
+          DISDEX_V96_EXPECTED_OLD_CONFIG_FINGERPRINT="$(printf 'a%.0s' {1..64})" \
+          DISDEX_V96_CONFIG_MIGRATION_ACKNOWLEDGEMENT="I_ACKNOWLEDGE_V96_CONFIG_STATE_MIGRATION" \
+          npm run strategy:disdex-v96:state:migrate
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.runtime-state/migration-selftest')
+          state = json.loads((root / 'runner-live.json').read_text(encoding='utf-8'))
+          assert state['configFingerprint'] != 'a' * 64
+          assert 'operatorOverride' not in state
+          assert state['bootstrapRequired'] is False
+          assert state['forwardEvidence']['completedDecisionBars'] == 0
+          assert state['forwardEvidence']['startedAt'] > 0
+          assert list(root.glob('runner-live.json.before-volume50-turnover075-*.json'))
+          PY
       - name: Existing V46 validation
         run: |
           npm run strategy:disdex-v46:selftest
