@@ -1,0 +1,70 @@
+name: V96 PENGU volume-floor validation
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_pengu_volume_floor_validation.py'
+      - 'scripts/research_lab_v96_frequency_uplift.py'
+      - '.github/workflows/v96-pengu-volume-floor-validation.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-pengu-volume-floor-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-pengu-volume-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_pengu_volume_floor_validation.py') }}
+          restore-keys: |
+            v96-pengu-volume-${{ runner.os }}-
+            v96-frequency-uplift-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile scripts
+        run: |
+          python -m py_compile scripts/research_lab_v96_frequency_uplift.py
+          python -m py_compile scripts/research_lab_v96_pengu_volume_floor_validation.py
+      - name: Run validation
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_pengu_volume_floor_validation.py
+      - name: Validate outputs
+        run: |
+          test -s .research-state/v96-pengu-volume-floor-validation.json
+          test -s .research-state/v96-pengu-volume-floor-validation.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('.research-state/v96-pengu-volume-floor-validation.json').read_text())
+          assert payload['status'] in {
+              'PENGU_VOLUME60_HISTORICAL_ROBUST_LEAD_SHADOW_ONLY',
+              'PENGU_VOLUME60_NOT_ROBUST',
+          }
+          assert len(payload['results']) == 7
+          assert payload['safety'] == {
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'ordersSent': False,
+          }
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-pengu-volume-floor-validation
+          path: |
+            .research-state/v96-pengu-volume-floor-validation.json
+            .research-state/v96-pengu-volume-floor-validation.md
+          retention-days: 30
