@@ -1,0 +1,71 @@
+name: V96 Core Volume50 execution sweep
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_core_volume50_execution_sweep.py'
+      - 'scripts/research_lab_v96_frequency_uplift.py'
+      - '.github/workflows/v96-core-volume50-execution-sweep.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-core-volume50-execution-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-core-volume50-exec-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_core_volume50_execution_sweep.py') }}
+          restore-keys: |
+            v96-core-volume50-exec-${{ runner.os }}-
+            v96-core-volume-${{ runner.os }}-
+            v96-frequency-uplift-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile scripts
+        run: |
+          python -m py_compile scripts/research_lab_v96_frequency_uplift.py
+          python -m py_compile scripts/research_lab_v96_core_volume50_execution_sweep.py
+      - name: Run sweep
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_core_volume50_execution_sweep.py
+      - name: Validate outputs
+        run: |
+          test -s .research-state/v96-core-volume50-execution-sweep.json
+          test -s .research-state/v96-core-volume50-execution-sweep.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('.research-state/v96-core-volume50-execution-sweep.json').read_text())
+          assert payload['status'] in {
+              'CORE_VOLUME50_FASTER_EXECUTION_LEAD_FOUND',
+              'NO_ROBUST_CORE_VOLUME50_FASTER_EXECUTION',
+          }
+          assert len(payload['results']) == 10
+          assert payload['safety'] == {
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'ordersSent': False,
+          }
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-core-volume50-execution-sweep
+          path: |
+            .research-state/v96-core-volume50-execution-sweep.json
+            .research-state/v96-core-volume50-execution-sweep.md
+          retention-days: 30

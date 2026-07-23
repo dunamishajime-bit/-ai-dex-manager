@@ -1,0 +1,68 @@
+name: V96 small-order execution backtest
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/research_lab_v96_small_order_execution_bt.py"
+      - ".github/workflows/v96-small-order-execution-bt.yml"
+
+concurrency:
+  group: v96-small-order-execution-bt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-perp-research-usdm-${{ runner.os }}-20260723
+          restore-keys: |
+            v96-perp-research-usdm-${{ runner.os }}-
+            perp-research-usdm-${{ runner.os }}-
+
+      - name: Compile research script
+        run: python -m py_compile scripts/research_lab_v96_small_order_execution_bt.py
+
+      - name: Run focused execution backtest
+        env:
+          PYTHONPATH: scripts
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state/v96-small-order-execution
+        run: python scripts/research_lab_v96_small_order_execution_bt.py
+
+      - name: Validate outputs
+        run: |
+          test -s .research-state/v96-small-order-execution/v96-small-order-execution-bt.json
+          test -s .research-state/v96-small-order-execution/v96-small-order-execution-bt.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('.research-state/v96-small-order-execution/v96-small-order-execution-bt.json')
+          data = json.loads(path.read_text())
+          assert data['strategyId'] == 'V96_SMALL_ORDER_EXECUTION_THRESHOLD_BT_V1'
+          assert len(data['results']) == 50
+          assert data['safety']['ordersSent'] is False
+          assert data['safety']['productionChanged'] is False
+          print('validated', len(data['results']), 'scenario/account/policy rows')
+          PY
+
+      - name: Upload backtest evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-small-order-execution-bt
+          path: .research-state/v96-small-order-execution
+          if-no-files-found: warn
+          retention-days: 30

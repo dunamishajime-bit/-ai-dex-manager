@@ -1,0 +1,72 @@
+name: V96 PENGU low-volume Short refinement
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_pengu_low_volume_short_refinement.py'
+      - 'scripts/research_lab_v96_pengu_volume_floor_validation.py'
+      - 'scripts/research_lab_v96_frequency_uplift.py'
+      - '.github/workflows/v96-pengu-low-volume-short-refinement.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-pengu-low-volume-short-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-pengu-short-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_pengu_low_volume_short_refinement.py') }}
+          restore-keys: |
+            v96-pengu-short-${{ runner.os }}-
+            v96-pengu-volume-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile scripts
+        run: |
+          python -m py_compile scripts/research_lab_v96_frequency_uplift.py
+          python -m py_compile scripts/research_lab_v96_pengu_volume_floor_validation.py
+          python -m py_compile scripts/research_lab_v96_pengu_low_volume_short_refinement.py
+      - name: Run refinement
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_pengu_low_volume_short_refinement.py
+      - name: Validate outputs
+        run: |
+          test -s .research-state/v96-pengu-low-volume-short-refinement.json
+          test -s .research-state/v96-pengu-low-volume-short-refinement.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('.research-state/v96-pengu-low-volume-short-refinement.json').read_text())
+          assert payload['status'] in {
+              'LOW_VOLUME_SHORT_REFINEMENT_FOUND',
+              'NO_ROBUST_LOW_VOLUME_SHORT_REFINEMENT',
+          }
+          assert len(payload['results']) == 11
+          assert payload['safety'] == {
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'ordersSent': False,
+          }
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-pengu-low-volume-short-refinement
+          path: |
+            .research-state/v96-pengu-low-volume-short-refinement.json
+            .research-state/v96-pengu-low-volume-short-refinement.md
+          retention-days: 30
