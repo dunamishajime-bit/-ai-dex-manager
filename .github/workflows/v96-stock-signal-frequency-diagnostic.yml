@@ -1,0 +1,39 @@
+name: V96 Stock Signal Frequency Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_stock_signal_frequency_diagnostic.py"
+      - ".github/workflows/v96-stock-signal-frequency-diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-stock-signal-frequency-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax and self-test
+        run: |
+          python -m py_compile research/v96_stock_signal_frequency_diagnostic.py
+          python research/v96_stock_signal_frequency_diagnostic.py --self-test
+      - name: Compare strict and balanced signal frequency
+        run: |
+          python research/v96_stock_signal_frequency_diagnostic.py \
+            --history-days 270 \
+            --output-dir /tmp/v96-stock-signal-frequency
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-signal-frequency-diagnostic
+          path: /tmp/v96-stock-signal-frequency
+          retention-days: 90
