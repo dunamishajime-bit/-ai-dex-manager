@@ -17,6 +17,7 @@ FORWARD_FILE="${DISDEX_V96_FORWARD_EVIDENCE_FILE:-${APPROVAL_DIR}/disdex-v96-for
 PARITY_FILE="${DISDEX_V96_EXECUTION_PARITY_FILE:-${APPROVAL_DIR}/disdex-v96-parity.json}"
 OVERRIDE_FILE="${DISDEX_V96_OPERATOR_OVERRIDE_FILE:-${APPROVAL_DIR}/disdex-v96-operator-override.json}"
 KILL_SWITCH_FILE="${DISDEX_V96_KILL_SWITCH_FILE:-${APPROVAL_DIR}/disdex-v96-kill-switch.json}"
+CONFIG_MIGRATION_MODE="${DISDEX_V96_CONFIG_MIGRATION_MODE:-false}"
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "Run with sudo/root so systemd can be updated." >&2
@@ -24,6 +25,10 @@ if [[ "${EUID}" -ne 0 ]]; then
 fi
 if [[ "${DEPLOY_MODE}" != "paper" && "${DEPLOY_MODE}" != "live" ]]; then
   echo "DISDEX_V96_DEPLOY_MODE must be paper or live." >&2
+  exit 1
+fi
+if [[ "${CONFIG_MIGRATION_MODE}" != "true" && "${CONFIG_MIGRATION_MODE}" != "false" ]]; then
+  echo "DISDEX_V96_CONFIG_MIGRATION_MODE must be true or false." >&2
   exit 1
 fi
 if [[ ! -d "${REPO_ROOT}/.git" ]]; then
@@ -52,7 +57,7 @@ if [[ ! "${RUNTIME_COMMIT_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
 fi
 
 sudo -u "${RUN_USER}" "${NPM_BIN}" ci
-sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v96:selftest
+sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v96:parity
 sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v96:typecheck
 sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v46:selftest
 sudo -u "${RUN_USER}" "${NPM_BIN}" run strategy:disdex-v46:typecheck
@@ -103,12 +108,16 @@ if [[ "${DEPLOY_MODE}" == "live" ]]; then
   LIVE_ACK="I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK"
 
   # This performs signed reads only. It must pass before any existing V46 service is stopped.
+  # CONFIG_MIGRATION_MODE permits existing managed positions only after the dedicated
+  # state migration has cleared pending/manual-review state and the old Override audit.
   sudo -u "${RUN_USER}" env \
     DOTENV_CONFIG_PATH="${ENV_FILE}" \
     DISDEX_V96_RUNNER_MODE=live \
     DISDEX_V96_LIVE_EXECUTION_ENABLED=true \
     DISDEX_V96_LIVE_ACKNOWLEDGEMENT="${LIVE_ACK}" \
     DISDEX_V96_RUNTIME_COMMIT_SHA="${RUNTIME_COMMIT_SHA}" \
+    DISDEX_V96_STATE_DIR="${STATE_DIR}" \
+    DISDEX_V96_CONFIG_MIGRATION_MODE="${CONFIG_MIGRATION_MODE}" \
     DISDEX_V96_FORWARD_EVIDENCE_FILE="${FORWARD_FILE}" \
     DISDEX_V96_EXECUTION_PARITY_FILE="${PARITY_FILE}" \
     DISDEX_V96_OPERATOR_OVERRIDE_FILE="${OVERRIDE_FILE}" \
