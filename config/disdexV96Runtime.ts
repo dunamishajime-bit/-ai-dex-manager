@@ -2,15 +2,17 @@ export const DISDEX_V96_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as 
 
 export const DISDEX_V96_ALLOCATION = {
     researchVersion: 96,
-    historicalResearchPr: 56,
-    historicalStatus: "V35_STRONG_RESERVED_PENGU_PASS",
+    productionRevision: "CORE_VOLUME50_TURNOVER075_LIVE_R1",
+    historicalResearchPr: 73,
+    historicalStatus: "V96_FREQUENCY_UPLIFT_HISTORICAL_CLUSTER_USER_APPROVED_FOR_LIVE",
     penguSignalLineage: "PENGU_V67_REPLAYED_BY_PRODUCTION_V46_SIGNAL",
     penguTargetGross: 1.15,
     totalGrossCap: 2,
     minimumActivePenguClip: 0.50,
     corePolicy: {
+        componentVolumeFloor: 0.50,
         weightBandTolerancePct: 5,
-        portfolioRebalanceThresholdPct: 20,
+        portfolioRebalanceThresholdPct: 7.5,
         forcedRefreshBars: 12,
         strongBoostPct: 30,
         strongBoostCompleted12hGate: {
@@ -42,12 +44,12 @@ export const DISDEX_V96_FORWARD_REQUIREMENTS = {
 
 export const DISDEX_V96_EXECUTION_PARITY = {
     status: "APPROVED",
-    corePort: "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS",
+    corePort: "V96_VOLUME50_WEIGHT_BAND075_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS",
     signalChronologyParity: "APPROVED",
     allocationParity: "APPROVED",
     quantityParity: "APPROVED",
     recoveryParity: "APPROVED",
-    goldenVectorSource: "PYTHON_V90_STABILIZE_PLUS_V86_CONTROLLED_CORE",
+    goldenVectorSource: "PYTHON_V90_STABILIZE_PLUS_V86_CONTROLLED_CORE_WITH_V96_VOLUME50",
     approvalScope: "ALGORITHM_AND_PRODUCTION_EXECUTION_CONTRACT",
 } as const;
 
@@ -67,7 +69,7 @@ export const DISDEX_V96_LIVE_PROMOTION = {
 
 export const DISDEX_V96_RUNTIME = {
     strategyId: DISDEX_V96_STRATEGY_ID,
-    implementationStatus: "LIVE_READY_OPERATOR_CONTROLLED_EXECUTION_PARITY_APPROVED",
+    implementationStatus: "LIVE_READY_VOLUME50_TURNOVER075_OPERATOR_CONTROLLED",
     mode: "LIVE_READY" as const,
     liveTradingEnabled: true,
     maximumGross: DISDEX_V96_ALLOCATION.totalGrossCap,
@@ -85,5 +87,5 @@ export const DISDEX_V96_RUNTIME = {
     operatorOverrideStatus: "IMPLEMENTED_REQUIRED_WHEN_FORWARD_NOT_APPROVED",
     dailyLossLimitStatus: "IMPLEMENTED_MAX_2_PERCENT",
     killSwitchStatus: "IMPLEMENTED_FLATTEN_MANAGED_REDUCE_ONLY",
-    liveBlockReason: "LIVE requires execution parity plus either approved Forward Evidence or a valid time-limited Operator Override, daily loss controls, Kill Switch configuration, credentials, and explicit V46 service handoff.",
+    liveBlockReason: "LIVE requires fresh execution parity and a fresh exact-commit Operator Override for the Volume50/Turnover7.5 configuration, daily loss controls, Kill Switch configuration, credentials, migrated state when positions are retained, and explicit service handoff.",
 } as const;
