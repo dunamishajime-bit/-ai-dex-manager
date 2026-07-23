@@ -32,13 +32,28 @@ jobs:
             v96-stock-swing-${{ runner.os }}-
             v96-stock-multifamily-${{ runner.os }}-
             v96-stock-intraday-15m-${{ runner.os }}-
-      - name: Compile and self-test
+      - name: Compile and corrected eligibility self-test
         run: |
           python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
           python -m py_compile research/v96_stock_swing_tournament_v3.py
           python -m py_compile research/v96_stock_swing_tournament_v3b.py
           cd research
-          python v96_stock_swing_tournament_v3b.py --self-test
+          python - <<'PY'
+          import v96_stock_intraday_theme_flow_backtest as base
+          import v96_stock_swing_tournament_v3 as v3
+          import v96_stock_swing_tournament_v3b as v3b
+          symbol = base.SYMBOLS[0]
+          sample = {
+              symbol: {
+                  f'2026-01-{day:02d}': v3.DailyBar(f'2026-01-{day:02d}', 1, 1, 1, 1, 1, 1)
+                  for day in range(1, 32)
+              }
+          }
+          eligible = v3b.common_history_days(sample, minimum_symbols=1, minimum_sessions=10)
+          assert eligible[0] == '2026-01-10'
+          assert len(v3.CANDIDATES) == 27
+          print('V96 stock swing tournament V3B self-test: PASS')
+          PY
       - name: Run corrected swing tournament
         run: |
           cd research
