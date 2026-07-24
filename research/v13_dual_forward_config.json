@@ -1,0 +1,70 @@
+{
+  "strategyId": "V96_STOCK_V13G_V13D_FIXED_FORWARD",
+  "mode": "SHADOW_RESEARCH_ONLY",
+  "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
+  "sourceBranchReference": "research/stock-cross-venue-maker-hedge-v13",
+  "dataBranch": "research-data/v13g-v13d-forward-20260727",
+  "dataDirectory": "research-data/v13g-v13d-forward-20260727",
+  "timezone": "America/New_York",
+  "sessionDates": [
+    "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31",
+    "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07",
+    "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14",
+    "2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21"
+  ],
+  "universe": ["AMZN", "META", "MSFT", "NVDA", "TSLA"],
+  "arms": {
+    "V13G": {"candidateId": "EDGE20__NONE", "previousCompletedSymbolCooldown": false},
+    "V13D": {"candidateId": "EDGE20__NO_PREVIOUS_SYMBOL", "previousCompletedSymbolCooldown": true}
+  },
+  "frozenRules": {
+    "makerVenue": "ASTER",
+    "hedgeVenue": "XYZ",
+    "minimumAbsoluteBasisDislocationBps": 20.0,
+    "decisionClockNy": "09:59:55",
+    "decisionDeadlineNy": "10:00:20",
+    "entryQuoteExpiryNy": "10:00:30",
+    "entryQuoteTtlMs": 35000,
+    "onePortfolioPositionPerArm": true,
+    "rankOnlySameDecisionBatch": true,
+    "selectionScore": "largest absolute basis dislocation, then symbol ascending",
+    "maximumDisplayedQueueUsd": 250.0,
+    "minimumHedgeTopUsd": 100.0,
+    "minimumProjectedNormalNetBps": 2.0,
+    "bookFreshnessMs": 1500,
+    "referenceMoveCancelBps": 4.0,
+    "maximumAdverseTradeImbalance": 0.65,
+    "tradeImbalanceWindowMs": 2000,
+    "hedgeDelayMs": 250,
+    "lateDecisionClockNy": "14:30:00",
+    "lateTakeProfitPriceBps": 30.0,
+    "targetExitClockNy": "15:00:00",
+    "hardFlattenDeadlineNy": "15:10:00",
+    "noOvernightInventory": true,
+    "retuningAllowed": false
+  },
+  "initialVirtualNotionalUsdt": 100.0,
+  "costBps": {"FORWARD_MEDIAN": 10.0, "NORMAL": 16.0, "P95": 26.0, "SEVERE": 45.0},
+  "reviewGate": {
+    "requiredCompleteSessions": 20,
+    "minimumCompletedCyclesPerArm": 4,
+    "minimumNormalPositiveNetRate": 0.55,
+    "normalP95SevereAverageNetMustBePositive": true,
+    "maximumGrowthSingleSymbolPositiveProfitShare": 0.50,
+    "maximumDiversifiedSingleSymbolPositiveProfitShare": 0.40,
+    "maximumPartialFillFailures": 0,
+    "maximumUnhedgedHedgeFailures": 0,
+    "maximumUnresolvedEndingInventory": 0,
+    "retuningOnCollectedForwardWindow": false,
+    "passingStatus": "V13G_V13D_FIXED_FORWARD_SHADOW_REVIEW_PASS_NOT_LIVE"
+  },
+  "safety": {
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false,
+    "v11Changed": false,
+    "originalV13ForwardCollectorChanged": false
+  }
+}
