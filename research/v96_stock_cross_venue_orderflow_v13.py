@@ -164,6 +164,12 @@ async def collect_xyz(engine: Engine, stop: float) -> None:
             await asyncio.sleep(min(2, max(0, stop - time.monotonic())))
 
 
+async def maintain(engine: Engine, stop: float) -> None:
+    while time.monotonic() < stop:
+        engine.tick(now_ms())
+        await asyncio.sleep(min(0.25, max(0.0, stop - time.monotonic())))
+
+
 async def probe(duration: int, output: Path) -> dict:
     if websockets is None:
         raise RuntimeError("websockets is required")
@@ -176,7 +182,7 @@ async def probe(duration: int, output: Path) -> dict:
                        "symbols": list(SYMBOLS), "safety": {"orderSubmissionAllowed": False}})
         await seed(engine)
         stop = time.monotonic() + max(1, duration)
-        await asyncio.gather(collect_aster(engine, stop), collect_xyz(engine, stop))
+        await asyncio.gather(collect_aster(engine, stop), collect_xyz(engine, stop), maintain(engine, stop))
         result = engine.result()
         engine.record({"recordType": "run_result", **result})
     finally:
@@ -195,13 +201,22 @@ def self_test() -> None:
     engine = Engine(writer)
     engine.book("ASTER", "AMZN", 1000, 1000, 99, 1, 101, 1)
     engine.book("XYZ", "AMZN", 1000, 1000, 100, 2, 102, 2)
-    quote = engine.quotes["AMZN"]
-    assert quote["status"] == "OPEN" and quote["queueAheadUsd"] == 99
+    opening = engine.quotes["AMZN"]
+    assert opening["purpose"] == "OPEN" and opening["status"] == "OPEN"
     engine.trade("ASTER", "AMZN", 1001, 1001, 99, 0.5, "SELL")
-    assert quote["status"] == "OPEN" and quote["filledUsd"] == 0
-    engine.trade("ASTER", "AMZN", 1002, 1002, 99, 2.0, "SELL")
-    assert quote["status"] == "FILLED_AND_HEDGED" and engine.stats["fills"] == 1
-    assert engine.result()["costScenarios"]["NORMAL"]["averageNetBps"] > 0
+    assert opening["status"] == "OPEN" and opening["filledUsd"] == 0
+    engine.trade("ASTER", "AMZN", 1002, 1002, 99, 3.0, "SELL")
+    assert opening["status"] == "FILLED_AND_HEDGED"
+    assert engine.stats["entry_fills"] == 1 and engine.stats["cycles"] == 0
+    engine.book("ASTER", "AMZN", 1003, 1003, 101, 2, 102, 1)
+    engine.book("XYZ", "AMZN", 1003, 1003, 99, 2, 100, 2)
+    closing = engine.quotes["AMZN"]
+    assert closing["purpose"] == "CLOSE" and closing["status"] == "OPEN"
+    engine.trade("ASTER", "AMZN", 1004, 1004, 102, 3.0, "BUY")
+    assert closing["status"] == "FILLED_AND_HEDGED" and engine.stats["cycles"] == 1
+    result = engine.result()
+    assert result["virtualExecution"]["completedCycles"] == 1
+    assert result["costScenarios"]["NORMAL"]["averageNetBps"] > 0
     writer.close()
     path.unlink(missing_ok=True)
     print("V96 Stock Cross-Venue Maker Hedge V13 self-test: PASS")
