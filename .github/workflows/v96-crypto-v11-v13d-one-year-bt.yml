@@ -53,11 +53,17 @@ jobs:
           cd scripts
           python research_lab_v96_crypto_v11_v13d_one_year_bt.py --self-test
       - name: Run fixed one-year portfolio backtest
+        shell: bash
         run: |
+          mkdir -p .research-state/v96-crypto-v11-v13d-one-year
+          set +e
           cd scripts
           python research_lab_v96_crypto_v11_v13d_one_year_bt.py \
             --cache-dir ../.cache/v96-crypto-v11-v13d-one-year \
-            --output-dir ../.research-state/v96-crypto-v11-v13d-one-year
+            --output-dir ../.research-state/v96-crypto-v11-v13d-one-year \
+            2>&1 | tee ../.research-state/v96-crypto-v11-v13d-one-year/backtest.log
+          CODE=${PIPESTATUS[0]}
+          exit "$CODE"
       - name: Validate frozen architecture and evidence
         run: |
           test -s .research-state/v96-crypto-v11-v13d-one-year/result.json
