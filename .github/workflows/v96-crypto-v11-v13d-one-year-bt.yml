@@ -1,0 +1,110 @@
+name: V96 Crypto V11 V13D One-Year Portfolio Backtest
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_crypto_v11_v13d_one_year_bt.py'
+      - 'docs/research/V96_CRYPTO_V11_V13D_ONE_YEAR_PROTOCOL_2026-07-25.md'
+      - '.github/workflows/v96-crypto-v11-v13d-one-year-bt.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-crypto-v11-v13d-one-year-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13D source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/v96-crypto-v11-v13d-one-year
+          key: v96-crypto-v11-v13d-one-year-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_crypto_v11_v13d_one_year_bt.py') }}
+          restore-keys: |
+            v96-crypto-v11-v13d-one-year-${{ runner.os }}-
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile and deterministic self-test
+        run: |
+          python -m py_compile scripts/research_lab_v96_crypto_v11_v13d_one_year_bt.py
+          cd scripts
+          python research_lab_v96_crypto_v11_v13d_one_year_bt.py --self-test
+      - name: Run fixed one-year portfolio backtest
+        run: |
+          cd scripts
+          python research_lab_v96_crypto_v11_v13d_one_year_bt.py \
+            --cache-dir ../.cache/v96-crypto-v11-v13d-one-year \
+            --output-dir ../.research-state/v96-crypto-v11-v13d-one-year
+      - name: Validate frozen architecture and evidence
+        run: |
+          test -s .research-state/v96-crypto-v11-v13d-one-year/result.json
+          test -s .research-state/v96-crypto-v11-v13d-one-year/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-crypto-v11-v13d-one-year/result.json').read_text())
+          assert p['period']['calendarDays'] == 365
+          assert p['period']['startInclusive'].startswith('2025-07-01')
+          assert p['period']['endExclusive'].startswith('2026-07-01')
+          assert p['sourceCommits']['v11'] == '0fad24c105a7f0f61af6042ba04a8b1386ffec7c'
+          assert p['sourceCommits']['v13d'] == 'dbfd7e026a81343a23ab97d202761f7f9bbe5755'
+          assert p['architecture']['cryptoGrossCap'] == 1.0
+          assert p['architecture']['stockGrossCap'] == 1.0
+          assert p['architecture']['totalGrossCap'] == 2.0
+          assert p['architecture']['sleeveLending'] is False
+          assert p['architecture']['stockPriority'].startswith('V13D 10:00 first')
+          assert p['fixedStrategies']['V11']['candidateId'] == 'BOTH__FLAT__CONVERGENCE__ABS_TOP1'
+          assert p['fixedStrategies']['V13D']['candidateId'] == 'EDGE20__NO_PREVIOUS_SYMBOL'
+          assert p['data']['V11']['trades'] > 0
+          assert p['data']['crypto']['cappedMaxGross'] <= 1.0 + 1e-9
+          for scenario in p['results'].values():
+              assert scenario['unified']['observedMaximumGross'] <= 2.0 + 1e-9
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'realPositionsChanged': False,
+          }
+          assert p['status'] in {
+              'ONE_YEAR_UNIFIED_HISTORICAL_LEAD_FORWARD_EXECUTION_REQUIRED',
+              'ONE_YEAR_UNIFIED_HISTORICAL_DIAGNOSTIC_NOT_PRODUCTION_APPROVED',
+          }
+          print(json.dumps({
+              'status': p['status'],
+              'stockRouting': p['data']['routedStock'],
+              'normal': p['results']['NORMAL']['unified'],
+              'severe': p['results']['SEVERE']['unified'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-crypto-v11-v13d-one-year-${{ github.run_id }}
+          path: .research-state/v96-crypto-v11-v13d-one-year
+          retention-days: 90
+          if-no-files-found: warn
