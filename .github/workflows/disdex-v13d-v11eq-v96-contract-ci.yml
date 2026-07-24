@@ -1,0 +1,49 @@
+name: Dis-Dex V13D V11-EQ V96 Contract CI
+
+on:
+  pull_request:
+    paths:
+      - 'config/disdexStockRouterV13DV11EqRuntime.ts'
+      - 'lib/disdex-v13d-v11eq-stock-router-contract.ts'
+      - 'scripts/disdex-v13d-v11eq-v96-contract-selftest.ts'
+      - 'docs/implementation/V13D_V11EQ_CRYPTO_V96_CODEX_LIVE_HANDOFF.md'
+      - 'tsconfig.v13d-v11eq-router.json'
+      - 'package.json'
+      - '.github/workflows/disdex-v13d-v11eq-v96-contract-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dis-dex-v13d-v11eq-v96-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Validate new router contract
+        run: npm run strategy:disdex-v13d-v11eq-v96:contract
+      - name: Protect existing Crypto V96 behavior
+        run: |
+          npm run strategy:disdex-v96:typecheck
+          npm run strategy:disdex-v96:selftest
+          npm run strategy:disdex-v96:frequency:selftest
+      - name: Assert implementation handoff cannot submit real orders
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const config = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
+          if (!config.includes('mode: "DISABLED"')) throw new Error('mode must remain DISABLED');
+          if (!config.includes('liveTradingEnabled: false')) throw new Error('LIVE must remain disabled');
+          if (!config.includes('orderSubmissionAllowed: false')) throw new Error('real order submission must remain disabled');
+          if (!config.includes('sleeveLendingEnabled: false')) throw new Error('sleeve lending must remain disabled');
+          NODE
