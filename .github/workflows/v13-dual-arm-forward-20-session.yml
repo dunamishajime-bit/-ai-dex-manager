@@ -1,0 +1,286 @@
+name: V13G V13D Fixed 20-Session Forward
+
+on:
+  pull_request:
+    paths:
+      - "research/v13_dual_forward_wrapper.py"
+      - "research/v13_dual_forward_aggregate.py"
+      - "research/v13_dual_forward_config.json"
+      - "docs/research/V13G_V13D_FIXED_FORWARD_PROTOCOL_2026-07-24.md"
+      - ".github/workflows/v13-dual-arm-forward-20-session.yml"
+  push:
+    branches: [master]
+    paths:
+      - "research/v13_dual_forward_wrapper.py"
+      - "research/v13_dual_forward_aggregate.py"
+      - "research/v13_dual_forward_config.json"
+      - "docs/research/V13G_V13D_FIXED_FORWARD_PROTOCOL_2026-07-24.md"
+      - ".github/workflows/v13-dual-arm-forward-20-session.yml"
+  schedule:
+    - cron: "25,35,45,55 13 * * 1-5"
+    - cron: "20 20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Action to run
+        required: true
+        default: validate
+        type: choice
+        options: [validate, collect, aggregate]
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  CONFIG_PATH: research/v13_dual_forward_config.json
+  DATA_BRANCH: research-data/v13g-v13d-forward-20260727
+  DATA_DIR: research-data/v13g-v13d-forward-20260727
+  FROZEN_SOURCE_COMMIT: f1b2820705d5cef815a4b160feb124af1230d746
+
+jobs:
+  validate:
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'validate')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout exact frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FROZEN_SOURCE_COMMIT }}
+          path: .v13-frozen
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public market-data dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Syntax and deterministic tests
+        run: |
+          python -m py_compile research/v13_dual_forward_wrapper.py research/v13_dual_forward_aggregate.py
+          python research/v13_dual_forward_wrapper.py --self-test
+          python research/v13_dual_forward_aggregate.py --self-test
+          python -m json.tool "$CONFIG_PATH" >/dev/null
+      - name: Exact-source endpoint isolation probe
+        run: |
+          python research/v13_dual_forward_wrapper.py \
+            --source-root .v13-frozen \
+            --source-commit "$FROZEN_SOURCE_COMMIT" \
+            --config "$CONFIG_PATH" \
+            --duration-seconds 30 \
+            --output-dir .research-state/v13-dual-forward-probe
+      - name: Validate safety and endpoint coverage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('.research-state/v13-dual-forward-probe/result.json').read_text())
+          config = json.loads(Path('research/v13_dual_forward_config.json').read_text())
+          assert result['safety']['orderSubmissionAllowed'] is False
+          assert sorted(result['coverage']['completeSymbols']) == sorted(config['universe'])
+          assert result['coverage']['collectorErrors'] == 0
+          assert config['arms'] == {
+              'V13G': {'candidateId': 'EDGE20__NONE', 'previousCompletedSymbolCooldown': False},
+              'V13D': {'candidateId': 'EDGE20__NO_PREVIOUS_SYMBOL', 'previousCompletedSymbolCooldown': True},
+          }
+          assert config['frozenRules']['minimumAbsoluteBasisDislocationBps'] == 20.0
+          assert config['frozenRules']['retuningAllowed'] is False
+          assert config['safety']['originalV13ForwardCollectorChanged'] is False
+          print(json.dumps({'coverage': result['coverage'], 'safety': result['safety']}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v13g-v13d-validation-${{ github.run_id }}
+          path: .research-state/v13-dual-forward-probe
+          retention-days: 30
+          if-no-files-found: warn
+
+  collect:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule != '20 20 * * 1-5') ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'collect')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    concurrency:
+      group: v13g-v13d-forward-full-session
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout exact frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FROZEN_SOURCE_COMMIT }}
+          path: .v13-frozen
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public market-data dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Determine fixed session plan
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+          config = json.loads(Path(os.environ['CONFIG_PATH']).read_text())
+          now = dt.datetime.now(dt.timezone.utc)
+          session_date = now.date().isoformat()
+          target = dt.datetime.combine(now.date(), dt.time(19, 10), tzinfo=dt.timezone.utc)
+          duration = int((target - now).total_seconds())
+          reason = None
+          if session_date not in set(config['sessionDates']):
+              reason = 'OUTSIDE_FROZEN_SESSION_DATES'
+          elif duration < 60:
+              reason = 'STALE_TRIGGER'
+          elif now.hour < 13:
+              reason = 'EARLY_TRIGGER'
+          values = {
+              'SESSION_DATE': session_date,
+              'DURATION_SECONDS': max(1, duration),
+              'SKIP': '1' if reason else '0',
+              'SKIP_REASON': reason or '',
+          }
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as handle:
+              for key, value in values.items():
+                  handle.write(f'{key}={value}\n')
+          print(json.dumps(values, indent=2))
+          PY
+      - name: Run frozen two-arm evidence session
+        if: env.SKIP != '1'
+        run: |
+          set +e
+          rm -rf /tmp/v13-dual-forward-chunk
+          mkdir -p /tmp/v13-dual-forward-chunk
+          STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python research/v13_dual_forward_wrapper.py \
+            --source-root .v13-frozen \
+            --source-commit "$FROZEN_SOURCE_COMMIT" \
+            --config "$CONFIG_PATH" \
+            --duration-seconds "$DURATION_SECONDS" \
+            --output-dir /tmp/v13-dual-forward-chunk \
+            > /tmp/v13-dual-forward-chunk/stdout.log \
+            2> /tmp/v13-dual-forward-chunk/stderr.log
+          CODE=$?
+          echo "COLLECTOR_EXIT_CODE=$CODE" >> "$GITHUB_ENV"
+          echo "STARTED_AT_UTC=$STARTED_AT_UTC" >> "$GITHUB_ENV"
+          echo "FINISHED_AT_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+          exit 0
+      - name: Write immutable metadata
+        if: env.SKIP != '1'
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          output = Path('/tmp/v13-dual-forward-chunk')
+          config_path = Path(os.environ['CONFIG_PATH'])
+          result_path = output / 'result.json'
+          result = json.loads(result_path.read_text()) if result_path.exists() else {}
+          metadata = {
+              'strategyId': 'V96_STOCK_V13G_V13D_FIXED_FORWARD',
+              'sessionDate': os.environ['SESSION_DATE'],
+              'runId': os.environ['GITHUB_RUN_ID'],
+              'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'startedAtUtc': os.environ.get('STARTED_AT_UTC'),
+              'finishedAtUtc': os.environ.get('FINISHED_AT_UTC'),
+              'collectorExitCode': int(os.environ.get('COLLECTOR_EXIT_CODE', '99')),
+              'sourceCommit': os.environ['FROZEN_SOURCE_COMMIT'],
+              'workflowCommit': os.environ['GITHUB_SHA'],
+              'configSha256': hashlib.sha256(config_path.read_bytes()).hexdigest(),
+              'resultStatus': result.get('status'),
+              'fixedDualEvidence': result.get('fixedDualEvidence'),
+          }
+          (output / 'chunk.json').write_text(json.dumps(metadata, indent=2) + '\n')
+          print(json.dumps(metadata, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: env.SKIP != '1'
+        with:
+          name: v13g-v13d-${{ env.SESSION_DATE }}-${{ github.run_id }}
+          path: /tmp/v13-dual-forward-chunk
+          retention-days: 90
+          if-no-files-found: error
+      - name: Persist immutable evidence branch
+        if: env.SKIP != '1'
+        run: |
+          set -euo pipefail
+          STAGING="$(mktemp -d)"
+          cp -a /tmp/v13-dual-forward-chunk/. "$STAGING/"
+          rm -rf .v13-frozen
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin "$DATA_BRANCH"; then
+            git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
+          else
+            git switch -c "$DATA_BRANCH"
+          fi
+          DEST="$DATA_DIR/chunks/$SESSION_DATE/$GITHUB_RUN_ID"
+          mkdir -p "$DEST"
+          cp -a "$STAGING"/. "$DEST/"
+          mkdir -p "$DATA_DIR"
+          cp "$CONFIG_PATH" "$DATA_DIR/frozen-config.json"
+          git add "$DATA_DIR"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: append V13G V13D Forward $SESSION_DATE run $GITHUB_RUN_ID"
+            git push origin "HEAD:$DATA_BRANCH"
+          fi
+      - name: Fail after persistence when collector failed
+        if: env.SKIP != '1'
+        run: |
+          [[ "${COLLECTOR_EXIT_CODE:-99}" == "0" ]]
+
+  aggregate:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '20 20 * * 1-5') ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'aggregate')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    concurrency:
+      group: v13g-v13d-forward-aggregate
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch evidence branch
+        run: |
+          git fetch origin "$DATA_BRANCH"
+          rm -rf /tmp/v13-dual-data
+          git worktree add /tmp/v13-dual-data "origin/$DATA_BRANCH"
+      - name: Aggregate both frozen arms
+        run: |
+          rm -rf /tmp/v13-dual-report
+          python research/v13_dual_forward_aggregate.py \
+            --config "$CONFIG_PATH" \
+            --input-dir "/tmp/v13-dual-data/$DATA_DIR/chunks" \
+            --output-dir /tmp/v13-dual-report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v13g-v13d-aggregate-${{ github.run_id }}
+          path: /tmp/v13-dual-report
+          retention-days: 90
+      - name: Persist latest report
+        run: |
+          git -C /tmp/v13-dual-data config user.name "github-actions[bot]"
+          git -C /tmp/v13-dual-data config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf "/tmp/v13-dual-data/$DATA_DIR/latest-report"
+          mkdir -p "/tmp/v13-dual-data/$DATA_DIR/latest-report"
+          cp -a /tmp/v13-dual-report/. "/tmp/v13-dual-data/$DATA_DIR/latest-report/"
+          git -C /tmp/v13-dual-data add "$DATA_DIR/latest-report"
+          if ! git -C /tmp/v13-dual-data diff --cached --quiet; then
+            git -C /tmp/v13-dual-data commit -m "data: update V13G V13D fixed Forward aggregate"
+            git -C /tmp/v13-dual-data push origin "HEAD:$DATA_BRANCH"
+          fi
