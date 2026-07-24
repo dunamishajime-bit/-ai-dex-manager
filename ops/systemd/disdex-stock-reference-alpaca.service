@@ -1,0 +1,24 @@
+[Unit]
+Description=DisDex Alpaca SIP stock reference adapter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/dis-dex-manager
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+ExecStart=/home/deploy/dis-dex-manager/.venv-stock/bin/python scripts/disdex_stock_reference_alpaca_proxy.py
+Restart=always
+RestartSec=3
+TimeoutStopSec=20
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
