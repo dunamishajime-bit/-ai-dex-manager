@@ -5,6 +5,7 @@ on:
     paths:
       - "research/v96_stock_cross_venue_orderflow_v13.py"
       - "research/v96_stock_cross_venue_orderflow_v13_engine.py"
+      - "research/v96_stock_cross_venue_orderflow_v13_engine_base.py"
       - "docs/research/V96_STOCK_CROSS_VENUE_ORDERFLOW_V13_PROTOCOL_2026-07-24.md"
       - "docs/research/V96_STOCK_CROSS_VENUE_ORDERFLOW_V13_PROBE_2026-07-24.md"
       - ".github/workflows/v96-stock-cross-venue-orderflow-v13.yml"
@@ -35,6 +36,7 @@ jobs:
         run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
       - name: Syntax and deterministic self-test
         run: |
+          python -m py_compile research/v96_stock_cross_venue_orderflow_v13_engine_base.py
           python -m py_compile research/v96_stock_cross_venue_orderflow_v13_engine.py
           python -m py_compile research/v96_stock_cross_venue_orderflow_v13.py
           python research/v96_stock_cross_venue_orderflow_v13.py --self-test
@@ -60,6 +62,8 @@ jobs:
           assert result['safety']['vpsChanged'] is False
           assert result['safety']['cryptoV96Changed'] is False
           assert len(result['coverage']['completeSymbols']) == 5, result['coverage']
+          assert result['coverage']['collectorErrors'] == 0, result['coverage']
+          assert 'completedCycles' in result['virtualExecution']
           print(json.dumps({
               'strategyId': result['strategyId'],
               'status': result['status'],
