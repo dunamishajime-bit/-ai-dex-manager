@@ -1,0 +1,26 @@
+[Unit]
+Description=DisDex Crypto V96 plus V13D and V11-EQ combined LIVE runner
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/dis-dex-manager
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+ExecStartPre=/usr/bin/npm run strategy:disdex-v13d-v11eq-v96:preflight
+ExecStart=/usr/bin/npm run strategy:disdex-v13d-v11eq-v96:daemon
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=60
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/deploy/dis-dex-manager/.runtime-state
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
