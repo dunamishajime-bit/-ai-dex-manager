@@ -126,9 +126,9 @@ export function assertPortfolioGross(cryptoGross: number, stockGross: number): v
 
 export function assertLiveOrderSubmissionEnabled(): void {
     if (
-        DISDEX_V13D_V11EQ_V96_RUNTIME.mode !== "LIVE" ||
-        !DISDEX_V13D_V11EQ_V96_RUNTIME.liveTradingEnabled ||
-        !DISDEX_V13D_V11EQ_V96_RUNTIME.orderSubmissionAllowed
+        String(DISDEX_V13D_V11EQ_V96_RUNTIME.mode) !== "LIVE" ||
+        !Boolean(DISDEX_V13D_V11EQ_V96_RUNTIME.liveTradingEnabled) ||
+        !Boolean(DISDEX_V13D_V11EQ_V96_RUNTIME.orderSubmissionAllowed)
     ) {
         throw new Error(DISDEX_V13D_V11EQ_V96_RUNTIME.liveBlockReason);
     }
