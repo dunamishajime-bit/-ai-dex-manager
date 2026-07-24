@@ -199,23 +199,28 @@ def self_test() -> None:
     path = Path(".research-state/v13-self-test.jsonl.gz")
     writer = Writer(path)
     engine = Engine(writer)
-    engine.book("ASTER", "AMZN", 1000, 1000, 99, 1, 101, 1)
-    engine.book("XYZ", "AMZN", 1000, 1000, 100, 2, 102, 2)
+    test_ms = 1_784_901_600_000  # 2026-07-24 10:00 New York, regular session.
+    engine.book("ASTER", "AMZN", test_ms, test_ms, 99, 1, 101, 1)
+    engine.book("XYZ", "AMZN", test_ms, test_ms, 100, 2, 102, 2)
     opening = engine.quotes["AMZN"]
     assert opening["purpose"] == "OPEN" and opening["status"] == "OPEN"
-    engine.trade("ASTER", "AMZN", 1001, 1001, 99, 0.5, "SELL")
+    assert opening["makerVenue"] == "ASTER" and opening["side"] == "BUY"
+    assert opening["hedgePrice"] == 100  # Taker SELL uses the hedge bid.
+    engine.trade("ASTER", "AMZN", test_ms + 1, test_ms + 1, 99, 0.5, "SELL")
     assert opening["status"] == "OPEN" and opening["filledUsd"] == 0
-    engine.trade("ASTER", "AMZN", 1002, 1002, 99, 3.0, "SELL")
+    engine.trade("ASTER", "AMZN", test_ms + 2, test_ms + 2, 99, 3.0, "SELL")
     assert opening["status"] == "FILLED_AND_HEDGED"
     assert engine.stats["entry_fills"] == 1 and engine.stats["cycles"] == 0
-    engine.book("ASTER", "AMZN", 1003, 1003, 101, 2, 102, 1)
-    engine.book("XYZ", "AMZN", 1003, 1003, 99, 2, 100, 2)
+    engine.book("ASTER", "AMZN", test_ms + 3, test_ms + 3, 101, 2, 102, 1)
+    engine.book("XYZ", "AMZN", test_ms + 3, test_ms + 3, 99, 2, 100, 2)
     closing = engine.quotes["AMZN"]
     assert closing["purpose"] == "CLOSE" and closing["status"] == "OPEN"
-    engine.trade("ASTER", "AMZN", 1004, 1004, 102, 3.0, "BUY")
+    assert closing["hedgePrice"] == 100  # Taker BUY uses the hedge ask.
+    engine.trade("ASTER", "AMZN", test_ms + 4, test_ms + 4, 102, 3.0, "BUY")
     assert closing["status"] == "FILLED_AND_HEDGED" and engine.stats["cycles"] == 1
     result = engine.result()
     assert result["virtualExecution"]["completedCycles"] == 1
+    assert result["virtualExecution"]["unhedgedRejected"] == 0
     assert result["costScenarios"]["NORMAL"]["averageNetBps"] > 0
     writer.close()
     path.unlink(missing_ok=True)
