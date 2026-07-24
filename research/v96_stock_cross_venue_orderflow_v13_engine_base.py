@@ -9,6 +9,7 @@ import time
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Optional
+from zoneinfo import ZoneInfo
 
 STRATEGY_ID = "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13"
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
@@ -16,6 +17,7 @@ ASTER = {s: f"{s}USDT" for s in SYMBOLS}
 XYZ = {s: f"xyz:{s}" for s in SYMBOLS}
 ASTER_WS = "wss://fstream.asterdex.com"
 XYZ_WS = "wss://api.hyperliquid.xyz/ws"
+NY = ZoneInfo("America/New_York")
 COSTS = {"FORWARD_MEDIAN": 6.0, "NORMAL": 10.0, "P95": 17.0, "SEVERE": 30.0}
 FORCED_COSTS = {"FORWARD_MEDIAN": 10.0, "NORMAL": 16.0, "P95": 26.0, "SEVERE": 45.0}
 NOTIONAL = 100.0
@@ -37,6 +39,12 @@ def now_ms() -> int:
 def iso(ms: Optional[int] = None) -> str:
     value = dt.datetime.fromtimestamp((ms or now_ms()) / 1000, tz=dt.timezone.utc)
     return value.isoformat().replace("+00:00", "Z")
+
+
+def us_regular_session(ms: int) -> bool:
+    local = dt.datetime.fromtimestamp(ms / 1000, tz=dt.timezone.utc).astimezone(NY)
+    minute = local.hour * 60 + local.minute
+    return local.weekday() < 5 and 570 <= minute < 960
 
 
 def finite(value: Any) -> Optional[float]:
@@ -157,7 +165,7 @@ class BaseEngine:
 
     def opening_candidates(self, symbol: str, received_ms: int) -> list[dict]:
         pair = self.ready(symbol, received_ms)
-        if not pair:
+        if not pair or not us_regular_session(received_ms):
             return []
         rows = []
         for maker, hedge in ((pair[0], pair[1]), (pair[1], pair[0])):
@@ -214,4 +222,6 @@ class BaseEngine:
                  "adverseImbalance": adverse, "eligible": eligible}]
 
     def candidates(self, symbol: str, received_ms: int) -> list[dict]:
-        return self.closing_candidates(symbol, received_ms) if symbol in self.inventory else self.opening_candidates(symbol, received_ms)
+        if symbol in self.inventory:
+            return self.closing_candidates(symbol, received_ms)
+        return self.opening_candidates(symbol, received_ms)
