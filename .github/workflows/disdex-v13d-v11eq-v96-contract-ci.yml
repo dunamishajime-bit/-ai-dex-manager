@@ -1,4 +1,4 @@
-name: Dis-Dex V13D V11-EQ V96 Contract CI
+name: Dis-Dex V13D V11-EQ V96 LIVE Runner CI
 
 on:
   pull_request:
@@ -6,6 +6,13 @@ on:
       - 'config/disdexStockRouterV13DV11EqRuntime.ts'
       - 'lib/disdex-v13d-v11eq-stock-router-contract.ts'
       - 'scripts/disdex-v13d-v11eq-v96-contract-selftest.ts'
+      - 'scripts/disdex-v13d-v11eq-v96-live-runner.ts'
+      - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
+      - 'scripts/disdex-v13d-v11eq-v96-kill-switch.ts'
+      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
+      - 'requirements-stock-live.txt'
+      - 'ops/systemd/disdex-v13d-v11eq-v96.service'
+      - 'ops/env/disdex-v13d-v11eq-v96.env.example'
       - 'docs/implementation/V13D_V11EQ_CRYPTO_V96_CODEX_LIVE_HANDOFF.md'
       - 'tsconfig.v13d-v11eq-router.json'
       - 'package.json'
@@ -16,34 +23,49 @@ permissions:
   contents: read
 
 concurrency:
-  group: dis-dex-v13d-v11eq-v96-contract-${{ github.ref }}
+  group: dis-dex-v13d-v11eq-v96-live-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-stock-live.txt
       - run: npm ci
-      - name: Validate new router contract
-        run: npm run strategy:disdex-v13d-v11eq-v96:contract
+      - run: python -m pip install -r requirements-stock-live.txt
+      - name: Validate combined LIVE contract and engines
+        run: |
+          npm run strategy:disdex-v13d-v11eq-v96:contract
+          python -c "import hyperliquid, eth_account; print('Stock LIVE dependencies: PASS')"
       - name: Protect existing Crypto V96 behavior
         run: |
           npm run strategy:disdex-v96:typecheck
           npm run strategy:disdex-v96:selftest
           npm run strategy:disdex-v96:frequency:selftest
-      - name: Assert implementation handoff cannot submit real orders
+      - name: Assert LIVE is implemented but remains environment gated
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
           const config = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
-          if (!config.includes('mode: "DISABLED"')) throw new Error('mode must remain DISABLED');
-          if (!config.includes('liveTradingEnabled: false')) throw new Error('LIVE must remain disabled');
-          if (!config.includes('orderSubmissionAllowed: false')) throw new Error('real order submission must remain disabled');
+          const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
+          const stock = fs.readFileSync('scripts/disdex_v13d_v11eq_stock_live_engine.py', 'utf8');
+          if (!config.includes('mode: "LIVE_READY"')) throw new Error('combined runtime must be LIVE_READY');
+          if (!config.includes('liveTradingEnabled: true')) throw new Error('LIVE implementation flag missing');
+          if (!config.includes('orderSubmissionAllowed: true')) throw new Error('order implementation flag missing');
           if (!config.includes('sleeveLendingEnabled: false')) throw new Error('sleeve lending must remain disabled');
+          if (!supervisor.includes('DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED')) throw new Error('combined environment gate missing');
+          if (!supervisor.includes('I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96')) throw new Error('combined acknowledgement missing');
+          if (!supervisor.includes('DISDEX_V96_MAX_GROSS')) throw new Error('Crypto Gross cap handoff missing');
+          if (!stock.includes('POST_ONLY') && !stock.includes('post_only')) throw new Error('Aster post-only implementation missing');
+          if (!stock.includes('perp_dexs=["xyz"]')) throw new Error('Hyperliquid xyz execution implementation missing');
           NODE
