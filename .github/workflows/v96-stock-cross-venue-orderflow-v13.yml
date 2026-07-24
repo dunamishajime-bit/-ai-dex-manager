@@ -50,12 +50,13 @@ jobs:
           python research/v96_stock_cross_venue_orderflow_v13.py \
             --duration-seconds "$DURATION" \
             --output-dir .research-state/v96-stock-cross-venue-orderflow-v13
-      - name: Validate endpoint and symbol coverage
+      - name: Validate endpoint and safety coverage
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           result = json.loads(Path('.research-state/v96-stock-cross-venue-orderflow-v13/result.json').read_text())
+          execution = result['virtualExecution']
           assert result['safety']['orderSubmissionAllowed'] is False
           assert result['safety']['productionChanged'] is False
           assert result['safety']['liveChanged'] is False
@@ -63,12 +64,18 @@ jobs:
           assert result['safety']['cryptoV96Changed'] is False
           assert len(result['coverage']['completeSymbols']) == 5, result['coverage']
           assert result['coverage']['collectorErrors'] == 0, result['coverage']
-          assert 'completedCycles' in result['virtualExecution']
+          assert result['status'] == 'V13_FORWARD_DATA_REQUIRED', result['status']
+          assert execution['pendingHedges'] == 0, execution
+          assert execution['openInventories'] == 0, execution
+          assert execution['partialFillFailures'] == 0, execution
+          assert execution['unhedgedRejected'] == 0, execution
+          assert execution['unresolvedInventory'] == 0, execution
           print(json.dumps({
               'strategyId': result['strategyId'],
               'status': result['status'],
               'coverage': result['coverage'],
-              'virtualExecution': result['virtualExecution'],
+              'virtualExecution': execution,
+              'diagnostics': result['diagnostics'],
               'costScenarios': result['costScenarios'],
           }, indent=2))
           PY
