@@ -76,14 +76,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 28.693054869588355,
-      "spreadBpsP95": 37.4909241118543,
+      "spreadBpsMedian": 29.19295602222453,
+      "spreadBpsP95": 45.106422966687404,
       "depth10BpsQuoteMedian": 0.0,
-      "imbalance10BpsMedian": null,
+      "imbalance10BpsMedian": 0.34391080427584647,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 0.13538354637798733,
-      "openInterestChangePct": 0.0,
-      "priceChangePct": 0.0,
+      "markIndexPremiumBpsMedian": -1.6100233490479177,
+      "openInterestChangePct": 90.25270758122741,
+      "priceChangePct": 0.3298930204062245,
       "liquidationEvents": 0
     },
     {
@@ -94,12 +94,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 55.40262424342316,
-      "spreadBpsP95": 181.13439854163582,
+      "spreadBpsMedian": 99.41646855413842,
+      "spreadBpsP95": 194.68532476069456,
       "depth10BpsQuoteMedian": 0.0,
-      "imbalance10BpsMedian": 0.015128880240508555,
+      "imbalance10BpsMedian": -0.33497084982149433,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 2.0902430533875638,
+      "markIndexPremiumBpsMedian": -6.951177802791975,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -113,12 +113,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 20.05871733620275,
-      "spreadBpsP95": 24.4989433558756,
-      "depth10BpsQuoteMedian": 3999.3050000000003,
-      "imbalance10BpsMedian": 0.7238364902001893,
-      "fundingRateMedian": -0.00018343,
-      "markIndexPremiumBpsMedian": -4.676131078407142,
+      "spreadBpsMedian": 22.853772715544416,
+      "spreadBpsP95": 24.974465651208966,
+      "depth10BpsQuoteMedian": 0.0,
+      "imbalance10BpsMedian": 0.011052431701944272,
+      "fundingRateMedian": 0.0,
+      "markIndexPremiumBpsMedian": 4.033704719037523,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -131,12 +131,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 6.382299755345419,
-      "spreadBpsP95": 8.096303398316723,
-      "depth10BpsQuoteMedian": 43769.443,
-      "imbalance10BpsMedian": 0.9767392088167864,
+      "spreadBpsMedian": 6.407928743832612,
+      "spreadBpsP95": 7.820994565212851,
+      "depth10BpsQuoteMedian": 4154.9285,
+      "imbalance10BpsMedian": 0.908833701093764,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 2.301958789834302,
+      "markIndexPremiumBpsMedian": 0.7077489822715499,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -150,12 +150,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 10.677688797037879,
-      "spreadBpsP95": 360.55291296826834,
-      "depth10BpsQuoteMedian": 3998.0859,
-      "imbalance10BpsMedian": 0.00012325679585066076,
+      "spreadBpsMedian": 14.131279587365833,
+      "spreadBpsP95": 86.99403253415397,
+      "depth10BpsQuoteMedian": 3998.7721999999994,
+      "imbalance10BpsMedian": 6.266217257668808e-05,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 6.671943208949038,
+      "markIndexPremiumBpsMedian": 0.0,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -168,14 +168,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 33.043767972669,
-      "spreadBpsP95": 39.04653694292866,
+      "spreadBpsMedian": 35.85791439336684,
+      "spreadBpsP95": 91.62953102903124,
       "depth10BpsQuoteMedian": 0.0,
       "imbalance10BpsMedian": null,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 8.181523487513775,
-      "openInterestChangePct": 0.0,
-      "priceChangePct": 0.0,
+      "markIndexPremiumBpsMedian": 7.42601159090972,
+      "openInterestChangePct": 0.11025358324145973,
+      "priceChangePct": -1.8970189701897011,
       "liquidationEvents": 0
     },
     {
@@ -187,14 +187,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 9.148665819568325,
-      "spreadBpsP95": 11.527298627393849,
-      "depth10BpsQuoteMedian": 4299.008,
-      "imbalance10BpsMedian": -0.00040703146862043697,
+      "spreadBpsMedian": 9.030277229510064,
+      "spreadBpsP95": 16.420095432780176,
+      "depth10BpsQuoteMedian": 4368.387000000001,
+      "imbalance10BpsMedian": -0.00042361458774604443,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 6.712757677291847,
+      "markIndexPremiumBpsMedian": 0.0,
       "openInterestChangePct": 0.0,
-      "priceChangePct": 0.0,
+      "priceChangePct": -0.17993008431010926,
       "liquidationEvents": 0
     },
     {
@@ -205,12 +205,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 35.04635677191266,
-      "spreadBpsP95": 1662.6683186369748,
+      "spreadBpsMedian": 33.08729956731877,
+      "spreadBpsP95": 7949.126611209941,
       "depth10BpsQuoteMedian": 0.0,
-      "imbalance10BpsMedian": null,
+      "imbalance10BpsMedian": 0.43182374893733516,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": -6.016094925480608,
+      "markIndexPremiumBpsMedian": 159.22919246150968,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -223,14 +223,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 5.149772551712494,
-      "spreadBpsP95": 5.177591416876576,
-      "depth10BpsQuoteMedian": 90964.1538,
-      "imbalance10BpsMedian": -0.24391273381840692,
+      "spreadBpsMedian": 5.390351271224712,
+      "spreadBpsP95": 8.985533291401612,
+      "depth10BpsQuoteMedian": 84519.2011,
+      "imbalance10BpsMedian": -0.3807291158110715,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": -15.03476456486963,
-      "openInterestChangePct": 0.0,
-      "priceChangePct": 0.619728008263043,
+      "markIndexPremiumBpsMedian": -0.454501705670074,
+      "openInterestChangePct": 3.8785805782498572,
+      "priceChangePct": 0.19653385742361973,
       "liquidationEvents": 0
     },
     {
@@ -241,14 +241,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 10.306541530678857,
-      "spreadBpsP95": 11.879454795548192,
-      "depth10BpsQuoteMedian": 876.8650000000001,
-      "imbalance10BpsMedian": 0.11839722604290627,
-      "fundingRateMedian": 0.00013713,
-      "markIndexPremiumBpsMedian": 11.058361690248208,
-      "openInterestChangePct": 0.07962676356458864,
-      "priceChangePct": 0.0,
+      "spreadBpsMedian": 8.161215393307518,
+      "spreadBpsP95": 10.032610439116173,
+      "depth10BpsQuoteMedian": 4926.5933,
+      "imbalance10BpsMedian": 0.9557573909019428,
+      "fundingRateMedian": 0.0,
+      "markIndexPremiumBpsMedian": 5.924385054170145,
+      "openInterestChangePct": 0.0022817245273865083,
+      "priceChangePct": -0.39215686274509665,
       "liquidationEvents": 0
     },
     {
@@ -259,14 +259,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 5.799342741154848,
-      "spreadBpsP95": 8.750506495859344,
-      "depth10BpsQuoteMedian": 32024.6748,
-      "imbalance10BpsMedian": -0.048980258237122994,
+      "spreadBpsMedian": 3.871842028844453,
+      "spreadBpsP95": 5.806640066345116,
+      "depth10BpsQuoteMedian": 32599.234600000003,
+      "imbalance10BpsMedian": -0.7142358108273295,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 0.0,
-      "openInterestChangePct": -2.6511653175422367,
-      "priceChangePct": -0.3443328550932545,
+      "markIndexPremiumBpsMedian": 3.3836159605771243,
+      "openInterestChangePct": -0.26468655072564573,
+      "priceChangePct": -0.32752143338792283,
       "liquidationEvents": 0
     },
     {
@@ -277,12 +277,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 25.475194556527292,
-      "spreadBpsP95": 27.870253132289353,
+      "spreadBpsMedian": 26.816046854049887,
+      "spreadBpsP95": 28.797747920834027,
       "depth10BpsQuoteMedian": 0.0,
       "imbalance10BpsMedian": null,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 5.61108884417294,
+      "markIndexPremiumBpsMedian": 5.211530917099694,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -295,14 +295,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 3.340730665520948,
-      "spreadBpsP95": 6.2091699625693835,
-      "depth10BpsQuoteMedian": 55929.38219999999,
-      "imbalance10BpsMedian": 0.002570576740044591,
+      "spreadBpsMedian": 4.400655208664568,
+      "spreadBpsP95": 5.87408890729167,
+      "depth10BpsQuoteMedian": 55090.446599999996,
+      "imbalance10BpsMedian": -0.5560926243028418,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": -1.940960291052507,
-      "openInterestChangePct": 0.06170613455143137,
-      "priceChangePct": -0.5791597436506035,
+      "markIndexPremiumBpsMedian": 0.0,
+      "openInterestChangePct": 0.21012068063241962,
+      "priceChangePct": -0.8025291828793857,
       "liquidationEvents": 0
     },
     {
@@ -313,12 +313,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 21.650950163685984,
-      "spreadBpsP95": 26.216710276803937,
+      "spreadBpsMedian": 23.565761566862196,
+      "spreadBpsP95": 26.226955993326357,
       "depth10BpsQuoteMedian": 0.0,
-      "imbalance10BpsMedian": 0.6009850506269725,
+      "imbalance10BpsMedian": 0.8306777782575528,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 4.752002178407544,
+      "markIndexPremiumBpsMedian": 3.325918899630409,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -331,14 +331,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 3.4375031594701375,
-      "spreadBpsP95": 4.590822471193934,
-      "depth10BpsQuoteMedian": 105804.59,
-      "imbalance10BpsMedian": -0.2824110779913765,
-      "fundingRateMedian": -0.00013242,
-      "markIndexPremiumBpsMedian": -0.9306962944910513,
-      "openInterestChangePct": -2.596288534416291,
-      "priceChangePct": 0.4403180865992784,
+      "spreadBpsMedian": 3.637100503478863,
+      "spreadBpsP95": 5.078706576371983,
+      "depth10BpsQuoteMedian": 127109.97510000001,
+      "imbalance10BpsMedian": -0.2779875082974891,
+      "fundingRateMedian": -1.858e-05,
+      "markIndexPremiumBpsMedian": 0.0,
+      "openInterestChangePct": -3.2053516217887434,
+      "priceChangePct": -0.1616290561686773,
       "liquidationEvents": 0
     },
     {
@@ -350,14 +350,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 7.6838111703403245,
-      "spreadBpsP95": 10.081721584934929,
-      "depth10BpsQuoteMedian": 44649.9012,
-      "imbalance10BpsMedian": 0.9796725635057212,
+      "spreadBpsMedian": 7.741810615957641,
+      "spreadBpsP95": 10.62571055838566,
+      "depth10BpsQuoteMedian": 7873.7307,
+      "imbalance10BpsMedian": 0.8867363187843669,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 0.0,
+      "markIndexPremiumBpsMedian": 1.0728703988349686,
       "openInterestChangePct": 0.0,
-      "priceChangePct": -0.21103117505995028,
+      "priceChangePct": 0.0,
       "liquidationEvents": 0
     },
     {
@@ -368,12 +368,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 11.464133639043611,
-      "spreadBpsP95": 13.937970678637633,
-      "depth10BpsQuoteMedian": 54315.068499999994,
-      "imbalance10BpsMedian": -0.00048710156901071516,
+      "spreadBpsMedian": 10.70355275616446,
+      "spreadBpsP95": 13.173603861128932,
+      "depth10BpsQuoteMedian": 53673.6336,
+      "imbalance10BpsMedian": 0.06839201824209724,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 1.0782640135165167,
+      "markIndexPremiumBpsMedian": 3.6720215885610585,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -386,12 +386,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 11.3997231495807,
-      "spreadBpsP95": 13.84455015284222,
-      "depth10BpsQuoteMedian": 4537.7744999999995,
-      "imbalance10BpsMedian": 0.0006600585181583185,
+      "spreadBpsMedian": 12.223444566679353,
+      "spreadBpsP95": 14.09860272515657,
+      "depth10BpsQuoteMedian": 4684.6984,
+      "imbalance10BpsMedian": 0.045309424145919784,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 4.506484239377162,
+      "markIndexPremiumBpsMedian": 0.0,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -404,12 +404,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 32.649253731343414,
-      "spreadBpsP95": 38.083514883850995,
+      "spreadBpsMedian": 32.33677279007622,
+      "spreadBpsP95": 39.388612822060445,
       "depth10BpsQuoteMedian": 0.0,
       "imbalance10BpsMedian": null,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 4.77062264917949,
+      "markIndexPremiumBpsMedian": 3.3066499753231504,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -422,14 +422,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 2.9789056245462953,
-      "spreadBpsP95": 4.314157548396544,
-      "depth10BpsQuoteMedian": 73770.3541,
-      "imbalance10BpsMedian": 0.14309322313452508,
-      "fundingRateMedian": -9.36e-05,
-      "markIndexPremiumBpsMedian": -0.17479555926791512,
-      "openInterestChangePct": -1.9145358113061062,
-      "priceChangePct": 0.3513105871107536,
+      "spreadBpsMedian": 3.940611176082512,
+      "spreadBpsP95": 5.226341037737478,
+      "depth10BpsQuoteMedian": 65168.7943,
+      "imbalance10BpsMedian": 0.2835110889302428,
+      "fundingRateMedian": 0.0,
+      "markIndexPremiumBpsMedian": 5.8983763996489635,
+      "openInterestChangePct": 3.566783391695849,
+      "priceChangePct": -0.30422685182250886,
       "liquidationEvents": 0
     },
     {
@@ -440,14 +440,14 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 6.474986510444138,
-      "spreadBpsP95": 8.505125226536686,
-      "depth10BpsQuoteMedian": 7034.9309,
-      "imbalance10BpsMedian": 0.8332841194206088,
+      "spreadBpsMedian": 6.542157977539724,
+      "spreadBpsP95": 8.089008381329943,
+      "depth10BpsQuoteMedian": 8720.1439,
+      "imbalance10BpsMedian": 0.857740049194403,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 0.2356968163153006,
-      "openInterestChangePct": -1.17073455564638,
-      "priceChangePct": 0.25976435661934083,
+      "markIndexPremiumBpsMedian": 10.282547005813214,
+      "openInterestChangePct": -0.08172632875255159,
+      "priceChangePct": 0.22042843837317694,
       "liquidationEvents": 0
     },
     {
@@ -458,12 +458,12 @@
       "snapshots": 55,
       "coveragePct": 100.0,
       "timestampsMonotonic": true,
-      "spreadBpsMedian": 29.364334368305062,
-      "spreadBpsP95": 59.30855104426722,
+      "spreadBpsMedian": 28.617160595625133,
+      "spreadBpsP95": 32.9100112893107,
       "depth10BpsQuoteMedian": 0.0,
-      "imbalance10BpsMedian": null,
+      "imbalance10BpsMedian": 1.0,
       "fundingRateMedian": 0.0,
-      "markIndexPremiumBpsMedian": 7.209895800581734,
+      "markIndexPremiumBpsMedian": 13.406870236594148,
       "openInterestChangePct": 0.0,
       "priceChangePct": 0.0,
       "liquidationEvents": 0
@@ -487,211 +487,211 @@
   "collectionWindowDays": 7,
   "sessionMicrostructure": {
     "sessions": {
-      "AFTER_HOURS": {
+      "CLOSED": {
         "samples": 1210,
-        "spreadBpsMedian": 11.384890623729412,
-        "spreadBpsP95": 41.92074623738513,
-        "depth10BpsQuoteMedian": 4377.1455000000005,
-        "zeroDepth10Pct": 36.85950413223141
+        "spreadBpsMedian": 11.50369769476179,
+        "spreadBpsP95": 70.81278688218501,
+        "depth10BpsQuoteMedian": 4266.3294000000005,
+        "zeroDepth10Pct": 39.33884297520661
       }
     },
     "symbols": {
       "ADBEUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 28.693054869588355,
-          "spreadBpsP95": 37.4909241118543,
+          "spreadBpsMedian": 29.19295602222453,
+          "spreadBpsP95": 45.106422966687404,
           "depth10BpsQuoteMedian": 0.0,
-          "zeroDepth10Pct": 100.0
+          "zeroDepth10Pct": 83.63636363636363
         }
       },
       "AMATUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 55.40262424342316,
-          "spreadBpsP95": 181.13439854163582,
+          "spreadBpsMedian": 99.41646855413842,
+          "spreadBpsP95": 194.68532476069456,
           "depth10BpsQuoteMedian": 0.0,
-          "zeroDepth10Pct": 74.54545454545455
+          "zeroDepth10Pct": 89.0909090909091
         }
       },
       "AMDUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 20.05871733620275,
-          "spreadBpsP95": 24.4989433558756,
-          "depth10BpsQuoteMedian": 3999.3050000000003,
-          "zeroDepth10Pct": 45.45454545454545
+          "spreadBpsMedian": 22.853772715544416,
+          "spreadBpsP95": 24.974465651208966,
+          "depth10BpsQuoteMedian": 0.0,
+          "zeroDepth10Pct": 76.36363636363637
         }
       },
       "AMZNUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 6.382299755345419,
-          "spreadBpsP95": 8.096303398316723,
-          "depth10BpsQuoteMedian": 43769.443,
+          "spreadBpsMedian": 6.407928743832612,
+          "spreadBpsP95": 7.820994565212851,
+          "depth10BpsQuoteMedian": 4154.9285,
           "zeroDepth10Pct": 0.0
         }
       },
       "ARMUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 10.677688797037879,
-          "spreadBpsP95": 360.55291296826834,
-          "depth10BpsQuoteMedian": 3998.0859,
-          "zeroDepth10Pct": 18.181818181818183
+          "spreadBpsMedian": 14.131279587365833,
+          "spreadBpsP95": 86.99403253415397,
+          "depth10BpsQuoteMedian": 3998.7721999999994,
+          "zeroDepth10Pct": 20.0
         }
       },
       "ASMLUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 33.043767972669,
-          "spreadBpsP95": 39.04653694292866,
+          "spreadBpsMedian": 35.85791439336684,
+          "spreadBpsP95": 91.62953102903124,
           "depth10BpsQuoteMedian": 0.0,
           "zeroDepth10Pct": 100.0
         }
       },
       "AVGOUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 9.148665819568325,
-          "spreadBpsP95": 11.527298627393849,
-          "depth10BpsQuoteMedian": 4299.008,
-          "zeroDepth10Pct": 3.6363636363636362
+          "spreadBpsMedian": 9.030277229510064,
+          "spreadBpsP95": 16.420095432780176,
+          "depth10BpsQuoteMedian": 4368.387000000001,
+          "zeroDepth10Pct": 7.2727272727272725
         }
       },
       "CRMUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 35.04635677191266,
-          "spreadBpsP95": 1662.6683186369748,
+          "spreadBpsMedian": 33.08729956731877,
+          "spreadBpsP95": 7949.126611209941,
           "depth10BpsQuoteMedian": 0.0,
-          "zeroDepth10Pct": 100.0
+          "zeroDepth10Pct": 98.18181818181819
         }
       },
       "DRAMUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 5.149772551712494,
-          "spreadBpsP95": 5.177591416876576,
-          "depth10BpsQuoteMedian": 90964.1538,
+          "spreadBpsMedian": 5.390351271224712,
+          "spreadBpsP95": 8.985533291401612,
+          "depth10BpsQuoteMedian": 84519.2011,
           "zeroDepth10Pct": 0.0
         }
       },
       "GOOGLUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 10.306541530678857,
-          "spreadBpsP95": 11.879454795548192,
-          "depth10BpsQuoteMedian": 876.8650000000001,
+          "spreadBpsMedian": 8.161215393307518,
+          "spreadBpsP95": 10.032610439116173,
+          "depth10BpsQuoteMedian": 4926.5933,
           "zeroDepth10Pct": 0.0
         }
       },
       "INTCUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 5.799342741154848,
-          "spreadBpsP95": 8.750506495859344,
-          "depth10BpsQuoteMedian": 32024.6748,
+          "spreadBpsMedian": 3.871842028844453,
+          "spreadBpsP95": 5.806640066345116,
+          "depth10BpsQuoteMedian": 32599.234600000003,
           "zeroDepth10Pct": 0.0
         }
       },
       "METAUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 25.475194556527292,
-          "spreadBpsP95": 27.870253132289353,
+          "spreadBpsMedian": 26.816046854049887,
+          "spreadBpsP95": 28.797747920834027,
           "depth10BpsQuoteMedian": 0.0,
           "zeroDepth10Pct": 100.0
         }
       },
       "MRVLUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 3.340730665520948,
-          "spreadBpsP95": 6.2091699625693835,
-          "depth10BpsQuoteMedian": 55929.38219999999,
+          "spreadBpsMedian": 4.400655208664568,
+          "spreadBpsP95": 5.87408890729167,
+          "depth10BpsQuoteMedian": 55090.446599999996,
           "zeroDepth10Pct": 0.0
         }
       },
       "MSFTUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 21.650950163685984,
-          "spreadBpsP95": 26.216710276803937,
+          "spreadBpsMedian": 23.565761566862196,
+          "spreadBpsP95": 26.226955993326357,
           "depth10BpsQuoteMedian": 0.0,
-          "zeroDepth10Pct": 69.0909090909091
+          "zeroDepth10Pct": 87.27272727272727
         }
       },
       "MUUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 3.4375031594701375,
-          "spreadBpsP95": 4.590822471193934,
-          "depth10BpsQuoteMedian": 105804.59,
+          "spreadBpsMedian": 3.637100503478863,
+          "spreadBpsP95": 5.078706576371983,
+          "depth10BpsQuoteMedian": 127109.97510000001,
           "zeroDepth10Pct": 0.0
         }
       },
       "NVDAUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 7.6838111703403245,
-          "spreadBpsP95": 10.081721584934929,
-          "depth10BpsQuoteMedian": 44649.9012,
+          "spreadBpsMedian": 7.741810615957641,
+          "spreadBpsP95": 10.62571055838566,
+          "depth10BpsQuoteMedian": 7873.7307,
           "zeroDepth10Pct": 0.0
         }
       },
       "ORCLUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 11.464133639043611,
-          "spreadBpsP95": 13.937970678637633,
-          "depth10BpsQuoteMedian": 54315.068499999994,
-          "zeroDepth10Pct": 0.0
+          "spreadBpsMedian": 10.70355275616446,
+          "spreadBpsP95": 13.173603861128932,
+          "depth10BpsQuoteMedian": 53673.6336,
+          "zeroDepth10Pct": 3.6363636363636362
         }
       },
       "PLTRUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 11.3997231495807,
-          "spreadBpsP95": 13.84455015284222,
-          "depth10BpsQuoteMedian": 4537.7744999999995,
-          "zeroDepth10Pct": 0.0
+          "spreadBpsMedian": 12.223444566679353,
+          "spreadBpsP95": 14.09860272515657,
+          "depth10BpsQuoteMedian": 4684.6984,
+          "zeroDepth10Pct": 1.8181818181818181
         }
       },
       "QCOMUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 32.649253731343414,
-          "spreadBpsP95": 38.083514883850995,
+          "spreadBpsMedian": 32.33677279007622,
+          "spreadBpsP95": 39.388612822060445,
           "depth10BpsQuoteMedian": 0.0,
           "zeroDepth10Pct": 100.0
         }
       },
       "SNDKUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 2.9789056245462953,
-          "spreadBpsP95": 4.314157548396544,
-          "depth10BpsQuoteMedian": 73770.3541,
+          "spreadBpsMedian": 3.940611176082512,
+          "spreadBpsP95": 5.226341037737478,
+          "depth10BpsQuoteMedian": 65168.7943,
           "zeroDepth10Pct": 0.0
         }
       },
       "TSLAUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 6.474986510444138,
-          "spreadBpsP95": 8.505125226536686,
-          "depth10BpsQuoteMedian": 7034.9309,
+          "spreadBpsMedian": 6.542157977539724,
+          "spreadBpsP95": 8.089008381329943,
+          "depth10BpsQuoteMedian": 8720.1439,
           "zeroDepth10Pct": 0.0
         }
       },
       "TSMUSDT": {
-        "AFTER_HOURS": {
+        "CLOSED": {
           "samples": 55,
-          "spreadBpsMedian": 29.364334368305062,
-          "spreadBpsP95": 59.30855104426722,
+          "spreadBpsMedian": 28.617160595625133,
+          "spreadBpsP95": 32.9100112893107,
           "depth10BpsQuoteMedian": 0.0,
-          "zeroDepth10Pct": 100.0
+          "zeroDepth10Pct": 98.18181818181819
         }
       }
     }
@@ -744,45 +744,45 @@
     "latencies": {
       "bookTicker": {
         "samples": 1210,
-        "p50Ms": 146.99450000000002,
-        "p95Ms": 248.017,
-        "maxMs": 490.187
+        "p50Ms": 133.3225,
+        "p95Ms": 235.46814999999998,
+        "maxMs": 5217.765
       },
       "depth": {
         "samples": 1210,
-        "p50Ms": 147.6975,
-        "p95Ms": 243.01714999999993,
-        "maxMs": 513.434
+        "p50Ms": 133.373,
+        "p95Ms": 214.91924999999995,
+        "maxMs": 400.251
       },
       "klines1m": {
         "samples": 1210,
-        "p50Ms": 147.055,
-        "p95Ms": 226.70765,
-        "maxMs": 412.659
+        "p50Ms": 132.8535,
+        "p95Ms": 177.5501,
+        "maxMs": 370.568
       },
       "lastPrice": {
         "samples": 1210,
-        "p50Ms": 146.99450000000002,
-        "p95Ms": 252.33504999999994,
-        "maxMs": 406.892
+        "p50Ms": 133.30450000000002,
+        "p95Ms": 225.04975,
+        "maxMs": 4988.292
       },
       "openInterest": {
         "samples": 1210,
-        "p50Ms": 173.623,
-        "p95Ms": 448.29825000000005,
-        "maxMs": 609.837
+        "p50Ms": 150.5025,
+        "p95Ms": 361.02864999999997,
+        "maxMs": 495.144
       },
       "premium": {
         "samples": 1210,
-        "p50Ms": 148.9425,
-        "p95Ms": 395.6087,
-        "maxMs": 601.236
+        "p50Ms": 135.156,
+        "p95Ms": 382.51945,
+        "maxMs": 512.239
       },
       "ticker24h": {
         "samples": 1210,
-        "p50Ms": 147.1755,
-        "p95Ms": 243.68604999999997,
-        "maxMs": 417.26
+        "p50Ms": 133.1015,
+        "p95Ms": 208.30134999999996,
+        "maxMs": 4907.093
       }
     },
     "minuteBarCoveragePctV2": 100.0,
@@ -791,7 +791,7 @@
       "cryptoEntryAllowedByClock": 1210
     },
     "sessionCounts": {
-      "AFTER_HOURS": 1210
+      "CLOSED": 1210
     },
     "executionFillability": {
       "100": {
@@ -826,8 +826,8 @@
         },
         "sell": {
           "attempts": 1210,
-          "fillable": 1207,
-          "fillablePct": 99.75206611570248
+          "fillable": 1205,
+          "fillablePct": 99.58677685950413
         }
       }
     },
@@ -835,43 +835,43 @@
       "100": {
         "buy": {
           "samples": 1210,
-          "medianSlippageBps": 5.691056910568371,
-          "p95SlippageBps": 20.75662818233126,
-          "maxSlippageBps": 2715.2800258983502
+          "medianSlippageBps": 5.794414569020301,
+          "p95SlippageBps": 35.59633673255209,
+          "maxSlippageBps": 44332.80305440662
         },
         "sell": {
           "samples": 1210,
-          "medianSlippageBps": 5.695455849301645,
-          "p95SlippageBps": 22.392834293025743,
-          "maxSlippageBps": 19141.59966731356
+          "medianSlippageBps": 5.752794369749958,
+          "p95SlippageBps": 38.68708714504831,
+          "maxSlippageBps": 22213.8304652645
         }
       },
       "500": {
         "buy": {
           "samples": 1210,
-          "medianSlippageBps": 7.41066936130963,
-          "p95SlippageBps": 20.75662818233126,
-          "maxSlippageBps": 2715.2800258983502
+          "medianSlippageBps": 8.510567028485738,
+          "p95SlippageBps": 35.59633673255209,
+          "maxSlippageBps": 44332.80305440662
         },
         "sell": {
           "samples": 1210,
-          "medianSlippageBps": 6.152593401399509,
-          "p95SlippageBps": 22.392834293025743,
-          "maxSlippageBps": 19141.59966731356
+          "medianSlippageBps": 6.178433191282862,
+          "p95SlippageBps": 39.30661897619521,
+          "maxSlippageBps": 22213.8304652645
         }
       },
       "1000": {
         "buy": {
           "samples": 1210,
-          "medianSlippageBps": 9.604391041414528,
-          "p95SlippageBps": 22.340235762673856,
-          "maxSlippageBps": 2715.2800258983502
+          "medianSlippageBps": 10.628386612182572,
+          "p95SlippageBps": 41.47863896089474,
+          "maxSlippageBps": 44333.73743767171
         },
         "sell": {
-          "samples": 1207,
-          "medianSlippageBps": 6.523689146213929,
-          "p95SlippageBps": 22.195215555839393,
-          "maxSlippageBps": 19141.59966731356
+          "samples": 1205,
+          "medianSlippageBps": 6.665309154214594,
+          "p95SlippageBps": 41.30642311824489,
+          "maxSlippageBps": 22213.8304652645
         }
       }
     },
@@ -879,139 +879,139 @@
       "symbols": {
         "ADBEUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "AMATUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "AMDUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "AMZNUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "ARMUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "ASMLUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "AVGOUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "CRMUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "DRAMUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "GOOGLUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "INTCUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "METAUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "MRVLUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "MSFTUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "MUUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "NVDAUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "ORCLUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "PLTRUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "QCOMUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "SNDKUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "TSLAUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         },
         "TSMUSDT": {
           "samples": 55,
-          "maxGapSeconds": 60.014,
+          "maxGapSeconds": 60.013,
           "gapsOver90Seconds": 0,
           "gapsOver10Minutes": 0
         }
       },
-      "globalMaxGapSeconds": 60.014,
-      "globalP95GapSeconds": 60.009,
+      "globalMaxGapSeconds": 60.013,
+      "globalP95GapSeconds": 60.012,
       "gapsOver90Seconds": 0,
       "gapsOver10Minutes": 0
     },
@@ -1066,8 +1066,8 @@
         "ASMLUSDT": "TRADING",
         "ADBEUSDT": "TRADING"
       },
-      "clockSkewMedianMs": -1652.0,
-      "clockSkewMaxAbsMs": 1652.0,
+      "clockSkewMedianMs": -1440.0,
+      "clockSkewMaxAbsMs": 1440.0,
       "coveragePass": true
     },
     "limitations": [
