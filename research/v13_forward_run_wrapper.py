@@ -50,13 +50,13 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     engine_base, collector = load_frozen_modules(source_root, args.source_commit)
+    collector.self_test()
     original_session_gate = engine_base.us_regular_session
 
     def frozen_forward_session_gate(received_ms: int) -> bool:
         return original_session_gate(received_ms) and received_ms < args.entry_cutoff_ms
 
     engine_base.us_regular_session = frozen_forward_session_gate
-    collector.self_test()
     result = asyncio.run(collector.probe(args.duration_seconds, output_dir))
     wrapper_meta = {
         "sourceCommit": args.source_commit,
