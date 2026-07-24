@@ -1,0 +1,373 @@
+name: V13 Maker Hedge Fixed 20-Session Forward
+
+on:
+  pull_request:
+    paths:
+      - "research/v13_forward_run_wrapper.py"
+      - "research/v13_forward_aggregate.py"
+      - "research/v13_forward_config.json"
+      - "docs/research/V13_MAKER_FORWARD_20_SESSION_PROTOCOL_2026-07-24.md"
+      - ".github/workflows/v13-maker-forward-20-session.yml"
+  push:
+    branches: [master]
+    paths:
+      - "research/v13_forward_run_wrapper.py"
+      - "research/v13_forward_aggregate.py"
+      - "research/v13_forward_config.json"
+      - "docs/research/V13_MAKER_FORWARD_20_SESSION_PROTOCOL_2026-07-24.md"
+      - ".github/workflows/v13-maker-forward-20-session.yml"
+  schedule:
+    - cron: "25,35,45,55 13 * * 1-5"
+    - cron: "45,55 18 * * 1-5"
+    - cron: "5,15 19 * * 1-5"
+    - cron: "20 20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Action to run
+        required: true
+        default: validate
+        type: choice
+        options: [validate, collect, aggregate]
+      segment:
+        description: Segment for manual collection
+        required: false
+        default: OPEN_CORE
+        type: choice
+        options: [OPEN_CORE, LATE_CLOSE]
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  CONFIG_PATH: research/v13_forward_config.json
+  DATA_BRANCH: research-data/v13-maker-forward-20260727
+  DATA_DIR: research-data/v13-maker-forward-20260727
+  FROZEN_SOURCE_COMMIT: f1b2820705d5cef815a4b160feb124af1230d746
+
+jobs:
+  validate:
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'validate')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout exact frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FROZEN_SOURCE_COMMIT }}
+          path: .v13-frozen
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public market-data dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Syntax and aggregate self-tests
+        run: |
+          python -m py_compile research/v13_forward_run_wrapper.py
+          python -m py_compile research/v13_forward_aggregate.py
+          python research/v13_forward_aggregate.py --self-test
+      - name: Run exact-source endpoint probe through wrapper
+        shell: bash
+        run: |
+          NOW_MS="$(python - <<'PY'
+          import time
+          print(int(time.time() * 1000))
+          PY
+          )"
+          CUTOFF_MS=$((NOW_MS + 120000))
+          python research/v13_forward_run_wrapper.py \
+            --source-root .v13-frozen \
+            --source-commit "$FROZEN_SOURCE_COMMIT" \
+            --duration-seconds 30 \
+            --entry-cutoff-ms "$CUTOFF_MS" \
+            --output-dir .research-state/v13-forward-wrapper-probe
+      - name: Validate endpoint and safety isolation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path(".research-state/v13-forward-wrapper-probe/result.json").read_text())
+          execution = result["virtualExecution"]
+          assert result["safety"]["orderSubmissionAllowed"] is False
+          assert len(result["coverage"]["completeSymbols"]) == 5, result["coverage"]
+          assert result["coverage"]["collectorErrors"] == 0, result["coverage"]
+          assert execution["partialFillFailures"] == 0, execution
+          assert execution["unhedgedRejected"] == 0, execution
+          assert execution["unresolvedInventory"] == 0, execution
+          print(json.dumps({
+              "status": result["status"],
+              "coverage": result["coverage"],
+              "virtualExecution": execution,
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v13-forward-wrapper-validation-${{ github.run_id }}
+          path: .research-state/v13-forward-wrapper-probe
+          retention-days: 30
+          if-no-files-found: warn
+
+  collect:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule != '20 20 * * 1-5') ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'collect')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 345
+    concurrency:
+      group: v13-forward-${{ github.event.schedule == '25,35,45,55 13 * * 1-5' && 'OPEN_CORE' || 'LATE_CLOSE' }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout exact frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FROZEN_SOURCE_COMMIT }}
+          path: .v13-frozen
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public market-data dependency
+        run: python -m pip install --disable-pip-version-check "websockets>=14,<16"
+      - name: Determine frozen acquisition plan
+        shell: bash
+        env:
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+          MANUAL_SEGMENT: ${{ inputs.segment }}
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          config = json.loads(Path(os.environ["CONFIG_PATH"]).read_text())
+          now = dt.datetime.now(dt.timezone.utc)
+          schedule = os.environ.get("EVENT_SCHEDULE", "")
+          if schedule == "25,35,45,55 13 * * 1-5":
+              segment = "OPEN_CORE"
+          elif schedule in {"45,55 18 * * 1-5", "5,15 19 * * 1-5"}:
+              segment = "LATE_CLOSE"
+          else:
+              segment = os.environ.get("MANUAL_SEGMENT") or "OPEN_CORE"
+
+          session_date = now.date().isoformat()
+          allowed = session_date in set(config["sessionDates"])
+          segment_cfg = config["segments"][segment]
+          target_time = dt.time.fromisoformat(segment_cfg["targetEndUtc"])
+          target = dt.datetime.combine(now.date(), target_time, tzinfo=dt.timezone.utc)
+          cutoff = target - dt.timedelta(
+              seconds=int(segment_cfg["entryCutoffSecondsBeforeEnd"])
+          )
+          duration = int((target - now).total_seconds())
+          skip_reason = None
+          if not allowed:
+              skip_reason = "OUTSIDE_FROZEN_SESSION_DATES"
+          elif duration < 60:
+              skip_reason = "STALE_SEGMENT_TRIGGER"
+          elif segment == "OPEN_CORE" and now.hour < 13:
+              skip_reason = "EARLY_OPEN_TRIGGER"
+          elif segment == "LATE_CLOSE" and (now.hour < 18 or (now.hour == 18 and now.minute < 35)):
+              skip_reason = "EARLY_LATE_TRIGGER"
+
+          values = {
+              "SESSION_DATE": session_date,
+              "SEGMENT": segment,
+              "TARGET_END_UTC": target.isoformat().replace("+00:00", "Z"),
+              "ENTRY_CUTOFF_MS": int(cutoff.timestamp() * 1000),
+              "DURATION_SECONDS": max(1, duration),
+              "SKIP": "1" if skip_reason else "0",
+              "SKIP_REASON": skip_reason or "",
+          }
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as handle:
+              for key, value in values.items():
+                  handle.write(f"{key}={value}\n")
+          print(json.dumps(values, indent=2))
+          PY
+      - name: Run frozen Forward chunk
+        if: env.SKIP != '1'
+        shell: bash
+        run: |
+          set +e
+          rm -rf /tmp/v13-forward-chunk
+          mkdir -p /tmp/v13-forward-chunk
+          STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python research/v13_forward_run_wrapper.py \
+            --source-root .v13-frozen \
+            --source-commit "$FROZEN_SOURCE_COMMIT" \
+            --duration-seconds "$DURATION_SECONDS" \
+            --entry-cutoff-ms "$ENTRY_CUTOFF_MS" \
+            --output-dir /tmp/v13-forward-chunk \
+            > /tmp/v13-forward-chunk/stdout.log \
+            2> /tmp/v13-forward-chunk/stderr.log
+          CODE=$?
+          FINISHED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "COLLECTOR_EXIT_CODE=$CODE" >> "$GITHUB_ENV"
+          echo "STARTED_AT_UTC=$STARTED_AT_UTC" >> "$GITHUB_ENV"
+          echo "FINISHED_AT_UTC=$FINISHED_AT_UTC" >> "$GITHUB_ENV"
+          exit 0
+      - name: Write immutable chunk metadata
+        if: env.SKIP != '1'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          output = Path("/tmp/v13-forward-chunk")
+          config_path = Path(os.environ["CONFIG_PATH"])
+          result_path = output / "result.json"
+          result = json.loads(result_path.read_text()) if result_path.exists() else None
+          metadata = {
+              "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
+              "sessionDate": os.environ["SESSION_DATE"],
+              "segment": os.environ["SEGMENT"],
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "startedAtUtc": os.environ.get("STARTED_AT_UTC"),
+              "finishedAtUtc": os.environ.get("FINISHED_AT_UTC"),
+              "targetEndUtc": os.environ["TARGET_END_UTC"],
+              "entryCutoffMs": int(os.environ["ENTRY_CUTOFF_MS"]),
+              "collectorExitCode": int(os.environ.get("COLLECTOR_EXIT_CODE", "99")),
+              "sourceCommit": os.environ["FROZEN_SOURCE_COMMIT"],
+              "workflowCommit": os.environ["GITHUB_SHA"],
+              "configSha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
+              "resultStatus": result.get("status") if result else None,
+              "completeSymbols": result.get("coverage", {}).get("completeSymbols", []) if result else [],
+              "collectorErrors": result.get("coverage", {}).get("collectorErrors") if result else None,
+          }
+          (output / "chunk.json").write_text(
+              json.dumps(metadata, indent=2) + "\n", encoding="utf-8"
+          )
+          print(json.dumps(metadata, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: env.SKIP != '1'
+        with:
+          name: v13-forward-${{ env.SESSION_DATE }}-${{ env.SEGMENT }}-${{ github.run_id }}
+          path: /tmp/v13-forward-chunk
+          retention-days: 90
+          if-no-files-found: error
+      - name: Persist immutable chunk to evidence branch
+        if: env.SKIP != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGING="$(mktemp -d)"
+          cp -a /tmp/v13-forward-chunk/. "$STAGING/"
+          rm -rf .v13-frozen
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin "$DATA_BRANCH"; then
+            git switch -C "$DATA_BRANCH" "origin/$DATA_BRANCH"
+          else
+            git switch -c "$DATA_BRANCH"
+          fi
+          DEST="$DATA_DIR/chunks/$SESSION_DATE/$SEGMENT/$GITHUB_RUN_ID"
+          mkdir -p "$DEST"
+          cp -a "$STAGING"/. "$DEST/"
+          mkdir -p "$DATA_DIR"
+          cp "$CONFIG_PATH" "$DATA_DIR/frozen-config.json"
+          cat > "$DATA_DIR/README.md" <<EOF
+          # V13 Maker Hedge fixed Forward evidence
+
+          - Frozen source commit: $FROZEN_SOURCE_COMMIT
+          - Fixed sessions: 2026-07-27 through 2026-08-21, 20 U.S. regular sessions
+          - Segments: OPEN_CORE and LATE_CLOSE
+          - Data: Aster/XYZ books and trades, conservative virtual queue fills, delayed hedges and completed cycles
+          - Trading: SHADOW only; order submission disabled
+          - Retuning on collected data: prohibited
+          EOF
+          git add "$DATA_DIR"
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "data: append V13 Forward $SESSION_DATE $SEGMENT run $GITHUB_RUN_ID"
+          git push origin "HEAD:$DATA_BRANCH"
+      - name: Fail after evidence persistence when collector failed
+        if: env.SKIP != '1'
+        shell: bash
+        run: |
+          if [[ "${COLLECTOR_EXIT_CODE:-99}" != "0" ]]; then
+            echo "Collector failed after immutable evidence persistence."
+            exit 1
+          fi
+
+  aggregate:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '20 20 * * 1-5') ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'aggregate')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    concurrency:
+      group: v13-forward-aggregate
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch immutable evidence branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$DATA_BRANCH"
+          rm -rf /tmp/v13-data
+          git worktree add /tmp/v13-data "origin/$DATA_BRANCH"
+      - name: Aggregate without retuning
+        shell: bash
+        run: |
+          rm -rf /tmp/v13-forward-report
+          python research/v13_forward_aggregate.py \
+            --config "$CONFIG_PATH" \
+            --input-dir "/tmp/v13-data/$DATA_DIR/chunks" \
+            --output-dir /tmp/v13-forward-report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v13-forward-aggregate-${{ github.run_id }}
+          path: /tmp/v13-forward-report
+          retention-days: 90
+      - name: Persist latest aggregate report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C /tmp/v13-data config user.name "github-actions[bot]"
+          git -C /tmp/v13-data config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf "/tmp/v13-data/$DATA_DIR/latest-report"
+          mkdir -p "/tmp/v13-data/$DATA_DIR/latest-report"
+          cp -a /tmp/v13-forward-report/. "/tmp/v13-data/$DATA_DIR/latest-report/"
+          git -C /tmp/v13-data add "$DATA_DIR/latest-report"
+          if ! git -C /tmp/v13-data diff --cached --quiet; then
+            git -C /tmp/v13-data commit -m "data: update V13 fixed Forward aggregate"
+            git -C /tmp/v13-data push origin "HEAD:$DATA_BRANCH"
+          fi
+      - name: Disable completed fixed-window collector
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python - <<'PY' > /tmp/v13-finalize.env
+          import json
+          from pathlib import Path
+          result = json.loads(Path("/tmp/v13-forward-report/aggregate-result.json").read_text())
+          final = result["window"]["collectionWindowFinished"]
+          print(f"FINALIZE={'1' if final else '0'}")
+          PY
+          source /tmp/v13-finalize.env
+          if [[ "$FINALIZE" == "1" ]]; then
+            gh api --method PUT \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/v13-maker-forward-20-session.yml/disable"
+          fi
