@@ -140,10 +140,15 @@ class BaseEngine:
             return None
         return a, x
 
-    def top(self, book: dict, side: str) -> tuple[float, float]:
-        if side == "BUY":
+    def maker_top(self, book: dict, quote_side: str) -> tuple[float, float]:
+        if quote_side == "BUY":
             return book["bid"], book["bid"] * book["bidQty"]
         return book["ask"], book["ask"] * book["askQty"]
+
+    def taker_top(self, book: dict, action: str) -> tuple[float, float]:
+        if action == "BUY":
+            return book["ask"], book["ask"] * book["askQty"]
+        return book["bid"], book["bid"] * book["bidQty"]
 
     def flow_fields(self, venue: str, symbol: str, side: str, received_ms: int) -> tuple[Optional[float], Optional[float]]:
         imbalance = self.imbalance(venue, symbol, received_ms)
@@ -157,9 +162,9 @@ class BaseEngine:
         rows = []
         for maker, hedge in ((pair[0], pair[1]), (pair[1], pair[0])):
             for side in ("BUY", "SELL"):
-                maker_price, maker_usd = self.top(maker, side)
-                hedge_side = "SELL" if side == "BUY" else "BUY"
-                hedge_price, hedge_usd = self.top(hedge, hedge_side)
+                maker_price, maker_usd = self.maker_top(maker, side)
+                hedge_action = "SELL" if side == "BUY" else "BUY"
+                hedge_price, hedge_usd = self.taker_top(hedge, hedge_action)
                 quantity = NOTIONAL / maker_price
                 required_hedge_usd = quantity * hedge_price
                 gross = (hedge_price / maker_price - 1) * 10_000 if side == "BUY" else (maker_price / hedge_price - 1) * 10_000
@@ -191,9 +196,9 @@ class BaseEngine:
         maker = self.books[(inv["makerVenue"], symbol)]
         hedge = self.books[(inv["hedgeVenue"], symbol)]
         side = "SELL" if inv["openSide"] == "BUY" else "BUY"
-        hedge_side = "BUY" if inv["openSide"] == "BUY" else "SELL"
-        maker_price, maker_usd = self.top(maker, side)
-        hedge_price, hedge_usd = self.top(hedge, hedge_side)
+        hedge_action = "BUY" if inv["openSide"] == "BUY" else "SELL"
+        maker_price, maker_usd = self.maker_top(maker, side)
+        hedge_price, hedge_usd = self.taker_top(hedge, hedge_action)
         required_hedge_usd = inv["quantity"] * hedge_price
         gross = self.cycle_gross_bps(inv, maker_price, hedge_price)
         net = gross - COSTS["NORMAL"]
