@@ -1,246 +1,177 @@
-# V13D + V11-EQ Stock Router + Crypto V96 — Codex Implementation and LIVE Handoff
+# V13D + V11-EQ Stock Router + Crypto V96 — LIVE Operations Runbook
 
-## User-approved target
+## Implementation status
 
-Implement one coordinated Production system containing:
+This branch includes an executable combined system, not only a strategy contract.
 
-1. Crypto V96 as the 24-hour Crypto sleeve;
-2. V13D as the first-priority Stock strategy at 10:00 New York;
-3. V11-EQ as the second-priority Stock fallback at 10:30 New York;
-4. a shared Portfolio risk layer enforcing Crypto Gross 1.0, Stock Gross 1.0 and total Gross 2.0.
+- Crypto sleeve: existing `scripts/disdex-v96-live-runner.ts`
+- Stock sleeve: `scripts/disdex_v13d_v11eq_stock_live_engine.py`
+- Combined supervisor: `scripts/disdex-v13d-v11eq-v96-live-runner.ts`
+- Combined no-order preflight: `scripts/disdex-v13d-v11eq-v96-live-preflight.ts`
+- Shared Kill Switch: `scripts/disdex-v13d-v11eq-v96-kill-switch.ts`
+- systemd unit: `ops/systemd/disdex-v13d-v11eq-v96.service`
+- environment template: `ops/env/disdex-v13d-v11eq-v96.env.example`
 
-The Stock strategies remain separate engines. Do not merge V13D and V11-EQ signal logic into one model.
+The repository runtime is `LIVE_READY`. Real orders still require explicit environment activation, valid Aster and Hyperliquid credentials, a fresh external cash-stock reference feed, successful combined preflight, and the existing Crypto V96 exact-commit live gates.
 
-## Frozen implementation contract
+## Fixed architecture
 
-The canonical constants are in:
+- Crypto V96 Gross cap: 1.0
+- Stock Gross cap: 1.0
+- Portfolio Gross cap: 2.0
+- No sleeve lending
+- Maximum one Stock position
+- V13D first at 10:00 New York
+- V11-EQ fallback at 10:30 only when V13D did not open
+- Shared UTC daily-loss limit: 2%
+- Shared Kill Switch file; active action is cancel and reduce-only flatten of managed positions
+- Existing unmanaged positions are not closed
 
-- `config/disdexStockRouterV13DV11EqRuntime.ts`
-- `lib/disdex-v13d-v11eq-stock-router-contract.ts`
+## Stock execution implementation
 
-Do not alter thresholds while implementing. Any change requires a separate research PR and explicit user approval.
+### V13D
 
-## Strategy order and time router
+- Aster Stock Perp is the Maker leg using `LIMIT` + `GTX` post-only.
+- Hyperliquid `xyz:` Stock Perp is the opposite IOC hedge using the official Python SDK.
+- Aster Maker fill must reach 90% within 3 seconds.
+- The Hyperliquid hedge starts after the fixed 250 ms delay and must reach 99% fill.
+- Incomplete hedge causes immediate flatten and shared Kill Switch activation.
+- Previous completed V13D symbol is skipped once.
+- 14:30 New York TP check uses 30 bps price gross; otherwise 15:00 exit and 15:10 hard-flat deadline.
 
-All Stock times use `America/New_York` with DST support.
+### V11-EQ
 
-| Time | Required behavior |
-| --- | --- |
-| 00:00–09:29 | Crypto V96 continues. Stock sleeve holds cash. |
-| 09:30–09:59 | Collect authenticated cash, Aster and XYZ evidence. No Stock entry. |
-| 10:00 | Evaluate V13D once using one simultaneous decision batch. |
-| 10:00–10:30 | Manage any V13D Maker/Hedge completion. Do not let later prices influence symbol selection. |
-| 10:30 | Evaluate V11-EQ only when no completed V13D Stock position exists. |
-| 10:30–15:30 | Manage the selected Stock engine's own frozen exits. Crypto continues independently. |
-| 15:30–15:10 rule exception | V13D must already be flat by 15:10. V11-EQ must be flat at 15:30. |
-| After Stock flat | Stock sleeve returns to cash. Crypto V96 continues. |
+- The 10:00 signal Top1 symbol is frozen.
+- At 10:30 the same symbol must still be absolute-Basis Top1.
+- Basis >=50 bps.
+- Estimated round-trip cost <=60 bps.
+- Cost/Basis <=75%.
+- Estimated Net Edge >=10 bps.
+- Aster depth >=2x order notional.
+- Spread <=20 bps and <=2x the trailing 30-second median.
+- Data and reference clock age <=1.5 seconds.
+- Adverse two-second price move <=5 bps.
+- Adverse Basis expansion <=10 bps.
+- Entry uses Aster `LIMIT` + `GTX`, TTL 10 seconds, fill >=90%, and no market-entry fallback.
+- Exit is Basis <=15 bps, zero-cross, 1.5x Basis stop, or 15:30 final exit.
 
-## V13D implementation
+## Required external cash-stock reference contract
 
-Use the exact `V13D_EDGE20_NO_PREVIOUS_SYMBOL` rules from the runtime contract.
+LIVE does not use Yahoo. Configure an authenticated, fresh reference endpoint:
 
-Required execution sequence:
+```text
+DISDEX_STOCK_REFERENCE_MODE=external
+DISDEX_STOCK_REFERENCE_URL_TEMPLATE=https://provider.example/quote?symbol={symbol}
+DISDEX_STOCK_REFERENCE_PRICE_PATH=price
+DISDEX_STOCK_REFERENCE_TIMESTAMP_PATH=timestamp
+DISDEX_STOCK_REFERENCE_HEADERS_JSON={"Authorization":"Bearer ..."}
+```
 
-1. Obtain fresh Aster and XYZ books for all five symbols in the same bounded decision batch.
-2. Reject stale, shallow or invalid books before ranking.
-3. Rank by largest absolute Aster/XYZ Basis dislocation, minimum 20 bps, alphabetical tie-break.
-4. Apply the immediately previous completed V13D symbol cooldown once.
-5. Place only the Aster Maker order for the selected symbol.
-6. Prove Maker fill from authenticated order/trade updates. Do not infer a real fill from a candle.
-7. After the frozen 250 ms delay, place the exact opposite XYZ Taker hedge.
-8. Incomplete Maker fill, stale hedge data, insufficient hedge depth or unresolved hedge state must fail closed.
-9. Store both venue Funding and realized execution costs.
-10. Exit both legs at 14:30 when the frozen price-gross condition is met, otherwise at 15:00; hard flat deadline 15:10.
+For each AMZN, META, MSFT, NVDA and TSLA request, the response must expose a positive price and epoch timestamp in milliseconds or seconds. Quotes older than 1.5 seconds fail closed.
 
-Never allow an unhedged Stock position to remain open because the expected edge appears attractive.
+## Installation
 
-## V11-EQ implementation
+```bash
+cd /home/deploy/dis-dex-manager
+npm ci
+python3 -m venv .venv-stock
+. .venv-stock/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-stock-live.txt
+```
 
-V11-EQ preserves V11's signal and exit. Only the pre-entry Execution Quality Gate is new.
+Set `DISDEX_PYTHON_BIN=/home/deploy/dis-dex-manager/.venv-stock/bin/python` in the environment file when using the virtual environment.
 
-### Signal
+## Migration from standalone V96
 
-- Cash/Aster absolute Basis at least 50 bps;
-- five-symbol absolute-Basis Top1;
-- both Long and Short directions;
-- Stock target Gross 1.0;
-- no Top2, normalized selection or tiered sizing;
-- no candidate replacement after the 10:00 signal is frozen.
+Do not run the old standalone V96 daemon and the combined supervisor simultaneously.
 
-### Mandatory Entry gate
+1. Activate the shared Kill Switch only if an emergency flatten is required.
+2. Confirm there are no unknown open Stock orders or unmanaged Stock positions.
+3. Stop and disable the old standalone V96 systemd service.
+4. Preserve or migrate the existing V96 state under the combined Crypto state directory:
+   `.runtime-state/disdex-v13d-v11eq-v96/crypto-v96`.
+5. Copy the environment template to `/etc/disdex/disdex-v13d-v11eq-v96.env` with mode `0600`.
+6. Install the new systemd unit.
+7. Run combined preflight.
+8. Start the combined service.
 
-All conditions must pass:
+The existing V96 runner lock and the new Stock runner lock prevent duplicate instances.
 
-- data age no more than 1.5 seconds;
-- source clock difference no more than 1.5 seconds;
-- no fallback or reference-only cash source;
-- estimated round-trip cost no more than 60 bps;
-- estimated round-trip cost / Entry Basis no more than 0.75;
-- conservative estimated Net Edge at least 10 bps;
-- cumulative executable depth at least two times order notional;
-- current Aster Spread no more than 20 bps;
-- current Spread no more than two times the trailing 30-second median;
-- adverse two-second move no more than 5 bps;
-- adverse Basis movement no more than 10 bps;
-- candidate remains Top1 at Entry;
-- Stock sleeve unoccupied;
-- no daily-loss lock;
-- no Kill Switch.
+## Paper run
 
-If any condition fails, hold cash. Do not substitute the second-ranked symbol.
+Keep the default environment values:
 
-### Entry execution
+```text
+DISDEX_V13D_V11EQ_V96_RUNNER_MODE=paper
+DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED=false
+DISDEX_V96_LIVE_EXECUTION_ENABLED=false
+```
 
-- post-only Limit only;
-- maximum TTL 10 seconds;
-- never chase the price;
-- no automatic market fallback;
-- cancel remainder after TTL;
-- accepted fill ratio must be at least 90%;
-- if below 90%, cancel and flatten the fill safely;
-- persist every rejection reason and every order-state transition.
+Then run:
 
-### Exit
+```bash
+npm run strategy:disdex-v13d-v11eq-v96:once
+npm run strategy:disdex-v13d-v11eq-v96:daemon
+```
 
-- Basis absolute value at or below 15 bps;
-- or Basis zero-cross;
-- or Basis expansion to 1.5 times Entry Basis;
-- otherwise forced exit at 15:30 New York;
-- no overnight Stock position.
+## LIVE activation
 
-A normal convergence exit may attempt a short Limit close. The expansion stop and final time exit may use Taker execution. Any unresolved remainder is a Kill Switch event.
+Set all existing V96 approval files and acknowledgements, plus:
 
-## Stock conflict resolution
+```text
+DISDEX_V13D_V11EQ_V96_RUNNER_MODE=live
+DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED=true
+DISDEX_V13D_V11EQ_V96_LIVE_ACKNOWLEDGEMENT=I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96
+DISDEX_V96_LIVE_EXECUTION_ENABLED=true
+```
 
-The router must be deterministic:
+The existing V96 acknowledgement, exact runtime commit SHA, execution-parity file, Forward/override evidence and Kill Switch variables remain mandatory. Configure Aster and Hyperliquid account credentials and the external reference endpoint before continuing.
 
-1. completed V13D position;
-2. otherwise V11-EQ Gate pass;
-3. otherwise cash.
+Run the no-order preflight:
 
-Rules:
+```bash
+npm run strategy:disdex-v13d-v11eq-v96:preflight
+```
 
-- only one Stock position total;
-- V11-EQ cannot replace or offset V13D;
-- V13D cannot enter after the 10:00 decision attempt has finished;
-- a rejected V13D candidate does not cause re-ranking from later market data;
-- V11-EQ cannot select another symbol when its frozen Top1 fails the Entry gate;
-- client order IDs must identify strategy, date, symbol, leg and attempt idempotently.
+A pass must end with:
 
-## Crypto V96 integration
+```text
+DISDEX_V13D_V11EQ_V96_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT
+```
 
-Do not rewrite the existing V96 signal engine.
+Then start:
 
-- retain current Core Volume50 / Turnover7.5, Weight Band, Strong Boost, Drawdown and Whipsaw behavior;
-- retain existing PENGU V46 handoff behavior;
-- compute the complete V96 target first;
-- proportionally cap the complete Crypto target to Crypto sleeve Gross 1.0;
-- do not transfer unused Stock capacity to Crypto;
-- do not transfer unused Crypto capacity to Stock;
-- Stock orders never cancel or resize Crypto orders;
-- Crypto orders never cancel or resize Stock orders;
-- total Portfolio Gross must remain at or below 2.0.
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now disdex-v13d-v11eq-v96.service
+journalctl -u disdex-v13d-v11eq-v96.service -f
+```
 
-## Shared risk and recovery
+## Emergency stop
 
-Implement one authoritative Portfolio risk state:
+```bash
+npm run strategy:disdex-v13d-v11eq-v96:kill-switch -- --activate --reason "operator emergency stop"
+```
 
-- maximum daily Portfolio loss 2%;
-- daily accounting boundary UTC;
-- cancel all pending managed orders when locked;
-- flatten managed positions reduce-only when the lock or Kill Switch requires it;
-- never close unmanaged/manual positions;
-- unknown order state, stale data, reconciliation failure or duplicate runner ownership fails closed;
-- process restart must reconcile remote orders and positions before creating orders;
-- all order commands must be idempotent;
-- one active service owner only;
-- persist configuration fingerprint and exact Git commit.
+The Kill Switch is shared with Crypto V96. It remains latched. Do not delete or clear it until Aster and Hyperliquid orders, positions, runner state and audit logs have been reconciled manually.
 
-## Required modules for Codex
+## State and audit evidence
 
-Codex should create or adapt the following separation of responsibilities:
+- Crypto V96 state: `.runtime-state/disdex-v13d-v11eq-v96/crypto-v96`
+- Stock state: `.runtime-state/disdex-v13d-v11eq-v96/stock/stock-runner-{mode}.json`
+- Stock audit: `.runtime-state/disdex-v13d-v11eq-v96/stock/stock-audit-{mode}.jsonl`
+- Shared Kill Switch: `.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json`
 
-- Stock market-data adapters for authenticated cash, Aster and XYZ;
-- V13D signal and dual-venue execution engine;
-- V11-EQ signal and Execution Quality Gate engine;
-- Stock state and reconciliation store;
-- Stock router/scheduler;
-- shared V96/Stock Portfolio Gross allocator;
-- shared daily-loss and Kill Switch coordinator;
-- combined live runner and preflight;
-- Paper and Shadow executors using the same decision path as LIVE;
-- systemd installer/service unit separate from currently running legacy services.
+Unknown order state, incomplete hedge, reconciliation mismatch, stale data, daily loss trip or fatal Stock tick failure all fail closed.
 
-Do not reuse a research candle fill as a Production order fill.
+## Validation commands
 
-## Required tests before LIVE
+```bash
+npm run strategy:disdex-v13d-v11eq-v96:contract
+npm run strategy:disdex-v96:typecheck
+npm run strategy:disdex-v96:selftest
+npm run strategy:disdex-v96:frequency:selftest
+```
 
-### Pure contract tests
-
-- V13D always wins when completed;
-- V11-EQ runs only when V13D did not complete;
-- no substitute Stock symbol after frozen Top1 rejection;
-- every EQ rejection reason tested at its exact boundary;
-- Crypto Gross, Stock Gross and total Gross caps tested;
-- sleeve lending remains disabled;
-- mode disabled blocks every real order.
-
-### Execution tests
-
-- Maker no-fill;
-- Maker partial fill;
-- hedge success;
-- hedge timeout;
-- duplicate WebSocket event;
-- REST/WebSocket order-state disagreement;
-- stale order book;
-- insufficient depth;
-- post-only rejection;
-- V11 89.9% fill flatten path;
-- forced Stock close and unresolved remainder;
-- daily-loss lock during pending order;
-- restart with open V13D hedge;
-- restart with open V11-EQ position;
-- duplicate process ownership;
-- Kill Switch while both Crypto and Stock sleeves are active.
-
-### End-to-end gates
-
-- TypeScript typecheck passes;
-- existing V96 parity and self-tests remain green;
-- new Stock contract self-test passes;
-- combined Paper rehearsal covers at least one V13D attempt and one V11-EQ attempt;
-- zero unknown order events;
-- zero Gross violations;
-- zero unresolved ending Stock inventory;
-- exact-commit preflight artifact saved;
-- credentials, venue account mode and symbol precision verified;
-- operator override created only after all evidence is reviewed.
-
-## Activation sequence
-
-Codex must not jump directly from implementation to LIVE.
-
-1. Implement with `mode=DISABLED`, `liveTradingEnabled=false`, `orderSubmissionAllowed=false`.
-2. Run contract, type, V96 parity, execution and recovery tests.
-3. Run Shadow with real books and no orders.
-4. Run Paper through the same router and state machine.
-5. Reconcile current real positions and confirm `closeUnmanagedPositions=false`.
-6. Produce an exact-commit preflight report.
-7. Obtain explicit operator approval for that commit and runtime configuration.
-8. Enable the dedicated service without stopping unrelated existing services.
-9. Confirm first-cycle state and order ownership.
-
-No code path may silently enable LIVE from environment defaults. LIVE requires both configuration approval and an explicit runtime operator override.
-
-## Current handoff safety state
-
-The committed runtime contract intentionally has:
-
-- `mode=DISABLED`;
-- `liveTradingEnabled=false`;
-- `orderSubmissionAllowed=false`;
-- `paperTradingEnabled=false`;
-- `shadowCollectionEnabled=true`.
-
-This branch is an implementation handoff, not evidence that the combined strategy is already running.
+No private key, API token, approval artifact or environment file containing secrets may be committed to GitHub.
