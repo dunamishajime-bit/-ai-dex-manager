@@ -48,7 +48,7 @@ class Engine(BaseEngine):
         else:
             maker = self.books[(quote["makerVenue"], quote["symbol"])]
             hedge = self.books[(quote["hedgeVenue"], quote["symbol"])]
-            current, _ = self.top(maker, quote["side"])
+            current, _ = self.maker_top(maker, quote["side"])
             if current != quote["makerPrice"]:
                 reason = "MAKER_TOP_MOVED"
             elif abs(hedge["mid"] / quote["referenceMid"] - 1) * 10_000 > CANCEL_MOVE_BPS:
@@ -78,8 +78,8 @@ class Engine(BaseEngine):
         if not hedge or trade["receivedMs"] - hedge["receivedMs"] > FRESH_MS:
             self.reject_unhedged(quote, trade["receivedMs"], "HEDGE_BOOK_STALE")
             return
-        hedge_side = "SELL" if quote["side"] == "BUY" else "BUY"
-        hedge_price, hedge_usd = self.top(hedge, hedge_side)
+        hedge_action = "SELL" if quote["side"] == "BUY" else "BUY"
+        hedge_price, hedge_usd = self.taker_top(hedge, hedge_action)
         required_hedge_usd = quote["quantity"] * hedge_price
         if hedge_usd < required_hedge_usd:
             self.reject_unhedged(quote, trade["receivedMs"], "HEDGE_TOP_DEPTH")
@@ -137,10 +137,10 @@ class Engine(BaseEngine):
             self.record({"recordType": "virtual_quote_cancel", "canceledMs": received_ms, **quote})
         maker = self.books[(inv["makerVenue"], symbol)]
         hedge = self.books[(inv["hedgeVenue"], symbol)]
-        close_side = "SELL" if inv["openSide"] == "BUY" else "BUY"
-        hedge_side = "BUY" if inv["openSide"] == "BUY" else "SELL"
-        maker_price, maker_usd = self.top(maker, "BUY" if close_side == "SELL" else "SELL")
-        hedge_price, hedge_usd = self.top(hedge, hedge_side)
+        maker_action = "SELL" if inv["openSide"] == "BUY" else "BUY"
+        hedge_action = "BUY" if inv["openSide"] == "BUY" else "SELL"
+        maker_price, maker_usd = self.taker_top(maker, maker_action)
+        hedge_price, hedge_usd = self.taker_top(hedge, hedge_action)
         required_maker = inv["quantity"] * maker_price
         required_hedge = inv["quantity"] * hedge_price
         if maker_usd < required_maker or hedge_usd < required_hedge:
