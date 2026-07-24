@@ -6,6 +6,7 @@ on:
       - "research/v96_stock_cross_venue_orderflow_v13.py"
       - "research/v96_stock_cross_venue_orderflow_v13_engine.py"
       - "docs/research/V96_STOCK_CROSS_VENUE_ORDERFLOW_V13_PROTOCOL_2026-07-24.md"
+      - "docs/research/V96_STOCK_CROSS_VENUE_ORDERFLOW_V13_PROBE_2026-07-24.md"
       - ".github/workflows/v96-stock-cross-venue-orderflow-v13.yml"
   workflow_dispatch:
     inputs:
