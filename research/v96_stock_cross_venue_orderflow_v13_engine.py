@@ -9,9 +9,17 @@ from v96_stock_cross_venue_orderflow_v13_engine_base import (
     Writer, XYZ, XYZ_WS, finite, iso, now_ms, percentile, request_json,
 )
 
+HEDGE_DELAY_MS = 250
+
 
 class Engine(BaseEngine):
+    def __init__(self, writer: Writer):
+        super().__init__(writer)
+        self.pending_hedges: dict[str, dict] = {}
+
     def refresh(self, symbol: str, received_ms: int) -> None:
+        if symbol in self.pending_hedges:
+            return
         quote = self.quotes.get(symbol)
         if quote and quote["status"] == "OPEN":
             self.cancel_if_needed(quote, received_ms)
@@ -71,24 +79,51 @@ class Engine(BaseEngine):
         consumed = min(quote["queueAheadUsd"], usd)
         quote["queueAheadUsd"] -= consumed
         usd -= consumed
-        quote["filledUsd"] += min(max(0.0, quote["targetFillUsd"] - quote["filledUsd"]), max(0.0, usd))
+        incremental_fill = min(max(0.0, quote["targetFillUsd"] - quote["filledUsd"]), max(0.0, usd))
+        if incremental_fill <= 0:
+            return
+        quote["filledUsd"] += incremental_fill
         if quote["filledUsd"] + 1e-9 < quote["targetFillUsd"]:
+            quote["status"] = "PARTIAL_FILL_SAFETY_FAILED"
+            quote["cancelReason"] = "PARTIAL_FILL_REQUIRES_SEPARATE_HEDGER"
+            self.stats["partial_fill_failures"] += 1
+            self.stats["unhedged"] += 1
+            self.record({"recordType": "virtual_partial_fill_safety_failure",
+                         "failedMs": trade["receivedMs"], **quote})
             return
-        hedge = self.books.get((quote["hedgeVenue"], quote["symbol"]))
-        if not hedge or trade["receivedMs"] - hedge["receivedMs"] > FRESH_MS:
-            self.reject_unhedged(quote, trade["receivedMs"], "HEDGE_BOOK_STALE")
-            return
-        hedge_action = "SELL" if quote["side"] == "BUY" else "BUY"
-        hedge_price, hedge_usd = self.taker_top(hedge, hedge_action)
-        required_hedge_usd = quote["quantity"] * hedge_price
-        if hedge_usd < required_hedge_usd:
-            self.reject_unhedged(quote, trade["receivedMs"], "HEDGE_TOP_DEPTH")
-            return
-        quote["status"] = "FILLED_AND_HEDGED"
-        if quote["purpose"] == "OPEN":
-            self.open_inventory(quote, hedge_price, trade["receivedMs"])
-        else:
-            self.complete_cycle(quote, hedge_price, trade["receivedMs"], "MAKER_CYCLE")
+        quote["status"] = "PENDING_HEDGE"
+        self.pending_hedges[quote["symbol"]] = {"quote": quote,
+                                                 "fillReceivedMs": trade["receivedMs"],
+                                                 "dueMs": trade["receivedMs"] + HEDGE_DELAY_MS}
+        self.stats["pending_hedges_created"] += 1
+        self.record({"recordType": "virtual_maker_fill_pending_hedge",
+                     "fillReceivedMs": trade["receivedMs"], "hedgeDueMs": trade["receivedMs"] + HEDGE_DELAY_MS,
+                     **quote})
+
+    def process_pending_hedges(self, received_ms: int, force: bool = False) -> None:
+        for symbol, pending in list(self.pending_hedges.items()):
+            if not force and received_ms < pending["dueMs"]:
+                continue
+            quote = pending["quote"]
+            hedge = self.books.get((quote["hedgeVenue"], symbol))
+            if not hedge or received_ms - hedge["receivedMs"] > FRESH_MS:
+                self.reject_unhedged(quote, received_ms, "DELAYED_HEDGE_BOOK_STALE")
+                del self.pending_hedges[symbol]
+                continue
+            hedge_action = "SELL" if quote["side"] == "BUY" else "BUY"
+            hedge_price, hedge_usd = self.taker_top(hedge, hedge_action)
+            required_hedge_usd = quote["quantity"] * hedge_price
+            if hedge_usd < required_hedge_usd:
+                self.reject_unhedged(quote, received_ms, "DELAYED_HEDGE_TOP_DEPTH")
+                del self.pending_hedges[symbol]
+                continue
+            quote["status"] = "FILLED_AND_HEDGED"
+            quote["hedgeLatencyMs"] = max(0, received_ms - pending["fillReceivedMs"])
+            if quote["purpose"] == "OPEN":
+                self.open_inventory(quote, hedge_price, received_ms)
+            else:
+                self.complete_cycle(quote, hedge_price, received_ms, "MAKER_CYCLE")
+            del self.pending_hedges[symbol]
 
     def reject_unhedged(self, quote: dict, received_ms: int, reason: str) -> None:
         quote["status"], quote["cancelReason"] = "UNHEDGED_REJECTED", reason
@@ -104,7 +139,8 @@ class Engine(BaseEngine):
         self.inventory[quote["symbol"]] = inv
         self.stats["entry_fills"] += 1
         self.record({"recordType": "virtual_inventory_open", "openedAt": iso(received_ms), **inv,
-                     "entryDislocationBps": quote["grossEdgeBps"]})
+                     "entryDislocationBps": quote["grossEdgeBps"],
+                     "hedgeLatencyMs": quote.get("hedgeLatencyMs")})
 
     def complete_cycle(self, quote: dict, hedge_price: float, received_ms: int,
                        profile: str, close_reason: Optional[str] = None) -> None:
@@ -119,7 +155,8 @@ class Engine(BaseEngine):
                  "hedgeOpenPrice": inv["hedgeOpenPrice"], "makerClosePrice": quote["makerPrice"],
                  "hedgeClosePrice": hedge_price, "quantity": inv["quantity"], "grossBps": gross,
                  "openedMs": inv["openedMs"], "closedMs": received_ms,
-                 "holdingMs": received_ms - inv["openedMs"], "closeReason": close_reason or profile}
+                 "holdingMs": received_ms - inv["openedMs"], "closeReason": close_reason or profile,
+                 "closeHedgeLatencyMs": quote.get("hedgeLatencyMs")}
         self.cycles.append(cycle)
         self.stats["cycles"] += 1
         del self.inventory[quote["symbol"]]
@@ -163,6 +200,7 @@ class Engine(BaseEngine):
         return True
 
     def tick(self, received_ms: int) -> None:
+        self.process_pending_hedges(received_ms)
         for symbol in SYMBOLS:
             quote = self.quotes.get(symbol)
             if quote and quote["status"] == "OPEN":
@@ -173,6 +211,7 @@ class Engine(BaseEngine):
             self.refresh(symbol, received_ms)
 
     def close_for_result(self, received_ms: int) -> None:
+        self.process_pending_hedges(received_ms, force=True)
         for symbol in list(self.inventory):
             self.force_close(symbol, received_ms, "PROBE_END")
         for quote in self.quotes.values():
@@ -207,7 +246,7 @@ class Engine(BaseEngine):
                                "maxPositiveProfitContributionShare": max_share}
         if len(complete) != len(SYMBOLS):
             status = "V13_ENDPOINT_OR_SYMBOL_COVERAGE_FAILED"
-        elif self.stats["unhedged"] > 0 or self.inventory:
+        elif self.stats["unhedged"] > 0 or self.inventory or self.pending_hedges:
             status = "V13_EXECUTION_SAFETY_FAILED"
         elif len(self.cycles) >= 30:
             normal, p95, severe = scenarios["NORMAL"], scenarios["P95"], scenarios["SEVERE"]
@@ -232,14 +271,17 @@ class Engine(BaseEngine):
                                      "entryFills": self.stats["entry_fills"],
                                      "completedCycles": self.stats["cycles"],
                                      "forcedCycles": self.stats["forced_cycles"],
+                                     "pendingHedges": len(self.pending_hedges),
                                      "openInventories": len(self.inventory),
+                                     "partialFillFailures": self.stats["partial_fill_failures"],
                                      "unhedgedRejected": self.stats["unhedged"],
                                      "unresolvedInventory": len(self.inventory),
                                      "unresolvedCloseAttempts": self.stats["unresolved_close_attempts"],
                                      "cancellations": {k.removeprefix("cancel_"): v for k, v in self.stats.items()
                                                        if k.startswith("cancel_")}},
                 "costScenarios": scenarios,
-                "diagnostics": {"latencyP50Ms": percentile(self.latencies, 0.5),
+                "diagnostics": {"hedgeDelayMs": HEDGE_DELAY_MS,
+                                "latencyP50Ms": percentile(self.latencies, 0.5),
                                 "latencyP95Ms": percentile(self.latencies, 0.95),
                                 "projectedNetEdgeP50Bps": percentile(self.edges, 0.5),
                                 "projectedNetEdgeP95Bps": percentile(self.edges, 0.95)},
@@ -248,6 +290,7 @@ class Engine(BaseEngine):
                                   "minimumPositiveNetRate": 0.55,
                                   "normalP95SevereAverageNetMustBePositive": True,
                                   "maximumSingleSymbolPnlShare": 0.40,
+                                  "maximumPartialFillFailures": 0,
                                   "maximumUnhedgedRejected": 0,
                                   "maximumUnresolvedInventory": 0,
                                   "retuningOnCollectedForwardWindow": False}}
