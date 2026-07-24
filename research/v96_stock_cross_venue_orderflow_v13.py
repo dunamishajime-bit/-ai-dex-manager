@@ -209,17 +209,22 @@ def self_test() -> None:
     engine.trade("ASTER", "AMZN", test_ms + 1, test_ms + 1, 99, 0.5, "SELL")
     assert opening["status"] == "OPEN" and opening["filledUsd"] == 0
     engine.trade("ASTER", "AMZN", test_ms + 2, test_ms + 2, 99, 3.0, "SELL")
+    assert opening["status"] == "PENDING_HEDGE" and engine.stats["entry_fills"] == 0
+    engine.tick(test_ms + 252)
     assert opening["status"] == "FILLED_AND_HEDGED"
     assert engine.stats["entry_fills"] == 1 and engine.stats["cycles"] == 0
-    engine.book("ASTER", "AMZN", test_ms + 3, test_ms + 3, 101, 2, 102, 1)
-    engine.book("XYZ", "AMZN", test_ms + 3, test_ms + 3, 99, 2, 100, 2)
+    engine.book("ASTER", "AMZN", test_ms + 253, test_ms + 253, 101, 2, 102, 1)
+    engine.book("XYZ", "AMZN", test_ms + 253, test_ms + 253, 99, 2, 100, 2)
     closing = engine.quotes["AMZN"]
     assert closing["purpose"] == "CLOSE" and closing["status"] == "OPEN"
     assert closing["hedgePrice"] == 100  # Taker BUY uses the hedge ask.
-    engine.trade("ASTER", "AMZN", test_ms + 4, test_ms + 4, 102, 3.0, "BUY")
+    engine.trade("ASTER", "AMZN", test_ms + 254, test_ms + 254, 102, 3.0, "BUY")
+    assert closing["status"] == "PENDING_HEDGE" and engine.stats["cycles"] == 0
+    engine.tick(test_ms + 504)
     assert closing["status"] == "FILLED_AND_HEDGED" and engine.stats["cycles"] == 1
     result = engine.result()
     assert result["virtualExecution"]["completedCycles"] == 1
+    assert result["virtualExecution"]["partialFillFailures"] == 0
     assert result["virtualExecution"]["unhedgedRejected"] == 0
     assert result["costScenarios"]["NORMAL"]["averageNetBps"] > 0
     writer.close()
