@@ -10,8 +10,10 @@ on:
       - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
       - 'scripts/disdex-v13d-v11eq-v96-kill-switch.ts'
       - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
+      - 'scripts/disdex_stock_reference_alpaca_proxy.py'
       - 'requirements-stock-live.txt'
       - 'ops/systemd/disdex-v13d-v11eq-v96.service'
+      - 'ops/systemd/disdex-stock-reference-alpaca.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
       - 'docs/implementation/V13D_V11EQ_CRYPTO_V96_CODEX_LIVE_HANDOFF.md'
       - 'tsconfig.v13d-v11eq-router.json'
@@ -46,7 +48,8 @@ jobs:
       - name: Validate combined LIVE contract and engines
         run: |
           npm run strategy:disdex-v13d-v11eq-v96:contract
-          python -c "import hyperliquid, eth_account; print('Stock LIVE dependencies: PASS')"
+          python scripts/disdex_stock_reference_alpaca_proxy.py --self-test
+          python -c "import hyperliquid, eth_account, websocket; print('Stock LIVE dependencies: PASS')"
       - name: Protect existing Crypto V96 behavior
         run: |
           npm run strategy:disdex-v96:typecheck
@@ -59,6 +62,8 @@ jobs:
           const config = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
           const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
           const stock = fs.readFileSync('scripts/disdex_v13d_v11eq_stock_live_engine.py', 'utf8');
+          const reference = fs.readFileSync('scripts/disdex_stock_reference_alpaca_proxy.py', 'utf8');
+          const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
           if (!config.includes('mode: "LIVE_READY"')) throw new Error('combined runtime must be LIVE_READY');
           if (!config.includes('liveTradingEnabled: true')) throw new Error('LIVE implementation flag missing');
           if (!config.includes('orderSubmissionAllowed: true')) throw new Error('order implementation flag missing');
@@ -68,4 +73,7 @@ jobs:
           if (!supervisor.includes('DISDEX_V96_MAX_GROSS')) throw new Error('Crypto Gross cap handoff missing');
           if (!stock.includes('POST_ONLY') && !stock.includes('post_only')) throw new Error('Aster post-only implementation missing');
           if (!stock.includes('perp_dexs=["xyz"]')) throw new Error('Hyperliquid xyz execution implementation missing');
+          if (!reference.includes('wss://stream.data.alpaca.markets/v2/')) throw new Error('Alpaca websocket reference missing');
+          if (!reference.includes('DISDEX_STOCK_REFERENCE_PROXY_MAX_AGE_MS')) throw new Error('reference freshness gate missing');
+          if (!env.includes('DISDEX_STOCK_REFERENCE_URL_TEMPLATE=http://127.0.0.1:8797/quote?symbol={symbol}')) throw new Error('local reference URL missing');
           NODE
