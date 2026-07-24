@@ -1,0 +1,97 @@
+name: V96 Stock V13 Edge-Floor Tournament
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_stock_cross_venue_maker_v13_historical_proxy.py"
+      - "research/v96_stock_cross_venue_maker_v13_hold_duration.py"
+      - "research/v96_stock_v13_profit_pursuit_tournament.py"
+      - "research/v96_stock_v13_edge_floor_tournament.py"
+      - "docs/research/V96_STOCK_V13_EDGE_FLOOR_PROTOCOL_2026-07-24.md"
+      - "docs/research/V96_STOCK_V13_EDGE_FLOOR_RESULT_2026-07-24.md"
+      - ".github/workflows/v96-stock-v13-edge-floor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-stock-v13-edge-floor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax and deterministic self-test
+        run: |
+          python -m py_compile \
+            research/v96_stock_cross_venue_maker_v13_historical_proxy.py \
+            research/v96_stock_cross_venue_maker_v13_hold_duration.py \
+            research/v96_stock_v13_profit_pursuit_tournament.py \
+            research/v96_stock_v13_edge_floor_tournament.py
+          python research/v96_stock_v13_edge_floor_tournament.py --self-test
+      - name: Run fixed edge-floor tournament
+        run: |
+          python research/v96_stock_v13_edge_floor_tournament.py \
+            --cache-dir .cache/v13-edge-floor \
+            --output-dir .research-state/v13-edge-floor
+      - name: Validate no-lookahead, selected arms and safety
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path('.research-state/v13-edge-floor/result.json').read_text())
+          assert result['status'].startswith('V13G_'), result
+          assert result['selectedGrowth']['candidateId'] == 'EDGE20__NONE', result['selectedGrowth']['candidateId']
+          assert result['selectedDiversified']['candidateId'] == 'EDGE20__NO_PREVIOUS_SYMBOL', result['selectedDiversified']['candidateId']
+          assert result['rules']['quoteTimeNy'] == '10:00 only'
+          assert result['rules']['onePositionTotal'] is True
+          assert result['rules']['lookaheadSelection'] is False
+          assert result['selectionDiscipline']['independentHoldoutClaim'] is False
+          assert result['selectionDiscipline']['nearbyEdgeFloorSearchAfterThisRun'] is False
+          assert result['safety']['orderSubmissionAllowed'] is False
+          assert result['safety']['productionChanged'] is False
+          assert result['safety']['liveChanged'] is False
+          assert result['safety']['vpsChanged'] is False
+          assert result['safety']['cryptoV96Changed'] is False
+          assert result['safety']['v11Changed'] is False
+          assert result['safety']['forwardCollectorChanged'] is False
+          print(json.dumps({
+              'status': result['status'],
+              'growth': {
+                  'candidateId': result['selectedGrowth']['candidateId'],
+                  'full': result['selectedGrowth']['forcedTakerCosts']['full'],
+                  'development': result['selectedGrowth']['forcedTakerCosts']['periods']['DEVELOPMENT'],
+                  'validation': result['selectedGrowth']['forcedTakerCosts']['periods']['VALIDATION'],
+                  'holdout': result['selectedGrowth']['forcedTakerCosts']['periods']['HOLDOUT'],
+                  'concentration': result['selectedGrowth']['concentrationNormal'],
+                  'portfolio': result['selectedGrowth']['portfolioNormal'],
+                  'removal': result['selectedGrowth']['removalNormal'],
+              },
+              'diversified': {
+                  'candidateId': result['selectedDiversified']['candidateId'],
+                  'full': result['selectedDiversified']['forcedTakerCosts']['full'],
+                  'development': result['selectedDiversified']['forcedTakerCosts']['periods']['DEVELOPMENT'],
+                  'validation': result['selectedDiversified']['forcedTakerCosts']['periods']['VALIDATION'],
+                  'holdout': result['selectedDiversified']['forcedTakerCosts']['periods']['HOLDOUT'],
+                  'concentration': result['selectedDiversified']['concentrationNormal'],
+                  'portfolio': result['selectedDiversified']['portfolioNormal'],
+              },
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-stock-v13-edge-floor-${{ github.run_id }}
+          path: |
+            .research-state/v13-edge-floor
+            .cache/v13-edge-floor
+          retention-days: 90
+          if-no-files-found: warn
