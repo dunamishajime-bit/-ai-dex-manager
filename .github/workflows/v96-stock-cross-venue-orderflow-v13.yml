@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: v96-stock-cross-venue-orderflow-v13-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   validate-and-probe:
