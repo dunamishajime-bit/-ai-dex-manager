@@ -1,0 +1,82 @@
+name: V96 Stock V13 Profit Pursuit Tournament
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_stock_v13_profit_pursuit_tournament.py"
+      - "research/v96_stock_cross_venue_maker_v13_hold_duration.py"
+      - "docs/research/V96_STOCK_V13_PROFIT_PURSUIT_PROTOCOL_2026-07-24.md"
+      - "docs/research/V96_STOCK_V13_PROFIT_PURSUIT_RESULT_2026-07-24.md"
+      - ".github/workflows/v96-stock-v13-profit-pursuit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-stock-v13-profit-pursuit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax and deterministic self-test
+        run: |
+          python -m py_compile \
+            research/v96_stock_cross_venue_maker_v13_historical_proxy.py \
+            research/v96_stock_cross_venue_maker_v13_hold_duration.py \
+            research/v96_stock_v13_profit_pursuit_tournament.py
+          python research/v96_stock_v13_profit_pursuit_tournament.py --self-test
+      - name: Run V13 profit-pursuit tournament
+        run: |
+          python research/v96_stock_v13_profit_pursuit_tournament.py \
+            --cache-dir .cache/v13-profit-pursuit \
+            --output-dir .research-state/v13-profit-pursuit
+      - name: Validate chronology, no-lookahead and safety
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path('.research-state/v13-profit-pursuit/result.json').read_text())
+          assert result['status'].startswith('V13G_'), result
+          assert result['rules']['onePositionTotal'] is True
+          assert result['rules']['lookaheadSelection'] is False
+          assert result['rules']['entryCutoffNy'] == '10:30'
+          assert result['rules']['targetExitNy'] == '15:00'
+          assert result['selectionDiscipline']['independentHoldoutClaim'] is False
+          assert result['safety']['orderSubmissionAllowed'] is False
+          assert result['safety']['productionChanged'] is False
+          assert result['safety']['liveChanged'] is False
+          assert result['safety']['vpsChanged'] is False
+          assert result['safety']['cryptoV96Changed'] is False
+          assert result['safety']['v11Changed'] is False
+          assert result['safety']['forwardCollectorChanged'] is False
+          assert result['universe'] == ['AMZN', 'META', 'MSFT', 'NVDA', 'TSLA']
+          selected = result['selected']
+          print(json.dumps({
+              'status': result['status'],
+              'entryMode': selected['entryMode'],
+              'exitMode': selected['exitMode'],
+              'forcedFull': selected['forcedTakerCosts']['full'],
+              'forcedHoldout': selected['forcedTakerCosts']['periods']['HOLDOUT'],
+              'twoMakerFull': selected['twoMakerSensitivity']['full'],
+              'concentration': selected['concentrationNormal'],
+              'portfolio': selected['portfolioNormal'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-stock-v13-profit-pursuit-${{ github.run_id }}
+          path: |
+            .research-state/v13-profit-pursuit
+            .cache/v13-profit-pursuit
+          retention-days: 90
+          if-no-files-found: warn
