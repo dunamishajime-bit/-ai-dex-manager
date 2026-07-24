@@ -102,7 +102,11 @@ class Engine(BaseEngine):
 
     def process_pending_hedges(self, received_ms: int, force: bool = False) -> None:
         for symbol, pending in list(self.pending_hedges.items()):
-            if not force and received_ms < pending["dueMs"]:
+            if received_ms < pending["dueMs"]:
+                if not force:
+                    continue
+                self.reject_unhedged(pending["quote"], received_ms, "PROBE_END_BEFORE_HEDGE_DELAY")
+                del self.pending_hedges[symbol]
                 continue
             quote = pending["quote"]
             hedge = self.books.get((quote["hedgeVenue"], symbol))
