@@ -7,8 +7,8 @@
     "modes": {
       "full": 1
     },
-    "eventObservations": 88,
-    "uniqueEvents": 88,
+    "eventObservations": 93,
+    "uniqueEvents": 93,
     "parseErrors": []
   },
   "sources": {
@@ -48,43 +48,39 @@
   "events": {
     "bySource": {
       "NASDAQ_SEC_FILINGS_FALLBACK": 5,
-      "GOOGLE_NEWS_RSS": 62,
-      "NASDAQ_EARNINGS_CALENDAR": 8,
-      "NASDAQ_TRADER_HALT_RSS": 1,
+      "GOOGLE_NEWS_RSS": 70,
+      "NASDAQ_EARNINGS_CALENDAR": 6,
       "FEDERAL_RESERVE_FOMC_CALENDAR": 2,
       "BEA_OFFICIAL_RELEASE_SCHEDULE": 3,
       "BLS_OFFICIAL_SCHEDULE_FROZEN": 7
     },
     "byType": {
       "SEC_MATERIAL_FILING": 3,
-      "COMPANY_NEWS_HEADLINE": 62,
-      "EARNINGS_SCHEDULED": 8,
+      "COMPANY_NEWS_HEADLINE": 70,
       "SEC_PERIODIC_OR_EARNINGS_FILING": 2,
-      "TRADING_HALT_OR_RESUMPTION": 1,
+      "EARNINGS_SCHEDULED": 6,
       "FOMC_MEETING_DECISION_WINDOW": 2,
       "MACRO_RELEASE_SCHEDULED": 10
     },
     "bySymbol": {
       "GOOGLUSDT": 6,
-      "TSLAUSDT": 7,
-      "INTCUSDT": 46,
+      "TSLAUSDT": 6,
+      "INTCUSDT": 50,
       "SNDKUSDT": 2,
-      "MUUSDT": 3,
       "DRAMUSDT": 1,
       "AMDUSDT": 1,
+      "MUUSDT": 5,
       "NVDAUSDT": 2,
-      "MSFTUSDT": 2,
-      "ASMLUSDT": 1,
+      "ASMLUSDT": 2,
       "ORCLUSDT": 1,
       "ARMUSDT": 1,
       "METAUSDT": 1,
+      "MSFTUSDT": 1,
       "QCOMUSDT": 1,
       "AMZNUSDT": 1
     },
     "riskHints": {
-      "EARNINGS": 71,
-      "TRADING_STATUS": 1,
-      "LEGAL_REGULATORY": 1,
+      "EARNINGS": 78,
       "MACRO_EVENT": 12
     },
     "missingPublishedOrEffectiveTime": [],
@@ -97,23 +93,8 @@
         "headline": "Micron stock gains 3%: how is the company benefiting from Alphabet and Tesla earnings - Invezz",
         "publishedAt": "2026-07-23T14:44:57Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "024359045315b8752880a8b8",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "INTCUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Semiconductor ETFs Surge Ahead of Intel Earnings - ETF Database",
-        "publishedAt": "2026-07-23T19:41:15Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -127,8 +108,8 @@
         "headline": "Consumer Price Index for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-12T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -142,8 +123,8 @@
         "headline": "Intel Q2 2026 Earnings Preview: What to Watch as AI Demand Tests 18A - EBC Financial Group",
         "publishedAt": "2026-07-23T10:39:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -157,8 +138,8 @@
         "headline": "Intel to report Q2 earnings as chip stocks bounce off recent losses - Yahoo Finance",
         "publishedAt": "2026-07-23T10:24:34Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -172,8 +153,8 @@
         "headline": "Here’s How Much Traders See Intel Stock Moving After Earnings - Investopedia",
         "publishedAt": "2026-07-23T13:14:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -187,8 +168,8 @@
         "headline": "Intel earnings loom as investors watch jobs data and corporate results - Yahoo Finance UK",
         "publishedAt": "2026-07-22T22:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -202,8 +183,23 @@
         "headline": "Why Elon Musk Thanked Micron on Tesla's Earnings Call - Tesla (NASDAQ:TSLA), Micron Technology (NASDAQ:MU - Benzinga",
         "publishedAt": "2026-07-23T13:35:03Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "23d97040e899d1b3bfa7798d",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "MUUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Micron stock gains 3%: how is the company benefiting from Alphabet and Tesla earnings - Invezz",
+        "publishedAt": "2026-07-23T15:10:31Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -217,8 +213,8 @@
         "headline": "Intel (INTC) Q2 2026 Earnings: What the Results Mean for the Stock - TradingKey",
         "publishedAt": "2026-07-23T13:27:50Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -232,10 +228,25 @@
         "headline": "GOOGL filed 8-K",
         "publishedAt": "2026-07-22T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": []
+      },
+      {
+        "eventId": "2ad451f79808ee1d0f70ea17",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "DRAMUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Ai boom drives server dram spot price far above contracts, lifting Korea chip outlook - CHOSUNBIZ - Chosunbiz",
+        "publishedAt": "2026-07-23T07:56:00Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
       },
       {
         "eventId": "2b2a9d9767cf77f78c978225",
@@ -245,8 +256,8 @@
         "headline": "Intel (INTC) Beats Q2 Earnings and Revenue Estimates - Yahoo Finance",
         "publishedAt": "2026-07-23T21:25:04Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -260,8 +271,8 @@
         "headline": "Intel Earnings Might Prove the AI Boom Is Still Going Strong — Or About to Stall - Yahoo Finance",
         "publishedAt": "2026-07-22T16:53:03Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -275,8 +286,8 @@
         "headline": "U.S. International Trade in Goods and Services, June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-04T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -290,8 +301,8 @@
         "headline": "Nasdaq, S&P 500 Futures Fall As Tesla, Alphabet Earnings Revive AI Spending Fears: Why TSLA, GOOGL, SPCX, NOW, INTC, AMD, SLS Are In Focus - Stocktwits",
         "publishedAt": "2026-07-23T08:41:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -305,8 +316,8 @@
         "headline": "Why Nvidia (NVDA) Stock Faces Sell-the-News Risk Following Its Q2 Earnings Report - Barchart.com",
         "publishedAt": "2026-07-23T13:47:29Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -320,8 +331,8 @@
         "headline": "What investors should look for in Intel's earnings results - CNBC",
         "publishedAt": "2026-07-23T16:01:11Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -335,8 +346,8 @@
         "headline": "Here's What Key Metrics Tell Us About Intel (INTC) Q2 Earnings - Yahoo Finance",
         "publishedAt": "2026-07-23T21:30:01Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -350,8 +361,8 @@
         "headline": "Is Intel (INTC) a 'Buy' Ahead of Its Upcoming Earnings Announcement? - Zacks Investment Research",
         "publishedAt": "2026-07-23T14:34:52Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -365,8 +376,8 @@
         "headline": "Intel Stock: Inside the Earnings Beat That Is Spiking Shares Higher - Barron's",
         "publishedAt": "2026-07-23T21:26:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -380,23 +391,53 @@
         "headline": "ASML, IBD Stock Of The Day, Rebounds From Post-Earnings Swoon - Investor's Business Daily",
         "publishedAt": "2026-07-23T17:44:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
         ]
       },
       {
-        "eventId": "4522386587772c112e575f87",
-        "source": "NASDAQ_EARNINGS_CALENDAR",
-        "symbol": "TSLAUSDT",
-        "eventType": "EARNINGS_SCHEDULED",
-        "headline": "TSLA scheduled earnings on 2026-07-22 time-not-supplied",
-        "publishedAt": null,
-        "effectiveAt": "2026-07-22T16:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "eventId": "41797953de37c8b4f1564455",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Needs More Than Blowout Earnings as Chips Rally Falters - Yahoo Finance",
+        "publishedAt": "2026-07-23T08:35:56Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "424e1a0a6ff93759b0f06157",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Semiconductor ETFs Surge Ahead of Intel Earnings - ETF Database",
+        "publishedAt": "2026-07-23T19:50:18Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "43428b60b6c1541ad3eec51f",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Earnings: AI Driven Demand Leads to Decade High Sales Growth - Yahoo Finance Singapore",
+        "publishedAt": "2026-07-23T23:09:00Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -410,11 +451,26 @@
         "headline": "FOMC meeting 2026-09-15 through 2026-09-16",
         "publishedAt": null,
         "effectiveAt": "2026-09-16T18:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
+        ]
+      },
+      {
+        "eventId": "4d0e8311e116847bde482827",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "MUUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Micron Has Strong Q3 Earnings and Rising Guidance. Is It a Buy? - AOL.com",
+        "publishedAt": "2026-07-24T01:04:43Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
         ]
       },
       {
@@ -425,8 +481,8 @@
         "headline": "Why Elon Musk Thanked Micron on Tesla's Earnings Call - Tesla (NASDAQ:TSLA), Micron Technology (NASDAQ:MU - Benzinga",
         "publishedAt": "2026-07-23T13:35:03Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -440,8 +496,8 @@
         "headline": "TSLA filed 10-Q",
         "publishedAt": "2026-07-23T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -455,8 +511,8 @@
         "headline": "Personal Income and Outlays, June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -470,8 +526,8 @@
         "headline": "Intel Posts Strongest Revenue Growth in 15 Years on 'Unprecedented' AI Demand - Benzinga",
         "publishedAt": "2026-07-23T20:21:15Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -485,23 +541,8 @@
         "headline": "What You Need To Know Ahead of Sandisk's Earnings Release - Barchart.com",
         "publishedAt": "2026-07-23T14:12:34Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "61390899d2e14c537e62bef0",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "INTCUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Intel earnings setup: Options market prices in double-digit move (INTC:NASDAQ) - Seeking Alpha",
-        "publishedAt": "2026-07-22T15:55:10Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -515,8 +556,8 @@
         "headline": "MSFT scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -530,8 +571,8 @@
         "headline": "Intel earnings will pit red-hot AI demand against a sluggish PC market - MarketWatch",
         "publishedAt": "2026-07-22T17:46:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -545,8 +586,8 @@
         "headline": "Employment Cost Index for Second Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-31T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -560,23 +601,8 @@
         "headline": "Why Nvidia Stock Isn’t Rallying as It Should After Alphabet Earnings - Barron's",
         "publishedAt": "2026-07-23T20:39:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "69cad474a745edcc0fd778cb",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "INTCUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "A Massive Buying Signal Just Flashed for Intel Stock Investors Before the July 23 Earnings Report - Yahoo Finance",
-        "publishedAt": "2026-07-22T13:36:00Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -590,8 +616,8 @@
         "headline": "Intel Earnings Arrive as Chip Stocks Continue to Wobble -- Barrons.com - Moomoo",
         "publishedAt": "2026-07-23T19:09:16Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -605,8 +631,8 @@
         "headline": "Earnings Flash (INTC) Intel Posts Q2 Revenue $16.1B, vs. FactSet Est of $14.44B - marketscreener.com",
         "publishedAt": "2026-07-23T20:02:30Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -620,23 +646,8 @@
         "headline": "GOOGL filed 10-Q",
         "publishedAt": "2026-07-23T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "6c4e249abf752fb88be8bd7c",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "INTCUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Intel (INTC) Q2 Earnings: What To Expect - Yahoo Finance",
-        "publishedAt": "2026-07-22T12:38:27Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -650,8 +661,8 @@
         "headline": "Intel Stock Nearly Tripled in 2026 — Q2 Earnings Could Be a Reality Check - Benzinga",
         "publishedAt": "2026-07-23T18:22:34Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -665,8 +676,8 @@
         "headline": "[Morning News] Intel earnings beat AI demand forecasts; Oracle signs major contract with Department of Defense; USD/JPY approaches 164; US announces new tariffs - Moomoo",
         "publishedAt": "2026-07-23T22:38:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -680,8 +691,8 @@
         "headline": "Intel Earnings Prediction Market Preview: What Will Lip-Bu Tan Say? - Benzinga",
         "publishedAt": "2026-07-23T15:55:52Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -695,8 +706,8 @@
         "headline": "ARM scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -710,8 +721,8 @@
         "headline": "Micron stock gains 3%: how is the company benefiting from Alphabet and Tesla earnings - Invezz",
         "publishedAt": "2026-07-23T14:44:57Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -725,8 +736,8 @@
         "headline": "Intel Stock Jumps On Chipmaker's Big Q2 Earnings Beat - Investor's Business Daily",
         "publishedAt": "2026-07-23T21:27:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -740,23 +751,38 @@
         "headline": "Productivity and Costs (P) for Second Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-06T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
         ]
       },
       {
-        "eventId": "8a9ad39d6b15d58ff2d8e193",
+        "eventId": "8aeecd3e6cb03f80c6513e11",
         "source": "GOOGLE_NEWS_RSS",
         "symbol": "INTCUSDT",
         "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Intel Earnings Face Sky-High Expectations - TradingView",
-        "publishedAt": "2026-07-22T21:03:49Z",
+        "headline": "Intel Earnings Test AI-Fueled Rally - Yahoo! Finance Canada",
+        "publishedAt": "2026-07-22T18:05:11Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "8c00ea61fe299faa1a17167b",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "AI Hype Delivers Intel Its Fastest Revenue Growth in 15 Years - Gizmodo",
+        "publishedAt": "2026-07-24T00:35:18Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -770,38 +796,8 @@
         "headline": "Earnings call transcript: Intel tops Q2 2026 estimates as shares rebound after hours - Investing.com",
         "publishedAt": "2026-07-23T22:16:55Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "8ec591b982534bc4f0812c3e",
-        "source": "NASDAQ_TRADER_HALT_RSS",
-        "symbol": "TSLAUSDT",
-        "eventType": "TRADING_HALT_OR_RESUMPTION",
-        "headline": "TEST",
-        "publishedAt": "2026-07-23T04:00:00Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "TRADING_STATUS"
-        ]
-      },
-      {
-        "eventId": "8ee51a5086c50b865f98cf56",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "INTCUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Intel Needs More Than Blowout Earnings as Chips Rally Falters - Bloomberg.com",
-        "publishedAt": "2026-07-23T08:35:56Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -815,8 +811,8 @@
         "headline": "Micron stock gains 3%: how is the company benefiting from Alphabet and Tesla earnings - Invezz",
         "publishedAt": "2026-07-23T14:44:57Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -830,8 +826,8 @@
         "headline": "GDP (Advance Estimate), 2nd Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -845,11 +841,26 @@
         "headline": "Employment Situation for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-07T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
+        ]
+      },
+      {
+        "eventId": "9d56cddcd51e058737c5cbb5",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "ASMLUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "ASML beats Q2 earnings on AI chip demand, raises 2026 revenue forecast up to 38% growth - Pluang",
+        "publishedAt": "2026-07-23T19:25:40Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
         ]
       },
       {
@@ -860,8 +871,8 @@
         "headline": "AMZN scheduled earnings on 2026-07-30 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T20:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -875,8 +886,8 @@
         "headline": "META scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -890,8 +901,8 @@
         "headline": "Intel tops Q2 estimates on top and bottom lines, offers upbeat Q3 outlook - Yahoo Finance",
         "publishedAt": "2026-07-23T20:25:59Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -905,26 +916,11 @@
         "headline": "Nasdaq, S&P 500 Futures Fall As Tesla, Alphabet Earnings Revive AI Spending Fears: Why TSLA, GOOGL, SPCX, NOW, INTC, AMD, SLS Are In Focus - Stocktwits",
         "publishedAt": "2026-07-23T08:41:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "abbef475490eb42ffa588b3d",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "MSFTUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "INVESTOR ALERT: Pomerantz Law Firm Reminds Investors with Losses on their Investment in Microsoft Corporation of Class Action Lawsuit and Upcoming Deadlines - MSFT - PR Newswire",
-        "publishedAt": "2026-07-23T14:00:00Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "LEGAL_REGULATORY"
         ]
       },
       {
@@ -935,8 +931,23 @@
         "headline": "Sandisk Trades at 9x Earnings Before Its August 5 Report. Here’s Where the Stock Could Go - TIKR.com",
         "publishedAt": "2026-07-22T17:16:19Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "b0006a45bf80b8b0ca318be1",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Earnings Are Out – Stock Jumps 5% on Massive Beat & Raise - 24/7 Wall St.",
+        "publishedAt": "2026-07-23T20:04:08Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -950,8 +961,8 @@
         "headline": "Intel Q2 2026 earnings: revenue up 25%, fastest growth since 2011 - qz.com",
         "publishedAt": "2026-07-23T20:57:54Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -965,8 +976,8 @@
         "headline": "[Morning News] Intel earnings beat AI demand forecasts; Oracle signs major contract with Department of Defense; USD/JPY approaches 164; US announces new tariffs - Moomoo",
         "publishedAt": "2026-07-23T22:38:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -980,8 +991,8 @@
         "headline": "Intel's Q2 2026 earnings eyed amid 172% rally, focusing on AI-driven growth and capital spending. - Pluang",
         "publishedAt": "2026-07-23T12:13:24Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -995,8 +1006,8 @@
         "headline": "Intel jumps 10% after AI-fueled quarter crushes estimates, upbeat outlook - Investing.com",
         "publishedAt": "2026-07-23T21:23:51Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1010,23 +1021,8 @@
         "headline": "INTC scheduled earnings on 2026-07-23 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-23T20:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "c504f898b4757f83d9a47e27",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "INTCUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "A Massive Buying Signal Just Flashed for Intel Stock Investors Before the July 23 Earnings Report - The Motley Fool",
-        "publishedAt": "2026-07-22T14:16:00Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1040,8 +1036,23 @@
         "headline": "Intel revenue jumps 25% as AI demand lifts data center and foundry sales - Blockspace Media",
         "publishedAt": "2026-07-23T21:29:19Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "c679b6eb0dedbfdd77a3a05f",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Stock Jumps as Earnings Blow Past Expectations Amid Booming AI Demand - Investopedia",
+        "publishedAt": "2026-07-23T21:54:32Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1055,23 +1066,8 @@
         "headline": "What to expect as Intel reports earnings after the bell - CNBC",
         "publishedAt": "2026-07-23T18:51:55Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "cdd6a2e8ab46372603a86b99",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "INTCUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Intel Needs More Than Blowout Earnings as Chips Rally Falters - Advisor Perspectives",
-        "publishedAt": "2026-07-23T13:40:26Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1085,8 +1081,8 @@
         "headline": "Nasdaq, S&P 500 Futures Fall As Tesla, Alphabet Earnings Revive AI Spending Fears: Why TSLA, GOOGL, SPCX, NOW, INTC, AMD, SLS Are In Focus - Stocktwits",
         "publishedAt": "2026-07-23T08:41:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1100,10 +1096,40 @@
         "headline": "TSLA filed 8-K",
         "publishedAt": "2026-07-22T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": []
+      },
+      {
+        "eventId": "d738d8cf4c77f566995e8f52",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Needs More Than Blowout Earnings as Chips Rally Falters - Bloomberg.com",
+        "publishedAt": "2026-07-23T17:37:50Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "d78de5009b680465c8f75c40",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "MUUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Micron stock trades near recent highs as AI memory demand supports revenue growth - Ad-hoc-news.de",
+        "publishedAt": "2026-07-23T18:51:32Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
       },
       {
         "eventId": "d7b330aa45357160a83d42a3",
@@ -1113,8 +1139,8 @@
         "headline": "Nasdaq, S&P 500 Futures Fall As Tesla, Alphabet Earnings Revive AI Spending Fears: Why TSLA, GOOGL, SPCX, NOW, INTC, AMD, SLS Are In Focus - Stocktwits",
         "publishedAt": "2026-07-23T08:41:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1128,8 +1154,8 @@
         "headline": "QCOM scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1143,8 +1169,8 @@
         "headline": "Intel Earnings: Wall Street Looks for Proof the Recovery Is Real - Investing.com",
         "publishedAt": "2026-07-23T13:17:21Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1158,8 +1184,8 @@
         "headline": "Intel Earnings Might Prove the AI Boom Is Still Going Strong — Or About to Stall - 24/7 Wall St.",
         "publishedAt": "2026-07-22T16:53:03Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1173,8 +1199,8 @@
         "headline": "Producer Price Index for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-13T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -1188,8 +1214,8 @@
         "headline": "FOMC meeting 2026-07-28 through 2026-07-29",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T18:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -1203,8 +1229,8 @@
         "headline": "Real Earnings for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-12T12:30:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -1218,8 +1244,8 @@
         "headline": "Job Openings and Labor Turnover Survey for June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-04T14:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -1233,8 +1259,8 @@
         "headline": "Why Nvidia Stock Isn’t Rallying as It Should After Alphabet Earnings - Barron's",
         "publishedAt": "2026-07-23T20:39:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1248,8 +1274,8 @@
         "headline": "Intel Bearish Momentum Intact Below 120.35 As Earnings Loom (INTC) - Seeking Alpha",
         "publishedAt": "2026-07-23T11:38:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1263,23 +1289,38 @@
         "headline": "Intel's Q2 earnings blow past Wall Street's estimates, with an upbeat Q3 outlook to boot - Yahoo Finance",
         "publishedAt": "2026-07-23T20:18:20Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
         ]
       },
       {
-        "eventId": "f044f45062f1ca49cdf97e50",
+        "eventId": "eff1dc767fc5d0d5273466f1",
         "source": "GOOGLE_NEWS_RSS",
         "symbol": "INTCUSDT",
         "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Intel earnings - Tulsa World",
-        "publishedAt": "2026-07-23T22:26:10Z",
+        "headline": "Jim Cramer dubs Intel a ‘miracle stock’ ahead of earnings - Invezz",
+        "publishedAt": "2026-07-23T03:14:15Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "f273c5d6206e47d7f5bbfd3e",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Earnings Review: AI CPU Demand Is Finally Showing Up - Moomoo",
+        "publishedAt": "2026-07-24T01:02:24Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1293,8 +1334,8 @@
         "headline": "Intel Earnings Are Imminent; These Most Accurate Analysts Revise Forecasts Ahead Of Earnings Call - Benzinga",
         "publishedAt": "2026-07-23T11:46:06Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1308,23 +1349,53 @@
         "headline": "Intel's stock jumps as chipmaker rides AI boom to fastest revenue growth in almost 15 years - CNBC",
         "publishedAt": "2026-07-23T20:03:07Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
         ]
       },
       {
-        "eventId": "f600aabb6b91bcefed425729",
+        "eventId": "f5b65f6fe2d85023cc5402fd",
         "source": "GOOGLE_NEWS_RSS",
-        "symbol": "DRAMUSDT",
+        "symbol": "TSLAUSDT",
         "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Ai boom drives server dram spot price far above contracts, lifting Korea chip outlook - CHOSUNBIZ - Chosunbiz",
-        "publishedAt": "2026-07-23T07:56:00Z",
+        "headline": "Micron stock gains 3%: how is the company benefiting from Alphabet and Tesla earnings - Invezz",
+        "publishedAt": "2026-07-23T15:10:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "f8bf1a36c0a33e28e7d491ab",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "INTC Q2 FY2026 earnings call - finance.biggo.com",
+        "publishedAt": "2026-07-24T02:48:45Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "f8d23745f1cf82531a33eba0",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Q2 Earnings Far Exceed Expectations: 59% Data Center Business Growth, CPUs Becoming AI Era Protagonists Again - TradingKey",
+        "publishedAt": "2026-07-24T03:12:43Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1338,36 +1409,21 @@
         "headline": "INTC filed 8-K",
         "publishedAt": "2026-07-23T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": []
       },
       {
-        "eventId": "fbcdd2299611e3bcdad38f16",
-        "source": "NASDAQ_EARNINGS_CALENDAR",
-        "symbol": "GOOGLUSDT",
-        "eventType": "EARNINGS_SCHEDULED",
-        "headline": "GOOGL scheduled earnings on 2026-07-22 time-not-supplied",
-        "publishedAt": null,
-        "effectiveAt": "2026-07-22T16:00:00Z",
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "fd1efc075c004ec858c1f6e4",
+        "eventId": "fafcaa06700fe0d83c3bb5a4",
         "source": "GOOGLE_NEWS_RSS",
-        "symbol": "MUUSDT",
+        "symbol": "GOOGLUSDT",
         "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Micron Has Strong Q3 Earnings and Rising Guidance. Is It a Buy? - AOL.com",
-        "publishedAt": "2026-07-23T00:28:02Z",
+        "headline": "Micron stock gains 3%: how is the company benefiting from Alphabet and Tesla earnings - Invezz",
+        "publishedAt": "2026-07-23T15:10:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1381,8 +1437,8 @@
         "headline": "Earnings Flash (INTC) Intel Posts Q2 Revenue $16.1B, Vs. FactSet Est of $14.44B - Moomoo",
         "publishedAt": "2026-07-23T20:01:53Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -1396,8 +1452,23 @@
         "headline": "Intel earnings beat by $0.21, revenue topped estimates - Investing.com",
         "publishedAt": "2026-07-23T20:05:29Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-24T00:08:03.258340Z",
-        "lastFetchedAt": "2026-07-24T00:08:03.258340Z",
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "fedbdccc272cebaa672c3843",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel Q2 Earnings Call Highlights - MarketBeat",
+        "publishedAt": "2026-07-23T23:09:08Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-24T04:27:10.501089Z",
+        "lastFetchedAt": "2026-07-24T04:27:10.501089Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
