@@ -169,6 +169,13 @@ def self_test() -> None:
     engine = Engine(writer)
     engine.book("ASTER", "AMZN", 1000, 1000, 99, 1, 101, 1)
     engine.book("XYZ", "AMZN", 1000, 1000, 100, 2, 102, 2)
+    quote = engine.quotes["AMZN"]
+    assert quote["status"] == "OPEN" and quote["queueAheadUsd"] == 99
+    engine.trade("ASTER", "AMZN", 1001, 1001, 99, 0.5, "SELL")
+    assert quote["status"] == "OPEN" and quote["filledUsd"] == 0
+    engine.trade("ASTER", "AMZN", 1002, 1002, 99, 2.0, "SELL")
+    assert quote["status"] == "FILLED_AND_HEDGED" and engine.stats["fills"] == 1
+    assert engine.result()["costScenarios"]["NORMAL"]["averageNetBps"] > 0
     writer.close()
     path.unlink(missing_ok=True)
     print("V96 Stock Cross-Venue Maker Hedge V13 self-test: PASS")
