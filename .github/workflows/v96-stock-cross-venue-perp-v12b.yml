@@ -1,0 +1,87 @@
+name: V96 Stock Cross-Venue Perp V12B
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_cross_venue_perp_v12.py'
+      - 'research/v96_stock_cross_venue_perp_v12b.py'
+      - 'research/v96_stock_basis_mature_v9.py'
+      - 'research/v96_stock_funding_carry_tournament_v4.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
+      - '.github/workflows/v96-stock-cross-venue-perp-v12b.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-cross-venue-v12b-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Aster, XYZ and Funding caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/v96-stock-basis-mature-v9
+            .cache/v96-stock-funding
+            .cache/v96-stock-cross-venue-v12
+          key: v96-stock-cross-venue-v12b-${{ runner.os }}-${{ hashFiles('research/v96_stock_cross_venue_perp_v12.py', 'research/v96_stock_cross_venue_perp_v12b.py') }}
+          restore-keys: |
+            v96-stock-cross-venue-v12b-${{ runner.os }}-
+            v96-stock-cross-venue-v12-${{ runner.os }}-
+            v96-stock-basis-v9-${{ runner.os }}-
+            v96-stock-funding-v4-${{ runner.os }}-
+      - name: Compile and self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          python -m py_compile research/v96_stock_funding_carry_tournament_v4.py
+          python -m py_compile research/v96_stock_basis_mature_v9.py
+          python -m py_compile research/v96_stock_cross_venue_perp_v12.py
+          python -m py_compile research/v96_stock_cross_venue_perp_v12b.py
+          cd research
+          python v96_stock_cross_venue_perp_v12b.py --self-test
+      - name: Run corrected cross-venue validation
+        run: |
+          cd research
+          python v96_stock_cross_venue_perp_v12b.py \
+            --aster-cache-dir ../.cache/v96-stock-basis-mature-v9 \
+            --aster-funding-cache-dir ../.cache/v96-stock-funding \
+            --xyz-cache-dir ../.cache/v96-stock-cross-venue-v12 \
+            --output-dir ../.research-state/v96-stock-cross-venue-v12
+      - name: Validate evidence
+        run: |
+          test -s .research-state/v96-stock-cross-venue-v12/v96-stock-cross-venue-perp-v12.json
+          test -s .research-state/v96-stock-cross-venue-v12/v96-stock-cross-venue-perp-v12.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-stock-cross-venue-v12/v96-stock-cross-venue-perp-v12.json').read_text())
+          assert p['candidateCount'] == 24
+          assert p['familyCount'] == 6
+          assert p['status'] in {
+              'INSUFFICIENT_ALIGNED_CROSS_VENUE_HISTORY',
+              'ROBUST_CROSS_VENUE_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'P95_CROSS_VENUE_EDGE_FOUND_FAILS_SEVERE_SHADOW_ONLY',
+              'CROSS_VENUE_VALIDATION_LEAD_FAILED_REUSED_HOLDOUT',
+              'NO_VALIDATION_PASSING_CROSS_VENUE_FAMILY',
+          }
+          if p['status'] != 'INSUFFICIENT_ALIGNED_CROSS_VENUE_HISTORY':
+              assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
+          assert p['safety']['orderSubmissionAllowed'] is False
+          assert p['safety']['productionChanged'] is False
+          assert p['safety']['liveChanged'] is False
+          assert p['safety']['vpsChanged'] is False
+          assert p['safety']['cryptoV96Changed'] is False
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-cross-venue-perp-v12b
+          path: .research-state/v96-stock-cross-venue-v12
+          retention-days: 90
