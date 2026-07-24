@@ -139,26 +139,45 @@ class AlpacaStream(threading.Thread):
         if self.feed not in {"sip", "iex"}:
             raise RuntimeError("ALPACA_DATA_FEED must be sip or iex")
 
+    @staticmethod
+    def _rows(raw: str) -> list[dict[str, Any]]:
+        payload = json.loads(raw)
+        rows = payload if isinstance(payload, list) else [payload]
+        return [row for row in rows if isinstance(row, dict)]
+
+    @classmethod
+    def _wait_for_success(cls, connection: websocket.WebSocket, message: str, attempts: int = 4) -> None:
+        seen: list[dict[str, Any]] = []
+        for _ in range(attempts):
+            rows = cls._rows(connection.recv())
+            seen.extend(rows)
+            if any(row.get("T") == "success" and row.get("msg") == message for row in rows):
+                return
+            error = next((row for row in rows if row.get("T") == "error"), None)
+            if error:
+                raise RuntimeError(f"Alpaca stream error while waiting for {message}: {error}")
+        raise RuntimeError(f"Alpaca stream did not confirm {message}: {seen}")
+
     def run(self) -> None:
         backoff = 1.0
         while not self.stop_event.is_set():
             connection = None
             try:
                 connection = websocket.create_connection(self.url, timeout=10, enable_multithread=True)
+                self._wait_for_success(connection, "connected")
                 connection.send(json.dumps({"action": "auth", "key": self.key, "secret": self.secret}))
-                auth = json.loads(connection.recv())
-                if not any(row.get("T") == "success" and row.get("msg") == "authenticated" for row in auth):
-                    raise RuntimeError(f"Alpaca authentication failed: {auth}")
+                self._wait_for_success(connection, "authenticated")
                 connection.send(json.dumps({"action": "subscribe", "quotes": list(SYMBOLS)}))
                 self.store.set_connected(True)
                 backoff = 1.0
                 while not self.stop_event.is_set():
                     connection.settimeout(5)
-                    raw = connection.recv()
-                    rows = json.loads(raw)
-                    for row in rows if isinstance(rows, list) else [rows]:
-                        if isinstance(row, dict):
-                            self.store.update(row, self.feed)
+                    try:
+                        raw = connection.recv()
+                    except websocket.WebSocketTimeoutException:
+                        continue
+                    for row in self._rows(raw):
+                        self.store.update(row, self.feed)
             except Exception as error:
                 self.store.set_error(error)
                 if self.stop_event.wait(backoff):
@@ -242,6 +261,7 @@ class ReferenceServer(ThreadingHTTPServer):
 
 def self_test() -> None:
     assert parse_rfc3339_ms("2026-07-25T01:02:03.123456789Z") == 1784941323123
+    assert AlpacaStream._rows('[{"T":"success","msg":"connected"}]')[0]["msg"] == "connected"
     store = QuoteStore()
     store.update({
         "T": "q",
