@@ -1,0 +1,89 @@
+name: V96 Stock V13 Longer-Hold Backtest
+
+on:
+  pull_request:
+    paths:
+      - "research/v96_stock_cross_venue_maker_v13_historical_proxy.py"
+      - "research/v96_stock_cross_venue_maker_v13_hold_duration.py"
+      - "docs/research/V96_STOCK_V13_HOLD_DURATION_PROTOCOL_2026-07-24.md"
+      - "docs/research/V96_STOCK_V13_HOLD_DURATION_RESULT_2026-07-24.md"
+      - ".github/workflows/v96-stock-v13-hold-duration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-stock-v13-hold-duration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax and deterministic self-test
+        run: |
+          python -m py_compile research/v96_stock_cross_venue_maker_v13_historical_proxy.py
+          python -m py_compile research/v96_stock_cross_venue_maker_v13_hold_duration.py
+          python research/v96_stock_cross_venue_maker_v13_hold_duration.py --self-test
+      - name: Run fixed longer-hold historical backtest
+        run: |
+          python research/v96_stock_cross_venue_maker_v13_hold_duration.py \
+            --cache-dir .cache/v13-hold-duration \
+            --output-dir .research-state/v13-hold-duration
+      - name: Validate evidence and safety
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('.research-state/v13-hold-duration/result.json').read_text())
+          assert result['status'] != 'PENDING', result
+          assert result['universe'] == ['AMZN', 'META', 'MSFT', 'NVDA', 'TSLA']
+          assert result['frozenTest']['candidateCount'] == 12
+          assert result['frozenTest']['holdMinutes'] == [30, 60, 120, 180, 240, 300]
+          assert result['data']['regularSessions'] >= 60, result['data']
+          assert result['safety']['orderSubmissionAllowed'] is False
+          assert result['safety']['productionChanged'] is False
+          assert result['safety']['liveChanged'] is False
+          assert result['safety']['vpsChanged'] is False
+          assert result['safety']['cryptoV96Changed'] is False
+          assert result['safety']['v11Changed'] is False
+          assert result['safety']['forwardCollectorChanged'] is False
+          for symbol, diag in result['data']['diagnostics'].items():
+              assert diag['asterBars'] > 0, (symbol, diag)
+              assert diag['xyzBars'] > 0, (symbol, diag)
+              assert diag['alignedBars'] > 0, (symbol, diag)
+          print(json.dumps({
+              'strategyId': result['strategyId'],
+              'status': result['status'],
+              'sessions': result['data']['regularSessions'],
+              'developmentPassing': result['developmentPassingCandidateIds'],
+              'validationPassing': result['validationPassingCandidateIds'],
+              'selected': result['selected']['candidateId'] if result.get('selected') else None,
+              'candidateNormal': {
+                  candidate_id: {
+                      'holdMinutes': node['holdMinutes'],
+                      'makerVenue': node['makerVenue'],
+                      'development': node['forcedTakerCosts']['periods']['DEVELOPMENT']['NORMAL'],
+                      'validation': node['forcedTakerCosts']['periods']['VALIDATION']['NORMAL'],
+                      'holdout': node['forcedTakerCosts']['periods']['HOLDOUT']['NORMAL'],
+                      'full': node['forcedTakerCosts']['full']['NORMAL'],
+                  }
+                  for candidate_id, node in result['candidates'].items()
+              },
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-stock-v13-hold-duration-${{ github.run_id }}
+          path: |
+            .research-state/v13-hold-duration
+            .cache/v13-hold-duration
+          retention-days: 90
+          if-no-files-found: warn
