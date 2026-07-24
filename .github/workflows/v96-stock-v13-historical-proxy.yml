@@ -5,6 +5,7 @@ on:
     paths:
       - "research/v96_stock_cross_venue_maker_v13_historical_proxy.py"
       - "docs/research/V96_STOCK_V13_HISTORICAL_PROXY_PROTOCOL_2026-07-24.md"
+      - "docs/research/V96_STOCK_V13_HISTORICAL_PROXY_RESULT_2026-07-24.md"
       - ".github/workflows/v96-stock-v13-historical-proxy.yml"
   workflow_dispatch:
 
