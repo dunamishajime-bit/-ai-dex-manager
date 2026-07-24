@@ -125,10 +125,21 @@ class Engine(BaseEngine):
         del self.inventory[quote["symbol"]]
         self.record({"recordType": "virtual_cycle_complete", **cycle})
 
+    def record_unresolved(self, inv: dict, received_ms: int, reason: str) -> None:
+        if inv.get("lastUnresolvedReason") == reason:
+            return
+        inv["lastUnresolvedReason"] = reason
+        self.stats["unresolved_close_attempts"] += 1
+        self.record({"recordType": "virtual_inventory_unresolved", "receivedMs": received_ms,
+                     "reason": reason, **inv})
+
     def force_close(self, symbol: str, received_ms: int, reason: str) -> bool:
         inv = self.inventory.get(symbol)
+        if not inv:
+            return False
         pair = self.ready(symbol, received_ms)
-        if not inv or not pair:
+        if not pair:
+            self.record_unresolved(inv, received_ms, f"{reason}_STALE_BOOK")
             return False
         quote = self.quotes.get(symbol)
         if quote and quote["status"] == "OPEN":
@@ -144,9 +155,7 @@ class Engine(BaseEngine):
         required_maker = inv["quantity"] * maker_price
         required_hedge = inv["quantity"] * hedge_price
         if maker_usd < required_maker or hedge_usd < required_hedge:
-            self.stats["unresolved_inventory"] += 1
-            self.record({"recordType": "virtual_inventory_unresolved", "receivedMs": received_ms,
-                         "reason": f"{reason}_DEPTH", **inv})
+            self.record_unresolved(inv, received_ms, f"{reason}_DEPTH")
             return False
         synthetic = {"symbol": symbol, "makerPrice": maker_price}
         self.complete_cycle(synthetic, hedge_price, received_ms, "FORCED_TAKER", reason)
@@ -178,19 +187,39 @@ class Engine(BaseEngine):
         complete = [s for s, venues in coverage.items() if venues == ["ASTER", "XYZ"]]
         scenarios = {}
         for name in COSTS:
-            net = [c["grossBps"] - (COSTS[name] if c["profile"] == "MAKER_CYCLE" else FORCED_COSTS[name])
-                   for c in self.cycles]
+            rows = []
+            by_symbol = {symbol: 0.0 for symbol in SYMBOLS}
+            for cycle in self.cycles:
+                cost = COSTS[name] if cycle["profile"] == "MAKER_CYCLE" else FORCED_COSTS[name]
+                net = cycle["grossBps"] - cost
+                rows.append(net)
+                by_symbol[cycle["symbol"]] += net
+            positive_total = sum(max(0.0, value) for value in by_symbol.values())
+            max_share = (max((max(0.0, value) for value in by_symbol.values()), default=0.0) / positive_total
+                         if positive_total > 0 else None)
             scenarios[name] = {"makerCycleCostBps": COSTS[name], "forcedCloseCostBps": FORCED_COSTS[name],
-                               "completedCycles": len(net),
-                               "averageNetBps": sum(net) / len(net) if net else None,
-                               "positiveNetRate": sum(n > 0 for n in net) / len(net) if net else None,
-                               "minimumNetBps": min(net) if net else None,
-                               "maximumNetBps": max(net) if net else None}
-        status = "V13_FORWARD_DATA_REQUIRED" if len(complete) == len(SYMBOLS) else "V13_ENDPOINT_OR_SYMBOL_COVERAGE_FAILED"
-        if len(self.cycles) >= 30:
-            normal = scenarios["NORMAL"]
-            status = ("V13_SHORT_PROBE_LEAD_FORWARD_ONLY" if normal["averageNetBps"] > 0
-                      and normal["positiveNetRate"] >= 0.55 else "V13_SHORT_PROBE_FAILED")
+                               "completedCycles": len(rows),
+                               "averageNetBps": sum(rows) / len(rows) if rows else None,
+                               "positiveNetRate": sum(n > 0 for n in rows) / len(rows) if rows else None,
+                               "minimumNetBps": min(rows) if rows else None,
+                               "maximumNetBps": max(rows) if rows else None,
+                               "bySymbolNetBps": by_symbol,
+                               "maxPositiveProfitContributionShare": max_share}
+        if len(complete) != len(SYMBOLS):
+            status = "V13_ENDPOINT_OR_SYMBOL_COVERAGE_FAILED"
+        elif self.stats["unhedged"] > 0 or self.inventory:
+            status = "V13_EXECUTION_SAFETY_FAILED"
+        elif len(self.cycles) >= 30:
+            normal, p95, severe = scenarios["NORMAL"], scenarios["P95"], scenarios["SEVERE"]
+            passed = (normal["averageNetBps"] is not None and normal["averageNetBps"] > 0
+                      and p95["averageNetBps"] is not None and p95["averageNetBps"] > 0
+                      and severe["averageNetBps"] is not None and severe["averageNetBps"] > 0
+                      and normal["positiveNetRate"] is not None and normal["positiveNetRate"] >= 0.55
+                      and normal["maxPositiveProfitContributionShare"] is not None
+                      and normal["maxPositiveProfitContributionShare"] <= 0.40)
+            status = "V13_SHORT_PROBE_LEAD_FORWARD_ONLY" if passed else "V13_SHORT_PROBE_FAILED"
+        else:
+            status = "V13_FORWARD_DATA_REQUIRED"
         return {"strategyId": STRATEGY_ID, "status": status, "generatedAt": iso(),
                 "safety": {"mode": "SHADOW_RESEARCH_ONLY", "orderSubmissionAllowed": False,
                            "productionChanged": False, "liveChanged": False, "vpsChanged": False,
@@ -205,7 +234,8 @@ class Engine(BaseEngine):
                                      "forcedCycles": self.stats["forced_cycles"],
                                      "openInventories": len(self.inventory),
                                      "unhedgedRejected": self.stats["unhedged"],
-                                     "unresolvedInventory": self.stats["unresolved_inventory"],
+                                     "unresolvedInventory": len(self.inventory),
+                                     "unresolvedCloseAttempts": self.stats["unresolved_close_attempts"],
                                      "cancellations": {k.removeprefix("cancel_"): v for k, v in self.stats.items()
                                                        if k.startswith("cancel_")}},
                 "costScenarios": scenarios,
@@ -218,4 +248,6 @@ class Engine(BaseEngine):
                                   "minimumPositiveNetRate": 0.55,
                                   "normalP95SevereAverageNetMustBePositive": True,
                                   "maximumSingleSymbolPnlShare": 0.40,
+                                  "maximumUnhedgedRejected": 0,
+                                  "maximumUnresolvedInventory": 0,
                                   "retuningOnCollectedForwardWindow": False}}
