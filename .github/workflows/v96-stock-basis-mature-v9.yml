@@ -1,0 +1,79 @@
+name: V96 Stock Basis Mature V9
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_basis_mature_v9.py'
+      - 'research/v96_stock_funding_carry_tournament_v4.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
+      - '.github/workflows/v96-stock-basis-mature-v9.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-basis-mature-v9-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Basis and Funding cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/v96-stock-basis-mature-v9
+            .cache/v96-stock-funding
+          key: v96-stock-basis-v9-${{ runner.os }}-${{ hashFiles('research/v96_stock_basis_mature_v9.py') }}
+          restore-keys: |
+            v96-stock-basis-v9-${{ runner.os }}-
+            v96-stock-funding-v4-${{ runner.os }}-
+      - name: Compile and self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          python -m py_compile research/v96_stock_funding_carry_tournament_v4.py
+          python -m py_compile research/v96_stock_basis_mature_v9.py
+          cd research
+          python v96_stock_basis_mature_v9.py --self-test
+      - name: Run Basis validation
+        run: |
+          cd research
+          python v96_stock_basis_mature_v9.py \
+            --market-cache-dir ../.cache/v96-stock-basis-mature-v9 \
+            --funding-cache-dir ../.cache/v96-stock-funding \
+            --output-dir ../.research-state/v96-stock-basis-mature-v9
+      - name: Validate evidence
+        run: |
+          test -s .research-state/v96-stock-basis-mature-v9/v96-stock-basis-mature-v9.json
+          test -s .research-state/v96-stock-basis-mature-v9/v96-stock-basis-mature-v9.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-stock-basis-mature-v9/v96-stock-basis-mature-v9.json').read_text())
+          assert p['candidateCount'] == 9
+          assert p['familyCount'] == 3
+          assert p['status'] in {
+              'INSUFFICIENT_ALIGNED_INDEX_HISTORY',
+              'CRYPTO_LIKE_BASIS_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'ROBUST_POSITIVE_BASIS_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'BASIS_VALIDATION_LEAD_FAILED_REUSED_HOLDOUT',
+              'NO_VALIDATION_PASSING_BASIS_FAMILY',
+          }
+          if p['status'] != 'INSUFFICIENT_ALIGNED_INDEX_HISTORY':
+              assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
+          assert p['safety']['orderSubmissionAllowed'] is False
+          assert p['safety']['productionChanged'] is False
+          assert p['safety']['liveChanged'] is False
+          assert p['safety']['vpsChanged'] is False
+          assert p['safety']['cryptoV96Changed'] is False
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-basis-mature-v9
+          path: .research-state/v96-stock-basis-mature-v9
+          retention-days: 90

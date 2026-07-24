@@ -1,0 +1,92 @@
+name: V96 Stock Perp Fade Enhancement V11
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_perp_fade_enhancement_v11.py'
+      - 'research/v96_stock_cash_perp_basis_v10.py'
+      - 'research/v96_stock_basis_mature_v9.py'
+      - 'research/v96_stock_funding_carry_tournament_v4.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
+      - '.github/workflows/v96-stock-perp-fade-enhancement-v11.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-perp-fade-enhancement-v11-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Stock caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/v96-stock-cash-yahoo-v10
+            .cache/v96-stock-basis-mature-v9
+            .cache/v96-stock-funding
+          key: v96-stock-perp-fade-v11-${{ runner.os }}-${{ hashFiles('research/v96_stock_perp_fade_enhancement_v11.py') }}
+          restore-keys: |
+            v96-stock-perp-fade-v11-${{ runner.os }}-
+            v96-stock-cash-perp-v10-${{ runner.os }}-
+            v96-stock-basis-v9-${{ runner.os }}-
+            v96-stock-funding-v4-${{ runner.os }}-
+      - name: Compile and self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          python -m py_compile research/v96_stock_funding_carry_tournament_v4.py
+          python -m py_compile research/v96_stock_basis_mature_v9.py
+          python -m py_compile research/v96_stock_cash_perp_basis_v10.py
+          python -m py_compile research/v96_stock_perp_fade_enhancement_v11.py
+          cd research
+          python v96_stock_perp_fade_enhancement_v11.py --self-test
+      - name: Run 90-candidate enhancement tournament
+        run: |
+          cd research
+          python v96_stock_perp_fade_enhancement_v11.py \
+            --cash-cache-dir ../.cache/v96-stock-cash-yahoo-v10 \
+            --perp-cache-dir ../.cache/v96-stock-basis-mature-v9 \
+            --funding-cache-dir ../.cache/v96-stock-funding \
+            --output-dir ../.research-state/v96-stock-perp-fade-enhancement-v11
+      - name: Validate evidence
+        run: |
+          test -s .research-state/v96-stock-perp-fade-enhancement-v11/v96-stock-perp-fade-enhancement-v11.json
+          test -s .research-state/v96-stock-perp-fade-enhancement-v11/v96-stock-perp-fade-enhancement-v11.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-stock-perp-fade-enhancement-v11/v96-stock-perp-fade-enhancement-v11.json').read_text())
+          assert p['candidateCount'] == 90
+          assert p['status'] in {
+              'INSUFFICIENT_ALIGNED_INTRADAY_HISTORY',
+              'CRYPTO_LIKE_ENHANCEMENT_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'ROBUST_STRICT_ENHANCEMENT_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'P95_ENHANCEMENT_FOUND_FAILS_SEVERE_SHADOW_ONLY',
+              'VALIDATION_ENHANCEMENT_FAILED_REUSED_HOLDOUT',
+              'NO_P95_VALIDATION_PASSING_ENHANCEMENT',
+          }
+          if p['status'] != 'INSUFFICIENT_ALIGNED_INTRADAY_HISTORY':
+              assert p['selectionDiscipline']['allCombinationsPredeclared'] is True
+              assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
+              assert len(p['validationRows']) <= 12
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+          }
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-perp-fade-enhancement-v11
+          path: .research-state/v96-stock-perp-fade-enhancement-v11
+          retention-days: 90

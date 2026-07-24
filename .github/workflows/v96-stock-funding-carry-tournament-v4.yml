@@ -1,0 +1,81 @@
+name: V96 Stock Funding Carry Tournament V4
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_funding_carry_tournament_v4.py'
+      - 'research/v96_stock_swing_tournament_v3.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
+      - '.github/workflows/v96-stock-funding-carry-tournament-v4.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-funding-carry-tournament-v4-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tournament:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore price and Funding cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/v96-stock-intraday-theme-flow
+            .cache/v96-stock-funding
+          key: v96-stock-funding-v4-${{ runner.os }}-${{ hashFiles('research/v96_stock_funding_carry_tournament_v4.py') }}
+          restore-keys: |
+            v96-stock-funding-v4-${{ runner.os }}-
+            v96-stock-swing-v3b-${{ runner.os }}-
+            v96-stock-intraday-15m-${{ runner.os }}-
+      - name: Compile and self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          python -m py_compile research/v96_stock_swing_tournament_v3.py
+          python -m py_compile research/v96_stock_funding_carry_tournament_v4.py
+          cd research
+          python v96_stock_funding_carry_tournament_v4.py --self-test
+      - name: Run Funding carry tournament
+        run: |
+          cd research
+          python v96_stock_funding_carry_tournament_v4.py \
+            --price-cache-dir ../.cache/v96-stock-intraday-theme-flow \
+            --funding-cache-dir ../.cache/v96-stock-funding \
+            --output-dir ../.research-state/v96-stock-funding-carry-tournament-v4
+      - name: Validate evidence
+        run: |
+          test -s .research-state/v96-stock-funding-carry-tournament-v4/v96-stock-funding-carry-tournament-v4.json
+          test -s .research-state/v96-stock-funding-carry-tournament-v4/v96-stock-funding-carry-tournament-v4.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-stock-funding-carry-tournament-v4/v96-stock-funding-carry-tournament-v4.json').read_text())
+          assert p['candidateCount'] == 24
+          assert p['familyCount'] == 8
+          assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
+          assert p['status'] in {
+              'CRYPTO_LIKE_FUNDING_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'ROBUST_POSITIVE_FUNDING_EDGE_FOUND_REUSED_HISTORY_SHADOW_ONLY',
+              'FUNDING_VALIDATION_LEAD_FAILED_REUSED_HOLDOUT',
+              'NO_VALIDATION_PASSING_FUNDING_FAMILY',
+          }
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+          }
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-funding-carry-tournament-v4
+          path: .research-state/v96-stock-funding-carry-tournament-v4
+          retention-days: 90

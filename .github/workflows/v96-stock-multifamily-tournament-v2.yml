@@ -1,0 +1,76 @@
+name: V96 Stock Multi-family Tournament V2
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_multifamily_tournament_v2.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
+      - '.github/workflows/v96-stock-multifamily-tournament-v2.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-multifamily-tournament-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tournament:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Aster 15m cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/v96-stock-intraday-theme-flow
+          key: v96-stock-multifamily-${{ runner.os }}-${{ hashFiles('research/v96_stock_multifamily_tournament_v2.py') }}
+          restore-keys: |
+            v96-stock-multifamily-${{ runner.os }}-
+            v96-stock-intraday-15m-${{ runner.os }}-
+      - name: Compile and self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_v1.py
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          python -m py_compile research/v96_stock_multifamily_tournament_v2.py
+          cd research
+          python v96_stock_multifamily_tournament_v2.py --self-test
+      - name: Run predeclared tournament
+        run: |
+          cd research
+          python v96_stock_multifamily_tournament_v2.py \
+            --cache-dir ../.cache/v96-stock-intraday-theme-flow \
+            --output-dir ../.research-state/v96-stock-multifamily-tournament-v2
+      - name: Validate evidence contract
+        run: |
+          test -s .research-state/v96-stock-multifamily-tournament-v2/v96-stock-multifamily-tournament-v2.json
+          test -s .research-state/v96-stock-multifamily-tournament-v2/v96-stock-multifamily-tournament-v2.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-stock-multifamily-tournament-v2/v96-stock-multifamily-tournament-v2.json').read_text())
+          assert p['candidateCount'] == 27
+          assert p['familyCount'] == 9
+          assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
+          assert p['status'] in {
+              'CRYPTO_LIKE_HISTORICAL_STOCK_EDGE_FOUND_SHADOW_ONLY',
+              'ROBUST_POSITIVE_STOCK_EDGE_FOUND_SHADOW_ONLY',
+              'VALIDATION_LEAD_FAILED_UNTOUCHED_HOLDOUT',
+              'NO_VALIDATION_PASSING_STOCK_FAMILY',
+          }
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+          }
+          PY
+      - name: Upload tournament evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-multifamily-tournament-v2
+          path: .research-state/v96-stock-multifamily-tournament-v2
+          retention-days: 90

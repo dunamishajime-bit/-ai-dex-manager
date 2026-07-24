@@ -1,0 +1,76 @@
+name: V96 Stock Swing Tournament V3B
+
+on:
+  pull_request:
+    paths:
+      - 'research/v96_stock_swing_tournament_v3.py'
+      - 'research/v96_stock_swing_tournament_v3b.py'
+      - 'research/v96_stock_swing_tournament_v3c.py'
+      - 'research/v96_stock_intraday_theme_flow_backtest.py'
+      - '.github/workflows/v96-stock-swing-tournament-v3b.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-stock-swing-tournament-v3b-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tournament:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Aster 15m cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/v96-stock-intraday-theme-flow
+          key: v96-stock-swing-v3b-${{ runner.os }}-${{ hashFiles('research/v96_stock_swing_tournament_v3b.py', 'research/v96_stock_swing_tournament_v3c.py') }}
+          restore-keys: |
+            v96-stock-swing-v3b-${{ runner.os }}-
+            v96-stock-swing-${{ runner.os }}-
+            v96-stock-multifamily-${{ runner.os }}-
+            v96-stock-intraday-15m-${{ runner.os }}-
+      - name: Compile and corrected eligibility self-test
+        run: |
+          python -m py_compile research/v96_stock_intraday_theme_flow_backtest.py
+          python -m py_compile research/v96_stock_swing_tournament_v3.py
+          python -m py_compile research/v96_stock_swing_tournament_v3b.py
+          python -m py_compile research/v96_stock_swing_tournament_v3c.py
+          cd research
+          python v96_stock_swing_tournament_v3c.py --self-test
+      - name: Run corrected swing tournament
+        run: |
+          cd research
+          python v96_stock_swing_tournament_v3c.py \
+            --cache-dir ../.cache/v96-stock-intraday-theme-flow \
+            --output-dir ../.research-state/v96-stock-swing-tournament-v3b
+      - name: Validate evidence
+        run: |
+          test -s .research-state/v96-stock-swing-tournament-v3b/v96-stock-swing-tournament-v3b.json
+          test -s .research-state/v96-stock-swing-tournament-v3b/v96-stock-swing-tournament-v3b.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-stock-swing-tournament-v3b/v96-stock-swing-tournament-v3b.json').read_text())
+          assert p['candidateCount'] == 27
+          assert p['familyCount'] == 9
+          assert p['eligibility']['minimumCompletedSessionsPerSymbol'] == 61
+          assert p['eligibility']['minimumSymbolsWithHistory'] == 8
+          assert p['status'] in {
+              'CRYPTO_LIKE_SWING_EDGE_FOUND_SHADOW_ONLY',
+              'ROBUST_POSITIVE_SWING_EDGE_FOUND_SHADOW_ONLY',
+              'SWING_VALIDATION_LEAD_FAILED_REUSED_HOLDOUT',
+              'NO_VALIDATION_PASSING_SWING_FAMILY',
+          }
+          assert p['safety']['orderSubmissionAllowed'] is False
+          assert p['safety']['productionChanged'] is False
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-swing-tournament-v3b
+          path: .research-state/v96-stock-swing-tournament-v3b
+          retention-days: 90
