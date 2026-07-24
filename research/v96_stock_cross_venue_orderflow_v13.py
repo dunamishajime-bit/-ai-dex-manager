@@ -62,25 +62,51 @@ def parse_xyz_trade(data: dict, received: int) -> Optional[tuple]:
 
 async def seed(engine: Engine) -> None:
     async def one_aster(symbol: str) -> None:
-        received = now_ms()
-        try:
-            query = urllib.parse.urlencode({"symbol": ASTER[symbol]})
-            data = await asyncio.to_thread(request_json, f"https://fapi.asterdex.com/fapi/v1/ticker/bookTicker?{query}")
-            parsed = parse_aster_book({"s": ASTER[symbol], "E": received, **data}, received)
-            if parsed:
-                engine.book("ASTER", parsed[0], parsed[1], received, *parsed[2:])
-        except Exception as exc:
-            engine.record({"recordType": "collector_error", "venue": "ASTER_REST", "symbol": symbol, "error": repr(exc)})
+        errors = []
+        for attempt in range(3):
+            received = now_ms()
+            try:
+                query = urllib.parse.urlencode({"symbol": ASTER[symbol]})
+                data = await asyncio.to_thread(request_json, f"https://fapi.asterdex.com/fapi/v1/ticker/bookTicker?{query}")
+                parsed = parse_aster_book({"s": ASTER[symbol], "E": received, **data}, received)
+                if parsed:
+                    engine.book("ASTER", parsed[0], parsed[1], received, *parsed[2:])
+                    return
+                errors.append("bookTicker returned no valid top of book")
+            except Exception as exc:
+                errors.append(repr(exc))
+            try:
+                query = urllib.parse.urlencode({"symbol": ASTER[symbol], "limit": 5})
+                depth = await asyncio.to_thread(request_json, f"https://fapi.asterdex.com/fapi/v1/depth?{query}")
+                bids, asks = depth.get("bids", []), depth.get("asks", [])
+                if bids and asks:
+                    bid, bid_qty = finite(bids[0][0]), finite(bids[0][1])
+                    ask, ask_qty = finite(asks[0][0]), finite(asks[0][1])
+                    if None not in (bid, bid_qty, ask, ask_qty):
+                        engine.book("ASTER", symbol, received, received, bid, bid_qty, ask, ask_qty)
+                        return
+                errors.append("depth returned no valid top of book")
+            except Exception as exc:
+                errors.append(repr(exc))
+            await asyncio.sleep(0.5 * (attempt + 1))
+        engine.record({"recordType": "collector_error", "venue": "ASTER_REST", "symbol": symbol, "errors": errors})
 
     async def one_xyz(symbol: str) -> None:
-        received = now_ms()
-        try:
-            data = await asyncio.to_thread(request_json, "https://api.hyperliquid.xyz/info", {"type": "l2Book", "coin": XYZ[symbol]})
-            parsed = parse_xyz_book(data, received)
-            if parsed:
-                engine.book("XYZ", parsed[0], parsed[1], received, *parsed[2:])
-        except Exception as exc:
-            engine.record({"recordType": "collector_error", "venue": "XYZ_REST", "symbol": symbol, "error": repr(exc)})
+        errors = []
+        for attempt in range(3):
+            received = now_ms()
+            try:
+                data = await asyncio.to_thread(request_json, "https://api.hyperliquid.xyz/info", {"type": "l2Book", "coin": XYZ[symbol]})
+                parsed = parse_xyz_book(data, received)
+                if parsed:
+                    engine.book("XYZ", parsed[0], parsed[1], received, *parsed[2:])
+                    return
+                errors.append("l2Book returned no valid top of book")
+            except Exception as exc:
+                errors.append(repr(exc))
+            await asyncio.sleep(0.5 * (attempt + 1))
+        engine.record({"recordType": "collector_error", "venue": "XYZ_REST", "symbol": symbol, "errors": errors})
+
     await asyncio.gather(*(one_aster(s) for s in SYMBOLS), *(one_xyz(s) for s in SYMBOLS))
 
 
