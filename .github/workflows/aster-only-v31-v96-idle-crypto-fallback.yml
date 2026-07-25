@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py'
+      - 'scripts/run_aster_only_v31_v96_idle_crypto_fallback_fast.py'
       - 'docs/research/ASTER_ONLY_V31_V96_IDLE_CRYPTO_FALLBACK_PROTOCOL_2026-07-26.md'
       - '.github/workflows/aster-only-v31-v96-idle-crypto-fallback.yml'
   workflow_dispatch:
@@ -40,7 +41,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache/aster-only-v31-v96-idle
-          key: aster-only-v31-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py') }}
+          key: aster-only-v31-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py', 'scripts/run_aster_only_v31_v96_idle_crypto_fallback_fast.py') }}
           restore-keys: |
             aster-only-v31-${{ runner.os }}-
             aster-only-v22-${{ runner.os }}-
@@ -52,11 +53,13 @@ jobs:
             scripts/research_lab_aster_only_v14_replacement_tournament.py \
             scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
             scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
-            scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py
+            scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py \
+            scripts/run_aster_only_v31_v96_idle_crypto_fallback_fast.py
           python - <<'PY'
           import sys
           sys.path.insert(0, 'scripts')
           import research_lab_aster_only_v31_v96_idle_crypto_fallback as v31
+          import run_aster_only_v31_v96_idle_crypto_fallback_fast as runner
           assert (v31.BT_END - v31.BT_START).days == 365
           assert len(v31.CANDIDATES) == 558
           assert v31.MAX_GROSS == 1.0
@@ -69,6 +72,11 @@ jobs:
               'LINKUSDT', 'AVAXUSDT', 'DOGEUSDT', 'AAVEUSDT',
           }
           assert all(candidate.risk_name in v31.RISK_MAP for candidate in v31.CANDIDATES)
+          assert v31.overlaps is runner.fast_overlaps
+          test_intervals = [(10, 20, 'A'), (30, 40, 'B')]
+          assert runner.fast_overlaps(test_intervals, 19, 21) is True
+          assert runner.fast_overlaps(test_intervals, 20, 30) is False
+          assert runner.fast_overlaps(test_intervals, 29, 31) is True
           print('V31 freeze assertions: PASS')
           PY
       - name: Run V31 V96-idle tournament
@@ -77,7 +85,7 @@ jobs:
           mkdir -p .research-state/aster-only-v31-v96-idle
           set -o pipefail
           cd scripts
-          python research_lab_aster_only_v31_v96_idle_crypto_fallback.py \
+          python run_aster_only_v31_v96_idle_crypto_fallback_fast.py \
             --cache-dir ../.cache/aster-only-v31-v96-idle \
             --output-dir ../.research-state/aster-only-v31-v96-idle \
             2>&1 | tee ../.research-state/aster-only-v31-v96-idle/backtest.log
