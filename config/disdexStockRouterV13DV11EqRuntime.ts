@@ -1,5 +1,5 @@
 export const DISDEX_V13D_V11EQ_V96_STRATEGY_ID =
-    "DISDEX_V13D_V11EQ_STOCK_ROUTER_PLUS_CRYPTO_V96" as const;
+    "DISDEX_V11EQ_ASTER_ONLY_PLUS_CRYPTO_V96" as const;
 
 export const DISDEX_V13D_V11EQ_V96_LINEAGE = {
     cryptoV96ProductionCommit: "a4529372a4a331b602a51d36f3287345a89436bb",
@@ -12,7 +12,7 @@ export const DISDEX_V13D_V11EQ_V96_LINEAGE = {
 
 export const DISDEX_V13D_V11EQ_V96_ALLOCATION = {
     cryptoSleeveGrossCap: 1.0,
-    stockSleeveGrossCap: 1.0,
+    stockSleeveGrossCap: "EXCESS_MARGIN_ONLY" as const,
     portfolioGrossCap: 2.0,
     sleeveLendingEnabled: false,
     maximumConcurrentStockPositions: 1,
@@ -22,8 +22,8 @@ export const DISDEX_V13D_V11EQ_V96_ALLOCATION = {
 } as const;
 
 export const DISDEX_V13D_CONFIG = {
-    strategyId: "V13D_EDGE20_NO_PREVIOUS_SYMBOL",
-    enabledForLive: true,
+    strategyId: "V13D_DISABLED",
+    enabledForLive: false,
     priority: 1,
     timeZone: "America/New_York",
     decisionTimeNy: "10:00:00",
@@ -31,7 +31,7 @@ export const DISDEX_V13D_CONFIG = {
     minimumAbsoluteBasisBps: 20,
     selection: "LARGEST_ABSOLUTE_BASIS_TOP1_ALPHABETICAL_TIEBREAK",
     makerVenue: "ASTER",
-    hedgeVenue: "HYPERLIQUID_XYZ",
+    hedgeVenue: "DISABLED",
     makerNotionalUsd: 100,
     previousCompletedSymbolCooldownOnce: true,
     maximumDisplayedAsterQueueUsd: 250,
@@ -118,15 +118,15 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     shadowCollectionEnabled: true,
     stateSchemaVersion: 2,
     stateDirectory: ".runtime-state/disdex-v13d-v11eq-v96",
-    stockOrderClientIdPrefix: "stock-v13d-v11eq-",
-    pythonStockEngine: "scripts/disdex_v13d_v11eq_stock_live_engine.py",
+    stockOrderClientIdPrefix: "stock-v11eq-aster-only-",
+    pythonStockEngine: "scripts/disdex_v11eq_aster_only_live_engine.py",
     combinedSupervisor: "scripts/disdex-v13d-v11eq-v96-live-runner.ts",
     combinedPreflight: "scripts/disdex-v13d-v11eq-v96-live-preflight.ts",
     requireCredentialsAndEndpointPreflight: true,
     requireExternalFreshStockReferenceFeedForLive: true,
     requireCombinedLiveEnvironmentSwitch: true,
-    requiredCombinedLiveAcknowledgement: "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96",
+    requiredCombinedLiveAcknowledgement: "I_ACCEPT_REAL_MONEY_V96_V11EQ_ASTER_ONLY",
     cryptoV96RetainsOwnLiveGates: true,
     liveBlockReason:
-        "Real orders are submitted only when the combined runner is started in live mode, the combined live environment switch and acknowledgement are present, Stock and V96 preflight pass, venue credentials and fresh external Stock references are available, and the existing V96 exact-commit live gates pass.",
+        "Real orders are submitted only when the Aster-only combined runner is started in live mode, its acknowledgement is present, V11-EQ uses only measured excess Aster margin, free Pyth plus Alpaca IEX reference checks pass, and the existing V96 exact-commit live gates pass. Hyperliquid and V13D are excluded.",
 } as const;
