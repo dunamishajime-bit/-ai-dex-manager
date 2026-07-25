@@ -512,10 +512,8 @@ def analyze(cache_root: Path) -> dict:
         default=None,
     )
 
-    winner = None
-    strict_passed = False
-    if selected is not None:
-        candidate_id = selected["candidate"]["candidate_id"]
+    def evaluate_row(row: dict) -> dict:
+        candidate_id = row["candidate"]["candidate_id"]
         trades = all_trades[candidate_id]
         final_reused = scenario_set(trades, splits["FINAL_REUSED"])
         holdout = scenario_set(trades, holdout_days)
@@ -523,24 +521,33 @@ def analyze(cache_root: Path) -> dict:
         checks, robustness = strict_checks(
             trades,
             target_days,
-            selected["development"],
-            selected["validation"],
+            row["development"],
+            row["validation"],
             final_reused,
             holdout,
         )
-        strict_passed = all(checks.values())
-        winner = {
-            **selected,
+        return {
+            **row,
             "finalReused": final_reused,
             "holdout": holdout,
             "full": full,
             "checks": checks,
-            "allStrictHurdlesPassed": strict_passed,
+            "allStrictHurdlesPassed": all(checks.values()),
             "robustness": robustness,
             "tradeAudit": [
                 trade for trade in trades if str(trade["day"]) in set(target_days)
             ],
         }
+
+    diagnostic_row = max(
+        validation_rows,
+        key=lambda row: (row["validationScore"], row["candidate"]["candidate_id"]),
+        default=None,
+    )
+    diagnostic_lead = evaluate_row(diagnostic_row) if diagnostic_row is not None else None
+
+    winner = evaluate_row(selected) if selected is not None else None
+    strict_passed = bool(winner and winner["allStrictHurdlesPassed"])
 
     status = (
         "ASTER_ONLY_V20_STRICT_HURDLE_PASS_SHADOW_ONLY"
@@ -590,6 +597,7 @@ def analyze(cache_root: Path) -> dict:
         "developmentTop": top_development,
         "validationRows": validation_rows,
         "winner": winner,
+        "diagnosticLead": diagnostic_lead,
         "selectionDiscipline": {
             "candidateGridPredeclared": True,
             "developmentSelectsTop20": True,
@@ -638,6 +646,19 @@ def report(result: dict) -> str:
     winner = result.get("winner")
     if winner is None:
         lines.append("No candidate passed chronological Validation.")
+        diagnostic = result.get("diagnosticLead")
+        if diagnostic is not None:
+            normal = diagnostic["full"]["NORMAL"]
+            p95 = diagnostic["full"]["P95"]
+            lines.append(f"- Closest validation lead: `{diagnostic['candidate']['candidate_id']}`")
+            lines.append(
+                f"- Full Normal/P95 diagnostic: {normal['compoundedReturnPct']:.6f}% / "
+                f"{p95['compoundedReturnPct']:.6f}%"
+            )
+            lines.append(
+                f"- Validation Normal/P95: {diagnostic['validation']['NORMAL']['compoundedReturnPct']:.6f}% / "
+                f"{diagnostic['validation']['P95']['compoundedReturnPct']:.6f}%"
+            )
     else:
         lines.append(f"- Candidate: `{winner['candidate']['candidate_id']}`")
         normal = winner["full"]["NORMAL"]
@@ -683,6 +704,7 @@ def main() -> int:
         "period": result["period"],
         "candidateCount": result["candidateCount"],
         "winner": result.get("winner"),
+        "diagnosticLead": result.get("diagnosticLead"),
     }, indent=2, ensure_ascii=False))
     return 0
 
