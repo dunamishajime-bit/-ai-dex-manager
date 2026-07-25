@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/research_lab_aster_only_v14_replacement_tournament.py'
+      - 'scripts/run_aster_only_v14_with_frozen_v13d_benchmark.py'
       - 'docs/research/ASTER_ONLY_V14_REPLACEMENT_PROTOCOL_2026-07-26.md'
       - '.github/workflows/aster-only-v14-replacement-research.yml'
   workflow_dispatch:
@@ -52,7 +53,9 @@ jobs:
             v96-stock-cash-perp-v10-${{ runner.os }}-
       - name: Compile and deterministic self-test
         run: |
-          python -m py_compile scripts/research_lab_aster_only_v14_replacement_tournament.py
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/run_aster_only_v14_with_frozen_v13d_benchmark.py
           python - <<'PY'
           import math
           import sys
@@ -82,7 +85,7 @@ jobs:
           mkdir -p .research-state/aster-only-v14-replacement
           set -o pipefail
           cd scripts
-          python research_lab_aster_only_v14_replacement_tournament.py \
+          python run_aster_only_v14_with_frozen_v13d_benchmark.py \
             --cache-dir ../.cache/v96-crypto-v11-v13d-one-year \
             --output-dir ../.research-state/aster-only-v14-replacement \
             2>&1 | tee ../.research-state/aster-only-v14-replacement/backtest.log
@@ -102,6 +105,7 @@ jobs:
           assert p['rules']['maximumHoldingHours'] == [1, 2, 3]
           assert p['rules']['severeCostAction'] == 'FAIL_CLOSED_NO_ENTRY'
           assert p['v13dBenchmark']['twoVenueCapitalHoursIncluded'] is True
+          assert p['v13dBenchmark']['frozenSuccessfulArtifact']['workflowRun'] == 30117325883
           assert p['selectionDiscipline']['independentHoldoutClaim'] is False
           assert p['selectionDiscipline']['furtherThresholdRetuningOnSameHistoryAllowed'] is False
           assert p['safety'] == {
