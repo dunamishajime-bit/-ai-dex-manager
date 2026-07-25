@@ -77,7 +77,7 @@ jobs:
           if (!supervisor.includes('DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED')) throw new Error('combined environment gate missing');
           if (!preflight.includes('DISDEX_V96_CONFIG_MIGRATION_MODE')) throw new Error('combined preflight migration mode missing');
           if (!migration.includes('systemctl') || !migration.includes('reconcileOrder')) throw new Error('verified V96 migration checks missing');
-          if (!migration.includes('PARTIALLY_FILLED') || !migration.includes('UNKNOWN')) throw new Error('pending fail-closed statuses missing');
+          if (!migration.includes('Pending V96 order cannot be safely migrated')) throw new Error('pending fail-closed path missing');
           if (!reference.includes('hermes.pyth.network')) throw new Error('Pyth Core reference missing');
           if (!reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Alpaca IEX validator missing');
           if (!reference.includes('cross_source_divergence')) throw new Error('cross-source fail-closed gate missing');
