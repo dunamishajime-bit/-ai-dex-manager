@@ -1,0 +1,142 @@
+name: Aster-only V31 V96-Idle Crypto Fallback
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py'
+      - 'docs/research/ASTER_ONLY_V31_V96_IDLE_CRYPTO_FALLBACK_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v31-v96-idle-crypto-fallback.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v31-v96-idle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 and Crypto V96 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore V31 caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v31-v96-idle
+          key: aster-only-v31-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py') }}
+          restore-keys: |
+            aster-only-v31-${{ runner.os }}-
+            aster-only-v22-${{ runner.os }}-
+            aster-only-v19-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_v96_crypto_v11_v13d_one_year_bt.py \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v31_v96_idle_crypto_fallback as v31
+          assert (v31.BT_END - v31.BT_START).days == 365
+          assert len(v31.CANDIDATES) == 558
+          assert v31.MAX_GROSS == 1.0
+          assert v31.COSTS == {'NORMAL': 16.0, 'P95': 24.0, 'SEVERE': 60.0}
+          assert v31.STOCK_COSTS == {'NORMAL': 40.0, 'P95': 44.0, 'SEVERE': 100.0}
+          assert v31.DAILY_LOSS_LOCK == -0.02
+          assert max(candidate.maximum_holding_hours for candidate in v31.CANDIDATES) == 4
+          assert set(v31.UNIVERSE) == {
+              'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT',
+              'LINKUSDT', 'AVAXUSDT', 'DOGEUSDT', 'AAVEUSDT',
+          }
+          assert all(candidate.risk_name in v31.RISK_MAP for candidate in v31.CANDIDATES)
+          print('V31 freeze assertions: PASS')
+          PY
+      - name: Run V31 V96-idle tournament
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v31-v96-idle
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v31_v96_idle_crypto_fallback.py \
+            --cache-dir ../.cache/aster-only-v31-v96-idle \
+            --output-dir ../.research-state/aster-only-v31-v96-idle \
+            2>&1 | tee ../.research-state/aster-only-v31-v96-idle/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v31-v96-idle/result.json
+          test -s .research-state/aster-only-v31-v96-idle/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v31-v96-idle/result.json').read_text())
+          assert p['version'] == 31
+          assert p['candidateCount'] == 558
+          assert p['period']['calendarDays'] == 365
+          assert p['architecture']['venue'] == 'ASTER_ONLY'
+          assert p['architecture']['maximumConcurrentGross'] == 1.0
+          assert p['architecture']['maximumConcurrentPositions'] == 1
+          assert p['architecture']['maximumHoldingHours'] == 4
+          assert p['architecture']['v96Priority'] is True
+          assert p['architecture']['v11EqPriority'] is True
+          assert p['architecture']['v19Priority'] is True
+          assert p['architecture']['forcedUtilization'] is False
+          assert p['architecture']['hyperliquidUsed'] is False
+          assert p['selectionDiscipline']['finalAndHoldoutUsedForSelection'] is False
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V31_NO_VALIDATED_V96_IDLE_CRYPTO_FALLBACK',
+              'ASTER_ONLY_V31_WINNER_DID_NOT_CLEAR_FINAL_AUDIT',
+              'ASTER_ONLY_V31_VALIDATED_SHADOW_LEAD',
+          }
+          if p['status'] == 'ASTER_ONLY_V31_VALIDATED_SHADOW_LEAD':
+              assert p['winner']['accepted'] is True
+              assert all(p['winner']['checks'].values())
+              assert p['winner']['priorityOverlapCount'] == 0
+          print(json.dumps({
+              'status': p['status'],
+              'developmentSurvivors': p['developmentSurvivors'],
+              'validationSurvivors': p['validationSurvivors'],
+              'winner': p['winner'],
+              'baselineUnified': p['baselineUnified'],
+              'topDevelopmentDiagnostics': p['topDevelopmentDiagnostics'][:5],
+              'topValidationDiagnostics': p['topValidationDiagnostics'][:5],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v31-v96-idle-${{ github.run_id }}
+          path: .research-state/aster-only-v31-v96-idle
+          retention-days: 90
+          if-no-files-found: warn
