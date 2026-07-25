@@ -48,7 +48,20 @@ def load_frozen_ir_events(_cache_dir, trading_days: Sequence[str]) -> Tuple[Dict
     return result, diagnostics
 
 
+_ORIGINAL_ANALYZE = v30.analyze
+
+
+def analyze_with_frozen_ir_events(cache_root):
+    result = _ORIGINAL_ANALYZE(cache_root)
+    result["selectionDiscipline"]["filingSessionRule"] = (
+        "strictly next aligned session after frozen official IR earnings release date"
+    )
+    result["data"]["sec"]["sourceMode"] = "FROZEN_OFFICIAL_IR_RELEASE_DATES"
+    return result
+
+
 v30.load_sec_events = load_frozen_ir_events
+v30.analyze = analyze_with_frozen_ir_events
 
 
 if __name__ == "__main__":
