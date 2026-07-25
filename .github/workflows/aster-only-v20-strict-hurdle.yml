@@ -1,0 +1,130 @@
+name: Aster-only V20 Strict Hurdle Tournament
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py'
+      - 'docs/research/ASTER_ONLY_V20_STRICT_HURDLE_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v20-strict-hurdle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v20-strict-hurdle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash/Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13D source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore exact-window caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v20-strict-hurdle
+          key: aster-only-v20-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py') }}
+          restore-keys: |
+            aster-only-v20-${{ runner.os }}-
+            aster-only-v19-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v15_intraday_shock_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v20_strict_hurdle_tournament as v20
+          assert len(v20.CANDIDATES) == 144
+          assert len(v20.FAMILY_THRESHOLDS) == 4
+          assert v20.STRICT_HURDLES['minimumNormalReturnPct'] == 50.0
+          assert v20.STRICT_HURDLES['minimumP95ReturnPct'] == 30.0
+          assert v20.STRICT_HURDLES['minimumNormalProfitFactor'] == 1.5
+          assert v20.STRICT_HURDLES['minimumNormalMaxDrawdownPct'] == -15.0
+          assert v20.MAX_GROSS == 1.0
+          assert v20.MAX_HOLDING_HOURS == 2
+          assert v20.DAILY_LOSS_LIMIT == -0.02
+          print('V20 strict-hurdle freeze assertions: PASS')
+          PY
+      - name: Run strict-hurdle tournament
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v20-strict-hurdle
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            --cache-dir ../.cache/aster-only-v20-strict-hurdle \
+            --output-dir ../.research-state/aster-only-v20-strict-hurdle \
+            2>&1 | tee ../.research-state/aster-only-v20-strict-hurdle/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v20-strict-hurdle/result.json
+          test -s .research-state/aster-only-v20-strict-hurdle/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v20-strict-hurdle/result.json').read_text())
+          assert p['version'] == 20
+          assert p['candidateCount'] == 144
+          assert p['familyCount'] == 4
+          assert p['period']['calendarDays'] == 365
+          assert p['rules']['venue'] == 'ASTER_ONLY'
+          assert p['rules']['hyperliquidUsed'] is False
+          assert p['rules']['maximumConcurrentGross'] == 1.0
+          assert p['rules']['maximumHoldingHours'] == 2
+          assert p['rules']['maximumOnePositionAtATime'] is True
+          assert p['rules']['dailyLossLimitPct'] == 2.0
+          assert p['selectionDiscipline']['julyHoldoutExcludedFromSelection'] is True
+          assert p['selectionDiscipline']['holdoutRetuningAllowed'] is False
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+            'mode': 'RESEARCH_ONLY',
+            'orderSubmissionAllowed': False,
+            'productionChanged': False,
+            'liveChanged': False,
+            'vpsChanged': False,
+            'cryptoV96Changed': False,
+            'v11EqChanged': False,
+            'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+            'ASTER_ONLY_V20_STRICT_HURDLE_PASS_SHADOW_ONLY',
+            'ASTER_ONLY_V20_NO_STRICT_HURDLE_CANDIDATE',
+          }
+          if p['status'] == 'ASTER_ONLY_V20_STRICT_HURDLE_PASS_SHADOW_ONLY':
+              assert p['winner'] is not None
+              assert p['winner']['allStrictHurdlesPassed'] is True
+              assert all(p['winner']['checks'].values())
+          print(json.dumps({
+            'status': p['status'],
+            'period': p['period'],
+            'winner': p.get('winner'),
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v20-strict-hurdle-${{ github.run_id }}
+          path: .research-state/aster-only-v20-strict-hurdle
+          retention-days: 90
+          if-no-files-found: warn
