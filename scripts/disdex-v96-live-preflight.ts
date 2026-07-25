@@ -13,6 +13,10 @@ import {
     type DisDexV96OperatorOverrideApproval,
 } from "../lib/disdex-v96-live-risk-controls";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
+import {
+    assertCombinedV96MigrationReady,
+    canonicalManagedPositions,
+} from "../lib/disdex-v96-combined-state-migration";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
 
@@ -68,7 +72,7 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V96-LIVE-Preflight/1.1",
+        userAgent: "DisDex-V96-LIVE-Preflight/1.2",
     });
     if (!client.hasTradingCredentials()) {
         throw new Error("V96 preflight requires ASTER_USER_ADDRESS and ASTER_API_PRIVATE_KEY.");
@@ -97,6 +101,7 @@ async function main() {
     }
 
     let migratedStateVerified = false;
+    let migrationId: string | undefined;
     if (configMigrationMode) {
         const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
         const state = await new FileDisDexV96RunnerStateStore(resolve(stateRoot, "runner-live.json"), "live").load();
@@ -104,6 +109,16 @@ async function main() {
         if (state.pending) throw new Error("V96 config-migration preflight found a pending state order.");
         if (state.manualReviewReason) throw new Error(`V96 config-migration preflight found manual review: ${state.manualReviewReason}`);
         if (state.operatorOverride) throw new Error("Migrated V96 state still contains the old Operator Override audit.");
+        const combinedRoot = String(process.env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT || "").trim();
+        if (!combinedRoot) throw new Error("Combined migration preflight requires DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT.");
+        const migration = await assertCombinedV96MigrationReady({
+            combinedRoot,
+            managedPositions: canonicalManagedPositions(managedPositions),
+        });
+        if (migration.manifest.asterAccountAddress !== String(process.env.ASTER_USER_ADDRESS || "").toLowerCase()) {
+            throw new Error("Combined V96 migration account does not match ASTER_USER_ADDRESS.");
+        }
+        migrationId = migration.manifest.migrationId;
         migratedStateVerified = true;
     } else if (managedPositions.length) {
         throw new Error(`V96 initial LIVE bootstrap requires managed positions to be flat; found ${managedPositions.length}.`);
@@ -125,7 +140,7 @@ async function main() {
     }
     console.log(JSON.stringify({
         status: "DISDEX_V96_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT",
-        preflightMode: configMigrationMode ? "CONFIG_MIGRATION_WITH_EXISTING_MANAGED_POSITIONS" : "INITIAL_FLAT_BOOTSTRAP",
+        preflightMode: configMigrationMode ? "CONFIG_MIGRATION_WITH_EXISTING_MANAGED_POSITIONS_VERIFIED_BY_COMBINED_MANIFEST" : "INITIAL_FLAT_BOOTSTRAP",
         runtimeCommitSha,
         configFingerprint: gate.configFingerprint,
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
@@ -137,6 +152,7 @@ async function main() {
         oneWayMode: true,
         managedPositionCount: managedPositions.length,
         migratedStateVerified,
+        migrationId,
         openOrderCount: openOrders.length,
         usdtBalance: Number(usdt.balance ?? usdt.crossWalletBalance ?? 0),
         usdtAvailableBalance: Number(usdt.availableBalance ?? 0),

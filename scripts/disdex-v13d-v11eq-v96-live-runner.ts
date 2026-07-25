@@ -10,6 +10,7 @@ import {
     DISDEX_V13D_V11EQ_V96_RUNTIME,
     DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
 } from "../config/disdexStockRouterV13DV11EqRuntime";
+import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
@@ -44,6 +45,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
     return {
         ...process.env,
         DISDEX_V13D_V11EQ_V96_RUNNER_MODE: runnerMode,
+        DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stockStateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
         DISDEX_V96_RUNNER_MODE: runnerMode,
@@ -52,6 +54,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V96_MAX_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
         DISDEX_V96_PAPER_MAX_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap + 0.05),
         DISDEX_V96_RUNNER_INTERVAL_MS: process.env.DISDEX_V96_RUNNER_INTERVAL_MS || "30000",
+        DISDEX_V96_CONFIG_MIGRATION_MODE: runnerMode === "live" ? "true" : "false",
     } as NodeJS.ProcessEnv;
 }
 
@@ -88,7 +91,7 @@ function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedC
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const stock = spawn(python, ["scripts/disdex_v13d_v11eq_stock_live_engine.py", "--mode", runnerMode, runFlag], {
+    const stock = spawn(python, ["scripts/disdex_v13d_v11eq_stock_free_live_engine.py", "--mode", runnerMode, runFlag], {
         cwd: process.cwd(), env, stdio: "inherit",
     });
     return [{ name: "crypto-v96", process: crypto }, { name: "stock-v13d-v11eq", process: stock }];
@@ -111,6 +114,16 @@ async function stopChildren(children: ManagedChild[], signal: NodeJS.Signals = "
 async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     assertCombinedLiveActivation(runnerMode);
     const paths = combinedPaths();
+    let migrationId: string | undefined;
+    if (runnerMode === "live") {
+        const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
+        if (!runtimeCommitSha) throw new Error("Combined LIVE activation requires DISDEX_V96_RUNTIME_COMMIT_SHA.");
+        const activation = await markCombinedV96MigrationActivated({
+            combinedRoot: paths.stateRoot,
+            runtimeCommitSha,
+        });
+        migrationId = activation.migrationId;
+    }
     await Promise.all([mkdir(paths.cryptoStateRoot, { recursive: true }), mkdir(paths.stockStateRoot, { recursive: true })]);
     const children = spawnManagedChildren(runnerMode, daemon);
     let intentionalStop = false;
@@ -126,6 +139,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         strategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
         runnerMode,
         daemon,
+        migrationId,
         cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
         stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
         totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
@@ -158,7 +172,9 @@ function selfTest() {
     const env = buildCombinedChildEnvironment("paper");
     assert.equal(env.DISDEX_V96_MAX_GROSS, "1");
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
+    assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
     assert.equal(env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE, "paper");
+    assert.match(String(env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT), /selftest-combined$/);
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
     if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;

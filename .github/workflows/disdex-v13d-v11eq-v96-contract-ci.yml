@@ -5,17 +5,23 @@ on:
     paths:
       - 'config/disdexStockRouterV13DV11EqRuntime.ts'
       - 'lib/disdex-v13d-v11eq-stock-router-contract.ts'
+      - 'lib/disdex-v96-combined-state-migration.ts'
       - 'scripts/disdex-v13d-v11eq-v96-contract-selftest.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-runner.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
       - 'scripts/disdex-v13d-v11eq-v96-kill-switch.ts'
+      - 'scripts/disdex-v96-combined-state-migrate.ts'
+      - 'scripts/disdex-v96-live-preflight.ts'
       - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
-      - 'scripts/disdex_stock_reference_alpaca_proxy.py'
+      - 'scripts/disdex_v13d_v11eq_stock_free_live_engine.py'
+      - 'scripts/disdex_stock_reference_pyth_iex_proxy.py'
       - 'requirements-stock-live.txt'
       - 'ops/systemd/disdex-v13d-v11eq-v96.service'
-      - 'ops/systemd/disdex-stock-reference-alpaca.service'
+      - 'ops/systemd/disdex-v13d-v11eq-v96-preflight.service'
+      - 'ops/systemd/disdex-v96-combined-migration.service'
+      - 'ops/systemd/disdex-stock-reference-free.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
-      - 'docs/implementation/V13D_V11EQ_CRYPTO_V96_CODEX_LIVE_HANDOFF.md'
+      - 'docs/implementation/FREE_PYTH_IEX_AND_V96_COMBINED_MIGRATION.md'
       - 'tsconfig.v13d-v11eq-router.json'
       - 'package.json'
       - '.github/workflows/disdex-v13d-v11eq-v96-contract-ci.yml'
@@ -45,35 +51,44 @@ jobs:
           cache-dependency-path: requirements-stock-live.txt
       - run: npm ci
       - run: python -m pip install -r requirements-stock-live.txt
-      - name: Validate combined LIVE contract and engines
+      - name: Validate combined LIVE contract, migration and free reference
         run: |
           npm run strategy:disdex-v13d-v11eq-v96:contract
-          python scripts/disdex_stock_reference_alpaca_proxy.py --self-test
           python -c "import hyperliquid, eth_account, websocket; print('Stock LIVE dependencies: PASS')"
       - name: Protect existing Crypto V96 behavior
         run: |
           npm run strategy:disdex-v96:typecheck
           npm run strategy:disdex-v96:selftest
           npm run strategy:disdex-v96:frequency:selftest
-      - name: Assert LIVE is implemented but remains environment gated
+      - name: Assert LIVE remains fail-closed and migration-gated
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
           const config = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
           const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
-          const stock = fs.readFileSync('scripts/disdex_v13d_v11eq_stock_live_engine.py', 'utf8');
-          const reference = fs.readFileSync('scripts/disdex_stock_reference_alpaca_proxy.py', 'utf8');
+          const preflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
+          const migration = fs.readFileSync('scripts/disdex-v96-combined-state-migrate.ts', 'utf8');
+          const reference = fs.readFileSync('scripts/disdex_stock_reference_pyth_iex_proxy.py', 'utf8');
+          const freeEngine = fs.readFileSync('scripts/disdex_v13d_v11eq_stock_free_live_engine.py', 'utf8');
           const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
+          const migrationUnit = fs.readFileSync('ops/systemd/disdex-v96-combined-migration.service', 'utf8');
+          const preflightUnit = fs.readFileSync('ops/systemd/disdex-v13d-v11eq-v96-preflight.service', 'utf8');
           if (!config.includes('mode: "LIVE_READY"')) throw new Error('combined runtime must be LIVE_READY');
           if (!config.includes('liveTradingEnabled: true')) throw new Error('LIVE implementation flag missing');
           if (!config.includes('orderSubmissionAllowed: true')) throw new Error('order implementation flag missing');
           if (!config.includes('sleeveLendingEnabled: false')) throw new Error('sleeve lending must remain disabled');
+          if (!supervisor.includes('markCombinedV96MigrationActivated')) throw new Error('combined activation migration gate missing');
           if (!supervisor.includes('DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED')) throw new Error('combined environment gate missing');
-          if (!supervisor.includes('I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96')) throw new Error('combined acknowledgement missing');
-          if (!supervisor.includes('DISDEX_V96_MAX_GROSS')) throw new Error('Crypto Gross cap handoff missing');
-          if (!stock.includes('POST_ONLY') && !stock.includes('post_only')) throw new Error('Aster post-only implementation missing');
-          if (!stock.includes('perp_dexs=["xyz"]')) throw new Error('Hyperliquid xyz execution implementation missing');
-          if (!reference.includes('wss://stream.data.alpaca.markets/v2/')) throw new Error('Alpaca websocket reference missing');
-          if (!reference.includes('DISDEX_STOCK_REFERENCE_PROXY_MAX_AGE_MS')) throw new Error('reference freshness gate missing');
+          if (!preflight.includes('DISDEX_V96_CONFIG_MIGRATION_MODE')) throw new Error('combined preflight migration mode missing');
+          if (!migration.includes('systemctl') || !migration.includes('reconcileOrder')) throw new Error('verified V96 migration checks missing');
+          if (!migration.includes('Pending V96 order cannot be safely migrated')) throw new Error('pending fail-closed path missing');
+          if (!reference.includes('hermes.pyth.network')) throw new Error('Pyth Core reference missing');
+          if (!reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Alpaca IEX validator missing');
+          if (!reference.includes('cross_source_divergence')) throw new Error('cross-source fail-closed gate missing');
+          if (!freeEngine.includes('REFERENCE_FRESHNESS_DEFERRED_MARKET_CLOSED')) throw new Error('market-closed startup handling missing');
+          if (!freeEngine.includes('DISDEX_V13D_MIN_PROJECTED_NET_BPS') || !freeEngine.includes('DISDEX_V11EQ_MIN_NET_EDGE_BPS')) throw new Error('free-reference edge floors missing');
+          if (!env.includes('ALPACA_DATA_FEED=iex')) throw new Error('free IEX environment missing');
           if (!env.includes('DISDEX_STOCK_REFERENCE_URL_TEMPLATE=http://127.0.0.1:8797/quote?symbol={symbol}')) throw new Error('local reference URL missing');
+          if (!migrationUnit.includes('EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env')) throw new Error('secure migration unit missing environment file');
+          if (!preflightUnit.includes('EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env')) throw new Error('secure preflight unit missing environment file');
           NODE
