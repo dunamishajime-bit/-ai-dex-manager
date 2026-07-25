@@ -1,8 +1,8 @@
 [Unit]
 Description=DisDex Crypto V96 plus V13D and V11-EQ combined LIVE runner
-After=network-online.target disdex-stock-reference-alpaca.service
+After=network-online.target disdex-stock-reference-free.service
 Wants=network-online.target
-Requires=disdex-stock-reference-alpaca.service
+Requires=disdex-stock-reference-free.service
 
 [Service]
 Type=simple
