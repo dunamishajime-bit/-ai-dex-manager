@@ -56,7 +56,7 @@ jobs:
           import sys
           sys.path.insert(0, 'scripts')
           import research_lab_aster_only_v22_v11eq_primary_v19_fallback as v22
-          assert (v22.BT_END_EXCLUSIVE - v22.BT_START).days == 365
+          assert (v22.v19.BT_END_EXCLUSIVE - v22.v19.BT_START).days == 365
           assert v22.MAX_COST_BPS == 60.0
           assert v22.MIN_EDGE_BPS == 10.0
           assert v22.v19.CANDIDATE.candidate_id == 'TIME_SLOT_ZSCORE_FADE__T2__SLOT_1230__H2__NONE'
