@@ -30,7 +30,7 @@ All orders are simulated only on Aster stock perpetuals. Hyperliquid is not used
 
 ## Selection discipline
 
-- 138 candidates are predeclared before execution;
+- 150 candidates are predeclared before execution;
 - Development screens candidates and sends at most 40 to Validation;
 - Validation selects at most one candidate;
 - Final reused and July Holdout are audit-only and are not used for winner selection;
