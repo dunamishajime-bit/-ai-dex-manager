@@ -29,21 +29,23 @@ async function main() {
     const env = {
         ...process.env,
         DISDEX_V13D_V11EQ_V96_RUNNER_MODE: "live",
+        DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.root,
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stock,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.kill,
         DISDEX_V96_STATE_DIR: paths.crypto,
         DISDEX_V96_KILL_SWITCH_FILE: paths.kill,
         DISDEX_V96_MAX_GROSS: "1",
+        DISDEX_V96_CONFIG_MIGRATION_MODE: "true",
     } as NodeJS.ProcessEnv;
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-    await run(python, ["-c", "import hyperliquid, eth_account; print('Python Stock dependencies: PASS')"], env);
-    await run(python, ["scripts/disdex_v13d_v11eq_stock_live_engine.py", "--mode", "live", "--preflight"], env);
+    await run(python, ["-c", "import hyperliquid, eth_account, websocket; print('Python Stock dependencies: PASS')"], env);
+    await run(python, ["scripts/disdex_v13d_v11eq_stock_free_live_engine.py", "--mode", "live", "--preflight"], env);
     await run(tsx, ["scripts/disdex-v96-live-preflight.ts"], env);
     console.log(JSON.stringify({
         status: "DISDEX_V13D_V11EQ_V96_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT",
-        stockPreflight: "PASS",
-        cryptoV96Preflight: "PASS",
+        stockPreflight: "PASS_FREE_PYTH_PRIMARY_ALPACA_IEX_VALIDATED",
+        cryptoV96Preflight: "PASS_VERIFIED_COMBINED_MIGRATION",
         ordersSent: false,
         cryptoGrossCap: 1,
         stockGrossCap: 1,
