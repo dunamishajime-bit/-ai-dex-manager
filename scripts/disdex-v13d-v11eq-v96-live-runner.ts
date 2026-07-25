@@ -45,6 +45,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
     return {
         ...process.env,
         DISDEX_V13D_V11EQ_V96_RUNNER_MODE: runnerMode,
+        DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stockStateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
         DISDEX_V96_RUNNER_MODE: runnerMode,
@@ -173,6 +174,7 @@ function selfTest() {
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
     assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
     assert.equal(env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE, "paper");
+    assert.match(String(env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT), /selftest-combined$/);
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
     if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
