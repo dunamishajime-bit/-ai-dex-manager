@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/research_lab_aster_only_v27_beta_squeeze_orb_tournament.py'
+      - 'scripts/run_aster_only_v27_beta_squeeze_orb_tournament.py'
       - 'docs/research/ASTER_ONLY_V27_BETA_SQUEEZE_ORB_PROTOCOL_2026-07-26.md'
       - '.github/workflows/aster-only-v27-beta-squeeze-orb.yml'
   workflow_dispatch:
@@ -40,7 +41,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache/aster-only-v27-beta-squeeze-orb
-          key: aster-only-v27-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v27_beta_squeeze_orb_tournament.py') }}
+          key: aster-only-v27-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v27_beta_squeeze_orb_tournament.py', 'scripts/run_aster_only_v27_beta_squeeze_orb_tournament.py') }}
           restore-keys: |
             aster-only-v27-${{ runner.os }}-
             aster-only-v26-${{ runner.os }}-
@@ -54,11 +55,13 @@ jobs:
             scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
             scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
             scripts/research_lab_aster_only_v26_nonbasis_fallback_tournament.py \
-            scripts/research_lab_aster_only_v27_beta_squeeze_orb_tournament.py
+            scripts/research_lab_aster_only_v27_beta_squeeze_orb_tournament.py \
+            scripts/run_aster_only_v27_beta_squeeze_orb_tournament.py
           python - <<'PY'
           import sys
           sys.path.insert(0, 'scripts')
           import research_lab_aster_only_v27_beta_squeeze_orb_tournament as v27
+          import run_aster_only_v27_beta_squeeze_orb_tournament as runner
           assert (v27.v19.BT_END_EXCLUSIVE - v27.v19.BT_START).days == 365
           assert len(v27.CANDIDATES) == 420
           assert v27.BASELINE_NORMAL == 72.276908
@@ -67,6 +70,7 @@ jobs:
           assert v27.BASELINE_FALLBACK_P95 == 7.400908
           assert v27.TP_PCT == 0.85
           assert v27.SL_PCT == 0.75
+          assert v27.build_trade is runner.build_trade_with_attribution
           assert all(candidate.maximum_holding_hours in {1, 2} for candidate in v27.CANDIDATES)
           assert all(candidate.slot in {1, 2, 3} for candidate in v27.CANDIDATES)
           print('V27 freeze assertions: PASS')
@@ -77,7 +81,7 @@ jobs:
           mkdir -p .research-state/aster-only-v27-beta-squeeze-orb
           set -o pipefail
           cd scripts
-          python research_lab_aster_only_v27_beta_squeeze_orb_tournament.py \
+          python run_aster_only_v27_beta_squeeze_orb_tournament.py \
             --cache-dir ../.cache/aster-only-v27-beta-squeeze-orb \
             --output-dir ../.research-state/aster-only-v27-beta-squeeze-orb \
             2>&1 | tee ../.research-state/aster-only-v27-beta-squeeze-orb/backtest.log
