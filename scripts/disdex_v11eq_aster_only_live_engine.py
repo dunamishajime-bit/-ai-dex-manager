@@ -15,7 +15,7 @@ import disdex_v13d_v11eq_stock_live_engine as base
 
 STRATEGY_ID = "DISDEX_V11EQ_ASTER_ONLY_EXCESS_MARGIN"
 # REFERENCE_FRESHNESS_DEFERRED_MARKET_CLOSED: quote freshness is required during regular US session only.
-LIVE_ACK = "I_ACCEPT_REAL_MONEY_V11EQ_ASTER_ONLY"
+LIVE_ACK = "I_ACCEPT_REAL_MONEY_V96_V11EQ_ASTER_ONLY"
 V96_SYMBOLS = {"BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"}
 
 
@@ -249,7 +249,7 @@ class AsterOnlyStockEngine(base.StockEngine):
 
 
 def self_test() -> None:
-    assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V11EQ_ASTER_ONLY"
+    assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V96_V11EQ_ASTER_ONLY"
     assert STRATEGY_ID == "DISDEX_V11EQ_ASTER_ONLY_EXCESS_MARGIN"
     assert "HYPERLIQUID_API_PRIVATE_KEY" not in os.environ
     assert "V13D" not in STRATEGY_ID
