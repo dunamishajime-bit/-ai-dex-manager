@@ -140,7 +140,7 @@ async function main() {
     }
     console.log(JSON.stringify({
         status: "DISDEX_V96_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT",
-        preflightMode: configMigrationMode ? "VERIFIED_COMBINED_STATE_MIGRATION_WITH_EXISTING_MANAGED_POSITIONS" : "INITIAL_FLAT_BOOTSTRAP",
+        preflightMode: configMigrationMode ? "CONFIG_MIGRATION_WITH_EXISTING_MANAGED_POSITIONS_VERIFIED_BY_COMBINED_MANIFEST" : "INITIAL_FLAT_BOOTSTRAP",
         runtimeCommitSha,
         configFingerprint: gate.configFingerprint,
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
