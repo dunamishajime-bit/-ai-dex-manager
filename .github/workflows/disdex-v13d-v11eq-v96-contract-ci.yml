@@ -17,6 +17,8 @@ on:
       - 'scripts/disdex_stock_reference_pyth_iex_proxy.py'
       - 'requirements-stock-live.txt'
       - 'ops/systemd/disdex-v13d-v11eq-v96.service'
+      - 'ops/systemd/disdex-v13d-v11eq-v96-preflight.service'
+      - 'ops/systemd/disdex-v96-combined-migration.service'
       - 'ops/systemd/disdex-stock-reference-free.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
       - 'docs/implementation/FREE_PYTH_IEX_AND_V96_COMBINED_MIGRATION.md'
@@ -69,6 +71,8 @@ jobs:
           const reference = fs.readFileSync('scripts/disdex_stock_reference_pyth_iex_proxy.py', 'utf8');
           const freeEngine = fs.readFileSync('scripts/disdex_v13d_v11eq_stock_free_live_engine.py', 'utf8');
           const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
+          const migrationUnit = fs.readFileSync('ops/systemd/disdex-v96-combined-migration.service', 'utf8');
+          const preflightUnit = fs.readFileSync('ops/systemd/disdex-v13d-v11eq-v96-preflight.service', 'utf8');
           if (!config.includes('mode: "LIVE_READY"')) throw new Error('combined runtime must be LIVE_READY');
           if (!config.includes('liveTradingEnabled: true')) throw new Error('LIVE implementation flag missing');
           if (!config.includes('orderSubmissionAllowed: true')) throw new Error('order implementation flag missing');
@@ -81,7 +85,10 @@ jobs:
           if (!reference.includes('hermes.pyth.network')) throw new Error('Pyth Core reference missing');
           if (!reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Alpaca IEX validator missing');
           if (!reference.includes('cross_source_divergence')) throw new Error('cross-source fail-closed gate missing');
+          if (!freeEngine.includes('REFERENCE_FRESHNESS_DEFERRED_MARKET_CLOSED')) throw new Error('market-closed startup handling missing');
           if (!freeEngine.includes('DISDEX_V13D_MIN_PROJECTED_NET_BPS') || !freeEngine.includes('DISDEX_V11EQ_MIN_NET_EDGE_BPS')) throw new Error('free-reference edge floors missing');
           if (!env.includes('ALPACA_DATA_FEED=iex')) throw new Error('free IEX environment missing');
           if (!env.includes('DISDEX_STOCK_REFERENCE_URL_TEMPLATE=http://127.0.0.1:8797/quote?symbol={symbol}')) throw new Error('local reference URL missing');
+          if (!migrationUnit.includes('EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env')) throw new Error('secure migration unit missing environment file');
+          if (!preflightUnit.includes('EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env')) throw new Error('secure preflight unit missing environment file');
           NODE
