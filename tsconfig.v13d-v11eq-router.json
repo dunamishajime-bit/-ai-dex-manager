@@ -7,10 +7,13 @@
     "next-env.d.ts",
     "config/disdexStockRouterV13DV11EqRuntime.ts",
     "lib/disdex-v13d-v11eq-stock-router-contract.ts",
+    "lib/disdex-v96-combined-state-migration.ts",
     "scripts/disdex-v13d-v11eq-v96-contract-selftest.ts",
     "scripts/disdex-v13d-v11eq-v96-live-runner.ts",
     "scripts/disdex-v13d-v11eq-v96-live-preflight.ts",
-    "scripts/disdex-v13d-v11eq-v96-kill-switch.ts"
+    "scripts/disdex-v13d-v11eq-v96-kill-switch.ts",
+    "scripts/disdex-v96-combined-state-migrate.ts",
+    "scripts/disdex-v96-live-preflight.ts"
   ],
   "exclude": [
     "node_modules",
