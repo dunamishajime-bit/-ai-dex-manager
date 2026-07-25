@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import os
+import time
 import urllib.parse
 
 import disdex_v13d_v11eq_stock_live_engine as engine
@@ -20,12 +21,21 @@ def regular_us_equity_session(value: dt.datetime | None = None) -> bool:
 def reference_health(reference: engine.ReferenceProvider) -> dict:
     parsed = urllib.parse.urlsplit(reference.template.format(symbol="NVDA", unix_ms=engine.now_ms()))
     health_url = urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "/health", "", ""))
-    payload = engine.http_json(health_url, headers=reference.headers, timeout=reference.timeout)
-    if not isinstance(payload, dict):
-        raise RuntimeError("Free reference /health returned a non-object response")
-    if payload.get("pythConnected") is not True or payload.get("iexConnected") is not True:
-        raise RuntimeError(f"Free reference sources are not connected: {payload}")
-    return payload
+    timeout_ms = engine.int_env("DISDEX_STOCK_REFERENCE_HEALTH_TIMEOUT_MS", 20_000)
+    deadline = engine.now_ms() + timeout_ms
+    last_error: Exception | None = None
+    while engine.now_ms() <= deadline:
+        try:
+            payload = engine.http_json(health_url, headers=reference.headers, timeout=reference.timeout)
+            if not isinstance(payload, dict):
+                raise RuntimeError("Free reference /health returned a non-object response")
+            if payload.get("pythConnected") is True and payload.get("iexConnected") is True:
+                return payload
+            last_error = RuntimeError(f"Free reference sources are not connected: {payload}")
+        except Exception as error:
+            last_error = error
+        time.sleep(0.25)
+    raise RuntimeError(f"Free reference health did not become ready within {timeout_ms}ms: {last_error}")
 
 
 def free_preflight(self: engine.StockEngine) -> dict:
