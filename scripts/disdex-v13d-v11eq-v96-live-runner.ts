@@ -12,11 +12,11 @@ import {
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
 
-const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96" as const;
+const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V11EQ_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
 
 type RunnerMode = "paper" | "live";
-type ManagedChild = { name: "crypto-v96" | "stock-v13d-v11eq"; process: ChildProcess };
+type ManagedChild = { name: "crypto-v96" | "stock-v11eq-aster-only"; process: ChildProcess };
 
 function boolEnv(name: string, fallback = false) {
     const value = process.env[name];
@@ -48,6 +48,9 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stockStateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
+        DISDEX_V11EQ_ASTER_ONLY_RUNNER_MODE: runnerMode,
+        DISDEX_V11EQ_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
+        DISDEX_V11EQ_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
         DISDEX_V96_RUNNER_MODE: runnerMode,
         DISDEX_V96_STATE_DIR: paths.cryptoStateRoot,
         DISDEX_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
@@ -63,10 +66,10 @@ export function assertCombinedLiveActivation(runnerMode: RunnerMode) {
     if (!DISDEX_V13D_V11EQ_V96_RUNTIME.liveTradingEnabled || !DISDEX_V13D_V11EQ_V96_RUNTIME.orderSubmissionAllowed) {
         throw new Error("Repository combined runtime is not LIVE-enabled.");
     }
-    if (!boolEnv("DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED", false)) {
-        throw new Error("LIVE requires DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED=true.");
+    if (!boolEnv("DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED", false)) {
+        throw new Error("LIVE requires DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true.");
     }
-    if (process.env.DISDEX_V13D_V11EQ_V96_LIVE_ACKNOWLEDGEMENT !== LIVE_ACKNOWLEDGEMENT) {
+    if (process.env.DISDEX_V11EQ_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT !== LIVE_ACKNOWLEDGEMENT) {
         throw new Error(`LIVE requires acknowledgement ${LIVE_ACKNOWLEDGEMENT}.`);
     }
 }
@@ -91,10 +94,10 @@ function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedC
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const stock = spawn(python, ["scripts/disdex_v13d_v11eq_stock_free_live_engine.py", "--mode", runnerMode, runFlag], {
+    const stock = spawn(python, ["scripts/disdex_v11eq_aster_only_live_engine.py", "--mode", runnerMode, runFlag], {
         cwd: process.cwd(), env, stdio: "inherit",
     });
-    return [{ name: "crypto-v96", process: crypto }, { name: "stock-v13d-v11eq", process: stock }];
+    return [{ name: "crypto-v96", process: crypto }, { name: "stock-v11eq-aster-only", process: stock }];
 }
 
 function waitForExit(child: ManagedChild) {

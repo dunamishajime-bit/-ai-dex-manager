@@ -1,5 +1,5 @@
 [Unit]
-Description=DisDex V96 plus V13D and V11-EQ combined no-order preflight
+Description=DisDex V96 plus Aster-only V11-EQ no-order preflight
 After=network-online.target disdex-stock-reference-free.service
 Wants=network-online.target
 Requires=disdex-stock-reference-free.service

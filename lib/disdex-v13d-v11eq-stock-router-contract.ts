@@ -64,15 +64,12 @@ export function evaluateV11EqGate(snapshot: V11ExecutionSnapshot): V11EqGateResu
 }
 
 export function decideStockRoute(v13d: V13DDecision, v11Snapshot?: V11ExecutionSnapshot): StockRouterDecision {
-    if (v13d.eligible && v13d.completedMakerFill && v13d.completedHedge && v13d.symbol) {
-        return { action: "OPEN", strategy: "V13D", symbol: v13d.symbol, reasons: ["V13D_FIRST_PRIORITY_COMPLETED"] };
-    }
     if (!v11Snapshot) {
-        return { action: "HOLD_CASH", strategy: "NONE", reasons: [v13d.reason ?? "V13D_NOT_COMPLETED", "V11_EQ_SNAPSHOT_MISSING"] };
+        return { action: "HOLD_CASH", strategy: "NONE", reasons: ["V13D_DISABLED", "V11_EQ_SNAPSHOT_MISSING"] };
     }
     const gate = evaluateV11EqGate(v11Snapshot);
     if (!gate.accepted) return { action: "HOLD_CASH", strategy: "NONE", reasons: gate.reasons };
-    return { action: "OPEN", strategy: "V11_EQ", symbol: v11Snapshot.symbol, reasons: ["V13D_NOT_COMPLETED", "V11_EQ_GATE_PASS"] };
+    return { action: "OPEN", strategy: "V11_EQ", symbol: v11Snapshot.symbol, reasons: ["V13D_DISABLED", "V11_EQ_GATE_PASS"] };
 }
 
 export function assertPortfolioGross(cryptoGross: number, stockGross: number): void {
@@ -80,7 +77,7 @@ export function assertPortfolioGross(cryptoGross: number, stockGross: number): v
     if (!Number.isFinite(cryptoGross) || !Number.isFinite(stockGross)) throw new Error("Gross values must be finite");
     if (cryptoGross < 0 || stockGross < 0) throw new Error("Gross values cannot be negative");
     if (cryptoGross > allocation.cryptoSleeveGrossCap + 1e-12) throw new Error(`Crypto Gross cap exceeded: ${cryptoGross}`);
-    if (stockGross > allocation.stockSleeveGrossCap + 1e-12) throw new Error(`Stock Gross cap exceeded: ${stockGross}`);
+    if (typeof allocation.stockSleeveGrossCap === "number" && stockGross > allocation.stockSleeveGrossCap + 1e-12) throw new Error(`Stock Gross cap exceeded: ${stockGross}`);
     if (cryptoGross + stockGross > allocation.portfolioGrossCap + 1e-12) throw new Error(`Portfolio Gross cap exceeded: ${cryptoGross + stockGross}`);
 }
 

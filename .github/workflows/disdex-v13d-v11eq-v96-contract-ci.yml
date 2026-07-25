@@ -13,9 +13,9 @@ on:
       - 'scripts/disdex-v96-combined-state-migrate.ts'
       - 'scripts/disdex-v96-live-preflight.ts'
       - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
-      - 'scripts/disdex_v13d_v11eq_stock_free_live_engine.py'
+      - 'scripts/disdex_v11eq_aster_only_live_engine.py'
       - 'scripts/disdex_stock_reference_pyth_iex_proxy.py'
-      - 'requirements-stock-live.txt'
+      - 'requirements-stock-aster-only.txt'
       - 'ops/systemd/disdex-v13d-v11eq-v96.service'
       - 'ops/systemd/disdex-v13d-v11eq-v96-preflight.service'
       - 'ops/systemd/disdex-v96-combined-migration.service'
@@ -48,13 +48,13 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: requirements-stock-live.txt
+          cache-dependency-path: requirements-stock-aster-only.txt
       - run: npm ci
-      - run: python -m pip install -r requirements-stock-live.txt
+      - run: python -m pip install -r requirements-stock-aster-only.txt
       - name: Validate combined LIVE contract, migration and free reference
         run: |
           npm run strategy:disdex-v13d-v11eq-v96:contract
-          python -c "import hyperliquid, eth_account, websocket; print('Stock LIVE dependencies: PASS')"
+          python -c "import websocket; print('Aster-only Reference dependencies: PASS')"
       - name: Protect existing Crypto V96 behavior
         run: |
           npm run strategy:disdex-v96:typecheck
@@ -69,7 +69,7 @@ jobs:
           const preflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
           const migration = fs.readFileSync('scripts/disdex-v96-combined-state-migrate.ts', 'utf8');
           const reference = fs.readFileSync('scripts/disdex_stock_reference_pyth_iex_proxy.py', 'utf8');
-          const freeEngine = fs.readFileSync('scripts/disdex_v13d_v11eq_stock_free_live_engine.py', 'utf8');
+          const asterOnlyEngine = fs.readFileSync('scripts/disdex_v11eq_aster_only_live_engine.py', 'utf8');
           const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
           const migrationUnit = fs.readFileSync('ops/systemd/disdex-v96-combined-migration.service', 'utf8');
           const preflightUnit = fs.readFileSync('ops/systemd/disdex-v13d-v11eq-v96-preflight.service', 'utf8');
@@ -78,15 +78,17 @@ jobs:
           if (!config.includes('orderSubmissionAllowed: true')) throw new Error('order implementation flag missing');
           if (!config.includes('sleeveLendingEnabled: false')) throw new Error('sleeve lending must remain disabled');
           if (!supervisor.includes('markCombinedV96MigrationActivated')) throw new Error('combined activation migration gate missing');
-          if (!supervisor.includes('DISDEX_V13D_V11EQ_V96_LIVE_EXECUTION_ENABLED')) throw new Error('combined environment gate missing');
+          if (!supervisor.includes('DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED')) throw new Error('combined environment gate missing');
           if (!preflight.includes('DISDEX_V96_CONFIG_MIGRATION_MODE')) throw new Error('combined preflight migration mode missing');
           if (!migration.includes('systemctl') || !migration.includes('reconcileOrder')) throw new Error('verified V96 migration checks missing');
           if (!migration.includes('Pending V96 order cannot be safely migrated')) throw new Error('pending fail-closed path missing');
           if (!reference.includes('hermes.pyth.network')) throw new Error('Pyth Core reference missing');
           if (!reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Alpaca IEX validator missing');
           if (!reference.includes('cross_source_divergence')) throw new Error('cross-source fail-closed gate missing');
-          if (!freeEngine.includes('REFERENCE_FRESHNESS_DEFERRED_MARKET_CLOSED')) throw new Error('market-closed startup handling missing');
-          if (!freeEngine.includes('DISDEX_V13D_MIN_PROJECTED_NET_BPS') || !freeEngine.includes('DISDEX_V11EQ_MIN_NET_EDGE_BPS')) throw new Error('free-reference edge floors missing');
+          if (!asterOnlyEngine.includes('REFERENCE_FRESHNESS_DEFERRED_MARKET_CLOSED')) throw new Error('market-closed startup handling missing');
+          if (!asterOnlyEngine.includes('excess_margin_usd') || !asterOnlyEngine.includes('DISDEX_V96_SAFETY_RESERVE_PCT')) throw new Error('Aster-only excess-margin guard missing');
+          if (asterOnlyEngine.includes('HyperliquidXYZClient') || asterOnlyEngine.includes('self.xyz')) throw new Error('Hyperliquid must be excluded from Aster-only engine');
+          if (!config.includes('strategyId: "V13D_DISABLED"') || !config.includes('enabledForLive: false')) throw new Error('V13D must be disabled');
           if (!env.includes('ALPACA_DATA_FEED=iex')) throw new Error('free IEX environment missing');
           if (!env.includes('DISDEX_STOCK_REFERENCE_URL_TEMPLATE=http://127.0.0.1:8797/quote?symbol={symbol}')) throw new Error('local reference URL missing');
           if (!migrationUnit.includes('EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env')) throw new Error('secure migration unit missing environment file');
