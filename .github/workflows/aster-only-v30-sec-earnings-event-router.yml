@@ -1,0 +1,141 @@
+name: Aster-only V30 SEC Earnings Event Router
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v30_sec_earnings_event_router.py'
+      - 'docs/research/ASTER_ONLY_V30_SEC_EARNINGS_EVENT_ROUTER_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v30-sec-earnings-event-router.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v30-sec-event-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash/Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13D source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore exact-window caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v30-sec-event
+          key: aster-only-v30-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v30_sec_earnings_event_router.py') }}
+          restore-keys: |
+            aster-only-v30-${{ runner.os }}-
+            aster-only-v29-${{ runner.os }}-
+            aster-only-v22-${{ runner.os }}-
+            aster-only-v19-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v26_nonbasis_fallback_tournament.py \
+            scripts/research_lab_aster_only_v30_sec_earnings_event_router.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v30_sec_earnings_event_router as v30
+          assert (v30.v19.BT_END_EXCLUSIVE - v30.v19.BT_START).days == 365
+          assert len(v30.CANDIDATES) == 432
+          assert v30.BASELINE_NORMAL == 72.276908
+          assert v30.BASELINE_P95 == 68.080022
+          assert v30.BASELINE_FALLBACK_NORMAL == 7.813259
+          assert v30.BASELINE_FALLBACK_P95 == 7.400908
+          assert v30.TP_PCT == 0.90
+          assert v30.SL_PCT == 0.80
+          assert set(v30.CIK_BY_SYMBOL) == {'AMZN', 'META', 'MSFT', 'NVDA', 'TSLA'}
+          assert all(candidate.entry_slot in {1, 2} for candidate in v30.CANDIDATES)
+          assert all(candidate.maximum_holding_hours in {1, 2} for candidate in v30.CANDIDATES)
+          assert all(candidate.route_policy in {'EVENT_PRIORITY', 'MAX_EDGE', 'SEQUENTIAL_THEN_V19'} for candidate in v30.CANDIDATES)
+          print('V30 freeze assertions: PASS')
+          PY
+      - name: Run V30 SEC earnings event router
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v30-sec-event
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v30_sec_earnings_event_router.py \
+            --cache-dir ../.cache/aster-only-v30-sec-event \
+            --output-dir ../.research-state/aster-only-v30-sec-event \
+            2>&1 | tee ../.research-state/aster-only-v30-sec-event/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v30-sec-event/result.json
+          test -s .research-state/aster-only-v30-sec-event/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v30-sec-event/result.json').read_text())
+          assert p['version'] == 30
+          assert p['candidateCount'] == 432
+          assert p['period']['calendarDays'] == 365
+          assert p['architecture'] == {
+              'venue': 'ASTER_ONLY',
+              'maximumConcurrentGross': 1.0,
+              'maximumConcurrentPositions': 1,
+              'sequentialIntradayEntriesAllowed': True,
+              'hyperliquidUsed': False,
+          }
+          assert p['selectionDiscipline']['finalAndHoldoutUsedForSelection'] is False
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['eventData']['source'] == 'SEC data.sec.gov submissions API'
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V30_NO_VALIDATED_SEC_EVENT_ROUTER',
+              'ASTER_ONLY_V30_WINNER_DID_NOT_CLEAR_FINAL_AUDIT',
+              'ASTER_ONLY_V30_VALIDATED_SEC_EVENT_SHADOW_LEAD',
+          }
+          if p['status'] == 'ASTER_ONLY_V30_VALIDATED_SEC_EVENT_SHADOW_LEAD':
+              assert p['winner']['accepted'] is True
+              assert all(p['winner']['audit']['checks'].values())
+          print(json.dumps({
+              'status': p['status'],
+              'developmentSurvivors': p['developmentSurvivors'],
+              'validationSurvivors': p['validationSurvivors'],
+              'winner': p['winner'],
+              'topDevelopment': p['topDevelopment'][:3],
+              'eventData': p['eventData'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v30-sec-event-${{ github.run_id }}
+          path: .research-state/aster-only-v30-sec-event
+          retention-days: 90
+          if-no-files-found: warn
