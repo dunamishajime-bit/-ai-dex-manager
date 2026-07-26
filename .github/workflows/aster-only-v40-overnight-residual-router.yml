@@ -36,16 +36,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Restore overnight caches
+      - name: Restore successful V39 overnight caches
         uses: actions/cache@v4
         with:
-          path: .cache/aster-only-v40-overnight-residual
-          key: aster-only-v40-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v40_overnight_residual_router.py') }}
+          path: .cache/aster-only-v39-overnight-open
+          key: aster-only-v40-v39cache-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v40_overnight_residual_router.py') }}
           restore-keys: |
-            aster-only-v40-${{ runner.os }}-
             aster-only-v39-${{ runner.os }}-
-            aster-only-v22-${{ runner.os }}-
-            aster-only-v19-${{ runner.os }}-
       - name: Compile and freeze assertions
         run: |
           python -m py_compile \
@@ -75,7 +72,7 @@ jobs:
           set -o pipefail
           cd scripts
           python research_lab_aster_only_v40_overnight_residual_router.py \
-            --cache-dir ../.cache/aster-only-v40-overnight-residual \
+            --cache-dir ../.cache/aster-only-v39-overnight-open \
             --output-dir ../.research-state/aster-only-v40-overnight-residual \
             2>&1 | tee ../.research-state/aster-only-v40-overnight-residual/backtest.log
       - name: Validate result and safety
