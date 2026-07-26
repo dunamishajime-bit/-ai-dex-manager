@@ -4,6 +4,11 @@ import type { LiveRunnerLock } from "@/lib/live-runner-state";
 import { buildDisDexV35RebalanceActions, type DisDexV35RebalanceAction } from "@/lib/disdex-v35-portfolio-runner";
 import type { DisDexV46AsterMarketDataProvider } from "@/lib/disdex-v46-market-data-provider";
 import { buildDisDexV96CombinedSignal, type DisDexV96CombinedSignal } from "@/lib/disdex-v96-combined-signal";
+import {
+    planDisDexV96ExecutionCapacity,
+    shouldSkipDisDexV96Signal,
+    type DisDexV96ExecutionCapacityPlan,
+} from "@/lib/disdex-v96-execution-capacity";
 import { normalizeDisDexV96OrderQuantity } from "@/lib/disdex-v96-order-quantity";
 import type {
     DisDexV96PendingOrder,
@@ -20,6 +25,9 @@ import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME, DISDEX_V96_STRATEGY_ID }
 import { disDexV96ConfigFingerprint } from "@/lib/disdex-v96-live-gates";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
+const ONE_TIME_ETH_SIGNAL_SKIP_REFERENCE_TS = 1785024000000;
+const DEFAULT_ROUND_TRIP_FEE_BPS = 8;
+const DEFAULT_MINIMUM_EXECUTION_HEADROOM_USD = 4;
 
 export interface DisDexV96PortfolioRunnerConfig {
     mode: DisDexV96RunnerMode;
@@ -32,6 +40,9 @@ export interface DisDexV96PortfolioRunnerConfig {
     maxTransactionRetries: number;
     closeUnmanagedPositions: boolean;
     penguTargetGrossCap?: number;
+    oneTimeSkippedSignalReferenceTs?: number;
+    roundTripFeeBps: number;
+    minimumExecutionHeadroomUsd: number;
     maximumDailyLossPct: number;
     maximumDailyLossUsd?: number;
     killSwitchPath?: string;
@@ -147,6 +158,11 @@ function recordCompleted(state: DisDexV96RunnerState, pending: DisDexV96PendingO
     }].slice(-500);
     state.lastCompletedIdempotencyKey = pending.idempotencyKey;
     state.pending = undefined;
+}
+
+function quantityPlanIsBelowExchangeMinimum(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return /below the (configured )?minimum|normalized .*quantity is zero|normalized .*notional|quantity is zero/i.test(message);
 }
 
 export class DisDexV96PortfolioRunner {
@@ -373,6 +389,7 @@ export class DisDexV96PortfolioRunner {
 
             const signal = buildDisDexV96CombinedSignal(history, this.now(), {
                 penguTargetGrossCap: this.dependencies.config.penguTargetGrossCap,
+                totalGrossCap: this.dependencies.config.maxGross,
             });
             if (!risk.flatten && signal.allocation.finalGross > this.dependencies.config.maxGross + 1e-9) {
                 state.forwardEvidence.grossCapBreaches += 1;
@@ -429,38 +446,97 @@ export class DisDexV96PortfolioRunner {
                     signal,
                 };
             }
-            const action = rebalance.actions[0];
+            let action = rebalance.actions[0];
             if (risk.flatten && !action.reduceOnly) {
                 state.manualReviewReason = "V96 risk invariant violation: emergency action was not reduce-only.";
                 await this.dependencies.stateStore.save(state);
                 return { status: "manual-review", message: state.manualReviewReason, signal, action };
             }
-            const key = idempotencyKey(signal, action, risk.reason);
-            if (state.lastCompletedIdempotencyKey === key) {
+            if (!risk.flatten && shouldSkipDisDexV96Signal({
+                configuredReferenceTs: this.dependencies.config.oneTimeSkippedSignalReferenceTs,
+                signalReferenceTs: signal.referenceTs,
+                symbol: action.symbol,
+                side: action.side,
+                reduceOnly: action.reduceOnly,
+            })) {
+                state.skippedSignalReferenceTs = signal.referenceTs;
                 await this.dependencies.stateStore.save(state);
-                return { status: "held", message: "The same V96 rebalance action was already completed.", signal, action, idempotencyKey: key };
+                this.log.warn("V96 stale ETH signal was formally skipped", {
+                    referenceTs: signal.referenceTs,
+                    symbol: action.symbol,
+                    side: action.side,
+                    alreadyRecorded: state.skippedSignalReferenceTs === signal.referenceTs,
+                });
+                return {
+                    status: "held",
+                    message: `ETHUSDT BUY referenceTs=${signal.referenceTs} is the explicitly skipped stale signal; no order was sent.`,
+                    signal,
+                    action,
+                };
             }
             const position = positions.find((item) => item.symbol.toUpperCase() === action.symbol);
             const signedQuantity = position ? signedPositionQuantity(position) : 0;
             if (signedQuantity !== 0 && action.targetWeight !== 0 && Math.sign(signedQuantity) !== Math.sign(action.targetWeight) && !action.reduceOnly) {
                 throw new Error("V96 invariant violation: direction changes must close reduce-only before opening the opposite side.");
             }
-            const requiredIncreaseUsd = Math.max(0, Math.abs(action.targetNotionalUsd) - Math.abs(action.currentNotionalUsd));
-            const availableCapacityUsd = Math.max(0, account.availableBalance) * Math.max(0, 1 - this.dependencies.config.cashReservePct / 100);
-            if (!action.reduceOnly && requiredIncreaseUsd > availableCapacityUsd + 1e-9) {
+
+            let capacityPlan: DisDexV96ExecutionCapacityPlan;
+            try {
+                capacityPlan = planDisDexV96ExecutionCapacity({
+                    account,
+                    positions,
+                    managedPositions: activeManagedPositions,
+                    action,
+                    config: {
+                        cashReservePct: this.dependencies.config.cashReservePct,
+                        maxGross: this.dependencies.config.maxGross,
+                        maxSlippageBps: this.dependencies.config.maxSlippageBps,
+                        minOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
+                        roundTripFeeBps: this.dependencies.config.roundTripFeeBps,
+                        minimumExecutionHeadroomUsd: this.dependencies.config.minimumExecutionHeadroomUsd,
+                    },
+                });
+            } catch (error) {
+                state.manualReviewReason = `V96 execution-capacity validation failed: ${error instanceof Error ? error.message : String(error)}`;
                 await this.dependencies.stateStore.save(state);
-                return { status: "held", message: `Insufficient available balance capacity for ${action.symbol}; no order was sent.`, signal, action, idempotencyKey: key };
+                return { status: "manual-review", message: state.manualReviewReason, signal, action };
             }
-            const quantityPlan = await normalizeDisDexV96OrderQuantity({
-                executor: this.dependencies.executor,
-                symbol: action.symbol,
-                side: action.side,
-                quote: quotes[action.symbol],
-                deltaNotionalUsd: action.deltaNotionalUsd,
-                minimumOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
-                reduceOnly: action.reduceOnly,
-                currentPositionQuantity: position ? signedPositionQuantity(position) : undefined,
-            });
+            action = capacityPlan.action;
+            if (capacityPlan.blockedReason) {
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: `${capacityPlan.blockedReason} No order was sent.`, signal, action };
+            }
+            const key = idempotencyKey(signal, action, risk.reason);
+            if (state.lastCompletedIdempotencyKey === key) {
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: "The same V96 rebalance action was already completed.", signal, action, idempotencyKey: key };
+            }
+
+            let quantityPlan;
+            try {
+                quantityPlan = await normalizeDisDexV96OrderQuantity({
+                    executor: this.dependencies.executor,
+                    symbol: action.symbol,
+                    side: action.side,
+                    quote: quotes[action.symbol],
+                    deltaNotionalUsd: action.deltaNotionalUsd,
+                    minimumOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
+                    reduceOnly: action.reduceOnly,
+                    currentPositionQuantity: position ? signedPositionQuantity(position) : undefined,
+                });
+            } catch (error) {
+                if (quantityPlanIsBelowExchangeMinimum(error)) {
+                    await this.dependencies.stateStore.save(state);
+                    return {
+                        status: "held",
+                        message: `${error instanceof Error ? error.message : String(error)} No order was sent.`,
+                        signal,
+                        action,
+                        idempotencyKey: key,
+                    };
+                }
+                throw error;
+            }
             const pending: DisDexV96PendingOrder = {
                 idempotencyKey: key,
                 clientOrderId: clientOrderId(key),
@@ -478,7 +554,7 @@ export class DisDexV96PortfolioRunner {
                 createdAt: this.now(),
                 updatedAt: this.now(),
                 retryCount: 0,
-                reason: `${DISDEX_V96_STRATEGY_ID}: ${risk.reason || action.reason} coreScale=${signal.allocation.coreScale.toFixed(6)} penguSide=${signal.pengu.side} penguClip=${signal.allocation.penguClip.toFixed(6)} penguGrossCap=${signal.penguGrossCapApplied.toFixed(6)}`,
+                reason: `${DISDEX_V96_STRATEGY_ID}: ${risk.reason || action.reason} coreScale=${signal.allocation.coreScale.toFixed(6)} penguSide=${signal.pengu.side} penguClip=${signal.allocation.penguClip.toFixed(6)} penguGrossCap=${signal.penguGrossCapApplied.toFixed(6)} signalTargetWeight=${capacityPlan.signalTargetWeight.toFixed(6)} executionTargetWeight=${capacityPlan.executionTargetWeight.toFixed(6)} executionScale=${capacityPlan.executionScale.toFixed(6)}`,
             };
             state.pending = pending;
             await this.dependencies.stateStore.save(state);
@@ -487,7 +563,17 @@ export class DisDexV96PortfolioRunner {
                 symbol: action.symbol,
                 side: action.side,
                 reduceOnly: action.reduceOnly,
-                targetWeight: action.targetWeight,
+                signalTargetWeight: capacityPlan.signalTargetWeight,
+                executionTargetWeight: capacityPlan.executionTargetWeight,
+                executionScale: capacityPlan.executionScale,
+                requestedIncreaseUsd: capacityPlan.requestedIncreaseUsd,
+                executableIncreaseUsd: capacityPlan.executableIncreaseUsd,
+                availableBalanceUsd: capacityPlan.reportedAvailableBalanceUsd,
+                requiredInitialMarginUsd: capacityPlan.requiredInitialMarginUsd,
+                cashReserveUsd: capacityPlan.cashReserveUsd,
+                estimatedCostHeadroomUsd: capacityPlan.estimatedCostHeadroomUsd,
+                protectedCashUsd: capacityPlan.protectedCashUsd,
+                projectedManagedGross: capacityPlan.projectedManagedGross,
                 requestedQuantity: pending.requestedQuantity,
                 normalizedQuantity: pending.normalizedQuantity,
                 coreScale: signal.allocation.coreScale,
@@ -521,6 +607,11 @@ export function buildDefaultDisDexV96RunnerConfig(
         maxTransactionRetries: Math.max(1, input.maxTransactionRetries ?? 3),
         closeUnmanagedPositions: input.closeUnmanagedPositions === true,
         penguTargetGrossCap: input.penguTargetGrossCap,
+        oneTimeSkippedSignalReferenceTs: Number.isFinite(Number(input.oneTimeSkippedSignalReferenceTs))
+            ? Number(input.oneTimeSkippedSignalReferenceTs)
+            : ONE_TIME_ETH_SIGNAL_SKIP_REFERENCE_TS,
+        roundTripFeeBps: Math.max(0, input.roundTripFeeBps ?? DEFAULT_ROUND_TRIP_FEE_BPS),
+        minimumExecutionHeadroomUsd: Math.max(0, input.minimumExecutionHeadroomUsd ?? DEFAULT_MINIMUM_EXECUTION_HEADROOM_USD),
         maximumDailyLossPct: Math.min(
             DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct,
             Math.max(0.1, input.maximumDailyLossPct ?? DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct),
