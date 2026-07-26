@@ -68,3 +68,5 @@ jobs:
             .research-state/btc-lead-lag-spread-v47.md
           if-no-files-found: warn
           retention-days: 30
+
+# Research-only workflow. No production, VPS, environment, or trading changes.
