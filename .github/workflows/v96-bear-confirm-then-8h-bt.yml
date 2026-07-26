@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/research_lab_v96_bear_confirm_then_8h_bt.py'
+      - 'scripts/research_lab_v96_bear_confirm_then_8h_refine_result.py'
       - 'scripts/research_lab_v96_bear_confirm_then_8h_result_gate.py'
       - '.github/workflows/v96-bear-confirm-then-8h-bt.yml'
   workflow_dispatch:
@@ -34,6 +35,7 @@ jobs:
       - name: Compile research backtest
         run: |
           python -m py_compile scripts/research_lab_v96_bear_confirm_then_8h_bt.py
+          python -m py_compile scripts/research_lab_v96_bear_confirm_then_8h_refine_result.py
           python -m py_compile scripts/research_lab_v96_bear_confirm_then_8h_result_gate.py
       - name: Run Bear confirmation and conditional 8h comparison
         env:
@@ -41,6 +43,7 @@ jobs:
         run: |
           cd scripts
           python research_lab_v96_bear_confirm_then_8h_bt.py
+          python research_lab_v96_bear_confirm_then_8h_refine_result.py
           python research_lab_v96_bear_confirm_then_8h_result_gate.py
       - name: Validate outputs
         run: |
