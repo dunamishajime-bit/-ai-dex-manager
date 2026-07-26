@@ -81,8 +81,8 @@ jobs:
           p = json.loads(Path('.research-state/v96-v52-dual-slot-one-year/result.json').read_text())
           assert p['version'] == 53
           assert p['period']['calendarDays'] == 365
-          assert p['period']['startInclusive'].startswith('2025-07-25')
-          assert p['period']['endExclusive'].startswith('2026-07-25')
+          assert p['period']['startInclusive'].startswith('2025-07-01')
+          assert p['period']['endExclusive'].startswith('2026-07-01')
           assert p['architecture']['cryptoGrossCap'] == 1.0
           assert p['architecture']['stockGrossCap'] == 1.5
           assert p['architecture']['totalGrossCap'] == 2.5
