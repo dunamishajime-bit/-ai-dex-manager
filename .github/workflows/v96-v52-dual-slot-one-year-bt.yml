@@ -1,4 +1,4 @@
-# Exact common-period replay: 2025-07-01 through 2026-07-01 UTC.
+# Exact common-period replay: 2025-07-01 through 2026-07-01 UTC. PR synchronization trigger.
 name: V96 plus V52 Dual-Slot One-Year Compounded Backtest
 
 on:
