@@ -1,11 +1,12 @@
 # V96 + V52 Dual-Slot One-Year Compounded Portfolio Backtest Protocol
 
-## Fixed period
+## Fixed common period
 
-- Start inclusive: 2025-07-25 00:00 UTC
-- End exclusive: 2026-07-25 00:00 UTC
+- Start inclusive: 2025-07-01 00:00 UTC
+- End exclusive: 2026-07-01 00:00 UTC
 - Calendar span: exactly 365 days
-- The V52 trailing-one-year window is authoritative. Crypto V96 is replayed over the same dates.
+- The complete frozen V96 one-year window is authoritative.
+- V52 is replayed without strategy retuning over the same dates, using a 40-calendar-day pre-period warmup only for causal rolling inputs.
 
 ## Fixed architecture
 
