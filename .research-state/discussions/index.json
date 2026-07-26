@@ -1,7 +1,29 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-26T13:56:45.866Z",
+  "updatedAt": "2026-07-26T17:16:36.961Z",
   "items": [
+    {
+      "id": "main-research-0061-2026-07-26T17-16-36-961Z",
+      "path": "discussions/2026/07/26/main-research-0061-2026-07-26T17-16-36-961Z.json",
+      "cycle": 61,
+      "completedAt": "2026-07-26T17:16:36.961Z",
+      "profile": "attack",
+      "title": "Main Strategy Research #61：WIN80_ULTRA90_TOP1_V1 / Win80 / Ultra90 Entry品質",
+      "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Win80 / Ultra90 Entry品質」を議論。2件を提案し、最優先はWIN80_SCORE_82_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。",
+      "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN80_SCORE_82_CHILD_V1で、Win80 minimum scoreだけを変更した親子リプレイを作成します。WIN80_TRIGGER_80_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。",
+      "messageCount": 7,
+      "finalCandidates": 0,
+      "bestOosMonthlyPct": null,
+      "bestOosDrawdownPct": null,
+      "bestWorstStressMonthlyPct": null,
+      "topStrategyIds": [
+        "WIN80_ULTRA90_TOP1_V1",
+        "WIN80_SCORE_82_CHILD_V1",
+        "WIN80_TRIGGER_80_CHILD_V1"
+      ],
+      "snapshotEvidenceAvailable": true,
+      "snapshotSignalCount": 86
+    },
     {
       "id": "main-research-0060-2026-07-26T13-56-45-866Z",
       "path": "discussions/2026/07/26/main-research-0060-2026-07-26T13-56-45-866Z.json",
