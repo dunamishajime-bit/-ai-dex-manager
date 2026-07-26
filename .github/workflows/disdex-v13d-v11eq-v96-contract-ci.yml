@@ -6,11 +6,16 @@ on:
       - 'config/disdexStockRouterV13DV11EqRuntime.ts'
       - 'lib/disdex-v13d-v11eq-stock-router-contract.ts'
       - 'lib/disdex-v96-combined-state-migration.ts'
+      - 'lib/disdex-v96-execution-capacity.ts'
+      - 'lib/disdex-v96-portfolio-runner.ts'
+      - 'lib/disdex-v96-runner-state.ts'
       - 'scripts/disdex-v13d-v11eq-v96-contract-selftest.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-runner.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
       - 'scripts/disdex-v13d-v11eq-v96-kill-switch.ts'
       - 'scripts/disdex-v96-combined-state-migrate.ts'
+      - 'scripts/disdex-v96-position-reconcile.ts'
+      - 'scripts/disdex-v96-execution-safety-selftest.ts'
       - 'scripts/disdex-v96-live-preflight.ts'
       - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
       - 'scripts/disdex_v11eq_aster_only_live_engine.py'
@@ -23,6 +28,7 @@ on:
       - 'ops/systemd/disdex-stock-reference-free.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
       - 'docs/implementation/V96_V52_VPS_LIVE_HANDOFF.md'
+      - 'tsconfig.v96-runner.json'
       - 'tsconfig.v13d-v11eq-router.json'
       - 'package.json'
       - '.github/workflows/disdex-v13d-v11eq-v96-contract-ci.yml'
@@ -61,6 +67,7 @@ jobs:
           npm run strategy:disdex-v96:typecheck
           npm run strategy:disdex-v96:selftest
           npm run strategy:disdex-v96:frequency:selftest
+          npm run strategy:disdex-v96:execution:selftest
       - name: Assert V52 LIVE remains fail-closed
         run: |
           node - <<'NODE'
@@ -69,6 +76,10 @@ jobs:
           const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
           const preflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
           const migration = fs.readFileSync('scripts/disdex-v96-combined-state-migrate.ts', 'utf8');
+          const reconciliation = fs.readFileSync('scripts/disdex-v96-position-reconcile.ts', 'utf8');
+          const v96Runner = fs.readFileSync('lib/disdex-v96-portfolio-runner.ts', 'utf8');
+          const v96State = fs.readFileSync('lib/disdex-v96-runner-state.ts', 'utf8');
+          const capacity = fs.readFileSync('lib/disdex-v96-execution-capacity.ts', 'utf8');
           const reference = fs.readFileSync('scripts/disdex_stock_reference_pyth_iex_proxy.py', 'utf8');
           const v52 = fs.readFileSync('scripts/disdex_v52_aster_only_live_engine.py', 'utf8');
           const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
@@ -80,6 +91,13 @@ jobs:
           if (!supervisor.includes('DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED')) throw new Error('V52 environment gate missing');
           if (!preflight.includes('disdex_v52_aster_only_live_engine.py')) throw new Error('V52 preflight missing');
           if (!migration.includes('systemctl') || !migration.includes('reconcileOrder')) throw new Error('verified V96 migration checks missing');
+          if (!reconciliation.includes('ASTER_API_PRIVATE_KEY') || !reconciliation.includes('systemctl')) throw new Error('authenticated V96 position reconciliation missing');
+          if (!reconciliation.includes('ordersSent: false') || !reconciliation.includes('closeUnmanagedPositions: false')) throw new Error('reconciliation no-order invariant missing');
+          if (reconciliation.includes('executeMarket(')) throw new Error('reconciliation must not submit orders');
+          if (!v96Runner.includes('skippedSignalReferenceTs') || !v96State.includes('skippedSignalReferenceTs')) throw new Error('formal one-time signal skip missing');
+          if (!v96Runner.includes('1785024000000')) throw new Error('stale ETH referenceTs skip missing');
+          if (!v96Runner.includes('planDisDexV96ExecutionCapacity') || !capacity.includes('requiredInitialMarginUsd')) throw new Error('dynamic V96 execution sizing missing');
+          if (!v96Runner.includes('closeUnmanagedPositions') || !v96Runner.includes('direction changes must close reduce-only')) throw new Error('V96 safety invariants missing');
           if (!reference.includes('hermes.pyth.network') || !reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Pyth/IEX reference missing');
           if (!v52.includes('POST_EARLY3__B75__H3__BOTH__NONE') && !config.includes('POST_EARLY3__B75__H3__BOTH__NONE')) throw new Error('frozen V50 candidate missing');
           if (!v52.includes('I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION')) throw new Error('legacy V11 state migration gate missing');
