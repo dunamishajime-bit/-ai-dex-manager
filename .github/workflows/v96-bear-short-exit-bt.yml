@@ -1,0 +1,58 @@
+name: V96 Bear Short fixed-entry exit backtest
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_bear_short_exit_bt.py'
+      - 'scripts/research_lab_v96_bear_short_exit_result_gate.py'
+      - '.github/workflows/v96-bear-short-exit-bt.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-bear-short-exit-bt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical market-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-bear-short-exit-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_bear_short_exit_bt.py') }}
+          restore-keys: |
+            v96-flat-fallback-entry-${{ runner.os }}-
+            v96-profit-capture-${{ runner.os }}-
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile research backtest
+        run: |
+          python -m py_compile scripts/research_lab_v96_bear_short_exit_bt.py
+          python -m py_compile scripts/research_lab_v96_bear_short_exit_result_gate.py
+      - name: Run Bear Short exit comparison
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_bear_short_exit_bt.py
+          python research_lab_v96_bear_short_exit_result_gate.py
+      - name: Validate outputs
+        run: |
+          test -s .research-state/v96-bear-short-exit-bt.json
+          test -s .research-state/v96-bear-short-exit-bt.md
+      - name: Upload research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-bear-short-exit-bt
+          path: |
+            .research-state/v96-bear-short-exit-bt.json
+            .research-state/v96-bear-short-exit-bt.md
+          if-no-files-found: warn
+          retention-days: 90
