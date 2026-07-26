@@ -101,6 +101,17 @@ function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedC
     return [{ name: "crypto-v96", process: crypto }, { name: "stock-v52-aster-only", process: stock }];
 }
 
+function runCommand(command: string, args: string[], env: NodeJS.ProcessEnv) {
+    return new Promise<void>((resolveRun, reject) => {
+        const child = spawn(command, args, { cwd: process.cwd(), env, stdio: "inherit" });
+        child.once("error", reject);
+        child.once("exit", (code, signal) => {
+            if (code === 0) resolveRun();
+            else reject(new Error(`${command} ${args.join(" ")} failed: code=${code}, signal=${signal || "none"}`));
+        });
+    });
+}
+
 function waitForExit(child: ManagedChild) {
     return new Promise<{ child: ManagedChild; code: number | null; signal: NodeJS.Signals | null }>((resolveExit, reject) => {
         child.process.once("error", reject);
@@ -122,6 +133,9 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     if (runnerMode === "live") {
         const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
         if (!runtimeCommitSha) throw new Error("Combined LIVE activation requires DISDEX_V96_RUNTIME_COMMIT_SHA.");
+        const env = buildCombinedChildEnvironment(runnerMode);
+        const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
+        await runCommand(tsx, ["scripts/disdex-v13d-v11eq-v96-live-preflight.ts"], env);
         const activation = await markCombinedV96MigrationActivated({ combinedRoot: paths.stateRoot, runtimeCommitSha });
         migrationId = activation.migrationId;
     }
@@ -141,6 +155,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         runnerMode,
         daemon,
         migrationId,
+        authenticatedPreflightPassed: runnerMode === "live",
         cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
         stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
         totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
