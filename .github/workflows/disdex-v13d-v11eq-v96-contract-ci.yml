@@ -25,6 +25,7 @@ on:
       - 'ops/systemd/disdex-v13d-v11eq-v96.service'
       - 'ops/systemd/disdex-v13d-v11eq-v96-preflight.service'
       - 'ops/systemd/disdex-v96-combined-migration.service'
+      - 'ops/systemd/disdex-v96-position-reconciliation.service'
       - 'ops/systemd/disdex-stock-reference-free.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
       - 'docs/implementation/V96_V52_VPS_LIVE_HANDOFF.md'
