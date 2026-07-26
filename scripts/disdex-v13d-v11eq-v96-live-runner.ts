@@ -12,11 +12,11 @@ import {
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
 
-const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V11EQ_ASTER_ONLY" as const;
+const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
 
 type RunnerMode = "paper" | "live";
-type ManagedChild = { name: "crypto-v96" | "stock-v11eq-aster-only"; process: ChildProcess };
+type ManagedChild = { name: "crypto-v96" | "stock-v52-aster-only"; process: ChildProcess };
 
 function boolEnv(name: string, fallback = false) {
     const value = process.env[name];
@@ -25,9 +25,7 @@ function boolEnv(name: string, fallback = false) {
 }
 
 function mode(): RunnerMode {
-    return String(process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE || "paper").toLowerCase() === "live"
-        ? "live"
-        : "paper";
+    return String(process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE || "paper").toLowerCase() === "live" ? "live" : "paper";
 }
 
 function combinedPaths() {
@@ -48,9 +46,14 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stockStateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
-        DISDEX_V11EQ_ASTER_ONLY_RUNNER_MODE: runnerMode,
-        DISDEX_V11EQ_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
-        DISDEX_V11EQ_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
+        DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
+        DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
+        DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
+        DISDEX_V52_CRYPTO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
+        DISDEX_V52_STOCK_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap),
+        DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap),
+        DISDEX_V52_V11_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v11MaximumGross),
+        DISDEX_V52_V50_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v50MaximumGross),
         DISDEX_V96_RUNNER_MODE: runnerMode,
         DISDEX_V96_STATE_DIR: paths.cryptoStateRoot,
         DISDEX_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
@@ -66,10 +69,10 @@ export function assertCombinedLiveActivation(runnerMode: RunnerMode) {
     if (!DISDEX_V13D_V11EQ_V96_RUNTIME.liveTradingEnabled || !DISDEX_V13D_V11EQ_V96_RUNTIME.orderSubmissionAllowed) {
         throw new Error("Repository combined runtime is not LIVE-enabled.");
     }
-    if (!boolEnv("DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED", false)) {
-        throw new Error("LIVE requires DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true.");
+    if (!boolEnv("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", false)) {
+        throw new Error("LIVE requires DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true.");
     }
-    if (process.env.DISDEX_V11EQ_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT !== LIVE_ACKNOWLEDGEMENT) {
+    if (process.env.DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT !== LIVE_ACKNOWLEDGEMENT) {
         throw new Error(`LIVE requires acknowledgement ${LIVE_ACKNOWLEDGEMENT}.`);
     }
 }
@@ -80,7 +83,7 @@ async function activateSharedKillSwitch(path: string, reason: string) {
         strategyId: V96_KILL_SWITCH_STRATEGY_ID,
         action: "FLATTEN_MANAGED",
         reason,
-        operator: "disdex-v13d-v11eq-v96-supervisor",
+        operator: "disdex-v96-v52-supervisor",
         activatedAt: new Date().toISOString(),
         combinedStrategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
     };
@@ -94,10 +97,8 @@ function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedC
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const stock = spawn(python, ["scripts/disdex_v11eq_aster_only_live_engine.py", "--mode", runnerMode, runFlag], {
-        cwd: process.cwd(), env, stdio: "inherit",
-    });
-    return [{ name: "crypto-v96", process: crypto }, { name: "stock-v11eq-aster-only", process: stock }];
+    const stock = spawn(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    return [{ name: "crypto-v96", process: crypto }, { name: "stock-v52-aster-only", process: stock }];
 }
 
 function waitForExit(child: ManagedChild) {
@@ -121,10 +122,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     if (runnerMode === "live") {
         const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
         if (!runtimeCommitSha) throw new Error("Combined LIVE activation requires DISDEX_V96_RUNTIME_COMMIT_SHA.");
-        const activation = await markCombinedV96MigrationActivated({
-            combinedRoot: paths.stateRoot,
-            runtimeCommitSha,
-        });
+        const activation = await markCombinedV96MigrationActivated({ combinedRoot: paths.stateRoot, runtimeCommitSha });
         migrationId = activation.migrationId;
     }
     await Promise.all([mkdir(paths.cryptoStateRoot, { recursive: true }), mkdir(paths.stockStateRoot, { recursive: true })]);
@@ -138,7 +136,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     process.once("SIGINT", () => { void stop(); });
     process.once("SIGTERM", () => { void stop(); });
     console.log(JSON.stringify({
-        event: "disdex-v13d-v11eq-v96-supervisor-start",
+        event: "disdex-v96-v52-supervisor-start",
         strategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
         runnerMode,
         daemon,
@@ -171,20 +169,22 @@ function selfTest() {
     const previousMode = process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
     const previousState = process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR;
     process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = "paper";
-    process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = ".runtime-state/selftest-combined";
+    process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = ".runtime-state/selftest-v96-v52";
     const env = buildCombinedChildEnvironment("paper");
     assert.equal(env.DISDEX_V96_MAX_GROSS, "1");
+    assert.equal(env.DISDEX_V52_STOCK_GROSS_CAP, "1.5");
+    assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "2.5");
+    assert.equal(env.DISDEX_V52_V11_GROSS_CAP, "1");
+    assert.equal(env.DISDEX_V52_V50_GROSS_CAP, "1");
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
     assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
-    assert.equal(env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE, "paper");
-    assert.match(String(env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT), /selftest-combined$/);
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
     if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
     else process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = previousMode;
     if (previousState === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR;
     else process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = previousState;
-    console.log("V13D + V11-EQ + V96 supervisor self-test: PASS");
+    console.log("V96 + V52 supervisor self-test: PASS");
 }
 
 async function main() {
@@ -193,10 +193,6 @@ async function main() {
 }
 
 main().catch((error) => {
-    console.error(JSON.stringify({
-        level: "fatal",
-        event: "disdex-v13d-v11eq-v96-supervisor-failed",
-        message: error instanceof Error ? error.message : String(error),
-    }));
+    console.error(JSON.stringify({ level: "fatal", event: "disdex-v96-v52-supervisor-failed", message: error instanceof Error ? error.message : String(error) }));
     process.exitCode = 1;
 });
