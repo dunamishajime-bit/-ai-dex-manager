@@ -1,0 +1,88 @@
+name: V96 12h-entry 6h-exit profit capture backtest
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_profit_capture_bt.py'
+      - 'scripts/research_lab_v96_profit_capture_result_gate.py'
+      - '.github/workflows/v96-profit-capture-bt.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-profit-capture-bt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical market-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-profit-capture-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_profit_capture_bt.py') }}
+          restore-keys: |
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            v96-core-vol50-p10-${{ runner.os }}-
+            v96-core-volume50-exec-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile exact research backtest
+        run: |
+          python -m py_compile scripts/research_lab_v96_profit_capture_bt.py
+          python -m py_compile scripts/research_lab_v96_profit_capture_result_gate.py
+      - name: Run V96 profit extension comparison
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_profit_capture_bt.py
+          python research_lab_v96_profit_capture_result_gate.py
+      - name: Validate frozen scope and outputs
+        run: |
+          test -s .research-state/v96-profit-capture-bt.json
+          test -s .research-state/v96-profit-capture-bt.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path('.research-state/v96-profit-capture-bt.json').read_text())
+          assert payload['strategyId'] == 'DISDEX_V96_12H_ENTRY_6H_EXIT_PROFIT_CAPTURE_GROSS_FEE_BT'
+          assert payload['method']['entryChronology'] == 'Unchanged completed 12h V96 target chronology'
+          assert payload['method']['sixHourUse'].startswith('Exit-only')
+          assert set(payload['families']) == {
+              'sixHourExitOnly',
+              'profitCaptureTrailing',
+              'strongMarketGross',
+              'feeFilter',
+          }
+          assert payload['baseline']['combined']['full']['observedMaxConcurrentGross'] <= 2.0 + 1e-9
+          assert payload['combination']['combined']['full']['observedMaxConcurrentGross'] <= 2.0 + 1e-9
+          assert payload['safety'] == {
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'ordersSent': False,
+          }
+          assert payload['status'] in {
+              'V96_PROFIT_EXTENSION_CANDIDATE_FOUND',
+              'V96_PROFIT_EXTENSION_HISTORICAL_LEAD_FORWARD_REQUIRED',
+              'NO_ROBUST_V96_PROFIT_EXTENSION',
+          }
+          assert 'resultGate' in payload
+          assert payload['penguIndependentAudit']['decision'] == 'DIAGNOSTIC_ONLY_FIXED_HISTORICAL_SEQUENCE_NO_PENGU_PROMOTION'
+          PY
+      - name: Upload research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-profit-capture-bt
+          path: |
+            .research-state/v96-profit-capture-bt.json
+            .research-state/v96-profit-capture-bt.md
+          if-no-files-found: warn
+          retention-days: 90
