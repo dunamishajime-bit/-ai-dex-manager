@@ -1,0 +1,145 @@
+name: Aster-only V29 Frozen Multi-Signal Router
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v29_frozen_multi_signal_router.py'
+      - 'docs/research/ASTER_ONLY_V29_FROZEN_MULTI_SIGNAL_ROUTER_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v29-frozen-multi-signal-router.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v29-frozen-router-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash/Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13D source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore exact-window caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v29-frozen-router
+          key: aster-only-v29-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v29_frozen_multi_signal_router.py') }}
+          restore-keys: |
+            aster-only-v29-${{ runner.os }}-
+            aster-only-v27-${{ runner.os }}-
+            aster-only-v26-${{ runner.os }}-
+            aster-only-v25-${{ runner.os }}-
+            aster-only-v22-${{ runner.os }}-
+            aster-only-v19-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v15_intraday_shock_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v25_early_micro_plus_v19.py \
+            scripts/research_lab_aster_only_v26_nonbasis_fallback_tournament.py \
+            scripts/research_lab_aster_only_v27_beta_squeeze_orb_tournament.py \
+            scripts/research_lab_aster_only_v29_frozen_multi_signal_router.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v29_frozen_multi_signal_router as v29
+          assert (v29.v19.BT_END_EXCLUSIVE - v29.v19.BT_START).days == 365
+          assert len(v29.POLICIES) == 18
+          assert v29.BASELINE_NORMAL == 72.276908
+          assert v29.BASELINE_P95 == 68.080022
+          assert v29.BASELINE_FALLBACK_NORMAL == 7.813259
+          assert v29.BASELINE_FALLBACK_P95 == 7.400908
+          assert v29.DAILY_LOSS_LOCK == -0.02
+          assert v29.MICRO_Z.candidate_id == 'TIME_SLOT_ZSCORE_FADE__T2__SLOT_1130__H1__NONE'
+          assert v29.MICRO_ACCEL.candidate_id == 'BASIS_ACCELERATION_FADE__T25__SLOT_1130__H1__COOLDOWN'
+          assert v29.v19.CANDIDATE.candidate_id == 'TIME_SLOT_ZSCORE_FADE__T2__SLOT_1230__H2__NONE'
+          assert v29.ORB.candidate_id == 'OPENING_RANGE_VOLUME__B10__V1.25__L15__S2__H2'
+          assert v29.BREADTH.candidate_id == 'BREADTH_LAG__B25__L15__S3__H2'
+          print('V29 freeze assertions: PASS')
+          PY
+      - name: Run V29 frozen multi-signal router
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v29-frozen-router
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v29_frozen_multi_signal_router.py \
+            --cache-dir ../.cache/aster-only-v29-frozen-router \
+            --output-dir ../.research-state/aster-only-v29-frozen-router \
+            2>&1 | tee ../.research-state/aster-only-v29-frozen-router/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v29-frozen-router/result.json
+          test -s .research-state/aster-only-v29-frozen-router/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v29-frozen-router/result.json').read_text())
+          assert p['version'] == 29
+          assert p['policyCount'] == 18
+          assert p['period']['calendarDays'] == 365
+          assert p['architecture'] == {
+              'venue': 'ASTER_ONLY',
+              'maximumConcurrentGross': 1.0,
+              'maximumConcurrentPositions': 1,
+              'sequentialIntradayEntriesAllowed': True,
+              'hyperliquidUsed': False,
+          }
+          assert p['selectionDiscipline']['componentsRetuned'] is False
+          assert p['selectionDiscipline']['finalAndHoldoutUsedForSelection'] is False
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V29_NO_VALIDATED_MULTI_SIGNAL_ROUTER',
+              'ASTER_ONLY_V29_WINNER_DID_NOT_CLEAR_FINAL_AUDIT',
+              'ASTER_ONLY_V29_VALIDATED_SHADOW_LEAD',
+          }
+          if p['status'] == 'ASTER_ONLY_V29_VALIDATED_SHADOW_LEAD':
+              assert p['winner']['accepted'] is True
+              assert all(p['winner']['audit']['checks'].values())
+          print(json.dumps({
+              'status': p['status'],
+              'developmentSurvivors': p['developmentSurvivors'],
+              'validationSurvivors': p['validationSurvivors'],
+              'winner': p['winner'],
+              'topPolicies': p['topPolicies'][:3],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v29-frozen-router-${{ github.run_id }}
+          path: .research-state/aster-only-v29-frozen-router
+          retention-days: 90
+          if-no-files-found: warn

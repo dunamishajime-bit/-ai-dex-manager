@@ -1,0 +1,136 @@
+name: Aster-only V16 Relative-Value Pair Research
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v14_replacement_tournament.py'
+      - 'scripts/research_lab_aster_only_v15_intraday_shock_tournament.py'
+      - 'scripts/research_lab_aster_only_v16_relative_value_pair.py'
+      - 'scripts/run_aster_only_v14_with_frozen_v13d_benchmark.py'
+      - 'docs/research/ASTER_ONLY_V16_RELATIVE_VALUE_PAIR_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v16-relative-value-pair.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v16-relative-value-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash/Aster research source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13D benchmark source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/v96-crypto-v11-v13d-one-year
+            .cache/v96-stock-cash-yahoo-v10
+            .cache/v96-stock-basis-mature-v9
+            .cache/v96-stock-funding
+          key: aster-only-v16-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v16_relative_value_pair.py') }}
+          restore-keys: |
+            aster-only-v16-${{ runner.os }}-
+            aster-only-v15-${{ runner.os }}-
+            aster-only-v14-${{ runner.os }}-
+            v96-crypto-v11eq-v13d-one-year-${{ runner.os }}-
+            v96-stock-cash-perp-v10-${{ runner.os }}-
+      - name: Compile and deterministic tests
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/run_aster_only_v14_with_frozen_v13d_benchmark.py \
+            scripts/research_lab_aster_only_v15_intraday_shock_tournament.py \
+            scripts/research_lab_aster_only_v16_relative_value_pair.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v16_relative_value_pair as v16
+          assert len(v16.CANDIDATES) == 240
+          assert len(v16.FAMILY_THRESHOLDS) == 5
+          assert v16.receives_long_funding(-0.5) is True
+          assert v16.receives_short_funding(0.5) is True
+          assert v16.receives_long_funding(0.5) is False
+          assert v16.CONVERGENCE_FRACTION == 0.50
+          print('Aster-only V16 deterministic tests: PASS')
+          PY
+      - name: Run fixed V16 pair tournament
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v16-pair
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v16_relative_value_pair.py \
+            --cache-dir ../.cache/v96-crypto-v11-v13d-one-year \
+            --output-dir ../.research-state/aster-only-v16-pair \
+            2>&1 | tee ../.research-state/aster-only-v16-pair/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v16-pair/result.json
+          test -s .research-state/aster-only-v16-pair/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v16-pair/result.json').read_text())
+          assert p['version'] == 16
+          assert p['candidateCount'] == 240
+          assert p['familyCount'] == 5
+          assert p['rules']['venue'] == 'ASTER_ONLY'
+          assert p['rules']['hyperliquidUsed'] is False
+          assert p['rules']['twoAsterLegs'] is True
+          assert p['rules']['longGross'] == 0.5
+          assert p['rules']['shortGross'] == 0.5
+          assert p['rules']['totalGross'] == 1.0
+          assert p['rules']['maximumHoldingHours'] == [1, 2]
+          assert p['rules']['severeCostAction'] == 'FAIL_CLOSED_NO_ENTRY'
+          assert p['v13dBenchmark']['twoVenueCapitalHoursIncluded'] is True
+          assert p['selectionDiscipline']['independentHoldoutClaim'] is False
+          assert p['selectionDiscipline']['furtherThresholdRetuningOnSameHistoryAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'NO_VALIDATION_PASSING_ASTER_ONLY_V16_PAIR',
+              'ASTER_ONLY_V16_PAIR_VALIDATION_LEAD_DOES_NOT_FULLY_REPLACE_V13D',
+              'ASTER_ONLY_V16_PAIR_TARGET_MET_REUSED_HISTORY_FORWARD_REQUIRED',
+          }
+          print(json.dumps({
+              'status': p['status'],
+              'period': p['period'],
+              'benchmark': p['v13dBenchmark']['results'],
+              'winner': p.get('winner'),
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v16-pair-${{ github.run_id }}
+          path: .research-state/aster-only-v16-pair
+          retention-days: 90
+          if-no-files-found: warn

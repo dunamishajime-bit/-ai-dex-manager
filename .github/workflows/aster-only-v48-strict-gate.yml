@@ -1,0 +1,100 @@
+name: Aster-only V48 Strict Stress Gate
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/aster-only-v48-strict-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v48-strict-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  strict-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash and Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore successful V39 market caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v39-overnight-open
+          key: aster-only-v48-strict-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v48_frozen_three_window_stress_audit.py') }}
+          restore-keys: |
+            aster-only-v39-${{ runner.os }}-
+      - name: Compile frozen audit
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v39_overnight_open_router.py \
+            scripts/research_lab_aster_only_v40_overnight_residual_router.py \
+            scripts/research_lab_aster_only_v42_idiosyncratic_open_residual.py \
+            scripts/research_lab_aster_only_v46_closing_overlay.py \
+            scripts/research_lab_aster_only_v47_three_window_router.py \
+            scripts/research_lab_aster_only_v48_frozen_three_window_stress_audit.py
+      - name: Run V48 frozen stress audit
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v48-strict
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v48_frozen_three_window_stress_audit.py \
+            --cache-dir ../.cache/aster-only-v39-overnight-open \
+            --output-dir ../.research-state/aster-only-v48-strict \
+            2>&1 | tee ../.research-state/aster-only-v48-strict/audit.log
+      - name: Require every V48 stress check
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v48-strict/result.json').read_text())
+          assert p['status'] == 'ASTER_ONLY_V48_HISTORICAL_STRESS_PASS_FORWARD_SHADOW_ONLY', p['status']
+          assert p['allChecksPassed'] is True
+          assert all(p['checks'].values()), p['checks']
+          assert p['baseAudit']['full']['NORMAL']['compoundedReturnPct'] > 72.276908
+          assert p['baseAudit']['full']['P95']['compoundedReturnPct'] > 68.080022
+          assert p['baseAudit']['fallbackFull']['NORMAL']['compoundedReturnPct'] > 7.813259
+          assert p['baseAudit']['fallbackFull']['P95']['compoundedReturnPct'] > 7.400908
+          assert p['baseAudit']['validation']['NORMAL']['trades'] >= 8
+          assert p['baseAudit']['validationAuxTrades'] >= 4
+          print(json.dumps({
+              'status': p['status'],
+              'candidate': p['frozenCandidate'],
+              'normal': p['baseAudit']['full']['NORMAL'],
+              'p95': p['baseAudit']['full']['P95'],
+              'fallback': p['baseAudit']['fallbackFull'],
+              'validation': p['baseAudit']['validation'],
+              'validationAuxTrades': p['baseAudit']['validationAuxTrades'],
+              'customCosts': p['customCosts'],
+              'checks': p['checks'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v48-strict-${{ github.run_id }}
+          path: .research-state/aster-only-v48-strict
+          retention-days: 90
+          if-no-files-found: warn

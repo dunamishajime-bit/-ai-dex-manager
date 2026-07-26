@@ -1,0 +1,133 @@
+name: Aster-only V17 July Untouched Holdout
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v14_replacement_tournament.py'
+      - 'scripts/research_lab_aster_only_v15_intraday_shock_tournament.py'
+      - 'scripts/research_lab_aster_only_v16_relative_value_pair.py'
+      - 'scripts/research_lab_aster_only_v17_july_holdout.py'
+      - 'docs/research/ASTER_ONLY_V17_JULY_UNTOUCHED_HOLDOUT_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v17-july-holdout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v17-july-holdout-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  holdout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash/Aster research source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13D benchmark source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore full frozen-source caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/v96-crypto-v11-v13d-one-year
+            .cache/v96-stock-cash-yahoo-v10
+            .cache/v96-stock-basis-mature-v9
+            .cache/v96-stock-funding
+          key: aster-only-v17-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v17_july_holdout.py') }}
+          restore-keys: |
+            aster-only-v17-${{ runner.os }}-
+            aster-only-v16-${{ runner.os }}-
+            aster-only-v15-${{ runner.os }}-
+            aster-only-v14-${{ runner.os }}-
+            v96-stock-cash-perp-v10-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v15_intraday_shock_tournament.py \
+            scripts/research_lab_aster_only_v16_relative_value_pair.py \
+            scripts/research_lab_aster_only_v17_july_holdout.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v17_july_holdout as v17
+          assert v17.HOLDOUT_START == '2026-07-01'
+          assert v17.HOLDOUT_END_EXCLUSIVE == '2026-07-23'
+          assert v17.V14_CANDIDATE.candidate_id == 'ZSCORE_RESIDUAL_FADE__T2.5__H3__NONE'
+          assert v17.V15_CANDIDATE.candidate_id == 'TIME_SLOT_ZSCORE_FADE__T2__SLOT_1230__H2__NONE'
+          assert v17.V16_CANDIDATE.candidate_id == 'ZSCORE_PAIR__T3__SLOT_1130__H2__CONVERGENCE_50'
+          print('V17 frozen-candidate assertions: PASS')
+          PY
+      - name: Run July untouched holdout
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v17-july
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v17_july_holdout.py \
+            --cache-dir ../.cache/v96-crypto-v11-v13d-one-year \
+            --output-dir ../.research-state/aster-only-v17-july \
+            2>&1 | tee ../.research-state/aster-only-v17-july/holdout.log
+      - name: Validate holdout evidence and safety
+        run: |
+          test -s .research-state/aster-only-v17-july/result.json
+          test -s .research-state/aster-only-v17-july/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v17-july/result.json').read_text())
+          assert p['version'] == 17
+          assert p['frozenCandidateCount'] == 3
+          assert p['period']['holdoutStartInclusive'] == '2026-07-01'
+          assert p['period']['holdoutEndExclusive'] == '2026-07-23'
+          assert p['selectionDiscipline']['candidateIdsFrozenBeforeHoldout'] is True
+          assert p['selectionDiscipline']['julyParameterRetuningAllowed'] is False
+          assert p['selectionDiscipline']['bestCandidateSelectionFromJulyAllowed'] is False
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'JULY_FORWARD_SIGNAL_FOUND_SHADOW_ONLY',
+              'NO_JULY_FORWARD_SIGNAL_FROM_FROZEN_CANDIDATES',
+          }
+          print(json.dumps({
+              'status': p['status'],
+              'period': p['period'],
+              'passingCandidateIds': p['passingCandidateIds'],
+              'results': [{
+                  'candidateId': row['candidate']['candidate_id'],
+                  'pass': row['forwardSignalPass'],
+                  'normal': row['metrics']['NORMAL'],
+                  'p95': row['metrics']['P95'],
+              } for row in p['results']],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v17-july-${{ github.run_id }}
+          path: .research-state/aster-only-v17-july
+          retention-days: 90
+          if-no-files-found: warn

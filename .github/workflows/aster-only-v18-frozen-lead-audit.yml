@@ -1,0 +1,126 @@
+name: Aster-only V18 Frozen Lead Audit
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v14_replacement_tournament.py'
+      - 'scripts/research_lab_aster_only_v15_intraday_shock_tournament.py'
+      - 'scripts/research_lab_aster_only_v17_july_holdout.py'
+      - 'scripts/research_lab_aster_only_v18_frozen_lead_audit.py'
+      - 'docs/research/ASTER_ONLY_V18_FROZEN_V15_LEAD_AUDIT_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v18-frozen-lead-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v18-frozen-lead-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash/Aster research source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13D benchmark source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore frozen-source caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/v96-crypto-v11-v13d-one-year
+            .cache/v96-stock-cash-yahoo-v10
+            .cache/v96-stock-basis-mature-v9
+            .cache/v96-stock-funding
+          key: aster-only-v18-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v18_frozen_lead_audit.py') }}
+          restore-keys: |
+            aster-only-v18-${{ runner.os }}-
+            aster-only-v17-${{ runner.os }}-
+            aster-only-v15-${{ runner.os }}-
+            aster-only-v14-${{ runner.os }}-
+            v96-stock-cash-perp-v10-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v15_intraday_shock_tournament.py \
+            scripts/research_lab_aster_only_v17_july_holdout.py \
+            scripts/research_lab_aster_only_v18_frozen_lead_audit.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v18_frozen_lead_audit as v18
+          assert v18.CANDIDATE.candidate_id == 'TIME_SLOT_ZSCORE_FADE__T2__SLOT_1230__H2__NONE'
+          assert v18.V13D_NORMAL_RETURN_PCT == 2.979561
+          assert v18.V13D_P95_RETURN_PCT == 1.855422
+          assert v18.V13D_NORMAL_BPS_PER_CAPITAL_HOUR == 2.969653
+          print('V18 frozen lead assertions: PASS')
+          PY
+      - name: Run full frozen-lead audit
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v18-audit
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v18_frozen_lead_audit.py \
+            --cache-dir ../.cache/v96-crypto-v11-v13d-one-year \
+            --output-dir ../.research-state/aster-only-v18-audit \
+            2>&1 | tee ../.research-state/aster-only-v18-audit/audit.log
+      - name: Validate evidence and safety
+        run: |
+          test -s .research-state/aster-only-v18-audit/result.json
+          test -s .research-state/aster-only-v18-audit/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v18-audit/result.json').read_text())
+          assert p['version'] == 18
+          assert p['candidate']['candidate_id'] == 'TIME_SLOT_ZSCORE_FADE__T2__SLOT_1230__H2__NONE'
+          assert p['candidate']['venue'] == 'ASTER_ONLY'
+          assert p['candidate']['hyperliquidUsed'] is False
+          assert p['selectionDiscipline']['candidateFrozenBeforeJulyHoldout'] is True
+          assert p['selectionDiscipline']['parametersChangedByV18'] is False
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V18_SHADOW_CANDIDATE_FOUND',
+              'ASTER_ONLY_V18_FROZEN_LEAD_FAILED_ROBUSTNESS_AUDIT',
+          }
+          print(json.dumps({
+              'status': p['status'],
+              'candidate': p['candidate'],
+              'segments': p['segments'],
+              'checks': p['checks'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v18-audit-${{ github.run_id }}
+          path: .research-state/aster-only-v18-audit
+          retention-days: 90
+          if-no-files-found: warn

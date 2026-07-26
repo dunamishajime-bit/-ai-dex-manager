@@ -1,0 +1,159 @@
+name: Aster-only V33 Residual Gross Overlay
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v33_residual_gross_overlay.py'
+      - 'scripts/run_aster_only_v33_residual_gross_overlay_fast.py'
+      - 'docs/research/ASTER_ONLY_V33_RESIDUAL_GROSS_OVERLAY_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v33-residual-gross-overlay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v33-residual-gross-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 and Crypto V96 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore V33 caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v33-residual-gross
+          key: aster-only-v33-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v33_residual_gross_overlay.py', 'scripts/run_aster_only_v33_residual_gross_overlay_fast.py') }}
+          restore-keys: |
+            aster-only-v33-${{ runner.os }}-
+            aster-only-v32-${{ runner.os }}-
+            aster-only-v31-${{ runner.os }}-
+            aster-only-v22-${{ runner.os }}-
+            aster-only-v19-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_v96_crypto_v11_v13d_one_year_bt.py \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py \
+            scripts/research_lab_aster_only_v32_online_ridge_idle_crypto.py \
+            scripts/research_lab_aster_only_v33_residual_gross_overlay.py \
+            scripts/run_aster_only_v33_residual_gross_overlay_fast.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v33_residual_gross_overlay as v33
+          import run_aster_only_v33_residual_gross_overlay_fast as runner
+          assert (v33.INTEGRATED_END - v33.INTEGRATED_START).days == 365
+          assert len(v33.RULE_BASES) == 189
+          assert len(v33.RULE_CANDIDATES) == 567
+          assert len(v33.ONLINE_MODEL_IDS) == 6
+          assert len(v33.ONLINE_CANDIDATES) == 432
+          assert len(v33.CANDIDATES) == 999
+          assert v33.TOTAL_GROSS_CAP == 2.0
+          assert v33.MIN_OVERLAY_GROSS == 0.15
+          assert v33.MAX_OVERLAY_GROSS_OPTIONS == (0.25, 0.50, 0.75)
+          assert v33.RULE_FAMILIES == ('FUNDING_SQUEEZE_CONT', 'EXHAUSTION_FADE', 'VOL_COMPRESSION_BREAK')
+          assert v33.build_rule_trades is runner.fast_build_rule_trades
+          assert v33.build_online_trades is runner.fast_build_online_trades
+          assert all(candidate.maximum_overlay_gross in v33.MAX_OVERLAY_GROSS_OPTIONS for candidate in v33.CANDIDATES)
+          print('V33 freeze assertions: PASS')
+          PY
+      - name: Run V33 residual Gross tournament
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v33-residual-gross
+          set -o pipefail
+          cd scripts
+          python run_aster_only_v33_residual_gross_overlay_fast.py \
+            --cache-dir ../.cache/aster-only-v33-residual-gross \
+            --output-dir ../.research-state/aster-only-v33-residual-gross \
+            2>&1 | tee ../.research-state/aster-only-v33-residual-gross/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v33-residual-gross/result.json
+          test -s .research-state/aster-only-v33-residual-gross/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v33-residual-gross/result.json').read_text())
+          assert p['version'] == 33
+          assert p['candidateCount'] == 999
+          assert p['ruleCandidateCount'] == 567
+          assert p['onlineCandidateCount'] == 432
+          assert p['period']['integratedCalendarDays'] == 365
+          assert p['architecture'] == {
+              'venue': 'ASTER_ONLY',
+              'totalGrossCap': 2.0,
+              'overlayMaximumGrossOptions': [0.25, 0.5, 0.75],
+              'overlayMinimumGross': 0.15,
+              'maximumOverlayPositions': 1,
+              'v96FirstPriority': True,
+              'stockSecondPriority': True,
+              'overlayThirdPriority': True,
+              'forcedUtilization': False,
+              'hyperliquidUsed': False,
+              'julyUnifiedClaimAllowed': False,
+          }
+          assert p['selectionDiscipline']['finalAndJulyUsedForSelection'] is False
+          assert p['selectionDiscipline']['julyCandidateOnlyAudit'] is True
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V33_NO_VALIDATED_RESIDUAL_GROSS_OVERLAY',
+              'ASTER_ONLY_V33_WINNER_DID_NOT_CLEAR_FINAL_AUDIT',
+              'ASTER_ONLY_V33_VALIDATED_SHADOW_LEAD',
+          }
+          if p['status'] == 'ASTER_ONLY_V33_VALIDATED_SHADOW_LEAD':
+              assert p['winner']['accepted'] is True
+              assert all(p['winner']['checks'].values())
+              assert p['winner']['grossCapViolations'] == 0
+              assert p['winner']['maximumTotalGross'] <= 2.0 + 1e-9
+          print(json.dumps({
+              'status': p['status'],
+              'developmentSurvivors': p['developmentSurvivors'],
+              'validationSurvivors': p['validationSurvivors'],
+              'winner': p['winner'],
+              'baselineUnified': p['baselineUnified'],
+              'capacity': p['capacity'],
+              'topDevelopmentDiagnostics': p['topDevelopmentDiagnostics'][:5],
+              'topValidationDiagnostics': p['topValidationDiagnostics'][:5],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v33-residual-gross-${{ github.run_id }}
+          path: .research-state/aster-only-v33-residual-gross
+          retention-days: 90
+          if-no-files-found: warn

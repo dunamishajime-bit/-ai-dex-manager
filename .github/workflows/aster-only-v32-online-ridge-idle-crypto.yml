@@ -1,0 +1,157 @@
+name: Aster-only V32 Online Ridge Idle Crypto
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v32_online_ridge_idle_crypto.py'
+      - 'scripts/run_aster_only_v32_online_ridge_idle_crypto_fast.py'
+      - 'docs/research/ASTER_ONLY_V32_ONLINE_RIDGE_IDLE_CRYPTO_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v32-online-ridge-idle-crypto.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v32-online-ridge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 and Crypto V96 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore V32 caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v32-online-ridge
+          key: aster-only-v32-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v32_online_ridge_idle_crypto.py', 'scripts/run_aster_only_v32_online_ridge_idle_crypto_fast.py') }}
+          restore-keys: |
+            aster-only-v32-${{ runner.os }}-
+            aster-only-v31-${{ runner.os }}-
+            aster-only-v22-${{ runner.os }}-
+            aster-only-v19-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_v96_crypto_v11_v13d_one_year_bt.py \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v31_v96_idle_crypto_fallback.py \
+            scripts/research_lab_aster_only_v32_online_ridge_idle_crypto.py \
+            scripts/run_aster_only_v32_online_ridge_idle_crypto_fast.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v32_online_ridge_idle_crypto as v32
+          import run_aster_only_v32_online_ridge_idle_crypto_fast as runner
+          assert (v32.INTEGRATED_END - v32.INTEGRATED_START).days == 365
+          assert len(v32.MODEL_SPECS) == 27
+          assert len(v32.CANDIDATES) == 1458
+          assert v32.DIMENSION == 16
+          assert v32.MODEL_LOOKBACKS == (30, 60, 120)
+          assert v32.MODEL_HORIZONS == (1, 2, 4)
+          assert v32.RIDGE_PENALTIES == (0.1, 1.0, 10.0)
+          assert v32.ENTRY_THRESHOLDS_BPS == (20.0, 35.0, 50.0)
+          assert v32.CONFIDENCE_RATIOS == (0.25, 0.50)
+          assert v32.REGIMES == ('NONE', 'BTC_STABLE', 'CROSS_SECTION_DISPERSION')
+          assert v32.v31.COSTS == {'NORMAL': 16.0, 'P95': 24.0, 'SEVERE': 60.0}
+          assert v32.build_candidate_trades is runner.fast_build_candidate_trades
+          assert v32.v31.overlaps is runner.fast_overlaps
+          test_intervals = [(10, 20, 'A'), (30, 40, 'B')]
+          assert runner.fast_overlaps(test_intervals, 19, 21) is True
+          assert runner.fast_overlaps(test_intervals, 20, 30) is False
+          assert runner.fast_overlaps(test_intervals, 29, 31) is True
+          print('V32 freeze assertions: PASS')
+          PY
+      - name: Run V32 online ridge tournament
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v32-online-ridge
+          set -o pipefail
+          cd scripts
+          python run_aster_only_v32_online_ridge_idle_crypto_fast.py \
+            --cache-dir ../.cache/aster-only-v32-online-ridge \
+            --output-dir ../.research-state/aster-only-v32-online-ridge \
+            2>&1 | tee ../.research-state/aster-only-v32-online-ridge/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v32-online-ridge/result.json
+          test -s .research-state/aster-only-v32-online-ridge/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v32-online-ridge/result.json').read_text())
+          assert p['version'] == 32
+          assert p['candidateCount'] == 1458
+          assert p['modelSpecCount'] == 27
+          assert p['period']['integratedCalendarDays'] == 365
+          assert p['architecture']['venue'] == 'ASTER_ONLY'
+          assert p['architecture']['maximumConcurrentGross'] == 1.0
+          assert p['architecture']['maximumConcurrentPositions'] == 1
+          assert p['architecture']['maximumHoldingHours'] == 4
+          assert p['architecture']['v96Priority'] is True
+          assert p['architecture']['v11EqPriority'] is True
+          assert p['architecture']['v19Priority'] is True
+          assert p['architecture']['forcedUtilization'] is False
+          assert p['architecture']['hyperliquidUsed'] is False
+          assert p['architecture']['julyUnifiedClaimAllowed'] is False
+          assert p['model']['type'] == 'CAUSAL_DAILY_REFIT_POOLED_RIDGE'
+          assert p['model']['targetAvailabilityRule'] == 'sample available on UTC day after target horizon completes'
+          assert p['selectionDiscipline']['finalAndJulyUsedForSelection'] is False
+          assert p['selectionDiscipline']['julyCandidateOnlyAudit'] is True
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V32_NO_VALIDATED_ONLINE_RIDGE_FALLBACK',
+              'ASTER_ONLY_V32_WINNER_DID_NOT_CLEAR_FINAL_AUDIT',
+              'ASTER_ONLY_V32_VALIDATED_SHADOW_LEAD',
+          }
+          if p['status'] == 'ASTER_ONLY_V32_VALIDATED_SHADOW_LEAD':
+              assert p['winner']['accepted'] is True
+              assert all(p['winner']['checks'].values())
+              assert p['winner']['priorityOverlapCountIntegrated'] == 0
+          print(json.dumps({
+              'status': p['status'],
+              'developmentSurvivors': p['developmentSurvivors'],
+              'validationSurvivors': p['validationSurvivors'],
+              'winner': p['winner'],
+              'baselineUnified': p['baselineUnified'],
+              'topDevelopmentDiagnostics': p['topDevelopmentDiagnostics'][:5],
+              'topValidationDiagnostics': p['topValidationDiagnostics'][:5],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v32-online-ridge-${{ github.run_id }}
+          path: .research-state/aster-only-v32-online-ridge
+          retention-days: 90
+          if-no-files-found: warn
