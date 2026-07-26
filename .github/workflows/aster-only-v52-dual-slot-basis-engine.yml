@@ -1,0 +1,126 @@
+name: Aster-only V52 Dual-Slot Basis Engine
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v52_dual_slot_basis_engine.py'
+      - 'docs/research/ASTER_ONLY_V52_DUAL_SLOT_BASIS_ENGINE_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v52-dual-slot-basis-engine.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v52-dual-slot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash and Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore successful aligned market cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v39-overnight-open
+          key: aster-only-v52-v39cache-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v52_dual_slot_basis_engine.py') }}
+          restore-keys: |
+            aster-only-v39-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v50_post_open_basis_engine.py \
+            scripts/research_lab_aster_only_v52_dual_slot_basis_engine.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v52_dual_slot_basis_engine as v52
+          assert v52.V50_CANDIDATE_ID == 'POST_EARLY3__B75__H3__BOTH__NONE'
+          assert v52.GROSS_CAPS == (1.0, 1.5, 2.0)
+          assert v52.MINIMUM_ALLOCATED_GROSS == 0.25
+          assert (v52.v19.BT_END_EXCLUSIVE - v52.v19.BT_START).days == 365
+          assert v52.frozen_v50_candidate().candidate_id == v52.V50_CANDIDATE_ID
+          print('V52 freeze assertions: PASS')
+          PY
+      - name: Run V52 one-year dual-slot backtest
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v52-dual-slot
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v52_dual_slot_basis_engine.py \
+            --cache-dir ../.cache/aster-only-v39-overnight-open \
+            --output-dir ../.research-state/aster-only-v52-dual-slot \
+            2>&1 | tee ../.research-state/aster-only-v52-dual-slot/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v52-dual-slot/result.json
+          test -s .research-state/aster-only-v52-dual-slot/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v52-dual-slot/result.json').read_text())
+          assert p['version'] == 52
+          assert p['period']['calendarDays'] == 365
+          assert set(p['comparisons']) == {
+              'V11_ONLY', 'V50_ONLY', 'UNIFIED_GROSS_1_0',
+              'DUAL_SLOT_GROSS_1_5', 'DUAL_SLOT_GROSS_2_0',
+          }
+          assert p['frozenComponents']['v11MaximumGross'] == 1.0
+          assert p['frozenComponents']['v50MaximumGross'] == 1.0
+          assert p['frozenComponents']['sameSymbolConcurrentEntryAllowed'] is False
+          assert p['architecture']['cryptoV96Included'] is False
+          assert p['architecture']['hyperliquidUsed'] is False
+          for name, row in p['comparisons'].items():
+              configured = row['full']['NORMAL']['routing']['configuredGrossCap']
+              observed = row['full']['NORMAL']['routing']['maximumObservedGross']
+              assert observed <= configured + 1e-9, (name, observed, configured)
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v50Changed': False,
+          }
+          print(json.dumps({
+              'status': p['status'],
+              'comparison': {
+                  name: {
+                      'normal': row['full']['NORMAL'],
+                      'p95': row['full']['P95'],
+                  }
+                  for name, row in p['comparisons'].items()
+              },
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v52-dual-slot-${{ github.run_id }}
+          path: .research-state/aster-only-v52-dual-slot
+          retention-days: 90
+          if-no-files-found: warn
