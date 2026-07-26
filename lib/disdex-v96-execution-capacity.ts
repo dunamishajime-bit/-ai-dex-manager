@@ -40,12 +40,6 @@ function finiteNonNegative(value: unknown, name: string) {
     return number;
 }
 
-function signedPositionQuantity(position: DirectPosition) {
-    if (position.positionSide === "SHORT") return -Math.abs(position.quantity);
-    if (position.positionSide === "LONG") return Math.abs(position.quantity);
-    return Number(position.quantity);
-}
-
 export function disDexV96AccountEquity(account: DirectAccountSnapshot, positions: DirectPosition[]) {
     const walletBalance = finiteNonNegative(account.walletBalance, "V96 wallet balance");
     const unrealizedPnl = positions.reduce((sum, position) => {
