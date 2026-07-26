@@ -373,6 +373,7 @@ export class DisDexV96PortfolioRunner {
 
             const signal = buildDisDexV96CombinedSignal(history, this.now(), {
                 penguTargetGrossCap: this.dependencies.config.penguTargetGrossCap,
+                totalGrossCap: this.dependencies.config.maxGross,
             });
             if (!risk.flatten && signal.allocation.finalGross > this.dependencies.config.maxGross + 1e-9) {
                 state.forwardEvidence.grossCapBreaches += 1;

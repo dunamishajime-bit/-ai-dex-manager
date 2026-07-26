@@ -25,7 +25,7 @@ export interface DisDexV96CombinedSignal {
 export function buildDisDexV96CombinedSignal(
     history: DisDexPenguV46History,
     now = Date.now(),
-    options: { penguTargetGrossCap?: number } = {},
+    options: { penguTargetGrossCap?: number; totalGrossCap?: number } = {},
 ): DisDexV96CombinedSignal {
     const core = buildDisDexV95CoreSignal(history, now);
     const pengu = buildDisDexPenguV46Signal(history, now);
@@ -34,11 +34,15 @@ export function buildDisDexV96CombinedSignal(
     const penguGrossCapApplied = Number.isFinite(suppliedCap) && suppliedCap > 0
         ? Math.min(requestedPenguGross, suppliedCap)
         : requestedPenguGross;
+    const suppliedTotalGrossCap = Number(options.totalGrossCap);
+    const totalGrossCap = Number.isFinite(suppliedTotalGrossCap) && suppliedTotalGrossCap > 0
+        ? suppliedTotalGrossCap
+        : DISDEX_V96_ALLOCATION.totalGrossCap;
     const allocation = allocateDisDexV96ReservedPengu({
         coreWeights: core.targetWeights as Record<string, number>,
         penguSide: pengu.side,
         penguTargetGross: penguGrossCapApplied,
-        totalGrossCap: DISDEX_V96_ALLOCATION.totalGrossCap,
+        totalGrossCap,
         minimumActivePenguClip: DISDEX_V96_ALLOCATION.minimumActivePenguClip,
     });
     return {
