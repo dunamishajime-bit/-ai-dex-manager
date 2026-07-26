@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/research_lab_v96_profit_capture_bt.py'
+      - 'scripts/research_lab_v96_profit_capture_result_gate.py'
       - '.github/workflows/v96-profit-capture-bt.yml'
   workflow_dispatch:
 
@@ -31,13 +32,16 @@ jobs:
             v96-core-volume50-exec-${{ runner.os }}-
             perp-research-usdm-
       - name: Compile exact research backtest
-        run: python -m py_compile scripts/research_lab_v96_profit_capture_bt.py
+        run: |
+          python -m py_compile scripts/research_lab_v96_profit_capture_bt.py
+          python -m py_compile scripts/research_lab_v96_profit_capture_result_gate.py
       - name: Run V96 profit extension comparison
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
         run: |
           cd scripts
           python research_lab_v96_profit_capture_bt.py
+          python research_lab_v96_profit_capture_result_gate.py
       - name: Validate frozen scope and outputs
         run: |
           test -s .research-state/v96-profit-capture-bt.json
@@ -66,8 +70,10 @@ jobs:
           }
           assert payload['status'] in {
               'V96_PROFIT_EXTENSION_CANDIDATE_FOUND',
+              'V96_PROFIT_EXTENSION_HISTORICAL_LEAD_FORWARD_REQUIRED',
               'NO_ROBUST_V96_PROFIT_EXTENSION',
           }
+          assert 'resultGate' in payload
           assert payload['penguIndependentAudit']['decision'] == 'DIAGNOSTIC_ONLY_FIXED_HISTORICAL_SEQUENCE_NO_PENGU_PROMOTION'
           PY
       - name: Upload research evidence
