@@ -39,9 +39,14 @@ def main() -> None:
         )
 
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    md_lines = md_path.read_text(encoding="utf-8").splitlines()
+    for index, line in enumerate(md_lines):
+        if line.startswith("Status: `"):
+            md_lines[index] = f"Status: `{payload['status']}`"
+            break
     if best is not None:
         u = best["uplift"]
-        extra = [
+        md_lines.extend([
             "",
             "## Descriptive 2025-validation alternate",
             "",
@@ -49,8 +54,8 @@ def main() -> None:
             "- Not selection-clean because the Discovery-ranked candidate was different.",
             f"- 2025 Normal/Severe uplift: `{u['validation2025']['normal']['returnPctPoints']:.4f}` / `{u['validation2025']['severe']['returnPctPoints']:.4f}` points",
             f"- Reused 2026H1 Normal/Severe uplift: `{u['reused2026H1']['normal']['returnPctPoints']:.4f}` / `{u['reused2026H1']['severe']['returnPctPoints']:.4f}` points",
-        ]
-        md_path.write_text(md_path.read_text(encoding="utf-8").rstrip() + "\n" + "\n".join(extra) + "\n", encoding="utf-8")
+        ])
+    md_path.write_text("\n".join(md_lines).rstrip() + "\n", encoding="utf-8")
 
     print(json.dumps({
         "status": payload["status"],
