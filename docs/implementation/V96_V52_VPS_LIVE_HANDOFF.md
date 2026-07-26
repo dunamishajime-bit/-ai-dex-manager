@@ -13,6 +13,26 @@
 - No forced replacement and no sleeve lending.
 - V13D and Hyperliquid remain disabled.
 
+## Crypto V96 execution-layer amendment
+
+This branch does not change V96 Entry conditions, symbol selection, Strong Boost, PENGU logic, Kill Switch, UNKNOWN-order handling, One-way Mode, idempotency or pending-order recovery.
+
+- `ETHUSDT BUY` with `referenceTs=1785024000000` is explicitly skipped. The runner records `skippedSignalReferenceTs` through the normal atomic state store. Repeated ticks for the same reference remain skipped; later reference timestamps are evaluated normally. Reduce-only safety orders are never blocked by this skip.
+- Signal Gross remains 1.0. Immediately before an exposure-increasing order, the runner recomputes authenticated available balance, Cash Reserve, execution-cost headroom, existing-position initial-margin requirement, order delta and total Gross capacity.
+- When full Gross cannot be funded safely, only the execution target is proportionally reduced. It is not permanently fixed at Gross 0.95. With the observed small balance, the default execution buffer produces approximately a 0.95 execution target; when the balance is sufficiently larger, full Gross 1.0 is restored.
+- Invalid balances, invalid leverage/notional, account-state inconsistency or Gross-cap violation stop in manual review. Quantities below Aster step/minQty/minNotional are held without submitting an order.
+- `DISDEX_V96_CLOSE_UNMANAGED_POSITIONS=false` remains the default.
+
+Relevant environment controls:
+
+```bash
+DISDEX_V96_ONE_TIME_SKIP_REFERENCE_TS=1785024000000
+DISDEX_V96_CASH_RESERVE_PCT=2
+DISDEX_V96_ROUND_TRIP_FEE_BPS=8
+DISDEX_V96_MIN_EXECUTION_HEADROOM_USD=4
+DISDEX_V96_CLOSE_UNMANAGED_POSITIONS=false
+```
+
 ## Safety gates
 
 Merging or pulling the code cannot submit orders. The environment template is Paper/disabled. LIVE requires all of the following:
@@ -82,6 +102,42 @@ sudo systemctl is-active <OLD_TRADING_UNIT> && exit 1 || true
 ```
 
 If the official V96 combined migration has not already been completed, run it exactly as documented in `FREE_PYTH_IEX_AND_V96_COMBINED_MIGRATION.md`.
+
+### Formal PENGU/stale-position reconciliation
+
+Do not delete or edit `runner-live.json` or the migration manifest manually. Do not submit a PENGU close order merely because a legacy record contains `PENGUUSDT -3`.
+
+The reconciliation command uses authenticated Aster balance, position and open-order APIs. It records legacy and actual positions, open-order counts and managed Gross before/after. It never calls the order executor.
+
+First keep the trading service stopped and install the oneshot unit:
+
+```bash
+sudo cp ops/systemd/disdex-v96-position-reconciliation.service /etc/systemd/system/
+sudo systemctl daemon-reload
+```
+
+Set the exact acknowledgement. Set `ALLOW_FLAT=true` only after the authenticated Aster response has been reviewed and confirms no managed position:
+
+```bash
+DISDEX_V96_POSITION_RECONCILIATION_ACKNOWLEDGEMENT=I_ACKNOWLEDGE_V96_POSITION_RECONCILIATION_NO_ORDERS
+DISDEX_V96_POSITION_RECONCILIATION_ALLOW_FLAT=true
+```
+
+Run once:
+
+```bash
+sudo systemctl start disdex-v96-position-reconciliation.service
+sudo systemctl status disdex-v96-position-reconciliation.service --no-pager
+journalctl -u disdex-v96-position-reconciliation.service -n 200 --no-pager
+```
+
+Expected success status:
+
+```text
+DISDEX_V96_POSITION_RECONCILIATION_PASS_NO_ORDERS_SENT
+```
+
+If Aster returns any real managed position while the legacy record differs, any Open Order, an account mismatch or a changing position snapshot, the script writes/retains manual-review state and exits without orders. The combined preflight compares the authenticated positions against the formal reconciliation artifact and remains blocked on any mismatch.
 
 Run the combined no-order preflight:
 
