@@ -1,0 +1,115 @@
+name: Aster-only V50 Standalone Post-Open Basis Engine
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v50_post_open_basis_engine.py'
+      - 'docs/research/ASTER_ONLY_V50_POST_OPEN_BASIS_ENGINE_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v50-post-open-basis-engine.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v50-post-open-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash and Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore successful aligned market cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v39-overnight-open
+          key: aster-only-v50-v39cache-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v50_post_open_basis_engine.py') }}
+          restore-keys: |
+            aster-only-v39-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v50_post_open_basis_engine.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v50_post_open_basis_engine as v50
+          assert len(v50.CANDIDATES) == 162
+          assert tuple(name for name, _index in v50.WINDOWS) == ('1130', '1230', '1330', '1430')
+          assert all('1030' not in candidate.candidate_id for candidate in v50.CANDIDATES)
+          assert (v50.v19.BT_END_EXCLUSIVE - v50.v19.BT_START).days == 365
+          assert v50.MAX_DAILY_TRADES == 3
+          print('V50 freeze assertions: PASS')
+          PY
+      - name: Run V50 standalone tournament
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v50-post-open-basis
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v50_post_open_basis_engine.py \
+            --cache-dir ../.cache/aster-only-v39-overnight-open \
+            --output-dir ../.research-state/aster-only-v50-post-open-basis \
+            2>&1 | tee ../.research-state/aster-only-v50-post-open-basis/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v50-post-open-basis/result.json
+          test -s .research-state/aster-only-v50-post-open-basis/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v50-post-open-basis/result.json').read_text())
+          assert p['version'] == 50
+          assert p['candidateCount'] == 162
+          assert p['period']['calendarDays'] == 365
+          assert p['architecture']['v11TenThirtyTradesIncluded'] is False
+          assert p['architecture']['otherStrategyReturnsIncluded'] is False
+          assert p['architecture']['maximumConcurrentGross'] == 1.0
+          assert p['architecture']['maximumConcurrentPositions'] == 1
+          assert p['architecture']['hyperliquidUsed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v48Changed': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V50_NO_VALIDATED_STANDALONE_50PCT_POST_OPEN_ENGINE',
+              'ASTER_ONLY_V50_STANDALONE_50PCT_SHADOW_LEAD',
+              'ASTER_ONLY_V50_VALIDATION_WINNER_FAILED_FINAL_HURDLES',
+          }
+          print(json.dumps({'status': p['status'], 'winner': p['winner'], 'top': p['topDiagnostics'][:3]}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v50-post-open-basis-${{ github.run_id }}
+          path: .research-state/aster-only-v50-post-open-basis
+          retention-days: 90
+          if-no-files-found: warn
