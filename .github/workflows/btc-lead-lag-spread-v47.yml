@@ -1,0 +1,70 @@
+name: BTC Lead-Lag Spread V47
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_btc_lead_lag_spread_v47.py"
+      - ".github/workflows/btc-lead-lag-spread-v47.yml"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "lib/research-lab/perp/**"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "scripts/research_lab_btc_lead_lag_spread_v47.py"
+      - ".github/workflows/btc-lead-lag-spread-v47.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: btc-lead-lag-spread-v47-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: btc-lead-lag-v47-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            utc-session-v26-usdm-
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+            champion-deep-usdm-v1-
+
+      - name: Validate research source
+        run: python -m py_compile scripts/research_lab_btc_lead_lag_spread_v47.py
+
+      - name: Run chronological lead-lag research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_btc_lead_lag_spread_v47.py
+
+      - name: Upload V47 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-lead-lag-spread-v47
+          path: |
+            .research-state/btc-lead-lag-spread-v47.json
+            .research-state/btc-lead-lag-spread-v47.md
+          if-no-files-found: warn
+          retention-days: 30
