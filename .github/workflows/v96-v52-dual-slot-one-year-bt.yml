@@ -60,18 +60,16 @@ jobs:
             scripts/research_lab_aster_only_v50_post_open_basis_engine.py \
             scripts/research_lab_aster_only_v52_dual_slot_basis_engine.py \
             scripts/research_lab_v96_v52_dual_slot_one_year_bt.py
-          cd scripts
-          python research_lab_v96_v52_dual_slot_one_year_bt.py --self-test
+          python scripts/research_lab_v96_v52_dual_slot_one_year_bt.py --self-test
       - name: Run fixed one-year compounded portfolio backtest
         shell: bash
         run: |
           mkdir -p .research-state/v96-v52-dual-slot-one-year
           set -o pipefail
-          cd scripts
-          python research_lab_v96_v52_dual_slot_one_year_bt.py \
-            --stock-cache-dir ../.cache/aster-only-v39-overnight-open \
-            --output-dir ../.research-state/v96-v52-dual-slot-one-year \
-            2>&1 | tee ../.research-state/v96-v52-dual-slot-one-year/backtest.log
+          python scripts/research_lab_v96_v52_dual_slot_one_year_bt.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --output-dir .research-state/v96-v52-dual-slot-one-year \
+            2>&1 | tee .research-state/v96-v52-dual-slot-one-year/backtest.log
       - name: Validate architecture, result and safety
         run: |
           test -s .research-state/v96-v52-dual-slot-one-year/result.json
