@@ -1,0 +1,139 @@
+name: Aster-only V45 Sequential Core Reversal
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v45_sequential_core_reversal.py'
+      - 'docs/research/ASTER_ONLY_V45_SEQUENTIAL_CORE_REVERSAL_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v45-sequential-core-reversal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v45-sequential-core-reversal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash and Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore successful V39 overnight caches
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v39-overnight-open
+          key: aster-only-v45-v39cache-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v45_sequential_core_reversal.py') }}
+          restore-keys: |
+            aster-only-v39-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v39_overnight_open_router.py \
+            scripts/research_lab_aster_only_v40_overnight_residual_router.py \
+            scripts/research_lab_aster_only_v42_idiosyncratic_open_residual.py \
+            scripts/research_lab_aster_only_v43_filtered_open_reversal.py \
+            scripts/research_lab_aster_only_v45_sequential_core_reversal.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v45_sequential_core_reversal as v45
+          assert (v45.v39.v19.BT_END_EXCLUSIVE - v45.v39.v19.BT_START).days == 365
+          assert len(v45.CANDIDATES) == 288
+          assert v45.CORE.candidate_id == 'R100__ONMAX100__OPENMAX10000__LONG_ONLY__REL_ANY__DOM1'
+          assert sorted({c.reversal_gross for c in v45.CANDIDATES}) == [0.25, 0.5, 0.75, 1.0]
+          assert v45.v39.BASELINE_NORMAL == 72.276908
+          assert v45.v39.BASELINE_P95 == 68.080022
+          assert v45.v39.BASELINE_FALLBACK_NORMAL == 7.813259
+          assert v45.v39.BASELINE_FALLBACK_P95 == 7.400908
+          print('V45 freeze assertions: PASS')
+          PY
+      - name: Run V45 sequential router
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v45-sequential
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v45_sequential_core_reversal.py \
+            --cache-dir ../.cache/aster-only-v39-overnight-open \
+            --output-dir ../.research-state/aster-only-v45-sequential \
+            2>&1 | tee ../.research-state/aster-only-v45-sequential/backtest.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v45-sequential/result.json
+          test -s .research-state/aster-only-v45-sequential/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v45-sequential/result.json').read_text())
+          assert p['version'] == 45
+          assert p['candidateCount'] == 288
+          assert p['period']['calendarDays'] == 365
+          assert p['architecture'] == {
+              'venue': 'ASTER_ONLY',
+              'signalSource': 'SEQUENTIAL_CORE_1030_AND_REVERSAL_1130',
+              'maximumConcurrentGross': 1.0,
+              'maximumConcurrentPositions': 1,
+              'sequentialIntradayEntriesAllowed': True,
+              'fractionalReversalGross': True,
+              'v11EqPriority': True,
+              'v19SequentialWhenNonOverlapping': True,
+              'hyperliquidUsed': False,
+          }
+          assert p['selectionDiscipline']['finalAndHoldoutUsedForSelection'] is False
+          assert p['selectionDiscipline']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v13dProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V45_NO_VALIDATED_SEQUENTIAL_ROUTER',
+              'ASTER_ONLY_V45_WINNER_DID_NOT_CLEAR_FINAL_AUDIT',
+              'ASTER_ONLY_V45_VALIDATED_SHADOW_LEAD',
+          }
+          if p['status'] == 'ASTER_ONLY_V45_VALIDATED_SHADOW_LEAD':
+              assert p['winner']['accepted'] is True
+              assert all(p['winner']['audit']['checks'].values())
+          print(json.dumps({
+              'status': p['status'],
+              'developmentSurvivors': p['developmentSurvivors'],
+              'validationSurvivors': p['validationSurvivors'],
+              'winner': p['winner'],
+              'topDevelopmentDiagnostics': p['topDevelopmentDiagnostics'][:5],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v45-sequential-${{ github.run_id }}
+          path: .research-state/aster-only-v45-sequential
+          retention-days: 90
+          if-no-files-found: warn
