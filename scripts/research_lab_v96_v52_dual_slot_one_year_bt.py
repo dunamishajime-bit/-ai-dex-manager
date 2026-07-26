@@ -22,8 +22,9 @@ TOTAL_GROSS_CAP = 2.5
 V11_MAX_GROSS = 1.0
 V50_MAX_GROSS = 1.0
 DAILY_LOSS_LIMIT = -0.02
-PERIOD_START = stock.v19.BT_START
-PERIOD_END = stock.v19.BT_END_EXCLUSIVE
+PERIOD_START = base.PERIOD_START
+PERIOD_END = base.PERIOD_END
+STOCK_WARMUP_DAYS = 40
 START_MS = int(PERIOD_START.timestamp() * 1000)
 END_MS = int(PERIOD_END.timestamp() * 1000)
 
@@ -40,55 +41,18 @@ def rounded(value: Any):
 
 
 def build_crypto() -> dict:
-    raw = crypto_bt.v89.build_raw()
-    profile = crypto_bt.build_core_profile(crypto_bt.NEW, raw)
-    trades = crypto_bt.v69.scale_trades(crypto_bt.v96.TARGET_V67_GROSS)
-    trade_start = min(int(row["entry_ts"]) for row in trades)
-    trade_end = max(int(row["exit_ts"]) for row in trades)
-    pengu_rows = crypto_bt.core.fetch_klines(
-        "PENGUUSDT",
-        min(START_MS, trade_start) - 30 * crypto_bt.v69.DAY,
-        max(END_MS, trade_end) + crypto_bt.v69.HOUR,
-    )
-    combined = crypto_bt.combined_series(profile, pengu_rows)
-
-    def cap(rows: Sequence[dict]) -> List[dict]:
-        result: List[dict] = []
-        for row in rows:
-            ts = int(row["ts"])
-            if not START_MS <= ts < END_MS:
-                continue
-            raw_max = max(0.0, float(row.get("maxGross", row.get("gross", 0.0))))
-            scale = min(1.0, CRYPTO_GROSS_CAP / raw_max) if raw_max > 0 else 1.0
-            result.append({
-                "ts": ts,
-                "return": float(row["return"]) * scale,
-                "gross": raw_max * scale,
-                "sourceGross": raw_max,
-                "scale": scale,
-            })
-        return result
-
-    normal = cap(combined["normalRows"])
-    severe = cap(combined["severeRows"])
-    if not normal or not severe:
-        raise RuntimeError("no Crypto V96 rows in fixed V52 period")
-    return {
-        "normal": normal,
-        "severe": severe,
-        "diagnostics": {
-            "normalRows": len(normal),
-            "severeRows": len(severe),
-            "first": base.iso_ms(normal[0]["ts"]),
-            "last": base.iso_ms(normal[-1]["ts"]),
-            "sourceMaxGross": max(row["sourceGross"] for row in normal),
-            "cappedMaxGross": max(row["gross"] for row in normal),
-            "minimumScale": min(row["scale"] for row in normal),
-        },
-    }
+    crypto = base.build_crypto()
+    if not crypto["normal"] or not crypto["severe"]:
+        raise RuntimeError("no Crypto V96 rows in fixed common period")
+    return crypto
 
 
 def build_stock(cache_root: Path) -> Tuple[List[dict], List[dict], List[str], dict]:
+    stock.v19.BT_START = PERIOD_START
+    stock.v19.BT_END_EXCLUSIVE = PERIOD_END
+    stock.v19.WARMUP_START = PERIOD_START - dt.timedelta(days=STOCK_WARMUP_DAYS)
+    stock.v19.BT_START_DAY = PERIOD_START.date().isoformat()
+    stock.v19.BT_END_DAY_EXCLUSIVE = PERIOD_END.date().isoformat()
     stock.v19.configure_exact_data_window()
     days, aligned, data_diag = stock.v19.v17.load_all(cache_root / "aligned")
     warmup = [
@@ -140,11 +104,7 @@ def simulate(
                 "trade": raw,
                 "priority": 1,
             })
-    timeline.sort(key=lambda row: (
-        int(row["ts"]),
-        int(row["priority"]),
-        str(row.get("trade", {}).get("strategy", "")),
-    ))
+    timeline.sort(key=lambda row: (int(row["ts"]), int(row["priority"]), str(row.get("trade", {}).get("strategy", ""))))
 
     active: Dict[str, dict] = {}
     events: List[dict] = []
@@ -157,10 +117,10 @@ def simulate(
 
     def observe_gross() -> None:
         nonlocal max_crypto_gross, max_stock_gross, max_total_gross
-        active_stock_gross = sum(float(item["allocatedGross"]) for item in active.values())
+        stock_gross = sum(float(item["allocatedGross"]) for item in active.values())
         max_crypto_gross = max(max_crypto_gross, current_crypto_gross)
-        max_stock_gross = max(max_stock_gross, active_stock_gross)
-        max_total_gross = max(max_total_gross, current_crypto_gross + active_stock_gross)
+        max_stock_gross = max(max_stock_gross, stock_gross)
+        max_total_gross = max(max_total_gross, current_crypto_gross + stock_gross)
 
     while index < len(timeline):
         row = timeline[index]
