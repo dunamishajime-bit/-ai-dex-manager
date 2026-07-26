@@ -1,0 +1,58 @@
+name: V96 flat-only fallback entry backtest
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v96_flat_fallback_entry_bt.py'
+      - 'scripts/research_lab_v96_flat_fallback_entry_result_gate.py'
+      - '.github/workflows/v96-flat-fallback-entry-bt.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v96-flat-fallback-entry-bt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical market-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v96-flat-fallback-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_flat_fallback_entry_bt.py') }}
+          restore-keys: |
+            v96-profit-capture-${{ runner.os }}-
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            v96-core-vol50-p10-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile research backtest
+        run: |
+          python -m py_compile scripts/research_lab_v96_flat_fallback_entry_bt.py
+          python -m py_compile scripts/research_lab_v96_flat_fallback_entry_result_gate.py
+      - name: Run flat-only fallback entry comparison
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: ../.research-state
+        run: |
+          cd scripts
+          python research_lab_v96_flat_fallback_entry_bt.py
+          python research_lab_v96_flat_fallback_entry_result_gate.py
+      - name: Validate outputs
+        run: |
+          test -s .research-state/v96-flat-fallback-entry-bt.json
+          test -s .research-state/v96-flat-fallback-entry-bt.md
+      - name: Upload research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-flat-fallback-entry-bt
+          path: |
+            .research-state/v96-flat-fallback-entry-bt.json
+            .research-state/v96-flat-fallback-entry-bt.md
+          if-no-files-found: warn
+          retention-days: 90
