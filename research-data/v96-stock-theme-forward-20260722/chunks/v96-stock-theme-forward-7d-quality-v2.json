@@ -46,45 +46,45 @@
   "latencies": {
     "bookTicker": {
       "samples": 1210,
-      "p50Ms": 134.596,
-      "p95Ms": 233.16975000000002,
-      "maxMs": 488.812
+      "p50Ms": 200.7335,
+      "p95Ms": 280.7966,
+      "maxMs": 1951.108
     },
     "depth": {
       "samples": 1210,
-      "p50Ms": 135.014,
-      "p95Ms": 229.7157499999999,
-      "maxMs": 414.772
+      "p50Ms": 200.833,
+      "p95Ms": 273.28409999999997,
+      "maxMs": 1885.364
     },
     "klines1m": {
       "samples": 1210,
-      "p50Ms": 134.5525,
-      "p95Ms": 191.92675000000003,
-      "maxMs": 5327.555
+      "p50Ms": 200.579,
+      "p95Ms": 257.96399999999994,
+      "maxMs": 478.108
     },
     "lastPrice": {
       "samples": 1210,
-      "p50Ms": 134.264,
-      "p95Ms": 220.5127,
-      "maxMs": 5292.9
+      "p50Ms": 200.77300000000002,
+      "p95Ms": 286.45685,
+      "maxMs": 1925.707
     },
     "openInterest": {
       "samples": 1210,
-      "p50Ms": 157.27800000000002,
-      "p95Ms": 379.43199999999996,
-      "maxMs": 5316.135
+      "p50Ms": 239.639,
+      "p95Ms": 517.4956,
+      "maxMs": 665.418
     },
     "premium": {
       "samples": 1210,
-      "p50Ms": 137.208,
-      "p95Ms": 374.7792,
-      "maxMs": 5270.085
+      "p50Ms": 202.05700000000002,
+      "p95Ms": 474.99164999999994,
+      "maxMs": 569.216
     },
     "ticker24h": {
       "samples": 1210,
-      "p50Ms": 134.724,
-      "p95Ms": 209.60589999999993,
-      "maxMs": 5283.719
+      "p50Ms": 200.662,
+      "p95Ms": 270.14805,
+      "maxMs": 1844.63
     }
   },
   "minuteBarCoveragePctV2": 100.0,
@@ -116,20 +116,20 @@
       },
       "sell": {
         "attempts": 1210,
-        "fillable": 1205,
-        "fillablePct": 99.58677685950413
+        "fillable": 1210,
+        "fillablePct": 100.0
       }
     },
     "1000": {
       "buy": {
         "attempts": 1210,
-        "fillable": 1205,
-        "fillablePct": 99.58677685950413
+        "fillable": 1210,
+        "fillablePct": 100.0
       },
       "sell": {
         "attempts": 1210,
-        "fillable": 1203,
-        "fillablePct": 99.42148760330578
+        "fillable": 1209,
+        "fillablePct": 99.91735537190083
       }
     }
   },
@@ -137,43 +137,43 @@
     "100": {
       "buy": {
         "samples": 1210,
-        "medianSlippageBps": 4.6756217157428726,
-        "p95SlippageBps": 19.765490549712432,
-        "maxSlippageBps": 9230.704243200811
+        "medianSlippageBps": 5.046665088818125,
+        "p95SlippageBps": 39.41328561978112,
+        "maxSlippageBps": 9075.983567342091
       },
       "sell": {
         "samples": 1210,
-        "medianSlippageBps": 4.324428214492748,
-        "p95SlippageBps": 19.984464863939674,
-        "maxSlippageBps": 139763.69114360242
+        "medianSlippageBps": 4.766302247370957,
+        "p95SlippageBps": 26.360536074047694,
+        "maxSlippageBps": 597.7700438257294
       }
     },
     "500": {
       "buy": {
         "samples": 1210,
-        "medianSlippageBps": 7.825462677862882,
-        "p95SlippageBps": 19.765490549712432,
-        "maxSlippageBps": 9230.704243200811
+        "medianSlippageBps": 7.420509132716191,
+        "p95SlippageBps": 39.50350807046769,
+        "maxSlippageBps": 28625.582066685045
       },
       "sell": {
-        "samples": 1205,
-        "medianSlippageBps": 4.922917476355426,
-        "p95SlippageBps": 19.707377864798037,
-        "maxSlippageBps": 82230.42106113856
+        "samples": 1210,
+        "medianSlippageBps": 5.274047637388035,
+        "p95SlippageBps": 26.370727506240854,
+        "maxSlippageBps": 1893.1340943333307
       }
     },
     "1000": {
       "buy": {
-        "samples": 1205,
-        "medianSlippageBps": 9.337436248444408,
-        "p95SlippageBps": 19.15595929361835,
-        "maxSlippageBps": 9230.704243200811
+        "samples": 1210,
+        "medianSlippageBps": 8.812937935223086,
+        "p95SlippageBps": 41.869242210180616,
+        "maxSlippageBps": 34300.96472667995
       },
       "sell": {
-        "samples": 1203,
-        "medianSlippageBps": 5.18067607822692,
-        "p95SlippageBps": 19.57130409756,
-        "maxSlippageBps": 20232.416354130102
+        "samples": 1209,
+        "medianSlippageBps": 5.523380458281046,
+        "p95SlippageBps": 28.951075342157495,
+        "maxSlippageBps": 110.79002010180083
       }
     }
   },
@@ -313,7 +313,7 @@
       }
     },
     "globalMaxGapSeconds": 60.015,
-    "globalP95GapSeconds": 60.012,
+    "globalP95GapSeconds": 60.00999999999999,
     "gapsOver90Seconds": 0,
     "gapsOver10Minutes": 0
   },
@@ -368,8 +368,8 @@
       "ASMLUSDT": "TRADING",
       "ADBEUSDT": "TRADING"
     },
-    "clockSkewMedianMs": -1363.0,
-    "clockSkewMaxAbsMs": 1363.0,
+    "clockSkewMedianMs": -1408.0,
+    "clockSkewMaxAbsMs": 1408.0,
     "coveragePass": true
   },
   "limitations": [
