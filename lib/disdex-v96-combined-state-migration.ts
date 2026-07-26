@@ -165,8 +165,9 @@ export async function assertCombinedV96MigrationReady(input: {
 }) {
     const loaded = await loadCombinedV96Migration(input.combinedRoot);
     const stateSha = await sha256File(loaded.paths.statePath);
-    if (!loaded.activation && stateSha !== loaded.manifest.destinationStateSha256) {
-        throw new Error("Combined V96 state changed after migration and before first activation.");
+    const expectedPreActivationStateSha = loaded.reconciliation?.stateShaAfter || loaded.manifest.destinationStateSha256;
+    if (!loaded.activation && stateSha !== expectedPreActivationStateSha) {
+        throw new Error("Combined V96 state changed after migration/reconciliation and before first activation.");
     }
     const expectedManagedPositions = expectedManagedPositionsForMigration(loaded.manifest, loaded.reconciliation);
     if (input.managedPositions && !managedPositionSnapshotsMatch(input.managedPositions, expectedManagedPositions)) {
