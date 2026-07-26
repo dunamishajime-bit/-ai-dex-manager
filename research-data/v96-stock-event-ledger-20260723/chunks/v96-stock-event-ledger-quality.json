@@ -64,18 +64,19 @@
     },
     "bySymbol": {
       "GOOGLUSDT": 2,
-      "INTCUSDT": 6,
+      "INTCUSDT": 7,
       "TSLAUSDT": 2,
       "TSMUSDT": 1,
-      "QCOMUSDT": 2,
       "AMATUSDT": 4,
       "MUUSDT": 4,
       "AMZNUSDT": 2,
       "MSFTUSDT": 2,
       "ASMLUSDT": 2,
-      "SNDKUSDT": 2,
+      "SNDKUSDT": 1,
+      "NVDAUSDT": 1,
       "ARMUSDT": 1,
       "METAUSDT": 1,
+      "QCOMUSDT": 1,
       "PLTRUSDT": 1
     },
     "riskHints": {
@@ -92,8 +93,8 @@
         "headline": "Consumer Price Index for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-12T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -107,8 +108,8 @@
         "headline": "Semiconductor ETFs Surge Ahead of Intel Earnings - VettaFi - Commentaries - Advisor Perspectives",
         "publishedAt": "2026-07-25T13:38:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -122,8 +123,23 @@
         "headline": "Applied Materials stock trades near record levels as AI demand supports recent earnings - AD HOC NEWS",
         "publishedAt": "2026-07-25T11:31:09Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "1d3f53a6a283f3772529e285",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "NVDAUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Nvidia stock trades near record territory as AI demand drives earnings and valuation - AD HOC NEWS",
+        "publishedAt": "2026-07-26T11:09:02Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -137,26 +153,11 @@
         "headline": "U.S. International Trade in Goods and Services, June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-04T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
-        ]
-      },
-      {
-        "eventId": "344f2a5ee98ef2c7bcb72b62",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "SNDKUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Should You Buy Sandisk Stock Before It Reports Earnings on Aug. 5? - The Motley Fool",
-        "publishedAt": "2026-07-26T09:52:47Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
         ]
       },
       {
@@ -167,8 +168,8 @@
         "headline": "Applied Materials (AMAT) Earnings Preview: AI Chip Demand, Capital Expenditure Trends, & Trade Setups - In Progress - TradingKey",
         "publishedAt": "2026-07-25T21:00:35Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -182,8 +183,8 @@
         "headline": "ASML stock trades near record levels as chip equipment demand supports earnings - AD HOC NEWS",
         "publishedAt": "2026-07-26T06:35:25Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -197,8 +198,8 @@
         "headline": "PLTR scheduled earnings on 2026-08-03 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-08-03T20:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -212,8 +213,8 @@
         "headline": "FOMC meeting 2026-09-15 through 2026-09-16",
         "publishedAt": null,
         "effectiveAt": "2026-09-16T18:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -227,8 +228,8 @@
         "headline": "INTC filed 10-Q",
         "publishedAt": "2026-07-24T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -242,8 +243,8 @@
         "headline": "Should You Buy Sandisk Stock Before It Reports Earnings on Aug. 5? - Yahoo Finance",
         "publishedAt": "2026-07-26T09:35:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -257,8 +258,8 @@
         "headline": "Micron Has Strong Q3 Earnings and Rising Guidance. Is It a Buy? - AOL.com",
         "publishedAt": "2026-07-25T18:05:48Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -272,8 +273,8 @@
         "headline": "TSLA filed 10-Q",
         "publishedAt": "2026-07-23T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -287,11 +288,26 @@
         "headline": "Personal Income and Outlays, June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
+        ]
+      },
+      {
+        "eventId": "5e89d3759102cf2c1faf6db4",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "MUUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Micron Technology stock trades near recent highs as memory demand supports earnings outlook - AD HOC NEWS",
+        "publishedAt": "2026-07-26T11:43:59Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
         ]
       },
       {
@@ -302,8 +318,8 @@
         "headline": "MSFT scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -317,26 +333,11 @@
         "headline": "Employment Cost Index for Second Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-31T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
-        ]
-      },
-      {
-        "eventId": "684e64ac5eb1fb12f82d0e7f",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "MUUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Micron Technology stock steadies as AI memory demand supports recent earnings beat - AD HOC NEWS",
-        "publishedAt": "2026-07-25T11:39:54Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
         ]
       },
       {
@@ -347,23 +348,8 @@
         "headline": "GOOGL filed 10-Q",
         "publishedAt": "2026-07-23T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "6fcc7fdb86e538cee430167a",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "QCOMUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Texas Instruments vs. Qualcomm: One Pays Out 94% of Earnings. The Better Dividend Chip Stock Is Clear. - Barchart.com",
-        "publishedAt": "2026-07-24T23:00:02Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -377,8 +363,8 @@
         "headline": "Applied Materials stock extends its earnings lead - AD HOC NEWS",
         "publishedAt": "2026-07-25T05:50:27Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -392,8 +378,8 @@
         "headline": "ARM scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -407,8 +393,8 @@
         "headline": "Tesla, Intel, Google All Dropped After Earnings - Will Microsoft, Amazon, Meta Follow? - Benzinga",
         "publishedAt": "2026-07-25T21:34:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -422,8 +408,8 @@
         "headline": "Productivity and Costs (P) for Second Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-06T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -437,8 +423,8 @@
         "headline": "Tesla, Intel, Google All Dropped After Earnings - Will Microsoft, Amazon, Meta Follow? - Benzinga",
         "publishedAt": "2026-07-25T21:34:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -452,8 +438,8 @@
         "headline": "TSM filed 6-K",
         "publishedAt": "2026-07-24T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": []
       },
@@ -465,8 +451,8 @@
         "headline": "GDP (Advance Estimate), 2nd Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -480,8 +466,8 @@
         "headline": "Employment Situation for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-07T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -495,8 +481,8 @@
         "headline": "AMZN scheduled earnings on 2026-07-30 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T20:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -510,8 +496,8 @@
         "headline": "META scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -525,8 +511,8 @@
         "headline": "Tesla, Intel, Google All Dropped After Earnings - Will Microsoft, Amazon, Meta Follow? - Benzinga",
         "publishedAt": "2026-07-25T21:34:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -540,8 +526,8 @@
         "headline": "Why Is Intel (INTC) Stock Volatile After Earnings? Revenue Beat Overshadowed by $11 Billion Loss - TradingKey",
         "publishedAt": "2026-07-25T12:44:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -555,8 +541,8 @@
         "headline": "ASML Faces a Trio of Catalysts: Dividend Mechanics, Customer Earnings, and Geopolitical Headwinds - AD HOC NEWS",
         "publishedAt": "2026-07-26T00:41:03Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -570,8 +556,23 @@
         "headline": "Tesla, Intel, Google All Dropped After Earnings - Will Microsoft, Amazon, Meta Follow? - Benzinga",
         "publishedAt": "2026-07-25T21:34:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "b5af2ddcf4e2dfb861d19399",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "INTCUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Intel stock trades steadily as investors weigh AI chip roadmap and recent earnings metrics - AD HOC NEWS",
+        "publishedAt": "2026-07-26T05:52:38Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -585,8 +586,8 @@
         "headline": "Intel Stock Surges 11% After Q2 Earnings Beat in 2026 - Memeburn",
         "publishedAt": "2026-07-26T06:53:55Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -600,8 +601,8 @@
         "headline": "Micron Technology stock trades steady as AI memory demand supports recent earnings - AD HOC NEWS",
         "publishedAt": "2026-07-25T18:59:53Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -615,8 +616,8 @@
         "headline": "Tesla, Intel, Google All Dropped After Earnings - Will Microsoft, Amazon, Meta Follow? - Benzinga",
         "publishedAt": "2026-07-25T21:34:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -630,8 +631,8 @@
         "headline": "QCOM scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -645,8 +646,8 @@
         "headline": "Producer Price Index for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-13T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -660,8 +661,8 @@
         "headline": "FOMC meeting 2026-07-28 through 2026-07-29",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T18:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -675,8 +676,8 @@
         "headline": "Real Earnings for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-12T12:30:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -690,8 +691,8 @@
         "headline": "Job Openings and Labor Turnover Survey for June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-04T14:00:00Z",
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -705,8 +706,8 @@
         "headline": "INTC filed 8-K",
         "publishedAt": "2026-07-23T04:00:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": []
       },
@@ -718,8 +719,8 @@
         "headline": "Micron (MU) Reports Record $41.5B Revenue and Guides $50B Next Quarter - TradingKey",
         "publishedAt": "2026-07-25T19:09:37Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -733,8 +734,8 @@
         "headline": "Applied Materials stock trades steady as AI chip spending and recent earnings shape outlook - AD HOC NEWS",
         "publishedAt": "2026-07-25T18:13:50Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-26T10:09:56.538377Z",
-        "lastFetchedAt": "2026-07-26T10:09:56.538377Z",
+        "firstFetchedAt": "2026-07-26T12:13:14.344362Z",
+        "lastFetchedAt": "2026-07-26T12:13:14.344362Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
