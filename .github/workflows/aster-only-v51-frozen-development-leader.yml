@@ -1,0 +1,110 @@
+name: Aster-only V51 Frozen Development Leader Audit
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_aster_only_v51_frozen_development_leader_audit.py'
+      - 'docs/research/ASTER_ONLY_V51_FROZEN_DEVELOPMENT_LEADER_AUDIT_PROTOCOL_2026-07-26.md'
+      - '.github/workflows/aster-only-v51-frozen-development-leader.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aster-only-v51-frozen-development-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash and Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore successful aligned market cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster-only-v39-overnight-open
+          key: aster-only-v51-v39cache-${{ runner.os }}-${{ hashFiles('scripts/research_lab_aster_only_v50_post_open_basis_engine.py', 'scripts/research_lab_aster_only_v51_frozen_development_leader_audit.py') }}
+          restore-keys: |
+            aster-only-v39-${{ runner.os }}-
+      - name: Compile and freeze assertions
+        run: |
+          python -m py_compile \
+            scripts/research_lab_aster_only_v14_replacement_tournament.py \
+            scripts/research_lab_aster_only_v19_trailing_one_year_bt.py \
+            scripts/research_lab_aster_only_v20_strict_hurdle_tournament.py \
+            scripts/research_lab_aster_only_v22_v11eq_primary_v19_fallback.py \
+            scripts/research_lab_aster_only_v50_post_open_basis_engine.py \
+            scripts/research_lab_aster_only_v51_frozen_development_leader_audit.py
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import research_lab_aster_only_v50_post_open_basis_engine as v50
+          import research_lab_aster_only_v51_frozen_development_leader_audit as v51
+          assert len(v50.CANDIDATES) == 162
+          assert v51.CUSTOM_COSTS == (50.0, 60.0)
+          print('V51 freeze assertions: PASS')
+          PY
+      - name: Run V51 frozen audit
+        shell: bash
+        run: |
+          mkdir -p .research-state/aster-only-v51-frozen-development-leader
+          set -o pipefail
+          cd scripts
+          python research_lab_aster_only_v51_frozen_development_leader_audit.py \
+            --cache-dir ../.cache/aster-only-v39-overnight-open \
+            --output-dir ../.research-state/aster-only-v51-frozen-development-leader \
+            2>&1 | tee ../.research-state/aster-only-v51-frozen-development-leader/audit.log
+      - name: Validate result and safety
+        run: |
+          test -s .research-state/aster-only-v51-frozen-development-leader/result.json
+          test -s .research-state/aster-only-v51-frozen-development-leader/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/aster-only-v51-frozen-development-leader/result.json').read_text())
+          assert p['version'] == 51
+          assert p['selection']['validationFinalHoldoutUsedForSelection'] is False
+          assert p['interpretation']['v50OriginalGateOverridden'] is False
+          assert p['interpretation']['productionPromotionAllowed'] is False
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'orderSubmissionAllowed': False,
+              'productionChanged': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'cryptoV96Changed': False,
+              'v11EqChanged': False,
+              'v19Changed': False,
+              'v48Changed': False,
+              'v50ProductionChanged': False,
+          }
+          assert p['status'] in {
+              'ASTER_ONLY_V51_FROZEN_DEVELOPMENT_LEADER_EXTENDED_POST_SELECTION_PASS_SHADOW_ONLY',
+              'ASTER_ONLY_V51_FROZEN_DEVELOPMENT_LEADER_STRESS_FAIL',
+          }
+          print(json.dumps({'status': p['status'], 'candidate': p['selectedCandidate'], 'full': p['baseAudit']['full'], 'post': p['postDevelopment'], 'checks': p['checks']}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-only-v51-frozen-development-${{ github.run_id }}
+          path: .research-state/aster-only-v51-frozen-development-leader
+          retention-days: 90
+          if-no-files-found: warn
