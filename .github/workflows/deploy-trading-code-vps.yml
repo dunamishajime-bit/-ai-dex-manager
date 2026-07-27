@@ -34,6 +34,7 @@ jobs:
       VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
       VPS_STATE_ROOT: ${{ vars.VPS_STATE_ROOT }}
       VPS_OPS_STATE_DIR: ${{ vars.VPS_OPS_STATE_DIR }}
+      VPS_DEPLOYMENT_LAYOUT_MODE: ${{ vars.VPS_DEPLOYMENT_LAYOUT_MODE }}
       VPS_UI_SERVICE_MANAGER: ${{ vars.VPS_UI_SERVICE_MANAGER }}
       VPS_UI_SERVICE: ${{ vars.VPS_UI_SERVICE }}
       VPS_TRADING_SERVICE_MANAGER: ${{ vars.VPS_TRADING_SERVICE_MANAGER }}
@@ -104,12 +105,12 @@ jobs:
         if: steps.request.outputs.enabled == 'true'
         continue-on-error: true
         shell: bash
-        env:
-          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/pre
-          VPS_INSPECTION_PROFILE: basic
-          VPS_STRICT_INSPECTION: 'false'
-          TARGET_COMMIT: ''
-        run: node scripts/ops/vps-inspection.mjs
+        run: |
+          VPS_REPORT_DIR="${VPS_REPORT_ROOT}/pre" \
+          VPS_INSPECTION_PROFILE=basic \
+          VPS_STRICT_INSPECTION=false \
+          TARGET_COMMIT='' \
+          node scripts/ops/vps-inspection.mjs
 
       - name: Install exact GitHub SHA dependencies
         if: steps.request.outputs.enabled == 'true'
@@ -140,19 +141,19 @@ jobs:
         shell: bash
         env:
           TARGET_COMMIT: ${{ steps.request.outputs.target_sha }}
-          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/deploy
-        run: bash scripts/ops/vps-deploy-trading-code.sh
+        run: VPS_REPORT_DIR="${VPS_REPORT_ROOT}/deploy" bash scripts/ops/vps-deploy-trading-code.sh
 
       - name: Post-deploy read-only snapshot
         if: always() && steps.request.outputs.enabled == 'true'
         continue-on-error: true
         shell: bash
         env:
-          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/post
-          VPS_INSPECTION_PROFILE: basic
-          VPS_STRICT_INSPECTION: 'false'
           TARGET_COMMIT: ${{ steps.request.outputs.target_sha }}
-        run: node scripts/ops/vps-inspection.mjs
+        run: |
+          VPS_REPORT_DIR="${VPS_REPORT_ROOT}/post" \
+          VPS_INSPECTION_PROFILE=basic \
+          VPS_STRICT_INSPECTION=false \
+          node scripts/ops/vps-inspection.mjs
 
       - name: Publish staging summary
         if: always() && steps.request.outputs.enabled == 'true'
@@ -173,6 +174,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vps-trading-stage-${{ steps.request.outputs.target_sha }}-${{ github.run_number }}
-          path: ${{ env.VPS_REPORT_ROOT }}
+          path: ${{ runner.temp }}/disdex-trading-stage-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: error
           retention-days: 14
