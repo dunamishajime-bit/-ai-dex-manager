@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import inspect
+import sys
 import time
 from typing import Any
 
@@ -144,10 +146,29 @@ def install_unknown_order_safe_run(cls: Any) -> None:
     cls.run = run
 
 
+def self_test() -> None:
+    assert getattr(
+        engine.V52AsterOnlyEngine,
+        "_v52_execution_safety_installed",
+        False,
+    )
+    recheck_source = inspect.getsource(
+        engine.V52AsterOnlyEngine.recheck_entry_conditions,
+    )
+    run_source = inspect.getsource(engine.V52AsterOnlyEngine.run)
+    assert "POST_FILL_EXISTING_POSITION" in recheck_source
+    assert "ORDER_EXECUTION_UNKNOWN" in run_source
+    assert "manualReviewReason" in run_source
+    print("V52 patched safe runner self-test: PASS")
+
+
 safety.install_class(engine.V52AsterOnlyEngine)
 install_postfill_aware_gross_recheck(engine.V52AsterOnlyEngine)
 install_unknown_order_safe_run(engine.V52AsterOnlyEngine)
 
 
 if __name__ == "__main__":
+    if "--self-test" in sys.argv:
+        self_test()
+        raise SystemExit(0)
     raise SystemExit(engine.main())
