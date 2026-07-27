@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "requestId": "bootstrap-template",
+  "requestedAt": "2026-07-27T00:00:00Z",
+  "inspectionProfile": "basic",
+  "targetCommit": "workflow-head",
+  "reason": "Bootstrap template only. Change requestId and requestedAt to trigger a new inspection after the runner is installed."
+}
