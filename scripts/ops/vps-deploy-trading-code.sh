@@ -14,6 +14,8 @@ ops_validate_sha "$TARGET_COMMIT"
 ops_require_absolute_path VPS_APP_DIR
 ops_require_absolute_path VPS_OPS_STATE_DIR
 ops_require_absolute_path VPS_REPORT_DIR
+ops_require_env VPS_DEPLOYMENT_LAYOUT_MODE
+[[ "$VPS_DEPLOYMENT_LAYOUT_MODE" == "in-place-reviewed" ]] || ops_die "this script supports only an explicitly reviewed in-place VPS layout; adapt it to an atomic release layout or set VPS_DEPLOYMENT_LAYOUT_MODE=in-place-reviewed after verification"
 ops_require_env VPS_TRADING_SERVICE_MANAGER
 ops_require_env VPS_TRADING_SERVICE
 ops_validate_service_name "$VPS_TRADING_SERVICE"
@@ -43,6 +45,7 @@ write_report() {
     "generatedAt=$(ops_now)" \
     "status=${status}" \
     "message=${message}" \
+    "deploymentLayoutMode=${VPS_DEPLOYMENT_LAYOUT_MODE}" \
     "targetCommit=${TARGET_COMMIT}" \
     "previousCommit=${PREVIOUS_SHA}" \
     "deployedCommit=$(ops_current_sha 2>/dev/null || true)" \
@@ -63,6 +66,7 @@ write_report() {
 
 - Status: **${status}**
 - Message: ${message}
+- Deployment layout: ${VPS_DEPLOYMENT_LAYOUT_MODE}
 - Target SHA: \`${TARGET_COMMIT}\`
 - Previous SHA: \`${PREVIOUS_SHA}\`
 - Current source SHA: \`$(ops_current_sha 2>/dev/null || printf 'unknown')\`
