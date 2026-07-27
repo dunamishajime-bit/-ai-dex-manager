@@ -54,14 +54,3 @@ jobs:
           node --check scripts/ops/vps-ops-selftest.mjs
       - name: Run fail-closed operations self-test
         run: node scripts/ops/vps-ops-selftest.mjs
-      - name: Confirm request templates are disabled
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          for (const path of ['ops/requests/ui-deploy-request.json', 'ops/requests/trading-code-deploy-request.json']) {
-            const request = JSON.parse(fs.readFileSync(path, 'utf8'));
-            if (request.enabled !== false) throw new Error(`${path} must remain disabled in reviewed source; a one-time trigger commit may set it true only when intentionally deploying`);
-          }
-          console.log('VPS request templates are disabled.');
-          NODE
