@@ -117,7 +117,7 @@ def remove_bootstrap_files() -> None:
     for path in BOOTSTRAP_DIR.glob("bundle.part*"):
         path.unlink()
     Path(__file__).unlink()
-    WORKFLOW_PATH.unlink()
+    WORKFLOW_PATH.unlink(missing_ok=True)
     try:
         BOOTSTRAP_DIR.rmdir()
     except OSError:
@@ -135,8 +135,12 @@ def commit_and_push() -> None:
         raise RuntimeError("bootstrap produced no repository changes")
     run("git", "commit", "-m", "Adopt split atomic VPS release layout")
     branch = os.environ.get("GITHUB_REF_NAME", "").strip()
+    if not branch:
+        branch = subprocess.run(
+            ["git", "branch", "--show-current"], cwd=ROOT, check=True, text=True, capture_output=True
+        ).stdout.strip()
     if branch != "codex/research-trade-history-sync-pr98":
-        raise RuntimeError(f"unexpected workflow branch: {branch!r}")
+        raise RuntimeError(f"unexpected bootstrap branch: {branch!r}")
     run("git", "push", "origin", f"HEAD:{branch}")
 
 
