@@ -1,0 +1,67 @@
+name: VPS Operations Static Safety CI
+
+on:
+  push:
+    branches:
+      - master
+      - codex/research-trade-history-sync-pr98
+    paths:
+      - .github/workflows/inspect-vps.yml
+      - .github/workflows/deploy-ui-vps.yml
+      - .github/workflows/deploy-trading-code-vps.yml
+      - .github/workflows/restart-trading-approved.yml
+      - .github/workflows/vps-ops-static-ci.yml
+      - scripts/ops/**
+      - ops/requests/**
+      - docs/implementation/PLUS_VPS_RUNNER_HANDOFF.md
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .github/workflows/inspect-vps.yml
+      - .github/workflows/deploy-ui-vps.yml
+      - .github/workflows/deploy-trading-code-vps.yml
+      - .github/workflows/restart-trading-approved.yml
+      - .github/workflows/vps-ops-static-ci.yml
+      - scripts/ops/**
+      - ops/requests/**
+      - docs/implementation/PLUS_VPS_RUNNER_HANDOFF.md
+
+permissions:
+  contents: read
+
+jobs:
+  static-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check shell syntax
+        shell: bash
+        run: |
+          bash -n scripts/ops/vps-common.sh
+          bash -n scripts/ops/vps-deploy-ui.sh
+          bash -n scripts/ops/vps-deploy-trading-code.sh
+          bash -n scripts/ops/vps-restart-trading-approved.sh
+      - name: Check Node syntax
+        shell: bash
+        run: |
+          node --check scripts/ops/vps-inspection.mjs
+          node --check scripts/ops/vps-trading-restart-gate.mjs
+          node --check scripts/ops/vps-ops-selftest.mjs
+      - name: Run fail-closed operations self-test
+        run: node scripts/ops/vps-ops-selftest.mjs
+      - name: Confirm request templates are disabled
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          for (const path of ['ops/requests/ui-deploy-request.json', 'ops/requests/trading-code-deploy-request.json']) {
+            const request = JSON.parse(fs.readFileSync(path, 'utf8'));
+            if (request.enabled !== false) throw new Error(`${path} must remain disabled in reviewed source; a one-time trigger commit may set it true only when intentionally deploying`);
+          }
+          console.log('VPS request templates are disabled.');
+          NODE
