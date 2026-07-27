@@ -609,12 +609,21 @@ class AsterClient:
             str(raw.get("msg")) if raw.get("msg") else None,
         )
 
-    def poll_fill(self, symbol: str, client_id: str, requested: float, side: str, ttl_ms: int) -> Fill:
+    def poll_fill(self, symbol: str, client_id: str, requested: float, side: str, ttl_ms: int, recheck: Optional[Any] = None) -> Fill:
         if not self.live:
             raise RuntimeError("poll_fill is not needed in paper mode")
         deadline = now_ms() + ttl_ms
         last = Fill("ASTER", symbol, side, requested, 0.0, 0.0, "NEW", client_id)
         while now_ms() < deadline:
+            if recheck is not None:
+                try:
+                    if not bool(recheck()):
+                        self.cancel(symbol, client_id)
+                        raw = self.get_order(symbol, client_id)
+                        return self._fill(raw, requested, side, client_id)
+                except Exception as error:
+                    self.cancel(symbol, client_id)
+                    raise RuntimeError(f"ENTRY_RECHECK_FAILED_DURING_WAIT: {error}") from error
             raw = self.get_order(symbol, client_id)
             last = self._fill(raw, requested, side, client_id)
             if last.status in {"FILLED", "CANCELED", "REJECTED", "EXPIRED"}:
@@ -769,6 +778,7 @@ class ReferenceProvider:
 
     def quote(self, symbol: str) -> ReferenceQuote:
         received = now_ms()
+        self.last_timestamp_fallback = False
         if self.mode == "external":
             url = self.template.format(symbol=symbol, unix_ms=received)
             payload = http_json(url, headers=self.headers, timeout=self.timeout)
@@ -1229,8 +1239,15 @@ class StockEngine:
             client_id=client_id,
             post_only=True,
         )
-        fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client_id, normalized_quantity, candidate["side"], V11_ENTRY_TTL_MS)
+        fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client_id, normalized_quantity, candidate["side"], V11_ENTRY_TTL_MS, recheck=lambda: (self.recheck_entry_conditions(candidate) or True))
         self.log("v11eq-entry-result", candidate=candidate, fill=dataclasses.asdict(fill))
+        if fill.fill_ratio >= V11_MIN_FILL_RATIO:
+            try:
+                self.recheck_entry_conditions(candidate)
+            except Exception as error:
+                self.log("v11eq-post-fill-recheck-failed", candidate=candidate, error=str(error))
+                self.flatten_aster_leg(symbol, candidate["side"], fill.executed_qty, "ENTRY_POST_FILL_RECHECK")
+                return False
         if fill.fill_ratio < V11_MIN_FILL_RATIO:
             if fill.executed_qty > 0:
                 self.flatten_aster_leg(symbol, candidate["side"], fill.executed_qty, "V11EQ_LOW_FILL")

@@ -140,9 +140,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         available = base.finite(snapshot.get("availableBalanceUsd"), equity)
         reserve = max(self.minimum_entry_usd, equity * base.float_env("DISDEX_V52_CASH_RESERVE_PCT", 10.0) / 100.0)
         required_margin = base.finite(snapshot.get("cryptoNotionalUsd")) / max(1.0, base.float_env("DISDEX_V52_LEVERAGE", 1.0))
-        cost_headroom = max(0.0, available - reserve - required_margin)
+        fee_slippage_buffer = max(0.0, equity * base.float_env("DISDEX_V52_ENTRY_COST_BUFFER_PCT", 0.25) / 100.0)
+        cost_headroom = max(0.0, available - reserve - required_margin - fee_slippage_buffer)
         capacity = max(0.0, min(1.0, cost_headroom / equity if equity > 0 else 0.0))
-        snapshot.update({"reserveUsd": reserve, "requiredMarginUsd": required_margin, "costHeadroomUsd": cost_headroom, "scaleReason": "BALANCE_AND_RESERVE" if capacity < 1.0 else "NONE"})
+        snapshot.update({"signalGross": 1.0, "executionGross": capacity, "equityUsd": equity, "availableBalanceUsd": available, "reserveUsd": reserve, "requiredMarginUsd": required_margin, "costHeadroomUsd": cost_headroom, "currentCryptoGross": snapshot.get("cryptoGross", 0.0), "currentStockGross": snapshot.get("stockGross", 0.0), "projectedTotalGross": snapshot.get("totalGross", 0.0) + capacity, "scaleReason": "BALANCE_RESERVE_MARGIN_COST" if capacity < 1.0 else "NONE"})
         return capacity
 
     def available_slot_gross(self, slot: str) -> Tuple[float, dict]:
@@ -222,8 +223,15 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         client = self.client_id(slot, symbol, "OPEN")
         self._set_pending({"slot": slot, "action": "OPEN", "symbol": symbol, "side": side, "quantity": quantity, "clientId": client, "candidate": candidate, "targetGross": target_gross, "price": price})
         initial = self.aster.place_limit(symbol=aster_symbol, side=side, quantity=quantity, price=price, client_id=client, post_only=True)
-        fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client, quantity, side, base.V11_ENTRY_TTL_MS)
+        fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client, quantity, side, base.V11_ENTRY_TTL_MS, recheck=lambda: (self.recheck_entry_conditions(candidate) or True))
         self.log("v52-entry-result", slot=slot, candidate=candidate, targetGross=target_gross, fill=dataclasses.asdict(fill))
+        if fill.fill_ratio >= base.V11_MIN_FILL_RATIO:
+            try:
+                self.recheck_entry_conditions(candidate)
+            except Exception as error:
+                self.log("v52-post-fill-recheck-failed", slot=slot, candidate=candidate, error=str(error))
+                self.flatten_aster_leg(symbol, side, fill.executed_qty, "ENTRY_POST_FILL_RECHECK")
+                return False
         if fill.fill_ratio < base.V11_MIN_FILL_RATIO:
             if fill.executed_qty > 0:
                 self.flatten_aster_leg(symbol, side, fill.executed_qty, f"{slot}_LOW_FILL")

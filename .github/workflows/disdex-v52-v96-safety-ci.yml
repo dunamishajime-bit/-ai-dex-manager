@@ -1,0 +1,31 @@
+name: Dis-Dex V52 V96 Safety CI
+
+on:
+  push:
+    branches: [master, codex/research-trade-history-sync-pr98]
+  pull_request:
+    branches: [master]
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run strategy:disdex-v96:parity
+      - run: npm run strategy:executor:selftest
+      - run: npm run strategy:disdex-v35:runner:selftest
+      - run: npm run strategy:disdex-v46:selftest
+      - run: npm run strategy:disdex-v52:contract
+      - run: npm run strategy:disdex-v52:safety:selftest
+      - run: python -m py_compile scripts/disdex_v13d_v11eq_stock_live_engine.py scripts/disdex_v11eq_aster_only_live_engine.py scripts/disdex_v52_aster_only_live_engine.py
+      - run: npm run build
