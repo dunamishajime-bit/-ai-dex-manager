@@ -1,0 +1,116 @@
+name: Restart Trading Daemon - Explicit Approval
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact staged 40-character commit SHA
+        required: true
+        type: string
+      confirmation:
+        description: Type I_APPROVE_LIVE_TRADING_DAEMON_RESTART
+        required: true
+        type: string
+      reason:
+        description: Human-readable reason
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-vps-deployment
+  cancel-in-progress: false
+
+jobs:
+  restart-trading:
+    name: Revalidate and restart the production trading daemon
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 45
+    environment: trading-production
+    env:
+      VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+      VPS_STATE_ROOT: ${{ vars.VPS_STATE_ROOT }}
+      VPS_OPS_STATE_DIR: ${{ vars.VPS_OPS_STATE_DIR }}
+      VPS_UI_SERVICE_MANAGER: ${{ vars.VPS_UI_SERVICE_MANAGER }}
+      VPS_UI_SERVICE: ${{ vars.VPS_UI_SERVICE }}
+      VPS_TRADING_SERVICE_MANAGER: ${{ vars.VPS_TRADING_SERVICE_MANAGER }}
+      VPS_TRADING_SERVICE: ${{ vars.VPS_TRADING_SERVICE }}
+      VPS_TRADING_HEALTH_URL: ${{ vars.VPS_TRADING_HEALTH_URL }}
+      VPS_UI_HEALTH_URL: ${{ vars.VPS_UI_HEALTH_URL }}
+      VPS_API_HEALTH_URL: ${{ vars.VPS_API_HEALTH_URL }}
+      VPS_ENABLE_APPROVED_TRADING_RESTART: ${{ vars.VPS_ENABLE_APPROVED_TRADING_RESTART }}
+      VPS_PREFLIGHT_TIMEOUT: 20m
+    steps:
+      - name: Validate exact SHA and confirmation
+        id: request
+        shell: bash
+        env:
+          EXPECTED_SHA_INPUT: ${{ inputs.expected_sha }}
+          CONFIRMATION_INPUT: ${{ inputs.confirmation }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const sha = String(process.env.EXPECTED_SHA_INPUT || '').trim();
+          const confirmation = String(process.env.CONFIRMATION_INPUT || '');
+          if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error('expected_sha must be an exact lowercase 40-character SHA');
+          if (confirmation !== 'I_APPROVE_LIVE_TRADING_DAEMON_RESTART') throw new Error('confirmation phrase is invalid');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `expected_sha=${sha}\n`);
+          NODE
+
+      - name: Checkout approved exact SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.request.outputs.expected_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare private report directories
+        shell: bash
+        run: |
+          root="${RUNNER_TEMP}/disdex-trading-restart-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$root/restart" "$root/post"
+          chmod 700 "$root" "$root/restart" "$root/post"
+          echo "VPS_REPORT_ROOT=$root" >> "$GITHUB_ENV"
+
+      - name: Execute approved fail-closed restart
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ steps.request.outputs.expected_sha }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/restart
+        run: bash scripts/ops/vps-restart-trading-approved.sh
+
+      - name: Post-restart read-only inspection
+        if: always()
+        continue-on-error: true
+        shell: bash
+        env:
+          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/post
+          VPS_INSPECTION_PROFILE: basic
+          VPS_STRICT_INSPECTION: 'false'
+          TARGET_COMMIT: ${{ steps.request.outputs.expected_sha }}
+        run: node scripts/ops/vps-inspection.mjs
+
+      - name: Publish restart summary
+        if: always()
+        shell: bash
+        run: |
+          for report in \
+            "${VPS_REPORT_ROOT}/restart/trading-restart.md" \
+            "${VPS_REPORT_ROOT}/post/vps-inspection.md"; do
+            if [[ -f "$report" ]]; then
+              cat "$report" >> "$GITHUB_STEP_SUMMARY"
+              printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Upload sanitized restart artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vps-trading-restart-${{ steps.request.outputs.expected_sha }}-${{ github.run_number }}
+          path: ${{ env.VPS_REPORT_ROOT }}
+          if-no-files-found: error
+          retention-days: 30
