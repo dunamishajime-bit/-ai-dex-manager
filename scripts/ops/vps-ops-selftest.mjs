@@ -60,11 +60,13 @@ requireMatch(".github/workflows/inspect-vps.yml", inspectWorkflow, /readOnly|rea
 const uiWorkflow = read(".github/workflows/deploy-ui-vps.yml");
 requireMatch(".github/workflows/deploy-ui-vps.yml", uiWorkflow, /ops\/requests\/ui-deploy-request\.json/, "UI request path trigger is missing");
 requireMatch(".github/workflows/deploy-ui-vps.yml", uiWorkflow, /vps-deploy-ui\.sh/, "fixed UI deployment script is missing");
+requireMatch(".github/workflows/deploy-ui-vps.yml", uiWorkflow, /VPS_DEPLOYMENT_LAYOUT_MODE:\s*\$\{\{\s*vars\.VPS_DEPLOYMENT_LAYOUT_MODE\s*\}\}/, "reviewed deployment layout variable is required");
 forbidMatch(".github/workflows/deploy-ui-vps.yml", uiWorkflow, /restart-trading|ops_restart_trading/, "UI workflow must not restart trading");
 
 const tradingWorkflow = read(".github/workflows/deploy-trading-code-vps.yml");
 requireMatch(".github/workflows/deploy-trading-code-vps.yml", tradingWorkflow, /ops\/requests\/trading-code-deploy-request\.json/, "trading code request path trigger is missing");
 requireMatch(".github/workflows/deploy-trading-code-vps.yml", tradingWorkflow, /vps-deploy-trading-code\.sh/, "fixed trading staging script is missing");
+requireMatch(".github/workflows/deploy-trading-code-vps.yml", tradingWorkflow, /VPS_DEPLOYMENT_LAYOUT_MODE:\s*\$\{\{\s*vars\.VPS_DEPLOYMENT_LAYOUT_MODE\s*\}\}/, "reviewed deployment layout variable is required");
 forbidMatch(".github/workflows/deploy-trading-code-vps.yml", tradingWorkflow, /ops_restart_trading|systemctl\s+restart|pm2\s+restart/, "trading code staging workflow must not restart trading");
 
 const restartWorkflow = read(".github/workflows/restart-trading-approved.yml");
@@ -90,15 +92,21 @@ const tradingDeploy = read("scripts/ops/vps-deploy-trading-code.sh");
 forbidMatch("scripts/ops/vps-deploy-trading-code.sh", tradingDeploy, /ops_restart_trading|systemctl\s+restart|pm2\s+restart/, "trading staging script must contain no restart operation");
 requireMatch("scripts/ops/vps-deploy-trading-code.sh", tradingDeploy, /PASS_NO_ORDERS_SENT/, "no-order preflight proof is required");
 requireMatch("scripts/ops/vps-deploy-trading-code.sh", tradingDeploy, /SERVICE_PID_AFTER.*SERVICE_PID_BEFORE|SERVICE_PID_BEFORE.*SERVICE_PID_AFTER/s, "PID preservation check is required");
+requireMatch("scripts/ops/vps-deploy-trading-code.sh", tradingDeploy, /VPS_DEPLOYMENT_LAYOUT_MODE.*in-place-reviewed/s, "fail-closed deployment layout gate is required");
 
 const uiDeploy = read("scripts/ops/vps-deploy-ui.sh");
 forbidMatch("scripts/ops/vps-deploy-ui.sh", uiDeploy, /ops_restart_trading/, "UI deploy script must not call the trading restart helper");
 requireMatch("scripts/ops/vps-deploy-ui.sh", uiDeploy, /ROLLBACK_ATTEMPTED/, "UI rollback reporting is required");
+requireMatch("scripts/ops/vps-deploy-ui.sh", uiDeploy, /VPS_DEPLOYMENT_LAYOUT_MODE.*in-place-reviewed/s, "fail-closed deployment layout gate is required");
 
 const inspection = read("scripts/ops/vps-inspection.mjs");
 forbidMatch("scripts/ops/vps-inspection.mjs", inspection, /readFileSync\([^\n]*\.env/, "inspection must not read .env");
 requireMatch("scripts/ops/vps-inspection.mjs", inspection, /secretsRead:\s*false/, "inspection must explicitly report that secrets were not read");
 requireMatch("scripts/ops/vps-inspection.mjs", inspection, /servicesRestarted:\s*false/, "inspection must explicitly report zero restarts");
+
+const layoutAddendum = read("docs/implementation/PLUS_VPS_RUNNER_LAYOUT_ADDENDUM.md");
+requireMatch("docs/implementation/PLUS_VPS_RUNNER_LAYOUT_ADDENDUM.md", layoutAddendum, /VPS_DEPLOYMENT_LAYOUT_MODE/, "layout gate documentation is required");
+requireMatch("docs/implementation/PLUS_VPS_RUNNER_LAYOUT_ADDENDUM.md", layoutAddendum, /atomic release|atomic releases/i, "safe alternative deployment guidance is required");
 
 if (failures.length > 0) {
   console.error(JSON.stringify({ status: "VPS_OPS_SELFTEST_FAILED", failureCount: failures.length, failures }, null, 2));
@@ -113,6 +121,7 @@ console.log(JSON.stringify({
     pullRequestTriggers: false,
     arbitraryShellInputs: false,
     tradingRestartDuringCodeStage: false,
+    deploymentLayoutFailClosed: true,
     environmentApprovedRestartOnly: true,
   },
 }, null, 2));
