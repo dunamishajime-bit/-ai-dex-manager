@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "collectorId": "V96_STOCK_EVENT_LEDGER_V1",
+  "mode": "full",
+  "fetchedAt": "2026-07-27T08:43:40.394925Z",
+  "summary": {
+    "eventCount": 45,
+    "eventsBySource": {
+      "NASDAQ_SEC_FILINGS_FALLBACK": 2,
+      "GOOGLE_NEWS_RSS": 24,
+      "FEDERAL_RESERVE_FOMC_CALENDAR": 2,
+      "NASDAQ_EARNINGS_CALENDAR": 7,
+      "BEA_OFFICIAL_RELEASE_SCHEDULE": 3,
+      "BLS_OFFICIAL_SCHEDULE_FROZEN": 7
+    },
+    "eventsByType": {
+      "SEC_PERIODIC_OR_EARNINGS_FILING": 1,
+      "SEC_MATERIAL_FILING": 1,
+      "COMPANY_NEWS_HEADLINE": 24,
+      "FOMC_MEETING_DECISION_WINDOW": 2,
+      "EARNINGS_SCHEDULED": 7,
+      "MACRO_RELEASE_SCHEDULED": 10
+    },
+    "eventsBySymbol": {
+      "INTCUSDT": 4,
+      "TSMUSDT": 1,
+      "AMZNUSDT": 2,
+      "GOOGLUSDT": 1,
+      "METAUSDT": 2,
+      "MSFTUSDT": 2,
+      "TSLAUSDT": 1,
+      "ASMLUSDT": 4,
+      "SNDKUSDT": 3,
+      "MUUSDT": 3,
+      "AVGOUSDT": 2,
+      "QCOMUSDT": 4,
+      "AMDUSDT": 2,
+      "ARMUSDT": 1,
+      "PLTRUSDT": 1
+    },
+    "sourceFailures": [],
+    "nonLiveFallbacks": [
+      "blsCalendar"
+    ]
+  },
+  "sourceResults": {
+    "googleNewsRss": {
+      "ok": true,
+      "groups": [
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 608.624,
+          "bytes": 131099,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "ADBEUSDT",
+            "AMZNUSDT",
+            "CRMUSDT",
+            "GOOGLUSDT",
+            "METAUSDT",
+            "MSFTUSDT",
+            "ORCLUSDT",
+            "PLTRUSDT",
+            "TSLAUSDT"
+          ]
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 491.999,
+          "bytes": 130686,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "AMDUSDT",
+            "ARMUSDT",
+            "AVGOUSDT",
+            "INTCUSDT",
+            "MRVLUSDT",
+            "NVDAUSDT",
+            "QCOMUSDT"
+          ]
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 552.991,
+          "bytes": 130518,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "AMATUSDT",
+            "ASMLUSDT",
+            "MUUSDT",
+            "SNDKUSDT",
+            "TSMUSDT"
+          ]
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 317.631,
+          "bytes": 32505,
+          "contentType": "application/xml; charset=utf-8",
+          "symbols": [
+            "DRAMUSDT"
+          ]
+        }
+      ],
+      "records": 25,
+      "recordsBeforeChronologyFilter": 372,
+      "staleOrInvalidTimeRejected": 326,
+      "noRiskKeywordRejected": 21,
+      "ambiguousMappingRejected": 0,
+      "chronologyWindowHours": 36
+    },
+    "nasdaqTradeHalts": {
+      "ok": true,
+      "status": 200,
+      "latencyMs": 147.589,
+      "bytes": 33140,
+      "contentType": "text/xml",
+      "records": 0
+    },
+    "asterExchangeInfo": {
+      "ok": true,
+      "status": 200,
+      "latencyMs": 1020.852,
+      "bytes": 725879,
+      "contentType": "application/json",
+      "records": 0,
+      "observedSymbols": 22
+    },
+    "secEdgar": {
+      "ok": true,
+      "records": 2,
+      "primary": {
+        "ok": false,
+        "records": 0,
+        "successfulCompanies": 0,
+        "expectedCompanies": 21,
+        "companies": [
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "ADBEUSDT",
+            "ticker": "ADBE",
+            "cik": 796343
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "AMATUSDT",
+            "ticker": "AMAT",
+            "cik": 6951
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "AMDUSDT",
+            "ticker": "AMD",
+            "cik": 2488
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "AMZNUSDT",
+            "ticker": "AMZN",
+            "cik": 1018724
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "ARMUSDT",
+            "ticker": "ARM",
+            "cik": 1973239
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "ASMLUSDT",
+            "ticker": "ASML",
+            "cik": 937966
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "AVGOUSDT",
+            "ticker": "AVGO",
+            "cik": 1730168
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "CRMUSDT",
+            "ticker": "CRM",
+            "cik": 1108524
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "GOOGLUSDT",
+            "ticker": "GOOGL",
+            "cik": 1652044
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "INTCUSDT",
+            "ticker": "INTC",
+            "cik": 50863
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "METAUSDT",
+            "ticker": "META",
+            "cik": 1326801
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "MRVLUSDT",
+            "ticker": "MRVL",
+            "cik": 1835632
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "MSFTUSDT",
+            "ticker": "MSFT",
+            "cik": 789019
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "MUUSDT",
+            "ticker": "MU",
+            "cik": 723125
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "NVDAUSDT",
+            "ticker": "NVDA",
+            "cik": 1045810
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "ORCLUSDT",
+            "ticker": "ORCL",
+            "cik": 1341439
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "PLTRUSDT",
+            "ticker": "PLTR",
+            "cik": 1321655
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "QCOMUSDT",
+            "ticker": "QCOM",
+            "cik": 804328
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "SNDKUSDT",
+            "ticker": "SNDK",
+            "cik": 2023554
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "TSLAUSDT",
+            "ticker": "TSLA",
+            "cik": 1318605
+          },
+          {
+            "ok": false,
+            "latencyMs": null,
+            "bytes": 0,
+            "error": "HTTPError: HTTP Error 403: Forbidden",
+            "symbol": "TSMUSDT",
+            "ticker": "TSM",
+            "cik": 1046179
+          }
+        ],
+        "tickerMapDependencyRemoved": true
+      },
+      "fallback": {
+        "ok": true,
+        "records": 2,
+        "successfulCompanies": 21,
+        "expectedCompanies": 21,
+        "companies": [
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 2130.893,
+            "bytes": 68554,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "ADBEUSDT",
+            "ticker": "ADBE",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 3110.538,
+            "bytes": 68868,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "AMATUSDT",
+            "ticker": "AMAT",
+            "rowsDetected": 49
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 3644.856,
+            "bytes": 71490,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "AMDUSDT",
+            "ticker": "AMD",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 4663.475,
+            "bytes": 68500,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "AMZNUSDT",
+            "ticker": "AMZN",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 2405.409,
+            "bytes": 69846,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "ARMUSDT",
+            "ticker": "ARM",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 4114.599,
+            "bytes": 12809,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "ASMLUSDT",
+            "ticker": "ASML",
+            "rowsDetected": 8
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 1722.562,
+            "bytes": 67340,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "AVGOUSDT",
+            "ticker": "AVGO",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 6997.263,
+            "bytes": 70044,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "CRMUSDT",
+            "ticker": "CRM",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 2093.452,
+            "bytes": 68714,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "GOOGLUSDT",
+            "ticker": "GOOGL",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 1129.152,
+            "bytes": 71541,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "INTCUSDT",
+            "ticker": "INTC",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 3129.776,
+            "bytes": 68256,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "METAUSDT",
+            "ticker": "META",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 1129.776,
+            "bytes": 70314,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "MRVLUSDT",
+            "ticker": "MRVL",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 1140.179,
+            "bytes": 71189,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "MSFTUSDT",
+            "ticker": "MSFT",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 3952.782,
+            "bytes": 70690,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "MUUSDT",
+            "ticker": "MU",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 2200.397,
+            "bytes": 69672,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "NVDAUSDT",
+            "ticker": "NVDA",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 3685.009,
+            "bytes": 63927,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "ORCLUSDT",
+            "ticker": "ORCL",
+            "rowsDetected": 45
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 2464.807,
+            "bytes": 70732,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "PLTRUSDT",
+            "ticker": "PLTR",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 8445.815,
+            "bytes": 70055,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "QCOMUSDT",
+            "ticker": "QCOM",
+            "rowsDetected": 50
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 3138.061,
+            "bytes": 67401,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "SNDKUSDT",
+            "ticker": "SNDK",
+            "rowsDetected": 48
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 3678.616,
+            "bytes": 43019,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "TSLAUSDT",
+            "ticker": "TSLA",
+            "rowsDetected": 30
+          },
+          {
+            "ok": true,
+            "status": 200,
+            "latencyMs": 2193.216,
+            "bytes": 75738,
+            "contentType": "application/json; charset=utf-8",
+            "symbol": "TSMUSDT",
+            "ticker": "TSM",
+            "rowsDetected": 50
+          }
+        ],
+        "sourceMode": "nasdaq_public_fallback"
+      },
+      "fallbackUsed": true,
+      "sourceMode": "nasdaq_public_fallback"
+    },
+    "nasdaqEarnings": {
+      "ok": true,
+      "days": [
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 1021.312,
+          "bytes": 568,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-07-26"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 2020.41,
+          "bytes": 16293,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-07-27"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 1021.653,
+          "bytes": 33422,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-07-28"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 1029.475,
+          "bytes": 63954,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-07-29"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 3023.492,
+          "bytes": 69263,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-07-30"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 2031.913,
+          "bytes": 10882,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-07-31"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 2038.559,
+          "bytes": 145,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-08-01"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 2029.867,
+          "bytes": 145,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-08-02"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 3021.641,
+          "bytes": 31521,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-08-03"
+        },
+        {
+          "ok": true,
+          "status": 200,
+          "latencyMs": 2023.422,
+          "bytes": 85231,
+          "contentType": "application/json; charset=utf-8",
+          "date": "2026-08-04"
+        }
+      ],
+      "records": 7
+    },
+    "blsCalendar": {
+      "ok": true,
+      "records": 7,
+      "live": {
+        "ok": false,
+        "records": 0,
+        "primaryIcs": {
+          "ok": false,
+          "latencyMs": null,
+          "bytes": 0,
+          "error": "HTTPError: HTTP Error 403: Forbidden"
+        },
+        "fallbackHtml": {
+          "ok": false,
+          "latencyMs": null,
+          "bytes": 0,
+          "error": "HTTPError: HTTP Error 403: Forbidden"
+        },
+        "fallbackUsed": true
+      },
+      "fallbackUsed": true,
+      "sourceMode": "frozen_point_in_time_official_schedule",
+      "liveSourceAvailable": false,
+      "fallbackIsNotLive": true
+    },
+    "fomcCalendar": {
+      "ok": true,
+      "status": 200,
+      "latencyMs": 53.497,
+      "bytes": 166219,
+      "contentType": "text/html",
+      "records": 2,
+      "sourceSha256": "4213c1b2a4c86fd13608fb3412241cbd3fc180930b611179deab4ea0eaa4a06f",
+      "overExtractionPrevented": true
+    },
+    "beaCalendar": {
+      "ok": true,
+      "records": 3,
+      "live": {
+        "ok": true,
+        "status": 200,
+        "latencyMs": 64.227,
+        "bytes": 80254,
+        "contentType": "text/html; charset=UTF-8",
+        "records": 3,
+        "sourceSha256": "71d68129f497c073c96919ae0a453ee5a90423d10bfc4c02929d76448565736d"
+      },
+      "fallbackUsed": false,
+      "sourceMode": "bea_official_live"
+    }
+  },
+  "safety": {
+    "mode": "SHADOW_OBSERVATION_ONLY",
+    "orderSubmissionAllowed": false,
+    "entryDecisionChanged": false,
+    "productionStrategyChanged": false,
+    "currentV96WeightsMutable": false,
+    "articleBodiesStored": false,
+    "sentimentUsedForDirection": false
+  },
+  "files": {
+    "eventLedger": "event-ledger-20260727T084340Z-30250995489.json.gz"
+  }
+}
