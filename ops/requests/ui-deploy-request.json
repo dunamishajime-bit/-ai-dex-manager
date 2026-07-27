@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "requestId": "bootstrap-template",
+  "requestedAt": "2026-07-27T00:00:00Z",
+  "enabled": false,
+  "targetCommit": "workflow-head",
+  "reason": "Bootstrap template only. Set enabled=true and update requestId/requestedAt after the VPS runner is installed."
+}
