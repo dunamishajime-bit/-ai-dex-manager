@@ -1,0 +1,320 @@
+{
+  "strategyId": "V96_STOCK_V13G_V13D_FIXED_FORWARD",
+  "status": "V13G_V13D_FIXED_FORWARD_IN_PROGRESS",
+  "generatedAt": "2026-07-27T21:31:51.278124Z",
+  "configSha256": "2b4e103c01e0b386ff87146cfde01ef60c854bcb9554656a5a764d4b601a3875",
+  "window": {
+    "firstSession": "2026-07-27",
+    "lastSession": "2026-08-21",
+    "requiredSessions": 20,
+    "completeSessions": 0,
+    "collectionWindowFinished": false
+  },
+  "frozenArms": {
+    "V13G": {
+      "candidateId": "EDGE20__NONE",
+      "previousCompletedSymbolCooldown": false
+    },
+    "V13D": {
+      "candidateId": "EDGE20__NO_PREVIOUS_SYMBOL",
+      "previousCompletedSymbolCooldown": true
+    }
+  },
+  "selections": [
+    {
+      "sessionDate": "2026-07-27",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-07-28",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-07-29",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-07-30",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-07-31",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-03",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-04",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-05",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-06",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-07",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-10",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-11",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-12",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-13",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-14",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-17",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-18",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-19",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-20",
+      "complete": false,
+      "arms": {}
+    },
+    {
+      "sessionDate": "2026-08-21",
+      "complete": false,
+      "arms": {}
+    }
+  ],
+  "arms": {
+    "V13G": {
+      "completedCycles": 0,
+      "costScenarios": {
+        "FORWARD_MEDIAN": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 10.0
+        },
+        "NORMAL": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 16.0
+        },
+        "P95": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 26.0
+        },
+        "SEVERE": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 45.0
+        }
+      },
+      "executionSafety": {},
+      "gates": {
+        "cyclesPassed": false,
+        "executionSafetyPassed": true,
+        "performancePassed": false,
+        "concentrationPassed": false,
+        "passed": false,
+        "concentrationLimit": 0.5
+      }
+    },
+    "V13D": {
+      "completedCycles": 0,
+      "costScenarios": {
+        "FORWARD_MEDIAN": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 10.0
+        },
+        "NORMAL": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 16.0
+        },
+        "P95": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 26.0
+        },
+        "SEVERE": {
+          "completedCycles": 0,
+          "averageNetBps": null,
+          "totalNetBps": 0,
+          "positiveNetRate": null,
+          "profitFactor": null,
+          "minimumNetBps": null,
+          "maximumNetBps": null,
+          "bySymbolNetBps": {
+            "AMZN": 0.0,
+            "META": 0.0,
+            "MSFT": 0.0,
+            "NVDA": 0.0,
+            "TSLA": 0.0
+          },
+          "maxPositiveProfitContributionShare": null,
+          "costBps": 45.0
+        }
+      },
+      "executionSafety": {},
+      "gates": {
+        "cyclesPassed": false,
+        "executionSafetyPassed": true,
+        "performancePassed": false,
+        "concentrationPassed": false,
+        "passed": false,
+        "concentrationLimit": 0.4
+      }
+    }
+  },
+  "gates": {
+    "coveragePassed": false,
+    "retuningAllowed": false,
+    "productionOrLiveAuthorized": false
+  },
+  "canonicalChunks": [],
+  "ignoredAttempts": [
+    {
+      "path": "/tmp/v13-dual-data/research-data/v13g-v13d-forward-20260727/chunks/2026-07-27/30282441852",
+      "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT"
+    }
+  ],
+  "safety": {
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false,
+    "v11Changed": false,
+    "originalV13ForwardCollectorChanged": false
+  }
+}
