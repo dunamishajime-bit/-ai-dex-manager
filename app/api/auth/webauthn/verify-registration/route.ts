@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { registrationResponse } = body;
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const expectedChallenge = cookieStore.get("registration-challenge")?.value;
 
     if (!expectedChallenge) {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import dataclasses
 import datetime as dt
 import hashlib
@@ -89,6 +90,13 @@ def int_env(name: str, fallback: int) -> int:
     return int(value) if math.isfinite(value) else fallback
 
 
+ASTER_BOOK_CACHE_MS = max(250, int_env("DISDEX_ASTER_BOOK_CACHE_MS", 750))
+ASTER_ACCOUNT_CACHE_MS = max(1_000, int_env("DISDEX_ASTER_ACCOUNT_CACHE_MS", 5_000))
+ASTER_EXCHANGE_INFO_CACHE_MS = max(60_000, int_env("DISDEX_ASTER_EXCHANGE_INFO_CACHE_MS", 21_600_000))
+ASTER_429_COOLDOWN_MS = max(5_000, int_env("DISDEX_ASTER_429_COOLDOWN_MS", 30_000))
+_ASTER_RATE_LIMIT_UNTIL_MS = 0
+_ASTER_RATE_LIMIT_LOCK = threading.Lock()
+
 def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
@@ -131,6 +139,11 @@ def http_json(
     headers: Optional[Dict[str, str]] = None,
     timeout: float = 10.0,
 ) -> Any:
+    global _ASTER_RATE_LIMIT_UNTIL_MS
+    with _ASTER_RATE_LIMIT_LOCK:
+        if now_ms() < _ASTER_RATE_LIMIT_UNTIL_MS:
+            remaining = _ASTER_RATE_LIMIT_UNTIL_MS - now_ms()
+            raise RuntimeError(f"Aster REST rate-limit cooldown active ({remaining}ms remaining)")
     encoded = None
     target = url
     if params:
@@ -151,6 +164,11 @@ def http_json(
             return json.loads(text) if text else {}
     except urllib.error.HTTPError as error:
         body = error.read().decode(errors="replace")
+        if error.code == 429:
+            retry_after = finite(error.headers.get("Retry-After"), ASTER_429_COOLDOWN_MS / 1000.0)
+            cooldown = max(ASTER_429_COOLDOWN_MS, int(retry_after * 1000))
+            with _ASTER_RATE_LIMIT_LOCK:
+                _ASTER_RATE_LIMIT_UNTIL_MS = max(_ASTER_RATE_LIMIT_UNTIL_MS, now_ms() + cooldown)
         raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
 
 
@@ -315,6 +333,8 @@ class AsterClient:
         self.timeout = float_env("ASTER_REQUEST_TIMEOUT_MS", 10_000) / 1000.0
         self._nonce = 0
         self._rules: Dict[str, dict] = {}
+        self._exchange_info_loaded_at = 0
+        self._cache: Dict[str, Tuple[int, Any]] = {}
         self._signer = None
         if live:
             if not self.user_address or not self.private_key:
@@ -371,6 +391,10 @@ class AsterClient:
         return http_json(f"{self.base_url}/fapi/v3/ping", timeout=self.timeout)
 
     def exchange_info(self) -> dict:
+        if self._rules and now_ms() - self._exchange_info_loaded_at < ASTER_EXCHANGE_INFO_CACHE_MS:
+            cached = self._cache.get("exchangeInfo")
+            if cached:
+                return copy.deepcopy(cached[1])
         payload = http_json(f"{self.base_url}/fapi/v3/exchangeInfo", timeout=self.timeout)
         for row in payload.get("symbols", []):
             filters = {item.get("filterType"): item for item in row.get("filters", [])}
@@ -385,6 +409,8 @@ class AsterClient:
                 "tick": finite(price_filter.get("tickSize")),
                 "minNotional": finite(minimum.get("notional")),
             }
+        self._exchange_info_loaded_at = now_ms()
+        self._cache["exchangeInfo"] = (self._exchange_info_loaded_at + ASTER_EXCHANGE_INFO_CACHE_MS, payload)
         return payload
 
     def rules(self, symbol: str) -> dict:
@@ -406,6 +432,10 @@ class AsterClient:
         return normalized_qty, normalized_price
 
     def book(self, symbol: str, limit: int = 20) -> Book:
+        key = f"book:{symbol}:{limit}"
+        cached = self._cache.get(key)
+        if cached and now_ms() < cached[0]:
+            return copy.deepcopy(cached[1])
         received = now_ms()
         payload = http_json(
             f"{self.public_url}/fapi/v1/depth",
@@ -417,7 +447,9 @@ class AsterClient:
         if not bids or not asks or min(bids[0] + asks[0]) <= 0 or asks[0][0] <= bids[0][0]:
             raise RuntimeError(f"Invalid Aster depth for {symbol}")
         event = int(payload.get("E") or payload.get("T") or received)
-        return Book("ASTER", symbol, bids[0][0], bids[0][1], asks[0][0], asks[0][1], bids, asks, event, received)
+        result = Book("ASTER", symbol, bids[0][0], bids[0][1], asks[0][0], asks[0][1], bids, asks, event, received)
+        self._cache[key] = (received + ASTER_BOOK_CACHE_MS, result)
+        return copy.deepcopy(result)
 
     def adverse_imbalance(self, symbol: str, maker_side: str) -> Optional[float]:
         end = now_ms()
@@ -446,13 +478,29 @@ class AsterClient:
         return -imbalance if maker_side == "BUY" else imbalance
 
     def balances(self) -> List[dict]:
-        return self._signed("GET", "/fapi/v3/balance", {})
+        return self._account_cached("balances", lambda: self._signed("GET", "/fapi/v3/balance", {}))
 
     def positions(self) -> List[dict]:
-        return self._signed("GET", "/fapi/v3/positionRisk", {})
+        return self._account_cached("positions", lambda: self._signed("GET", "/fapi/v3/positionRisk", {}))
 
     def open_orders(self, symbol: Optional[str] = None) -> List[dict]:
-        return self._signed("GET", "/fapi/v3/openOrders", {"symbol": symbol} if symbol else {})
+        key = f"openOrders:{symbol or '*'}"
+        return self._account_cached(key, lambda: self._signed("GET", "/fapi/v3/openOrders", {"symbol": symbol} if symbol else {}))
+
+    def _account_cached(self, key: str, loader: Any) -> Any:
+        cached = self._cache.get(key)
+        if cached and now_ms() < cached[0]:
+            return copy.deepcopy(cached[1])
+        value = loader()
+        self._cache[key] = (now_ms() + ASTER_ACCOUNT_CACHE_MS, value)
+        return copy.deepcopy(value)
+
+    def _invalidate_account_cache(self) -> None:
+        for key in ("balances", "positions"):
+            self._cache.pop(key, None)
+        for key in list(self._cache):
+            if key.startswith("openOrders:"):
+                self._cache.pop(key, None)
 
     def get_order(self, symbol: str, client_id: str) -> dict:
         return self._signed("GET", "/fapi/v3/order", {"symbol": symbol, "origClientOrderId": client_id})
@@ -460,12 +508,16 @@ class AsterClient:
     def cancel(self, symbol: str, client_id: str) -> dict:
         if not self.live:
             return {"symbol": symbol, "clientOrderId": client_id, "status": "CANCELED"}
-        return self._signed("DELETE", "/fapi/v3/order", {"symbol": symbol, "origClientOrderId": client_id})
+        result = self._signed("DELETE", "/fapi/v3/order", {"symbol": symbol, "origClientOrderId": client_id})
+        self._invalidate_account_cache()
+        return result
 
     def cancel_all(self, symbol: str) -> Any:
         if not self.live:
             return {"symbol": symbol, "status": "CANCELED"}
-        return self._signed("DELETE", "/fapi/v3/allOpenOrders", {"symbol": symbol})
+        result = self._signed("DELETE", "/fapi/v3/allOpenOrders", {"symbol": symbol})
+        self._invalidate_account_cache()
+        return result
 
     def place_limit(
         self,
@@ -493,6 +545,7 @@ class AsterClient:
             "newClientOrderId": client_id[:36],
             "newOrderRespType": "RESULT",
         })
+        self._invalidate_account_cache()
         return self._fill(raw, quantity, side, client_id)
 
     def place_market(
@@ -518,6 +571,7 @@ class AsterClient:
             "newClientOrderId": client_id[:36],
             "newOrderRespType": "RESULT",
         })
+        self._invalidate_account_cache()
         return self._fill(raw, quantity, side, client_id)
 
     def _fill(self, raw: dict, requested: float, side: str, client_id: str) -> Fill:

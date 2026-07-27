@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Copy, Loader2, Plus, QrCode, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useAsterAccount } from "@/hooks/useAsterAccount";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 
 function formatUsd(value?: number) {
@@ -119,6 +120,7 @@ function StatCard({
 export default function WalletsPage() {
   const { user } = useAuth();
   const { wallet, loading, refresh } = useOperationalWallet();
+  const { account: asterAccount } = useAsterAccount();
 
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
@@ -280,6 +282,20 @@ export default function WalletsPage() {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.16),rgba(3,5,10,0.72))]" />
 
       <div className="relative z-10 space-y-4">
+        <section className="grid gap-3 md:grid-cols-3">
+          <div className="panel-gold rounded-[24px] p-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">Aster Wallet</div>
+            <div className="mt-2 break-all text-xs text-white/80">{asterAccount?.address || "???..."}</div>
+          </div>
+          <div className="panel-gold rounded-[24px] p-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">Aster USDT??</div>
+            <div className="mt-2 text-2xl font-black text-white">{asterAccount ? "$" + asterAccount.usdtBalance.toFixed(2) : "???..."}</div>
+          </div>
+          <div className="panel-gold rounded-[24px] p-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">Aster??</div>
+            <div className="mt-2 text-2xl font-black text-white">{asterAccount?.positions.length ?? 0}?</div>
+          </div>
+        </section>
         <header className="rounded-[30px] border border-gold-400/18 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.68))] p-4 backdrop-blur-[10px] md:p-5">
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.34em] text-gold-100/72">
             <Wallet className="h-3.5 w-3.5" />

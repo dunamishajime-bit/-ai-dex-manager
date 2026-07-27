@@ -8,6 +8,7 @@ import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionP
 import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTradeRunPanel";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
+import { useAsterAccount } from "@/hooks/useAsterAccount";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { cn } from "@/lib/utils";
 
@@ -31,9 +32,10 @@ function walletStatusLabel(status?: string) {
 export default function PositionsPage() {
   const { tradeNotifications, activeStrategies } = useSimulation();
   const { wallet } = useOperationalWallet();
+  const { account: asterAccount } = useAsterAccount();
   const { formatPrice } = useCurrency();
 
-  const isWalletRunning = wallet?.status === "running";
+  const isWalletRunning = Boolean(asterAccount);
 
   const rows = useMemo(() => {
     return (wallet?.trackedHoldings || [])
@@ -77,7 +79,7 @@ export default function PositionsPage() {
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <Metric
             label="Portfolio"
-            value={formatPrice(Number(wallet?.lastPortfolioUsd || 0))}
+            value={formatPrice(asterAccount?.usdtBalance ?? Number(wallet?.lastPortfolioUsd || 0))}
             detail={`BNB残高 ${Number(wallet?.lastBalanceFormatted || 0).toFixed(6)} / 保有銘柄 ${rows.length}`}
           />
           <Metric label="Strategies" value={`${activeStrategies.length}`} detail="現在読み込み中の戦略数です。" />

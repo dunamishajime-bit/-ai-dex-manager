@@ -7,6 +7,7 @@ import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";
 
 import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
 import { useSimulation } from "@/context/SimulationContext";
+import { useAsterAccount } from "@/hooks/useAsterAccount";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 
 function SummaryCard({
@@ -66,11 +67,12 @@ function QuickLink({
 export default function HomePage() {
   const { activeStrategies, tradeNotifications } = useSimulation();
   const { wallet } = useOperationalWallet();
+  const { account: asterAccount } = useAsterAccount();
   const [v96Active, setV96Active] = useState(false);
-  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);
-  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");
-  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);
-  const cashUsd = Number(usdtHolding?.usdValue || 0);
+  const holdings = asterAccount?.positions || (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);
+  const usdtHolding = holdings.find((holding) => "symbol" in holding && holding.symbol === "USDT");
+  const portfolioUsd = asterAccount?.usdtBalance ?? Number(wallet?.lastPortfolioUsd || 0);
+  const cashUsd = asterAccount?.usdtAvailable ?? Number((usdtHolding as any)?.usdValue || 0);
   useEffect(() => {
     let cancelled = false;
     const refresh = async () => {
