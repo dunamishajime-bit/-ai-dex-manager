@@ -57,6 +57,7 @@
     "strategy:disdex-v13d-v11eq-v96:daemon": "tsx scripts/disdex-v13d-v11eq-v96-live-runner.ts --daemon",
     "strategy:disdex-v13d-v11eq-v96:kill-switch": "tsx scripts/disdex-v13d-v11eq-v96-kill-switch.ts",
     "strategy:disdex-v52:contract": "npm run strategy:disdex-v13d-v11eq-v96:contract",
+    "strategy:disdex-v52:safety:selftest": "python3 scripts/disdex-v52-safety-selftest.py",
     "strategy:disdex-v52:preflight": "npm run strategy:disdex-v13d-v11eq-v96:preflight",
     "strategy:disdex-v52:once": "npm run strategy:disdex-v13d-v11eq-v96:once",
     "strategy:disdex-v52:daemon": "npm run strategy:disdex-v13d-v11eq-v96:daemon",

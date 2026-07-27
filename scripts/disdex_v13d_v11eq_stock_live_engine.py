@@ -94,8 +94,19 @@ ASTER_BOOK_CACHE_MS = max(250, int_env("DISDEX_ASTER_BOOK_CACHE_MS", 750))
 ASTER_ACCOUNT_CACHE_MS = max(1_000, int_env("DISDEX_ASTER_ACCOUNT_CACHE_MS", 5_000))
 ASTER_EXCHANGE_INFO_CACHE_MS = max(60_000, int_env("DISDEX_ASTER_EXCHANGE_INFO_CACHE_MS", 21_600_000))
 ASTER_429_COOLDOWN_MS = max(5_000, int_env("DISDEX_ASTER_429_COOLDOWN_MS", 30_000))
-_ASTER_RATE_LIMIT_UNTIL_MS = 0
+_API_COOLDOWN_UNTIL_MS = {"ASTER_PUBLIC": 0, "REFERENCE": 0, "ASTER_SIGNED": 0}
 _ASTER_RATE_LIMIT_LOCK = threading.Lock()
+
+def api_category(url: str, headers: Optional[Dict[str, str]]) -> str:
+    host = urllib.parse.urlparse(url).netloc.lower()
+    if headers and any(key.lower() in {"x-mbx-apikey", "x-api-key", "authorization"} for key in headers):
+        return "ASTER_SIGNED"
+    return "ASTER_PUBLIC" if "asterdex" in host else "REFERENCE"
+
+def transient_error_class(category: str, status: Optional[int] = None) -> str:
+    if status in {408, 429, 500, 502, 503, 504}:
+        return {"ASTER_PUBLIC": "TRANSIENT_PUBLIC_DATA", "REFERENCE": "TRANSIENT_REFERENCE_DATA"}.get(category, "SIGNED_API_FAILURE")
+    return "SIGNED_API_FAILURE" if category == "ASTER_SIGNED" else category
 
 def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -139,11 +150,11 @@ def http_json(
     headers: Optional[Dict[str, str]] = None,
     timeout: float = 10.0,
 ) -> Any:
-    global _ASTER_RATE_LIMIT_UNTIL_MS
+    category = api_category(url, headers)
     with _ASTER_RATE_LIMIT_LOCK:
-        if now_ms() < _ASTER_RATE_LIMIT_UNTIL_MS:
-            remaining = _ASTER_RATE_LIMIT_UNTIL_MS - now_ms()
-            raise RuntimeError(f"Aster REST rate-limit cooldown active ({remaining}ms remaining)")
+        if now_ms() < _API_COOLDOWN_UNTIL_MS[category]:
+            remaining = _API_COOLDOWN_UNTIL_MS[category] - now_ms()
+            raise RuntimeError(f"{transient_error_class(category, 429)} cooldown active ({remaining}ms remaining)")
     encoded = None
     target = url
     if params:
@@ -168,8 +179,9 @@ def http_json(
             retry_after = finite(error.headers.get("Retry-After"), ASTER_429_COOLDOWN_MS / 1000.0)
             cooldown = max(ASTER_429_COOLDOWN_MS, int(retry_after * 1000))
             with _ASTER_RATE_LIMIT_LOCK:
-                _ASTER_RATE_LIMIT_UNTIL_MS = max(_ASTER_RATE_LIMIT_UNTIL_MS, now_ms() + cooldown)
-        raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
+                _API_COOLDOWN_UNTIL_MS[category] = max(_API_COOLDOWN_UNTIL_MS[category], now_ms() + cooldown)
+        kind = transient_error_class(category, error.code)
+        raise RuntimeError(f"{kind}: HTTP {error.code} {target}: {body[:500]}") from error
 
 
 def get_path(payload: Any, path: str) -> Any:
@@ -202,6 +214,12 @@ def round_tick(value: float, tick: float, side: str) -> float:
     units = math.floor(scaled + 1e-12) if side == "BUY" else math.ceil(scaled - 1e-12)
     return units * tick
 
+
+def passive_exit_price(book: "Book", close_side: str) -> float:
+    return book.ask if close_side == "SELL" else book.bid
+
+def urgent_exit_reason(reason: str) -> bool:
+    return reason in {"BASIS_STOP", "MISSED_CHECKPOINT_FAIL_CLOSED", "FINAL_1530", "V96_MARGIN_PRIORITY", "DAILY_LOSS", "KILL_SWITCH", "FATAL_TICK_ERROR"} or reason.startswith("STATE_INCONSISTENCY")
 
 def bps_change(current: float, previous: float) -> float:
     return (current / previous - 1.0) * 10_000.0 if current > 0 and previous > 0 else 0.0
@@ -421,13 +439,13 @@ class AsterClient:
             raise RuntimeError(f"Aster symbol is unavailable: {symbol}")
         return row
 
-    def normalize(self, symbol: str, quantity: float, price: float, side: str) -> Tuple[float, float]:
+    def normalize(self, symbol: str, quantity: float, price: float, side: str, *, reduce_only: bool = False) -> Tuple[float, float]:
         row = self.rules(symbol)
         normalized_qty = floor_step(min(quantity, row["maxQty"]), row["step"])
         normalized_price = round_tick(price, row["tick"], side)
         if normalized_qty < row["minQty"] or normalized_qty <= 0:
             raise RuntimeError(f"Aster quantity below minimum for {symbol}")
-        if row["minNotional"] > 0 and normalized_qty * normalized_price < row["minNotional"]:
+        if not reduce_only and row["minNotional"] > 0 and normalized_qty * normalized_price < row["minNotional"]:
             raise RuntimeError(f"Aster notional below minimum for {symbol}")
         return normalized_qty, normalized_price
 
@@ -530,7 +548,7 @@ class AsterClient:
         reduce_only: bool = False,
         post_only: bool = True,
     ) -> Fill:
-        quantity, price = self.normalize(symbol, quantity, price, side)
+        quantity, price = self.normalize(symbol, quantity, price, side, reduce_only=reduce_only)
         if not self.live:
             return Fill("ASTER", symbol, side, quantity, quantity, price, "FILLED", client_id, "paper")
         raw = self._signed("POST", "/fapi/v3/order", {
@@ -558,7 +576,7 @@ class AsterClient:
         client_id: str,
         reduce_only: bool = False,
     ) -> Fill:
-        quantity, _ = self.normalize(symbol, quantity, expected_price, side)
+        quantity, _ = self.normalize(symbol, quantity, expected_price, side, reduce_only=reduce_only)
         if not self.live:
             return Fill("ASTER", symbol, side, quantity, quantity, expected_price, "FILLED", client_id, "paper")
         raw = self._signed("POST", "/fapi/v3/order", {
@@ -608,14 +626,20 @@ class AsterClient:
             raw = self.get_order(symbol, client_id)
             return self._fill(raw, requested, side, client_id)
 
-    def equity(self) -> float:
+    def account_summary(self) -> dict:
         if not self.live:
-            return float_env("DISDEX_STOCK_PAPER_ASTER_EQUITY_USD", 1000.0)
+            equity = float_env("DISDEX_STOCK_PAPER_ASTER_EQUITY_USD", 1000.0)
+            return {"equityUsd": equity, "availableBalanceUsd": equity, "crossWalletBalanceUsd": equity, "unrealizedPnlUsd": 0.0}
         balances = self.balances()
-        usdt = next((row for row in balances if str(row.get("asset", "")).upper() == "USDT"), None)
-        wallet = finite((usdt or {}).get("balance") or (usdt or {}).get("crossWalletBalance"))
+        usdt = next((row for row in balances if str(row.get("asset", "")).upper() == "USDT"), None) or {}
         unrealized = sum(finite(row.get("unRealizedProfit") or row.get("unrealizedProfit")) for row in self.positions())
-        return wallet + unrealized
+        wallet = finite(usdt.get("balance") or usdt.get("crossWalletBalance"))
+        available = finite(usdt.get("availableBalance") or usdt.get("maxWithdrawAmount"), wallet)
+        cross = finite(usdt.get("crossWalletBalance") or usdt.get("balance"), wallet)
+        return {"equityUsd": wallet + unrealized, "availableBalanceUsd": available, "crossWalletBalanceUsd": cross, "unrealizedPnlUsd": unrealized}
+
+    def equity(self) -> float:
+        return float(self.account_summary()["equityUsd"])
 
 
 class HyperliquidXYZClient:
@@ -737,6 +761,7 @@ class ReferenceProvider:
         self.timeout = float_env("DISDEX_STOCK_REFERENCE_TIMEOUT_MS", 5000) / 1000.0
         headers_raw = os.getenv("DISDEX_STOCK_REFERENCE_HEADERS_JSON", "{}")
         self.headers = json.loads(headers_raw)
+        self.last_timestamp_fallback = False
         if live and self.mode != "external":
             raise RuntimeError("Live Stock engine requires DISDEX_STOCK_REFERENCE_MODE=external")
         if self.mode == "external" and "{symbol}" not in self.template:
@@ -748,10 +773,16 @@ class ReferenceProvider:
             url = self.template.format(symbol=symbol, unix_ms=received)
             payload = http_json(url, headers=self.headers, timeout=self.timeout)
             price = finite(get_path(payload, self.price_path))
-            timestamp = int(finite(get_path(payload, self.timestamp_path), received))
+            try:
+                timestamp = int(finite(get_path(payload, self.timestamp_path), 0))
+                if timestamp <= 0:
+                    raise ValueError("missing source timestamp")
+            except (KeyError, TypeError, ValueError):
+                timestamp = received
+                self.last_timestamp_fallback = True
             if timestamp < 10_000_000_000:
                 timestamp *= 1000
-            source = url.split("?", 1)[0]
+            source = url.split("?", 1)[0] + (" [timestamp-fallback]" if self.last_timestamp_fallback else "")
         elif self.mode == "yahoo":
             url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1m&range=1d"
             payload = http_json(url, timeout=self.timeout)
@@ -796,6 +827,7 @@ class StockEngine:
         self.state = read_json(self.state_path, {}) or {}
         self.spreads: Dict[str, Deque[Tuple[int, float]]] = {symbol: deque() for symbol in SYMBOLS}
         self.mids: Dict[str, Deque[Tuple[int, float]]] = {symbol: deque() for symbol in SYMBOLS}
+        self.last_book_event = {symbol: 0 for symbol in SYMBOLS}
         self.stop_requested = False
 
     def log(self, event: str, **fields: Any) -> None:
@@ -944,8 +976,11 @@ class StockEngine:
             except Exception as error:
                 self.log("history-book-error", symbol=symbol, error=str(error))
                 continue
-            self.spreads[symbol].append((received, book.spread_bps))
-            self.mids[symbol].append((received, book.mid))
+            if book.event_ms == self.last_book_event[symbol]:
+                continue
+            self.last_book_event[symbol] = book.event_ms
+            self.spreads[symbol].append((book.event_ms, book.spread_bps))
+            self.mids[symbol].append((book.event_ms, book.mid))
             while self.spreads[symbol] and self.spreads[symbol][0][0] < received - 30_000:
                 self.spreads[symbol].popleft()
             while self.mids[symbol] and self.mids[symbol][0][0] < received - 5000:
@@ -1109,7 +1144,7 @@ class StockEngine:
         now = now_ms()
         spread_values = [value for timestamp, value in self.spreads[selected] if timestamp >= now - 30_000]
         median = sorted(spread_values)[len(spread_values) // 2] if spread_values else 0.0
-        two_second_mid = next((value for timestamp, value in self.mids[selected] if timestamp >= now - 2200), aster.mid)
+        two_second_mid = next((value for timestamp, value in reversed(self.mids[selected]) if timestamp <= now - 2000), aster.mid)
         adverse_two_second = max(0.0, bps_change(aster.mid, two_second_mid) * (1 if side == "BUY" else -1))
         signal_value = finite(signal_basis.get(selected), basis)
         adverse_basis = max(0.0, abs(basis) - abs(signal_value))
@@ -1118,9 +1153,13 @@ class StockEngine:
             reasons.append("BASIS_BELOW_50")
         if selected != top1:
             reasons.append("NO_LONGER_TOP1")
-        if now - aster.received_ms > V11_MAX_DATA_AGE_MS or now - reference.received_ms > V11_MAX_DATA_AGE_MS:
+        if now - aster.received_ms > V11_MAX_DATA_AGE_MS or now - reference.timestamp_ms > V11_MAX_DATA_AGE_MS:
             reasons.append("STALE_DATA")
-        if abs(aster.received_ms - reference.received_ms) > V11_MAX_SOURCE_CLOCK_DIFF_MS:
+        if reference.timestamp_ms > now + 250:
+            reasons.append("REFERENCE_FUTURE_TIMESTAMP")
+        if reference.timestamp_ms <= 0:
+            reasons.append("REFERENCE_TIMESTAMP_MISSING")
+        if abs(aster.event_ms - reference.timestamp_ms) > V11_MAX_SOURCE_CLOCK_DIFF_MS:
             reasons.append("SOURCE_CLOCK_MISMATCH")
         if cost > V11_MAX_ROUND_TRIP_COST_BPS:
             reasons.append("ROUND_TRIP_COST_OVER_60")
@@ -1159,7 +1198,24 @@ class StockEngine:
             "costDetail": cost_detail,
         }, rejections
 
+    def recheck_entry_conditions(self, candidate: dict) -> None:
+        symbol = str(candidate["symbol"])
+        book = self.aster.book(ASTER_SYMBOL[symbol], 20)
+        quote = self.reference.quote(symbol)
+        now = now_ms()
+        if quote.timestamp_ms <= 0 or quote.timestamp_ms > now + 250 or now - quote.timestamp_ms > V11_MAX_DATA_AGE_MS:
+            raise RuntimeError("TRANSIENT_REFERENCE_DATA: entry reference is stale or invalid")
+        basis = (book.mid / quote.price - 1.0) * 10_000.0
+        expected = finite(candidate.get("basisBps"))
+        if abs(basis) < V11_MIN_BASIS_BPS or basis * expected <= 0:
+            raise RuntimeError("ENTRY_RECHECK_FAILED: basis threshold or sign changed")
+        cost, _ = self.estimate_v11_cost(book, "BUY" if candidate.get("side") == "SELL" else "SELL", max(1.0, finite(candidate.get("notionalUsd"), self.v11_notional)))
+        net_edge = abs(basis) - V11_CONVERGENCE_BPS - cost
+        if net_edge < V11_MIN_NET_EDGE_BPS:
+            raise RuntimeError("ENTRY_RECHECK_FAILED: net edge below 10bps")
+
     def open_v11(self, candidate: dict) -> bool:
+        self.recheck_entry_conditions(candidate)
         symbol = candidate["symbol"]
         aster_symbol = ASTER_SYMBOL[symbol]
         quantity = self.v11_notional / candidate["entryPrice"]
@@ -1246,17 +1302,16 @@ class StockEngine:
         close_side = "SELL" if open_side == "BUY" else "BUY"
         quantity = finite(position["asterQty"])
         book = self.aster.book(ASTER_SYMBOL[symbol], 20)
-        price = book.bid if close_side == "SELL" else book.ask
+        price = passive_exit_price(book, close_side)
         client_id = self.client_id("V11EQ", symbol, "CLOSE-LIMIT")
-        initial = self.aster.place_limit(
-            symbol=ASTER_SYMBOL[symbol],
-            side=close_side,
-            quantity=quantity,
-            price=price,
-            client_id=client_id,
-            reduce_only=True,
-            post_only=True,
-        )
+        urgent = urgent_exit_reason(reason)
+        try:
+            initial = self.aster.place_market(symbol=ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, expected_price=book.ask if close_side == "BUY" else book.bid, client_id=client_id, reduce_only=True) if urgent else self.aster.place_limit(symbol=ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, price=price, client_id=client_id, reduce_only=True, post_only=True)
+        except RuntimeError as error:
+            if urgent or "GTX" not in str(error).upper():
+                raise
+            self.log("post-only-exit-rejected-fallback", symbol=symbol, reason=reason, error=str(error))
+            initial = Fill("ASTER", ASTER_SYMBOL[symbol], close_side, quantity, 0.0, 0.0, "REJECTED", client_id, error=str(error))
         fill = initial if not self.live else self.aster.poll_fill(ASTER_SYMBOL[symbol], client_id, quantity, close_side, 2000)
         remaining = max(0.0, quantity - fill.executed_qty)
         if remaining > quantity * 0.01:
@@ -1470,6 +1525,13 @@ def self_test() -> None:
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96"
     assert V13D_MIN_BASIS_BPS == 20.0
     assert V11_MAX_ROUND_TRIP_COST_BPS == 60.0
+    assert passive_exit_price(book, "SELL") == book.ask
+    assert passive_exit_price(book, "BUY") == book.bid
+    assert urgent_exit_reason("BASIS_STOP") and urgent_exit_reason("FINAL_1530")
+    assert not urgent_exit_reason("BASIS_CONVERGED")
+    assert api_category("https://fapi.asterdex.com/fapi/v3/depth", None) == "ASTER_PUBLIC"
+    assert api_category("https://query.example.test/quote", None) == "REFERENCE"
+    assert transient_error_class("REFERENCE", 429) == "TRANSIENT_REFERENCE_DATA"
     print("V13D + V11-EQ Stock live engine self-test: PASS")
 
 

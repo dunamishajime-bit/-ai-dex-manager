@@ -132,7 +132,18 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             raise RuntimeError("Aster equity must be positive")
         crypto_notional = self.current_v96_notional()
         stock_notional = self._actual_stock_notional()
-        return {"equityUsd": equity, "cryptoNotionalUsd": crypto_notional, "stockNotionalUsd": stock_notional, "cryptoGross": crypto_notional / equity, "stockGross": stock_notional / equity, "totalGross": (crypto_notional + stock_notional) / equity}
+        account = self.aster.account_summary()
+        return {"equityUsd": equity, "availableBalanceUsd": account["availableBalanceUsd"], "crossWalletBalanceUsd": account["crossWalletBalanceUsd"], "unrealizedPnlUsd": account["unrealizedPnlUsd"], "cryptoNotionalUsd": crypto_notional, "stockNotionalUsd": stock_notional, "cryptoGross": crypto_notional / equity, "stockGross": stock_notional / equity, "totalGross": (crypto_notional + stock_notional) / equity}
+
+    def execution_capacity_gross(self, snapshot: dict, slot: str) -> float:
+        equity = base.finite(snapshot.get("equityUsd"))
+        available = base.finite(snapshot.get("availableBalanceUsd"), equity)
+        reserve = max(self.minimum_entry_usd, equity * base.float_env("DISDEX_V52_CASH_RESERVE_PCT", 10.0) / 100.0)
+        required_margin = base.finite(snapshot.get("cryptoNotionalUsd")) / max(1.0, base.float_env("DISDEX_V52_LEVERAGE", 1.0))
+        cost_headroom = max(0.0, available - reserve - required_margin)
+        capacity = max(0.0, min(1.0, cost_headroom / equity if equity > 0 else 0.0))
+        snapshot.update({"reserveUsd": reserve, "requiredMarginUsd": required_margin, "costHeadroomUsd": cost_headroom, "scaleReason": "BALANCE_AND_RESERVE" if capacity < 1.0 else "NONE"})
+        return capacity
 
     def available_slot_gross(self, slot: str) -> Tuple[float, dict]:
         snapshot = self.gross_snapshot()
@@ -194,10 +205,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         return base.StockEngine.v11_candidates(self, rows)
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        self.recheck_entry_conditions(candidate)
         if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
             return False
         snapshot = self.gross_snapshot()
         self.assert_gross_safe(snapshot)
+        target_gross = min(target_gross, self.execution_capacity_gross(snapshot, slot))
         target_notional = target_gross * snapshot["equityUsd"]
         if target_notional < self.minimum_entry_usd:
             return False
@@ -237,10 +250,17 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         close_side = "SELL" if open_side == "BUY" else "BUY"
         quantity = base.finite(position["asterQty"])
         book = self.aster.book(base.ASTER_SYMBOL[symbol], 20)
-        price = book.bid if close_side == "SELL" else book.ask
+        price = base.passive_exit_price(book, close_side)
         client = self.client_id(slot, symbol, "CLOSE")
         self._set_pending({"slot": slot, "action": "CLOSE", "symbol": symbol, "side": close_side, "quantity": quantity, "clientId": client})
-        initial = self.aster.place_limit(symbol=base.ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, price=price, client_id=client, reduce_only=True, post_only=True)
+        urgent = reason in {"BASIS_STOP", "MISSED_CHECKPOINT_FAIL_CLOSED", "FINAL_1530", "V96_MARGIN_PRIORITY", "DAILY_LOSS", "KILL_SWITCH", "FATAL_TICK_ERROR"} or reason.startswith("STATE_INCONSISTENCY")
+        try:
+            initial = self.aster.place_market(symbol=base.ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, expected_price=book.ask if close_side == "BUY" else book.bid, client_id=client, reduce_only=True) if urgent else self.aster.place_limit(symbol=base.ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, price=price, client_id=client, reduce_only=True, post_only=True)
+        except RuntimeError as error:
+            if urgent or "GTX" not in str(error).upper():
+                raise
+            self.log("post-only-exit-rejected-fallback", symbol=symbol, reason=reason, error=str(error))
+            initial = base.Fill("ASTER", base.ASTER_SYMBOL[symbol], close_side, quantity, 0.0, 0.0, "REJECTED", client, error=str(error))
         fill = initial if not self.live else self.aster.poll_fill(base.ASTER_SYMBOL[symbol], client, quantity, close_side, 2000)
         remaining = max(0.0, quantity - fill.executed_qty)
         if remaining > quantity * 0.01:
@@ -292,8 +312,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             if abs(basis) < V50_MIN_ENTRY_BASIS_BPS: reasons.append("BASIS_BELOW_75")
             if signal_basis * basis <= 0: reasons.append("SIGN_CHANGED")
             if adverse > V50_MAX_ADVERSE_BASIS_MOVE_BPS: reasons.append("ADVERSE_BASIS_MOVE")
-            if now - aster.received_ms > base.V11_MAX_DATA_AGE_MS or now - reference.received_ms > base.V11_MAX_DATA_AGE_MS: reasons.append("STALE_DATA")
-            if abs(aster.received_ms - reference.received_ms) > base.V11_MAX_SOURCE_CLOCK_DIFF_MS: reasons.append("SOURCE_CLOCK_MISMATCH")
+            if now - aster.received_ms > base.V11_MAX_DATA_AGE_MS or now - reference.timestamp_ms > base.V11_MAX_DATA_AGE_MS: reasons.append("STALE_DATA")
+            if abs(aster.event_ms - reference.timestamp_ms) > base.V11_MAX_SOURCE_CLOCK_DIFF_MS: reasons.append("SOURCE_CLOCK_MISMATCH")
             if cost > V50_MAX_ROUND_TRIP_COST_BPS: reasons.append("ROUND_TRIP_COST_OVER_60")
             if abs(basis) - V50_CONVERGENCE_BPS - cost < V50_MIN_NET_EDGE_BPS: reasons.append("NET_EDGE_BELOW_10")
             if aster.depth_usd(exit_action) < 2.0 * notional: reasons.append("DEPTH_BELOW_2X")
@@ -431,10 +451,14 @@ def self_test() -> None:
     engine = object.__new__(V52AsterOnlyEngine)
     engine.crypto_gross_cap = 1.0; engine.stock_gross_cap = 1.5; engine.portfolio_gross_cap = 2.5
     engine.v11_gross_cap = 1.0; engine.v50_gross_cap = 1.0; engine.gross_tolerance = 0.03
+    engine.minimum_entry_usd = 5.0
     engine.state = {"positions": {V11_SLOT: {}}}; engine.v96_requires_margin = lambda: False
-    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoGross": 1.0, "stockGross": 1.0, "totalGross": 2.0}
+    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "availableBalanceUsd": 100.0, "cryptoNotionalUsd": 0.0, "cryptoGross": 1.0, "stockGross": 1.0, "totalGross": 2.0}
     gross, _ = engine.available_slot_gross(V50_SLOT)
     assert gross == 0.5
+    assert base.passive_exit_price(base.Book("ASTER", "AMZNUSDT", 99.9, 10, 100.1, 10, [], [], 1, 1), "SELL") == 100.1
+    assert base.passive_exit_price(base.Book("ASTER", "AMZNUSDT", 99.9, 10, 100.1, 10, [], [], 1, 1), "BUY") == 99.9
+    assert engine.execution_capacity_gross({"equityUsd": 100.0, "availableBalanceUsd": 58.7, "cryptoNotionalUsd": 0.0}, V50_SLOT) < 1.0
     print("V52 V11-EQ + V50 Aster-only live engine self-test: PASS")
 
 

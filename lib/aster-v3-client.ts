@@ -128,7 +128,7 @@ export interface AsterOrderResponse {
 export interface AsterUserTrade {
     id?: number; orderId?: number; symbol: string; price?: string; qty?: string; quoteQty?: string;
     commission?: string; commissionAsset?: string; time?: number; buyer?: boolean; maker?: boolean;
-    realizedPnl?: string; side?: AsterOrderSide;
+    realizedPnl?: string; side?: AsterOrderSide; positionSide?: AsterPositionSide; reduceOnly?: boolean; clientOrderId?: string; origClientOrderId?: string;
 }
 
 export interface AsterNewMarketOrder {
