@@ -14,6 +14,7 @@ on:
       - scripts/ops/**
       - ops/requests/**
       - docs/implementation/PLUS_VPS_RUNNER_HANDOFF.md
+      - docs/implementation/PLUS_VPS_RUNNER_LAYOUT_ADDENDUM.md
   pull_request:
     branches:
       - master
@@ -26,6 +27,7 @@ on:
       - scripts/ops/**
       - ops/requests/**
       - docs/implementation/PLUS_VPS_RUNNER_HANDOFF.md
+      - docs/implementation/PLUS_VPS_RUNNER_LAYOUT_ADDENDUM.md
 
 permissions:
   contents: read
