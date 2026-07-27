@@ -46,54 +46,55 @@
   "latencies": {
     "bookTicker": {
       "samples": 1210,
-      "p50Ms": 170.5155,
-      "p95Ms": 276.4523,
-      "maxMs": 556.653
+      "p50Ms": 125.3055,
+      "p95Ms": 199.76404999999997,
+      "maxMs": 540.854
     },
     "depth": {
       "samples": 1210,
-      "p50Ms": 169.8245,
-      "p95Ms": 272.24649999999997,
-      "maxMs": 551.658
+      "p50Ms": 125.26249999999999,
+      "p95Ms": 194.97769999999997,
+      "maxMs": 4955.785
     },
     "klines1m": {
       "samples": 1210,
-      "p50Ms": 170.253,
-      "p95Ms": 260.3301,
-      "maxMs": 404.533
+      "p50Ms": 125.436,
+      "p95Ms": 186.52239999999998,
+      "maxMs": 5229.778
     },
     "lastPrice": {
       "samples": 1210,
-      "p50Ms": 170.3505,
-      "p95Ms": 272.18944999999997,
-      "maxMs": 457.012
+      "p50Ms": 125.3265,
+      "p95Ms": 193.69865,
+      "maxMs": 1228.87
     },
     "openInterest": {
       "samples": 1210,
-      "p50Ms": 189.756,
-      "p95Ms": 526.8761,
-      "maxMs": 716.817
+      "p50Ms": 131.1085,
+      "p95Ms": 345.17535,
+      "maxMs": 5352.839
     },
     "premium": {
       "samples": 1210,
-      "p50Ms": 171.4365,
-      "p95Ms": 323.96984999999995,
-      "maxMs": 600.962
+      "p50Ms": 126.4545,
+      "p95Ms": 248.02814999999998,
+      "maxMs": 5179.896
     },
     "ticker24h": {
       "samples": 1210,
-      "p50Ms": 170.452,
-      "p95Ms": 268.33045,
-      "maxMs": 471.105
+      "p50Ms": 125.304,
+      "p95Ms": 186.08769999999998,
+      "maxMs": 1160.322
     }
   },
   "minuteBarCoveragePctV2": 100.0,
   "marketActivityCoveragePctV2": 100.0,
   "marketClockCounts": {
-    "cryptoEntryAllowedByClock": 1210
+    "stockEntryAllowedByClock": 1210,
+    "usRegularSession": 1210
   },
   "sessionCounts": {
-    "PREMARKET": 1210
+    "REGULAR_CORE": 1210
   },
   "executionFillability": {
     "100": {
@@ -128,8 +129,8 @@
       },
       "sell": {
         "attempts": 1210,
-        "fillable": 1208,
-        "fillablePct": 99.83471074380165
+        "fillable": 1210,
+        "fillablePct": 100.0
       }
     }
   },
@@ -137,43 +138,43 @@
     "100": {
       "buy": {
         "samples": 1210,
-        "medianSlippageBps": 5.584862354610642,
-        "p95SlippageBps": 26.797312066658023,
-        "maxSlippageBps": 113.44104503265618
+        "medianSlippageBps": 5.419917584897904,
+        "p95SlippageBps": 32.65664825157065,
+        "maxSlippageBps": 39230.41448089006
       },
       "sell": {
         "samples": 1210,
-        "medianSlippageBps": 5.39334201227426,
-        "p95SlippageBps": 25.729321446997773,
-        "maxSlippageBps": 114.74269819193195
+        "medianSlippageBps": 5.320872695887546,
+        "p95SlippageBps": 29.389001464871104,
+        "maxSlippageBps": 1003.7339408898172
       }
     },
     "500": {
       "buy": {
         "samples": 1210,
-        "medianSlippageBps": 7.174533013718509,
-        "p95SlippageBps": 27.50158007412007,
-        "maxSlippageBps": 113.44104503265618
+        "medianSlippageBps": 7.477371403254995,
+        "p95SlippageBps": 32.65664825157065,
+        "maxSlippageBps": 39230.41448089006
       },
       "sell": {
         "samples": 1210,
-        "medianSlippageBps": 5.611223346287941,
-        "p95SlippageBps": 26.30933768282626,
-        "maxSlippageBps": 20240.430425041184
+        "medianSlippageBps": 6.4661831761536614,
+        "p95SlippageBps": 29.389001464871104,
+        "maxSlippageBps": 1936.6700635555567
       }
     },
     "1000": {
       "buy": {
         "samples": 1210,
-        "medianSlippageBps": 8.607266026543492,
-        "p95SlippageBps": 31.181483311255697,
-        "maxSlippageBps": 113.44104503265618
+        "medianSlippageBps": 9.310356518480445,
+        "p95SlippageBps": 49.7571465792159,
+        "maxSlippageBps": 39230.5084904605
       },
       "sell": {
-        "samples": 1208,
-        "medianSlippageBps": 5.9600653603852916,
-        "p95SlippageBps": 26.235650725454413,
-        "maxSlippageBps": 100.61336489830985
+        "samples": 1210,
+        "medianSlippageBps": 6.90513650440816,
+        "p95SlippageBps": 34.66605128893063,
+        "maxSlippageBps": 13467.085275761126
       }
     }
   },
@@ -368,8 +369,8 @@
       "ASMLUSDT": "TRADING",
       "ADBEUSDT": "TRADING"
     },
-    "clockSkewMedianMs": -1418.0,
-    "clockSkewMaxAbsMs": 1418.0,
+    "clockSkewMedianMs": -1069.0,
+    "clockSkewMaxAbsMs": 1069.0,
     "coveragePass": true
   },
   "limitations": [
