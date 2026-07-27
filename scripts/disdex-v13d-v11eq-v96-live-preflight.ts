@@ -9,6 +9,8 @@ import {
     DISDEX_V13D_V11EQ_V96_RUNTIME,
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 
+const STOCK_RUNNER_PATH = "scripts/disdex_v52_safe_runner.py" as const;
+
 function statePaths() {
     const root = resolve(process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR || DISDEX_V13D_V11EQ_V96_RUNTIME.stateDirectory);
     const kill = resolve(process.env.DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE || resolve(root, "kill-switch.json"));
@@ -50,11 +52,12 @@ async function main() {
     } as NodeJS.ProcessEnv;
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-    await run(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", "live", "--preflight"], env);
+    await run(python, [STOCK_RUNNER_PATH, "--mode", "live", "--preflight"], env);
     await run(tsx, ["scripts/disdex-v96-live-preflight.ts"], env);
     console.log(JSON.stringify({
         status: "DISDEX_V96_V52_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT",
         stockPreflight: "PASS_V52_DUAL_SLOT_ASTER_ONLY_PYTH_IEX_VALIDATED",
+        stockRunnerPath: STOCK_RUNNER_PATH,
         cryptoV96Preflight: "PASS_VERIFIED_COMBINED_MIGRATION",
         ordersSent: false,
         cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
