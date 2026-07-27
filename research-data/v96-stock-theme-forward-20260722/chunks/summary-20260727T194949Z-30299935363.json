@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "status": "collected",
+  "windowStartUtc": "2026-07-22T01:00:00Z",
+  "windowEndUtc": "2026-07-29T01:00:00Z",
+  "durationSecondsRequested": 3300,
+  "durationSecondsActual": 3300.0,
+  "intervalSeconds": 60.0,
+  "stats": {
+    "snapshots": 1210,
+    "liquidation_events": 0,
+    "rest_errors": 0,
+    "websocket_connections": 1,
+    "websocket_errors": 0,
+    "started_at": "2026-07-27T19:49:49.541024Z",
+    "finished_at": "2026-07-27T20:44:49.664929Z",
+    "symbols": [
+      "ADBEUSDT",
+      "AMATUSDT",
+      "AMDUSDT",
+      "AMZNUSDT",
+      "ARMUSDT",
+      "ASMLUSDT",
+      "AVGOUSDT",
+      "CRMUSDT",
+      "DRAMUSDT",
+      "GOOGLUSDT",
+      "INTCUSDT",
+      "METAUSDT",
+      "MRVLUSDT",
+      "MSFTUSDT",
+      "MUUSDT",
+      "NVDAUSDT",
+      "ORCLUSDT",
+      "PLTRUSDT",
+      "QCOMUSDT",
+      "SNDKUSDT",
+      "TSLAUSDT",
+      "TSMUSDT"
+    ]
+  },
+  "files": {
+    "snapshots": "snapshots-20260727T194949Z-30299935363.jsonl.gz",
+    "liquidations": "liquidations-20260727T194949Z-30299935363.jsonl.gz",
+    "errors": "errors-20260727T194949Z-30299935363.jsonl.gz"
+  },
+  "safety": {
+    "orderSubmissionAllowed": false,
+    "liveTradingChanged": false,
+    "productionStrategyChanged": false
+  }
+}
