@@ -1,36 +1,52 @@
-# Codex VPS Runner Task
+# Codex VPS Runner Task — Apply Prepared Split-Atomic Implementation
 
-Work on branch `codex/research-trade-history-sync-pr98` and fetch its current remote HEAD first.
+Work only on branch `codex/research-trade-history-sync-pr98`.
 
-Follow these documents in order:
+The complete GitHub-side split-atomic implementation has already been written and stored in a verified bootstrap bundle. Do not redesign it and do not manually recreate the files.
 
-1. `docs/implementation/PLUS_VPS_RUNNER_HANDOFF.md`
-2. `docs/implementation/PLUS_VPS_RUNNER_LAYOUT_ADDENDUM.md`
-3. `docs/implementation/V52_CODEX_DIFF_REVIEW_HANDOFF.md` for unchanged strategy/safety invariants
-
-The GitHub-side workflows, request files, inspection/deployment scripts, rollback logic, restart gate and static self-test are already implemented. Do not redesign or rewrite them. Review the current code, fix only real defects or VPS-layout mismatches, then use the existing SSH access to install and configure the repository-dedicated `disdex-vps` self-hosted runner.
-
-Required first commands:
+## First commands
 
 ```bash
 git fetch origin codex/research-trade-history-sync-pr98
 git checkout codex/research-trade-history-sync-pr98
 git reset --hard origin/codex/research-trade-history-sync-pr98
-bash -n scripts/ops/vps-common.sh scripts/ops/vps-deploy-ui.sh scripts/ops/vps-deploy-trading-code.sh scripts/ops/vps-restart-trading-approved.sh
-node --check scripts/ops/vps-inspection.mjs
-node --check scripts/ops/vps-trading-restart-gate.mjs
-node scripts/ops/vps-ops-selftest.mjs
+python3 ops/bootstrap/apply_split_atomic_bundle.py
 ```
 
-During this task:
+The applicator must:
+
+- verify the fixed SHA-256 of the bundle;
+- reject unexpected or unsafe archive paths;
+- install the prepared workflows, scripts, fixed privileged helper examples and migration documentation;
+- run shell syntax checks, Node syntax checks, the VPS operations self-test and `git diff --check`;
+- delete the temporary bundle and applicator;
+- commit and push `Adopt split atomic VPS release layout` to the same branch.
+
+After it pushes, refresh the branch again:
+
+```bash
+git fetch origin codex/research-trade-history-sync-pr98
+git reset --hard origin/codex/research-trade-history-sync-pr98
+```
+
+Then follow the newly installed files in this order:
+
+1. `CODEX_VPS_RUNNER_TASK.md`
+2. `docs/implementation/SPLIT_ATOMIC_VPS_MIGRATION.md`
+3. `docs/implementation/V52_CODEX_DIFF_REVIEW_HANDOFF.md`
+
+## Hard safety boundary for this pass
 
 - zero real orders;
 - zero position changes;
 - zero Kill Switch changes;
 - zero direct runtime-state edits;
-- zero production trading daemon restarts/stops;
+- zero production trading daemon stops or restarts;
+- zero UI reloads until a separate explicit migration approval;
+- do not set `VPS_DEPLOYMENT_LAYOUT_MODE=in-place-reviewed`;
 - keep `VPS_ENABLE_APPROVED_TRADING_RESTART=false`;
-- do not set `VPS_DEPLOYMENT_LAYOUT_MODE=in-place-reviewed` without verifying the live deployment layout; implement atomic releases instead if in-place build/reload is unsafe;
 - do not merge or retarget PR #98.
 
-Complete read-only inspection, a safe UI deployment test, and trading-code staging with authenticated no-order preflight. Return request templates to `enabled=false` after each one-time trigger. Push residual fixes and report the final SHA, runner configuration, workflow/artifact results, before/after PIDs and proof of all zero-mutation invariants above.
+The inspected layout is not safe for in-place deployment. The prepared implementation uses separate exact-SHA UI and trading release roots and intentionally fails closed until PM2 and systemd are explicitly migrated to their respective `current` symlinks.
+
+If runner registration or Repository Variables cannot be completed because no GitHub registration token or authenticated GitHub administration path is available, stop safely and report the exact remaining manual UI steps. Never request that a token, `.env`, API key or private key be pasted into GitHub source, logs or chat.
