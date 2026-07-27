@@ -87,6 +87,16 @@ jobs:
           chmod 700 "$report_dir"
           echo "VPS_REPORT_DIR=$report_dir" >> "$GITHUB_ENV"
 
+      - name: Run isolated full no-order test profile
+        if: steps.request.outputs.profile == 'full-no-order'
+        shell: bash
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+          npm run strategy:disdex-v52:contract
+          npm run strategy:disdex-v52:safety:selftest
+          npm run build
+
       - name: Run read-only VPS inspection
         id: inspection
         shell: bash
@@ -109,6 +119,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vps-inspection-${{ github.sha }}-${{ github.run_number }}
-          path: ${{ env.VPS_REPORT_DIR }}
+          path: ${{ runner.temp }}/disdex-vps-inspection-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: error
           retention-days: 14
