@@ -1,0 +1,114 @@
+name: VPS Read-Only Inspection
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Inspection profile
+        required: true
+        default: basic
+        type: choice
+        options:
+          - basic
+          - full-no-order
+      reason:
+        description: Human-readable reason
+        required: false
+        type: string
+  push:
+    branches:
+      - master
+      - codex/research-trade-history-sync-pr98
+    paths:
+      - ops/requests/vps-inspection-request.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-vps-inspection
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    name: Inspect production VPS without writes
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 35
+    env:
+      VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+      VPS_STATE_ROOT: ${{ vars.VPS_STATE_ROOT }}
+      VPS_OPS_STATE_DIR: ${{ vars.VPS_OPS_STATE_DIR }}
+      VPS_UI_SERVICE_MANAGER: ${{ vars.VPS_UI_SERVICE_MANAGER }}
+      VPS_UI_SERVICE: ${{ vars.VPS_UI_SERVICE }}
+      VPS_TRADING_SERVICE_MANAGER: ${{ vars.VPS_TRADING_SERVICE_MANAGER }}
+      VPS_TRADING_SERVICE: ${{ vars.VPS_TRADING_SERVICE }}
+      VPS_UI_HEALTH_URL: ${{ vars.VPS_UI_HEALTH_URL }}
+      VPS_API_HEALTH_URL: ${{ vars.VPS_API_HEALTH_URL }}
+      VPS_STRICT_INSPECTION: 'true'
+      TARGET_COMMIT: ${{ github.sha }}
+    steps:
+      - name: Checkout inspection code at exact workflow SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Resolve fixed inspection request
+        id: request
+        shell: bash
+        env:
+          DISPATCH_PROFILE: ${{ inputs.profile }}
+          DISPATCH_REASON: ${{ inputs.reason }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const eventName = process.env.GITHUB_EVENT_NAME;
+          let profile = process.env.DISPATCH_PROFILE || 'basic';
+          let reason = process.env.DISPATCH_REASON || 'manual workflow dispatch';
+          let requestId = `dispatch-${process.env.GITHUB_RUN_ID}`;
+          if (eventName === 'push') {
+            const request = JSON.parse(fs.readFileSync('ops/requests/vps-inspection-request.json', 'utf8'));
+            if (request.schemaVersion !== 1) throw new Error('unsupported inspection request schemaVersion');
+            if (!['basic', 'full-no-order'].includes(request.inspectionProfile)) throw new Error('invalid inspectionProfile');
+            if (request.targetCommit !== 'workflow-head') throw new Error('targetCommit must be workflow-head');
+            profile = request.inspectionProfile;
+            reason = String(request.reason || 'GitHub request file').slice(0, 500);
+            requestId = String(request.requestId || '').trim();
+            if (!/^[A-Za-z0-9._:-]{3,120}$/.test(requestId)) throw new Error('invalid requestId');
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `profile=${profile}\nrequest_id=${requestId}\nreason=${reason.replace(/[\r\n]+/g, ' ')}\n`);
+          NODE
+
+      - name: Prepare private report directory
+        shell: bash
+        run: |
+          report_dir="${RUNNER_TEMP}/disdex-vps-inspection-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$report_dir"
+          chmod 700 "$report_dir"
+          echo "VPS_REPORT_DIR=$report_dir" >> "$GITHUB_ENV"
+
+      - name: Run read-only VPS inspection
+        id: inspection
+        shell: bash
+        env:
+          VPS_INSPECTION_PROFILE: ${{ steps.request.outputs.profile }}
+        run: node scripts/ops/vps-inspection.mjs
+
+      - name: Publish Markdown summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f "${VPS_REPORT_DIR}/vps-inspection.md" ]]; then
+            cat "${VPS_REPORT_DIR}/vps-inspection.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "VPS inspection failed before a Markdown report was produced." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload sanitized inspection artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vps-inspection-${{ github.sha }}-${{ github.run_number }}
+          path: ${{ env.VPS_REPORT_DIR }}
+          if-no-files-found: error
+          retention-days: 14
