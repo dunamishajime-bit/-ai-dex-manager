@@ -11,6 +11,6 @@ Status: **EXTENDED_FORWARD_DATA_QUALITY_PASS**
 - global max acquisition gap seconds: 60.015
 - U.S. open 30m samples: 0
 - U.S. regular core samples: 0
-- U.S. close 30m samples: 242
+- U.S. close 30m samples: 0
 
 This report measures acquisition quality and execution feasibility only. It does not approve profitability or Production.
