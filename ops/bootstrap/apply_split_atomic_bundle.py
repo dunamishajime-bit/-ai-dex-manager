@@ -14,7 +14,14 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 BOOTSTRAP_DIR = ROOT / "ops" / "bootstrap"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "apply-split-atomic-bootstrap.yml"
-EXPECTED_ARCHIVE_SHA256 = "d0f968b8d3fda23bda9c090cd8e2138a0bce589c3af8edfee9847dbc265826ff"
+EXPECTED_ARCHIVE_SHA256 = "2a4c0dfd42aa8cc6e88ffc352126a37de9b9e2b864d689dae3d122ab9e1b3760"
+EXPECTED_PART_GIT_BLOBS = {
+    "bundle.part00": "0e1d86ea923a3f71843a8328ead4f17739390610",
+    "bundle.part01": "0c89dc3d2ee862e619c09dab0de50a2231a1243b",
+    "bundle.part02": "25f8467693930ad015a55ea0a94474ecc02ce576",
+    "bundle.part03": "3810d7c5ad9818aa008524c654f873d9a0be49ea",
+    "bundle.part04": "e73c27d02bd1f8b80967efbf0089499f822ec1b7",
+}
 EXPECTED_PATHS = {
     "scripts/ops/vps-common.sh",
     "scripts/ops/root/disdex-vps-control",
@@ -42,6 +49,11 @@ def run(*args: str) -> None:
     subprocess.run(args, cwd=ROOT, check=True)
 
 
+def git_blob_sha(data: bytes) -> str:
+    header = f"blob {len(data)}\0".encode()
+    return hashlib.sha1(header + data).hexdigest()
+
+
 def safe_member_name(name: str) -> str:
     path = PurePosixPath(name)
     if path.is_absolute() or not path.parts or ".." in path.parts or "." in path.parts:
@@ -53,15 +65,30 @@ def safe_member_name(name: str) -> str:
 
 
 def load_archive() -> bytes:
-    parts = sorted(BOOTSTRAP_DIR.glob("bundle.part*"))
-    expected_names = [f"bundle.part{index:02d}" for index in range(5)]
-    if [part.name for part in parts] != expected_names:
-        raise RuntimeError(f"bundle parts mismatch: {[part.name for part in parts]}")
-    encoded = b"".join(part.read_bytes() for part in parts)
-    archive = base64.b64decode(encoded, validate=True)
+    expected_names = list(EXPECTED_PART_GIT_BLOBS)
+    parts = [BOOTSTRAP_DIR / name for name in expected_names]
+    if not all(part.is_file() for part in parts):
+        found = sorted(path.name for path in BOOTSTRAP_DIR.glob("bundle.part*"))
+        raise RuntimeError(f"bundle parts mismatch: {found}")
+
+    encoded_parts: list[bytes] = []
+    for part in parts:
+        data = part.read_bytes()
+        actual_blob = git_blob_sha(data)
+        expected_blob = EXPECTED_PART_GIT_BLOBS[part.name]
+        if actual_blob != expected_blob:
+            raise RuntimeError(
+                f"bundle part Git blob mismatch for {part.name}: "
+                f"expected={expected_blob} actual={actual_blob}"
+            )
+        encoded_parts.append(data)
+
+    archive = base64.b64decode(b"".join(encoded_parts), validate=True)
     digest = hashlib.sha256(archive).hexdigest()
     if digest != EXPECTED_ARCHIVE_SHA256:
-        raise RuntimeError(f"archive sha256 mismatch: {digest}")
+        raise RuntimeError(
+            f"archive sha256 mismatch: expected={EXPECTED_ARCHIVE_SHA256} actual={digest}"
+        )
     return archive
 
 
