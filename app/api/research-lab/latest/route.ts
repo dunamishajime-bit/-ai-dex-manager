@@ -211,7 +211,7 @@ function normalizeResearchFocus(value: unknown): ChampionDeepDashboardSummary["r
   return {
     mode: "win80_ultra90_lineage",
     title: stringValue(item.title, "Win80 / Ultra90 Main-Lineage Research"),
-    mainStrategyId: stringValue(item.mainStrategyId, "WIN80_ULTRA90_TOP1_V1"),
+    mainStrategyId: stringValue(item.mainStrategyId, "DISDEX_V35_STRONG_RESERVED_PENGU_V96"),
     mainStrategyLocked: item.mainStrategyLocked === true,
     autoPromotionToMain: item.autoPromotionToMain === true,
     productionLogicMutable: item.productionLogicMutable === true,
@@ -288,7 +288,10 @@ export async function GET() {
     ]);
     const history = normalizeHistory(state.history);
     const lastRunAt = typeof state.lastRunAt === "string" ? state.lastRunAt : history.at(-1)?.completedAt ?? null;
-    const latestDiscussion = normalizeDiscussionEntry(discussionIndex.items?.[0]);
+    const latestDiscussion = normalizeDiscussionEntry(discussionIndex.items?.find((item) => {
+      const ids = Array.isArray(item?.topStrategyIds) ? item.topStrategyIds.map(String) : [];
+      return ids.includes("DISDEX_V35_STRONG_RESERVED_PENGU_V96") || ids.includes("DISDEX_V35_CORE_PLUS_PENGU_DUAL_V46");
+    }));
     const payload: ResearchDashboardPayload = {
       generatedAt: new Date().toISOString(),
       lastRunAt,

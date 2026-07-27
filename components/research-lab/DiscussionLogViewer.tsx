@@ -26,7 +26,7 @@ import type {
 import { cn } from "@/lib/utils";
 
 const REFRESH_INTERVAL_MS = 60_000;
-const MAIN_STRATEGY_ID = "WIN80_ULTRA90_TOP1_V1";
+const MAIN_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96";
 
 function isMainStrategyDiscussion(item: Pick<ResearchDiscussionIndexEntry, "title" | "topStrategyIds">) {
   return item.topStrategyIds.includes(MAIN_STRATEGY_ID)
@@ -134,7 +134,7 @@ export default function DiscussionLogViewer() {
   const [error, setError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState("");
   const [query, setQuery] = useState("");
-  const [showLegacy, setShowLegacy] = useState(false);
+
 
   const loadList = useCallback(async () => {
     try {
@@ -145,7 +145,7 @@ export default function DiscussionLogViewer() {
       setSelectedPath((current) => {
         if (current && body.items.some((item) => item.path === current)) return current;
         const latestMain = body.items.find(isMainStrategyDiscussion);
-        return latestMain?.path ?? body.latest?.path ?? null;
+        return latestMain?.path ?? null;
       });
       setError(null);
     } catch (loadError) {
@@ -183,7 +183,7 @@ export default function DiscussionLogViewer() {
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return items.filter((item) => {
-      if (!showLegacy && !isMainStrategyDiscussion(item)) return false;
+      if (!isMainStrategyDiscussion(item)) return false;
       if (dateFilter && dateKey(item.completedAt) !== dateFilter) return false;
       if (!normalizedQuery) return true;
       return [item.title, item.summary, item.decision, ...item.topStrategyIds]
@@ -191,7 +191,7 @@ export default function DiscussionLogViewer() {
         .toLowerCase()
         .includes(normalizedQuery);
     });
-  }, [dateFilter, items, query, showLegacy]);
+  }, [dateFilter, items, query]);
 
   return (
     <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
@@ -211,35 +211,8 @@ export default function DiscussionLogViewer() {
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setShowLegacy(false)}
-            className={cn(
-              "rounded-xl border px-3 py-2 text-[10px] font-bold",
-              !showLegacy
-                ? "border-gold-400/30 bg-gold-400/10 text-gold-50"
-                : "border-white/10 bg-black/20 text-white/45",
-            )}
-          >
-            メイン研究
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowLegacy(true)}
-            className={cn(
-              "rounded-xl border px-3 py-2 text-[10px] font-bold",
-              showLegacy
-                ? "border-white/20 bg-white/[0.06] text-white/75"
-                : "border-white/10 bg-black/20 text-white/45",
-            )}
-          >
-            旧ログも表示
-          </button>
-        </div>
-
         <div className="mt-3 rounded-xl border border-sky-400/15 bg-sky-500/[0.055] px-3 py-2 text-[10px] leading-5 text-sky-50/65">
-          既定表示は{MAIN_STRATEGY_ID}を直接扱う会議です。旧Champion Deepはアーカイブとしてのみ表示します。
+          既定表示はV96 Core + V52を直接扱う会議です。旧ロジックのログは表示しません。
         </div>
 
         <div className="mt-4 space-y-2">
