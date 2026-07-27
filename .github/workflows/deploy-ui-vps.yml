@@ -1,0 +1,161 @@
+name: Deploy UI to VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact 40-character commit SHA; blank uses the selected workflow ref HEAD
+        required: false
+        type: string
+      reason:
+        description: Human-readable reason
+        required: false
+        type: string
+  push:
+    branches:
+      - master
+      - codex/research-trade-history-sync-pr98
+    paths:
+      - ops/requests/ui-deploy-request.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-vps-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy-ui:
+    name: Test, deploy, health-check and rollback UI
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 60
+    env:
+      VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+      VPS_STATE_ROOT: ${{ vars.VPS_STATE_ROOT }}
+      VPS_OPS_STATE_DIR: ${{ vars.VPS_OPS_STATE_DIR }}
+      VPS_UI_SERVICE_MANAGER: ${{ vars.VPS_UI_SERVICE_MANAGER }}
+      VPS_UI_SERVICE: ${{ vars.VPS_UI_SERVICE }}
+      VPS_TRADING_SERVICE_MANAGER: ${{ vars.VPS_TRADING_SERVICE_MANAGER }}
+      VPS_TRADING_SERVICE: ${{ vars.VPS_TRADING_SERVICE }}
+      VPS_UI_HEALTH_URL: ${{ vars.VPS_UI_HEALTH_URL }}
+      VPS_API_HEALTH_URL: ${{ vars.VPS_API_HEALTH_URL }}
+      VPS_COMMAND_TIMEOUT: 35m
+    steps:
+      - name: Checkout workflow source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve fixed UI deploy request
+        id: request
+        shell: bash
+        env:
+          DISPATCH_SHA: ${{ inputs.expected_sha }}
+          DISPATCH_REASON: ${{ inputs.reason }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const eventName = process.env.GITHUB_EVENT_NAME;
+          let enabled = true;
+          let targetSha = String(process.env.DISPATCH_SHA || process.env.GITHUB_SHA).trim();
+          let reason = process.env.DISPATCH_REASON || 'manual workflow dispatch';
+          let requestId = `dispatch-${process.env.GITHUB_RUN_ID}`;
+          if (eventName === 'push') {
+            const request = JSON.parse(fs.readFileSync('ops/requests/ui-deploy-request.json', 'utf8'));
+            if (request.schemaVersion !== 1) throw new Error('unsupported UI deploy request schemaVersion');
+            if (request.targetCommit !== 'workflow-head') throw new Error('targetCommit must be workflow-head');
+            enabled = request.enabled === true;
+            targetSha = process.env.GITHUB_SHA;
+            reason = String(request.reason || 'GitHub request file').slice(0, 500);
+            requestId = String(request.requestId || '').trim();
+            if (!/^[A-Za-z0-9._:-]{3,120}$/.test(requestId)) throw new Error('invalid requestId');
+          }
+          if (!/^[0-9a-f]{40}$/.test(targetSha)) throw new Error('expected_sha must be an exact lowercase 40-character SHA');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `enabled=${enabled}\ntarget_sha=${targetSha}\nrequest_id=${requestId}\nreason=${reason.replace(/[\r\n]+/g, ' ')}\n`);
+          NODE
+
+      - name: Record disabled request
+        if: steps.request.outputs.enabled != 'true'
+        shell: bash
+        run: echo 'UI deploy request is disabled; no VPS mutation was performed.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout exact deployment SHA
+        if: steps.request.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.request.outputs.target_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare private report directories
+        if: steps.request.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          root="${RUNNER_TEMP}/disdex-ui-deploy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$root/pre" "$root/deploy" "$root/post"
+          chmod 700 "$root" "$root/pre" "$root/deploy" "$root/post"
+          echo "VPS_REPORT_ROOT=$root" >> "$GITHUB_ENV"
+
+      - name: Pre-deploy read-only snapshot
+        if: steps.request.outputs.enabled == 'true'
+        continue-on-error: true
+        shell: bash
+        env:
+          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/pre
+          VPS_INSPECTION_PROFILE: basic
+          VPS_STRICT_INSPECTION: 'false'
+          TARGET_COMMIT: ''
+        run: node scripts/ops/vps-inspection.mjs
+
+      - name: Install and test exact GitHub SHA
+        if: steps.request.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+          npm run build
+
+      - name: Deploy UI exact SHA with automatic rollback
+        if: steps.request.outputs.enabled == 'true'
+        shell: bash
+        env:
+          TARGET_COMMIT: ${{ steps.request.outputs.target_sha }}
+          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/deploy
+        run: bash scripts/ops/vps-deploy-ui.sh
+
+      - name: Post-deploy read-only snapshot
+        if: always() && steps.request.outputs.enabled == 'true'
+        continue-on-error: true
+        shell: bash
+        env:
+          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/post
+          VPS_INSPECTION_PROFILE: basic
+          VPS_STRICT_INSPECTION: 'false'
+          TARGET_COMMIT: ${{ steps.request.outputs.target_sha }}
+        run: node scripts/ops/vps-inspection.mjs
+
+      - name: Publish deployment summary
+        if: always() && steps.request.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          for report in \
+            "${VPS_REPORT_ROOT}/pre/vps-inspection.md" \
+            "${VPS_REPORT_ROOT}/deploy/ui-deploy.md" \
+            "${VPS_REPORT_ROOT}/post/vps-inspection.md"; do
+            if [[ -f "$report" ]]; then
+              cat "$report" >> "$GITHUB_STEP_SUMMARY"
+              printf '\n---\n' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Upload sanitized UI deployment artifact
+        if: always() && steps.request.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vps-ui-deploy-${{ steps.request.outputs.target_sha }}-${{ github.run_number }}
+          path: ${{ env.VPS_REPORT_ROOT }}
+          if-no-files-found: error
+          retention-days: 14
