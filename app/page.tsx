@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import Link from "next/link";
 import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";
 
@@ -64,11 +66,29 @@ function QuickLink({
 export default function HomePage() {
   const { activeStrategies, tradeNotifications } = useSimulation();
   const { wallet } = useOperationalWallet();
+  const [v96Active, setV96Active] = useState(false);
   const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);
   const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");
   const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);
   const cashUsd = Number(usdtHolding?.usdValue || 0);
-  const isWalletRunning = wallet?.status === "running";
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const response = await fetch("/api/disdex/status", { cache: "no-store" });
+        const data = await response.json();
+        if (!cancelled) setV96Active(data.active === true);
+      } catch {
+        if (!cancelled) setV96Active(false);
+      }
+    };
+    void refresh();
+    const timer = window.setInterval(refresh, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
@@ -111,9 +131,9 @@ export default function HomePage() {
             />
             <SummaryCard
               title="Auto Trade"
-              value={isWalletRunning ? "稼働中" : "停止中"}
-              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"
-              tone={isWalletRunning ? "profit" : "loss"}
+              value={v96Active ? "稼働中" : "停止中"}
+              text={v96Active ? "Aster V96 LIVEサービスが稼働中です。" : "Aster V96 LIVEサービスは停止中です。"}
+              tone={v96Active ? "profit" : "loss"}
             />
           </div>
         </section>
