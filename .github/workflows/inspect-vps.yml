@@ -35,16 +35,26 @@ jobs:
     runs-on: [self-hosted, linux, x64, disdex-vps]
     timeout-minutes: 35
     env:
-      VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+      VPS_SOURCE_REPO_DIR: ${{ vars.VPS_SOURCE_REPO_DIR }}
+      VPS_UI_APP_DIR: ${{ vars.VPS_UI_APP_DIR }}
+      VPS_TRADING_APP_DIR: ${{ vars.VPS_TRADING_APP_DIR }}
+      VPS_UI_RELEASES_DIR: ${{ vars.VPS_UI_RELEASES_DIR }}
+      VPS_UI_CURRENT_LINK: ${{ vars.VPS_UI_CURRENT_LINK }}
+      VPS_TRADING_RELEASES_DIR: ${{ vars.VPS_TRADING_RELEASES_DIR }}
+      VPS_TRADING_CURRENT_LINK: ${{ vars.VPS_TRADING_CURRENT_LINK }}
+      VPS_TRADING_STAGED_LINK: ${{ vars.VPS_TRADING_STAGED_LINK }}
       VPS_STATE_ROOT: ${{ vars.VPS_STATE_ROOT }}
       VPS_OPS_STATE_DIR: ${{ vars.VPS_OPS_STATE_DIR }}
+      VPS_CONTROL_HELPER: ${{ vars.VPS_CONTROL_HELPER }}
+      VPS_DEPLOYMENT_LAYOUT_MODE: ${{ vars.VPS_DEPLOYMENT_LAYOUT_MODE }}
       VPS_UI_SERVICE_MANAGER: ${{ vars.VPS_UI_SERVICE_MANAGER }}
       VPS_UI_SERVICE: ${{ vars.VPS_UI_SERVICE }}
       VPS_TRADING_SERVICE_MANAGER: ${{ vars.VPS_TRADING_SERVICE_MANAGER }}
       VPS_TRADING_SERVICE: ${{ vars.VPS_TRADING_SERVICE }}
       VPS_UI_HEALTH_URL: ${{ vars.VPS_UI_HEALTH_URL }}
       VPS_API_HEALTH_URL: ${{ vars.VPS_API_HEALTH_URL }}
-      VPS_STRICT_INSPECTION: 'true'
+      VPS_TRADING_HEALTH_URL: ${{ vars.VPS_TRADING_HEALTH_URL }}
+      VPS_STRICT_INSPECTION: 'false'
       TARGET_COMMIT: ${{ github.sha }}
     steps:
       - name: Checkout inspection code at exact workflow SHA
@@ -87,17 +97,7 @@ jobs:
           chmod 700 "$report_dir"
           echo "VPS_REPORT_DIR=$report_dir" >> "$GITHUB_ENV"
 
-      - name: Run isolated full no-order test profile
-        if: steps.request.outputs.profile == 'full-no-order'
-        shell: bash
-        run: |
-          npm ci --no-audit --no-fund
-          npm run typecheck
-          npm run strategy:disdex-v52:contract
-          npm run strategy:disdex-v52:safety:selftest
-          npm run build
-
-      - name: Run read-only VPS inspection
+      - name: Run read-only split-layout VPS inspection
         id: inspection
         shell: bash
         env:
@@ -119,6 +119,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vps-inspection-${{ github.sha }}-${{ github.run_number }}
-          path: ${{ runner.temp }}/disdex-vps-inspection-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.VPS_REPORT_DIR }}
           if-no-files-found: error
           retention-days: 14

@@ -1,0 +1,14 @@
+module.exports = {
+  apps: [
+    {
+      name: "ai-dex-manager-ui",
+      cwd: "/home/deploy/disdex-ui/current",
+      script: "/usr/bin/npm",
+      args: "run start -- -p 3001",
+      interpreter: "/usr/bin/node",
+      exec_mode: "fork",
+      watch: false,
+      autorestart: true,
+    },
+  ],
+};

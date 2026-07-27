@@ -1,0 +1,6 @@
+# Install as:
+# /etc/systemd/system/disdex-v96-v52-live.service.d/20-atomic-release.conf
+# Then run systemctl daemon-reload. Do not restart until the operator explicitly approves it.
+
+[Service]
+WorkingDirectory=/home/deploy/disdex-trading/current

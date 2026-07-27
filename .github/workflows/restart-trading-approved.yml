@@ -25,14 +25,26 @@ concurrency:
 
 jobs:
   restart-trading:
-    name: Revalidate and restart the production trading daemon
+    name: Revalidate, atomically switch and restart production trading daemon
     runs-on: [self-hosted, linux, x64, disdex-vps]
-    timeout-minutes: 45
+    timeout-minutes: 60
     environment: trading-production
     env:
-      VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+      VPS_SOURCE_REPO_DIR: ${{ vars.VPS_SOURCE_REPO_DIR }}
+      VPS_UI_APP_DIR: ${{ vars.VPS_UI_APP_DIR }}
+      VPS_TRADING_APP_DIR: ${{ vars.VPS_TRADING_APP_DIR }}
+      VPS_UI_RELEASES_DIR: ${{ vars.VPS_UI_RELEASES_DIR }}
+      VPS_UI_CURRENT_LINK: ${{ vars.VPS_UI_CURRENT_LINK }}
+      VPS_TRADING_RELEASES_DIR: ${{ vars.VPS_TRADING_RELEASES_DIR }}
+      VPS_TRADING_CURRENT_LINK: ${{ vars.VPS_TRADING_CURRENT_LINK }}
+      VPS_TRADING_STAGED_LINK: ${{ vars.VPS_TRADING_STAGED_LINK }}
+      VPS_TRADING_SHARED_STATE_DIR: ${{ vars.VPS_TRADING_SHARED_STATE_DIR }}
+      VPS_TRADING_SHARED_APPROVAL_DIR: ${{ vars.VPS_TRADING_SHARED_APPROVAL_DIR }}
+      VPS_TRADING_PREFLIGHT_SERVICE_TEMPLATE: ${{ vars.VPS_TRADING_PREFLIGHT_SERVICE_TEMPLATE }}
       VPS_STATE_ROOT: ${{ vars.VPS_STATE_ROOT }}
       VPS_OPS_STATE_DIR: ${{ vars.VPS_OPS_STATE_DIR }}
+      VPS_CONTROL_HELPER: ${{ vars.VPS_CONTROL_HELPER }}
+      VPS_DEPLOYMENT_LAYOUT_MODE: ${{ vars.VPS_DEPLOYMENT_LAYOUT_MODE }}
       VPS_UI_SERVICE_MANAGER: ${{ vars.VPS_UI_SERVICE_MANAGER }}
       VPS_UI_SERVICE: ${{ vars.VPS_UI_SERVICE }}
       VPS_TRADING_SERVICE_MANAGER: ${{ vars.VPS_TRADING_SERVICE_MANAGER }}
@@ -74,24 +86,24 @@ jobs:
           chmod 700 "$root" "$root/restart" "$root/post"
           echo "VPS_REPORT_ROOT=$root" >> "$GITHUB_ENV"
 
-      - name: Execute approved fail-closed restart
+      - name: Execute approved fail-closed atomic restart
         shell: bash
         env:
           EXPECTED_SHA: ${{ steps.request.outputs.expected_sha }}
           CONFIRMATION: ${{ inputs.confirmation }}
-        run: VPS_REPORT_DIR="${VPS_REPORT_ROOT}/restart" bash scripts/ops/vps-restart-trading-approved.sh
+          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/restart
+        run: bash scripts/ops/vps-restart-trading-approved.sh
 
       - name: Post-restart read-only inspection
         if: always()
         continue-on-error: true
         shell: bash
         env:
+          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/post
+          VPS_INSPECTION_PROFILE: basic
+          VPS_STRICT_INSPECTION: 'false'
           TARGET_COMMIT: ${{ steps.request.outputs.expected_sha }}
-        run: |
-          VPS_REPORT_DIR="${VPS_REPORT_ROOT}/post" \
-          VPS_INSPECTION_PROFILE=basic \
-          VPS_STRICT_INSPECTION=false \
-          node scripts/ops/vps-inspection.mjs
+        run: node scripts/ops/vps-inspection.mjs
 
       - name: Publish restart summary
         if: always()
@@ -111,6 +123,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vps-trading-restart-${{ steps.request.outputs.expected_sha }}-${{ github.run_number }}
-          path: ${{ runner.temp }}/disdex-trading-restart-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.VPS_REPORT_ROOT }}
           if-no-files-found: error
           retention-days: 30
