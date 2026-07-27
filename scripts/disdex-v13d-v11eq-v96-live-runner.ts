@@ -14,6 +14,7 @@ import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-st
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
+const STOCK_RUNNER_PATH = "scripts/disdex_v52_safe_runner.py" as const;
 
 type RunnerMode = "paper" | "live";
 type ManagedChild = { name: "crypto-v96" | "stock-v52-aster-only"; process: ChildProcess };
@@ -97,7 +98,7 @@ function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedC
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const stock = spawn(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    const stock = spawn(python, [STOCK_RUNNER_PATH, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
     return [{ name: "crypto-v96", process: crypto }, { name: "stock-v52-aster-only", process: stock }];
 }
 
@@ -156,6 +157,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         daemon,
         migrationId,
         authenticatedPreflightPassed: runnerMode === "live",
+        stockRunnerPath: STOCK_RUNNER_PATH,
         cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
         stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
         totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
@@ -194,6 +196,7 @@ function selfTest() {
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
     assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
+    assert.equal(STOCK_RUNNER_PATH, "scripts/disdex_v52_safe_runner.py");
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
     if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
     else process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = previousMode;
