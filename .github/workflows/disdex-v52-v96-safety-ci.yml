@@ -9,7 +9,7 @@ on:
 jobs:
   safety:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,5 +27,13 @@ jobs:
       - run: npm run strategy:disdex-v46:selftest
       - run: npm run strategy:disdex-v52:contract
       - run: npm run strategy:disdex-v52:safety:selftest
-      - run: python -m py_compile scripts/disdex_v13d_v11eq_stock_live_engine.py scripts/disdex_v11eq_aster_only_live_engine.py scripts/disdex_v52_aster_only_live_engine.py
+      - name: Compile V52 runtime and safety layer
+        run: >-
+          python -m py_compile
+          scripts/disdex_v13d_v11eq_stock_live_engine.py
+          scripts/disdex_v11eq_aster_only_live_engine.py
+          scripts/disdex_v52_aster_only_live_engine.py
+          scripts/disdex_v52_execution_safety_patch.py
+          scripts/disdex_v52_safe_runner.py
+          scripts/disdex-v52-safety-selftest.py
       - run: npm run build
