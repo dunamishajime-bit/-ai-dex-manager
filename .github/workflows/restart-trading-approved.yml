@@ -79,19 +79,19 @@ jobs:
         env:
           EXPECTED_SHA: ${{ steps.request.outputs.expected_sha }}
           CONFIRMATION: ${{ inputs.confirmation }}
-          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/restart
-        run: bash scripts/ops/vps-restart-trading-approved.sh
+        run: VPS_REPORT_DIR="${VPS_REPORT_ROOT}/restart" bash scripts/ops/vps-restart-trading-approved.sh
 
       - name: Post-restart read-only inspection
         if: always()
         continue-on-error: true
         shell: bash
         env:
-          VPS_REPORT_DIR: ${{ env.VPS_REPORT_ROOT }}/post
-          VPS_INSPECTION_PROFILE: basic
-          VPS_STRICT_INSPECTION: 'false'
           TARGET_COMMIT: ${{ steps.request.outputs.expected_sha }}
-        run: node scripts/ops/vps-inspection.mjs
+        run: |
+          VPS_REPORT_DIR="${VPS_REPORT_ROOT}/post" \
+          VPS_INSPECTION_PROFILE=basic \
+          VPS_STRICT_INSPECTION=false \
+          node scripts/ops/vps-inspection.mjs
 
       - name: Publish restart summary
         if: always()
@@ -111,6 +111,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vps-trading-restart-${{ steps.request.outputs.expected_sha }}-${{ github.run_number }}
-          path: ${{ env.VPS_REPORT_ROOT }}
+          path: ${{ runner.temp }}/disdex-trading-restart-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: error
           retention-days: 30
