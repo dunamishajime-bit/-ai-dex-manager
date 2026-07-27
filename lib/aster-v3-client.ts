@@ -125,6 +125,12 @@ export interface AsterOrderResponse {
     msg?: string;
 }
 
+export interface AsterUserTrade {
+    id?: number; orderId?: number; symbol: string; price?: string; qty?: string; quoteQty?: string;
+    commission?: string; commissionAsset?: string; time?: number; buyer?: boolean; maker?: boolean;
+    realizedPnl?: string; side?: AsterOrderSide;
+}
+
 export interface AsterNewMarketOrder {
     symbol: string;
     side: AsterOrderSide;
@@ -420,6 +426,10 @@ export class AsterV3Client {
             params: symbol ? { symbol } : undefined,
             signed: true,
         });
+    }
+
+    getUserTrades(symbol: string, limit = 100) {
+        return this.request<AsterUserTrade[]>({ method: "GET", path: "/fapi/v3/userTrades", params: { symbol, limit }, signed: true });
     }
 
     getOrder(symbol: string, clientOrderId: string) {
