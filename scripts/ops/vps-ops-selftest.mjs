@@ -126,12 +126,14 @@ requireMatch("scripts/ops/vps-inspection.mjs", inspection, /servicesRestarted:\s
 requireMatch("scripts/ops/vps-inspection.mjs", inspection, /executionProvenance/, "inspection must report execution provenance");
 requireMatch("scripts/ops/vps-inspection.mjs", inspection, /atomicReady/, "inspection must report atomic-layout readiness");
 
-
 const controlHelper = read("scripts/ops/root/disdex-vps-control");
 requireMatch("scripts/ops/root/disdex-vps-control", controlHelper, /UI_PROCESS="ai-dex-manager-ui"/, "UI process must be fixed in the installed helper");
 requireMatch("scripts/ops/root/disdex-vps-control", controlHelper, /TRADING_SERVICE="disdex-v96-v52-live\.service"/, "trading service must be fixed in the installed helper");
 requireMatch("scripts/ops/root/disdex-vps-control", controlHelper, /PREFLIGHT_PREFIX="disdex-v96-v52-preflight"/, "preflight template must be fixed in the installed helper");
-forbidMatch("scripts/ops/root/disdex-vps-control", controlHelper, /eval|(?:bash|sh)\s+-c/, "control helper must not execute dynamic shell text");
+requireMatch("scripts/ops/root/disdex-vps-control", controlHelper, /PM2_FIELD="\$field"\s+"\$NODE"\s+-e/, "PM2 JSON must be parsed with node -e so piped jlist data remains on stdin");
+requireMatch("scripts/ops/root/disdex-vps-control", controlHelper, /process\.stdin\.setEncoding\("utf8"\)/, "PM2 JSON parser must consume piped UTF-8 stdin");
+forbidMatch("scripts/ops/root/disdex-vps-control", controlHelper, /\|\s*"\$NODE"\s+-\s+[^\n]*<<['"]?NODE/, "node stdin must not be used for both script source and piped PM2 JSON");
+forbidMatch("scripts/ops/root/disdex-vps-control", controlHelper, /\beval\b|\b(?:bash|sh)\s+-c\b/, "control helper must not execute dynamic shell text");
 
 const preflightUnit = read("ops/systemd/disdex-v96-v52-preflight@.service");
 requireMatch("ops/systemd/disdex-v96-v52-preflight@.service", preflightUnit, /WorkingDirectory=\/home\/deploy\/disdex-trading\/releases\/%i/, "preflight unit must run the exact release instance");
