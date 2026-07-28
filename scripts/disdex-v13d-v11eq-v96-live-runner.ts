@@ -44,7 +44,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         ...process.env,
         DISDEX_V13D_V11EQ_V96_RUNNER_MODE: runnerMode,
         DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.stateRoot,
-        DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stockStateRoot,
+        DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
         DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
         DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
