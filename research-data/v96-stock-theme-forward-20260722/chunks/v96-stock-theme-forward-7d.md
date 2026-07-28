@@ -7,7 +7,7 @@ Profitability: **PRELIMINARY_FORWARD_PNL_EVALUATED_SEPARATELY**
 - REST success: 100.0000%
 - expected / observed symbols: 22 / 22
 - collector errors: 0
-- liquidation events: 0
+- liquidation events: 1
 - crypto overlap: 0
 - regular-session median spread: None
 - after-hours median spread: None
