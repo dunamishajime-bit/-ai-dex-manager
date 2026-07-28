@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import disdex_v11eq_aster_only_live_engine as legacy
+from disdex_v52_daily_loss import update_v52_strategy_daily_latch
 
 base = legacy.base
 
@@ -47,6 +48,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", 1.0)
         self.gross_tolerance = base.float_env("DISDEX_V52_GROSS_TOLERANCE", 0.03)
         self.minimum_entry_usd = base.float_env("DISDEX_V52_MIN_ENTRY_USD", 5.0)
+        self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
+        self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
 
     def _migrate_state(self) -> None:
@@ -96,6 +99,23 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if self.state.get("utcDay") != utc_day:
             equity = self.portfolio_equity()
             self.state.update({"utcDay": utc_day, "dayStartEquity": equity, "dailyLossTripped": False})
+        latch = self.state.get("v52StrategyDailyLossLatch")
+        if not isinstance(latch, dict) or latch.get("utcDay") != utc_day:
+            configured_capital = base.float_env("DISDEX_V52_STRATEGY_CAPITAL_USD", 0.0)
+            if configured_capital <= 0:
+                try:
+                    configured_capital = max(self.minimum_entry_usd, self.excess_margin_usd())
+                except Exception:
+                    configured_capital = 0.0
+            self.state["v52StrategyDailyLossLatch"] = update_v52_strategy_daily_latch(
+                previous=latch if isinstance(latch, dict) else None,
+                trades=(self.state.get("v52Ledger") or {}).get("trades", []),
+                unrealized_pnl=0.0,
+                strategy_capital_usd=configured_capital,
+                now_ms=base.now_ms(),
+                maximum_daily_loss_pct=self.max_daily_loss_pct,
+                data_available=configured_capital > 0,
+            )
         if self.state.get("nyDay") != ny_day:
             self.state.update({"nyDay": ny_day, "v11Attempted": False, "v11SignalBasis": {}, "v11SignalSelectedSymbol": None, "v11SignalAt": None, "v50SignalBasis": {}, "v50Attempted": {}, "v50CompletedTrades": 0})
         self.save()
@@ -219,7 +239,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         local = dt.datetime.now(tz=base.NY)
         next_checkpoint = local.replace(minute=30, second=0, microsecond=0) + dt.timedelta(hours=1)
         maximum_exit = min(local + dt.timedelta(hours=V50_MAX_HOLDING_HOURS), local.replace(hour=15, minute=30, second=0, microsecond=0))
-        position = {"strategy": slot, "symbol": symbol, "openedAt": base.now_ms(), "entryBasisBps": candidate["basisBps"], "signalBasisBps": candidate.get("signalBasisBps"), "asterOpenSide": side, "asterQty": fill.executed_qty, "asterEntryPrice": fill.average_price or price, "targetGross": target_gross, "route": candidate.get("route")}
+        position = {"strategy": slot, "positionId": client, "entryClientOrderId": client, "symbol": symbol, "openedAt": base.now_ms(), "entryBasisBps": candidate["basisBps"], "signalBasisBps": candidate.get("signalBasisBps"), "asterOpenSide": side, "asterQty": fill.executed_qty, "asterEntryPrice": fill.average_price or price, "entryCommission": (fill.executed_qty * (fill.average_price or price)) * self.aster_taker_fee_bps / 10000.0, "targetGross": target_gross, "route": candidate.get("route")}
         if slot == V50_SLOT:
             position.update({"checksCompleted": 0, "nextCheckpointAt": int(next_checkpoint.timestamp() * 1000), "maximumExitAt": int(maximum_exit.timestamp() * 1000)})
         self.positions()[slot] = position
@@ -248,6 +268,11 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             if market.fill_ratio < 0.99:
                 self.activate_kill_switch(f"{slot} close did not fully complete")
                 raise RuntimeError(f"{slot} close incomplete")
+        exit_price = fill.average_price or price
+        direction = 1.0 if open_side == "BUY" else -1.0
+        gross_pnl = (exit_price - base.finite(position.get("asterEntryPrice"))) * quantity * direction
+        commission = base.finite(position.get("entryCommission")) + (exit_price * quantity * self.aster_taker_fee_bps / 10000.0)
+        self._v52_ledger().append({"strategyId": slot, "symbol": symbol, "side": "LONG" if direction > 0 else "SHORT", "entryAt": position.get("openedAt"), "exitAt": base.now_ms(), "realizedPnl": gross_pnl - commission, "unrealizedPnl": 0.0, "commission": commission, "funding": 0.0, "deposits": 0.0, "withdrawals": 0.0, "unattributedDifference": 0.0, "clientOrderId": client, "tradeId": client, "positionId": position.get("positionId"), "exitReason": reason})
         self.positions().pop(slot, None)
         if slot == V50_SLOT:
             self.state["v50CompletedTrades"] = int(self.state.get("v50CompletedTrades", 0)) + 1
@@ -341,12 +366,75 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.save()
         self.log("v50-checkpoint-hold", symbol=symbol, basisBps=basis, checksCompleted=checks)
 
+    def _v52_unrealized_pnl(self) -> float:
+        if not self.live:
+            return 0.0
+        marks = {str(row.get("symbol") or ""): row for row in self.aster.positions()}
+        total = 0.0
+        for position in self.positions().values():
+            symbol = base.ASTER_SYMBOL[str(position["symbol"])]
+            row = marks.get(symbol) or {}
+            mark = base.finite(row.get("markPrice") or row.get("entryPrice"))
+            entry = base.finite(position.get("asterEntryPrice"))
+            qty = base.finite(position.get("asterQty"))
+            direction = 1.0 if position.get("asterOpenSide") == "BUY" else -1.0
+            total += (mark - entry) * qty * direction
+        return total
+
+    def _v52_ledger(self) -> list:
+        ledger = self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
+        if ledger.get("strategyId") != STRATEGY_ID or not isinstance(ledger.get("trades"), list):
+            raise RuntimeError("V52 PnL ledger is invalid")
+        return ledger["trades"]
+
+    def enforce_daily_loss(self) -> bool:
+        latch = self.state.get("v52StrategyDailyLossLatch")
+        if not isinstance(latch, dict):
+            latch = None
+        try:
+            capital = base.float_env("DISDEX_V52_STRATEGY_CAPITAL_USD", 0.0)
+            if capital <= 0:
+                capital = max(self.minimum_entry_usd, self.excess_margin_usd())
+            next_latch = update_v52_strategy_daily_latch(
+                previous=latch,
+                trades=self._v52_ledger(),
+                unrealized_pnl=self._v52_unrealized_pnl(),
+                strategy_capital_usd=capital,
+                now_ms=base.now_ms(),
+                maximum_daily_loss_pct=self.max_daily_loss_pct,
+                data_available=capital > 0,
+            )
+        except Exception as error:
+            next_latch = {
+                "latchName": "v52StrategyDailyLossLatch",
+                "utcDay": dt.datetime.now(tz=base.UTC).date().isoformat(),
+                "strategyStartCapitalUsd": 0.0,
+                "realizedPnl": 0.0,
+                "unrealizedPnl": 0.0,
+                "commission": 0.0,
+                "funding": 0.0,
+                "deposits": 0.0,
+                "withdrawals": 0.0,
+                "unattributedDifference": 0.0,
+                "lossUsd": 0.0,
+                "lossPct": 0.0,
+                "lossLimitUsd": 0.0,
+                "tripped": True,
+                "failClosed": True,
+                "tripReason": f"V52 PnL API failure: {error}",
+                "lastCheckedAt": base.now_ms(),
+            }
+        self.state["v52StrategyDailyLossLatch"] = next_latch
+        self.save()
+        return bool(next_latch.get("tripped") or next_latch.get("failClosed"))
+
     def tick(self) -> None:
         self.reset_days()
         kill = self.kill_switch()
         if kill:
             self.flatten_all(str(kill.get("reason") or "KILL_SWITCH")); return
-        self.enforce_daily_loss()
+        if self.enforce_daily_loss():
+            return
         if self.kill_switch():
             self.flatten_all("DAILY_LOSS"); return
         self.update_history()

@@ -59,7 +59,7 @@ export const DISDEX_V96_LIVE_PROMOTION = {
     maximumOverrideValidityHours: 72,
     maximumOverridePenguGross: 0.15,
     maximumPortfolioGross: 2,
-    maximumDailyLossPct: 2,
+    maximumDailyLossPct: 5,
     requireAbsoluteOrPercentageDailyLossLimit: true,
     killSwitchAction: "FLATTEN_MANAGED",
     killSwitchFailClosed: true,
@@ -85,7 +85,7 @@ export const DISDEX_V96_RUNTIME = {
     executionParityStatus: DISDEX_V96_EXECUTION_PARITY.status,
     coreExecutionParity: DISDEX_V96_EXECUTION_PARITY.corePort,
     operatorOverrideStatus: "IMPLEMENTED_REQUIRED_WHEN_FORWARD_NOT_APPROVED",
-    dailyLossLimitStatus: "IMPLEMENTED_MAX_2_PERCENT",
+    dailyLossLimitStatus: "IMPLEMENTED_PORTFOLIO_MAX_5_PERCENT",
     killSwitchStatus: "IMPLEMENTED_FLATTEN_MANAGED_REDUCE_ONLY",
     liveBlockReason: "LIVE requires fresh execution parity and a fresh exact-commit Operator Override for the Volume50/Turnover7.5 configuration, daily loss controls, Kill Switch configuration, credentials, migrated state when positions are retained, and explicit service handoff.",
 } as const;

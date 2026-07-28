@@ -69,7 +69,7 @@ function override(input: Partial<Omit<DisDexV96OperatorOverrideApproval, "artifa
         forwardEvidenceBypassAccepted: true,
         initialPenguGrossCap: 0.15,
         maximumPortfolioGross: 2,
-        maximumDailyLossPct: 2,
+        maximumDailyLossPct: 5,
         maximumDailyLossUsd: 50,
         acknowledgement: "I_APPROVE_DISDEX_V96_OPERATOR_CONTROLLED_LIVE",
         ...input,
@@ -118,7 +118,7 @@ async function main() {
     assert.equal(DISDEX_V96_EXECUTION_PARITY.corePort, "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS");
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverrideValidityHours, 72);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 0.15);
-    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 2);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.killSwitchAction, "FLATTEN_MANAGED");
 
     const allocation = allocateDisDexV96ReservedPengu({
@@ -215,30 +215,30 @@ async function main() {
 
     const startRisk = updateDisDexV96DailyRisk({
         equity: 1000,
-        maximumDailyLossPct: 2,
+        maximumDailyLossPct: 5,
         maximumDailyLossUsd: 50,
         now: NOW,
     });
-    close(startRisk.lossLimitUsd, 20);
+    close(startRisk.lossLimitUsd, 50);
     assert.equal(startRisk.tripped, false);
     const trip = updateDisDexV96DailyRisk({
         previous: startRisk,
-        equity: 980,
-        maximumDailyLossPct: 2,
+        equity: 950,
+        maximumDailyLossPct: 5,
         maximumDailyLossUsd: 50,
         now: NOW + HOUR,
     });
     assert.equal(trip.tripped, true);
-    close(trip.lossPct, 2);
+    close(trip.lossPct, 5);
     const nextDay = updateDisDexV96DailyRisk({
         previous: trip,
         equity: 990,
-        maximumDailyLossPct: 2,
+        maximumDailyLossPct: 5,
         maximumDailyLossUsd: 50,
         now: NOW + 24 * HOUR,
     });
-    assert.equal(nextDay.tripped, true);
-    assert.equal(nextDay.trippedAt, trip.trippedAt);
+    assert.equal(nextDay.tripped, false);
+    assert.equal(nextDay.resetReason, "UTC_DAY_ROLLOVER");
 
     const fakeExecutor: DirectTradeExecutor = {
         getAccountSnapshot: async () => { throw new Error("unused"); },

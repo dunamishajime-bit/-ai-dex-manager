@@ -40,6 +40,8 @@ export interface DisDexV96DailyRiskState {
     trippedAt?: number;
     tripReason?: string;
     lastCheckedAt: number;
+    latchName?: "portfolioDailyLossLatch";
+    resetReason?: "UTC_DAY_ROLLOVER" | "INITIALIZED" | "TRIPPED";
 }
 
 export interface DisDexV96OperatorOverrideResult {
@@ -152,6 +154,24 @@ export function updateDisDexV96DailyRisk(input: {
     const now = input.now ?? Date.now();
     const day = utcDay(now);
     const equity = Math.max(0, finite(input.equity));
+    const dayChanged = Boolean(input.previous && input.previous.utcDay !== day);
+    if (dayChanged) {
+        return {
+            utcDay: day,
+            dayStartEquity: equity,
+            lastEquity: equity,
+            lossUsd: 0,
+            lossPct: 0,
+            lossLimitUsd: Math.min(
+                equity * Math.max(0, finite(input.maximumDailyLossPct)) / 100,
+                input.maximumDailyLossUsd && input.maximumDailyLossUsd > 0 ? input.maximumDailyLossUsd : Number.POSITIVE_INFINITY,
+            ),
+            tripped: false,
+            lastCheckedAt: now,
+            latchName: "portfolioDailyLossLatch",
+            resetReason: "UTC_DAY_ROLLOVER",
+        };
+    }
     if (input.previous?.tripped) {
         const lossUsd = Math.max(input.previous.lossUsd, input.previous.dayStartEquity - equity, 0);
         const lossPct = input.previous.dayStartEquity > 0
@@ -159,11 +179,12 @@ export function updateDisDexV96DailyRisk(input: {
             : input.previous.lossPct;
         return {
             ...input.previous,
+            latchName: "portfolioDailyLossLatch",
             lastEquity: equity,
             lossUsd,
             lossPct,
             tripped: true,
-            tripReason: input.previous.tripReason || "V96 daily loss trip remains latched until manual review.",
+            tripReason: input.previous.tripReason || "V96 portfolio daily loss trip remains latched until manual review.",
             lastCheckedAt: now,
         };
     }
