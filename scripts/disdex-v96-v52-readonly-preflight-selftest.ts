@@ -8,15 +8,10 @@ async function main() {
     for (const forbidden of ["mkdir(", "writeFile(", "appendFile(", "rename(", "unlink(", "save(", "placeMarketOrder", "placeLimitOrder", "cancelAll"]) {
         assert.equal(source.includes(forbidden), false, `read-only preflight contains forbidden operation: ${forbidden}`);
     }
+    assert.match(source, /readOptionalApproval/);
+    assert.match(source, /forwardEvidenceApplicable/);
     await assert.rejects(() => readStateSummary(resolve(".runtime-state/does-not-exist/runner-live.json"), "missing"), /READ_ONLY_PREFLIGHT_STATE_MISSING/);
-    console.log(JSON.stringify({
-        status: "DISDEX_V96_V52_READONLY_PREFLIGHT_SELFTEST_OK",
-        mkdir: false,
-        stateWrite: false,
-        rolloverSave: false,
-        missingState: "FAIL_CLOSED",
-        ordersSent: 0,
-    }));
+    console.log(JSON.stringify({ status: "DISDEX_V96_V52_READONLY_PREFLIGHT_SELFTEST_OK", mkdir: false, stateWrite: false, rolloverSave: false, missingState: "FAIL_CLOSED", ordersSent: 0, forwardEvidenceBypass: "OPERATOR_OVERRIDE_ONLY" }));
 }
 
 main().catch((error) => {

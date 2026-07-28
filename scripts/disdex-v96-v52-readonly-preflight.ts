@@ -37,11 +37,9 @@ function statePaths(env: NodeJS.ProcessEnv = process.env) {
     const killSwitch = resolve(env.DISDEX_V96_KILL_SWITCH_FILE || `${combinedRoot}/kill-switch.json`);
     return {
         combinedRoot,
-        cryptoRoot,
-        stockRoot,
-        killSwitch,
         cryptoState: resolve(cryptoRoot, "runner-live.json"),
         stockState: resolve(stockRoot, "runner-live.json"),
+        killSwitch,
     };
 }
 
@@ -54,12 +52,8 @@ async function readJson<T>(path: string, label: string): Promise<T> {
 export async function readStateSummary(path: string, label: string): Promise<ReadOnlyStateSummary> {
     const state = await readJson<Record<string, unknown>>(path, label);
     const dailyRisk = state.dailyRisk && typeof state.dailyRisk === "object" ? state.dailyRisk as Record<string, unknown> : {};
-    const portfolioLatch = state.portfolioDailyLossLatch && typeof state.portfolioDailyLossLatch === "object"
-        ? state.portfolioDailyLossLatch as Record<string, unknown>
-        : {};
-    const v52Latch = state.v52StrategyDailyLossLatch && typeof state.v52StrategyDailyLossLatch === "object"
-        ? state.v52StrategyDailyLossLatch as Record<string, unknown>
-        : {};
+    const portfolioLatch = state.portfolioDailyLossLatch && typeof state.portfolioDailyLossLatch === "object" ? state.portfolioDailyLossLatch as Record<string, unknown> : {};
+    const v52Latch = state.v52StrategyDailyLossLatch && typeof state.v52StrategyDailyLossLatch === "object" ? state.v52StrategyDailyLossLatch as Record<string, unknown> : {};
     return {
         path,
         exists: true,
@@ -75,6 +69,16 @@ async function readApproval<T>(path: string | undefined, label: string) {
     return readJson<T>(resolve(path), label);
 }
 
+async function readOptionalApproval<T>(path: string | undefined) {
+    if (!path) return undefined;
+    try {
+        return await readJson<T>(resolve(path), "optional-forward-evidence");
+    } catch (error) {
+        if (error instanceof Error && error.message === "READ_ONLY_PREFLIGHT_STATE_MISSING:optional-forward-evidence") return undefined;
+        throw error;
+    }
+}
+
 export async function runReadOnlyPreflight() {
     const paths = statePaths();
     const before = {
@@ -82,7 +86,7 @@ export async function runReadOnlyPreflight() {
         stock: await readStateSummary(paths.stockState, "stock"),
     };
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
-        readApproval<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE, "forward-evidence"),
+        readOptionalApproval<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
         readApproval<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE, "execution-parity"),
         readApproval<DisDexV96OperatorOverrideApproval>(process.env.DISDEX_V96_OPERATOR_OVERRIDE_FILE, "operator-override"),
     ]);
@@ -104,26 +108,20 @@ export async function runReadOnlyPreflight() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-ReadOnly-LIVE-Preflight/1.0",
+        userAgent: "DisDex-ReadOnly-LIVE-Preflight/1.1",
     });
     if (!client.hasTradingCredentials()) throw new Error("READ_ONLY_PREFLIGHT_ASTER_CREDENTIALS_MISSING");
-    const [ping, balances, positions, openOrders] = await Promise.all([
-        client.ping(),
-        client.getBalances(),
-        client.getPositions(),
-        client.getOpenOrders(),
-    ]);
+    const [ping, balances, positions, openOrders] = await Promise.all([client.ping(), client.getBalances(), client.getPositions(), client.getOpenOrders()]);
     void ping;
     if (!Array.isArray(positions) || positions.length === 0) throw new Error("READ_ONLY_PREFLIGHT_ONE_WAY_UNVERIFIED");
-    const nonOneWay = positions.filter((row) => String(row.positionSide || "").toUpperCase() !== "BOTH");
-    if (nonOneWay.length) throw new Error("READ_ONLY_PREFLIGHT_HEDGE_MODE");
+    if (positions.some((row) => String(row.positionSide || "").toUpperCase() !== "BOTH")) throw new Error("READ_ONLY_PREFLIGHT_HEDGE_MODE");
     const managedPositions = positions.filter((row) => MANAGED_SYMBOLS.includes(String(row.symbol).toUpperCase() as typeof MANAGED_SYMBOLS[number]) && Math.abs(Number(row.positionAmt) || 0) > 1e-12);
     if (!Array.isArray(openOrders)) throw new Error("READ_ONLY_PREFLIGHT_OPEN_ORDERS_UNAVAILABLE");
     if (!Array.isArray(balances)) throw new Error("READ_ONLY_PREFLIGHT_BALANCE_UNAVAILABLE");
 
-    const nowUtcDay = new Date().toISOString().slice(0, 10);
+    const currentUtcDay = new Date().toISOString().slice(0, 10);
     const savedUtcDay = before.stock.utcDay || before.crypto.utcDay;
-    const rolloverRequired = Boolean(savedUtcDay && savedUtcDay !== nowUtcDay);
+    const rolloverRequired = Boolean(savedUtcDay && savedUtcDay !== currentUtcDay);
     const rolloverWouldTrip = before.stock.tripped || before.crypto.tripped;
     const after = {
         crypto: await readStateSummary(paths.cryptoState, "crypto-after"),
@@ -142,25 +140,24 @@ export async function runReadOnlyPreflight() {
         balancesRead: true,
         killSwitchActive: false,
         operatorOverrideApproved: gate.operatorOverrideApproved,
+        forwardEvidenceApplicable: Boolean(forwardEvidence),
+        forwardEvidenceApproved: gate.forwardEvidenceApproved,
         v96DailyLossLimitPct: DISDEX_V96_RUNTIME.maximumDailyLossPct,
         v52DailyLossLimitPct: 3.5,
         statePaths: { combinedRoot: paths.combinedRoot, crypto: paths.cryptoState, stock: paths.stock },
-        currentUtcDay: nowUtcDay,
+        currentUtcDay,
         savedUtcDay,
         rolloverRequired,
         rolloverWouldTrip,
         resetReasonPlanned: rolloverRequired ? "UTC_DAY_ROLLOVER" : undefined,
         stateChanged: false,
         approvalChanged: false,
-        restartPermission: rolloverRequired ? "BLOCKED_UNTIL_FORMAL_ROLLOVER" : "PERMITTED_ONLY_IF_OTHER_GATES_PASS",
     };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-    runReadOnlyPreflight()
-        .then((result) => console.log(JSON.stringify(result)))
-        .catch((error) => {
-            console.error(JSON.stringify({ status: "DISDEX_V96_V52_READONLY_PREFLIGHT_FAIL_CLOSED", message: error instanceof Error ? error.message : String(error), ordersSent: false, stateChanged: false, approvalChanged: false }));
-            process.exitCode = 1;
-        });
+    runReadOnlyPreflight().then((result) => console.log(JSON.stringify(result))).catch((error) => {
+        console.error(JSON.stringify({ status: "DISDEX_V96_V52_READONLY_PREFLIGHT_FAIL_CLOSED", message: error instanceof Error ? error.message : String(error), ordersSent: false, stateChanged: false, approvalChanged: false }));
+        process.exitCode = 1;
+    });
 }
