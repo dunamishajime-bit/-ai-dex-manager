@@ -7,8 +7,8 @@
     "modes": {
       "full": 1
     },
-    "eventObservations": 33,
-    "uniqueEvents": 33,
+    "eventObservations": 35,
+    "uniqueEvents": 35,
     "parseErrors": []
   },
   "sources": {
@@ -47,14 +47,14 @@
   },
   "events": {
     "bySource": {
-      "GOOGLE_NEWS_RSS": 11,
+      "GOOGLE_NEWS_RSS": 13,
       "FEDERAL_RESERVE_FOMC_CALENDAR": 2,
       "NASDAQ_EARNINGS_CALENDAR": 8,
       "BEA_OFFICIAL_RELEASE_SCHEDULE": 5,
       "BLS_OFFICIAL_SCHEDULE_FROZEN": 7
     },
     "byType": {
-      "COMPANY_NEWS_HEADLINE": 11,
+      "COMPANY_NEWS_HEADLINE": 13,
       "FOMC_MEETING_DECISION_WINDOW": 2,
       "EARNINGS_SCHEDULED": 8,
       "MACRO_RELEASE_SCHEDULED": 12
@@ -62,17 +62,18 @@
     "bySymbol": {
       "QCOMUSDT": 4,
       "DRAMUSDT": 1,
+      "AVGOUSDT": 1,
       "SNDKUSDT": 2,
       "ARMUSDT": 3,
       "INTCUSDT": 4,
+      "AMDUSDT": 2,
       "METAUSDT": 1,
       "MSFTUSDT": 1,
       "AMZNUSDT": 1,
-      "PLTRUSDT": 1,
-      "AMDUSDT": 1
+      "PLTRUSDT": 1
     },
     "riskHints": {
-      "EARNINGS": 19,
+      "EARNINGS": 21,
       "MACRO_EVENT": 14
     },
     "missingPublishedOrEffectiveTime": [],
@@ -85,8 +86,8 @@
         "headline": "Is Qualcomm Stock a Buy Ahead of July 29 Q3 Earnings? - 24/7 Wall St.",
         "publishedAt": "2026-07-27T18:03:03Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -100,8 +101,8 @@
         "headline": "Consumer Price Index for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-12T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -115,8 +116,8 @@
         "headline": "Arm Holdings Earnings Preview: AI Optimism Faces Its Next Big Test - Barchart.com",
         "publishedAt": "2026-07-27T15:50:31Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -130,8 +131,8 @@
         "headline": "Arm Holdings (ARM) Could Be 40% Undervalued As Earnings Near - Yahoo Finance",
         "publishedAt": "2026-07-27T21:09:18Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -145,8 +146,8 @@
         "headline": "Personal Income and Outlays, July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-26T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -160,8 +161,8 @@
         "headline": "U.S. International Trade in Goods and Services, June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-04T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -175,8 +176,8 @@
         "headline": "SNDK scheduled earnings on 2026-08-05 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-08-05T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -190,8 +191,23 @@
         "headline": "DRAM ETF braces for key Samsung, SK Hynix, Kioxia, Seagate earnings - Invezz",
         "publishedAt": "2026-07-27T13:31:11Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "3dfbad64fc5071d55375f3dd",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "AMDUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Wedbush Tweaks AMD Stock Price Target Ahead of Earnings - Yahoo Finance",
+        "publishedAt": "2026-07-27T16:50:26Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -205,8 +221,8 @@
         "headline": "PLTR scheduled earnings on 2026-08-03 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-08-03T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -220,8 +236,8 @@
         "headline": "FOMC meeting 2026-09-15 through 2026-09-16",
         "publishedAt": null,
         "effectiveAt": "2026-09-16T18:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -235,8 +251,23 @@
         "headline": "5-star analyst aggressively resets Intel stock price target after earnings - thestreet.com",
         "publishedAt": "2026-07-27T21:49:26Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "57d6f1a22eaa962a6ad8c899",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "AVGOUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Broadcom's Quarterly Earnings Preview: What You Need to Know - Barchart.com",
+        "publishedAt": "2026-07-27T13:45:11Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -250,8 +281,8 @@
         "headline": "Personal Income and Outlays, June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -265,8 +296,8 @@
         "headline": "MSFT scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -280,8 +311,8 @@
         "headline": "Employment Cost Index for Second Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-31T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -295,8 +326,8 @@
         "headline": "Intel: The Pullback Creates A Stronger Entry Point After Q2 Earnings (NASDAQ:INTC) - Seeking Alpha",
         "publishedAt": "2026-07-27T19:34:33Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -310,8 +341,23 @@
         "headline": "Is Intel Stock a Buy After Its Latest Earnings Report? - The Motley Fool",
         "publishedAt": "2026-07-27T16:33:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "observationCount": 1,
+        "riskHints": [
+          "EARNINGS"
+        ]
+      },
+      {
+        "eventId": "7f0f0e8eb04694bccc2b4174",
+        "source": "GOOGLE_NEWS_RSS",
+        "symbol": "QCOMUSDT",
+        "eventType": "COMPANY_NEWS_HEADLINE",
+        "headline": "Qualcomm (QCOM) Reports Earnings Tomorrow: What To Expect - StockStory",
+        "publishedAt": "2026-07-28T03:59:43Z",
+        "effectiveAt": null,
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -325,8 +371,8 @@
         "headline": "ARM scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -340,8 +386,8 @@
         "headline": "Productivity and Costs (P) for Second Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-06T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -355,8 +401,8 @@
         "headline": "Qualcomm Earnings Preview: Is the Handset Trough Finally Here? - Moomoo",
         "publishedAt": "2026-07-27T03:18:40Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -370,8 +416,8 @@
         "headline": "GDP (Advance Estimate), 2nd Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -385,8 +431,8 @@
         "headline": "GDP (Second Estimate) and Corporate Profits, 2nd Quarter 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-26T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -400,8 +446,8 @@
         "headline": "Sandisk Slides as Memory-Sector Weakness and Pre-Earnings Caution Weigh on Shares - Quiver Quantitative",
         "publishedAt": "2026-07-27T14:53:00Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -415,8 +461,8 @@
         "headline": "Employment Situation for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-07T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -430,8 +476,8 @@
         "headline": "AMZN scheduled earnings on 2026-07-30 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-30T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -445,8 +491,8 @@
         "headline": "META scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -460,8 +506,8 @@
         "headline": "AMD scheduled earnings on 2026-08-04 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-08-04T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -475,23 +521,8 @@
         "headline": "Intel: 60x Earnings Is Too Much For An Unfinished Turnaround (NASDAQ:INTC) - Seeking Alpha",
         "publishedAt": "2026-07-27T18:30:36Z",
         "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "observationCount": 1,
-        "riskHints": [
-          "EARNINGS"
-        ]
-      },
-      {
-        "eventId": "b7e155b939276ade15bc2d2a",
-        "source": "GOOGLE_NEWS_RSS",
-        "symbol": "QCOMUSDT",
-        "eventType": "COMPANY_NEWS_HEADLINE",
-        "headline": "Qualcomm (QCOM) Reports Earnings Tomorrow: What To Expect - TradingView",
-        "publishedAt": "2026-07-28T03:22:00Z",
-        "effectiveAt": null,
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -505,8 +536,8 @@
         "headline": "QCOM scheduled earnings on 2026-07-29 time-after-hours",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T20:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "EARNINGS"
@@ -520,8 +551,8 @@
         "headline": "Producer Price Index for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-13T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -535,8 +566,8 @@
         "headline": "FOMC meeting 2026-07-28 through 2026-07-29",
         "publishedAt": null,
         "effectiveAt": "2026-07-29T18:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -550,8 +581,8 @@
         "headline": "Real Earnings for July 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-12T12:30:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
@@ -565,8 +596,8 @@
         "headline": "Job Openings and Labor Turnover Survey for June 2026",
         "publishedAt": null,
         "effectiveAt": "2026-08-04T14:00:00Z",
-        "firstFetchedAt": "2026-07-28T06:37:10.072608Z",
-        "lastFetchedAt": "2026-07-28T06:37:10.072608Z",
+        "firstFetchedAt": "2026-07-28T09:43:32.644520Z",
+        "lastFetchedAt": "2026-07-28T09:43:32.644520Z",
         "observationCount": 1,
         "riskHints": [
           "MACRO_EVENT"
