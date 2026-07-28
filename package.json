@@ -66,7 +66,9 @@
     "strategy:live:selftest": "tsx scripts/win80-ultra90-live-runner-selftest.ts && tsx scripts/aster-market-data-provider-selftest.ts",
     "strategy:executor:selftest": "tsx scripts/aster-direct-trade-executor-selftest.ts",
     "strategy:market:selftest": "tsx scripts/aster-market-data-provider-selftest.ts",
-    "strategy:live:typecheck": "tsc --noEmit -p tsconfig.live-runner.json"
+    "strategy:live:typecheck": "tsc --noEmit -p tsconfig.live-runner.json",
+    "strategy:disdex-v96-v52:preflight:readonly": "tsx scripts/disdex-v96-v52-readonly-preflight.ts",
+    "strategy:disdex-v96-v52:preflight:readonly:selftest": "tsx scripts/disdex-v96-v52-readonly-preflight-selftest.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
