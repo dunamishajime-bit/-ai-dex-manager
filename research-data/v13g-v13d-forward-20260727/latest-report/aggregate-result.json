@@ -1,7 +1,7 @@
 {
   "strategyId": "V96_STOCK_V13G_V13D_FIXED_FORWARD",
   "status": "V13G_V13D_FIXED_FORWARD_IN_PROGRESS",
-  "generatedAt": "2026-07-27T21:31:51.278124Z",
+  "generatedAt": "2026-07-28T21:34:04.375297Z",
   "configSha256": "2b4e103c01e0b386ff87146cfde01ef60c854bcb9554656a5a764d4b601a3875",
   "window": {
     "firstSession": "2026-07-27",
@@ -305,6 +305,10 @@
   "ignoredAttempts": [
     {
       "path": "/tmp/v13-dual-data/research-data/v13g-v13d-forward-20260727/chunks/2026-07-27/30282441852",
+      "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT"
+    },
+    {
+      "path": "/tmp/v13-dual-data/research-data/v13g-v13d-forward-20260727/chunks/2026-07-28/30374582600",
       "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT"
     }
   ],
