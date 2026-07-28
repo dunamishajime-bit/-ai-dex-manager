@@ -1,7 +1,7 @@
 {
   "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
   "status": "V13_FORWARD_COLLECTION_IN_PROGRESS",
-  "generatedAt": "2026-07-27T21:30:01.559683Z",
+  "generatedAt": "2026-07-28T21:32:26.594872Z",
   "configSha256": "c25dd7fa5fd53544c0c172bd8191fbad486601259434b93ea418323dea31404e",
   "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
   "window": {
@@ -240,7 +240,14 @@
       "startedAtUtc": "2026-07-27T15:57:17Z"
     }
   ],
-  "ignoredAttempts": [],
+  "ignoredAttempts": [
+    {
+      "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-07-28/OPEN_CORE/30374515267",
+      "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT",
+      "sessionDate": "2026-07-28",
+      "segment": "OPEN_CORE"
+    }
+  ],
   "safety": {
     "orderSubmissionAllowed": false,
     "productionChanged": false,
