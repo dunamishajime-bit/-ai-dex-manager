@@ -9,7 +9,7 @@ Profitability: **PRELIMINARY_FORWARD_PNL_EVALUATED_SEPARATELY**
 - collector errors: 0
 - liquidation events: 1
 - crypto overlap: 0
-- regular-session median spread: None
+- regular-session median spread: 11.913390620551558
 - after-hours median spread: None
 
 Seven days permits only preliminary Shadow PnL and execution-feasibility review. It cannot approve a trading edge.
