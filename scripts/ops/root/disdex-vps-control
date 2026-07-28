@@ -26,11 +26,14 @@ require_sha() {
 
 pm2_field() {
   local field="$1"
-  "$RUNUSER" -u "$UI_USER" -- env PM2_HOME="$UI_PM2_HOME" "$PM2" jlist | "$NODE" - "$UI_PROCESS" "$field" <<'NODE'
+  "$RUNUSER" -u "$UI_USER" -- env PM2_HOME="$UI_PM2_HOME" "$PM2" jlist |
+    UI_PROCESS="$UI_PROCESS" PM2_FIELD="$field" "$NODE" -e '
 let input = "";
+process.stdin.setEncoding("utf8");
 process.stdin.on("data", chunk => input += chunk);
 process.stdin.on("end", () => {
-  const [name, field] = process.argv.slice(2);
+  const name = process.env.UI_PROCESS || "";
+  const field = process.env.PM2_FIELD || "";
   try {
     const rows = JSON.parse(input || "[]");
     const row = rows.find(item => item?.name === name);
@@ -44,7 +47,7 @@ process.stdin.on("end", () => {
     process.exitCode = 1;
   }
 });
-NODE
+'
 }
 
 action="${1:-}"
