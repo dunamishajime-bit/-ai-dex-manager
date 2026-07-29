@@ -2,6 +2,11 @@
 name: Stage V96 V52 Release 7d565b3
 
 on:
+  push:
+    branches:
+      - ops/v96-v52-stage-7d565b3
+    paths:
+      - '.github/workflows/vps-stage-release-7d565b3.yml'
   pull_request:
     branches:
       - codex/vps-runtime-safety-sync
@@ -17,7 +22,7 @@ concurrency:
 
 jobs:
   stage:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-stage-7d565b3'
+    if: github.ref == 'refs/heads/ops/v96-v52-stage-7d565b3' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-stage-7d565b3')
     runs-on: [self-hosted, linux, x64, disdex-vps]
     timeout-minutes: 120
     env:
