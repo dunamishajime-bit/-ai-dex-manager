@@ -10,8 +10,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 }
 
 repo_root="${1:-}"
-[[ "$repo_root" == /* && -d "$repo_root/.git" ]] || {
-  printf 'usage: install-disdex-vps-control /absolute/path/to/repository\n' >&2
+[[ "$repo_root" == /* && -d "$repo_root" ]] || {
+  printf 'usage: install-disdex-vps-control /absolute/path/to/immutable-release-source\n' >&2
   exit 2
 }
 
