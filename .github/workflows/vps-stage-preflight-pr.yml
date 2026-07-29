@@ -18,13 +18,12 @@ jobs:
   stage-preflight:
     if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'codex/vps-runtime-safety-sync'
     runs-on: [self-hosted, linux, x64, disdex-vps]
-    timeout-minutes: 120
+    timeout-minutes: 20
     env:
       TARGET_SHA: ${{ github.event.pull_request.head.sha }}
       RELEASES_DIR: /home/deploy/disdex-trading/releases
       STAGED_LINK: /home/deploy/disdex-trading/staged
-      SHARED_STATE: /home/deploy/ai-dex-manager-v96-paper/.runtime-state
-      SHARED_APPROVAL: /home/deploy/ai-dex-manager-v96-paper/.runtime-approval
+      LIVE_REPO: /home/deploy/ai-dex-manager-v96-paper
     steps:
       - name: Checkout exact PR head
         uses: actions/checkout@v4
@@ -33,111 +32,41 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Inspect shared path metadata without reading contents
+      - name: Inspect runtime path metadata without reading contents
         shell: bash
         run: |
           set -Eeuo pipefail
-          for path in "$SHARED_STATE" "$SHARED_APPROVAL" "$RELEASES_DIR"; do
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
+          candidates=(
+            "$LIVE_REPO"
+            "$LIVE_REPO/.runtime-state"
+            "$LIVE_REPO/.runtime-state/disdex-v13d-v11eq-v96"
+            "$LIVE_REPO/.runtime-state/disdex-v96"
+            "$LIVE_REPO/.runtime-state/crypto-v96"
+            "$LIVE_REPO/.runtime-state/stock"
+            "$LIVE_REPO/.runtime-approval"
+            "$LIVE_REPO/.runtime-approval/disdex-v96-operator-override.json"
+            "$LIVE_REPO/.runtime-approval/disdex-v96-execution-parity.json"
+            "$RELEASES_DIR"
+            "/home/deploy/disdex-ops"
+          )
+          for path in "${candidates[@]}"; do
             if [[ -e "$path" || -L "$path" ]]; then
               stat -c 'path=%n type=%F owner=%U:%G mode=%a' "$path"
             else
               printf 'path=%s exists=false\n' "$path"
             fi
           done
-          find /home/deploy/ai-dex-manager-v96-paper -maxdepth 2 \
-            \( -iname '*approval*' -o -iname '*override*' -o -iname '*parity*' -o -iname '*evidence*' \) \
-            -printf 'candidate=%p type=%y owner=%u:%g mode=%m\n' 2>/dev/null | head -100
-
-      - name: Verify stopped service and prepare exact release
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
-          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
-          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
-          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
-          test -d "$SHARED_STATE"
-
-          release="$RELEASES_DIR/$TARGET_SHA"
-          if [[ -e "$release" ]]; then
-            test -d "$release"
-            test "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" = "$TARGET_SHA"
-          else
-            tmp="$RELEASES_DIR/.tmp-$TARGET_SHA-$GITHUB_RUN_ID"
-            rm -rf "$tmp"
-            mkdir -p "$tmp"
-            git archive --format=tar HEAD | tar -xf - -C "$tmp"
-            printf '%s\n' "$TARGET_SHA" > "$tmp/.disdex-release-sha"
-            chmod 600 "$tmp/.disdex-release-sha"
-            mv "$tmp" "$release"
-          fi
-
-          if [[ ! -e "$release/.runtime-state" ]]; then ln -s "$SHARED_STATE" "$release/.runtime-state"; fi
-          test "$(readlink -f "$release/.runtime-state")" = "$(readlink -f "$SHARED_STATE")"
-          if [[ -e "$SHARED_APPROVAL" || -L "$SHARED_APPROVAL" ]]; then
-            if [[ ! -e "$release/.runtime-approval" ]]; then ln -s "$SHARED_APPROVAL" "$release/.runtime-approval"; fi
-            test "$(readlink -f "$release/.runtime-approval")" = "$(readlink -f "$SHARED_APPROVAL")"
-          else
-            mkdir -p "$release/.runtime-approval"
-            chmod 700 "$release/.runtime-approval"
-          fi
-          echo "RELEASE_DIR=$release" >> "$GITHUB_ENV"
-
-      - name: Install and validate exact release
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          cd "$RELEASE_DIR"
-          npm ci --no-audit --no-fund
-          npm run strategy:disdex-v96-v52:preflight:readonly:selftest
-          npm run strategy:disdex-v52:contract
-          npm run strategy:disdex-v96:typecheck
-          npm run strategy:disdex-v96:selftest
-          npm run strategy:disdex-v96:frequency:selftest
-          test "$(tr -d '[:space:]' < .disdex-release-sha)" = "$TARGET_SHA"
-
-      - name: Run fixed read-only authenticated preflight
-        id: preflight
-        shell: bash
-        run: |
-          set +e
-          sudo -n /usr/local/sbin/disdex-vps-control preflight-start "$TARGET_SHA"
-          rc=$?
-          sudo -n /usr/local/sbin/disdex-vps-control preflight-log "$TARGET_SHA" > "$RUNNER_TEMP/preflight.log" 2>&1
-          {
-            echo '--- filtered preflight evidence ---'
-            grep -Ei 'PREFLIGHT|READ_ONLY|PASS|FAIL|approval|fingerprint|forward-evidence|ordersSent|openOrders|positions|kill.switch|Aster|V96|V52|ERROR' "$RUNNER_TEMP/preflight.log" | \
-              sed -E 's/(api[-_ ]?key|secret|token|password|private[-_ ]?key)[=:][^ ,;]+/\1=[REDACTED]/Ig' | tail -200
-            echo '--- end filtered evidence ---'
-          }
-          echo "preflight_rc=$rc" >> "$GITHUB_OUTPUT"
-          exit 0
-
-      - name: Stage release only when preflight passes
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          rc='${{ steps.preflight.outputs.preflight_rc }}'
-          if [[ "$rc" != "0" ]]; then
-            echo 'preflight_passed=false' >> "$GITHUB_STEP_SUMMARY"
-            echo 'staged_link_changed=false' >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-          tmp_link="${STAGED_LINK}.tmp.${GITHUB_RUN_ID}"
-          rm -f "$tmp_link"
-          ln -s "$RELEASE_DIR" "$tmp_link"
-          mv -Tf "$tmp_link" "$STAGED_LINK"
-          test "$(readlink -f "$STAGED_LINK")" = "$(readlink -f "$RELEASE_DIR")"
-          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
-          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
-          {
-            echo 'preflight_passed=true'
-            echo "staged_sha=$TARGET_SHA"
-            echo 'staged_link_changed=true'
-            echo 'live_current_changed=false'
-            echo 'service_restarted=false'
-            echo 'orders_sent=false'
-            echo 'positions_changed=false'
-            echo 'runtime_state_changed=false'
-            echo 'approval_changed=false'
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo '--- systemd unit path declarations ---'
+          systemctl cat disdex-v96-v52-live.service --no-pager | \
+            grep -E '^(WorkingDirectory|EnvironmentFile|ExecStart|StateDirectory|ReadWritePaths|ReadOnlyPaths)=' || true
+          echo '--- filtered recent failure evidence ---'
+          sudo -n /usr/local/sbin/disdex-vps-control trading-log | \
+            grep -Ei 'approval|fingerprint|forward-evidence|state|migration|preflight|failed|error|runtime.commit|operator.override' | \
+            sed -E 's/(api[-_ ]?key|secret|token|password|private[-_ ]?key)[=:][^ ,;]+/\1=[REDACTED]/Ig' | tail -120 || true
+          echo 'diagnostic_only=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'service_state=inactive' >> "$GITHUB_STEP_SUMMARY"
+          echo 'orders_sent=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'runtime_state_changed=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'approval_changed=false' >> "$GITHUB_STEP_SUMMARY"
