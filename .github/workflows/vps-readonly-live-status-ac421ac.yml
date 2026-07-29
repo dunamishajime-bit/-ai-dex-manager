@@ -1,0 +1,91 @@
+name: Read-only V96 V52 LIVE Status ac421ac
+
+on:
+  pull_request:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - '.github/workflows/vps-readonly-live-status-ac421ac.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-status-ac421ac'
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 15
+    env:
+      TARGET_SHA: ac421acb05e771afc99ed916d11948ca95370d32
+      RELEASE_DIR: /home/deploy/disdex-trading/releases/ac421acb05e771afc99ed916d11948ca95370d32
+      CONTROL: /usr/local/sbin/disdex-vps-control
+      SERVICE: disdex-v96-v52-live.service
+      KILL_SWITCH: /home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+    steps:
+      - name: Verify current LIVE status without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          state="$(sudo -n "$CONTROL" trading-state)"
+          pid="$(sudo -n "$CONTROL" trading-pid)"
+          current="$(sudo -n "$CONTROL" trading-current)"
+          restarts="$(systemctl show "$SERVICE" --property NRestarts --value)"
+          result="$(systemctl show "$SERVICE" --property Result --value)"
+          substate="$(systemctl show "$SERVICE" --property SubState --value)"
+          started="$(systemctl show "$SERVICE" --property ActiveEnterTimestamp --value)"
+
+          printf 'service_state=%s\n' "$state"
+          printf 'service_substate=%s\n' "$substate"
+          printf 'service_pid=%s\n' "$pid"
+          printf 'current_release=%s\n' "$current"
+          printf 'restart_count=%s\n' "$restarts"
+          printf 'service_result=%s\n' "$result"
+          printf 'active_since=%s\n' "$started"
+
+          test "$state" = "active"
+          test "$substate" = "running"
+          [[ "$pid" =~ ^[1-9][0-9]*$ ]]
+          test "$current" = "$RELEASE_DIR"
+          test "$restarts" = "0"
+          test "$result" = "success"
+
+          KILL_SWITCH="$KILL_SWITCH" /usr/bin/node <<'NODE'
+          const fs = require('node:fs');
+          const path = process.env.KILL_SWITCH;
+          if (!fs.existsSync(path)) {
+            console.log(JSON.stringify({ status: 'KILL_SWITCH_CLEAR', exists: false }));
+            process.exit(0);
+          }
+          const value = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (value.active === true) throw new Error(`Kill Switch active: ${value.reason || 'unknown'}`);
+          console.log(JSON.stringify({ status: 'KILL_SWITCH_CLEAR', exists: true, active: false }));
+          NODE
+
+          sudo -n "$CONTROL" trading-log | tail -300 > "$RUNNER_TEMP/live-status.log"
+          TARGET_SHA="$TARGET_SHA" LIVE_LOG="$RUNNER_TEMP/live-status.log" /usr/bin/node <<'NODE'
+          const fs = require('node:fs');
+          const log = fs.readFileSync(process.env.LIVE_LOG, 'utf8');
+          const sha = process.env.TARGET_SHA;
+          const start = log.lastIndexOf('DISDEX_V96_OPERATOR_OVERRIDE_AUDIT_SYNC_PASS_NO_ORDERS_SENT');
+          if (start < 0) throw new Error('current activation audit marker missing');
+          const current = log.slice(start);
+          if (!current.includes(`"runtimeCommitSha":"${sha}"`)) throw new Error('current runtime SHA missing');
+          if (!current.includes('DISDEX_V96_V52_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT')) throw new Error('LIVE preflight pass missing');
+          if (!current.includes('"event":"disdex-v96-v52-supervisor-start"')) throw new Error('supervisor start missing');
+          if (/DISDEX_V96_V52_READONLY_PREFLIGHT_FAIL_CLOSED|DISDEX_V96_V52_LIVE_PREFLIGHT_FAILED|disdex-v96-v52-supervisor-fail-closed-hold|disdex-v96-v52-supervisor-failed/.test(current)) {
+            throw new Error('failure marker present after current activation');
+          }
+          console.log(JSON.stringify({ status: 'CURRENT_LIVE_LOG_HEALTHY', runtimeCommitSha: sha }));
+          NODE
+
+          {
+            echo "release_sha=$TARGET_SHA"
+            echo "service_state=$state"
+            echo "service_substate=$substate"
+            echo "service_pid=$pid"
+            echo "restart_count=$restarts"
+            echo "service_result=$result"
+            echo "current_release=$current"
+            echo 'kill_switch_active=false'
+            echo 'inspection_only=true'
+          } >> "$GITHUB_STEP_SUMMARY"
