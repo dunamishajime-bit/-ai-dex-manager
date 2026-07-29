@@ -7,6 +7,11 @@ on:
       - ops/v96-v52-live-start-7d565b3
     paths:
       - '.github/workflows/vps-activate-live-7d565b3.yml'
+  pull_request:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - '.github/workflows/vps-activate-live-7d565b3.yml'
 
 permissions:
   contents: read
@@ -17,6 +22,7 @@ concurrency:
 
 jobs:
   activate:
+    if: github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-live-start-7d565b3')
     runs-on: [self-hosted, linux, x64, disdex-vps]
     timeout-minutes: 120
     env:
