@@ -1,3 +1,4 @@
+# Explicit staging request for the audited restart-safe candidate.
 name: Stage V96 V52 Release ac421ac
 
 on:
