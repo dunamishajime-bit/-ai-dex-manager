@@ -42,7 +42,6 @@
     "strategy:disdex-v96:preflight": "tsx scripts/disdex-v96-live-preflight.ts",
     "strategy:disdex-v96:state:migrate": "tsx scripts/disdex-v96-migrate-config-state.ts",
     "strategy:disdex-v96:override:create": "tsx scripts/disdex-v96-create-operator-override.ts",
-    "strategy:disdex-v96:parity:renew": "tsx scripts/disdex-v96-renew-execution-parity.ts",
     "strategy:disdex-v96:kill-switch": "tsx scripts/disdex-v96-kill-switch.ts",
     "strategy:disdex-v13d-v11eq-v96:contract:selftest": "tsx scripts/disdex-v13d-v11eq-v96-contract-selftest.ts",
     "strategy:disdex-v13d-v11eq-v96:contract:typecheck": "tsc --noEmit -p tsconfig.v13d-v11eq-router.json",
