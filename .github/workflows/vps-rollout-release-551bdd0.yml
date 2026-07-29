@@ -1,0 +1,145 @@
+name: Rollout V96 V52 Release 551bdd0
+
+on:
+  pull_request:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - '.github/workflows/vps-rollout-release-551bdd0.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-vps-rollout-551bdd0
+  cancel-in-progress: false
+
+jobs:
+  rollout:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-rollout-551bdd0'
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 150
+    env:
+      TARGET_SHA: 551bdd02069d56d76218ff80c15f172f61275b50
+      RELEASES_DIR: /home/deploy/disdex-trading/releases
+      PYTHONPATH: /home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+    steps:
+      - name: Checkout exact validated candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 551bdd02069d56d76218ff80c15f172f61275b50
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Stage immutable release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
+          release="$RELEASES_DIR/$TARGET_SHA"
+          if [[ -e "$release" ]]; then
+            test -d "$release"
+            test ! -L "$release"
+            test -f "$release/.disdex-release-sha"
+            test "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" = "$TARGET_SHA"
+          else
+            tmp="$RELEASES_DIR/.tmp-$TARGET_SHA-$GITHUB_RUN_ID"
+            rm -rf "$tmp"
+            mkdir -p "$tmp"
+            git archive --format=tar HEAD | tar -xf - -C "$tmp"
+            printf '%s\n' "$TARGET_SHA" > "$tmp/.disdex-release-sha"
+            chmod 0640 "$tmp/.disdex-release-sha"
+            mv "$tmp" "$release"
+          fi
+          echo "RELEASE_DIR=$release" >> "$GITHUB_ENV"
+
+      - name: Install dependencies and rerun release contracts
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cd "$RELEASE_DIR"
+          npm ci --no-audit --no-fund
+          bash -n scripts/ops/root/disdex-vps-control
+          bash -n scripts/ops/root/install-disdex-vps-control
+          bash -n scripts/ops/disdex-v96-v52-live.sh
+          bash -n scripts/ops/disdex-v96-v52-renew-approvals.sh
+          npm run strategy:disdex-v96-v52:preflight:readonly:selftest
+          npm run strategy:disdex-v52:contract
+          npm run strategy:disdex-v96:typecheck
+          npm run strategy:disdex-v96:selftest
+          npm run strategy:disdex-v96:frequency:selftest
+          npm run strategy:disdex-v96:execution:selftest
+          test "$(tr -d '[:space:]' < .disdex-release-sha)" = "$TARGET_SHA"
+          printf '%s\n' "$TARGET_SHA" > .disdex-release-ready
+          chmod 0640 .disdex-release-ready
+
+      - name: Renew exact-commit approvals through fixed systemd unit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
+          sudo -n /usr/local/sbin/disdex-vps-control approval-start "$TARGET_SHA"
+
+      - name: Capture approval evidence
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n /usr/local/sbin/disdex-vps-control approval-state "$TARGET_SHA" || true
+          sudo -n /usr/local/sbin/disdex-vps-control approval-log "$TARGET_SHA" | tee "$RUNNER_TEMP/approval.log"
+          grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_PASS' "$RUNNER_TEMP/approval.log"
+          grep -q "approvedCommitSha=$TARGET_SHA" "$RUNNER_TEMP/approval.log"
+          grep -q 'ordersSent=false' "$RUNNER_TEMP/approval.log"
+          grep -q 'runtimeStateChanged=false' "$RUNNER_TEMP/approval.log"
+
+      - name: Run authenticated read-only preflight
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n /usr/local/sbin/disdex-vps-control preflight-start "$TARGET_SHA"
+
+      - name: Verify read-only preflight and mark release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n /usr/local/sbin/disdex-vps-control preflight-state "$TARGET_SHA" || true
+          sudo -n /usr/local/sbin/disdex-vps-control preflight-log "$TARGET_SHA" | tee "$RUNNER_TEMP/preflight.log"
+          grep -q 'DISDEX_V96_V52_READONLY_PREFLIGHT_PASS' "$RUNNER_TEMP/preflight.log"
+          grep -q '"ordersSent":false' "$RUNNER_TEMP/preflight.log"
+          grep -q '"positionChangesSent":false' "$RUNNER_TEMP/preflight.log"
+          grep -q '"stateChanged":false' "$RUNNER_TEMP/preflight.log"
+          grep -q '"approvalChanged":false' "$RUNNER_TEMP/preflight.log"
+          grep -q '"asterAuthenticated":true' "$RUNNER_TEMP/preflight.log"
+          grep -q '"managedPositionCount":0' "$RUNNER_TEMP/preflight.log"
+          grep -q '"openOrderCount":0' "$RUNNER_TEMP/preflight.log"
+          grep -q '"killSwitchActive":false' "$RUNNER_TEMP/preflight.log"
+          grep -q '"operatorOverrideApproved":true' "$RUNNER_TEMP/preflight.log"
+          grep -q '"v96DailyLossLimitPct":5' "$RUNNER_TEMP/preflight.log"
+          grep -q '"v52DailyLossLimitPct":3.5' "$RUNNER_TEMP/preflight.log"
+          printf '%s\n' "$TARGET_SHA" > "$RELEASE_DIR/.disdex-preflight-pass"
+          chmod 0640 "$RELEASE_DIR/.disdex-preflight-pass"
+
+      - name: Atomically select current release without starting LIVE
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
+          sudo -n /usr/local/sbin/disdex-vps-control trading-switch "$TARGET_SHA"
+          test "$(sudo -n /usr/local/sbin/disdex-vps-control trading-current)" = "$RELEASE_DIR"
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
+          {
+            echo "release_sha=$TARGET_SHA"
+            echo "current_release=$RELEASE_DIR"
+            echo 'approval_renewed=true'
+            echo 'read_only_preflight_pass=true'
+            echo 'service_state=inactive'
+            echo 'service_restarted=false'
+            echo 'orders_sent=false'
+            echo 'positions_changed=false'
+            echo 'runtime_state_changed=false'
+          } >> "$GITHUB_STEP_SUMMARY"
