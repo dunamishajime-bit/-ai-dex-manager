@@ -2,7 +2,7 @@ import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
-import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
+import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import {
     assertDisDexV96LiveGates,
     type DisDexV96ExecutionParityApproval,
@@ -46,6 +46,9 @@ async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
 async function main() {
     const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
     const configMigrationMode = boolEnv("DISDEX_V96_CONFIG_MIGRATION_MODE", false);
+    const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
+    const requestedDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
+    const requestedPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
         optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
         optionalJson<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE),
@@ -58,12 +61,12 @@ async function main() {
         forwardEvidence,
         executionParity,
         operatorOverride,
+        maximumGross: requestedMaxGross,
+        maximumDailyLossPct: requestedDailyLossPct,
+        initialPenguGrossCap: requestedPenguGrossCap,
         runtimeCommitSha,
     });
-    if (gate.operatorOverrideApproved && gate.operatorOverride) {
-        const remainingMs = Date.parse(gate.operatorOverride.expiresAt) - Date.now();
-        if (remainingMs < 15 * 60_000) throw new Error("V96 Operator Override expires in less than 15 minutes.");
-    }
+
     const killSwitch = await readDisDexV96KillSwitch(process.env.DISDEX_V96_KILL_SWITCH_FILE);
     if (killSwitch?.active) throw new Error(`V96 Kill Switch is active: ${killSwitch.reason}`);
 
@@ -156,7 +159,6 @@ async function main() {
         configFingerprint: gate.configFingerprint,
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
         operatorOverrideApproved: gate.operatorOverrideApproved,
-        operatorOverrideExpiresAt: gate.operatorOverride?.expiresAt,
         operatorOverrideAuditVerified,
         initialPenguGrossCap: gate.operatorOverride?.initialPenguGrossCap,
         maximumDailyLossPct: gate.operatorOverride?.maximumDailyLossPct,

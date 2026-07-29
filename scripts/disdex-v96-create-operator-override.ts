@@ -40,10 +40,6 @@ async function main() {
     if (acknowledgement !== "I_APPROVE_DISDEX_V96_OPERATOR_CONTROLLED_LIVE") {
         throw new Error("The exact Operator Override acknowledgement is required.");
     }
-    const durationHours = numberEnv("DISDEX_V96_OPERATOR_OVERRIDE_HOURS", 24);
-    if (!(durationHours > 0 && durationHours <= DISDEX_V96_LIVE_PROMOTION.maximumOverrideValidityHours)) {
-        throw new Error(`Override validity must be between 0 and ${DISDEX_V96_LIVE_PROMOTION.maximumOverrideValidityHours} hours.`);
-    }
     const initialPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
     const maximumPortfolioGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross);
     const maximumDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
@@ -61,7 +57,6 @@ async function main() {
         throw new Error(`Daily loss limit must not exceed ${DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct}%.`);
     }
     const approvedAt = new Date();
-    const expiresAt = new Date(approvedAt.getTime() + durationHours * 3_600_000);
     const base: Omit<DisDexV96OperatorOverrideApproval, "artifactSha256"> = {
         status: "APPROVED",
         strategyId: DISDEX_V96_STRATEGY_ID,
@@ -70,7 +65,6 @@ async function main() {
         operator: required("DISDEX_V96_OPERATOR"),
         reason: required("DISDEX_V96_OPERATOR_OVERRIDE_REASON"),
         approvedAt: approvedAt.toISOString(),
-        expiresAt: expiresAt.toISOString(),
         forwardEvidenceBypassAccepted: true,
         initialPenguGrossCap,
         maximumPortfolioGross,
@@ -90,7 +84,6 @@ async function main() {
         approvedCommitSha: approval.approvedCommitSha,
         operator: approval.operator,
         approvedAt: approval.approvedAt,
-        expiresAt: approval.expiresAt,
         initialPenguGrossCap: approval.initialPenguGrossCap,
         maximumPortfolioGross: approval.maximumPortfolioGross,
         maximumDailyLossPct: approval.maximumDailyLossPct,

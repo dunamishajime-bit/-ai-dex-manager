@@ -74,8 +74,6 @@ async function main() {
     if (!gate.operatorOverrideApproved || !gate.operatorOverride) {
         throw new Error("Audit sync requires an approved exact-commit Operator Override.");
     }
-    const remainingMs = Date.parse(gate.operatorOverride.expiresAt) - Date.now();
-    if (remainingMs < 15 * 60_000) throw new Error("Operator Override expires in less than 15 minutes.");
 
     const killSwitch = await readDisDexV96KillSwitch(process.env.DISDEX_V96_KILL_SWITCH_FILE);
     if (killSwitch?.active) throw new Error(`V96 Kill Switch is active: ${killSwitch.reason}`);

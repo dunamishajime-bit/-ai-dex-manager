@@ -56,7 +56,6 @@ export const DISDEX_V96_EXECUTION_PARITY = {
 export const DISDEX_V96_LIVE_PROMOTION = {
     policyVersion: 1,
     operatorOverrideEnabled: true,
-    maximumOverrideValidityHours: 72,
     maximumOverridePenguGross: 0.15,
     maximumPortfolioGross: 2,
     maximumDailyLossPct: 5,

@@ -48,6 +48,7 @@ export interface DisDexV96PortfolioRunnerConfig {
     maximumDailyLossUsd?: number;
     killSwitchPath?: string;
     operatorOverride?: DisDexV96OperatorOverrideApproval;
+    liveGateCheck?: () => Promise<{ allowed: boolean; message?: string }>;
 }
 
 export interface DisDexV96TickResult {
@@ -220,7 +221,7 @@ export class DisDexV96PortfolioRunner {
                 artifactSha256: override.artifactSha256,
                 operator: override.operator,
                 approvedAt: override.approvedAt,
-                expiresAt: override.expiresAt,
+                ...(override.expiresAt ? { expiresAt: override.expiresAt } : {}),
                 approvedCommitSha: override.approvedCommitSha,
                 initialPenguGrossCap: override.initialPenguGrossCap,
                 maximumPortfolioGross: override.maximumPortfolioGross,
@@ -355,6 +356,10 @@ export class DisDexV96PortfolioRunner {
 
     async tick(): Promise<DisDexV96TickResult> {
         this.ensureExecutionGate();
+        if (this.dependencies.config.mode === "live" && this.dependencies.config.liveGateCheck) {
+            const gate = await this.dependencies.config.liveGateCheck();
+            if (!gate.allowed) return { status: "manual-review", message: gate.message || "V96 LIVE approval gate failed during tick." };
+        }
         const lock = await this.dependencies.lock.acquire(randomUUID());
         if (!lock) return { status: "locked", message: "Another V96 tick owns the runner lock." };
         try {

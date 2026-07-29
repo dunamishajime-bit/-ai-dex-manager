@@ -25,6 +25,7 @@ import {
 import { normalizeDisDexV96OrderQuantity } from "../lib/disdex-v96-order-quantity";
 import { createDisDexV96RunnerState, FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
 import { buildDisDexV95CoreSignal } from "../lib/disdex-v95-core-signal";
+import { buildDefaultDisDexV96RunnerConfig } from "../lib/disdex-v96-portfolio-runner";
 import type { DirectTradeExecutor } from "../lib/direct-trade-executor";
 import type { DisDexV35Candle, DisDexV35CoreSymbol } from "../lib/disdex-v35-signal-engine";
 import type { DisDexPenguV46History } from "../lib/pengu-dual-engine-v46";
@@ -65,7 +66,6 @@ function override(input: Partial<Omit<DisDexV96OperatorOverrideApproval, "artifa
         operator: "v96-selftest",
         reason: "Exercise guarded initial LIVE.",
         approvedAt: new Date(NOW - HOUR).toISOString(),
-        expiresAt: new Date(NOW + 24 * HOUR).toISOString(),
         forwardEvidenceBypassAccepted: true,
         initialPenguGrossCap: 0.15,
         maximumPortfolioGross: 2,
@@ -116,7 +116,6 @@ async function main() {
     assert.equal(DISDEX_V96_RUNTIME.forwardEvidenceStatus, "NOT_APPROVED");
     assert.equal(DISDEX_V96_RUNTIME.executionParityStatus, "APPROVED");
     assert.equal(DISDEX_V96_EXECUTION_PARITY.corePort, "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS");
-    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverrideValidityHours, 72);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 0.15);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.killSwitchAction, "FLATTEN_MANAGED");
@@ -161,6 +160,9 @@ async function main() {
     assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
     assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
 
+    const effectiveOneGross = buildDefaultDisDexV96RunnerConfig({ maxGross: 1 });
+    assert.equal(effectiveOneGross.maxGross, 1);
+
     const approvedOverride = override();
     const live = evaluateDisDexV96LiveGates({
         runnerMode: "live",
@@ -197,22 +199,96 @@ async function main() {
     assert.equal(wrongCommit.allowed, false);
     assert.ok(wrongCommit.reasons.some((reason) => reason.includes("runtime commit")));
 
-    const expired = override({
-        approvedAt: new Date(NOW - 48 * HOUR).toISOString(),
-        expiresAt: new Date(NOW - HOUR).toISOString(),
-    });
-    const expiredGate = evaluateDisDexV96LiveGates({
+    const legacy = override({ expiresAt: new Date(NOW + 24 * HOUR).toISOString() });
+    const legacyGate = evaluateDisDexV96LiveGates({
         runnerMode: "live",
         environmentLiveExecutionEnabled: true,
         activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
         executionParity: parity(),
-        operatorOverride: expired,
+        operatorOverride: legacy,
+        maximumGross: 2,
+        maximumDailyLossPct: 5,
+        initialPenguGrossCap: 0.15,
         runtimeCommitSha: RUNTIME_COMMIT,
         now: NOW,
     });
-    assert.equal(expiredGate.allowed, false);
-    assert.ok(expiredGate.reasons.some((reason) => reason.includes("expired")));
+    assert.equal(legacyGate.allowed, false);
+    assert.ok(legacyGate.reasons.some((reason) => reason.includes("time-bounded")));
 
+    const permanent = override();
+    const permanentGate = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: permanent,
+        maximumGross: 2,
+        maximumDailyLossPct: 5,
+        initialPenguGrossCap: 0.15,
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW + 365 * 24 * HOUR,
+    });
+    assert.equal(permanentGate.allowed, true);
+
+    const changedRisk = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: permanent,
+        maximumGross: 1,
+        maximumDailyLossPct: 5,
+        initialPenguGrossCap: 0.15,
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW,
+    });
+    assert.equal(changedRisk.allowed, false);
+    assert.ok(changedRisk.reasons.some((reason) => reason.includes("maximum Gross")));
+
+    const changedDailyLoss = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: permanent,
+        maximumGross: 2,
+        maximumDailyLossPct: 3.5,
+        initialPenguGrossCap: 0.15,
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW,
+    });
+    assert.equal(changedDailyLoss.allowed, false);
+    assert.ok(changedDailyLoss.reasons.some((reason) => reason.includes("daily loss limit")));
+
+    const changedPengu = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: permanent,
+        maximumGross: 2,
+        maximumDailyLossPct: 5,
+        initialPenguGrossCap: 0.10,
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW,
+    });
+    assert.equal(changedPengu.allowed, false);
+    assert.ok(changedPengu.reasons.some((reason) => reason.includes("initial PENGU Gross")));
+    const revoked = override({ revokedAt: new Date(NOW).toISOString(), revokedBy: "operator", revokeReason: "test" });
+    const revokedGate = evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride: revoked,
+        maximumGross: 2,
+        maximumDailyLossPct: 5,
+        initialPenguGrossCap: 0.15,
+        runtimeCommitSha: RUNTIME_COMMIT,
+        now: NOW,
+    });
+    assert.equal(revokedGate.allowed, false);
+    assert.ok(revokedGate.reasons.some((reason) => reason.includes("revoked")));
     const startRisk = updateDisDexV96DailyRisk({
         equity: 1000,
         maximumDailyLossPct: 5,

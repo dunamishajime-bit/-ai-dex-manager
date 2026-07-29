@@ -70,7 +70,7 @@ export interface DisDexV96OperatorOverrideAudit {
     artifactSha256: string;
     operator: string;
     approvedAt: string;
-    expiresAt: string;
+    expiresAt?: string;
     approvedCommitSha: string;
     initialPenguGrossCap: number;
     maximumPortfolioGross: number;

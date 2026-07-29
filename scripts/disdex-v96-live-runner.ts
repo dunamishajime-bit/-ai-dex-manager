@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { DisDexV46AsterMarketDataProvider } from "../lib/disdex-v46-market-data-provider";
@@ -13,7 +13,7 @@ import {
     type DisDexV96ExecutionParityApproval,
     type DisDexV96ForwardEvidenceApproval,
 } from "../lib/disdex-v96-live-gates";
-import type { DisDexV96KillSwitchCommand, DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
+import type { DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
 import { DisDexV96PortfolioRunner, buildDefaultDisDexV96RunnerConfig } from "../lib/disdex-v96-portfolio-runner";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
 
@@ -48,32 +48,13 @@ async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
     }
 }
 
-async function activateExpiryKillSwitch(input: {
-    runnerMode: "paper" | "live";
-    operatorOverride?: DisDexV96OperatorOverrideApproval;
-    killSwitchPath?: string;
-}) {
-    if (input.runnerMode !== "live" || !input.operatorOverride) return false;
-    if (Date.now() < Date.parse(input.operatorOverride.expiresAt)) return false;
-    if (!input.killSwitchPath) throw new Error("V96 live mode requires DISDEX_V96_KILL_SWITCH_FILE.");
-    const path = resolve(input.killSwitchPath);
-    const command: DisDexV96KillSwitchCommand = {
-        active: true,
-        strategyId: DISDEX_V96_STRATEGY_ID,
-        action: "FLATTEN_MANAGED",
-        reason: `Operator Override expired at ${input.operatorOverride.expiresAt}.`,
-        operator: "disdex-v96-runtime-expiry-guard",
-        activatedAt: new Date().toISOString(),
-    };
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, `${JSON.stringify(command, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-    return true;
-}
-
 async function main() {
     const runnerMode = mode();
     const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
     const killSwitchPath = process.env.DISDEX_V96_KILL_SWITCH_FILE;
+    const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
+    const requestedDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
+    const requestedPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
     if (runnerMode === "live" && !killSwitchPath) {
         throw new Error("V96 live mode requires DISDEX_V96_KILL_SWITCH_FILE.");
     }
@@ -90,6 +71,9 @@ async function main() {
         forwardEvidence,
         executionParity,
         operatorOverride,
+        maximumGross: requestedMaxGross,
+        maximumDailyLossPct: requestedDailyLossPct,
+        initialPenguGrossCap: requestedPenguGrossCap,
         runtimeCommitSha,
     } as const;
     const liveGate = runnerMode === "live"
@@ -128,8 +112,26 @@ async function main() {
         cacheTtlMs: numberEnv("DISDEX_V96_HISTORY_CACHE_TTL_MS", 5 * 60_000),
         fundingCacheTtlMs: numberEnv("DISDEX_V96_FUNDING_CACHE_TTL_MS", 5 * 60_000),
     });
+    const liveGateCheck = runnerMode === "live"
+        ? async () => {
+            const [freshForwardEvidence, freshExecutionParity, freshOperatorOverride] = await Promise.all([
+                optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
+                optionalJson<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE),
+                optionalJson<DisDexV96OperatorOverrideApproval>(process.env.DISDEX_V96_OPERATOR_OVERRIDE_FILE),
+            ]);
+            const freshGate = evaluateDisDexV96LiveGates({
+                ...liveGateInput,
+                forwardEvidence: freshForwardEvidence,
+                executionParity: freshExecutionParity,
+                operatorOverride: freshOperatorOverride,
+            });
+            return {
+                allowed: freshGate.allowed,
+                message: freshGate.allowed ? undefined : `V96 LIVE approval gate failed during tick: ${freshGate.reasons.join("; ")}`,
+            };
+        }
+        : undefined;
     const approvedOverride = liveGate.operatorOverrideApproved ? liveGate.operatorOverride : undefined;
-    const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
     const maximumGross = approvedOverride
         ? Math.min(requestedMaxGross, approvedOverride.maximumPortfolioGross)
         : requestedMaxGross;
@@ -153,6 +155,7 @@ async function main() {
             ?? optionalNumberEnv("DISDEX_V96_MAX_DAILY_LOSS_USD"),
         killSwitchPath,
         operatorOverride: approvedOverride,
+        liveGateCheck,
     });
     const stateStore = new FileDisDexV96RunnerStateStore(resolve(stateRoot, `runner-${runnerMode}.json`), runnerMode);
     const runner = new DisDexV96PortfolioRunner({
@@ -185,7 +188,6 @@ async function main() {
         liveGateReasons: liveGate.reasons,
         forwardEvidenceApproved: liveGate.forwardEvidenceApproved,
         operatorOverrideApproved: liveGate.operatorOverrideApproved,
-        operatorOverrideExpiresAt: approvedOverride?.expiresAt,
         configFingerprint: liveGate.configFingerprint,
         forwardEvidenceStatus: forwardEvidence?.status || "NOT_APPROVED",
         executionParityStatus: executionParity?.status || "NOT_REVIEWED",
@@ -198,19 +200,6 @@ async function main() {
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
     do {
-        const expirySwitchActivated = await activateExpiryKillSwitch({
-            runnerMode,
-            operatorOverride: approvedOverride,
-            killSwitchPath,
-        });
-        if (expirySwitchActivated) {
-            console.warn(JSON.stringify({
-                level: "warn",
-                event: "disdex-v96-operator-override-expired",
-                expiresAt: approvedOverride?.expiresAt,
-                action: "FLATTEN_MANAGED",
-            }));
-        }
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), runnerMode, ...result }));
         if (result.status === "manual-review") stopping = true;

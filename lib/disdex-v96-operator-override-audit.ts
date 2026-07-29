@@ -8,7 +8,7 @@ export function disDexV96OperatorOverrideAuditFromApproval(
         artifactSha256: approval.artifactSha256,
         operator: approval.operator,
         approvedAt: approval.approvedAt,
-        expiresAt: approval.expiresAt,
+        ...(approval.expiresAt ? { expiresAt: approval.expiresAt } : {}),
         approvedCommitSha: approval.approvedCommitSha,
         initialPenguGrossCap: approval.initialPenguGrossCap,
         maximumPortfolioGross: approval.maximumPortfolioGross,

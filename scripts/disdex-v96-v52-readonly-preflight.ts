@@ -4,7 +4,7 @@ import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { DISDEX_V13D_V11EQ_V96_RUNTIME } from "../config/disdexStockRouterV13DV11EqRuntime";
-import { DISDEX_V96_LIVE_PROMOTION } from "../config/disdexV96Runtime";
+import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { assertDisDexV96LiveGates, type DisDexV96ExecutionParityApproval, type DisDexV96ForwardEvidenceApproval } from "../lib/disdex-v96-live-gates";
 import { readDisDexV96KillSwitch, type DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
@@ -86,6 +86,9 @@ function approvalPath(path: string | undefined) {
 export async function runReadOnlyPreflight() {
     const paths = statePaths();
     const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
+    const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
+    const requestedDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
+    const requestedPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
     const before = {
         crypto: await readStateSummary(paths.cryptoState, "crypto"),
         stock: await readStateSummary(paths.stockState, "stock"),
@@ -135,6 +138,9 @@ export async function runReadOnlyPreflight() {
         forwardEvidence,
         executionParity,
         operatorOverride,
+        maximumGross: requestedMaxGross,
+        maximumDailyLossPct: requestedDailyLossPct,
+        initialPenguGrossCap: requestedPenguGrossCap,
         runtimeCommitSha,
     });
     const killSwitch = await readDisDexV96KillSwitch(paths.killSwitch);
