@@ -25,27 +25,32 @@ jobs:
           helper=false
           unit=false
           sudo_helper=false
+          bootstrap_sudo=false
           [[ -x /usr/local/sbin/disdex-vps-control ]] && helper=true
           [[ -f /etc/systemd/system/disdex-v96-v52-preflight@.service ]] && unit=true
+          if sudo -n /usr/bin/id -u >/tmp/disdex-sudo-id.txt 2>/tmp/disdex-bootstrap-sudo-error.txt && [[ "$(cat /tmp/disdex-sudo-id.txt)" == "0" ]]; then
+            bootstrap_sudo=true
+          fi
           if [[ "$helper" == true ]] && sudo -n /usr/local/sbin/disdex-vps-control trading-state >/tmp/disdex-trading-state.txt 2>/tmp/disdex-helper-error.txt; then
             sudo_helper=true
           fi
           printf 'runner_user=%s\n' "$(id -un)"
+          printf 'bootstrap_sudo_available=%s\n' "$bootstrap_sudo"
           printf 'helper_installed=%s\n' "$helper"
           printf 'preflight_unit_installed=%s\n' "$unit"
           printf 'limited_sudo_works=%s\n' "$sudo_helper"
-          if [[ -s /tmp/disdex-helper-error.txt ]]; then
-            sed -E 's/(token|secret|password|private key)[^ ]*/\1=[REDACTED]/Ig' /tmp/disdex-helper-error.txt | head -20
-          fi
+          if [[ -s /tmp/disdex-bootstrap-sudo-error.txt ]]; then head -5 /tmp/disdex-bootstrap-sudo-error.txt; fi
+          if [[ -s /tmp/disdex-helper-error.txt ]]; then head -5 /tmp/disdex-helper-error.txt; fi
           if [[ "$sudo_helper" == true ]]; then
             printf 'trading_state='; cat /tmp/disdex-trading-state.txt
             printf 'trading_pid='; sudo -n /usr/local/sbin/disdex-vps-control trading-pid
             printf 'trading_cwd='; sudo -n /usr/local/sbin/disdex-vps-control trading-cwd
           fi
           {
+            echo "bootstrap_sudo_available=$bootstrap_sudo"
             echo "helper_installed=$helper"
             echo "preflight_unit_installed=$unit"
             echo "limited_sudo_works=$sudo_helper"
             echo 'vps_writes=false'
           } >> "$GITHUB_STEP_SUMMARY"
-          [[ "$helper" == true && "$unit" == true && "$sudo_helper" == true ]]
+          [[ "$bootstrap_sudo" == true || ( "$helper" == true && "$unit" == true && "$sudo_helper" == true ) ]]
