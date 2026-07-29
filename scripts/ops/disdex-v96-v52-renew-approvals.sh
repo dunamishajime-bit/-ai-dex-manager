@@ -39,6 +39,14 @@ mkdir -p "$approval_dir"
 tmp="$(mktemp -d "$approval_dir/.renew-$sha.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT
 
+# The release tree is intentionally read-only under systemd. Route every cache,
+# bytecode and temporary write into the approval transaction directory.
+export HOME="$tmp/home"
+export npm_config_cache="$tmp/npm-cache"
+export PYTHONPYCACHEPREFIX="$tmp/pycache"
+export PYTHONPATH="${PYTHONPATH:-/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages}"
+mkdir -p "$HOME" "$npm_config_cache" "$PYTHONPYCACHEPREFIX"
+
 golden="$tmp/disdex-v95-golden.json"
 /usr/bin/python3 scripts/disdex_v96_golden_vector_generator.py --output "$golden"
 node_modules/.bin/tsx scripts/disdex-v95-golden-parity.ts "$golden"
@@ -59,8 +67,8 @@ DISDEX_V96_OPERATOR_OVERRIDE_FILE="$tmp/operator-override.json" \
   /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly
 
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
-cp -a "$parity_file" "$parity_file.bak.$timestamp"
-cp -a "$override_file" "$override_file.bak.$timestamp"
+if [[ -f "$parity_file" ]]; then cp -a "$parity_file" "$parity_file.bak.$timestamp"; fi
+if [[ -f "$override_file" ]]; then cp -a "$override_file" "$override_file.bak.$timestamp"; fi
 install -m 0600 "$tmp/parity.json" "$parity_file.new.$sha"
 install -m 0600 "$tmp/operator-override.json" "$override_file.new.$sha"
 mv -f "$parity_file.new.$sha" "$parity_file"
