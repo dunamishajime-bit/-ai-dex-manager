@@ -9,6 +9,10 @@ sha="${DISDEX_V96_APPROVED_COMMIT_SHA:-}"
   printf 'invalid exact approval SHA\n' >&2
   exit 1
 }
+[[ "${DISDEX_V96_EXECUTION_PARITY_REVIEW_ACKNOWLEDGEMENT:-}" == "I_REVIEWED_DISDEX_V96_EXECUTION_PARITY_FOR_EXACT_COMMIT" ]] || {
+  printf 'execution parity review acknowledgement missing\n' >&2
+  exit 1
+}
 marker="$(pwd -P)/.disdex-release-sha"
 [[ -f "$marker" && "$(tr -d '[:space:]' < "$marker")" == "$sha" ]] || {
   printf 'release marker does not match approval SHA\n' >&2
@@ -35,6 +39,9 @@ mkdir -p "$approval_dir"
 tmp="$(mktemp -d "$approval_dir/.renew-$sha.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT
 
+golden="$tmp/disdex-v95-golden.json"
+/usr/bin/python3 scripts/disdex_v96_golden_vector_generator.py --output "$golden"
+node_modules/.bin/tsx scripts/disdex-v95-golden-parity.ts "$golden"
 /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly:selftest
 /usr/bin/npm run strategy:disdex-v52:contract
 /usr/bin/npm run strategy:disdex-v96:typecheck
@@ -42,7 +49,9 @@ trap 'rm -rf "$tmp"' EXIT
 /usr/bin/npm run strategy:disdex-v96:frequency:selftest
 /usr/bin/npm run strategy:disdex-v96:execution:selftest
 
-/usr/bin/npm run strategy:disdex-v96:parity:renew -- "$tmp/parity.json"
+DISDEX_V96_PRODUCTION_COMMIT_SHA="$sha" \
+DISDEX_V96_PARITY_REVIEWER="${DISDEX_V96_EXECUTION_PARITY_REVIEWER:?reviewer is required}" \
+  node_modules/.bin/tsx scripts/disdex-v96-write-execution-parity-approval.ts "$golden" "$tmp/parity.json"
 /usr/bin/npm run strategy:disdex-v96:override:create -- "$tmp/operator-override.json"
 
 DISDEX_V96_EXECUTION_PARITY_FILE="$tmp/parity.json" \
