@@ -57,7 +57,7 @@ export async function readStateSummary(path: string, label: string): Promise<Rea
     return {
         path,
         exists: true,
-        utcDay: typeof state.utcDay === 'string' ? state.utcDay : typeof dailyRisk.utcDay === 'string' ? dailyRisk.utcDay : undefined,
+        utcDay: typeof state.utcDay === "string" ? state.utcDay : typeof dailyRisk.utcDay === "string" ? dailyRisk.utcDay : undefined,
         tripped: dailyRisk.tripped === true || portfolioLatch.tripped === true || v52Latch.tripped === true || state.dailyLossTripped === true,
         manualReview: typeof state.manualReviewReason === "string" && state.manualReviewReason.length > 0,
         pending: Boolean(state.pending),
@@ -79,8 +79,13 @@ async function readOptionalApproval<T>(path: string | undefined) {
     }
 }
 
+function approvalPath(path: string | undefined) {
+    return path ? resolve(path) : undefined;
+}
+
 export async function runReadOnlyPreflight() {
     const paths = statePaths();
+    const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
     const before = {
         crypto: await readStateSummary(paths.cryptoState, "crypto"),
         stock: await readStateSummary(paths.stockState, "stock"),
@@ -90,6 +95,39 @@ export async function runReadOnlyPreflight() {
         readApproval<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE, "execution-parity"),
         readApproval<DisDexV96OperatorOverrideApproval>(process.env.DISDEX_V96_OPERATOR_OVERRIDE_FILE, "operator-override"),
     ]);
+    console.log(JSON.stringify({
+        status: "DISDEX_V96_V52_READONLY_APPROVAL_SUMMARY",
+        runtimeCommitSha,
+        approvalPaths: {
+            forwardEvidence: approvalPath(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
+            executionParity: approvalPath(process.env.DISDEX_V96_EXECUTION_PARITY_FILE),
+            operatorOverride: approvalPath(process.env.DISDEX_V96_OPERATOR_OVERRIDE_FILE),
+        },
+        executionParity: {
+            status: executionParity.status,
+            productionCommitSha: executionParity.productionCommitSha,
+            researchCommitSha: executionParity.researchCommitSha,
+            configFingerprint: executionParity.configFingerprint,
+            allocationParityPassed: executionParity.allocationParityPassed,
+            signalChronologyParityPassed: executionParity.signalChronologyParityPassed,
+            orderQuantityParityPassed: executionParity.orderQuantityParityPassed,
+            restartRecoveryPassed: executionParity.restartRecoveryPassed,
+            reviewer: executionParity.reviewer,
+            reviewedAt: executionParity.reviewedAt,
+        },
+        operatorOverride: {
+            status: operatorOverride.status,
+            approvedCommitSha: operatorOverride.approvedCommitSha,
+            configFingerprint: operatorOverride.configFingerprint,
+            approvedAt: operatorOverride.approvedAt,
+            expiresAt: operatorOverride.expiresAt,
+            initialPenguGrossCap: operatorOverride.initialPenguGrossCap,
+            maximumPortfolioGross: operatorOverride.maximumPortfolioGross,
+            maximumDailyLossPct: operatorOverride.maximumDailyLossPct,
+        },
+        forwardEvidencePresent: Boolean(forwardEvidence),
+        secretsPrinted: false,
+    }));
     const gate = assertDisDexV96LiveGates({
         runnerMode: "live",
         environmentLiveExecutionEnabled: boolEnv("DISDEX_V96_LIVE_EXECUTION_ENABLED"),
@@ -97,7 +135,7 @@ export async function runReadOnlyPreflight() {
         forwardEvidence,
         executionParity,
         operatorOverride,
-        runtimeCommitSha: String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim(),
+        runtimeCommitSha,
     });
     const killSwitch = await readDisDexV96KillSwitch(paths.killSwitch);
     if (killSwitch?.active) throw new Error(`READ_ONLY_PREFLIGHT_KILL_SWITCH_ACTIVE:${killSwitch.reason}`);
@@ -108,7 +146,7 @@ export async function runReadOnlyPreflight() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-ReadOnly-LIVE-Preflight/1.1",
+        userAgent: "DisDex-ReadOnly-LIVE-Preflight/1.2",
     });
     if (!client.hasTradingCredentials()) throw new Error("READ_ONLY_PREFLIGHT_ASTER_CREDENTIALS_MISSING");
     const [ping, balances, positions, openOrders] = await Promise.all([client.ping(), client.getBalances(), client.getPositions(), client.getOpenOrders()]);
@@ -139,6 +177,7 @@ export async function runReadOnlyPreflight() {
         openOrderCount: openOrders.length,
         balancesRead: true,
         killSwitchActive: false,
+        executionParityApproved: true,
         operatorOverrideApproved: gate.operatorOverrideApproved,
         forwardEvidenceApplicable: Boolean(forwardEvidence),
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
