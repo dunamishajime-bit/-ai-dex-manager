@@ -15,6 +15,9 @@ import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-st
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
 
+const READ_ONLY_PREFLIGHT_SCRIPT = "scripts/disdex-v96-v52-readonly-preflight.ts" as const;
+const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-live-preflight.ts" as const;
+
 type RunnerMode = "paper" | "live";
 type ManagedChild = { name: "crypto-v96" | "stock-v52-aster-only"; process: ChildProcess };
 
@@ -77,6 +80,36 @@ export function assertCombinedLiveActivation(runnerMode: RunnerMode) {
     }
 }
 
+export function livePreflightScripts() {
+    return [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT] as const;
+}
+
+export function shouldHoldFailClosed(runnerMode: RunnerMode, daemon: boolean) {
+    return runnerMode === "live" && daemon;
+}
+
+async function holdFailClosed(reason: string) {
+    console.error(JSON.stringify({
+        level: "error",
+        event: "disdex-v96-v52-supervisor-fail-closed-hold",
+        reason,
+        childrenStarted: false,
+        ordersSent: false,
+        stateChangedBySupervisor: false,
+        restartRequiredAfterApproval: true,
+    }));
+    await new Promise<void>((resolveStop) => {
+        let stopped = false;
+        const stop = () => {
+            if (stopped) return;
+            stopped = true;
+            resolveStop();
+        };
+        process.once("SIGINT", stop);
+        process.once("SIGTERM", stop);
+    });
+}
+
 async function activateSharedKillSwitch(path: string, reason: string) {
     const command = {
         active: true,
@@ -135,7 +168,16 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         if (!runtimeCommitSha) throw new Error("Combined LIVE activation requires DISDEX_V96_RUNTIME_COMMIT_SHA.");
         const env = buildCombinedChildEnvironment(runnerMode);
         const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-        await runCommand(tsx, ["scripts/disdex-v13d-v11eq-v96-live-preflight.ts"], env);
+        try {
+            for (const script of livePreflightScripts()) {
+                await runCommand(tsx, [script], env);
+            }
+        } catch (error) {
+            const reason = error instanceof Error ? error.message : String(error);
+            if (!shouldHoldFailClosed(runnerMode, daemon)) throw error;
+            await holdFailClosed(reason);
+            return;
+        }
         const activation = await markCombinedV96MigrationActivated({ combinedRoot: paths.stateRoot, runtimeCommitSha });
         migrationId = activation.migrationId;
     }
@@ -194,6 +236,10 @@ function selfTest() {
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
     assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
+    assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
+    assert.equal(shouldHoldFailClosed("live", true), true);
+    assert.equal(shouldHoldFailClosed("live", false), false);
+    assert.equal(shouldHoldFailClosed("paper", true), false);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
     if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
     else process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = previousMode;
