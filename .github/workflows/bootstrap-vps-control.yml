@@ -1,0 +1,65 @@
+name: Bootstrap Fixed VPS Control
+
+on:
+  push:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - ops/requests/bootstrap-vps-control-request.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-vps-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: Install fixed helper, limited sudoers and read-only preflight unit
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact workflow SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Validate fixed sources
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$(id -un)" = "disdex-runner"
+          bash -n scripts/ops/root/disdex-vps-control
+          grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' scripts/ops/root/disdex-vps-control
+          grep -q 'ExecStart=/usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly' ops/systemd/disdex-v96-v52-preflight@.service
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/root/disdex-vps-control
+
+      - name: Install fixed privileged boundary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tmp_sudoers="${RUNNER_TEMP}/disdex-vps-control.sudoers"
+          printf '%s\n' 'disdex-runner ALL=(root) NOPASSWD: /usr/local/sbin/disdex-vps-control *' > "$tmp_sudoers"
+          chmod 600 "$tmp_sudoers"
+          sudo -n /usr/sbin/visudo -cf "$tmp_sudoers"
+          sudo -n /usr/bin/install -o root -g root -m 0755 scripts/ops/root/disdex-vps-control /usr/local/sbin/disdex-vps-control
+          sudo -n /usr/bin/install -o root -g root -m 0440 "$tmp_sudoers" /etc/sudoers.d/disdex-vps-control
+          sudo -n /usr/bin/install -o root -g root -m 0644 ops/systemd/disdex-v96-v52-preflight@.service /etc/systemd/system/disdex-v96-v52-preflight@.service
+          sudo -n /usr/bin/install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading
+          sudo -n /usr/bin/install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading/releases
+          sudo -n /usr/bin/install -d -o disdex-runner -g deploy -m 2770 /home/deploy/disdex-ops
+          sudo -n /bin/systemctl daemon-reload
+
+      - name: Verify read-only helper actions
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n /usr/local/sbin/disdex-vps-control trading-state
+          sudo -n /usr/local/sbin/disdex-vps-control trading-pid
+          sudo -n /usr/local/sbin/disdex-vps-control trading-cwd
+          test -x /usr/local/sbin/disdex-vps-control
+          test -f /etc/systemd/system/disdex-v96-v52-preflight@.service
+          echo 'Fixed helper, limited sudoers and read-only preflight unit installed.' >> "$GITHUB_STEP_SUMMARY"
