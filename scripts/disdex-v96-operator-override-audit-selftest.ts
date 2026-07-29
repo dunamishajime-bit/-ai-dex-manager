@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 
+import { DISDEX_V96_STRATEGY_ID } from "../config/disdexV96Runtime";
 import type { DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
 import {
     disDexV96OperatorOverrideAuditFromApproval,
@@ -9,7 +10,7 @@ import {
 
 const approval: DisDexV96OperatorOverrideApproval = {
     status: "APPROVED",
-    strategyId: "V35_WEIGHT_BAND_PLUS_FIXED_STRONG_V96",
+    strategyId: DISDEX_V96_STRATEGY_ID,
     configFingerprint: "a".repeat(64),
     approvedCommitSha: "b".repeat(40),
     operator: "operator-selftest",
