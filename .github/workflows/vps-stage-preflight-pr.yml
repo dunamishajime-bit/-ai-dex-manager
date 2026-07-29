@@ -22,7 +22,6 @@ jobs:
     env:
       TARGET_SHA: ${{ github.event.pull_request.head.sha }}
       RELEASES_DIR: /home/deploy/disdex-trading/releases
-      STAGED_LINK: /home/deploy/disdex-trading/staged
       LIVE_REPO: /home/deploy/ai-dex-manager-v96-paper
     steps:
       - name: Checkout exact PR head
@@ -32,39 +31,24 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Inspect runtime path metadata without reading contents
+      - name: Capture existing unit and safe path metadata
         shell: bash
         run: |
           set -Eeuo pipefail
           [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
           [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
-          candidates=(
-            "$LIVE_REPO"
-            "$LIVE_REPO/.runtime-state"
-            "$LIVE_REPO/.runtime-state/disdex-v13d-v11eq-v96"
-            "$LIVE_REPO/.runtime-state/disdex-v96"
-            "$LIVE_REPO/.runtime-state/crypto-v96"
-            "$LIVE_REPO/.runtime-state/stock"
-            "$LIVE_REPO/.runtime-approval"
-            "$LIVE_REPO/.runtime-approval/disdex-v96-operator-override.json"
-            "$LIVE_REPO/.runtime-approval/disdex-v96-execution-parity.json"
-            "$RELEASES_DIR"
-            "/home/deploy/disdex-ops"
-          )
-          for path in "${candidates[@]}"; do
-            if [[ -e "$path" || -L "$path" ]]; then
-              stat -c 'path=%n type=%F owner=%U:%G mode=%a' "$path"
-            else
-              printf 'path=%s exists=false\n' "$path"
-            fi
+          for path in \
+            "$LIVE_REPO/.runtime-state" \
+            "$LIVE_REPO/.runtime-state/disdex-v13d-v11eq-v96" \
+            "$LIVE_REPO/.runtime-approval" \
+            "$LIVE_REPO/.runtime-approval/disdex-v96-operator-override.json" \
+            "$RELEASES_DIR" \
+            /home/deploy/disdex-ops; do
+            stat -c 'path=%n type=%F owner=%U:%G mode=%a' "$path"
           done
-          echo '--- systemd unit path declarations ---'
-          systemctl cat disdex-v96-v52-live.service --no-pager | \
-            grep -E '^(WorkingDirectory|EnvironmentFile|ExecStart|StateDirectory|ReadWritePaths|ReadOnlyPaths)=' || true
-          echo '--- filtered recent failure evidence ---'
-          sudo -n /usr/local/sbin/disdex-vps-control trading-log | \
-            grep -Ei 'approval|fingerprint|forward-evidence|state|migration|preflight|failed|error|runtime.commit|operator.override' | \
-            sed -E 's/(api[-_ ]?key|secret|token|password|private[-_ ]?key)[=:][^ ,;]+/\1=[REDACTED]/Ig' | tail -120 || true
+          echo '--- existing live unit ---'
+          systemctl cat disdex-v96-v52-live.service --no-pager
+          echo '--- end existing live unit ---'
           echo 'diagnostic_only=true' >> "$GITHUB_STEP_SUMMARY"
           echo 'service_state=inactive' >> "$GITHUB_STEP_SUMMARY"
           echo 'orders_sent=false' >> "$GITHUB_STEP_SUMMARY"
