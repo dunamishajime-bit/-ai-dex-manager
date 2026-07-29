@@ -16,15 +16,36 @@ repo_root="${1:-}"
 }
 
 helper_source="${repo_root}/scripts/ops/root/disdex-vps-control"
-unit_source="${repo_root}/ops/systemd/disdex-v96-v52-preflight@.service"
-[[ -f "$helper_source" && -f "$unit_source" ]] || {
-  printf 'fixed helper or preflight unit source is missing\n' >&2
-  exit 2
+preflight_source="${repo_root}/ops/systemd/disdex-v96-v52-preflight@.service"
+approval_source="${repo_root}/ops/systemd/disdex-v96-v52-approval@.service"
+live_source="${repo_root}/ops/systemd/disdex-v96-v52-live.service"
+live_launcher="${repo_root}/scripts/ops/disdex-v96-v52-live.sh"
+approval_launcher="${repo_root}/scripts/ops/disdex-v96-v52-renew-approvals.sh"
+for source in "$helper_source" "$preflight_source" "$approval_source" "$live_source" "$live_launcher" "$approval_launcher"; do
+  [[ -f "$source" ]] || {
+    printf 'required fixed source is missing: %s\n' "$source" >&2
+    exit 2
+  }
+done
+
+state="$(systemctl is-active disdex-v96-v52-live.service 2>/dev/null || true)"
+pid="$(systemctl show disdex-v96-v52-live.service --property MainPID --value 2>/dev/null || printf '0')"
+[[ "$state" == "inactive" || "$state" == "failed" ]] || {
+  printf 'trading service must be inactive before unit installation\n' >&2
+  exit 3
+}
+[[ "$pid" == "0" ]] || {
+  printf 'trading service PID must be zero before unit installation\n' >&2
+  exit 3
 }
 
 bash -n "$helper_source"
+bash -n "$live_launcher"
+bash -n "$approval_launcher"
 grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"
-grep -q 'ExecStart=/usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly' "$unit_source"
+grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' "$live_source"
+grep -q 'ExecStart=/usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly' "$preflight_source"
+grep -q 'ExecStart=/usr/bin/bash scripts/ops/disdex-v96-v52-renew-approvals.sh' "$approval_source"
 ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$helper_source"
 
 sudoers_tmp="$(mktemp)"
@@ -33,19 +54,45 @@ printf '%s\n' 'disdex-runner ALL=(root) NOPASSWD: /usr/local/sbin/disdex-vps-con
 chmod 0600 "$sudoers_tmp"
 visudo -cf "$sudoers_tmp"
 
+backup_root="/etc/disdex/systemd-backup/$(date -u +%Y%m%dT%H%M%SZ)"
+install -d -o root -g root -m 0700 "$backup_root"
+for path in \
+  /etc/systemd/system/disdex-v96-v52-live.service \
+  /etc/systemd/system/disdex-v96-v52-live.service.d/paths.conf \
+  /etc/systemd/system/disdex-v96-v52-live.service.d/readonly-preflight.conf \
+  /etc/systemd/system/disdex-v96-v52-live.service.d/runtime-commit.conf \
+  /etc/systemd/system/disdex-v96-v52-preflight@.service \
+  /usr/local/sbin/disdex-vps-control; do
+  if [[ -f "$path" ]]; then cp -a "$path" "$backup_root/$(basename "$path")"; fi
+done
+
 install -o root -g root -m 0755 "$helper_source" /usr/local/sbin/disdex-vps-control
 install -o root -g root -m 0440 "$sudoers_tmp" /etc/sudoers.d/disdex-vps-control
-install -o root -g root -m 0644 "$unit_source" /etc/systemd/system/disdex-v96-v52-preflight@.service
+install -o root -g root -m 0644 "$live_source" /etc/systemd/system/disdex-v96-v52-live.service
+install -o root -g root -m 0644 "$preflight_source" /etc/systemd/system/disdex-v96-v52-preflight@.service
+install -o root -g root -m 0644 "$approval_source" /etc/systemd/system/disdex-v96-v52-approval@.service
+rm -f \
+  /etc/systemd/system/disdex-v96-v52-live.service.d/paths.conf \
+  /etc/systemd/system/disdex-v96-v52-live.service.d/readonly-preflight.conf \
+  /etc/systemd/system/disdex-v96-v52-live.service.d/runtime-commit.conf
+rmdir /etc/systemd/system/disdex-v96-v52-live.service.d 2>/dev/null || true
+
 install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading
 install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading/releases
 install -d -o disdex-runner -g deploy -m 2770 /home/deploy/disdex-ops
 systemctl daemon-reload
 
+[[ "$(systemctl is-active disdex-v96-v52-live.service 2>/dev/null || true)" == "inactive" || "$(systemctl is-active disdex-v96-v52-live.service 2>/dev/null || true)" == "failed" ]]
+[[ "$(systemctl show disdex-v96-v52-live.service --property MainPID --value)" == "0" ]]
+[[ "$(systemctl show disdex-v96-v52-live.service --property WorkingDirectory --value)" == "/home/deploy/disdex-trading/current" ]]
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-state >/dev/null
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-pid >/dev/null
-sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-cwd >/dev/null
+sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-current >/dev/null
 
 printf 'DISDEX_VPS_CONTROL_INSTALL_PASS\n'
+printf 'backupRoot=%s\n' "$backup_root"
+printf 'workingDirectory=/home/deploy/disdex-trading/current\n'
 printf 'servicesRestarted=false\n'
 printf 'ordersSent=false\n'
 printf 'runtimeStateChanged=false\n'
+printf 'approvalChanged=false\n'
