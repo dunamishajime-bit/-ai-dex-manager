@@ -7,6 +7,11 @@ on:
       - ops/v96-v52-stage-ac421ac
     paths:
       - '.github/workflows/vps-stage-release-ac421ac.yml'
+  pull_request:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - '.github/workflows/vps-stage-release-ac421ac.yml'
 
 permissions:
   contents: read
@@ -17,6 +22,7 @@ concurrency:
 
 jobs:
   stage:
+    if: github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-stage-ac421ac')
     runs-on: [self-hosted, linux, x64, disdex-vps]
     timeout-minutes: 120
     env:
