@@ -1,0 +1,675 @@
+{
+  "strategyId": "V96_STOCK_THEME_FORWARD_7D_EQUAL_GROSS_PNL_V1",
+  "allocationId": "V96_CRYPTO_1_STOCK_1_EQUAL_GROSS_V1",
+  "status": "PRELIMINARY_FORWARD_PNL_ONLY_NOT_ROBUST",
+  "selectedForProduction": false,
+  "window": {
+    "startUtc": "2026-07-22T01:00:00+00:00",
+    "endUtc": "2026-07-29T01:00:00+00:00"
+  },
+  "allocation": {
+    "allocationId": "V96_CRYPTO_1_STOCK_1_EQUAL_GROSS_V1",
+    "routingPolicyId": "V96_MARKET_HOURS_STOCK_OVERLAY_V1",
+    "historicalBacktestPolicyId": "V96_STOCK_HISTORICAL_BT_POLICY_V1",
+    "effectiveFromUtc": "2026-07-23T00:00:00Z",
+    "researchAllocation": {
+      "cryptoGrossCap": 1.0,
+      "stockGrossCap": 1.0,
+      "portfolioGrossCap": 2.0,
+      "stockDirectionalGross": 1.0,
+      "stockNeutralLongGross": 0.5,
+      "stockNeutralShortGross": 0.5
+    },
+    "operation": {
+      "architecture": "MARKET_HOURS_STOCK_OVERLAY",
+      "cryptoEngineHours": "24H",
+      "stockEngineHours": "CONFIRMED_US_REGULAR_SESSION_ONLY",
+      "hardTimeSliceEnabled": false,
+      "cryptoSignalSuppressedDuringStockSession": false,
+      "simultaneousCryptoAndStockEntriesAllowed": true,
+      "capitalTransferBetweenSleeves": false,
+      "staticJstClockAloneIsAuthoritative": false
+    },
+    "eventDataPolicy": {
+      "role": "RISK_GATE_AND_RESEARCH_ONLY",
+      "newsSelectsDirection": false,
+      "articleBodiesStored": false,
+      "currentSevenDayBaselineChangedByEvents": false
+    },
+    "evaluationPolicy": {
+      "initialComparison": "CRYPTO_1.0_VS_STOCK_1.0_AND_COMBINED_GROSS_2.0",
+      "missedSignalPnlUsedForAllocationDecision": false,
+      "historicalBacktestAfterRulesFrozen": true,
+      "historicalBacktestIsProductionApproval": false,
+      "futureReallocationImplemented": false
+    },
+    "safety": {
+      "mode": "SHADOW_RESEARCH_ONLY",
+      "orderSubmissionAllowed": false,
+      "productionChanged": false,
+      "liveChanged": false,
+      "vpsChanged": false,
+      "currentProductionV96WeightsChanged": false
+    },
+    "legacyAllocation": {
+      "cryptoGross": 1.9,
+      "stockGross": 0.1,
+      "status": "LEGACY_REFERENCE_ONLY"
+    }
+  },
+  "frozenRules": {
+    "directional": "BREADTH_67_PRIMARY, next trading-day execution, Stock Gross 1.00",
+    "neutral": "PAIR_L20_PRIMARY, weekly strongest Long 0.50 and weakest Short 0.50",
+    "normalTurnoverBps": 20.0,
+    "severeTurnoverBps": 50.0,
+    "cryptoGrossCap": 1.0,
+    "stockGrossCap": 1.0,
+    "portfolioGrossCap": 2.0,
+    "retuningAllowed": false
+  },
+  "directional": {
+    "normal": {
+      "scenario": "NORMAL",
+      "metrics": {
+        "completedIntervals": 2,
+        "activeIntervals": 2,
+        "compoundedReturnPct": -5.890343535409404,
+        "maxDrawdownPct": -5.890343535409404,
+        "positiveIntervalRatePct": 0.0,
+        "markedToMarketReturnPct": -0.5663402197802083
+      },
+      "rows": [
+        {
+          "day": "2026-07-21",
+          "sourceDay": "2026-07-20",
+          "theme": "SEMICONDUCTOR",
+          "symbol": "SNDKUSDT",
+          "side": -1,
+          "gross": 1.0,
+          "active": true,
+          "completed": true,
+          "nextDay": "2026-07-22",
+          "rawSymbolReturn": 0.03204536980709993,
+          "fundingCost": 0.00062204,
+          "turnover": 1.0,
+          "return": -0.03466740980709993,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-22",
+          "sourceDay": "2026-07-21",
+          "theme": "SEMICONDUCTOR",
+          "symbol": "MRVLUSDT",
+          "side": -1,
+          "gross": 1.0,
+          "active": true,
+          "completed": true,
+          "nextDay": "2026-07-23",
+          "rawSymbolReturn": 0.02110639938319192,
+          "fundingCost": -0.0,
+          "turnover": 2.0,
+          "return": -0.02510639938319192,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-23",
+          "sourceDay": "2026-07-22",
+          "theme": null,
+          "symbol": null,
+          "side": 0,
+          "gross": 0.0,
+          "active": false,
+          "completed": false,
+          "nextDay": null,
+          "rawSymbolReturn": null,
+          "fundingCost": 0.0,
+          "turnover": 1.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-24",
+          "sourceDay": "2026-07-23",
+          "theme": null,
+          "symbol": null,
+          "side": 0,
+          "gross": 0.0,
+          "active": false,
+          "completed": false,
+          "nextDay": null,
+          "rawSymbolReturn": null,
+          "fundingCost": 0.0,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-27",
+          "sourceDay": "2026-07-24",
+          "theme": null,
+          "symbol": null,
+          "side": 0,
+          "gross": 0.0,
+          "active": false,
+          "completed": false,
+          "nextDay": null,
+          "rawSymbolReturn": null,
+          "fundingCost": 0.0,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-28",
+          "sourceDay": "2026-07-27",
+          "theme": "SEMICONDUCTOR",
+          "symbol": "SNDKUSDT",
+          "side": -1,
+          "gross": 1.0,
+          "active": true,
+          "completed": false,
+          "nextDay": null,
+          "rawSymbolReturn": null,
+          "fundingCost": -0.0015343999999999998,
+          "turnover": 1.0,
+          "return": 0.0,
+          "markedToMarketReturn": -0.005663402197802083
+        }
+      ]
+    },
+    "severe": {
+      "scenario": "SEVERE",
+      "metrics": {
+        "completedIntervals": 3,
+        "activeIntervals": 3,
+        "compoundedReturnPct": -0.8860954846193869,
+        "maxDrawdownPct": -5.7177176294519345,
+        "positiveIntervalRatePct": 33.33333333333333,
+        "markedToMarketReturnPct": 0.0
+      },
+      "rows": [
+        {
+          "day": "2026-07-21",
+          "sourceDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "symbol": "SNDKUSDT",
+          "side": -1,
+          "gross": 1.0,
+          "active": true,
+          "completed": true,
+          "nextDay": "2026-07-22",
+          "rawSymbolReturn": 0.03204536980709993,
+          "fundingCost": 0.00062204,
+          "turnover": 1.0,
+          "return": -0.03866740980709993,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-22",
+          "sourceDay": "2026-07-20",
+          "theme": "SEMICONDUCTOR",
+          "symbol": "SNDKUSDT",
+          "side": -1,
+          "gross": 1.0,
+          "active": true,
+          "completed": true,
+          "nextDay": "2026-07-23",
+          "rawSymbolReturn": 0.018177669607544855,
+          "fundingCost": 7.661e-05,
+          "turnover": 0.0,
+          "return": -0.019254279607544857,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-23",
+          "sourceDay": "2026-07-21",
+          "theme": "SEMICONDUCTOR",
+          "symbol": "MRVLUSDT",
+          "side": -1,
+          "gross": 1.0,
+          "active": true,
+          "completed": true,
+          "nextDay": "2026-07-24",
+          "rawSymbolReturn": -0.06224634261444073,
+          "fundingCost": -0.0,
+          "turnover": 2.0,
+          "return": 0.05124634261444073,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-24",
+          "sourceDay": "2026-07-22",
+          "theme": null,
+          "symbol": null,
+          "side": 0,
+          "gross": 0.0,
+          "active": false,
+          "completed": false,
+          "nextDay": null,
+          "rawSymbolReturn": null,
+          "fundingCost": 0.0,
+          "turnover": 1.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-27",
+          "sourceDay": "2026-07-23",
+          "theme": null,
+          "symbol": null,
+          "side": 0,
+          "gross": 0.0,
+          "active": false,
+          "completed": false,
+          "nextDay": null,
+          "rawSymbolReturn": null,
+          "fundingCost": 0.0,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-28",
+          "sourceDay": "2026-07-24",
+          "theme": null,
+          "symbol": null,
+          "side": 0,
+          "gross": 0.0,
+          "active": false,
+          "completed": false,
+          "nextDay": null,
+          "rawSymbolReturn": null,
+          "fundingCost": 0.0,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        }
+      ]
+    }
+  },
+  "neutral": {
+    "normal": {
+      "scenario": "NORMAL",
+      "metrics": {
+        "completedIntervals": 0,
+        "activeIntervals": 0,
+        "compoundedReturnPct": 0.0,
+        "maxDrawdownPct": 0.0,
+        "positiveIntervalRatePct": 0.0,
+        "markedToMarketReturnPct": -2.8655016160472164
+      },
+      "rows": [
+        {
+          "day": "2026-07-21",
+          "sourceDay": "2026-07-20",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-22"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": 0.03204536980709993
+          },
+          "fundingCost": 0.00031102,
+          "turnover": 1.0,
+          "return": 0.0,
+          "markedToMarketReturn": -0.00031102
+        },
+        {
+          "day": "2026-07-22",
+          "sourceDay": "2026-07-21",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-23"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": 0.018177669607544855
+          },
+          "fundingCost": 3.8305e-05,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": -3.8305e-05
+        },
+        {
+          "day": "2026-07-23",
+          "sourceDay": "2026-07-22",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-24"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": -0.06841214113194394
+          },
+          "fundingCost": 6.7355e-05,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": -6.7355e-05
+        },
+        {
+          "day": "2026-07-24",
+          "sourceDay": "2026-07-23",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-27"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": -0.10561027436620474
+          },
+          "fundingCost": 0.0,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-27",
+          "sourceDay": "2026-07-24",
+          "decisionDay": "2026-07-24",
+          "theme": "AI",
+          "long": "METAUSDT",
+          "short": "ORCLUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [],
+          "rawReturns": {},
+          "fundingCost": 0.0,
+          "turnover": 2.0,
+          "return": 0.0,
+          "markedToMarketReturn": -0.010101839684625469
+        },
+        {
+          "day": "2026-07-28",
+          "sourceDay": "2026-07-27",
+          "decisionDay": "2026-07-24",
+          "theme": "AI",
+          "long": "METAUSDT",
+          "short": "ORCLUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [],
+          "rawReturns": {},
+          "fundingCost": 0.0,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": -0.018136496475846697
+        }
+      ]
+    },
+    "severe": {
+      "scenario": "SEVERE",
+      "metrics": {
+        "completedIntervals": 0,
+        "activeIntervals": 0,
+        "compoundedReturnPct": 0.0,
+        "maxDrawdownPct": 0.0,
+        "positiveIntervalRatePct": 0.0,
+        "markedToMarketReturnPct": -1.84153514758467
+      },
+      "rows": [
+        {
+          "day": "2026-07-21",
+          "sourceDay": "2026-07-17",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-22"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": 0.03204536980709993
+          },
+          "fundingCost": 0.00031102,
+          "turnover": 1.0,
+          "return": 0.0,
+          "markedToMarketReturn": -0.00031102
+        },
+        {
+          "day": "2026-07-22",
+          "sourceDay": "2026-07-20",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-23"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": 0.018177669607544855
+          },
+          "fundingCost": 3.8305e-05,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": -3.8305e-05
+        },
+        {
+          "day": "2026-07-23",
+          "sourceDay": "2026-07-21",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-24"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": -0.06841214113194394
+          },
+          "fundingCost": 6.7355e-05,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": -6.7355e-05
+        },
+        {
+          "day": "2026-07-24",
+          "sourceDay": "2026-07-22",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-27"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": -0.10561027436620474
+          },
+          "fundingCost": 0.0,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.0
+        },
+        {
+          "day": "2026-07-27",
+          "sourceDay": "2026-07-23",
+          "decisionDay": "2026-07-17",
+          "theme": "SEMICONDUCTOR",
+          "long": "AVGOUSDT",
+          "short": "SNDKUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [
+            "2026-07-28"
+          ],
+          "rawReturns": {
+            "SNDKUSDT": -0.18415527945670118
+          },
+          "fundingCost": -0.000137825,
+          "turnover": 0.0,
+          "return": 0.0,
+          "markedToMarketReturn": 0.000137825
+        },
+        {
+          "day": "2026-07-28",
+          "sourceDay": "2026-07-24",
+          "decisionDay": "2026-07-24",
+          "theme": "AI",
+          "long": "METAUSDT",
+          "short": "ORCLUSDT",
+          "gross": 1.0,
+          "net": 0.0,
+          "active": true,
+          "completed": false,
+          "nextDays": [],
+          "rawReturns": {},
+          "fundingCost": 0.0,
+          "turnover": 2.0,
+          "return": 0.0,
+          "markedToMarketReturn": -0.018136496475846697
+        }
+      ]
+    }
+  },
+  "coverage": {
+    "ADBEUSDT": {
+      "regularDays": 1,
+      "fundingRows": 120
+    },
+    "AMATUSDT": {
+      "regularDays": 11,
+      "fundingRows": 145
+    },
+    "AMDUSDT": {
+      "regularDays": 43,
+      "fundingRows": 209
+    },
+    "AMZNUSDT": {
+      "regularDays": 45,
+      "fundingRows": 291
+    },
+    "ARMUSDT": {
+      "regularDays": 31,
+      "fundingRows": 191
+    },
+    "ASMLUSDT": {
+      "regularDays": 7,
+      "fundingRows": 133
+    },
+    "AVGOUSDT": {
+      "regularDays": 24,
+      "fundingRows": 299
+    },
+    "CRMUSDT": {
+      "regularDays": 5,
+      "fundingRows": 141
+    },
+    "DRAMUSDT": {
+      "regularDays": 59,
+      "fundingRows": 255
+    },
+    "GOOGLUSDT": {
+      "regularDays": 63,
+      "fundingRows": 299
+    },
+    "INTCUSDT": {
+      "regularDays": 69,
+      "fundingRows": 291
+    },
+    "METAUSDT": {
+      "regularDays": 34,
+      "fundingRows": 299
+    },
+    "MRVLUSDT": {
+      "regularDays": 48,
+      "fundingRows": 217
+    },
+    "MSFTUSDT": {
+      "regularDays": 40,
+      "fundingRows": 312
+    },
+    "MUUSDT": {
+      "regularDays": 63,
+      "fundingRows": 299
+    },
+    "NVDAUSDT": {
+      "regularDays": 69,
+      "fundingRows": 312
+    },
+    "ORCLUSDT": {
+      "regularDays": 32,
+      "fundingRows": 217
+    },
+    "PLTRUSDT": {
+      "regularDays": 17,
+      "fundingRows": 209
+    },
+    "QCOMUSDT": {
+      "regularDays": 7,
+      "fundingRows": 146
+    },
+    "SNDKUSDT": {
+      "regularDays": 64,
+      "fundingRows": 291
+    },
+    "TSLAUSDT": {
+      "regularDays": 68,
+      "fundingRows": 291
+    },
+    "TSMUSDT": {
+      "regularDays": 37,
+      "fundingRows": 299
+    }
+  },
+  "safety": {
+    "mode": "SHADOW",
+    "orderSubmissionAllowed": false,
+    "currentProductionV96WeightsMutable": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false
+  },
+  "limitations": [
+    "The window contains only about five U.S. regular sessions.",
+    "The 1.00/1.00 allocation is a normalized comparison baseline, not a Production approval.",
+    "Completed next-open holding intervals are fewer than the number of sessions.",
+    "Current-listing survivorship bias remains.",
+    "No result from this report can approve profitability, robustness, or Production."
+  ]
+}
