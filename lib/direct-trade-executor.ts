@@ -100,7 +100,7 @@ export interface DirectTradeExecutor {
     getPositions(): Promise<DirectPosition[]>;
     getOpenOrders(): Promise<DirectOpenOrder[]>;
     getMarketQuote(symbol: string): Promise<DirectMarketQuote>;
-    normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number): Promise<NormalizedOrderQuantity>;
+    normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number, options?: { allowBelowMinNotional?: boolean }): Promise<NormalizedOrderQuantity>;
     executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult>;
     reconcileOrder(symbol: string, clientOrderId: string): Promise<DirectTradeResult>;
 }
@@ -272,7 +272,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         };
     }
 
-    async normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number): Promise<NormalizedOrderQuantity> {
+    async normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number, options: { allowBelowMinNotional?: boolean } = {}): Promise<NormalizedOrderQuantity> {
         const row = await this.getSymbolInfo(symbol);
         const marketLot = row.filters?.find((filter) => filter.filterType === "MARKET_LOT_SIZE")
             ?? row.filters?.find((filter) => filter.filterType === "LOT_SIZE");
@@ -287,7 +287,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         if (quantity < minQuantity || quantity <= 0) {
             throw new Error(`Quantity ${quantity} is below Aster minQty ${minQuantity} for ${symbol}.`);
         }
-        if (minNotional > 0 && notional + 1e-9 < minNotional) {
+        if (!options.allowBelowMinNotional && minNotional > 0 && notional + 1e-9 < minNotional) {
             throw new Error(`Notional ${notional.toFixed(4)} is below Aster minimum ${minNotional} for ${symbol}.`);
         }
         const precision = Math.min(12, Math.max(decimalPlaces(stepSize), row.quantityPrecision ?? 0));
@@ -391,7 +391,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 `Slippage guard blocked ${symbol}: ${adverseSlippageBps.toFixed(2)}bps > ${command.maxSlippageBps.toFixed(2)}bps.`,
             );
         }
-        const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice);
+        const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice, { allowBelowMinNotional: command.reduceOnly === true });
         try {
             const raw = await this.client.placeMarketOrder({
                 symbol,

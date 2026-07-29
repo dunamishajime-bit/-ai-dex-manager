@@ -4,6 +4,7 @@ import type { AsterOrderSide } from "@/lib/aster-v3-client";
 import { DISDEX_V96_RUNTIME, DISDEX_V96_STRATEGY_ID } from "@/config/disdexV96Runtime";
 import { disDexV96ConfigFingerprint } from "@/lib/disdex-v96-live-gates";
 import type { DisDexV96DailyRiskState } from "@/lib/disdex-v96-live-risk-controls";
+import type { DailyLossLedgerEntry } from "@/lib/disdex-daily-loss-ledger";
 
 export type DisDexV96RunnerMode = "paper" | "live";
 export type DisDexV96PendingPhase = "planned" | "submitted" | "manual_review";
@@ -122,6 +123,8 @@ export interface DisDexV96RunnerState {
     forwardEvidence: DisDexV96ForwardEvidenceState;
     operatorOverride?: DisDexV96OperatorOverrideAudit;
     dailyRisk?: DisDexV96DailyRiskState;
+    portfolioDailyLossLatch?: DisDexV96DailyRiskState;
+    dailyLossLedger?: DailyLossLedgerEntry[];
     killSwitch?: DisDexV96KillSwitchAudit;
     positionReconciliation?: DisDexV96PositionReconciliationAudit;
     bootstrapRequired: boolean;
@@ -212,6 +215,10 @@ function normalize(value: unknown, mode: DisDexV96RunnerMode): DisDexV96RunnerSt
         dailyRisk: raw.dailyRisk && typeof raw.dailyRisk === "object"
             ? raw.dailyRisk as DisDexV96DailyRiskState
             : undefined,
+        portfolioDailyLossLatch: raw.portfolioDailyLossLatch && typeof raw.portfolioDailyLossLatch === "object"
+            ? raw.portfolioDailyLossLatch as DisDexV96DailyRiskState
+            : undefined,
+        dailyLossLedger: Array.isArray(raw.dailyLossLedger) ? raw.dailyLossLedger.slice(-500) as DailyLossLedgerEntry[] : undefined,
         killSwitch: raw.killSwitch && typeof raw.killSwitch === "object"
             ? raw.killSwitch as DisDexV96KillSwitchAudit
             : undefined,

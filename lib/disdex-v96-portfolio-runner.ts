@@ -23,6 +23,7 @@ import {
 } from "@/lib/disdex-v96-live-risk-controls";
 import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME, DISDEX_V96_STRATEGY_ID } from "@/config/disdexV96Runtime";
 import { disDexV96ConfigFingerprint } from "@/lib/disdex-v96-live-gates";
+import { createDailyLossLedgerEntry } from "@/lib/disdex-daily-loss-ledger";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
 const ONE_TIME_ETH_SIGNAL_SKIP_REFERENCE_TS = 1785024000000;
@@ -198,6 +199,21 @@ export class DisDexV96PortfolioRunner {
             maximumDailyLossUsd: this.dependencies.config.maximumDailyLossUsd,
             now: this.now(),
         });
+        state.portfolioDailyLossLatch = state.dailyRisk;
+        const currentEquity = accountEquity(resolvedAccount, resolvedPositions);
+        const ledger = state.dailyLossLedger ?? [];
+        state.dailyLossLedger = [...ledger, createDailyLossLedgerEntry({
+            strategyId: "V96",
+            realizedPnl: 0,
+            unrealizedPnl: resolvedPositions.reduce((sum, row) => sum + Number(row.unrealizedPnl || 0), 0),
+            commission: 0,
+            funding: 0,
+            deposits: 0,
+            withdrawals: 0,
+            startEquity: state.dailyRisk.dayStartEquity,
+            currentEquity,
+            unattributedDifference: currentEquity - state.dailyRisk.dayStartEquity,
+        })].slice(-500);
         const override = this.dependencies.config.operatorOverride;
         if (override) {
             state.operatorOverride = {
@@ -225,7 +241,7 @@ export class DisDexV96PortfolioRunner {
             state.killSwitch = { ...state.killSwitch, active: false, observedAt: this.now() };
         }
         if (killSwitch) return { flatten: true, reason: `Kill Switch: ${killSwitch.reason}` };
-        if (state.dailyRisk.tripped) return { flatten: true, reason: state.dailyRisk.tripReason || "V96 daily loss limit tripped." };
+        if (state.portfolioDailyLossLatch?.tripped || state.dailyRisk.tripped) return { flatten: true, reason: state.dailyRisk.tripReason || "V96 portfolio daily loss limit tripped." };
         return { flatten: false, reason: undefined as string | undefined };
     }
 

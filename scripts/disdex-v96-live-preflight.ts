@@ -13,6 +13,7 @@ import {
     type DisDexV96OperatorOverrideApproval,
 } from "../lib/disdex-v96-live-risk-controls";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
+import { disDexV96OperatorOverrideAuditMismatches } from "../lib/disdex-v96-operator-override-audit";
 import {
     assertCombinedV96MigrationReady,
     canonicalManagedPositions,
@@ -72,7 +73,7 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V96-LIVE-Preflight/1.2",
+        userAgent: "DisDex-V96-LIVE-Preflight/1.3",
     });
     if (!client.hasTradingCredentials()) {
         throw new Error("V96 preflight requires ASTER_USER_ADDRESS and ASTER_API_PRIVATE_KEY.");
@@ -101,6 +102,7 @@ async function main() {
     }
 
     let migratedStateVerified = false;
+    let operatorOverrideAuditVerified = false;
     let migrationId: string | undefined;
     if (configMigrationMode) {
         const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
@@ -108,7 +110,16 @@ async function main() {
         if (state.bootstrapRequired) throw new Error("V96 config-migration preflight requires a migrated established state with bootstrapRequired=false.");
         if (state.pending) throw new Error("V96 config-migration preflight found a pending state order.");
         if (state.manualReviewReason) throw new Error(`V96 config-migration preflight found manual review: ${state.manualReviewReason}`);
-        if (state.operatorOverride) throw new Error("Migrated V96 state still contains the old Operator Override audit.");
+        if (state.operatorOverride) {
+            if (!gate.operatorOverrideApproved || !gate.operatorOverride) {
+                throw new Error("Migrated V96 state contains an Operator Override audit but the current exact-commit Override route is not approved.");
+            }
+            const mismatches = disDexV96OperatorOverrideAuditMismatches(state.operatorOverride, gate.operatorOverride);
+            if (mismatches.length) {
+                throw new Error(`Migrated V96 state Operator Override audit does not match the current approved artifact: ${mismatches.join(",")}`);
+            }
+            operatorOverrideAuditVerified = true;
+        }
         const combinedRoot = String(process.env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT || "").trim();
         if (!combinedRoot) throw new Error("Combined migration preflight requires DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT.");
         const migration = await assertCombinedV96MigrationReady({
@@ -146,6 +157,7 @@ async function main() {
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
         operatorOverrideApproved: gate.operatorOverrideApproved,
         operatorOverrideExpiresAt: gate.operatorOverride?.expiresAt,
+        operatorOverrideAuditVerified,
         initialPenguGrossCap: gate.operatorOverride?.initialPenguGrossCap,
         maximumDailyLossPct: gate.operatorOverride?.maximumDailyLossPct,
         maximumDailyLossUsd: gate.operatorOverride?.maximumDailyLossUsd,

@@ -1,0 +1,55 @@
+name: DisDex VPS Release Boundary CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/**'
+      - 'ops/systemd/**'
+      - 'lib/disdex-v96-operator-override-audit.ts'
+      - 'scripts/disdex-v96-create-operator-override.ts'
+      - 'scripts/disdex-v96-sync-operator-override-audit.ts'
+      - 'scripts/disdex-v96-operator-override-audit-selftest.ts'
+      - 'scripts/disdex-v96-live-preflight.ts'
+      - 'scripts/disdex-v96-v52-readonly-preflight.ts'
+      - '.github/workflows/disdex-vps-ops-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate shell boundaries
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/root/disdex-vps-control
+          bash -n scripts/ops/root/install-disdex-vps-control
+          bash -n scripts/ops/disdex-v96-v52-live.sh
+          bash -n scripts/ops/disdex-v96-v52-renew-approvals.sh
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/root/disdex-vps-control
+          grep -q 'require_trading_inactive' scripts/ops/root/disdex-vps-control
+          grep -q 'preflight pass marker missing' scripts/ops/root/disdex-vps-control
+          grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
+          grep -q 'DISDEX_V96_RUNTIME_COMMIT_SHA=%i' ops/systemd/disdex-v96-v52-preflight@.service
+          grep -q 'Conflicts=disdex-v96-v52-live.service' ops/systemd/disdex-v96-v52-approval@.service
+          grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_PASS' scripts/ops/disdex-v96-v52-renew-approvals.sh
+          grep -q 'DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT="$shared_state"' scripts/ops/disdex-v96-v52-live.sh
+          grep -q 'DISDEX_V96_STATE_DIR="$shared_state/crypto-v96"' scripts/ops/disdex-v96-v52-live.sh
+          grep -q 'strategy:disdex-v96:override:audit:sync' scripts/ops/disdex-v96-v52-live.sh
+          grep -q 'DISDEX_V96_OPERATOR_OVERRIDE_AUDIT_SYNC_PASS_NO_ORDERS_SENT' scripts/disdex-v96-sync-operator-override-audit.ts
+          grep -q 'Operator Override audit does not match the current approved artifact' scripts/disdex-v96-live-preflight.ts
+
+      - name: Validate no automatic live mutation workflow
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ! grep -R --line-number -E 'disdex-vps-control (trading-switch|trading-restart|approval-start)' .github/workflows \
+            --exclude='disdex-vps-ops-ci.yml'
+          echo 'No automatic approval, current switch, or LIVE restart workflow is committed.'
