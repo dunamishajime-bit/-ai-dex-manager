@@ -1,0 +1,56 @@
+name: Inspect V96 V52 LIVE Exit
+
+on:
+  pull_request:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - '.github/workflows/vps-inspect-live-exit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-live-start-7d565b3'
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 15
+    env:
+      CONTROL: /usr/local/sbin/disdex-vps-control
+      SERVICE: disdex-v96-v52-live.service
+      KILL_SWITCH: /home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+    steps:
+      - name: Capture read-only exit evidence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          printf 'service_state='; sudo -n "$CONTROL" trading-state
+          printf 'service_pid='; sudo -n "$CONTROL" trading-pid
+          printf 'service_cwd='; sudo -n "$CONTROL" trading-cwd
+          printf 'current_release='; sudo -n "$CONTROL" trading-current
+          systemctl show "$SERVICE" \
+            --property=LoadState,ActiveState,SubState,Result,NRestarts,MainPID,ExecMainCode,ExecMainStatus,ExecMainStartTimestamp,ExecMainExitTimestamp \
+            --no-pager
+          echo '--- live journal ---'
+          sudo -n "$CONTROL" trading-log | tail -500
+          echo '--- matching processes ---'
+          pgrep -af 'disdex-v96-live-runner|disdex_v52_aster_only_live_engine|disdex-v13d-v11eq-v96-live-runner' || true
+          echo '--- kill switch summary ---'
+          KILL_SWITCH="$KILL_SWITCH" /usr/bin/node <<'NODE'
+          const fs = require('node:fs');
+          const path = process.env.KILL_SWITCH;
+          if (!fs.existsSync(path)) {
+            console.log(JSON.stringify({ exists: false }));
+            process.exit(0);
+          }
+          const value = JSON.parse(fs.readFileSync(path, 'utf8'));
+          console.log(JSON.stringify({
+            exists: true,
+            active: value.active === true,
+            action: typeof value.action === 'string' ? value.action : null,
+            reason: typeof value.reason === 'string' ? value.reason : null,
+            activatedAt: typeof value.activatedAt === 'string' ? value.activatedAt : null,
+            strategyId: typeof value.strategyId === 'string' ? value.strategyId : null,
+          }));
+          NODE
+          echo 'inspection_only=true' >> "$GITHUB_STEP_SUMMARY"
