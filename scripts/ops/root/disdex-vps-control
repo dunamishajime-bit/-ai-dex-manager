@@ -8,7 +8,11 @@ UI_USER="deploy"
 UI_PM2_HOME="/home/deploy/.pm2"
 UI_PROCESS="ai-dex-manager-ui"
 TRADING_SERVICE="disdex-v96-v52-live.service"
+TRADING_ROOT="/home/deploy/disdex-trading"
+TRADING_RELEASES="${TRADING_ROOT}/releases"
+TRADING_CURRENT="${TRADING_ROOT}/current"
 PREFLIGHT_PREFIX="disdex-v96-v52-preflight"
+APPROVAL_PREFIX="disdex-v96-v52-approval"
 
 RUNUSER="$(command -v runuser)"
 PM2="$(command -v pm2)"
@@ -21,6 +25,45 @@ require_sha() {
   [[ "$value" =~ ^[0-9a-f]{40}$ ]] || {
     printf 'invalid exact SHA\n' >&2
     exit 2
+  }
+}
+
+release_dir() {
+  local sha="$1"
+  printf '%s/%s' "$TRADING_RELEASES" "$sha"
+}
+
+validate_release() {
+  local sha="$1"
+  local release
+  require_sha "$sha"
+  release="$(release_dir "$sha")"
+  [[ -d "$release" && ! -L "$release" ]] || {
+    printf 'immutable release directory missing\n' >&2
+    exit 2
+  }
+  [[ -f "$release/.disdex-release-sha" ]] || {
+    printf 'release marker missing\n' >&2
+    exit 2
+  }
+  [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$sha" ]] || {
+    printf 'release marker SHA mismatch\n' >&2
+    exit 2
+  }
+  printf '%s' "$release"
+}
+
+require_trading_inactive() {
+  local state pid
+  state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+  pid="$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value)"
+  [[ "$state" == "inactive" || "$state" == "failed" ]] || {
+    printf 'trading service must be inactive\n' >&2
+    exit 3
+  }
+  [[ "$pid" == "0" ]] || {
+    printf 'trading service PID must be zero\n' >&2
+    exit 3
   }
 }
 
@@ -60,13 +103,36 @@ case "$action" in
   trading-state) "$SYSTEMCTL" is-active "$TRADING_SERVICE" 2>/dev/null || true ;;
   trading-pid) "$SYSTEMCTL" show "$TRADING_SERVICE" --property MainPID --value ;;
   trading-cwd) "$SYSTEMCTL" show "$TRADING_SERVICE" --property WorkingDirectory --value ;;
+  trading-current)
+    if [[ -L "$TRADING_CURRENT" ]]; then readlink -f "$TRADING_CURRENT"; else printf 'not-set\n'; fi
+    ;;
   trading-log) exec "$JOURNALCTL" -u "$TRADING_SERVICE" --since "2 hours ago" --no-pager -n 500 ;;
   trading-stop) exec "$SYSTEMCTL" stop "$TRADING_SERVICE" ;;
   trading-restart) exec "$SYSTEMCTL" restart "$TRADING_SERVICE" ;;
+  trading-switch)
+    sha="${2:-}"
+    require_trading_inactive
+    release="$(validate_release "$sha")"
+    [[ -f "$release/.disdex-preflight-pass" ]] || {
+      printf 'preflight pass marker missing\n' >&2
+      exit 3
+    }
+    [[ "$(tr -d '[:space:]' < "$release/.disdex-preflight-pass")" == "$sha" ]] || {
+      printf 'preflight pass marker SHA mismatch\n' >&2
+      exit 3
+    }
+    tmp_link="${TRADING_CURRENT}.tmp.$$"
+    rm -f "$tmp_link"
+    ln -s "$release" "$tmp_link"
+    chown -h deploy:deploy "$tmp_link"
+    mv -Tf "$tmp_link" "$TRADING_CURRENT"
+    [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]]
+    printf 'TRADING_CURRENT_SWITCH_PASS\nsha=%s\n' "$sha"
+    ;;
   daemon-reload) exec "$SYSTEMCTL" daemon-reload ;;
   preflight-start)
     sha="${2:-}"
-    require_sha "$sha"
+    validate_release "$sha" >/dev/null
     unit="${PREFLIGHT_PREFIX}@${sha}.service"
     "$SYSTEMCTL" reset-failed "$unit" >/dev/null 2>&1 || true
     exec "$SYSTEMCTL" start "$unit"
@@ -83,6 +149,27 @@ case "$action" in
     require_sha "$sha"
     unit="${PREFLIGHT_PREFIX}@${sha}.service"
     exec "$JOURNALCTL" -u "$unit" --no-pager -n 800
+    ;;
+  approval-start)
+    sha="${2:-}"
+    require_trading_inactive
+    validate_release "$sha" >/dev/null
+    unit="${APPROVAL_PREFIX}@${sha}.service"
+    "$SYSTEMCTL" reset-failed "$unit" >/dev/null 2>&1 || true
+    exec "$SYSTEMCTL" start "$unit"
+    ;;
+  approval-state)
+    sha="${2:-}"
+    require_sha "$sha"
+    unit="${APPROVAL_PREFIX}@${sha}.service"
+    "$SYSTEMCTL" is-active "$unit" 2>/dev/null || true
+    "$SYSTEMCTL" is-failed "$unit" 2>/dev/null || true
+    ;;
+  approval-log)
+    sha="${2:-}"
+    require_sha "$sha"
+    unit="${APPROVAL_PREFIX}@${sha}.service"
+    exec "$JOURNALCTL" -u "$unit" --no-pager -n 1200
     ;;
   *)
     printf 'unsupported fixed control action\n' >&2
