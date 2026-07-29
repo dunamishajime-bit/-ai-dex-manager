@@ -1,0 +1,199 @@
+name: Activate V96 V52 LIVE ac421ac
+
+on:
+  pull_request:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - '.github/workflows/vps-activate-live-ac421ac.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-v96-v52-live-ac421ac
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-live-ac421ac'
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 120
+    env:
+      TARGET_SHA: ac421acb05e771afc99ed916d11948ca95370d32
+      RELEASE_DIR: /home/deploy/disdex-trading/releases/ac421acb05e771afc99ed916d11948ca95370d32
+      CONTROL: /usr/local/sbin/disdex-vps-control
+      SERVICE: disdex-v96-v52-live.service
+      KILL_SWITCH: /home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+
+    steps:
+      - name: Verify exact inactive release gate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -d "$RELEASE_DIR"
+          test ! -L "$RELEASE_DIR"
+          test -f "$RELEASE_DIR/.disdex-release-sha"
+          test -f "$RELEASE_DIR/.disdex-release-ready"
+          test "$(tr -d '[:space:]' < "$RELEASE_DIR/.disdex-release-sha")" = "$TARGET_SHA"
+          test "$(tr -d '[:space:]' < "$RELEASE_DIR/.disdex-release-ready")" = "$TARGET_SHA"
+          test "$(sudo -n "$CONTROL" trading-state)" = "inactive"
+          test "$(sudo -n "$CONTROL" trading-pid)" = "0"
+          test "$(systemctl show "$SERVICE" --property WorkingDirectory --value)" = "/home/deploy/disdex-trading/current"
+          printf 'previous_current='; sudo -n "$CONTROL" trading-current
+
+      - name: Renew exact-commit approvals
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n "$CONTROL" approval-start "$TARGET_SHA"
+          sudo -n "$CONTROL" approval-log "$TARGET_SHA" | tee "$RUNNER_TEMP/approval.log"
+          grep -F 'DISDEX_V96_V52_APPROVAL_RENEWAL_PASS' "$RUNNER_TEMP/approval.log"
+          grep -F "approvedCommitSha=$TARGET_SHA" "$RUNNER_TEMP/approval.log"
+          grep -F 'ordersSent=false' "$RUNNER_TEMP/approval.log"
+          grep -F 'positionsChanged=false' "$RUNNER_TEMP/approval.log"
+          grep -F 'runtimeStateChanged=false' "$RUNNER_TEMP/approval.log"
+          grep -F 'approvalChanged=true' "$RUNNER_TEMP/approval.log"
+          test "$(sudo -n "$CONTROL" trading-state)" = "inactive"
+          test "$(sudo -n "$CONTROL" trading-pid)" = "0"
+
+      - name: Run authenticated read-only preflight
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n "$CONTROL" preflight-start "$TARGET_SHA"
+          sudo -n "$CONTROL" preflight-log "$TARGET_SHA" | tee "$RUNNER_TEMP/preflight.log"
+          PREFLIGHT_LOG="$RUNNER_TEMP/preflight.log" TARGET_SHA="$TARGET_SHA" /usr/bin/node <<'NODE'
+          const fs = require('node:fs');
+          const lines = fs.readFileSync(process.env.PREFLIGHT_LOG, 'utf8').split(/\r?\n/);
+          function payload(status) {
+            const marker = `{"status":"${status}"`;
+            const line = [...lines].reverse().find((value) => value.includes(marker));
+            if (!line) throw new Error(`missing ${status}`);
+            return JSON.parse(line.slice(line.indexOf(marker)));
+          }
+          const sha = process.env.TARGET_SHA;
+          const summary = payload('DISDEX_V96_V52_READONLY_APPROVAL_SUMMARY');
+          const pass = payload('DISDEX_V96_V52_READONLY_PREFLIGHT_PASS');
+          if (summary.runtimeCommitSha !== sha) throw new Error('runtime SHA mismatch');
+          if (summary.executionParity?.productionCommitSha !== sha) throw new Error('parity SHA mismatch');
+          if (summary.operatorOverride?.approvedCommitSha !== sha) throw new Error('override SHA mismatch');
+          if (summary.executionParity?.configFingerprint !== summary.operatorOverride?.configFingerprint) throw new Error('fingerprint mismatch');
+          if (pass.asterAuthenticated !== true || pass.killSwitchActive !== false) throw new Error('authentication or kill switch gate failed');
+          if (pass.executionParityApproved !== true || pass.operatorOverrideApproved !== true) throw new Error('approval gate failed');
+          if (pass.managedPositionCount !== 0 || pass.openOrderCount !== 0) throw new Error('clean-start gate failed');
+          if (pass.v96DailyLossLimitPct !== 5 || pass.v52DailyLossLimitPct !== 3.5) throw new Error('daily loss limit mismatch');
+          if (pass.ordersSent !== false || pass.cancelSent !== false || pass.positionChangesSent !== false) throw new Error('read-only preflight changed exchange state');
+          if (pass.stateChanged !== false || pass.approvalChanged !== false) throw new Error('read-only preflight changed local state');
+          console.log(JSON.stringify({ status: 'ACTIVATION_PREFLIGHT_VERIFIED', runtimeCommitSha: sha }));
+          NODE
+          printf '%s\n' "$TARGET_SHA" > "$RELEASE_DIR/.disdex-preflight-pass"
+          chmod 0640 "$RELEASE_DIR/.disdex-preflight-pass"
+          test "$(tr -d '[:space:]' < "$RELEASE_DIR/.disdex-preflight-pass")" = "$TARGET_SHA"
+          test "$(sudo -n "$CONTROL" trading-state)" = "inactive"
+          test "$(sudo -n "$CONTROL" trading-pid)" = "0"
+
+      - name: Select release and start LIVE
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n "$CONTROL" trading-switch "$TARGET_SHA"
+          test "$(sudo -n "$CONTROL" trading-current)" = "$RELEASE_DIR"
+          test "$(sudo -n "$CONTROL" trading-state)" = "inactive"
+          test "$(sudo -n "$CONTROL" trading-pid)" = "0"
+
+          sudo -n "$CONTROL" trading-restart
+          for _ in $(seq 1 90); do
+            state="$(sudo -n "$CONTROL" trading-state)"
+            pid="$(sudo -n "$CONTROL" trading-pid)"
+            if [[ "$state" == "active" && "$pid" =~ ^[1-9][0-9]*$ ]]; then
+              break
+            fi
+            if [[ "$state" == "failed" ]]; then
+              echo 'LIVE service entered failed state' >&2
+              exit 1
+            fi
+            sleep 1
+          done
+
+          test "$(sudo -n "$CONTROL" trading-state)" = "active"
+          pid_before="$(sudo -n "$CONTROL" trading-pid)"
+          [[ "$pid_before" =~ ^[1-9][0-9]*$ ]]
+          restarts_before="$(systemctl show "$SERVICE" --property NRestarts --value)"
+          sleep 120
+
+          state_after="$(sudo -n "$CONTROL" trading-state)"
+          pid_after="$(sudo -n "$CONTROL" trading-pid)"
+          restarts_after="$(systemctl show "$SERVICE" --property NRestarts --value)"
+          result="$(systemctl show "$SERVICE" --property Result --value)"
+          current="$(sudo -n "$CONTROL" trading-current)"
+
+          printf 'live_state=%s\n' "$state_after"
+          printf 'live_pid=%s\n' "$pid_after"
+          printf 'current_release=%s\n' "$current"
+          printf 'restart_count_before=%s\n' "$restarts_before"
+          printf 'restart_count_after=%s\n' "$restarts_after"
+          printf 'service_result=%s\n' "$result"
+
+          test "$state_after" = "active"
+          test "$pid_after" = "$pid_before"
+          test "$current" = "$RELEASE_DIR"
+          test "$restarts_after" = "$restarts_before"
+          test "$result" = "success"
+
+          sudo -n "$CONTROL" trading-log | tail -500 | tee "$RUNNER_TEMP/live.log"
+          LIVE_LOG="$RUNNER_TEMP/live.log" TARGET_SHA="$TARGET_SHA" /usr/bin/node <<'NODE'
+          const fs = require('node:fs');
+          const log = fs.readFileSync(process.env.LIVE_LOG, 'utf8');
+          const sha = process.env.TARGET_SHA;
+          const syncMarker = 'DISDEX_V96_OPERATOR_OVERRIDE_AUDIT_SYNC_PASS_NO_ORDERS_SENT';
+          const start = log.lastIndexOf(syncMarker);
+          if (start < 0) throw new Error('missing override audit sync pass');
+          const current = log.slice(start);
+          if (!current.includes(`"runtimeCommitSha":"${sha}"`)) throw new Error('new runtime SHA absent from LIVE log');
+          if (!current.includes('DISDEX_V96_V52_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT')) throw new Error('writeful preflight pass absent');
+          if (!current.includes('"event":"disdex-v96-v52-supervisor-start"')) throw new Error('supervisor start absent');
+          if (!current.includes('/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json')) throw new Error('normalized Kill Switch path absent');
+          if (/DISDEX_V96_V52_READONLY_PREFLIGHT_FAIL_CLOSED|DISDEX_V96_V52_LIVE_PREFLIGHT_FAILED|disdex-v96-v52-supervisor-fail-closed-hold|disdex-v96-v52-supervisor-failed/.test(current)) {
+            throw new Error('LIVE failure marker present after audit sync');
+          }
+          console.log(JSON.stringify({ status: 'LIVE_LOG_VERIFIED', runtimeCommitSha: sha }));
+          NODE
+
+          KILL_SWITCH="$KILL_SWITCH" /usr/bin/node <<'NODE'
+          const fs = require('node:fs');
+          const path = process.env.KILL_SWITCH;
+          if (!fs.existsSync(path)) {
+            console.log(JSON.stringify({ status: 'KILL_SWITCH_CLEAR', exists: false }));
+          } else {
+            const value = JSON.parse(fs.readFileSync(path, 'utf8'));
+            if (value.active === true) throw new Error(`Kill Switch active: ${value.reason || 'unknown'}`);
+            console.log(JSON.stringify({ status: 'KILL_SWITCH_CLEAR', exists: true, active: false }));
+          }
+          NODE
+
+          {
+            echo "release_sha=$TARGET_SHA"
+            echo "current_release=$current"
+            echo "service_state=$state_after"
+            echo "service_pid=$pid_after"
+            echo "restart_count=$restarts_after"
+            echo 'approval_renewed=true'
+            echo 'read_only_preflight_passed=true'
+            echo 'operator_override_audit_synced=true'
+            echo 'writeful_preflight_passed=true'
+            echo 'live_service_started=true'
+            echo 'order_resumption_authorized=true'
+            echo 'kill_switch_active=false'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail closed on activation error
+        if: failure()
+        shell: bash
+        run: |
+          set +e
+          sudo -n "$CONTROL" trading-stop
+          printf 'fail_closed_state='; sudo -n "$CONTROL" trading-state
+          printf 'fail_closed_pid='; sudo -n "$CONTROL" trading-pid
+          printf 'fail_closed_current='; sudo -n "$CONTROL" trading-current
+          systemctl show "$SERVICE" --property ActiveState,SubState,Result,NRestarts,MainPID --no-pager
