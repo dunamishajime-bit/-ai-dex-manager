@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "requestId": "bootstrap-vps-control-20260729",
+  "targetCommit": "workflow-head",
+  "enabled": true,
+  "reason": "Install the fixed helper, limited sudoers and read-only preflight unit for auditable GitHub Actions VPS operations."
+}
