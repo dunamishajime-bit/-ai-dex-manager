@@ -1,0 +1,95 @@
+name: Stage V96 V52 Release 0971185
+
+on:
+  pull_request:
+    branches:
+      - codex/vps-runtime-safety-sync
+    paths:
+      - '.github/workflows/vps-stage-release-0971185.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-vps-stage-0971185
+  cancel-in-progress: false
+
+jobs:
+  stage:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ops/v96-v52-stage-0971185'
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 120
+    env:
+      TARGET_SHA: 0971185d4688e48b1ee9c6e74a7658b5bce2bd96
+      RELEASES_DIR: /home/deploy/disdex-trading/releases
+      PYTHONPATH: /home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 0971185d4688e48b1ee9c6e74a7658b5bce2bd96
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Stage immutable release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
+          release="$RELEASES_DIR/$TARGET_SHA"
+          if [[ -e "$release" ]]; then
+            test -d "$release"
+            test ! -L "$release"
+            test -f "$release/.disdex-release-sha"
+            test "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" = "$TARGET_SHA"
+          else
+            tmp="$RELEASES_DIR/.tmp-$TARGET_SHA-$GITHUB_RUN_ID"
+            rm -rf "$tmp"
+            mkdir -p "$tmp"
+            git archive --format=tar HEAD | tar -xf - -C "$tmp"
+            printf '%s\n' "$TARGET_SHA" > "$tmp/.disdex-release-sha"
+            chmod 0640 "$tmp/.disdex-release-sha"
+            mv "$tmp" "$release"
+          fi
+          echo "RELEASE_DIR=$release" >> "$GITHUB_ENV"
+
+      - name: Install dependencies and validate release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cd "$RELEASE_DIR"
+          npm ci --no-audit --no-fund
+          bash -n scripts/ops/root/disdex-vps-control
+          bash -n scripts/ops/root/install-disdex-vps-control
+          bash -n scripts/ops/disdex-v96-v52-live.sh
+          bash -n scripts/ops/disdex-v96-v52-renew-approvals.sh
+          npm run strategy:disdex-v96-v52:preflight:readonly:selftest
+          npm run strategy:disdex-v52:contract
+          npm run strategy:disdex-v96:typecheck
+          npm run strategy:disdex-v96:selftest
+          npm run strategy:disdex-v96:frequency:selftest
+          npm run strategy:disdex-v96:execution:selftest
+          test "$(tr -d '[:space:]' < .disdex-release-sha)" = "$TARGET_SHA"
+          printf '%s\n' "$TARGET_SHA" > .disdex-release-ready
+          chmod 0640 .disdex-release-ready
+
+      - name: Confirm staging only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$(tr -d '[:space:]' < "$RELEASE_DIR/.disdex-release-ready")" = "$TARGET_SHA"
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
+          [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
+          {
+            echo "release_sha=$TARGET_SHA"
+            echo "release_dir=$RELEASE_DIR"
+            echo 'release_ready=true'
+            echo 'current_link_changed=false'
+            echo 'service_restarted=false'
+            echo 'orders_sent=false'
+            echo 'positions_changed=false'
+            echo 'runtime_state_changed=false'
+            echo 'approval_changed=false'
+          } >> "$GITHUB_STEP_SUMMARY"
