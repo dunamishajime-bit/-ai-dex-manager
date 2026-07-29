@@ -18,14 +18,34 @@ jobs:
     runs-on: [self-hosted, linux, x64, disdex-vps]
     timeout-minutes: 10
     steps:
-      - name: Verify installed fixed helper without VPS writes
+      - name: Diagnose installed fixed boundary without VPS writes
         shell: bash
         run: |
-          set -Eeuo pipefail
-          test -x /usr/local/sbin/disdex-vps-control
-          test -f /etc/systemd/system/disdex-v96-v52-preflight@.service
-          printf 'trading_state='; sudo -n /usr/local/sbin/disdex-vps-control trading-state
-          printf 'trading_pid='; sudo -n /usr/local/sbin/disdex-vps-control trading-pid
-          printf 'trading_cwd='; sudo -n /usr/local/sbin/disdex-vps-control trading-cwd
-          echo 'fixed_control_verified=true' >> "$GITHUB_STEP_SUMMARY"
-          echo 'vps_writes=false' >> "$GITHUB_STEP_SUMMARY"
+          set -u
+          helper=false
+          unit=false
+          sudo_helper=false
+          [[ -x /usr/local/sbin/disdex-vps-control ]] && helper=true
+          [[ -f /etc/systemd/system/disdex-v96-v52-preflight@.service ]] && unit=true
+          if [[ "$helper" == true ]] && sudo -n /usr/local/sbin/disdex-vps-control trading-state >/tmp/disdex-trading-state.txt 2>/tmp/disdex-helper-error.txt; then
+            sudo_helper=true
+          fi
+          printf 'runner_user=%s\n' "$(id -un)"
+          printf 'helper_installed=%s\n' "$helper"
+          printf 'preflight_unit_installed=%s\n' "$unit"
+          printf 'limited_sudo_works=%s\n' "$sudo_helper"
+          if [[ -s /tmp/disdex-helper-error.txt ]]; then
+            sed -E 's/(token|secret|password|private key)[^ ]*/\1=[REDACTED]/Ig' /tmp/disdex-helper-error.txt | head -20
+          fi
+          if [[ "$sudo_helper" == true ]]; then
+            printf 'trading_state='; cat /tmp/disdex-trading-state.txt
+            printf 'trading_pid='; sudo -n /usr/local/sbin/disdex-vps-control trading-pid
+            printf 'trading_cwd='; sudo -n /usr/local/sbin/disdex-vps-control trading-cwd
+          fi
+          {
+            echo "helper_installed=$helper"
+            echo "preflight_unit_installed=$unit"
+            echo "limited_sudo_works=$sudo_helper"
+            echo 'vps_writes=false'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [[ "$helper" == true && "$unit" == true && "$sudo_helper" == true ]]
