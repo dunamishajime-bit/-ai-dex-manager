@@ -52,8 +52,8 @@ DISDEX_V96_OPERATOR_OVERRIDE_FILE="$tmp/operator-override.json" \
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 cp -a "$parity_file" "$parity_file.bak.$timestamp"
 cp -a "$override_file" "$override_file.bak.$timestamp"
-install -o deploy -g deploy -m 0600 "$tmp/parity.json" "$parity_file.new.$sha"
-install -o deploy -g deploy -m 0600 "$tmp/operator-override.json" "$override_file.new.$sha"
+install -m 0600 "$tmp/parity.json" "$parity_file.new.$sha"
+install -m 0600 "$tmp/operator-override.json" "$override_file.new.$sha"
 mv -f "$parity_file.new.$sha" "$parity_file"
 mv -f "$override_file.new.$sha" "$override_file"
 
