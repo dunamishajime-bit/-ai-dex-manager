@@ -1,3 +1,4 @@
+# Exact-SHA staging request for the final validated candidate.
 name: Stage V96 V52 Release 7d565b3
 
 on:
