@@ -35,10 +35,11 @@ async function main() {
     if (required("DISDEX_V96_EXECUTION_PARITY_REVIEW_ACKNOWLEDGEMENT") !== ACKNOWLEDGEMENT) {
         throw new Error(`The exact acknowledgement ${ACKNOWLEDGEMENT} is required.`);
     }
-    const path = resolve(required("DISDEX_V96_EXECUTION_PARITY_FILE"));
+    const sourcePath = resolve(required("DISDEX_V96_EXECUTION_PARITY_FILE"));
+    const outputPath = resolve(process.argv[2] || sourcePath);
     const targetCommitSha = requireSha(required("DISDEX_V96_APPROVED_COMMIT_SHA"), "DISDEX_V96_APPROVED_COMMIT_SHA");
     const reviewer = required("DISDEX_V96_EXECUTION_PARITY_REVIEWER");
-    const current = JSON.parse(await readFile(path, "utf8")) as DisDexV96ExecutionParityApproval;
+    const current = JSON.parse(await readFile(sourcePath, "utf8")) as DisDexV96ExecutionParityApproval;
     if (current.status !== "APPROVED") throw new Error("Existing execution parity must already be APPROVED.");
     if (current.strategyId !== DISDEX_V96_STRATEGY_ID) throw new Error("Existing execution parity strategyId mismatch.");
     if (!current.allocationParityPassed || !current.signalChronologyParityPassed || !current.orderQuantityParityPassed || !current.restartRecoveryPassed) {
@@ -59,10 +60,11 @@ async function main() {
         reviewer,
         reviewedAt: new Date().toISOString(),
     };
-    await atomicWriteJson(path, renewed);
+    await atomicWriteJson(outputPath, renewed);
     console.log(JSON.stringify({
         status: "DISDEX_V96_EXECUTION_PARITY_RENEWED",
-        path,
+        sourcePath,
+        outputPath,
         productionCommitSha: renewed.productionCommitSha,
         researchCommitSha: renewed.researchCommitSha,
         configFingerprint: renewed.configFingerprint,
