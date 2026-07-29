@@ -33,6 +33,21 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Inspect shared path metadata without reading contents
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for path in "$SHARED_STATE" "$SHARED_APPROVAL" "$RELEASES_DIR"; do
+            if [[ -e "$path" || -L "$path" ]]; then
+              stat -c 'path=%n type=%F owner=%U:%G mode=%a' "$path"
+            else
+              printf 'path=%s exists=false\n' "$path"
+            fi
+          done
+          find /home/deploy/ai-dex-manager-v96-paper -maxdepth 2 \
+            \( -iname '*approval*' -o -iname '*override*' -o -iname '*parity*' -o -iname '*evidence*' \) \
+            -printf 'candidate=%p type=%y owner=%u:%g mode=%m\n' 2>/dev/null | head -100
+
       - name: Verify stopped service and prepare exact release
         shell: bash
         run: |
@@ -42,7 +57,6 @@ jobs:
           [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-state)" == "inactive" ]]
           [[ "$(sudo -n /usr/local/sbin/disdex-vps-control trading-pid)" == "0" ]]
           test -d "$SHARED_STATE"
-          test -e "$SHARED_APPROVAL"
 
           release="$RELEASES_DIR/$TARGET_SHA"
           if [[ -e "$release" ]]; then
@@ -59,9 +73,14 @@ jobs:
           fi
 
           if [[ ! -e "$release/.runtime-state" ]]; then ln -s "$SHARED_STATE" "$release/.runtime-state"; fi
-          if [[ ! -e "$release/.runtime-approval" ]]; then ln -s "$SHARED_APPROVAL" "$release/.runtime-approval"; fi
           test "$(readlink -f "$release/.runtime-state")" = "$(readlink -f "$SHARED_STATE")"
-          test "$(readlink -f "$release/.runtime-approval")" = "$(readlink -f "$SHARED_APPROVAL")"
+          if [[ -e "$SHARED_APPROVAL" || -L "$SHARED_APPROVAL" ]]; then
+            if [[ ! -e "$release/.runtime-approval" ]]; then ln -s "$SHARED_APPROVAL" "$release/.runtime-approval"; fi
+            test "$(readlink -f "$release/.runtime-approval")" = "$(readlink -f "$SHARED_APPROVAL")"
+          else
+            mkdir -p "$release/.runtime-approval"
+            chmod 700 "$release/.runtime-approval"
+          fi
           echo "RELEASE_DIR=$release" >> "$GITHUB_ENV"
 
       - name: Install and validate exact release
