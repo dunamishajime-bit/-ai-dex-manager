@@ -44,8 +44,8 @@ bash -n "$live_launcher"
 bash -n "$approval_launcher"
 grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"
 grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' "$live_source"
-grep -q 'ExecStart=/usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly' "$preflight_source"
-grep -q 'ExecStart=/usr/bin/bash scripts/ops/disdex-v96-v52-renew-approvals.sh' "$approval_source"
+grep -q 'ExecStart=/usr/bin/env DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly' "$preflight_source"
+grep -q 'ExecStart=/usr/bin/env DISDEX_V96_APPROVED_COMMIT_SHA=%i DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-renew-approvals.sh' "$approval_source"
 ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$helper_source"
 
 sudoers_tmp="$(mktemp)"
@@ -62,6 +62,7 @@ for path in \
   /etc/systemd/system/disdex-v96-v52-live.service.d/readonly-preflight.conf \
   /etc/systemd/system/disdex-v96-v52-live.service.d/runtime-commit.conf \
   /etc/systemd/system/disdex-v96-v52-preflight@.service \
+  /etc/systemd/system/disdex-v96-v52-approval@.service \
   /usr/local/sbin/disdex-vps-control; do
   if [[ -f "$path" ]]; then cp -a "$path" "$backup_root/$(basename "$path")"; fi
 done
