@@ -4,7 +4,7 @@ import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { DISDEX_V13D_V11EQ_V96_RUNTIME } from "../config/disdexStockRouterV13DV11EqRuntime";
-import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
+import { DISDEX_V96_LIVE_PROMOTION } from "../config/disdexV96Runtime";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { assertDisDexV96LiveGates, type DisDexV96ExecutionParityApproval, type DisDexV96ForwardEvidenceApproval } from "../lib/disdex-v96-live-gates";
 import { readDisDexV96KillSwitch, type DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
@@ -57,8 +57,8 @@ export async function readStateSummary(path: string, label: string): Promise<Rea
     return {
         path,
         exists: true,
-        utcDay: typeof state.utcDay === "string" ? state.utcDay : undefined,
-        tripped: dailyRisk.tripped === true || portfolioLatch.tripped === true || v52Latch.tripped === true,
+        utcDay: typeof state.utcDay === 'string' ? state.utcDay : typeof dailyRisk.utcDay === 'string' ? dailyRisk.utcDay : undefined,
+        tripped: dailyRisk.tripped === true || portfolioLatch.tripped === true || v52Latch.tripped === true || state.dailyLossTripped === true,
         manualReview: typeof state.manualReviewReason === "string" && state.manualReviewReason.length > 0,
         pending: Boolean(state.pending),
     };
@@ -121,8 +121,8 @@ export async function runReadOnlyPreflight() {
 
     const currentUtcDay = new Date().toISOString().slice(0, 10);
     const savedUtcDay = before.stock.utcDay || before.crypto.utcDay;
-    const rolloverRequired = Boolean(savedUtcDay && savedUtcDay !== currentUtcDay);
-    const rolloverWouldTrip = before.stock.tripped || before.crypto.tripped;
+    const rolloverRequired = Boolean((before.crypto.utcDay && before.crypto.utcDay !== currentUtcDay) || (before.stock.utcDay && before.stock.utcDay !== currentUtcDay));
+    const rolloverWouldTrip = rolloverRequired ? false : before.stock.tripped || before.crypto.tripped;
     const after = {
         crypto: await readStateSummary(paths.cryptoState, "crypto-after"),
         stock: await readStateSummary(paths.stockState, "stock-after"),
@@ -142,11 +142,12 @@ export async function runReadOnlyPreflight() {
         operatorOverrideApproved: gate.operatorOverrideApproved,
         forwardEvidenceApplicable: Boolean(forwardEvidence),
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
-        v96DailyLossLimitPct: DISDEX_V96_RUNTIME.maximumDailyLossPct,
+        v96DailyLossLimitPct: DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct,
         v52DailyLossLimitPct: 3.5,
-        statePaths: { combinedRoot: paths.combinedRoot, crypto: paths.cryptoState, stock: paths.stock },
+        statePaths: { combinedRoot: paths.combinedRoot, crypto: paths.cryptoState, stock: paths.stockState },
         currentUtcDay,
         savedUtcDay,
+        savedUtcDays: { crypto: before.crypto.utcDay, stock: before.stock.utcDay },
         rolloverRequired,
         rolloverWouldTrip,
         resetReasonPlanned: rolloverRequired ? "UTC_DAY_ROLLOVER" : undefined,
