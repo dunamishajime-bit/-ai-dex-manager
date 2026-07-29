@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || {
+  printf 'run this installer as root\n' >&2
+  exit 1
+}
+
+repo_root="${1:-}"
+[[ "$repo_root" == /* && -d "$repo_root/.git" ]] || {
+  printf 'usage: install-disdex-vps-control /absolute/path/to/repository\n' >&2
+  exit 2
+}
+
+helper_source="${repo_root}/scripts/ops/root/disdex-vps-control"
+unit_source="${repo_root}/ops/systemd/disdex-v96-v52-preflight@.service"
+[[ -f "$helper_source" && -f "$unit_source" ]] || {
+  printf 'fixed helper or preflight unit source is missing\n' >&2
+  exit 2
+}
+
+bash -n "$helper_source"
+grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"
+grep -q 'ExecStart=/usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly' "$unit_source"
+! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$helper_source"
+
+sudoers_tmp="$(mktemp)"
+trap 'rm -f "$sudoers_tmp"' EXIT
+printf '%s\n' 'disdex-runner ALL=(root) NOPASSWD: /usr/local/sbin/disdex-vps-control *' > "$sudoers_tmp"
+chmod 0600 "$sudoers_tmp"
+visudo -cf "$sudoers_tmp"
+
+install -o root -g root -m 0755 "$helper_source" /usr/local/sbin/disdex-vps-control
+install -o root -g root -m 0440 "$sudoers_tmp" /etc/sudoers.d/disdex-vps-control
+install -o root -g root -m 0644 "$unit_source" /etc/systemd/system/disdex-v96-v52-preflight@.service
+install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading
+install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading/releases
+install -d -o disdex-runner -g deploy -m 2770 /home/deploy/disdex-ops
+systemctl daemon-reload
+
+sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-state >/dev/null
+sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-pid >/dev/null
+sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-cwd >/dev/null
+
+printf 'DISDEX_VPS_CONTROL_INSTALL_PASS\n'
+printf 'servicesRestarted=false\n'
+printf 'ordersSent=false\n'
+printf 'runtimeStateChanged=false\n'
