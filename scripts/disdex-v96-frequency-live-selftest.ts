@@ -65,7 +65,7 @@ function main() {
     assert.equal(DISDEX_V96_ALLOCATION.penguTargetGross, 1.15);
     assert.equal(DISDEX_V96_ALLOCATION.totalGrossCap, 2);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 0.15);
-    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 2);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 5);
     assert.equal(DISDEX_V96_RUNTIME.minimumOrderNotionalUsd, 5);
     assert.equal(DISDEX_V96_RUNTIME.rebalanceTolerancePct, 1);
     assert.equal(DISDEX_V96_RUNTIME.closeUnmanagedPositions, false);
