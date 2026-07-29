@@ -62,6 +62,7 @@ DISDEX_V96_PARITY_REVIEWER="${DISDEX_V96_EXECUTION_PARITY_REVIEWER:?reviewer is 
   node_modules/.bin/tsx scripts/disdex-v96-write-execution-parity-approval.ts "$golden" "$tmp/parity.json"
 /usr/bin/npm run strategy:disdex-v96:override:create -- "$tmp/operator-override.json"
 
+DISDEX_V96_RUNTIME_COMMIT_SHA="$sha" \
 DISDEX_V96_EXECUTION_PARITY_FILE="$tmp/parity.json" \
 DISDEX_V96_OPERATOR_OVERRIDE_FILE="$tmp/operator-override.json" \
   /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly
@@ -74,7 +75,8 @@ install -m 0600 "$tmp/operator-override.json" "$override_file.new.$sha"
 mv -f "$parity_file.new.$sha" "$parity_file"
 mv -f "$override_file.new.$sha" "$override_file"
 
-/usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly
+DISDEX_V96_RUNTIME_COMMIT_SHA="$sha" \
+  /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly
 printf 'DISDEX_V96_V52_APPROVAL_RENEWAL_PASS\n'
 printf 'approvedCommitSha=%s\n' "$sha"
 printf 'ordersSent=false\n'
