@@ -1,0 +1,31 @@
+name: Verify Fixed VPS Control
+
+on:
+  pull_request:
+    branches:
+      - feature/v96-v52-dual-slot-live
+    paths:
+      - '.github/workflows/verify-vps-control-pr.yml'
+      - 'scripts/ops/root/disdex-vps-control'
+      - 'ops/systemd/disdex-v96-v52-preflight@.service'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'codex/vps-runtime-safety-sync'
+    runs-on: [self-hosted, linux, x64, disdex-vps]
+    timeout-minutes: 10
+    steps:
+      - name: Verify installed fixed helper without VPS writes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -x /usr/local/sbin/disdex-vps-control
+          test -f /etc/systemd/system/disdex-v96-v52-preflight@.service
+          printf 'trading_state='; sudo -n /usr/local/sbin/disdex-vps-control trading-state
+          printf 'trading_pid='; sudo -n /usr/local/sbin/disdex-vps-control trading-pid
+          printf 'trading_cwd='; sudo -n /usr/local/sbin/disdex-vps-control trading-cwd
+          echo 'fixed_control_verified=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'vps_writes=false' >> "$GITHUB_STEP_SUMMARY"
