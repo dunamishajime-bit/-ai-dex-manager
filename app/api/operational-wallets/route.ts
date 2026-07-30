@@ -151,6 +151,15 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
   const portfolioUsd = Number(
     trackedHoldings.reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0).toFixed(6),
   );
+  const stableBalanceUsd = trackedHoldings
+    .filter((holding) => ASTER_STABLE_ASSET_SYMBOLS.has(holding.symbol))
+    .reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0);
+  const accountBalanceCandidate = [
+    account?.totalWalletBalance,
+    account?.totalMarginBalance,
+    stableBalanceUsd,
+  ].map(toFiniteNumber).find((value) => value > 0) ?? 0;
+  const accountBalanceUsd = Number(accountBalanceCandidate.toFixed(8));
   const availableBalanceUsd = Number(toFiniteNumber(account?.availableBalance).toFixed(8));
   const previousHighWaterUsd = Number(wallet.lastPortfolioHighWaterUsd || 0);
   const portfolioHighWaterUsd = portfolioUsd > 0
@@ -166,6 +175,9 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
     ...wallet,
     lastBalanceWei: toAsterBalanceWei(availableBalanceUsd).toString(),
     lastBalanceFormatted: availableBalanceUsd.toFixed(8),
+    lastAsterAccountBalanceUsd: accountBalanceUsd,
+    lastAsterAvailableBalanceUsd: availableBalanceUsd,
+    lastAsterBalanceUpdatedAt: new Date().toISOString(),
     lastPortfolioUsd: portfolioUsd,
     lastPortfolioHighWaterUsd: portfolioHighWaterUsd,
     lastPortfolioDrawdownPct: portfolioDrawdownPct,

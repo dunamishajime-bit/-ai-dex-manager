@@ -38,6 +38,11 @@ export type OperationalWalletRecord = {
   depositDetectedAt?: string;
   lastBalanceWei?: string;
   lastBalanceFormatted?: string;
+  /** AsterDex account-level wallet balance, kept separate from portfolio valuation. */
+  lastAsterAccountBalanceUsd?: number;
+  /** AsterDex balance available for new orders. */
+  lastAsterAvailableBalanceUsd?: number;
+  lastAsterBalanceUpdatedAt?: string;
   lastPortfolioUsd?: number;
   lastPortfolioHighWaterUsd?: number;
   lastPortfolioDrawdownPct?: number;
