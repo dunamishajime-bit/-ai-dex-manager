@@ -12,6 +12,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { TradeNotificationToast } from "@/components/features/TradeNotificationToast";
 import ParticleBackground from "@/components/layout/ParticleBackground";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { LiveProductionBanner } from "@/components/layout/LiveProductionBanner";
 import { LoginPage } from "@/components/features/LoginPage";
 import LearningIndicator from "@/components/features/LearningIndicator";
 import { CurrencyProvider } from "@/context/CurrencyContext";
@@ -79,6 +80,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <TopBar />
+          <LiveProductionBanner />
           <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>
         </div>
         <FlashEffect />

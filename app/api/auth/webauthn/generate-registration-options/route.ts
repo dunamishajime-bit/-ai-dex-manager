@@ -3,7 +3,7 @@ import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { cookies } from "next/headers";
 import { getWebAuthnRequestContext } from "@/lib/server/webauthn-origin";
 
-const RP_NAME = "Professional DisManager";
+const RP_NAME = "DISTerminal";
 
 export async function POST(req: NextRequest) {
     try {

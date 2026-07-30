@@ -1,62 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";
+import { ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
 
 import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 
-function SummaryCard({
-  title,
-  value,
-  text,
-  tone = "default",
-}: {
-  title: string;
-  value: string;
-  text: string;
-  tone?: "default" | "profit" | "loss";
-}) {
+function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
   return (
     <div className="panel-gold rounded-[24px] p-4">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>
-      <div
-        className={`mt-2 text-[1.45rem] font-black ${
-          tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"
-        }`}
-      >
-        {value}
-      </div>
-      <div className="mt-1 text-[11px] leading-5 text-white/78">{text}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/72">{title}</div>
+      <div className={`mt-2 text-2xl font-black ${tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"}`}>{value}</div>
+      <div className="mt-1 text-[11px] leading-5 text-white/72">{detail}</div>
     </div>
   );
 }
 
-function QuickLink({
-  href,
-  title,
-  text,
-  icon: Icon,
-}: {
-  href: string;
-  title: string;
-  text: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
+function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: string; detail: string; icon: typeof Wallet }) {
   return (
-    <Link
-      href={href}
-      className="group rounded-[22px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.64))] px-4 py-4 transition hover:border-gold-300/36"
-    >
+    <Link href={href} className="group rounded-[22px] border border-gold-400/16 bg-black/20 p-4 transition hover:border-gold-300/40">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm font-bold text-white">
-          <Icon className="h-4 w-4 text-gold-100" />
-          {title}
-        </div>
-        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />
+        <span className="flex items-center gap-2 text-sm font-bold text-white"><Icon className="h-4 w-4 text-gold-100" />{title}</span>
+        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-1" />
       </div>
-      <p className="mt-2 text-[11px] leading-5 text-white/76">{text}</p>
+      <p className="mt-2 text-[11px] leading-5 text-white/72">{detail}</p>
     </Link>
   );
 }
@@ -64,74 +33,37 @@ function QuickLink({
 export default function HomePage() {
   const { wallet } = useOperationalWallet();
   const { formatPrice } = useCurrency();
-  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);
-  const collateralUsd = holdings
-    .filter((holding) => holding.symbol === "USDT" || holding.symbol === "USDF")
-    .reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0);
-  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);
-  const isWalletRunning = wallet?.status === "running";
+  const balance = Number(wallet?.lastAsterAccountBalanceUsd ?? wallet?.lastPortfolioUsd ?? 0);
+  const available = Number(wallet?.lastAsterAvailableBalanceUsd ?? wallet?.lastBalanceFormatted ?? 0);
+  const positions = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0).length;
 
   return (
-    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
-      <div className="absolute inset-0 bg-[url('/backgrounds/login_bg.png')] bg-cover bg-center opacity-[0.22] mix-blend-screen" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />
-
-      <div className="relative z-10 space-y-3 p-3 md:p-4">
-        <section className="grid gap-3 xl:grid-cols-[1.08fr_0.92fr]">
-          <div className="panel-gold rounded-[30px] p-4 md:p-5">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">
-              <Wallet className="h-3.5 w-3.5" />
-              Professional DisManager
-            </div>
-            <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">
-              combined を 3 lane で運用
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">
-              本番戦略は combined 固定です。PENGU は BTC 15m GoldCat、HYPE は freq、
-              ETH は reclaim_balanced を使って別レーンで判定し、AsterDex で実行します。
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                BTC 15m GoldCat
-              </span>
-              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                PENGU 15m sizing
-              </span>
-              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                HYPE freq lane
-              </span>
-              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                ETH reclaim lane
-              </span>
-              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                AsterDex execution
-              </span>
+    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.06)] md:p-4">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />
+      <div className="relative z-10 space-y-3">
+        <section className="grid gap-3 xl:grid-cols-[1.15fr_0.85fr]">
+          <div className="panel-gold rounded-[30px] p-5 md:p-7">
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
+            <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">V96 Crypto + V52 Stock 統合LIVE</h1>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEX上のV96 CryptoとV52 Stockを、同一の安全ゲートと口座状態で監視します。ここに表示する稼働状態は、確認済みのProduction構成に限定します。</p>
+            <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
+              <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5 text-emerald-100">LIVE / AsterDirectTradeExecutor</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V96損失上限 {config.v96DailyLossPct}%</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52損失上限 {config.v52DailyLossPct}%</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">最大Gross {config.maximumGross.toFixed(1)} / PENGU {config.penguInitialGross.toFixed(2)}</span>
             </div>
           </div>
-
-          <div className="grid gap-3">
-            <SummaryCard
-              title="Portfolio"
-              value={formatPrice(portfolioUsd)}
-              text={`Collateral ${formatPrice(collateralUsd)} / 保有資産 ${holdings.length}`}
-            />
-            <SummaryCard
-              title="Execution"
-              value={isWalletRunning ? "稼働中" : "停止中"}
-              text="PENGU / HYPE / ETH の 3 lane を combined で評価します。"
-              tone={isWalletRunning ? "profit" : "loss"}
-            />
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <SummaryCard title="AsterDEX残高" value={formatPrice(balance)} detail={`利用可能残高 ${formatPrice(available)}`} tone="profit" />
+            <SummaryCard title="統合LIVE状態" value="稼働構成" detail={`管理対象の表示件数 ${positions} / 実状態は各APIを優先`} />
           </div>
         </section>
-
-        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <QuickLink href="/wallets" title="運用ウォレット" text="残高、USDT/USDF、運用状態を確認します。" icon={Wallet} />
-          <QuickLink href="/positions" title="ポジション" text="combined の現在ポジションと lane 状態を確認します。" icon={BarChart3} />
-          <QuickLink href="/performance" title="成績" text="取引履歴と期間別のパフォーマンスを確認します。" icon={Coins} />
-          <QuickLink href="/settings" title="設定" text="運用設定と runtime control を確認します。" icon={Settings} />
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <QuickLink href="/positions" title="ダッシュボード" detail="V96 CryptoとV52 Stockの状態、リスクゲート、保有状況を確認します。" icon={BarChart3} />
+          <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
+          <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
+          <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
         </section>
-
         <LiveDecisionPanel compact />
       </div>
     </main>
