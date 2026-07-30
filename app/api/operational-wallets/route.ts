@@ -31,7 +31,7 @@ function sanitizeWallet(wallet: OperationalWalletRecord | null): WalletResponse 
 }
 
 function walletChainName(chainId = 56) {
-  return chainId === 56 ? "BNB Chain" : `Chain ${chainId}`;
+  return chainId === 56 ? "AsterDEX" : `AsterDEX Chain ${chainId}`;
 }
 
 function isValidAddress(value?: string) {
@@ -173,6 +173,7 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
 
   return {
     ...wallet,
+    asterAccountAddress: config.userAddress,
     lastBalanceWei: toAsterBalanceWei(availableBalanceUsd).toString(),
     lastBalanceFormatted: availableBalanceUsd.toFixed(8),
     lastAsterAccountBalanceUsd: accountBalanceUsd,
@@ -213,7 +214,8 @@ async function refreshWalletBalance(wallet: OperationalWalletRecord) {
     console.warn("Failed to refresh Aster operational wallet balance:", error);
   }
 
-  return wallet;
+  const config = loadAsterDexClientConfig();
+  return config?.userAddress ? { ...wallet, asterAccountAddress: config.userAddress } : wallet;
 }
 
 async function resolveWallet(userId?: string, email?: string) {

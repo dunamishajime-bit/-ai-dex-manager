@@ -48,6 +48,23 @@ export type AsterDexPositionRisk = {
   positionSide?: string;
 };
 
+export type AsterDexUserTrade = {
+  id?: number | string;
+  orderId?: number | string;
+  symbol?: string;
+  side?: "BUY" | "SELL" | string;
+  positionSide?: "BOTH" | "LONG" | "SHORT" | string;
+  price?: string;
+  qty?: string;
+  quoteQty?: string;
+  commission?: string;
+  commissionAsset?: string;
+  realizedPnl?: string;
+  buyer?: boolean;
+  maker?: boolean;
+  time?: number;
+};
+
 type RequestMethod = "GET" | "POST" | "DELETE" | "PUT";
 
 type RequestParamValue = string | number | boolean | null | undefined;
@@ -215,6 +232,16 @@ export class AsterDexClient {
 
   getPositionRisk(symbol?: string) {
     return this.signedRequest<AsterDexPositionRisk[]>("GET", "/fapi/v3/positionRisk", symbol ? [["symbol", symbol]] : []);
+  }
+
+  /** Read-only account fills. This endpoint never places or cancels orders. */
+  getUserTrades(symbol: string, options: { startTime?: number; endTime?: number; limit?: number } = {}) {
+    return this.signedRequest<AsterDexUserTrade[]>("GET", "/fapi/v3/userTrades", [
+      ["symbol", symbol],
+      ["startTime", options.startTime],
+      ["endTime", options.endTime],
+      ["limit", options.limit ?? 500],
+    ]);
   }
 
   getAgents() {

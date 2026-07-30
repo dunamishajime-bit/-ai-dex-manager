@@ -29,6 +29,8 @@ export type OperationalWalletRecord = {
   encryptedPrivateKey: string;
   chainId: number;
   chainName: string;
+  /** Public AsterDEX account address used by the server-side read-only account API. */
+  asterAccountAddress?: string;
   createdAt: string;
   updatedAt: string;
   status: OperationalWalletStatus;
