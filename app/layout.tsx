@@ -1,15 +1,12 @@
 "use client";
-
 import "./globals.css";
 import { usePathname } from "next/navigation";
-
 import { SimulationProvider } from "@/context/SimulationContext";
 import { FlashEffect } from "@/components/ui/FlashEffect";
 import { Web3Provider } from "@/context/Web3Context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
-import { TradeNotificationToast } from "@/components/features/TradeNotificationToast";
 import ParticleBackground from "@/components/layout/ParticleBackground";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { LiveProductionBanner } from "@/components/layout/LiveProductionBanner";
@@ -22,25 +19,20 @@ import {
   PUBLIC_RESET_PASSWORD_ENABLED,
   SITE_BRAND_NAME,
 } from "@/lib/site-access";
-
 const PUBLIC_PATHS = [
   "/login",
   ...(PUBLIC_RESET_PASSWORD_ENABLED ? ["/reset-password"] : []),
   ...(PUBLIC_REGISTER_ENABLED ? ["/register"] : []),
 ];
-
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const pathname = usePathname();
-
   if (pathname === "/admin" && PUBLIC_ADMIN_ENABLED) {
     return <>{children}</>;
   }
-
   if (PUBLIC_PATHS.some((path) => pathname?.startsWith(path))) {
     return <>{children}</>;
   }
-
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-cyber-black">
@@ -51,29 +43,22 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
   if (!isAuthenticated) {
     return <LoginPage />;
   }
-
   return <>{children}</>;
 }
-
 function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
-
   const isAdmin = pathname === "/admin" && PUBLIC_ADMIN_ENABLED;
   const isPublicPath = PUBLIC_PATHS.some((path) => pathname?.startsWith(path));
-
   if (!isAuthenticated && !isAdmin && !isPublicPath) {
     return <AuthGuard>{children}</AuthGuard>;
   }
-
   if (isPublicPath) {
     return <AuthGuard>{children}</AuthGuard>;
   }
-
   return (
     <AuthGuard>
       <div className="flex h-screen overflow-hidden bg-cyber-black text-white">
@@ -84,14 +69,12 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>
         </div>
         <FlashEffect />
-        <TradeNotificationToast />
         <LearningIndicator />
         <BottomNav />
       </div>
     </AuthGuard>
   );
 }
-
 export default function RootLayout({
   children,
 }: {
