@@ -1,4 +1,4 @@
-export const DIST_TERMINAL_LIVE_CONFIG = {
+﻿export const DIST_TERMINAL_LIVE_CONFIG = {
   productName: "DISTerminal",
   strategyLabel: "V96 Crypto + V52 Stock 統合LIVE",
   executionVenue: "AsterDEX",
