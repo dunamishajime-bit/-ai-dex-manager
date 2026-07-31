@@ -72,6 +72,7 @@ export const DISDEX_V96_RUNTIME = {
     mode: "LIVE_READY" as const,
     liveTradingEnabled: true,
     maximumGross: DISDEX_V96_ALLOCATION.totalGrossCap,
+    minimumExecutionLeverage: 3,
     cashReservePct: 2,
     maximumSlippageBps: 35,
     minimumOrderNotionalUsd: 5,
@@ -86,5 +87,5 @@ export const DISDEX_V96_RUNTIME = {
     operatorOverrideStatus: "IMPLEMENTED_REQUIRED_WHEN_FORWARD_NOT_APPROVED",
     dailyLossLimitStatus: "IMPLEMENTED_PORTFOLIO_MAX_5_PERCENT",
     killSwitchStatus: "IMPLEMENTED_FLATTEN_MANAGED_REDUCE_ONLY",
-    liveBlockReason: "LIVE requires fresh execution parity and a fresh exact-commit Operator Override for PENGU Gross 1.15 and total Gross 2.5, daily loss controls, Kill Switch configuration, credentials, migrated state when positions are retained, and explicit service handoff.",
+    liveBlockReason: "LIVE requires fresh execution parity and a fresh exact-commit Operator Override for PENGU Gross 1.15 and total Gross 2.5, authenticated managed-symbol leverage of at least 3x, daily loss controls, Kill Switch configuration, credentials, migrated state when positions are retained, and explicit service handoff.",
 } as const;
