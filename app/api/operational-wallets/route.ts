@@ -12,6 +12,7 @@ import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/
 import { appendPortfolioSnapshot } from "@/lib/server/portfolio-snapshot-db";
 import { encryptVaultSecret } from "@/lib/server/wallet-vault";
 import type {
+  AsterAccountSnapshot,
   OperationalWalletHolding,
   OperationalWalletRecord,
   OperationalWalletStatus,
@@ -22,6 +23,16 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 type WalletResponse = Omit<OperationalWalletRecord, "encryptedPrivateKey">;
+
+function toAsterAccountSnapshot(wallet: OperationalWalletRecord): AsterAccountSnapshot {
+  return {
+    asterAccountAddress: wallet.asterAccountAddress,
+    lastAsterAccountBalanceUsd: wallet.lastAsterAccountBalanceUsd,
+    lastAsterAvailableBalanceUsd: wallet.lastAsterAvailableBalanceUsd,
+    lastAsterBalanceUpdatedAt: wallet.lastAsterBalanceUpdatedAt,
+    trackedHoldings: wallet.trackedHoldings,
+  };
+}
 
 function sanitizeWallet(wallet: OperationalWalletRecord | null): WalletResponse | null {
   if (!wallet) return null;
@@ -297,7 +308,8 @@ export async function GET(req: NextRequest) {
   try {
     const wallet = await resolveWallet(userId, email);
     if (!wallet || wallet.deletedAt) {
-      return NextResponse.json({ ok: true, wallet: null });
+      const probe = await refreshWalletBalanceFromAster({ lastPortfolioHighWaterUsd: 0 } as OperationalWalletRecord);
+        return NextResponse.json({ ok: true, wallet: null, asterAccount: probe ? toAsterAccountSnapshot(probe) : null });
     }
 
     const normalized = await normalizeWalletOwnerIdentity(wallet, userId, email, displayName);
@@ -313,7 +325,7 @@ export async function GET(req: NextRequest) {
       });
     }
     await syncUserWalletMetadata(refreshed, userId, email);
-    return NextResponse.json({ ok: true, wallet: sanitizeWallet(refreshed) });
+    return NextResponse.json({ ok: true, wallet: sanitizeWallet(refreshed), asterAccount: toAsterAccountSnapshot(refreshed) });
   } catch (error) {
     return NextResponse.json(
       {

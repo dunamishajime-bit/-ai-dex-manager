@@ -19,6 +19,8 @@ export type OperationalWalletHolding = {
   isNative?: boolean;
 };
 
+export type AsterAccountSnapshot = Pick<OperationalWalletRecord, "asterAccountAddress" | "lastAsterAccountBalanceUsd" | "lastAsterAvailableBalanceUsd" | "lastAsterBalanceUpdatedAt" | "trackedHoldings">;
+
 export type OperationalWalletRecord = {
   id: string;
   userId: string;
