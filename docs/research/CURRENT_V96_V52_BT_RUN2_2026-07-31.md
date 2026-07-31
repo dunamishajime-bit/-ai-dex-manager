@@ -1,0 +1,1 @@
+Temporary research-only rerun using verified Binance monthly USD-M klines for Crypto history and the active V96/V52 release contract `ac421acb05e771afc99ed916d11948ca95370d32`. No LIVE, VPS, order, position, approval, or runtime-state changes.
