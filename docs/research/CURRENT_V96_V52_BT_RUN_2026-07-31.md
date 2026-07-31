@@ -1,0 +1,1 @@
+Temporary research-only trigger for the current V96/V52 one-year backtest at active release `ac421acb05e771afc99ed916d11948ca95370d32`. No LIVE, VPS, order, position, approval, or runtime-state changes.
