@@ -1,0 +1,46 @@
+name: PENGU Reversal Ensemble V38
+
+on:
+  push:
+    branches:
+      - research/pengu-adaptive-72h-v36
+    paths:
+      - scripts/research_lab_pengu_adaptive_72h_v36.py
+      - scripts/research_lab_pengu_reversal_ensemble_v38.py
+      - .github/workflows/pengu-reversal-ensemble-v38.yml
+  pull_request:
+    paths:
+      - scripts/research_lab_pengu_adaptive_72h_v36.py
+      - scripts/research_lab_pengu_reversal_ensemble_v38.py
+      - .github/workflows/pengu-reversal-ensemble-v38.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_pengu_adaptive_72h_v36.py scripts/research_lab_pengu_reversal_ensemble_v38.py
+      - name: Run PENGU reversal ensemble frozen audit
+        run: python scripts/research_lab_pengu_reversal_ensemble_v38.py
+      - name: Upload V38 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-reversal-ensemble-v38
+          path: |
+            .research-state/pengu-reversal-ensemble-v38.json
+            .research-state/pengu-reversal-ensemble-v38.md
+          retention-days: 30
