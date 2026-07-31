@@ -2,7 +2,8 @@
 const nextConfig = {
     // Keep production builds viable on the 2 GiB VPS without changing runtime trading code.
     experimental: {
-        cpus: 1,`r`n        webpackBuildWorker: true,
+        cpus: 1,
+        webpackBuildWorker: true,
     },
     webpack: (config) => {
         config.resolve.alias = {
