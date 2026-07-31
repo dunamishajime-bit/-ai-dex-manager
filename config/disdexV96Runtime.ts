@@ -2,12 +2,12 @@ export const DISDEX_V96_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as 
 
 export const DISDEX_V96_ALLOCATION = {
     researchVersion: 96,
-    productionRevision: "CORE_VOLUME50_TURNOVER075_LIVE_R1",
+    productionRevision: "CORE_VOLUME50_TURNOVER075_LIVE_R2_GROSS_2P5_PENGU_1P15",
     historicalResearchPr: 73,
     historicalStatus: "V96_FREQUENCY_UPLIFT_HISTORICAL_CLUSTER_USER_APPROVED_FOR_LIVE",
     penguSignalLineage: "PENGU_V67_REPLAYED_BY_PRODUCTION_V46_SIGNAL",
     penguTargetGross: 1.15,
-    totalGrossCap: 2,
+    totalGrossCap: 2.5,
     minimumActivePenguClip: 0.50,
     corePolicy: {
         componentVolumeFloor: 0.50,
@@ -54,10 +54,10 @@ export const DISDEX_V96_EXECUTION_PARITY = {
 } as const;
 
 export const DISDEX_V96_LIVE_PROMOTION = {
-    policyVersion: 1,
+    policyVersion: 2,
     operatorOverrideEnabled: true,
-    maximumOverridePenguGross: 0.15,
-    maximumPortfolioGross: 2,
+    maximumOverridePenguGross: 1.15,
+    maximumPortfolioGross: 2.5,
     maximumDailyLossPct: 5,
     requireAbsoluteOrPercentageDailyLossLimit: true,
     killSwitchAction: "FLATTEN_MANAGED",
@@ -68,7 +68,7 @@ export const DISDEX_V96_LIVE_PROMOTION = {
 
 export const DISDEX_V96_RUNTIME = {
     strategyId: DISDEX_V96_STRATEGY_ID,
-    implementationStatus: "LIVE_READY_VOLUME50_TURNOVER075_OPERATOR_CONTROLLED",
+    implementationStatus: "LIVE_READY_GROSS_2P5_PENGU_1P15_OPERATOR_CONTROLLED",
     mode: "LIVE_READY" as const,
     liveTradingEnabled: true,
     maximumGross: DISDEX_V96_ALLOCATION.totalGrossCap,
@@ -86,5 +86,5 @@ export const DISDEX_V96_RUNTIME = {
     operatorOverrideStatus: "IMPLEMENTED_REQUIRED_WHEN_FORWARD_NOT_APPROVED",
     dailyLossLimitStatus: "IMPLEMENTED_PORTFOLIO_MAX_5_PERCENT",
     killSwitchStatus: "IMPLEMENTED_FLATTEN_MANAGED_REDUCE_ONLY",
-    liveBlockReason: "LIVE requires fresh execution parity and a fresh exact-commit Operator Override for the Volume50/Turnover7.5 configuration, daily loss controls, Kill Switch configuration, credentials, migrated state when positions are retained, and explicit service handoff.",
+    liveBlockReason: "LIVE requires fresh execution parity and a fresh exact-commit Operator Override for PENGU Gross 1.15 and total Gross 2.5, daily loss controls, Kill Switch configuration, credentials, migrated state when positions are retained, and explicit service handoff.",
 } as const;
