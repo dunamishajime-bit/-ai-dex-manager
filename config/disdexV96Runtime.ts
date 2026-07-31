@@ -7,7 +7,7 @@ export const DISDEX_V96_ALLOCATION = {
     historicalStatus: "V96_FREQUENCY_UPLIFT_HISTORICAL_CLUSTER_USER_APPROVED_FOR_LIVE",
     penguSignalLineage: "PENGU_V67_REPLAYED_BY_PRODUCTION_V46_SIGNAL",
     penguTargetGross: 1.15,
-    totalGrossCap: 2,
+    totalGrossCap: 2.5,
     minimumActivePenguClip: 0.50,
     corePolicy: {
         componentVolumeFloor: 0.50,
@@ -56,8 +56,8 @@ export const DISDEX_V96_EXECUTION_PARITY = {
 export const DISDEX_V96_LIVE_PROMOTION = {
     policyVersion: 1,
     operatorOverrideEnabled: true,
-    maximumOverridePenguGross: 0.15,
-    maximumPortfolioGross: 2,
+    maximumOverridePenguGross: 1.15,
+    maximumPortfolioGross: 2.5,
     maximumDailyLossPct: 5,
     requireAbsoluteOrPercentageDailyLossLimit: true,
     killSwitchAction: "FLATTEN_MANAGED",
