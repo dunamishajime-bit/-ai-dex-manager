@@ -89,6 +89,7 @@ export async function runReadOnlyPreflight() {
     const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
     const requestedDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
     const requestedPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
+    const requiredExecutionLeverage = Math.max(DISDEX_V96_RUNTIME.minimumExecutionLeverage, Math.ceil(requestedMaxGross));
     const before = {
         crypto: await readStateSummary(paths.cryptoState, "crypto"),
         stock: await readStateSummary(paths.stockState, "stock"),
@@ -129,6 +130,9 @@ export async function runReadOnlyPreflight() {
             maximumDailyLossPct: operatorOverride.maximumDailyLossPct,
         },
         forwardEvidencePresent: Boolean(forwardEvidence),
+        requestedMaxGross,
+        requestedPenguGrossCap,
+        requiredExecutionLeverage,
         secretsPrinted: false,
     }));
     const gate = assertDisDexV96LiveGates({
@@ -152,13 +156,26 @@ export async function runReadOnlyPreflight() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-ReadOnly-LIVE-Preflight/1.2",
+        userAgent: "DisDex-ReadOnly-LIVE-Preflight/1.3",
     });
     if (!client.hasTradingCredentials()) throw new Error("READ_ONLY_PREFLIGHT_ASTER_CREDENTIALS_MISSING");
     const [ping, balances, positions, openOrders] = await Promise.all([client.ping(), client.getBalances(), client.getPositions(), client.getOpenOrders()]);
     void ping;
     if (!Array.isArray(positions) || positions.length === 0) throw new Error("READ_ONLY_PREFLIGHT_ONE_WAY_UNVERIFIED");
     if (positions.some((row) => String(row.positionSide || "").toUpperCase() !== "BOTH")) throw new Error("READ_ONLY_PREFLIGHT_HEDGE_MODE");
+    const managedRiskRows = Object.fromEntries(
+        positions
+            .filter((row) => MANAGED_SYMBOLS.includes(String(row.symbol).toUpperCase() as typeof MANAGED_SYMBOLS[number]))
+            .map((row) => [String(row.symbol).toUpperCase(), Number(row.leverage)]),
+    ) as Record<string, number>;
+    const missingLeverageRows = MANAGED_SYMBOLS.filter((symbol) => !Number.isFinite(managedRiskRows[symbol]));
+    if (missingLeverageRows.length) {
+        throw new Error(`READ_ONLY_PREFLIGHT_LEVERAGE_ROWS_MISSING:${missingLeverageRows.join(",")}`);
+    }
+    const insufficientLeverage = MANAGED_SYMBOLS.filter((symbol) => managedRiskRows[symbol] < requiredExecutionLeverage);
+    if (insufficientLeverage.length) {
+        throw new Error(`READ_ONLY_PREFLIGHT_LEVERAGE_BELOW_${requiredExecutionLeverage}X:${insufficientLeverage.map((symbol) => `${symbol}=${managedRiskRows[symbol]}`).join(",")}`);
+    }
     const managedPositions = positions.filter((row) => MANAGED_SYMBOLS.includes(String(row.symbol).toUpperCase() as typeof MANAGED_SYMBOLS[number]) && Math.abs(Number(row.positionAmt) || 0) > 1e-12);
     if (!Array.isArray(openOrders)) throw new Error("READ_ONLY_PREFLIGHT_OPEN_ORDERS_UNAVAILABLE");
     if (!Array.isArray(balances)) throw new Error("READ_ONLY_PREFLIGHT_BALANCE_UNAVAILABLE");
@@ -180,6 +197,8 @@ export async function runReadOnlyPreflight() {
         executor: "AsterDirectTradeExecutor",
         asterAuthenticated: true,
         managedPositionCount: managedPositions.length,
+        managedSymbolLeverage: managedRiskRows,
+        requiredExecutionLeverage,
         openOrderCount: openOrders.length,
         balancesRead: true,
         killSwitchActive: false,

@@ -67,8 +67,8 @@ function override(input: Partial<Omit<DisDexV96OperatorOverrideApproval, "artifa
         reason: "Exercise guarded initial LIVE.",
         approvedAt: new Date(NOW - HOUR).toISOString(),
         forwardEvidenceBypassAccepted: true,
-        initialPenguGrossCap: 0.15,
-        maximumPortfolioGross: 2,
+        initialPenguGrossCap: 1.15,
+        maximumPortfolioGross: 2.5,
         maximumDailyLossPct: 5,
         maximumDailyLossUsd: 50,
         acknowledgement: "I_APPROVE_DISDEX_V96_OPERATOR_CONTROLLED_LIVE",
@@ -116,7 +116,8 @@ async function main() {
     assert.equal(DISDEX_V96_RUNTIME.forwardEvidenceStatus, "NOT_APPROVED");
     assert.equal(DISDEX_V96_RUNTIME.executionParityStatus, "APPROVED");
     assert.equal(DISDEX_V96_EXECUTION_PARITY.corePort, "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS");
-    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 0.15);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 1.15);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross, 2.5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.killSwitchAction, "FLATTEN_MANAGED");
 
@@ -124,8 +125,10 @@ async function main() {
         coreWeights: { BTCUSDT: 0.9, ETHUSDT: 0.9 },
         penguSide: 1,
     });
-    close(allocation.coreScale, 1.425 / 1.8);
-    close(allocation.penguClip, 0.5);
+    close(allocation.coreScale, 1.35 / 1.8);
+    close(allocation.penguClip, 1);
+    close(allocation.penguFinalGross, 1.15);
+    close(allocation.finalGross, 2.5);
     assert.ok(allocation.finalGross <= DISDEX_V96_ALLOCATION.totalGrossCap);
 
     const combinedEthTarget = allocateDisDexV96ReservedPengu({
@@ -156,7 +159,7 @@ async function main() {
     assert.ok(combinedWithPengu.penguClip >= 0.5);
     close(combinedWithPengu.reservedPenguGross, 0.575);
 
-    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 1);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 2.5);
     assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
     assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
 
@@ -206,9 +209,9 @@ async function main() {
         activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
         executionParity: parity(),
         operatorOverride: legacy,
-        maximumGross: 2,
+        maximumGross: 2.5,
         maximumDailyLossPct: 5,
-        initialPenguGrossCap: 0.15,
+        initialPenguGrossCap: 1.15,
         runtimeCommitSha: RUNTIME_COMMIT,
         now: NOW,
     });
@@ -222,9 +225,9 @@ async function main() {
         activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
         executionParity: parity(),
         operatorOverride: permanent,
-        maximumGross: 2,
+        maximumGross: 2.5,
         maximumDailyLossPct: 5,
-        initialPenguGrossCap: 0.15,
+        initialPenguGrossCap: 1.15,
         runtimeCommitSha: RUNTIME_COMMIT,
         now: NOW + 365 * 24 * HOUR,
     });
@@ -238,7 +241,7 @@ async function main() {
         operatorOverride: permanent,
         maximumGross: 1,
         maximumDailyLossPct: 5,
-        initialPenguGrossCap: 0.15,
+        initialPenguGrossCap: 1.15,
         runtimeCommitSha: RUNTIME_COMMIT,
         now: NOW,
     });
@@ -251,9 +254,9 @@ async function main() {
         activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
         executionParity: parity(),
         operatorOverride: permanent,
-        maximumGross: 2,
+        maximumGross: 2.5,
         maximumDailyLossPct: 3.5,
-        initialPenguGrossCap: 0.15,
+        initialPenguGrossCap: 1.15,
         runtimeCommitSha: RUNTIME_COMMIT,
         now: NOW,
     });
@@ -266,7 +269,7 @@ async function main() {
         activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
         executionParity: parity(),
         operatorOverride: permanent,
-        maximumGross: 2,
+        maximumGross: 2.5,
         maximumDailyLossPct: 5,
         initialPenguGrossCap: 0.10,
         runtimeCommitSha: RUNTIME_COMMIT,
@@ -281,9 +284,9 @@ async function main() {
         activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
         executionParity: parity(),
         operatorOverride: revoked,
-        maximumGross: 2,
+        maximumGross: 2.5,
         maximumDailyLossPct: 5,
-        initialPenguGrossCap: 0.15,
+        initialPenguGrossCap: 1.15,
         runtimeCommitSha: RUNTIME_COMMIT,
         now: NOW,
     });
