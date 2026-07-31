@@ -1,0 +1,250 @@
+    n = len(index)
+    returns = np.zeros(n)
+    gross_series = np.zeros(n)
+    margin_series = np.zeros(n)
+    costs = np.zeros(n)
+    funding_costs = np.zeros(n)
+    equity = 1.0
+    peak = 1.0
+    positions: dict[str, Trade] = {}
+    trade_rows: list[dict] = []
+    liquidations = 0
+    current_day = None
+    day_start_equity = 1.0
+    day_losses = 0
+    block_new = False
+    pending: dict[int, list[tuple[str, int, float, float, float]]] = {}
+
+    for i in range(n - 1):
+        ts = index[i]
+        day = ts.floor("D")
+        if current_day is None or day != current_day:
+            current_day = day
+            day_start_equity = equity
+            day_losses = 0
+            block_new = False
+        dd = equity / peak - 1.0
+        dd_mult = 1.0
+        if dd <= -0.35:
+            dd_mult = 0.20
+        elif dd <= -0.25:
+            dd_mult = 0.40
+        elif dd <= -0.15:
+            dd_mult = 0.65
+        if equity / day_start_equity - 1.0 <= -0.03 or day_losses >= 2:
+            block_new = True
+
+        equity_before = max(equity, 1e-12)
+        bar_pnl = 0.0
+        bar_cost = 0.0
+        bar_funding = 0.0
+
+        # Execute queued signals at this bar open. Newly opened positions can
+        # stop or target during the same candle.
+        if not block_new and i in pending:
+            available_slots = risk.max_positions - len(positions)
+            current_gross = sum(p.notional for p in positions.values())
+            current_margin = sum(p.margin_used for p in positions.values())
+            same_side = {
+                1: sum(1 for p in positions.values() if p.direction > 0),
+                -1: sum(1 for p in positions.values() if p.direction < 0),
+            }
+            for symbol, direction, score, signal_mid, signal_atr in sorted(
+                pending[i], key=lambda x: x[2], reverse=True
+            ):
+                if available_slots <= 0 or symbol in positions or same_side[direction] >= 2:
+                    continue
+                j = col[symbol]
+                entry = open_a[i, j]
+                if not np.isfinite(entry) or not np.isfinite(signal_atr) or signal_atr <= 0:
+                    continue
+                stop_dist = ex.stop_atr * signal_atr
+                stop_pct = stop_dist / entry
+                if stop_pct <= 0 or stop_pct > 0.04:
+                    continue
+                target = entry + direction * ex.target_fraction * abs(signal_mid - entry)
+                stop = entry - direction * stop_dist
+                reward_pct = abs(target / entry - 1.0)
+                if reward_pct / stop_pct < ex.min_reward_risk:
+                    continue
+                risk_budget = equity * risk.risk_per_trade * risk_multiplier * dd_mult
+                risk_notional = risk_budget / stop_pct
+                margin_cap_notional = equity * risk.margin_fraction * risk.leverage
+                portfolio_room = max(equity * risk.max_gross - current_gross, 0.0)
+                notional = min(risk_notional, margin_cap_notional, portfolio_room)
+                margin_used = notional / risk.leverage
+                if notional <= equity * 0.05 or current_margin + margin_used > equity * 0.40:
+                    continue
+                entry_cost = notional * one_way_cost
+                bar_pnl -= entry_cost
+                bar_cost += entry_cost
+                positions[symbol] = Trade(
+                    symbol=symbol, direction=direction, entry_i=i, entry_time=ts,
+                    entry=entry, mark=entry, stop=stop, target=target,
+                    notional=notional, leverage=risk.leverage, margin_used=margin_used,
+                    signal_score=score, initial_risk=notional * stop_pct,
+                    entry_cost=entry_cost,
+                )
+                available_slots -= 1
+                current_gross += notional
+                current_margin += margin_used
+                same_side[direction] += 1
+
+        to_close: list[tuple[str, float, str]] = []
+        for symbol, pos in list(positions.items()):
+            j = col[symbol]
+            if not np.isfinite(open_a[i, j]) or not np.isfinite(close_a[i, j]):
+                continue
+            pos.bars_held += 1
+            fr = fund_a[i, j]
+            if np.isfinite(fr) and fr != 0:
+                pay = pos.notional * pos.direction * fr
+                bar_pnl -= pay
+                bar_funding += pay
+                pos.funding_paid += pay
+
+            liq_dist = max(1.0 / pos.leverage - MAINT_MARGIN, 0.01)
+            liq_price = pos.entry * (1 - liq_dist) if pos.direction > 0 else pos.entry * (1 + liq_dist)
+            o, h, l, c = open_a[i, j], high_a[i, j], low_a[i, j], close_a[i, j]
+            reason = None
+            exit_price = None
+            # Gap handling first. A protective stop is assumed to execute before
+            # the more distant liquidation boundary unless the bar opens beyond it.
+            if pos.direction > 0:
+                if o <= liq_price:
+                    reason, exit_price = "liquidation", liq_price
+                elif o <= pos.stop:
+                    reason, exit_price = "gap_stop", o
+                elif l <= pos.stop:
+                    reason, exit_price = "stop", pos.stop
+                elif h >= pos.target:
+                    reason, exit_price = "target", pos.target
+            else:
+                if o >= liq_price:
+                    reason, exit_price = "liquidation", liq_price
+                elif o >= pos.stop:
+                    reason, exit_price = "gap_stop", o
+                elif h >= pos.stop:
+                    reason, exit_price = "stop", pos.stop
+                elif l <= pos.target:
+                    reason, exit_price = "target", pos.target
+            if reason is None and pos.bars_held >= ex.max_hold_bars:
+                reason, exit_price = "time", c
+            if reason is None and np.isfinite(mid_a[i, j]):
+                crossed = (pos.direction > 0 and c >= mid_a[i, j]) or (pos.direction < 0 and c <= mid_a[i, j])
+                if crossed:
+                    reason, exit_price = "mid", c
+
+            mark_to = float(exit_price) if reason is not None else c
+            incremental = pos.notional * pos.direction * (mark_to / pos.mark - 1.0)
+            bar_pnl += incremental
+            pos.gross_pnl += incremental
+            pos.mark = mark_to
+            if reason is not None:
+                to_close.append((symbol, float(exit_price), reason))
+
+        for symbol, exit_price, reason in to_close:
+            pos = positions.pop(symbol)
+            exit_cost = pos.notional * one_way_cost
+            bar_pnl -= exit_cost
+            bar_cost += exit_cost
+            if reason == "liquidation":
+                liquidations += 1
+            net_trade = pos.gross_pnl - pos.entry_cost - exit_cost - pos.funding_paid
+            if net_trade < 0:
+                day_losses += 1
+            trade_rows.append({
+                "symbol": symbol, "direction": pos.direction,
+                "entry_time": pos.entry_time, "exit_time": ts,
+                "entry": pos.entry, "exit": exit_price,
+                "notional": pos.notional, "leverage": pos.leverage,
+                "margin_used": pos.margin_used, "bars_held": pos.bars_held,
+                "reason": reason, "gross_pnl": pos.gross_pnl,
+                "trading_cost": pos.entry_cost + exit_cost,
+                "funding_paid": pos.funding_paid, "net_pnl": net_trade,
+                "initial_risk": pos.initial_risk, "signal_score": pos.signal_score,
+            })
+
+        # Queue completed-bar signals for a future open.
+        if not block_new:
+            candidates = []
+            for j, symbol in enumerate(symbols):
+                direction = int(dir_a[i, j])
+                if direction == 0 or symbol in positions:
+                    continue
+                score, smid, satr = score_a[i, j], mid_a[i, j], atr_a[i, j]
+                if np.isfinite(score) and np.isfinite(smid) and np.isfinite(satr):
+                    candidates.append((symbol, direction, float(score), float(smid), float(satr)))
+            if candidates:
+                pending.setdefault(i + entry_delay_bars, []).extend(candidates)
+
+        bar_ret = max(bar_pnl / equity_before, -0.95)
+        returns[i] = bar_ret
+        costs[i] = bar_cost
+        funding_costs[i] = bar_funding
+        equity = equity_before * (1.0 + bar_ret)
+        peak = max(peak, equity)
+        gross_series[i] = sum(p.notional for p in positions.values()) / max(equity, 1e-12)
+        margin_series[i] = sum(p.margin_used for p in positions.values()) / max(equity, 1e-12)
+
+    final_i = n - 1
+    final_pnl = 0.0
+    final_cost = 0.0
+    equity_before = max(equity, 1e-12)
+    for symbol, pos in list(positions.items()):
+        j = col[symbol]
+        exit_price = close_a[final_i, j]
+        if not np.isfinite(exit_price):
+            continue
+        incremental = pos.notional * pos.direction * (exit_price / pos.mark - 1.0)
+        pos.gross_pnl += incremental
+        exit_cost = pos.notional * one_way_cost
+        final_pnl += incremental - exit_cost
+        final_cost += exit_cost
+        net_trade = pos.gross_pnl - pos.entry_cost - exit_cost - pos.funding_paid
+        trade_rows.append({
+            "symbol": symbol, "direction": pos.direction,
+            "entry_time": pos.entry_time, "exit_time": index[final_i],
+            "entry": pos.entry, "exit": exit_price,
+            "notional": pos.notional, "leverage": pos.leverage,
+            "margin_used": pos.margin_used, "bars_held": pos.bars_held,
+            "reason": "final", "gross_pnl": pos.gross_pnl,
+            "trading_cost": pos.entry_cost + exit_cost,
+            "funding_paid": pos.funding_paid, "net_pnl": net_trade,
+            "initial_risk": pos.initial_risk, "signal_score": pos.signal_score,
+        })
+    returns[final_i] = max(final_pnl / equity_before, -0.95)
+    costs[final_i] = final_cost
+    ret = pd.Series(returns, index=index, name="strategy_return")
+    return Simulation(
+        returns=ret, equity=(1.0 + ret).cumprod(),
+        gross=pd.Series(gross_series, index=index, name="gross"),
+        margin=pd.Series(margin_series, index=index, name="margin"),
+        trades=pd.DataFrame(trade_rows),
+        costs=pd.Series(costs, index=index, name="costs"),
+        funding=pd.Series(funding_costs, index=index, name="funding"),
+        liquidations=liquidations,
+    )
+
+
+def cagr(ret: pd.Series) -> float:
+    if ret.empty:
+        return float("nan")
+    total = float((1 + ret).prod())
+    years = max((ret.index[-1] - ret.index[0]).total_seconds() / 31557600, 1 / 365.25)
+    return -1.0 if total <= 0 else total ** (1 / years) - 1
+
+
+def max_dd(ret: pd.Series) -> float:
+    if ret.empty:
+        return float("nan")
+    eq = (1 + ret).cumprod()
+    return float((eq / eq.cummax() - 1).min())
+
+
+def summarize(sim: Simulation, start: pd.Timestamp, end: pd.Timestamp | None = None) -> dict:
+    mask = period_mask(sim.returns.index, start, end)
+    ret = sim.returns.loc[mask]
+    monthly = (1 + ret).resample("ME").prod() - 1
+    daily = (1 + ret).resample("D").prod() - 1
+    trades = sim.trades.copy()

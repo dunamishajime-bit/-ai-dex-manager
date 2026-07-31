@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Integrated directional crypto portfolio research.
+
+Sleeves:
+1. Multi-asset time-series trend.
+2. Cross-sectional relative momentum.
+3. Breakout/volume/funding event continuation.
+
+Candidate selection uses 2021-2022 development and 2023 validation only.
+2024-2026H1 is an untouched final holdout. Execution is next 4H open,
+with symbol-level settled funding and turnover costs.
+"""
+from __future__ import annotations
+
+import io
+import json
+import math
+import time
+import zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import requests
+
+from research import multiperp_cross_section as base
+
+OUT = Path("backtest_output_integrated_profit")
+FUNDING_CACHE = Path(".cache/integrated_funding")
+PRICE_CACHE = Path(".cache/multiperp_4h")
+START_MONTH = "2021-01"
+END_MONTH = "2026-06"
+START = pd.Timestamp("2021-01-01", tz="UTC")
+DEV_END = pd.Timestamp("2023-01-01", tz="UTC")
+VAL_END = pd.Timestamp("2024-01-01", tz="UTC")
+FINAL_END = pd.Timestamp("2026-07-01", tz="UTC")
+ANNUAL_BARS = 6 * 365.25
+BASE_COST = 0.0006
+
+# Includes two well-known failed/delisted contracts to reduce pure-survivor bias.
+UNIVERSE = [
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT",
+    "SOLUSDT", "LINKUSDT", "LTCUSDT", "DOTUSDT", "AVAXUSDT", "BCHUSDT",
+    "EOSUSDT", "ETCUSDT", "LUNAUSDT", "FTTUSDT",
+]
+
+
+@dataclass(frozen=True)
+class CrossSpec:
+    name: str
+    horizons: tuple[int, int, int]
+    long_k: int
+    short_k: int
+    rebalance_days: int
+    bull_short: float
+
+
+@dataclass(frozen=True)
+class TrendSpec:
+    name: str
+    horizons: tuple[int, int, int]
+    entry_floor: float
+
+
+@dataclass(frozen=True)
+class EventSpec:
+    name: str
+    volume_z: float
+    range_z: float
+    hold_bars: int
+
+
+@dataclass(frozen=True)
+class Candidate:
+    name: str
+    cross: str
+    trend: str
+    event: str
+    trend_weight: float
+    cross_weight: float
+    event_weight: float
+    target_vol: float
+    max_gross: float
+
+
+@dataclass
+class Simulation:
+    returns: pd.Series
+    equity: pd.Series
+    positions: pd.DataFrame
+    turnover: pd.Series
+    trading_cost: pd.Series
+    funding_cost: pd.Series
+    gross_pnl: pd.Series
+    dd_multiplier: pd.Series
+
+
+def periods() -> list[pd.Period]:
+    return list(pd.period_range(START_MONTH, END_MONTH, freq="M"))
+
+
+def parse_timestamp(values: pd.Series) -> pd.Series:
+    numeric = pd.to_numeric(values, errors="coerce")
+    if numeric.notna().sum() == 0:
+        return pd.to_datetime(values, utc=True, errors="coerce")
+    median = numeric.dropna().median()
+    if median > 10**16:
+        unit = "ns"
+    elif median > 10**13:
+        unit = "us"
+    elif median > 10**11:
+        unit = "ms"
+    else:
+        unit = "s"
+    return pd.to_datetime(numeric, unit=unit, utc=True, errors="coerce")
+
+
+def parse_funding_csv(raw: bytes) -> pd.DataFrame:
+    named = pd.read_csv(io.BytesIO(raw))
+    named.columns = [str(c).strip().lower() for c in named.columns]
+    tcols = [c for c in named.columns if "time" in c]
+    rcols = [c for c in named.columns if "rate" in c and "interval" not in c]
+    if tcols and rcols:
+        times = named[tcols[0]]
+        rates = named[rcols[0]]
+    else:
+        positional = pd.read_csv(io.BytesIO(raw), header=None)
+        if positional.shape[1] < 2:
+            return pd.DataFrame(columns=["timestamp", "funding_rate"])
+        times = positional.iloc[:, 0]
+        rates = positional.iloc[:, 2 if positional.shape[1] >= 3 else 1]
+    out = pd.DataFrame({
+        "timestamp": parse_timestamp(times),
+        "funding_rate": pd.to_numeric(rates, errors="coerce"),
+    }).dropna()
+    out = out.loc[out["funding_rate"].abs() < 0.05]
+    return out.drop_duplicates("timestamp", keep="last").sort_values("timestamp")
+
+
+def funding_one(symbol: str, period: pd.Period) -> tuple[str, pd.DataFrame | None]:
+    FUNDING_CACHE.mkdir(parents=True, exist_ok=True)
+    stamp = period.strftime("%Y-%m")
+    cached = FUNDING_CACHE / f"{symbol}-funding-{stamp}.csv"
+    if cached.exists() and cached.stat().st_size > 0:
+        frame = pd.read_csv(cached, parse_dates=["timestamp"])
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+        return symbol, frame
+    url = (
