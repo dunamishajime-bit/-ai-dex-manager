@@ -52,7 +52,10 @@ V11_CONVERGENCE_BPS = 15.0
 V11_MIN_DEPTH_MULTIPLE = 2.0
 V11_MAX_SPREAD_BPS = 20.0
 V11_MAX_SPREAD_MEDIAN_MULTIPLE = 2.0
-V11_MAX_DATA_AGE_MS = 1500
+# Pyth Core publishes equity reference updates on a slower cadence than the
+# crypto book. Keep the source-timestamp fail-closed check, but allow the
+# validated reference stream up to five seconds before treating it as stale.
+V11_MAX_DATA_AGE_MS = 5000
 V11_MAX_SOURCE_CLOCK_DIFF_MS = 1500
 V11_MAX_ADVERSE_TWO_SECOND_BPS = 5.0
 V11_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
@@ -1416,6 +1419,7 @@ def self_test() -> None:
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96"
     assert V13D_MIN_BASIS_BPS == 20.0
     assert V11_MAX_ROUND_TRIP_COST_BPS == 60.0
+    assert V11_MAX_DATA_AGE_MS == 5000
     print("V13D + V11-EQ Stock live engine self-test: PASS")
 
 

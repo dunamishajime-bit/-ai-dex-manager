@@ -394,7 +394,7 @@ class ReferenceServer(ThreadingHTTPServer):
     def __init__(self, address: tuple[str, int], store: QuoteStore):
         super().__init__(address, Handler)
         self.quote_store = store
-        self.pyth_max_age_ms = int_env("DISDEX_PYTH_MAX_AGE_MS", 1200)
+        self.pyth_max_age_ms = int_env("DISDEX_PYTH_MAX_AGE_MS", 5000)
         self.iex_max_age_ms = int_env("DISDEX_IEX_MAX_AGE_MS", 1500)
         self.max_confidence_bps = float_env("DISDEX_PYTH_MAX_CONFIDENCE_BPS", 10.0)
         self.max_cross_bps = float_env("DISDEX_REFERENCE_MAX_CROSS_SOURCE_BPS", 20.0)

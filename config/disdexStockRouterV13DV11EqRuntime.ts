@@ -45,7 +45,7 @@ export const DISDEX_V11_EQ_CONFIG = {
     selection: "SIGNAL_TOP1_MUST_REMAIN_TOP1_AT_ENTRY",
     directions: "LONG_AND_SHORT",
     targetGross: 1.0,
-    maximumDataAgeMs: 1500,
+    maximumDataAgeMs: 5000,
     maximumSourceClockDifferenceMs: 1500,
     maximumEstimatedRoundTripCostBps: 60,
     maximumCostToEntryBasisRatio: 0.75,
