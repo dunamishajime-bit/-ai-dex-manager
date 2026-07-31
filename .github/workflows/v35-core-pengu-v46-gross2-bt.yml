@@ -1,0 +1,55 @@
+name: V35 Core Plus PENGU V46 Gross2 BT
+
+on:
+  push:
+    branches:
+      - research/v35-pengu-v46-gross2-bt-corebase
+    paths:
+      - scripts/research_lab_v35_core_pengu_v46_gross2.py
+      - scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
+      - .github/workflows/v35-core-pengu-v46-gross2-bt.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_v35_core_pengu_v46_gross2.py
+      - scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
+      - .github/workflows/v35-core-pengu-v46-gross2-bt.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_v35_core_pengu_v46_gross2.py scripts/research_lab_v35_core_pengu_v46_gross2_v2.py
+      - name: Run corrected Gross 2.0 combined backtest
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_v35_core_pengu_v46_gross2_v2.py 2>&1 | tee .research-state/v35-core-pengu-v46-gross2-bt.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v35-core-pengu-v46-gross2-bt
+          path: |
+            .research-state/v35-core-pengu-v46-gross2-bt.json
+            .research-state/v35-core-pengu-v46-gross2-bt.md
+            .research-state/v35-core-pengu-v46-gross2-bt.log
+          if-no-files-found: warn
+          retention-days: 30
