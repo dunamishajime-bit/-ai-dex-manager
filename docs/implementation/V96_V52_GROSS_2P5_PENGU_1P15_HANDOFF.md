@@ -13,7 +13,7 @@
 - V96 / shared portfolio maximum Gross: `2.5`
 - V96 Core remaining capacity when PENGU is fully active and no Stock exposure exists: `1.35`
 - Stock sleeve maximum: `1.5`, but only within the shared portfolio residual.
-- Combined portfolio Daily Loss limit remains `2%`.
+- Combined portfolio Daily Loss limit remains `5%`.
 - V96 Operator Override Daily Loss maximum remains `5%`.
 - Kill Switch behavior is unchanged.
 
