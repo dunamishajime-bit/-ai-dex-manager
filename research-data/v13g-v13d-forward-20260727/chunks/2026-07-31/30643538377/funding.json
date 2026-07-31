@@ -1,0 +1,182 @@
+{
+  "startedMs": 1785512150880,
+  "endedMs": 1785525000585,
+  "rows": {
+    "AMZN": {
+      "ASTER": [
+        {
+          "symbol": "AMZNUSDT",
+          "fundingTime": 1785513600000,
+          "fundingRate": "0.00000000"
+        }
+      ],
+      "XYZ": [
+        {
+          "coin": "xyz:AMZN",
+          "fundingRate": "0.00000625",
+          "premium": "0.0003302248",
+          "time": 1785513600020
+        },
+        {
+          "coin": "xyz:AMZN",
+          "fundingRate": "0.0000088802",
+          "premium": "0.0004420827",
+          "time": 1785517200020
+        },
+        {
+          "coin": "xyz:AMZN",
+          "fundingRate": "0.000006709",
+          "premium": "0.000407344",
+          "time": 1785520800073
+        },
+        {
+          "coin": "xyz:AMZN",
+          "fundingRate": "0.00000625",
+          "premium": "0.0002563131",
+          "time": 1785524400025
+        }
+      ]
+    },
+    "META": {
+      "ASTER": [
+        {
+          "symbol": "METAUSDT",
+          "fundingTime": 1785513600000,
+          "fundingRate": "0.00000000"
+        }
+      ],
+      "XYZ": [
+        {
+          "coin": "xyz:META",
+          "fundingRate": "0.000022221",
+          "premium": "0.0006555366",
+          "time": 1785513600020
+        },
+        {
+          "coin": "xyz:META",
+          "fundingRate": "0.0000150437",
+          "premium": "0.0005406986",
+          "time": 1785517200020
+        },
+        {
+          "coin": "xyz:META",
+          "fundingRate": "0.0000260032",
+          "premium": "0.0007160512",
+          "time": 1785520800073
+        },
+        {
+          "coin": "xyz:META",
+          "fundingRate": "0.0000329014",
+          "premium": "0.0008264218",
+          "time": 1785524400025
+        }
+      ]
+    },
+    "MSFT": {
+      "ASTER": [
+        {
+          "symbol": "MSFTUSDT",
+          "fundingTime": 1785513600000,
+          "fundingRate": "0.00000000"
+        }
+      ],
+      "XYZ": [
+        {
+          "coin": "xyz:MSFT",
+          "fundingRate": "-0.0000063047",
+          "premium": "-0.0004008754",
+          "time": 1785513600020
+        },
+        {
+          "coin": "xyz:MSFT",
+          "fundingRate": "-0.000026266",
+          "premium": "-0.0007202564",
+          "time": 1785517200020
+        },
+        {
+          "coin": "xyz:MSFT",
+          "fundingRate": "-0.0000042076",
+          "premium": "-0.0003673221",
+          "time": 1785520800073
+        },
+        {
+          "coin": "xyz:MSFT",
+          "fundingRate": "-0.0000053427",
+          "premium": "-0.0003854834",
+          "time": 1785524400025
+        }
+      ]
+    },
+    "NVDA": {
+      "ASTER": [
+        {
+          "symbol": "NVDAUSDT",
+          "fundingTime": 1785513600000,
+          "fundingRate": "0.00000000"
+        }
+      ],
+      "XYZ": [
+        {
+          "coin": "xyz:NVDA",
+          "fundingRate": "0.00000625",
+          "premium": "0.0001314359",
+          "time": 1785513600020
+        },
+        {
+          "coin": "xyz:NVDA",
+          "fundingRate": "0.00000625",
+          "premium": "-0.0000168303",
+          "time": 1785517200020
+        },
+        {
+          "coin": "xyz:NVDA",
+          "fundingRate": "0.00000625",
+          "premium": "-0.0000043724",
+          "time": 1785520800073
+        },
+        {
+          "coin": "xyz:NVDA",
+          "fundingRate": "0.00000625",
+          "premium": "-0.0001482194",
+          "time": 1785524400025
+        }
+      ]
+    },
+    "TSLA": {
+      "ASTER": [
+        {
+          "symbol": "TSLAUSDT",
+          "fundingTime": 1785513600000,
+          "fundingRate": "0.00000000"
+        }
+      ],
+      "XYZ": [
+        {
+          "coin": "xyz:TSLA",
+          "fundingRate": "0.0000115203",
+          "premium": "0.0004843244",
+          "time": 1785513600020
+        },
+        {
+          "coin": "xyz:TSLA",
+          "fundingRate": "0.00000625",
+          "premium": "0.0003352871",
+          "time": 1785517200020
+        },
+        {
+          "coin": "xyz:TSLA",
+          "fundingRate": "0.00000625",
+          "premium": "0.0002882783",
+          "time": 1785520800073
+        },
+        {
+          "coin": "xyz:TSLA",
+          "fundingRate": "0.00000625",
+          "premium": "0.0002935684",
+          "time": 1785524400025
+        }
+      ]
+    }
+  },
+  "errors": []
+}
