@@ -7,21 +7,23 @@
 - Historical evidence source: PR #73
 - Core component volume floor: `0.70 -> 0.50`
 - Portfolio rebalance threshold: `20% -> 7.5%`
+- PENGU target and Operator Override cap: `1.15`
+- Total portfolio Gross cap: `2.5`
 
-Unchanged controls:
+Controls retained:
 
 - completed 12-hour chronology only;
 - Weight Band tolerance `5%`;
 - forced refresh after `12` completed 12-hour bars;
 - Bear confirmation `4` bars;
 - Strong Boost, whipsaw and drawdown guards;
-- total Gross cap `2.0`;
 - minimum adjustment `max(5 USD, 1% account equity)`;
 - PENGU signal rules unchanged;
-- initial Operator Override PENGU Gross cap `0.15`;
-- daily loss limit maximum `2%`;
+- daily loss limit maximum `5%`;
 - Kill Switch action `FLATTEN_MANAGED`;
 - `closeUnmanagedPositions=false`.
+
+At PENGU Gross `1.15`, the remaining portfolio Gross capacity is `1.35`. The combined runner must still scale all targets so final Gross never exceeds `2.5`.
 
 ## Historical evidence classification
 
@@ -38,7 +40,7 @@ This is user-approved known-history evidence, not independent Holdout evidence. 
 
 ## Critical fingerprint rule
 
-Changing the two thresholds changes the V96 Configuration Fingerprint. Therefore:
+Changing PENGU Gross or the total Gross cap changes the V96 Configuration Fingerprint. Therefore:
 
 - the previous execution-parity approval is invalid;
 - the previous Operator Override is invalid;
@@ -91,7 +93,7 @@ npm run build
 ```bash
 mkdir -p .runtime-approval
 DISDEX_V96_PRODUCTION_COMMIT_SHA="$DISDEX_V96_RUNTIME_COMMIT_SHA" \
-DISDEX_V96_PARITY_REVIEWER="v96-volume50-turnover075-vps-parity" \
+DISDEX_V96_PARITY_REVIEWER="v96-gross-2p5-pengu-1p15-vps-parity" \
 npx tsx scripts/disdex-v96-write-execution-parity-approval.ts \
   .runtime-state/disdex-v95-golden.json \
   .runtime-approval/disdex-v96-parity.json
@@ -136,16 +138,15 @@ The migration:
 ```bash
 export DISDEX_V96_APPROVED_COMMIT_SHA="$DISDEX_V96_RUNTIME_COMMIT_SHA"
 export DISDEX_V96_OPERATOR="<OPERATOR_NAME>"
-export DISDEX_V96_OPERATOR_OVERRIDE_REASON="User approved V96 Core Volume50 Turnover7.5 LIVE revision after PR 73 historical validation"
+export DISDEX_V96_OPERATOR_OVERRIDE_REASON="User approved PENGU Gross 1.15 and total portfolio Gross 2.5"
 export DISDEX_V96_OPERATOR_OVERRIDE_ACKNOWLEDGEMENT="I_APPROVE_DISDEX_V96_OPERATOR_CONTROLLED_LIVE"
-export DISDEX_V96_OPERATOR_OVERRIDE_HOURS=24
-export DISDEX_V96_INITIAL_PENGU_GROSS=0.15
-export DISDEX_V96_MAX_GROSS=2
-export DISDEX_V96_MAX_DAILY_LOSS_PCT=2
+export DISDEX_V96_INITIAL_PENGU_GROSS=1.15
+export DISDEX_V96_MAX_GROSS=2.5
+export DISDEX_V96_MAX_DAILY_LOSS_PCT=5
 npm run strategy:disdex-v96:override:create -- .runtime-approval/disdex-v96-operator-override.json
 ```
 
-The Override must match the new commit and new Configuration Fingerprint.
+The Override must match the new commit, new Configuration Fingerprint, PENGU Gross `1.15`, portfolio Gross `2.5`, and daily loss maximum `5%`. It remains valid until explicitly revoked.
 
 ### 8. Run migration-mode no-order preflight
 
@@ -203,8 +204,8 @@ Then verify through signed exchange reads:
 - current managed positions;
 - zero UNKNOWN or partially filled orders;
 - open-order state;
-- account Gross at or below `2.0`;
-- PENGU Gross at or below `0.15` while the Override route is used;
+- account Gross at or below `2.5`;
+- PENGU Gross at or below `1.15` while the Override route is used;
 - current daily-risk state;
 - Kill Switch inactive;
 - first new decision reports the new Configuration Fingerprint.
