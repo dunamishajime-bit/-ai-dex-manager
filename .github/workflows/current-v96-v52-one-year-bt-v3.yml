@@ -1,0 +1,152 @@
+name: Current V96 V52 One-Year Backtest Exact Aster
+
+on:
+  pull_request:
+    branches:
+      - codex/current-logic-bt-20260731
+    paths:
+      - 'docs/research/CURRENT_V96_V52_BT_RUN3_2026-07-31.md'
+      - '.github/workflows/current-v96-v52-one-year-bt-v3.yml'
+      - 'scripts/current_v96_v52_bt_aster_adapter.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: current-v96-v52-one-year-v3-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout frozen research replay source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .research-src
+          fetch-depth: 1
+      - name: Checkout frozen V11 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .research-src/.v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 dependency source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .research-src/.v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .cache/v96-crypto-v11-v13d-one-year
+          key: current-v96-v52-one-year-aster-${{ runner.os }}-v1
+          restore-keys: |
+            current-v96-v52-one-year-${{ runner.os }}-v2
+            current-v96-v52-one-year-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            aster-only-v52-v39cache-${{ runner.os }}-
+            aster-only-v39-${{ runner.os }}-
+            v96-crypto-v11eq-v13d-one-year-${{ runner.os }}-
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Materialize and patch current-logic wrapper
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64
+          import gzip
+          import re
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/current-v96-v52-one-year-bt.yml').read_text(encoding='utf-8')
+          match = re.search(r'payload = "([A-Za-z0-9+/=]+)"', workflow)
+          if not match:
+              raise RuntimeError('embedded wrapper payload not found')
+          source = gzip.decompress(base64.b64decode(match.group(1))).decode('utf-8')
+          source = source.replace(
+              'SCENARIOS = legacy.SCENARIOS\n',
+              'SCENARIOS = legacy.SCENARIOS\nfrom current_v96_v52_bt_aster_adapter import install_historical_data_adapters\n',
+              1,
+          )
+          source = source.replace(
+              'def build_current_crypto() -> dict:\n    raw = crypto_bt.v89.build_raw()',
+              'def build_current_crypto() -> dict:\n    install_historical_data_adapters(crypto_bt)\n    raw = crypto_bt.v89.build_raw()',
+              1,
+          )
+          Path('scripts/research_lab_current_v96_v52_one_year_bt.py').write_text(source, encoding='utf-8')
+          PY
+      - name: Compile and deterministic self-test
+        run: |
+          python -m py_compile scripts/current_v96_v52_bt_aster_adapter.py
+          python -m py_compile scripts/research_lab_current_v96_v52_one_year_bt.py
+          python scripts/research_lab_current_v96_v52_one_year_bt.py --self-test
+      - name: Run exact-Aster current-logic one-year compounded backtest
+        shell: bash
+        run: |
+          mkdir -p .research-state/current-v96-v52-one-year
+          set -o pipefail
+          python scripts/research_lab_current_v96_v52_one_year_bt.py \
+            --repo-root . \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --output-dir .research-state/current-v96-v52-one-year \
+            2>&1 | tee .research-state/current-v96-v52-one-year/backtest.log
+      - name: Add exact source and reproduction files
+        shell: bash
+        run: |
+          mkdir -p .research-state/current-v96-v52-one-year/reproduction
+          cp scripts/research_lab_current_v96_v52_one_year_bt.py .research-state/current-v96-v52-one-year/reproduction/
+          cp scripts/current_v96_v52_bt_aster_adapter.py .research-state/current-v96-v52-one-year/reproduction/
+          cp config/disdexV96Runtime.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp config/disdexStockRouterV13DV11EqRuntime.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp lib/disdex-v96-allocation.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp lib/disdex-v96-combined-signal.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp scripts/disdex_v52_daily_loss.py .research-state/current-v96-v52-one-year/reproduction/
+          cp scripts/disdex_v52_aster_only_live_engine.py .research-state/current-v96-v52-one-year/reproduction/
+          git archive --format=zip --output=.research-state/current-v96-v52-one-year/reproduction/current-source-ac421ac.zip ac421acb05e771afc99ed916d11948ca95370d32
+          sha256sum .research-state/current-v96-v52-one-year/reproduction/* > .research-state/current-v96-v52-one-year/reproduction/SHA256SUMS
+      - name: Validate result contract
+        run: |
+          test -s .research-state/current-v96-v52-one-year/result.json
+          test -s .research-state/current-v96-v52-one-year/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/current-v96-v52-one-year/result.json').read_text())
+          assert p['status'] == 'CURRENT_V96_V52_ONE_YEAR_REPLAY_PASS_RESEARCH_ONLY'
+          assert p['source']['currentLogicCommit'] == 'ac421acb05e771afc99ed916d11948ca95370d32'
+          assert p['architecture']['penguTargetGrossCap'] == 0.15
+          assert p['architecture']['v96AccountDailyLossLimitPct'] == 5.0
+          assert p['architecture']['v52StrategyDailyLossLimitPct'] == 3.5
+          assert p['architecture']['oldCombinedDailyLoss2PctApplied'] is False
+          for node in p['results'].values():
+              row=node['unifiedCompoundedPortfolio']
+              assert row['observedMaximumCryptoGross'] <= 1.0 + 1e-9
+              assert row['observedMaximumStockGross'] <= 1.5 + 1e-9
+              assert row['observedMaximumTotalGross'] <= 2.5 + 1e-9
+          print(json.dumps({
+              'status': p['status'],
+              'normal': p['results']['NORMAL']['unifiedCompoundedPortfolio'],
+              'severe': p['results']['SEVERE']['unifiedCompoundedPortfolio'],
+              'normalDelta': p['comparisonTo20260726ResearchReplay']['NORMAL']['unifiedReturnDeltaPctPoints'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-v96-v52-one-year-exact-aster-${{ github.run_id }}
+          path: .research-state/current-v96-v52-one-year
+          retention-days: 90
+          if-no-files-found: error
