@@ -1,0 +1,127 @@
+name: Current V96 V52 One-Year Backtest
+
+on:
+  pull_request:
+    branches:
+      - codex/current-logic-bt-20260731
+    paths:
+      - 'docs/research/CURRENT_V96_V52_BT_RUN_2026-07-31.md'
+      - '.github/workflows/current-v96-v52-one-year-bt.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: current-v96-v52-one-year-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout frozen research replay source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .research-src
+          fetch-depth: 1
+      - name: Checkout frozen V11 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .research-src/.v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 dependency source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .research-src/.v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .cache/v96-crypto-v11-v13d-one-year
+          key: current-v96-v52-one-year-${{ runner.os }}-v1
+          restore-keys: |
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            aster-only-v52-v39cache-${{ runner.os }}-
+            aster-only-v39-${{ runner.os }}-
+            v96-crypto-v11eq-v13d-one-year-${{ runner.os }}-
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Materialize current-logic backtest wrapper
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, gzip
+          from pathlib import Path
+          payload = "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"
+          Path('scripts/research_lab_current_v96_v52_one_year_bt.py').write_bytes(gzip.decompress(base64.b64decode(payload)))
+          PY
+      - name: Compile and deterministic self-test
+        run: |
+          python -m py_compile scripts/research_lab_current_v96_v52_one_year_bt.py
+          python scripts/research_lab_current_v96_v52_one_year_bt.py --self-test
+      - name: Run current-logic one-year compounded backtest
+        shell: bash
+        run: |
+          mkdir -p .research-state/current-v96-v52-one-year
+          set -o pipefail
+          python scripts/research_lab_current_v96_v52_one_year_bt.py --repo-root . --stock-cache-dir .cache/aster-only-v39-overnight-open --output-dir .research-state/current-v96-v52-one-year 2>&1 | tee .research-state/current-v96-v52-one-year/backtest.log
+      - name: Add exact source and wrapper to artifact
+        shell: bash
+        run: |
+          mkdir -p .research-state/current-v96-v52-one-year/reproduction
+          cp scripts/research_lab_current_v96_v52_one_year_bt.py .research-state/current-v96-v52-one-year/reproduction/
+          cp config/disdexV96Runtime.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp config/disdexStockRouterV13DV11EqRuntime.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp lib/disdex-v96-allocation.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp lib/disdex-v96-combined-signal.ts .research-state/current-v96-v52-one-year/reproduction/
+          cp scripts/disdex_v52_daily_loss.py .research-state/current-v96-v52-one-year/reproduction/
+          cp scripts/disdex_v52_aster_only_live_engine.py .research-state/current-v96-v52-one-year/reproduction/
+          git archive --format=zip --output=.research-state/current-v96-v52-one-year/reproduction/current-source-ac421ac.zip ac421acb05e771afc99ed916d11948ca95370d32
+          sha256sum .research-state/current-v96-v52-one-year/reproduction/* > .research-state/current-v96-v52-one-year/reproduction/SHA256SUMS
+      - name: Validate result contract
+        run: |
+          test -s .research-state/current-v96-v52-one-year/result.json
+          test -s .research-state/current-v96-v52-one-year/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/current-v96-v52-one-year/result.json').read_text())
+          assert p['status'] == 'CURRENT_V96_V52_ONE_YEAR_REPLAY_PASS_RESEARCH_ONLY'
+          assert p['source']['currentLogicCommit'] == 'ac421acb05e771afc99ed916d11948ca95370d32'
+          assert p['architecture']['penguTargetGrossCap'] == 0.15
+          assert p['architecture']['v96AccountDailyLossLimitPct'] == 5.0
+          assert p['architecture']['v52StrategyDailyLossLimitPct'] == 3.5
+          assert p['architecture']['oldCombinedDailyLoss2PctApplied'] is False
+          for node in p['results'].values():
+              row=node['unifiedCompoundedPortfolio']
+              assert row['observedMaximumCryptoGross'] <= 1.0 + 1e-9
+              assert row['observedMaximumStockGross'] <= 1.5 + 1e-9
+              assert row['observedMaximumTotalGross'] <= 2.5 + 1e-9
+          print(json.dumps({
+              'status': p['status'],
+              'normal': p['results']['NORMAL']['unifiedCompoundedPortfolio'],
+              'severe': p['results']['SEVERE']['unifiedCompoundedPortfolio'],
+              'normalDelta': p['comparisonTo20260726ResearchReplay']['NORMAL']['unifiedReturnDeltaPctPoints'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-v96-v52-one-year-${{ github.run_id }}
+          path: .research-state/current-v96-v52-one-year
+          retention-days: 90
+          if-no-files-found: error
