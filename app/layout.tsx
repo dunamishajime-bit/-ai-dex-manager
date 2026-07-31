@@ -102,7 +102,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <title>{SITE_BRAND_NAME}</title>
-        <meta name="description" content="個人用の運用状況とトレード履歴を確認するための非公開サイトです。" />
+        <meta name="description" content="DISTerminal: AsterDEXのV96 Crypto + V52 Stock統合LIVEを、残高・ポジション・履歴の読み取り専用画面で確認します。" />
         <meta name="robots" content="noindex, nofollow" />
         <meta name="googlebot" content="noindex, nofollow, noarchive" />
         <meta name="bingbot" content="noindex, nofollow, noarchive" />

@@ -206,6 +206,13 @@ export class AsterDexClient {
     return this.signedRequest<any[]>("GET", "/fapi/v3/openOrders", symbol ? [["symbol", symbol]] : []);
   }
 
+  getUserTrades(symbol: string, limit = 500) {
+    return this.signedRequest<any[]>("GET", "/fapi/v3/userTrades", [
+      ["symbol", symbol],
+      ["limit", limit],
+    ]);
+  }
+
   getOrder(symbol: string, orderId: string) {
     return this.signedRequest<any>("GET", "/fapi/v3/order", [
       ["symbol", symbol],

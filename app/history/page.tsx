@@ -1,301 +1,48 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Download, ExternalLink, RefreshCw } from "lucide-react";
-
-import { Card } from "@/components/ui/Card";
-
-type TradeHistoryEntry = {
-  id: string;
-  executedAt: string;
-  walletId: string;
-  walletAddress: string;
-  chainId: number;
-  txHash: string;
-  provider?: string;
-  action: "BUY" | "SELL";
-  sourceSymbol: string;
-  destSymbol: string;
-  sourceAmount: number;
-  destAmount: number;
-  sourceUsdValue: number;
-  destUsdValue: number;
-  entryPriceUsd?: number;
-  exitPriceUsd?: number;
-  realizedPnlUsd?: number;
-  realizedPnlPct?: number;
-  reason: string;
-};
-
-function formatNumber(value?: number, digits = 2) {
-  if (value === undefined || value === null || Number.isNaN(value)) return "-";
-  return value.toLocaleString("ja-JP", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: digits,
-  });
-}
-
-function formatUsd(value?: number, digits = 2) {
-  if (value === undefined || value === null || Number.isNaN(value)) return "-";
-  return `$${formatNumber(value, digits)}`;
-}
-
-function explorerTxUrl(chainId: number, txHash: string) {
-  if (chainId === 56) return `https://bscscan.com/tx/${txHash}`;
-  if (chainId === 137) return `https://polygonscan.com/tx/${txHash}`;
-  if (chainId === 1) return `https://etherscan.io/tx/${txHash}`;
-  return `https://bscscan.com/tx/${txHash}`;
-}
-
-function hasExplorerTx(entry: Pick<TradeHistoryEntry, "provider" | "txHash">) {
-  if (entry.provider === "AsterDex") return false;
-  return /^0x[a-fA-F0-9]{32,}$/.test(entry.txHash);
-}
+import { RefreshCw, ShieldCheck } from "lucide-react";
+import { useDisterminalTrades } from "@/hooks/useDisterminalTrades";
+import { DataCard, ReadOnlyNotice, SourceLine, formatUsd } from "@/components/disterminal/ReadOnlyCard";
 
 export default function HistoryPage() {
-  const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadEntries = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/system/trade-history", { cache: "no-store" });
-      if (!response.ok) throw new Error("履歴の読み込みに失敗しました。");
-      const data = await response.json();
-      setEntries(Array.isArray(data.entries) ? data.entries : []);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "履歴の読み込みに失敗しました。");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadEntries();
-  }, []);
-
-  const visibleEntries = useMemo(
-    () => entries.filter((entry) => Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001),
-    [entries],
-  );
-
-  const summary = useMemo(() => {
-    const sells = visibleEntries.filter((entry) => entry.action === "SELL" && typeof entry.realizedPnlUsd === "number");
-    const realizedPnlUsd = sells.reduce((sum, entry) => sum + Number(entry.realizedPnlUsd || 0), 0);
-    const wins = sells.filter((entry) => Number(entry.realizedPnlUsd || 0) > 0).length;
-    const walletAddress = visibleEntries[0]?.walletAddress || "-";
-
-    return {
-      walletAddress,
-      totalTrades: visibleEntries.length,
-      realizedPnlUsd,
-      winRate: sells.length > 0 ? (wins / sells.length) * 100 : 0,
-    };
-  }, [visibleEntries]);
-
-  const handleExport = () => {
-    const headers = [
-      "executedAt",
-      "walletAddress",
-      "action",
-      "sourceSymbol",
-      "destSymbol",
-      "sourceAmount",
-      "destAmount",
-      "sourceUsdValue",
-      "destUsdValue",
-      "entryPriceUsd",
-      "exitPriceUsd",
-      "realizedPnlUsd",
-      "realizedPnlPct",
-      "txHash",
-    ];
-
-    const rows = visibleEntries.map((entry) =>
-      [
-        entry.executedAt,
-        entry.walletAddress,
-        entry.action,
-        entry.sourceSymbol,
-        entry.destSymbol,
-        entry.sourceAmount,
-        entry.destAmount,
-        entry.sourceUsdValue,
-        entry.destUsdValue,
-        entry.entryPriceUsd ?? "",
-        entry.exitPriceUsd ?? "",
-        entry.realizedPnlUsd ?? "",
-        entry.realizedPnlPct ?? "",
-        entry.txHash,
-      ].join(","),
-    );
-
-    const csvContent = `data:text/csv;charset=utf-8,${[headers.join(","), ...rows].join("\n")}`;
-    const link = document.createElement("a");
-    link.href = encodeURI(csvContent);
-    link.download = "disdex-trade-history.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
+  const { data, loading, refresh } = useDisterminalTrades();
+  const trades = data?.ok ? data.closedTrades : [];
+  const netPnl = trades.reduce((sum, trade) => sum + trade.netPnl, 0);
+  const wins = trades.filter((trade) => trade.netPnl > 0).length;
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-gold-200 to-gold-500 bg-clip-text text-transparent">
-            トレード履歴
-          </h1>
-          <p className="mt-2 text-sm text-gray-400">
-            約定履歴と、ローカル ledger ベースの概算損益を時系列で確認できます。
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => void loadEntries()}
-            className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition-colors hover:bg-white/10"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            再読み込み
-          </button>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 rounded-lg border border-gold-500/40 bg-gold-500/10 px-4 py-2 text-sm text-gold-300 transition-colors hover:bg-gold-500/20"
-          >
-            <Download className="h-4 w-4" />
-            CSV出力
-          </button>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">対象口座</div>
-          <div className="mt-2 break-all font-mono text-sm text-white">{summary.walletAddress}</div>
-        </Card>
-        <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">取引件数</div>
-          <div className="mt-2 text-2xl font-semibold text-white">{summary.totalTrades}</div>
-        </Card>
-        <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">概算確定損益</div>
-          <div className={`mt-2 text-2xl font-semibold ${summary.realizedPnlUsd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-            {formatUsd(summary.realizedPnlUsd)}
+    <main className="space-y-4">
+      <section className="rounded-3xl border border-gold-400/16 bg-[#06090f] p-5 text-white md:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-100/70"><ShieldCheck className="h-4 w-4" />AsterDEX fills</div>
+            <h1 className="mt-2 text-3xl font-black">トレード履歴</h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">AsterDEX userTradesをV96 Crypto / V52 Stockに分類し、未決済Entryを利益・損失へ含めずFIFOで決済済み取引だけを表示します。</p>
           </div>
-        </Card>
-        <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">勝率</div>
-          <div className="mt-2 text-2xl font-semibold text-white">{formatNumber(summary.winRate, 1)}%</div>
-        </Card>
-      </div>
-
-      <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-        このページの損益は Aster の公式 net PnL ではなく、ローカル trade ledger の約定価格から再計算した概算値です。
-        手数料、funding、未実現損益、口座残高の増減とは一致しない場合があります。
-      </div>
-
-      <Card title="約定一覧" glow="gold">
-        {error ? (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-            {error}
-          </div>
-        ) : null}
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] text-left text-sm">
-            <thead className="border-b border-white/10 text-xs uppercase text-gray-400">
-              <tr>
-                <th className="px-3 py-3">日時</th>
-                <th className="px-3 py-3">売買</th>
-                <th className="px-3 py-3">通貨</th>
-                <th className="px-3 py-3">数量</th>
-                <th className="px-3 py-3">取得単価</th>
-                <th className="px-3 py-3">売却単価</th>
-                <th className="px-3 py-3">損益額</th>
-                <th className="px-3 py-3">損益率</th>
-                <th className="px-3 py-3">Tx</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleEntries.map((entry) => (
-                <tr key={entry.id} className="border-b border-white/5 align-top text-gray-200">
-                  <td className="px-3 py-4 font-mono text-xs text-gray-300">
-                    {new Date(entry.executedAt).toLocaleString("ja-JP")}
-                  </td>
-                  <td className={`px-3 py-4 font-semibold ${entry.action === "BUY" ? "text-emerald-400" : "text-red-400"}`}>
-                    {entry.action === "BUY" ? "買い" : "売り"}
-                  </td>
-                  <td className="px-3 py-4">
-                    <div className="font-semibold text-white">
-                      {entry.destSymbol} / {entry.sourceSymbol}
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500">{entry.reason}</div>
-                  </td>
-                  <td className="px-3 py-4 font-mono text-xs">
-                    <div>
-                      {formatNumber(entry.sourceAmount, 6)} {entry.sourceSymbol}
-                    </div>
-                    <div className="mt-1 text-gray-500">
-                      → {formatNumber(entry.destAmount, 6)} {entry.destSymbol}
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 font-mono text-xs text-white">{formatUsd(entry.entryPriceUsd, 4)}</td>
-                  <td className="px-3 py-4 font-mono text-xs text-white">{formatUsd(entry.exitPriceUsd, 4)}</td>
-                  <td
-                    className={`px-3 py-4 font-mono text-xs font-semibold ${
-                      Number(entry.realizedPnlUsd || 0) > 0
-                        ? "text-emerald-400"
-                        : Number(entry.realizedPnlUsd || 0) < 0
-                          ? "text-red-400"
-                          : "text-gray-500"
-                    }`}
-                  >
-                    {formatUsd(entry.realizedPnlUsd)}
-                  </td>
-                  <td
-                    className={`px-3 py-4 font-mono text-xs font-semibold ${
-                      Number(entry.realizedPnlPct || 0) > 0
-                        ? "text-emerald-400"
-                        : Number(entry.realizedPnlPct || 0) < 0
-                          ? "text-red-400"
-                          : "text-gray-500"
-                    }`}
-                  >
-                    {entry.realizedPnlPct !== undefined ? `${formatNumber(entry.realizedPnlPct, 2)}%` : "-"}
-                  </td>
-                  <td className="px-3 py-4 font-mono text-xs">
-                    {hasExplorerTx(entry) ? (
-                      <a
-                        href={explorerTxUrl(entry.chainId, entry.txHash)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-gold-300 hover:text-gold-200"
-                      >
-                        {entry.txHash.slice(0, 8)}...{entry.txHash.slice(-6)}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-white/75">
-                        {entry.provider || "venue"} / {entry.txHash.slice(0, 18)}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {!isLoading && visibleEntries.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-3 py-10 text-center text-sm text-gray-500">
-                    表示できるトレード履歴がありません。
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+          <button type="button" onClick={() => void refresh()} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/75"><RefreshCw className="h-4 w-4" />更新</button>
         </div>
-      </Card>
-    </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <DataCard label="Closed Trades" value={data?.ok ? String(trades.length) : loading ? "取得中…" : "取得不能"} />
+          <DataCard label="Net PnL" value={data?.ok ? formatUsd(netPnl) : loading ? "取得中…" : "取得不能"} />
+          <DataCard label="Win Rate" value={data?.ok && trades.length > 0 ? ((wins / trades.length) * 100).toFixed(1) + "%" : data?.ok ? "データなし" : "未確認"} />
+        </div>
+      </section>
+      {!data?.ok ? <ReadOnlyNotice tone="warning">Aster約定履歴を取得できません。過去取引を0件へ置き換えていません。</ReadOnlyNotice> : null}
+      <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
+        <div className="border-b border-white/10 px-5 py-4"><h2 className="font-bold">決済済み取引</h2><p className="mt-1 text-xs text-white/50">{data?.ok ? "約定数: " + data.fills : "source未確認"}</p></div>
+        {loading ? <div className="p-5 text-sm text-white/60">Aster約定履歴を取得中…</div> : trades.length === 0 && data?.ok ? <div className="p-5 text-sm text-white/60">決済済み取引は確認されていません。未決済Entryはここへ表示しません。</div> : null}
+        <div className="divide-y divide-white/8">
+          {trades.map((trade) => (
+            <div key={trade.id} className="grid gap-3 px-5 py-4 text-sm lg:grid-cols-[0.8fr_0.8fr_1fr_1fr_1fr]">
+              <div><div className="font-bold">{trade.symbol}</div><div className="mt-1 text-xs text-white/50">{trade.strategy} / {trade.side}</div></div>
+              <div className="text-xs text-white/60">Entry<br />{new Date(trade.entryAt).toLocaleString("ja-JP")}<br />{trade.entryPrice}</div>
+              <div className="text-xs text-white/60">Exit<br />{new Date(trade.exitAt).toLocaleString("ja-JP")}<br />{trade.exitPrice}</div>
+              <div className="text-xs text-white/60">数量 {trade.quantity}<br />保有 {trade.holdingMinutes}分<br />理由 {trade.exitReason}</div>
+              <div className={trade.netPnl >= 0 ? "text-emerald-200" : "text-rose-200"}>Net {formatUsd(trade.netPnl)}<div className="mt-1 text-xs text-white/50">Gross {formatUsd(trade.grossPnl)} / 手数料 {formatUsd(trade.commission)}</div></div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <SourceLine source={data?.ok ? data.source : "AsterDEX userTrades"} fetchedAt={data?.fetchedAt} />
+    </main>
   );
 }

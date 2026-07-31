@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { icon: Home, label: "ホーム", href: "/" },
-  { icon: BarChart3, label: "ダッシュ", href: "/positions" },
-  { icon: Wallet, label: "ウォレット", href: "/wallets" },
-  { icon: CalendarDays, label: "成績", href: "/performance" },
-  { icon: FileText, label: "履歴", href: "/history" },
+  { icon: BarChart3, label: "LIVE状況", href: "/positions" },
+  { icon: Wallet, label: "Aster口座", href: "/wallets" },
+  { icon: CalendarDays, label: "成績分析", href: "/performance" },
+  { icon: FileText, label: "トレード履歴", href: "/history" },
   { icon: Settings, label: "設定", href: "/settings" },
 ] as const;
 

@@ -1,58 +1,63 @@
 "use client";
 
-import { useMemo } from "react";
-import { Activity, ShieldCheck, Wallet } from "lucide-react";
-
-import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
-import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTradeRunPanel";
-import { useCurrency } from "@/context/CurrencyContext";
-import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { RefreshCw, ShieldCheck } from "lucide-react";
+import { useDisterminalAccount } from "@/hooks/useDisterminalAccount";
+import { useDisterminalLiveStatus } from "@/hooks/useDisterminalLiveStatus";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { DataCard, ReadOnlyNotice, SourceLine, formatUsd } from "@/components/disterminal/ReadOnlyCard";
 
 export default function PositionsPage() {
-  const { wallet } = useOperationalWallet();
-  const { formatPrice } = useCurrency();
-  const rows = useMemo(() => (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0).sort((a, b) => Number(b.usdValue || 0) - Number(a.usdValue || 0)), [wallet?.trackedHoldings]);
-  const balance = Number(wallet?.lastAsterAccountBalanceUsd ?? wallet?.lastPortfolioUsd ?? 0);
-  const available = Number(wallet?.lastAsterAvailableBalanceUsd ?? wallet?.lastBalanceFormatted ?? 0);
+  const { data: account, loading, refresh } = useDisterminalAccount();
+  const { data: live } = useDisterminalLiveStatus();
+  const positions = account?.ok ? account.positions : [];
+  const liveConfirmed = live?.state === "ACTIVE";
 
   return (
-    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
-      <div className="relative z-10 space-y-3">
-        <header className="panel-gold rounded-[30px] p-5 md:p-7">
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />Production dashboard</div>
-          <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">V96 Crypto + V52 Stock</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/82">V96の暗号資産スリーブとV52の株式スリーブを分けて表示し、口座全体の安全ゲートを確認します。研究候補や旧Paper構成は本番状態として表示しません。</p>
-          <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold">
-            <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5 text-emerald-100">LIVE / {config.executor}</span>
-            <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V96 {config.v96DailyLossPct}%</span>
-            <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 {config.v52DailyLossPct}%</span>
-            <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Total Gross ≤ {config.maximumGross.toFixed(1)}</span>
+    <main className="space-y-4">
+      <section className="rounded-3xl border border-gold-400/16 bg-[#06090f] p-5 text-white md:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-100/70"><ShieldCheck className="h-4 w-4" />DISTerminal LIVE monitor</div>
+            <h1 className="mt-2 text-3xl font-black">LIVE状況 / ポジション</h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">実際のAsterDEX読み取り結果だけを表示します。画面から注文・決済・手動実行はできません。</p>
           </div>
-        </header>
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Metric label="Aster残高" value={formatPrice(balance)} detail={`利用可能 ${formatPrice(available)}`} />
-          <Metric label="Crypto sleeve" value="V96" detail={config.cryptoSymbols.join(" / ")} />
-          <Metric label="Stock sleeve" value="V52" detail={config.stockSymbols.join(" / ")} />
-          <Metric label="Executor" value="Aster Direct" detail="One-way / Fail Closed" />
-        </section>
-        <section className="panel-gold rounded-[30px] p-4 md:p-5">
-          <div className="flex items-center gap-2 text-sm font-bold"><Wallet className="h-4 w-4 text-gold-100" />現在の口座内表示</div>
+          <button type="button" onClick={() => void refresh()} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/75"><RefreshCw className="h-4 w-4" />更新</button>
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <DataCard label="LIVE" value={liveConfirmed ? "稼働確認済み" : "未確認"} detail={live?.reason} />
+          <DataCard label="Executor" value={config.executor} detail="設定値。実稼働は別途状態ソースで確認" />
+          <DataCard label="Open Orders" value={account?.ok && account.openOrderCount !== null ? String(account.openOrderCount) : loading ? "取得中…" : "未確認"} />
+          <DataCard label="Total Gross Limit" value={config.maximumGross.toFixed(1)} detail="Portfolio設定値" />
+        </div>
+      </section>
+      {!account?.ok ? <ReadOnlyNotice tone="warning">Aster建玉・Open Ordersを取得できません。取得不能を0件として扱っていません。</ReadOnlyNotice> : null}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+          <h2 className="text-lg font-bold">現在の管理対象建玉</h2>
+          <p className="mt-1 text-xs text-white/50">V96: {config.cryptoSymbols.join(", ")} / V52: {config.stockSymbols.join(", ")}</p>
           <div className="mt-4 space-y-2">
-            {rows.length ? rows.map((row) => <div key={row.symbol} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{row.symbol}</div><div className="text-xs text-white/60">{row.name}</div></div><div className="text-right"><div className="font-semibold">{Number(row.amount).toFixed(6)}</div><div className="text-xs text-emerald-200">{formatPrice(Number(row.usdValue || 0))}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/65">現在表示できる保有残高はありません。実口座状態の取得結果を待機しています。</div>}
+            {loading ? <p className="text-sm text-white/60">取得中…</p> : positions.length === 0 && account?.ok ? <p className="text-sm text-white/60">現在、AsterDEXから建玉は確認されていません。</p> : null}
+            {positions.map((position) => (
+              <div key={position.symbol} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="flex items-center justify-between gap-3"><span className="font-bold">{position.symbol}</span><span className={position.side === "LONG" ? "text-emerald-200" : "text-rose-200"}>{position.side}</span></div>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/65"><span>数量: {position.quantity}</span><span>Entry: {position.entryPrice ?? "未取得"}</span><span>Mark: {position.markPrice ?? "未取得"}</span><span>uPnL: {formatUsd(position.unrealizedPnl)}</span></div>
+              </div>
+            ))}
           </div>
-        </section>
-        <section className="grid gap-3 md:grid-cols-2">
-          <div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><Activity className="h-4 w-4 text-gold-100" />安全状態</div><p className="mt-3 text-sm leading-7 text-white/78">V96が口座全体の最終防衛線、V52が戦略単体の停止線です。建玉・注文・承認の実状態が取得できない場合は新規注文を停止します。</p></div>
-          <div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4 text-gold-100" />監視対象</div><p className="mt-3 text-sm leading-7 text-white/78">Crypto: {config.cryptoSymbols.join(", ")}</p><p className="text-sm leading-7 text-white/78">Stock: {config.stockSymbols.join(", ")}</p></div>
-        </section>
-        <ManualTradeRunPanel />
-        <LiveDecisionPanel />
-      </div>
+        </div>
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+          <h2 className="text-lg font-bold">リスク・安全状態</h2>
+          <div className="mt-4 space-y-3 text-sm text-white/70">
+            <div className="flex justify-between gap-3"><span>V96 Daily Loss</span><strong className="text-white">{config.v96DailyLossPct}%</strong></div>
+            <div className="flex justify-between gap-3"><span>V52 Daily Loss</span><strong className="text-white">{config.v52DailyLossPct}%</strong></div>
+            <div className="flex justify-between gap-3"><span>PENGU初期Gross</span><strong className="text-white">{config.penguInitialGross.toFixed(2)}</strong></div>
+            <div className="flex justify-between gap-3"><span>Execution Parity / Override</span><strong className="text-amber-100">実状態を確認中</strong></div>
+            <div className="flex justify-between gap-3"><span>Kill Switch</span><strong className="text-amber-100">実状態を確認中</strong></div>
+          </div>
+          <ReadOnlyNotice>この画面は読み取り専用です。状態が取得できない場合、LIVE稼働を推測表示しません。</ReadOnlyNotice>
+        </div>
+      </section>
+      <SourceLine source={account?.ok ? account.source : "AsterDEX read-only account API"} fetchedAt={account?.fetchedAt} />
     </main>
   );
-}
-
-function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return <div className="panel-gold rounded-[24px] p-4"><div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/72">{label}</div><div className="mt-2 text-xl font-black text-white">{value}</div><div className="mt-1 text-[11px] leading-5 text-white/72">{detail}</div></div>;
 }
