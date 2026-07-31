@@ -27,6 +27,7 @@ export interface DisDexV96ExecutionCapacityPlan {
     cashReserveUsd: number;
     estimatedCostHeadroomUsd: number;
     protectedCashUsd: number;
+    availableMarginUsd: number;
     availableIncreaseCapacityUsd: number;
     grossIncreaseCapacityUsd: number;
     currentAccountGrossNotionalUsd: number;
@@ -96,6 +97,8 @@ export function planDisDexV96ExecutionCapacity(input: {
     config: DisDexV96ExecutionCapacityConfig;
 }): DisDexV96ExecutionCapacityPlan {
     const { action, config } = input;
+    const maxGross = finiteNonNegative(config.maxGross, "V96 maximum Gross");
+    if (maxGross <= 0) throw new Error("V96 maximum Gross must be positive.");
     const equityUsd = disDexV96AccountEquity(input.account, input.positions);
     const reportedAvailableBalanceUsd = finiteNonNegative(input.account.availableBalance, "V96 available balance");
     const requiredInitialMarginUsd = disDexV96RequiredInitialMarginUsd(input.positions);
@@ -115,14 +118,16 @@ export function planDisDexV96ExecutionCapacity(input: {
         : Math.max(0, Math.abs(action.targetNotionalUsd) - Math.abs(action.currentNotionalUsd));
     const estimatedCostHeadroomUsd = requestedIncreaseUsd * (roundTripFeeBps + maxSlippageBps) / 10_000;
     const protectedCashUsd = Math.max(cashReserveUsd, estimatedCostHeadroomUsd, minimumExecutionHeadroomUsd);
-    const availableIncreaseCapacityUsd = Math.max(0, effectiveAvailableBalanceUsd - protectedCashUsd);
+    const availableMarginUsd = Math.max(0, effectiveAvailableBalanceUsd - protectedCashUsd);
+    // Read-only LIVE preflight verifies that every managed Aster symbol has
+    // leverage >= ceil(maxGross). Multiplying free margin by maxGross therefore
+    // permits Gross above 1.0 without exceeding the approved portfolio cap.
+    const availableIncreaseCapacityUsd = availableMarginUsd * maxGross;
 
     const currentAccountGrossNotionalUsd = grossNotionalUsd(input.positions, "V96 account");
     const currentManagedGrossNotionalUsd = grossNotionalUsd(input.managedPositions, "V96 managed");
     const externalGrossNotionalUsd = Math.max(0, currentAccountGrossNotionalUsd - currentManagedGrossNotionalUsd);
     const otherManagedGrossNotionalUsd = Math.max(0, currentManagedGrossNotionalUsd - Math.abs(action.currentNotionalUsd));
-    const maxGross = finiteNonNegative(config.maxGross, "V96 maximum Gross");
-    if (maxGross <= 0) throw new Error("V96 maximum Gross must be positive.");
     const maximumTargetNotionalByGrossUsd = Math.max(
         0,
         maxGross * equityUsd - externalGrossNotionalUsd - otherManagedGrossNotionalUsd,
@@ -149,6 +154,7 @@ export function planDisDexV96ExecutionCapacity(input: {
             cashReserveUsd,
             estimatedCostHeadroomUsd,
             protectedCashUsd,
+            availableMarginUsd,
             availableIncreaseCapacityUsd,
             grossIncreaseCapacityUsd,
             currentAccountGrossNotionalUsd,
@@ -176,7 +182,7 @@ export function planDisDexV96ExecutionCapacity(input: {
         targetWeight: executionTargetWeight,
         deltaNotionalUsd: deltaDirection * executableIncreaseUsd,
         reason: executionScale + EPSILON < 1
-            ? `${action.reason} Execution size was proportionally reduced to available V96 balance and shared portfolio Gross capacity.`
+            ? `${action.reason} Execution size was proportionally reduced to available margin and shared portfolio Gross capacity.`
             : action.reason,
     };
     const projectedManagedGross = (otherManagedGrossNotionalUsd + executionTargetNotionalAbsUsd) / equityUsd;
@@ -188,7 +194,7 @@ export function planDisDexV96ExecutionCapacity(input: {
     }
     const minimumOrderNotionalUsd = finiteNonNegative(config.minOrderNotionalUsd, "V96 minimum order notional");
     const blockedReason = executableIncreaseUsd + EPSILON < minimumOrderNotionalUsd
-        ? `V96 executable increase ${executableIncreaseUsd.toFixed(4)} USD is below the minimum order notional after Cash Reserve, cost headroom, margin and shared portfolio Gross checks.`
+        ? `V96 executable increase ${executableIncreaseUsd.toFixed(4)} USD is below the minimum order notional after Cash Reserve, cost headroom, leverage, margin and shared portfolio Gross checks.`
         : undefined;
     return {
         action: adjustedAction,
@@ -205,6 +211,7 @@ export function planDisDexV96ExecutionCapacity(input: {
         cashReserveUsd,
         estimatedCostHeadroomUsd,
         protectedCashUsd,
+        availableMarginUsd,
         availableIncreaseCapacityUsd,
         grossIncreaseCapacityUsd,
         currentAccountGrossNotionalUsd,
