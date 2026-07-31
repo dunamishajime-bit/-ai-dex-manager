@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - codex/vps-runtime-safety-sync
     paths:
       - config/disdexV96Runtime.ts
       - lib/disdex-v95-*.ts
@@ -128,12 +129,15 @@ jobs:
           grep -q 'portfolioRebalanceThresholdPct: 7.5' config/disdexV96Runtime.ts
           grep -q 'weightBandTolerancePct: 5' config/disdexV96Runtime.ts
           grep -q 'forcedRefreshBars: 12' config/disdexV96Runtime.ts
+          grep -q 'penguTargetGross: 1.15' config/disdexV96Runtime.ts
+          grep -q 'totalGrossCap: 2.5' config/disdexV96Runtime.ts
           grep -q 'mode: "LIVE_READY"' config/disdexV96Runtime.ts
           grep -q 'liveTradingEnabled: true' config/disdexV96Runtime.ts
           grep -q 'forwardEvidenceStatus: "NOT_APPROVED"' config/disdexV96Runtime.ts
           grep -q 'operatorOverrideEnabled: true' config/disdexV96Runtime.ts
-          grep -q 'maximumOverridePenguGross: 0.15' config/disdexV96Runtime.ts
-          grep -q 'maximumDailyLossPct: 2' config/disdexV96Runtime.ts
+          grep -q 'maximumOverridePenguGross: 1.15' config/disdexV96Runtime.ts
+          grep -q 'maximumPortfolioGross: 2.5' config/disdexV96Runtime.ts
+          grep -q 'maximumDailyLossPct: 5' config/disdexV96Runtime.ts
           grep -q 'killSwitchAction: "FLATTEN_MANAGED"' config/disdexV96Runtime.ts
           grep -q 'status: "APPROVED"' config/disdexV96Runtime.ts
           grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS' config/disdexV96Runtime.ts
