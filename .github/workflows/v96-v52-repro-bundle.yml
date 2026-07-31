@@ -1,0 +1,230 @@
+name: Build V96 V52 Repro Bundle
+
+on:
+  push:
+    branches:
+      - codex/v96-v52-repro-bundle-20260731
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download and verify monthly OHLCV, archive exact source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          python - <<'PY'
+          from __future__ import annotations
+
+          import csv
+          import datetime as dt
+          import hashlib
+          import json
+          import shutil
+          import subprocess
+          import time
+          import urllib.request
+          import zipfile
+          from pathlib import Path
+
+          SOURCE_SHA = "04c1a369223bd27e9e42bc93604b3777b9230d92"
+          SOURCE_BRANCH = "research/v96-v52-common-year-final"
+          PR_NUMBER = 97
+          SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT"]
+          START = dt.date(2025, 7, 1)
+          END = dt.date(2026, 7, 1)
+          BASE_URL = "https://data.binance.vision/data/futures/um/monthly/klines"
+
+          root = Path("build/v96-v52-common-year-repro")
+          ohlcv = root / "ohlcv_monthly"
+          source = root / "source"
+          results = root / "original_results_placeholder"
+          manifest_dir = root / "manifest"
+          for directory in (ohlcv, source, results, manifest_dir):
+              directory.mkdir(parents=True, exist_ok=True)
+
+          def month_iter(start: dt.date, end: dt.date):
+              current = start
+              while current < end:
+                  yield current.strftime("%Y-%m")
+                  current = (current.replace(day=28) + dt.timedelta(days=4)).replace(day=1)
+
+          def sha256(path: Path) -> str:
+              digest = hashlib.sha256()
+              with path.open("rb") as reader:
+                  for chunk in iter(lambda: reader.read(1024 * 1024), b""):
+                      digest.update(chunk)
+              return digest.hexdigest()
+
+          def download(url: str, destination: Path, attempts: int = 6) -> None:
+              headers = {"User-Agent": "DisDex-Repro-Bundle/1.0"}
+              last_error: Exception | None = None
+              for attempt in range(1, attempts + 1):
+                  try:
+                      request = urllib.request.Request(url, headers=headers)
+                      with urllib.request.urlopen(request, timeout=90) as response, destination.open("wb") as writer:
+                          shutil.copyfileobj(response, writer)
+                      if destination.stat().st_size <= 0:
+                          raise RuntimeError(f"empty download: {url}")
+                      return
+                  except Exception as error:
+                      last_error = error
+                      destination.unlink(missing_ok=True)
+                      if attempt == attempts:
+                          break
+                      time.sleep(min(30, 2 ** attempt))
+              raise RuntimeError(f"download failed after {attempts} attempts: {url}: {last_error}")
+
+          rows: list[dict[str, object]] = []
+          for symbol in SYMBOLS:
+              for month in month_iter(START, END):
+                  filename = f"{symbol}-1h-{month}.zip"
+                  url = f"{BASE_URL}/{symbol}/1h/{filename}"
+                  checksum_url = url + ".CHECKSUM"
+                  destination = ohlcv / filename
+                  checksum_path = ohlcv / (filename + ".CHECKSUM")
+                  print(f"Downloading {filename}", flush=True)
+                  download(url, destination)
+                  download(checksum_url, checksum_path)
+
+                  checksum_text = checksum_path.read_text(encoding="utf-8").strip()
+                  expected = checksum_text.split()[0].lower()
+                  actual = sha256(destination)
+                  if actual != expected:
+                      raise RuntimeError(f"checksum mismatch for {filename}: {actual} != {expected}")
+
+                  with zipfile.ZipFile(destination) as archive:
+                      bad = archive.testzip()
+                      if bad is not None:
+                          raise RuntimeError(f"corrupt member in {filename}: {bad}")
+                      names = [name for name in archive.namelist() if not name.endswith("/")]
+                      expected_csv = filename[:-4] + ".csv"
+                      if expected_csv not in names:
+                          raise RuntimeError(f"expected CSV missing in {filename}: {expected_csv}")
+
+                  rows.append({
+                      "symbol": symbol,
+                      "year_month": month,
+                      "filename": filename,
+                      "bytes": destination.stat().st_size,
+                      "sha256": actual,
+                      "source_url": url,
+                      "checksum_url": checksum_url,
+                      "verified": True,
+                  })
+
+          if len(rows) != 72:
+              raise RuntimeError(f"expected 72 monthly OHLCV ZIPs, got {len(rows)}")
+
+          source_archive = source / f"ai-dex-manager-{SOURCE_SHA}.zip"
+          subprocess.run([
+              "git", "archive", "--format=zip", f"--output={source_archive}", SOURCE_SHA
+          ], check=True)
+
+          key_files = [
+              ".github/workflows/v96-v52-dual-slot-one-year-bt.yml",
+              "docs/research/V96_V52_DUAL_SLOT_ONE_YEAR_PROTOCOL_2026-07-26.md",
+              "scripts/research_lab_v96_v52_dual_slot_one_year_bt.py",
+          ]
+          for relative in key_files:
+              target = source / "key_files" / relative
+              target.parent.mkdir(parents=True, exist_ok=True)
+              content = subprocess.check_output(["git", "show", f"{SOURCE_SHA}:{relative}"])
+              target.write_bytes(content)
+
+          downloader = root / "download_monthly_ohlcv.py"
+          downloader.write_text(
+              """from __future__ import annotations\n\n"
+              "# Generated helper. The authoritative downloaded files and checksums are already in ohlcv_monthly/.\n"
+              "# Source pattern: https://data.binance.vision/data/futures/um/monthly/klines/{symbol}/1h/{filename}\n"
+              "SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'LINKUSDT', 'AVAXUSDT']\n"
+              "PERIOD = ('2025-07', '2026-06')\n"
+              """,
+              encoding="utf-8",
+          )
+
+          with (manifest_dir / "ohlcv_manifest.csv").open("w", newline="", encoding="utf-8") as writer_file:
+              writer = csv.DictWriter(writer_file, fieldnames=list(rows[0]))
+              writer.writeheader()
+              writer.writerows(rows)
+
+          metadata = {
+              "bundleVersion": 1,
+              "generatedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
+              "repository": "dunamishajime-bit/-ai-dex-manager",
+              "sourceCommit": SOURCE_SHA,
+              "sourceBranch": SOURCE_BRANCH,
+              "pullRequest": PR_NUMBER,
+              "backtestStrategyId": "DISDEX_V96_V52_DUAL_SLOT_ONE_YEAR_PORTFOLIO",
+              "backtestPeriod": {
+                  "startInclusive": "2025-07-01T00:00:00+00:00",
+                  "endExclusive": "2026-07-01T00:00:00+00:00",
+              },
+              "ohlcv": {
+                  "market": "Binance USD-M Futures public archive",
+                  "dataType": "monthly klines",
+                  "interval": "1h",
+                  "symbols": SYMBOLS,
+                  "months": list(month_iter(START, END)),
+                  "zipCount": len(rows),
+                  "checksumsVerified": True,
+              },
+              "notes": [
+                  "The full repository source archive is frozen at the exact backtest commit.",
+                  "The 72 monthly OHLCV ZIP files cover the six V96 core symbols from 2025-07 through 2026-06.",
+                  "The original result.json, report.md and backtest.log are injected into the final user-facing archive after this Actions artifact is downloaded.",
+                  "Stock cash/perpetual source history is not represented by these Binance monthly crypto OHLCV files; the exact stock acquisition/alignment logic is preserved in the source archive.",
+              ],
+          }
+          (manifest_dir / "bundle_metadata.json").write_text(
+              json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+
+          readme = f"""# V96 + V52 Common-Year Backtest Reproduction Bundle\n\n"
+          readme += f"- Exact source commit: `{SOURCE_SHA}`\n"
+          readme += f"- Source branch: `{SOURCE_BRANCH}`\n"
+          readme += f"- Pull request: `#{PR_NUMBER}`\n"
+          readme += "- Backtest period: `2025-07-01` inclusive to `2026-07-01` exclusive\n"
+          readme += "- Monthly crypto OHLCV: 72 verified ZIP files (6 symbols x 12 months)\n"
+          readme += "- Interval/market: Binance USD-M Futures, 1h monthly klines\n\n"
+          readme += "## Contents\n\n"
+          readme += "- `source/ai-dex-manager-<SHA>.zip`: full repository source at the exact BT commit\n"
+          readme += "- `source/key_files/`: main BT script, protocol and original workflow\n"
+          readme += "- `ohlcv_monthly/`: monthly OHLCV ZIPs and official `.CHECKSUM` files\n"
+          readme += "- `manifest/ohlcv_manifest.csv`: byte sizes, SHA-256 values and source URLs\n"
+          readme += "- `original_results/`: added to the final attached archive after artifact retrieval\n\n"
+          readme += "This is research/reproduction material only. It does not submit orders or alter LIVE/VPS state.\n"
+          (root / "README.md").write_text(readme, encoding="utf-8")
+
+          sums: list[str] = []
+          for path in sorted(root.rglob("*")):
+              if path.is_file() and path.name != "SHA256SUMS":
+                  sums.append(f"{sha256(path)}  {path.relative_to(root).as_posix()}")
+          (root / "SHA256SUMS").write_text("\n".join(sums) + "\n", encoding="utf-8")
+
+          output = Path("dist/v96-v52-common-year-repro-source-and-ohlcv.zip")
+          with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
+              for path in sorted(root.rglob("*")):
+                  if path.is_file():
+                      archive.write(path, path.relative_to(root.parent))
+          print(f"Created {output} ({output.stat().st_size} bytes)")
+          PY
+
+      - name: Upload reproduction bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-v52-common-year-repro-source-and-ohlcv-${{ github.run_id }}
+          path: dist/v96-v52-common-year-repro-source-and-ohlcv.zip
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
