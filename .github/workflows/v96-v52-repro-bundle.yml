@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - codex/v96-v52-repro-bundle-20260731
+  pull_request:
+    branches:
+      - codex/v96-v52-repro-bundle-20260731
 
 permissions:
   contents: read
@@ -141,16 +144,15 @@ jobs:
               content = subprocess.check_output(["git", "show", f"{SOURCE_SHA}:{relative}"])
               target.write_bytes(content)
 
-          downloader = root / "download_monthly_ohlcv.py"
-          downloader.write_text(
-              """from __future__ import annotations\n\n"
-              "# Generated helper. The authoritative downloaded files and checksums are already in ohlcv_monthly/.\n"
-              "# Source pattern: https://data.binance.vision/data/futures/um/monthly/klines/{symbol}/1h/{filename}\n"
+          downloader_text = (
+              "from __future__ import annotations\n\n"
+              "# The authoritative files and checksums are already included in ohlcv_monthly/.\n"
+              "# Public source pattern:\n"
+              "# https://data.binance.vision/data/futures/um/monthly/klines/{symbol}/1h/{filename}\n"
               "SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'LINKUSDT', 'AVAXUSDT']\n"
               "PERIOD = ('2025-07', '2026-06')\n"
-              """,
-              encoding="utf-8",
           )
+          (root / "download_monthly_ohlcv.py").write_text(downloader_text, encoding="utf-8")
 
           with (manifest_dir / "ohlcv_manifest.csv").open("w", newline="", encoding="utf-8") as writer_file:
               writer = csv.DictWriter(writer_file, fieldnames=list(rows[0]))
@@ -190,20 +192,22 @@ jobs:
               encoding="utf-8",
           )
 
-          readme = f"""# V96 + V52 Common-Year Backtest Reproduction Bundle\n\n"
-          readme += f"- Exact source commit: `{SOURCE_SHA}`\n"
-          readme += f"- Source branch: `{SOURCE_BRANCH}`\n"
-          readme += f"- Pull request: `#{PR_NUMBER}`\n"
-          readme += "- Backtest period: `2025-07-01` inclusive to `2026-07-01` exclusive\n"
-          readme += "- Monthly crypto OHLCV: 72 verified ZIP files (6 symbols x 12 months)\n"
-          readme += "- Interval/market: Binance USD-M Futures, 1h monthly klines\n\n"
-          readme += "## Contents\n\n"
-          readme += "- `source/ai-dex-manager-<SHA>.zip`: full repository source at the exact BT commit\n"
-          readme += "- `source/key_files/`: main BT script, protocol and original workflow\n"
-          readme += "- `ohlcv_monthly/`: monthly OHLCV ZIPs and official `.CHECKSUM` files\n"
-          readme += "- `manifest/ohlcv_manifest.csv`: byte sizes, SHA-256 values and source URLs\n"
-          readme += "- `original_results/`: added to the final attached archive after artifact retrieval\n\n"
-          readme += "This is research/reproduction material only. It does not submit orders or alter LIVE/VPS state.\n"
+          readme = (
+              "# V96 + V52 Common-Year Backtest Reproduction Bundle\n\n"
+              f"- Exact source commit: `{SOURCE_SHA}`\n"
+              f"- Source branch: `{SOURCE_BRANCH}`\n"
+              f"- Pull request: `#{PR_NUMBER}`\n"
+              "- Backtest period: `2025-07-01` inclusive to `2026-07-01` exclusive\n"
+              "- Monthly crypto OHLCV: 72 verified ZIP files (6 symbols x 12 months)\n"
+              "- Interval/market: Binance USD-M Futures, 1h monthly klines\n\n"
+              "## Contents\n\n"
+              "- `source/ai-dex-manager-<SHA>.zip`: full repository source at the exact BT commit\n"
+              "- `source/key_files/`: main BT script, protocol and original workflow\n"
+              "- `ohlcv_monthly/`: monthly OHLCV ZIPs and official `.CHECKSUM` files\n"
+              "- `manifest/ohlcv_manifest.csv`: byte sizes, SHA-256 values and source URLs\n"
+              "- `original_results/`: added to the final attached archive after artifact retrieval\n\n"
+              "This is research/reproduction material only. It does not submit orders or alter LIVE/VPS state.\n"
+          )
           (root / "README.md").write_text(readme, encoding="utf-8")
 
           sums: list[str] = []
