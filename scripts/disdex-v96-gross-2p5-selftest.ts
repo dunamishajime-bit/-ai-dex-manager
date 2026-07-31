@@ -4,6 +4,7 @@ import { DISDEX_V13D_V11EQ_V96_ALLOCATION } from "../config/disdexStockRouterV13
 import { DISDEX_V96_ALLOCATION, DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import type { DirectAccountSnapshot, DirectPosition } from "../lib/direct-trade-executor";
 import type { DisDexV35RebalanceAction } from "../lib/disdex-v35-portfolio-runner";
+import { allocateDisDexV96ReservedPengu } from "../lib/disdex-v96-allocation";
 import { planDisDexV96ExecutionCapacity } from "../lib/disdex-v96-execution-capacity";
 
 const NOW = Date.UTC(2026, 6, 31, 14, 30, 0);
@@ -59,6 +60,15 @@ assert.equal(DISDEX_V96_RUNTIME.minimumExecutionLeverage, 3);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 2.5);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
 
+const reservedAllocation = allocateDisDexV96ReservedPengu({
+    coreWeights: { BTCUSDT: 0.9, ETHUSDT: 0.9 },
+    penguSide: 1,
+});
+assert.equal(reservedAllocation.penguFinalGross, 1.15);
+assert.equal(reservedAllocation.penguClip, 1);
+assert.ok(Math.abs(reservedAllocation.scaledCoreGross - 1.35) <= 1e-12);
+assert.ok(Math.abs(reservedAllocation.finalGross - 2.5) <= 1e-12);
+
 const pengu115 = planDisDexV96ExecutionCapacity({
     account: account(100),
     positions: [],
@@ -92,7 +102,8 @@ console.log(JSON.stringify({
     operatorOverridePenguCap: DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross,
     portfolioGrossCap: DISDEX_V96_ALLOCATION.totalGrossCap,
     requiredExecutionLeverage: DISDEX_V96_RUNTIME.minimumExecutionLeverage,
-    pengu115Unscaled: true,
+    pengu115ReservedBeforeCore: true,
+    coreResidualGross: reservedAllocation.scaledCoreGross,
     stockGross: 1.5,
     residualCryptoGross: sharedCap.projectedManagedGross,
     finalPortfolioGross: sharedCap.projectedPortfolioGross,
