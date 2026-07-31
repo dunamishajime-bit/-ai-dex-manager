@@ -1,0 +1,97 @@
+# Aster–Binance Event-Driven Microstructure Backtest
+
+## Mechanical verdict
+
+**PASS for paper-trading research.**
+
+The deployment gate is deliberately demanding: holdout CAGR at least 40%, maximum drawdown no worse than -30%, and Sharpe at least 1.0 after Aster taker fees and slippage.
+
+## Test design
+
+- Symbols requested/tested: BTCUSDT, ETHUSDT, SOLUSDT, PENGUUSDT
+- Usable symbols: BTCUSDT, ETHUSDT, SOLUSDT, PENGUUSDT
+- Historical window: 2025-10-01 through 2026-06-30
+- Untouched holdout: 2026-04-01 onward
+- Bar interval: 5m; signal on completed bar, execution from next bar open
+- Aster taker fee: 0.040% per side
+- Slippage allowance: 0.010% per side
+- Round-trip friction: 0.100%
+- Fixed logic: equal-weight sleeves with pre-specified directions
+- Adaptive logic: ridge weights fitted only before the holdout
+
+## Strategy results
+
+| Strategy | Period | Hold min | Threshold | Return | CAGR | Max DD | Sharpe | Best month | Worst month |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| fixed_equal | holdout | 60 | 0.55 | 16.59% | 85.19% | -7.14% | 3.98 | 12.10% | -2.33% |
+| selection_ridge | holdout | 60 | 2.00 | 6.21% | 27.36% | -15.09% | 1.19 | 16.45% | -12.16% |
+
+## Leverage sensitivity — holdout
+
+| Strategy | Scale | CAGR | Max DD | Sharpe | Best month | Worst month |
+| --- | --- | --- | --- | --- | --- | --- |
+| fixed_equal | holdout_1.0x | 85.19% | -7.14% | 3.98 | 12.10% | -2.33% |
+| fixed_equal | holdout_1.5x | 149.67% | -10.56% | 3.98 | 18.55% | -3.54% |
+| fixed_equal | holdout_2.0x | 234.51% | -13.89% | 3.98 | 25.26% | -4.77% |
+| fixed_equal | holdout_3.0x | 489.44% | -20.27% | 3.98 | 39.51% | -7.29% |
+| selection_ridge | holdout_1.0x | 27.36% | -15.09% | 1.19 | 16.45% | -12.16% |
+| selection_ridge | holdout_1.5x | 41.06% | -21.87% | 1.19 | 25.37% | -17.80% |
+| selection_ridge | holdout_2.0x | 54.31% | -28.19% | 1.19 | 34.75% | -23.14% |
+| selection_ridge | holdout_3.0x | 77.90% | -39.53% | 1.19 | 54.94% | -33.00% |
+
+## Strongest individual event studies in the holdout
+
+| Symbol | Feature | Horizon | Threshold | Events | Gross/event | Net/event | Win rate | Trade t-like |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PENGUUSDT | sig_price_mr | 60 | 2.50 | 855 | 0.64% | 0.54% | 58.95% | 11.38 |
+| PENGUUSDT | sig_price_mr | 30 | 2.50 | 855 | 0.55% | 0.45% | 53.80% | 11.84 |
+| PENGUUSDT | sig_price_mr | 60 | 2.00 | 1752 | 0.54% | 0.44% | 57.76% | 13.93 |
+| PENGUUSDT | sig_price_mr | 30 | 2.00 | 1752 | 0.48% | 0.38% | 53.71% | 15.87 |
+| PENGUUSDT | sig_price_mr | 60 | 1.50 | 3457 | 0.47% | 0.37% | 57.10% | 17.33 |
+| PENGUUSDT | sig_price_mr | 30 | 1.50 | 3457 | 0.39% | 0.29% | 50.88% | 18.23 |
+| PENGUUSDT | sig_price_mr | 15 | 2.50 | 855 | 0.37% | 0.27% | 41.40% | 9.01 |
+| PENGUUSDT | sig_price_mr | 15 | 2.00 | 1752 | 0.34% | 0.24% | 41.04% | 12.51 |
+| PENGUUSDT | sig_flow_cont | 60 | 2.00 | 30 | 0.33% | 0.23% | 56.67% | 1.30 |
+| PENGUUSDT | sig_price_mr | 15 | 1.50 | 3457 | 0.28% | 0.18% | 39.60% | 14.67 |
+| PENGUUSDT | sig_lead_follow | 60 | 2.00 | 1623 | 0.27% | 0.17% | 52.56% | 5.22 |
+| PENGUUSDT | sig_flow_cont | 30 | 2.00 | 30 | 0.23% | 0.13% | 43.33% | 0.75 |
+| PENGUUSDT | sig_lead_follow | 30 | 2.00 | 1623 | 0.22% | 0.12% | 49.54% | 5.03 |
+| PENGUUSDT | sig_lead_follow | 60 | 2.50 | 799 | 0.22% | 0.12% | 51.31% | 2.48 |
+| PENGUUSDT | sig_lead_follow | 60 | 1.50 | 3320 | 0.22% | 0.12% | 51.33% | 5.35 |
+
+## Current public-order-book endpoint probe
+
+| Venue | Samples | Avg spread bps | Median top-20 depth USD | Depth imbalance |
+| --- | --- | --- | --- | --- |
+| aster | 20 | 0.05 | 3382799.01 | -0.02 |
+
+This short probe confirms endpoint accessibility only. It is not enough observations to establish a tradable spread/depth edge.
+
+## What was and was not historically tested
+
+Historically tested where data existed:
+
+- Aster versus Binance traded-price dislocation
+- Aster/Binance mark-versus-trade basis dislocation
+- settled/latest funding-rate differences and jumps
+- Binance open-interest changes from public metrics archives
+- taker-buy/taker-sell flow imbalance from both venues' klines
+- Binance-to-Aster lead/lag residual
+- Binance public liquidation snapshots when the archive contained them
+- range/volume illiquidity as a separately labelled proxy
+
+Not historically proven from official Aster archives:
+
+- full historical Aster order-book thinning and spread expansion
+- full historical Aster liquidation stream
+- the complete intra-funding-period predicted funding path
+
+Aster exposes these as live public streams/endpoints, so production research must record them prospectively before deployment. Missing archive fields are not silently replaced by fabricated values.
+
+## Important limitations
+
+1. Five-minute bars cannot reproduce queue position, sub-second latency, partial fills, or adverse selection.
+2. Aster historical availability begins later than Binance and may differ by symbol.
+3. Binance metrics and liquidation archives are used only when actually downloadable; coverage is exported separately.
+4. The strategy assumes taker execution. Maker execution may lower fees but introduces fill-selection risk.
+5. Results are a research screen, not a promise of future returns.
