@@ -42,5 +42,11 @@ export DISDEX_V96_OPERATOR_OVERRIDE_FILE="$shared_approval/disdex-v96-operator-o
 export DISDEX_V96_CONFIG_MIGRATION_MODE=true
 export DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT=I_SYNC_CURRENT_EXACT_OPERATOR_OVERRIDE_AUDIT
 
+# Keep the service fail-closed without a systemd restart loop while the shared Kill Switch is active.
+while [[ -f "$DISDEX_V96_KILL_SWITCH_FILE" ]] && /usr/bin/jq -e ".active == true" "$DISDEX_V96_KILL_SWITCH_FILE" >/dev/null 2>&1; do
+  printf "shared Kill Switch active; waiting for formal operator clearance\n" >&2
+  sleep 30
+done
+
 /usr/bin/npm run strategy:disdex-v96:override:audit:sync
 exec /usr/bin/npm run strategy:disdex-v52:daemon
