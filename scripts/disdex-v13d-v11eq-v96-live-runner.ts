@@ -228,7 +228,8 @@ function selfTest() {
     process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = "paper";
     process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = ".runtime-state/selftest-v96-v52";
     const env = buildCombinedChildEnvironment("paper");
-    assert.equal(env.DISDEX_V96_MAX_GROSS, "1");
+    assert.equal(env.DISDEX_V96_MAX_GROSS, "2.5");
+    assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "2.5");
     assert.equal(env.DISDEX_V52_STOCK_GROSS_CAP, "1.5");
     assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "2.5");
     assert.equal(env.DISDEX_V52_V11_GROSS_CAP, "1");
