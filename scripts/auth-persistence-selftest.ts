@@ -15,6 +15,7 @@ assert.equal(
   "production releases must use the shared data directory",
 );
 
+<<<<<<< HEAD
 const legacyDeployRoot = path.join(tempRoot, "legacy-deploy");
 const legacyRelease = path.join(legacyDeployRoot, "disdex-trading", "releases", "current-sha");
 const legacyShared = path.join(legacyDeployRoot, "disdex-ui", "shared", "data");
@@ -25,6 +26,8 @@ assert.equal(
   "a release mounted under a migrated project root must retain the existing durable auth store",
 );
 
+=======
+>>>>>>> 43843de8 (Persist authentication across UI releases)
 const explicit = path.join(tempRoot, "explicit-data");
 assert.equal(
   getDisterminalDataDir(currentRelease, {
