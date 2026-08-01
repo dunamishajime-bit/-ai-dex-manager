@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import os
+import sys
 import time
 import urllib.parse
 
@@ -18,6 +19,19 @@ def regular_us_equity_session(value: dt.datetime | None = None) -> bool:
     return local.weekday() < 5 and engine.clock("09:30:00") <= engine.ny_seconds(local) <= engine.clock("16:00:00")
 
 
+def reference_health_ready(payload: dict, value: dt.datetime | None = None) -> bool:
+    """Accept explicit market-closed health without requiring live feeds.
+
+    During the US equity weekend or outside the regular session, the proxy
+    intentionally disconnects Pyth and Alpaca IEX so it does not poll paid or
+    rate-limited sources. Only an explicit ``marketOpen=false`` response may
+    use this path; missing or ambiguous health remains fail-closed.
+    """
+
+    if payload.get("marketOpen") is False and not regular_us_equity_session(value):
+        return True
+    return payload.get("pythConnected") is True and payload.get("iexConnected") is True
+
 def reference_health(reference: engine.ReferenceProvider) -> dict:
     parsed = urllib.parse.urlsplit(reference.template.format(symbol="NVDA", unix_ms=engine.now_ms()))
     health_url = urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "/health", "", ""))
@@ -29,7 +43,7 @@ def reference_health(reference: engine.ReferenceProvider) -> dict:
             payload = engine.http_json(health_url, headers=reference.headers, timeout=reference.timeout)
             if not isinstance(payload, dict):
                 raise RuntimeError("Free reference /health returned a non-object response")
-            if payload.get("pythConnected") is True and payload.get("iexConnected") is True:
+            if reference_health_ready(payload):
                 return payload
             last_error = RuntimeError(f"Free reference sources are not connected: {payload}")
         except Exception as error:
@@ -101,5 +115,15 @@ def free_preflight(self: engine.StockEngine) -> dict:
 engine.StockEngine.preflight = free_preflight
 
 
+def self_test() -> None:
+    closed = {"marketOpen": False, "pythConnected": False, "iexConnected": False}
+    assert reference_health_ready(closed, dt.datetime(2026, 8, 1, 14, 0, tzinfo=engine.UTC))
+    assert not reference_health_ready(closed, dt.datetime(2026, 7, 31, 15, 0, tzinfo=engine.UTC))
+    assert reference_health_ready({"pythConnected": True, "iexConnected": True}, dt.datetime(2026, 7, 31, 15, 0, tzinfo=engine.UTC))
+    print("Free Pyth + Alpaca IEX preflight market-closed self-test: PASS")
+
 if __name__ == "__main__":
-    raise SystemExit(engine.main())
+    if "--self-test" in sys.argv:
+        self_test()
+    else:
+        raise SystemExit(engine.main())
