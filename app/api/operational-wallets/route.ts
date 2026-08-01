@@ -216,6 +216,31 @@ async function refreshWalletBalance(wallet: OperationalWalletRecord) {
   return wallet;
 }
 
+function buildReadOnlyAsterWallet(
+  userId: string,
+  email: string,
+  displayName: string,
+  config: NonNullable<ReturnType<typeof loadAsterDexClientConfig>>,
+): OperationalWalletRecord {
+  const now = new Date().toISOString();
+  return {
+    id: "aster-readonly:" + config.userAddress.toLowerCase(),
+    userId,
+    email,
+    displayName,
+    label: "AsterDEX read-only account",
+    address: config.userAddress,
+    encryptedPrivateKey: "",
+    chainId: config.chainId,
+    chainName: "Aster Futures",
+    createdAt: now,
+    updatedAt: now,
+    status: "running",
+    backupConfirmed: false,
+    whitelist: [],
+  };
+}
+
 async function resolveWallet(userId?: string, email?: string) {
   if (userId) {
     const byUser = await findOperationalWalletByUser(userId);
@@ -293,24 +318,33 @@ export async function GET(req: NextRequest) {
   const displayName = searchParams.get("displayName") || undefined;
 
   try {
-    const wallet = await resolveWallet(userId, email);
+    let wallet = await resolveWallet(userId, email);
+    let persistedWallet = true;
     if (!wallet || wallet.deletedAt) {
-      return NextResponse.json({ ok: true, wallet: null });
+      const owner = userId ? await findUserById(userId) : email ? await findUserByEmail(email) : undefined;
+      const config = loadAsterDexClientConfig();
+      if (!owner || !config) {
+        return NextResponse.json({ ok: true, wallet: null, reason: config ? "user_not_found" : "aster_not_configured" });
+      }
+      wallet = buildReadOnlyAsterWallet(owner.id, owner.email, owner.displayName, config);
+      persistedWallet = false;
     }
 
-    const normalized = await normalizeWalletOwnerIdentity(wallet, userId, email, displayName);
+    const normalized = persistedWallet
+      ? await normalizeWalletOwnerIdentity(wallet, userId, email, displayName)
+      : wallet;
     const refreshed = await refreshWalletBalance(normalized);
-    if (refreshed !== normalized) {
+    if (persistedWallet && refreshed !== normalized) {
       await upsertOperationalWallet(refreshed);
     }
-    if (typeof refreshed.lastPortfolioUsd === "number" && refreshed.lastPortfolioUsd > 0) {
+    if (persistedWallet && typeof refreshed.lastPortfolioUsd === "number" && refreshed.lastPortfolioUsd > 0) {
       await appendPortfolioSnapshot({
         walletId: refreshed.id,
         capturedAt: new Date().toISOString(),
         portfolioUsd: Number(refreshed.lastPortfolioUsd),
       });
     }
-    await syncUserWalletMetadata(refreshed, userId, email);
+    if (persistedWallet) await syncUserWalletMetadata(refreshed, userId, email);
     return NextResponse.json({ ok: true, wallet: sanitizeWallet(refreshed) });
   } catch (error) {
     return NextResponse.json(

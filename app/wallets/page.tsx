@@ -138,8 +138,8 @@ export default function WalletsPage() {
       .sort((a, b) => Number(b.usdValue || 0) - Number(a.usdValue || 0));
   }, [wallet?.trackedHoldings]);
 
-  const totalHoldingsUsd = Number(wallet?.lastPortfolioUsd || 0);
-  const nativeBalance = wallet?.lastBalanceFormatted ? Number(wallet.lastBalanceFormatted) : 0;
+  const totalHoldingsUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
+  const availableBalanceUsd = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
 
   useEffect(() => {
     let mounted = true;
@@ -398,8 +398,8 @@ export default function WalletsPage() {
                   ) : null}
 
                   <div className="mt-3 grid gap-2 text-[11px] text-white/72 md:grid-cols-2">
-                    <div>総評価額 {formatUsd(totalHoldingsUsd)}</div>
-                    <div>Aster利用可能残高 {wallet.lastBalanceFormatted ? `${wallet.lastBalanceFormatted} USD` : "-"}</div>
+                    <div>総評価額 {totalHoldingsUsd === null ? "\u53d6\u5f97\u4e0d\u80fd" : formatUsd(totalHoldingsUsd)}</div>
+                    <div>Aster available balance {availableBalanceUsd === null ? "UNAVAILABLE" : `${availableBalanceUsd.toFixed(8)} USD`}</div>
                     <div>バックアップ確認 {wallet.backupConfirmed ? "済み" : "未確認"}</div>
                     <div>入金検知 {formatDate(wallet.depositDetectedAt)}</div>
                     <div>Owner接続 {formatDate(wallet.ownerReconnectedAt)}</div>
@@ -480,9 +480,9 @@ export default function WalletsPage() {
               />
               <StatCard
                 title="総評価額"
-                value={formatUsd(totalHoldingsUsd)}
-                note={nativeBalance > 0 ? `BNB残高 ${nativeBalance.toFixed(6)}` : "BNB残高はまだありません"}
-                tone={totalHoldingsUsd > 0 ? "profit" : "default"}
+                value={totalHoldingsUsd === null ? "\u53d6\u5f97\u4e0d\u80fd" : formatUsd(totalHoldingsUsd)}
+                note={availableBalanceUsd === null ? "Aster account balance unavailable" : `Available ${availableBalanceUsd.toFixed(8)} USD`}
+                tone={totalHoldingsUsd !== null && totalHoldingsUsd > 0 ? "profit" : "default"}
               />
               <StatCard
                 title="入金検知"

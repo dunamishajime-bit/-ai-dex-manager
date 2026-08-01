@@ -32,6 +32,12 @@ export interface TradeHistoryEntry {
   reason: string;
   openedAt?: string;
   closedAt?: string;
+  tradeId?: string;
+  orderId?: string;
+  positionSide?: "BOTH" | "LONG" | "SHORT";
+  commission?: number;
+  commissionAsset?: string;
+  maker?: boolean;
 }
 
 interface OpenPositionRecord {

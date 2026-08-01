@@ -13,8 +13,8 @@ export default function PositionsPage() {
   const { wallet } = useOperationalWallet();
   const { formatPrice } = useCurrency();
   const rows = useMemo(() => (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0).sort((a, b) => Number(b.usdValue || 0) - Number(a.usdValue || 0)), [wallet?.trackedHoldings]);
-  const balance = Number(wallet?.lastAsterAccountBalanceUsd ?? wallet?.lastPortfolioUsd ?? 0);
-  const available = Number(wallet?.lastAsterAvailableBalanceUsd ?? wallet?.lastBalanceFormatted ?? 0);
+  const balance = typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null;
+  const available = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
@@ -31,7 +31,7 @@ export default function PositionsPage() {
           </div>
         </header>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Metric label="Aster残高" value={formatPrice(balance)} detail={`利用可能 ${formatPrice(available)}`} />
+          <Metric label="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? "Aster account balance unavailable" : `Available ${formatPrice(available)}`} />
           <Metric label="Crypto sleeve" value="V96" detail={config.cryptoSymbols.join(" / ")} />
           <Metric label="Stock sleeve" value="V52" detail={config.stockSymbols.join(" / ")} />
           <Metric label="Executor" value="Aster Direct" detail="One-way / Fail Closed" />

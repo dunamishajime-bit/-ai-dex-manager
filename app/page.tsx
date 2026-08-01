@@ -33,8 +33,8 @@ function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: s
 export default function HomePage() {
   const { wallet } = useOperationalWallet();
   const { formatPrice } = useCurrency();
-  const balance = Number(wallet?.lastAsterAccountBalanceUsd ?? wallet?.lastPortfolioUsd ?? 0);
-  const available = Number(wallet?.lastAsterAvailableBalanceUsd ?? wallet?.lastBalanceFormatted ?? 0);
+  const balance = typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null;
+  const available = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
   const positions = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0).length;
 
   return (
@@ -54,7 +54,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <SummaryCard title="AsterDEX残高" value={formatPrice(balance)} detail={`利用可能残高 ${formatPrice(available)}`} tone="profit" />
+            <SummaryCard title="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? "Aster account balance unavailable" : `Available ${formatPrice(available)}`} tone="profit" />
             <SummaryCard title="統合LIVE状態" value="稼働構成" detail={`管理対象の表示件数 ${positions} / 実状態は各APIを優先`} />
           </div>
         </section>

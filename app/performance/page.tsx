@@ -252,7 +252,7 @@ export default function PerformancePage() {
     [closedTrades, monthCursor],
   );
 
-  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);
+  const portfolioUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -277,7 +277,7 @@ export default function PerformancePage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card glow="gold" noHover>
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Current Portfolio</div>
-          <div className="mt-2 text-2xl font-semibold text-white">{formatPrice(portfolioUsd)}</div>
+          <div className="mt-2 text-2xl font-semibold text-white">{portfolioUsd === null ? "\u53d6\u5f97\u4e0d\u80fd" : formatPrice(portfolioUsd)}</div>
           <div className="mt-1 text-sm text-gray-400">現在のAster口座評価額</div>
         </Card>
         <Card glow="gold" noHover>
