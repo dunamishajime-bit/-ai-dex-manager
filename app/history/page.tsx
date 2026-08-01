@@ -25,6 +25,13 @@ type TradeHistoryEntry = {
   realizedPnlUsd?: number;
   realizedPnlPct?: number;
   reason: string;
+  openedAt?: string;
+  closedAt?: string;
+  tradeStatus?: "open" | "closed" | "unmatched_exit";
+  positionSide?: "BOTH" | "LONG" | "SHORT";
+  strategyId?: "V96" | "V52" | "UNKNOWN";
+  commission?: number;
+  netPnlUsd?: number;
 };
 
 function formatNumber(value?: number, digits = 2) {
@@ -82,7 +89,7 @@ export default function HistoryPage() {
   );
 
   const summary = useMemo(() => {
-    const sells = visibleEntries.filter((entry) => entry.action === "SELL" && typeof entry.realizedPnlUsd === "number");
+    const sells = visibleEntries.filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number");
     const realizedPnlUsd = sells.reduce((sum, entry) => sum + Number(entry.realizedPnlUsd || 0), 0);
     const wins = sells.filter((entry) => Number(entry.realizedPnlUsd || 0) > 0).length;
     const walletAddress = visibleEntries[0]?.walletAddress || "-";
@@ -225,6 +232,7 @@ export default function HistoryPage() {
                   <td className="px-3 py-4 font-mono text-xs text-gray-300">
                     {new Date(entry.executedAt).toLocaleString("ja-JP")}
                   </td>
+                  <td className="px-3 py-4 text-xs text-white/70">{entry.tradeStatus === "closed" ? "\u6c7a\u6e08\u6e08\u307f" : entry.tradeStatus === "open" ? "\u5efa\u7389\u7167\u5408\u5f85\u3061" : "\u7167\u5408\u4e0d\u4e00\u81f4"}</td>
                   <td className={`px-3 py-4 font-semibold ${entry.action === "BUY" ? "text-emerald-400" : "text-red-400"}`}>
                     {entry.action === "BUY" ? "買い" : "売り"}
                   </td>
@@ -287,7 +295,7 @@ export default function HistoryPage() {
               ))}
               {!isLoading && visibleEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-3 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-3 py-10 text-center text-sm text-gray-500">
                     表示できるトレード履歴がありません。
                   </td>
                 </tr>

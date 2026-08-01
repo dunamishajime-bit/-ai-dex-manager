@@ -38,6 +38,9 @@ export interface TradeHistoryEntry {
   commission?: number;
   commissionAsset?: string;
   maker?: boolean;
+  tradeStatus?: "open" | "closed" | "unmatched_exit";
+  strategyId?: "V96" | "V52" | "UNKNOWN";
+  netPnlUsd?: number;
 }
 
 interface OpenPositionRecord {

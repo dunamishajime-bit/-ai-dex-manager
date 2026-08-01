@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
 
-import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
@@ -47,7 +46,7 @@ export default function HomePage() {
             <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">V96 Crypto + V52 Stock 統合LIVE</h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEX上のV96 CryptoとV52 Stockを、同一の安全ゲートと口座状態で監視します。ここに表示する稼働状態は、確認済みのProduction構成に限定します。</p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
-              <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5 text-emerald-100">LIVE / AsterDirectTradeExecutor</span>
+              <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5 text-emerald-100">{"LIVE\u7a3c\u50cd: \u672a\u78ba\u8a8d / AsterDirectTradeExecutor"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V96損失上限 {config.v96DailyLossPct}%</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52損失上限 {config.v52DailyLossPct}%</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">最大Gross {config.maximumGross.toFixed(1)} / PENGU {config.penguInitialGross.toFixed(2)}</span>
@@ -64,7 +63,7 @@ export default function HomePage() {
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
         </section>
-        <LiveDecisionPanel compact />
+        <QuickLink href="/decision-status" title={"\u5224\u5b9a\u72b6\u6cc1"} detail={"V96 Crypto\u3068 V52 Stock\u306e\u5bfe\u8c61\u9298\u67c4\u30921\u6642\u9593\u3054\u3068\u306b\u8aad\u307f\u53d6\u308a\u78ba\u8a8d\u3057\u307e\u3059\u3002"} icon={BarChart3} />
       </div>
     </main>
   );

@@ -9,7 +9,8 @@ import { SITE_BRAND_NAME } from "@/lib/site-access";
 
 const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
-  { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
+  { href: "/positions", label: "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9", icon: BarChart3 },
+  { href: "/decision-status", label: "判定状況", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/performance", label: "成績", icon: CalendarDays },
   { href: "/history", label: "トレード履歴", icon: FileText },

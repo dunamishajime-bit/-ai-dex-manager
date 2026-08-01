@@ -65,6 +65,21 @@ export type AsterDexUserTrade = {
   time?: number;
 };
 
+export type AsterDexKline = [
+  number,
+  string,
+  string,
+  string,
+  string,
+  string,
+  number,
+  string,
+  number,
+  string,
+  string,
+  string,
+];
+
 type RequestMethod = "GET" | "POST" | "DELETE" | "PUT";
 
 type RequestParamValue = string | number | boolean | null | undefined;
@@ -211,6 +226,14 @@ export class AsterDexClient {
     return this.publicRequest<{ symbol: string; price: string; time?: number }>("/fapi/v3/ticker/price", [["symbol", symbol]]);
   }
 
+  getKlines(symbol: string, interval = "1h", limit = 100) {
+    return this.publicRequest<AsterDexKline[]>("/fapi/v3/klines", [
+      ["symbol", symbol],
+      ["interval", interval],
+      ["limit", Math.min(1000, Math.max(1, limit))],
+    ]);
+  }
+
   getBalance() {
     return this.signedRequest<any[]>("GET", "/fapi/v3/balance");
   }
@@ -236,13 +259,14 @@ export class AsterDexClient {
 
   getUserTrades(
     symbol: string,
-    options: { limit?: number; startTime?: number; endTime?: number } = {},
+    options: { limit?: number; startTime?: number; endTime?: number; fromId?: number } = {},
   ) {
     return this.signedRequest<AsterDexUserTrade[]>("GET", "/fapi/v3/userTrades", [
       ["symbol", symbol],
       ["limit", options.limit],
       ["startTime", options.startTime],
       ["endTime", options.endTime],
+      ["fromId", options.fromId],
     ]);
   }
 

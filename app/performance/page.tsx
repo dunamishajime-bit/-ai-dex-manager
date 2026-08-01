@@ -19,12 +19,17 @@ type TradeHistoryEntry = {
   realizedPnlUsd?: number;
   realizedPnlPct?: number;
   openedAt?: string;
+  closedAt?: string;
+  tradeStatus?: "open" | "closed" | "unmatched_exit";
+  strategyId?: "V96" | "V52" | "UNKNOWN";
+  netPnlUsd?: number;
 };
 
 type ClosedTrade = TradeHistoryEntry & {
   realizedPnlUsd: number;
   realizedPnlPct: number;
   openedAt: string;
+  closedAt: string;
 };
 
 type PeriodSummary = {
@@ -98,14 +103,15 @@ function weekLabel(date: Date) {
 
 function toClosedTrades(entries: TradeHistoryEntry[]) {
   return entries
-    .filter(
-      (entry): entry is ClosedTrade =>
-        entry.action === "SELL"
-        && typeof entry.realizedPnlUsd === "number"
-        && typeof entry.realizedPnlPct === "number"
-        && Boolean(entry.openedAt),
-    )
-    .sort((left, right) => new Date(left.executedAt).getTime() - new Date(right.executedAt).getTime());
+    .filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number")
+    .map((entry) => ({
+      ...entry,
+      realizedPnlUsd: Number(entry.realizedPnlUsd),
+      realizedPnlPct: typeof entry.realizedPnlPct === "number" ? entry.realizedPnlPct : 0,
+      openedAt: entry.openedAt || entry.executedAt,
+      closedAt: entry.closedAt || entry.executedAt,
+    }))
+    .sort((left, right) => new Date(left.closedAt).getTime() - new Date(right.closedAt).getTime());
 }
 
 function buildPeriodSummaries(
@@ -176,8 +182,6 @@ export default function PerformancePage() {
   const { formatPrice } = useCurrency();
   const { wallet } = useOperationalWallet();
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
-  const [portfolioWeekly, setPortfolioWeekly] = useState<PortfolioPeriodSummary>(null);
-  const [portfolioMonthly, setPortfolioMonthly] = useState<PortfolioPeriodSummary>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
@@ -187,31 +191,15 @@ export default function PerformancePage() {
     setError(null);
     try {
       const response = await fetch("/api/system/trade-history", { cache: "no-store" });
-      if (!response.ok) throw new Error("取引履歴の読み込みに失敗しました。");
+      if (!response.ok) throw new Error("Official trade history could not be loaded.");
       const data = await response.json();
       setEntries(Array.isArray(data.entries) ? data.entries : []);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "取引履歴の読み込みに失敗しました。");
+      setError(loadError instanceof Error ? loadError.message : "Official trade history could not be loaded.");
     } finally {
       setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    async function loadPerformanceSummary() {
-      if (!wallet?.userId && !wallet?.email) return;
-      const params = new URLSearchParams();
-      if (wallet?.userId) params.set("userId", wallet.userId);
-      if (wallet?.email) params.set("email", wallet.email);
-      const response = await fetch(`/api/system/performance-summary?${params.toString()}`, { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) return;
-      setPortfolioWeekly(data.weekly ?? null);
-      setPortfolioMonthly(data.monthly ?? null);
-    }
-
-    void loadPerformanceSummary();
-  }, [wallet?.email, wallet?.userId]);
 
   useEffect(() => {
     void loadEntries();
@@ -227,7 +215,7 @@ export default function PerformancePage() {
     [closedTrades],
   );
 
-  const latestTradeOpenedAt = closedTrades.length ? closedTrades[closedTrades.length - 1].openedAt : null;
+  const latestTradeOpenedAt = closedTrades.length ? closedTrades[closedTrades.length - 1].closedAt : null;
   const latestWeek = weekly[0];
   const latestMonth = monthly[0];
 
@@ -282,20 +270,20 @@ export default function PerformancePage() {
         </Card>
         <Card glow="gold" noHover>
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Weekly Realized PnL</div>
-          <div className={cn("mt-2 text-2xl font-semibold", toneClass(portfolioWeekly?.pnlUsd ?? 0))}>
-            {portfolioWeekly ? formatPrice(portfolioWeekly.pnlUsd) : "-"}
+          <div className={cn("mt-2 text-2xl font-semibold", toneClass(latestWeek?.pnlUsd ?? 0))}>
+            {latestWeek ? formatPrice(latestWeek.pnlUsd) : "-"}
           </div>
           <div className="mt-1 text-sm text-gray-400">
-            {portfolioWeekly ? `${portfolioWeekly.label} / ${formatPct(portfolioWeekly.returnPct, 2)} / real balance` : "週次の残高履歴がまだ不足しています。"}
+            {latestWeek ? `${latestWeek.label} / ${formatPct(latestWeek.returnPct, 2)} / Aster official settled fills` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
           </div>
         </Card>
         <Card glow="gold" noHover>
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Monthly Realized PnL</div>
-          <div className={cn("mt-2 text-2xl font-semibold", toneClass(portfolioMonthly?.pnlUsd ?? 0))}>
-            {portfolioMonthly ? formatPrice(portfolioMonthly.pnlUsd) : "-"}
+          <div className={cn("mt-2 text-2xl font-semibold", toneClass(latestMonth?.pnlUsd ?? 0))}>
+            {latestMonth ? formatPrice(latestMonth.pnlUsd) : "-"}
           </div>
           <div className="mt-1 text-sm text-gray-400">
-            {portfolioMonthly ? `${portfolioMonthly.label} / ${formatPct(portfolioMonthly.returnPct, 2)} / real balance` : "月次の残高履歴がまだ不足しています。"}
+            {latestMonth ? `${latestMonth.label} / ${formatPct(latestMonth.returnPct, 2)} / Aster official settled fills` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
           </div>
         </Card>
       </div>

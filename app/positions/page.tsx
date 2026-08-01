@@ -3,8 +3,6 @@
 import { useMemo } from "react";
 import { Activity, ShieldCheck, Wallet } from "lucide-react";
 
-import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
-import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTradeRunPanel";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
@@ -46,8 +44,11 @@ export default function PositionsPage() {
           <div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><Activity className="h-4 w-4 text-gold-100" />安全状態</div><p className="mt-3 text-sm leading-7 text-white/78">V96が口座全体の最終防衛線、V52が戦略単体の停止線です。建玉・注文・承認の実状態が取得できない場合は新規注文を停止します。</p></div>
           <div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4 text-gold-100" />監視対象</div><p className="mt-3 text-sm leading-7 text-white/78">Crypto: {config.cryptoSymbols.join(", ")}</p><p className="text-sm leading-7 text-white/78">Stock: {config.stockSymbols.join(", ")}</p></div>
         </section>
-        <ManualTradeRunPanel />
-        <LiveDecisionPanel />
+        <section className="panel-gold rounded-[30px] p-4 md:p-5">
+          <div className="flex items-center gap-2 text-sm font-bold"><Activity className="h-4 w-4 text-gold-100" />{"\u5224\u5b9a\u72b6\u6cc1"}</div>
+          <p className="mt-3 text-sm leading-7 text-white/75">{"V96 Crypto\u3068 V52 Stock\u306e\u5bfe\u8c61\u9298\u67c4\u3092\u4e00\u6642\u9593\u3054\u3068\u306b\u8aad\u307f\u53d6\u308a\u78ba\u8a8d\u3057\u307e\u3059\u3002"}</p>
+          <a href="/decision-status" className="mt-3 inline-flex rounded-lg border border-gold-400/25 px-3 py-2 text-sm text-gold-100 hover:bg-gold-400/10">{"\u5224\u5b9a\u72b6\u6cc1\u3092\u958b\u304f"}</a>
+        </section>
       </div>
     </main>
   );
