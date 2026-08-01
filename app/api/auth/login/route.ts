@@ -23,7 +23,11 @@ export async function POST(req: NextRequest) {
         user.lastLogin = Date.now();
         await upsertUser(user);
 
-        return NextResponse.json({ success: true, user });
+        const { passwordHash: _passwordHash, resetToken: _resetToken, resetTokenExpires: _resetTokenExpires, ...safeUser } = user;
+        void _passwordHash;
+        void _resetToken;
+        void _resetTokenExpires;
+        return NextResponse.json({ success: true, user: safeUser });
     } catch (e) {
         console.error("Login API error:", e);
         return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

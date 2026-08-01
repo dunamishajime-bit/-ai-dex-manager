@@ -44,7 +44,11 @@ export async function POST(req: NextRequest) {
 
         await upsertUser(newUser);
 
-        return NextResponse.json({ success: true, user: newUser });
+        const { passwordHash, resetToken, resetTokenExpires, ...safeUser } = newUser;
+        void passwordHash;
+        void resetToken;
+        void resetTokenExpires;
+        return NextResponse.json({ success: true, user: safeUser });
     } catch (e) {
         console.error("Registration API error:", e);
         return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

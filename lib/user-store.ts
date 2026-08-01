@@ -187,7 +187,8 @@ export function registerUser(email: string, displayName: string, password: strin
 
 export function verifyUserCredential(email: string, password: string): UserProfile | null {
     const users = getAllUsers();
-    const user = users.find(u => u.email === email);
+    const cleanEmail = email.trim().toLowerCase();
+    const user = users.find(u => u.email.trim().toLowerCase() === cleanEmail);
     if (!user) return null;
 
     const inputHash = btoa(password);

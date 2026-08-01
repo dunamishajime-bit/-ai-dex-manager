@@ -224,11 +224,29 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         symbol = str(candidate["symbol"])
         aster_symbol = base.ASTER_SYMBOL[symbol]
         side = str(candidate["side"])
+        minimum_basis = base.V11_MIN_BASIS_BPS if slot == V11_SLOT else V50_MIN_ENTRY_BASIS_BPS
+        maximum_ratio = base.V11_MAX_COST_BASIS_RATIO if slot == V11_SLOT else None
+        candidate, reasons = self.recheck_entry_candidate(
+            candidate, target_notional, minimum_basis_bps=minimum_basis,
+            maximum_cost_bps=V50_MAX_ROUND_TRIP_COST_BPS,
+            minimum_net_edge_bps=V50_MIN_NET_EDGE_BPS,
+            maximum_cost_ratio=maximum_ratio,
+        )
+        if candidate is None:
+            self.log("v52-entry-recheck-rejected", slot=slot, symbol=symbol, reasons=reasons)
+            return False
         quantity = target_notional / base.finite(candidate["entryPrice"])
         quantity, price = self.aster.normalize(aster_symbol, quantity, base.finite(candidate["entryPrice"]), side)
         client = self.client_id(slot, symbol, "OPEN")
         self._set_pending({"slot": slot, "action": "OPEN", "symbol": symbol, "side": side, "quantity": quantity, "clientId": client, "candidate": candidate, "targetGross": target_gross, "price": price})
-        initial = self.aster.place_limit(symbol=aster_symbol, side=side, quantity=quantity, price=price, client_id=client, post_only=True)
+        try:
+            initial = self.aster.place_limit(symbol=aster_symbol, side=side, quantity=quantity, price=price, client_id=client, post_only=True)
+        except base.HttpRequestError as error:
+            if not base.is_post_only_rejection(error):
+                raise
+            self.log("v52-entry-post-only-rejected", slot=slot, symbol=symbol, error=str(error))
+            self._clear_pending()
+            return False
         fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client, quantity, side, base.V11_ENTRY_TTL_MS)
         self.log("v52-entry-result", slot=slot, candidate=candidate, targetGross=target_gross, fill=dataclasses.asdict(fill))
         if fill.fill_ratio < base.V11_MIN_FILL_RATIO:
@@ -256,29 +274,53 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         open_side = str(position["asterOpenSide"])
         close_side = "SELL" if open_side == "BUY" else "BUY"
         quantity = base.finite(position["asterQty"])
-        book = self.aster.book(base.ASTER_SYMBOL[symbol], 20)
-        price = book.bid if close_side == "SELL" else book.ask
         client = self.client_id(slot, symbol, "CLOSE")
         self._set_pending({"slot": slot, "action": "CLOSE", "symbol": symbol, "side": close_side, "quantity": quantity, "clientId": client})
-        initial = self.aster.place_limit(symbol=base.ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, price=price, client_id=client, reduce_only=True, post_only=True)
-        fill = initial if not self.live else self.aster.poll_fill(base.ASTER_SYMBOL[symbol], client, quantity, close_side, 2000)
-        remaining = max(0.0, quantity - fill.executed_qty)
-        if remaining > quantity * 0.01:
-            market = self.flatten_aster_leg(symbol, open_side, remaining, reason + "-TAKER")
-            if market.fill_ratio < 0.99:
-                self.activate_kill_switch(f"{slot} close did not fully complete")
-                raise RuntimeError(f"{slot} close incomplete")
-        exit_price = fill.average_price or price
+        maker_fill = base.Fill("ASTER", base.ASTER_SYMBOL[symbol], close_side, quantity, 0.0, 0.0, "NOT_SENT", client)
+        maker_price = 0.0
+        market_fill = base.Fill("ASTER", base.ASTER_SYMBOL[symbol], close_side, 0.0, 0.0, 0.0, "NOT_SENT", client + "-TAKER")
+        if reason in base.EMERGENCY_EXIT_REASONS:
+            market_fill = self.flatten_aster_leg(symbol, open_side, quantity, reason)
+        else:
+            book = self.aster.book(base.ASTER_SYMBOL[symbol], 20, force_refresh=True)
+            maker_price = base.passive_exit_price(book, close_side)
+            try:
+                maker_fill = self.aster.place_limit(
+                    symbol=base.ASTER_SYMBOL[symbol], side=close_side, quantity=quantity,
+                    price=maker_price, client_id=client, reduce_only=True, post_only=True,
+                    position_quantity=quantity,
+                )
+            except base.HttpRequestError as error:
+                if not base.is_post_only_rejection(error):
+                    raise
+                maker_fill = base.Fill("ASTER", base.ASTER_SYMBOL[symbol], close_side, quantity, 0.0, maker_price, "POST_ONLY_REJECTED", client, error=str(error))
+            if self.live and maker_fill.status not in {"POST_ONLY_REJECTED", "REJECTED", "EXPIRED", "CANCELED"}:
+                maker_fill = self.aster.poll_fill(base.ASTER_SYMBOL[symbol], client, quantity, close_side, 2000)
+            remaining = max(0.0, quantity - maker_fill.executed_qty)
+            if remaining > 0:
+                market_fill = self.flatten_aster_leg(symbol, open_side, remaining, reason + "-TAKER")
+        executed = maker_fill.executed_qty + market_fill.executed_qty
+        if executed < quantity * 0.999:
+            self.state["manualReviewReason"] = f"{slot} close incomplete: {executed:.12f}/{quantity:.12f}"
+            self.save()
+            raise RuntimeError(f"{slot} close incomplete")
+        if self.live and self.managed_aster_positions(force_refresh=True).get(base.ASTER_SYMBOL[symbol], 0.0):
+            self.state["manualReviewReason"] = f"{slot} close reconciliation mismatch"
+            self.save()
+            raise RuntimeError(f"{slot} close left an Aster position")
+        maker_px = maker_fill.average_price or maker_price
+        market_px = market_fill.average_price or maker_px
+        exit_price = ((maker_fill.executed_qty * maker_px) + (market_fill.executed_qty * market_px)) / executed if executed > 0 else market_px
         direction = 1.0 if open_side == "BUY" else -1.0
-        gross_pnl = (exit_price - base.finite(position.get("asterEntryPrice"))) * quantity * direction
-        commission = base.finite(position.get("entryCommission")) + (exit_price * quantity * self.aster_taker_fee_bps / 10000.0)
-        self._v52_ledger().append({"strategyId": slot, "symbol": symbol, "side": "LONG" if direction > 0 else "SHORT", "entryAt": position.get("openedAt"), "exitAt": base.now_ms(), "realizedPnl": gross_pnl - commission, "unrealizedPnl": 0.0, "commission": commission, "funding": 0.0, "deposits": 0.0, "withdrawals": 0.0, "unattributedDifference": 0.0, "clientOrderId": client, "tradeId": client, "positionId": position.get("positionId"), "exitReason": reason})
+        gross_pnl = (exit_price - base.finite(position.get("asterEntryPrice"))) * executed * direction
+        commission = base.finite(position.get("entryCommission")) + (maker_fill.executed_qty * maker_px * self.aster_maker_fee_bps / 10000.0) + (market_fill.executed_qty * market_px * self.aster_taker_fee_bps / 10000.0)
+        self._v52_ledger().append({"strategyId": slot, "symbol": symbol, "side": "LONG" if direction > 0 else "SHORT", "entryAt": position.get("openedAt"), "exitAt": base.now_ms(), "realizedPnl": gross_pnl - commission, "unrealizedPnl": 0.0, "commission": commission, "funding": 0.0, "deposits": 0.0, "withdrawals": 0.0, "unattributedDifference": 0.0, "clientOrderId": client, "tradeId": client, "positionId": position.get("positionId"), "exitReason": reason, "makerExecutedQty": maker_fill.executed_qty, "takerExecutedQty": market_fill.executed_qty})
         self.positions().pop(slot, None)
         if slot == V50_SLOT:
             self.state["v50CompletedTrades"] = int(self.state.get("v50CompletedTrades", 0)) + 1
         self._clear_pending()
         self.save()
-        self.log("v52-position-closed", slot=slot, symbol=symbol, reason=reason)
+        self.log("v52-position-closed", slot=slot, symbol=symbol, reason=reason, makerFill=dataclasses.asdict(maker_fill), takerFill=dataclasses.asdict(market_fill))
 
     def flatten_all(self, reason: str) -> None:
         for symbol in base.ASTER_SYMBOL.values():
@@ -313,12 +355,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             cost, detail = self.estimate_v11_cost(aster, exit_action, notional)
             adverse = max(0.0, abs(basis) - abs(signal_basis))
             reasons: List[str] = []
+            freshness_reasons, _book_ts, _reference_ts = base.market_data_freshness_reasons(aster, reference, now)
+            reasons.extend(freshness_reasons)
             if symbol in active_symbols: reasons.append("SAME_SYMBOL_ACTIVE")
             if abs(basis) < V50_MIN_ENTRY_BASIS_BPS: reasons.append("BASIS_BELOW_75")
             if signal_basis * basis <= 0: reasons.append("SIGN_CHANGED")
             if adverse > V50_MAX_ADVERSE_BASIS_MOVE_BPS: reasons.append("ADVERSE_BASIS_MOVE")
-            if now - aster.received_ms > base.V11_MAX_DATA_AGE_MS or now - reference.received_ms > base.V11_MAX_DATA_AGE_MS: reasons.append("STALE_DATA")
-            if abs(aster.received_ms - reference.received_ms) > base.V11_MAX_SOURCE_CLOCK_DIFF_MS: reasons.append("SOURCE_CLOCK_MISMATCH")
             if cost > V50_MAX_ROUND_TRIP_COST_BPS: reasons.append("ROUND_TRIP_COST_OVER_60")
             if abs(basis) - V50_CONVERGENCE_BPS - cost < V50_MIN_NET_EDGE_BPS: reasons.append("NET_EDGE_BELOW_10")
             if aster.depth_usd(exit_action) < 2.0 * notional: reasons.append("DEPTH_BELOW_2X")
@@ -404,6 +446,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 maximum_daily_loss_pct=self.max_daily_loss_pct,
                 data_available=capital > 0,
             )
+        except base.TransientDataError:
+            raise
         except Exception as error:
             next_latch = {
                 "latchName": "v52StrategyDailyLossLatch",
@@ -429,6 +473,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         return bool(next_latch.get("tripped") or next_latch.get("failClosed"))
 
     def tick(self) -> None:
+        if self.state.get("pendingOrder"):
+            self.log("v52-pending-order-review", pending=self.state.get("pendingOrder"))
+            return
         self.reset_days()
         kill = self.kill_switch()
         if kill:
@@ -437,13 +484,13 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             return
         if self.kill_switch():
             self.flatten_all("DAILY_LOSS"); return
-        self.update_history()
         local = dt.datetime.now(tz=base.NY)
         if local.weekday() >= 5:
             return
         sec = base.ny_seconds(local)
         if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):
             return
+        self.update_history()
         rows = self.books_and_refs()
         if self.v96_requires_margin():
             if self.positions(): self.flatten_all("V96_MARGIN_PRIORITY")
@@ -493,6 +540,27 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         snapshot = self.gross_snapshot(); self.assert_gross_safe(snapshot)
         return {"strategyId": STRATEGY_ID, "mode": self.mode, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": health.get("status"), "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
 
+    def _handle_transient_data_error(self, error: base.TransientDataError) -> None:
+        now = base.now_ms()
+        if self.data_unavailable_since_ms is None:
+            self.data_unavailable_since_ms = now
+        elapsed = now - self.data_unavailable_since_ms
+        self.state["dataUnavailableSinceMs"] = self.data_unavailable_since_ms
+        self.state["lastTransientDataCategory"] = error.category
+        self.save()
+        self.log("v52-transient-data-error", category=error.category, elapsedMs=elapsed, error=str(error))
+        if not self.positions() or elapsed < self.exit_data_grace_ms:
+            return
+        try:
+            self.flatten_all("DATA_UNAVAILABLE_FAIL_CLOSED")
+        except Exception as flatten_error:
+            self.state["manualReviewReason"] = f"Transient data grace expired: {flatten_error}"
+            self.save()
+            self.stop_requested = True
+            return
+        self.data_unavailable_since_ms = None
+        self.state.pop("dataUnavailableSinceMs", None)
+        self.save()
     def run(self, daemon: bool) -> None:
         self.lock.acquire()
         try:
@@ -500,14 +568,29 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             self.log("v52-runner-start", strategyId=STRATEGY_ID, caps={"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap})
             while not self.stop_requested:
                 started = base.now_ms()
-                try: self.tick()
+                try:
+                    self.tick()
+                    if self.data_unavailable_since_ms is not None:
+                        self.data_unavailable_since_ms = None
+                        self.state.pop("dataUnavailableSinceMs", None)
+                        self.save()
+                except base.OrderExecutionUnknownError as error:
+                    self.state["manualReviewReason"] = f"Order status unknown: {error}"
+                    self.save()
+                    self.log("v52-order-execution-unknown", error=str(error))
+                    self.stop_requested = True
+                    raise
+                except base.TransientDataError as error:
+                    self._handle_transient_data_error(error)
+                    if self.stop_requested:
+                        raise
                 except Exception as error:
                     self.log("v52-tick-error", error=str(error))
                     if self.live:
                         self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
                 if not daemon: break
                 active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
-                interval = 250 if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
+                interval = self.active_interval_ms if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
                 time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
         finally: self.lock.release()
 
@@ -516,6 +599,47 @@ def self_test() -> None:
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY"
     assert V50_WINDOWS == ("11:30", "12:30", "13:30")
     assert V50_MIN_ENTRY_BASIS_BPS == 75.0
+    book = base.Book("ASTER", "AMZNUSDT", 99.9, 10, 100.1, 10, [(99.9, 10)], [(100.1, 10)], 1000, 1000)
+    assert base.passive_exit_price(book, "SELL") == book.ask
+    assert base.passive_exit_price(book, "BUY") == book.bid
+    quote = base.ReferenceQuote("AMZN", 100.0, 1000, 1000, "test")
+    assert base.market_data_freshness_reasons(book, quote, 1000)[0] == []
+    fallback = base.ReferenceQuote("AMZN", 100.0, 0, 1000, "test", True)
+    assert "REFERENCE_TIMESTAMP_FALLBACK" in base.market_data_freshness_reasons(book, fallback, 1000)[0]
+    assert base.is_post_only_rejection(base.HttpRequestError("GTX post only", status_code=400, body="GTX"))
+    base._HTTP_COOLDOWN_UNTIL.clear()
+    base._set_request_cooldown("TRANSIENT_REFERENCE_DATA")
+    assert base._request_cooldown_remaining("TRANSIENT_REFERENCE_DATA") > 0
+    assert base._request_cooldown_remaining("TRANSIENT_PUBLIC_DATA") == 0
+    base._HTTP_COOLDOWN_UNTIL.clear()
+    client = object.__new__(base.AsterClient)
+    client._rules = {"AMZNUSDT": {"status": "TRADING", "step": 0.001, "minQty": 0.001, "maxQty": 1000.0, "tick": 0.01, "minNotional": 5.0}}
+    try:
+        client.normalize("AMZNUSDT", 0.01, 100.0, "BUY")
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("entry below minNotional must be rejected")
+    reduced, _ = client.normalize("AMZNUSDT", 0.01, 100.0, "SELL", reduce_only=True, position_quantity=0.01)
+    assert reduced == 0.01
+    cached_client = object.__new__(base.AsterClient)
+    cached_client.public_url = "https://test.invalid"
+    cached_client.timeout = 1.0
+    cached_client.book_cache_ttl_ms = 10_000
+    cached_client._book_cache = {}
+    cached_client._book_cache_lock = base.threading.RLock()
+    calls = []
+    original_http_json = base.http_json
+    def fake_http_json(*_args, **_kwargs):
+        calls.append(True)
+        return {"E": 2000, "bids": [[99.9, 10]], "asks": [[100.1, 10]]}
+    base.http_json = fake_http_json
+    try:
+        cached_client.book("AMZNUSDT")
+        cached_client.book("AMZNUSDT")
+    finally:
+        base.http_json = original_http_json
+    assert len(calls) == 1
     engine = object.__new__(V52AsterOnlyEngine)
     engine.crypto_gross_cap = 1.0; engine.stock_gross_cap = 1.5; engine.portfolio_gross_cap = 2.5
     engine.v11_gross_cap = 1.0; engine.v50_gross_cap = 1.0; engine.gross_tolerance = 0.03

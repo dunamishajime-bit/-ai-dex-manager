@@ -41,6 +41,10 @@ class AsterOnlyStockEngine(base.StockEngine):
         self.state = base.read_json(self.state_path, {}) or {}
         self.spreads = {symbol: base.deque() for symbol in base.SYMBOLS}
         self.mids = {symbol: base.deque() for symbol in base.SYMBOLS}
+        self.last_book_event_ms = {symbol: 0 for symbol in base.SYMBOLS}
+        self.data_unavailable_since_ms = None
+        self.active_interval_ms = max(750, base.int_env("DISDEX_STOCK_ACTIVE_INTERVAL_MS", 1000))
+        self.exit_data_grace_ms = max(5_000, base.int_env("DISDEX_STOCK_EXIT_DATA_GRACE_MS", 30_000))
         self.stop_requested = False
         self.v11_notional = 0.0
 
@@ -105,13 +109,13 @@ class AsterOnlyStockEngine(base.StockEngine):
                 if client.startswith("stock-v11eq-aster-only-"):
                     self.aster.cancel(symbol, client)
 
-    def books_and_refs(self):
+    def books_and_refs(self, *, force_refresh: bool = False):
         result = {}
         with ThreadPoolExecutor(max_workers=10) as pool:
             jobs = {}
             for symbol in base.SYMBOLS:
-                jobs[(symbol, "aster")] = pool.submit(self.aster.book, base.ASTER_SYMBOL[symbol], 20)
-                jobs[(symbol, "ref")] = pool.submit(self.reference.quote, symbol)
+                jobs[(symbol, "aster")] = pool.submit(self.aster.book, base.ASTER_SYMBOL[symbol], 20, force_refresh=force_refresh)
+                jobs[(symbol, "ref")] = pool.submit(self.reference.quote, symbol, force_refresh=force_refresh)
             for symbol in base.SYMBOLS:
                 aster = jobs[(symbol, "aster")].result()
                 # The inherited V11-EQ candidate path ignores the second book.
@@ -135,10 +139,11 @@ class AsterOnlyStockEngine(base.StockEngine):
                 if abs(qty) <= 1e-12:
                     continue
                 side = "BUY" if qty < 0 else "SELL"
-                book = self.aster.book(symbol, 20)
+                book = self.aster.book(symbol, 20, force_refresh=True)
                 self.aster.place_market(symbol=symbol, side=side, quantity=abs(qty),
                                         expected_price=book.ask if side == "BUY" else book.bid,
-                                        client_id=self.client_id("RECOVERY", symbol, "ASTER_ONLY"), reduce_only=True)
+                                        client_id=self.client_id("RECOVERY", symbol, "ASTER_ONLY"), reduce_only=True,
+                                        position_quantity=abs(qty))
 
     def tick(self) -> None:
         self.reset_days()
@@ -150,7 +155,6 @@ class AsterOnlyStockEngine(base.StockEngine):
         if self.kill_switch():
             self.flatten_all("DAILY_LOSS")
             return
-        self.update_history()
         local = dt.datetime.now(tz=base.NY)
         if local.weekday() >= 5:
             return
@@ -158,6 +162,7 @@ class AsterOnlyStockEngine(base.StockEngine):
         need_rows = self.state.get("position") is not None or base.clock("09:59:55") <= sec <= base.clock("15:30:30")
         if not need_rows:
             return
+        self.update_history()
         rows = self.books_and_refs()
         if not self.state.get("v11SignalBasis") and base.clock("09:59:55") <= sec <= base.clock("10:00:20"):
             self.record_v11_signal(rows)
@@ -232,6 +237,20 @@ class AsterOnlyStockEngine(base.StockEngine):
                 started = base.now_ms()
                 try:
                     self.tick()
+                    if self.data_unavailable_since_ms is not None:
+                        self.data_unavailable_since_ms = None
+                        self.state.pop("dataUnavailableSinceMs", None)
+                        self.save()
+                except base.OrderExecutionUnknownError as error:
+                    self.state["manualReviewReason"] = f"Order status unknown: {error}"
+                    self.save()
+                    self.log("aster-only-order-execution-unknown", error=str(error))
+                    self.stop_requested = True
+                    raise
+                except base.TransientDataError as error:
+                    self._handle_transient_data_error(error)
+                    if self.stop_requested:
+                        raise
                 except Exception as error:
                     self.log("aster-only-tick-error", error=str(error))
                     if self.live:
@@ -242,7 +261,7 @@ class AsterOnlyStockEngine(base.StockEngine):
                     break
                 local_sec = base.ny_seconds()
                 active = base.clock("09:59:50") <= local_sec <= base.clock("10:30:30") or self.state.get("position") is not None
-                interval = 250 if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
+                interval = self.active_interval_ms if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
                 time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
         finally:
             self.lock.release()

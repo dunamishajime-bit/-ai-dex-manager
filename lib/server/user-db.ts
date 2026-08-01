@@ -99,6 +99,10 @@ function saveUsersToFs(users: ServerUser[]): void {
 
 // ========== Public API (Async) ==========
 
+export function isUserStoreAvailable(): boolean {
+    return USE_REDIS || fs.existsSync(DB_PATH);
+}
+
 export async function loadUsers(): Promise<ServerUser[]> {
     if (USE_REDIS) {
         return loadUsersFromRedis();

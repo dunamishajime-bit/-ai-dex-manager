@@ -225,9 +225,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const syncUsers = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/users", { cache: "no-store" });
-      const json = await response.json();
-      const serverUsers = json.success && Array.isArray(json.users) ? json.users : [];
+      const json = await response.json().catch(() => null);
       const localUsers = getAllUsers();
+      if (!response.ok || json?.success !== true || json?.available !== true || !Array.isArray(json.users)) {
+        setRegisteredUsers(localUsers.map(toAuthUser));
+        return;
+      }
+
+      const serverUsers = json.users;
       const localById = new Map(localUsers.map((entry) => [entry.id, entry]));
       const merged = serverUsers.map((serverUser: any) => mergeUserByRecency(serverUser, localById.get(serverUser.id)));
 

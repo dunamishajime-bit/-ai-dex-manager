@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loadUsers } from '@/lib/server/user-db';
+import { isUserStoreAvailable, loadUsers } from '@/lib/server/user-db';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
     try {
+        if (!isUserStoreAvailable()) {
+            return NextResponse.json({ success: false, available: false, users: [], message: "User directory is not configured" }, { status: 503 });
+        }
         const users = await loadUsers();
         // Return without sensitive/heavy fields for safety and performance
         const safeUsers = users.map(
@@ -24,10 +27,10 @@ export async function GET(req: NextRequest) {
                 return u;
             },
         );
-        return NextResponse.json({ success: true, users: safeUsers });
+        return NextResponse.json({ success: true, available: true, users: safeUsers });
     } catch (e) {
         console.error("Get users API error:", e);
-        return NextResponse.json({ success: true, users: [], message: "Running in serverless/read-only mode" });
+        return NextResponse.json({ success: false, available: false, users: [], message: "User directory is temporarily unavailable" }, { status: 503 });
     }
 }
 
