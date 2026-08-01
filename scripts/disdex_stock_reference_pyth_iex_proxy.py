@@ -13,15 +13,25 @@ from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, Optional
+from zoneinfo import ZoneInfo
 
 import websocket
 
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
 UTC = dt.timezone.utc
+NY = ZoneInfo("America/New_York")
+OFF_HOURS_WAIT_SECONDS = 30
 
 
 def now_ms() -> int:
     return int(time.time() * 1000)
+
+
+def is_equity_market_open(value: Optional[dt.datetime] = None) -> bool:
+    local = (value or dt.datetime.now(tz=UTC)).astimezone(NY)
+    if local.weekday() >= 5:
+        return False
+    return dt.time(9, 30) <= local.time() < dt.time(16, 0)
 
 
 def float_env(name: str, fallback: float) -> float:
@@ -200,7 +210,8 @@ class QuoteStore:
     def health(self) -> dict:
         with self._lock:
             return {
-                "status": "ok" if self._pyth_connected and self._iex_connected else "degraded",
+                "status": "ok" if self._pyth_connected and self._iex_connected else ("market_closed" if not is_equity_market_open() else "degraded"),
+                "marketOpen": is_equity_market_open(),
                 "pythConnected": self._pyth_connected,
                 "iexConnected": self._iex_connected,
                 "pythError": self._pyth_error,
@@ -217,7 +228,7 @@ class PythStream(threading.Thread):
         self.stop_event = stop_event
         self.base_url = (os.getenv("PYTH_HERMES_URL") or "https://hermes.pyth.network").rstrip("/")
         self.api_key = (os.getenv("PYTH_API_KEY") or "").strip()
-        self.feed_ids = self._resolve_feed_ids()
+        self.feed_ids: Dict[str, str] = {}
 
     @staticmethod
     def _metadata_symbol(row: Dict[str, Any]) -> str:
@@ -256,16 +267,23 @@ class PythStream(threading.Thread):
         return f"{self.base_url}/v2/updates/price/stream?{urllib.parse.urlencode(pairs)}"
 
     def run(self) -> None:
-        reverse = {feed_id.lower().removeprefix("0x"): symbol for symbol, feed_id in self.feed_ids.items()}
         backoff = 1.0
         while not self.stop_event.is_set():
+            if not is_equity_market_open():
+                self.store.set_connected("pyth", False)
+                if self.stop_event.wait(OFF_HOURS_WAIT_SECONDS):
+                    break
+                continue
             try:
+                if not self.feed_ids:
+                    self.feed_ids = self._resolve_feed_ids()
+                reverse = {feed_id.lower().removeprefix("0x"): symbol for symbol, feed_id in self.feed_ids.items()}
                 request = urllib.request.Request(self._stream_url(), headers={**auth_headers(self.api_key), "Accept": "text/event-stream"})
                 with urllib.request.urlopen(request, timeout=30) as response:
                     self.store.set_connected("pyth", True)
                     backoff = 1.0
                     for raw in response:
-                        if self.stop_event.is_set():
+                        if self.stop_event.is_set() or not is_equity_market_open():
                             break
                         line = raw.decode(errors="replace").strip()
                         if not line.startswith("data:"):
@@ -281,6 +299,8 @@ class PythStream(threading.Thread):
                 if self.stop_event.wait(backoff):
                     break
                 backoff = min(30.0, backoff * 2.0)
+            finally:
+                self.store.set_connected("pyth", False)
 
 
 class AlpacaIexStream(threading.Thread):
@@ -318,6 +338,11 @@ class AlpacaIexStream(threading.Thread):
     def run(self) -> None:
         backoff = 1.0
         while not self.stop_event.is_set():
+            if not is_equity_market_open():
+                self.store.set_connected("iex", False)
+                if self.stop_event.wait(OFF_HOURS_WAIT_SECONDS):
+                    break
+                continue
             connection = None
             try:
                 connection = websocket.create_connection(self.url, timeout=10, enable_multithread=True)
@@ -328,6 +353,8 @@ class AlpacaIexStream(threading.Thread):
                 self.store.set_connected("iex", True)
                 backoff = 1.0
                 while not self.stop_event.is_set():
+                    if not is_equity_market_open():
+                        break
                     connection.settimeout(5)
                     try:
                         raw = connection.recv()
@@ -341,6 +368,7 @@ class AlpacaIexStream(threading.Thread):
                     break
                 backoff = min(30.0, backoff * 2.0)
             finally:
+                self.store.set_connected("iex", False)
                 if connection is not None:
                     try:
                         connection.close()
@@ -401,6 +429,10 @@ class ReferenceServer(ThreadingHTTPServer):
 
 
 def self_test() -> None:
+    assert is_equity_market_open(dt.datetime(2026, 7, 31, 14, 0, tzinfo=UTC))
+    assert not is_equity_market_open(dt.datetime(2026, 7, 31, 13, 29, tzinfo=UTC))
+    assert not is_equity_market_open(dt.datetime(2026, 7, 31, 20, 0, tzinfo=UTC))
+    assert not is_equity_market_open(dt.datetime(2026, 8, 1, 14, 0, tzinfo=UTC))
     assert parse_rfc3339_ms("2026-07-25T01:02:03.123456789Z") == 1784941323123
     store = QuoteStore()
     now_seconds = int(time.time())
@@ -412,6 +444,8 @@ def self_test() -> None:
     assert payload["source"] == "pyth-core-validated-by-alpaca-iex"
     bad, error = store.validated("NVDA", pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=0.01, max_cross_bps=20)
     assert bad is None and error and error["error"] == "pyth_confidence_too_wide"
+    health = store.health()
+    assert health["marketOpen"] == is_equity_market_open()
     print("Pyth Core + Alpaca IEX reference proxy self-test: PASS")
 
 
