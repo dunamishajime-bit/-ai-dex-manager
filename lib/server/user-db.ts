@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getDisterminalDataDir } from './disterminal-data-path';
 
 // ========== Types ==========
 
@@ -43,7 +44,8 @@ const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const USE_REDIS = !!(KV_URL && KV_TOKEN);
 const REDIS_KEY = "disdex:users";
-const DB_PATH = path.join(process.cwd(), 'data', 'users.json');
+const DATA_DIR = getDisterminalDataDir();
+const DB_PATH = path.join(DATA_DIR, 'users.json');
 
 // In-memory fallback for environments without fs access
 let memoryUsers: ServerUser[] | null = null;
@@ -74,9 +76,24 @@ async function saveUsersToRedis(users: ServerUser[]): Promise<void> {
 function loadUsersFromFs(): ServerUser[] {
     try {
         if (memoryUsers) return memoryUsers;
-        if (!fs.existsSync(DB_PATH)) return [];
-        const data = fs.readFileSync(DB_PATH, 'utf8');
-        memoryUsers = JSON.parse(data);
+        if (fs.existsSync(DB_PATH)) {
+            const data = fs.readFileSync(DB_PATH, 'utf8');
+            memoryUsers = JSON.parse(data);
+            return memoryUsers || [];
+        }
+
+        // A release switch can leave the previous user DB in the old release.
+        // Migrate it once into the shared path instead of treating all users
+        // as deleted. The migration only considers sibling release data files.
+        const legacyPath = findLegacyReleaseUserDb();
+        if (!legacyPath) return [];
+
+        const legacyData = fs.readFileSync(legacyPath, 'utf8');
+        const legacyUsers = JSON.parse(legacyData);
+        if (!Array.isArray(legacyUsers)) return [];
+
+        memoryUsers = legacyUsers;
+        saveUsersToFs(legacyUsers);
         return memoryUsers || [];
     } catch (e) {
         console.error("Failed to load users from server DB:", e);
@@ -84,14 +101,39 @@ function loadUsersFromFs(): ServerUser[] {
     }
 }
 
+function findLegacyReleaseUserDb(): string | null {
+    const cwd = path.resolve(process.cwd());
+    const releasesDir = path.dirname(cwd);
+    if (path.basename(releasesDir) !== 'releases' || !fs.existsSync(releasesDir)) {
+        return null;
+    }
+
+    const candidates = fs.readdirSync(releasesDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && path.resolve(releasesDir, entry.name) !== cwd)
+        .map((entry) => {
+            const candidate = path.join(releasesDir, entry.name, 'data', 'users.json');
+            if (!fs.existsSync(candidate)) return null;
+            return { candidate, mtimeMs: fs.statSync(candidate).mtimeMs };
+        })
+        .filter((entry): entry is { candidate: string; mtimeMs: number } => Boolean(entry))
+        .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+    return candidates[0]?.candidate || null;
+}
+
 function saveUsersToFs(users: ServerUser[]): void {
     memoryUsers = users;
     try {
-        const dataDir = path.dirname(DB_PATH);
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir, { recursive: true });
+        if (!fs.existsSync(DATA_DIR)) {
+            fs.mkdirSync(DATA_DIR, { recursive: true, mode: 0o750 });
         }
-        fs.writeFileSync(DB_PATH, JSON.stringify(users, null, 2), 'utf8');
+
+        const tempPath = `${DB_PATH}.${process.pid}.${Date.now()}.tmp`;
+        fs.writeFileSync(tempPath, JSON.stringify(users, null, 2), {
+            encoding: 'utf8',
+            mode: 0o640,
+        });
+        fs.renameSync(tempPath, DB_PATH);
     } catch (e) {
         console.warn("Failed to save users to server DB (filesystem is likely read-only):", e);
     }

@@ -7,6 +7,7 @@
         "build": "next build --webpack",
         "start": "next start",
         "lint": "eslint .",
+        "auth:persistence:selftest": "tsx scripts/auth-persistence-selftest.ts",
         "bt:v7:current": "tsx scripts/backtest-v7-current-fast.ts",
         "bt:v7:live": "tsx scripts/backtest-v7-live-equivalent-fast.ts"
     },

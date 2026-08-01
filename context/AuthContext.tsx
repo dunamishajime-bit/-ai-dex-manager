@@ -73,8 +73,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_KEY = "disdex_auth_user";
 const AUTH_COOKIE = "disdex_auth";
-const ACTIVITY_KEY = "jdex_last_activity";
-const INACTIVITY_LIMIT_MS = 10 * 60 * 1000;
+
+
 
 function setAuthCookie() {
   if (typeof document === "undefined") return;
@@ -228,6 +228,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const json = await response.json();
       const serverUsers = json.success && Array.isArray(json.users) ? json.users : [];
       const localUsers = getAllUsers();
+
+      // An empty response can mean a fresh immutable release, a temporary
+      // server read failure, or a not-yet-mounted shared data directory. Do
+      // not erase known local credentials until the server returns a user
+      // list. Login can still be completed through the local fallback.
+      if (serverUsers.length === 0 && localUsers.length > 0) {
+        setRegisteredUsers(localUsers.map(toAuthUser));
+        return;
+      }
+
       const localById = new Map(localUsers.map((entry) => [entry.id, entry]));
       const merged = serverUsers.map((serverUser: any) => mergeUserByRecency(serverUser, localById.get(serverUser.id)));
 
@@ -335,57 +345,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !user) return;
-
-    let timeoutId: number | null = null;
-
-    const scheduleLogout = () => {
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
-      }
-      timeoutId = window.setTimeout(() => {
-        triggerLogout();
-      }, INACTIVITY_LIMIT_MS);
-    };
-
-    const markActivity = () => {
-      localStorage.setItem(ACTIVITY_KEY, String(Date.now()));
-      scheduleLogout();
-    };
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === ACTIVITY_KEY) {
-        scheduleLogout();
-      }
-    };
-
-    const events: Array<keyof WindowEventMap> = [
-      "mousemove",
-      "mousedown",
-      "keydown",
-      "scroll",
-      "touchstart",
-      "click",
-    ];
-
-    events.forEach((eventName) => {
-      window.addEventListener(eventName, markActivity, { passive: true });
-    });
-    window.addEventListener("storage", handleStorage);
-
-    markActivity();
-
-    return () => {
-      events.forEach((eventName) => {
-        window.removeEventListener(eventName, markActivity);
-      });
-      window.removeEventListener("storage", handleStorage);
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, [triggerLogout, user]);
 
   const send2FACode = useCallback(async (email: string, code: string, type: "login" | "register") => {
     const response = await fetch("/api/auth/2fa", {
