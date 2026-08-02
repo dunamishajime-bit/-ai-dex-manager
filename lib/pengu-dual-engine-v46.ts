@@ -36,10 +36,17 @@ export interface DisDexPenguV46Decision {
     shortEligible: boolean;
 }
 
+export interface DisDexPenguV46SignalOptions {
+    longBelowBtcSmaGrossScale?: number;
+    shortMinimumRsi?: number;
+}
+
 export interface DisDexPenguV46Signal {
     strategyId: typeof DISDEX_PENGU_DUAL_ENGINE_V46.id;
     side: -1 | 0 | 1;
     targetGross: number;
+    grossScale: number;
+    riskAdjustment: 'NONE' | 'LONG_BTC_BELOW_SMA168_HALF';
     decisionTs?: number;
     entryTs?: number;
     exitTs?: number;
@@ -121,7 +128,10 @@ function btcRiskAllowsShort(features: DisDexPenguV46DecisionFeatures) {
     return !(features.btcCloseAboveSma168 && features.btcMomentum72hPct > config.blockShortAboveMomentumPct);
 }
 
-export function evaluateDisDexPenguV46Decision(features: DisDexPenguV46DecisionFeatures): DisDexPenguV46Decision {
+export function evaluateDisDexPenguV46Decision(
+    features: DisDexPenguV46DecisionFeatures,
+    options: Pick<DisDexPenguV46SignalOptions, 'shortMinimumRsi'> = {},
+): DisDexPenguV46Decision {
     const config = DISDEX_PENGU_DUAL_ENGINE_V46;
     const fundingAllowed = features.fundingRate !== null && features.fundingRate <= config.fundingCap;
     const commonLong = features.volumeRatio >= config.volumeFloor
@@ -140,10 +150,15 @@ export function evaluateDisDexPenguV46Decision(features: DisDexPenguV46DecisionF
         && features.rsi14 >= config.long.rsiMinimum
         && features.rsi14 <= config.long.rsiMaximum;
 
-    const shortEligible = features.volumeRatio >= config.volumeFloor
+    const shortBaseEligible = features.volumeRatio >= config.volumeFloor
         && btcRiskAllowsShort(features)
         && features.close < features.priorLow24h
         && features.penguMomentum6hPct < config.short.confirmationThresholdPct;
+    const shortMinimumRsi = Number(options.shortMinimumRsi);
+    const shortBlockedByOversoldRsi = shortBaseEligible
+        && Number.isFinite(shortMinimumRsi)
+        && features.rsi14 < shortMinimumRsi;
+    const shortEligible = shortBaseEligible && !shortBlockedByOversoldRsi;
 
     if (shortEligible) {
         return { side: -1, reason: "PENGU V46 confirmed 24-hour breakdown Short.", longEligible, shortEligible };
@@ -153,9 +168,11 @@ export function evaluateDisDexPenguV46Decision(features: DisDexPenguV46DecisionF
     }
     return {
         side: 0,
-        reason: features.fundingRate === null
-            ? "PENGU V46 Long is fail-closed because funding coverage is unavailable; no Short trigger is active."
-            : "PENGU V46 has no active Long or Short trigger.",
+        reason: shortBlockedByOversoldRsi
+            ? "PENGU V46 Short rejected: RSI14 " + features.rsi14.toFixed(2) + " is below the " + shortMinimumRsi + " oversold floor."
+            : features.fundingRate === null
+                ? "PENGU V46 Long is fail-closed because funding coverage is unavailable; no Short trigger is active."
+                : "PENGU V46 has no active Long or Short trigger.",
         longEligible,
         shortEligible,
     };
@@ -216,6 +233,7 @@ function buildFeatures(input: {
 export function buildDisDexPenguV46Signal(
     history: DisDexPenguV46History,
     now = Date.now(),
+    options: DisDexPenguV46SignalOptions = {},
 ): DisDexPenguV46Signal {
     const config = DISDEX_PENGU_DUAL_ENGINE_V46;
     // The provider already supplies completed candles, but the signal layer repeats
@@ -245,7 +263,7 @@ export function buildDisDexPenguV46Signal(
         const features = buildFeatures({ pengu, penguIndex, btc, btcIndex, funding });
         if (!features) continue;
         evaluatedDecisionBars += 1;
-        const decision = evaluateDisDexPenguV46Decision(features);
+        const decision = evaluateDisDexPenguV46Decision(features, options);
         if (decision.side === 0) continue;
         // The signal becomes actionable immediately after the completed decision
         // candle closes, matching the backtest's next-open execution convention.
@@ -253,14 +271,27 @@ export function buildDisDexPenguV46Signal(
         const exitTs = entryTs + config.holdHours * HOUR;
         nextFreeTs = exitTs;
         if (entryTs <= now && now < exitTs) {
+            const configuredLongScale = Number(options.longBelowBtcSmaGrossScale);
+            const grossScale = decision.side > 0
+                && !features.btcCloseAboveSma168
+                && Number.isFinite(configuredLongScale)
+                && configuredLongScale > 0
+                && configuredLongScale < 1
+                ? configuredLongScale
+                : 1;
+            const riskAdjustment = grossScale < 1 ? 'LONG_BTC_BELOW_SMA168_HALF' as const : 'NONE' as const;
             active = {
                 strategyId: config.id,
                 side: decision.side,
-                targetGross: decision.side > 0 ? config.longGross : config.shortGross,
+                targetGross: (decision.side > 0 ? config.longGross : config.shortGross) * grossScale,
+                grossScale,
+                riskAdjustment,
                 decisionTs: ts,
                 entryTs,
                 exitTs,
-                reason: decision.reason,
+                reason: riskAdjustment === "NONE"
+                    ? decision.reason
+                    : decision.reason + " Long gross scaled to 50% because BTC is below SMA168.",
                 features,
                 diagnostics: {
                     evaluatedDecisionBars,
@@ -276,6 +307,8 @@ export function buildDisDexPenguV46Signal(
         strategyId: config.id,
         side: 0,
         targetGross: 0,
+        grossScale: 1,
+        riskAdjustment: "NONE",
         reason: "PENGU V46 has no active 24-hour position window.",
         diagnostics: {
             evaluatedDecisionBars,

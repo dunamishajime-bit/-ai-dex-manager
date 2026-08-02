@@ -28,8 +28,13 @@ export function buildDisDexV96CombinedSignal(
     options: { penguTargetGrossCap?: number; totalGrossCap?: number } = {},
 ): DisDexV96CombinedSignal {
     const core = buildDisDexV95CoreSignal(history, now);
-    const pengu = buildDisDexPenguV46Signal(history, now);
-    const requestedPenguGross = pengu.side === 0 ? 0 : DISDEX_V96_ALLOCATION.penguTargetGross;
+    const pengu = buildDisDexPenguV46Signal(history, now, {
+        longBelowBtcSmaGrossScale: DISDEX_V96_ALLOCATION.penguRiskControls.longBelowBtcSmaGrossScale,
+        shortMinimumRsi: DISDEX_V96_ALLOCATION.penguRiskControls.shortMinimumRsi,
+    });
+    const requestedPenguGross = pengu.side === 0
+        ? 0
+        : DISDEX_V96_ALLOCATION.penguTargetGross * pengu.grossScale;
     const suppliedCap = Number(options.penguTargetGrossCap);
     const penguGrossCapApplied = Number.isFinite(suppliedCap) && suppliedCap > 0
         ? Math.min(requestedPenguGross, suppliedCap)

@@ -34,6 +34,23 @@ assert.equal(longDecision.side, 1);
 assert.equal(longDecision.longEligible, true);
 assert.equal(longDecision.shortEligible, false);
 
+const oversoldShort = evaluateDisDexPenguV46Decision({
+    ...longFeatures,
+    fundingRate: null,
+    penguCloseAboveSma72: false,
+    penguCloseAboveSma168: false,
+    penguSma168Rising48h: false,
+    penguMomentum6hPct: -2,
+    priorLow24h: 0.010,
+    close: 0.0095,
+    btcCloseAboveSma168: false,
+    btcMomentum72hPct: -2,
+    rsi14: 24.99,
+}, { shortMinimumRsi: 25 });
+assert.equal(oversoldShort.side, 0);
+assert.equal(oversoldShort.shortEligible, false);
+assert.match(oversoldShort.reason, /oversold floor/);
+
 const fundingBlocked = evaluateDisDexPenguV46Decision({ ...longFeatures, fundingRate: null });
 assert.equal(fundingBlocked.side, 0);
 assert.equal(fundingBlocked.longEligible, false);
@@ -132,6 +149,22 @@ assert.equal(immediateSignal.exitTs, latest.openTime + 25 * HOUR);
 assert.equal(immediateSignal.diagnostics.fundingCoverage, true);
 assert.ok(immediateSignal.features);
 assert.ok(immediateSignal.features!.rsi14 >= 45 && immediateSignal.features!.rsi14 <= 72);
+assert.equal(immediateSignal.grossScale, 1);
+
+const weakBtc1h = btc1h.map((row, index) => {
+    const close = 100 - index * 0.0001;
+    return { ...row, open: close, high: close * 1.001, low: close * 0.999, close };
+});
+const scaledLongSignal = buildDisDexPenguV46Signal({
+    core12h: { BTCUSDT: [], ETHUSDT: [], BNBUSDT: [], SOLUSDT: [] },
+    btc1h: weakBtc1h,
+    pengu1h,
+    penguFunding: [{ fundingTime: latest.closeTime, fundingRate: 0.0002 }],
+}, signalNow, { longBelowBtcSmaGrossScale: 0.5, shortMinimumRsi: 25 });
+assert.equal(scaledLongSignal.side, 1);
+assert.equal(scaledLongSignal.grossScale, 0.5);
+assert.equal(scaledLongSignal.targetGross, DISDEX_PENGU_DUAL_ENGINE_V46.longGross * 0.5);
+assert.match(scaledLongSignal.reason, /scaled to 50%/);
 
 const futureFundingMustNotEnableLong = buildDisDexPenguV46Signal({
     core12h: {

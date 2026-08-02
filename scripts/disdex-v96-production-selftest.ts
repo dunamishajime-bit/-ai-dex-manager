@@ -119,6 +119,8 @@ async function main() {
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 1.15);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross, 2.5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 5);
+    assert.equal(DISDEX_V96_ALLOCATION.penguRiskControls.longBelowBtcSmaGrossScale, 0.5);
+    assert.equal(DISDEX_V96_ALLOCATION.penguRiskControls.shortMinimumRsi, 25);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.killSwitchAction, "FLATTEN_MANAGED");
 
     const allocation = allocateDisDexV96ReservedPengu({
@@ -130,6 +132,16 @@ async function main() {
     close(allocation.penguFinalGross, 1.15);
     close(allocation.finalGross, 2.5);
     assert.ok(allocation.finalGross <= DISDEX_V96_ALLOCATION.totalGrossCap);
+
+    const scaledPengu = allocateDisDexV96ReservedPengu({
+        coreWeights: {},
+        penguSide: 1,
+        penguTargetGross: DISDEX_V96_ALLOCATION.penguTargetGross * DISDEX_V96_ALLOCATION.penguRiskControls.longBelowBtcSmaGrossScale,
+        totalGrossCap: DISDEX_V96_ALLOCATION.totalGrossCap,
+        minimumActivePenguClip: DISDEX_V96_ALLOCATION.minimumActivePenguClip,
+    });
+    close(scaledPengu.penguTargetGross, 0.575);
+    close(scaledPengu.penguFinalGross, 0.575);
 
     const combinedEthTarget = allocateDisDexV96ReservedPengu({
         coreWeights: { ETHUSDT: 1.32 },
