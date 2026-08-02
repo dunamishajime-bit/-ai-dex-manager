@@ -1,6 +1,6 @@
 export const DIST_TERMINAL_LIVE_CONFIG = {
   productName: "DISTerminal",
-  strategyLabel: "V96 Crypto + V52 Stock 統合LIVE",
+  strategyLabel: "V96 Crypto + V52 Stock \u7d71\u5408LIVE",
   executionVenue: "AsterDEX",
   executor: "AsterDirectTradeExecutor",
   approvedReleaseSha: "52bad2e37217ea1431d46648090f3bf3d8b20c1e",
