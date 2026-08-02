@@ -37,7 +37,7 @@
     "strategy:disdex-v96:frequency:selftest": "tsx scripts/disdex-v96-frequency-live-selftest.ts",
     "strategy:disdex-v96:execution:selftest": "tsx scripts/disdex-v96-execution-safety-selftest.ts",
     "strategy:disdex-v96:override:audit:selftest": "tsx scripts/disdex-v96-operator-override-audit-selftest.ts",
-    "strategy:disdex-v96:typecheck": "tsc --noEmit -p tsconfig.v96-runner.json",
+    "strategy:disdex-v96:typecheck": "tsc --noEmit --incremental false -p tsconfig.v96-runner.json",
     "strategy:disdex-v96:once": "tsx scripts/disdex-v96-live-runner.ts --once",
     "strategy:disdex-v96:daemon": "tsx scripts/disdex-v96-live-runner.ts --daemon",
     "strategy:disdex-v96:preflight": "tsx scripts/disdex-v96-live-preflight.ts",
