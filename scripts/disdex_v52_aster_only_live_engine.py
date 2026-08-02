@@ -51,7 +51,61 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
+        self._decision_items: Dict[Tuple[str, str], dict] = {}
+        self._decision_market_open = False
+        self._decision_market_label = "LIVE判定未取得"
 
+    def write_decision_snapshot(self, *, market_open: bool, market_label: str) -> None:
+        """Publish the latest V52 decision inputs for the read-only UI."""
+        checked_at = dt.datetime.now(tz=base.UTC).isoformat().replace("+00:00", "Z")
+        items = list(self._decision_items.values())
+        if not items:
+            items = [
+                {
+                    "symbol": symbol,
+                    "slot": V11_SLOT,
+                    "status": "outside_hours" if not market_open else "unavailable",
+                    "side": "WAIT",
+                    "reasons": [
+                        "米国株式市場の対象時間外です。" if not market_open else "V52 LIVE Runnerの判定データがまだありません。"
+                    ],
+                    "checkedAt": checked_at,
+                }
+                for symbol in base.SYMBOLS
+            ]
+        path = Path(os.getenv("DISDEX_V52_DECISION_SNAPSHOT_FILE", str(self.state_root / "decision-status.json"))).resolve()
+        payload = {
+            "version": 1,
+            "checkedAt": checked_at,
+            "source": "disdex-v52-live-runner",
+            "strategyId": STRATEGY_ID,
+            "runnerMode": "live" if self.live else "paper",
+            "marketOpen": market_open,
+            "marketLabel": market_label,
+            "items": items,
+        }
+        base.atomic_write_json(path, payload)
+
+    def _record_decision_items(self, *, slot: str, candidate: Optional[dict], rejections: Dict[str, List[str]], checked_at: str) -> None:
+        candidate_symbol = str(candidate.get("symbol")) if candidate else ""
+        for symbol in base.SYMBOLS:
+            if symbol == candidate_symbol:
+                side = str(candidate.get("side"))
+                status = "candidate"
+                reasons = ["V52 LIVE Runnerの全条件を通過しました。"]
+            else:
+                side = "WAIT"
+                status = "rejected"
+                reasons = list(rejections.get(symbol) or rejections.get("ROUTER") or ["候補条件を満たしていません。"])
+            self._decision_items[(symbol, slot)] = {
+                "symbol": symbol,
+                "slot": slot,
+                "status": status,
+                "side": side if side in {"BUY", "SELL"} else "WAIT",
+                "reasons": reasons,
+                "checkedAt": checked_at,
+                "dataUpdatedAt": checked_at,
+            }
     def _migrate_state(self) -> None:
         positions = self.state.get("positions")
         if positions is not None and not isinstance(positions, dict):
@@ -485,9 +539,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if self.kill_switch():
             self.flatten_all("DAILY_LOSS"); return
         local = dt.datetime.now(tz=base.NY)
+        sec = base.ny_seconds(local)
+        market_open = local.weekday() < 5 and base.clock("09:30:00") <= sec <= base.clock("16:00:00")
+        market_label = "米国株式市場 09:30-16:00（ニューヨーク時間）" if market_open else "米国株式市場の対象時間外"
+        self.write_decision_snapshot(market_open=market_open, market_label=market_label)
         if local.weekday() >= 5:
             return
-        sec = base.ny_seconds(local)
         if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):
             return
         self.update_history()
@@ -506,6 +563,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             gross, snapshot = self.available_slot_gross(V11_SLOT)
             self.v11_notional = gross * snapshot["equityUsd"]
             candidate, rejections = (None, {"ROUTER": ["NO_GROSS_CAPACITY"]}) if gross <= 0 else self.v11_candidates(rows)
+            checked_at = dt.datetime.now(tz=base.UTC).isoformat().replace("+00:00", "Z")
+            self._record_decision_items(slot=V11_SLOT, candidate=candidate, rejections=rejections, checked_at=checked_at)
+            self.write_decision_snapshot(market_open=True, market_label="米国株式市場 09:30-16:00（ニューヨーク時間）")
             self.log("v52-v11-decision", candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
             if candidate: self.open_basis_position(V11_SLOT, candidate, gross)
         attempted = self.state.setdefault("v50Attempted", {})
@@ -517,6 +577,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             gross, snapshot = self.available_slot_gross(V50_SLOT)
             notional = gross * snapshot["equityUsd"]
             candidate, rejections = (None, {"ROUTER": ["NO_GROSS_CAPACITY"]}) if gross <= 0 else self.v50_candidate(window, rows, notional)
+            checked_at = dt.datetime.now(tz=base.UTC).isoformat().replace("+00:00", "Z")
+            self._record_decision_items(slot=V50_SLOT, candidate=candidate, rejections=rejections, checked_at=checked_at)
+            self.write_decision_snapshot(market_open=True, market_label="米国株式市場 09:30-16:00（ニューヨーク時間）")
             self.log("v52-v50-decision", window=window, candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
             if candidate: self.open_basis_position(V50_SLOT, candidate, gross)
 

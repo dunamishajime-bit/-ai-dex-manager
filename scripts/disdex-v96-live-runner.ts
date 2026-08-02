@@ -16,6 +16,7 @@ import {
 import type { DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
 import { DisDexV96PortfolioRunner, buildDefaultDisDexV96RunnerConfig } from "../lib/disdex-v96-portfolio-runner";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
+import { writeDisDexV96DecisionSnapshot } from "../lib/disdex-v96-decision-snapshot";
 
 function boolEnv(name: string, fallback = false) {
     const raw = process.env[name];
@@ -201,6 +202,15 @@ async function main() {
     process.on("SIGTERM", stop);
     do {
         const result = await runner.tick();
+        try {
+            await writeDisDexV96DecisionSnapshot(runnerMode, result);
+        } catch (snapshotError) {
+            console.warn(JSON.stringify({
+                level: "warn",
+                event: "disdex-v96-decision-snapshot-write-failed",
+                message: snapshotError instanceof Error ? snapshotError.message : String(snapshotError),
+            }));
+        }
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), runnerMode, ...result }));
         if (result.status === "manual-review") stopping = true;
         if (!daemon || stopping) break;
