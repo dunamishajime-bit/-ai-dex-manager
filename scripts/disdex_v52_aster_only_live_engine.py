@@ -599,6 +599,13 @@ def self_test() -> None:
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY"
     assert V50_WINDOWS == ("11:30", "12:30", "13:30")
     assert V50_MIN_ENTRY_BASIS_BPS == 75.0
+    from disdex_v13d_v11eq_stock_free_live_engine import reference_health_ready
+    market_closed = {"status": "market_closed", "marketOpen": False, "pythConnected": False, "iexConnected": False}
+    assert reference_health_ready(market_closed, regular_session=False)
+    assert not reference_health_ready(market_closed, regular_session=True)
+    connected = {"status": "ok", "marketOpen": True, "pythConnected": True, "iexConnected": True}
+    assert reference_health_ready(connected, regular_session=True)
+
     book = base.Book("ASTER", "AMZNUSDT", 99.9, 10, 100.1, 10, [(99.9, 10)], [(100.1, 10)], 1000, 1000)
     assert base.passive_exit_price(book, "SELL") == book.ask
     assert base.passive_exit_price(book, "BUY") == book.bid

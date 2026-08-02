@@ -18,6 +18,17 @@ def regular_us_equity_session(value: dt.datetime | None = None) -> bool:
     return local.weekday() < 5 and engine.clock("09:30:00") <= engine.ny_seconds(local) <= engine.clock("16:00:00")
 
 
+def reference_health_ready(payload: dict, regular_session: bool) -> bool:
+    if payload.get("pythConnected") is True and payload.get("iexConnected") is True:
+        return True
+    return (
+        not regular_session
+        and payload.get("status") == "market_closed"
+        and payload.get("marketOpen") is False
+    )
+
+
+
 def reference_health(reference: engine.ReferenceProvider) -> dict:
     parsed = urllib.parse.urlsplit(reference.template.format(symbol="NVDA", unix_ms=engine.now_ms()))
     health_url = urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "/health", "", ""))
@@ -29,7 +40,7 @@ def reference_health(reference: engine.ReferenceProvider) -> dict:
             payload = engine.http_json(health_url, headers=reference.headers, timeout=reference.timeout)
             if not isinstance(payload, dict):
                 raise RuntimeError("Free reference /health returned a non-object response")
-            if payload.get("pythConnected") is True and payload.get("iexConnected") is True:
+            if reference_health_ready(payload, regular_us_equity_session()):
                 return payload
             last_error = RuntimeError(f"Free reference sources are not connected: {payload}")
         except Exception as error:
