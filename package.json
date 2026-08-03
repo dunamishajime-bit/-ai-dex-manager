@@ -27,6 +27,10 @@
     "strategy:disdex-v35:once": "tsx scripts/disdex-v35-live-runner.ts --once",
     "strategy:disdex-v35:daemon": "tsx scripts/disdex-v35-live-runner.ts --daemon",
     "strategy:disdex-v46:selftest": "tsx scripts/disdex-v46-pengu-selftest.ts",
+    "strategy:pengu-dual-ls-v1:selftest": "tsx scripts/pengu-dual-ls-v1-selftest.ts",
+    "strategy:pengu-dual-ls-v1:typecheck": "tsc --noEmit -p tsconfig.pengu-dual-ls-v1.json",
+    "strategy:pengu-dual-ls-v1:once": "tsx scripts/disdex-pengu-dual-ls-v1-live-runner.ts --once",
+    "strategy:pengu-dual-ls-v1:daemon": "tsx scripts/disdex-pengu-dual-ls-v1-live-runner.ts --daemon",
     "strategy:disdex-v46:typecheck": "tsc --noEmit -p tsconfig.v46-runner.json",
     "strategy:disdex-v46:once": "tsx scripts/disdex-v46-live-runner.ts --once",
     "strategy:disdex-v46:daemon": "tsx scripts/disdex-v46-live-runner.ts --daemon",
@@ -111,10 +115,4 @@
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
-    "eslint-config-next": "14.1.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5"
-  }
-}
+    "eslint-config-n
