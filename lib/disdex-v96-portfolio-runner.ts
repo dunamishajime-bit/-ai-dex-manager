@@ -26,6 +26,11 @@ import { disDexV96ConfigFingerprint } from "@/lib/disdex-v96-live-gates";
 import { createDailyLossLedgerEntry } from "@/lib/disdex-daily-loss-ledger";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
+const CORE_MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"] as const;
+
+function legacyPenguEnabled() {
+    return !/^(0|false|off|no)$/i.test(String(process.env.PENGU_LEGACY_CORE_ENABLED ?? "true").trim());
+}
 const ONE_TIME_ETH_SIGNAL_SKIP_REFERENCE_TS = 1785024000000;
 const DEFAULT_ROUND_TRIP_FEE_BPS = 8;
 const DEFAULT_MINIMUM_EXECUTION_HEADROOM_USD = 4;
@@ -99,7 +104,22 @@ function accountEquity(account: DirectAccountSnapshot, positions: DirectPosition
 }
 
 function managedPositions(positions: DirectPosition[]) {
-    return positions.filter((position) => MANAGED_SYMBOLS.includes(position.symbol.toUpperCase() as typeof MANAGED_SYMBOLS[number]));
+    return positions.filter((position) => {
+        const symbol = position.symbol.toUpperCase();
+        return legacyPenguEnabled()
+            ? MANAGED_SYMBOLS.includes(symbol as typeof MANAGED_SYMBOLS[number])
+            : CORE_MANAGED_SYMBOLS.includes(symbol as typeof CORE_MANAGED_SYMBOLS[number]);
+    });
+}
+
+function corePositions(positions: DirectPosition[]) {
+    return legacyPenguEnabled()
+        ? positions
+        : positions.filter((position) => position.symbol.toUpperCase() !== "PENGUUSDT");
+}
+
+function grossOf(position: DirectPosition) {
+    return Math.abs(finite(position.notionalUsd, position.quantity * position.markPrice));
 }
 
 function filled(result: DirectTradeResult) {
@@ -408,11 +428,20 @@ export class DisDexV96PortfolioRunner {
                 return { status: "held", message: `V96 will not rebalance while ${openOrders.length} open order(s) exist.` };
             }
 
+            const coreOnlyPositions = corePositions(positions);
+            const activePenguGross = legacyPenguEnabled()
+                ? 0
+                : positions
+                    .filter((position) => position.symbol.toUpperCase() === "PENGUUSDT")
+                    .reduce((sum, position) => sum + grossOf(position), 0);
+            const effectiveMaxGross = legacyPenguEnabled()
+                ? this.dependencies.config.maxGross
+                : Math.max(0, this.dependencies.config.maxGross - activePenguGross);
             const signal = buildDisDexV96CombinedSignal(history, this.now(), {
-                penguTargetGrossCap: this.dependencies.config.penguTargetGrossCap,
-                totalGrossCap: this.dependencies.config.maxGross,
+                penguTargetGrossCap: legacyPenguEnabled() ? this.dependencies.config.penguTargetGrossCap : 0,
+                totalGrossCap: effectiveMaxGross,
             });
-            if (!risk.flatten && signal.allocation.finalGross > this.dependencies.config.maxGross + 1e-9) {
+            if (!risk.flatten && signal.allocation.finalGross > effectiveMaxGross + 1e-9) {
                 state.forwardEvidence.grossCapBreaches += 1;
                 state.manualReviewReason = `V96 Gross cap breach: ${signal.allocation.finalGross}`;
                 await this.dependencies.stateStore.save(state);
@@ -437,8 +466,8 @@ export class DisDexV96PortfolioRunner {
                 return { status: "held", message: `${risk.reason} No managed position remains open.`, signal };
             }
             const quoteSymbols = new Set<string>([
-                ...MANAGED_SYMBOLS,
-                ...(this.dependencies.config.closeUnmanagedPositions ? positions.map((position) => position.symbol.toUpperCase()) : []),
+                ...(legacyPenguEnabled() ? MANAGED_SYMBOLS : CORE_MANAGED_SYMBOLS),
+                ...(this.dependencies.config.closeUnmanagedPositions ? coreOnlyPositions.map((position) => position.symbol.toUpperCase()) : []),
             ]);
             const quotes = Object.fromEntries(await Promise.all(
                 [...quoteSymbols].map(async (symbol) => [symbol, await this.dependencies.executor.getMarketQuote(symbol)]),
@@ -446,12 +475,12 @@ export class DisDexV96PortfolioRunner {
             const targetWeights = risk.flatten ? {} : signal.targetWeights;
             const rebalance = buildDisDexV35RebalanceActions({
                 account,
-                positions,
+                positions: coreOnlyPositions,
                 quotes,
                 targetWeights,
                 config: {
                     cashReservePct: this.dependencies.config.cashReservePct,
-                    maxGross: this.dependencies.config.maxGross,
+                    maxGross: effectiveMaxGross,
                     minOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
                     rebalanceTolerancePct: this.dependencies.config.rebalanceTolerancePct,
                     closeUnmanagedPositions: this.dependencies.config.closeUnmanagedPositions,
@@ -510,7 +539,7 @@ export class DisDexV96PortfolioRunner {
                     action,
                     config: {
                         cashReservePct: this.dependencies.config.cashReservePct,
-                        maxGross: this.dependencies.config.maxGross,
+                        maxGross: effectiveMaxGross,
                         maxSlippageBps: this.dependencies.config.maxSlippageBps,
                         minOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
                         roundTripFeeBps: this.dependencies.config.roundTripFeeBps,
