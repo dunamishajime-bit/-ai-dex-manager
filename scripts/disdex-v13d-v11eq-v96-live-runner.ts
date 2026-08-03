@@ -16,10 +16,11 @@ const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
 
 const READ_ONLY_PREFLIGHT_SCRIPT = "scripts/disdex-v96-v52-readonly-preflight.ts" as const;
-const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-live-preflight.ts" as const;
+const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-strategy-preflight.ts" as const;
 
 type RunnerMode = "paper" | "live";
 type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v1" | "stock-v52-aster-only"; process: ChildProcess };
+type V52PreflightStatus = "ACTIVE" | "WAITING_MARKET_CLOSED" | "BLOCKED_DATA_UNAVAILABLE";
 
 function boolEnv(name: string, fallback = false) {
     const value = process.env[name];
@@ -100,6 +101,10 @@ export function shouldHoldFailClosed(runnerMode: RunnerMode, daemon: boolean) {
     return runnerMode === "live" && daemon;
 }
 
+function shouldStartV52Worker(status: V52PreflightStatus) {
+    return status === "ACTIVE";
+}
+
 async function holdFailClosed(reason: string) {
     console.error(JSON.stringify({
         level: "error",
@@ -136,15 +141,19 @@ async function activateSharedKillSwitch(path: string, reason: string) {
     await writeFile(path, `${JSON.stringify(command, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
 }
 
-function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedChild[] {
+function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean, v52PreflightStatus: V52PreflightStatus = "ACTIVE"): ManagedChild[] {
     const env = buildCombinedChildEnvironment(runnerMode);
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
     const pengu = spawn(tsx, ["scripts/disdex-pengu-dual-ls-v1-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const stock = spawn(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    return [{ name: "crypto-v96", process: crypto }, { name: "pengu-dual-ls-v1", process: pengu }, { name: "stock-v52-aster-only", process: stock }];
+    const children: ManagedChild[] = [{ name: "crypto-v96", process: crypto }, { name: "pengu-dual-ls-v1", process: pengu }];
+    if (shouldStartV52Worker(v52PreflightStatus)) {
+        const stock = spawn(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+        children.push({ name: "stock-v52-aster-only", process: stock });
+    }
+    return children;
 }
 
 function runCommand(command: string, args: string[], env: NodeJS.ProcessEnv) {
@@ -156,6 +165,30 @@ function runCommand(command: string, args: string[], env: NodeJS.ProcessEnv) {
             else reject(new Error(`${command} ${args.join(" ")} failed: code=${code}, signal=${signal || "none"}`));
         });
     });
+}
+
+function runCapture(command: string, args: string[], env: NodeJS.ProcessEnv) {
+    return new Promise<{ code: number | null; stdout: string; stderr: string }>((resolveRun, reject) => {
+        const child = spawn(command, args, { cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"] });
+        let stdout = "";
+        let stderr = "";
+        child.stdout.on("data", (chunk) => { stdout += String(chunk); });
+        child.stderr.on("data", (chunk) => { stderr += String(chunk); });
+        child.once("error", reject);
+        child.once("exit", (code) => resolveRun({ code, stdout, stderr }));
+    });
+}
+
+function parsePreflightSummary(output: string): { v52Preflight?: { status?: V52PreflightStatus } } {
+    for (const line of output.split(/\r?\n/).map((value) => value.trim()).filter(Boolean).reverse()) {
+        try {
+            const parsed = JSON.parse(line) as { v52Preflight?: { status?: V52PreflightStatus } };
+            if (parsed && typeof parsed === "object") return parsed;
+        } catch {
+            // Ignore non-JSON diagnostics. The final structured result is authoritative.
+        }
+    }
+    throw new Error("Strategy-specific preflight returned no structured result.");
 }
 
 function waitForExit(child: ManagedChild) {
@@ -176,6 +209,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     assertCombinedLiveActivation(runnerMode);
     const paths = combinedPaths();
     let migrationId: string | undefined;
+    let v52PreflightStatus: V52PreflightStatus = "ACTIVE";
     if (runnerMode === "live") {
         const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
         if (!runtimeCommitSha) throw new Error("Combined LIVE activation requires DISDEX_V96_RUNTIME_COMMIT_SHA.");
@@ -183,7 +217,19 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
         try {
             for (const script of livePreflightScripts()) {
-                await runCommand(tsx, [script], env);
+                if (script === VERIFIED_PREFLIGHT_SCRIPT) {
+                    const result = await runCapture(tsx, [script], env);
+                    if (result.code !== 0) throw new Error("Strategy-specific live preflight failed; fail-closed.");
+                    const summary = parsePreflightSummary(result.stdout);
+                    const status = summary.v52Preflight?.status;
+                    if (status !== "ACTIVE" && status !== "WAITING_MARKET_CLOSED" && status !== "BLOCKED_DATA_UNAVAILABLE") {
+                        throw new Error("Strategy-specific preflight did not return a valid V52 status.");
+                    }
+                    v52PreflightStatus = status;
+                    console.log(result.stdout.trim());
+                } else {
+                    await runCommand(tsx, [script], env);
+                }
             }
         } catch (error) {
             const reason = error instanceof Error ? error.message : String(error);
@@ -195,7 +241,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         migrationId = activation.migrationId;
     }
     await Promise.all([mkdir(paths.cryptoStateRoot, { recursive: true }), mkdir(paths.penguStateRoot, { recursive: true }), mkdir(paths.stockStateRoot, { recursive: true })]);
-    const children = spawnManagedChildren(runnerMode, daemon);
+    const children = spawnManagedChildren(runnerMode, daemon, v52PreflightStatus);
     let intentionalStop = false;
     const stop = async () => {
         if (intentionalStop) return;
@@ -214,6 +260,8 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
         stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
         totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
+        v52PreflightStatus,
+        v52WorkerStarted: shouldStartV52Worker(v52PreflightStatus),
         killSwitchPath: paths.killSwitchPath,
     }));
     if (!daemon) {
@@ -255,6 +303,9 @@ function selfTest() {
     assert.equal(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, "2.5");
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
+    assert.equal(shouldStartV52Worker("ACTIVE"), true);
+    assert.equal(shouldStartV52Worker("WAITING_MARKET_CLOSED"), false);
+    assert.equal(shouldStartV52Worker("BLOCKED_DATA_UNAVAILABLE"), false);
     assert.equal(shouldHoldFailClosed("live", true), true);
     assert.equal(shouldHoldFailClosed("live", false), false);
     assert.equal(shouldHoldFailClosed("paper", true), false);
