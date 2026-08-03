@@ -56,7 +56,7 @@ function gross(weights: Record<string, number> | Partial<Record<DisDexV35CoreSym
 }
 
 function main() {
-    assert.equal(DISDEX_V96_ALLOCATION.productionRevision, "CORE_VOLUME50_TURNOVER075_LIVE_R2_GROSS_2P5_PENGU_1P15");
+    assert.equal(DISDEX_V96_ALLOCATION.productionRevision, "CORE_VOLUME50_TURNOVER075_LIVE_R2_GROSS_2P5_PENGU_1P15_LONGA_SHORTCANDIDATE_HOLD18");
     assert.equal(DISDEX_V96_ALLOCATION.historicalResearchPr, 73);
     assert.equal(DISDEX_V96_ALLOCATION.corePolicy.componentVolumeFloor, 0.50);
     assert.equal(DISDEX_V96_ALLOCATION.corePolicy.weightBandTolerancePct, 5);
@@ -97,7 +97,7 @@ function main() {
         componentVolumeFloor: DISDEX_V96_ALLOCATION.corePolicy.componentVolumeFloor,
         portfolioRebalanceThresholdPct: DISDEX_V96_ALLOCATION.corePolicy.portfolioRebalanceThresholdPct,
         sharedV35Unchanged: true,
-        penguSignalRulesChanged: false,
+        penguSignalProfile: "LONG_A_SHORT_CANDIDATE_HOLD18",
         penguReservationPolicy: DISDEX_V96_ALLOCATION.penguReservationPolicy,
         grossCap: DISDEX_V96_ALLOCATION.totalGrossCap,
     }));

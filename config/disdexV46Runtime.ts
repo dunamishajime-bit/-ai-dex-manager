@@ -6,7 +6,8 @@ export const DISDEX_PENGU_DUAL_ENGINE_V46 = {
     longGross: 0.15,
     shortGross: 0.15,
     forwardPromotionGross: 0.30,
-    holdHours: 24,
+    // BT candidate: Long-strengthened A plus Short candidate, 18-hour hold.
+    holdHours: 18,
     volumeRecentHours: 12,
     volumeBaseHours: 72,
     volumeFloor: 0.8,

@@ -161,7 +161,7 @@ export function evaluateDisDexPenguV46Decision(
     const shortEligible = shortBaseEligible && !shortBlockedByOversoldRsi;
 
     if (shortEligible) {
-        return { side: -1, reason: "PENGU V46 confirmed 24-hour breakdown Short.", longEligible, shortEligible };
+        return { side: -1, reason: "PENGU V46 confirmed 18-hour breakdown Short.", longEligible, shortEligible };
     }
     if (longEligible) {
         return { side: 1, reason: "PENGU V46 regime-confirmed Trend Resume Long.", longEligible, shortEligible };
@@ -309,7 +309,7 @@ export function buildDisDexPenguV46Signal(
         targetGross: 0,
         grossScale: 1,
         riskAdjustment: "NONE",
-        reason: "PENGU V46 has no active 24-hour position window.",
+        reason: "PENGU V46 has no active 18-hour position window.",
         diagnostics: {
             evaluatedDecisionBars,
             fundingCoverage: latestFundingCoverage,

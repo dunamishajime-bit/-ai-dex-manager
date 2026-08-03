@@ -145,7 +145,7 @@ const immediateSignal = buildDisDexPenguV46Signal({
 }, signalNow);
 assert.equal(immediateSignal.side, 1);
 assert.equal(immediateSignal.entryTs, latest.openTime + HOUR);
-assert.equal(immediateSignal.exitTs, latest.openTime + 25 * HOUR);
+assert.equal(immediateSignal.exitTs, latest.openTime + 19 * HOUR);
 assert.equal(immediateSignal.diagnostics.fundingCoverage, true);
 assert.ok(immediateSignal.features);
 assert.ok(immediateSignal.features!.rsi14 >= 45 && immediateSignal.features!.rsi14 <= 72);
@@ -246,6 +246,7 @@ assert.equal(reversal.actions[0].reduceOnly, true);
 assert.equal(reversal.actions[0].targetWeight, -0.15);
 assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.longGross, 0.15);
 assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.shortGross, 0.15);
+assert.equal(DISDEX_PENGU_DUAL_ENGINE_V46.holdHours, 18);
 assert.equal(DISDEX_V46_RUNTIME.maximumGross, 2);
 assert.equal(DISDEX_V46_RUNTIME.liveTradingEnabled, false);
 assert.equal(DISDEX_V46_RUNTIME.mode, "PAPER");

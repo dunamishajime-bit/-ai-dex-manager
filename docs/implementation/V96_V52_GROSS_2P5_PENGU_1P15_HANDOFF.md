@@ -10,6 +10,7 @@
 
 - V96 PENGU target Gross: `1.15`
 - Operator Override PENGU cap: `1.15`
+- PENGU profile: Long-strengthened A plus Short candidate with an 18-hour holding window.
 - V96 / shared portfolio maximum Gross: `2.5`
 - V96 Core remaining capacity when PENGU is fully active and no Stock exposure exists: `1.35`
 - Stock sleeve maximum: `1.5`, but only within the shared portfolio residual.
