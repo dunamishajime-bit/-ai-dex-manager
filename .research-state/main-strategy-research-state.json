@@ -2,10 +2,9 @@
   "version": 2,
   "programId": "win80_ultra90_direct_v2",
   "mainStrategyId": "WIN80_ULTRA90_TOP1_V1",
-  "iteration": 109,
-  "updatedAt": "2026-08-03T18:05:43.404Z",
+  "iteration": 110,
+  "updatedAt": "2026-08-03T21:23:31.913Z",
   "completedFocuses": [
-    "related_logic",
     "entry_quality",
     "ultra90_rotation",
     "top1_ranking",
@@ -24,10 +23,33 @@
     "entry_quality",
     "ultra90_rotation",
     "top1_ranking",
-    "position_concentration"
+    "position_concentration",
+    "related_logic"
   ],
-  "lastDiscussionId": "main-research-0109-2026-08-03T18-05-43-404Z",
+  "lastDiscussionId": "main-research-0110-2026-08-03T21-23-31-913Z",
   "experimentQueue": [
+    {
+      "id": "WIN85_DUAL_CONFIRM_SIBLING_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "related_logic",
+      "parameterGroup": "New sibling logic",
+      "currentValue": "WIN80 Top-1",
+      "proposedValue": "Score85 + 1H/6H trend agreement + next-bar confirmation",
+      "rationale": "Win80の高選別思想を維持しながら、Entryを1段階確認して騙しを減らす近縁ロジック。",
+      "expectedEffect": "取引数を抑えた高勝率型。メインを変更せず別系統で検証する。",
+      "status": "REPLAY_REQUIRED"
+    },
+    {
+      "id": "ULTRA90_PULLBACK_SIBLING_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "related_logic",
+      "parameterGroup": "New sibling logic",
+      "currentValue": "Immediate Ultra90 rotation",
+      "proposedValue": "Ultra90 detected -> pullback/retest confirmation -> rotation",
+      "rationale": "Ultra90の強さを使いつつ、直後の高値掴みを減らす近縁ロジック。",
+      "expectedEffect": "Slippage・Gap耐性改善とEntry遅延の比較。",
+      "status": "REPLAY_REQUIRED"
+    },
     {
       "id": "INITIAL_NOTIONAL_80_CHILD_V1",
       "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
@@ -114,28 +136,6 @@
       "proposedValue": "80.00%",
       "rationale": "発火途中のEntryを減らし、騙しBreakoutを抑制できるかを確認する。",
       "expectedEffect": "損失回数低下とEntry遅延のトレードオフ。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "WIN85_DUAL_CONFIRM_SIBLING_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "related_logic",
-      "parameterGroup": "New sibling logic",
-      "currentValue": "WIN80 Top-1",
-      "proposedValue": "Score85 + 1H/6H trend agreement + next-bar confirmation",
-      "rationale": "Win80の高選別思想を維持しながら、Entryを1段階確認して騙しを減らす近縁ロジック。",
-      "expectedEffect": "取引数を抑えた高勝率型。メインを変更せず別系統で検証する。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "ULTRA90_PULLBACK_SIBLING_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "related_logic",
-      "parameterGroup": "New sibling logic",
-      "currentValue": "Immediate Ultra90 rotation",
-      "proposedValue": "Ultra90 detected -> pullback/retest confirmation -> rotation",
-      "rationale": "Ultra90の強さを使いつつ、直後の高値掴みを減らす近縁ロジック。",
-      "expectedEffect": "Slippage・Gap耐性改善とEntry遅延の比較。",
       "status": "REPLAY_REQUIRED"
     }
   ],
