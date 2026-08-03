@@ -1,0 +1,24 @@
+{
+  "scope": "PENGU-only exit study with current Entry fixed",
+  "period": "2025-08-13T00:00:00.000Z..2026-08-03T00:00:00.000Z",
+  "effectivePenguGross": 1.15,
+  "entries": 33,
+  "variants": {
+    "hold12": { "returnPct": 7.38, "cagrPct": 7.61, "maxDrawdownPct": -12.06, "profitFactor": 1.129, "winRatePct": 60.61, "trades": 33 },
+    "hold18_current": { "returnPct": 50.46, "cagrPct": 52.24, "maxDrawdownPct": -11.39, "profitFactor": 1.845, "winRatePct": 69.7, "trades": 33 },
+    "hold24": { "returnPct": 51.49, "cagrPct": 53.32, "maxDrawdownPct": -12.85, "profitFactor": 1.71, "winRatePct": 60.61, "trades": 33 },
+    "hold36": { "returnPct": 44.15, "cagrPct": 45.68, "maxDrawdownPct": -16.85, "profitFactor": 1.705, "winRatePct": 62.5, "trades": 32 },
+    "hold48": { "returnPct": 92.85, "cagrPct": 96.54, "maxDrawdownPct": -26.14, "profitFactor": 1.897, "winRatePct": 59.38, "trades": 32 },
+    "hold36_trail4_retrace2": { "returnPct": 78.77, "cagrPct": 81.8, "maxDrawdownPct": -13.64, "profitFactor": 2.106, "winRatePct": 66.67, "trades": 33 },
+    "hold36_trail6_retrace3": { "returnPct": 101.82, "cagrPct": 105.96, "maxDrawdownPct": -14.34, "profitFactor": 2.288, "winRatePct": 62.5, "trades": 32 },
+    "hold48_trail4_retrace2": { "returnPct": 108.65, "cagrPct": 113.13, "maxDrawdownPct": -18.41, "profitFactor": 2.167, "winRatePct": 72.73, "trades": 33 }
+  },
+  "holdout": {
+    "period": "2026-03-11T00:00:00.000Z..2026-08-03T00:00:00.000Z",
+    "hold18_current": { "returnPct": -2.79, "maxDrawdownPct": -11.39, "profitFactor": 0.843, "winRatePct": 57.14, "trades": 14 },
+    "hold24": { "returnPct": 7.52, "maxDrawdownPct": -12.85, "profitFactor": 1.288, "winRatePct": 50, "trades": 14 },
+    "hold48": { "returnPct": -4.82, "maxDrawdownPct": -26.14, "profitFactor": 0.874, "winRatePct": 42.86, "trades": 14 },
+    "hold36_trail4_retrace2": { "returnPct": 6.42, "maxDrawdownPct": -13.64, "profitFactor": 1.254, "winRatePct": 57.14, "trades": 14 }
+  },
+  "conclusion": "24hはholdoutで現行18hを上回ったが、48hは過学習とDD増大のため不採用。"
+}

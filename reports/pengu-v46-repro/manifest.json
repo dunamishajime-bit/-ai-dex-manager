@@ -1,0 +1,16 @@
+{
+  "purpose": "Reproducible PENGU V46 research inputs and prior BT results",
+  "sourceProductionSha": "02e6c446df5c33dbf277dfa26325e392e4b59984",
+  "branchBase": "codex/pengu-long-short-18h",
+  "marketSource": "Binance public spot OHLCV",
+  "fundingSource": "Aster V3 public /fapi/v3/fundingRate",
+  "period": { "marketStart": "2025-08-03T00:00:00.000Z", "marketEnd": "2026-08-03T00:00:00.000Z", "fundingWarmupStart": "2025-08-02T00:00:00.000Z" },
+  "files": {
+    "data/BTCUSDT-1h-2025-08-03_2026-08-03.json": { "kind": "1h OHLCV", "symbol": "BTCUSDT", "rows": 8761, "sha256": "82D8FEE01A7D8B3D2DA9F3069E8B44439F0447FF018CBBF7267C8F255D360908" },
+    "data/PENGUUSDT-1h-2025-08-03_2026-08-03.json": { "kind": "1h OHLCV", "symbol": "PENGUUSDT", "rows": 8761, "sha256": "5B01D416BBDD4BF5A6EC1CED1F62DD23E669485D23CA863C2EA41AE969468402" },
+    "data/PENGUUSDT-funding-v3-2025-08-02_2026-08-03.json": { "kind": "funding history", "symbol": "PENGUUSDT", "rows": 2196, "sha256": "BA44A5FB8D45BC3A6B6B7BE1F980313C67257E2D6B08EB1C559C4244BE0DC023" }
+  },
+  "dataFields": ["ts", "open", "high", "low", "close", "volume"],
+  "fundingFields": ["symbol", "fundingTime", "fundingRate"],
+  "liveSafety": "No LIVE, VPS, approval, runtime, account, order, or position data included."
+}

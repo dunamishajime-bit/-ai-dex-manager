@@ -1,0 +1,35 @@
+{
+  "scope": "PENGU-only research hypothesis; current 6h Core plus 1h Pre-Core",
+  "period": "2025-08-13T00:00:00.000Z..2026-08-03T00:00:00.000Z",
+  "preCoreParameters": {
+    "impulse": "preceding structure with 6h close return >= +5% or <= -5%",
+    "retracement": "25%..55% of impulse range",
+    "volumeRatioFloor": 1.2,
+    "reclaim": "1h close breaks prior 1h high/low",
+    "btcFilter": "6h BTC return >= -2% for Long, <= +4% for Short",
+    "longFundingCap": 0.0003,
+    "shortRsiFloor": 25,
+    "initialGross": 0.5,
+    "hardStopPct": 2.5,
+    "cooldownHours": 12
+  },
+  "signals": { "currentCore6h": 33, "preCore1h": 17 },
+  "timeStop12h": {
+    "preOnly": { "trades": 14, "returnPct": 12.65, "cagrPct": 13.04, "maxDrawdownPct": -1.31, "profitFactor": 4.048, "winRatePct": 71.43, "hardStops": 3 },
+    "combinedIndependent": { "trades": 46, "returnPct": 41.68, "maxDrawdownPct": -17.49, "profitFactor": 1.535, "winRatePct": 65.22 },
+    "promotions": 0,
+    "grossAdds": 0
+  },
+  "timeStop18h": {
+    "preOnly": { "trades": 14, "returnPct": 2.57, "cagrPct": 2.65, "maxDrawdownPct": -4.35, "profitFactor": 1.276, "winRatePct": 35.71, "hardStops": 6 },
+    "combinedIndependent": { "trades": 46, "returnPct": 29.01, "maxDrawdownPct": -17.87, "profitFactor": 1.366, "winRatePct": 54.35 },
+    "promotions": 0,
+    "grossAdds": 0
+  },
+  "limitations": [
+    "昇格が0件のため、D/Eの昇格効果は未検証",
+    "PENGU単独であり、V96 Core全体・V52 Stock・Portfolio Gross競合は未反映",
+    "履歴Bookのspread、slippage、depthは未反映"
+  ],
+  "conclusion": "Pre-Core単独は候補だが、少数サンプルであり本番採用不可。昇格方式は追加設計と未使用期間検証が必要。"
+}
