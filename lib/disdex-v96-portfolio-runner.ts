@@ -26,6 +26,11 @@ import { disDexV96ConfigFingerprint } from "@/lib/disdex-v96-live-gates";
 import { createDailyLossLedgerEntry } from "@/lib/disdex-daily-loss-ledger";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
+const CORE_MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"] as const;
+
+function legacyPenguEnabled() {
+    return !/^(0|false|off|no)$/i.test(String(process.env.PENGU_LEGACY_CORE_ENABLED ?? "true").trim());
+}
 const ONE_TIME_ETH_SIGNAL_SKIP_REFERENCE_TS = 1785024000000;
 const DEFAULT_ROUND_TRIP_FEE_BPS = 8;
 const DEFAULT_MINIMUM_EXECUTION_HEADROOM_USD = 4;
@@ -99,7 +104,22 @@ function accountEquity(account: DirectAccountSnapshot, positions: DirectPosition
 }
 
 function managedPositions(positions: DirectPosition[]) {
-    return positions.filter((position) => MANAGED_SYMBOLS.includes(position.symbol.toUpperCase() as typeof MANAGED_SYMBOLS[number]));
+    return positions.filter((position) => {
+        const symbol = position.symbol.toUpperCase();
+        return legacyPenguEnabled()
+            ? MANAGED_SYMBOLS.includes(symbol as typeof MANAGED_SYMBOLS[number])
+            : CORE_MANAGED_SYMBOLS.includes(symbol as typeof CORE_MANAGED_SYMBOLS[number]);
+    });
+}
+
+function corePositions(positions: DirectPosition[]) {
+    return legacyPenguEnabled()
+        ? positions
+        : positions.filter((position) => position.symbol.toUpperCase() !== "PENGUUSDT");
+}
+
+function grossOf(position: DirectPosition) {
+    return Math.abs(finite(position.notionalUsd, position.quantity * position.markPrice));
 }
 
 function filled(result: DirectTradeResult) {
@@ -291,354 +311,4 @@ export class DisDexV96PortfolioRunner {
             state.manualReviewReason = pending.lastError;
             await this.dependencies.stateStore.save(state);
             return { status: "manual-review", message: pending.lastError, idempotencyKey: pending.idempotencyKey };
-        }
-        try {
-            if (!pending.reduceOnly) {
-                const risk = await this.refreshRisk(state);
-                if (risk.flatten) {
-                    state.pending = undefined;
-                    await this.dependencies.stateStore.save(state);
-                    return { status: "held", message: `${risk.reason} Planned exposure-increasing order was canceled before submission.` };
-                }
-            }
-            pending.phase = "submitted";
-            pending.updatedAt = this.now();
-            await this.dependencies.stateStore.save(state);
-            const command: DirectTradeCommand = {
-                requestId: pending.idempotencyKey,
-                clientOrderId: pending.clientOrderId,
-                symbol: pending.symbol,
-                side: pending.side,
-                quantity: pending.normalizedQuantity,
-                positionSide: "BOTH",
-                reduceOnly: pending.reduceOnly,
-                expectedPrice: pending.expectedPrice,
-                maxSlippageBps: this.dependencies.config.maxSlippageBps,
-                reason: pending.reason,
-            };
-            const result = await this.dependencies.executor.executeMarket(command);
-            if (result.status === "UNKNOWN" || result.status === "NEW" || result.status === "PARTIALLY_FILLED") {
-                state.forwardEvidence.unknownOrderEvents += result.status === "UNKNOWN" ? 1 : 0;
-                pending.lastError = `V96 execution requires reconciliation/manual review (${result.status}).`;
-                if (result.status === "PARTIALLY_FILLED") {
-                    pending.phase = "manual_review";
-                    state.manualReviewReason = pending.lastError;
-                }
-                await this.dependencies.stateStore.save(state);
-                return { status: pending.phase === "manual_review" ? "manual-review" : "held", message: pending.lastError, idempotencyKey: pending.idempotencyKey };
-            }
-            if (!filled(result)) throw new Error(`V96 order was not fully filled (${result.status}).`);
-            recordCompleted(state, pending, result, this.now());
-            await this.dependencies.stateStore.save(state);
-            this.log.info("V96 rebalance completed", {
-                symbol: pending.symbol,
-                side: pending.side,
-                reduceOnly: pending.reduceOnly,
-                executedQuantity: result.executedQuantity,
-                averagePrice: result.averagePrice,
-                targetWeight: pending.targetWeight,
-            });
-            return { status: "completed", message: `${pending.side} ${pending.symbol} completed.`, idempotencyKey: pending.idempotencyKey };
-        } catch (error) {
-            pending.retryCount += 1;
-            pending.lastError = recordFailure(state, error, this.now());
-            pending.updatedAt = this.now();
-            pending.phase = pending.retryCount >= this.dependencies.config.maxTransactionRetries ? "manual_review" : "planned";
-            if (pending.phase === "manual_review") state.manualReviewReason = pending.lastError;
-            await this.dependencies.stateStore.save(state);
-            return {
-                status: pending.phase === "manual_review" ? "manual-review" : "failed",
-                message: pending.lastError,
-                idempotencyKey: pending.idempotencyKey,
-            };
-        }
-    }
-
-    async tick(): Promise<DisDexV96TickResult> {
-        this.ensureExecutionGate();
-        if (this.dependencies.config.mode === "live" && this.dependencies.config.liveGateCheck) {
-            const gate = await this.dependencies.config.liveGateCheck();
-            if (!gate.allowed) return { status: "manual-review", message: gate.message || "V96 LIVE approval gate failed during tick." };
-        }
-        const lock = await this.dependencies.lock.acquire(randomUUID());
-        if (!lock) return { status: "locked", message: "Another V96 tick owns the runner lock." };
-        try {
-            const state = await this.dependencies.stateStore.load();
-            state.lastRunAt = this.now();
-            if (state.manualReviewReason) {
-                await this.dependencies.stateStore.save(state);
-                return { status: "manual-review", message: state.manualReviewReason };
-            }
-            if (state.pending) return await this.reconcilePending(state);
-
-            const [history, account, positions, openOrders] = await Promise.all([
-                this.dependencies.marketData.load(),
-                this.dependencies.executor.getAccountSnapshot(),
-                this.dependencies.executor.getPositions(),
-                this.dependencies.executor.getOpenOrders(),
-            ]);
-            let risk: { flatten: boolean; reason?: string };
-            try {
-                risk = await this.refreshRisk(state, account, positions);
-            } catch (error) {
-                state.manualReviewReason = `V96 risk-control validation failed: ${error instanceof Error ? error.message : String(error)}`;
-                await this.dependencies.stateStore.save(state);
-                return { status: "manual-review", message: state.manualReviewReason };
-            }
-            if (state.bootstrapRequired) {
-                if (this.dependencies.config.mode === "live") {
-                    const initialManagedPositions = managedPositions(positions);
-                    if (initialManagedPositions.length || openOrders.length) {
-                        state.manualReviewReason = "Initial V96 LIVE bootstrap requires managed symbols to be flat and zero open orders.";
-                        await this.dependencies.stateStore.save(state);
-                        return { status: "manual-review", message: state.manualReviewReason };
-                    }
-                }
-                state.bootstrapRequired = false;
-                await this.dependencies.stateStore.save(state);
-                return { status: "held", message: "V96 bootstrap completed; signal evaluation starts on the next tick." };
-            }
-            if (openOrders.length) {
-                if (risk.flatten) {
-                    state.manualReviewReason = `${risk.reason} Existing open orders prevent automatic emergency flattening.`;
-                    await this.dependencies.stateStore.save(state);
-                    return { status: "manual-review", message: state.manualReviewReason };
-                }
-                await this.dependencies.stateStore.save(state);
-                return { status: "held", message: `V96 will not rebalance while ${openOrders.length} open order(s) exist.` };
-            }
-
-            const signal = buildDisDexV96CombinedSignal(history, this.now(), {
-                penguTargetGrossCap: this.dependencies.config.penguTargetGrossCap,
-                totalGrossCap: this.dependencies.config.maxGross,
-            });
-            if (!risk.flatten && signal.allocation.finalGross > this.dependencies.config.maxGross + 1e-9) {
-                state.forwardEvidence.grossCapBreaches += 1;
-                state.manualReviewReason = `V96 Gross cap breach: ${signal.allocation.finalGross}`;
-                await this.dependencies.stateStore.save(state);
-                return { status: "manual-review", message: state.manualReviewReason, signal };
-            }
-            if (state.lastSignalReferenceTs !== signal.referenceTs) {
-                state.forwardEvidence.startedAt ||= this.now();
-                state.forwardEvidence.completedDecisionBars += 1;
-                if (signal.pengu.side !== 0) {
-                    state.forwardEvidence.minimumObservedPenguClip = Math.min(
-                        state.forwardEvidence.minimumObservedPenguClip,
-                        signal.allocation.penguClip,
-                    );
-                }
-                state.forwardEvidence.lastUpdatedAt = this.now();
-            }
-            state.lastSignalReferenceTs = signal.referenceTs;
-
-            const activeManagedPositions = managedPositions(positions);
-            if (risk.flatten && activeManagedPositions.length === 0) {
-                await this.dependencies.stateStore.save(state);
-                return { status: "held", message: `${risk.reason} No managed position remains open.`, signal };
-            }
-            const quoteSymbols = new Set<string>([
-                ...MANAGED_SYMBOLS,
-                ...(this.dependencies.config.closeUnmanagedPositions ? positions.map((position) => position.symbol.toUpperCase()) : []),
-            ]);
-            const quotes = Object.fromEntries(await Promise.all(
-                [...quoteSymbols].map(async (symbol) => [symbol, await this.dependencies.executor.getMarketQuote(symbol)]),
-            ));
-            const targetWeights = risk.flatten ? {} : signal.targetWeights;
-            const rebalance = buildDisDexV35RebalanceActions({
-                account,
-                positions,
-                quotes,
-                targetWeights,
-                config: {
-                    cashReservePct: this.dependencies.config.cashReservePct,
-                    maxGross: this.dependencies.config.maxGross,
-                    minOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
-                    rebalanceTolerancePct: this.dependencies.config.rebalanceTolerancePct,
-                    closeUnmanagedPositions: this.dependencies.config.closeUnmanagedPositions,
-                },
-            });
-            if (!rebalance.actions.length) {
-                await this.dependencies.stateStore.save(state);
-                return {
-                    status: "no-change",
-                    message: risk.flatten
-                        ? `${risk.reason} Emergency flatten target is already satisfied.`
-                        : `V96 portfolio is within ${rebalance.tolerance.toFixed(2)} USD tolerance.`,
-                    signal,
-                };
-            }
-            let action = rebalance.actions[0];
-            if (risk.flatten && !action.reduceOnly) {
-                state.manualReviewReason = "V96 risk invariant violation: emergency action was not reduce-only.";
-                await this.dependencies.stateStore.save(state);
-                return { status: "manual-review", message: state.manualReviewReason, signal, action };
-            }
-            if (!risk.flatten && shouldSkipDisDexV96Signal({
-                configuredReferenceTs: this.dependencies.config.oneTimeSkippedSignalReferenceTs,
-                signalReferenceTs: signal.referenceTs,
-                symbol: action.symbol,
-                side: action.side,
-                reduceOnly: action.reduceOnly,
-            })) {
-                state.skippedSignalReferenceTs = signal.referenceTs;
-                await this.dependencies.stateStore.save(state);
-                this.log.warn("V96 stale ETH signal was formally skipped", {
-                    referenceTs: signal.referenceTs,
-                    symbol: action.symbol,
-                    side: action.side,
-                    alreadyRecorded: state.skippedSignalReferenceTs === signal.referenceTs,
-                });
-                return {
-                    status: "held",
-                    message: `ETHUSDT BUY referenceTs=${signal.referenceTs} is the explicitly skipped stale signal; no order was sent.`,
-                    signal,
-                    action,
-                };
-            }
-            const position = positions.find((item) => item.symbol.toUpperCase() === action.symbol);
-            const signedQuantity = position ? signedPositionQuantity(position) : 0;
-            if (signedQuantity !== 0 && action.targetWeight !== 0 && Math.sign(signedQuantity) !== Math.sign(action.targetWeight) && !action.reduceOnly) {
-                throw new Error("V96 invariant violation: direction changes must close reduce-only before opening the opposite side.");
-            }
-
-            let capacityPlan: DisDexV96ExecutionCapacityPlan;
-            try {
-                capacityPlan = planDisDexV96ExecutionCapacity({
-                    account,
-                    positions,
-                    managedPositions: activeManagedPositions,
-                    action,
-                    config: {
-                        cashReservePct: this.dependencies.config.cashReservePct,
-                        maxGross: this.dependencies.config.maxGross,
-                        maxSlippageBps: this.dependencies.config.maxSlippageBps,
-                        minOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
-                        roundTripFeeBps: this.dependencies.config.roundTripFeeBps,
-                        minimumExecutionHeadroomUsd: this.dependencies.config.minimumExecutionHeadroomUsd,
-                    },
-                });
-            } catch (error) {
-                state.manualReviewReason = `V96 execution-capacity validation failed: ${error instanceof Error ? error.message : String(error)}`;
-                await this.dependencies.stateStore.save(state);
-                return { status: "manual-review", message: state.manualReviewReason, signal, action };
-            }
-            action = capacityPlan.action;
-            if (capacityPlan.blockedReason) {
-                await this.dependencies.stateStore.save(state);
-                return { status: "held", message: `${capacityPlan.blockedReason} No order was sent.`, signal, action };
-            }
-            const key = idempotencyKey(signal, action, risk.reason);
-            if (state.lastCompletedIdempotencyKey === key) {
-                await this.dependencies.stateStore.save(state);
-                return { status: "held", message: "The same V96 rebalance action was already completed.", signal, action, idempotencyKey: key };
-            }
-
-            let quantityPlan;
-            try {
-                quantityPlan = await normalizeDisDexV96OrderQuantity({
-                    executor: this.dependencies.executor,
-                    symbol: action.symbol,
-                    side: action.side,
-                    quote: quotes[action.symbol],
-                    deltaNotionalUsd: action.deltaNotionalUsd,
-                    minimumOrderNotionalUsd: this.dependencies.config.minOrderNotionalUsd,
-                    reduceOnly: action.reduceOnly,
-                    currentPositionQuantity: position ? signedPositionQuantity(position) : undefined,
-                });
-            } catch (error) {
-                if (quantityPlanIsBelowExchangeMinimum(error)) {
-                    await this.dependencies.stateStore.save(state);
-                    return {
-                        status: "held",
-                        message: `${error instanceof Error ? error.message : String(error)} No order was sent.`,
-                        signal,
-                        action,
-                        idempotencyKey: key,
-                    };
-                }
-                throw error;
-            }
-            const pending: DisDexV96PendingOrder = {
-                idempotencyKey: key,
-                clientOrderId: clientOrderId(key),
-                phase: "planned",
-                symbol: action.symbol,
-                side: action.side,
-                requestedQuantity: quantityPlan.requestedQuantity,
-                normalizedQuantity: quantityPlan.normalized.quantity,
-                reduceOnly: action.reduceOnly,
-                expectedPrice: quantityPlan.referencePrice,
-                targetWeight: action.targetWeight,
-                targetNotionalUsd: action.targetNotionalUsd,
-                deltaNotionalUsd: action.deltaNotionalUsd,
-                referenceTs: signal.referenceTs,
-                createdAt: this.now(),
-                updatedAt: this.now(),
-                retryCount: 0,
-                reason: `${DISDEX_V96_STRATEGY_ID}: ${risk.reason || action.reason} coreScale=${signal.allocation.coreScale.toFixed(6)} penguSide=${signal.pengu.side} penguClip=${signal.allocation.penguClip.toFixed(6)} penguGrossCap=${signal.penguGrossCapApplied.toFixed(6)} signalTargetWeight=${capacityPlan.signalTargetWeight.toFixed(6)} executionTargetWeight=${capacityPlan.executionTargetWeight.toFixed(6)} executionScale=${capacityPlan.executionScale.toFixed(6)}`,
-            };
-            state.pending = pending;
-            await this.dependencies.stateStore.save(state);
-            this.log.info("V96 rebalance planned", {
-                referenceTs: signal.referenceTs,
-                symbol: action.symbol,
-                side: action.side,
-                reduceOnly: action.reduceOnly,
-                signalTargetWeight: capacityPlan.signalTargetWeight,
-                executionTargetWeight: capacityPlan.executionTargetWeight,
-                executionScale: capacityPlan.executionScale,
-                requestedIncreaseUsd: capacityPlan.requestedIncreaseUsd,
-                executableIncreaseUsd: capacityPlan.executableIncreaseUsd,
-                availableBalanceUsd: capacityPlan.reportedAvailableBalanceUsd,
-                requiredInitialMarginUsd: capacityPlan.requiredInitialMarginUsd,
-                cashReserveUsd: capacityPlan.cashReserveUsd,
-                estimatedCostHeadroomUsd: capacityPlan.estimatedCostHeadroomUsd,
-                protectedCashUsd: capacityPlan.protectedCashUsd,
-                projectedManagedGross: capacityPlan.projectedManagedGross,
-                requestedQuantity: pending.requestedQuantity,
-                normalizedQuantity: pending.normalizedQuantity,
-                coreScale: signal.allocation.coreScale,
-                penguClip: signal.allocation.penguClip,
-                penguGrossCap: signal.penguGrossCapApplied,
-                riskReason: risk.reason,
-            });
-            const result = await this.executePending(state);
-            return { ...result, signal, action, idempotencyKey: key };
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            this.log.error("V96 runner tick failed", { message });
-            return { status: /manual review/i.test(message) ? "manual-review" : "failed", message };
-        } finally {
-            await lock.release();
-        }
-    }
-}
-
-export function buildDefaultDisDexV96RunnerConfig(
-    input: Partial<DisDexV96PortfolioRunnerConfig> = {},
-): DisDexV96PortfolioRunnerConfig {
-    return {
-        mode: input.mode || "paper",
-        liveGateAllowed: input.liveGateAllowed === true,
-        cashReservePct: Math.min(25, Math.max(0, input.cashReservePct ?? DISDEX_V96_RUNTIME.cashReservePct)),
-        maxGross: Math.min(DISDEX_V96_RUNTIME.maximumGross, Math.max(0.1, input.maxGross ?? DISDEX_V96_RUNTIME.maximumGross)),
-        maxSlippageBps: Math.max(1, input.maxSlippageBps ?? DISDEX_V96_RUNTIME.maximumSlippageBps),
-        minOrderNotionalUsd: Math.max(5, input.minOrderNotionalUsd ?? DISDEX_V96_RUNTIME.minimumOrderNotionalUsd),
-        rebalanceTolerancePct: Math.min(10, Math.max(0.1, input.rebalanceTolerancePct ?? DISDEX_V96_RUNTIME.rebalanceTolerancePct)),
-        maxTransactionRetries: Math.max(1, input.maxTransactionRetries ?? 3),
-        closeUnmanagedPositions: input.closeUnmanagedPositions === true,
-        penguTargetGrossCap: input.penguTargetGrossCap,
-        oneTimeSkippedSignalReferenceTs: Number.isFinite(Number(input.oneTimeSkippedSignalReferenceTs))
-            ? Number(input.oneTimeSkippedSignalReferenceTs)
-            : ONE_TIME_ETH_SIGNAL_SKIP_REFERENCE_TS,
-        roundTripFeeBps: Math.max(0, input.roundTripFeeBps ?? DEFAULT_ROUND_TRIP_FEE_BPS),
-        minimumExecutionHeadroomUsd: Math.max(0, input.minimumExecutionHeadroomUsd ?? DEFAULT_MINIMUM_EXECUTION_HEADROOM_USD),
-        maximumDailyLossPct: Math.min(
-            DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct,
-            Math.max(0.1, input.maximumDailyLossPct ?? DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct),
-        ),
-        maximumDailyLossUsd: input.maximumDailyLossUsd && input.maximumDailyLossUsd > 0 ? input.maximumDailyLossUsd : undefined,
-        killSwitchPath: input.killSwitchPath,
-        operatorOverride: input.operatorOverride,
-    };
-}
+      
