@@ -33,13 +33,22 @@ jobs:
           bash -n scripts/ops/root/install-disdex-vps-control
           bash -n scripts/ops/disdex-v96-v52-live.sh
           bash -n scripts/ops/disdex-v96-v52-renew-approvals.sh
+          bash -n scripts/ops/disdex-v96-v52-candidate-preflight.sh
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/root/disdex-vps-control
           grep -q 'require_trading_inactive' scripts/ops/root/disdex-vps-control
-          grep -q 'preflight pass marker missing' scripts/ops/root/disdex-vps-control
+          grep -q 'trading-promote)' scripts/ops/root/disdex-vps-control
+          grep -q 'run_preflight_unit "$sha"' scripts/ops/root/disdex-vps-control
+          ! grep -q '.disdex-preflight-pass' scripts/ops/root/disdex-vps-control
           grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
           grep -q 'DISDEX_V96_RUNTIME_COMMIT_SHA=%i' ops/systemd/disdex-v96-v52-preflight@.service
+          grep -q 'disdex-v96-v52-candidate-preflight.sh' ops/systemd/disdex-v96-v52-preflight@.service
           grep -q 'Conflicts=disdex-v96-v52-live.service' ops/systemd/disdex-v96-v52-approval@.service
+          grep -q 'Environment=DISDEX_V96_MAX_GROSS=1' ops/systemd/disdex-v96-v52-approval@.service
+          grep -q 'ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state' ops/systemd/disdex-v96-v52-approval@.service
           grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_PASS' scripts/ops/disdex-v96-v52-renew-approvals.sh
+          grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_ROLLBACK' scripts/ops/disdex-v96-v52-renew-approvals.sh
+          grep -q 'DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE=CANDIDATE_RELEASE' scripts/ops/disdex-v96-v52-renew-approvals.sh
+          grep -q 'CANDIDATE_RELEASE' scripts/disdex-v96-sync-operator-override-audit.ts
           grep -q 'DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT="$shared_state"' scripts/ops/disdex-v96-v52-live.sh
           grep -q 'DISDEX_V96_STATE_DIR="$shared_state/crypto-v96"' scripts/ops/disdex-v96-v52-live.sh
           grep -q 'strategy:disdex-v96:override:audit:sync' scripts/ops/disdex-v96-v52-live.sh
@@ -50,6 +59,6 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          ! grep -R --line-number -E 'disdex-vps-control (trading-switch|trading-restart|approval-start)' .github/workflows \
+          ! grep -R --line-number -E 'disdex-vps-control (trading-switch|trading-promote|trading-restart|approval-start)' .github/workflows \
             --exclude='disdex-vps-ops-ci.yml'
           echo 'No automatic approval, current switch, or LIVE restart workflow is committed.'
