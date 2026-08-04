@@ -21,6 +21,13 @@ Environment=DISDEX_V96_OPERATOR_OVERRIDE_REASON=Explicit_user_approval_for_PENGU
 Environment=DISDEX_V96_INITIAL_PENGU_GROSS=1.15
 Environment=DISDEX_V96_MAX_GROSS=1
 Environment=DISDEX_V96_MAX_DAILY_LOSS_PCT=5
+Environment=PENGU_DUAL_LS_V1_MODE=LIVE
+Environment=PENGU_DUAL_LS_V1_ENABLED=true
+Environment=PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED=true
+Environment=PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED=true
+Environment=PENGU_DUAL_LS_V1_MAX_GROSS=0.75
+Environment=PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP=1
+Environment=PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT=5
 Environment=DISDEX_V96_CONFIG_MIGRATION_MODE=true
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
@@ -32,7 +39,7 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v96-paper/.r
 Environment=DISDEX_V96_FORWARD_EVIDENCE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-forward.json
 Environment=DISDEX_V96_EXECUTION_PARITY_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-parity.json
 Environment=DISDEX_V96_OPERATOR_OVERRIDE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-operator-override.json
-ExecStart=/usr/bin/env DISDEX_V96_APPROVED_COMMIT_SHA=%i DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-renew-approvals.sh
+ExecStart=/usr/bin/env DISDEX_V96_APPROVED_COMMIT_SHA=%i DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
 TimeoutStartSec=60min
 NoNewPrivileges=true
 PrivateTmp=true
