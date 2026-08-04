@@ -21,7 +21,7 @@ const DATA_FAILURE_PATTERNS = [
     /pyth.*iex/i,
 ];
 
-function isUsRegularEquitySession(now = new Date()): boolean {
+export function isUsRegularEquitySession(now = new Date()): boolean {
     const formatter = new Intl.DateTimeFormat("en-US", {
         timeZone: "America/New_York",
         weekday: "short",
@@ -99,8 +99,18 @@ async function main() {
     let v52Status: V52PreflightStatus;
     let v52Detail: Record<string, unknown> | undefined;
     if (v52.code === 0) {
-        v52Status = "ACTIVE";
         v52Detail = parseLastJson(v52.stdout);
+        if (isUsRegularEquitySession()) {
+            v52Status = "ACTIVE";
+        } else {
+            v52Status = "WAITING_MARKET_CLOSED";
+            v52Detail = {
+                ...v52Detail,
+                marketSession: "CLOSED",
+                reason: "US_EQUITY_MARKET_CLOSED",
+                ordersAllowed: false,
+            };
+        }
     } else {
         const classified = classifyV52PreflightFailure(v52Output);
         if (!classified) throw new Error("V52 preflight failed for a non-data safety reason; fail-closed.");
