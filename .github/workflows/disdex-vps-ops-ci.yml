@@ -30,14 +30,23 @@ jobs:
         run: |
           set -Eeuo pipefail
           bash -n scripts/ops/root/disdex-vps-control
+          bash -n scripts/ops/root/disdex-promotion-transaction-lib.sh
           bash -n scripts/ops/root/install-disdex-vps-control
           bash -n scripts/ops/disdex-v96-v52-live.sh
           bash -n scripts/ops/disdex-v96-v52-renew-approvals.sh
           bash -n scripts/ops/disdex-v96-v52-candidate-preflight.sh
+          bash -n scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
+          bash scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/root/disdex-vps-control
           grep -q 'require_trading_inactive' scripts/ops/root/disdex-vps-control
           grep -q 'trading-promote)' scripts/ops/root/disdex-vps-control
-          grep -q 'run_preflight_unit "$sha"' scripts/ops/root/disdex-vps-control
+          grep -q 'promotion_exit_handler' scripts/ops/root/disdex-vps-control
+          grep -q 'rollback_promotion' scripts/ops/root/disdex-vps-control
+          grep -q 'disdex_txn_snapshot_file "$STOCK_STATE_FILE"' scripts/ops/root/disdex-vps-control
+          grep -q 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS' scripts/ops/root/disdex-vps-control
+          grep -q 'DISDEX_V96_V52_PROMOTION_ROLLBACK_FAILED' scripts/ops/root/disdex-vps-control
+          grep -q 'disdex_txn_validate_backup' scripts/ops/root/disdex-promotion-transaction-lib.sh
+          grep -q 'tamperRejected=true' scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
           ! grep -q '.disdex-preflight-pass' scripts/ops/root/disdex-vps-control
           grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
           grep -q 'DISDEX_V96_RUNTIME_COMMIT_SHA=%i' ops/systemd/disdex-v96-v52-preflight@.service
