@@ -4,6 +4,17 @@ set -Eeuo pipefail
 umask 077
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+TRANSACTION_LIB="/usr/local/libexec/disdex-promotion-transaction-lib.sh"
+if [[ ! -f "$TRANSACTION_LIB" ]]; then
+  TRANSACTION_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/disdex-promotion-transaction-lib.sh"
+fi
+[[ -f "$TRANSACTION_LIB" && ! -L "$TRANSACTION_LIB" ]] || {
+  printf 'promotion transaction library missing\n' >&2
+  exit 2
+}
+# shellcheck source=scripts/ops/root/disdex-promotion-transaction-lib.sh
+source "$TRANSACTION_LIB"
+
 UI_USER="deploy"
 UI_PM2_HOME="/home/deploy/.pm2"
 UI_PROCESS="ai-dex-manager-ui"
@@ -13,12 +24,29 @@ TRADING_RELEASES="${TRADING_ROOT}/releases"
 TRADING_CURRENT="${TRADING_ROOT}/current"
 PREFLIGHT_PREFIX="disdex-v96-v52-preflight"
 APPROVAL_PREFIX="disdex-v96-v52-approval"
+SHARED_ROOT="/home/deploy/ai-dex-manager-v96-paper"
+SHARED_APPROVAL_ROOT="${SHARED_ROOT}/.runtime-approval"
+SHARED_STATE_ROOT="${SHARED_ROOT}/.runtime-state/disdex-v13d-v11eq-v96"
+PARITY_FILE="${SHARED_APPROVAL_ROOT}/disdex-v96-parity.json"
+OVERRIDE_FILE="${SHARED_APPROVAL_ROOT}/disdex-v96-operator-override.json"
+CRYPTO_STATE_FILE="${SHARED_STATE_ROOT}/crypto-v96/runner-live.json"
+STOCK_STATE_FILE="${SHARED_STATE_ROOT}/stock/runner-live.json"
+PROMOTION_ROOT="/home/deploy/disdex-ops/promotion-transactions"
+PROMOTION_LOCK="/home/deploy/disdex-ops/promotion.lock"
 
 RUNUSER="$(command -v runuser)"
 PM2="$(command -v pm2)"
 NODE="$(command -v node)"
 SYSTEMCTL="$(command -v systemctl)"
 JOURNALCTL="$(command -v journalctl)"
+FLOCK="$(command -v flock)"
+
+promotion_transaction_dir=""
+promotion_rollback_armed=false
+promotion_success=false
+promotion_target_sha=""
+promotion_old_sha=""
+promotion_lock_fd=""
 
 require_sha() {
   local value="${1:-}"
@@ -38,18 +66,7 @@ validate_release() {
   local release
   require_sha "$sha"
   release="$(release_dir "$sha")"
-  [[ -d "$release" && ! -L "$release" ]] || {
-    printf 'immutable release directory missing\n' >&2
-    exit 2
-  }
-  [[ -f "$release/.disdex-release-sha" ]] || {
-    printf 'release marker missing\n' >&2
-    exit 2
-  }
-  [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$sha" ]] || {
-    printf 'release marker SHA mismatch\n' >&2
-    exit 2
-  }
+  disdex_txn_validate_release_target "$release" "$TRADING_RELEASES" || exit 2
   printf '%s' "$release"
 }
 
@@ -99,16 +116,7 @@ run_approval_unit() {
 atomic_switch_current() {
   local sha="$1"
   local release="$2"
-  local tmp_link
-  tmp_link="${TRADING_CURRENT}.tmp.$$"
-  rm -f "$tmp_link"
-  ln -s "$release" "$tmp_link"
-  chown -h deploy:deploy "$tmp_link"
-  mv -Tf "$tmp_link" "$TRADING_CURRENT"
-  [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]] || {
-    printf 'atomic current switch verification failed\n' >&2
-    exit 4
-  }
+  disdex_txn_atomic_symlink "$TRADING_CURRENT" "$release" "deploy:deploy"
   printf 'TRADING_CURRENT_SWITCH_PASS\nsha=%s\n' "$sha"
 }
 
@@ -131,6 +139,96 @@ start_trading_service_verified() {
     return 1
   fi
   printf 'DISDEX_V96_V52_LIVE_START_PASS\nstate=%s\nmainPid=%s\n' "$state" "$pid"
+}
+
+acquire_promotion_lock() {
+  install -d -o root -g root -m 0700 "$PROMOTION_ROOT"
+  exec {promotion_lock_fd}>"$PROMOTION_LOCK"
+  if ! "$FLOCK" -n "$promotion_lock_fd"; then
+    printf 'another promotion transaction is already running\n' >&2
+    exit 5
+  fi
+}
+
+begin_promotion_transaction() {
+  local target_sha="$1"
+  local timestamp
+  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  promotion_transaction_dir="${PROMOTION_ROOT}/${timestamp}-${target_sha}-$$"
+  install -d -o root -g root -m 0700 "$promotion_transaction_dir"
+  disdex_txn_snapshot_current "$TRADING_CURRENT" "$TRADING_RELEASES" "$promotion_transaction_dir"
+  disdex_txn_snapshot_file "$PARITY_FILE" "$promotion_transaction_dir" parity.json
+  disdex_txn_snapshot_file "$OVERRIDE_FILE" "$promotion_transaction_dir" operator-override.json
+  disdex_txn_snapshot_file "$CRYPTO_STATE_FILE" "$promotion_transaction_dir" crypto-runner-live.json
+  disdex_txn_snapshot_file "$STOCK_STATE_FILE" "$promotion_transaction_dir" stock-runner-live.json
+  promotion_old_sha="$(tr -d '[:space:]' < "$promotion_transaction_dir/old-current-sha")"
+  promotion_target_sha="$target_sha"
+  printf '%s\n' "$target_sha" > "$promotion_transaction_dir/target-sha"
+  promotion_rollback_armed=true
+}
+
+wait_for_trading_stopped() {
+  local state pid attempt
+  "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+  for attempt in $(seq 1 60); do
+    state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+    pid="$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value 2>/dev/null || printf '0')"
+    if [[ ( "$state" == "inactive" || "$state" == "failed" ) && "$pid" == "0" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+  printf 'rollback could not stop LIVE service safely\n' >&2
+  return 1
+}
+
+validate_promotion_backups() {
+  disdex_txn_validate_current_snapshot "$promotion_transaction_dir" "$TRADING_RELEASES"
+  disdex_txn_validate_backup "$promotion_transaction_dir" parity.json
+  disdex_txn_validate_backup "$promotion_transaction_dir" operator-override.json
+  disdex_txn_validate_backup "$promotion_transaction_dir" crypto-runner-live.json
+  disdex_txn_validate_backup "$promotion_transaction_dir" stock-runner-live.json
+}
+
+rollback_promotion() {
+  printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_BEGIN\n' >&2
+  printf 'targetSha=%s\noldSha=%s\n' "$promotion_target_sha" "$promotion_old_sha" >&2
+  validate_promotion_backups || return 1
+  wait_for_trading_stopped || return 1
+
+  # Restore all approval/state artifacts before moving current back. The
+  # service is confirmed stopped, so no process can write these files.
+  disdex_txn_restore_file "$promotion_transaction_dir" parity.json "$PARITY_FILE" || return 1
+  disdex_txn_restore_file "$promotion_transaction_dir" operator-override.json "$OVERRIDE_FILE" || return 1
+  disdex_txn_restore_file "$promotion_transaction_dir" crypto-runner-live.json "$CRYPTO_STATE_FILE" || return 1
+  disdex_txn_restore_file "$promotion_transaction_dir" stock-runner-live.json "$STOCK_STATE_FILE" || return 1
+  disdex_txn_restore_current "$promotion_transaction_dir" "$TRADING_CURRENT" "$TRADING_RELEASES" "deploy:deploy" || return 1
+  disdex_txn_verify_current "$promotion_transaction_dir" "$TRADING_CURRENT" || return 1
+  require_trading_inactive
+
+  printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS\n' >&2
+  printf 'restoredSha=%s\nservice=inactive\nmainPid=0\nordersSentByRollback=false\n' "$promotion_old_sha" >&2
+}
+
+promotion_exit_handler() {
+  local status=$?
+  trap - EXIT INT TERM HUP
+  set +e
+  if [[ "$promotion_success" == "true" ]]; then
+    rm -rf "$promotion_transaction_dir"
+    exit "$status"
+  fi
+  if [[ "$promotion_rollback_armed" == "true" ]]; then
+    if rollback_promotion; then
+      rm -rf "$promotion_transaction_dir"
+      exit "$status"
+    fi
+    printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_FAILED\n' >&2
+    printf 'transactionDir=%s\nserviceMustRemainStopped=true\n' "$promotion_transaction_dir" >&2
+    exit 70
+  fi
+  [[ -z "$promotion_transaction_dir" ]] || rm -rf "$promotion_transaction_dir"
+  exit "$status"
 }
 
 pm2_field() {
@@ -184,14 +282,24 @@ case "$action" in
     ;;
   trading-promote)
     sha="${2:-}"
+    require_sha "$sha"
+    acquire_promotion_lock
     require_trading_inactive
     release="$(validate_release "$sha")"
+    begin_promotion_transaction "$sha"
+    trap promotion_exit_handler EXIT
+    trap 'exit 130' INT TERM HUP
+
     run_approval_unit "$sha"
     run_preflight_unit "$sha"
     atomic_switch_current "$sha" "$release"
     run_preflight_unit "$sha"
     start_trading_service_verified
-    printf 'DISDEX_V96_V52_PROMOTION_PASS\nsha=%s\nordersSentByPromotion=false\n' "$sha"
+    [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]]
+
+    promotion_success=true
+    printf 'DISDEX_V96_V52_PROMOTION_PASS\n'
+    printf 'sha=%s\noldSha=%s\nordersSentByPromotion=false\n' "$sha" "$promotion_old_sha"
     ;;
   daemon-reload) exec "$SYSTEMCTL" daemon-reload ;;
   preflight-start)
