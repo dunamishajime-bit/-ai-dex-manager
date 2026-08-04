@@ -34,12 +34,12 @@ STOCK_STATE_FILE="${SHARED_STATE_ROOT}/stock/runner-live.json"
 PROMOTION_ROOT="/home/deploy/disdex-ops/promotion-transactions"
 PROMOTION_LOCK="/home/deploy/disdex-ops/promotion.lock"
 
-RUNUSER="$(command -v runuser)"
-PM2="$(command -v pm2)"
-NODE="$(command -v node)"
-SYSTEMCTL="$(command -v systemctl)"
-JOURNALCTL="$(command -v journalctl)"
-FLOCK="$(command -v flock)"
+RUNUSER="$(command -v runuser || true)"
+PM2="$(command -v pm2 || true)"
+NODE="$(command -v node || true)"
+SYSTEMCTL="$(command -v systemctl || true)"
+JOURNALCTL="$(command -v journalctl || true)"
+FLOCK="$(command -v flock || true)"
 
 promotion_transaction_dir=""
 promotion_rollback_armed=false
@@ -47,6 +47,9 @@ promotion_success=false
 promotion_target_sha=""
 promotion_old_sha=""
 promotion_lock_fd=""
+promotion_selftest_mode=false
+promotion_selftest_scenario=""
+promotion_selftest_root=""
 
 require_sha() {
   local value="${1:-}"
@@ -116,12 +119,15 @@ run_approval_unit() {
 atomic_switch_current() {
   local sha="$1"
   local release="$2"
-  disdex_txn_atomic_symlink "$TRADING_CURRENT" "$release" "deploy:deploy"
+  local owner_group="deploy:deploy"
+  if [[ "$promotion_selftest_mode" == "true" ]]; then owner_group=""; fi
+  disdex_txn_atomic_symlink "$TRADING_CURRENT" "$release" "$owner_group"
   printf 'TRADING_CURRENT_SWITCH_PASS\nsha=%s\n' "$sha"
 }
 
 start_trading_service_verified() {
-  local state pid
+  local state pid restart_before restart_after attempt
+  restart_before="$($SYSTEMCTL show "$TRADING_SERVICE" --property NRestarts --value 2>/dev/null || printf '0')"
   "$SYSTEMCTL" reset-failed "$TRADING_SERVICE" >/dev/null 2>&1 || true
   if ! "$SYSTEMCTL" start "$TRADING_SERVICE"; then
     "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
@@ -138,7 +144,27 @@ start_trading_service_verified() {
     "$JOURNALCTL" -u "$TRADING_SERVICE" --no-pager -n 300 >&2 || true
     return 1
   fi
-  printf 'DISDEX_V96_V52_LIVE_START_PASS\nstate=%s\nmainPid=%s\n' "$state" "$pid"
+  for attempt in $(seq 1 10); do
+    sleep 1
+    state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+    [[ "$state" == "active" ]] || {
+      "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+      printf 'LIVE service failed startup stability gate\n' >&2
+      return 1
+    }
+    [[ "$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value)" == "$pid" ]] || {
+      "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+      printf 'LIVE service MainPID changed during startup stability gate\n' >&2
+      return 1
+    }
+  done
+  restart_after="$($SYSTEMCTL show "$TRADING_SERVICE" --property NRestarts --value 2>/dev/null || printf '0')"
+  [[ "$restart_after" == "$restart_before" ]] || {
+    "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+    printf 'LIVE service restarted during startup stability gate\n' >&2
+    return 1
+  }
+  printf 'DISDEX_V96_V52_LIVE_START_PASS\nstate=%s\nmainPid=%s\nrestartCount=%s\n' "$state" "$pid" "$restart_after"
 }
 
 acquire_promotion_lock() {
@@ -191,21 +217,19 @@ validate_promotion_backups() {
 }
 
 rollback_promotion() {
+  local owner_group="deploy:deploy"
+  if [[ "$promotion_selftest_mode" == "true" ]]; then owner_group=""; fi
   printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_BEGIN\n' >&2
   printf 'targetSha=%s\noldSha=%s\n' "$promotion_target_sha" "$promotion_old_sha" >&2
   validate_promotion_backups || return 1
   wait_for_trading_stopped || return 1
-
-  # Restore all approval/state artifacts before moving current back. The
-  # service is confirmed stopped, so no process can write these files.
   disdex_txn_restore_file "$promotion_transaction_dir" parity.json "$PARITY_FILE" || return 1
   disdex_txn_restore_file "$promotion_transaction_dir" operator-override.json "$OVERRIDE_FILE" || return 1
   disdex_txn_restore_file "$promotion_transaction_dir" crypto-runner-live.json "$CRYPTO_STATE_FILE" || return 1
   disdex_txn_restore_file "$promotion_transaction_dir" stock-runner-live.json "$STOCK_STATE_FILE" || return 1
-  disdex_txn_restore_current "$promotion_transaction_dir" "$TRADING_CURRENT" "$TRADING_RELEASES" "deploy:deploy" || return 1
+  disdex_txn_restore_current "$promotion_transaction_dir" "$TRADING_CURRENT" "$TRADING_RELEASES" "$owner_group" || return 1
   disdex_txn_verify_current "$promotion_transaction_dir" "$TRADING_CURRENT" || return 1
   require_trading_inactive
-
   printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS\n' >&2
   printf 'restoredSha=%s\nservice=inactive\nmainPid=0\nordersSentByRollback=false\n' "$promotion_old_sha" >&2
 }
@@ -229,6 +253,45 @@ promotion_exit_handler() {
   fi
   [[ -z "$promotion_transaction_dir" ]] || rm -rf "$promotion_transaction_dir"
   exit "$status"
+}
+
+execute_promotion() {
+  local sha="$1"
+  local release
+  require_sha "$sha"
+  acquire_promotion_lock
+  require_trading_inactive
+  release="$(validate_release "$sha")"
+  begin_promotion_transaction "$sha"
+  trap promotion_exit_handler EXIT
+  trap 'exit 130' INT TERM HUP
+
+  run_approval_unit "$sha"
+  run_preflight_unit "$sha"
+  atomic_switch_current "$sha" "$release"
+  if [[ "$promotion_selftest_mode" == "true" && "$promotion_selftest_scenario" == "snapshot-tamper" ]]; then
+    printf 'tamper\n' >> "$promotion_transaction_dir/parity.json"
+    return 61
+  fi
+  run_preflight_unit "$sha"
+  start_trading_service_verified
+  [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]]
+
+  promotion_success=true
+  printf 'DISDEX_V96_V52_PROMOTION_PASS\n'
+  printf 'sha=%s\noldSha=%s\nordersSentByPromotion=false\n' "$sha" "$promotion_old_sha"
+}
+
+promotion_selftest_library() {
+  local path="/usr/local/libexec/disdex-promotion-selftest-lib.sh"
+  if [[ ! -f "$path" ]]; then
+    path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/disdex-promotion-selftest-lib.sh"
+  fi
+  [[ -f "$path" && ! -L "$path" ]] || {
+    printf 'promotion selftest library missing\n' >&2
+    return 1
+  }
+  printf '%s' "$path"
 }
 
 pm2_field() {
@@ -281,25 +344,17 @@ case "$action" in
     atomic_switch_current "$sha" "$release"
     ;;
   trading-promote)
-    sha="${2:-}"
-    require_sha "$sha"
-    acquire_promotion_lock
-    require_trading_inactive
-    release="$(validate_release "$sha")"
-    begin_promotion_transaction "$sha"
-    trap promotion_exit_handler EXIT
-    trap 'exit 130' INT TERM HUP
-
-    run_approval_unit "$sha"
-    run_preflight_unit "$sha"
-    atomic_switch_current "$sha" "$release"
-    run_preflight_unit "$sha"
-    start_trading_service_verified
-    [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]]
-
-    promotion_success=true
-    printf 'DISDEX_V96_V52_PROMOTION_PASS\n'
-    printf 'sha=%s\noldSha=%s\nordersSentByPromotion=false\n' "$sha" "$promotion_old_sha"
+    execute_promotion "${2:-}"
+    ;;
+  trading-promote-selftest)
+    # shellcheck source=scripts/ops/root/disdex-promotion-selftest-lib.sh
+    source "$(promotion_selftest_library)"
+    scenario="${2:-all}"
+    case "$scenario" in
+      all) run_all_promotion_selftests ;;
+      before-switch|post-switch-preflight|service-start|snapshot-tamper) run_promotion_selftest_scenario "$scenario" ;;
+      *) printf 'unsupported promotion selftest scenario\n' >&2; exit 2 ;;
+    esac
     ;;
   daemon-reload) exec "$SYSTEMCTL" daemon-reload ;;
   preflight-start)
