@@ -44,7 +44,7 @@ export DISDEX_V13D_V11EQ_V96_STATE_DIR="$shared_state"
 export DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE="$shared_state/kill-switch.json"
 export DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR="$shared_state/margin-risk"
 export DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE="$shared_state/margin-risk/guard-live.json"
-export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT="scripts/disdex_v96_v52_margin_guard.py"
+export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT="scripts/disdex_v96_v52_margin_guard_runtime.py"
 export DISDEX_V52_ASTER_ONLY_STATE_DIR="$shared_state/stock"
 export DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE="$shared_state/kill-switch.json"
 export DISDEX_V96_STATE_DIR="$shared_state/crypto-v96"
@@ -79,13 +79,14 @@ stop_children() {
 }
 trap 'stop_children; exit 0' INT TERM HUP
 
-/usr/bin/python3 scripts/disdex_v96_v52_margin_guard.py --mode live --daemon &
+/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon &
 guard_pid=$!
 /usr/bin/npm run strategy:disdex-v52:daemon &
 supervisor_pid=$!
 
 printf 'DISDEX_V96_V52_LIVE_PROCESS_GROUP_START\n'
 printf 'runtimeCommitSha=%s\nmarginGuardPid=%s\nsupervisorPid=%s\n' "$sha" "$guard_pid" "$supervisor_pid"
+printf 'marginGuardRuntime=serialized\n'
 printf 'healthyMarginPollIntervalMs=300000\nwarningMarginPollIntervalMs=60000\n'
 printf 'ordersSentByLauncher=false\n'
 
@@ -101,7 +102,7 @@ fi
 
 reason="LIVE child exited unexpectedly"
 if ! kill -0 "$guard_pid" >/dev/null 2>&1; then
-  reason="Adaptive Margin Guard exited unexpectedly with status $child_status"
+  reason="Serialized adaptive Margin Guard exited unexpectedly with status $child_status"
 elif ! kill -0 "$supervisor_pid" >/dev/null 2>&1; then
   reason="V96/V52 trading supervisor exited unexpectedly with status $child_status"
 fi
