@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { AsterV3Client } from "../lib/aster-v3-client";
+import { AsterV3Client, type AsterPositionRiskRow } from "../lib/aster-v3-client";
 import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import {
     assertDisDexV96LiveGates,
@@ -20,6 +20,12 @@ import {
 } from "../lib/disdex-v96-combined-state-migration";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
+type ExtendedPositionRiskRow = AsterPositionRiskRow & {
+    marginType?: string;
+    isolated?: boolean;
+    initialMargin?: string;
+    positionInitialMargin?: string;
+};
 
 function boolEnv(name: string, fallback = false) {
     const raw = process.env[name];
@@ -30,6 +36,41 @@ function boolEnv(name: string, fallback = false) {
 function numberEnv(name: string, fallback: number) {
     const value = Number(process.env[name]);
     return Number.isFinite(value) ? value : fallback;
+}
+
+function normalizedMarginType(row: ExtendedPositionRiskRow) {
+    const raw = String(row.marginType || "").trim().toLowerCase();
+    if (raw === "cross" || raw === "crossed") return "cross";
+    if (raw === "isolated" || raw === "isolate") return "isolated";
+    if (row.isolated === false) return "cross";
+    if (row.isolated === true) return "isolated";
+    return "unknown";
+}
+
+function assertManagedAccountConfiguration(positionRows: AsterPositionRiskRow[]) {
+    const requiredLeverage = numberEnv(
+        "DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE",
+        DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage,
+    );
+    if (requiredLeverage !== DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage) {
+        throw new Error(`V96 required leverage must be exactly ${DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage}x.`);
+    }
+    const bySymbol = new Map(positionRows.map((row) => [String(row.symbol).toUpperCase(), row as ExtendedPositionRiskRow]));
+    const configuration: Record<string, { leverage: number; marginType: string }> = {};
+    for (const symbol of MANAGED_SYMBOLS) {
+        const row = bySymbol.get(symbol);
+        if (!row) throw new Error(`V96 managed symbol position-risk row missing: ${symbol}`);
+        const leverage = Number(row.leverage);
+        const marginType = normalizedMarginType(row);
+        if (leverage !== requiredLeverage) {
+            throw new Error(`V96 managed symbol leverage mismatch for ${symbol}: expected ${requiredLeverage}, got ${leverage}.`);
+        }
+        if (marginType !== DISDEX_V96_LIVE_PROMOTION.requiredMarginType) {
+            throw new Error(`V96 managed symbol margin type mismatch for ${symbol}: expected cross, got ${marginType}.`);
+        }
+        configuration[symbol] = { leverage, marginType };
+    }
+    return configuration;
 }
 
 async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
@@ -49,6 +90,9 @@ async function main() {
     const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
     const requestedDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
     const requestedPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
+    if (Math.abs(requestedMaxGross - DISDEX_V96_RUNTIME.maximumGross) > 1e-12) {
+        throw new Error(`V96 Crypto sleeve Gross must be ${DISDEX_V96_RUNTIME.maximumGross}, got ${requestedMaxGross}.`);
+    }
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
         optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
         optionalJson<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE),
@@ -76,7 +120,7 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V96-LIVE-Preflight/1.3",
+        userAgent: "DisDex-V96-LIVE-Preflight/1.4",
     });
     if (!client.hasTradingCredentials()) {
         throw new Error("V96 preflight requires ASTER_USER_ADDRESS and ASTER_API_PRIVATE_KEY.");
@@ -90,12 +134,13 @@ async function main() {
     ]);
     void ping;
     if (!Array.isArray(positionRows) || positionRows.length === 0) {
-        throw new Error("Aster positionRisk returned no rows; One-way Mode could not be verified.");
+        throw new Error("Aster positionRisk returned no rows; One-way Mode and leverage could not be verified.");
     }
     const nonBothRows = positionRows.filter((row) => String(row.positionSide || "").toUpperCase() !== "BOTH");
     if (nonBothRows.length) {
         throw new Error(`Aster account is not in One-way Mode; ${nonBothRows.length} position row(s) are not BOTH.`);
     }
+    const accountConfiguration = assertManagedAccountConfiguration(positionRows);
     const managedPositions = positionRows.filter((row) =>
         MANAGED_SYMBOLS.includes(String(row.symbol).toUpperCase() as typeof MANAGED_SYMBOLS[number])
         && Math.abs(Number(row.positionAmt) || 0) > 1e-12,
@@ -161,8 +206,12 @@ async function main() {
         operatorOverrideApproved: gate.operatorOverrideApproved,
         operatorOverrideAuditVerified,
         initialPenguGrossCap: gate.operatorOverride?.initialPenguGrossCap,
+        maximumPortfolioGross: gate.operatorOverride?.maximumPortfolioGross,
         maximumDailyLossPct: gate.operatorOverride?.maximumDailyLossPct,
         maximumDailyLossUsd: gate.operatorOverride?.maximumDailyLossUsd,
+        accountConfiguration,
+        requiredInitialLeverage: DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage,
+        requiredMarginType: DISDEX_V96_LIVE_PROMOTION.requiredMarginType,
         oneWayMode: true,
         managedPositionCount: managedPositions.length,
         migratedStateVerified,
