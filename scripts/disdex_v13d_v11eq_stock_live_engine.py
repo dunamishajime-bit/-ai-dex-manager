@@ -1303,7 +1303,7 @@ class StockEngine:
         if local.weekday() >= 5:
             return
         sec = ny_seconds(local)
-        need_rows = self.state.get("position") is not None or clock("09:59:55") <= sec <= clock("15:30:30")
+        need_rows = bool(self.state.get("position")) or clock("09:59:55") <= sec <= clock("15:30:30")
         if not need_rows:
             return
         rows = self.books_and_refs()

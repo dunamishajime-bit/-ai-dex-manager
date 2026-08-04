@@ -73,10 +73,16 @@ export function allocateDisDexV96ReservedPengu(input: {
         };
     }
 
-    const reservedPenguGross = minimumActivePenguClip * penguTargetGross;
-    if (reservedPenguGross > totalGrossCap + 1e-9) {
+    const minimumPenguGross = minimumActivePenguClip * penguTargetGross;
+    if (minimumPenguGross > totalGrossCap + 1e-9) {
         throw new Error("V96 minimum PENGU reservation exceeds the total Gross cap.");
     }
+    // When the portfolio cap can hold the full PENGU target, reserve the full
+    // target first and scale Core into the residual. Under a smaller cap, keep
+    // the legacy minimum clip so fail-closed combined configurations still work.
+    const reservedPenguGross = totalGrossCap + 1e-9 >= penguTargetGross
+        ? penguTargetGross
+        : minimumPenguGross;
     const coreCapacity = Math.max(0, totalGrossCap - reservedPenguGross);
     const coreScale = rawCoreGross > 0 ? Math.min(1, coreCapacity / rawCoreGross) : 1;
     const scaledCoreWeights = scaleWeights(cleanCore, coreScale);
