@@ -19,6 +19,7 @@ on:
       - 'scripts/disdex-v96-v52-readonly-preflight.ts'
       - 'scripts/disdex_v96_v52_margin_risk_policy.py'
       - 'scripts/disdex_v96_v52_margin_guard.py'
+      - 'scripts/disdex_v96_v52_margin_guard_runtime.py'
       - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
       - 'scripts/disdex_v52_margin_aware_live_engine.py'
       - 'requirements-stock-aster-only.txt'
@@ -66,6 +67,7 @@ jobs:
           npm run strategy:disdex-v96-v52:preflight:readonly:selftest
           python3 scripts/disdex_v96_v52_margin_risk_policy.py
           python3 scripts/disdex_v96_v52_margin_guard.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test
           python3 scripts/disdex_v96_v52_margin_guard_selftest.py
           python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
           python -c "import websocket; print('V52 reference dependencies: PASS')"
@@ -91,8 +93,10 @@ jobs:
           const capacity = fs.readFileSync('lib/disdex-v96-execution-capacity.ts', 'utf8');
           const executor = fs.readFileSync('lib/direct-trade-executor.ts', 'utf8');
           const marginPolicy = fs.readFileSync('scripts/disdex_v96_v52_margin_risk_policy.py', 'utf8');
-          const marginGuard = fs.readFileSync('scripts/disdex_v96_v52_margin_guard.py', 'utf8');
+          const marginRuntime = fs.readFileSync('scripts/disdex_v96_v52_margin_guard_runtime.py', 'utf8');
           const v52 = fs.readFileSync('scripts/disdex_v52_margin_aware_live_engine.py', 'utf8');
+          const livePolicy = fs.readFileSync('scripts/ops/disdex-v96-v52-live-policy.sh', 'utf8');
+          const liveLauncher = fs.readFileSync('scripts/ops/disdex-v96-v52-live.sh', 'utf8');
           const liveUnit = fs.readFileSync('ops/systemd/disdex-v96-v52-live.service', 'utf8');
           const approvalUnit = fs.readFileSync('ops/systemd/disdex-v96-v52-approval@.service', 'utf8');
 
@@ -116,9 +120,12 @@ jobs:
           if (!marginPolicy.includes('HEALTHY_POLL_INTERVAL_MS = 5 * 60_000')) throw new Error('healthy 5-minute polling missing');
           if (!marginPolicy.includes('WARNING_POLL_INTERVAL_MS = 60_000')) throw new Error('warning 1-minute polling missing');
           if (!marginPolicy.includes('REDUCE_MARGIN_RATIO_PCT = 65.0')) throw new Error('pre-liquidation stop-loss threshold missing');
-          if (!marginGuard.includes('reduceOnly": "true"')) throw new Error('emergency reduce-only orders missing');
-          if (!marginGuard.includes('remainingManagedPositions')) throw new Error('emergency position reconciliation missing');
+          if (!marginRuntime.includes('reduceOnly": "true"')) throw new Error('serialized emergency reduce-only orders missing');
+          if (!marginRuntime.includes('emergency-flatten.lock')) throw new Error('emergency action lock missing');
+          if (!marginRuntime.includes('CONCURRENT_FLATTEN_ALREADY_COMPLETED')) throw new Error('concurrent flatten reconciliation missing');
           if (!v52.includes('V52 adaptive margin-aware concurrent Stock runner self-test: PASS')) throw new Error('adaptive V52 runner missing');
+          if (!livePolicy.includes('DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py')) throw new Error('fixed serialized Guard path missing');
+          if (!liveLauncher.includes('scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon')) throw new Error('serialized Guard launcher missing');
           if (!liveUnit.includes('DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true')) throw new Error('LIVE unit Margin Guard missing');
           if (!approvalUnit.includes('DISDEX_V96_MAX_GROSS=1.5')) throw new Error('approval unit V96 Gross 1.5 missing');
           NODE
