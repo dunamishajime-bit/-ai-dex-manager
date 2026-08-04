@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { AsterV3Client } from "../lib/aster-v3-client";
+import { AsterV3Client, type AsterPositionRiskRow } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { DisDexV46AsterMarketDataProvider } from "../lib/disdex-v46-market-data-provider";
 import { FileLiveRunnerLock } from "../lib/live-runner-state";
@@ -16,6 +16,16 @@ import {
 import type { DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
 import { DisDexV96PortfolioRunner, buildDefaultDisDexV96RunnerConfig } from "../lib/disdex-v96-portfolio-runner";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
+
+const ALL_MANAGED_ASTER_SYMBOLS = [
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT",
+    "AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT",
+] as const;
+
+type ExtendedPositionRiskRow = AsterPositionRiskRow & {
+    marginType?: string;
+    isolated?: boolean;
+};
 
 function boolEnv(name: string, fallback = false) {
     const raw = process.env[name];
@@ -35,6 +45,38 @@ function optionalNumberEnv(name: string) {
 
 function mode(): "paper" | "live" {
     return String(process.env.DISDEX_V96_RUNNER_MODE || "paper").toLowerCase() === "live" ? "live" : "paper";
+}
+
+function normalizedMarginType(row: ExtendedPositionRiskRow) {
+    const raw = String(row.marginType || "").trim().toLowerCase();
+    if (raw === "cross" || raw === "crossed") return "cross";
+    if (raw === "isolated" || raw === "isolate") return "isolated";
+    if (row.isolated === false) return "cross";
+    if (row.isolated === true) return "isolated";
+    return "unknown";
+}
+
+function verifyManagedAccountConfiguration(positionRows: AsterPositionRiskRow[]) {
+    const requiredLeverage = numberEnv(
+        "DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE",
+        DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage,
+    );
+    if (requiredLeverage !== DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage) {
+        throw new Error(`Managed Aster leverage policy must be exactly ${DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage}x.`);
+    }
+    const bySymbol = new Map(positionRows.map((row) => [String(row.symbol).toUpperCase(), row as ExtendedPositionRiskRow]));
+    for (const symbol of ALL_MANAGED_ASTER_SYMBOLS) {
+        const row = bySymbol.get(symbol);
+        if (!row) throw new Error(`Managed Aster position-risk row missing during tick: ${symbol}.`);
+        const leverage = Number(row.leverage);
+        const marginType = normalizedMarginType(row);
+        if (leverage !== requiredLeverage) {
+            throw new Error(`Managed Aster leverage changed for ${symbol}: expected ${requiredLeverage}, got ${leverage}.`);
+        }
+        if (marginType !== DISDEX_V96_LIVE_PROMOTION.requiredMarginType) {
+            throw new Error(`Managed Aster margin type changed for ${symbol}: expected cross, got ${marginType}.`);
+        }
+    }
 }
 
 async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
@@ -57,6 +99,9 @@ async function main() {
     const requestedPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
     if (runnerMode === "live" && !killSwitchPath) {
         throw new Error("V96 live mode requires DISDEX_V96_KILL_SWITCH_FILE.");
+    }
+    if (runnerMode === "live" && Math.abs(requestedMaxGross - DISDEX_V96_RUNTIME.maximumGross) > 1e-12) {
+        throw new Error(`V96 Crypto sleeve Gross must be ${DISDEX_V96_RUNTIME.maximumGross}, got ${requestedMaxGross}.`);
     }
     const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
@@ -86,11 +131,13 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V96-Reserved-PENGU/2.0",
+        userAgent: "DisDex-V96-Reserved-PENGU/3.0",
     });
     if (runnerMode === "live" && !client.hasTradingCredentials()) {
         throw new Error("V96 live mode requires ASTER_USER_ADDRESS and ASTER_API_PRIVATE_KEY.");
     }
+    if (runnerMode === "live") verifyManagedAccountConfiguration(await client.getPositions());
+
     const aster = new AsterDirectTradeExecutor(client, {
         exchangeInfoTtlMs: numberEnv("ASTER_EXCHANGE_INFO_TTL_MS", 15 * 60_000),
         reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
@@ -114,11 +161,20 @@ async function main() {
     });
     const liveGateCheck = runnerMode === "live"
         ? async () => {
-            const [freshForwardEvidence, freshExecutionParity, freshOperatorOverride] = await Promise.all([
+            const [freshForwardEvidence, freshExecutionParity, freshOperatorOverride, freshPositionRows] = await Promise.all([
                 optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
                 optionalJson<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE),
                 optionalJson<DisDexV96OperatorOverrideApproval>(process.env.DISDEX_V96_OPERATOR_OVERRIDE_FILE),
+                client.getPositions(),
             ]);
+            try {
+                verifyManagedAccountConfiguration(freshPositionRows);
+            } catch (error) {
+                return {
+                    allowed: false,
+                    message: `V96 LIVE leverage/margin gate failed during tick: ${error instanceof Error ? error.message : String(error)}`,
+                };
+            }
             const freshGate = evaluateDisDexV96LiveGates({
                 ...liveGateInput,
                 forwardEvidence: freshForwardEvidence,
@@ -173,7 +229,12 @@ async function main() {
         runtimeCommitSha,
         runnerMode,
         executor: executor.constructor.name,
-        maximumGross: config.maxGross,
+        v96CryptoSleeveGross: config.maxGross,
+        combinedPortfolioGross: numberEnv("DISDEX_V52_PORTFOLIO_GROSS_CAP", config.maxGross),
+        requiredInitialLeverage: numberEnv("DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE", DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage),
+        requiredMarginType: DISDEX_V96_LIVE_PROMOTION.requiredMarginType,
+        maximumInitialMarginFraction: numberEnv("DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION", 0.70),
+        minimumAvailableBalanceFractionAfterOrder: numberEnv("DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION", 0.20),
         cashReservePct: config.cashReservePct,
         roundTripFeeBps: config.roundTripFeeBps,
         minimumExecutionHeadroomUsd: config.minimumExecutionHeadroomUsd,
