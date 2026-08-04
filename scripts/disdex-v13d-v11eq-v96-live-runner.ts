@@ -17,6 +17,7 @@ const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as co
 
 const READ_ONLY_PREFLIGHT_SCRIPT = "scripts/disdex-v96-v52-readonly-preflight.ts" as const;
 const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-strategy-preflight.ts" as const;
+const MARGIN_AWARE_V52_ENGINE = "scripts/disdex_v52_margin_aware_live_engine.py" as const;
 
 type RunnerMode = "paper" | "live";
 type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v1" | "stock-v52-aster-only"; process: ChildProcess };
@@ -59,6 +60,13 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap),
         DISDEX_V52_V11_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v11MaximumGross),
         DISDEX_V52_V50_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v50MaximumGross),
+        DISDEX_V52_RESERVED_FIRST_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross),
+        DISDEX_V52_MINIMUM_FIRST_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumFirstStockGross),
+        DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumSecondStockGross),
+        DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumConcurrentStockPositions),
+        DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoInitialLeverage),
+        DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumInitialMarginFraction),
+        DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumAvailableBalanceFractionAfterOrder),
         DISDEX_V96_RUNNER_MODE: runnerMode,
         DISDEX_V96_STATE_DIR: paths.cryptoStateRoot,
         DISDEX_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
@@ -75,7 +83,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         PENGU_DUAL_LS_V1_LOCK_PATH: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.lock`),
         PENGU_DUAL_LS_V1_KILL_SWITCH_FILE: paths.killSwitchPath,
         PENGU_DUAL_LS_V1_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
-        PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap),
+        PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
         PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT: "5",
     } as NodeJS.ProcessEnv;
 }
@@ -150,7 +158,7 @@ function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean, v52Prefli
     const pengu = spawn(tsx, ["scripts/disdex-pengu-dual-ls-v1-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
     const children: ManagedChild[] = [{ name: "crypto-v96", process: crypto }, { name: "pengu-dual-ls-v1", process: pengu }];
     if (shouldStartV52Worker(v52PreflightStatus)) {
-        const stock = spawn(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+        const stock = spawn(python, [MARGIN_AWARE_V52_ENGINE, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
         children.push({ name: "stock-v52-aster-only", process: stock });
     }
     return children;
@@ -260,6 +268,12 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
         stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
         totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
+        reservedFirstStockGross: DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross,
+        minimumSecondStockGross: DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumSecondStockGross,
+        requiredInitialLeverage: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoInitialLeverage,
+        maximumInitialMarginFraction: DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumInitialMarginFraction,
+        minimumAvailableBalanceFractionAfterOrder: DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumAvailableBalanceFractionAfterOrder,
+        v52Engine: MARGIN_AWARE_V52_ENGINE,
         v52PreflightStatus,
         v52WorkerStarted: shouldStartV52Worker(v52PreflightStatus),
         killSwitchPath: paths.killSwitchPath,
@@ -289,18 +303,24 @@ function selfTest() {
     process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = "paper";
     process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = ".runtime-state/selftest-v96-v52";
     const env = buildCombinedChildEnvironment("paper");
-    assert.equal(env.DISDEX_V96_MAX_GROSS, "2.5");
-    assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "2.5");
+    assert.equal(env.DISDEX_V96_MAX_GROSS, "1.5");
+    assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "1.5");
     assert.equal(env.DISDEX_V52_STOCK_GROSS_CAP, "1.5");
     assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "2.5");
     assert.equal(env.DISDEX_V52_V11_GROSS_CAP, "1");
     assert.equal(env.DISDEX_V52_V50_GROSS_CAP, "1");
+    assert.equal(env.DISDEX_V52_RESERVED_FIRST_STOCK_GROSS, "1");
+    assert.equal(env.DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS, "0.25");
+    assert.equal(env.DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS, "2");
+    assert.equal(env.DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE, "5");
+    assert.equal(env.DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION, "0.7");
+    assert.equal(env.DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION, "0.2");
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
     assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
     assert.equal(env.PENGU_LEGACY_CORE_ENABLED, "false");
     assert.equal(env.PENGU_DUAL_LS_V1_ENABLED, "true");
     assert.equal(env.PENGU_DUAL_LS_V1_MODE, "PAPER");
-    assert.equal(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, "2.5");
+    assert.equal(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, "1.5");
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
     assert.equal(shouldStartV52Worker("ACTIVE"), true);
@@ -310,11 +330,12 @@ function selfTest() {
     assert.equal(shouldHoldFailClosed("live", false), false);
     assert.equal(shouldHoldFailClosed("paper", true), false);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
+    assert.equal(MARGIN_AWARE_V52_ENGINE, DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine);
     if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
     else process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = previousMode;
     if (previousState === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR;
     else process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = previousState;
-    console.log("V96 + V52 supervisor self-test: PASS");
+    console.log("V96 + V52 margin-aware supervisor self-test: PASS");
 }
 
 async function main() {
