@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
 import { resolvePenguDualLsV1Runtime } from "../config/penguDualLsV1Runtime";
+import { DISDEX_V13D_V11EQ_V96_ALLOCATION } from "../config/disdexStockRouterV13DV11EqRuntime";
 
 export type V52PreflightStatus =
     | "ACTIVE"
@@ -81,12 +82,16 @@ function assertPenguPreflight() {
     if (runtime.maximumGross <= 0 || runtime.maximumGross > runtime.portfolioGrossCap) {
         throw new Error("PENGU preflight gross cap is invalid.");
     }
+    if (Math.abs(runtime.portfolioGrossCap - DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap) > 1e-12) {
+        throw new Error("PENGU preflight Crypto sleeve Gross does not match the combined allocation.");
+    }
     return {
         status: "PASS",
         strategyId: runtime.strategyId,
         maximumGross: runtime.maximumGross,
         longGross: runtime.longGross,
         shortGross: runtime.shortGross,
+        portfolioGrossCap: runtime.portfolioGrossCap,
     } as const;
 }
 
@@ -94,7 +99,11 @@ async function main() {
     const env = { ...process.env };
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-    const v52 = await spawnCaptured(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", "live", "--preflight-readonly"], env);
+    const v52 = await spawnCaptured(
+        python,
+        ["scripts/disdex_v52_margin_aware_live_engine.py", "--mode", "live", "--preflight-readonly"],
+        env,
+    );
     const v52Output = `${v52.stdout}\n${v52.stderr}`;
     let v52Status: V52PreflightStatus;
     let v52Detail: Record<string, unknown> | undefined;
@@ -113,21 +122,28 @@ async function main() {
         }
     } else {
         const classified = classifyV52PreflightFailure(v52Output);
-        if (!classified) throw new Error("V52 preflight failed for a non-data safety reason; fail-closed.");
+        if (!classified) throw new Error(`V52 preflight failed for a non-data safety reason; fail-closed. ${v52Output.trim()}`);
         v52Status = classified;
     }
 
     const crypto = await spawnCaptured(tsx, ["scripts/disdex-v96-live-preflight.ts"], env);
-    if (crypto.code !== 0) throw new Error("V96 crypto preflight failed; fail-closed.");
+    if (crypto.code !== 0) throw new Error(`V96 crypto preflight failed; fail-closed. ${crypto.stderr.trim()}`);
     const cryptoDetail = parseLastJson(crypto.stdout);
     const pengu = assertPenguPreflight();
     console.log(JSON.stringify({
         status: "DISDEX_V96_V52_STRATEGY_PREFLIGHT_PASS",
-        portfolioSafety: "PASS_SHARED_CRYPTO_PREFLIGHT",
+        portfolioSafety: "PASS_SHARED_CRYPTO_PREFLIGHT_AND_MARGIN_AWARE_V52",
         cryptoV96Preflight: "PASS",
         cryptoV96Detail: cryptoDetail,
         penguDualPreflight: pengu,
-        v52Preflight: { status: v52Status, mode: "READ_ONLY", ordersAllowed: shouldStartV52Worker(v52Status), detail: v52Detail, dataFailureDoesNotBypassSafety: true },
+        combinedAllocation: DISDEX_V13D_V11EQ_V96_ALLOCATION,
+        v52Preflight: {
+            status: v52Status,
+            mode: "READ_ONLY",
+            ordersAllowed: shouldStartV52Worker(v52Status),
+            detail: v52Detail,
+            dataFailureDoesNotBypassSafety: true,
+        },
         ordersSent: false,
         cancelSent: false,
         positionChangesSent: false,
@@ -136,7 +152,13 @@ async function main() {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
     main().catch((error) => {
-        console.error(JSON.stringify({ status: "DISDEX_V96_V52_STRATEGY_PREFLIGHT_FAIL_CLOSED", message: error instanceof Error ? error.message : String(error), ordersSent: false, cancelSent: false, positionChangesSent: false }));
+        console.error(JSON.stringify({
+            status: "DISDEX_V96_V52_STRATEGY_PREFLIGHT_FAIL_CLOSED",
+            message: error instanceof Error ? error.message : String(error),
+            ordersSent: false,
+            cancelSent: false,
+            positionChangesSent: false,
+        }));
         process.exitCode = 1;
     });
 }
