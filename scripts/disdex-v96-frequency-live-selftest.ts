@@ -56,7 +56,7 @@ function gross(weights: Record<string, number> | Partial<Record<DisDexV35CoreSym
 }
 
 function main() {
-    assert.equal(DISDEX_V96_ALLOCATION.productionRevision, "CORE_VOLUME50_TURNOVER075_LIVE_R2_GROSS_2P5_PENGU_1P15");
+    assert.equal(DISDEX_V96_ALLOCATION.productionRevision, "CORE_VOLUME50_TURNOVER075_LIVE_R3_CRYPTO_GROSS_1P5_PENGU_1P15");
     assert.equal(DISDEX_V96_ALLOCATION.historicalResearchPr, 73);
     assert.equal(DISDEX_V96_ALLOCATION.corePolicy.componentVolumeFloor, 0.50);
     assert.equal(DISDEX_V96_ALLOCATION.corePolicy.weightBandTolerancePct, 5);
@@ -64,11 +64,11 @@ function main() {
     assert.equal(DISDEX_V96_ALLOCATION.corePolicy.forcedRefreshBars, 12);
     assert.equal(DISDEX_V96_ALLOCATION.penguTargetGross, 1.15);
     assert.equal(DISDEX_V96_ALLOCATION.penguReservationPolicy, "FULL_TARGET_BEFORE_CORE");
-    assert.equal(DISDEX_V96_ALLOCATION.totalGrossCap, 2.5);
+    assert.equal(DISDEX_V96_ALLOCATION.totalGrossCap, 1.5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 1.15);
-    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross, 2.5);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross, 1.5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 5);
-    assert.equal(DISDEX_V96_RUNTIME.minimumExecutionLeverage, 3);
+    assert.equal(DISDEX_V96_RUNTIME.minimumExecutionLeverage, 5);
     assert.equal(DISDEX_V96_RUNTIME.minimumOrderNotionalUsd, 5);
     assert.equal(DISDEX_V96_RUNTIME.rebalanceTolerancePct, 1);
     assert.equal(DISDEX_V96_RUNTIME.closeUnmanagedPositions, false);
@@ -99,7 +99,9 @@ function main() {
         sharedV35Unchanged: true,
         penguSignalRulesChanged: false,
         penguReservationPolicy: DISDEX_V96_ALLOCATION.penguReservationPolicy,
-        grossCap: DISDEX_V96_ALLOCATION.totalGrossCap,
+        cryptoSleeveGrossCap: DISDEX_V96_ALLOCATION.totalGrossCap,
+        combinedPortfolioGrossCap: 2.5,
+        requiredInitialLeverage: DISDEX_V96_RUNTIME.minimumExecutionLeverage,
     }));
 }
 
