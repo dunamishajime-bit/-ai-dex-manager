@@ -10,7 +10,7 @@ User=deploy
 Group=deploy
 WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
-EnvironmentFile=/etc/disdex/disdex-v96-v52-live-overrides.env
+EnvironmentFile=-/etc/disdex/disdex-v96-v52-live-overrides.env
 Environment=DISDEX_V96_APPROVED_COMMIT_SHA=%i
 Environment=DISDEX_V96_RUNTIME_COMMIT_SHA=%i
 Environment=DISDEX_V96_EXECUTION_PARITY_REVIEW_ACKNOWLEDGEMENT=I_REVIEWED_DISDEX_V96_EXECUTION_PARITY_FOR_EXACT_COMMIT
