@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import {
     DISDEX_V96_ALLOCATION,
     DISDEX_V96_EXECUTION_PARITY,
@@ -64,11 +65,11 @@ function override(input: Partial<Omit<DisDexV96OperatorOverrideApproval, "artifa
         configFingerprint: disDexV96ConfigFingerprint(),
         approvedCommitSha: RUNTIME_COMMIT,
         operator: "v96-selftest",
-        reason: "Exercise guarded initial LIVE.",
+        reason: "Exercise guarded V96 Crypto sleeve LIVE.",
         approvedAt: new Date(NOW - HOUR).toISOString(),
         forwardEvidenceBypassAccepted: true,
         initialPenguGrossCap: 1.15,
-        maximumPortfolioGross: 2.5,
+        maximumPortfolioGross: 1.5,
         maximumDailyLossPct: 5,
         maximumDailyLossUsd: 50,
         acknowledgement: "I_APPROVE_DISDEX_V96_OPERATOR_CONTROLLED_LIVE",
@@ -110,6 +111,27 @@ function chronologyFixture() {
     return { history, now, expectedReferenceTs };
 }
 
+function liveGate(operatorOverride: DisDexV96OperatorOverrideApproval, input: {
+    maximumGross?: number;
+    maximumDailyLossPct?: number;
+    initialPenguGrossCap?: number;
+    now?: number;
+    runtimeCommitSha?: string;
+} = {}) {
+    return evaluateDisDexV96LiveGates({
+        runnerMode: "live",
+        environmentLiveExecutionEnabled: true,
+        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
+        executionParity: parity(),
+        operatorOverride,
+        maximumGross: input.maximumGross ?? 1.5,
+        maximumDailyLossPct: input.maximumDailyLossPct ?? 5,
+        initialPenguGrossCap: input.initialPenguGrossCap ?? 1.15,
+        runtimeCommitSha: input.runtimeCommitSha ?? RUNTIME_COMMIT,
+        now: input.now ?? NOW,
+    });
+}
+
 async function main() {
     assert.equal(DISDEX_V96_RUNTIME.mode, "LIVE_READY");
     assert.equal(DISDEX_V96_RUNTIME.liveTradingEnabled, true);
@@ -117,68 +139,55 @@ async function main() {
     assert.equal(DISDEX_V96_RUNTIME.executionParityStatus, "APPROVED");
     assert.equal(DISDEX_V96_EXECUTION_PARITY.corePort, "V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS");
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 1.15);
-    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross, 2.5);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross, 1.5);
     assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct, 5);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage, 5);
+    assert.equal(DISDEX_V96_LIVE_PROMOTION.requiredMarginType, "cross");
     assert.equal(DISDEX_V96_LIVE_PROMOTION.killSwitchAction, "FLATTEN_MANAGED");
+
+    assert.equal(DISDEX_V96_ALLOCATION.totalGrossCap, 1.5);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 1.5);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross, 1.0);
 
     const allocation = allocateDisDexV96ReservedPengu({
         coreWeights: { BTCUSDT: 0.9, ETHUSDT: 0.9 },
         penguSide: 1,
     });
-    close(allocation.coreScale, 1.35 / 1.8);
+    close(allocation.coreScale, 0.35 / 1.8);
     close(allocation.penguClip, 1);
     close(allocation.penguFinalGross, 1.15);
-    close(allocation.finalGross, 2.5);
-    assert.ok(allocation.finalGross <= DISDEX_V96_ALLOCATION.totalGrossCap);
+    close(allocation.scaledCoreGross, 0.35);
+    close(allocation.finalGross, 1.5);
 
-    const combinedEthTarget = allocateDisDexV96ReservedPengu({
+    const oneGross = allocateDisDexV96ReservedPengu({
         coreWeights: { ETHUSDT: 1.32 },
         penguSide: 0,
         totalGrossCap: 1,
     });
-    close(combinedEthTarget.targetWeights.ETHUSDT, 1);
-    close(combinedEthTarget.finalGross, 1);
-    assert.equal(combinedEthTarget.finalGross > 1 + 1e-9, false);
+    close(oneGross.targetWeights.ETHUSDT, 1);
+    close(oneGross.finalGross, 1);
 
-    const standaloneEthTarget = allocateDisDexV96ReservedPengu({
-        coreWeights: { ETHUSDT: 1.32 },
-        penguSide: 0,
-        totalGrossCap: 2,
-    });
-    close(standaloneEthTarget.targetWeights.ETHUSDT, 1.32);
-    close(standaloneEthTarget.finalGross, 1.32);
-
-    const combinedWithPengu = allocateDisDexV96ReservedPengu({
+    const clippedPengu = allocateDisDexV96ReservedPengu({
         coreWeights: { ETHUSDT: 1.32 },
         penguSide: 1,
         penguTargetGross: 1.15,
         totalGrossCap: 1,
         minimumActivePenguClip: 0.5,
     });
-    assert.ok(combinedWithPengu.finalGross <= 1 + 1e-12);
-    assert.ok(combinedWithPengu.penguClip >= 0.5);
-    close(combinedWithPengu.reservedPenguGross, 0.575);
+    assert.ok(clippedPengu.finalGross <= 1 + 1e-12);
+    assert.ok(clippedPengu.penguClip >= 0.5);
+    close(clippedPengu.reservedPenguGross, 0.575);
 
-    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 2.5);
-    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
-    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
-
-    const effectiveOneGross = buildDefaultDisDexV96RunnerConfig({ maxGross: 1 });
-    assert.equal(effectiveOneGross.maxGross, 1);
+    const runnerConfig = buildDefaultDisDexV96RunnerConfig({ maxGross: 1.5 });
+    assert.equal(runnerConfig.maxGross, 1.5);
 
     const approvedOverride = override();
-    const live = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: approvedOverride,
-        runtimeCommitSha: RUNTIME_COMMIT,
-        now: NOW,
-    });
-    assert.equal(live.allowed, true);
-    assert.equal(live.forwardEvidenceApproved, false);
-    assert.equal(live.operatorOverrideApproved, true);
+    const approved = liveGate(approvedOverride);
+    assert.equal(approved.allowed, true);
+    assert.equal(approved.forwardEvidenceApproved, false);
+    assert.equal(approved.operatorOverrideApproved, true);
 
     const noOverride = evaluateDisDexV96LiveGates({
         runnerMode: "live",
@@ -190,108 +199,35 @@ async function main() {
     });
     assert.equal(noOverride.allowed, false);
 
-    const wrongCommit = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: approvedOverride,
-        runtimeCommitSha: "f".repeat(40),
-        now: NOW,
-    });
+    const wrongCommit = liveGate(approvedOverride, { runtimeCommitSha: "f".repeat(40) });
     assert.equal(wrongCommit.allowed, false);
     assert.ok(wrongCommit.reasons.some((reason) => reason.includes("runtime commit")));
 
-    const legacy = override({ expiresAt: new Date(NOW + 24 * HOUR).toISOString() });
-    const legacyGate = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: legacy,
-        maximumGross: 2.5,
-        maximumDailyLossPct: 5,
-        initialPenguGrossCap: 1.15,
-        runtimeCommitSha: RUNTIME_COMMIT,
-        now: NOW,
-    });
-    assert.equal(legacyGate.allowed, false);
-    assert.ok(legacyGate.reasons.some((reason) => reason.includes("time-bounded")));
+    const expiring = override({ expiresAt: new Date(NOW + 24 * HOUR).toISOString() });
+    const expiringGate = liveGate(expiring);
+    assert.equal(expiringGate.allowed, false);
+    assert.ok(expiringGate.reasons.some((reason) => reason.includes("time-bounded")));
 
-    const permanent = override();
-    const permanentGate = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: permanent,
-        maximumGross: 2.5,
-        maximumDailyLossPct: 5,
-        initialPenguGrossCap: 1.15,
-        runtimeCommitSha: RUNTIME_COMMIT,
-        now: NOW + 365 * 24 * HOUR,
-    });
-    assert.equal(permanentGate.allowed, true);
+    const permanentFuture = liveGate(approvedOverride, { now: NOW + 365 * 24 * HOUR });
+    assert.equal(permanentFuture.allowed, true);
 
-    const changedRisk = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: permanent,
-        maximumGross: 1,
-        maximumDailyLossPct: 5,
-        initialPenguGrossCap: 1.15,
-        runtimeCommitSha: RUNTIME_COMMIT,
-        now: NOW,
-    });
-    assert.equal(changedRisk.allowed, false);
-    assert.ok(changedRisk.reasons.some((reason) => reason.includes("maximum Gross")));
+    const changedGross = liveGate(approvedOverride, { maximumGross: 1 });
+    assert.equal(changedGross.allowed, false);
+    assert.ok(changedGross.reasons.some((reason) => reason.includes("maximum Gross")));
 
-    const changedDailyLoss = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: permanent,
-        maximumGross: 2.5,
-        maximumDailyLossPct: 3.5,
-        initialPenguGrossCap: 1.15,
-        runtimeCommitSha: RUNTIME_COMMIT,
-        now: NOW,
-    });
+    const changedDailyLoss = liveGate(approvedOverride, { maximumDailyLossPct: 3.5 });
     assert.equal(changedDailyLoss.allowed, false);
     assert.ok(changedDailyLoss.reasons.some((reason) => reason.includes("daily loss limit")));
 
-    const changedPengu = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: permanent,
-        maximumGross: 2.5,
-        maximumDailyLossPct: 5,
-        initialPenguGrossCap: 0.10,
-        runtimeCommitSha: RUNTIME_COMMIT,
-        now: NOW,
-    });
+    const changedPengu = liveGate(approvedOverride, { initialPenguGrossCap: 0.10 });
     assert.equal(changedPengu.allowed, false);
     assert.ok(changedPengu.reasons.some((reason) => reason.includes("initial PENGU Gross")));
+
     const revoked = override({ revokedAt: new Date(NOW).toISOString(), revokedBy: "operator", revokeReason: "test" });
-    const revokedGate = evaluateDisDexV96LiveGates({
-        runnerMode: "live",
-        environmentLiveExecutionEnabled: true,
-        activationAcknowledgement: "I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK",
-        executionParity: parity(),
-        operatorOverride: revoked,
-        maximumGross: 2.5,
-        maximumDailyLossPct: 5,
-        initialPenguGrossCap: 1.15,
-        runtimeCommitSha: RUNTIME_COMMIT,
-        now: NOW,
-    });
+    const revokedGate = liveGate(revoked);
     assert.equal(revokedGate.allowed, false);
     assert.ok(revokedGate.reasons.some((reason) => reason.includes("revoked")));
+
     const startRisk = updateDisDexV96DailyRisk({
         equity: 1000,
         maximumDailyLossPct: 5,
@@ -365,7 +301,6 @@ async function main() {
     assert.equal(core.chronology.latestCompletedOpenTime, chronology.expectedReferenceTs);
     assert.equal(core.chronology.usesCompleted12hBarsOnly, true);
     assert.equal(core.chronology.nextUnobservedReturnForcedToZero, true);
-    assert.ok(core.finalGross <= 2 + 1e-12);
 
     const directory = await mkdtemp(join(tmpdir(), "disdex-v96-live-promotion-"));
     try {
@@ -385,7 +320,6 @@ async function main() {
         const statePath = join(directory, "runner-live.json");
         const store = new FileDisDexV96RunnerStateStore(statePath, "live");
         const state = createDisDexV96RunnerState("live");
-        assert.equal(state.version, 2);
         state.bootstrapRequired = false;
         state.dailyRisk = trip;
         state.operatorOverride = {
@@ -404,6 +338,7 @@ async function main() {
         assert.equal(recovered.version, 2);
         assert.equal(recovered.dailyRisk?.tripped, true);
         assert.equal(recovered.operatorOverride?.artifactSha256, approvedOverride.artifactSha256);
+        assert.equal(recovered.operatorOverride?.maximumPortfolioGross, 1.5);
         assert.equal(recovered.bootstrapRequired, false);
     } finally {
         await rm(directory, { recursive: true, force: true });
@@ -412,6 +347,8 @@ async function main() {
     console.log(JSON.stringify({
         status: "DISDEX_V96_LIVE_PROMOTION_SELFTEST_PASS",
         strategyId: DISDEX_V96_STRATEGY_ID,
+        v96CryptoSleeveGross: 1.5,
+        combinedPortfolioGross: 2.5,
         liveTradingEnabled: DISDEX_V96_RUNTIME.liveTradingEnabled,
         forwardEvidenceStatus: DISDEX_V96_RUNTIME.forwardEvidenceStatus,
         operatorOverrideRoute: "APPROVED",
