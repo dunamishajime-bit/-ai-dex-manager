@@ -2,7 +2,7 @@
 
 # Fixed operator-approved LIVE policy for the V96 + V52 release boundary.
 # This is sourced after systemd EnvironmentFile values so stale VPS overrides
-# cannot silently restore an incompatible Gross, leverage or SHADOW setup.
+# cannot silently restore an incompatible Gross, leverage, monitoring or SHADOW setup.
 
 disdex_apply_v96_v52_fixed_live_policy() {
   export DISDEX_V96_MAX_GROSS=1.5
@@ -11,6 +11,7 @@ disdex_apply_v96_v52_fixed_live_policy() {
   export DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5
   export DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION=0.70
   export DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION=0.20
+  export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
 
   export DISDEX_V52_CRYPTO_GROSS_CAP=1.5
   export DISDEX_V52_STOCK_GROSS_CAP=1.5
@@ -55,6 +56,10 @@ disdex_assert_v96_v52_fixed_live_policy() {
   }
   [[ "${DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION:-}" == "0.20" ]] || {
     printf 'fixed policy mismatch: DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION\n' >&2
+    return 1
+  }
+  [[ "${DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED:-}" == "true" ]] || {
+    printf 'fixed policy mismatch: DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED\n' >&2
     return 1
   }
   [[ "${DISDEX_V52_CRYPTO_GROSS_CAP:-}" == "1.5" ]] || return 1
