@@ -4,6 +4,16 @@ set -Eeuo pipefail
 umask 077
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+policy_script="$(pwd -P)/scripts/ops/disdex-v96-v52-live-policy.sh"
+[[ -f "$policy_script" && ! -L "$policy_script" ]] || {
+  printf 'fixed LIVE policy script missing\n' >&2
+  exit 1
+}
+# shellcheck source=scripts/ops/disdex-v96-v52-live-policy.sh
+source "$policy_script"
+disdex_apply_v96_v52_fixed_live_policy
+disdex_assert_v96_v52_fixed_live_policy
+
 sha="${DISDEX_V96_RUNTIME_COMMIT_SHA:-}"
 [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || {
   printf 'invalid exact runtime SHA\n' >&2
@@ -47,6 +57,10 @@ DISDEX_V96_CONFIG_MIGRATION_MODE=true \
 
 printf 'DISDEX_V96_V52_CANDIDATE_PREFLIGHT_PASS\n'
 printf 'runtimeCommitSha=%s\n' "$sha"
+printf 'maximumPortfolioGross=1\n'
+printf 'initialPenguGrossCap=1.15\n'
+printf 'maximumDailyLossPct=5\n'
+printf 'penguDualMode=LIVE\n'
 printf 'ordersSent=false\n'
 printf 'cancelSent=false\n'
 printf 'positionChangesSent=false\n'
