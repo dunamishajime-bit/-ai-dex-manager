@@ -48,21 +48,33 @@ const expensive = evaluateV11EqGate({
 assert.equal(expensive.accepted, false);
 assert.equal(expensive.reasons.includes("COST_TO_BASIS_RATIO_TOO_HIGH"), true);
 assert.equal(expensive.reasons.includes("NET_EDGE_TOO_LOW"), true);
-assert.doesNotThrow(() => assertPortfolioGross(2.5, 0));
+
+assert.doesNotThrow(() => assertPortfolioGross(1.5, 0));
 assert.doesNotThrow(() => assertPortfolioGross(1.15, 1.35));
-assert.throws(() => assertPortfolioGross(2.5000000001, 0), /Crypto Gross cap exceeded/);
+assert.doesNotThrow(() => assertPortfolioGross(1.0, 1.5));
+assert.throws(() => assertPortfolioGross(1.5000000001, 0), /Crypto Gross cap exceeded/);
 assert.throws(() => assertPortfolioGross(1.15, 1.3500000001), /Portfolio Gross cap exceeded/);
 assert.throws(() => assertPortfolioGross(0, 1.5000000001), /Stock Gross cap exceeded/);
-assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 2.5);
+
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 1.5);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
-assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoMayUsePortfolioResidual, true);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross, 1.0);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumFirstStockGross, 0.5);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumSecondStockGross, 0.25);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoMayUsePortfolioResidual, false);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumConcurrentStockPositions, 2);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoInitialLeverage, 5);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockInitialLeverage, 5);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.requiredMarginType, "cross");
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumInitialMarginFraction, 0.70);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumAvailableBalanceFractionAfterOrder, 0.20);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.sameSymbolConcurrentStockPositionAllowed, false);
 assert.equal(DISDEX_V50_CONFIG.strategyId, "POST_EARLY3__B75__H3__BOTH__NONE");
 assert.deepEqual(DISDEX_V50_CONFIG.entryTimesNy, ["11:30:00", "12:30:00", "13:30:00"]);
 assert.equal(DISDEX_V13D_V11EQ_V96_RUNTIME.stateSchemaVersion, 3);
 assert.equal(DISDEX_V13D_V11EQ_V96_RUNTIME.liveTradingEnabled, true);
+assert.equal(DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine, "scripts/disdex_v52_margin_aware_live_engine.py");
 assert.throws(() => assertLiveOrderSubmissionEnabled({
     runnerMode: "live",
     environmentLiveExecutionEnabled: false,
@@ -78,4 +90,4 @@ assert.doesNotThrow(() => assertLiveOrderSubmissionEnabled({
     preflightPassed: true,
     killSwitchActive: false,
 }));
-console.log("V96 + V52 LIVE contract self-test: PASS");
+console.log("V96 + V52 margin-aware LIVE contract self-test: PASS");
