@@ -56,6 +56,11 @@ function finiteNonNegative(value: unknown, name: string) {
     return number;
 }
 
+function optionalEnvironmentNumber(name: string) {
+    const value = Number(process.env[name]);
+    return Number.isFinite(value) ? value : undefined;
+}
+
 function grossNotionalUsd(positions: DirectPosition[], label: string) {
     return positions.reduce((sum, position) => {
         const notional = Number(position.notionalUsd);
@@ -111,20 +116,40 @@ export function planDisDexV96ExecutionCapacity(input: {
     const { action, config } = input;
     const managedGrossCap = finiteNonNegative(config.maxGross, "V96 managed Gross");
     if (managedGrossCap <= 0) throw new Error("V96 managed Gross must be positive.");
-    const portfolioGrossCap = finiteNonNegative(config.portfolioGrossCap ?? managedGrossCap, "Combined portfolio Gross");
+    const portfolioGrossCap = finiteNonNegative(
+        config.portfolioGrossCap
+            ?? optionalEnvironmentNumber("DISDEX_V52_PORTFOLIO_GROSS_CAP")
+            ?? managedGrossCap,
+        "Combined portfolio Gross",
+    );
     if (portfolioGrossCap < managedGrossCap) {
         throw new Error("Combined portfolio Gross must not be smaller than the V96 managed Gross cap.");
     }
-    const targetInitialLeverage = Math.max(1, finiteNonNegative(config.targetInitialLeverage ?? 1, "V96 target leverage"));
+    const targetInitialLeverage = Math.max(
+        1,
+        finiteNonNegative(
+            config.targetInitialLeverage
+                ?? optionalEnvironmentNumber("DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE")
+                ?? 1,
+            "V96 target leverage",
+        ),
+    );
     const maximumInitialMarginFraction = Math.min(
         1,
-        finiteNonNegative(config.maximumInitialMarginFraction ?? 1, "Maximum initial-margin fraction"),
+        finiteNonNegative(
+            config.maximumInitialMarginFraction
+                ?? optionalEnvironmentNumber("DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION")
+                ?? 1,
+            "Maximum initial-margin fraction",
+        ),
     );
     if (maximumInitialMarginFraction <= 0) throw new Error("Maximum initial-margin fraction must be positive.");
     const minimumAvailableBalanceFractionAfterOrder = Math.min(
         1,
         finiteNonNegative(
-            config.minimumAvailableBalanceFractionAfterOrder ?? 0,
+            config.minimumAvailableBalanceFractionAfterOrder
+                ?? optionalEnvironmentNumber("DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION")
+                ?? 0,
             "Minimum available-balance fraction after order",
         ),
     );
