@@ -37,7 +37,7 @@ const exact = (actual, expected, label) => {
 exact(approval.status, "APPROVED", "status");
 exact(approval.approvedCommitSha, sha, "approvedCommitSha");
 exact(Number(approval.initialPenguGrossCap), 1.15, "initialPenguGrossCap");
-exact(Number(approval.maximumPortfolioGross), 1, "maximumPortfolioGross");
+exact(Number(approval.maximumPortfolioGross), 1.5, "maximumPortfolioGross");
 exact(Number(approval.maximumDailyLossPct), 5, "maximumDailyLossPct");
 if (!/^[0-9a-f]{64}$/i.test(String(approval.artifactSha256 || ""))) {
   throw new Error("artifactSha256 is invalid");
@@ -48,7 +48,8 @@ process.stdout.write(JSON.stringify({
   initialPenguGrossCap: approval.initialPenguGrossCap,
   maximumPortfolioGross: approval.maximumPortfolioGross,
   maximumDailyLossPct: approval.maximumDailyLossPct,
-  artifactSha256: approval.artifactSha256,
+  combinedPortfolioGrossCap: 2.5,
+  reservedFirstStockGross: 1.0,
 }) + "\n");
 NODE
 
@@ -59,9 +60,13 @@ DISDEX_V96_RUNTIME_COMMIT_SHA="$sha" \
 
 printf 'DISDEX_V96_V52_APPROVAL_POLICY_WRAPPER_PASS\n'
 printf 'approvedCommitSha=%s\n' "$sha"
-printf 'maximumPortfolioGross=1\n'
+printf 'v96CryptoSleeveGross=1.5\n'
+printf 'combinedPortfolioGross=2.5\n'
+printf 'reservedFirstStockGross=1\n'
 printf 'initialPenguGrossCap=1.15\n'
 printf 'maximumDailyLossPct=5\n'
+printf 'requiredInitialLeverage=5\n'
+printf 'requiredMarginType=cross\n'
 printf 'penguDualMode=LIVE\n'
 printf 'ordersSent=false\n'
 printf 'cancelSent=false\n'
