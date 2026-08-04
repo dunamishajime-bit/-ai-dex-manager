@@ -1,0 +1,24 @@
+{
+  "strategyId": "V96_STOCK_V13G_V13D_FIXED_FORWARD",
+  "sessionDate": "2026-08-04",
+  "runId": "30925654465",
+  "runAttempt": "1",
+  "startedAtUtc": "2026-08-04T15:44:26Z",
+  "finishedAtUtc": "2026-08-04T19:10:03Z",
+  "collectorExitCode": 0,
+  "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
+  "workflowCommit": "e250937b0da935a3a242a1127b113e1e716494c3",
+  "configSha256": "32eb66a03a998b43342d0e4e9da14c3939c099b05143d73a7b7d601b682683a4",
+  "resultStatus": "V13_FORWARD_DATA_REQUIRED",
+  "fixedDualEvidence": {
+    "decisionDone": false,
+    "decisionReceivedMs": null,
+    "candidateCount": 0,
+    "eligibleSymbols": [],
+    "frozenArms": [
+      "V13G",
+      "V13D"
+    ],
+    "retuningAllowed": false
+  }
+}
