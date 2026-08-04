@@ -85,15 +85,15 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.maximum_initial_margin_fraction = base.float_env("DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION", 0.70)
         self.minimum_available_balance_fraction = base.float_env("DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION", 0.20)
         self._last_account_risk_check_ms = 0
+        self._account_risk_cache = None
         self._assert_policy_configuration()
 
     def _assert_policy_configuration(self) -> None:
-        exact = (
+        for actual, expected, label in (
             (self.crypto_gross_cap, 1.5, "Crypto sleeve Gross"),
             (self.stock_gross_cap, 1.5, "Stock sleeve Gross"),
             (self.portfolio_gross_cap, 2.5, "combined Portfolio Gross"),
-        )
-        for actual, expected, label in exact:
+        ):
             if abs(actual - expected) > EPSILON:
                 raise RuntimeError(f"V52 fixed {label} must be {expected}")
         if self.crypto_gross_cap + self.reserved_first_stock_gross > self.portfolio_gross_cap + EPSILON:
@@ -110,8 +110,6 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             raise RuntimeError("Second Stock position minimum Gross must be at least 0.25")
 
     def excess_margin_usd(self) -> float:
-        # V52 daily-loss capital is its proportional sleeve capital, not Crypto
-        # notional subtracted as if every perpetual position used 1x cash.
         equity = self.portfolio_equity()
         if equity <= 0 or self.portfolio_gross_cap <= 0:
             return 0.0
@@ -140,9 +138,8 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
 
     def assert_account_margin_safe(self, *, force: bool = False, rows: Optional[List[dict]] = None) -> dict:
         now = base.now_ms()
-        cached = getattr(self, "_account_risk_cache", None)
-        if not force and cached and now - self._last_account_risk_check_ms < ACCOUNT_RISK_POLL_INTERVAL_MS:
-            return cached
+        if not force and self._account_risk_cache and now - self._last_account_risk_check_ms < ACCOUNT_RISK_POLL_INTERVAL_MS:
+            return self._account_risk_cache
         position_rows = rows if rows is not None else self.aster.positions()
         configuration = verify_fixed_account_configuration(position_rows, self.required_initial_leverage)
         margin = self.account_margin_snapshot(position_rows)
@@ -155,10 +152,9 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             raise RuntimeError(
                 f"Combined available balance is below reserve: {margin['availableBalanceUsd']:.6f} < {minimum_available:.6f}"
             )
-        result = {"configuration": configuration, "margin": margin}
-        self._account_risk_cache = result
+        self._account_risk_cache = {"configuration": configuration, "margin": margin}
         self._last_account_risk_check_ms = now
-        return result
+        return self._account_risk_cache
 
     def projected_margin_capacity_gross(self, snapshot: dict, margin: dict) -> float:
         equity = base.finite(snapshot.get("equityUsd"))
@@ -195,8 +191,6 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         return max(0.0, capacity), {**snapshot, "margin": margin, "minimumRequiredSlotGross": minimum}
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
-        # Force a fresh leverage, margin, available-balance and Gross read before
-        # every new Stock order. Reduce-only exits remain available.
         self._account_risk_cache = None
         current_capacity, capacity_snapshot = self.available_slot_gross(slot)
         if target_gross <= 0 or target_gross > current_capacity + self.gross_tolerance:
@@ -206,8 +200,8 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         return super().open_basis_position(slot, candidate, min(target_gross, current_capacity))
 
     def tick(self) -> None:
-        if self.live:
-            self.assert_account_margin_safe(force=False)
+        if self.live and base.now_ms() - self._last_account_risk_check_ms >= ACCOUNT_RISK_POLL_INTERVAL_MS:
+            self.assert_account_margin_safe(force=True)
             self.assert_gross_safe()
         super().tick()
 
