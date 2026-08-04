@@ -23,6 +23,8 @@ MANAGED_STOCK_SYMBOLS = tuple(base.ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = MANAGED_CRYPTO_SYMBOLS + MANAGED_STOCK_SYMBOLS
 REQUIRED_LEVERAGE = 5
 REQUIRED_MARGIN_TYPE = "cross"
+EMERGENCY_FLATTEN_ATTEMPTS = 3
+EMERGENCY_RECONCILIATION_DELAY_SECONDS = 1.0
 
 
 def normalized_margin_type(row: dict) -> str:
@@ -53,6 +55,26 @@ def verify_managed_configuration(rows: List[dict]) -> Dict[str, dict]:
             raise RuntimeError(f"Margin Guard margin type mismatch for {symbol}: expected cross, got {margin_type}")
         result[symbol] = {"leverage": leverage, "marginType": margin_type}
     return result
+
+
+def active_managed_positions(rows: List[dict]) -> List[dict]:
+    managed = set(MANAGED_SYMBOLS)
+    return [
+        row
+        for row in rows
+        if str(row.get("symbol") or "").upper() in managed
+        and abs(base.finite(row.get("positionAmt"))) > 1e-12
+    ]
+
+
+def quantity_text_from_position(row: dict) -> str:
+    raw = str(row.get("positionAmt") or "").strip()
+    if not raw:
+        raise RuntimeError(f"Position quantity is missing for {row.get('symbol')}")
+    text = raw[1:] if raw.startswith("-") else raw
+    if not text or base.finite(text) <= 0:
+        raise RuntimeError(f"Position quantity is invalid for {row.get('symbol')}: {raw}")
+    return text
 
 
 class MarginGuard:
@@ -110,10 +132,10 @@ class MarginGuard:
         base.atomic_write_json(self.state_path, payload)
         self.state = payload
 
-    def activate_shared_kill_switch(self, reason: str, decision: dict) -> None:
+    def activate_shared_kill_switch(self, reason: str, decision: dict) -> bool:
         existing = base.read_json(self.kill_switch_path, {}) or {}
         if existing.get("active"):
-            return
+            return False
         payload = {
             "active": True,
             "strategyId": "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
@@ -139,6 +161,114 @@ class MarginGuard:
             "positionChangesSent": False,
             **payload["marginRisk"],
         }, separators=(",", ":")), flush=True)
+        return True
+
+    def emergency_flatten_managed(self, decision: dict) -> dict:
+        if not self.live:
+            return {
+                "status": "PAPER_NO_EXTERNAL_ACTION",
+                "cancelRequestsSent": 0,
+                "reduceOnlyOrdersSent": 0,
+                "remainingManagedPositions": [],
+                "ordersSent": False,
+                "cancelSent": False,
+                "positionChangesSent": False,
+            }
+
+        cancel_requests = 0
+        reduce_only_orders = 0
+        fill_results: list[dict] = []
+        cancellation_errors: list[dict] = []
+        order_errors: list[dict] = []
+
+        open_orders = self.client.open_orders()
+        symbols_with_orders = sorted({
+            str(row.get("symbol") or "").upper()
+            for row in open_orders
+            if str(row.get("symbol") or "").upper() in set(MANAGED_SYMBOLS)
+        })
+        for symbol in symbols_with_orders:
+            try:
+                self.client.cancel_all(symbol)
+                cancel_requests += 1
+            except Exception as error:
+                cancellation_errors.append({"symbol": symbol, "error": str(error)})
+
+        remaining: List[dict] = []
+        for attempt in range(1, EMERGENCY_FLATTEN_ATTEMPTS + 1):
+            remaining = active_managed_positions(self.positions())
+            if not remaining:
+                break
+            for row in remaining:
+                symbol = str(row.get("symbol") or "").upper()
+                quantity = base.finite(row.get("positionAmt"))
+                side = "SELL" if quantity > 0 else "BUY"
+                client_id = f"margin-guard-{symbol.lower()}-{int(time.time())}"[:36]
+                try:
+                    raw = self.client._signed("POST", "/fapi/v3/order", {
+                        "symbol": symbol,
+                        "side": side,
+                        "type": "MARKET",
+                        "quantity": quantity_text_from_position(row),
+                        "positionSide": "BOTH",
+                        "reduceOnly": "true",
+                        "newClientOrderId": client_id,
+                        "newOrderRespType": "RESULT",
+                    })
+                    reduce_only_orders += 1
+                    fill_results.append({
+                        "attempt": attempt,
+                        "symbol": symbol,
+                        "side": side,
+                        "clientOrderId": str(raw.get("clientOrderId") or client_id),
+                        "orderId": raw.get("orderId"),
+                        "status": str(raw.get("status") or "UNKNOWN"),
+                        "executedQty": str(raw.get("executedQty") or "0"),
+                        "averagePrice": str(raw.get("avgPrice") or "0"),
+                    })
+                except Exception as error:
+                    order_errors.append({
+                        "attempt": attempt,
+                        "symbol": symbol,
+                        "side": side,
+                        "error": str(error),
+                    })
+            time.sleep(EMERGENCY_RECONCILIATION_DELAY_SECONDS)
+
+        remaining = active_managed_positions(self.positions())
+        result = {
+            "status": "PASS" if not remaining else "FAILED_REMAINING_POSITIONS",
+            "stage": decision.get("stage"),
+            "maintenanceMarginRatioPct": decision.get("maintenanceMarginRatioPct"),
+            "minimumLiquidationBufferPct": decision.get("minimumLiquidationBufferPct"),
+            "cancelRequestsSent": cancel_requests,
+            "reduceOnlyOrdersSent": reduce_only_orders,
+            "fillResults": fill_results,
+            "cancellationErrors": cancellation_errors,
+            "orderErrors": order_errors,
+            "remainingManagedPositions": [
+                {
+                    "symbol": str(row.get("symbol") or "").upper(),
+                    "positionAmt": str(row.get("positionAmt") or "0"),
+                    "markPrice": str(row.get("markPrice") or "0"),
+                    "liquidationPrice": str(row.get("liquidationPrice") or "0"),
+                }
+                for row in remaining
+            ],
+            "ordersSent": reduce_only_orders > 0,
+            "cancelSent": cancel_requests > 0,
+            "positionChangesSent": reduce_only_orders > 0,
+        }
+        print(json.dumps({
+            "event": "margin-guard-emergency-flatten-result",
+            **result,
+        }, ensure_ascii=False, separators=(",", ":")), flush=True)
+        if remaining:
+            raise RuntimeError(
+                "Margin Guard emergency reduce-only flatten did not clear every managed position: "
+                + ",".join(str(row.get("symbol") or "") for row in remaining)
+            )
+        return result
 
     def evaluate_once(self, *, write_state: bool, allow_kill_switch: bool) -> dict:
         account = self.account_info()
@@ -177,12 +307,21 @@ class MarginGuard:
             "positionChangesSent": False,
         }, separators=(",", ":")), flush=True)
         if allow_kill_switch and payload["stage"] in {"REDUCE", "CRITICAL"}:
-            self.activate_shared_kill_switch(
+            reason = (
                 "Margin Guard triggered pre-liquidation managed stop-loss: "
                 f"stage={payload['stage']}, marginRatio={payload['maintenanceMarginRatioPct']:.4f}%, "
-                f"minimumLiquidationBuffer={payload['minimumLiquidationBufferPct']}",
-                payload,
+                f"minimumLiquidationBuffer={payload['minimumLiquidationBufferPct']}"
             )
+            self.activate_shared_kill_switch(reason, payload)
+            emergency = self.emergency_flatten_managed(payload)
+            payload["emergencyFlatten"] = emergency
+            payload["ordersSent"] = emergency["ordersSent"]
+            payload["cancelSent"] = emergency["cancelSent"]
+            payload["positionChangesSent"] = emergency["positionChangesSent"]
+            payload["checkedAt"] = base.now_ms()
+            payload["nextCheckAt"] = payload["checkedAt"] + WARNING_POLL_INTERVAL_MS
+            if write_state:
+                self.write_state(payload)
         return payload
 
     def handle_failure(self, error: Exception) -> dict:
@@ -203,9 +342,9 @@ class MarginGuard:
             "nextCheckAt": now + WARNING_POLL_INTERVAL_MS,
             "consecutiveFailures": failures,
             "lastError": str(error),
-            "ordersSent": False,
-            "cancelSent": False,
-            "positionChangesSent": False,
+            "ordersSent": bool(self.state.get("ordersSent")),
+            "cancelSent": bool(self.state.get("cancelSent")),
+            "positionChangesSent": bool(self.state.get("positionChangesSent")),
         }
         self.write_state(payload)
         print(json.dumps({
@@ -217,10 +356,18 @@ class MarginGuard:
             "ordersAllowed": False,
         }, separators=(",", ":")), flush=True)
         if active_count > 0 and (failures >= 2 or previous_stage in {"WARNING", "REDUCE", "CRITICAL"}):
-            self.activate_shared_kill_switch(
-                "Margin Guard lost authenticated risk data while managed positions were active",
-                payload,
-            )
+            reason = "Margin Guard lost authenticated risk data while managed positions were active"
+            self.activate_shared_kill_switch(reason, payload)
+            try:
+                emergency = self.emergency_flatten_managed(payload)
+                payload["emergencyFlatten"] = emergency
+                payload["ordersSent"] = emergency["ordersSent"]
+                payload["cancelSent"] = emergency["cancelSent"]
+                payload["positionChangesSent"] = emergency["positionChangesSent"]
+                self.write_state(payload)
+            except Exception as flatten_error:
+                payload["emergencyFlattenError"] = str(flatten_error)
+                self.write_state(payload)
         return payload
 
     def require_healthy(self, *, write_state: bool, allow_kill_switch: bool) -> dict:
@@ -265,6 +412,12 @@ def self_test() -> None:
     assert len(checked) == len(MANAGED_SYMBOLS)
     assert HEALTHY_POLL_INTERVAL_MS == 300_000
     assert WARNING_POLL_INTERVAL_MS == 60_000
+    assert quantity_text_from_position({"symbol": "BTCUSDT", "positionAmt": "-0.123000"}) == "0.123000"
+    assert len(active_managed_positions([
+        {"symbol": "BTCUSDT", "positionAmt": "1"},
+        {"symbol": "OTHER", "positionAmt": "1"},
+        {"symbol": "ETHUSDT", "positionAmt": "0"},
+    ])) == 1
     print("V96/V52 adaptive Margin Guard self-test: PASS")
 
 
