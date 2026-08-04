@@ -15,6 +15,7 @@ CRYPTO_SYMBOLS = ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT")
 STOCK_SYMBOLS = tuple(ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = CRYPTO_SYMBOLS + STOCK_SYMBOLS
 SCRIPT_RELATIVE_PATH = Path("scripts/disdex-v96-v52-prepare-account-risk.py")
+RELEASES_ROOT = Path("/home/deploy/disdex-trading/releases")
 
 
 def _validate_sha(value: str) -> str:
@@ -41,6 +42,42 @@ def _release_diagnostics(cwd: Path, expected: Path, executed_script: Path) -> st
         f"executedScript={executed_script}; executedScriptReal={_safe_resolve(executed_script)}; "
         f"expectedScript={expected_script}; expectedScriptReal={_safe_resolve(expected_script)}"
     )
+
+
+def _derive_authoritative_release_sha(
+    executed_script: Path,
+    releases_root: Path,
+) -> str:
+    try:
+        script_real = executed_script.resolve(strict=True)
+        root_real = releases_root.resolve(strict=True)
+    except OSError as error:
+        raise RuntimeError(
+            "Account-risk preparation could not resolve immutable release paths: "
+            f"executedScript={executed_script}; releasesRoot={releases_root}; error={error}"
+        ) from error
+
+    try:
+        release_real = script_real.parents[1]
+    except IndexError as error:
+        raise RuntimeError(
+            f"Executed account-risk script has no immutable release parent: {script_real}"
+        ) from error
+
+    try:
+        parent_matches = os.path.samefile(release_real.parent, root_real)
+    except OSError as error:
+        raise RuntimeError(
+            "Account-risk preparation could not verify the releases root: "
+            f"release={release_real}; releasesRoot={root_real}; error={error}"
+        ) from error
+    if not parent_matches:
+        raise RuntimeError(
+            "Executed account-risk script is outside the immutable releases root: "
+            f"executedScript={script_real}; release={release_real}; releasesRoot={root_real}"
+        )
+
+    return _validate_sha(release_real.name)
 
 
 def _validate_release_identity(
@@ -90,11 +127,15 @@ def _validate_release_identity(
         )
 
 
-def require_exact_release() -> str:
-    sha = _validate_sha(str(os.getenv("DISDEX_V96_RUNTIME_COMMIT_SHA") or ""))
-    expected = Path(f"/home/deploy/disdex-trading/releases/{sha}")
-    _validate_release_identity(sha, Path.cwd(), expected, Path(__file__))
-    return sha
+def require_exact_release() -> tuple[str, str, bool]:
+    executed_script = Path(__file__)
+    sha = _derive_authoritative_release_sha(executed_script, RELEASES_ROOT)
+    expected = RELEASES_ROOT / sha
+    _validate_release_identity(sha, Path.cwd(), expected, executed_script)
+
+    environment_sha = str(os.getenv("DISDEX_V96_RUNTIME_COMMIT_SHA") or "").strip().lower()
+    environment_matches = environment_sha == sha
+    return sha, environment_sha, environment_matches
 
 
 def _expect_failure(label: str, callback) -> None:
@@ -107,6 +148,7 @@ def _expect_failure(label: str, callback) -> None:
 
 def run_self_test() -> int:
     sha = "a" * 40
+    stale_sha = "b" * 40
     with tempfile.TemporaryDirectory(prefix="disdex-account-risk-release-") as temporary:
         root = Path(temporary)
         releases = root / "releases"
@@ -117,7 +159,19 @@ def run_self_test() -> int:
         marker = expected / ".disdex-release-sha"
         marker.write_text(f"{sha}\n", encoding="utf-8")
 
+        assert _derive_authoritative_release_sha(expected_script, releases) == sha
         _validate_release_identity(sha, expected, expected, expected_script)
+
+        previous_environment_sha = os.environ.get("DISDEX_V96_RUNTIME_COMMIT_SHA")
+        os.environ["DISDEX_V96_RUNTIME_COMMIT_SHA"] = stale_sha
+        try:
+            assert _derive_authoritative_release_sha(expected_script, releases) == sha
+            assert os.environ["DISDEX_V96_RUNTIME_COMMIT_SHA"] != sha
+        finally:
+            if previous_environment_sha is None:
+                os.environ.pop("DISDEX_V96_RUNTIME_COMMIT_SHA", None)
+            else:
+                os.environ["DISDEX_V96_RUNTIME_COMMIT_SHA"] = previous_environment_sha
 
         alias_root = root / "release-alias"
         alias_root.symlink_to(releases, target_is_directory=True)
@@ -132,8 +186,14 @@ def run_self_test() -> int:
         unrelated_cwd.mkdir()
         _validate_release_identity(sha, unrelated_cwd, expected, expected_script)
 
-        foreign_script = root / "foreign.py"
+        foreign_root = root / "foreign-releases"
+        foreign_script = foreign_root / sha / SCRIPT_RELATIVE_PATH
+        foreign_script.parent.mkdir(parents=True)
         foreign_script.write_text("# foreign script\n", encoding="utf-8")
+        _expect_failure(
+            "outside releases root",
+            lambda: _derive_authoritative_release_sha(foreign_script, releases),
+        )
         _expect_failure(
             "foreign executed script",
             lambda: _validate_release_identity(sha, expected, expected, foreign_script),
@@ -160,7 +220,8 @@ def run_self_test() -> int:
 
         _expect_failure("invalid SHA", lambda: _validate_sha("not-a-sha"))
 
-    print("V96/V52 account-risk executed-release identity self-test: PASS")
+    print("V96/V52 account-risk immutable-release authority self-test: PASS")
+    print("staleEnvironmentRuntimeShaIgnored=true")
     return 0
 
 
@@ -231,7 +292,7 @@ def apply_leverage(client: AsterClient, symbol: str) -> None:
 
 
 def main() -> int:
-    sha = require_exact_release()
+    sha, environment_sha, environment_matches = require_exact_release()
     require_service_inactive()
     acknowledgement = str(os.getenv("DISDEX_V96_V52_ACCOUNT_RISK_ACKNOWLEDGEMENT") or "").strip()
     if acknowledgement != ACKNOWLEDGEMENT:
@@ -258,6 +319,10 @@ def main() -> int:
     print(json.dumps({
         "status": "DISDEX_V96_V52_ACCOUNT_RISK_PREPARATION_PASS",
         "runtimeCommitSha": sha,
+        "runtimeShaSource": "executedImmutableRelease",
+        "environmentRuntimeSha": environment_sha or None,
+        "environmentRuntimeShaMatched": environment_matches,
+        "staleEnvironmentRuntimeShaIgnored": bool(environment_sha and not environment_matches),
         "requiredLeverage": REQUIRED_LEVERAGE,
         "requiredMarginType": "cross",
         "managedSymbols": configuration,
