@@ -1,3 +1,6 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
 import {
     AsterApiError,
     AsterV3Client,
@@ -9,6 +12,8 @@ import {
     type AsterPositionRiskRow,
     type AsterPositionSide,
 } from "@/lib/aster-v3-client";
+
+const execFileAsync = promisify(execFile);
 
 export type DirectTradeStatus = "FILLED" | "PARTIALLY_FILLED" | "NEW" | "REJECTED" | "CANCELED" | "EXPIRED" | "UNKNOWN";
 
@@ -115,6 +120,38 @@ export interface AsterDirectTradeExecutorOptions {
 function safeNumber(value: unknown, fallback = 0) {
     const number = Number(value);
     return Number.isFinite(number) ? number : fallback;
+}
+
+function boolEnvironment(name: string, fallback = false) {
+    const value = process.env[name];
+    if (value === undefined) return fallback;
+    return /^(1|true|yes|on)$/i.test(value.trim());
+}
+
+async function runFreshMarginGuardBeforeExposureOrder() {
+    if (!boolEnvironment("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED", false)) return;
+    const python = process.env.DISDEX_PYTHON_BIN || "python3";
+    const script = process.env.DISDEX_V96_V52_MARGIN_GUARD_SCRIPT
+        || "scripts/disdex_v96_v52_margin_guard.py";
+    try {
+        const result = await execFileAsync(
+            python,
+            [script, "--mode", "live", "--preflight-readonly"],
+            {
+                cwd: process.cwd(),
+                env: process.env,
+                timeout: 30_000,
+                maxBuffer: 1024 * 1024,
+            },
+        );
+        const output = `${result.stdout || ""}\n${result.stderr || ""}`;
+        if (!/"stage":"HEALTHY"/.test(output) && !/"stage":\s*"HEALTHY"/.test(output)) {
+            throw new Error("Margin Guard did not return a HEALTHY order-time result.");
+        }
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Fresh V96/V52 pre-order Margin Guard blocked exposure increase: ${message}`);
+    }
 }
 
 function asArray<T>(value: T | T[]): T[] {
@@ -379,6 +416,9 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
     async executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult> {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
+        if (command.reduceOnly !== true) {
+            await runFreshMarginGuardBeforeExposureOrder();
+        }
         const quote = await this.getMarketQuote(symbol);
         const executablePrice = command.side === "BUY" ? quote.askPrice : quote.bidPrice;
         const adverseSlippageBps = command.expectedPrice > 0
