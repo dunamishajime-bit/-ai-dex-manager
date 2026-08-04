@@ -33,10 +33,14 @@ jobs:
           bash -n scripts/ops/root/disdex-promotion-transaction-lib.sh
           bash -n scripts/ops/root/disdex-promotion-selftest-lib.sh
           bash -n scripts/ops/root/install-disdex-vps-control
+          bash -n scripts/ops/disdex-v96-v52-live-policy.sh
+          bash -n scripts/ops/disdex-v96-v52-live-policy-selftest.sh
+          bash -n scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
           bash -n scripts/ops/disdex-v96-v52-live.sh
           bash -n scripts/ops/disdex-v96-v52-renew-approvals.sh
           bash -n scripts/ops/disdex-v96-v52-candidate-preflight.sh
           bash -n scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
+          bash scripts/ops/disdex-v96-v52-live-policy-selftest.sh
           bash scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
           sudo bash scripts/ops/root/disdex-vps-control trading-promote-selftest all
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/root/disdex-vps-control
@@ -54,11 +58,33 @@ jobs:
           grep -q 'disdex_txn_validate_backup' scripts/ops/root/disdex-promotion-transaction-lib.sh
           grep -q 'tamperRejected=true' scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
           ! grep -q '.disdex-preflight-pass' scripts/ops/root/disdex-vps-control
+
+          grep -q 'export DISDEX_V96_MAX_GROSS=1' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -q 'export DISDEX_V96_INITIAL_PENGU_GROSS=1.15' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -q 'export DISDEX_V96_MAX_DAILY_LOSS_PCT=5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -q 'export PENGU_DUAL_LS_V1_MODE=LIVE' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -q 'export PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED=true' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -q 'export PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED=true' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -q 'export PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP=1' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -q 'staleEnvironmentOverridden=true' scripts/ops/disdex-v96-v52-live-policy-selftest.sh
+          grep -q 'disdex_apply_v96_v52_fixed_live_policy' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+          grep -q 'exact(Number(approval.maximumPortfolioGross), 1' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+          grep -q 'exact(Number(approval.initialPenguGrossCap), 1.15' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+          grep -q 'exact(Number(approval.maximumDailyLossPct), 5' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+          grep -q 'DISDEX_V96_V52_APPROVAL_POLICY_WRAPPER_PASS' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+          grep -q 'disdex_apply_v96_v52_fixed_live_policy' scripts/ops/disdex-v96-v52-candidate-preflight.sh
+          grep -q 'disdex_apply_v96_v52_fixed_live_policy' scripts/ops/disdex-v96-v52-live.sh
+
           grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
+          grep -q 'Environment=DISDEX_V96_MAX_GROSS=1' ops/systemd/disdex-v96-v52-live.service
+          grep -q 'Environment=PENGU_DUAL_LS_V1_MODE=LIVE' ops/systemd/disdex-v96-v52-live.service
           grep -q 'DISDEX_V96_RUNTIME_COMMIT_SHA=%i' ops/systemd/disdex-v96-v52-preflight@.service
+          grep -q 'Environment=PENGU_DUAL_LS_V1_MODE=LIVE' ops/systemd/disdex-v96-v52-preflight@.service
           grep -q 'disdex-v96-v52-candidate-preflight.sh' ops/systemd/disdex-v96-v52-preflight@.service
           grep -q 'Conflicts=disdex-v96-v52-live.service' ops/systemd/disdex-v96-v52-approval@.service
           grep -q 'Environment=DISDEX_V96_MAX_GROSS=1' ops/systemd/disdex-v96-v52-approval@.service
+          grep -q 'Environment=PENGU_DUAL_LS_V1_MODE=LIVE' ops/systemd/disdex-v96-v52-approval@.service
+          grep -q 'disdex-v96-v52-approval-policy-wrapper.sh' ops/systemd/disdex-v96-v52-approval@.service
           grep -q 'ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state' ops/systemd/disdex-v96-v52-approval@.service
           grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_PASS' scripts/ops/disdex-v96-v52-renew-approvals.sh
           grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_ROLLBACK' scripts/ops/disdex-v96-v52-renew-approvals.sh
