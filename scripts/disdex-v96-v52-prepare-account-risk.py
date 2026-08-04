@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
 from disdex_v13d_v11eq_stock_live_engine import AsterClient, ASTER_SYMBOL, finite
@@ -14,18 +16,125 @@ STOCK_SYMBOLS = tuple(ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = CRYPTO_SYMBOLS + STOCK_SYMBOLS
 
 
-def require_exact_release() -> str:
-    sha = str(os.getenv("DISDEX_V96_RUNTIME_COMMIT_SHA") or "").strip().lower()
+def _validate_sha(value: str) -> str:
+    sha = value.strip().lower()
     if len(sha) != 40 or any(char not in "0123456789abcdef" for char in sha):
         raise RuntimeError("Account-risk preparation requires an exact runtime SHA")
-    expected = Path(f"/home/deploy/disdex-trading/releases/{sha}")
-    cwd = Path.cwd().resolve()
-    marker = cwd / ".disdex-release-sha"
-    if cwd != expected:
-        raise RuntimeError("Account-risk preparation must run from the exact immutable release")
-    if not marker.is_file() or marker.is_symlink() or marker.read_text(encoding="utf-8").strip() != sha:
-        raise RuntimeError("Immutable release SHA marker mismatch")
     return sha
+
+
+def _release_diagnostics(cwd: Path, expected: Path) -> str:
+    def resolved(path: Path) -> str:
+        try:
+            return str(path.resolve(strict=False))
+        except OSError as error:
+            return f"<resolve-error:{error}>"
+
+    return (
+        f"cwd={cwd}; cwdReal={resolved(cwd)}; "
+        f"expected={expected}; expectedReal={resolved(expected)}; "
+        f"expectedExists={expected.exists()}; expectedIsDir={expected.is_dir()}; "
+        f"expectedIsSymlink={expected.is_symlink()}"
+    )
+
+
+def _validate_release_identity(sha: str, cwd: Path, expected: Path) -> None:
+    if not expected.exists() or not expected.is_dir():
+        raise RuntimeError(
+            "Exact immutable release directory is missing: "
+            + _release_diagnostics(cwd, expected)
+        )
+    if expected.is_symlink():
+        raise RuntimeError(
+            "Exact immutable release directory must not be a symlink: "
+            + _release_diagnostics(cwd, expected)
+        )
+
+    try:
+        same_release = os.path.samefile(cwd, expected)
+    except OSError as error:
+        raise RuntimeError(
+            "Account-risk preparation could not verify the immutable release identity: "
+            + _release_diagnostics(cwd, expected)
+            + f"; samefileError={error}"
+        ) from error
+
+    if not same_release:
+        raise RuntimeError(
+            "Account-risk preparation must run from the exact immutable release: "
+            + _release_diagnostics(cwd, expected)
+        )
+
+    marker = expected / ".disdex-release-sha"
+    if not marker.is_file() or marker.is_symlink():
+        raise RuntimeError(
+            f"Immutable release SHA marker is missing, non-regular, or symlinked: marker={marker}"
+        )
+    marker_sha = marker.read_text(encoding="utf-8").strip().lower()
+    if marker_sha != sha:
+        raise RuntimeError(
+            f"Immutable release SHA marker mismatch: expected={sha}; actual={marker_sha}"
+        )
+
+
+def require_exact_release() -> str:
+    sha = _validate_sha(str(os.getenv("DISDEX_V96_RUNTIME_COMMIT_SHA") or ""))
+    expected = Path(f"/home/deploy/disdex-trading/releases/{sha}")
+    cwd = Path.cwd()
+    _validate_release_identity(sha, cwd, expected)
+    return sha
+
+
+def _expect_failure(label: str, callback) -> None:
+    try:
+        callback()
+    except RuntimeError:
+        return
+    raise AssertionError(f"Expected account-risk exact-release rejection: {label}")
+
+
+def run_self_test() -> int:
+    sha = "a" * 40
+    with tempfile.TemporaryDirectory(prefix="disdex-account-risk-release-") as temporary:
+        root = Path(temporary)
+        releases = root / "releases"
+        expected = releases / sha
+        expected.mkdir(parents=True)
+        marker = expected / ".disdex-release-sha"
+        marker.write_text(f"{sha}\n", encoding="utf-8")
+
+        _validate_release_identity(sha, expected, expected)
+
+        alias_root = root / "release-alias"
+        alias_root.symlink_to(releases, target_is_directory=True)
+        _validate_release_identity(sha, alias_root / sha, expected)
+
+        other = releases / ("b" * 40)
+        other.mkdir()
+        (other / ".disdex-release-sha").write_text(f"{sha}\n", encoding="utf-8")
+        _expect_failure(
+            "different directory",
+            lambda: _validate_release_identity(sha, other, expected),
+        )
+
+        marker.write_text(f"{'c' * 40}\n", encoding="utf-8")
+        _expect_failure(
+            "marker mismatch",
+            lambda: _validate_release_identity(sha, expected, expected),
+        )
+        marker.write_text(f"{sha}\n", encoding="utf-8")
+
+        symlink_expected = root / "symlink-release"
+        symlink_expected.symlink_to(expected, target_is_directory=True)
+        _expect_failure(
+            "symlink expected directory",
+            lambda: _validate_release_identity(sha, expected, symlink_expected),
+        )
+
+        _expect_failure("invalid SHA", lambda: _validate_sha("not-a-sha"))
+
+    print("V96/V52 account-risk exact-release identity self-test: PASS")
+    return 0
 
 
 def require_service_inactive() -> None:
@@ -136,6 +245,11 @@ def main() -> int:
 
 if __name__ == "__main__":
     try:
+        arguments = sys.argv[1:]
+        if arguments:
+            if arguments == ["--self-test"]:
+                raise SystemExit(run_self_test())
+            raise RuntimeError(f"Unsupported account-risk preparation arguments: {arguments}")
         raise SystemExit(main())
     except Exception as error:
         print(json.dumps({
