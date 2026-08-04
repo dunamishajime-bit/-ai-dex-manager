@@ -48,8 +48,8 @@ class SerializedMarginGuard(MarginGuard):
 
         lock_handle = self._acquire_emergency_lock()
         try:
-            already_flat = active_managed_positions(self.positions())
-            if not already_flat:
+            active_positions = active_managed_positions(self.positions())
+            if not active_positions:
                 return {
                     "status": "CONCURRENT_FLATTEN_ALREADY_COMPLETED",
                     "cancelRequestsSent": 0,
@@ -179,28 +179,49 @@ class SerializedMarginGuard(MarginGuard):
         }
         return self.emergency_flatten_managed(decision)
 
+    def _wait_without_account_calls(self, interval_ms: int, *, interrupt_on_kill_switch: bool) -> bool:
+        """Wait without authenticated API calls.
+
+        Returns True when a newly active local Kill Switch should interrupt a healthy wait.
+        """
+        deadline = base.now_ms() + max(1_000, int(interval_ms))
+        while not self.stop_requested and base.now_ms() < deadline:
+            if interrupt_on_kill_switch and self._kill_switch_requests_flatten():
+                return True
+            remaining_seconds = max(0.0, (deadline - base.now_ms()) / 1000.0)
+            time.sleep(min(1.0, remaining_seconds))
+        return False
+
     def run(self, daemon: bool) -> None:
         self.lock.acquire()
         try:
             while not self.stop_requested:
-                try:
-                    if self._kill_switch_requests_flatten():
+                if self._kill_switch_requests_flatten():
+                    try:
                         self._flatten_for_existing_kill_switch()
+                    except Exception as error:
+                        self.handle_failure(error)
+                    if not daemon:
+                        break
+                    # Kill Switch state is local and latched. Do not tight-loop account APIs
+                    # after managed positions have already been reconciled flat.
+                    self._wait_without_account_calls(
+                        WARNING_POLL_INTERVAL_MS,
+                        interrupt_on_kill_switch=False,
+                    )
+                    continue
+
+                try:
                     decision = self.evaluate_once(write_state=True, allow_kill_switch=True)
                 except Exception as error:
                     decision = self.handle_failure(error)
                 if not daemon:
                     break
                 interval = int(decision.get("pollIntervalMs") or WARNING_POLL_INTERVAL_MS)
-                deadline = base.now_ms() + interval
-                while not self.stop_requested and base.now_ms() < deadline:
-                    if self._kill_switch_requests_flatten():
-                        try:
-                            self._flatten_for_existing_kill_switch()
-                        except Exception as error:
-                            self.handle_failure(error)
-                        break
-                    time.sleep(min(1.0, max(0.0, (deadline - base.now_ms()) / 1000.0)))
+                self._wait_without_account_calls(
+                    interval,
+                    interrupt_on_kill_switch=True,
+                )
         finally:
             self.lock.release()
 
@@ -209,6 +230,7 @@ def self_test() -> None:
     assert EMERGENCY_LOCK_WAIT_SECONDS < 30
     guard = object.__new__(SerializedMarginGuard)
     assert isinstance(guard, MarginGuard)
+    assert hasattr(SerializedMarginGuard, "_wait_without_account_calls")
     print("V96/V52 serialized Margin Guard runtime self-test: PASS")
 
 
