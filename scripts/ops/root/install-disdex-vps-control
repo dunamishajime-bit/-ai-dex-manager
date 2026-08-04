@@ -19,13 +19,16 @@ helper_source="${repo_root}/scripts/ops/root/disdex-vps-control"
 transaction_lib_source="${repo_root}/scripts/ops/root/disdex-promotion-transaction-lib.sh"
 promotion_selftest_lib_source="${repo_root}/scripts/ops/root/disdex-promotion-selftest-lib.sh"
 transaction_selftest="${repo_root}/scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh"
+live_policy_source="${repo_root}/scripts/ops/disdex-v96-v52-live-policy.sh"
+live_policy_selftest="${repo_root}/scripts/ops/disdex-v96-v52-live-policy-selftest.sh"
+approval_policy_wrapper="${repo_root}/scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh"
 preflight_source="${repo_root}/ops/systemd/disdex-v96-v52-preflight@.service"
 approval_source="${repo_root}/ops/systemd/disdex-v96-v52-approval@.service"
 live_source="${repo_root}/ops/systemd/disdex-v96-v52-live.service"
 live_launcher="${repo_root}/scripts/ops/disdex-v96-v52-live.sh"
 approval_launcher="${repo_root}/scripts/ops/disdex-v96-v52-renew-approvals.sh"
 preflight_launcher="${repo_root}/scripts/ops/disdex-v96-v52-candidate-preflight.sh"
-for source in "$helper_source" "$transaction_lib_source" "$promotion_selftest_lib_source" "$transaction_selftest" "$preflight_source" "$approval_source" "$live_source" "$live_launcher" "$approval_launcher" "$preflight_launcher"; do
+for source in "$helper_source" "$transaction_lib_source" "$promotion_selftest_lib_source" "$transaction_selftest" "$live_policy_source" "$live_policy_selftest" "$approval_policy_wrapper" "$preflight_source" "$approval_source" "$live_source" "$live_launcher" "$approval_launcher" "$preflight_launcher"; do
   [[ -f "$source" ]] || {
     printf 'required fixed source is missing: %s\n' "$source" >&2
     exit 2
@@ -47,10 +50,14 @@ bash -n "$helper_source"
 bash -n "$transaction_lib_source"
 bash -n "$promotion_selftest_lib_source"
 bash -n "$transaction_selftest"
+bash -n "$live_policy_source"
+bash -n "$live_policy_selftest"
+bash -n "$approval_policy_wrapper"
 bash -n "$live_launcher"
 bash -n "$approval_launcher"
 bash -n "$preflight_launcher"
 bash "$transaction_selftest"
+bash "$live_policy_selftest"
 bash "$helper_source" trading-promote-selftest all
 grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"
 grep -q 'trading-promote)' "$helper_source"
@@ -62,9 +69,18 @@ grep -q 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS' "$helper_source"
 grep -q 'DISDEX_V96_V52_FULL_PROMOTION_FAILURE_INJECTION_SELFTEST_PASS' "$promotion_selftest_lib_source"
 grep -q 'productionPathsTouched=false' "$promotion_selftest_lib_source"
 grep -q 'disdex_txn_validate_backup' "$transaction_lib_source"
+grep -q 'DISDEX_V96_MAX_GROSS=1' "$live_policy_source"
+grep -q 'PENGU_DUAL_LS_V1_MODE=LIVE' "$live_policy_source"
+grep -q 'disdex_apply_v96_v52_fixed_live_policy' "$approval_policy_wrapper"
+grep -q 'maximumPortfolioGross), 1' "$approval_policy_wrapper"
+grep -q 'disdex_apply_v96_v52_fixed_live_policy' "$preflight_launcher"
+grep -q 'disdex_apply_v96_v52_fixed_live_policy' "$live_launcher"
 grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' "$live_source"
+grep -q 'Environment=PENGU_DUAL_LS_V1_MODE=LIVE' "$live_source"
+grep -q 'Environment=PENGU_DUAL_LS_V1_MODE=LIVE' "$preflight_source"
+grep -q 'Environment=PENGU_DUAL_LS_V1_MODE=LIVE' "$approval_source"
 grep -q 'ExecStart=/usr/bin/env DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-candidate-preflight.sh' "$preflight_source"
-grep -q 'ExecStart=/usr/bin/env DISDEX_V96_APPROVED_COMMIT_SHA=%i DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-renew-approvals.sh' "$approval_source"
+grep -q 'ExecStart=/usr/bin/env DISDEX_V96_APPROVED_COMMIT_SHA=%i DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh' "$approval_source"
 grep -q 'ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state' "$approval_source"
 grep -q 'DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE=CANDIDATE_RELEASE' "$approval_launcher"
 ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$helper_source"
@@ -124,6 +140,7 @@ printf 'backupRoot=%s\n' "$backup_root"
 printf 'workingDirectory=/home/deploy/disdex-trading/current\n'
 printf 'promotionRollbackSelftest=PASS\n'
 printf 'fullPromotionFailureInjectionSelftest=PASS\n'
+printf 'fixedLivePolicySelftest=PASS\n'
 printf 'servicesRestarted=false\n'
 printf 'ordersSent=false\n'
 printf 'runtimeStateChanged=false\n'
