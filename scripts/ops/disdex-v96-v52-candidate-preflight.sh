@@ -20,7 +20,7 @@ sha="${DISDEX_V96_RUNTIME_COMMIT_SHA:-}"
   exit 1
 }
 marker="$(pwd -P)/.disdex-release-sha"
-[[ -f "$marker" && "$(tr -d '[:space:]' < "$marker")" == "$sha" ]] || {
+[[ -f "$marker" && ! -L "$marker" && "$(tr -d '[:space:]' < "$marker")" == "$sha" ]] || {
   printf 'release marker does not match runtime SHA\n' >&2
   exit 1
 }
@@ -48,6 +48,12 @@ export PYTHONPYCACHEPREFIX="$tmp/pycache"
 export PYTHONPATH="${PYTHONPATH:-/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages}"
 mkdir -p "$HOME" "$npm_config_cache" "$PYTHONPYCACHEPREFIX"
 
+# Authenticated account-risk validation. This mode is strictly read-only:
+# no state write, no Kill Switch mutation and no order/cancel/position action.
+/usr/bin/python3 scripts/disdex_v96_v52_margin_guard.py \
+  --mode live \
+  --preflight-readonly
+
 DISDEX_V96_RUNTIME_COMMIT_SHA="$sha" \
   /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly
 
@@ -57,9 +63,19 @@ DISDEX_V96_CONFIG_MIGRATION_MODE=true \
 
 printf 'DISDEX_V96_V52_CANDIDATE_PREFLIGHT_PASS\n'
 printf 'runtimeCommitSha=%s\n' "$sha"
-printf 'maximumPortfolioGross=1\n'
+printf 'v96CryptoSleeveGross=1.5\n'
+printf 'v52StockSleeveGross=1.5\n'
+printf 'combinedPortfolioGross=2.5\n'
 printf 'initialPenguGrossCap=1.15\n'
 printf 'maximumDailyLossPct=5\n'
+printf 'v52MaximumDailyLossPct=3.5\n'
+printf 'requiredInitialLeverage=5\n'
+printf 'requiredMarginType=cross\n'
+printf 'healthyMarginPollIntervalMs=300000\n'
+printf 'warningMarginPollIntervalMs=60000\n'
+printf 'warningMarginRatioPct=50\n'
+printf 'stopLossMarginRatioPct=65\n'
+printf 'criticalMarginRatioPct=75\n'
 printf 'penguDualMode=LIVE\n'
 printf 'ordersSent=false\n'
 printf 'cancelSent=false\n'
