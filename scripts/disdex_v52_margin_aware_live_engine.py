@@ -202,8 +202,6 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         return max(0.0, capacity), {**snapshot, "minimumRequiredSlotGross": minimum, "marginRisk": decision}
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
-        # A second immediate authenticated check is intentional. The first check
-        # sizes the candidate; this check is the final order-time safety boundary.
         if self.live:
             decision = self.fresh_order_risk_check()
             if not decision.get("ordersAllowed"):
@@ -300,9 +298,13 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         )
         if not self.positions() and first_capacity + EPSILON < self.minimum_first_stock_gross:
             raise RuntimeError(f"Combined account cannot support minimum first V52 Stock Gross: {first_capacity:.6f}")
+        strategy_capital = (
+            base.finite(decision.get("totalMarginBalanceUsd"))
+            * min(1.0, self.stock_gross_cap / self.portfolio_gross_cap)
+        )
         checks.update({
             "marginGuard": decision,
-            "v52StrategyCapitalUsd": self.excess_margin_usd(),
+            "v52StrategyCapitalUsd": strategy_capital,
             "requiredInitialLeverage": 5,
             "requiredMarginType": "cross",
             "maximumInitialMarginFraction": self.maximum_initial_margin_fraction,
@@ -316,6 +318,7 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             "warningMarginPollIntervalMs": WARNING_POLL_INTERVAL_MS,
             "activeLoopIntervalMs": ACTIVE_LOOP_INTERVAL_MS,
             "dailyLossCheckIntervalMs": DAILY_LOSS_CHECK_INTERVAL_MS,
+            "runtimeStateChanged": not read_only,
         })
         return checks
 
@@ -363,6 +366,7 @@ def self_test() -> None:
     engine.minimum_second_stock_gross = 0.25
     engine.maximum_concurrent_stock_positions = 2
     engine.required_initial_leverage = 5
+    engine.maximum_initial_margin_fraction = 0.20
     engine.maximum_initial_margin_fraction = 0.70
     engine.minimum_available_balance_fraction = 0.20
     engine.gross_tolerance = 0.03
