@@ -543,7 +543,7 @@ def main() -> int:
     if args.self_test: self_test(); return 0
     runner = V52AsterOnlyEngine(args.mode)
     signal.signal(signal.SIGINT, lambda *_: setattr(runner, "stop_requested", True)); signal.signal(signal.SIGTERM, lambda *_: setattr(runner, "stop_requested", True))
-    if args.preflight_readonly: print(json.dumps(runner.preflight(read_only=True), indent=2, ensure_ascii=False)); return 0
+    if args.preflight_readonly: print(json.dumps(runner.preflight(read_only=True), ensure_ascii=False, separators=(",", ":"))); return 0
     if args.preflight: print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False)); return 0
     runner.run(args.daemon); return 0
 
