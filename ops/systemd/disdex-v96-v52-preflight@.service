@@ -1,5 +1,5 @@
 [Unit]
-Description=DisDex V96 plus V52 authenticated integrated preflight for release %i
+Description=DisDex V96 plus margin-aware V52 authenticated integrated preflight for release %i
 After=network-online.target
 Wants=network-online.target
 Conflicts=disdex-v96-v52-live.service
@@ -12,15 +12,28 @@ WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v96-v52-live-overrides.env
 Environment=DISDEX_V96_RUNTIME_COMMIT_SHA=%i
-Environment=DISDEX_V96_MAX_GROSS=1
+Environment=DISDEX_V96_MAX_GROSS=1.5
 Environment=DISDEX_V96_INITIAL_PENGU_GROSS=1.15
 Environment=DISDEX_V96_MAX_DAILY_LOSS_PCT=5
+Environment=DISDEX_V52_CRYPTO_GROSS_CAP=1.5
+Environment=DISDEX_V52_STOCK_GROSS_CAP=1.5
+Environment=DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5
+Environment=DISDEX_V52_V11_GROSS_CAP=1
+Environment=DISDEX_V52_V50_GROSS_CAP=1
+Environment=DISDEX_V52_RESERVED_FIRST_STOCK_GROSS=1
+Environment=DISDEX_V52_MINIMUM_FIRST_STOCK_GROSS=0.5
+Environment=DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS=0.25
+Environment=DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS=2
+Environment=DISDEX_V52_MAX_DAILY_LOSS_PCT=3.5
+Environment=DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5
+Environment=DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION=0.70
+Environment=DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION=0.20
 Environment=PENGU_DUAL_LS_V1_MODE=LIVE
 Environment=PENGU_DUAL_LS_V1_ENABLED=true
 Environment=PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED=true
 Environment=PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED=true
 Environment=PENGU_DUAL_LS_V1_MAX_GROSS=0.75
-Environment=PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP=1
+Environment=PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP=1.5
 Environment=PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT=5
 Environment=DISDEX_V96_CONFIG_MIGRATION_MODE=true
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
