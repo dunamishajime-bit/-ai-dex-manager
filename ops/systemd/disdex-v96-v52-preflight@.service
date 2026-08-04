@@ -15,6 +15,13 @@ Environment=DISDEX_V96_RUNTIME_COMMIT_SHA=%i
 Environment=DISDEX_V96_MAX_GROSS=1
 Environment=DISDEX_V96_INITIAL_PENGU_GROSS=1.15
 Environment=DISDEX_V96_MAX_DAILY_LOSS_PCT=5
+Environment=PENGU_DUAL_LS_V1_MODE=LIVE
+Environment=PENGU_DUAL_LS_V1_ENABLED=true
+Environment=PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED=true
+Environment=PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED=true
+Environment=PENGU_DUAL_LS_V1_MAX_GROSS=0.75
+Environment=PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP=1
+Environment=PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT=5
 Environment=DISDEX_V96_CONFIG_MIGRATION_MODE=true
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
