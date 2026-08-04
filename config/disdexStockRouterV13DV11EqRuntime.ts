@@ -10,15 +10,23 @@ export const DISDEX_V13D_V11EQ_V96_LINEAGE = {
 } as const;
 
 export const DISDEX_V13D_V11EQ_V96_ALLOCATION = {
-    cryptoSleeveGrossCap: 2.5,
+    cryptoSleeveGrossCap: 1.5,
     stockSleeveGrossCap: 1.5,
     v11MaximumGross: 1.0,
     v50MaximumGross: 1.0,
     portfolioGrossCap: 2.5,
-    sleeveLendingEnabled: false,
-    cryptoMayUsePortfolioResidual: true,
+    reservedFirstStockGross: 1.0,
+    minimumFirstStockGross: 0.5,
+    minimumSecondStockGross: 0.25,
     maximumConcurrentStockPositions: 2,
-    maximumConcurrentPositionsPerStockStrategy: 1,
+    cryptoInitialLeverage: 5,
+    stockInitialLeverage: 5,
+    requiredMarginType: "cross" as const,
+    maximumInitialMarginFraction: 0.70,
+    minimumAvailableBalanceFractionAfterOrder: 0.20,
+    sleeveLendingEnabled: false,
+    cryptoMayUsePortfolioResidual: false,
+    firstStockSlotReservedWhileCryptoActive: true,
     sameSymbolConcurrentStockPositionAllowed: false,
     firstFilledPositionPreserved: true,
     forcedReplacementAllowed: false,
@@ -102,7 +110,8 @@ export const DISDEX_V50_CONFIG = {
 } as const;
 
 export const DISDEX_V13D_V11EQ_V96_RISK = {
-    maximumPortfolioDailyLossPct: 2,
+    maximumPortfolioDailyLossPct: 5,
+    maximumV52SleeveDailyLossPct: 3.5,
     dailyLossTimeZone: "UTC",
     dailyLossAction: "CANCEL_NEW_ORDERS_AND_FLATTEN_MANAGED",
     dailyLossFailClosed: true,
@@ -117,7 +126,7 @@ export const DISDEX_V13D_V11EQ_V96_RISK = {
 
 export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     strategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
-    implementationStatus: "VPS_LIVE_READY_GROSS_2P5_PENGU_1P15_ENV_PREFLIGHT_AND_STATE_MIGRATION_GATED",
+    implementationStatus: "VPS_LIVE_READY_V96_1P5_STOCK_1P5_PORTFOLIO_2P5_FIXED_5X_MARGIN_GATED",
     mode: "LIVE_READY" as const,
     liveTradingEnabled: true,
     orderSubmissionAllowed: true,
@@ -125,7 +134,7 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     stateSchemaVersion: 3,
     stateDirectory: ".runtime-state/disdex-v13d-v11eq-v96",
     stockOrderClientIdPrefix: "stock-v52-",
-    pythonStockEngine: "scripts/disdex_v52_aster_only_live_engine.py",
+    pythonStockEngine: "scripts/disdex_v52_margin_aware_live_engine.py",
     combinedSupervisor: "scripts/disdex-v13d-v11eq-v96-live-runner.ts",
     combinedPreflight: "scripts/disdex-v13d-v11eq-v96-live-preflight.ts",
     requireCredentialsAndEndpointPreflight: true,
@@ -135,5 +144,5 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     legacyV11StateMigrationAcknowledgement: "I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION",
     cryptoV96RetainsOwnLiveGates: true,
     liveBlockReason:
-        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU 1.15 and portfolio Gross 2.5, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all Gross limits. Hyperliquid and V13D remain excluded.",
+        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU 1.15 and V96 Crypto Gross 1.5, combined Portfolio Gross 2.5, fixed 5x cross margin for all managed Aster symbols, at least 20% projected available balance, at most 70% projected initial-margin usage, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all sleeve limits. Hyperliquid and V13D remain excluded.",
 } as const;
