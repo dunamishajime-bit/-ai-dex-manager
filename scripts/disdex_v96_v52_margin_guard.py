@@ -140,7 +140,7 @@ class MarginGuard:
             **payload["marginRisk"],
         }, separators=(",", ":")), flush=True)
 
-    def evaluate_once(self) -> dict:
+    def evaluate_once(self, *, write_state: bool, allow_kill_switch: bool) -> dict:
         account = self.account_info()
         positions = self.positions()
         configuration = verify_managed_configuration(positions)
@@ -160,7 +160,8 @@ class MarginGuard:
             "positionChangesSent": False,
             **decision,
         }
-        self.write_state(payload)
+        if write_state:
+            self.write_state(payload)
         print(json.dumps({
             "event": "margin-guard-check",
             "stage": payload["stage"],
@@ -170,11 +171,12 @@ class MarginGuard:
             "minimumLiquidationBufferPct": payload["minimumLiquidationBufferPct"],
             "nearestLiquidationSymbol": payload["nearestLiquidationSymbol"],
             "activeManagedPositionCount": payload["activeManagedPositionCount"],
+            "readOnly": not write_state,
             "ordersSent": False,
             "cancelSent": False,
             "positionChangesSent": False,
         }, separators=(",", ":")), flush=True)
-        if payload["stage"] in {"REDUCE", "CRITICAL"}:
+        if allow_kill_switch and payload["stage"] in {"REDUCE", "CRITICAL"}:
             self.activate_shared_kill_switch(
                 "Margin Guard triggered pre-liquidation managed stop-loss: "
                 f"stage={payload['stage']}, marginRatio={payload['maintenanceMarginRatioPct']:.4f}%, "
@@ -221,11 +223,11 @@ class MarginGuard:
             )
         return payload
 
-    def preflight(self) -> dict:
-        decision = self.evaluate_once()
+    def require_healthy(self, *, write_state: bool, allow_kill_switch: bool) -> dict:
+        decision = self.evaluate_once(write_state=write_state, allow_kill_switch=allow_kill_switch)
         if decision["stage"] != "HEALTHY":
             raise RuntimeError(
-                f"Margin Guard preflight requires HEALTHY account risk, got {decision['stage']}"
+                f"Margin Guard requires HEALTHY account risk, got {decision['stage']}"
             )
         return decision
 
@@ -234,7 +236,7 @@ class MarginGuard:
         try:
             while not self.stop_requested:
                 try:
-                    decision = self.evaluate_once()
+                    decision = self.evaluate_once(write_state=True, allow_kill_switch=True)
                 except Exception as error:
                     decision = self.handle_failure(error)
                 if not daemon:
@@ -272,6 +274,7 @@ def main() -> int:
     parser.add_argument("--daemon", action="store_true")
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--preflight-readonly", action="store_true")
+    parser.add_argument("--preorder-check", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -281,7 +284,18 @@ def main() -> int:
     signal.signal(signal.SIGINT, lambda *_: setattr(guard, "stop_requested", True))
     signal.signal(signal.SIGTERM, lambda *_: setattr(guard, "stop_requested", True))
     if args.preflight_readonly:
-        print(json.dumps(guard.preflight(), ensure_ascii=False, separators=(",", ":")))
+        print(json.dumps(
+            guard.require_healthy(write_state=False, allow_kill_switch=False),
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ))
+        return 0
+    if args.preorder_check:
+        print(json.dumps(
+            guard.require_healthy(write_state=True, allow_kill_switch=True),
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ))
         return 0
     guard.run(args.daemon and not args.once)
     return 0
