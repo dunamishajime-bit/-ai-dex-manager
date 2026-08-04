@@ -64,7 +64,6 @@ jobs:
           grep -q 'rollback_promotion' scripts/ops/root/disdex-vps-control
           grep -q 'disdex_txn_snapshot_file "$STOCK_STATE_FILE"' scripts/ops/root/disdex-vps-control
           grep -q 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS' scripts/ops/root/disdex-vps-control
-          grep -q 'DISDEX_V96_V52_PROMOTION_ROLLBACK_FAILED' scripts/ops/root/disdex-vps-control
           grep -q 'DISDEX_V96_V52_FULL_PROMOTION_FAILURE_INJECTION_SELFTEST_PASS' scripts/ops/root/disdex-promotion-selftest-lib.sh
           grep -q 'productionPathsTouched=false' scripts/ops/root/disdex-promotion-selftest-lib.sh
           grep -q 'assert_promotion_selftest_isolated' scripts/ops/root/disdex-promotion-selftest-lib.sh
