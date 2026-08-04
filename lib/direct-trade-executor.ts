@@ -136,7 +136,7 @@ async function runFreshMarginGuardBeforeExposureOrder() {
     try {
         const result = await execFileAsync(
             python,
-            [script, "--mode", "live", "--preflight-readonly"],
+            [script, "--mode", "live", "--preorder-check"],
             {
                 cwd: process.cwd(),
                 env: process.env,
