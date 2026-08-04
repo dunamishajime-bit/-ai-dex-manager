@@ -10,7 +10,7 @@ User=deploy
 Group=deploy
 WorkingDirectory=/home/deploy/disdex-trading/current
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
-EnvironmentFile=/etc/disdex/disdex-v96-v52-live-overrides.env
+EnvironmentFile=-/etc/disdex/disdex-v96-v52-live-overrides.env
 Environment=NODE_ENV=production
 Environment=DISDEX_V13D_V11EQ_V96_RUNNER_MODE=live
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
