@@ -6,6 +6,10 @@ const EPSILON = 1e-9;
 export interface DisDexV96ExecutionCapacityConfig {
     cashReservePct: number;
     maxGross: number;
+    portfolioGrossCap?: number;
+    targetInitialLeverage?: number;
+    maximumInitialMarginFraction?: number;
+    minimumAvailableBalanceFractionAfterOrder?: number;
     maxSlippageBps: number;
     minOrderNotionalUsd: number;
     roundTripFeeBps: number;
@@ -32,6 +36,14 @@ export interface DisDexV96ExecutionCapacityPlan {
     grossIncreaseCapacityUsd: number;
     currentAccountGrossNotionalUsd: number;
     externalGrossNotionalUsd: number;
+    managedGrossCap: number;
+    portfolioGrossCap: number;
+    targetInitialLeverage: number;
+    maximumInitialMarginFraction: number;
+    minimumAvailableBalanceAfterOrderUsd: number;
+    projectedInitialMarginUsd: number;
+    projectedInitialMarginFraction: number;
+    projectedAvailableBalanceUsd: number;
     projectedManagedGross: number;
     projectedPortfolioGross: number;
     wasScaled: boolean;
@@ -97,8 +109,26 @@ export function planDisDexV96ExecutionCapacity(input: {
     config: DisDexV96ExecutionCapacityConfig;
 }): DisDexV96ExecutionCapacityPlan {
     const { action, config } = input;
-    const maxGross = finiteNonNegative(config.maxGross, "V96 maximum Gross");
-    if (maxGross <= 0) throw new Error("V96 maximum Gross must be positive.");
+    const managedGrossCap = finiteNonNegative(config.maxGross, "V96 managed Gross");
+    if (managedGrossCap <= 0) throw new Error("V96 managed Gross must be positive.");
+    const portfolioGrossCap = finiteNonNegative(config.portfolioGrossCap ?? managedGrossCap, "Combined portfolio Gross");
+    if (portfolioGrossCap < managedGrossCap) {
+        throw new Error("Combined portfolio Gross must not be smaller than the V96 managed Gross cap.");
+    }
+    const targetInitialLeverage = Math.max(1, finiteNonNegative(config.targetInitialLeverage ?? 1, "V96 target leverage"));
+    const maximumInitialMarginFraction = Math.min(
+        1,
+        finiteNonNegative(config.maximumInitialMarginFraction ?? 1, "Maximum initial-margin fraction"),
+    );
+    if (maximumInitialMarginFraction <= 0) throw new Error("Maximum initial-margin fraction must be positive.");
+    const minimumAvailableBalanceFractionAfterOrder = Math.min(
+        1,
+        finiteNonNegative(
+            config.minimumAvailableBalanceFractionAfterOrder ?? 0,
+            "Minimum available-balance fraction after order",
+        ),
+    );
+
     const equityUsd = disDexV96AccountEquity(input.account, input.positions);
     const reportedAvailableBalanceUsd = finiteNonNegative(input.account.availableBalance, "V96 available balance");
     const requiredInitialMarginUsd = disDexV96RequiredInitialMarginUsd(input.positions);
@@ -117,28 +147,56 @@ export function planDisDexV96ExecutionCapacity(input: {
         ? 0
         : Math.max(0, Math.abs(action.targetNotionalUsd) - Math.abs(action.currentNotionalUsd));
     const estimatedCostHeadroomUsd = requestedIncreaseUsd * (roundTripFeeBps + maxSlippageBps) / 10_000;
-    const protectedCashUsd = Math.max(cashReserveUsd, estimatedCostHeadroomUsd, minimumExecutionHeadroomUsd);
-    const availableMarginUsd = Math.max(0, effectiveAvailableBalanceUsd - protectedCashUsd);
-    // Read-only LIVE preflight verifies that every managed Aster symbol has
-    // leverage >= ceil(maxGross). Multiplying free margin by maxGross therefore
-    // permits Gross above 1.0 without exceeding the approved portfolio cap.
-    const availableIncreaseCapacityUsd = availableMarginUsd * maxGross;
+    const minimumAvailableBalanceAfterOrderUsd = equityUsd * minimumAvailableBalanceFractionAfterOrder;
+    const protectedCashUsd = Math.max(
+        cashReserveUsd,
+        estimatedCostHeadroomUsd,
+        minimumExecutionHeadroomUsd,
+        minimumAvailableBalanceAfterOrderUsd,
+    );
+    const maximumInitialMarginUsd = equityUsd * maximumInitialMarginFraction;
+    const marginRoomByFractionUsd = Math.max(0, maximumInitialMarginUsd - requiredInitialMarginUsd);
+    const marginRoomByAvailableBalanceUsd = Math.max(0, effectiveAvailableBalanceUsd - protectedCashUsd);
+    const availableMarginUsd = Math.min(marginRoomByFractionUsd, marginRoomByAvailableBalanceUsd);
+    const availableIncreaseCapacityUsd = availableMarginUsd * targetInitialLeverage;
 
     const currentAccountGrossNotionalUsd = grossNotionalUsd(input.positions, "V96 account");
     const currentManagedGrossNotionalUsd = grossNotionalUsd(input.managedPositions, "V96 managed");
     const externalGrossNotionalUsd = Math.max(0, currentAccountGrossNotionalUsd - currentManagedGrossNotionalUsd);
     const otherManagedGrossNotionalUsd = Math.max(0, currentManagedGrossNotionalUsd - Math.abs(action.currentNotionalUsd));
-    const maximumTargetNotionalByGrossUsd = Math.max(
+    const maximumTargetNotionalByManagedGrossUsd = Math.max(
         0,
-        maxGross * equityUsd - externalGrossNotionalUsd - otherManagedGrossNotionalUsd,
+        managedGrossCap * equityUsd - otherManagedGrossNotionalUsd,
+    );
+    const maximumTargetNotionalByPortfolioGrossUsd = Math.max(
+        0,
+        portfolioGrossCap * equityUsd - externalGrossNotionalUsd - otherManagedGrossNotionalUsd,
+    );
+    const maximumTargetNotionalByGrossUsd = Math.min(
+        maximumTargetNotionalByManagedGrossUsd,
+        maximumTargetNotionalByPortfolioGrossUsd,
     );
     const grossIncreaseCapacityUsd = Math.max(0, maximumTargetNotionalByGrossUsd - Math.abs(action.currentNotionalUsd));
 
-    if (action.reduceOnly || requestedIncreaseUsd <= EPSILON) {
-        const projectedManagedGross = (otherManagedGrossNotionalUsd + Math.abs(action.targetNotionalUsd)) / equityUsd;
+    const buildProjection = (targetNotionalAbsUsd: number, increaseUsd: number) => {
+        const projectedInitialMarginUsd = requiredInitialMarginUsd + increaseUsd / targetInitialLeverage;
+        const projectedInitialMarginFraction = projectedInitialMarginUsd / equityUsd;
+        const projectedAvailableBalanceUsd = Math.max(0, effectiveAvailableBalanceUsd - increaseUsd / targetInitialLeverage);
+        const projectedManagedGross = (otherManagedGrossNotionalUsd + targetNotionalAbsUsd) / equityUsd;
         const projectedPortfolioGross = (
-            externalGrossNotionalUsd + otherManagedGrossNotionalUsd + Math.abs(action.targetNotionalUsd)
+            externalGrossNotionalUsd + otherManagedGrossNotionalUsd + targetNotionalAbsUsd
         ) / equityUsd;
+        return {
+            projectedInitialMarginUsd,
+            projectedInitialMarginFraction,
+            projectedAvailableBalanceUsd,
+            projectedManagedGross,
+            projectedPortfolioGross,
+        };
+    };
+
+    if (action.reduceOnly || requestedIncreaseUsd <= EPSILON) {
+        const projection = buildProjection(Math.abs(action.targetNotionalUsd), requestedIncreaseUsd);
         return {
             action,
             signalTargetWeight: action.targetWeight,
@@ -159,8 +217,12 @@ export function planDisDexV96ExecutionCapacity(input: {
             grossIncreaseCapacityUsd,
             currentAccountGrossNotionalUsd,
             externalGrossNotionalUsd,
-            projectedManagedGross,
-            projectedPortfolioGross,
+            managedGrossCap,
+            portfolioGrossCap,
+            targetInitialLeverage,
+            maximumInitialMarginFraction,
+            minimumAvailableBalanceAfterOrderUsd,
+            ...projection,
             wasScaled: false,
         };
     }
@@ -182,19 +244,25 @@ export function planDisDexV96ExecutionCapacity(input: {
         targetWeight: executionTargetWeight,
         deltaNotionalUsd: deltaDirection * executableIncreaseUsd,
         reason: executionScale + EPSILON < 1
-            ? `${action.reason} Execution size was proportionally reduced to available margin and shared portfolio Gross capacity.`
+            ? `${action.reason} Execution size was proportionally reduced to fixed 5x margin capacity, V96 sleeve Gross and combined portfolio Gross capacity.`
             : action.reason,
     };
-    const projectedManagedGross = (otherManagedGrossNotionalUsd + executionTargetNotionalAbsUsd) / equityUsd;
-    const projectedPortfolioGross = (
-        externalGrossNotionalUsd + otherManagedGrossNotionalUsd + executionTargetNotionalAbsUsd
-    ) / equityUsd;
-    if (projectedPortfolioGross > maxGross + EPSILON) {
-        throw new Error(`V96 projected portfolio Gross ${projectedPortfolioGross.toFixed(8)} exceeds ${maxGross}; manual review is required.`);
+    const projection = buildProjection(executionTargetNotionalAbsUsd, executableIncreaseUsd);
+    if (projection.projectedManagedGross > managedGrossCap + EPSILON) {
+        throw new Error(`V96 projected managed Gross ${projection.projectedManagedGross.toFixed(8)} exceeds ${managedGrossCap}; manual review is required.`);
+    }
+    if (projection.projectedPortfolioGross > portfolioGrossCap + EPSILON) {
+        throw new Error(`V96 projected combined portfolio Gross ${projection.projectedPortfolioGross.toFixed(8)} exceeds ${portfolioGrossCap}; manual review is required.`);
+    }
+    if (projection.projectedInitialMarginFraction > maximumInitialMarginFraction + EPSILON) {
+        throw new Error(`V96 projected initial-margin fraction ${projection.projectedInitialMarginFraction.toFixed(8)} exceeds ${maximumInitialMarginFraction}; manual review is required.`);
+    }
+    if (projection.projectedAvailableBalanceUsd + EPSILON < minimumAvailableBalanceAfterOrderUsd) {
+        throw new Error("V96 projected available balance would fall below the protected combined-account reserve.");
     }
     const minimumOrderNotionalUsd = finiteNonNegative(config.minOrderNotionalUsd, "V96 minimum order notional");
     const blockedReason = executableIncreaseUsd + EPSILON < minimumOrderNotionalUsd
-        ? `V96 executable increase ${executableIncreaseUsd.toFixed(4)} USD is below the minimum order notional after Cash Reserve, cost headroom, leverage, margin and shared portfolio Gross checks.`
+        ? `V96 executable increase ${executableIncreaseUsd.toFixed(4)} USD is below the minimum order notional after Cash Reserve, cost headroom, fixed leverage, margin, V96 sleeve Gross and combined portfolio Gross checks.`
         : undefined;
     return {
         action: adjustedAction,
@@ -216,8 +284,12 @@ export function planDisDexV96ExecutionCapacity(input: {
         grossIncreaseCapacityUsd,
         currentAccountGrossNotionalUsd,
         externalGrossNotionalUsd,
-        projectedManagedGross,
-        projectedPortfolioGross,
+        managedGrossCap,
+        portfolioGrossCap,
+        targetInitialLeverage,
+        maximumInitialMarginFraction,
+        minimumAvailableBalanceAfterOrderUsd,
+        ...projection,
         wasScaled: executionScale + EPSILON < 1,
         blockedReason,
     };
