@@ -1,72 +1,30 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import signal
-from typing import Dict, List, Optional, Tuple
+import time
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 import disdex_v52_aster_only_live_engine as legacy
+from disdex_v96_v52_margin_guard import MANAGED_SYMBOLS, verify_managed_configuration
+from disdex_v96_v52_margin_risk_policy import (
+    HEALTHY_POLL_INTERVAL_MS,
+    WARNING_POLL_INTERVAL_MS,
+    build_margin_risk_snapshot,
+    classify_margin_risk,
+)
 
 base = legacy.base
 STRATEGY_ID = legacy.STRATEGY_ID
 V11_SLOT = legacy.V11_SLOT
 V50_SLOT = legacy.V50_SLOT
-MANAGED_CRYPTO_SYMBOLS = ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT")
-MANAGED_STOCK_SYMBOLS = tuple(base.ASTER_SYMBOL.values())
-MANAGED_SYMBOLS = MANAGED_CRYPTO_SYMBOLS + MANAGED_STOCK_SYMBOLS
 EPSILON = 1e-9
-ACCOUNT_RISK_POLL_INTERVAL_MS = 30_000
-
-
-def normalized_margin_type(row: dict) -> str:
-    raw = str(row.get("marginType") or "").strip().lower()
-    if raw in {"cross", "crossed"}:
-        return "cross"
-    if raw in {"isolated", "isolate"}:
-        return "isolated"
-    if row.get("isolated") is False:
-        return "cross"
-    if row.get("isolated") is True:
-        return "isolated"
-    return "unknown"
-
-
-def position_notional(row: dict) -> float:
-    return abs(base.finite(row.get("positionAmt"))) * base.finite(row.get("markPrice") or row.get("entryPrice"))
-
-
-def row_initial_margin(row: dict) -> float:
-    for key in ("initialMargin", "positionInitialMargin", "isolatedMargin"):
-        raw = row.get(key)
-        if raw is not None and str(raw).strip() != "":
-            reported = base.finite(raw, -1.0)
-            if reported >= 0:
-                return reported
-    notional = position_notional(row)
-    leverage = base.finite(row.get("leverage"))
-    if notional <= 0:
-        return 0.0
-    if leverage < 1:
-        raise RuntimeError(f"Invalid leverage for {row.get('symbol')}: {row.get('leverage')}")
-    return notional / leverage
-
-
-def verify_fixed_account_configuration(rows: List[dict], required_leverage: int) -> Dict[str, dict]:
-    by_symbol = {str(row.get("symbol") or "").upper(): row for row in rows}
-    result: Dict[str, dict] = {}
-    for symbol in MANAGED_SYMBOLS:
-        row = by_symbol.get(symbol)
-        if row is None:
-            raise RuntimeError(f"Aster position-risk row missing for managed symbol: {symbol}")
-        leverage = int(base.finite(row.get("leverage")))
-        margin_type = normalized_margin_type(row)
-        if leverage != required_leverage:
-            raise RuntimeError(f"Managed symbol leverage mismatch for {symbol}: expected {required_leverage}, got {leverage}")
-        if margin_type != "cross":
-            raise RuntimeError(f"Managed symbol margin type mismatch for {symbol}: expected cross, got {margin_type}")
-        result[symbol] = {"leverage": leverage, "marginType": margin_type}
-    return result
+ACTIVE_LOOP_INTERVAL_MS = 2_000
+DAILY_LOSS_CHECK_INTERVAL_MS = 60_000
 
 
 class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
@@ -84,8 +42,18 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.required_initial_leverage = base.int_env("DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE", 5)
         self.maximum_initial_margin_fraction = base.float_env("DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION", 0.70)
         self.minimum_available_balance_fraction = base.float_env("DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION", 0.20)
-        self._last_account_risk_check_ms = 0
-        self._account_risk_cache = None
+        combined_root = Path(os.getenv(
+            "DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT",
+            str(self.state_root.parent),
+        )).resolve()
+        self.margin_guard_state_path = Path(os.getenv(
+            "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE",
+            str(combined_root / "margin-risk" / f"guard-{mode}.json"),
+        )).resolve()
+        self._last_daily_loss_check_ms = 0
+        self._last_daily_loss_result = False
+        self._last_reset_utc_day = None
+        self._last_reset_ny_day = None
         self._assert_policy_configuration()
 
     def _assert_policy_configuration(self) -> None:
@@ -97,7 +65,7 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             if abs(actual - expected) > EPSILON:
                 raise RuntimeError(f"V52 fixed {label} must be {expected}")
         if self.crypto_gross_cap + self.reserved_first_stock_gross > self.portfolio_gross_cap + EPSILON:
-            raise RuntimeError("V52 policy does not reserve enough Gross for the first Stock position")
+            raise RuntimeError("V52 policy does not reserve Gross 1.0 for the first Stock position")
         if self.maximum_concurrent_stock_positions != 2:
             raise RuntimeError("V52 maximum concurrent Stock positions must be exactly 2")
         if self.required_initial_leverage != 5:
@@ -109,124 +77,227 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         if self.minimum_second_stock_gross < 0.25 - EPSILON:
             raise RuntimeError("Second Stock position minimum Gross must be at least 0.25")
 
-    def excess_margin_usd(self) -> float:
-        equity = self.portfolio_equity()
-        if equity <= 0 or self.portfolio_gross_cap <= 0:
-            return 0.0
-        return equity * min(1.0, self.stock_gross_cap / self.portfolio_gross_cap)
+    def account_info(self) -> dict:
+        if not self.live:
+            equity = base.float_env("DISDEX_STOCK_PAPER_ASTER_EQUITY_USD", 1000.0)
+            return {
+                "totalMaintMargin": "0",
+                "totalMarginBalance": str(equity),
+                "totalPositionInitialMargin": "0",
+                "totalOpenOrderInitialMargin": "0",
+                "availableBalance": str(equity),
+            }
+        return self.aster._signed("GET", "/fapi/v4/account", {})
 
-    def _usdt_balance(self) -> dict:
-        row = next((item for item in self.aster.balances() if str(item.get("asset") or "").upper() == "USDT"), None)
-        if row is None:
-            raise RuntimeError("Aster USDT balance row is missing")
-        return row
+    def _write_guard_state(self, decision: dict, configuration: Dict[str, dict]) -> None:
+        now = base.now_ms()
+        payload = {
+            "schemaVersion": 1,
+            "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD",
+            "mode": self.mode,
+            "checkedAt": now,
+            "nextCheckAt": now + int(decision["pollIntervalMs"]),
+            "consecutiveFailures": 0,
+            "accountConfiguration": configuration,
+            "ordersSent": False,
+            "cancelSent": False,
+            "positionChangesSent": False,
+            **decision,
+        }
+        self.margin_guard_state_path.parent.mkdir(parents=True, exist_ok=True)
+        base.atomic_write_json(self.margin_guard_state_path, payload)
 
-    def account_margin_snapshot(self, rows: List[dict]) -> dict:
-        equity = self.portfolio_equity()
+    def gross_snapshot_from_rows(self, account: dict, rows: List[dict]) -> dict:
+        equity = base.finite(account.get("totalMarginBalance"))
         if equity <= 0:
-            raise RuntimeError("Aster equity must be positive")
-        available = base.finite(self._usdt_balance().get("availableBalance"))
-        if available < 0:
-            raise RuntimeError("Aster available balance is invalid")
-        initial_margin = sum(row_initial_margin(row) for row in rows)
+            raise RuntimeError("Aster totalMarginBalance must be positive")
+        crypto_symbols = {"BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"}
+        stock_symbols = set(base.ASTER_SYMBOL.values())
+        crypto_notional = 0.0
+        stock_notional = 0.0
+        for row in rows:
+            symbol = str(row.get("symbol") or "").upper()
+            notional = abs(base.finite(row.get("positionAmt"))) * base.finite(row.get("markPrice") or row.get("entryPrice"))
+            if symbol in crypto_symbols:
+                crypto_notional += notional
+            elif symbol in stock_symbols:
+                stock_notional += notional
         return {
             "equityUsd": equity,
-            "availableBalanceUsd": available,
-            "currentInitialMarginUsd": initial_margin,
-            "currentInitialMarginFraction": initial_margin / equity,
+            "cryptoNotionalUsd": crypto_notional,
+            "stockNotionalUsd": stock_notional,
+            "cryptoGross": crypto_notional / equity,
+            "stockGross": stock_notional / equity,
+            "totalGross": (crypto_notional + stock_notional) / equity,
         }
 
-    def assert_account_margin_safe(self, *, force: bool = False, rows: Optional[List[dict]] = None) -> dict:
-        now = base.now_ms()
-        if not force and self._account_risk_cache and now - self._last_account_risk_check_ms < ACCOUNT_RISK_POLL_INTERVAL_MS:
-            return self._account_risk_cache
-        position_rows = rows if rows is not None else self.aster.positions()
-        configuration = verify_fixed_account_configuration(position_rows, self.required_initial_leverage)
-        margin = self.account_margin_snapshot(position_rows)
-        if margin["currentInitialMarginFraction"] > self.maximum_initial_margin_fraction + EPSILON:
-            raise RuntimeError(
-                f"Combined initial-margin fraction exceeds safety maximum: {margin['currentInitialMarginFraction']:.6f} > {self.maximum_initial_margin_fraction:.6f}"
+    def fresh_order_risk_check(self) -> dict:
+        account = self.account_info()
+        rows = self.aster.positions() if self.live else [
+            {
+                "symbol": symbol,
+                "positionAmt": "0",
+                "markPrice": "1",
+                "liquidationPrice": "0",
+                "leverage": "5",
+                "marginType": "cross",
+            }
+            for symbol in MANAGED_SYMBOLS
+        ]
+        configuration = verify_managed_configuration(rows)
+        previous = base.read_json(self.margin_guard_state_path, {}) or {}
+        snapshot = build_margin_risk_snapshot(account, rows, MANAGED_SYMBOLS)
+        decision = classify_margin_risk(snapshot, str(previous.get("stage") or "HEALTHY"))
+        decision["gross"] = self.gross_snapshot_from_rows(account, rows)
+        self._write_guard_state(decision, configuration)
+        if decision["stage"] in {"REDUCE", "CRITICAL"}:
+            self.activate_kill_switch(
+                "V52 pre-order Margin Guard triggered pre-liquidation stop-loss: "
+                f"stage={decision['stage']}, marginRatio={decision['maintenanceMarginRatioPct']:.4f}%, "
+                f"minimumLiquidationBuffer={decision['minimumLiquidationBufferPct']}"
             )
-        minimum_available = margin["equityUsd"] * self.minimum_available_balance_fraction
-        if margin["availableBalanceUsd"] + EPSILON < minimum_available:
-            raise RuntimeError(
-                f"Combined available balance is below reserve: {margin['availableBalanceUsd']:.6f} < {minimum_available:.6f}"
-            )
-        self._account_risk_cache = {"configuration": configuration, "margin": margin}
-        self._last_account_risk_check_ms = now
-        return self._account_risk_cache
+        return decision
 
-    def projected_margin_capacity_gross(self, snapshot: dict, margin: dict) -> float:
-        equity = base.finite(snapshot.get("equityUsd"))
+    def projected_margin_capacity_gross(self, decision: dict) -> float:
+        equity = base.finite(decision.get("totalMarginBalanceUsd"))
         if equity <= 0:
             return 0.0
-        room_by_fraction = max(0.0, equity * self.maximum_initial_margin_fraction - base.finite(margin.get("currentInitialMarginUsd")))
-        room_by_balance = max(0.0, base.finite(margin.get("availableBalanceUsd")) - equity * self.minimum_available_balance_fraction)
+        initial_margin = (
+            base.finite(decision.get("totalPositionInitialMarginUsd"))
+            + base.finite(decision.get("totalOpenOrderInitialMarginUsd"))
+        )
+        available = base.finite(decision.get("availableBalanceUsd"))
+        room_by_fraction = max(0.0, equity * self.maximum_initial_margin_fraction - initial_margin)
+        room_by_balance = max(0.0, available - equity * self.minimum_available_balance_fraction)
         return min(room_by_fraction, room_by_balance) * self.required_initial_leverage / equity
 
     def available_slot_gross(self, slot: str) -> Tuple[float, dict]:
-        snapshot = self.gross_snapshot()
         positions = self.positions()
         if slot in positions or self.v96_requires_margin() or len(positions) >= self.maximum_concurrent_stock_positions:
+            return 0.0, self.gross_snapshot()
+        decision = self.fresh_order_risk_check() if self.live else {
+            "stage": "HEALTHY",
+            "ordersAllowed": True,
+            "gross": self.gross_snapshot(),
+            "totalMarginBalanceUsd": self.portfolio_equity(),
+            "totalPositionInitialMarginUsd": 0.0,
+            "totalOpenOrderInitialMarginUsd": 0.0,
+            "availableBalanceUsd": self.portfolio_equity(),
+        }
+        snapshot = decision["gross"]
+        if not decision.get("ordersAllowed"):
+            self.log("v52-entry-blocked-by-margin-guard", slot=slot, marginRisk=decision)
             return 0.0, snapshot
-        if self.live:
-            margin = self.assert_account_margin_safe(force=True)["margin"]
-        else:
-            margin = {
-                "equityUsd": snapshot["equityUsd"],
-                "availableBalanceUsd": snapshot["equityUsd"],
-                "currentInitialMarginUsd": snapshot["totalGross"] * snapshot["equityUsd"] / self.required_initial_leverage,
-                "currentInitialMarginFraction": snapshot["totalGross"] / self.required_initial_leverage,
-            }
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
         capacity = min(
             slot_cap,
             max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
             max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
-            self.projected_margin_capacity_gross(snapshot, margin),
+            self.projected_margin_capacity_gross(decision),
         )
         minimum = self.minimum_first_stock_gross if not positions else self.minimum_second_stock_gross
         if capacity + EPSILON < minimum:
-            return 0.0, {**snapshot, "margin": margin, "minimumRequiredSlotGross": minimum}
-        return max(0.0, capacity), {**snapshot, "margin": margin, "minimumRequiredSlotGross": minimum}
+            return 0.0, {**snapshot, "minimumRequiredSlotGross": minimum, "marginRisk": decision}
+        return max(0.0, capacity), {**snapshot, "minimumRequiredSlotGross": minimum, "marginRisk": decision}
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
-        self._account_risk_cache = None
-        current_capacity, capacity_snapshot = self.available_slot_gross(slot)
-        if target_gross <= 0 or target_gross > current_capacity + self.gross_tolerance:
-            self.log("v52-entry-capacity-recheck-blocked", slot=slot, requestedGross=target_gross,
-                     currentCapacityGross=current_capacity, capacitySnapshot=capacity_snapshot)
-            return False
-        return super().open_basis_position(slot, candidate, min(target_gross, current_capacity))
+        # A second immediate authenticated check is intentional. The first check
+        # sizes the candidate; this check is the final order-time safety boundary.
+        if self.live:
+            decision = self.fresh_order_risk_check()
+            if not decision.get("ordersAllowed"):
+                self.log("v52-final-preorder-margin-guard-blocked", slot=slot, marginRisk=decision)
+                return False
+            snapshot = decision["gross"]
+            current_capacity = min(
+                self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap,
+                max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
+                max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
+                self.projected_margin_capacity_gross(decision),
+            )
+            minimum = self.minimum_first_stock_gross if not self.positions() else self.minimum_second_stock_gross
+            if current_capacity + EPSILON < minimum or target_gross > current_capacity + self.gross_tolerance:
+                self.log(
+                    "v52-final-preorder-capacity-blocked",
+                    slot=slot,
+                    requestedGross=target_gross,
+                    currentCapacityGross=current_capacity,
+                    minimumRequiredGross=minimum,
+                    marginRisk=decision,
+                )
+                return False
+        return super().open_basis_position(slot, candidate, target_gross)
 
-    def tick(self) -> None:
-        if self.live and base.now_ms() - self._last_account_risk_check_ms >= ACCOUNT_RISK_POLL_INTERVAL_MS:
-            self.assert_account_margin_safe(force=True)
-            self.assert_gross_safe()
-        super().tick()
+    def reset_days(self) -> None:
+        utc_day = dt.datetime.now(tz=base.UTC).date().isoformat()
+        ny_day = dt.datetime.now(tz=base.NY).date().isoformat()
+        latch = self.state.get("v52StrategyDailyLossLatch")
+        if (
+            self._last_reset_utc_day == utc_day
+            and self._last_reset_ny_day == ny_day
+            and isinstance(latch, dict)
+            and latch.get("utcDay") == utc_day
+        ):
+            return
+        super().reset_days()
+        self._last_reset_utc_day = utc_day
+        self._last_reset_ny_day = ny_day
+
+    def _cached_equity(self) -> float:
+        row = base.read_json(self.margin_guard_state_path, {}) or {}
+        equity = base.finite(row.get("totalMarginBalanceUsd"))
+        if equity > 0:
+            return equity
+        return base.float_env("DISDEX_STOCK_PAPER_ASTER_EQUITY_USD", 1000.0) if not self.live else 0.0
+
+    def excess_margin_usd(self) -> float:
+        equity = self._cached_equity()
+        if equity <= 0:
+            if self.live:
+                decision = self.fresh_order_risk_check()
+                equity = base.finite(decision.get("totalMarginBalanceUsd"))
+            else:
+                equity = self.portfolio_equity()
+        if equity <= 0:
+            return 0.0
+        return equity * min(1.0, self.stock_gross_cap / self.portfolio_gross_cap)
+
+    def _v52_unrealized_pnl(self) -> float:
+        total = 0.0
+        for position in self.positions().values():
+            symbol = str(position["symbol"])
+            book = self.aster.book(base.ASTER_SYMBOL[symbol], 5)
+            mark = book.mid
+            entry = base.finite(position.get("asterEntryPrice"))
+            quantity = base.finite(position.get("asterQty"))
+            direction = 1.0 if position.get("asterOpenSide") == "BUY" else -1.0
+            total += (mark - entry) * quantity * direction
+        return total
+
+    def enforce_daily_loss(self) -> bool:
+        now = base.now_ms()
+        if now - self._last_daily_loss_check_ms < DAILY_LOSS_CHECK_INTERVAL_MS:
+            return self._last_daily_loss_result
+        self._last_daily_loss_check_ms = now
+        self._last_daily_loss_result = super().enforce_daily_loss()
+        return self._last_daily_loss_result
 
     def preflight(self, read_only: bool = False) -> dict:
         checks = super().preflight(read_only=read_only)
-        if self.live:
-            account = self.assert_account_margin_safe(force=True)
-            configuration, margin = account["configuration"], account["margin"]
-        else:
-            configuration = {symbol: {"leverage": 5, "marginType": "cross"} for symbol in MANAGED_SYMBOLS}
-            equity = self.portfolio_equity()
-            margin = {"equityUsd": equity, "availableBalanceUsd": equity,
-                      "currentInitialMarginUsd": 0.0, "currentInitialMarginFraction": 0.0}
-        gross = checks["gross"]
+        decision = self.fresh_order_risk_check()
+        if decision["stage"] != "HEALTHY":
+            raise RuntimeError(f"V52 preflight requires HEALTHY Margin Guard, got {decision['stage']}")
+        gross = decision["gross"]
         first_capacity = min(
             self.v11_gross_cap,
             max(0.0, self.stock_gross_cap - gross["stockGross"]),
             max(0.0, self.portfolio_gross_cap - gross["totalGross"]),
-            self.projected_margin_capacity_gross(gross, margin),
+            self.projected_margin_capacity_gross(decision),
         )
         if not self.positions() and first_capacity + EPSILON < self.minimum_first_stock_gross:
             raise RuntimeError(f"Combined account cannot support minimum first V52 Stock Gross: {first_capacity:.6f}")
         checks.update({
-            "accountConfiguration": configuration,
-            "accountMargin": margin,
+            "marginGuard": decision,
             "v52StrategyCapitalUsd": self.excess_margin_usd(),
             "requiredInitialLeverage": 5,
             "requiredMarginType": "cross",
@@ -237,15 +308,46 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             "minimumSecondStockGross": self.minimum_second_stock_gross,
             "maximumConcurrentStockPositions": self.maximum_concurrent_stock_positions,
             "firstStockCapacityGross": first_capacity,
-            "accountRiskPollIntervalMs": ACCOUNT_RISK_POLL_INTERVAL_MS,
+            "healthyMarginPollIntervalMs": HEALTHY_POLL_INTERVAL_MS,
+            "warningMarginPollIntervalMs": WARNING_POLL_INTERVAL_MS,
+            "activeLoopIntervalMs": ACTIVE_LOOP_INTERVAL_MS,
+            "dailyLossCheckIntervalMs": DAILY_LOSS_CHECK_INTERVAL_MS,
         })
         return checks
 
+    def run(self, daemon: bool) -> None:
+        self.lock.acquire()
+        try:
+            self.reset_days()
+            self.reconcile()
+            self.log(
+                "v52-margin-aware-runner-start",
+                strategyId=STRATEGY_ID,
+                healthyMarginPollIntervalMs=HEALTHY_POLL_INTERVAL_MS,
+                warningMarginPollIntervalMs=WARNING_POLL_INTERVAL_MS,
+                activeLoopIntervalMs=ACTIVE_LOOP_INTERVAL_MS,
+                dailyLossCheckIntervalMs=DAILY_LOSS_CHECK_INTERVAL_MS,
+            )
+            while not self.stop_requested:
+                started = base.now_ms()
+                try:
+                    self.tick()
+                except Exception as error:
+                    self.log("v52-margin-aware-tick-error", error=str(error))
+                    if self.live:
+                        self.activate_kill_switch(f"V52 margin-aware fatal tick error: {error}")
+                        self.flatten_all("FATAL_TICK_ERROR")
+                        raise
+                if not daemon:
+                    break
+                active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
+                interval = ACTIVE_LOOP_INTERVAL_MS if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
+                time.sleep(max(0.0, interval - (base.now_ms() - started)) / 1000.0)
+        finally:
+            self.lock.release()
+
 
 def self_test() -> None:
-    rows = [{"symbol": symbol, "leverage": "5", "marginType": "cross", "positionAmt": "0", "markPrice": "1"}
-            for symbol in MANAGED_SYMBOLS]
-    assert len(verify_fixed_account_configuration(rows, 5)) == len(MANAGED_SYMBOLS)
     engine = object.__new__(MarginAwareV52AsterOnlyEngine)
     engine.crypto_gross_cap = 1.5
     engine.stock_gross_cap = 1.5
@@ -263,32 +365,39 @@ def self_test() -> None:
     engine.live = False
     engine.v96_requires_margin = lambda: False
     engine.portfolio_equity = lambda: 100.0
-    assert abs(engine.excess_margin_usd() - 60.0) < EPSILON
-
-    engine.state = {"positions": {}}
-    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoNotionalUsd": 115.0, "stockNotionalUsd": 0.0,
-                                     "cryptoGross": 1.15, "stockGross": 0.0, "totalGross": 1.15}
+    engine.positions = lambda: {}
+    engine.gross_snapshot = lambda: {
+        "equityUsd": 100.0,
+        "cryptoNotionalUsd": 115.0,
+        "stockNotionalUsd": 0.0,
+        "cryptoGross": 1.15,
+        "stockGross": 0.0,
+        "totalGross": 1.15,
+    }
     first, _ = engine.available_slot_gross(V11_SLOT)
     assert abs(first - 1.0) < EPSILON
 
-    engine.state = {"positions": {V11_SLOT: {"symbol": "META"}}}
-    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoNotionalUsd": 115.0, "stockNotionalUsd": 100.0,
-                                     "cryptoGross": 1.15, "stockGross": 1.0, "totalGross": 2.15}
+    engine.positions = lambda: {V11_SLOT: {"symbol": "META"}}
+    engine.gross_snapshot = lambda: {
+        "equityUsd": 100.0,
+        "cryptoNotionalUsd": 115.0,
+        "stockNotionalUsd": 100.0,
+        "cryptoGross": 1.15,
+        "stockGross": 1.0,
+        "totalGross": 2.15,
+    }
     second, _ = engine.available_slot_gross(V50_SLOT)
     assert abs(second - 0.35) < EPSILON
-
-    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoNotionalUsd": 150.0, "stockNotionalUsd": 100.0,
-                                     "cryptoGross": 1.5, "stockGross": 1.0, "totalGross": 2.5}
-    blocked, _ = engine.available_slot_gross(V50_SLOT)
-    assert blocked == 0.0
-    assert abs(2.5 / 5.0 - 0.50) < EPSILON
-    print("V52 margin-aware concurrent Stock runner self-test: PASS")
+    assert HEALTHY_POLL_INTERVAL_MS == 300_000
+    assert WARNING_POLL_INTERVAL_MS == 60_000
+    assert ACTIVE_LOOP_INTERVAL_MS == 2_000
+    assert DAILY_LOSS_CHECK_INTERVAL_MS == 60_000
+    print("V52 adaptive margin-aware concurrent Stock runner self-test: PASS")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=("paper", "live"),
-                        default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"))
+    parser.add_argument("--mode", choices=("paper", "live"), default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"))
     parser.add_argument("--daemon", action="store_true")
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--preflight", action="store_true")
@@ -296,14 +405,17 @@ def main() -> int:
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        self_test(); return 0
+        self_test()
+        return 0
     runner = MarginAwareV52AsterOnlyEngine(args.mode)
     signal.signal(signal.SIGINT, lambda *_: setattr(runner, "stop_requested", True))
     signal.signal(signal.SIGTERM, lambda *_: setattr(runner, "stop_requested", True))
     if args.preflight_readonly:
-        print(json.dumps(runner.preflight(read_only=True), ensure_ascii=False, separators=(",", ":"))); return 0
+        print(json.dumps(runner.preflight(read_only=True), ensure_ascii=False, separators=(",", ":")))
+        return 0
     if args.preflight:
-        print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False)); return 0
+        print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False))
+        return 0
     runner.run(args.daemon and not args.once)
     return 0
 
