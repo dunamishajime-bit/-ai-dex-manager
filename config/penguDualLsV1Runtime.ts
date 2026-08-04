@@ -8,6 +8,7 @@ export const PENGU_DUAL_LS_V1 = {
     longGross: 0.75,
     shortGross: 0.75,
     maximumGross: 0.75,
+    portfolioGrossCap: 1.5,
     long: {
         compressionLookbackHours: 24,
         compressionWindowHours: 120,
@@ -114,7 +115,7 @@ export function resolvePenguDualLsV1Runtime(env: Partial<NodeJS.ProcessEnv> = pr
         maximumSlippageBps: Math.max(1, finiteEnv(env.PENGU_DUAL_LS_V1_MAX_SLIPPAGE_BPS, PENGU_DUAL_LS_V1.safety.maxSlippageBps)),
         minimumOrderNotionalUsd: Math.max(5, finiteEnv(env.PENGU_DUAL_LS_V1_MIN_ORDER_NOTIONAL_USD, PENGU_DUAL_LS_V1.safety.minimumOrderNotionalUsd)),
         maxTransactionRetries: Math.max(1, Math.floor(finiteEnv(env.PENGU_DUAL_LS_V1_MAX_TRANSACTION_RETRIES, PENGU_DUAL_LS_V1.safety.maxTransactionRetries))),
-        portfolioGrossCap: Math.max(0, Math.min(2.5, finiteEnv(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, 2.5))),
+        portfolioGrossCap: Math.max(0, Math.min(PENGU_DUAL_LS_V1.portfolioGrossCap, finiteEnv(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, PENGU_DUAL_LS_V1.portfolioGrossCap))),
         maximumDailyLossPct: Math.max(0, Math.min(5, finiteEnv(env.PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT, 5))),
         killSwitchPath: env.PENGU_DUAL_LS_V1_KILL_SWITCH_FILE,
         portfolioDailyLossStatePath: env.PENGU_DUAL_LS_V1_PORTFOLIO_DAILY_LOSS_STATE_FILE,
