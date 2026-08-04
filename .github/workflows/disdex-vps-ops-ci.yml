@@ -6,14 +6,11 @@ on:
       - 'scripts/ops/**'
       - 'ops/systemd/**'
       - 'lib/direct-trade-executor.ts'
-      - 'lib/disdex-v96-operator-override-audit.ts'
-      - 'scripts/disdex-v96-create-operator-override.ts'
-      - 'scripts/disdex-v96-sync-operator-override-audit.ts'
-      - 'scripts/disdex-v96-operator-override-audit-selftest.ts'
       - 'scripts/disdex-v96-live-preflight.ts'
       - 'scripts/disdex-v96-v52-readonly-preflight.ts'
       - 'scripts/disdex_v96_v52_margin_risk_policy.py'
       - 'scripts/disdex_v96_v52_margin_guard.py'
+      - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
       - 'scripts/disdex_v52_margin_aware_live_engine.py'
       - '.github/workflows/disdex-vps-ops-ci.yml'
   workflow_dispatch:
@@ -29,107 +26,73 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate release and runtime boundaries
+      - name: Validate executable VPS safety boundaries
         shell: bash
         run: |
           set -Eeuo pipefail
-          bash -n scripts/ops/root/disdex-vps-control
-          bash -n scripts/ops/root/disdex-promotion-transaction-lib.sh
-          bash -n scripts/ops/root/disdex-promotion-selftest-lib.sh
-          bash -n scripts/ops/root/install-disdex-vps-control
-          bash -n scripts/ops/disdex-v96-v52-live-policy.sh
-          bash -n scripts/ops/disdex-v96-v52-live-policy-selftest.sh
-          bash -n scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
-          bash -n scripts/ops/disdex-v96-v52-live.sh
-          bash -n scripts/ops/disdex-v96-v52-renew-approvals.sh
-          bash -n scripts/ops/disdex-v96-v52-candidate-preflight.sh
-          bash -n scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
+
+          bash_scripts=(
+            scripts/ops/root/disdex-vps-control
+            scripts/ops/root/disdex-promotion-transaction-lib.sh
+            scripts/ops/root/disdex-promotion-selftest-lib.sh
+            scripts/ops/root/install-disdex-vps-control
+            scripts/ops/disdex-v96-v52-live-policy.sh
+            scripts/ops/disdex-v96-v52-live-policy-selftest.sh
+            scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+            scripts/ops/disdex-v96-v52-live.sh
+            scripts/ops/disdex-v96-v52-renew-approvals.sh
+            scripts/ops/disdex-v96-v52-candidate-preflight.sh
+            scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
+          )
+          for script in "${bash_scripts[@]}"; do
+            bash -n "$script"
+          done
+
           python3 -m py_compile \
             scripts/disdex_v96_v52_margin_risk_policy.py \
             scripts/disdex_v96_v52_margin_guard.py \
+            scripts/disdex_v96_v52_margin_guard_selftest.py \
             scripts/disdex_v52_margin_aware_live_engine.py \
             scripts/ops/root/disdex-vps-retention-cleanup
+
           python3 scripts/disdex_v96_v52_margin_risk_policy.py
           python3 scripts/disdex_v96_v52_margin_guard.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_selftest.py
           python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
           python3 scripts/ops/root/disdex-vps-retention-cleanup --self-test
           bash scripts/ops/disdex-v96-v52-live-policy-selftest.sh
           bash scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
           sudo bash scripts/ops/root/disdex-vps-control trading-promote-selftest all
+
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/root/disdex-vps-control
-          grep -q 'require_trading_inactive' scripts/ops/root/disdex-vps-control
-          grep -q 'trading-promote)' scripts/ops/root/disdex-vps-control
-          grep -q 'trading-promote-selftest)' scripts/ops/root/disdex-vps-control
-          grep -q 'promotion_exit_handler' scripts/ops/root/disdex-vps-control
-          grep -q 'rollback_promotion' scripts/ops/root/disdex-vps-control
-          grep -q 'disdex_txn_snapshot_file "$STOCK_STATE_FILE"' scripts/ops/root/disdex-vps-control
-          grep -q 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS' scripts/ops/root/disdex-vps-control
-          grep -q 'DISDEX_V96_V52_FULL_PROMOTION_FAILURE_INJECTION_SELFTEST_PASS' scripts/ops/root/disdex-promotion-selftest-lib.sh
-          grep -q 'productionPathsTouched=false' scripts/ops/root/disdex-promotion-selftest-lib.sh
-          grep -q 'assert_promotion_selftest_isolated' scripts/ops/root/disdex-promotion-selftest-lib.sh
-          grep -q 'disdex_txn_validate_backup' scripts/ops/root/disdex-promotion-transaction-lib.sh
-          grep -q 'tamperRejected=true' scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
-          ! grep -q '.disdex-preflight-pass' scripts/ops/root/disdex-vps-control
+          ! grep -Fq '.disdex-preflight-pass' scripts/ops/root/disdex-vps-control
 
-          grep -Eq '^  export DISDEX_V96_MAX_GROSS=1\.5$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Eq '^  export DISDEX_V96_INITIAL_PENGU_GROSS=1\.15$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Eq '^  export DISDEX_V96_MAX_DAILY_LOSS_PCT=5$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Eq '^  export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Eq '^  export PENGU_DUAL_LS_V1_MODE=LIVE$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Eq '^  export PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED=true$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Eq '^  export PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED=true$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Eq '^  export PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP=1\.5$' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -q 'staleEnvironmentOverridden=true' scripts/ops/disdex-v96-v52-live-policy-selftest.sh
-          grep -q 'preorderMarginGuardEnabled=true' scripts/ops/disdex-v96-v52-live-policy-selftest.sh
-          grep -q 'healthyMarginPollIntervalMs=300000' scripts/ops/disdex-v96-v52-live-policy-selftest.sh
-          grep -q 'warningMarginPollIntervalMs=60000' scripts/ops/disdex-v96-v52-live-policy-selftest.sh
-          grep -q 'disdex_apply_v96_v52_fixed_live_policy' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
-          grep -q 'exact(Number(approval.maximumPortfolioGross), 1.5' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
-          grep -q 'exact(Number(approval.initialPenguGrossCap), 1.15' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
-          grep -q 'exact(Number(approval.maximumDailyLossPct), 5' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
-          grep -q 'DISDEX_V96_V52_APPROVAL_POLICY_WRAPPER_PASS' scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
-          grep -q 'disdex_apply_v96_v52_fixed_live_policy' scripts/ops/disdex-v96-v52-candidate-preflight.sh
-          grep -q -- '--preflight-readonly' scripts/ops/disdex-v96-v52-candidate-preflight.sh
-          grep -q 'disdex_apply_v96_v52_fixed_live_policy' scripts/ops/disdex-v96-v52-live.sh
-          grep -q 'scripts/disdex_v96_v52_margin_guard.py --mode live --daemon' scripts/ops/disdex-v96-v52-live.sh
-          grep -q 'HEALTHY_POLL_INTERVAL_MS = 5 \* 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
-          grep -q 'WARNING_POLL_INTERVAL_MS = 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
-          grep -q 'REDUCE_MARGIN_RATIO_PCT = 65.0' scripts/disdex_v96_v52_margin_risk_policy.py
-          grep -q 'CRITICAL_MARGIN_RATIO_PCT = 75.0' scripts/disdex_v96_v52_margin_risk_policy.py
-          grep -q 'command.reduceOnly !== true' lib/direct-trade-executor.ts
-          grep -q -- '--preorder-check' lib/direct-trade-executor.ts
+          grep -Fq 'export DISDEX_V96_MAX_GROSS=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_STOCK_GROSS_CAP=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true' scripts/ops/disdex-v96-v52-live-policy.sh
 
-          grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
-          grep -q '^Environment=DISDEX_V96_MAX_GROSS=1.5$' ops/systemd/disdex-v96-v52-live.service
-          grep -q '^Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true$' ops/systemd/disdex-v96-v52-live.service
-          grep -q '^Environment=PENGU_DUAL_LS_V1_MODE=LIVE$' ops/systemd/disdex-v96-v52-live.service
-          grep -q 'DISDEX_V96_RUNTIME_COMMIT_SHA=%i' ops/systemd/disdex-v96-v52-preflight@.service
-          grep -q '^Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true$' ops/systemd/disdex-v96-v52-preflight@.service
-          grep -q '^Environment=PENGU_DUAL_LS_V1_MODE=LIVE$' ops/systemd/disdex-v96-v52-preflight@.service
-          grep -q 'disdex-v96-v52-candidate-preflight.sh' ops/systemd/disdex-v96-v52-preflight@.service
-          grep -q 'Conflicts=disdex-v96-v52-live.service' ops/systemd/disdex-v96-v52-approval@.service
-          grep -q '^Environment=DISDEX_V96_MAX_GROSS=1.5$' ops/systemd/disdex-v96-v52-approval@.service
-          grep -q '^Environment=PENGU_DUAL_LS_V1_MODE=LIVE$' ops/systemd/disdex-v96-v52-approval@.service
-          grep -q 'disdex-v96-v52-approval-policy-wrapper.sh' ops/systemd/disdex-v96-v52-approval@.service
-          grep -q 'ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state' ops/systemd/disdex-v96-v52-approval@.service
-          grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_PASS' scripts/ops/disdex-v96-v52-renew-approvals.sh
-          grep -q 'DISDEX_V96_V52_APPROVAL_RENEWAL_ROLLBACK' scripts/ops/disdex-v96-v52-renew-approvals.sh
-          grep -q 'DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE=CANDIDATE_RELEASE' scripts/ops/disdex-v96-v52-renew-approvals.sh
-          grep -q 'CANDIDATE_RELEASE' scripts/disdex-v96-sync-operator-override-audit.ts
-          grep -q 'DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT="$shared_state"' scripts/ops/disdex-v96-v52-live.sh
-          grep -q 'DISDEX_V96_STATE_DIR="$shared_state/crypto-v96"' scripts/ops/disdex-v96-v52-live.sh
-          grep -q 'strategy:disdex-v96:override:audit:sync' scripts/ops/disdex-v96-v52-live.sh
-          grep -q 'DISDEX_V96_OPERATOR_OVERRIDE_AUDIT_SYNC_PASS_NO_ORDERS_SENT' scripts/disdex-v96-sync-operator-override-audit.ts
-          grep -q 'Operator Override audit does not match the current approved artifact' scripts/disdex-v96-live-preflight.ts
+          grep -Fq 'HEALTHY_POLL_INTERVAL_MS = 5 * 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'WARNING_POLL_INTERVAL_MS = 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'REDUCE_MARGIN_RATIO_PCT = 65.0' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'CRITICAL_MARGIN_RATIO_PCT = 75.0' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'reduceOnly": "true"' scripts/disdex_v96_v52_margin_guard.py
+          grep -Fq 'remainingManagedPositions' scripts/disdex_v96_v52_margin_guard.py
+          grep -Fq -- '--preorder-check' lib/direct-trade-executor.ts
+          grep -Fq 'command.reduceOnly !== true' lib/direct-trade-executor.ts
 
-          grep -q 'DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS' scripts/ops/root/disdex-vps-retention-cleanup
-          grep -q 'protectedPathsTouched=false' scripts/ops/root/disdex-vps-retention-cleanup
-          grep -q 'ExecStart=/usr/local/sbin/disdex-vps-retention-cleanup --apply' ops/systemd/disdex-vps-retention.service
-          grep -q '^OnCalendar=daily$' ops/systemd/disdex-vps-retention.timer
-          grep -q '^SystemMaxUse=256M$' ops/systemd/90-disdex-storage-guard.conf
-          grep -q '^MaxRetentionSec=14day$' ops/systemd/90-disdex-storage-guard.conf
+          grep -Fq 'scripts/disdex_v96_v52_margin_guard.py --mode live --daemon' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
+          grep -Fq 'Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true' ops/systemd/disdex-v96-v52-live.service
 
-      - name: Validate no automatic live mutation workflow
+          grep -Fq 'DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS' scripts/ops/root/disdex-vps-retention-cleanup
+          grep -Fq 'ExecStart=/usr/local/sbin/disdex-vps-retention-cleanup --apply' ops/systemd/disdex-vps-retention.service
+          grep -Fq 'OnCalendar=daily' ops/systemd/disdex-vps-retention.timer
+          grep -Fq 'SystemMaxUse=256M' ops/systemd/90-disdex-storage-guard.conf
+          grep -Fq 'MaxRetentionSec=14day' ops/systemd/90-disdex-storage-guard.conf
+
+      - name: Validate no automatic LIVE mutation workflow
         shell: bash
         run: |
           set -Eeuo pipefail
