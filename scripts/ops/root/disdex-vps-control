@@ -67,6 +67,72 @@ require_trading_inactive() {
   }
 }
 
+run_exact_oneshot() {
+  local unit="$1"
+  local label="$2"
+  local result status
+  "$SYSTEMCTL" reset-failed "$unit" >/dev/null 2>&1 || true
+  if ! "$SYSTEMCTL" start "$unit"; then
+    printf '%s failed\n' "$label" >&2
+    "$JOURNALCTL" -u "$unit" --no-pager -n 250 >&2 || true
+    return 1
+  fi
+  result="$($SYSTEMCTL show "$unit" --property Result --value)"
+  status="$($SYSTEMCTL show "$unit" --property ExecMainStatus --value)"
+  if [[ "$result" != "success" || "$status" != "0" ]]; then
+    printf '%s did not finish successfully\n' "$label" >&2
+    "$JOURNALCTL" -u "$unit" --no-pager -n 250 >&2 || true
+    return 1
+  fi
+}
+
+run_preflight_unit() {
+  local sha="$1"
+  run_exact_oneshot "${PREFLIGHT_PREFIX}@${sha}.service" "candidate preflight"
+}
+
+run_approval_unit() {
+  local sha="$1"
+  run_exact_oneshot "${APPROVAL_PREFIX}@${sha}.service" "exact-commit approval renewal"
+}
+
+atomic_switch_current() {
+  local sha="$1"
+  local release="$2"
+  local tmp_link
+  tmp_link="${TRADING_CURRENT}.tmp.$$"
+  rm -f "$tmp_link"
+  ln -s "$release" "$tmp_link"
+  chown -h deploy:deploy "$tmp_link"
+  mv -Tf "$tmp_link" "$TRADING_CURRENT"
+  [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]] || {
+    printf 'atomic current switch verification failed\n' >&2
+    exit 4
+  }
+  printf 'TRADING_CURRENT_SWITCH_PASS\nsha=%s\n' "$sha"
+}
+
+start_trading_service_verified() {
+  local state pid
+  "$SYSTEMCTL" reset-failed "$TRADING_SERVICE" >/dev/null 2>&1 || true
+  if ! "$SYSTEMCTL" start "$TRADING_SERVICE"; then
+    "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+    printf 'LIVE service start failed; fail-closed\n' >&2
+    "$JOURNALCTL" -u "$TRADING_SERVICE" --no-pager -n 300 >&2 || true
+    return 1
+  fi
+  sleep 2
+  state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+  pid="$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value)"
+  if [[ "$state" != "active" || "$pid" == "0" ]]; then
+    "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+    printf 'LIVE service verification failed; fail-closed\n' >&2
+    "$JOURNALCTL" -u "$TRADING_SERVICE" --no-pager -n 300 >&2 || true
+    return 1
+  fi
+  printf 'DISDEX_V96_V52_LIVE_START_PASS\nstate=%s\nmainPid=%s\n' "$state" "$pid"
+}
+
 pm2_field() {
   local field="$1"
   "$RUNUSER" -u "$UI_USER" -- env PM2_HOME="$UI_PM2_HOME" "$PM2" jlist |
@@ -113,29 +179,25 @@ case "$action" in
     sha="${2:-}"
     require_trading_inactive
     release="$(validate_release "$sha")"
-    [[ -f "$release/.disdex-preflight-pass" ]] || {
-      printf 'preflight pass marker missing\n' >&2
-      exit 3
-    }
-    [[ "$(tr -d '[:space:]' < "$release/.disdex-preflight-pass")" == "$sha" ]] || {
-      printf 'preflight pass marker SHA mismatch\n' >&2
-      exit 3
-    }
-    tmp_link="${TRADING_CURRENT}.tmp.$$"
-    rm -f "$tmp_link"
-    ln -s "$release" "$tmp_link"
-    chown -h deploy:deploy "$tmp_link"
-    mv -Tf "$tmp_link" "$TRADING_CURRENT"
-    [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]]
-    printf 'TRADING_CURRENT_SWITCH_PASS\nsha=%s\n' "$sha"
+    run_preflight_unit "$sha"
+    atomic_switch_current "$sha" "$release"
+    ;;
+  trading-promote)
+    sha="${2:-}"
+    require_trading_inactive
+    release="$(validate_release "$sha")"
+    run_approval_unit "$sha"
+    run_preflight_unit "$sha"
+    atomic_switch_current "$sha" "$release"
+    run_preflight_unit "$sha"
+    start_trading_service_verified
+    printf 'DISDEX_V96_V52_PROMOTION_PASS\nsha=%s\nordersSentByPromotion=false\n' "$sha"
     ;;
   daemon-reload) exec "$SYSTEMCTL" daemon-reload ;;
   preflight-start)
     sha="${2:-}"
     validate_release "$sha" >/dev/null
-    unit="${PREFLIGHT_PREFIX}@${sha}.service"
-    "$SYSTEMCTL" reset-failed "$unit" >/dev/null 2>&1 || true
-    exec "$SYSTEMCTL" start "$unit"
+    run_preflight_unit "$sha"
     ;;
   preflight-state)
     sha="${2:-}"
@@ -154,9 +216,7 @@ case "$action" in
     sha="${2:-}"
     require_trading_inactive
     validate_release "$sha" >/dev/null
-    unit="${APPROVAL_PREFIX}@${sha}.service"
-    "$SYSTEMCTL" reset-failed "$unit" >/dev/null 2>&1 || true
-    exec "$SYSTEMCTL" start "$unit"
+    run_approval_unit "$sha"
     ;;
   approval-state)
     sha="${2:-}"
