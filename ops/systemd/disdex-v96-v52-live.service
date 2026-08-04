@@ -1,5 +1,5 @@
 [Unit]
-Description=DisDex V96 plus margin-aware Aster-only V52 LIVE immutable release runner
+Description=DisDex V96 plus adaptive-margin Aster-only V52 LIVE immutable release runner
 After=network-online.target disdex-stock-reference-free.service
 Wants=network-online.target
 Requires=disdex-stock-reference-free.service
@@ -16,6 +16,10 @@ Environment=DISDEX_V13D_V11EQ_V96_RUNNER_MODE=live
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk/guard-live.json
+Environment=DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard.py
+Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
 Environment=DISDEX_V52_ASTER_ONLY_RUNNER_MODE=live
 Environment=DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true
 Environment=DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT=I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY
@@ -57,7 +61,7 @@ Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/s
 ExecStart=/usr/bin/bash scripts/ops/disdex-v96-v52-live.sh
 Restart=on-failure
 RestartSec=15
-TimeoutStopSec=60
+TimeoutStopSec=90
 KillSignal=SIGTERM
 NoNewPrivileges=true
 PrivateTmp=true
