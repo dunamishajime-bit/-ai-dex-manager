@@ -18,7 +18,7 @@ Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-pape
 Environment=DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
 Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk
 Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk/guard-live.json
-Environment=DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard.py
+Environment=DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py
 Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
 Environment=DISDEX_V52_ASTER_ONLY_RUNNER_MODE=live
 Environment=DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true
