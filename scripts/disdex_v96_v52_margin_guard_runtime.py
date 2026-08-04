@@ -217,6 +217,7 @@ def main() -> int:
     parser.add_argument("--mode", choices=("paper", "live"), default="paper")
     parser.add_argument("--daemon", action="store_true")
     parser.add_argument("--once", action="store_true")
+    parser.add_argument("--emergency-once", action="store_true")
     parser.add_argument("--preflight-readonly", action="store_true")
     parser.add_argument("--preorder-check", action="store_true")
     parser.add_argument("--self-test", action="store_true")
@@ -227,6 +228,21 @@ def main() -> int:
     guard = SerializedMarginGuard(args.mode)
     signal.signal(signal.SIGINT, lambda *_: setattr(guard, "stop_requested", True))
     signal.signal(signal.SIGTERM, lambda *_: setattr(guard, "stop_requested", True))
+    if args.emergency_once:
+        if not guard._kill_switch_requests_flatten():
+            print(json.dumps({
+                "status": "NO_ACTIVE_FLATTEN_KILL_SWITCH",
+                "ordersSent": False,
+                "cancelSent": False,
+                "positionChangesSent": False,
+            }, separators=(",", ":")))
+            return 0
+        result = guard._flatten_for_existing_kill_switch()
+        print(json.dumps({
+            "status": "EMERGENCY_FLATTEN_ONCE_COMPLETE",
+            **result,
+        }, ensure_ascii=False, separators=(",", ":")))
+        return 0
     if args.preflight_readonly:
         print(json.dumps(
             guard.require_healthy(write_state=False, allow_kill_switch=False),
