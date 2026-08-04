@@ -1,7 +1,8 @@
 [Unit]
-Description=DisDex V96 plus V52 read-only authenticated preflight for release %i
+Description=DisDex V96 plus V52 authenticated integrated preflight for release %i
 After=network-online.target
 Wants=network-online.target
+Conflicts=disdex-v96-v52-live.service
 
 [Service]
 Type=oneshot
@@ -11,6 +12,10 @@ WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v96-v52-live-overrides.env
 Environment=DISDEX_V96_RUNTIME_COMMIT_SHA=%i
+Environment=DISDEX_V96_MAX_GROSS=1
+Environment=DISDEX_V96_INITIAL_PENGU_GROSS=1.15
+Environment=DISDEX_V96_MAX_DAILY_LOSS_PCT=5
+Environment=DISDEX_V96_CONFIG_MIGRATION_MODE=true
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
@@ -21,7 +26,7 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v96-paper/.r
 Environment=DISDEX_V96_FORWARD_EVIDENCE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-forward.json
 Environment=DISDEX_V96_EXECUTION_PARITY_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-parity.json
 Environment=DISDEX_V96_OPERATOR_OVERRIDE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-operator-override.json
-ExecStart=/usr/bin/env DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly
+ExecStart=/usr/bin/env DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-candidate-preflight.sh
 TimeoutStartSec=20min
 NoNewPrivileges=true
 PrivateTmp=true
