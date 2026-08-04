@@ -1,5 +1,5 @@
 [Unit]
-Description=DisDex V96 plus margin-aware V52 authenticated integrated preflight for release %i
+Description=DisDex V96 plus adaptive-margin V52 authenticated integrated preflight for release %i
 After=network-online.target
 Wants=network-online.target
 Conflicts=disdex-v96-v52-live.service
@@ -28,6 +28,10 @@ Environment=DISDEX_V52_MAX_DAILY_LOSS_PCT=3.5
 Environment=DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5
 Environment=DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION=0.70
 Environment=DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION=0.20
+Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk/guard-live.json
+Environment=DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard.py
 Environment=PENGU_DUAL_LS_V1_MODE=LIVE
 Environment=PENGU_DUAL_LS_V1_ENABLED=true
 Environment=PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED=true
