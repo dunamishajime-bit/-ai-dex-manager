@@ -34,7 +34,6 @@ const longDecision = evaluatePenguDualLsV1Decision(baseFeatures);
 assert.equal(longDecision.side, 1);
 assert.equal(longDecision.longEligible, true);
 assert.equal(longDecision.shortEligible, false);
-
 assert.equal(evaluatePenguDualLsV1Decision({ ...baseFeatures, fundingRate: null }).side, 0);
 assert.equal(evaluatePenguDualLsV1Decision({ ...baseFeatures, shortRecentlyActive: true }).side, 0);
 
@@ -67,6 +66,7 @@ assert.equal(defaultRuntime.mode, "SHADOW");
 assert.equal(defaultRuntime.maximumGross, 0.75);
 assert.equal(defaultRuntime.longGross, 0.75);
 assert.equal(defaultRuntime.shortGross, 0.75);
+assert.equal(defaultRuntime.portfolioGrossCap, 1.5);
 assert.equal(defaultRuntime.closeUnmanagedPositions, false);
 
 const cappedRuntime = resolvePenguDualLsV1Runtime({
@@ -75,10 +75,12 @@ const cappedRuntime = resolvePenguDualLsV1Runtime({
     PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED: "true",
     PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED: "true",
     PENGU_DUAL_LS_V1_MAX_GROSS: "2.5",
+    PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP: "2.5",
 });
 assert.equal(cappedRuntime.maximumGross, 0.75);
 assert.equal(cappedRuntime.longGross, 0.75);
 assert.equal(cappedRuntime.shortGross, 0.75);
+assert.equal(cappedRuntime.portfolioGrossCap, 1.5);
 
 let executorCalls = 0;
 const executor = {
@@ -107,7 +109,7 @@ const runner = new PenguDualLsV1PortfolioRunner({
         maxSlippageBps: PENGU_DUAL_LS_V1.safety.maxSlippageBps,
         minimumOrderNotionalUsd: PENGU_DUAL_LS_V1.safety.minimumOrderNotionalUsd,
         maxTransactionRetries: PENGU_DUAL_LS_V1.safety.maxTransactionRetries,
-        portfolioGrossCap: 2.5,
+        portfolioGrossCap: PENGU_DUAL_LS_V1.portfolioGrossCap,
         maximumDailyLossPct: 5,
     },
 });
