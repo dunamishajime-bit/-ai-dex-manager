@@ -24,6 +24,8 @@ Environment=DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v
 Environment=DISDEX_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/crypto-v96
 Environment=DISDEX_V96_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
 Environment=DISDEX_V96_MAX_GROSS=1
+Environment=DISDEX_V96_INITIAL_PENGU_GROSS=1.15
+Environment=DISDEX_V96_MAX_DAILY_LOSS_PCT=5
 Environment=DISDEX_V96_LIVE_EXECUTION_ENABLED=true
 Environment=DISDEX_V96_LIVE_ACKNOWLEDGEMENT=I_ACKNOWLEDGE_DISDEX_V96_LIVE_RISK
 Environment=DISDEX_V96_FORWARD_EVIDENCE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-forward.json
