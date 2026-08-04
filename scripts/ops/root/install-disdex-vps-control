@@ -18,12 +18,18 @@ transaction_selftest="$repo_root/scripts/ops/disdex-v96-v52-promotion-rollback-s
 live_policy_source="$repo_root/scripts/ops/disdex-v96-v52-live-policy.sh"
 live_policy_selftest="$repo_root/scripts/ops/disdex-v96-v52-live-policy-selftest.sh"
 approval_policy_wrapper="$repo_root/scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh"
+margin_policy="$repo_root/scripts/disdex_v96_v52_margin_risk_policy.py"
+margin_guard="$repo_root/scripts/disdex_v96_v52_margin_guard.py"
 margin_aware_engine="$repo_root/scripts/disdex_v52_margin_aware_live_engine.py"
 account_risk_script="$repo_root/scripts/disdex-v96-v52-prepare-account-risk.py"
+retention_cleanup="$repo_root/scripts/ops/root/disdex-vps-retention-cleanup"
 preflight_source="$repo_root/ops/systemd/disdex-v96-v52-preflight@.service"
 approval_source="$repo_root/ops/systemd/disdex-v96-v52-approval@.service"
 account_risk_source="$repo_root/ops/systemd/disdex-v96-v52-account-risk@.service"
 live_source="$repo_root/ops/systemd/disdex-v96-v52-live.service"
+retention_service_source="$repo_root/ops/systemd/disdex-vps-retention.service"
+retention_timer_source="$repo_root/ops/systemd/disdex-vps-retention.timer"
+journald_guard_source="$repo_root/ops/systemd/90-disdex-storage-guard.conf"
 live_launcher="$repo_root/scripts/ops/disdex-v96-v52-live.sh"
 approval_launcher="$repo_root/scripts/ops/disdex-v96-v52-renew-approvals.sh"
 preflight_launcher="$repo_root/scripts/ops/disdex-v96-v52-candidate-preflight.sh"
@@ -31,9 +37,11 @@ preflight_launcher="$repo_root/scripts/ops/disdex-v96-v52-candidate-preflight.sh
 required_sources=(
   "$helper_source" "$transaction_lib_source" "$promotion_selftest_lib_source"
   "$transaction_selftest" "$live_policy_source" "$live_policy_selftest"
-  "$approval_policy_wrapper" "$margin_aware_engine" "$account_risk_script"
-  "$preflight_source" "$approval_source" "$account_risk_source" "$live_source"
-  "$live_launcher" "$approval_launcher" "$preflight_launcher"
+  "$approval_policy_wrapper" "$margin_policy" "$margin_guard" "$margin_aware_engine"
+  "$account_risk_script" "$retention_cleanup" "$preflight_source" "$approval_source"
+  "$account_risk_source" "$live_source" "$retention_service_source"
+  "$retention_timer_source" "$journald_guard_source" "$live_launcher"
+  "$approval_launcher" "$preflight_launcher"
 )
 for source in "${required_sources[@]}"; do
   [[ -f "$source" && ! -L "$source" ]] || {
@@ -55,13 +63,21 @@ for script in "$helper_source" "$transaction_lib_source" "$promotion_selftest_li
   "$approval_policy_wrapper" "$live_launcher" "$approval_launcher" "$preflight_launcher"; do
   bash -n "$script"
 done
-python3 -m py_compile "$margin_aware_engine" "$account_risk_script"
+python3 -m py_compile \
+  "$margin_policy" \
+  "$margin_guard" \
+  "$margin_aware_engine" \
+  "$account_risk_script" \
+  "$retention_cleanup"
+python3 "$margin_policy"
+python3 "$margin_guard" --self-test
 python3 "$margin_aware_engine" --self-test
+python3 "$retention_cleanup" --self-test
 bash "$transaction_selftest"
 bash "$live_policy_selftest"
 bash "$helper_source" trading-promote-selftest all
 
-# Static safety boundary checks.
+# Static safety-boundary checks.
 grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"
 grep -q 'trading-promote)' "$helper_source"
 grep -q 'trading-promote-selftest)' "$helper_source"
@@ -75,18 +91,37 @@ grep -q 'disdex_txn_validate_backup' "$transaction_lib_source"
 grep -Eq '^  export DISDEX_V96_MAX_GROSS=1\.5$' "$live_policy_source"
 grep -Eq '^  export DISDEX_V52_PORTFOLIO_GROSS_CAP=2\.5$' "$live_policy_source"
 grep -Eq '^  export DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5$' "$live_policy_source"
+grep -Eq '^  export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true$' "$live_policy_source"
 grep -Eq '^  export DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS=2$' "$live_policy_source"
 grep -q 'maximumPortfolioGross), 1.5' "$approval_policy_wrapper"
 grep -q 'combinedPortfolioGrossCap: 2.5' "$approval_policy_wrapper"
-grep -q 'V52 margin-aware concurrent Stock runner self-test: PASS' "$margin_aware_engine"
+grep -q 'HEALTHY_POLL_INTERVAL_MS = 5 \* 60_000' "$margin_policy"
+grep -q 'WARNING_POLL_INTERVAL_MS = 60_000' "$margin_policy"
+grep -q 'WARNING_MARGIN_RATIO_PCT = 50.0' "$margin_policy"
+grep -q 'REDUCE_MARGIN_RATIO_PCT = 65.0' "$margin_policy"
+grep -q 'CRITICAL_MARGIN_RATIO_PCT = 75.0' "$margin_policy"
+grep -q 'ACTIVATE_SHARED_KILL_SWITCH_FLATTEN_MANAGED' "$margin_policy"
+grep -q -- '--preorder-check' "$margin_guard"
+grep -q -- '--preflight-readonly' "$margin_guard"
+grep -q 'V52 adaptive margin-aware concurrent Stock runner self-test: PASS' "$margin_aware_engine"
 grep -q 'DISDEX_V96_V52_ACCOUNT_RISK_PREPARATION_PASS' "$account_risk_script"
+grep -q 'DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS' "$retention_cleanup"
+grep -q 'RELEASE_KEEP_NONCURRENT = 2' "$retention_cleanup"
+grep -q 'AUDIT_RETENTION_DAYS = 14' "$retention_cleanup"
+grep -q 'PROMOTION_FAILURE_RETENTION_DAYS = 90' "$retention_cleanup"
 grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' "$live_source"
 grep -q '^Environment=DISDEX_V96_MAX_GROSS=1.5$' "$live_source"
 grep -q '^Environment=DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5$' "$live_source"
 grep -q '^Environment=DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5$' "$live_source"
+grep -q '^Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true$' "$live_source"
 grep -q '^Environment=DISDEX_V96_MAX_GROSS=1.5$' "$preflight_source"
+grep -q '^Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true$' "$preflight_source"
 grep -q '^Environment=DISDEX_V96_MAX_GROSS=1.5$' "$approval_source"
 grep -q 'ExecStart=/usr/bin/python3 scripts/disdex-v96-v52-prepare-account-risk.py' "$account_risk_source"
+grep -q 'ExecStart=/usr/local/sbin/disdex-vps-retention-cleanup --apply' "$retention_service_source"
+grep -q '^OnCalendar=daily$' "$retention_timer_source"
+grep -q '^SystemMaxUse=256M$' "$journald_guard_source"
+grep -q '^MaxRetentionSec=14day$' "$journald_guard_source"
 grep -q 'ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state' "$approval_source"
 grep -q 'DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE=CANDIDATE_RELEASE' "$approval_launcher"
 ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$helper_source"
@@ -104,7 +139,11 @@ backup_paths=(
   /etc/systemd/system/disdex-v96-v52-preflight@.service
   /etc/systemd/system/disdex-v96-v52-approval@.service
   /etc/systemd/system/disdex-v96-v52-account-risk@.service
+  /etc/systemd/system/disdex-vps-retention.service
+  /etc/systemd/system/disdex-vps-retention.timer
+  /etc/systemd/journald.conf.d/90-disdex-storage-guard.conf
   /usr/local/sbin/disdex-vps-control
+  /usr/local/sbin/disdex-vps-retention-cleanup
   /usr/local/libexec/disdex-promotion-transaction-lib.sh
   /usr/local/libexec/disdex-promotion-selftest-lib.sh
 )
@@ -112,28 +151,43 @@ for path in "${backup_paths[@]}"; do
   [[ -f "$path" ]] && cp -a "$path" "$backup_root/$(basename "$path")"
 done
 
-install -d -o root -g root -m 0755 /usr/local/libexec
+install -d -o root -g root -m 0755 /usr/local/libexec /etc/systemd/journald.conf.d
 install -o root -g root -m 0644 "$transaction_lib_source" /usr/local/libexec/disdex-promotion-transaction-lib.sh
 install -o root -g root -m 0644 "$promotion_selftest_lib_source" /usr/local/libexec/disdex-promotion-selftest-lib.sh
 install -o root -g root -m 0755 "$helper_source" /usr/local/sbin/disdex-vps-control
+install -o root -g root -m 0755 "$retention_cleanup" /usr/local/sbin/disdex-vps-retention-cleanup
 install -o root -g root -m 0440 "$sudoers_tmp" /etc/sudoers.d/disdex-vps-control
 install -o root -g root -m 0644 "$live_source" /etc/systemd/system/disdex-v96-v52-live.service
 install -o root -g root -m 0644 "$preflight_source" /etc/systemd/system/disdex-v96-v52-preflight@.service
 install -o root -g root -m 0644 "$approval_source" /etc/systemd/system/disdex-v96-v52-approval@.service
 install -o root -g root -m 0644 "$account_risk_source" /etc/systemd/system/disdex-v96-v52-account-risk@.service
+install -o root -g root -m 0644 "$retention_service_source" /etc/systemd/system/disdex-vps-retention.service
+install -o root -g root -m 0644 "$retention_timer_source" /etc/systemd/system/disdex-vps-retention.timer
+install -o root -g root -m 0644 "$journald_guard_source" /etc/systemd/journald.conf.d/90-disdex-storage-guard.conf
 rm -rf /etc/systemd/system/disdex-v96-v52-live.service.d
 
 install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading /home/deploy/disdex-trading/releases
 install -d -o disdex-runner -g deploy -m 2770 /home/deploy/disdex-ops
+install -d -o deploy -g deploy -m 0700 /home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk
 systemctl daemon-reload
+systemctl enable --now disdex-vps-retention.timer
+systemctl restart systemd-journald
+journalctl --vacuum-time=14d --vacuum-size=256M >/dev/null
+
+/usr/local/sbin/disdex-vps-retention-cleanup --self-test >/dev/null
+retention_dry_run="$(/usr/local/sbin/disdex-vps-retention-cleanup --dry-run)"
+printf '%s\n' "$retention_dry_run" | grep -q '"status":"DISDEX_VPS_RETENTION_CLEANUP_PASS"'
+printf '%s\n' "$retention_dry_run" | grep -q '"protectedPathsTouched":false'
 
 post_state="$(systemctl is-active disdex-v96-v52-live.service 2>/dev/null || true)"
 post_pid="$(systemctl show disdex-v96-v52-live.service --property MainPID --value)"
 [[ "$post_state" == "inactive" || "$post_state" == "failed" ]]
 [[ "$post_pid" == "0" ]]
 [[ "$(systemctl show disdex-v96-v52-live.service --property WorkingDirectory --value)" == "/home/deploy/disdex-trading/current" ]]
+[[ "$(systemctl is-active disdex-vps-retention.timer)" == "active" ]]
 [[ -f /usr/local/libexec/disdex-promotion-transaction-lib.sh && ! -L /usr/local/libexec/disdex-promotion-transaction-lib.sh ]]
 [[ -f /usr/local/libexec/disdex-promotion-selftest-lib.sh && ! -L /usr/local/libexec/disdex-promotion-selftest-lib.sh ]]
+[[ -x /usr/local/sbin/disdex-vps-retention-cleanup && ! -L /usr/local/sbin/disdex-vps-retention-cleanup ]]
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-state >/dev/null
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-pid >/dev/null
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-current >/dev/null
@@ -145,9 +199,16 @@ printf 'workingDirectory=/home/deploy/disdex-trading/current\n'
 printf 'promotionRollbackSelftest=PASS\n'
 printf 'fullPromotionFailureInjectionSelftest=PASS\n'
 printf 'fixedLivePolicySelftest=PASS\n'
+printf 'adaptiveMarginPolicySelftest=PASS\n'
+printf 'adaptiveMarginGuardSelftest=PASS\n'
 printf 'marginAwareStockSelftest=PASS\n'
+printf 'retentionCleanupSelftest=PASS\n'
+printf 'retentionDryRun=PASS\n'
+printf 'retentionTimerActive=true\n'
+printf 'journaldStorageGuardInstalled=true\n'
+printf 'journaldRestarted=true\n'
 printf 'accountRiskUnitInstalled=true\n'
-printf 'servicesRestarted=false\n'
+printf 'tradingServicesRestarted=false\n'
 printf 'ordersSent=false\n'
 printf 'runtimeStateChanged=false\n'
 printf 'approvalChanged=false\n'
