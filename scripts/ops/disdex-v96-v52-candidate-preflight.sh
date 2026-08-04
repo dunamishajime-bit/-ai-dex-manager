@@ -50,7 +50,7 @@ mkdir -p "$HOME" "$npm_config_cache" "$PYTHONPYCACHEPREFIX"
 
 # Authenticated account-risk validation. This mode is strictly read-only:
 # no state write, no Kill Switch mutation and no order/cancel/position action.
-/usr/bin/python3 scripts/disdex_v96_v52_margin_guard.py \
+/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py \
   --mode live \
   --preflight-readonly
 
@@ -63,6 +63,7 @@ DISDEX_V96_CONFIG_MIGRATION_MODE=true \
 
 printf 'DISDEX_V96_V52_CANDIDATE_PREFLIGHT_PASS\n'
 printf 'runtimeCommitSha=%s\n' "$sha"
+printf 'marginGuardRuntime=serialized\n'
 printf 'v96CryptoSleeveGross=1.5\n'
 printf 'v52StockSleeveGross=1.5\n'
 printf 'combinedPortfolioGross=2.5\n'
