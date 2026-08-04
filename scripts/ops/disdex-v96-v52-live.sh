@@ -24,6 +24,16 @@ expected="/home/deploy/disdex-trading/releases/$sha"
   exit 1
 }
 
+policy_script="$(pwd -P)/scripts/ops/disdex-v96-v52-live-policy.sh"
+[[ -f "$policy_script" && ! -L "$policy_script" ]] || {
+  printf 'fixed LIVE policy script missing\n' >&2
+  exit 1
+}
+# shellcheck source=scripts/ops/disdex-v96-v52-live-policy.sh
+source "$policy_script"
+disdex_apply_v96_v52_fixed_live_policy
+disdex_assert_v96_v52_fixed_live_policy
+
 shared_repo="/home/deploy/ai-dex-manager-v96-paper"
 shared_state="$shared_repo/.runtime-state/disdex-v13d-v11eq-v96"
 shared_approval="$shared_repo/.runtime-approval"
