@@ -168,11 +168,13 @@ def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> 
     protected: set[Path] = set()
     if current is not None:
         protected.add(current)
+    noncurrent_kept = 0
     for release in releases:
         if release == current:
             continue
-        if len([path for path in protected if path != current]) < RELEASE_KEEP_NONCURRENT:
+        if noncurrent_kept < RELEASE_KEEP_NONCURRENT:
             protected.add(release)
+            noncurrent_kept += 1
     for release in sorted(protected):
         report.protected_paths.append(str(release))
     for release in releases:
@@ -303,24 +305,37 @@ def protected_runtime_paths(paths: CleanupPaths) -> list[Path]:
         paths.approval_root / "disdex-v96-parity.json",
         paths.approval_root / "disdex-v96-operator-override.json",
         paths.approval_root / "disdex-v96-forward.json",
-        paths.promotion_lock,
     ]
 
 
-def snapshot_protected(paths: CleanupPaths) -> dict[str, tuple[bool, int, int]]:
-    result = {}
-    for path in protected_runtime_paths(paths):
-        try:
-            row = path.lstat()
-            result[str(path)] = (True, row.st_ino, row.st_size)
-        except FileNotFoundError:
-            result[str(path)] = (False, 0, 0)
-    return result
+def path_lexists(path: Path) -> bool:
+    return os.path.lexists(path)
+
+
+def existing_protected_paths(paths: CleanupPaths) -> set[str]:
+    return {str(path) for path in protected_runtime_paths(paths) if path_lexists(path)}
+
+
+def verify_protected_paths(
+    paths: CleanupPaths,
+    existed_before: set[str],
+    current_before: Optional[Path],
+    report: CleanupReport,
+) -> None:
+    deleted = set(report.deleted_paths)
+    for path_text in existed_before:
+        path = Path(path_text)
+        if path_text in deleted or not path_lexists(path):
+            raise RuntimeError(f"protected runtime path was removed by cleanup: {path}")
+    current_after = current_release(paths)
+    if current_before != current_after:
+        raise RuntimeError("current release target changed during retention cleanup")
+    if current_before is not None and str(current_before) in deleted:
+        raise RuntimeError("current release was selected for deletion")
 
 
 def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -> CleanupReport:
     report = CleanupReport(dry_run=dry_run)
-    before = snapshot_protected(paths)
     lock_handle = None
     if acquire_lock:
         paths.promotion_lock.parent.mkdir(parents=True, exist_ok=True)
@@ -332,19 +347,19 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
             report.skipped_paths.append("promotion lock busy; cleanup skipped")
             lock_handle.close()
             return report
+    existed_before = existing_protected_paths(paths)
+    current_before = current_release(paths)
     try:
         current_time = now_seconds()
         cleanup_releases(paths, report, current_time)
         cleanup_audits(paths, report, current_time)
         cleanup_backups(paths, report, current_time)
         cleanup_stale_temporary_files(paths, report, current_time)
+        verify_protected_paths(paths, existed_before, current_before, report)
     finally:
         if lock_handle is not None:
             fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
             lock_handle.close()
-    after = snapshot_protected(paths)
-    if before != after:
-        raise RuntimeError("protected runtime path metadata changed during retention cleanup")
     return report
 
 
@@ -385,7 +400,7 @@ def self_test() -> None:
             releases.append(release)
         paths.current_link.symlink_to(releases[3])
         for protected in protected_runtime_paths(paths):
-            if protected == paths.current_link or protected == paths.promotion_lock:
+            if protected == paths.current_link:
                 continue
             protected.parent.mkdir(parents=True, exist_ok=True)
             protected.write_text("protected\n", encoding="utf-8")
@@ -406,12 +421,13 @@ def self_test() -> None:
             transaction.mkdir()
             set_old(transaction, 100 + index)
 
-        before = snapshot_protected(paths)
+        protected_before = existing_protected_paths(paths)
+        current_before = current_release(paths)
         dry = run_cleanup(paths, dry_run=True, acquire_lock=False)
         assert dry.deleted_paths
         assert all(path.exists() for path in releases)
         applied = run_cleanup(paths, dry_run=False, acquire_lock=False)
-        assert snapshot_protected(paths) == before
+        verify_protected_paths(paths, protected_before, current_before, applied)
         assert paths.current_link.resolve() == releases[3]
         assert retained_txn.exists()
         remaining = exact_release_dirs(paths)
