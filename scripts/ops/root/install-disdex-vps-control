@@ -17,6 +17,7 @@ repo_root="${1:-}"
 
 helper_source="${repo_root}/scripts/ops/root/disdex-vps-control"
 transaction_lib_source="${repo_root}/scripts/ops/root/disdex-promotion-transaction-lib.sh"
+promotion_selftest_lib_source="${repo_root}/scripts/ops/root/disdex-promotion-selftest-lib.sh"
 transaction_selftest="${repo_root}/scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh"
 preflight_source="${repo_root}/ops/systemd/disdex-v96-v52-preflight@.service"
 approval_source="${repo_root}/ops/systemd/disdex-v96-v52-approval@.service"
@@ -24,7 +25,7 @@ live_source="${repo_root}/ops/systemd/disdex-v96-v52-live.service"
 live_launcher="${repo_root}/scripts/ops/disdex-v96-v52-live.sh"
 approval_launcher="${repo_root}/scripts/ops/disdex-v96-v52-renew-approvals.sh"
 preflight_launcher="${repo_root}/scripts/ops/disdex-v96-v52-candidate-preflight.sh"
-for source in "$helper_source" "$transaction_lib_source" "$transaction_selftest" "$preflight_source" "$approval_source" "$live_source" "$live_launcher" "$approval_launcher" "$preflight_launcher"; do
+for source in "$helper_source" "$transaction_lib_source" "$promotion_selftest_lib_source" "$transaction_selftest" "$preflight_source" "$approval_source" "$live_source" "$live_launcher" "$approval_launcher" "$preflight_launcher"; do
   [[ -f "$source" ]] || {
     printf 'required fixed source is missing: %s\n' "$source" >&2
     exit 2
@@ -44,17 +45,22 @@ pid="$(systemctl show disdex-v96-v52-live.service --property MainPID --value 2>/
 
 bash -n "$helper_source"
 bash -n "$transaction_lib_source"
+bash -n "$promotion_selftest_lib_source"
 bash -n "$transaction_selftest"
 bash -n "$live_launcher"
 bash -n "$approval_launcher"
 bash -n "$preflight_launcher"
 bash "$transaction_selftest"
+bash "$helper_source" trading-promote-selftest all
 grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"
 grep -q 'trading-promote)' "$helper_source"
+grep -q 'trading-promote-selftest)' "$helper_source"
 grep -q 'promotion_exit_handler' "$helper_source"
 grep -q 'rollback_promotion' "$helper_source"
 grep -q 'stock-runner-live.json' "$helper_source"
 grep -q 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS' "$helper_source"
+grep -q 'DISDEX_V96_V52_FULL_PROMOTION_FAILURE_INJECTION_SELFTEST_PASS' "$promotion_selftest_lib_source"
+grep -q 'productionPathsTouched=false' "$promotion_selftest_lib_source"
 grep -q 'disdex_txn_validate_backup' "$transaction_lib_source"
 grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' "$live_source"
 grep -q 'ExecStart=/usr/bin/env DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-candidate-preflight.sh' "$preflight_source"
@@ -79,12 +85,14 @@ for path in \
   /etc/systemd/system/disdex-v96-v52-preflight@.service \
   /etc/systemd/system/disdex-v96-v52-approval@.service \
   /usr/local/sbin/disdex-vps-control \
-  /usr/local/libexec/disdex-promotion-transaction-lib.sh; do
+  /usr/local/libexec/disdex-promotion-transaction-lib.sh \
+  /usr/local/libexec/disdex-promotion-selftest-lib.sh; do
   if [[ -f "$path" ]]; then cp -a "$path" "$backup_root/$(basename "$path")"; fi
 done
 
 install -d -o root -g root -m 0755 /usr/local/libexec
 install -o root -g root -m 0644 "$transaction_lib_source" /usr/local/libexec/disdex-promotion-transaction-lib.sh
+install -o root -g root -m 0644 "$promotion_selftest_lib_source" /usr/local/libexec/disdex-promotion-selftest-lib.sh
 install -o root -g root -m 0755 "$helper_source" /usr/local/sbin/disdex-vps-control
 install -o root -g root -m 0440 "$sudoers_tmp" /etc/sudoers.d/disdex-vps-control
 install -o root -g root -m 0644 "$live_source" /etc/systemd/system/disdex-v96-v52-live.service
@@ -105,14 +113,17 @@ systemctl daemon-reload
 [[ "$(systemctl show disdex-v96-v52-live.service --property MainPID --value)" == "0" ]]
 [[ "$(systemctl show disdex-v96-v52-live.service --property WorkingDirectory --value)" == "/home/deploy/disdex-trading/current" ]]
 [[ -f /usr/local/libexec/disdex-promotion-transaction-lib.sh && ! -L /usr/local/libexec/disdex-promotion-transaction-lib.sh ]]
+[[ -f /usr/local/libexec/disdex-promotion-selftest-lib.sh && ! -L /usr/local/libexec/disdex-promotion-selftest-lib.sh ]]
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-state >/dev/null
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-pid >/dev/null
 sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-current >/dev/null
+sudo -u disdex-runner sudo -n /usr/local/sbin/disdex-vps-control trading-promote-selftest all >/dev/null
 
 printf 'DISDEX_VPS_CONTROL_INSTALL_PASS\n'
 printf 'backupRoot=%s\n' "$backup_root"
 printf 'workingDirectory=/home/deploy/disdex-trading/current\n'
 printf 'promotionRollbackSelftest=PASS\n'
+printf 'fullPromotionFailureInjectionSelftest=PASS\n'
 printf 'servicesRestarted=false\n'
 printf 'ordersSent=false\n'
 printf 'runtimeStateChanged=false\n'
