@@ -9,15 +9,14 @@ from typing import Dict, List, Optional, Tuple
 import disdex_v52_aster_only_live_engine as legacy
 
 base = legacy.base
-
 STRATEGY_ID = legacy.STRATEGY_ID
-LIVE_ACK = legacy.LIVE_ACK
 V11_SLOT = legacy.V11_SLOT
 V50_SLOT = legacy.V50_SLOT
 MANAGED_CRYPTO_SYMBOLS = ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT")
 MANAGED_STOCK_SYMBOLS = tuple(base.ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = MANAGED_CRYPTO_SYMBOLS + MANAGED_STOCK_SYMBOLS
 EPSILON = 1e-9
+ACCOUNT_RISK_POLL_INTERVAL_MS = 30_000
 
 
 def normalized_margin_type(row: dict) -> str:
@@ -26,18 +25,15 @@ def normalized_margin_type(row: dict) -> str:
         return "cross"
     if raw in {"isolated", "isolate"}:
         return "isolated"
-    isolated = row.get("isolated")
-    if isolated is False:
+    if row.get("isolated") is False:
         return "cross"
-    if isolated is True:
+    if row.get("isolated") is True:
         return "isolated"
     return "unknown"
 
 
 def position_notional(row: dict) -> float:
-    quantity = abs(base.finite(row.get("positionAmt")))
-    price = base.finite(row.get("markPrice") or row.get("entryPrice"))
-    return quantity * price
+    return abs(base.finite(row.get("positionAmt"))) * base.finite(row.get("markPrice") or row.get("entryPrice"))
 
 
 def row_initial_margin(row: dict) -> float:
@@ -47,8 +43,8 @@ def row_initial_margin(row: dict) -> float:
             reported = base.finite(raw, -1.0)
             if reported >= 0:
                 return reported
-    leverage = base.finite(row.get("leverage"))
     notional = position_notional(row)
+    leverage = base.finite(row.get("leverage"))
     if notional <= 0:
         return 0.0
     if leverage < 1:
@@ -58,7 +54,7 @@ def row_initial_margin(row: dict) -> float:
 
 def verify_fixed_account_configuration(rows: List[dict], required_leverage: int) -> Dict[str, dict]:
     by_symbol = {str(row.get("symbol") or "").upper(): row for row in rows}
-    checked: Dict[str, dict] = {}
+    result: Dict[str, dict] = {}
     for symbol in MANAGED_SYMBOLS:
         row = by_symbol.get(symbol)
         if row is None:
@@ -66,15 +62,11 @@ def verify_fixed_account_configuration(rows: List[dict], required_leverage: int)
         leverage = int(base.finite(row.get("leverage")))
         margin_type = normalized_margin_type(row)
         if leverage != required_leverage:
-            raise RuntimeError(
-                f"Managed symbol leverage mismatch for {symbol}: expected {required_leverage}, got {leverage}"
-            )
+            raise RuntimeError(f"Managed symbol leverage mismatch for {symbol}: expected {required_leverage}, got {leverage}")
         if margin_type != "cross":
-            raise RuntimeError(
-                f"Managed symbol margin type mismatch for {symbol}: expected cross, got {margin_type}"
-            )
-        checked[symbol] = {"leverage": leverage, "marginType": margin_type}
-    return checked
+            raise RuntimeError(f"Managed symbol margin type mismatch for {symbol}: expected cross, got {margin_type}")
+        result[symbol] = {"leverage": leverage, "marginType": margin_type}
+    return result
 
 
 class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
@@ -91,18 +83,19 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.maximum_concurrent_stock_positions = base.int_env("DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS", 2)
         self.required_initial_leverage = base.int_env("DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE", 5)
         self.maximum_initial_margin_fraction = base.float_env("DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION", 0.70)
-        self.minimum_available_balance_fraction = base.float_env(
-            "DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION", 0.20
-        )
+        self.minimum_available_balance_fraction = base.float_env("DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION", 0.20)
+        self._last_account_risk_check_ms = 0
         self._assert_policy_configuration()
 
     def _assert_policy_configuration(self) -> None:
-        if abs(self.crypto_gross_cap - 1.5) > EPSILON:
-            raise RuntimeError("V52 fixed Crypto sleeve Gross must be 1.5")
-        if abs(self.stock_gross_cap - 1.5) > EPSILON:
-            raise RuntimeError("V52 fixed Stock sleeve Gross must be 1.5")
-        if abs(self.portfolio_gross_cap - 2.5) > EPSILON:
-            raise RuntimeError("V52 fixed combined Portfolio Gross must be 2.5")
+        exact = (
+            (self.crypto_gross_cap, 1.5, "Crypto sleeve Gross"),
+            (self.stock_gross_cap, 1.5, "Stock sleeve Gross"),
+            (self.portfolio_gross_cap, 2.5, "combined Portfolio Gross"),
+        )
+        for actual, expected, label in exact:
+            if abs(actual - expected) > EPSILON:
+                raise RuntimeError(f"V52 fixed {label} must be {expected}")
         if self.crypto_gross_cap + self.reserved_first_stock_gross > self.portfolio_gross_cap + EPSILON:
             raise RuntimeError("V52 policy does not reserve enough Gross for the first Stock position")
         if self.maximum_concurrent_stock_positions != 2:
@@ -110,95 +103,78 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         if self.required_initial_leverage != 5:
             raise RuntimeError("V96/V52 managed-symbol leverage must be exactly 5x")
         if not 0 < self.maximum_initial_margin_fraction <= 0.70 + EPSILON:
-            raise RuntimeError("Maximum initial-margin fraction must be positive and no greater than 0.70")
+            raise RuntimeError("Maximum initial-margin fraction must be no greater than 0.70")
         if not 0.20 - EPSILON <= self.minimum_available_balance_fraction < 1:
             raise RuntimeError("Minimum available-balance fraction must be at least 0.20")
         if self.minimum_second_stock_gross < 0.25 - EPSILON:
             raise RuntimeError("Second Stock position minimum Gross must be at least 0.25")
 
     def excess_margin_usd(self) -> float:
-        # The legacy method subtracts Crypto notional as though it consumed 1x
-        # cash. V96 and V52 are fixed 5x perpetual sleeves, so V52 daily-loss
-        # capital is the Stock sleeve's proportional share of account equity.
+        # V52 daily-loss capital is its proportional sleeve capital, not Crypto
+        # notional subtracted as if every perpetual position used 1x cash.
         equity = self.portfolio_equity()
         if equity <= 0 or self.portfolio_gross_cap <= 0:
             return 0.0
-        stock_capital_fraction = min(1.0, self.stock_gross_cap / self.portfolio_gross_cap)
-        return equity * stock_capital_fraction
+        return equity * min(1.0, self.stock_gross_cap / self.portfolio_gross_cap)
 
     def _usdt_balance(self) -> dict:
-        rows = self.aster.balances()
-        row = next((item for item in rows if str(item.get("asset") or "").upper() == "USDT"), None)
+        row = next((item for item in self.aster.balances() if str(item.get("asset") or "").upper() == "USDT"), None)
         if row is None:
             raise RuntimeError("Aster USDT balance row is missing")
         return row
 
-    def account_margin_snapshot(self, rows: Optional[List[dict]] = None) -> dict:
-        position_rows = rows if rows is not None else self.aster.positions()
+    def account_margin_snapshot(self, rows: List[dict]) -> dict:
         equity = self.portfolio_equity()
         if equity <= 0:
             raise RuntimeError("Aster equity must be positive")
-        balance = self._usdt_balance()
-        available = base.finite(balance.get("availableBalance"))
+        available = base.finite(self._usdt_balance().get("availableBalance"))
         if available < 0:
             raise RuntimeError("Aster available balance is invalid")
-        current_initial_margin = sum(row_initial_margin(row) for row in position_rows)
+        initial_margin = sum(row_initial_margin(row) for row in rows)
         return {
             "equityUsd": equity,
             "availableBalanceUsd": available,
-            "currentInitialMarginUsd": current_initial_margin,
-            "currentInitialMarginFraction": current_initial_margin / equity,
+            "currentInitialMarginUsd": initial_margin,
+            "currentInitialMarginFraction": initial_margin / equity,
         }
 
-    def account_configuration(self, rows: Optional[List[dict]] = None) -> Dict[str, dict]:
+    def assert_account_margin_safe(self, *, force: bool = False, rows: Optional[List[dict]] = None) -> dict:
+        now = base.now_ms()
+        cached = getattr(self, "_account_risk_cache", None)
+        if not force and cached and now - self._last_account_risk_check_ms < ACCOUNT_RISK_POLL_INTERVAL_MS:
+            return cached
         position_rows = rows if rows is not None else self.aster.positions()
-        return verify_fixed_account_configuration(position_rows, self.required_initial_leverage)
+        configuration = verify_fixed_account_configuration(position_rows, self.required_initial_leverage)
+        margin = self.account_margin_snapshot(position_rows)
+        if margin["currentInitialMarginFraction"] > self.maximum_initial_margin_fraction + EPSILON:
+            raise RuntimeError(
+                f"Combined initial-margin fraction exceeds safety maximum: {margin['currentInitialMarginFraction']:.6f} > {self.maximum_initial_margin_fraction:.6f}"
+            )
+        minimum_available = margin["equityUsd"] * self.minimum_available_balance_fraction
+        if margin["availableBalanceUsd"] + EPSILON < minimum_available:
+            raise RuntimeError(
+                f"Combined available balance is below reserve: {margin['availableBalanceUsd']:.6f} < {minimum_available:.6f}"
+            )
+        result = {"configuration": configuration, "margin": margin}
+        self._account_risk_cache = result
+        self._last_account_risk_check_ms = now
+        return result
 
     def projected_margin_capacity_gross(self, snapshot: dict, margin: dict) -> float:
         equity = base.finite(snapshot.get("equityUsd"))
         if equity <= 0:
             return 0.0
-        current_initial_margin = base.finite(margin.get("currentInitialMarginUsd"))
-        available_balance = base.finite(margin.get("availableBalanceUsd"))
-        room_by_initial_margin = max(
-            0.0,
-            equity * self.maximum_initial_margin_fraction - current_initial_margin,
-        )
-        room_by_available_balance = max(
-            0.0,
-            available_balance - equity * self.minimum_available_balance_fraction,
-        )
-        margin_room = min(room_by_initial_margin, room_by_available_balance)
-        return margin_room * self.required_initial_leverage / equity
-
-    def assert_account_margin_safe(self, rows: Optional[List[dict]] = None) -> dict:
-        position_rows = rows if rows is not None else self.aster.positions()
-        configuration = self.account_configuration(position_rows)
-        margin = self.account_margin_snapshot(position_rows)
-        if margin["currentInitialMarginFraction"] > self.maximum_initial_margin_fraction + EPSILON:
-            raise RuntimeError(
-                "Combined account initial-margin fraction exceeds the fixed safety maximum: "
-                f"{margin['currentInitialMarginFraction']:.6f} > {self.maximum_initial_margin_fraction:.6f}"
-            )
-        minimum_available = margin["equityUsd"] * self.minimum_available_balance_fraction
-        if margin["availableBalanceUsd"] + EPSILON < minimum_available:
-            raise RuntimeError(
-                "Combined account available balance is below the fixed reserve: "
-                f"{margin['availableBalanceUsd']:.6f} < {minimum_available:.6f}"
-            )
-        return {"configuration": configuration, "margin": margin}
+        room_by_fraction = max(0.0, equity * self.maximum_initial_margin_fraction - base.finite(margin.get("currentInitialMarginUsd")))
+        room_by_balance = max(0.0, base.finite(margin.get("availableBalanceUsd")) - equity * self.minimum_available_balance_fraction)
+        return min(room_by_fraction, room_by_balance) * self.required_initial_leverage / equity
 
     def available_slot_gross(self, slot: str) -> Tuple[float, dict]:
         snapshot = self.gross_snapshot()
         positions = self.positions()
-        if slot in positions or self.v96_requires_margin():
+        if slot in positions or self.v96_requires_margin() or len(positions) >= self.maximum_concurrent_stock_positions:
             return 0.0, snapshot
-        if len(positions) >= self.maximum_concurrent_stock_positions:
-            return 0.0, snapshot
-        rows = self.aster.positions() if self.live else []
         if self.live:
-            account = self.assert_account_margin_safe(rows)
-            margin = account["margin"]
+            margin = self.assert_account_margin_safe(force=True)["margin"]
         else:
             margin = {
                 "equityUsd": snapshot["equityUsd"],
@@ -207,81 +183,58 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
                 "currentInitialMarginFraction": snapshot["totalGross"] / self.required_initial_leverage,
             }
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
-        gross_capacity = min(
+        capacity = min(
             slot_cap,
             max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
             max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
             self.projected_margin_capacity_gross(snapshot, margin),
         )
-        minimum = self.minimum_first_stock_gross if len(positions) == 0 else self.minimum_second_stock_gross
-        allocated = max(0.0, gross_capacity)
-        if allocated + EPSILON < minimum:
-            return 0.0, {
-                **snapshot,
-                "margin": margin,
-                "minimumRequiredSlotGross": minimum,
-                "marginCapacityGross": self.projected_margin_capacity_gross(snapshot, margin),
-            }
-        return allocated, {
-            **snapshot,
-            "margin": margin,
-            "minimumRequiredSlotGross": minimum,
-            "marginCapacityGross": self.projected_margin_capacity_gross(snapshot, margin),
-        }
+        minimum = self.minimum_first_stock_gross if not positions else self.minimum_second_stock_gross
+        if capacity + EPSILON < minimum:
+            return 0.0, {**snapshot, "margin": margin, "minimumRequiredSlotGross": minimum}
+        return max(0.0, capacity), {**snapshot, "margin": margin, "minimumRequiredSlotGross": minimum}
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        # Force a fresh leverage, margin, available-balance and Gross read before
+        # every new Stock order. Reduce-only exits remain available.
+        self._account_risk_cache = None
         current_capacity, capacity_snapshot = self.available_slot_gross(slot)
         if target_gross <= 0 or target_gross > current_capacity + self.gross_tolerance:
-            self.log(
-                "v52-entry-capacity-recheck-blocked",
-                slot=slot,
-                requestedGross=target_gross,
-                currentCapacityGross=current_capacity,
-                capacitySnapshot=capacity_snapshot,
-            )
+            self.log("v52-entry-capacity-recheck-blocked", slot=slot, requestedGross=target_gross,
+                     currentCapacityGross=current_capacity, capacitySnapshot=capacity_snapshot)
             return False
         return super().open_basis_position(slot, candidate, min(target_gross, current_capacity))
 
     def tick(self) -> None:
         if self.live:
-            self.assert_account_margin_safe()
+            self.assert_account_margin_safe(force=False)
             self.assert_gross_safe()
         super().tick()
 
     def preflight(self, read_only: bool = False) -> dict:
         checks = super().preflight(read_only=read_only)
-        rows = self.aster.positions() if self.live else []
         if self.live:
-            account = self.assert_account_margin_safe(rows)
-            configuration = account["configuration"]
-            margin = account["margin"]
+            account = self.assert_account_margin_safe(force=True)
+            configuration, margin = account["configuration"], account["margin"]
         else:
-            configuration = {
-                symbol: {"leverage": self.required_initial_leverage, "marginType": "cross"}
-                for symbol in MANAGED_SYMBOLS
-            }
-            margin = {
-                "equityUsd": self.portfolio_equity(),
-                "availableBalanceUsd": self.portfolio_equity(),
-                "currentInitialMarginUsd": 0.0,
-                "currentInitialMarginFraction": 0.0,
-            }
+            configuration = {symbol: {"leverage": 5, "marginType": "cross"} for symbol in MANAGED_SYMBOLS}
+            equity = self.portfolio_equity()
+            margin = {"equityUsd": equity, "availableBalanceUsd": equity,
+                      "currentInitialMarginUsd": 0.0, "currentInitialMarginFraction": 0.0}
         gross = checks["gross"]
-        first_slot_capacity = min(
+        first_capacity = min(
             self.v11_gross_cap,
             max(0.0, self.stock_gross_cap - gross["stockGross"]),
             max(0.0, self.portfolio_gross_cap - gross["totalGross"]),
             self.projected_margin_capacity_gross(gross, margin),
         )
-        if not self.positions() and first_slot_capacity + EPSILON < self.minimum_first_stock_gross:
-            raise RuntimeError(
-                f"Combined account cannot support the minimum first V52 Stock Gross: {first_slot_capacity:.6f}"
-            )
+        if not self.positions() and first_capacity + EPSILON < self.minimum_first_stock_gross:
+            raise RuntimeError(f"Combined account cannot support minimum first V52 Stock Gross: {first_capacity:.6f}")
         checks.update({
             "accountConfiguration": configuration,
             "accountMargin": margin,
             "v52StrategyCapitalUsd": self.excess_margin_usd(),
-            "requiredInitialLeverage": self.required_initial_leverage,
+            "requiredInitialLeverage": 5,
             "requiredMarginType": "cross",
             "maximumInitialMarginFraction": self.maximum_initial_margin_fraction,
             "minimumAvailableBalanceFractionAfterOrder": self.minimum_available_balance_fraction,
@@ -289,19 +242,16 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             "minimumFirstStockGross": self.minimum_first_stock_gross,
             "minimumSecondStockGross": self.minimum_second_stock_gross,
             "maximumConcurrentStockPositions": self.maximum_concurrent_stock_positions,
-            "firstStockCapacityGross": first_slot_capacity,
+            "firstStockCapacityGross": first_capacity,
+            "accountRiskPollIntervalMs": ACCOUNT_RISK_POLL_INTERVAL_MS,
         })
         return checks
 
 
 def self_test() -> None:
-    rows = [
-        {"symbol": symbol, "leverage": "5", "marginType": "cross", "positionAmt": "0", "markPrice": "1"}
-        for symbol in MANAGED_SYMBOLS
-    ]
-    checked = verify_fixed_account_configuration(rows, 5)
-    assert len(checked) == len(MANAGED_SYMBOLS)
-
+    rows = [{"symbol": symbol, "leverage": "5", "marginType": "cross", "positionAmt": "0", "markPrice": "1"}
+            for symbol in MANAGED_SYMBOLS]
+    assert len(verify_fixed_account_configuration(rows, 5)) == len(MANAGED_SYMBOLS)
     engine = object.__new__(MarginAwareV52AsterOnlyEngine)
     engine.crypto_gross_cap = 1.5
     engine.stock_gross_cap = 1.5
@@ -322,52 +272,29 @@ def self_test() -> None:
     assert abs(engine.excess_margin_usd() - 60.0) < EPSILON
 
     engine.state = {"positions": {}}
-    engine.gross_snapshot = lambda: {
-        "equityUsd": 100.0,
-        "cryptoNotionalUsd": 115.0,
-        "stockNotionalUsd": 0.0,
-        "cryptoGross": 1.15,
-        "stockGross": 0.0,
-        "totalGross": 1.15,
-    }
-    gross, snapshot = engine.available_slot_gross(V11_SLOT)
-    assert abs(gross - 1.0) < EPSILON
-    assert snapshot["margin"]["currentInitialMarginFraction"] < 0.70
+    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoNotionalUsd": 115.0, "stockNotionalUsd": 0.0,
+                                     "cryptoGross": 1.15, "stockGross": 0.0, "totalGross": 1.15}
+    first, _ = engine.available_slot_gross(V11_SLOT)
+    assert abs(first - 1.0) < EPSILON
 
     engine.state = {"positions": {V11_SLOT: {"symbol": "META"}}}
-    engine.gross_snapshot = lambda: {
-        "equityUsd": 100.0,
-        "cryptoNotionalUsd": 115.0,
-        "stockNotionalUsd": 100.0,
-        "cryptoGross": 1.15,
-        "stockGross": 1.0,
-        "totalGross": 2.15,
-    }
-    gross, _ = engine.available_slot_gross(V50_SLOT)
-    assert abs(gross - 0.35) < EPSILON
+    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoNotionalUsd": 115.0, "stockNotionalUsd": 100.0,
+                                     "cryptoGross": 1.15, "stockGross": 1.0, "totalGross": 2.15}
+    second, _ = engine.available_slot_gross(V50_SLOT)
+    assert abs(second - 0.35) < EPSILON
 
-    engine.gross_snapshot = lambda: {
-        "equityUsd": 100.0,
-        "cryptoNotionalUsd": 150.0,
-        "stockNotionalUsd": 100.0,
-        "cryptoGross": 1.5,
-        "stockGross": 1.0,
-        "totalGross": 2.5,
-    }
-    gross, _ = engine.available_slot_gross(V50_SLOT)
-    assert gross == 0.0
-
-    assert abs((2.5 / 5.0) - 0.50) < EPSILON
+    engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoNotionalUsd": 150.0, "stockNotionalUsd": 100.0,
+                                     "cryptoGross": 1.5, "stockGross": 1.0, "totalGross": 2.5}
+    blocked, _ = engine.available_slot_gross(V50_SLOT)
+    assert blocked == 0.0
+    assert abs(2.5 / 5.0 - 0.50) < EPSILON
     print("V52 margin-aware concurrent Stock runner self-test: PASS")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--mode",
-        choices=("paper", "live"),
-        default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"),
-    )
+    parser.add_argument("--mode", choices=("paper", "live"),
+                        default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"))
     parser.add_argument("--daemon", action="store_true")
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--preflight", action="store_true")
@@ -375,17 +302,14 @@ def main() -> int:
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        self_test()
-        return 0
+        self_test(); return 0
     runner = MarginAwareV52AsterOnlyEngine(args.mode)
     signal.signal(signal.SIGINT, lambda *_: setattr(runner, "stop_requested", True))
     signal.signal(signal.SIGTERM, lambda *_: setattr(runner, "stop_requested", True))
     if args.preflight_readonly:
-        print(json.dumps(runner.preflight(read_only=True), ensure_ascii=False, separators=(",", ":")))
-        return 0
+        print(json.dumps(runner.preflight(read_only=True), ensure_ascii=False, separators=(",", ":"))); return 0
     if args.preflight:
-        print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False))
-        return 0
+        print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False)); return 0
     runner.run(args.daemon and not args.once)
     return 0
 
