@@ -5,7 +5,7 @@ umask 077
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 marker="$(pwd -P)/.disdex-release-sha"
-[[ -f "$marker" ]] || {
+[[ -f "$marker" && ! -L "$marker" ]] || {
   printf 'release marker missing\n' >&2
   exit 1
 }
@@ -42,6 +42,9 @@ export DISDEX_V96_RUNTIME_COMMIT_SHA="$sha"
 export DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT="$shared_state"
 export DISDEX_V13D_V11EQ_V96_STATE_DIR="$shared_state"
 export DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE="$shared_state/kill-switch.json"
+export DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR="$shared_state/margin-risk"
+export DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE="$shared_state/margin-risk/guard-live.json"
+export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT="scripts/disdex_v96_v52_margin_guard.py"
 export DISDEX_V52_ASTER_ONLY_STATE_DIR="$shared_state/stock"
 export DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE="$shared_state/kill-switch.json"
 export DISDEX_V96_STATE_DIR="$shared_state/crypto-v96"
@@ -52,11 +55,93 @@ export DISDEX_V96_OPERATOR_OVERRIDE_FILE="$shared_approval/disdex-v96-operator-o
 export DISDEX_V96_CONFIG_MIGRATION_MODE=true
 export DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT=I_SYNC_CURRENT_EXACT_OPERATOR_OVERRIDE_AUDIT
 
+mkdir -p "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
+chmod 0700 "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
+
 # Keep the service fail-closed without a systemd restart loop while the shared Kill Switch is active.
 while [[ -f "$DISDEX_V96_KILL_SWITCH_FILE" ]] && /usr/bin/jq -e ".active == true" "$DISDEX_V96_KILL_SWITCH_FILE" >/dev/null 2>&1; do
-  printf "shared Kill Switch active; waiting for formal operator clearance\n" >&2
+  printf 'shared Kill Switch active; waiting for formal operator clearance\n' >&2
   sleep 30
 done
 
 /usr/bin/npm run strategy:disdex-v96:override:audit:sync
-exec /usr/bin/npm run strategy:disdex-v52:daemon
+
+intentional_stop=false
+guard_pid=""
+supervisor_pid=""
+
+stop_children() {
+  intentional_stop=true
+  [[ -z "$guard_pid" ]] || kill -TERM "$guard_pid" >/dev/null 2>&1 || true
+  [[ -z "$supervisor_pid" ]] || kill -TERM "$supervisor_pid" >/dev/null 2>&1 || true
+  [[ -z "$guard_pid" ]] || wait "$guard_pid" >/dev/null 2>&1 || true
+  [[ -z "$supervisor_pid" ]] || wait "$supervisor_pid" >/dev/null 2>&1 || true
+}
+trap 'stop_children; exit 0' INT TERM HUP
+
+/usr/bin/python3 scripts/disdex_v96_v52_margin_guard.py --mode live --daemon &
+guard_pid=$!
+/usr/bin/npm run strategy:disdex-v52:daemon &
+supervisor_pid=$!
+
+printf 'DISDEX_V96_V52_LIVE_PROCESS_GROUP_START\n'
+printf 'runtimeCommitSha=%s\nmarginGuardPid=%s\nsupervisorPid=%s\n' "$sha" "$guard_pid" "$supervisor_pid"
+printf 'healthyMarginPollIntervalMs=300000\nwarningMarginPollIntervalMs=60000\n'
+printf 'ordersSentByLauncher=false\n'
+
+set +e
+wait -n "$guard_pid" "$supervisor_pid"
+child_status=$?
+set -e
+
+if [[ "$intentional_stop" == "true" ]]; then
+  stop_children
+  exit 0
+fi
+
+reason="LIVE child exited unexpectedly"
+if ! kill -0 "$guard_pid" >/dev/null 2>&1; then
+  reason="Adaptive Margin Guard exited unexpectedly with status $child_status"
+elif ! kill -0 "$supervisor_pid" >/dev/null 2>&1; then
+  reason="V96/V52 trading supervisor exited unexpectedly with status $child_status"
+fi
+
+DISDEX_UNEXPECTED_CHILD_REASON="$reason" \
+DISDEX_UNEXPECTED_CHILD_KILL_SWITCH="$DISDEX_V96_KILL_SWITCH_FILE" \
+/usr/bin/python3 <<'PY'
+import datetime as dt
+import json
+import os
+import tempfile
+from pathlib import Path
+
+path = Path(os.environ["DISDEX_UNEXPECTED_CHILD_KILL_SWITCH"])
+reason = os.environ["DISDEX_UNEXPECTED_CHILD_REASON"]
+path.parent.mkdir(parents=True, exist_ok=True)
+payload = {
+    "active": True,
+    "strategyId": "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+    "combinedStrategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+    "action": "FLATTEN_MANAGED",
+    "reason": reason,
+    "operator": "disdex-v96-v52-live-launcher",
+    "activatedAt": dt.datetime.now(tz=dt.timezone.utc).isoformat(),
+}
+handle, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=str(path.parent))
+try:
+    with os.fdopen(handle, "w", encoding="utf-8") as writer:
+        json.dump(payload, writer, ensure_ascii=False, indent=2, sort_keys=True)
+        writer.write("\n")
+        writer.flush()
+        os.fsync(writer.fileno())
+    os.chmod(temporary, 0o600)
+    os.replace(temporary, path)
+finally:
+    if os.path.exists(temporary):
+        os.unlink(temporary)
+PY
+
+printf 'DISDEX_V96_V52_LIVE_CHILD_FAILURE_FAIL_CLOSED\n' >&2
+printf 'reason=%s\nkillSwitchActivated=true\n' "$reason" >&2
+stop_children
+exit 1
