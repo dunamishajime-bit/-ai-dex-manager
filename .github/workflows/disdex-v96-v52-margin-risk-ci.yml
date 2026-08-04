@@ -80,6 +80,7 @@ jobs:
           bash -n scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
           bash -n scripts/ops/disdex-v96-v52-candidate-preflight.sh
           bash -n scripts/ops/disdex-v96-v52-live.sh
+          bash -n scripts/ops/root/disdex-v96-v52-release-readiness
           bash -n scripts/ops/root/install-disdex-vps-control
           bash scripts/ops/disdex-v96-v52-live-policy-selftest.sh
 
@@ -94,12 +95,15 @@ jobs:
           grep -Fq 'WARNING_MARGIN_RATIO_PCT = 50.0' scripts/disdex_v96_v52_margin_risk_policy.py
           grep -Fq 'REDUCE_MARGIN_RATIO_PCT = 65.0' scripts/disdex_v96_v52_margin_risk_policy.py
           grep -Fq 'CRITICAL_MARGIN_RATIO_PCT = 75.0' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq '_wait_without_account_calls' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq 'interrupt_on_kill_switch=False' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq 'reduceOnly": "true"' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq 'emergency-flatten.lock' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq 'CONCURRENT_FLATTEN_ALREADY_COMPLETED' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq -- '--preorder-check' lib/direct-trade-executor.ts
           grep -Fq 'command.reduceOnly !== true' lib/direct-trade-executor.ts
-          grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'startupWaitLoop=false' scripts/ops/disdex-v96-v52-live.sh
           grep -Fq 'DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS' scripts/ops/root/disdex-vps-retention-cleanup
           grep -Fq 'OnCalendar=daily' ops/systemd/disdex-vps-retention.timer
           grep -Fq 'SystemMaxUse=256M' ops/systemd/90-disdex-storage-guard.conf
@@ -110,3 +114,9 @@ jobs:
           set -Eeuo pipefail
           bash scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
           sudo bash scripts/ops/root/disdex-vps-control trading-promote-selftest all
+
+      - name: Validate one-shot release readiness gate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo bash scripts/ops/root/disdex-v96-v52-release-readiness "$(pwd -P)" source
