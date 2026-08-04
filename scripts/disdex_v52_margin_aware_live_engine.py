@@ -131,7 +131,7 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             "totalGross": (crypto_notional + stock_notional) / equity,
         }
 
-    def fresh_order_risk_check(self) -> dict:
+    def fresh_order_risk_check(self, *, write_state: bool = True, allow_kill_switch: bool = True) -> dict:
         account = self.account_info()
         rows = self.aster.positions() if self.live else [
             {
@@ -149,8 +149,9 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         snapshot = build_margin_risk_snapshot(account, rows, MANAGED_SYMBOLS)
         decision = classify_margin_risk(snapshot, str(previous.get("stage") or "HEALTHY"))
         decision["gross"] = self.gross_snapshot_from_rows(account, rows)
-        self._write_guard_state(decision, configuration)
-        if decision["stage"] in {"REDUCE", "CRITICAL"}:
+        if write_state:
+            self._write_guard_state(decision, configuration)
+        if allow_kill_switch and decision["stage"] in {"REDUCE", "CRITICAL"}:
             self.activate_kill_switch(
                 "V52 pre-order Margin Guard triggered pre-liquidation stop-loss: "
                 f"stage={decision['stage']}, marginRatio={decision['maintenanceMarginRatioPct']:.4f}%, "
@@ -284,7 +285,10 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
 
     def preflight(self, read_only: bool = False) -> dict:
         checks = super().preflight(read_only=read_only)
-        decision = self.fresh_order_risk_check()
+        decision = self.fresh_order_risk_check(
+            write_state=not read_only,
+            allow_kill_switch=not read_only,
+        )
         if decision["stage"] != "HEALTHY":
             raise RuntimeError(f"V52 preflight requires HEALTHY Margin Guard, got {decision['stage']}")
         gross = decision["gross"]
