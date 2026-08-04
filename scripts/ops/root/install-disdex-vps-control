@@ -21,7 +21,8 @@ approval_source="${repo_root}/ops/systemd/disdex-v96-v52-approval@.service"
 live_source="${repo_root}/ops/systemd/disdex-v96-v52-live.service"
 live_launcher="${repo_root}/scripts/ops/disdex-v96-v52-live.sh"
 approval_launcher="${repo_root}/scripts/ops/disdex-v96-v52-renew-approvals.sh"
-for source in "$helper_source" "$preflight_source" "$approval_source" "$live_source" "$live_launcher" "$approval_launcher"; do
+preflight_launcher="${repo_root}/scripts/ops/disdex-v96-v52-candidate-preflight.sh"
+for source in "$helper_source" "$preflight_source" "$approval_source" "$live_source" "$live_launcher" "$approval_launcher" "$preflight_launcher"; do
   [[ -f "$source" ]] || {
     printf 'required fixed source is missing: %s\n' "$source" >&2
     exit 2
@@ -42,10 +43,15 @@ pid="$(systemctl show disdex-v96-v52-live.service --property MainPID --value 2>/
 bash -n "$helper_source"
 bash -n "$live_launcher"
 bash -n "$approval_launcher"
+bash -n "$preflight_launcher"
 grep -q 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"
+grep -q 'trading-promote)' "$helper_source"
+grep -q 'run_preflight_unit "$sha"' "$helper_source"
 grep -q 'WorkingDirectory=/home/deploy/disdex-trading/current' "$live_source"
-grep -q 'ExecStart=/usr/bin/env DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/npm run strategy:disdex-v96-v52:preflight:readonly' "$preflight_source"
+grep -q 'ExecStart=/usr/bin/env DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-candidate-preflight.sh' "$preflight_source"
 grep -q 'ExecStart=/usr/bin/env DISDEX_V96_APPROVED_COMMIT_SHA=%i DISDEX_V96_RUNTIME_COMMIT_SHA=%i /usr/bin/bash scripts/ops/disdex-v96-v52-renew-approvals.sh' "$approval_source"
+grep -q 'ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state' "$approval_source"
+grep -q 'DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE=CANDIDATE_RELEASE' "$approval_launcher"
 ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$helper_source"
 
 sudoers_tmp="$(mktemp)"
