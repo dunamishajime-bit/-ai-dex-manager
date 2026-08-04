@@ -58,13 +58,40 @@ export DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT=I_SYNC_CURRENT_EXACT_OPERA
 mkdir -p "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
 chmod 0700 "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
 
-# Keep the service fail-closed without a systemd restart loop while the shared Kill Switch is active.
-while [[ -f "$DISDEX_V96_KILL_SWITCH_FILE" ]] && /usr/bin/jq -e ".active == true" "$DISDEX_V96_KILL_SWITCH_FILE" >/dev/null 2>&1; do
-  printf 'shared Kill Switch active; waiting for formal operator clearance\n' >&2
-  sleep 30
-done
+kill_switch_active() {
+  [[ -f "$DISDEX_V96_KILL_SWITCH_FILE" ]] \
+    && /usr/bin/jq -e '.active == true' "$DISDEX_V96_KILL_SWITCH_FILE" >/dev/null 2>&1
+}
+
+# Never wait indefinitely at startup. If the Kill Switch is already active,
+# execute one bounded emergency reduce-only reconciliation and leave LIVE off.
+# A later formal operator clearance and explicit restart are required.
+if kill_switch_active; then
+  /usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py \
+    --mode live \
+    --emergency-once
+  printf 'DISDEX_V96_V52_LIVE_NOT_STARTED_KILL_SWITCH_ACTIVE\n'
+  printf 'runtimeCommitSha=%s\n' "$sha"
+  printf 'startupWaitLoop=false\n'
+  printf 'liveSupervisorStarted=false\n'
+  printf 'formalOperatorClearanceRequired=true\n'
+  exit 0
+fi
 
 /usr/bin/npm run strategy:disdex-v96:override:audit:sync
+
+# Close the small race in which a Kill Switch is activated during audit sync.
+if kill_switch_active; then
+  /usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py \
+    --mode live \
+    --emergency-once
+  printf 'DISDEX_V96_V52_LIVE_NOT_STARTED_KILL_SWITCH_ACTIVATED_DURING_STARTUP\n'
+  printf 'runtimeCommitSha=%s\n' "$sha"
+  printf 'startupWaitLoop=false\n'
+  printf 'liveSupervisorStarted=false\n'
+  printf 'formalOperatorClearanceRequired=true\n'
+  exit 0
+fi
 
 intentional_stop=false
 guard_pid=""
