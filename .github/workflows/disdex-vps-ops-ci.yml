@@ -10,6 +10,7 @@ on:
       - 'scripts/disdex-v96-v52-readonly-preflight.ts'
       - 'scripts/disdex_v96_v52_margin_risk_policy.py'
       - 'scripts/disdex_v96_v52_margin_guard.py'
+      - 'scripts/disdex_v96_v52_margin_guard_runtime.py'
       - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
       - 'scripts/disdex_v52_margin_aware_live_engine.py'
       - '.github/workflows/disdex-vps-ops-ci.yml'
@@ -51,12 +52,14 @@ jobs:
           python3 -m py_compile \
             scripts/disdex_v96_v52_margin_risk_policy.py \
             scripts/disdex_v96_v52_margin_guard.py \
+            scripts/disdex_v96_v52_margin_guard_runtime.py \
             scripts/disdex_v96_v52_margin_guard_selftest.py \
             scripts/disdex_v52_margin_aware_live_engine.py \
             scripts/ops/root/disdex-vps-retention-cleanup
 
           python3 scripts/disdex_v96_v52_margin_risk_policy.py
           python3 scripts/disdex_v96_v52_margin_guard.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test
           python3 scripts/disdex_v96_v52_margin_guard_selftest.py
           python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
           python3 scripts/ops/root/disdex-vps-retention-cleanup --self-test
@@ -72,17 +75,20 @@ jobs:
           grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5' scripts/ops/disdex-v96-v52-live-policy.sh
           grep -Fq 'export DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5' scripts/ops/disdex-v96-v52-live-policy.sh
           grep -Fq 'export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-live-policy.sh
 
           grep -Fq 'HEALTHY_POLL_INTERVAL_MS = 5 * 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
           grep -Fq 'WARNING_POLL_INTERVAL_MS = 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
           grep -Fq 'REDUCE_MARGIN_RATIO_PCT = 65.0' scripts/disdex_v96_v52_margin_risk_policy.py
           grep -Fq 'CRITICAL_MARGIN_RATIO_PCT = 75.0' scripts/disdex_v96_v52_margin_risk_policy.py
-          grep -Fq 'reduceOnly": "true"' scripts/disdex_v96_v52_margin_guard.py
-          grep -Fq 'remainingManagedPositions' scripts/disdex_v96_v52_margin_guard.py
+          grep -Fq 'reduceOnly": "true"' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq 'emergency-flatten.lock' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq 'CONCURRENT_FLATTEN_ALREADY_COMPLETED' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq -- '--preorder-check' lib/direct-trade-executor.ts
           grep -Fq 'command.reduceOnly !== true' lib/direct-trade-executor.ts
 
-          grep -Fq 'scripts/disdex_v96_v52_margin_guard.py --mode live --daemon' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-candidate-preflight.sh
           grep -Fq 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
           grep -Fq 'Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true' ops/systemd/disdex-v96-v52-live.service
 
