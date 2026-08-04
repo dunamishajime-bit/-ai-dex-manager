@@ -1,7 +1,9 @@
 import "dotenv/config";
 
+import { execFile as execFileCallback } from "node:child_process";
 import { copyFile, readFile, realpath } from "node:fs/promises";
 import { resolve } from "node:path";
+import { promisify } from "node:util";
 
 import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import {
@@ -19,8 +21,13 @@ import {
 } from "../lib/disdex-v96-operator-override-audit";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
 
-const ACKNOWLEDGEMENT = "I_SYNC_CURRENT_EXACT_OPERATOR_OVERRIDE_AUDIT";
+const CURRENT_ACKNOWLEDGEMENT = "I_SYNC_CURRENT_EXACT_OPERATOR_OVERRIDE_AUDIT";
+const CANDIDATE_ACKNOWLEDGEMENT = "I_SYNC_CANDIDATE_EXACT_OPERATOR_OVERRIDE_AUDIT";
+const CANDIDATE_MODE = "CANDIDATE_RELEASE";
 const CURRENT_LINK = "/home/deploy/disdex-trading/current";
+const RELEASES_ROOT = "/home/deploy/disdex-trading/releases";
+const LIVE_SERVICE = "disdex-v96-v52-live.service";
+const execFile = promisify(execFileCallback);
 
 function required(name: string) {
     const value = String(process.env[name] || "").trim();
@@ -45,17 +52,63 @@ async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
     }
 }
 
-async function main() {
-    if (required("DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT") !== ACKNOWLEDGEMENT) {
-        throw new Error("Exact Operator Override audit-sync acknowledgement is required.");
+async function assertLiveServiceInactive() {
+    const { stdout } = await execFile("/usr/bin/systemctl", [
+        "show",
+        LIVE_SERVICE,
+        "--property=ActiveState",
+        "--property=MainPID",
+    ]);
+    const fields = Object.fromEntries(
+        stdout.split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => {
+                const index = line.indexOf("=");
+                return index >= 0 ? [line.slice(0, index), line.slice(index + 1)] : [line, ""];
+            }),
+    );
+    if (!["inactive", "failed"].includes(String(fields.ActiveState || ""))) {
+        throw new Error("Candidate Operator Override audit sync requires the LIVE service to be inactive.");
     }
+    if (String(fields.MainPID || "0") !== "0") {
+        throw new Error("Candidate Operator Override audit sync requires LIVE MainPID=0.");
+    }
+}
+
+async function resolveAuditSyncScope(releaseRoot: string, runtimeCommitSha: string) {
+    const expectedRelease = resolve(RELEASES_ROOT, runtimeCommitSha);
+    if (releaseRoot !== expectedRelease) {
+        throw new Error("Operator Override audit sync must run from the exact immutable release.");
+    }
+
+    const acknowledgement = required("DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT");
+    const currentRelease = await realpath(CURRENT_LINK).catch(() => undefined);
+    if (currentRelease === releaseRoot) {
+        if (acknowledgement !== CURRENT_ACKNOWLEDGEMENT) {
+            throw new Error("Exact current-release Operator Override audit-sync acknowledgement is required.");
+        }
+        return "CURRENT_RELEASE" as const;
+    }
+
+    if (String(process.env.DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE || "").trim() !== CANDIDATE_MODE) {
+        throw new Error("Non-current Operator Override audit sync requires explicit candidate-release mode.");
+    }
+    if (acknowledgement !== CANDIDATE_ACKNOWLEDGEMENT) {
+        throw new Error("Exact candidate-release Operator Override audit-sync acknowledgement is required.");
+    }
+    await assertLiveServiceInactive();
+    return CANDIDATE_MODE;
+}
+
+async function main() {
     const runtimeCommitSha = required("DISDEX_V96_RUNTIME_COMMIT_SHA").toLowerCase();
     if (!/^[a-f0-9]{40}$/.test(runtimeCommitSha)) throw new Error("Runtime commit SHA must be exact.");
 
-    const releaseRoot = resolve(process.cwd());
+    const releaseRoot = await realpath(resolve(process.cwd()));
     const markerSha = (await readFile(resolve(releaseRoot, ".disdex-release-sha"), "utf8")).trim().toLowerCase();
     if (markerSha !== runtimeCommitSha) throw new Error("Release marker does not match runtime commit SHA.");
-    if (await realpath(CURRENT_LINK) !== releaseRoot) throw new Error("Current release link does not target the audit-sync release.");
+    const syncScope = await resolveAuditSyncScope(releaseRoot, runtimeCommitSha);
 
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
         optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
@@ -99,6 +152,8 @@ async function main() {
     console.log(JSON.stringify({
         status: "DISDEX_V96_OPERATOR_OVERRIDE_AUDIT_SYNC_PASS_NO_ORDERS_SENT",
         runtimeCommitSha,
+        syncScope,
+        releaseRoot,
         statePath,
         backupPath,
         auditChanged: !unchanged,
