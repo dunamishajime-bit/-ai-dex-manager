@@ -84,10 +84,14 @@ jobs:
           grep -Fq 'reduceOnly": "true"' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq 'emergency-flatten.lock' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq 'CONCURRENT_FLATTEN_ALREADY_COMPLETED' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq -- '--emergency-once' scripts/disdex_v96_v52_margin_guard_runtime.py
           grep -Fq -- '--preorder-check' lib/direct-trade-executor.ts
           grep -Fq 'command.reduceOnly !== true' lib/direct-trade-executor.ts
 
           grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'startupWaitLoop=false' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'LIVE_NOT_STARTED_KILL_SWITCH_ACTIVE' scripts/ops/disdex-v96-v52-live.sh
+          ! grep -Fq 'waiting for formal operator clearance' scripts/ops/disdex-v96-v52-live.sh
           grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-candidate-preflight.sh
           grep -Fq 'WorkingDirectory=/home/deploy/disdex-trading/current' ops/systemd/disdex-v96-v52-live.service
           grep -Fq 'Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true' ops/systemd/disdex-v96-v52-live.service
