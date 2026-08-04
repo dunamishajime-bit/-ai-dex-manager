@@ -94,7 +94,7 @@ async function main() {
     const env = { ...process.env };
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-    const v52 = await spawnCaptured(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", "live", "--preflight"], env);
+    const v52 = await spawnCaptured(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", "live", "--preflight-readonly"], env);
     const v52Output = `${v52.stdout}\n${v52.stderr}`;
     let v52Status: V52PreflightStatus;
     let v52Detail: Record<string, unknown> | undefined;
@@ -117,7 +117,7 @@ async function main() {
         cryptoV96Preflight: "PASS",
         cryptoV96Detail: cryptoDetail,
         penguDualPreflight: pengu,
-        v52Preflight: { status: v52Status, ordersAllowed: shouldStartV52Worker(v52Status), detail: v52Detail, dataFailureDoesNotBypassSafety: true },
+        v52Preflight: { status: v52Status, mode: "READ_ONLY", ordersAllowed: shouldStartV52Worker(v52Status), detail: v52Detail, dataFailureDoesNotBypassSafety: true },
         ordersSent: false,
         cancelSent: false,
         positionChangesSent: false,

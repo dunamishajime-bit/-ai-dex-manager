@@ -168,7 +168,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             if value > cap + self.gross_tolerance:
                 raise RuntimeError(f"{name} Gross exceeds V52 cap: {value:.6f} > {cap:.6f}")
 
-    def reconcile(self) -> None:
+    def reconcile(self, read_only: bool = False) -> None:
         if self.state.get("pendingOrder"):
             raise RuntimeError("Unresolved V52 pending order requires operator review before restart")
         if not self.live:
@@ -180,12 +180,14 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             signed = base.finite(position.get("asterQty")) * (1 if position.get("asterOpenSide") == "BUY" else -1)
             expected[symbol] = expected.get(symbol, 0.0) + signed
         if set(actual) != set(expected):
-            self.activate_kill_switch("V52 managed Stock symbol reconciliation mismatch")
+            if not read_only:
+                self.activate_kill_switch("V52 managed Stock symbol reconciliation mismatch")
             raise RuntimeError("V52 managed Stock symbols do not match state")
         for symbol, expected_qty in expected.items():
             actual_qty = base.finite(actual.get(symbol))
             if abs(expected_qty - actual_qty) > max(1e-8, abs(expected_qty) * 0.02):
-                self.activate_kill_switch("V52 managed Stock quantity reconciliation mismatch")
+                if not read_only:
+                    self.activate_kill_switch("V52 managed Stock quantity reconciliation mismatch")
                 raise RuntimeError("V52 managed Stock quantity mismatch")
         for symbol in base.ASTER_SYMBOL.values():
             for order in self.aster.open_orders(symbol):
@@ -473,11 +475,17 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             self.log("v52-v50-decision", window=window, candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
             if candidate: self.open_basis_position(V50_SLOT, candidate, gross)
 
-    def preflight(self) -> dict:
+    def preflight(self, read_only: bool = False) -> dict:
         if self.live:
             if not base.bool_env("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", False): raise RuntimeError("V52 LIVE requires DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true")
             if os.getenv("DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT") != LIVE_ACK: raise RuntimeError(f"V52 LIVE requires acknowledgement {LIVE_ACK}")
-        self.state_root.mkdir(parents=True, exist_ok=True); self.save()
+        if read_only:
+            if not self.state_root.is_dir():
+                raise RuntimeError("V52 state directory missing for read-only preflight")
+            if not self.state_path.is_file():
+                raise RuntimeError("V52 state file missing for read-only preflight")
+        else:
+            self.state_root.mkdir(parents=True, exist_ok=True); self.save()
         if self.kill_switch(): raise RuntimeError("Shared Kill Switch is active")
         if self.state.get("pendingOrder"): raise RuntimeError("V52 pending order must be resolved before no-order preflight")
         self.aster.ping(); self.aster.exchange_info()
@@ -489,9 +497,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             for symbol in base.SYMBOLS:
                 quote = self.reference.quote(symbol)
                 if base.now_ms() - quote.timestamp_ms > base.V11_MAX_DATA_AGE_MS: raise RuntimeError(f"Reference quote stale for {symbol}")
-        self.reconcile()
+        self.reconcile(read_only=read_only)
         snapshot = self.gross_snapshot(); self.assert_gross_safe(snapshot)
-        return {"strategyId": STRATEGY_ID, "mode": self.mode, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": health.get("status"), "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
+        return {"strategyId": STRATEGY_ID, "mode": self.mode, "readOnly": read_only, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": health.get("status"), "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
 
     def run(self, daemon: bool) -> None:
         self.lock.acquire()
@@ -530,11 +538,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=("paper", "live"), default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"))
     parser.add_argument("--daemon", action="store_true"); parser.add_argument("--once", action="store_true")
-    parser.add_argument("--preflight", action="store_true"); parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--preflight", action="store_true"); parser.add_argument("--preflight-readonly", action="store_true"); parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test: self_test(); return 0
     runner = V52AsterOnlyEngine(args.mode)
     signal.signal(signal.SIGINT, lambda *_: setattr(runner, "stop_requested", True)); signal.signal(signal.SIGTERM, lambda *_: setattr(runner, "stop_requested", True))
+    if args.preflight_readonly: print(json.dumps(runner.preflight(read_only=True), indent=2, ensure_ascii=False)); return 0
     if args.preflight: print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False)); return 0
     runner.run(args.daemon); return 0
 
