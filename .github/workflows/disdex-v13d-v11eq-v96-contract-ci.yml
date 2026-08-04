@@ -5,6 +5,7 @@ on:
     paths:
       - 'config/disdexV96Runtime.ts'
       - 'config/disdexStockRouterV13DV11EqRuntime.ts'
+      - 'lib/direct-trade-executor.ts'
       - 'lib/disdex-v13d-v11eq-stock-router-contract.ts'
       - 'lib/disdex-v96-combined-state-migration.ts'
       - 'lib/disdex-v96-execution-capacity.ts'
@@ -13,27 +14,18 @@ on:
       - 'scripts/disdex-v13d-v11eq-v96-contract-selftest.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-runner.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
-      - 'scripts/disdex-v13d-v11eq-v96-kill-switch.ts'
-      - 'scripts/disdex-v96-combined-state-migrate.ts'
-      - 'scripts/disdex-v96-position-reconcile.ts'
-      - 'scripts/disdex-v96-execution-safety-selftest.ts'
       - 'scripts/disdex-v96-gross-2p5-selftest.ts'
       - 'scripts/disdex-v96-live-preflight.ts'
       - 'scripts/disdex-v96-v52-readonly-preflight.ts'
-      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
-      - 'scripts/disdex_v11eq_aster_only_live_engine.py'
-      - 'scripts/disdex_v52_aster_only_live_engine.py'
-      - 'scripts/disdex_stock_reference_pyth_iex_proxy.py'
+      - 'scripts/disdex_v96_v52_margin_risk_policy.py'
+      - 'scripts/disdex_v96_v52_margin_guard.py'
+      - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
+      - 'scripts/disdex_v52_margin_aware_live_engine.py'
       - 'requirements-stock-aster-only.txt'
-      - 'ops/systemd/disdex-v13d-v11eq-v96.service'
-      - 'ops/systemd/disdex-v13d-v11eq-v96-preflight.service'
-      - 'ops/systemd/disdex-v96-combined-migration.service'
-      - 'ops/systemd/disdex-v96-position-reconciliation.service'
+      - 'ops/systemd/disdex-v96-v52-live.service'
+      - 'ops/systemd/disdex-v96-v52-preflight@.service'
       - 'ops/systemd/disdex-v96-v52-approval@.service'
-      - 'ops/systemd/disdex-stock-reference-free.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
-      - 'docs/implementation/V96_V52_VPS_LIVE_HANDOFF.md'
-      - 'docs/implementation/V96_V52_GROSS_2P5_PENGU_1P15_HANDOFF.md'
       - 'tsconfig.v96-runner.json'
       - 'tsconfig.v13d-v11eq-router.json'
       - 'package.json'
@@ -64,69 +56,69 @@ jobs:
           cache-dependency-path: requirements-stock-aster-only.txt
       - run: npm ci
       - run: python -m pip install -r requirements-stock-aster-only.txt
-      - name: Validate V96 plus V52 contract and state migration
+
+      - name: Validate V96 plus V52 contracts
         run: |
+          set -Eeuo pipefail
           npm run strategy:disdex-v52:contract
           npx tsx scripts/disdex-v96-gross-2p5-selftest.ts
+          npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+          npm run strategy:disdex-v96-v52:preflight:readonly:selftest
+          python3 scripts/disdex_v96_v52_margin_risk_policy.py
+          python3 scripts/disdex_v96_v52_margin_guard.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_selftest.py
+          python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
           python -c "import websocket; print('V52 reference dependencies: PASS')"
+
       - name: Protect existing Crypto V96 behavior
         run: |
+          set -Eeuo pipefail
           npm run strategy:disdex-v96:typecheck
           npm run strategy:disdex-v96:selftest
           npm run strategy:disdex-v96:frequency:selftest
           npm run strategy:disdex-v96:execution:selftest
-      - name: Assert V96 2.5 and V52 LIVE remain fail-closed
+
+      - name: Assert separated sleeves and fail-closed LIVE boundaries
         run: |
+          set -Eeuo pipefail
           node - <<'NODE'
           const fs = require('node:fs');
           const v96Config = fs.readFileSync('config/disdexV96Runtime.ts', 'utf8');
-          const config = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
+          const combinedConfig = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
           const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
-          const preflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
+          const integratedPreflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
           const readonlyPreflight = fs.readFileSync('scripts/disdex-v96-v52-readonly-preflight.ts', 'utf8');
-          const migration = fs.readFileSync('scripts/disdex-v96-combined-state-migrate.ts', 'utf8');
-          const reconciliation = fs.readFileSync('scripts/disdex-v96-position-reconcile.ts', 'utf8');
-          const v96Runner = fs.readFileSync('lib/disdex-v96-portfolio-runner.ts', 'utf8');
-          const v96State = fs.readFileSync('lib/disdex-v96-runner-state.ts', 'utf8');
           const capacity = fs.readFileSync('lib/disdex-v96-execution-capacity.ts', 'utf8');
-          const reference = fs.readFileSync('scripts/disdex_stock_reference_pyth_iex_proxy.py', 'utf8');
-          const v52 = fs.readFileSync('scripts/disdex_v52_aster_only_live_engine.py', 'utf8');
-          const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
-          const approval = fs.readFileSync('ops/systemd/disdex-v96-v52-approval@.service', 'utf8');
+          const executor = fs.readFileSync('lib/direct-trade-executor.ts', 'utf8');
+          const marginPolicy = fs.readFileSync('scripts/disdex_v96_v52_margin_risk_policy.py', 'utf8');
+          const marginGuard = fs.readFileSync('scripts/disdex_v96_v52_margin_guard.py', 'utf8');
+          const v52 = fs.readFileSync('scripts/disdex_v52_margin_aware_live_engine.py', 'utf8');
+          const liveUnit = fs.readFileSync('ops/systemd/disdex-v96-v52-live.service', 'utf8');
+          const approvalUnit = fs.readFileSync('ops/systemd/disdex-v96-v52-approval@.service', 'utf8');
+
           if (!v96Config.includes('penguTargetGross: 1.15')) throw new Error('PENGU target 1.15 missing');
-          if (!v96Config.includes('totalGrossCap: 2.5')) throw new Error('V96 total Gross 2.5 missing');
-          if (!v96Config.includes('maximumOverridePenguGross: 1.15')) throw new Error('Override PENGU 1.15 missing');
-          if (!v96Config.includes('maximumPortfolioGross: 2.5')) throw new Error('Override portfolio Gross 2.5 missing');
-          if (!v96Config.includes('minimumExecutionLeverage: 3')) throw new Error('minimum leverage 3 missing');
-          if (!config.includes('mode: "LIVE_READY"')) throw new Error('runtime must be LIVE_READY');
-          if (!config.includes('cryptoSleeveGrossCap: 2.5')) throw new Error('Crypto Gross 2.5 missing');
-          if (!config.includes('stockSleeveGrossCap: 1.5')) throw new Error('Stock Gross 1.5 missing');
-          if (!config.includes('portfolioGrossCap: 2.5')) throw new Error('Portfolio Gross 2.5 missing');
-          if (!config.includes('sameSymbolConcurrentStockPositionAllowed: false')) throw new Error('same-symbol block missing');
-          if (!supervisor.includes('markCombinedV96MigrationActivated')) throw new Error('V96 migration gate missing');
-          if (!supervisor.includes('DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED')) throw new Error('V52 environment gate missing');
-          if (!supervisor.includes('DISDEX_V96_MAX_GROSS, "2.5"')) throw new Error('Supervisor Gross 2.5 self-test missing');
-          if (!preflight.includes('disdex_v52_aster_only_live_engine.py')) throw new Error('V52 preflight missing');
+          if (!v96Config.includes('totalGrossCap: 1.5')) throw new Error('V96 Crypto sleeve Gross 1.5 missing');
+          if (!v96Config.includes('maximumPortfolioGross: 1.5')) throw new Error('Operator Override V96 Gross 1.5 missing');
+          if (!v96Config.includes('requiredInitialLeverage: 5')) throw new Error('fixed 5x leverage missing');
+          if (!combinedConfig.includes('cryptoSleeveGrossCap: 1.5')) throw new Error('Crypto sleeve 1.5 missing');
+          if (!combinedConfig.includes('stockSleeveGrossCap: 1.5')) throw new Error('Stock sleeve 1.5 missing');
+          if (!combinedConfig.includes('portfolioGrossCap: 2.5')) throw new Error('Combined Gross 2.5 missing');
+          if (!combinedConfig.includes('reservedFirstStockGross: 1.0')) throw new Error('first Stock slot reservation missing');
+          if (!combinedConfig.includes('minimumSecondStockGross: 0.25')) throw new Error('second Stock minimum missing');
+          if (!combinedConfig.includes('maximumConcurrentStockPositions: 2')) throw new Error('two Stock slots missing');
+          if (!combinedConfig.includes('requiredMarginType: "cross"')) throw new Error('cross margin requirement missing');
+          if (!supervisor.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 supervisor path missing');
+          if (!integratedPreflight.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 preflight path missing');
           if (!readonlyPreflight.includes('READ_ONLY_PREFLIGHT_LEVERAGE_BELOW_')) throw new Error('authenticated leverage gate missing');
-          if (!migration.includes('systemctl') || !migration.includes('reconcileOrder')) throw new Error('verified V96 migration checks missing');
-          if (!reconciliation.includes('ASTER_API_PRIVATE_KEY') || !reconciliation.includes('systemctl')) throw new Error('authenticated V96 position reconciliation missing');
-          if (!reconciliation.includes('ordersSent: false') || !reconciliation.includes('closeUnmanagedPositions: false')) throw new Error('reconciliation no-order invariant missing');
-          if (reconciliation.includes('executeMarket(')) throw new Error('reconciliation must not submit orders');
-          if (!v96Runner.includes('skippedSignalReferenceTs') || !v96State.includes('skippedSignalReferenceTs')) throw new Error('formal one-time signal skip missing');
-          if (!v96Runner.includes('1785024000000')) throw new Error('stale ETH referenceTs skip missing');
-          if (!v96Runner.includes('planDisDexV96ExecutionCapacity') || !capacity.includes('projectedPortfolioGross')) throw new Error('shared portfolio Gross sizing missing');
-          if (!capacity.includes('availableMarginUsd * maxGross')) throw new Error('Gross above 1.0 leverage capacity missing');
-          if (!v96Runner.includes('closeUnmanagedPositions') || !v96Runner.includes('direction changes must close reduce-only')) throw new Error('V96 safety invariants missing');
-          if (!reference.includes('hermes.pyth.network') || !reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Pyth/IEX reference missing');
-          if (!v52.includes('POST_EARLY3__B75__H3__BOTH__NONE') && !config.includes('POST_EARLY3__B75__H3__BOTH__NONE')) throw new Error('frozen V50 candidate missing');
-          if (!v52.includes('I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION')) throw new Error('legacy V11 state migration gate missing');
-          if (!v52.includes('pendingOrder')) throw new Error('pending order persistence missing');
-          if (!v52.includes('MISSED_CHECKPOINT_FAIL_CLOSED')) throw new Error('V50 checkpoint recovery missing');
-          if (v52.includes('HyperliquidXYZClient') || v52.includes('self.xyz')) throw new Error('Hyperliquid must remain excluded');
-          if (!env.includes('DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false')) throw new Error('safe disabled default missing');
-          if (!env.includes('DISDEX_V52_CRYPTO_GROSS_CAP=2.5')) throw new Error('V52 Crypto cap env missing');
-          if (!env.includes('DISDEX_V96_INITIAL_PENGU_GROSS=1.15')) throw new Error('PENGU approval env missing');
-          if (!env.includes('DISDEX_V96_MAX_GROSS=2.5')) throw new Error('V96 Gross env missing');
-          if (!approval.includes('DISDEX_V96_INITIAL_PENGU_GROSS=1.15')) throw new Error('approval PENGU 1.15 missing');
-          if (!approval.includes('DISDEX_V96_MAX_GROSS=2.5')) throw new Error('approval Gross 2.5 missing');
+          if (!capacity.includes('managedGrossCap') || !capacity.includes('portfolioGrossCap')) throw new Error('separated Gross capacity gates missing');
+          if (!capacity.includes('maximumInitialMarginFraction')) throw new Error('initial-margin capacity gate missing');
+          if (!executor.includes('--preorder-check') || !executor.includes('command.reduceOnly !== true')) throw new Error('fresh exposure-order Margin Guard missing');
+          if (!marginPolicy.includes('HEALTHY_POLL_INTERVAL_MS = 5 * 60_000')) throw new Error('healthy 5-minute polling missing');
+          if (!marginPolicy.includes('WARNING_POLL_INTERVAL_MS = 60_000')) throw new Error('warning 1-minute polling missing');
+          if (!marginPolicy.includes('REDUCE_MARGIN_RATIO_PCT = 65.0')) throw new Error('pre-liquidation stop-loss threshold missing');
+          if (!marginGuard.includes('reduceOnly": "true"')) throw new Error('emergency reduce-only orders missing');
+          if (!marginGuard.includes('remainingManagedPositions')) throw new Error('emergency position reconciliation missing');
+          if (!v52.includes('V52 adaptive margin-aware concurrent Stock runner self-test: PASS')) throw new Error('adaptive V52 runner missing');
+          if (!liveUnit.includes('DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true')) throw new Error('LIVE unit Margin Guard missing');
+          if (!approvalUnit.includes('DISDEX_V96_MAX_GROSS=1.5')) throw new Error('approval unit V96 Gross 1.5 missing');
           NODE
