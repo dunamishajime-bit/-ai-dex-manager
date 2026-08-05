@@ -1,0 +1,35 @@
+{
+  "research_only": true,
+  "live_trading": false,
+  "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"],
+  "data_source": "Binance official public Spot monthly klines",
+  "interval": "5m",
+  "period": {
+    "start": "2025-08-01T00:00:00Z",
+    "end_exclusive": "2026-08-01T00:00:00Z"
+  },
+  "splits": {
+    "train": ["2025-08-01T00:00:00Z", "2026-02-01T00:00:00Z"],
+    "validation": ["2026-02-01T00:00:00Z", "2026-05-01T00:00:00Z"],
+    "test": ["2026-05-01T00:00:00Z", "2026-08-01T00:00:00Z"]
+  },
+  "binary_contract": {
+    "expiry_minutes": 5,
+    "payout_on_win": 0.8,
+    "loss_on_loss": -1.0,
+    "tie": 0.0,
+    "entry_reference": "signal candle close",
+    "settlement_reference": "next 5m candle close"
+  },
+  "portfolio": {
+    "max_signals_per_timestamp": 2,
+    "risk_fraction_per_trade": 0.01,
+    "martingale": false
+  },
+  "selection": {
+    "test_used_for_selection": false,
+    "minimum_train_trades": 800,
+    "minimum_validation_trades": 300,
+    "test_expectancy_must_be_positive_for_adoption": true
+  }
+}
