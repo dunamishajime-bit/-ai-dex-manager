@@ -1,0 +1,155 @@
+{
+  "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
+  "status": "V13_EXECUTION_SAFETY_FAILED",
+  "generatedAt": "2026-08-05T18:45:00.574000Z",
+  "safety": {
+    "mode": "SHADOW_RESEARCH_ONLY",
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false
+  },
+  "coverage": {
+    "booksBySymbol": {
+      "AMZN": [
+        "ASTER",
+        "XYZ"
+      ],
+      "META": [
+        "ASTER",
+        "XYZ"
+      ],
+      "MSFT": [
+        "ASTER",
+        "XYZ"
+      ],
+      "NVDA": [
+        "ASTER",
+        "XYZ"
+      ],
+      "TSLA": [
+        "ASTER",
+        "XYZ"
+      ]
+    },
+    "completeSymbols": [
+      "AMZN",
+      "META",
+      "MSFT",
+      "NVDA",
+      "TSLA"
+    ],
+    "asterBooks": 259733,
+    "xyzBooks": 10630,
+    "asterTrades": 182,
+    "xyzTrades": 19535,
+    "collectorErrors": 1
+  },
+  "virtualExecution": {
+    "quotesOpened": 9587,
+    "entryFills": 8,
+    "completedCycles": 8,
+    "forcedCycles": 8,
+    "pendingHedges": 0,
+    "openInventories": 0,
+    "partialFillFailures": 2,
+    "unhedgedRejected": 3,
+    "unresolvedInventory": 0,
+    "unresolvedCloseAttempts": 6,
+    "cancellations": {
+      "STALE_OR_INVALID_BOOK": 2135,
+      "MAKER_TOP_MOVED": 7253,
+      "ADVERSE_ORDER_FLOW": 23,
+      "REFERENCE_MOVED": 165
+    }
+  },
+  "costScenarios": {
+    "FORWARD_MEDIAN": {
+      "makerCycleCostBps": 6.0,
+      "forcedCloseCostBps": 10.0,
+      "completedCycles": 8,
+      "averageNetBps": -15.600033958378985,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -27.585473580893456,
+      "maximumNetBps": -12.569505113314786,
+      "bySymbolNetBps": {
+        "AMZN": -39.21635995289657,
+        "META": -57.998438133241855,
+        "MSFT": -27.585473580893456,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "NORMAL": {
+      "makerCycleCostBps": 10.0,
+      "forcedCloseCostBps": 16.0,
+      "completedCycles": 8,
+      "averageNetBps": -21.600033958378983,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -33.585473580893456,
+      "maximumNetBps": -18.569505113314786,
+      "bySymbolNetBps": {
+        "AMZN": -57.21635995289657,
+        "META": -81.99843813324185,
+        "MSFT": -33.585473580893456,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "P95": {
+      "makerCycleCostBps": 17.0,
+      "forcedCloseCostBps": 26.0,
+      "completedCycles": 8,
+      "averageNetBps": -31.600033958378983,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -43.585473580893456,
+      "maximumNetBps": -28.569505113314786,
+      "bySymbolNetBps": {
+        "AMZN": -87.21635995289657,
+        "META": -121.99843813324185,
+        "MSFT": -43.585473580893456,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "SEVERE": {
+      "makerCycleCostBps": 30.0,
+      "forcedCloseCostBps": 45.0,
+      "completedCycles": 8,
+      "averageNetBps": -50.60003395837899,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -62.585473580893456,
+      "maximumNetBps": -47.56950511331478,
+      "bySymbolNetBps": {
+        "AMZN": -144.21635995289657,
+        "META": -197.99843813324185,
+        "MSFT": -62.585473580893456,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    }
+  },
+  "diagnostics": {
+    "hedgeDelayMs": 250,
+    "latencyP50Ms": 87,
+    "latencyP95Ms": 98.0,
+    "projectedNetEdgeP50Bps": -10.171741631889155,
+    "projectedNetEdgeP95Bps": 7.85928983294105
+  },
+  "promotionGate": {
+    "minimumForwardRegularSessions": 20,
+    "minimumCompletedCycles": 100,
+    "minimumPositiveNetRate": 0.55,
+    "normalP95SevereAverageNetMustBePositive": true,
+    "maximumSingleSymbolPnlShare": 0.4,
+    "maximumPartialFillFailures": 0,
+    "maximumUnhedgedRejected": 0,
+    "maximumUnresolvedInventory": 0,
+    "retuningOnCollectedForwardWindow": false
+  }
+}
