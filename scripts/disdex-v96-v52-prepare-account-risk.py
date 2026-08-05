@@ -16,6 +16,8 @@ STOCK_SYMBOLS = tuple(ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = CRYPTO_SYMBOLS + STOCK_SYMBOLS
 SCRIPT_RELATIVE_PATH = Path("scripts/disdex-v96-v52-prepare-account-risk.py")
 RELEASES_ROOT = Path("/home/deploy/disdex-trading/releases")
+ASTER_CHANGE_MARGIN_TYPE_PATH = "/fapi/v3/marginType"
+ASTER_CHANGE_LEVERAGE_PATH = "/fapi/v3/leverage"
 
 
 def _validate_sha(value: str) -> str:
@@ -220,7 +222,10 @@ def run_self_test() -> int:
 
         _expect_failure("invalid SHA", lambda: _validate_sha("not-a-sha"))
 
+    assert ASTER_CHANGE_MARGIN_TYPE_PATH == "/fapi/v3/marginType"
+    assert ASTER_CHANGE_LEVERAGE_PATH == "/fapi/v3/leverage"
     print("V96/V52 account-risk immutable-release authority self-test: PASS")
+    print("asterAccountRiskApiVersion=v3")
     print("staleEnvironmentRuntimeShaIgnored=true")
     return 0
 
@@ -275,7 +280,11 @@ def verify_configuration(client: AsterClient) -> dict:
 
 def apply_margin_type(client: AsterClient, symbol: str) -> None:
     try:
-        client._signed("POST", "/fapi/v1/marginType", {"symbol": symbol, "marginType": "CROSSED"})
+        client._signed(
+            "POST",
+            ASTER_CHANGE_MARGIN_TYPE_PATH,
+            {"symbol": symbol, "marginType": "CROSSED"},
+        )
     except RuntimeError as error:
         message = str(error)
         if "-4046" not in message and "NO_NEED_TO_CHANGE_MARGIN_TYPE" not in message:
@@ -284,7 +293,11 @@ def apply_margin_type(client: AsterClient, symbol: str) -> None:
 
 def apply_leverage(client: AsterClient, symbol: str) -> None:
     try:
-        client._signed("POST", "/fapi/v1/leverage", {"symbol": symbol, "leverage": REQUIRED_LEVERAGE})
+        client._signed(
+            "POST",
+            ASTER_CHANGE_LEVERAGE_PATH,
+            {"symbol": symbol, "leverage": REQUIRED_LEVERAGE},
+        )
     except RuntimeError as error:
         message = str(error)
         if "-4028" not in message and "already exist" not in message.lower():
@@ -323,6 +336,7 @@ def main() -> int:
         "environmentRuntimeSha": environment_sha or None,
         "environmentRuntimeShaMatched": environment_matches,
         "staleEnvironmentRuntimeShaIgnored": bool(environment_sha and not environment_matches),
+        "asterAccountRiskApiVersion": "v3",
         "requiredLeverage": REQUIRED_LEVERAGE,
         "requiredMarginType": "cross",
         "managedSymbols": configuration,
