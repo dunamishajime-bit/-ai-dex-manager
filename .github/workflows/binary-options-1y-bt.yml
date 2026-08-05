@@ -1,0 +1,75 @@
+name: Binary Options 1Y Research BT
+
+on:
+  push:
+    branches:
+      - codex/binary-options-1y-bt
+    paths:
+      - research/binary-options/binary_options_bt.py.gz.b64
+      - research/binary-options/config.json
+      - .github/workflows/binary-options-1y-bt.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: binary-options-1y-bt
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/binary-options-1y-bt
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pandas requests scikit-learn
+
+      - name: Decode reproducible backtest script
+        run: |
+          base64 -d research/binary-options/binary_options_bt.py.gz.b64 | gzip -dc > research/binary-options/binary_options_bt.py
+          python -m py_compile research/binary-options/binary_options_bt.py
+
+      - name: Run one-year backtest
+        run: |
+          python research/binary-options/binary_options_bt.py \
+            --output research/binary-options/results \
+            --cache .cache/binance-binary-options
+
+      - name: Preserve exact reproduction script
+        run: |
+          cp research/binary-options/binary_options_bt.py research/binary-options/results/reproduce_binary_options_bt.py
+          cp research/binary-options/config.json research/binary-options/results/config.json
+
+      - name: Upload result bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-options-1y-bt-results
+          path: research/binary-options/results
+          retention-days: 30
+
+      - name: Commit research results to isolated branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/binary-options/results
+          if git diff --cached --quiet; then
+            echo "No result changes"
+          else
+            git commit -m "Add binary options 1Y backtest results [skip ci]"
+            git push origin HEAD:codex/binary-options-1y-bt
+          fi
