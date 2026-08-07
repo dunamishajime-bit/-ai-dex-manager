@@ -1,0 +1,99 @@
+name: V96 Event T8 External Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/v96-recent-regime-redesign-final2
+    paths:
+      - 'scripts/research_lab_v96_event_t8_external_audit.py'
+      - '.github/workflows/v96-event-t8-external-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 520b18285187573487d2dafa39d8d1e13f9d48cf
+          path: .pengu-evidence
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .research-base/.v11
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .research-base/.v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-event-t8-audit-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_event_t8_external_audit.py') }}
+          restore-keys: |
+            v96-recent-event-v1-${{ runner.os }}-
+            v96-recent-dual-v1-${{ runner.os }}-
+            v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+      - name: Compile
+        run: |
+          python -m py_compile scripts/research_lab_v96_recent_event_core_v1.py
+          python -m py_compile scripts/research_lab_v96_event_t8_external_audit.py
+          python -m py_compile scripts/research_lab_v96_recent_regime_integrated_bt.py
+          python -m py_compile scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py
+      - name: PENGU evidence
+        run: |
+          mkdir -p .research-state/v96-event-t8-audit
+          python scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py \
+            --evidence-root .pengu-evidence/reports/pengu-v46-repro/data \
+            --ledger research/evidence/trail6_3_36_dual_ledger.csv \
+            --output .research-state/v96-event-t8-audit/pengu-evidence-replay.json
+      - name: T8 backward external audit
+        run: |
+          python scripts/research_lab_v96_event_t8_external_audit.py \
+            --output-dir .research-state/v96-event-t8-audit \
+            2>&1 | tee .research-state/v96-event-t8-audit/t8-audit.log
+      - name: Integrate T8 with PENGU and V52
+        run: |
+          python scripts/research_lab_v96_recent_regime_integrated_bt.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --pengu-replay .research-state/v96-event-t8-audit/pengu-evidence-replay.json \
+            --v96-redesign .research-state/v96-event-t8-audit/v96-event-t8-external-audit.json \
+            --output-dir .research-state/v96-event-t8-audit \
+            2>&1 | tee .research-state/v96-event-t8-audit/integrated.log
+      - name: Validate
+        run: |
+          python - <<'PY'
+          import json
+          a=json.load(open('.research-state/v96-event-t8-audit/v96-event-t8-external-audit.json'))
+          i=json.load(open('.research-state/v96-event-t8-audit/v96-recent-integrated.json'))
+          assert a['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert i['safety']==a['safety']
+          assert i['redesignedResult']['results']['NORMAL']['CORE_FIRST']['full']['observedMaximumTotalGross']<=2.5+1e-9
+          print(json.dumps({'audit':a,'integratedStatus':i['status'],'comparison':i['comparison'],'checks':i['checks']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-event-t8-external-audit-${{ github.run_id }}
+          path: .research-state/v96-event-t8-audit
+          retention-days: 90
+          if-no-files-found: warn
