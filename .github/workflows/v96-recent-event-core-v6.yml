@@ -1,0 +1,86 @@
+name: V96 Recent Event Core V6 4h
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v96-recent-regime-redesign-final2]
+    paths:
+      - 'scripts/research_lab_v96_recent_event_core_v6.py'
+      - 'scripts/research_lab_v96_recent_event_core_v6_integrated_bt.py'
+      - '.github/workflows/v96-recent-event-core-v6.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v96-recent-event-core-v6-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 520b18285187573487d2dafa39d8d1e13f9d48cf
+          path: .pengu-evidence
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .research-base/.v11
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .research-base/.v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-recent-event-v6-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_recent_event_core_v6.py') }}
+          restore-keys: |
+            v96-recent-event-v5-${{ runner.os }}-
+            v96-recent-event-v4-${{ runner.os }}-
+            v96-recent-event-v2-fixed-${{ runner.os }}-
+            v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile
+        run: |
+          python -m py_compile scripts/research_lab_v96_recent_event_core_v6.py
+          python -m py_compile scripts/research_lab_v96_recent_event_core_v6_integrated_bt.py
+          python -m py_compile scripts/research_lab_v96_recent_event_core_v2_integrated_bt.py
+          python -m py_compile scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py
+      - name: PENGU evidence
+        run: |
+          mkdir -p .research-state/v96-recent-event-core-v6
+          python scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py --evidence-root .pengu-evidence/reports/pengu-v46-repro/data --ledger research/evidence/trail6_3_36_dual_ledger.csv --output .research-state/v96-recent-event-core-v6/pengu-evidence-replay.json
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/v96-recent-event-core-v6/pengu-evidence-replay.json'));assert p['fullMetrics']['trades']==73;assert abs(p['fullMetrics']['compoundedReturnPct']-453.8728109085672)<.05
+          PY
+      - name: Search V6 4h event core
+        run: python scripts/research_lab_v96_recent_event_core_v6.py --output-dir .research-state/v96-recent-event-core-v6 | tee .research-state/v96-recent-event-core-v6/v6.log
+      - name: Integrate V6
+        run: python scripts/research_lab_v96_recent_event_core_v6_integrated_bt.py --stock-cache-dir .cache/aster-only-v39-overnight-open --pengu-replay .research-state/v96-recent-event-core-v6/pengu-evidence-replay.json --v96-event-v6 .research-state/v96-recent-event-core-v6/v96-recent-event-core-v6.json --output-dir .research-state/v96-recent-event-core-v6 | tee .research-state/v96-recent-event-core-v6/integrated.log
+      - name: Validate
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('.research-state/v96-recent-event-core-v6/v96-recent-event-core-v6.json'));i=json.load(open('.research-state/v96-recent-event-core-v6/v96-recent-event-core-v6-integrated.json'));assert r['selectionPolicy']['lateEvaluationUsedForRanking'] is False;assert r['selectionPolicy']['fullPeriodUsedForRanking'] is False;assert r['architecture']['gross']==.75;expected={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False};assert r['safety']==expected and i['safety']==expected;assert i['redesignedResult']['results']['NORMAL']['CORE_FIRST']['full']['observedMaximumTotalGross']<=2.5+1e-9;print(json.dumps({'status':r['status'],'count':r['candidateCounts'],'selected':r['selected']['variantId'],'full':r['selected']['full'],'late':r['selected']['lateEvaluation'],'beats86':r['selectedBeats86p139'],'latePass':r['selectedPassesLateEvaluation'],'bestFullDiagnostic':r['topFullDiagnosticOnly'][0],'integrated':i['comparison'],'checks':i['checks']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-recent-event-core-v6-${{ github.run_id }}
+          path: .research-state/v96-recent-event-core-v6
+          retention-days: 90
