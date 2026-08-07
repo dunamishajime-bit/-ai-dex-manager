@@ -1,0 +1,135 @@
+name: V96 Recent Event Core V3 Adaptive Router
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/v96-recent-regime-redesign-final2
+    paths:
+      - 'scripts/research_lab_v96_recent_event_core_v3.py'
+      - 'scripts/research_lab_v96_recent_event_core_v3_integrated_bt.py'
+      - '.github/workflows/v96-recent-event-core-v3.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-recent-event-core-v3-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+      - name: Checkout frozen accepted PENGU evidence
+        uses: actions/checkout@v4
+        with:
+          ref: 520b18285187573487d2dafa39d8d1e13f9d48cf
+          path: .pengu-evidence
+          fetch-depth: 1
+      - name: Checkout frozen V96/V52 research base
+        uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+      - name: Checkout frozen V11 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .research-base/.v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .research-base/.v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-recent-event-v3-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_recent_event_core_v3.py') }}
+          restore-keys: |
+            v96-recent-event-v2-fixed-${{ runner.os }}-
+            v96-recent-event-v2-${{ runner.os }}-
+            v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Compile
+        run: |
+          python -m py_compile scripts/research_lab_v96_recent_event_core_v3.py
+          python -m py_compile scripts/research_lab_v96_recent_event_core_v3_integrated_bt.py
+          python -m py_compile scripts/research_lab_v96_recent_event_core_v2_integrated_bt.py
+          python -m py_compile scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py
+      - name: Replay accepted PENGU evidence
+        run: |
+          mkdir -p .research-state/v96-recent-event-core-v3
+          python scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py \
+            --evidence-root .pengu-evidence/reports/pengu-v46-repro/data \
+            --ledger research/evidence/trail6_3_36_dual_ledger.csv \
+            --output .research-state/v96-recent-event-core-v3/pengu-evidence-replay.json
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/v96-recent-event-core-v3/pengu-evidence-replay.json'))
+          assert p['fullMetrics']['trades']==73
+          assert abs(p['fullMetrics']['compoundedReturnPct']-453.8728109085672)<0.05
+          assert p['integrity']['maximumRequestedGross']==0.75
+          PY
+      - name: Search adaptive exits, breakouts, and regime routers
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_v96_recent_event_core_v3.py \
+            --output-dir .research-state/v96-recent-event-core-v3 \
+            2>&1 | tee .research-state/v96-recent-event-core-v3/event-core-v3.log
+      - name: Integrate selected V3 with PENGU and V52
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_v96_recent_event_core_v3_integrated_bt.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --pengu-replay .research-state/v96-recent-event-core-v3/pengu-evidence-replay.json \
+            --v96-event-v3 .research-state/v96-recent-event-core-v3/v96-recent-event-core-v3.json \
+            --output-dir .research-state/v96-recent-event-core-v3 \
+            2>&1 | tee .research-state/v96-recent-event-core-v3/integrated-v3.log
+      - name: Validate outputs and safety
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('.research-state/v96-recent-event-core-v3/v96-recent-event-core-v3.json'))
+          i=json.load(open('.research-state/v96-recent-event-core-v3/v96-recent-event-core-v3-integrated.json'))
+          assert r['selectionPolicy']['lateEvaluationUsedForRanking'] is False
+          assert r['selectionPolicy']['fullPeriodUsedForRanking'] is False
+          assert r['architecture']['gross']==0.75
+          expected={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert r['safety']==expected and i['safety']==expected
+          assert i['redesignedResult']['results']['NORMAL']['CORE_FIRST']['full']['observedMaximumTotalGross']<=2.5+1e-9
+          print(json.dumps({
+            'researchStatus':r['status'],
+            'candidateCounts':r['candidateCounts'],
+            'selected':r['selected']['variantId'],
+            'selectedFull':r['selected']['full'],
+            'selectedLate':r['selected']['lateEvaluation'],
+            'beatsV2':r['selectedBeatsV2'],
+            'integratedStatus':i['status'],
+            'comparison':i['comparison'],
+            'checks':i['checks'],
+          },indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-recent-event-core-v3-${{ github.run_id }}
+          path: .research-state/v96-recent-event-core-v3
+          retention-days: 90
+          if-no-files-found: warn
