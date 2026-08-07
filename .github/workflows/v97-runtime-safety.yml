@@ -1,0 +1,40 @@
+name: V97 Runtime Safety
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v97-complete-live-readiness]
+    paths:
+      - 'config/disdexV97Runtime.ts'
+      - 'lib/disdex-v97-*.ts'
+      - 'scripts/disdex-v97-*.ts'
+      - 'tsconfig.v97.json'
+      - '.github/workflows/v97-runtime-safety.yml'
+permissions:
+  contents: read
+jobs:
+  safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Focused V97 typecheck
+        run: npx tsc -p tsconfig.v97.json --noEmit
+      - name: V97 deterministic selftest
+        run: npx tsx scripts/disdex-v97-selftest.ts
+      - name: V97 repository live gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -q 'liveTradingEnabled: true' config/disdexV97Runtime.ts; then
+            echo 'V97 repository LIVE gate unexpectedly enabled' >&2
+            exit 1
+          fi
+          grep -q 'maximumPortfolioDailyLossPct: 2' config/disdexV97Runtime.ts
+          grep -q 'portfolioGrossCap: 2.5' config/disdexV97Runtime.ts
+          grep -q 'maximumAdaptiveGross: 1.25' config/disdexV97Runtime.ts
+          echo V97_FAIL_CLOSED_CONTRACT_PASS
