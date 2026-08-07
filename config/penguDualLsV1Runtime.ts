@@ -119,3 +119,5 @@ export function resolvePenguDualLsV1Runtime(env: Partial<NodeJS.ProcessEnv> = pr
         killSwitchPath: env.PENGU_DUAL_LS_V1_KILL_SWITCH_FILE,
         portfolioDailyLossStatePath: env.PENGU_DUAL_LS_V1_PORTFOLIO_DAILY_LOSS_STATE_FILE,
         closeUnmanagedPositions: false,
+    };
+}
