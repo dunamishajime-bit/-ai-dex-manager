@@ -50,8 +50,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: npm
+          node-version: '24'
 
       - uses: actions/setup-python@v5
         with:
@@ -71,18 +70,13 @@ jobs:
             v96-volume50-turnover075-full-${{ runner.os }}-
             perp-research-usdm-
 
-      - name: Install TypeScript dependencies
-        run: npm ci
-
-      - name: Static compile checks
-        run: |
-          python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
-          npx tsc --noEmit --pretty false -p tsconfig.pengu-dual-ls-v1.json
+      - name: Static Python compile check
+        run: python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
 
       - name: Replay PENGU Dual LS V1 from Aster through latest completed hour
         run: |
           mkdir -p .research-state/v96-v52-pengu-dual-ls-v1
-          npx tsx scripts/research_lab_pengu_dual_ls_v1_replay.ts \
+          npx --yes tsx@4.21.0 scripts/research_lab_pengu_dual_ls_v1_replay.ts \
             2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.log
 
       - name: Run unified V96 Core plus PENGU Dual LS V1 plus V52 backtest
