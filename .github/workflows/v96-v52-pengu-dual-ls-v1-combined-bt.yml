@@ -1,0 +1,140 @@
+name: V96 V52 PENGU Dual LS V1 Unified Backtest
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/v96-v52-pengu-dual-ls-v1-combined-bt
+    paths:
+      - 'scripts/research_lab_pengu_dual_ls_v1_replay.ts'
+      - 'scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py'
+      - '.github/workflows/v96-v52-pengu-dual-ls-v1-combined-bt.yml'
+      - 'lib/pengu-dual-ls-v1.ts'
+      - 'config/penguDualLsV1Runtime.ts'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-v52-pengu-dual-ls-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout production-integrated branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V96 V52 research source
+        uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .research-base/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .research-base/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-v52-pengu-dual-ls-v1-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py', 'scripts/research_lab_pengu_dual_ls_v1_replay.ts') }}
+          restore-keys: |
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            aster-only-v52-v39cache-${{ runner.os }}-
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            perp-research-usdm-
+
+      - name: Install TypeScript dependencies
+        run: npm ci
+
+      - name: Static compile checks
+        run: |
+          python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
+          npx tsc --noEmit --pretty false -p tsconfig.pengu-dual-ls-v1.json
+
+      - name: Replay PENGU Dual LS V1 from Aster through latest completed hour
+        run: |
+          mkdir -p .research-state/v96-v52-pengu-dual-ls-v1
+          npx tsx scripts/research_lab_pengu_dual_ls_v1_replay.ts \
+            2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.log
+
+      - name: Run unified V96 Core plus PENGU Dual LS V1 plus V52 backtest
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --pengu-replay .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.json \
+            --output-dir .research-state/v96-v52-pengu-dual-ls-v1 \
+            2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/backtest.log
+
+      - name: Validate result and research safety
+        run: |
+          test -s .research-state/v96-v52-pengu-dual-ls-v1/result.json
+          test -s .research-state/v96-v52-pengu-dual-ls-v1/report.md
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-v52-pengu-dual-ls-v1/result.json').read_text())
+          assert p['period']['startInclusive'].startswith('2025-08-13')
+          assert p['period']['holdoutFreshStartInclusive'].startswith('2026-03-11')
+          assert p['architecture']['penguGrossCap'] == 0.75
+          assert p['architecture']['totalGrossCap'] == 2.5
+          assert p['checks']['legacyPenguRemovedFromV96'] is True
+          assert p['checks']['penguReplayNoOverlap'] is True
+          for scenario in ('NORMAL', 'SEVERE'):
+              for order in ('CORE_FIRST', 'PENGU_FIRST'):
+                  for window in ('full', 'holdoutFreshStart'):
+                      row = p['results'][scenario][order][window]
+                      assert row['observedMaximumTotalGross'] <= 2.5 + 1e-9
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'ordersSent': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'productionChanged': False,
+          }
+          print(json.dumps({
+              'status': p['status'],
+              'period': p['period'],
+              'normal': p['results']['NORMAL'],
+              'severe': p['results']['SEVERE'],
+              'tieDelta': p['tieOrderReturnPctPointDeltaPenguFirstMinusCoreFirst'],
+              'checks': p['checks'],
+          }, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-v52-pengu-dual-ls-v1-${{ github.run_id }}
+          path: .research-state/v96-v52-pengu-dual-ls-v1
+          retention-days: 90
+          if-no-files-found: warn
