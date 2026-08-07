@@ -1,0 +1,9 @@
+from __future__ import annotations
+import argparse,json,subprocess,sys
+from pathlib import Path
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--stock-cache-dir',required=True);p.add_argument('--pengu-replay',required=True);p.add_argument('--v96-event-v6',required=True);p.add_argument('--output-dir',required=True);a=p.parse_args();o=Path(a.output_dir);o.mkdir(parents=True,exist_ok=True);src=json.loads(Path(a.v96_event_v6).read_text());compat=dict(src);compat['selectedBeatsPreviousT8']=bool(src['selectedBeats86p139']);cp=o/'v96-v6-compat.json';cp.write_text(json.dumps(compat,indent=2)+'\n')
+ subprocess.run([sys.executable,'scripts/research_lab_v96_recent_event_core_v2_integrated_bt.py','--stock-cache-dir',a.stock_cache_dir,'--pengu-replay',a.pengu_replay,'--v96-event-v2',str(cp),'--output-dir',str(o)],check=True)
+ ip=o/'v96-recent-event-core-v2-integrated.json';r=json.loads(ip.read_text());r['status']='V96_EVENT_V6_INTEGRATED_PASS' if r['status']=='V96_EVENT_V2_INTEGRATED_PASS' and src['selectedBeats86p139'] else 'V96_EVENT_V6_INTEGRATED_DIAGNOSTIC';r['researchStatus']=src['status'];r['selected']=src['selected'];r['checks']['selectedBeats86p139']=bool(src['selectedBeats86p139']);r['checks'].pop('selectedBeatsT8',None);r['redesignedResult']['strategyId']='DISDEX_V96_RECENT_EVENT_CORE_V6_PLUS_PENGU_DUAL_LS_V1_PLUS_V52_UNIFIED_BT';r['redesignedResult']['architecture']['v96']=f"V96_RECENT_EVENT_CORE_V6_4H_FAILED_BOUNCE_HYBRID ({src['selected']['variantId']}); legacy V96 unchanged";(o/'v96-recent-event-core-v6-integrated.json').write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n');c=r['comparison'];print(json.dumps({'status':r['status'],'selected':src['selected']['variantId'],'baseline':c['baseline'],'redesigned':c['redesigned'],'checks':r['checks']},indent=2))
+if __name__=='__main__':main()
