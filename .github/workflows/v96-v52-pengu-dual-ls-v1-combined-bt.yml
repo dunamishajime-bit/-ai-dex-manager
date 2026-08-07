@@ -6,11 +6,9 @@ on:
     branches:
       - research/v96-v52-pengu-dual-ls-v1-combined-bt
     paths:
-      - 'scripts/research_lab_pengu_dual_ls_v1_replay.ts'
+      - 'scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py'
       - 'scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py'
       - '.github/workflows/v96-v52-pengu-dual-ls-v1-combined-bt.yml'
-      - 'lib/pengu-dual-ls-v1.ts'
-      - 'config/penguDualLsV1Runtime.ts'
 
 permissions:
   contents: read
@@ -24,8 +22,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     steps:
-      - name: Checkout production-integrated branch
+      - name: Checkout unified research branch
         uses: actions/checkout@v4
+
+      - name: Checkout frozen accepted PENGU evidence
+        uses: actions/checkout@v4
+        with:
+          ref: 520b18285187573487d2dafa39d8d1e13f9d48cf
+          path: .pengu-evidence
+          fetch-depth: 1
 
       - name: Checkout frozen V96 V52 research source
         uses: actions/checkout@v4
@@ -48,10 +53,6 @@ jobs:
           path: .research-base/.v13
           fetch-depth: 1
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -63,7 +64,7 @@ jobs:
             .cache/aster-only-v39-overnight-open
             .cache/perp-research-usdm
             .research-base/.cache/perp-research-usdm
-          key: v96-v52-pengu-dual-ls-v1-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py', 'scripts/research_lab_pengu_dual_ls_v1_replay.ts') }}
+          key: v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py', 'scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py') }}
           restore-keys: |
             v96-v52-dual-slot-one-year-${{ runner.os }}-
             aster-only-v52-v39cache-${{ runner.os }}-
@@ -71,27 +72,53 @@ jobs:
             perp-research-usdm-
 
       - name: Static Python compile check
-        run: python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
+        run: |
+          python -m py_compile scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py
+          python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
 
-      - name: Replay PENGU Dual LS V1 from Aster through latest completed hour
+      - name: Replay frozen accepted PENGU Dual LS V1 evidence
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .research-state/v96-v52-pengu-dual-ls-v1
-          cp package.json .research-state/v96-v52-pengu-dual-ls-v1/package.json.original
-          printf '%s\n' '{"private":true,"type":"commonjs"}' > package.json
-          trap 'cp .research-state/v96-v52-pengu-dual-ls-v1/package.json.original package.json' EXIT
-          npx --yes tsx@4.21.0 scripts/research_lab_pengu_dual_ls_v1_replay.ts \
-            2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.log
-          test -s .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.json
+          python scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py \
+            --evidence-root .pengu-evidence/reports/pengu-v46-repro/data \
+            --output .research-state/v96-v52-pengu-dual-ls-v1/pengu-evidence-replay.json \
+            2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/pengu-evidence-replay.log
 
-      - name: Run unified V96 Core plus PENGU Dual LS V1 plus V52 backtest
+      - name: Require accepted PENGU standalone reproduction before portfolio merge
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-v52-pengu-dual-ls-v1/pengu-evidence-replay.json').read_text())
+          f = p['fullMetrics']
+          h = p['holdoutMetrics']
+          assert f['trades'] == 73, f
+          assert f['longs'] == 26, f
+          assert f['shorts'] == 47, f
+          assert abs(f['compoundedReturnPct'] - 453.8728109085672) < 0.05, f
+          assert abs(f['profitFactor'] - 3.4009110979235766) < 0.01, f
+          assert abs(f['winRatePct'] - 72.6027397260274) < 0.01, f
+          assert abs(f['maxDrawdownPct'] - (-6.643885312020137)) < 0.05, f
+          assert h['trades'] == 30, h
+          assert abs(h['compoundedReturnPct'] - 49.73) < 0.20, h
+          assert abs(h['profitFactor'] - 2.290) < 0.03, h
+          assert abs(h['winRatePct'] - 66.66666666666667) < 0.01, h
+          assert abs(h['maxDrawdownPct'] - (-6.64)) < 0.10, h
+          assert p['integrity']['noOverlap'] is True
+          assert p['integrity']['maximumRequestedGross'] == 0.75
+          print('ACCEPTED_PENGU_EVIDENCE_REPRODUCED')
+          print(json.dumps({'full': f, 'holdout': h, 'diagnostics': p['diagnostics']}, indent=2))
+          PY
+
+      - name: Run unified V96 Core plus accepted PENGU Dual LS V1 plus V52 backtest
         shell: bash
         run: |
           set -o pipefail
           python scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py \
             --stock-cache-dir .cache/aster-only-v39-overnight-open \
-            --pengu-replay .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.json \
+            --pengu-replay .research-state/v96-v52-pengu-dual-ls-v1/pengu-evidence-replay.json \
             --output-dir .research-state/v96-v52-pengu-dual-ls-v1 \
             2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/backtest.log
 
