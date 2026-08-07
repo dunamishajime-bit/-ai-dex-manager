@@ -1,0 +1,40 @@
+name: V96 V11 Trade Router Micro
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v96-recent-regime-redesign-final2]
+    paths: ['scripts/research_lab_v96_recent_event_core_v11_micro_runner.py','.github/workflows/v96-v11-micro.yml']
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: research/v96-v52-dual-slot-one-year-bt, path: .research-base, fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-v11-micro-${{ runner.os }}
+          restore-keys: |
+            v96-v11-scout-
+            v96-v6-fast-
+      - name: Run V11 micro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .research-state/v96-v11-micro
+          python scripts/research_lab_v96_recent_event_core_v11_micro_runner.py --output-dir .research-state/v96-v11-micro | tee .research-state/v96-v11-micro/v11.log
+          test -s .research-state/v96-v11-micro/v96-recent-event-core-v11.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-v11-micro-${{ github.run_id }}
+          path: .research-state/v96-v11-micro
+          retention-days: 90
