@@ -1,0 +1,62 @@
+name: V97 Adaptive Event Core V1 Research
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v97-complete-live-readiness]
+    paths:
+      - 'scripts/research_lab_v97_adaptive_event_core_v1.py'
+      - '.github/workflows/v97-adaptive-event-core-v1.yml'
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v97-event-v1-${{ runner.os }}
+          restore-keys: |
+            v96-v12-
+            v96-v11-
+            v96-v6-fast-
+      - name: Compile V97 research
+        run: python -m py_compile scripts/research_lab_v97_adaptive_event_core_v1.py
+      - name: Run V97 exact-parity research
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .research-state/v97-v1
+          python scripts/research_lab_v97_adaptive_event_core_v1.py --output-dir .research-state/v97-v1 | tee .research-state/v97-v1/v97.log
+          test -s .research-state/v97-v1/v97-research.json
+          test -s .research-state/v97-v1/v97-frozen-schedule.json
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/v97-v1/v97-research.json'))
+          assert p['parityGate']['passed'] is True
+          assert p['parityGate']['expectedTrades'] == 50
+          assert abs(p['parityGate']['fixedReplay']['compoundedReturnPct'] - 101.998210) < 0.00001
+          assert p['safety']['ordersSent'] is False
+          assert p['safety']['liveChanged'] is False
+          assert p['safety']['vpsChanged'] is False
+          assert p['safety']['productionChanged'] is False
+          print('V97_PARITY_AND_SAFETY_GATE_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v97-adaptive-event-core-v1-${{ github.run_id }}
+          path: .research-state/v97-v1
+          retention-days: 90
