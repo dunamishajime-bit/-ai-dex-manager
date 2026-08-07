@@ -6,8 +6,10 @@ on:
     branches:
       - research/v96-v52-pengu-dual-ls-v1-combined-bt
     paths:
+      - 'research/evidence/trail6_3_36_dual_ledger.csv'
       - 'scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py'
       - 'scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py'
+      - 'scripts/research_lab_v96_v52_pengu_dual_ls_v1_routing_audit.py'
       - '.github/workflows/v96-v52-pengu-dual-ls-v1-combined-bt.yml'
 
 permissions:
@@ -64,8 +66,9 @@ jobs:
             .cache/aster-only-v39-overnight-open
             .cache/perp-research-usdm
             .research-base/.cache/perp-research-usdm
-          key: v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py', 'scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py') }}
+          key: v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-${{ hashFiles('research/evidence/trail6_3_36_dual_ledger.csv', 'scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py', 'scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py', 'scripts/research_lab_v96_v52_pengu_dual_ls_v1_routing_audit.py') }}
           restore-keys: |
+            v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-
             v96-v52-dual-slot-one-year-${{ runner.os }}-
             aster-only-v52-v39cache-${{ runner.os }}-
             v96-volume50-turnover075-full-${{ runner.os }}-
@@ -75,6 +78,7 @@ jobs:
         run: |
           python -m py_compile scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py
           python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
+          python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_routing_audit.py
 
       - name: Replay frozen accepted PENGU Dual LS V1 evidence
         shell: bash
@@ -83,6 +87,7 @@ jobs:
           mkdir -p .research-state/v96-v52-pengu-dual-ls-v1
           python scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py \
             --evidence-root .pengu-evidence/reports/pengu-v46-repro/data \
+            --ledger research/evidence/trail6_3_36_dual_ledger.csv \
             --output .research-state/v96-v52-pengu-dual-ls-v1/pengu-evidence-replay.json \
             2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/pengu-evidence-replay.log
 
@@ -122,14 +127,26 @@ jobs:
             --output-dir .research-state/v96-v52-pengu-dual-ls-v1 \
             2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/backtest.log
 
+      - name: Run routing-only with and without PENGU audit
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_v96_v52_pengu_dual_ls_v1_routing_audit.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --pengu-replay .research-state/v96-v52-pengu-dual-ls-v1/pengu-evidence-replay.json \
+            --output .research-state/v96-v52-pengu-dual-ls-v1/routing-audit.json \
+            2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/routing-audit.log
+
       - name: Validate result and research safety
         run: |
           test -s .research-state/v96-v52-pengu-dual-ls-v1/result.json
           test -s .research-state/v96-v52-pengu-dual-ls-v1/report.md
+          test -s .research-state/v96-v52-pengu-dual-ls-v1/routing-audit.json
           python - <<'PY'
           import json
           from pathlib import Path
           p = json.loads(Path('.research-state/v96-v52-pengu-dual-ls-v1/result.json').read_text())
+          audit = json.loads(Path('.research-state/v96-v52-pengu-dual-ls-v1/routing-audit.json').read_text())
           assert p['period']['startInclusive'].startswith('2025-08-13')
           assert p['period']['holdoutFreshStartInclusive'].startswith('2026-03-11')
           assert p['architecture']['penguGrossCap'] == 0.75
@@ -141,6 +158,9 @@ jobs:
                   for window in ('full', 'holdoutFreshStart'):
                       row = p['results'][scenario][order][window]
                       assert row['observedMaximumTotalGross'] <= 2.5 + 1e-9
+                      a = audit['comparison'][scenario][order][window]
+                      assert a['observedMaximumTotalGross'] <= 2.5 + 1e-9
+          assert audit['dailyLossLatchEnabled'] is False
           assert p['safety'] == {
               'mode': 'RESEARCH_ONLY',
               'ordersSent': False,
@@ -148,12 +168,13 @@ jobs:
               'vpsChanged': False,
               'productionChanged': False,
           }
+          assert audit['safety'] == p['safety']
           print(json.dumps({
               'status': p['status'],
               'period': p['period'],
-              'normal': p['results']['NORMAL'],
-              'severe': p['results']['SEVERE'],
-              'tieDelta': p['tieOrderReturnPctPointDeltaPenguFirstMinusCoreFirst'],
+              'dailyLockApproxNormal': p['results']['NORMAL'],
+              'routingOnlyComparison': audit['comparison']['NORMAL'],
+              'routingOnlySevereComparison': audit['comparison']['SEVERE'],
               'checks': p['checks'],
           }, indent=2))
           PY
