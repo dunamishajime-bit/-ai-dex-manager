@@ -1,0 +1,56 @@
+name: V97 Aster V3 Auth Regression
+
+on:
+  push:
+    branches:
+      - research/v97-complete-live-readiness-2
+    paths:
+      - 'lib/aster-v3-client.ts'
+      - 'scripts/disdex-aster-v3-auth-readonly.ts'
+      - 'scripts/disdex-v96-v52-prepare-account-risk.py'
+      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
+      - '.github/workflows/v97-aster-v3-auth-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python syntax and account-risk self-test
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile \
+            scripts/disdex_v13d_v11eq_stock_live_engine.py \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          python3 scripts/disdex-v96-v52-prepare-account-risk.py --self-test
+
+      - name: Reject legacy Aster account-risk endpoints
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ! grep -R --line-number -E '/fapi/v1/(marginType|leverage)' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -q 'ASTER_CHANGE_MARGIN_TYPE_PATH = "/fapi/v3/marginType"' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -q 'ASTER_CHANGE_LEVERAGE_PATH = "/fapi/v3/leverage"' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+
+      - name: Verify V3 client and read-only auth probe boundary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -q 'https://fapi3.asterdex.com' lib/aster-v3-client.ts
+          grep -q 'client.getBalances()' scripts/disdex-aster-v3-auth-readonly.ts
+          grep -q 'client.getPositions()' scripts/disdex-aster-v3-auth-readonly.ts
+          grep -q 'client.getOpenOrders()' scripts/disdex-aster-v3-auth-readonly.ts
+          ! grep -Eq 'client\.(placeMarketOrder|placeLimitOrder|cancelOrder|cancelAll)' \
+            scripts/disdex-aster-v3-auth-readonly.ts
+          echo 'Aster V3 auth regression boundary: PASS'
