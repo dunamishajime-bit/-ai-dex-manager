@@ -5,6 +5,7 @@ on:
     branches: [research/v97-complete-live-readiness]
     paths:
       - 'scripts/research_lab_v97_adaptive_event_core_v1.py'
+      - 'scripts/research_lab_v97_adaptive_event_core_v1_runner.py'
       - '.github/workflows/v97-adaptive-event-core-v1.yml'
 permissions:
   contents: read
@@ -33,13 +34,13 @@ jobs:
             v96-v11-
             v96-v6-fast-
       - name: Compile V97 research
-        run: python -m py_compile scripts/research_lab_v97_adaptive_event_core_v1.py
+        run: python -m py_compile scripts/research_lab_v97_adaptive_event_core_v1.py scripts/research_lab_v97_adaptive_event_core_v1_runner.py
       - name: Run V97 exact-parity research
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .research-state/v97-v1
-          python scripts/research_lab_v97_adaptive_event_core_v1.py --output-dir .research-state/v97-v1 | tee .research-state/v97-v1/v97.log
+          python scripts/research_lab_v97_adaptive_event_core_v1_runner.py --output-dir .research-state/v97-v1 | tee .research-state/v97-v1/v97.log
           test -s .research-state/v97-v1/v97-research.json
           test -s .research-state/v97-v1/v97-frozen-schedule.json
           python - <<'PY'
