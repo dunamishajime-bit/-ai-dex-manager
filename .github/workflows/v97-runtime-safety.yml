@@ -31,6 +31,7 @@ jobs:
           set -euo pipefail
           npm ci --prefix .runtime-base
           ln -s "$PWD/.runtime-base/node_modules" node_modules
+          cp .runtime-base/package.json package.json
       - name: Focused V97 typecheck
         run: ./node_modules/.bin/tsc -p tsconfig.v97.json --noEmit
       - name: V97 deterministic selftest
