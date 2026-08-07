@@ -74,10 +74,16 @@ jobs:
         run: python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
 
       - name: Replay PENGU Dual LS V1 from Aster through latest completed hour
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p .research-state/v96-v52-pengu-dual-ls-v1
+          cp package.json .research-state/v96-v52-pengu-dual-ls-v1/package.json.original
+          printf '%s\n' '{"private":true,"type":"commonjs"}' > package.json
+          trap 'cp .research-state/v96-v52-pengu-dual-ls-v1/package.json.original package.json' EXIT
           npx --yes tsx@4.21.0 scripts/research_lab_pengu_dual_ls_v1_replay.ts \
             2>&1 | tee .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.log
+          test -s .research-state/v96-v52-pengu-dual-ls-v1/pengu-replay.json
 
       - name: Run unified V96 Core plus PENGU Dual LS V1 plus V52 backtest
         shell: bash
