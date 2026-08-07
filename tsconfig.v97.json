@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true },
+  "include": [
+    "next-env.d.ts",
+    "config/disdexV97Runtime.ts",
+    "lib/aster-v3-client.ts",
+    "lib/direct-trade-executor.ts",
+    "lib/live-runner-state.ts",
+    "lib/signed-paper-direct-trade-executor.ts",
+    "lib/disdex-v96-live-risk-controls.ts",
+    "lib/disdex-v97-signal-engine.ts",
+    "lib/disdex-v97-market-data-provider.ts",
+    "lib/disdex-v97-runner-state.ts",
+    "lib/disdex-v97-portfolio-runner.ts",
+    "scripts/disdex-v97-live-runner.ts",
+    "scripts/disdex-v97-selftest.ts"
+  ],
+  "exclude": ["node_modules", "backups", "restoretmp"]
+}
