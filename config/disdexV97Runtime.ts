@@ -19,18 +19,8 @@ export const DISDEX_V97_CORE = {
     side: "SHORT_ONLY" as const,
     signalChronology: "COMPLETED_4H_BAR_NEXT_4H_OPEN" as const,
     tieBreak: "SCORE_THEN_SYMBOL_DESC" as const,
-    scoreWeights: {
-        decline: 1,
-        relativeWeakness: 0.3,
-        bounce: 0.2,
-        negativeCurrent4h: 0.4,
-        volumeRatio: 0.2,
-    },
-    volumeRatio: {
-        recentBars: 12,
-        baseBars: 48,
-        minimum: 0,
-    },
+    scoreWeights: { decline: 1, relativeWeakness: 0.3, bounce: 0.2, negativeCurrent4h: 0.4, volumeRatio: 0.2 },
+    volumeRatio: { recentBars: 12, baseBars: 48, minimum: 0 },
 } as const;
 
 export const DISDEX_V97_RISK = {
@@ -47,9 +37,6 @@ export const DISDEX_V97_RISK = {
 } as const;
 
 export const DISDEX_V97_CONTROLLER = {
-    // Research-selected adaptive parameters are pinned here only after the
-    // exact-parity / chronological selection workflow passes. Until then V97
-    // remains repository-disabled and fixed at the validated 0.75 base Gross.
     version: "RESEARCH_PENDING" as const,
     adaptiveEnabled: false,
     baseGross: DISDEX_V97_CORE.baseGross,
@@ -60,6 +47,8 @@ export const DISDEX_V97_RUNTIME = {
     strategyId: DISDEX_V97_STRATEGY_ID,
     mode: "SHADOW" as DisDexV97Mode,
     enabled: false,
+    // This repository gate cannot be raised by environment variables. It is
+    // intentionally false until research + execution parity + readiness pass.
     liveTradingEnabled: false,
     liveExecutionEnabled: false,
     implementationStatus: "RESEARCH_PARITY_AND_LIVE_READINESS_IN_PROGRESS" as const,
@@ -72,7 +61,6 @@ function boolEnv(value: string | undefined, fallback: boolean) {
     if (value === undefined) return fallback;
     return /^(1|true|yes|on)$/i.test(value.trim());
 }
-
 function finiteEnv(value: string | undefined, fallback: number) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
@@ -81,15 +69,13 @@ function finiteEnv(value: string | undefined, fallback: number) {
 export function resolveDisDexV97Runtime(env: Partial<NodeJS.ProcessEnv> = process.env) {
     const rawMode = String(env.DISDEX_V97_MODE || DISDEX_V97_RUNTIME.mode).trim().toUpperCase();
     const mode: DisDexV97Mode = rawMode === "LIVE" || rawMode === "PAPER" ? rawMode : "SHADOW";
-    const maximumGross = Math.min(
-        DISDEX_V97_CORE.maximumAdaptiveGross,
-        Math.max(0, finiteEnv(env.DISDEX_V97_MAX_GROSS, DISDEX_V97_CONTROLLER.maximumGross)),
-    );
+    const maximumGross = Math.min(DISDEX_V97_CORE.maximumAdaptiveGross, Math.max(0, finiteEnv(env.DISDEX_V97_MAX_GROSS, DISDEX_V97_CONTROLLER.maximumGross)));
     return {
         strategyId: DISDEX_V97_STRATEGY_ID,
         mode,
         enabled: boolEnv(env.DISDEX_V97_ENABLED, DISDEX_V97_RUNTIME.enabled),
-        liveTradingEnabled: boolEnv(env.DISDEX_V97_LIVE_TRADING_ENABLED, DISDEX_V97_RUNTIME.liveTradingEnabled),
+        // Explicit environment switches are necessary but never sufficient.
+        liveTradingEnabled: DISDEX_V97_RUNTIME.liveTradingEnabled && boolEnv(env.DISDEX_V97_LIVE_TRADING_ENABLED, false),
         liveExecutionEnabled: boolEnv(env.DISDEX_V97_LIVE_EXECUTION_ENABLED, DISDEX_V97_RUNTIME.liveExecutionEnabled),
         baseGross: Math.min(DISDEX_V97_CORE.baseGross, maximumGross),
         maximumGross,
