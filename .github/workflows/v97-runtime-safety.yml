@@ -14,18 +14,27 @@ permissions:
 jobs:
   safety:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          path: .runtime-base
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-      - run: npm ci
+      - name: Install from clean production manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix .runtime-base
+          ln -s "$PWD/.runtime-base/node_modules" node_modules
       - name: Focused V97 typecheck
-        run: npx tsc -p tsconfig.v97.json --noEmit
+        run: ./node_modules/.bin/tsc -p tsconfig.v97.json --noEmit
       - name: V97 deterministic selftest
-        run: npx tsx scripts/disdex-v97-selftest.ts
+        run: ./node_modules/.bin/tsx scripts/disdex-v97-selftest.ts
       - name: V97 repository live gate
         shell: bash
         run: |
