@@ -1,0 +1,56 @@
+name: V97 Adaptive Event Core V3 Selection
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v97-complete-live-readiness]
+    paths:
+      - 'scripts/research_lab_v97_adaptive_event_core_v3_runner.py'
+      - '.github/workflows/v97-adaptive-event-core-v3.yml'
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v97-event-v3-${{ runner.os }}
+          restore-keys: |
+            v97-event-v2-
+            v97-event-v1-
+      - name: Compile
+        run: python -m py_compile scripts/research_lab_v97_adaptive_event_core_v1.py scripts/research_lab_v97_adaptive_event_core_v2_runner.py scripts/research_lab_v97_adaptive_event_core_v3_runner.py
+      - name: Run V97 V3 selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .research-state/v97-v3
+          python scripts/research_lab_v97_adaptive_event_core_v3_runner.py --output-dir .research-state/v97-v3 | tee .research-state/v97-v3/v97-v3.log
+          test -s .research-state/v97-v3/v97-research.json
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/v97-v3/v97-research.json'))
+          assert p['parityGate']['passed'] is True
+          assert p['selectionPolicy']['lateEvaluationUsedForRanking'] is False
+          assert p['selectionPolicy']['fullPeriodUsedForRanking'] is False
+          print('V97_V3_SELECTION',p['selected']['variantId'],p['status'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v97-adaptive-event-core-v3-${{ github.run_id }}
+          path: .research-state/v97-v3
+          retention-days: 90
