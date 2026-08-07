@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -30,8 +31,6 @@ def main() -> None:
 
     # Disable the daily-loss latch only for this audit. Gross limits, slot occupancy,
     # same-symbol rejection, cost gates, tie ordering and all strategy returns stay active.
-    # This isolates whether adding PENGU itself hurts the portfolio, independently of the
-    # separate daily-loss approximation in the combined simulator.
     combined.DAILY_LOSS_LIMIT = -999.0
 
     pengu_path = Path(args.pengu_replay)
@@ -81,6 +80,24 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"status": payload["status"], "comparison": comparison}, ensure_ascii=False, indent=2))
+
+    # Run the dedicated V52 ablation with the real daily-loss latch restored inside a
+    # fresh process. This compares no-stock, V11-only, V50-only and both sleeves across
+    # a 0..100 bps stock-cost grid while V96 and frozen PENGU stay fixed.
+    ablation_output = out.with_name("v52-value-ablation.json")
+    subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "research_lab_v52_value_ablation.py"),
+            "--stock-cache-dir",
+            args.stock_cache_dir,
+            "--pengu-replay",
+            args.pengu_replay,
+            "--output",
+            str(ablation_output),
+        ],
+        check=True,
+    )
 
 
 if __name__ == "__main__":
