@@ -1,0 +1,160 @@
+name: V96 Recent Regime Redesign
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/v96-recent-regime-redesign-final2
+    paths:
+      - 'scripts/research_lab_v96_recent_regime_redesign.py'
+      - 'scripts/research_lab_v96_recent_regime_integrated_bt.py'
+      - '.github/workflows/v96-recent-regime-redesign.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-recent-regime-redesign-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout recent-regime research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen accepted PENGU evidence
+        uses: actions/checkout@v4
+        with:
+          ref: 520b18285187573487d2dafa39d8d1e13f9d48cf
+          path: .pengu-evidence
+          fetch-depth: 1
+
+      - name: Checkout frozen V96 V52 research source
+        uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .research-base/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .research-base/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-recent-regime-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_recent_regime_redesign.py', 'scripts/research_lab_v96_recent_regime_integrated_bt.py') }}
+          restore-keys: |
+            v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            v96-volume50-turnover075-full-${{ runner.os }}-
+            perp-research-usdm-
+
+      - name: Static Python compile check
+        run: |
+          python -m py_compile scripts/research_lab_v96_recent_regime_redesign.py
+          python -m py_compile scripts/research_lab_v96_recent_regime_integrated_bt.py
+          python -m py_compile scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py
+          python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
+
+      - name: Replay frozen accepted PENGU Dual LS V1 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .research-state/v96-recent-regime-redesign
+          python scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py \
+            --evidence-root .pengu-evidence/reports/pengu-v46-repro/data \
+            --ledger research/evidence/trail6_3_36_dual_ledger.csv \
+            --output .research-state/v96-recent-regime-redesign/pengu-evidence-replay.json \
+            2>&1 | tee .research-state/v96-recent-regime-redesign/pengu-evidence-replay.log
+
+      - name: Require accepted PENGU evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v96-recent-regime-redesign/pengu-evidence-replay.json').read_text())
+          f = p['fullMetrics']
+          h = p['holdoutMetrics']
+          assert f['trades'] == 73, f
+          assert abs(f['compoundedReturnPct'] - 453.8728109085672) < 0.05, f
+          assert abs(f['profitFactor'] - 3.4009110979235766) < 0.01, f
+          assert h['trades'] == 30, h
+          assert p['integrity']['noOverlap'] is True
+          assert p['integrity']['maximumRequestedGross'] == 0.75
+          print('ACCEPTED_PENGU_EVIDENCE_OK')
+          PY
+
+      - name: Search recent-regime V96 candidates with untouched fresh holdout
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_v96_recent_regime_redesign.py \
+            --output-dir .research-state/v96-recent-regime-redesign \
+            2>&1 | tee .research-state/v96-recent-regime-redesign/v96-redesign.log
+
+      - name: Integrate selected V96 with fixed PENGU and V52
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/research_lab_v96_recent_regime_integrated_bt.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --pengu-replay .research-state/v96-recent-regime-redesign/pengu-evidence-replay.json \
+            --v96-redesign .research-state/v96-recent-regime-redesign/v96-recent-regime-redesign.json \
+            --output-dir .research-state/v96-recent-regime-redesign \
+            2>&1 | tee .research-state/v96-recent-regime-redesign/v96-integrated.log
+
+      - name: Validate research safety and report status
+        run: |
+          test -s .research-state/v96-recent-regime-redesign/v96-recent-regime-redesign.json
+          test -s .research-state/v96-recent-regime-redesign/v96-recent-integrated.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          redesign = json.loads(Path('.research-state/v96-recent-regime-redesign/v96-recent-regime-redesign.json').read_text())
+          integrated = json.loads(Path('.research-state/v96-recent-regime-redesign/v96-recent-integrated.json').read_text())
+          assert redesign['selectionPolicy']['holdoutUsedForRanking'] is False
+          assert redesign['period']['holdoutStartInclusive'].startswith('2026-03-11')
+          assert redesign['period']['endExclusive'].startswith('2026-08-03')
+          assert redesign['safety'] == {'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert integrated['safety'] == redesign['safety']
+          assert integrated['redesignedResult']['results']['NORMAL']['CORE_FIRST']['full']['observedMaximumTotalGross'] <= 2.5 + 1e-9
+          print(json.dumps({
+              'redesignStatus': redesign['status'],
+              'selected': redesign['selected']['variantId'],
+              'selectedHoldout': redesign['selected']['holdout'],
+              'selectedFull': redesign['selected']['full'],
+              'integratedStatus': integrated['status'],
+              'comparison': integrated['comparison'],
+              'checks': integrated['checks'],
+          }, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-recent-regime-redesign-${{ github.run_id }}
+          path: .research-state/v96-recent-regime-redesign
+          retention-days: 90
+          if-no-files-found: warn
