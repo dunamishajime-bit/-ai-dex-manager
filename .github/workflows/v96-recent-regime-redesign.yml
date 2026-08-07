@@ -7,6 +7,7 @@ on:
       - research/v96-recent-regime-redesign-final2
     paths:
       - 'scripts/research_lab_v96_recent_regime_redesign.py'
+      - 'scripts/research_lab_v96_recent_regime_redesign_fast.py'
       - 'scripts/research_lab_v96_recent_regime_integrated_bt.py'
       - '.github/workflows/v96-recent-regime-redesign.yml'
 
@@ -64,8 +65,9 @@ jobs:
             .cache/aster-only-v39-overnight-open
             .cache/perp-research-usdm
             .research-base/.cache/perp-research-usdm
-          key: v96-recent-regime-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_recent_regime_redesign.py', 'scripts/research_lab_v96_recent_regime_integrated_bt.py') }}
+          key: v96-recent-regime-fast-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_recent_regime_redesign.py', 'scripts/research_lab_v96_recent_regime_redesign_fast.py', 'scripts/research_lab_v96_recent_regime_integrated_bt.py') }}
           restore-keys: |
+            v96-recent-regime-${{ runner.os }}-
             v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-
             v96-v52-dual-slot-one-year-${{ runner.os }}-
             v96-volume50-turnover075-full-${{ runner.os }}-
@@ -74,6 +76,7 @@ jobs:
       - name: Static Python compile check
         run: |
           python -m py_compile scripts/research_lab_v96_recent_regime_redesign.py
+          python -m py_compile scripts/research_lab_v96_recent_regime_redesign_fast.py
           python -m py_compile scripts/research_lab_v96_recent_regime_integrated_bt.py
           python -m py_compile scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py
           python -m py_compile scripts/research_lab_v96_v52_pengu_dual_ls_v1_combined_bt.py
@@ -106,11 +109,11 @@ jobs:
           print('ACCEPTED_PENGU_EVIDENCE_OK')
           PY
 
-      - name: Search recent-regime V96 candidates with untouched fresh holdout
+      - name: Search bounded recent-regime V96 candidates with untouched fresh holdout
         shell: bash
         run: |
           set -o pipefail
-          python scripts/research_lab_v96_recent_regime_redesign.py \
+          python scripts/research_lab_v96_recent_regime_redesign_fast.py \
             --output-dir .research-state/v96-recent-regime-redesign \
             2>&1 | tee .research-state/v96-recent-regime-redesign/v96-redesign.log
 
@@ -142,6 +145,7 @@ jobs:
           assert integrated['redesignedResult']['results']['NORMAL']['CORE_FIRST']['full']['observedMaximumTotalGross'] <= 2.5 + 1e-9
           print(json.dumps({
               'redesignStatus': redesign['status'],
+              'candidateCounts': redesign['candidateCounts'],
               'selected': redesign['selected']['variantId'],
               'selectedHoldout': redesign['selected']['holdout'],
               'selectedFull': redesign['selected']['full'],
