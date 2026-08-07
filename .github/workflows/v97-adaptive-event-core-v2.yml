@@ -1,0 +1,57 @@
+name: V97 Adaptive Event Core V2 Research
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v97-complete-live-readiness]
+    paths:
+      - 'scripts/research_lab_v97_adaptive_event_core_v2_runner.py'
+      - '.github/workflows/v97-adaptive-event-core-v2.yml'
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v96-v52-dual-slot-one-year-bt
+          path: .research-base
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v97-event-v2-${{ runner.os }}
+          restore-keys: |
+            v97-event-v1-
+            v96-v6-fast-
+      - name: Compile
+        run: python -m py_compile scripts/research_lab_v97_adaptive_event_core_v1.py scripts/research_lab_v97_adaptive_event_core_v2_runner.py
+      - name: Run V97 V2 robust neighborhood
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .research-state/v97-v2
+          python scripts/research_lab_v97_adaptive_event_core_v2_runner.py --output-dir .research-state/v97-v2 | tee .research-state/v97-v2/v97-v2.log
+          test -s .research-state/v97-v2/v97-research.json
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/v97-v2/v97-research.json'))
+          assert p['parityGate']['passed'] is True
+          assert p['parityGate']['expectedTrades'] == 50
+          assert abs(p['parityGate']['fixedReplay']['compoundedReturnPct'] - 101.998210) < 0.00001
+          assert not p['safety']['ordersSent'] and not p['safety']['liveChanged'] and not p['safety']['vpsChanged'] and not p['safety']['productionChanged']
+          print('V97_V2_PARITY_SAFETY_PASS', p['status'], p['selected']['variantId'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v97-adaptive-event-core-v2-${{ github.run_id }}
+          path: .research-state/v97-v2
+          retention-days: 90
