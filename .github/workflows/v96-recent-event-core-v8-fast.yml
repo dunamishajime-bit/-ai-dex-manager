@@ -1,0 +1,43 @@
+name: V96 Recent Event Core V8 Quality Filter Fast
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v96-recent-regime-redesign-final2]
+    paths:
+      - 'scripts/research_lab_v96_recent_event_core_v8.py'
+      - 'scripts/research_lab_v96_recent_event_core_v8_fast_runner.py'
+      - '.github/workflows/v96-recent-event-core-v8-fast.yml'
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: research/v96-v52-dual-slot-one-year-bt, path: .research-base, fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-v8-fast-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v96_recent_event_core_v8.py', 'scripts/research_lab_v96_recent_event_core_v8_fast_runner.py') }}
+          restore-keys: |
+            v96-v8-${{ runner.os }}-
+            v96-v6-fast-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+      - name: Compile
+        run: python -m py_compile scripts/research_lab_v96_recent_event_core_v6.py scripts/research_lab_v96_recent_event_core_v8.py scripts/research_lab_v96_recent_event_core_v8_fast_runner.py
+      - name: Search cached V8
+        run: |
+          mkdir -p .research-state/v96-v8-fast
+          python scripts/research_lab_v96_recent_event_core_v8_fast_runner.py --output-dir .research-state/v96-v8-fast | tee .research-state/v96-v8-fast/v8.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-v8-fast-${{ github.run_id }}
+          path: .research-state/v96-v8-fast
+          retention-days: 90
