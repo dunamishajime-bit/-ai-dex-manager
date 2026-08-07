@@ -1,0 +1,54 @@
+name: V96 V6 Best102 Integrated Diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/v96-recent-regime-redesign-final2]
+    paths:
+      - 'scripts/research_lab_v96_recent_event_core_v6_best102_runner.py'
+      - '.github/workflows/v96-v6-best102-integrated.yml'
+permissions:
+  contents: read
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: 520b18285187573487d2dafa39d8d1e13f9d48cf, path: .pengu-evidence, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: research/v96-v52-dual-slot-one-year-bt, path: .research-base, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c, path: .research-base/.v11, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755, path: .research-base/.v13, fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .research-base/.cache/perp-research-usdm
+          key: v96-v6-best102-${{ runner.os }}
+          restore-keys: |
+            v96-v6-fast-${{ runner.os }}-
+            v96-v6-bounded-${{ runner.os }}-
+            v96-v52-pengu-dual-ls-v1-frozen-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+      - name: Compile
+        run: python -m py_compile scripts/research_lab_v96_recent_event_core_v6.py scripts/research_lab_v96_recent_event_core_v6_best102_runner.py scripts/research_lab_v96_recent_event_core_v6_integrated_bt.py
+      - name: PENGU evidence
+        run: |
+          mkdir -p .research-state/v96-v6-best102
+          python scripts/research_lab_pengu_dual_ls_v1_evidence_replay.py --evidence-root .pengu-evidence/reports/pengu-v46-repro/data --ledger research/evidence/trail6_3_36_dual_ledger.csv --output .research-state/v96-v6-best102/pengu-evidence-replay.json
+      - name: Freeze and replay 101.998pct candidate
+        run: python scripts/research_lab_v96_recent_event_core_v6_best102_runner.py --output-dir .research-state/v96-v6-best102 | tee .research-state/v96-v6-best102/core.log
+      - name: Integrate with fixed PENGU and V52
+        run: python scripts/research_lab_v96_recent_event_core_v6_integrated_bt.py --stock-cache-dir .cache/aster-only-v39-overnight-open --pengu-replay .research-state/v96-v6-best102/pengu-evidence-replay.json --v96-event-v6 .research-state/v96-v6-best102/v96-recent-event-core-v6.json --output-dir .research-state/v96-v6-best102 | tee .research-state/v96-v6-best102/integrated.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v96-v6-best102-${{ github.run_id }}
+          path: .research-state/v96-v6-best102
+          retention-days: 90
