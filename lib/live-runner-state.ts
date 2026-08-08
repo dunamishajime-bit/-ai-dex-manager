@@ -140,6 +140,11 @@ export class FileLiveRunnerStateStore implements LiveRunnerStateStore {
     }
 }
 
+export function resolveLiveRunnerLockPath(configuredPath: string | undefined, stateRoot: string, mode: "paper" | "live"): string {
+    const configured = String(configuredPath || "").trim();
+    return configured ? resolve(configured) : resolve(stateRoot, `runner-${mode.toLowerCase()}.lock`);
+}
+
 export class FileLiveRunnerLock implements LiveRunnerLock {
     private readonly path: string;
 
