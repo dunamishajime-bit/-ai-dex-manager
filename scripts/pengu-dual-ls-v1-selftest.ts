@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { PENGU_DUAL_LS_V1, resolvePenguDualLsV1Runtime } from "../config/penguDualLsV1Runtime";
 import { evaluatePenguDualLsV1Decision } from "../lib/pengu-dual-ls-v1";
-import { MemoryLiveRunnerLock } from "../lib/live-runner-state";
+import { MemoryLiveRunnerLock, resolveLiveRunnerLockPath } from "../lib/live-runner-state";
 import { MemoryPenguDualLsV1RunnerStateStore, createPenguDualLsV1RunnerState } from "../lib/pengu-dual-ls-v1-runner-state";
 import { PenguDualLsV1PortfolioRunner } from "../lib/pengu-dual-ls-v1-portfolio-runner";
 
@@ -68,6 +68,14 @@ assert.equal(defaultRuntime.longGross, 0.75);
 assert.equal(defaultRuntime.shortGross, 0.75);
 assert.equal(defaultRuntime.portfolioGrossCap, 1.5);
 assert.equal(defaultRuntime.closeUnmanagedPositions, false);
+assert.equal(
+    resolveLiveRunnerLockPath("/tmp/crypto/runner-live.lock", "/tmp/pengu", "live"),
+    "/tmp/crypto/runner-live.lock",
+);
+assert.equal(
+    resolveLiveRunnerLockPath(undefined, "/tmp/pengu", "live"),
+    "/tmp/pengu/runner-live.lock",
+);
 
 const cappedRuntime = resolvePenguDualLsV1Runtime({
     PENGU_DUAL_LS_V1_ENABLED: "true",
