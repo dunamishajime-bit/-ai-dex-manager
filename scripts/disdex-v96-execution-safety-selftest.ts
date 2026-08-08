@@ -69,6 +69,10 @@ function action(input: Partial<DisDexV35RebalanceAction> = {}): DisDexV35Rebalan
 const capacityConfig = {
     cashReservePct: 2,
     maxGross: 1,
+    portfolioGrossCap: 1,
+    targetInitialLeverage: 1,
+    maximumInitialMarginFraction: 1,
+    minimumAvailableBalanceFractionAfterOrder: 0,
     maxSlippageBps: 35,
     minOrderNotionalUsd: 5,
     roundTripFeeBps: 8,
