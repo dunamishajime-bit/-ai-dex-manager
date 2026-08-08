@@ -39,13 +39,13 @@ jobs:
           path: .cache/perp-research-usdm
           key: volatility-breakout-v49-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
           restore-keys: |
-            cross-sectional-dispersion-v48-usdm-
+            dispersion-reversal-v48-usdm-
+            btc-lead-lag-v47-usdm-
             utc-session-v26-usdm-
             multi-horizon-v3-usdm-
             win80-profit-v1-usdm-
             usdm-snapshot-v2-
             autonomous-usdm-v2-
-            champion-deep-usdm-v1-
 
       - name: Validate research source
         run: python -m py_compile scripts/research_lab_volatility_breakout_breadth_v49.py
