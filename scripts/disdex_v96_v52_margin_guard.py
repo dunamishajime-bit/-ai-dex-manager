@@ -112,7 +112,7 @@ class MarginGuard:
                 "totalOpenOrderInitialMargin": "0",
                 "availableBalance": str(equity),
             }
-        return self.client._signed("GET", "/fapi/v4/account", {})
+        return self.client._signed("GET", "/fapi/v3/account", {})
 
     def positions(self) -> List[dict]:
         return self.client.positions() if self.live else [
