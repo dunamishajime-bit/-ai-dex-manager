@@ -2,7 +2,7 @@ import "dotenv/config";
 import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
-import { FileLiveRunnerLock } from "../lib/live-runner-state";
+import { FileLiveRunnerLock, resolveLiveRunnerLockPath } from "../lib/live-runner-state";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV1Runtime } from "../config/penguDualLsV1Runtime";
 import { PenguDualLsV1AsterMarketDataProvider } from "../lib/pengu-dual-ls-v1-market-data-provider";
@@ -52,7 +52,7 @@ async function main() {
         marketData,
         executor,
         stateStore: new FilePenguDualLsV1RunnerStateStore(resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`), runtime.mode),
-        lock: new FileLiveRunnerLock(resolve(process.env.PENGU_DUAL_LS_V1_LOCK_PATH || stateRoot, `runner-${runtime.mode.toLowerCase()}.lock`), numberEnv("PENGU_DUAL_LS_V1_LOCK_STALE_MS", 10 * 60_000)),
+        lock: new FileLiveRunnerLock(resolveLiveRunnerLockPath(process.env.PENGU_DUAL_LS_V1_LOCK_PATH, stateRoot, runtime.mode.toLowerCase() as "paper" | "live"), numberEnv("PENGU_DUAL_LS_V1_LOCK_STALE_MS", 10 * 60_000)),
         config: {
             mode: runtime.mode,
             enabled: runtime.enabled,
