@@ -45,7 +45,7 @@ export interface LiveRunnerFailureRecord {
 export interface LiveRunnerState {
     version: 1;
     strategyId: string;
-    mode: "paper" | "live";
+    mode: string;
     updatedAt: number;
     lastRunAt?: number;
     lastCompletedIdempotencyKey?: string;
