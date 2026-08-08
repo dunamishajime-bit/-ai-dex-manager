@@ -1,0 +1,60 @@
+name: Cross-Sectional Dispersion Reversal V48 Fast
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_cross_sectional_dispersion_reversal_v48_fast.py"
+      - ".github/workflows/cross-sectional-dispersion-reversal-v48-fast.yml"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "lib/research-lab/perp/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dispersion-reversal-v48-fast-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: dispersion-reversal-v48-fast-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            dispersion-reversal-v48-usdm-
+            btc-lead-lag-v47-usdm-
+            utc-session-v26-usdm-
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+      - name: Validate source
+        run: python -m py_compile scripts/research_lab_cross_sectional_dispersion_reversal_v48_fast.py
+      - name: Run fast equivalent V48
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_cross_sectional_dispersion_reversal_v48_fast.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-sectional-dispersion-reversal-v48-fast
+          path: |
+            .research-state/cross-sectional-dispersion-reversal-v48-fast.json
+            .research-state/cross-sectional-dispersion-reversal-v48-fast.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research-only. No production, VPS, environment, account, order, position, or live-trading changes.
