@@ -87,7 +87,7 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
                 "totalOpenOrderInitialMargin": "0",
                 "availableBalance": str(equity),
             }
-        return self.aster._signed("GET", "/fapi/v4/account", {})
+        return self.aster._signed("GET", "/fapi/v3/account", {})
 
     def _write_guard_state(self, decision: dict, configuration: Dict[str, dict]) -> None:
         now = base.now_ms()
