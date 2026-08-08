@@ -6,6 +6,7 @@ on:
     branches:
       - research/win80-profit-optimization-v1
     paths:
+      - "research/volatility-breakout-v49-trigger.txt"
       - "scripts/research_lab_volatility_breakout_breadth_v49.py"
       - ".github/workflows/volatility-breakout-breadth-v49.yml"
       - "scripts/research_lab_cross_sectional_dispersion_reversal_v48.py"
