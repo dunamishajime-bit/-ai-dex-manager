@@ -59,3 +59,4 @@ jobs:
           retention-days: 30
 
 # Research-only workflow. No production, VPS, environment, credentials, account access, orders, positions, or live-trading changes.
+# Triggered for the first V49 research run after workflow registration.
