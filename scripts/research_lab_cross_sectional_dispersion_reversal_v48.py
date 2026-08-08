@@ -115,25 +115,17 @@ def log_returns(rows: List[dict]) -> List[float]:
     return values
 
 
-def cumulative(values: List[float], end: int, window: int) -> Optional[float]:
-    start = end - window + 1
-    if start < 1:
-        return None
-    return sum(values[start:end + 1])
+def prefix(values: List[float]) -> List[float]:
+    result = [0.0]
+    total = 0.0
+    for value in values:
+        total += value
+        result.append(total)
+    return result
 
 
-def rolling_beta(leader: List[float], follower: List[float], end: int, lookback: int) -> Optional[float]:
-    start = end - lookback + 1
-    if start < 1:
-        return None
-    x = leader[start:end + 1]
-    y = follower[start:end + 1]
-    mx, my = mean(x), mean(y)
-    variance = mean([(value - mx) ** 2 for value in x])
-    if variance <= 1e-12:
-        return None
-    covariance = mean([(a - mx) * (b - my) for a, b in zip(x, y)])
-    return max(0.15, min(3.0, covariance / variance))
+def range_sum(pref: List[float], start: int, end: int) -> float:
+    return pref[end + 1] - pref[start]
 
 
 def funding_pct(points: List[dict], start_ts: int, end_ts: int, direction: int, weight: float) -> float:
@@ -172,56 +164,106 @@ def variants() -> List[Variant]:
     ]
 
 
-def residual_snapshot(returns: Dict[str, List[float]], index: int, window: int, lookback: int) -> Optional[Dict[str, float]]:
-    btc_move = cumulative(returns["BTC"], index, window)
-    if btc_move is None:
-        return None
-    residuals: Dict[str, float] = {}
-    for symbol in TRADE_SYMBOLS:
-        move = cumulative(returns[symbol], index, window)
-        beta = rolling_beta(returns["BTC"], returns[symbol], index, lookback)
-        if move is None or beta is None:
-            return None
-        residuals[symbol] = move - beta * btc_move
-    return residuals
+def build_signal_cache(returns: Dict[str, List[float]]) -> Dict[Tuple[int, int], List[Optional[Tuple[float, str, str]]]]:
+    n = len(returns["BTC"])
+    return_prefix = {symbol: prefix(returns[symbol]) for symbol in SYMBOLS}
+    btc_sq_prefix = prefix([value * value for value in returns["BTC"]])
+    cross_prefix = {
+        symbol: prefix([a * b for a, b in zip(returns["BTC"], returns[symbol])])
+        for symbol in TRADE_SYMBOLS
+    }
+    cache: Dict[Tuple[int, int], List[Optional[Tuple[float, str, str]]]] = {}
+
+    for window in SIGNAL_WINDOWS:
+        for lookback in DISPERSION_LOOKBACKS:
+            residuals: List[Optional[Dict[str, float]]] = [None] * n
+            dispersions: List[Optional[float]] = [None] * n
+            for index in range(n):
+                move_start = index - window + 1
+                beta_start = index - lookback + 1
+                if move_start < 1 or beta_start < 1:
+                    continue
+                btc_move = range_sum(return_prefix["BTC"], move_start, index)
+                count = lookback
+                sum_x = range_sum(return_prefix["BTC"], beta_start, index)
+                sum_x2 = range_sum(btc_sq_prefix, beta_start, index)
+                mx = sum_x / count
+                variance = sum_x2 / count - mx * mx
+                if variance <= 1e-12:
+                    continue
+                snapshot: Dict[str, float] = {}
+                valid = True
+                for symbol in TRADE_SYMBOLS:
+                    move = range_sum(return_prefix[symbol], move_start, index)
+                    sum_y = range_sum(return_prefix[symbol], beta_start, index)
+                    sum_xy = range_sum(cross_prefix[symbol], beta_start, index)
+                    my = sum_y / count
+                    covariance = sum_xy / count - mx * my
+                    beta = max(0.15, min(3.0, covariance / variance))
+                    snapshot[symbol] = move - beta * btc_move
+                if valid:
+                    residuals[index] = snapshot
+                    dispersions[index] = std(list(snapshot.values()))
+
+            d_sum = [0.0]
+            d_sq = [0.0]
+            d_count = [0]
+            for value in dispersions:
+                if value is None:
+                    d_sum.append(d_sum[-1])
+                    d_sq.append(d_sq[-1])
+                    d_count.append(d_count[-1])
+                else:
+                    d_sum.append(d_sum[-1] + value)
+                    d_sq.append(d_sq[-1] + value * value)
+                    d_count.append(d_count[-1] + 1)
+
+            signals: List[Optional[Tuple[float, str, str]]] = [None] * n
+            for index in range(n):
+                snapshot = residuals[index]
+                current = dispersions[index]
+                if snapshot is None or current is None:
+                    continue
+                hist_start = max(window, index - lookback)
+                hist_end = index - 1
+                if hist_end < hist_start:
+                    continue
+                count_hist = d_count[hist_end + 1] - d_count[hist_start]
+                if count_hist < 96:
+                    continue
+                total = d_sum[hist_end + 1] - d_sum[hist_start]
+                total_sq = d_sq[hist_end + 1] - d_sq[hist_start]
+                hist_mean = total / count_hist
+                variance_hist = max(0.0, total_sq / count_hist - hist_mean * hist_mean)
+                scale = math.sqrt(variance_hist)
+                if scale <= 1e-10:
+                    continue
+                z_score = (current - hist_mean) / scale
+                winner = max(snapshot, key=snapshot.get)
+                loser = min(snapshot, key=snapshot.get)
+                if winner != loser:
+                    signals[index] = (z_score, winner, loser)
+            cache[(window, lookback)] = signals
+    return cache
 
 
-def dispersion_series(returns: Dict[str, List[float]], end: int, window: int, lookback: int) -> List[float]:
-    start = end - lookback
-    values = []
-    for cursor in range(max(window, start), end):
-        snapshot = residual_snapshot(returns, cursor, window, lookback)
-        if snapshot:
-            values.append(std(list(snapshot.values())))
-    return values
-
-
-def simulate(variant: Variant, raw: Dict[str, dict], timestamps: List[int], rows: Dict[str, List[dict]], returns: Dict[str, List[float]], start: int, end: int) -> dict:
+def simulate(variant: Variant, raw: Dict[str, dict], timestamps: List[int], rows: Dict[str, List[dict]], signal_cache: Dict[Tuple[int, int], List[Optional[Tuple[float, str, str]]]], start: int, end: int) -> dict:
     normal_values: List[float] = []
     stress_values: List[float] = []
     year_values: Dict[str, List[float]] = {}
     symbol_values: Dict[str, List[float]] = {symbol: [] for symbol in TRADE_SYMBOLS}
     next_free_index = 0
     dispersion_scores: List[float] = []
+    signals = signal_cache[(variant.signal_window, variant.dispersion_lookback)]
 
     for index, ts in enumerate(timestamps):
         if ts < start or ts >= end or index < next_free_index or index % variant.rebalance_hours != 0:
             continue
-        snapshot = residual_snapshot(returns, index, variant.signal_window, variant.dispersion_lookback)
-        if not snapshot:
+        signal = signals[index]
+        if signal is None:
             continue
-        history = dispersion_series(returns, index, variant.signal_window, variant.dispersion_lookback)
-        scale = std(history)
-        if len(history) < 96 or scale <= 1e-10:
-            continue
-        current = std(list(snapshot.values()))
-        z_score = (current - mean(history)) / scale
+        z_score, winner, loser = signal
         if z_score < variant.dispersion_z:
-            continue
-
-        winner = max(snapshot, key=snapshot.get)
-        loser = min(snapshot, key=snapshot.get)
-        if winner == loser:
             continue
         long_normal = forward_return(rows[loser], index, variant.hold_hours, 0)
         short_normal = forward_return(rows[winner], index, variant.hold_hours, 0)
@@ -324,11 +366,12 @@ def main() -> None:
     raw = clean({symbol: v4.load_symbol(cache_root, symbol) for symbol in SYMBOLS})
     timestamps, rows = aligned(raw)
     returns = {symbol: log_returns(rows[symbol]) for symbol in SYMBOLS}
+    signal_cache = build_signal_cache(returns)
     model_map = {variant.variant_id: variant for variant in variants()}
     tested = []
     for variant in variants():
-        development = simulate(variant, raw, timestamps, rows, returns, v4.START_2023, v4.START_2024)
-        validation = simulate(variant, raw, timestamps, rows, returns, v4.START_2024, v4.START_2025)
+        development = simulate(variant, raw, timestamps, rows, signal_cache, v4.START_2023, v4.START_2024)
+        validation = simulate(variant, raw, timestamps, rows, signal_cache, v4.START_2024, v4.START_2025)
         tested.append({"variant": variant.__dict__, "development2023": development, "validation2024": validation, "developmentPassed": gate(development, "development"), "validationPassed": gate(validation, "validation"), "neighborCount": 0, "neighborhoodScore": -999.0})
 
     passed = [item for item in tested if item["developmentPassed"] and item["validationPassed"]]
@@ -345,10 +388,10 @@ def main() -> None:
     confirmation_passed = final_passed = False
     if selected:
         variant = model_map[selected["variant"]["variant_id"]]
-        confirmation = simulate(variant, raw, timestamps, rows, returns, v4.START_2025, v4.START_2026)
+        confirmation = simulate(variant, raw, timestamps, rows, signal_cache, v4.START_2025, v4.START_2026)
         confirmation_passed = gate(confirmation, "confirmation")
         if confirmation_passed:
-            final = simulate(variant, raw, timestamps, rows, returns, v4.START_2026, v4.END)
+            final = simulate(variant, raw, timestamps, rows, signal_cache, v4.START_2026, v4.END)
             final_passed = gate(final, "final")
 
     status = "NO_ROBUST_DISPERSION_REVERSAL_EDGE" if not selected else "CONFIRMATION_REJECTED" if not confirmation_passed else "FINAL_PERIOD_REJECTED" if not final_passed else "FORWARD_PAPER_CANDIDATE"
