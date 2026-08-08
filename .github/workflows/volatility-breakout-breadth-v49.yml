@@ -1,0 +1,68 @@
+name: Volatility Breakout Breadth V49
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_volatility_breakout_breadth_v49.py"
+      - ".github/workflows/volatility-breakout-breadth-v49.yml"
+      - "scripts/research_lab_cross_sectional_dispersion_reversal_v48.py"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "lib/research-lab/perp/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: volatility-breakout-breadth-v49-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: volatility-breakout-v49-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            cross-sectional-dispersion-v48-usdm-
+            utc-session-v26-usdm-
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+            champion-deep-usdm-v1-
+
+      - name: Validate research source
+        run: python -m py_compile scripts/research_lab_volatility_breakout_breadth_v49.py
+
+      - name: Run chronological V49 research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_volatility_breakout_breadth_v49.py
+
+      - name: Upload V49 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: volatility-breakout-breadth-v49
+          path: |
+            .research-state/volatility-breakout-breadth-v49.json
+            .research-state/volatility-breakout-breadth-v49.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research-only workflow. No production, VPS, environment, account, API-key, or trading changes.
