@@ -78,7 +78,8 @@ python3 "$margin_aware_engine" --self-test
 python3 "$retention_cleanup" --self-test
 bash "$transaction_selftest"
 bash "$live_policy_selftest"
-bash "$helper_source" trading-promote-selftest all
+DISDEX_PROMOTION_SELFTEST_LIBRARY="$promotion_selftest_lib_source" \
+  bash "$helper_source" trading-promote-selftest all
 
 # Static safety-boundary checks supplement executable self-tests.
 grep -Fq 'TRADING_SERVICE="disdex-v96-v52-live.service"' "$helper_source"

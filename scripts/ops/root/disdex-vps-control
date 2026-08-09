@@ -334,8 +334,8 @@ execute_promotion() {
 }
 
 promotion_selftest_library() {
-  local path="/usr/local/libexec/disdex-promotion-selftest-lib.sh"
-  if [[ ! -f "$path" ]]; then
+  local path="${DISDEX_PROMOTION_SELFTEST_LIBRARY:-/usr/local/libexec/disdex-promotion-selftest-lib.sh}"
+  if [[ -z "${DISDEX_PROMOTION_SELFTEST_LIBRARY:-}" && ! -f "$path" ]]; then
     path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/disdex-promotion-selftest-lib.sh"
   fi
   [[ -f "$path" && ! -L "$path" ]] || {
