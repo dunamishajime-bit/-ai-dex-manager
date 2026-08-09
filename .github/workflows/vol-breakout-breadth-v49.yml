@@ -55,3 +55,4 @@ jobs:
           retention-days: 30
 
 # Research-only. No production, VPS, .env, account/order, or live-trading changes.
+# Trigger: 2026-08-09 JST next-gen research.
