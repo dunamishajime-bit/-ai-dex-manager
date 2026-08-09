@@ -1,0 +1,70 @@
+name: State Transition V55
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "research/state-transition-v55-trigger.txt"
+      - "scripts/research_lab_state_transition_v55.py"
+      - "scripts/research-lab-prefetch-trend-vol-v53.ts"
+      - "lib/research-lab/perp/**"
+      - ".github/workflows/state-transition-v55.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: state-transition-v55-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore public USD-M source cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: state-transition-v55-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            parallel-trend-vol-v53-usdm-
+            parallel-event-regime-v53-usdm-
+            volatility-breakout-v49-usdm-
+            win80-profit-v1-usdm-
+            autonomous-usdm-v2-
+      - name: Install dependencies
+        run: npm ci
+      - name: Prefetch genuine public USD-M history
+        run: npx tsx scripts/research-lab-prefetch-trend-vol-v53.ts
+      - name: Validate research script
+        run: python -m py_compile scripts/research_lab_state_transition_v55.py
+      - name: Run state-transition research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_state_transition_v55.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: state-transition-v55
+          path: |
+            .research-state/state-transition-v55.json
+            .research-state/state-transition-v55.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. Public historical market data only. No production, VPS, credentials, order, position, approval, or LIVE changes.
