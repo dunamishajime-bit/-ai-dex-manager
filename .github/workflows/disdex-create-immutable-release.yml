@@ -4,15 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       target_sha:
-        description: Exact 40-character Git commit SHA to materialize as an immutable VPS release
+        description: Exact 40-character Git commit SHA to materialize
         required: true
         type: string
+  push:
+    branches:
+      - chatgpt/v52-pengu-only-live-20260809
+    paths:
+      - '.github/release-requests/disdex-immutable-release.txt'
 
 permissions:
   contents: read
 
 concurrency:
-  group: disdex-immutable-release-${{ inputs.target_sha }}
+  group: disdex-immutable-vps-release
   cancel-in-progress: false
 
 env:
@@ -23,29 +28,44 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Validate exact target SHA
+      - name: Checkout request revision
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Resolve and validate exact target SHA
+        id: target
         shell: bash
         env:
-          TARGET_SHA: ${{ inputs.target_sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_SHA: ${{ inputs.target_sha }}
         run: |
           set -Eeuo pipefail
-          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]] || {
-            echo "target_sha must be an exact lowercase 40-character Git SHA" >&2
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            target="$DISPATCH_SHA"
+          else
+            target="$(tr -d '[:space:]' < .github/release-requests/disdex-immutable-release.txt)"
+          fi
+          [[ "$target" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "target must be an exact lowercase 40-character Git SHA" >&2
             exit 2
           }
+          echo "sha=$target" >> "$GITHUB_OUTPUT"
+          echo "Requested immutable release SHA: $target"
 
       - name: Checkout exact target commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.target_sha }}
+          ref: ${{ steps.target.outputs.sha }}
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Verify checkout identity and package source tree
+      - name: Verify identity and package exact Git tree
         id: package
         shell: bash
         env:
-          TARGET_SHA: ${{ inputs.target_sha }}
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
         run: |
           set -Eeuo pipefail
           actual="$(git rev-parse HEAD)"
@@ -53,137 +73,96 @@ jobs:
             echo "checkout SHA mismatch: expected=$TARGET_SHA actual=$actual" >&2
             exit 3
           }
-
           archive="$RUNNER_TEMP/disdex-${TARGET_SHA}.tar.gz"
           git archive --format=tar.gz --output="$archive" "$TARGET_SHA"
-          archive_sha256="$(sha256sum "$archive" | awk '{print $1}')"
-          printf '%s  %s\n' "$archive_sha256" "$(basename "$archive")" > "${archive}.sha256"
-
+          digest="$(sha256sum "$archive" | awk '{print $1}')"
           echo "archive=$archive" >> "$GITHUB_OUTPUT"
-          echo "archive_sha256=$archive_sha256" >> "$GITHUB_OUTPUT"
-          echo "Exact source commit: $TARGET_SHA"
-          echo "Archive SHA256: $archive_sha256"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Source tree fixed at $TARGET_SHA; archive sha256=$digest"
 
-      - name: Configure pinned SSH trust
+      - name: Configure pinned VPS SSH trust
         shell: bash
         env:
-          VPS_SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_SSH_PRIVATE_KEY }}
-          VPS_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          KEY: ${{ secrets.DISDEX_VPS_SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DISDEX_VPS_HOST }}
         run: |
           set -Eeuo pipefail
-          [[ -n "$VPS_SSH_PRIVATE_KEY" ]] || {
-            echo "Missing repository secret DISDEX_VPS_SSH_PRIVATE_KEY" >&2
-            exit 4
-          }
-          [[ -n "$VPS_KNOWN_HOSTS" ]] || {
-            echo "Missing repository secret DISDEX_VPS_KNOWN_HOSTS" >&2
-            exit 4
-          }
+          [[ -n "$KEY" ]] || { echo "Missing DISDEX_VPS_SSH_PRIVATE_KEY" >&2; exit 4; }
+          [[ -n "$KNOWN_HOSTS" ]] || { echo "Missing DISDEX_VPS_KNOWN_HOSTS" >&2; exit 4; }
+          [[ -n "$HOST" ]] || { echo "Missing DISDEX_VPS_HOST" >&2; exit 4; }
           install -d -m 0700 "$HOME/.ssh"
-          printf '%s\n' "$VPS_SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$KEY" > "$HOME/.ssh/id_ed25519"
           chmod 0600 "$HOME/.ssh/id_ed25519"
-          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          printf '%s\n' "$KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 0600 "$HOME/.ssh/known_hosts"
 
-      - name: Upload exact source archive
+      - name: Upload exact commit archive
         shell: bash
         env:
-          TARGET_SHA: ${{ inputs.target_sha }}
-          VPS_HOST: ${{ secrets.DISDEX_VPS_HOST }}
-          VPS_PORT: ${{ secrets.DISDEX_VPS_SSH_PORT }}
-          VPS_USER: ${{ secrets.DISDEX_VPS_SSH_USER }}
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
           ARCHIVE: ${{ steps.package.outputs.archive }}
+          HOST: ${{ secrets.DISDEX_VPS_HOST }}
+          PORT_SECRET: ${{ secrets.DISDEX_VPS_SSH_PORT }}
+          USER_SECRET: ${{ secrets.DISDEX_VPS_SSH_USER }}
         run: |
           set -Eeuo pipefail
-          [[ -n "$VPS_HOST" ]] || {
-            echo "Missing repository secret DISDEX_VPS_HOST" >&2
-            exit 4
-          }
-          port="${VPS_PORT:-22}"
-          user="${VPS_USER:-root}"
-          remote_prefix="/tmp/disdex-release-${TARGET_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          scp -P "$port" -i "$HOME/.ssh/id_ed25519" \
-            -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "$ARCHIVE" "${ARCHIVE}.sha256" \
-            "${user}@${VPS_HOST}:${remote_prefix}/" 2>/tmp/disdex-scp.err || {
-              # scp cannot create the target directory; create it without mutating release/current.
-              ssh -p "$port" -i "$HOME/.ssh/id_ed25519" \
-                -o BatchMode=yes -o StrictHostKeyChecking=yes \
-                "${user}@${VPS_HOST}" "install -d -m 0700 '${remote_prefix}'"
-              scp -P "$port" -i "$HOME/.ssh/id_ed25519" \
-                -o BatchMode=yes -o StrictHostKeyChecking=yes \
-                "$ARCHIVE" "${ARCHIVE}.sha256" \
-                "${user}@${VPS_HOST}:${remote_prefix}/"
-            }
-          echo "REMOTE_PREFIX=$remote_prefix" >> "$GITHUB_ENV"
+          port="${PORT_SECRET:-22}"
+          user="${USER_SECRET:-root}"
+          remote="/tmp/disdex-release-${TARGET_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          ssh -p "$port" -i "$HOME/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${user}@${HOST}" "install -d -m 0700 '$remote'"
+          scp -P "$port" -i "$HOME/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$ARCHIVE" "${user}@${HOST}:${remote}/disdex-${TARGET_SHA}.tar.gz"
+          echo "REMOTE_UPLOAD=$remote" >> "$GITHUB_ENV"
 
-      - name: Materialize immutable release and run readiness
+      - name: Materialize immutable release and verify readiness
         shell: bash
         env:
-          TARGET_SHA: ${{ inputs.target_sha }}
-          EXPECTED_ARCHIVE_SHA256: ${{ steps.package.outputs.archive_sha256 }}
-          VPS_HOST: ${{ secrets.DISDEX_VPS_HOST }}
-          VPS_PORT: ${{ secrets.DISDEX_VPS_SSH_PORT }}
-          VPS_USER: ${{ secrets.DISDEX_VPS_SSH_USER }}
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
+          ARCHIVE_SHA256: ${{ steps.package.outputs.digest }}
+          HOST: ${{ secrets.DISDEX_VPS_HOST }}
+          PORT_SECRET: ${{ secrets.DISDEX_VPS_SSH_PORT }}
+          USER_SECRET: ${{ secrets.DISDEX_VPS_SSH_USER }}
         run: |
           set -Eeuo pipefail
-          port="${VPS_PORT:-22}"
-          user="${VPS_USER:-root}"
-
-          ssh -p "$port" -i "$HOME/.ssh/id_ed25519" \
-            -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "${user}@${VPS_HOST}" \
-            "TARGET_SHA='$TARGET_SHA' EXPECTED_ARCHIVE_SHA256='$EXPECTED_ARCHIVE_SHA256' REMOTE_PREFIX='$REMOTE_PREFIX' RELEASE_ROOT='$RELEASE_ROOT' bash -s" <<'REMOTE'
+          port="${PORT_SECRET:-22}"
+          user="${USER_SECRET:-root}"
+          ssh -p "$port" -i "$HOME/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${user}@${HOST}" \
+            "TARGET_SHA='$TARGET_SHA' ARCHIVE_SHA256='$ARCHIVE_SHA256' REMOTE_UPLOAD='$REMOTE_UPLOAD' RELEASE_ROOT='$RELEASE_ROOT' bash -s" <<'REMOTE'
           set -Eeuo pipefail
           umask 022
-
-          [[ "$(id -u)" == "0" ]] || {
-            echo "Immutable release creation requires the configured SSH account to be root" >&2
-            exit 10
-          }
+          [[ "$(id -u)" == "0" ]] || { echo "release builder SSH user must be root" >&2; exit 10; }
           [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 11
-          [[ "$EXPECTED_ARCHIVE_SHA256" =~ ^[0-9a-f]{64}$ ]] || exit 11
+          [[ "$ARCHIVE_SHA256" =~ ^[0-9a-f]{64}$ ]] || exit 11
           [[ "$RELEASE_ROOT" == "/home/deploy/disdex-trading/releases" ]] || exit 11
 
-          final="${RELEASE_ROOT}/${TARGET_SHA}"
-          staging="${RELEASE_ROOT}/.staging-${TARGET_SHA}-${RANDOM}-$$"
-          archive="${REMOTE_PREFIX}/disdex-${TARGET_SHA}.tar.gz"
-          checksum_file="${archive}.sha256"
-
+          final="$RELEASE_ROOT/$TARGET_SHA"
+          staging="$RELEASE_ROOT/.staging-$TARGET_SHA-$$-$RANDOM"
+          archive="$REMOTE_UPLOAD/disdex-$TARGET_SHA.tar.gz"
           cleanup() {
-            rm -rf "$REMOTE_PREFIX"
-            if [[ -n "${staging:-}" && -d "$staging" ]]; then rm -rf "$staging"; fi
+            rm -rf "$REMOTE_UPLOAD"
+            [[ -n "${staging:-}" && -d "$staging" ]] && rm -rf "$staging" || true
           }
           trap cleanup EXIT INT TERM HUP
 
-          [[ -f "$archive" && ! -L "$archive" ]] || {
-            echo "uploaded release archive missing or unsafe" >&2
-            exit 12
-          }
-          actual_archive_sha256="$(sha256sum "$archive" | awk '{print $1}')"
-          [[ "$actual_archive_sha256" == "$EXPECTED_ARCHIVE_SHA256" ]] || {
-            echo "uploaded archive checksum mismatch" >&2
-            exit 12
+          [[ -f "$archive" && ! -L "$archive" ]] || { echo "archive missing/unsafe" >&2; exit 12; }
+          [[ "$(sha256sum "$archive" | awk '{print $1}')" == "$ARCHIVE_SHA256" ]] || {
+            echo "archive checksum mismatch" >&2; exit 12;
           }
 
           install -d -o deploy -g deploy -m 0755 /home/deploy/disdex-trading
           install -d -o deploy -g deploy -m 0755 "$RELEASE_ROOT"
           [[ -d "$RELEASE_ROOT" && ! -L "$RELEASE_ROOT" ]] || exit 13
-
           if [[ -e "$final" || -L "$final" ]]; then
-            echo "FAIL_CLOSED: exact immutable release already exists: $final" >&2
+            echo "FAIL_CLOSED: immutable release already exists: $final" >&2
             exit 14
           fi
 
           install -d -o deploy -g deploy -m 0755 "$staging"
           runuser -u deploy -- tar -xzf "$archive" -C "$staging"
-
-          # The source archive was generated by `git archive` from the exact target SHA.
-          # Install dependencies only in staging; source files are never rewritten.
-          [[ -f "$staging/package.json" && -f "$staging/package-lock.json" ]] || {
-            echo "package manifest/lock missing from release source" >&2
-            exit 15
-          }
+          [[ -f "$staging/package.json" && -f "$staging/package-lock.json" ]] || exit 15
           runuser -u deploy -- env HOME=/home/deploy npm_config_audit=false npm_config_fund=false \
             bash -c "cd '$staging' && /usr/bin/npm ci --no-audit --no-fund"
 
@@ -193,53 +172,38 @@ jobs:
           find "$staging" -xdev -type d -exec chmod go-w {} +
           find "$staging" -xdev -type f -exec chmod go-w {} +
 
-          # Atomic publication: nothing touches the `current` symlink.
+          # Publish atomically. Never touch /home/deploy/disdex-trading/current.
           mv "$staging" "$final"
           staging=""
-
           [[ -d "$final" && ! -L "$final" ]] || exit 16
           [[ -f "$final/.disdex-release-sha" && ! -L "$final/.disdex-release-sha" ]] || exit 16
           [[ "$(tr -d '[:space:]' < "$final/.disdex-release-sha")" == "$TARGET_SHA" ]] || exit 16
-          [[ "$(stat -c '%U:%G' "$final")" == "deploy:deploy" ]] || {
-            echo "release owner/group mismatch" >&2
-            exit 16
-          }
+          [[ "$(stat -c '%U:%G' "$final")" == "deploy:deploy" ]] || exit 16
 
-          # Readiness is deliberately read-only and fail-closed. Never stop/start/restart LIVE here.
+          # Readiness is read-only. Do not stop/start/restart LIVE here.
           live_state="$(systemctl is-active disdex-v96-v52-live.service 2>/dev/null || true)"
           live_pid="$(systemctl show disdex-v96-v52-live.service --property MainPID --value 2>/dev/null || printf '0')"
           [[ "$live_state" == "inactive" || "$live_state" == "failed" ]] || {
-            echo "FAIL_CLOSED: LIVE service must already be inactive for release readiness" >&2
-            exit 17
+            echo "FAIL_CLOSED: LIVE service is not inactive" >&2; exit 17;
           }
-          [[ "$live_pid" == "0" ]] || {
-            echo "FAIL_CLOSED: LIVE MainPID must already be zero for release readiness" >&2
-            exit 17
-          }
+          [[ "$live_pid" == "0" ]] || { echo "FAIL_CLOSED: LIVE MainPID is not zero" >&2; exit 17; }
 
-          systemctl reset-failed "disdex-v96-v52-preflight@${TARGET_SHA}.service" >/dev/null 2>&1 || true
-          systemctl start "disdex-v96-v52-preflight@${TARGET_SHA}.service"
-          result="$(systemctl show "disdex-v96-v52-preflight@${TARGET_SHA}.service" --property Result --value)"
-          status="$(systemctl show "disdex-v96-v52-preflight@${TARGET_SHA}.service" --property ExecMainStatus --value)"
+          unit="disdex-v96-v52-preflight@${TARGET_SHA}.service"
+          systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+          systemctl start "$unit"
+          result="$(systemctl show "$unit" --property Result --value)"
+          status="$(systemctl show "$unit" --property ExecMainStatus --value)"
           [[ "$result" == "success" && "$status" == "0" ]] || {
-            echo "FAIL_CLOSED: immutable release readiness/preflight failed" >&2
-            journalctl -u "disdex-v96-v52-preflight@${TARGET_SHA}.service" --no-pager -n 250 >&2 || true
+            echo "FAIL_CLOSED: release readiness/preflight failed" >&2
+            journalctl -u "$unit" --no-pager -n 250 >&2 || true
             exit 18
           }
 
-          # Re-verify identity after readiness; preflight is not allowed to modify the release marker.
           [[ "$(tr -d '[:space:]' < "$final/.disdex-release-sha")" == "$TARGET_SHA" ]] || exit 19
-          [[ ! -L /home/deploy/disdex-trading/current || "$(readlink -f /home/deploy/disdex-trading/current)" != "$final" ]] || {
-            # This workflow never promotes. If current was already this release before the run,
-            # the earlier 'release already exists' guard would have stopped us.
-            echo "unexpected current mutation detected" >&2
-            exit 19
-          }
-
           echo "DISDEX_IMMUTABLE_RELEASE_READY"
           echo "sha=$TARGET_SHA"
           echo "release=$final"
-          echo "owner=$(stat -c '%U:%G' "$final")"
+          echo "owner=deploy:deploy"
           echo "marker=PASS"
           echo "readiness=PASS"
           echo "currentChanged=false"
@@ -247,20 +211,18 @@ jobs:
           echo "ordersSent=false"
           REMOTE
 
-      - name: Release creation summary
+      - name: Summary
         shell: bash
         env:
-          TARGET_SHA: ${{ inputs.target_sha }}
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
         run: |
-          set -Eeuo pipefail
           {
             echo "## Immutable DisDex release ready"
-            echo ""
             echo "- SHA: \`$TARGET_SHA\`"
-            echo "- VPS release: \`/home/deploy/disdex-trading/releases/$TARGET_SHA\`"
-            echo "- Marker: \`.disdex-release-sha\` verified"
-            echo "- Readiness: PASS"
-            echo "- current symlink: not changed"
-            echo "- LIVE service: not started/restarted"
-            echo "- Next step: submit exactly one Bridge deploy/promote request for this same SHA"
+            echo "- Path: \`/home/deploy/disdex-trading/releases/$TARGET_SHA\`"
+            echo "- SHA marker: PASS"
+            echo "- owner/group: deploy:deploy"
+            echo "- readiness: PASS"
+            echo "- current/service/orders: unchanged"
+            echo "- Next: one Bridge trading-promote/deploy for the same SHA"
           } >> "$GITHUB_STEP_SUMMARY"
