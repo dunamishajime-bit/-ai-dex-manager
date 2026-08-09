@@ -1,0 +1,42 @@
+name: Microstructure Premium Shock V21
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/win80-profit-optimization-v1]
+    paths:
+      - "scripts/research_lab_microstructure_parallel_v21.py"
+      - ".github/workflows/microstructure-premium-shock-v21.yml"
+      - "research/aster-market-intelligence-v19-trigger.txt"
+permissions:
+  contents: read
+concurrency:
+  group: microstructure-premium-shock-v21-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache/restore@v4
+        with:
+          path: .research-state/aster-market-intelligence-v19/history
+          key: micro-premium-v21-read-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            aster-market-intelligence-v19-${{ github.ref_name }}-
+      - run: python -m py_compile scripts/research_lab_microstructure_parallel_v21.py
+      - name: Run premium shock audit
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+          MICROSTRUCTURE_FAMILY: PREMIUM_SHOCK
+        run: python scripts/research_lab_microstructure_parallel_v21.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: microstructure-premium-shock-v21
+          path: .research-state/microstructure-premium_shock-v21/*
+          retention-days: 30
+# Research only; no LIVE/VPS/account/order access.
