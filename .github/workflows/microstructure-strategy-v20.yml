@@ -1,0 +1,55 @@
+name: Microstructure Strategy V20
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_microstructure_strategy_v20.py"
+      - "research/aster-market-intelligence-v19-trigger.txt"
+      - ".github/workflows/microstructure-strategy-v20.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: microstructure-strategy-v20-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore cumulative public V19 history
+        uses: actions/cache/restore@v4
+        with:
+          path: .research-state/aster-market-intelligence-v19/history
+          key: microstructure-v20-read-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            aster-market-intelligence-v19-${{ github.ref_name }}-
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_microstructure_strategy_v20.py
+      - name: Run frozen chronological microstructure audit
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_microstructure_strategy_v20.py
+      - name: Upload V20 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: microstructure-strategy-v20
+          path: |
+            .research-state/microstructure-strategy-v20/microstructure-strategy-v20.json
+            .research-state/microstructure-strategy-v20/microstructure-strategy-v20.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. Public market data only. No credentials, orders, accounts, positions, VPS, production, or LIVE changes.
