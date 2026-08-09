@@ -1,0 +1,59 @@
+name: Parallel Relative Value V52
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_parallel_relative_value_v52.py"
+      - ".github/workflows/parallel-relative-value-v52.yml"
+      - "scripts/research_lab_nextgen_independent_families_v49.py"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "lib/research-lab/perp/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: parallel-relative-value-v52-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: parallel-relative-value-v52-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            nextgen-v49-usdm-
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+      - name: Validate source
+        run: python -m py_compile scripts/research_lab_parallel_relative_value_v52.py
+      - name: Run parallel relative-value research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_parallel_relative_value_v52.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parallel-relative-value-v52
+          path: |
+            .research-state/parallel-relative-value-v52.json
+            .research-state/parallel-relative-value-v52.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. No production/VPS/runtime/order/account changes.
