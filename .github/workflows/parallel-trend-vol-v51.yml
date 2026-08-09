@@ -1,0 +1,71 @@
+name: Parallel Trend Vol Research V51
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_parallel_trend_vol_v51.py"
+      - ".github/workflows/parallel-trend-vol-v51.yml"
+      - "research/parallel-trend-vol-v51-trigger.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: parallel-trend-vol-v51-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family:
+          - compression_expansion
+          - trend_acceleration
+          - breadth_momentum
+          - downside_cash_hedge
+          - vol_regime_rotation
+          - session_breakout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore USD-M research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: parallel-trend-vol-v51-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+            usdm-snapshot-v2-
+            autonomous-usdm-v2-
+            champion-deep-usdm-v1-
+      - name: Validate research source
+        run: python -m py_compile scripts/research_lab_parallel_trend_vol_v51.py
+      - name: Run family
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+          TREND_VOL_FAMILY: ${{ matrix.family }}
+        run: python scripts/research_lab_parallel_trend_vol_v51.py
+      - name: Upload family evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parallel-trend-vol-v51-${{ matrix.family }}
+          path: |
+            .research-state/parallel-trend-vol-v51-${{ matrix.family }}.json
+            .research-state/parallel-trend-vol-v51-${{ matrix.family }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research-only workflow. No production, VPS, environment, credentials, account, order or position changes.
