@@ -63,7 +63,6 @@ def generate(fam,candles,idx,start,end,costbps,delay):
             if len(rows)==6:
                 rows.sort()
                 lo=rows[:2]; hi=rows[-2:]
-                # leadership only when vol rank reorganizes: low-vol leaders with positive impulse or high-vol laggards with negative impulse
                 cand=[(m,s) for ratio,m,s in lo if m>1.0]
                 if cand:
                     m,s=max(cand); picks=[(s,1,18)]
@@ -75,14 +74,14 @@ def generate(fam,candles,idx,start,end,costbps,delay):
         elif fam=="beta_dispersion_release":
             br=rs(candles['BTC'],bi,240)
             if len(br)<240:continue
-            betas=[]; impulses=[]
+            betas=[]
             for s in SYMS[1:]:
                 i=idx[s].get(ts); sr=rs(candles[s],i,240)
                 if len(sr)<240:continue
-                b_old=beta(sr[:168],br[:168]); b_new=beta(sr[-72:],br[-72:]); imp=ret(candles[s],i,8)
-                betas.append((abs(b_new-b_old),b_new-b_old,s)); impulses.append((imp or 0,s))
+                b_old=beta(sr[:168],br[:168]); b_new=beta(sr[-72:],br[-72:])
+                betas.append((abs(b_new-b_old),b_new-b_old,s))
             if len(betas)==5:
-                shift,s=max(betas)
+                shift,delta,s=max(betas)
                 i=idx[s].get(ts); imp=ret(candles[s],i,8)
                 if shift>.35 and imp is not None and abs(imp)>1.2:
                     picks=[(s,1 if imp>0 else -1,16)]
