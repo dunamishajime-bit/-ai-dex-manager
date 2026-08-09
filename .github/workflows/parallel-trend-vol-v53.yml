@@ -7,6 +7,10 @@ on:
       - research/win80-profit-optimization-v1
     paths:
       - "research/parallel-trend-vol-v53-trigger.txt"
+      - "scripts/research-lab-prefetch-trend-vol-v53.ts"
+      - "scripts/research_lab_parallel_trend_vol_v53.py"
+      - "lib/research-lab/perp/**"
+      - ".github/workflows/parallel-trend-vol-v53.yml"
 
 permissions:
   contents: read
@@ -22,6 +26,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -32,10 +41,16 @@ jobs:
           path: .cache/perp-research-usdm
           key: parallel-trend-vol-v53-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
           restore-keys: |
+            parallel-trend-vol-v51-usdm-
+            volatility-breakout-v49-usdm-
             multi-horizon-v3-usdm-
             win80-profit-v1-usdm-
             usdm-snapshot-v2-
             autonomous-usdm-v2-
+      - name: Install dependencies
+        run: npm ci
+      - name: Prefetch public USD-M history
+        run: npx tsx scripts/research-lab-prefetch-trend-vol-v53.ts
       - name: Validate research source
         run: python -m py_compile scripts/research_lab_parallel_trend_vol_v53.py
       - name: Run parallel Trend Vol research
@@ -53,4 +68,4 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-# Research only. No production, VPS, credentials, order, position, approval, or LIVE changes.
+# Research only. Public historical market data only. No production, VPS, credentials, order, position, approval, or LIVE changes.
