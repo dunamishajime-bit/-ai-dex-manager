@@ -234,7 +234,7 @@ validate_existing_promotion_artifacts() {
     return 1
   }
   for state_file in "$crypto_backup" "$stock_backup"; do
-    "$JQ" -e --arg sha "$old_sha" '(.approvedCommitSha == $sha) or (.runtimeCommitSha == $sha)' "$state_file" >/dev/null || {
+    "$JQ" -e --arg sha "$old_sha" '(.approvedCommitSha == $sha) or (.runtimeCommitSha == $sha) or (.operatorOverride.approvedCommitSha == $sha)' "$state_file" >/dev/null || {
       printf 'existing runner state does not target old current SHA: %s\n' "$(basename "$state_file")" >&2
       return 1
     }
