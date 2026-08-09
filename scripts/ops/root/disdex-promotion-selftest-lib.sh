@@ -55,10 +55,10 @@ case "$cmd" in
       exit 0
     fi
     if [[ "$service" == "$DISDEX_TEST_APPROVAL_UNIT" ]]; then
-      printf 'new-parity\n' > "$DISDEX_TEST_PARITY_FILE"
-      printf 'new-override\n' > "$DISDEX_TEST_OVERRIDE_FILE"
-      printf 'new-crypto\n' > "$DISDEX_TEST_CRYPTO_STATE_FILE"
-      printf 'new-stock\n' > "$DISDEX_TEST_STOCK_STATE_FILE"
+      printf '{"productionCommitSha":"%s","kind":"parity"}\n' "$DISDEX_TEST_NEW_SHA" > "$DISDEX_TEST_PARITY_FILE"
+      printf '{"approvedCommitSha":"%s","kind":"override"}\n' "$DISDEX_TEST_NEW_SHA" > "$DISDEX_TEST_OVERRIDE_FILE"
+      printf '{"approvedCommitSha":"%s","kind":"crypto"}\n' "$DISDEX_TEST_NEW_SHA" > "$DISDEX_TEST_CRYPTO_STATE_FILE"
+      printf '{"approvedCommitSha":"%s","kind":"stock"}\n' "$DISDEX_TEST_NEW_SHA" > "$DISDEX_TEST_STOCK_STATE_FILE"
       [[ "$DISDEX_TEST_SCENARIO" != "before-switch" ]]
       exit
     fi
@@ -111,10 +111,10 @@ setup_promotion_selftest_sandbox() {
   printf '%s\n' "$old_sha" > "$TRADING_RELEASES/$old_sha/.disdex-release-sha"
   printf '%s\n' "$new_sha" > "$TRADING_RELEASES/$new_sha/.disdex-release-sha"
   ln -s "$TRADING_RELEASES/$old_sha" "$TRADING_CURRENT"
-  printf 'old-parity\n' > "$PARITY_FILE"
-  printf 'old-override\n' > "$OVERRIDE_FILE"
-  printf 'old-crypto\n' > "$CRYPTO_STATE_FILE"
-  printf 'old-stock\n' > "$STOCK_STATE_FILE"
+  printf '{"productionCommitSha":"%s","kind":"parity"}\n' "$old_sha" > "$PARITY_FILE"
+  printf '{"approvedCommitSha":"%s","kind":"override"}\n' "$old_sha" > "$OVERRIDE_FILE"
+  printf '{"approvedCommitSha":"%s","kind":"crypto"}\n' "$old_sha" > "$CRYPTO_STATE_FILE"
+  printf '{"approvedCommitSha":"%s","kind":"stock"}\n' "$old_sha" > "$STOCK_STATE_FILE"
   printf 'inactive\n' > "$promotion_selftest_root/service-state"
   printf '0\n' > "$promotion_selftest_root/service-pid"
   printf '0\n' > "$promotion_selftest_root/service-restarts"
@@ -130,6 +130,8 @@ setup_promotion_selftest_sandbox() {
   export DISDEX_TEST_CRYPTO_STATE_FILE="$CRYPTO_STATE_FILE"
   export DISDEX_TEST_STOCK_STATE_FILE="$STOCK_STATE_FILE"
   export DISDEX_TEST_CURRENT="$TRADING_CURRENT"
+  export DISDEX_TEST_OLD_SHA="$old_sha"
+  export DISDEX_TEST_NEW_SHA="$new_sha"
   export DISDEX_TEST_NEW_RELEASE="$TRADING_RELEASES/$new_sha"
   export DISDEX_TEST_APPROVAL_UNIT="${APPROVAL_PREFIX}@${new_sha}.service"
   export DISDEX_TEST_PREFLIGHT_UNIT="${PREFLIGHT_PREFIX}@${new_sha}.service"
@@ -164,10 +166,10 @@ assert_promotion_selftest_isolated() {
 verify_promotion_selftest_rollback() {
   local expected_old="$TRADING_RELEASES/1111111111111111111111111111111111111111"
   [[ "$(readlink -f "$TRADING_CURRENT")" == "$expected_old" ]]
-  [[ "$(cat "$PARITY_FILE")" == "old-parity" ]]
-  [[ "$(cat "$OVERRIDE_FILE")" == "old-override" ]]
-  [[ "$(cat "$CRYPTO_STATE_FILE")" == "old-crypto" ]]
-  [[ "$(cat "$STOCK_STATE_FILE")" == "old-stock" ]]
+  grep -q '"productionCommitSha":"1111111111111111111111111111111111111111"' "$PARITY_FILE"
+  grep -q '"approvedCommitSha":"1111111111111111111111111111111111111111"' "$OVERRIDE_FILE"
+  grep -q '"approvedCommitSha":"1111111111111111111111111111111111111111"' "$CRYPTO_STATE_FILE"
+  grep -q '"approvedCommitSha":"1111111111111111111111111111111111111111"' "$STOCK_STATE_FILE"
   [[ "$(cat "$promotion_selftest_root/service-state")" == "inactive" ]]
   [[ "$(cat "$promotion_selftest_root/service-pid")" == "0" ]]
 }

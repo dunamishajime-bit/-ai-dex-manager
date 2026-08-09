@@ -40,6 +40,7 @@ NODE="$(command -v node || true)"
 SYSTEMCTL="$(command -v systemctl || true)"
 JOURNALCTL="$(command -v journalctl || true)"
 FLOCK="$(command -v flock || true)"
+JQ="$(command -v jq || true)"
 
 promotion_transaction_dir=""
 promotion_rollback_armed=false
@@ -84,6 +85,23 @@ require_trading_inactive() {
   [[ "$pid" == "0" ]] || {
     printf 'trading service PID must be zero\n' >&2
     exit 3
+  }
+}
+
+require_kill_switch_inactive() {
+  local kill_switch_file="${SHARED_STATE_ROOT}/kill-switch.json"
+  [[ -e "$kill_switch_file" ]] || return 0
+  [[ -f "$kill_switch_file" && ! -L "$kill_switch_file" ]] || {
+    printf 'Kill Switch artifact must be a regular non-symlink file\n' >&2
+    return 1
+  }
+  [[ -n "$JQ" ]] || {
+    printf 'jq is required to validate Kill Switch state\n' >&2
+    return 1
+  }
+  "$JQ" -e 'type == "object" and .active == false' "$kill_switch_file" >/dev/null || {
+    printf 'Kill Switch is active or malformed; LIVE start is blocked\n' >&2
+    return 1
   }
 }
 
@@ -193,6 +211,37 @@ begin_promotion_transaction() {
   promotion_rollback_armed=true
 }
 
+validate_existing_promotion_artifacts() {
+  local old_sha="$promotion_old_sha"
+  local parity_backup="$promotion_transaction_dir/parity.json"
+  local override_backup="$promotion_transaction_dir/operator-override.json"
+  local crypto_backup="$promotion_transaction_dir/crypto-runner-live.json"
+  local stock_backup="$promotion_transaction_dir/stock-runner-live.json"
+  [[ "$old_sha" =~ ^[0-9a-f]{40}$ ]] || {
+    printf 'old current SHA is invalid; approval/state authority is unknown\n' >&2
+    return 1
+  }
+  [[ -n "$JQ" ]] || {
+    printf 'jq is required to validate promotion approval/state authority\n' >&2
+    return 1
+  }
+  "$JQ" -e --arg sha "$old_sha" '.productionCommitSha == $sha' "$parity_backup" >/dev/null || {
+    printf 'existing Execution Parity does not target old current SHA\n' >&2
+    return 1
+  }
+  "$JQ" -e --arg sha "$old_sha" '.approvedCommitSha == $sha' "$override_backup" >/dev/null || {
+    printf 'existing Operator Override does not target old current SHA\n' >&2
+    return 1
+  }
+  for state_file in "$crypto_backup" "$stock_backup"; do
+    "$JQ" -e --arg sha "$old_sha" '(.approvedCommitSha == $sha) or (.runtimeCommitSha == $sha)' "$state_file" >/dev/null || {
+      printf 'existing runner state does not target old current SHA: %s\n' "$(basename "$state_file")" >&2
+      return 1
+    }
+  done
+  printf 'promotion authority snapshot matches old current SHA\n'
+}
+
 wait_for_trading_stopped() {
   local state pid attempt
   "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
@@ -266,6 +315,7 @@ execute_promotion() {
   trap promotion_exit_handler EXIT
   trap 'exit 130' INT TERM HUP
 
+  validate_existing_promotion_artifacts
   run_approval_unit "$sha"
   run_preflight_unit "$sha"
   atomic_switch_current "$sha" "$release"
@@ -274,6 +324,7 @@ execute_promotion() {
     return 61
   fi
   run_preflight_unit "$sha"
+  require_kill_switch_inactive
   start_trading_service_verified
   [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]]
 

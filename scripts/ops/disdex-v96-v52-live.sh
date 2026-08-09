@@ -55,43 +55,45 @@ export DISDEX_V96_OPERATOR_OVERRIDE_FILE="$shared_approval/disdex-v96-operator-o
 export DISDEX_V96_CONFIG_MIGRATION_MODE=true
 export DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT=I_SYNC_CURRENT_EXACT_OPERATOR_OVERRIDE_AUDIT
 
-mkdir -p "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
-chmod 0700 "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
-
 kill_switch_active() {
-  [[ -f "$DISDEX_V96_KILL_SWITCH_FILE" ]] \
-    && /usr/bin/jq -e '.active == true' "$DISDEX_V96_KILL_SWITCH_FILE" >/dev/null 2>&1
+  [[ -e "$DISDEX_V96_KILL_SWITCH_FILE" ]] || return 1
+  [[ -f "$DISDEX_V96_KILL_SWITCH_FILE" && ! -L "$DISDEX_V96_KILL_SWITCH_FILE" ]] || return 0
+  /usr/bin/jq -e 'type == "object" and .active == false' \
+    "$DISDEX_V96_KILL_SWITCH_FILE" >/dev/null 2>&1 || return 0
+  return 1
 }
 
 # Never wait indefinitely at startup. If the Kill Switch is already active,
-# execute one bounded emergency reduce-only reconciliation and leave LIVE off.
-# A later formal operator clearance and explicit restart are required.
+# fail closed before any worker or emergency-order path is entered. Emergency
+# reconciliation is reserved for an already-running live Margin Guard; startup
+# must never turn an existing Kill Switch into a new order attempt.
 if kill_switch_active; then
-  /usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py \
-    --mode live \
-    --emergency-once
-  printf 'DISDEX_V96_V52_LIVE_NOT_STARTED_KILL_SWITCH_ACTIVE\n'
-  printf 'runtimeCommitSha=%s\n' "$sha"
-  printf 'startupWaitLoop=false\n'
-  printf 'liveSupervisorStarted=false\n'
-  printf 'formalOperatorClearanceRequired=true\n'
-  exit 0
+  printf 'DISDEX_V96_V52_LIVE_NOT_STARTED_KILL_SWITCH_ACTIVE_OR_MALFORMED\n' >&2
+  printf 'runtimeCommitSha=%s\n' "$sha" >&2
+  printf 'startupWaitLoop=false\n' >&2
+  printf 'liveSupervisorStarted=false\n' >&2
+  printf 'formalOperatorClearanceRequired=true\n' >&2
+  printf 'emergencyReconciliationPerformed=false\n' >&2
+  printf 'ordersSentByLauncher=false\n' >&2
+  exit 78
 fi
 
 /usr/bin/npm run strategy:disdex-v96:override:audit:sync
 
 # Close the small race in which a Kill Switch is activated during audit sync.
 if kill_switch_active; then
-  /usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py \
-    --mode live \
-    --emergency-once
-  printf 'DISDEX_V96_V52_LIVE_NOT_STARTED_KILL_SWITCH_ACTIVATED_DURING_STARTUP\n'
-  printf 'runtimeCommitSha=%s\n' "$sha"
-  printf 'startupWaitLoop=false\n'
-  printf 'liveSupervisorStarted=false\n'
-  printf 'formalOperatorClearanceRequired=true\n'
-  exit 0
+  printf 'DISDEX_V96_V52_LIVE_NOT_STARTED_KILL_SWITCH_ACTIVATED_OR_MALFORMED_DURING_STARTUP\n' >&2
+  printf 'runtimeCommitSha=%s\n' "$sha" >&2
+  printf 'startupWaitLoop=false\n' >&2
+  printf 'liveSupervisorStarted=false\n' >&2
+  printf 'formalOperatorClearanceRequired=true\n' >&2
+  printf 'emergencyReconciliationPerformed=false\n' >&2
+  printf 'ordersSentByLauncher=false\n' >&2
+  exit 78
 fi
+
+mkdir -p "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
+chmod 0700 "$DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"
 
 intentional_stop=false
 guard_pid=""
