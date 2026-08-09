@@ -1,0 +1,62 @@
+name: Adaptive Edge Decay V54
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_adaptive_edge_decay_v54.py"
+      - ".github/workflows/adaptive-edge-decay-v54.yml"
+      - "research/adaptive-edge-decay-v54-trigger.txt"
+      - "scripts/research_lab_parallel_relative_value_v52.py"
+      - "scripts/research_lab_nextgen_independent_families_v49.py"
+      - "scripts/research_lab_parameter_bagged_rotation_v4.py"
+      - "lib/research-lab/perp/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adaptive-edge-decay-v54-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: adaptive-edge-decay-v54-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            parallel-relative-value-v52-usdm-
+            nextgen-v49-usdm-
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+      - name: Validate source
+        run: python -m py_compile scripts/research_lab_adaptive_edge_decay_v54.py
+      - name: Run adaptive meta-strategy research
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_adaptive_edge_decay_v54.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adaptive-edge-decay-v54
+          path: |
+            .research-state/adaptive-edge-decay-v54.json
+            .research-state/adaptive-edge-decay-v54.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. No production/VPS/runtime/order/account/approval changes.
