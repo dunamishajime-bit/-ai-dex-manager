@@ -1,0 +1,11 @@
+Release retry marker only.
+
+Purpose: create a new immutable Git SHA after prior deploy of c29a59a049d073ae44ebaa0e708a86765698b5cb returned FAIL_CLOSED / unknown status.
+
+Intended runtime remains unchanged:
+- V52
+- PENGU_DUAL_LS_V1
+- V96/V97 excluded from startup target
+
+No trading logic changes in this commit.
+Generated: 2026-08-10 01:45 Asia/Tokyo
