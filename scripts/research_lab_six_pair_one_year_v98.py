@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse, json, math, os, statistics
+from datetime import datetime, timezone
 from pathlib import Path
 
 import research_lab_parallel_event_regime_v53 as base
@@ -11,6 +12,9 @@ YEAR = 365 * DAY
 SYMS = ["BTC", "ETH", "BNB", "SOL", "LINK", "AVAX"]
 NORMAL_BPS = 10.0
 STRESS_BPS = 30.0
+# User-requested fixed one-year window: include all of 2026-08-09 Asia/Tokyo,
+# so the exclusive endpoint is 2026-08-10 00:00 JST = 2026-08-09 15:00 UTC.
+FIXED_END_EXCLUSIVE_UTC = int(datetime(2026, 8, 9, 15, 0, 0, tzinfo=timezone.utc).timestamp() * 1000)
 
 ret = base.ret
 metric = base.metric
@@ -34,15 +38,28 @@ def load():
 
 def periods(candles):
     common_first = max(int(candles[s][0]["ts"]) for s in SYMS)
-    common_last = min(int(candles[s][-2]["ts"]) for s in SYMS)
-    start = max(common_first, common_last - YEAR)
-    span = common_last - start
-    if span < 330 * DAY:
-        raise RuntimeError(f"INSUFFICIENT_COMMON_HISTORY:{span/DAY:.1f}d")
+    common_data_last = min(int(candles[s][-2]["ts"]) for s in SYMS)
+    # Cap at the last hourly candle strictly before 2026-08-10 00:00 JST.
+    common_last = min(common_data_last, FIXED_END_EXCLUSIVE_UTC - HOUR)
+    start = common_last - YEAR + HOUR
+    if start < common_first:
+        raise RuntimeError(f"INSUFFICIENT_FIXED_YEAR_HISTORY:{(common_last-common_first)/DAY:.1f}d")
+    span = common_last - start + HOUR
+    if span < 364 * DAY:
+        raise RuntimeError(f"INSUFFICIENT_FIXED_YEAR_SPAN:{span/DAY:.1f}d")
     a = start + int(span * .50)
     b = start + int(span * .70)
     c = start + int(span * .85)
-    return {"development":(start,a),"validation":(a,b),"confirmation":(b,c),"holdout":(c,common_last)}
+    # end values are exclusive for generate(); add one hour after final included candle.
+    return {
+        "development":(start,a),
+        "validation":(a,b),
+        "confirmation":(b,c),
+        "holdout":(c,common_last + HOUR),
+        "fixedWindowStart":start,
+        "fixedWindowEndExclusive":common_last + HOUR,
+        "requestedEndExclusive":FIXED_END_EXCLUSIVE_UTC,
+    }
 
 
 def rseries(c, i, n):
@@ -95,8 +112,8 @@ def generate(fam,candles,idx,start,end,costbps,delay):
             for s in SYMS:
                 i=idx[s].get(ts)
                 if i is None:continue
-                a=ret(candles[s],i,24); b=ret(candles[s],i-24,24)
-                if a is not None and b is not None: now.append((a,s)); prev.append((b,s))
+                aa=ret(candles[s],i,24); bb=ret(candles[s],i-24,24)
+                if aa is not None and bb is not None: now.append((aa,s)); prev.append((bb,s))
             if len(now)==6:
                 en=entropy_positive([x for x,_ in now]); ep=entropy_positive([x for x,_ in prev])
                 breadth=sum(x>0 for x,_ in now)
@@ -108,7 +125,6 @@ def generate(fam,candles,idx,start,end,costbps,delay):
                     if x<-1.0:picks=[(s,-1,24)]
 
         elif fam=="serial_dependence_switch":
-            # Trade only when lag-1 serial dependence changes sign; direction comes from current impulse.
             for s in SYMS:
                 i=idx[s].get(ts)
                 if i is None or i<360:continue
@@ -120,7 +136,6 @@ def generate(fam,candles,idx,start,end,costbps,delay):
                 elif old>=.08 and new<=-.05:picks.append((s,-1 if imp>0 else 1,12))
 
         elif fam=="residual_variance_release":
-            # BTC/ETH two-factor residual variance compression -> release; direction from residual sign only after release.
             br=rseries(candles['BTC'],bi,168)
             ei=idx['ETH'].get(ts)
             if ei is None or ei<168:continue
@@ -129,7 +144,6 @@ def generate(fam,candles,idx,start,end,costbps,delay):
                 i=idx[s].get(ts)
                 if i is None or i<336:continue
                 sr=rseries(candles[s],i,168)
-                # fixed equal factor mix avoids fitting betas
                 resid=[z-(x+y)/2 for x,y,z in zip(br,er,sr)]
                 old=statistics.pstdev(resid[:96]); recent=statistics.pstdev(resid[-24:])
                 cur=sum(resid[-6:])
@@ -137,7 +151,6 @@ def generate(fam,candles,idx,start,end,costbps,delay):
                     picks.append((s,1 if cur>0 else -1,12))
 
         elif fam=="semivol_skew_transition":
-            # Directional risk asymmetry transition, not price trend: downside/upside semivol ratio flips regime.
             for s in SYMS:
                 i=idx[s].get(ts)
                 if i is None or i<240:continue
@@ -150,7 +163,6 @@ def generate(fam,candles,idx,start,end,costbps,delay):
                 elif ro<.80 and rn>1.30 and one<0:picks.append((s,-1,18))
 
         elif fam=="path_efficiency_state_change":
-            # Uses path efficiency (net displacement / traveled path), a different state variable from trend magnitude.
             for s in SYMS:
                 i=idx[s].get(ts)
                 if i is None or i<240:continue
@@ -160,8 +172,6 @@ def generate(fam,candles,idx,start,end,costbps,delay):
                 elif eold>.48 and enew<.18 and abs(imp)>2.0:picks.append((s,-1 if imp>0 else 1,12))
 
         elif fam=="cross_asset_shock_absorption":
-            # Relative shock absorption: after a market-wide impulse, trade assets that resisted the impulse,
-            # expecting defensive leadership persistence; not BTC lead-lag catch-up.
             moves=[]
             for s in SYMS:
                 i=idx[s].get(ts); r=ret(candles[s],i,6) if i is not None else None
@@ -170,11 +180,9 @@ def generate(fam,candles,idx,start,end,costbps,delay):
                 med=statistics.median(x for x,_ in moves)
                 if abs(med)>=2.0:
                     if med<0:
-                        # strongest absorber during sell shock
                         r,s=max(moves)
                         if r-med>=2.0:picks=[(s,1,18)]
                     else:
-                        # weakest participation during euphoric shock -> defensive short
                         r,s=min(moves)
                         if med-r>=2.0:picks=[(s,-1,18)]
 
@@ -200,31 +208,45 @@ def stage_ok(m,stage):
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--family',required=True,choices=families()); a=ap.parse_args()
     candles,idx,_=load(); ps=periods(candles); fam=a.family
-    result={"strategyId":"SIX_PAIR_ONE_YEAR_V98","family":fam,"universe":[s+"/USDT" for s in SYMS],"periods":ps,"normalBps":NORMAL_BPS,"stressBps":STRESS_BPS,"productionChanged":False,"realTradingEnabled":False}
-    dev,_=generate(fam,candles,idx,*ps['development'],NORMAL_BPS,0); dm=metric(dev); result['development']=dm
+    stage_periods={k:v for k,v in ps.items() if k in ('development','validation','confirmation','holdout')}
+    result={
+        "strategyId":"SIX_PAIR_ONE_YEAR_V98_FIXED_YESTERDAY",
+        "researchIntent":"V96 structural inspiration only; new mechanisms for recent market",
+        "family":fam,
+        "universe":[s+"/USDT" for s in SYMS],
+        "periods":stage_periods,
+        "fixedWindowStart":ps['fixedWindowStart'],
+        "fixedWindowEndExclusive":ps['fixedWindowEndExclusive'],
+        "requestedWindowJST":"2025-08-10 00:00 JST <= ts < 2026-08-10 00:00 JST (includes all 2026-08-09 JST)",
+        "normalBps":NORMAL_BPS,
+        "stressBps":STRESS_BPS,
+        "productionChanged":False,
+        "realTradingEnabled":False,
+    }
+    dev,_=generate(fam,candles,idx,*stage_periods['development'],NORMAL_BPS,0); dm=metric(dev); result['development']=dm
     if not stage_ok(dm,'development'):
         result.update(status='NO_ROBUST_IMPROVEMENT',robust=False,reason='DEVELOPMENT_FAIL')
     else:
-        val,_=generate(fam,candles,idx,*ps['validation'],NORMAL_BPS,0); vm=metric(val); result['validation']=vm
+        val,_=generate(fam,candles,idx,*stage_periods['validation'],NORMAL_BPS,0); vm=metric(val); result['validation']=vm
         if not stage_ok(vm,'validation'):
             result.update(status='NO_ROBUST_IMPROVEMENT',robust=False,reason='VALIDATION_FAIL')
         else:
-            conf,_=generate(fam,candles,idx,*ps['confirmation'],NORMAL_BPS,0); cm=metric(conf)
-            cs,_=generate(fam,candles,idx,*ps['confirmation'],STRESS_BPS,1); csm=metric(cs)
+            conf,_=generate(fam,candles,idx,*stage_periods['confirmation'],NORMAL_BPS,0); cm=metric(conf)
+            cs,_=generate(fam,candles,idx,*stage_periods['confirmation'],STRESS_BPS,1); csm=metric(cs)
             result['confirmation']=cm;result['stressConfirmation']=csm
             confok=stage_ok(cm,'confirmation') and (cm['pfWithoutBest'] or 0)>1 and (csm['pf'] or 0)>1 and csm['returnPct']>0
             if not confok:
                 result.update(status='NO_ROBUST_IMPROVEMENT',robust=False,reason='CONFIRMATION_FAIL')
             else:
-                hold,pair=generate(fam,candles,idx,*ps['holdout'],NORMAL_BPS,0); hm=metric(hold)
-                hs,_=generate(fam,candles,idx,*ps['holdout'],STRESS_BPS,1); hsm=metric(hs)
+                hold,pair=generate(fam,candles,idx,*stage_periods['holdout'],NORMAL_BPS,0); hm=metric(hold)
+                hs,_=generate(fam,candles,idx,*stage_periods['holdout'],STRESS_BPS,1); hsm=metric(hs)
                 result['holdout']=hm;result['stressHoldout']=hsm;result['holdoutPairContribution']={s:sum(pair[s]) for s in SYMS}
                 robust=stage_ok(hm,'holdout') and (hm['pfWithoutBest'] or 0)>1 and (hsm['pf'] or 0)>1 and hsm['returnPct']>0
                 result.update(status='ROBUST_PASS' if robust else 'NO_ROBUST_IMPROVEMENT',robust=robust,reason='PASS' if robust else 'HOLDOUT_FAIL')
     out=Path(os.environ.get('RESEARCH_AUTONOMOUS_STATE_DIR','.research-state'));out.mkdir(parents=True,exist_ok=True)
     stem=f"six-pair-one-year-v98-{fam}"
     (out/f"{stem}.json").write_text(json.dumps(result,indent=2),encoding='utf-8')
-    (out/f"{stem}.md").write_text(f"# Six Pair One Year V98 — {fam}\n\n```json\n{json.dumps(result,indent=2)}\n```\n",encoding='utf-8')
+    (out/f"{stem}.md").write_text(f"# Six Pair One Year V98 Fixed Yesterday — {fam}\n\n```json\n{json.dumps(result,indent=2)}\n```\n",encoding='utf-8')
     print(json.dumps(result,indent=2))
 
 if __name__=='__main__':main()
