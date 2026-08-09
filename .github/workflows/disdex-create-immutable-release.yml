@@ -111,9 +111,12 @@ jobs:
           user="${USER_SECRET:-root}"
           remote="/tmp/disdex-release-${TARGET_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           ssh -p "$port" -i "$HOME/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "${user}@${HOST}" "install -d -m 0700 '$remote'"
+            "${user}@${HOST}" "install -d -o deploy -g deploy -m 0700 '$remote'"
           scp -P "$port" -i "$HOME/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=yes \
             "$ARCHIVE" "${user}@${HOST}:${remote}/disdex-${TARGET_SHA}.tar.gz"
+          ssh -p "$port" -i "$HOME/.ssh/id_ed25519" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${user}@${HOST}" \
+            "chown deploy:deploy '$remote/disdex-${TARGET_SHA}.tar.gz' && chmod 0600 '$remote/disdex-${TARGET_SHA}.tar.gz'"
           echo "REMOTE_UPLOAD=$remote" >> "$GITHUB_ENV"
 
       - name: Materialize immutable release and verify readiness
