@@ -1,0 +1,85 @@
+name: Distinct Logic Tournament V56
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "research/distinct-logic-tournament-v56-trigger.txt"
+      - "scripts/research_lab_distinct_logic_tournament_v56.py"
+      - "scripts/research-lab-prefetch-event-regime-v53.ts"
+      - "lib/research-lab/perp/**"
+      - ".github/workflows/distinct-logic-tournament-v56.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: distinct-logic-tournament-v56-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        family:
+          - trend_breakout
+          - shock_mean_reversion
+          - rs_rotation
+          - residual_statarb
+          - carry_hedged
+          - crash_rebound
+          - session_opening_range
+          - compression_expansion
+          - lead_lag
+          - orderflow_depth
+          - pair_cointegration
+          - breadth_capitulation
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore public USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: distinct-tournament-v56-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            event-regime-v53-usdm-
+            parallel-trend-vol-v53-usdm-
+            parallel-trend-vol-v51-usdm-
+            win80-profit-v1-usdm-
+            autonomous-usdm-v2-
+      - name: Install dependencies
+        run: npm ci
+      - name: Prefetch genuine public USD-M history
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Compile research source
+        run: python -m py_compile scripts/research_lab_distinct_logic_tournament_v56.py
+      - name: Run materially distinct family
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_distinct_logic_tournament_v56.py --family "${{ matrix.family }}"
+      - name: Upload family evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: distinct-logic-tournament-v56-${{ matrix.family }}
+          path: |
+            .research-state/distinct-logic-tournament-v56-${{ matrix.family }}.json
+            .research-state/distinct-logic-tournament-v56-${{ matrix.family }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. Distinct mechanisms, tiny representative parameter sets, genuine public data only.
+# No production, Frozen V6/Fresh Forward V9, VPS, credentials, orders, accounts, positions, approvals or LIVE changes.
