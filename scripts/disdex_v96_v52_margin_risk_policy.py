@@ -34,13 +34,29 @@ def maintenance_margin_ratio_pct(account: dict) -> float:
     return maintenance / margin_balance * 100.0
 
 
+def _margin_type(row: dict) -> str:
+    raw = str(row.get("marginType") or "").strip().lower()
+    if raw in {"cross", "crossed"} or row.get("isolated") is False:
+        return "cross"
+    if raw in {"isolated", "isolate"} or row.get("isolated") is True:
+        return "isolated"
+    return "unknown"
+
+
 def liquidation_buffer_pct(row: dict) -> Optional[float]:
     quantity = finite(row.get("positionAmt"))
     if abs(quantity) <= 1e-12:
         return None
     mark = finite(row.get("markPrice"))
     liquidation = finite(row.get("liquidationPrice"))
-    if mark <= 0 or liquidation <= 0:
+    if mark <= 0:
+        raise RuntimeError(f"Active position has invalid mark/liquidation price: {row.get('symbol')}")
+    if liquidation <= 0:
+        if _margin_type(row) == "cross":
+            # Aster may return liquidationPrice="0" for a valid cross-margin
+            # position when no position-specific liquidation price is exposed.
+            # The account-level maintenance-margin ratio remains mandatory.
+            return None
         raise RuntimeError(f"Active position has invalid mark/liquidation price: {row.get('symbol')}")
     buffer = (mark - liquidation) / mark if quantity > 0 else (liquidation - mark) / mark
     return max(0.0, buffer * 100.0)
@@ -56,20 +72,24 @@ def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed
         if symbol not in symbols or abs(finite(row.get("positionAmt"))) <= 1e-12:
             continue
         buffer = liquidation_buffer_pct(row)
-        if buffer is None:
-            continue
         active.append({
             "symbol": symbol,
             "positionAmt": finite(row.get("positionAmt")),
             "markPrice": finite(row.get("markPrice")),
             "liquidationPrice": finite(row.get("liquidationPrice")),
             "liquidationBufferPct": buffer,
+            "liquidationPriceAvailable": buffer is not None,
             "leverage": finite(row.get("leverage")),
             "marginType": str(row.get("marginType") or ("isolated" if row.get("isolated") is True else "cross" if row.get("isolated") is False else "unknown")).lower(),
         })
-        if minimum_buffer is None or buffer < minimum_buffer:
+        if buffer is not None and (minimum_buffer is None or buffer < minimum_buffer):
             minimum_buffer = buffer
             nearest_symbol = symbol
+    if active:
+        margin_balance = finite(account.get("totalMarginBalance"))
+        maintenance = finite(account.get("totalMaintMargin"))
+        if margin_balance <= 0 or maintenance <= 0:
+            raise RuntimeError("Active position has incomplete account-level margin risk data")
     ratio = maintenance_margin_ratio_pct(account)
     return {
         "maintenanceMarginRatioPct": ratio,
@@ -174,6 +194,33 @@ def self_test() -> None:
     snapshot = build_margin_risk_snapshot(account, rows, ["BTCUSDT"])
     assert abs(snapshot["maintenanceMarginRatioPct"] - 10.0) < 1e-12
     assert abs(snapshot["minimumLiquidationBufferPct"] - 10.0) < 1e-12
+
+    cross_without_position_liquidation = build_margin_risk_snapshot(
+        {"totalMaintMargin": "1", "totalMarginBalance": "100"},
+        [{
+            "symbol": "BNBUSDT",
+            "positionAmt": "0.07",
+            "markPrice": "609.27",
+            "liquidationPrice": "0",
+            "leverage": "5",
+            "marginType": "cross",
+        }],
+        ["BNBUSDT"],
+    )
+    assert cross_without_position_liquidation["activeManagedPositionCount"] == 1
+    assert cross_without_position_liquidation["minimumLiquidationBufferPct"] is None
+    assert cross_without_position_liquidation["activeManagedPositions"][0]["liquidationPriceAvailable"] is False
+    assert classify_margin_risk(cross_without_position_liquidation)["stage"] == "HEALTHY"
+    try:
+        build_margin_risk_snapshot(
+            {"totalMaintMargin": "1", "totalMarginBalance": "100"},
+            [{"symbol": "BNBUSDT", "positionAmt": "0.07", "markPrice": "609.27", "liquidationPrice": "0", "marginType": "isolated"}],
+            ["BNBUSDT"],
+        )
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("isolated position without liquidation price must fail closed")
     print("V96/V52 adaptive margin risk policy self-test: PASS")
 
 
