@@ -1,0 +1,77 @@
+name: Six Pair One Year V98
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "research/six-pair-one-year-v98-trigger.txt"
+      - "scripts/research_lab_six_pair_one_year_v98.py"
+      - ".github/workflows/six-pair-one-year-v98.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: six-pair-one-year-v98-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family:
+          - leadership_entropy_transition
+          - serial_dependence_switch
+          - residual_variance_release
+          - semivol_skew_transition
+          - path_efficiency_state_change
+          - cross_asset_shock_absorption
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore genuine public USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: six-pair-v98-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            distinct-tournament-v56-usdm-
+            event-regime-v53-usdm-
+            parallel-trend-vol-v51-usdm-
+            win80-profit-v1-usdm-
+      - name: Install dependencies
+        run: npm ci
+      - name: Prefetch genuine public six-pair USD-M history
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Compile V98 research source
+        run: python -m py_compile scripts/research_lab_six_pair_one_year_v98.py
+      - name: Run one distinct family now
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_six_pair_one_year_v98.py --family "${{ matrix.family }}"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: six-pair-one-year-v98-${{ matrix.family }}
+          path: |
+            .research-state/six-pair-one-year-v98-${{ matrix.family }}.json
+            .research-state/six-pair-one-year-v98-${{ matrix.family }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. Fixed universe: BTC/ETH/BNB/SOL/LINK/AVAX versus USDT.
+# Rolling most-recent one-year history only. V96 is inspiration for multi-asset state/cash/risk ideas,
+# but the six mechanisms above are intentionally not V96 logic and not exact prior rejected families.
