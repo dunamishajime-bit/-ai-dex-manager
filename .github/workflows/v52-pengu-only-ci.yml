@@ -1,0 +1,45 @@
+name: V52 PENGU Only CI
+
+on:
+  push:
+    branches:
+      - chatgpt/v52-pengu-only-live-20260809
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: PENGU fixed logic checks
+        run: |
+          npm run strategy:pengu-dual-ls-v1:typecheck
+          npm run strategy:pengu-dual-ls-v1:selftest
+      - name: V52 stock self-test
+        run: npm run strategy:disdex-v13d-v11eq-v96:stock:selftest
+      - name: V52 plus PENGU contract
+        run: npm run strategy:disdex-v52:contract
+      - name: Assert V96 and V97 are not in V52 daemon path
+        run: |
+          node - <<'NODE'
+          const p = require('./package.json');
+          const daemon = p.scripts['strategy:disdex-v52:daemon'];
+          if (daemon !== 'tsx scripts/disdex-v52-pengu-live-runner.ts --daemon') throw new Error(`unexpected daemon: ${daemon}`);
+          const fs = require('fs');
+          const runner = fs.readFileSync('scripts/disdex-v52-pengu-live-runner.ts', 'utf8');
+          if (runner.includes('scripts/disdex-v96-live-runner.ts')) throw new Error('V96 runner referenced');
+          if (runner.includes('disdex-v97')) throw new Error('V97 runner referenced');
+          if (!runner.includes('PENGU_DUAL_LS_V1_MAX_GROSS: "0.75"')) throw new Error('PENGU Gross 0.75 lock missing');
+          console.log('V52_PENGU_ONLY_PATH_OK');
+          NODE
