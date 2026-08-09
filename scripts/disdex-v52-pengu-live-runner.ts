@@ -45,9 +45,13 @@ export function buildV52PenguEnvironment(runnerMode: RunnerMode): NodeJS.Process
         DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
         DISDEX_V52_ASTER_ONLY_STATE_DIR: p.stockStateRoot,
         DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: p.killSwitchPath,
-        DISDEX_V52_CRYPTO_GROSS_CAP: "0",
+        // The margin-aware V52 child enforces the shared fixed sleeve policy
+        // even when this supervisor owns only PENGU. Keep the child policy
+        // environment aligned with the immutable allocation instead of
+        // replacing the crypto cap with the PENGU-only routing scope.
+        DISDEX_V52_CRYPTO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
         DISDEX_V52_STOCK_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap),
-        DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap + PENGU_DUAL_LS_V1.maximumGross),
+        DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap),
         DISDEX_V52_V11_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v11MaximumGross),
         DISDEX_V52_V50_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v50MaximumGross),
         DISDEX_V52_RESERVED_FIRST_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross),
