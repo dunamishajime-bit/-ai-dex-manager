@@ -128,12 +128,21 @@ install -m 0600 "$tmp/operator-override.json" "$override_file.new.$sha"
 mv -f "$parity_file.new.$sha" "$parity_file"
 mv -f "$override_file.new.$sha" "$override_file"
 
-# Formally synchronize the established state audit to the exact candidate
-# approval while current still points to the previous release. This route is
-# allowed only for an inactive LIVE service and an exact immutable release.
+# Formally synchronize the established state audit to the exact approval. A
+# renewal for the release currently selected by `current` is a current-release
+# audit; a renewal for another immutable release is a candidate-release audit.
+# Both routes remain explicit and require their own acknowledgement.
+current_release="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+if [[ "$current_release" == "/home/deploy/disdex-trading/releases/$sha" ]]; then
+  audit_mode=CURRENT_RELEASE
+  audit_ack=I_SYNC_CURRENT_EXACT_OPERATOR_OVERRIDE_AUDIT
+else
+  audit_mode=CANDIDATE_RELEASE
+  audit_ack=I_SYNC_CANDIDATE_EXACT_OPERATOR_OVERRIDE_AUDIT
+fi
 DISDEX_V96_RUNTIME_COMMIT_SHA="$sha" \
-DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE=CANDIDATE_RELEASE \
-DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT=I_SYNC_CANDIDATE_EXACT_OPERATOR_OVERRIDE_AUDIT \
+DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE="$audit_mode" \
+DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT="$audit_ack" \
   /usr/bin/npm run strategy:disdex-v96:override:audit:sync
 
 # Run the same authenticated + integrated preflight used by the promotion
