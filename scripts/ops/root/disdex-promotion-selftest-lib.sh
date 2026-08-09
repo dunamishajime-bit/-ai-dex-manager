@@ -114,7 +114,7 @@ setup_promotion_selftest_sandbox() {
   printf '{"productionCommitSha":"%s","kind":"parity"}\n' "$old_sha" > "$PARITY_FILE"
   printf '{"approvedCommitSha":"%s","kind":"override"}\n' "$old_sha" > "$OVERRIDE_FILE"
   printf '{"operatorOverride":{"approvedCommitSha":"%s"},"kind":"crypto"}\n' "$old_sha" > "$CRYPTO_STATE_FILE"
-  printf '{"approvedCommitSha":"%s","kind":"stock"}\n' "$old_sha" > "$STOCK_STATE_FILE"
+  printf '{"strategyId":"DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96","schemaVersion":3,"kind":"stock"}\n' > "$STOCK_STATE_FILE"
   printf 'inactive\n' > "$promotion_selftest_root/service-state"
   printf '0\n' > "$promotion_selftest_root/service-pid"
   printf '0\n' > "$promotion_selftest_root/service-restarts"
@@ -169,7 +169,7 @@ verify_promotion_selftest_rollback() {
   grep -q '"productionCommitSha":"1111111111111111111111111111111111111111"' "$PARITY_FILE"
   grep -q '"approvedCommitSha":"1111111111111111111111111111111111111111"' "$OVERRIDE_FILE"
   grep -q '"operatorOverride":{"approvedCommitSha":"1111111111111111111111111111111111111111"}' "$CRYPTO_STATE_FILE"
-  grep -q '"approvedCommitSha":"1111111111111111111111111111111111111111"' "$STOCK_STATE_FILE"
+  grep -q '"strategyId":"DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"' "$STOCK_STATE_FILE"
   [[ "$(cat "$promotion_selftest_root/service-state")" == "inactive" ]]
   [[ "$(cat "$promotion_selftest_root/service-pid")" == "0" ]]
 }

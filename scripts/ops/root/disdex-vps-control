@@ -233,12 +233,14 @@ validate_existing_promotion_artifacts() {
     printf 'existing Operator Override does not target old current SHA\n' >&2
     return 1
   }
-  for state_file in "$crypto_backup" "$stock_backup"; do
-    "$JQ" -e --arg sha "$old_sha" '(.approvedCommitSha == $sha) or (.runtimeCommitSha == $sha) or (.operatorOverride.approvedCommitSha == $sha)' "$state_file" >/dev/null || {
-      printf 'existing runner state does not target old current SHA: %s\n' "$(basename "$state_file")" >&2
-      return 1
-    }
-  done
+  "$JQ" -e --arg sha "$old_sha" '(.approvedCommitSha == $sha) or (.runtimeCommitSha == $sha) or (.operatorOverride.approvedCommitSha == $sha)' "$crypto_backup" >/dev/null || {
+    printf 'existing runner state does not target old current SHA: %s\n' "$(basename "$crypto_backup")" >&2
+    return 1
+  }
+  "$JQ" -e '(.strategyId == "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") and (.schemaVersion == 3)' "$stock_backup" >/dev/null || {
+    printf 'existing stock runner state has an unexpected schema: %s\n' "$(basename "$stock_backup")" >&2
+    return 1
+  }
   printf 'promotion authority snapshot matches old current SHA\n'
 }
 
