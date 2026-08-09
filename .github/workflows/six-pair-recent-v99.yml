@@ -1,0 +1,74 @@
+name: Six Pair Recent V99
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_lab_six_pair_recent_v99.py"
+      - ".github/workflows/six-pair-recent-v99.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: six-pair-recent-v99-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family:
+          - vol_rank_leadership
+          - beta_dispersion_release
+          - downside_breadth_recovery
+          - idiosyncratic_gap_persistence
+          - correlation_synchronization_break
+          - drawdown_velocity_reversal
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore genuine public USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: six-pair-v99-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            six-pair-v98-usdm-
+            distinct-tournament-v56-usdm-
+            event-regime-v53-usdm-
+            parallel-trend-vol-v51-usdm-
+      - name: Install dependencies
+        run: npm ci
+      - name: Prefetch genuine public six-pair USD-M history
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Compile V99 research source
+        run: python -m py_compile scripts/research_lab_six_pair_recent_v99.py
+      - name: Run one distinct family
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_six_pair_recent_v99.py --family "${{ matrix.family }}"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: six-pair-recent-v99-${{ matrix.family }}
+          path: |
+            .research-state/six-pair-recent-v99-${{ matrix.family }}.json
+            .research-state/six-pair-recent-v99-${{ matrix.family }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. Fixed six-pair universe and fixed recent one-year window inherited from V98.
