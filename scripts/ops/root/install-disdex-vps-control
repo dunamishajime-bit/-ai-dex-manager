@@ -132,7 +132,7 @@ grep -Fq 'OnCalendar=daily' "$retention_timer_source"
 grep -Fq 'SystemMaxUse=256M' "$journald_guard_source"
 grep -Fq 'MaxRetentionSec=14day' "$journald_guard_source"
 grep -Fq 'ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state' "$approval_source"
-grep -Fq 'DISDEX_V96_OPERATOR_AUDIT_SYNC_MODE=CANDIDATE_RELEASE' "$approval_launcher"
+grep -Fq 'audit_mode=CANDIDATE_RELEASE' "$approval_launcher"
 ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$helper_source"
 ! grep -Fq '.disdex-preflight-pass' "$helper_source"
 
