@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 
 import { DISDEX_V13D_V11EQ_V96_ALLOCATION } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { PENGU_DUAL_LS_V1 } from "../config/penguDualLsV1Runtime";
+import { resolveV52PenguPaths } from "./disdex-v52-pengu-paths";
 
 type RunnerMode = "paper" | "live";
 type V52Status = "ACTIVE" | "WAITING_MARKET_CLOSED" | "BLOCKED_DATA_UNAVAILABLE";
@@ -27,13 +28,7 @@ function mode(): RunnerMode {
 }
 
 function paths() {
-    const stateRoot = resolve(process.env.DISDEX_V52_PENGU_STATE_DIR || process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR || ".runtime-state/disdex-v52-pengu");
-    return {
-        stateRoot,
-        penguStateRoot: resolve(stateRoot, "pengu-dual-ls-v1"),
-        stockStateRoot: resolve(stateRoot, "stock-v52"),
-        killSwitchPath: resolve(process.env.DISDEX_V52_PENGU_KILL_SWITCH_FILE || resolve(stateRoot, "kill-switch.json")),
-    };
+    return resolveV52PenguPaths();
 }
 
 export function buildV52PenguEnvironment(runnerMode: RunnerMode): NodeJS.ProcessEnv {

@@ -65,6 +65,7 @@
     "strategy:disdex-v13d-v11eq-v96:daemon": "tsx scripts/disdex-v13d-v11eq-v96-live-runner.ts --daemon",
     "strategy:disdex-v13d-v11eq-v96:kill-switch": "tsx scripts/disdex-v13d-v11eq-v96-kill-switch.ts",
     "strategy:disdex-v52:contract": "npm run strategy:pengu-dual-ls-v1:typecheck && npm run strategy:pengu-dual-ls-v1:selftest && npm run strategy:disdex-v13d-v11eq-v96:stock:selftest",
+    "strategy:disdex-v52:state-path:selftest": "tsx scripts/disdex-v52-pengu-live-runner-selftest.ts",
     "strategy:disdex-v52:preflight": "tsx scripts/disdex-v52-pengu-preflight.ts",
     "strategy:disdex-v52:once": "tsx scripts/disdex-v52-pengu-live-runner.ts --once",
     "strategy:disdex-v52:daemon": "tsx scripts/disdex-v52-pengu-live-runner.ts --daemon",
