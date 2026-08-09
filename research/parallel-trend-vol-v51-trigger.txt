@@ -1,0 +1,2 @@
+2026-08-09T11:10:00+09:00
+Research-only parallel trend/volatility validation trigger.
