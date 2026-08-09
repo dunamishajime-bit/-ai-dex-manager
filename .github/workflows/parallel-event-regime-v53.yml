@@ -1,0 +1,66 @@
+name: Parallel Event Regime V53
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "research/parallel-event-regime-v53-trigger.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: parallel-event-regime-v53-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        family:
+          - crash_rebound
+          - failed_breakout
+          - volume_exhaustion
+          - funding_shock
+          - btc_shock_propagation
+          - correlation_break
+          - weekend_session
+          - panic_breadth
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: event-regime-v53-usdm-${{ hashFiles('lib/research-lab/perp/futures-data-source.ts') }}
+          restore-keys: |
+            multi-horizon-v3-usdm-
+            win80-profit-v1-usdm-
+            autonomous-usdm-v2-
+      - name: Compile research source
+        run: python -m py_compile scripts/research_lab_parallel_event_regime_v53.py
+      - name: Run family
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_parallel_event_regime_v53.py --family "${{ matrix.family }}"
+      - name: Upload family evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: event-regime-v53-${{ matrix.family }}
+          path: |
+            .research-state/parallel-event-regime-v53-${{ matrix.family }}.json
+            .research-state/parallel-event-regime-v53-${{ matrix.family }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. No VPS, production, credentials, orders, positions, approvals, or LIVE changes.
