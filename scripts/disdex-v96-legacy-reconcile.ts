@@ -3,7 +3,7 @@ import "dotenv/config";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
-import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
+import { DISDEX_V13D_V11EQ_V96_RUNTIME } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { AsterApiError, AsterV3Client, type AsterOrderResponse } from "../lib/aster-v3-client";
 import { readDisDexV96KillSwitch } from "../lib/disdex-v96-live-risk-controls";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
@@ -33,10 +33,14 @@ async function getOrderOrNotFound(client: AsterV3Client, symbol: string, clientO
 
 async function main() {
     const apply = process.argv.includes("--apply");
-    const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
+    const combinedRoot = resolve(process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR || DISDEX_V13D_V11EQ_V96_RUNTIME.stateDirectory);
+    const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || resolve(combinedRoot, "crypto-v96"));
     const statePath = resolve(stateRoot, "runner-live.json");
-    const killSwitchPath = process.env.DISDEX_V96_KILL_SWITCH_FILE;
-    if (!killSwitchPath) throw new Error("LEGACY_RECONCILE_KILL_SWITCH_PATH_MISSING");
+    const killSwitchPath = resolve(
+        process.env.DISDEX_V96_KILL_SWITCH_FILE
+        || process.env.DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE
+        || resolve(combinedRoot, "kill-switch.json"),
+    );
     const killSwitch = await readDisDexV96KillSwitch(killSwitchPath);
     if (!killSwitch?.active) throw new Error("LEGACY_RECONCILE_REQUIRES_ACTIVE_KILL_SWITCH");
 
@@ -101,6 +105,9 @@ async function main() {
         reconciliationType: "LEGACY_V96_PENDING_AND_MARGIN_GUARD",
         strategyId: state.strategyId,
         verifiedAt: new Date().toISOString(),
+        combinedRoot,
+        legacyStateRoot: stateRoot,
+        killSwitchPath,
         killSwitch: {
             active: true,
             reason: killSwitch.reason,
