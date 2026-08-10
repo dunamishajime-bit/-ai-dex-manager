@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import { DISDEX_V13D_V11EQ_V96_RUNTIME } from "../config/disdexStockRouterV13DV11EqRuntime";
+import { DISDEX_V96_STRATEGY_ID } from "../config/disdexV96Runtime";
 import { AsterApiError, AsterV3Client, type AsterOrderResponse } from "../lib/aster-v3-client";
 import { readDisDexV96KillSwitch } from "../lib/disdex-v96-live-risk-controls";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
@@ -46,9 +47,17 @@ async function main() {
 
     const store = new FileDisDexV96RunnerStateStore(statePath, "live");
     const state = await store.load();
+    if (state.strategyId !== DISDEX_V96_STRATEGY_ID) {
+        throw new Error(`LEGACY_RECONCILE_STRATEGY_ID_MISMATCH:${state.strategyId}`);
+    }
     if (!state.pending) throw new Error("LEGACY_RECONCILE_NO_PENDING_STATE");
     if (state.pending.phase !== "manual_review") {
         throw new Error(`LEGACY_RECONCILE_PENDING_PHASE_NOT_MANUAL_REVIEW:${state.pending.phase}`);
+    }
+
+    const pending = structuredClone(state.pending);
+    if (pending.symbol.toUpperCase() !== "SOLUSDT" || String(pending.side).toUpperCase() !== "BUY" || pending.reduceOnly === true) {
+        throw new Error(`LEGACY_RECONCILE_UNEXPECTED_PENDING:${pending.symbol}:${pending.side}:reduceOnly=${pending.reduceOnly}`);
     }
 
     const client = new AsterV3Client({
@@ -61,7 +70,6 @@ async function main() {
     });
     if (!client.hasTradingCredentials()) throw new Error("LEGACY_RECONCILE_ASTER_CREDENTIALS_MISSING");
 
-    const pending = structuredClone(state.pending);
     const bnbFill = [...state.completedExecutions].reverse().find((row) =>
         row.symbol.toUpperCase() === "BNBUSDT" && row.reduceOnly === true && String(row.status).toUpperCase() === "FILLED"
     );
@@ -90,6 +98,10 @@ async function main() {
     if (pendingOrder && !TERMINAL_ORDER_STATUSES.has(pendingStatus)) {
         throw new Error(`LEGACY_RECONCILE_PENDING_ORDER_NOT_TERMINAL:${pendingStatus}`);
     }
+    if (pendingOrder && pendingOrder.clientOrderId && pendingOrder.clientOrderId !== pending.clientOrderId) {
+        throw new Error("LEGACY_RECONCILE_SOL_CLIENT_ORDER_ID_MISMATCH");
+    }
+
     const bnbStatus = terminalStatus(bnbExchangeOrder);
     if (bnbStatus !== "FILLED") {
         throw new Error(`LEGACY_RECONCILE_BNB_EXCHANGE_STATUS_NOT_FILLED:${bnbStatus}`);
@@ -99,6 +111,22 @@ async function main() {
     }
     if (String(bnbExchangeOrder?.side || "").toUpperCase() !== "SELL") {
         throw new Error(`LEGACY_RECONCILE_BNB_EXCHANGE_SIDE_NOT_SELL:${String(bnbExchangeOrder?.side || "UNKNOWN")}`);
+    }
+    if (bnbExchangeOrder?.clientOrderId && bnbExchangeOrder.clientOrderId !== bnbFill.clientOrderId) {
+        throw new Error("LEGACY_RECONCILE_BNB_CLIENT_ORDER_ID_MISMATCH");
+    }
+    if (bnbFill.orderId !== undefined && bnbExchangeOrder?.orderId !== undefined && String(bnbFill.orderId) !== String(bnbExchangeOrder.orderId)) {
+        throw new Error("LEGACY_RECONCILE_BNB_ORDER_ID_MISMATCH");
+    }
+    const durableBnbExecutedQty = Number(bnbFill.executedQuantity);
+    const exchangeBnbExecutedQty = Number(bnbExchangeOrder?.executedQty);
+    if (!Number.isFinite(durableBnbExecutedQty) || durableBnbExecutedQty <= 0
+        || !Number.isFinite(exchangeBnbExecutedQty) || exchangeBnbExecutedQty <= 0) {
+        throw new Error("LEGACY_RECONCILE_BNB_EXECUTED_QUANTITY_INVALID");
+    }
+    const bnbQtyTolerance = Math.max(1e-12, durableBnbExecutedQty * 1e-8);
+    if (Math.abs(durableBnbExecutedQty - exchangeBnbExecutedQty) > bnbQtyTolerance) {
+        throw new Error(`LEGACY_RECONCILE_BNB_EXECUTED_QUANTITY_MISMATCH:${durableBnbExecutedQty}:${exchangeBnbExecutedQty}`);
     }
 
     const reportBase = {
@@ -138,6 +166,7 @@ async function main() {
                 executedQty: bnbExchangeOrder?.executedQty,
                 avgPrice: bnbExchangeOrder?.avgPrice,
             },
+            quantityMatched: true,
         },
         exchangeEvidence: {
             managedPositionCount: activeManagedPositions.length,
