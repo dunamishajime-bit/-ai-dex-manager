@@ -1,39 +1,26 @@
-name: Dis-Dex V96 V52 LIVE Runner CI
+name: Dis-Dex PENGU V52 Fail-Closed CI
 
 on:
   pull_request:
     paths:
       - 'config/disdexV96Runtime.ts'
+      - 'config/penguDualLsV1Runtime.ts'
       - 'config/disdexStockRouterV13DV11EqRuntime.ts'
-      - 'lib/disdex-v13d-v11eq-stock-router-contract.ts'
-      - 'lib/disdex-v96-combined-state-migration.ts'
-      - 'lib/disdex-v96-execution-capacity.ts'
+      - 'lib/aster-v3-client.ts'
+      - 'lib/disdex-v96-live-risk-controls.ts'
       - 'lib/disdex-v96-portfolio-runner.ts'
       - 'lib/disdex-v96-runner-state.ts'
-      - 'scripts/disdex-v13d-v11eq-v96-contract-selftest.ts'
+      - 'lib/pengu-dual-ls-v1*.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-runner.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
-      - 'scripts/disdex-v13d-v11eq-v96-kill-switch.ts'
-      - 'scripts/disdex-v96-combined-state-migrate.ts'
-      - 'scripts/disdex-v96-position-reconcile.ts'
-      - 'scripts/disdex-v96-execution-safety-selftest.ts'
-      - 'scripts/disdex-v96-gross-2p5-selftest.ts'
-      - 'scripts/disdex-v96-live-preflight.ts'
-      - 'scripts/disdex-v96-v52-readonly-preflight.ts'
-      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
-      - 'scripts/disdex_v11eq_aster_only_live_engine.py'
-      - 'scripts/disdex_v52_aster_only_live_engine.py'
-      - 'scripts/disdex_stock_reference_pyth_iex_proxy.py'
-      - 'requirements-stock-aster-only.txt'
+      - 'scripts/disdex-v96-live-runner.ts'
+      - 'scripts/disdex-v96-legacy-reconcile.ts'
+      - 'scripts/pengu-dual-ls-v1-selftest.ts'
+      - 'scripts/pengu-dual-ls-v1-live-preflight.ts'
+      - 'scripts/pengu-live-kill-switch-release.ts'
       - 'ops/systemd/disdex-v13d-v11eq-v96.service'
-      - 'ops/systemd/disdex-v13d-v11eq-v96-preflight.service'
-      - 'ops/systemd/disdex-v96-combined-migration.service'
-      - 'ops/systemd/disdex-v96-position-reconciliation.service'
-      - 'ops/systemd/disdex-v96-v52-approval@.service'
-      - 'ops/systemd/disdex-stock-reference-free.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
-      - 'docs/implementation/V96_V52_VPS_LIVE_HANDOFF.md'
-      - 'docs/implementation/V96_V52_GROSS_2P5_PENGU_1P15_HANDOFF.md'
+      - 'tsconfig.pengu-dual-ls-v1.json'
       - 'tsconfig.v96-runner.json'
       - 'tsconfig.v13d-v11eq-router.json'
       - 'package.json'
@@ -44,89 +31,96 @@ permissions:
   contents: read
 
 concurrency:
-  group: dis-dex-v96-v52-live-${{ github.ref }}
+  group: dis-dex-pengu-v52-fail-closed-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
+  pengu-cross-platform:
+    name: PENGU self-test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: requirements-stock-aster-only.txt
       - run: npm ci
-      - run: python -m pip install -r requirements-stock-aster-only.txt
-      - name: Validate V96 plus V52 contract and state migration
+      - name: Typecheck isolated PENGU execution boundary
+        run: npm run strategy:pengu-dual-ls-v1:typecheck
+      - name: Run PENGU cross-platform self-test
+        run: npm run strategy:pengu-dual-ls-v1:selftest
+      - name: Assert supervisor never starts legacy V96
+        run: npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+
+  fail-closed-contract:
+    name: Fail-closed execution contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Typecheck combined, PENGU, and legacy reconciliation code
         run: |
-          npm run strategy:disdex-v52:contract
-          npx tsx scripts/disdex-v96-gross-2p5-selftest.ts
-          python -c "import websocket; print('V52 reference dependencies: PASS')"
-      - name: Protect existing Crypto V96 behavior
-        run: |
+          npm run strategy:disdex-v13d-v11eq-v96:contract:typecheck
+          npm run strategy:pengu-dual-ls-v1:typecheck
           npm run strategy:disdex-v96:typecheck
+      - name: Preserve historical V96 algorithm tests without LIVE execution
+        run: |
           npm run strategy:disdex-v96:selftest
           npm run strategy:disdex-v96:frequency:selftest
           npm run strategy:disdex-v96:execution:selftest
-      - name: Assert V96 2.5 and V52 LIVE remain fail-closed
+      - name: Verify production crypto isolation and no-order reconciliation
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
-          const v96Config = fs.readFileSync('config/disdexV96Runtime.ts', 'utf8');
-          const config = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
           const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
           const preflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
-          const readonlyPreflight = fs.readFileSync('scripts/disdex-v96-v52-readonly-preflight.ts', 'utf8');
-          const migration = fs.readFileSync('scripts/disdex-v96-combined-state-migrate.ts', 'utf8');
-          const reconciliation = fs.readFileSync('scripts/disdex-v96-position-reconcile.ts', 'utf8');
-          const v96Runner = fs.readFileSync('lib/disdex-v96-portfolio-runner.ts', 'utf8');
-          const v96State = fs.readFileSync('lib/disdex-v96-runner-state.ts', 'utf8');
-          const capacity = fs.readFileSync('lib/disdex-v96-execution-capacity.ts', 'utf8');
-          const reference = fs.readFileSync('scripts/disdex_stock_reference_pyth_iex_proxy.py', 'utf8');
-          const v52 = fs.readFileSync('scripts/disdex_v52_aster_only_live_engine.py', 'utf8');
+          const penguPreflight = fs.readFileSync('scripts/pengu-dual-ls-v1-live-preflight.ts', 'utf8');
+          const penguSelftest = fs.readFileSync('scripts/pengu-dual-ls-v1-selftest.ts', 'utf8');
+          const legacyRunner = fs.readFileSync('scripts/disdex-v96-live-runner.ts', 'utf8');
+          const reconcile = fs.readFileSync('scripts/disdex-v96-legacy-reconcile.ts', 'utf8');
+          const release = fs.readFileSync('scripts/pengu-live-kill-switch-release.ts', 'utf8');
+          const service = fs.readFileSync('ops/systemd/disdex-v13d-v11eq-v96.service', 'utf8');
           const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
-          const approval = fs.readFileSync('ops/systemd/disdex-v96-v52-approval@.service', 'utf8');
-          if (!v96Config.includes('penguTargetGross: 1.15')) throw new Error('PENGU target 1.15 missing');
-          if (!v96Config.includes('totalGrossCap: 2.5')) throw new Error('V96 total Gross 2.5 missing');
-          if (!v96Config.includes('maximumOverridePenguGross: 1.15')) throw new Error('Override PENGU 1.15 missing');
-          if (!v96Config.includes('maximumPortfolioGross: 2.5')) throw new Error('Override portfolio Gross 2.5 missing');
-          if (!v96Config.includes('minimumExecutionLeverage: 3')) throw new Error('minimum leverage 3 missing');
-          if (!config.includes('mode: "LIVE_READY"')) throw new Error('runtime must be LIVE_READY');
-          if (!config.includes('cryptoSleeveGrossCap: 2.5')) throw new Error('Crypto Gross 2.5 missing');
-          if (!config.includes('stockSleeveGrossCap: 1.5')) throw new Error('Stock Gross 1.5 missing');
-          if (!config.includes('portfolioGrossCap: 2.5')) throw new Error('Portfolio Gross 2.5 missing');
-          if (!config.includes('sameSymbolConcurrentStockPositionAllowed: false')) throw new Error('same-symbol block missing');
-          if (!supervisor.includes('markCombinedV96MigrationActivated')) throw new Error('V96 migration gate missing');
-          if (!supervisor.includes('DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED')) throw new Error('V52 environment gate missing');
-          if (!supervisor.includes('DISDEX_V96_MAX_GROSS, "2.5"')) throw new Error('Supervisor Gross 2.5 self-test missing');
-          if (!preflight.includes('disdex_v52_aster_only_live_engine.py')) throw new Error('V52 preflight missing');
-          if (!readonlyPreflight.includes('READ_ONLY_PREFLIGHT_LEVERAGE_BELOW_')) throw new Error('authenticated leverage gate missing');
-          if (!migration.includes('systemctl') || !migration.includes('reconcileOrder')) throw new Error('verified V96 migration checks missing');
-          if (!reconciliation.includes('ASTER_API_PRIVATE_KEY') || !reconciliation.includes('systemctl')) throw new Error('authenticated V96 position reconciliation missing');
-          if (!reconciliation.includes('ordersSent: false') || !reconciliation.includes('closeUnmanagedPositions: false')) throw new Error('reconciliation no-order invariant missing');
-          if (reconciliation.includes('executeMarket(')) throw new Error('reconciliation must not submit orders');
-          if (!v96Runner.includes('skippedSignalReferenceTs') || !v96State.includes('skippedSignalReferenceTs')) throw new Error('formal one-time signal skip missing');
-          if (!v96Runner.includes('1785024000000')) throw new Error('stale ETH referenceTs skip missing');
-          if (!v96Runner.includes('planDisDexV96ExecutionCapacity') || !capacity.includes('projectedPortfolioGross')) throw new Error('shared portfolio Gross sizing missing');
-          if (!capacity.includes('availableMarginUsd * maxGross')) throw new Error('Gross above 1.0 leverage capacity missing');
-          if (!v96Runner.includes('closeUnmanagedPositions') || !v96Runner.includes('direction changes must close reduce-only')) throw new Error('V96 safety invariants missing');
-          if (!reference.includes('hermes.pyth.network') || !reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Pyth/IEX reference missing');
-          if (!v52.includes('POST_EARLY3__B75__H3__BOTH__NONE') && !config.includes('POST_EARLY3__B75__H3__BOTH__NONE')) throw new Error('frozen V50 candidate missing');
-          if (!v52.includes('I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION')) throw new Error('legacy V11 state migration gate missing');
-          if (!v52.includes('pendingOrder')) throw new Error('pending order persistence missing');
-          if (!v52.includes('MISSED_CHECKPOINT_FAIL_CLOSED')) throw new Error('V50 checkpoint recovery missing');
-          if (v52.includes('HyperliquidXYZClient') || v52.includes('self.xyz')) throw new Error('Hyperliquid must remain excluded');
-          if (!env.includes('DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false')) throw new Error('safe disabled default missing');
-          if (!env.includes('DISDEX_V52_CRYPTO_GROSS_CAP=2.5')) throw new Error('V52 Crypto cap env missing');
-          if (!env.includes('DISDEX_V96_INITIAL_PENGU_GROSS=1.15')) throw new Error('PENGU approval env missing');
-          if (!env.includes('DISDEX_V96_MAX_GROSS=2.5')) throw new Error('V96 Gross env missing');
-          if (!approval.includes('DISDEX_V96_INITIAL_PENGU_GROSS=1.15')) throw new Error('approval PENGU 1.15 missing');
-          if (!approval.includes('DISDEX_V96_MAX_GROSS=2.5')) throw new Error('approval Gross 2.5 missing');
+
+          if (!supervisor.includes('cryptoRunner: "PENGU_DUAL_LS_V1_ONLY"')) throw new Error('PENGU-only supervisor marker missing');
+          if (!supervisor.includes('DISDEX_ENABLE_LEGACY_V96_LIVE: "false"')) throw new Error('legacy V96 environment block missing');
+          if (supervisor.includes('spawn(tsx, ["scripts/disdex-v96-live-runner.ts"')) throw new Error('legacy V96 spawn still present');
+          if (!supervisor.includes('scripts/pengu-dual-ls-v1-live-preflight.ts')) throw new Error('isolated PENGU preflight missing from supervisor');
+          if (!preflight.includes('scripts/pengu-dual-ls-v1-live-preflight.ts')) throw new Error('system preflight does not call isolated PENGU preflight');
+          if (preflight.includes('scripts/disdex-v96-live-preflight.ts') || preflight.includes('disdex-v96-combined-state-migrate')) throw new Error('legacy V96 startup preflight still wired');
+
+          if (!legacyRunner.includes('LEGACY_V96_LIVE_RETIRED')) throw new Error('legacy V96 hard-retirement marker missing');
+          if (!legacyRunner.includes('if (runnerMode === "live")')) throw new Error('legacy V96 unconditional LIVE block missing');
+
+          if (!penguPreflight.includes('PENGU_PREFLIGHT_KILL_SWITCH_ACTIVE')) throw new Error('PENGU kill-switch gate missing');
+          if (!penguPreflight.includes('PENGU_PREFLIGHT_OPEN_ORDER_COUNT')) throw new Error('PENGU open-order gate missing');
+          if (!penguPreflight.includes('PENGU_PREFLIGHT_INVALID_POSITION_OR_MARK_PRICE')) throw new Error('PENGU mark/position validation missing');
+          if (penguPreflight.includes('.executeMarket(') || penguPreflight.includes('.placeMarketOrder(')) throw new Error('PENGU preflight must not submit orders');
+
+          if (!reconcile.includes('RECONCILE_LEGACY_V96_FLAT_STATE')) throw new Error('reconciliation acknowledgement missing');
+          if (!reconcile.includes('manual_review')) throw new Error('manual-review state gate missing');
+          if (!reconcile.includes('BNBUSDT') || !reconcile.includes('reduceOnly')) throw new Error('BNB reduce-only fill evidence gate missing');
+          if (!reconcile.includes('LEGACY_V96_RECONCILE_OPEN_ORDERS_PRESENT')) throw new Error('zero-open-orders reconciliation gate missing');
+          if (reconcile.includes('.executeMarket(') || reconcile.includes('.placeMarketOrder(')) throw new Error('reconciliation must not submit orders');
+
+          if (!release.includes('RELEASE_KILL_SWITCH_AFTER_RECONCILIATION')) throw new Error('kill-switch release acknowledgement missing');
+          if (!release.includes('LEGACY_V96_RECONCILE_APPLIED')) throw new Error('kill-switch release lacks reconciliation evidence gate');
+          if (!release.includes('KILL_SWITCH_RELEASE_OPEN_ORDERS_PRESENT')) throw new Error('kill-switch release lacks zero-open-orders gate');
+          if (release.includes('.executeMarket(') || release.includes('.placeMarketOrder(')) throw new Error('kill-switch release must not submit orders');
+
+          if (!penguSelftest.includes('tmpdir()') || !penguSelftest.includes('normalize(')) throw new Error('cross-platform temp path regression test missing');
+          if (!service.includes('PENGU Dual LS V1')) throw new Error('systemd service description still advertises legacy V96');
+          if (!env.includes('DISDEX_ENABLE_LEGACY_V96_LIVE=false')) throw new Error('safe legacy V96 env default missing');
+          if (!env.includes('PENGU_LEGACY_CORE_ENABLED=false')) throw new Error('legacy PENGU core env block missing');
+          if (env.includes('DISDEX_V96_LIVE_EXECUTION_ENABLED=true')) throw new Error('legacy V96 live authorization remains in env');
           NODE
