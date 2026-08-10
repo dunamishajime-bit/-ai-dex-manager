@@ -75,6 +75,10 @@ export function DecisionStatusPanel() {
     setLoading(true);
     try {
       const response = await fetch("/api/system/decision-status", { cache: "no-store" });
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        throw new Error("判定データAPIに接続できません。");
+      }
       const data = await response.json();
       if (!response.ok || !data?.readOnly) throw new Error(data?.error || "判定データを取得できません。");
       setSnapshot(data as Snapshot);
