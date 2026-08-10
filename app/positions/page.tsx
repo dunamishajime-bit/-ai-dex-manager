@@ -4,8 +4,6 @@ import { useMemo } from "react";
 import { Activity, BarChart3, ShieldCheck, Wallet } from "lucide-react";
 
 import { AutoTradeHistoryPanel } from "@/components/features/autotrade/AutoTradeHistoryPanel";
-import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
-import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTradeRunPanel";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
@@ -155,8 +153,6 @@ export default function PositionsPage() {
           </div>
         </section>
 
-        <ManualTradeRunPanel />
-        <LiveDecisionPanel />
         <AutoTradeHistoryPanel />
       </div>
     </main>

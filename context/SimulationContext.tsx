@@ -5445,9 +5445,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         executionOverride?: TradeExecutionOverride,
         tradeMeta?: TradeExecutionMeta,
     ): Promise<boolean> => {
-        // --- HARD STOP (temporary) ---
-        // Mitigation: Setting to false as we are implementing robust locks
-        const HARD_STOP_TRADING = false;
+        // The web application is read-only. Live execution is owned exclusively by
+        // the immutable strategy runners; legacy simulation callers fail closed.
+        const HARD_STOP_TRADING = true;
 
         if (tradeExecutionLockRef.current || tradeInProgress) {
             console.warn("[TRADE_BLOCKED] Trade already in progress. Skipping duplicate request.", { tokenSymbol, action });
@@ -10018,12 +10018,6 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         refreshDailyStrategyProposals,
         refreshContinuousStrategyMonitor,
     ]);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            (window as any).__DIS_EXECUTE_TRADE__ = executeTrade;
-        }
-    }, [executeTrade]);
 
     return (
         <SimulationContext.Provider value={{

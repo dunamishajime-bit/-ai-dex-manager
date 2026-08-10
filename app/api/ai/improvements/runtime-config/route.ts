@@ -37,7 +37,7 @@ function buildCurrentAssessment(
         reason: `改善適用 ${latestCount.applied} 件 / 保留 ${latestCount.pending} 件を踏まえ、ロジック切替後の執行差を監視するためです。`,
         expectedImpact: "バックテストと実売買のズレを早期に検知できます。",
         risk: "low" as const,
-        filesLikelyAffected: ["config/reclaimHybridStrategy.ts", "app/api/trade/route.ts", "config/botConfig.ts"],
+        filesLikelyAffected: ["config/reclaimHybridStrategy.ts", "config/botConfig.ts"],
       },
       {
         title: "月次で価格取得フォールバックの監査を実施",

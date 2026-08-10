@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { PENGU_DUAL_LS_V1, resolvePenguDualLsV1Runtime } from "../config/penguDualLsV1Runtime";
-import { evaluatePenguDualLsV1Decision } from "../lib/pengu-dual-ls-v1";
+import { buildPenguDualLsV1Signal, evaluatePenguDualLsV1Decision } from "../lib/pengu-dual-ls-v1";
 import { MemoryLiveRunnerLock } from "../lib/live-runner-state";
 import { MemoryPenguDualLsV1RunnerStateStore, createPenguDualLsV1RunnerState } from "../lib/pengu-dual-ls-v1-runner-state";
 import { PenguDualLsV1PortfolioRunner } from "../lib/pengu-dual-ls-v1-portfolio-runner";
@@ -60,6 +60,30 @@ const conflictingDecision = evaluatePenguDualLsV1Decision({
     shortBreakdownConfirmed: true,
 }, 1.1);
 assert.equal(conflictingDecision.side, -1);
+
+const HOUR = 3_600_000;
+const historyStart = 1_700_000_000_000;
+const makeCandle = (index: number) => {
+    const openTime = historyStart + index * HOUR;
+    const close = 1 + index / 10_000;
+    return { openTime, closeTime: openTime + HOUR - 1, open: close, high: close * 1.01, low: close * 0.99, close, volume: 100 };
+};
+const continuousRows = Array.from({ length: 240 }, (_, index) => makeCandle(index));
+const malformedGapSignal = buildPenguDualLsV1Signal({
+    pengu1h: continuousRows,
+    btc1h: continuousRows.filter((_, index) => index !== 100),
+    penguFunding: [],
+}, undefined, historyStart + continuousRows.length * HOUR + 1);
+assert.equal(malformedGapSignal.side, 0);
+assert.match(malformedGapSignal.reason, /欠損|不連続|Fail Closed/);
+
+const malformedDuplicateSignal = buildPenguDualLsV1Signal({
+    pengu1h: [...continuousRows, continuousRows[continuousRows.length - 1]],
+    btc1h: continuousRows,
+    penguFunding: [],
+}, undefined, historyStart + continuousRows.length * HOUR + 1);
+assert.equal(malformedDuplicateSignal.side, 0);
+assert.match(malformedDuplicateSignal.reason, /欠損|重複|不連続|Fail Closed/);
 
 const defaultRuntime = resolvePenguDualLsV1Runtime({});
 assert.equal(defaultRuntime.enabled, false);

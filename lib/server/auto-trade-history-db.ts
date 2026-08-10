@@ -1,7 +1,7 @@
 ﻿import fs from "fs";
 import path from "path";
 
-import type { LiveHybridRunSummary } from "@/lib/server/live-hybrid-autotrade";
+import type { LegacyAutoTradeRunSummary } from "@/lib/server/legacy-autotrade-types";
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -10,7 +10,7 @@ const REDIS_KEY = "disdex:auto-trade-history";
 const DB_PATH = path.join(process.cwd(), "data", "auto-trade-history.json");
 const MAX_HISTORY = 120;
 
-export interface AutoTradeHistoryEntry extends LiveHybridRunSummary {
+export interface AutoTradeHistoryEntry extends LegacyAutoTradeRunSummary {
   id: string;
   tradedCount: number;
   noopCount: number;
@@ -71,7 +71,7 @@ export async function saveAutoTradeHistory(entries: AutoTradeHistoryEntry[]) {
   saveToFs(next);
 }
 
-export async function appendAutoTradeHistory(summary: LiveHybridRunSummary) {
+export async function appendAutoTradeHistory(summary: LegacyAutoTradeRunSummary) {
   const history = await loadAutoTradeHistory();
   const counts = summary.walletResults.reduce(
     (acc, result) => {

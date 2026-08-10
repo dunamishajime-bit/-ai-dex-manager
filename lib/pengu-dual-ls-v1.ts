@@ -104,7 +104,7 @@ function median(values: number[]) {
 }
 
 function cleanRows(rows: DisDexV35Candle[], now: number) {
-    return [...rows]
+    const cleaned = [...rows]
         .filter((row) => row.openTime > 0
             && row.closeTime > row.openTime
             && row.closeTime < now
@@ -113,8 +113,12 @@ function cleanRows(rows: DisDexV35Candle[], now: number) {
             && row.low > 0
             && row.close > 0
             && row.volume >= 0)
-        .sort((left, right) => left.openTime - right.openTime)
-        .filter((row, index, source) => index === 0 || row.openTime !== source[index - 1].openTime);
+        .sort((left, right) => left.openTime - right.openTime);
+    for (let index = 1; index < cleaned.length; index += 1) {
+        const delta = cleaned[index].openTime - cleaned[index - 1].openTime;
+        if (delta !== HOUR) return undefined;
+    }
+    return cleaned;
 }
 
 function sma(rows: DisDexV35Candle[], end: number, length: number) {
@@ -298,17 +302,20 @@ function edgeDecision(
     funding: PenguDualLsV1FundingPoint[],
     penguIndex: number,
     btcIndex: number,
+    btcIndexes: Map<number, number>,
 ): { decision: PenguDualLsV1FeatureBuild; priorDecision: PenguDualLsV1Decision | undefined } | undefined {
     const current = buildFeaturesAt(rows, penguIndex, btcRows, btcIndex, funding);
     if (!current) return undefined;
-    const prior = penguIndex > 0 && btcIndex > 0
-        ? buildFeaturesAt(rows, penguIndex - 1, btcRows, btcIndex - 1, funding)
+    const previousPenguTs = rows[penguIndex - 1]?.openTime;
+    const previousBtcIndex = previousPenguTs === undefined ? undefined : btcIndexes.get(previousPenguTs);
+    const prior = penguIndex > 0 && previousBtcIndex !== undefined
+        ? buildFeaturesAt(rows, penguIndex - 1, btcRows, previousBtcIndex, funding)
         : undefined;
     const priorDecision = prior ? decisionAt(prior.features, prior.shortVolumeRatio) : undefined;
     let shortRecentlyActive = false;
     for (let cursor = Math.max(0, penguIndex - PENGU_DUAL_LS_V1.long.shortBlockLookbackHours); cursor <= penguIndex; cursor += 1) {
-        const btcCursor = btcRows.findIndex((row) => row.openTime === rows[cursor].openTime);
-        if (btcCursor < 0) continue;
+        const btcCursor = btcIndexes.get(rows[cursor].openTime);
+        if (btcCursor === undefined) continue;
         const candidate = buildFeaturesAt(rows, cursor, btcRows, btcCursor, funding);
         if (candidate && shortRawEligible({ ...candidate.features, volumeRatio: candidate.shortVolumeRatio })) shortRecentlyActive = true;
     }
@@ -348,6 +355,16 @@ export function buildPenguDualLsV1Signal(
 ): PenguDualLsV1Signal {
     const pengu = cleanRows(history.pengu1h, now);
     const btc = cleanRows(history.btc1h, now);
+    if (!pengu || !btc || pengu.length === 0 || btc.length === 0) {
+        return {
+            strategyId: PENGU_DUAL_LS_V1.id,
+            referenceTs: 0,
+            side: 0,
+            targetGross: 0,
+            reason: "PENGU/BTCの1時間足に欠損・重複・不連続データがあるためFail Closedです。",
+            diagnostics: { evaluatedDecisionBars: 0, fundingCoverage: false, edgeTriggered: false, longEligible: false, shortEligible: false, shortRecentlyActive: false },
+        };
+    }
     const funding = [...history.penguFunding]
         .filter((point) => point.fundingTime > 0 && Number.isFinite(point.fundingRate))
         .sort((left, right) => left.fundingTime - right.fundingTime);
@@ -365,7 +382,7 @@ export function buildPenguDualLsV1Signal(
             diagnostics: { evaluatedDecisionBars: 0, fundingCoverage: false, edgeTriggered: false, longEligible: false, shortEligible: false, shortRecentlyActive: false },
         };
     }
-    const edge = edgeDecision(pengu, btc, funding, latest.index, latest.btcIndex);
+    const edge = edgeDecision(pengu, btc, funding, latest.index, latest.btcIndex, btcIndexes);
     if (!edge) {
         return {
             strategyId: PENGU_DUAL_LS_V1.id,

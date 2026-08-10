@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";
 
-import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
 import { useSimulation } from "@/context/SimulationContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 
@@ -131,7 +130,6 @@ export default function HomePage() {
           <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />
         </section>
 
-        <LiveDecisionPanel compact />
       </div>
     </main>
   );
