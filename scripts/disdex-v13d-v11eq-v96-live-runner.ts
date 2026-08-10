@@ -80,7 +80,9 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED: runnerMode === "live" ? "true" : "false",
         PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED: runnerMode === "live" ? "true" : "false",
         PENGU_DUAL_LS_V1_STATE_DIR: paths.penguStateRoot,
-        PENGU_DUAL_LS_V1_LOCK_PATH: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.lock`),
+        // PENGU is an independent runner. Its lock must not collide with the
+        // V96 portfolio runner lock in cryptoStateRoot.
+        PENGU_DUAL_LS_V1_LOCK_PATH: resolve(paths.penguStateRoot, `runner-${runnerMode}.lock`),
         PENGU_DUAL_LS_V1_KILL_SWITCH_FILE: paths.killSwitchPath,
         PENGU_DUAL_LS_V1_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
         PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
@@ -321,6 +323,11 @@ function selfTest() {
     assert.equal(env.PENGU_DUAL_LS_V1_ENABLED, "true");
     assert.equal(env.PENGU_DUAL_LS_V1_MODE, "PAPER");
     assert.equal(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, "1.5");
+    assert.equal(
+        env.PENGU_DUAL_LS_V1_LOCK_PATH,
+        resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "pengu-dual-ls-v1", "runner-paper.lock"),
+    );
+    assert.notEqual(env.PENGU_DUAL_LS_V1_LOCK_PATH, resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "runner-paper.lock"));
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
     assert.equal(shouldStartV52Worker("ACTIVE"), true);

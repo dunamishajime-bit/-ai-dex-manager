@@ -56,6 +56,8 @@
     "strategy:disdex-v13d-v11eq-v96:reference:selftest": "python3 -m py_compile scripts/disdex_stock_reference_pyth_iex_proxy.py && python3 scripts/disdex_stock_reference_pyth_iex_proxy.py --self-test",
     "strategy:disdex-v13d-v11eq-v96:state:migrate:selftest": "tsx scripts/disdex-v96-combined-state-migrate.ts --self-test",
     "strategy:disdex-v13d-v11eq-v96:state:migrate": "tsx scripts/disdex-v96-combined-state-migrate.ts",
+    "strategy:disdex-v13d-v11eq-v96:pending:reconcile": "tsx scripts/disdex-v96-reconcile-pending-state.ts",
+    "strategy:disdex-v13d-v11eq-v96:pending:reconcile:selftest": "tsx scripts/disdex-v96-reconcile-pending-state.ts --self-test",
     "strategy:disdex-v13d-v11eq-v96:position:reconcile": "tsx scripts/disdex-v96-position-reconcile.ts",
     "strategy:disdex-v13d-v11eq-v96:supervisor:selftest": "tsx scripts/disdex-v13d-v11eq-v96-live-runner.ts --self-test",
     "strategy:disdex-v13d-v11eq-v96:contract": "npm run strategy:disdex-v13d-v11eq-v96:contract:typecheck && npm run strategy:disdex-v13d-v11eq-v96:contract:selftest && npm run strategy:disdex-v96:execution:selftest && npm run strategy:disdex-v96:override:audit:selftest && npm run strategy:disdex-v13d-v11eq-v96:stock:selftest && npm run strategy:disdex-v13d-v11eq-v96:reference:selftest && npm run strategy:disdex-v13d-v11eq-v96:state:migrate:selftest && npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest",
