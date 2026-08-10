@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "id": "main-research-0148-2026-08-10T13-44-47-727Z",
-  "cycle": 148,
-  "startedAt": "2026-08-10T13:44:37.727Z",
-  "completedAt": "2026-08-10T13:44:47.727Z",
+  "id": "main-research-0149-2026-08-10T17-09-18-203Z",
+  "cycle": 149,
+  "startedAt": "2026-08-10T17:09:08.203Z",
+  "completedAt": "2026-08-10T17:09:18.203Z",
   "profile": "attack",
-  "title": "Main Strategy Research #148：WIN80_ULTRA90_TOP1_V1 / Top-1順位付け",
-  "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Top-1順位付け」を議論。2件を提案し、最優先はTOP1_COST_ADJUSTED_RANK_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。",
-  "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はTOP1_COST_ADJUSTED_RANK_CHILD_V1で、Top-1 ranking scoreだけを変更した親子リプレイを作成します。TOP1_REGIME_CONFIRM_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。",
+  "title": "Main Strategy Research #149：WIN80_ULTRA90_TOP1_V1 / 初回100%・最大2通貨",
+  "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「初回100%・最大2通貨」を議論。2件を提案し、最優先はINITIAL_NOTIONAL_80_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。",
+  "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。",
   "methodology": "研究Program win80_ultra90_direct_v2。親はproduction main WIN80_ULTRA90_TOP1_V1だけです。旧Champion Deep Stateは読み込まず、実コード定数、歴史参考値、Critic反論、実パラメータ変更案から議論を生成します。再現可能なリプレイ結果がない案はREPLAY_REQUIREDとし、OOSや月利を捏造しません。 追加Evidence: binance-usdm-futuresの1h OHLCV/FundingキャッシュからStrategyEngineInputを6時間ごとに再構築し、次1h足始値Entry・固定24h/72h/168h Outcome・Fee/Slippage/Funding控除で検証。Artifact fingerprint=251058c8a001971f985f20b71d51154fee32ea07eebf3f6113378f8e15765f2d。",
   "finalCandidates": 0,
   "bestTrainMonthlyPct": null,
@@ -16,20 +16,20 @@
   "bestWorstStressMonthlyPct": null,
   "topStrategyIds": [
     "WIN80_ULTRA90_TOP1_V1",
-    "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
-    "TOP1_REGIME_CONFIRM_CHILD_V1"
+    "INITIAL_NOTIONAL_80_CHILD_V1",
+    "MAX_POSITION_1_CHILD_V1"
   ],
   "messages": [
     {
       "id": "m-001",
       "sequence": 1,
-      "createdAt": "2026-08-10T13:44:38.727Z",
+      "createdAt": "2026-08-10T17:09:09.203Z",
       "speakerId": "research-moderator",
       "speakerName": "Research Moderator",
       "role": "moderator",
       "stance": "context",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "Main Strategy Research #148を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「Top-1順位付け」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。",
+      "content": "Main Strategy Research #149を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「初回100%・最大2通貨」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。",
       "evidence": [
         {
           "label": "固定親",
@@ -48,7 +48,7 @@
         },
         {
           "label": "今回の焦点",
-          "value": "Top-1順位付け",
+          "value": "初回100%・最大2通貨",
           "assessment": "neutral"
         }
       ]
@@ -56,7 +56,7 @@
     {
       "id": "m-002",
       "sequence": 2,
-      "createdAt": "2026-08-10T13:44:39.727Z",
+      "createdAt": "2026-08-10T17:09:10.203Z",
       "speakerId": "main-strategy-researcher",
       "speakerName": "Main Strategy Researcher",
       "role": "researcher",
@@ -114,21 +114,21 @@
     {
       "id": "m-003",
       "sequence": 3,
-      "createdAt": "2026-08-10T13:44:40.727Z",
+      "createdAt": "2026-08-10T17:09:11.203Z",
       "speakerId": "hypothesis-researcher",
       "speakerName": "Hypothesis Researcher",
       "role": "researcher",
       "stance": "proposal",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "1. TOP1_COST_ADJUSTED_RANK_CHILD_V1: Top-1 ranking scoreを「Tier + Score + Confidence + Trigger + RR + Volume + EventPriority」から「Current ranking - estimated round-trip cost penalty」へ変更。高ScoreでもSpread・Slippage負けする銘柄をTop-1から外せるかを検証する。 期待効果: 約定後期待値とStress耐性の改善。\n2. TOP1_REGIME_CONFIRM_CHILD_V1: Top-1 tie breakerを「Trend agreement bonus」から「BTC regime agreement as final tie breaker」へ変更。僅差候補ではBTC地合い一致を優先し、逆行Entryを減らす。 期待効果: 勝率改善と候補減少。",
+      "content": "1. INITIAL_NOTIONAL_80_CHILD_V1: Initial notional fractionを「100.00%」から「80.00%」へ変更。初回100%集中を抑え、次のUltra90または急変時の余力を残す。 期待効果: DD低下と月利低下の比較。\n2. MAX_POSITION_1_CHILD_V1: Maximum concurrent positionsを「2」から「1」へ変更。Top-1思想を完全単一保有にした場合の集中収益と相関リスクを比較する。 期待効果: 管理単純化と分散効果消失の比較。",
       "evidence": [
         {
-          "label": "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
+          "label": "INITIAL_NOTIONAL_80_CHILD_V1",
           "value": "REPLAY_REQUIRED",
           "assessment": "neutral"
         },
         {
-          "label": "TOP1_REGIME_CONFIRM_CHILD_V1",
+          "label": "MAX_POSITION_1_CHILD_V1",
           "value": "REPLAY_REQUIRED",
           "assessment": "neutral"
         }
@@ -137,7 +137,7 @@
     {
       "id": "m-004",
       "sequence": 4,
-      "createdAt": "2026-08-10T13:44:41.727Z",
+      "createdAt": "2026-08-10T17:09:12.203Z",
       "speakerId": "overfit-critic",
       "speakerName": "AI反対派 / Overfit",
       "role": "overfit_critic",
@@ -165,7 +165,7 @@
     {
       "id": "m-005",
       "sequence": 5,
-      "createdAt": "2026-08-10T13:44:42.727Z",
+      "createdAt": "2026-08-10T17:09:13.203Z",
       "speakerId": "tail-risk-critic",
       "speakerName": "AI反対派 / Tail Risk",
       "role": "tail_risk_critic",
@@ -193,7 +193,7 @@
     {
       "id": "m-006",
       "sequence": 6,
-      "createdAt": "2026-08-10T13:44:43.727Z",
+      "createdAt": "2026-08-10T17:09:14.203Z",
       "speakerId": "execution-critic",
       "speakerName": "AI反対派 / Execution",
       "role": "execution_critic",
@@ -231,13 +231,13 @@
     {
       "id": "m-007",
       "sequence": 7,
-      "createdAt": "2026-08-10T13:44:44.727Z",
+      "createdAt": "2026-08-10T17:09:15.203Z",
       "speakerId": "research-cio",
       "speakerName": "Research CIO",
       "role": "cio",
       "stance": "decision",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はTOP1_COST_ADJUSTED_RANK_CHILD_V1で、Top-1 ranking scoreだけを変更した親子リプレイを作成します。TOP1_REGIME_CONFIRM_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。\n\n現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。",
+      "content": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。\n\n現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。",
       "evidence": [
         {
           "label": "メイン維持",
@@ -246,7 +246,7 @@
         },
         {
           "label": "最優先実験",
-          "value": "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
+          "value": "INITIAL_NOTIONAL_80_CHILD_V1",
           "assessment": "neutral"
         },
         {
@@ -281,7 +281,7 @@
     "datasetId": "WIN80_USDM_1H_REFERENCE_2025H2_2026Q1_V1",
     "strategyId": "WIN80_ULTRA90_TOP1_V1",
     "source": "binance-usdm-futures",
-    "generatedAt": "2026-08-10T13:44:37.726Z",
+    "generatedAt": "2026-08-10T17:09:08.202Z",
     "period": {
       "startIso": "2025-07-01T00:00:00.000Z",
       "endIso": "2026-04-07T00:00:00.000Z"
