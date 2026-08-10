@@ -1,0 +1,63 @@
+name: PENGU V2 Pass3 Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-dual-ls-v2-20260810
+    paths:
+      - '.github/workflows/pengu-v2-pass3-research.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Build pass3 from frozen pass2 source
+        shell: bash
+        run: |
+          base64 -d scripts/research/pengu_dual_ls_v2_pass2.mjs.gz.b64 | gzip -d > /tmp/pengu_v2_pass3.mjs
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/pengu_v2_pass3.mjs')
+          s=p.read_text()
+          a="return pLookRet>=c.impulse && pClose>x.ema72 && x.rel24>=c.rel && x.vol>=c.vol && x.bRet24>-0.03 && pull>=c.pullMin && pull<=c.pullMax && trigger ? 1:0;"
+          b="return pLookRet>=c.impulse && pClose>x.ema72 && x.rel24>=c.rel && x.vol>=c.vol && btcStrong && pull>=c.pullMin && pull<=c.pullMax && trigger ? 1:0;"
+          assert a in s
+          s=s.replace(a,b)
+          a2="return rr>=c.impulse && x.close>x.ema72 && x.rel24>=c.rel && x.vol>=c.vol && x.close>x.ph24 ? 1:0;"
+          b2="return rr>=c.impulse && x.close>x.ema72 && x.rel24>=c.rel && x.vol>=c.vol && x.btcClose>x.btcEma168 && x.bRet72>0.04 && x.close>x.ph24 ? 1:0;"
+          assert a2 in s
+          s=s.replace(a2,b2)
+          marker="  const pair=align(pk.rows,bk.rows); const f=makeFeatures(pair);\n"
+          inject=marker+"  const csvHeader='ts,p_open,p_high,p_low,p_close,p_volume,b_open,b_high,b_low,b_close,b_volume\\n';\n  const csvBody=pair.map(x=>[x.p.ts,x.p.open,x.p.high,x.p.low,x.p.close,x.p.volume,x.b.open,x.b.high,x.b.low,x.b.close,x.b.volume].join(',')).join('\\n')+'\\n';\n  fs.writeFileSync(path.join(OUT,'aster-aligned-1h.csv'),csvHeader+csvBody);\n  fs.writeFileSync(path.join(OUT,'aster-funding-pengu.csv'),'ts,rate\\n'+fu.rows.map(x=>`${x.ts},${x.rate}`).join('\\n')+'\\n');\n"
+          assert marker in s
+          s=s.replace(marker,inject)
+          s=s.replace("schema:'pengu-dual-ls-v2-pass2/v1'","schema:'pengu-dual-ls-v2-pass3/v1'")
+          s=s.replace("status:'PENGU_V2_PASS2_COMPLETE'","status:'PENGU_V2_PASS3_COMPLETE'")
+          p.write_text(s)
+          PY
+      - name: Syntax check
+        run: node --check /tmp/pengu_v2_pass3.mjs
+      - name: Run Aster public-data V2 pass3
+        env:
+          PENGU_V2_START: '2025-08-03T00:00:00Z'
+          PENGU_V2_EVAL_START: '2025-08-10T00:00:00Z'
+          PENGU_V2_END: '2026-08-10T00:00:00Z'
+          PENGU_V2_OUT: 'research/pengu-v2-pass3-output'
+        run: node /tmp/pengu_v2_pass3.mjs
+      - name: Upload research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v2-pass3-${{ github.sha }}
+          path: research/pengu-v2-pass3-output/
+          if-no-files-found: warn
+          retention-days: 30
