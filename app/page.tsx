@@ -13,7 +13,7 @@ function SummaryCard({ title, value, detail, tone = "default" }: { title: string
 }
 
 function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: string; detail: string; icon: typeof Wallet }) {
-  return <Link href={href} className="group rounded-[22px] border border-gold-400/16 bg-black/20 p-4 transition hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><span className="flex items-center gap-2 text-sm font-bold text-white"><Icon className="h-4 w-4 text-gold-100" />{title}</span><ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-1" /></div><p className="mt-2 text-[11px] leading-5 text-white/72">{detail}</p></Link>;
+  return <Link href={href} className="group block rounded-[22px] border border-gold-400/16 bg-black/20 p-4 transition hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><span className="flex items-center gap-2 text-sm font-bold text-white"><Icon className="h-4 w-4 text-gold-100" />{title}</span><ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-1" /></div><p className="mt-2 text-[11px] leading-5 text-white/72">{detail}</p></Link>;
 }
 
 type MarketStatus = {
