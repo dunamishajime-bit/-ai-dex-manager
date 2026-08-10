@@ -1,0 +1,39 @@
+name: PENGU V2 Bybit Frozen
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-dual-ls-v2-20260810
+    paths:
+      - 'scripts/research/pengu_v2_bybit_frozen.py.gz.b64'
+      - '.github/workflows/pengu-v2-bybit-frozen.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-bybit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check -q numpy pandas
+      - name: Decode evaluator
+        run: base64 -d scripts/research/pengu_v2_bybit_frozen.py.gz.b64 | gzip -d > /tmp/pengu_v2_bybit_frozen.py
+      - name: Syntax check
+        run: python -m py_compile /tmp/pengu_v2_bybit_frozen.py
+      - name: Run frozen Bybit test
+        run: python /tmp/pengu_v2_bybit_frozen.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v2-bybit-frozen-${{ github.sha }}
+          path: research/pengu-v2-bybit-freeze/
+          if-no-files-found: warn
+          retention-days: 30
