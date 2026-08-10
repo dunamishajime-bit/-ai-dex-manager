@@ -218,15 +218,21 @@ export default function PerformancePage() {
     [closedTrades],
   );
 
-  const latestTradeClosedAt = closedTrades.length ? closedTrades[closedTrades.length - 1].closedAt : null;
+  const latestActivityAt = useMemo(() => {
+    const dates = entries
+      .filter((entry) => Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001)
+      .map((entry) => tradeCloseDate(entry).getTime())
+      .filter((time) => Number.isFinite(time));
+    return dates.length ? new Date(Math.max(...dates)).toISOString() : null;
+  }, [entries]);
   const latestWeek = weekly[0];
   const latestMonth = monthly[0];
 
   useEffect(() => {
-    if (latestTradeClosedAt) {
-      setMonthCursor(startOfMonth(new Date(latestTradeClosedAt)));
+    if (latestActivityAt) {
+      setMonthCursor(startOfMonth(new Date(latestActivityAt)));
     }
-  }, [latestTradeClosedAt]);
+  }, [latestActivityAt]);
 
   const calendarDays = useMemo(() => buildCalendarDays(monthCursor), [monthCursor]);
   const calendarMap = useMemo(() => {
@@ -340,7 +346,7 @@ export default function PerformancePage() {
             </button>
             <button
               type="button"
-              onClick={() => setMonthCursor(startOfMonth(latestTradeClosedAt ? new Date(latestTradeClosedAt) : new Date()))}
+              onClick={() => setMonthCursor(startOfMonth(latestActivityAt ? new Date(latestActivityAt) : new Date()))}
               className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10"
             >
               最新月
