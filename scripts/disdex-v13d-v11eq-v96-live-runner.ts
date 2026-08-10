@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import assert from "node:assert/strict";
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import {
@@ -11,6 +11,7 @@ import {
     DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
+import { isUsRegularEquitySession } from "./disdex-v13d-v11eq-v96-strategy-preflight";
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
@@ -18,6 +19,8 @@ const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as co
 const READ_ONLY_PREFLIGHT_SCRIPT = "scripts/disdex-v96-v52-readonly-preflight.ts" as const;
 const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-strategy-preflight.ts" as const;
 const MARGIN_AWARE_V52_ENGINE = "scripts/disdex_v52_margin_aware_live_engine.py" as const;
+const V52_MARKET_RECHECK_INTERVAL_MS = 30_000;
+const V52_DATA_RECHECK_INTERVAL_MS = 60_000;
 
 type RunnerMode = "paper" | "live";
 type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v1" | "stock-v52-aster-only"; process: ChildProcess };
@@ -115,6 +118,14 @@ function shouldStartV52Worker(status: V52PreflightStatus) {
     return status === "ACTIVE";
 }
 
+export type V52WorkerAction = "START" | "STOP" | "HOLD";
+
+export function v52WorkerAction(status: V52PreflightStatus, hasWorker: boolean): V52WorkerAction {
+    if (status === "ACTIVE" && !hasWorker) return "START";
+    if (status !== "ACTIVE" && hasWorker) return "STOP";
+    return "HOLD";
+}
+
 async function holdFailClosed(reason: string) {
     console.error(JSON.stringify({
         level: "error",
@@ -151,18 +162,22 @@ async function activateSharedKillSwitch(path: string, reason: string) {
     await writeFile(path, `${JSON.stringify(command, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
 }
 
+function spawnV52Worker(runnerMode: RunnerMode, daemon: boolean): ManagedChild {
+    const env = buildCombinedChildEnvironment(runnerMode);
+    const python = process.env.DISDEX_PYTHON_BIN || "python3";
+    const runFlag = daemon ? "--daemon" : "--once";
+    const stock = spawn(python, [MARGIN_AWARE_V52_ENGINE, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    return { name: "stock-v52-aster-only", process: stock };
+}
+
 function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean, v52PreflightStatus: V52PreflightStatus = "ACTIVE"): ManagedChild[] {
     const env = buildCombinedChildEnvironment(runnerMode);
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-    const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
     const pengu = spawn(tsx, ["scripts/disdex-pengu-dual-ls-v1-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
     const children: ManagedChild[] = [{ name: "crypto-v96", process: crypto }, { name: "pengu-dual-ls-v1", process: pengu }];
-    if (shouldStartV52Worker(v52PreflightStatus)) {
-        const stock = spawn(python, [MARGIN_AWARE_V52_ENGINE, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-        children.push({ name: "stock-v52-aster-only", process: stock });
-    }
+    if (shouldStartV52Worker(v52PreflightStatus)) children.push(spawnV52Worker(runnerMode, daemon));
     return children;
 }
 
@@ -201,6 +216,19 @@ function parsePreflightSummary(output: string): { v52Preflight?: { status?: V52P
     throw new Error("Strategy-specific preflight returned no structured result.");
 }
 
+function validateV52PreflightStatus(value: unknown): V52PreflightStatus {
+    if (value === "ACTIVE" || value === "WAITING_MARKET_CLOSED" || value === "BLOCKED_DATA_UNAVAILABLE") return value;
+    throw new Error("Strategy-specific preflight did not return a valid V52 status.");
+}
+
+async function runVerifiedStrategyPreflight(tsx: string, env: NodeJS.ProcessEnv) {
+    const result = await runCapture(tsx, [VERIFIED_PREFLIGHT_SCRIPT], env);
+    if (result.code !== 0) throw new Error(`Strategy-specific live preflight failed; fail-closed. ${result.stderr.trim()}`);
+    const summary = parsePreflightSummary(result.stdout);
+    const status = validateV52PreflightStatus(summary.v52Preflight?.status);
+    return { status, output: result.stdout.trim() };
+}
+
 function waitForExit(child: ManagedChild) {
     return new Promise<{ child: ManagedChild; code: number | null; signal: NodeJS.Signals | null }>((resolveExit, reject) => {
         child.process.once("error", reject);
@@ -208,35 +236,47 @@ function waitForExit(child: ManagedChild) {
     });
 }
 
+async function waitForChildShutdown(child: ManagedChild) {
+    if (child.process.exitCode !== null) return;
+    await waitForExit(child);
+}
+
 async function stopChildren(children: ManagedChild[], signal: NodeJS.Signals = "SIGTERM") {
     for (const child of children) {
         if (child.process.exitCode === null && !child.process.killed) child.process.kill(signal);
     }
-    await Promise.allSettled(children.map((child) => waitForExit(child)));
+    await Promise.allSettled(children.map((child) => waitForChildShutdown(child)));
+}
+
+async function v52HasOpenPosition(stateRoot: string): Promise<boolean> {
+    try {
+        const raw = await readFile(resolve(stateRoot, "runner-live.json"), "utf8");
+        const state = JSON.parse(raw) as { positions?: unknown; pendingOrder?: unknown };
+        const positions = state.positions && typeof state.positions === "object" ? Object.keys(state.positions).length : 0;
+        return positions > 0 || Boolean(state.pendingOrder);
+    } catch {
+        // An unreadable state must keep the worker alive rather than abandon an
+        // unknown position during a market transition.
+        return true;
+    }
 }
 
 async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     assertCombinedLiveActivation(runnerMode);
     const paths = combinedPaths();
+    const env = buildCombinedChildEnvironment(runnerMode);
+    const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
     let migrationId: string | undefined;
     let v52PreflightStatus: V52PreflightStatus = "ACTIVE";
     if (runnerMode === "live") {
         const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
         if (!runtimeCommitSha) throw new Error("Combined LIVE activation requires DISDEX_V96_RUNTIME_COMMIT_SHA.");
-        const env = buildCombinedChildEnvironment(runnerMode);
-        const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
         try {
             for (const script of livePreflightScripts()) {
                 if (script === VERIFIED_PREFLIGHT_SCRIPT) {
-                    const result = await runCapture(tsx, [script], env);
-                    if (result.code !== 0) throw new Error("Strategy-specific live preflight failed; fail-closed.");
-                    const summary = parsePreflightSummary(result.stdout);
-                    const status = summary.v52Preflight?.status;
-                    if (status !== "ACTIVE" && status !== "WAITING_MARKET_CLOSED" && status !== "BLOCKED_DATA_UNAVAILABLE") {
-                        throw new Error("Strategy-specific preflight did not return a valid V52 status.");
-                    }
-                    v52PreflightStatus = status;
-                    console.log(result.stdout.trim());
+                    const result = await runVerifiedStrategyPreflight(tsx, env);
+                    v52PreflightStatus = result.status;
+                    console.log(result.output);
                 } else {
                     await runCommand(tsx, [script], env);
                 }
@@ -251,11 +291,61 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         migrationId = activation.migrationId;
     }
     await Promise.all([mkdir(paths.cryptoStateRoot, { recursive: true }), mkdir(paths.penguStateRoot, { recursive: true }), mkdir(paths.stockStateRoot, { recursive: true })]);
-    const children = spawnManagedChildren(runnerMode, daemon, v52PreflightStatus);
+    let children = spawnManagedChildren(runnerMode, daemon, v52PreflightStatus);
+    let stockChild = children.find((child) => child.name === "stock-v52-aster-only");
     let intentionalStop = false;
+    const expectedStops = new Set<ManagedChild>();
+    let resolveMonitorStop!: () => void;
+    const monitorStop = new Promise<void>((resolveStop) => { resolveMonitorStop = resolveStop; });
+    let resolveUnexpectedChild!: (value: { kind: "child-exit"; child: ManagedChild; code: number | null; signal: NodeJS.Signals | null }) => void;
+    const unexpectedChild = new Promise<{ kind: "child-exit"; child: ManagedChild; code: number | null; signal: NodeJS.Signals | null }>((resolveExit) => {
+        resolveUnexpectedChild = resolveExit;
+    });
+    for (const child of children) {
+        child.process.once("exit", (code, signal) => {
+            if (!intentionalStop && !expectedStops.has(child)) {
+                resolveUnexpectedChild({ kind: "child-exit", child, code, signal });
+            }
+        });
+    }
+    const stopV52Worker = async () => {
+        const child = stockChild;
+        if (!child) return;
+        expectedStops.add(child);
+        stockChild = undefined;
+        children = children.filter((candidate) => candidate !== child);
+        if (child.process.exitCode === null && !child.process.killed) child.process.kill("SIGTERM");
+        await waitForChildShutdown(child);
+        console.log(JSON.stringify({
+            event: "v52-worker-transition",
+            action: "STOP",
+            reason: "US_EQUITY_MARKET_CLOSED",
+            workerStarted: false,
+            ordersSent: false,
+        }));
+    };
+    const startV52Worker = () => {
+        if (stockChild) return;
+        const child = spawnV52Worker(runnerMode, daemon);
+        children.push(child);
+        stockChild = child;
+        child.process.once("exit", (code, signal) => {
+            if (!intentionalStop && !expectedStops.has(child)) {
+                resolveUnexpectedChild({ kind: "child-exit", child, code, signal });
+            }
+        });
+        console.log(JSON.stringify({
+            event: "v52-worker-transition",
+            action: "START",
+            reason: "V52_PREFLIGHT_ACTIVE",
+            workerStarted: true,
+            ordersSent: false,
+        }));
+    };
     const stop = async () => {
         if (intentionalStop) return;
         intentionalStop = true;
+        resolveMonitorStop();
         await stopChildren(children);
     };
     process.once("SIGINT", () => { void stop(); });
@@ -286,15 +376,59 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         if (failed) throw new Error(`${failed.child.name} exited with code ${failed.code} signal ${failed.signal || "none"}.`);
         return;
     }
-    const first = await Promise.race(children.map(waitForExit));
+
+    const monitor = (async () => {
+        const waitForMonitor = async (milliseconds: number) => {
+            await Promise.race([
+                new Promise<void>((resolveWait) => setTimeout(resolveWait, milliseconds)),
+                monitorStop,
+            ]);
+        };
+        while (!intentionalStop) {
+            const marketOpen = isUsRegularEquitySession();
+            if (!marketOpen) {
+                if (stockChild && !(await v52HasOpenPosition(paths.stockStateRoot))) await stopV52Worker();
+                await waitForMonitor(V52_MARKET_RECHECK_INTERVAL_MS);
+                continue;
+            }
+            const previousStatus = v52PreflightStatus;
+            const hadWorker = Boolean(stockChild);
+            const checked = await runVerifiedStrategyPreflight(tsx, env);
+            v52PreflightStatus = checked.status;
+            const action = v52WorkerAction(checked.status, hadWorker);
+            console.log(JSON.stringify({
+                event: "v52-preflight-recheck",
+                previousStatus,
+                status: checked.status,
+                ordersAllowed: shouldStartV52Worker(checked.status),
+                workerStarted: hadWorker,
+                action,
+                output: checked.output,
+            }));
+            if (action === "START") startV52Worker();
+            if (action === "STOP") await stopV52Worker();
+            await waitForMonitor(V52_DATA_RECHECK_INTERVAL_MS);
+        }
+        return { kind: "monitor-stopped" as const };
+    })().catch((error) => ({
+        kind: "monitor-error" as const,
+        error: error instanceof Error ? error : new Error(String(error)),
+    }));
+
+    const first = await Promise.race([unexpectedChild, monitor]);
     if (!intentionalStop) {
-        const reason = `${first.child.name} exited unexpectedly (code=${first.code}, signal=${first.signal || "none"}).`;
+        const reason = first.kind === "child-exit"
+            ? `${first.child.name} exited unexpectedly (code=${first.code}, signal=${first.signal || "none"}).`
+            : first.kind === "monitor-error"
+                ? `V52 lifecycle monitor failed; fail-closed. ${first.error.message}`
+                : "Combined supervisor monitor stopped unexpectedly.";
+        intentionalStop = true;
+        resolveMonitorStop();
         if (runnerMode === "live") {
             await activateSharedKillSwitch(paths.killSwitchPath, reason);
             await new Promise<void>((resolveWait) => setTimeout(resolveWait, 35_000));
         }
-        intentionalStop = true;
-        await stopChildren(children.filter((child) => child !== first.child));
+        await stopChildren(first.kind === "child-exit" ? children.filter((child) => child !== first.child) : children);
         throw new Error(reason);
     }
 }
@@ -333,6 +467,12 @@ function selfTest() {
     assert.equal(shouldStartV52Worker("ACTIVE"), true);
     assert.equal(shouldStartV52Worker("WAITING_MARKET_CLOSED"), false);
     assert.equal(shouldStartV52Worker("BLOCKED_DATA_UNAVAILABLE"), false);
+    assert.equal(v52WorkerAction("ACTIVE", false), "START");
+    assert.equal(v52WorkerAction("ACTIVE", true), "HOLD");
+    assert.equal(v52WorkerAction("WAITING_MARKET_CLOSED", false), "HOLD");
+    assert.equal(v52WorkerAction("WAITING_MARKET_CLOSED", true), "STOP");
+    assert.equal(v52WorkerAction("BLOCKED_DATA_UNAVAILABLE", false), "HOLD");
+    assert.equal(v52WorkerAction("BLOCKED_DATA_UNAVAILABLE", true), "STOP");
     assert.equal(shouldHoldFailClosed("live", true), true);
     assert.equal(shouldHoldFailClosed("live", false), false);
     assert.equal(shouldHoldFailClosed("paper", true), false);

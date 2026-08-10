@@ -36,6 +36,10 @@ export function isUsRegularEquitySession(now = new Date()): boolean {
     return minutes >= 570 && minutes <= 960;
 }
 
+export function shouldFetchV52MarketData(now = new Date()): boolean {
+    return isUsRegularEquitySession(now);
+}
+
 export function containsDataFailure(output: string): boolean {
     return DATA_FAILURE_PATTERNS.some((pattern) => pattern.test(output));
 }
@@ -99,31 +103,31 @@ async function main() {
     const env = { ...process.env };
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-    const v52 = await spawnCaptured(
-        python,
-        ["scripts/disdex_v52_margin_aware_live_engine.py", "--mode", "live", "--preflight-readonly"],
-        env,
-    );
-    const v52Output = `${v52.stdout}\n${v52.stderr}`;
     let v52Status: V52PreflightStatus;
     let v52Detail: Record<string, unknown> | undefined;
-    if (v52.code === 0) {
-        v52Detail = parseLastJson(v52.stdout);
-        if (isUsRegularEquitySession()) {
-            v52Status = "ACTIVE";
-        } else {
-            v52Status = "WAITING_MARKET_CLOSED";
-            v52Detail = {
-                ...v52Detail,
-                marketSession: "CLOSED",
-                reason: "US_EQUITY_MARKET_CLOSED",
-                ordersAllowed: false,
-            };
-        }
+    if (!shouldFetchV52MarketData()) {
+        v52Status = "WAITING_MARKET_CLOSED";
+        v52Detail = {
+            marketSession: "CLOSED",
+            reason: "US_EQUITY_MARKET_CLOSED",
+            ordersAllowed: false,
+            referenceFetchSkipped: true,
+        };
     } else {
-        const classified = classifyV52PreflightFailure(v52Output);
-        if (!classified) throw new Error(`V52 preflight failed for a non-data safety reason; fail-closed. ${v52Output.trim()}`);
-        v52Status = classified;
+        const v52 = await spawnCaptured(
+            python,
+            ["scripts/disdex_v52_margin_aware_live_engine.py", "--mode", "live", "--preflight-readonly"],
+            env,
+        );
+        const v52Output = `${v52.stdout}\n${v52.stderr}`;
+        if (v52.code === 0) {
+            v52Status = "ACTIVE";
+            v52Detail = parseLastJson(v52.stdout);
+        } else {
+            const classified = classifyV52PreflightFailure(v52Output);
+            if (!classified) throw new Error(`V52 preflight failed for a non-data safety reason; fail-closed. ${v52Output.trim()}`);
+            v52Status = classified;
+        }
     }
 
     const crypto = await spawnCaptured(tsx, ["scripts/disdex-v96-live-preflight.ts"], env);
