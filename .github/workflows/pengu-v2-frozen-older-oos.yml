@@ -37,3 +37,4 @@ jobs:
           path: research/pengu-v2-frozen-oos/
           if-no-files-found: warn
           retention-days: 30
+# trigger: frozen parameters, no optimization
