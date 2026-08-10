@@ -27,7 +27,7 @@ def klines(symbol,start,end):
     rows=[];cur=int(start.timestamp()*1000);endms=int(end.timestamp()*1000);step=480*3600*1000
     while cur<endms:
         to=min(endms-1,cur+step-1)
-        x=get('/api/v1/kline/query',{'symbol':symbol,'granularity':3600,'from':cur,'to':to})
+        x=get('/api/v1/kline/query',{'symbol':symbol,'granularity':60,'from':cur,'to':to})
         rows.extend(x or []);cur=to+1;time.sleep(.05)
     if not rows:return pd.DataFrame()
     d=pd.DataFrame(rows,columns=['t','open','high','low','close','volume','turnover'])
