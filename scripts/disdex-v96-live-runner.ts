@@ -50,6 +50,9 @@ async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
 
 async function main() {
     const runnerMode = mode();
+    if (runnerMode === "live") {
+        throw new Error("LEGACY_V96_LIVE_RETIRED: production crypto execution is PENGU_DUAL_LS_V1 only; no V96 LIVE orders are permitted.");
+    }
     const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
     const killSwitchPath = process.env.DISDEX_V96_KILL_SWITCH_FILE;
     const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
