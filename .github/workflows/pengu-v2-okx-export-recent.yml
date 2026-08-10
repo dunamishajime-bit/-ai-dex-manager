@@ -1,0 +1,33 @@
+name: PENGU V2 OKX Export Recent
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-dual-ls-v2-20260810
+    paths:
+      - 'scripts/research/pengu_v2_okx_export_recent.py'
+      - '.github/workflows/pengu-v2-okx-export-recent.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check -q numpy pandas
+      - name: Export dataset
+        run: python scripts/research/pengu_v2_okx_export_recent.py
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v2-okx-export-recent-${{ github.sha }}
+          path: research/pengu-v2-okx-export-recent/
+          retention-days: 30
