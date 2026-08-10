@@ -7,6 +7,7 @@ on:
       - research/win80-profit-optimization-v1
     paths:
       - "research/pair-specific-v104-trigger.txt"
+      - ".github/workflows/pair-specific-v104-exact-window.yml"
 
 permissions:
   contents: read
@@ -16,41 +17,58 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  research:
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        style: [cycle, dependency, temporal]
+  data:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-python@v5
+      - name: Restore exact-window genuine USD-M cache
+        uses: actions/cache@v4
         with:
-          python-version: "3.12"
+          path: .cache/perp-research-usdm
+          key: pair-specific-v104-exact-usdm-v3-20260810
       - name: Install dependencies
         run: npm ci
-      - name: Force fresh genuine six-pair USD-M history
+      - name: Prepare genuine six-pair USD-M history once
         run: |
-          rm -rf .cache/perp-research-usdm
           npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
           python - <<'PY'
           from pathlib import Path
           root=Path('.cache/perp-research-usdm/consolidated')
           for sym in ['BTC','ETH','BNB','SOL','LINK','AVAX']:
-              matches=sorted(root.glob(f'{sym}USDT-1661990400000-*-v2.json'))
+              matches=sorted(root.glob(f'{sym}USDT-1661990400000-*-v3.json'))
               if not matches:
                   raise SystemExit(f'MISSING_FRESH_CACHE:{sym}')
               src=matches[-1]
-              dst=root/f'{sym}USDT-1661990400000-1782864000000-v2.json'
+              dst=root/f'{sym}USDT-1661990400000-1782864000000-v3.json'
               if src != dst:
                   dst.write_bytes(src.read_bytes())
           PY
+
+  research:
+    needs: data
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        style: [cycle, dependency, temporal]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore exact-window genuine USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pair-specific-v104-exact-usdm-v3-20260810
+          fail-on-cache-miss: true
       - name: Compile research source
         run: python -m py_compile scripts/research_lab_pair_specific_v103.py
       - name: Run exact-window pair-specific validation
