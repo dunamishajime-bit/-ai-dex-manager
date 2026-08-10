@@ -1,0 +1,42 @@
+name: PENGU V2 Pass2 Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-dual-ls-v2-20260810
+    paths:
+      - 'scripts/research/pengu_dual_ls_v2_pass2.mjs.gz.b64'
+      - '.github/workflows/pengu-v2-pass2-research.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Decode research script
+        run: base64 -d scripts/research/pengu_dual_ls_v2_pass2.mjs.gz.b64 | gzip -d > /tmp/pengu_dual_ls_v2_pass2.mjs
+      - name: Syntax check
+        run: node --check /tmp/pengu_dual_ls_v2_pass2.mjs
+      - name: Run Aster public-data V2 pass2
+        env:
+          PENGU_V2_START: '2025-08-03T00:00:00Z'
+          PENGU_V2_EVAL_START: '2025-08-10T00:00:00Z'
+          PENGU_V2_END: '2026-08-10T00:00:00Z'
+          PENGU_V2_OUT: 'research/pengu-v2-pass2-output'
+        run: node /tmp/pengu_dual_ls_v2_pass2.mjs
+      - name: Upload research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v2-pass2-${{ github.sha }}
+          path: research/pengu-v2-pass2-output/
+          if-no-files-found: warn
+          retention-days: 30
