@@ -6,6 +6,7 @@ on:
       - research/aifx-free-early-wave-20260810
     paths:
       - research/aifx_early_wave/run_pair_wave_classifier_proxy.py
+      - research/aifx_early_wave/run_pair_wave_classifier_proxy_fixed.py
       - research/aifx_early_wave/run_early_wave_proxy.py
       - research/aifx_early_wave/run_wave_state_proxy.py
       - research/aifx_early_wave/run_mtf_wave_proxy.py
@@ -28,7 +29,7 @@ jobs:
       - name: Install research dependencies
         run: python -m pip install --disable-pip-version-check numpy pandas scikit-learn
       - name: Run pair-direction wave classifier proxy
-        run: python research/aifx_early_wave/run_pair_wave_classifier_proxy.py
+        run: python research/aifx_early_wave/run_pair_wave_classifier_proxy_fixed.py
       - name: Commit frozen results
         run: |
           git config user.name "github-actions[bot]"
