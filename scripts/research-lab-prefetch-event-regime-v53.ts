@@ -1,7 +1,7 @@
 import { loadPerpMarketData } from "../lib/research-lab/perp/data-store";
 
 const START_TS = Date.UTC(2022, 8, 1); // 2022-09-01 UTC
-const END_TS = Date.UTC(2026, 6, 1);   // 2026-07-01 UTC
+const END_TS = Date.UTC(2026, 7, 10);  // 2026-08-10 UTC; covers the fixed 2026-08-09 JST research end
 const SYMBOLS = ["BTC", "ETH", "BNB", "SOL", "LINK", "AVAX"];
 
 async function main() {
