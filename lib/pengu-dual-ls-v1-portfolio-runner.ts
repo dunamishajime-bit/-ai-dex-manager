@@ -269,6 +269,7 @@ export class PenguDualLsV1PortfolioRunner {
             if (this.dependencies.config.mode === "SHADOW") {
                 const signal = buildPenguDualLsV1Signal(history, state.position, this.now());
                 state.lastSignalReferenceTs = signal.referenceTs;
+                state.latestSignal = signal;
                 await this.dependencies.stateStore.save(state);
                 this.log.info("PENGU Dual LS shadow decision", {
                     strategyId: signal.strategyId,
@@ -319,6 +320,7 @@ export class PenguDualLsV1PortfolioRunner {
                 }
                 : baseSignal;
             state.lastSignalReferenceTs = signal.referenceTs;
+            state.latestSignal = signal;
             const reduceOnly = Boolean(signal.exit && state.position && actual);
             const side: AsterOrderSide | undefined = reduceOnly
                 ? (state.position!.side > 0 ? "SELL" : "BUY")

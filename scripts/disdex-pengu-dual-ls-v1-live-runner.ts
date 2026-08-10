@@ -52,7 +52,7 @@ async function main() {
         marketData,
         executor,
         stateStore: new FilePenguDualLsV1RunnerStateStore(resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`), runtime.mode),
-        lock: new FileLiveRunnerLock(resolveLiveRunnerLockPath(process.env.PENGU_DUAL_LS_V1_LOCK_PATH, stateRoot, runtime.mode.toLowerCase()), numberEnv("PENGU_DUAL_LS_V1_LOCK_STALE_MS", 10 * 60_000)),
+        lock: new FileLiveRunnerLock(resolveLiveRunnerLockPath(process.env.PENGU_DUAL_LS_V1_LOCK_PATH, stateRoot, runtime.mode.toLowerCase() as "live" | "paper"), numberEnv("PENGU_DUAL_LS_V1_LOCK_STALE_MS", 10 * 60_000)),
         config: {
             mode: runtime.mode,
             enabled: runtime.enabled,
