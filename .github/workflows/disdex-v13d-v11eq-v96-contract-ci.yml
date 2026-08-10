@@ -78,49 +78,67 @@ jobs:
           npm run strategy:disdex-v96:selftest
           npm run strategy:disdex-v96:frequency:selftest
           npm run strategy:disdex-v96:execution:selftest
-      - name: Verify production crypto isolation and no-order reconciliation
+      - name: Verify production crypto isolation and no-order remediation
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
-          const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
-          const preflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
-          const penguPreflight = fs.readFileSync('scripts/pengu-dual-ls-v1-live-preflight.ts', 'utf8');
-          const penguSelftest = fs.readFileSync('scripts/pengu-dual-ls-v1-selftest.ts', 'utf8');
-          const legacyRunner = fs.readFileSync('scripts/disdex-v96-live-runner.ts', 'utf8');
-          const reconcile = fs.readFileSync('scripts/disdex-v96-legacy-reconcile.ts', 'utf8');
-          const release = fs.readFileSync('scripts/pengu-live-kill-switch-release.ts', 'utf8');
-          const service = fs.readFileSync('ops/systemd/disdex-v13d-v11eq-v96.service', 'utf8');
-          const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
+          const files = {
+            supervisor: fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8'),
+            preflight: fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8'),
+            penguPreflight: fs.readFileSync('scripts/pengu-dual-ls-v1-live-preflight.ts', 'utf8'),
+            penguSelftest: fs.readFileSync('scripts/pengu-dual-ls-v1-selftest.ts', 'utf8'),
+            legacyRunner: fs.readFileSync('scripts/disdex-v96-live-runner.ts', 'utf8'),
+            reconcile: fs.readFileSync('scripts/disdex-v96-legacy-reconcile.ts', 'utf8'),
+            release: fs.readFileSync('scripts/pengu-live-kill-switch-release.ts', 'utf8'),
+            service: fs.readFileSync('ops/systemd/disdex-v13d-v11eq-v96.service', 'utf8'),
+            env: fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8'),
+          };
+          const requireText = (name, text, needle) => {
+            if (!text.includes(needle)) throw new Error(`${name}: missing ${needle}`);
+            console.log(`PASS ${name}: ${needle}`);
+          };
+          const forbidText = (name, text, needle) => {
+            if (text.includes(needle)) throw new Error(`${name}: forbidden ${needle}`);
+            console.log(`PASS ${name}: forbidden text absent`);
+          };
 
-          if (!supervisor.includes('cryptoRunner: "PENGU_DUAL_LS_V1_ONLY"')) throw new Error('PENGU-only supervisor marker missing');
-          if (!supervisor.includes('DISDEX_ENABLE_LEGACY_V96_LIVE: "false"')) throw new Error('legacy V96 environment block missing');
-          if (supervisor.includes('spawn(tsx, ["scripts/disdex-v96-live-runner.ts"')) throw new Error('legacy V96 spawn still present');
-          if (!supervisor.includes('scripts/pengu-dual-ls-v1-live-preflight.ts')) throw new Error('isolated PENGU preflight missing from supervisor');
-          if (!preflight.includes('scripts/pengu-dual-ls-v1-live-preflight.ts')) throw new Error('system preflight does not call isolated PENGU preflight');
-          if (preflight.includes('scripts/disdex-v96-live-preflight.ts') || preflight.includes('disdex-v96-combined-state-migrate')) throw new Error('legacy V96 startup preflight still wired');
+          requireText('supervisor', files.supervisor, 'cryptoRunner: "PENGU_DUAL_LS_V1_ONLY"');
+          requireText('supervisor', files.supervisor, 'DISDEX_ENABLE_LEGACY_V96_LIVE: "false"');
+          forbidText('supervisor', files.supervisor, 'spawn(tsx, ["scripts/disdex-v96-live-runner.ts"');
+          requireText('supervisor', files.supervisor, 'scripts/pengu-dual-ls-v1-live-preflight.ts');
 
-          if (!legacyRunner.includes('LEGACY_V96_LIVE_RETIRED')) throw new Error('legacy V96 hard-retirement marker missing');
-          if (!legacyRunner.includes('if (runnerMode === "live")')) throw new Error('legacy V96 unconditional LIVE block missing');
+          requireText('legacy runner', files.legacyRunner, 'assertLegacyV96LiveRetired(runnerMode)');
+          requireText('legacy runner', files.legacyRunner, 'LEGACY_V96_LIVE_RETIRED');
 
-          if (!penguPreflight.includes('PENGU_PREFLIGHT_KILL_SWITCH_ACTIVE')) throw new Error('PENGU kill-switch gate missing');
-          if (!penguPreflight.includes('PENGU_PREFLIGHT_OPEN_ORDER_COUNT')) throw new Error('PENGU open-order gate missing');
-          if (!penguPreflight.includes('PENGU_PREFLIGHT_INVALID_POSITION_OR_MARK_PRICE')) throw new Error('PENGU mark/position validation missing');
-          if (penguPreflight.includes('.executeMarket(') || penguPreflight.includes('.placeMarketOrder(')) throw new Error('PENGU preflight must not submit orders');
+          requireText('combined preflight', files.preflight, 'scripts/pengu-dual-ls-v1-live-preflight.ts');
+          forbidText('combined preflight', files.preflight, 'scripts/disdex-v96-live-preflight.ts');
+          forbidText('combined preflight', files.preflight, 'disdex-v96-combined-state-migrate');
 
-          if (!reconcile.includes('RECONCILE_LEGACY_V96_FLAT_STATE')) throw new Error('reconciliation acknowledgement missing');
-          if (!reconcile.includes('manual_review')) throw new Error('manual-review state gate missing');
-          if (!reconcile.includes('BNBUSDT') || !reconcile.includes('reduceOnly')) throw new Error('BNB reduce-only fill evidence gate missing');
-          if (!reconcile.includes('LEGACY_V96_RECONCILE_OPEN_ORDERS_PRESENT')) throw new Error('zero-open-orders reconciliation gate missing');
-          if (reconcile.includes('.executeMarket(') || reconcile.includes('.placeMarketOrder(')) throw new Error('reconciliation must not submit orders');
+          requireText('PENGU preflight', files.penguPreflight, 'PENGU_PREFLIGHT_KILL_SWITCH_ACTIVE');
+          requireText('PENGU preflight', files.penguPreflight, 'PENGU_PREFLIGHT_OPEN_ORDER_COUNT');
+          requireText('PENGU preflight', files.penguPreflight, 'PENGU_PREFLIGHT_INVALID_POSITION_OR_MARK_PRICE');
+          forbidText('PENGU preflight', files.penguPreflight, '.executeMarket(');
+          forbidText('PENGU preflight', files.penguPreflight, '.placeMarketOrder(');
 
-          if (!release.includes('RELEASE_KILL_SWITCH_AFTER_RECONCILIATION')) throw new Error('kill-switch release acknowledgement missing');
-          if (!release.includes('LEGACY_V96_RECONCILE_APPLIED')) throw new Error('kill-switch release lacks reconciliation evidence gate');
-          if (!release.includes('KILL_SWITCH_RELEASE_OPEN_ORDERS_PRESENT')) throw new Error('kill-switch release lacks zero-open-orders gate');
-          if (release.includes('.executeMarket(') || release.includes('.placeMarketOrder(')) throw new Error('kill-switch release must not submit orders');
+          requireText('legacy reconciliation', files.reconcile, 'RECONCILE_LEGACY_V96_FLAT_STATE');
+          requireText('legacy reconciliation', files.reconcile, 'LEGACY_RECONCILE_UNEXPECTED_PENDING');
+          requireText('legacy reconciliation', files.reconcile, 'SOLUSDT');
+          requireText('legacy reconciliation', files.reconcile, 'BNBUSDT');
+          requireText('legacy reconciliation', files.reconcile, 'LEGACY_RECONCILE_BNB_EXECUTED_QUANTITY_MISMATCH');
+          requireText('legacy reconciliation', files.reconcile, 'LEGACY_RECONCILE_OPEN_ORDERS_PRESENT');
+          forbidText('legacy reconciliation', files.reconcile, '.executeMarket(');
+          forbidText('legacy reconciliation', files.reconcile, '.placeMarketOrder(');
 
-          if (!penguSelftest.includes('tmpdir()') || !penguSelftest.includes('normalize(')) throw new Error('cross-platform temp path regression test missing');
-          if (!service.includes('PENGU Dual LS V1')) throw new Error('systemd service description still advertises legacy V96');
-          if (!env.includes('DISDEX_ENABLE_LEGACY_V96_LIVE=false')) throw new Error('safe legacy V96 env default missing');
-          if (!env.includes('PENGU_LEGACY_CORE_ENABLED=false')) throw new Error('legacy PENGU core env block missing');
-          if (env.includes('DISDEX_V96_LIVE_EXECUTION_ENABLED=true')) throw new Error('legacy V96 live authorization remains in env');
+          requireText('kill-switch release', files.release, 'RELEASE_KILL_SWITCH_AFTER_RECONCILIATION');
+          requireText('kill-switch release', files.release, 'LEGACY_V96_RECONCILE_APPLIED');
+          requireText('kill-switch release', files.release, 'KILL_SWITCH_RELEASE_OPEN_ORDERS_PRESENT');
+          forbidText('kill-switch release', files.release, '.executeMarket(');
+          forbidText('kill-switch release', files.release, '.placeMarketOrder(');
+
+          requireText('cross-platform selftest', files.penguSelftest, 'tmpdir()');
+          requireText('cross-platform selftest', files.penguSelftest, 'normalize(');
+          requireText('systemd', files.service, 'PENGU Dual LS V1');
+          requireText('environment', files.env, 'DISDEX_ENABLE_LEGACY_V96_LIVE=false');
+          requireText('environment', files.env, 'PENGU_LEGACY_CORE_ENABLED=false');
+          forbidText('environment', files.env, 'DISDEX_V96_LIVE_EXECUTION_ENABLED=true');
           NODE
