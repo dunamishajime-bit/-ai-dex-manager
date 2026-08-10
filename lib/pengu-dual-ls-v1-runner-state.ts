@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { PenguDualLsV1Mode } from "@/config/penguDualLsV1Runtime";
-import type { PenguDualLsV1Position } from "@/lib/pengu-dual-ls-v1";
+import type { PenguDualLsV1Position, PenguDualLsV1Signal } from "@/lib/pengu-dual-ls-v1";
 
 export interface PenguDualLsV1PendingOrder {
     idempotencyKey: string;
@@ -33,6 +33,8 @@ export interface PenguDualLsV1RunnerState {
     updatedAt: number;
     lastRunAt?: number;
     lastSignalReferenceTs?: number;
+    /** Sanitized read-only decision telemetry for the monitoring UI. */
+    latestSignal?: PenguDualLsV1Signal;
     lastCompletedIdempotencyKey?: string;
     position?: PenguDualLsV1Position;
     pending?: PenguDualLsV1PendingOrder;
@@ -60,6 +62,7 @@ function normalize(value: unknown, mode: PenguDualLsV1Mode): PenguDualLsV1Runner
         updatedAt: Number.isFinite(Number(raw.updatedAt)) ? Number(raw.updatedAt) : Date.now(),
         lastRunAt: Number.isFinite(Number(raw.lastRunAt)) ? Number(raw.lastRunAt) : undefined,
         lastSignalReferenceTs: Number.isFinite(Number(raw.lastSignalReferenceTs)) ? Number(raw.lastSignalReferenceTs) : undefined,
+        latestSignal: raw.latestSignal && typeof raw.latestSignal === "object" ? raw.latestSignal as PenguDualLsV1Signal : undefined,
         lastCompletedIdempotencyKey: typeof raw.lastCompletedIdempotencyKey === "string" ? raw.lastCompletedIdempotencyKey : undefined,
         position: position && (position.side === 1 || position.side === -1) ? position : undefined,
         pending: raw.pending && typeof raw.pending === "object" ? raw.pending as PenguDualLsV1PendingOrder : undefined,
