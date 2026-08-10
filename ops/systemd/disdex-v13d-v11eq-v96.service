@@ -1,5 +1,5 @@
 [Unit]
-Description=DisDex Crypto V96 plus Aster-only V52 dual-slot LIVE runner
+Description=DisDex PENGU Dual LS V1 plus Aster-only V52 LIVE runner
 After=network-online.target disdex-stock-reference-free.service
 Wants=network-online.target
 Requires=disdex-stock-reference-free.service
