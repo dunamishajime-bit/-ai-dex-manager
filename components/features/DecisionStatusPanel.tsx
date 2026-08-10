@@ -15,11 +15,13 @@ type DecisionStatusItem = {
   checkedAt: string;
   source: string;
   dataUpdatedAt?: string;
+  distanceToTrigger?: string;
 };
 
 type Snapshot = {
   ok: boolean;
   readOnly: true;
+  dataAvailable: boolean;
   refreshIntervalMinutes: number;
   checkedAt: string;
   source: string;
@@ -58,6 +60,18 @@ function Sleeve({ title, items, marketLabel }: { title: string; items: DecisionS
               <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(item.status)}`}>{item.status}</span>
             </div>
             <p className="mt-3 text-sm leading-6 text-white/80">判定理由：{item.reason}</p>
+            {item.scoreMax > 0 ? (
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between text-[11px] text-white/55">
+                  <span>発火条件への近さ</span>
+                  <span>{Math.max(0, Math.min(100, (item.score / item.scoreMax) * 100)).toFixed(0)}%</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full bg-gold-300 transition-all" style={{ width: `${Math.max(0, Math.min(100, (item.score / item.scoreMax) * 100))}%` }} />
+                </div>
+              </div>
+            ) : null}
+            {item.distanceToTrigger ? <div className="mt-2 text-xs text-white/60">発火条件との差：{item.distanceToTrigger}</div> : null}
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/45"><span>データ時刻：{time(item.dataUpdatedAt)}</span><span>確認時刻：{time(item.checkedAt)}</span></div>
           </article>
         ))}
@@ -106,6 +120,7 @@ export function DecisionStatusPanel() {
         <span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />最終確認：{time(snapshot.checkedAt)} / 次回更新：1時間ごと</span>
         <button type="button" onClick={() => void load()} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08]"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />再確認</button>
       </div>
+      {!snapshot.dataAvailable ? <div className="rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">実ランナーの判定データ未取得：発火見込みは表示していません。</div> : null}
       {error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部データを取得できません：{error}</div> : null}
       <div className="grid gap-4 xl:grid-cols-2">
         <Sleeve title="PENGU Dual LS V1 判定状況" items={snapshot.pengu.items} />
