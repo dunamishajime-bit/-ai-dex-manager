@@ -69,8 +69,10 @@ export const DISDEX_V96_LIVE_PROMOTION = {
 
 export const DISDEX_V96_RUNTIME = {
     strategyId: DISDEX_V96_STRATEGY_ID,
-    implementationStatus: "LIVE_READY_GROSS_2P5_PENGU_1P15_OPERATOR_CONTROLLED",
+    implementationStatus: "HISTORICAL_CONTRACT_ONLY_LIVE_RUNNER_RETIRED",
     mode: "LIVE_READY" as const,
+    // Kept true only so historical V96 gate/parity self-tests remain reproducible.
+    // scripts/disdex-v96-live-runner.ts is the production execution boundary and rejects LIVE unconditionally.
     liveTradingEnabled: true,
     maximumGross: DISDEX_V96_ALLOCATION.totalGrossCap,
     minimumExecutionLeverage: 3,
@@ -85,8 +87,8 @@ export const DISDEX_V96_RUNTIME = {
     forwardEvidenceStatus: "NOT_APPROVED",
     executionParityStatus: DISDEX_V96_EXECUTION_PARITY.status,
     coreExecutionParity: DISDEX_V96_EXECUTION_PARITY.corePort,
-    operatorOverrideStatus: "IMPLEMENTED_REQUIRED_WHEN_FORWARD_NOT_APPROVED",
-    dailyLossLimitStatus: "IMPLEMENTED_PORTFOLIO_MAX_5_PERCENT",
-    killSwitchStatus: "IMPLEMENTED_FLATTEN_MANAGED_REDUCE_ONLY",
-    liveBlockReason: "LIVE requires fresh execution parity and a fresh exact-commit Operator Override for PENGU Gross 1.15 and total Gross 2.5, authenticated managed-symbol leverage of at least 3x, daily loss controls, Kill Switch configuration, credentials, migrated state when positions are retained, and explicit service handoff.",
+    operatorOverrideStatus: "HISTORICAL_CONTRACT_ONLY",
+    dailyLossLimitStatus: "LEGACY_STATE_READ_ONLY_FOR_AUDIT",
+    killSwitchStatus: "LEGACY_KILL_SWITCH_RETAINED_FOR_FAIL_CLOSED_AUDIT",
+    liveBlockReason: "Legacy V96 live process is retired. Production crypto execution is PENGU_DUAL_LS_V1 only; V96 state and gate logic remain solely for audit, replay, and reconciliation.",
 } as const;

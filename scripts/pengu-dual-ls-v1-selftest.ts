@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { tmpdir } from "node:os";
+import { normalize, resolve, sep } from "node:path";
 import { PENGU_DUAL_LS_V1, resolvePenguDualLsV1Runtime } from "../config/penguDualLsV1Runtime";
 import { buildPenguDualLsV1Signal, evaluatePenguDualLsV1Decision } from "../lib/pengu-dual-ls-v1";
 import { MemoryLiveRunnerLock } from "../lib/live-runner-state";
@@ -84,6 +86,15 @@ const malformedDuplicateSignal = buildPenguDualLsV1Signal({
 }, undefined, historyStart + continuousRows.length * HOUR + 1);
 assert.equal(malformedDuplicateSignal.side, 0);
 assert.match(malformedDuplicateSignal.reason, /欠損|重複|不連続|Fail Closed/);
+
+// OS-independent regression: never compare a Windows literal (C:\\tmp) with a POSIX literal (/tmp).
+// All runtime temp/state paths are built and compared through node:path + os.tmpdir().
+const tempRoot = resolve(tmpdir(), "pengu-dual-ls-v1-selftest");
+const statePath = resolve(tempRoot, "state", "runner-live.json");
+const equivalentStatePath = resolve(tempRoot, "state", "..", "state", "runner-live.json");
+assert.equal(normalize(statePath), normalize(equivalentStatePath));
+assert.ok(statePath.includes(`state${sep}runner-live.json`));
+assert.equal(statePath.includes("C:\\tmp/") || statePath.includes("/tmp\\"), false);
 
 const defaultRuntime = resolvePenguDualLsV1Runtime({});
 assert.equal(defaultRuntime.enabled, false);

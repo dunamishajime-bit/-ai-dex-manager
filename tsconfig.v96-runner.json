@@ -42,6 +42,7 @@
     "scripts/disdex-v96-live-runner.ts",
     "scripts/disdex-v96-migrate-config-state.ts",
     "scripts/disdex-v96-position-reconcile.ts",
+    "scripts/disdex-v96-legacy-reconcile.ts",
     "scripts/disdex-v96-execution-safety-selftest.ts",
     "scripts/disdex-v96-frequency-live-selftest.ts",
     "scripts/disdex-v96-production-selftest.ts"

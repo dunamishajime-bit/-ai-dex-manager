@@ -11,12 +11,16 @@
     "lib/live-runner-state.ts",
     "lib/signed-paper-direct-trade-executor.ts",
     "lib/disdex-v35-signal-engine.ts",
+    "lib/disdex-v96-live-risk-controls.ts",
+    "lib/disdex-v96-runner-state.ts",
     "lib/pengu-dual-ls-v1.ts",
     "lib/pengu-dual-ls-v1-market-data-provider.ts",
     "lib/pengu-dual-ls-v1-runner-state.ts",
     "lib/pengu-dual-ls-v1-portfolio-runner.ts",
     "scripts/disdex-pengu-dual-ls-v1-live-runner.ts",
-    "scripts/pengu-dual-ls-v1-selftest.ts"
+    "scripts/pengu-dual-ls-v1-selftest.ts",
+    "scripts/pengu-dual-ls-v1-live-preflight.ts",
+    "scripts/pengu-live-kill-switch-release.ts"
   ],
   "exclude": [
     "node_modules",
