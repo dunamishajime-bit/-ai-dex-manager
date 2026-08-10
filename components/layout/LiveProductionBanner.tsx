@@ -11,13 +11,13 @@ export function LiveProductionBanner() {
           {config.strategyLabel}
         </span>
         <span>{config.executionVenue}</span>
-        <span>V96損失上限 {config.v96DailyLossPct}%</span>
-        <span>V52損失上限 {config.v52DailyLossPct}%</span>
-        <span>最大Gross {config.maximumGross.toFixed(1)}</span>
-        <span>PENGU初期Gross {config.penguInitialGross.toFixed(2)}</span>
+        <span>V96/V97：現在停止</span>
+        <span>V52：市場時間外は待機</span>
+        <span>Portfolio Gross上限 {config.maximumGross.toFixed(1)}</span>
+        <span>PENGU Gross {config.penguMaximumGross.toFixed(2)} / 初期 {config.penguInitialGross.toFixed(2)}</span>
         <span className="inline-flex items-center gap-1 text-emerald-200">
           <ShieldCheck className="h-3.5 w-3.5" />
-          Kill Switch / Parity / Override は実状態を確認
+          状態は実API確認時のみ稼働中と表示
         </span>
       </div>
     </section>

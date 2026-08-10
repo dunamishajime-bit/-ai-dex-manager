@@ -21,7 +21,7 @@ type TradeHistoryEntry = {
   openedAt?: string;
   closedAt?: string;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
-  strategyId?: "V96" | "V52" | "UNKNOWN";
+  strategyId?: "PENGU_DUAL_LS_V1" | "V52" | "UNKNOWN";
   netPnlUsd?: number;
 };
 
@@ -398,7 +398,7 @@ export default function PerformancePage() {
                   {trades.length > 3 ? <div className="text-[11px] text-gray-500">+{trades.length - 3} more</div> : null}
                   {isLogicChangeDay ? (
                     <div className="rounded-lg border border-amber-300/35 bg-amber-300/10 px-2 py-1.5 text-[10px] font-semibold leading-4 text-amber-100">
-                      現行構成: V96 Crypto + V52 Stock 統合LIVE
+                      現行構成: PENGU Dual LS V1 + V52 Stock
                     </div>
                   ) : null}
                 </div>

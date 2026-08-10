@@ -19,36 +19,14 @@ export default function PositionsPage() {
       <div className="relative z-10 space-y-3">
         <header className="panel-gold rounded-[30px] p-5 md:p-7">
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />Production dashboard</div>
-          <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">V96 Crypto + V52 Stock</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/82">V96の暗号資産スリーブとV52の株式スリーブを分けて表示し、口座全体の安全ゲートを確認します。研究候補や旧Paper構成は本番状態として表示しません。</p>
-          <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold">
-            <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5 text-emerald-100">LIVE / {config.executor}</span>
-            <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V96 {config.v96DailyLossPct}%</span>
-            <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 {config.v52DailyLossPct}%</span>
-            <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Total Gross ≤ {config.maximumGross.toFixed(1)}</span>
-          </div>
+          <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{config.strategyLabel}</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/82">PENGU Dual LS V1とV52 Stockを分けて表示します。V96/V97は現在停止中、V52は市場時間外に注文停止です。実状態を取得できない場合は推測表示しません。</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold"><span className="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-white/75">LIVE状態：実API確認</span><span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V96/V97：停止</span><span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 Daily Loss {config.v52DailyLossPct}%</span><span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">PENGU Gross {config.penguMaximumGross.toFixed(2)}</span></div>
         </header>
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Metric label="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? "Aster account balance unavailable" : `Available ${formatPrice(available)}`} />
-          <Metric label="Crypto sleeve" value="V96" detail={config.cryptoSymbols.join(" / ")} />
-          <Metric label="Stock sleeve" value="V52" detail={config.stockSymbols.join(" / ")} />
-          <Metric label="Executor" value="Aster Direct" detail="One-way / Fail Closed" />
-        </section>
-        <section className="panel-gold rounded-[30px] p-4 md:p-5">
-          <div className="flex items-center gap-2 text-sm font-bold"><Wallet className="h-4 w-4 text-gold-100" />現在の口座内表示</div>
-          <div className="mt-4 space-y-2">
-            {rows.length ? rows.map((row) => <div key={row.symbol} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{row.symbol}</div><div className="text-xs text-white/60">{row.name}</div></div><div className="text-right"><div className="font-semibold">{Number(row.amount).toFixed(6)}</div><div className="text-xs text-emerald-200">{formatPrice(Number(row.usdValue || 0))}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/65">現在表示できる保有残高はありません。実口座状態の取得結果を待機しています。</div>}
-          </div>
-        </section>
-        <section className="grid gap-3 md:grid-cols-2">
-          <div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><Activity className="h-4 w-4 text-gold-100" />安全状態</div><p className="mt-3 text-sm leading-7 text-white/78">V96が口座全体の最終防衛線、V52が戦略単体の停止線です。建玉・注文・承認の実状態が取得できない場合は新規注文を停止します。</p></div>
-          <div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4 text-gold-100" />監視対象</div><p className="mt-3 text-sm leading-7 text-white/78">Crypto: {config.cryptoSymbols.join(", ")}</p><p className="text-sm leading-7 text-white/78">Stock: {config.stockSymbols.join(", ")}</p></div>
-        </section>
-        <section className="panel-gold rounded-[30px] p-4 md:p-5">
-          <div className="flex items-center gap-2 text-sm font-bold"><Activity className="h-4 w-4 text-gold-100" />{"\u5224\u5b9a\u72b6\u6cc1"}</div>
-          <p className="mt-3 text-sm leading-7 text-white/75">{"V96 Crypto\u3068 V52 Stock\u306e\u5bfe\u8c61\u9298\u67c4\u3092\u4e00\u6642\u9593\u3054\u3068\u306b\u8aad\u307f\u53d6\u308a\u78ba\u8a8d\u3057\u307e\u3059\u3002"}</p>
-          <a href="/decision-status" className="mt-3 inline-flex rounded-lg border border-gold-400/25 px-3 py-2 text-sm text-gold-100 hover:bg-gold-400/10">{"\u5224\u5b9a\u72b6\u6cc1\u3092\u958b\u304f"}</a>
-        </section>
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Metric label="Aster balance" value={balance === null ? "取得不能" : formatPrice(balance)} detail={available === null ? "取得時刻不明" : `利用可能 ${formatPrice(available)}`} /><Metric label="Crypto strategy" value="PENGU Dual LS" detail={`${config.cryptoSymbols.join(" / ")} / Gross ${config.penguMaximumGross.toFixed(2)}`} /><Metric label="Stock strategy" value="V52 Stock" detail={`${config.stockSymbols.join(" / ")} / 市場時間外は待機`} /><Metric label="Executor" value="AsterDirectTradeExecutor" detail="Fail Closed / 注文画面なし" /></section>
+        <section className="panel-gold rounded-[30px] p-4 md:p-5"><div className="flex items-center gap-2 text-sm font-bold"><Wallet className="h-4 w-4 text-gold-100" />現在の保有状況</div><div className="mt-4 space-y-2">{rows.length ? rows.map((row) => <div key={row.symbol} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{row.symbol}</div><div className="text-xs text-white/60">{row.name}</div></div><div className="text-right"><div className="font-semibold">{Number(row.amount).toFixed(6)}</div><div className="text-xs text-emerald-200">{formatPrice(Number(row.usdValue || 0))}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/65">現在表示できる保有データはありません。取得不能と実残高0は区別して表示します。</div>}</div></section>
+        <section className="grid gap-3 md:grid-cols-2"><div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><Activity className="h-4 w-4 text-gold-100" />安全状態</div><p className="mt-3 text-sm leading-7 text-white/78">PENGU Dual LS V1は単一ポジション枠で判定し、V52は市場時間と参照データが正常な場合だけ注文許可になります。Kill Switch、Daily Loss、Gross、重複注文防止は共通Gateで維持します。</p></div><div className="panel-gold rounded-[30px] p-4"><div className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4 text-gold-100" />監視対象</div><p className="mt-3 text-sm leading-7 text-white/78">Crypto：{config.cryptoSymbols.join(", ")}</p><p className="text-sm leading-7 text-white/78">Stock：{config.stockSymbols.join(", ")}</p><p className="text-sm leading-7 text-white/78">V96/V97：現在停止</p></div></section>
+        <section className="panel-gold rounded-[30px] p-4 md:p-5"><div className="flex items-center gap-2 text-sm font-bold"><Activity className="h-4 w-4 text-gold-100" />判定状況</div><p className="mt-3 text-sm leading-7 text-white/75">PENGUのLong/Short判定とV52の市場時間・参照データ状態を1時間ごとに読み取り確認します。</p><a href="/decision-status" className="mt-3 inline-flex rounded-lg border border-gold-400/25 px-3 py-2 text-sm text-gold-100 hover:bg-gold-400/10">判定状況を開く</a></section>
       </div>
     </main>
   );

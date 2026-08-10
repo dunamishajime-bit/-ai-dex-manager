@@ -34,8 +34,8 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): "V96" | "V52" {
-  return /^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol) ? "V52" : "V96";
+function strategyForSymbol(symbol: string): "PENGU_DUAL_LS_V1" | "V52" {
+  return /^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol) ? "V52" : "PENGU_DUAL_LS_V1";
 }
 
 function isEntry(direction: Direction, side: "BUY" | "SELL") {

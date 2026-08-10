@@ -39,7 +39,7 @@ export interface TradeHistoryEntry {
   commissionAsset?: string;
   maker?: boolean;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
-  strategyId?: "V96" | "V52" | "UNKNOWN";
+  strategyId?: "PENGU_DUAL_LS_V1" | "V52" | "UNKNOWN";
   netPnlUsd?: number;
 }
 
