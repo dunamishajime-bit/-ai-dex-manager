@@ -1,0 +1,1567 @@
+{
+  "status": "PROXY_REJECT",
+  "source_timezone_verified": false,
+  "formal_production_evidence": false,
+  "session_rules_used": false,
+  "cost_stress": "2x configured proxy spread floor + execution buffer",
+  "selection_uses_oos": false,
+  "features": [
+    "ret1_atr",
+    "ret2_atr",
+    "ret4_atr",
+    "ret8_atr",
+    "body_signed",
+    "body_frac",
+    "close_loc",
+    "atr_ratio",
+    "channel_pos16",
+    "eff12",
+    "eff16",
+    "disp4",
+    "disp12",
+    "disp16",
+    "posfrac8",
+    "negfrac8",
+    "m30_disp4",
+    "m30_disp12",
+    "m30_eff12",
+    "h1_disp8"
+  ],
+  "threshold_candidates": [
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75
+  ],
+  "label": {
+    "horizon_bars": 32,
+    "mfe_atr": 2.5,
+    "max_mae_atr": 1.5
+  },
+  "execution": {
+    "stop_atr": 1.5,
+    "trail_activate_r": 1.0,
+    "trail_atr": 2.75,
+    "max_hold_bars": 192,
+    "exit_probability": 0.35
+  },
+  "train_years": [
+    2013,
+    2014,
+    2015
+  ],
+  "development_years": [
+    2016,
+    2017
+  ],
+  "validation_years": [
+    2018,
+    2019
+  ],
+  "oos_years": [
+    2020,
+    2021
+  ],
+  "directions": {
+    "EURUSD:LONG": {
+      "pair": "EURUSD",
+      "direction": "LONG",
+      "selected_threshold": 0.6,
+      "development_candidates": [
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 56,
+            "net_r": -11.8919167081481,
+            "pf": 0.6187163423065648,
+            "max_dd_r": -17.76755211206766,
+            "win_rate": 0.32142857142857145,
+            "net_pips": -118.88886288318638,
+            "worst_trade_r": -1.0000000000001228,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 3,
+            "net_r": -1.5727130663470028,
+            "pf": 0.2136434668265113,
+            "max_dd_r": -2.0000000000000324,
+            "win_rate": 0.3333333333333333,
+            "net_pips": -12.18284934356495,
+            "worst_trade_r": -1.0000000000000504,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 1377,
+            "net_r": -35.610519240174355,
+            "pf": 0.9558627182011473,
+            "max_dd_r": -67.55283359667818,
+            "win_rate": 0.32752360203340597,
+            "net_pips": 37.219800647731816,
+            "worst_trade_r": -3.1600712190476767,
+            "gap_count": 24,
+            "worst_gap_r": -3.1600712190476767
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 56,
+        "net_r": -11.8919167081481,
+        "pf": 0.6187163423065648,
+        "max_dd_r": -17.76755211206766,
+        "win_rate": 0.32142857142857145,
+        "net_pips": -118.88886288318638,
+        "worst_trade_r": -1.0000000000001228,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 26,
+          "net_r": 0.02305361150308083,
+          "pf": 1.0017548330121386,
+          "max_dd_r": -5.552950426874937,
+          "win_rate": 0.4230769230769231,
+          "net_pips": 35.64001125050842,
+          "worst_trade_r": -1.000000000000103,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        },
+        "2017": {
+          "trades": 30,
+          "net_r": -11.914970319651182,
+          "pf": 0.33996208297968905,
+          "max_dd_r": -15.341853345672975,
+          "win_rate": 0.23333333333333334,
+          "net_pips": -154.52887413369479,
+          "worst_trade_r": -1.0000000000001228,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.21314091726740333
+    },
+    "EURUSD:SHORT": {
+      "pair": "EURUSD",
+      "direction": "SHORT",
+      "selected_threshold": 0.75,
+      "development_candidates": [
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 2,
+            "net_r": -1.4888020234333377,
+            "pf": 0.0,
+            "max_dd_r": -1.4888020234333377,
+            "win_rate": 0.0,
+            "net_pips": -99.40000000000504,
+            "worst_trade_r": -0.9099943387305618,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 34,
+            "net_r": -2.3711925586716256,
+            "pf": 0.8707695439968139,
+            "max_dd_r": -9.133186489402215,
+            "win_rate": 0.35294117647058826,
+            "net_pips": -63.91504459160257,
+            "worst_trade_r": -1.0000000000000544,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 294,
+            "net_r": -49.334352623439685,
+            "pf": 0.7215971291300899,
+            "max_dd_r": -59.098477628918204,
+            "win_rate": 0.29591836734693877,
+            "net_pips": -399.16756622279786,
+            "worst_trade_r": -1.0000000000001987,
+            "gap_count": 4,
+            "worst_gap_r": 0.936453997156641
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 1589,
+            "net_r": -192.6865319090642,
+            "pf": 0.7986752901835417,
+            "max_dd_r": -203.0037929685335,
+            "win_rate": 0.32158590308370044,
+            "net_pips": -1801.160482816995,
+            "worst_trade_r": -2.322309389991879,
+            "gap_count": 11,
+            "worst_gap_r": -2.322309389991879
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 0,
+          "net_r": 0.0,
+          "pf": 0.0,
+          "max_dd_r": 0.0,
+          "win_rate": 0.0,
+          "net_pips": 0.0,
+          "worst_trade_r": 0.0,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        },
+        "2017": {
+          "trades": 0,
+          "net_r": 0.0,
+          "pf": 0.0,
+          "max_dd_r": 0.0,
+          "win_rate": 0.0,
+          "net_pips": 0.0,
+          "worst_trade_r": 0.0,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.21046296171064555
+    },
+    "GBPUSD:LONG": {
+      "pair": "GBPUSD",
+      "direction": "LONG",
+      "selected_threshold": 0.65,
+      "development_candidates": [
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 30,
+            "net_r": 16.642588121844796,
+            "pf": 2.5133149321456822,
+            "max_dd_r": -4.990135845833798,
+            "win_rate": 0.5333333333333333,
+            "net_pips": 524.1256362464753,
+            "worst_trade_r": -1.0000000000000886,
+            "gap_count": 2,
+            "worst_gap_r": 1.642564057563566
+          },
+          "positive_years": 2
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 19,
+            "net_r": 11.42723846564635,
+            "pf": 2.386402059707314,
+            "max_dd_r": -1.9999999999999218,
+            "win_rate": 0.47368421052631576,
+            "net_pips": 392.1379615531828,
+            "worst_trade_r": -1.000000000000013,
+            "gap_count": 1,
+            "worst_gap_r": 5.095279742444081
+          },
+          "positive_years": 2
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 4,
+            "net_r": 2.9889569722455347,
+            "pf": 3.9889569722456573,
+            "max_dd_r": -0.999999999999959,
+            "win_rate": 0.75,
+            "net_pips": 79.8353131631968,
+            "worst_trade_r": -0.999999999999959,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 2
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 92,
+            "net_r": -1.1869381992256591,
+            "pf": 0.9735405554914007,
+            "max_dd_r": -10.681052206024015,
+            "win_rate": 0.40217391304347827,
+            "net_pips": 122.93431985655131,
+            "worst_trade_r": -1.0000000000001243,
+            "gap_count": 3,
+            "worst_gap_r": 0.40466287886157737
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 1248,
+            "net_r": -44.666340359647336,
+            "pf": 0.9370115860693334,
+            "max_dd_r": -56.21319440153629,
+            "win_rate": 0.3557692307692308,
+            "net_pips": -1155.9116466148737,
+            "worst_trade_r": -9.892017674848622,
+            "gap_count": 31,
+            "worst_gap_r": -9.892017674848622
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 30,
+        "net_r": 16.642588121844796,
+        "pf": 2.5133149321456822,
+        "max_dd_r": -4.990135845833798,
+        "win_rate": 0.5333333333333333,
+        "net_pips": 524.1256362464753,
+        "worst_trade_r": -1.0000000000000886,
+        "gap_count": 2,
+        "worst_gap_r": 1.642564057563566
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 14,
+          "net_r": 5.0026110458210304,
+          "pf": 1.7848482398239474,
+          "max_dd_r": -4.064731659179763,
+          "win_rate": 0.5,
+          "net_pips": 164.4705707856753,
+          "worst_trade_r": -1.0000000000000022,
+          "gap_count": 1,
+          "worst_gap_r": 1.642564057563566
+        },
+        "2017": {
+          "trades": 16,
+          "net_r": 11.639977076023762,
+          "pf": 3.5175936440168174,
+          "max_dd_r": -1.0955477019608084,
+          "win_rate": 0.5625,
+          "net_pips": 359.6550654607999,
+          "worst_trade_r": -1.0000000000000886,
+          "gap_count": 1,
+          "worst_gap_r": 5.095279742444081
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.21363359707851493
+    },
+    "GBPUSD:SHORT": {
+      "pair": "GBPUSD",
+      "direction": "SHORT",
+      "selected_threshold": 0.75,
+      "development_candidates": [
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 9,
+            "net_r": 0.4527036024384534,
+            "pf": 1.0754506004064082,
+            "max_dd_r": -4.293473847329922,
+            "win_rate": 0.3333333333333333,
+            "net_pips": -7.355639679813567,
+            "worst_trade_r": -1.000000000000054,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 79,
+            "net_r": -2.572130262091521,
+            "pf": 0.9407668916500426,
+            "max_dd_r": -15.685628648953445,
+            "win_rate": 0.35443037974683544,
+            "net_pips": -223.45154068887257,
+            "worst_trade_r": -1.0000000000000553,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 1638,
+            "net_r": -98.33690700743398,
+            "pf": 0.8935771094255174,
+            "max_dd_r": -132.44321451117094,
+            "win_rate": 0.34493284493284493,
+            "net_pips": -1401.10651432171,
+            "worst_trade_r": -3.8007742538622797,
+            "gap_count": 18,
+            "worst_gap_r": -3.8007742538622797
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 32,
+            "net_r": -4.228927270035475,
+            "pf": 0.7705604691163636,
+            "max_dd_r": -8.361462739441476,
+            "win_rate": 0.28125,
+            "net_pips": -341.12180646610267,
+            "worst_trade_r": -1.0000000000000386,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 331,
+            "net_r": -57.482769630866116,
+            "pf": 0.7131186762737309,
+            "max_dd_r": -72.08557606560106,
+            "win_rate": 0.3081570996978852,
+            "net_pips": -1376.314165635908,
+            "worst_trade_r": -2.721626666772923,
+            "gap_count": 2,
+            "worst_gap_r": -2.721626666772923
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 9,
+        "net_r": 0.4527036024384534,
+        "pf": 1.0754506004064082,
+        "max_dd_r": -4.293473847329922,
+        "win_rate": 0.3333333333333333,
+        "net_pips": -7.355639679813567,
+        "worst_trade_r": -1.000000000000054,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 3,
+          "net_r": 1.961997367993924,
+          "pf": 1.9809986839969438,
+          "max_dd_r": -1.0000000000000226,
+          "win_rate": 0.3333333333333333,
+          "net_pips": 20.44706925952821,
+          "worst_trade_r": -1.0000000000000226,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        },
+        "2017": {
+          "trades": 6,
+          "net_r": -1.509293765555471,
+          "pf": 0.6226765586111338,
+          "max_dd_r": -4.000000000000015,
+          "win_rate": 0.3333333333333333,
+          "net_pips": -27.80270893934178,
+          "worst_trade_r": -1.000000000000054,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.21175356732264827
+    },
+    "USDJPY:LONG": {
+      "pair": "USDJPY",
+      "direction": "LONG",
+      "selected_threshold": 0.65,
+      "development_candidates": [
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 35,
+            "net_r": 16.797044144857512,
+            "pf": 1.8743943275082704,
+            "max_dd_r": -6.099768158318714,
+            "win_rate": 0.34285714285714286,
+            "net_pips": 125.49463869120387,
+            "worst_trade_r": -1.0000000000001041,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 2
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 2,
+            "net_r": 1.0298358633615186,
+            "pf": 2.0298358633615323,
+            "max_dd_r": -0.9999999999999867,
+            "win_rate": 0.5,
+            "net_pips": 9.911888825403992,
+            "worst_trade_r": -0.9999999999999867,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 7,
+            "net_r": 2.919261733271971,
+            "pf": 2.3469576764038194,
+            "max_dd_r": -1.0000000000000173,
+            "win_rate": 0.5714285714285714,
+            "net_pips": 75.12072561310958,
+            "worst_trade_r": -1.0000000000000175,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 937,
+            "net_r": 27.5650218515833,
+            "pf": 1.052925269888474,
+            "max_dd_r": -40.09954164685098,
+            "win_rate": 0.3607257203842049,
+            "net_pips": 459.13993635421843,
+            "worst_trade_r": -1.507586778355567,
+            "gap_count": 9,
+            "worst_gap_r": -1.507586778355567
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 206,
+            "net_r": 7.253041949028509,
+            "pf": 1.0590916424730883,
+            "max_dd_r": -21.439600609204895,
+            "win_rate": 0.32038834951456313,
+            "net_pips": 112.46423840764805,
+            "worst_trade_r": -1.3017025717960296,
+            "gap_count": 3,
+            "worst_gap_r": -1.3017025717960296
+          },
+          "positive_years": 1
+        }
+      ],
+      "development": {
+        "trades": 35,
+        "net_r": 16.797044144857512,
+        "pf": 1.8743943275082704,
+        "max_dd_r": -6.099768158318714,
+        "win_rate": 0.34285714285714286,
+        "net_pips": 125.49463869120387,
+        "worst_trade_r": -1.0000000000001041,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 22,
+          "net_r": 13.148595274291749,
+          "pf": 2.353068655865833,
+          "max_dd_r": -2.790181575452733,
+          "win_rate": 0.4090909090909091,
+          "net_pips": 131.87263246081926,
+          "worst_trade_r": -1.0000000000000349,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        },
+        "2017": {
+          "trades": 13,
+          "net_r": 3.6484488705657667,
+          "pf": 1.3843584738938344,
+          "max_dd_r": -4.978974128241151,
+          "win_rate": 0.23076923076923078,
+          "net_pips": -6.3779937696153866,
+          "worst_trade_r": -1.0000000000001041,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.2780189610635507
+    },
+    "USDJPY:SHORT": {
+      "pair": "USDJPY",
+      "direction": "SHORT",
+      "selected_threshold": 0.55,
+      "development_candidates": [
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 935,
+            "net_r": -31.333920936120677,
+            "pf": 0.9416229076446981,
+            "max_dd_r": -67.19041870119108,
+            "win_rate": 0.3358288770053476,
+            "net_pips": -372.85577492547606,
+            "worst_trade_r": -5.78384774882509,
+            "gap_count": 16,
+            "worst_gap_r": -5.78384774882509
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 2,
+            "net_r": -1.9999999999999964,
+            "pf": 0.0,
+            "max_dd_r": -1.9999999999999964,
+            "win_rate": 0.0,
+            "net_pips": -24.591756246510954,
+            "worst_trade_r": -1.0000000000000138,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 60,
+            "net_r": -13.514202742156208,
+            "pf": 0.5749706550010114,
+            "max_dd_r": -15.104910481858392,
+            "win_rate": 0.3333333333333333,
+            "net_pips": -179.60073930613163,
+            "worst_trade_r": -1.4555720289377594,
+            "gap_count": 2,
+            "worst_gap_r": -1.4555720289377594
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 935,
+        "net_r": -31.333920936120677,
+        "pf": 0.9416229076446981,
+        "max_dd_r": -67.19041870119108,
+        "win_rate": 0.3358288770053476,
+        "net_pips": -372.85577492547606,
+        "worst_trade_r": -5.78384774882509,
+        "gap_count": 16,
+        "worst_gap_r": -5.78384774882509
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 456,
+          "net_r": -36.92857414956916,
+          "pf": 0.8620484666482309,
+          "max_dd_r": -49.942774936430794,
+          "win_rate": 0.32456140350877194,
+          "net_pips": -343.56585910624347,
+          "worst_trade_r": -5.78384774882509,
+          "gap_count": 9,
+          "worst_gap_r": -5.78384774882509
+        },
+        "2017": {
+          "trades": 479,
+          "net_r": 5.594653213448477,
+          "pf": 1.0207934912778676,
+          "max_dd_r": -35.908229352677346,
+          "win_rate": 0.3465553235908142,
+          "net_pips": -29.289915819232704,
+          "worst_trade_r": -1.9972934907499191,
+          "gap_count": 7,
+          "worst_gap_r": -1.9972934907499191
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.2527420510947918
+    },
+    "EURJPY:LONG": {
+      "pair": "EURJPY",
+      "direction": "LONG",
+      "selected_threshold": 0.6,
+      "development_candidates": [
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 86,
+            "net_r": -8.377987908300433,
+            "pf": 0.8181962743816674,
+            "max_dd_r": -19.060000876347388,
+            "win_rate": 0.3488372093023256,
+            "net_pips": -99.66995838820765,
+            "worst_trade_r": -1.0000000000000704,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 551,
+            "net_r": -19.977071251667933,
+            "pf": 0.9348199773818384,
+            "max_dd_r": -32.25476718784315,
+            "win_rate": 0.3629764065335753,
+            "net_pips": -170.41543497545462,
+            "worst_trade_r": -2.1873103551828086,
+            "gap_count": 9,
+            "worst_gap_r": -2.1873103551828086
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 3,
+            "net_r": -2.438934601789531,
+            "pf": 0.0,
+            "max_dd_r": -2.438934601789531,
+            "win_rate": 0.0,
+            "net_pips": -68.88985336457267,
+            "worst_trade_r": -1.0000000000000266,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 15,
+            "net_r": -7.3850831281099225,
+            "pf": 0.20588416498255896,
+            "max_dd_r": -7.948989113858205,
+            "win_rate": 0.2,
+            "net_pips": -186.97539527952642,
+            "worst_trade_r": -1.0000000000000515,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 86,
+        "net_r": -8.377987908300433,
+        "pf": 0.8181962743816674,
+        "max_dd_r": -19.060000876347388,
+        "win_rate": 0.3488372093023256,
+        "net_pips": -99.66995838820765,
+        "worst_trade_r": -1.0000000000000704,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 45,
+          "net_r": 0.13901876566303617,
+          "pf": 1.0057548467627089,
+          "max_dd_r": -10.122793737413183,
+          "win_rate": 0.37777777777777777,
+          "net_pips": 77.14538614236801,
+          "worst_trade_r": -1.0000000000000635,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        },
+        "2017": {
+          "trades": 41,
+          "net_r": -8.517006673963468,
+          "pf": 0.6115529065877667,
+          "max_dd_r": -9.302664564747056,
+          "win_rate": 0.3170731707317073,
+          "net_pips": -176.81534453057566,
+          "worst_trade_r": -1.0000000000000704,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.2606090120801374
+    },
+    "EURJPY:SHORT": {
+      "pair": "EURJPY",
+      "direction": "SHORT",
+      "selected_threshold": 0.65,
+      "development_candidates": [
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 3,
+            "net_r": -0.9980931294161612,
+            "pf": 0.1599735315386296,
+            "max_dd_r": -0.9999999999999875,
+            "win_rate": 0.3333333333333333,
+            "net_pips": -51.84171961853252,
+            "worst_trade_r": -0.9999999999999875,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 66,
+            "net_r": 2.139921346135299,
+            "pf": 1.0632436094004287,
+            "max_dd_r": -9.571125753003978,
+            "win_rate": 0.4090909090909091,
+            "net_pips": -132.58221665588934,
+            "worst_trade_r": -1.0000000000000735,
+            "gap_count": 1,
+            "worst_gap_r": -0.4268618025221872
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 850,
+            "net_r": -83.34067985823762,
+            "pf": 0.8333107633710738,
+            "max_dd_r": -96.79001533971349,
+            "win_rate": 0.3211764705882353,
+            "net_pips": -1439.4714081325133,
+            "worst_trade_r": -1.2403481323934737,
+            "gap_count": 6,
+            "worst_gap_r": -1.2403481323934737
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 3,
+        "net_r": -0.9980931294161612,
+        "pf": 0.1599735315386296,
+        "max_dd_r": -0.9999999999999875,
+        "win_rate": 0.3333333333333333,
+        "net_pips": -51.84171961853252,
+        "worst_trade_r": -0.9999999999999875,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 1,
+          "net_r": -0.9999999999999875,
+          "pf": 0.0,
+          "max_dd_r": -0.9999999999999875,
+          "win_rate": 0.0,
+          "net_pips": -51.27514988673738,
+          "worst_trade_r": -0.9999999999999875,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        },
+        "2017": {
+          "trades": 2,
+          "net_r": 0.0019068705838262423,
+          "pf": 1.0101338369056994,
+          "max_dd_r": -0.18816866716631347,
+          "win_rate": 0.5,
+          "net_pips": -0.5665697317951413,
+          "worst_trade_r": -0.18816866716631347,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.245836884325582
+    },
+    "GBPJPY:LONG": {
+      "pair": "GBPJPY",
+      "direction": "LONG",
+      "selected_threshold": 0.55,
+      "development_candidates": [
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 1056,
+            "net_r": 83.53277477663211,
+            "pf": 1.143982696508083,
+            "max_dd_r": -36.87281668046081,
+            "win_rate": 0.3645833333333333,
+            "net_pips": 1738.7250805986023,
+            "worst_trade_r": -2.236805928129807,
+            "gap_count": 14,
+            "worst_gap_r": -2.236805928129807
+          },
+          "positive_years": 2
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 12,
+            "net_r": 0.593158815397417,
+            "pf": 1.1369328484980648,
+            "max_dd_r": -2.257263676996643,
+            "win_rate": 0.4166666666666667,
+            "net_pips": -57.305352137632326,
+            "worst_trade_r": -0.999999999999984,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 2
+        },
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 32,
+            "net_r": 3.6678738992861066,
+            "pf": 1.2613580228333177,
+            "max_dd_r": -5.115876158010765,
+            "win_rate": 0.4375,
+            "net_pips": -9.469816197818659,
+            "worst_trade_r": -1.0000000000000238,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 96,
+            "net_r": 7.803265424885598,
+            "pf": 1.1609091221804058,
+            "max_dd_r": -11.192405747274872,
+            "win_rate": 0.4166666666666667,
+            "net_pips": -25.896953635087584,
+            "worst_trade_r": -1.246047444253603,
+            "gap_count": 4,
+            "worst_gap_r": -1.246047444253603
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 4,
+            "net_r": -0.6487129060104726,
+            "pf": 0.6707172338903189,
+            "max_dd_r": -1.9700785245298635,
+            "win_rate": 0.25,
+            "net_pips": -32.422144375678386,
+            "worst_trade_r": -0.9999999999999611,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        }
+      ],
+      "development": {
+        "trades": 1056,
+        "net_r": 83.53277477663211,
+        "pf": 1.143982696508083,
+        "max_dd_r": -36.87281668046081,
+        "win_rate": 0.3645833333333333,
+        "net_pips": 1738.7250805986023,
+        "worst_trade_r": -2.236805928129807,
+        "gap_count": 14,
+        "worst_gap_r": -2.236805928129807
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 539,
+          "net_r": 1.0536687153232869,
+          "pf": 1.0034751586317239,
+          "max_dd_r": -36.87281668046081,
+          "win_rate": 0.35435992578849723,
+          "net_pips": -148.89239943107157,
+          "worst_trade_r": -1.3735327204478218,
+          "gap_count": 8,
+          "worst_gap_r": -1.3735327204478218
+        },
+        "2017": {
+          "trades": 517,
+          "net_r": 82.47910606130883,
+          "pf": 1.2978033917062501,
+          "max_dd_r": -20.69532326334013,
+          "win_rate": 0.37524177949709864,
+          "net_pips": 1887.6174800296703,
+          "worst_trade_r": -2.236805928129807,
+          "gap_count": 6,
+          "worst_gap_r": -2.236805928129807
+        }
+      },
+      "development_gate": true,
+      "validation": {
+        "trades": 651,
+        "net_r": -74.07814684054716,
+        "pf": 0.815804034259068,
+        "max_dd_r": -98.16120347300222,
+        "win_rate": 0.2995391705069124,
+        "net_pips": -1189.565531426289,
+        "worst_trade_r": -2.825047574629621,
+        "gap_count": 10,
+        "worst_gap_r": -2.825047574629621
+      },
+      "validation_by_year": {
+        "2018": {
+          "trades": 322,
+          "net_r": -57.567703737569815,
+          "pf": 0.707514103569647,
+          "max_dd_r": -63.50594601290469,
+          "win_rate": 0.2950310559006211,
+          "net_pips": -1251.6910668940395,
+          "worst_trade_r": -1.123494947206142,
+          "gap_count": 4,
+          "worst_gap_r": -1.123494947206142
+        },
+        "2019": {
+          "trades": 329,
+          "net_r": -16.510443102977334,
+          "pf": 0.919597798695243,
+          "max_dd_r": -48.81723173529085,
+          "win_rate": 0.303951367781155,
+          "net_pips": 62.125535467750126,
+          "worst_trade_r": -2.825047574629621,
+          "gap_count": 6,
+          "worst_gap_r": -2.825047574629621
+        }
+      },
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.25605269564746935
+    },
+    "GBPJPY:SHORT": {
+      "pair": "GBPJPY",
+      "direction": "SHORT",
+      "selected_threshold": 0.65,
+      "development_candidates": [
+        {
+          "threshold": 0.65,
+          "metrics": {
+            "trades": 2,
+            "net_r": 3.6344364633174826,
+            "pf": 99.0,
+            "max_dd_r": 0.0,
+            "win_rate": 1.0,
+            "net_pips": 126.51449557266972,
+            "worst_trade_r": 1.482171208085345,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.6,
+          "metrics": {
+            "trades": 92,
+            "net_r": 2.726764197063608,
+            "pf": 1.0568839753978976,
+            "max_dd_r": -17.548235343040396,
+            "win_rate": 0.358695652173913,
+            "net_pips": 76.03081236466949,
+            "worst_trade_r": -1.0000000000000755,
+            "gap_count": 1,
+            "worst_gap_r": 5.946099335976397
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.55,
+          "metrics": {
+            "trades": 1178,
+            "net_r": 30.862349256837604,
+            "pf": 1.0465800887356407,
+            "max_dd_r": -76.15900306244342,
+            "win_rate": 0.34889643463497455,
+            "net_pips": 957.5020322740248,
+            "worst_trade_r": -4.3343214433629935,
+            "gap_count": 13,
+            "worst_gap_r": -4.3343214433629935
+          },
+          "positive_years": 1
+        },
+        {
+          "threshold": 0.7,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        },
+        {
+          "threshold": 0.75,
+          "metrics": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "positive_years": 0
+        }
+      ],
+      "development": {
+        "trades": 2,
+        "net_r": 3.6344364633174826,
+        "pf": 99.0,
+        "max_dd_r": 0.0,
+        "win_rate": 1.0,
+        "net_pips": 126.51449557266972,
+        "worst_trade_r": 1.482171208085345,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "development_by_year": {
+        "2016": {
+          "trades": 2,
+          "net_r": 3.6344364633174826,
+          "pf": 99.0,
+          "max_dd_r": 0.0,
+          "win_rate": 1.0,
+          "net_pips": 126.51449557266972,
+          "worst_trade_r": 1.482171208085345,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        },
+        "2017": {
+          "trades": 0,
+          "net_r": 0.0,
+          "pf": 0.0,
+          "max_dd_r": 0.0,
+          "win_rate": 0.0,
+          "net_pips": 0.0,
+          "worst_trade_r": 0.0,
+          "gap_count": 0,
+          "worst_gap_r": 0.0
+        }
+      },
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "validation_by_year": {},
+      "validation_gate": false,
+      "oos": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "win_rate": 0.0,
+        "net_pips": 0.0,
+        "worst_trade_r": 0.0,
+        "gap_count": 0,
+        "worst_gap_r": 0.0
+      },
+      "oos_by_year": {},
+      "oos_wave_diagnostics": {},
+      "oos_pass": false,
+      "train_positive_rate": 0.2380501528390186
+    }
+  },
+  "development_passed": [
+    "GBPJPY:LONG"
+  ],
+  "validation_passed": [],
+  "oos_passed": [],
+  "oos_passed_portfolio_unconstrained_sum": {
+    "trades": 0,
+    "net_r": 0.0,
+    "pf": 0.0,
+    "max_dd_r": 0.0,
+    "win_rate": 0.0,
+    "net_pips": 0.0,
+    "worst_trade_r": 0.0,
+    "gap_count": 0,
+    "worst_gap_r": 0.0
+  }
+}
