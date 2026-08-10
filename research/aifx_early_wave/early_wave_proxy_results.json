@@ -1,0 +1,1590 @@
+{
+  "status": "PROXY_REJECT",
+  "source": "ejtraderLabs/historical-data M15 mid OHLC",
+  "source_timezone_verified": false,
+  "session_rules_used": false,
+  "formal_production_evidence": false,
+  "cost_stress": "2x configured proxy spread floor + execution buffer",
+  "selection_uses_oos": false,
+  "parameters": {
+    "families": [
+      "IMPULSE_START",
+      "CONTINUATION",
+      "REVERSAL"
+    ],
+    "stop_atr": 1.25,
+    "trail_activate_r": 1.0,
+    "trail_atr": 2.0,
+    "max_hold_m15_bars": 96
+  },
+  "complete_years": [
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021
+  ],
+  "development_years": [
+    2013,
+    2014,
+    2015,
+    2016,
+    2017
+  ],
+  "validation_years": [
+    2018,
+    2019
+  ],
+  "oos_years": [
+    2020,
+    2021
+  ],
+  "pairs": {
+    "EURUSD": {
+      "directions": {
+        "LONG": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 705,
+                "net_r": -169.66371015697308,
+                "pf": 0.5992042299236175,
+                "max_dd_r": -178.9119062102004,
+                "win_rate": 0.2822695035460993,
+                "net_pips": -1350.7418085517459,
+                "worst_trade_r": -1.000000000000235,
+                "gap_count": 4,
+                "worst_gap_r": 0.14672224915715296
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -42.00715729743473
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1050,
+                "net_r": -239.99751403309511,
+                "pf": 0.6309379222825386,
+                "max_dd_r": -263.3936391538034,
+                "win_rate": 0.2742857142857143,
+                "net_pips": -2000.9661789259123,
+                "worst_trade_r": -1.7547281207962304,
+                "gap_count": 19,
+                "worst_gap_r": -1.7547281207962304
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -72.84755039773447
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2164,
+                "net_r": -448.429282109101,
+                "pf": 0.6703578181827642,
+                "max_dd_r": -477.2818838898888,
+                "win_rate": 0.2680221811460259,
+                "net_pips": -3923.5449072645833,
+                "worst_trade_r": -9.006861065448177,
+                "gap_count": 33,
+                "worst_gap_r": -9.006861065448177
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -132.83856616782302
+            }
+          ],
+          "development": {
+            "trades": 705,
+            "net_r": -169.66371015697308,
+            "pf": 0.5992042299236175,
+            "max_dd_r": -178.9119062102004,
+            "win_rate": 0.2822695035460993,
+            "net_pips": -1350.7418085517459,
+            "worst_trade_r": -1.000000000000235,
+            "gap_count": 4,
+            "worst_gap_r": 0.14672224915715296
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 124,
+              "net_r": -28.73793706737927,
+              "pf": 0.59446943901035,
+              "max_dd_r": -34.69980246317215,
+              "win_rate": 0.2903225806451613,
+              "net_pips": -136.02971333495526,
+              "worst_trade_r": -1.0000000000001912,
+              "gap_count": 2,
+              "worst_gap_r": 0.14672224915715296
+            },
+            "2014": {
+              "trades": 139,
+              "net_r": -40.6003300911726,
+              "pf": 0.5286464440070852,
+              "max_dd_r": -40.600330091172616,
+              "win_rate": 0.2589928057553957,
+              "net_pips": -206.78483883338254,
+              "worst_trade_r": -1.000000000000235,
+              "gap_count": 0,
+              "worst_gap_r": 0.0
+            },
+            "2015": {
+              "trades": 143,
+              "net_r": -28.25079951117498,
+              "pf": 0.6602790014138391,
+              "max_dd_r": -30.602881627634243,
+              "win_rate": 0.3076923076923077,
+              "net_pips": -316.43709652721554,
+              "worst_trade_r": -1.0000000000001108,
+              "gap_count": 1,
+              "worst_gap_r": 0.2549492202421941
+            },
+            "2016": {
+              "trades": 167,
+              "net_r": -42.00715729743473,
+              "pf": 0.5982771936119221,
+              "max_dd_r": -42.007157297434695,
+              "win_rate": 0.25149700598802394,
+              "net_pips": -422.078865195299,
+              "worst_trade_r": -1.000000000000206,
+              "gap_count": 1,
+              "worst_gap_r": 0.17912167899308315
+            },
+            "2017": {
+              "trades": 132,
+              "net_r": -30.067486189811518,
+              "pf": 0.6174139137500512,
+              "max_dd_r": -35.37235815584346,
+              "win_rate": 0.3106060606060606,
+              "net_pips": -269.41129466089274,
+              "worst_trade_r": -1.0000000000001894,
+              "gap_count": 0,
+              "worst_gap_r": 0.0
+            }
+          },
+          "positive_dev_years": 0,
+          "worst_dev_year_r": -42.00715729743473,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        },
+        "SHORT": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 699,
+                "net_r": -120.41244173840512,
+                "pf": 0.7053085348444045,
+                "max_dd_r": -126.68098729081018,
+                "win_rate": 0.30472103004291845,
+                "net_pips": -928.4247922506369,
+                "worst_trade_r": -1.0554119749101696,
+                "gap_count": 9,
+                "worst_gap_r": -1.0554119749101696
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -44.90244468630957
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1090,
+                "net_r": -301.66294523072827,
+                "pf": 0.5699980069949167,
+                "max_dd_r": -304.93260069935405,
+                "win_rate": 0.24495412844036699,
+                "net_pips": -2949.7251958987576,
+                "worst_trade_r": -1.000000000000286,
+                "gap_count": 8,
+                "worst_gap_r": -0.5313430306692163
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -93.74213789901614
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2252,
+                "net_r": -503.94357905307675,
+                "pf": 0.6492640284792565,
+                "max_dd_r": -509.74594639097984,
+                "win_rate": 0.2619893428063943,
+                "net_pips": -4180.896316277753,
+                "worst_trade_r": -1.621040395383297,
+                "gap_count": 26,
+                "worst_gap_r": -1.621040395383297
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -121.27144043429166
+            }
+          ],
+          "development": {
+            "trades": 699,
+            "net_r": -120.41244173840512,
+            "pf": 0.7053085348444045,
+            "max_dd_r": -126.68098729081018,
+            "win_rate": 0.30472103004291845,
+            "net_pips": -928.4247922506369,
+            "worst_trade_r": -1.0554119749101696,
+            "gap_count": 9,
+            "worst_gap_r": -1.0554119749101696
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 122,
+              "net_r": -26.750623317442635,
+              "pf": 0.6072311947891507,
+              "max_dd_r": -33.01916886984772,
+              "win_rate": 0.3114754098360656,
+              "net_pips": -309.0689041963368,
+              "worst_trade_r": -1.0000000000001665,
+              "gap_count": 1,
+              "worst_gap_r": -0.2021937073830031
+            },
+            "2014": {
+              "trades": 139,
+              "net_r": -13.893281974706422,
+              "pf": 0.8364236901845606,
+              "max_dd_r": -21.619148733545792,
+              "win_rate": 0.2733812949640288,
+              "net_pips": 38.685781476586264,
+              "worst_trade_r": -1.0000000000002425,
+              "gap_count": 3,
+              "worst_gap_r": -0.19846445592203718
+            },
+            "2015": {
+              "trades": 127,
+              "net_r": -16.241229151138526,
+              "pf": 0.7715452439059434,
+              "max_dd_r": -30.99061436088837,
+              "win_rate": 0.33070866141732286,
+              "net_pips": -253.65821469982336,
+              "worst_trade_r": -1.0554119749101696,
+              "gap_count": 2,
+              "worst_gap_r": -1.0554119749101696
+            },
+            "2016": {
+              "trades": 170,
+              "net_r": -44.90244468630957,
+              "pf": 0.5848066761910444,
+              "max_dd_r": -49.2215632993026,
+              "win_rate": 0.2647058823529412,
+              "net_pips": -323.9492896352839,
+              "worst_trade_r": -1.0223611208895251,
+              "gap_count": 3,
+              "worst_gap_r": -1.0223611208895251
+            },
+            "2017": {
+              "trades": 141,
+              "net_r": -18.624862608807973,
+              "pf": 0.7559725002328288,
+              "max_dd_r": -22.028139380162436,
+              "win_rate": 0.3546099290780142,
+              "net_pips": -80.43416519577966,
+              "worst_trade_r": -1.0000000000002447,
+              "gap_count": 0,
+              "worst_gap_r": 0.0
+            }
+          },
+          "positive_dev_years": 0,
+          "worst_dev_year_r": -44.90244468630957,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        }
+      }
+    },
+    "GBPUSD": {
+      "directions": {
+        "LONG": {
+          "chosen_family": "CONTINUATION",
+          "all_development_candidates": [
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1052,
+                "net_r": -109.57463207067279,
+                "pf": 0.8236454186271283,
+                "max_dd_r": -114.10063111709394,
+                "win_rate": 0.30798479087452474,
+                "net_pips": -1599.1702267855667,
+                "worst_trade_r": -2.7346156972011046,
+                "gap_count": 21,
+                "worst_gap_r": -2.7346156972011046
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -43.93025959892144
+            },
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 775,
+                "net_r": -154.2367125147063,
+                "pf": 0.6647716780899801,
+                "max_dd_r": -154.2367125147063,
+                "win_rate": 0.2838709677419355,
+                "net_pips": -1433.5249522527226,
+                "worst_trade_r": -2.2891514057177376,
+                "gap_count": 4,
+                "worst_gap_r": -2.2891514057177376
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -44.943665006798
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2095,
+                "net_r": -202.30680173392443,
+                "pf": 0.8389547480081709,
+                "max_dd_r": -215.06660894393693,
+                "win_rate": 0.3016706443914081,
+                "net_pips": -2910.9396121067293,
+                "worst_trade_r": -2.3995042153206354,
+                "gap_count": 45,
+                "worst_gap_r": -2.3995042153206354
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -72.83924000856601
+            }
+          ],
+          "development": {
+            "trades": 1052,
+            "net_r": -109.57463207067279,
+            "pf": 0.8236454186271283,
+            "max_dd_r": -114.10063111709394,
+            "win_rate": 0.30798479087452474,
+            "net_pips": -1599.1702267855667,
+            "worst_trade_r": -2.7346156972011046,
+            "gap_count": 21,
+            "worst_gap_r": -2.7346156972011046
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 220,
+              "net_r": -40.480654060878564,
+              "pf": 0.7014161202797773,
+              "max_dd_r": -48.416123168776295,
+              "win_rate": 0.32272727272727275,
+              "net_pips": -358.4795331129631,
+              "worst_trade_r": -1.0000000000001514,
+              "gap_count": 4,
+              "worst_gap_r": 1.0636348389990342
+            },
+            "2014": {
+              "trades": 223,
+              "net_r": -21.64014688772659,
+              "pf": 0.8416469746958855,
+              "max_dd_r": -40.72089524499859,
+              "win_rate": 0.273542600896861,
+              "net_pips": -425.44512071908355,
+              "worst_trade_r": -1.0000000000002358,
+              "gap_count": 4,
+              "worst_gap_r": -0.07074398969399823
+            },
+            "2015": {
+              "trades": 212,
+              "net_r": -2.2381941095912303,
+              "pf": 0.980991105769234,
+              "max_dd_r": -28.627495098384205,
+              "win_rate": 0.33962264150943394,
+              "net_pips": -167.26261238611715,
+              "worst_trade_r": -1.001163717665416,
+              "gap_count": 2,
+              "worst_gap_r": -1.001163717665416
+            },
+            "2016": {
+              "trades": 192,
+              "net_r": -43.93025959892144,
+              "pf": 0.632802885149722,
+              "max_dd_r": -49.547674575043956,
+              "win_rate": 0.2552083333333333,
+              "net_pips": -924.5511316933789,
+              "worst_trade_r": -2.7346156972011046,
+              "gap_count": 7,
+              "worst_gap_r": -2.7346156972011046
+            },
+            "2017": {
+              "trades": 205,
+              "net_r": -1.2853774135549774,
+              "pf": 0.9884943401387238,
+              "max_dd_r": -21.509284332835215,
+              "win_rate": 0.3463414634146341,
+              "net_pips": 276.56817112597736,
+              "worst_trade_r": -1.0000000000001548,
+              "gap_count": 4,
+              "worst_gap_r": 0.549153181073213
+            }
+          },
+          "positive_dev_years": 0,
+          "worst_dev_year_r": -43.93025959892144,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        },
+        "SHORT": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 749,
+                "net_r": -105.97237824383222,
+                "pf": 0.7488444358195543,
+                "max_dd_r": -105.97237824383231,
+                "win_rate": 0.31241655540720964,
+                "net_pips": -964.5129343812498,
+                "worst_trade_r": -2.058554998148809,
+                "gap_count": 19,
+                "worst_gap_r": -2.058554998148809
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -33.23369384421201
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1086,
+                "net_r": -85.37236949030756,
+                "pf": 0.8664259207017877,
+                "max_dd_r": -132.16787055019216,
+                "win_rate": 0.31307550644567217,
+                "net_pips": -687.3041020161754,
+                "worst_trade_r": -1.143635913152268,
+                "gap_count": 17,
+                "worst_gap_r": -1.143635913152268
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -35.11710861068602
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2172,
+                "net_r": -172.3545680446871,
+                "pf": 0.8665648530015156,
+                "max_dd_r": -235.12823305088546,
+                "win_rate": 0.30064456721915284,
+                "net_pips": -1023.3476004656362,
+                "worst_trade_r": -1.7596191239136207,
+                "gap_count": 43,
+                "worst_gap_r": -1.7596191239136207
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -52.91947995509129
+            }
+          ],
+          "development": {
+            "trades": 749,
+            "net_r": -105.97237824383222,
+            "pf": 0.7488444358195543,
+            "max_dd_r": -105.97237824383231,
+            "win_rate": 0.31241655540720964,
+            "net_pips": -964.5129343812498,
+            "worst_trade_r": -2.058554998148809,
+            "gap_count": 19,
+            "worst_gap_r": -2.058554998148809
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 155,
+              "net_r": -33.23369384421201,
+              "pf": 0.6272801946985811,
+              "max_dd_r": -44.35326159985652,
+              "win_rate": 0.2903225806451613,
+              "net_pips": -321.7447004595544,
+              "worst_trade_r": -1.0000000000001394,
+              "gap_count": 1,
+              "worst_gap_r": 2.8433818250861855
+            },
+            "2014": {
+              "trades": 145,
+              "net_r": -20.693031785158286,
+              "pf": 0.7405267364994625,
+              "max_dd_r": -28.729141297628612,
+              "win_rate": 0.3310344827586207,
+              "net_pips": -79.48715945751873,
+              "worst_trade_r": -1.0000000000002507,
+              "gap_count": 5,
+              "worst_gap_r": -0.023210140493750458
+            },
+            "2015": {
+              "trades": 166,
+              "net_r": -20.95528551716086,
+              "pf": 0.7888614181620287,
+              "max_dd_r": -25.04558299171165,
+              "win_rate": 0.2891566265060241,
+              "net_pips": -250.88653261185817,
+              "worst_trade_r": -1.0000000000001474,
+              "gap_count": 5,
+              "worst_gap_r": -0.3177471171909093
+            },
+            "2016": {
+              "trades": 145,
+              "net_r": -4.655876409203566,
+              "pf": 0.9397930195656605,
+              "max_dd_r": -23.353000187809936,
+              "win_rate": 0.33793103448275863,
+              "net_pips": -28.88588692513635,
+              "worst_trade_r": -1.000000000000141,
+              "gap_count": 2,
+              "worst_gap_r": -0.7802797313275789
+            },
+            "2017": {
+              "trades": 138,
+              "net_r": -26.43449068809752,
+              "pf": 0.6541959718443321,
+              "max_dd_r": -31.500541985067425,
+              "win_rate": 0.3188405797101449,
+              "net_pips": -283.5086549271824,
+              "worst_trade_r": -2.058554998148809,
+              "gap_count": 6,
+              "worst_gap_r": -2.058554998148809
+            }
+          },
+          "positive_dev_years": 0,
+          "worst_dev_year_r": -33.23369384421201,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        }
+      }
+    },
+    "USDJPY": {
+      "directions": {
+        "LONG": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 444,
+                "net_r": 17.135956607256738,
+                "pf": 1.075756546708782,
+                "max_dd_r": -24.578977030405465,
+                "win_rate": 0.38063063063063063,
+                "net_pips": 316.038902798563,
+                "worst_trade_r": -1.6133226473325826,
+                "gap_count": 6,
+                "worst_gap_r": -1.6133226473325826
+              },
+              "positive_dev_years": 3,
+              "worst_dev_year_r": -22.163904943164614
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2171,
+                "net_r": -42.037890302778386,
+                "pf": 0.9656452766189069,
+                "max_dd_r": -85.07000595976137,
+                "win_rate": 0.33625057577153383,
+                "net_pips": -854.1561994705543,
+                "worst_trade_r": -6.835219003039821,
+                "gap_count": 31,
+                "worst_gap_r": -6.835219003039821
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -32.70997297346091
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1219,
+                "net_r": -81.57937678724139,
+                "pf": 0.8857851742138748,
+                "max_dd_r": -97.85978695609263,
+                "win_rate": 0.31501230516817064,
+                "net_pips": -959.2839077675342,
+                "worst_trade_r": -4.051882172459494,
+                "gap_count": 10,
+                "worst_gap_r": -4.051882172459494
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -28.377397759632803
+            }
+          ],
+          "development": {
+            "trades": 444,
+            "net_r": 17.135956607256738,
+            "pf": 1.075756546708782,
+            "max_dd_r": -24.578977030405465,
+            "win_rate": 0.38063063063063063,
+            "net_pips": 316.038902798563,
+            "worst_trade_r": -1.6133226473325826,
+            "gap_count": 6,
+            "worst_gap_r": -1.6133226473325826
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 61,
+              "net_r": -1.5785729374681,
+              "pf": 0.9436989433968154,
+              "max_dd_r": -9.088104446043683,
+              "win_rate": 0.4098360655737705,
+              "net_pips": 13.251993180304567,
+              "worst_trade_r": -1.0000000000000517,
+              "gap_count": 2,
+              "worst_gap_r": -0.5365473159574522
+            },
+            "2014": {
+              "trades": 76,
+              "net_r": 16.644763343542902,
+              "pf": 1.4783564687275694,
+              "max_dd_r": -6.880139996916914,
+              "win_rate": 0.4605263157894737,
+              "net_pips": 138.72123648366568,
+              "worst_trade_r": -1.0000000000001266,
+              "gap_count": 0,
+              "worst_gap_r": 0.0
+            },
+            "2015": {
+              "trades": 126,
+              "net_r": 6.362709446562663,
+              "pf": 1.1022507992248056,
+              "max_dd_r": -21.558007737364665,
+              "win_rate": 0.3888888888888889,
+              "net_pips": 48.57612465066268,
+              "worst_trade_r": -1.0000000000001168,
+              "gap_count": 2,
+              "worst_gap_r": 0.463261680479529
+            },
+            "2016": {
+              "trades": 89,
+              "net_r": 17.870961697783887,
+              "pf": 1.406253196981173,
+              "max_dd_r": -10.83714640856283,
+              "win_rate": 0.38202247191011235,
+              "net_pips": 336.2573155744883,
+              "worst_trade_r": -1.6133226473325826,
+              "gap_count": 1,
+              "worst_gap_r": -1.6133226473325826
+            },
+            "2017": {
+              "trades": 92,
+              "net_r": -22.163904943164614,
+              "pf": 0.6121644260917872,
+              "max_dd_r": -24.578977030405454,
+              "win_rate": 0.2826086956521739,
+              "net_pips": -220.7677670905582,
+              "worst_trade_r": -1.0000000000000913,
+              "gap_count": 1,
+              "worst_gap_r": 1.4929598374766648
+            }
+          },
+          "positive_dev_years": 3,
+          "worst_dev_year_r": -22.163904943164614,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        },
+        "SHORT": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 593,
+                "net_r": -76.07347787788386,
+                "pf": 0.7765037348629641,
+                "max_dd_r": -92.39717729120075,
+                "win_rate": 0.30522765598650925,
+                "net_pips": -883.9988604966973,
+                "worst_trade_r": -3.2598410475815793,
+                "gap_count": 11,
+                "worst_gap_r": -3.2598410475815793
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -43.132304488849925
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1007,
+                "net_r": -215.28595314553093,
+                "pf": 0.6444430708214025,
+                "max_dd_r": -218.65713458750616,
+                "win_rate": 0.2919563058589871,
+                "net_pips": -2542.002545830279,
+                "worst_trade_r": -2.155146430392543,
+                "gap_count": 8,
+                "worst_gap_r": -2.155146430392543
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -63.316790179665894
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2139,
+                "net_r": -318.4798871771866,
+                "pf": 0.7496988789885418,
+                "max_dd_r": -333.88119606803133,
+                "win_rate": 0.30481533426834967,
+                "net_pips": -3542.7162540219865,
+                "worst_trade_r": -1.9692970543933261,
+                "gap_count": 37,
+                "worst_gap_r": -1.9692970543933261
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -113.4966334458412
+            }
+          ],
+          "development": {
+            "trades": 593,
+            "net_r": -76.07347787788386,
+            "pf": 0.7765037348629641,
+            "max_dd_r": -92.39717729120075,
+            "win_rate": 0.30522765598650925,
+            "net_pips": -883.9988604966973,
+            "worst_trade_r": -3.2598410475815793,
+            "gap_count": 11,
+            "worst_gap_r": -3.2598410475815793
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 114,
+              "net_r": -26.896435356100056,
+              "pf": 0.5815146722440454,
+              "max_dd_r": -30.684794754616536,
+              "win_rate": 0.3157894736842105,
+              "net_pips": -267.7648514169249,
+              "worst_trade_r": -2.6276157710726307,
+              "gap_count": 4,
+              "worst_gap_r": -2.6276157710726307
+            },
+            "2014": {
+              "trades": 111,
+              "net_r": -14.754841313452006,
+              "pf": 0.7830542313713006,
+              "max_dd_r": -25.165612117712257,
+              "win_rate": 0.2972972972972973,
+              "net_pips": -117.25766708224512,
+              "worst_trade_r": -1.0000000000000961,
+              "gap_count": 2,
+              "worst_gap_r": -0.6398581763224441
+            },
+            "2015": {
+              "trades": 117,
+              "net_r": -43.132304488849925,
+              "pf": 0.39277456319489573,
+              "max_dd_r": -43.852071762280374,
+              "win_rate": 0.27350427350427353,
+              "net_pips": -430.83167965805274,
+              "worst_trade_r": -3.2598410475815793,
+              "gap_count": 2,
+              "worst_gap_r": -3.2598410475815793
+            },
+            "2016": {
+              "trades": 132,
+              "net_r": 8.235679976361975,
+              "pf": 1.1134406374190717,
+              "max_dd_r": -19.81705769859103,
+              "win_rate": 0.32575757575757575,
+              "net_pips": -52.87085789574206,
+              "worst_trade_r": -1.0000000000000653,
+              "gap_count": 3,
+              "worst_gap_r": -0.3215432839545518
+            },
+            "2017": {
+              "trades": 119,
+              "net_r": 0.4744233041561521,
+              "pf": 1.0073593012694575,
+              "max_dd_r": -12.552113061307796,
+              "win_rate": 0.31092436974789917,
+              "net_pips": -15.273804443734207,
+              "worst_trade_r": -1.0000000000001519,
+              "gap_count": 0,
+              "worst_gap_r": 0.0
+            }
+          },
+          "positive_dev_years": 2,
+          "worst_dev_year_r": -43.132304488849925,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        }
+      }
+    },
+    "EURJPY": {
+      "directions": {
+        "LONG": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 645,
+                "net_r": -59.242575898652724,
+                "pf": 0.8434491448920303,
+                "max_dd_r": -127.41454065746632,
+                "win_rate": 0.29767441860465116,
+                "net_pips": -295.03019504294474,
+                "worst_trade_r": -1.972859964098287,
+                "gap_count": 7,
+                "worst_gap_r": -1.972859964098287
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -41.560199395865666
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1135,
+                "net_r": -179.93817273915084,
+                "pf": 0.743231971966173,
+                "max_dd_r": -198.38674519892345,
+                "win_rate": 0.29691629955947135,
+                "net_pips": -2043.2865095460593,
+                "worst_trade_r": -3.5002552661092308,
+                "gap_count": 13,
+                "worst_gap_r": -3.5002552661092308
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -66.18416697793808
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2083,
+                "net_r": -214.46949602027874,
+                "pf": 0.8297935179252308,
+                "max_dd_r": -259.49484881698845,
+                "win_rate": 0.30196831493038884,
+                "net_pips": -1750.5996725559794,
+                "worst_trade_r": -3.1021024782627666,
+                "gap_count": 26,
+                "worst_gap_r": -3.1021024782627666
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -74.07278175723697
+            }
+          ],
+          "development": {
+            "trades": 645,
+            "net_r": -59.242575898652724,
+            "pf": 0.8434491448920303,
+            "max_dd_r": -127.41454065746632,
+            "win_rate": 0.29767441860465116,
+            "net_pips": -295.03019504294474,
+            "worst_trade_r": -1.972859964098287,
+            "gap_count": 7,
+            "worst_gap_r": -1.972859964098287
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 109,
+              "net_r": 34.7577351451351,
+              "pf": 1.699512050926508,
+              "max_dd_r": -10.392290739311697,
+              "win_rate": 0.41284403669724773,
+              "net_pips": 764.6598138030399,
+              "worst_trade_r": -1.1056411243607231,
+              "gap_count": 3,
+              "worst_gap_r": -1.1056411243607231
+            },
+            "2014": {
+              "trades": 132,
+              "net_r": -31.311943145976755,
+              "pf": 0.6255689606731435,
+              "max_dd_r": -40.45897348576126,
+              "win_rate": 0.2727272727272727,
+              "net_pips": -279.50927613400154,
+              "worst_trade_r": -1.003208924608529,
+              "gap_count": 1,
+              "worst_gap_r": -1.003208924608529
+            },
+            "2015": {
+              "trades": 134,
+              "net_r": -32.05596095892284,
+              "pf": 0.5994876721634064,
+              "max_dd_r": -38.097573134040736,
+              "win_rate": 0.26865671641791045,
+              "net_pips": -335.61905136751164,
+              "worst_trade_r": -1.0896719521295533,
+              "gap_count": 1,
+              "worst_gap_r": -1.0896719521295533
+            },
+            "2016": {
+              "trades": 133,
+              "net_r": -41.560199395865666,
+              "pf": 0.5132567691596013,
+              "max_dd_r": -45.71812940933049,
+              "win_rate": 0.2631578947368421,
+              "net_pips": -507.5241388350662,
+              "worst_trade_r": -1.972859964098287,
+              "gap_count": 1,
+              "worst_gap_r": -1.972859964098287
+            },
+            "2017": {
+              "trades": 137,
+              "net_r": 10.927792456977441,
+              "pf": 1.1371317440541977,
+              "max_dd_r": -16.824196705360315,
+              "win_rate": 0.291970802919708,
+              "net_pips": 62.96245749059466,
+              "worst_trade_r": -1.000000000000147,
+              "gap_count": 1,
+              "worst_gap_r": -0.023245002346677257
+            }
+          },
+          "positive_dev_years": 2,
+          "worst_dev_year_r": -41.560199395865666,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        },
+        "SHORT": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 700,
+                "net_r": -68.30170644708232,
+                "pf": 0.8304902483112431,
+                "max_dd_r": -85.6469239193783,
+                "win_rate": 0.31142857142857144,
+                "net_pips": -833.9361586649408,
+                "worst_trade_r": -1.8910187202761477,
+                "gap_count": 14,
+                "worst_gap_r": -1.7605156766553496
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -40.460455789187705
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1126,
+                "net_r": -185.58184544523596,
+                "pf": 0.7333677578127327,
+                "max_dd_r": -188.75868984137904,
+                "win_rate": 0.28063943161634103,
+                "net_pips": -3006.2043177751675,
+                "worst_trade_r": -2.4792626045876016,
+                "gap_count": 10,
+                "worst_gap_r": -2.4792626045876016
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -61.20219252915713
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2103,
+                "net_r": -197.85586839678362,
+                "pf": 0.8413672700355455,
+                "max_dd_r": -203.03435318623696,
+                "win_rate": 0.30337612933903946,
+                "net_pips": -2678.1309063354565,
+                "worst_trade_r": -2.7637456620149896,
+                "gap_count": 29,
+                "worst_gap_r": -1.329478375202844
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -70.39279988603296
+            }
+          ],
+          "development": {
+            "trades": 700,
+            "net_r": -68.30170644708232,
+            "pf": 0.8304902483112431,
+            "max_dd_r": -85.6469239193783,
+            "win_rate": 0.31142857142857144,
+            "net_pips": -833.9361586649408,
+            "worst_trade_r": -1.8910187202761477,
+            "gap_count": 14,
+            "worst_gap_r": -1.7605156766553496
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 130,
+              "net_r": -17.75700587218604,
+              "pf": 0.7655187792849897,
+              "max_dd_r": -19.983897735834255,
+              "win_rate": 0.3,
+              "net_pips": -381.09872523941846,
+              "worst_trade_r": -1.7605156766553496,
+              "gap_count": 2,
+              "worst_gap_r": -1.7605156766553496
+            },
+            "2014": {
+              "trades": 121,
+              "net_r": -40.460455789187705,
+              "pf": 0.46412366226790414,
+              "max_dd_r": -48.567986618833814,
+              "win_rate": 0.256198347107438,
+              "net_pips": -385.86988408980005,
+              "worst_trade_r": -1.8910187202761477,
+              "gap_count": 0,
+              "worst_gap_r": 0.0
+            },
+            "2015": {
+              "trades": 156,
+              "net_r": 8.676137000817707,
+              "pf": 1.101926634079497,
+              "max_dd_r": -22.37787571568056,
+              "win_rate": 0.3333333333333333,
+              "net_pips": 189.98147741220066,
+              "worst_trade_r": -1.000000000000201,
+              "gap_count": 3,
+              "worst_gap_r": -0.37802273461395414
+            },
+            "2016": {
+              "trades": 147,
+              "net_r": -19.217456120915628,
+              "pf": 0.7831216537400671,
+              "max_dd_r": -24.79830991164892,
+              "win_rate": 0.2857142857142857,
+              "net_pips": -301.0602722734575,
+              "worst_trade_r": -1.1765961787087986,
+              "gap_count": 6,
+              "worst_gap_r": -1.1765961787087986
+            },
+            "2017": {
+              "trades": 146,
+              "net_r": 0.45707433438935574,
+              "pf": 1.00586190268797,
+              "max_dd_r": -17.77336982985071,
+              "win_rate": 0.3698630136986301,
+              "net_pips": 44.111245525535026,
+              "worst_trade_r": -1.5843667853100891,
+              "gap_count": 3,
+              "worst_gap_r": -1.5843667853100891
+            }
+          },
+          "positive_dev_years": 2,
+          "worst_dev_year_r": -40.460455789187705,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        }
+      }
+    },
+    "GBPJPY": {
+      "directions": {
+        "LONG": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 589,
+                "net_r": -42.54061713832738,
+                "pf": 0.8733195372634748,
+                "max_dd_r": -56.72704917371391,
+                "win_rate": 0.3089983022071307,
+                "net_pips": -687.9634723274436,
+                "worst_trade_r": -5.893594729779534,
+                "gap_count": 15,
+                "worst_gap_r": -5.893594729779534
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -14.039100340433347
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2001,
+                "net_r": -85.63522449681999,
+                "pf": 0.9233212265749638,
+                "max_dd_r": -110.1670488968793,
+                "win_rate": 0.3308345827086457,
+                "net_pips": -1006.5104221182135,
+                "worst_trade_r": -10.727199235469007,
+                "gap_count": 28,
+                "worst_gap_r": -10.727199235469007
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -53.389244988924844
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1140,
+                "net_r": -178.61112578554184,
+                "pf": 0.7350992983629745,
+                "max_dd_r": -200.2823780732464,
+                "win_rate": 0.2868421052631579,
+                "net_pips": -3015.83162955448,
+                "worst_trade_r": -1.164807858761681,
+                "gap_count": 12,
+                "worst_gap_r": -1.164807858761681
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -64.50189368827405
+            }
+          ],
+          "development": {
+            "trades": 589,
+            "net_r": -42.54061713832738,
+            "pf": 0.8733195372634748,
+            "max_dd_r": -56.72704917371391,
+            "win_rate": 0.3089983022071307,
+            "net_pips": -687.9634723274436,
+            "worst_trade_r": -5.893594729779534,
+            "gap_count": 15,
+            "worst_gap_r": -5.893594729779534
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 96,
+              "net_r": -14.039100340433347,
+              "pf": 0.7464828889382866,
+              "max_dd_r": -31.49177033636129,
+              "win_rate": 0.2916666666666667,
+              "net_pips": -229.40135533370096,
+              "worst_trade_r": -1.000000000000086,
+              "gap_count": 4,
+              "worst_gap_r": -0.07631011950990724
+            },
+            "2014": {
+              "trades": 118,
+              "net_r": 1.8529958425706394,
+              "pf": 1.0291570358404698,
+              "max_dd_r": -16.371321950698217,
+              "win_rate": 0.3220338983050847,
+              "net_pips": 4.346744137771452,
+              "worst_trade_r": -1.000000000000183,
+              "gap_count": 3,
+              "worst_gap_r": -0.8174307979424879
+            },
+            "2015": {
+              "trades": 134,
+              "net_r": -9.333025235804538,
+              "pf": 0.8748230116146143,
+              "max_dd_r": -17.05290676375042,
+              "win_rate": 0.31343283582089554,
+              "net_pips": -75.32189932261417,
+              "worst_trade_r": -1.0000000000001446,
+              "gap_count": 2,
+              "worst_gap_r": -0.07943450568367184
+            },
+            "2016": {
+              "trades": 120,
+              "net_r": -12.739132609416233,
+              "pf": 0.8331040581214288,
+              "max_dd_r": -25.85180717393097,
+              "win_rate": 0.30833333333333335,
+              "net_pips": -435.54466753964647,
+              "worst_trade_r": -5.893594729779534,
+              "gap_count": 4,
+              "worst_gap_r": -5.893594729779534
+            },
+            "2017": {
+              "trades": 121,
+              "net_r": -8.282354795243904,
+              "pf": 0.874495278931315,
+              "max_dd_r": -24.188018233171242,
+              "win_rate": 0.30578512396694213,
+              "net_pips": 47.957705730746625,
+              "worst_trade_r": -1.0000000000001248,
+              "gap_count": 2,
+              "worst_gap_r": -0.7126089678895571
+            }
+          },
+          "positive_dev_years": 1,
+          "worst_dev_year_r": -14.039100340433347,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        },
+        "SHORT": {
+          "chosen_family": "REVERSAL",
+          "all_development_candidates": [
+            {
+              "family": "REVERSAL",
+              "development": {
+                "trades": 723,
+                "net_r": 3.133983981551129,
+                "pf": 1.0081205875221873,
+                "max_dd_r": -38.750910810286946,
+                "win_rate": 0.3236514522821577,
+                "net_pips": 229.0395932294487,
+                "worst_trade_r": -2.5279909784062786,
+                "gap_count": 17,
+                "worst_gap_r": -2.5279909784062786
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -20.60945857955213
+            },
+            {
+              "family": "CONTINUATION",
+              "development": {
+                "trades": 1074,
+                "net_r": -34.84102362549922,
+                "pf": 0.9432924372779397,
+                "max_dd_r": -47.12865400966596,
+                "win_rate": 0.31843575418994413,
+                "net_pips": -1489.8988190930486,
+                "worst_trade_r": -3.3476981982599354,
+                "gap_count": 11,
+                "worst_gap_r": -3.3476981982599354
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -34.39979472489509
+            },
+            {
+              "family": "IMPULSE_START",
+              "development": {
+                "trades": 2088,
+                "net_r": -128.6261465845169,
+                "pf": 0.8952678713785455,
+                "max_dd_r": -151.02885072793282,
+                "win_rate": 0.3103448275862069,
+                "net_pips": -2729.0022049075505,
+                "worst_trade_r": -3.4181026866503768,
+                "gap_count": 22,
+                "worst_gap_r": -3.4181026866503768
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -86.59726994115138
+            }
+          ],
+          "development": {
+            "trades": 723,
+            "net_r": 3.133983981551129,
+            "pf": 1.0081205875221873,
+            "max_dd_r": -38.750910810286946,
+            "win_rate": 0.3236514522821577,
+            "net_pips": 229.0395932294487,
+            "worst_trade_r": -2.5279909784062786,
+            "gap_count": 17,
+            "worst_gap_r": -2.5279909784062786
+          },
+          "development_by_year": {
+            "2013": {
+              "trades": 128,
+              "net_r": -20.60945857955213,
+              "pf": 0.6952121415504766,
+              "max_dd_r": -24.35007623060566,
+              "win_rate": 0.2890625,
+              "net_pips": -439.85703473783246,
+              "worst_trade_r": -1.717230605665191,
+              "gap_count": 2,
+              "worst_gap_r": -1.717230605665191
+            },
+            "2014": {
+              "trades": 158,
+              "net_r": -8.315227892620761,
+              "pf": 0.9091113042853106,
+              "max_dd_r": -26.490051394978636,
+              "win_rate": 0.2974683544303797,
+              "net_pips": -152.34392119056963,
+              "worst_trade_r": -2.4704448435478983,
+              "gap_count": 6,
+              "worst_gap_r": -2.4704448435478983
+            },
+            "2015": {
+              "trades": 161,
+              "net_r": 24.35858463913337,
+              "pf": 1.294518889101728,
+              "max_dd_r": -12.81222114072521,
+              "win_rate": 0.36645962732919257,
+              "net_pips": 507.61123680418905,
+              "worst_trade_r": -1.007716401416125,
+              "gap_count": 4,
+              "worst_gap_r": -1.007716401416125
+            },
+            "2016": {
+              "trades": 139,
+              "net_r": 9.67518751520317,
+              "pf": 1.1359020328127556,
+              "max_dd_r": -10.628914788385586,
+              "win_rate": 0.3237410071942446,
+              "net_pips": 306.89469208955273,
+              "worst_trade_r": -1.0000000000001181,
+              "gap_count": 2,
+              "worst_gap_r": -0.7517761009634577
+            },
+            "2017": {
+              "trades": 137,
+              "net_r": -1.9751017006125267,
+              "pf": 0.9729159525913414,
+              "max_dd_r": -12.578181287413866,
+              "win_rate": 0.3357664233576642,
+              "net_pips": 6.734620264109026,
+              "worst_trade_r": -2.5279909784062786,
+              "gap_count": 3,
+              "worst_gap_r": -2.5279909784062786
+            }
+          },
+          "positive_dev_years": 2,
+          "worst_dev_year_r": -20.60945857955213,
+          "development_gate": false,
+          "validation": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "validation_by_year": {},
+          "validation_gate": false,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "win_rate": 0.0,
+            "net_pips": 0.0,
+            "worst_trade_r": 0.0,
+            "gap_count": 0,
+            "worst_gap_r": 0.0
+          },
+          "oos_by_year": {},
+          "oos_wave_diagnostics": {},
+          "oos_pass": false
+        }
+      }
+    }
+  },
+  "oos_passed_directions": [],
+  "oos_portfolio_unconstrained_sum": {
+    "trades": 0,
+    "net_r": 0.0,
+    "pf": 0.0,
+    "max_dd_r": 0.0,
+    "win_rate": 0.0,
+    "net_pips": 0.0,
+    "worst_trade_r": 0.0,
+    "gap_count": 0,
+    "worst_gap_r": 0.0
+  }
+}
