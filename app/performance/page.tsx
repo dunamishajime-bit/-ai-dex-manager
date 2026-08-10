@@ -6,6 +6,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, TrendingUp } from "
 import { Card } from "@/components/ui/Card";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { tradeCloseDate, tradeHistoryAnchorId } from "@/lib/trade-history-view";
 import { cn } from "@/lib/utils";
 
 type TradeHistoryEntry = {
@@ -125,7 +126,7 @@ function buildPeriodSummaries(
   const grouped = new Map<string, { label: string; trades: ClosedTrade[] }>();
 
   for (const trade of trades) {
-    const closeDate = new Date(trade.executedAt);
+    const closeDate = tradeCloseDate(trade);
     const key = keyFn(closeDate);
     const current = grouped.get(key);
     if (current) {
@@ -215,28 +216,28 @@ export default function PerformancePage() {
     [closedTrades],
   );
 
-  const latestTradeOpenedAt = closedTrades.length ? closedTrades[closedTrades.length - 1].closedAt : null;
+  const latestTradeClosedAt = closedTrades.length ? closedTrades[closedTrades.length - 1].closedAt : null;
   const latestWeek = weekly[0];
   const latestMonth = monthly[0];
 
   useEffect(() => {
-    if (latestTradeOpenedAt) {
-      setMonthCursor(startOfMonth(new Date(latestTradeOpenedAt)));
+    if (latestTradeClosedAt) {
+      setMonthCursor(startOfMonth(new Date(latestTradeClosedAt)));
     }
-  }, [latestTradeOpenedAt]);
+  }, [latestTradeClosedAt]);
 
   const calendarDays = useMemo(() => buildCalendarDays(monthCursor), [monthCursor]);
   const calendarMap = useMemo(() => {
     const map = new Map<string, ClosedTrade[]>();
     for (const trade of closedTrades) {
-      const key = dateKey(new Date(trade.openedAt));
+      const key = dateKey(tradeCloseDate(trade));
       map.set(key, [...(map.get(key) || []), trade]);
     }
     return map;
   }, [closedTrades]);
 
   const monthTrades = useMemo(
-    () => closedTrades.filter((trade) => monthKey(new Date(trade.openedAt)) === monthKey(monthCursor)).reverse(),
+    () => closedTrades.filter((trade) => monthKey(tradeCloseDate(trade)) === monthKey(monthCursor)).reverse(),
     [closedTrades, monthCursor],
   );
 
@@ -337,7 +338,7 @@ export default function PerformancePage() {
             </button>
             <button
               type="button"
-              onClick={() => setMonthCursor(startOfMonth(latestTradeOpenedAt ? new Date(latestTradeOpenedAt) : new Date()))}
+              onClick={() => setMonthCursor(startOfMonth(latestTradeClosedAt ? new Date(latestTradeClosedAt) : new Date()))}
               className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10"
             >
               最新月
@@ -386,14 +387,18 @@ export default function PerformancePage() {
                 </div>
                 <div className="mt-2 space-y-1.5">
                   {trades.slice(0, 3).map((trade) => (
-                    <div key={trade.id} className="rounded-lg border border-white/8 bg-black/20 px-2 py-1.5">
+                    <a
+                      key={trade.id}
+                      href={`/history#${tradeHistoryAnchorId(trade.id)}`}
+                      className="block rounded-lg border border-white/8 bg-black/20 px-2 py-1.5 transition hover:border-gold-300/45 hover:bg-gold-300/5"
+                    >
                       <div className="truncate text-[11px] font-semibold text-white">
                         {trade.sourceSymbol}/{trade.destSymbol}
                       </div>
                       <div className={cn("mt-1 text-[11px] font-semibold", toneClass(trade.realizedPnlPct))}>
                         {formatPct(trade.realizedPnlPct, 2)}
                       </div>
-                    </div>
+                    </a>
                   ))}
                   {trades.length > 3 ? <div className="text-[11px] text-gray-500">+{trades.length - 3} more</div> : null}
                   {isLogicChangeDay ? (
@@ -423,7 +428,7 @@ export default function PerformancePage() {
                     {trade.sourceSymbol}/{trade.destSymbol}
                   </div>
                   <div className="mt-1 text-xs text-gray-500">
-                    entry {new Date(trade.openedAt).toLocaleDateString("ja-JP")} / close {new Date(trade.executedAt).toLocaleDateString("ja-JP")}
+                    entry {new Date(trade.openedAt).toLocaleDateString("ja-JP")} / close {tradeCloseDate(trade).toLocaleDateString("ja-JP")}
                   </div>
                 </div>
                 <div className="flex items-center gap-4 md:gap-6">

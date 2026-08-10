@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Download, ExternalLink, RefreshCw } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
+import { tradeHistoryAnchorId } from "@/lib/trade-history-view";
 
 type TradeHistoryEntry = {
   id: string;
@@ -228,7 +229,7 @@ export default function HistoryPage() {
             </thead>
             <tbody>
               {visibleEntries.map((entry) => (
-                <tr key={entry.id} className="border-b border-white/5 align-top text-gray-200">
+                <tr id={tradeHistoryAnchorId(entry.id)} key={entry.id} className="scroll-mt-24 border-b border-white/5 align-top text-gray-200">
                   <td className="px-3 py-4 font-mono text-xs text-gray-300">
                     {new Date(entry.executedAt).toLocaleString("ja-JP")}
                   </td>
