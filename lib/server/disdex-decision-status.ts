@@ -130,6 +130,7 @@ async function loadPenguItem(checkedAt: string): Promise<DecisionStatusItem> {
       : "条件不足";
   const positionNote = snapshot.positionSide ? "保有中のため新規シグナルは注文に使いません。" : "";
   const modeNote = snapshot.mode === "LIVE" ? "" : `Runner mode=${snapshot.mode}。`;
+  const dataTimestamp = snapshot.latestCompletedPenguTs || snapshot.referenceTs;
   return {
     symbol: "PENGUUSDT",
     sleeve: "V96",
@@ -141,7 +142,7 @@ async function loadPenguItem(checkedAt: string): Promise<DecisionStatusItem> {
     reason: `${modeNote}${snapshot.reason}${positionNote}`.trim(),
     checkedAt,
     source: result.source,
-    dataUpdatedAt: new Date(snapshot.latestCompletedPenguTs || snapshot.referenceTs).toISOString(),
+    dataUpdatedAt: dataTimestamp > 0 ? new Date(dataTimestamp).toISOString() : undefined,
   };
 }
 
