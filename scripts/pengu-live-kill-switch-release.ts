@@ -3,7 +3,6 @@ import "dotenv/config";
 import { readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { readDisDexV96KillSwitch } from "../lib/disdex-v96-live-risk-controls";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
@@ -11,6 +10,7 @@ import { FilePenguDualLsV1RunnerStateStore } from "../lib/pengu-dual-ls-v1-runne
 
 const MANAGED_SYMBOLS = new Set(["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"]);
 const RELEASE_ACK = "RELEASE_KILL_SWITCH_AFTER_RECONCILIATION" as const;
+const LEGACY_V96_RETIRED_MARKER = "LEGACY_V96_LIVE_RETIRED" as const;
 
 function boolEnv(name: string, fallback = false) {
     const raw = process.env[name];
@@ -37,17 +37,24 @@ async function latestAppliedReconciliation(stateRoot: string) {
     throw new Error("KILL_SWITCH_RELEASE_APPLIED_RECONCILIATION_MISSING");
 }
 
+async function assertLegacyV96ProcessRetired() {
+    const runnerPath = resolve(process.cwd(), "scripts/disdex-v96-live-runner.ts");
+    const source = await readFile(runnerPath, "utf8");
+    if (!source.includes(LEGACY_V96_RETIRED_MARKER) || !source.includes('runnerMode === "live"')) {
+        throw new Error("KILL_SWITCH_RELEASE_LEGACY_V96_PROCESS_BOUNDARY_MISSING");
+    }
+    return runnerPath;
+}
+
 async function main() {
     const apply = process.argv.includes("--apply");
-    if (DISDEX_V96_RUNTIME.liveTradingEnabled !== false) {
-        throw new Error("KILL_SWITCH_RELEASE_LEGACY_V96_RUNTIME_NOT_RETIRED");
-    }
     if (boolEnv("DISDEX_ENABLE_LEGACY_V96_LIVE", false)) {
         throw new Error("KILL_SWITCH_RELEASE_LEGACY_V96_ENV_ENABLED");
     }
     if (boolEnv("PENGU_LEGACY_CORE_ENABLED", false)) {
         throw new Error("KILL_SWITCH_RELEASE_PENGU_LEGACY_CORE_ENABLED");
     }
+    const legacyRunnerPath = await assertLegacyV96ProcessRetired();
 
     const combinedRoot = resolve(process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR || ".runtime-state/disdex-v96");
     const legacyStateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || resolve(combinedRoot, "crypto-v96"));
@@ -85,11 +92,13 @@ async function main() {
         killSwitchPath,
         originalReason: killSwitch.reason,
         reconciliationAuditPath: reconciliation.path,
+        legacyRunnerPath,
+        legacyRunnerRetiredMarker: LEGACY_V96_RETIRED_MARKER,
         legacyPending: false,
         penguPending: false,
         managedPositionCount: 0,
         openOrderCount: 0,
-        legacyV96RuntimeLiveEnabled: false,
+        legacyV96ProcessRetired: true,
         legacyV96EnvEnabled: false,
         penguLegacyCoreEnabled: false,
         ordersSent: false,
