@@ -16,6 +16,8 @@ type TradeHistoryEntry = {
   action: "BUY" | "SELL";
   sourceSymbol: string;
   destSymbol: string;
+  sourceAmount: number;
+  destAmount: number;
   sourceUsdValue: number;
   realizedPnlUsd?: number;
   realizedPnlPct?: number;
@@ -228,13 +230,13 @@ export default function PerformancePage() {
 
   const calendarDays = useMemo(() => buildCalendarDays(monthCursor), [monthCursor]);
   const calendarMap = useMemo(() => {
-    const map = new Map<string, ClosedTrade[]>();
-    for (const trade of closedTrades) {
+    const map = new Map<string, TradeHistoryEntry[]>();
+    for (const trade of entries.filter((entry) => Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001)) {
       const key = dateKey(tradeCloseDate(trade));
       map.set(key, [...(map.get(key) || []), trade]);
     }
     return map;
-  }, [closedTrades]);
+  }, [entries]);
 
   const monthTrades = useMemo(
     () => closedTrades.filter((trade) => monthKey(tradeCloseDate(trade)) === monthKey(monthCursor)).reverse(),
@@ -386,20 +388,28 @@ export default function PerformancePage() {
                   ) : null}
                 </div>
                 <div className="mt-2 space-y-1.5">
-                  {trades.slice(0, 3).map((trade) => (
-                    <a
-                      key={trade.id}
-                      href={`/history#${tradeHistoryAnchorId(trade.id)}`}
-                      className="block rounded-lg border border-white/8 bg-black/20 px-2 py-1.5 transition hover:border-gold-300/45 hover:bg-gold-300/5"
-                    >
-                      <div className="truncate text-[11px] font-semibold text-white">
-                        {trade.sourceSymbol}/{trade.destSymbol}
-                      </div>
-                      <div className={cn("mt-1 text-[11px] font-semibold", toneClass(trade.realizedPnlPct))}>
-                        {formatPct(trade.realizedPnlPct, 2)}
-                      </div>
-                    </a>
-                  ))}
+                  {trades.slice(0, 3).map((trade) => {
+                    const isClosed = trade.tradeStatus === "closed" && typeof trade.realizedPnlPct === "number";
+                    const resultLabel = isClosed
+                      ? formatPct(trade.realizedPnlPct, 2)
+                      : trade.tradeStatus === "open"
+                        ? "建玉中"
+                        : "照合待ち";
+                    return (
+                      <a
+                        key={trade.id}
+                        href={`/history#${tradeHistoryAnchorId(trade.id)}`}
+                        className="block rounded-lg border border-white/8 bg-black/20 px-2 py-1.5 transition hover:border-gold-300/45 hover:bg-gold-300/5"
+                      >
+                        <div className="truncate text-[11px] font-semibold text-white">
+                          {trade.sourceSymbol}/{trade.destSymbol}
+                        </div>
+                        <div className={cn("mt-1 text-[11px] font-semibold", isClosed ? toneClass(Number(trade.realizedPnlPct)) : "text-white/55")}>
+                          {resultLabel}
+                        </div>
+                      </a>
+                    );
+                  })}
                   {trades.length > 3 ? <div className="text-[11px] text-gray-500">+{trades.length - 3} more</div> : null}
                   {isLogicChangeDay ? (
                     <div className="rounded-lg border border-amber-300/35 bg-amber-300/10 px-2 py-1.5 text-[10px] font-semibold leading-4 text-amber-100">
