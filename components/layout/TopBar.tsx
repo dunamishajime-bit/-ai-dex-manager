@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { usePathname } from "next/navigation";
-import { Bell, CreditCard, ShieldAlert, Wallet } from "lucide-react";
+import { Bell, CreditCard, ShieldAlert } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
@@ -71,7 +71,7 @@ export function TopBar() {
             <Bell className="mr-1 inline h-3.5 w-3.5" />
             通知
           </button>
-          <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-white/60">{"LIVE: \u672a\u78ba\u8a8d"}</span>
+          <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-white/60">{"LIVE\u7a3c\u50cd: \u72b6\u614b\u672a\u78ba\u8a8d"}</span>
           <button
             type="button"
             className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.14),rgba(245,158,11,0.08))] px-3 py-2 text-xs font-semibold text-white"
