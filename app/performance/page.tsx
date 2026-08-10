@@ -325,7 +325,7 @@ export default function PerformancePage() {
             <CalendarDays className="h-5 w-5 text-gold-300" />
             <div>
               <div className="text-lg font-semibold text-white">{monthLabel(monthCursor)}</div>
-              <div className="text-xs text-gray-500">エントリー日ベースでクローズ成績を表示</div>
+              <div className="text-xs text-gray-500">決済日ベースでトレード履歴と連動して表示</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
