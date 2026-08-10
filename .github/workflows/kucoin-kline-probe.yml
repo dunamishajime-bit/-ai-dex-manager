@@ -1,0 +1,21 @@
+name: KuCoin Kline Probe
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-dual-ls-v2-20260810
+    paths:
+      - 'scripts/research/kucoin_kline_probe.py'
+      - '.github/workflows/kucoin-kline-probe.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/research/kucoin_kline_probe.py
