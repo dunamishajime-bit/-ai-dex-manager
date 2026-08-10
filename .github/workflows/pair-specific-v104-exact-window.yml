@@ -1,0 +1,78 @@
+name: Pair Specific V104 Exact Window
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "research/pair-specific-v104-trigger.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pair-specific-v104-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        style: [cycle, dependency, temporal]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: npm ci
+      - name: Force fresh genuine six-pair USD-M history
+        run: |
+          rm -rf .cache/perp-research-usdm
+          npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Compile research source
+        run: python -m py_compile scripts/research_lab_pair_specific_v103.py
+      - name: Run exact-window pair-specific validation
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: |
+          python scripts/research_lab_pair_specific_v103.py --style "${{ matrix.style }}" | tee "v104-${{ matrix.style }}.log"
+          python - <<'PY'
+          import json, pathlib, sys
+          style='${{ matrix.style }}'
+          p=pathlib.Path(f'.research-state/pair-specific-v103-{style}.json')
+          d=json.loads(p.read_text())
+          want_start=1754751600000
+          want_end=1786287600000
+          got_start=d['periods']['fixedWindowStart']
+          got_end=d['periods']['fixedWindowEndExclusive']
+          if (got_start,got_end)!=(want_start,want_end):
+              raise SystemExit(f'EXACT_WINDOW_MISMATCH:{got_start}:{got_end}:wanted:{want_start}:{want_end}')
+          out=pathlib.Path('.research-state')/f'pair-specific-v104-{style}.json'
+          d['strategyId']=d['strategyId'].replace('V103','V104')
+          out.write_text(json.dumps(d,indent=2),encoding='utf-8')
+          (out.with_suffix('.md')).write_text('# '+d['strategyId']+'\n\n```json\n'+json.dumps(d,indent=2)+'\n```\n',encoding='utf-8')
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pair-specific-v104-${{ matrix.style }}
+          path: |
+            .research-state/pair-specific-v104-${{ matrix.style }}.json
+            .research-state/pair-specific-v104-${{ matrix.style }}.md
+            v104-${{ matrix.style }}.log
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. Exact fixed window: 2025-08-10 00:00 JST through 2026-08-10 00:00 JST exclusive.
+# No production/VPS/live-trading changes.
