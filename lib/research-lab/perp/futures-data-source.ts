@@ -6,8 +6,10 @@ import type { Candle1h } from "@/lib/backtest/types";
 import type { PerpFundingPoint } from "./types";
 
 const FUTURES_KLINE_ROOT = "https://data.binance.vision/data/futures/um/monthly/klines";
+const FUTURES_DAILY_KLINE_ROOT = "https://data.binance.vision/data/futures/um/daily/klines";
 const FUTURES_FUNDING_ROOT = "https://data.binance.vision/data/futures/um/monthly/fundingRate";
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
+const DAY = 86_400_000;
 
 function normalizeTimestamp(value: number) {
   if (!Number.isFinite(value)) return value;
@@ -59,6 +61,20 @@ function monthKeys(startTs: number, endTs: number) {
     if (nextMonth > endTs) break;
     keys.push(`${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`);
     cursor = nextMonth;
+  }
+  return keys;
+}
+
+function partialMonthDayKeys(startTs: number, endTs: number) {
+  if (endTs <= startTs) return [];
+  const lastIncluded = new Date(endTs - 1);
+  const monthStart = Date.UTC(lastIncluded.getUTCFullYear(), lastIncluded.getUTCMonth(), 1);
+  let cursor = Math.max(monthStart, Date.UTC(new Date(startTs).getUTCFullYear(), new Date(startTs).getUTCMonth(), new Date(startTs).getUTCDate()));
+  const keys: string[] = [];
+  while (cursor + DAY <= endTs) {
+    const d = new Date(cursor);
+    keys.push(`${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`);
+    cursor += DAY;
   }
   return keys;
 }
@@ -179,6 +195,17 @@ export async function loadUsdMFuturesSymbol(input: {
       zipPath: fundingZip,
       extractedDir: fundingZip.replace(/\.zip$/i, ""),
       reader: readFundingCsv,
+    }));
+  }
+
+  for (const dayKey of partialMonthDayKeys(input.startTs, input.endTs)) {
+    const klineName = `${symbol}-1h-${dayKey}.zip`;
+    const klineZip = path.join(input.cacheRoot, "raw", symbol, "klines-daily", klineName);
+    candles.push(...await loadArchiveCsv({
+      url: `${FUTURES_DAILY_KLINE_ROOT}/${encodeURIComponent(symbol)}/1h/${klineName}`,
+      zipPath: klineZip,
+      extractedDir: klineZip.replace(/\.zip$/i, ""),
+      reader: readKlineCsv,
     }));
   }
 
