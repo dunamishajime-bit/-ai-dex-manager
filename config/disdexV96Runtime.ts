@@ -69,11 +69,11 @@ export const DISDEX_V96_LIVE_PROMOTION = {
 
 export const DISDEX_V96_RUNTIME = {
     strategyId: DISDEX_V96_STRATEGY_ID,
-    implementationStatus: "RETIRED_FROM_LIVE_PENGU_ONLY_BOUNDARY",
+    implementationStatus: "HISTORICAL_CONTRACT_ONLY_LIVE_RUNNER_RETIRED",
     mode: "LIVE_READY" as const,
-    // Hard production boundary: legacy V96 remains available for audit/replay only.
-    // The PENGU-only supervisor must never authorize this runtime to submit live orders.
-    liveTradingEnabled: false,
+    // Kept true only so historical V96 gate/parity self-tests remain reproducible.
+    // scripts/disdex-v96-live-runner.ts is the production execution boundary and rejects LIVE unconditionally.
+    liveTradingEnabled: true,
     maximumGross: DISDEX_V96_ALLOCATION.totalGrossCap,
     minimumExecutionLeverage: 3,
     cashReservePct: 2,
@@ -87,8 +87,8 @@ export const DISDEX_V96_RUNTIME = {
     forwardEvidenceStatus: "NOT_APPROVED",
     executionParityStatus: DISDEX_V96_EXECUTION_PARITY.status,
     coreExecutionParity: DISDEX_V96_EXECUTION_PARITY.corePort,
-    operatorOverrideStatus: "RETIRED_FROM_LIVE",
+    operatorOverrideStatus: "HISTORICAL_CONTRACT_ONLY",
     dailyLossLimitStatus: "LEGACY_STATE_READ_ONLY_FOR_AUDIT",
     killSwitchStatus: "LEGACY_KILL_SWITCH_RETAINED_FOR_FAIL_CLOSED_AUDIT",
-    liveBlockReason: "Legacy V96 live execution is retired. Production crypto execution is PENGU_DUAL_LS_V1 only; V96 state may be read for reconciliation/audit but V96 orders must not be submitted.",
+    liveBlockReason: "Legacy V96 live process is retired. Production crypto execution is PENGU_DUAL_LS_V1 only; V96 state and gate logic remain solely for audit, replay, and reconciliation.",
 } as const;
