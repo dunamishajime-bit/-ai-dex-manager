@@ -438,10 +438,24 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
 }
 
 function selfTest() {
-    const previousMode = process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
-    const previousState = process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR;
-    process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = "paper";
-    process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = ".runtime-state/selftest-v96-v52";
+    const selfTestState = resolve(".runtime-state/selftest-v96-v52");
+    const selfTestKillSwitch = resolve(selfTestState, "kill-switch.json");
+    const selfTestEnvironment: Record<string, string> = {
+        DISDEX_V13D_V11EQ_V96_RUNNER_MODE: "paper",
+        DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: selfTestState,
+        DISDEX_V13D_V11EQ_V96_STATE_DIR: selfTestState,
+        DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: selfTestKillSwitch,
+        DISDEX_V52_ASTER_ONLY_STATE_DIR: resolve(selfTestState, "stock"),
+        DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: selfTestKillSwitch,
+        DISDEX_V96_STATE_DIR: resolve(selfTestState, "crypto-v96"),
+        DISDEX_V96_KILL_SWITCH_FILE: selfTestKillSwitch,
+        PENGU_DUAL_LS_V2_STATE_DIR: resolve(selfTestState, "crypto-v96", "pengu-dual-ls-v2-final"),
+        PENGU_DUAL_LS_V2_KILL_SWITCH_FILE: selfTestKillSwitch,
+    };
+    const previousEnvironment = Object.fromEntries(
+        Object.keys(selfTestEnvironment).map((name) => [name, process.env[name]]),
+    );
+    Object.assign(process.env, selfTestEnvironment);
     const env = buildCombinedChildEnvironment("paper");
     assert.equal(env.DISDEX_V96_MAX_GROSS, "1.5");
     assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "1.5");
@@ -483,10 +497,10 @@ function selfTest() {
     assert.equal(shouldHoldFailClosed("paper", true), false);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
     assert.equal(MARGIN_AWARE_V52_ENGINE, DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine);
-    if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
-    else process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = previousMode;
-    if (previousState === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR;
-    else process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = previousState;
+    for (const [name, previous] of Object.entries(previousEnvironment)) {
+        if (previous === undefined) delete process.env[name];
+        else process.env[name] = previous;
+    }
     console.log("V96 + V52 margin-aware supervisor self-test: PASS");
 }
 
