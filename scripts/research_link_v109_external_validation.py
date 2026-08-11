@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import json, os, time, urllib.parse, urllib.request
+import argparse,json,os,time,urllib.parse,urllib.request
 from pathlib import Path
 
 import research_lab_pair_specific_v109 as v109
@@ -15,11 +15,11 @@ STRESS_BPS=v109.STRESS_BPS
 KIND='regime_wave'
 
 
-def get_json(url, tries=6):
+def get_json(url,tries=6):
     err=None
     for k in range(tries):
         try:
-            req=urllib.request.Request(url,headers={'User-Agent':'disdex-research-link-v109/1.0'})
+            req=urllib.request.Request(url,headers={'User-Agent':'disdex-research-v109-external/1.1'})
             with urllib.request.urlopen(req,timeout=30) as r:
                 return json.loads(r.read().decode('utf-8'))
         except Exception as e:
@@ -44,9 +44,7 @@ def fetch_bybit(s,start,end):
         if d.get('retCode')!=0: raise RuntimeError(f'BYBIT:{s}:{d}')
         xs=d.get('result',{}).get('list',[])
         if not xs: break
-        batch=[]
-        for x in xs:
-            ts=int(x[0]); batch.append({'ts':ts,'open':x[1],'high':x[2],'low':x[3],'close':x[4],'volume':x[5] if len(x)>5 else '0'})
+        batch=[{'ts':int(x[0]),'open':x[1],'high':x[2],'low':x[3],'close':x[4],'volume':x[5] if len(x)>5 else '0'} for x in xs]
         rows.extend(batch); oldest=min(int(r['ts']) for r in batch)
         if oldest>=cursor: break
         cursor=oldest
@@ -78,7 +76,7 @@ def fetch_okx(s,start,end):
 
 
 def cache_file(venue,s,start,end):
-    p=Path('.cache/link-v109-external');p.mkdir(parents=True,exist_ok=True)
+    p=Path('.cache/v109-external'); p.mkdir(parents=True,exist_ok=True)
     return p/f'{venue}-{s}-{start}-{end}.json'
 
 
@@ -100,36 +98,38 @@ def shifted_periods(ps,shift):
     return {k:(v[0]+shift,v[1]+shift) if isinstance(v,(list,tuple)) and len(v)==2 else v for k,v in ps.items()}
 
 
-def section_metrics(model,candles,idx,period):
-    n,_=v109.pair_trades(KIND,'LINK',candles,idx,*period,NORMAL_BPS,0,model)
-    s,_=v109.pair_trades(KIND,'LINK',candles,idx,*period,STRESS_BPS,1,model)
+def section_metrics(symbol,model,candles,idx,period):
+    n,_=v109.pair_trades(KIND,symbol,candles,idx,*period,NORMAL_BPS,0,model)
+    s,_=v109.pair_trades(KIND,symbol,candles,idx,*period,STRESS_BPS,1,model)
     return {'normal':v109.metric(n),'stress':v109.metric(s)}
 
 
-def evaluate_model(model,candles,idx,ps):
-    out={k:section_metrics(model,candles,idx,ps[k]) for k in ('development','validation','confirmation','holdout')}
-    out['year']=section_metrics(model,candles,idx,(ps['development'][0],ps['holdout'][1])); return out
+def evaluate_model(symbol,model,candles,idx,ps):
+    out={k:section_metrics(symbol,model,candles,idx,ps[k]) for k in ('development','validation','confirmation','holdout')}
+    out['year']=section_metrics(symbol,model,candles,idx,(ps['development'][0],ps['holdout'][1]))
+    return out
 
 
 def main():
+    ap=argparse.ArgumentParser(); ap.add_argument('--symbol',choices=['LINK','SOL'],required=True); symbol=ap.parse_args().symbol
     bin_c,bin_i,_=v109.b.base.load(); cur=v109.b.base.periods(bin_c)
-    frozen=v109.train(KIND,'LINK',bin_c,bin_i,*cur['development'])
+    frozen=v109.train(KIND,symbol,bin_c,bin_i,*cur['development'])
     frozen_summary={'threshold':frozen['threshold'],'trainStart':frozen['trainStart'],'trainEnd':frozen['trainEnd'],'mu':frozen['mu'],'sd':frozen['sd'],'w':frozen['w']}
     start=cur['development'][0]; end=cur['holdout'][1]; prior_start=start-YEAR; prior_end=end-YEAR; prior=shifted_periods(cur,-YEAR)
-    result={'strategyId':'LINK_V109_REGIME_WAVE_EXTERNAL_VALIDATION','currentWindow':[start,end],'priorWindow':[prior_start,prior_end],'frozenModel':frozen_summary,'venues':{},'notes':['same-period external venue uses exact Binance-Development-frozen model','prior-period replication keeps architecture/training procedure fixed and trains only within prior Development','venue failures are recorded and do not suppress independent venue evidence']}
+    result={'strategyId':f'{symbol}_V109_REGIME_WAVE_EXTERNAL_VALIDATION','symbol':symbol,'currentWindow':[start,end],'priorWindow':[prior_start,prior_end],'frozenModel':frozen_summary,'venues':{},'notes':['same-period external venue uses exact Binance-Development-frozen model','prior-period replication keeps architecture/training procedure fixed and trains only within prior Development','venue failures are recorded independently']}
     for venue in ('BYBIT','OKX'):
         vr={}
         try:
             cur_c,cur_i,cur_cov,cur_warm=load_venue(venue,start,end); vr.update(coverageCurrent=cur_cov,warmupCurrentHours=cur_warm)
             if min(cur_cov.values())<.97 or min(cur_warm.values())<900: vr['currentStatus']='DATA_INSUFFICIENT'
-            else: vr.update(currentFrozenModel=evaluate_model(frozen,cur_c,cur_i,cur),currentStatus='OK')
+            else: vr.update(currentFrozenModel=evaluate_model(symbol,frozen,cur_c,cur_i,cur),currentStatus='OK')
         except Exception as e:
             vr.update(currentStatus='DATA_UNAVAILABLE',currentError=str(e))
         try:
             pre_c,pre_i,pre_cov,pre_warm=load_venue(venue,prior_start,prior_end); vr.update(coveragePrior=pre_cov,warmupPriorHours=pre_warm)
             if min(pre_cov.values())<.97 or min(pre_warm.values())<900: vr['priorStatus']='DATA_INSUFFICIENT'
             else:
-                pm=v109.train(KIND,'LINK',pre_c,pre_i,*prior['development']); vr['priorModel']={'threshold':pm['threshold'],'trainStart':pm['trainStart'],'trainEnd':pm['trainEnd']}; vr['priorCausalReplication']=evaluate_model(pm,pre_c,pre_i,prior); vr['priorStatus']='OK'
+                pm=v109.train(KIND,symbol,pre_c,pre_i,*prior['development']); vr['priorModel']={'threshold':pm['threshold'],'trainStart':pm['trainStart'],'trainEnd':pm['trainEnd']}; vr['priorCausalReplication']=evaluate_model(symbol,pm,pre_c,pre_i,prior); vr['priorStatus']='OK'
         except Exception as e:
             vr.update(priorStatus='DATA_UNAVAILABLE',priorError=str(e))
         result['venues'][venue]=vr
@@ -140,7 +140,7 @@ def main():
             tested+=1; block=vr[key]; y=block['year']['normal']; h=block['holdout']['normal']
             if (y.get('returnPct') or 0)<=0 or (y.get('pf') or 0)<=1 or (h.get('returnPct') or 0)<=0 or (h.get('pf') or 0)<=1: failed=True
     result['verdict']='FAIL_EXTERNAL_REPLICATION' if failed else 'PASS_EXTERNAL_REPLICATION' if tested>=2 else 'PARTIAL_EXTERNAL_EVIDENCE'
-    out=Path(os.environ.get('RESEARCH_AUTONOMOUS_STATE_DIR','.research-state'));out.mkdir(parents=True,exist_ok=True); txt=json.dumps(result,indent=2)
-    (out/'link-v109-external-validation.json').write_text(txt,encoding='utf-8'); (out/'link-v109-external-validation.md').write_text('# LINK V109 External Validation\n\n```json\n'+txt+'\n```\n',encoding='utf-8'); print(txt)
+    out=Path(os.environ.get('RESEARCH_AUTONOMOUS_STATE_DIR','.research-state')); out.mkdir(parents=True,exist_ok=True); stem=f'{symbol.lower()}-v109-external-validation'; txt=json.dumps(result,indent=2)
+    (out/f'{stem}.json').write_text(txt,encoding='utf-8'); (out/f'{stem}.md').write_text(f'# {symbol} V109 External Validation\n\n```json\n{txt}\n```\n',encoding='utf-8'); print(txt)
 
 if __name__=='__main__': main()
