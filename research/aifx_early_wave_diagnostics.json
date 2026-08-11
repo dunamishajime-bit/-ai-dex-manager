@@ -1,0 +1,1601 @@
+{
+  "status": "DIAGNOSTIC_ONLY_FROZEN_LOGIC",
+  "note": "OOS diagnostic metrics below do not resurrect directions that failed Development/Validation. No thresholds/families were changed after the first run.",
+  "development_years": [
+    2013,
+    2014,
+    2015,
+    2016,
+    2017
+  ],
+  "validation_years": [
+    2018,
+    2019
+  ],
+  "oos_years": [
+    2020,
+    2021
+  ],
+  "rows": [
+    {
+      "pair": "EURUSD",
+      "direction": "LONG",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 511,
+        "net_r": -164.99876946175016,
+        "pf": 0.5196995628759178,
+        "max_dd_r": -179.36478749895886,
+        "net_pips": -1278.704419612622,
+        "win_rate": 0.23679060665362034
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 215,
+        "net_r": -54.48812006628869,
+        "pf": 0.5955133719991814,
+        "max_dd_r": -54.488120066288715,
+        "net_pips": -434.4306779999285,
+        "win_rate": 0.27906976744186046
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 124,
+          "net_r": -22.44362331795275,
+          "pf": 0.6956291509401205,
+          "max_dd_r": -29.73086250860829,
+          "net_pips": -200.13106026750327,
+          "win_rate": 0.33064516129032256
+        },
+        "2021": {
+          "trades": 91,
+          "net_r": -32.044496748335945,
+          "pf": 0.474435415366915,
+          "max_dd_r": -35.09559814161921,
+          "net_pips": -234.29961773242525,
+          "win_rate": 0.2087912087912088
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 46,
+        "coverage": 0.6865671641791045,
+        "median_price_lag": 0.3776119366582529,
+        "mean_price_lag": 0.42168333912573674,
+        "median_time_lag": 0.2306668216258222
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 254,
+        "net_r": -76.7104002460951,
+        "pf": 0.5993359812213662,
+        "max_dd_r": -83.64687192148622,
+        "net_pips": -677.4791785213074,
+        "win_rate": 0.24015748031496062
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 31,
+        "coverage": 0.4626865671641791,
+        "median_price_lag": 0.6238401142041343,
+        "mean_price_lag": 0.6101730249623565,
+        "median_time_lag": 0.6117021276595744
+      },
+      "price_lag_improvement_fraction": 0.24622817754588144,
+      "direction_swing_pips": 11653.200000000013,
+      "diagnostic_capture_ratio_directional": -0.03727994696735042
+    },
+    {
+      "pair": "EURUSD",
+      "direction": "LONG",
+      "timeframe": "M30",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 1182,
+        "net_r": -211.09413635869828,
+        "pf": 0.706266696197003,
+        "max_dd_r": -217.10701333514965,
+        "net_pips": -2493.4714978265406,
+        "win_rate": 0.2622673434856176
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 460,
+        "net_r": -53.836170980683804,
+        "pf": 0.8007391328872216,
+        "max_dd_r": -57.07186011926699,
+        "net_pips": -949.5087979490725,
+        "win_rate": 0.28695652173913044
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 234,
+          "net_r": -19.389145913288097,
+          "pf": 0.8482617825805836,
+          "max_dd_r": -40.1245403650335,
+          "net_pips": -469.5476251282571,
+          "win_rate": 0.32905982905982906
+        },
+        "2021": {
+          "trades": 226,
+          "net_r": -34.4470250673957,
+          "pf": 0.7580952164279608,
+          "max_dd_r": -54.4261715834858,
+          "net_pips": -479.9611728208153,
+          "win_rate": 0.24336283185840707
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 64,
+        "coverage": 0.9552238805970149,
+        "median_price_lag": 0.26877132040804197,
+        "mean_price_lag": 0.3668861793696804,
+        "median_time_lag": 0.12468274111675126
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 254,
+        "net_r": -76.7104002460951,
+        "pf": 0.5993359812213662,
+        "max_dd_r": -83.64687192148622,
+        "net_pips": -677.4791785213074,
+        "win_rate": 0.24015748031496062
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 31,
+        "coverage": 0.4626865671641791,
+        "median_price_lag": 0.6238401142041343,
+        "mean_price_lag": 0.6101730249623565,
+        "median_time_lag": 0.6117021276595744
+      },
+      "price_lag_improvement_fraction": 0.35506879379609235,
+      "direction_swing_pips": 11653.200000000013,
+      "diagnostic_capture_ratio_directional": -0.0814805201960896
+    },
+    {
+      "pair": "EURUSD",
+      "direction": "SHORT",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 534,
+        "net_r": -157.2303947622376,
+        "pf": 0.5422994195890413,
+        "max_dd_r": -163.54084275269517,
+        "net_pips": -1236.6732753155895,
+        "win_rate": 0.2303370786516854
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 181,
+        "net_r": -79.13382077780037,
+        "pf": 0.36530896531926066,
+        "max_dd_r": -86.75196385006501,
+        "net_pips": -588.7643366768791,
+        "win_rate": 0.16574585635359115
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 93,
+          "net_r": -46.717141815673614,
+          "pf": 0.2781636128648459,
+          "max_dd_r": -46.71714181567362,
+          "net_pips": -399.7363309538704,
+          "win_rate": 0.16129032258064516
+        },
+        "2021": {
+          "trades": 88,
+          "net_r": -32.41667896212673,
+          "pf": 0.4593706630837406,
+          "max_dd_r": -40.034822034391354,
+          "net_pips": -189.0280057230087,
+          "win_rate": 0.17045454545454544
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 41,
+        "coverage": 0.6119402985074627,
+        "median_price_lag": 0.30724637681159017,
+        "mean_price_lag": 0.3917520769028301,
+        "median_time_lag": 0.24583333333333332
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 258,
+        "net_r": -85.2051740089599,
+        "pf": 0.5654253123651336,
+        "max_dd_r": -85.47634345555643,
+        "net_pips": -745.8683486807405,
+        "win_rate": 0.24031007751937986
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 36,
+        "coverage": 0.5373134328358209,
+        "median_price_lag": 0.5510822291711801,
+        "mean_price_lag": 0.5632392335306514,
+        "median_time_lag": 0.45019807583474813
+      },
+      "price_lag_improvement_fraction": 0.24383585235958993,
+      "direction_swing_pips": 11497.700000000015,
+      "diagnostic_capture_ratio_directional": -0.051207140269521584
+    },
+    {
+      "pair": "EURUSD",
+      "direction": "SHORT",
+      "timeframe": "M30",
+      "family_dev_selected": "REVERSAL",
+      "development": {
+        "trades": 1674,
+        "net_r": -214.5836359705834,
+        "pf": 0.7679119356629374,
+        "max_dd_r": -218.513753829125,
+        "net_pips": -3029.013566541876,
+        "win_rate": 0.2831541218637993
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 690,
+        "net_r": -93.7485257596068,
+        "pf": 0.753396341380209,
+        "max_dd_r": -112.40903966016273,
+        "net_pips": -1289.7632505446245,
+        "win_rate": 0.30144927536231886
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 336,
+          "net_r": -41.035570860276266,
+          "pf": 0.7731391561047501,
+          "max_dd_r": -58.04399404958691,
+          "net_pips": -704.9258661089186,
+          "win_rate": 0.3125
+        },
+        "2021": {
+          "trades": 354,
+          "net_r": -52.71295489933054,
+          "pf": 0.7354754933384696,
+          "max_dd_r": -69.56578943929146,
+          "net_pips": -584.8373844357058,
+          "win_rate": 0.2909604519774011
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 64,
+        "coverage": 0.9552238805970149,
+        "median_price_lag": 0.15774851010582797,
+        "mean_price_lag": 0.22764640239366696,
+        "median_time_lag": 0.06
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 258,
+        "net_r": -85.2051740089599,
+        "pf": 0.5654253123651336,
+        "max_dd_r": -85.47634345555643,
+        "net_pips": -745.8683486807405,
+        "win_rate": 0.24031007751937986
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 36,
+        "coverage": 0.5373134328358209,
+        "median_price_lag": 0.5510822291711801,
+        "mean_price_lag": 0.5632392335306514,
+        "median_time_lag": 0.45019807583474813
+      },
+      "price_lag_improvement_fraction": 0.39333371906535214,
+      "direction_swing_pips": 11497.700000000015,
+      "diagnostic_capture_ratio_directional": -0.11217576128657233
+    },
+    {
+      "pair": "GBPUSD",
+      "direction": "LONG",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 467,
+        "net_r": -99.64369645411473,
+        "pf": 0.656865058996841,
+        "max_dd_r": -103.47429311361456,
+        "net_pips": -1083.840570226784,
+        "win_rate": 0.2676659528907923
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 193,
+        "net_r": -54.197461281620335,
+        "pf": 0.562243680379433,
+        "max_dd_r": -59.13288717897846,
+        "net_pips": -561.971553501801,
+        "win_rate": 0.2694300518134715
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 92,
+          "net_r": -11.445254725687743,
+          "pf": 0.7814148847150254,
+          "max_dd_r": -18.02109622958989,
+          "net_pips": -169.50482296616,
+          "win_rate": 0.31521739130434784
+        },
+        "2021": {
+          "trades": 101,
+          "net_r": -42.75220655593259,
+          "pf": 0.40162134790328496,
+          "max_dd_r": -48.11897512735899,
+          "net_pips": -392.4667305356411,
+          "win_rate": 0.22772277227722773
+        }
+      },
+      "early_lag": {
+        "legs": 70,
+        "detected": 45,
+        "coverage": 0.6428571428571429,
+        "median_price_lag": 0.4144778987828267,
+        "mean_price_lag": 0.41780667586108794,
+        "median_time_lag": 0.24043062200956938
+      },
+      "baseline_family": "breakout",
+      "baseline_oos": {
+        "trades": 450,
+        "net_r": -74.95580141681293,
+        "pf": 0.7595152010505215,
+        "max_dd_r": -78.87066308669043,
+        "net_pips": -1041.0366410750948,
+        "win_rate": 0.29333333333333333
+      },
+      "baseline_lag": {
+        "legs": 70,
+        "detected": 40,
+        "coverage": 0.5714285714285714,
+        "median_price_lag": 0.5463831575473116,
+        "mean_price_lag": 0.5342663943065615,
+        "median_time_lag": 0.36849517167381973
+      },
+      "price_lag_improvement_fraction": 0.1319052587644849,
+      "direction_swing_pips": 18053.8,
+      "diagnostic_capture_ratio_directional": -0.03112760490876165
+    },
+    {
+      "pair": "GBPUSD",
+      "direction": "LONG",
+      "timeframe": "M30",
+      "family_dev_selected": "IMPULSE_START",
+      "development": {
+        "trades": 2375,
+        "net_r": -351.1306375767605,
+        "pf": 0.7738290690487071,
+        "max_dd_r": -361.5806604486855,
+        "net_pips": -5633.674787747438,
+        "win_rate": 0.2488421052631579
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 969,
+        "net_r": -94.01833576004296,
+        "pf": 0.8466080884379548,
+        "max_dd_r": -107.40230265770896,
+        "net_pips": -1698.5369190551871,
+        "win_rate": 0.27347781217750256
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 490,
+          "net_r": -34.38594222150557,
+          "pf": 0.8867779430528807,
+          "max_dd_r": -48.97437109325208,
+          "net_pips": -799.6550412405281,
+          "win_rate": 0.29183673469387755
+        },
+        "2021": {
+          "trades": 479,
+          "net_r": -59.6323935385374,
+          "pf": 0.8071555386027149,
+          "max_dd_r": -84.54134514963968,
+          "net_pips": -898.8818778146591,
+          "win_rate": 0.2546972860125261
+        }
+      },
+      "early_lag": {
+        "legs": 70,
+        "detected": 68,
+        "coverage": 0.9714285714285714,
+        "median_price_lag": 0.1730268142804437,
+        "mean_price_lag": 0.22818166483330662,
+        "median_time_lag": 0.04754370102471368
+      },
+      "baseline_family": "breakout",
+      "baseline_oos": {
+        "trades": 450,
+        "net_r": -74.95580141681293,
+        "pf": 0.7595152010505215,
+        "max_dd_r": -78.87066308669043,
+        "net_pips": -1041.0366410750948,
+        "win_rate": 0.29333333333333333
+      },
+      "baseline_lag": {
+        "legs": 70,
+        "detected": 40,
+        "coverage": 0.5714285714285714,
+        "median_price_lag": 0.5463831575473116,
+        "mean_price_lag": 0.5342663943065615,
+        "median_time_lag": 0.36849517167381973
+      },
+      "price_lag_improvement_fraction": 0.3733563432668679,
+      "direction_swing_pips": 18053.8,
+      "diagnostic_capture_ratio_directional": -0.09408196163994213
+    },
+    {
+      "pair": "GBPUSD",
+      "direction": "SHORT",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 473,
+        "net_r": -87.17181896689365,
+        "pf": 0.6836822779205834,
+        "max_dd_r": -100.54892148346228,
+        "net_pips": -1084.7191965028346,
+        "win_rate": 0.2769556025369979
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 168,
+        "net_r": -54.644740733438,
+        "pf": 0.47156561370101263,
+        "max_dd_r": -55.325758476945595,
+        "net_pips": -527.4986512041968,
+        "win_rate": 0.2261904761904762
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 90,
+          "net_r": -23.93977677197602,
+          "pf": 0.5575633439223813,
+          "max_dd_r": -24.903139037833267,
+          "net_pips": -272.82118209365217,
+          "win_rate": 0.23333333333333334
+        },
+        "2021": {
+          "trades": 78,
+          "net_r": -30.70496396146197,
+          "pf": 0.37717893997573365,
+          "max_dd_r": -31.76020929242989,
+          "net_pips": -254.67746911054468,
+          "win_rate": 0.21794871794871795
+        }
+      },
+      "early_lag": {
+        "legs": 70,
+        "detected": 41,
+        "coverage": 0.5857142857142857,
+        "median_price_lag": 0.3885486834047735,
+        "mean_price_lag": 0.4382762729382524,
+        "median_time_lag": 0.2638888888888889
+      },
+      "baseline_family": "breakout",
+      "baseline_oos": {
+        "trades": 333,
+        "net_r": -7.738037968118638,
+        "pf": 0.9645277946777487,
+        "max_dd_r": -29.112873287597388,
+        "net_pips": 103.01181796905863,
+        "win_rate": 0.3333333333333333
+      },
+      "baseline_lag": {
+        "legs": 70,
+        "detected": 33,
+        "coverage": 0.4714285714285714,
+        "median_price_lag": 0.5182775712515448,
+        "mean_price_lag": 0.5459861743601834,
+        "median_time_lag": 0.5047169811320755
+      },
+      "price_lag_improvement_fraction": 0.12972888784677133,
+      "direction_swing_pips": 17752.300000000003,
+      "diagnostic_capture_ratio_directional": -0.02971438355617
+    },
+    {
+      "pair": "GBPUSD",
+      "direction": "SHORT",
+      "timeframe": "M30",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 1125,
+        "net_r": -173.7986179538377,
+        "pf": 0.7234086790204216,
+        "max_dd_r": -177.30058414569842,
+        "net_pips": -2613.3514699261264,
+        "win_rate": 0.2817777777777778
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 435,
+        "net_r": -28.946842875852756,
+        "pf": 0.8777194938164684,
+        "max_dd_r": -44.58930347875072,
+        "net_pips": -372.8864924279108,
+        "win_rate": 0.31494252873563217
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 216,
+          "net_r": -0.5253195500203658,
+          "pf": 0.9955230867482501,
+          "max_dd_r": -31.518166047152892,
+          "net_pips": -85.47153736595544,
+          "win_rate": 0.30092592592592593
+        },
+        "2021": {
+          "trades": 219,
+          "net_r": -28.42152332583239,
+          "pf": 0.7619343674451259,
+          "max_dd_r": -31.11631113089647,
+          "net_pips": -287.41495506195537,
+          "win_rate": 0.3287671232876712
+        }
+      },
+      "early_lag": {
+        "legs": 70,
+        "detected": 64,
+        "coverage": 0.9142857142857143,
+        "median_price_lag": 0.26999458307122065,
+        "mean_price_lag": 0.33973899039634275,
+        "median_time_lag": 0.1512791286727457
+      },
+      "baseline_family": "breakout",
+      "baseline_oos": {
+        "trades": 333,
+        "net_r": -7.738037968118638,
+        "pf": 0.9645277946777487,
+        "max_dd_r": -29.112873287597388,
+        "net_pips": 103.01181796905863,
+        "win_rate": 0.3333333333333333
+      },
+      "baseline_lag": {
+        "legs": 70,
+        "detected": 33,
+        "coverage": 0.4714285714285714,
+        "median_price_lag": 0.5182775712515448,
+        "mean_price_lag": 0.5459861743601834,
+        "median_time_lag": 0.5047169811320755
+      },
+      "price_lag_improvement_fraction": 0.24828298818032418,
+      "direction_swing_pips": 17752.300000000003,
+      "diagnostic_capture_ratio_directional": -0.021004967943754373
+    },
+    {
+      "pair": "USDJPY",
+      "direction": "LONG",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 508,
+        "net_r": -34.65761925376476,
+        "pf": 0.8814666974487648,
+        "max_dd_r": -61.800035025596955,
+        "net_pips": -472.02562149715135,
+        "win_rate": 0.3090551181102362
+      },
+      "positive_dev_years": 2,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 216,
+        "net_r": -39.6173777817703,
+        "pf": 0.7200468768168393,
+        "max_dd_r": -52.57519783492614,
+        "net_pips": -328.5920513778251,
+        "win_rate": 0.25462962962962965
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 95,
+          "net_r": -23.75630584362926,
+          "pf": 0.618762600200977,
+          "max_dd_r": -28.66758739145164,
+          "net_pips": -174.87934550277942,
+          "win_rate": 0.25263157894736843
+        },
+        "2021": {
+          "trades": 121,
+          "net_r": -15.861071938141041,
+          "pf": 0.7997355724661421,
+          "max_dd_r": -23.9992419286095,
+          "net_pips": -153.71270587504569,
+          "win_rate": 0.256198347107438
+        }
+      },
+      "early_lag": {
+        "legs": 75,
+        "detected": 50,
+        "coverage": 0.6666666666666666,
+        "median_price_lag": 0.3232355393173802,
+        "mean_price_lag": 0.3591544038328975,
+        "median_time_lag": 0.24623426645573973
+      },
+      "baseline_family": "breakout",
+      "baseline_oos": {
+        "trades": 442,
+        "net_r": -74.84324062750363,
+        "pf": 0.7614167246791633,
+        "max_dd_r": -74.84324062750356,
+        "net_pips": -379.525488255868,
+        "win_rate": 0.2828054298642534
+      },
+      "baseline_lag": {
+        "legs": 75,
+        "detected": 43,
+        "coverage": 0.5733333333333334,
+        "median_price_lag": 0.6059907834101375,
+        "mean_price_lag": 0.5629171361274318,
+        "median_time_lag": 0.5740223463687151
+      },
+      "price_lag_improvement_fraction": 0.28275524409275726,
+      "direction_swing_pips": 11838.700000000008,
+      "diagnostic_capture_ratio_directional": -0.027755754548879935
+    },
+    {
+      "pair": "USDJPY",
+      "direction": "LONG",
+      "timeframe": "M30",
+      "family_dev_selected": "IMPULSE_START",
+      "development": {
+        "trades": 2388,
+        "net_r": 70.58276098436161,
+        "pf": 1.0482753275427281,
+        "max_dd_r": -93.201853731174,
+        "net_pips": -199.44600931957268,
+        "win_rate": 0.29731993299832493
+      },
+      "positive_dev_years": 3,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 1055,
+        "net_r": -96.60353882100607,
+        "pf": 0.8607369684931537,
+        "max_dd_r": -125.55511903969028,
+        "net_pips": -1124.879387628208,
+        "win_rate": 0.25308056872037915
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 498,
+          "net_r": -56.2082881420433,
+          "pf": 0.8318808565535086,
+          "max_dd_r": -89.4695944373266,
+          "net_pips": -580.2683000117142,
+          "win_rate": 0.25100401606425704
+        },
+        "2021": {
+          "trades": 557,
+          "net_r": -40.39525067896277,
+          "pf": 0.8875851253857168,
+          "max_dd_r": -71.82769787682234,
+          "net_pips": -544.6110876164937,
+          "win_rate": 0.25493716337522443
+        }
+      },
+      "early_lag": {
+        "legs": 75,
+        "detected": 73,
+        "coverage": 0.9733333333333334,
+        "median_price_lag": 0.21953255425709353,
+        "mean_price_lag": 0.25621198372039383,
+        "median_time_lag": 0.07211538461538461
+      },
+      "baseline_family": "breakout",
+      "baseline_oos": {
+        "trades": 442,
+        "net_r": -74.84324062750363,
+        "pf": 0.7614167246791633,
+        "max_dd_r": -74.84324062750356,
+        "net_pips": -379.525488255868,
+        "win_rate": 0.2828054298642534
+      },
+      "baseline_lag": {
+        "legs": 75,
+        "detected": 43,
+        "coverage": 0.5733333333333334,
+        "median_price_lag": 0.6059907834101375,
+        "mean_price_lag": 0.5629171361274318,
+        "median_time_lag": 0.5740223463687151
+      },
+      "price_lag_improvement_fraction": 0.38645822915304395,
+      "direction_swing_pips": 11838.700000000008,
+      "diagnostic_capture_ratio_directional": -0.09501713766107826
+    },
+    {
+      "pair": "USDJPY",
+      "direction": "SHORT",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 377,
+        "net_r": -74.03365968514288,
+        "pf": 0.6770028931356082,
+        "max_dd_r": -74.0336596851429,
+        "net_pips": -400.58912959958803,
+        "win_rate": 0.27851458885941643
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 181,
+        "net_r": -61.26064110747467,
+        "pf": 0.48030857889267037,
+        "max_dd_r": -62.066837304574086,
+        "net_pips": -393.84745809262824,
+        "win_rate": 0.23204419889502761
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 94,
+          "net_r": -27.829658279244654,
+          "pf": 0.5370968817026631,
+          "max_dd_r": -28.63585447634407,
+          "net_pips": -226.93324949695324,
+          "win_rate": 0.2872340425531915
+        },
+        "2021": {
+          "trades": 87,
+          "net_r": -33.43098282823002,
+          "pf": 0.42119916376372163,
+          "max_dd_r": -33.430982828230036,
+          "net_pips": -166.914208595675,
+          "win_rate": 0.1724137931034483
+        }
+      },
+      "early_lag": {
+        "legs": 75,
+        "detected": 46,
+        "coverage": 0.6133333333333333,
+        "median_price_lag": 0.3593091054534635,
+        "mean_price_lag": 0.412927717647044,
+        "median_time_lag": 0.42040712034750016
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 252,
+        "net_r": -6.855020076606647,
+        "pf": 0.959216642944975,
+        "max_dd_r": -20.69934305700154,
+        "net_pips": -151.78731184261665,
+        "win_rate": 0.30952380952380953
+      },
+      "baseline_lag": {
+        "legs": 75,
+        "detected": 32,
+        "coverage": 0.4266666666666667,
+        "median_price_lag": 0.5325917009350807,
+        "mean_price_lag": 0.5579758266820036,
+        "median_time_lag": 0.4832251082251082
+      },
+      "price_lag_improvement_fraction": 0.17328259548161717,
+      "direction_swing_pips": 11165.900000000007,
+      "diagnostic_capture_ratio_directional": -0.035272343303506926
+    },
+    {
+      "pair": "USDJPY",
+      "direction": "SHORT",
+      "timeframe": "M30",
+      "family_dev_selected": "REVERSAL",
+      "development": {
+        "trades": 1779,
+        "net_r": -185.70424447587968,
+        "pf": 0.8108877886794165,
+        "max_dd_r": -200.36729248945332,
+        "net_pips": -2745.8610492719854,
+        "win_rate": 0.2962338392355256
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 687,
+        "net_r": -96.76544135397012,
+        "pf": 0.7492579012033217,
+        "max_dd_r": -106.12245240178392,
+        "net_pips": -1148.8812100369103,
+        "win_rate": 0.2678311499272198
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 333,
+          "net_r": -3.1687308097722884,
+          "pf": 0.9820871763727006,
+          "max_dd_r": -37.5596785135704,
+          "net_pips": -221.88383731654113,
+          "win_rate": 0.3063063063063063
+        },
+        "2021": {
+          "trades": 354,
+          "net_r": -93.59671054419785,
+          "pf": 0.5522092914659618,
+          "max_dd_r": -93.9749550768557,
+          "net_pips": -926.9973727203692,
+          "win_rate": 0.23163841807909605
+        }
+      },
+      "early_lag": {
+        "legs": 75,
+        "detected": 63,
+        "coverage": 0.84,
+        "median_price_lag": 0.18325434439179505,
+        "mean_price_lag": 0.23256613977900398,
+        "median_time_lag": 0.08
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 252,
+        "net_r": -6.855020076606647,
+        "pf": 0.959216642944975,
+        "max_dd_r": -20.69934305700154,
+        "net_pips": -151.78731184261665,
+        "win_rate": 0.30952380952380953
+      },
+      "baseline_lag": {
+        "legs": 75,
+        "detected": 32,
+        "coverage": 0.4266666666666667,
+        "median_price_lag": 0.5325917009350807,
+        "mean_price_lag": 0.5579758266820036,
+        "median_time_lag": 0.4832251082251082
+      },
+      "price_lag_improvement_fraction": 0.3493373565432856,
+      "direction_swing_pips": 11165.900000000007,
+      "diagnostic_capture_ratio_directional": -0.10289194870426115
+    },
+    {
+      "pair": "EURJPY",
+      "direction": "LONG",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 474,
+        "net_r": -87.99330454284197,
+        "pf": 0.7034412332501011,
+        "max_dd_r": -119.10623610002898,
+        "net_pips": -1023.3023737922764,
+        "win_rate": 0.28270042194092826
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 209,
+        "net_r": -98.68972198080418,
+        "pf": 0.3687479566847379,
+        "max_dd_r": -98.76490597628657,
+        "net_pips": -653.5040300458121,
+        "win_rate": 0.19617224880382775
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 87,
+          "net_r": -27.727026834184457,
+          "pf": 0.5391745613706609,
+          "max_dd_r": -29.77693644227395,
+          "net_pips": -137.18618082908165,
+          "win_rate": 0.22988505747126436
+        },
+        "2021": {
+          "trades": 122,
+          "net_r": -70.96269514661972,
+          "pf": 0.26212321421578716,
+          "max_dd_r": -70.96269514661972,
+          "net_pips": -516.3178492167305,
+          "win_rate": 0.1721311475409836
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 41,
+        "coverage": 0.6119402985074627,
+        "median_price_lag": 0.3180873180873143,
+        "mean_price_lag": 0.37780596621510165,
+        "median_time_lag": 0.13709677419354838
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 314,
+        "net_r": -60.51308220461636,
+        "pf": 0.7316646343061749,
+        "max_dd_r": -78.50312569642854,
+        "net_pips": -575.6987707069627,
+        "win_rate": 0.27388535031847133
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 31,
+        "coverage": 0.4626865671641791,
+        "median_price_lag": 0.5372316126084932,
+        "mean_price_lag": 0.518896077747343,
+        "median_time_lag": 0.42813455657492355
+      },
+      "price_lag_improvement_fraction": 0.2191442945211789,
+      "direction_swing_pips": 13614.500000000005,
+      "diagnostic_capture_ratio_directional": -0.04800058981569737
+    },
+    {
+      "pair": "EURJPY",
+      "direction": "LONG",
+      "timeframe": "M30",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 1228,
+        "net_r": -80.9629169811829,
+        "pf": 0.8805311850753588,
+        "max_dd_r": -116.37767032512728,
+        "net_pips": -1495.7983917728016,
+        "win_rate": 0.30944625407166126
+      },
+      "positive_dev_years": 2,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 495,
+        "net_r": -123.77733624441689,
+        "pf": 0.6122869444158817,
+        "max_dd_r": -125.22374252228269,
+        "net_pips": -1431.3892260193343,
+        "win_rate": 0.25656565656565655
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 246,
+          "net_r": -35.46720308796934,
+          "pf": 0.7687651899888734,
+          "max_dd_r": -45.334249907308575,
+          "net_pips": -563.9646095951235,
+          "win_rate": 0.2926829268292683
+        },
+        "2021": {
+          "trades": 249,
+          "net_r": -88.31013315644756,
+          "pf": 0.4675881694614775,
+          "max_dd_r": -94.4278386273113,
+          "net_pips": -867.4246164242106,
+          "win_rate": 0.22088353413654618
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 63,
+        "coverage": 0.9402985074626866,
+        "median_price_lag": 0.26210653753026175,
+        "mean_price_lag": 0.3497880255024569,
+        "median_time_lag": 0.13725490196078433
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 314,
+        "net_r": -60.51308220461636,
+        "pf": 0.7316646343061749,
+        "max_dd_r": -78.50312569642854,
+        "net_pips": -575.6987707069627,
+        "win_rate": 0.27388535031847133
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 31,
+        "coverage": 0.4626865671641791,
+        "median_price_lag": 0.5372316126084932,
+        "mean_price_lag": 0.518896077747343,
+        "median_time_lag": 0.42813455657492355
+      },
+      "price_lag_improvement_fraction": 0.2751250750782314,
+      "direction_swing_pips": 13614.500000000005,
+      "diagnostic_capture_ratio_directional": -0.10513711307938843
+    },
+    {
+      "pair": "EURJPY",
+      "direction": "SHORT",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 377,
+        "net_r": -129.35752159963437,
+        "pf": 0.4645113577997357,
+        "max_dd_r": -129.80009137135787,
+        "net_pips": -1423.905364277499,
+        "win_rate": 0.259946949602122
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 179,
+        "net_r": -49.06272531817474,
+        "pf": 0.5665503865855833,
+        "max_dd_r": -54.470523338642685,
+        "net_pips": -347.49328598500426,
+        "win_rate": 0.27932960893854747
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 84,
+          "net_r": -14.90922600699175,
+          "pf": 0.6989593786071261,
+          "max_dd_r": -17.260804444500423,
+          "net_pips": -150.85412868072723,
+          "win_rate": 0.35714285714285715
+        },
+        "2021": {
+          "trades": 95,
+          "net_r": -34.153499311183,
+          "pf": 0.46354921821664347,
+          "max_dd_r": -38.96465532886773,
+          "net_pips": -196.63915730427703,
+          "win_rate": 0.21052631578947367
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 40,
+        "coverage": 0.5970149253731343,
+        "median_price_lag": 0.22706452703973257,
+        "mean_price_lag": 0.3242851553771037,
+        "median_time_lag": 0.18408577986960378
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 253,
+        "net_r": -38.92767002401833,
+        "pf": 0.7807922081685204,
+        "max_dd_r": -46.96126311403659,
+        "net_pips": -446.95134705474686,
+        "win_rate": 0.2845849802371542
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 33,
+        "coverage": 0.4925373134328358,
+        "median_price_lag": 0.5294370434035268,
+        "mean_price_lag": 0.571557849675399,
+        "median_time_lag": 0.5625
+      },
+      "price_lag_improvement_fraction": 0.30237251636379425,
+      "direction_swing_pips": 12708.500000000007,
+      "diagnostic_capture_ratio_directional": -0.027343375377503566
+    },
+    {
+      "pair": "EURJPY",
+      "direction": "SHORT",
+      "timeframe": "M30",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 1178,
+        "net_r": -258.6549647646148,
+        "pf": 0.6423031221950432,
+        "max_dd_r": -258.7563297412326,
+        "net_pips": -4405.298722343288,
+        "win_rate": 0.25551782682512736
+      },
+      "positive_dev_years": 0,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 469,
+        "net_r": -85.62953057603734,
+        "pf": 0.6955316854569938,
+        "max_dd_r": -100.93344640799336,
+        "net_pips": -1139.9289208747887,
+        "win_rate": 0.26865671641791045
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 234,
+          "net_r": -24.394383029109715,
+          "pf": 0.8169130569960599,
+          "max_dd_r": -32.68094551876555,
+          "net_pips": -410.0001227984066,
+          "win_rate": 0.28205128205128205
+        },
+        "2021": {
+          "trades": 235,
+          "net_r": -61.23514754692762,
+          "pf": 0.5862587672946425,
+          "max_dd_r": -73.05212927938922,
+          "net_pips": -729.9287980763822,
+          "win_rate": 0.2553191489361702
+        }
+      },
+      "early_lag": {
+        "legs": 67,
+        "detected": 60,
+        "coverage": 0.8955223880597015,
+        "median_price_lag": 0.31428104698696924,
+        "mean_price_lag": 0.36295510303603595,
+        "median_time_lag": 0.140625
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 253,
+        "net_r": -38.92767002401833,
+        "pf": 0.7807922081685204,
+        "max_dd_r": -46.96126311403659,
+        "net_pips": -446.95134705474686,
+        "win_rate": 0.2845849802371542
+      },
+      "baseline_lag": {
+        "legs": 67,
+        "detected": 33,
+        "coverage": 0.4925373134328358,
+        "median_price_lag": 0.5294370434035268,
+        "mean_price_lag": 0.571557849675399,
+        "median_time_lag": 0.5625
+      },
+      "price_lag_improvement_fraction": 0.21515599641655758,
+      "direction_swing_pips": 12708.500000000007,
+      "diagnostic_capture_ratio_directional": -0.08969814855213346
+    },
+    {
+      "pair": "GBPJPY",
+      "direction": "LONG",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 455,
+        "net_r": -107.10607004026582,
+        "pf": 0.6287787666084841,
+        "max_dd_r": -138.363578480539,
+        "net_pips": -1634.244699643277,
+        "win_rate": 0.2703296703296703
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 222,
+        "net_r": -83.51307925277446,
+        "pf": 0.4691445854435823,
+        "max_dd_r": -86.02224783317162,
+        "net_pips": -959.457762352676,
+        "win_rate": 0.22072072072072071
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 108,
+          "net_r": -23.804421032173003,
+          "pf": 0.6593338584680973,
+          "max_dd_r": -31.00179604605765,
+          "net_pips": -368.5664793573153,
+          "win_rate": 0.2777777777777778
+        },
+        "2021": {
+          "trades": 114,
+          "net_r": -59.70865822060145,
+          "pf": 0.31716145464095435,
+          "max_dd_r": -59.70865822060142,
+          "net_pips": -590.8912829953607,
+          "win_rate": 0.16666666666666666
+        }
+      },
+      "early_lag": {
+        "legs": 65,
+        "detected": 49,
+        "coverage": 0.7538461538461538,
+        "median_price_lag": 0.3919540229885065,
+        "mean_price_lag": 0.39230906290994033,
+        "median_time_lag": 0.24759615384615385
+      },
+      "baseline_family": "pullback",
+      "baseline_oos": {
+        "trades": 666,
+        "net_r": -63.48001165667452,
+        "pf": 0.8408382699651706,
+        "max_dd_r": -68.45335029367189,
+        "net_pips": -939.5844123400963,
+        "win_rate": 0.3588588588588589
+      },
+      "baseline_lag": {
+        "legs": 65,
+        "detected": 33,
+        "coverage": 0.5076923076923077,
+        "median_price_lag": 0.539828080229221,
+        "mean_price_lag": 0.4932719903539971,
+        "median_time_lag": 0.39917355371900826
+      },
+      "price_lag_improvement_fraction": 0.1478740572407145,
+      "direction_swing_pips": 20541.500000000004,
+      "diagnostic_capture_ratio_directional": -0.046708261925987676
+    },
+    {
+      "pair": "GBPJPY",
+      "direction": "LONG",
+      "timeframe": "M30",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 1212,
+        "net_r": -162.17274173840278,
+        "pf": 0.7748675469041119,
+        "max_dd_r": -184.88023934386905,
+        "net_pips": -2684.7529799811127,
+        "win_rate": 0.2863036303630363
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 498,
+        "net_r": -96.32615759499734,
+        "pf": 0.6919068267394834,
+        "max_dd_r": -101.40958210423301,
+        "net_pips": -1534.9634755380093,
+        "win_rate": 0.2429718875502008
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 239,
+          "net_r": -55.19043478083382,
+          "pf": 0.6316770928638359,
+          "max_dd_r": -56.05584853088165,
+          "net_pips": -1019.3575891151966,
+          "win_rate": 0.2384937238493724
+        },
+        "2021": {
+          "trades": 259,
+          "net_r": -41.13572281416353,
+          "pf": 0.7473393351469005,
+          "max_dd_r": -52.589934902928846,
+          "net_pips": -515.6058864228129,
+          "win_rate": 0.2471042471042471
+        }
+      },
+      "early_lag": {
+        "legs": 65,
+        "detected": 57,
+        "coverage": 0.8769230769230769,
+        "median_price_lag": 0.29556313993173494,
+        "mean_price_lag": 0.3221932942340207,
+        "median_time_lag": 0.13561076604554864
+      },
+      "baseline_family": "pullback",
+      "baseline_oos": {
+        "trades": 666,
+        "net_r": -63.48001165667452,
+        "pf": 0.8408382699651706,
+        "max_dd_r": -68.45335029367189,
+        "net_pips": -939.5844123400963,
+        "win_rate": 0.3588588588588589
+      },
+      "baseline_lag": {
+        "legs": 65,
+        "detected": 33,
+        "coverage": 0.5076923076923077,
+        "median_price_lag": 0.539828080229221,
+        "mean_price_lag": 0.4932719903539971,
+        "median_time_lag": 0.39917355371900826
+      },
+      "price_lag_improvement_fraction": 0.24426494029748608,
+      "direction_swing_pips": 20541.500000000004,
+      "diagnostic_capture_ratio_directional": -0.07472499454947346
+    },
+    {
+      "pair": "GBPJPY",
+      "direction": "SHORT",
+      "timeframe": "M15",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 334,
+        "net_r": -80.73999908131864,
+        "pf": 0.5978670625391673,
+        "max_dd_r": -85.26392129567516,
+        "net_pips": -1259.327308372744,
+        "win_rate": 0.26646706586826346
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 169,
+        "net_r": -37.150128169126674,
+        "pf": 0.6368317347302586,
+        "max_dd_r": -37.15012816912667,
+        "net_pips": -578.460385050505,
+        "win_rate": 0.2485207100591716
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 90,
+          "net_r": -11.390869585651098,
+          "pf": 0.7861425008291129,
+          "max_dd_r": -15.242084379104995,
+          "net_pips": -303.6495844399326,
+          "win_rate": 0.25555555555555554
+        },
+        "2021": {
+          "trades": 79,
+          "net_r": -25.759258583475575,
+          "pf": 0.47463003462643366,
+          "max_dd_r": -27.880688341609726,
+          "net_pips": -274.8108006105724,
+          "win_rate": 0.24050632911392406
+        }
+      },
+      "early_lag": {
+        "legs": 65,
+        "detected": 40,
+        "coverage": 0.6153846153846154,
+        "median_price_lag": 0.39427193867090116,
+        "mean_price_lag": 0.40487697775717,
+        "median_time_lag": 0.2606010476978219
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 223,
+        "net_r": 10.429454061735981,
+        "pf": 1.0725305510450636,
+        "max_dd_r": -16.496379780544686,
+        "net_pips": 361.6969488904701,
+        "win_rate": 0.336322869955157
+      },
+      "baseline_lag": {
+        "legs": 65,
+        "detected": 38,
+        "coverage": 0.5846153846153846,
+        "median_price_lag": 0.5850842870932191,
+        "mean_price_lag": 0.5550377700968872,
+        "median_time_lag": 0.5199152124617963
+      },
+      "price_lag_improvement_fraction": 0.19081234842231798,
+      "direction_swing_pips": 19334.800000000003,
+      "diagnostic_capture_ratio_directional": -0.02991809509539819
+    },
+    {
+      "pair": "GBPJPY",
+      "direction": "SHORT",
+      "timeframe": "M30",
+      "family_dev_selected": "CONTINUATION",
+      "development": {
+        "trades": 1155,
+        "net_r": -125.06609744078526,
+        "pf": 0.8149890869007139,
+        "max_dd_r": -133.125416933899,
+        "net_pips": -3468.2911952180802,
+        "win_rate": 0.2753246753246753
+      },
+      "positive_dev_years": 1,
+      "development_gate": false,
+      "validation": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "validation_gate": false,
+      "diagnostic_oos": {
+        "trades": 484,
+        "net_r": -105.82790234381649,
+        "pf": 0.6358864595092085,
+        "max_dd_r": -107.2763269556089,
+        "net_pips": -1916.8598095747825,
+        "win_rate": 0.27479338842975204
+      },
+      "diagnostic_oos_by_year": {
+        "2020": {
+          "trades": 253,
+          "net_r": -60.57415377860751,
+          "pf": 0.5956487545906725,
+          "max_dd_r": -63.655056336521916,
+          "net_pips": -1271.7116180919247,
+          "win_rate": 0.2885375494071146
+        },
+        "2021": {
+          "trades": 231,
+          "net_r": -45.25374856520899,
+          "pf": 0.6786858047533835,
+          "max_dd_r": -48.54303993947907,
+          "net_pips": -645.1481914828577,
+          "win_rate": 0.2597402597402597
+        }
+      },
+      "early_lag": {
+        "legs": 65,
+        "detected": 62,
+        "coverage": 0.9538461538461539,
+        "median_price_lag": 0.2848640992597984,
+        "mean_price_lag": 0.34904285454129985,
+        "median_time_lag": 0.11177437020810514
+      },
+      "baseline_family": "momentum",
+      "baseline_oos": {
+        "trades": 223,
+        "net_r": 10.429454061735981,
+        "pf": 1.0725305510450636,
+        "max_dd_r": -16.496379780544686,
+        "net_pips": 361.6969488904701,
+        "win_rate": 0.336322869955157
+      },
+      "baseline_lag": {
+        "legs": 65,
+        "detected": 38,
+        "coverage": 0.5846153846153846,
+        "median_price_lag": 0.5850842870932191,
+        "mean_price_lag": 0.5550377700968872,
+        "median_time_lag": 0.5199152124617963
+      },
+      "price_lag_improvement_fraction": 0.30022018783342075,
+      "direction_swing_pips": 19334.800000000003,
+      "diagnostic_capture_ratio_directional": -0.09914040018902612
+    }
+  ]
+}
