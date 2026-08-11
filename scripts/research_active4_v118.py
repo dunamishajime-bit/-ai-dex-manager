@@ -3,7 +3,9 @@ import argparse,json,math,os,statistics
 from pathlib import Path
 import research_active4_v115 as q
 HOUR=q.HOUR; NORMAL_BPS=q.NORMAL_BPS; STRESS_BPS=q.STRESS_BPS; p=q.p; ret=q.ret; metric=q.metric
-CANDS={'btc_wave_event48':('BTC',.60,6.2,600,48),'btc_wave_event72':('BTC',.58,6.0,600,72),'eth_wave_event48':('ETH',.56,6.5,504,48),'bnb_wave_event48':('BNB',.50,6.0,408,48),'avax_wave_event36':('AVAX',.44,7.8,360,36)}
+# Simulator contract is (symbol,risk,base_trail,maxhold). Event horizon is kept separately.
+CANDS={'btc_wave_event48':('BTC',.60,6.2,600),'btc_wave_event72':('BTC',.58,6.0,600),'eth_wave_event48':('ETH',.56,6.5,504),'bnb_wave_event48':('BNB',.50,6.0,408),'avax_wave_event36':('AVAX',.44,7.8,360)}
+HORIZON={'btc_wave_event48':48,'btc_wave_event72':72,'eth_wave_event48':48,'bnb_wave_event48':48,'avax_wave_event36':36}
 q.CANDS.update(CANDS)
 MODELS={}
 def mean(x):return statistics.fmean(x) if x else 0.0
@@ -21,7 +23,7 @@ def feats(cid,candles,idx,ts):
   xs += [((ret(c,i,n) or 0)-(ret(candles['BTC'],bi,n) or 0))/(v*math.sqrt(n)+1e-9) for n in (6,24,72,168)]
  return xs
 def label(cid,candles,idx,ts):
- s=CANDS[cid][0];h=CANDS[cid][4];c=candles[s];i=idx[s].get(ts)
+ s=CANDS[cid][0];h=HORIZON[cid];c=candles[s];i=idx[s].get(ts)
  if i is None or i+h>=len(c):return None
  v=p.vol(c,i,168)
  if v<=1e-9:return None
@@ -43,10 +45,10 @@ def solve(a,y,lam=4.0):
    if abs(z)>1e-12:M[r]=[x-z*t for x,t in zip(M[r],M[col])]
  return [M[i][n] for i in range(n)]
 def train(cid,candles,idx,per):
- a,b=per;X=[];Y=[]
+ a,b=per;X=[];Y=[];h=HORIZON[cid]
  for row in candles[CANDS[cid][0]][::4]:
   ts=int(row['ts'])
-  if not(a<=ts<b-CANDS[cid][4]*HOUR):continue
+  if not(a<=ts<b-h*HOUR):continue
   f=feats(cid,candles,idx,ts);y=label(cid,candles,idx,ts)
   if f is not None and y is not None:X.append(f);Y.append(y)
  mu=[mean([r[j] for r in X]) for j in range(len(X[0]))];ss=[max(sd([r[j] for r in X]),1e-6) for j in range(len(mu))];Z=[[1]+[(r[j]-mu[j])/ss[j] for j in range(len(mu))] for r in X]
