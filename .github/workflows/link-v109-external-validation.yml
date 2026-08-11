@@ -63,7 +63,11 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        symbol: [LINK, SOL]
+        include:
+          - symbol: LINK
+            slug: link
+          - symbol: SOL
+            slug: sol
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -100,8 +104,8 @@ jobs:
         with:
           name: ${{ matrix.symbol }}-v109-external-validation
           path: |
-            .research-state/${{ lower(matrix.symbol) }}-v109-external-validation.json
-            .research-state/${{ lower(matrix.symbol) }}-v109-external-validation.md
+            .research-state/${{ matrix.slug }}-v109-external-validation.json
+            .research-state/${{ matrix.slug }}-v109-external-validation.md
           if-no-files-found: warn
           retention-days: 30
 
