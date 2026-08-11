@@ -38,15 +38,25 @@ export PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false
 export PENGU_DUAL_LS_V2_MAX_GROSS=0.10
 export PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=2.5
 export PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=2
+export DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/dis-dex-manager/.runtime-state/disdex-v13d-v11eq-v96
+export DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/dis-dex-manager/.runtime-state/disdex-v13d-v11eq-v96
+export DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=/home/deploy/dis-dex-manager/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+export DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=/home/deploy/dis-dex-manager/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+export DISDEX_V96_KILL_SWITCH_FILE=/home/deploy/dis-dex-manager/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+export PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=/home/deploy/dis-dex-manager/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
 
 disdex_apply_v96_v52_fixed_live_policy
 disdex_assert_v96_v52_fixed_live_policy
+disdex_apply_v96_v52_shared_runtime_paths
+disdex_assert_v96_v52_shared_runtime_paths
 
 grep -Fq 'createInterruptibleDelay' "$root/scripts/disdex-v96-live-runner.ts"
 grep -Fq 'createInterruptibleDelay' "$root/scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
 
 printf 'DISDEX_V96_V52_FIXED_LIVE_POLICY_SELFTEST_PASS\n'
 printf 'staleEnvironmentOverridden=true\n'
+printf 'sharedKillSwitchPath=%s\n' "$DISDEX_V96_KILL_SWITCH_FILE"
+printf 'killSwitchAliasesAligned=true\n'
 printf 'v96CryptoSleeveGross=%s\n' "$DISDEX_V96_MAX_GROSS"
 printf 'stockSleeveGross=%s\n' "$DISDEX_V52_STOCK_GROSS_CAP"
 printf 'combinedPortfolioGross=%s\n' "$DISDEX_V52_PORTFOLIO_GROSS_CAP"

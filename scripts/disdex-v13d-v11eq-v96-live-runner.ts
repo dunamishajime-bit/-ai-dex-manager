@@ -11,6 +11,7 @@ import {
     DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
+import { resolveDisDexV96V52SharedRuntimePaths } from "../lib/disdex-v96-v52-shared-runtime-paths";
 import { isUsRegularEquitySession } from "./disdex-v13d-v11eq-v96-strategy-preflight";
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
@@ -37,13 +38,13 @@ function mode(): RunnerMode {
 }
 
 function combinedPaths() {
-    const stateRoot = resolve(process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR || DISDEX_V13D_V11EQ_V96_RUNTIME.stateDirectory);
+    const shared = resolveDisDexV96V52SharedRuntimePaths();
     return {
-        stateRoot,
-        cryptoStateRoot: resolve(stateRoot, "crypto-v96"),
-        penguStateRoot: resolve(stateRoot, "crypto-v96", "pengu-dual-ls-v2-final"),
-        stockStateRoot: resolve(stateRoot, "stock"),
-        killSwitchPath: resolve(process.env.DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE || resolve(stateRoot, "kill-switch.json")),
+        stateRoot: shared.combinedRoot,
+        cryptoStateRoot: shared.cryptoStateRoot,
+        penguStateRoot: shared.penguStateRoot,
+        stockStateRoot: shared.stockStateRoot,
+        killSwitchPath: shared.killSwitchPath,
     };
 }
 
