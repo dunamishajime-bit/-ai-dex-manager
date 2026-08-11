@@ -1,0 +1,64 @@
+name: Pair Large Wave V112
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_pair_large_wave_v112.py"
+      - ".github/workflows/pair-large-wave-v112.yml"
+      - "research/pair-large-wave-v112-trigger.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pair-large-wave-v112-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        candidate:
+          - btc_trend_pullback
+          - btc_failed_break_reversal
+          - eth_beta_acceleration
+          - bnb_squeeze_expansion
+          - avax_impulse_decay
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pair-specific-v107-exact-usdm-v3-20260811
+          restore-keys: |
+            pair-specific-v104-exact-usdm-v3-20260810
+            pair-specific-v106-usdm-
+            six-pair-v98-usdm-
+      - name: Compile
+        run: python -m py_compile scripts/research_pair_large_wave_v112.py
+      - name: Run independent large-wave lifecycle engine
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_pair_large_wave_v112.py --candidate "${{ matrix.candidate }}"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pair-large-wave-v112-${{ matrix.candidate }}
+          path: |
+            .research-state/pair-large-wave-v112-${{ matrix.candidate }}.json
+            .research-state/pair-large-wave-v112-${{ matrix.candidate }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research-only. Independent large-wave families. No production/VPS/live changes.
