@@ -48,7 +48,7 @@ export default function PositionsPage() {
             V96 + PENGU_DUAL_LS_V2_FINAL + V52
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-7 text-white/82">
-            この画面は現在の本番ロジックと固定リスク設定を表示します。旧12H Trend / Range判定、BNB Chain基準のWebウォレット評価、UNI / TWT補助候補、旧Web手動発注は現行LIVEロジックではありません。
+            現在の本番ロジックと固定リスク設定を読み取り専用で表示します。この画面から注文・取消・建玉変更は行えません。
           </p>
         </header>
 
@@ -145,7 +145,7 @@ export default function PositionsPage() {
         </section>
 
         <section className="rounded-[22px] border border-gold-400/14 bg-black/25 px-4 py-3 text-[11px] leading-5 text-white/62">
-          このページは現行Production Logicの説明画面です。リアルタイムのposition、pending、Open Orders、Kill Switch、MainPID、Aster残高はVPS runtimeを正とします。HP側で推測判定や旧12Hロジックによる発注は行いません。
+          現行Production Logicの読み取り専用画面です。リアルタイムのposition、pending、Open Orders、Kill Switch、MainPID、Aster残高はVPS runtimeを正とし、取得不能時は推測表示しません。
         </section>
       </div>
     </main>
