@@ -1,0 +1,24 @@
+{
+  "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
+  "sessionDate": "2026-08-11",
+  "segment": "OPEN_CORE",
+  "runId": "31502205817",
+  "runAttempt": "1",
+  "startedAtUtc": "2026-08-11T14:34:04Z",
+  "finishedAtUtc": "2026-08-11T18:45:01Z",
+  "targetEndUtc": "2026-08-11T18:45:00Z",
+  "entryCutoffMs": 1786473810000,
+  "collectorExitCode": 0,
+  "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
+  "workflowCommit": "d686f6dc0b841ba6299830fe8aade797420f4597",
+  "configSha256": "c25dd7fa5fd53544c0c172bd8191fbad486601259434b93ea418323dea31404e",
+  "resultStatus": "V13_FORWARD_DATA_REQUIRED",
+  "completeSymbols": [
+    "AMZN",
+    "META",
+    "MSFT",
+    "NVDA",
+    "TSLA"
+  ],
+  "collectorErrors": 1
+}
