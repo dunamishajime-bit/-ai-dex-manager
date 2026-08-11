@@ -100,6 +100,7 @@ grep -Fq 'export DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS=2' "$live_policy_sour
 grep -Fq 'disdex_apply_v96_v52_shared_runtime_paths' "$live_policy_source"
 grep -Fq 'disdex_assert_v96_v52_shared_runtime_paths' "$live_launcher"
 grep -Fq 'disdex_assert_v96_v52_shared_runtime_paths' "$preflight_launcher"
+grep -Fq 'disdex_assert_v96_v52_shared_runtime_paths' "$approval_policy_wrapper"
 grep -Fq 'maximumPortfolioGross), 1.5' "$approval_policy_wrapper"
 grep -Fq 'combinedPortfolioGrossCap: 2.5' "$approval_policy_wrapper"
 grep -Fq 'HEALTHY_POLL_INTERVAL_MS = 5 * 60_000' "$margin_policy"

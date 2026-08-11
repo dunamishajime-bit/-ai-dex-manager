@@ -13,6 +13,8 @@ policy_script="$(pwd -P)/scripts/ops/disdex-v96-v52-live-policy.sh"
 source "$policy_script"
 disdex_apply_v96_v52_fixed_live_policy
 disdex_assert_v96_v52_fixed_live_policy
+disdex_apply_v96_v52_shared_runtime_paths
+disdex_assert_v96_v52_shared_runtime_paths
 
 sha="${DISDEX_V96_APPROVED_COMMIT_SHA:-}"
 [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || {
