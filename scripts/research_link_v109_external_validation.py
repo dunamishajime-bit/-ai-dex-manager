@@ -8,6 +8,7 @@ import research_lab_pair_specific_v109 as v109
 HOUR=v109.HOUR
 DAY=24*HOUR
 YEAR=365*DAY
+WARMUP=1000*HOUR
 SYMS=v109.SYMS
 NORMAL_BPS=v109.NORMAL_BPS
 STRESS_BPS=v109.STRESS_BPS
@@ -87,19 +88,23 @@ def cache_file(venue,s,start,end):
 
 
 def load_venue(venue,start,end):
+    # Fetch extra past-only history solely so the frozen feature lookbacks are populated
+    # from the first target-window bar. Metrics remain restricted to [start,end).
+    fetch_start=start-WARMUP
     candles={}
     fetcher=fetch_bybit if venue=='BYBIT' else fetch_okx
     for s in SYMS:
-        p=cache_file(venue,s,start,end)
+        p=cache_file(venue,s,fetch_start,end)
         if p.exists():
             rows=json.loads(p.read_text())
         else:
-            rows=fetcher(s,start,end);p.write_text(json.dumps(rows))
+            rows=fetcher(s,fetch_start,end);p.write_text(json.dumps(rows))
         candles[s]=rows
     idx={s:{int(r['ts']):i for i,r in enumerate(candles[s])} for s in SYMS}
     expected=(end-start)//HOUR
-    coverage={s:len(candles[s])/expected if expected else 0 for s in SYMS}
-    return candles,idx,coverage
+    coverage={s:sum(start<=int(r['ts'])<end for r in candles[s])/expected if expected else 0 for s in SYMS}
+    warmup={s:sum(fetch_start<=int(r['ts'])<start for r in candles[s]) for s in SYMS}
+    return candles,idx,coverage,warmup
 
 
 def shifted_periods(ps,shift):
@@ -128,18 +133,18 @@ def main():
     frozen_summary={'threshold':frozen['threshold'],'trainStart':frozen['trainStart'],'trainEnd':frozen['trainEnd'],'mu':frozen['mu'],'sd':frozen['sd'],'w':frozen['w']}
     start=cur['development'][0]; end=cur['holdout'][1]
     prior_start=start-YEAR; prior_end=end-YEAR; prior=shifted_periods(cur,-YEAR)
-    result={'strategyId':'LINK_V109_REGIME_WAVE_EXTERNAL_VALIDATION','currentWindow':[start,end],'priorWindow':[prior_start,prior_end],'frozenModel':frozen_summary,'venues':{},'notes':['same-period external venue uses the exact Binance-Development-frozen model','prior-period replication uses the exact same architecture/training procedure but trains only inside that prior Development period; no current/future period is used']}
+    result={'strategyId':'LINK_V109_REGIME_WAVE_EXTERNAL_VALIDATION','currentWindow':[start,end],'priorWindow':[prior_start,prior_end],'frozenModel':frozen_summary,'venues':{},'notes':['same-period external venue uses the exact Binance-Development-frozen model','prior-period replication uses the exact same architecture/training procedure but trains only inside that prior Development period; no current/future period is used','venue downloads include 1000 hours of past-only warmup; all metrics remain restricted to the declared target windows']}
     for venue in ('BYBIT','OKX'):
-        cur_c,cur_i,cur_cov=load_venue(venue,start,end)
-        venue_result={'coverageCurrent':cur_cov}
-        if min(cur_cov.values())<.97:
+        cur_c,cur_i,cur_cov,cur_warm=load_venue(venue,start,end)
+        venue_result={'coverageCurrent':cur_cov,'warmupCurrentHours':cur_warm}
+        if min(cur_cov.values())<.97 or min(cur_warm.values())<900:
             venue_result['currentStatus']='DATA_INSUFFICIENT'
         else:
             venue_result['currentFrozenModel']=evaluate_model(frozen,cur_c,cur_i,cur)
             venue_result['currentStatus']='OK'
-        pre_c,pre_i,pre_cov=load_venue(venue,prior_start,prior_end)
-        venue_result['coveragePrior']=pre_cov
-        if min(pre_cov.values())<.97:
+        pre_c,pre_i,pre_cov,pre_warm=load_venue(venue,prior_start,prior_end)
+        venue_result['coveragePrior']=pre_cov;venue_result['warmupPriorHours']=pre_warm
+        if min(pre_cov.values())<.97 or min(pre_warm.values())<900:
             venue_result['priorStatus']='DATA_INSUFFICIENT'
         else:
             prior_model=v109.train(KIND,'LINK',pre_c,pre_i,*prior['development'])
@@ -147,7 +152,6 @@ def main():
             venue_result['priorCausalReplication']=evaluate_model(prior_model,pre_c,pre_i,prior)
             venue_result['priorStatus']='OK'
         result['venues'][venue]=venue_result
-    # Conservative summary: positive normal year + PF>1 + positive holdout/PF>1 on each available test; stress reported separately, not tuned.
     verdict='PASS_EXTERNAL_REPLICATION'
     for venue,vr in result['venues'].items():
         if vr.get('currentStatus')!='OK' or vr.get('priorStatus')!='OK': verdict='INCOMPLETE_DATA'; continue
