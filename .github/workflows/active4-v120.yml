@@ -1,0 +1,94 @@
+name: Active4 V120 Distinct Large-Wave Lifecycle Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_active4_v120.py"
+      - ".github/workflows/active4-v120.yml"
+      - "research/active4-v120-trigger.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: active4-v120-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pair-specific-v107-exact-usdm-v3-20260811
+          restore-keys: |
+            pair-specific-v104-exact-usdm-v3-20260810
+            pair-specific-v106-usdm-
+            six-pair-v98-usdm-
+      - run: npm ci
+      - name: Refresh genuine public six-pair USD-M history
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Normalize exact-window cache filename
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated')
+          for sym in ['BTC','ETH','BNB','SOL','LINK','AVAX']:
+              exact=root/f'{sym}USDT-1661990400000-1786287600000-v3.json'
+              if exact.exists(): continue
+              matches=sorted(root.glob(f'{sym}USDT-1661990400000-*-v3.json'))
+              if not matches: raise SystemExit(f'MISSING_GENUINE_CACHE:{sym}')
+              exact.write_bytes(matches[-1].read_bytes())
+          PY
+
+  research:
+    needs: data
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        candidate: [btc_vol_release, btc_failed_auction, eth_leadership_transition, bnb_regime_accel, avax_breadth_burst]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pair-specific-v107-exact-usdm-v3-20260811
+          restore-keys: |
+            pair-specific-v104-exact-usdm-v3-20260810
+            pair-specific-v106-usdm-
+            six-pair-v98-usdm-
+      - name: Compile
+        run: python -m py_compile scripts/research_active4_v120.py
+      - name: Run distinct large-wave lifecycle candidate
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_active4_v120.py --candidate "${{ matrix.candidate }}"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: active4-v120-${{ matrix.candidate }}
+          path: |
+            .research-state/active4-v120-${{ matrix.candidate }}.json
+            .research-state/active4-v120-${{ matrix.candidate }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only. BTC/ETH/BNB/AVAX iterative discovery; LINK/SOL untouched/frozen.
+# No production/VPS/live/credentials/orders/accounts/positions changes.
