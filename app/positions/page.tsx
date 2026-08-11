@@ -1,15 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
-import { Activity, BarChart3, ShieldCheck, Wallet } from "lucide-react";
-
-import { AutoTradeHistoryPanel } from "@/components/features/autotrade/AutoTradeHistoryPanel";
-import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
-import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTradeRunPanel";
-import { useCurrency } from "@/context/CurrencyContext";
-import { useSimulation } from "@/context/SimulationContext";
-import { useOperationalWallet } from "@/hooks/useOperationalWallet";
-import { cn } from "@/lib/utils";
+import {
+  Activity,
+  Gauge,
+  Layers3,
+  ShieldCheck,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
@@ -21,143 +19,132 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
   );
 }
 
-function walletStatusLabel(status?: string) {
-  if (status === "running") return "稼働中";
-  if (status === "awaiting_deposit") return "入金確認待ち";
-  if (status === "paused") return "停止中";
-  return "未設定";
+function Gate({ title, value, note }: { title: string; value: string; note: string }) {
+  return (
+    <div className="rounded-[18px] border border-white/10 bg-white/[0.035] p-3">
+      <div className="text-[10px] uppercase tracking-[0.22em] text-gold-100/70">{title}</div>
+      <div className="mt-1 text-lg font-black text-white">{value}</div>
+      <div className="mt-1 text-[11px] leading-5 text-white/68">{note}</div>
+    </div>
+  );
 }
 
 export default function PositionsPage() {
-  const { tradeNotifications, activeStrategies } = useSimulation();
-  const { wallet } = useOperationalWallet();
-  const { formatPrice } = useCurrency();
-
-  const isWalletRunning = wallet?.status === "running";
-
-  const rows = useMemo(() => {
-    return (wallet?.trackedHoldings || [])
-      .filter((holding) => Number(holding.amount) > 0)
-      .map((holding) => ({
-        ...holding,
-        amountNumber: Number(holding.amount),
-      }))
-      .sort((left, right) => right.usdValue - left.usdValue);
-  }, [wallet?.trackedHoldings]);
-
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.07)]">
-      <div className="pointer-events-none absolute inset-0 bg-[url('/backgrounds/login_bg.png')] bg-cover bg-center opacity-[0.20] mix-blend-screen" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.10),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_24%),radial-gradient(circle_at_center,rgba(245,158,11,0.07),transparent_32%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.18),rgba(3,5,10,0.70))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[url('/backgrounds/login_bg.png')] bg-cover bg-center opacity-[0.18] mix-blend-screen" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.10),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_24%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.18),rgba(3,5,10,0.72))]" />
 
       <div className="relative z-10 space-y-3">
         <header className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.34em] text-gold-100/72">
             <ShieldCheck className="h-3.5 w-3.5" />
-            dashboard
+            Current Production Dashboard
           </div>
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h1 className="gold-heading text-[1.7rem] font-black tracking-tight sm:text-[2rem] md:text-[2.8rem]">
-                運用状況を一画面で確認します。
-              </h1>
-              <p className="mt-2 max-w-3xl text-sm leading-7 text-white/82">
-                運用ウォレットの実残高、手動判定、自動売買の履歴をまとめて確認できます。
-                通常候補と追加候補の評価は、現在の本番ロジックに合わせて表示されます。
-              </p>
-            </div>
-            <div className="flex items-center gap-2 rounded-full border border-gold-400/18 bg-white/[0.03] px-4 py-2 text-[11px] text-gold-100">
-              <Activity className="h-4 w-4" />
-              自動売買 {isWalletRunning ? "稼働中" : "停止中"}
-            </div>
-          </div>
+          <h1 className="gold-heading mt-2 break-words text-[1.7rem] font-black tracking-tight sm:text-[2rem] md:text-[2.7rem]">
+            V96 + PENGU_DUAL_LS_V2_FINAL + V52
+          </h1>
+          <p className="mt-2 max-w-4xl text-sm leading-7 text-white/82">
+            この画面は現在の本番ロジックと固定リスク設定を表示します。旧12H Trend / Range判定、BNB Chain基準のWebウォレット評価、UNI / TWT補助候補、旧Web手動発注は現行LIVEロジックではありません。
+          </p>
         </header>
 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <Metric
-            label="Portfolio"
-            value={formatPrice(Number(wallet?.lastPortfolioUsd || 0))}
-            detail={`BNB残高 ${Number(wallet?.lastBalanceFormatted || 0).toFixed(6)} / 保有銘柄 ${rows.length}`}
-          />
-          <Metric label="Strategies" value={`${activeStrategies.length}`} detail="現在読み込み中の戦略数です。" />
-          <Metric label="Notifications" value={`${tradeNotifications.length}`} detail="最新の通知件数です。" />
-          <Metric label="Wallet" value={walletStatusLabel(wallet?.status)} detail="運用ウォレットの現在の状態です。" />
+          <Metric label="Execution" value="Aster" detail="Perpetual / 5x Cross" />
+          <Metric label="Engines" value="3" detail="V96 / PENGU_DUAL_LS_V2_FINAL / V52" />
+          <Metric label="Combined Cap" value="2.5 Gross" detail="Crypto 1.5 / Stock 1.5" />
+          <Metric label="Safety" value="Fail Closed" detail="Approval・Parity・Preflight・Stateを検証" />
         </section>
 
-        <section className="grid gap-3 xl:grid-cols-[1.18fr_0.82fr]">
-          <div className="panel-gold rounded-[30px] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-100/72">Operational Wallet</div>
-                <h2 className="mt-1 text-lg font-black text-white">保有資産一覧</h2>
-              </div>
-              <BarChart3 className="h-5 w-5 text-gold-100" />
+        <section className="grid gap-3 xl:grid-cols-3">
+          <div className="panel-gold rounded-[28px] p-4">
+            <div className="flex items-center gap-2 text-sm font-black text-white">
+              <Activity className="h-4 w-4 text-gold-100" />
+              V96 Crypto Core
             </div>
-
-            <div className="mt-4 space-y-2">
-              {rows.length > 0 ? (
-                rows.map((row) => (
-                  <div
-                    key={row.symbol}
-                    className="grid gap-3 rounded-[18px] border border-white/10 bg-white/[0.04] px-4 py-4 sm:grid-cols-2 md:grid-cols-[1fr_0.9fr_0.9fr_0.7fr]"
-                  >
-                    <div>
-                      <div className="text-sm font-bold text-white">{row.symbol}</div>
-                      <div className="mt-1 text-[11px] text-white/68">{row.name}</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">数量</div>
-                      <div className="mt-1 text-sm font-bold text-white">{row.amountNumber.toFixed(6)}</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">現在値</div>
-                      <div className="mt-1 text-sm font-bold text-white">{formatPrice(row.usdPrice)}</div>
-                    </div>
-                    <div className="text-left sm:text-right">
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">評価額</div>
-                      <div className={cn("mt-1 text-sm font-black", row.usdValue >= 0 ? "text-profit" : "text-loss")}>
-                        {formatPrice(row.usdValue)}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-[18px] border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/70">
-                  まだ保有資産はありません。運用ウォレットへ入金すると、ここに最新の残高が表示されます。
-                </div>
-              )}
+            <p className="mt-3 text-[12px] leading-6 text-white/78">
+              BTC・ETH・BNB・SOLを対象にするCrypto Core。PENGU V2とCrypto sleeveを共有し、Portfolio上限を超えないよう統合制御します。
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <Gate title="Crypto Sleeve" value="1.5" note="V96 + PENGU V2で共有" />
+              <Gate title="Daily Loss" value="5%" note="V96 Crypto側Gate" />
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="panel-gold rounded-[30px] p-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <Wallet className="h-4 w-4 text-gold-100" />
-                表示ルール
-              </div>
-              <div className="mt-3 space-y-2 text-sm leading-7 text-white/82">
-                <p>表示される保有資産は、運用ウォレットの実残高です。</p>
-                <p>価格表示は BNB Chain 上の対USDT建てを基準に計算しています。</p>
-                <p>UNI / TWT は通常時の主力候補ではなく、USDT待機中の補助候補として評価します。</p>
+          <div className="panel-gold rounded-[28px] p-4">
+            <div className="flex items-center gap-2 text-sm font-black text-white">
+              <TrendingDown className="h-4 w-4 text-loss" />
+              PENGU_DUAL_LS_V2_FINAL
+            </div>
+            <p className="mt-3 text-[12px] leading-6 text-white/78">
+              PENGU専用の独立1H Long / Short。Legacy V1は停止し、PENGUのLIVE注文オーナーはV2 FINALのみです。
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <Gate title="Gross" value="0.60–0.75" note="ATR24連動・上限0.75" />
+              <Gate title="Cooldown" value="6h" note="最大1ポジション・Short優先" />
+            </div>
+          </div>
+
+          <div className="panel-gold rounded-[28px] p-4">
+            <div className="flex items-center gap-2 text-sm font-black text-white">
+              <TrendingUp className="h-4 w-4 text-profit" />
+              V52 US Stock
+            </div>
+            <p className="mt-3 text-[12px] leading-6 text-white/78">
+              AMZN・META・MSFT・NVDA・TSLAを対象。米国通常市場時間だけworkerを稼働し、時間外はWAITING_MARKET_CLOSEDで待機します。
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <Gate title="Stock Sleeve" value="1.5" note="最大2ポジション" />
+              <Gate title="Daily Loss" value="3.5%" note="V52 Stock側Gate" />
+            </div>
+          </div>
+        </section>
+
+        <section className="panel-gold rounded-[28px] p-4">
+          <div className="flex items-center gap-2 text-sm font-black text-white">
+            <Layers3 className="h-4 w-4 text-gold-100" />
+            PENGU_DUAL_LS_V2_FINAL Entry / Exit
+          </div>
+          <div className="mt-3 grid gap-3 xl:grid-cols-2">
+            <div className="rounded-[22px] border border-loss/20 bg-loss/[0.05] p-4">
+              <div className="font-black text-white">SHORT — 急落後Pullback / Rebreak</div>
+              <div className="mt-2 space-y-1 text-[12px] leading-6 text-white/78">
+                <p>72h PENGU return ≤ 0%、24h return ≤ -7%でImpulse開始。</p>
+                <p>24h以内に安値から+1.25%以上戻し、+6%超ならsetup無効。</p>
+                <p>再下抜け時に close&lt;prev 1h low、close&lt;EMA72、EMA72&lt;EMA168、BTC比相対弱さ≤-2%、Volume ratio 0.25–3.0、BTC24h≤+4%、PENGU24h≥-12%、BTC/EMA168乖離≥-4%、RSI14≥30を要求。</p>
+                <p>次の1H OpenでEntry。最大72h、Hard Stop 8%、+15% favorable後4%Trailing。</p>
               </div>
             </div>
-            <div className="panel-gold rounded-[30px] p-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <ShieldCheck className="h-4 w-4 text-gold-100" />
-                自動売買状態
-              </div>
-              <div className="mt-2 text-[1.1rem] font-black text-white">{walletStatusLabel(wallet?.status)}</div>
-              <div className="mt-1 text-[11px] leading-5 text-white/78">
-                入金確認後は自動売買が稼働します。停止中や入金待ちの状態もここに表示されます。
+
+            <div className="rounded-[22px] border border-profit/20 bg-profit/[0.05] p-4">
+              <div className="font-black text-white">LONG — Strong Trend Breakout</div>
+              <div className="mt-2 space-y-1 text-[12px] leading-6 text-white/78">
+                <p>72h PENGU return ≥ +15%、24h return ≥ +10%を要求。</p>
+                <p>close&gt;prior 18h high、BTC比Relative≥+1%、BTC24h≥0%、RSI14 48–78、Volume ratio 0.25–3.0、ATR24/close≤5%、close&gt;EMA168。</p>
+                <p>rising-edgeの最初のBreakoutだけを次の1H OpenでEntry。</p>
+                <p>最大120h、Hard Stop 8%、+10% favorable後3%Trailing。</p>
               </div>
             </div>
           </div>
         </section>
 
-        <ManualTradeRunPanel />
-        <LiveDecisionPanel />
-        <AutoTradeHistoryPanel />
+        <section className="panel-gold rounded-[28px] p-4">
+          <div className="flex items-center gap-2 text-sm font-black text-white">
+            <Gauge className="h-4 w-4 text-gold-100" />
+            Production Risk Policy
+          </div>
+          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Gate title="Leverage" value="5x Cross" note="Aster対象10銘柄" />
+            <Gate title="Combined" value="2.5 Gross" note="全戦略Portfolio上限" />
+            <Gate title="PENGU Cap" value="0.75" note="V2固定仕様の実行上限" />
+            <Gate title="Margin Guard" value="5m / 1m" note="通常5分・WARNING時1分" />
+          </div>
+        </section>
+
+        <section className="rounded-[22px] border border-gold-400/14 bg-black/25 px-4 py-3 text-[11px] leading-5 text-white/62">
+          このページは現行Production Logicの説明画面です。リアルタイムのposition、pending、Open Orders、Kill Switch、MainPID、Aster残高はVPS runtimeを正とします。HP側で推測判定や旧12Hロジックによる発注は行いません。
+        </section>
       </div>
     </main>
   );
