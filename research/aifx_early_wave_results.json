@@ -1,0 +1,2355 @@
+{
+  "status": "PROXY_REJECT",
+  "precommit": "AIFX_EARLY_WAVE_PRECOMMIT_20260811.md",
+  "source": "ejtraderLabs/historical-data",
+  "source_timezone_verified": false,
+  "session_rules_used": false,
+  "cost_stress": "2x floor+buffer",
+  "complete_years_by_pair": {
+    "EURUSD": [
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ],
+    "GBPUSD": [
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ],
+    "USDJPY": [
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ],
+    "EURJPY": [
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ],
+    "GBPJPY": [
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "development_years": [
+    2013,
+    2014,
+    2015,
+    2016,
+    2017
+  ],
+  "validation_years": [
+    2018,
+    2019
+  ],
+  "oos_years": [
+    2020,
+    2021
+  ],
+  "pairs": {
+    "EURUSD": {
+      "directions": {
+        "LONG": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 511,
+                "net_r": -164.99876946175016,
+                "pf": 0.5196995628759178,
+                "max_dd_r": -179.36478749895886,
+                "net_pips": -1278.704419612622,
+                "win_rate": 0.23679060665362034
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 102,
+                  "net_r": -4.452393957497454,
+                  "pf": 0.925071312327195,
+                  "max_dd_r": -19.787356703759436,
+                  "net_pips": -49.0620906939876,
+                  "win_rate": 0.29411764705882354
+                },
+                "2014": {
+                  "trades": 91,
+                  "net_r": -34.76305171477507,
+                  "pf": 0.3999644226414372,
+                  "max_dd_r": -34.763051714775074,
+                  "net_pips": -248.48300732406514,
+                  "win_rate": 0.1978021978021978
+                },
+                "2015": {
+                  "trades": 95,
+                  "net_r": -26.78156640486658,
+                  "pf": 0.5386222029608366,
+                  "max_dd_r": -27.034479494820285,
+                  "net_pips": -232.57273642612432,
+                  "win_rate": 0.2631578947368421
+                },
+                "2016": {
+                  "trades": 111,
+                  "net_r": -63.166188464428984,
+                  "pf": 0.32309149623184624,
+                  "max_dd_r": -66.285555312329,
+                  "net_pips": -459.12287637911663,
+                  "win_rate": 0.17117117117117117
+                },
+                "2017": {
+                  "trades": 112,
+                  "net_r": -35.835568920182084,
+                  "pf": 0.5209984138507647,
+                  "max_dd_r": -43.45432544805173,
+                  "net_pips": -289.46370878932817,
+                  "win_rate": 0.25892857142857145
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -63.166188464428984,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 1182,
+                "net_r": -211.09413635869828,
+                "pf": 0.706266696197003,
+                "max_dd_r": -217.10701333514965,
+                "net_pips": -2493.4714978265406,
+                "win_rate": 0.2622673434856176
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 247,
+                  "net_r": -20.77381077821133,
+                  "pf": 0.8595821658143271,
+                  "max_dd_r": -32.745281796873776,
+                  "net_pips": -312.7742577619408,
+                  "win_rate": 0.291497975708502
+                },
+                "2014": {
+                  "trades": 221,
+                  "net_r": -73.48444216994778,
+                  "pf": 0.47550325551517536,
+                  "max_dd_r": -81.12155285190893,
+                  "net_pips": -717.8355422643912,
+                  "win_rate": 0.22624434389140272
+                },
+                "2015": {
+                  "trades": 235,
+                  "net_r": -34.677830897800604,
+                  "pf": 0.7498701483111707,
+                  "max_dd_r": -40.90396158655437,
+                  "net_pips": -390.4739342780995,
+                  "win_rate": 0.2851063829787234
+                },
+                "2016": {
+                  "trades": 231,
+                  "net_r": -38.271196691405216,
+                  "pf": 0.733391352201328,
+                  "max_dd_r": -52.90556141525156,
+                  "net_pips": -567.6588920224002,
+                  "win_rate": 0.23809523809523808
+                },
+                "2017": {
+                  "trades": 248,
+                  "net_r": -43.88685582133333,
+                  "pf": 0.7043146089998472,
+                  "max_dd_r": -48.331919692705,
+                  "net_pips": -504.72887149970893,
+                  "win_rate": 0.2661290322580645
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -73.48444216994778,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "momentum",
+          "baseline_oos": {
+            "trades": 254,
+            "net_r": -76.7104002460951,
+            "pf": 0.5993359812213662,
+            "max_dd_r": -83.64687192148622,
+            "net_pips": -677.4791785213074,
+            "win_rate": 0.24015748031496062
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 160,
+              "net_r": -35.67157065237082,
+              "pf": 0.694697742990368,
+              "max_dd_r": -46.00804232776198,
+              "net_pips": -364.66409626241483,
+              "win_rate": 0.25625
+            },
+            "2021": {
+              "trades": 94,
+              "net_r": -41.038829593724294,
+              "pf": 0.45001427954279355,
+              "max_dd_r": -42.23882959372417,
+              "net_pips": -312.81508225889263,
+              "win_rate": 0.2127659574468085
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 33,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 33,
+                "detected": 19,
+                "coverage": 0.5757575757575758,
+                "median_price_lag": 0.6767111493758093,
+                "mean_price_lag": 0.5990528988614184,
+                "median_time_lag": 0.6590909090909091
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 34,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 34,
+                "detected": 12,
+                "coverage": 0.35294117647058826,
+                "median_price_lag": 0.6175135086709594,
+                "mean_price_lag": 0.6277798912888416,
+                "median_time_lag": 0.6079115764979639
+              }
+            }
+          }
+        },
+        "SHORT": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 534,
+                "net_r": -157.2303947622376,
+                "pf": 0.5422994195890413,
+                "max_dd_r": -163.54084275269517,
+                "net_pips": -1236.6732753155895,
+                "win_rate": 0.2303370786516854
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 115,
+                  "net_r": -39.317401295932925,
+                  "pf": 0.4895462915564684,
+                  "max_dd_r": -41.33415163411917,
+                  "net_pips": -358.8563776141784,
+                  "win_rate": 0.21739130434782608
+                },
+                "2014": {
+                  "trades": 133,
+                  "net_r": -60.8217538874524,
+                  "pf": 0.3444609361358571,
+                  "max_dd_r": -63.03283694279698,
+                  "net_pips": -356.1329814216396,
+                  "win_rate": 0.18796992481203006
+                },
+                "2015": {
+                  "trades": 106,
+                  "net_r": -4.344309095444436,
+                  "pf": 0.9233602137645871,
+                  "max_dd_r": -19.56753488612794,
+                  "net_pips": -43.59308910103721,
+                  "win_rate": 0.32075471698113206
+                },
+                "2016": {
+                  "trades": 94,
+                  "net_r": -24.921794842840733,
+                  "pf": 0.575728877046249,
+                  "max_dd_r": -27.162265911703457,
+                  "net_pips": -276.7965233491321,
+                  "win_rate": 0.24468085106382978
+                },
+                "2017": {
+                  "trades": 86,
+                  "net_r": -27.825135640567108,
+                  "pf": 0.5226565790928537,
+                  "max_dd_r": -32.72148023780288,
+                  "net_pips": -201.29430382960223,
+                  "win_rate": 0.18604651162790697
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -60.8217538874524,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "REVERSAL",
+              "development": {
+                "trades": 1674,
+                "net_r": -214.5836359705834,
+                "pf": 0.7679119356629374,
+                "max_dd_r": -218.513753829125,
+                "net_pips": -3029.013566541876,
+                "win_rate": 0.2831541218637993
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 311,
+                  "net_r": -31.665252462323807,
+                  "pf": 0.8138253306840421,
+                  "max_dd_r": -44.93444223270076,
+                  "net_pips": -477.05061236718257,
+                  "win_rate": 0.2861736334405145
+                },
+                "2014": {
+                  "trades": 327,
+                  "net_r": 0.6546721028170817,
+                  "pf": 1.0036839789737435,
+                  "max_dd_r": -28.403563672555016,
+                  "net_pips": 65.4732753383324,
+                  "win_rate": 0.30275229357798167
+                },
+                "2015": {
+                  "trades": 354,
+                  "net_r": -36.729710115752496,
+                  "pf": 0.7998021576630305,
+                  "max_dd_r": -44.234194256416366,
+                  "net_pips": -616.740980091175,
+                  "win_rate": 0.3050847457627119
+                },
+                "2016": {
+                  "trades": 337,
+                  "net_r": -76.9631557558732,
+                  "pf": 0.5990514074551373,
+                  "max_dd_r": -93.61862327780656,
+                  "net_pips": -1008.8308823421555,
+                  "win_rate": 0.26112759643916916
+                },
+                "2017": {
+                  "trades": 345,
+                  "net_r": -69.88018973945097,
+                  "pf": 0.652971535517633,
+                  "max_dd_r": -80.79345309900671,
+                  "net_pips": -991.8643670796956,
+                  "win_rate": 0.2608695652173913
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -76.9631557558732,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "momentum",
+          "baseline_oos": {
+            "trades": 258,
+            "net_r": -85.2051740089599,
+            "pf": 0.5654253123651336,
+            "max_dd_r": -85.47634345555643,
+            "net_pips": -745.8683486807405,
+            "win_rate": 0.24031007751937986
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 105,
+              "net_r": -50.32743850893745,
+              "pf": 0.407456183630128,
+              "max_dd_r": -54.291054469000265,
+              "net_pips": -517.2064561858281,
+              "win_rate": 0.2
+            },
+            "2021": {
+              "trades": 153,
+              "net_r": -34.877735500022446,
+              "pf": 0.6861568945423213,
+              "max_dd_r": -35.27773550002249,
+              "net_pips": -228.66189249491242,
+              "win_rate": 0.2679738562091503
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 34,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 34,
+                "detected": 15,
+                "coverage": 0.4411764705882353,
+                "median_price_lag": 0.7344940152339511,
+                "mean_price_lag": 0.6402536397034182,
+                "median_time_lag": 0.627906976744186
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 33,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 33,
+                "detected": 21,
+                "coverage": 0.6363636363636364,
+                "median_price_lag": 0.4299900695134217,
+                "mean_price_lag": 0.5082289434072466,
+                "median_time_lag": 0.4166666666666667
+              }
+            }
+          }
+        }
+      },
+      "oos_swing_opportunity": {
+        "2020": {
+          "major_swing_pips": 13583.800000000001,
+          "long_pips": 7293.7,
+          "short_pips": 6290.1,
+          "legs": 67,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        },
+        "2021": {
+          "major_swing_pips": 9567.100000000028,
+          "long_pips": 4359.500000000014,
+          "short_pips": 5207.600000000014,
+          "legs": 67,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        }
+      }
+    },
+    "GBPUSD": {
+      "directions": {
+        "LONG": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 467,
+                "net_r": -99.64369645411473,
+                "pf": 0.656865058996841,
+                "max_dd_r": -103.47429311361456,
+                "net_pips": -1083.840570226784,
+                "win_rate": 0.2676659528907923
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 94,
+                  "net_r": -15.963327335403168,
+                  "pf": 0.7097984525062161,
+                  "max_dd_r": -19.93730343722239,
+                  "net_pips": -162.0471106519883,
+                  "win_rate": 0.2872340425531915
+                },
+                "2014": {
+                  "trades": 85,
+                  "net_r": -7.720540542509432,
+                  "pf": 0.8514256151389954,
+                  "max_dd_r": -14.608129949025903,
+                  "net_pips": -34.7558463684683,
+                  "win_rate": 0.3058823529411765
+                },
+                "2015": {
+                  "trades": 95,
+                  "net_r": -39.25283710325837,
+                  "pf": 0.3700880701627396,
+                  "max_dd_r": -41.05392283772492,
+                  "net_pips": -424.12736179828323,
+                  "win_rate": 0.24210526315789474
+                },
+                "2016": {
+                  "trades": 87,
+                  "net_r": -25.14955788106906,
+                  "pf": 0.5508722734655177,
+                  "max_dd_r": -28.773432695206157,
+                  "net_pips": -459.1727037353732,
+                  "win_rate": 0.2413793103448276
+                },
+                "2017": {
+                  "trades": 106,
+                  "net_r": -11.55743359187468,
+                  "pf": 0.8224911050692616,
+                  "max_dd_r": -27.566522354751555,
+                  "net_pips": -3.7375476726708747,
+                  "win_rate": 0.2641509433962264
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -39.25283710325837,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "IMPULSE_START",
+              "development": {
+                "trades": 2375,
+                "net_r": -351.1306375767605,
+                "pf": 0.7738290690487071,
+                "max_dd_r": -361.5806604486855,
+                "net_pips": -5633.674787747438,
+                "win_rate": 0.2488421052631579
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 496,
+                  "net_r": 0.9243529880762509,
+                  "pf": 1.0029670827974204,
+                  "max_dd_r": -74.6094824912221,
+                  "net_pips": -63.50964370388525,
+                  "win_rate": 0.2762096774193548
+                },
+                "2014": {
+                  "trades": 479,
+                  "net_r": -111.049433694499,
+                  "pf": 0.6668214988097896,
+                  "max_dd_r": -113.18652689633277,
+                  "net_pips": -1652.3904531730605,
+                  "win_rate": 0.22129436325678498
+                },
+                "2015": {
+                  "trades": 463,
+                  "net_r": -53.55230472378639,
+                  "pf": 0.8255051833828159,
+                  "max_dd_r": -74.2717497150073,
+                  "net_pips": -783.9153471648787,
+                  "win_rate": 0.24622030237580994
+                },
+                "2016": {
+                  "trades": 472,
+                  "net_r": -124.54561114932883,
+                  "pf": 0.6054485296486778,
+                  "max_dd_r": -127.81155767194905,
+                  "net_pips": -2537.9696485539107,
+                  "win_rate": 0.2266949152542373
+                },
+                "2017": {
+                  "trades": 465,
+                  "net_r": -62.9076409972225,
+                  "pf": 0.7793482383109402,
+                  "max_dd_r": -81.17182465762858,
+                  "net_pips": -595.8896951517036,
+                  "win_rate": 0.2731182795698925
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -124.54561114932883,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "breakout",
+          "baseline_oos": {
+            "trades": 450,
+            "net_r": -74.95580141681293,
+            "pf": 0.7595152010505215,
+            "max_dd_r": -78.87066308669043,
+            "net_pips": -1041.0366410750948,
+            "win_rate": 0.29333333333333333
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 230,
+              "net_r": -42.33631753397742,
+              "pf": 0.7360947707124479,
+              "max_dd_r": -44.05750910234274,
+              "net_pips": -699.4380372568188,
+              "win_rate": 0.3
+            },
+            "2021": {
+              "trades": 220,
+              "net_r": -32.61948388283551,
+              "pf": 0.7843536760876995,
+              "max_dd_r": -37.94687199572435,
+              "net_pips": -341.5986038182761,
+              "win_rate": 0.2863636363636364
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 37,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 37,
+                "detected": 20,
+                "coverage": 0.5405405405405406,
+                "median_price_lag": 0.5311380720004921,
+                "mean_price_lag": 0.5022305030484433,
+                "median_time_lag": 0.30291889483065954
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 33,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 33,
+                "detected": 20,
+                "coverage": 0.6060606060606061,
+                "median_price_lag": 0.567538056065698,
+                "mean_price_lag": 0.5663022855646797,
+                "median_time_lag": 0.41738746279761907
+              }
+            }
+          }
+        },
+        "SHORT": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 473,
+                "net_r": -87.17181896689365,
+                "pf": 0.6836822779205834,
+                "max_dd_r": -100.54892148346228,
+                "net_pips": -1084.7191965028346,
+                "win_rate": 0.2769556025369979
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 117,
+                  "net_r": -22.750008135383467,
+                  "pf": 0.6545743601974416,
+                  "max_dd_r": -26.481776390086797,
+                  "net_pips": -194.74201177900332,
+                  "win_rate": 0.3247863247863248
+                },
+                "2014": {
+                  "trades": 87,
+                  "net_r": -12.700556067960425,
+                  "pf": 0.7296551218174268,
+                  "max_dd_r": -21.803186150798172,
+                  "net_pips": -60.43274566148283,
+                  "win_rate": 0.28735632183908044
+                },
+                "2015": {
+                  "trades": 101,
+                  "net_r": -25.446185989808033,
+                  "pf": 0.5753955056355218,
+                  "max_dd_r": -36.75822250047619,
+                  "net_pips": -309.5979995066922,
+                  "win_rate": 0.2376237623762376
+                },
+                "2016": {
+                  "trades": 91,
+                  "net_r": -6.9346456896229,
+                  "pf": 0.8678421953878452,
+                  "max_dd_r": -17.04244458940909,
+                  "net_pips": -270.32905645127056,
+                  "win_rate": 0.2967032967032967
+                },
+                "2017": {
+                  "trades": 77,
+                  "net_r": -19.34042308411883,
+                  "pf": 0.6158162961095426,
+                  "max_dd_r": -28.985757345984183,
+                  "net_pips": -249.61738310438574,
+                  "win_rate": 0.22077922077922077
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -25.446185989808033,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 1125,
+                "net_r": -173.7986179538377,
+                "pf": 0.7234086790204216,
+                "max_dd_r": -177.30058414569842,
+                "net_pips": -2613.3514699261264,
+                "win_rate": 0.2817777777777778
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 220,
+                  "net_r": -41.91996774741167,
+                  "pf": 0.6669909554676163,
+                  "max_dd_r": -47.05602977157404,
+                  "net_pips": -462.69411667353216,
+                  "win_rate": 0.2681818181818182
+                },
+                "2014": {
+                  "trades": 239,
+                  "net_r": -33.32766518495015,
+                  "pf": 0.7568306128565487,
+                  "max_dd_r": -51.12631834407133,
+                  "net_pips": -272.56942919633434,
+                  "win_rate": 0.2928870292887029
+                },
+                "2015": {
+                  "trades": 212,
+                  "net_r": -25.43707739224964,
+                  "pf": 0.7757796954778123,
+                  "max_dd_r": -43.318898403199285,
+                  "net_pips": -398.97491362674845,
+                  "win_rate": 0.27358490566037735
+                },
+                "2016": {
+                  "trades": 242,
+                  "net_r": -35.34864246712232,
+                  "pf": 0.739620593993117,
+                  "max_dd_r": -43.06250717693515,
+                  "net_pips": -843.212800410198,
+                  "win_rate": 0.2768595041322314
+                },
+                "2017": {
+                  "trades": 212,
+                  "net_r": -37.765265162103915,
+                  "pf": 0.6750429178063658,
+                  "max_dd_r": -42.20869049678384,
+                  "net_pips": -635.9002100193134,
+                  "win_rate": 0.2971698113207547
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -41.91996774741167,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "breakout",
+          "baseline_oos": {
+            "trades": 333,
+            "net_r": -7.738037968118638,
+            "pf": 0.9645277946777487,
+            "max_dd_r": -29.112873287597388,
+            "net_pips": 103.01181796905863,
+            "win_rate": 0.3333333333333333
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 125,
+              "net_r": 18.752802590707258,
+              "pf": 1.2497019400539138,
+              "max_dd_r": -8.017632757558468,
+              "net_pips": 368.55282617396676,
+              "win_rate": 0.384
+            },
+            "2021": {
+              "trades": 208,
+              "net_r": -26.490840558825894,
+              "pf": 0.814804986564833,
+              "max_dd_r": -29.112873287597374,
+              "net_pips": -265.5410082049081,
+              "win_rate": 0.30288461538461536
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 37,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 37,
+                "detected": 15,
+                "coverage": 0.40540540540540543,
+                "median_price_lag": 0.5689160086144983,
+                "mean_price_lag": 0.5738112427583857,
+                "median_time_lag": 0.497787610619469
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 33,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 33,
+                "detected": 18,
+                "coverage": 0.5454545454545454,
+                "median_price_lag": 0.42818889666549886,
+                "mean_price_lag": 0.5227986173616815,
+                "median_time_lag": 0.525603272349719
+              }
+            }
+          }
+        }
+      },
+      "oos_swing_opportunity": {
+        "2020": {
+          "major_swing_pips": 22229.799999999996,
+          "long_pips": 11341.399999999998,
+          "short_pips": 10888.399999999998,
+          "legs": 74,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        },
+        "2021": {
+          "major_swing_pips": 13576.300000000007,
+          "long_pips": 6712.400000000002,
+          "short_pips": 6863.900000000004,
+          "legs": 66,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        }
+      }
+    },
+    "USDJPY": {
+      "directions": {
+        "LONG": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 508,
+                "net_r": -34.65761925376476,
+                "pf": 0.8814666974487648,
+                "max_dd_r": -61.800035025596955,
+                "net_pips": -472.02562149715135,
+                "win_rate": 0.3090551181102362
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 106,
+                  "net_r": 14.415575062263006,
+                  "pf": 1.2479046354515977,
+                  "max_dd_r": -16.17857153929107,
+                  "net_pips": 59.47073744159184,
+                  "win_rate": 0.39622641509433965
+                },
+                "2014": {
+                  "trades": 116,
+                  "net_r": -20.87916194972942,
+                  "pf": 0.6877045452025737,
+                  "max_dd_r": -32.1543479121989,
+                  "net_pips": -129.5798962577365,
+                  "win_rate": 0.25862068965517243
+                },
+                "2015": {
+                  "trades": 91,
+                  "net_r": -26.172176667423575,
+                  "pf": 0.5105350335431589,
+                  "max_dd_r": -32.83056182942966,
+                  "net_pips": -202.9156081609031,
+                  "win_rate": 0.2857142857142857
+                },
+                "2016": {
+                  "trades": 95,
+                  "net_r": -10.288814248657683,
+                  "pf": 0.8023457650525823,
+                  "max_dd_r": -16.480155676843737,
+                  "net_pips": -174.61942283674574,
+                  "win_rate": 0.2736842105263158
+                },
+                "2017": {
+                  "trades": 100,
+                  "net_r": 8.266958549782915,
+                  "pf": 1.133650978241353,
+                  "max_dd_r": -16.00306487675229,
+                  "net_pips": -24.381431683357846,
+                  "win_rate": 0.33
+                }
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -26.172176667423575,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "IMPULSE_START",
+              "development": {
+                "trades": 2388,
+                "net_r": 70.58276098436161,
+                "pf": 1.0482753275427281,
+                "max_dd_r": -93.201853731174,
+                "net_pips": -199.44600931957268,
+                "win_rate": 0.29731993299832493
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 463,
+                  "net_r": 89.14279265498203,
+                  "pf": 1.30920424813646,
+                  "max_dd_r": -28.97922571493558,
+                  "net_pips": 950.7108793259306,
+                  "win_rate": 0.3002159827213823
+                },
+                "2014": {
+                  "trades": 492,
+                  "net_r": 26.329282755035422,
+                  "pf": 1.0883713024754136,
+                  "max_dd_r": -64.12781036057714,
+                  "net_pips": -26.733807027267176,
+                  "win_rate": 0.29878048780487804
+                },
+                "2015": {
+                  "trades": 479,
+                  "net_r": -21.347783276826608,
+                  "pf": 0.9282215688719998,
+                  "max_dd_r": -48.12879998704278,
+                  "net_pips": -616.0765038687487,
+                  "win_rate": 0.29436325678496866
+                },
+                "2016": {
+                  "trades": 466,
+                  "net_r": 5.46098121826239,
+                  "pf": 1.0195398655406418,
+                  "max_dd_r": -48.64912972702517,
+                  "net_pips": -164.3330278617995,
+                  "win_rate": 0.30042918454935624
+                },
+                "2017": {
+                  "trades": 488,
+                  "net_r": -29.002512367091633,
+                  "pf": 0.9029885736154748,
+                  "max_dd_r": -38.63657896131244,
+                  "net_pips": -343.01354988768793,
+                  "win_rate": 0.2930327868852459
+                }
+              },
+              "positive_dev_years": 3,
+              "worst_dev_year_r": -29.002512367091633,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "breakout",
+          "baseline_oos": {
+            "trades": 442,
+            "net_r": -74.84324062750363,
+            "pf": 0.7614167246791633,
+            "max_dd_r": -74.84324062750356,
+            "net_pips": -379.525488255868,
+            "win_rate": 0.2828054298642534
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 133,
+              "net_r": -39.00372364053988,
+              "pf": 0.6104315544494067,
+              "max_dd_r": -39.00372364053988,
+              "net_pips": -132.17706212098363,
+              "win_rate": 0.23308270676691728
+            },
+            "2021": {
+              "trades": 309,
+              "net_r": -35.83951698696374,
+              "pf": 0.8321949271486878,
+              "max_dd_r": -37.29068911633221,
+              "net_pips": -247.3484261348844,
+              "win_rate": 0.3042071197411003
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 42,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 42,
+                "detected": 19,
+                "coverage": 0.4523809523809524,
+                "median_price_lag": 0.6456996148908771,
+                "mean_price_lag": 0.5824796714906594,
+                "median_time_lag": 0.5967741935483871
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 33,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 33,
+                "detected": 24,
+                "coverage": 0.7272727272727273,
+                "median_price_lag": 0.5562756166347789,
+                "mean_price_lag": 0.5474301289648767,
+                "median_time_lag": 0.5052273075156896
+              }
+            }
+          }
+        },
+        "SHORT": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 377,
+                "net_r": -74.03365968514288,
+                "pf": 0.6770028931356082,
+                "max_dd_r": -74.0336596851429,
+                "net_pips": -400.58912959958803,
+                "win_rate": 0.27851458885941643
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 66,
+                  "net_r": -18.659978407839375,
+                  "pf": 0.5056357105783258,
+                  "max_dd_r": -18.659978407839375,
+                  "net_pips": -139.37910966237723,
+                  "win_rate": 0.30303030303030304
+                },
+                "2014": {
+                  "trades": 75,
+                  "net_r": -25.860008768564498,
+                  "pf": 0.4776991574301546,
+                  "max_dd_r": -26.721382298376934,
+                  "net_pips": -179.10233206107904,
+                  "win_rate": 0.22666666666666666
+                },
+                "2015": {
+                  "trades": 86,
+                  "net_r": -12.507631477867626,
+                  "pf": 0.7618662391227646,
+                  "max_dd_r": -22.493594793269803,
+                  "net_pips": -154.51701892021674,
+                  "win_rate": 0.26744186046511625
+                },
+                "2016": {
+                  "trades": 78,
+                  "net_r": 5.0865001025583325,
+                  "pf": 1.1157540500967091,
+                  "max_dd_r": -12.735155536163592,
+                  "net_pips": 266.18402491979367,
+                  "win_rate": 0.3333333333333333
+                },
+                "2017": {
+                  "trades": 72,
+                  "net_r": -22.092541133429705,
+                  "pf": 0.5142943789564037,
+                  "max_dd_r": -22.092541133429698,
+                  "net_pips": -193.7746938757087,
+                  "win_rate": 0.2638888888888889
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -25.860008768564498,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "REVERSAL",
+              "development": {
+                "trades": 1779,
+                "net_r": -185.70424447587968,
+                "pf": 0.8108877886794165,
+                "max_dd_r": -200.36729248945332,
+                "net_pips": -2745.8610492719854,
+                "win_rate": 0.2962338392355256
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 352,
+                  "net_r": -14.229387325407943,
+                  "pf": 0.9259357403061866,
+                  "max_dd_r": -33.79972974477988,
+                  "net_pips": -340.2564636745197,
+                  "win_rate": 0.3210227272727273
+                },
+                "2014": {
+                  "trades": 341,
+                  "net_r": -57.01791815084037,
+                  "pf": 0.7011452808782161,
+                  "max_dd_r": -79.21199126055751,
+                  "net_pips": -481.4082913200309,
+                  "win_rate": 0.2785923753665689
+                },
+                "2015": {
+                  "trades": 366,
+                  "net_r": -32.42419627198317,
+                  "pf": 0.833638561296779,
+                  "max_dd_r": -47.65561183699235,
+                  "net_pips": -399.7005538989143,
+                  "win_rate": 0.32786885245901637
+                },
+                "2016": {
+                  "trades": 364,
+                  "net_r": -23.812490662420156,
+                  "pf": 0.8844688806078829,
+                  "max_dd_r": -47.62544362129391,
+                  "net_pips": -547.7072158235885,
+                  "win_rate": 0.2802197802197802
+                },
+                "2017": {
+                  "trades": 356,
+                  "net_r": -58.220252065228046,
+                  "pf": 0.706037800183007,
+                  "max_dd_r": -66.5404215621681,
+                  "net_pips": -976.7885245549323,
+                  "win_rate": 0.27247191011235955
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -58.220252065228046,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "momentum",
+          "baseline_oos": {
+            "trades": 252,
+            "net_r": -6.855020076606647,
+            "pf": 0.959216642944975,
+            "max_dd_r": -20.69934305700154,
+            "net_pips": -151.78731184261665,
+            "win_rate": 0.30952380952380953
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 176,
+              "net_r": 8.806641966197052,
+              "pf": 1.077137386195488,
+              "max_dd_r": -19.062547611207865,
+              "net_pips": -8.695944002457168,
+              "win_rate": 0.3352272727272727
+            },
+            "2021": {
+              "trades": 76,
+              "net_r": -15.661662042803703,
+              "pf": 0.7095146197882762,
+              "max_dd_r": -18.376871440797004,
+              "net_pips": -143.09136784015948,
+              "win_rate": 0.25
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 43,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 43,
+                "detected": 21,
+                "coverage": 0.4883720930232558,
+                "median_price_lag": 0.4829416224412428,
+                "mean_price_lag": 0.5110751604936127,
+                "median_time_lag": 0.43703703703703706
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 32,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 32,
+                "detected": 11,
+                "coverage": 0.34375,
+                "median_price_lag": 0.7144235407621821,
+                "mean_price_lag": 0.6475134621325681,
+                "median_time_lag": 0.7149532710280374
+              }
+            }
+          }
+        }
+      },
+      "oos_swing_opportunity": {
+        "2020": {
+          "major_swing_pips": 14056.6,
+          "long_pips": 6737.2,
+          "short_pips": 7319.400000000001,
+          "legs": 85,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        },
+        "2021": {
+          "major_swing_pips": 8948.000000000016,
+          "long_pips": 5101.500000000008,
+          "short_pips": 3846.5000000000073,
+          "legs": 65,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        }
+      }
+    },
+    "EURJPY": {
+      "directions": {
+        "LONG": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 474,
+                "net_r": -87.99330454284197,
+                "pf": 0.7034412332501011,
+                "max_dd_r": -119.10623610002898,
+                "net_pips": -1023.3023737922764,
+                "win_rate": 0.28270042194092826
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 101,
+                  "net_r": -16.702575954003482,
+                  "pf": 0.6921288502429325,
+                  "max_dd_r": -21.99044474057066,
+                  "net_pips": -236.5345299545652,
+                  "win_rate": 0.33663366336633666
+                },
+                "2014": {
+                  "trades": 91,
+                  "net_r": -29.036171836538163,
+                  "pf": 0.5204960345317613,
+                  "max_dd_r": -36.345989349608644,
+                  "net_pips": -183.63356255625263,
+                  "win_rate": 0.23076923076923078
+                },
+                "2015": {
+                  "trades": 96,
+                  "net_r": -47.08816105356255,
+                  "pf": 0.37566083376216364,
+                  "max_dd_r": -48.56405766719889,
+                  "net_pips": -599.151723329598,
+                  "win_rate": 0.2604166666666667
+                },
+                "2016": {
+                  "trades": 94,
+                  "net_r": -5.187872354811862,
+                  "pf": 0.9153434685909702,
+                  "max_dd_r": -25.36706459460502,
+                  "net_pips": -70.1441224121723,
+                  "win_rate": 0.24468085106382978
+                },
+                "2017": {
+                  "trades": 92,
+                  "net_r": 10.021476656074078,
+                  "pf": 1.2216851504489854,
+                  "max_dd_r": -20.585685661089787,
+                  "net_pips": 66.1615644603117,
+                  "win_rate": 0.33695652173913043
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -47.08816105356255,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 1228,
+                "net_r": -80.9629169811829,
+                "pf": 0.8805311850753588,
+                "max_dd_r": -116.37767032512728,
+                "net_pips": -1495.7983917728016,
+                "win_rate": 0.30944625407166126
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 284,
+                  "net_r": 7.08328920149904,
+                  "pf": 1.0493476304688008,
+                  "max_dd_r": -31.4491161992433,
+                  "net_pips": 232.9300541243768,
+                  "win_rate": 0.352112676056338
+                },
+                "2014": {
+                  "trades": 232,
+                  "net_r": 1.160852610860454,
+                  "pf": 1.0093253227686347,
+                  "max_dd_r": -29.982560750998758,
+                  "net_pips": -28.12177178844877,
+                  "win_rate": 0.3275862068965517
+                },
+                "2015": {
+                  "trades": 210,
+                  "net_r": -20.069545878316536,
+                  "pf": 0.8260656612300988,
+                  "max_dd_r": -33.15367922612448,
+                  "net_pips": -443.480635053821,
+                  "win_rate": 0.29523809523809524
+                },
+                "2016": {
+                  "trades": 250,
+                  "net_r": -44.23893610610286,
+                  "pf": 0.707710481994137,
+                  "max_dd_r": -48.9265002575999,
+                  "net_pips": -860.9429757829289,
+                  "win_rate": 0.28
+                },
+                "2017": {
+                  "trades": 252,
+                  "net_r": -24.898576809122996,
+                  "pf": 0.8257980830290724,
+                  "max_dd_r": -36.522102146043295,
+                  "net_pips": -396.18306327197956,
+                  "win_rate": 0.2857142857142857
+                }
+              },
+              "positive_dev_years": 2,
+              "worst_dev_year_r": -44.23893610610286,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "momentum",
+          "baseline_oos": {
+            "trades": 314,
+            "net_r": -60.51308220461636,
+            "pf": 0.7316646343061749,
+            "max_dd_r": -78.50312569642854,
+            "net_pips": -575.6987707069627,
+            "win_rate": 0.27388535031847133
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 153,
+              "net_r": 5.6577117539100055,
+              "pf": 1.0574490622315702,
+              "max_dd_r": -13.000000000000497,
+              "net_pips": 12.118948428911835,
+              "win_rate": 0.3464052287581699
+            },
+            "2021": {
+              "trades": 161,
+              "net_r": -66.17079395852636,
+              "pf": 0.47909585753696704,
+              "max_dd_r": -66.17079395852637,
+              "net_pips": -587.8177191358745,
+              "win_rate": 0.20496894409937888
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 36,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 36,
+                "detected": 14,
+                "coverage": 0.3888888888888889,
+                "median_price_lag": 0.4314574444194922,
+                "mean_price_lag": 0.46350184144586,
+                "median_time_lag": 0.4642857142857143
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 31,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 31,
+                "detected": 17,
+                "coverage": 0.5483870967741935,
+                "median_price_lag": 0.5680628272251201,
+                "mean_price_lag": 0.5645148605838587,
+                "median_time_lag": 0.42813455657492355
+              }
+            }
+          }
+        },
+        "SHORT": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 377,
+                "net_r": -129.35752159963437,
+                "pf": 0.4645113577997357,
+                "max_dd_r": -129.80009137135787,
+                "net_pips": -1423.905364277499,
+                "win_rate": 0.259946949602122
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 65,
+                  "net_r": -11.300320312091594,
+                  "pf": 0.6571550244318551,
+                  "max_dd_r": -13.936813329917946,
+                  "net_pips": -184.11034909662902,
+                  "win_rate": 0.4
+                },
+                "2014": {
+                  "trades": 80,
+                  "net_r": -45.5052641277208,
+                  "pf": 0.25047957745265736,
+                  "max_dd_r": -45.50526412772083,
+                  "net_pips": -474.26600704069983,
+                  "win_rate": 0.1375
+                },
+                "2015": {
+                  "trades": 97,
+                  "net_r": -24.931372059125618,
+                  "pf": 0.5639186551861429,
+                  "max_dd_r": -28.26906747167294,
+                  "net_pips": -271.8246427516263,
+                  "win_rate": 0.31958762886597936
+                },
+                "2016": {
+                  "trades": 71,
+                  "net_r": -17.799675723866773,
+                  "pf": 0.5986619815845398,
+                  "max_dd_r": -24.363948427622553,
+                  "net_pips": -203.72151469129562,
+                  "win_rate": 0.22535211267605634
+                },
+                "2017": {
+                  "trades": 64,
+                  "net_r": -29.820889376829598,
+                  "pf": 0.3569476031843841,
+                  "max_dd_r": -30.263459148552986,
+                  "net_pips": -289.9828506972483,
+                  "win_rate": 0.21875
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -45.5052641277208,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 1178,
+                "net_r": -258.6549647646148,
+                "pf": 0.6423031221950432,
+                "max_dd_r": -258.7563297412326,
+                "net_pips": -4405.298722343288,
+                "win_rate": 0.25551782682512736
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 237,
+                  "net_r": -80.22232737636708,
+                  "pf": 0.47734575600813395,
+                  "max_dd_r": -80.2223273763671,
+                  "net_pips": -1310.692829826232,
+                  "win_rate": 0.21940928270042195
+                },
+                "2014": {
+                  "trades": 223,
+                  "net_r": -45.7033555250634,
+                  "pf": 0.6596508877085925,
+                  "max_dd_r": -54.5243781557335,
+                  "net_pips": -714.7009221375527,
+                  "win_rate": 0.273542600896861
+                },
+                "2015": {
+                  "trades": 239,
+                  "net_r": -43.186541937454834,
+                  "pf": 0.6965483508103992,
+                  "max_dd_r": -62.12280500871835,
+                  "net_pips": -864.4256936510985,
+                  "win_rate": 0.25523012552301255
+                },
+                "2016": {
+                  "trades": 243,
+                  "net_r": -44.94946372852901,
+                  "pf": 0.6959521257345722,
+                  "max_dd_r": -48.57228730298137,
+                  "net_pips": -678.4188318093654,
+                  "win_rate": 0.26337448559670784
+                },
+                "2017": {
+                  "trades": 236,
+                  "net_r": -44.59327619720045,
+                  "pf": 0.6928492339823836,
+                  "max_dd_r": -44.69464117381818,
+                  "net_pips": -837.0604449190396,
+                  "win_rate": 0.2669491525423729
+                }
+              },
+              "positive_dev_years": 0,
+              "worst_dev_year_r": -80.22232737636708,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "momentum",
+          "baseline_oos": {
+            "trades": 253,
+            "net_r": -38.92767002401833,
+            "pf": 0.7807922081685204,
+            "max_dd_r": -46.96126311403659,
+            "net_pips": -446.95134705474686,
+            "win_rate": 0.2845849802371542
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 124,
+              "net_r": -9.279447313694762,
+              "pf": 0.8873881470164781,
+              "max_dd_r": -17.31304040371301,
+              "net_pips": -199.3322524308141,
+              "win_rate": 0.31451612903225806
+            },
+            "2021": {
+              "trades": 129,
+              "net_r": -29.648222710323573,
+              "pf": 0.6885081487459489,
+              "max_dd_r": -34.51327624870363,
+              "net_pips": -247.61909462393277,
+              "win_rate": 0.2558139534883721
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 37,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 37,
+                "detected": 16,
+                "coverage": 0.43243243243243246,
+                "median_price_lag": 0.5451762116098544,
+                "mean_price_lag": 0.5777931921986407,
+                "median_time_lag": 0.7281249999999999
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 30,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 30,
+                "detected": 17,
+                "coverage": 0.5666666666666667,
+                "median_price_lag": 0.5294370434035268,
+                "mean_price_lag": 0.5656892920064657,
+                "median_time_lag": 0.5341880341880342
+              }
+            }
+          }
+        }
+      },
+      "oos_swing_opportunity": {
+        "2020": {
+          "major_swing_pips": 15954.200000000008,
+          "long_pips": 8185.2000000000035,
+          "short_pips": 7769.000000000004,
+          "legs": 73,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        },
+        "2021": {
+          "major_swing_pips": 10368.800000000005,
+          "long_pips": 5429.300000000002,
+          "short_pips": 4939.500000000003,
+          "legs": 61,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        }
+      }
+    },
+    "GBPJPY": {
+      "directions": {
+        "LONG": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 455,
+                "net_r": -107.10607004026582,
+                "pf": 0.6287787666084841,
+                "max_dd_r": -138.363578480539,
+                "net_pips": -1634.244699643277,
+                "win_rate": 0.2703296703296703
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 80,
+                  "net_r": 7.1403507780325715,
+                  "pf": 1.1593452544853087,
+                  "max_dd_r": -10.869699631635022,
+                  "net_pips": 409.9023335666715,
+                  "win_rate": 0.3125
+                },
+                "2014": {
+                  "trades": 99,
+                  "net_r": -31.957526026460744,
+                  "pf": 0.5185653377012532,
+                  "max_dd_r": -31.957526026460748,
+                  "net_pips": -424.7299432058213,
+                  "win_rate": 0.29292929292929293
+                },
+                "2015": {
+                  "trades": 80,
+                  "net_r": -42.248486219532396,
+                  "pf": 0.2512738865051098,
+                  "max_dd_r": -43.80849062228354,
+                  "net_pips": -693.9340284109079,
+                  "win_rate": 0.1875
+                },
+                "2016": {
+                  "trades": 84,
+                  "net_r": -31.31134116886031,
+                  "pf": 0.4811022586914902,
+                  "max_dd_r": -36.8706888627432,
+                  "net_pips": -797.5320937311594,
+                  "win_rate": 0.25
+                },
+                "2017": {
+                  "trades": 112,
+                  "net_r": -8.72906740344493,
+                  "pf": 0.8558704313152405,
+                  "max_dd_r": -23.333286614620533,
+                  "net_pips": -127.95096786205988,
+                  "win_rate": 0.29464285714285715
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -42.248486219532396,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 1212,
+                "net_r": -162.17274173840278,
+                "pf": 0.7748675469041119,
+                "max_dd_r": -184.88023934386905,
+                "net_pips": -2684.7529799811127,
+                "win_rate": 0.2863036303630363
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 265,
+                  "net_r": 2.5765538855577574,
+                  "pf": 1.016076304500683,
+                  "max_dd_r": -40.912343797069994,
+                  "net_pips": 490.7718033653879,
+                  "win_rate": 0.3018867924528302
+                },
+                "2014": {
+                  "trades": 263,
+                  "net_r": -47.39083562584444,
+                  "pf": 0.7035932348592376,
+                  "max_dd_r": -54.032151504938575,
+                  "net_pips": -747.4299424579613,
+                  "win_rate": 0.26996197718631176
+                },
+                "2015": {
+                  "trades": 210,
+                  "net_r": -31.56935191065798,
+                  "pf": 0.7087214905183975,
+                  "max_dd_r": -40.247234163048375,
+                  "net_pips": -413.7887867417277,
+                  "win_rate": 0.30952380952380953
+                },
+                "2016": {
+                  "trades": 227,
+                  "net_r": -60.598658150774256,
+                  "pf": 0.5686696001568033,
+                  "max_dd_r": -62.360558494113924,
+                  "net_pips": -1861.5167285970017,
+                  "win_rate": 0.2599118942731278
+                },
+                "2017": {
+                  "trades": 247,
+                  "net_r": -25.190449936683862,
+                  "pf": 0.8335225582296649,
+                  "max_dd_r": -43.90947145164873,
+                  "net_pips": -152.78932554980997,
+                  "win_rate": 0.291497975708502
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -60.598658150774256,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "pullback",
+          "baseline_oos": {
+            "trades": 666,
+            "net_r": -63.48001165667452,
+            "pf": 0.8408382699651706,
+            "max_dd_r": -68.45335029367189,
+            "net_pips": -939.5844123400963,
+            "win_rate": 0.3588588588588589
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 307,
+              "net_r": -29.200981572555957,
+              "pf": 0.8422150528640945,
+              "max_dd_r": -36.12795150242144,
+              "net_pips": -459.2943754785466,
+              "win_rate": 0.3550488599348534
+            },
+            "2021": {
+              "trades": 359,
+              "net_r": -34.27903008411855,
+              "pf": 0.8396463484107404,
+              "max_dd_r": -45.42509811610538,
+              "net_pips": -480.29003686154965,
+              "win_rate": 0.362116991643454
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 42,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 42,
+                "detected": 20,
+                "coverage": 0.47619047619047616,
+                "median_price_lag": 0.48608699000374356,
+                "mean_price_lag": 0.4952010669258756,
+                "median_time_lag": 0.3740154181330652
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 23,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 23,
+                "detected": 13,
+                "coverage": 0.5652173913043478,
+                "median_price_lag": 0.5903571428571476,
+                "mean_price_lag": 0.4903041802434149,
+                "median_time_lag": 0.39917355371900826
+              }
+            }
+          }
+        },
+        "SHORT": {
+          "timeframes": {
+            "M15": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 334,
+                "net_r": -80.73999908131864,
+                "pf": 0.5978670625391673,
+                "max_dd_r": -85.26392129567516,
+                "net_pips": -1259.327308372744,
+                "win_rate": 0.26646706586826346
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 57,
+                  "net_r": -19.108319956629387,
+                  "pf": 0.43159977848501063,
+                  "max_dd_r": -19.58542985534671,
+                  "net_pips": -356.77948200052185,
+                  "win_rate": 0.24561403508771928
+                },
+                "2014": {
+                  "trades": 52,
+                  "net_r": -27.282926333688337,
+                  "pf": 0.24857601194377427,
+                  "max_dd_r": -27.856635722540794,
+                  "net_pips": -331.07264904466547,
+                  "win_rate": 0.17307692307692307
+                },
+                "2015": {
+                  "trades": 75,
+                  "net_r": -21.5799108594126,
+                  "pf": 0.5319144060040953,
+                  "max_dd_r": -29.426436416720417,
+                  "net_pips": -278.4725003765885,
+                  "win_rate": 0.26666666666666666
+                },
+                "2016": {
+                  "trades": 81,
+                  "net_r": 3.8162566034497907,
+                  "pf": 1.080452003284512,
+                  "max_dd_r": -23.987281712376046,
+                  "net_pips": -8.149223617763823,
+                  "win_rate": 0.30864197530864196
+                },
+                "2017": {
+                  "trades": 69,
+                  "net_r": -16.585098535038117,
+                  "pf": 0.5555459878518518,
+                  "max_dd_r": -20.631910850677272,
+                  "net_pips": -284.85345333320424,
+                  "win_rate": 0.30434782608695654
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -27.282926333688337,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            },
+            "M30": {
+              "chosen_family": "CONTINUATION",
+              "development": {
+                "trades": 1155,
+                "net_r": -125.06609744078526,
+                "pf": 0.8149890869007139,
+                "max_dd_r": -133.125416933899,
+                "net_pips": -3468.2911952180802,
+                "win_rate": 0.2753246753246753
+              },
+              "development_by_year": {
+                "2013": {
+                  "trades": 221,
+                  "net_r": -34.26373131924291,
+                  "pf": 0.7221386222284044,
+                  "max_dd_r": -44.26092120452299,
+                  "net_pips": -731.0425338662355,
+                  "win_rate": 0.3076923076923077
+                },
+                "2014": {
+                  "trades": 212,
+                  "net_r": -23.679096594765145,
+                  "pf": 0.820701358736268,
+                  "max_dd_r": -41.247176346740325,
+                  "net_pips": -548.356273195688,
+                  "win_rate": 0.2358490566037736
+                },
+                "2015": {
+                  "trades": 223,
+                  "net_r": -28.205486850363762,
+                  "pf": 0.7848032870701079,
+                  "max_dd_r": -47.756878034199836,
+                  "net_pips": -1005.6169318434712,
+                  "win_rate": 0.30493273542600896
+                },
+                "2016": {
+                  "trades": 269,
+                  "net_r": 5.362586498359562,
+                  "pf": 1.0362211763326121,
+                  "max_dd_r": -23.728776542275956,
+                  "net_pips": -118.37103196803866,
+                  "win_rate": 0.3048327137546468
+                },
+                "2017": {
+                  "trades": 230,
+                  "net_r": -44.28036917477306,
+                  "pf": 0.6870559247289398,
+                  "max_dd_r": -51.69130899965514,
+                  "net_pips": -1064.904424344647,
+                  "win_rate": 0.21739130434782608
+                }
+              },
+              "positive_dev_years": 1,
+              "worst_dev_year_r": -44.28036917477306,
+              "development_gate": false,
+              "validation": {
+                "trades": 0,
+                "net_r": 0.0,
+                "pf": 0.0,
+                "max_dd_r": 0.0,
+                "net_pips": 0.0,
+                "win_rate": 0.0
+              },
+              "validation_by_year": {},
+              "validation_gate": false
+            }
+          },
+          "selected_timeframe": null,
+          "selected_family": null,
+          "oos": {
+            "trades": 0,
+            "net_r": 0.0,
+            "pf": 0.0,
+            "max_dd_r": 0.0,
+            "net_pips": 0.0,
+            "win_rate": 0.0
+          },
+          "oos_by_year": {},
+          "oos_pass": false,
+          "baseline_dev_selected_family": "momentum",
+          "baseline_oos": {
+            "trades": 223,
+            "net_r": 10.429454061735981,
+            "pf": 1.0725305510450636,
+            "max_dd_r": -16.496379780544686,
+            "net_pips": 361.6969488904701,
+            "win_rate": 0.336322869955157
+          },
+          "baseline_oos_by_year": {
+            "2020": {
+              "trades": 121,
+              "net_r": 18.20136947761716,
+              "pf": 1.24268492636823,
+              "max_dd_r": -9.99999999999992,
+              "net_pips": 449.00015588072364,
+              "win_rate": 0.38016528925619836
+            },
+            "2021": {
+              "trades": 102,
+              "net_r": -7.77191541588118,
+              "pf": 0.8870261703218725,
+              "max_dd_r": -16.49637978054467,
+              "net_pips": -87.30320699025356,
+              "win_rate": 0.28431372549019607
+            }
+          },
+          "lag_by_year": {
+            "2020": {
+              "early": {
+                "legs": 42,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 42,
+                "detected": 23,
+                "coverage": 0.5476190476190477,
+                "median_price_lag": 0.6038636363636316,
+                "mean_price_lag": 0.5721148744445079,
+                "median_time_lag": 0.5483870967741935
+              }
+            },
+            "2021": {
+              "early": {
+                "legs": 23,
+                "detected": 0,
+                "coverage": 0.0,
+                "median_price_lag": null,
+                "mean_price_lag": null,
+                "median_time_lag": null
+              },
+              "baseline": {
+                "legs": 23,
+                "detected": 15,
+                "coverage": 0.6521739130434783,
+                "median_price_lag": 0.5249543517955028,
+                "mean_price_lag": 0.5288528767638687,
+                "median_time_lag": 0.4772727272727273
+              }
+            }
+          }
+        }
+      },
+      "oos_swing_opportunity": {
+        "2020": {
+          "major_swing_pips": 25029.000000000004,
+          "long_pips": 12382.800000000003,
+          "short_pips": 12646.200000000003,
+          "legs": 84,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        },
+        "2021": {
+          "major_swing_pips": 14847.300000000005,
+          "long_pips": 8158.700000000002,
+          "short_pips": 6688.600000000002,
+          "legs": 46,
+          "selected_net_pips": 0.0,
+          "net_capture_ratio": 0.0
+        }
+      }
+    }
+  },
+  "portfolio": {
+    "trades": 0,
+    "net_r": 0.0,
+    "pf": 0.0,
+    "max_dd_r": 0.0,
+    "net_pips": 0.0,
+    "win_rate": 0.0,
+    "mtm_max_dd_r": 0.0,
+    "policy": {
+      "rejected_same_pair": 0,
+      "rejected_position_limit": 0,
+      "rejected_currency_limit": 0
+    },
+    "by_year": {
+      "2020": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      },
+      "2021": {
+        "trades": 0,
+        "net_r": 0.0,
+        "pf": 0.0,
+        "max_dd_r": 0.0,
+        "net_pips": 0.0,
+        "win_rate": 0.0
+      }
+    }
+  },
+  "oos_passed_directions": []
+}
