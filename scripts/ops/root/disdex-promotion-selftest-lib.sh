@@ -38,7 +38,12 @@ case "$cmd" in
       esac
     fi
     ;;
-  reset-failed) exit 0 ;;
+  reset-failed)
+    if [[ "$service" == "$DISDEX_TEST_TRADING_SERVICE" ]]; then
+      printf '0\n' > "$DISDEX_TEST_SERVICE_RESTARTS"
+    fi
+    exit 0
+    ;;
   stop)
     printf 'inactive\n' > "$DISDEX_TEST_SERVICE_STATE"
     printf '0\n' > "$DISDEX_TEST_SERVICE_PID"
@@ -203,9 +208,28 @@ run_promotion_selftest_scenario() {
 
 run_all_promotion_selftests() {
   local scenario
+  run_promotion_startup_stability_selftest
   for scenario in before-switch post-switch-preflight service-start snapshot-tamper; do
     run_promotion_selftest_scenario "$scenario"
   done
   printf 'DISDEX_V96_V52_FULL_PROMOTION_FAILURE_INJECTION_SELFTEST_PASS\n'
   printf 'productionPathsTouched=false\nordersSent=false\ncancelSent=false\npositionChangesSent=false\n'
+}
+
+run_promotion_startup_stability_selftest() {
+  local output
+  setup_promotion_selftest_sandbox "startup-stability" >/dev/null
+  assert_promotion_selftest_isolated
+  # Reproduce a previously failed unit with historical restarts. systemd
+  # reset-failed clears this counter before the new candidate baseline.
+  printf '7\n' > "$DISDEX_TEST_SERVICE_RESTARTS"
+  sleep() { :; }
+  output="$(start_trading_service_verified)"
+  unset -f sleep
+  grep -q 'DISDEX_V96_V52_LIVE_START_PASS' <<< "$output"
+  [[ "$(cat "$DISDEX_TEST_SERVICE_STATE")" == "active" ]]
+  [[ "$(cat "$DISDEX_TEST_SERVICE_PID")" == "4242" ]]
+  [[ "$(cat "$DISDEX_TEST_SERVICE_RESTARTS")" == "0" ]]
+  rm -rf "$promotion_selftest_root"
+  printf 'promotionSelftest=startup-stability PASS historicalRestartsIgnored=true restartCount=0\n'
 }

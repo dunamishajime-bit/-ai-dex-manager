@@ -1,4 +1,6 @@
 import "dotenv/config";
+
+import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { AsterV3Client, type AsterPositionRiskRow } from "../lib/aster-v3-client";
@@ -257,7 +259,11 @@ async function main() {
     const daemon = process.argv.includes("--daemon");
     const intervalMs = Math.max(30_000, numberEnv("DISDEX_V96_RUNNER_INTERVAL_MS", 5 * 60_000));
     let stopping = false;
-    const stop = () => { stopping = true; };
+    const intervalWait = createInterruptibleDelay();
+    const stop = () => {
+        stopping = true;
+        intervalWait.interrupt();
+    };
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
     do {
@@ -265,7 +271,7 @@ async function main() {
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), runnerMode, ...result }));
         if (result.status === "manual-review") stopping = true;
         if (!daemon || stopping) break;
-        await new Promise<void>((resolveWait) => setTimeout(resolveWait, intervalMs));
+        await intervalWait.wait(intervalMs);
     } while (!stopping);
 }
 

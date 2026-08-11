@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { FileLiveRunnerLock, resolveLiveRunnerLockPath } from "../lib/live-runner-state";
+import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
@@ -74,7 +75,11 @@ async function main() {
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
     let stopping = false;
-    const stop = () => { stopping = true; };
+    const boundaryWait = createInterruptibleDelay();
+    const stop = () => {
+        stopping = true;
+        boundaryWait.interrupt();
+    };
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
     do {
@@ -83,7 +88,7 @@ async function main() {
         if (!daemon || stopping) break;
         const now = Date.now();
         const waitUntilNextClosedHour = HOUR_MS - (now % HOUR_MS) + boundaryDelayMs;
-        await new Promise<void>((resolveWait) => setTimeout(resolveWait, waitUntilNextClosedHour));
+        await boundaryWait.wait(waitUntilNextClosedHour);
     } while (!stopping);
 }
 

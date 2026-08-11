@@ -11,6 +11,7 @@ import {
     type PenguDualLsV2Position,
 } from "../lib/pengu-dual-ls-v2";
 import { MemoryLiveRunnerLock } from "../lib/live-runner-state";
+import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { PenguDualLsV2PortfolioRunner, normalizedPositionGross } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { MemoryPenguDualLsV2RunnerStateStore, createPenguDualLsV2RunnerState } from "../lib/pengu-dual-ls-v2-runner-state";
 
@@ -176,6 +177,14 @@ const shadowRunner = new PenguDualLsV2PortfolioRunner({
 });
 
 async function main() {
+    const shutdownDelay = createInterruptibleDelay();
+    const shutdownStartedAt = Date.now();
+    const longWait = shutdownDelay.wait(60_000);
+    shutdownDelay.interrupt();
+    await longWait;
+    assert.equal(shutdownDelay.interrupted, true);
+    assert.ok(Date.now() - shutdownStartedAt < 1_000, "SIGTERM-style interruption must not wait for the next hourly boundary");
+
     const shadowResult = await shadowRunner.tick();
     assert.equal(shadowResult.status, "shadow");
     assert.equal(executorCalls, 0);

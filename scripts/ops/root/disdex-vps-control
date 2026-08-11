@@ -4,9 +4,10 @@ set -Eeuo pipefail
 umask 077
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-TRANSACTION_LIB="/usr/local/libexec/disdex-promotion-transaction-lib.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+TRANSACTION_LIB="$SCRIPT_DIR/disdex-promotion-transaction-lib.sh"
 if [[ ! -f "$TRANSACTION_LIB" ]]; then
-  TRANSACTION_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/disdex-promotion-transaction-lib.sh"
+  TRANSACTION_LIB="/usr/local/libexec/disdex-promotion-transaction-lib.sh"
 fi
 [[ -f "$TRANSACTION_LIB" && ! -L "$TRANSACTION_LIB" ]] || {
   printf 'promotion transaction library missing\n' >&2
@@ -127,8 +128,11 @@ atomic_switch_current() {
 
 start_trading_service_verified() {
   local state pid restart_before restart_after attempt
-  restart_before="$($SYSTEMCTL show "$TRADING_SERVICE" --property NRestarts --value 2>/dev/null || printf '0')"
   "$SYSTEMCTL" reset-failed "$TRADING_SERVICE" >/dev/null 2>&1 || true
+  # reset-failed also resets systemd's historical restart counter. Capture the
+  # stability baseline afterwards so a prior failed release is not mistaken
+  # for a restart by this newly started candidate.
+  restart_before="$($SYSTEMCTL show "$TRADING_SERVICE" --property NRestarts --value 2>/dev/null || printf '0')"
   if ! "$SYSTEMCTL" start "$TRADING_SERVICE"; then
     "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
     printf 'LIVE service start failed; fail-closed\n' >&2
@@ -283,9 +287,9 @@ execute_promotion() {
 }
 
 promotion_selftest_library() {
-  local path="/usr/local/libexec/disdex-promotion-selftest-lib.sh"
+  local path="$SCRIPT_DIR/disdex-promotion-selftest-lib.sh"
   if [[ ! -f "$path" ]]; then
-    path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/disdex-promotion-selftest-lib.sh"
+    path="/usr/local/libexec/disdex-promotion-selftest-lib.sh"
   fi
   [[ -f "$path" && ! -L "$path" ]] || {
     printf 'promotion selftest library missing\n' >&2

@@ -42,6 +42,9 @@ export PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=2
 disdex_apply_v96_v52_fixed_live_policy
 disdex_assert_v96_v52_fixed_live_policy
 
+grep -Fq 'createInterruptibleDelay' "$root/scripts/disdex-v96-live-runner.ts"
+grep -Fq 'createInterruptibleDelay' "$root/scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
+
 printf 'DISDEX_V96_V52_FIXED_LIVE_POLICY_SELFTEST_PASS\n'
 printf 'staleEnvironmentOverridden=true\n'
 printf 'v96CryptoSleeveGross=%s\n' "$DISDEX_V96_MAX_GROSS"
@@ -70,3 +73,4 @@ printf 'penguV1LiveEnabled=%s\n' "$PENGU_DUAL_LS_V1_ENABLED"
 printf 'ordersSent=false\n'
 printf 'cancelSent=false\n'
 printf 'positionChangesSent=false\n'
+printf 'interruptibleRunnerShutdown=true\n'
