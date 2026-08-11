@@ -1,0 +1,57 @@
+name: LINK V109 External Venue Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_link_v109_external_validation.py"
+      - ".github/workflows/link-v109-external-validation.yml"
+      - "research/link-v109-external-trigger.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: link-v109-external-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/link-v109-external
+          key: link-v109-external-20260811-v1
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+            six-pair-v98-usdm-
+      - name: Compile
+        run: python -m py_compile scripts/research_link_v109_external_validation.py
+      - name: Validate frozen LINK logic across Bybit and OKX plus prior-year causal replication
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_link_v109_external_validation.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-v109-external-validation
+          path: |
+            .research-state/link-v109-external-validation.json
+            .research-state/link-v109-external-validation.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research-only validation. Public market data only. No API keys, orders, accounts, VPS, or production changes.
