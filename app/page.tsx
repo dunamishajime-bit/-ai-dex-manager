@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLiveServiceStatus } from "@/hooks/useLiveServiceStatus";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 
@@ -31,10 +32,26 @@ function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: s
 
 export default function HomePage() {
   const { wallet } = useOperationalWallet();
+  const liveService = useLiveServiceStatus();
   const { formatPrice } = useCurrency();
   const balance = typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null;
   const available = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
   const positions = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0).length;
+  const liveLabel = liveService.loading && liveService.checkedAt === null
+    ? "確認中"
+    : liveService.state === "ACTIVE"
+      ? "稼働中"
+      : liveService.state === "STOPPED"
+        ? "停止中"
+        : "未確認";
+  const liveBadgeClass = liveService.state === "ACTIVE"
+    ? "border-emerald-400/30 bg-emerald-500/12 text-emerald-100"
+    : liveService.state === "STOPPED"
+      ? "border-rose-400/30 bg-rose-500/12 text-rose-100"
+      : "border-amber-400/25 bg-amber-500/10 text-amber-100";
+  const liveCheckedAt = liveService.checkedAt
+    ? new Date(liveService.checkedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+    : "未確認";
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.06)] md:p-4">
@@ -46,7 +63,9 @@ export default function HomePage() {
             <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{config.strategyLabel}</h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEX上のV96 Crypto、独立したPENGU Dual LS V2、V52 Stockを、同一の安全ゲートと口座状態で監視します。実サービス状態を取得できない場合は、LIVE稼働中とは表示しません。</p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
-              <span className="rounded-full border border-amber-400/25 bg-amber-500/10 px-3 py-1.5 text-amber-100">{"LIVE状態: 実サービス未確認 / AsterDirectTradeExecutor"}</span>
+              <span className={`rounded-full border px-3 py-1.5 ${liveBadgeClass}`}>
+                LIVE状態: {liveLabel} / {config.executor}
+              </span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{config.penguStrategyId}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V96損失上限 {config.v96DailyLossPct}%</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52損失上限 {config.v52DailyLossPct}%</span>
@@ -55,7 +74,12 @@ export default function HomePage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <SummaryCard title="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? "Aster account balance unavailable" : `Available ${formatPrice(available)}`} tone="profit" />
-            <SummaryCard title="統合LIVE状態" value="稼働構成" detail={`管理対象の表示件数 ${positions} / 実状態は各APIを優先`} />
+            <SummaryCard
+              title="統合LIVE状態"
+              value={liveLabel}
+              detail={`${liveService.mainPid && liveService.state === "ACTIVE" ? `MainPID ${liveService.mainPid}` : "MainPID 未確認"} / 最終確認 ${liveCheckedAt} / 保有表示 ${positions}`}
+              tone={liveService.state === "ACTIVE" ? "profit" : liveService.state === "STOPPED" ? "loss" : "default"}
+            />
           </div>
         </section>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -64,7 +88,6 @@ export default function HomePage() {
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
         </section>
-        <QuickLink href="/decision-status" title={"\u5224\u5b9a\u72b6\u6cc1"} detail={"V96 Crypto\u3068 V52 Stock\u306e\u5bfe\u8c61\u9298\u67c4\u30921\u6642\u9593\u3054\u3068\u306b\u8aad\u307f\u53d6\u308a\u78ba\u8a8d\u3057\u307e\u3059\u3002"} icon={BarChart3} />
       </div>
     </main>
   );
