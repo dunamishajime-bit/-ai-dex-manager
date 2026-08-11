@@ -21,7 +21,7 @@ function buildLegacyPenguSignal(history: DisDexPenguV46History, now: number): Di
         strategyId: "PENGU_DUAL_ENGINE_V46",
         side: 0,
         targetGross: 0,
-        reason: "Legacy PENGU V46 is disabled; PENGU_DUAL_LS_V1 is the sole PENGU owner.",
+        reason: "Legacy PENGU V46 is disabled; PENGU_DUAL_LS_V2_FINAL is the sole PENGU order owner.",
         diagnostics: {
             evaluatedDecisionBars: 0,
             fundingCoverage: false,

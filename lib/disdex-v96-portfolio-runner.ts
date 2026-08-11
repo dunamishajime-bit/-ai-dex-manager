@@ -429,11 +429,14 @@ export class DisDexV96PortfolioRunner {
             }
 
             const coreOnlyPositions = corePositions(positions);
+            const currentAccountEquity = accountEquity(account, positions);
             const activePenguGross = legacyPenguEnabled()
                 ? 0
-                : positions
-                    .filter((position) => position.symbol.toUpperCase() === "PENGUUSDT")
-                    .reduce((sum, position) => sum + grossOf(position), 0);
+                : currentAccountEquity > 0
+                    ? positions
+                        .filter((position) => position.symbol.toUpperCase() === "PENGUUSDT")
+                        .reduce((sum, position) => sum + grossOf(position), 0) / currentAccountEquity
+                    : Number.POSITIVE_INFINITY;
             const effectiveMaxGross = legacyPenguEnabled()
                 ? this.dependencies.config.maxGross
                 : Math.max(0, this.dependencies.config.maxGross - activePenguGross);

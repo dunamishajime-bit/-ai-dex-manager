@@ -31,6 +31,13 @@ export PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED=false
 export PENGU_DUAL_LS_V1_MAX_GROSS=0.10
 export PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP=2.5
 export PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT=2
+export PENGU_DUAL_LS_V2_MODE=SHADOW
+export PENGU_DUAL_LS_V2_ENABLED=false
+export PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=false
+export PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=false
+export PENGU_DUAL_LS_V2_MAX_GROSS=0.10
+export PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=2.5
+export PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=2
 
 disdex_apply_v96_v52_fixed_live_policy
 disdex_assert_v96_v52_fixed_live_policy
@@ -54,10 +61,12 @@ printf 'stopLossMarginRatioPct=65\n'
 printf 'criticalMarginRatioPct=75\n'
 printf 'initialPenguGrossCap=%s\n' "$DISDEX_V96_INITIAL_PENGU_GROSS"
 printf 'maximumDailyLossPct=%s\n' "$DISDEX_V96_MAX_DAILY_LOSS_PCT"
-printf 'penguDualMode=%s\n' "$PENGU_DUAL_LS_V1_MODE"
-printf 'penguDualEnabled=%s\n' "$PENGU_DUAL_LS_V1_ENABLED"
-printf 'penguDualLiveTradingEnabled=%s\n' "$PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED"
-printf 'penguDualLiveExecutionEnabled=%s\n' "$PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED"
+printf 'penguDualStrategy=PENGU_DUAL_LS_V2_FINAL\n'
+printf 'penguDualMode=%s\n' "$PENGU_DUAL_LS_V2_MODE"
+printf 'penguDualEnabled=%s\n' "$PENGU_DUAL_LS_V2_ENABLED"
+printf 'penguDualLiveTradingEnabled=%s\n' "$PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED"
+printf 'penguDualLiveExecutionEnabled=%s\n' "$PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED"
+printf 'penguV1LiveEnabled=%s\n' "$PENGU_DUAL_LS_V1_ENABLED"
 printf 'ordersSent=false\n'
 printf 'cancelSent=false\n'
 printf 'positionChangesSent=false\n'

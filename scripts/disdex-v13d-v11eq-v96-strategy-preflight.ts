@@ -3,7 +3,7 @@ import "dotenv/config";
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
-import { resolvePenguDualLsV1Runtime } from "../config/penguDualLsV1Runtime";
+import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { DISDEX_V13D_V11EQ_V96_ALLOCATION } from "../config/disdexStockRouterV13DV11EqRuntime";
 
 export type V52PreflightStatus =
@@ -78,7 +78,7 @@ function parseLastJson(output: string): Record<string, unknown> {
 }
 
 function assertPenguPreflight() {
-    const runtime = resolvePenguDualLsV1Runtime();
+    const runtime = resolvePenguDualLsV2Runtime();
     if (runtime.mode !== "LIVE") throw new Error(`PENGU preflight requires LIVE mode, got ${runtime.mode}.`);
     if (!runtime.enabled || !runtime.liveExecutionEnabled || !runtime.liveTradingEnabled) {
         throw new Error("PENGU preflight LIVE gates are not all enabled.");

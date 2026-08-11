@@ -23,7 +23,7 @@ const V52_MARKET_RECHECK_INTERVAL_MS = 30_000;
 const V52_DATA_RECHECK_INTERVAL_MS = 60_000;
 
 type RunnerMode = "paper" | "live";
-type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v1" | "stock-v52-aster-only"; process: ChildProcess };
+type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v2-final" | "stock-v52-aster-only"; process: ChildProcess };
 type V52PreflightStatus = "ACTIVE" | "WAITING_MARKET_CLOSED" | "BLOCKED_DATA_UNAVAILABLE";
 
 function boolEnv(name: string, fallback = false) {
@@ -41,7 +41,7 @@ function combinedPaths() {
     return {
         stateRoot,
         cryptoStateRoot: resolve(stateRoot, "crypto-v96"),
-        penguStateRoot: resolve(stateRoot, "crypto-v96", "pengu-dual-ls-v1"),
+        penguStateRoot: resolve(stateRoot, "crypto-v96", "pengu-dual-ls-v2-final"),
         stockStateRoot: resolve(stateRoot, "stock"),
         killSwitchPath: resolve(process.env.DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE || resolve(stateRoot, "kill-switch.json")),
     };
@@ -78,18 +78,21 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V96_RUNNER_INTERVAL_MS: process.env.DISDEX_V96_RUNNER_INTERVAL_MS || "30000",
         DISDEX_V96_CONFIG_MIGRATION_MODE: runnerMode === "live" ? "true" : "false",
         PENGU_LEGACY_CORE_ENABLED: "false",
-        PENGU_DUAL_LS_V1_ENABLED: "true",
-        PENGU_DUAL_LS_V1_MODE: runnerMode === "live" ? "LIVE" : "PAPER",
-        PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED: runnerMode === "live" ? "true" : "false",
-        PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED: runnerMode === "live" ? "true" : "false",
-        PENGU_DUAL_LS_V1_STATE_DIR: paths.penguStateRoot,
+        PENGU_DUAL_LS_V1_ENABLED: "false",
+        PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED: "false",
+        PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED: "false",
+        PENGU_DUAL_LS_V2_ENABLED: "true",
+        PENGU_DUAL_LS_V2_MODE: runnerMode === "live" ? "LIVE" : "PAPER",
+        PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED: runnerMode === "live" ? "true" : "false",
+        PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED: runnerMode === "live" ? "true" : "false",
+        PENGU_DUAL_LS_V2_STATE_DIR: paths.penguStateRoot,
         // PENGU is an independent runner. Its lock must not collide with the
         // V96 portfolio runner lock in cryptoStateRoot.
-        PENGU_DUAL_LS_V1_LOCK_PATH: resolve(paths.penguStateRoot, `runner-${runnerMode}.lock`),
-        PENGU_DUAL_LS_V1_KILL_SWITCH_FILE: paths.killSwitchPath,
-        PENGU_DUAL_LS_V1_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
-        PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
-        PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT: "5",
+        PENGU_DUAL_LS_V2_LOCK_PATH: resolve(paths.penguStateRoot, `runner-${runnerMode}.lock`),
+        PENGU_DUAL_LS_V2_KILL_SWITCH_FILE: paths.killSwitchPath,
+        PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
+        PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
+        PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT: "5",
     } as NodeJS.ProcessEnv;
 }
 
@@ -175,8 +178,8 @@ function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean, v52Prefli
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const pengu = spawn(tsx, ["scripts/disdex-pengu-dual-ls-v1-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const children: ManagedChild[] = [{ name: "crypto-v96", process: crypto }, { name: "pengu-dual-ls-v1", process: pengu }];
+    const pengu = spawn(tsx, ["scripts/disdex-pengu-dual-ls-v2-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    const children: ManagedChild[] = [{ name: "crypto-v96", process: crypto }, { name: "pengu-dual-ls-v2-final", process: pengu }];
     if (shouldStartV52Worker(v52PreflightStatus)) children.push(spawnV52Worker(runnerMode, daemon));
     return children;
 }
@@ -454,14 +457,15 @@ function selfTest() {
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
     assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
     assert.equal(env.PENGU_LEGACY_CORE_ENABLED, "false");
-    assert.equal(env.PENGU_DUAL_LS_V1_ENABLED, "true");
-    assert.equal(env.PENGU_DUAL_LS_V1_MODE, "PAPER");
-    assert.equal(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, "1.5");
+    assert.equal(env.PENGU_DUAL_LS_V1_ENABLED, "false");
+    assert.equal(env.PENGU_DUAL_LS_V2_ENABLED, "true");
+    assert.equal(env.PENGU_DUAL_LS_V2_MODE, "PAPER");
+    assert.equal(env.PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP, "1.5");
     assert.equal(
-        env.PENGU_DUAL_LS_V1_LOCK_PATH,
-        resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "pengu-dual-ls-v1", "runner-paper.lock"),
+        env.PENGU_DUAL_LS_V2_LOCK_PATH,
+        resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "pengu-dual-ls-v2-final", "runner-paper.lock"),
     );
-    assert.notEqual(env.PENGU_DUAL_LS_V1_LOCK_PATH, resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "runner-paper.lock"));
+    assert.notEqual(env.PENGU_DUAL_LS_V2_LOCK_PATH, resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "runner-paper.lock"));
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
     assert.equal(shouldStartV52Worker("ACTIVE"), true);
