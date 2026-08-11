@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse,json,math,os
 from pathlib import Path
 import research_active4_v119 as q
+import research_lab_pair_specific_v109 as v109
 
 HOUR=q.HOUR; NORMAL_BPS=q.NORMAL_BPS; STRESS_BPS=q.STRESS_BPS; p=q.p; ret=q.ret
 CANDS={
@@ -104,7 +105,7 @@ def state(cid,candles,idx,ts):
 q.state=state
 
 def run(cid):
- candles,idx,_=q.b.p.v109.b.base.load(); ps=q.b.p.v109.b.base.periods(candles)
+ candles,idx,_=v109.b.base.load(); ps=v109.b.base.periods(candles)
  dm=q.evalm(cid,candles,idx,ps['development'],NORMAL_BPS,0); vm=q.evalm(cid,candles,idx,ps['validation'],NORMAL_BPS,0); vs=q.evalm(cid,candles,idx,ps['validation'],STRESS_BPS,1)
  dw=q.wave_diag(cid,candles,idx,ps['development']); vw=q.wave_diag(cid,candles,idx,ps['validation']); df=q.folds(cid,candles,idx,ps['development']); vf=q.folds(cid,candles,idx,ps['validation'])
  result={'strategyId':'V120_'+cid.upper(),'pair':CANDS[cid][0],'periods':ps,'development':dm,'validation':vm,'validationStress':vs,'waveDiagnostics':{'development':dw,'validation':vw},'walkForward':{'development':df,'validation':vf},'productionChanged':False,'realTradingEnabled':False}
