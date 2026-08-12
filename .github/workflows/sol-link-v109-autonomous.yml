@@ -8,6 +8,7 @@ on:
     paths:
       - "research/sol-link-v109-autonomous-trigger.txt"
       - "scripts/research_sol_link_v109_autonomous.py"
+      - "scripts/research_sol_v109_wrongwave_latch.py"
       - ".github/workflows/sol-link-v109-autonomous.yml"
 
 permissions:
@@ -47,12 +48,20 @@ jobs:
             pair-specific-v104-exact-usdm-v3-20260810
             pair-specific-v106-usdm-
             six-pair-v98-usdm-
-      - name: Compile research-only driver
-        run: python -m py_compile scripts/research_sol_link_v109_autonomous.py
+      - name: Compile research-only drivers
+        run: |
+          python -m py_compile scripts/research_sol_link_v109_autonomous.py
+          python -m py_compile scripts/research_sol_v109_wrongwave_latch.py
       - name: Run autonomous structural D/V chain
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
-        run: python scripts/research_sol_link_v109_autonomous.py --pair "${{ matrix.pair }}"
+        shell: bash
+        run: |
+          if [ "${{ matrix.pair }}" = "SOL" ]; then
+            python scripts/research_sol_v109_wrongwave_latch.py
+          else
+            python scripts/research_sol_link_v109_autonomous.py --pair LINK
+          fi
       - name: Upload D/V research evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -67,5 +76,6 @@ jobs:
 
 # Research-only independent line.
 # Frozen V109 source/threshold/risk/trail are reference-only and never modified.
+# SOL uses a materially distinct latched wrong-wave rejection successor; LINK preserves its D/V survivor chain.
 # Design evidence: Development/Validation only. Confirmation/Holdout are not read.
 # Production/live/VPS/.env/credentials/API keys/orders/accounts/positions/approvals/realTradingEnabled untouched.
