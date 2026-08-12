@@ -28,6 +28,13 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Assert Frozen V109 source is unchanged
+        shell: bash
+        run: |
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef" || {
+            echo "FROZEN_V109_SOURCE_DRIFT" >&2
+            exit 1
+          }
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
