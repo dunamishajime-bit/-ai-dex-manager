@@ -12,6 +12,7 @@ on:
       - "scripts/research_sol_link_v109_next_structures.py"
       - "scripts/research_sol_link_v109_next_structures_v2.py"
       - "scripts/research_sol_link_v109_next_structures_v3.py"
+      - "scripts/research_sol_link_v109_next_structures_v4.py"
       - ".github/workflows/sol-link-v109-autonomous.yml"
 
 permissions:
@@ -54,12 +55,12 @@ jobs:
       - name: Compile research-only drivers
         run: |
           python -m py_compile scripts/research_sol_link_v109_autonomous.py
-          python -m py_compile scripts/research_sol_link_v109_next_structures_v3.py
+          python -m py_compile scripts/research_sol_link_v109_next_structures_v4.py
       - name: Run autonomous structural D/V chain
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         shell: bash
-        run: python scripts/research_sol_link_v109_next_structures_v3.py --pair "${{ matrix.pair }}"
+        run: python scripts/research_sol_link_v109_next_structures_v4.py --pair "${{ matrix.pair }}"
       - name: Upload D/V research evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -72,9 +73,9 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-# Research-only independent line.
+# Research-only independent line. Development/Validation only.
 # Frozen V109 source/threshold/risk/trail are reference-only and never modified.
-# SOL: Wrong-wave latched shadow -> causal retest wait -> release only after fast recovery; slow/medium contradiction rejects.
-# LINK: Cash -> fresh volatility requalification -> sponsor handshake -> 48h forecast owner with causal midpoint ownership checkpoint.
-# Design evidence: Development/Validation only. Confirmation/Holdout are not read.
+# SOL: keep original V109 opportunity breadth; enter as scout and use post-entry wrong-wave contradiction only as an early loss controller.
+# LINK: keep broad Frozen-V109 entries; manage only causal quality-cash / midpoint-to-48h horizon ownership after entry.
+# Confirmation/Holdout are never read for design, ranking, tuning, or redesign.
 # Production/live/VPS/.env/credentials/API keys/orders/accounts/positions/approvals/realTradingEnabled untouched.
