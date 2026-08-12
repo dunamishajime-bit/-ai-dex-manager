@@ -114,6 +114,13 @@ def path_size(path: Path) -> int:
     return 0
 
 
+def restore_owner(path: Path, uid: Optional[int], gid: Optional[int]) -> None:
+    """Keep runtime files owned by their service user after root rotation."""
+    chown = getattr(os, "chown", None)
+    if chown is not None and uid is not None and gid is not None:
+        chown(path, uid, gid)
+
+
 def is_within(path: Path, root: Path) -> bool:
     try:
         path.resolve(strict=False).relative_to(root.resolve(strict=False))
@@ -195,19 +202,26 @@ def rotate_file(path: Path, archive_days: int, report: CleanupReport, now: float
     report.rotated_paths.append(str(path))
     report.compressed_paths.append(str(archive))
     if not report.dry_run:
-        mode = stat.S_IMODE(path.stat().st_mode)
+        original = path.stat()
+        mode = stat.S_IMODE(original.st_mode)
+        uid = getattr(original, "st_uid", None)
+        gid = getattr(original, "st_gid", None)
         if copytruncate:
             with path.open("rb") as source, gzip.open(archive, "wb", compresslevel=6) as target:
                 shutil.copyfileobj(source, target)
             path.open("w", encoding="utf-8").close()
+            restore_owner(archive, uid, gid)
             os.chmod(path, mode)
         else:
             temporary = path.with_name(f".{path.name}.rotate.{os.getpid()}")
             os.replace(path, temporary)
             path.touch(mode=mode, exist_ok=False)
+            restore_owner(path, uid, gid)
+            os.chmod(path, mode)
             with temporary.open("rb") as source, gzip.open(archive, "wb", compresslevel=6) as target:
                 shutil.copyfileobj(source, target)
             temporary.unlink(missing_ok=True)
+            restore_owner(archive, uid, gid)
         os.chmod(archive, 0o600)
     cutoff = now - archive_days * 24 * 60 * 60
     for old in path.parent.glob(f"{path.name}.*.gz"):
@@ -406,6 +420,7 @@ def self_test() -> None:
             protected.write_text("protected\n", encoding="utf-8")
         audit = paths.state_root / "stock" / "audit-live.jsonl"
         audit.write_text('{"event":"one"}\n', encoding="utf-8")
+        audit_before = audit.stat()
         pm2 = paths.pm2_log_root / "ui-out.log"
         pm2.write_text("line\n", encoding="utf-8")
         for index in range(8):
@@ -434,17 +449,27 @@ def self_test() -> None:
         assert releases[3] in remaining
         assert len(remaining) <= 3
         assert audit.exists() and audit.stat().st_size == 0
+        audit_after = audit.stat()
+        assert stat.S_IMODE(audit_after.st_mode) == stat.S_IMODE(audit_before.st_mode)
+        for field in ("st_uid", "st_gid"):
+            if hasattr(audit_before, field):
+                assert getattr(audit_after, field) == getattr(audit_before, field)
+        archive = next(path for path in audit.parent.glob("audit-live.jsonl.*.gz") if path.is_file())
+        for field in ("st_uid", "st_gid"):
+            if hasattr(audit_before, field):
+                assert getattr(archive.stat(), field) == getattr(audit_before, field)
         assert pm2.exists() and pm2.stat().st_size == 0
         assert applied.deleted_paths
-        print("DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS")
-        print("protectedPathsTouched=false")
-        print("currentReleaseDeleted=false")
-        print("runtimeStateDeleted=false")
-        print("approvalDeleted=false")
-        print("killSwitchDeleted=false")
-        print("ordersSent=false")
-        print("cancelSent=false")
-        print("positionChangesSent=false")
+    print("DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS")
+    print("runtimeAuditOwnerPreserved=true")
+    print("protectedPathsTouched=false")
+    print("currentReleaseDeleted=false")
+    print("runtimeStateDeleted=false")
+    print("approvalDeleted=false")
+    print("killSwitchDeleted=false")
+    print("ordersSent=false")
+    print("cancelSent=false")
+    print("positionChangesSent=false")
 
 
 def main() -> int:

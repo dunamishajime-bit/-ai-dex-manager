@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 0077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || {
+  printf 'runtime permission self-test must run as root\n' >&2
+  exit 1
+}
+id deploy >/dev/null
+command -v runuser >/dev/null
+command -v stat >/dev/null
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+state_root="$tmp/runtime-state"
+stock_root="$state_root/stock"
+install -d -o deploy -g deploy -m 0700 "$stock_root"
+
+audit_path="$stock_root/audit-live.jsonl"
+atomic_probe="$stock_root/runner-live.json"
+
+runuser -u deploy -- /usr/bin/python3 - "$audit_path" "$atomic_probe" <<'PY'
+import os
+import sys
+import tempfile
+
+audit_path, atomic_path = sys.argv[1:]
+with open(audit_path, "a", encoding="utf-8") as handle:
+    handle.write('{"event":"append-probe"}\n')
+    handle.flush()
+    os.fsync(handle.fileno())
+
+fd, temporary = tempfile.mkstemp(prefix=".runner-live.", dir=os.path.dirname(atomic_path), text=True)
+try:
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write('{"event":"atomic-probe"}\n')
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, atomic_path)
+finally:
+    if os.path.exists(temporary):
+        os.unlink(temporary)
+PY
+
+[[ "$(stat -c '%U:%G' "$state_root")" == "deploy:deploy" ]]
+[[ "$(stat -c '%U:%G' "$stock_root")" == "deploy:deploy" ]]
+[[ "$(stat -c '%U:%G' "$audit_path")" == "deploy:deploy" ]]
+[[ "$(stat -c '%U:%G' "$atomic_probe")" == "deploy:deploy" ]]
+[[ "$(stat -c '%a' "$audit_path")" == "600" ]]
+[[ "$(stat -c '%a' "$atomic_probe")" == "600" ]]
+runuser -u deploy -- test -w "$stock_root"
+runuser -u deploy -- test -w "$audit_path"
+
+printf 'DISDEX_RUNTIME_STATE_PERMISSION_SELFTEST_PASS\n'
+printf 'runtimeStateOwnerPolicy=deploy:deploy\n'
+printf 'auditAppendAsServiceUser=true\n'
+printf 'atomicReplaceAsServiceUser=true\n'
