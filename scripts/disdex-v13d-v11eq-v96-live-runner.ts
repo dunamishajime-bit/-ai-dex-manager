@@ -10,11 +10,13 @@ import {
     DISDEX_V13D_V11EQ_V96_RUNTIME,
     DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
 } from "../config/disdexStockRouterV13DV11EqRuntime";
+import { sendEmail } from "../lib/mail-service";
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const SHARED_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
 const PENGU_SELFTEST_SCRIPT = "scripts/pengu-dual-ls-v1-selftest.ts" as const;
 const PENGU_PREFLIGHT_SCRIPT = "scripts/pengu-dual-ls-v1-live-preflight.ts" as const;
+const DEFAULT_ORDER_FILL_EMAIL = "dunamis.hajime@gmail.com";
 
 type RunnerMode = "paper" | "live";
 type ManagedChildName = "pengu-dual-ls-v1" | "stock-v52-aster-only";
@@ -139,13 +141,69 @@ async function activateSharedKillSwitch(path: string, reason: string) {
     await writeFile(path, `${JSON.stringify(command, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
 }
 
+function maybeNotifyV52Fill(line: string, runnerMode: RunnerMode) {
+    if (runnerMode !== "live") return;
+    const isOpen = line.includes("v52-position-open");
+    const isClose = line.includes("v52-position-closed");
+    if (!isOpen && !isClose) return;
+    const to = (process.env.DISDEX_ORDER_FILL_EMAIL || process.env.PENGU_ORDER_FILL_EMAIL || DEFAULT_ORDER_FILL_EMAIL).trim();
+    if (!to) return;
+    const timestamp = new Date().toISOString();
+    const action = isOpen ? "OPEN" : "CLOSE";
+    const subject = `[DisDex][FILLED] V52 ${action} 注文約定`;
+    const text = [
+        "DisDex V52で注文が約定しました。",
+        "",
+        "Status: FILLED",
+        `Strategy: V52`,
+        `Action: ${action}`,
+        `Mode: LIVE`,
+        `Timestamp: ${timestamp}`,
+        `RunnerLog: ${line}`,
+    ].join("\n");
+    void sendEmail(to, subject, text).then((mailResult) => {
+        if (mailResult.success && !mailResult.simulated) {
+            console.log(JSON.stringify({ level: "info", event: "V52_ORDER_FILL_EMAIL_SENT", to, action }));
+        } else {
+            console.error(JSON.stringify({ level: "error", event: "V52_ORDER_FILL_EMAIL_FAILED", to, action, simulated: mailResult.simulated, error: mailResult.error instanceof Error ? mailResult.error.message : String(mailResult.error || "mail provider not configured") }));
+        }
+    }).catch((error) => {
+        // Notification failure must never stop or restart a LIVE trading child.
+        console.error(JSON.stringify({ level: "error", event: "V52_ORDER_FILL_EMAIL_FAILED", to, action, error: error instanceof Error ? error.message : String(error) }));
+    });
+}
+
+function attachV52Output(child: ChildProcess, runnerMode: RunnerMode) {
+    const stdout = child.stdout;
+    if (!stdout) return;
+    let buffer = "";
+    stdout.setEncoding("utf8");
+    stdout.on("data", (chunk: string) => {
+        process.stdout.write(chunk);
+        buffer += chunk;
+        while (true) {
+            const newline = buffer.indexOf("\n");
+            if (newline < 0) break;
+            const line = buffer.slice(0, newline).trim();
+            buffer = buffer.slice(newline + 1);
+            if (line) maybeNotifyV52Fill(line, runnerMode);
+        }
+    });
+    stdout.on("end", () => {
+        const line = buffer.trim();
+        if (line) maybeNotifyV52Fill(line, runnerMode);
+        buffer = "";
+    });
+}
+
 function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedChild[] {
     const env = buildCombinedChildEnvironment(runnerMode);
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const pengu = spawn(tsx, ["scripts/disdex-pengu-dual-ls-v1-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const stock = spawn(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    const stock = spawn(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: ["inherit", "pipe", "inherit"] });
+    attachV52Output(stock, runnerMode);
     return [{ name: "pengu-dual-ls-v1", process: pengu }, { name: "stock-v52-aster-only", process: stock }];
 }
 
