@@ -1,0 +1,4 @@
+launch=2026-08-13T00:03:54+09:00
+scope=research-only BTC ETH BNB AVAX
+confirmation=UNTOUCHED
+holdout=UNTOUCHED
