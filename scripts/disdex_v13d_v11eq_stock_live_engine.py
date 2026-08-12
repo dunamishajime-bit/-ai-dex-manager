@@ -1418,6 +1418,7 @@ def self_test() -> None:
     assert clock("10:30:00") == 37_800
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96"
     assert V13D_MIN_BASIS_BPS == 20.0
+    assert V11_MAX_DATA_AGE_MS == 5000
     assert V11_MAX_ROUND_TRIP_COST_BPS == 60.0
     print("V13D + V11-EQ Stock live engine self-test: PASS")
 
