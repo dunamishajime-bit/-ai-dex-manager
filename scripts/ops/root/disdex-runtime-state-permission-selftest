@@ -16,7 +16,7 @@ tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 state_root="$tmp/runtime-state"
 stock_root="$state_root/stock"
-install -d -o deploy -g deploy -m 0700 "$stock_root"
+install -d -o deploy -g deploy -m 0700 "$state_root" "$stock_root"
 
 audit_path="$stock_root/audit-live.jsonl"
 atomic_probe="$stock_root/runner-live.json"
