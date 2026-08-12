@@ -12,6 +12,7 @@ import {
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
 import { resolveDisDexV96V52SharedRuntimePaths } from "../lib/disdex-v96-v52-shared-runtime-paths";
+import { sendEmail } from "../lib/mail-service";
 import { isUsRegularEquitySession } from "./disdex-v13d-v11eq-v96-strategy-preflight";
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
@@ -22,6 +23,7 @@ const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-strategy-prefli
 const MARGIN_AWARE_V52_ENGINE = "scripts/disdex_v52_margin_aware_live_engine.py" as const;
 const V52_MARKET_RECHECK_INTERVAL_MS = 30_000;
 const V52_DATA_RECHECK_INTERVAL_MS = 60_000;
+const DEFAULT_ORDER_FILL_EMAIL = "dunamis.hajime@gmail.com";
 
 type RunnerMode = "paper" | "live";
 type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v2-final" | "stock-v52-aster-only"; process: ChildProcess };
@@ -122,6 +124,74 @@ function shouldStartV52Worker(status: V52PreflightStatus) {
     return status === "ACTIVE";
 }
 
+function maybeNotifyV52Fill(line: string, runnerMode: RunnerMode) {
+    if (runnerMode !== "live") return;
+    const action = line.includes("v52-position-open")
+        ? "OPEN"
+        : line.includes("v52-position-closed")
+            ? "CLOSE"
+            : null;
+    if (!action) return;
+
+    const to = (process.env.DISDEX_ORDER_FILL_EMAIL || DEFAULT_ORDER_FILL_EMAIL).trim();
+    if (!to) return;
+
+    const subject = `[DisDex][FILLED] V52 ${action}`;
+    const text = [
+        "Status: FILLED",
+        "Strategy: V52",
+        `Action: ${action}`,
+        "Mode: LIVE",
+        `Timestamp: ${new Date().toISOString()}`,
+        `RunnerLog: ${line.trim()}`,
+    ].join("\n");
+
+    void sendEmail(to, subject, text).then((result) => {
+        if (result.success && !result.simulated) {
+            console.log(JSON.stringify({ event: "V52_ORDER_FILL_EMAIL_SENT", action }));
+        } else {
+            console.error(JSON.stringify({
+                event: "V52_ORDER_FILL_EMAIL_FAILED",
+                action,
+                simulated: result.simulated,
+                error: result.error instanceof Error
+                    ? result.error.message
+                    : String(result.error || "mail provider not configured"),
+            }));
+        }
+    }).catch((error) => {
+        console.error(JSON.stringify({
+            event: "V52_ORDER_FILL_EMAIL_FAILED",
+            action,
+            error: error instanceof Error ? error.message : String(error),
+        }));
+    });
+}
+
+function attachV52Output(child: ChildProcess, runnerMode: RunnerMode) {
+    const stdout = child.stdout;
+    if (!stdout) return;
+
+    let buffer = "";
+    stdout.setEncoding("utf8");
+    stdout.on("data", (chunk: string) => {
+        process.stdout.write(chunk);
+        buffer += chunk;
+        while (true) {
+            const newline = buffer.indexOf("\n");
+            if (newline < 0) break;
+            const line = buffer.slice(0, newline).trim();
+            buffer = buffer.slice(newline + 1);
+            if (line) maybeNotifyV52Fill(line, runnerMode);
+        }
+    });
+    stdout.on("end", () => {
+        const line = buffer.trim();
+        if (line) maybeNotifyV52Fill(line, runnerMode);
+        buffer = "";
+    });
+}
+
 export type V52WorkerAction = "START" | "STOP" | "HOLD";
 
 export function v52WorkerAction(status: V52PreflightStatus, hasWorker: boolean): V52WorkerAction {
@@ -170,7 +240,12 @@ function spawnV52Worker(runnerMode: RunnerMode, daemon: boolean): ManagedChild {
     const env = buildCombinedChildEnvironment(runnerMode);
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
-    const stock = spawn(python, [MARGIN_AWARE_V52_ENGINE, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    const stock = spawn(python, [MARGIN_AWARE_V52_ENGINE, "--mode", runnerMode, runFlag], {
+        cwd: process.cwd(),
+        env,
+        stdio: ["inherit", "pipe", "inherit"],
+    });
+    attachV52Output(stock, runnerMode);
     return { name: "stock-v52-aster-only", process: stock };
 }
 
