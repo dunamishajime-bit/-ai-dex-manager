@@ -10,12 +10,16 @@ import research_lab_pair_specific_v109 as v109
 import research_sol_link_v109_autonomous as base
 
 HOUR = base.HOUR
-# Keep a permanent pointer to the unwrapped simulator before run() temporarily
-# replaces base.simulate. This prevents research wrappers from recursively
-# calling themselves and changes no Frozen V109 code or parameters.
 ORIGINAL_BASE_SIMULATE = base.simulate
-SOL_CID = 'sol_wrong_wave_path_quarantine'
-LINK_CID = 'link_vol_requalification_rearm_horizon'
+SOL_CID = 'sol_wrong_wave_slow_anchor_release'
+LINK_CID = 'link_vol_two_stage_requalification_owner'
+
+
+def _open_trade(c, i, delay, end):
+    ei = i + 1 + delay
+    if ei >= len(c) or int(c[ei]['ts']) >= end:
+        return None
+    return ei, int(c[ei]['ts']), float(c[ei]['open'])
 
 
 def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
@@ -53,7 +57,7 @@ def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
             'costContributionPct': raw_cost * v109.RISK[pair], 'mfePct': mfe, 'maePct': mae,
             'pnl0To48hPct': p0_48, 'pnl48hToExitPct': pnl - p0_48, 'exitReason': '+'.join(flags),
             'volRatio24_96': regs.get('vr'), 'breadth24': regs.get('breadth'),
-            'entryLifecycle': 'LATCHED_SHADOW_PATH_QUARANTINE_TO_CORE',
+            'entryLifecycle': 'LATCHED_SHADOW_SLOW_ANCHOR_RELEASE_TO_CORE',
         })
         vals.append(pnl)
         state = 0; life = 'CASH'; probe_side = 0; probe_ts = None
@@ -79,34 +83,34 @@ def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
         if state == 0 and life == 'CASH' and d and frozen_gate:
             probe_side = d; probe_ts = ts; life = 'LATCHED_SHADOW'; continue
 
-        if state == 0 and life in ('LATCHED_SHADOW', 'PATH_QUARANTINE'):
+        if state == 0 and life in ('LATCHED_SHADOW', 'FAST_QUARANTINE'):
             elapsed = (ts - probe_ts) // HOUR
             predictor_against = pr * probe_side < 0
             fast_against = ctx['r3'] * probe_side < 0 and ctx['r6'] * probe_side < 0
             medium_against = ctx['r12'] * probe_side < 0
+            slow_against = ctx['r24'] * probe_side < 0
 
-            # Materially distinct successor to contradiction-veto: an early path fracture
-            # does not instantly discard the latched wave. It enters quarantine. Only a
-            # joint predictor+medium contradiction rejects the wave; otherwise the same
-            # latched side can recover causally without threshold/risk/trail changes.
-            if predictor_against and medium_against:
+            # New structural ownership rule: fast fracture only quarantines. Medium conflict
+            # does not itself reject. The latched side is discarded only when the slow path
+            # also loses ownership, or when predictor+medium+slow all contradict it.
+            if slow_against and (medium_against or predictor_against):
                 life = 'CASH'; probe_side = 0; probe_ts = None; continue
             if fast_against:
-                life = 'PATH_QUARANTINE'
-            elif life == 'PATH_QUARANTINE' and ctx['r6'] * probe_side > 0 and ctx['r12'] * probe_side >= 0:
+                life = 'FAST_QUARANTINE'
+            elif life == 'FAST_QUARANTINE' and ctx['r6'] * probe_side > 0:
                 life = 'LATCHED_SHADOW'
 
-            # Acceptance requires coherent path ownership rather than a single confirming
-            # horizon: either fast+medium agree, or fast persistence agrees while medium is
-            # non-contradictory. This targets the concentrated wrong-wave tail structurally.
             fast_support = ctx['r3'] * probe_side > 0 and ctx['r6'] * probe_side > 0
-            medium_support = ctx['r6'] * probe_side > 0 and ctx['r12'] * probe_side > 0
-            coherent = medium_support or (fast_support and ctx['r12'] * probe_side >= 0)
+            medium_support = ctx['r12'] * probe_side > 0
+            slow_intact = ctx['r24'] * probe_side >= 0
+            # Release from shadow requires fast recovery plus a non-broken slow anchor;
+            # medium evidence may be neutral but cannot be opposite at acceptance.
+            coherent = fast_support and slow_intact and ctx['r12'] * probe_side >= 0
             if life == 'LATCHED_SHADOW' and elapsed >= 3 and coherent:
-                ei = i + 1 + delay
-                if ei < len(c) and int(c[ei]['ts']) < end:
-                    state = probe_side; signal_ts = ts; entry_i = ei; entry_ts = int(c[ei]['ts'])
-                    entry = float(c[ei]['open']); peak = entry; trough = entry; entry_pred = pr; life = 'CORE'
+                opened = _open_trade(c, i, delay, end)
+                if opened:
+                    entry_i, entry_ts, entry = opened
+                    state = probe_side; signal_ts = ts; peak = entry; trough = entry; entry_pred = pr; life = 'CORE'
                 continue
             if elapsed > 12:
                 life = 'CASH'; probe_side = 0; probe_ts = None
@@ -120,24 +124,96 @@ def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
 def link_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
     if cid != LINK_CID or pair != 'LINK':
         return ORIGINAL_BASE_SIMULATE(cid, pair, candles, idx, start, end, cost_bps, delay, model)
-    original_entry_ok = base._entry_ok
+    th = model['threshold']; c = candles[pair]
+    state = 0; life = 'CASH'; probe_side = 0; probe_ts = None; rearm_ready = True
+    entry = peak = trough = None; entry_i = entry_ts = signal_ts = None; entry_pred = None
+    vals, recs = [], []
 
-    def fresh_requalification(_cid, side, ctx, prev_ctx=None):
-        # Volatility-aware Cash state: ownership can arm only on a fresh causal
-        # requalification from sub-1 vol ratio to qualified vol, not just because
-        # current volatility is elevated. Frozen threshold/risk/trail are untouched.
-        return ctx['vr'] >= 1.0 and prev_ctx is not None and prev_ctx['vr'] < 1.0
+    def close(ts, i, flags):
+        nonlocal state, life, probe_side, probe_ts, rearm_ready, entry, peak, trough, entry_i, entry_ts, signal_ts, entry_pred
+        proposed = i + 1 + delay
+        if flags == ['PERIOD_END'] or proposed >= len(c) or int(c[proposed]['ts']) >= end:
+            xi = i; xp = float(c[i]['close'])
+        else:
+            xi = proposed; xp = float(c[xi]['open'])
+        gross = state * ((xp / entry - 1) * 100); raw_cost = cost_bps / 100.0
+        pnl = (gross - raw_cost) * v109.RISK[pair]
+        lo, hi = min(entry_i, xi), max(entry_i, xi)
+        highs = [float(c[j].get('high', c[j]['close'])) for j in range(lo, hi + 1)]
+        lows = [float(c[j].get('low', c[j]['close'])) for j in range(lo, hi + 1)]
+        if state > 0:
+            mfe = (max(highs) / entry - 1) * 100; mae = (min(lows) / entry - 1) * 100
+        else:
+            mfe = (entry / min(lows) - 1) * 100; mae = (entry / max(highs) - 1) * 100
+        i48 = min(entry_i + base.HORIZON, xi); p48 = float(c[i48]['close'])
+        gross48 = state * ((p48 / entry - 1) * 100); p0_48 = (gross48 - raw_cost) * v109.RISK[pair]
+        regs = base._ctx(pair, candles, idx, signal_ts) or {}
+        recs.append({
+            'candidate': cid, 'pair': pair, 'side': 'LONG' if state > 0 else 'SHORT',
+            'signalTs': signal_ts, 'entryExecTs': entry_ts, 'exitSignalTs': ts, 'exitExecTs': int(c[xi]['ts']),
+            'entryPredictor': entry_pred, 'threshold': th, 'entryPrice': entry, 'exitPrice': xp,
+            'heldHours': (ts - signal_ts) / HOUR, 'netPnlPct': pnl, 'grossReturnPct': gross,
+            'costContributionPct': raw_cost * v109.RISK[pair], 'mfePct': mfe, 'maePct': mae,
+            'pnl0To48hPct': p0_48, 'pnl48hToExitPct': pnl - p0_48, 'exitReason': '+'.join(flags),
+            'volRatio24_96': regs.get('vr'), 'breadth24': regs.get('breadth'),
+            'entryLifecycle': 'VOL_REQUALIFICATION_PROBE_ACCEPTANCE_48H_OWNER',
+        })
+        vals.append(pnl)
+        state = 0; life = 'CASH'; probe_side = 0; probe_ts = None; rearm_ready = False
+        entry = peak = trough = None; entry_i = entry_ts = signal_ts = None; entry_pred = None
 
-    base._entry_ok = fresh_requalification
-    try:
-        vals, recs = ORIGINAL_BASE_SIMULATE(
-            'link_cash_rearm_horizon', pair, candles, idx, start, end, cost_bps, delay, model
-        )
-    finally:
-        base._entry_ok = original_entry_ok
-    for r in recs:
-        r['candidate'] = cid
-        r['entryLifecycle'] = 'VOL_REQUALIFICATION_REARM_48H_OWNER'
+    prev_ctx = None
+    for row in c:
+        ts = int(row['ts'])
+        if not (start <= ts < end):
+            continue
+        ctx = base._ctx(pair, candles, idx, ts)
+        if ctx is None:
+            continue
+        i = ctx['i']; pr = v109.predict(base.KIND, pair, candles, idx, ts, model); px = ctx['close']
+
+        # Re-arm only after returning to Cash and volatility has genuinely de-qualified.
+        if state == 0 and life == 'CASH' and not rearm_ready and ctx['vr'] < 1.0:
+            rearm_ready = True
+
+        if state:
+            peak = max(peak, px); trough = min(trough, px); held = (ts - signal_ts) // HOUR
+            adverse = (px / peak - 1) * 100 if state > 0 else (trough / px - 1) * 100
+            flags = base._exit_flags(pair, state, pr, th, adverse, held, cid)
+            if flags:
+                close(ts, i, flags); prev_ctx = ctx; continue
+
+        d = 1 if pr >= th else -1 if pr <= -th else 0
+        frozen_gate = ctx['v24'] < 3.2 * ctx['v336']
+        fresh_vol = prev_ctx is not None and prev_ctx['vr'] < 1.0 and ctx['vr'] >= 1.0
+
+        # Stage 1: fresh volatility requalification only creates a probe; no ownership yet.
+        if state == 0 and life == 'CASH' and rearm_ready and fresh_vol and d and frozen_gate:
+            probe_side = d; probe_ts = ts; life = 'REQUALIFICATION_PROBE'; prev_ctx = ctx; continue
+
+        if state == 0 and life == 'REQUALIFICATION_PROBE':
+            elapsed = (ts - probe_ts) // HOUR
+            predictor_reject = pr * probe_side < 0
+            fast_support = ctx['r3'] * probe_side > 0 and ctx['r6'] * probe_side > 0
+            medium_not_against = ctx['r12'] * probe_side >= 0
+            # Stage 2: ownership begins only after causal path acceptance following the
+            # fresh vol transition. The 48h clock starts here, not at requalification.
+            if predictor_reject or ctx['vr'] < 1.0:
+                life = 'CASH'; probe_side = 0; probe_ts = None; rearm_ready = ctx['vr'] < 1.0
+            elif elapsed >= 1 and fast_support and medium_not_against:
+                opened = _open_trade(c, i, delay, end)
+                if opened:
+                    entry_i, entry_ts, entry = opened
+                    state = probe_side; signal_ts = ts; peak = entry; trough = entry; entry_pred = pr
+                    life = 'FORECAST_OWNER'; rearm_ready = False
+            elif elapsed > 12:
+                life = 'CASH'; probe_side = 0; probe_ts = None; rearm_ready = False
+
+        prev_ctx = ctx
+
+    if state and signal_ts is not None:
+        last_ts = max(int(r['ts']) for r in c if start <= int(r['ts']) < end)
+        close(last_ts, idx[pair][last_ts], ['PERIOD_END'])
     return vals, recs
 
 
@@ -157,15 +233,15 @@ def run(pair):
         'nextCandidateGeneration': None if res['status'] == 'FROZEN_SURVIVOR' else {
             'sourceDiagnosis': res['diagnosis'],
             'policy': 'NEXT_RUN_NEW_STRUCTURAL_MECHANISM_ONLY_NO_NUMERIC_RETUNE',
-            'structuralDirection': ('wrong-wave path-quarantine/causal recovery mechanism only' if pair == 'SOL'
-                                    else 'volatility-aware Cash plus 48h ownership requalification/re-arm only'),
+            'structuralDirection': ('wrong-wave slow-anchor shadow/release mechanism only' if pair == 'SOL'
+                                    else 'volatility-aware Cash plus two-stage requalification/probe/48h ownership only'),
         },
         'periods': {'development': ps['development'], 'validation': ps['validation'],
                     'confirmation': 'UNTOUCHED', 'holdout': 'UNTOUCHED'},
         'frozenV109Changed': False, 'frozenThreshold': model['threshold'], 'frozenRisk': v109.RISK[pair],
         'frozenTrailPct': v109.TRAIL[pair],
-        'researchMultiplicity': {'evaluatedThisRun': 1, 'priorCatalog': 5 if pair == 'SOL' else 3,
-                                 'cumulative': 6 if pair == 'SOL' else 4},
+        'researchMultiplicity': {'evaluatedThisRun': 1, 'priorCatalog': 6 if pair == 'SOL' else 4,
+                                 'cumulative': 7 if pair == 'SOL' else 5},
         'antiOverfit': {'denseSweep': False, 'thresholdRetune': False, 'riskRetune': False, 'trailRetune': False,
                         'sideHardcode': False, 'confirmationRead': False, 'holdoutRead': False,
                         'designEvidence': ['development', 'validation'], 'strictPeriodIsolation': True},
