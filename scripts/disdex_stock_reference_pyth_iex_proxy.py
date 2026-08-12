@@ -19,6 +19,13 @@ import websocket
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
 UTC = dt.timezone.utc
 
+# V52 reference-quality policy. These are ceilings, not fallbacks: every
+# quote still requires both connected sources and passes all validations below.
+DEFAULT_PYTH_MAX_AGE_MS = 5000
+DEFAULT_IEX_MAX_AGE_MS = 5000
+DEFAULT_PYTH_MAX_CONFIDENCE_BPS = 25.0
+DEFAULT_REFERENCE_MAX_CROSS_SOURCE_BPS = 50.0
+
 
 def now_ms() -> int:
     return int(time.time() * 1000)
@@ -394,24 +401,54 @@ class ReferenceServer(ThreadingHTTPServer):
     def __init__(self, address: tuple[str, int], store: QuoteStore):
         super().__init__(address, Handler)
         self.quote_store = store
-        self.pyth_max_age_ms = int_env("DISDEX_PYTH_MAX_AGE_MS", 1200)
-        self.iex_max_age_ms = int_env("DISDEX_IEX_MAX_AGE_MS", 1500)
-        self.max_confidence_bps = float_env("DISDEX_PYTH_MAX_CONFIDENCE_BPS", 10.0)
-        self.max_cross_bps = float_env("DISDEX_REFERENCE_MAX_CROSS_SOURCE_BPS", 20.0)
+        self.pyth_max_age_ms = int_env("DISDEX_PYTH_MAX_AGE_MS", DEFAULT_PYTH_MAX_AGE_MS)
+        self.iex_max_age_ms = int_env("DISDEX_IEX_MAX_AGE_MS", DEFAULT_IEX_MAX_AGE_MS)
+        self.max_confidence_bps = float_env("DISDEX_PYTH_MAX_CONFIDENCE_BPS", DEFAULT_PYTH_MAX_CONFIDENCE_BPS)
+        self.max_cross_bps = float_env("DISDEX_REFERENCE_MAX_CROSS_SOURCE_BPS", DEFAULT_REFERENCE_MAX_CROSS_SOURCE_BPS)
 
 
 def self_test() -> None:
+    assert DEFAULT_PYTH_MAX_AGE_MS == 5000
+    assert DEFAULT_IEX_MAX_AGE_MS == 5000
+    assert DEFAULT_PYTH_MAX_CONFIDENCE_BPS == 25.0
+    assert DEFAULT_REFERENCE_MAX_CROSS_SOURCE_BPS == 50.0
     assert parse_rfc3339_ms("2026-07-25T01:02:03.123456789Z") == 1784941323123
     store = QuoteStore()
     now_seconds = int(time.time())
     store.update_pyth("NVDA", {"price": {"price": "1201200", "conf": "200", "expo": -4, "publish_time": now_seconds}}, "feed")
     store.update_iex({"T": "q", "S": "NVDA", "bp": 120.10, "ap": 120.14, "t": dt.datetime.now(tz=UTC).isoformat().replace("+00:00", "Z")})
-    payload, error = store.validated("NVDA", pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=10, max_cross_bps=20)
+    payload, error = store.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
     assert error is None and payload is not None
     assert abs(payload["price"] - 120.12) < 1e-9
     assert payload["source"] == "pyth-core-validated-by-alpaca-iex"
-    bad, error = store.validated("NVDA", pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=0.01, max_cross_bps=20)
+
+    stale_pyth = QuoteStore()
+    stale_pyth._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.2, now_ms() - 5001, now_ms(), "feed")
+    stale_pyth._iex["NVDA"] = IexQuote("NVDA", 120.10, 120.14, now_ms(), now_ms())
+    bad, error = stale_pyth.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "pyth_quote_stale"
+
+    stale_iex = QuoteStore()
+    stale_iex._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.2, now_ms(), now_ms(), "feed")
+    stale_iex._iex["NVDA"] = IexQuote("NVDA", 120.10, 120.14, now_ms() - 5001, now_ms())
+    bad, error = stale_iex.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "iex_quote_stale"
+
+    wide_confidence = QuoteStore()
+    wide_confidence._pyth["NVDA"] = PythQuote("NVDA", 120.12, 120.12 * 26 / 10_000, now_ms(), now_ms(), "feed")
+    wide_confidence._iex["NVDA"] = IexQuote("NVDA", 120.10, 120.14, now_ms(), now_ms())
+    bad, error = wide_confidence.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
     assert bad is None and error and error["error"] == "pyth_confidence_too_wide"
+
+    divergent = QuoteStore()
+    divergent._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.2, now_ms(), now_ms(), "feed")
+    divergent._iex["NVDA"] = IexQuote("NVDA", 121.00, 121.04, now_ms(), now_ms())
+    bad, error = divergent.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "cross_source_divergence"
+
+    missing = QuoteStore()
+    bad, error = missing.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "pyth_quote_unavailable"
     print("Pyth Core + Alpaca IEX reference proxy self-test: PASS")
 
 
