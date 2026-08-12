@@ -1,0 +1,4 @@
+trigger=2026-08-12T13:00:00+09:00
+universe=BTC,ETH,BNB,AVAX
+link_sol=frozen_external_validation
+research_only=true
