@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
+  "entryCutoffMs": 1786564710000,
+  "durationSeconds": 709,
+  "resultStatus": "V13_FORWARD_DATA_REQUIRED",
+  "safety": {
+    "mode": "SHADOW_RESEARCH_ONLY",
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false
+  }
+}
