@@ -19,6 +19,7 @@ from disdex_v96_v52_margin_risk_policy import (
 )
 
 base = legacy.base
+ReferenceQualityError = legacy.ReferenceQualityError
 STRATEGY_ID = legacy.STRATEGY_ID
 V11_SLOT = legacy.V11_SLOT
 V50_SLOT = legacy.V50_SLOT
@@ -340,11 +341,15 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
                 try:
                     self.tick()
                 except Exception as error:
-                    self.log("v52-margin-aware-tick-error", error=str(error))
-                    if self.live:
-                        self.activate_kill_switch(f"V52 margin-aware fatal tick error: {error}")
-                        self.flatten_all("FATAL_TICK_ERROR")
-                        raise
+                    if self._handle_tick_error(error):
+                        if not daemon:
+                            break
+                    else:
+                        self.log("v52-margin-aware-tick-error", error=str(error))
+                        if self.live:
+                            self.activate_kill_switch(f"V52 margin-aware fatal tick error: {error}")
+                            self.flatten_all("FATAL_TICK_ERROR")
+                            raise
                 if not daemon:
                     break
                 active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
@@ -355,6 +360,37 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
 
 
 def self_test() -> None:
+    # Reference-quality failures block only the affected tick; they must not
+    # activate the shared Kill Switch or flatten positions.  A normal runtime
+    # error remains outside this recovery path and is still fatal in run().
+    recovery_engine = object.__new__(MarginAwareV52AsterOnlyEngine)
+    recovery_engine.state = {}
+    recovery_engine.save = lambda: None
+    recovery_engine.log = lambda *_args, **_fields: None
+    stale = ReferenceQualityError(
+        "iex_quote_stale",
+        {"symbol": "META", "ageMs": 5396, "maximumAgeMs": 5000},
+    )
+    assert recovery_engine._handle_tick_error(stale) is True
+    assert recovery_engine.state["referenceStatus"] == "BLOCKED_DATA_UNAVAILABLE"
+    assert recovery_engine.state["referenceOrdersAllowed"] is False
+    assert recovery_engine.state["referenceFailure"]["ageMs"] == 5396
+    recovery_engine._record_reference_active()
+    assert recovery_engine.state["referenceStatus"] == "ACTIVE"
+    assert recovery_engine.state["referenceOrdersAllowed"] is True
+    assert "referenceFailure" not in recovery_engine.state
+    assert recovery_engine._handle_tick_error(RuntimeError("runtime permission failure")) is False
+    for code in (
+        "pyth_quote_unavailable",
+        "iex_quote_unavailable",
+        "pyth_quote_stale",
+        "iex_quote_stale",
+        "pyth_confidence_too_wide",
+        "cross_source_divergence",
+    ):
+        assert ReferenceQualityError(code).code == code
+    assert not isinstance(RuntimeError("runtime permission failure"), ReferenceQualityError)
+
     engine = object.__new__(MarginAwareV52AsterOnlyEngine)
     engine.crypto_gross_cap = 1.5
     engine.stock_gross_cap = 1.5
@@ -400,6 +436,7 @@ def self_test() -> None:
     assert WARNING_POLL_INTERVAL_MS == 60_000
     assert ACTIVE_LOOP_INTERVAL_MS == 2_000
     assert DAILY_LOSS_CHECK_INTERVAL_MS == 60_000
+    print("V52 reference transient recovery self-test: PASS")
     print("V52 adaptive margin-aware concurrent Stock runner self-test: PASS")
 
 

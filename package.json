@@ -57,7 +57,7 @@
     "strategy:disdex-v96:kill-switch": "tsx scripts/disdex-v96-kill-switch.ts",
     "strategy:disdex-v13d-v11eq-v96:contract:selftest": "tsx scripts/disdex-v13d-v11eq-v96-contract-selftest.ts",
     "strategy:disdex-v13d-v11eq-v96:contract:typecheck": "tsc --noEmit -p tsconfig.v13d-v11eq-router.json",
-    "strategy:disdex-v13d-v11eq-v96:stock:selftest": "python3 -m py_compile scripts/disdex_v11eq_aster_only_live_engine.py scripts/disdex_v52_aster_only_live_engine.py && python3 scripts/disdex_v52_aster_only_live_engine.py --self-test",
+    "strategy:disdex-v13d-v11eq-v96:stock:selftest": "python3 -m py_compile scripts/disdex_v11eq_aster_only_live_engine.py scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_margin_aware_live_engine.py scripts/disdex_v52_reference_recovery_selftest.py && python3 scripts/disdex_v52_aster_only_live_engine.py --self-test && python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test && python3 scripts/disdex_v52_reference_recovery_selftest.py",
     "strategy:disdex-v13d-v11eq-v96:reference:selftest": "python3 -m py_compile scripts/disdex_stock_reference_pyth_iex_proxy.py && python3 scripts/disdex_stock_reference_pyth_iex_proxy.py --self-test",
     "strategy:disdex-v13d-v11eq-v96:state:migrate:selftest": "tsx scripts/disdex-v96-combined-state-migrate.ts --self-test",
     "strategy:disdex-v13d-v11eq-v96:state:migrate": "tsx scripts/disdex-v96-combined-state-migrate.ts",
