@@ -10,13 +10,17 @@ import research_lab_pair_specific_v109 as v109
 import research_sol_link_v109_autonomous as base
 
 HOUR = base.HOUR
-SOL_CID = 'sol_wrong_wave_contradiction_veto'
+# Keep a permanent pointer to the unwrapped simulator before run() temporarily
+# replaces base.simulate. This prevents research wrappers from recursively
+# calling themselves and changes no Frozen V109 code or parameters.
+ORIGINAL_BASE_SIMULATE = base.simulate
+SOL_CID = 'sol_wrong_wave_path_quarantine'
 LINK_CID = 'link_vol_requalification_rearm_horizon'
 
 
 def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
     if cid != SOL_CID or pair != 'SOL':
-        return base.simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model)
+        return ORIGINAL_BASE_SIMULATE(cid, pair, candles, idx, start, end, cost_bps, delay, model)
     th = model['threshold']; c = candles[pair]
     state = 0; life = 'CASH'; probe_side = 0; probe_ts = None
     entry = peak = trough = None; entry_i = entry_ts = signal_ts = None; entry_pred = None
@@ -49,7 +53,7 @@ def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
             'costContributionPct': raw_cost * v109.RISK[pair], 'mfePct': mfe, 'maePct': mae,
             'pnl0To48hPct': p0_48, 'pnl48hToExitPct': pnl - p0_48, 'exitReason': '+'.join(flags),
             'volRatio24_96': regs.get('vr'), 'breadth24': regs.get('breadth'),
-            'entryLifecycle': 'LATCHED_SHADOW_CONTRADICTION_VETO_TO_CORE',
+            'entryLifecycle': 'LATCHED_SHADOW_PATH_QUARANTINE_TO_CORE',
         })
         vals.append(pnl)
         state = 0; life = 'CASH'; probe_side = 0; probe_ts = None
@@ -75,18 +79,30 @@ def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
         if state == 0 and life == 'CASH' and d and frozen_gate:
             probe_side = d; probe_ts = ts; life = 'LATCHED_SHADOW'; continue
 
-        if state == 0 and life == 'LATCHED_SHADOW':
+        if state == 0 and life in ('LATCHED_SHADOW', 'PATH_QUARANTINE'):
             elapsed = (ts - probe_ts) // HOUR
-            # Material structural change from the prior latch:
-            # reject only when independent predictor-direction AND medium price-path evidence
-            # contradict the latched side. Absence of fresh confirmation is not itself rejection.
-            predictor_contradiction = pr * probe_side < 0
-            medium_contradiction = ctx['r12'] * probe_side < 0
-            if predictor_contradiction and medium_contradiction:
+            predictor_against = pr * probe_side < 0
+            fast_against = ctx['r3'] * probe_side < 0 and ctx['r6'] * probe_side < 0
+            medium_against = ctx['r12'] * probe_side < 0
+
+            # Materially distinct successor to contradiction-veto: an early path fracture
+            # does not instantly discard the latched wave. It enters quarantine. Only a
+            # joint predictor+medium contradiction rejects the wave; otherwise the same
+            # latched side can recover causally without threshold/risk/trail changes.
+            if predictor_against and medium_against:
                 life = 'CASH'; probe_side = 0; probe_ts = None; continue
-            # Acceptance is causal and asymmetric: after the same shadow age, either fast or
-            # medium path support is sufficient unless the joint contradiction veto fired.
-            if elapsed >= 3 and (ctx['r6'] * probe_side > 0 or ctx['r12'] * probe_side > 0):
+            if fast_against:
+                life = 'PATH_QUARANTINE'
+            elif life == 'PATH_QUARANTINE' and ctx['r6'] * probe_side > 0 and ctx['r12'] * probe_side >= 0:
+                life = 'LATCHED_SHADOW'
+
+            # Acceptance requires coherent path ownership rather than a single confirming
+            # horizon: either fast+medium agree, or fast persistence agrees while medium is
+            # non-contradictory. This targets the concentrated wrong-wave tail structurally.
+            fast_support = ctx['r3'] * probe_side > 0 and ctx['r6'] * probe_side > 0
+            medium_support = ctx['r6'] * probe_side > 0 and ctx['r12'] * probe_side > 0
+            coherent = medium_support or (fast_support and ctx['r12'] * probe_side >= 0)
+            if life == 'LATCHED_SHADOW' and elapsed >= 3 and coherent:
                 ei = i + 1 + delay
                 if ei < len(c) and int(c[ei]['ts']) < end:
                     state = probe_side; signal_ts = ts; entry_i = ei; entry_ts = int(c[ei]['ts'])
@@ -103,15 +119,20 @@ def sol_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
 
 def link_simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model):
     if cid != LINK_CID or pair != 'LINK':
-        return base.simulate(cid, pair, candles, idx, start, end, cost_bps, delay, model)
+        return ORIGINAL_BASE_SIMULATE(cid, pair, candles, idx, start, end, cost_bps, delay, model)
     original_entry_ok = base._entry_ok
+
     def fresh_requalification(_cid, side, ctx, prev_ctx=None):
-        # New structural mechanism: ownership can arm only on a fresh volatility
-        # requalification from Cash, not simply because the current vol ratio is high.
+        # Volatility-aware Cash state: ownership can arm only on a fresh causal
+        # requalification from sub-1 vol ratio to qualified vol, not just because
+        # current volatility is elevated. Frozen threshold/risk/trail are untouched.
         return ctx['vr'] >= 1.0 and prev_ctx is not None and prev_ctx['vr'] < 1.0
+
     base._entry_ok = fresh_requalification
     try:
-        vals, recs = base.simulate('link_cash_rearm_horizon', pair, candles, idx, start, end, cost_bps, delay, model)
+        vals, recs = ORIGINAL_BASE_SIMULATE(
+            'link_cash_rearm_horizon', pair, candles, idx, start, end, cost_bps, delay, model
+        )
     finally:
         base._entry_ok = original_entry_ok
     for r in recs:
@@ -136,15 +157,15 @@ def run(pair):
         'nextCandidateGeneration': None if res['status'] == 'FROZEN_SURVIVOR' else {
             'sourceDiagnosis': res['diagnosis'],
             'policy': 'NEXT_RUN_NEW_STRUCTURAL_MECHANISM_ONLY_NO_NUMERIC_RETUNE',
-            'structuralDirection': ('wrong-wave contradiction-veto/acceptance mechanism only' if pair == 'SOL'
+            'structuralDirection': ('wrong-wave path-quarantine/causal recovery mechanism only' if pair == 'SOL'
                                     else 'volatility-aware Cash plus 48h ownership requalification/re-arm only'),
         },
         'periods': {'development': ps['development'], 'validation': ps['validation'],
                     'confirmation': 'UNTOUCHED', 'holdout': 'UNTOUCHED'},
         'frozenV109Changed': False, 'frozenThreshold': model['threshold'], 'frozenRisk': v109.RISK[pair],
         'frozenTrailPct': v109.TRAIL[pair],
-        'researchMultiplicity': {'evaluatedThisRun': 1, 'priorCatalog': 4 if pair == 'SOL' else 3,
-                                 'cumulative': 5 if pair == 'SOL' else 4},
+        'researchMultiplicity': {'evaluatedThisRun': 1, 'priorCatalog': 5 if pair == 'SOL' else 3,
+                                 'cumulative': 6 if pair == 'SOL' else 4},
         'antiOverfit': {'denseSweep': False, 'thresholdRetune': False, 'riskRetune': False, 'trailRetune': False,
                         'sideHardcode': False, 'confirmationRead': False, 'holdoutRead': False,
                         'designEvidence': ['development', 'validation'], 'strictPeriodIsolation': True},
@@ -165,7 +186,6 @@ def run(pair):
         for block in ('development', 'validation'):
             for tr in res['ledger'][block]:
                 row = {k: tr.get(k) for k in cols}; row['block'] = block; w.writerow(row)
-    # Print complete D/V diagnostics so automation can inspect metrics without artifact download.
     print(json.dumps(out, indent=2))
 
 
