@@ -1,0 +1,1 @@
+V128 acceptance-lock cash-first batch trigger 2026-08-12T19:00:00+09:00
