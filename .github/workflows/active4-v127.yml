@@ -2,6 +2,11 @@ name: Active4 V127 Accepted-Core Hold Research
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "research/active4-v127-trigger.txt"
 
 permissions:
   contents: read
