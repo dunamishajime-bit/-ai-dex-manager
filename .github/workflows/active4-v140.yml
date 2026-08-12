@@ -1,0 +1,59 @@
+name: Active4 V140 Pair Roles
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "scripts/research_active4_v140_pair_roles.py"
+      - ".github/workflows/active4-v140.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: active4-v140-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        candidate: [btc_wave_sponsorship_handoff_v10, btc_reacceleration_owner_v10, eth_relative_regime_handoff_v10, bnb_twoofthree_transition_cash_v10, avax_shock_reacceleration_event_v10]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pair-specific-v107-exact-usdm-v3-20260811
+          restore-keys: |
+            pair-specific-v104-exact-usdm-v3-20260810
+            pair-specific-v106-usdm-
+            six-pair-v98-usdm-
+      - name: Compile
+        run: python -m py_compile scripts/research_active4_v140_pair_roles.py
+      - name: Run V140 candidate
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_active4_v140_pair_roles.py --candidate "${{ matrix.candidate }}"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: active4-v140-${{ matrix.candidate }}
+          path: |
+            .research-state/active4-v140-${{ matrix.candidate }}.json
+            .research-state/active4-v140-${{ matrix.candidate }}.md
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research only: BTC/ETH/BNB/AVAX Development/Validation.
+# Confirmation/Holdout, LINK/SOL, production/live/VPS/.env/credentials/orders/accounts/positions untouched.
