@@ -1,10 +1,11 @@
 from __future__ import annotations
 import argparse,json,math,os
 from pathlib import Path
-import research_active4_v119 as q
+import research_active4_v119 as lineage
+import research_active4_v115 as engine
 import research_lab_pair_specific_v109 as v109
 
-HOUR=q.HOUR; NORMAL_BPS=q.NORMAL_BPS; STRESS_BPS=q.STRESS_BPS; p=q.p; ret=q.ret
+HOUR=engine.HOUR; NORMAL_BPS=engine.NORMAL_BPS; STRESS_BPS=engine.STRESS_BPS; p=engine.p; ret=engine.ret
 CANDS={
  'btc_vol_release':('BTC',.60,6.4,624),
  'btc_failed_auction':('BTC',.56,5.8,456),
@@ -12,10 +13,10 @@ CANDS={
  'bnb_regime_accel':('BNB',.48,6.0,432),
  'avax_breadth_burst':('AVAX',.43,7.6,384),
 }
-q.CANDS.update(CANDS)
+engine.CANDS.update(CANDS)
 
 def state(cid,candles,idx,ts):
- x=q.feat(cid,candles,idx,ts); z={'bias':0,'prewave':0,'onset':0,'continue':0,'reentry':0,'reverse':0,'exhaust':0,'strength':0.0}
+ x=engine.feat(cid,candles,idx,ts); z={'bias':0,'prewave':0,'onset':0,'continue':0,'reentry':0,'reverse':0,'exhaust':0,'strength':0.0}
  if not x:return z
  r=x['r']; v=x['v']; px=x['px']
  if cid=='btc_vol_release':
@@ -102,20 +103,20 @@ def state(cid,candles,idx,ts):
   z['strength']=abs(rel72)/(v[168]*math.sqrt(72)+1e-9)+.5*x['e72']+.25*abs(br-.5)
  return z
 
-q.state=state
+engine.state=state
 
 def run(cid):
  candles,idx,_=v109.b.base.load(); ps=v109.b.base.periods(candles)
- dm=q.evalm(cid,candles,idx,ps['development'],NORMAL_BPS,0); vm=q.evalm(cid,candles,idx,ps['validation'],NORMAL_BPS,0); vs=q.evalm(cid,candles,idx,ps['validation'],STRESS_BPS,1)
- dw=q.wave_diag(cid,candles,idx,ps['development']); vw=q.wave_diag(cid,candles,idx,ps['validation']); df=q.folds(cid,candles,idx,ps['development']); vf=q.folds(cid,candles,idx,ps['validation'])
+ dm=engine.evalm(cid,candles,idx,ps['development'],NORMAL_BPS,0); vm=engine.evalm(cid,candles,idx,ps['validation'],NORMAL_BPS,0); vs=engine.evalm(cid,candles,idx,ps['validation'],STRESS_BPS,1)
+ dw=engine.wave_diag(cid,candles,idx,ps['development']); vw=engine.wave_diag(cid,candles,idx,ps['validation']); df=engine.folds(cid,candles,idx,ps['development']); vf=engine.folds(cid,candles,idx,ps['validation'])
  result={'strategyId':'V120_'+cid.upper(),'pair':CANDS[cid][0],'periods':ps,'development':dm,'validation':vm,'validationStress':vs,'waveDiagnostics':{'development':dw,'validation':vw},'walkForward':{'development':df,'validation':vf},'productionChanged':False,'realTradingEnabled':False}
  promote=(dm.get('pf') or 0)>=1.20 and dm.get('returnPct',0)>0 and (vm.get('pf') or 0)>=1.20 and vm.get('returnPct',0)>0 and (vs.get('pf') or 0)>1 and vm.get('maxDDPct',-999)>-20 and vw['captureRatePct']>=20 and vf['positivePfFolds']>=2
  if not promote:result.update(status='FAIL',reason='DEV_VALIDATION_WAVE')
  else:
-  cm=q.evalm(cid,candles,idx,ps['confirmation'],NORMAL_BPS,0); cs=q.evalm(cid,candles,idx,ps['confirmation'],STRESS_BPS,1); result.update(confirmation=cm,confirmationStress=cs)
+  cm=engine.evalm(cid,candles,idx,ps['confirmation'],NORMAL_BPS,0); cs=engine.evalm(cid,candles,idx,ps['confirmation'],STRESS_BPS,1); result.update(confirmation=cm,confirmationStress=cs)
   if (cm.get('pf') or 0)<1.2 or cm.get('returnPct',0)<=0 or (cs.get('pf') or 0)<=1:result.update(status='FAIL',reason='CONFIRMATION')
   else:
-   hm=q.evalm(cid,candles,idx,ps['holdout'],NORMAL_BPS,0); hs=q.evalm(cid,candles,idx,ps['holdout'],STRESS_BPS,1); ym=q.evalm(cid,candles,idx,(ps['development'][0],ps['holdout'][1]),NORMAL_BPS,0); ys=q.evalm(cid,candles,idx,(ps['development'][0],ps['holdout'][1]),STRESS_BPS,1)
+   hm=engine.evalm(cid,candles,idx,ps['holdout'],NORMAL_BPS,0); hs=engine.evalm(cid,candles,idx,ps['holdout'],STRESS_BPS,1); ym=engine.evalm(cid,candles,idx,(ps['development'][0],ps['holdout'][1]),NORMAL_BPS,0); ys=engine.evalm(cid,candles,idx,(ps['development'][0],ps['holdout'][1]),STRESS_BPS,1)
    ok=(hm.get('pf') or 0)>1 and hm.get('returnPct',0)>0 and (hs.get('pf') or 0)>1 and (ym.get('pf') or 0)>=1.2 and ym.get('returnPct',0)>0 and (ys.get('pf') or 0)>1
    result.update(holdout=hm,holdoutStress=hs,year=ym,yearStress=ys,status='PASS' if ok else 'FAIL',reason='PASS' if ok else 'FINAL')
  out=Path(os.environ.get('RESEARCH_AUTONOMOUS_STATE_DIR','.research-state'));out.mkdir(parents=True,exist_ok=True);stem='active4-v120-'+cid;txt=json.dumps(result,indent=2);(out/f'{stem}.json').write_text(txt);(out/f'{stem}.md').write_text('# '+result['strategyId']+'\n\n```json\n'+txt+'\n```\n');print(txt)
