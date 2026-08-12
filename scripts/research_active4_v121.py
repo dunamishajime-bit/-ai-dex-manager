@@ -25,12 +25,13 @@ def state(cid,candles,idx,ts):
   if z['bias'] and x['e168']>.20 and v[24]<1.35*v[168]:z['prewave']=z['bias']
   if z['bias']==1 and r[72]>0 and r[24]<0 and r[6]>0 and x['rp72']>.35 and x['z6']>.06:z['onset']=1
   elif z['bias']==-1 and r[72]<0 and r[24]>0 and r[6]<0 and x['rp72']<.65 and x['z6']<-.06:z['onset']=-1
-  if z['bias']==1 and r[168]>0 and r[72]>0 and x['sl72']>0 and x['e168']>.22:z['continue']=1
-  elif z['bias']==-1 and r[168]<0 and r[72]<0 and x['sl72']<0 and x['e168']>.22:z['continue']=-1
+  sl72=p.slope(x['c'],x['i'],72)
+  if z['bias']==1 and r[168]>0 and r[72]>0 and sl72>0 and x['e168']>.22:z['continue']=1
+  elif z['bias']==-1 and r[168]<0 and r[72]<0 and sl72<0 and x['e168']>.22:z['continue']=-1
   if z['continue']==1 and r[24]<0 and r[3]>0 and x['rp168']>.45:z['reentry']=1
   elif z['continue']==-1 and r[24]>0 and r[3]<0 and x['rp168']<.55:z['reentry']=-1
-  if z['bias']==1 and r[72]<0 and x['sl72']<0:z['reverse']=-1
-  elif z['bias']==-1 and r[72]>0 and x['sl72']>0:z['reverse']=1
+  if z['bias']==1 and r[72]<0 and sl72<0:z['reverse']=-1
+  elif z['bias']==-1 and r[72]>0 and sl72>0:z['reverse']=1
   if x['shock']>2.4 and x['e24']<.08:z['exhaust']=1 if r[24]>0 else -1
   z['strength']=abs(x['z168'])+.65*x['e168']+.25*abs(x['z72'])
  elif cid=='btc_capitulation_reclaim':
