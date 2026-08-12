@@ -10,6 +10,7 @@ on:
       - "scripts/research_sol_link_v109_autonomous.py"
       - "scripts/research_sol_v109_wrongwave_latch.py"
       - "scripts/research_sol_link_v109_next_structures.py"
+      - "scripts/research_sol_link_v109_next_structures_v2.py"
       - ".github/workflows/sol-link-v109-autonomous.yml"
 
 permissions:
@@ -52,12 +53,12 @@ jobs:
       - name: Compile research-only drivers
         run: |
           python -m py_compile scripts/research_sol_link_v109_autonomous.py
-          python -m py_compile scripts/research_sol_link_v109_next_structures.py
+          python -m py_compile scripts/research_sol_link_v109_next_structures_v2.py
       - name: Run autonomous structural D/V chain
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         shell: bash
-        run: python scripts/research_sol_link_v109_next_structures.py --pair "${{ matrix.pair }}"
+        run: python scripts/research_sol_link_v109_next_structures_v2.py --pair "${{ matrix.pair }}"
       - name: Upload D/V research evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -72,7 +73,7 @@ jobs:
 
 # Research-only independent line.
 # Frozen V109 source/threshold/risk/trail are reference-only and never modified.
-# SOL: materially distinct contradiction-veto Wrong-wave successor.
-# LINK: materially distinct volatility requalification + Cash re-arm + 48h ownership successor.
+# SOL: Wrong-wave latched shadow -> causal acceptance-watch -> reject on fast/medium contradiction or slow-anchor loss.
+# LINK: Cash -> fresh volatility requalification -> path probe -> breadth sponsor handshake -> 48h forecast owner.
 # Design evidence: Development/Validation only. Confirmation/Holdout are not read.
 # Production/live/VPS/.env/credentials/API keys/orders/accounts/positions/approvals/realTradingEnabled untouched.
