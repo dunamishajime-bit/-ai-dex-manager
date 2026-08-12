@@ -6,17 +6,25 @@ import research_active4_v136_lifecycle_repair as v136
 # No Confirmation/Holdout access, no dense sweeps, no threshold/risk/trail retuning.
 ORIG_CANDS=dict(v136.CANDS)
 ORIG_SIGNAL=v136.signal
+BASE_IDS={
+ 'btc_sponsor_persistence_core_v7':'btc_sponsor_durable_core_v6',
+ 'btc_dual_horizon_acceptance_v7':'btc_sponsor_durable_core_v6',
+ 'eth_relative_persistence_owner_v7':'eth_relative_anchor_handoff_v6',
+ 'bnb_consensus_transition_arm_v7':'bnb_consensus_cash_rearm_v6',
+ 'avax_persistent_burst_initiation_v7':'avax_burst_acceptance_rearm_v6',
+}
+# Engine-facing tuples point to the existing V132 feature families so dyn_size remains causal and valid.
 CANDS={
- 'btc_sponsor_persistence_core_v7':('BTC','btc_sponsor_durable_core_v6',.32),
- 'btc_dual_horizon_acceptance_v7':('BTC','btc_sponsor_durable_core_v6',.32),
- 'eth_relative_persistence_owner_v7':('ETH','eth_relative_anchor_handoff_v6',.30),
- 'bnb_consensus_transition_arm_v7':('BNB','bnb_consensus_cash_rearm_v6',.28),
- 'avax_persistent_burst_initiation_v7':('AVAX','avax_burst_acceptance_rearm_v6',.18),
+ 'btc_sponsor_persistence_core_v7':('BTC','btc_breadth_decay_owner',.32),
+ 'btc_dual_horizon_acceptance_v7':('BTC','btc_breadth_decay_owner',.32),
+ 'eth_relative_persistence_owner_v7':('ETH','eth_transition_owner',.30),
+ 'bnb_consensus_transition_arm_v7':('BNB','bnb_neutral_compression_release',.28),
+ 'avax_persistent_burst_initiation_v7':('AVAX','avax_burst_scout_handoff',.18),
 }
 v136.CANDS.clear(); v136.CANDS.update(CANDS)
+v136.v133.CANDS.clear(); v136.v133.CANDS.update(CANDS)
 
 def _base(old,candles,idx,ts):
-    # Original V136 signal needs its own catalog. Swap only for the duration of this pure signal call.
     saved=dict(v136.CANDS)
     try:
         v136.CANDS.clear(); v136.CANDS.update(ORIG_CANDS)
@@ -24,10 +32,8 @@ def _base(old,candles,idx,ts):
     finally:
         v136.CANDS.clear(); v136.CANDS.update(saved)
 
-def _old(cid): return CANDS[cid][1]
-
 def signal(cid,candles,idx,ts):
-    old=_old(cid)
+    old=BASE_IDS[cid]
     z=_base(old,candles,idx,ts)
     p12=_base(old,candles,idx,ts-12*v136.v109.HOUR)
     p6=_base(old,candles,idx,ts-6*v136.v109.HOUR)
@@ -52,6 +58,7 @@ def signal(cid,candles,idx,ts):
     return q
 
 v136.signal=signal
+v136.v133.sig=signal
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser(); ap.add_argument('--candidate',choices=sorted(CANDS),required=True)
