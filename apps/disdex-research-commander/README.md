@@ -1,91 +1,58 @@
 # DisDex Research Commander
 
-Research-only ChatGPT Plugin/MCP server for the V96-successor backtest program.
+Research-only ChatGPT MCP server for the V96-successor backtest program. This service is deliberately separate from the trading application.
 
-## Purpose
+## Scope
 
-Turn requests such as `全通貨分析して` into a structured research workflow:
+The server provides bounded research inspection and orchestration only:
 
-1. inspect GitHub Actions shard capacity,
-2. collect completed artifact-backed BT evidence,
-3. inspect Trade Ledger evidence,
-4. diagnose Development/Validation failure mechanisms,
-5. compare proposed logic against registered lineage to avoid minor variants,
-6. register the next research candidate,
-7. launch research-only GitHub Actions without exceeding five active shards.
+- `get_research_status`
+- `get_completed_bt`
+- `get_trade_ledger`
+- `diagnose_candidate`
+- `compare_lineage`
+- `register_candidate`
+- `launch_bt_shards`
+- `get_guardrails`
 
-The server deliberately does **not** expose generic shell, SSH, repository patching, production deploy, VPS, live-runner, credential, order, account, position, approval, Frozen V6/Fresh Forward V9, or `realTradingEnabled` tools.
+The service has no generic shell, SSH, repository patching, production deploy, VPS, live-runner, credential, order, account, position, approval, or `realTradingEnabled` tool. Development/Validation evidence is the only redesign input. Confirmation/Holdout data is inaccessible to diagnostics and candidate registration.
 
-## App archetype
+## Authentication and configuration
 
-`tool-only`. UI is intentionally deferred; the first goal is lower BT orchestration latency and stronger research guardrails.
+`/mcp` and `/health` require a bearer token. `/` returns only non-sensitive metadata. Store the following in `/etc/disdex-research-commander.env` with `root:root` ownership and mode `0600`; never commit it:
 
-## Tools
-
-- `get_research_status` — queued/in-progress shard counts and capacity.
-- `get_completed_bt` — recent completed artifact-backed Development/Validation results.
-- `get_trade_ledger` — bounded trade-level artifact extraction.
-- `diagnose_candidate` — deterministic D/V diagnosis before redesign.
-- `compare_lineage` — similarity check against the candidate registry.
-- `register_candidate` — writes only `research/commander/candidates/*.json`.
-- `launch_bt_shards` — dispatches research workflow only, with a hard 5-shard cap.
-- `get_guardrails` — returns the server safety boundary.
-
-## Research policy
-
-- Redesign source: Development and Validation only.
-- Confirmation/Holdout: never used by `diagnose_candidate` or candidate registration as redesign inputs.
-- No dense threshold sweep.
-- No minor variant generation as a substitute for structural redesign.
-- BTC role: Major Wave Ownership.
-- ETH role: Relative Leadership Acceleration.
-- BNB role: Relative Impulse Scout; consensus is continuation evidence, not mandatory entry evidence.
-- AVAX role: Volatility Event Trader.
-- SOL role: Frozen V109 opportunity + Wrong-wave Loss Controller.
-- LINK role: Frozen V109 + Quality Cash/Horizon Control.
-
-## GitHub authorization
-
-Use a **dedicated research-only GitHub credential** limited to this repository. It needs:
-
-- Actions: Read + Write, for status and `workflow_dispatch`.
-- Contents: Read + Write, only because `register_candidate` stores JSON under `research/commander/candidates/`.
-
-Do not reuse VPS, exchange, wallet, production, or live-runner credentials. The MCP server contains no tools that can consume them.
-
-Recommended environment:
-
-```bash
-cp .env.example .env
-export DISDEX_GITHUB_TOKEN='...'
-npm install
-npm run selftest
-npm start
+```dotenv
+MCP_AUTH_TOKEN=generate-a-long-random-bearer-token
+DISDEX_RESEARCH_GITHUB_TOKEN=dedicated-fine-grained-token
+GITHUB_REPO=dunamishajime-bit/-ai-dex-manager
+GITHUB_RESEARCH_BRANCH=research/win80-profit-optimization-v1
+GITHUB_WRITE_ENABLED=false
+PORT=8789
+DISDEX_RESEARCH_CACHE_DIR=/var/cache/disdex-research-commander
 ```
 
-Health endpoint: `GET /`
+The GitHub credential is dedicated to this repository. Use only the minimum Contents/Actions permissions required by the enabled tools. Never reuse VPS, exchange, wallet, or production credentials.
 
-MCP endpoint: `POST/GET/DELETE /mcp`
+## Safety boundaries
 
-## Connect to ChatGPT
+- GitHub reads are restricted to the exact repository and research branch.
+- Writes are restricted to `research/commander/candidates/*.json` and the exact research BT workflow.
+- `launch_bt_shards` requires an explicit `RESEARCH_ONLY_EXECUTION` acknowledgement and never exceeds five active shards.
+- `register_candidate` requires an explicit `RESEARCH_ONLY_REGISTRATION` acknowledgement.
+- Workflow names are exact-allowlisted; production/live/deploy/promote workflows are rejected.
+- Artifact responses are cached by run, artifact, and commit SHA and never include raw confirmation/holdout data.
 
-Deploy the server behind HTTPS, then add the HTTPS URL ending in `/mcp` as a ChatGPT plugin connection in Developer mode. Refresh the plugin connection after tool metadata changes.
+## Local verification
 
-## Write acknowledgements
+```bash
+npm ci
+npm run selftest
+node server.mjs
+```
 
-Two mutating operations have explicit acknowledgements:
+The server listens only on `127.0.0.1:8789`. It is intended to be placed behind a dedicated HTTPS reverse proxy such as `research.professional-dismanager.net`. The `ops/` templates enable a dedicated systemd unit without touching trading services; DNS, TLS, and the secrets file are explicit deployment prerequisites.
 
-- `launch_bt_shards`: `RESEARCH_ONLY_EXECUTION`
-- `register_candidate`: `RESEARCH_ONLY_REGISTRATION`
+## ChatGPT connection
 
-`launch_bt_shards` also requires `expectedShards` and refuses a dispatch when current queued/in-progress jobs plus requested shards would exceed 5.
+After HTTPS is provisioned, add `https://research.professional-dismanager.net/mcp` as an MCP connection and provide the bearer secret through the connector UI. Do not put the secret in GitHub, source, or logs.
 
-## Candidate registry
-
-Candidate specs are immutable by default. If `research/commander/candidates/<candidateId>.json` already exists, `register_candidate` returns `ALREADY_EXISTS` and does not overwrite it.
-
-The registry records the D/V diagnosis reference that justified each new candidate, creating an auditable chain:
-
-`BT evidence -> diagnosis -> candidate -> workflow run`
-
-This is intentionally separate from production strategy configuration.
