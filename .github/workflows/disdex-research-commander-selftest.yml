@@ -1,0 +1,39 @@
+name: DisDex Research Commander Selftest
+
+on:
+  push:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "apps/disdex-research-commander/**"
+      - ".github/workflows/disdex-research-commander-selftest.yml"
+  pull_request:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "apps/disdex-research-commander/**"
+      - ".github/workflows/disdex-research-commander-selftest.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-commander-selftest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Research Commander selftest
+        working-directory: apps/disdex-research-commander
+        run: npm run selftest
+      - name: Research Commander syntax
+        working-directory: apps/disdex-research-commander
+        run: node --check server.mjs && node --check selftest.mjs
+
