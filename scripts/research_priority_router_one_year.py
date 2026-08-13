@@ -173,12 +173,18 @@ def normalize_record(
 ) -> dict[str, Any]:
     entry_ts = int(record.get("entryExecTs", record.get("entryTs")))
     exit_ts = int(record.get("exitExecTs", record.get("exitTs")))
-    entry_price = float(record["entryPrice"])
-    exit_price = float(record["exitPrice"])
+    entry_index = index[pair].get(entry_ts)
+    exit_index = index[pair].get(exit_ts)
+    if entry_index is None or exit_index is None:
+        raise RuntimeError(f"MISSING_TRADE_PRICE_MARK:{pair}:{entry_ts}:{exit_ts}")
+    entry_price = float(record.get("entryPrice", candles[pair][entry_index]["open"]))
+    exit_field = "close" if record.get("exitReason") == "PERIOD_END" else "open"
+    exit_price = float(record.get("exitPrice", candles[pair][exit_index][exit_field]))
     side_text = str(record["side"]).upper()
     side = 1 if side_text in ("LONG", "1") else -1
     gross_pct = side * (exit_price / entry_price - 1.0) * 100.0
-    net_pct = (gross_pct - NORMAL_BPS / 100.0) * RISK[pair]
+    calculated_net_pct = (gross_pct - NORMAL_BPS / 100.0) * RISK[pair]
+    net_pct = float(record.get("netPnlPct", record.get("pnl", calculated_net_pct)))
     return {
         "symbol": pair,
         "side": "LONG" if side > 0 else "SHORT",
