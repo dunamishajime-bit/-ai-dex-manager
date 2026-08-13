@@ -1,0 +1,14 @@
+{
+  "name": "disdex-research-commander",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "selftest": "node selftest.mjs",
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+
