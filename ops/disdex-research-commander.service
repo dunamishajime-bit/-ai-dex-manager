@@ -1,0 +1,36 @@
+[Unit]
+Description=DisDex Research Commander (research-only MCP)
+After=network-online.target
+Wants=network-online.target
+ConditionPathIsDirectory=/home/deploy/disdex-research-commander
+
+[Service]
+Type=simple
+User=disdex-research
+Group=disdex-research
+WorkingDirectory=/home/deploy/disdex-research-commander
+EnvironmentFile=/etc/disdex-research-commander.env
+ExecStart=/usr/bin/node /home/deploy/disdex-research-commander/server.mjs
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+StateDirectory=disdex-research-commander
+CacheDirectory=disdex-research-commander
+ReadWritePaths=/var/lib/disdex-research-commander /var/cache/disdex-research-commander
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
+
