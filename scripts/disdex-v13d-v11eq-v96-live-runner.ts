@@ -203,7 +203,10 @@ function runCapture(command: string, args: string[], env: NodeJS.ProcessEnv) {
         child.stdout.on("data", (chunk) => { stdout += String(chunk); });
         child.stderr.on("data", (chunk) => { stderr += String(chunk); });
         child.once("error", reject);
-        child.once("exit", (code) => resolveRun({ code, stdout, stderr }));
+        // `exit` can precede the final stdout pipe drain.  The V52 preflight
+        // emits a large, one-line JSON report, so parsing it at `exit` could
+        // intermittently see an empty or truncated report and kill LIVE.
+        child.once("close", (code) => resolveRun({ code, stdout, stderr }));
     });
 }
 

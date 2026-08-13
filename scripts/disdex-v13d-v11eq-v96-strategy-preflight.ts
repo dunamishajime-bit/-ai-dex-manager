@@ -61,7 +61,9 @@ function spawnCaptured(command: string, args: string[], env: NodeJS.ProcessEnv):
         child.stdout.on("data", (chunk) => { stdout += String(chunk); });
         child.stderr.on("data", (chunk) => { stderr += String(chunk); });
         child.once("error", reject);
-        child.once("exit", (code) => resolveResult({ code, stdout, stderr }));
+        // Wait for stdio to close, not merely for the process to exit: the
+        // structured report is intentionally emitted as a large final line.
+        child.once("close", (code) => resolveResult({ code, stdout, stderr }));
     });
 }
 
