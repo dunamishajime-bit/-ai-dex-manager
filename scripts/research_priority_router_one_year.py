@@ -403,6 +403,7 @@ def run_router(
         trade = _close_position(pos, exit_price, reason)
         turnover_notional += abs(pos["capital"])
         real_trades.append(trade)
+        slot["capital"] = pos["capital"]
         slot["position"] = None
 
     def open_slot(slot: dict[str, Any], candidate: dict[str, Any], ts: int) -> None:
