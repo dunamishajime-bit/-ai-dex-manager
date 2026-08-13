@@ -1,0 +1,30 @@
+# Add this as a separate server block only after DNS and a certificate for
+# research.professional-dismanager.net are ready. Never edit the existing
+# DisDex server block in-place.
+server {
+    listen 443 ssl http2;
+    server_name research.professional-dismanager.net;
+
+    # Use the certificate paths provisioned for this hostname.
+    ssl_certificate /etc/letsencrypt/live/research.professional-dismanager.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/research.professional-dismanager.net/privkey.pem;
+
+    location = /mcp {
+        proxy_pass http://127.0.0.1:8789/mcp;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+    }
+
+    location = /health {
+        proxy_pass http://127.0.0.1:8789/health;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}
+
