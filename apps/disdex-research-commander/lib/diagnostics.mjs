@@ -1,4 +1,4 @@
-const num = (v, d = 0) => Number.isFinite(Number(v)) ? Number(v) : d;
+const num = (v) => Number.isFinite(Number(v)) ? Number(v) : null;
 
 export function normalizeEvidence(raw) {
   const dev = raw.development ?? raw.dev ?? {};
@@ -26,7 +26,6 @@ export function normalizeEvidence(raw) {
     givebackPct: num(waves.exitGivebackPct),
     failureTaxonomy: val.failureTaxonomy ?? waves.failureTaxonomy ?? {},
     folds: raw.walkForward ?? {},
-    raw,
   };
 }
 
@@ -45,17 +44,17 @@ export function diagnoseEvidence(raw) {
   const add = (code, severity, evidence, action) => causes.push({ code, severity, evidence, action });
   const ft = x.failureTaxonomy ?? {};
 
-  if (x.val.trades < 5) add('TRADE_STARVATION', 100, `Validation trades=${x.val.trades}`, 'Remove pre-entry AND/confirmation layers; use scout/early-loss-control without numeric threshold loosening.');
-  if (x.dev.trades >= 8 && x.val.trades > 0 && x.dev.pf >= 1.2 && x.val.pf < 1) add('DEV_VAL_COLLAPSE', 95, `Dev PF=${x.dev.pf.toFixed(2)} -> Val PF=${x.val.pf.toFixed(2)}`, 'Change economic role/state transition rather than tuning the same signal family.');
-  if (x.val.falseStartRatePct >= 50) add('FALSE_START_DOMINANT', 90, `False-start=${x.val.falseStartRatePct.toFixed(1)}%`, 'Enter smaller/earlier as scout and reject quickly on contradiction; do not add another confirmation gate.');
-  if (num(ft.wrongCoreOwnership) >= Math.max(3, num(x.val.trades) * 0.35)) add('WRONG_CORE_OWNERSHIP', 88, `wrongCoreOwnership=${num(ft.wrongCoreOwnership)}`, 'Redefine Core acceptance from independent evidence; separate scout from ownership.');
-  if (x.val.trades >= 5 && x.val.pfWithoutBest > 0 && x.val.pfWithoutBest < 1) add('BEST_TRADE_DEPENDENCE', 82, `PF without best=${x.val.pfWithoutBest.toFixed(2)}`, 'Require broad contribution; avoid promoting tiny-sample PF spikes.');
-  if (x.stressPf > 0 && x.stressPf < 1) add('STRESS_EDGE_WEAK', 80, `Stress PF=${x.stressPf.toFixed(2)}`, 'Reduce turnover/cost exposure structurally; keep only higher-quality ownership periods.');
-  if (x.pair === 'BTC' && x.captureRatePct < 25) add('BTC_WAVE_MISS', 78, `Major-wave capture=${x.captureRatePct.toFixed(1)}%`, 'Prioritize early scout/probe and accepted expansion; stop adding entry filters.');
-  if (x.pair === 'BTC' && x.captureRatePct >= 25 && x.mfeCapturePct < 20) add('BTC_OWNERSHIP_LEAK', 86, `Capture=${x.captureRatePct.toFixed(1)}%, MFE captured=${x.mfeCapturePct.toFixed(1)}%`, 'Shift research from entry detection to staged Core/add and structural hold/exit.');
-  if (x.pair === 'ETH' && x.val.pf < 1.2) add('ETH_STATIC_LEADERSHIP_LAG', 84, `Validation PF=${x.val.pf.toFixed(2)}`, 'Use ETH-vs-BTC leadership acceleration/transition derivative, not static relative-strength levels.');
-  if (x.pair === 'BNB' && x.val.trades <= 5) add('BNB_CONSENSUS_STARVATION', 96, `Validation trades=${x.val.trades}`, 'Consensus must move from entry prerequisite to continuation evidence after a fresh relative-impulse scout.');
-  if (x.pair === 'AVAX' && x.val.pf < 1) add('AVAX_ROLE_MISMATCH', 92, `Validation PF=${x.val.pf.toFixed(2)}`, 'Use short volatility-event ownership with expiry-to-cash; stop forcing multi-day wave Core behavior.');
+  if ((x.val.trades ?? 0) < 5) add('TRADE_STARVATION', 100, `Validation trades=${x.val.trades ?? 'unknown'}`, 'Remove pre-entry AND/confirmation layers; use scout/early-loss-control without numeric threshold loosening.');
+  if ((x.dev.trades ?? 0) >= 8 && (x.val.trades ?? 0) > 0 && (x.dev.pf ?? 0) >= 1.2 && (x.val.pf ?? 0) < 1) add('DEV_VAL_COLLAPSE', 95, `Dev/Validation PF degradation observed.`, 'Change economic role/state transition rather than tuning the same signal family.');
+  if ((x.val.falseStartRatePct ?? 0) >= 50) add('FALSE_START_DOMINANT', 90, `False-start=${x.val.falseStartRatePct.toFixed(1)}%`, 'Enter smaller/earlier as scout and reject quickly on contradiction; do not add another confirmation gate.');
+  if ((num(ft.wrongCoreOwnership) ?? 0) >= Math.max(3, (num(x.val.trades) ?? 0) * 0.35)) add('WRONG_CORE_OWNERSHIP', 88, `wrongCoreOwnership=${num(ft.wrongCoreOwnership) ?? 'unknown'}`, 'Redefine Core acceptance from independent evidence; separate scout from ownership.');
+  if ((x.val.trades ?? 0) >= 5 && (x.val.pfWithoutBest ?? 0) > 0 && (x.val.pfWithoutBest ?? 0) < 1) add('BEST_TRADE_DEPENDENCE', 82, 'Validation PF without best trade is below 1.', 'Require broad contribution; avoid promoting tiny-sample PF spikes.');
+  if ((x.stressPf ?? 0) > 0 && (x.stressPf ?? 0) < 1) add('STRESS_EDGE_WEAK', 80, `Stress PF=${x.stressPf.toFixed(2)}`, 'Reduce turnover/cost exposure structurally; keep only higher-quality ownership periods.');
+  if (x.pair === 'BTC' && (x.captureRatePct ?? 0) < 25) add('BTC_WAVE_MISS', 78, `Major-wave capture=${x.captureRatePct == null ? 'unknown' : x.captureRatePct.toFixed(1)}%`, 'Prioritize early scout/probe and accepted expansion; stop adding entry filters.');
+  if (x.pair === 'BTC' && (x.captureRatePct ?? 0) >= 25 && (x.mfeCapturePct ?? 0) < 20) add('BTC_OWNERSHIP_LEAK', 86, 'Wave capture is materially higher than MFE captured.', 'Shift research from entry detection to staged Core/add and structural hold/exit.');
+  if (x.pair === 'ETH' && (x.val.pf ?? 0) < 1.2) add('ETH_STATIC_LEADERSHIP_LAG', 84, 'Validation PF is below the leadership threshold.', 'Use ETH-vs-BTC leadership acceleration/transition derivative, not static relative-strength levels.');
+  if (x.pair === 'BNB' && (x.val.trades ?? 0) <= 5) add('BNB_CONSENSUS_STARVATION', 96, `Validation trades=${x.val.trades ?? 'unknown'}`, 'Consensus must move from entry prerequisite to continuation evidence after a fresh relative-impulse scout.');
+  if (x.pair === 'AVAX' && (x.val.pf ?? 0) < 1) add('AVAX_ROLE_MISMATCH', 92, 'Validation PF is below 1.', 'Use short volatility-event ownership with expiry-to-cash; stop forcing multi-day wave Core behavior.');
 
   causes.sort((a, b) => b.severity - a.severity);
   return {
@@ -82,3 +81,4 @@ export function tokenSimilarity(a = '', b = '') {
   for (const x of A) if (B.has(x)) inter++;
   return inter / (A.size + B.size - inter);
 }
+
