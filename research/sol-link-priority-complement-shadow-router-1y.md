@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 0.3 seconds
-Output:
 # SOL/LINK Priority + ETH/BNB/AVAX Shadow Router - one-year offline BT
 
 This is a research-only comparison. It does not change production code,
