@@ -10,8 +10,7 @@ User=disdex-research
 Group=disdex-research
 WorkingDirectory=/home/deploy/disdex-research-commander
 EnvironmentFile=/etc/disdex-research-commander.env
-ExecStart=/usr/bin/node --jitless /home/deploy/disdex-research-commander/server.mjs
-Restart=on-failure
+ExecStart=/usr/bin/node /home/deploy/disdex-research-commander/server.mjs`nRestart=on-failure
 RestartSec=5s
 NoNewPrivileges=true
 PrivateTmp=true
@@ -23,7 +22,6 @@ ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictSUIDSGID=true
 LockPersonality=true
-MemoryDenyWriteExecute=true
 CapabilityBoundingSet=
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 StateDirectory=disdex-research-commander
