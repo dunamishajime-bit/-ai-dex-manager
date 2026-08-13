@@ -14,6 +14,7 @@ on:
       - "scripts/research_sol_link_v109_next_structures_v3.py"
       - "scripts/research_sol_link_v109_next_structures_v4.py"
       - "scripts/research_sol_link_v109_next_structures_v5.py"
+      - "scripts/research_sol_link_v109_next_structures_v6.py"
       - ".github/workflows/sol-link-v109-autonomous.yml"
 
 permissions:
@@ -56,12 +57,12 @@ jobs:
       - name: Compile research-only drivers
         run: |
           python -m py_compile scripts/research_sol_link_v109_autonomous.py
-          python -m py_compile scripts/research_sol_link_v109_next_structures_v5.py
+          python -m py_compile scripts/research_sol_link_v109_next_structures_v6.py
       - name: Run autonomous structural D/V chain
         env:
           RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
         shell: bash
-        run: python scripts/research_sol_link_v109_next_structures_v5.py --pair "${{ matrix.pair }}"
+        run: python scripts/research_sol_link_v109_next_structures_v6.py --pair "${{ matrix.pair }}"
       - name: Upload D/V research evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -76,7 +77,7 @@ jobs:
 
 # Research-only independent line. Development/Validation only.
 # Frozen V109 source/threshold/risk/trail are reference-only and never modified.
-# SOL: preserve Frozen-V109 entry breadth; use post-entry adverse-excursion quarantine inside the existing 48h horizon.
-# LINK: preserve broad Frozen-V109 entries; use post-entry adverse volatility-regime cash release to reduce Stress tail loss.
+# SOL: exact Frozen-V109 entry breadth -> Scout Probation -> evidence-based Durable Owner transfer; failed probation -> Cash.
+# LINK: exact Frozen-V109 broad entry -> fixed 48h Forecast Contract; early Frozen exits remain allowed.
 # Confirmation/Holdout are never read for design, ranking, tuning, or redesign.
 # Production/live/VPS/.env/credentials/API keys/orders/accounts/positions/approvals/realTradingEnabled untouched.
