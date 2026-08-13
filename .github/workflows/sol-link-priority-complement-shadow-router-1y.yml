@@ -57,7 +57,7 @@ jobs:
           from pathlib import Path
           root = Path('.cache/perp-research-usdm/consolidated')
           required = [
-              root / 'BTCUSDT-1661990400000-1782864000000-v2.json',
+              root / 'BTCUSDT-1661990400000-1786320000000-v3.json',
               root / 'ETHUSDT-1661990400000-1782864000000-v2.json',
               root / 'BNBUSDT-1661990400000-1782864000000-v2.json',
               root / 'SOLUSDT-1661990400000-1782864000000-v2.json',
