@@ -4,6 +4,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { FileLiveRunnerLock, resolveLiveRunnerLockPath } from "../lib/live-runner-state";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { sendEmail } from "../lib/mail-service";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
@@ -11,6 +12,7 @@ import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
 
 const HOUR_MS = 60 * 60_000;
+const DEFAULT_ORDER_FILL_EMAIL = "dunamis.hajime@gmail.com";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -74,6 +76,7 @@ async function main() {
     });
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
+    const orderFillEmail = (process.env.PENGU_ORDER_FILL_EMAIL || DEFAULT_ORDER_FILL_EMAIL).trim();
     let stopping = false;
     const boundaryWait = createInterruptibleDelay();
     const stop = () => {
@@ -84,7 +87,35 @@ async function main() {
     process.on("SIGTERM", stop);
     do {
         const result = await runner.tick();
-        console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
+        const timestamp = new Date().toISOString();
+        console.log(JSON.stringify({ timestamp, mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
+        // Notify only after the portfolio runner has durably recorded a confirmed LIVE fill.
+        // Notification failure must never retry or fail the trading cycle.
+        if (runtime.mode === "LIVE" && result.status === "completed" && orderFillEmail) {
+            const subject = `[DisDex][FILLED] ${runtime.strategyId} 豕ｨ譁・ｴ・ｮ啻;
+            const text = [
+                "DisDex縺ｧ豕ｨ譁・′邏・ｮ壹＠縺ｾ縺励◆縲・,
+                "",
+                "Status: FILLED",
+                `Strategy: ${runtime.strategyId}`,
+                `Mode: ${runtime.mode}`,
+                `Result: ${result.message}`,
+                `Timestamp: ${timestamp}`,
+                `IdempotencyKey: ${result.idempotencyKey || "-"}`,
+                `SignalSide: ${result.signal?.side ?? "-"}`,
+                `Reason: ${result.signal?.reason || "-"}`,
+            ].join("\n");
+            try {
+                const mailResult = await sendEmail(orderFillEmail, subject, text);
+                if (mailResult.success && !mailResult.simulated) {
+                    console.log(JSON.stringify({ level: "info", event: "PENGU_ORDER_FILL_EMAIL_SENT", to: orderFillEmail, idempotencyKey: result.idempotencyKey }));
+                } else {
+                    console.error(JSON.stringify({ level: "error", event: "PENGU_ORDER_FILL_EMAIL_FAILED", to: orderFillEmail, simulated: mailResult.simulated, error: mailResult.error instanceof Error ? mailResult.error.message : String(mailResult.error || "mail provider not configured") }));
+                }
+            } catch (error) {
+                console.error(JSON.stringify({ level: "error", event: "PENGU_ORDER_FILL_EMAIL_FAILED", to: orderFillEmail, error: error instanceof Error ? error.message : String(error) }));
+            }
+        }
         if (!daemon || stopping) break;
         const now = Date.now();
         const waitUntilNextClosedHour = HOUR_MS - (now % HOUR_MS) + boundaryDelayMs;
