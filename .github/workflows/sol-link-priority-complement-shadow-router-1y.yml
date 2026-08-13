@@ -70,6 +70,19 @@ jobs:
           print('EXACT_CONSOLIDATED_INPUTS_PASS')
           PY
 
+      - name: Provide compatibility names for frozen Champion drivers
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('.cache/perp-research-usdm/consolidated')
+          for symbol in ('BTC', 'ETH', 'BNB', 'SOL', 'LINK', 'AVAX'):
+              source = root / f'{symbol}USDT-1661990400000-1786320000000-v3.json'
+              target = root / f'{symbol}USDT-1661990400000-1782864000000-v2.json'
+              target.write_bytes(source.read_bytes())
+          print('FROZEN_CHAMPION_COMPAT_CACHE_PASS')
+          PY
+
       - name: Compile
         run: python -m py_compile scripts/research_priority_router_one_year.py
 
