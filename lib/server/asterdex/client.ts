@@ -91,8 +91,18 @@ const MESSAGE_TYPES = {
 } as const;
 
 export function loadAsterDexClientConfig(): AsterDexClientConfig | null {
-  const apiKey = process.env.ASTER_API_KEY?.trim() || "";
-  const apiSecret = process.env.ASTER_API_SECRET?.trim() || "";
+  const apiSecret = (
+    process.env.ASTER_API_SECRET
+    || process.env.ASTER_API_PRIVATE_KEY
+    || ""
+  ).trim();
+  if (!apiSecret) return null;
+
+  // The production environment names the signer key ASTER_API_PRIVATE_KEY.
+  // Derive the signer address when the optional API-key alias is absent; the
+  // private key itself is never returned to callers or serialized in a response.
+  const derivedSigner = privateKeyToAccount(apiSecret as `0x${string}`).address;
+  const apiKey = (process.env.ASTER_API_KEY?.trim() || derivedSigner).trim();
   const userAddress = (
     process.env.ASTER_USER_ADDRESS
     || process.env.ASTER_MAIN_ADDRESS
@@ -100,13 +110,17 @@ export function loadAsterDexClientConfig(): AsterDexClientConfig | null {
     || ""
   ).trim();
 
-  if (!apiKey || !apiSecret || !userAddress) return null;
+  if (!apiKey || !userAddress) return null;
 
   return {
     apiKey,
     apiSecret,
     userAddress,
-    baseUrl: process.env.ASTER_API_BASE_URL?.trim() || DEFAULT_BASE_URL,
+    baseUrl: (
+      process.env.ASTER_API_BASE_URL
+      || process.env.ASTER_FUTURES_BASE_URL
+      || DEFAULT_BASE_URL
+    ).trim(),
     chainId: Number(process.env.ASTER_CHAIN_ID || DEFAULT_CHAIN_ID),
   };
 }

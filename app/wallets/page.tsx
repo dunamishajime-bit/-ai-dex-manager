@@ -138,8 +138,11 @@ export default function WalletsPage() {
       .sort((a, b) => Number(b.usdValue || 0) - Number(a.usdValue || 0));
   }, [wallet?.trackedHoldings]);
 
-  const totalHoldingsUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
+  const totalHoldingsUsd = typeof wallet?.lastPortfolioUsd === "number" && Number.isFinite(wallet.lastPortfolioUsd)
+    ? wallet.lastPortfolioUsd
+    : null;
   const availableBalanceUsd = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
+  const isReadOnlyAsterWallet = Boolean(wallet?.id.startsWith("aster-readonly:"));
 
   useEffect(() => {
     let mounted = true;
@@ -307,7 +310,24 @@ export default function WalletsPage() {
         ) : null}
 
         <section className="grid gap-4 xl:grid-cols-[1.02fr_0.98fr]">
-          <Panel title="1. 作成" description="運用ウォレットを作成します。" icon={Wallet}>
+          <Panel
+            title={isReadOnlyAsterWallet ? "1. Aster公式読取" : "1. 作成"}
+            description={isReadOnlyAsterWallet ? "この画面はAsterDEX口座を読み取り専用で表示します。" : "運用ウォレットを作成します。"}
+            icon={Wallet}
+          >
+            {isReadOnlyAsterWallet ? (
+              <div className="flex flex-wrap items-center gap-3 text-sm text-white/78">
+                <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-100">公式API読取</span>
+                <span>口座情報はこの画面から変更・送金・注文しません。</span>
+                <button
+                  onClick={() => void refresh()}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white transition hover:border-gold-300/40"
+                >
+                  <RefreshCw className="mr-2 inline-block h-4 w-4" />
+                  最新状態を更新
+                </button>
+              </div>
+            ) : (
             <div className="grid gap-3">
               <div className="grid gap-3 md:grid-cols-2">
                 <Field label="表示名" note="画面用の名前です。">
@@ -351,6 +371,7 @@ export default function WalletsPage() {
                 </button>
               </div>
             </div>
+            )}
           </Panel>
 
           <Panel title="2. 現在のウォレット" description="アドレスと保有状況を確認します。" icon={ShieldCheck}>
@@ -440,6 +461,7 @@ export default function WalletsPage() {
                   ) : null}
                 </div>
 
+                {!isReadOnlyAsterWallet ? (
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={handleOwnerReconnect}
@@ -460,6 +482,7 @@ export default function WalletsPage() {
                     メモを保存
                   </button>
                 </div>
+                ) : null}
               </div>
             ) : (
               <div className="rounded-[18px] border border-dashed border-white/10 px-4 py-8 text-sm leading-7 text-white/70">
@@ -470,12 +493,12 @@ export default function WalletsPage() {
         </section>
 
         <section className="grid gap-4">
-          <Panel title="3. 状態メモ" description="運用状況の目安です。" icon={ShieldCheck}>
+          <Panel title="3. Aster公式口座状態" description="メモの有無に依存せず、AsterDEXの読み取り結果を表示します。" icon={ShieldCheck}>
             <div className="grid gap-3 md:grid-cols-2">
               <StatCard
-                title="ウォレット状態"
-                value={wallet ? statusText(wallet.status) : "未設定"}
-                note={wallet?.backupConfirmed ? "バックアップ確認済み" : "バックアップ未確認"}
+                title="Aster公式読取"
+                value={wallet?.lastAsterBalanceUpdatedAt ? "確認済み" : "取得不能"}
+                note={wallet?.lastAsterBalanceUpdatedAt ? `最終取得 ${formatDate(wallet.lastAsterBalanceUpdatedAt)}` : "AsterDEXから口座情報を取得できませんでした"}
                 tone={wallet?.status === "running" ? "profit" : wallet?.status === "paused" ? "loss" : "default"}
               />
               <StatCard
@@ -485,20 +508,20 @@ export default function WalletsPage() {
                 tone={totalHoldingsUsd !== null && totalHoldingsUsd > 0 ? "profit" : "default"}
               />
               <StatCard
-                title="入金検知"
-                value={wallet?.depositDetectedAt ? "確認済み" : "未確認"}
-                note={wallet?.depositDetectedAt ? formatDate(wallet.depositDetectedAt) : "入金後に日時が表示されます"}
-                tone={wallet?.depositDetectedAt ? "profit" : "default"}
+                title="利用可能残高"
+                value={availableBalanceUsd === null ? "取得不能" : formatUsd(availableBalanceUsd)}
+                note={availableBalanceUsd === null ? "AsterDEXの利用可能残高を確認できません" : "Aster公式のavailable balance"}
+                tone={availableBalanceUsd !== null ? "profit" : "default"}
               />
               <StatCard
-                title="Owner接続"
-                value={wallet?.ownerReconnectedAt ? "確認済み" : "未確認"}
-                note={wallet?.ownerReconnectedAt ? formatDate(wallet.ownerReconnectedAt) : "必要なときに記録できます"}
+                title="保有資産"
+                value={wallet ? `${activeHoldings.length} 件` : "取得不能"}
+                note={wallet ? "Aster公式account assets" : "AsterDEXから保有資産を取得できません"}
               />
             </div>
 
             <div className="mt-4 rounded-[18px] border border-white/10 bg-white/[0.04] p-4 text-sm leading-7 text-white/78">
-              入金確認、バックアップ確認、保有資産の3点を見れば、今の運用状況をひと通り把握できます。
+              Aster公式APIから取得した評価額・利用可能残高・保有資産を表示します。取得に失敗した場合は、古いローカル値やゼロで置き換えません。
             </div>
           </Panel>
         </section>

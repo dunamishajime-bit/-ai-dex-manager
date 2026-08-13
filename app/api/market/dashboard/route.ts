@@ -61,7 +61,10 @@ export async function GET() {
         // Self-seed if empty
         if (!universe) {
             try {
-                const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/agents/refresh-universe`, { method: "POST" });
+                // The production UI service listens on its systemd PORT.  Do
+                // not silently self-call the Next.js development default 3000.
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL || `http://127.0.0.1:${process.env.PORT || "3001"}`;
+                const refreshRes = await fetch(`${appUrl}/api/agents/refresh-universe`, { method: "POST" });
                 if (refreshRes.ok) {
                     universe = await kvGet<Universe>("universe:v1");
                 }

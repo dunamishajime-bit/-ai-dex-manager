@@ -76,6 +76,12 @@ function toFiniteNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function toOptionalFiniteNumber(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 function formatAsterAmount(value: number) {
   return value.toFixed(8);
 }
@@ -148,8 +154,11 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
     .filter((holding): holding is OperationalWalletHolding => Boolean(holding))
     .sort((left, right) => right.usdValue - left.usdValue);
 
+  const officialPortfolioUsd = [account?.totalMarginBalance, account?.totalWalletBalance]
+    .map(toOptionalFiniteNumber)
+    .find((value): value is number => value !== undefined);
   const portfolioUsd = Number(
-    trackedHoldings.reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0).toFixed(6),
+    (officialPortfolioUsd ?? trackedHoldings.reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0)).toFixed(6),
   );
   const stableBalanceUsd = trackedHoldings
     .filter((holding) => ASTER_STABLE_ASSET_SYMBOLS.has(holding.symbol))
@@ -158,9 +167,14 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
     account?.totalWalletBalance,
     account?.totalMarginBalance,
     stableBalanceUsd,
-  ].map(toFiniteNumber).find((value) => value > 0) ?? 0;
-  const accountBalanceUsd = Number(accountBalanceCandidate.toFixed(8));
-  const availableBalanceUsd = Number(toFiniteNumber(account?.availableBalance).toFixed(8));
+  ].map(toOptionalFiniteNumber).find((value): value is number => value !== undefined);
+  const accountBalanceUsd = accountBalanceCandidate === undefined
+    ? wallet.lastAsterAccountBalanceUsd
+    : Number(accountBalanceCandidate.toFixed(8));
+  const availableBalanceValue = toOptionalFiniteNumber(account?.availableBalance);
+  const availableBalanceUsd = availableBalanceValue === undefined
+    ? wallet.lastAsterAvailableBalanceUsd
+    : Number(availableBalanceValue.toFixed(8));
   const previousHighWaterUsd = Number(wallet.lastPortfolioHighWaterUsd || 0);
   const portfolioHighWaterUsd = portfolioUsd > 0
     ? Math.max(previousHighWaterUsd, portfolioUsd)
@@ -173,8 +187,8 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
 
   return {
     ...wallet,
-    lastBalanceWei: toAsterBalanceWei(availableBalanceUsd).toString(),
-    lastBalanceFormatted: availableBalanceUsd.toFixed(8),
+    lastBalanceWei: availableBalanceUsd === undefined ? wallet.lastBalanceWei : toAsterBalanceWei(availableBalanceUsd).toString(),
+    lastBalanceFormatted: availableBalanceUsd === undefined ? wallet.lastBalanceFormatted : availableBalanceUsd.toFixed(8),
     lastAsterAccountBalanceUsd: accountBalanceUsd,
     lastAsterAvailableBalanceUsd: availableBalanceUsd,
     lastAsterBalanceUpdatedAt: new Date().toISOString(),
@@ -316,17 +330,34 @@ export async function GET(req: NextRequest) {
   const userId = searchParams.get("userId") || undefined;
   const email = searchParams.get("email") || undefined;
   const displayName = searchParams.get("displayName") || undefined;
+  // The UI authentication model is browser-session based.  Do not expose the
+  // configured venue account to an anonymous request merely because an email
+  // query parameter was supplied.
+  const authenticated = req.cookies.get("disdex_auth")?.value === "1";
 
   try {
+    if (!authenticated) {
+      return NextResponse.json({ ok: false, wallet: null, reason: "authentication_required" }, { status: 401 });
+    }
+
     let wallet = await resolveWallet(userId, email);
     let persistedWallet = true;
     if (!wallet || wallet.deletedAt) {
       const owner = userId ? await findUserById(userId) : email ? await findUserByEmail(email) : undefined;
       const config = loadAsterDexClientConfig();
-      if (!owner || !config) {
-        return NextResponse.json({ ok: true, wallet: null, reason: config ? "user_not_found" : "aster_not_configured" });
+      if (!config) {
+        return NextResponse.json({ ok: true, wallet: null, reason: "aster_not_configured" });
       }
-      wallet = buildReadOnlyAsterWallet(owner.id, owner.email, owner.displayName, config);
+      // Immutable UI releases can legitimately have no matching legacy
+      // wallet/user record.  In that case expose the configured Aster account
+      // as a non-persistent, read-only record.  It is intentionally never
+      // written to the local wallet DB and cannot be modified through PATCH.
+      wallet = buildReadOnlyAsterWallet(
+        owner?.id || `aster-session:${config.userAddress.toLowerCase()}`,
+        owner?.email || email || "authorized-aster-session",
+        owner?.displayName || displayName || "AsterDEX account",
+        config,
+      );
       persistedWallet = false;
     }
 
