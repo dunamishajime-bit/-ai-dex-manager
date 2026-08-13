@@ -100,14 +100,9 @@ function toHistoryEntry(
   const matched = entry ? { costUsd: 0, openedAt: undefined, matchedQuantity: 0 } : consumeLots(book, quantity);
   const close = !entry;
   const averageEntryPrice = matched.matchedQuantity > 0 ? matched.costUsd / matched.matchedQuantity : undefined;
-  const derivedRealized = averageEntryPrice === undefined
-    ? undefined
-    : direction === "LONG"
-      ? (price - averageEntryPrice) * matched.matchedQuantity
-      : (averageEntryPrice - price) * matched.matchedQuantity;
-  const realizedPnlUsd = close
-    ? (explicitRealized ? finite(trade.realizedPnl) : derivedRealized)
-    : undefined;
+  // realizedPnl is authoritative only when supplied by Aster's official fill.
+  // Do not reconstruct a local-ledger estimate when the venue omits it.
+  const realizedPnlUsd = close && explicitRealized ? finite(trade.realizedPnl) : undefined;
   const costBasisUsd = averageEntryPrice !== undefined ? averageEntryPrice * matched.matchedQuantity : undefined;
   const realizedPnlPct = realizedPnlUsd !== undefined && costBasisUsd && costBasisUsd > 0
     ? (realizedPnlUsd / costBasisUsd) * 100
@@ -249,3 +244,4 @@ export async function loadAsterTradeHistory(): Promise<AsterTradeHistoryResult> 
     error: result.error,
   };
 }
+

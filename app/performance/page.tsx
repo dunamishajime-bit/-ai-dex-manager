@@ -38,7 +38,7 @@ type PeriodSummary = {
   startCapital: number;
   endCapital: number;
   pnlUsd: number;
-  returnPct: number;
+  returnPct: number | null;
   tradeCount: number;
 };
 
@@ -61,7 +61,7 @@ function formatNumber(value?: number, digits = 2) {
   });
 }
 
-function formatPct(value?: number, digits = 2) {
+function formatPct(value?: number | null, digits = 2) {
   if (value === undefined || value === null || Number.isNaN(value)) return "-";
   return `${value >= 0 ? "+" : ""}${formatNumber(value, digits)}%`;
 }
@@ -121,7 +121,6 @@ function buildPeriodSummaries(
 ) {
   if (!trades.length) return [] as PeriodSummary[];
 
-  const seedCapital = Math.max(1, Number(trades[0].sourceUsdValue || 0));
   const grouped = new Map<string, { label: string; trades: ClosedTrade[] }>();
 
   for (const trade of trades) {
@@ -135,21 +134,18 @@ function buildPeriodSummaries(
     }
   }
 
-  let rollingCapital = seedCapital;
   return Array.from(grouped.entries())
     .map(([key, group]) => {
       const pnlUsd = group.trades.reduce((sum, trade) => sum + trade.realizedPnlUsd, 0);
-      const startCapital = rollingCapital;
-      const endCapital = startCapital + pnlUsd;
-      const returnPct = startCapital > 0 ? (pnlUsd / startCapital) * 100 : 0;
-      rollingCapital = endCapital;
       return {
         key,
         label: group.label,
-        startCapital,
-        endCapital,
+        startCapital: 0,
+        endCapital: 0,
         pnlUsd,
-        returnPct,
+        // Aster userTrades supplies realized PnL, but not account equity for
+        // each period. Do not manufacture a return percentage from trade size.
+        returnPct: null,
         tradeCount: group.trades.length,
       };
     })
@@ -240,7 +236,9 @@ export default function PerformancePage() {
     [closedTrades, monthCursor],
   );
 
-  const portfolioUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
+  const portfolioUsd = typeof wallet?.lastPortfolioUsd === "number" && Number.isFinite(wallet.lastPortfolioUsd)
+    ? wallet.lastPortfolioUsd
+    : null;
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -446,12 +444,10 @@ function PeriodRow({ item, formatPrice }: { item: PeriodSummary; formatPrice: (v
       <div className="flex items-center justify-between gap-3">
         <div>
           <div className="text-sm font-semibold text-white">{item.label}</div>
-          <div className="mt-1 text-xs text-gray-500">
-            start {formatPrice(item.startCapital)} / end {formatPrice(item.endCapital)}
-          </div>
+          <div className="mt-1 text-xs text-gray-500">Aster公式約定の実現損益 / {item.tradeCount}件</div>
         </div>
         <div className="text-right">
-          <div className={cn("text-lg font-semibold", toneClass(item.returnPct))}>{formatPct(item.returnPct, 2)}</div>
+          <div className={cn("text-lg font-semibold", toneClass(item.pnlUsd))}>{formatPct(item.returnPct, 2)}</div>
           <div className={cn("mt-1 text-xs", toneClass(item.pnlUsd))}>{formatPrice(item.pnlUsd)}</div>
         </div>
       </div>
@@ -467,3 +463,4 @@ function TradeValue({ label, value, tone }: { label: string; value: string; tone
     </div>
   );
 }
+
