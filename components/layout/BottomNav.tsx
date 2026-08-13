@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 1 seconds
+Output:
 "use client";
 
 import Link from "next/link";
@@ -12,6 +15,7 @@ const NAV_ITEMS = [
   { icon: Activity, label: "AIラボ", href: "/research-lab", matchPrefix: true },
   { icon: Wallet, label: "ウォレット", href: "/wallets", matchPrefix: false },
   { icon: FileText, label: "履歴", href: "/history", matchPrefix: false },
+  { icon: BarChart3, label: "成績", href: "/performance", matchPrefix: false },
   { icon: Settings, label: "設定", href: "/settings", matchPrefix: false },
 ] as const;
 
@@ -45,3 +49,4 @@ function BottomNavItem({ icon: Icon, label, href, matchPrefix }: (typeof NAV_ITE
     </Link>
   );
 }
+

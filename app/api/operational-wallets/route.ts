@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 0.9 seconds
+Output:
 import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, erc20Abi, formatEther, formatUnits, http } from "viem";
 import { bsc } from "viem/chains";
@@ -13,6 +16,7 @@ import {
   upsertOperationalWallet,
 } from "@/lib/server/operational-wallet-db";
 import { encryptVaultSecret } from "@/lib/server/wallet-vault";
+import { loadAsterReadonlySnapshot } from "@/lib/server/aster-readonly";
 import type { TokenRef } from "@/lib/types/market";
 import type {
   OperationalWalletHolding,
@@ -323,10 +327,15 @@ export async function GET(req: NextRequest) {
   const email = searchParams.get("email") || undefined;
   const displayName = searchParams.get("displayName") || undefined;
 
+  if (req.cookies.get("disdex_auth")?.value !== "1") {
+    return NextResponse.json({ ok: false, error: "Authentication required." }, { status: 401 });
+  }
+
   try {
+    const asterAccount = await loadAsterReadonlySnapshot();
     const wallet = await resolveWallet(userId, email);
     if (!wallet || wallet.deletedAt) {
-      return NextResponse.json({ ok: true, wallet: null });
+      return NextResponse.json({ ok: true, wallet: null, asterAccount });
     }
 
     const normalized = await normalizeWalletOwnerIdentity(wallet, userId, email, displayName);
@@ -335,7 +344,7 @@ export async function GET(req: NextRequest) {
       await upsertOperationalWallet(refreshed);
     }
     await syncUserWalletMetadata(refreshed, userId, email);
-    return NextResponse.json({ ok: true, wallet: sanitizeWallet(refreshed) });
+    return NextResponse.json({ ok: true, wallet: sanitizeWallet(refreshed), asterAccount });
   } catch (error) {
     return NextResponse.json(
       {
@@ -521,3 +530,4 @@ export async function PATCH(req: NextRequest) {
     );
   }
 }
+

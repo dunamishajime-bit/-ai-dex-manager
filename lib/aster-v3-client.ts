@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 0.9 seconds
+Output:
 import { privateKeyToAccount } from "viem/accounts";
 
 export type AsterHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
@@ -123,6 +126,23 @@ export interface AsterOrderResponse {
     updateTime?: number;
     code?: number;
     msg?: string;
+}
+
+export interface AsterUserTrade {
+    symbol?: string;
+    id?: number | string;
+    orderId?: number | string;
+    price?: string | number;
+    qty?: string | number;
+    quoteQty?: string | number;
+    commission?: string | number;
+    commissionAsset?: string;
+    realizedPnl?: string | number;
+    realizedProfit?: string | number;
+    side?: AsterOrderSide;
+    positionSide?: AsterPositionSide;
+    maker?: boolean;
+    time?: number;
 }
 
 export interface AsterNewMarketOrder {
@@ -422,6 +442,19 @@ export class AsterV3Client {
         });
     }
 
+    getUserTrades(symbol: string, options: { limit?: number; fromId?: number } = {}) {
+        return this.request<AsterUserTrade[]>({
+            method: "GET",
+            path: "/fapi/v3/userTrades",
+            params: {
+                symbol,
+                limit: options.limit,
+                fromId: options.fromId,
+            },
+            signed: true,
+        });
+    }
+
     getOrder(symbol: string, clientOrderId: string) {
         return this.request<AsterOrderResponse>({
             method: "GET",
@@ -450,3 +483,4 @@ export class AsterV3Client {
         });
     }
 }
+

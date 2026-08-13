@@ -1,4 +1,7 @@
-﻿import fs from "fs";
+Exit code: 0
+Wall time: 1 seconds
+Output:
+import fs from "fs";
 import path from "path";
 
 import type { OperationalWalletHolding } from "@/lib/operational-wallet-types";
@@ -27,11 +30,18 @@ export interface TradeHistoryEntry {
   destUsdValue: number;
   entryPriceUsd?: number;
   exitPriceUsd?: number;
+  fillPriceUsd?: number;
   realizedPnlUsd?: number;
   realizedPnlPct?: number;
   reason: string;
   openedAt?: string;
   closedAt?: string;
+  tradeId?: string;
+  orderId?: string;
+  positionSide?: string;
+  commission?: number;
+  commissionAsset?: string;
+  maker?: boolean;
 }
 
 interface OpenPositionRecord {
@@ -409,3 +419,4 @@ export async function appendTradeHistory(input: AppendTradeHistoryInput): Promis
   await saveTradeLedger(db);
   return entry;
 }
+
