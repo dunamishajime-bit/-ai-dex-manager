@@ -38,6 +38,10 @@ assert.equal(decisionStatus.includes("/fapi/v3/klines"), false);
 assert.equal(decisionStatus.includes("fetchKlines"), false);
 assert.match(decisionStatus, /PENGU_DUAL_LS_V2_FINAL/);
 assert.match(decisionStatus, /pengu-dual-ls-v2-final\/runner-live\.json/);
+assert.match(decisionStatus, /stock\/runner-live\.json/);
+assert.match(decisionStatus, /RUNNER_HEARTBEAT_MAX_AGE_MS/);
+assert.match(decisionStatus, /BLOCKED_DATA_UNAVAILABLE/);
+assert.match(decisionStatus, /refreshIntervalMinutes: 1/);
 assert.match(decisionStatus, /disdex-v96-v52-live\.service/);
 assert.match(decisionStatus, /過去データから推測表示しません/);
 

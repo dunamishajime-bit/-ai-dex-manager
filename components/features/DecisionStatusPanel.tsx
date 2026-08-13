@@ -25,7 +25,18 @@ type Snapshot = {
   source: string;
   service: { active: boolean; state: "ACTIVE" | "STOPPED" | "UNKNOWN"; label: string; mainPid: number | null };
   v96: { items: DecisionStatusItem[] };
-  v52: { marketOpen: boolean; marketLabel: string; items: DecisionStatusItem[] };
+  v52: {
+    marketOpen: boolean;
+    marketLabel: string;
+    items: DecisionStatusItem[];
+    runtime: {
+      status: "ACTIVE" | "BLOCKED_DATA_UNAVAILABLE" | "STALE" | "UNAVAILABLE" | "STOPPED";
+      ordersAllowed: boolean;
+      updatedAt?: string;
+      failureCode?: string;
+      source: string;
+    };
+  };
   error?: string;
 };
 
@@ -106,7 +117,7 @@ export function DecisionStatusPanel() {
 
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), 60 * 60 * 1000);
+    const timer = window.setInterval(() => void load(), 60 * 1000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -134,6 +145,14 @@ export function DecisionStatusPanel() {
         </button>
       </div>
       {error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{error}</div> : null}
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60">
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          <span>V52実Runner：{snapshot.v52.runtime.status}</span>
+          <span>新規注文許可：{snapshot.v52.runtime.ordersAllowed ? "可（他の安全Gate確認が必要）" : "不可"}</span>
+          <span>Runner更新：{time(snapshot.v52.runtime.updatedAt)}</span>
+          <span>画面更新：1分ごと</span>
+        </div>
+      </div>
       <div className="grid gap-4 xl:grid-cols-2">
         <Sleeve title="V96 Crypto / PENGU V2 判定状況" items={snapshot.v96.items} />
         <Sleeve
