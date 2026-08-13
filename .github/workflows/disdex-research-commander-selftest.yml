@@ -30,14 +30,11 @@ jobs:
           cache: npm
           cache-dependency-path: apps/disdex-research-commander/package-lock.json
       - name: Install
-        working-directory: apps/disdex-research-commander
-        run: npm ci --ignore-scripts
+        run: npm --prefix apps/disdex-research-commander ci --ignore-scripts
       - name: Selftest
-        working-directory: apps/disdex-research-commander
-        run: npm run selftest
+        run: npm --prefix apps/disdex-research-commander run selftest
       - name: Syntax check
-        working-directory: apps/disdex-research-commander
-        run: node --check server.mjs && node --check selftest.mjs && node --check lib/github.mjs && node --check lib/diagnostics.mjs && node --check lib/policy.mjs
+        run: node --check apps/disdex-research-commander/server.mjs && node --check apps/disdex-research-commander/selftest.mjs && node --check apps/disdex-research-commander/lib/github.mjs && node --check apps/disdex-research-commander/lib/diagnostics.mjs && node --check apps/disdex-research-commander/lib/policy.mjs
 
 # Research-only app validation. No production/VPS/live/credential/order/account/position access.
 
