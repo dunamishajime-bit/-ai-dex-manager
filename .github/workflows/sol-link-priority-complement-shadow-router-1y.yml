@@ -35,10 +35,11 @@ jobs:
           python-version: "3.12"
 
       - name: Restore exact research cache
+        id: research-cache
         uses: actions/cache@v4
         with:
           path: .cache/perp-research-usdm
-          key: pair-specific-v107-exact-usdm-v3-20260811
+          key: priority-router-v1-data-v3
           restore-keys: |
             pair-specific-v104-exact-usdm-v3-20260810
             pair-specific-v106-usdm-
@@ -82,6 +83,14 @@ jobs:
               target.write_bytes(source.read_bytes())
           print('FROZEN_CHAMPION_COMPAT_CACHE_PASS')
           PY
+
+      - name: Save prefetched research cache
+        if: steps.research-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: priority-router-v1-data-v3
+
 
       - name: Compile
         run: python -m py_compile scripts/research_priority_router_one_year.py
