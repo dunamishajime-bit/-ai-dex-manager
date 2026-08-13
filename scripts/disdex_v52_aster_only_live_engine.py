@@ -32,6 +32,20 @@ V50_MAX_ROUND_TRIP_COST_BPS = 60.0
 V50_MIN_NET_EDGE_BPS = 10.0
 
 
+def transient_reference_error(error: BaseException | str) -> bool:
+    """Return true only for reference-validation failures which are safe to retry while flat."""
+    message = str(error).lower()
+    return any(marker in message for marker in (
+        "iex_quote_stale",
+        "pyth_quote_stale",
+        "cross_source_divergence",
+        "reference quote stale",
+        "reference quote unavailable",
+        "free reference sources are not connected",
+        "free reference health did not become ready",
+    ))
+
+
 class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def __init__(self, mode: str):
         super().__init__(mode)
@@ -492,14 +506,22 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         missing = [symbol for symbol in base.ASTER_SYMBOL.values() if symbol not in self.aster._rules]
         if missing: raise RuntimeError(f"Aster Stock symbols missing: {missing}")
         from disdex_v13d_v11eq_stock_free_live_engine import reference_health, regular_us_equity_session
-        health = reference_health(self.reference)
         if regular_us_equity_session():
+            health = reference_health(self.reference)
             for symbol in base.SYMBOLS:
                 quote = self.reference.quote(symbol)
                 if base.now_ms() - quote.timestamp_ms > base.V11_MAX_DATA_AGE_MS: raise RuntimeError(f"Reference quote stale for {symbol}")
+            reference_health_status = health.get("status")
+            reference_freshness_mode = "REQUIRED_DURING_US_REGULAR_SESSION"
+        else:
+            # IEX does not publish fresh quotes outside the regular session.  Starting
+            # the daemon must remain possible; entries remain gated by fresh data when
+            # the next regular session begins.
+            reference_health_status = "DEFERRED_MARKET_CLOSED"
+            reference_freshness_mode = "DEFERRED_MARKET_CLOSED"
         self.reconcile(read_only=read_only)
         snapshot = self.gross_snapshot(); self.assert_gross_safe(snapshot)
-        return {"strategyId": STRATEGY_ID, "mode": self.mode, "readOnly": read_only, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": health.get("status"), "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
+        return {"strategyId": STRATEGY_ID, "mode": self.mode, "readOnly": read_only, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": reference_health_status, "referenceFreshnessMode": reference_freshness_mode, "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
 
     def run(self, daemon: bool) -> None:
         self.lock.acquire()
@@ -511,7 +533,13 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 try: self.tick()
                 except Exception as error:
                     self.log("v52-tick-error", error=str(error))
-                    if self.live:
+                    if transient_reference_error(error) and not self.positions():
+                        # A stale or disagreeing independent reference is an entry
+                        # gate, not an execution fault.  Do not kill the V52 daemon
+                        # or consume its narrow entry window; wait for fresh, agreeing
+                        # quotes and re-evaluate on the next tick.
+                        self.log("v52-entry-held-reference-validation", error=str(error))
+                    elif self.live:
                         self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
                 if not daemon: break
                 active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
@@ -531,6 +559,9 @@ def self_test() -> None:
     engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoGross": 1.0, "stockGross": 1.0, "totalGross": 2.0}
     gross, _ = engine.available_slot_gross(V50_SLOT)
     assert gross == 0.5
+    assert transient_reference_error("iex_quote_stale META")
+    assert transient_reference_error("cross_source_divergence TSLA")
+    assert not transient_reference_error("Managed Stock position reconciliation mismatch")
     print("V52 V11-EQ + V50 Aster-only live engine self-test: PASS")
 
 
