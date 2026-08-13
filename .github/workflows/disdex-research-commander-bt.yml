@@ -1,0 +1,58 @@
+name: DisDex Research Commander BT
+
+on:
+  workflow_dispatch:
+    inputs:
+      shard:
+        description: Research shard identifier
+        required: true
+        type: string
+      request_id:
+        description: Research request identifier
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-research-commander-${{ inputs.request_id }}-${{ inputs.shard }}
+  cancel-in-progress: false
+
+jobs:
+  research-bt:
+    if: github.ref == 'refs/heads/research/win80-profit-optimization-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/win80-profit-optimization-v1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/disdex-research-commander/package-lock.json
+      - name: Install research commander dependencies
+        working-directory: apps/disdex-research-commander
+        run: npm ci --ignore-scripts
+      - name: Run research-only validation
+        run: |
+          npm run research:lab:selftest --if-present
+          npm run research:main-lineage:selftest --if-present
+          npm run research:commander:selftest --if-present
+      - name: Write shard provenance
+        env:
+          SHARD: ${{ inputs.shard }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p .research-state/commander
+          node -e 'const fs=require("node:fs"); const p=".research-state/commander/"+process.env.REQUEST_ID+"-"+process.env.SHARD+".json"; fs.writeFileSync(p, JSON.stringify({requestId:process.env.REQUEST_ID, shard:process.env.SHARD, headSha:process.env.HEAD_SHA, scope:"development-validation-only", confirmationHoldoutUntouched:true}, null, 2)+"\n")'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-commander-${{ inputs.request_id }}-${{ inputs.shard }}
+          path: .research-state/commander/*.json
+          if-no-files-found: error
+
