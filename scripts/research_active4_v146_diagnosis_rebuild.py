@@ -33,26 +33,22 @@ def signal(cid,candles,idx,ts):
  if not x:return z
  r=x['r'];v=x['v'];br=x['br'];c=x['c'];i=x['i'];shock=x['shock'];sl72=p.slope(c,i,72);sl168=x['sl168']
  sponsor=side3(br-.5)
- rr6=rel(candles,idx,pair,ts,6);rr12=rel(candles,idx,pair,ts,12);rr24=rel(candles,idx,pair,ts,24);rr72=rel(candles,idx,pair,ts,72)
+ rr6=rel(candles,idx,pair,ts,6);rr12=rel(candles,idx,pair,ts,12);rr24=rel(candles,idx,pair,ts,24)
 
  if cid=='btc_expansion_decay_owner_cs_v16':
-  # V145 diagnosis: Dev was strong but Val lost ownership (MFE capture 11.9%, giveback 3.50%).
-  # Enter early as before, but Core ownership is terminated by medium expansion decay instead of waiting for full reversal.
+  # V145 diagnosis: Dev strong, Val ownership collapsed (MFE capture 11.9%, giveback 3.50%).
   slow=side3(r[336]) if r[336]*sl168>0 else 0; med=side3(r[72]) if r[72]*sl72>0 else 0; fast=side3(r[6]+r[12])
   z['bias']=slow if slow and med in (0,slow) else 0
   if slow and v[48]<v[168] and med!=-slow:z['prewave']=slow
   if slow and fast==slow and sponsor!=-slow:z['onset']=slow
   if slow and med==slow and r[24]*slow>0 and sponsor!=-slow:z['continue']=slow
-  # Only one pullback/reclaim route; no repeated late-wave recycling.
   if slow and med==slow and r[24]*slow<0 and r[12]*slow>0 and sponsor==slow:z['reentry']=slow
-  # Economic exit: loss of 24h expansion while fast also stops supporting, before slow trend reverses.
   if slow and r[24]*slow<=0 and fast!=slow:z['exhaust']=slow
   if slow and med==-slow and fast==-slow:z['reverse']=-slow
   z['strength']=abs(x['z168'])+x['e72']+abs(r[24])/(v[168]*math.sqrt(24)+1e-9)
 
  elif cid=='btc_pullback_probation_owner_cs_v16':
-  # V145 pullback route had Val PF 3.60 but 88.9% false starts / one Core trade.
-  # Scout the pullback, then require immediate re-acceleration to earn ownership; failed scouts expire quickly.
+  # V145 pullback route: Val PF 3.60 but 88.9% false starts and only one Core trade.
   slow=side3(r[336]) if r[336]*sl168>0 else 0; fast=side3(r[6]+r[12]); med=side3(r[72])
   z['bias']=slow
   pullback=bool(slow and r[24]*slow<0 and sponsor!=-slow)
@@ -65,8 +61,7 @@ def signal(cid,candles,idx,ts):
   z['strength']=abs(x['z168'])+abs(r[12])/(v[168]*math.sqrt(12)+1e-9)
 
  elif cid=='eth_relative_velocity_handoff_cs_v16':
-  # V145 acceleration sign alone failed all Val folds. Trade a causal handoff: relative fast velocity must overtake
-  # medium velocity while absolute ETH price confirms; exit when the velocity handoff collapses.
+  # V145 acceleration sign failed all Val folds; use relative fast-vs-medium velocity handoff plus absolute confirmation.
   bi=idx['BTC'].get(ts)
   if bi is None or bi<336:return z
   btc=candles['BTC'];q={n:r[n]-(ret(btc,bi,n) or 0.0) for n in (6,12,24,72)}
@@ -82,23 +77,20 @@ def signal(cid,candles,idx,ts):
   z['strength']=abs(delta)/(v[168]+1e-9)+abs(q[12])/(v[168]*math.sqrt(12)+1e-9)
 
  elif cid=='bnb_impulse_probation_extension_cs_v16':
-  # V145 fixed starvation but Val false-start rose to 53.3%. Keep broad scout access, shorten failed scouts.
-  impulse=rr6+rr12; side=side3(impulse); fast=side3(rr6+r[6]);
+  # V145 fixed starvation but Val false-start rose to 53.3%; keep scout access and shorten failed scouts.
+  impulse=rr6+rr12; side=side3(impulse); fast=side3(rr6+r[6])
   z['bias']=side
   if side:z['prewave']=side
   if side and fast==side:z['onset']=side
   votes=(1 if rr24*side>0 else 0)+(1 if r[24]*side>0 else 0)+(1 if sponsor==side else 0) if side else 0
-  # Consensus remains continuation evidence only, never an entry prerequisite.
   if side and votes>=2 and rr12*side>0:z['continue']=side
   z['reentry']=0
-  # Probation failure: if the impulse does not persist into 12/24h path, exit rather than holding ~28h.
   if side and (rr12*side<=0 or (fast!=side and votes<2)):z['exhaust']=side
   if side and rr24*side<0 and r[24]*side<0:z['reverse']=-side
   z['strength']=abs(impulse)/(v[168]*math.sqrt(12)+1e-9)+abs(rr24)/(v[168]*math.sqrt(24)+1e-9)
 
  else:
-  # V145 AVAX captured ~38% of events but PF<0.6: event presence was not the problem, direction ownership was.
-  # Separate shock detection from direction handoff; only directionally synchronized event expansion can own Core.
+  # V145 AVAX captured ~38% of events but PF<0.6; event presence was not the problem, direction ownership was.
   event=(v[24]>v[168]) or shock>1.0
   fast=side3(rr6+r[6]); med=side3(rr24+r[24]); side=fast if event else 0
   z['bias']=side
@@ -106,7 +98,6 @@ def signal(cid,candles,idx,ts):
   if event and side and rr12*side>0 and r[12]*side>0:z['onset']=side
   if event and side and med==side and sponsor!=-side:z['continue']=side
   z['reentry']=0
-  # Event expiry and directional de-synchronization are immediate Cash triggers.
   if side and (not event or med==-side or sponsor==-side):z['exhaust']=side
   if side and rr12*side<0 and r[12]*side<0:z['reverse']=-side
   z['strength']=shock+abs(rr12)/(v[168]*math.sqrt(12)+1e-9)+abs(rr24)/(v[168]*math.sqrt(24)+1e-9)
@@ -131,14 +122,16 @@ def role_diag(cid,candles,idx,period,trades):
   events.append(hit is not None);last=ts
  return {'role':CANDS[cid][3],'events':len(events),'captured':sum(events),'eventCaptureRatePct':100*sum(events)/len(events) if events else 0,'tradeStarvation':len(trades)<4}
 
-def dominant(dm,vm,vs,vw,vr):
+def dominant(cid,dm,vm,vs,vw,vr):
  if vm.get('trades',0)<4:return 'TRADE_STARVATION'
  if dm.get('returnPct',0)>0 and vm.get('returnPct',0)<0:return 'DEV_TO_VAL_REGIME_BREAK'
  if vm.get('falseStartRatePct',0)>50:return 'FALSE_START_DOMINANT'
- if vm.get('wrongCoreOwnership',0)>0:return 'WRONG_CORE_OWNERSHIP'
+ ft=vm.get('failureTaxonomy') or {}
+ if ft.get('wrongCoreOwnership',0)>max(2,vm.get('trades',0)*.25):return 'WRONG_CORE_OWNERSHIP'
+ if CANDS[cid][3]=='MAJOR_WAVE_OWNERSHIP' and (vw.get('medianWaveMfeCapturedPct') or 0)<20:return 'MFE_CAPTURE_WEAK'
  if (vm.get('pfWithoutBest') or 0)<1:return 'BROAD_EDGE_WEAK'
  if (vs.get('pf') or 0)<1:return 'STRESS_EDGE_WEAK'
- if CANDS[next(k for k,v in CANDS.items() if v[0]==CANDS[next(iter(CANDS))][0])][3]=='MAJOR_WAVE_OWNERSHIP' and (vw.get('medianWaveMfeCapturedPct') or 0)<20:return 'MFE_CAPTURE_WEAK'
+ if vr.get('eventCaptureRatePct',0)<20:return 'ROLE_EVENT_CAPTURE_WEAK'
  return 'FOLD_OR_EXPECTANCY_WEAK'
 
 def run(cid):
@@ -148,7 +141,7 @@ def run(cid):
  adequate=dm.get('trades',0)>=8 and vm.get('trades',0)>=4;stable=df['positivePfFolds']>=2 and vf['positivePfFolds']>=2
  common=adequate and stable and (dm.get('pf') or 0)>=1.2 and dm.get('returnPct',0)>0 and (vm.get('pf') or 0)>=1.2 and vm.get('returnPct',0)>0 and (vs.get('pf') or 0)>1 and vm.get('maxDDPct',-999)>-20 and (vm.get('pfWithoutBest') or 0)>=1
  role=CANDS[cid][3];role_ok=(vw['captureRatePct']>=20 and (vw['medianWaveMfeCapturedPct'] or 0)>=20) if role=='MAJOR_WAVE_OWNERSHIP' else (vr['events']>=4 and vr['eventCaptureRatePct']>0)
- res={'strategyId':'V146_'+cid.upper(),'pair':CANDS[cid][0],'role':role,'periods':{'development':ps['development'],'validation':ps['validation'],'confirmation':'UNTOUCHED','holdout':'UNTOUCHED'},'development':dm,'validation':vm,'validationStress':vs,'waveDiagnostics':{'development':dw,'validation':vw},'roleDiagnostics':{'development':dr,'validation':vr},'walkForward':{'development':df,'validation':vf},'diagnosis':dominant(dm,vm,vs,vw,vr),'researchMultiplicity':{'family':'DIAGNOSIS_DRIVEN_CLEAN_SHEET','generation':146,'candidatesThisBatch':5},'status':'FROZEN_SURVIVOR' if common and role_ok else 'FAIL','reason':'DEV_VALIDATION_ROLE_GATE','architecture':'CLEAN_SHEET_RAW_CAUSAL_V16','inheritsPriorSignals':False,'productionChanged':False,'realTradingEnabled':False}
+ res={'strategyId':'V146_'+cid.upper(),'pair':CANDS[cid][0],'role':role,'periods':{'development':ps['development'],'validation':ps['validation'],'confirmation':'UNTOUCHED','holdout':'UNTOUCHED'},'development':dm,'validation':vm,'validationStress':vs,'waveDiagnostics':{'development':dw,'validation':vw},'roleDiagnostics':{'development':dr,'validation':vr},'walkForward':{'development':df,'validation':vf},'diagnosis':dominant(cid,dm,vm,vs,vw,vr),'researchMultiplicity':{'family':'DIAGNOSIS_DRIVEN_CLEAN_SHEET','generation':146,'candidatesThisBatch':5},'status':'FROZEN_SURVIVOR' if common and role_ok else 'FAIL','reason':'DEV_VALIDATION_ROLE_GATE','architecture':'CLEAN_SHEET_RAW_CAUSAL_V16','inheritsPriorSignals':False,'productionChanged':False,'realTradingEnabled':False}
  out=Path(os.environ.get('RESEARCH_AUTONOMOUS_STATE_DIR','.research-state'));out.mkdir(parents=True,exist_ok=True);stem='active4-v146-'+cid;txt=json.dumps(res,indent=2);(out/f'{stem}.json').write_text(txt);(out/f'{stem}.md').write_text('# '+res['strategyId']+'\n\n```json\n'+txt+'\n```\n');print(txt)
 
 if __name__=='__main__':
