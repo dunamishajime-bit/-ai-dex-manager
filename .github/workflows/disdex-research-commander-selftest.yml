@@ -30,9 +30,14 @@ jobs:
           cache: npm
           cache-dependency-path: apps/disdex-research-commander/package-lock.json
       - name: Install
-        run: npm --prefix apps/disdex-research-commander ci --ignore-scripts
+        run: |
+          cd apps/disdex-research-commander
+          test -f package.json
+          npm install --ignore-scripts
       - name: Selftest
-        run: npm --prefix apps/disdex-research-commander run selftest
+        run: |
+          cd apps/disdex-research-commander
+          npm run selftest
       - name: Syntax check
         run: node --check apps/disdex-research-commander/server.mjs && node --check apps/disdex-research-commander/selftest.mjs && node --check apps/disdex-research-commander/lib/github.mjs && node --check apps/disdex-research-commander/lib/diagnostics.mjs && node --check apps/disdex-research-commander/lib/policy.mjs
 
