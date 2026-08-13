@@ -2,10 +2,9 @@
   "version": 2,
   "programId": "win80_ultra90_direct_v2",
   "mainStrategyId": "WIN80_ULTRA90_TOP1_V1",
-  "iteration": 162,
-  "updatedAt": "2026-08-12T21:04:10.974Z",
+  "iteration": 163,
+  "updatedAt": "2026-08-13T02:47:50.579Z",
   "completedFocuses": [
-    "top1_ranking",
     "position_concentration",
     "related_logic",
     "entry_quality",
@@ -24,10 +23,33 @@
     "position_concentration",
     "related_logic",
     "entry_quality",
-    "ultra90_rotation"
+    "ultra90_rotation",
+    "top1_ranking"
   ],
-  "lastDiscussionId": "main-research-0162-2026-08-12T21-04-10-974Z",
+  "lastDiscussionId": "main-research-0163-2026-08-13T02-47-50-579Z",
   "experimentQueue": [
+    {
+      "id": "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "top1_ranking",
+      "parameterGroup": "Top-1 ranking score",
+      "currentValue": "Tier + Score + Confidence + Trigger + RR + Volume + EventPriority",
+      "proposedValue": "Current ranking - estimated round-trip cost penalty",
+      "rationale": "高ScoreでもSpread・Slippage負けする銘柄をTop-1から外せるかを検証する。",
+      "expectedEffect": "約定後期待値とStress耐性の改善。",
+      "status": "REPLAY_REQUIRED"
+    },
+    {
+      "id": "TOP1_REGIME_CONFIRM_CHILD_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "top1_ranking",
+      "parameterGroup": "Top-1 tie breaker",
+      "currentValue": "Trend agreement bonus",
+      "proposedValue": "BTC regime agreement as final tie breaker",
+      "rationale": "僅差候補ではBTC地合い一致を優先し、逆行Entryを減らす。",
+      "expectedEffect": "勝率改善と候補減少。",
+      "status": "REPLAY_REQUIRED"
+    },
     {
       "id": "ULTRA90_ROTATION_60_CHILD_V1",
       "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
@@ -114,28 +136,6 @@
       "proposedValue": "1",
       "rationale": "Top-1思想を完全単一保有にした場合の集中収益と相関リスクを比較する。",
       "expectedEffect": "管理単純化と分散効果消失の比較。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "top1_ranking",
-      "parameterGroup": "Top-1 ranking score",
-      "currentValue": "Tier + Score + Confidence + Trigger + RR + Volume + EventPriority",
-      "proposedValue": "Current ranking - estimated round-trip cost penalty",
-      "rationale": "高ScoreでもSpread・Slippage負けする銘柄をTop-1から外せるかを検証する。",
-      "expectedEffect": "約定後期待値とStress耐性の改善。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "TOP1_REGIME_CONFIRM_CHILD_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "top1_ranking",
-      "parameterGroup": "Top-1 tie breaker",
-      "currentValue": "Trend agreement bonus",
-      "proposedValue": "BTC regime agreement as final tie breaker",
-      "rationale": "僅差候補ではBTC地合い一致を優先し、逆行Entryを減らす。",
-      "expectedEffect": "勝率改善と候補減少。",
       "status": "REPLAY_REQUIRED"
     }
   ],
