@@ -93,7 +93,10 @@ export async function sendEmail(to: string, subject: string, text: string, html?
 
     // Priority 3: Mock (Development only)
     if (process.env.NODE_ENV === "production") {
+        /*
         const error = new Error("繝｡繝ｼ繝ｫ騾∽ｿ｡險ｭ螳壹′譛ｪ螳御ｺ・〒縺吶・mail 縺ｾ縺溘・ SendGrid 繧定ｨｭ螳壹＠縺ｦ縺上□縺輔＞縲・);
+        */
+        const error = new Error("Mail delivery configuration is incomplete. Configure Gmail SMTP or SendGrid.");
         console.error("[MailService] Production mail config missing");
         return { success: false, simulated: false, error };
     }

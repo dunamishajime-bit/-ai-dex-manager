@@ -92,9 +92,24 @@ async function main() {
         // Notify only after the portfolio runner has durably recorded a confirmed LIVE fill.
         // Notification failure must never retry or fail the trading cycle.
         if (runtime.mode === "LIVE" && result.status === "completed" && orderFillEmail) {
+            /*
             const subject = `[DisDex][FILLED] ${runtime.strategyId} 豕ｨ譁・ｴ・ｮ啻;
             const text = [
                 "DisDex縺ｧ豕ｨ譁・′邏・ｮ壹＠縺ｾ縺励◆縲・,
+                "",
+                "Status: FILLED",
+                `Strategy: ${runtime.strategyId}`,
+                `Mode: ${runtime.mode}`,
+                `Result: ${result.message}`,
+                `Timestamp: ${timestamp}`,
+                `IdempotencyKey: ${result.idempotencyKey || "-"}`,
+                `SignalSide: ${result.signal?.side ?? "-"}`,
+                `Reason: ${result.signal?.reason || "-"}`,
+            ].join("\n");
+            */
+            const subject = `[DisDex][FILLED] ${runtime.strategyId} order fill`;
+            const text = [
+                "DisDex order fill confirmed.",
                 "",
                 "Status: FILLED",
                 `Strategy: ${runtime.strategyId}`,
