@@ -46,6 +46,15 @@ def main() -> int:
         assert stale.detail["ageMs"] == 5396
         print("Test A: IEX stale 5396ms -> blocked without worker-fatal classification: PASS")
 
+        _ReferenceHandler.payload = {"error": "unknown_provider_internal_failure", "symbol": "META"}
+        try:
+            stock.http_json(url, reference_request=True)
+        except RuntimeError as error:
+            assert "unknown_provider_internal_failure" in str(error)
+        else:
+            raise AssertionError("unknown provider failure was incorrectly recovered")
+        print("Test A2: unknown reference 503 remains fatal: PASS")
+
         _ReferenceHandler.status = 200
         _ReferenceHandler.payload = {"price": 582.7, "timestamp": stock.now_ms()}
         old_env = {key: os.environ.get(key) for key in ("DISDEX_STOCK_REFERENCE_MODE", "DISDEX_STOCK_REFERENCE_URL_TEMPLATE")}

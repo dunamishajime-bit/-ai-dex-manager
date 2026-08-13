@@ -192,7 +192,10 @@ def http_json(
                     detail = parsed
             except json.JSONDecodeError:
                 pass
-            code = str(detail.get("error") or "reference_http_unavailable")
+            response_code = detail.get("error")
+            if response_code is not None and str(response_code) not in REFERENCE_QUALITY_ERROR_CODES:
+                raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
+            code = str(response_code or "reference_http_unavailable")
             detail = {**detail, "httpStatus": error.code}
             raise ReferenceQualityError(code, detail) from error
         raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
