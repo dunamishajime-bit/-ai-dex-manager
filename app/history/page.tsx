@@ -1,4 +1,7 @@
-﻿"use client";
+Exit code: 0
+Wall time: 0.6 seconds
+Output:
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Download, ExternalLink, RefreshCw } from "lucide-react";
@@ -156,7 +159,7 @@ export default function HistoryPage() {
             トレード履歴
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            約定履歴と、ローカル ledger ベースの概算損益を時系列で確認できます。
+            AsterDEX公式の約定履歴と、公式約定に含まれる実現損益を時系列で確認できます。
           </p>
         </div>
 
@@ -188,7 +191,7 @@ export default function HistoryPage() {
           <div className="mt-2 text-2xl font-semibold text-white">{summary.totalTrades}</div>
         </Card>
         <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">概算確定損益</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">公式実現損益</div>
           <div className={`mt-2 text-2xl font-semibold ${summary.realizedPnlUsd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
             {formatUsd(summary.realizedPnlUsd)}
           </div>
@@ -200,8 +203,8 @@ export default function HistoryPage() {
       </div>
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-        このページの損益は Aster の公式 net PnL ではなく、ローカル trade ledger の約定価格から再計算した概算値です。
-        手数料、funding、未実現損益、口座残高の増減とは一致しない場合があります。
+        表示元はログイン済みAsterDEX口座の公式 userTrades です。取得不能時はローカル台帳へ置き換えず、履歴を空状態として表示します。
+        公式約定に含まれない funding や未実現損益は、この実現損益集計には含めません。
       </div>
 
       <Card title="約定一覧" glow="gold">
@@ -307,3 +310,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+

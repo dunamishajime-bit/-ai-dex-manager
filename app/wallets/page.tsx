@@ -1,4 +1,7 @@
-﻿"use client";
+Exit code: 0
+Wall time: 0.6 seconds
+Output:
+"use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Copy, Loader2, Plus, QrCode, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
@@ -138,7 +141,9 @@ export default function WalletsPage() {
       .sort((a, b) => Number(b.usdValue || 0) - Number(a.usdValue || 0));
   }, [wallet?.trackedHoldings]);
 
-  const totalHoldingsUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
+  const totalHoldingsUsd = typeof wallet?.lastPortfolioUsd === "number" && Number.isFinite(wallet.lastPortfolioUsd)
+    ? wallet.lastPortfolioUsd
+    : null;
   const availableBalanceUsd = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
 
   useEffect(() => {
@@ -470,7 +475,7 @@ export default function WalletsPage() {
         </section>
 
         <section className="grid gap-4">
-          <Panel title="3. 状態メモ" description="運用状況の目安です。" icon={ShieldCheck}>
+          <Panel title="3. Aster公式口座状態" description="メモの有無に依存せず、AsterDEXの読み取り結果を表示します。" icon={ShieldCheck}>
             <div className="grid gap-3 md:grid-cols-2">
               <StatCard
                 title="ウォレット状態"
@@ -518,3 +523,4 @@ export default function WalletsPage() {
     </main>
   );
 }
+

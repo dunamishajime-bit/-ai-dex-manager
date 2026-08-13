@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 0.6 seconds
+Output:
 import { NextRequest, NextResponse } from "next/server";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { RECLAIM_HYBRID_EXECUTION_PROFILE } from "@/config/reclaimHybridStrategy";
@@ -76,6 +79,12 @@ function toFiniteNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function toOptionalFiniteNumber(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 function formatAsterAmount(value: number) {
   return value.toFixed(8);
 }
@@ -148,8 +157,11 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
     .filter((holding): holding is OperationalWalletHolding => Boolean(holding))
     .sort((left, right) => right.usdValue - left.usdValue);
 
+  const officialPortfolioUsd = [account?.totalMarginBalance, account?.totalWalletBalance]
+    .map(toOptionalFiniteNumber)
+    .find((value): value is number => value !== undefined);
   const portfolioUsd = Number(
-    trackedHoldings.reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0).toFixed(6),
+    (officialPortfolioUsd ?? trackedHoldings.reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0)).toFixed(6),
   );
   const stableBalanceUsd = trackedHoldings
     .filter((holding) => ASTER_STABLE_ASSET_SYMBOLS.has(holding.symbol))
@@ -158,9 +170,14 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
     account?.totalWalletBalance,
     account?.totalMarginBalance,
     stableBalanceUsd,
-  ].map(toFiniteNumber).find((value) => value > 0) ?? 0;
-  const accountBalanceUsd = Number(accountBalanceCandidate.toFixed(8));
-  const availableBalanceUsd = Number(toFiniteNumber(account?.availableBalance).toFixed(8));
+  ].map(toOptionalFiniteNumber).find((value): value is number => value !== undefined);
+  const accountBalanceUsd = accountBalanceCandidate === undefined
+    ? wallet.lastAsterAccountBalanceUsd
+    : Number(accountBalanceCandidate.toFixed(8));
+  const availableBalanceValue = toOptionalFiniteNumber(account?.availableBalance);
+  const availableBalanceUsd = availableBalanceValue === undefined
+    ? wallet.lastAsterAvailableBalanceUsd
+    : Number(availableBalanceValue.toFixed(8));
   const previousHighWaterUsd = Number(wallet.lastPortfolioHighWaterUsd || 0);
   const portfolioHighWaterUsd = portfolioUsd > 0
     ? Math.max(previousHighWaterUsd, portfolioUsd)
@@ -173,8 +190,8 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
 
   return {
     ...wallet,
-    lastBalanceWei: toAsterBalanceWei(availableBalanceUsd).toString(),
-    lastBalanceFormatted: availableBalanceUsd.toFixed(8),
+    lastBalanceWei: availableBalanceUsd === undefined ? wallet.lastBalanceWei : toAsterBalanceWei(availableBalanceUsd).toString(),
+    lastBalanceFormatted: availableBalanceUsd === undefined ? wallet.lastBalanceFormatted : availableBalanceUsd.toFixed(8),
     lastAsterAccountBalanceUsd: accountBalanceUsd,
     lastAsterAvailableBalanceUsd: availableBalanceUsd,
     lastAsterBalanceUpdatedAt: new Date().toISOString(),
@@ -531,3 +548,4 @@ export async function PATCH(req: NextRequest) {
     );
   }
 }
+
