@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 0.3 seconds
-Output:
 """Causal one-year Priority Portfolio Router research backtest.
 
 Research-only.  This module deliberately reuses the frozen Champion drivers:
