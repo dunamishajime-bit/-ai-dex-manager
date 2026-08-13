@@ -627,6 +627,12 @@ def shadow_summary(
     candidates: dict[str, list[dict[str, Any]]],
     router: dict[str, Any],
 ) -> dict[str, Any]:
+    def _without_best(values: list[float]) -> list[float]:
+        if not values:
+            return []
+        best_index = max(range(len(values)), key=values.__getitem__)
+        return values[:best_index] + values[best_index + 1 :]
+
     real_by_symbol = defaultdict(list)
     for trade in router["realTrades"]:
         real_by_symbol[trade["symbol"]].append(trade)
@@ -646,15 +652,7 @@ def shadow_summary(
             "shadowTrades": len(shadows),
             "shadowHypotheticalReturnPct": compound(shadow_values),
             "shadowPf": profit_factor(shadow_values),
-            "shadowPfWithoutBest": profit_factor(
-                shadow_values[
-                    shadow_values.index(max(shadow_values)) :
-                ] if False else (
-                    shadow_values[:shadow_values.index(max(shadow_values))]
-                    + shadow_values[shadow_values.index(max(shadow_values)) + 1 :]
-                    if shadow_values else []
-                )
-            ),
+            "shadowPfWithoutBest": profit_factor(_without_best(shadow_values)),
             "adoptedCount": len(real),
             "skippedCount": max(0, len(shadows) - len(real)),
             "preemptedBySolCount": sum(
@@ -844,4 +842,3 @@ if __name__ == "__main__":
         run_selftest()
     else:
         _run()
-
