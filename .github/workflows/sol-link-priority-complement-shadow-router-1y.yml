@@ -58,11 +58,11 @@ jobs:
           root = Path('.cache/perp-research-usdm/consolidated')
           required = [
               root / 'BTCUSDT-1661990400000-1786320000000-v3.json',
-              root / 'ETHUSDT-1661990400000-1782864000000-v2.json',
-              root / 'BNBUSDT-1661990400000-1782864000000-v2.json',
-              root / 'SOLUSDT-1661990400000-1782864000000-v2.json',
-              root / 'LINKUSDT-1661990400000-1782864000000-v2.json',
-              root / 'AVAXUSDT-1661990400000-1782864000000-v2.json',
+              root / 'ETHUSDT-1661990400000-1786320000000-v3.json',
+              root / 'BNBUSDT-1661990400000-1786320000000-v3.json',
+              root / 'SOLUSDT-1661990400000-1786320000000-v3.json',
+              root / 'LINKUSDT-1661990400000-1786320000000-v3.json',
+              root / 'AVAXUSDT-1661990400000-1786320000000-v3.json',
           ]
           missing = [str(path) for path in required if not path.is_file()]
           if missing:
