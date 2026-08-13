@@ -1,7 +1,7 @@
 {
   "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
   "status": "V13_FORWARD_COLLECTION_IN_PROGRESS",
-  "generatedAt": "2026-08-12T21:02:59.936463Z",
+  "generatedAt": "2026-08-13T21:04:08.806137Z",
   "configSha256": "c25dd7fa5fd53544c0c172bd8191fbad486601259434b93ea418323dea31404e",
   "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
   "window": {
@@ -90,7 +90,9 @@
     },
     {
       "sessionDate": "2026-08-13",
-      "segmentsPresent": [],
+      "segmentsPresent": [
+        "LATE_CLOSE"
+      ],
       "complete": false
     },
     {
@@ -125,25 +127,25 @@
     }
   ],
   "coverage": {
-    "asterBooks": 267407,
-    "xyzBooks": 13040,
-    "asterTrades": 402,
-    "xyzTrades": 36559
+    "asterBooks": 299860,
+    "xyzBooks": 13910,
+    "asterTrades": 424,
+    "xyzTrades": 41653
   },
   "executionSafety": {
-    "partialFillFailures": 0,
-    "unhedgedRejected": 0,
+    "partialFillFailures": 1,
+    "unhedgedRejected": 1,
     "unresolvedInventory": 0,
     "unresolvedCloseAttempts": 0,
     "pendingHedgesAtEnd": 0,
     "openInventoriesAtEnd": 0,
     "cancellations": {
-      "STALE_OR_INVALID_BOOK": 1558,
-      "MAKER_TOP_MOVED": 3953,
-      "ADVERSE_ORDER_FLOW": 5,
-      "REFERENCE_MOVED": 217
+      "STALE_OR_INVALID_BOOK": 1650,
+      "MAKER_TOP_MOVED": 4670,
+      "ADVERSE_ORDER_FLOW": 6,
+      "REFERENCE_MOVED": 421
     },
-    "passed": true
+    "passed": false
   },
   "cycles": {
     "completed": 0,
@@ -234,7 +236,7 @@
   },
   "gates": {
     "coveragePassed": false,
-    "executionSafetyPassed": true,
+    "executionSafetyPassed": false,
     "minimumCyclesPassed": false,
     "performancePassed": false,
     "retuningAllowed": false,
@@ -275,6 +277,13 @@
       "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-12/LATE_CLOSE/31634406625",
       "runId": "31634406625",
       "startedAtUtc": "2026-08-12T19:48:10Z"
+    },
+    {
+      "sessionDate": "2026-08-13",
+      "segment": "LATE_CLOSE",
+      "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-13/LATE_CLOSE/31737323829",
+      "runId": "31737323829",
+      "startedAtUtc": "2026-08-13T19:44:35Z"
     }
   ],
   "ignoredAttempts": [
@@ -342,6 +351,12 @@
       "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-12/OPEN_CORE/31607472432",
       "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT",
       "sessionDate": "2026-08-12",
+      "segment": "OPEN_CORE"
+    },
+    {
+      "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-13/OPEN_CORE/31710923800",
+      "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT",
+      "sessionDate": "2026-08-13",
       "segment": "OPEN_CORE"
     }
   ],
