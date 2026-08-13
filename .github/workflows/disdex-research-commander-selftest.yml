@@ -21,14 +21,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/disdex-research-commander/package-lock.json
       - name: Install
         working-directory: apps/disdex-research-commander
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
       - name: Selftest
         working-directory: apps/disdex-research-commander
         run: npm run selftest
       - name: Syntax check
         working-directory: apps/disdex-research-commander
-        run: node --check server.mjs && node --check lib/github.mjs && node --check lib/diagnostics.mjs
+        run: node --check server.mjs && node --check selftest.mjs && node --check lib/github.mjs && node --check lib/diagnostics.mjs && node --check lib/policy.mjs
 
 # Research-only app validation. No production/VPS/live/credential/order/account/position access.
+
