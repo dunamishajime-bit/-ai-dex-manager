@@ -1,0 +1,52 @@
+name: DisDex Research Commander BT
+
+on:
+  workflow_dispatch:
+    inputs:
+      shard:
+        description: Research shard number
+        required: true
+        type: string
+      request_id:
+        description: Research request identifier
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-commander-bt-${{ github.ref }}-${{ inputs.shard }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    if: github.ref == 'refs/heads/research/win80-profit-optimization-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install research dependencies
+        run: npm ci
+      - name: Run research-only selftests
+        run: |
+          npm run research:lab:selftest
+          npm run research:main-lineage:selftest
+      - name: Write shard provenance
+        env:
+          RESEARCH_REQUEST_ID: ${{ inputs.request_id }}
+          RESEARCH_SHARD: ${{ inputs.shard }}
+        run: |
+          mkdir -p .research-state/commander
+          node -e "const fs=require('fs');const p=require('path');const shard=process.env.RESEARCH_SHARD;if(!/^[1-5]$/.test(shard))process.exit(78);fs.writeFileSync(p.join('.research-state','commander',`shard-${shard}.json`),JSON.stringify({requestId:process.env.RESEARCH_REQUEST_ID,shard,sha:process.env.GITHUB_SHA,stage:'Development/Validation',productionChanged:false,realTradingEnabled:false},null,2))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-commander-${{ inputs.request_id }}-shard-${{ inputs.shard }}
+          path: .research-state/commander/shard-${{ inputs.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+
