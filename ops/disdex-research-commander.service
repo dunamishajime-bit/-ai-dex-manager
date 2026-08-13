@@ -10,7 +10,8 @@ User=disdex-research
 Group=disdex-research
 WorkingDirectory=/home/deploy/disdex-research-commander
 EnvironmentFile=/etc/disdex-research-commander.env
-ExecStart=/usr/bin/node /home/deploy/disdex-research-commander/server.mjs`nRestart=on-failure
+ExecStart=/usr/bin/node /home/deploy/disdex-research-commander/server.mjs
+Restart=on-failure
 RestartSec=5s
 NoNewPrivileges=true
 PrivateTmp=true
