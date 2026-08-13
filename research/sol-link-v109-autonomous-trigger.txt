@@ -4,4 +4,5 @@ design_evidence=DEVELOPMENT_VALIDATION_ONLY
 frozen_v109=UNCHANGED
 confirmation=UNTOUCHED
 holdout=UNTOUCHED
-cycle=1
+cycle=2
+candidate_set=V6_PROBATION_OWNER_FIXED_FORECAST_CONTRACT
