@@ -44,6 +44,32 @@ jobs:
             pair-specific-v106-usdm-
             six-pair-v98-usdm-
 
+      - name: Install data-prefetch dependencies
+        run: npm ci
+
+      - name: Prefetch genuine public USD-M history
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact consolidated inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('.cache/perp-research-usdm/consolidated')
+          required = [
+              root / 'BTCUSDT-1661990400000-1782864000000-v2.json',
+              root / 'ETHUSDT-1661990400000-1782864000000-v2.json',
+              root / 'BNBUSDT-1661990400000-1782864000000-v2.json',
+              root / 'SOLUSDT-1661990400000-1782864000000-v2.json',
+              root / 'LINKUSDT-1661990400000-1782864000000-v2.json',
+              root / 'AVAXUSDT-1661990400000-1782864000000-v2.json',
+          ]
+          missing = [str(path) for path in required if not path.is_file()]
+          if missing:
+              raise SystemExit('MISSING_EXACT_CONSOLIDATED_INPUTS:' + ','.join(missing))
+          print('EXACT_CONSOLIDATED_INPUTS_PASS')
+          PY
+
       - name: Compile
         run: python -m py_compile scripts/research_priority_router_one_year.py
 
@@ -66,4 +92,3 @@ jobs:
 
 # Research-only. No production, LIVE, VPS, approval, state, account or order
 # path is imported or mutated by this workflow.
-
