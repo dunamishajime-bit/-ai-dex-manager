@@ -183,9 +183,22 @@ function notifyV52Fill(line: string, runnerMode: RunnerMode) {
     const to = (process.env.DISDEX_ORDER_FILL_EMAIL || process.env.PENGU_ORDER_FILL_EMAIL || DEFAULT_ORDER_FILL_EMAIL).trim();
     if (!to) return;
     const action = isOpen ? "OPEN" : "CLOSE";
+    /*
     const subject = `[DisDex][FILLED] V52 ${action} 豕ｨ譁・ｴ・ｮ啻;
     const text = [
         "DisDex V52縺ｧ豕ｨ譁・′邏・ｮ壹＠縺ｾ縺励◆縲・,
+        "",
+        "Status: FILLED",
+        "Strategy: V52",
+        `Action: ${action}`,
+        "Mode: LIVE",
+        `Timestamp: ${new Date().toISOString()}`,
+        `RunnerLog: ${line}`,
+    ].join("\n");
+    */
+    const subject = `[DisDex][FILLED] V52 ${action} order fill`;
+    const text = [
+        "DisDex V52 order fill confirmed.",
         "",
         "Status: FILLED",
         "Strategy: V52",
