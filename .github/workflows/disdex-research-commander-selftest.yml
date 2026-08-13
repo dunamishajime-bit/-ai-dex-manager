@@ -2,6 +2,12 @@ name: DisDex Research Commander Selftest
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "apps/disdex-research-commander/**"
+      - ".github/workflows/disdex-research-commander-selftest.yml"
   push:
     branches:
       - research/win80-profit-optimization-v1
