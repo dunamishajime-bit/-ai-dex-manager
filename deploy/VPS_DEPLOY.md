@@ -43,9 +43,22 @@ Create `.env.local` in the project root and set at least:
 - `EXECUTION_PRIVATE_KEY`
 - `TRADER_PRIVATE_KEY`
 - `TRADER_ADDRESS`
-- `SENDGRID_API_KEY`
-- `GMAIL_USER`
-- `GMAIL_APP_PASSWORD`
+Email notifications (choose one provider; never commit the secret):
+- Gmail SMTP: `GMAIL_USER` + `GMAIL_APP_PASSWORD`
+- or SendGrid: `SENDGRID_API_KEY`
+- recipient: `DISDEX_ORDER_FILL_EMAIL` (optional `PENGU_ORDER_FILL_EMAIL`)
+
+Important: linking Gmail to ChatGPT/Codex confirms the assistant can use Gmail, but it does not inject credentials into the VPS process. Configure the VPS independently. For Gmail, create a Google App Password and set it as `GMAIL_APP_PASSWORD`; never commit that value.
+
+Example Gmail configuration:
+
+```bash
+DISDEX_ORDER_FILL_EMAIL=dunamis.hajime@gmail.com
+GMAIL_USER=dunamis.hajime@gmail.com
+GMAIL_APP_PASSWORD=<Google App Password>
+```
+
+SendGrid is an alternative; do not configure both unless you intentionally want Gmail priority.
 
 ## 4. Build
 

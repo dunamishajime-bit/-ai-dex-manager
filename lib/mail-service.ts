@@ -1,9 +1,9 @@
 import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
 
-const API_KEY = process.env.SENDGRID_API_KEY;
-const GMAIL_USER = process.env.GMAIL_USER;
-const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+const API_KEY = process.env.SENDGRID_API_KEY?.trim() || "";
+const GMAIL_USER = process.env.GMAIL_USER?.trim() || "";
+const GMAIL_APP_PASSWORD = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
 
 if (API_KEY) {
     sgMail.setApiKey(API_KEY);
@@ -33,8 +33,10 @@ function buildUtf8HtmlDocument(bodyHtml?: string, fallbackText?: string) {
 
 export async function sendEmail(to: string, subject: string, text: string, html?: string): Promise<SendEmailResult> {
     console.log(`[MailService] Attempting to send email to: ${to}`);
-    console.log(`[MailService] Env Vars Status - User: ${!!GMAIL_USER}, Pass: ${!!GMAIL_APP_PASSWORD}`);
-    if (GMAIL_USER) console.log(`[MailService] User: ${GMAIL_USER}`);
+    console.log(`[MailService] Provider status - Gmail: ${Boolean(GMAIL_USER && GMAIL_APP_PASSWORD)}, SendGrid: ${Boolean(API_KEY)}`);
+    if ((GMAIL_USER && !GMAIL_APP_PASSWORD) || (!GMAIL_USER && GMAIL_APP_PASSWORD)) {
+        console.error("[MailService] Gmail requires both GMAIL_USER and GMAIL_APP_PASSWORD. A ChatGPT Gmail plugin connection is not inherited by the VPS process.");
+    }
 
     // Priority 1: Gmail (if configured)
     if (GMAIL_USER && GMAIL_APP_PASSWORD) {
@@ -44,7 +46,7 @@ export async function sendEmail(to: string, subject: string, text: string, html?
                 service: "gmail",
                 auth: {
                     user: GMAIL_USER,
-                    pass: GMAIL_APP_PASSWORD.replace(/\s+/g, ''), // Remove spaces from app password logic
+                    pass: GMAIL_APP_PASSWORD,
                 },
             });
 
@@ -91,7 +93,7 @@ export async function sendEmail(to: string, subject: string, text: string, html?
 
     // Priority 3: Mock (Development only)
     if (process.env.NODE_ENV === "production") {
-        const error = new Error("メール送信設定が未完了です。Gmail または SendGrid を設定してください。");
+        const error = new Error("メール送信設定が未完了です。VPSの環境変数に GMAIL_USER + GMAIL_APP_PASSWORD または SENDGRID_API_KEY を設定してください。ChatGPTのGmailプラグイン連携だけではVPSから送信できません。");
         console.error("[MailService] Production mail config missing");
         return { success: false, simulated: false, error };
     }
@@ -124,7 +126,7 @@ export async function sendPasswordResetEmail(email: string, resetToken: string):
         </div>
     `;
 
-    if (!API_KEY && !GMAIL_USER) {
+    if (!API_KEY && !(GMAIL_USER && GMAIL_APP_PASSWORD)) {
         // Extra mock logging for the link specifically if mocking, as sendEmail generic mock might not show the link clearly
         console.warn(`[Mock Link] ${resetUrl}`);
     }
