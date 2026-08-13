@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 0.9 seconds
+Output:
 "use client";
 
 import { usePathname } from "next/navigation";
@@ -17,6 +20,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings": "設定",
   "/admin": "管理",
   "/history": "トレード履歴",
+  "/performance": "成績",
 };
 
 export function TopBar() {
@@ -104,3 +108,4 @@ export function TopBar() {
     </header>
   );
 }
+

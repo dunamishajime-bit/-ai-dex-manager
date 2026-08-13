@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 1 seconds
+Output:
 "use client";
 
 import Link from "next/link";
@@ -41,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/history", label: "トレード履歴", icon: FileText },
+  { href: "/performance", label: "成績", icon: BarChart3 },
   { href: "/settings", label: "設定", icon: Settings },
 ];
 
@@ -132,3 +136,4 @@ export function Sidebar() {
     </aside>
   );
 }
+

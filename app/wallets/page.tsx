@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 1 seconds
+Output:
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
@@ -118,7 +121,7 @@ function StatCard({
 
 export default function WalletsPage() {
   const { user } = useAuth();
-  const { wallet, loading, refresh } = useOperationalWallet();
+  const { wallet, asterAccount, loading, refresh } = useOperationalWallet();
 
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
@@ -140,6 +143,7 @@ export default function WalletsPage() {
 
   const totalHoldingsUsd = Number(wallet?.lastPortfolioUsd || 0);
   const nativeBalance = wallet?.lastBalanceFormatted ? Number(wallet.lastBalanceFormatted) : 0;
+  const asterAvailable = asterAccount?.status === "available";
 
   useEffect(() => {
     let mounted = true;
@@ -305,6 +309,27 @@ export default function WalletsPage() {
             {message}
           </div>
         ) : null}
+
+        <section className="rounded-[26px] border border-emerald-400/20 bg-[linear-gradient(180deg,rgba(6,30,24,0.42),rgba(4,10,12,0.78))] p-4 shadow-[0_0_24px_rgba(16,185,129,0.05)] md:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-200/75">AsterDEX / Read-only account</div>
+              <h2 className="mt-1 text-lg font-black text-white">AsterDEX口座情報</h2>
+              <p className="mt-1 text-xs leading-5 text-white/65">残高・利用可能残高・建玉・Open OrdersはAsterDEX公式APIから取得します。取得不能時にローカル値や0へ置き換えません。</p>
+            </div>
+            <span className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${asterAvailable ? "border-emerald-300/30 bg-emerald-400/10 text-emerald-100" : "border-amber-300/30 bg-amber-400/10 text-amber-100"}`}>
+              {asterAvailable ? "確認済み" : asterAccount?.status === "not_configured" ? "未設定" : "取得不能"}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard title="Wallet Balance" value={asterAvailable ? formatUsd(asterAccount?.walletBalanceUsd) : "取得不能"} note="AsterDEX公式担保残高" tone={asterAvailable ? "profit" : "loss"} />
+            <StatCard title="Available Balance" value={asterAvailable ? formatUsd(asterAccount?.availableBalanceUsd) : "取得不能"} note="AsterDEX公式利用可能残高" tone={asterAvailable ? "profit" : "loss"} />
+            <StatCard title="Current Portfolio" value={asterAvailable ? formatUsd(asterAccount?.portfolioUsd) : "取得不能"} note="Wallet + 未実現損益" tone={asterAvailable ? "profit" : "loss"} />
+            <StatCard title="Positions / Orders" value={asterAvailable ? `${asterAccount?.positions.length ?? 0} / ${asterAccount?.openOrdersCount ?? 0}` : "未確認"} note="AsterDEX公式positionRisk / openOrders" tone="default" />
+          </div>
+          <div className="mt-3 text-[11px] text-white/55">口座: {asterAccount?.accountAddress || "未確認"} / 最終確認: {asterAccount?.refreshedAt ? formatDate(asterAccount.refreshedAt) : "未確認"}</div>
+          {!asterAvailable && asterAccount?.error ? <div className="mt-3 rounded-xl border border-amber-300/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-100">{asterAccount.error}</div> : null}
+        </section>
 
         <section className="grid gap-4 xl:grid-cols-[1.02fr_0.98fr]">
           <Panel title="1. 作成" description="運用ウォレットを作成します。" icon={Wallet}>
@@ -518,3 +543,4 @@ export default function WalletsPage() {
     </main>
   );
 }
+
