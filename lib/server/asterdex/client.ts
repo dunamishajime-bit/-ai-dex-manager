@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 0.6 seconds
-Output:
 import { privateKeyToAccount } from "viem/accounts";
 
 const DEFAULT_BASE_URL = "https://fapi.asterdex.com";
