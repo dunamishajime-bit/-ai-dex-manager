@@ -49,6 +49,12 @@ jobs:
         run: npm ci
 
       - name: Prefetch genuine public USD-M history
+        env:
+          # The frozen Python Champion loader consumes the fixed 2022-09-01
+          # through 2026-07-01 research cache.  Keep this contract explicit;
+          # the broader default prefetch window is not used by this BT.
+          PERP_RESEARCH_START_DATE: "2022-09-01T00:00:00Z"
+          PERP_RESEARCH_END_DATE: "2026-07-01T00:00:00Z"
         run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
 
       - name: Verify exact consolidated inputs
@@ -57,7 +63,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           root = Path('.cache/perp-research-usdm/consolidated')
-          required = [root / f'{symbol}USDT-1661990400000-1786320000000-v3.json' for symbol in ('BTC','ETH','BNB','SOL','LINK','AVAX')]
+          required = [root / f'{symbol}USDT-1661990400000-1782864000000-v3.json' for symbol in ('BTC','ETH','BNB','SOL','LINK','AVAX')]
           missing = [str(path) for path in required if not path.is_file()]
           if missing:
               raise SystemExit('MISSING_EXACT_CONSOLIDATED_INPUTS:' + ','.join(missing))
