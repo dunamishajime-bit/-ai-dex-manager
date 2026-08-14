@@ -67,7 +67,7 @@ jobs:
           from pathlib import Path
           root = Path('.cache/perp-research-usdm/consolidated')
           symbols = ('BTC','SOL','LINK','ETH','BNB','AVAX')
-          required = [root / f'{symbol}USDT-1661990400000-1782864000000-v2.json' for symbol in symbols]
+          required = [root / f'{symbol}USDT-1661990400000-1782864000000-v3.json' for symbol in symbols]
           missing = [str(path) for path in required if not path.is_file()]
           if missing:
               raise SystemExit('MISSING_EXACT_CONSOLIDATED_INPUTS:' + ','.join(missing))
