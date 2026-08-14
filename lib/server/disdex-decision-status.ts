@@ -45,7 +45,7 @@ export type DecisionStatusSnapshot = {
 };
 
 type V52RuntimeStatus = {
-  status: "ACTIVE" | "BLOCKED_DATA_UNAVAILABLE" | "STALE" | "UNAVAILABLE" | "STOPPED";
+  status: "ACTIVE" | "WAITING_MARKET_CLOSED" | "BLOCKED_DATA_UNAVAILABLE" | "STALE" | "UNAVAILABLE" | "STOPPED";
   ordersAllowed: boolean;
   updatedAt?: string;
   failureCode?: string;
@@ -412,6 +412,17 @@ function buildV52Items(
   market: ReturnType<typeof newYorkMarketClock>,
 ) {
   const runtime = readV52Runtime(serviceActive, now);
+  if (!market.open && serviceActive) {
+    return {
+      items: config.stockSymbols.map((symbol) => outsideMarketItem(symbol, checkedAt, market.label)),
+      runtime: {
+        status: "WAITING_MARKET_CLOSED" as const,
+        ordersAllowed: false,
+        updatedAt: runtime.updatedAt,
+        source: "V52 market-session scheduler",
+      },
+    };
+  }
   if (!market.open) {
     return { items: config.stockSymbols.map((symbol) => outsideMarketItem(symbol, checkedAt, market.label)), runtime };
   }

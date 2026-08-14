@@ -30,7 +30,7 @@ type Snapshot = {
     marketLabel: string;
     items: DecisionStatusItem[];
     runtime: {
-      status: "ACTIVE" | "BLOCKED_DATA_UNAVAILABLE" | "STALE" | "UNAVAILABLE" | "STOPPED";
+      status: "ACTIVE" | "WAITING_MARKET_CLOSED" | "BLOCKED_DATA_UNAVAILABLE" | "STALE" | "UNAVAILABLE" | "STOPPED";
       ordersAllowed: boolean;
       updatedAt?: string;
       failureCode?: string;

@@ -43,6 +43,7 @@ assert.match(decisionStatus, /RUNNER_HEARTBEAT_MAX_AGE_MS/);
 assert.match(decisionStatus, /BLOCKED_DATA_UNAVAILABLE/);
 assert.match(decisionStatus, /判定未出力/);
 assert.match(decisionStatus, /V52実Runner・参照データGate・注文許可は正常です/);
+assert.match(decisionStatus, /WAITING_MARKET_CLOSED/);
 assert.match(decisionStatus, /refreshIntervalMinutes: 1/);
 assert.match(decisionStatus, /disdex-v96-v52-live\.service/);
 assert.match(decisionStatus, /過去データから推測表示しません/);
