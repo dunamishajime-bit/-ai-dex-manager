@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 
 type Sleeve = "V96" | "V52";
-type Status = "発火候補" | "条件不足" | "対象時間外" | "取得不能" | "停止中";
+type Status = "発火候補" | "条件不足" | "対象時間外" | "取得不能" | "判定未出力" | "停止中";
 type Side = "LONG" | "SHORT" | "WAIT";
 type JsonRecord = Record<string, unknown>;
 
@@ -274,6 +274,26 @@ function unavailableItem(
   };
 }
 
+function decisionNotPublishedItem(
+  symbol: string,
+  checkedAt: string,
+  dataUpdatedAt?: string,
+): DecisionStatusItem {
+  return {
+    symbol,
+    sleeve: "V52",
+    rank: 0,
+    score: 0,
+    scoreMax: 1,
+    status: "判定未出力",
+    side: "WAIT",
+    reason: "V52実Runner・参照データGate・注文許可は正常です。銘柄別の読み取り専用判定スナップショットだけが未出力のため、発火候補や条件不足を推測表示していません。",
+    checkedAt,
+    source: "V52 runner heartbeat",
+    dataUpdatedAt,
+  };
+}
+
 function outsideMarketItem(symbol: string, checkedAt: string, marketLabel: string): DecisionStatusItem {
   return {
     symbol,
@@ -416,11 +436,9 @@ function buildV52Items(
   const decisionItems = Array.isArray(decision?.items) ? decision.items : null;
   if (!decision || !isFresh(decisionUpdatedAt, now) || !decisionItems) {
     return {
-      items: config.stockSymbols.map((symbol) => unavailableItem(
+      items: config.stockSymbols.map((symbol) => decisionNotPublishedItem(
         symbol,
-        "V52",
         checkedAt,
-        "V52実Runnerは稼働中ですが、銘柄別判定スナップショットが未生成または古いため、発火候補を推測表示しません。",
         runtime.updatedAt,
       )),
       runtime,

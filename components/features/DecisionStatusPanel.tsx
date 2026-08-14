@@ -9,7 +9,7 @@ type DecisionStatusItem = {
   rank: number;
   score: number;
   scoreMax: number;
-  status: "発火候補" | "条件不足" | "対象時間外" | "取得不能" | "停止中";
+  status: "発火候補" | "条件不足" | "対象時間外" | "取得不能" | "判定未出力" | "停止中";
   side: "LONG" | "SHORT" | "WAIT";
   reason: string;
   checkedAt: string;
@@ -43,6 +43,7 @@ type Snapshot = {
 function statusClass(status: DecisionStatusItem["status"]) {
   if (status === "発火候補") return "border-emerald-400/35 bg-emerald-500/10 text-emerald-100";
   if (status === "取得不能") return "border-rose-400/35 bg-rose-500/10 text-rose-100";
+  if (status === "判定未出力") return "border-sky-400/35 bg-sky-500/10 text-sky-100";
   if (status === "停止中") return "border-amber-400/35 bg-amber-500/10 text-amber-100";
   if (status === "対象時間外") return "border-slate-400/25 bg-slate-500/10 text-slate-200";
   return "border-white/15 bg-white/[0.04] text-white/75";
