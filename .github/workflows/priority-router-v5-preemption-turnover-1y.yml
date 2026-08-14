@@ -1,0 +1,95 @@
+name: Priority Router V5 Preemption Turnover 1Y
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/router-v5-preemption-turnover-bt-20260814
+    paths:
+      - "scripts/research_priority_router_one_year.py"
+      - "scripts/research_priority_router_v3.py"
+      - "scripts/research_priority_router_v5.py"
+      - "scripts/research-lab-prefetch-event-regime-v53.ts"
+      - ".github/workflows/priority-router-v5-preemption-turnover-1y.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: priority-router-v5-preemption-turnover-1y-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen Champion sources
+        shell: bash
+        run: |
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
+          test "$(git hash-object scripts/research_pairwise_profit_attribution_v4.py)" = "bd07487b115923443bdf55cc87ca18f66c786142"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore exact research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pair-specific-v107-exact-usdm-v3-20260811
+          restore-keys: |
+            pair-specific-v104-exact-usdm-v3-20260810
+            pair-specific-v106-usdm-
+            six-pair-v98-usdm-
+
+      - name: Install data-prefetch dependencies
+        run: npm ci
+
+      - name: Prefetch genuine public USD-M history
+        env:
+          # The frozen Champion loader consumes the fixed 2022-09-01 through
+          # 2026-07-01 research cache. This is a data-contract setting only.
+          PERP_RESEARCH_START_DATE: "2022-09-01T00:00:00Z"
+          PERP_RESEARCH_END_DATE: "2026-07-01T00:00:00Z"
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact consolidated inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('.cache/perp-research-usdm/consolidated')
+          required = [root / f'{symbol}USDT-1661990400000-1782864000000-v3.json' for symbol in ('BTC','ETH','BNB','SOL','LINK','AVAX')]
+          missing = [str(path) for path in required if not path.is_file()]
+          if missing:
+              raise SystemExit('MISSING_EXACT_CONSOLIDATED_INPUTS:' + ','.join(missing))
+          print('EXACT_CONSOLIDATED_INPUTS_PASS')
+          PY
+
+      - name: Compile and self-test
+        run: |
+          python -m py_compile scripts/research_priority_router_one_year.py scripts/research_priority_router_v3.py scripts/research_priority_router_v5.py
+          python scripts/research_priority_router_one_year.py --self-test
+          python scripts/research_priority_router_v3.py --self-test
+          python scripts/research_priority_router_v5.py --self-test
+
+      - name: Run V5 preemption audit and turnover ablation
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_priority_router_v5.py
+
+      - name: Upload research artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: priority-router-v5-preemption-turnover-1y
+          path: .research-state/priority-router-v5-preemption-turnover-1y.json
+          if-no-files-found: warn
+          retention-days: 30
+
+# Research-only. No production, LIVE, VPS, approval, state, account, or order
+# path is imported or mutated by this workflow.
