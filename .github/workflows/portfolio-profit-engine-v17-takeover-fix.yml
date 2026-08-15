@@ -1,0 +1,67 @@
+name: Portfolio Profit Engine V17 Takeover Fix
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_portfolio_profit_engine_v17.py
+      - scripts/research_portfolio_profit_engine_v17_takeover_fix.py
+      - .github/workflows/portfolio-profit-engine-v17-takeover-fix.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen V17 strategy source and V15 stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v17.py)" = "$(git hash-object scripts/research_portfolio_profit_engine_v17.py)"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v15.py)" = "1ac36230c636df11649892256ad7bbba0c6693a1"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v14.py)" = "f297505cabf45488a507a90b3a730720ac94c203"
+          echo V17_STRATEGY_UNCHANGED_V15_FROZEN_PASS
+      - name: Restore exact 3Y research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - name: Compile V17 execution fix
+        run: python -m py_compile scripts/research_portfolio_profit_engine_v17.py scripts/research_portfolio_profit_engine_v17_takeover_fix.py
+      - name: Run V17 fixed execution
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_portfolio_profit_engine_v17_takeover_fix.py
+      - name: Assert research boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/portfolio-profit-engine-v17.json').read_text())
+          assert d['researchOnly'] is True and d['productionChanged'] is False and d['vpsChanged'] is False and d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False and d['liveEligible'] is False and d['freshOosRead'] is False and d['freshOosConsumed'] is False
+          assert d['target']['main3YCagrPct']==100.0 and d['target']['grossExposureCapPct']==100.0 and d['target']['leverageMultiplier']==1.0
+          assert d['antiOverfit']['overlappingExposure'] is False and d['antiOverfit']['parameterGrid'] is False
+          print('V17_TAKEOVER_FIX_RESEARCH_BOUNDARY_PASS')
+          PY
+      - name: Upload V17 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-profit-engine-v17-takeover-fix
+          path: |
+            .research-state/portfolio-profit-engine-v17.json
+            .research-state/portfolio-profit-engine-v17-trades.jsonl
+          if-no-files-found: warn
+          retention-days: 30
