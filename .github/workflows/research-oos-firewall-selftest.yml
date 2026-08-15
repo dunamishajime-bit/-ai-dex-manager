@@ -1,0 +1,76 @@
+name: Research OOS Firewall Self-test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - research/registry/research-candidate-registry-20260815.json
+      - scripts/research_oos_firewall.py
+      - .github/workflows/research-oos-firewall-selftest.yml
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen registry and firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object research/registry/research-candidate-registry-20260815.json)" = "da0d9485cb1cbbb830645c905d6e109b68efe425"
+          test "$(git hash-object scripts/research_oos_firewall.py)" = "9c34a2815915e66ebf4cfbfe3dafdbc36fd0f1c2"
+          echo RESEARCH_REGISTRY_HASH_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile firewall
+        run: python -m py_compile scripts/research_oos_firewall.py
+
+      - name: Assert SOL frozen forward only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/research_oos_firewall.py --symbol SOL --purpose forward-paper --expect pass
+          python scripts/research_oos_firewall.py --symbol SOL --purpose fresh-oos --expect block
+          python scripts/research_oos_firewall.py --symbol SOL --purpose live --expect block
+          python scripts/research_oos_firewall.py --symbol SOL --purpose retune --expect block
+
+      - name: Assert rejected pairs sealed
+        shell: bash
+        run: |
+          set -euo pipefail
+          for s in AVAX ETH LINK BNB; do
+            python scripts/research_oos_firewall.py --symbol "$s" --purpose fresh-oos --expect block
+            python scripts/research_oos_firewall.py --symbol "$s" --purpose forward-paper --expect block
+            python scripts/research_oos_firewall.py --symbol "$s" --purpose live --expect block
+            python scripts/research_oos_firewall.py --symbol "$s" --purpose retune --expect block
+          done
+
+      - name: Assert registry production boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('research/registry/research-candidate-registry-20260815.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['globalPolicy']['liveEligiblePairs'] == []
+          assert d['pairs']['SOL']['freshOos']['consumed'] is True
+          for s in ('AVAX','ETH','LINK','BNB'):
+              assert d['pairs'][s]['freshOos']['consumed'] is False
+              assert d['pairs'][s]['freshOosPermission'] is False
+          print('RESEARCH_OOS_FIREWALL_SELFTEST_PASS')
+          PY
