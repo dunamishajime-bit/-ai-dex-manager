@@ -1,0 +1,56 @@
+name: Premium Index Archive Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_premium_index_archive_probe.py
+      - .github/workflows/premium-index-archive-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen data-only probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_premium_index_archive_probe.py)" = "3ff58a42c64404fbee282b5e6bdc0e0ac8a98be3"
+          echo PREMIUM_PROBE_SOURCE_PASS
+      - name: Compile probe
+        run: python -m py_compile scripts/research_premium_index_archive_probe.py
+      - name: Probe official monthly 1h premium index archives
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_premium_index_archive_probe.py
+      - name: Assert data-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/premium-index-archive-probe.json').read_text())
+          assert x['researchOnly'] is True and x['dataInfrastructureOnly'] is True
+          assert x['strategyEvaluated'] is False and x['returnsCalculated'] is False and x['numericPremiumValuesEmitted'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False
+          assert x['freshOosRead'] is False and x['post202606DataRequested'] is False
+          print('PREMIUM_PROBE_BOUNDARY_PASS')
+          PY
+      - name: Upload probe artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: premium-index-archive-probe
+          path: .research-state/premium-index-archive-probe.json
+          if-no-files-found: warn
+          retention-days: 30
