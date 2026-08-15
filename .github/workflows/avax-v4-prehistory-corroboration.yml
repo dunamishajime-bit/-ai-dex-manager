@@ -9,6 +9,10 @@ on:
       - scripts/research_avax_v4_prehistory_corroboration.py
       - .github/workflows/avax-v4-prehistory-corroboration.yml
 
+concurrency:
+  group: avax-v4-prehistory-corroboration-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -24,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object scripts/research_causal_handoff_clean_sheet_v4.py)" = "83bb895bfc865fbc0cc60f3e84789675101c2fb6"
-          test "$(git hash-object scripts/research_avax_v4_prehistory_corroboration.py)" = "daffc6f1d8335734029ce5ae5f6ea89962dd6f64"
+          test "$(git hash-object scripts/research_avax_v4_prehistory_corroboration.py)" = "fe6e2b8a4ca1eee14ad7e5e75b655eb902ddeec3"
           echo FROZEN_AVAX_V4_SOURCE_PASS
 
       - uses: actions/setup-python@v5
