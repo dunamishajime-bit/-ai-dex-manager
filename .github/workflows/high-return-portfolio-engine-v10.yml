@@ -1,0 +1,121 @@
+name: High Return Portfolio Engine V10
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - .github/workflows/high-return-portfolio-engine-v10.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: high-return-portfolio-engine-v10-first-run
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen V9/V10 research sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_high_return_portfolio_engine_v9.py)" = "bdb2b97de7b47859c47792d6f41ef78e35aa8c0d"
+          test "$(git hash-object scripts/research_high_return_portfolio_engine_v10.py)" = "acbec341c663c08f8884095776cf8dbfa55c212a"
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
+          test "$(git hash-object scripts/research_priority_router_v6_historical_robustness.py)" = "74cc5c732da7567dfb465e0558b872c8c8dcc435"
+          echo V10_FROZEN_SOURCES_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore proven 3Y USD-M research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+            pair-specific-v106-usdm-
+
+      - name: Install prefetch dependencies
+        run: npm ci
+
+      - name: Prefetch genuine Binance USD-M history
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact frozen six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('.cache/perp-research-usdm/consolidated')
+          symbols = ('BTC','SOL','LINK','ETH','BNB','AVAX')
+          required = [root / f'{symbol}USDT-1661990400000-1782864000000-v3.json' for symbol in symbols]
+          missing = [str(path) for path in required if not path.is_file()]
+          if missing:
+              raise SystemExit('MISSING_EXACT_CONSOLIDATED_INPUTS:' + ','.join(missing))
+          print('EXACT_CONSOLIDATED_INPUTS_PASS')
+          PY
+
+      - name: Compile frozen high-return engine
+        run: |
+          python -m py_compile \
+            scripts/research_high_return_portfolio_engine_v9.py \
+            scripts/research_high_return_portfolio_engine_v10.py \
+            scripts/research_lab_pair_specific_v109.py \
+            scripts/research_priority_router_v6_historical_robustness.py
+
+      - name: Run first V10 annual-return-standard backtest
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_high_return_portfolio_engine_v10.py
+
+      - name: Assert research-only and annual-standard boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('.research-state/high-return-portfolio-engine-v10.json')
+          if not p.is_file(): raise SystemExit('V10_RESULT_MISSING')
+          x=json.loads(p.read_text())
+          assert x['researchOnly'] is True
+          assert x['productionChanged'] is False
+          assert x['vpsChanged'] is False
+          assert x['liveChanged'] is False
+          assert x['realTradingEnabled'] is False
+          assert x['freshOosRead'] is False
+          assert x['post20260701DataUsed'] is False
+          assert x['v9BacktestedBeforeThisCorrection'] is False
+          s=x['returnStandard']
+          assert s['annual80PctIsMinimumFloorNotTarget'] is True
+          assert float(s['minimumEveryYearPct']) == 80.0
+          assert float(s['primaryMedianAnnualPct']) == 100.0
+          assert float(s['primary3YCagrPct']) == 100.0
+          assert float(s['strongMinimumEveryYearPct']) == 100.0
+          assert float(s['strong3YCagrPct']) == 120.0
+          print('V10_RESEARCH_BOUNDARY_AND_RETURN_STANDARD_PASS')
+          PY
+
+      - name: Upload V10 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: high-return-portfolio-engine-v10
+          path: |
+            .research-state/high-return-portfolio-engine-v10.json
+            .research-state/high-return-portfolio-engine-v10.md
+          if-no-files-found: warn
+          retention-days: 30
