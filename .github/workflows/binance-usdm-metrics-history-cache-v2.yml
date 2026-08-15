@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object scripts/research_fetch_binance_usdm_metrics_symbol_v2.py)" = "63ea217719b2997186e3d10797e6c79b588099aa"
+          test "$(git hash-object scripts/research_fetch_binance_usdm_metrics_symbol_v2.py)" = "b80b6e48ca69bc7f42eb285d9d5316a677126035"
           echo METRICS_SYMBOL_V2_SOURCE_PASS
       - uses: actions/setup-python@v5
         with:
@@ -59,8 +59,9 @@ jobs:
           assert d['dailyArchiveCoverage'] == 1.0
           assert d['hourCoverage'] >= 0.995
           assert d['maxGapHours'] <= 12
-          assert d['valid5mRows'] + d['invalid5mRows'] == d['source5mRows']
-          print('METRICS_SYMBOL_V2_FAIL_CLOSED_PASS',s,'coverage=',d['hourCoverage'],'maxGap=',d['maxGapHours'],'invalid5m=',d['invalid5mRows'],'partialDays=',d['partialDays'])
+          assert d['inDay5mRows'] + d['boundaryOverlapRows'] == d['sourceArchiveRows']
+          assert d['valid5mRows'] + d['invalid5mRows'] == d['inDay5mRows']
+          print('METRICS_SYMBOL_V2_FAIL_CLOSED_PASS',s,'coverage=',d['hourCoverage'],'maxGap=',d['maxGapHours'],'boundaryOverlap=',d['boundaryOverlapRows'],'invalid5m=',d['invalid5mRows'],'partialDays=',d['partialDays'])
           PY
       - name: Upload symbol metrics artifact
         uses: actions/upload-artifact@v4
@@ -104,7 +105,8 @@ jobs:
             assert h==m['dataSha256'],(s,h,m['dataSha256'])
             assert m['dailyArchiveCoverage']==1.0 and m['hourCoverage']>=0.995 and m['maxGapHours']<=12
             assert m['freshOosRead'] is False and m['post20260701DataUsed'] is False
-            assert m['valid5mRows'] + m['invalid5mRows'] == m['source5mRows']
+            assert m['inDay5mRows'] + m['boundaryOverlapRows'] == m['sourceArchiveRows']
+            assert m['valid5mRows'] + m['invalid5mRows'] == m['inDay5mRows']
             sm[s]=m
           schema=sm['BTCUSDT']['schema']
           assert all(v['schema']==schema for v in sm.values())
@@ -114,11 +116,11 @@ jobs:
             'strategyEvaluationPerformed':False,'freshOosRead':False,'post20260701DataUsed':False,
             'freshOosBoundaryExclusiveMs':1782864000000,'start':'2023-07-01T00:00:00+00:00','endExclusive':'2026-07-01T00:00:00+00:00',
             'schema':schema,
-            'hourlyRule':'drop snapshots with any non-finite required numeric field; then use last valid 5m snapshot inside each UTC candle hour; no interpolation or cross-hour carry',
+            'hourlyRule':'discard only verified next-day 0-5s boundary-overlap rows; drop in-day snapshots with any non-finite required numeric field; then use last valid in-day 5m snapshot inside each UTC candle hour; no interpolation or cross-hour carry',
             'symbols':sm,
           }
           (root/'manifest.json').write_text(json.dumps(out,indent=2,sort_keys=True))
-          print(json.dumps({s:{'hours':m['hourlyRows'],'coverage':m['hourCoverage'],'maxGap':m['maxGapHours'],'invalid5m':m['invalid5mRows'],'partialDays':m['partialDays']} for s,m in sm.items()},indent=2))
+          print(json.dumps({s:{'hours':m['hourlyRows'],'coverage':m['hourCoverage'],'maxGap':m['maxGapHours'],'boundaryOverlap':m['boundaryOverlapRows'],'invalid5m':m['invalid5mRows'],'partialDays':m['partialDays']} for s,m in sm.items()},indent=2))
           print('METRICS_V2_COMBINED_CACHE_PASS')
           PY
       - name: Upload combined manifest
