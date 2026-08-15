@@ -1,0 +1,74 @@
+name: Binance USD-M Metrics Coverage Manifest
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_fetch_binance_usdm_metrics_history.py
+      - scripts/research_binance_usdm_metrics_coverage_manifest.py
+      - .github/workflows/binance-usdm-metrics-coverage-manifest.yml
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Assert frozen base fetcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_fetch_binance_usdm_metrics_history.py)" = "9d7342db171cebaeb05488dd9716d5700b1793b1"
+          echo FROZEN_METRICS_FETCHER_HASH_PASS
+
+      - name: Compile research diagnostics
+        run: |
+          python -m py_compile scripts/research_fetch_binance_usdm_metrics_history.py
+          python -m py_compile scripts/research_binance_usdm_metrics_coverage_manifest.py
+
+      - name: Assert OOS URL firewall
+        run: python scripts/research_fetch_binance_usdm_metrics_history.py --firewall-self-test
+
+      - name: Build sealed coverage manifest
+        run: python scripts/research_binance_usdm_metrics_coverage_manifest.py
+
+      - name: Assert research-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('research-output/usdm-metrics-coverage/manifest.json')
+          d=json.loads(p.read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['v7Executed'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['policy']['forwardFillMissingDays'] is False
+          assert d['policy']['lowerCoverageGate'] is False
+          print('RESEARCH_ONLY_BOUNDARY_PASS')
+          PY
+
+      - name: Upload coverage manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-coverage-manifest
+          path: research-output/usdm-metrics-coverage/manifest.json
+          if-no-files-found: error
+          retention-days: 14
