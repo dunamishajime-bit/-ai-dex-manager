@@ -1,0 +1,131 @@
+name: SOL V3 Fresh OOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_sol_v3_fresh_oos.py
+      - .github/workflows/sol-v3-fresh-oos.yml
+
+permissions:
+  contents: read
+
+jobs:
+  fresh-oos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen SOL V3 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_pair_specific_clean_sheet_v3.py)" = "e53d04416309e7adc92cbef7f0230ea7f60b368d"
+          echo FROZEN_SOL_V3_SOURCE_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore USD-M research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: sol-v3-fresh-oos-usdm-20260815-v1
+          restore-keys: |
+            pairwise-clean-sheet-3y-usdm-v1-20260815
+            pair-specific-v107-exact-usdm-v3-20260811
+
+      - name: Check exact Fresh OOS inputs
+        id: exact
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          root = Path('.cache/perp-research-usdm/consolidated')
+          start = 1661990400000
+          end = 1786752000000
+          symbols = ('BTC','ETH','BNB','SOL','LINK','AVAX')
+          required = [root / f'{s}USDT-{start}-{end}-v3.json' for s in symbols]
+          ready = all(p.is_file() for p in required)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"ready={'true' if ready else 'false'}\n")
+          print('FRESH_OOS_EXACT_CACHE_READY' if ready else 'FRESH_OOS_EXACT_CACHE_MISS')
+          PY
+
+      - name: Install prefetch dependencies
+        if: steps.exact.outputs.ready != 'true'
+        run: npm ci
+
+      - name: Prefetch fixed Fresh OOS market history
+        if: steps.exact.outputs.ready != 'true'
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-08-15T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact Fresh OOS consolidated inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('.cache/perp-research-usdm/consolidated')
+          start = 1661990400000
+          end = 1786752000000
+          symbols = ('BTC','ETH','BNB','SOL','LINK','AVAX')
+          required = [root / f'{s}USDT-{start}-{end}-v3.json' for s in symbols]
+          missing = [str(p) for p in required if not p.is_file()]
+          if missing:
+              raise SystemExit('MISSING_FRESH_OOS_EXACT_INPUTS:' + ','.join(missing))
+          print('FRESH_OOS_EXACT_INPUTS_PASS')
+          PY
+
+      - name: Compile frozen OOS harness
+        run: |
+          python -m py_compile scripts/research_pair_specific_clean_sheet_v3.py scripts/research_sol_v3_fresh_oos.py
+
+      - name: Run frozen SOL V3 Fresh OOS
+        env:
+          RESEARCH_STATE_DIR: .research-state
+          SOURCE_V3_SHA: 738eac0d6d7d20173cc3824282ef5b591dc7a3a5
+          SOURCE_V3_BLOB_SHA: e53d04416309e7adc92cbef7f0230ea7f60b368d
+        run: python scripts/research_sol_v3_fresh_oos.py
+
+      - name: Assert Fresh OOS fail-closed boundaries
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('.research-state/sol-v3-fresh-oos.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['symbol'] == 'SOL'
+          assert d['oos']['startTs'] == 1782864000000
+          assert d['oos']['endTsExclusive'] == 1786752000000
+          assert d['antiOverfit']['v3LogicFrozen'] is True
+          assert d['antiOverfit']['signalThresholdChanged'] is False
+          assert d['antiOverfit']['exitThresholdChanged'] is False
+          assert d['antiOverfit']['parameterSearch'] is False
+          assert d['antiOverfit']['sameRunRetuning'] is False
+          assert d['evidenceGate']['liveEligible'] is False
+          print('FRESH_OOS_RESEARCH_ONLY_FAIL_CLOSED_PASS')
+          PY
+
+      - name: Upload Fresh OOS artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sol-v3-fresh-oos-20260701-20260815
+          path: |
+            .research-state/sol-v3-fresh-oos.json
+            .research-state/sol-v3-fresh-oos.md
+          if-no-files-found: warn
+          retention-days: 30
