@@ -1,0 +1,79 @@
+name: High Return V10 Churn Diagnosis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - .github/workflows/high-return-v10-churn-diagnosis.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: high-return-v10-churn-diagnosis
+  cancel-in-progress: false
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen strategy and diagnostic sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_high_return_portfolio_engine_v9.py)" = "bdb2b97de7b47859c47792d6f41ef78e35aa8c0d"
+          test "$(git hash-object scripts/research_high_return_portfolio_engine_v10.py)" = "acbec341c663c08f8884095776cf8dbfa55c212a"
+          test "$(git hash-object scripts/research_high_return_v10_churn_diagnosis.py)" = "dad0403b8bbefd8f7bd8924cdf34af4c59dc11e7"
+          echo FROZEN_V10_DIAG_SOURCES_PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore exact 3Y USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+      - name: Install prefetch dependencies
+        run: npm ci
+      - name: Prefetch only to frozen historical boundary
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Compile instrumentation
+        run: python -m py_compile scripts/research_high_return_portfolio_engine_v9.py scripts/research_high_return_v10_churn_diagnosis.py
+      - name: Run frozen V10 churn/mode diagnosis
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_high_return_v10_churn_diagnosis.py
+      - name: Assert instrumentation-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/high-return-v10-churn-diagnosis.json').read_text())
+          assert x['instrumentationOnly'] is True
+          assert x['strategyChanged'] is False
+          assert x['productionChanged'] is False
+          assert x['vpsChanged'] is False
+          assert x['liveChanged'] is False
+          assert x['realTradingEnabled'] is False
+          assert x['freshOosRead'] is False
+          print('V10_DIAG_BOUNDARY_PASS')
+          PY
+      - name: Upload diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: high-return-v10-churn-diagnosis
+          path: .research-state/high-return-v10-churn-diagnosis.json
+          if-no-files-found: warn
+          retention-days: 30
