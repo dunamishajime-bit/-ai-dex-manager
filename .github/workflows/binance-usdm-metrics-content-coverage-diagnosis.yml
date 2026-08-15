@@ -1,0 +1,60 @@
+name: Binance USD-M Metrics Content Coverage Diagnosis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_probe_binance_usdm_metrics_content_coverage.py
+      - .github/workflows/binance-usdm-metrics-content-coverage-diagnosis.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen content probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_probe_binance_usdm_metrics_content_coverage.py)" = "be22f4ad4dcc4df1944c411137ff7d4e192f0439"
+          echo METRICS_CONTENT_PROBE_SOURCE_PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile probe
+        run: python -m py_compile scripts/research_probe_binance_usdm_metrics_content_coverage.py
+      - name: Diagnose daily metrics contents
+        run: python scripts/research_probe_binance_usdm_metrics_content_coverage.py
+      - name: Assert probe-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/binance-usdm-metrics-content-coverage-diagnosis.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['endExclusive'] == '2026-07-01'
+          print('METRICS_CONTENT_PROBE_ONLY_PASS')
+          PY
+      - name: Upload content diagnosis
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-content-coverage-diagnosis
+          path: |
+            .research-state/binance-usdm-metrics-content-coverage-diagnosis.json
+            .research-state/binance-usdm-metrics-content-coverage-diagnosis.md
+          if-no-files-found: error
+          retention-days: 30
