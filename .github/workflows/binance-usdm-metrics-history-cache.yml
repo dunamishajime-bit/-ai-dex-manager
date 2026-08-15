@@ -1,0 +1,85 @@
+name: Binance USD-M Metrics History Cache
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_fetch_binance_usdm_metrics_history.py
+      - .github/workflows/binance-usdm-metrics-history-cache.yml
+
+concurrency:
+  group: binance-usdm-metrics-history-cache-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen metrics fetcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_fetch_binance_usdm_metrics_history.py)" = "9d7342db171cebaeb05488dd9716d5700b1793b1"
+          echo METRICS_FETCHER_SOURCE_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile metrics fetcher
+        run: python -m py_compile scripts/research_fetch_binance_usdm_metrics_history.py
+
+      - name: Assert Fresh OOS firewall before network access
+        run: python scripts/research_fetch_binance_usdm_metrics_history.py --firewall-self-test
+
+      - name: Restore exact metrics design cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/research-usdm-metrics-v1
+          key: research-usdm-metrics-v1-20230701-20260701
+
+      - name: Build exact design-period metrics cache
+        run: python scripts/research_fetch_binance_usdm_metrics_history.py
+
+      - name: Assert research-only cache boundary and coverage
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('.cache/research-usdm-metrics-v1/manifest.json')
+          d=json.loads(p.read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['endExclusive'].startswith('2026-07-01T00:00:00')
+          assert d['freshOosBoundaryExclusiveMs'] == 1782864000000
+          expected={'BTCUSDT','ETHUSDT','BNBUSDT','LINKUSDT','AVAXUSDT'}
+          assert set(d['symbols']) == expected
+          for symbol,meta in d['symbols'].items():
+              assert meta['dayCoverage'] >= 0.98, (symbol,meta['dayCoverage'])
+              assert meta['hourCoverage'] >= 0.97, (symbol,meta['hourCoverage'])
+              assert meta['lastHourTs'] < d['freshOosBoundaryExclusiveMs']
+          print('METRICS_DESIGN_CACHE_FAIL_CLOSED_PASS')
+          PY
+
+      - name: Publish cache manifest only
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-history-manifest
+          path: .cache/research-usdm-metrics-v1/manifest.json
+          if-no-files-found: error
+          retention-days: 30
