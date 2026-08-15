@@ -1,5 +1,6 @@
 name: USD-M Metrics Mechanism Router V7
 
+# Data-only cache blocker cleared 2026-08-16; frozen V7 sources remain unchanged.
 on:
   workflow_dispatch:
   push:
