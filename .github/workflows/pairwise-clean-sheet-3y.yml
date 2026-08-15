@@ -7,6 +7,7 @@ on:
       - chatgpt/pairwise-clean-sheet-3y-20260815
     paths:
       - scripts/research_pairwise_clean_sheet_3y.py
+      - scripts/run_research_pairwise_clean_sheet_3y_cached.py
       - .github/workflows/pairwise-clean-sheet-3y.yml
 
 permissions:
@@ -66,13 +67,13 @@ jobs:
 
       - name: Compile research harness
         run: |
-          python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_priority_router_v6.py
+          python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/run_research_pairwise_clean_sheet_3y_cached.py scripts/research_priority_router_v6.py
           python scripts/research_priority_router_v6.py --self-test
 
       - name: Run pairwise clean-sheet 3Y backtest
         env:
           RESEARCH_STATE_DIR: .research-state
-        run: python scripts/research_pairwise_clean_sheet_3y.py
+        run: python scripts/run_research_pairwise_clean_sheet_3y_cached.py
 
       - name: Upload artifact
         if: always()
