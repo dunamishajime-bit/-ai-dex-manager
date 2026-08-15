@@ -1,0 +1,131 @@
+name: Funding Crowding Release V5
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_funding_crowding_release_v5.py
+      - .github/workflows/funding-crowding-release-v5.yml
+
+concurrency:
+  group: funding-crowding-release-v5-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen research sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_pairwise_clean_sheet_3y.py)" = "65419f4d0699f07366dea89385bc571a35e1d211"
+          test "$(git hash-object scripts/research_funding_crowding_release_v5.py)" = "256bd1c013ff7075a556415bbc308d9e496ab3da"
+          echo FROZEN_RESEARCH_SOURCES_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore exact 3Y research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+
+      - name: Check exact inputs
+        id: exact
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          root = Path('.cache/perp-research-usdm/consolidated')
+          symbols = ('BTC','SOL','LINK','ETH','BNB','AVAX')
+          required = [root / f'{s}USDT-1661990400000-1782864000000-v3.json' for s in symbols]
+          ready = all(p.is_file() for p in required)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"ready={'true' if ready else 'false'}\n")
+          print('EXACT_CACHE_READY' if ready else 'EXACT_CACHE_MISS')
+          PY
+
+      - name: Install prefetch dependencies
+        if: steps.exact.outputs.ready != 'true'
+        run: npm ci
+
+      - name: Prefetch genuine Binance USD-M history
+        if: steps.exact.outputs.ready != 'true'
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact consolidated inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('.cache/perp-research-usdm/consolidated')
+          symbols = ('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing = [str(root / f'{s}USDT-1661990400000-1782864000000-v3.json') for s in symbols if not (root / f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing:
+              raise SystemExit('MISSING_EXACT_CONSOLIDATED_INPUTS:' + ','.join(missing))
+          print('EXACT_CONSOLIDATED_INPUTS_PASS')
+          PY
+
+      - name: Compile V5 harness
+        run: python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_funding_crowding_release_v5.py
+
+      - name: Run funding crowding V5
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_funding_crowding_release_v5.py
+
+      - name: Assert research-only fail-closed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('.research-state/funding-crowding-release-v5.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['solV3Frozen'] is True
+          assert d['v4FrozenFailed'] is True
+          assert d['freshOosRead'] is False
+          assert d['antiOverfit']['newInformationSource'] == 'PERPETUAL_FUNDING_CROWDING'
+          assert d['antiOverfit']['oneArchitecturePerPair'] is True
+          assert d['antiOverfit']['parameterGrid'] is False
+          assert d['antiOverfit']['familyTournament'] is False
+          assert d['antiOverfit']['sameRunRetuning'] is False
+          assert d['antiOverfit']['v4GateRelaxation'] is False
+          assert d['antiOverfit']['post20260701DataUsed'] is False
+          assert d['antiOverfit']['freshOosRequiredBeforeAnyLiveUse'] is True
+          print('RESEARCH_ONLY_FAIL_CLOSED_PASS')
+          PY
+
+      - name: Upload V5 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: funding-crowding-release-v5
+          path: |
+            .research-state/funding-crowding-release-v5.json
+            .research-state/funding-crowding-release-v5-trades.jsonl
+            .research-state/funding-crowding-release-v5.md
+          if-no-files-found: warn
+          retention-days: 30
