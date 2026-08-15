@@ -1,0 +1,62 @@
+name: Loss Only Trade Harvest Core Redirect Safe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_loss_only_trade_harvest_core_redirect_safe.py
+      - scripts/research_loss_only_trade_harvest_redirect_safe.py
+      - .github/workflows/loss-only-trade-harvest-core-redirect-safe.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen transport wrappers
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_only_trade_harvest.py)" = "26c6389bf25f6a2160b164a7916c0b1fbf5a648e"
+          test "$(git hash-object scripts/research_loss_only_trade_harvest_core.py)" = "b4c7e28a255c44e2068ebf27240c90e8a2e187e3"
+          test "$(git hash-object scripts/research_loss_only_trade_harvest_redirect_safe.py)" = "ab6ce3cdc4b670fff40e12e9eec5afe987122dbc"
+          test "$(git hash-object scripts/research_loss_only_trade_harvest_core_redirect_safe.py)" = "f121340f8c70c4ba45c6a3adfd0cf389c511b0f3"
+          echo LOSS_ONLY_CORE_REDIRECT_SAFE_SOURCE_PASS
+      - name: Compile
+        run: python -m py_compile scripts/research_loss_only_trade_harvest.py scripts/research_loss_only_trade_harvest_core.py scripts/research_loss_only_trade_harvest_redirect_safe.py scripts/research_loss_only_trade_harvest_core_redirect_safe.py
+      - name: Harvest fixed core population
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_only_trade_harvest_core_redirect_safe.py
+      - name: Assert one-way boundary and nonempty transport
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/loss-only-core-harvest-summary.json').read_text())
+          assert x['researchOnly'] and x['winnerFeaturesInspected'] is False and x['blockersSelected'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          assert x['machineReadableFilesScanned'] > 0
+          print('LOSS_ONLY_CORE_REDIRECT_SAFE_BOUNDARY_PASS')
+          PY
+      - name: Upload redirect-safe core harvest
+        uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-trade-harvest-core-redirect-safe
+          path: |
+            .research-state/loss-only-core-normalized-trades.jsonl
+            .research-state/loss-only-core-losing-trades.jsonl
+            .research-state/loss-only-core-harvest-summary.json
+          retention-days: 30
