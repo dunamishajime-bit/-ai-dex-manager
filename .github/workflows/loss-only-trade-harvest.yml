@@ -1,0 +1,59 @@
+name: Loss Only Trade Harvest
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_loss_only_trade_harvest.py
+      - .github/workflows/loss-only-trade-harvest.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen harvest source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_only_trade_harvest.py)" = "26c6389bf25f6a2160b164a7916c0b1fbf5a648e"
+          test -f docs/research/LOSS_ONLY_ENTRY_FIREWALL_PROTOCOL_20260816.md
+          echo LOSS_ONLY_HARVEST_SOURCE_PASS
+      - name: Compile
+        run: python -m py_compile scripts/research_loss_only_trade_harvest.py
+      - name: Harvest fixed V96+ research artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_only_trade_harvest.py
+      - name: Assert one-way boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/loss-only-trade-harvest-summary.json').read_text())
+          assert x['researchOnly'] is True and x['winnerFeaturesInspected'] is False and x['blockersSelected'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          assert x['selectedArtifacts'] > 0
+          print('LOSS_ONLY_HARVEST_BOUNDARY_PASS')
+          PY
+      - name: Upload normalized trade harvest
+        uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-trade-harvest
+          path: |
+            .research-state/loss-only-normalized-trades.jsonl
+            .research-state/loss-only-losing-trades.jsonl
+            .research-state/loss-only-trade-harvest-summary.json
+          retention-days: 30
