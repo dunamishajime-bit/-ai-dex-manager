@@ -1,0 +1,134 @@
+name: USD-M Metrics Mechanism Router V7
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_metrics_mechanism_router_v7.py
+      - scripts/research_metrics_mechanism_router_v7_runner.py
+      - .github/workflows/metrics-mechanism-router-v7.yml
+
+concurrency:
+  group: metrics-mechanism-router-v7-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen V7 strategy and data adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_metrics_mechanism_router_v7.py)" = "05022eb9dda5bd09dea86f9d8495bb77dfa063a9"
+          test "$(git hash-object scripts/research_metrics_mechanism_router_v7_runner.py)" = "79e42e394011a95871a16b762fdf5cb2a0aea0ab"
+          echo FROZEN_V7_SOURCES_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore exact 3Y price research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+
+      - name: Restore exact metrics V2 design cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/research-usdm-metrics-v2
+          key: research-usdm-metrics-v2-20230701-20260701
+          fail-on-cache-miss: true
+
+      - name: Assert exact input boundaries before evaluation
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          mroot=Path('.cache/research-usdm-metrics-v2')
+          d=json.loads((mroot/'manifest.json').read_text())
+          assert d['cacheVersion']=='v2'
+          assert d['researchOnly'] is True
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['freshOosBoundaryExclusiveMs']==1782864000000
+          symbols=('BTCUSDT','ETHUSDT','BNBUSDT','LINKUSDT','AVAXUSDT')
+          assert set(d['symbols'])==set(symbols)
+          for s in symbols:
+              meta=d['symbols'][s]
+              assert (mroot/f'{s}.hourly.json.gz').is_file(),s
+              assert meta['dailyArchiveCoverage']==1.0
+              assert meta['hourCoverage']>=0.995
+              assert meta['maxGapHours']<=12
+              assert meta['freshOosRead'] is False
+              assert meta['post20260701DataUsed'] is False
+          proot=Path('.cache/perp-research-usdm/consolidated')
+          for s in ('BTC','ETH','BNB','SOL','LINK','AVAX'):
+              p=proot/f'{s}USDT-1661990400000-1782864000000-v3.json'
+              assert p.is_file(),p
+          print('V7_EXACT_INPUT_BOUNDARIES_PASS')
+          PY
+
+      - name: Compile frozen V7 harness
+        run: python -m py_compile scripts/research_metrics_mechanism_router_v7.py scripts/research_metrics_mechanism_router_v7_runner.py
+
+      - name: Run frozen V7 first evaluation
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_metrics_mechanism_router_v7_runner.py
+
+      - name: Assert research-only anti-overfit boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/metrics-mechanism-router-v7.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['newInformationSource']=='BINANCE_USDM_HISTORICAL_METRICS'
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['validationUsedForSelection'] is False
+          assert d['evaluationUsedForSelection'] is False
+          assert d['sameRunRetuning'] is False
+          assert d['parameterGrid'] is False
+          assert d['selectionPeriod']=='development_only_2023_07_to_2024_07'
+          assert d['liveEligiblePairs']==[]
+          assert set(d['mechanismSet'])=={
+              'POSITION_BUILD_CONTINUATION',
+              'DELEVERAGING_REVERSAL',
+              'CROWD_SQUEEZE',
+              'TOP_GLOBAL_DIVERGENCE',
+          }
+          for pair,result in d['pairs'].items():
+              assert result['validationUsedForSelection'] is False
+              assert result['evaluationUsedForSelection'] is False
+          print('V7_RESEARCH_ONLY_ANTI_OVERFIT_PASS')
+          PY
+
+      - name: Upload V7 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-mechanism-router-v7
+          path: |
+            .research-state/metrics-mechanism-router-v7.json
+            .research-state/metrics-mechanism-router-v7.md
+          if-no-files-found: warn
+          retention-days: 30
