@@ -1,0 +1,115 @@
+name: AVAX V4 Regime Break Diagnosis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_avax_v4_regime_break_diagnosis.py
+      - .github/workflows/avax-v4-regime-break-diagnosis.yml
+
+concurrency:
+  group: avax-v4-regime-break-diagnosis-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_causal_handoff_clean_sheet_v4.py)" = "83bb895bfc865fbc0cc60f3e84789675101c2fb6"
+          test "$(git hash-object scripts/research_causal_handoff_clean_sheet_v4_cached.py)" = "bd61de92ff9819ee839068afd964080b5f835c7b"
+          test "$(git hash-object scripts/research_avax_v4_regime_break_diagnosis.py)" = "1d97e67d109d56fdc5d527f530ddf1c90f30d7ce"
+          echo FROZEN_DIAGNOSIS_SOURCES_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore exact research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+
+      - name: Check exact inputs
+        id: exact
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          root=Path('.cache/perp-research-usdm/consolidated')
+          symbols=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          required=[root/f'{s}USDT-1661990400000-1782864000000-v3.json' for s in symbols]
+          ready=all(p.is_file() for p in required)
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as fh:
+              fh.write(f"ready={'true' if ready else 'false'}\n")
+          print('EXACT_CACHE_READY' if ready else 'EXACT_CACHE_MISS')
+          PY
+
+      - name: Install prefetch dependencies
+        if: steps.exact.outputs.ready != 'true'
+        run: npm ci
+
+      - name: Prefetch genuine Binance USD-M history
+        if: steps.exact.outputs.ready != 'true'
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Compile diagnosis harness
+        run: python -m py_compile scripts/research_causal_handoff_clean_sheet_v4.py scripts/research_causal_handoff_clean_sheet_v4_cached.py scripts/research_avax_v4_regime_break_diagnosis.py
+
+      - name: Run trade-level regime diagnosis
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_avax_v4_regime_break_diagnosis.py
+
+      - name: Assert instrumentation-only fail-closed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/avax-v4-regime-break-diagnosis.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['v4LogicFrozen'] is True
+          assert d['originalV4GateStillBinding'] is True
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['newEntryDesigned'] is False
+          assert d['candidateThresholdsDerived'] is False
+          assert d['parameterSearch'] is False
+          print('INSTRUMENTATION_ONLY_FAIL_CLOSED_PASS')
+          PY
+
+      - name: Upload diagnosis artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: avax-v4-regime-break-diagnosis
+          path: |
+            .research-state/avax-v4-regime-break-diagnosis.json
+            .research-state/avax-v4-regime-break-diagnosis-trades.jsonl
+            .research-state/avax-v4-regime-break-diagnosis.md
+          if-no-files-found: warn
+          retention-days: 30
