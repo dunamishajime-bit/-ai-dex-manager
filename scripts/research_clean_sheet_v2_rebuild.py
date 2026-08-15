@@ -35,6 +35,7 @@ SYMBOL_ARCH = {
 _raw_ctx = base._ctx
 _cache: dict[tuple[str, int], dict[str, float] | None] = {}
 
+
 def ctx(symbol: str, candles, index, ts: int):
     key = (symbol, int(ts))
     if key not in _cache:
@@ -203,6 +204,8 @@ def simulate(symbol: str, arch: str, candles, index, start: int, end: int, cost_
                 candidate = ownership_arm(x)
                 if candidate is not None:
                     armed = {"side": candidate, "ts": ts}
+                continue
+            if side is None:
                 continue
         else:
             side = shock_signal(x)
