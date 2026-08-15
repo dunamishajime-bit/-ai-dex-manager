@@ -1,0 +1,67 @@
+name: Binance USD-M Metrics Schema Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_probe_binance_usdm_metrics.py
+      - .github/workflows/binance-usdm-metrics-schema-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen schema probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_probe_binance_usdm_metrics.py)" = "7a3e68f9fdb30dba19e30c4c451bc61a2f691e3b"
+          echo METRICS_SCHEMA_PROBE_SOURCE_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile probe
+        run: python -m py_compile scripts/research_probe_binance_usdm_metrics.py
+
+      - name: Probe historical metrics archives
+        run: python scripts/research_probe_binance_usdm_metrics.py
+
+      - name: Assert schema-probe-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/binance-usdm-metrics-schema-probe.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['freshOosRead'] is False
+          assert all(date <= '2026-06-30' for date in d['dates'])
+          print('METRICS_SCHEMA_PROBE_ONLY_PASS')
+          PY
+
+      - name: Upload probe artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-schema-probe
+          path: |
+            .research-state/binance-usdm-metrics-schema-probe.json
+            .research-state/binance-usdm-metrics-schema-probe.md
+          if-no-files-found: warn
+          retention-days: 30
