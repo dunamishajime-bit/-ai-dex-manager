@@ -1,0 +1,62 @@
+name: Binance USD-M Metrics Content Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_fetch_binance_usdm_metrics_history.py
+      - scripts/research_binance_usdm_metrics_content_validation_manifest.py
+      - .github/workflows/binance-usdm-metrics-content-validation.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen parser
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_fetch_binance_usdm_metrics_history.py)" = "9d7342db171cebaeb05488dd9716d5700b1793b1"
+          echo FROZEN_METRICS_PARSER_PASS
+      - name: Compile
+        run: python -m py_compile scripts/research_fetch_binance_usdm_metrics_history.py scripts/research_binance_usdm_metrics_content_validation_manifest.py
+      - name: Validate all sealed archive contents
+        run: python scripts/research_binance_usdm_metrics_content_validation_manifest.py
+      - name: Assert research boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('research-output/usdm-metrics-content-validation/manifest.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['v7Executed'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['policy']['lowerCoverageGate'] is False
+          assert d['policy']['forwardFillInvalidDays'] is False
+          print('CONTENT_VALIDATION_RESEARCH_BOUNDARY_PASS')
+          PY
+      - name: Upload validation manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-content-validation
+          path: research-output/usdm-metrics-content-validation/manifest.json
+          if-no-files-found: error
+          retention-days: 14
