@@ -43,10 +43,28 @@ jobs:
             pair-specific-v104-exact-usdm-v3-20260810
             pair-specific-v106-usdm-
 
+      - name: Check exact cached inputs
+        id: exact
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          root = Path('.cache/perp-research-usdm/consolidated')
+          symbols = ('BTC','SOL','LINK','ETH','BNB','AVAX')
+          required = [root / f'{symbol}USDT-1661990400000-1782864000000-v3.json' for symbol in symbols]
+          ready = all(path.is_file() for path in required)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"ready={'true' if ready else 'false'}\n")
+          print('EXACT_CACHE_READY' if ready else 'EXACT_CACHE_MISS')
+          PY
+
       - name: Install prefetch dependencies
+        if: steps.exact.outputs.ready != 'true'
         run: npm ci
 
       - name: Prefetch genuine Binance USD-M history
+        if: steps.exact.outputs.ready != 'true'
         env:
           PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
           PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
