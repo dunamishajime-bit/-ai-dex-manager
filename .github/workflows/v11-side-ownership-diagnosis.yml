@@ -1,0 +1,62 @@
+name: V11 Side Ownership Diagnosis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - .github/workflows/v11-side-ownership-diagnosis.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_persistent_opportunity_ownership_v11.py)" = "9bb36b31b1fb2ea1f401a1858ee31ee1d0232d7e"
+          test "$(git hash-object scripts/research_v11_side_ownership_diagnosis.py)" = "08f64f34f82f1e6a90035800675f5149e84b26eb"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+      - run: npm ci
+      - name: Prefetch frozen historical data only
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - run: python -m py_compile scripts/research_persistent_opportunity_ownership_v11.py scripts/research_v11_side_ownership_diagnosis.py
+      - name: Run instrumentation only
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_v11_side_ownership_diagnosis.py
+      - name: Assert boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/v11-side-ownership-diagnosis.json').read_text())
+          assert x['instrumentationOnly'] is True and x['strategyChanged'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['freshOosRead'] is False
+          print('V11_SIDE_DIAG_BOUNDARY_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v11-side-ownership-diagnosis
+          path: .research-state/v11-side-ownership-diagnosis.json
+          if-no-files-found: warn
+          retention-days: 30
