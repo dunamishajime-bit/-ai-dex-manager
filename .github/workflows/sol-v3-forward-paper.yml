@@ -2,8 +2,6 @@ name: SOL V3 Forward Paper
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "20 7 * * *"
   push:
     branches:
       - chatgpt/3y-entry-edge-diagnosis-20260815
