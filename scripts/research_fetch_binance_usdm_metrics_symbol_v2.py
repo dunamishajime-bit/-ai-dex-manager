@@ -1,13 +1,18 @@
 """Per-symbol research-only Binance USD-M metrics fetcher v2.
 
-Designed after infrastructure diagnostics established that every BTC design-day
-archive exists, while a tiny number of archives contain partial intraday rows
-and a small number of individual 5-minute snapshots contain blank ratio fields.
-The fetcher requires 100% daily archive/header availability, never interpolates
-or zero-fills missing metrics, drops only snapshots with non-finite required
-numeric fields, and gates the resulting series on >=99.5% hourly coverage with
-no gap longer than 12 hours. Each symbol runs in its own GitHub job to avoid the
-long-lived multi-symbol request failure seen in the v1 bulk fetch.
+Infrastructure diagnostics established three source facts for the design period:
+1. Daily archives exist even when a small number of individual ratio fields are
+   blank. Those invalid 5-minute snapshots are dropped, never imputed/zeroed.
+2. Some daily archives contain exactly one next-day boundary overlap row at
+   00:00:00-00:00:02 UTC. Only a verified 0-5 second next-day overlap is
+   discarded; any other cross-day row remains fail-closed.
+3. A few archives are genuinely partial intraday files. Missing hours are never
+   interpolated or carried across hours.
+
+The resulting per-symbol series must still satisfy 100% daily archive/header
+availability, >=99.5% hourly coverage, and no continuous missing gap >12 hours.
+Each symbol runs in its own GitHub job to avoid long-lived multi-symbol request
+failures observed in the bulk fetcher.
 
 Hard Fresh-OOS firewall: only 2023-07-01 <= t < 2026-07-01 UTC is addressable.
 No production/VPS/LIVE/order code is imported or modified.
@@ -45,6 +50,7 @@ WORKERS=20
 RETRIES=3
 MIN_HOUR_COVERAGE=0.995
 MAX_GAP_HOURS=12
+MAX_BOUNDARY_OVERLAP_SECONDS=5
 
 
 def days():
@@ -76,6 +82,8 @@ def finite_float(value: str) -> float:
 
 def fetch_day(symbol: str, day: dt.date) -> dict[str,Any]:
     url=url_for(symbol,day); last=None
+    day_start=dt.datetime.combine(day,dt.time(),tzinfo=UTC)
+    day_end=day_start+dt.timedelta(days=1)
     for attempt in range(RETRIES):
         try:
             req=urllib.request.Request(url,headers={"User-Agent":"research-usdm-metrics-symbol-v2/1.0"})
@@ -87,11 +95,16 @@ def fetch_day(symbol: str, day: dt.date) -> dict[str,Any]:
             reader=csv.DictReader(io.StringIO(raw))
             header=tuple(reader.fieldnames or ())
             if header!=HEADER: raise RuntimeError('HEADER_MISMATCH:'+'|'.join(header))
-            valid_rows=[]; source_rows=0; invalid_rows=0; invalid_by_column=Counter()
+            valid_rows=[]; source_rows=0; invalid_rows=0; boundary_rows=0; in_day_rows=0; invalid_by_column=Counter()
             for item in reader:
                 source_rows+=1
                 ts=parse_time(item['create_time'])
-                if ts.date()!=day: raise RuntimeError(f"CROSS_DAY_ROW:{ts.isoformat()}")
+                if ts.date()!=day:
+                    if day_end<=ts<=day_end+dt.timedelta(seconds=MAX_BOUNDARY_OVERLAP_SECONDS):
+                        boundary_rows+=1
+                        continue
+                    raise RuntimeError(f"UNEXPECTED_CROSS_DAY_ROW:{day.isoformat()}:{ts.isoformat()}")
+                in_day_rows+=1
                 if not (START<=ts<END): raise RuntimeError(f"FRESH_OOS_ROW_BLOCK:{ts.isoformat()}")
                 if item['symbol'].strip().upper()!=symbol: raise RuntimeError(f"SYMBOL_MISMATCH:{item['symbol']}:{symbol}")
                 parsed={}; bad=[]
@@ -113,13 +126,18 @@ def fetch_day(symbol: str, day: dt.date) -> dict[str,Any]:
                   'takerLongShortVol':parsed['sum_taker_long_short_vol_ratio'],
                 })
             if source_rows<=0: raise RuntimeError('EMPTY_METRICS_DAY')
+            if source_rows != in_day_rows + boundary_rows:
+                raise RuntimeError(f"ROW_ACCOUNTING_MISMATCH:{source_rows}:{in_day_rows}:{boundary_rows}")
+            if in_day_rows != len(valid_rows) + invalid_rows:
+                raise RuntimeError(f"IN_DAY_ROW_ACCOUNTING_MISMATCH:{in_day_rows}:{len(valid_rows)}:{invalid_rows}")
             hourly={}
             for row in sorted(valid_rows,key=lambda x:x['ts']):
                 hour=int(row['ts']//3_600_000*3_600_000)
                 hourly[hour]=row
             return {
                 'day':day.isoformat(),'available':True,
-                'sourceRows':source_rows,'validRows':len(valid_rows),'invalidRows':invalid_rows,
+                'sourceRows':source_rows,'inDayRows':in_day_rows,'boundaryOverlapRows':boundary_rows,
+                'validRows':len(valid_rows),'invalidRows':invalid_rows,
                 'invalidByColumn':dict(invalid_by_column),
                 'hourly':[dict(v,hourTs=k) for k,v in sorted(hourly.items())],
             }
@@ -153,15 +171,23 @@ def build(symbol: str, out_root: Path) -> dict[str,Any]:
     failed=[r for r in rows if not r.get('available')]
     if failed:
         raise RuntimeError(f"METRICS_ARCHIVE_AVAILABILITY_FAIL:{symbol}:{len(failed)}:{failed[:5]}")
-    hourly={}; partial=[]; invalid_days=[]; invalid_totals=Counter(); source_total=0; valid_total=0
+    hourly={}; partial=[]; invalid_days=[]; boundary_days=[]; invalid_totals=Counter()
+    source_total=0; in_day_total=0; boundary_total=0; valid_total=0; invalid_total=0
     for r in rows:
-        source_rows=int(r['sourceRows']); valid_rows=int(r['validRows']); invalid_rows=int(r['invalidRows'])
-        source_total+=source_rows; valid_total+=valid_rows
-        if source_rows!=288: partial.append({'day':r['day'],'sourceRows':source_rows})
+        source_rows=int(r['sourceRows']); in_day_rows=int(r['inDayRows']); boundary_rows=int(r['boundaryOverlapRows'])
+        valid_rows=int(r['validRows']); invalid_rows=int(r['invalidRows'])
+        source_total+=source_rows; in_day_total+=in_day_rows; boundary_total+=boundary_rows; valid_total+=valid_rows; invalid_total+=invalid_rows
+        if in_day_rows!=288: partial.append({'day':r['day'],'inDayRows':in_day_rows,'sourceRows':source_rows})
+        if boundary_rows:
+            boundary_days.append({'day':r['day'],'boundaryOverlapRows':boundary_rows})
         if invalid_rows:
-            invalid_days.append({'day':r['day'],'sourceRows':source_rows,'validRows':valid_rows,'invalidRows':invalid_rows,'invalidByColumn':r['invalidByColumn']})
+            invalid_days.append({'day':r['day'],'inDayRows':in_day_rows,'validRows':valid_rows,'invalidRows':invalid_rows,'invalidByColumn':r['invalidByColumn']})
             invalid_totals.update(r['invalidByColumn'])
         for x in r['hourly']: hourly[int(x['hourTs'])]=x
+    if source_total != in_day_total + boundary_total:
+        raise RuntimeError(f"TOTAL_ROW_ACCOUNTING_MISMATCH:{source_total}:{in_day_total}:{boundary_total}")
+    if in_day_total != valid_total + invalid_total:
+        raise RuntimeError(f"TOTAL_IN_DAY_ROW_ACCOUNTING_MISMATCH:{in_day_total}:{valid_total}:{invalid_total}")
     ordered=[hourly[k] for k in sorted(hourly)]
     expected=len(ds)*24
     coverage=len(ordered)/expected
@@ -182,11 +208,12 @@ def build(symbol: str, out_root: Path) -> dict[str,Any]:
       'strategyEvaluationPerformed':False,'freshOosRead':False,'post20260701DataUsed':False,
       'start':START.isoformat(),'endExclusive':END.isoformat(),'freshOosBoundaryExclusiveMs':int(END.timestamp()*1000),
       'schema':list(HEADER),'dailyArchiveCoverage':1.0,'expectedDays':len(ds),'availableDays':len(ds),
-      'source5mRows':source_total,'valid5mRows':valid_total,'invalid5mRows':source_total-valid_total,
-      'invalidCellsByColumn':dict(invalid_totals),'invalidDays':invalid_days,
+      'sourceArchiveRows':source_total,'inDay5mRows':in_day_total,'boundaryOverlapRows':boundary_total,
+      'valid5mRows':valid_total,'invalid5mRows':invalid_total,'invalidCellsByColumn':dict(invalid_totals),
+      'invalidDays':invalid_days,'boundaryOverlapDays':boundary_days,
       'expectedHours':expected,'hourlyRows':len(ordered),'hourCoverage':coverage,'maxGapHours':gap,
       'partialDays':partial,
-      'hourlyRule':'drop snapshots with any non-finite required numeric field; then use last valid 5m snapshot inside each UTC candle hour; no interpolation or cross-hour carry',
+      'hourlyRule':'discard only verified next-day 0-5s boundary-overlap rows; drop in-day snapshots with any non-finite required numeric field; then use last valid in-day 5m snapshot inside each UTC candle hour; no interpolation or cross-hour carry',
       'dataFile':data_path.name,'dataSha256':sha256(data_path),
     }
     manifest_path=out_root/f'{symbol}.manifest.json'
