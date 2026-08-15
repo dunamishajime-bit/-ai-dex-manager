@@ -1,0 +1,85 @@
+name: Counter Factor Ownership V16
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_counter_factor_ownership_v16.py
+      - .github/workflows/counter-factor-ownership-v16.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen V16 research source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_counter_factor_ownership_v16.py)" = "4c6b89643f727f2a4a78e346450e709830893c3d"
+          test "$(git hash-object scripts/research_residual_market_ownership_v15.py)" = "daba5f2cef328018c272bd929595aa19a113ad10"
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
+          test "$(git hash-object scripts/research_priority_router_v6_historical_robustness.py)" = "74cc5c732da7567dfb465e0558b872c8c8dcc435"
+          echo V16_FROZEN_SOURCE_PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+      - name: Install prefetch dependencies
+        run: npm ci
+      - name: Prefetch genuine history to frozen boundary
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Verify exact six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated');syms=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing=[str(root/f'{s}USDT-1661990400000-1782864000000-v3.json') for s in syms if not (root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing: raise SystemExit('MISSING_EXACT_INPUTS:'+','.join(missing))
+          print('V16_EXACT_INPUTS_PASS')
+          PY
+      - name: Compile V16
+        run: python -m py_compile scripts/research_counter_factor_ownership_v16.py
+      - name: Run first V16 backtest
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_counter_factor_ownership_v16.py
+      - name: Assert research-only boundary and annual standard
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/counter-factor-ownership-v16.json').read_text())
+          assert x['researchOnly'] is True and x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False
+          assert x['freshOosRead'] is False and x['post20260701DataUsed'] is False
+          assert x['architecture']['counterFactorCoreState'] is True and x['architecture']['factorHorizonsHours']==[24,72]
+          assert x['architecture']['pairSpecificParameters'] is False and x['architecture']['parameterGrid'] is False
+          assert x['architecture']['totalGrossResearchOnly']==1.25 and x['architecture']['annualSelector'] is False and x['architecture']['leverageRaised'] is False
+          assert x['architecture']['rankCanReplaceActiveOwner'] is False and x['architecture']['periodicResize'] is False
+          assert x['returnStandard']['minimumEveryYearPct']==80.0 and x['returnStandard']['primaryMedianAnnualPct']==100.0 and x['returnStandard']['primary3YCagrPct']==100.0 and x['returnStandard']['eightyPctIsTarget'] is False
+          print('V16_RESEARCH_BOUNDARY_PASS')
+          PY
+      - name: Upload V16 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: counter-factor-ownership-v16
+          path: .research-state/counter-factor-ownership-v16.json
+          if-no-files-found: warn
+          retention-days: 30
