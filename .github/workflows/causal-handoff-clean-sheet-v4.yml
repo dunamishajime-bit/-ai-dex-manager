@@ -7,7 +7,12 @@ on:
       - chatgpt/3y-entry-edge-diagnosis-20260815
     paths:
       - scripts/research_causal_handoff_clean_sheet_v4.py
+      - scripts/research_causal_handoff_clean_sheet_v4_cached.py
       - .github/workflows/causal-handoff-clean-sheet-v4.yml
+
+concurrency:
+  group: causal-handoff-clean-sheet-v4-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -26,6 +31,7 @@ jobs:
           test "$(git hash-object scripts/research_pairwise_clean_sheet_3y.py)" = "65419f4d0699f07366dea89385bc571a35e1d211"
           test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
           test "$(git hash-object scripts/research_causal_handoff_clean_sheet_v4.py)" = "83bb895bfc865fbc0cc60f3e84789675101c2fb6"
+          test "$(git hash-object scripts/research_causal_handoff_clean_sheet_v4_cached.py)" = "a20cf76236dc4e71c67ebc0cd9979b3f3e1c71fc"
           echo FROZEN_RESEARCH_SOURCES_PASS
 
       - uses: actions/setup-python@v5
@@ -82,12 +88,12 @@ jobs:
           PY
 
       - name: Compile V4 harness
-        run: python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_causal_handoff_clean_sheet_v4.py
+        run: python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_causal_handoff_clean_sheet_v4.py scripts/research_causal_handoff_clean_sheet_v4_cached.py
 
       - name: Run causal handoff V4
         env:
           RESEARCH_STATE_DIR: .research-state
-        run: python scripts/research_causal_handoff_clean_sheet_v4.py
+        run: python scripts/research_causal_handoff_clean_sheet_v4_cached.py
 
       - name: Assert research-only fail-closed
         shell: bash
