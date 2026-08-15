@@ -1,0 +1,132 @@
+name: SOL V3 Forward Paper
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 7 * * *"
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_sol_v3_forward_paper.py
+      - .github/workflows/sol-v3-forward-paper.yml
+
+permissions:
+  contents: read
+
+jobs:
+  forward-paper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/3y-entry-edge-diagnosis-20260815
+
+      - name: Assert frozen SOL V3 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_pair_specific_clean_sheet_v3.py)" = "e53d04416309e7adc92cbef7f0230ea7f60b368d"
+          echo FROZEN_SOL_V3_SOURCE_PASS
+
+      - name: Resolve completed UTC-day endpoint
+        id: window
+        shell: bash
+        run: |
+          set -euo pipefail
+          end_iso="$(date -u +%Y-%m-%dT00:00:00Z)"
+          end_s="$(date -u -d "$end_iso" +%s)"
+          end_ms="$((end_s * 1000))"
+          if (( end_ms <= 1782864000000 )); then
+            echo "NO_FORWARD_WINDOW:$end_iso"
+            exit 1
+          fi
+          echo "end_iso=$end_iso" >> "$GITHUB_OUTPUT"
+          echo "end_ms=$end_ms" >> "$GITHUB_OUTPUT"
+          echo "FORWARD_PAPER_END:$end_iso:$end_ms"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore forward research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: sol-v3-forward-paper-${{ steps.window.outputs.end_ms }}
+          restore-keys: |
+            sol-v3-forward-paper-
+            sol-v3-fresh-oos-usdm-20260815-v1
+            pairwise-clean-sheet-3y-usdm-v1-20260815
+
+      - name: Check exact forward inputs
+        id: exact
+        shell: bash
+        env:
+          END_MS: ${{ steps.window.outputs.end_ms }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          root = Path('.cache/perp-research-usdm/consolidated')
+          start = 1661990400000
+          end = int(os.environ['END_MS'])
+          symbols = ('BTC','ETH','BNB','SOL','LINK','AVAX')
+          required = [root / f'{s}USDT-{start}-{end}-v3.json' for s in symbols]
+          ready = all(p.is_file() for p in required)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"ready={'true' if ready else 'false'}\n")
+          print('FORWARD_EXACT_CACHE_READY' if ready else 'FORWARD_EXACT_CACHE_MISS')
+          PY
+
+      - name: Install prefetch dependencies
+        if: steps.exact.outputs.ready != 'true'
+        run: npm ci
+
+      - name: Prefetch completed forward market history
+        if: steps.exact.outputs.ready != 'true'
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: ${{ steps.window.outputs.end_iso }}
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Compile frozen forward harness
+        run: python -m py_compile scripts/research_pair_specific_clean_sheet_v3.py scripts/research_sol_v3_forward_paper.py
+
+      - name: Run cumulative SOL V3 forward paper
+        env:
+          RESEARCH_STATE_DIR: .research-state
+          FORWARD_PAPER_END_TS: ${{ steps.window.outputs.end_ms }}
+        run: python scripts/research_sol_v3_forward_paper.py
+
+      - name: Assert research-only forward boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('.research-state/sol-v3-forward-paper.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['symbol'] == 'SOL'
+          assert d['antiOverfit']['v3LogicFrozen'] is True
+          assert d['antiOverfit']['parameterSearch'] is False
+          assert d['antiOverfit']['sameRunRetuning'] is False
+          assert d['evidenceGate']['liveEligible'] is False
+          print('FORWARD_PAPER_RESEARCH_ONLY_FAIL_CLOSED_PASS')
+          PY
+
+      - name: Upload cumulative forward artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sol-v3-forward-paper-${{ steps.window.outputs.end_ms }}
+          path: |
+            .research-state/sol-v3-forward-paper.json
+            .research-state/sol-v3-forward-paper.md
+          if-no-files-found: warn
+          retention-days: 30
