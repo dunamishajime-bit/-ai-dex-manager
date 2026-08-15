@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-08-15",
+  "researchBranch": "chatgpt/3y-entry-edge-diagnosis-20260815",
+  "researchOnly": true,
+  "productionChanged": false,
+  "vpsChanged": false,
+  "liveChanged": false,
+  "realTradingEnabled": false,
+  "globalPolicy": {
+    "noSameEvidenceRetuning": true,
+    "freshOosRequiredBeforeAnyLiveUse": true,
+    "rejectedPairFreshOosFailClosed": true,
+    "historicalDiagnosisIsNotFreshOos": true,
+    "liveEligiblePairs": []
+  },
+  "evidenceFamilies": {
+    "V2": {
+      "state": "FROZEN_FAILED",
+      "runId": 31889249366,
+      "sha": "cc71c0ecd908290177ca3878c57729a299624e12",
+      "retuneAllowed": false
+    },
+    "V3": {
+      "state": "FROZEN",
+      "runId": 31889473264,
+      "sha": "738eac0d6d7d20173cc3824282ef5b591dc7a3a5",
+      "retuneAllowed": false
+    },
+    "V4": {
+      "state": "FROZEN_FAILED",
+      "runId": 31890880129,
+      "sha": "c8db73ee52c887257684ec4acb1128d952b8f879",
+      "retuneAllowed": false
+    },
+    "V5": {
+      "state": "FROZEN_FAILED",
+      "runId": 31891098553,
+      "sha": "4b21751b9f59491701e2662b867f9039ea462596",
+      "retuneAllowed": false
+    },
+    "AVAX_V6": {
+      "state": "FROZEN_FAILED",
+      "runId": 31891608498,
+      "sha": "d248c25e3965ebc7ee10edfc298a8764ad9c728d",
+      "retuneAllowed": false
+    }
+  },
+  "pairs": {
+    "SOL": {
+      "state": "FROZEN_FORWARD_PAPER_ONLY",
+      "architecture": "CONTRACTION_REACCEL_CAPTURE",
+      "frozenSourceBlob": "e53d04416309e7adc92cbef7f0230ea7f60b368d",
+      "historicalRunId": 31889473264,
+      "historical": {
+        "trades": 108,
+        "returnPct": 34.24,
+        "pf": 1.723,
+        "pfWithoutBest": 1.565,
+        "maxDDPct": -7.40
+      },
+      "freshOos": {
+        "consumed": true,
+        "startExclusiveRule": "2026-07-01T00:00:00Z inclusive",
+        "endExclusive": "2026-08-15T00:00:00Z",
+        "runId": 31889723638,
+        "result": "INSUFFICIENT_FRESH_SAMPLE_WEAK",
+        "trades": 4,
+        "normalReturnPct": -0.6566,
+        "normalPf": 0.1148,
+        "stressReturnPct": -1.2703,
+        "stressPf": 0.0193
+      },
+      "freshOosPermission": false,
+      "forwardPaperPermission": true,
+      "liveEligible": false,
+      "retuneAllowed": false,
+      "allowedNextActions": [
+        "ACCUMULATE_FROZEN_FORWARD_PAPER"
+      ]
+    },
+    "AVAX": {
+      "state": "FROZEN_REJECTED_REGIME_DEPENDENT",
+      "v4Architecture": "SYNCHRONIZED_MARKET_CATCHUP_12H",
+      "v4RunId": 31890880129,
+      "v4Later3Y": {
+        "trades": 18,
+        "returnPct": 17.69,
+        "pf": 4.0328,
+        "pfWithoutBest": 2.8822,
+        "maxDDPct": -2.8785
+      },
+      "prehistoryRunId": 31891261592,
+      "prehistory": {
+        "trades": 10,
+        "returnPct": -19.9857,
+        "pf": 0.04157,
+        "stressReturnPct": -15.1798,
+        "stressPf": 0.03985
+      },
+      "v6RunId": 31891608498,
+      "v6AllDesign": {
+        "trades": 158,
+        "returnPct": 1.8656,
+        "pf": 1.0443,
+        "pfWithoutBest": 0.9707,
+        "stressReturnPct": -17.1704,
+        "stressPf": 0.8463
+      },
+      "freshOos": {
+        "consumed": false,
+        "reservedFrom": "2026-07-01T00:00:00Z"
+      },
+      "freshOosPermission": false,
+      "forwardPaperPermission": false,
+      "liveEligible": false,
+      "retuneAllowed": false,
+      "allowedNextActions": [
+        "WAIT_FOR_NEW_UNSEEN_EVIDENCE",
+        "RESEARCH_ONLY_NEW_EXTERNAL_INFORMATION_SOURCE"
+      ]
+    },
+    "ETH": {
+      "state": "FROZEN_REJECTED",
+      "freshOos": {"consumed": false, "reservedFrom": "2026-07-01T00:00:00Z"},
+      "freshOosPermission": false,
+      "forwardPaperPermission": false,
+      "liveEligible": false,
+      "retuneAllowed": false,
+      "allowedNextActions": ["WAIT_FOR_NEW_UNSEEN_EVIDENCE", "RESEARCH_ONLY_NEW_EXTERNAL_INFORMATION_SOURCE"]
+    },
+    "LINK": {
+      "state": "FROZEN_REJECTED",
+      "freshOos": {"consumed": false, "reservedFrom": "2026-07-01T00:00:00Z"},
+      "freshOosPermission": false,
+      "forwardPaperPermission": false,
+      "liveEligible": false,
+      "retuneAllowed": false,
+      "allowedNextActions": ["WAIT_FOR_NEW_UNSEEN_EVIDENCE", "RESEARCH_ONLY_NEW_EXTERNAL_INFORMATION_SOURCE"]
+    },
+    "BNB": {
+      "state": "FROZEN_REJECTED",
+      "freshOos": {"consumed": false, "reservedFrom": "2026-07-01T00:00:00Z"},
+      "freshOosPermission": false,
+      "forwardPaperPermission": false,
+      "liveEligible": false,
+      "retuneAllowed": false,
+      "allowedNextActions": ["WAIT_FOR_NEW_UNSEEN_EVIDENCE", "RESEARCH_ONLY_NEW_EXTERNAL_INFORMATION_SOURCE"]
+    }
+  }
+}
