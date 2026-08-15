@@ -1,0 +1,90 @@
+name: Profit Loss Combined Candidate V1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_profit_loss_combined_candidate_v1.py
+      - .github/workflows/profit-loss-combined-candidate-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+
+      - name: Assert frozen loss firewall profit patterns and candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_only_firewall_frozen_v1.py)" = "f60fa2d4876bb7e6334a530325d7547a6f805edd"
+          test "$(git hash-object scripts/research_profit_tier_patterns_frozen_v1.py)" = "c3c88f38cb6853beab9d03a1df814f3fba4b0454"
+          test "$(git hash-object scripts/research_profit_loss_combined_candidate_v1.py)" = "25bd0233ae6f789b4d6af330bf1c173bf3e12967"
+          test -f docs/research/PROFIT_TIER_ENTRY_PATTERN_PROTOCOL_20260816.md
+          echo PROFIT_LOSS_CANDIDATE_SOURCE_PASS
+
+      - name: Install prefetch dependencies
+        run: npm ci
+
+      - name: Prefetch frozen historical OHLCV only
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated');syms=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing=[str(root/f'{s}USDT-1661990400000-1782864000000-v3.json') for s in syms if not (root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing:raise SystemExit('MISSING_EXACT_INPUTS:'+','.join(missing))
+          print('PROFIT_LOSS_EXACT_INPUTS_PASS')
+          PY
+
+      - name: Compile frozen candidate
+        run: python -m py_compile scripts/research_profit_loss_combined_candidate_v1.py scripts/research_profit_tier_patterns_frozen_v1.py
+
+      - name: Run first frozen Profit plus Loss backtest
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_profit_loss_combined_candidate_v1.py
+
+      - name: Assert no same-data rescue tuning and return standard
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/profit-loss-combined-candidate-v1.json').read_text())
+          assert x['researchOnly'] is True and x['profitPatternsFrozenBeforeBacktest'] is True and x['candidateRuleFrozenBeforeBacktest'] is True
+          assert x['pairSpecificParameters'] is False and x['parameterGrid'] is False and x['leverageRaisedToMeetTarget'] is False
+          assert x['totalGross']==1.0 and x['holdHours']==24 and x['maxPositions']==2
+          assert x['freshOosRead'] is False and x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False
+          print('PROFIT_LOSS_CANDIDATE_BOUNDARY_PASS')
+          PY
+
+      - name: Upload frozen Profit plus Loss result
+        uses: actions/upload-artifact@v4
+        with:
+          name: profit-loss-combined-candidate-v1
+          path: |
+            .research-state/profit-loss-combined-candidate-v1.json
+            .research-state/profit-loss-combined-candidate-v1-trades.jsonl
+          retention-days: 30
