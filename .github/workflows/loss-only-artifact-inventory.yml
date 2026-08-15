@@ -1,0 +1,57 @@
+name: Loss Only Artifact Inventory
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_loss_only_artifact_inventory.py
+      - .github/workflows/loss-only-artifact-inventory.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert metadata-only source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_only_artifact_inventory.py)" = "f5f2843878354f6f0102f24564c71ca516b9077b"
+          test -f docs/research/LOSS_ONLY_ENTRY_FIREWALL_PROTOCOL_20260816.md
+          echo LOSS_ONLY_INVENTORY_SOURCE_PASS
+      - name: Compile
+        run: python -m py_compile scripts/research_loss_only_artifact_inventory.py
+      - name: Inventory repository artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_only_artifact_inventory.py
+      - name: Assert research-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/loss-only-artifact-inventory.json').read_text())
+          assert x['researchOnly'] and x['metadataOnly']
+          assert x['artifactBodiesRead'] is False and x['tradeOutcomesRead'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          assert x['explicitV96Artifacts'] > 0
+          print('LOSS_ONLY_INVENTORY_BOUNDARY_PASS')
+          PY
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-artifact-inventory
+          path: .research-state/loss-only-artifact-inventory.json
+          retention-days: 30
