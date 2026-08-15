@@ -1,0 +1,90 @@
+name: Portfolio Profit Engine V15
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_portfolio_profit_engine_v15.py
+      - .github/workflows/portfolio-profit-engine-v15.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen V14 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v14.py)" = "f297505cabf45488a507a90b3a730720ac94c203"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v11.py)" = "97a76e525e9805dcbb3eaf8bec563869e15129ef"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v12.py)" = "94c80404016707394a5b7c5c0bf69250956f5b76"
+          echo FROZEN_V15_BASES_PASS
+      - name: Restore exact 3Y research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+      - name: Check exact inputs
+        id: exact
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          root=Path('.cache/perp-research-usdm/consolidated'); symbols=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          ready=all((root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file() for s in symbols)
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as fh: fh.write(f"ready={'true' if ready else 'false'}\n")
+          print('EXACT_CACHE_READY' if ready else 'EXACT_CACHE_MISS')
+          PY
+      - name: Install prefetch dependencies
+        if: steps.exact.outputs.ready != 'true'
+        run: npm ci
+      - name: Prefetch genuine Binance USD-M history
+        if: steps.exact.outputs.ready != 'true'
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Compile V15
+        run: python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_portfolio_profit_engine_v8.py scripts/research_portfolio_profit_engine_v11.py scripts/research_portfolio_profit_engine_v12.py scripts/research_portfolio_profit_engine_v14.py scripts/research_portfolio_profit_engine_v15.py
+      - name: Run V15
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_portfolio_profit_engine_v15.py
+      - name: Assert research boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/portfolio-profit-engine-v15.json').read_text())
+          assert d['researchOnly'] is True and d['productionChanged'] is False and d['vpsChanged'] is False and d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False and d['liveEligible'] is False and d['freshOosRead'] is False and d['freshOosConsumed'] is False
+          assert d['target']['main3YCagrPct']==100.0 and d['target']['grossExposureCapPct']==100.0 and d['target']['leverageMultiplier']==1.0
+          assert d['diagnosisBasis']['v14LongRulesChanged'] is False and d['diagnosisBasis']['v14RankingChanged'] is False and d['diagnosisBasis']['v14OwnershipChanged'] is False
+          assert d['antiOverfit']['parameterGrid'] is False and d['antiOverfit']['sameRunRetuning'] is False and d['antiOverfit']['shortSleeveEnabled'] is False
+          print('V15_RESEARCH_ONLY_FAIL_CLOSED_PASS')
+          PY
+      - name: Upload V15 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-profit-engine-v15
+          path: |
+            .research-state/portfolio-profit-engine-v15.json
+            .research-state/portfolio-profit-engine-v15-trades.jsonl
+          if-no-files-found: warn
+          retention-days: 30
