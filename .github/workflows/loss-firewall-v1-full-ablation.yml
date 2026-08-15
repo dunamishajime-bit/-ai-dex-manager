@@ -1,0 +1,77 @@
+name: Loss Firewall V1 Full Ablation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - .github/workflows/loss-firewall-v1-full-ablation.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+      - name: Assert frozen candidate firewall and diagnostic source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_firewall_generic_candidate_v1.py)" = "f006aea16d41d078abf12b0a73c97b02c1411229"
+          test "$(git hash-object scripts/research_loss_only_firewall_frozen_v1.py)" = "f60fa2d4876bb7e6334a530325d7547a6f805edd"
+          test "$(git hash-object scripts/research_loss_firewall_v1_full_ablation.py)" = "78b7130232ac96c70e46d9c49e87400aa88cd118"
+          echo FULL_ABLATION_SOURCE_PASS
+      - name: Install prefetch dependencies
+        run: npm ci
+      - name: Prefetch frozen historical OHLCV only
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Verify exact six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated');syms=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing=[s for s in syms if not (root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing:raise SystemExit('MISSING_EXACT_INPUTS:'+','.join(missing))
+          print('FULL_ABLATION_EXACT_INPUTS_PASS')
+          PY
+      - name: Compile diagnostic
+        run: python -m py_compile scripts/research_loss_only_firewall_discovery.py scripts/research_loss_only_firewall_frozen_v1.py scripts/research_loss_firewall_generic_candidate_v1.py scripts/research_loss_firewall_v1_full_ablation.py
+      - name: Compare entire firewall ON versus OFF only
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_firewall_v1_full_ablation.py
+      - name: Assert no individual blocker optimization
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/loss-firewall-v1-full-ablation.json').read_text())
+          assert x['diagnosticOnly'] is True and x['individualBlockerAblation'] is False and x['blockerRetune'] is False and x['newCandidateSelected'] is False
+          assert x['sameGenericTrigger'] is True and x['sameHold'] is True and x['sameGross'] is True and x['sameCostsAndDelay'] is True
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          print('FULL_ABLATION_NO_OPTIMIZATION_PASS')
+          PY
+      - name: Upload full ablation
+        uses: actions/upload-artifact@v4
+        with:
+          name: loss-firewall-v1-full-ablation
+          path: .research-state/loss-firewall-v1-full-ablation.json
+          retention-days: 30
