@@ -1,0 +1,89 @@
+name: Persistent Opportunity Ownership V11
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - .github/workflows/persistent-opportunity-ownership-v11.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: persistent-opportunity-ownership-v11-first-run
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen V11 research source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_persistent_opportunity_ownership_v11.py)" = "9bb36b31b1fb2ea1f401a1858ee31ee1d0232d7e"
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
+          test "$(git hash-object scripts/research_priority_router_v6_historical_robustness.py)" = "74cc5c732da7567dfb465e0558b872c8c8dcc435"
+          echo V11_FROZEN_SOURCE_PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore proven exact 3Y USD-M cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+      - name: Install prefetch dependencies
+        run: npm ci
+      - name: Prefetch genuine history to frozen boundary
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Verify exact six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated')
+          syms=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing=[str(root/f'{s}USDT-1661990400000-1782864000000-v3.json') for s in syms if not (root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing: raise SystemExit('MISSING_EXACT_INPUTS:'+','.join(missing))
+          print('V11_EXACT_INPUTS_PASS')
+          PY
+      - name: Compile V11
+        run: python -m py_compile scripts/research_persistent_opportunity_ownership_v11.py
+      - name: Run first V11 backtest
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_persistent_opportunity_ownership_v11.py
+      - name: Assert research-only boundary and annual standard
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/persistent-opportunity-ownership-v11.json').read_text())
+          assert x['researchOnly'] is True and x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False
+          assert x['freshOosRead'] is False and x['post20260701DataUsed'] is False
+          assert x['returnStandard']['minimumEveryYearPct']==80.0
+          assert x['returnStandard']['primaryMedianAnnualPct']==100.0
+          assert x['returnStandard']['primary3YCagrPct']==100.0
+          assert x['returnStandard']['eightyPctIsTarget'] is False
+          print('V11_RESEARCH_BOUNDARY_PASS')
+          PY
+      - name: Upload V11 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: persistent-opportunity-ownership-v11
+          path: .research-state/persistent-opportunity-ownership-v11.json
+          if-no-files-found: warn
+          retention-days: 30
