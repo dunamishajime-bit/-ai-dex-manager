@@ -1,0 +1,107 @@
+name: Loss Only Firewall Discovery
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_loss_only_firewall_discovery.py
+      - .github/workflows/loss-only-firewall-discovery.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+      - name: Assert frozen loser-only source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_only_firewall_discovery.py)" = "a7e4999f18e3bf6ad67c291a5dc43843feaf01b8"
+          test "$(git hash-object scripts/research_lab_pair_specific_v101.py)" = "4e1aff6400e83735a6ce13fef81e394a7c77952b"
+          test -f docs/research/LOSS_ONLY_ENTRY_FIREWALL_PROTOCOL_20260816.md
+          echo LOSS_ONLY_DISCOVERY_SOURCE_PASS
+      - name: Download latest harvest LOSERS ONLY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: python
+        run: |
+          import io,json,os,urllib.request,zipfile
+          repo=os.environ['GITHUB_REPOSITORY'];token=os.environ['GITHUB_TOKEN']
+          h={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'loss-only-discovery'}
+          def get(url):
+              q=urllib.request.Request(url,headers=h)
+              with urllib.request.urlopen(q,timeout=90) as r:return r.read()
+          data=json.loads(get(f'https://api.github.com/repos/{repo}/actions/artifacts?name=loss-only-trade-harvest&per_page=100'))
+          arts=[a for a in data.get('artifacts',[]) if not a.get('expired')]
+          if not arts: raise SystemExit('NO_HARVEST_ARTIFACT')
+          a=max(arts,key=lambda x:x['created_at'])
+          raw=get(a['archive_download_url']);z=zipfile.ZipFile(io.BytesIO(raw))
+          os.makedirs('.research-state',exist_ok=True)
+          allowed={'loss-only-losing-trades.jsonl','loss-only-trade-harvest-summary.json'}
+          names={n.split('/')[-1]:n for n in z.namelist()}
+          for base in allowed:
+              if base not in names: raise SystemExit('MISSING_HARVEST_FILE:'+base)
+              open('.research-state/'+base,'wb').write(z.read(names[base]))
+          assert not os.path.exists('.research-state/loss-only-normalized-trades.jsonl')
+          print('LOSER_ONLY_HARVEST_INPUT_PASS',a['id'])
+      - name: Install prefetch dependencies
+        run: npm ci
+      - name: Prefetch frozen historical OHLCV only
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Verify exact six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated');syms=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing=[str(root/f'{s}USDT-1661990400000-1782864000000-v3.json') for s in syms if not (root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing: raise SystemExit('MISSING_EXACT_INPUTS:'+','.join(missing))
+          print('LOSS_ONLY_DISCOVERY_EXACT_INPUTS_PASS')
+          PY
+      - name: Compile discovery
+        run: python -m py_compile scripts/research_loss_only_firewall_discovery.py
+      - name: Derive recurring loss blockers from LOSERS ONLY
+        env:
+          LOSS_ONLY_LOSERS_PATH: .research-state/loss-only-losing-trades.jsonl
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_only_firewall_discovery.py
+      - name: Assert one-way information boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads(Path('.research-state/loss-only-firewall-discovery.json').read_text())
+          assert x['researchOnly'] is True and x['losersOnly'] is True and x['winnerFileRead'] is False and x['winnerFeaturesInspected'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          assert not os.path.exists('.research-state/loss-only-normalized-trades.jsonl')
+          print('LOSS_ONLY_DISCOVERY_BOUNDARY_PASS')
+          PY
+      - name: Upload loser-only discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-firewall-discovery
+          path: |
+            .research-state/loss-only-firewall-discovery.json
+            .research-state/loss-only-firewall-discovery.md
+            .research-state/loss-only-enriched-losers.jsonl
+          retention-days: 30
