@@ -1,0 +1,92 @@
+name: V12 Latency Cost Transition Diagnosis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_v12_latency_cost_transition_diagnosis.py
+      - .github/workflows/v12-latency-cost-transition-diagnosis.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen V12 and instrumentation sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_independent_relative_ownership_v12.py)" = "08f39d3fbd60749543f56d13ffb8f7f5c0453f3f"
+          test "$(git hash-object scripts/research_v12_latency_cost_transition_diagnosis.py)" = "700a3219c20354fd1413326726696b9a36326b80"
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
+          test "$(git hash-object scripts/research_priority_router_v6_historical_robustness.py)" = "74cc5c732da7567dfb465e0558b872c8c8dcc435"
+          echo V12_DIAG_FROZEN_SOURCE_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+
+      - name: Install prefetch dependencies
+        run: npm ci
+
+      - name: Prefetch frozen historical boundary only
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated');syms=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing=[str(root/f'{s}USDT-1661990400000-1782864000000-v3.json') for s in syms if not (root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing: raise SystemExit('MISSING_EXACT_INPUTS:'+','.join(missing))
+          print('V12_DIAG_EXACT_INPUTS_PASS')
+          PY
+
+      - name: Compile frozen diagnosis
+        run: python -m py_compile scripts/research_independent_relative_ownership_v12.py scripts/research_v12_latency_cost_transition_diagnosis.py
+
+      - name: Run V12 latency cost transition diagnosis
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_v12_latency_cost_transition_diagnosis.py
+
+      - name: Assert instrumentation-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/v12-latency-cost-transition-diagnosis.json').read_text())
+          assert x['researchOnly'] is True and x['instrumentationOnly'] is True and x['v12Changed'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False
+          assert x['freshOosRead'] is False and x['post20260701DataUsed'] is False
+          assert x['diagnosticComparisonsOnly']==['10bps_delay0','30bps_delay0','10bps_delay1','30bps_delay1']
+          print('V12_DIAG_BOUNDARY_PASS')
+          PY
+
+      - name: Upload diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-latency-cost-transition-diagnosis
+          path: .research-state/v12-latency-cost-transition-diagnosis.json
+          if-no-files-found: warn
+          retention-days: 30
