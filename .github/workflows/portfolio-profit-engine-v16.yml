@@ -1,0 +1,96 @@
+name: Portfolio Profit Engine V16
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_portfolio_profit_engine_v16.py
+      - .github/workflows/portfolio-profit-engine-v16.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen component sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v14.py)" = "f297505cabf45488a507a90b3a730720ac94c203"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v12.py)" = "94c80404016707394a5b7c5c0bf69250956f5b76"
+          test "$(git hash-object scripts/research_metrics_mechanism_router_v7.py)" = "05022eb9dda5bd09dea86f9d8495bb77dfa063a9"
+          test "$(git hash-object scripts/research_metrics_mechanism_router_v7_runner.py)" = "79e42e394011a95871a16b762fdf5cb2a0aea0ab"
+          echo FROZEN_V16_COMPONENTS_PASS
+      - name: Restore exact 3Y price research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - name: Restore exact metrics V2 design cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/research-usdm-metrics-v2
+          key: research-usdm-metrics-v2-20230701-20260701
+          fail-on-cache-miss: true
+      - name: Assert sealed metrics input
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.cache/research-usdm-metrics-v2')
+          d=json.loads((root/'manifest.json').read_text())
+          assert d['cacheVersion']=='v2'
+          assert d['researchOnly'] is True and d['strategyEvaluationPerformed'] is False
+          assert d['freshOosRead'] is False and d['post20260701DataUsed'] is False
+          assert d['freshOosBoundaryExclusiveMs']==1782864000000
+          for s in ('BTCUSDT','ETHUSDT','BNBUSDT','LINKUSDT','AVAXUSDT'):
+              m=d['symbols'][s]
+              assert m['dailyArchiveCoverage']==1.0
+              assert m['hourCoverage']>=0.995
+              assert m['maxGapHours']<=12
+          print('V16_SEALED_METRICS_INPUT_PASS')
+          PY
+      - name: Compile V16
+        run: python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_portfolio_profit_engine_v8.py scripts/research_portfolio_profit_engine_v11.py scripts/research_portfolio_profit_engine_v12.py scripts/research_portfolio_profit_engine_v14.py scripts/research_metrics_mechanism_router_v7.py scripts/research_metrics_mechanism_router_v7_runner.py scripts/research_portfolio_profit_engine_v16.py
+      - name: Run V16
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_portfolio_profit_engine_v16.py
+      - name: Assert research boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/portfolio-profit-engine-v16.json').read_text())
+          assert d['researchOnly'] is True and d['productionChanged'] is False and d['vpsChanged'] is False and d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False and d['liveEligible'] is False and d['freshOosRead'] is False and d['freshOosConsumed'] is False
+          assert d['target']['main3YCagrPct']==100.0 and d['target']['grossExposureCapPct']==100.0 and d['target']['leverageMultiplier']==1.0
+          assert d['selectionPeriod']=='development_only_2023_07_to_2024_07'
+          assert d['antiOverfit']['parameterGrid'] is False and d['antiOverfit']['familySelectionUsesDevelopmentOnly'] is True
+          assert d['antiOverfit']['validationUsedForSelection'] is False and d['antiOverfit']['evaluationUsedForSelection'] is False
+          assert d['antiOverfit']['sameRunRetuning'] is False and d['antiOverfit']['freshOosUsedForTuning'] is False
+          assert d['diagnosisBasis']['v15PriceLongRulesChanged'] is False and d['diagnosisBasis']['v15OwnershipCadenceChanged'] is False
+          print('V16_RESEARCH_ONLY_FAIL_CLOSED_PASS')
+          PY
+      - name: Upload V16 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-profit-engine-v16
+          path: |
+            .research-state/portfolio-profit-engine-v16.json
+            .research-state/portfolio-profit-engine-v16-trades.jsonl
+          if-no-files-found: warn
+          retention-days: 30
