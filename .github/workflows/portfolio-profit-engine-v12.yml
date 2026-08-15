@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object scripts/research_portfolio_profit_engine_v11.py)" = "$(git hash-object scripts/research_portfolio_profit_engine_v11.py)"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v11.py)" = "97a76e525e9805dcbb3eaf8bec563869e15129ef"
           test "$(git hash-object scripts/research_portfolio_profit_engine_v8.py)" = "963153ecf2483d382b00439ea8d74572943379be"
           test "$(git hash-object scripts/research_pairwise_clean_sheet_3y.py)" = "65419f4d0699f07366dea89385bc571a35e1d211"
           echo FROZEN_V12_BASES_PASS
