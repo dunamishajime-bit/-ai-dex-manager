@@ -1,0 +1,96 @@
+name: Binance USD-M Metrics Monthly Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - .github/workflows/binance-usdm-metrics-monthly-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe monthly metrics archives only
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, urllib.request, urllib.error, zipfile, io, csv
+          from pathlib import Path
+          symbols=('BTCUSDT','ETHUSDT','BNBUSDT','LINKUSDT','AVAXUSDT')
+          months=('2024-07','2025-07','2026-06')
+          base='https://data.binance.vision/data/futures/um/monthly/metrics'
+          rows=[]
+          for s in symbols:
+            for m in months:
+              name=f'{s}-metrics-{m}.zip'
+              url=f'{base}/{s}/{name}'
+              rec={'symbol':s,'month':m,'url':url,'available':False}
+              try:
+                req=urllib.request.Request(url,headers={'User-Agent':'research-monthly-probe/1.0'})
+                with urllib.request.urlopen(req,timeout=20) as r: payload=r.read()
+                rec['available']=True; rec['zipBytes']=len(payload)
+                with zipfile.ZipFile(io.BytesIO(payload)) as zf:
+                  names=[n for n in zf.namelist() if n.lower().endswith('.csv')]
+                  rec['csvNames']=names[:3]
+                  if names:
+                    data=zf.read(names[0]).decode('utf-8-sig',errors='replace')
+                    parsed=list(csv.reader(io.StringIO(data)))
+                    rec['header']=parsed[0] if parsed else []
+                    rec['rowCount']=max(0,len(parsed)-1)
+              except urllib.error.HTTPError as e:
+                rec['httpStatus']=e.code
+              except Exception as e:
+                rec['error']=type(e).__name__+':'+str(e)[:200]
+              rows.append(rec)
+          available=[r for r in rows if r['available']]
+          out={
+            'researchLine':'BINANCE_USDM_METRICS_MONTHLY_PROBE',
+            'researchOnly':True,'productionChanged':False,'vpsChanged':False,'liveChanged':False,'realTradingEnabled':False,
+            'strategyEvaluationPerformed':False,'freshOosRead':False,'post20260701DataUsed':False,
+            'availableCount':len(available),'totalProbes':len(rows),'results':rows
+          }
+          root=Path('.research-state'); root.mkdir(exist_ok=True)
+          (root/'binance-usdm-metrics-monthly-probe.json').write_text(json.dumps(out,indent=2,sort_keys=True))
+          lines=['# Binance USD-M Metrics Monthly Probe','',f"Available: {len(available)}/{len(rows)}",'']
+          for r in rows: lines.append(f"- {r['symbol']} {r['month']}: available={r['available']} rows={r.get('rowCount')} status={r.get('httpStatus')} error={r.get('error')}")
+          lines += ['','Probe only. No strategy evaluation. No Fresh OOS data read.']
+          (root/'binance-usdm-metrics-monthly-probe.md').write_text('\n'.join(lines)+'\n')
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Assert probe-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/binance-usdm-metrics-monthly-probe.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          print('MONTHLY_METRICS_PROBE_ONLY_PASS')
+          PY
+      - name: Upload monthly probe artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-monthly-probe
+          path: |
+            .research-state/binance-usdm-metrics-monthly-probe.json
+            .research-state/binance-usdm-metrics-monthly-probe.md
+          if-no-files-found: warn
+          retention-days: 30
