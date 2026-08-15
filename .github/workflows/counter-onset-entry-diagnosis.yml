@@ -1,0 +1,83 @@
+name: Counter Onset Entry Diagnosis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_counter_onset_entry_diagnosis.py
+      - .github/workflows/counter-onset-entry-diagnosis.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen counter-onset sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_counter_onset_entry_diagnosis.py)" = "c170befe96340f3ccbe646a815a143a22333d801"
+          test "$(git hash-object scripts/research_residual_market_ownership_v15.py)" = "daba5f2cef328018c272bd929595aa19a113ad10"
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
+          test "$(git hash-object scripts/research_priority_router_v6_historical_robustness.py)" = "74cc5c732da7567dfb465e0558b872c8c8dcc435"
+          echo COUNTER_ONSET_FROZEN_SOURCE_PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+      - name: Install prefetch dependencies
+        run: npm ci
+      - name: Prefetch frozen historical boundary only
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Verify exact six-symbol inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cache/perp-research-usdm/consolidated');syms=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          missing=[str(root/f'{s}USDT-1661990400000-1782864000000-v3.json') for s in syms if not (root/f'{s}USDT-1661990400000-1782864000000-v3.json').is_file()]
+          if missing: raise SystemExit('MISSING_EXACT_INPUTS:'+','.join(missing))
+          print('COUNTER_ONSET_EXACT_INPUTS_PASS')
+          PY
+      - name: Compile entry diagnosis
+        run: python -m py_compile scripts/research_counter_onset_entry_diagnosis.py
+      - name: Run counter onset entry diagnosis
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_counter_onset_entry_diagnosis.py
+      - name: Assert instrumentation-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/counter-onset-entry-diagnosis.json').read_text())
+          assert x['researchOnly'] is True and x['instrumentationOnly'] is True and x['strategyChanged'] is False
+          assert x['eventClassesFrozenBeforeResults']==['COUNTER_FIRST_FROM_ALIGNED','COUNTER_FIRST_FROM_MIXED','COUNTER_FIRST_FROM_ABSENT_OR_FLIP','COUNTER_CONFIRMED']
+          assert x['horizonsFrozenBeforeResultsHours']==[6,24,48]
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False
+          assert x['freshOosRead'] is False and x['post20260701DataUsed'] is False
+          print('COUNTER_ONSET_BOUNDARY_PASS')
+          PY
+      - name: Upload entry diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: counter-onset-entry-diagnosis
+          path: .research-state/counter-onset-entry-diagnosis.json
+          if-no-files-found: warn
+          retention-days: 30
