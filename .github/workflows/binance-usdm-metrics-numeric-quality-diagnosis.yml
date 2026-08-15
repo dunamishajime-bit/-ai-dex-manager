@@ -1,0 +1,60 @@
+name: Binance USD-M Metrics Numeric Quality Diagnosis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_probe_binance_usdm_metrics_numeric_quality.py
+      - .github/workflows/binance-usdm-metrics-numeric-quality-diagnosis.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen numeric probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_probe_binance_usdm_metrics_numeric_quality.py)" = "13755193174abbf4b21c82774295c0ea576578ac"
+          echo METRICS_NUMERIC_PROBE_SOURCE_PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile probe
+        run: python -m py_compile scripts/research_probe_binance_usdm_metrics_numeric_quality.py
+      - name: Diagnose numeric blanks
+        run: python scripts/research_probe_binance_usdm_metrics_numeric_quality.py
+      - name: Assert probe-only boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/binance-usdm-metrics-numeric-quality-diagnosis.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['strategyEvaluationPerformed'] is False
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['endExclusive']=='2026-07-01'
+          print('METRICS_NUMERIC_PROBE_ONLY_PASS')
+          PY
+      - name: Upload numeric diagnosis
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-numeric-quality-diagnosis
+          path: |
+            .research-state/binance-usdm-metrics-numeric-quality-diagnosis.json
+            .research-state/binance-usdm-metrics-numeric-quality-diagnosis.md
+          if-no-files-found: error
+          retention-days: 30
