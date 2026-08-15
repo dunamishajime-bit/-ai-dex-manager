@@ -1,0 +1,62 @@
+name: Loss Only Trade Harvest V2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_loss_only_trade_harvest_v2.py
+      - .github/workflows/loss-only-trade-harvest-v2.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen harvester plus transport-only fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_only_trade_harvest.py)" = "26c6389bf25f6a2160b164a7916c0b1fbf5a648e"
+          test "$(git hash-object scripts/research_loss_only_trade_harvest_v2.py)" = "28e7bb99e17ca8bab9b22c87384613332f221e1e"
+          test -f docs/research/LOSS_ONLY_ENTRY_FIREWALL_PROTOCOL_20260816.md
+          echo LOSS_ONLY_HARVEST_V2_SOURCE_PASS
+      - name: Compile
+        run: python -m py_compile scripts/research_loss_only_trade_harvest.py scripts/research_loss_only_trade_harvest_v2.py
+      - name: Harvest same fixed V96+ artifact population
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_only_trade_harvest_v2.py
+      - name: Assert transport recovery and one-way boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/loss-only-trade-harvest-summary.json').read_text())
+          assert x['researchOnly'] is True and x['winnerFeaturesInspected'] is False and x['blockersSelected'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          assert x['selectedArtifacts'] > 0
+          assert x['machineReadableFilesScanned'] > 0, x
+          assert x['rawCandidateRecords'] > 0, x
+          print('LOSS_ONLY_HARVEST_V2_RECOVERY_PASS')
+          PY
+      - name: Upload normalized trade harvest V2
+        uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-trade-harvest-v2
+          path: |
+            .research-state/loss-only-normalized-trades.jsonl
+            .research-state/loss-only-losing-trades.jsonl
+            .research-state/loss-only-trade-harvest-summary.json
+          retention-days: 30
