@@ -1,0 +1,59 @@
+name: Loss Only Trade Harvest Redirect Safe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_loss_only_trade_harvest_redirect_safe.py
+      - .github/workflows/loss-only-trade-harvest-redirect-safe.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen redirect-safe broad harvest sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_loss_only_trade_harvest.py)" = "26c6389bf25f6a2160b164a7916c0b1fbf5a648e"
+          test "$(git hash-object scripts/research_loss_only_trade_harvest_redirect_safe.py)" = "ab6ce3cdc4b670fff40e12e9eec5afe987122dbc"
+          echo LOSS_ONLY_REDIRECT_SAFE_BROAD_SOURCE_PASS
+      - name: Compile
+        run: python -m py_compile scripts/research_loss_only_trade_harvest.py scripts/research_loss_only_trade_harvest_redirect_safe.py
+      - name: Harvest fixed V96+ research population
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_only_trade_harvest_redirect_safe.py
+      - name: Assert one-way boundary and nonempty transport
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/loss-only-trade-harvest-summary.json').read_text())
+          assert x['researchOnly'] and x['winnerFeaturesInspected'] is False and x['blockersSelected'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          assert x['machineReadableFilesScanned'] > 0
+          print('LOSS_ONLY_REDIRECT_SAFE_BROAD_BOUNDARY_PASS')
+          PY
+      - name: Upload redirect-safe broad harvest
+        uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-trade-harvest-redirect-safe
+          path: |
+            .research-state/loss-only-normalized-trades.jsonl
+            .research-state/loss-only-losing-trades.jsonl
+            .research-state/loss-only-trade-harvest-summary.json
+          retention-days: 30
