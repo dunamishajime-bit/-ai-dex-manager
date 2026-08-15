@@ -1,0 +1,63 @@
+name: Loss Only Trade Harvest Extended Manifest
+
+on:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths: [.github/workflows/loss-only-trade-harvest-extended-manifest.yml]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Assert frozen extended harvest source
+        run: |
+          test "$(git hash-object scripts/research_loss_only_trade_harvest.py)" = "26c6389bf25f6a2160b164a7916c0b1fbf5a648e"
+          test "$(git hash-object scripts/research_loss_only_trade_harvest_redirect_safe.py)" = "ab6ce3cdc4b670fff40e12e9eec5afe987122dbc"
+          test "$(git hash-object scripts/research_loss_only_trade_harvest_extended_manifest.py)" = "096ddd8e2c57aa15b2ba53c97021e29ffa5d9ecd"
+      - name: Download frozen artifact inventory directly
+        env: {GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"}
+        shell: python
+        run: |
+          import io,os,urllib.request,urllib.error,zipfile
+          tok=os.environ['GITHUB_TOKEN'];url=f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/9251271508/zip";H={'Authorization':f'Bearer {tok}','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'extended-loss-harvest'}
+          class NR(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,req,fp,code,msg,heads,newurl):return None
+          q=urllib.request.Request(url,headers=H);op=urllib.request.build_opener(NR)
+          try:raw=op.open(q,timeout=60).read()
+          except urllib.error.HTTPError as e:
+            if e.code not in (301,302,303,307,308):raise
+            raw=urllib.request.urlopen(urllib.request.Request(e.headers['Location'],headers={'User-Agent':'extended-loss-harvest'}),timeout=120).read()
+          z=zipfile.ZipFile(io.BytesIO(raw));name=[n for n in z.namelist() if n.endswith('loss-only-artifact-inventory.json')][0];os.makedirs('.research-state',exist_ok=True);open('.research-state/loss-only-artifact-inventory.json','wb').write(z.read(name));print('FIXED_INVENTORY_PASS')
+      - name: Compile
+        run: python -m py_compile scripts/research_loss_only_trade_harvest.py scripts/research_loss_only_trade_harvest_redirect_safe.py scripts/research_loss_only_trade_harvest_extended_manifest.py
+      - name: Harvest extended manifest population
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOSS_ONLY_INVENTORY_PATH: .research-state/loss-only-artifact-inventory.json
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_loss_only_trade_harvest_extended_manifest.py
+      - name: Assert one-way boundary
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('.research-state/loss-only-extended-harvest-summary.json'))
+          assert x['researchOnly'] and x['selectionOutcomeBlind'] and x['winnerFeaturesInspected'] is False and x['blockersSelected'] is False
+          assert x['productionChanged'] is False and x['vpsChanged'] is False and x['liveChanged'] is False and x['realTradingEnabled'] is False and x['freshOosRead'] is False
+          print('EXTENDED_HARVEST_BOUNDARY_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-trade-harvest-extended-manifest
+          path: |
+            .research-state/loss-only-extended-normalized-trades.jsonl
+            .research-state/loss-only-extended-losing-trades.jsonl
+            .research-state/loss-only-extended-harvest-summary.json
+          retention-days: 30
