@@ -1,0 +1,68 @@
+name: Portfolio Profit Engine V18
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_portfolio_profit_engine_v18.py
+      - .github/workflows/portfolio-profit-engine-v18.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen V15 ranking stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v15.py)" = "1ac36230c636df11649892256ad7bbba0c6693a1"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v14.py)" = "f297505cabf45488a507a90b3a730720ac94c203"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v11.py)" = "97a76e525e9805dcbb3eaf8bec563869e15129ef"
+          echo FROZEN_V15_RANKING_STACK_PASS
+      - name: Restore exact 3Y research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - name: Compile V18
+        run: python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_portfolio_profit_engine_v8.py scripts/research_portfolio_profit_engine_v11.py scripts/research_portfolio_profit_engine_v14.py scripts/research_portfolio_profit_engine_v15.py scripts/research_portfolio_profit_engine_v18.py
+      - name: Run V18
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_portfolio_profit_engine_v18.py
+      - name: Assert research boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/portfolio-profit-engine-v18.json').read_text())
+          assert d['researchOnly'] is True and d['productionChanged'] is False and d['vpsChanged'] is False and d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False and d['liveEligible'] is False and d['freshOosRead'] is False and d['freshOosConsumed'] is False
+          assert d['target']['main3YCagrPct']==100.0 and d['target']['grossExposureCapPct']==100.0 and d['target']['leverageMultiplier']==1.0
+          assert d['diagnosisBasis']['v15BreadthRulesChanged'] is False and d['diagnosisBasis']['v15RankingRulesChanged'] is False
+          assert d['antiOverfit']['parameterGrid'] is False and d['antiOverfit']['perSymbolParameters'] is False
+          assert d['antiOverfit']['maxConcurrentNames']==2
+          print('V18_RESEARCH_ONLY_FAIL_CLOSED_PASS')
+          PY
+      - name: Upload V18 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-profit-engine-v18
+          path: |
+            .research-state/portfolio-profit-engine-v18.json
+            .research-state/portfolio-profit-engine-v18-trades.jsonl
+          if-no-files-found: warn
+          retention-days: 30
