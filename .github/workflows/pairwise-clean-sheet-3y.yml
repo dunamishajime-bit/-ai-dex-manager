@@ -1,0 +1,84 @@
+name: Pairwise Clean Sheet 3Y Backtest
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/pairwise-clean-sheet-3y-20260815
+    paths:
+      - scripts/research_pairwise_clean_sheet_3y.py
+      - .github/workflows/pairwise-clean-sheet-3y.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen research dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_priority_router_v6.py)" = "d86763ba638eabfb0f07f288856556420100f2d7"
+          test "$(git hash-object scripts/research_lab_pair_specific_v109.py)" = "75a80eed073df2ef5e13ff3a297f94c533ac2aef"
+          test "$(git hash-object scripts/research_priority_router_one_year.py)" = "eee4320c3d31efb349778f0420ba9bafb505e935"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+            pair-specific-v106-usdm-
+
+      - name: Install prefetch dependencies
+        run: npm ci
+
+      - name: Prefetch genuine Binance USD-M history
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Verify exact consolidated inputs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('.cache/perp-research-usdm/consolidated')
+          symbols = ('BTC','SOL','LINK','ETH','BNB','AVAX')
+          required = [root / f'{symbol}USDT-1661990400000-1782864000000-v3.json' for symbol in symbols]
+          missing = [str(path) for path in required if not path.is_file()]
+          if missing:
+              raise SystemExit('MISSING_EXACT_CONSOLIDATED_INPUTS:' + ','.join(missing))
+          print('EXACT_CONSOLIDATED_INPUTS_PASS')
+          PY
+
+      - name: Compile research harness
+        run: |
+          python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_priority_router_v6.py
+          python scripts/research_priority_router_v6.py --self-test
+
+      - name: Run pairwise clean-sheet 3Y backtest
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_pairwise_clean_sheet_3y.py
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pairwise-clean-sheet-3y
+          path: .research-state/pairwise-clean-sheet-3y.json
+          if-no-files-found: warn
+          retention-days: 30
