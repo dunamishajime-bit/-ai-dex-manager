@@ -1,0 +1,87 @@
+name: Loss Only Firewall Discovery Merged Auto
+
+on:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths: [.github/workflows/loss-only-firewall-discovery-merged-auto.yml]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: pair-specific-v107-exact-usdm-v3-20260811
+      - name: Assert frozen discovery source
+        run: test "$(git hash-object scripts/research_loss_only_firewall_discovery.py)" = "a7e4999f18e3bf6ad67c291a5dc43843feaf01b8"
+      - name: Await Broad and merge Broad+Core LOSERS ONLY
+        env: {GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"}
+        shell: python
+        run: |
+          import io,json,os,time,urllib.request,urllib.error,zipfile
+          repo=os.environ['GITHUB_REPOSITORY'];tok=os.environ['GITHUB_TOKEN'];H={'Authorization':f'Bearer {tok}','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'loss-only-merged-auto'}
+          def get(u):
+            with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=60) as r:return r.read()
+          class NR(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,req,fp,code,msg,heads,newurl):return None
+          def latest(name):
+            for _ in range(180):
+              xs=[a for a in json.loads(get(f'https://api.github.com/repos/{repo}/actions/artifacts?name={name}&per_page=100')).get('artifacts',[]) if not a.get('expired')]
+              if xs:return max(xs,key=lambda a:a['created_at'])
+              time.sleep(5)
+            raise SystemExit('ARTIFACT_NOT_READY:'+name)
+          def download(a):
+            q=urllib.request.Request(a['archive_download_url'],headers=H);op=urllib.request.build_opener(NR)
+            try:return op.open(q,timeout=60).read()
+            except urllib.error.HTTPError as e:
+              if e.code not in (301,302,303,307,308):raise
+              return urllib.request.urlopen(urllib.request.Request(e.headers['Location'],headers={'User-Agent':'loss-only-merged-auto'}),timeout=120).read()
+          specs=[('loss-only-trade-harvest-redirect-safe','loss-only-losing-trades.jsonl'),('loss-only-trade-harvest-core-redirect-safe','loss-only-core-losing-trades.jsonl')]
+          allrows=[];src=[]
+          for an,fn in specs:
+            a=latest(an);z=zipfile.ZipFile(io.BytesIO(download(a)));names={n.split('/')[-1]:n for n in z.namelist()};rows=[json.loads(x) for x in z.read(names[fn]).decode().splitlines() if x.strip()];allrows+=rows;src.append({'artifact':an,'id':a['id'],'digest':a.get('digest'),'rows':len(rows)})
+          uniq={};drop=0
+          for r in allrows:
+            v=r.get('version');br=str(r.get('branch') or '').lower()
+            if (isinstance(v,(int,float)) and int(v)<96) or ('research/v71' in br and (v is None or int(v)<96)):drop+=1;continue
+            k=(r.get('sourceFamily'),r.get('symbol'),r.get('side'),r.get('entryTs'),r.get('exitTs'),round(float(r.get('returnPct') or 0),8),r.get('mode'));uniq[k]=r
+          rows=sorted(uniq.values(),key=lambda r:(int(r.get('entryTs') or 0),str(r.get('sourceFamily')),str(r.get('symbol'))));os.makedirs('.research-state',exist_ok=True)
+          with open('.research-state/loss-only-losing-trades.jsonl','w') as f:
+            for r in rows:f.write(json.dumps(r,sort_keys=True)+'\n')
+          s={'researchOnly':True,'winnerFilesRead':False,'sources':src,'inputRows':len(allrows),'droppedPreV96Records':drop,'deduplicatedLosers':len(rows),'sourceFamilies':len({r.get('sourceFamily') for r in rows}),'partitions':{p:sum(r.get('partition')==p for r in rows) for p in ('LOSS_DISCOVERY','LOSS_VALIDATION')},'symbols':{x:sum(r.get('symbol')==x for r in rows) for x in ('BTC','ETH','BNB','SOL','LINK','AVAX')}};open('.research-state/loss-only-merged-input-summary.json','w').write(json.dumps(s,indent=2,sort_keys=True));print(json.dumps(s,indent=2))
+      - name: Install dependencies
+        run: npm ci
+      - name: Prefetch frozen OHLCV
+        env: {PERP_RESEARCH_START_DATE: '2022-09-01T00:00:00Z', PERP_RESEARCH_END_DATE: '2026-07-01T00:00:00Z'}
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+      - name: Run frozen loser-only discovery
+        env: {LOSS_ONLY_LOSERS_PATH: .research-state/loss-only-losing-trades.jsonl, RESEARCH_STATE_DIR: .research-state}
+        run: python scripts/research_loss_only_firewall_discovery.py
+      - name: Assert no winner access
+        run: |
+          python - <<'PY'
+          import json,os
+          x=json.load(open('.research-state/loss-only-firewall-discovery.json'));m=json.load(open('.research-state/loss-only-merged-input-summary.json'))
+          assert x['losersOnly'] and x['winnerFileRead'] is False and x['winnerFeaturesInspected'] is False and m['winnerFilesRead'] is False
+          assert not os.path.exists('.research-state/loss-only-normalized-trades.jsonl')
+          print('MERGED_LOSER_ONLY_BOUNDARY_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loss-only-firewall-discovery-merged-final
+          path: |
+            .research-state/loss-only-merged-input-summary.json
+            .research-state/loss-only-firewall-discovery.json
+            .research-state/loss-only-firewall-discovery.md
+            .research-state/loss-only-enriched-losers.jsonl
+          retention-days: 30
