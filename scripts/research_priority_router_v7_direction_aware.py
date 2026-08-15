@@ -41,6 +41,20 @@ def _source_hash() -> str:
     return hashlib.sha256(Path(v6.__file__).read_bytes()).hexdigest()
 
 
+def _directional_breakdown(trades: list[dict[str, Any]]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for side in ("LONG", "SHORT"):
+        rows = [row for row in trades if str(row.get("side", "")).upper() == side]
+        vals = [float(row.get("portfolioPnlPctPoints", 0.0)) for row in rows]
+        out[side] = {
+            "trades": len(vals),
+            "contributionPctPoints": sum(vals),
+            "pf": base.profit_factor(vals),
+            "winRatePct": (sum(value > 0 for value in vals) / len(vals) * 100.0) if vals else 0.0,
+        }
+    return out
+
+
 def _hostility(f: dict[str, float], t: dict[str, Any], side: str) -> int:
     score = 0
     for key in ("breadth_72", "alt_rel_72", "dispersion_72", "btc_vol_percentile"):
@@ -105,6 +119,8 @@ def _scale_candidates(candidates: dict[str, list[dict[str, Any]]], engine: attr.
 
 def _summary(normal: dict[str, Any], stress: dict[str, Any], exposure_audit: dict[str, Any]) -> dict[str, Any]:
     m, sm = normal["metrics"], stress["metrics"]
+    directional = _directional_breakdown(normal["realTrades"])
+    stress_directional = _directional_breakdown(stress["realTrades"])
     return {
         "returnPct": float(m["oneYearReturnPct"]),
         "cagrPct": float(m["cagrPct"]),
@@ -118,10 +134,10 @@ def _summary(normal: dict[str, Any], stress: dict[str, Any], exposure_audit: dic
         "winRatePct": float(m["winRatePct"]),
         "turnoverPct": float(m["portfolioTurnoverPctOfInitialEquity"]),
         "cashPct": float(normal["allocationTimePct"]["averageCashPct"]),
-        "long": hist.directional_breakdown(normal["realTrades"]).get("LONG", {}),
-        "short": hist.directional_breakdown(normal["realTrades"]).get("SHORT", {}),
-        "stressLong": hist.directional_breakdown(stress["realTrades"]).get("LONG", {}),
-        "stressShort": hist.directional_breakdown(stress["realTrades"]).get("SHORT", {}),
+        "long": directional["LONG"],
+        "short": directional["SHORT"],
+        "stressLong": stress_directional["LONG"],
+        "stressShort": stress_directional["SHORT"],
         "exposureAudit": exposure_audit,
     }
 
