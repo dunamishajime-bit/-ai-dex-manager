@@ -1,0 +1,117 @@
+name: AVAX Persistent Residual Propagation V6
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_avax_persistent_residual_propagation_v6.py
+      - .github/workflows/avax-persistent-residual-propagation-v6.yml
+
+concurrency:
+  group: avax-persistent-residual-propagation-v6-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert frozen V6 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_avax_persistent_residual_propagation_v6.py)" = "1486786b091f3fbe9168b34752a053aa53b2331d"
+          echo FROZEN_AVAX_V6_SOURCE_PASS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore exact design-history cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          restore-keys: |
+            pair-specific-v107-exact-usdm-v3-20260811
+            pair-specific-v104-exact-usdm-v3-20260810
+
+      - name: Check exact pre-Fresh inputs
+        id: exact
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          root=Path('.cache/perp-research-usdm/consolidated')
+          symbols=('BTC','SOL','LINK','ETH','BNB','AVAX')
+          required=[root/f'{s}USDT-1661990400000-1782864000000-v3.json' for s in symbols]
+          ready=all(p.is_file() for p in required)
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as fh:
+              fh.write(f"ready={'true' if ready else 'false'}\n")
+          print('EXACT_DESIGN_CACHE_READY' if ready else 'EXACT_DESIGN_CACHE_MISS')
+          PY
+
+      - name: Install prefetch dependencies
+        if: steps.exact.outputs.ready != 'true'
+        run: npm ci
+
+      - name: Prefetch design history only
+        if: steps.exact.outputs.ready != 'true'
+        env:
+          PERP_RESEARCH_START_DATE: 2022-09-01T00:00:00Z
+          PERP_RESEARCH_END_DATE: 2026-07-01T00:00:00Z
+        run: npx tsx scripts/research-lab-prefetch-event-regime-v53.ts
+
+      - name: Compile V6 harness
+        run: python -m py_compile scripts/research_avax_persistent_residual_propagation_v6.py
+
+      - name: Run V6 historical design sanity check
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_avax_persistent_residual_propagation_v6.py
+
+      - name: Assert design-only fail-closed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.research-state/avax-persistent-residual-propagation-v6.json').read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['v4SignalOrExitCalled'] is False
+          assert d['freshOosRead'] is False
+          assert d['post20260701DataUsed'] is False
+          assert d['allHistoricalDataTreatedAsDesignEvidence'] is True
+          assert d['historicalSanityGateIsNotOosEvidence'] is True
+          assert d['antiOverfit']['cleanSheet'] is True
+          assert d['antiOverfit']['parameterGrid'] is False
+          assert d['antiOverfit']['familyTournament'] is False
+          assert d['antiOverfit']['sameRunRetuning'] is False
+          assert d['antiOverfit']['v4ThresholdPatch'] is False
+          assert d['antiOverfit']['freshOosRequiredBeforeAnyLiveUse'] is True
+          print('DESIGN_ONLY_FAIL_CLOSED_PASS')
+          PY
+
+      - name: Upload V6 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: avax-persistent-residual-propagation-v6
+          path: |
+            .research-state/avax-persistent-residual-propagation-v6.json
+            .research-state/avax-persistent-residual-propagation-v6-trades.jsonl
+            .research-state/avax-persistent-residual-propagation-v6.md
+          if-no-files-found: warn
+          retention-days: 30
