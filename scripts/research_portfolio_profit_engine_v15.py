@@ -19,9 +19,11 @@ import research_portfolio_profit_engine_v8 as v8
 import research_portfolio_profit_engine_v11 as v11
 import research_portfolio_profit_engine_v14 as v14
 
+V14_BREADTH_REGIME = v14._breadth_regime
+
 
 def _long_only_regime(ts: int, features: dict[str, dict[int, dict[str, float]]]) -> int:
-    side = v14._breadth_regime(ts, features)
+    side = V14_BREADTH_REGIME(ts, features)
     return 1 if side > 0 else 0
 
 
