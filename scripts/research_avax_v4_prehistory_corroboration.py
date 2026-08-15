@@ -41,8 +41,8 @@ def main() -> None:
     results = {}
     all_records = []
     for label, (start, end) in PERIODS.items():
-        normal = v4.simulate(SYMBOL, v4.ARCH[SYMBOL], candles, index, start, end, v4.NORMAL_BPS, 0)
-        stress = v4.simulate(SYMBOL, v4.ARCH[SYMBOL], candles, index, start, end, v4.STRESS_BPS, v4.STRESS_DELAY)
+        normal = v4.simulate(SYMBOL, candles, index, start, end, v4.NORMAL_BPS, 0)
+        stress = v4.simulate(SYMBOL, candles, index, start, end, v4.STRESS_BPS, v4.STRESS_DELAY)
         results[label] = {
             "normal": v4.metric(normal),
             "stress": v4.metric(stress),
