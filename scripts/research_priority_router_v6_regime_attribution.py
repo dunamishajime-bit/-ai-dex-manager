@@ -462,7 +462,19 @@ def _trade_attribution(run: dict[str, Any], engine: FeatureEngine, thresholds: d
     for tr in run.get("realTrades", []):
         ts = int(tr["entryTs"])
         feat = engine.snapshot(ts)
-        rows.append({"symbol": tr["symbol"], "side": tr["side"], "entryTs": ts, "exitTs": int(tr["exitTs"]), "year": _year_label(ts), "pnlPctPoints": float(tr["portfolioPnlPctPoints"]), "netReturnPct": float(tr["netReturnPct"]), **feat})
+        end_ts = int(tr["exitTs"])
+        idx0, idx1 = engine.index[str(tr["symbol"])].get(ts), engine.index[str(tr["symbol"])].get(end_ts)
+        mfe, mae = 0.0, 0.0
+        if idx0 is not None and idx1 is not None and idx1 >= idx0:
+            rows_candles = engine.candles[str(tr["symbol"])][idx0:idx1 + 1]
+            entry = float(tr["entryPrice"])
+            if str(tr["side"]).upper() == "LONG":
+                mfe = (max(float(x["high"]) for x in rows_candles) / entry - 1.0) * 100.0
+                mae = (min(float(x["low"]) for x in rows_candles) / entry - 1.0) * 100.0
+            else:
+                mfe = (entry / min(float(x["low"]) for x in rows_candles) - 1.0) * 100.0
+                mae = (entry / max(float(x["high"]) for x in rows_candles) - 1.0) * 100.0
+        rows.append({"symbol": tr["symbol"], "side": tr["side"], "entryTs": ts, "exitTs": end_ts, "year": _year_label(ts), "pnlPctPoints": float(tr["portfolioPnlPctPoints"]), "netReturnPct": float(tr["netReturnPct"]), "mfePct": mfe, "maePct": mae, **feat})
     by_symbol = {}
     for symbol in base.TRADE_SYMBOLS:
         vals = [r for r in rows if r["symbol"] == symbol]
@@ -472,7 +484,7 @@ def _trade_attribution(run: dict[str, Any], engine: FeatureEngine, thresholds: d
     for feature in FEATURES:
         cut1, cut2 = thresholds["q33"][feature], thresholds["q67"][feature]
         groups = {"LOW": [r for r in rows if r[feature] < cut1], "MEDIUM": [r for r in rows if cut1 <= r[feature] < cut2], "HIGH": [r for r in rows if r[feature] >= cut2]}
-        bins[feature] = {name: {"trades": len(vals), "returnPctPoints": sum(r["pnlPctPoints"] for r in vals), "pf": base.profit_factor([r["netReturnPct"] for r in vals]), "pfWithoutBest": base.profit_factor(base._without_best([r["netReturnPct"] for r in vals])) if vals else None, "winRatePct": sum(r["netReturnPct"] > 0 for r in vals) / len(vals) * 100.0 if vals else 0.0} for name, vals in groups.items()}
+        bins[feature] = {name: {"trades": len(vals), "returnPctPoints": sum(r["pnlPctPoints"] for r in vals), "pf": base.profit_factor([r["netReturnPct"] for r in vals]), "pfWithoutBest": base.profit_factor(base._without_best([r["netReturnPct"] for r in vals])) if vals else None, "winRatePct": sum(r["netReturnPct"] > 0 for r in vals) / len(vals) * 100.0 if vals else 0.0, "meanMfePct": _mean([r["mfePct"] for r in vals]), "meanMaePct": _mean([r["maePct"] for r in vals]), "bySide": {side: {"trades": sum(r["side"] == side for r in vals), "returnPctPoints": sum(r["pnlPctPoints"] for r in vals if r["side"] == side), "pf": base.profit_factor([r["netReturnPct"] for r in vals if r["side"] == side])} for side in ("LONG", "SHORT")}} for name, vals in groups.items()}
     monthly = defaultdict(list)
     for r in rows:
         dt = datetime.fromtimestamp(r["entryTs"] / 1000, JST)
