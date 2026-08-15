@@ -1,0 +1,127 @@
+name: Binance USD-M Metrics History Cache V2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_fetch_binance_usdm_metrics_symbol_v2.py
+      - .github/workflows/binance-usdm-metrics-history-cache-v2.yml
+
+concurrency:
+  group: binance-usdm-metrics-history-cache-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-symbol:
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        symbol: [BTCUSDT, ETHUSDT, BNBUSDT, LINKUSDT, AVAXUSDT]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert frozen per-symbol fetcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_fetch_binance_usdm_metrics_symbol_v2.py)" = "3820e15ee1924c3ee58356a10435825552efefc3"
+          echo METRICS_SYMBOL_V2_SOURCE_PASS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile fetcher
+        run: python -m py_compile scripts/research_fetch_binance_usdm_metrics_symbol_v2.py
+      - name: Assert Fresh OOS firewall
+        run: python scripts/research_fetch_binance_usdm_metrics_symbol_v2.py --firewall-self-test
+      - name: Fetch exact design metrics for ${{ matrix.symbol }}
+        run: python scripts/research_fetch_binance_usdm_metrics_symbol_v2.py --symbol ${{ matrix.symbol }}
+      - name: Assert symbol data boundary
+        shell: bash
+        env:
+          SYMBOL: ${{ matrix.symbol }}
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          s=os.environ['SYMBOL']; p=Path(f'.cache/research-usdm-metrics-v2/{s}.manifest.json'); d=json.loads(p.read_text())
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False and d['vpsChanged'] is False and d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False and d['strategyEvaluationPerformed'] is False
+          assert d['freshOosRead'] is False and d['post20260701DataUsed'] is False
+          assert d['freshOosBoundaryExclusiveMs'] == 1782864000000
+          assert d['dailyArchiveCoverage'] == 1.0
+          assert d['hourCoverage'] >= 0.995
+          assert d['maxGapHours'] <= 12
+          print('METRICS_SYMBOL_V2_FAIL_CLOSED_PASS',s,d['hourCoverage'],d['maxGapHours'],d['partialDays'])
+          PY
+      - name: Upload symbol metrics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-v2-${{ matrix.symbol }}
+          path: |
+            .cache/research-usdm-metrics-v2/${{ matrix.symbol }}.hourly.json.gz
+            .cache/research-usdm-metrics-v2/${{ matrix.symbol }}.manifest.json
+          if-no-files-found: error
+          retention-days: 7
+
+  merge-cache:
+    needs: fetch-symbol
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare cache save hook
+        uses: actions/cache@v4
+        with:
+          path: .cache/research-usdm-metrics-v2
+          key: research-usdm-metrics-v2-20230701-20260701
+      - name: Download all symbol artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: metrics-v2-*
+          path: .cache/research-usdm-metrics-v2
+          merge-multiple: true
+      - name: Build and assert combined manifest
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('.cache/research-usdm-metrics-v2'); symbols=('BTCUSDT','ETHUSDT','BNBUSDT','LINKUSDT','AVAXUSDT')
+          sm={}
+          for s in symbols:
+            m=json.loads((root/f'{s}.manifest.json').read_text())
+            p=root/f'{s}.hourly.json.gz'
+            h=hashlib.sha256(p.read_bytes()).hexdigest()
+            assert h==m['dataSha256'],(s,h,m['dataSha256'])
+            assert m['dailyArchiveCoverage']==1.0 and m['hourCoverage']>=0.995 and m['maxGapHours']<=12
+            assert m['freshOosRead'] is False and m['post20260701DataUsed'] is False
+            sm[s]=m
+          schema=sm['BTCUSDT']['schema']
+          assert all(v['schema']==schema for v in sm.values())
+          out={
+            'cacheVersion':'v2','source':'binance-data-vision-usdm-daily-metrics','researchOnly':True,
+            'productionChanged':False,'vpsChanged':False,'liveChanged':False,'realTradingEnabled':False,
+            'strategyEvaluationPerformed':False,'freshOosRead':False,'post20260701DataUsed':False,
+            'freshOosBoundaryExclusiveMs':1782864000000,'start':'2023-07-01T00:00:00+00:00','endExclusive':'2026-07-01T00:00:00+00:00',
+            'schema':schema,'hourlyRule':'last available 5m metrics snapshot inside each UTC candle hour; no interpolation',
+            'symbols':sm,
+          }
+          (root/'manifest.json').write_text(json.dumps(out,indent=2,sort_keys=True))
+          print(json.dumps({s:{'hours':m['hourlyRows'],'coverage':m['hourCoverage'],'maxGap':m['maxGapHours'],'partialDays':m['partialDays']} for s,m in sm.items()},indent=2))
+          print('METRICS_V2_COMBINED_CACHE_PASS')
+          PY
+      - name: Upload combined manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-usdm-metrics-history-v2-manifest
+          path: .cache/research-usdm-metrics-v2/manifest.json
+          if-no-files-found: error
+          retention-days: 30
