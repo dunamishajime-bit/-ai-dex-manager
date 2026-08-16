@@ -1,0 +1,38 @@
+name: Research Multi-Horizon Leader V27
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths:
+      - scripts/research_multi_horizon_leader_v27.ts
+      - .github/workflows/research-multi-horizon-leader-v27.yml
+permissions:
+  contents: read
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Assert frozen V27 source
+        run: test "$(git hash-object scripts/research_multi_horizon_leader_v27.ts)" = "b43b19ec216dfbba6773e3bae63dfc41a4f5005a"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - run: npm ci
+      - name: Run V27 research
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_multi_horizon_leader_v27.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multi-horizon-leader-v27
+          path: .research-state/multi-horizon-leader-v27.json
+          include-hidden-files: true
+          retention-days: 30
