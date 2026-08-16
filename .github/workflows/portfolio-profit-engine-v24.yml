@@ -1,0 +1,37 @@
+name: Portfolio Profit Engine V24
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths:
+      - scripts/research_portfolio_profit_engine_v24.ts
+      - .github/workflows/portfolio-profit-engine-v24.yml
+permissions:
+  contents: read
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Assert frozen V24 source
+        run: test "$(git hash-object scripts/research_portfolio_profit_engine_v24.ts)" = "578c72cef828bf4767cafd03903229cd30b6e915"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - run: npm ci
+      - name: Run V24 research
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_portfolio_profit_engine_v24.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-profit-engine-v24
+          path: .research-state/portfolio-profit-engine-v24*
+          retention-days: 30
