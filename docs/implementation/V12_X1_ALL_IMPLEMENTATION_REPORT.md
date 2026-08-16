@@ -17,6 +17,10 @@ PENGU Dual LS V2 and V52 stock sleeves. It is an offline implementation only.
   unacknowledged protection install triggers reduce-only flatten and manual
   review. Stop replacements are acknowledged before the previous stop is
   canceled.
+- V52 crypto gross accounting now covers the complete V12 universe plus
+  PENGU; unknown non-flat Aster symbols fail closed for manual review.
+- Expired account-lock ownership is never deleted automatically because an
+  exchange order may still be pending; it remains blocked until reconciliation.
 
 ## Frozen lineage
 
@@ -34,3 +38,10 @@ order API is touched by these checks.
 `VPS_UNCHANGED=true`
 `LIVE_NOT_ACTIVATED=true`
 `ORDERS_SENT=0`
+
+## Deliberate production divergence
+
+The V12 runner in this implementation is plan-only and has no Aster order
+adapter. It can produce SHADOW/PAPER signals and durable state/reservations,
+but a LIVE request returns `live-blocked`. Adding a venue adapter, activating
+systemd, or changing the kill switch requires a separate explicit request.
