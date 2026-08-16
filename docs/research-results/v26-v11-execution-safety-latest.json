@@ -15,7 +15,7 @@
     "stopCancelFailure": "KEEP_BOTH_REDUCE_ONLY_STOPS_UNTIL_RECONCILED"
   },
   "pass": true,
-  "caseCount": 12,
+  "caseCount": 13,
   "cases": {
     "splitBrainLeaseFencing": {
       "primary": "EXECUTED",
@@ -44,6 +44,10 @@
     },
     "hedgeModeRejected": {
       "outcome": "PREFLIGHT_REJECTED",
+      "marketCalls": 0
+    },
+    "expiredDuringReconciliation": {
+      "outcome": "STALE_REJECTED",
       "marketCalls": 0
     },
     "stopPlaceVerifyThenCancel": {
