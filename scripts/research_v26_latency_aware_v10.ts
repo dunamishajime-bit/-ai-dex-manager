@@ -42,7 +42,6 @@ async function main() {
     "governance: \"No V26 signal/parameter search and no chase threshold. Zero-Chase activates only when entry age is 1H. Development and Validation must both pass before Evaluation/combined 3Y are read.\",",
   );
   mustReplace("V26_LATENCY_AWARE_V9_ASTER_RESIDENT_STOP", "V26_LATENCY_AWARE_V10_ZERO_CHASE_RESIDENT_STOP");
-  mustReplace("V9_", "V10_");
   mustReplace("v26-latency-aware-v9.json", "v26-latency-aware-v10.json");
   mustReplace("V9_RESIDENT_STOP_EXECUTION_FAILS_DV", "V10_ZERO_CHASE_FAILS_DV");
   mustReplace("V9_ASTER_RESIDENT_STOP_EXECUTION_ACCEPTED", "V10_ZERO_CHASE_RESIDENT_STOP_ACCEPTED");
