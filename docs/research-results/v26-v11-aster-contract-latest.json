@@ -1,0 +1,21 @@
+{
+  "researchLine": "V26_V11_ASTER_PROTECTIVE_HTTP_CONTRACT",
+  "researchOnly": true,
+  "productionDeployed": false,
+  "vpsChanged": false,
+  "liveChanged": false,
+  "realTradingEnabled": false,
+  "pass": true,
+  "verified": {
+    "signedPositionModeGet": true,
+    "stopMarketPost": true,
+    "oneWayPositionSideBoth": true,
+    "reduceOnlyTrue": true,
+    "stopPriceForwarded": true,
+    "closePositionAbsent": true,
+    "cancelByOrigClientOrderId": true,
+    "mutation503ExecutionUnknown": true,
+    "read503NotExecutionUnknown": true
+  },
+  "callCount": 6
+}
