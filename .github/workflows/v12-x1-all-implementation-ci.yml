@@ -46,6 +46,7 @@ jobs:
           npx tsx scripts/v12-x1-all-selftest.ts
           npx tsx scripts/disdex-account-order-lock-selftest.ts
           npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
+          npx tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts
           npx tsx scripts/v12-resident-stop-selftest.ts
           npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test
           python scripts/disdex_account_order_lock.py --self-test
