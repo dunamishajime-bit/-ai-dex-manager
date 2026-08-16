@@ -15,9 +15,29 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, Optional
 
 import websocket
+from zoneinfo import ZoneInfo
 
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
 UTC = dt.timezone.utc
+NEW_YORK = ZoneInfo("America/New_York")
+
+
+def regular_us_equity_session(value: dt.datetime | None = None) -> bool:
+    """Return whether the NYSE/Nasdaq regular session is open.
+
+    This is used only to classify health. It never makes a stale quote
+    executable: freshnessReady remains false until every per-symbol
+    quote passes the normal 5-second two-source policy.
+    """
+    local = (value or dt.datetime.now(tz=UTC)).astimezone(NEW_YORK)
+    if local.weekday() >= 5:
+        return False
+    seconds = local.hour * 3600 + local.minute * 60 + local.second
+    return 9 * 3600 + 30 * 60 <= seconds < 16 * 3600
+
+
+def market_label() -> str:
+    return "US equities 09:30-16:00 America/New_York"
 
 # V52 reference-quality policy. These are ceilings, not fallbacks: every
 # quote still requires both connected sources and passes all validations below.
@@ -257,9 +277,30 @@ class QuoteStore:
                 row["valid"] = True
             quote_status[symbol] = row
 
+        connected = pyth_connected and iex_connected
+        session_open = regular_us_equity_session()
+        # Outside regular hours a connected stream is expected to have no
+        # fresh equity quote. Report that state explicitly as deferred.
+        # freshnessReady remains false and /quote still rejects stale or
+        # missing data, preserving the fail-closed entry gate.
+        if connected and all_quotes_valid:
+            status = "ok"
+        elif connected and not session_open:
+            status = "deferred"
+        else:
+            status = "degraded"
         return {
-            "status": "ok" if pyth_connected and iex_connected and all_quotes_valid else "degraded",
+            "status": status,
             "freshnessReady": all_quotes_valid,
+            "marketOpen": session_open,
+            "marketLabel": market_label(),
+            "healthReason": (
+                "READY"
+                if status == "ok"
+                else "MARKET_CLOSED_REFERENCE_DEFERRED"
+                if status == "deferred"
+                else "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY"
+            ),
             "pythConnected": pyth_connected,
             "iexConnected": iex_connected,
             "pythError": pyth_error,
@@ -430,7 +471,13 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("cache-control", "no-store")
         self.send_header("content-length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            # A probe or reverse proxy may close after receiving headers. A
+            # client disconnect must not flood the journal or look like a
+            # reference-stream failure.
+            return
 
     def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
@@ -479,6 +526,9 @@ def self_test() -> None:
     assert DEFAULT_IEX_MAX_AGE_MS == 5000
     assert DEFAULT_PYTH_MAX_CONFIDENCE_BPS == 25.0
     assert DEFAULT_REFERENCE_MAX_CROSS_SOURCE_BPS == 50.0
+    assert regular_us_equity_session(dt.datetime(2026, 8, 17, 14, 0, tzinfo=NEW_YORK)) is True
+    assert regular_us_equity_session(dt.datetime(2026, 8, 17, 16, 0, tzinfo=NEW_YORK)) is False
+    assert regular_us_equity_session(dt.datetime(2026, 8, 16, 12, 0, tzinfo=NEW_YORK)) is False
     assert parse_rfc3339_ms("2026-07-25T01:02:03.123456789Z") == 1784941323123
     store = QuoteStore()
     now_seconds = int(time.time())
