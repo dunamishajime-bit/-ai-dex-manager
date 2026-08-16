@@ -15,6 +15,7 @@ type ChildResult = { code: number | null; stdout: string; stderr: string };
 
 const DATA_FAILURE_PATTERNS = [
     /iex_quote_unavailable/i,
+    /pyth_confidence_too_wide/i,
     /cross_source_divergence/i,
     /reference quote (?:stale|unavailable|failed)/i,
     /reference (?:health|source).*?(?:failed|unavailable|not connected|did not become ready)/i,
@@ -33,7 +34,7 @@ export function isUsRegularEquitySession(now = new Date()): boolean {
     const parts = Object.fromEntries(formatter.formatToParts(now).map((part) => [part.type, part.value]));
     if (["Sat", "Sun"].includes(parts.weekday)) return false;
     const minutes = Number(parts.hour) * 60 + Number(parts.minute);
-    return minutes >= 570 && minutes <= 960;
+    return minutes >= 570 && minutes < 960;
 }
 
 export function shouldFetchV52MarketData(now = new Date()): boolean {
@@ -41,7 +42,16 @@ export function shouldFetchV52MarketData(now = new Date()): boolean {
 }
 
 export function containsDataFailure(output: string): boolean {
-    return DATA_FAILURE_PATTERNS.some((pattern) => pattern.test(output));
+    if (DATA_FAILURE_PATTERNS.some((pattern) => pattern.test(output))) return true;
+
+    // Only classify transport failures as V52 reference-data failures when the
+    // traceback proves they came from the read-only reference quote adapter.
+    // Authentication and account-risk HTTP failures must remain common
+    // fail-closed blockers.
+    if (!/self\.reference\.quote\(symbol\)/i.test(output)) return false;
+    return /urllib\.error\.(?:HTTPError|URLError)/i.test(output)
+        || /RuntimeError:\s+HTTP\s+(?:429|5\d\d)\b/i.test(output)
+        || /<urlopen error .*?(?:timed out|connection refused|temporary failure)/i.test(output);
 }
 
 export function classifyV52PreflightFailure(output: string, now = new Date()): V52PreflightStatus | undefined {

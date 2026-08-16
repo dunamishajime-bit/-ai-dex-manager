@@ -33,25 +33,11 @@ policy_script="$(pwd -P)/scripts/ops/disdex-v96-v52-live-policy.sh"
 source "$policy_script"
 disdex_apply_v96_v52_fixed_live_policy
 disdex_assert_v96_v52_fixed_live_policy
-
-shared_repo="/home/deploy/ai-dex-manager-v96-paper"
-shared_state="$shared_repo/.runtime-state/disdex-v13d-v11eq-v96"
-shared_approval="$shared_repo/.runtime-approval"
+disdex_apply_v96_v52_shared_runtime_paths
+disdex_assert_v96_v52_shared_runtime_paths
 
 export DISDEX_V96_RUNTIME_COMMIT_SHA="$sha"
-export DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT="$shared_state"
-export DISDEX_V13D_V11EQ_V96_STATE_DIR="$shared_state"
-export DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE="$shared_state/kill-switch.json"
-export DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR="$shared_state/margin-risk"
-export DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE="$shared_state/margin-risk/guard-live.json"
 export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT="scripts/disdex_v96_v52_margin_guard_runtime.py"
-export DISDEX_V52_ASTER_ONLY_STATE_DIR="$shared_state/stock"
-export DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE="$shared_state/kill-switch.json"
-export DISDEX_V96_STATE_DIR="$shared_state/crypto-v96"
-export DISDEX_V96_KILL_SWITCH_FILE="$shared_state/kill-switch.json"
-export DISDEX_V96_FORWARD_EVIDENCE_FILE="$shared_approval/disdex-v96-forward.json"
-export DISDEX_V96_EXECUTION_PARITY_FILE="$shared_approval/disdex-v96-parity.json"
-export DISDEX_V96_OPERATOR_OVERRIDE_FILE="$shared_approval/disdex-v96-operator-override.json"
 export DISDEX_V96_CONFIG_MIGRATION_MODE=true
 export DISDEX_V96_OPERATOR_AUDIT_SYNC_ACKNOWLEDGEMENT=I_SYNC_CURRENT_EXACT_OPERATOR_OVERRIDE_AUDIT
 

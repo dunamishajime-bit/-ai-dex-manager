@@ -3,11 +3,11 @@ import "dotenv/config";
 import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { DISDEX_V13D_V11EQ_V96_RUNTIME } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { assertDisDexV96LiveGates, type DisDexV96ExecutionParityApproval, type DisDexV96ForwardEvidenceApproval } from "../lib/disdex-v96-live-gates";
 import { readDisDexV96KillSwitch, type DisDexV96OperatorOverrideApproval } from "../lib/disdex-v96-live-risk-controls";
+import { resolveDisDexV96V52SharedRuntimePaths } from "../lib/disdex-v96-v52-shared-runtime-paths";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
 
@@ -30,17 +30,19 @@ function numberEnv(name: string, fallback: number) {
     return Number.isFinite(value) ? value : fallback;
 }
 
-function statePaths(env: NodeJS.ProcessEnv = process.env) {
-    const combinedRoot = resolve(env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT || env.DISDEX_V13D_V11EQ_V96_STATE_DIR || DISDEX_V13D_V11EQ_V96_RUNTIME.stateDirectory);
-    const cryptoRoot = resolve(env.DISDEX_V96_STATE_DIR || `${combinedRoot}/crypto-v96`);
-    const stockRoot = resolve(env.DISDEX_V52_ASTER_ONLY_STATE_DIR || `${combinedRoot}/stock`);
-    const killSwitch = resolve(env.DISDEX_V96_KILL_SWITCH_FILE || `${combinedRoot}/kill-switch.json`);
+export function resolveReadOnlyStatePaths(env: NodeJS.ProcessEnv = process.env) {
+    const shared = resolveDisDexV96V52SharedRuntimePaths(env);
     return {
-        combinedRoot,
-        cryptoState: resolve(cryptoRoot, "runner-live.json"),
-        stockState: resolve(stockRoot, "runner-live.json"),
-        killSwitch,
+        combinedRoot: shared.combinedRoot,
+        cryptoState: resolve(shared.cryptoStateRoot, "runner-live.json"),
+        stockState: resolve(shared.stockStateRoot, "runner-live.json"),
+        killSwitch: shared.killSwitchPath,
     };
+}
+
+export async function assertReadOnlyKillSwitchInactive(path: string) {
+    const killSwitch = await readDisDexV96KillSwitch(path);
+    if (killSwitch?.active) throw new Error(`READ_ONLY_PREFLIGHT_KILL_SWITCH_ACTIVE:${killSwitch.reason}`);
 }
 
 async function readJson<T>(path: string, label: string): Promise<T> {
@@ -84,7 +86,7 @@ function approvalPath(path: string | undefined) {
 }
 
 export async function runReadOnlyPreflight() {
-    const paths = statePaths();
+    const paths = resolveReadOnlyStatePaths();
     const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
     const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
     const requestedDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
@@ -130,6 +132,7 @@ export async function runReadOnlyPreflight() {
             maximumDailyLossPct: operatorOverride.maximumDailyLossPct,
         },
         forwardEvidencePresent: Boolean(forwardEvidence),
+        killSwitchPath: paths.killSwitch,
         requestedMaxGross,
         requestedPenguGrossCap,
         requiredExecutionLeverage,
@@ -147,8 +150,7 @@ export async function runReadOnlyPreflight() {
         initialPenguGrossCap: requestedPenguGrossCap,
         runtimeCommitSha,
     });
-    const killSwitch = await readDisDexV96KillSwitch(paths.killSwitch);
-    if (killSwitch?.active) throw new Error(`READ_ONLY_PREFLIGHT_KILL_SWITCH_ACTIVE:${killSwitch.reason}`);
+    await assertReadOnlyKillSwitchInactive(paths.killSwitch);
 
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
@@ -208,7 +210,7 @@ export async function runReadOnlyPreflight() {
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
         v96DailyLossLimitPct: DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct,
         v52DailyLossLimitPct: 3.5,
-        statePaths: { combinedRoot: paths.combinedRoot, crypto: paths.cryptoState, stock: paths.stockState },
+        statePaths: { combinedRoot: paths.combinedRoot, crypto: paths.cryptoState, stock: paths.stockState, killSwitch: paths.killSwitch },
         currentUtcDay,
         savedUtcDay,
         savedUtcDays: { crypto: before.crypto.utcDay, stock: before.stock.utcDay },
