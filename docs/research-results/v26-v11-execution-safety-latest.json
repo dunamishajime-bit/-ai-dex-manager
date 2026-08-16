@@ -1,0 +1,75 @@
+{
+  "researchLine": "V26_V11_EXECUTION_SAFETY_SELFTEST",
+  "researchOnly": true,
+  "productionDeployed": false,
+  "vpsChanged": false,
+  "liveChanged": false,
+  "realTradingEnabled": false,
+  "architecture": {
+    "entryFreshnessMs": 3600000,
+    "staleEntryPolicy": "FAIL_CLOSED_REJECT",
+    "positionModeRequirement": "ONE_WAY",
+    "entryRedundancy": "LEASE_FENCED_ACTIVE_STANDBY_WITH_PRE_SUBMIT_RECONCILIATION",
+    "executionUnknownPolicy": "RECONCILE_THEN_NEVER_BLIND_RETRY",
+    "residentStopUpdate": "PLACE_NEW_REDUCE_ONLY_STOP_VERIFY_THEN_CANCEL_OLD",
+    "stopCancelFailure": "KEEP_BOTH_REDUCE_ONLY_STOPS_UNTIL_RECONCILED"
+  },
+  "pass": true,
+  "caseCount": 12,
+  "cases": {
+    "splitBrainLeaseFencing": {
+      "primary": "EXECUTED",
+      "secondary": "LEASE_DENIED",
+      "marketCalls": 1
+    },
+    "ackLossAfterExchangeAccept": {
+      "outcome": "RECONCILED_AFTER_UNKNOWN",
+      "marketCalls": 1
+    },
+    "unknownWithoutOrder": {
+      "outcome": "EXECUTION_UNKNOWN_FAIL_CLOSED",
+      "marketCalls": 1
+    },
+    "preSubmitReconciliationUnavailable": {
+      "outcome": "RECONCILIATION_UNCERTAIN_FAIL_CLOSED",
+      "marketCalls": 0
+    },
+    "leaseUnavailable": {
+      "outcome": "LEASE_DENIED",
+      "marketCalls": 0
+    },
+    "staleOneHourEntry": {
+      "outcome": "STALE_REJECTED",
+      "marketCalls": 0
+    },
+    "hedgeModeRejected": {
+      "outcome": "PREFLIGHT_REJECTED",
+      "marketCalls": 0
+    },
+    "stopPlaceVerifyThenCancel": {
+      "outcome": "REPLACED",
+      "stopCalls": 1,
+      "cancelCalls": 1
+    },
+    "newStopRejectedOldRetained": {
+      "outcome": "NEW_STOP_UNCONFIRMED_OLD_RETAINED",
+      "cancelCalls": 0,
+      "oldStatus": "NEW"
+    },
+    "stopAckLostReconciled": {
+      "outcome": "REPLACED",
+      "cancelCalls": 1
+    },
+    "oldStopCancelFailedOverlapSafe": {
+      "outcome": "OVERLAP_SAFE_OLD_CANCEL_FAILED",
+      "oldReduceOnly": true,
+      "newReduceOnly": true
+    },
+    "clientOrderIds": {
+      "entryId": "v11-e-BTCUSDT-msvmvr40-06uy77o",
+      "stopId": "v11-s-BTCUSDT-rr-06uy77o",
+      "entryLength": 30,
+      "stopLength": 24
+    }
+  }
+}
