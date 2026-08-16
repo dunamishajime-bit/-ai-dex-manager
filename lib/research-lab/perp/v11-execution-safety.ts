@@ -45,6 +45,13 @@ export class V11OrderNotFoundError extends Error {
   }
 }
 
+export class V11StaleEntryError extends Error {
+  constructor(message = "entry decision deadline expired") {
+    super(message);
+    this.name = "V11StaleEntryError";
+  }
+}
+
 export interface V11AsterGateway {
   isOneWayMode(): Promise<boolean>;
   supportsStopMarket(symbol: string): Promise<boolean>;
@@ -54,6 +61,7 @@ export interface V11AsterGateway {
     side: V11Side;
     quantity: string;
     clientOrderId: string;
+    deadlineTs: number;
   }): Promise<V11OrderSnapshot>;
   placeReduceOnlyStopMarket(input: {
     symbol: string;
@@ -126,16 +134,18 @@ async function reconcileExisting(gateway: V11AsterGateway, symbol: string, clien
 export async function executeV11FreshEntry(input: {
   intent: V11DecisionIntent;
   executorId: string;
-  now: number;
+  clock: () => number;
   lease: V11ExecutionLease;
   gateway: V11AsterGateway;
   maxAgeMs?: number;
 }): Promise<V11EntryResult> {
-  const { intent, executorId, now, lease, gateway } = input;
+  const { intent, executorId, clock, lease, gateway } = input;
   const maxAgeMs = input.maxAgeMs ?? V11_ENTRY_MAX_AGE_MS;
   const clientOrderId = v11DecisionClientOrderId(intent);
+  const deadlineTs = intent.decisionTs + maxAgeMs;
+  const initialNow = clock();
 
-  if (!isV11FreshDecision(intent.decisionTs, now, maxAgeMs)) {
+  if (!isV11FreshDecision(intent.decisionTs, initialNow, maxAgeMs)) {
     return { outcome: "STALE_REJECTED", submitted: false, clientOrderId, reason: "decision tick is stale" };
   }
   if (!(await gateway.isOneWayMode())) {
@@ -148,7 +158,11 @@ export async function executeV11FreshEntry(input: {
   const leaseKey = `v11:${intent.decisionId}`;
   let grant: V11LeaseGrant;
   try {
-    grant = await lease.tryAcquire({ key: leaseKey, owner: executorId, now, expiresAt: intent.decisionTs + maxAgeMs });
+    const leaseNow = clock();
+    if (!isV11FreshDecision(intent.decisionTs, leaseNow, maxAgeMs)) {
+      return { outcome: "STALE_REJECTED", submitted: false, clientOrderId, reason: "decision tick expired during preflight" };
+    }
+    grant = await lease.tryAcquire({ key: leaseKey, owner: executorId, now: leaseNow, expiresAt: deadlineTs });
   } catch (error) {
     return { outcome: "LEASE_DENIED", submitted: false, clientOrderId, reason: `lease unavailable: ${error instanceof Error ? error.message : String(error)}` };
   }
@@ -165,11 +179,18 @@ export async function executeV11FreshEntry(input: {
     return { outcome: "RECONCILIATION_UNCERTAIN_FAIL_CLOSED", submitted: false, clientOrderId, fence: grant.fence, reason: before.error };
   }
 
+  if (!isV11FreshDecision(intent.decisionTs, clock(), maxAgeMs)) {
+    return { outcome: "STALE_REJECTED", submitted: false, clientOrderId, fence: grant.fence, reason: "decision tick expired before submission" };
+  }
+
   try {
-    const order = await gateway.placeMarket({ symbol: intent.symbol, side: intent.side, quantity: intent.quantity, clientOrderId });
+    const order = await gateway.placeMarket({ symbol: intent.symbol, side: intent.side, quantity: intent.quantity, clientOrderId, deadlineTs });
     await lease.markCommitted({ key: leaseKey, owner: executorId, fence: grant.fence });
     return { outcome: "EXECUTED", submitted: true, clientOrderId, fence: grant.fence, order };
   } catch (error) {
+    if (error instanceof V11StaleEntryError) {
+      return { outcome: "STALE_REJECTED", submitted: false, clientOrderId, fence: grant.fence, reason: error.message };
+    }
     if (!(error instanceof V11ExecutionUnknownError)) throw error;
     const after = await reconcileExisting(gateway, intent.symbol, clientOrderId);
     if (after.kind === "found") {

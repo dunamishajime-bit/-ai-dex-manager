@@ -12,6 +12,7 @@ export interface AsterV3ClientOptions {
     recvWindowMs?: number;
     fetchImpl?: typeof fetch;
     userAgent?: string;
+    now?: () => number;
 }
 
 export interface AsterExchangeFilter {
@@ -116,6 +117,8 @@ export interface AsterOrderResponse {
     positionSide?: AsterPositionSide;
     type?: string;
     reduceOnly?: boolean;
+    closePosition?: boolean;
+    stopPrice?: string;
     origQty?: string;
     executedQty?: string;
     cumQuote?: string;
@@ -123,6 +126,10 @@ export interface AsterOrderResponse {
     updateTime?: number;
     code?: number;
     msg?: string;
+}
+
+export interface AsterPositionModeResponse {
+    dualSidePosition: boolean;
 }
 
 export interface AsterNewMarketOrder {
@@ -133,6 +140,17 @@ export interface AsterNewMarketOrder {
     reduceOnly?: boolean;
     newClientOrderId: string;
     newOrderRespType?: "ACK" | "RESULT";
+    deadlineTs?: number;
+}
+
+export interface AsterNewReduceOnlyStopMarketOrder {
+    symbol: string;
+    side: AsterOrderSide;
+    quantity: string;
+    stopPrice: string;
+    newClientOrderId: string;
+    workingType?: "CONTRACT_PRICE" | "MARK_PRICE";
+    priceProtect?: boolean;
 }
 
 export class AsterApiError extends Error {
@@ -157,6 +175,16 @@ export class AsterApiError extends Error {
         this.retryAfterMs = input.retryAfterMs;
         this.executionUnknown = input.executionUnknown === true;
         this.responseBody = input.responseBody;
+    }
+}
+
+export class AsterRequestDeadlineError extends Error {
+    readonly deadlineTs: number;
+
+    constructor(deadlineTs: number) {
+        super(`Aster request deadline expired at ${deadlineTs}.`);
+        this.name = "AsterRequestDeadlineError";
+        this.deadlineTs = deadlineTs;
     }
 }
 
@@ -225,8 +253,10 @@ function retryAfterFromHeaders(headers: Headers): number | undefined {
 class MonotonicMicrosecondNonce {
     private last = 0n;
 
+    constructor(private readonly now: () => number) {}
+
     next() {
-        const now = BigInt(Date.now()) * 1000n;
+        const now = BigInt(Math.floor(this.now())) * 1000n;
         this.last = now > this.last ? now : this.last + 1n;
         return this.last.toString();
     }
@@ -241,7 +271,8 @@ export class AsterV3Client {
     private readonly recvWindowMs: number;
     private readonly fetchImpl: typeof fetch;
     private readonly userAgent: string;
-    private readonly nonce = new MonotonicMicrosecondNonce();
+    private readonly now: () => number;
+    private readonly nonce: MonotonicMicrosecondNonce;
 
     constructor(options: AsterV3ClientOptions = {}) {
         this.baseUrl = normalizeBaseUrl(options.baseUrl);
@@ -253,6 +284,8 @@ export class AsterV3Client {
         this.recvWindowMs = Math.min(5000, Math.max(1000, options.recvWindowMs ?? 5000));
         this.fetchImpl = options.fetchImpl ?? fetch;
         this.userAgent = options.userAgent || "DisDex-Win80-LiveRunner/1.0";
+        this.now = options.now ?? Date.now;
+        this.nonce = new MonotonicMicrosecondNonce(this.now);
     }
 
     hasTradingCredentials() {
@@ -293,16 +326,19 @@ export class AsterV3Client {
         params?: Record<string, unknown>;
         signed?: boolean;
         orderMutation?: boolean;
+        deadlineTs?: number;
     }): Promise<T> {
         const method = input.method;
         const params = input.params || {};
         const abort = new AbortController();
         const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
         try {
+            this.assertBeforeDeadline(input.deadlineTs);
             let query = "";
             let body: string | undefined;
             if (input.signed) {
                 const signed = await this.signParams(params);
+                this.assertBeforeDeadline(input.deadlineTs);
                 const payload = encodeParams({ ...signed.signedParams, signature: signed.signature });
                 if (method === "GET") query = payload;
                 else body = payload;
@@ -313,6 +349,7 @@ export class AsterV3Client {
             }
 
             const url = `${this.baseUrl}${input.path}${query ? `?${query}` : ""}`;
+            this.assertBeforeDeadline(input.deadlineTs);
             const response = await this.fetchImpl(url, {
                 method,
                 body,
@@ -350,6 +387,12 @@ export class AsterV3Client {
         } finally {
             clearTimeout(timeout);
         }
+    }
+
+    private assertBeforeDeadline(deadlineTs?: number) {
+        if (deadlineTs === undefined) return;
+        if (!Number.isFinite(deadlineTs)) throw new Error("Aster request deadline must be finite.");
+        if (this.now() >= deadlineTs) throw new AsterRequestDeadlineError(deadlineTs);
     }
 
     ping() {
@@ -422,6 +465,14 @@ export class AsterV3Client {
         });
     }
 
+    getPositionMode() {
+        return this.request<AsterPositionModeResponse>({
+            method: "GET",
+            path: "/fapi/v3/positionSide/dual",
+            signed: true,
+        });
+    }
+
     getOrder(symbol: string, clientOrderId: string) {
         return this.request<AsterOrderResponse>({
             method: "GET",
@@ -444,6 +495,42 @@ export class AsterV3Client {
                 reduceOnly: order.reduceOnly === true ? "true" : "false",
                 newClientOrderId: order.newClientOrderId,
                 newOrderRespType: order.newOrderRespType || "RESULT",
+            },
+            signed: true,
+            orderMutation: true,
+            deadlineTs: order.deadlineTs,
+        });
+    }
+
+    placeReduceOnlyStopMarket(order: AsterNewReduceOnlyStopMarketOrder) {
+        return this.request<AsterOrderResponse>({
+            method: "POST",
+            path: "/fapi/v3/order",
+            params: {
+                symbol: order.symbol.toUpperCase(),
+                side: order.side,
+                positionSide: "BOTH",
+                type: "STOP_MARKET",
+                quantity: order.quantity,
+                reduceOnly: "true",
+                stopPrice: order.stopPrice,
+                newClientOrderId: order.newClientOrderId,
+                workingType: order.workingType || "CONTRACT_PRICE",
+                priceProtect: order.priceProtect === true ? "TRUE" : "FALSE",
+                newOrderRespType: "ACK",
+            },
+            signed: true,
+            orderMutation: true,
+        });
+    }
+
+    cancelOrder(symbol: string, clientOrderId: string) {
+        return this.request<AsterOrderResponse>({
+            method: "DELETE",
+            path: "/fapi/v3/order",
+            params: {
+                symbol: symbol.toUpperCase(),
+                origClientOrderId: clientOrderId,
             },
             signed: true,
             orderMutation: true,

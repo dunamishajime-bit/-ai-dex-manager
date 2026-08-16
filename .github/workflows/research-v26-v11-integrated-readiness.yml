@@ -1,0 +1,98 @@
+name: Research V26 V11 Integrated Execution Readiness
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/v26-latency-aware-search-20260816]
+    paths:
+      - lib/aster-v3-client.ts
+      - lib/direct-trade-executor.ts
+      - lib/redundant-entry-coordinator.ts
+      - lib/research-lab/perp/v11-aster-execution-gateway.ts
+      - lib/research-lab/perp/v11-aster-protective-client.ts
+      - lib/research-lab/perp/v11-execution-safety.ts
+      - lib/research-lab/perp/v11-upstash-execution-lease.ts
+      - scripts/research_v26_v11_aster_contract_selftest.ts
+      - scripts/research_v26_v11_execution_safety_selftest.ts
+      - scripts/research_v26_v11_integrated_readiness_selftest.ts
+      - scripts/research_v26_latency_aware_v12.ts
+      - docs/research-results/v26-latency-aware-v12-latest.json
+      - .github/workflows/research-v26-v11-integrated-readiness.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: research-v26-v11-integrated-readiness
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Typecheck complete repository
+        run: npm run typecheck
+      - name: Run existing Aster direct executor safety checks
+        run: npm run strategy:executor:selftest
+      - name: Run V12 at-most-once entry-loss D/V gate and holdout
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: node --import tsx scripts/research_v26_latency_aware_v12.ts
+      - name: Run V11 execution-safety fault injection
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: node --import tsx scripts/research_v26_v11_execution_safety_selftest.ts
+      - name: Run V11 Aster HTTP contract
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: node --import tsx scripts/research_v26_v11_aster_contract_selftest.ts
+      - name: Run integrated V11 gateway, lease, and stop lifecycle
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: node --import tsx scripts/research_v26_v11_integrated_readiness_selftest.ts
+      - name: Assert BT lineage, research boundary, and fail-closed readiness
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const bt = JSON.parse(fs.readFileSync('docs/research-results/v26-latency-aware-v11-latest.json', 'utf8'));
+          const v12 = JSON.parse(fs.readFileSync('.research-state/v26-latency-aware-v12.json', 'utf8'));
+          const safety = JSON.parse(fs.readFileSync('.research-state/v26-v11-execution-safety.json', 'utf8'));
+          const contract = JSON.parse(fs.readFileSync('.research-state/v26-v11-aster-contract.json', 'utf8'));
+          const integrated = JSON.parse(fs.readFileSync('.research-state/v26-v11-integrated-readiness.json', 'utf8'));
+          if (!bt.dvRobust || !bt.acceptance || !Object.values(bt.acceptance).every(Boolean)) throw new Error('V11_BT_ACCEPTANCE_FAIL');
+          if (!v12.dvRobust || !v12.acceptance || !Object.values(v12.acceptance).every(Boolean) || v12.diagnosis !== 'V12_AT_MOST_ONCE_ENTRY_LOSS_RESEARCH_ACCEPTED') throw new Error('V12_CLAIM_LOSS_BT_ACCEPTANCE_FAIL');
+          if (!safety.pass || !contract.pass || !integrated.pass) throw new Error('V11_EXECUTION_VERIFICATION_FAIL');
+          if (!Object.values(integrated.architectureVerified || {}).every(Boolean)) throw new Error('V11_ARCHITECTURE_GAP');
+          if (!integrated.operationalRequirements?.distinctAsterAgentSignerPerExecutor || integrated.operationalRequirements?.requirementVerifiedOnDeployment !== false) throw new Error('V11_AGENT_NONCE_BOUNDARY_FAIL');
+          if (integrated.operationalRequirements?.claimedOwnerCrashPolicy !== 'FAIL_CLOSED_SKIP_ENTRY' || integrated.operationalRequirements?.clientOrderIdScope !== 'OPEN_ORDERS_ONLY_PER_ASTER_DOCUMENTATION' || integrated.operationalRequirements?.claimLossStressBacktested !== true) throw new Error('V11_AT_MOST_ONCE_BOUNDARY_FAIL');
+          if (!integrated.researchOnly || integrated.productionDeployed || integrated.vpsChanged || integrated.liveChanged || integrated.realTradingEnabled) throw new Error('RESEARCH_BOUNDARY_FAIL');
+          if (integrated.authenticatedVenueDryRun !== false || integrated.liveFeasibilityVerified !== false || integrated.liveEligible !== false) throw new Error('LIVE_STATUS_MUST_REMAIN_FAIL_CLOSED');
+          console.log('V26_V11_INTEGRATED_READINESS_PASS');
+          NODE
+      - name: Publish integrated readiness evidence
+        run: |
+          mkdir -p docs/research-results
+          cp .research-state/v26-latency-aware-v12.json docs/research-results/v26-latency-aware-v12-latest.json
+          cp .research-state/v26-v11-integrated-readiness.json docs/research-results/v26-v11-integrated-readiness-latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/research-results/v26-latency-aware-v12-latest.json docs/research-results/v26-v11-integrated-readiness-latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "research: record V26 V11 integrated readiness [skip ci]"
+            git push
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v26-v11-integrated-readiness
+          path: |
+            .research-state/v26-latency-aware-v12.json
+            .research-state/v26-v11-integrated-readiness.json
+          include-hidden-files: true
+          retention-days: 30

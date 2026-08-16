@@ -51,17 +51,19 @@ class FakeGateway implements V11AsterGateway {
   failStopBeforeRecord = false;
   unknownStopAfterRecord = false;
   failCancel = false;
+  onGetOrder?: () => void;
   readonly orders = new Map<string, V11OrderSnapshot>();
 
   async isOneWayMode() { return this.oneWay; }
   async supportsStopMarket() { return this.stopMarket; }
   async getOrder(symbol: string, clientOrderId: string) {
+    this.onGetOrder?.();
     if (this.uncertainGetOrder) throw new Error("Aster query unavailable");
     const order = this.orders.get(clientOrderId);
     if (!order || order.symbol !== symbol) throw new V11OrderNotFoundError();
     return order;
   }
-  async placeMarket(input: { symbol: string; side: "BUY" | "SELL"; quantity: string; clientOrderId: string }) {
+  async placeMarket(input: { symbol: string; side: "BUY" | "SELL"; quantity: string; clientOrderId: string; deadlineTs: number }) {
     this.marketCalls += 1;
     if (this.unknownMarketWithoutRecord) throw new V11ExecutionUnknownError("timeout before known ack");
     const order: V11OrderSnapshot = { clientOrderId: input.clientOrderId, symbol: input.symbol, status: "FILLED", reduceOnly: false };
@@ -101,8 +103,8 @@ async function main() {
 
   {
     const lease = new FakeLease(); const gateway = new FakeGateway();
-    const primary = await executeV11FreshEntry({ intent: base, executorId: "primary", now: base.decisionTs + 10_000, lease, gateway });
-    const secondary = await executeV11FreshEntry({ intent: base, executorId: "secondary", now: base.decisionTs + 20_000, lease, gateway });
+    const primary = await executeV11FreshEntry({ intent: base, executorId: "primary", clock: () => base.decisionTs + 10_000, lease, gateway });
+    const secondary = await executeV11FreshEntry({ intent: base, executorId: "secondary", clock: () => base.decisionTs + 20_000, lease, gateway });
     assert(primary.outcome === "EXECUTED", "primary did not execute");
     assert(secondary.outcome === "LEASE_DENIED", "secondary was not fenced");
     assert(gateway.marketCalls === 1, "split-brain produced duplicate market order");
@@ -111,7 +113,7 @@ async function main() {
 
   {
     const lease = new FakeLease(); const gateway = new FakeGateway(); gateway.unknownMarketAfterRecord = true;
-    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", now: base.decisionTs + 5_000, lease, gateway });
+    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", clock: () => base.decisionTs + 5_000, lease, gateway });
     assert(result.outcome === "RECONCILED_AFTER_UNKNOWN", "unknown execution was not reconciled");
     assert(gateway.marketCalls === 1, "unknown execution was retried");
     cases.ackLossAfterExchangeAccept = { outcome: result.outcome, marketCalls: gateway.marketCalls };
@@ -119,7 +121,7 @@ async function main() {
 
   {
     const lease = new FakeLease(); const gateway = new FakeGateway(); gateway.unknownMarketWithoutRecord = true;
-    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", now: base.decisionTs + 5_000, lease, gateway });
+    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", clock: () => base.decisionTs + 5_000, lease, gateway });
     assert(result.outcome === "EXECUTION_UNKNOWN_FAIL_CLOSED", "absent order after unknown did not fail closed");
     assert(gateway.marketCalls === 1, "execution-unknown path automatically retried");
     cases.unknownWithoutOrder = { outcome: result.outcome, marketCalls: gateway.marketCalls };
@@ -127,7 +129,7 @@ async function main() {
 
   {
     const lease = new FakeLease(); const gateway = new FakeGateway(); gateway.uncertainGetOrder = true;
-    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", now: base.decisionTs + 5_000, lease, gateway });
+    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", clock: () => base.decisionTs + 5_000, lease, gateway });
     assert(result.outcome === "RECONCILIATION_UNCERTAIN_FAIL_CLOSED", "query uncertainty did not fail closed");
     assert(gateway.marketCalls === 0, "order submitted despite uncertain pre-reconciliation");
     cases.preSubmitReconciliationUnavailable = { outcome: result.outcome, marketCalls: gateway.marketCalls };
@@ -135,7 +137,7 @@ async function main() {
 
   {
     const lease = new FakeLease(); lease.unavailable = true; const gateway = new FakeGateway();
-    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", now: base.decisionTs + 5_000, lease, gateway });
+    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", clock: () => base.decisionTs + 5_000, lease, gateway });
     assert(result.outcome === "LEASE_DENIED", "lease outage did not fail closed");
     assert(gateway.marketCalls === 0, "order submitted without lease");
     cases.leaseUnavailable = { outcome: result.outcome, marketCalls: gateway.marketCalls };
@@ -143,7 +145,7 @@ async function main() {
 
   {
     const lease = new FakeLease(); const gateway = new FakeGateway();
-    const result = await executeV11FreshEntry({ intent: base, executorId: "standby", now: base.decisionTs + V11_ENTRY_MAX_AGE_MS, lease, gateway });
+    const result = await executeV11FreshEntry({ intent: base, executorId: "standby", clock: () => base.decisionTs + V11_ENTRY_MAX_AGE_MS, lease, gateway });
     assert(result.outcome === "STALE_REJECTED", "one-hour stale entry was not rejected");
     assert(gateway.marketCalls === 0, "stale entry reached Aster");
     cases.staleOneHourEntry = { outcome: result.outcome, marketCalls: gateway.marketCalls };
@@ -151,10 +153,20 @@ async function main() {
 
   {
     const lease = new FakeLease(); const gateway = new FakeGateway(); gateway.oneWay = false;
-    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", now: base.decisionTs + 1_000, lease, gateway });
+    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", clock: () => base.decisionTs + 1_000, lease, gateway });
     assert(result.outcome === "PREFLIGHT_REJECTED", "hedge mode was not rejected");
     assert(gateway.marketCalls === 0, "hedge-mode preflight leaked order");
     cases.hedgeModeRejected = { outcome: result.outcome, marketCalls: gateway.marketCalls };
+  }
+
+  {
+    const lease = new FakeLease(); const gateway = new FakeGateway();
+    let now = base.decisionTs + 1_000;
+    gateway.onGetOrder = () => { now = base.decisionTs + V11_ENTRY_MAX_AGE_MS; };
+    const result = await executeV11FreshEntry({ intent: base, executorId: "primary", clock: () => now, lease, gateway });
+    assert(result.outcome === "STALE_REJECTED", "decision expiring during reconciliation was submitted");
+    assert(gateway.marketCalls === 0, "pre-submit deadline check leaked a market order");
+    cases.expiredDuringReconciliation = { outcome: result.outcome, marketCalls: gateway.marketCalls };
   }
 
   const oldStopId = v11StopClientOrderId({ symbol: "BTCUSDT", decisionId: base.decisionId, version: 1 });

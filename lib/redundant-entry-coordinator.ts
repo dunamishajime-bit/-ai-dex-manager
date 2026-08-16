@@ -36,7 +36,7 @@ export class UpstashExecutionLeaseStore implements ExecutionLeaseStore {
 
     async release(key: string, token: string): Promise<boolean> {
         const redisKey = this.keyFor(key);
-        const result = await this.redis.eval<number>(
+        const result = await this.redis.eval<string[], number>(
             `if redis.call("GET", KEYS[1]) == ARGV[1] then return redis.call("DEL", KEYS[1]) else return 0 end`,
             [redisKey],
             [token],

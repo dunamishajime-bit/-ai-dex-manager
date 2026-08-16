@@ -1,0 +1,76 @@
+{
+  "researchLine": "V26_V11_INTEGRATED_EXECUTION_READINESS",
+  "researchOnly": true,
+  "productionDeployed": false,
+  "vpsChanged": false,
+  "liveChanged": false,
+  "realTradingEnabled": false,
+  "liveEligible": false,
+  "pass": true,
+  "architectureVerified": {
+    "concreteAsterGateway": true,
+    "singleClientNonceStreamPerAgent": true,
+    "fullFreshnessAtMostOnceClaim": true,
+    "standbyCanOwnUnclaimedFreshDecision": true,
+    "claimedOwnerCrashFailsClosed": true,
+    "committedDecisionCannotReacquire": true,
+    "deterministicClientOrderReconciliation": true,
+    "exchangeClientIdNotTreatedAsPermanentIdempotency": true,
+    "noBlindRetryAfter503": true,
+    "venueResidentReduceOnlyStop": true,
+    "newStopVerifiedBeforeOldCancel": true,
+    "staleEntryFailsClosed": true,
+    "hardEntryDeadlineAtClientBoundary": true
+  },
+  "operationalRequirements": {
+    "distinctAsterAgentSignerPerExecutor": true,
+    "nonceScope": "Aster V3 nonce uniqueness is maintained per Agent address; primary and standby must not share one signer key.",
+    "requirementVerifiedOnDeployment": false,
+    "claimedOwnerCrashPolicy": "FAIL_CLOSED_SKIP_ENTRY",
+    "clientOrderIdScope": "OPEN_ORDERS_ONLY_PER_ASTER_DOCUMENTATION",
+    "claimLossStressBacktested": true,
+    "claimLossStressEvidence": "docs/research-results/v26-latency-aware-v12-latest.json"
+  },
+  "authenticatedVenueDryRun": false,
+  "liveFeasibilityVerified": false,
+  "remainingBoundary": "Verify a distinct Aster Agent signer per executor, authenticated /order/test, and an isolated non-production STOP_MARKET lifecycle before any LIVE integration.",
+  "caseCount": 8,
+  "cases": {
+    "claimedOwnerCrashFailsClosed": {
+      "abandonedFence": 1,
+      "standby": "LEASE_DENIED",
+      "expired": "STALE_REJECTED",
+      "marketCalls": 0
+    },
+    "unclaimedTickStandbyExecution": {
+      "standby": "EXECUTED",
+      "duplicate": "LEASE_DENIED",
+      "marketCalls": 1
+    },
+    "entry503AfterAccept": {
+      "outcome": "RECONCILED_AFTER_UNKNOWN",
+      "marketCalls": 1
+    },
+    "stopRatchetOrder": {
+      "outcome": "REPLACED",
+      "newStopBeforeOldCancel": true
+    },
+    "stop503AfterAccept": {
+      "outcome": "REPLACED",
+      "newStopConfirmed": true
+    },
+    "staleEntry": {
+      "outcome": "STALE_REJECTED",
+      "submitted": false
+    },
+    "hardEntryDeadline": {
+      "rejected": true,
+      "submitted": false
+    },
+    "singleAgentNonceStream": {
+      "signedRequestCount": 16,
+      "unique": true,
+      "strictlyIncreasing": true
+    }
+  }
+}
