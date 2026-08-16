@@ -23,6 +23,7 @@ def reference_health(reference: engine.ReferenceProvider) -> dict:
     health_url = urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "/health", "", ""))
     timeout_ms = engine.int_env("DISDEX_STOCK_REFERENCE_HEALTH_TIMEOUT_MS", 20_000)
     deadline = engine.now_ms() + timeout_ms
+    require_fresh = regular_us_equity_session()
     last_error: Exception | None = None
     while engine.now_ms() <= deadline:
         try:
@@ -30,8 +31,17 @@ def reference_health(reference: engine.ReferenceProvider) -> dict:
             if not isinstance(payload, dict):
                 raise RuntimeError("Free reference /health returned a non-object response")
             if payload.get("pythConnected") is True and payload.get("iexConnected") is True:
-                return payload
-            last_error = RuntimeError(f"Free reference sources are not connected: {payload}")
+                if not require_fresh:
+                    return payload
+                # A live websocket handshake is not sufficient: the source can
+                # remain connected while its last quote is stale or the two
+                # sources diverge.  The reference proxy exposes these checks in
+                # freshnessReady/status; require both during regular session.
+                if payload.get("status") == "ok" and payload.get("freshnessReady") is True:
+                    return payload
+                last_error = RuntimeError(f"Free reference quote quality is not ready: {payload}")
+            else:
+                last_error = RuntimeError(f"Free reference sources are not connected: {payload}")
         except Exception as error:
             last_error = error
         time.sleep(0.25)
