@@ -1,0 +1,49 @@
+name: Research Dev-Only Evolution V26 No-PENGU
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths:
+      - scripts/research_dev_only_evolution_v26_no_pengu.ts
+      - .github/workflows/research-dev-only-evolution-v26-no-pengu.yml
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Assert frozen No-PENGU source
+        run: test "$(git hash-object scripts/research_dev_only_evolution_v26_no_pengu.ts)" = "814bc9624d04e1acce41c9d681882ec35c254500"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - run: npm ci
+      - name: Run V26 No-PENGU Development-only evolution
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_dev_only_evolution_v26_no_pengu.ts
+      - name: Assert PENGU exclusion and research boundary
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('.research-state/dev-only-evolution-v26-no-pengu.json','utf8'));
+          if(!d.researchOnly||d.productionChanged||d.vpsChanged||d.liveChanged||d.realTradingEnabled) throw new Error('BOUNDARY_FAIL');
+          if(!d.penguExcluded||d.universe.includes('PENGU')) throw new Error('PENGU_EXCLUSION_FAIL');
+          if(d.target.leverageMultiplier!==1) throw new Error('LEVERAGE_FAIL');
+          for(const f of d.finalists){if(f.genome.symbols.includes('PENGU')) throw new Error('GENOME_PENGU_FAIL');if(f.combined3Y.maximumEffectiveLeverage>1.000001) throw new Error('EFFECTIVE_LEVERAGE_FAIL')}
+          console.log('V26_NO_PENGU_BOUNDARY_PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dev-only-evolution-v26-no-pengu
+          path: .research-state/dev-only-evolution-v26-no-pengu.json
+          include-hidden-files: true
+          retention-days: 30
