@@ -1,0 +1,59 @@
+name: Research V26 Latency-Aware V11 Redundant Entry Resident Stop
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/v26-latency-aware-search-20260816]
+    paths:
+      - scripts/research_v26_latency_aware_v9.ts
+      - scripts/research_v26_latency_aware_v11.ts
+      - .github/workflows/research-v26-latency-aware-v11.yml
+permissions:
+  contents: write
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v26-latency-aware-3y-usdm-v1-20260816
+          fail-on-cache-miss: true
+      - run: npm ci
+      - name: Typecheck V11 research wrapper
+        run: npx tsc --noEmit -p tsconfig.research.json
+      - name: Run V11 redundant-entry resident-stop study
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_v26_latency_aware_v11.ts
+      - name: Assert research boundary and architecture provenance
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'); const d=JSON.parse(fs.readFileSync('.research-state/v26-latency-aware-v11.json','utf8'));
+          if(!d.researchOnly||d.productionChanged||d.vpsChanged||d.liveChanged||d.realTradingEnabled) throw new Error('BOUNDARY_FAIL');
+          if(!d.penguExcluded||d.universe.includes('PENGU')||d.universe.length!==14||d.leverage!==1) throw new Error('UNIVERSE_OR_LEVERAGE_FAIL');
+          if(!d.development.parityPass||!d.validation.parityPass) throw new Error('ENGINE_PARITY_FAIL');
+          if(!d.venueProtectionFeasibilityVerified||d.redundantEntryExecutorImplemented!==false||d.liveFeasibilityVerified!==false) throw new Error('IMPLEMENTATION_STATUS_FAIL');
+          if(!String(d.venueModel.staleEntryPolicy||'').includes('FAIL_CLOSED_REJECT')) throw new Error('STALE_ENTRY_POLICY_FAIL');
+          if(!String(d.venueModel.deterministicOrderRequirement||'').includes('duplicate')) throw new Error('REDUNDANCY_REQUIREMENT_FAIL');
+          console.log('V26_LATENCY_AWARE_V11_BOUNDARY_PASS');
+          NODE
+      - name: Publish V11 research result
+        run: |
+          mkdir -p docs/research-results
+          cp .research-state/v26-latency-aware-v11.json docs/research-results/v26-latency-aware-v11-latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/research-results/v26-latency-aware-v11-latest.json
+          if ! git diff --cached --quiet; then git commit -m "research: record V26 latency-aware V11 result [skip ci]" && git push; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v26-latency-aware-v11
+          path: .research-state/v26-latency-aware-v11.json
+          include-hidden-files: true
+          retention-days: 30
