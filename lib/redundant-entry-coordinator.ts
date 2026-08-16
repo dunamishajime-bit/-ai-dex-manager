@@ -50,13 +50,12 @@ export type RedundantEntryDecision = {
     decisionTs: number;
     freshUntilTs: number;
     ownerId: string;
-    leaseTtlMs: number;
     command: DirectTradeCommand;
 };
 
 export type RedundantEntryOutcome =
     | { status: "EXECUTED"; result: DirectTradeResult; decisionId: string; ownerId: string }
-    | { status: "STANDBY_SKIPPED"; decisionId: string; ownerId: string; reason: "LEASE_HELD" }
+    | { status: "STANDBY_SKIPPED"; decisionId: string; ownerId: string; reason: "DECISION_LOCKED" }
     | { status: "STALE_REJECTED"; decisionId: string; ownerId: string; reason: "DECISION_EXPIRED" };
 
 function stableDecisionKey(decisionId: string) {
@@ -97,34 +96,31 @@ export class RedundantEntryCoordinator {
 
         const key = stableDecisionKey(decision.decisionId);
         const token = stableLeaseToken(decision.ownerId, decision.decisionId);
-        const ttlMs = Math.min(
-            Math.max(1, Math.ceil(decision.leaseTtlMs)),
-            Math.max(1, Math.ceil(decision.freshUntilTs - now + 1)),
-        );
+        // Keep the decision key for its entire remaining freshness window. We deliberately do NOT
+        // release it after execution: a second node arriving milliseconds later must never be able
+        // to re-acquire the same still-fresh decision and submit a duplicate market order.
+        const ttlMs = Math.max(1, Math.ceil(decision.freshUntilTs - now + 1));
         const lease = await this.leases.tryAcquire(key, token, ttlMs);
         if (!lease.acquired) {
             return {
                 status: "STANDBY_SKIPPED",
                 decisionId: decision.decisionId,
                 ownerId: decision.ownerId,
-                reason: "LEASE_HELD",
+                reason: "DECISION_LOCKED",
             };
         }
 
-        try {
-            // The clientOrderId must be identical across primary/standby for the same decision.
-            // AsterDirectTradeExecutor already reconciles execution-unknown 503/timeouts instead of blind resubmission.
-            const result = await this.executor.executeMarket(decision.command);
-            return {
-                status: "EXECUTED",
-                result,
-                decisionId: decision.decisionId,
-                ownerId: decision.ownerId,
-            };
-        } finally {
-            // Release is token-checked. If the lease already expired and another owner acquired it,
-            // this call cannot delete the new owner's lease.
-            await this.leases.release(key, token).catch(() => false);
-        }
+        // The clientOrderId must be identical across primary/standby for the same decision.
+        // AsterDirectTradeExecutor already reconciles execution-unknown 503/timeouts instead of
+        // blindly resubmitting. If this owner dies after acquiring the lock but before submission,
+        // that trade is intentionally skipped: fail-closed duplicate prevention has priority over
+        // forcing every signal to execute.
+        const result = await this.executor.executeMarket(decision.command);
+        return {
+            status: "EXECUTED",
+            result,
+            decisionId: decision.decisionId,
+            ownerId: decision.ownerId,
+        };
     }
 }
