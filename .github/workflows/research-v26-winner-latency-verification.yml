@@ -1,0 +1,50 @@
+name: Research V26 Winner Latency Verification
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths:
+      - scripts/research_v26_candidate_latency_verification.ts
+      - .github/workflows/research-v26-winner-latency-verification.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Assert frozen verification source
+        run: test "$(git hash-object scripts/research_v26_candidate_latency_verification.ts)" = "4457fda820e5c3528ea6a4ccb58ad383c5086547"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - run: npm ci
+      - name: Run frozen candidate latency verification
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_v26_candidate_latency_verification.ts
+      - name: Assert research boundary
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('.research-state/v26-winner-latency-verification.json','utf8'));
+          if(!d.researchOnly||d.productionChanged||d.vpsChanged||d.liveChanged||d.realTradingEnabled) throw new Error('BOUNDARY_FAIL');
+          if(d.freshOosRead||d.freshOosConsumed) throw new Error('FRESH_OOS_FAIL');
+          if(d.frozenGenome.parameters.leverage!==1) throw new Error('LEVERAGE_FAIL');
+          console.log('V26_WINNER_BOUNDARY_PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v26-winner-latency-verification
+          path: |
+            .research-state/v26-winner-latency-verification.json
+            .research-state/v26-winner-latency-trades.jsonl
+          include-hidden-files: true
+          retention-days: 30
