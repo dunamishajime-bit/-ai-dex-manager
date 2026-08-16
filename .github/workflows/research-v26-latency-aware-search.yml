@@ -23,8 +23,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .cache/perp-research-usdm
-          key: pairwise-clean-sheet-3y-usdm-v1-20260815
-          fail-on-cache-miss: true
+          key: v26-latency-aware-3y-usdm-v1-20260816
       - run: npm ci
       - name: Run latency-aware structural search
         env:
