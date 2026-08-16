@@ -1,0 +1,421 @@
+{
+  "researchLine": "V26_LATENCY_AWARE_V11_REDUNDANT_ENTRY_RESIDENT_STOP",
+  "researchOnly": true,
+  "productionChanged": false,
+  "vpsChanged": false,
+  "liveChanged": false,
+  "realTradingEnabled": false,
+  "liveEligible": false,
+  "penguExcluded": true,
+  "leverage": 1,
+  "universe": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "SOL",
+    "LINK",
+    "AVAX",
+    "DOGE",
+    "INJ",
+    "XRP",
+    "ADA",
+    "LTC",
+    "ATOM",
+    "AAVE",
+    "NEAR"
+  ],
+  "liveFeasibilityVerified": false,
+  "venueProtectionFeasibilityVerified": true,
+  "redundantEntryExecutorImplemented": false,
+  "venue": "Aster Futures API V3",
+  "venueModel": {
+    "protectiveOrder": "STOP_MARKET",
+    "stopOwnership": "venue",
+    "signalTimeframeHours": 2,
+    "singleNodeOutage": "independent hot-standby executor must execute the same fresh decision tick; do not fill the command one hour late",
+    "staleEntryPolicy": "FAIL_CLOSED_REJECT: if the intended decision tick is stale, submit no new position and do not chase price",
+    "correlatedExecutorOutage": "new entries remain disabled until a fresh decision tick; existing positions retain the last accepted venue-resident STOP_MARKET",
+    "conservativeStopStress": "one complete 2H trailing-stop update is missed while prior accepted venue stop remains active",
+    "deterministicOrderRequirement": "same decision identity/client order identity plus reconciliation must prevent duplicate fills across executors",
+    "feeStressBpsPerSide": 10,
+    "slippageStressBpsPerSide": 5,
+    "nativeTrailingNotUsed": "V26 uses fixed 0.4 ATR distance; Aster TRAILING_STOP_MARKET uses percentage callbackRate, so resident STOP_MARKET preserves V26 semantics"
+  },
+  "governance": "No V26 signal/parameter search and no late-entry optimization. Universal +1H late-fill performance is deliberately not accepted as an operating mode: stale entries fail closed. Development and Validation must both pass cost stress plus resident-stop single-node-outage stress before Evaluation/combined 3Y are read.",
+  "development": {
+    "original": {
+      "cagrPct": 106.21179473771285,
+      "maxDrawdownPct": 4.42252862946734,
+      "profitFactor": 2.5776636306532814,
+      "tradeCount": 269,
+      "winRatePct": 51.301115241635685,
+      "endingEquity": 20648.437702038216,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "parity": {
+      "tradeCount": true,
+      "endingEquity": true,
+      "profitFactor": true,
+      "maximumEffectiveLeverage": true
+    },
+    "parityPass": true,
+    "modes": {
+      "resident-normal": {
+        "label": "resident-normal",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 5,
+        "slippageBpsPerSide": 0,
+        "tradeCount": 269,
+        "endingEquity": 20648.43770203822,
+        "returnPct": 106.48437702038218,
+        "cagrPct": 106.17781702696263,
+        "maxDrawdownPct": 4.42252862946734,
+        "profitFactor": 2.5776636306532814,
+        "profitFactorWithoutBest": 2.470661456956164,
+        "winRatePct": 51.301115241635685,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 253,
+          "take-profit": 13,
+          "stop-loss": 3
+        }
+      },
+      "resident-cost-stress": {
+        "label": "resident-cost-stress",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 268,
+        "endingEquity": 13590.618451861435,
+        "returnPct": 35.90618451861436,
+        "cagrPct": 35.820770204014664,
+        "maxDrawdownPct": 6.925522173844756,
+        "profitFactor": 1.443980574026229,
+        "profitFactorWithoutBest": 1.3802492359948664,
+        "winRatePct": 43.28358208955223,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 253,
+          "take-profit": 12,
+          "stop-loss": 3
+        }
+      },
+      "resident-single-node-outage-stoplag2h": {
+        "label": "resident-single-node-outage-stoplag2h",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 1,
+        "stopUpdateLagHours": 2,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 221,
+        "endingEquity": 16051.367924168751,
+        "returnPct": 60.51367924168751,
+        "cagrPct": 60.35810608702721,
+        "maxDrawdownPct": 9.06903426765102,
+        "profitFactor": 1.6270373640263407,
+        "profitFactorWithoutBest": 1.5649280378045762,
+        "winRatePct": 50.678733031674206,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 195,
+          "take-profit": 17,
+          "stop-loss": 9
+        }
+      }
+    },
+    "robust": true
+  },
+  "validation": {
+    "original": {
+      "cagrPct": 185.95218536724585,
+      "maxDrawdownPct": 5.64310366575364,
+      "profitFactor": 3.116842551612842,
+      "tradeCount": 297,
+      "winRatePct": 53.87205387205387,
+      "endingEquity": 28567.813294724583,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "parity": {
+      "tradeCount": true,
+      "endingEquity": true,
+      "profitFactor": true,
+      "maximumEffectiveLeverage": true
+    },
+    "parityPass": true,
+    "modes": {
+      "resident-normal": {
+        "label": "resident-normal",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 5,
+        "slippageBpsPerSide": 0,
+        "tradeCount": 297,
+        "endingEquity": 28567.813294724583,
+        "returnPct": 185.67813294724584,
+        "cagrPct": 185.88360068720547,
+        "maxDrawdownPct": 5.64310366575364,
+        "profitFactor": 3.116842551612842,
+        "profitFactorWithoutBest": 3.011080499510462,
+        "winRatePct": 53.87205387205387,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 287,
+          "take-profit": 7,
+          "stop-loss": 3
+        }
+      },
+      "resident-cost-stress": {
+        "label": "resident-cost-stress",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 297,
+        "endingEquity": 18148.208461010465,
+        "returnPct": 81.48208461010465,
+        "cagrPct": 81.55618255392358,
+        "maxDrawdownPct": 6.434651624692718,
+        "profitFactor": 1.8243876693928442,
+        "profitFactorWithoutBest": 1.7644516244111939,
+        "winRatePct": 46.12794612794613,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 287,
+          "take-profit": 7,
+          "stop-loss": 3
+        }
+      },
+      "resident-single-node-outage-stoplag2h": {
+        "label": "resident-single-node-outage-stoplag2h",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 1,
+        "stopUpdateLagHours": 2,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 241,
+        "endingEquity": 25193.828850296508,
+        "returnPct": 151.93828850296507,
+        "cagrPct": 152.09778725886287,
+        "maxDrawdownPct": 6.55348535610407,
+        "profitFactor": 2.665781338081777,
+        "profitFactorWithoutBest": 2.570199228908463,
+        "winRatePct": 52.69709543568465,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 217,
+          "take-profit": 20,
+          "stop-loss": 4
+        }
+      }
+    },
+    "robust": true
+  },
+  "dvRobust": true,
+  "evaluation": {
+    "original": {
+      "cagrPct": 110.66023191270259,
+      "maxDrawdownPct": 5.099691008147556,
+      "profitFactor": 3.5104686979840105,
+      "tradeCount": 223,
+      "winRatePct": 57.399103139013455,
+      "endingEquity": 21051.70381088255,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "parity": {
+      "tradeCount": true,
+      "endingEquity": true,
+      "profitFactor": true,
+      "maximumEffectiveLeverage": true
+    },
+    "parityPass": true,
+    "modes": {
+      "resident-normal": {
+        "label": "resident-normal",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 5,
+        "slippageBpsPerSide": 0,
+        "tradeCount": 223,
+        "endingEquity": 21051.703810882555,
+        "returnPct": 110.51703810882555,
+        "cagrPct": 110.62439980936962,
+        "maxDrawdownPct": 5.099691008147556,
+        "profitFactor": 3.51046869798401,
+        "profitFactorWithoutBest": 3.3299211035664014,
+        "winRatePct": 57.399103139013455,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 218,
+          "take-profit": 4,
+          "stop-loss": 1
+        }
+      },
+      "resident-cost-stress": {
+        "label": "resident-cost-stress",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 223,
+        "endingEquity": 14734.198543218812,
+        "returnPct": 47.341985432188125,
+        "cagrPct": 47.381105494402576,
+        "maxDrawdownPct": 6.89866983491449,
+        "profitFactor": 1.8322586111008892,
+        "profitFactorWithoutBest": 1.7338063250272033,
+        "winRatePct": 46.63677130044843,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 218,
+          "take-profit": 4,
+          "stop-loss": 1
+        }
+      },
+      "resident-single-node-outage-stoplag2h": {
+        "label": "resident-single-node-outage-stoplag2h",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 1,
+        "stopUpdateLagHours": 2,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 182,
+        "endingEquity": 16752.734566199015,
+        "returnPct": 67.52734566199014,
+        "cagrPct": 67.58656171299926,
+        "maxDrawdownPct": 6.564559835989376,
+        "profitFactor": 2.1384538322259363,
+        "profitFactorWithoutBest": 2.032692073016712,
+        "winRatePct": 54.395604395604394,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 167,
+          "take-profit": 9,
+          "stop-loss": 6
+        }
+      }
+    },
+    "robust": true
+  },
+  "combined3Y": {
+    "original": {
+      "cagrPct": 131.54124004524235,
+      "maxDrawdownPct": 5.643103665753597,
+      "profitFactor": 3.2463448417359997,
+      "tradeCount": 789,
+      "winRatePct": 53.99239543726235,
+      "endingEquity": 124179.9405592453,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "parity": {
+      "tradeCount": true,
+      "endingEquity": true,
+      "profitFactor": true,
+      "maximumEffectiveLeverage": true
+    },
+    "parityPass": true,
+    "modes": {
+      "resident-normal": {
+        "label": "resident-normal",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 5,
+        "slippageBpsPerSide": 0,
+        "tradeCount": 789,
+        "endingEquity": 124179.9405592453,
+        "returnPct": 1141.799405592453,
+        "cagrPct": 131.5264595556703,
+        "maxDrawdownPct": 5.643103665753597,
+        "profitFactor": 3.246344841736,
+        "profitFactorWithoutBest": 3.1541053410313555,
+        "winRatePct": 53.99239543726235,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 758,
+          "take-profit": 24,
+          "stop-loss": 7
+        }
+      },
+      "resident-cost-stress": {
+        "label": "resident-cost-stress",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 0,
+        "stopUpdateLagHours": 0,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 788,
+        "endingEquity": 36341.2195122049,
+        "returnPct": 263.412195122049,
+        "cagrPct": 53.729502906728534,
+        "maxDrawdownPct": 6.925522173844756,
+        "profitFactor": 1.7409553365210177,
+        "profitFactorWithoutBest": 1.7021006770478608,
+        "winRatePct": 45.30456852791878,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 758,
+          "take-profit": 23,
+          "stop-loss": 7
+        }
+      },
+      "resident-single-node-outage-stoplag2h": {
+        "label": "resident-single-node-outage-stoplag2h",
+        "entryDelayHours": 0,
+        "stopUpdateLagBars": 1,
+        "stopUpdateLagHours": 2,
+        "feeBpsPerSide": 10,
+        "slippageBpsPerSide": 5,
+        "tradeCount": 644,
+        "endingEquity": 67747.29068971753,
+        "returnPct": 577.4729068971752,
+        "cagrPct": 89.19114307988455,
+        "maxDrawdownPct": 9.06903426765102,
+        "profitFactor": 2.1961381957653727,
+        "profitFactorWithoutBest": 2.1435910790043295,
+        "winRatePct": 52.484472049689444,
+        "maximumEffectiveLeverage": 1.0000000000000002,
+        "liquidationCount": 0,
+        "exitReasons": {
+          "trailing-stop": 579,
+          "take-profit": 46,
+          "stop-loss": 19
+        }
+      }
+    },
+    "robust": true
+  },
+  "acceptance": {
+    "normal3YCagrAtLeast100": true,
+    "dvRobust": true,
+    "combinedResidentStressPositive": true,
+    "combinedResidentPfWithoutBestAtLeast095": true,
+    "combinedResidentDdAtMost50": true,
+    "maxLeverageAtMost1": true,
+    "zeroLiquidations": true,
+    "engineParityPass": true
+  },
+  "diagnosis": "V11_REDUNDANT_RESIDENT_ARCH_RESEARCH_ACCEPTED"
+}
