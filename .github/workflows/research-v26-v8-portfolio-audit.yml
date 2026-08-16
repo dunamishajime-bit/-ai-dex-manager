@@ -1,0 +1,57 @@
+name: Research V26 V8 Portfolio Overlap Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/v26-latency-aware-search-20260816]
+    paths:
+      - scripts/research_v26_v8_portfolio_audit.ts
+      - .github/workflows/research-v26-v8-portfolio-audit.yml
+permissions:
+  contents: write
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v26-latency-aware-3y-usdm-v1-20260816
+          fail-on-cache-miss: true
+      - run: npm ci
+      - name: Typecheck research audit
+        run: npx tsc --noEmit -p tsconfig.research.json
+      - name: Run V26 V8 portfolio overlap audit
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_v26_v8_portfolio_audit.ts
+      - name: Assert audit boundary and parity
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'); const d=JSON.parse(fs.readFileSync('.research-state/v26-v8-portfolio-audit.json','utf8'));
+          if(!d.researchOnly||d.productionChanged||d.vpsChanged||d.liveChanged||d.realTradingEnabled) throw new Error('BOUNDARY_FAIL');
+          if(!d.penguExcluded||d.universe.includes('PENGU')||d.universe.length!==14||d.leverage!==1) throw new Error('UNIVERSE_OR_LEVERAGE_FAIL');
+          if(d.combined3Y.concurrency.selectionMismatch!==0) throw new Error('SELECTION_PARITY_FAIL');
+          if(d.combined3Y.concurrency.actualOverlappingTradePairs!==0) throw new Error('TRADE_OVERLAP_FAIL');
+          if(d.combined3Y.capitalUsage.maximumPct>100.0001) throw new Error('CAPITAL_LIMIT_FAIL');
+          console.log('V26_V8_PORTFOLIO_AUDIT_PASS');
+          NODE
+      - name: Publish portfolio audit result
+        run: |
+          mkdir -p docs/research-results
+          cp .research-state/v26-v8-portfolio-audit.json docs/research-results/v26-v8-portfolio-audit-latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/research-results/v26-v8-portfolio-audit-latest.json
+          if ! git diff --cached --quiet; then git commit -m "research: record V26 V8 portfolio audit [skip ci]" && git push; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v26-v8-portfolio-audit
+          path: .research-state/v26-v8-portfolio-audit.json
+          include-hidden-files: true
+          retention-days: 30
