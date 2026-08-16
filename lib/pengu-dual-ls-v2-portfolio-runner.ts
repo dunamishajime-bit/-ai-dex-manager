@@ -23,6 +23,7 @@ import type {
 } from "@/lib/pengu-dual-ls-v2-runner-state";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
+import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 
 const SYMBOL = "PENGUUSDT";
 
@@ -167,8 +168,13 @@ export class PenguDualLsV2PortfolioRunner {
         if (this.dependencies.config.mode !== "LIVE") return undefined;
         const killSwitch = await readDisDexV96KillSwitch(this.dependencies.config.killSwitchPath);
         if (killSwitch) return `Shared Kill Switch: ${killSwitch.reason}`;
+        const sharedPath = this.dependencies.config.portfolioDailyLossStatePath || process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH;
+        if (sharedPath) {
+            const validation = await readSharedCryptoDailyRisk(sharedPath);
+            if (!validation.ok) return `Shared crypto daily-risk state blocked PENGU entry: ${validation.reason}.`;
+        }
         const dailyLossTripped = await readPortfolioDailyLoss(this.dependencies.config.portfolioDailyLossStatePath);
-        if (dailyLossTripped) return `V96 portfolio daily loss latch is active at ${this.dependencies.config.maximumDailyLossPct}%.`;
+        if (dailyLossTripped) return `Shared crypto daily loss latch is active at ${this.dependencies.config.maximumDailyLossPct}%.`;
         return undefined;
     }
 

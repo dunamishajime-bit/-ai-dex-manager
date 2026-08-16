@@ -1,0 +1,56 @@
+name: V12 X1 ALL implementation safety CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'config/v12X1AllRuntime.ts'
+      - 'lib/v12-x1-all.ts'
+      - 'lib/v12-aster-market-data-provider.ts'
+      - 'lib/v12-resident-stop-lifecycle.ts'
+      - 'lib/disdex-account-order-lock.ts'
+      - 'lib/disdex-shared-crypto-daily-risk.ts'
+      - 'lib/disdex-aster-portfolio-classifier.ts'
+      - 'lib/pengu-dual-ls-v2-portfolio-runner.ts'
+      - 'scripts/disdex-pengu-dual-ls-v2-live-runner.ts'
+      - 'scripts/disdex_v52_aster_only_live_engine.py'
+      - 'scripts/disdex_account_order_lock.py'
+      - 'scripts/disdex_v12_crypto_daily_risk.py'
+      - 'scripts/v12-*-selftest.ts'
+      - 'scripts/disdex-account-order-lock-selftest.ts'
+      - '.github/workflows/v12-x1-all-implementation-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Typecheck application and PENGU contract
+        run: |
+          npx tsc --noEmit -p tsconfig.json
+          npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+      - name: Run V12 and cross-language safety self-tests
+        run: |
+          npx tsx scripts/v12-x1-all-selftest.ts
+          npx tsx scripts/disdex-account-order-lock-selftest.ts
+          npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
+          npx tsx scripts/v12-resident-stop-selftest.ts
+          npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test
+          python scripts/disdex_account_order_lock.py --self-test
+          python scripts/disdex_v12_crypto_daily_risk.py --self-test
+          python -m py_compile scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_account_order_lock.py scripts/disdex_v12_crypto_daily_risk.py
+      - name: Assert no live activation or order submission in implementation checks
+        run: |
+          ! rg -n 'I_ACCEPT_REAL_MONEY|LIVE_ACK|placeMarket|place_limit|submitOrder' scripts/v12-*-selftest.ts scripts/disdex-account-order-lock-selftest.ts

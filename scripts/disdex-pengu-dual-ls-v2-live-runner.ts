@@ -2,7 +2,7 @@ import "dotenv/config";
 import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
-import { FileLiveRunnerLock, resolveLiveRunnerLockPath } from "../lib/live-runner-state";
+import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
@@ -48,11 +48,14 @@ async function main() {
         hourlyLimit: numberEnv("PENGU_DUAL_LS_V2_HOURLY_LIMIT", 1000),
         cacheTtlMs: numberEnv("PENGU_DUAL_LS_V2_HISTORY_CACHE_TTL_MS", 5 * 60_000),
     });
+    const accountLock = new FileAccountOrderLock(process.env.DISDEX_ACCOUNT_LOCK_PATH || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
     const runner = new PenguDualLsV2PortfolioRunner({
         marketData,
         executor,
         stateStore: new FilePenguDualLsV2RunnerStateStore(resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`), runtime.mode),
-        lock: new FileLiveRunnerLock(resolveLiveRunnerLockPath(process.env.PENGU_DUAL_LS_V2_LOCK_PATH, stateRoot, runtime.mode.toLowerCase() as "live" | "paper"), numberEnv("PENGU_DUAL_LS_V2_LOCK_STALE_MS", 10 * 60_000)),
+        // PENGU and the V12/V52 runners share one account-scoped lock. This
+        // prevents sleeve-local reservations from racing across languages.
+        lock: accountLock,
         config: {
             mode: runtime.mode,
             enabled: runtime.enabled,

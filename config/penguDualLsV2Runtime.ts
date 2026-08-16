@@ -124,7 +124,7 @@ export function resolvePenguDualLsV2Runtime(env: Partial<NodeJS.ProcessEnv> = pr
         portfolioGrossCap: Math.max(0, Math.min(PENGU_DUAL_LS_V2.portfolioGrossCap, finiteEnv(env.PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP, PENGU_DUAL_LS_V2.portfolioGrossCap))),
         maximumDailyLossPct: Math.max(0, Math.min(5, finiteEnv(env.PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT, 5))),
         killSwitchPath: env.PENGU_DUAL_LS_V2_KILL_SWITCH_FILE,
-        portfolioDailyLossStatePath: env.PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE,
+        portfolioDailyLossStatePath: env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || env.PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE || ".runtime-state/shared/crypto-daily-risk.json",
         closeUnmanagedPositions: false,
     };
 }

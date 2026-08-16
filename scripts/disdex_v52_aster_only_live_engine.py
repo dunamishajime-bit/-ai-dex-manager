@@ -13,6 +13,8 @@ from typing import Dict, List, Optional, Tuple
 
 import disdex_v11eq_aster_only_live_engine as legacy
 from disdex_v52_daily_loss import update_v52_strategy_daily_latch
+from disdex_account_order_lock import AccountOrderLock
+from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
 
 base = legacy.base
 
@@ -53,7 +55,11 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.state_path = self.state_root / f"runner-{mode}.json"
         self.audit_path = self.state_root / f"audit-{mode}.jsonl"
         self.kill_switch_path = Path(os.getenv("DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE", str(self.kill_switch_path))).resolve()
-        self.lock = base.FileLock(self.state_root / f"runner-{mode}.lock", base.int_env("DISDEX_STOCK_LOCK_STALE_MS", 15 * 60_000))
+        self.lock = AccountOrderLock(
+            os.getenv("DISDEX_ACCOUNT_LOCK_PATH", ".runtime-state/shared/account-order.lock"),
+            base.int_env("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000),
+            default_owner=f"V52:{mode}:{os.getpid()}",
+        )
         self.state = base.read_json(self.state_path, {}) or {}
         self.crypto_gross_cap = base.float_env("DISDEX_V52_CRYPTO_GROSS_CAP", 1.0)
         self.stock_gross_cap = base.float_env("DISDEX_V52_STOCK_GROSS_CAP", 1.5)
@@ -451,6 +457,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             self.flatten_all(str(kill.get("reason") or "KILL_SWITCH")); return
         if self.enforce_daily_loss():
             return
+        if self.live:
+            risk_path = os.getenv("DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH", ".runtime-state/shared/crypto-daily-risk.json")
+            ok, reason, _ = read_shared_crypto_daily_risk(risk_path)
+            if not ok:
+                self.log("v52-entry-held-shared-crypto-risk", reason=reason, path=risk_path)
+                return
         if self.kill_switch():
             self.flatten_all("DAILY_LOSS"); return
         self.update_history()
@@ -524,7 +536,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         return {"strategyId": STRATEGY_ID, "mode": self.mode, "readOnly": read_only, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": reference_health_status, "referenceFreshnessMode": reference_freshness_mode, "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
 
     def run(self, daemon: bool) -> None:
-        self.lock.acquire()
+        if not self.lock.acquire():
+            self.log("v52-account-lock-busy", accountLockPath=str(self.lock.path))
+            return
         try:
             self.reset_days(); self.reconcile()
             self.log("v52-runner-start", strategyId=STRATEGY_ID, caps={"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap})
