@@ -77,7 +77,10 @@ class AccountOrderLock:
                     current = _load(self.path)
                     if int(current.get("expiresAt", 0)) > _now_ms() or attempt:
                         return False
-                    self.path.unlink()
+                    # Expired ownership is not proof that an exchange order is
+                    # settled. Leave the lease in place for reconciliation/manual
+                    # review instead of deleting it automatically.
+                    return False
                 except FileNotFoundError:
                     continue
                 except Exception:

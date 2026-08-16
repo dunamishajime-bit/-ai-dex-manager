@@ -2,12 +2,14 @@ import { resolveV12X1AllRuntime, type V12RuntimeMode } from "@/config/v12X1AllRu
 import { buildV12Signal, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
 import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import { FileV12X1AllRunnerStateStore } from "@/lib/v12-x1-all-runner-state";
 
 export interface V12X1AllRunnerDependencies {
     marketData: { load(): Promise<Record<string, V12Bar[]>> };
     equity: () => Promise<number>;
     now?: () => number;
     lock?: FileAccountOrderLock;
+    stateStore?: FileV12X1AllRunnerStateStore;
     log?: (message: string, payload?: Record<string, unknown>) => void;
 }
 
@@ -36,10 +38,12 @@ export async function runV12X1AllOnce(deps: V12X1AllRunnerDependencies, env: Par
     const equity = await deps.equity();
     const sizing = sizeV12Position(equity, data[signal.symbol][index].close, signal.atr, signal.side);
     const lock = deps.lock || new FileAccountOrderLock(runtime.lockPath);
+    const stateStore = deps.stateStore || new FileV12X1AllRunnerStateStore(runtime.statePath, runtime.mode);
     const handle = await lock.acquire(`V12_X1.00_ALL:${process.pid}`);
     if (!handle) return { status: "locked", reason: "ACCOUNT_LOCK_BUSY", signal, requestedGross: sizing.requestedGross };
     try {
         await handle.reserve({ strategyId: runtime.strategyId, symbol: `${signal.symbol}USDT`, side: signal.side, gross: sizing.requestedGross, notionalUsd: sizing.requestedNotional });
+        await stateStore.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: runtime.mode, updatedAt: Date.now(), lastReferenceTs: signal.referenceTs, pending: { idempotencyKey: `${runtime.strategyId}|${signal.referenceTs}|${signal.symbol}|${signal.side}`, action: "ENTRY", clientOrderId: `v12-plan-${signal.referenceTs}`, createdAt: Date.now() } });
         log("v12-signal", { strategyId: runtime.strategyId, mode: runtime.mode, signal, requestedGross: sizing.requestedGross, ordersSent: 0 });
         if (runtime.mode === "LIVE") return { status: "live-blocked", reason: "LIVE_ADAPTER_NOT_INSTALLED_AND_EXPLICIT_ACTIVATION_REQUIRED", signal, requestedGross: sizing.requestedGross };
         return { status: runtime.mode === "PAPER" ? "paper" : "shadow", reason: "PLAN_ONLY_NO_ORDER_SUBMISSION", signal, requestedGross: sizing.requestedGross };

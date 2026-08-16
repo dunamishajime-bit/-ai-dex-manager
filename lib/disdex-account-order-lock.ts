@@ -58,9 +58,9 @@ export class FileAccountOrderLock {
     constructor(path = process.env.DISDEX_ACCOUNT_LOCK_PATH || ".runtime-state/shared/account-order.lock", private readonly leaseMs = 120_000) { this.path = resolve(path); }
 
     private async read(): Promise<AccountLockDocument> { return normalize(JSON.parse(await readFile(this.path, "utf8"))); }
-    private async removeStale() {
-        try { const doc = await this.read(); if (doc.expiresAt > Date.now()) return false; await unlink(this.path); return true; }
-        catch (error) { const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : ""; if (code === "ENOENT") return true; try { await unlink(this.path); return true; } catch { return false; } }
+    private async staleRequiresReview() {
+        try { const doc = await this.read(); return doc.expiresAt <= Date.now(); }
+        catch (error) { const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : ""; return code !== "ENOENT"; }
     }
 
     async acquire(ownerId: string, accountScope = DEFAULT_ACCOUNT_SCOPE): Promise<AccountLockHandle | null> {
@@ -91,7 +91,10 @@ export class FileAccountOrderLock {
             } catch (error) {
                 const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
                 if (code !== "EEXIST") throw error;
-                if (attempt === 0 && await this.removeStale()) continue;
+                // An expired lease may still correspond to an exchange order in
+                // flight. Never delete it automatically; reconciliation/manual
+                // review must clear the account-scoped lock.
+                if (attempt === 0 && await this.staleRequiresReview()) return null;
                 return null;
             }
         }

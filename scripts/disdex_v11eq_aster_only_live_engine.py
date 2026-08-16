@@ -16,7 +16,14 @@ import disdex_v13d_v11eq_stock_live_engine as base
 STRATEGY_ID = "DISDEX_V11EQ_ASTER_ONLY_EXCESS_MARGIN"
 # REFERENCE_FRESHNESS_DEFERRED_MARKET_CLOSED: quote freshness is required during regular US session only.
 LIVE_ACK = "I_ACCEPT_REAL_MONEY_V96_V11EQ_ASTER_ONLY"
-V96_SYMBOLS = {"BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"}
+# Generic crypto accounting for the integrated V12 + PENGU portfolio.  The
+# legacy name is retained for state compatibility, but it must not omit V12
+# symbols when V52 checks available gross capacity.
+V96_SYMBOLS = {
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT",
+    "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT",
+    "AAVEUSDT", "NEARUSDT", "PENGUUSDT",
+}
 
 
 class AsterOnlyStockEngine(base.StockEngine):
@@ -69,11 +76,17 @@ class AsterOnlyStockEngine(base.StockEngine):
         total = 0.0
         for row in self.aster.positions():
             symbol = str(row.get("symbol") or "").upper()
-            if symbol not in V96_SYMBOLS:
-                continue
             qty = abs(base.finite(row.get("positionAmt")))
             price = base.finite(row.get("markPrice") or row.get("entryPrice"))
-            total += qty * price
+            if qty <= 1e-12:
+                continue
+            if symbol in V96_SYMBOLS:
+                total += qty * price
+            elif symbol in base.ASTER_SYMBOL.values():
+                # Known stock sleeves are accounted by V52 stock gross.
+                continue
+            else:
+                raise RuntimeError(f"Unknown non-flat Aster symbol requires manual review: {symbol}")
         return total
 
     def excess_margin_usd(self) -> float:
