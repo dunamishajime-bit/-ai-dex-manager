@@ -1,0 +1,66 @@
+name: Portfolio Profit Engine V21
+
+on:
+  push:
+    branches:
+      - chatgpt/3y-entry-edge-diagnosis-20260815
+    paths:
+      - scripts/research_portfolio_profit_engine_v21.py
+      - .github/workflows/portfolio-profit-engine-v21.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert frozen V21 and V15 stack
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v21.py)" = "9f29c4392ce2d8bd9655c532f41db4ade5a55986"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v15.py)" = "1ac36230c636df11649892256ad7bbba0c6693a1"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v14.py)" = "f297505cabf45488a507a90b3a730720ac94c203"
+          test "$(git hash-object scripts/research_portfolio_profit_engine_v12.py)" = "94c80404016707394a5b7c5c0bf69250956f5b76"
+          echo FROZEN_V21_STACK_PASS
+      - name: Restore exact 3Y research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - name: Compile V21
+        run: python -m py_compile scripts/research_pairwise_clean_sheet_3y.py scripts/research_portfolio_profit_engine_v8.py scripts/research_portfolio_profit_engine_v11.py scripts/research_portfolio_profit_engine_v12.py scripts/research_portfolio_profit_engine_v14.py scripts/research_portfolio_profit_engine_v15.py scripts/research_portfolio_profit_engine_v21.py
+      - name: Run V21
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: python scripts/research_portfolio_profit_engine_v21.py
+      - name: Assert research boundary
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('.research-state/portfolio-profit-engine-v21.json'))
+          assert d['researchOnly'] is True
+          assert d['productionChanged'] is False
+          assert d['vpsChanged'] is False
+          assert d['liveChanged'] is False
+          assert d['realTradingEnabled'] is False
+          assert d['freshOosRead'] is False
+          assert d['freshOosConsumed'] is False
+          assert d['target']['leverageMultiplier'] == 1.0
+          print('RESEARCH_BOUNDARY_PASS')
+          PY
+      - name: Upload V21 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-profit-engine-v21
+          path: |
+            .research-state/portfolio-profit-engine-v21.json
+            .research-state/portfolio-profit-engine-v21-trades.jsonl
+          retention-days: 30
