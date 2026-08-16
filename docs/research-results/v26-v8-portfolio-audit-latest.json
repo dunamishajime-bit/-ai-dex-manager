@@ -1,0 +1,1883 @@
+{
+  "researchLine": "V26_V8_PORTFOLIO_OVERLAP_AUDIT",
+  "researchOnly": true,
+  "productionChanged": false,
+  "vpsChanged": false,
+  "liveChanged": false,
+  "realTradingEnabled": false,
+  "penguExcluded": true,
+  "leverage": 1,
+  "universe": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "SOL",
+    "LINK",
+    "AVAX",
+    "DOGE",
+    "INJ",
+    "XRP",
+    "ADA",
+    "LTC",
+    "ATOM",
+    "AAVE",
+    "NEAR"
+  ],
+  "signalSemantics": {
+    "family": "relative_strength",
+    "timeframeHours": 2,
+    "importantNote": "breakoutBars/buffer are present in the genome but are NOT gating conditions for relative_strength family; engine only requires breakout for breakout or dual_direction families.",
+    "parameters": {
+      "timeframeHours": 2,
+      "leverage": 1,
+      "riskPerTradePct": 3.19,
+      "maxMarginUsagePct": 100,
+      "btcRegimeSmaBars": 53,
+      "btcRegimeMomentumBars": 52,
+      "regimeThresholdPct": 0.0377,
+      "momentumBars": 45,
+      "breakoutBars": 18,
+      "breakoutBufferPct": 0.0233,
+      "minimumMomentumPct": 0.0227,
+      "minimumVolumeRatio": 0.9845,
+      "minimumEdgeToCostRatio": 6.0879,
+      "volatilityLookbackBars": 15,
+      "volatilityPenalty": 2.3953,
+      "atrBars": 31,
+      "stopAtr": 2.477,
+      "takeProfitAtr": 3.1995,
+      "trailingAtr": 0.4,
+      "maxHoldBars": 23,
+      "rebalanceBars": 20,
+      "cooldownBars": 1,
+      "allowLong": true,
+      "allowShort": true,
+      "allowNeutralRegime": true,
+      "neutralScoreThreshold": 1.4649
+    }
+  },
+  "development": {
+    "window": {
+      "label": "development",
+      "startTs": 1688169600000,
+      "endTs": 1719792000000
+    },
+    "portfolio": {
+      "cagrPct": 106.21179473771285,
+      "maxDrawdownPct": 4.42252862946734,
+      "profitFactor": 2.5776636306532814,
+      "tradeCount": 269,
+      "winRatePct": 51.301115241635685,
+      "endingEquity": 20648.437702038216,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "residentExecutionStress": {
+      "noDelay": {
+        "mode": "none",
+        "tradeCount": 269,
+        "skippedInfeasibleTrades": 0,
+        "endingEquity": 13147.268106523343,
+        "returnPct": 31.47268106523342,
+        "cagrPct": 31.398983031197837,
+        "maxDrawdownPct": 8.712840808772478,
+        "profitFactor": 1.3897825438773137,
+        "profitFactorWithoutBest": 1.3281236749866558,
+        "winRatePct": 43.12267657992565
+      },
+      "entryDelayResidentExit": {
+        "mode": "entry",
+        "tradeCount": 256,
+        "skippedInfeasibleTrades": 13,
+        "endingEquity": 11901.521028174271,
+        "returnPct": 19.01521028174271,
+        "cagrPct": 18.972762319106963,
+        "maxDrawdownPct": 8.397331842784874,
+        "profitFactor": 1.4616047023045136,
+        "profitFactorWithoutBest": 1.3952554035223639,
+        "winRatePct": 46.875
+      }
+    },
+    "capitalUsage": {
+      "formula": "min(balance*riskPerTradePct/stopDistancePct, balance*leverage*maxMarginUsagePct)",
+      "riskPerTradePct": 3.19,
+      "leverage": 1,
+      "maxMarginUsagePct": 100,
+      "averagePct": 84.01258684556839,
+      "medianPct": 100,
+      "minimumPct": 24.782859223299177,
+      "maximumPct": 100
+    },
+    "concurrency": {
+      "engineMaximumOpenPositions": 1,
+      "actualOverlappingTradePairs": 0,
+      "simultaneousOrderDecisionBars": 200,
+      "totalOrders": 269,
+      "simultaneousOrderDecisionPct": 74.34944237918215,
+      "maxCandidatesOnOrderDecision": 14,
+      "overlapDepthOnOrderDecisions": {
+        "1": 69,
+        "2": 35,
+        "3": 23,
+        "4": 18,
+        "5": 10,
+        "6": 14,
+        "7": 11,
+        "8": 14,
+        "9": 9,
+        "10": 9,
+        "11": 11,
+        "12": 16,
+        "13": 20,
+        "14": 10
+      },
+      "selectionMismatch": 0
+    },
+    "signalCompetitionAllBars": {
+      "signalBars": 608,
+      "overlapBars": 469,
+      "overlapPct": 77.13815789473684,
+      "maxCandidatesAnyBar": 14,
+      "depth": {
+        "1": 139,
+        "2": 83,
+        "3": 56,
+        "4": 45,
+        "5": 22,
+        "6": 29,
+        "7": 32,
+        "8": 25,
+        "9": 23,
+        "10": 24,
+        "11": 27,
+        "12": 32,
+        "13": 36,
+        "14": 35
+      },
+      "bySymbol": {
+        "BTC": {
+          "eligibleBars": 323,
+          "topRankBars": 166,
+          "rankLossBars": 157
+        },
+        "ETH": {
+          "eligibleBars": 280,
+          "topRankBars": 60,
+          "rankLossBars": 220
+        },
+        "BNB": {
+          "eligibleBars": 205,
+          "topRankBars": 51,
+          "rankLossBars": 154
+        },
+        "SOL": {
+          "eligibleBars": 247,
+          "topRankBars": 36,
+          "rankLossBars": 211
+        },
+        "LINK": {
+          "eligibleBars": 217,
+          "topRankBars": 33,
+          "rankLossBars": 184
+        },
+        "AVAX": {
+          "eligibleBars": 251,
+          "topRankBars": 33,
+          "rankLossBars": 218
+        },
+        "DOGE": {
+          "eligibleBars": 256,
+          "topRankBars": 28,
+          "rankLossBars": 228
+        },
+        "INJ": {
+          "eligibleBars": 215,
+          "topRankBars": 19,
+          "rankLossBars": 196
+        },
+        "XRP": {
+          "eligibleBars": 250,
+          "topRankBars": 58,
+          "rankLossBars": 192
+        },
+        "ADA": {
+          "eligibleBars": 262,
+          "topRankBars": 20,
+          "rankLossBars": 242
+        },
+        "LTC": {
+          "eligibleBars": 234,
+          "topRankBars": 29,
+          "rankLossBars": 205
+        },
+        "ATOM": {
+          "eligibleBars": 237,
+          "topRankBars": 38,
+          "rankLossBars": 199
+        },
+        "AAVE": {
+          "eligibleBars": 227,
+          "topRankBars": 16,
+          "rankLossBars": 211
+        },
+        "NEAR": {
+          "eligibleBars": 243,
+          "topRankBars": 21,
+          "rankLossBars": 222
+        }
+      }
+    },
+    "orderDecisionCompetitionBySymbol": {
+      "BTC": {
+        "eligibleOnOrderDecisions": 147,
+        "selectedOrders": 75,
+        "lostToHigherRank": 72
+      },
+      "ETH": {
+        "eligibleOnOrderDecisions": 124,
+        "selectedOrders": 30,
+        "lostToHigherRank": 94
+      },
+      "BNB": {
+        "eligibleOnOrderDecisions": 92,
+        "selectedOrders": 22,
+        "lostToHigherRank": 70
+      },
+      "SOL": {
+        "eligibleOnOrderDecisions": 107,
+        "selectedOrders": 14,
+        "lostToHigherRank": 93
+      },
+      "LINK": {
+        "eligibleOnOrderDecisions": 97,
+        "selectedOrders": 14,
+        "lostToHigherRank": 83
+      },
+      "AVAX": {
+        "eligibleOnOrderDecisions": 104,
+        "selectedOrders": 15,
+        "lostToHigherRank": 89
+      },
+      "DOGE": {
+        "eligibleOnOrderDecisions": 107,
+        "selectedOrders": 10,
+        "lostToHigherRank": 97
+      },
+      "INJ": {
+        "eligibleOnOrderDecisions": 95,
+        "selectedOrders": 9,
+        "lostToHigherRank": 86
+      },
+      "XRP": {
+        "eligibleOnOrderDecisions": 112,
+        "selectedOrders": 27,
+        "lostToHigherRank": 85
+      },
+      "ADA": {
+        "eligibleOnOrderDecisions": 112,
+        "selectedOrders": 6,
+        "lostToHigherRank": 106
+      },
+      "LTC": {
+        "eligibleOnOrderDecisions": 102,
+        "selectedOrders": 14,
+        "lostToHigherRank": 88
+      },
+      "ATOM": {
+        "eligibleOnOrderDecisions": 90,
+        "selectedOrders": 14,
+        "lostToHigherRank": 76
+      },
+      "AAVE": {
+        "eligibleOnOrderDecisions": 95,
+        "selectedOrders": 8,
+        "lostToHigherRank": 87
+      },
+      "NEAR": {
+        "eligibleOnOrderDecisions": 103,
+        "selectedOrders": 11,
+        "lostToHigherRank": 92
+      }
+    },
+    "performanceBySymbol": {
+      "BTC": {
+        "tradeCount": 75,
+        "longTrades": 47,
+        "shortTrades": 28,
+        "wins": 43,
+        "winRatePct": 57.333333333333336,
+        "profitFactor": 3.7480666441067227,
+        "netPnl": 3937.8297075998094,
+        "pnlContributionPct": 36.9803516514546,
+        "avgCapitalUsagePct": 95.68184328419377,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 58.74044385592319,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "ETH": {
+        "tradeCount": 30,
+        "longTrades": 20,
+        "shortTrades": 10,
+        "wins": 12,
+        "winRatePct": 40,
+        "profitFactor": 0.7505260870596709,
+        "netPnl": -343.2874313224841,
+        "pnlContributionPct": -3.2238290811127626,
+        "avgCapitalUsagePct": 87.65999740863482,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 49.14993562479908,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 1.9333333333333333
+      },
+      "BNB": {
+        "tradeCount": 22,
+        "longTrades": 16,
+        "shortTrades": 6,
+        "wins": 8,
+        "winRatePct": 36.36363636363637,
+        "profitFactor": 1.2214059403956221,
+        "netPnl": 108.12481006219241,
+        "pnlContributionPct": 1.0154053870409185,
+        "avgCapitalUsagePct": 93.23662094463738,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 55.30020448749408,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "SOL": {
+        "tradeCount": 14,
+        "longTrades": 12,
+        "shortTrades": 2,
+        "wins": 9,
+        "winRatePct": 64.28571428571429,
+        "profitFactor": 4.233659170026518,
+        "netPnl": 576.7169052804908,
+        "pnlContributionPct": 5.4159767039826,
+        "avgCapitalUsagePct": 64.08038194285147,
+        "medianCapitalUsagePct": 62.610571136580276,
+        "minCapitalUsagePct": 39.76054537896314,
+        "maxCapitalUsagePct": 92.62713126456448,
+        "avgHoldingBars": 2.142857142857143
+      },
+      "LINK": {
+        "tradeCount": 14,
+        "longTrades": 12,
+        "shortTrades": 2,
+        "wins": 6,
+        "winRatePct": 42.857142857142854,
+        "profitFactor": 3.3294481293171367,
+        "netPnl": 849.4407226539985,
+        "pnlContributionPct": 7.977139430429366,
+        "avgCapitalUsagePct": 79.72371402450987,
+        "medianCapitalUsagePct": 77.51738861563257,
+        "minCapitalUsagePct": 28.9842054883653,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.142857142857143
+      },
+      "AVAX": {
+        "tradeCount": 15,
+        "longTrades": 12,
+        "shortTrades": 3,
+        "wins": 6,
+        "winRatePct": 40,
+        "profitFactor": 1.715799213965382,
+        "netPnl": 290.19242327363855,
+        "pnlContributionPct": 2.7252112600338774,
+        "avgCapitalUsagePct": 77.45437707910213,
+        "medianCapitalUsagePct": 79.71137182361578,
+        "minCapitalUsagePct": 40.40104674920629,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.066666666666667
+      },
+      "DOGE": {
+        "tradeCount": 10,
+        "longTrades": 7,
+        "shortTrades": 3,
+        "wins": 7,
+        "winRatePct": 70,
+        "profitFactor": 4.315751919065391,
+        "netPnl": 579.1669727779447,
+        "pnlContributionPct": 5.43898540785082,
+        "avgCapitalUsagePct": 60.723884175389585,
+        "medianCapitalUsagePct": 54.42133159327552,
+        "minCapitalUsagePct": 24.782859223299177,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.2
+      },
+      "INJ": {
+        "tradeCount": 9,
+        "longTrades": 4,
+        "shortTrades": 5,
+        "wins": 6,
+        "winRatePct": 66.66666666666667,
+        "profitFactor": 4.2376647903571385,
+        "netPnl": 546.2673068749706,
+        "pnlContributionPct": 5.130023033993135,
+        "avgCapitalUsagePct": 63.60243975056307,
+        "medianCapitalUsagePct": 52.8715326547877,
+        "minCapitalUsagePct": 26.471613190797722,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "XRP": {
+        "tradeCount": 27,
+        "longTrades": 15,
+        "shortTrades": 12,
+        "wins": 13,
+        "winRatePct": 48.148148148148145,
+        "profitFactor": 2.513542641781618,
+        "netPnl": 1102.904323206658,
+        "pnlContributionPct": 10.35742851738288,
+        "avgCapitalUsagePct": 86.18473111249413,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 32.886265289010545,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.037037037037037
+      },
+      "ADA": {
+        "tradeCount": 6,
+        "longTrades": 4,
+        "shortTrades": 2,
+        "wins": 2,
+        "winRatePct": 33.333333333333336,
+        "profitFactor": 3.2794748215817053,
+        "netPnl": 342.92845408194535,
+        "pnlContributionPct": 3.220457908264843,
+        "avgCapitalUsagePct": 74.09667265060374,
+        "medianCapitalUsagePct": 73.94542789241817,
+        "minCapitalUsagePct": 39.57249821030058,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "LTC": {
+        "tradeCount": 14,
+        "longTrades": 8,
+        "shortTrades": 6,
+        "wins": 7,
+        "winRatePct": 50,
+        "profitFactor": 2.128091779749046,
+        "netPnl": 787.9549731291363,
+        "pnlContributionPct": 7.399723745186702,
+        "avgCapitalUsagePct": 86.54018232354406,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 47.95509761231903,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 1.7857142857142858
+      },
+      "ATOM": {
+        "tradeCount": 14,
+        "longTrades": 7,
+        "shortTrades": 7,
+        "wins": 5,
+        "winRatePct": 35.714285714285715,
+        "profitFactor": 2.094350287008565,
+        "netPnl": 470.0393672746182,
+        "pnlContributionPct": 4.414162719707204,
+        "avgCapitalUsagePct": 90.79612925904102,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 52.037319079236056,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.142857142857143
+      },
+      "AAVE": {
+        "tradeCount": 8,
+        "longTrades": 5,
+        "shortTrades": 3,
+        "wins": 6,
+        "winRatePct": 75,
+        "profitFactor": 13.413037627344442,
+        "netPnl": 936.8158174947449,
+        "pnlContributionPct": 8.79768322554423,
+        "avgCapitalUsagePct": 72.24289235354601,
+        "medianCapitalUsagePct": 81.23746443908675,
+        "minCapitalUsagePct": 30.526363029052284,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "NEAR": {
+        "tradeCount": 11,
+        "longTrades": 7,
+        "shortTrades": 4,
+        "wins": 8,
+        "winRatePct": 72.72727272727273,
+        "profitFactor": 6.959867903965258,
+        "netPnl": 463.34334965056894,
+        "pnlContributionPct": 4.351280090241592,
+        "avgCapitalUsagePct": 50.48081417620187,
+        "medianCapitalUsagePct": 46.9801583014437,
+        "minCapitalUsagePct": 31.322028205711028,
+        "maxCapitalUsagePct": 76.24393406447973,
+        "avgHoldingBars": 2.1818181818181817
+      }
+    }
+  },
+  "validation": {
+    "window": {
+      "label": "validation",
+      "startTs": 1719792000000,
+      "endTs": 1751328000000
+    },
+    "portfolio": {
+      "cagrPct": 185.95218536724585,
+      "maxDrawdownPct": 5.64310366575364,
+      "profitFactor": 3.116842551612842,
+      "tradeCount": 297,
+      "winRatePct": 53.87205387205387,
+      "endingEquity": 28567.813294724583,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "residentExecutionStress": {
+      "noDelay": {
+        "mode": "none",
+        "tradeCount": 297,
+        "skippedInfeasibleTrades": 0,
+        "endingEquity": 18045.379324260586,
+        "returnPct": 80.45379324260587,
+        "cagrPct": 80.5267687463865,
+        "maxDrawdownPct": 7.779291793287851,
+        "profitFactor": 1.8129407208904114,
+        "profitFactorWithoutBest": 1.7534183827888523,
+        "winRatePct": 46.12794612794613
+      },
+      "entryDelayResidentExit": {
+        "mode": "entry",
+        "tradeCount": 289,
+        "skippedInfeasibleTrades": 8,
+        "endingEquity": 15981.97845515526,
+        "returnPct": 59.819784551552615,
+        "cagrPct": 59.87111866037795,
+        "maxDrawdownPct": 4.414485332696252,
+        "profitFactor": 2.1634802945079854,
+        "profitFactorWithoutBest": 2.0799813007851187,
+        "winRatePct": 49.48096885813148
+      }
+    },
+    "capitalUsage": {
+      "formula": "min(balance*riskPerTradePct/stopDistancePct, balance*leverage*maxMarginUsagePct)",
+      "riskPerTradePct": 3.19,
+      "leverage": 1,
+      "maxMarginUsagePct": 100,
+      "averagePct": 77.46370933685452,
+      "medianPct": 82.72620012740204,
+      "minimumPct": 17.58312375444799,
+      "maximumPct": 100
+    },
+    "concurrency": {
+      "engineMaximumOpenPositions": 1,
+      "actualOverlappingTradePairs": 0,
+      "simultaneousOrderDecisionBars": 205,
+      "totalOrders": 297,
+      "simultaneousOrderDecisionPct": 69.02356902356902,
+      "maxCandidatesOnOrderDecision": 14,
+      "overlapDepthOnOrderDecisions": {
+        "1": 92,
+        "2": 20,
+        "3": 19,
+        "4": 16,
+        "5": 9,
+        "6": 11,
+        "7": 5,
+        "8": 10,
+        "9": 11,
+        "10": 15,
+        "11": 12,
+        "12": 7,
+        "13": 21,
+        "14": 49
+      },
+      "selectionMismatch": 0
+    },
+    "signalCompetitionAllBars": {
+      "signalBars": 671,
+      "overlapBars": 508,
+      "overlapPct": 75.70789865871834,
+      "maxCandidatesAnyBar": 14,
+      "depth": {
+        "1": 163,
+        "2": 52,
+        "3": 47,
+        "4": 37,
+        "5": 44,
+        "6": 28,
+        "7": 16,
+        "8": 22,
+        "9": 22,
+        "10": 28,
+        "11": 34,
+        "12": 25,
+        "13": 55,
+        "14": 98
+      },
+      "bySymbol": {
+        "BTC": {
+          "eligibleBars": 388,
+          "topRankBars": 221,
+          "rankLossBars": 167
+        },
+        "ETH": {
+          "eligibleBars": 331,
+          "topRankBars": 44,
+          "rankLossBars": 287
+        },
+        "BNB": {
+          "eligibleBars": 299,
+          "topRankBars": 53,
+          "rankLossBars": 246
+        },
+        "SOL": {
+          "eligibleBars": 342,
+          "topRankBars": 26,
+          "rankLossBars": 316
+        },
+        "LINK": {
+          "eligibleBars": 333,
+          "topRankBars": 43,
+          "rankLossBars": 290
+        },
+        "AVAX": {
+          "eligibleBars": 340,
+          "topRankBars": 26,
+          "rankLossBars": 314
+        },
+        "DOGE": {
+          "eligibleBars": 338,
+          "topRankBars": 17,
+          "rankLossBars": 321
+        },
+        "INJ": {
+          "eligibleBars": 337,
+          "topRankBars": 36,
+          "rankLossBars": 301
+        },
+        "XRP": {
+          "eligibleBars": 287,
+          "topRankBars": 28,
+          "rankLossBars": 259
+        },
+        "ADA": {
+          "eligibleBars": 303,
+          "topRankBars": 18,
+          "rankLossBars": 285
+        },
+        "LTC": {
+          "eligibleBars": 270,
+          "topRankBars": 28,
+          "rankLossBars": 242
+        },
+        "ATOM": {
+          "eligibleBars": 296,
+          "topRankBars": 53,
+          "rankLossBars": 243
+        },
+        "AAVE": {
+          "eligibleBars": 283,
+          "topRankBars": 42,
+          "rankLossBars": 241
+        },
+        "NEAR": {
+          "eligibleBars": 324,
+          "topRankBars": 36,
+          "rankLossBars": 288
+        }
+      }
+    },
+    "orderDecisionCompetitionBySymbol": {
+      "BTC": {
+        "eligibleOnOrderDecisions": 171,
+        "selectedOrders": 95,
+        "lostToHigherRank": 76
+      },
+      "ETH": {
+        "eligibleOnOrderDecisions": 144,
+        "selectedOrders": 18,
+        "lostToHigherRank": 126
+      },
+      "BNB": {
+        "eligibleOnOrderDecisions": 126,
+        "selectedOrders": 27,
+        "lostToHigherRank": 99
+      },
+      "SOL": {
+        "eligibleOnOrderDecisions": 146,
+        "selectedOrders": 15,
+        "lostToHigherRank": 131
+      },
+      "LINK": {
+        "eligibleOnOrderDecisions": 142,
+        "selectedOrders": 17,
+        "lostToHigherRank": 125
+      },
+      "AVAX": {
+        "eligibleOnOrderDecisions": 144,
+        "selectedOrders": 12,
+        "lostToHigherRank": 132
+      },
+      "DOGE": {
+        "eligibleOnOrderDecisions": 142,
+        "selectedOrders": 6,
+        "lostToHigherRank": 136
+      },
+      "INJ": {
+        "eligibleOnOrderDecisions": 141,
+        "selectedOrders": 20,
+        "lostToHigherRank": 121
+      },
+      "XRP": {
+        "eligibleOnOrderDecisions": 118,
+        "selectedOrders": 12,
+        "lostToHigherRank": 106
+      },
+      "ADA": {
+        "eligibleOnOrderDecisions": 131,
+        "selectedOrders": 6,
+        "lostToHigherRank": 125
+      },
+      "LTC": {
+        "eligibleOnOrderDecisions": 110,
+        "selectedOrders": 14,
+        "lostToHigherRank": 96
+      },
+      "ATOM": {
+        "eligibleOnOrderDecisions": 128,
+        "selectedOrders": 21,
+        "lostToHigherRank": 107
+      },
+      "AAVE": {
+        "eligibleOnOrderDecisions": 123,
+        "selectedOrders": 21,
+        "lostToHigherRank": 102
+      },
+      "NEAR": {
+        "eligibleOnOrderDecisions": 137,
+        "selectedOrders": 13,
+        "lostToHigherRank": 124
+      }
+    },
+    "performanceBySymbol": {
+      "BTC": {
+        "tradeCount": 95,
+        "longTrades": 59,
+        "shortTrades": 36,
+        "wins": 49,
+        "winRatePct": 51.578947368421055,
+        "profitFactor": 1.8801973211719563,
+        "netPnl": 3289.1269038441465,
+        "pnlContributionPct": 17.714131716192135,
+        "avgCapitalUsagePct": 93.45275672304399,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 51.225960084663015,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.0105263157894737
+      },
+      "ETH": {
+        "tradeCount": 18,
+        "longTrades": 9,
+        "shortTrades": 9,
+        "wins": 10,
+        "winRatePct": 55.55555555555556,
+        "profitFactor": 4.401584253316791,
+        "netPnl": 803.3214030919822,
+        "pnlContributionPct": 4.326419004440437,
+        "avgCapitalUsagePct": 91.05946649986183,
+        "medianCapitalUsagePct": 95.1723096669414,
+        "minCapitalUsagePct": 70.18565788982875,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "BNB": {
+        "tradeCount": 27,
+        "longTrades": 18,
+        "shortTrades": 9,
+        "wins": 12,
+        "winRatePct": 44.44444444444444,
+        "profitFactor": 3.9502633549066513,
+        "netPnl": 1869.1980452098487,
+        "pnlContributionPct": 10.066872256524244,
+        "avgCapitalUsagePct": 91.17740162212667,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 51.63427148400168,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.259259259259259
+      },
+      "SOL": {
+        "tradeCount": 15,
+        "longTrades": 8,
+        "shortTrades": 7,
+        "wins": 8,
+        "winRatePct": 53.333333333333336,
+        "profitFactor": 3.86696386297814,
+        "netPnl": 1118.2006434344964,
+        "pnlContributionPct": 6.022252732109255,
+        "avgCapitalUsagePct": 62.088758967447,
+        "medianCapitalUsagePct": 57.64177504308451,
+        "minCapitalUsagePct": 45.74020366588159,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.066666666666667
+      },
+      "LINK": {
+        "tradeCount": 17,
+        "longTrades": 11,
+        "shortTrades": 6,
+        "wins": 10,
+        "winRatePct": 58.8235294117647,
+        "profitFactor": 3.5477000790976443,
+        "netPnl": 1247.0196760064514,
+        "pnlContributionPct": 6.716028733231339,
+        "avgCapitalUsagePct": 68.59035718106958,
+        "medianCapitalUsagePct": 72.16043076085667,
+        "minCapitalUsagePct": 32.3376820432045,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.176470588235294
+      },
+      "AVAX": {
+        "tradeCount": 12,
+        "longTrades": 8,
+        "shortTrades": 4,
+        "wins": 9,
+        "winRatePct": 75,
+        "profitFactor": 6.318805915141271,
+        "netPnl": 1351.3646742993735,
+        "pnlContributionPct": 7.277995813773711,
+        "avgCapitalUsagePct": 65.87343226312116,
+        "medianCapitalUsagePct": 68.42374493411955,
+        "minCapitalUsagePct": 35.81573708748091,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 1.9166666666666667
+      },
+      "DOGE": {
+        "tradeCount": 6,
+        "longTrades": 5,
+        "shortTrades": 1,
+        "wins": 4,
+        "winRatePct": 66.66666666666667,
+        "profitFactor": 14.090785506465727,
+        "netPnl": 835.6566959667,
+        "pnlContributionPct": 4.500566020900931,
+        "avgCapitalUsagePct": 54.85576187635576,
+        "medianCapitalUsagePct": 59.77432642326825,
+        "minCapitalUsagePct": 17.58312375444799,
+        "maxCapitalUsagePct": 72.01980337063452,
+        "avgHoldingBars": 2
+      },
+      "INJ": {
+        "tradeCount": 20,
+        "longTrades": 13,
+        "shortTrades": 7,
+        "wins": 12,
+        "winRatePct": 60,
+        "profitFactor": 5.556551813516944,
+        "netPnl": 2648.2246278216217,
+        "pnlContributionPct": 14.262447525654656,
+        "avgCapitalUsagePct": 53.5674507522899,
+        "medianCapitalUsagePct": 56.186907485129225,
+        "minCapitalUsagePct": 35.37191406121116,
+        "maxCapitalUsagePct": 74.52169368600195,
+        "avgHoldingBars": 2.2
+      },
+      "XRP": {
+        "tradeCount": 12,
+        "longTrades": 9,
+        "shortTrades": 3,
+        "wins": 7,
+        "winRatePct": 58.333333333333336,
+        "profitFactor": 13.630919316504482,
+        "netPnl": 2114.634668360754,
+        "pnlContributionPct": 11.388711394257482,
+        "avgCapitalUsagePct": 65.50665438176517,
+        "medianCapitalUsagePct": 66.02880433760691,
+        "minCapitalUsagePct": 20.58658482908294,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 1.9166666666666667
+      },
+      "ADA": {
+        "tradeCount": 6,
+        "longTrades": 4,
+        "shortTrades": 2,
+        "wins": 3,
+        "winRatePct": 50,
+        "profitFactor": 2.974171252669711,
+        "netPnl": 301.75059167221855,
+        "pnlContributionPct": 1.6251272397162182,
+        "avgCapitalUsagePct": 66.09555506573808,
+        "medianCapitalUsagePct": 66.80563255770136,
+        "minCapitalUsagePct": 28.791033197092688,
+        "maxCapitalUsagePct": 99.95372882413257,
+        "avgHoldingBars": 2
+      },
+      "LTC": {
+        "tradeCount": 14,
+        "longTrades": 8,
+        "shortTrades": 6,
+        "wins": 6,
+        "winRatePct": 42.857142857142854,
+        "profitFactor": 1.9663719420575705,
+        "netPnl": 254.20258893118165,
+        "pnlContributionPct": 1.369049682352228,
+        "avgCapitalUsagePct": 73.48418009306985,
+        "medianCapitalUsagePct": 80.73216612441172,
+        "minCapitalUsagePct": 29.314803606537964,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "ATOM": {
+        "tradeCount": 21,
+        "longTrades": 10,
+        "shortTrades": 11,
+        "wins": 12,
+        "winRatePct": 57.142857142857146,
+        "profitFactor": 3.9251099533407285,
+        "netPnl": 1467.2503506437383,
+        "pnlContributionPct": 7.902117106383272,
+        "avgCapitalUsagePct": 72.68041957451622,
+        "medianCapitalUsagePct": 74.97389936130354,
+        "minCapitalUsagePct": 35.0363659859472,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.1904761904761907
+      },
+      "AAVE": {
+        "tradeCount": 21,
+        "longTrades": 13,
+        "shortTrades": 8,
+        "wins": 11,
+        "winRatePct": 52.38095238095238,
+        "profitFactor": 2.697351721212989,
+        "netPnl": 1335.8008882258137,
+        "pnlContributionPct": 7.19417449444807,
+        "avgCapitalUsagePct": 60.062764283378435,
+        "medianCapitalUsagePct": 57.493082257570705,
+        "minCapitalUsagePct": 26.827536237537856,
+        "maxCapitalUsagePct": 97.21561817635019,
+        "avgHoldingBars": 2.0476190476190474
+      },
+      "NEAR": {
+        "tradeCount": 13,
+        "longTrades": 12,
+        "shortTrades": 1,
+        "wins": 7,
+        "winRatePct": 53.84615384615385,
+        "profitFactor": 0.8679320650500328,
+        "netPnl": -67.93846278373852,
+        "pnlContributionPct": -0.36589371998393017,
+        "avgCapitalUsagePct": 56.95990370892423,
+        "medianCapitalUsagePct": 56.531984150967126,
+        "minCapitalUsagePct": 39.59545703685588,
+        "maxCapitalUsagePct": 80.6212196988413,
+        "avgHoldingBars": 2.076923076923077
+      }
+    }
+  },
+  "evaluation": {
+    "window": {
+      "label": "evaluation",
+      "startTs": 1751328000000,
+      "endTs": 1782864000000
+    },
+    "portfolio": {
+      "cagrPct": 110.66023191270259,
+      "maxDrawdownPct": 5.099691008147556,
+      "profitFactor": 3.5104686979840105,
+      "tradeCount": 223,
+      "winRatePct": 57.399103139013455,
+      "endingEquity": 21051.70381088255,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "residentExecutionStress": {
+      "noDelay": {
+        "mode": "none",
+        "tradeCount": 223,
+        "skippedInfeasibleTrades": 0,
+        "endingEquity": 14685.533538561363,
+        "returnPct": 46.85533538561364,
+        "cagrPct": 46.89399338085381,
+        "maxDrawdownPct": 7.478990482669282,
+        "profitFactor": 1.8214130571517573,
+        "profitFactorWithoutBest": 1.7239753111100533,
+        "winRatePct": 46.63677130044843
+      },
+      "entryDelayResidentExit": {
+        "mode": "entry",
+        "tradeCount": 220,
+        "skippedInfeasibleTrades": 3,
+        "endingEquity": 15286.31835464924,
+        "returnPct": 52.8631835464924,
+        "cagrPct": 52.90762221324681,
+        "maxDrawdownPct": 7.5945710681181735,
+        "profitFactor": 2.527209193117734,
+        "profitFactorWithoutBest": 2.3561409647848266,
+        "winRatePct": 51.36363636363637
+      }
+    },
+    "capitalUsage": {
+      "formula": "min(balance*riskPerTradePct/stopDistancePct, balance*leverage*maxMarginUsagePct)",
+      "riskPerTradePct": 3.19,
+      "leverage": 1,
+      "maxMarginUsagePct": 100,
+      "averagePct": 81.0369175584764,
+      "medianPct": 90.3932731187237,
+      "minimumPct": 20.556434605345927,
+      "maximumPct": 100
+    },
+    "concurrency": {
+      "engineMaximumOpenPositions": 1,
+      "actualOverlappingTradePairs": 0,
+      "simultaneousOrderDecisionBars": 146,
+      "totalOrders": 223,
+      "simultaneousOrderDecisionPct": 65.47085201793722,
+      "maxCandidatesOnOrderDecision": 14,
+      "overlapDepthOnOrderDecisions": {
+        "1": 77,
+        "2": 32,
+        "3": 9,
+        "4": 8,
+        "5": 9,
+        "6": 9,
+        "7": 2,
+        "8": 2,
+        "9": 3,
+        "10": 3,
+        "11": 11,
+        "12": 5,
+        "13": 20,
+        "14": 33
+      },
+      "selectionMismatch": 0
+    },
+    "signalCompetitionAllBars": {
+      "signalBars": 512,
+      "overlapBars": 359,
+      "overlapPct": 70.1171875,
+      "maxCandidatesAnyBar": 14,
+      "depth": {
+        "1": 153,
+        "2": 55,
+        "3": 27,
+        "4": 25,
+        "5": 14,
+        "6": 15,
+        "7": 11,
+        "8": 16,
+        "9": 12,
+        "10": 17,
+        "11": 21,
+        "12": 28,
+        "13": 40,
+        "14": 78
+      },
+      "bySymbol": {
+        "BTC": {
+          "eligibleBars": 270,
+          "topRankBars": 134,
+          "rankLossBars": 136
+        },
+        "ETH": {
+          "eligibleBars": 245,
+          "topRankBars": 24,
+          "rankLossBars": 221
+        },
+        "BNB": {
+          "eligibleBars": 240,
+          "topRankBars": 68,
+          "rankLossBars": 172
+        },
+        "SOL": {
+          "eligibleBars": 236,
+          "topRankBars": 16,
+          "rankLossBars": 220
+        },
+        "LINK": {
+          "eligibleBars": 234,
+          "topRankBars": 7,
+          "rankLossBars": 227
+        },
+        "AVAX": {
+          "eligibleBars": 236,
+          "topRankBars": 27,
+          "rankLossBars": 209
+        },
+        "DOGE": {
+          "eligibleBars": 239,
+          "topRankBars": 17,
+          "rankLossBars": 222
+        },
+        "INJ": {
+          "eligibleBars": 210,
+          "topRankBars": 20,
+          "rankLossBars": 190
+        },
+        "XRP": {
+          "eligibleBars": 253,
+          "topRankBars": 37,
+          "rankLossBars": 216
+        },
+        "ADA": {
+          "eligibleBars": 237,
+          "topRankBars": 23,
+          "rankLossBars": 214
+        },
+        "LTC": {
+          "eligibleBars": 216,
+          "topRankBars": 37,
+          "rankLossBars": 179
+        },
+        "ATOM": {
+          "eligibleBars": 217,
+          "topRankBars": 46,
+          "rankLossBars": 171
+        },
+        "AAVE": {
+          "eligibleBars": 227,
+          "topRankBars": 24,
+          "rankLossBars": 203
+        },
+        "NEAR": {
+          "eligibleBars": 206,
+          "topRankBars": 32,
+          "rankLossBars": 174
+        }
+      }
+    },
+    "orderDecisionCompetitionBySymbol": {
+      "BTC": {
+        "eligibleOnOrderDecisions": 114,
+        "selectedOrders": 53,
+        "lostToHigherRank": 61
+      },
+      "ETH": {
+        "eligibleOnOrderDecisions": 97,
+        "selectedOrders": 12,
+        "lostToHigherRank": 85
+      },
+      "BNB": {
+        "eligibleOnOrderDecisions": 91,
+        "selectedOrders": 25,
+        "lostToHigherRank": 66
+      },
+      "SOL": {
+        "eligibleOnOrderDecisions": 92,
+        "selectedOrders": 6,
+        "lostToHigherRank": 86
+      },
+      "LINK": {
+        "eligibleOnOrderDecisions": 88,
+        "selectedOrders": 2,
+        "lostToHigherRank": 86
+      },
+      "AVAX": {
+        "eligibleOnOrderDecisions": 92,
+        "selectedOrders": 14,
+        "lostToHigherRank": 78
+      },
+      "DOGE": {
+        "eligibleOnOrderDecisions": 98,
+        "selectedOrders": 9,
+        "lostToHigherRank": 89
+      },
+      "INJ": {
+        "eligibleOnOrderDecisions": 85,
+        "selectedOrders": 11,
+        "lostToHigherRank": 74
+      },
+      "XRP": {
+        "eligibleOnOrderDecisions": 93,
+        "selectedOrders": 13,
+        "lostToHigherRank": 80
+      },
+      "ADA": {
+        "eligibleOnOrderDecisions": 94,
+        "selectedOrders": 12,
+        "lostToHigherRank": 82
+      },
+      "LTC": {
+        "eligibleOnOrderDecisions": 84,
+        "selectedOrders": 19,
+        "lostToHigherRank": 65
+      },
+      "ATOM": {
+        "eligibleOnOrderDecisions": 81,
+        "selectedOrders": 23,
+        "lostToHigherRank": 58
+      },
+      "AAVE": {
+        "eligibleOnOrderDecisions": 94,
+        "selectedOrders": 12,
+        "lostToHigherRank": 82
+      },
+      "NEAR": {
+        "eligibleOnOrderDecisions": 86,
+        "selectedOrders": 12,
+        "lostToHigherRank": 74
+      }
+    },
+    "performanceBySymbol": {
+      "BTC": {
+        "tradeCount": 53,
+        "longTrades": 17,
+        "shortTrades": 36,
+        "wins": 34,
+        "winRatePct": 64.15094339622641,
+        "profitFactor": 5.084705418516834,
+        "netPnl": 2725.6133636500276,
+        "pnlContributionPct": 24.66238156840694,
+        "avgCapitalUsagePct": 95.67726976654353,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 42.326198046984274,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.0754716981132075
+      },
+      "ETH": {
+        "tradeCount": 12,
+        "longTrades": 6,
+        "shortTrades": 6,
+        "wins": 8,
+        "winRatePct": 66.66666666666667,
+        "profitFactor": 3.7672534613617406,
+        "netPnl": 452.91315514302386,
+        "pnlContributionPct": 4.098129690166347,
+        "avgCapitalUsagePct": 86.80584237629303,
+        "medianCapitalUsagePct": 90.32103870202567,
+        "minCapitalUsagePct": 46.90853593597697,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2
+      },
+      "BNB": {
+        "tradeCount": 25,
+        "longTrades": 10,
+        "shortTrades": 15,
+        "wins": 11,
+        "winRatePct": 44,
+        "profitFactor": 2.6840624717568087,
+        "netPnl": 912.3062806886392,
+        "pnlContributionPct": 8.254892605702077,
+        "avgCapitalUsagePct": 84.41537845645722,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 34.03495641437683,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.12
+      },
+      "SOL": {
+        "tradeCount": 6,
+        "longTrades": 1,
+        "shortTrades": 5,
+        "wins": 2,
+        "winRatePct": 33.333333333333336,
+        "profitFactor": 0.4552313251390307,
+        "netPnl": -320.6874315120952,
+        "pnlContributionPct": -2.901701285156736,
+        "avgCapitalUsagePct": 60.49381965068255,
+        "medianCapitalUsagePct": 49.57480007082761,
+        "minCapitalUsagePct": 30.52298248433513,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 1.8333333333333333
+      },
+      "LINK": {
+        "tradeCount": 2,
+        "longTrades": 2,
+        "shortTrades": 0,
+        "wins": 2,
+        "winRatePct": 100,
+        "profitFactor": 99,
+        "netPnl": 38.11780573470265,
+        "pnlContributionPct": 0.3449043368061333,
+        "avgCapitalUsagePct": 84.0752850374049,
+        "medianCapitalUsagePct": 84.0752850374049,
+        "minCapitalUsagePct": 70.22956684860459,
+        "maxCapitalUsagePct": 97.9210032262052,
+        "avgHoldingBars": 2
+      },
+      "AVAX": {
+        "tradeCount": 14,
+        "longTrades": 6,
+        "shortTrades": 8,
+        "wins": 6,
+        "winRatePct": 42.857142857142854,
+        "profitFactor": 3.4907998899433688,
+        "netPnl": 947.5838015500188,
+        "pnlContributionPct": 8.574096969708306,
+        "avgCapitalUsagePct": 80.591289768499,
+        "medianCapitalUsagePct": 90.09574638272,
+        "minCapitalUsagePct": 36.173592632327896,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.4285714285714284
+      },
+      "DOGE": {
+        "tradeCount": 9,
+        "longTrades": 2,
+        "shortTrades": 7,
+        "wins": 5,
+        "winRatePct": 55.55555555555556,
+        "profitFactor": 2.637646801908762,
+        "netPnl": 301.1921418865611,
+        "pnlContributionPct": 2.7253005241597106,
+        "avgCapitalUsagePct": 62.78199798299839,
+        "medianCapitalUsagePct": 72.18415009432351,
+        "minCapitalUsagePct": 20.556434605345927,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.2222222222222223
+      },
+      "INJ": {
+        "tradeCount": 11,
+        "longTrades": 2,
+        "shortTrades": 9,
+        "wins": 6,
+        "winRatePct": 54.54545454545455,
+        "profitFactor": 1.0793443976877506,
+        "netPnl": 24.251169484936753,
+        "pnlContributionPct": 0.21943376243088186,
+        "avgCapitalUsagePct": 52.79382424905744,
+        "medianCapitalUsagePct": 47.75000449961907,
+        "minCapitalUsagePct": 23.76824184973282,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.272727272727273
+      },
+      "XRP": {
+        "tradeCount": 13,
+        "longTrades": 4,
+        "shortTrades": 9,
+        "wins": 11,
+        "winRatePct": 84.61538461538461,
+        "profitFactor": 22.30909266930775,
+        "netPnl": 1601.8973463088976,
+        "pnlContributionPct": 14.494573630642515,
+        "avgCapitalUsagePct": 87.8803131328241,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 32.562585829652484,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.1538461538461537
+      },
+      "ADA": {
+        "tradeCount": 12,
+        "longTrades": 3,
+        "shortTrades": 9,
+        "wins": 5,
+        "winRatePct": 41.666666666666664,
+        "profitFactor": 4.400094159328214,
+        "netPnl": 1194.2585757849436,
+        "pnlContributionPct": 10.806103712343095,
+        "avgCapitalUsagePct": 74.89386207330688,
+        "medianCapitalUsagePct": 75.78971881933818,
+        "minCapitalUsagePct": 43.62303024286184,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.0833333333333335
+      },
+      "LTC": {
+        "tradeCount": 19,
+        "longTrades": 13,
+        "shortTrades": 6,
+        "wins": 10,
+        "winRatePct": 52.63157894736842,
+        "profitFactor": 2.0572716241960305,
+        "netPnl": 424.4778728765889,
+        "pnlContributionPct": 3.8408364912802635,
+        "avgCapitalUsagePct": 90.43102649464184,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 48.238692563831634,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.0526315789473686
+      },
+      "ATOM": {
+        "tradeCount": 23,
+        "longTrades": 7,
+        "shortTrades": 16,
+        "wins": 12,
+        "winRatePct": 52.17391304347826,
+        "profitFactor": 3.6432651704967958,
+        "netPnl": 1143.9403096963108,
+        "pnlContributionPct": 10.350804991442843,
+        "avgCapitalUsagePct": 80.52046071605561,
+        "medianCapitalUsagePct": 84.46548081382936,
+        "minCapitalUsagePct": 33.89606719729699,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.0869565217391304
+      },
+      "AAVE": {
+        "tradeCount": 12,
+        "longTrades": 2,
+        "shortTrades": 10,
+        "wins": 7,
+        "winRatePct": 58.333333333333336,
+        "profitFactor": 3.2272037255708947,
+        "netPnl": 499.7716216399158,
+        "pnlContributionPct": 4.522122834560523,
+        "avgCapitalUsagePct": 68.30554536758405,
+        "medianCapitalUsagePct": 70.491971758603,
+        "minCapitalUsagePct": 43.990698000665,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.25
+      },
+      "NEAR": {
+        "tradeCount": 12,
+        "longTrades": 5,
+        "shortTrades": 7,
+        "wins": 9,
+        "winRatePct": 75,
+        "profitFactor": 13.884897425291324,
+        "netPnl": 1106.0677979500867,
+        "pnlContributionPct": 10.008120167507085,
+        "avgCapitalUsagePct": 51.01034123142477,
+        "medianCapitalUsagePct": 47.9225393716757,
+        "minCapitalUsagePct": 31.424147003984366,
+        "maxCapitalUsagePct": 76.20190584841218,
+        "avgHoldingBars": 2.5
+      }
+    }
+  },
+  "combined3Y": {
+    "window": {
+      "label": "combined3y",
+      "startTs": 1688169600000,
+      "endTs": 1782864000000
+    },
+    "portfolio": {
+      "cagrPct": 131.54124004524235,
+      "maxDrawdownPct": 5.643103665753597,
+      "profitFactor": 3.2463448417359997,
+      "tradeCount": 789,
+      "winRatePct": 53.99239543726235,
+      "endingEquity": 124179.9405592453,
+      "maximumEffectiveLeverage": 1,
+      "liquidationCount": 0
+    },
+    "residentExecutionStress": {
+      "noDelay": {
+        "mode": "none",
+        "tradeCount": 789,
+        "skippedInfeasibleTrades": 0,
+        "endingEquity": 34841.05237938467,
+        "returnPct": 248.41052379384672,
+        "cagrPct": 51.58487527981206,
+        "maxDrawdownPct": 8.712840808772478,
+        "profitFactor": 1.7175565501703876,
+        "profitFactorWithoutBest": 1.6794664288787389,
+        "winRatePct": 45.247148288973385
+      },
+      "entryDelayResidentExit": {
+        "mode": "entry",
+        "tradeCount": 765,
+        "skippedInfeasibleTrades": 24,
+        "endingEquity": 29076.08361888383,
+        "returnPct": 190.7608361888383,
+        "cagrPct": 42.71733427488928,
+        "maxDrawdownPct": 8.397331842784874,
+        "profitFactor": 2.133965802288596,
+        "profitFactorWithoutBest": 2.067013133819582,
+        "winRatePct": 49.15032679738562
+      }
+    },
+    "capitalUsage": {
+      "formula": "min(balance*riskPerTradePct/stopDistancePct, balance*leverage*maxMarginUsagePct)",
+      "riskPerTradePct": 3.19,
+      "leverage": 1,
+      "maxMarginUsagePct": 100,
+      "averagePct": 80.7063880228694,
+      "medianPct": 90.3932731187237,
+      "minimumPct": 17.58312375444799,
+      "maximumPct": 100
+    },
+    "concurrency": {
+      "engineMaximumOpenPositions": 1,
+      "actualOverlappingTradePairs": 0,
+      "simultaneousOrderDecisionBars": 551,
+      "totalOrders": 789,
+      "simultaneousOrderDecisionPct": 69.83523447401774,
+      "maxCandidatesOnOrderDecision": 14,
+      "overlapDepthOnOrderDecisions": {
+        "1": 238,
+        "2": 87,
+        "3": 51,
+        "4": 42,
+        "5": 28,
+        "6": 34,
+        "7": 18,
+        "8": 26,
+        "9": 23,
+        "10": 27,
+        "11": 34,
+        "12": 28,
+        "13": 61,
+        "14": 92
+      },
+      "selectionMismatch": 0
+    },
+    "signalCompetitionAllBars": {
+      "signalBars": 1791,
+      "overlapBars": 1336,
+      "overlapPct": 74.59519821328867,
+      "maxCandidatesAnyBar": 14,
+      "depth": {
+        "1": 455,
+        "2": 190,
+        "3": 130,
+        "4": 107,
+        "5": 80,
+        "6": 72,
+        "7": 59,
+        "8": 63,
+        "9": 57,
+        "10": 69,
+        "11": 82,
+        "12": 85,
+        "13": 131,
+        "14": 211
+      },
+      "bySymbol": {
+        "BTC": {
+          "eligibleBars": 981,
+          "topRankBars": 521,
+          "rankLossBars": 460
+        },
+        "ETH": {
+          "eligibleBars": 856,
+          "topRankBars": 128,
+          "rankLossBars": 728
+        },
+        "BNB": {
+          "eligibleBars": 744,
+          "topRankBars": 172,
+          "rankLossBars": 572
+        },
+        "SOL": {
+          "eligibleBars": 825,
+          "topRankBars": 78,
+          "rankLossBars": 747
+        },
+        "LINK": {
+          "eligibleBars": 784,
+          "topRankBars": 83,
+          "rankLossBars": 701
+        },
+        "AVAX": {
+          "eligibleBars": 827,
+          "topRankBars": 86,
+          "rankLossBars": 741
+        },
+        "DOGE": {
+          "eligibleBars": 833,
+          "topRankBars": 62,
+          "rankLossBars": 771
+        },
+        "INJ": {
+          "eligibleBars": 762,
+          "topRankBars": 75,
+          "rankLossBars": 687
+        },
+        "XRP": {
+          "eligibleBars": 790,
+          "topRankBars": 123,
+          "rankLossBars": 667
+        },
+        "ADA": {
+          "eligibleBars": 802,
+          "topRankBars": 61,
+          "rankLossBars": 741
+        },
+        "LTC": {
+          "eligibleBars": 720,
+          "topRankBars": 94,
+          "rankLossBars": 626
+        },
+        "ATOM": {
+          "eligibleBars": 750,
+          "topRankBars": 137,
+          "rankLossBars": 613
+        },
+        "AAVE": {
+          "eligibleBars": 737,
+          "topRankBars": 82,
+          "rankLossBars": 655
+        },
+        "NEAR": {
+          "eligibleBars": 773,
+          "topRankBars": 89,
+          "rankLossBars": 684
+        }
+      }
+    },
+    "orderDecisionCompetitionBySymbol": {
+      "BTC": {
+        "eligibleOnOrderDecisions": 432,
+        "selectedOrders": 223,
+        "lostToHigherRank": 209
+      },
+      "ETH": {
+        "eligibleOnOrderDecisions": 365,
+        "selectedOrders": 60,
+        "lostToHigherRank": 305
+      },
+      "BNB": {
+        "eligibleOnOrderDecisions": 309,
+        "selectedOrders": 74,
+        "lostToHigherRank": 235
+      },
+      "SOL": {
+        "eligibleOnOrderDecisions": 345,
+        "selectedOrders": 35,
+        "lostToHigherRank": 310
+      },
+      "LINK": {
+        "eligibleOnOrderDecisions": 327,
+        "selectedOrders": 33,
+        "lostToHigherRank": 294
+      },
+      "AVAX": {
+        "eligibleOnOrderDecisions": 340,
+        "selectedOrders": 41,
+        "lostToHigherRank": 299
+      },
+      "DOGE": {
+        "eligibleOnOrderDecisions": 347,
+        "selectedOrders": 25,
+        "lostToHigherRank": 322
+      },
+      "INJ": {
+        "eligibleOnOrderDecisions": 321,
+        "selectedOrders": 40,
+        "lostToHigherRank": 281
+      },
+      "XRP": {
+        "eligibleOnOrderDecisions": 323,
+        "selectedOrders": 52,
+        "lostToHigherRank": 271
+      },
+      "ADA": {
+        "eligibleOnOrderDecisions": 337,
+        "selectedOrders": 24,
+        "lostToHigherRank": 313
+      },
+      "LTC": {
+        "eligibleOnOrderDecisions": 296,
+        "selectedOrders": 47,
+        "lostToHigherRank": 249
+      },
+      "ATOM": {
+        "eligibleOnOrderDecisions": 299,
+        "selectedOrders": 58,
+        "lostToHigherRank": 241
+      },
+      "AAVE": {
+        "eligibleOnOrderDecisions": 312,
+        "selectedOrders": 41,
+        "lostToHigherRank": 271
+      },
+      "NEAR": {
+        "eligibleOnOrderDecisions": 326,
+        "selectedOrders": 36,
+        "lostToHigherRank": 290
+      }
+    },
+    "performanceBySymbol": {
+      "BTC": {
+        "tradeCount": 223,
+        "longTrades": 123,
+        "shortTrades": 100,
+        "wins": 126,
+        "winRatePct": 56.502242152466366,
+        "profitFactor": 3.0487022746474217,
+        "netPnl": 26807.230450248375,
+        "pnlContributionPct": 23.478056056911967,
+        "avgCapitalUsagePct": 94.731145437805,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 42.32619804698427,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.022421524663677
+      },
+      "ETH": {
+        "tradeCount": 60,
+        "longTrades": 35,
+        "shortTrades": 25,
+        "wins": 30,
+        "winRatePct": 50,
+        "profitFactor": 2.409299178883972,
+        "netPnl": 3987.0931126028636,
+        "pnlContributionPct": 3.4919383326654074,
+        "avgCapitalUsagePct": 88.50900712953458,
+        "medianCapitalUsagePct": 98.007711248607,
+        "minCapitalUsagePct": 46.90853593597698,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 1.9666666666666666
+      },
+      "BNB": {
+        "tradeCount": 74,
+        "longTrades": 44,
+        "shortTrades": 30,
+        "wins": 31,
+        "winRatePct": 41.891891891891895,
+        "profitFactor": 2.8727946194978844,
+        "netPnl": 9349.245543169303,
+        "pnlContributionPct": 8.18816816454568,
+        "avgCapitalUsagePct": 89.50513467555234,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 34.03495641437682,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.135135135135135
+      },
+      "SOL": {
+        "tradeCount": 35,
+        "longTrades": 21,
+        "shortTrades": 14,
+        "wins": 19,
+        "winRatePct": 54.285714285714285,
+        "profitFactor": 1.2230529018817142,
+        "netPnl": 993.9532298898422,
+        "pnlContributionPct": 0.8705147550625174,
+        "avgCapitalUsagePct": 62.611989989020614,
+        "medianCapitalUsagePct": 54.45478911050342,
+        "minCapitalUsagePct": 30.52298248433513,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.057142857142857
+      },
+      "LINK": {
+        "tradeCount": 33,
+        "longTrades": 25,
+        "shortTrades": 8,
+        "wins": 18,
+        "winRatePct": 54.54545454545455,
+        "profitFactor": 3.6533207913901737,
+        "netPnl": 3649.1911162632837,
+        "pnlContributionPct": 3.196000189166156,
+        "avgCapitalUsagePct": 74.25207995442821,
+        "medianCapitalUsagePct": 73.09177219214912,
+        "minCapitalUsagePct": 28.9842054883653,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.1515151515151514
+      },
+      "AVAX": {
+        "tradeCount": 41,
+        "longTrades": 26,
+        "shortTrades": 15,
+        "wins": 21,
+        "winRatePct": 51.21951219512195,
+        "profitFactor": 3.731504019795491,
+        "netPnl": 8670.163438073565,
+        "pnlContributionPct": 7.593420872009318,
+        "avgCapitalUsagePct": 75.13597317324323,
+        "medianCapitalUsagePct": 78.60509169868402,
+        "minCapitalUsagePct": 35.81573708748091,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.1463414634146343
+      },
+      "DOGE": {
+        "tradeCount": 25,
+        "longTrades": 14,
+        "shortTrades": 11,
+        "wins": 16,
+        "winRatePct": 64,
+        "profitFactor": 3.933312532638204,
+        "netPnl": 4081.341849834236,
+        "pnlContributionPct": 3.5744823739127134,
+        "avgCapitalUsagePct": 60.05645579436064,
+        "medianCapitalUsagePct": 58.89237337092419,
+        "minCapitalUsagePct": 17.58312375444799,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.16
+      },
+      "INJ": {
+        "tradeCount": 40,
+        "longTrades": 19,
+        "shortTrades": 21,
+        "wins": 24,
+        "winRatePct": 60,
+        "profitFactor": 2.9413680551985433,
+        "netPnl": 6157.490403225507,
+        "pnlContributionPct": 5.3927952432507436,
+        "avgCapitalUsagePct": 55.61257598851243,
+        "medianCapitalUsagePct": 53.5004479456288,
+        "minCapitalUsagePct": 23.76824184973282,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.175
+      },
+      "XRP": {
+        "tradeCount": 52,
+        "longTrades": 28,
+        "shortTrades": 24,
+        "wins": 31,
+        "winRatePct": 59.61538461538461,
+        "profitFactor": 10.828949041388057,
+        "netPnl": 14918.578033958545,
+        "pnlContributionPct": 13.065848485196614,
+        "avgCapitalUsagePct": 81.83676275663917,
+        "medianCapitalUsagePct": 100,
+        "minCapitalUsagePct": 20.58658482908294,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.0384615384615383
+      },
+      "ADA": {
+        "tradeCount": 24,
+        "longTrades": 11,
+        "shortTrades": 13,
+        "wins": 10,
+        "winRatePct": 41.666666666666664,
+        "profitFactor": 4.156346396644986,
+        "netPnl": 8010.697286544744,
+        "pnlContributionPct": 7.015853439149568,
+        "avgCapitalUsagePct": 72.4949879657389,
+        "medianCapitalUsagePct": 73.3872460146151,
+        "minCapitalUsagePct": 28.791033197092688,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.0416666666666665
+      },
+      "LTC": {
+        "tradeCount": 47,
+        "longTrades": 29,
+        "shortTrades": 18,
+        "wins": 23,
+        "winRatePct": 48.93617021276596,
+        "profitFactor": 2.0572977443126494,
+        "netPnl": 3816.7567087277175,
+        "pnlContributionPct": 3.3427559079410205,
+        "avgCapitalUsagePct": 84.22405483469764,
+        "medianCapitalUsagePct": 96.1034978530847,
+        "minCapitalUsagePct": 29.314803606537964,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 1.9574468085106382
+      },
+      "ATOM": {
+        "tradeCount": 58,
+        "longTrades": 24,
+        "shortTrades": 34,
+        "wins": 29,
+        "winRatePct": 50,
+        "profitFactor": 3.5503447197015174,
+        "netPnl": 10247.565369400843,
+        "pnlContributionPct": 8.974926172853998,
+        "avgCapitalUsagePct": 80.16215891656367,
+        "medianCapitalUsagePct": 84.9908248428973,
+        "minCapitalUsagePct": 33.89606719729699,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.1379310344827585
+      },
+      "AAVE": {
+        "tradeCount": 41,
+        "longTrades": 20,
+        "shortTrades": 21,
+        "wins": 24,
+        "winRatePct": 58.53658536585366,
+        "profitFactor": 3.196686374640516,
+        "netPnl": 6643.092365379412,
+        "pnlContributionPct": 5.818090579520373,
+        "avgCapitalUsagePct": 64.85189593147129,
+        "medianCapitalUsagePct": 64.91041025315947,
+        "minCapitalUsagePct": 26.827536237537856,
+        "maxCapitalUsagePct": 100,
+        "avgHoldingBars": 2.097560975609756
+      },
+      "NEAR": {
+        "tradeCount": 36,
+        "longTrades": 24,
+        "shortTrades": 12,
+        "wins": 24,
+        "winRatePct": 66.66666666666667,
+        "profitFactor": 5.159330732416634,
+        "netPnl": 6847.5416519271275,
+        "pnlContributionPct": 5.997149427813985,
+        "avgCapitalUsagePct": 52.99699441475926,
+        "medianCapitalUsagePct": 52.833225437500005,
+        "minCapitalUsagePct": 31.322028205711028,
+        "maxCapitalUsagePct": 80.6212196988413,
+        "avgHoldingBars": 2.25
+      }
+    }
+  }
+}
