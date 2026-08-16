@@ -1,0 +1,33 @@
+name: Research V26 Symbol Contribution
+on:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths:
+      - 'scripts/research_v26_symbol_contribution_report.ts'
+      - '.github/workflows/research-v26-symbol-contribution.yml'
+permissions:
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - run: npm ci
+      - run: npx tsx scripts/research_v26_symbol_contribution_report.ts
+        env:
+          RESEARCH_STATE_DIR: .research-state
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v26-symbol-contribution-report
+          path: .research-state/v26-symbol-contribution-report.json
+          include-hidden-files: true
+          retention-days: 30
