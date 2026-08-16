@@ -1,0 +1,418 @@
+{
+  "researchLine": "V26_LATENCY_AWARE_V12_YEAR_SYMBOL_BREAKDOWN",
+  "generatedAtUtc": "2026-08-16",
+  "researchOnly": true,
+  "productionChanged": false,
+  "vpsChanged": false,
+  "liveChanged": false,
+  "realTradingEnabled": false,
+  "liveEligible": false,
+  "branch": "chatgpt/v26-latency-aware-search-20260816",
+  "source": {
+    "baseCommit": "95c27a00f37d2d0dc5c7ffcd12b48ff42ee08f6d",
+    "v12ResultPath": "docs/research-results/v26-latency-aware-v12-latest.json",
+    "v12ResultBlobSha": "a8e35b440776382b63376f545b4c8a1da076f6da",
+    "generatorPath": "scripts/research_v26_latency_aware_v12.ts",
+    "periodDefinitionPath": "scripts/research_v26_latency_aware_v9.ts"
+  },
+  "interpretation": {
+    "portfolioType": "shared rotating portfolio",
+    "contributionDefinition": "Realized net PnL attributed to the traded symbol, divided by the period starting equity; symbol contributions sum to portfolio return subject to two-decimal rounding.",
+    "notStandaloneSymbolReturn": true,
+    "normalMode": "resident-normal",
+    "annualStressSelection": "For each one-year period, the predeclared V12 claim-loss mode with the lowest PF without best is reported.",
+    "combinedStressSelection": "For combined 3Y, the predeclared V12 claim-loss mode with the lowest combined PF without best is reported.",
+    "stressParameters": {
+      "feeBpsPerSide": 10,
+      "slippageBpsPerSide": 5,
+      "entryOpportunityLossPct": 5,
+      "stopUpdateLagHours": 2
+    },
+    "contributionPrecisionDecimals": 2
+  },
+  "periods": [
+    {
+      "key": "development",
+      "startUtc": "2023-07-01T00:00:00.000Z",
+      "endExclusiveUtc": "2024-07-01T00:00:00.000Z",
+      "normal": {
+        "mode": "resident-normal",
+        "returnPct": 106.48437702038218,
+        "cagrPct": 106.17781702696263,
+        "profitFactor": 2.5776636306532814,
+        "profitFactorWithoutBest": 2.470661456956164,
+        "maxDrawdownPct": 4.42252862946734,
+        "tradeCount": 269,
+        "skippedEntries": 0
+      },
+      "stress": {
+        "mode": "resident-claim-loss-5pct-c-stoplag2h",
+        "returnPct": 50.84386517852884,
+        "cagrPct": 50.71685278292597,
+        "profitFactor": 1.5392170960641218,
+        "profitFactorWithoutBest": 1.479535682711262,
+        "maxDrawdownPct": 9.069034267650986,
+        "tradeCount": 216,
+        "skippedEntries": 11
+      },
+      "symbolContributionPct": {
+        "BTC": {
+          "normal": 39.38,
+          "stress": 19.32
+        },
+        "ETH": {
+          "normal": -3.43,
+          "stress": -0.05
+        },
+        "BNB": {
+          "normal": 1.08,
+          "stress": 7.32
+        },
+        "SOL": {
+          "normal": 5.77,
+          "stress": 10.94
+        },
+        "LINK": {
+          "normal": 8.49,
+          "stress": -2.34
+        },
+        "AVAX": {
+          "normal": 2.9,
+          "stress": -3.96
+        },
+        "DOGE": {
+          "normal": 5.79,
+          "stress": 0.63
+        },
+        "INJ": {
+          "normal": 5.46,
+          "stress": 4.84
+        },
+        "XRP": {
+          "normal": 11.03,
+          "stress": 0.81
+        },
+        "ADA": {
+          "normal": 3.43,
+          "stress": 5.08
+        },
+        "LTC": {
+          "normal": 7.88,
+          "stress": -3.77
+        },
+        "ATOM": {
+          "normal": 4.7,
+          "stress": 1.69
+        },
+        "AAVE": {
+          "normal": 9.37,
+          "stress": 4.03
+        },
+        "NEAR": {
+          "normal": 4.63,
+          "stress": 6.3
+        }
+      }
+    },
+    {
+      "key": "validation",
+      "startUtc": "2024-07-01T00:00:00.000Z",
+      "endExclusiveUtc": "2025-07-01T00:00:00.000Z",
+      "normal": {
+        "mode": "resident-normal",
+        "returnPct": 185.67813294724584,
+        "cagrPct": 185.88360068720547,
+        "profitFactor": 3.116842551612842,
+        "profitFactorWithoutBest": 3.011080499510462,
+        "maxDrawdownPct": 5.64310366575364,
+        "tradeCount": 297,
+        "skippedEntries": 0
+      },
+      "stress": {
+        "mode": "resident-claim-loss-5pct-e-stoplag2h",
+        "returnPct": 123.89717297849128,
+        "cagrPct": 124.02081317470626,
+        "profitFactor": 2.4891000620221724,
+        "profitFactorWithoutBest": 2.3966399129872724,
+        "maxDrawdownPct": 6.44266553702459,
+        "tradeCount": 235,
+        "skippedEntries": 15
+      },
+      "symbolContributionPct": {
+        "BTC": {
+          "normal": 32.89,
+          "stress": 39.91
+        },
+        "ETH": {
+          "normal": 8.03,
+          "stress": -7.15
+        },
+        "BNB": {
+          "normal": 18.69,
+          "stress": 8.98
+        },
+        "SOL": {
+          "normal": 11.18,
+          "stress": 15.24
+        },
+        "LINK": {
+          "normal": 12.47,
+          "stress": 8.23
+        },
+        "AVAX": {
+          "normal": 13.51,
+          "stress": 2.33
+        },
+        "DOGE": {
+          "normal": 8.36,
+          "stress": -1.42
+        },
+        "INJ": {
+          "normal": 26.48,
+          "stress": 9.74
+        },
+        "XRP": {
+          "normal": 21.15,
+          "stress": 10.22
+        },
+        "ADA": {
+          "normal": 3.02,
+          "stress": 11.92
+        },
+        "LTC": {
+          "normal": 2.54,
+          "stress": 3.88
+        },
+        "ATOM": {
+          "normal": 14.67,
+          "stress": 13.64
+        },
+        "AAVE": {
+          "normal": 13.36,
+          "stress": 9.42
+        },
+        "NEAR": {
+          "normal": -0.68,
+          "stress": -1.05
+        }
+      }
+    },
+    {
+      "key": "evaluation",
+      "startUtc": "2025-07-01T00:00:00.000Z",
+      "endExclusiveUtc": "2026-07-01T00:00:00.000Z",
+      "normal": {
+        "mode": "resident-normal",
+        "returnPct": 110.51703810882555,
+        "cagrPct": 110.62439980936962,
+        "profitFactor": 3.51046869798401,
+        "profitFactorWithoutBest": 3.3299211035664014,
+        "maxDrawdownPct": 5.099691008147556,
+        "tradeCount": 223,
+        "skippedEntries": 0
+      },
+      "stress": {
+        "mode": "resident-claim-loss-5pct-d-stoplag2h",
+        "returnPct": 58.23046005466208,
+        "cagrPct": 58.2802001806018,
+        "profitFactor": 1.9518849232504492,
+        "profitFactorWithoutBest": 1.8547260207294574,
+        "maxDrawdownPct": 7.838126378009279,
+        "tradeCount": 179,
+        "skippedEntries": 12
+      },
+      "symbolContributionPct": {
+        "BTC": {
+          "normal": 27.26,
+          "stress": 16.49
+        },
+        "ETH": {
+          "normal": 4.53,
+          "stress": 5.19
+        },
+        "BNB": {
+          "normal": 9.12,
+          "stress": 5.03
+        },
+        "SOL": {
+          "normal": -3.21,
+          "stress": -2.56
+        },
+        "LINK": {
+          "normal": 0.38,
+          "stress": 3.71
+        },
+        "AVAX": {
+          "normal": 9.48,
+          "stress": 4.91
+        },
+        "DOGE": {
+          "normal": 3.01,
+          "stress": 0.33
+        },
+        "INJ": {
+          "normal": 0.24,
+          "stress": 2.01
+        },
+        "XRP": {
+          "normal": 16.02,
+          "stress": 5.17
+        },
+        "ADA": {
+          "normal": 11.94,
+          "stress": 5.78
+        },
+        "LTC": {
+          "normal": 4.24,
+          "stress": 4.02
+        },
+        "ATOM": {
+          "normal": 11.44,
+          "stress": -0.28
+        },
+        "AAVE": {
+          "normal": 5,
+          "stress": 4.66
+        },
+        "NEAR": {
+          "normal": 11.06,
+          "stress": 3.78
+        }
+      }
+    }
+  ],
+  "combined3Y": {
+    "startUtc": "2023-07-01T00:00:00.000Z",
+    "endExclusiveUtc": "2026-07-01T00:00:00.000Z",
+    "normal": {
+      "mode": "resident-normal",
+      "returnPct": 1141.799405592453,
+      "cagrPct": 131.5264595556703,
+      "profitFactor": 3.246344841736,
+      "profitFactorWithoutBest": 3.1541053410313555,
+      "maxDrawdownPct": 5.643103665753597,
+      "tradeCount": 789,
+      "skippedEntries": 0
+    },
+    "stress": {
+      "mode": "resident-claim-loss-5pct-d-stoplag2h",
+      "returnPct": 555.4242603155552,
+      "cagrPct": 87.11650082505211,
+      "profitFactor": 2.0977332772213826,
+      "profitFactorWithoutBest": 2.049075442379589,
+      "maxDrawdownPct": 9.066906785440214,
+      "tradeCount": 631,
+      "skippedEntries": 41
+    },
+    "symbols": {
+      "BTC": {
+        "normalContributionPct": 268.07,
+        "stressContributionPct": 161.67,
+        "stressProfitFactor": 2.28,
+        "stressTradeCount": 177
+      },
+      "ETH": {
+        "normalContributionPct": 39.87,
+        "stressContributionPct": 9.64,
+        "stressProfitFactor": 1.23,
+        "stressTradeCount": 45
+      },
+      "BNB": {
+        "normalContributionPct": 93.49,
+        "stressContributionPct": 49.5,
+        "stressProfitFactor": 1.88,
+        "stressTradeCount": 68
+      },
+      "SOL": {
+        "normalContributionPct": 9.94,
+        "stressContributionPct": 40.84,
+        "stressProfitFactor": 2.31,
+        "stressTradeCount": 28
+      },
+      "LINK": {
+        "normalContributionPct": 36.49,
+        "stressContributionPct": 24.08,
+        "stressProfitFactor": 1.95,
+        "stressTradeCount": 30
+      },
+      "AVAX": {
+        "normalContributionPct": 86.7,
+        "stressContributionPct": 21.74,
+        "stressProfitFactor": 1.88,
+        "stressTradeCount": 27
+      },
+      "DOGE": {
+        "normalContributionPct": 40.81,
+        "stressContributionPct": 5.01,
+        "stressProfitFactor": 1.24,
+        "stressTradeCount": 21
+      },
+      "INJ": {
+        "normalContributionPct": 61.57,
+        "stressContributionPct": 20.54,
+        "stressProfitFactor": 1.66,
+        "stressTradeCount": 30
+      },
+      "XRP": {
+        "normalContributionPct": 149.19,
+        "stressContributionPct": 49.32,
+        "stressProfitFactor": 2.2,
+        "stressTradeCount": 47
+      },
+      "ADA": {
+        "normalContributionPct": 80.11,
+        "stressContributionPct": 55.06,
+        "stressProfitFactor": 5.06,
+        "stressTradeCount": 21
+      },
+      "LTC": {
+        "normalContributionPct": 38.17,
+        "stressContributionPct": 21.27,
+        "stressProfitFactor": 1.54,
+        "stressTradeCount": 32
+      },
+      "ATOM": {
+        "normalContributionPct": 102.48,
+        "stressContributionPct": 32.88,
+        "stressProfitFactor": 2.1,
+        "stressTradeCount": 46
+      },
+      "AAVE": {
+        "normalContributionPct": 66.43,
+        "stressContributionPct": 41.95,
+        "stressProfitFactor": 4.67,
+        "stressTradeCount": 26
+      },
+      "NEAR": {
+        "normalContributionPct": 68.48,
+        "stressContributionPct": 21.92,
+        "stressProfitFactor": 2.6,
+        "stressTradeCount": 33
+      }
+    }
+  },
+  "validation": {
+    "symbolKeysMatchUniverse": true,
+    "annualContributionSumsPctRounded": {
+      "development": {
+        "normal": 106.48,
+        "stress": 50.84
+      },
+      "validation": {
+        "normal": 185.67,
+        "stress": 123.89
+      },
+      "evaluation": {
+        "normal": 110.51,
+        "stress": 58.24
+      }
+    },
+    "combinedContributionSumsPctRounded": {
+      "normal": 1141.8,
+      "stress": 555.42
+    },
+    "roundingTolerancePct": 0.02,
+    "note": "Portfolio metrics retain full precision from the committed V12 result; symbol attribution values are stored to two decimals."
+  },
+  "diagnosis": "V12_YEAR_SYMBOL_BREAKDOWN_RECORDED"
+}
