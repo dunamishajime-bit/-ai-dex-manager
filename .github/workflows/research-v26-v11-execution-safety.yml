@@ -1,0 +1,54 @@
+name: Research V26 V11 Execution Safety
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/v26-latency-aware-search-20260816]
+    paths:
+      - lib/research-lab/perp/v11-execution-safety.ts
+      - scripts/research_v26_v11_execution_safety_selftest.ts
+      - .github/workflows/research-v26-v11-execution-safety.yml
+permissions:
+  contents: write
+jobs:
+  safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Typecheck research safety state machine
+        run: npx tsc --noEmit -p tsconfig.research.json
+      - name: Fault-inject V11 execution safety
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_v26_v11_execution_safety_selftest.ts
+      - name: Assert fail-closed invariants
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'); const d=JSON.parse(fs.readFileSync('.research-state/v26-v11-execution-safety.json','utf8'));
+          if(!d.researchOnly||d.productionDeployed||d.vpsChanged||d.liveChanged||d.realTradingEnabled) throw new Error('BOUNDARY_FAIL');
+          if(!d.pass||d.caseCount<10) throw new Error('SELFTEST_FAIL');
+          if(d.cases.splitBrainLeaseFencing.marketCalls!==1) throw new Error('DUPLICATE_ENTRY_FAIL');
+          if(d.cases.staleOneHourEntry.marketCalls!==0) throw new Error('STALE_ENTRY_FAIL');
+          if(d.cases.newStopRejectedOldRetained.cancelCalls!==0||d.cases.newStopRejectedOldRetained.oldStatus!=='NEW') throw new Error('NAKED_STOP_FAIL');
+          if(d.cases.oldStopCancelFailedOverlapSafe.oldReduceOnly!==true||d.cases.oldStopCancelFailedOverlapSafe.newReduceOnly!==true) throw new Error('OVERLAP_SAFETY_FAIL');
+          console.log('V26_V11_EXECUTION_SAFETY_PASS');
+          NODE
+      - name: Publish safety result
+        run: |
+          mkdir -p docs/research-results
+          cp .research-state/v26-v11-execution-safety.json docs/research-results/v26-v11-execution-safety-latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/research-results/v26-v11-execution-safety-latest.json
+          if ! git diff --cached --quiet; then git commit -m "research: record V26 V11 execution safety result [skip ci]" && git push; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v26-v11-execution-safety
+          path: .research-state/v26-v11-execution-safety.json
+          include-hidden-files: true
+          retention-days: 30
