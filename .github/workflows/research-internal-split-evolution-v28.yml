@@ -1,0 +1,48 @@
+name: Research Internal-Split Evolution V28
+on:
+  workflow_dispatch:
+  push:
+    branches: [chatgpt/3y-entry-edge-diagnosis-20260815]
+    paths:
+      - scripts/research_internal_split_evolution_v28.ts
+      - .github/workflows/research-internal-split-evolution-v28.yml
+permissions:
+  contents: read
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Assert frozen V28 source
+        run: test "$(git hash-object scripts/research_internal_split_evolution_v28.ts)" = "81861b043fd455e60c911c44082d1d1faf05af84"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: pairwise-clean-sheet-3y-usdm-v1-20260815
+          fail-on-cache-miss: true
+      - run: npm ci
+      - name: Run V28 internal-split evolution
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_internal_split_evolution_v28.ts
+      - name: Assert research boundary
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('.research-state/internal-split-evolution-v28.json','utf8'));
+          if(!d.researchOnly||d.productionChanged||d.vpsChanged||d.liveChanged||d.realTradingEnabled) throw new Error('BOUNDARY_FAIL');
+          if(d.target.leverageMultiplier!==1) throw new Error('LEVERAGE_FAIL');
+          for(const f of d.finalists){if(f.combined3Y.maximumEffectiveLeverage>1.000001) throw new Error('EFFECTIVE_LEVERAGE_FAIL')}
+          console.log('V28_BOUNDARY_PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: internal-split-evolution-v28
+          path: .research-state/internal-split-evolution-v28.json
+          include-hidden-files: true
+          retention-days: 30
