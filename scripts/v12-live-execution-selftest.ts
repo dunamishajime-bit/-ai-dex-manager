@@ -8,7 +8,7 @@ import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { buildSharedCryptoDailyRiskState, writeSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import type { V12AsterLiveAdapter, V12AsterOrderView } from "@/lib/v12-aster-live-adapter";
 import { V12LiveExecutionEngine } from "@/lib/v12-live-execution-engine";
-import type { ResidentOrderView } from "@/lib/v12-resident-stop-lifecycle";
+import { planV12TrailingStop, type ResidentOrderView } from "@/lib/v12-resident-stop-lifecycle";
 import { buildV12Signal, type V12Bar } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
@@ -101,7 +101,17 @@ function fakeAdapter(): FakeAdapter {
         getAccountSnapshot: async () => ({ availableBalance: 1000, walletBalance: 1000, asset: "USDT", updatedAt: NOW }),
         getPositions: async () => fake.positions,
         getOpenOrders: async () => [],
-        listV12Orders: async () => [] as V12AsterOrderView[],
+        listV12Orders: async () => [...fake.resident.values()].filter((row) => row.clientOrderId.startsWith("v12-") && row.status !== "CANCELED").map((row) => ({
+            symbol: fake.positions[0]?.symbol || "ETHUSDT",
+            clientOrderId: row.clientOrderId,
+            status: row.status || "NEW",
+            side: row.side,
+            type: row.type,
+            reduceOnly: row.reduceOnly,
+            quantity: Number(row.quantity || 0),
+            executedQuantity: 0,
+            stopPrice: row.stopPrice,
+        })) as V12AsterOrderView[],
         normalizeStopPrice: async (_symbol: string, requested: number) => ({ price: requested, text: String(requested) }),
         openOrders: async (_symbol: string) => [...fake.resident.values()],
         placeStopMarket: async (input: { symbol: string; side: "BUY" | "SELL"; quantity: number; stopPrice: number; clientOrderId: string; reduceOnly: true }) => {
@@ -172,19 +182,25 @@ async function makeHarness(root: string, name: string) {
     return { stateStore, lock, riskPath, marketData, signal, adapter, engine };
 }
 
+async function enterHarness(root: string, name: string) {
+    const harness = await makeHarness(root, name);
+    const result = await harness.engine.tick();
+    assert.equal(result.status, "entered");
+    const state = await harness.stateStore.load();
+    assert.ok(state.active);
+    return { ...harness, state };
+}
+
 async function main() {
     const root = await mkdtemp(join(tmpdir(), "v12-live-execution-"));
     try {
         // Normal entry: durable pending must exist before the exchange send.
-        const normal = await makeHarness(root, "normal");
-        const entered = await normal.engine.tick();
-        assert.equal(entered.status, "entered");
+        const normal = await enterHarness(root, "normal");
         assert.equal(normal.adapter.entryCalls, 1);
         assert.equal(normal.adapter.pendingObservedBeforeSend, true, "durable pending must be saved before order send");
-        const afterEntry = await normal.stateStore.load();
-        assert.equal(afterEntry.pending, undefined);
-        assert.ok(afterEntry.active?.protection.stopClientOrderId);
-        assert.ok(afterEntry.active?.protection.takeProfitClientOrderId);
+        assert.equal(normal.state.pending, undefined);
+        assert.ok(normal.state.active?.protection.stopClientOrderId);
+        assert.ok(normal.state.active?.protection.takeProfitClientOrderId);
 
         // Ordinary restart with a live protected V12 position must reconcile and
         // must never submit the entry again.
@@ -226,6 +242,79 @@ async function main() {
         assert.equal(recovered.status, "entered");
         assert.equal(crash.adapter.entryCalls, 0, "pending recovery must query the original ID instead of resubmitting");
         assert.equal((await crash.stateStore.load()).pending, undefined);
+
+        // Crash after STOP_UPDATE pending save but before the exchange send: the
+        // same deterministic replacement ID is submitted exactly once on restart.
+        const stopBeforeSend = await enterHarness(root, "stop-before-send");
+        const stopState = (await stopBeforeSend.stateStore.load()).active!;
+        const plannedBeforeSend = await planV12TrailingStop(stopBeforeSend.adapter, stopState.protection, stopState.entryPrice + stopState.atrAtEntry * 8);
+        assert.ok(plannedBeforeSend.plan, "fixture must request a trailing STOP replacement");
+        const planBeforeSend = plannedBeforeSend.plan!;
+        const pendingStopBeforeSend: V12PendingOrderState = {
+            idempotencyKey: planBeforeSend.clientOrderId,
+            action: "STOP_UPDATE",
+            clientOrderId: planBeforeSend.clientOrderId,
+            symbol: stopState.symbol,
+            side: stopState.side,
+            quantity: stopState.quantity,
+            signalTs: stopBeforeSend.marketData.BTC.at(-1)!.endTs,
+            reason: "TRAILING_STOP_UPDATE",
+            createdAt: NOW,
+            positionId: stopState.positionId,
+            stopPrice: planBeforeSend.stopPrice,
+            previousStopClientOrderId: planBeforeSend.previousStopClientOrderId,
+            nextPeakOrTrough: planBeforeSend.nextPeakOrTrough,
+        };
+        await stopBeforeSend.stateStore.save({ ...await stopBeforeSend.stateStore.load(), active: { ...stopState, protection: plannedBeforeSend.state }, pending: pendingStopBeforeSend });
+        const beforeSendPlacements = stopBeforeSend.adapter.stopPlacements;
+        const recoveredBeforeSend = await stopBeforeSend.engine.tick();
+        assert.equal(recoveredBeforeSend.status, "held");
+        assert.equal(stopBeforeSend.adapter.stopPlacements, beforeSendPlacements + 1, "pending STOP_UPDATE must submit its deterministic replacement once");
+        const afterStopBeforeSend = await stopBeforeSend.stateStore.load();
+        assert.equal(afterStopBeforeSend.pending, undefined);
+        assert.equal(afterStopBeforeSend.active?.protection.stopClientOrderId, planBeforeSend.clientOrderId);
+        assert.equal(stopBeforeSend.adapter.resident.get(planBeforeSend.previousStopClientOrderId!)?.status, "CANCELED");
+
+        // Crash after Aster accepted the replacement STOP but before local state
+        // save: restart must discover/reuse it and must not submit a duplicate.
+        const stopAfterSend = await enterHarness(root, "stop-after-send");
+        const stopAfterState = (await stopAfterSend.stateStore.load()).active!;
+        const plannedAfterSend = await planV12TrailingStop(stopAfterSend.adapter, stopAfterState.protection, stopAfterState.entryPrice + stopAfterState.atrAtEntry * 9);
+        assert.ok(plannedAfterSend.plan);
+        const planAfterSend = plannedAfterSend.plan!;
+        const pendingStopAfterSend: V12PendingOrderState = {
+            idempotencyKey: planAfterSend.clientOrderId,
+            action: "STOP_UPDATE",
+            clientOrderId: planAfterSend.clientOrderId,
+            symbol: stopAfterState.symbol,
+            side: stopAfterState.side,
+            quantity: stopAfterState.quantity,
+            signalTs: stopAfterSend.marketData.BTC.at(-1)!.endTs,
+            reason: "TRAILING_STOP_UPDATE",
+            createdAt: NOW,
+            positionId: stopAfterState.positionId,
+            stopPrice: planAfterSend.stopPrice,
+            previousStopClientOrderId: planAfterSend.previousStopClientOrderId,
+            nextPeakOrTrough: planAfterSend.nextPeakOrTrough,
+        };
+        await stopAfterSend.stateStore.save({ ...await stopAfterSend.stateStore.load(), active: { ...stopAfterState, protection: plannedAfterSend.state }, pending: pendingStopAfterSend });
+        stopAfterSend.adapter.resident.set(planAfterSend.clientOrderId, {
+            clientOrderId: planAfterSend.clientOrderId,
+            status: "NEW",
+            side: stopAfterState.side === "LONG" ? "SELL" : "BUY",
+            type: "STOP_MARKET",
+            reduceOnly: true,
+            quantity: stopAfterState.quantity,
+            stopPrice: planAfterSend.stopPrice,
+        });
+        const afterSendPlacements = stopAfterSend.adapter.stopPlacements;
+        const recoveredAfterSend = await stopAfterSend.engine.tick();
+        assert.equal(recoveredAfterSend.status, "held");
+        assert.equal(stopAfterSend.adapter.stopPlacements, afterSendPlacements, "accepted deterministic replacement STOP must not be resubmitted after crash");
+        const afterStopAfterSend = await stopAfterSend.stateStore.load();
+        assert.equal(afterStopAfterSend.pending, undefined);
+        assert.equal(afterStopAfterSend.active?.protection.stopClientOrderId, planAfterSend.clientOrderId);
+        assert.equal(stopAfterSend.adapter.resident.get(planAfterSend.previousStopClientOrderId!)?.status, "CANCELED");
 
         // UNKNOWN is never retried with another ID; it becomes sticky manual review.
         const unknown = await makeHarness(root, "unknown");
