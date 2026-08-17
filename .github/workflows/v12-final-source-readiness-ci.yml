@@ -26,7 +26,7 @@ on:
       - 'scripts/disdex_v12_crypto_daily_risk.py'
       - 'scripts/disdex_v12_v52_*.py'
       - 'scripts/ops/disdex-v12-*.sh'
-      - 'scripts/ops/root/disdex-v12-live-activate-from-sha-v2'
+      - 'scripts/ops/root/disdex-v12-live-activate-from-sha-v3'
       - 'scripts/ops/root/disdex-v96-to-v12-live-migrate-final'
       - 'scripts/ops/root/install-disdex-v12-live'
       - 'scripts/ops/root/disdex-v12-live-status-report'
@@ -93,27 +93,34 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
+          activate=scripts/ops/root/disdex-v12-live-activate-from-sha-v3
+          audit=scripts/ops/disdex-v12-current-release-delta-audit-v2.sh
+          migrate=scripts/ops/root/disdex-v96-to-v12-live-migrate-final
           scripts=(
             scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
-            scripts/ops/disdex-v12-current-release-delta-audit.sh
+            "$audit"
             scripts/ops/root/install-disdex-v12-live
-            scripts/ops/root/disdex-v96-to-v12-live-migrate-final
+            "$migrate"
             scripts/ops/root/disdex-v12-live-status-report
             scripts/ops/root/disdex-v96-refuse-while-v12-active
-            scripts/ops/root/disdex-v12-live-activate-from-sha-v2
+            "$activate"
           )
           for script in "${scripts[@]}"; do bash -n "$script"; done
-          grep -Fq 'v12_start_attempted=true' scripts/ops/root/disdex-v96-to-v12-live-migrate-final
-          grep -Fq '"$v12_start_attempted" != "true"' scripts/ops/root/disdex-v96-to-v12-live-migrate-final
-          grep -Fq 'VPS_RELEASE_DELTA_BLOCKED' scripts/ops/disdex-v12-current-release-delta-audit.sh
-          grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' scripts/ops/disdex-v12-current-release-delta-audit.sh
+          grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' "$activate"
+          grep -Fq 'disdex-v12-current-release-delta-audit-v2.sh' "$activate"
+          grep -Fq 'v12_start_attempted=true' "$migrate"
+          grep -Fq '"$v12_start_attempted" != "true"' "$migrate"
+          grep -Fq 'VPS_RELEASE_DELTA_BLOCKED' "$audit"
+          grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' "$audit"
+          grep -Fq 'VPS_RELEASE_FULL_TREE_DELTA_PRESERVATION_PASS' "$audit"
           grep -Fq 'V96_REVERSE_INTERLOCK_VERIFIED=TRUE' scripts/ops/root/disdex-v12-live-status-report
           grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.5' ops/env/disdex-v12-pengu-v2-v52.env.example
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' \
-            scripts/ops/root/disdex-v12-live-activate-from-sha-v2 \
-            scripts/ops/root/disdex-v96-to-v12-live-migrate-final \
+            "$activate" \
+            "$audit" \
+            "$migrate" \
             scripts/ops/root/disdex-v12-live-status-report \
             scripts/ops/root/disdex-v96-refuse-while-v12-active
 
@@ -121,12 +128,25 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          ! rg -n 'I_ACCEPT_REAL_MONEY|LIVE_ACK|ASTER_API_PRIVATE_KEY|ASTER_USER_ADDRESS|placeMarket|place_limit|submitOrder' \
-            scripts/v12-*-selftest.ts \
-            scripts/disdex-shared-crypto-risk-selftest.ts \
-            scripts/disdex-account-order-lock-selftest.ts \
-            scripts/disdex-account-order-lock-cross-language-selftest.ts \
+          files=(
+            scripts/v12-*-selftest.ts
+            scripts/disdex-shared-crypto-risk-selftest.ts
+            scripts/disdex-account-order-lock-selftest.ts
+            scripts/disdex-account-order-lock-cross-language-selftest.ts
             scripts/pengu-dual-ls-v2-selftest.ts
+          )
+          set +e
+          grep -En 'I_ACCEPT_REAL_MONEY|LIVE_ACK|ASTER_API_PRIVATE_KEY|ASTER_USER_ADDRESS|placeMarket|place_limit|submitOrder' "${files[@]}"
+          scan_status=$?
+          set -e
+          if (( scan_status == 0 )); then
+            echo 'OFFLINE_TEST_PRODUCTION_CREDENTIAL_OR_ORDER_SURFACE_FOUND' >&2
+            exit 1
+          fi
+          if (( scan_status != 1 )); then
+            echo "OFFLINE_TEST_SCAN_FAILED code=$scan_status" >&2
+            exit "$scan_status"
+          fi
           grep -Fq 'realExchangeCalls: 0' scripts/v12-live-execution-selftest.ts
           grep -Fq 'exchangeCalls: 0' scripts/disdex-account-order-lock-cross-language-selftest.ts
 
