@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Three-way, read-only source audit for the VPS-only release marker problem.
-# It compares:
-#   A) Git base commit used by the V12 implementation branch,
-#   B) the currently deployed VPS release (which may not be a Git commit),
+# Three-way, read-only source audit for a VPS release marker that may not map to
+# a public Git commit. It compares:
+#   A) the implementation branch Git base,
+#   B) the currently deployed VPS release,
 #   C) the candidate immutable V12 release.
-# It never reads /etc/disdex secrets, calls Aster, or mutates a service.
+# No /etc/disdex secret is read, no Aster call is made and no service changes.
 current_input="${1:-/home/deploy/disdex-trading/current}"
 candidate_input="${2:-}"
 source_repo="${3:-}"
@@ -74,13 +74,18 @@ base_file() {
   local rel="$1" out="$2"
   runuser -u deploy -- git -C "$source_repo" show "${base_sha}:${rel}" > "$out" 2>/dev/null
 }
+append_diff() {
+  local label_a="$1" file_a="$2" label_b="$3" file_b="$4"
+  printf '%s\n' "--- $label_a -> $label_b" >> "$report"
+  diff -u --label "$label_a" --label "$label_b" "$file_a" "$file_b" 2>/dev/null | head -n 160 >> "$report" || true
+}
 
 vps_delta_count=0
 preserved_count=0
 would_lose_count=0
 overlap_count=0
 candidate_only_count=0
-missing_count=0
+structure_change_count=0
 {
   printf 'V12_CURRENT_RELEASE_THREE_WAY_DELTA_AUDIT\n'
   printf 'baseSha=%s\nsourceRepo=%s\n' "$base_sha" "$source_repo"
@@ -95,38 +100,80 @@ for rel in "${critical_paths[@]}"; do
   candidate_file="$candidate/$rel"
   safe_name="$(printf '%s' "$rel" | tr '/ ' '__')"
   base_file_path="$tmp_root/$safe_name.base"
-
-  base_exists=true
-  if ! base_file "$rel" "$base_file_path"; then base_exists=false; fi
+  base_exists=true; base_file "$rel" "$base_file_path" || base_exists=false
   current_exists=true; [[ -f "$current_file" ]] || current_exists=false
   candidate_exists=true; [[ -f "$candidate_file" ]] || candidate_exists=false
 
-  if [[ "$base_exists" != true || "$current_exists" != true || "$candidate_exists" != true ]]; then
-    missing_count=$((missing_count + 1))
-    printf 'MISSING_OR_NEW path=%s base=%s current=%s candidate=%s\n' "$rel" "$base_exists" "$current_exists" "$candidate_exists" >> "$report"
-    # A current-only file is an explicit VPS delta that cannot be silently lost.
-    if [[ "$current_exists" == true && "$base_exists" != true && "$candidate_exists" != true ]]; then
-      would_lose_count=$((would_lose_count + 1))
-      vps_delta_count=$((vps_delta_count + 1))
+  if [[ "$base_exists" != "$current_exists" || "$base_exists" != "$candidate_exists" || "$current_exists" != "$candidate_exists" ]]; then
+    structure_change_count=$((structure_change_count + 1))
+    printf 'STRUCTURE path=%s base=%s current=%s candidate=%s\n' "$rel" "$base_exists" "$current_exists" "$candidate_exists" >> "$report"
+  fi
+
+  # File absent from base: candidate additions are normal implementation changes;
+  # a current-only file is a VPS addition that must not disappear silently.
+  if [[ "$base_exists" != true ]]; then
+    if [[ "$current_exists" != true && "$candidate_exists" != true ]]; then
+      printf 'ABSENT_ALL path=%s\n' "$rel" >> "$report"
+    elif [[ "$current_exists" != true && "$candidate_exists" == true ]]; then
+      candidate_only_count=$((candidate_only_count + 1))
+      printf 'CANDIDATE_INTENDED_ADD path=%s candidate=%s\n' "$rel" "$(hash_file "$candidate_file")" >> "$report"
+    elif [[ "$current_exists" == true && "$candidate_exists" != true ]]; then
+      vps_delta_count=$((vps_delta_count + 1)); would_lose_count=$((would_lose_count + 1))
       printf 'VPS_DELTA_WOULD_BE_LOST path=%s reason=current-only-file\n' "$rel" >> "$report"
-    elif [[ "$current_exists" == true && "$base_exists" != true && "$candidate_exists" == true ]]; then
+    else
       vps_delta_count=$((vps_delta_count + 1))
       current_hash="$(hash_file "$current_file")"; candidate_hash="$(hash_file "$candidate_file")"
       if [[ "$current_hash" == "$candidate_hash" ]]; then
-        preserved_count=$((preserved_count + 1)); printf 'VPS_DELTA_PRESERVED path=%s reason=current-new-file-preserved\n' "$rel" >> "$report"
+        preserved_count=$((preserved_count + 1))
+        printf 'VPS_DELTA_PRESERVED path=%s reason=current-added-file-preserved sha256=%s\n' "$rel" "$current_hash" >> "$report"
       else
-        overlap_count=$((overlap_count + 1)); printf 'VPS_DELTA_OVERLAP_REVIEW path=%s reason=current-new-file-differs\n' "$rel" >> "$report"
+        overlap_count=$((overlap_count + 1))
+        printf 'VPS_DELTA_OVERLAP_REVIEW path=%s reason=current-added-file-differs current=%s candidate=%s\n' "$rel" "$current_hash" "$candidate_hash" >> "$report"
       fi
     fi
     continue
   fi
 
   base_hash="$(hash_file "$base_file_path")"
-  current_hash="$(hash_file "$current_file")"
-  candidate_hash="$(hash_file "$candidate_file")"
-  current_delta=false; [[ "$current_hash" != "$base_hash" ]] && current_delta=true
-  candidate_delta=false; [[ "$candidate_hash" != "$base_hash" ]] && candidate_delta=true
 
+  # A file deleted only on the VPS is a real VPS-side delta too.
+  if [[ "$current_exists" != true ]]; then
+    vps_delta_count=$((vps_delta_count + 1))
+    if [[ "$candidate_exists" != true ]]; then
+      preserved_count=$((preserved_count + 1))
+      printf 'VPS_DELTA_PRESERVED path=%s reason=current-deletion-preserved\n' "$rel" >> "$report"
+    else
+      candidate_hash="$(hash_file "$candidate_file")"
+      if [[ "$candidate_hash" == "$base_hash" ]]; then
+        would_lose_count=$((would_lose_count + 1))
+        printf 'VPS_DELTA_WOULD_BE_LOST path=%s reason=current-deletion-restored-by-candidate\n' "$rel" >> "$report"
+      else
+        overlap_count=$((overlap_count + 1))
+        printf 'VPS_DELTA_OVERLAP_REVIEW path=%s reason=current-deletion-vs-candidate-change candidate=%s\n' "$rel" "$candidate_hash" >> "$report"
+      fi
+    fi
+    continue
+  fi
+
+  current_hash="$(hash_file "$current_file")"
+  current_delta=false; [[ "$current_hash" != "$base_hash" ]] && current_delta=true
+
+  # Candidate deletion is an ordinary candidate-only change only when current
+  # exactly matches base. Otherwise it overlaps a VPS-side modification.
+  if [[ "$candidate_exists" != true ]]; then
+    if [[ "$current_delta" != true ]]; then
+      candidate_only_count=$((candidate_only_count + 1))
+      printf 'CANDIDATE_INTENDED_DELETE path=%s\n' "$rel" >> "$report"
+    else
+      vps_delta_count=$((vps_delta_count + 1)); overlap_count=$((overlap_count + 1))
+      printf 'VPS_DELTA_OVERLAP_REVIEW path=%s reason=candidate-deletes-vps-modified-file current=%s\n' "$rel" "$current_hash" >> "$report"
+      append_diff "base/$rel" "$base_file_path" "current/$rel" "$current_file"
+    fi
+    continue
+  fi
+
+  candidate_hash="$(hash_file "$candidate_file")"
+  candidate_delta=false; [[ "$candidate_hash" != "$base_hash" ]] && candidate_delta=true
   if [[ "$current_delta" != true && "$candidate_delta" != true ]]; then
     printf 'UNCHANGED path=%s sha256=%s\n' "$rel" "$base_hash" >> "$report"
     continue
@@ -137,8 +184,6 @@ for rel in "${critical_paths[@]}"; do
     continue
   fi
 
-  # Anything current!=base is a VPS-side delta relative to the implementation
-  # branch base and must be explicitly preserved or reviewed.
   vps_delta_count=$((vps_delta_count + 1))
   if [[ "$current_hash" == "$candidate_hash" ]]; then
     preserved_count=$((preserved_count + 1))
@@ -152,11 +197,8 @@ for rel in "${critical_paths[@]}"; do
     overlap_count=$((overlap_count + 1))
     printf 'VPS_DELTA_OVERLAP_REVIEW path=%s base=%s current=%s candidate=%s\n' "$rel" "$base_hash" "$current_hash" "$candidate_hash" >> "$report"
   fi
-
-  printf '%s\n' "--- base -> current: $rel" >> "$report"
-  diff -u --label "base/$rel" --label "current/$rel" "$base_file_path" "$current_file" 2>/dev/null | head -n 160 >> "$report" || true
-  printf '%s\n' "--- base -> candidate: $rel" >> "$report"
-  diff -u --label "base/$rel" --label "candidate/$rel" "$base_file_path" "$candidate_file" 2>/dev/null | head -n 160 >> "$report" || true
+  append_diff "base/$rel" "$base_file_path" "current/$rel" "$current_file"
+  append_diff "base/$rel" "$base_file_path" "candidate/$rel" "$candidate_file"
   printf '\n' >> "$report"
 done
 
@@ -166,13 +208,13 @@ done
   printf 'summaryWouldBeLost=%d\n' "$would_lose_count"
   printf 'summaryOverlapReview=%d\n' "$overlap_count"
   printf 'summaryCandidateOnly=%d\n' "$candidate_only_count"
-  printf 'summaryMissingOrNew=%d\n' "$missing_count"
+  printf 'summaryStructureChanges=%d\n' "$structure_change_count"
 } >> "$report"
 
 printf 'STATUS: VPS_RELEASE_THREE_WAY_DELTA_AUDIT_COMPLETE\n'
 printf 'baseSha=%s\ncurrentSha=%s\ncandidateSha=%s\n' "$base_sha" "$current_sha" "$candidate_sha"
-printf 'vpsDelta=%d\npreserved=%d\nwouldBeLost=%d\noverlapReview=%d\ncandidateOnly=%d\nmissingOrNew=%d\n' \
-  "$vps_delta_count" "$preserved_count" "$would_lose_count" "$overlap_count" "$candidate_only_count" "$missing_count"
+printf 'vpsDelta=%d\npreserved=%d\nwouldBeLost=%d\noverlapReview=%d\ncandidateOnly=%d\nstructureChanges=%d\n' \
+  "$vps_delta_count" "$preserved_count" "$would_lose_count" "$overlap_count" "$candidate_only_count" "$structure_change_count"
 printf 'report=%s\nordersSent=false\nservicesChanged=false\nsecretsRead=false\n' "$report"
 if [[ $would_lose_count -gt 0 ]]; then
   printf 'VPS_RELEASE_DELTA_BLOCKED\n'
