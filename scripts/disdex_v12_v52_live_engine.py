@@ -5,9 +5,10 @@ import contextlib
 import json
 import os
 import signal
+import time
 
 # Expand the legacy V96/V52 shared Margin Guard before importing the
-# margin-aware V52 engine.  This preserves the deployed V96 implementation while
+# margin-aware V52 engine. This preserves the deployed V96 implementation while
 # giving the post-migration composition the full frozen V12 universe.
 import disdex_v96_v52_margin_guard as guard
 
@@ -32,16 +33,13 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
     """V52 stock sleeve for the V12 + PENGU V2 crypto composition.
 
     Capacity is based on actual Aster positions across every frozen V12 symbol,
-    PENGU and the five stock symbols.  The legacy V96 state no longer receives
-    margin priority after migration; existing stock positions are therefore not
-    force-closed merely because the retired V96 state is stale.
+    PENGU and the five stock symbols. The legacy V96 state no longer receives
+    margin priority after migration.
 
-    The legacy V52 process used ``self.lock`` as both its daemon singleton lock
-    and the cross-language account-order lock.  Holding that shared lock for the
-    whole daemon lifetime would permanently starve PENGU/V12.  Post-migration we
-    keep a local runner lock for process exclusivity and acquire the shared
-    account lock only around exchange-mutating entry/exit/flatten critical
-    sections.
+    The daemon singleton lock is local. The cross-language account-order lock is
+    held only around exchange-mutating critical sections. Owner IDs encode the
+    shared arbitration priority: P1 for reduce-only/flatten and P2 for new V52
+    stock exposure.
     """
 
     def __init__(self, mode: str):
@@ -54,39 +52,57 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
         self._account_critical_depth = 0
 
     @contextlib.contextmanager
-    def _account_critical(self):
+    def _account_critical(self, priority: int, wait_seconds: float, required: bool):
         if self._account_critical_depth > 0:
             self._account_critical_depth += 1
             try:
-                yield
+                yield True
             finally:
                 self._account_critical_depth -= 1
             return
 
-        if not self.account_order_lock.acquire():
-            raise RuntimeError("V52_SHARED_ACCOUNT_ORDER_LOCK_BUSY")
+        deadline = time.monotonic() + max(0.0, wait_seconds)
+        acquired = False
+        owner_id = f"V52:P{priority}:{self.mode}:{os.getpid()}:{time.time_ns()}"
+        while True:
+            if self.account_order_lock.acquire(owner_id=owner_id):
+                acquired = True
+                break
+            if time.monotonic() >= deadline:
+                if required:
+                    raise RuntimeError(f"V52_SHARED_ACCOUNT_ORDER_LOCK_TIMEOUT:P{priority}")
+                yield False
+                return
+            time.sleep(0.05)
+
         self._account_critical_depth = 1
         try:
-            # Gross/margin reconciliation and durable pending creation occur in
-            # the inherited order method while this account-scoped lock is held.
-            yield
+            yield True
         finally:
             self._account_critical_depth = 0
-            self.account_order_lock.release()
+            if acquired:
+                self.account_order_lock.release()
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
-        with self._account_critical():
+        # New stock exposure is P2. If a simultaneous P1 close/protection action
+        # wins arbitration, do not turn ordinary contention into a fatal V52
+        # error; simply skip this entry opportunity and re-evaluate later.
+        with self._account_critical(priority=2, wait_seconds=1.0, required=False) as acquired:
+            if not acquired:
+                self.log("v52-entry-skipped-account-priority", slot=slot, priority=2, ordersSent=False)
+                return False
             return super().open_basis_position(slot, candidate, target_gross)
 
     def close_slot(self, slot: str, reason: str) -> None:
-        with self._account_critical():
+        # Risk-reducing exits are the highest shared-account priority and retry
+        # boundedly rather than yielding to a new exposure request.
+        with self._account_critical(priority=1, wait_seconds=30.0, required=True):
             return super().close_slot(slot, reason)
 
     def flatten_all(self, reason: str) -> None:
         # Keep cancellation + all reduce-only close operations serialized as one
-        # high-priority critical section. close_slot() is re-entrant here and
-        # therefore does not attempt a second shared-lock acquisition.
-        with self._account_critical():
+        # P1 critical section. close_slot() is re-entrant here.
+        with self._account_critical(priority=1, wait_seconds=30.0, required=True):
             return super().flatten_all(reason)
 
     def v96_requires_margin(self) -> bool:
@@ -146,23 +162,25 @@ def self_test() -> None:
 
     class FakeAccountLock:
         def __init__(self):
-            self.acquires = 0
+            self.acquires: list[str] = []
             self.releases = 0
 
-        def acquire(self):
-            self.acquires += 1
+        def acquire(self, owner_id=None):
+            self.acquires.append(str(owner_id))
             return True
 
         def release(self):
             self.releases += 1
 
     fake = FakeAccountLock()
+    engine.mode = "paper"
     engine.account_order_lock = fake
     engine._account_critical_depth = 0
-    with engine._account_critical():
-        with engine._account_critical():
+    with engine._account_critical(priority=1, wait_seconds=0, required=True):
+        with engine._account_critical(priority=1, wait_seconds=0, required=True):
             assert engine._account_critical_depth == 2
-    assert fake.acquires == 1
+    assert len(fake.acquires) == 1
+    assert ":P1:" in fake.acquires[0]
     assert fake.releases == 1
     assert engine._account_critical_depth == 0
     assert len(V12_CRYPTO_SYMBOLS) == 15
