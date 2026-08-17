@@ -138,7 +138,7 @@ export default function PositionsPage() {
           </div>
           <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <Gate title="Leverage" value="5x Cross" note="Aster対象10銘柄" />
-            <Gate title="Portfolio" value={`${config.maximumGross.toFixed(1)} Gross`} note="V96 Portfolio上限" />
+            <Gate title="Portfolio" value={`${config.maximumGross.toFixed(1)} Gross`} note="V96/V52 combined account cap" />
             <Gate title="PENGU Cap" value="0.75" note="V2固定仕様の実行上限" />
             <Gate title="Margin Guard" value="5m / 1m" note="通常5分・WARNING時1分" />
           </div>
