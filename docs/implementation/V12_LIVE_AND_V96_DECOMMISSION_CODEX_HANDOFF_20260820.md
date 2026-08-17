@@ -11,12 +11,11 @@ This file is the canonical handoff for the complete production job. Use the exac
 - V96/V12 migration interlocks — removed after V96 service removal
 
 ## Phase A — actual V12 activation
-Use the canonical V3 activation path and command from the exact green Git object:
+Use only the canonical V3 activation command from the exact green Git object:
 
-- `docs/implementation/V12_CODEX_MINIMAL_VPS_HANDOFF_20260820_V3.md`
-- `scripts/ops/root/disdex-v12-live-activate-from-sha-v3`
+`scripts/ops/root/disdex-v12-live-activate-from-sha-v3`
 
-No SHADOW period. No synthetic/artificial LIVE order. Do not weaken any risk/reference/Gross/freshness gate.
+No SHADOW period. No synthetic/artificial LIVE order. Do not weaken any risk/reference/Gross/freshness/reconciliation/Kill Switch gate.
 
 Do not continue to V96 deletion unless actual VPS evidence ends with:
 
@@ -67,7 +66,7 @@ Preferred neutral paths:
 
 After shared dependencies are neutral, remove V96-only executable runtime material: V96 runners/supervisors/runtime config/operator overrides/V96-only preflights and migration commands/V96 systemd units/V96 deploy-start scripts/V96 package scripts/V96-only CI/runtime contract tests. Remove V96↔V12 start interlocks only after the V96 trading service definitions no longer exist.
 
-Historical docs/research may retain the string V96. Executable production paths may not.
+Historical docs/research may retain V96 references. Executable production paths may not.
 
 Run:
 
