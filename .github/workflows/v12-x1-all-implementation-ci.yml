@@ -68,6 +68,7 @@ jobs:
         run: |
           npx tsx scripts/v12-x1-all-selftest.ts
           npx tsx scripts/disdex-account-order-lock-selftest.ts
+          npx tsx scripts/disdex-account-order-lock-cross-language-selftest.ts
           npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
           npx tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts
           npx tsx scripts/v12-resident-stop-selftest.ts
@@ -116,7 +117,7 @@ jobs:
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' scripts/ops/root/disdex-v96-to-v12-live-migrate
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/create-disdex-v12-immutable-release scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate scripts/ops/root/disdex-v12-live-status-report
 
-      - name: Validate post-migration systemd invariants
+      - name: Validate post-migration systemd and account-priority invariants
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -128,15 +129,26 @@ jobs:
           grep -Fq 'disdex_v12_v52_live_engine.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
           grep -Fq 'disdex-pengu-dual-ls-v2-live-runner.ts --daemon' ops/systemd/disdex-pengu-dual-ls-v2@.service
           grep -Fq 'DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'DISDEX_ACCOUNT_LOCK_WAITER_TTL_MS=10000' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_LOCK_RETRY_MS=5000' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v12_v52_margin_guard_runtime.py' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_V12_LIVE_ALLOW_REAL_ORDERS=true' ops/env/disdex-v12-x1-all.live.env.example
           grep -Fq 'V12_X1_ALL_LOCK_RETRY_MS=5000' ops/env/disdex-v12-x1-all.live.env.example
+          grep -Fq 'P1: reduce-only exit / protection work' lib/disdex-account-order-lock.ts
+          grep -Fq 'P2: V52 stock exposure' lib/disdex-account-order-lock.ts
+          grep -Fq 'P3: PENGU V2 exposure' lib/disdex-account-order-lock.ts
+          grep -Fq 'P4: V12 exposure' lib/disdex-account-order-lock.ts
+          grep -Fq 'PENGU_DUAL_LS_V2:P${priority}' scripts/disdex-pengu-dual-ls-v2-live-runner.ts
+          grep -Fq 'V12_X1.00_ALL:P${priority}' scripts/disdex-v12-x1-all-live-runner.ts
+          grep -Fq 'priority=2' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'priority=1' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'LINKUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'NEARUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'PENGUUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'self.account_order_lock = self.lock' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'def _account_critical' scripts/disdex_v12_v52_live_engine.py
-          grep -Fq 'V52_SHARED_ACCOUNT_ORDER_LOCK_BUSY' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'V52_SHARED_ACCOUNT_ORDER_LOCK_TIMEOUT' scripts/disdex_v12_v52_live_engine.py
 
       - name: Assert tests cannot submit production orders
         shell: bash
@@ -145,6 +157,8 @@ jobs:
           ! rg -n 'I_ACCEPT_REAL_MONEY|LIVE_ACK|ASTER_API_PRIVATE_KEY|ASTER_USER_ADDRESS|placeMarket|place_limit|submitOrder' \
             scripts/v12-*-selftest.ts \
             scripts/disdex-shared-crypto-risk-selftest.ts \
-            scripts/disdex-account-order-lock-selftest.ts
+            scripts/disdex-account-order-lock-selftest.ts \
+            scripts/disdex-account-order-lock-cross-language-selftest.ts
           grep -Fq 'realExchangeCalls: 0' scripts/v12-live-execution-selftest.ts
           grep -Fq 'ordersSent: 0' scripts/v12-live-execution-selftest.ts
+          grep -Fq 'exchangeCalls: 0' scripts/disdex-account-order-lock-cross-language-selftest.ts
