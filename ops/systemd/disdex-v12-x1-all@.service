@@ -15,6 +15,7 @@ EnvironmentFile=/etc/disdex/disdex-v12-x1-all.env
 Environment=NODE_ENV=production
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/bash /home/deploy/disdex-trading/releases/%i/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh %i runtime
 ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-v12-x1-all-live-runner.ts --daemon
 Restart=on-failure
 RestartPreventExitStatus=2
