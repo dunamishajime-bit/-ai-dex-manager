@@ -29,16 +29,21 @@ source_tree="$(runuser -u deploy -- git -C "$source_repo" rev-parse "${sha}^{tre
 release_root=/home/deploy/disdex-trading/releases
 release="$release_root/$sha"
 staging="$release_root/.staging-$sha-$$"
-archive="/home/deploy/disdex-ops/v12-release-$sha-$$.tar"
-install -d -o disdex-runner -g deploy -m 2775 /home/deploy/disdex-trading "$release_root" 2>/dev/null || \
-  install -d -o deploy -g deploy -m 0755 /home/deploy/disdex-trading "$release_root"
-install -d -o deploy -g deploy -m 0700 /home/deploy/disdex-ops
+build_root=/home/deploy/disdex-v12-release-build
+archive="$build_root/$sha-$$.tar"
+
+# Do not modify ownership/mode of existing operations directories. The only new
+# writable build workspace is dedicated to this immutable-release builder.
+[[ -d /home/deploy/disdex-trading && ! -L /home/deploy/disdex-trading ]] || { printf 'V12_RELEASE_BUILD_TRADING_ROOT_INVALID\n' >&2; exit 3; }
+[[ -d "$release_root" && ! -L "$release_root" ]] || { printf 'V12_RELEASE_BUILD_RELEASE_ROOT_INVALID\n' >&2; exit 3; }
+install -d -o deploy -g deploy -m 0700 "$build_root"
 
 if [[ -e "$release" || -L "$release" ]]; then
   [[ -d "$release" && ! -L "$release" ]] || { printf 'V12_RELEASE_BUILD_EXISTING_TARGET_INVALID\n' >&2; exit 4; }
   [[ -f "$release/.disdex-release-sha" && ! -L "$release/.disdex-release-sha" ]] || { printf 'V12_RELEASE_BUILD_EXISTING_MARKER_MISSING\n' >&2; exit 4; }
   [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$sha" ]] || { printf 'V12_RELEASE_BUILD_EXISTING_MARKER_MISMATCH\n' >&2; exit 4; }
-  [[ -f "$release/.disdex-release-source-tree" && "$(tr -d '[:space:]' < "$release/.disdex-release-source-tree")" == "$source_tree" ]] || { printf 'V12_RELEASE_BUILD_EXISTING_TREE_MISMATCH\n' >&2; exit 4; }
+  [[ -f "$release/.disdex-release-source-tree" && ! -L "$release/.disdex-release-source-tree" ]] || { printf 'V12_RELEASE_BUILD_EXISTING_TREE_MARKER_MISSING\n' >&2; exit 4; }
+  [[ "$(tr -d '[:space:]' < "$release/.disdex-release-source-tree")" == "$source_tree" ]] || { printf 'V12_RELEASE_BUILD_EXISTING_TREE_MISMATCH\n' >&2; exit 4; }
   [[ -x "$release/node_modules/.bin/tsx" ]] || { printf 'V12_RELEASE_BUILD_EXISTING_TSX_MISSING\n' >&2; exit 4; }
   printf 'V12_IMMUTABLE_RELEASE_ALREADY_VALID\nsha=%s\nsourceTree=%s\nrelease=%s\nordersSent=false\nservicesChanged=false\n' "$sha" "$source_tree" "$release"
   exit 0
@@ -58,15 +63,14 @@ install -d -o deploy -g deploy -m 0700 "$staging"
 # worktree. Uncommitted or VPS-only source changes cannot silently enter the new
 # immutable release.
 runuser -u deploy -- git -C "$source_repo" archive --format=tar --output="$archive" "$sha"
-chown deploy:deploy "$archive"
 runuser -u deploy -- tar -xf "$archive" -C "$staging"
 
-# Verify the extracted committed source tree independently before generated
-# build/dependency files are added. git archive is the authoritative source;
-# this checksum inventory makes later VPS inspection straightforward.
+# Inventory only committed extracted source, before node_modules/.next/markers
+# are introduced. This supports later inspection without pretending generated
+# build output is part of the Git tree.
 (
   cd "$staging"
-  find . -type f -not -path './node_modules/*' -not -path './.next/*' -print0 | sort -z | xargs -0 sha256sum
+  find . -type f -print0 | sort -z | xargs -0 sha256sum
 ) > "$staging/.disdex-release-source-files.sha256"
 chown deploy:deploy "$staging/.disdex-release-source-files.sha256"
 chmod 0600 "$staging/.disdex-release-source-files.sha256"
