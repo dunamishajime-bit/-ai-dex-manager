@@ -24,6 +24,23 @@ release="/home/deploy/disdex-trading/releases/$sha"
   printf 'V12_MUTUAL_EXCLUSION_RELEASE_MARKER_MISMATCH\n' >&2
   exit 1
 }
+[[ -f "$release/.disdex-release-source-tree" && ! -L "$release/.disdex-release-source-tree" ]] || {
+  printf 'V12_MUTUAL_EXCLUSION_SOURCE_TREE_MARKER_MISSING\n' >&2
+  exit 1
+}
+source_tree="$(tr -d '[:space:]' < "$release/.disdex-release-source-tree")"
+[[ "$source_tree" =~ ^[0-9a-f]{40}$ ]] || {
+  printf 'V12_MUTUAL_EXCLUSION_SOURCE_TREE_MARKER_INVALID\n' >&2
+  exit 1
+}
+[[ -s "$release/.disdex-release-source-files.sha256" && ! -L "$release/.disdex-release-source-files.sha256" ]] || {
+  printf 'V12_MUTUAL_EXCLUSION_SOURCE_INVENTORY_MISSING\n' >&2
+  exit 1
+}
+[[ -x "$release/node_modules/.bin/tsx" && -d "$release/.next" ]] || {
+  printf 'V12_MUTUAL_EXCLUSION_LINUX_BUILD_INVALID\n' >&2
+  exit 1
+}
 
 # The two known V96 production supervisors must both be inactive. Do not use
 # this script to stop them; migration is always an explicit operator action.
@@ -55,4 +72,4 @@ if [[ "$mode" == "initial" ]]; then
 fi
 
 printf 'V12_MUTUAL_EXCLUSION_PREFLIGHT_PASS\n'
-printf 'releaseSha=%s\nmode=%s\nordersSent=false\n' "$sha" "$mode"
+printf 'releaseSha=%s\nsourceTree=%s\nmode=%s\nordersSent=false\n' "$sha" "$source_tree" "$mode"
