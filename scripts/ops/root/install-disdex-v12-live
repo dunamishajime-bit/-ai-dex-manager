@@ -14,9 +14,16 @@ sha="$(basename "$repo_root")"
 [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_LIVE_INSTALL_RELEASE_NAME_INVALID\n' >&2; exit 2; }
 [[ "$repo_root" == "/home/deploy/disdex-trading/releases/$sha" ]] || { printf 'V12_LIVE_INSTALL_RELEASE_PATH_INVALID\n' >&2; exit 2; }
 marker="$repo_root/.disdex-release-sha"
+tree_marker="$repo_root/.disdex-release-source-tree"
+source_inventory="$repo_root/.disdex-release-source-files.sha256"
 [[ -f "$marker" && ! -L "$marker" ]] || { printf 'V12_LIVE_INSTALL_RELEASE_MARKER_MISSING\n' >&2; exit 2; }
 [[ "$(tr -d '[:space:]' < "$marker")" == "$sha" ]] || { printf 'V12_LIVE_INSTALL_RELEASE_MARKER_MISMATCH\n' >&2; exit 2; }
+[[ -f "$tree_marker" && ! -L "$tree_marker" ]] || { printf 'V12_LIVE_INSTALL_SOURCE_TREE_MARKER_MISSING\n' >&2; exit 2; }
+source_tree="$(tr -d '[:space:]' < "$tree_marker")"
+[[ "$source_tree" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_LIVE_INSTALL_SOURCE_TREE_MARKER_INVALID\n' >&2; exit 2; }
+[[ -s "$source_inventory" && ! -L "$source_inventory" ]] || { printf 'V12_LIVE_INSTALL_SOURCE_INVENTORY_MISSING\n' >&2; exit 2; }
 [[ -x "$repo_root/node_modules/.bin/tsx" ]] || { printf 'V12_LIVE_INSTALL_TSX_MISSING\n' >&2; exit 2; }
+[[ -d "$repo_root/.next" ]] || { printf 'V12_LIVE_INSTALL_LINUX_BUILD_MISSING\n' >&2; exit 2; }
 id deploy >/dev/null 2>&1 || { printf 'V12_LIVE_INSTALL_DEPLOY_USER_MISSING\n' >&2; exit 2; }
 [[ -f /etc/disdex/disdex-v13d-v11eq-v96.env && ! -L /etc/disdex/disdex-v13d-v11eq-v96.env ]] || {
   printf 'V12_LIVE_INSTALL_EXISTING_PRODUCTION_ENV_MISSING\n' >&2
@@ -39,6 +46,7 @@ unit_names=(
 )
 required=(
   "$repo_root/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh"
+  "$repo_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
   "$repo_root/scripts/ops/root/disdex-v96-to-v12-live-migrate"
   "$repo_root/scripts/disdex-v12-live-readiness.ts"
   "$repo_root/scripts/disdex-pengu-v2-live-readiness.ts"
@@ -68,6 +76,7 @@ fi
 # Offline executable validation. These tests contain no production credentials
 # and submit no real order.
 bash -n "$repo_root/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh"
+bash -n "$repo_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
 bash -n "$repo_root/scripts/ops/root/disdex-v96-to-v12-live-migrate"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/v12-x1-all-selftest.ts"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/v12-resident-stop-selftest.ts"
@@ -119,7 +128,7 @@ for unit in \
 done
 
 printf 'V12_LIVE_COMPONENTS_INSTALL_PASS\n'
-printf 'releaseSha=%s\n' "$sha"
+printf 'releaseSha=%s\nsourceTree=%s\n' "$sha" "$source_tree"
 printf 'backupRoot=%s\n' "$backup_root"
 printf 'existingV96ServiceChanged=false\nservicesStarted=false\nordersSent=false\n'
 printf 'nextCommand=bash %s/scripts/ops/root/disdex-v96-to-v12-live-migrate %s I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION\n' "$repo_root" "$sha"
