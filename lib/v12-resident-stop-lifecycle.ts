@@ -71,8 +71,14 @@ export async function installV12Protection(adapter: ResidentStopAdapter, state: 
         return installed;
     } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
-        for (const clientOrderId of [stopClientOrderId, takeProfitClientOrderId]) { try { await adapter.cancel(clientOrderId); } catch { /* flatten remains mandatory */ } }
+        // Never cancel a confirmed STOP before the emergency close is proven
+        // flat. If the close itself is UNKNOWN/fails, propagate the error so
+        // durable active state remains and any existing exchange protection is
+        // preserved for manual reconciliation.
         await adapter.flattenReduceOnly({ symbol: normalizedState.symbol, side: closeSide, quantity: normalizedState.quantity, clientOrderId: id(normalizedState, "STOP", 999) });
+        for (const clientOrderId of [stopClientOrderId, takeProfitClientOrderId]) {
+            try { await adapter.cancel(clientOrderId); } catch { /* flat position; stale reduce-only cleanup is manual-review */ }
+        }
         return { ...normalizedState, stopClientOrderId, takeProfitClientOrderId, manualReview: `PROTECTION_FAILED_FLATTENED:${reason}` };
     }
 }
