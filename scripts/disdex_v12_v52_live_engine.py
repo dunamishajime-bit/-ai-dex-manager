@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import signal
@@ -34,7 +35,59 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
     PENGU and the five stock symbols.  The legacy V96 state no longer receives
     margin priority after migration; existing stock positions are therefore not
     force-closed merely because the retired V96 state is stale.
+
+    The legacy V52 process used ``self.lock`` as both its daemon singleton lock
+    and the cross-language account-order lock.  Holding that shared lock for the
+    whole daemon lifetime would permanently starve PENGU/V12.  Post-migration we
+    keep a local runner lock for process exclusivity and acquire the shared
+    account lock only around exchange-mutating entry/exit/flatten critical
+    sections.
     """
+
+    def __init__(self, mode: str):
+        super().__init__(mode)
+        self.account_order_lock = self.lock
+        self.lock = legacy.base.FileLock(
+            self.state_root / f"runner-{mode}.lock",
+            legacy.base.int_env("DISDEX_STOCK_LOCK_STALE_MS", 15 * 60_000),
+        )
+        self._account_critical_depth = 0
+
+    @contextlib.contextmanager
+    def _account_critical(self):
+        if self._account_critical_depth > 0:
+            self._account_critical_depth += 1
+            try:
+                yield
+            finally:
+                self._account_critical_depth -= 1
+            return
+
+        if not self.account_order_lock.acquire():
+            raise RuntimeError("V52_SHARED_ACCOUNT_ORDER_LOCK_BUSY")
+        self._account_critical_depth = 1
+        try:
+            # Gross/margin reconciliation and durable pending creation occur in
+            # the inherited order method while this account-scoped lock is held.
+            yield
+        finally:
+            self._account_critical_depth = 0
+            self.account_order_lock.release()
+
+    def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        with self._account_critical():
+            return super().open_basis_position(slot, candidate, target_gross)
+
+    def close_slot(self, slot: str, reason: str) -> None:
+        with self._account_critical():
+            return super().close_slot(slot, reason)
+
+    def flatten_all(self, reason: str) -> None:
+        # Keep cancellation + all reduce-only close operations serialized as one
+        # high-priority critical section. close_slot() is re-entrant here and
+        # therefore does not attempt a second shared-lock acquisition.
+        with self._account_critical():
+            return super().flatten_all(reason)
 
     def v96_requires_margin(self) -> bool:
         return False
@@ -90,6 +143,28 @@ def self_test() -> None:
         assert "Unknown non-flat Aster symbol" in str(error)
     else:
         raise AssertionError("Unknown non-flat symbols must fail closed")
+
+    class FakeAccountLock:
+        def __init__(self):
+            self.acquires = 0
+            self.releases = 0
+
+        def acquire(self):
+            self.acquires += 1
+            return True
+
+        def release(self):
+            self.releases += 1
+
+    fake = FakeAccountLock()
+    engine.account_order_lock = fake
+    engine._account_critical_depth = 0
+    with engine._account_critical():
+        with engine._account_critical():
+            assert engine._account_critical_depth == 2
+    assert fake.acquires == 1
+    assert fake.releases == 1
+    assert engine._account_critical_depth == 0
     assert len(V12_CRYPTO_SYMBOLS) == 15
     print("V12-aware V52 live engine self-test: PASS")
 
