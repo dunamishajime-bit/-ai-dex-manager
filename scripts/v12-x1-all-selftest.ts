@@ -21,7 +21,39 @@ assert.equal(classifyAsterSymbol("AVAXUSDT").sleeve, "V12");
 assert.equal(classifyAsterSymbol("PENGUUSDT").sleeve, "PENGU_DUAL_LS_V2");
 assert.equal(classifyAsterSymbol("METAUSDT").sleeve, "V11_EQ");
 assert.equal(classifyAsterSymbol("NOT_A_SYMBOL").tradable, false);
+
 const now = Date.now();
-const risk = buildSharedCryptoDailyRiskState({ accountScope: "ASTER_FUTURES", utcDay: new Date(now).toISOString().slice(0, 10), strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL"], lossPct: 0, maximumLossPct: 5, tripped: false, updatedAt: now });
-assert.equal(validateSharedCryptoDailyRisk(risk, now).ok, true);
+const completeRisk = buildSharedCryptoDailyRiskState({
+    accountScope: "ASTER_FUTURES",
+    utcDay: new Date(now).toISOString().slice(0, 10),
+    strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL"],
+    lossPct: 0,
+    maximumLossPct: 5,
+    tripped: false,
+    updatedAt: now,
+    realizedPnl: 10,
+    unrealizedPnl: -4,
+    fees: -1,
+    funding: -0.5,
+    netDailyPnl: 4.5,
+    referenceEquity: 1000,
+    sourceComplete: true,
+});
+assert.equal(validateSharedCryptoDailyRisk(completeRisk, now).ok, true);
+
+const incompleteRisk = buildSharedCryptoDailyRiskState({
+    accountScope: "ASTER_FUTURES",
+    utcDay: new Date(now).toISOString().slice(0, 10),
+    strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL"],
+    lossPct: 0,
+    maximumLossPct: 5,
+    tripped: false,
+    updatedAt: now,
+});
+assert.equal(validateSharedCryptoDailyRisk(incompleteRisk, now).ok, false);
+assert.equal(validateSharedCryptoDailyRisk(incompleteRisk, now).reason, "PNL_BREAKDOWN_INCOMPLETE");
+
+// Keep buildV12Signal referenced by this frozen-module smoke test without constructing
+// a synthetic strategy opportunity that could accidentally become a pseudo-parity fixture.
+assert.equal(typeof buildV12Signal, "function");
 console.log("V12_X1_ALL_SELFTEST_PASS", JSON.stringify({ strategyId: V12_X1_ALL.strategyId, bars: h2.length }));
