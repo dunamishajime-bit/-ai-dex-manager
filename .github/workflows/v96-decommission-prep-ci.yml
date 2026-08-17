@@ -1,0 +1,44 @@
+name: V96 Decommission Preparation CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/ops/disdex-v96-decommission-source-audit.sh'
+      - 'scripts/ops/root/disdex-v96-runtime-decommission-readiness'
+      - 'docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md'
+      - '.github/workflows/v96-decommission-prep-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  decommission-prep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shell syntax
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/disdex-v96-decommission-source-audit.sh
+          bash -n scripts/ops/root/disdex-v96-runtime-decommission-readiness
+      - name: Prove preparation audit is read-only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash scripts/ops/disdex-v96-decommission-source-audit.sh . --pre
+          ! grep -Eq '\bsystemctl[[:space:]]+(stop|disable|enable|restart)|\brm[[:space:]]+-|\bmv[[:space:]]+' scripts/ops/disdex-v96-decommission-source-audit.sh
+          ! grep -Eq '\bsystemctl[[:space:]]+(stop|disable|enable|restart)|\brm[[:space:]]+-|\bmv[[:space:]]+' scripts/ops/root/disdex-v96-runtime-decommission-readiness
+      - name: Validate handoff safety invariants
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'STATUS: V96_RUNTIME_DECOMMISSION_READY' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'STATUS: V96_DECOMMISSION_SOURCE_CLEAN' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'STATUS: V12_LIVE_V96_DECOMMISSIONED' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'ORDERS_SENT_FOR_TESTING=0' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'No synthetic or artificial LIVE test order.' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'V96 mutual-exclusion interlocks' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
