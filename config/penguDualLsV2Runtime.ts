@@ -8,6 +8,7 @@ export const PENGU_DUAL_LS_V2 = {
     shortGross: 0.75,
     maximumGross: 0.75,
     portfolioGrossCap: 1.5,
+    combinedPortfolioGrossCap: 2.5,
     short: {
         regimeReturn72hMaximum: 0,
         impulseReturn24hMaximum: -0.07,
@@ -91,6 +92,7 @@ export interface ResolvedPenguDualLsV2Runtime {
     maxTransactionRetries: number;
     maximumEntryDelayMs: number;
     portfolioGrossCap: number;
+    combinedPortfolioGrossCap: number;
     maximumDailyLossPct: number;
     killSwitchPath?: string;
     portfolioDailyLossStatePath?: string;
@@ -122,6 +124,7 @@ export function resolvePenguDualLsV2Runtime(env: Partial<NodeJS.ProcessEnv> = pr
         maxTransactionRetries: Math.max(1, Math.floor(finiteEnv(env.PENGU_DUAL_LS_V2_MAX_TRANSACTION_RETRIES, PENGU_DUAL_LS_V2.safety.maxTransactionRetries))),
         maximumEntryDelayMs: Math.min(5 * 60_000, Math.max(5_000, finiteEnv(env.PENGU_DUAL_LS_V2_MAX_ENTRY_DELAY_MS, 5 * 60_000))),
         portfolioGrossCap: Math.max(0, Math.min(PENGU_DUAL_LS_V2.portfolioGrossCap, finiteEnv(env.PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP, PENGU_DUAL_LS_V2.portfolioGrossCap))),
+        combinedPortfolioGrossCap: Math.max(0, Math.min(PENGU_DUAL_LS_V2.combinedPortfolioGrossCap, finiteEnv(env.PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP, PENGU_DUAL_LS_V2.combinedPortfolioGrossCap))),
         maximumDailyLossPct: Math.max(0, Math.min(5, finiteEnv(env.PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT, 5))),
         killSwitchPath: env.PENGU_DUAL_LS_V2_KILL_SWITCH_FILE,
         portfolioDailyLossStatePath: env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || env.PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE || ".runtime-state/shared/crypto-daily-risk.json",
