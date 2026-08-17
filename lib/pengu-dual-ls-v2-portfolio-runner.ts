@@ -9,7 +9,7 @@ import type {
     DirectTradeExecutor,
     DirectTradeResult,
 } from "@/lib/direct-trade-executor";
-import type { LiveRunnerLock } from "@/lib/live-runner-state";
+import type { LiveRunnerLock, LiveRunnerLockHandle } from "@/lib/live-runner-state";
 import {
     buildPenguDualLsV2Signal,
     type PenguDualLsV2History,
@@ -26,6 +26,17 @@ import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 
 const SYMBOL = "PENGUUSDT";
+
+type ReservableLiveRunnerLockHandle = LiveRunnerLockHandle & {
+    reserve?: (input: {
+        strategyId: string;
+        symbol: string;
+        side: "LONG" | "SHORT" | "FLAT";
+        gross: number;
+        notionalUsd: number;
+    }) => Promise<{ reservationId: string }>;
+    releaseReservation?: (reservationId: string) => Promise<void>;
+};
 
 export interface PenguDualLsV2PortfolioRunnerConfig {
     mode: PenguDualLsV2Mode;
@@ -278,6 +289,8 @@ export class PenguDualLsV2PortfolioRunner {
         const ownerId = randomUUID();
         const lock = await this.dependencies.lock.acquire(ownerId);
         if (!lock) return { status: "locked", message: "Another PENGU Dual LS tick owns the account lock." };
+        const reservableLock = lock as ReservableLiveRunnerLockHandle;
+        let reservationId: string | undefined;
         try {
             const state = await this.dependencies.stateStore.load();
             state.lastRunAt = this.now();
@@ -398,6 +411,25 @@ export class PenguDualLsV2PortfolioRunner {
                 updatedAt: this.now(),
                 retryCount: 0,
             };
+
+            if (!reduceOnly) {
+                if (this.dependencies.config.mode === "LIVE" && (!reservableLock.reserve || !reservableLock.releaseReservation)) {
+                    throw new Error("PENGU_SHARED_ACCOUNT_RESERVATION_UNAVAILABLE");
+                }
+                if (reservableLock.reserve) {
+                    const reservation = await reservableLock.reserve({
+                        strategyId: "PENGU_DUAL_LS_V2_FINAL",
+                        symbol: SYMBOL,
+                        side: side === "BUY" ? "LONG" : "SHORT",
+                        gross: targetGross,
+                        notionalUsd: targetNotional,
+                    });
+                    reservationId = reservation.reservationId;
+                }
+            }
+
+            // Critical order invariant: lock -> exchange/state/gross checks ->
+            // reservation -> durable pending -> send -> result/reconcile -> unlock.
             state.pending = pending;
             await this.dependencies.stateStore.save(state);
             this.log.info("PENGU Dual LS order planned", {
@@ -409,6 +441,7 @@ export class PenguDualLsV2PortfolioRunner {
                 targetNotional,
                 otherGross,
                 remainingPortfolioGross,
+                sharedReservationId: reservationId,
                 referenceTs: signal.referenceTs,
             });
             const result = await this.executePending(state);
@@ -420,6 +453,9 @@ export class PenguDualLsV2PortfolioRunner {
             this.log.error("PENGU Dual LS tick failed", { message });
             return { status: /manual|unknown|state/i.test(message) ? "manual-review" : "failed", message };
         } finally {
+            if (reservationId && reservableLock.releaseReservation) {
+                await reservableLock.releaseReservation(reservationId);
+            }
             await lock.release();
         }
     }
