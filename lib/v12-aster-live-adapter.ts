@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import { AsterApiError, AsterV3Client, type AsterOrderResponse, type AsterOrderSide } from "@/lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition, type DirectTradeResult } from "@/lib/direct-trade-executor";
+import { assertSharedKillSwitchAllowsNewEntry } from "@/lib/disdex-shared-kill-switch";
 import type { ResidentStopAdapter } from "@/lib/v12-resident-stop-lifecycle";
 
 export const V12_CLIENT_ORDER_PREFIX = "v12-" as const;
@@ -52,6 +53,10 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     }
 
     async executeEntry(input: { signalTs: number; symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string }): Promise<DirectTradeResult> {
+        // Check the account-level production kill switch immediately before the
+        // only V12 path that can create exposure. Reduce-only exits and resident
+        // protection remain available while the switch is active.
+        await assertSharedKillSwitchAllowsNewEntry();
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "ENTRY", signalTs: input.signalTs, symbol: input.symbol, side: input.side });
         return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY" });
     }
