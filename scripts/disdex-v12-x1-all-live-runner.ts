@@ -34,7 +34,15 @@ export async function buildV12LiveRuntime() {
         reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
         reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
     });
-    const lock = new FileAccountOrderLock(runtime.lockPath || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
+    const lock = new FileAccountOrderLock(
+        runtime.lockPath || ".runtime-state/shared/account-order.lock",
+        numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000),
+        {
+            ownerPrefix: "V12_X1.00_ALL:",
+            strategyId: "V12_X1.00_ALL",
+            pendingStatePath: runtime.statePath,
+        },
+    );
     const stateStore = new FileV12X1AllRunnerStateStore(runtime.statePath, runtime.mode);
     const marketData = new V12AsterMarketDataProvider(client, { hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500) });
     return { runtime, status: "live" as const, engine: new V12LiveExecutionEngine({ adapter, marketData, stateStore, lock, riskPath: runtime.riskPath }) };
@@ -49,7 +57,9 @@ async function main() {
     const built = await buildV12LiveRuntime();
     if (built.status === "disabled") { console.log(JSON.stringify({ strategyId: "V12_X1.00_ALL", status: "disabled" })); return; }
     if (built.status !== "live" || !built.engine) throw new Error("V12_X1_ALL production runner only accepts explicit LIVE activation; PAPER/SHADOW use research tooling.");
-    const daemon = process.argv.includes("--daemon"); const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_BOUNDARY_DELAY_MS", 5_000)));
+    const daemon = process.argv.includes("--daemon");
+    const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_BOUNDARY_DELAY_MS", 5_000)));
+    const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_LOCK_RETRY_MS", 5_000)));
     const delay = createInterruptibleDelay(); let stopping = false; const stop = () => { stopping = true; delay.interrupt(); };
     process.on("SIGINT", stop); process.on("SIGTERM", stop);
     do {
@@ -57,6 +67,13 @@ async function main() {
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: built.runtime.strategyId, mode: built.runtime.mode, ...result }));
         if (result.status === "manual-review") process.exitCode = 2;
         if (!daemon || stopping || result.status === "manual-review") break;
+        if (result.status === "locked") {
+            // A short PENGU/V52 critical section must not make V12 miss startup
+            // reconciliation or wait until the next 2H boundary. Retry soon; a
+            // dead expired V12 lock is atomically taken over by the lock layer.
+            await delay.wait(lockRetryMs);
+            continue;
+        }
         const now = Date.now(); const wait = TWO_HOURS_MS - (now % TWO_HOURS_MS) + boundaryDelayMs; await delay.wait(wait);
     } while (!stopping);
 }
