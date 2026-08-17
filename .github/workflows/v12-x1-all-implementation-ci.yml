@@ -28,6 +28,7 @@ on:
       - 'scripts/ops/root/create-disdex-v12-immutable-release'
       - 'scripts/ops/root/install-disdex-v12-live'
       - 'scripts/ops/root/disdex-v96-to-v12-live-migrate'
+      - 'scripts/ops/root/disdex-v12-live-status-report'
       - 'ops/env/disdex-v12-*.example'
       - 'ops/systemd/disdex-v12-*.service'
       - 'ops/systemd/disdex-v12-*.target'
@@ -93,6 +94,7 @@ jobs:
           bash -n scripts/ops/root/create-disdex-v12-immutable-release
           bash -n scripts/ops/root/install-disdex-v12-live
           bash -n scripts/ops/root/disdex-v96-to-v12-live-migrate
+          bash -n scripts/ops/root/disdex-v12-live-status-report
           grep -Fq 'mode="${2:-runtime}"' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq '.disdex-release-source-tree' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
@@ -103,11 +105,16 @@ jobs:
           grep -Fq 'npm --prefix "$staging" run build' scripts/ops/root/create-disdex-v12-immutable-release
           grep -Fq 'currentChanged=false' scripts/ops/root/create-disdex-v12-immutable-release
           grep -Fq 'V12_LIVE_INSTALL_SOURCE_TREE_MARKER_MISSING' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'disdex-v12-runtime-status@.service' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'Automatic V96 restart is prohibited' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'disdex-v12-live-status-report" "$sha" pre-enable' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'disdex-v12-live-status-report" "$sha" final' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'systemctl enable "$target"' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'LIVE_RUNTIME_VERIFIED_PRE_ENABLE' scripts/ops/root/disdex-v12-live-status-report
+          grep -Fq 'LIVE_ACTIVATED_VERIFIED' scripts/ops/root/disdex-v12-live-status-report
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' scripts/ops/root/disdex-v96-to-v12-live-migrate
-          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/create-disdex-v12-immutable-release scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/create-disdex-v12-immutable-release scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate scripts/ops/root/disdex-v12-live-status-report
 
       - name: Validate post-migration systemd invariants
         shell: bash
@@ -116,6 +123,7 @@ jobs:
           grep -Fq 'WorkingDirectory=/home/deploy/disdex-trading/releases/%i' ops/systemd/disdex-v12-x1-all@.service
           grep -Fq 'RestartPreventExitStatus=2' ops/systemd/disdex-v12-x1-all@.service
           grep -Fq 'disdex-v12-mutual-exclusion-preflight.sh %i runtime' ops/systemd/disdex-v12-x1-all@.service
+          grep -Fq 'scripts/disdex-v12-runtime-status.ts' ops/systemd/disdex-v12-runtime-status@.service
           grep -Fq 'disdex_v12_v52_margin_guard_runtime.py --mode live --daemon' ops/systemd/disdex-v12-v52-margin-guard@.service
           grep -Fq 'disdex_v12_v52_live_engine.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
           grep -Fq 'disdex-pengu-dual-ls-v2-live-runner.ts --daemon' ops/systemd/disdex-pengu-dual-ls-v2@.service
