@@ -47,15 +47,16 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
         if (!row || row.status !== "TRADING") throw new Error(`V12_SYMBOL_NOT_TRADING:${symbol}`);
         const filter = row.filters?.find((item) => item.filterType === "PRICE_FILTER"); const tick = finite(filter?.tickSize);
         if (!(tick > 0)) throw new Error(`V12_PRICE_FILTER_MISSING:${symbol}`);
+        const minPrice = finite(filter?.minPrice);
+        const maxPrice = finite(filter?.maxPrice, Number.POSITIVE_INFINITY);
         const precision = Math.min(12, String(filter?.tickSize || "").split(".")[1]?.replace(/0+$/, "").length || 0);
-        const price = Math.round(requested / tick) * tick; if (!(price > 0)) throw new Error("V12_STOP_PRICE_NORMALIZATION_FAILED");
+        const anchor = minPrice > 0 ? minPrice : 0;
+        const price = anchor + Math.round((requested - anchor) / tick) * tick;
+        if (!(price > 0) || price < minPrice - 1e-12 || price > maxPrice + 1e-12) throw new Error("V12_STOP_PRICE_NORMALIZATION_FAILED");
         return { price, text: price.toFixed(precision) };
     }
 
     async executeEntry(input: { signalTs: number; symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string }): Promise<DirectTradeResult> {
-        // Check the account-level production kill switch immediately before the
-        // only V12 path that can create exposure. Reduce-only exits and resident
-        // protection remain available while the switch is active.
         await assertSharedKillSwitchAllowsNewEntry();
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "ENTRY", signalTs: input.signalTs, symbol: input.symbol, side: input.side });
         return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY" });
@@ -73,7 +74,15 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
         const normalizedStop = await this.normalizeStopPrice(symbol, input.stopPrice);
         try {
             const view = normalizeOrder(await this.client.placeConditionalOrder({ symbol, side: input.side, type: input.type, quantity: normalizedQty.quantityText, stopPrice: normalizedStop.text, positionSide: "BOTH", reduceOnly: true, newClientOrderId: input.clientOrderId, newOrderRespType: "ACK", workingType: "MARK_PRICE" }));
-            if (view.clientOrderId !== input.clientOrderId || view.symbol !== symbol || view.side !== input.side || String(view.type || "").toUpperCase() !== input.type) throw new Error("V12_PROTECTION_ACK_MISMATCH");
+            // ACK responses are not used as proof that protection is active. If
+            // a field is present it must not contradict the request; the caller
+            // then verifies the order from Aster open-order state by the same
+            // deterministic clientOrderId before treating the leg as protected.
+            if (view.clientOrderId && view.clientOrderId !== input.clientOrderId) throw new Error("V12_PROTECTION_ACK_CLIENT_ID_MISMATCH");
+            if (view.symbol && view.symbol !== symbol) throw new Error("V12_PROTECTION_ACK_SYMBOL_MISMATCH");
+            if (view.side && view.side !== input.side) throw new Error("V12_PROTECTION_ACK_SIDE_MISMATCH");
+            if (view.type && String(view.type).toUpperCase() !== input.type) throw new Error("V12_PROTECTION_ACK_TYPE_MISMATCH");
+            if (view.reduceOnly === false) throw new Error("V12_PROTECTION_ACK_REDUCE_ONLY_FALSE");
             return view;
         } catch (error) {
             if (!(error instanceof AsterApiError) || !error.executionUnknown) throw error;
@@ -92,12 +101,11 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     }
     async placeStopMarket(input: { symbol: string; side: "BUY" | "SELL"; quantity: number; stopPrice: number; clientOrderId: string; reduceOnly: true }) {
         const order = await this.placeConditional({ ...input, type: "STOP_MARKET" });
-        const normalized = await this.normalizeStopPrice(input.symbol, input.stopPrice);
-        return { acknowledged: order.reduceOnly === true && activeStatus(order.status) && Math.abs((order.stopPrice || normalized.price) - normalized.price) < 1e-9, orderId: order.orderId != null ? String(order.orderId) : undefined };
+        return { acknowledged: true, orderId: order.orderId != null ? String(order.orderId) : undefined };
     }
     async placeTakeProfit(input: { symbol: string; side: "BUY" | "SELL"; quantity: number; stopPrice: number; clientOrderId: string; reduceOnly: true }) {
         const order = await this.placeConditional({ ...input, type: "TAKE_PROFIT_MARKET" });
-        return { acknowledged: order.reduceOnly === true && activeStatus(order.status), orderId: order.orderId != null ? String(order.orderId) : undefined };
+        return { acknowledged: true, orderId: order.orderId != null ? String(order.orderId) : undefined };
     }
     async cancel(clientOrderId: string) {
         const open = await this.executor.getOpenOrders(); const row = open.find((item) => item.clientOrderId === clientOrderId); if (!row) return;
