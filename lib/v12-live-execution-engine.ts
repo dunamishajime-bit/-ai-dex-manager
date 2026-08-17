@@ -6,7 +6,15 @@ import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { planUnifiedPortfolio, type ActivePortfolioPosition } from "@/lib/disdex-unified-portfolio-routing";
 import { V12AsterLiveAdapter, deterministicV12ClientOrderId } from "@/lib/v12-aster-live-adapter";
-import { cancelV12Protection, installV12Protection, reconcileV12Protection, updateV12TrailingStop, type V12StopState } from "@/lib/v12-resident-stop-lifecycle";
+import {
+    applyV12TrailingStop,
+    cancelV12Protection,
+    installV12Protection,
+    planV12TrailingStop,
+    reconcileV12Protection,
+    type V12StopState,
+    type V12TrailingPlan,
+} from "@/lib/v12-resident-stop-lifecycle";
 import { buildV12Signal, protectiveLevels, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
@@ -120,10 +128,44 @@ export class V12LiveExecutionEngine {
         return { status: "exited" as const, reason: "EXIT_RECONCILED", clientOrderId: pending.clientOrderId };
     }
 
+    private async reconcilePendingStopUpdate(state: V12X1AllRunnerState, pending: V12PendingOrderState, positions: DirectPosition[]): Promise<V12LiveTickResult | undefined> {
+        const active = state.active;
+        if (!active) return this.fail(state, "V12_STOP_UPDATE_PENDING_WITHOUT_ACTIVE_STATE");
+        const actual = positions.find((row) => row.symbol.toUpperCase() === active.symbol.toUpperCase() && Math.abs(row.quantity) > EPS);
+        if (!actual || !positionMatches(active, actual)) return this.fail(state, "V12_STOP_UPDATE_POSITION_MISMATCH");
+        if (pending.positionId !== active.positionId || pending.symbol !== active.symbol || pending.side !== active.side || Math.abs(pending.quantity - active.quantity) > Math.max(1e-8, active.quantity * 0.01)) {
+            return this.fail(state, "V12_STOP_UPDATE_METADATA_MISMATCH");
+        }
+        if (!(Number(pending.stopPrice) > 0) || !Number.isFinite(Number(pending.nextPeakOrTrough))) return this.fail(state, "V12_STOP_UPDATE_METADATA_INVALID");
+        const plan: V12TrailingPlan = {
+            clientOrderId: pending.clientOrderId,
+            stopPrice: Number(pending.stopPrice),
+            previousStopClientOrderId: pending.previousStopClientOrderId,
+            nextPeakOrTrough: Number(pending.nextPeakOrTrough),
+        };
+        const applied = await applyV12TrailingStop(this.d.adapter, active.protection, plan);
+        if (applied.manualReview) return this.fail(state, applied.manualReview);
+        state.active = { ...active, quantity: actualQuantity(actual), entryPrice: actual.entryPrice || active.entryPrice, protection: applied };
+        state.pending = undefined;
+        await this.d.stateStore.save(state);
+        await this.verifyNoUnexpectedV12Orders(state);
+        return undefined;
+    }
+
     private async restartReconcile(state: V12X1AllRunnerState, positions: DirectPosition[]) : Promise<V12LiveTickResult | undefined> {
         this.validatePortfolioPositions(positions);
         if (state.killSwitch?.active || state.manualReview) return { status: "manual-review", reason: state.killSwitch?.reason || state.manualReview || "V12_MANUAL_REVIEW" };
-        if (state.pending) return state.pending.action === "ENTRY" ? this.reconcilePendingEntry(state, state.pending, positions) : this.reconcilePendingExit(state, state.pending, positions);
+        if (state.pending) {
+            if (state.pending.action === "ENTRY") return this.reconcilePendingEntry(state, state.pending, positions);
+            if (state.pending.action === "EXIT") return this.reconcilePendingExit(state, state.pending, positions);
+            if (state.pending.action === "STOP_UPDATE") {
+                const recovery = await this.reconcilePendingStopUpdate(state, state.pending, positions);
+                if (recovery) return recovery;
+                state = await this.d.stateStore.load();
+            } else {
+                return this.fail(state, `V12_FAILSAFE_CLOSE_PENDING_REQUIRES_MANUAL_REVIEW:${state.pending.clientOrderId}`);
+            }
+        }
         const v12Actual = positions.filter((row) => V12_SYMBOLS.has(row.symbol.toUpperCase()) && Math.abs(row.quantity) > EPS);
         if (!state.active && v12Actual.length) return this.fail(state, `V12_POSITION_ONLY_MISMATCH:${v12Actual.map((row) => row.symbol).join(",")}`);
         if (state.active) {
@@ -171,8 +213,33 @@ export class V12LiveExecutionEngine {
                 if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "held", reason: "NO_NEW_CONFIRMED_2H_BAR" };
                 const activeBars = data[state.active.symbol.replace(/USDT$/, "")]; if (!activeBars) return this.fail(state, "V12_ACTIVE_SYMBOL_MARKET_DATA_MISSING");
                 const activeBar = activeBars[index];
-                const protection = await updateV12TrailingStop(this.d.adapter, state.active.protection, activeBar.close);
-                if (protection.manualReview) return this.fail(state, protection.manualReview);
+                const planned = await planV12TrailingStop(this.d.adapter, state.active.protection, activeBar.close);
+                let protection = planned.state;
+                if (planned.plan) {
+                    const pending: V12PendingOrderState = {
+                        idempotencyKey: planned.plan.clientOrderId,
+                        action: "STOP_UPDATE",
+                        clientOrderId: planned.plan.clientOrderId,
+                        symbol: state.active.symbol,
+                        side: state.active.side,
+                        quantity: state.active.quantity,
+                        signalTs: latestTs,
+                        reason: "TRAILING_STOP_UPDATE",
+                        createdAt: this.now(),
+                        positionId: state.active.positionId,
+                        stopPrice: planned.plan.stopPrice,
+                        previousStopClientOrderId: planned.plan.previousStopClientOrderId,
+                        nextPeakOrTrough: planned.plan.nextPeakOrTrough,
+                    };
+                    state.active = { ...state.active, protection: planned.state };
+                    state.pending = pending;
+                    await this.d.stateStore.save(state);
+                    protection = await applyV12TrailingStop(this.d.adapter, planned.state, planned.plan);
+                    if (protection.manualReview) return this.fail(state, protection.manualReview);
+                    state.active = { ...state.active, protection };
+                    state.pending = undefined;
+                    await this.d.stateStore.save(state);
+                }
                 const holdingBars = state.active.holdingBars + 1; state.active = { ...state.active, holdingBars, peakPrice: Math.max(state.active.peakPrice, activeBar.high), troughPrice: Math.min(state.active.troughPrice, activeBar.low), protection };
                 state.lastReferenceTs = latestTs; const next = buildV12Signal(data, index);
                 const changed = Boolean(next && (`${next.symbol}USDT` !== state.active.symbol || next.side !== state.active.side));
