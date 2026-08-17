@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || { printf 'V96_TO_V12_MIGRATION_REQUIRES_ROOT\n' >&2; exit 1; }
+sha="${1:-}"
+ack="${2:-}"
+required_ack="I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION"
+[[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V96_TO_V12_MIGRATION_INVALID_SHA\n' >&2; exit 2; }
+[[ "$ack" == "$required_ack" ]] || { printf 'V96_TO_V12_MIGRATION_ACK_REQUIRED expected=%s\n' "$required_ack" >&2; exit 2; }
+
+release="/home/deploy/disdex-trading/releases/$sha"
+marker="$release/.disdex-release-sha"
+current_link="/home/deploy/disdex-trading/current"
+reverse_interlock=/usr/local/libexec/disdex-v96-refuse-while-v12-active
+[[ -d "$release" && ! -L "$release" ]] || { printf 'V96_TO_V12_MIGRATION_RELEASE_INVALID\n' >&2; exit 3; }
+[[ -f "$marker" && ! -L "$marker" ]] || { printf 'V96_TO_V12_MIGRATION_RELEASE_MARKER_MISSING\n' >&2; exit 3; }
+[[ "$(tr -d '[:space:]' < "$marker")" == "$sha" ]] || { printf 'V96_TO_V12_MIGRATION_RELEASE_MARKER_MISMATCH\n' >&2; exit 3; }
+[[ -f "$release/.disdex-release-source-tree" && ! -L "$release/.disdex-release-source-tree" ]] || { printf 'V96_TO_V12_MIGRATION_SOURCE_TREE_MISSING\n' >&2; exit 3; }
+[[ -x "$release/node_modules/.bin/tsx" && -d "$release/.next" ]] || { printf 'V96_TO_V12_MIGRATION_BUILD_INVALID\n' >&2; exit 3; }
+[[ -f "$release/scripts/ops/root/disdex-v12-live-status-report" ]] || { printf 'V96_TO_V12_MIGRATION_STATUS_REPORT_MISSING\n' >&2; exit 3; }
+[[ -x "$reverse_interlock" && ! -L "$reverse_interlock" ]] || { printf 'V96_TO_V12_MIGRATION_REVERSE_INTERLOCK_MISSING\n' >&2; exit 3; }
+[[ -L "$current_link" ]] || { printf 'V96_TO_V12_MIGRATION_CURRENT_NOT_SYMLINK\n' >&2; exit 3; }
+previous_current="$(readlink -f "$current_link")"
+[[ -d "$previous_current" && ! -L "$previous_current" ]] || { printf 'V96_TO_V12_MIGRATION_PREVIOUS_CURRENT_INVALID\n' >&2; exit 3; }
+for env_file in \
+  /etc/disdex/disdex-v13d-v11eq-v96.env \
+  /etc/disdex/disdex-v12-pengu-v2-v52.env \
+  /etc/disdex/disdex-v12-x1-all.env; do
+  [[ -f "$env_file" && ! -L "$env_file" ]] || { printf 'V96_TO_V12_MIGRATION_ENV_MISSING path=%s\n' "$env_file" >&2; exit 3; }
+done
+
+known_old_units=(disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service)
+present_old_units=()
+new_units=(
+  "disdex-shared-crypto-risk@$sha.service"
+  "disdex-v12-v52-margin-guard@$sha.service"
+  "disdex-pengu-dual-ls-v2@$sha.service"
+  "disdex-v52-aster-only@$sha.service"
+  "disdex-v12-x1-all@$sha.service"
+)
+target="disdex-v12-pengu-v2-v52@$sha.target"
+old_stopped=false
+current_switched=false
+v12_start_attempted=false
+v12_started=false
+
+status_of() { systemctl is-active "$1" 2>/dev/null || true; }
+pid_of() { systemctl show "$1" --property MainPID --value 2>/dev/null || printf '0'; }
+restarts_of() { systemctl show "$1" --property NRestarts --value 2>/dev/null || printf '0'; }
+unit_exists() { systemctl cat "$1" >/dev/null 2>&1; }
+require_active() {
+  local unit="$1"
+  [[ "$(status_of "$unit")" == "active" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_NOT_ACTIVE unit=%s state=%s\n' "$unit" "$(status_of "$unit")" >&2; return 1; }
+  [[ "$(pid_of "$unit")" != "0" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_PID_ZERO unit=%s\n' "$unit" >&2; return 1; }
+}
+require_inactive() {
+  local unit="$1" state
+  state="$(status_of "$unit")"
+  [[ "$state" == "inactive" || "$state" == "failed" || "$state" == "unknown" || -z "$state" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_STILL_ACTIVE unit=%s state=%s\n' "$unit" "$state" >&2; return 1; }
+  [[ "$(pid_of "$unit")" == "0" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_PID_REMAINS unit=%s pid=%s\n' "$unit" "$(pid_of "$unit")" >&2; return 1; }
+}
+run_oneshot() {
+  local unit="$1"
+  systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+  systemctl start "$unit"
+}
+atomic_current_switch() {
+  local destination="$1" temp
+  temp="${current_link}.v12-tmp.$$"
+  rm -f "$temp"
+  ln -s "$destination" "$temp"
+  mv -Tf "$temp" "$current_link"
+  [[ "$(readlink -f "$current_link")" == "$destination" ]]
+}
+install_reverse_interlocks() {
+  local unit drop_dir drop_file temp expected
+  expected=$'[Service]\nExecStartPre=/usr/local/libexec/disdex-v96-refuse-while-v12-active\n'
+  for unit in "${present_old_units[@]}"; do
+    drop_dir="/etc/systemd/system/${unit}.d"
+    drop_file="$drop_dir/90-v12-mutual-exclusion.conf"
+    install -d -o root -g root -m 0755 "$drop_dir"
+    if [[ -e "$drop_file" || -L "$drop_file" ]]; then
+      [[ -f "$drop_file" && ! -L "$drop_file" ]] || { printf 'V96_REVERSE_INTERLOCK_DROPIN_INVALID unit=%s\n' "$unit" >&2; return 1; }
+      [[ "$(cat "$drop_file")"$'\n' == "$expected" ]] || { printf 'V96_REVERSE_INTERLOCK_DROPIN_CONFLICT unit=%s\n' "$unit" >&2; return 1; }
+      continue
+    fi
+    temp="${drop_file}.tmp.$$"
+    printf '%s' "$expected" > "$temp"
+    chmod 0644 "$temp"
+    chown root:root "$temp"
+    mv "$temp" "$drop_file"
+  done
+  systemctl daemon-reload
+  for unit in "${present_old_units[@]}"; do
+    systemctl cat "$unit" 2>/dev/null | grep -Fq 'ExecStartPre=/usr/local/libexec/disdex-v96-refuse-while-v12-active' || {
+      printf 'V96_REVERSE_INTERLOCK_NOT_LOADED unit=%s\n' "$unit" >&2
+      return 1
+    }
+  done
+}
+
+on_error() {
+  local code=$?
+  trap - ERR
+  # Metadata rollback is safe only before the first V12 start attempt. Once
+  # `systemctl start` has been issued, a natural signal could have created
+  # exposure even if the service immediately failed and MainPID is already 0.
+  # Keep the candidate release current for forensic/reconciliation tooling and
+  # never start V96 automatically.
+  if [[ "$current_switched" == "true" && "$v12_start_attempted" != "true" && -d "$previous_current" ]]; then
+    atomic_current_switch "$previous_current" || true
+    printf 'currentSymlinkRollbackAttempted=true\n' >&2
+  else
+    printf 'currentSymlinkRollbackAttempted=false\n' >&2
+  fi
+  printf 'STATUS: V96_TO_V12_LIVE_MIGRATION_BLOCKED\n' >&2
+  printf 'releaseSha=%s\noldV96Stopped=%s\ncurrentSwitched=%s\nv12StartAttempted=%s\nv12Started=%s\nordersSentForTesting=0\n' \
+    "$sha" "$old_stopped" "$current_switched" "$v12_start_attempted" "$v12_started" >&2
+  for unit in "${known_old_units[@]}" "${new_units[@]}"; do
+    printf 'unit=%s state=%s pid=%s restarts=%s\n' "$unit" "$(status_of "$unit")" "$(pid_of "$unit")" "$(restarts_of "$unit")" >&2
+  done
+  printf 'Automatic V96 restart is prohibited. Reconcile Aster/V12 state before any rollback.\n' >&2
+  exit "$code"
+}
+trap on_error ERR
+
+systemctl daemon-reload
+for unit in "${known_old_units[@]}"; do
+  unit_exists "$unit" && present_old_units+=("$unit")
+done
+(( ${#present_old_units[@]} >= 1 )) || { printf 'V96_TO_V12_NO_KNOWN_V96_SUPERVISOR_INSTALLED\n' >&2; false; }
+
+for unit in "${new_units[@]}"; do
+  [[ "$(status_of "$unit")" != "active" ]] || { printf 'V96_TO_V12_NEW_UNIT_ALREADY_ACTIVE unit=%s\n' "$unit" >&2; false; }
+done
+[[ "$(status_of "$target")" != "active" ]] || { printf 'V96_TO_V12_TARGET_ALREADY_ACTIVE\n' >&2; false; }
+if systemctl is-enabled --quiet "$target" 2>/dev/null; then printf 'V96_TO_V12_TARGET_ALREADY_ENABLED\n' >&2; false; fi
+
+active_old=()
+for unit in "${present_old_units[@]}"; do [[ "$(status_of "$unit")" == "active" ]] && active_old+=("$unit"); done
+(( ${#active_old[@]} <= 1 )) || { printf 'V96_TO_V12_MULTIPLE_V96_SUPERVISORS_ACTIVE units=%s\n' "${active_old[*]}" >&2; false; }
+
+run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
+run_oneshot "disdex-v12-live-readiness@$sha.service"
+run_oneshot "disdex-pengu-v2-readiness@$sha.service"
+run_oneshot "disdex-v52-v12-readiness@$sha.service"
+run_oneshot "disdex-v96-to-v12-migration-preflight@$sha.service"
+
+for unit in "${active_old[@]}"; do systemctl stop "$unit"; done
+for unit in "${present_old_units[@]}"; do require_inactive "$unit"; done
+old_stopped=true
+if pgrep -af '[d]isdex-v96-live-runner\.ts' >/dev/null 2>&1 || pgrep -af '[d]isdex-v13d-v11eq-v96-live-runner\.ts' >/dev/null 2>&1; then
+  printf 'V96_TO_V12_ORPHAN_V96_PROCESS_AFTER_STOP\n' >&2; false
+fi
+
+systemctl start "disdex-shared-crypto-risk@$sha.service"
+require_active "disdex-shared-crypto-risk@$sha.service"
+run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
+run_oneshot "disdex-v96-stop-recheck@$sha.service"
+/usr/bin/bash "$release/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh" "$sha" initial
+systemctl start "disdex-v12-v52-margin-guard@$sha.service"
+require_active "disdex-v12-v52-margin-guard@$sha.service"
+
+systemctl start "disdex-pengu-dual-ls-v2@$sha.service"
+systemctl start "disdex-v52-aster-only@$sha.service"
+require_active "disdex-pengu-dual-ls-v2@$sha.service"
+require_active "disdex-v52-aster-only@$sha.service"
+sleep 3
+require_active "disdex-pengu-dual-ls-v2@$sha.service"
+require_active "disdex-v52-aster-only@$sha.service"
+[[ "$(restarts_of "disdex-pengu-dual-ls-v2@$sha.service")" == "0" ]] || { printf 'PENGU_V2_RESTART_DURING_MIGRATION\n' >&2; false; }
+[[ "$(restarts_of "disdex-v52-aster-only@$sha.service")" == "0" ]] || { printf 'V52_RESTART_DURING_MIGRATION\n' >&2; false; }
+run_oneshot "disdex-pengu-v2-readiness@$sha.service"
+
+for unit in "${present_old_units[@]}"; do
+  systemctl disable "$unit" >/dev/null 2>&1 || true
+  if systemctl is-enabled --quiet "$unit" 2>/dev/null; then printf 'V96_TO_V12_OLD_UNIT_STILL_ENABLED unit=%s\n' "$unit" >&2; false; fi
+done
+install_reverse_interlocks
+
+atomic_current_switch "$release"
+current_switched=true
+/usr/bin/bash "$release/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh" "$sha" runtime
+
+# From this line forward, never restore the old current pointer automatically.
+v12_start_attempted=true
+systemctl start "$target"
+require_active "disdex-v12-x1-all@$sha.service"
+v12_started=true
+require_active "disdex-pengu-dual-ls-v2@$sha.service"
+require_active "disdex-v52-aster-only@$sha.service"
+require_active "disdex-shared-crypto-risk@$sha.service"
+require_active "disdex-v12-v52-margin-guard@$sha.service"
+sleep 3
+require_active "disdex-v12-x1-all@$sha.service"
+[[ "$(restarts_of "disdex-v12-x1-all@$sha.service")" == "0" ]] || { printf 'V12_RESTART_DURING_ACTIVATION\n' >&2; false; }
+[[ "$(readlink -f "$current_link")" == "$release" ]] || { printf 'V12_CURRENT_RELEASE_POINTER_MISMATCH\n' >&2; false; }
+
+/usr/bin/bash "$release/scripts/ops/root/disdex-v12-live-status-report" "$sha" pre-enable
+systemctl enable "$target" >/dev/null
+systemctl is-enabled --quiet "$target"
+/usr/bin/bash "$release/scripts/ops/root/disdex-v12-live-status-report" "$sha" final
+
+trap - ERR
+printf 'STATUS: LIVE_ACTIVATED\n'
+printf 'releaseSha=%s\npreviousCurrent=%s\ncurrentRelease=%s\n' "$sha" "$previous_current" "$(readlink -f "$current_link")"
+printf 'presentLegacyV96Units=%s\n' "${present_old_units[*]}"
+printf 'V96_STOPPED=TRUE\nV12_LIVE_STARTED=TRUE\nPENGU_V2_RUNNING=TRUE\nV52_RUNNING=TRUE\n'
+printf 'V12_RUNTIME_RECONCILIATION_PASS=TRUE\nV96_V12_SIMULTANEOUS_LIVE=FALSE\nV96_REVERSE_INTERLOCK_INSTALLED=TRUE\nV12_BOOT_TARGET_ENABLED=TRUE\nORDERS_SENT_FOR_TESTING=0\n'
+printf 'v12MainPid=%s\npenguMainPid=%s\nv52MainPid=%s\n' \
+  "$(pid_of "disdex-v12-x1-all@$sha.service")" \
+  "$(pid_of "disdex-pengu-dual-ls-v2@$sha.service")" \
+  "$(pid_of "disdex-v52-aster-only@$sha.service")"
