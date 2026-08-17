@@ -5,7 +5,6 @@ root="${1:-.}"
 mode="${2:---pre}"
 [[ -d "$root" ]] || { printf 'V96_DECOMMISSION_AUDIT_ROOT_INVALID\n' >&2; exit 2; }
 [[ "$mode" == "--pre" || "$mode" == "--expect-clean" ]] || { printf 'V96_DECOMMISSION_AUDIT_MODE_INVALID\n' >&2; exit 2; }
-command -v rg >/dev/null 2>&1 || { printf 'V96_DECOMMISSION_AUDIT_RG_MISSING\n' >&2; exit 2; }
 
 cd "$root"
 
@@ -15,24 +14,43 @@ cd "$root"
 runtime_paths=(config lib scripts ops package.json .github)
 pattern='DISDEX_V96|V96_|_V96|disdex-v96|disdex_v96|V96 LIVE|V96_LIVE'
 
+# Prefer ripgrep when present, but do not make the audit depend on it. The
+# production/decommission host only needs standard GNU grep for the fallback.
 set +e
-runtime_hits="$(rg -n --hidden \
-  --glob '!docs/**' \
-  --glob '!research/**' \
-  --glob '!artifacts/**' \
-  --glob '!node_modules/**' \
-  --glob '!.next/**' \
-  --glob '!scripts/ops/disdex-v96-decommission-source-audit.sh' \
-  --glob '!scripts/ops/root/disdex-v96-runtime-decommission-readiness' \
-  --glob '!.github/workflows/v96-decommission-prep-ci.yml' \
-  "$pattern" "${runtime_paths[@]}" 2>/dev/null)"
-rg_status=$?
+if command -v rg >/dev/null 2>&1; then
+  runtime_hits="$(rg -n --hidden \
+    --glob '!docs/**' \
+    --glob '!research/**' \
+    --glob '!artifacts/**' \
+    --glob '!node_modules/**' \
+    --glob '!.next/**' \
+    --glob '!scripts/ops/disdex-v96-decommission-source-audit.sh' \
+    --glob '!scripts/ops/root/disdex-v96-runtime-decommission-readiness' \
+    --glob '!.github/workflows/v96-decommission-prep-ci.yml' \
+    "$pattern" "${runtime_paths[@]}" 2>/dev/null)"
+  scan_status=$?
+  scan_tool=rg
+else
+  runtime_hits="$(grep -RInE \
+    --exclude-dir=docs \
+    --exclude-dir=research \
+    --exclude-dir=artifacts \
+    --exclude-dir=node_modules \
+    --exclude-dir=.next \
+    --exclude='disdex-v96-decommission-source-audit.sh' \
+    --exclude='disdex-v96-runtime-decommission-readiness' \
+    --exclude='v96-decommission-prep-ci.yml' \
+    -- "$pattern" "${runtime_paths[@]}" 2>/dev/null)"
+  scan_status=$?
+  scan_tool=grep
+fi
 set -e
-if (( rg_status != 0 && rg_status != 1 )); then
-  printf 'V96_DECOMMISSION_AUDIT_RG_FAILED code=%s\n' "$rg_status" >&2
-  exit "$rg_status"
+if (( scan_status != 0 && scan_status != 1 )); then
+  printf 'V96_DECOMMISSION_AUDIT_SCAN_FAILED tool=%s code=%s\n' "$scan_tool" "$scan_status" >&2
+  exit "$scan_status"
 fi
 
+printf 'V96_DECOMMISSION_AUDIT_SCAN_TOOL=%s\n' "$scan_tool"
 printf 'V96_DECOMMISSION_RUNTIME_REFERENCE_COUNT=%s\n' "$(printf '%s\n' "$runtime_hits" | sed '/^$/d' | wc -l | tr -d ' ')"
 if [[ -n "$runtime_hits" ]]; then
   printf '%s\n' '--- executable/runtime V96 references ---'
