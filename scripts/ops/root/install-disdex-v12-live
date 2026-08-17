@@ -45,11 +45,13 @@ unit_names=(
   disdex-v96-stop-recheck@.service
   disdex-v12-pengu-v2-v52@.target
 )
+reverse_interlock_source="$repo_root/scripts/ops/root/disdex-v96-refuse-while-v12-active"
 required=(
   "$repo_root/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh"
   "$repo_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
   "$repo_root/scripts/ops/root/disdex-v96-to-v12-live-migrate"
   "$repo_root/scripts/ops/root/disdex-v12-live-status-report"
+  "$reverse_interlock_source"
   "$repo_root/scripts/disdex-v12-live-readiness.ts"
   "$repo_root/scripts/disdex-v12-runtime-status.ts"
   "$repo_root/scripts/disdex-pengu-v2-live-readiness.ts"
@@ -82,6 +84,7 @@ bash -n "$repo_root/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh"
 bash -n "$repo_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
 bash -n "$repo_root/scripts/ops/root/disdex-v96-to-v12-live-migrate"
 bash -n "$repo_root/scripts/ops/root/disdex-v12-live-status-report"
+bash -n "$reverse_interlock_source"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/v12-x1-all-selftest.ts"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/v12-resident-stop-selftest.ts"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/disdex-shared-crypto-risk-selftest.ts"
@@ -93,10 +96,11 @@ PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 "$repo_root/s
 PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 "$repo_root/scripts/disdex_v12_v52_live_engine.py" --self-test
 
 backup_root="/etc/disdex/v12-migration-backup/$(date -u +%Y%m%dT%H%M%SZ)"
-install -d -o root -g root -m 0700 "$backup_root" /etc/disdex
+install -d -o root -g root -m 0700 "$backup_root" /etc/disdex /usr/local/libexec
 for path in \
   /etc/disdex/disdex-v12-pengu-v2-v52.env \
-  /etc/disdex/disdex-v12-x1-all.env; do
+  /etc/disdex/disdex-v12-x1-all.env \
+  /usr/local/libexec/disdex-v96-refuse-while-v12-active; do
   [[ -f "$path" ]] && cp -a "$path" "$backup_root/$(basename "$path")"
 done
 for name in "${unit_names[@]}"; do
@@ -105,9 +109,12 @@ for name in "${unit_names[@]}"; do
 done
 
 # Both installed migration envs are non-secret fixed policy. Credentials remain
-# solely in the existing production env file.
+# solely in the existing production env file. The reverse interlock helper is
+# inert until migration installs the legacy-service drop-ins after V96 is flat
+# and stopped.
 install -o root -g root -m 0600 "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example" /etc/disdex/disdex-v12-pengu-v2-v52.env
 install -o root -g root -m 0600 "$repo_root/ops/env/disdex-v12-x1-all.live.env.example" /etc/disdex/disdex-v12-x1-all.env
+install -o root -g root -m 0755 "$reverse_interlock_source" /usr/local/libexec/disdex-v96-refuse-while-v12-active
 for name in "${unit_names[@]}"; do
   install -o root -g root -m 0644 "$repo_root/ops/systemd/$name" "/etc/systemd/system/$name"
 done
