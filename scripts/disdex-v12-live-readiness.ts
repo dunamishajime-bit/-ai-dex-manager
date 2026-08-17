@@ -6,6 +6,7 @@ import { V12_X1_ALL, resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
+import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
 
 function boolEnv(name: string) { return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim()); }
@@ -23,13 +24,14 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V12-LIVE-Readiness/1.0",
+        userAgent: "DisDex-V12-LIVE-Readiness/1.1",
     });
     if (!client.hasTradingCredentials()) throw new Error("V12_LIVE_REQUIRES_ASTER_CREDENTIALS");
 
     const stateStore = new FileV12X1AllRunnerStateStore(runtime.statePath, "LIVE");
-    const [risk, state, _ping, positions, openOrders, exchangeInfo] = await Promise.all([
+    const [risk, sharedKillSwitch, state, _ping, positions, openOrders, exchangeInfo] = await Promise.all([
         readSharedCryptoDailyRisk(runtime.riskPath),
+        readSharedKillSwitch(),
         stateStore.load(),
         client.ping(),
         client.getPositions(),
@@ -39,6 +41,7 @@ async function main() {
     void _ping;
 
     if (!risk.ok) throw new Error(`V12_SHARED_CRYPTO_RISK_NOT_READY:${risk.reason}`);
+    if (sharedKillSwitch.active) throw new Error(`V12_SHARED_KILL_SWITCH_ACTIVE:${sharedKillSwitch.reason || "UNSPECIFIED"}`);
     if (state.killSwitch?.active || state.manualReview) throw new Error(`V12_STATE_MANUAL_REVIEW:${state.killSwitch?.reason || state.manualReview}`);
     if (state.pending) throw new Error(`V12_PENDING_STATE_PRESENT:${state.pending.clientOrderId}`);
     if (state.active) throw new Error(`V12_ACTIVE_STATE_PRESENT:${state.active.symbol}`);
@@ -76,7 +79,9 @@ async function main() {
         sourceSha: V12_X1_ALL.sourceSha,
         riskStateFresh: true,
         riskLossPct: risk.state?.lossPct,
-        killSwitchActive: false,
+        sharedKillSwitchActive: false,
+        sharedKillSwitchPath: sharedKillSwitch.sourcePath,
+        v12KillSwitchActive: false,
         pendingState: false,
         activeState: false,
         sharedAccountLockAvailable: true,
