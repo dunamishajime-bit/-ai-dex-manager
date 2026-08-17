@@ -1,67 +1,31 @@
-# V12 LIVE activation through V96 full decommission — Codex handoff
+# V12 LIVE activation through V96 full decommission — FINAL Codex handoff
 
-## Objective
-Finish production in the final composition:
+This file is the canonical handoff for the complete production job. Use the exact latest green SHA of branch `chatgpt/v12-live-adapter-final-20260817`. Do not stop at source readiness or deployment.
 
+## Final target
 - V12_X1.00_ALL — LIVE
 - PENGU_DUAL_LS_V2_FINAL — LIVE
 - V52 — LIVE
-- V96 runtime logic — removed from active runtime and executable source
+- V96 trading runtime — removed
+- V96 executable production dependencies — removed
+- V96/V12 migration interlocks — removed after V96 service removal
 
-Do not stop at source readiness. Do not stop at deployment. Complete the actual VPS transition, verify `LIVE_ACTIVATED_VERIFIED`, then remove V96 runtime/source dependencies in a second immutable release.
+## Phase A — actual V12 activation
+Use the canonical V3 activation path and command from the exact green Git object:
 
-## Non-negotiable safety rules
-- No SHADOW observation phase.
-- No synthetic or artificial LIVE test order.
-- Do not modify frozen V12 Entry/Exit/universe/timeframe/multiplier/backtest lineage.
-- Do not modify PENGU V2 signal logic.
-- Do not modify V52 signal/entry/exit logic or weaken its reference-quality gates.
-- Never allow V96 and V12 to be simultaneously new-entry LIVE capable.
-- UNKNOWN order/status/state mismatch is FAIL_CLOSED.
-- Never auto-adopt or auto-close an unknown position.
-- Never auto-clear a Kill Switch.
-- Do not edit an immutable release in place.
-- Do not delete a credential/state file until the replacement path is installed, verified and actively used.
-- `ORDERS_SENT_FOR_TESTING=0` throughout.
+- `docs/implementation/V12_CODEX_MINIMAL_VPS_HANDOFF_20260820_V3.md`
+- `scripts/ops/root/disdex-v12-live-activate-from-sha-v3`
 
-# Phase A — activate V12 using the existing V3 path
+No SHADOW period. No synthetic/artificial LIVE order. Do not weaken any risk/reference/Gross/freshness gate.
 
-Use the exact green HEAD of branch:
-
-`chatgpt/v12-live-adapter-final-20260817`
-
-Canonical activation handoff:
-
-`docs/implementation/V12_CODEX_MINIMAL_VPS_HANDOFF_20260820_V3.md`
-
-Canonical command from the exact Git object:
-
-`scripts/ops/root/disdex-v12-live-activate-from-sha-v3`
-
-Required result before proceeding:
+Do not continue to V96 deletion unless actual VPS evidence ends with:
 
 `STATUS: LIVE_ACTIVATED_VERIFIED`
 
-and all of:
+and proves V12/PENGU/V52/shared-risk/Margin Guard active, V96 inactive/disabled, runtime reconciliation PASS, V96/V12 simultaneous LIVE FALSE, and `ORDERS_SENT_FOR_TESTING=0`.
 
-- V12 service active with valid MainPID and no activation restart loop
-- PENGU V2 active
-- V52 active
-- shared crypto risk active/fresh
-- full-universe Margin Guard active
-- V96 services inactive and disabled
-- no orphan V96 runner process
-- V12 runtime reconciliation PASS
-- PENGU readiness PASS
-- V52 readiness PASS
-- V96/V12 simultaneous LIVE = FALSE
-- `ORDERS_SENT_FOR_TESTING=0`
-
-If Phase A does not reach `LIVE_ACTIVATED_VERIFIED`, do not perform V96 source/runtime deletion.
-
-# Phase B — prove V96 runtime decommission readiness
-
-Run from the activated immutable release:
+## Phase B — prove V96 can be decommissioned
+Run:
 
 `sudo /home/deploy/disdex-trading/current/scripts/ops/root/disdex-v96-runtime-decommission-readiness <ACTIVATED_SHA>`
 
@@ -69,68 +33,41 @@ Require:
 
 `STATUS: V96_RUNTIME_DECOMMISSION_READY`
 
-This check intentionally does not infer V96 ownership from BTC/ETH/BNB/SOL symbols after V12 is live, because V12 legitimately overlaps those symbols. V96 flatness was proved before the V12 start and mutual-exclusion prevents later V96 exposure.
+Do not infer V96 ownership from overlapping BTC/ETH/BNB/SOL symbols after V12 is live. V96 flatness must have been proved before V12 activation and V96 must have remained unable to create new exposure by the transition interlocks.
 
-# Phase C — create the V96-decommission source release
+## Phase C — create a second immutable V96-free release
+Create `codex/v96-decommission-after-v12-live-20260820` from the exact ACTIVATED SHA. Never rewrite/edit the activated immutable release.
 
-Create a new branch from the exact activated source SHA:
+Before deleting V96 code, neutralize shared functionality still carrying V96 names/dependencies. Preserve and keep fail-closed:
 
-`codex/v96-decommission-after-v12-live-20260820`
-
-Do not rewrite the already-activated SHA.
-
-## C1. Neutralize shared dependencies before deleting V96
-
-Shared functionality must survive, but must no longer depend on V96 runtime code or V96-only naming.
-
-Keep/standardize these shared components:
-
-- account-scoped order lock and reservation
+- account order lock/reservation
 - shared crypto daily risk
 - shared Kill Switch
-- Aster V3 adapter/executor
-- portfolio Gross classifier/router
-- full-universe Margin Guard
-- V52 reference-quality service/gates
-- V12 resident protection/restart reconciliation
+- Aster adapter/executor
+- portfolio Gross and Margin Guard
+- V52 reference-quality gates
+- V12 resident STOP/restart reconciliation
 
-Specific cleanup requirements:
+Mandatory neutralization:
 
-1. PENGU V2 must stop importing V96 Kill Switch helpers. Migrate to `lib/disdex-shared-kill-switch.ts` or a neutral equivalent **without weakening malformed/missing-state fail-closed behavior**. Do not swap readers merely because the name is neutral; prove schema/path/error-behavior parity in self-tests first.
-2. Any V12/PENGU/V52 runtime dependency on `lib/disdex-v96-*` or `config/disdexV96Runtime.ts` must be removed.
-3. Rename shared environment variables whose names contain `V96` to neutral production names. During source migration, compatibility aliases may exist only long enough to migrate the live VPS config; the final decommission release must run on neutral names.
-4. Rename shared Python/TS constants whose strategy/runtime identity incorrectly contains V96. If a durable state schema contains the old identity, implement an explicit one-time state migration with backup, exact old/new schema validation and no trading action.
-5. Migrate active production state roots to neutral paths only with atomic copy/rename and byte/content validation. Never reset state. Preserve V12/PENGU/V52 durable position/pending/risk history.
-6. Migrate Aster/reference credentials from the legacy V96-named environment file into a neutral root-owned secret environment file without printing secrets. Verify new services use the new file before the old file is retired.
+1. Remove V12/PENGU/V52 runtime imports from `lib/disdex-v96-*` and `config/disdexV96Runtime.ts`.
+2. PENGU Kill Switch migration must preserve or strengthen current schema/path/malformed-state fail-closed behavior. Do not replace a strict reader with a weaker neutral reader merely to remove the V96 name.
+3. Rename shared `V96` env/config identifiers to neutral production names. Temporary compatibility aliases may exist only for verified migration; the final clean runtime must use neutral names.
+4. If durable state identity/schema contains V96, implement an explicit one-time migration with backup, exact old/new validation, atomic write/rename, and zero trading actions.
+5. Migrate active state roots atomically without resetting V12/PENGU/V52 positions, pending state, protection state, daily-risk state or audit continuity.
+6. Move Aster/reference secrets from the V96-named env into a neutral root-owned env without printing secrets; verify every active unit uses the neutral env before retiring the legacy file.
 
-Recommended neutral names (use consistently; equivalent neutral names are acceptable if already established in source):
+Preferred neutral paths:
 
-- secret env: `/etc/disdex/disdex-aster-production.env`
-- shared state root: `/var/lib/disdex/production`
-- shared Kill Switch: `/var/lib/disdex/production/kill-switch.json`
-- shared account lock: `/var/lib/disdex/production/account-order.lock`
-- shared crypto risk: `/var/lib/disdex/production/crypto-daily-risk.json`
+- `/etc/disdex/disdex-aster-production.env`
+- `/var/lib/disdex/production`
+- `/var/lib/disdex/production/kill-switch.json`
+- `/var/lib/disdex/production/account-order.lock`
+- `/var/lib/disdex/production/crypto-daily-risk.json`
 
-Do not move a live state file by deleting/recreating it. Use verified migration and retain a read-only backup until final validation finishes.
+After shared dependencies are neutral, remove V96-only executable runtime material: V96 runners/supervisors/runtime config/operator overrides/V96-only preflights and migration commands/V96 systemd units/V96 deploy-start scripts/V96 package scripts/V96-only CI/runtime contract tests. Remove V96↔V12 start interlocks only after the V96 trading service definitions no longer exist.
 
-## C2. Delete V96-only executable logic
-
-After C1 has removed every active dependency, delete V96-only runtime implementation, including as applicable:
-
-- V96 runner(s)
-- V96 supervisor/combined supervisor logic
-- V96 strategy runtime config
-- V96 operator-override runtime
-- V96-only preflight/readiness
-- V96 pending/state migration utilities that are not needed by V12/PENGU/V52
-- V96-only kill-switch command implementation after all consumers use shared Kill Switch
-- V96-only systemd service/target definitions
-- V96-only deploy/start scripts
-- V96-only package scripts
-- V96-only Actions/workflows and runtime contract tests
-- V96↔V12 mutual-exclusion interlocks once V96 service definitions themselves no longer exist
-
-Historical implementation documents or research records may retain the string `V96`, but no executable production path may depend on V96 code after decommission.
+Historical docs/research may retain the string V96. Executable production paths may not.
 
 Run:
 
@@ -140,85 +77,52 @@ Require:
 
 `STATUS: V96_DECOMMISSION_SOURCE_CLEAN`
 
-If executable/runtime references remain, do not declare V96 removed.
+## Phase D — CI and V96-free immutable SHA
+Require all relevant tests to PASS: application TS build/typecheck, V12 frozen parity/live lifecycle/crash recovery/resident+trailing STOP, PENGU V2 typecheck/self-test/parity, shared crypto risk, Kill Switch schema/fail-closed parity, Node/Python priority/reservation/crash recovery, portfolio Gross caps, V52 contract/reference safety, full-universe Margin Guard, state/env migration tests, V96 source-clean audit, Linux production build.
 
-# Phase D — decommission CI and immutable clean release
+Tests must not contain production Aster credentials and must send zero real orders.
 
-The new V96-free SHA must pass at minimum:
+Create a new immutable 40-char DECOMMISSION_SHA. Do not edit ACTIVATED_SHA in place.
 
-- application TypeScript compile
-- PENGU V2 typecheck/self-test/parity
-- V12 frozen parity and latest required parity
-- V12 live execution/crash-recovery tests
-- resident STOP and trailing STOP tests
-- shared crypto risk tests
-- Node/Python shared lock priority tests
-- portfolio Gross classifier/cap tests
-- V52 self-test/contract
-- full-universe Margin Guard self-test
-- migration/state-schema tests introduced by C1
-- shared Kill Switch schema/path/fail-closed parity tests
-- `disdex-v96-decommission-source-audit.sh . --expect-clean`
-- Linux production build
+## Phase E — switch to clean release without forced liquidation
+Before switching, re-run current V12 final status, require no unresolved V12/PENGU/V52 pending order, validate shared risk/Kill Switch, and validate resident V12 protection for any open V12 position. Back up state/env without exposing secrets.
 
-No test may contain production Aster credentials or submit a real order.
+Do not force-liquidate positions merely for source cleanup. Restart into the clean release with the same durable state and first reconcile actual Aster positions/open orders/protection. Any mismatch => FAIL_CLOSED, no new entry.
 
-Create a new immutable 40-char SHA release. Do not modify the activated V12 release.
+Only after the clean release is verified active may legacy V96 VPS remnants be removed.
 
-# Phase E — switch from activated V12 release to the V96-free clean release
-
-Before changing runtime:
-
-1. Re-run the current activated release final status and require PASS.
-2. Confirm no unresolved pending order for V12/PENGU/V52.
-3. Confirm shared Kill Switch/risk state is valid.
-4. Confirm resident V12 protection is valid for any open V12 position.
-5. Back up active durable state and old environment files without exposing secrets.
-
-Deploy the clean release using a controlled restart/reconciliation sequence. Do not force-liquidate positions merely to perform source cleanup.
-
-For any existing position, the new release must reuse the same durable state and reconcile the actual Aster position/open orders/protection before evaluating a new signal. If reconciliation is not exact, FAIL_CLOSED and do not start new entries.
-
-After the clean release is active, verify V12, PENGU V2, V52, shared risk and Margin Guard independently. Do not remove legacy files until this passes.
-
-# Phase F — remove V96 runtime remnants from VPS
-
-Only after the V96-free release is confirmed active:
-
+## Phase F — final VPS V96 removal
 - remove obsolete V96 systemd unit files and V96-only drop-ins
-- `systemctl daemon-reload`
-- verify no V96 unit is active, enabled or loadable as a trading service
-- remove V96/V12 mutual-exclusion drop-ins/helpers that are now unnecessary
-- remove the old V96-named credential env only after all active units use the verified neutral secret env
+- daemon-reload
+- prove no V96 trading service is active, enabled or loadable
+- remove V96/V12 mutual-exclusion helpers/drop-ins because V96 no longer exists
+- retire the V96-named secret env only after neutral secret env use is verified
 - remove V96-only active state paths from production configuration
-- preserve old V96 state as a read-only forensic archive rather than feeding it to any live service; do not treat archived state as active
-- do not delete V12/PENGU/V52 state merely because it resides under a historically V96-named directory until it has been verified migrated to the neutral state root
+- retain old V96 state only as read-only forensic archive if desired; never feed it to live services
+- do not delete PENGU/V52/V12 live state just because the old path historically contained `v96`
 
-# Final acceptance
+## Prohibited
+- source-only success label
+- SHADOW observation period
+- artificial LIVE order
+- direct edit of an immutable release
+- force-liquidating valid positions solely to remove V96 source
+- V96 auto-restart
+- unknown-position auto-adopt/auto-close
+- UNKNOWN order resubmit under a different ID
+- Kill Switch auto-clear
+- risk/reference/Gross gate relaxation
+- deleting old secret/state before the neutral replacement is actively verified
+- deleting shared V52/PENGU/V12 functionality just because a filename/env currently contains V96
 
-Final production composition must be exactly:
-
-- V12 LIVE
-- PENGU V2 LIVE
-- V52 LIVE
-- shared account order lock
-- shared crypto risk
-- shared Kill Switch
-- shared portfolio Gross/Margin Guard
-- Aster adapter
-- V52 reference service
-
-No V96 trading service or executable production dependency remains.
-
-Required final report:
+## Final acceptance
+Do not use the final success label unless every field is proven:
 
 ```text
 STATUS: V12_LIVE_V96_DECOMMISSIONED
-
 ACTIVATION_SHA=<40-char>
 DECOMMISSION_SHA=<40-char>
 CURRENT_RELEASE=<path>
-
 V12_LIVE_STARTED=TRUE
 V12_SERVICE_ACTIVE=TRUE
 V12_RESTART_RECONCILIATION_PASS=TRUE
@@ -226,27 +130,23 @@ PENGU_V2_RUNNING=TRUE
 V52_RUNNING=TRUE
 SHARED_CRYPTO_RISK_RUNNING=TRUE
 FULL_UNIVERSE_MARGIN_GUARD_RUNNING=TRUE
-
 V96_SERVICE_PRESENT=FALSE
 V96_SERVICE_ENABLED=FALSE
 V96_PROCESS_COUNT=0
 V96_EXECUTABLE_SOURCE_DEPENDENCIES=0
 V96_MUTUAL_EXCLUSION_INTERLOCK_REQUIRED=FALSE
 V96_LEGACY_SECRET_ENV_ACTIVE=FALSE
-
 CRYPTO_GROSS_CAP=1.5
 STOCK_GROSS_CAP=1.5
 PORTFOLIO_GROSS_CAP=2.5
 V12_GROSS_CAP=1.0
 PENGU_GROSS_CAP=0.75
-
 V12_PENGU_CRYPTO_DAILY_LOSS=5%
 V52_DAILY_LOSS=3.5%
 KILL_SWITCH_STICKY=TRUE
 V52_REFERENCE_GATES_UNCHANGED=TRUE
-
 ORDERS_SENT_FOR_TESTING=0
 ARTIFICIAL_LIVE_ORDERS=0
 ```
 
-If any final field cannot be proven, report the exact blocker and remain FAIL_CLOSED. Do not use `V12_LIVE_V96_DECOMMISSIONED` as a partial-success label.
+If any field cannot be proven, report the exact blocker and remain FAIL_CLOSED. Partial completion is not `V12_LIVE_V96_DECOMMISSIONED`.
