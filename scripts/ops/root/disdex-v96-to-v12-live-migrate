@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || { printf 'V96_TO_V12_MIGRATION_REQUIRES_ROOT\n' >&2; exit 1; }
+sha="${1:-}"
+ack="${2:-}"
+required_ack="I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION"
+[[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V96_TO_V12_MIGRATION_INVALID_SHA\n' >&2; exit 2; }
+[[ "$ack" == "$required_ack" ]] || { printf 'V96_TO_V12_MIGRATION_ACK_REQUIRED expected=%s\n' "$required_ack" >&2; exit 2; }
+
+release="/home/deploy/disdex-trading/releases/$sha"
+marker="$release/.disdex-release-sha"
+[[ -d "$release" && ! -L "$release" ]] || { printf 'V96_TO_V12_MIGRATION_RELEASE_INVALID\n' >&2; exit 3; }
+[[ -f "$marker" && ! -L "$marker" ]] || { printf 'V96_TO_V12_MIGRATION_RELEASE_MARKER_MISSING\n' >&2; exit 3; }
+[[ "$(tr -d '[:space:]' < "$marker")" == "$sha" ]] || { printf 'V96_TO_V12_MIGRATION_RELEASE_MARKER_MISMATCH\n' >&2; exit 3; }
+[[ -x "$release/node_modules/.bin/tsx" ]] || { printf 'V96_TO_V12_MIGRATION_TSX_MISSING\n' >&2; exit 3; }
+for env_file in \
+  /etc/disdex/disdex-v13d-v11eq-v96.env \
+  /etc/disdex/disdex-v12-pengu-v2-v52.env \
+  /etc/disdex/disdex-v12-x1-all.env; do
+  [[ -f "$env_file" && ! -L "$env_file" ]] || { printf 'V96_TO_V12_MIGRATION_ENV_MISSING path=%s\n' "$env_file" >&2; exit 3; }
+done
+
+old_units=(disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service)
+new_units=(
+  "disdex-shared-crypto-risk@$sha.service"
+  "disdex-v12-v52-margin-guard@$sha.service"
+  "disdex-pengu-dual-ls-v2@$sha.service"
+  "disdex-v52-aster-only@$sha.service"
+  "disdex-v12-x1-all@$sha.service"
+)
+target="disdex-v12-pengu-v2-v52@$sha.target"
+old_stopped=false
+
+status_of() { systemctl is-active "$1" 2>/dev/null || true; }
+pid_of() { systemctl show "$1" --property MainPID --value 2>/dev/null || printf '0'; }
+restarts_of() { systemctl show "$1" --property NRestarts --value 2>/dev/null || printf '0'; }
+require_active() {
+  local unit="$1"
+  [[ "$(status_of "$unit")" == "active" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_NOT_ACTIVE unit=%s state=%s\n' "$unit" "$(status_of "$unit")" >&2; return 1; }
+  [[ "$(pid_of "$unit")" != "0" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_PID_ZERO unit=%s\n' "$unit" >&2; return 1; }
+}
+require_inactive() {
+  local unit="$1" state
+  state="$(status_of "$unit")"
+  [[ "$state" == "inactive" || "$state" == "failed" || "$state" == "unknown" || -z "$state" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_STILL_ACTIVE unit=%s state=%s\n' "$unit" "$state" >&2; return 1; }
+  [[ "$(pid_of "$unit")" == "0" ]] || { printf 'V96_TO_V12_REQUIRED_UNIT_PID_REMAINS unit=%s pid=%s\n' "$unit" "$(pid_of "$unit")" >&2; return 1; }
+}
+run_oneshot() {
+  local unit="$1"
+  systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+  systemctl start "$unit"
+}
+
+on_error() {
+  local code=$?
+  trap - ERR
+  printf 'STATUS: V96_TO_V12_LIVE_MIGRATION_BLOCKED\n' >&2
+  printf 'releaseSha=%s\noldV96Stopped=%s\nordersSentForTesting=0\n' "$sha" "$old_stopped" >&2
+  for unit in "${old_units[@]}" "${new_units[@]}"; do
+    printf 'unit=%s state=%s pid=%s restarts=%s\n' "$unit" "$(status_of "$unit")" "$(pid_of "$unit")" "$(restarts_of "$unit")" >&2
+  done
+  printf 'Automatic V96 restart is prohibited. Reconcile Aster/V12 state before any rollback.\n' >&2
+  exit "$code"
+}
+trap on_error ERR
+
+systemctl daemon-reload
+
+# This is an initial migration command. Refuse an ambiguous partially-active
+# post-migration topology rather than guessing which strategy owns the account.
+for unit in "${new_units[@]}"; do
+  state="$(status_of "$unit")"
+  if [[ "$state" == "active" ]]; then
+    printf 'V96_TO_V12_NEW_UNIT_ALREADY_ACTIVE unit=%s\n' "$unit" >&2
+    false
+  fi
+done
+if [[ "$(status_of "$target")" == "active" ]]; then
+  printf 'V96_TO_V12_TARGET_ALREADY_ACTIVE\n' >&2
+  false
+fi
+
+active_old=()
+for unit in "${old_units[@]}"; do
+  [[ "$(status_of "$unit")" == "active" ]] && active_old+=("$unit")
+done
+(( ${#active_old[@]} <= 1 )) || { printf 'V96_TO_V12_MULTIPLE_V96_SUPERVISORS_ACTIVE units=%s\n' "${active_old[*]}" >&2; false; }
+
+# Build one fresh shared 5%% crypto risk snapshot first. This is read-only to the
+# exchange and guarantees readiness is not accidentally passing on stale state.
+run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
+
+# All four pre-stop checks are order-free. V12 is checked while V96 is still
+# running; V96 must already be flat, while PENGU/V52 may retain reconciled
+# positions but cannot have unresolved pending/open orders.
+run_oneshot "disdex-v12-live-readiness@$sha.service"
+run_oneshot "disdex-pengu-v2-readiness@$sha.service"
+run_oneshot "disdex-v52-v12-readiness@$sha.service"
+run_oneshot "disdex-v96-to-v12-migration-preflight@$sha.service"
+
+# Stop only after every preflight has passed. On the currently deployed combined
+# service this also briefly stops PENGU V2/V52; their same durable state is
+# resumed by standalone units below. No position is force-closed by migration.
+for unit in "${active_old[@]}"; do
+  systemctl stop "$unit"
+done
+for unit in "${old_units[@]}"; do
+  require_inactive "$unit"
+done
+old_stopped=true
+
+# An orphan V96 process is equivalent to a live service and blocks the switch.
+if pgrep -af '[d]isdex-v96-live-runner\.ts' >/dev/null 2>&1 || pgrep -af '[d]isdex-v13d-v11eq-v96-live-runner\.ts' >/dev/null 2>&1; then
+  printf 'V96_TO_V12_ORPHAN_V96_PROCESS_AFTER_STOP\n' >&2
+  false
+fi
+
+# Keep the shared crypto risk snapshot fresh after the service boundary, then
+# prove Aster still has no V96 core position/order. The initial mutual-exclusion
+# preflight repeats that check and also verifies all V96 process paths are gone.
+systemctl start "disdex-shared-crypto-risk@$sha.service"
+require_active "disdex-shared-crypto-risk@$sha.service"
+run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
+run_oneshot "disdex-v96-stop-recheck@$sha.service"
+/usr/bin/bash "$release/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh" "$sha" initial
+
+# Start the full-universe serialized Margin Guard before any post-migration
+# strategy runner is allowed to create new exposure.
+systemctl start "disdex-v12-v52-margin-guard@$sha.service"
+require_active "disdex-v12-v52-margin-guard@$sha.service"
+
+# Resume unchanged PENGU V2 and V52 from their existing production state first.
+systemctl start "disdex-pengu-dual-ls-v2@$sha.service"
+systemctl start "disdex-v52-aster-only@$sha.service"
+require_active "disdex-pengu-dual-ls-v2@$sha.service"
+require_active "disdex-v52-aster-only@$sha.service"
+
+# Allow the child runners one bounded startup cycle, then reject immediate crash
+# loops. Natural strategy signals are allowed; no synthetic order is created.
+sleep 3
+require_active "disdex-pengu-dual-ls-v2@$sha.service"
+require_active "disdex-v52-aster-only@$sha.service"
+[[ "$(restarts_of "disdex-pengu-dual-ls-v2@$sha.service")" == "0" ]] || { printf 'PENGU_V2_RESTART_DURING_MIGRATION\n' >&2; false; }
+[[ "$(restarts_of "disdex-v52-aster-only@$sha.service")" == "0" ]] || { printf 'V52_RESTART_DURING_MIGRATION\n' >&2; false; }
+run_oneshot "disdex-pengu-v2-readiness@$sha.service"
+
+# Permanently remove V96 from the boot topology before enabling the new target.
+for unit in "${old_units[@]}"; do
+  systemctl disable "$unit" >/dev/null 2>&1 || true
+done
+systemctl enable "$target" >/dev/null
+
+# Final simultaneous-LIVE interlock. Runtime mode deliberately does not require
+# BTC/ETH/BNB/SOL to remain flat on later V12 restarts because V12 itself may own
+# those symbols after activation.
+/usr/bin/bash "$release/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh" "$sha" runtime
+
+# Start the composition target. V12's own ExecStartPre repeats runtime mutual
+# exclusion and its engine performs durable restart reconciliation before signal
+# evaluation. No test order is manufactured by this migration command.
+systemctl start "$target"
+require_active "disdex-v12-x1-all@$sha.service"
+require_active "disdex-pengu-dual-ls-v2@$sha.service"
+require_active "disdex-v52-aster-only@$sha.service"
+require_active "disdex-shared-crypto-risk@$sha.service"
+require_active "disdex-v12-v52-margin-guard@$sha.service"
+sleep 3
+require_active "disdex-v12-x1-all@$sha.service"
+[[ "$(restarts_of "disdex-v12-x1-all@$sha.service")" == "0" ]] || { printf 'V12_RESTART_DURING_ACTIVATION\n' >&2; false; }
+
+trap - ERR
+printf 'STATUS: LIVE_ACTIVATED\n'
+printf 'releaseSha=%s\n' "$sha"
+printf 'V96_STOPPED=TRUE\nV12_LIVE_STARTED=TRUE\nPENGU_V2_RUNNING=TRUE\nV52_RUNNING=TRUE\n'
+printf 'V96_V12_SIMULTANEOUS_LIVE=FALSE\nORDERS_SENT_FOR_TESTING=0\n'
+printf 'v12MainPid=%s\npenguMainPid=%s\nv52MainPid=%s\n' \
+  "$(pid_of "disdex-v12-x1-all@$sha.service")" \
+  "$(pid_of "disdex-pengu-dual-ls-v2@$sha.service")" \
+  "$(pid_of "disdex-v52-aster-only@$sha.service")"
