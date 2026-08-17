@@ -2,13 +2,13 @@ import "dotenv/config";
 import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
-import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
+import { DEFAULT_ACCOUNT_SCOPE, FileAccountOrderLock, type AccountLockHandle } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
 import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-runner";
-import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
+import { FilePenguDualLsV2RunnerStateStore, type PenguDualLsV2RunnerState } from "../lib/pengu-dual-ls-v2-runner-state";
 
 const HOUR_MS = 60 * 60_000;
 
@@ -17,9 +17,39 @@ function numberEnv(name: string, fallback: number) {
     return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+export function penguAccountPriority(state: PenguDualLsV2RunnerState) {
+    // An existing position may require a stop/trailing/exit decision on this
+    // tick; pending reduce-only recovery is definitively risk-reducing. Both are
+    // P1. Flat/new-exposure work is P3, behind V52 entry and every P1 action.
+    return state.position || state.pending?.reduceOnly ? 1 : 3;
+}
+
+class PenguPriorityAccountOrderLock extends FileAccountOrderLock {
+    constructor(
+        path: string,
+        leaseMs: number,
+        private readonly stateStore: FilePenguDualLsV2RunnerStateStore,
+        statePath: string,
+    ) {
+        super(path, leaseMs, {
+            ownerPrefix: "PENGU_DUAL_LS_V2:",
+            strategyId: "PENGU_DUAL_LS_V2_FINAL",
+            pendingStatePath: statePath,
+        });
+    }
+
+    override async acquire(ownerId: string, accountScope = DEFAULT_ACCOUNT_SCOPE): Promise<AccountLockHandle | null> {
+        const state = await this.stateStore.load();
+        const priority = penguAccountPriority(state);
+        return super.acquire(`PENGU_DUAL_LS_V2:P${priority}:${process.pid}:${ownerId}`, accountScope);
+    }
+}
+
 async function main() {
     const runtime = resolvePenguDualLsV2Runtime();
     const stateRoot = resolve(process.env.PENGU_DUAL_LS_V2_STATE_DIR || ".runtime-state/pengu-dual-ls-v2");
+    const statePath = resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`);
+    const stateStore = new FilePenguDualLsV2RunnerStateStore(statePath, runtime.mode);
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
         userAddress: process.env.ASTER_USER_ADDRESS,
@@ -48,13 +78,16 @@ async function main() {
         hourlyLimit: numberEnv("PENGU_DUAL_LS_V2_HOURLY_LIMIT", 1000),
         cacheTtlMs: numberEnv("PENGU_DUAL_LS_V2_HISTORY_CACHE_TTL_MS", 5 * 60_000),
     });
-    const accountLock = new FileAccountOrderLock(process.env.DISDEX_ACCOUNT_LOCK_PATH || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
+    const accountLock = new PenguPriorityAccountOrderLock(
+        process.env.DISDEX_ACCOUNT_LOCK_PATH || ".runtime-state/shared/account-order.lock",
+        numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000),
+        stateStore,
+        statePath,
+    );
     const runner = new PenguDualLsV2PortfolioRunner({
         marketData,
         executor,
-        stateStore: new FilePenguDualLsV2RunnerStateStore(resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`), runtime.mode),
-        // PENGU and the V12/V52 runners share one account-scoped lock. This
-        // prevents sleeve-local reservations from racing across languages.
+        stateStore,
         lock: accountLock,
         config: {
             mode: runtime.mode,
@@ -77,6 +110,7 @@ async function main() {
     });
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
+    const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_MS", 5_000)));
     let stopping = false;
     const boundaryWait = createInterruptibleDelay();
     const stop = () => {
@@ -89,6 +123,12 @@ async function main() {
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
+        if (result.status === "locked") {
+            // A simultaneous higher-priority P1/P2 critical section must not make
+            // PENGU miss its still-valid entry/exit window. Retry shortly.
+            await boundaryWait.wait(lockRetryMs);
+            continue;
+        }
         const now = Date.now();
         const waitUntilNextClosedHour = HOUR_MS - (now % HOUR_MS) + boundaryDelayMs;
         await boundaryWait.wait(waitUntilNextClosedHour);
