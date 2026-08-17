@@ -52,11 +52,19 @@ export interface AccountLockRecoveryOptions {
     strategyId: string;
     /** Durable state saved before any exposure-increasing order is sent. */
     pendingStatePath: string;
+    /** Fixed-symbol strategies such as PENGU do not repeat symbol in pending state. */
+    fixedSymbol?: string;
 }
 
 function validNumber(value: unknown) { return Number.isFinite(Number(value)); }
 function finiteEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
 function sleep(ms: number) { return new Promise<void>((resolve) => setTimeout(resolve, Math.max(0, ms))); }
+function normalizedReservationSide(value: unknown): AccountReservation["side"] | undefined {
+    const side = String(value || "").toUpperCase();
+    if (side === "BUY") return "LONG";
+    if (side === "SELL") return "SHORT";
+    return side === "LONG" || side === "SHORT" || side === "FLAT" ? side : undefined;
+}
 
 /**
  * Cross-language account execution priority. Lower numbers win only among
@@ -126,7 +134,11 @@ export class FileAccountOrderLock {
     ) {
         this.path = resolve(path);
         this.waiterDir = `${this.path}.waiters`;
-        this.recovery = recovery ? { ...recovery, pendingStatePath: resolve(recovery.pendingStatePath) } : undefined;
+        this.recovery = recovery ? {
+            ...recovery,
+            pendingStatePath: resolve(recovery.pendingStatePath),
+            fixedSymbol: recovery.fixedSymbol?.toUpperCase(),
+        } : undefined;
         this.arbitrationMs = Math.min(1000, Math.max(0, finiteEnv("DISDEX_ACCOUNT_LOCK_ARBITRATION_MS", 200)));
         this.waiterTtlMs = Math.max(2000, finiteEnv("DISDEX_ACCOUNT_LOCK_WAITER_TTL_MS", 10_000));
     }
@@ -147,8 +159,11 @@ export class FileAccountOrderLock {
             document: assertOwner,
             reserve: async (input) => {
                 if (!(validNumber(input.gross) && Number(input.gross) >= 0 && validNumber(input.notionalUsd) && Number(input.notionalUsd) >= 0)) throw new Error("ACCOUNT_RESERVATION_INVALID");
+                const symbol = String(input.symbol || "").toUpperCase();
+                const side = normalizedReservationSide(input.side);
+                if (!symbol || !side) throw new Error("ACCOUNT_RESERVATION_INVALID");
                 const current = await assertOwner();
-                const reservation: AccountReservation = { ...input, reservationId: createHash("sha256").update(`${leaseId}|${input.strategyId}|${input.symbol}|${input.side}|${input.gross}|${input.notionalUsd}`).digest("hex").slice(0, 24), createdAt: Date.now(), status: "RESERVED" };
+                const reservation: AccountReservation = { ...input, symbol, side, reservationId: createHash("sha256").update(`${leaseId}|${input.strategyId}|${symbol}|${side}|${input.gross}|${input.notionalUsd}`).digest("hex").slice(0, 24), createdAt: Date.now(), status: "RESERVED" };
                 await atomicWrite(this.path, { ...current, expiresAt: Date.now() + this.leaseMs, reservations: [...current.reservations.filter((row) => row.reservationId !== reservation.reservationId), reservation] });
                 return reservation;
             },
@@ -231,11 +246,11 @@ export class FileAccountOrderLock {
     }
 
     /**
-     * A hard-killed V12 process can leave the account lock behind after its
+     * A hard-killed strategy process can leave the account lock behind after a
      * durable pending record was written. We only take over that expired lock
-     * when the original V12 PID is definitely gone and the reservation matches
-     * the durable pending transaction. The lock is replaced atomically, so
-     * another sleeve never sees an unlocked gap during recovery.
+     * when the original owner PID is definitely gone and any active reservation
+     * matches the durable pending transaction. The lock is replaced atomically,
+     * so another sleeve never sees an unlocked gap during recovery.
      */
     private async takeoverExpiredStrategyLock(ownerId: string, accountScope: string): Promise<AccountLockHandle | null> {
         if (!this.recovery) return null;
@@ -256,9 +271,14 @@ export class FileAccountOrderLock {
         if (active.length) {
             const pending = state.pending;
             if (!pending) {
+                // Invariant: reserve -> durable pending -> send. If pending is
+                // absent, the crashed process could not have sent a new-entry
+                // order under this reservation (or already reconciled it).
                 current = { ...current, reservations: current.reservations.map((row) => row.status === "RESERVED" ? { ...row, status: "RELEASED" as const } : row) };
-            } else if (!active.every((row) => row.strategyId === this.recovery!.strategyId && row.symbol === String(pending.symbol || "").toUpperCase() && row.side === String(pending.side || "").toUpperCase())) {
-                return null;
+            } else {
+                const pendingSymbol = this.recovery.fixedSymbol || String(pending.symbol || "").toUpperCase();
+                const pendingSide = normalizedReservationSide(pending.side);
+                if (!pendingSymbol || !pendingSide || !active.every((row) => row.strategyId === this.recovery!.strategyId && row.symbol === pendingSymbol && row.side === pendingSide)) return null;
             }
         }
 
