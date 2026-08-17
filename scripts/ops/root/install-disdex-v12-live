@@ -38,6 +38,7 @@ unit_names=(
   disdex-v52-aster-only@.service
   disdex-v12-x1-all@.service
   disdex-v12-live-readiness@.service
+  disdex-v12-runtime-status@.service
   disdex-pengu-v2-readiness@.service
   disdex-v52-v12-readiness@.service
   disdex-v96-to-v12-migration-preflight@.service
@@ -48,7 +49,9 @@ required=(
   "$repo_root/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh"
   "$repo_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
   "$repo_root/scripts/ops/root/disdex-v96-to-v12-live-migrate"
+  "$repo_root/scripts/ops/root/disdex-v12-live-status-report"
   "$repo_root/scripts/disdex-v12-live-readiness.ts"
+  "$repo_root/scripts/disdex-v12-runtime-status.ts"
   "$repo_root/scripts/disdex-pengu-v2-live-readiness.ts"
   "$repo_root/scripts/disdex-v96-to-v12-migration-preflight.ts"
   "$repo_root/scripts/disdex-v96-stop-recheck.ts"
@@ -78,6 +81,7 @@ fi
 bash -n "$repo_root/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh"
 bash -n "$repo_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
 bash -n "$repo_root/scripts/ops/root/disdex-v96-to-v12-live-migrate"
+bash -n "$repo_root/scripts/ops/root/disdex-v12-live-status-report"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/v12-x1-all-selftest.ts"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/v12-resident-stop-selftest.ts"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/disdex-shared-crypto-risk-selftest.ts"
