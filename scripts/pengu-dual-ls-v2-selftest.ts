@@ -12,7 +12,7 @@ import {
 } from "../lib/pengu-dual-ls-v2";
 import { MemoryLiveRunnerLock } from "../lib/live-runner-state";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
-import { PenguDualLsV2PortfolioRunner, normalizedPositionGross } from "../lib/pengu-dual-ls-v2-portfolio-runner";
+import { classifiedPortfolioGross, PenguDualLsV2PortfolioRunner, normalizedPositionGross } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { MemoryPenguDualLsV2RunnerStateStore, createPenguDualLsV2RunnerState } from "../lib/pengu-dual-ls-v2-runner-state";
 
 const HOUR = 3_600_000;
@@ -59,9 +59,11 @@ const liveRuntime = resolvePenguDualLsV2Runtime({
     PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED: "true",
     PENGU_DUAL_LS_V2_MAX_GROSS: "2.5",
     PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: "2.5",
+    PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP: "9.0",
 });
 assert.equal(liveRuntime.maximumGross, 0.75);
 assert.equal(liveRuntime.portfolioGrossCap, 1.5);
+assert.equal(liveRuntime.combinedPortfolioGrossCap, 2.5);
 assert.equal(liveRuntime.maximumEntryDelayMs, 5 * 60_000);
 assert.equal(resolvePenguDualLsV2Runtime({ PENGU_DUAL_LS_V2_MAX_ENTRY_DELAY_MS: "9999999" }).maximumEntryDelayMs, 5 * 60_000);
 
@@ -126,8 +128,15 @@ const state = createPenguDualLsV2RunnerState("PAPER");
 assert.equal(state.strategyId, "PENGU_DUAL_LS_V2_FINAL");
 assert.equal(state.pending, undefined);
 assert.equal(state.position, undefined);
-assert.equal(normalizedPositionGross([{ symbol: "BTCUSDT", quantity: 1, entryPrice: 100, markPrice: 100, unrealizedPnl: 0, pnlPct: 0, positionSide: "LONG", leverage: 5, notionalUsd: 100, updatedAt: 0 }], 1_000), 0.1);
+const btcPosition = { symbol: "BTCUSDT", quantity: 1, entryPrice: 100, markPrice: 100, unrealizedPnl: 0, pnlPct: 0, positionSide: "LONG" as const, leverage: 5, notionalUsd: 100, updatedAt: 0 };
+const stockPosition = { symbol: "NVDAUSDT", quantity: 2, entryPrice: 100, markPrice: 100, unrealizedPnl: 0, pnlPct: 0, positionSide: "LONG" as const, leverage: 5, notionalUsd: 200, updatedAt: 0 };
+assert.equal(normalizedPositionGross([btcPosition], 1_000), 0.1);
 assert.equal(normalizedPositionGross([], 0), Number.POSITIVE_INFINITY);
+assert.deepEqual(classifiedPortfolioGross([btcPosition, stockPosition], 1_000), { cryptoGross: 0.1, stockGross: 0.2, combinedGross: 0.30000000000000004 });
+assert.throws(
+    () => classifiedPortfolioGross([{ ...btcPosition, symbol: "UNKNOWNUSDT", notionalUsd: 10 }], 1_000),
+    /PENGU_UNKNOWN_NONZERO_ASTER_POSITION:UNKNOWNUSDT/,
+);
 
 const historyRows = Array.from({ length: 200 }, (_, index) => ({
     openTime: (index + 1) * HOUR,
@@ -172,6 +181,7 @@ const shadowRunner = new PenguDualLsV2PortfolioRunner({
         maxTransactionRetries: PENGU_DUAL_LS_V2.safety.maxTransactionRetries,
         maximumEntryDelayMs: 5 * 60_000,
         portfolioGrossCap: PENGU_DUAL_LS_V2.portfolioGrossCap,
+        combinedPortfolioGrossCap: PENGU_DUAL_LS_V2.combinedPortfolioGrossCap,
         maximumDailyLossPct: 5,
     },
 });
