@@ -6,7 +6,9 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
+import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
+import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
 
@@ -28,16 +30,21 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V96-to-V12-Migration-Preflight/1.0",
+        userAgent: "DisDex-V96-to-V12-Migration-Preflight/1.1",
     });
     if (!client.hasTradingCredentials()) throw new Error("MIGRATION_PREFLIGHT_REQUIRES_ASTER_CREDENTIALS");
 
     const v96StateDir = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
-    const v96State = await new FileDisDexV96RunnerStateStore(resolve(v96StateDir, "runner-live.json"), "live").load();
-    const v12State = await new FileV12X1AllRunnerStateStore(v12.statePath, "LIVE").load();
-    const risk = await readSharedCryptoDailyRisk(v12.riskPath);
+    const [v96State, v12State, risk, sharedKillSwitch] = await Promise.all([
+        new FileDisDexV96RunnerStateStore(resolve(v96StateDir, "runner-live.json"), "live").load(),
+        new FileV12X1AllRunnerStateStore(v12.statePath, "LIVE").load(),
+        readSharedCryptoDailyRisk(v12.riskPath),
+        readSharedKillSwitch(),
+    ]);
     if (!risk.ok) throw new Error(`SHARED_CRYPTO_RISK_NOT_READY:${risk.reason}`);
+    if (sharedKillSwitch.active) throw new Error(`MIGRATION_BLOCKED_SHARED_KILL_SWITCH:${sharedKillSwitch.reason || "UNSPECIFIED"}`);
 
+    if (v96State.bootstrapRequired) throw new Error("MIGRATION_BLOCKED_V96_STATE_BOOTSTRAP_REQUIRED");
     if (v96State.pending) throw new Error(`MIGRATION_BLOCKED_V96_PENDING:${v96State.pending.clientOrderId}`);
     if (v96State.manualReviewReason) throw new Error(`MIGRATION_BLOCKED_V96_MANUAL_REVIEW:${v96State.manualReviewReason}`);
     if (v96State.killSwitch?.active) throw new Error(`MIGRATION_BLOCKED_V96_KILL_SWITCH:${v96State.killSwitch.reason}`);
@@ -47,7 +54,13 @@ async function main() {
 
     const [_ping, positions, openOrders] = await Promise.all([client.ping(), client.getPositions(), client.getOpenOrders()]);
     void _ping;
-    const v96Positions = positions.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()) && Math.abs(Number(row.positionAmt) || 0) > EPS);
+    const nonzero = positions.filter((row) => Math.abs(Number(row.positionAmt) || 0) > EPS);
+    const unknownPositions = nonzero.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
+    if (unknownPositions.length) throw new Error(`MIGRATION_BLOCKED_UNKNOWN_NONZERO_POSITION:${unknownPositions.map((row) => row.symbol).join(",")}`);
+    const unknownOrders = openOrders.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
+    if (unknownOrders.length) throw new Error(`MIGRATION_BLOCKED_UNKNOWN_OPEN_ORDER:${unknownOrders.map((row) => row.symbol).join(",")}`);
+
+    const v96Positions = nonzero.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
     if (v96Positions.length) throw new Error(`MIGRATION_BLOCKED_V96_NOT_FLAT:${v96Positions.map((row) => `${row.symbol}:${row.positionAmt}`).join(",")}`);
 
     const v96OpenOrders = openOrders.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
@@ -62,15 +75,18 @@ async function main() {
 
     console.log(JSON.stringify({
         status: "V96_TO_V12_MIGRATION_PREFLIGHT_PASS",
+        v96StateBootstrapRequired: false,
         v96ManagedPositions: 0,
         v96OpenOrders: 0,
         v96ResidentProtection: 0,
         v96Pending: 0,
         v12Pending: 0,
         v12ActivePosition: 0,
+        sharedKillSwitchActive: false,
         sharedRiskFresh: true,
         sharedRiskLossPct: risk.state?.lossPct,
         sharedAccountLockAvailable: true,
+        preservedNonV96PositionCount: nonzero.length,
         ordersSent: false,
     }));
 }
