@@ -22,6 +22,7 @@ import type {
     PenguDualLsV2RunnerStateStore,
 } from "@/lib/pengu-dual-ls-v2-runner-state";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
+import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 
@@ -52,6 +53,7 @@ export interface PenguDualLsV2PortfolioRunnerConfig {
     maxTransactionRetries: number;
     maximumEntryDelayMs: number;
     portfolioGrossCap: number;
+    combinedPortfolioGrossCap: number;
     maximumDailyLossPct: number;
     killSwitchPath?: string;
     portfolioDailyLossStatePath?: string;
@@ -126,6 +128,33 @@ export function normalizedPositionGross(positions: DirectPosition[], equity: num
     return positions
         .filter((position) => !excludedSymbol || position.symbol.toUpperCase() !== excludedSymbol.toUpperCase())
         .reduce((sum, position) => sum + grossOf(position), 0) / equity;
+}
+
+export function classifiedPortfolioGross(positions: DirectPosition[], equity: number, excludedSymbol?: string) {
+    if (!(equity > 0)) {
+        return {
+            cryptoGross: Number.POSITIVE_INFINITY,
+            stockGross: Number.POSITIVE_INFINITY,
+            combinedGross: Number.POSITIVE_INFINITY,
+        };
+    }
+    let cryptoNotional = 0;
+    let stockNotional = 0;
+    for (const position of positions) {
+        if (excludedSymbol && position.symbol.toUpperCase() === excludedSymbol.toUpperCase()) continue;
+        const notional = grossOf(position);
+        if (!(notional > 1e-12)) continue;
+        const classification = classifyAsterSymbol(position.symbol);
+        if (!classification.tradable || classification.assetClass === "UNKNOWN") {
+            throw new Error(`PENGU_UNKNOWN_NONZERO_ASTER_POSITION:${position.symbol}`);
+        }
+        if (classification.assetClass === "CRYPTO") cryptoNotional += notional;
+        else if (classification.assetClass === "STOCK") stockNotional += notional;
+        else throw new Error(`PENGU_UNKNOWN_NONZERO_ASTER_POSITION:${position.symbol}`);
+    }
+    const cryptoGross = cryptoNotional / equity;
+    const stockGross = stockNotional / equity;
+    return { cryptoGross, stockGross, combinedGross: cryptoGross + stockGross };
 }
 
 async function readPortfolioDailyLoss(pathValue?: string) {
@@ -380,11 +409,14 @@ export class PenguDualLsV2PortfolioRunner {
             const accountEquity = Math.max(0, finite(account.walletBalance, account.availableBalance));
             const reserve = accountEquity * this.dependencies.config.cashReservePct / 100;
             const available = Math.max(0, Math.min(account.availableBalance, accountEquity - reserve));
-            const otherGross = normalizedPositionGross(positions, accountEquity, SYMBOL);
-            const remainingPortfolioGross = Math.max(0, this.dependencies.config.portfolioGrossCap - otherGross);
+            const classifiedGross = reduceOnly
+                ? { cryptoGross: 0, stockGross: 0, combinedGross: 0 }
+                : classifiedPortfolioGross(positions, accountEquity, SYMBOL);
+            const remainingCryptoGross = Math.max(0, this.dependencies.config.portfolioGrossCap - classifiedGross.cryptoGross);
+            const remainingCombinedGross = Math.max(0, this.dependencies.config.combinedPortfolioGrossCap - classifiedGross.combinedGross);
             const targetGross = reduceOnly
                 ? 0
-                : Math.min(this.dependencies.config.maximumGross, signal.targetGross, remainingPortfolioGross);
+                : Math.min(this.dependencies.config.maximumGross, signal.targetGross, remainingCryptoGross, remainingCombinedGross);
             const targetNotional = reduceOnly ? Math.abs(actual!.quantity) * quote.midPrice : Math.min(targetGross * accountEquity, available);
             if (!reduceOnly && targetNotional < this.dependencies.config.minimumOrderNotionalUsd) {
                 await this.dependencies.stateStore.save(state);
@@ -404,7 +436,7 @@ export class PenguDualLsV2PortfolioRunner {
                 quantity: requestedQuantity,
                 reduceOnly,
                 expectedPrice: side === "BUY" ? quote.askPrice : quote.bidPrice,
-                reason: reduceOnly ? signal.reason : `${signal.reason} targetGross=${targetGross.toFixed(4)} portfolioRemaining=${remainingPortfolioGross.toFixed(4)}`,
+                reason: reduceOnly ? signal.reason : `${signal.reason} targetGross=${targetGross.toFixed(4)} cryptoRemaining=${remainingCryptoGross.toFixed(4)} combinedRemaining=${remainingCombinedGross.toFixed(4)}`,
                 referenceTs: signal.referenceTs,
                 targetGross,
                 createdAt: this.now(),
@@ -439,8 +471,11 @@ export class PenguDualLsV2PortfolioRunner {
                 reduceOnly,
                 targetGross,
                 targetNotional,
-                otherGross,
-                remainingPortfolioGross,
+                cryptoGross: classifiedGross.cryptoGross,
+                stockGross: classifiedGross.stockGross,
+                combinedGross: classifiedGross.combinedGross,
+                remainingCryptoGross,
+                remainingCombinedGross,
                 sharedReservationId: reservationId,
                 referenceTs: signal.referenceTs,
             });
