@@ -24,7 +24,7 @@ on:
       - 'scripts/disdex_v12_crypto_daily_risk.py'
       - 'scripts/v12-*-selftest.ts'
       - 'scripts/disdex-*-selftest.ts'
-      - 'scripts/ops/disdex-v12-mutual-exclusion-preflight.sh'
+      - 'scripts/ops/disdex-v12-*.sh'
       - 'scripts/ops/root/install-disdex-v12-live'
       - 'scripts/ops/root/disdex-v96-to-v12-live-migrate'
       - 'ops/env/disdex-v12-*.example'
@@ -88,14 +88,17 @@ jobs:
         run: |
           set -Eeuo pipefail
           bash -n scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          bash -n scripts/ops/disdex-v12-current-release-delta-audit.sh
           bash -n scripts/ops/root/install-disdex-v12-live
           bash -n scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'mode="${2:-runtime}"' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' scripts/ops/disdex-v12-current-release-delta-audit.sh
+          grep -Fq 'secretsRead=false' scripts/ops/disdex-v12-current-release-delta-audit.sh
           grep -Fq 'I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'Automatic V96 restart is prohibited' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' scripts/ops/root/disdex-v96-to-v12-live-migrate
-          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate
 
       - name: Validate post-migration systemd invariants
         shell: bash
@@ -110,9 +113,13 @@ jobs:
           grep -Fq 'DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v12_v52_margin_guard_runtime.py' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_V12_LIVE_ALLOW_REAL_ORDERS=true' ops/env/disdex-v12-x1-all.live.env.example
+          grep -Fq 'V12_X1_ALL_LOCK_RETRY_MS=5000' ops/env/disdex-v12-x1-all.live.env.example
           grep -Fq 'LINKUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'NEARUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'PENGUUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
+          grep -Fq 'self.account_order_lock = self.lock' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'def _account_critical' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'V52_SHARED_ACCOUNT_ORDER_LOCK_BUSY' scripts/disdex_v12_v52_live_engine.py
 
       - name: Assert tests cannot submit production orders
         shell: bash
