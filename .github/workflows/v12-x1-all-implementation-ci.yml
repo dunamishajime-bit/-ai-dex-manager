@@ -25,6 +25,7 @@ on:
       - 'scripts/v12-*-selftest.ts'
       - 'scripts/disdex-*-selftest.ts'
       - 'scripts/ops/disdex-v12-*.sh'
+      - 'scripts/ops/root/create-disdex-v12-immutable-release'
       - 'scripts/ops/root/install-disdex-v12-live'
       - 'scripts/ops/root/disdex-v96-to-v12-live-migrate'
       - 'ops/env/disdex-v12-*.example'
@@ -89,16 +90,24 @@ jobs:
           set -Eeuo pipefail
           bash -n scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           bash -n scripts/ops/disdex-v12-current-release-delta-audit.sh
+          bash -n scripts/ops/root/create-disdex-v12-immutable-release
           bash -n scripts/ops/root/install-disdex-v12-live
           bash -n scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'mode="${2:-runtime}"' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          grep -Fq '.disdex-release-source-tree' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' scripts/ops/disdex-v12-current-release-delta-audit.sh
           grep -Fq 'secretsRead=false' scripts/ops/disdex-v12-current-release-delta-audit.sh
+          grep -Fq 'git -C "$source_repo" archive --format=tar' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'rev-parse --verify "${sha}^{commit}"' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'npm --prefix "$staging" run build' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'currentChanged=false' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'V12_LIVE_INSTALL_SOURCE_TREE_MARKER_MISSING' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'Automatic V96 restart is prohibited' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'systemctl enable "$target"' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' scripts/ops/root/disdex-v96-to-v12-live-migrate
-          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/create-disdex-v12-immutable-release scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate
 
       - name: Validate post-migration systemd invariants
         shell: bash
