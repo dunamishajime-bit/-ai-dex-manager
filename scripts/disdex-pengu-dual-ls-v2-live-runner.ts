@@ -105,6 +105,7 @@ async function main() {
             maxTransactionRetries: runtime.maxTransactionRetries,
             maximumEntryDelayMs: runtime.maximumEntryDelayMs,
             portfolioGrossCap: runtime.portfolioGrossCap,
+            combinedPortfolioGrossCap: runtime.combinedPortfolioGrossCap,
             maximumDailyLossPct: runtime.maximumDailyLossPct,
             killSwitchPath: runtime.killSwitchPath,
             portfolioDailyLossStatePath: runtime.portfolioDailyLossStatePath,
