@@ -29,6 +29,7 @@ on:
       - 'scripts/ops/root/install-disdex-v12-live'
       - 'scripts/ops/root/disdex-v96-to-v12-live-migrate'
       - 'scripts/ops/root/disdex-v12-live-status-report'
+      - 'scripts/ops/root/disdex-v96-refuse-while-v12-active'
       - 'ops/env/disdex-v12-*.example'
       - 'ops/systemd/disdex-v12-*.service'
       - 'ops/systemd/disdex-v12-*.target'
@@ -96,10 +97,12 @@ jobs:
           bash -n scripts/ops/root/install-disdex-v12-live
           bash -n scripts/ops/root/disdex-v96-to-v12-live-migrate
           bash -n scripts/ops/root/disdex-v12-live-status-report
+          bash -n scripts/ops/root/disdex-v96-refuse-while-v12-active
           grep -Fq 'mode="${2:-runtime}"' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq '.disdex-release-source-tree' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' scripts/ops/disdex-v12-current-release-delta-audit.sh
+          grep -Fq 'VPS_DELTA_WOULD_BE_LOST' scripts/ops/disdex-v12-current-release-delta-audit.sh
           grep -Fq 'secretsRead=false' scripts/ops/disdex-v12-current-release-delta-audit.sh
           grep -Fq 'git -C "$source_repo" archive --format=tar' scripts/ops/root/create-disdex-v12-immutable-release
           grep -Fq 'rev-parse --verify "${sha}^{commit}"' scripts/ops/root/create-disdex-v12-immutable-release
@@ -107,15 +110,21 @@ jobs:
           grep -Fq 'currentChanged=false' scripts/ops/root/create-disdex-v12-immutable-release
           grep -Fq 'V12_LIVE_INSTALL_SOURCE_TREE_MARKER_MISSING' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'disdex-v12-runtime-status@.service' scripts/ops/root/install-disdex-v12-live
+          grep -Fq '/usr/local/libexec/disdex-v96-refuse-while-v12-active' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'present_old_units' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq '90-v12-mutual-exclusion.conf' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'Automatic V96 restart is prohibited' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'disdex-v12-live-status-report" "$sha" pre-enable' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'disdex-v12-live-status-report" "$sha" final' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'systemctl enable "$target"' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'V96_REVERSE_INTERLOCK_VERIFIED=TRUE' scripts/ops/root/disdex-v12-live-status-report
           grep -Fq 'LIVE_RUNTIME_VERIFIED_PRE_ENABLE' scripts/ops/root/disdex-v12-live-status-report
           grep -Fq 'LIVE_ACTIVATED_VERIFIED' scripts/ops/root/disdex-v12-live-status-report
+          grep -Fq 'V96_START_BLOCKED_V12_SERVICE_ACTIVE' scripts/ops/root/disdex-v96-refuse-while-v12-active
+          grep -Fq 'V96_START_BLOCKED_V12_TARGET_ACTIVE' scripts/ops/root/disdex-v96-refuse-while-v12-active
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' scripts/ops/root/disdex-v96-to-v12-live-migrate
-          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/create-disdex-v12-immutable-release scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate scripts/ops/root/disdex-v12-live-status-report
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/create-disdex-v12-immutable-release scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate scripts/ops/root/disdex-v12-live-status-report scripts/ops/root/disdex-v96-refuse-while-v12-active
 
       - name: Validate post-migration systemd and account-priority invariants
         shell: bash
@@ -139,14 +148,19 @@ jobs:
           grep -Fq 'P2: V52 stock exposure' lib/disdex-account-order-lock.ts
           grep -Fq 'P3: PENGU V2 exposure' lib/disdex-account-order-lock.ts
           grep -Fq 'P4: V12 exposure' lib/disdex-account-order-lock.ts
+          grep -Fq 'fixedSymbol: SYMBOL' scripts/disdex-pengu-dual-ls-v2-live-runner.ts
           grep -Fq 'PENGU_DUAL_LS_V2:P${priority}' scripts/disdex-pengu-dual-ls-v2-live-runner.ts
+          grep -Fq 'PENGU_SHARED_ACCOUNT_RESERVATION_UNAVAILABLE' lib/pengu-dual-ls-v2-portfolio-runner.ts
+          grep -Fq 'sharedReservationId' lib/pengu-dual-ls-v2-portfolio-runner.ts
           grep -Fq 'V12_X1.00_ALL:P${priority}' scripts/disdex-v12-x1-all-live-runner.ts
+          grep -Fq 'recovery_owner_prefix="V52:"' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'self.account_order_lock.reserve' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'priority=2' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'priority=1' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq '_recover_expired_owned_strategy_lock' scripts/disdex_account_order_lock.py
           grep -Fq 'LINKUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'NEARUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'PENGUUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
-          grep -Fq 'self.account_order_lock = self.lock' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'def _account_critical' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'V52_SHARED_ACCOUNT_ORDER_LOCK_TIMEOUT' scripts/disdex_v12_v52_live_engine.py
 
