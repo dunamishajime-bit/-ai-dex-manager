@@ -110,6 +110,17 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
         if (result.status === "UNKNOWN") throw new Error(`V12_FAILSAFE_CLOSE_UNKNOWN:${input.clientOrderId}`);
         const positions = await this.executor.getPositions(); if (positions.some((position) => position.symbol === input.symbol.toUpperCase() && Math.abs(position.quantity) > 1e-12)) throw new Error(`V12_FAILSAFE_CLOSE_POSITION_REMAINS:${input.symbol}`);
     }
-    async openOrders(symbol: string) { const orders = await this.client.getOpenOrders(symbol.toUpperCase()); return orders.map((order) => ({ clientOrderId: String(order.clientOrderId || ""), stopPrice: finite(order.stopPrice) || undefined, status: order.status })); }
+    async openOrders(symbol: string) {
+        const orders = await this.client.getOpenOrders(symbol.toUpperCase());
+        return orders.map((order) => ({
+            clientOrderId: String(order.clientOrderId || ""),
+            stopPrice: finite(order.stopPrice) || undefined,
+            status: order.status,
+            side: order.side,
+            type: order.type,
+            reduceOnly: order.reduceOnly,
+            quantity: finite(order.origQty),
+        }));
+    }
     async listV12Orders(symbol?: string) { const rows = await this.client.getOpenOrders(symbol?.toUpperCase()); return rows.map(normalizeOrder).filter((row) => row.clientOrderId.startsWith(V12_CLIENT_ORDER_PREFIX)); }
 }
