@@ -11,6 +11,7 @@ import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-
 import { FilePenguDualLsV2RunnerStateStore, type PenguDualLsV2RunnerState } from "../lib/pengu-dual-ls-v2-runner-state";
 
 const HOUR_MS = 60 * 60_000;
+const SYMBOL = "PENGUUSDT";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -35,6 +36,7 @@ class PenguPriorityAccountOrderLock extends FileAccountOrderLock {
             ownerPrefix: "PENGU_DUAL_LS_V2:",
             strategyId: "PENGU_DUAL_LS_V2_FINAL",
             pendingStatePath: statePath,
+            fixedSymbol: SYMBOL,
         });
     }
 
