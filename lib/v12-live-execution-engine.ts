@@ -43,7 +43,7 @@ function latestIndex(data: Record<string, V12Bar[]>) {
 }
 function initialProtection(input: { symbol: string; side: "LONG" | "SHORT"; quantity: number; entryPrice: number; atr: number; positionId: string }): V12StopState {
     const levels = protectiveLevels(input.entryPrice, input.atr, input.side);
-    return { strategyId: "V12_X1.00_ALL", symbol: input.symbol, side: input.side, positionId: input.positionId, quantity: input.quantity, entryPrice: input.entryPrice, atrAtEntry: input.atr, initialStop: levels.stopPrice, lastAckStop: levels.stopPrice, takeProfit: levels.takeProfitPrice, peakOrTrough: input.entryPrice };
+    return { strategyId: "V12_X1.00_ALL", symbol: input.symbol, side: input.side, positionId: input.positionId, quantity: input.quantity, entryPrice: input.entryPrice, atrAtEntry: input.atr, initialStop: levels.initialStop, lastAckStop: levels.initialStop, takeProfit: levels.takeProfit, peakOrTrough: input.entryPrice };
 }
 
 export class V12LiveExecutionEngine {
@@ -197,7 +197,7 @@ export class V12LiveExecutionEngine {
             const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
             if (state.lastCompletedIdempotencyKey === clientOrderId) { await this.d.stateStore.save(state); return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId }; }
             const reservation = await handle.reserve({ strategyId: "V12_X1.00_ALL", symbol, side: signal.side, gross: accepted.gross, notionalUsd: accepted.gross * equity });
-            const pending: V12PendingOrderState = { idempotencyKey: clientOrderId, action: "ENTRY", clientOrderId, symbol, side: signal.side, quantity, signalTs: signal.referenceTs, expectedPrice, requestedGross: accepted.gross, atrAtEntry: signal.atr, reason: signal.reason, createdAt: this.now() };
+            const pending: V12PendingOrderState = { idempotencyKey: clientOrderId, action: "ENTRY", clientOrderId, symbol, side: signal.side, quantity, signalTs: signal.referenceTs, expectedPrice, requestedGross: accepted.gross, atrAtEntry: signal.atr, reason: "signal-entry", createdAt: this.now() };
             state.pending = pending; await this.d.stateStore.save(state);
             const result = await this.d.adapter.executeEntry({ signalTs: signal.referenceTs, symbol, side: signal.side, quantity, expectedPrice, clientOrderId });
             await handle.releaseReservation(reservation.reservationId);
