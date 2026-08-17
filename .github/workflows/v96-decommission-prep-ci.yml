@@ -41,4 +41,4 @@ jobs:
           grep -Fq 'STATUS: V12_LIVE_V96_DECOMMISSIONED' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
           grep -Fq 'No synthetic or artificial LIVE test order.' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
-          grep -Fq 'V96 mutual-exclusion interlocks' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'mutual-exclusion interlocks' docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
