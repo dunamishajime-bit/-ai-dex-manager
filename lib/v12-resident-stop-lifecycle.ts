@@ -14,6 +14,12 @@ export interface ResidentStopAdapter {
     flattenReduceOnly(input: { symbol: string; side: "BUY" | "SELL"; quantity: number; clientOrderId: string }): Promise<void>;
     openOrders(symbol: string): Promise<ResidentOrderView[]>;
 }
+export interface V12TrailingPlan {
+    clientOrderId: string;
+    stopPrice: number;
+    previousStopClientOrderId?: string;
+    nextPeakOrTrough: number;
+}
 function exitSide(side: V12Side) { return side === "LONG" ? "SELL" : "BUY"; }
 function id(state: V12StopState, leg: "STOP" | "TP", version = 0) { return `v12-${leg.toLowerCase()}-${createHash("sha256").update(`${state.positionId}|${state.symbol}|${leg}|${version}`).digest("hex").slice(0, 22)}`.slice(0, 36); }
 function isActive(status?: string) { return !["CANCELED", "CANCELLED", "REJECTED", "EXPIRED", "FILLED"].includes(String(status || "NEW").toUpperCase()); }
@@ -83,31 +89,55 @@ export async function installV12Protection(adapter: ResidentStopAdapter, state: 
     }
 }
 
-export async function updateV12TrailingStop(adapter: ResidentStopAdapter, state: V12StopState, price: number): Promise<V12StopState> {
-    if (state.manualReview) return state;
+/** Compute and normalize a replacement trailing STOP without mutating exchange
+ * state. The caller may persist the returned deterministic plan before send. */
+export async function planV12TrailingStop(adapter: ResidentStopAdapter, state: V12StopState, price: number): Promise<{ state: V12StopState; plan?: V12TrailingPlan }> {
+    if (state.manualReview) return { state };
     const nextExtreme = state.side === "LONG" ? Math.max(state.peakOrTrough, price) : Math.min(state.peakOrTrough, price);
     const levels = protectiveLevels(state.entryPrice, state.atrAtEntry, state.side);
     const rawCandidate = nextTrailingStop(state.side, state.lastAckStop, nextExtreme, levels.trailingDistance);
-    if (rawCandidate === state.lastAckStop || !Number.isFinite(rawCandidate)) return { ...state, peakOrTrough: nextExtreme };
+    if (rawCandidate === state.lastAckStop || !Number.isFinite(rawCandidate)) return { state: { ...state, peakOrTrough: nextExtreme } };
     const normalized = await adapter.normalizeStopPrice(state.symbol, rawCandidate);
     const candidate = normalized.price;
-    if (candidate === state.lastAckStop) return { ...state, peakOrTrough: nextExtreme };
-    const nextId = id(state, "STOP", Math.round(candidate * 1e8)); const closeSide = exitSide(state.side);
+    if (candidate === state.lastAckStop) return { state: { ...state, peakOrTrough: nextExtreme } };
+    return {
+        state: { ...state, peakOrTrough: nextExtreme },
+        plan: {
+            clientOrderId: id(state, "STOP", Math.round(candidate * 1e8)),
+            stopPrice: candidate,
+            previousStopClientOrderId: state.stopClientOrderId,
+            nextPeakOrTrough: nextExtreme,
+        },
+    };
+}
+
+/** Apply one persisted trailing plan. Safe to call again after a crash: if the
+ * deterministic replacement STOP already exists it is verified and reused. */
+export async function applyV12TrailingStop(adapter: ResidentStopAdapter, state: V12StopState, plan: V12TrailingPlan): Promise<V12StopState> {
+    if (state.manualReview) return state;
+    if (plan.previousStopClientOrderId !== state.stopClientOrderId) return { ...state, manualReview: "TRAILING_STOP_PREVIOUS_ID_MISMATCH" };
+    const closeSide = exitSide(state.side);
     try {
-        let open = await adapter.openOrders(state.symbol); let existing = open.find((order) => order.clientOrderId === nextId);
-        if (existing && !validateLeg(existing, { id: nextId, type: "STOP_MARKET", side: closeSide, quantity: state.quantity, stopPrice: candidate })) throw new Error("TRAILING_STOP_EXISTING_MISMATCH");
+        let open = await adapter.openOrders(state.symbol); let existing = open.find((order) => order.clientOrderId === plan.clientOrderId);
+        if (existing && !validateLeg(existing, { id: plan.clientOrderId, type: "STOP_MARKET", side: closeSide, quantity: state.quantity, stopPrice: plan.stopPrice })) throw new Error("TRAILING_STOP_EXISTING_MISMATCH");
         if (!existing) {
-            const result = await adapter.placeStopMarket({ symbol: state.symbol, side: closeSide, quantity: state.quantity, stopPrice: candidate, clientOrderId: nextId, reduceOnly: true });
+            const result = await adapter.placeStopMarket({ symbol: state.symbol, side: closeSide, quantity: state.quantity, stopPrice: plan.stopPrice, clientOrderId: plan.clientOrderId, reduceOnly: true });
             if (!result.acknowledged) throw new Error("TRAILING_STOP_NOT_ACKNOWLEDGED");
         }
-        open = await adapter.openOrders(state.symbol); existing = open.find((order) => order.clientOrderId === nextId);
-        if (!validateLeg(existing, { id: nextId, type: "STOP_MARKET", side: closeSide, quantity: state.quantity, stopPrice: candidate })) throw new Error("TRAILING_STOP_NOT_VISIBLE_OR_MISMATCH");
-        if (state.stopClientOrderId && state.stopClientOrderId !== nextId) await adapter.cancel(state.stopClientOrderId);
-        return { ...state, peakOrTrough: nextExtreme, lastAckStop: candidate, stopClientOrderId: nextId };
+        open = await adapter.openOrders(state.symbol); existing = open.find((order) => order.clientOrderId === plan.clientOrderId);
+        if (!validateLeg(existing, { id: plan.clientOrderId, type: "STOP_MARKET", side: closeSide, quantity: state.quantity, stopPrice: plan.stopPrice })) throw new Error("TRAILING_STOP_NOT_VISIBLE_OR_MISMATCH");
+        if (plan.previousStopClientOrderId && plan.previousStopClientOrderId !== plan.clientOrderId) await adapter.cancel(plan.previousStopClientOrderId);
+        return { ...state, peakOrTrough: plan.nextPeakOrTrough, lastAckStop: plan.stopPrice, stopClientOrderId: plan.clientOrderId };
     } catch (error) {
-        try { if (nextId !== state.stopClientOrderId) await adapter.cancel(nextId); } catch { /* old STOP is still authoritative */ }
-        return { ...state, peakOrTrough: nextExtreme, manualReview: `TRAILING_STOP_UPDATE_FAILED:${error instanceof Error ? error.message : String(error)}` };
+        try { if (plan.clientOrderId !== state.stopClientOrderId) await adapter.cancel(plan.clientOrderId); } catch { /* old STOP remains authoritative */ }
+        return { ...state, peakOrTrough: plan.nextPeakOrTrough, manualReview: `TRAILING_STOP_UPDATE_FAILED:${error instanceof Error ? error.message : String(error)}` };
     }
+}
+
+export async function updateV12TrailingStop(adapter: ResidentStopAdapter, state: V12StopState, price: number): Promise<V12StopState> {
+    const planned = await planV12TrailingStop(adapter, state, price);
+    if (!planned.plan) return planned.state;
+    return applyV12TrailingStop(adapter, planned.state, planned.plan);
 }
 
 export async function reconcileV12Protection(adapter: ResidentStopAdapter, state: V12StopState): Promise<V12StopState> {
