@@ -1,0 +1,44 @@
+name: V12 LIVE activation V3 CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-v12-live-activate-from-sha-v3'
+      - 'scripts/ops/disdex-v12-current-release-delta-audit-v2.sh'
+      - 'scripts/ops/root/disdex-v96-to-v12-live-migrate-final'
+      - '.github/workflows/v12-live-activation-v3-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  final-activation-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate final V3 activation boundary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          activate=scripts/ops/root/disdex-v12-live-activate-from-sha-v3
+          audit=scripts/ops/disdex-v12-current-release-delta-audit-v2.sh
+          migrate=scripts/ops/root/disdex-v96-to-v12-live-migrate-final
+          for script in "$activate" "$audit" "$migrate"; do bash -n "$script"; done
+          grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' "$activate"
+          grep -Fq 'git -C "$source_repo" archive "$sha"' "$activate"
+          grep -Fq 'disdex-v12-current-release-delta-audit-v2.sh' "$activate"
+          grep -Fq 'disdex-v96-to-v12-live-migrate-final' "$activate"
+          grep -Fq 'V12_V3_PHASE=FULL_TREE_VPS_DELTA_AUDIT' "$activate"
+          grep -Fq 'V12_V3_PHASE=HARDENED_LIVE_MIGRATION' "$activate"
+          grep -Fq 'VPS_RELEASE_DELTA_BLOCKED' "$audit"
+          grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' "$audit"
+          grep -Fq 'VPS_RELEASE_FULL_TREE_DELTA_PRESERVATION_PASS' "$audit"
+          grep -Fq 'SECRET_LIKE_PATH_EXCLUDED' "$audit"
+          grep -Fq 'secretsRead=false' "$audit"
+          grep -Fq 'v12_start_attempted=true' "$migrate"
+          grep -Fq 'Automatic V96 restart is prohibited' "$migrate"
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$activate" "$audit" "$migrate"
+          ! grep -Eq 'placeMarket|place_limit|submitOrder|curl[[:space:]].*(order|fapi)' "$activate" "$audit" "$migrate"
+          echo V12_LIVE_ACTIVATION_V3_CI_PASS
