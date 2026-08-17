@@ -16,6 +16,12 @@ export interface V12PendingOrderState {
     atrAtEntry?: number;
     reason?: string;
     createdAt: number;
+    // STOP_UPDATE recovery metadata. Persisted before the replacement STOP is
+    // sent so a hard crash can reuse/reconcile the exact deterministic leg.
+    positionId?: string;
+    stopPrice?: number;
+    previousStopClientOrderId?: string;
+    nextPeakOrTrough?: number;
 }
 
 export interface V12ActivePositionState {
@@ -59,6 +65,9 @@ function validate(value: Partial<V12X1AllRunnerState>, mode: V12X1AllRunnerState
     }
     if (value.pending) {
         if (!value.pending.clientOrderId || !value.pending.idempotencyKey || !value.pending.symbol || !value.pending.side || !(value.pending.quantity > 0) || !Number.isFinite(value.pending.signalTs)) throw new Error("V12_STATE_PENDING_INVALID");
+        if (value.pending.action === "STOP_UPDATE") {
+            if (!value.pending.positionId || !(Number(value.pending.stopPrice) > 0) || !Number.isFinite(Number(value.pending.nextPeakOrTrough))) throw new Error("V12_STATE_STOP_UPDATE_PENDING_INVALID");
+        }
     }
     return value;
 }
