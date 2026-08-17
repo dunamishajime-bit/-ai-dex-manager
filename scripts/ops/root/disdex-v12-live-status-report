@@ -5,7 +5,9 @@ umask 077
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 [[ "$(id -u)" == "0" ]] || { printf 'V12_LIVE_STATUS_REQUIRES_ROOT\n' >&2; exit 1; }
 sha="${1:-}"
+mode="${2:-final}"
 [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_LIVE_STATUS_INVALID_SHA\n' >&2; exit 2; }
+[[ "$mode" == "pre-enable" || "$mode" == "final" ]] || { printf 'V12_LIVE_STATUS_INVALID_MODE\n' >&2; exit 2; }
 release="/home/deploy/disdex-trading/releases/$sha"
 current=/home/deploy/disdex-trading/current
 [[ -d "$release" && ! -L "$release" ]] || { printf 'V12_LIVE_STATUS_RELEASE_INVALID\n' >&2; exit 2; }
@@ -48,7 +50,11 @@ run_readonly_oneshot() {
 
 for unit in "$v12" "$pengu" "$v52" "$risk" "$margin"; do require_active "$unit"; done
 [[ "$(state_of "$target")" == "active" ]] || { printf 'V12_LIVE_STATUS_TARGET_NOT_ACTIVE\n' >&2; exit 3; }
-systemctl is-enabled --quiet "$target" || { printf 'V12_LIVE_STATUS_TARGET_NOT_ENABLED\n' >&2; exit 3; }
+if [[ "$mode" == "pre-enable" ]]; then
+  systemctl is-enabled --quiet "$target" 2>/dev/null && { printf 'V12_LIVE_STATUS_TARGET_PREMATURELY_ENABLED\n' >&2; exit 3; }
+else
+  systemctl is-enabled --quiet "$target" || { printf 'V12_LIVE_STATUS_TARGET_NOT_ENABLED\n' >&2; exit 3; }
+fi
 for unit in "${old_units[@]}"; do
   [[ "$(state_of "$unit")" != "active" && "$(pid_of "$unit")" == "0" ]] || { printf 'V12_LIVE_STATUS_V96_STILL_ACTIVE unit=%s\n' "$unit" >&2; exit 3; }
 done
@@ -63,17 +69,23 @@ run_readonly_oneshot "disdex-v12-runtime-status@$sha.service" V12_RUNTIME
 run_readonly_oneshot "disdex-pengu-v2-readiness@$sha.service" PENGU_V2
 run_readonly_oneshot "disdex-v52-v12-readiness@$sha.service" V52
 
-printf 'STATUS: LIVE_ACTIVATED_VERIFIED\n'
-printf 'releaseSha=%s\nsourceTree=%s\ncurrentRelease=%s\n' "$sha" "$source_tree" "$(readlink -f "$current")"
+if [[ "$mode" == "pre-enable" ]]; then
+  printf 'STATUS: LIVE_RUNTIME_VERIFIED_PRE_ENABLE\n'
+  boot_enabled=FALSE
+else
+  printf 'STATUS: LIVE_ACTIVATED_VERIFIED\n'
+  boot_enabled=TRUE
+fi
+printf 'releaseSha=%s\nsourceTree=%s\ncurrentRelease=%s\nverificationMode=%s\n' "$sha" "$source_tree" "$(readlink -f "$current")" "$mode"
 printf 'V96_STOPPED=TRUE\nV12_LIVE_STARTED=TRUE\nPENGU_V2_RUNNING=TRUE\nV52_RUNNING=TRUE\n'
 printf 'SHARED_CRYPTO_RISK_RUNNING=TRUE\nFULL_UNIVERSE_MARGIN_GUARD_RUNNING=TRUE\n'
 printf 'V12_RUNTIME_RECONCILIATION_PASS=TRUE\nPENGU_V2_READINESS_PASS=TRUE\nV52_READINESS_PASS=TRUE\n'
-printf 'V96_V12_SIMULTANEOUS_LIVE=FALSE\nV12_BOOT_TARGET_ENABLED=TRUE\nORDERS_SENT_FOR_TESTING=0\n'
+printf 'V96_V12_SIMULTANEOUS_LIVE=FALSE\nV12_BOOT_TARGET_ENABLED=%s\nORDERS_SENT_FOR_TESTING=0\n' "$boot_enabled"
 printf 'v12MainPid=%s\nv12Restarts=%s\npenguMainPid=%s\npenguRestarts=%s\nv52MainPid=%s\nv52Restarts=%s\n' \
   "$(pid_of "$v12")" "$(restarts_of "$v12")" \
   "$(pid_of "$pengu")" "$(restarts_of "$pengu")" \
   "$(pid_of "$v52")" "$(restarts_of "$v52")"
-printf '--- V12 runtime evidence ---\n'
+printf '%s\n' '--- V12 runtime evidence ---'
 journalctl -u "disdex-v12-runtime-status@$sha.service" --no-pager -n 20 | grep -E 'V12_RUNTIME_RECONCILIATION_(PASS|FAILED)' || true
 printf '%s\n' '--- PENGU V2 evidence ---'
 journalctl -u "disdex-pengu-v2-readiness@$sha.service" --no-pager -n 20 | grep -E 'PENGU_V2_LIVE_READINESS_(PASS|FAILED)' || true
