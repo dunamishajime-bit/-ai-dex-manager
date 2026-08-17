@@ -96,9 +96,9 @@ Keep/standardize these shared components:
 
 Specific cleanup requirements:
 
-1. PENGU V2 must stop importing V96 Kill Switch helpers. Use `lib/disdex-shared-kill-switch.ts` or a neutral equivalent.
+1. PENGU V2 must stop importing V96 Kill Switch helpers. Migrate to `lib/disdex-shared-kill-switch.ts` or a neutral equivalent **without weakening malformed/missing-state fail-closed behavior**. Do not swap readers merely because the name is neutral; prove schema/path/error-behavior parity in self-tests first.
 2. Any V12/PENGU/V52 runtime dependency on `lib/disdex-v96-*` or `config/disdexV96Runtime.ts` must be removed.
-3. Rename shared environment variables whose names contain `V96` to neutral production names. During the source migration, compatibility aliases may exist only long enough to migrate the live VPS config; the final decommission release must run on neutral names.
+3. Rename shared environment variables whose names contain `V96` to neutral production names. During source migration, compatibility aliases may exist only long enough to migrate the live VPS config; the final decommission release must run on neutral names.
 4. Rename shared Python/TS constants whose strategy/runtime identity incorrectly contains V96. If a durable state schema contains the old identity, implement an explicit one-time state migration with backup, exact old/new schema validation and no trading action.
 5. Migrate active production state roots to neutral paths only with atomic copy/rename and byte/content validation. Never reset state. Preserve V12/PENGU/V52 durable position/pending/risk history.
 6. Migrate Aster/reference credentials from the legacy V96-named environment file into a neutral root-owned secret environment file without printing secrets. Verify new services use the new file before the old file is retired.
@@ -157,6 +157,7 @@ The new V96-free SHA must pass at minimum:
 - V52 self-test/contract
 - full-universe Margin Guard self-test
 - migration/state-schema tests introduced by C1
+- shared Kill Switch schema/path/fail-closed parity tests
 - `disdex-v96-decommission-source-audit.sh . --expect-clean`
 - Linux production build
 
