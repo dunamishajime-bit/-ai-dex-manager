@@ -30,8 +30,6 @@ async function main() {
     assert.equal(activeReservedGross(await firstHandle.document()), 0);
     await firstHandle.release();
 
-    // Concurrent waiters inside one arbitration window must follow the fixed
-    // account priority regardless of the JavaScript call order.
     process.env.DISDEX_ACCOUNT_LOCK_ARBITRATION_MS = "300";
     const priorityPath = join(directory, "priority.lock");
     const p4Lock = new FileAccountOrderLock(priorityPath, 10_000);
@@ -50,7 +48,6 @@ async function main() {
     assert.equal(p4, null);
     await p1.release();
 
-    // Without P1, stock P2 must precede PENGU P3 and V12 P4.
     const priorityPath2 = join(directory, "priority2.lock");
     const [v12Entry, penguEntry, stockEntry] = await Promise.all([
         new FileAccountOrderLock(priorityPath2, 10_000).acquire("V12_X1.00_ALL:P4:101:v12-entry"),
@@ -62,9 +59,7 @@ async function main() {
     assert.equal(v12Entry, null);
     await stockEntry.release();
 
-    // Hard-crash recovery: an expired lock owned by a definitely-dead V12 PID
-    // can be atomically taken over only when its active reservation matches the
-    // durable pending transaction that was saved before the exchange send.
+    // V12 hard-crash recovery requires exact durable pending metadata.
     const statePath = join(directory, "v12-state.json");
     await writeFile(statePath, JSON.stringify({
         schema: "v12-x1-all-runner-state/v1",
@@ -102,7 +97,6 @@ async function main() {
     assert.equal(activeReservedGross(await recovered.document()), 0.25, "reservation must remain visible until pending reconciliation finishes");
     await recovered.release();
 
-    // Mismatched pending metadata is not enough evidence to take ownership.
     await writeFile(statePath, JSON.stringify({
         schema: "v12-x1-all-runner-state/v1",
         strategyId: "V12_X1.00_ALL",
@@ -129,6 +123,62 @@ async function main() {
         }],
     }));
     assert.equal(await recovering.acquire(`V12_X1.00_ALL:P4:${process.pid}:must-not-takeover`), null);
+
+    // PENGU durable pending intentionally omits symbol because the strategy is
+    // single-symbol. fixedSymbol plus BUY->LONG normalization must still prove
+    // that the dead P3 lock/reservation belongs to exactly this transaction.
+    const penguPath = join(directory, "pengu.lock");
+    const penguStatePath = join(directory, "pengu-state.json");
+    await writeFile(penguStatePath, JSON.stringify({
+        version: 1,
+        strategyId: "PENGU_DUAL_LS_V2_FINAL",
+        mode: "LIVE",
+        updatedAt: Date.now(),
+        pending: {
+            idempotencyKey: "pengu-dead",
+            clientOrderId: "dualls2-pengu-dead",
+            phase: "submitted",
+            side: "BUY",
+            quantity: 100,
+            reduceOnly: false,
+            expectedPrice: 0.1,
+            reason: "test",
+            referenceTs: Date.now(),
+            targetGross: 0.5,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            retryCount: 0,
+        },
+        failures: [],
+    }));
+    await writeFile(penguPath, JSON.stringify({
+        schema: ACCOUNT_LOCK_SCHEMA,
+        accountScope: "ASTER_FUTURES",
+        ownerId: "PENGU_DUAL_LS_V2:P3:99999999:dead",
+        leaseId: "pengu-dead-lease",
+        acquiredAt: Date.now() - 20_000,
+        expiresAt: Date.now() - 10_000,
+        reservations: [{
+            reservationId: "pengu-reservation",
+            strategyId: "PENGU_DUAL_LS_V2_FINAL",
+            symbol: "PENGUUSDT",
+            side: "LONG",
+            gross: 0.5,
+            notionalUsd: 500,
+            createdAt: Date.now() - 20_000,
+            status: "RESERVED",
+        }],
+    }));
+    const penguRecovering = new FileAccountOrderLock(penguPath, 10_000, {
+        ownerPrefix: "PENGU_DUAL_LS_V2:",
+        strategyId: "PENGU_DUAL_LS_V2_FINAL",
+        pendingStatePath: penguStatePath,
+        fixedSymbol: "PENGUUSDT",
+    });
+    const recoveredPengu = await penguRecovering.acquire(`PENGU_DUAL_LS_V2:P3:${process.pid}:replacement`);
+    assert.ok(recoveredPengu, "dead PENGU P3 lock must recover only with matching fixed-symbol pending evidence");
+    assert.equal(activeReservedGross(await recoveredPengu.document()), 0.5);
+    await recoveredPengu.release();
 
     console.log("ACCOUNT_ORDER_LOCK_TS_SELFTEST_PASS");
 }
