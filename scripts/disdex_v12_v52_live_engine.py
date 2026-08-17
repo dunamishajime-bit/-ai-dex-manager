@@ -11,6 +11,7 @@ import time
 # margin-aware V52 engine. This preserves the deployed V96 implementation while
 # giving the post-migration composition the full frozen V12 universe.
 import disdex_v96_v52_margin_guard as guard
+from disdex_account_order_lock import AccountOrderLock
 
 V12_CRYPTO_SYMBOLS = (
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT",
@@ -39,12 +40,23 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
     The daemon singleton lock is local. The cross-language account-order lock is
     held only around exchange-mutating critical sections. Owner IDs encode the
     shared arbitration priority: P1 for reduce-only/flatten and P2 for new V52
-    stock exposure.
+    stock exposure. New exposure is reserved in the shared lock before the
+    inherited V52 code persists ``pendingOrder`` and sends the order.
     """
 
     def __init__(self, mode: str):
         super().__init__(mode)
-        self.account_order_lock = self.lock
+        # Replace the inherited account lock with the same protocol configured
+        # for V52 durable crash recovery. The inherited state schema uses
+        # ``pendingOrder`` and strategyId=legacy.STRATEGY_ID.
+        self.account_order_lock = AccountOrderLock(
+            os.getenv("DISDEX_ACCOUNT_LOCK_PATH", ".runtime-state/shared/account-order.lock"),
+            legacy.base.int_env("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000),
+            recovery_owner_prefix="V52:",
+            recovery_state_strategy_id=legacy.STRATEGY_ID,
+            recovery_reservation_strategy_prefix="V52:",
+            pending_state_path=self.state_path,
+        )
         self.lock = legacy.base.FileLock(
             self.state_root / f"runner-{mode}.lock",
             legacy.base.int_env("DISDEX_STOCK_LOCK_STALE_MS", 15 * 60_000),
@@ -85,17 +97,47 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
         # New stock exposure is P2. If a simultaneous P1 close/protection action
-        # wins arbitration, do not turn ordinary contention into a fatal V52
-        # error; simply skip this entry opportunity and re-evaluate later.
+        # wins arbitration, ordinary contention skips this entry instead of
+        # becoming a fatal tick / Kill Switch event.
         with self._account_critical(priority=2, wait_seconds=1.0, required=False) as acquired:
             if not acquired:
                 self.log("v52-entry-skipped-account-priority", slot=slot, priority=2, ordersSent=False)
                 return False
-            return super().open_basis_position(slot, candidate, target_gross)
+
+            equity = self.portfolio_equity()
+            if not equity > 0:
+                raise RuntimeError("V52_ACCOUNT_EQUITY_INVALID_BEFORE_RESERVATION")
+            symbol = str(candidate.get("symbol") or "").upper()
+            open_side = str(candidate.get("side") or "").upper()
+            reservation_side = "LONG" if open_side == "BUY" else "SHORT" if open_side == "SELL" else ""
+            if not symbol or not reservation_side:
+                raise RuntimeError("V52_RESERVATION_INPUT_INVALID")
+            reservation = self.account_order_lock.reserve(
+                f"V52:{slot}",
+                symbol,
+                reservation_side,
+                float(target_gross),
+                float(target_gross) * float(equity),
+            )
+            try:
+                # Inherited path now executes while the reservation is visible:
+                # fresh gross/margin check -> durable pendingOrder -> send ->
+                # result/reconcile. A hard crash leaves both lock+reservation and
+                # pending evidence for dead-PID recovery.
+                return super().open_basis_position(slot, candidate, target_gross)
+            finally:
+                # On a live Python exception (not a hard crash), release the
+                # reservation before releasing the enclosing account lock.
+                try:
+                    self.account_order_lock.release_reservation(reservation["reservationId"])
+                except Exception as error:
+                    self.log("v52-reservation-release-failed", slot=slot, error=str(error))
+                    raise
 
     def close_slot(self, slot: str, reason: str) -> None:
-        # Risk-reducing exits are the highest shared-account priority and retry
-        # boundedly rather than yielding to a new exposure request.
+        # Risk-reducing exits are highest priority and retry boundedly rather
+        # than yielding to a new exposure request. No positive-gross reservation
+        # is needed for reduce-only work.
         with self._account_critical(priority=1, wait_seconds=30.0, required=True):
             return super().close_slot(slot, reason)
 
