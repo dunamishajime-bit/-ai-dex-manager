@@ -1,0 +1,161 @@
+{
+  "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
+  "status": "V13_FORWARD_DATA_REQUIRED",
+  "generatedAt": "2026-08-18T19:10:02.273000Z",
+  "safety": {
+    "mode": "SHADOW_RESEARCH_ONLY",
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false
+  },
+  "coverage": {
+    "booksBySymbol": {
+      "AMZN": [
+        "ASTER",
+        "XYZ"
+      ],
+      "META": [
+        "ASTER",
+        "XYZ"
+      ],
+      "MSFT": [
+        "ASTER",
+        "XYZ"
+      ],
+      "NVDA": [
+        "ASTER",
+        "XYZ"
+      ],
+      "TSLA": [
+        "ASTER",
+        "XYZ"
+      ]
+    },
+    "completeSymbols": [
+      "AMZN",
+      "META",
+      "MSFT",
+      "NVDA",
+      "TSLA"
+    ],
+    "asterBooks": 357330,
+    "xyzBooks": 17070,
+    "asterTrades": 295,
+    "xyzTrades": 32323,
+    "collectorErrors": 1
+  },
+  "virtualExecution": {
+    "quotesOpened": 0,
+    "entryFills": 0,
+    "completedCycles": 0,
+    "forcedCycles": 0,
+    "pendingHedges": 0,
+    "openInventories": 0,
+    "partialFillFailures": 0,
+    "unhedgedRejected": 0,
+    "unresolvedInventory": 0,
+    "unresolvedCloseAttempts": 0,
+    "cancellations": {}
+  },
+  "costScenarios": {
+    "FORWARD_MEDIAN": {
+      "makerCycleCostBps": 6.0,
+      "forcedCloseCostBps": 10.0,
+      "completedCycles": 0,
+      "averageNetBps": null,
+      "positiveNetRate": null,
+      "minimumNetBps": null,
+      "maximumNetBps": null,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "NORMAL": {
+      "makerCycleCostBps": 10.0,
+      "forcedCloseCostBps": 16.0,
+      "completedCycles": 0,
+      "averageNetBps": null,
+      "positiveNetRate": null,
+      "minimumNetBps": null,
+      "maximumNetBps": null,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "P95": {
+      "makerCycleCostBps": 17.0,
+      "forcedCloseCostBps": 26.0,
+      "completedCycles": 0,
+      "averageNetBps": null,
+      "positiveNetRate": null,
+      "minimumNetBps": null,
+      "maximumNetBps": null,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "SEVERE": {
+      "makerCycleCostBps": 30.0,
+      "forcedCloseCostBps": 45.0,
+      "completedCycles": 0,
+      "averageNetBps": null,
+      "positiveNetRate": null,
+      "minimumNetBps": null,
+      "maximumNetBps": null,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": 0.0,
+        "TSLA": 0.0
+      },
+      "maxPositiveProfitContributionShare": null
+    }
+  },
+  "diagnostics": {
+    "hedgeDelayMs": 250,
+    "latencyP50Ms": 72.0,
+    "latencyP95Ms": 88.0,
+    "projectedNetEdgeP50Bps": null,
+    "projectedNetEdgeP95Bps": null
+  },
+  "promotionGate": {
+    "minimumForwardRegularSessions": 20,
+    "minimumCompletedCycles": 100,
+    "minimumPositiveNetRate": 0.55,
+    "normalP95SevereAverageNetMustBePositive": true,
+    "maximumSingleSymbolPnlShare": 0.4,
+    "maximumPartialFillFailures": 0,
+    "maximumUnhedgedRejected": 0,
+    "maximumUnresolvedInventory": 0,
+    "retuningOnCollectedForwardWindow": false
+  },
+  "fixedDualEvidence": {
+    "decisionDone": false,
+    "decisionReceivedMs": null,
+    "candidateCount": 0,
+    "eligibleSymbols": [],
+    "frozenArms": [
+      "V13G",
+      "V13D"
+    ],
+    "retuningAllowed": false
+  }
+}
