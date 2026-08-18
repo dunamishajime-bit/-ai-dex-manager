@@ -85,6 +85,18 @@ Replace-ExactOnce -Label 'GitHub known_hosts secret source' `
     -Old '($knownHostLines -join "`n") | & $script:GhExe secret set DISDEX_VPS_KNOWN_HOSTS --repo $Repo' `
     -New '($knownHostLinesForGitHub -join "`n") | & $script:GhExe secret set DISDEX_VPS_KNOWN_HOSTS --repo $Repo'
 
+$discoveryStartOld = 'set -Eeuo pipefail' + "`n" + 'while IFS= read -r gitdir; do'
+$discoveryStartNew = 'set -Eeuo pipefail' + "`n" +
+    'tmp_gitdirs="$(mktemp)"' + "`n" +
+    'trap ''rm -f "$tmp_gitdirs"'' EXIT' + "`n" +
+    'find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort > "$tmp_gitdirs" || true' + "`n" +
+    'while IFS= read -r gitdir; do'
+Replace-ExactOnce -Label 'trusted clone discovery temp-file prefix' -Old $discoveryStartOld -New $discoveryStartNew
+
+Replace-ExactOnce -Label 'trusted clone discovery temp-file suffix' `
+    -Old 'done < <(find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort)' `
+    -New 'done < "$tmp_gitdirs"'
+
 if ($text -notmatch [regex]::Escape("HostKeyAlias=`$VpsHostKeyAlias")) {
     throw 'Patched bootstrap is missing HostKeyAlias.'
 }
@@ -93,6 +105,12 @@ if ($text -notmatch [regex]::Escape("`$VpsHost = '$VpsIp'")) {
 }
 if ($text -match 'ssh-keyscan') {
     throw 'Patched bootstrap must not use ssh-keyscan.'
+}
+if ($text -match '<\s*<\s*\(') {
+    throw 'Patched bootstrap must not use Bash process substitution.'
+}
+if ($text -notmatch 'tmp_gitdirs="\$\(mktemp\)"') {
+    throw 'Patched bootstrap is missing portable temporary-file clone discovery.'
 }
 
 [System.IO.File]::WriteAllText($PatchedPath, $text, [System.Text.UTF8Encoding]::new($false))
@@ -105,6 +123,7 @@ if ($errors.Count -ne 0) {
 }
 
 Write-Host 'DIRECT_IP_PATCH=PASS'
+Write-Host 'PORTABLE_DISCOVERY_PATCH=PASS'
 Write-Host 'StrictHostKeyChecking remains enabled; no host key was learned from the network.'
 
 if ($PatchOnly) {
