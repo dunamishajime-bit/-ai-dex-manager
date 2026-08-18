@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1'
       - 'scripts/ops/windows/bootstrap-disdex-v12-live-repair-git-metadata.ps1'
+      - 'scripts/ops/windows/resume-disdex-v12-live-after-local-probe.ps1'
       - '.github/workflows/disdex-vps-direct-ip-bootstrap-ci.yml'
 
 permissions:
@@ -22,7 +23,8 @@ jobs:
         run: |
           $paths = @(
             'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1',
-            'scripts/ops/windows/bootstrap-disdex-v12-live-repair-git-metadata.ps1'
+            'scripts/ops/windows/bootstrap-disdex-v12-live-repair-git-metadata.ps1',
+            'scripts/ops/windows/resume-disdex-v12-live-after-local-probe.ps1'
           )
           foreach ($path in $paths) {
             $tokens = $null
@@ -81,3 +83,34 @@ jobs:
           if ($t -match '(?m)^\s*(?:&\s*)?(?:ssh-keyscan|ssh-keyscan\.exe)\b') { throw 'ssh-keyscan execution forbidden' }
           if ($t -match '\$ErrorActionPreference\s*=\s*''SilentlyContinue''') { throw 'Global error suppression is forbidden' }
           if ($t -notmatch 'dunamishajime-bit/-ai-dex-manager') { throw 'Exact trusted origin guard missing' }
+
+      - name: Resume-only path safety assertions
+        shell: powershell
+        run: |
+          $p = 'scripts/ops/windows/resume-disdex-v12-live-after-local-probe.ps1'
+          $t = Get-Content $p -Raw
+          $required = @(
+            'Reuses installed constrained control; no Git repair/install',
+            'DISDEX_VPS_SSH_HOST',
+            'DISDEX_VPS_DEPLOY_PRIVATE_KEY',
+            'DISDEX_VPS_KNOWN_HOSTS',
+            'PROBE_ONLY_NO_TRADING_MUTATION',
+            'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3',
+            'CONTROL_REQUEST_REUSED',
+            'CONTROL_REQUEST_POSTED',
+            'gha-probe-',
+            'v12-live-',
+            'STATUS: LIVE_ACTIVATED_VERIFIED',
+            'V96_V12_SIMULTANEOUS_LIVE=FALSE',
+            'ORDERS_SENT_FOR_TESTING=0',
+            'ARTIFICIAL_LIVE_ORDERS=0',
+            'VERIFICATION_SOURCE=GITHUB_ACTIONS_REMOTE_EXACT_MARKERS'
+          )
+          foreach ($needle in $required) {
+            if (-not $t.Contains($needle)) { throw "Missing resume marker: $needle" }
+          }
+          if ($t -match 'chown|chmod.*\.git|git metadata repair') { throw 'Resume path must not repair Git metadata' }
+          if ($t -match 'install-disdex-github-actions-control|disdex-gha-install-vps-control') { throw 'Resume path must not reinstall forced-command control' }
+          if ($t -match 'ssh-keyscan') { throw 'Resume path must not learn host keys from network' }
+          if ($t -match '\$ErrorActionPreference\s*=\s*''SilentlyContinue''') { throw 'Global error suppression is forbidden' }
+          if ($t -match 'run_shell|run_command') { throw 'Generic shell operation is forbidden' }
