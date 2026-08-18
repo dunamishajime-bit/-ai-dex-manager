@@ -22,7 +22,8 @@ $ErrorActionPreference = 'Stop'
 $Repo = 'dunamishajime-bit/-ai-dex-manager'
 $CanonicalPath = 'scripts/ops/windows/resume-disdex-v12-live-after-local-probe.ps1'
 $CanonicalUrl = "https://raw.githubusercontent.com/$Repo/$ExpectedControlMasterSha/$CanonicalPath"
-$PatchedPath = Join-Path $env:TEMP ("resume-disdex-v12-live-host-fixed-$ExpectedControlMasterSha-$RequestSuffix.ps1")
+$TempRoot = if (-not [string]::IsNullOrWhiteSpace($env:TEMP)) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
+$PatchedPath = Join-Path $TempRoot ("resume-disdex-v12-live-host-fixed-$ExpectedControlMasterSha-$RequestSuffix.ps1")
 
 function Count-Literal([string]$Text, [string]$Needle) {
     if ([string]::IsNullOrEmpty($Needle)) { throw 'Needle must not be empty.' }
