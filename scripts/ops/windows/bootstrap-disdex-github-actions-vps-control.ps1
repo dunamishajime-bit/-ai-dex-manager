@@ -56,12 +56,7 @@ function Get-ControlResult([string]$RequestId, [int]$TimeoutSeconds) {
     do {
         $json = Invoke-GhText @('api', "repos/$Repo/issues/$ControlIssue/comments?per_page=100")
         $comments = @($json | ConvertFrom-Json)
-        $result = $comments |
-            Where-Object {
-                $_.body -like 'DISDEX_VPS_CONTROL_RESULT *' -and
-                $_.body -like "*requestId=$RequestId*"
-            } |
-            Select-Object -Last 1
+        $result = $comments | Where-Object { $_.body -like 'DISDEX_VPS_CONTROL_RESULT *' -and $_.body -like "*requestId=$RequestId*" } | Select-Object -Last 1
         if ($result) {
             return [string]$result.body
         }
@@ -78,15 +73,17 @@ function Show-FailedRun([string]$ResultText) {
     }
 }
 
-function Post-ControlRequest(
-    [string]$RequestId,
-    [string]$Operation,
-    [string]$SourceRef,
-    [string]$TargetSha,
-    [string]$BaseSha,
-    [string]$Acknowledgement,
-    [int]$TimeoutSeconds
-) {
+function Post-ControlRequest {
+    param(
+        [Parameter(Mandatory=$true)][string]$RequestId,
+        [Parameter(Mandatory=$true)][string]$Operation,
+        [Parameter(Mandatory=$true)][string]$SourceRef,
+        [Parameter(Mandatory=$true)][string]$TargetSha,
+        [Parameter(Mandatory=$true)][string]$BaseSha,
+        [Parameter(Mandatory=$true)][string]$Acknowledgement,
+        [Parameter(Mandatory=$true)][int]$TimeoutSeconds
+    )
+
     $payload = [ordered]@{
         requestId = $RequestId
         operation = $Operation
@@ -96,11 +93,13 @@ function Post-ControlRequest(
         acknowledgement = $Acknowledgement
         execute = $true
     } | ConvertTo-Json -Compress
+
     $body = "DISDEX_VPS_CONTROL_V1`n$payload"
     & $script:GhExe issue comment $ControlIssue --repo $Repo --body $body | Out-Null
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to post control request $RequestId"
     }
+
     $result = Get-ControlResult -RequestId $RequestId -TimeoutSeconds $TimeoutSeconds
     Write-Host $result
     if ($result -notlike 'DISDEX_VPS_CONTROL_RESULT SUCCESS*') {
@@ -115,6 +114,7 @@ function Require-V12GreenHead {
     $pr = $prJson | ConvertFrom-Json
     $sourceRef = [string]$pr.head.ref
     $targetSha = [string]$pr.head.sha
+
     if ($sourceRef -ne $ExpectedV12Branch) {
         throw "Unexpected V12 branch: $sourceRef"
     }
@@ -140,23 +140,17 @@ function Require-V12GreenHead {
     )
 
     foreach ($name in $required) {
-        $latest = $runs |
-            Where-Object { $_.name -eq $name } |
-            Sort-Object -Property run_number -Descending |
-            Select-Object -First 1
+        $latest = $runs | Where-Object { $_.name -eq $name } | Sort-Object -Property run_number -Descending | Select-Object -First 1
         if (-not $latest) {
-            throw "Required CI missing for $targetSha : $name"
+            throw "Required CI missing for ${targetSha}: $name"
         }
         if ($latest.status -ne 'completed' -or $latest.conclusion -ne 'success') {
-            throw "Required CI is not green for $targetSha : $name status=$($latest.status) conclusion=$($latest.conclusion)"
+            throw "Required CI is not green for ${targetSha}: $name status=$($latest.status) conclusion=$($latest.conclusion)"
         }
         Write-Host "CI PASS: $name (run $($latest.id))"
     }
 
-    return [pscustomobject]@{
-        SourceRef = $sourceRef
-        TargetSha = $targetSha
-    }
+    return [pscustomobject]@{ SourceRef = $sourceRef; TargetSha = $targetSha }
 }
 
 Write-Phase 'Prerequisites'
@@ -251,9 +245,7 @@ while IFS= read -r gitdir; do
   [[ "$(stat -c '%U' "$repo" 2>/dev/null || true)" == "deploy" ]] || continue
   origin="$(runuser -u deploy -- git -C "$repo" remote get-url origin 2>/dev/null || true)"
   case "$origin" in
-    https://github.com/dunamishajime-bit/-ai-dex-manager|\
-    https://github.com/dunamishajime-bit/-ai-dex-manager.git|\
-    git@github.com:dunamishajime-bit/-ai-dex-manager.git)
+    https://github.com/dunamishajime-bit/-ai-dex-manager|https://github.com/dunamishajime-bit/-ai-dex-manager.git|git@github.com:dunamishajime-bit/-ai-dex-manager.git)
       printf '%s\n' "$repo"
       ;;
   esac
@@ -305,10 +297,7 @@ runuser -u deploy -- git -C "$source_repo" merge-base --is-ancestor "$control_sh
 tool_root="/root/disdex-gha-bootstrap-$control_sha"
 rm -rf "$tool_root"
 mkdir -m 0700 "$tool_root"
-runuser -u deploy -- git -C "$source_repo" archive "$control_sha" \
-  scripts/ops/root/disdex-github-actions-entry \
-  scripts/ops/root/disdex-github-actions-control \
-  scripts/ops/root/install-disdex-github-actions-control | tar -x -C "$tool_root"
+runuser -u deploy -- git -C "$source_repo" archive "$control_sha" scripts/ops/root/disdex-github-actions-entry scripts/ops/root/disdex-github-actions-control scripts/ops/root/install-disdex-github-actions-control | tar -x -C "$tool_root"
 entry="$tool_root/scripts/ops/root/disdex-github-actions-entry"
 control="$tool_root/scripts/ops/root/disdex-github-actions-control"
 installer="$tool_root/scripts/ops/root/install-disdex-github-actions-control"
@@ -368,14 +357,7 @@ Write-Host 'GitHub Secrets: PASS (secret values were not printed)'
 Write-Phase 'GitHub Actions CONTROL_PROBE'
 $masterSha = (Invoke-GhText @('api', "repos/$Repo/commits/master", '--jq', '.sha')).Trim()
 $ghaProbeId = 'gha-probe-' + [DateTime]::UtcNow.ToString('yyyyMMddHHmmss')
-Post-ControlRequest \
-    -RequestId $ghaProbeId \
-    -Operation 'CONTROL_PROBE' \
-    -SourceRef 'master' \
-    -TargetSha $masterSha \
-    -BaseSha $masterSha \
-    -Acknowledgement 'PROBE_ONLY_NO_TRADING_MUTATION' \
-    -TimeoutSeconds 600 | Out-Null
+Post-ControlRequest -RequestId $ghaProbeId -Operation 'CONTROL_PROBE' -SourceRef 'master' -TargetSha $masterSha -BaseSha $masterSha -Acknowledgement 'PROBE_ONLY_NO_TRADING_MUTATION' -TimeoutSeconds 600 | Out-Null
 Write-Host 'GITHUB_ACTIONS_CONTROL_PROBE=PASS'
 
 if (-not $ActivateLive) {
@@ -390,14 +372,7 @@ Write-Host "V12 targetSha=$($v12.TargetSha)"
 
 Write-Phase 'Submit one V12 LIVE activation request'
 $liveRequestId = 'v12-live-' + [DateTime]::UtcNow.ToString('yyyyMMddHHmmss')
-Post-ControlRequest \
-    -RequestId $liveRequestId \
-    -Operation 'V12_LIVE_ACTIVATE_V3' \
-    -SourceRef $v12.SourceRef \
-    -TargetSha $v12.TargetSha \
-    -BaseSha $V12BaseSha \
-    -Acknowledgement 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' \
-    -TimeoutSeconds 5700 | Out-Null
+Post-ControlRequest -RequestId $liveRequestId -Operation 'V12_LIVE_ACTIVATE_V3' -SourceRef $v12.SourceRef -TargetSha $v12.TargetSha -BaseSha $V12BaseSha -Acknowledgement 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' -TimeoutSeconds 5700 | Out-Null
 
 Write-Host "`nSTATUS: LIVE_ACTIVATION_REQUEST_COMPLETED"
 Write-Host "ACTIVATION_SHA=$($v12.TargetSha)"
