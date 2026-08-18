@@ -129,6 +129,7 @@ jobs:
           grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' /tmp/disdex-v12-live-activate-from-sha-v3
           grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' /tmp/disdex-v12-live-activate-from-sha-v3
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' /tmp/disdex-v12-live-activate-from-sha-v3
+          grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' /tmp/disdex-v12-live-activate-from-sha-v3
 
       - name: Require green production source workflow set
         if: steps.request.outputs.operation == 'V12_LIVE_ACTIVATE_V3'
@@ -247,6 +248,7 @@ jobs:
               grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' /tmp/disdex-vps-control.log
               grep -Fq 'V96_V12_SIMULTANEOUS_LIVE=FALSE' /tmp/disdex-vps-control.log
               grep -Fq 'ORDERS_SENT_FOR_TESTING=0' /tmp/disdex-vps-control.log
+              grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' /tmp/disdex-vps-control.log
               ;;
             *)
               echo 'CONTROL_OPERATION_UNREACHABLE' >&2
