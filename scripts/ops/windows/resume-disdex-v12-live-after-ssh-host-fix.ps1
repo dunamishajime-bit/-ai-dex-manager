@@ -12,7 +12,8 @@ param(
     [ValidatePattern('^final[0-9]+$')]
     [string]$RequestSuffix,
 
-    [switch]$RequireV52MarketClosedWindow
+    [switch]$RequireV52MarketClosedWindow,
+    [switch]$PatchOnly
 )
 
 Set-StrictMode -Version Latest
@@ -77,6 +78,11 @@ Write-Host 'SSH_HOST_SECRET_STDIN_BOM_BYPASS=PASS'
 Write-Host 'REQUEST_SUFFIX_PATCH=PASS'
 Write-Host 'PATCHED_RESUME_PARSE=PASS'
 Write-Host 'Private key content was not printed.'
+
+if ($PatchOnly) {
+    Write-Host 'PATCH_ONLY=PASS'
+    exit 0
+}
 
 $args = @(
     '-NoProfile',
