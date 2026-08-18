@@ -90,14 +90,21 @@ jobs:
           $p = 'scripts/ops/windows/resume-disdex-v12-live-after-local-probe.ps1'
           $t = Get-Content $p -Raw
           $required = @(
+            'FINAL PINNED resume',
             'Reuses installed constrained control; no Git repair/install',
+            'ExpectedControlMasterSha',
+            'ExpectedV12Sha',
+            'CONTROL_MASTER_PIN=PASS',
+            'V12_GREEN_PIN=PASS',
+            'FINAL_RESUME_BLOCKED_US_REGULAR_SESSION',
             'DISDEX_VPS_SSH_HOST',
             'DISDEX_VPS_DEPLOY_PRIVATE_KEY',
             'DISDEX_VPS_KNOWN_HOSTS',
             'PROBE_ONLY_NO_TRADING_MUTATION',
             'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3',
-            'CONTROL_REQUEST_REUSED',
+            'CONTROL_REQUEST_REUSED_EXACT_PAYLOAD',
             'CONTROL_REQUEST_POSTED',
+            'github-actions[bot]',
             'gha-probe-',
             'v12-live-',
             'STATUS: LIVE_ACTIVATED_VERIFIED',
@@ -114,3 +121,5 @@ jobs:
           if ($t -match 'ssh-keyscan') { throw 'Resume path must not learn host keys from network' }
           if ($t -match '\$ErrorActionPreference\s*=\s*''SilentlyContinue''') { throw 'Global error suppression is forbidden' }
           if ($t -match 'run_shell|run_command') { throw 'Generic shell operation is forbidden' }
+          if ($t -notmatch 'Existing request ID has a different payload; refusing reuse') { throw 'Exact request payload reuse guard missing' }
+          if ($t -notmatch 'No request was posted') { throw 'Pre-request SHA/time fail-closed marker missing' }
