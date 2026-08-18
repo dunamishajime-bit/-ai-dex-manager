@@ -105,6 +105,11 @@ jobs:
             'CONTROL_REQUEST_REUSED_EXACT_PAYLOAD',
             'CONTROL_REQUEST_POSTED',
             'github-actions[bot]',
+            'Post-ControlComment',
+            'gh api --input sends the pre-constructed UTF-8 JSON file',
+            '--method POST',
+            '--input $inputPath',
+            'UTF8Encoding',
             'gha-probe-',
             'v12-live-',
             'STATUS: LIVE_ACTIVATED_VERIFIED',
@@ -123,3 +128,49 @@ jobs:
           if ($t -match 'run_shell|run_command') { throw 'Generic shell operation is forbidden' }
           if ($t -notmatch 'Existing request ID has a different payload; refusing reuse') { throw 'Exact request payload reuse guard missing' }
           if ($t -notmatch 'No request was posted') { throw 'Pre-request SHA/time fail-closed marker missing' }
+          if ($t -match 'issue comment[^\r\n]*--body\s') { throw 'Structured control JSON must not cross native --body argument boundary' }
+
+      - name: Verify control comment JSON file round-trip
+        shell: powershell
+        run: |
+          $payload = [ordered]@{
+            requestId = 'gha-probe-0123456789abcdef-final1'
+            operation = 'CONTROL_PROBE'
+            sourceRef = 'master'
+            targetSha = ('a' * 40)
+            baseSha = ('a' * 40)
+            acknowledgement = 'PROBE_ONLY_NO_TRADING_MUTATION'
+            execute = $true
+          } | ConvertTo-Json -Compress
+          $body = "DISDEX_VPS_CONTROL_V1`n$payload"
+          $api = [ordered]@{ body = $body } | ConvertTo-Json -Compress
+          $roundTrip = $api | ConvertFrom-Json
+          if ([string]$roundTrip.body -ne $body) { throw 'Control JSON file serialization changed the issue body' }
+          $lines = @(([string]$roundTrip.body) -split '\r?\n')
+          if ($lines.Count -ne 2) { throw 'Control body line count changed' }
+          $parsed = $lines[1] | ConvertFrom-Json
+          if ($parsed.requestId -ne 'gha-probe-0123456789abcdef-final1') { throw 'Control request JSON quotes did not survive round-trip' }
+          if ($parsed.operation -ne 'CONTROL_PROBE' -or $parsed.execute -ne $true) { throw 'Control request JSON semantics changed' }
+          Write-Host 'CONTROL_COMMENT_JSON_FILE_ROUNDTRIP=PASS'
+
+  github-runner-vps-network:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Probe direct VPS SSH port without authentication
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import socket
+          host = '162.43.50.223'
+          port = 22
+          with socket.create_connection((host, port), timeout=10) as sock:
+              sock.settimeout(5)
+              banner = sock.recv(128)
+          if not banner.startswith(b'SSH-'):
+              raise SystemExit(f'VPS_TCP22_UNEXPECTED_BANNER prefix={banner[:16]!r}')
+          print('GITHUB_RUNNER_VPS_TCP22=PASS')
+          print('authenticationAttempted=false')
+          print('tradingMutation=0')
+          PY

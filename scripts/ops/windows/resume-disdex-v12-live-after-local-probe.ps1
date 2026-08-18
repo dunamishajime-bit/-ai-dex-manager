@@ -68,6 +68,31 @@ function Set-GhSecretText([string]$Name, [string]$Value) {
     }
 }
 
+function Post-ControlComment([string]$Body, [string]$RequestId) {
+    $inputPath = Join-Path $env:TEMP ("disdex-control-comment-" + [Guid]::NewGuid().ToString('N') + '.json')
+    $stderrPath = Join-Path $env:TEMP ("disdex-control-comment-stderr-" + [Guid]::NewGuid().ToString('N') + '.txt')
+    try {
+        $apiPayload = [ordered]@{ body = $Body } | ConvertTo-Json -Compress
+        [System.IO.File]::WriteAllText($inputPath, $apiPayload, [System.Text.UTF8Encoding]::new($false))
+
+        # Do not pass the structured control body as a native-command argument.
+        # Windows PowerShell 5.1 can strip embedded JSON quotes from --body.
+        # gh api --input sends the pre-constructed UTF-8 JSON file as the HTTP body.
+        & $script:GhExe api --method POST "repos/$Repo/issues/$ControlIssue/comments" --input $inputPath 2> $stderrPath | Out-Null
+        $rc = $LASTEXITCODE
+        $stderr = if (Test-Path -LiteralPath $stderrPath) {
+            (Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue)
+        } else { '' }
+        if ($rc -ne 0) {
+            throw "Failed to post control request requestId=$RequestId rc=$rc stderr=$stderr"
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $inputPath -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Get-IssueComments {
     $json = Invoke-GhText @('api', "repos/$Repo/issues/$ControlIssue/comments?per_page=100")
     return @($json | ConvertFrom-Json)
@@ -161,20 +186,7 @@ function Ensure-ControlRequest {
     }
     else {
         $body = "DISDEX_VPS_CONTROL_V1`n$payload"
-        $stderrPath = Join-Path $env:TEMP ("disdex-gh-comment-stderr-" + [Guid]::NewGuid().ToString('N') + '.txt')
-        try {
-            & $script:GhExe issue comment $ControlIssue --repo $Repo --body $body 2> $stderrPath | Out-Null
-            $rc = $LASTEXITCODE
-            $stderr = if (Test-Path -LiteralPath $stderrPath) {
-                (Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue)
-            } else { '' }
-            if ($rc -ne 0) {
-                throw "Failed to post control request requestId=$RequestId rc=$rc stderr=$stderr"
-            }
-        }
-        finally {
-            Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
-        }
+        Post-ControlComment -Body $body -RequestId $RequestId
         Write-Host "CONTROL_REQUEST_POSTED requestId=$RequestId operation=$Operation"
     }
 
