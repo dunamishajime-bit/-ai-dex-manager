@@ -85,43 +85,17 @@ Replace-ExactOnce -Label 'GitHub known_hosts secret source' `
     -Old '($knownHostLines -join "`n") | & $script:GhExe secret set DISDEX_VPS_KNOWN_HOSTS --repo $Repo' `
     -New '($knownHostLinesForGitHub -join "`n") | & $script:GhExe secret set DISDEX_VPS_KNOWN_HOSTS --repo $Repo'
 
-$oldDiscovery = @'
-$discover = @'
-set -Eeuo pipefail
-while IFS= read -r gitdir; do
-  repo="${gitdir%/.git}"
-  [[ -d "$repo" && ! -L "$repo" ]] || continue
-  [[ "$(stat -c '%U' "$repo" 2>/dev/null || true)" == "deploy" ]] || continue
-  origin="$(runuser -u deploy -- git -C "$repo" remote get-url origin 2>/dev/null || true)"
-  case "$origin" in
-    https://github.com/dunamishajime-bit/-ai-dex-manager|https://github.com/dunamishajime-bit/-ai-dex-manager.git|git@github.com:dunamishajime-bit/-ai-dex-manager.git)
-      printf '%s\n' "$repo"
-      ;;
-  esac
-done < <(find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort)
-'@
-'@
+$discoveryStartOld = 'set -Eeuo pipefail' + "`n" + 'while IFS= read -r gitdir; do'
+$discoveryStartNew = 'set -Eeuo pipefail' + "`n" +
+    'tmp_gitdirs="$(mktemp)"' + "`n" +
+    'trap ''rm -f "$tmp_gitdirs"'' EXIT' + "`n" +
+    'find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort > "$tmp_gitdirs" || true' + "`n" +
+    'while IFS= read -r gitdir; do'
+Replace-ExactOnce -Label 'trusted clone discovery temp-file prefix' -Old $discoveryStartOld -New $discoveryStartNew
 
-$newDiscovery = @'
-$discover = @'
-set -Eeuo pipefail
-tmp_gitdirs="$(mktemp)"
-trap 'rm -f "$tmp_gitdirs"' EXIT
-find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort > "$tmp_gitdirs" || true
-while IFS= read -r gitdir; do
-  repo="${gitdir%/.git}"
-  [[ -d "$repo" && ! -L "$repo" ]] || continue
-  [[ "$(stat -c '%U' "$repo" 2>/dev/null || true)" == "deploy" ]] || continue
-  origin="$(runuser -u deploy -- git -C "$repo" remote get-url origin 2>/dev/null || true)"
-  case "$origin" in
-    https://github.com/dunamishajime-bit/-ai-dex-manager|https://github.com/dunamishajime-bit/-ai-dex-manager.git|git@github.com:dunamishajime-bit/-ai-dex-manager.git)
-      printf '%s\n' "$repo"
-      ;;
-  esac
-done < "$tmp_gitdirs"
-'@
-'@
-Replace-ExactOnce -Label 'trusted clone discovery without dev fd' -Old $oldDiscovery -New $newDiscovery
+Replace-ExactOnce -Label 'trusted clone discovery temp-file suffix' `
+    -Old 'done < <(find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort)' `
+    -New 'done < "$tmp_gitdirs"'
 
 if ($text -notmatch [regex]::Escape("HostKeyAlias=`$VpsHostKeyAlias")) {
     throw 'Patched bootstrap is missing HostKeyAlias.'
