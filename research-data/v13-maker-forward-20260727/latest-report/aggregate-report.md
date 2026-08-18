@@ -2,20 +2,20 @@
 
 **Status: `V13_FORWARD_COLLECTION_IN_PROGRESS`**
 
-- Generated: 2026-08-17T20:44:07.741539Z
+- Generated: 2026-08-18T20:41:13.988369Z
 - Frozen source commit: `f1b2820705d5cef815a4b160feb124af1230d746`
 - Frozen config SHA-256: `c25dd7fa5fd53544c0c172bd8191fbad486601259434b93ea418323dea31404e`
 - Complete sessions: 0 / 20
-- Completed hedged cycles: 4 / 100
+- Completed hedged cycles: 5 / 100
 
 ## Cost scenarios
 
 | Scenario | Cycles | Maker | Forced | Avg net bps | Positive rate | Max symbol share |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| FORWARD_MEDIAN | 4 | 0 | 4 | -15.6779 | 0.0000 | N/A |
-| NORMAL | 4 | 0 | 4 | -21.6779 | 0.0000 | N/A |
-| P95 | 4 | 0 | 4 | -31.6779 | 0.0000 | N/A |
-| SEVERE | 4 | 0 | 4 | -50.6779 | 0.0000 | N/A |
+| FORWARD_MEDIAN | 5 | 0 | 5 | -12.6996 | 0.0000 | N/A |
+| NORMAL | 5 | 0 | 5 | -18.6996 | 0.0000 | N/A |
+| P95 | 5 | 0 | 5 | -28.6996 | 0.0000 | N/A |
+| SEVERE | 5 | 0 | 5 | -47.6996 | 0.0000 | N/A |
 
 ## Safety
 
@@ -45,7 +45,7 @@
 | 2026-08-13 | LATE_CLOSE | NO |
 | 2026-08-14 | LATE_CLOSE | NO |
 | 2026-08-17 | LATE_CLOSE | NO |
-| 2026-08-18 | NONE | NO |
+| 2026-08-18 | LATE_CLOSE | NO |
 | 2026-08-19 | NONE | NO |
 | 2026-08-20 | NONE | NO |
 | 2026-08-21 | NONE | NO |
