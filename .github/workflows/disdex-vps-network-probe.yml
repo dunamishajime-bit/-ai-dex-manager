@@ -1,0 +1,83 @@
+name: DisDex VPS Network Probe
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      trim(github.event.comment.body) == 'DISDEX_VPS_NETWORK_PROBE_V1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CONTROL_ISSUE: '132'
+      VPS_HOST: professional-dismanager.net
+      VPS_PORT: '22'
+    steps:
+      - name: Probe DNS and TCP only
+        id: probe
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY' | tee /tmp/network-probe.txt
+          import socket
+          import os
+
+          host = os.environ['VPS_HOST']
+          port = int(os.environ['VPS_PORT'])
+          print('DISDEX_VPS_NETWORK_PROBE_V1')
+          print(f'host={host}')
+          print(f'port={port}')
+          try:
+              infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+              ips = sorted({info[4][0] for info in infos})
+          except Exception as exc:
+              print(f'dns=FAIL type={type(exc).__name__}')
+              raise SystemExit(2)
+          print('dns=PASS')
+          print('ips=' + ','.join(ips))
+          last = None
+          for ip in ips:
+              family = socket.AF_INET6 if ':' in ip else socket.AF_INET
+              sock = socket.socket(family, socket.SOCK_STREAM)
+              sock.settimeout(10)
+              try:
+                  sock.connect((ip, port))
+                  print(f'tcp22=PASS ip={ip}')
+                  raise SystemExit(0)
+              except Exception as exc:
+                  last = exc
+                  print(f'tcp22_attempt=FAIL ip={ip} type={type(exc).__name__}')
+              finally:
+                  sock.close()
+          print(f'tcp22=FAIL type={type(last).__name__ if last else "Unknown"}')
+          raise SystemExit(3)
+          PY
+
+      - name: Report probe success
+        if: success()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          body="$(tr '\n' ' ' < /tmp/network-probe.txt | sed 's/[[:space:]]\+/ /g')"
+          gh issue comment "$CONTROL_ISSUE" --repo "$GITHUB_REPOSITORY" --body "DISDEX_VPS_NETWORK_PROBE_RESULT SUCCESS $body run=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+      - name: Report probe failure
+        if: failure()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          body='probe_output_unavailable'
+          if [[ -f /tmp/network-probe.txt ]]; then
+            body="$(tr '\n' ' ' < /tmp/network-probe.txt | sed 's/[[:space:]]\+/ /g')"
+          fi
+          gh issue comment "$CONTROL_ISSUE" --repo "$GITHUB_REPOSITORY" --body "DISDEX_VPS_NETWORK_PROBE_RESULT FAILED $body run=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
