@@ -101,7 +101,7 @@ $installScpArgs = @(
 )
 & $script:ScpExe @installScpArgs
 if ($LASTEXITCODE -ne 0) { throw 'VPS control installer upload failed.' }
-$installCommand = "bash $remoteInstallScript '$sourceRepo' '$controlSha'"
+$installCommand = "bash $remoteInstallScript '$sourceRepo' '$controlSha' 2>&1"
 $installOutput = & $script:SshExe @operatorSsh $installCommand 2>&1
 '@
 Replace-ExactOnce -Label 'VPS control installation without SSH stdin' -Old $installExecutionOld -New $installExecutionNew
@@ -115,6 +115,7 @@ if ($text -match '\$installScript\s*\|\s*&\s*\$script:SshExe') { throw 'Patched 
 if ($text -match 'bash -s') { throw 'Patched bootstrap must not use bash -s.' }
 if ($text -notmatch [regex]::Escape("`$sourceRepo = '/home/deploy/disdex-trading'")) { throw 'Fixed trusted source clone validation missing.' }
 if ($text -notmatch 'disdex-gha-install-vps-control\.sh\.tmp') { throw 'SCP-based installer staging missing.' }
+if ($text -notmatch [regex]::Escape("2>&1")) { throw 'Remote installer stderr normalization missing.' }
 
 [System.IO.File]::WriteAllText($PatchedPath,$text,[System.Text.UTF8Encoding]::new($false))
 $tokens = $null
