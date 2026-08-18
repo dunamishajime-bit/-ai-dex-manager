@@ -79,6 +79,7 @@ jobs:
           grep -Fq 'DISDEX_VPS_KNOWN_HOSTS' "$workflow"
           grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' "$workflow"
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$workflow"
+          grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' "$workflow"
           ! grep -Fq 'workflow_dispatch:' "$workflow"
           ! grep -Eq '(ssh-keyscan|StrictHostKeyChecking=no)' "$workflow"
 
