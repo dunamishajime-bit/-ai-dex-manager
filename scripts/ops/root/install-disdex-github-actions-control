@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || {
+  printf 'DISDEX_GHA_INSTALL_REQUIRES_ROOT\n' >&2
+  exit 70
+}
+
+source_repo="${1:-}"
+public_key_file="${2:-}"
+[[ "$source_repo" == /* && -d "$source_repo" && ! -L "$source_repo" ]] || {
+  printf 'DISDEX_GHA_INSTALL_SOURCE_REPO_INVALID\n' >&2
+  exit 64
+}
+[[ "$(stat -c '%U' "$source_repo")" == "deploy" ]] || {
+  printf 'DISDEX_GHA_INSTALL_SOURCE_REPO_OWNER_INVALID\n' >&2
+  exit 64
+}
+[[ "$public_key_file" == /* && -f "$public_key_file" && ! -L "$public_key_file" ]] || {
+  printf 'DISDEX_GHA_INSTALL_PUBLIC_KEY_INVALID\n' >&2
+  exit 64
+}
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+control_src="$script_dir/disdex-github-actions-control"
+entry_src="$script_dir/disdex-github-actions-entry"
+[[ -f "$control_src" && ! -L "$control_src" && -f "$entry_src" && ! -L "$entry_src" ]] || {
+  printf 'DISDEX_GHA_INSTALL_SOURCE_TOOLS_MISSING\n' >&2
+  exit 66
+}
+bash -n "$control_src"
+bash -n "$entry_src"
+
+origin="$(runuser -u deploy -- git -C "$source_repo" remote get-url origin 2>/dev/null || true)"
+[[ -n "$origin" ]] || {
+  printf 'DISDEX_GHA_INSTALL_ORIGIN_MISSING\n' >&2
+  exit 66
+}
+
+mapfile -t key_lines < <(grep -Ev '^[[:space:]]*(#|$)' "$public_key_file")
+[[ ${#key_lines[@]} -eq 1 ]] || {
+  printf 'DISDEX_GHA_INSTALL_PUBLIC_KEY_LINE_COUNT_INVALID\n' >&2
+  exit 64
+}
+read -r key_type key_blob _ <<<"${key_lines[0]}"
+case "$key_type" in
+  ssh-ed25519|ecdsa-sha2-nistp256|rsa-sha2-512|rsa-sha2-256) ;;
+  *)
+    printf 'DISDEX_GHA_INSTALL_PUBLIC_KEY_TYPE_BLOCKED type=%s\n' "$key_type" >&2
+    exit 64
+    ;;
+esac
+[[ "$key_blob" =~ ^[A-Za-z0-9+/=]+$ ]] || {
+  printf 'DISDEX_GHA_INSTALL_PUBLIC_KEY_BLOB_INVALID\n' >&2
+  exit 64
+}
+
+install -o root -g root -m 0755 "$control_src" /usr/local/sbin/disdex-github-actions-control
+install -o root -g root -m 0755 "$entry_src" /usr/local/sbin/disdex-github-actions-entry
+install -d -o root -g root -m 0700 /etc/disdex /var/lib/disdex-github-actions-control /var/lib/disdex-github-actions-control/requests /var/lib/disdex-github-actions-control/tools
+
+config_tmp="$(mktemp /etc/disdex/github-actions-control.env.XXXXXX)"
+{
+  printf 'SOURCE_REPO=%q\n' "$source_repo"
+  printf 'EXPECTED_ORIGIN_URL=%q\n' "$origin"
+} >"$config_tmp"
+chmod 0600 "$config_tmp"
+chown root:root "$config_tmp"
+mv -f "$config_tmp" /etc/disdex/github-actions-control.env
+
+sudoers=/etc/sudoers.d/disdex-github-actions-control
+sudoers_tmp="$(mktemp /etc/sudoers.d/disdex-github-actions-control.XXXXXX)"
+printf 'deploy ALL=(root) NOPASSWD: /usr/local/sbin/disdex-github-actions-control --stdin\n' >"$sudoers_tmp"
+chmod 0440 "$sudoers_tmp"
+chown root:root "$sudoers_tmp"
+visudo -cf "$sudoers_tmp" >/dev/null
+mv -f "$sudoers_tmp" "$sudoers"
+visudo -cf "$sudoers" >/dev/null
+
+deploy_home="$(getent passwd deploy | cut -d: -f6)"
+[[ "$deploy_home" == /* && -d "$deploy_home" ]] || {
+  printf 'DISDEX_GHA_INSTALL_DEPLOY_HOME_INVALID\n' >&2
+  exit 66
+}
+ssh_dir="$deploy_home/.ssh"
+authorized="$ssh_dir/authorized_keys"
+install -d -o deploy -g deploy -m 0700 "$ssh_dir"
+[[ ! -e "$authorized" || -f "$authorized" ]] || {
+  printf 'DISDEX_GHA_INSTALL_AUTHORIZED_KEYS_INVALID\n' >&2
+  exit 66
+}
+tmp_auth="$(mktemp "$ssh_dir/authorized_keys.XXXXXX")"
+if [[ -f "$authorized" ]]; then
+  grep -v ' disdex-github-actions-control$' "$authorized" >"$tmp_auth" || true
+fi
+printf 'restrict,command="/usr/local/sbin/disdex-github-actions-entry" %s %s disdex-github-actions-control\n' "$key_type" "$key_blob" >>"$tmp_auth"
+chown deploy:deploy "$tmp_auth"
+chmod 0600 "$tmp_auth"
+mv -f "$tmp_auth" "$authorized"
+chown deploy:deploy "$authorized"
+chmod 0600 "$authorized"
+
+# Validate sudo policy without invoking the production control command.
+sudo -n -U deploy -l | grep -Fq '/usr/local/sbin/disdex-github-actions-control --stdin'
+
+printf 'DISDEX_GHA_INSTALL_PASS\n'
+printf 'sourceRepo=%s\n' "$source_repo"
+printf 'origin=%s\n' "$origin"
+printf 'sshUser=deploy\n'
+printf 'arbitraryShell=DISABLED\n'
+printf 'allowedOperation=CONTROL_PROBE\n'
+printf 'allowedOperation=V12_LIVE_ACTIVATE_V3\n'
+printf 'next=configure GitHub Actions secrets DISDEX_VPS_SSH_HOST, DISDEX_VPS_DEPLOY_PRIVATE_KEY, DISDEX_VPS_KNOWN_HOSTS and optional variable DISDEX_VPS_SSH_PORT\n'
