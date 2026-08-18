@@ -75,6 +75,8 @@ sudo bash "$ACTIVATE" \
 18. enables the V12+PENGU+V52 target only after runtime verification;
 19. performs final read-only verification.
 
+The VPS-side extended Python self-tests use explicit `/usr/bin/python3`; the activation path does not depend on an optional `python` alias.
+
 ## Shared account order contract
 
 Simultaneous arbitration window:
@@ -126,6 +128,7 @@ V96_REVERSE_INTERLOCK_VERIFIED=TRUE
 V96_V12_SIMULTANEOUS_LIVE=FALSE
 V12_BOOT_TARGET_ENABLED=TRUE
 ORDERS_SENT_FOR_TESTING=0
+ARTIFICIAL_LIVE_ORDERS=0
 ```
 
 Anything less is not LIVE completion.
