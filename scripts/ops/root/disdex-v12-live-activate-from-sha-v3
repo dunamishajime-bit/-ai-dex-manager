@@ -85,4 +85,4 @@ printf 'V12_V3_PHASE=FINAL_READ_ONLY_VERIFICATION\n'
 bash "$release/scripts/ops/root/disdex-v12-live-status-report" "$sha" final
 printf 'STATUS: LIVE_ACTIVATED_VERIFIED\nreleaseSha=%s\nbaseSha=%s\ncurrentRelease=%s\n' "$sha" "$base_sha" "$(readlink -f /home/deploy/disdex-trading/current)"
 printf 'FULL_TREE_VPS_DELTA_PRESERVATION=PASS\nSOURCE_VALIDATION=PASS\nIMMUTABLE_RELEASE=PASS\nLIVE_MIGRATION=PASS\n'
-printf 'V96_V12_SIMULTANEOUS_LIVE=FALSE\nORDERS_SENT_FOR_TESTING=0\n'
+printf 'V96_V12_SIMULTANEOUS_LIVE=FALSE\nORDERS_SENT_FOR_TESTING=0\nARTIFICIAL_LIVE_ORDERS=0\n'
