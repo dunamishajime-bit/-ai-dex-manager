@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [switch]$ActivateLive
+    [switch]$ActivateLive,
+    [switch]$PatchOnly
 )
 
 Set-StrictMode -Version Latest
@@ -9,13 +10,25 @@ $ErrorActionPreference = 'Stop'
 $Repo = 'dunamishajime-bit/-ai-dex-manager'
 $VpsIp = '162.43.50.223'
 $VpsHostKeyAlias = 'professional-dismanager.net'
-$CanonicalUrl = 'https://raw.githubusercontent.com/dunamishajime-bit/-ai-dex-manager/master/scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1'
+$CanonicalSha = '59c4fdde65db320d8a878b6bea78d5c4dca5af0b'
+$KeygenWrapperSha = '499ccacee9dc43077f5f67df26032cc90502c47d'
+$CanonicalUrl = "https://raw.githubusercontent.com/$Repo/$CanonicalSha/scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1"
+$KeygenUrl = "https://raw.githubusercontent.com/$Repo/$KeygenWrapperSha/scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-winps.ps1"
 $CanonicalPath = Join-Path $env:TEMP 'bootstrap-disdex-vps-control-direct-ip-canonical.ps1'
 $PatchedPath = Join-Path $env:TEMP 'bootstrap-disdex-vps-control-direct-ip-patched.ps1'
+$KeygenPath = Join-Path $env:TEMP 'bootstrap-disdex-vps-control-keygen-winps.ps1'
 
 Write-Host 'DISDEX_DIRECT_IP_BOOTSTRAP_V1'
 Write-Host "VPS_IP=$VpsIp"
 Write-Host "HOST_KEY_ALIAS=$VpsHostKeyAlias"
+Write-Host "CANONICAL_SHA=$CanonicalSha"
+
+# Ensure the dedicated constrained key exists using the Windows-tested no-passphrase path.
+Invoke-WebRequest -UseBasicParsing $KeygenUrl -OutFile $KeygenPath
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $KeygenPath -KeygenOnly
+if ($LASTEXITCODE -ne 0) {
+    throw "Windows-compatible dedicated SSH key preparation failed with exit code $LASTEXITCODE."
+}
 
 Invoke-WebRequest -UseBasicParsing $CanonicalUrl -OutFile $CanonicalPath
 $text = Get-Content -LiteralPath $CanonicalPath -Raw
@@ -93,6 +106,11 @@ if ($errors.Count -ne 0) {
 
 Write-Host 'DIRECT_IP_PATCH=PASS'
 Write-Host 'StrictHostKeyChecking remains enabled; no host key was learned from the network.'
+
+if ($PatchOnly) {
+    Write-Host 'PATCH_ONLY=PASS'
+    exit 0
+}
 
 if ($ActivateLive) {
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $PatchedPath -ActivateLive
