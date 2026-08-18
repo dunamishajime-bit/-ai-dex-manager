@@ -111,7 +111,7 @@ fi
 
 started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 write_state() {
-  local status="$1" rc="$2"
+  local status="$1" rc="${2:-}"
   local tmp="$state_file.tmp.$$"
   {
     printf 'requestId=%s\n' "$request_id"
@@ -120,9 +120,11 @@ write_state() {
     printf 'targetSha=%s\n' "$target_sha"
     printf 'baseSha=%s\n' "$base_sha"
     printf 'startedAt=%s\n' "$started_at"
-    printf 'finishedAt=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     printf 'status=%s\n' "$status"
-    printf 'exitCode=%s\n' "$rc"
+    if [[ "$status" != "RUNNING" ]]; then
+      printf 'finishedAt=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      printf 'exitCode=%s\n' "$rc"
+    fi
   } >"$tmp"
   chmod 0600 "$tmp"
   chown root:root "$tmp"
@@ -139,6 +141,11 @@ finish() {
     printf 'DISDEX_VPS_CONTROL_RESULT status=FAILED requestId=%s operation=%s targetSha=%s exitCode=%s\n' "$request_id" "$operation" "$target_sha" "$rc" >&2
   fi
 }
+
+# Persist RUNNING before any fetch/build/install/migration mutation.  A hard
+# process/host failure therefore leaves replay evidence and the same request ID
+# is never silently re-executed after restart.
+write_state RUNNING
 trap finish EXIT
 
 printf 'DISDEX_VPS_CONTROL_ACCEPTED requestId=%s operation=%s targetSha=%s\n' "$request_id" "$operation" "$target_sha"
