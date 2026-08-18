@@ -48,6 +48,14 @@ if ($hostCount -ne 1) {
 }
 $text = $text.Replace($hostNeedle, $hostReplacement)
 
+$runNeedle = "    if (`$ResultText -match '/actions/runs/(\d+)') {`n        `$runId = `$Matches[1]"
+$runReplacement = "    `$runMatch = [regex]::Match(`$ResultText, '/actions/runs/(?<id>\d+)')`n    if (`$runMatch.Success) {`n        `$runId = `$runMatch.Groups['id'].Value"
+$runCount = Count-Literal -Text $text -Needle $runNeedle
+if ($runCount -ne 1) {
+    throw "Expected exactly one legacy failed-run parser, found $runCount. No request was posted."
+}
+$text = $text.Replace($runNeedle, $runReplacement)
+
 $suffixNeedle = '-final1'
 $suffixCount = Count-Literal -Text $text -Needle $suffixNeedle
 if ($suffixCount -ne 2) {
@@ -68,14 +76,21 @@ $patched = [System.IO.File]::ReadAllText($PatchedPath)
 if ((Count-Literal -Text $patched -Needle $hostReplacement) -ne 1) {
     throw 'BOM-safe host setter patch verification failed. No request was posted.'
 }
+if ((Count-Literal -Text $patched -Needle $runReplacement) -ne 1) {
+    throw 'Failed-run parser patch verification failed. No request was posted.'
+}
 if ((Count-Literal -Text $patched -Needle "-$RequestSuffix") -ne 2) {
     throw 'Request suffix patch verification failed. No request was posted.'
 }
 if ((Count-Literal -Text $patched -Needle $hostNeedle) -ne 0) {
     throw 'Legacy stdin host setter remains after patch. No request was posted.'
 }
+if ((Count-Literal -Text $patched -Needle $runNeedle) -ne 0) {
+    throw 'Legacy failed-run parser remains after patch. No request was posted.'
+}
 
 Write-Host 'SSH_HOST_SECRET_STDIN_BOM_BYPASS=PASS'
+Write-Host 'FAILED_RUN_ID_DIAGNOSTIC_PATCH=PASS'
 Write-Host 'REQUEST_SUFFIX_PATCH=PASS'
 Write-Host 'PATCHED_RESUME_PARSE=PASS'
 Write-Host 'Private key content was not printed.'
