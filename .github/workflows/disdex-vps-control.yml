@@ -25,10 +25,6 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       CONTROL_ISSUE: '132'
-      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-      SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
-      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
-      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
       COMMENT_BODY: ${{ github.event.comment.body }}
 
     steps:
@@ -71,16 +67,26 @@ jobs:
               raise SystemExit("CONTROL_REQUEST_EXECUTE_NOT_TRUE")
           if not re.fullmatch(r"[A-Za-z0-9._-]{8,120}", payload["requestId"]):
               raise SystemExit("CONTROL_REQUEST_ID_INVALID")
-          if payload["operation"] != "V12_LIVE_ACTIVATE_V3":
-              raise SystemExit("CONTROL_OPERATION_NOT_ALLOWLISTED")
-          if payload["sourceRef"] != "chatgpt/v12-live-adapter-final-20260817":
-              raise SystemExit("CONTROL_SOURCE_REF_BLOCKED")
           if not re.fullmatch(r"[0-9a-f]{40}", payload["targetSha"]):
               raise SystemExit("CONTROL_TARGET_SHA_INVALID")
-          if payload["baseSha"] != "d686f6dc0b841ba6299830fe8aade797420f4597":
-              raise SystemExit("CONTROL_BASE_SHA_BLOCKED")
-          if payload["acknowledgement"] != "I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3":
-              raise SystemExit("CONTROL_ACK_INVALID")
+
+          operation = payload["operation"]
+          if operation == "CONTROL_PROBE":
+              if payload["sourceRef"] != "master":
+                  raise SystemExit("CONTROL_PROBE_SOURCE_REF_BLOCKED")
+              if payload["baseSha"] != payload["targetSha"]:
+                  raise SystemExit("CONTROL_PROBE_SHA_PAIR_INVALID")
+              if payload["acknowledgement"] != "PROBE_ONLY_NO_TRADING_MUTATION":
+                  raise SystemExit("CONTROL_PROBE_ACK_INVALID")
+          elif operation == "V12_LIVE_ACTIVATE_V3":
+              if payload["sourceRef"] != "chatgpt/v12-live-adapter-final-20260817":
+                  raise SystemExit("CONTROL_SOURCE_REF_BLOCKED")
+              if payload["baseSha"] != "d686f6dc0b841ba6299830fe8aade797420f4597":
+                  raise SystemExit("CONTROL_BASE_SHA_BLOCKED")
+              if payload["acknowledgement"] != "I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3":
+                  raise SystemExit("CONTROL_ACK_INVALID")
+          else:
+              raise SystemExit("CONTROL_OPERATION_NOT_ALLOWLISTED")
 
           out = os.environ["GITHUB_OUTPUT"]
           with open(out, "a", encoding="utf-8") as fh:
@@ -95,7 +101,7 @@ jobs:
                   fh.write(f"{output_name}={payload[key]}\n")
           PY
 
-      - name: Require exact implementation-branch HEAD
+      - name: Require exact source branch HEAD
         shell: bash
         env:
           SOURCE_REF: ${{ steps.request.outputs.source_ref }}
@@ -112,6 +118,7 @@ jobs:
           [[ "$(git rev-parse --verify "refs/remotes/origin/$SOURCE_REF^{commit}")" == "$TARGET_SHA" ]]
 
       - name: Require canonical V3 activation tool from exact target SHA
+        if: steps.request.outputs.operation == 'V12_LIVE_ACTIVATE_V3'
         shell: bash
         env:
           TARGET_SHA: ${{ steps.request.outputs.target_sha }}
@@ -124,6 +131,7 @@ jobs:
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' /tmp/disdex-v12-live-activate-from-sha-v3
 
       - name: Require green production source workflow set
+        if: steps.request.outputs.operation == 'V12_LIVE_ACTIVATE_V3'
         shell: bash
         env:
           TARGET_SHA: ${{ steps.request.outputs.target_sha }}
@@ -135,7 +143,6 @@ jobs:
             -f per_page=100 > /tmp/runs.json
           python3 - <<'PY'
           import json
-          import os
 
           required = {
               "DisDex Account Risk Release Identity CI",
@@ -175,6 +182,11 @@ jobs:
 
       - name: Validate constrained VPS SSH credentials are configured
         shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         run: |
           set -Eeuo pipefail
           [[ -n "$SSH_HOST" ]] || { echo 'DISDEX_VPS_SSH_HOST secret missing' >&2; exit 1; }
@@ -185,6 +197,9 @@ jobs:
 
       - name: Configure pinned SSH identity
         shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
         run: |
           set -Eeuo pipefail
           install -d -m 0700 "$HOME/.ssh"
@@ -198,6 +213,8 @@ jobs:
         id: execute
         shell: bash
         env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
           REQUEST_ID: ${{ steps.request.outputs.request_id }}
           OPERATION: ${{ steps.request.outputs.operation }}
           SOURCE_REF: ${{ steps.request.outputs.source_ref }}
@@ -220,9 +237,22 @@ jobs:
             -p "$SSH_PORT" \
             "deploy@$SSH_HOST" \
             "$remote_cmd" 2>&1 | tee /tmp/disdex-vps-control.log
-          grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' /tmp/disdex-vps-control.log
-          grep -Fq 'V96_V12_SIMULTANEOUS_LIVE=FALSE' /tmp/disdex-vps-control.log
-          grep -Fq 'ORDERS_SENT_FOR_TESTING=0' /tmp/disdex-vps-control.log
+
+          case "$OPERATION" in
+            CONTROL_PROBE)
+              grep -Fq "DISDEX_VPS_CONTROL_PROBE_PASS requestId=$REQUEST_ID" /tmp/disdex-vps-control.log
+              grep -Fq 'tradingMutation=0' /tmp/disdex-vps-control.log
+              ;;
+            V12_LIVE_ACTIVATE_V3)
+              grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' /tmp/disdex-vps-control.log
+              grep -Fq 'V96_V12_SIMULTANEOUS_LIVE=FALSE' /tmp/disdex-vps-control.log
+              grep -Fq 'ORDERS_SENT_FOR_TESTING=0' /tmp/disdex-vps-control.log
+              ;;
+            *)
+              echo 'CONTROL_OPERATION_UNREACHABLE' >&2
+              exit 1
+              ;;
+          esac
           grep -Fq "DISDEX_VPS_CONTROL_RESULT status=SUCCESS requestId=$REQUEST_ID" /tmp/disdex-vps-control.log
 
       - name: Report success to control issue
@@ -230,21 +260,24 @@ jobs:
         shell: bash
         env:
           REQUEST_ID: ${{ steps.request.outputs.request_id }}
+          OPERATION: ${{ steps.request.outputs.operation }}
           TARGET_SHA: ${{ steps.request.outputs.target_sha }}
         run: |
           set -Eeuo pipefail
           gh issue comment "$CONTROL_ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-            "DISDEX_VPS_CONTROL_RESULT SUCCESS requestId=$REQUEST_ID targetSha=$TARGET_SHA run=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            "DISDEX_VPS_CONTROL_RESULT SUCCESS requestId=$REQUEST_ID operation=$OPERATION targetSha=$TARGET_SHA run=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
       - name: Report failure to control issue
         if: failure()
         shell: bash
         env:
           REQUEST_ID: ${{ steps.request.outputs.request_id }}
+          OPERATION: ${{ steps.request.outputs.operation }}
           TARGET_SHA: ${{ steps.request.outputs.target_sha }}
         run: |
           set -Eeuo pipefail
           request_id="${REQUEST_ID:-unknown}"
+          operation="${OPERATION:-unknown}"
           target_sha="${TARGET_SHA:-unknown}"
           gh issue comment "$CONTROL_ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-            "DISDEX_VPS_CONTROL_RESULT FAILED requestId=$request_id targetSha=$target_sha run=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}. No automatic retry was performed."
+            "DISDEX_VPS_CONTROL_RESULT FAILED requestId=$request_id operation=$operation targetSha=$target_sha run=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}. No automatic retry was performed."
