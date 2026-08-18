@@ -103,13 +103,14 @@ mv -f "$tmp_auth" "$authorized"
 chown deploy:deploy "$authorized"
 chmod 0600 "$authorized"
 
-# Validate the exact sudo path without executing a production request.
-runuser -u deploy -- sudo -n -l /usr/local/sbin/disdex-github-actions-control --stdin >/dev/null
+# Validate sudo policy without invoking the production control command.
+sudo -n -U deploy -l | grep -Fq '/usr/local/sbin/disdex-github-actions-control --stdin'
 
 printf 'DISDEX_GHA_INSTALL_PASS\n'
 printf 'sourceRepo=%s\n' "$source_repo"
 printf 'origin=%s\n' "$origin"
 printf 'sshUser=deploy\n'
 printf 'arbitraryShell=DISABLED\n'
+printf 'allowedOperation=CONTROL_PROBE\n'
 printf 'allowedOperation=V12_LIVE_ACTIVATE_V3\n'
 printf 'next=configure GitHub Actions secrets DISDEX_VPS_SSH_HOST, DISDEX_VPS_DEPLOY_PRIVATE_KEY, DISDEX_VPS_KNOWN_HOSTS and optional variable DISDEX_VPS_SSH_PORT\n'
