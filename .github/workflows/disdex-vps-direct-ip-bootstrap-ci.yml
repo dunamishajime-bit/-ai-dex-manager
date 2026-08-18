@@ -152,3 +152,25 @@ jobs:
           if ($parsed.requestId -ne 'gha-probe-0123456789abcdef-final1') { throw 'Control request JSON quotes did not survive round-trip' }
           if ($parsed.operation -ne 'CONTROL_PROBE' -or $parsed.execute -ne $true) { throw 'Control request JSON semantics changed' }
           Write-Host 'CONTROL_COMMENT_JSON_FILE_ROUNDTRIP=PASS'
+
+  github-runner-vps-network:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Probe direct VPS SSH port without authentication
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import socket
+          host = '162.43.50.223'
+          port = 22
+          with socket.create_connection((host, port), timeout=10) as sock:
+              sock.settimeout(5)
+              banner = sock.recv(128)
+          if not banner.startswith(b'SSH-'):
+              raise SystemExit(f'VPS_TCP22_UNEXPECTED_BANNER prefix={banner[:16]!r}')
+          print('GITHUB_RUNNER_VPS_TCP22=PASS')
+          print('authenticationAttempted=false')
+          print('tradingMutation=0')
+          PY
