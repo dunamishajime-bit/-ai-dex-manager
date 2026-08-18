@@ -1,0 +1,51 @@
+name: DisDex VPS Control WinPS Keygen CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-winps.ps1'
+      - '.github/workflows/disdex-vps-control-winps-keygen-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  keygen:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse Windows PowerShell wrapper
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-winps.ps1'
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path), [ref]$null, [ref]$errors)
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+
+      - name: Execute no-passphrase key generation on Windows PowerShell
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $key = Join-Path $env:RUNNER_TEMP 'disdex_control_ci_ed25519'
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-winps.ps1 -KeygenOnly -KeyPath $key
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path -LiteralPath $key -PathType Leaf)) { throw 'private key missing' }
+          if (-not (Test-Path -LiteralPath "$key.pub" -PathType Leaf)) { throw 'public key missing' }
+          ssh-keygen -y -f $key | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'generated key validation failed' }
+          Remove-Item -LiteralPath $key, "$key.pub" -Force
+
+      - name: Safety assertions
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $text = Get-Content scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-winps.ps1 -Raw
+          if ($text -notmatch 'Private key content was not printed') { throw 'redaction assertion missing' }
+          if ($text -notmatch 'KeygenOnly') { throw 'KeygenOnly gate missing' }
+          if ($text -notmatch 'bootstrap-disdex-github-actions-vps-control.ps1') { throw 'canonical handoff missing' }
