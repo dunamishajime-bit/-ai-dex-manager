@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || {
+  printf 'DISDEX_VPS_CONTROL_REQUIRES_ROOT\n' >&2
+  exit 70
+}
+[[ "${1:-}" == "--stdin" && "$#" -eq 1 ]] || {
+  printf 'DISDEX_VPS_CONTROL_STDIN_ONLY\n' >&2
+  exit 64
+}
+
+IFS= read -r request_line || {
+  printf 'DISDEX_VPS_CONTROL_EMPTY_REQUEST\n' >&2
+  exit 64
+}
+if IFS= read -r extra_line; then
+  printf 'DISDEX_VPS_CONTROL_MULTILINE_REJECTED\n' >&2
+  exit 64
+fi
+[[ ${#request_line} -le 1024 ]] || {
+  printf 'DISDEX_VPS_CONTROL_REQUEST_TOO_LONG\n' >&2
+  exit 64
+}
+
+read -r protocol request_id operation source_ref target_sha base_sha ack extra <<<"$request_line"
+[[ -z "${extra:-}" ]] || {
+  printf 'DISDEX_VPS_CONTROL_FIELD_COUNT_INVALID\n' >&2
+  exit 64
+}
+[[ "$protocol" == "DISDEX_VPS_CONTROL_V1" ]] || {
+  printf 'DISDEX_VPS_CONTROL_PROTOCOL_INVALID\n' >&2
+  exit 64
+}
+[[ "$request_id" =~ ^[A-Za-z0-9._-]{8,120}$ ]] || {
+  printf 'DISDEX_VPS_CONTROL_REQUEST_ID_INVALID\n' >&2
+  exit 64
+}
+[[ "$source_ref" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$ && "$source_ref" != *..* && "$source_ref" != */. && "$source_ref" != ./* ]] || {
+  printf 'DISDEX_VPS_CONTROL_SOURCE_REF_INVALID\n' >&2
+  exit 64
+}
+[[ "$target_sha" =~ ^[0-9a-f]{40}$ && "$base_sha" =~ ^[0-9a-f]{40}$ ]] || {
+  printf 'DISDEX_VPS_CONTROL_SHA_INVALID\n' >&2
+  exit 64
+}
+
+case "$operation" in
+  V12_LIVE_ACTIVATE_V3)
+    [[ "$source_ref" == "chatgpt/v12-live-adapter-final-20260817" ]] || {
+      printf 'DISDEX_VPS_CONTROL_V12_SOURCE_REF_BLOCKED\n' >&2
+      exit 65
+    }
+    [[ "$base_sha" == "d686f6dc0b841ba6299830fe8aade797420f4597" ]] || {
+      printf 'DISDEX_VPS_CONTROL_V12_BASE_SHA_BLOCKED\n' >&2
+      exit 65
+    }
+    [[ "$ack" == "I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3" ]] || {
+      printf 'DISDEX_VPS_CONTROL_V12_ACK_REQUIRED\n' >&2
+      exit 65
+    }
+    ;;
+  *)
+    printf 'DISDEX_VPS_CONTROL_OPERATION_NOT_ALLOWLISTED operation=%s\n' "$operation" >&2
+    exit 65
+    ;;
+esac
+
+config=/etc/disdex/github-actions-control.env
+[[ -f "$config" && ! -L "$config" && "$(stat -c '%U:%G:%a' "$config")" == "root:root:600" ]] || {
+  printf 'DISDEX_VPS_CONTROL_CONFIG_INVALID\n' >&2
+  exit 66
+}
+# shellcheck disable=SC1090
+source "$config"
+: "${SOURCE_REPO:?SOURCE_REPO missing}"
+: "${EXPECTED_ORIGIN_URL:?EXPECTED_ORIGIN_URL missing}"
+[[ "$SOURCE_REPO" == /* && -d "$SOURCE_REPO" && ! -L "$SOURCE_REPO" ]] || {
+  printf 'DISDEX_VPS_CONTROL_SOURCE_REPO_INVALID\n' >&2
+  exit 66
+}
+[[ "$(stat -c '%U' "$SOURCE_REPO")" == "deploy" ]] || {
+  printf 'DISDEX_VPS_CONTROL_SOURCE_REPO_OWNER_INVALID\n' >&2
+  exit 66
+}
+actual_origin="$(runuser -u deploy -- git -C "$SOURCE_REPO" remote get-url origin 2>/dev/null || true)"
+[[ "$actual_origin" == "$EXPECTED_ORIGIN_URL" ]] || {
+  printf 'DISDEX_VPS_CONTROL_ORIGIN_MISMATCH\n' >&2
+  exit 66
+}
+
+state_root=/var/lib/disdex-github-actions-control
+request_root="$state_root/requests"
+tool_root="$state_root/tools/$request_id"
+install -d -o root -g root -m 0700 "$state_root" "$request_root" "$state_root/tools"
+exec 9>/var/lock/disdex-github-actions-control.lock
+flock -n 9 || {
+  printf 'DISDEX_VPS_CONTROL_BUSY\n' >&2
+  exit 75
+}
+
+state_file="$request_root/$request_id.state"
+if [[ -e "$state_file" || -L "$state_file" ]]; then
+  printf 'DISDEX_VPS_CONTROL_REPLAY_BLOCKED requestId=%s\n' "$request_id" >&2
+  [[ -f "$state_file" && ! -L "$state_file" ]] && cat "$state_file"
+  exit 76
+fi
+
+started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+write_state() {
+  local status="$1" rc="$2"
+  local tmp="$state_file.tmp.$$"
+  {
+    printf 'requestId=%s\n' "$request_id"
+    printf 'operation=%s\n' "$operation"
+    printf 'sourceRef=%s\n' "$source_ref"
+    printf 'targetSha=%s\n' "$target_sha"
+    printf 'baseSha=%s\n' "$base_sha"
+    printf 'startedAt=%s\n' "$started_at"
+    printf 'finishedAt=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    printf 'status=%s\n' "$status"
+    printf 'exitCode=%s\n' "$rc"
+  } >"$tmp"
+  chmod 0600 "$tmp"
+  chown root:root "$tmp"
+  mv -f "$tmp" "$state_file"
+}
+
+finish() {
+  rc=$?
+  if [[ $rc -eq 0 ]]; then
+    write_state SUCCESS 0
+    printf 'DISDEX_VPS_CONTROL_RESULT status=SUCCESS requestId=%s operation=%s targetSha=%s\n' "$request_id" "$operation" "$target_sha"
+  else
+    write_state FAILED "$rc"
+    printf 'DISDEX_VPS_CONTROL_RESULT status=FAILED requestId=%s operation=%s targetSha=%s exitCode=%s\n' "$request_id" "$operation" "$target_sha" "$rc" >&2
+  fi
+}
+trap finish EXIT
+
+printf 'DISDEX_VPS_CONTROL_ACCEPTED requestId=%s operation=%s targetSha=%s\n' "$request_id" "$operation" "$target_sha"
+
+# Fetch only named, allowlisted refs plus master into the existing trusted
+# deploy-owned clone.  Never reset, clean, checkout, or overwrite its worktree.
+runuser -u deploy -- git -C "$SOURCE_REPO" fetch --no-tags origin \
+  "refs/heads/$source_ref:refs/remotes/origin/$source_ref" \
+  "refs/heads/master:refs/remotes/origin/master"
+remote_sha="$(runuser -u deploy -- git -C "$SOURCE_REPO" rev-parse --verify "refs/remotes/origin/$source_ref^{commit}")"
+[[ "$remote_sha" == "$target_sha" ]] || {
+  printf 'DISDEX_VPS_CONTROL_TARGET_NOT_REF_HEAD expected=%s actual=%s\n' "$target_sha" "$remote_sha" >&2
+  exit 67
+}
+for commit in "$target_sha" "$base_sha"; do
+  resolved="$(runuser -u deploy -- git -C "$SOURCE_REPO" rev-parse --verify "${commit}^{commit}" 2>/dev/null || true)"
+  [[ "$resolved" == "$commit" ]] || {
+    printf 'DISDEX_VPS_CONTROL_COMMIT_NOT_LOCAL sha=%s\n' "$commit" >&2
+    exit 67
+  }
+done
+
+rm -rf "$tool_root"
+install -d -o deploy -g deploy -m 0700 "$tool_root"
+runuser -u deploy -- git -C "$SOURCE_REPO" archive "$target_sha" \
+  scripts/ops/root/disdex-v12-live-activate-from-sha-v3 | \
+  runuser -u deploy -- tar -x -C "$tool_root"
+activate="$tool_root/scripts/ops/root/disdex-v12-live-activate-from-sha-v3"
+[[ -f "$activate" && ! -L "$activate" ]] || {
+  printf 'DISDEX_VPS_CONTROL_ACTIVATION_TOOL_MISSING\n' >&2
+  exit 68
+}
+bash -n "$activate"
+
+case "$operation" in
+  V12_LIVE_ACTIVATE_V3)
+    bash "$activate" "$SOURCE_REPO" "$target_sha" "$base_sha" "$ack"
+    ;;
+esac
