@@ -49,6 +49,20 @@ read -r protocol request_id operation source_ref target_sha base_sha ack extra <
 }
 
 case "$operation" in
+  CONTROL_PROBE)
+    [[ "$source_ref" == "master" ]] || {
+      printf 'DISDEX_VPS_CONTROL_PROBE_SOURCE_REF_BLOCKED\n' >&2
+      exit 65
+    }
+    [[ "$base_sha" == "$target_sha" ]] || {
+      printf 'DISDEX_VPS_CONTROL_PROBE_SHA_PAIR_INVALID\n' >&2
+      exit 65
+    }
+    [[ "$ack" == "PROBE_ONLY_NO_TRADING_MUTATION" ]] || {
+      printf 'DISDEX_VPS_CONTROL_PROBE_ACK_REQUIRED\n' >&2
+      exit 65
+    }
+    ;;
   V12_LIVE_ACTIVATE_V3)
     [[ "$source_ref" == "chatgpt/v12-live-adapter-final-20260817" ]] || {
       printf 'DISDEX_VPS_CONTROL_V12_SOURCE_REF_BLOCKED\n' >&2
@@ -142,7 +156,7 @@ finish() {
   fi
 }
 
-# Persist RUNNING before any fetch/build/install/migration mutation.  A hard
+# Persist RUNNING before any fetch/build/install/migration work. A hard
 # process/host failure therefore leaves replay evidence and the same request ID
 # is never silently re-executed after restart.
 write_state RUNNING
@@ -150,11 +164,16 @@ trap finish EXIT
 
 printf 'DISDEX_VPS_CONTROL_ACCEPTED requestId=%s operation=%s targetSha=%s\n' "$request_id" "$operation" "$target_sha"
 
-# Fetch only named, allowlisted refs plus master into the existing trusted
-# deploy-owned clone.  Never reset, clean, checkout, or overwrite its worktree.
-runuser -u deploy -- git -C "$SOURCE_REPO" fetch --no-tags origin \
-  "refs/heads/$source_ref:refs/remotes/origin/$source_ref" \
-  "refs/heads/master:refs/remotes/origin/master"
+# Fetch named allowlisted refs into the existing trusted deploy-owned clone.
+# Never reset, clean, checkout, or overwrite its worktree.
+if [[ "$source_ref" == "master" ]]; then
+  runuser -u deploy -- git -C "$SOURCE_REPO" fetch --no-tags origin \
+    "refs/heads/master:refs/remotes/origin/master"
+else
+  runuser -u deploy -- git -C "$SOURCE_REPO" fetch --no-tags origin \
+    "refs/heads/$source_ref:refs/remotes/origin/$source_ref" \
+    "refs/heads/master:refs/remotes/origin/master"
+fi
 remote_sha="$(runuser -u deploy -- git -C "$SOURCE_REPO" rev-parse --verify "refs/remotes/origin/$source_ref^{commit}")"
 [[ "$remote_sha" == "$target_sha" ]] || {
   printf 'DISDEX_VPS_CONTROL_TARGET_NOT_REF_HEAD expected=%s actual=%s\n' "$target_sha" "$remote_sha" >&2
@@ -167,6 +186,14 @@ for commit in "$target_sha" "$base_sha"; do
     exit 67
   }
 done
+
+if [[ "$operation" == "CONTROL_PROBE" ]]; then
+  current_release="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+  printf 'DISDEX_VPS_CONTROL_PROBE_PASS requestId=%s targetSha=%s\n' "$request_id" "$target_sha"
+  printf 'sourceRepoReachable=TRUE\noriginVerified=TRUE\nforcedCommand=TRUE\ntradingMutation=0\n'
+  printf 'currentRelease=%s\n' "${current_release:-UNRESOLVED}"
+  exit 0
+fi
 
 rm -rf "$tool_root"
 install -d -o deploy -g deploy -m 0700 "$tool_root"
