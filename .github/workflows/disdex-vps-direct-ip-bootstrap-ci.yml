@@ -45,3 +45,6 @@ jobs:
           if ($t -match '(?m)^\s*(?:&\s*)?(?:ssh-keyscan|ssh-keyscan\.exe)\b') { throw 'ssh-keyscan execution forbidden' }
           if ($t -notmatch 'DISDEX_VPS_KNOWN_HOSTS') { throw 'Pinned known_hosts secret remap missing' }
           if ($t -notmatch 'PatchOnly') { throw 'PatchOnly test gate missing' }
+          $redirect = '$installCommand = "bash $remoteInstallScript ''$sourceRepo'' ''$controlSha'' 2>&1"'
+          if (-not $t.Contains($redirect)) { throw 'Remote installer stderr normalization missing' }
+          if ($t -match '\$ErrorActionPreference\s*=\s*''SilentlyContinue''') { throw 'Global error suppression is forbidden' }
