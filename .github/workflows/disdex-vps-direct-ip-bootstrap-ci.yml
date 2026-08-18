@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1'
+      - 'scripts/ops/windows/bootstrap-disdex-v12-live-repair-git-metadata.ps1'
       - '.github/workflows/disdex-vps-direct-ip-bootstrap-ci.yml'
 
 permissions:
@@ -16,17 +17,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Parse wrapper
+      - name: Parse wrappers
         shell: powershell
         run: |
-          $tokens = $null
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
-            (Resolve-Path 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1'),
-            [ref]$tokens,
-            [ref]$errors
-          ) | Out-Null
-          if ($errors.Count -ne 0) { throw $errors[0].Message }
+          $paths = @(
+            'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1',
+            'scripts/ops/windows/bootstrap-disdex-v12-live-repair-git-metadata.ps1'
+          )
+          foreach ($path in $paths) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $path),
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -ne 0) { throw "$path parse failed: $($errors[0].Message)" }
+          }
 
       - name: Execute patch-only path
         shell: powershell
@@ -34,7 +41,7 @@ jobs:
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1 -PatchOnly
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Safety assertions
+      - name: Direct IP wrapper safety assertions
         shell: powershell
         run: |
           $p = 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1'
@@ -48,3 +55,29 @@ jobs:
           $redirect = '$installCommand = "bash $remoteInstallScript ''$sourceRepo'' ''$controlSha'' 2>&1"'
           if (-not $t.Contains($redirect)) { throw 'Remote installer stderr normalization missing' }
           if ($t -match '\$ErrorActionPreference\s*=\s*''SilentlyContinue''') { throw 'Global error suppression is forbidden' }
+
+      - name: Git metadata repair boundary assertions
+        shell: powershell
+        run: |
+          $p = 'scripts/ops/windows/bootstrap-disdex-v12-live-repair-git-metadata.ps1'
+          $t = Get-Content $p -Raw
+          $required = @(
+            "`$SourceRepo = '/home/deploy/ai-dex-manager'",
+            'TRUSTED_CLONE_GIT_METADATA_REPAIR=PASS',
+            'DISDEX_TRUSTED_CLONE_GIT_METADATA_REPAIR_PASS',
+            'workingTreeMutation=0',
+            'tradingMutation=0',
+            'StrictHostKeyChecking=yes',
+            'HostKeyAlias=',
+            'chown -R deploy:deploy "$repo/.git"',
+            'find "$repo/.git" -type d -exec chmod u+rwx {} +',
+            'find "$repo/.git" -type f -exec chmod u+rw {} +',
+            'runuser -u deploy -- git -C "$repo" fetch --no-tags origin refs/heads/master:refs/remotes/origin/master'
+          )
+          foreach ($needle in $required) {
+            if (-not $t.Contains($needle)) { throw "Missing repair boundary marker: $needle" }
+          }
+          if ($t.Contains('chown -R deploy:deploy "$repo"')) { throw 'Broad working-tree chown is forbidden' }
+          if ($t -match '(?m)^\s*(?:&\s*)?(?:ssh-keyscan|ssh-keyscan\.exe)\b') { throw 'ssh-keyscan execution forbidden' }
+          if ($t -match '\$ErrorActionPreference\s*=\s*''SilentlyContinue''') { throw 'Global error suppression is forbidden' }
+          if ($t -notmatch 'dunamishajime-bit/-ai-dex-manager') { throw 'Exact trusted origin guard missing' }
