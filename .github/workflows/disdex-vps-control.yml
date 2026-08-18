@@ -204,11 +204,40 @@ jobs:
         run: |
           set -Eeuo pipefail
           install -d -m 0700 "$HOME/.ssh"
-          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/disdex_vps_control"
-          chmod 0600 "$HOME/.ssh/disdex_vps_control"
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 0600 "$HOME/.ssh/known_hosts"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          key = os.environ["SSH_PRIVATE_KEY"]
+          key = key.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
+          if not key.endswith("\n"):
+              key += "\n"
+          lines = key.splitlines()
+          if len(lines) < 3:
+              raise SystemExit("DISDEX_VPS_DEPLOY_PRIVATE_KEY_FORMAT_INVALID")
+          if lines[0] != "-----BEGIN OPENSSH PRIVATE KEY-----":
+              raise SystemExit("DISDEX_VPS_DEPLOY_PRIVATE_KEY_HEADER_INVALID")
+          if lines[-1] != "-----END OPENSSH PRIVATE KEY-----":
+              raise SystemExit("DISDEX_VPS_DEPLOY_PRIVATE_KEY_FOOTER_INVALID")
+          Path(os.path.expanduser("~/.ssh/disdex_vps_control")).write_text(
+              key, encoding="utf-8", newline="\n"
+          )
+
+          known = os.environ["SSH_KNOWN_HOSTS"]
+          known = known.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
+          if not known.strip():
+              raise SystemExit("DISDEX_VPS_KNOWN_HOSTS_EMPTY_AFTER_NORMALIZATION")
+          if not known.endswith("\n"):
+              known += "\n"
+          Path(os.path.expanduser("~/.ssh/known_hosts")).write_text(
+              known, encoding="utf-8", newline="\n"
+          )
+          print("DISDEX_SSH_SECRET_NORMALIZATION_PASS")
+          print("privateKeyPrinted=false")
+          PY
+          chmod 0600 "$HOME/.ssh/disdex_vps_control" "$HOME/.ssh/known_hosts"
           ssh-keygen -y -f "$HOME/.ssh/disdex_vps_control" >/dev/null
+          echo 'DISDEX_SSH_PRIVATE_KEY_PARSE_PASS'
 
       - name: Execute one fail-closed VPS control request
         id: execute

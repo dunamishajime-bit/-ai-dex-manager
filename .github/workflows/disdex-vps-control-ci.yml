@@ -80,8 +80,44 @@ jobs:
           grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' "$workflow"
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$workflow"
           grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' "$workflow"
+          grep -Fq 'DISDEX_SSH_SECRET_NORMALIZATION_PASS' "$workflow"
+          grep -Fq 'DISDEX_SSH_PRIVATE_KEY_PARSE_PASS' "$workflow"
+          grep -Fq 'replace("\r\n", "\n").replace("\r", "\n")' "$workflow"
+          grep -Fq 'lstrip("\ufeff")' "$workflow"
+          grep -Fq -- '-----BEGIN OPENSSH PRIVATE KEY-----' "$workflow"
+          grep -Fq -- '-----END OPENSSH PRIVATE KEY-----' "$workflow"
           ! grep -Fq 'workflow_dispatch:' "$workflow"
           ! grep -Eq '(ssh-keyscan|StrictHostKeyChecking=no)' "$workflow"
+
+      - name: Prove CRLF and BOM private-key recovery
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          ssh-keygen -q -t ed25519 -N '' -f "$tmp/source"
+          SOURCE="$tmp/source" BROKEN="$tmp/broken" FIXED="$tmp/fixed" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          source = Path(os.environ['SOURCE']).read_text(encoding='utf-8')
+          broken = '\ufeff' + source.replace('\n', '\r\n')
+          Path(os.environ['BROKEN']).write_text(broken, encoding='utf-8', newline='')
+
+          key = Path(os.environ['BROKEN']).read_text(encoding='utf-8')
+          key = key.lstrip('\ufeff').replace('\r\n', '\n').replace('\r', '\n')
+          if not key.endswith('\n'):
+              key += '\n'
+          lines = key.splitlines()
+          if lines[0] != '-----BEGIN OPENSSH PRIVATE KEY-----':
+              raise SystemExit('header recovery failed')
+          if lines[-1] != '-----END OPENSSH PRIVATE KEY-----':
+              raise SystemExit('footer recovery failed')
+          Path(os.environ['FIXED']).write_text(key, encoding='utf-8', newline='\n')
+          PY
+          chmod 0600 "$tmp/fixed"
+          ssh-keygen -y -f "$tmp/fixed" >/dev/null
+          echo 'DISDEX_SSH_SECRET_NORMALIZATION_SELFTEST_PASS'
 
       - name: Verify no arbitrary shell operation is documented or exposed
         run: |
