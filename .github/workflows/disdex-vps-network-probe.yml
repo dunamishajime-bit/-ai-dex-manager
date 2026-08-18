@@ -14,7 +14,7 @@ jobs:
       github.event.issue.number == 132 &&
       github.actor == 'dunamishajime-bit' &&
       github.event.comment.author_association == 'OWNER' &&
-      trim(github.event.comment.body) == 'DISDEX_VPS_NETWORK_PROBE_V1'
+      github.event.comment.body == 'DISDEX_VPS_NETWORK_PROBE_V1'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     env:
