@@ -108,7 +108,7 @@ sudo -n -U deploy -l | grep -Fq '/usr/local/sbin/disdex-github-actions-control -
 
 printf 'DISDEX_GHA_INSTALL_PASS\n'
 printf 'sourceRepo=%s\n' "$source_repo"
-printf 'origin=%s\n' "$origin"
+printf 'originConfigured=TRUE\n'
 printf 'sshUser=deploy\n'
 printf 'arbitraryShell=DISABLED\n'
 printf 'allowedOperation=CONTROL_PROBE\n'
