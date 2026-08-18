@@ -1,5 +1,15 @@
 [CmdletBinding()]
-param()
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidatePattern('^[0-9a-f]{40}$')]
+    [string]$ExpectedControlMasterSha,
+
+    [Parameter(Mandatory=$true)]
+    [ValidatePattern('^[0-9a-f]{40}$')]
+    [string]$ExpectedV12Sha,
+
+    [switch]$RequireV52MarketClosedWindow
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -66,14 +76,47 @@ function Get-IssueComments {
 function Find-ControlRequest([string]$RequestId) {
     $needle = '"requestId":"' + $RequestId + '"'
     return Get-IssueComments | Where-Object {
-        $_.body -like 'DISDEX_VPS_CONTROL_V1*' -and $_.body.Contains($needle)
+        $_.body -and $_.body -like 'DISDEX_VPS_CONTROL_V1*' -and $_.body.Contains($needle)
     } | Select-Object -Last 1
 }
 
 function Find-ControlResult([string]$RequestId) {
     return Get-IssueComments | Where-Object {
+        $_.body -and $_.user.login -eq 'github-actions[bot]' -and
         $_.body -like 'DISDEX_VPS_CONTROL_RESULT *' -and $_.body -like "*requestId=$RequestId*"
     } | Select-Object -Last 1
+}
+
+function Assert-ExistingRequestMatches {
+    param(
+        [Parameter(Mandatory=$true)]$Comment,
+        [Parameter(Mandatory=$true)][string]$ExpectedPayload,
+        [Parameter(Mandatory=$true)][string]$RequestId
+    )
+
+    $lines = @(([string]$Comment.body) -split '\r?\n')
+    if ($lines.Count -lt 2 -or $lines[0].Trim() -ne 'DISDEX_VPS_CONTROL_V1') {
+        throw "Existing control request is malformed: requestId=$RequestId"
+    }
+    $raw = (($lines | Select-Object -Skip 1) -join "`n").Trim()
+    $parsed = $raw | ConvertFrom-Json
+    $actualNames = @($parsed.PSObject.Properties.Name | Sort-Object)
+    $expectedNames = @('acknowledgement','baseSha','execute','operation','requestId','sourceRef','targetSha') | Sort-Object
+    if (($actualNames -join ',') -ne ($expectedNames -join ',')) {
+        throw "Existing request payload keys do not match: requestId=$RequestId"
+    }
+    $canonical = [ordered]@{
+        requestId = [string]$parsed.requestId
+        operation = [string]$parsed.operation
+        sourceRef = [string]$parsed.sourceRef
+        targetSha = [string]$parsed.targetSha
+        baseSha = [string]$parsed.baseSha
+        acknowledgement = [string]$parsed.acknowledgement
+        execute = [bool]$parsed.execute
+    } | ConvertTo-Json -Compress
+    if ($canonical -ne $ExpectedPayload) {
+        throw "Existing request ID has a different payload; refusing reuse: requestId=$RequestId"
+    }
 }
 
 function Show-FailedRun([string]$ResultText) {
@@ -101,21 +144,22 @@ function Ensure-ControlRequest {
         [Parameter(Mandatory=$true)][int]$TimeoutSeconds
     )
 
+    $payload = [ordered]@{
+        requestId = $RequestId
+        operation = $Operation
+        sourceRef = $SourceRef
+        targetSha = $TargetSha
+        baseSha = $BaseSha
+        acknowledgement = $Acknowledgement
+        execute = $true
+    } | ConvertTo-Json -Compress
+
     $existing = Find-ControlRequest -RequestId $RequestId
     if ($existing) {
-        Write-Host "CONTROL_REQUEST_REUSED requestId=$RequestId"
+        Assert-ExistingRequestMatches -Comment $existing -ExpectedPayload $payload -RequestId $RequestId
+        Write-Host "CONTROL_REQUEST_REUSED_EXACT_PAYLOAD requestId=$RequestId"
     }
     else {
-        $payload = [ordered]@{
-            requestId = $RequestId
-            operation = $Operation
-            sourceRef = $SourceRef
-            targetSha = $TargetSha
-            baseSha = $BaseSha
-            acknowledgement = $Acknowledgement
-            execute = $true
-        } | ConvertTo-Json -Compress
-
         $body = "DISDEX_VPS_CONTROL_V1`n$payload"
         $stderrPath = Join-Path $env:TEMP ("disdex-gh-comment-stderr-" + [Guid]::NewGuid().ToString('N') + '.txt')
         try {
@@ -141,6 +185,9 @@ function Ensure-ControlRequest {
             $text = [string]$result.body
             Write-Host $text
             if ($text -like 'DISDEX_VPS_CONTROL_RESULT SUCCESS*') {
+                if ($text -notlike "*operation=$Operation*" -or $text -notlike "*targetSha=$TargetSha*") {
+                    throw "Success result does not match exact operation/SHA: requestId=$RequestId"
+                }
                 return $text
             }
             Show-FailedRun -ResultText $text
@@ -149,10 +196,12 @@ function Ensure-ControlRequest {
         Start-Sleep -Seconds 5
     } while ([DateTime]::UtcNow -lt $deadline)
 
-    throw "Timed out waiting for requestId=$RequestId. Re-running this resume script will track the same deterministic request ID instead of posting a duplicate."
+    throw "Timed out waiting for requestId=$RequestId. Re-running this exact pinned resume tracks the same request ID; do not create a second request manually."
 }
 
 function Require-V12GreenHead {
+    param([Parameter(Mandatory=$true)][string]$PinnedV12Sha)
+
     $prJson = Invoke-GhText @('api', "repos/$Repo/pulls/$V12Pr")
     $pr = $prJson | ConvertFrom-Json
     $sourceRef = [string]$pr.head.ref
@@ -163,6 +212,9 @@ function Require-V12GreenHead {
     }
     if ($targetSha -notmatch '^[0-9a-f]{40}$') {
         throw "Invalid V12 branch HEAD: $targetSha"
+    }
+    if ($targetSha -ne $PinnedV12Sha) {
+        throw "V12 HEAD moved after audit. expected=$PinnedV12Sha actual=$targetSha. No request was posted."
     }
 
     $runsJson = Invoke-GhText @('api', "repos/$Repo/actions/runs?head_sha=$targetSha&per_page=100")
@@ -196,9 +248,24 @@ function Require-V12GreenHead {
     return [pscustomobject]@{ SourceRef = $sourceRef; TargetSha = $targetSha }
 }
 
+function Assert-V52PreferredWindow {
+    if (-not $RequireV52MarketClosedWindow) { return }
+    $eastern = [TimeZoneInfo]::FindSystemTimeZoneById('Eastern Standard Time')
+    $ny = [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $eastern)
+    $isWeekday = $ny.DayOfWeek -notin @([DayOfWeek]::Saturday, [DayOfWeek]::Sunday)
+    $sessionStart = $ny.Date.AddHours(9).AddMinutes(30)
+    $sessionEnd = $ny.Date.AddHours(16)
+    if ($isWeekday -and $ny -ge $sessionStart -and $ny -le $sessionEnd) {
+        throw "FINAL_RESUME_BLOCKED_US_REGULAR_SESSION ny=$($ny.ToString('yyyy-MM-dd HH:mm:ss zzz')). Run outside the code-defined 09:30-16:00 New York regular-session freshness window. No request was posted."
+    }
+    Write-Host "V52_PREFERRED_ACTIVATION_WINDOW=PASS ny=$($ny.ToString('yyyy-MM-dd HH:mm:ss'))"
+}
+
 Write-Host '============================================================'
-Write-Host ' DisDex V12 LIVE - resume after successful local probe'
+Write-Host ' DisDex V12 LIVE - FINAL PINNED resume after successful probe'
 Write-Host ' Reuses installed constrained control; no Git repair/install'
+Write-Host " EXPECTED_CONTROL_MASTER_SHA=$ExpectedControlMasterSha"
+Write-Host " EXPECTED_V12_SHA=$ExpectedV12Sha"
 Write-Host '============================================================'
 
 Write-Phase 'Prerequisites'
@@ -214,6 +281,16 @@ if (-not (Test-Path -LiteralPath $KnownHostsPath -PathType Leaf)) {
 
 $null = Invoke-GhText @('auth', 'status', '--hostname', 'github.com')
 Write-Host 'GitHub CLI auth: PASS'
+
+Write-Phase 'Verify audited exact SHAs before any request'
+$currentMasterSha = (Invoke-GhText @('api', "repos/$Repo/commits/master", '--jq', '.sha')).Trim()
+if ($currentMasterSha -ne $ExpectedControlMasterSha) {
+    throw "Control master moved after audit. expected=$ExpectedControlMasterSha actual=$currentMasterSha. No request was posted."
+}
+Write-Host "CONTROL_MASTER_PIN=PASS sha=$currentMasterSha"
+$v12 = Require-V12GreenHead -PinnedV12Sha $ExpectedV12Sha
+Write-Host "V12_GREEN_PIN=PASS sha=$($v12.TargetSha)"
+Assert-V52PreferredWindow
 
 Write-Phase 'Build pinned direct-IP known_hosts secret'
 $raw = @(& $script:SshKeygenExe -F $VpsHostKeyAlias -f $KnownHostsPath 2>$null)
@@ -237,42 +314,34 @@ Write-Host 'GITHUB_ACTIONS_SSH_CONFIGURATION=PASS'
 Write-Host 'Secret values were not printed.'
 
 Write-Phase 'GitHub Actions CONTROL_PROBE'
-$masterSha = (Invoke-GhText @('api', "repos/$Repo/commits/master", '--jq', '.sha')).Trim()
-if ($masterSha -notmatch '^[0-9a-f]{40}$') { throw "Invalid master SHA: $masterSha" }
-$probeRequestId = 'gha-probe-' + $masterSha.Substring(0,12) + '-resume1'
+$probeRequestId = 'gha-probe-' + $ExpectedControlMasterSha.Substring(0,16) + '-final1'
 $null = Ensure-ControlRequest `
     -RequestId $probeRequestId `
     -Operation 'CONTROL_PROBE' `
     -SourceRef 'master' `
-    -TargetSha $masterSha `
-    -BaseSha $masterSha `
+    -TargetSha $ExpectedControlMasterSha `
+    -BaseSha $ExpectedControlMasterSha `
     -Acknowledgement 'PROBE_ONLY_NO_TRADING_MUTATION' `
     -TimeoutSeconds 900
 Write-Host "GITHUB_ACTIONS_CONTROL_PROBE=PASS requestId=$probeRequestId"
 
-Write-Phase 'Refresh exact green V12 branch HEAD'
-$v12 = Require-V12GreenHead
-Write-Host "V12 sourceRef=$($v12.SourceRef)"
-Write-Host "V12 targetSha=$($v12.TargetSha)"
-
 Write-Phase 'V12 LIVE activation V3'
-$liveRequestId = 'v12-live-' + $v12.TargetSha.Substring(0,12) + '-resume1'
-$liveResult = Ensure-ControlRequest `
+$liveRequestId = 'v12-live-' + $ExpectedV12Sha.Substring(0,16) + '-final1'
+$null = Ensure-ControlRequest `
     -RequestId $liveRequestId `
     -Operation 'V12_LIVE_ACTIVATE_V3' `
     -SourceRef $v12.SourceRef `
-    -TargetSha $v12.TargetSha `
+    -TargetSha $ExpectedV12Sha `
     -BaseSha $V12BaseSha `
     -Acknowledgement 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' `
     -TimeoutSeconds 5700
 
-# A SUCCESS result is posted only after the control workflow has matched the
-# exact remote markers STATUS: LIVE_ACTIVATED_VERIFIED,
-# V96_V12_SIMULTANEOUS_LIVE=FALSE and ORDERS_SENT_FOR_TESTING=0.
+# GitHub Actions posts SUCCESS only after the exact VPS log contains all four
+# final markers below, including the remote artificial-order attestation.
 Write-Host ''
 Write-Host '============================================================'
 Write-Host 'STATUS: LIVE_ACTIVATED_VERIFIED'
-Write-Host "ACTIVATION_SHA=$($v12.TargetSha)"
+Write-Host "ACTIVATION_SHA=$ExpectedV12Sha"
 Write-Host "CONTROL_PROBE_REQUEST_ID=$probeRequestId"
 Write-Host "LIVE_REQUEST_ID=$liveRequestId"
 Write-Host 'V96_V12_SIMULTANEOUS_LIVE=FALSE'
