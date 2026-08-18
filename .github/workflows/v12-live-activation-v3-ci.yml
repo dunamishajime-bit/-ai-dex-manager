@@ -35,6 +35,8 @@ jobs:
           grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' "$activate"
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$activate"
           grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' "$activate"
+          grep -Fq '/usr/bin/python3' "$activate"
+          ! grep -Eq '^[[:space:]]+python[[:space:]]' "$activate"
           grep -Fq 'VPS_RELEASE_DELTA_BLOCKED' "$audit"
           grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' "$audit"
           grep -Fq 'VPS_RELEASE_FULL_TREE_DELTA_PRESERVATION_PASS' "$audit"
