@@ -1,0 +1,155 @@
+{
+  "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
+  "status": "V13_EXECUTION_SAFETY_FAILED",
+  "generatedAt": "2026-08-18T18:44:59.853000Z",
+  "safety": {
+    "mode": "SHADOW_RESEARCH_ONLY",
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false
+  },
+  "coverage": {
+    "booksBySymbol": {
+      "AMZN": [
+        "ASTER",
+        "XYZ"
+      ],
+      "META": [
+        "ASTER",
+        "XYZ"
+      ],
+      "MSFT": [
+        "ASTER",
+        "XYZ"
+      ],
+      "NVDA": [
+        "ASTER",
+        "XYZ"
+      ],
+      "TSLA": [
+        "ASTER",
+        "XYZ"
+      ]
+    },
+    "completeSymbols": [
+      "AMZN",
+      "META",
+      "MSFT",
+      "NVDA",
+      "TSLA"
+    ],
+    "asterBooks": 344305,
+    "xyzBooks": 15805,
+    "asterTrades": 288,
+    "xyzTrades": 31439,
+    "collectorErrors": 1
+  },
+  "virtualExecution": {
+    "quotesOpened": 15009,
+    "entryFills": 3,
+    "completedCycles": 3,
+    "forcedCycles": 3,
+    "pendingHedges": 0,
+    "openInventories": 0,
+    "partialFillFailures": 4,
+    "unhedgedRejected": 5,
+    "unresolvedInventory": 0,
+    "unresolvedCloseAttempts": 3,
+    "cancellations": {
+      "MAKER_TOP_MOVED": 12767,
+      "REFERENCE_MOVED": 236,
+      "STALE_OR_INVALID_BOOK": 1976,
+      "ADVERSE_ORDER_FLOW": 22
+    }
+  },
+  "costScenarios": {
+    "FORWARD_MEDIAN": {
+      "makerCycleCostBps": 6.0,
+      "forcedCloseCostBps": 10.0,
+      "completedCycles": 3,
+      "averageNetBps": -12.222220876559271,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -14.43681968764722,
+      "maximumNetBps": -10.455062571103113,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": -10.455062571103113,
+        "TSLA": -26.211600058574703
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "NORMAL": {
+      "makerCycleCostBps": 10.0,
+      "forcedCloseCostBps": 16.0,
+      "completedCycles": 3,
+      "averageNetBps": -18.222220876559273,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -20.436819687647223,
+      "maximumNetBps": -16.455062571103113,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": -16.455062571103113,
+        "TSLA": -38.2116000585747
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "P95": {
+      "makerCycleCostBps": 17.0,
+      "forcedCloseCostBps": 26.0,
+      "completedCycles": 3,
+      "averageNetBps": -28.222220876559273,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -30.436819687647223,
+      "maximumNetBps": -26.455062571103113,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": -26.455062571103113,
+        "TSLA": -58.2116000585747
+      },
+      "maxPositiveProfitContributionShare": null
+    },
+    "SEVERE": {
+      "makerCycleCostBps": 30.0,
+      "forcedCloseCostBps": 45.0,
+      "completedCycles": 3,
+      "averageNetBps": -47.22222087655928,
+      "positiveNetRate": 0.0,
+      "minimumNetBps": -49.43681968764722,
+      "maximumNetBps": -45.45506257110311,
+      "bySymbolNetBps": {
+        "AMZN": 0.0,
+        "META": 0.0,
+        "MSFT": 0.0,
+        "NVDA": -45.45506257110311,
+        "TSLA": -96.2116000585747
+      },
+      "maxPositiveProfitContributionShare": null
+    }
+  },
+  "diagnostics": {
+    "hedgeDelayMs": 250,
+    "latencyP50Ms": 58.0,
+    "latencyP95Ms": 72.0,
+    "projectedNetEdgeP50Bps": -10.0,
+    "projectedNetEdgeP95Bps": 6.506514177916376
+  },
+  "promotionGate": {
+    "minimumForwardRegularSessions": 20,
+    "minimumCompletedCycles": 100,
+    "minimumPositiveNetRate": 0.55,
+    "normalP95SevereAverageNetMustBePositive": true,
+    "maximumSingleSymbolPnlShare": 0.4,
+    "maximumPartialFillFailures": 0,
+    "maximumUnhedgedRejected": 0,
+    "maximumUnresolvedInventory": 0,
+    "retuningOnCollectedForwardWindow": false
+  }
+}
