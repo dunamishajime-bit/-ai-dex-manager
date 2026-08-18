@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -un)" == "deploy" ]] || {
+  printf 'DISDEX_GHA_ENTRY_WRONG_USER\n' >&2
+  exit 70
+}
+
+original="${SSH_ORIGINAL_COMMAND:-}"
+[[ -n "$original" && ${#original} -le 1024 ]] || {
+  printf 'DISDEX_GHA_ENTRY_COMMAND_INVALID\n' >&2
+  exit 64
+}
+
+# The GitHub Actions key is installed with an sshd forced command.  It never
+# receives an interactive shell.  Root receives exactly one line on stdin and
+# performs a second strict allowlist/format validation before any mutation.
+printf '%s\n' "$original" | /usr/bin/sudo -n /usr/local/sbin/disdex-github-actions-control --stdin
