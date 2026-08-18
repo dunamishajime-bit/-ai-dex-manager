@@ -85,6 +85,44 @@ Replace-ExactOnce -Label 'GitHub known_hosts secret source' `
     -Old '($knownHostLines -join "`n") | & $script:GhExe secret set DISDEX_VPS_KNOWN_HOSTS --repo $Repo' `
     -New '($knownHostLinesForGitHub -join "`n") | & $script:GhExe secret set DISDEX_VPS_KNOWN_HOSTS --repo $Repo'
 
+$oldDiscovery = @'
+$discover = @'
+set -Eeuo pipefail
+while IFS= read -r gitdir; do
+  repo="${gitdir%/.git}"
+  [[ -d "$repo" && ! -L "$repo" ]] || continue
+  [[ "$(stat -c '%U' "$repo" 2>/dev/null || true)" == "deploy" ]] || continue
+  origin="$(runuser -u deploy -- git -C "$repo" remote get-url origin 2>/dev/null || true)"
+  case "$origin" in
+    https://github.com/dunamishajime-bit/-ai-dex-manager|https://github.com/dunamishajime-bit/-ai-dex-manager.git|git@github.com:dunamishajime-bit/-ai-dex-manager.git)
+      printf '%s\n' "$repo"
+      ;;
+  esac
+done < <(find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort)
+'@
+'@
+
+$newDiscovery = @'
+$discover = @'
+set -Eeuo pipefail
+tmp_gitdirs="$(mktemp)"
+trap 'rm -f "$tmp_gitdirs"' EXIT
+find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | sort > "$tmp_gitdirs" || true
+while IFS= read -r gitdir; do
+  repo="${gitdir%/.git}"
+  [[ -d "$repo" && ! -L "$repo" ]] || continue
+  [[ "$(stat -c '%U' "$repo" 2>/dev/null || true)" == "deploy" ]] || continue
+  origin="$(runuser -u deploy -- git -C "$repo" remote get-url origin 2>/dev/null || true)"
+  case "$origin" in
+    https://github.com/dunamishajime-bit/-ai-dex-manager|https://github.com/dunamishajime-bit/-ai-dex-manager.git|git@github.com:dunamishajime-bit/-ai-dex-manager.git)
+      printf '%s\n' "$repo"
+      ;;
+  esac
+done < "$tmp_gitdirs"
+'@
+'@
+Replace-ExactOnce -Label 'trusted clone discovery without dev fd' -Old $oldDiscovery -New $newDiscovery
+
 if ($text -notmatch [regex]::Escape("HostKeyAlias=`$VpsHostKeyAlias")) {
     throw 'Patched bootstrap is missing HostKeyAlias.'
 }
@@ -93,6 +131,12 @@ if ($text -notmatch [regex]::Escape("`$VpsHost = '$VpsIp'")) {
 }
 if ($text -match 'ssh-keyscan') {
     throw 'Patched bootstrap must not use ssh-keyscan.'
+}
+if ($text -match '<\s*<\s*\(') {
+    throw 'Patched bootstrap must not use Bash process substitution.'
+}
+if ($text -notmatch 'tmp_gitdirs="\$\(mktemp\)"') {
+    throw 'Patched bootstrap is missing portable temporary-file clone discovery.'
 }
 
 [System.IO.File]::WriteAllText($PatchedPath, $text, [System.Text.UTF8Encoding]::new($false))
@@ -105,6 +149,7 @@ if ($errors.Count -ne 0) {
 }
 
 Write-Host 'DIRECT_IP_PATCH=PASS'
+Write-Host 'PORTABLE_DISCOVERY_PATCH=PASS'
 Write-Host 'StrictHostKeyChecking remains enabled; no host key was learned from the network.'
 
 if ($PatchOnly) {
