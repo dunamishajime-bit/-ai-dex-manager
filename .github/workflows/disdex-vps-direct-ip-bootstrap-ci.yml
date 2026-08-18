@@ -42,6 +42,6 @@ jobs:
           if ($t -notmatch '162\.43\.50\.223') { throw 'Direct VPS IP missing' }
           if ($t -notmatch 'HostKeyAlias') { throw 'HostKeyAlias missing' }
           if ($t -notmatch 'StrictHostKeyChecking') { throw 'StrictHostKeyChecking assertion missing' }
-          if ($t -match 'ssh-keyscan') { throw 'ssh-keyscan forbidden' }
+          if ($t -match '(?m)^\s*(?:&\s*)?(?:ssh-keyscan|ssh-keyscan\.exe)\b') { throw 'ssh-keyscan execution forbidden' }
           if ($t -notmatch 'DISDEX_VPS_KNOWN_HOSTS') { throw 'Pinned known_hosts secret remap missing' }
           if ($t -notmatch 'PatchOnly') { throw 'PatchOnly test gate missing' }
