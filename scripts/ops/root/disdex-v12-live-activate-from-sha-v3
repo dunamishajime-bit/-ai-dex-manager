@@ -64,11 +64,11 @@ scratch="$tool_root/python-selftest"; install -d -o deploy -g deploy -m 0700 "$s
 (
   cd "$scratch"
   runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS HOME=/home/deploy PYTHONPATH="$release/scripts" \
-    python "$release/scripts/disdex_account_order_lock.py" --self-test
+    /usr/bin/python3 "$release/scripts/disdex_account_order_lock.py" --self-test
 )
 for py_test in scripts/disdex_v12_crypto_daily_risk.py scripts/disdex_v12_v52_margin_guard_runtime.py scripts/disdex_v12_v52_live_engine.py; do
   runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS HOME=/home/deploy PYTHONPATH="$release/scripts" \
-    python "$release/$py_test" --self-test
+    /usr/bin/python3 "$release/$py_test" --self-test
 done
 printf 'V12_V3_OFFLINE_VALIDATION_PASS\nordersSent=0\nrealExchangeCalls=0\n'
 
