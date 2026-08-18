@@ -1,0 +1,47 @@
+name: DisDex VPS Direct IP Bootstrap CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1'
+      - '.github/workflows/disdex-vps-direct-ip-bootstrap-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  direct-ip-bootstrap:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse wrapper
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1'),
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -ne 0) { throw $errors[0].Message }
+
+      - name: Execute patch-only path
+        shell: powershell
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1 -PatchOnly
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Safety assertions
+        shell: powershell
+        run: |
+          $p = 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control-direct-ip.ps1'
+          $t = Get-Content $p -Raw
+          if ($t -notmatch '162\.43\.50\.223') { throw 'Direct VPS IP missing' }
+          if ($t -notmatch 'HostKeyAlias') { throw 'HostKeyAlias missing' }
+          if ($t -notmatch 'StrictHostKeyChecking') { throw 'StrictHostKeyChecking assertion missing' }
+          if ($t -match 'ssh-keyscan') { throw 'ssh-keyscan forbidden' }
+          if ($t -notmatch 'DISDEX_VPS_KNOWN_HOSTS') { throw 'Pinned known_hosts secret remap missing' }
+          if ($t -notmatch 'PatchOnly') { throw 'PatchOnly test gate missing' }
