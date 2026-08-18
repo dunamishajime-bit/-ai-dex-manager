@@ -1,0 +1,81 @@
+name: DisDex VPS Control Bootstrap CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1'
+      - '.github/workflows/disdex-vps-control-bootstrap-ci.yml'
+      - 'scripts/ops/root/install-disdex-github-actions-control'
+  push:
+    branches:
+      - chatgpt/vps-control-bootstrap-safe-20260819
+    paths:
+      - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1'
+      - '.github/workflows/disdex-vps-control-bootstrap-ci.yml'
+      - 'scripts/ops/root/install-disdex-github-actions-control'
+
+permissions:
+  contents: read
+
+jobs:
+  windows-bootstrap-safety:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse PowerShell
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1'),
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -ne 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          Write-Host 'POWERSHELL_PARSE=PASS'
+
+      - name: Verify constrained bootstrap boundary
+        shell: pwsh
+        run: |
+          $path = 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1'
+          $text = Get-Content -Raw $path
+          $required = @(
+            'CONTROL_PROBE',
+            'PROBE_ONLY_NO_TRADING_MUTATION',
+            'tradingMutation=0',
+            'V12_LIVE_ACTIVATE_V3',
+            'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3',
+            'Dis-Dex V96 Production Contract',
+            'DISDEX_VPS_DEPLOY_PRIVATE_KEY',
+            'StrictHostKeyChecking=yes',
+            'C:\Users\dis\Desktop\DisDex.pem',
+            'No automatic retry'
+          )
+          foreach ($needle in $required) {
+            if (-not $text.Contains($needle)) {
+              throw "Missing required safety marker: $needle"
+            }
+          }
+          if ($text -match 'StrictHostKeyChecking=no') { throw 'StrictHostKeyChecking=no is forbidden' }
+          if ($text -match 'ssh-keyscan') { throw 'ssh-keyscan trust-on-first-use is forbidden' }
+          if ($text -match 'run_shell|run_command') { throw 'Generic shell operation is forbidden' }
+          if ($text -match 'Get-Content[^\r\n]*DedicatedKey[^\r\n]*(Write-Host|Write-Output)') { throw 'Dedicated private key output is forbidden' }
+          Write-Host 'BOOTSTRAP_BOUNDARY=PASS'
+
+      - name: Verify installer no longer prints origin URL
+        shell: pwsh
+        run: |
+          $text = Get-Content -Raw 'scripts/ops/root/install-disdex-github-actions-control'
+          if ($text.Contains("printf 'origin=%s")) { throw 'Raw origin output is forbidden' }
+          if (-not $text.Contains("printf 'originConfigured=TRUE")) { throw 'Redacted origin marker missing' }
+          Write-Host 'INSTALLER_ORIGIN_REDACTION=PASS'
+
+      - name: Diff check
+        shell: bash
+        run: git diff --check
