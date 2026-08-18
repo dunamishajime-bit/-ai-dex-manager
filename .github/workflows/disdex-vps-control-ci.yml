@@ -39,11 +39,12 @@ jobs:
       - name: Verify forced-command boundary
         run: |
           set -Eeuo pipefail
+          installer=scripts/ops/root/install-disdex-github-actions-control
           grep -Fq 'SSH_ORIGINAL_COMMAND' scripts/ops/root/disdex-github-actions-entry
           grep -Fq '/usr/bin/sudo -n /usr/local/sbin/disdex-github-actions-control --stdin' scripts/ops/root/disdex-github-actions-entry
-          grep -Fq 'restrict,command="/usr/local/sbin/disdex-github-actions-entry"' scripts/ops/root/install-disdex-github-actions-control
-          grep -Fq 'deploy ALL=(root) NOPASSWD: /usr/local/sbin/disdex-github-actions-control --stdin' scripts/ops/root/install-disdex-github-actions-control
-          ! grep -Eq 'sudo[^\n]*(ALL|/bin/(ba)?sh|/usr/bin/(ba)?sh)' /etc/does-not-exist 2>/dev/null || false
+          grep -Fq 'restrict,command="/usr/local/sbin/disdex-github-actions-entry"' "$installer"
+          grep -Fq 'deploy ALL=(root) NOPASSWD: /usr/local/sbin/disdex-github-actions-control --stdin' "$installer"
+          ! grep -Eq 'NOPASSWD:.*(/bin/(ba)?sh|/usr/bin/(ba)?sh|ALL)' "$installer"
 
       - name: Verify production allowlist and replay gates
         run: |
