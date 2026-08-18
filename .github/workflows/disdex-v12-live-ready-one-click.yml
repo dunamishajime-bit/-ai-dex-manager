@@ -1,0 +1,175 @@
+name: DisDex V12 LIVE READY — ONE CLICK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: disdex-v12-live-ready-one-click
+  cancel-in-progress: false
+
+jobs:
+  live-ready:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      V12_SOURCE_REF: chatgpt/v12-live-adapter-final-20260817
+      V12_TARGET_SHA: f2db8bd87d33f154652be799220d352875866ebb
+      V12_BASE_SHA: d686f6dc0b841ba6299830fe8aade797420f4597
+
+    steps:
+      - name: Checkout current master
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require exact V12 source HEAD
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          remote_sha="$(git ls-remote origin "refs/heads/$V12_SOURCE_REF" | awk 'NR==1 {print $1}')"
+          [[ "$remote_sha" == "$V12_TARGET_SHA" ]] || {
+            echo "V12_SOURCE_HEAD_MISMATCH expected=$V12_TARGET_SHA actual=$remote_sha" >&2
+            exit 1
+          }
+          echo "V12_SOURCE_HEAD_VERIFIED=$V12_TARGET_SHA"
+
+      - name: Require green production source workflow set
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          gh api --method GET \
+            "repos/${GITHUB_REPOSITORY}/actions/runs" \
+            -f head_sha="$V12_TARGET_SHA" \
+            -f per_page=100 > /tmp/runs.json
+          python3 - <<'PY'
+          import json
+          required = {
+              "DisDex Account Risk Release Identity CI",
+              "DisDex VPS Release Boundary CI",
+              "V12 LIVE activation V3 CI",
+              "V12 LIVE activation orchestrator CI",
+              "V96 Decommission Preparation CI",
+              "Dis-Dex PENGU Dual LS V2 Final CI",
+              "V12 final source readiness CI",
+              "V12 X1 ALL implementation safety CI",
+              "Dis-Dex V96 V52 LIVE Runner CI",
+              "DisDex V96 V52 Margin Risk CI",
+              "V12 PENGU shared gross CI",
+          }
+          with open('/tmp/runs.json', encoding='utf-8') as fh:
+              runs = json.load(fh).get('workflow_runs', [])
+          latest = {}
+          for run in runs:
+              name = run.get('name')
+              if name not in required:
+                  continue
+              prev = latest.get(name)
+              if prev is None or int(run.get('run_number') or 0) > int(prev.get('run_number') or 0):
+                  latest[name] = run
+          missing = sorted(required - latest.keys())
+          bad = sorted(name for name, run in latest.items()
+                       if run.get('status') != 'completed' or run.get('conclusion') != 'success')
+          if missing or bad:
+              raise SystemExit(f'V12_REQUIRED_CI_NOT_GREEN missing={missing} bad={bad}')
+          print('V12_REQUIRED_CI_GREEN')
+          for name in sorted(required):
+              print(f'PASS {name} run={latest[name].get("id")}')
+          PY
+
+      - name: Validate constrained SSH inputs
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" ]]
+          [[ -n "$SSH_PRIVATE_KEY" ]]
+          [[ -n "$SSH_KNOWN_HOSTS" ]]
+          : "${SSH_PORT:=22}"
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          echo 'SSH_INPUTS_PRESENT=TRUE'
+
+      - name: Configure normalized pinned SSH identity
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          key = os.environ['SSH_PRIVATE_KEY'].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n')
+          if not key.endswith('\n'):
+              key += '\n'
+          lines = key.splitlines()
+          if len(lines) < 3 or lines[0] != '-----BEGIN OPENSSH PRIVATE KEY-----' or lines[-1] != '-----END OPENSSH PRIVATE KEY-----':
+              raise SystemExit('SSH_PRIVATE_KEY_FORMAT_INVALID')
+          Path(os.path.expanduser('~/.ssh/disdex_vps_control')).write_text(key, encoding='utf-8', newline='\n')
+          known = os.environ['SSH_KNOWN_HOSTS'].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n')
+          if not known.strip():
+              raise SystemExit('SSH_KNOWN_HOSTS_EMPTY')
+          if not known.endswith('\n'):
+              known += '\n'
+          Path(os.path.expanduser('~/.ssh/known_hosts')).write_text(known, encoding='utf-8', newline='\n')
+          PY
+          chmod 0600 "$HOME/.ssh/disdex_vps_control" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/disdex_vps_control" >/dev/null
+          echo 'SSH_PINNED_IDENTITY_READY=TRUE'
+
+      - name: Run read-only constrained CONTROL_PROBE
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          : "${SSH_PORT:=22}"
+          CONTROL_SHA="$(git rev-parse HEAD)"
+          REQUEST_ID="gha-ready-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          remote_cmd="DISDEX_VPS_CONTROL_V1 $REQUEST_ID CONTROL_PROBE master $CONTROL_SHA $CONTROL_SHA PROBE_ONLY_NO_TRADING_MUTATION"
+          timeout 10m ssh \
+            -i "$HOME/.ssh/disdex_vps_control" \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 \
+            -o ServerAliveInterval=15 \
+            -o ServerAliveCountMax=4 \
+            -p "$SSH_PORT" \
+            "deploy@$SSH_HOST" \
+            "$remote_cmd" 2>&1 | tee /tmp/disdex-live-ready-control.log
+          grep -Fq "DISDEX_VPS_CONTROL_PROBE_PASS requestId=$REQUEST_ID" /tmp/disdex-live-ready-control.log
+          grep -Fq 'tradingMutation=0' /tmp/disdex-live-ready-control.log
+          grep -Fq 'forcedCommand=TRUE' /tmp/disdex-live-ready-control.log
+          grep -Fq 'sourceRepoReachable=TRUE' /tmp/disdex-live-ready-control.log
+          grep -Fq 'originVerified=TRUE' /tmp/disdex-live-ready-control.log
+          echo "CONTROL_PROBE_REQUEST_ID=$REQUEST_ID"
+
+      - name: Publish LIVE READY summary
+        shell: bash
+        run: |
+          {
+            echo '## DisDex V12 LIVE READY'
+            echo ''
+            echo "- V12 exact SHA: \`$V12_TARGET_SHA\`"
+            echo '- Required production CI: PASS'
+            echo '- SSH pinned identity: PASS'
+            echo '- Constrained CONTROL_PROBE: PASS'
+            echo '- tradingMutation=0'
+            echo '- LIVE activation: NOT EXECUTED'
+            echo ''
+            echo '**STATUS: LIVE_READY_AWAITING_USER_ACTIVATION**'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo 'STATUS: LIVE_READY_AWAITING_USER_ACTIVATION'
