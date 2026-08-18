@@ -64,6 +64,32 @@ jobs:
           grep -Fq 'git -C "$SOURCE_REPO" archive "$target_sha"' "$control"
           ! grep -Eq '(eval[[:space:]]|bash[[:space:]]+-c|sh[[:space:]]+-c)' "$control"
 
+      - name: Prove least-privilege tool extraction topology
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          control=scripts/ops/root/disdex-github-actions-control
+          installer=scripts/ops/root/install-disdex-github-actions-control
+          grep -Fq 'install -d -o root -g deploy -m 0710 "$state_root"' "$control"
+          grep -Fq 'install -d -o root -g root -m 0700 "$request_root"' "$control"
+          grep -Fq 'install -d -o root -g deploy -m 0710 "$state_root/tools"' "$control"
+          grep -Fq 'install -d -o root -g deploy -m 0710 /var/lib/disdex-github-actions-control' "$installer"
+          grep -Fq 'install -d -o root -g root -m 0700 /var/lib/disdex-github-actions-control/requests' "$installer"
+          tmp="$(mktemp -d)"
+          trap 'sudo rm -rf "$tmp"' EXIT
+          user="$(id -un)"; group="$(id -gn)"; state="$tmp/state"
+          sudo install -d -o root -g "$group" -m 0710 "$state"
+          sudo install -d -o root -g root -m 0700 "$state/requests"
+          sudo install -d -o root -g "$group" -m 0710 "$state/tools"
+          sudo install -d -o "$user" -g "$group" -m 0700 "$state/tools/request"
+          printf 'PASS\n' > "$state/tools/request/probe"
+          [[ "$(cat "$state/tools/request/probe")" == PASS ]]
+          ! ls "$state" >/dev/null 2>&1
+          ! ls "$state/tools" >/dev/null 2>&1
+          ! test -r "$state/requests"
+          ! touch "$state/tools/should-not-write" 2>/dev/null
+          echo DISDEX_CONTROL_TOOL_PERMISSION_SELFTEST_PASS
+
       - name: Verify GitHub workflow owner and CI gates
         run: |
           set -Eeuo pipefail

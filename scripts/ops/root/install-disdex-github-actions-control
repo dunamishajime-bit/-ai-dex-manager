@@ -60,7 +60,10 @@ esac
 
 install -o root -g root -m 0755 "$control_src" /usr/local/sbin/disdex-github-actions-control
 install -o root -g root -m 0755 "$entry_src" /usr/local/sbin/disdex-github-actions-entry
-install -d -o root -g root -m 0700 /etc/disdex /var/lib/disdex-github-actions-control /var/lib/disdex-github-actions-control/requests /var/lib/disdex-github-actions-control/tools
+install -d -o root -g root -m 0700 /etc/disdex
+install -d -o root -g deploy -m 0710 /var/lib/disdex-github-actions-control
+install -d -o root -g root -m 0700 /var/lib/disdex-github-actions-control/requests
+install -d -o root -g deploy -m 0710 /var/lib/disdex-github-actions-control/tools
 
 config_tmp="$(mktemp /etc/disdex/github-actions-control.env.XXXXXX)"
 {
