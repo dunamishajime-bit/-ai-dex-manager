@@ -14,6 +14,76 @@ for commit in "$sha" "$base_sha"; do
   [[ "$resolved" == "$commit" ]] || { printf 'V12_ACTIVATE_V3_COMMIT_NOT_LOCAL sha=%s\n' "$commit" >&2; exit 3; }
 done
 
+release="/home/deploy/disdex-trading/releases/$sha"
+artifact_verified=false
+artifact_tag="disdex-artifact-$sha"
+artifact_name="disdex-release-$sha.tar.gz"
+artifact_base="https://github.com/dunamishajime-bit/-ai-dex-manager/releases/download/$artifact_tag"
+
+install_ci_artifact() {
+  local source_tree download_root archive checksum expected actual staging
+  command -v curl >/dev/null 2>&1 || return 1
+  source_tree="$(runuser -u deploy -- git -C "$source_repo" rev-parse "${sha}^{tree}")"
+  if [[ -e "$release" || -L "$release" ]]; then
+    [[ -d "$release" && ! -L "$release" ]] || { printf 'V12_CI_ARTIFACT_EXISTING_RELEASE_INVALID\n' >&2; return 2; }
+    if [[ -f "$release/.disdex-ci-artifact-sha256" && "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$sha" && "$(tr -d '[:space:]' < "$release/.disdex-release-source-tree")" == "$source_tree" && -x "$release/node_modules/.bin/tsx" && -d "$release/.next" ]]; then
+      artifact_verified=true
+      printf 'V12_CI_ARTIFACT_ALREADY_VALID sha=%s\n' "$sha"
+      return 0
+    fi
+    return 1
+  fi
+  download_root="/home/deploy/disdex-v12-artifact-download/$sha-$$"
+  staging="/home/deploy/disdex-trading/releases/.staging-artifact-$sha-$$"
+  install -d -o deploy -g deploy -m 0700 "$download_root"
+  [[ ! -e "$staging" && ! -L "$staging" ]] || { printf 'V12_CI_ARTIFACT_STAGING_COLLISION\n' >&2; return 2; }
+  install -d -o deploy -g deploy -m 0700 "$staging"
+  archive="$download_root/$artifact_name"
+  checksum="$archive.sha256"
+  if ! runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 "$artifact_base/$artifact_name.sha256" -o "$checksum"; then
+    rm -rf "$download_root" "$staging"
+    return 1
+  fi
+  runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 "$artifact_base/$artifact_name" -o "$archive" || { rm -rf "$download_root" "$staging"; return 2; }
+  expected="$(awk 'NR==1 {print $1}' "$checksum")"
+  [[ "$expected" =~ ^[0-9a-f]{64}$ ]] || { printf 'V12_CI_ARTIFACT_CHECKSUM_FORMAT_INVALID\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  actual="$(sha256sum "$archive" | awk '{print $1}')"
+  [[ "$actual" == "$expected" ]] || { printf 'V12_CI_ARTIFACT_CHECKSUM_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  python3 - "$archive" <<'PY'
+import posixpath, sys, tarfile
+path=sys.argv[1]
+with tarfile.open(path, 'r:gz') as tf:
+    for member in tf.getmembers():
+        name=member.name
+        norm=posixpath.normpath(name)
+        if name.startswith('/') or norm == '..' or norm.startswith('../'):
+            raise SystemExit(f'V12_CI_ARTIFACT_UNSAFE_PATH:{name}')
+        if member.issym() or member.islnk():
+            target=member.linkname
+            if target.startswith('/'):
+                raise SystemExit(f'V12_CI_ARTIFACT_UNSAFE_LINK:{name}')
+            resolved=posixpath.normpath(posixpath.join(posixpath.dirname(norm), target))
+            if resolved == '..' or resolved.startswith('../'):
+                raise SystemExit(f'V12_CI_ARTIFACT_UNSAFE_LINK:{name}')
+print('V12_CI_ARTIFACT_TAR_PATHS_PASS')
+PY
+  runuser -u deploy -- tar -xzf "$archive" -C "$staging"
+  [[ -f "$staging/.disdex-release-sha" && ! -L "$staging/.disdex-release-sha" ]] || { printf 'V12_CI_ARTIFACT_SHA_MARKER_MISSING\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  [[ "$(tr -d '[:space:]' < "$staging/.disdex-release-sha")" == "$sha" ]] || { printf 'V12_CI_ARTIFACT_SHA_MARKER_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  [[ "$(tr -d '[:space:]' < "$staging/.disdex-release-source-tree")" == "$source_tree" ]] || { printf 'V12_CI_ARTIFACT_TREE_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  (cd "$staging" && sha256sum -c --quiet .disdex-release-source-files.sha256) || { printf 'V12_CI_ARTIFACT_SOURCE_HASH_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  [[ -x "$staging/node_modules/.bin/tsx" && -d "$staging/.next" ]] || { printf 'V12_CI_ARTIFACT_RUNTIME_INVALID\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  printf '%s\n' "$actual" > "$staging/.disdex-ci-artifact-sha256"
+  chown -R deploy:deploy "$staging"
+  find "$staging" -xdev -type d ! -type l -exec chmod a-w {} +
+  find "$staging" -xdev -type f ! -type l -exec chmod a-w {} +
+  mv "$staging" "$release"
+  rm -rf "$download_root"
+  artifact_verified=true
+  printf 'V12_CI_ARTIFACT_INSTALL_PASS sha=%s archiveSha256=%s\n' "$sha" "$actual"
+  return 0
+}
+
 tool_root="/home/deploy/disdex-v12-activation-v3/$sha"
 if [[ -e "$tool_root" || -L "$tool_root" ]]; then
   [[ -d "$tool_root" && ! -L "$tool_root" ]] || { printf 'V12_ACTIVATE_V3_TOOL_ROOT_INVALID\n' >&2; exit 3; }
@@ -29,9 +99,19 @@ audit="$tool_root/scripts/ops/disdex-v12-current-release-delta-audit-v2.sh"
 [[ -f "$builder" && ! -L "$builder" && -f "$audit" && ! -L "$audit" ]] || { printf 'V12_ACTIVATE_V3_PRE_RELEASE_TOOL_MISSING\n' >&2; exit 3; }
 bash -n "$builder"; bash -n "$audit"
 
-printf 'V12_V3_PHASE=IMMUTABLE_RELEASE_BUILD\n'
-bash "$builder" "$source_repo" "$sha"
-release="/home/deploy/disdex-trading/releases/$sha"
+printf 'V12_V3_PHASE=IMMUTABLE_RELEASE_ARTIFACT_LOOKUP\n'
+artifact_rc=0
+install_ci_artifact || artifact_rc=$?
+if (( artifact_rc == 2 )); then
+  printf 'V12_ACTIVATE_V3_CI_ARTIFACT_INVALID\n' >&2
+  exit 4
+elif (( artifact_rc == 0 )); then
+  printf 'V12_V3_IMMUTABLE_RELEASE_FROM_CI_ARTIFACT=PASS\n'
+else
+  printf 'V12_ACTIVATE_V3_CI_ARTIFACT_NOT_READY\n' >&2
+  printf 'V12_V3_VPS_FALLBACK_BUILD=DISABLED\n' >&2
+  exit 4
+fi
 [[ -d "$release" && ! -L "$release" && -x "$release/node_modules/.bin/tsx" && -d "$release/.next" ]] || { printf 'V12_ACTIVATE_V3_RELEASE_BUILD_INVALID\n' >&2; exit 4; }
 for required in \
   scripts/ops/root/install-disdex-v12-live \
@@ -40,6 +120,10 @@ for required in \
   [[ -f "$release/$required" && ! -L "$release/$required" ]] || { printf 'V12_ACTIVATE_V3_RELEASE_TOOL_MISSING path=%s\n' "$required" >&2; exit 4; }
 done
 
+if [[ "$artifact_verified" == "true" ]]; then
+  printf 'V12_V3_PHASE=EXTENDED_OFFLINE_VALIDATION_CI_REUSED\n'
+  printf 'V12_V3_OFFLINE_VALIDATION_PASS\nordersSent=0\nrealExchangeCalls=0\nciArtifactReused=true\n'
+else
 printf 'V12_V3_PHASE=EXTENDED_OFFLINE_VALIDATION\n'
 (
   cd "$release"
@@ -71,6 +155,8 @@ for py_test in scripts/disdex_v12_crypto_daily_risk.py scripts/disdex_v12_v52_ma
     /usr/bin/python3 "$release/$py_test" --self-test
 done
 printf 'V12_V3_OFFLINE_VALIDATION_PASS\nordersSent=0\nrealExchangeCalls=0\n'
+
+fi
 
 printf 'V12_V3_PHASE=FULL_TREE_VPS_DELTA_AUDIT\n'
 bash "$audit" /home/deploy/disdex-trading/current "$release" "$source_repo" "$base_sha"

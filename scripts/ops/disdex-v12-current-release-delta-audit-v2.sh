@@ -43,6 +43,10 @@ trap 'rm -rf "$tmp"' EXIT INT TERM HUP
 base_list="$tmp/base.txt"; candidate_list="$tmp/candidate.txt"; current_list="$tmp/current.txt"; all_list="$tmp/all.txt"
 runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$base_sha" | LC_ALL=C sort -u > "$base_list"
 runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$candidate_sha" | LC_ALL=C sort -u > "$candidate_list"
+base_tree="$tmp/base-tree"; candidate_tree="$tmp/candidate-tree"
+mkdir -p "$base_tree" "$candidate_tree"
+runuser -u deploy -- git -C "$source_repo" archive --format=tar "$base_sha" | tar -xf - -C "$base_tree"
+runuser -u deploy -- git -C "$source_repo" archive --format=tar "$candidate_sha" | tar -xf - -C "$candidate_tree"
 
 # Current-only files are included unless they are known build/runtime products or
 # possible secret env/key material. Secret-like paths are never read or diffed.
@@ -71,8 +75,14 @@ compare_hash_file() {
   fi
 }
 git_file() {
-  local commit="$1" rel="$2" out="$3"
-  runuser -u deploy -- git -C "$source_repo" show "${commit}:${rel}" > "$out" 2>/dev/null
+  local commit="$1" rel="$2" out="$3" src
+  case "$commit" in
+    "$base_sha") src="$base_tree/$rel" ;;
+    "$candidate_sha") src="$candidate_tree/$rel" ;;
+    *) return 1 ;;
+  esac
+  [[ -f "$src" ]] || return 1
+  cp -- "$src" "$out"
 }
 append_diff() {
   local a_label="$1" a="$2" b_label="$3" b="$4"
