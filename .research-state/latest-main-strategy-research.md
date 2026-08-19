@@ -1,9 +1,9 @@
-# Main Strategy Research #203：WIN80_ULTRA90_TOP1_V1 / Top-1順位付け
+# Main Strategy Research #204：WIN80_ULTRA90_TOP1_V1 / 初回100%・最大2通貨
 
-- Completed: 2026-08-19T16:47:39.071Z
-- Main research iteration: 203
+- Completed: 2026-08-19T20:46:33.815Z
+- Main research iteration: 204
 - Profile: attack
-- Strategy / experiments: WIN80_ULTRA90_TOP1_V1, TOP1_COST_ADJUSTED_RANK_CHILD_V1, TOP1_REGIME_CONFIRM_CHILD_V1
+- Strategy / experiments: WIN80_ULTRA90_TOP1_V1, INITIAL_NOTIONAL_80_CHILD_V1, MAX_POSITION_1_CHILD_V1
 - BT Snapshot evidence: READY
 
 ## BT Snapshot Replay
@@ -50,31 +50,31 @@
 
 ## Summary
 
-旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Top-1順位付け」を議論。2件を提案し、最優先はTOP1_COST_ADJUSTED_RANK_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。
+旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「初回100%・最大2通貨」を議論。2件を提案し、最優先はINITIAL_NOTIONAL_80_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。
 
 ## CIO Decision
 
-WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はTOP1_COST_ADJUSTED_RANK_CHILD_V1で、Top-1 ranking scoreだけを変更した親子リプレイを作成します。TOP1_REGIME_CONFIRM_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。
+WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。
 
 ## Full Transcript
 
 ### 1. Research Moderator (moderator)
 
-- Time: 2026-08-19T16:47:30.071Z
+- Time: 2026-08-19T20:46:24.815Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: context
 
-Main Strategy Research #203を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「Top-1順位付け」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。
+Main Strategy Research #204を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「初回100%・最大2通貨」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。
 
 Evidence:
 - 固定親: WIN80_ULTRA90_TOP1_V1 [positive]
 - 旧Champion継承: NO [positive]
 - 研究Program: win80_ultra90_direct_v2 [positive]
-- 今回の焦点: Top-1順位付け [neutral]
+- 今回の焦点: 初回100%・最大2通貨 [neutral]
 
 ### 2. Main Strategy Researcher (researcher)
 
-- Time: 2026-08-19T16:47:31.071Z
+- Time: 2026-08-19T20:46:25.815Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: support
 
@@ -95,20 +95,20 @@ Evidence:
 
 ### 3. Hypothesis Researcher (researcher)
 
-- Time: 2026-08-19T16:47:32.071Z
+- Time: 2026-08-19T20:46:26.815Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: proposal
 
-1. TOP1_COST_ADJUSTED_RANK_CHILD_V1: Top-1 ranking scoreを「Tier + Score + Confidence + Trigger + RR + Volume + EventPriority」から「Current ranking - estimated round-trip cost penalty」へ変更。高ScoreでもSpread・Slippage負けする銘柄をTop-1から外せるかを検証する。 期待効果: 約定後期待値とStress耐性の改善。
-2. TOP1_REGIME_CONFIRM_CHILD_V1: Top-1 tie breakerを「Trend agreement bonus」から「BTC regime agreement as final tie breaker」へ変更。僅差候補ではBTC地合い一致を優先し、逆行Entryを減らす。 期待効果: 勝率改善と候補減少。
+1. INITIAL_NOTIONAL_80_CHILD_V1: Initial notional fractionを「100.00%」から「80.00%」へ変更。初回100%集中を抑え、次のUltra90または急変時の余力を残す。 期待効果: DD低下と月利低下の比較。
+2. MAX_POSITION_1_CHILD_V1: Maximum concurrent positionsを「2」から「1」へ変更。Top-1思想を完全単一保有にした場合の集中収益と相関リスクを比較する。 期待効果: 管理単純化と分散効果消失の比較。
 
 Evidence:
-- TOP1_COST_ADJUSTED_RANK_CHILD_V1: REPLAY_REQUIRED [neutral]
-- TOP1_REGIME_CONFIRM_CHILD_V1: REPLAY_REQUIRED [neutral]
+- INITIAL_NOTIONAL_80_CHILD_V1: REPLAY_REQUIRED [neutral]
+- MAX_POSITION_1_CHILD_V1: REPLAY_REQUIRED [neutral]
 
 ### 4. AI反対派 / Overfit (overfit_critic)
 
-- Time: 2026-08-19T16:47:33.071Z
+- Time: 2026-08-19T20:46:27.815Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -121,7 +121,7 @@ Evidence:
 
 ### 5. AI反対派 / Tail Risk (tail_risk_critic)
 
-- Time: 2026-08-19T16:47:34.071Z
+- Time: 2026-08-19T20:46:28.815Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -134,7 +134,7 @@ Evidence:
 
 ### 6. AI反対派 / Execution (execution_critic)
 
-- Time: 2026-08-19T16:47:35.071Z
+- Time: 2026-08-19T20:46:29.815Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -149,17 +149,17 @@ Evidence:
 
 ### 7. Research CIO (cio)
 
-- Time: 2026-08-19T16:47:36.071Z
+- Time: 2026-08-19T20:46:30.815Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: decision
 
-WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はTOP1_COST_ADJUSTED_RANK_CHILD_V1で、Top-1 ranking scoreだけを変更した親子リプレイを作成します。TOP1_REGIME_CONFIRM_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。
+WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。
 
 現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。
 
 Evidence:
 - メイン維持: WIN80_ULTRA90_TOP1_V1 [positive]
-- 最優先実験: TOP1_COST_ADJUSTED_RANK_CHILD_V1 [neutral]
+- 最優先実験: INITIAL_NOTIONAL_80_CHILD_V1 [neutral]
 - 旧Champion継承: NO [positive]
 - 自動メイン変更: 禁止 [positive]
 - 親Snapshot Replay: READY [positive]
