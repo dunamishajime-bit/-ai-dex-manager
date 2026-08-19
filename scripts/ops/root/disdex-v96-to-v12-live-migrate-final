@@ -144,6 +144,7 @@ for unit in "${present_old_units[@]}"; do [[ "$(status_of "$unit")" == "active" 
 (( ${#active_old[@]} <= 1 )) || { printf 'V96_TO_V12_MULTIPLE_V96_SUPERVISORS_ACTIVE units=%s\n' "${active_old[*]}" >&2; false; }
 
 run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
+run_oneshot "disdex-v12-stale-kill-switch-recovery@$sha.service"
 run_oneshot "disdex-v12-live-readiness@$sha.service"
 run_oneshot "disdex-pengu-v2-readiness@$sha.service"
 run_oneshot "disdex-v52-v12-readiness@$sha.service"

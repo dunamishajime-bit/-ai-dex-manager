@@ -38,6 +38,7 @@ unit_names=(
   disdex-v52-aster-only@.service
   disdex-v12-x1-all@.service
   disdex-v12-live-readiness@.service
+  disdex-v12-stale-kill-switch-recovery@.service
   disdex-v12-runtime-status@.service
   disdex-pengu-v2-readiness@.service
   disdex-v52-v12-readiness@.service
@@ -53,6 +54,7 @@ required=(
   "$repo_root/scripts/ops/root/disdex-v12-live-status-report"
   "$reverse_interlock_source"
   "$repo_root/scripts/disdex-v12-live-readiness.ts"
+  "$repo_root/scripts/disdex-v12-stale-kill-switch-recovery.ts"
   "$repo_root/scripts/disdex-v12-runtime-status.ts"
   "$repo_root/scripts/disdex-pengu-v2-live-readiness.ts"
   "$repo_root/scripts/disdex-v96-to-v12-migration-preflight.ts"
@@ -92,6 +94,7 @@ bash -n "$reverse_interlock_source"
   ./node_modules/.bin/tsx scripts/v12-resident-stop-selftest.ts
   ./node_modules/.bin/tsx scripts/disdex-shared-crypto-risk-selftest.ts
   ./node_modules/.bin/tsx scripts/v12-live-execution-selftest.ts
+  ./node_modules/.bin/tsx scripts/disdex-v12-stale-kill-switch-recovery.ts --self-test
 )
 PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 -m py_compile \
   "$repo_root/scripts/disdex_v12_v52_margin_guard_runtime.py" \
