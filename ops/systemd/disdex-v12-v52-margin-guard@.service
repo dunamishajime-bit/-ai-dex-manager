@@ -11,6 +11,7 @@ WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 Environment=NODE_ENV=production
+Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStart=/usr/bin/python3 scripts/disdex_v12_v52_margin_guard_runtime.py --mode live --daemon
