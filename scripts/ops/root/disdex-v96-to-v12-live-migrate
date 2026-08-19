@@ -146,6 +146,22 @@ for unit in "${present_old_units[@]}"; do
 done
 (( ${#active_old[@]} <= 1 )) || { printf 'V96_TO_V12_MULTIPLE_V96_SUPERVISORS_ACTIVE units=%s\n' "${active_old[*]}" >&2; false; }
 
+stale_risk_units=()
+while IFS= read -r unit; do
+  [[ -n "$unit" ]] || continue
+  [[ "$unit" == "disdex-shared-crypto-risk@$sha.service" ]] && continue
+  stale_risk_units+=("$unit")
+done < <(systemctl list-units --type=service --state=active --no-legend --plain 'disdex-shared-crypto-risk@*.service' 2>/dev/null | awk '{print $1}')
+for pattern in 'disdex-v12-x1-all@*.service' 'disdex-pengu-dual-ls-v2@*.service' 'disdex-v52-aster-only@*.service' 'disdex-v12-v52-margin-guard@*.service'; do
+  while IFS= read -r unit; do
+    [[ -n "$unit" ]] || continue
+    case "$unit" in
+      "disdex-v12-x1-all@$sha.service"|"disdex-pengu-dual-ls-v2@$sha.service"|"disdex-v52-aster-only@$sha.service"|"disdex-v12-v52-margin-guard@$sha.service") ;;
+      *) printf 'V96_TO_V12_CROSS_RELEASE_LIVE_UNIT_BLOCKED unit=%s\n' "$unit" >&2; false ;;
+    esac
+  done < <(systemctl list-units --type=service --state=active --no-legend --plain "$pattern" 2>/dev/null | awk '{print $1}')
+done
+
 run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
 run_oneshot "disdex-v12-live-readiness@$sha.service"
 run_oneshot "disdex-pengu-v2-readiness@$sha.service"
@@ -164,6 +180,16 @@ if pgrep -af '[d]isdex-v96-live-runner\.ts' >/dev/null 2>&1 || pgrep -af '[d]isd
   printf 'V96_TO_V12_ORPHAN_V96_PROCESS_AFTER_STOP\n' >&2
   false
 fi
+
+for unit in "${stale_risk_units[@]}"; do
+  systemctl stop "$unit"
+  require_inactive "$unit"
+  systemctl disable "$unit" >/dev/null 2>&1 || true
+  if systemctl is-enabled --quiet "$unit" 2>/dev/null; then
+    printf 'V96_TO_V12_STALE_RISK_UNIT_STILL_ENABLED unit=%s\n' "$unit" >&2
+    false
+  fi
+done
 
 systemctl start "disdex-shared-crypto-risk@$sha.service"
 require_active "disdex-shared-crypto-risk@$sha.service"
