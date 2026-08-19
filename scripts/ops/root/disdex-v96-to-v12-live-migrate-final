@@ -159,6 +159,19 @@ for pattern in 'disdex-v12-x1-all@*.service' 'disdex-pengu-dual-ls-v2@*.service'
   done < <(systemctl list-units --type=service --state=active --no-legend --plain "$pattern" 2>/dev/null | awk '{print $1}')
 done
 
+if (( ${#active_old[@]} == 0 && ${#stale_risk_units[@]} > 0 )); then
+  for unit in "${stale_risk_units[@]}"; do
+    systemctl stop "$unit"
+    require_inactive "$unit"
+    systemctl disable "$unit" >/dev/null 2>&1 || true
+    if systemctl is-enabled --quiet "$unit" 2>/dev/null; then
+      printf 'V96_TO_V12_STALE_RISK_UNIT_STILL_ENABLED unit=%s\n' "$unit" >&2
+      false
+    fi
+  done
+  stale_risk_units=()
+fi
+
 run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
 run_oneshot "disdex-v12-stale-kill-switch-recovery@$sha.service"
 run_oneshot "disdex-v12-live-readiness@$sha.service"
