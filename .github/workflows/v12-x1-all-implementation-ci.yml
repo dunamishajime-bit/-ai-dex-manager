@@ -99,7 +99,8 @@ jobs:
           bash -n scripts/ops/root/disdex-v12-live-status-report
           bash -n scripts/ops/root/disdex-v96-refuse-while-v12-active
           grep -Fq 'mode="${2:-runtime}"' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
-          grep -Fq 'disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          grep -Fq 'disdex-v96-stop-recheck@$sha.service' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          ! grep -Fq 'node_modules/.bin/tsx" scripts/disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq '.disdex-release-source-tree' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' scripts/ops/disdex-v12-current-release-delta-audit.sh
           grep -Fq 'VPS_DELTA_WOULD_BE_LOST' scripts/ops/disdex-v12-current-release-delta-audit.sh
