@@ -7,6 +7,7 @@ on:
       - 'scripts/ops/root/disdex-v12-live-activate-from-sha-v3'
       - 'scripts/ops/disdex-v12-current-release-delta-audit-v2.sh'
       - 'scripts/ops/root/disdex-v96-to-v12-live-migrate-final'
+      - 'scripts/ops/root/install-disdex-v12-live'
       - '.github/workflows/v12-live-activation-v3-ci.yml'
 
 permissions:
@@ -25,7 +26,8 @@ jobs:
           activate=scripts/ops/root/disdex-v12-live-activate-from-sha-v3
           audit=scripts/ops/disdex-v12-current-release-delta-audit-v2.sh
           migrate=scripts/ops/root/disdex-v96-to-v12-live-migrate-final
-          for script in "$activate" "$audit" "$migrate"; do bash -n "$script"; done
+          install=scripts/ops/root/install-disdex-v12-live
+          for script in "$activate" "$audit" "$migrate" "$install"; do bash -n "$script"; done
           grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' "$activate"
           grep -Fq 'git -C "$source_repo" archive "$sha"' "$activate"
           grep -Fq 'disdex-v12-current-release-delta-audit-v2.sh' "$activate"
@@ -44,6 +46,15 @@ jobs:
           grep -Fq 'secretsRead=false' "$audit"
           grep -Fq 'v12_start_attempted=true' "$migrate"
           grep -Fq 'Automatic V96 restart is prohibited' "$migrate"
-          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$activate" "$audit" "$migrate"
-          ! grep -Eq 'placeMarket|place_limit|submitOrder|curl[[:space:]].*(order|fapi)' "$activate" "$audit" "$migrate"
+          grep -Fq 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_REUSE_READY' "$install"
+          grep -Fq 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_RESTARTED' "$install"
+          grep -Fq 'cmp -s "$installed_risk_unit" "$repo_root/ops/systemd/disdex-shared-crypto-risk@.service"' "$install"
+          grep -Fq 'cmp -s "$installed_risk_env" "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example"' "$install"
+          grep -Fq 'V96_TO_V12_SHARED_RISK_REUSE_READY' "$migrate"
+          grep -Fq 'V96_TO_V12_SHARED_RISK_REUSED=TRUE' "$migrate"
+          grep -Fq 'cmp -s "$installed_unit" "$release/ops/systemd/disdex-shared-crypto-risk@.service"' "$migrate"
+          grep -Fq 'cmp -s "$installed_env" "$release/ops/env/disdex-v12-pengu-v2-v52.env.example"' "$migrate"
+          ! grep -Fq 'systemctl stop "$shared_risk_unit"' "$install" "$migrate"
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$activate" "$audit" "$migrate" "$install"
+          ! grep -Eq 'placeMarket|place_limit|submitOrder|curl[[:space:]].*(order|fapi)' "$activate" "$audit" "$migrate" "$install"
           echo V12_LIVE_ACTIVATION_V3_CI_PASS

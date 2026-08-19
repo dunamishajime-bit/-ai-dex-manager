@@ -42,6 +42,8 @@ new_units=(
   "disdex-v12-x1-all@$sha.service"
 )
 target="disdex-v12-pengu-v2-v52@$sha.target"
+shared_risk_unit="disdex-shared-crypto-risk@$sha.service"
+shared_risk_reused=false
 old_stopped=false
 current_switched=false
 v12_start_attempted=false
@@ -66,6 +68,29 @@ run_oneshot() {
   local unit="$1"
   systemctl reset-failed "$unit" >/dev/null 2>&1 || true
   systemctl start "$unit"
+}
+validate_reusable_shared_risk() {
+  local pid working installed_unit installed_env
+  require_active "$shared_risk_unit" || return 1
+  pid="$(pid_of "$shared_risk_unit")"
+  [[ "$pid" =~ ^[1-9][0-9]*$ ]] || { printf 'V96_TO_V12_SHARED_RISK_REUSE_PID_INVALID\n' >&2; return 1; }
+  working="$(systemctl show "$shared_risk_unit" --property WorkingDirectory --value 2>/dev/null || true)"
+  [[ "$working" == "$release" ]] || { printf 'V96_TO_V12_SHARED_RISK_REUSE_RELEASE_MISMATCH\n' >&2; return 1; }
+  installed_unit=/etc/systemd/system/disdex-shared-crypto-risk@.service
+  installed_env=/etc/disdex/disdex-v12-pengu-v2-v52.env
+  [[ -f "$installed_unit" && ! -L "$installed_unit" && -f "$installed_env" && ! -L "$installed_env" ]] || {
+    printf 'V96_TO_V12_SHARED_RISK_REUSE_CONFIG_MISSING\n' >&2
+    return 1
+  }
+  cmp -s "$installed_unit" "$release/ops/systemd/disdex-shared-crypto-risk@.service" || {
+    printf 'V96_TO_V12_SHARED_RISK_REUSE_UNIT_MISMATCH\n' >&2
+    return 1
+  }
+  cmp -s "$installed_env" "$release/ops/env/disdex-v12-pengu-v2-v52.env.example" || {
+    printf 'V96_TO_V12_SHARED_RISK_REUSE_ENV_MISMATCH\n' >&2
+    return 1
+  }
+  printf 'V96_TO_V12_SHARED_RISK_REUSE_READY pid=%s\n' "$pid"
 }
 atomic_current_switch() {
   local destination="$1" temp
@@ -134,6 +159,11 @@ done
 (( ${#present_old_units[@]} >= 1 )) || { printf 'V96_TO_V12_NO_KNOWN_V96_SUPERVISOR_INSTALLED\n' >&2; false; }
 
 for unit in "${new_units[@]}"; do
+  if [[ "$unit" == "$shared_risk_unit" && "$(status_of "$unit")" == "active" ]]; then
+    validate_reusable_shared_risk
+    shared_risk_reused=true
+    continue
+  fi
   [[ "$(status_of "$unit")" != "active" ]] || { printf 'V96_TO_V12_NEW_UNIT_ALREADY_ACTIVE unit=%s\n' "$unit" >&2; false; }
 done
 [[ "$(status_of "$target")" != "active" ]] || { printf 'V96_TO_V12_TARGET_ALREADY_ACTIVE\n' >&2; false; }
@@ -193,8 +223,13 @@ for unit in "${stale_risk_units[@]}"; do
   if systemctl is-enabled --quiet "$unit" 2>/dev/null; then printf 'V96_TO_V12_STALE_RISK_UNIT_STILL_ENABLED unit=%s\n' "$unit" >&2; false; fi
 done
 
-systemctl start "disdex-shared-crypto-risk@$sha.service"
-require_active "disdex-shared-crypto-risk@$sha.service"
+if [[ "$shared_risk_reused" == "true" ]]; then
+  require_active "$shared_risk_unit"
+  printf 'V96_TO_V12_SHARED_RISK_REUSED=TRUE\n'
+else
+  systemctl start "$shared_risk_unit"
+  require_active "$shared_risk_unit"
+fi
 run_oneshot "disdex-shared-crypto-risk-refresh@$sha.service"
 run_oneshot "disdex-v96-stop-recheck@$sha.service"
 /usr/bin/bash "$release/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh" "$sha" initial

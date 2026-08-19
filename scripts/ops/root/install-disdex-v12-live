@@ -70,6 +70,10 @@ for source in "${required[@]}"; do
   [[ -f "$source" && ! -L "$source" ]] || { printf 'V12_LIVE_INSTALL_REQUIRED_SOURCE_INVALID path=%s\n' "$source" >&2; exit 2; }
 done
 
+shared_risk_unit="disdex-shared-crypto-risk@$sha.service"
+shared_risk_preexisting_active=false
+shared_risk_preexisting_pid=0
+
 # Never rewrite LIVE unit/env definitions underneath an already running V12
 # composition. Existing V96 may remain active; this installer does not stop it.
 if systemctl list-units --type=service --state=active --no-legend 'disdex-v12-x1-all@*.service' 2>/dev/null | grep -q .; then
@@ -79,6 +83,44 @@ fi
 if systemctl list-units --type=target --state=active --no-legend 'disdex-v12-pengu-v2-v52@*.target' 2>/dev/null | grep -q .; then
   printf 'V12_LIVE_INSTALL_BLOCKED_TARGET_ALREADY_ACTIVE\n' >&2
   exit 3
+fi
+
+# A previous fail-closed activation can legitimately leave only the exact-SHA
+# shared risk daemon running. Reuse it only when it is demonstrably the same
+# immutable release/config and every trading or margin component is still inert.
+if [[ "$(systemctl is-active "$shared_risk_unit" 2>/dev/null || true)" == "active" ]]; then
+  for unit in \
+    "disdex-v12-v52-margin-guard@$sha.service" \
+    "disdex-pengu-dual-ls-v2@$sha.service" \
+    "disdex-v52-aster-only@$sha.service" \
+    "disdex-v12-x1-all@$sha.service"; do
+    [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" != "active" ]] || {
+      printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_WITH_ACTIVE_COMPONENT unit=%s\n' "$unit" >&2
+      exit 3
+    }
+  done
+  shared_risk_preexisting_pid="$(systemctl show "$shared_risk_unit" --property MainPID --value 2>/dev/null || true)"
+  [[ "$shared_risk_preexisting_pid" =~ ^[1-9][0-9]*$ ]] || { printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_PID_INVALID\n' >&2; exit 3; }
+  [[ "$(systemctl show "$shared_risk_unit" --property WorkingDirectory --value 2>/dev/null || true)" == "$repo_root" ]] || {
+    printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_RELEASE_MISMATCH\n' >&2
+    exit 3
+  }
+  installed_risk_unit=/etc/systemd/system/disdex-shared-crypto-risk@.service
+  installed_risk_env=/etc/disdex/disdex-v12-pengu-v2-v52.env
+  [[ -f "$installed_risk_unit" && ! -L "$installed_risk_unit" && -f "$installed_risk_env" && ! -L "$installed_risk_env" ]] || {
+    printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_CONFIG_MISSING\n' >&2
+    exit 3
+  }
+  cmp -s "$installed_risk_unit" "$repo_root/ops/systemd/disdex-shared-crypto-risk@.service" || {
+    printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_UNIT_MISMATCH\n' >&2
+    exit 3
+  }
+  cmp -s "$installed_risk_env" "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example" || {
+    printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_ENV_MISMATCH\n' >&2
+    exit 3
+  }
+  shared_risk_preexisting_active=true
+  printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_REUSE_READY pid=%s\n' "$shared_risk_preexisting_pid"
 fi
 
 # Offline executable validation. These tests contain no production credentials
@@ -122,7 +164,9 @@ done
 # solely in the existing production env file. The reverse interlock helper is
 # inert until migration installs the legacy-service drop-ins after V96 is flat
 # and stopped.
-install -o root -g root -m 0600 "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example" /etc/disdex/disdex-v12-pengu-v2-v52.env
+if [[ "$shared_risk_preexisting_active" != "true" ]]; then
+  install -o root -g root -m 0600 "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example" /etc/disdex/disdex-v12-pengu-v2-v52.env
+fi
 install -o root -g root -m 0600 "$repo_root/ops/env/disdex-v12-x1-all.live.env.example" /etc/disdex/disdex-v12-x1-all.env
 credential_source=/etc/disdex/disdex-v13d-v11eq-v96.env
 credential_overlay=/etc/disdex/disdex-v12-aster-credentials.env
@@ -135,6 +179,9 @@ done
 chown root:root "$credential_tmp"; chmod 0600 "$credential_tmp"; mv -f "$credential_tmp" "$credential_overlay"
 install -o root -g root -m 0755 "$reverse_interlock_source" /usr/local/libexec/disdex-v96-refuse-while-v12-active
 for name in "${unit_names[@]}"; do
+  if [[ "$shared_risk_preexisting_active" == "true" && "$name" == "disdex-shared-crypto-risk@.service" ]]; then
+    continue
+  fi
   install -o root -g root -m 0644 "$repo_root/ops/systemd/$name" "/etc/systemd/system/$name"
 done
 
@@ -149,16 +196,21 @@ systemctl daemon-reload
 # Installation must be inert. No new trading/risk/margin unit is started or
 # enabled here. The explicit migration command owns the service transition.
 for unit in \
-  "disdex-shared-crypto-risk@$sha.service" \
   "disdex-v12-v52-margin-guard@$sha.service" \
   "disdex-pengu-dual-ls-v2@$sha.service" \
   "disdex-v52-aster-only@$sha.service" \
   "disdex-v12-x1-all@$sha.service"; do
   [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" != "active" ]] || { printf 'V12_LIVE_INSTALL_INERTNESS_FAILED unit=%s\n' "$unit" >&2; exit 4; }
 done
+if [[ "$shared_risk_preexisting_active" == "true" ]]; then
+  [[ "$(systemctl is-active "$shared_risk_unit" 2>/dev/null || true)" == "active" ]] || { printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_STOPPED\n' >&2; exit 4; }
+  [[ "$(systemctl show "$shared_risk_unit" --property MainPID --value 2>/dev/null || true)" == "$shared_risk_preexisting_pid" ]] || { printf 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_RESTARTED\n' >&2; exit 4; }
+else
+  [[ "$(systemctl is-active "$shared_risk_unit" 2>/dev/null || true)" != "active" ]] || { printf 'V12_LIVE_INSTALL_INERTNESS_FAILED unit=%s\n' "$shared_risk_unit" >&2; exit 4; }
+fi
 
 printf 'V12_LIVE_COMPONENTS_INSTALL_PASS\n'
 printf 'releaseSha=%s\nsourceTree=%s\n' "$sha" "$source_tree"
 printf 'backupRoot=%s\n' "$backup_root"
-printf 'existingV96ServiceChanged=false\nservicesStarted=false\nordersSent=false\n'
+printf 'existingV96ServiceChanged=false\nservicesStarted=false\nordersSent=false\npreexistingSharedRiskReused=%s\n' "$shared_risk_preexisting_active"
 printf 'nextCommand=bash %s/scripts/ops/root/disdex-v96-to-v12-live-migrate %s I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION\n' "$repo_root" "$sha"
