@@ -1,0 +1,73 @@
+name: V12 VPS delta read-only export
+
+on:
+  push:
+    branches:
+      - chatgpt/v12-delta-readonly-export-20260819
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+      REPORT_PATH: /home/deploy/disdex-ops/v12-release-delta/80a4d0a687115fefbb14655b94a94b99ad52523b-base-d686f6dc0b841ba6299830fe8aade797420f4597-to-95168f291150cacc2ae140bab3e3d77e81d523c2-full-tree.txt
+    steps:
+      - name: Configure pinned read-only SSH transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          : "${SSH_PORT:=22}"
+          test -n "$SSH_HOST"
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          key = os.environ['SSH_PRIVATE_KEY'].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n')
+          known = os.environ['SSH_KNOWN_HOSTS'].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n')
+          if not key.endswith('\n'):
+              key += '\n'
+          if not known.endswith('\n'):
+              known += '\n'
+          Path.home().joinpath('.ssh/disdex_vps_readonly').write_text(key, encoding='utf-8', newline='\n')
+          Path.home().joinpath('.ssh/known_hosts').write_text(known, encoding='utf-8', newline='\n')
+          PY
+          chmod 0600 "$HOME/.ssh/disdex_vps_readonly" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/disdex_vps_readonly" >/dev/null
+
+      - name: Export existing full-tree audit report only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          : "${SSH_PORT:=22}"
+          ssh \
+            -i "$HOME/.ssh/disdex_vps_readonly" \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 \
+            -p "$SSH_PORT" \
+            "deploy@$SSH_HOST" \
+            "test -r '$REPORT_PATH' && cat '$REPORT_PATH'" \
+            > v12-full-tree-delta-report.txt
+          test -s v12-full-tree-delta-report.txt
+          echo 'V12_DELTA_REPORT_EXPORT_PASS'
+          wc -l v12-full-tree-delta-report.txt
+          grep -E '^(STATUS:|baseSha=|currentSha=|candidateSha=|vpsDelta=|preserved=|wouldBeLost=|overlapReview=|candidateOnly=|structural=)' v12-full-tree-delta-report.txt || true
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-full-tree-delta-report
+          path: v12-full-tree-delta-report.txt
+          if-no-files-found: error
+          retention-days: 3
