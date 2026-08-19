@@ -67,8 +67,10 @@ fi
 # has no orders. During later V12 restarts BTC/ETH/BNB/SOL may legitimately be
 # owned by V12, so repeating that zero-core assertion would block safe recovery.
 if [[ "$mode" == "initial" ]]; then
-  cd "$release"
-  "$release/node_modules/.bin/tsx" scripts/disdex-v96-stop-recheck.ts
+  [[ "$(id -u)" == "0" ]] || { printf 'V12_MUTUAL_EXCLUSION_INITIAL_REQUIRES_ROOT\n' >&2; exit 1; }
+  stop_recheck_unit="disdex-v96-stop-recheck@$sha.service"
+  /usr/bin/systemctl reset-failed "$stop_recheck_unit" >/dev/null 2>&1 || true
+  /usr/bin/systemctl start "$stop_recheck_unit"
 fi
 
 printf 'V12_MUTUAL_EXCLUSION_PREFLIGHT_PASS\n'
