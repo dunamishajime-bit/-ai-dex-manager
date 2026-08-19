@@ -1,4 +1,5 @@
 name: DisDex Account Risk Release Identity CI
+# shared-risk fail-closed recovery gate refresh: 2026-08-20
 
 on:
   pull_request:
