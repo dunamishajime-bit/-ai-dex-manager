@@ -21,7 +21,7 @@ function pythonAttempt(path: string, ownerId: string, holdSeconds: number) {
         "lock.release() if ok else None",
     ].join(";");
     return new Promise<string>((resolvePromise, reject) => {
-        const child = spawn("python", ["-c", code], {
+        const child = spawn("/usr/bin/python3", ["-c", code], {
             cwd: process.cwd(),
             env: {
                 ...process.env,
