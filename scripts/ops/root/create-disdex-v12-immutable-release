@@ -86,6 +86,7 @@ runuser -u deploy -- env HOME=/home/deploy npm --prefix "$staging" run strategy:
 runuser -u deploy -- env HOME=/home/deploy npm --prefix "$staging" run strategy:v12-x1-all:selftest
 runuser -u deploy -- env HOME=/home/deploy PYTHONPATH="$staging/scripts" python3 "$staging/scripts/disdex_v12_v52_margin_guard_runtime.py" --self-test
 runuser -u deploy -- env HOME=/home/deploy PYTHONPATH="$staging/scripts" python3 "$staging/scripts/disdex_v12_v52_live_engine.py" --self-test
+runuser -u deploy -- env HOME=/home/deploy PYTHONPATH="$staging/scripts" python3 "$staging/scripts/disdex_v52_reference_recovery_selftest.py"
 runuser -u deploy -- env HOME=/home/deploy npm --prefix "$staging" run build
 
 [[ -x "$staging/node_modules/.bin/tsx" ]] || { printf 'V12_RELEASE_BUILD_TSX_MISSING_AFTER_NPM_CI\n' >&2; exit 5; }

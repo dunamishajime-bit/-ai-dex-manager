@@ -4,6 +4,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { DEFAULT_ACCOUNT_SCOPE, FileAccountOrderLock, type AccountLockHandle } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { sendEmail } from "../lib/mail-service";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
@@ -12,6 +13,7 @@ import { FilePenguDualLsV2RunnerStateStore, type PenguDualLsV2RunnerState } from
 
 const HOUR_MS = 60 * 60_000;
 const SYMBOL = "PENGUUSDT";
+const DEFAULT_ORDER_FILL_EMAIL = "dunamis.hajime@gmail.com";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -45,6 +47,17 @@ class PenguPriorityAccountOrderLock extends FileAccountOrderLock {
         const priority = penguAccountPriority(state);
         return super.acquire(`PENGU_DUAL_LS_V2:P${priority}:${process.pid}:${ownerId}`, accountScope);
     }
+}
+
+function notifyPenguFill(result: { status: string; message: string; idempotencyKey?: string }, mode: string) {
+    if (mode !== "LIVE" || result.status !== "completed") return;
+    const to = (process.env.PENGU_ORDER_FILL_EMAIL || process.env.DISDEX_ORDER_FILL_EMAIL || DEFAULT_ORDER_FILL_EMAIL).trim();
+    if (!to) return;
+    const subject = "[DisDex][FILLED] PENGU_DUAL_LS_V2 order fill";
+    const text = ["DisDex PENGU order fill confirmed.", "", "Status: FILLED", "Strategy: PENGU_DUAL_LS_V2_FINAL", `Mode: ${mode}`, `Result: ${result.message}`, `Timestamp: ${new Date().toISOString()}`, `IdempotencyKey: ${result.idempotencyKey || "-"}`].join("\n");
+    void sendEmail(to, subject, text).then((mailResult) => {
+        if (!mailResult.success || mailResult.simulated) console.error(JSON.stringify({ level: "error", event: "PENGU_ORDER_FILL_EMAIL_FAILED", to, simulated: mailResult.simulated, error: String(mailResult.error || "mail provider not configured") }));
+    }).catch((error) => console.error(JSON.stringify({ level: "error", event: "PENGU_ORDER_FILL_EMAIL_FAILED", to, error: error instanceof Error ? error.message : String(error) })));
 }
 
 async function main() {
@@ -125,6 +138,7 @@ async function main() {
     do {
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
+        notifyPenguFill(result, runtime.mode);
         if (!daemon || stopping) break;
         if (result.status === "locked") {
             // A simultaneous higher-priority P1/P2 critical section must not make

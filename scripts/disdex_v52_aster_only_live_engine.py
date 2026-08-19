@@ -17,6 +17,7 @@ from disdex_account_order_lock import AccountOrderLock
 from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
 
 base = legacy.base
+ReferenceQualityError = base.ReferenceQualityError
 
 STRATEGY_ID = "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"
 LIVE_ACK = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY"
@@ -106,6 +107,26 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.state["strategyId"] = STRATEGY_ID
         self.state["updatedAt"] = base.now_ms()
         base.atomic_write_json(self.state_path, self.state)
+
+    def _record_reference_block(self, error: ReferenceQualityError) -> None:
+        self.state["referenceStatus"] = "BLOCKED_DATA_UNAVAILABLE"
+        self.state["referenceOrdersAllowed"] = False
+        self.state["referenceFailure"] = {"code": error.code, **error.detail, "at": base.now_ms()}
+        self.save()
+        self.log("v52-reference-quality-blocked", status="BLOCKED_DATA_UNAVAILABLE", ordersAllowed=False, recoverable=True, errorCode=error.code, **error.detail)
+
+    def _record_reference_active(self) -> None:
+        if self.state.get("referenceStatus") == "ACTIVE" and self.state.get("referenceOrdersAllowed") is True: return
+        self.state["referenceStatus"] = "ACTIVE"
+        self.state["referenceOrdersAllowed"] = True
+        self.state.pop("referenceFailure", None)
+        self.save()
+        self.log("v52-reference-quality-recovered", status="ACTIVE", ordersAllowed=True)
+
+    def _handle_tick_error(self, error: Exception) -> bool:
+        if not isinstance(error, ReferenceQualityError): return False
+        self._record_reference_block(error)
+        return True
 
     def positions(self) -> Dict[str, dict]:
         value = self.state.setdefault("positions", {})
@@ -473,6 +494,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):
             return
         rows = self.books_and_refs()
+        self._record_reference_active()
         if self.v96_requires_margin():
             if self.positions(): self.flatten_all("V96_MARGIN_PRIORITY")
             return
@@ -546,15 +568,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 started = base.now_ms()
                 try: self.tick()
                 except Exception as error:
-                    self.log("v52-tick-error", error=str(error))
-                    if transient_reference_error(error) and not self.positions():
-                        # A stale or disagreeing independent reference is an entry
-                        # gate, not an execution fault.  Do not kill the V52 daemon
-                        # or consume its narrow entry window; wait for fresh, agreeing
-                        # quotes and re-evaluate on the next tick.
-                        self.log("v52-entry-held-reference-validation", error=str(error))
-                    elif self.live:
-                        self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
+                    if self._handle_tick_error(error):
+                        if not daemon: break
+                    else:
+                        self.log("v52-tick-error", error=str(error))
+                        if self.live:
+                            self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
                 if not daemon: break
                 active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
                 interval = 250 if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)

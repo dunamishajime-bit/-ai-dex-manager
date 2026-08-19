@@ -19,6 +19,7 @@ from disdex_v96_v52_margin_risk_policy import (
 )
 
 base = legacy.base
+ReferenceQualityError = legacy.ReferenceQualityError
 STRATEGY_ID = legacy.STRATEGY_ID
 V11_SLOT = legacy.V11_SLOT
 V50_SLOT = legacy.V50_SLOT
@@ -340,11 +341,14 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
                 try:
                     self.tick()
                 except Exception as error:
-                    self.log("v52-margin-aware-tick-error", error=str(error))
-                    if self.live:
-                        self.activate_kill_switch(f"V52 margin-aware fatal tick error: {error}")
-                        self.flatten_all("FATAL_TICK_ERROR")
-                        raise
+                    if self._handle_tick_error(error):
+                        if not daemon: break
+                    else:
+                        self.log("v52-margin-aware-tick-error", error=str(error))
+                        if self.live:
+                            self.activate_kill_switch(f"V52 margin-aware fatal tick error: {error}")
+                            self.flatten_all("FATAL_TICK_ERROR")
+                            raise
                 if not daemon:
                     break
                 active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())

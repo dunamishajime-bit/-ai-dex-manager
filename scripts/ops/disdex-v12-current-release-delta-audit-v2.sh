@@ -51,7 +51,7 @@ runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$candidate_sh
   find . -type f -print | sed 's#^\./##' | while IFS= read -r rel; do
     case "$rel" in
       node_modules/*|.next/*|.git/*|.runtime-state/*|.codex-tmp/*|coverage/*|dist/*|.cache/*|tmp/*|logs/*) continue ;;
-      .disdex-release-*|*.log|*.pid|*.sock) continue ;;
+      .disdex-release-*|*.log|*.pid|*.sock|*/__pycache__/*|__pycache__/*|*.pyc|*.pre-*) continue ;;
       .env|.env.local|.env.production|.env.development|.env.test|*.pem|*.key|*private-key*|*secret*) continue ;;
     esac
     printf '%s\n' "$rel"
@@ -60,6 +60,16 @@ runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$candidate_sh
 cat "$base_list" "$candidate_list" "$current_list" | LC_ALL=C sort -u > "$all_list"
 
 hash_file() { sha256sum "$1" | awk '{print $1}'; }
+# Compare source text independent of CRLF/LF checkout normalization while
+# retaining raw SHA256 above for immutable candidate identity verification.
+compare_hash_file() {
+  local path="$1"
+  if LC_ALL=C grep -Iq . "$path"; then
+    sed 's/\r$//' "$path" | sha256sum | awk '{print $1}'
+  else
+    hash_file "$path"
+  fi
+}
 git_file() {
   local commit="$1" rel="$2" out="$3"
   runuser -u deploy -- git -C "$source_repo" show "${commit}:${rel}" > "$out" 2>/dev/null
@@ -69,8 +79,14 @@ append_diff() {
   printf '%s\n' "--- $a_label -> $b_label" >> "$report"
   diff -u --label "$a_label" --label "$b_label" "$a" "$b" 2>/dev/null | head -n 200 >> "$report" || true
 }
+review_manifest="$candidate/ops/review/v12-vps-delta-reviewed.tsv"
+reviewed_overlap() {
+  local rel="$1" current_hash="$2" candidate_hash="$3"
+  [[ -f "$review_manifest" && ! -L "$review_manifest" ]] || return 1
+  awk -F '\t' -v p="$rel" -v c="$current_hash" -v n="$candidate_hash" '$1==p && $2==c && $3==n && $4=="INTENTIONAL_CANDIDATE_SUPERSEDES_CURRENT" {ok=1} END {exit !ok}' "$review_manifest"
+}
 
-vps_delta=0; preserved=0; would_lose=0; overlap=0; candidate_only=0; unchanged=0; structural=0
+vps_delta=0; preserved=0; reviewed=0; would_lose=0; overlap=0; candidate_only=0; unchanged=0; structural=0
 {
   printf 'V12_CURRENT_RELEASE_FULL_TREE_DELTA_AUDIT_V2\n'
   printf 'baseSha=%s\ncurrentSha=%s\ncandidateSha=%s\n' "$base_sha" "$current_sha" "$candidate_sha"
@@ -117,22 +133,24 @@ while IFS= read -r rel; do
       vps_delta=$((vps_delta+1)); would_lose=$((would_lose+1)); printf 'VPS_DELTA_WOULD_BE_LOST path=%s reason=current-only-source\n' "$rel" >> "$report"
     elif [[ "$current_exists" == true && "$candidate_git_exists" == true ]]; then
       vps_delta=$((vps_delta+1))
-      if [[ "$(hash_file "$current/$rel")" == "$(hash_file "$candidate_tmp")" ]]; then preserved=$((preserved+1)); printf 'VPS_DELTA_PRESERVED path=%s reason=current-addition-preserved\n' "$rel" >> "$report"
+      current_hash="$(compare_hash_file "$current/$rel")"; candidate_hash="$(compare_hash_file "$candidate_tmp")"
+      if [[ "$current_hash" == "$candidate_hash" ]]; then preserved=$((preserved+1)); printf 'VPS_DELTA_PRESERVED path=%s reason=current-addition-preserved\n' "$rel" >> "$report"
+      elif reviewed_overlap "$rel" "$current_hash" "$candidate_hash"; then reviewed=$((reviewed+1)); printf 'VPS_DELTA_REVIEWED_SUPERSEDED path=%s reason=current-addition-reviewed\n' "$rel" >> "$report"
       else overlap=$((overlap+1)); printf 'VPS_DELTA_OVERLAP_REVIEW path=%s reason=current-addition-differs\n' "$rel" >> "$report"; fi
     fi
     continue
   fi
 
-  base_hash="$(hash_file "$base_tmp")"
+  base_hash="$(compare_hash_file "$base_tmp")"
   if [[ "$current_exists" != true ]]; then
     vps_delta=$((vps_delta+1))
     if [[ "$candidate_git_exists" != true ]]; then preserved=$((preserved+1)); printf 'VPS_DELTA_PRESERVED path=%s reason=current-deletion-preserved\n' "$rel" >> "$report"
-    elif [[ "$(hash_file "$candidate_tmp")" == "$base_hash" ]]; then would_lose=$((would_lose+1)); printf 'VPS_DELTA_WOULD_BE_LOST path=%s reason=current-deletion-restored\n' "$rel" >> "$report"
+    elif [[ "$(compare_hash_file "$candidate_tmp")" == "$base_hash" ]]; then would_lose=$((would_lose+1)); printf 'VPS_DELTA_WOULD_BE_LOST path=%s reason=current-deletion-restored\n' "$rel" >> "$report"
     else overlap=$((overlap+1)); printf 'VPS_DELTA_OVERLAP_REVIEW path=%s reason=current-deletion-vs-candidate-change\n' "$rel" >> "$report"; fi
     continue
   fi
 
-  current_hash="$(hash_file "$current/$rel")"
+  current_hash="$(compare_hash_file "$current/$rel")"
   current_delta=false; [[ "$current_hash" != "$base_hash" ]] && current_delta=true
   if [[ "$candidate_git_exists" != true ]]; then
     if [[ "$current_delta" == false ]]; then candidate_only=$((candidate_only+1)); printf 'CANDIDATE_INTENDED_DELETE path=%s\n' "$rel" >> "$report"
@@ -140,7 +158,7 @@ while IFS= read -r rel; do
     continue
   fi
 
-  candidate_hash="$(hash_file "$candidate_tmp")"
+  candidate_hash="$(compare_hash_file "$candidate_tmp")"
   candidate_delta=false; [[ "$candidate_hash" != "$base_hash" ]] && candidate_delta=true
   if [[ "$current_delta" == false && "$candidate_delta" == false ]]; then unchanged=$((unchanged+1)); continue; fi
   if [[ "$current_delta" == false && "$candidate_delta" == true ]]; then candidate_only=$((candidate_only+1)); printf 'CANDIDATE_INTENDED_CHANGE path=%s\n' "$rel" >> "$report"; continue; fi
@@ -148,17 +166,18 @@ while IFS= read -r rel; do
   vps_delta=$((vps_delta+1))
   if [[ "$current_hash" == "$candidate_hash" ]]; then preserved=$((preserved+1)); printf 'VPS_DELTA_PRESERVED path=%s\n' "$rel" >> "$report"; continue; fi
   if [[ "$candidate_hash" == "$base_hash" ]]; then would_lose=$((would_lose+1)); printf 'VPS_DELTA_WOULD_BE_LOST path=%s reason=candidate-restores-base\n' "$rel" >> "$report"
+  elif reviewed_overlap "$rel" "$current_hash" "$candidate_hash"; then reviewed=$((reviewed+1)); printf 'VPS_DELTA_REVIEWED_SUPERSEDED path=%s reason=both-changed-reviewed\n' "$rel" >> "$report"
   else overlap=$((overlap+1)); printf 'VPS_DELTA_OVERLAP_REVIEW path=%s reason=both-changed-differently\n' "$rel" >> "$report"; fi
   append_diff "base/$rel" "$base_tmp" "current/$rel" "$current/$rel"
   append_diff "base/$rel" "$base_tmp" "candidate/$rel" "$candidate_tmp"
 done < "$all_list"
 
 {
-  printf '\nsummaryVpsDelta=%d\nsummaryPreserved=%d\nsummaryWouldBeLost=%d\nsummaryOverlapReview=%d\nsummaryCandidateOnly=%d\nsummaryUnchanged=%d\nsummaryStructural=%d\n' \
-    "$vps_delta" "$preserved" "$would_lose" "$overlap" "$candidate_only" "$unchanged" "$structural"
+  printf '\nsummaryVpsDelta=%d\nsummaryPreserved=%d\nsummaryReviewed=%d\nsummaryWouldBeLost=%d\nsummaryOverlapReview=%d\nsummaryCandidateOnly=%d\nsummaryUnchanged=%d\nsummaryStructural=%d\n' \
+    "$vps_delta" "$preserved" "$reviewed" "$would_lose" "$overlap" "$candidate_only" "$unchanged" "$structural"
 } >> "$report"
 printf 'STATUS: VPS_RELEASE_FULL_TREE_DELTA_AUDIT_COMPLETE\nbaseSha=%s\ncurrentSha=%s\ncandidateSha=%s\n' "$base_sha" "$current_sha" "$candidate_sha"
-printf 'vpsDelta=%d\npreserved=%d\nwouldBeLost=%d\noverlapReview=%d\ncandidateOnly=%d\nstructural=%d\n' "$vps_delta" "$preserved" "$would_lose" "$overlap" "$candidate_only" "$structural"
+printf 'vpsDelta=%d\npreserved=%d\nreviewed=%d\nwouldBeLost=%d\noverlapReview=%d\ncandidateOnly=%d\nstructural=%d\n' "$vps_delta" "$preserved" "$reviewed" "$would_lose" "$overlap" "$candidate_only" "$structural"
 printf 'report=%s\nordersSent=false\nservicesChanged=false\nsecretsRead=false\n' "$report"
 if (( would_lose > 0 )); then printf 'VPS_RELEASE_DELTA_BLOCKED\n'; exit 10; fi
 if (( overlap > 0 )); then printf 'VPS_RELEASE_DELTA_REVIEW_REQUIRED\n'; exit 11; fi

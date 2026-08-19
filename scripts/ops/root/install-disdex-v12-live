@@ -59,6 +59,7 @@ required=(
   "$repo_root/scripts/disdex-v96-stop-recheck.ts"
   "$repo_root/scripts/disdex_v12_v52_margin_guard_runtime.py"
   "$repo_root/scripts/disdex_v12_v52_live_engine.py"
+  "$repo_root/scripts/disdex_v52_reference_recovery_selftest.py"
   "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example"
   "$repo_root/ops/env/disdex-v12-x1-all.live.env.example"
 )
@@ -91,9 +92,11 @@ bash -n "$reverse_interlock_source"
 "$repo_root/node_modules/.bin/tsx" "$repo_root/scripts/v12-live-execution-selftest.ts"
 PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 -m py_compile \
   "$repo_root/scripts/disdex_v12_v52_margin_guard_runtime.py" \
-  "$repo_root/scripts/disdex_v12_v52_live_engine.py"
+  "$repo_root/scripts/disdex_v12_v52_live_engine.py" \
+  "$repo_root/scripts/disdex_v52_reference_recovery_selftest.py"
 PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 "$repo_root/scripts/disdex_v12_v52_margin_guard_runtime.py" --self-test
 PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 "$repo_root/scripts/disdex_v12_v52_live_engine.py" --self-test
+PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 "$repo_root/scripts/disdex_v52_reference_recovery_selftest.py"
 
 backup_root="/etc/disdex/v12-migration-backup/$(date -u +%Y%m%dT%H%M%SZ)"
 install -d -o root -g root -m 0700 "$backup_root" /etc/disdex /usr/local/libexec
