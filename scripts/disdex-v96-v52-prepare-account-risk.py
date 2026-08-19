@@ -11,7 +11,11 @@ from disdex_v13d_v11eq_stock_live_engine import AsterClient, ASTER_SYMBOL, finit
 
 ACKNOWLEDGEMENT = "I_APPROVE_DISDEX_V96_V52_FIXED_5X_CROSS_MARGIN"
 REQUIRED_LEVERAGE = 5
-CRYPTO_SYMBOLS = ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT")
+CRYPTO_SYMBOLS = (
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT",
+    "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT",
+    "AAVEUSDT", "NEARUSDT", "PENGUUSDT",
+)
 STOCK_SYMBOLS = tuple(ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = CRYPTO_SYMBOLS + STOCK_SYMBOLS
 SCRIPT_RELATIVE_PATH = Path("scripts/disdex-v96-v52-prepare-account-risk.py")
@@ -224,6 +228,8 @@ def run_self_test() -> int:
 
     assert ASTER_CHANGE_MARGIN_TYPE_PATH == "/fapi/v3/marginType"
     assert ASTER_CHANGE_LEVERAGE_PATH == "/fapi/v3/leverage"
+    assert len(CRYPTO_SYMBOLS) == 15
+    assert "LINKUSDT" in CRYPTO_SYMBOLS and "NEARUSDT" in CRYPTO_SYMBOLS and "PENGUUSDT" in CRYPTO_SYMBOLS
     print("V96/V52 account-risk immutable-release authority self-test: PASS")
     print("asterAccountRiskApiVersion=v3")
     print("staleEnvironmentRuntimeShaIgnored=true")

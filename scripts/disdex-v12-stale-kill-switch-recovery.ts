@@ -15,6 +15,8 @@ import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
 const EXPECTED_STALE_REASON = "V96/V52 trading supervisor exited unexpectedly with status 1";
 const OPERATOR = "CHATGPT_GITHUB_ACTIONS_V12_MIGRATION_RECOVERY";
 const STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96";
+const ACCOUNT_RISK_ACK = "I_APPROVE_DISDEX_V96_V52_FIXED_5X_CROSS_MARGIN";
+const ACCOUNT_RISK_SCRIPT = "scripts/disdex-v96-v52-prepare-account-risk.py";
 function boolEnv(name: string) { return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim()); }
 function numberEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
 
@@ -34,7 +36,7 @@ function parseLastJson(output: string) {
     for (const line of output.split(/\r?\n/).map((v) => v.trim()).filter(Boolean).reverse()) {
         try { return JSON.parse(line) as Record<string, unknown>; } catch { /* continue */ }
     }
-    throw new Error("RECOVERY_MARGIN_GUARD_JSON_MISSING");
+    throw new Error("RECOVERY_JSON_OUTPUT_MISSING");
 }
 async function writeInactiveKillSwitch(path: string) {
     const payload = {
@@ -55,6 +57,8 @@ async function main() {
     if (process.argv.includes("--self-test")) {
         assert.equal(EXPECTED_STALE_REASON, "V96/V52 trading supervisor exited unexpectedly with status 1");
         assert.equal(OPERATOR, "CHATGPT_GITHUB_ACTIONS_V12_MIGRATION_RECOVERY");
+        assert.equal(ACCOUNT_RISK_ACK, "I_APPROVE_DISDEX_V96_V52_FIXED_5X_CROSS_MARGIN");
+        assert.equal(ACCOUNT_RISK_SCRIPT, "scripts/disdex-v96-v52-prepare-account-risk.py");
         console.log("V12 stale Kill Switch recovery self-test: PASS");
         return;
     }
@@ -66,6 +70,7 @@ async function main() {
     }
     for (const service of [
         "disdex-v96-v52-live.service",
+        "disdex-v13d-v11eq-v96.service",
         `disdex-v12-x1-all@${sha}.service`,
         `disdex-pengu-dual-ls-v2@${sha}.service`,
         `disdex-v52-aster-only@${sha}.service`,
@@ -103,6 +108,18 @@ async function main() {
         if (nonzero.length) throw new Error(`RECOVERY_ACCOUNT_NOT_FLAT:${nonzero.map((row) => row.symbol).join(",")}`);
         if (openOrders.length) throw new Error(`RECOVERY_OPEN_ORDERS_PRESENT:${openOrders.map((row) => row.symbol).join(",")}`);
 
+        const accountRisk = spawnSync("python3", [ACCOUNT_RISK_SCRIPT], {
+            cwd: process.cwd(),
+            env: { ...process.env, DISDEX_V96_V52_ACCOUNT_RISK_ACKNOWLEDGEMENT: ACCOUNT_RISK_ACK },
+            encoding: "utf8",
+            timeout: 120_000,
+        });
+        if (accountRisk.status !== 0) throw new Error(`RECOVERY_ACCOUNT_RISK_PREPARATION_FAILED:${String(accountRisk.stderr || accountRisk.stdout || "").slice(-700)}`);
+        const accountRiskState = parseLastJson(String(accountRisk.stdout || ""));
+        if (accountRiskState.status !== "DISDEX_V96_V52_ACCOUNT_RISK_PREPARATION_PASS" || accountRiskState.requiredLeverage !== 5 || accountRiskState.requiredMarginType !== "cross") {
+            throw new Error(`RECOVERY_ACCOUNT_RISK_PREPARATION_INVALID:${String(accountRiskState.status || "UNKNOWN")}`);
+        }
+
         const margin = spawnSync("python3", ["scripts/disdex_v12_v52_margin_guard_runtime.py", "--mode", "live", "--preflight-readonly"], {
             cwd: process.cwd(), env: process.env, encoding: "utf8", timeout: 30_000,
         });
@@ -113,7 +130,7 @@ async function main() {
         await writeInactiveKillSwitch(resolve(kill.sourcePath));
         const after = await readSharedKillSwitch();
         if (after.active) throw new Error("RECOVERY_KILL_SWITCH_DEACTIVATION_NOT_PERSISTED");
-        console.log(JSON.stringify({ status: "V12_STALE_SHARED_KILL_SWITCH_RECOVERY_PASS", reasonMatched: true, accountFlat: true, openOrderCount: 0, marginStage: "HEALTHY", sharedKillSwitchActive: false, ordersSent: false, cancelSent: false, positionChangesSent: false }));
+        console.log(JSON.stringify({ status: "V12_STALE_SHARED_KILL_SWITCH_RECOVERY_PASS", reasonMatched: true, accountFlat: true, openOrderCount: 0, accountRiskPrepared: true, requiredLeverage: 5, requiredMarginType: "cross", marginStage: "HEALTHY", sharedKillSwitchActive: false, ordersSent: false, cancelSent: false, positionChangesSent: false }));
     } finally {
         await handle.release();
     }
