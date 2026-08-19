@@ -18,13 +18,16 @@ const STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96";
 function boolEnv(name: string) { return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim()); }
 function numberEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
 
+function systemdValue(name: string, property: string) {
+    return execFileSync("systemctl", ["show", name, `--property=${property}`, "--value"], { encoding: "utf8" }).trim();
+}
+
 function requireInactiveService(name: string) {
-    const output = execFileSync("systemctl", ["show", name, "--property=ActiveState,SubState,MainPID", "--value"], { encoding: "utf8" });
-    const values = output.trim().split(/\r?\n/);
-    const active = values[0] || "unknown";
-    const sub = values[1] || "unknown";
-    const pid = Number(values[2] || 0);
-    if (!(["inactive", "failed"].includes(active)) || pid !== 0) throw new Error(`RECOVERY_SERVICE_NOT_INACTIVE:${name}:${active}/${sub}:pid=${pid}`);
+    const active = systemdValue(name, "ActiveState") || "unknown";
+    const sub = systemdValue(name, "SubState") || "unknown";
+    const pidText = systemdValue(name, "MainPID") || "0";
+    const pid = Number(pidText);
+    if (!Number.isFinite(pid) || !(["inactive", "failed"].includes(active)) || pid !== 0) throw new Error(`RECOVERY_SERVICE_NOT_INACTIVE:${name}:${active}/${sub}:pid=${pidText}`);
 }
 
 function parseLastJson(output: string) {
