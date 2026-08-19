@@ -211,6 +211,7 @@ bash -n "$activate"
 
 case "$operation" in
   V12_LIVE_ACTIVATE_V3)
-    bash "$activate" "$SOURCE_REPO" "$target_sha" "$base_sha" "$ack"
+    printf 'DISDEX_VPS_CONTROL_NODE_HEAP_MB=1536\n'
+    NODE_OPTIONS=--max-old-space-size=1536 bash "$activate" "$SOURCE_REPO" "$target_sha" "$base_sha" "$ack"
     ;;
 esac

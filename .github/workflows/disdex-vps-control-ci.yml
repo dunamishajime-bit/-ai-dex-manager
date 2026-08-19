@@ -64,6 +64,19 @@ jobs:
           grep -Fq 'git -C "$SOURCE_REPO" archive "$target_sha"' "$control"
           ! grep -Eq '(eval[[:space:]]|bash[[:space:]]+-c|sh[[:space:]]+-c)' "$control"
 
+      - name: Prove fixed V12 build heap envelope
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          control=scripts/ops/root/disdex-github-actions-control
+          grep -Fq 'DISDEX_VPS_CONTROL_NODE_HEAP_MB=1536' "$control"
+          grep -Fq 'NODE_OPTIONS=--max-old-space-size=1536 bash "$activate"' "$control"
+          NODE_OPTIONS=--max-old-space-size=1536 node - <<'NODE'
+          const mib = require('node:v8').getHeapStatistics().heap_size_limit / 1024 / 1024;
+          if (mib < 1500 || mib > 1700) process.exit(1);
+          console.log(`DISDEX_V12_BUILD_HEAP_SELFTEST_PASS heapLimitMiB=${mib.toFixed(0)}`);
+          NODE
+
       - name: Prove least-privilege tool extraction topology
         shell: bash
         run: |
