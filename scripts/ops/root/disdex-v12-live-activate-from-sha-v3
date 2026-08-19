@@ -20,6 +20,31 @@ artifact_tag="disdex-artifact-$sha"
 artifact_name="disdex-release-$sha.tar.gz"
 artifact_base="https://github.com/dunamishajime-bit/-ai-dex-manager/releases/download/$artifact_tag"
 
+safe_release_gc() {
+  local root="/home/deploy/disdex-trading/releases" current_path dir name marker marker_sha
+  current_path="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+  [[ "$current_path" == "$root/"* && -d "$current_path" && ! -L "$current_path" ]] || { printf 'V12_RELEASE_GC_CURRENT_INVALID\n' >&2; return 2; }
+  for dir in "$root"/*; do
+    [[ -d "$dir" && ! -L "$dir" ]] || continue
+    name="${dir##*/}"
+    [[ "$name" =~ ^[0-9a-f]{40}$ ]] || continue
+    [[ "$dir" != "$current_path" && "$name" != "$sha" ]] || continue
+    marker="$dir/.disdex-release-sha"
+    [[ -f "$marker" && ! -L "$marker" ]] || continue
+    marker_sha="$(tr -d '[:space:]' < "$marker")"
+    [[ "$marker_sha" == "$name" ]] || continue
+    if systemctl list-units --type=service --state=active --all --no-legend 2>/dev/null | grep -Fq "@$name.service"; then
+      printf 'V12_RELEASE_GC_KEEP_ACTIVE_UNIT sha=%s\n' "$name"; continue
+    fi
+    if pgrep -af -- "$dir/" >/dev/null 2>&1; then
+      printf 'V12_RELEASE_GC_KEEP_ACTIVE_PROCESS sha=%s\n' "$name"; continue
+    fi
+    rm -rf --one-file-system -- "$dir"
+    printf 'V12_RELEASE_GC_REMOVED sha=%s\n' "$name"
+  done
+  df -Pk "$root" | awk 'NR==2 {printf "V12_RELEASE_GC_FREE_KB=%s\n", $4}'
+}
+
 install_ci_artifact() {
   local source_tree download_root archive checksum expected actual staging
   command -v curl >/dev/null 2>&1 || return 1
@@ -99,6 +124,13 @@ audit="$tool_root/scripts/ops/disdex-v12-current-release-delta-audit-v2.sh"
 [[ -f "$builder" && ! -L "$builder" && -f "$audit" && ! -L "$audit" ]] || { printf 'V12_ACTIVATE_V3_PRE_RELEASE_TOOL_MISSING\n' >&2; exit 3; }
 bash -n "$builder"; bash -n "$audit"
 
+printf 'V12_V3_PHASE=SAFE_RELEASE_GC\n'
+gc_rc=0
+safe_release_gc || gc_rc=$?
+if (( gc_rc != 0 )); then
+  printf 'V12_RELEASE_GC_FAILED\n' >&2
+  exit 4
+fi
 printf 'V12_V3_PHASE=IMMUTABLE_RELEASE_ARTIFACT_LOOKUP\n'
 artifact_rc=0
 install_ci_artifact || artifact_rc=$?
