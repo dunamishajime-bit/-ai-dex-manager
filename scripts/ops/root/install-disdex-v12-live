@@ -109,6 +109,7 @@ install -d -o root -g root -m 0700 "$backup_root" /etc/disdex /usr/local/libexec
 for path in \
   /etc/disdex/disdex-v12-pengu-v2-v52.env \
   /etc/disdex/disdex-v12-x1-all.env \
+  /etc/disdex/disdex-v12-aster-credentials.env \
   /usr/local/libexec/disdex-v96-refuse-while-v12-active; do
   [[ -f "$path" ]] && cp -a "$path" "$backup_root/$(basename "$path")"
 done
@@ -123,6 +124,15 @@ done
 # and stopped.
 install -o root -g root -m 0600 "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example" /etc/disdex/disdex-v12-pengu-v2-v52.env
 install -o root -g root -m 0600 "$repo_root/ops/env/disdex-v12-x1-all.live.env.example" /etc/disdex/disdex-v12-x1-all.env
+credential_source=/etc/disdex/disdex-v13d-v11eq-v96.env
+credential_overlay=/etc/disdex/disdex-v12-aster-credentials.env
+credential_tmp="$(mktemp /etc/disdex/.disdex-v12-aster-credentials.XXXXXX)"
+for key in ASTER_FUTURES_BASE_URL ASTER_USER_ADDRESS ASTER_API_PRIVATE_KEY; do
+  line="$(grep -E "^${key}=.+" "$credential_source" | tail -n 1 || true)"
+  [[ -n "$line" ]] || { rm -f "$credential_tmp"; printf 'V12_LIVE_INSTALL_ASTER_CREDENTIAL_MISSING key=%s\n' "$key" >&2; exit 2; }
+  printf '%s\n' "$line" >> "$credential_tmp"
+done
+chown root:root "$credential_tmp"; chmod 0600 "$credential_tmp"; mv -f "$credential_tmp" "$credential_overlay"
 install -o root -g root -m 0755 "$reverse_interlock_source" /usr/local/libexec/disdex-v96-refuse-while-v12-active
 for name in "${unit_names[@]}"; do
   install -o root -g root -m 0644 "$repo_root/ops/systemd/$name" "/etc/systemd/system/$name"
