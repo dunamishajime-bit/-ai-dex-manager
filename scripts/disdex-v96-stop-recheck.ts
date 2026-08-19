@@ -1,6 +1,8 @@
 import "dotenv/config";
 
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
@@ -14,12 +16,34 @@ const EPS = 1e-12;
 
 function numberEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
 
+type AsterCredentialName = "ASTER_FUTURES_BASE_URL" | "ASTER_USER_ADDRESS" | "ASTER_API_PRIVATE_KEY";
+const ASTER_CREDENTIAL_NAMES: AsterCredentialName[] = ["ASTER_FUTURES_BASE_URL", "ASTER_USER_ADDRESS", "ASTER_API_PRIVATE_KEY"];
+
+function systemdAsterCredentials(): Partial<Record<AsterCredentialName, string>> {
+    const dir = String(process.env.CREDENTIALS_DIRECTORY || "").trim();
+    if (!dir) return {};
+    let raw: string;
+    try { raw = readFileSync(join(dir, "aster-env"), "utf8"); } catch { return {}; }
+    const result: Partial<Record<AsterCredentialName, string>> = {};
+    for (const line of raw.split(/\r?\n/)) {
+        for (const name of ASTER_CREDENTIAL_NAMES) {
+            const prefix = `${name}=`;
+            if (!line.startsWith(prefix)) continue;
+            let value = line.slice(prefix.length).trim();
+            if (value.length >= 2 && ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) value = value.slice(1, -1);
+            if (value) result[name] = value;
+        }
+    }
+    return result;
+}
+
 async function main() {
     const v12 = resolveV12X1AllRuntime();
+    const systemdCredentials = systemdAsterCredentials();
     const client = new AsterV3Client({
-        baseUrl: process.env.ASTER_FUTURES_BASE_URL,
-        userAddress: process.env.ASTER_USER_ADDRESS,
-        privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
+        baseUrl: process.env.ASTER_FUTURES_BASE_URL?.trim() || systemdCredentials.ASTER_FUTURES_BASE_URL,
+        userAddress: process.env.ASTER_USER_ADDRESS?.trim() || systemdCredentials.ASTER_USER_ADDRESS,
+        privateKey: (process.env.ASTER_API_PRIVATE_KEY?.trim() || systemdCredentials.ASTER_API_PRIVATE_KEY) as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
         userAgent: "DisDex-V96-Stop-Recheck/1.0",
