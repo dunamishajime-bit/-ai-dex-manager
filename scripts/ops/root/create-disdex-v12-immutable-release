@@ -68,10 +68,12 @@ runuser -u deploy -- tar -xf "$archive" -C "$staging"
 # Inventory only committed extracted source, before node_modules/.next/markers
 # are introduced. This supports later inspection without pretending generated
 # build output is part of the Git tree.
+manifest_tmp="$build_root/.disdex-source-manifest-$sha-$$"
 (
   cd "$staging"
   find . -type f -print0 | sort -z | xargs -0 sha256sum
-) > "$staging/.disdex-release-source-files.sha256"
+) > "$manifest_tmp"
+mv "$manifest_tmp" "$staging/.disdex-release-source-files.sha256"
 chown deploy:deploy "$staging/.disdex-release-source-files.sha256"
 chmod 0600 "$staging/.disdex-release-source-files.sha256"
 printf '%s\n' "$sha" > "$staging/.disdex-release-sha"

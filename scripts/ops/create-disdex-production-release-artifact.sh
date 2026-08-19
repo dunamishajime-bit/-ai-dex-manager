@@ -21,10 +21,12 @@ mkdir -p "$out_dir"
 staging="$(mktemp -d)"
 trap 'rm -rf "$staging"' EXIT INT TERM HUP
 git -C "$repo" archive --format=tar "$sha" | tar -xf - -C "$staging"
+manifest_tmp="$out_dir/.disdex-source-manifest-$sha-$$"
 (
   cd "$staging"
   find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum
-) > "$staging/.disdex-release-source-files.sha256"
+) > "$manifest_tmp"
+mv "$manifest_tmp" "$staging/.disdex-release-source-files.sha256"
 printf '%s\n' "$sha" > "$staging/.disdex-release-sha"
 printf '%s\n' "$source_tree" > "$staging/.disdex-release-source-tree"
 
