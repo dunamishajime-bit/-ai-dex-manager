@@ -5,16 +5,24 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
+import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
+import { reconcileV12Protection } from "../lib/v12-resident-stop-lifecycle";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
 
 const V96_CORE_SYMBOLS = new Set(["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]);
 const EPS = 1e-12;
 
 function numberEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
+function actualSide(position: { quantity: number; positionSide: string }) {
+    if (position.positionSide === "LONG") return "LONG" as const;
+    if (position.positionSide === "SHORT") return "SHORT" as const;
+    return position.quantity < 0 ? "SHORT" as const : "LONG" as const;
+}
 
 type AsterCredentialName = "ASTER_FUTURES_BASE_URL" | "ASTER_USER_ADDRESS" | "ASTER_API_PRIVATE_KEY";
 const ASTER_CREDENTIAL_NAMES: AsterCredentialName[] = ["ASTER_FUTURES_BASE_URL", "ASTER_USER_ADDRESS", "ASTER_API_PRIVATE_KEY"];
@@ -64,7 +72,6 @@ async function main() {
     if (!risk.ok) throw new Error(`V96_STOP_RECHECK_SHARED_RISK_INVALID:${risk.reason}`);
     if (sharedKillSwitch.active) throw new Error(`V96_STOP_RECHECK_SHARED_KILL_SWITCH_ACTIVE:${sharedKillSwitch.reason || "UNSPECIFIED"}`);
     if (state.pending) throw new Error(`V96_STOP_RECHECK_V12_PENDING:${state.pending.clientOrderId}`);
-    if (state.active) throw new Error(`V96_STOP_RECHECK_V12_ALREADY_ACTIVE:${state.active.symbol}`);
     if (state.killSwitch?.active || state.manualReview) throw new Error(`V96_STOP_RECHECK_V12_MANUAL_REVIEW:${state.killSwitch?.reason || state.manualReview}`);
 
     const nonzero = positions.filter((row) => Math.abs(Number(row.positionAmt) || 0) > EPS);
@@ -77,8 +84,32 @@ async function main() {
     if (v96Positions.length) throw new Error(`V96_STOP_RECHECK_POSITION_REMAINS:${v96Positions.map((row) => `${row.symbol}:${row.positionAmt}`).join(",")}`);
     const v96Orders = openOrders.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
     if (v96Orders.length) throw new Error(`V96_STOP_RECHECK_ORDER_REMAINS:${v96Orders.map((row) => `${row.symbol}:${row.clientOrderId || row.orderId || "unknown"}`).join(",")}`);
-    const v12Orders = openOrders.filter((row) => String(row.clientOrderId || "").startsWith("v12-"));
-    if (v12Orders.length) throw new Error(`V96_STOP_RECHECK_V12_ORDER_PREEXISTS:${v12Orders.map((row) => row.clientOrderId).join(",")}`);
+    const adapter = new V12AsterLiveAdapter(client, {
+        maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
+        reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+        reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+    });
+    const actualPositions = await adapter.getPositions();
+    const activeV12Orders = (await adapter.listV12Orders()).filter((row) => ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(row.status || "").toUpperCase()));
+    let v12StateActive = false;
+    if (state.active) {
+        const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
+        if (actualV12.length !== 1) throw new Error(`V96_STOP_RECHECK_V12_ACTIVE_POSITION_COUNT_MISMATCH:${actualV12.length}`);
+        const actual = actualV12[0];
+        if (actual.symbol.toUpperCase() !== state.active.symbol.toUpperCase()) throw new Error("V96_STOP_RECHECK_V12_ACTIVE_POSITION_SYMBOL_MISMATCH");
+        if (actualSide(actual) !== state.active.side) throw new Error("V96_STOP_RECHECK_V12_ACTIVE_POSITION_SIDE_MISMATCH");
+        if (Math.abs(Math.abs(actual.quantity) - state.active.quantity) > Math.max(1e-8, state.active.quantity * 0.01)) throw new Error("V96_STOP_RECHECK_V12_ACTIVE_POSITION_QTY_MISMATCH");
+        const protection = await reconcileV12Protection(adapter, state.active.protection);
+        if (protection.manualReview) throw new Error(`V96_STOP_RECHECK_${protection.manualReview}`);
+        const allowed = new Set([state.active.protection.stopClientOrderId, state.active.protection.takeProfitClientOrderId].filter(Boolean));
+        const unknown = activeV12Orders.filter((row) => !allowed.has(row.clientOrderId));
+        if (unknown.length) throw new Error(`V96_STOP_RECHECK_V12_UNKNOWN_ACTIVE_ORDER:${unknown.map((row) => row.clientOrderId).join(",")}`);
+        v12StateActive = true;
+    } else {
+        const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
+        if (actualV12.length) throw new Error(`V96_STOP_RECHECK_V12_POSITION_ONLY_MISMATCH:${actualV12.map((row) => row.symbol).join(",")}`);
+        if (activeV12Orders.length) throw new Error(`V96_STOP_RECHECK_V12_ORDER_ONLY_MISMATCH:${activeV12Orders.map((row) => row.clientOrderId).join(",")}`);
+    }
 
     const lock = new FileAccountOrderLock(v12.lockPath || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
     const handle = await lock.acquire(`V96_STOP_RECHECK:${process.pid}:${randomUUID()}`);
@@ -91,7 +122,7 @@ async function main() {
         v96CorePositions: 0,
         v96CoreOpenOrders: 0,
         v12PreexistingOrders: 0,
-        v12StateActive: false,
+        v12StateActive,
         v12Pending: false,
         sharedKillSwitchActive: false,
         sharedRiskFresh: true,
