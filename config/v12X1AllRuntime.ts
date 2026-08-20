@@ -10,7 +10,8 @@ export const V12_X1_ALL = Object.freeze({
     venue: "ASTER_FUTURES_V3",
     timeframeHours: 2,
     inputTimeframeHours: 1,
-    multiplier: 1,
+    multiplier: 1.5,
+    maximumGross: 1.5,
     entryPolicy: "ALL" as const,
     maximumPositions: 1,
     leverage: 1,
@@ -58,7 +59,8 @@ export interface ResolvedV12Runtime {
     enabled: boolean;
     liveTradingEnabled: boolean;
     liveExecutionEnabled: boolean;
-    multiplier: 1;
+    multiplier: number;
+    maximumGross: number;
     lockPath?: string;
     statePath: string;
     riskPath: string;
@@ -73,7 +75,8 @@ export function resolveV12X1AllRuntime(env: Partial<NodeJS.ProcessEnv> = process
         enabled: boolEnv(env.V12_X1_ALL_ENABLED, V12_X1_ALL_RUNTIME.enabled),
         liveTradingEnabled: boolEnv(env.V12_X1_ALL_LIVE_TRADING_ENABLED, V12_X1_ALL_RUNTIME.liveTradingEnabled),
         liveExecutionEnabled: boolEnv(env.V12_X1_ALL_LIVE_EXECUTION_ENABLED, V12_X1_ALL_RUNTIME.liveExecutionEnabled),
-        multiplier: 1,
+        multiplier: V12_X1_ALL.multiplier,
+        maximumGross: V12_X1_ALL.maximumGross,
         lockPath: env.DISDEX_ACCOUNT_LOCK_PATH,
         statePath: env.V12_X1_ALL_STATE_PATH || ".runtime-state/v12-x1-all/runner.json",
         riskPath: env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || ".runtime-state/shared/crypto-daily-risk.json",
