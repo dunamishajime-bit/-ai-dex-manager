@@ -27,7 +27,7 @@ PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
 ReadOnlyPaths=/home/deploy/disdex-trading/releases /home/deploy/ai-dex-manager-v96-paper/.runtime-state
-ReadWritePaths=/var/lib/disdex/v12-x1-all /var/lib/disdex/shared
+ReadWritePaths=/var/lib/disdex/v12-x1-all /var/lib/disdex/shared /home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/margin-risk
 UMask=0077
 
 [Install]
