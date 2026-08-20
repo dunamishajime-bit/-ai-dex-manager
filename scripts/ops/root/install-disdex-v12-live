@@ -54,6 +54,7 @@ required=(
   "$repo_root/scripts/ops/root/disdex-v12-live-status-report"
   "$reverse_interlock_source"
   "$repo_root/scripts/disdex-v12-live-readiness.ts"
+  "$repo_root/scripts/disdex-v12-stale-local-state-recovery.ts"
   "$repo_root/scripts/disdex-v12-stale-kill-switch-recovery.ts"
   "$repo_root/scripts/disdex-v12-runtime-status.ts"
   "$repo_root/scripts/disdex-pengu-v2-live-readiness.ts"
@@ -136,6 +137,7 @@ bash -n "$reverse_interlock_source"
   ./node_modules/.bin/tsx scripts/v12-resident-stop-selftest.ts
   ./node_modules/.bin/tsx scripts/disdex-shared-crypto-risk-selftest.ts
   ./node_modules/.bin/tsx scripts/v12-live-execution-selftest.ts
+  ./node_modules/.bin/tsx scripts/disdex-v12-stale-local-state-recovery.ts --self-test
   ./node_modules/.bin/tsx scripts/disdex-v12-stale-kill-switch-recovery.ts --self-test
 )
 PYTHONPATH="$repo_root/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 -m py_compile \

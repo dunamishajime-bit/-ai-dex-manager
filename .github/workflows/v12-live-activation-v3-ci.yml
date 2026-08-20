@@ -8,6 +8,7 @@ on:
       - 'scripts/ops/disdex-v12-current-release-delta-audit-v2.sh'
       - 'scripts/ops/root/disdex-v96-to-v12-live-migrate-final'
       - 'scripts/ops/root/install-disdex-v12-live'
+      - 'scripts/disdex-v12-stale-local-state-recovery.ts'
       - '.github/workflows/v12-live-activation-v3-ci.yml'
 
 permissions:
@@ -27,7 +28,9 @@ jobs:
           audit=scripts/ops/disdex-v12-current-release-delta-audit-v2.sh
           migrate=scripts/ops/root/disdex-v96-to-v12-live-migrate-final
           install=scripts/ops/root/install-disdex-v12-live
+          recovery=scripts/disdex-v12-stale-local-state-recovery.ts
           for script in "$activate" "$audit" "$migrate" "$install"; do bash -n "$script"; done
+          test -f "$recovery"
           grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' "$activate"
           grep -Fq 'git -C "$source_repo" archive "$sha"' "$activate"
           grep -Fq 'disdex-v12-current-release-delta-audit-v2.sh' "$activate"

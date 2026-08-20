@@ -55,7 +55,7 @@ runuser -u deploy -- git -C "$source_repo" archive --format=tar "$candidate_sha"
   find . -type f -print | sed 's#^\./##' | while IFS= read -r rel; do
     case "$rel" in
       node_modules/*|.next/*|.git/*|.runtime-state/*|.codex-tmp/*|coverage/*|dist/*|.cache/*|tmp/*|logs/*) continue ;;
-      .disdex-release-*|*.log|*.pid|*.sock|*/__pycache__/*|__pycache__/*|*.pyc|*.pre-*) continue ;;
+      .disdex-release-*|.disdex-ci-artifact-sha256|.disdex-ci-build-attestation|*.log|*.pid|*.sock|*/__pycache__/*|__pycache__/*|*.pyc|*.pre-*) continue ;;
       ops/review/v12-vps-delta-reviewed.tsv) continue ;;
       .env|.env.local|.env.production|.env.development|.env.test|*.pem|*.key|*private-key*|*secret*) continue ;;
     esac

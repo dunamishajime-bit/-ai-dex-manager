@@ -20,6 +20,32 @@ artifact_tag="disdex-artifact-$sha"
 artifact_name="disdex-release-$sha.tar.gz"
 artifact_base="https://github.com/dunamishajime-bit/-ai-dex-manager/releases/download/$artifact_tag"
 
+recover_stale_local_state() {
+  local recovery_script="$release/scripts/disdex-v12-stale-local-state-recovery.ts"
+  local request_id="v12-h2-recovery-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  [[ -f "$recovery_script" && ! -L "$recovery_script" ]] || {
+    printf 'V12_PARTIAL_RESUME_LOCAL_RECOVERY_SCRIPT_MISSING\n' >&2
+    return 2
+  }
+  for env_file in \
+    /etc/disdex/disdex-v13d-v11eq-v96.env \
+    /etc/disdex/disdex-v12-pengu-v2-v52.env \
+    /etc/disdex/disdex-v12-x1-all.env; do
+    [[ -f "$env_file" && ! -L "$env_file" ]] || {
+      printf 'V12_PARTIAL_RESUME_LOCAL_RECOVERY_ENV_MISSING path=%s\n' "$env_file" >&2
+      return 2
+    }
+  done
+  set -a
+  source /etc/disdex/disdex-v13d-v11eq-v96.env
+  source /etc/disdex/disdex-v12-pengu-v2-v52.env
+  source /etc/disdex/disdex-v12-x1-all.env
+  set +a
+  runuser -u deploy --preserve-environment -- \
+    "$release/node_modules/.bin/tsx" "$recovery_script" "$sha" "$request_id"
+  printf 'V12_PARTIAL_LOCAL_STATE_RECOVERY_PASS requestId=%s ordersSent=false positionChangesSent=false\n' "$request_id"
+}
+
 safe_release_gc() {
   local root="/home/deploy/disdex-trading/releases" current_path dir name marker marker_sha
   current_path="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
@@ -168,7 +194,6 @@ quiesce_previous_partial_activation() {
   run_previous_readonly "disdex-shared-crypto-risk-refresh@$previous_sha.service" SHARED_RISK_PRE_QUIESCE
   run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_PRE_QUIESCE
   run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_PRE_QUIESCE
-  run_previous_readonly "disdex-v96-to-v12-migration-preflight@$previous_sha.service" ACCOUNT_PRE_QUIESCE
 
   systemctl stop "$previous_pengu" "$previous_v52"
   for unit in "$previous_pengu" "$previous_v52"; do
@@ -177,6 +202,7 @@ quiesce_previous_partial_activation() {
   done
   run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_POST_QUIESCE
   run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_POST_QUIESCE
+  recover_stale_local_state
   run_previous_readonly "disdex-v96-to-v12-migration-preflight@$previous_sha.service" ACCOUNT_POST_QUIESCE
 
   systemctl stop "$previous_target" "$previous_margin" "$previous_risk"
@@ -227,7 +253,8 @@ fi
 for required in \
   scripts/ops/root/install-disdex-v12-live \
   scripts/ops/root/disdex-v96-to-v12-live-migrate-final \
-  scripts/ops/root/disdex-v12-live-status-report; do
+  scripts/ops/root/disdex-v12-live-status-report \
+  scripts/disdex-v12-stale-local-state-recovery.ts; do
   [[ -f "$release/$required" && ! -L "$release/$required" ]] || { printf 'V12_ACTIVATE_V3_RELEASE_TOOL_MISSING path=%s\n' "$required" >&2; exit 4; }
 done
 
