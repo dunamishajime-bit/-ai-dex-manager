@@ -19,6 +19,7 @@ import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v
  * Any state/reconciliation mismatch remains fail-closed.
  */
 const ALLOWLISTED_REASON = "V12 hourly history insufficient for BTC: 0";
+const PREORDER_MARGIN_GUARD_REASON_PREFIX = "Fresh V96/V52 pre-order Margin Guard blocked exposure increase:";
 const RECOVERY_REQUEST_PREFIX = "v12-h2-recovery-";
 const EPS = 1e-12;
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((base) => `${base}USDT`));
@@ -49,6 +50,25 @@ function isLegacyOddHourState(state: V12X1AllRunnerState) {
         && state.killSwitch.reason === ALLOWLISTED_REASON
         && !state.active
         && !state.pending;
+}
+
+function isPreorderMarginGuardState(state: V12X1AllRunnerState) {
+    return state.mode === "LIVE"
+        && typeof state.manualReview === "string"
+        && state.manualReview.startsWith(PREORDER_MARGIN_GUARD_REASON_PREFIX)
+        && state.killSwitch?.active === true
+        && state.killSwitch.reason === state.manualReview
+        && !state.active
+        && state.pending?.action === "ENTRY"
+        && Number.isFinite(state.pending.signalTs)
+        && Number.isFinite(state.pending.createdAt)
+        && !!state.pending.clientOrderId
+        && !!state.pending.idempotencyKey;
+}
+
+function isRecoverableState(state: V12X1AllRunnerState, allowPreorderMarginGuardRecovery: boolean) {
+    return isLegacyOddHourState(state)
+        || (allowPreorderMarginGuardRecovery && isPreorderMarginGuardState(state));
 }
 
 function nonzeroPositions(rows: Awaited<ReturnType<AsterV3Client["getPositions"]>>) {
@@ -103,6 +123,26 @@ async function main() {
             manualReview: ALLOWLISTED_REASON,
             killSwitch: { active: true, reason: ALLOWLISTED_REASON, trippedAt: 1 },
         }), true);
+        const preorderTestState: V12X1AllRunnerState = {
+            schema: "v12-x1-all-runner-state/v1",
+            strategyId: "V12_X1.00_ALL",
+            mode: "LIVE",
+            updatedAt: 1,
+            manualReview: PREORDER_MARGIN_GUARD_REASON_PREFIX + " test",
+            killSwitch: { active: true, reason: PREORDER_MARGIN_GUARD_REASON_PREFIX + " test", trippedAt: 1 },
+            pending: {
+                idempotencyKey: "v12-entry-test",
+                action: "ENTRY",
+                clientOrderId: "v12-entry-test",
+                symbol: "INJUSDT",
+                side: "LONG",
+                quantity: 1,
+                signalTs: 1,
+                createdAt: 1,
+            },
+        };
+        assert.equal(isPreorderMarginGuardState(preorderTestState), true);
+        assert.equal(isRecoverableState(preorderTestState, true), true);
         assertRequestId("v12-h2-recovery-20260820T000000Z-1234");
         console.log("V12 stale local state recovery self-test: PASS");
         return;
@@ -110,6 +150,7 @@ async function main() {
 
     const candidateSha = String(process.argv[2] || "").trim();
     const requestId = String(process.argv[3] || "").trim();
+    const allowPreorderMarginGuardRecovery = process.argv.includes("--allow-preorder-margin-guard-recovery");
     if (!/^[0-9a-f]{40}$/.test(candidateSha)) throw new Error("V12_LOCAL_RECOVERY_EXACT_SHA_REQUIRED");
     assertRequestId(requestId);
 
@@ -125,7 +166,7 @@ async function main() {
         console.log(JSON.stringify({ status: "V12_LOCAL_STATE_ALREADY_CLEAN", candidateSha, requestId, ordersSent: false, positionChangesSent: false }));
         return;
     }
-    if (!isLegacyOddHourState(state)) {
+    if (!isRecoverableState(state, allowPreorderMarginGuardRecovery)) {
         throw new Error(`V12_LOCAL_RECOVERY_REASON_NOT_ALLOWLISTED:${state.killSwitch?.reason || state.manualReview || "UNSPECIFIED"}`);
     }
 
@@ -177,7 +218,7 @@ async function main() {
 
         const currentBytes = await readFile(statePath);
         const currentState = await stateStore.load();
-        if (!isLegacyOddHourState(currentState)) throw new Error("V12_LOCAL_RECOVERY_STATE_CHANGED_DURING_RECONCILIATION");
+        if (!isRecoverableState(currentState, allowPreorderMarginGuardRecovery)) throw new Error("V12_LOCAL_RECOVERY_STATE_CHANGED_DURING_RECONCILIATION");
         const archived = await archiveAndReset(statePath, currentBytes, requestId, currentState);
         const after = await stateStore.load();
         if (after.killSwitch?.active || after.manualReview || after.active || after.pending) {
