@@ -20,7 +20,7 @@ async function main() {
     const delay = createInterruptibleDelay(); let stopping = false; const stop = () => { stopping = true; delay.interrupt(); };
     process.on("SIGINT", stop); process.on("SIGTERM", stop);
     do {
-        const state = await refreshSharedCryptoDailyRisk({ client, path, maximumLossPct: 5 });
+        const state = await refreshSharedCryptoDailyRisk({ client, path, maximumLossPct: numberEnv("DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT", 7.5) });
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), component: "shared-crypto-risk", lossPct: state.lossPct, maximumLossPct: state.maximumLossPct, tripped: state.tripped, realizedPnl: state.realizedPnl, unrealizedPnl: state.unrealizedPnl, fees: state.fees, funding: state.funding }));
         if (!daemon || stopping) break; await delay.wait(intervalMs);
     } while (!stopping);
