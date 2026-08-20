@@ -2,10 +2,10 @@ import { classifyAsterSymbol, type AsterPortfolioSleeve } from "@/lib/disdex-ast
 
 export const V12_PENGU_V52_PORTFOLIO_POLICY = Object.freeze({
     priority: "STOCK_FIRST" as const,
-    v12Multiplier: 1,
-    v12MaximumGross: 1,
+    v12Multiplier: 1.5,
+    v12MaximumGross: 1.5,
     penguMaximumGross: 0.75,
-    cryptoGrossCap: 1.5,
+    cryptoGrossCap: 2.0,
     stockGrossCap: 1.5,
     totalGrossCap: 2.5,
     maximumV12Positions: 1,
@@ -37,7 +37,7 @@ export function planUnifiedPortfolio(intents: PortfolioIntent[], active: ActiveP
         if (!classification.tradable || classification.sleeve !== intent.sleeve) { rejected.push({ intent, reason: "UNKNOWN_OR_SLEEVE_MISMATCH" }); continue; }
         if (!(intent.gross > 0 && intent.notionalUsd >= 0 && Number.isFinite(intent.signalTs))) { rejected.push({ intent, reason: "INVALID_INTENT" }); continue; }
         if (intent.sleeve === "V12" && occupiedV12) { rejected.push({ intent, reason: "V12_SLOT_OCCUPIED_NO_PREEMPTION" }); continue; }
-        const sleeveCap = intent.sleeve === "V12" ? 1 : intent.sleeve === "PENGU_DUAL_LS_V2" ? 0.75 : 1;
+        const sleeveCap = intent.sleeve === "V12" ? V12_PENGU_V52_PORTFOLIO_POLICY.v12MaximumGross : intent.sleeve === "PENGU_DUAL_LS_V2" ? V12_PENGU_V52_PORTFOLIO_POLICY.penguMaximumGross : 1;
         const gross = Math.min(intent.gross, sleeveCap);
         const isStock = intent.sleeve === "V11_EQ" || intent.sleeve === "V50_POST_OPEN_BASIS";
         const remaining = Math.min(isStock ? V12_PENGU_V52_PORTFOLIO_POLICY.stockGrossCap - stockGross : V12_PENGU_V52_PORTFOLIO_POLICY.cryptoGrossCap - cryptoGross, V12_PENGU_V52_PORTFOLIO_POLICY.totalGrossCap - cryptoGross - stockGross);
