@@ -36,6 +36,17 @@ function validateLeg(order: ResidentOrderView | undefined, input: { id: string; 
     return true;
 }
 
+// Aster rejects a replacement STOP when the trigger is already on the
+// triggerable side of the live market (for example, a confirmed bar close can
+// lag a fast move).  This is an execution-timing condition, not a protection
+// failure: the previously acknowledged STOP remains active.  Keep unknown
+// errors fail-closed, but allow this specific rejection to be retried on the
+// next confirmed bar without cancelling the old protection first.
+function isImmediateTriggerRejection(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return /immediately\s+trigger/i.test(message) || /would\s+immediately\s+trigger/i.test(message);
+}
+
 async function verifyProtection(adapter: ResidentStopAdapter, state: V12StopState, stopId: string, tpId: string) {
     const open = await adapter.openOrders(state.symbol); const side = exitSide(state.side);
     const stop = open.find((order) => order.clientOrderId === stopId); const tp = open.find((order) => order.clientOrderId === tpId);
@@ -130,6 +141,9 @@ export async function applyV12TrailingStop(adapter: ResidentStopAdapter, state: 
         return { ...state, peakOrTrough: plan.nextPeakOrTrough, lastAckStop: plan.stopPrice, stopClientOrderId: plan.clientOrderId };
     } catch (error) {
         try { if (plan.clientOrderId !== state.stopClientOrderId) await adapter.cancel(plan.clientOrderId); } catch { /* old STOP remains authoritative */ }
+        if (isImmediateTriggerRejection(error)) {
+            return { ...state, peakOrTrough: plan.nextPeakOrTrough };
+        }
         return { ...state, peakOrTrough: plan.nextPeakOrTrough, manualReview: `TRAILING_STOP_UPDATE_FAILED:${error instanceof Error ? error.message : String(error)}` };
     }
 }

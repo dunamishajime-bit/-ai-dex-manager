@@ -13,6 +13,7 @@ type TestAdapter = ResidentStopAdapter & {
     flattened: number;
     orders: Map<string, ResidentOrderView>;
     rejectNextStop: boolean;
+    immediateTriggerNextStop: boolean;
     rejectAllProtection: boolean;
     rejectNextTp: boolean;
 };
@@ -23,12 +24,17 @@ function adapter(): TestAdapter {
         flattened: 0,
         orders: new Map<string, ResidentOrderView>(),
         rejectNextStop: false,
+        immediateTriggerNextStop: false,
         rejectAllProtection: false,
         rejectNextTp: false,
     } as TestAdapter;
     value.normalizeStopPrice = async (_symbol, requested) => ({ price: Math.round(requested * 2) / 2 });
     value.placeStopMarket = async (input) => {
         value.events.push(`place-stop:${input.clientOrderId}`);
+        if (value.immediateTriggerNextStop) {
+            value.immediateTriggerNextStop = false;
+            throw new Error("Order would immediately trigger.");
+        }
         if (value.rejectAllProtection || value.rejectNextStop) {
             value.rejectNextStop = false;
             return { acknowledged: false };
@@ -135,6 +141,20 @@ async function main() {
     assert.ok(failedTrail.manualReview?.startsWith("TRAILING_STOP_UPDATE_FAILED:"));
     assert.equal(failure.orders.get(failureOldStop)?.status, "NEW", "old confirmed STOP must remain active if the replacement fails");
     assert.equal(failure.events.includes(`cancel:${failureOldStop}`), false, "old STOP must never be cancelled first");
+
+    // A fast live move can make a replacement trigger immediately while the
+    // previously acknowledged STOP is still valid.  Keep that old STOP and
+    // continue the daemon; unknown failures remain manual-review above.
+    const immediate = adapter();
+    const immediateInstalled = await installV12Protection(immediate, state);
+    const immediateOldStop = immediateInstalled.stopClientOrderId!;
+    immediate.events.length = 0;
+    immediate.immediateTriggerNextStop = true;
+    const immediateSkipped = await updateV12TrailingStop(immediate, immediateInstalled, 110);
+    assert.equal(immediateSkipped.manualReview, undefined);
+    assert.equal(immediateSkipped.stopClientOrderId, immediateOldStop);
+    assert.equal(immediate.orders.get(immediateOldStop)?.status, "NEW");
+    assert.equal(immediate.events.includes(`cancel:${immediateOldStop}`), false);
 
     const malformed = adapter();
     const malformedInstalled = await installV12Protection(malformed, state);
