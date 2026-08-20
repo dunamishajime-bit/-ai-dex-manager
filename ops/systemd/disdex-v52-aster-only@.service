@@ -12,7 +12,7 @@ WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 Environment=NODE_ENV=production
-Environment=DISDEX_V52_CRYPTO_GROSS_CAP=2.0
+Environment=DISDEX_V52_CRYPTO_GROSS_CAP=1.5
 Environment=DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
 Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
