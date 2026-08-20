@@ -44,7 +44,7 @@ recover_stale_local_state() {
   (
     cd "$release"
     runuser -u deploy --preserve-environment -- \
-      "$release/node_modules/.bin/tsx" "$recovery_script" "$sha" "$request_id"
+      "$release/node_modules/.bin/tsx" "$recovery_script" "$sha" "$request_id" --allow-preorder-margin-guard-recovery
   )
   printf 'V12_PARTIAL_LOCAL_STATE_RECOVERY_PASS requestId=%s ordersSent=false positionChangesSent=false\n' "$request_id"
 }
