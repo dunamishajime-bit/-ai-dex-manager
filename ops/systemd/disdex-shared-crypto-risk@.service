@@ -12,6 +12,7 @@ EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=-/etc/disdex/disdex-shared-crypto-risk.env
 Environment=NODE_ENV=production
+Environment=DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-shared-crypto-risk-writer.ts --daemon

@@ -117,8 +117,8 @@ jobs:
           grep -Fq 'Environment=DISDEX_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/crypto-v96' ops/systemd/disdex-v96-to-v12-migration-preflight@.service
           grep -Fq 'if (( ${#active_old[@]} == 0 && ${#stale_risk_units[@]} > 0 )); then' "$migrate"
           grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
-          grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5' ops/env/disdex-v12-pengu-v2-v52.env.example
-          grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.5' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' \
             "$activate" \
             "$audit" \

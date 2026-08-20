@@ -56,7 +56,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.self_test:
         now = int(dt.datetime.now(dt.timezone.utc).timestamp() * 1000)
-        state = {"schema": SCHEMA, "accountScope": "ASTER_FUTURES", "utcDay": dt.datetime.fromtimestamp(now / 1000, tz=dt.timezone.utc).date().isoformat(), "strategyIds": list(STRATEGIES), "lossPct": 0.0, "maximumLossPct": 5.0, "tripped": False, "updatedAt": now}
+        state = {"schema": SCHEMA, "accountScope": "ASTER_FUTURES", "utcDay": dt.datetime.fromtimestamp(now / 1000, tz=dt.timezone.utc).date().isoformat(), "strategyIds": list(STRATEGIES), "lossPct": 0.0, "maximumLossPct": 7.5, "tripped": False, "updatedAt": now}
         assert validate_shared_crypto_daily_risk(state, now)[0]
         stale = {**state, "updatedAt": now - 100_000}
         assert validate_shared_crypto_daily_risk(stale, now)[1] == "STALE"

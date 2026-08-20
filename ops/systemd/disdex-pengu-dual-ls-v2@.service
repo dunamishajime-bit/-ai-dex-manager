@@ -12,6 +12,10 @@ WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 Environment=NODE_ENV=production
+Environment=PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=2.0
+Environment=PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.0
+Environment=PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5
+Environment=DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon

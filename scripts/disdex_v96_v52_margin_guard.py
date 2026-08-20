@@ -18,7 +18,7 @@ from disdex_v96_v52_margin_risk_policy import (
 )
 
 STRATEGY_ID = "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
-MANAGED_CRYPTO_SYMBOLS = ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT")
+MANAGED_CRYPTO_SYMBOLS = ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT")
 MANAGED_STOCK_SYMBOLS = tuple(base.ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = MANAGED_CRYPTO_SYMBOLS + MANAGED_STOCK_SYMBOLS
 REQUIRED_LEVERAGE = 5
@@ -126,6 +126,26 @@ class MarginGuard:
             }
             for symbol in MANAGED_SYMBOLS
         ]
+
+    def grandfathered_v12_symbols(self) -> set[str]:
+        """Return only a reconciled position from the frozen V12 universe.
+        This migration exception admits no new symbol and never sends orders."""
+        raw_flag = str(os.getenv("V12_LIVE_GRANDFATHERED_POSITION_ALLOWED", "")).strip().lower()
+        if raw_flag not in {"1", "true", "yes", "on"}:
+            return set()
+        state_path = Path(os.getenv("V12_X1_ALL_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"))
+        state = base.read_json(state_path, {}) or {}
+        if not isinstance(state, dict) or state.get("strategyId") != "V12_X1.00_ALL" or state.get("mode") != "LIVE":
+            return set()
+        active = state.get("active")
+        protection = active.get("protection") if isinstance(active, dict) else None
+        symbol = str(active.get("symbol") or "").upper() if isinstance(active, dict) else ""
+        v12_universe = {"BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT"}
+        if symbol not in v12_universe or not isinstance(protection, dict):
+            return set()
+        if not protection.get("stopClientOrderId") or not protection.get("takeProfitClientOrderId"):
+            return set()
+        return {symbol}
 
     def write_state(self, payload: dict) -> None:
         self.state_root.mkdir(parents=True, exist_ok=True)
@@ -274,7 +294,7 @@ class MarginGuard:
         account = self.account_info()
         positions = self.positions()
         configuration = verify_managed_configuration(positions)
-        snapshot = build_margin_risk_snapshot(account, positions, MANAGED_SYMBOLS)
+        snapshot = build_margin_risk_snapshot(account, positions, MANAGED_SYMBOLS, self.grandfathered_v12_symbols())
         decision = classify_margin_risk(snapshot, str(self.state.get("stage") or "HEALTHY"))
         now = base.now_ms()
         payload = {

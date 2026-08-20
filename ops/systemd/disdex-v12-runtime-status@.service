@@ -13,6 +13,7 @@ EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=/etc/disdex/disdex-v12-x1-all.env
 Environment=NODE_ENV=production
+Environment=V12_LIVE_GRANDFATHERED_POSITION_ALLOWED=true
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-v12-runtime-status.ts
 NoNewPrivileges=true

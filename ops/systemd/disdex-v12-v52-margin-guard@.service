@@ -11,6 +11,8 @@ WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 Environment=NODE_ENV=production
+Environment=V12_LIVE_GRANDFATHERED_POSITION_ALLOWED=true
+Environment=V12_X1_ALL_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
 Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha

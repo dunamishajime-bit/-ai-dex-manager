@@ -15,8 +15,10 @@ assert.equal(resampleV12H1ToH2(oddStartH1).length, 2);
 assert.equal(resolveV12X1AllRuntime({}).mode, "SHADOW");
 assert.equal(resolveV12X1AllRuntime({}).enabled, false);
 assert.equal(V12_X1_ALL.multiplier, 1);
+assert.equal(V12_X1_ALL.grossMultiplier, 1.5);
+assert.equal(V12_X1_ALL.maximumGross, 1.5);
 const sized = sizeV12Position(1000, 100, 2, "LONG");
-assert.ok(sized.requestedGross > 0 && sized.requestedGross <= 1);
+assert.ok(sized.requestedGross > 0 && sized.requestedGross <= 1.5);
 const levels = protectiveLevels(100, 2, "LONG");
 assert.ok(levels.initialStop < 100 && levels.takeProfit > 100);
 assert.equal(classifyAsterSymbol("AVAXUSDT").sleeve, "V12");
@@ -30,7 +32,7 @@ const completeRisk = buildSharedCryptoDailyRiskState({
     utcDay: new Date(now).toISOString().slice(0, 10),
     strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL"],
     lossPct: 0,
-    maximumLossPct: 5,
+    maximumLossPct: 7.5,
     tripped: false,
     updatedAt: now,
     realizedPnl: 10,
