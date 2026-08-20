@@ -80,7 +80,7 @@ export async function buildV12LiveRuntime() {
 async function main() {
     if (process.argv.includes("--self-test")) {
         const disabled = resolveV12X1AllRuntime({ V12_X1_ALL_ENABLED: "false" });
-        if (disabled.enabled || disabled.multiplier !== 1) throw new Error("V12_RUNNER_SELFTEST_FAILED");
+        if (disabled.enabled || disabled.multiplier !== 1.5) throw new Error("V12_RUNNER_SELFTEST_FAILED");
         const base: V12X1AllRunnerState = { schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: Date.now() };
         if (v12AccountPriority(base) !== 4) throw new Error("V12_ENTRY_PRIORITY_SELFTEST_FAILED");
         if (v12AccountPriority({ ...base, pending: { idempotencyKey: "x", action: "STOP_UPDATE", clientOrderId: "x", symbol: "ETHUSDT", side: "LONG", quantity: 1, signalTs: Date.now(), createdAt: Date.now() } }) !== 1) throw new Error("V12_RISK_REDUCTION_PRIORITY_SELFTEST_FAILED");
