@@ -20,6 +20,7 @@ import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v
  */
 const ALLOWLISTED_REASON = "V12 hourly history insufficient for BTC: 0";
 const PREORDER_MARGIN_GUARD_REASON_PREFIX = "Fresh V96/V52 pre-order Margin Guard blocked exposure increase:";
+const IMMEDIATE_TRIGGER_TRAILING_REASON = "TRAILING_STOP_UPDATE_FAILED:Order would immediately trigger.";
 const RECOVERY_REQUEST_PREFIX = "v12-h2-recovery-";
 const EPS = 1e-12;
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((base) => `${base}USDT`));
@@ -66,9 +67,22 @@ function isPreorderMarginGuardState(state: V12X1AllRunnerState) {
         && !!state.pending.idempotencyKey;
 }
 
+function isImmediateTriggerTrailingState(state: V12X1AllRunnerState) {
+    return state.mode === "LIVE"
+        && state.manualReview === IMMEDIATE_TRIGGER_TRAILING_REASON
+        && state.killSwitch?.active === true
+        && state.killSwitch.reason === IMMEDIATE_TRIGGER_TRAILING_REASON
+        && !!state.active
+        && state.pending?.action === "STOP_UPDATE"
+        && !!state.pending.previousStopClientOrderId
+        && !!state.pending.positionId
+        && state.pending.positionId === state.active.positionId;
+}
+
 function isRecoverableState(state: V12X1AllRunnerState, allowPreorderMarginGuardRecovery: boolean) {
     return isLegacyOddHourState(state)
-        || (allowPreorderMarginGuardRecovery && isPreorderMarginGuardState(state));
+        || (allowPreorderMarginGuardRecovery && isPreorderMarginGuardState(state))
+        || isImmediateTriggerTrailingState(state);
 }
 
 function nonzeroPositions(rows: Awaited<ReturnType<AsterV3Client["getPositions"]>>) {
@@ -112,6 +126,58 @@ async function archiveAndReset(statePath: string, stateBytes: Buffer, requestId:
     return { archivePath, previousUpdatedAt: state.updatedAt };
 }
 
+async function archiveAndRepairActive(statePath: string, stateBytes: Buffer, requestId: string, state: V12X1AllRunnerState) {
+    const stateDir = dirname(statePath);
+    const archiveDir = resolve(stateDir, "recovery-archive");
+    await mkdir(archiveDir, { recursive: true, mode: 0o700 });
+    const archivePath = resolve(archiveDir, `${new Date().toISOString().replace(/[:.]/g, "-")}-${requestId}.json`);
+    await writeFile(archivePath, stateBytes, { flag: "wx", mode: 0o600 });
+
+    const repaired: V12X1AllRunnerState = {
+        ...state,
+        updatedAt: Date.now(),
+        manualReview: undefined,
+        killSwitch: undefined,
+        pending: undefined,
+    };
+    const temporary = `${statePath}.recovery.${process.pid}.${randomUUID()}.tmp`;
+    try {
+        await writeFile(temporary, `${JSON.stringify(repaired, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        await rename(temporary, statePath);
+    } catch (error) {
+        await writeFile(statePath, stateBytes, { encoding: "utf8", mode: 0o600 }).catch(() => undefined);
+        throw error;
+    }
+    return { archivePath, previousUpdatedAt: state.updatedAt };
+}
+
+function activePositionMatches(row: unknown, active: NonNullable<V12X1AllRunnerState["active"]>) {
+    const value = row as Record<string, unknown>;
+    const quantity = Number(value.positionAmt);
+    const actualSide = quantity >= 0 ? "LONG" : "SHORT";
+    return String(value.symbol || "").toUpperCase() === active.symbol
+        && actualSide === active.side
+        && Math.abs(Math.abs(quantity) - active.quantity) <= Math.max(1e-8, active.quantity * 0.001);
+}
+
+function protectionOrdersMatch(openOrders: unknown[], active: NonNullable<V12X1AllRunnerState["active"]>) {
+    const expected = active.protection;
+    const closeSide = active.side === "LONG" ? "SELL" : "BUY";
+    const v12Orders = openOrders.map((row) => row as Record<string, unknown>).filter((order) => String(order.symbol || "").toUpperCase() === active.symbol && String(order.clientOrderId || "").startsWith("v12-"));
+    if (v12Orders.length !== 2) return false;
+    const activeStatuses = new Set(["NEW", "PARTIALLY_FILLED", "PENDING_NEW"]);
+    const matches = (clientOrderId: string, type: string, stopPrice: number) => {
+        const order = v12Orders.find((row) => String(row.clientOrderId || "") === clientOrderId);
+        if (!order || !activeStatuses.has(String(order.status || "").toUpperCase())) return false;
+        if (String(order.type || "").toUpperCase() !== type || String(order.side || "").toUpperCase() !== closeSide || order.reduceOnly !== true) return false;
+        const quantity = Number(order.origQty); const trigger = Number(order.stopPrice);
+        return Math.abs(quantity - active.quantity) <= Math.max(1e-8, active.quantity * 0.001)
+            && Number.isFinite(trigger) && Math.abs(trigger - stopPrice) <= Math.max(1e-8, Math.abs(stopPrice) * 1e-8);
+    };
+    return matches(expected.stopClientOrderId || "", "STOP_MARKET", expected.lastAckStop)
+        && matches(expected.takeProfitClientOrderId || "", "TAKE_PROFIT_MARKET", expected.takeProfit);
+}
+
 async function main() {
     if (process.argv.includes("--self-test")) {
         assert.equal(ALLOWLISTED_REASON, "V12 hourly history insufficient for BTC: 0");
@@ -143,6 +209,22 @@ async function main() {
         };
         assert.equal(isPreorderMarginGuardState(preorderTestState), true);
         assert.equal(isRecoverableState(preorderTestState, true), true);
+        const trailingTestState: V12X1AllRunnerState = {
+            schema: "v12-x1-all-runner-state/v1",
+            strategyId: "V12_X1.00_ALL",
+            mode: "LIVE",
+            updatedAt: 1,
+            manualReview: IMMEDIATE_TRIGGER_TRAILING_REASON,
+            killSwitch: { active: true, reason: IMMEDIATE_TRIGGER_TRAILING_REASON, trippedAt: 1 },
+            active: {
+                symbol: "INJUSDT", side: "LONG", quantity: 1, gross: 0.5, positionId: "p1", entryPrice: 10,
+                atrAtEntry: 1, entrySignalTs: 1, holdingBars: 1, peakPrice: 10, troughPrice: 10,
+                protection: { strategyId: "V12_X1.00_ALL", symbol: "INJUSDT", side: "LONG", positionId: "p1", quantity: 1, entryPrice: 10, atrAtEntry: 1, initialStop: 8, lastAckStop: 8, takeProfit: 12, peakOrTrough: 10, stopClientOrderId: "v12-stop-old", takeProfitClientOrderId: "v12-tp-old" },
+            },
+            pending: { idempotencyKey: "v12-stop-new", action: "STOP_UPDATE", clientOrderId: "v12-stop-new", symbol: "INJUSDT", side: "LONG", quantity: 1, signalTs: 1, createdAt: 1, positionId: "p1", stopPrice: 9, previousStopClientOrderId: "v12-stop-old", nextPeakOrTrough: 10 },
+        };
+        assert.equal(isImmediateTriggerTrailingState(trailingTestState), true);
+        assert.equal(isRecoverableState(trailingTestState, false), true);
         assertRequestId("v12-h2-recovery-20260820T000000Z-1234");
         console.log("V12 stale local state recovery self-test: PASS");
         return;
@@ -209,11 +291,45 @@ async function main() {
         const unknownPositions = nonzero.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
         if (unknownPositions.length) throw new Error(`V12_LOCAL_RECOVERY_UNKNOWN_NONZERO_POSITION:${unknownPositions.map((row) => row.symbol).join(",")}`);
         const v12Positions = nonzero.filter((row) => V12_SYMBOLS.has(String(row.symbol).toUpperCase()));
-        if (v12Positions.length) throw new Error(`V12_LOCAL_RECOVERY_V12_POSITION_PRESENT:${v12Positions.map((row) => row.symbol).join(",")}`);
 
         const unknownOrders = openOrders.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
         if (unknownOrders.length) throw new Error(`V12_LOCAL_RECOVERY_UNKNOWN_OPEN_ORDER:${unknownOrders.map((row) => row.symbol).join(",")}`);
         const v12Orders = openOrders.filter((row) => V12_SYMBOLS.has(String(row.symbol).toUpperCase()));
+
+        if (isImmediateTriggerTrailingState(state)) {
+            const active = state.active!;
+            if (v12Positions.length !== 1 || !activePositionMatches(v12Positions[0], active)) {
+                throw new Error(`V12_LOCAL_RECOVERY_TRAILING_POSITION_MISMATCH:${v12Positions.map((row) => row.symbol).join(",") || "NONE"}`);
+            }
+            if (!protectionOrdersMatch(openOrders, active)) throw new Error("V12_LOCAL_RECOVERY_TRAILING_PROTECTION_MISMATCH");
+            const currentBytes = await readFile(statePath);
+            const currentState = await stateStore.load();
+            if (!isImmediateTriggerTrailingState(currentState)) throw new Error("V12_LOCAL_RECOVERY_STATE_CHANGED_DURING_RECONCILIATION");
+            const archived = await archiveAndRepairActive(statePath, currentBytes, requestId, currentState);
+            const after = await stateStore.load();
+            if (after.killSwitch?.active || after.manualReview || after.pending || !after.active) {
+                throw new Error("V12_LOCAL_RECOVERY_TRAILING_REPAIR_VERIFICATION_FAILED");
+            }
+            console.log(JSON.stringify({
+                status: "V12_LOCAL_TRAILING_RECOVERY_PASS",
+                candidateSha,
+                requestId,
+                reasonMatched: IMMEDIATE_TRIGGER_TRAILING_REASON,
+                archivePath: archived.archivePath,
+                preservedActiveSymbol: after.active.symbol,
+                preservedActiveSide: after.active.side,
+                preservedActiveQuantity: after.active.quantity,
+                asterV12PositionCount: v12Positions.length,
+                asterV12ProtectionOrderCount: v12Orders.length,
+                lockAttempts,
+                sharedKillSwitchChanged: false,
+                ordersSent: false,
+                positionChangesSent: false,
+            }));
+            return;
+        }
+
+        if (v12Positions.length) throw new Error(`V12_LOCAL_RECOVERY_V12_POSITION_PRESENT:${v12Positions.map((row) => row.symbol).join(",")}`);
         if (v12Orders.length) throw new Error(`V12_LOCAL_RECOVERY_V12_OPEN_ORDER:${v12Orders.map((row) => row.symbol).join(",")}`);
 
         const currentBytes = await readFile(statePath);
