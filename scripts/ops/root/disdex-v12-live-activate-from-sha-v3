@@ -41,8 +41,11 @@ recover_stale_local_state() {
   source /etc/disdex/disdex-v12-pengu-v2-v52.env
   source /etc/disdex/disdex-v12-x1-all.env
   set +a
-  runuser -u deploy --preserve-environment -- \
-    "$release/node_modules/.bin/tsx" "$recovery_script" "$sha" "$request_id"
+  (
+    cd "$release"
+    runuser -u deploy --preserve-environment -- \
+      "$release/node_modules/.bin/tsx" "$recovery_script" "$sha" "$request_id"
+  )
   printf 'V12_PARTIAL_LOCAL_STATE_RECOVERY_PASS requestId=%s ordersSent=false positionChangesSent=false\n' "$request_id"
 }
 
