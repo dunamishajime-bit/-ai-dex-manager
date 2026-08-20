@@ -32,6 +32,10 @@ function numberEnv(name: string, fallback: number) {
     return Number.isFinite(value) ? value : fallback;
 }
 
+function delay(ms: number) {
+    return new Promise<void>((resolveDelay) => setTimeout(resolveDelay, ms));
+}
+
 function assertRequestId(requestId: string) {
     if (!new RegExp(`^${RECOVERY_REQUEST_PREFIX}[A-Za-z0-9_-]{8,96}$`).test(requestId)) {
         throw new Error("V12_LOCAL_RECOVERY_REQUEST_ID_INVALID");
@@ -144,7 +148,13 @@ async function main() {
         runtime.lockPath || ".runtime-state/shared/account-order.lock",
         numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000),
     );
-    const handle = await lock.acquire(`V12_X1.00_ALL:P1:RECOVERY:${requestId}`);
+    let handle: Awaited<ReturnType<FileAccountOrderLock["acquire"]>> = null;
+    let lockAttempts = 0;
+    for (lockAttempts = 1; lockAttempts <= 30; lockAttempts += 1) {
+        handle = await lock.acquire(`V12_X1.00_ALL:P1:RECOVERY:${requestId}`);
+        if (handle) break;
+        await delay(1000);
+    }
     if (!handle) throw new Error("V12_LOCAL_RECOVERY_SHARED_ACCOUNT_LOCK_NOT_AVAILABLE");
     try {
         const [_ping, positions, openOrders] = await Promise.all([
@@ -182,6 +192,7 @@ async function main() {
             previousUpdatedAt: archived.previousUpdatedAt,
             nonzeroKnownNonV12PositionCount: nonzero.length,
             openOrderCount: openOrders.length,
+            lockAttempts,
             sharedKillSwitchChanged: false,
             ordersSent: false,
             positionChangesSent: false,

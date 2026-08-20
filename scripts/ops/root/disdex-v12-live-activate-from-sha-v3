@@ -145,24 +145,34 @@ quiesce_previous_partial_activation() {
   [[ "$previous_sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_SHA_INVALID\n' >&2; return 2; }
   [[ "$previous_sha" != "$sha" ]] || { printf 'V12_PARTIAL_RESUME_NOT_REQUIRED reason=current-is-candidate\n'; return 0; }
 
-  mapfile -t active_targets < <(systemctl list-units --type=target --state=active --no-legend --plain 'disdex-v12-pengu-v2-v52@*.target' 2>/dev/null | awk '{print $1}')
-  if (( ${#active_targets[@]} == 0 )); then
-    printf 'V12_PARTIAL_RESUME_NOT_REQUIRED reason=no-previous-target\n'
-    return 0
-  fi
-  (( ${#active_targets[@]} == 1 )) || { printf 'V12_PARTIAL_RESUME_MULTIPLE_TARGETS count=%s\n' "${#active_targets[@]}" >&2; return 2; }
   previous_target="disdex-v12-pengu-v2-v52@$previous_sha.target"
-  [[ "${active_targets[0]}" == "$previous_target" ]] || { printf 'V12_PARTIAL_RESUME_TARGET_SHA_MISMATCH unit=%s currentSha=%s\n' "${active_targets[0]}" "$previous_sha" >&2; return 2; }
-  [[ -f "$previous_release/.disdex-ci-artifact-sha256" && ! -L "$previous_release/.disdex-ci-artifact-sha256" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_CI_ARTIFACT\n' >&2; return 2; }
-  resolved="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "${previous_sha}^{commit}" 2>/dev/null || true)"
-  [[ "$resolved" == "$previous_sha" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_GIT_OBJECT_MISSING\n' >&2; return 2; }
-  runuser -u deploy -- git -C "$source_repo" merge-base --is-ancestor "$previous_sha" "$sha" || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_ANCESTOR\n' >&2; return 2; }
   previous_v12="disdex-v12-x1-all@$previous_sha.service"
   previous_risk="disdex-shared-crypto-risk@$previous_sha.service"
   previous_margin="disdex-v12-v52-margin-guard@$previous_sha.service"
   previous_pengu="disdex-pengu-dual-ls-v2@$previous_sha.service"
   previous_v52="disdex-v52-aster-only@$previous_sha.service"
-
+  mapfile -t active_targets < <(systemctl list-units --type=target --state=active --no-legend --plain 'disdex-v12-pengu-v2-v52@*.target' 2>/dev/null | awk '{print $1}')
+  if (( ${#active_targets[@]} == 0 )); then
+    for unit in "$previous_v12" "$previous_pengu" "$previous_v52"; do
+      state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
+      [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_NO_TARGET_TRADING_UNIT_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
+    done
+    recover_stale_local_state
+    systemctl stop "$previous_margin" "$previous_risk"
+    for unit in "$previous_margin" "$previous_risk"; do
+      state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+      [[ "$state" != "active" ]] || { printf 'V12_PARTIAL_RESUME_NO_TARGET_QUIESCE_FAILED unit=%s\n' "$unit" >&2; return 2; }
+      systemctl disable "$unit" >/dev/null 2>&1 || true
+    done
+    printf 'V12_PARTIAL_RESUME_QUIESCE_PASS previousSha=%s candidateSha=%s resumedNoTarget=true ordersSent=false\n' "$previous_sha" "$sha"
+    return 0
+  fi
+  (( ${#active_targets[@]} == 1 )) || { printf 'V12_PARTIAL_RESUME_MULTIPLE_TARGETS count=%s\n' "${#active_targets[@]}" >&2; return 2; }
+  [[ "${active_targets[0]}" == "$previous_target" ]] || { printf 'V12_PARTIAL_RESUME_TARGET_SHA_MISMATCH unit=%s currentSha=%s\n' "${active_targets[0]}" "$previous_sha" >&2; return 2; }
+  [[ -f "$previous_release/.disdex-ci-artifact-sha256" && ! -L "$previous_release/.disdex-ci-artifact-sha256" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_CI_ARTIFACT\n' >&2; return 2; }
+  resolved="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "${previous_sha}^{commit}" 2>/dev/null || true)"
+  [[ "$resolved" == "$previous_sha" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_GIT_OBJECT_MISSING\n' >&2; return 2; }
+  runuser -u deploy -- git -C "$source_repo" merge-base --is-ancestor "$previous_sha" "$sha" || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_ANCESTOR\n' >&2; return 2; }
   for unit in disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service; do
     state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
     [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_V96_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
