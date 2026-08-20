@@ -10,6 +10,8 @@ const h2 = resampleV12H1ToH2(h1);
 assert.equal(h2.length, 2);
 assert.equal(h2[0].sourceCount, 2);
 assert.equal(resampleV12H1ToH2(h1.filter((_, i) => i !== 2)).length, 1);
+const oddStartH1 = Array.from({ length: 5 }, (_, i) => ({ ts: start + 3_600_000 + i * 3_600_000, open: 100 + i, high: 101 + i, low: 99 + i, close: 100 + i, volume: 10, closed: true }));
+assert.equal(resampleV12H1ToH2(oddStartH1).length, 2);
 assert.equal(resolveV12X1AllRuntime({}).mode, "SHADOW");
 assert.equal(resolveV12X1AllRuntime({}).enabled, false);
 assert.equal(V12_X1_ALL.multiplier, 1);

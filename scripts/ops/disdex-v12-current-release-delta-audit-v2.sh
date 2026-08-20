@@ -41,8 +41,8 @@ report="$report_root/${current_sha}-base-${base_sha}-to-${candidate_sha}-full-tr
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT INT TERM HUP
 base_list="$tmp/base.txt"; candidate_list="$tmp/candidate.txt"; current_list="$tmp/current.txt"; all_list="$tmp/all.txt"
-runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$base_sha" | LC_ALL=C sort -u > "$base_list"
-runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$candidate_sha" | LC_ALL=C sort -u > "$candidate_list"
+runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$base_sha" | grep -Fvx 'ops/review/v12-vps-delta-reviewed.tsv' | LC_ALL=C sort -u > "$base_list"
+runuser -u deploy -- git -C "$source_repo" ls-tree -r --name-only "$candidate_sha" | grep -Fvx 'ops/review/v12-vps-delta-reviewed.tsv' | LC_ALL=C sort -u > "$candidate_list"
 base_tree="$tmp/base-tree"; candidate_tree="$tmp/candidate-tree"
 mkdir -p "$base_tree" "$candidate_tree"
 runuser -u deploy -- git -C "$source_repo" archive --format=tar "$base_sha" | tar -xf - -C "$base_tree"
@@ -56,6 +56,7 @@ runuser -u deploy -- git -C "$source_repo" archive --format=tar "$candidate_sha"
     case "$rel" in
       node_modules/*|.next/*|.git/*|.runtime-state/*|.codex-tmp/*|coverage/*|dist/*|.cache/*|tmp/*|logs/*) continue ;;
       .disdex-release-*|*.log|*.pid|*.sock|*/__pycache__/*|__pycache__/*|*.pyc|*.pre-*) continue ;;
+      ops/review/v12-vps-delta-reviewed.tsv) continue ;;
       .env|.env.local|.env.production|.env.development|.env.test|*.pem|*.key|*private-key*|*secret*) continue ;;
     esac
     printf '%s\n' "$rel"

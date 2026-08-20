@@ -60,7 +60,9 @@ export function resampleV12H1ToH2(input: V12H1Candle[]): V12Bar[] {
         if (sorted[i].ts === sorted[i - 1].ts) return [];
     }
     const output: V12Bar[] = [];
-    for (let i = 0; i < sorted.length; i += 2) {
+    let startIndex = 0;
+    while (startIndex < sorted.length && sorted[startIndex].ts % 7_200_000 !== 0) startIndex += 1;
+    for (let i = startIndex; i < sorted.length; i += 2) {
         const first = sorted[i];
         const second = sorted[i + 1];
         if (!first || !second || !validCandle(first) || !validCandle(second)) continue;
