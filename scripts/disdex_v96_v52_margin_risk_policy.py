@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable, Optional, Set
 
 HEALTHY_POLL_INTERVAL_MS = 5 * 60_000
 WARNING_POLL_INTERVAL_MS = 60_000
@@ -46,24 +46,32 @@ def liquidation_buffer_pct(row: dict) -> Optional[float]:
     return max(0.0, buffer * 100.0)
 
 
-def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed_symbols: Iterable[str]) -> dict:
+def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed_symbols: Iterable[str], grandfathered_symbols: Iterable[str] = ()) -> dict:
     symbols = {str(symbol).upper() for symbol in managed_symbols}
+    grandfathered: Set[str] = {str(symbol).upper() for symbol in grandfathered_symbols}
     active = []
+    liquidation_data_unavailable = []
     minimum_buffer: Optional[float] = None
     nearest_symbol: Optional[str] = None
     for row in positions:
         symbol = str(row.get("symbol") or "").upper()
         if symbol not in symbols or abs(finite(row.get("positionAmt"))) <= 1e-12:
             continue
-        buffer = liquidation_buffer_pct(row)
-        if buffer is None:
-            continue
+        try:
+            buffer = liquidation_buffer_pct(row)
+        except RuntimeError:
+            if symbol not in grandfathered:
+                raise
+            buffer = None
+            liquidation_data_unavailable.append(symbol)
         active.append({
             "symbol": symbol,
             "positionAmt": finite(row.get("positionAmt")),
             "markPrice": finite(row.get("markPrice")),
             "liquidationPrice": finite(row.get("liquidationPrice")),
             "liquidationBufferPct": buffer,
+            "liquidationPriceUnavailable": buffer is None,
+            "grandfathered": symbol in grandfathered,
             "leverage": finite(row.get("leverage")),
             "marginType": str(row.get("marginType") or ("isolated" if row.get("isolated") is True else "cross" if row.get("isolated") is False else "unknown")).lower(),
         })
@@ -75,6 +83,8 @@ def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed
         "maintenanceMarginRatioPct": ratio,
         "minimumLiquidationBufferPct": minimum_buffer,
         "nearestLiquidationSymbol": nearest_symbol,
+        "liquidationDataUnavailableSymbols": sorted(set(liquidation_data_unavailable)),
+        "grandfatheredPositionCount": len(liquidation_data_unavailable),
         "activeManagedPositionCount": len(active),
         "activeManagedPositions": active,
         "totalMaintMarginUsd": max(0.0, finite(account.get("totalMaintMargin"))),
