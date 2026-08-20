@@ -1,7 +1,7 @@
 {
   "strategyId": "V96_STOCK_CROSS_VENUE_MAKER_HEDGE_V13",
   "status": "V13_FORWARD_COLLECTION_IN_PROGRESS",
-  "generatedAt": "2026-08-19T20:46:01.245216Z",
+  "generatedAt": "2026-08-20T20:46:50.440133Z",
   "configSha256": "c25dd7fa5fd53544c0c172bd8191fbad486601259434b93ea418323dea31404e",
   "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
   "window": {
@@ -125,7 +125,9 @@
     },
     {
       "sessionDate": "2026-08-20",
-      "segmentsPresent": [],
+      "segmentsPresent": [
+        "LATE_CLOSE"
+      ],
       "complete": false
     },
     {
@@ -135,10 +137,10 @@
     }
   ],
   "coverage": {
-    "asterBooks": 529137,
-    "xyzBooks": 22945,
-    "asterTrades": 722,
-    "xyzTrades": 63543
+    "asterBooks": 586231,
+    "xyzBooks": 25275,
+    "asterTrades": 762,
+    "xyzTrades": 67573
   },
   "executionSafety": {
     "partialFillFailures": 3,
@@ -148,10 +150,10 @@
     "pendingHedgesAtEnd": 0,
     "openInventoriesAtEnd": 0,
     "cancellations": {
-      "STALE_OR_INVALID_BOOK": 2450,
-      "MAKER_TOP_MOVED": 9036,
-      "ADVERSE_ORDER_FLOW": 15,
-      "REFERENCE_MOVED": 827,
+      "STALE_OR_INVALID_BOOK": 2640,
+      "MAKER_TOP_MOVED": 9350,
+      "ADVERSE_ORDER_FLOW": 16,
+      "REFERENCE_MOVED": 833,
       "MAX_INVENTORY_AGE": 1
     },
     "passed": false
@@ -321,6 +323,13 @@
       "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-19/LATE_CLOSE/32291346468",
       "runId": "32291346468",
       "startedAtUtc": "2026-08-19T19:09:30Z"
+    },
+    {
+      "sessionDate": "2026-08-20",
+      "segment": "LATE_CLOSE",
+      "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-20/LATE_CLOSE/32407923280",
+      "runId": "32407923280",
+      "startedAtUtc": "2026-08-20T19:18:25Z"
     }
   ],
   "ignoredAttempts": [
@@ -418,6 +427,12 @@
       "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-19/OPEN_CORE/32261684505",
       "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT",
       "sessionDate": "2026-08-19",
+      "segment": "OPEN_CORE"
+    },
+    {
+      "path": "/tmp/v13-data/research-data/v13-maker-forward-20260727/chunks/2026-08-20/OPEN_CORE/32378062428",
+      "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT",
+      "sessionDate": "2026-08-20",
       "segment": "OPEN_CORE"
     }
   ],
