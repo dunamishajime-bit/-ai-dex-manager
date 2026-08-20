@@ -155,7 +155,7 @@ async function risk(path: string) {
         utcDay: new Date(NOW).toISOString().slice(0, 10),
         strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL"],
         lossPct: 0,
-        maximumLossPct: 5,
+        maximumLossPct: 7.5,
         tripped: false,
         updatedAt: NOW,
         realizedPnl: 0,
