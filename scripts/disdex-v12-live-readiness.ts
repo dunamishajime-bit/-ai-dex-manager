@@ -8,6 +8,8 @@ import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
+import { reconcileV12Protection } from "../lib/v12-resident-stop-lifecycle";
 
 function boolEnv(name: string) { return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim()); }
 function numberEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
@@ -44,13 +46,35 @@ async function main() {
     if (sharedKillSwitch.active) throw new Error(`V12_SHARED_KILL_SWITCH_ACTIVE:${sharedKillSwitch.reason || "UNSPECIFIED"}`);
     if (state.killSwitch?.active || state.manualReview) throw new Error(`V12_STATE_MANUAL_REVIEW:${state.killSwitch?.reason || state.manualReview}`);
     if (state.pending) throw new Error(`V12_PENDING_STATE_PRESENT:${state.pending.clientOrderId}`);
-    if (state.active) throw new Error(`V12_ACTIVE_STATE_PRESENT:${state.active.symbol}`);
+    const grandfatheredPositionAllowed = boolEnv("V12_LIVE_GRANDFATHERED_POSITION_ALLOWED");
+    if (state.active && !grandfatheredPositionAllowed) throw new Error(`V12_ACTIVE_STATE_PRESENT:${state.active.symbol}`);
 
     const nonzero = positions.filter((row) => Math.abs(Number(row.positionAmt) || 0) > 1e-12);
     const unknownPositions = nonzero.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
     if (unknownPositions.length) throw new Error(`ASTER_UNKNOWN_NONZERO_POSITION:${unknownPositions.map((row) => row.symbol).join(",")}`);
     const unknownOrders = openOrders.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
     if (unknownOrders.length) throw new Error(`ASTER_UNKNOWN_OPEN_ORDER:${unknownOrders.map((row) => row.symbol).join(",")}`);
+    let grandfatheredPosition = false;
+    if (state.active) {
+        if (!grandfatheredPositionAllowed) throw new Error("V12_GRANDFATHERED_POSITION_FLAG_REQUIRED");
+        const v12Symbols = new Set(V12_X1_ALL.universe.map((base) => `${base}USDT`));
+        const actual = nonzero.filter((row) => v12Symbols.has(String(row.symbol).toUpperCase()));
+        if (actual.length !== 1) throw new Error(`V12_GRANDFATHERED_POSITION_COUNT_MISMATCH:${actual.length}`);
+        const row = actual[0];
+        if (String(row.symbol).toUpperCase() !== state.active.symbol.toUpperCase()) throw new Error("V12_GRANDFATHERED_POSITION_SYMBOL_MISMATCH");
+        const quantity = Math.abs(Number(row.positionAmt) || 0);
+        if (Math.abs(quantity - state.active.quantity) > Math.max(1e-8, state.active.quantity * 0.01)) throw new Error("V12_GRANDFATHERED_POSITION_QTY_MISMATCH");
+        const actualSide = Number(row.positionAmt) < 0 ? "SHORT" : "LONG";
+        if (actualSide !== state.active.side) throw new Error("V12_GRANDFATHERED_POSITION_SIDE_MISMATCH");
+        const adapter = new V12AsterLiveAdapter(client, { maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20) });
+        const protection = await reconcileV12Protection(adapter, state.active.protection);
+        if (protection.manualReview) throw new Error(protection.manualReview);
+        const activeV12Orders = (await adapter.listV12Orders(state.active.symbol)).filter((order) => ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase()));
+        const allowed = new Set([state.active.protection.stopClientOrderId, state.active.protection.takeProfitClientOrderId].filter(Boolean));
+        const unknownProtection = activeV12Orders.filter((order) => !allowed.has(order.clientOrderId));
+        if (unknownProtection.length) throw new Error(`V12_GRANDFATHERED_UNKNOWN_ACTIVE_ORDER:${unknownProtection.map((order) => order.clientOrderId).join(",")}`);
+        grandfatheredPosition = true;
+    }
 
     const bySymbol = new Map(exchangeInfo.symbols.map((row) => [String(row.symbol).toUpperCase(), row]));
     for (const base of V12_X1_ALL.universe) {
@@ -83,7 +107,8 @@ async function main() {
         sharedKillSwitchPath: sharedKillSwitch.sourcePath,
         v12KillSwitchActive: false,
         pendingState: false,
-        activeState: false,
+        activeState: Boolean(state.active),
+        grandfatheredPosition,
         sharedAccountLockAvailable: true,
         allV12SymbolsTrading: true,
         requiredOrderTypesPresent: true,
