@@ -7,10 +7,18 @@ import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
+import { reconcileV12Protection } from "../lib/v12-resident-stop-lifecycle";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
 
+const EPS = 1e-12;
 function boolEnv(name: string) { return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim()); }
 function numberEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
+function actualSide(position: { quantity: number; positionSide: string }) {
+    if (position.positionSide === "LONG") return "LONG" as const;
+    if (position.positionSide === "SHORT") return "SHORT" as const;
+    return position.quantity < 0 ? "SHORT" as const : "LONG" as const;
+}
 
 async function main() {
     const runtime = resolveV12X1AllRuntime();
@@ -44,13 +52,41 @@ async function main() {
     if (sharedKillSwitch.active) throw new Error(`V12_SHARED_KILL_SWITCH_ACTIVE:${sharedKillSwitch.reason || "UNSPECIFIED"}`);
     if (state.killSwitch?.active || state.manualReview) throw new Error(`V12_STATE_MANUAL_REVIEW:${state.killSwitch?.reason || state.manualReview}`);
     if (state.pending) throw new Error(`V12_PENDING_STATE_PRESENT:${state.pending.clientOrderId}`);
-    if (state.active) throw new Error(`V12_ACTIVE_STATE_PRESENT:${state.active.symbol}`);
 
     const nonzero = positions.filter((row) => Math.abs(Number(row.positionAmt) || 0) > 1e-12);
     const unknownPositions = nonzero.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
     if (unknownPositions.length) throw new Error(`ASTER_UNKNOWN_NONZERO_POSITION:${unknownPositions.map((row) => row.symbol).join(",")}`);
     const unknownOrders = openOrders.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
     if (unknownOrders.length) throw new Error(`ASTER_UNKNOWN_OPEN_ORDER:${unknownOrders.map((row) => row.symbol).join(",")}`);
+
+    const adapter = new V12AsterLiveAdapter(client, {
+        maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
+        reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+        reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+    });
+    const actualPositions = await adapter.getPositions();
+    const activeV12Orders = (await adapter.listV12Orders()).filter((row) => ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(row.status || "").toUpperCase()));
+    let activeStateReconciled = false;
+    let residentProtectionVerified = false;
+    if (state.active) {
+        const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
+        if (actualV12.length !== 1) throw new Error(`V12_ACTIVE_POSITION_COUNT_MISMATCH:${actualV12.length}`);
+        const actual = actualV12[0];
+        if (actual.symbol.toUpperCase() !== state.active.symbol.toUpperCase()) throw new Error("V12_ACTIVE_POSITION_SYMBOL_MISMATCH");
+        if (actualSide(actual) !== state.active.side) throw new Error("V12_ACTIVE_POSITION_SIDE_MISMATCH");
+        if (Math.abs(Math.abs(actual.quantity) - state.active.quantity) > Math.max(1e-8, state.active.quantity * 0.01)) throw new Error("V12_ACTIVE_POSITION_QTY_MISMATCH");
+        const reconciledProtection = await reconcileV12Protection(adapter, state.active.protection);
+        if (reconciledProtection.manualReview) throw new Error(reconciledProtection.manualReview);
+        const allowed = new Set([state.active.protection.stopClientOrderId, state.active.protection.takeProfitClientOrderId].filter(Boolean));
+        const unknown = activeV12Orders.filter((row) => !allowed.has(row.clientOrderId));
+        if (unknown.length) throw new Error(`V12_UNKNOWN_ACTIVE_ORDER:${unknown.map((row) => row.clientOrderId).join(",")}`);
+        activeStateReconciled = true;
+        residentProtectionVerified = true;
+    } else {
+        const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
+        if (actualV12.length) throw new Error(`V12_POSITION_ONLY_MISMATCH:${actualV12.map((row) => row.symbol).join(",")}`);
+        if (activeV12Orders.length) throw new Error(`V12_ORDER_ONLY_MISMATCH:${activeV12Orders.map((row) => row.clientOrderId).join(",")}`);
+    }
 
     const bySymbol = new Map(exchangeInfo.symbols.map((row) => [String(row.symbol).toUpperCase(), row]));
     for (const base of V12_X1_ALL.universe) {
@@ -83,7 +119,8 @@ async function main() {
         sharedKillSwitchPath: sharedKillSwitch.sourcePath,
         v12KillSwitchActive: false,
         pendingState: false,
-        activeState: false,
+        activeState: activeStateReconciled,
+        residentProtectionVerified,
         sharedAccountLockAvailable: true,
         allV12SymbolsTrading: true,
         requiredOrderTypesPresent: true,
