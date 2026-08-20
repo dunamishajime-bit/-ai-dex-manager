@@ -175,7 +175,7 @@ export function sizeV12Position(equity: number, entryPrice: number, candidateAtr
     const riskCapital = equity * V12_X1_ALL.riskPerTradePct / 100;
     const riskNotional = riskCapital / (stopDistance / entryPrice);
     const marginNotional = equity * V12_X1_ALL.leverage * V12_X1_ALL.maxMarginUsagePct / 100;
-    const requestedNotional = Math.min(riskNotional, marginNotional) * V12_X1_ALL.multiplier;
+    const requestedNotional = Math.min(equity * V12_X1_ALL.maximumGross, Math.min(riskNotional, marginNotional) * V12_X1_ALL.multiplier);
     return { requestedNotional, requestedGross: requestedNotional / equity, stopDistance, riskCapital, entryPrice, quantity: requestedNotional / entryPrice };
 }
 
