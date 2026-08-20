@@ -184,6 +184,24 @@ def self_test() -> None:
     snapshot = build_margin_risk_snapshot(account, rows, ["BTCUSDT"])
     assert abs(snapshot["maintenanceMarginRatioPct"] - 10.0) < 1e-12
     assert abs(snapshot["minimumLiquidationBufferPct"] - 10.0) < 1e-12
+    grandfathered = build_margin_risk_snapshot(
+        account,
+        [{"symbol": "INJUSDT", "positionAmt": "1", "markPrice": "100", "liquidationPrice": "0"}],
+        ["INJUSDT"],
+        ["INJUSDT"],
+    )
+    assert grandfathered["grandfatheredPositionCount"] == 1
+    assert grandfathered["liquidationDataUnavailableSymbols"] == ["INJUSDT"]
+    try:
+        build_margin_risk_snapshot(
+            account,
+            [{"symbol": "INJUSDT", "positionAmt": "1", "markPrice": "100", "liquidationPrice": "0"}],
+            ["INJUSDT"],
+        )
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("non-grandfathered invalid liquidation data must fail closed")
     print("V96/V52 adaptive margin risk policy self-test: PASS")
 
 
