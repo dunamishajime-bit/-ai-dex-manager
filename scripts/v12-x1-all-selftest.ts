@@ -14,7 +14,8 @@ const oddStartH1 = Array.from({ length: 5 }, (_, i) => ({ ts: start + 3_600_000 
 assert.equal(resampleV12H1ToH2(oddStartH1).length, 2);
 assert.equal(resolveV12X1AllRuntime({}).mode, "SHADOW");
 assert.equal(resolveV12X1AllRuntime({}).enabled, false);
-assert.equal(V12_X1_ALL.multiplier, 1.5);
+assert.equal(V12_X1_ALL.multiplier, 1);
+assert.equal(V12_X1_ALL.grossMultiplier, 1.5);
 assert.equal(V12_X1_ALL.maximumGross, 1.5);
 const sized = sizeV12Position(1000, 100, 2, "LONG");
 assert.ok(sized.requestedGross > 0 && sized.requestedGross <= 1.5);
