@@ -11,12 +11,20 @@ import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-ris
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
+import { V12_X1_ALL } from "../config/v12X1AllRuntime";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
+import { reconcileV12Protection } from "../lib/v12-resident-stop-lifecycle";
 
 const V96_CORE_SYMBOLS = new Set(["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]);
 const EPS = 1e-12;
 
 function boolEnv(name: string) { return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim()); }
 function numberEnv(name: string, fallback: number) { const value = Number(process.env[name]); return Number.isFinite(value) ? value : fallback; }
+function actualSide(position: { quantity: number; positionSide: string }) {
+    if (position.positionSide === "LONG") return "LONG" as const;
+    if (position.positionSide === "SHORT") return "SHORT" as const;
+    return position.quantity < 0 ? "SHORT" as const : "LONG" as const;
+}
 
 async function main() {
     const v12 = resolveV12X1AllRuntime();
@@ -49,7 +57,6 @@ async function main() {
     if (v96State.manualReviewReason) throw new Error(`MIGRATION_BLOCKED_V96_MANUAL_REVIEW:${v96State.manualReviewReason}`);
     if (v96State.killSwitch?.active) throw new Error(`MIGRATION_BLOCKED_V96_KILL_SWITCH:${v96State.killSwitch.reason}`);
     if (v12State.pending) throw new Error(`MIGRATION_BLOCKED_V12_PENDING:${v12State.pending.clientOrderId}`);
-    if (v12State.active) throw new Error(`MIGRATION_BLOCKED_V12_ACTIVE:${v12State.active.symbol}`);
     if (v12State.killSwitch?.active || v12State.manualReview) throw new Error(`MIGRATION_BLOCKED_V12_MANUAL_REVIEW:${v12State.killSwitch?.reason || v12State.manualReview}`);
 
     const [_ping, positions, openOrders] = await Promise.all([client.ping(), client.getPositions(), client.getOpenOrders()]);
@@ -68,6 +75,36 @@ async function main() {
     const v96ResidentProtection = v96OpenOrders.filter((row) => ["STOP_MARKET", "TAKE_PROFIT_MARKET"].includes(String(row.type || "").toUpperCase()) || row.reduceOnly === true || row.closePosition === true);
     if (v96ResidentProtection.length) throw new Error(`MIGRATION_BLOCKED_V96_RESIDENT_PROTECTION:${v96ResidentProtection.length}`);
 
+    // A partially completed V12 activation may already own a live position.
+    // Preserve it only after a read-only, exact state/position/protection
+    // reconciliation.  This never places, cancels, or changes an order.
+    const adapter = new V12AsterLiveAdapter(client, {
+        maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
+        reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+        reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+    });
+    const actualPositions = await adapter.getPositions();
+    const activeV12Orders = (await adapter.listV12Orders()).filter((row) => ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(row.status || "").toUpperCase()));
+    let v12ActiveStateReconciled = false;
+    if (v12State.active) {
+        const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
+        if (actualV12.length !== 1) throw new Error(`MIGRATION_BLOCKED_V12_ACTIVE_POSITION_COUNT_MISMATCH:${actualV12.length}`);
+        const actual = actualV12[0];
+        if (actual.symbol.toUpperCase() !== v12State.active.symbol.toUpperCase()) throw new Error("MIGRATION_BLOCKED_V12_ACTIVE_POSITION_SYMBOL_MISMATCH");
+        if (actualSide(actual) !== v12State.active.side) throw new Error("MIGRATION_BLOCKED_V12_ACTIVE_POSITION_SIDE_MISMATCH");
+        if (Math.abs(Math.abs(actual.quantity) - v12State.active.quantity) > Math.max(1e-8, v12State.active.quantity * 0.01)) throw new Error("MIGRATION_BLOCKED_V12_ACTIVE_POSITION_QTY_MISMATCH");
+        const protection = await reconcileV12Protection(adapter, v12State.active.protection);
+        if (protection.manualReview) throw new Error(`MIGRATION_BLOCKED_${protection.manualReview}`);
+        const allowed = new Set([v12State.active.protection.stopClientOrderId, v12State.active.protection.takeProfitClientOrderId].filter(Boolean));
+        const unknown = activeV12Orders.filter((row) => !allowed.has(row.clientOrderId));
+        if (unknown.length) throw new Error(`MIGRATION_BLOCKED_V12_UNKNOWN_ACTIVE_ORDER:${unknown.map((row) => row.clientOrderId).join(",")}`);
+        v12ActiveStateReconciled = true;
+    } else {
+        const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
+        if (actualV12.length) throw new Error(`MIGRATION_BLOCKED_V12_POSITION_ONLY_MISMATCH:${actualV12.map((row) => row.symbol).join(",")}`);
+        if (activeV12Orders.length) throw new Error(`MIGRATION_BLOCKED_V12_ORDER_ONLY_MISMATCH:${activeV12Orders.map((row) => row.clientOrderId).join(",")}`);
+    }
+
     const lock = new FileAccountOrderLock(v12.lockPath || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
     const handle = await lock.acquire(`V96_TO_V12_PREFLIGHT:${process.pid}:${randomUUID()}`);
     if (!handle) throw new Error("MIGRATION_BLOCKED_SHARED_ACCOUNT_LOCK");
@@ -81,7 +118,8 @@ async function main() {
         v96ResidentProtection: 0,
         v96Pending: 0,
         v12Pending: 0,
-        v12ActivePosition: 0,
+        v12ActivePosition: v12State.active ? 1 : 0,
+        v12ActiveStateReconciled,
         sharedKillSwitchActive: false,
         sharedRiskFresh: true,
         sharedRiskLossPct: risk.state?.lossPct,
