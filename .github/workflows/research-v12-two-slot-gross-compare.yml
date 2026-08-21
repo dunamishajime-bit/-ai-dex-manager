@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - research/v12-two-slot-gross-compare-20260821
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'scripts/research_v12_two_slot_compare.ts'
+      - '.github/workflows/research-v12-two-slot-gross-compare.yml'
   workflow_dispatch:
 
 permissions:
@@ -20,13 +26,17 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Run read-only V12 GROSS comparison
+      - name: Run frozen current V12 one-slot baseline
         env:
-          RESEARCH_STATE_DIR: .research-state
+          RESEARCH_STATE_DIR: .research-state/current
+        run: npx tsx scripts/research_v26_latency_aware_v12.ts
+      - name: Run read-only V12 top-two comparison
+        env:
+          RESEARCH_STATE_DIR: .research-state/two-slot
         run: npx tsx scripts/research_v12_two_slot_compare.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v12-two-slot-gross-compare
-          path: .research-state/v12-two-slot-gross-compare.json
+          name: v12-one-vs-two-slot-gross-compare
+          path: .research-state
           if-no-files-found: warn
