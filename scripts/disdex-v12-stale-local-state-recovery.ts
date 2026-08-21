@@ -89,13 +89,17 @@ function isMinimumEntryQuantityState(state: V12X1AllRunnerState) {
         && MINIMUM_ENTRY_QUANTITY_REASON.test(state.manualReview)
         && state.killSwitch?.active === true
         && state.killSwitch.reason === state.manualReview
-        && !state.active
         && state.pending?.action === "ENTRY"
         && Number(state.pending.quantity) > 0
         && Number.isFinite(state.pending.signalTs)
         && Number.isFinite(state.pending.createdAt)
         && !!state.pending.clientOrderId
         && !!state.pending.idempotencyKey;
+}
+
+function activePositionsOf(state: V12X1AllRunnerState) {
+    if (Array.isArray(state.activePositions) && state.activePositions.length) return state.activePositions;
+    return state.active ? [state.active] : [];
 }
 
 function isImmediateTriggerTrailingState(state: V12X1AllRunnerState) {
@@ -257,6 +261,11 @@ async function main() {
             updatedAt: 1,
             manualReview: "Quantity 0 is below Aster minQty 1 for AVAXUSDT.",
             killSwitch: { active: true, reason: "Quantity 0 is below Aster minQty 1 for AVAXUSDT.", trippedAt: 1 },
+            active: {
+                symbol: "SOLUSDT", side: "LONG", quantity: 1, gross: 0.5, positionId: "v12-active-sol", entryPrice: 100,
+                atrAtEntry: 2, entrySignalTs: 1, holdingBars: 1, peakPrice: 100, troughPrice: 100,
+                protection: { strategyId: "V12_X1.00_ALL", symbol: "SOLUSDT", side: "LONG", positionId: "v12-active-sol", quantity: 1, entryPrice: 100, atrAtEntry: 2, initialStop: 96, lastAckStop: 96, takeProfit: 108, peakOrTrough: 100, stopClientOrderId: "v12-stop-sol", takeProfitClientOrderId: "v12-tp-sol" },
+            },
             pending: {
                 idempotencyKey: "v12-entry-min-qty",
                 action: "ENTRY",
@@ -380,6 +389,53 @@ async function main() {
                 preservedActiveSymbol: after.active.symbol,
                 preservedActiveSide: after.active.side,
                 preservedActiveQuantity: after.active.quantity,
+                asterV12PositionCount: v12Positions.length,
+                asterV12ProtectionOrderCount: v12Orders.length,
+                lockAttempts,
+                sharedKillSwitchChanged: false,
+                ordersSent: false,
+                positionChangesSent: false,
+            }));
+            return;
+        }
+
+        if (isMinimumEntryQuantityState(state) && activePositionsOf(state).length) {
+            const actives = activePositionsOf(state);
+            if (v12Positions.length !== actives.length) {
+                throw new Error(`V12_LOCAL_RECOVERY_MINIMUM_ENTRY_ACTIVE_COUNT_MISMATCH:expected=${actives.length}:actual=${v12Positions.length}`);
+            }
+            const expectedProtectionIds = new Set<string>();
+            for (const active of actives) {
+                const actual = v12Positions.find((row) => String(row.symbol).toUpperCase() === active.symbol.toUpperCase());
+                if (!actual || !activePositionMatches(actual, active)) {
+                    throw new Error(`V12_LOCAL_RECOVERY_MINIMUM_ENTRY_ACTIVE_POSITION_MISMATCH:${active.symbol}`);
+                }
+                if (!protectionOrdersMatch(openOrders, active)) {
+                    throw new Error(`V12_LOCAL_RECOVERY_MINIMUM_ENTRY_PROTECTION_MISMATCH:${active.symbol}`);
+                }
+                expectedProtectionIds.add(active.protection.stopClientOrderId || "");
+                expectedProtectionIds.add(active.protection.takeProfitClientOrderId || "");
+            }
+            const unexpected = v12Orders.filter((row) => !expectedProtectionIds.has(String(row.clientOrderId || "")));
+            if (unexpected.length) {
+                throw new Error(`V12_LOCAL_RECOVERY_MINIMUM_ENTRY_UNEXPECTED_OPEN_ORDER:${unexpected.map((row) => row.clientOrderId).join(",")}`);
+            }
+            const currentBytes = await readFile(statePath);
+            const currentState = await stateStore.load();
+            if (!isMinimumEntryQuantityState(currentState)) throw new Error("V12_LOCAL_RECOVERY_STATE_CHANGED_DURING_RECONCILIATION");
+            const archived = await archiveAndRepairActive(statePath, currentBytes, requestId, currentState);
+            const after = await stateStore.load();
+            if (after.killSwitch?.active || after.manualReview || after.pending || !activePositionsOf(after).length) {
+                throw new Error("V12_LOCAL_RECOVERY_MINIMUM_ENTRY_REPAIR_VERIFICATION_FAILED");
+            }
+            console.log(JSON.stringify({
+                status: "V12_LOCAL_MINIMUM_ENTRY_RECOVERY_PASS",
+                candidateSha,
+                requestId,
+                reasonMatched: true,
+                archivePath: archived.archivePath,
+                preservedActiveSymbols: activePositionsOf(after).map((row) => row.symbol),
+                pendingEntrySymbol: currentState.pending?.symbol,
                 asterV12PositionCount: v12Positions.length,
                 asterV12ProtectionOrderCount: v12Orders.length,
                 lockAttempts,
