@@ -1,4 +1,5 @@
 name: V12 Top2 Residual Gross 1.5 One-Year Backtest
+# monitored research rerun: 2026-08-21
 
 on:
   push:
