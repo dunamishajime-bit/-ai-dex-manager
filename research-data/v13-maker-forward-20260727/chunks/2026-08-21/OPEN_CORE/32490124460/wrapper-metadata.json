@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "f1b2820705d5cef815a4b160feb124af1230d746",
+  "entryCutoffMs": 1787337810000,
+  "durationSeconds": 16852,
+  "resultStatus": "V13_EXECUTION_SAFETY_FAILED",
+  "safety": {
+    "mode": "SHADOW_RESEARCH_ONLY",
+    "orderSubmissionAllowed": false,
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false
+  }
+}
