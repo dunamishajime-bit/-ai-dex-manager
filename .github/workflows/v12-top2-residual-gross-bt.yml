@@ -82,18 +82,18 @@ jobs:
       - name: Compile research runner
         run: python -m py_compile scripts/research_v12_top2_residual_bt.py
 
-      - name: Rebuild frozen ledgers
+      - name: Reuse audited frozen ledgers
         env:
-          PRODUCTION_SOURCE_SHA: 6f4d06fd990e5e847895b59c4890bb80335ff03e
-          PENGU_LEDGER_OUT: .research-state/v12-top2-residual-gross/pengu-v2-ledgers.json
-          V12_SOURCE_ROOT: .v12-research
-          V12_SOURCE_SHA: 27f023a37d08b71c6e59b797fdc03c20d6032da2
-          V12_LEDGER_OUT: .research-state/v12-top2-residual-gross/v12-ledgers.json
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -o pipefail
           mkdir -p .research-state/v12-top2-residual-gross
-          npx tsx scripts/research_pengu_v2_aster_ledger.ts 2>&1 | tee .research-state/v12-top2-residual-gross/pengu-ledger.log
-          npx tsx scripts/research_v12_combined_bt_ledger.ts 2>&1 | tee .research-state/v12-top2-residual-gross/v12-ledger.log
+          gh run download 31953373671 \
+            --name v12-v52-pengu-v2-combined-31953373671 \
+            --dir .research-state/v12-top2-residual-gross
+          test -s .research-state/v12-top2-residual-gross/v12-ledgers.json
+          test -s .research-state/v12-top2-residual-gross/pengu-v2-ledgers.json
+          sha256sum .research-state/v12-top2-residual-gross/v12-ledgers.json .research-state/v12-top2-residual-gross/pengu-v2-ledgers.json
 
       - name: Run frozen V12 Top2 residual ablation
         run: |
