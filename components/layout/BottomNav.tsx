@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, BarChart3, FileText, Home, Settings, Wallet } from "lucide-react";
+import { BarChart3, FileText, Home, Settings, Wallet } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { icon: Home, label: "ホーム", href: "/", matchPrefix: false },
   { icon: BarChart3, label: "ダッシュ", href: "/positions", matchPrefix: false },
-  { icon: Activity, label: "AIラボ", href: "/research-lab", matchPrefix: true },
   { icon: Wallet, label: "ウォレット", href: "/wallets", matchPrefix: false },
   { icon: FileText, label: "履歴", href: "/history", matchPrefix: false },
   { icon: Settings, label: "設定", href: "/settings", matchPrefix: false },

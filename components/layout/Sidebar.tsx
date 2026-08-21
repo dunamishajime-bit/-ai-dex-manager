@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
   BarChart3,
   FileText,
   Home,
   LogOut,
-  MessageSquareText,
   Settings,
   Wallet,
 } from "lucide-react";
@@ -31,14 +29,6 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
-  {
-    href: "/research-lab",
-    label: "AI研究ラボ",
-    icon: Activity,
-    children: [
-      { href: "/research-lab/discussions", label: "議論内容", icon: MessageSquareText },
-    ],
-  },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/history", label: "トレード履歴", icon: FileText },
   { href: "/settings", label: "設定", icon: Settings },
@@ -116,8 +106,8 @@ export function Sidebar() {
 
       <div className="mt-auto rounded-[18px] border border-[#8a8a8a] bg-[linear-gradient(180deg,rgba(17,20,23,0.96),rgba(9,11,14,0.98))] px-4 py-4 text-[11px] leading-6 text-white/78">
         <div className="mb-2 text-[11px] font-bold text-white">運用メモ</div>
-        <p>AI研究ラボは実売買から分離し、新戦略の生成・検証・反証を行います。</p>
-        <p>議論内容では、日時別のResearcher・Critic・CIO発言を数値Evidence付きで確認できます。</p>
+        <p>V12・PENGU V2・V52の稼働状態、判定Gate、残高、建玉を正本データで確認します。</p>
+        <p>注文可否はVPS workerの共通リスク・再照合・参照データGateが最終決定します。</p>
         <p>認証や基本設定の見直しは、設定ページから進めてください。</p>
       </div>
 

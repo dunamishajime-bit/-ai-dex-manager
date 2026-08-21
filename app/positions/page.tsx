@@ -9,6 +9,7 @@ import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTrade
 import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useV12LiveStatus } from "@/hooks/useV12LiveStatus";
 import { cn } from "@/lib/utils";
 
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
@@ -31,9 +32,16 @@ function walletStatusLabel(status?: string) {
 export default function PositionsPage() {
   const { tradeNotifications, activeStrategies } = useSimulation();
   const { wallet } = useOperationalWallet();
+  const { status: v12Status, loading: v12StatusLoading } = useV12LiveStatus();
   const { formatPrice } = useCurrency();
 
-  const isWalletRunning = wallet?.status === "running";
+  const autoTradeLabel = v12StatusLoading
+    ? "状態確認中"
+    : v12Status === "running"
+      ? "V12ライブ稼働中"
+      : v12Status === "blocked"
+        ? "V12ゲート停止"
+        : "状態確認不可";
 
   const rows = useMemo(() => {
     return (wallet?.trackedHoldings || [])
@@ -69,7 +77,7 @@ export default function PositionsPage() {
             </div>
             <div className="flex items-center gap-2 rounded-full border border-gold-400/18 bg-white/[0.03] px-4 py-2 text-[11px] text-gold-100">
               <Activity className="h-4 w-4" />
-              自動売買 {isWalletRunning ? "稼働中" : "停止中"}
+              自動売買 {autoTradeLabel}
             </div>
           </div>
         </header>
@@ -147,9 +155,11 @@ export default function PositionsPage() {
                 <ShieldCheck className="h-4 w-4 text-gold-100" />
                 自動売買状態
               </div>
-              <div className="mt-2 text-[1.1rem] font-black text-white">{walletStatusLabel(wallet?.status)}</div>
+              <div className={cn("mt-2 text-[1.1rem] font-black", v12Status === "running" ? "text-profit" : v12Status === "blocked" ? "text-loss" : "text-white")}>
+                {autoTradeLabel}
+              </div>
               <div className="mt-1 text-[11px] leading-5 text-white/78">
-                入金確認後は自動売買が稼働します。停止中や入金待ちの状態もここに表示されます。
+                V12 VPS worker、LIVE実行フラグ、共通リスクGateの状態を正本として表示します。EVM運用ウォレットの入金状態とは分離されています。
               </div>
             </div>
           </div>

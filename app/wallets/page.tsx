@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { Copy, Loader2, Plus, QrCode, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useV12LiveStatus } from "@/hooks/useV12LiveStatus";
 
 function formatUsd(value?: number) {
   return `$${Number(value || 0).toFixed(2)}`;
@@ -119,6 +120,7 @@ function StatCard({
 export default function WalletsPage() {
   const { user } = useAuth();
   const { wallet, loading, refresh } = useOperationalWallet();
+  const { status: v12Status, loading: v12StatusLoading } = useV12LiveStatus();
 
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
@@ -130,6 +132,13 @@ export default function WalletsPage() {
   const email = user?.email?.trim().toLowerCase() || "";
   const displayName = user?.nickname || user?.email || "オーナー";
   const canManageWallet = Boolean(email);
+  const v12Label = v12StatusLoading
+    ? "状態確認中"
+    : v12Status === "running"
+      ? "V12ライブ稼働中"
+      : v12Status === "blocked"
+        ? "V12ゲート停止"
+        : "状態確認不可";
 
   const activeHoldings = useMemo(() => {
     const items = wallet?.trackedHoldings || [];
@@ -473,10 +482,16 @@ export default function WalletsPage() {
           <Panel title="3. 状態メモ" description="運用状況の目安です。" icon={ShieldCheck}>
             <div className="grid gap-3 md:grid-cols-2">
               <StatCard
-                title="ウォレット状態"
+                title="EVMウォレット状態"
                 value={wallet ? statusText(wallet.status) : "未設定"}
                 note={wallet?.backupConfirmed ? "バックアップ確認済み" : "バックアップ未確認"}
                 tone={wallet?.status === "running" ? "profit" : wallet?.status === "paused" ? "loss" : "default"}
+              />
+              <StatCard
+                title="V12自動売買"
+                value={v12Label}
+                note="VPS worker・LIVE実行フラグ・共通リスクGateの正本状態"
+                tone={v12Status === "running" ? "profit" : v12Status === "blocked" ? "loss" : "default"}
               />
               <StatCard
                 title="総評価額"

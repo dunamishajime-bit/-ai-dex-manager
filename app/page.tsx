@@ -6,6 +6,7 @@ import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";
 import { V12GateStatusPanel } from "@/components/features/autotrade/V12GateStatusPanel";
 import { useSimulation } from "@/context/SimulationContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useV12LiveStatus } from "@/hooks/useV12LiveStatus";
 
 function SummaryCard({
   title,
@@ -64,11 +65,18 @@ function QuickLink({
 export default function HomePage() {
   const { activeStrategies, tradeNotifications } = useSimulation();
   const { wallet } = useOperationalWallet();
+  const { status: v12Status, loading: v12StatusLoading } = useV12LiveStatus();
   const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);
   const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");
   const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);
   const cashUsd = Number(usdtHolding?.usdValue || 0);
-  const isWalletRunning = wallet?.status === "running";
+  const autoTradeLabel = v12StatusLoading
+    ? "状態確認中"
+    : v12Status === "running"
+      ? "V12ライブ稼働中"
+      : v12Status === "blocked"
+        ? "V12ゲート停止"
+        : "状態確認不可";
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
@@ -111,9 +119,9 @@ export default function HomePage() {
             />
             <SummaryCard
               title="Auto Trade"
-              value={isWalletRunning ? "稼働中" : "停止中"}
-              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"
-              tone={isWalletRunning ? "profit" : "loss"}
+              value={autoTradeLabel}
+              text="V12 VPS worker・LIVE flag・共通リスクGateの正本状態を表示しています。"
+              tone={v12Status === "running" ? "profit" : v12Status === "blocked" ? "loss" : "default"}
             />
           </div>
         </section>
