@@ -239,6 +239,20 @@ export class V12LiveExecutionEngine {
         const scale = sizing.requestedGross > 0 ? acceptedGross / sizing.requestedGross : 0;
         const quantity = sizing.quantity * scale;
         if (!(quantity > 0)) return { status: "capacity-blocked", reason: "ZERO_EXECUTABLE_QUANTITY", signal };
+        // Check exchange lot/notional rules before writing a pending order.
+        // A signal whose requested notional cannot produce one executable
+        // unit is a deterministic capacity block, not a failed live order.
+        // Keeping this check before reservation/pending also ensures the
+        // same signal cannot leave a stale pending row or trip Kill Switch.
+        try {
+            await this.d.adapter.executor.normalizeMarketQuantity(symbol, quantity, expectedPrice);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (/^(?:Quantity .* is below Aster minQty|Notional .* is below Aster minimum)/i.test(message)) {
+                return { status: "capacity-blocked", reason: `EXECUTION_RULE_BLOCKED:${message}`, signal };
+            }
+            throw error;
+        }
         const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
         if (state.lastCompletedIdempotencyKey === clientOrderId) return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId };
         const reservation = await handle.reserve({ strategyId: "V12_X1.00_ALL", symbol, side: signal.side, gross: acceptedGross, notionalUsd: acceptedGross * equity });

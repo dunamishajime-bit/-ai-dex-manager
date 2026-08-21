@@ -23,6 +23,10 @@ function normalizeOrder(raw: AsterOrderResponse): V12AsterOrderView {
     return { symbol: String(raw.symbol || "").toUpperCase(), clientOrderId: String(raw.clientOrderId || ""), orderId: raw.orderId, status: String(raw.status || "UNKNOWN").toUpperCase(), side: raw.side, type: raw.type, reduceOnly: raw.reduceOnly, quantity: finite(raw.origQty), executedQuantity: finite(raw.executedQty), stopPrice: finite(raw.stopPrice) || undefined };
 }
 function activeStatus(status: string) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(status.toUpperCase()); }
+function isPreSendQuantityRejection(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return /^(?:Quantity .* is below Aster minQty|Notional .* is below Aster minimum)/i.test(message);
+}
 
 export class V12AsterLiveAdapter implements ResidentStopAdapter {
     readonly executor: AsterDirectTradeExecutor;
@@ -59,7 +63,34 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     async executeEntry(input: { signalTs: number; symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string }): Promise<DirectTradeResult> {
         await assertSharedKillSwitchAllowsNewEntry();
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "ENTRY", signalTs: input.signalTs, symbol: input.symbol, side: input.side });
-        return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY" });
+        const side = input.side === "LONG" ? "BUY" : "SELL";
+        try {
+            return await this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side, quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY" });
+        } catch (error) {
+            // Aster can reject an otherwise valid signal before the order is
+            // sent when the requested size floors below MARKET_LOT_SIZE or
+            // MIN_NOTIONAL. This is an execution-capacity outcome, not an
+            // exchange-unknown failure and must not trip the strategy kill
+            // switch. The caller clears the durable pending row and records
+            // the deterministic idempotency key without retrying the same
+            // undersized signal.
+            if (!isPreSendQuantityRejection(error)) throw error;
+            return {
+                requestId: clientOrderId,
+                clientOrderId,
+                symbol: input.symbol.toUpperCase(),
+                side,
+                status: "REJECTED",
+                requestedQuantity: input.quantity,
+                submittedQuantity: 0,
+                executedQuantity: 0,
+                averagePrice: 0,
+                quoteQuantity: 0,
+                executionUnknown: false,
+                reconciled: true,
+                error: error instanceof Error ? error.message : String(error),
+            };
+        }
     }
     async executeExit(input: { signalTs: number; symbol: string; positionSide: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string; failsafe?: boolean }): Promise<DirectTradeResult> {
         const action = input.failsafe ? "FAILSAFE_CLOSE" : "EXIT";
