@@ -7,6 +7,12 @@ on:
     paths:
       - 'scripts/research_v12_top2_gross15_one_year.ts'
       - '.github/workflows/v12-top2-gross15-one-year-bt.yml'
+  pull_request:
+    branches:
+      - research/v12-gross-compare-clean-20260821
+    paths:
+      - 'scripts/research_v12_top2_gross15_one_year.ts'
+      - '.github/workflows/v12-top2-gross15-one-year-bt.yml'
   workflow_dispatch:
 
 permissions:
@@ -40,10 +46,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run latest one-year V12 Top2 residual comparison
+      - name: Pin latest complete monthly-archive year
+        run: |
+          cp scripts/research_v12_top2_gross15_one_year.ts scripts/.research_v12_top2_gross15_complete_year.ts
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/.research_v12_top2_gross15_complete_year.ts')
+          s = p.read_text()
+          s = s.replace('const START = Date.UTC(2025, 7, 21);', 'const START = Date.UTC(2025, 7, 1);')
+          s = s.replace('const END = Date.UTC(2026, 7, 21);', 'const END = Date.UTC(2026, 7, 1);')
+          p.write_text(s)
+          PY
+
+      - name: Run latest complete one-year V12 Top2 residual comparison
         run: |
           set -o pipefail
-          npx tsx scripts/research_v12_top2_gross15_one_year.ts 2>&1 | tee .research-state/v12-top2-gross15/run.log
+          mkdir -p .research-state/v12-top2-gross15
+          npx tsx scripts/.research_v12_top2_gross15_complete_year.ts 2>&1 | tee .research-state/v12-top2-gross15/run.log
 
       - name: Validate research boundary and requested variant
         run: |
@@ -53,6 +72,7 @@ jobs:
           if (p.status !== 'PASS_RESEARCH_ONLY') throw new Error('research status failed');
           if (p.ordersSent !== false || p.productionChanged !== false || p.vpsChanged !== false) throw new Error('research boundary failed');
           if (p.period.calendarDays !== 365) throw new Error(`unexpected days ${p.period.calendarDays}`);
+          if (!p.period.startInclusive.startsWith('2025-08-01') || !p.period.endExclusive.startsWith('2026-08-01')) throw new Error(`unexpected complete-year period ${JSON.stringify(p.period)}`);
           if (!p.results.top2_residual_cap1p50) throw new Error('missing requested Top2 1.50 result');
           for (const mode of ['normal','stress']) {
             const r = p.results.top2_residual_cap1p50[mode];
@@ -62,6 +82,7 @@ jobs:
           NODE
 
       - name: Publish branch research results
+        if: github.event_name == 'push'
         run: |
           mkdir -p docs/research-results
           cp .research-state/v12-top2-gross15/result.json docs/research-results/v12-top2-gross15-one-year-latest.json
