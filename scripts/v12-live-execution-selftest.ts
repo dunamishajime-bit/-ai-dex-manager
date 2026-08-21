@@ -96,6 +96,16 @@ function fakeAdapter(): FakeAdapter {
         pendingObservedBeforeSend: false,
         executor: {
             getMarketQuote: async (symbol: string) => ({ symbol, bidPrice: 99.9, askPrice: 100.1, bidQuantity: 100, askQuantity: 100, midPrice: 100, spreadBps: 20, updatedAt: NOW }),
+            normalizeMarketQuantity: async (symbol: string, requestedQuantity: number, referencePrice: number) => ({
+                symbol,
+                quantity: requestedQuantity,
+                quantityText: String(requestedQuantity),
+                minQuantity: 0.001,
+                maxQuantity: 1_000_000,
+                stepSize: 0.001,
+                minNotional: 0,
+                notional: requestedQuantity * referencePrice,
+            }),
         },
         credentialsReady: async () => true,
         getAccountSnapshot: async () => ({ availableBalance: 1000, walletBalance: 1000, asset: "USDT", updatedAt: NOW }),
