@@ -1,14 +1,14 @@
 {
   "strategyId": "V96_STOCK_V13G_V13D_FIXED_FORWARD",
-  "status": "V13G_V13D_FIXED_FORWARD_IN_PROGRESS",
-  "generatedAt": "2026-08-20T20:49:23.439486Z",
+  "status": "V13G_V13D_FIXED_FORWARD_COVERAGE_INCOMPLETE",
+  "generatedAt": "2026-08-21T20:43:27.804591Z",
   "configSha256": "2b4e103c01e0b386ff87146cfde01ef60c854bcb9554656a5a764d4b601a3875",
   "window": {
     "firstSession": "2026-07-27",
     "lastSession": "2026-08-21",
     "requiredSessions": 20,
     "completeSessions": 0,
-    "collectionWindowFinished": false
+    "collectionWindowFinished": true
   },
   "frozenArms": {
     "V13G": {
@@ -373,6 +373,10 @@
     },
     {
       "path": "/tmp/v13-dual-data/research-data/v13g-v13d-forward-20260727/chunks/2026-08-20/32378143698",
+      "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT"
+    },
+    {
+      "path": "/tmp/v13-dual-data/research-data/v13g-v13d-forward-20260727/chunks/2026-08-21/32490229924",
       "reason": "NO_QUALITY_ELIGIBLE_ATTEMPT"
     }
   ],
