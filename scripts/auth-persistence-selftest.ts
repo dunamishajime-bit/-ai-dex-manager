@@ -15,6 +15,16 @@ assert.equal(
   "production releases must use the shared data directory",
 );
 
+const legacyDeployRoot = path.join(tempRoot, "legacy-deploy");
+const legacyRelease = path.join(legacyDeployRoot, "disdex-trading", "releases", "current-sha");
+const legacyShared = path.join(legacyDeployRoot, "disdex-ui", "shared", "data");
+fs.mkdirSync(legacyShared, { recursive: true });
+assert.equal(
+  getDisterminalDataDir(legacyRelease, { NODE_ENV: "production" }),
+  legacyShared,
+  "a release mounted under a migrated project root must retain the existing durable auth store",
+);
+
 const explicit = path.join(tempRoot, "explicit-data");
 assert.equal(
   getDisterminalDataDir(currentRelease, {
