@@ -29,7 +29,7 @@ type TradeHistoryEntry = {
   closedAt?: string;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
   positionSide?: "BOTH" | "LONG" | "SHORT";
-  strategyId?: "V96" | "V52" | "UNKNOWN";
+  strategyId?: "V12" | "V52" | "UNKNOWN";
   commission?: number;
   netPnlUsd?: number;
 };

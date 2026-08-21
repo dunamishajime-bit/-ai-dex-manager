@@ -91,8 +91,18 @@ const MESSAGE_TYPES = {
 } as const;
 
 export function loadAsterDexClientConfig(): AsterDexClientConfig | null {
-  const apiKey = process.env.ASTER_API_KEY?.trim() || "";
-  const apiSecret = process.env.ASTER_API_SECRET?.trim() || "";
+  const apiSecret = (
+    process.env.ASTER_API_SECRET
+    || process.env.ASTER_API_PRIVATE_KEY
+    || ""
+  ).trim();
+  if (!apiSecret) return null;
+
+  // Production UI uses ASTER_API_PRIVATE_KEY. Derive the API signer address
+  // when the optional API-key alias is absent; secret material is never
+  // returned or serialized by the client.
+  const derivedSigner = privateKeyToAccount(apiSecret as `0x${string}`).address;
+  const apiKey = (process.env.ASTER_API_KEY?.trim() || derivedSigner).trim();
   const userAddress = (
     process.env.ASTER_USER_ADDRESS
     || process.env.ASTER_MAIN_ADDRESS

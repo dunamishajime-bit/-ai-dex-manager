@@ -11,10 +11,11 @@ export function LiveProductionBanner() {
           {config.strategyLabel}
         </span>
         <span>{config.executionVenue}</span>
-        <span>V96損失上限 {config.v96DailyLossPct}%</span>
+        <span>V12+PENGU共有損失上限 {config.sharedCryptoDailyLossPct}%</span>
         <span>V52損失上限 {config.v52DailyLossPct}%</span>
-        <span>最大Gross {config.maximumGross.toFixed(1)}</span>
-        <span>PENGU初期Gross {config.penguInitialGross.toFixed(2)}</span>
+        <span>Portfolio Gross上限 {config.maximumGross.toFixed(1)}x</span>
+        <span>V12 {config.v12SizingMode} / PENGU上限 {config.penguGross.toFixed(2)}x / Crypto共有 {config.sharedCryptoGross.toFixed(1)}x</span>
+        <span>V52 Stock {config.v52StockGross.toFixed(1)}x（V11 {config.v52V11Gross.toFixed(1)}x / V50 {config.v52V50Gross.toFixed(1)}x）</span>
         <span className="inline-flex items-center gap-1 text-emerald-200">
           <ShieldCheck className="h-3.5 w-3.5" />
           Kill Switch / Parity / Override は実状態を確認
