@@ -112,8 +112,9 @@ async function main() {
         if (nonzero.length) throw new Error(`V12_MARGIN_FLATTEN_RECOVERY_ACCOUNT_NOT_FLAT:${nonzero.map((row) => row.symbol).join(",")}`);
         if (openOrders.length) throw new Error(`V12_MARGIN_FLATTEN_RECOVERY_OPEN_ORDERS_PRESENT:${openOrders.map((row) => row.symbol).join(",")}`);
 
+        const marginPythonPath = process.env.DISDEX_MARGIN_GUARD_PYTHONPATH || "/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages";
         const margin = spawnSync("/usr/bin/python3", ["scripts/disdex_v12_v52_margin_guard_runtime.py", "--mode", "live", "--preflight-readonly"], {
-            cwd: process.cwd(), env: { ...process.env, PYTHONPATH: `${resolve(process.cwd(), "scripts")}${process.env.PYTHONPATH ? `:${process.env.PYTHONPATH}` : ""}` }, encoding: "utf8", timeout: 30_000,
+            cwd: process.cwd(), env: { ...process.env, PYTHONPATH: `${resolve(process.cwd(), "scripts")}:${marginPythonPath}${process.env.PYTHONPATH ? `:${process.env.PYTHONPATH}` : ""}` }, encoding: "utf8", timeout: 30_000,
         });
         if (margin.status !== 0) throw new Error(`V12_MARGIN_FLATTEN_RECOVERY_MARGIN_PREFLIGHT_FAILED:${String(margin.stderr || margin.stdout || "").slice(-700)}`);
         const marginState = parseLastJson(String(margin.stdout || ""));
