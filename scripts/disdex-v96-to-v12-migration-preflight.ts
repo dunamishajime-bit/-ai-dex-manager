@@ -67,10 +67,28 @@ async function main() {
     const unknownOrders = openOrders.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
     if (unknownOrders.length) throw new Error(`MIGRATION_BLOCKED_UNKNOWN_OPEN_ORDER:${unknownOrders.map((row) => row.symbol).join(",")}`);
 
-    const v96Positions = nonzero.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
+    // A partially completed activation may already have reconciled a V12
+    // position on a symbol that was also part of the legacy V96 universe
+    // (currently SOLUSDT).  That position is not a V96 residual and must not
+    // make the migration fail closed as "V96 not flat".  It is exempted only
+    // when the V12 state below is active and will pass the exact
+    // state/side/quantity/protection reconciliation; any other V96-core
+    // position remains a hard blocker.
+    const reconciledV12Symbol = v12State.active ? String(v12State.active.symbol).toUpperCase() : undefined;
+    const v96Positions = nonzero.filter((row) => {
+        const symbol = String(row.symbol).toUpperCase();
+        return V96_CORE_SYMBOLS.has(symbol) && symbol !== reconciledV12Symbol;
+    });
     if (v96Positions.length) throw new Error(`MIGRATION_BLOCKED_V96_NOT_FLAT:${v96Positions.map((row) => `${row.symbol}:${row.positionAmt}`).join(",")}`);
 
-    const v96OpenOrders = openOrders.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
+    const v12ProtectionIds = new Set(v12State.active
+        ? [v12State.active.protection.stopClientOrderId, v12State.active.protection.takeProfitClientOrderId].filter(Boolean)
+        : []);
+    const v96OpenOrders = openOrders.filter((row) => {
+        const symbol = String(row.symbol).toUpperCase();
+        const clientOrderId = String(row.clientOrderId || "");
+        return V96_CORE_SYMBOLS.has(symbol) && !v12ProtectionIds.has(clientOrderId);
+    });
     if (v96OpenOrders.length) throw new Error(`MIGRATION_BLOCKED_V96_OPEN_ORDERS:${v96OpenOrders.map((row) => `${row.symbol}:${row.clientOrderId || row.orderId || "unknown"}`).join(",")}`);
     const v96ResidentProtection = v96OpenOrders.filter((row) => ["STOP_MARKET", "TAKE_PROFIT_MARKET"].includes(String(row.type || "").toUpperCase()) || row.reduceOnly === true || row.closePosition === true);
     if (v96ResidentProtection.length) throw new Error(`MIGRATION_BLOCKED_V96_RESIDENT_PROTECTION:${v96ResidentProtection.length}`);
