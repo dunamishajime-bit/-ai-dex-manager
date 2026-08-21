@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download, ExternalLink, RefreshCw } from "lucide-react";
+import { Download, ExternalLink, RefreshCw, CalendarDays } from "lucide-react";
+import Link from "next/link";
 
 import { Card } from "@/components/ui/Card";
 
@@ -28,6 +29,7 @@ type TradeHistoryEntry = {
   openedAt?: string;
   closedAt?: string;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
+  positionVerified?: boolean;
   positionSide?: "BOTH" | "LONG" | "SHORT";
   strategyId?: "V12" | "V52" | "UNKNOWN";
   commission?: number;
@@ -161,6 +163,13 @@ export default function HistoryPage() {
         </div>
 
         <div className="flex gap-2">
+          <Link
+            href="/performance"
+            className="flex items-center gap-2 rounded-lg border border-gold-500/40 bg-gold-500/10 px-4 py-2 text-sm text-gold-300 transition-colors hover:bg-gold-500/20"
+          >
+            <CalendarDays className="h-4 w-4" />
+            日別損益カレンダー
+          </Link>
           <button
             onClick={() => void loadEntries()}
             className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition-colors hover:bg-white/10"
@@ -232,7 +241,7 @@ export default function HistoryPage() {
                   <td className="px-3 py-4 font-mono text-xs text-gray-300">
                     {new Date(entry.executedAt).toLocaleString("ja-JP")}
                   </td>
-                  <td className="px-3 py-4 text-xs text-white/70">{entry.tradeStatus === "closed" ? "\u6c7a\u6e08\u6e08\u307f" : entry.tradeStatus === "open" ? "\u5efa\u7389\u7167\u5408\u5f85\u3061" : "\u7167\u5408\u4e0d\u4e00\u81f4"}</td>
+                  <td className="px-3 py-4 text-xs text-white/70">{entry.tradeStatus === "closed" ? "\u6c7a\u6e08\u6e08\u307f" : entry.tradeStatus === "open" && entry.positionVerified !== false ? "\u5efa\u7389\u7167\u5408\u6e08\u307f" : entry.tradeStatus === "open" ? "\u904e\u53bb\u5c65\u6b74\uff08\u73fe\u4fdd\u6709\u306a\u3057\uff09" : "\u7167\u5408\u4e0d\u4e00\u81f4"}</td>
                   <td className={`px-3 py-4 font-semibold ${entry.action === "BUY" ? "text-emerald-400" : "text-red-400"}`}>
                     {entry.action === "BUY" ? "買い" : "売り"}
                   </td>

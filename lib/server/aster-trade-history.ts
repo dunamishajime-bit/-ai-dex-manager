@@ -15,6 +15,7 @@ const STABLE_ASSETS = new Set(["USDT", "USDC", "USDF", "BUSD", "FDUSD"]);
 type Direction = "LONG" | "SHORT";
 type Lot = { quantity: number; costUsd: number; openedAt: string };
 type Book = { netQuantity: number; lots: Lot[] };
+type LivePosition = { symbol?: string; positionAmt?: string | number; positionSide?: string };
 
 let cache: { expiresAt: number; entries: TradeHistoryEntry[]; error?: string } | null = null;
 
@@ -75,6 +76,36 @@ function directionForTrade(trade: AsterDexUserTrade, currentNetQuantity: number)
   if (currentNetQuantity > 1e-10) return side === "SELL" ? "LONG" : "SHORT";
   if (currentNetQuantity < -1e-10) return side === "BUY" ? "SHORT" : "LONG";
   return side === "BUY" ? "LONG" : "SHORT";
+}
+
+function livePositionSide(position: LivePosition): { side: Direction; quantity: number } | null {
+  const amount = finite(position.positionAmt);
+  const quantity = Math.abs(amount);
+  if (!position.symbol || quantity <= 0.0000001) return null;
+  const positionSide = String(position.positionSide || "BOTH").toUpperCase();
+  const side = positionSide === "SHORT" || (positionSide !== "LONG" && amount < 0) ? "SHORT" : "LONG";
+  return { side, quantity };
+}
+
+function reconcileOpenEntries(entries: TradeHistoryEntry[], positions: LivePosition[]) {
+  const current = new Map<string, Map<Direction, number>>();
+  for (const position of positions) {
+    const symbol = String(position.symbol || "").toUpperCase();
+    const normalized = livePositionSide(position);
+    if (!symbol || !normalized) continue;
+    const bySide = current.get(symbol) || new Map<Direction, number>();
+    bySide.set(normalized.side, (bySide.get(normalized.side) || 0) + normalized.quantity);
+    current.set(symbol, bySide);
+  }
+
+  return entries.map((entry) => {
+    if (entry.tradeStatus !== "open") return entry;
+    const side = entry.positionSide === "SHORT" ? "SHORT" : "LONG";
+    const base = side === "SHORT" ? entry.sourceSymbol : entry.destSymbol;
+    const symbol = `${base}USDT`.toUpperCase();
+    const quantity = current.get(symbol)?.get(side) || 0;
+    return { ...entry, positionVerified: quantity > 0.0000001 };
+  });
 }
 
 function toHistoryEntry(
@@ -217,6 +248,15 @@ async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error
     }
   }
 
+  // The fill ledger is historical evidence; it is not authoritative for the
+  // current position. Reconcile open-looking fills against positionRisk so a
+  // closed SOLUSDT position cannot remain displayed as a live holding.
+  try {
+    const positions = await client.getPositionRisk();
+    entries.splice(0, entries.length, ...reconcileOpenEntries(entries, positions));
+  } catch (error) {
+    errors.push("position reconciliation: " + (error instanceof Error ? error.message : "Position snapshot unavailable"));
+  }
   entries.sort((left, right) => Date.parse(right.executedAt) - Date.parse(left.executedAt));
   return {
     entries,

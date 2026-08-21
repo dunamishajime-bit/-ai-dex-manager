@@ -216,28 +216,28 @@ export default function PerformancePage() {
     [closedTrades],
   );
 
-  const latestTradeOpenedAt = closedTrades.length ? closedTrades[closedTrades.length - 1].closedAt : null;
+  const latestTradeClosedAt = closedTrades.length ? closedTrades[closedTrades.length - 1].closedAt : null;
   const latestWeek = weekly[0];
   const latestMonth = monthly[0];
 
   useEffect(() => {
-    if (latestTradeOpenedAt) {
-      setMonthCursor(startOfMonth(new Date(latestTradeOpenedAt)));
+    if (latestTradeClosedAt) {
+      setMonthCursor(startOfMonth(new Date(latestTradeClosedAt)));
     }
-  }, [latestTradeOpenedAt]);
+  }, [latestTradeClosedAt]);
 
   const calendarDays = useMemo(() => buildCalendarDays(monthCursor), [monthCursor]);
   const calendarMap = useMemo(() => {
     const map = new Map<string, ClosedTrade[]>();
     for (const trade of closedTrades) {
-      const key = dateKey(new Date(trade.openedAt));
+      const key = dateKey(new Date(trade.closedAt));
       map.set(key, [...(map.get(key) || []), trade]);
     }
     return map;
   }, [closedTrades]);
 
   const monthTrades = useMemo(
-    () => closedTrades.filter((trade) => monthKey(new Date(trade.openedAt)) === monthKey(monthCursor)).reverse(),
+    () => closedTrades.filter((trade) => monthKey(new Date(trade.closedAt)) === monthKey(monthCursor)).reverse(),
     [closedTrades, monthCursor],
   );
 
@@ -325,7 +325,7 @@ export default function PerformancePage() {
             <CalendarDays className="h-5 w-5 text-gold-300" />
             <div>
               <div className="text-lg font-semibold text-white">{monthLabel(monthCursor)}</div>
-              <div className="text-xs text-gray-500">エントリー日ベースでクローズ成績を表示</div>
+              <div className="text-xs text-gray-500">決済日ベースで実現損益を表示</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -338,7 +338,7 @@ export default function PerformancePage() {
             </button>
             <button
               type="button"
-              onClick={() => setMonthCursor(startOfMonth(latestTradeOpenedAt ? new Date(latestTradeOpenedAt) : new Date()))}
+              onClick={() => setMonthCursor(startOfMonth(latestTradeClosedAt ? new Date(latestTradeClosedAt) : new Date()))}
               className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10"
             >
               最新月

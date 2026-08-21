@@ -39,6 +39,8 @@ export interface TradeHistoryEntry {
   commissionAsset?: string;
   maker?: boolean;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
+  /** Whether an open fill is confirmed by the current venue position snapshot. */
+  positionVerified?: boolean;
   strategyId?: "V96" | "V52" | "UNKNOWN";
   netPnlUsd?: number;
 }
