@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import fs from "fs";
 import path from "path";
 
@@ -17,10 +16,6 @@ function existingSharedDataDir(resolvedCwd: string): string | null {
   return null;
 }
 
-=======
-import path from "path";
-
->>>>>>> 43843de8 (Persist authentication across UI releases)
 export function getDisterminalDataDir(
   cwd = process.cwd(),
   env: NodeJS.ProcessEnv = process.env,
@@ -30,11 +25,7 @@ export function getDisterminalDataDir(
   const resolvedCwd = path.resolve(cwd);
   const releaseDir = path.basename(path.dirname(resolvedCwd)) === "releases";
   if (releaseDir) {
-<<<<<<< HEAD
     return existingSharedDataDir(resolvedCwd) ?? path.resolve(resolvedCwd, "..", "..", "shared", "data");
-=======
-    return path.resolve(resolvedCwd, "..", "..", "shared", "data");
->>>>>>> 43843de8 (Persist authentication across UI releases)
   }
   return path.join(resolvedCwd, "data");
 }
