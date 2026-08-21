@@ -49,6 +49,25 @@ recover_stale_local_state() {
   printf 'V12_PARTIAL_LOCAL_STATE_RECOVERY_PASS requestId=%s ordersSent=false positionChangesSent=false\n' "$request_id"
 }
 
+recover_stale_margin_flatten() {
+  local recovery_script="$release/scripts/disdex-v12-margin-flatten-recovery.ts"
+  local request_id="v12-margin-flatten-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  [[ -f "$recovery_script" && ! -L "$recovery_script" ]] || {
+    printf 'V12_MARGIN_FLATTEN_RECOVERY_SCRIPT_MISSING\n' >&2
+    return 2
+  }
+  set -a
+  source /etc/disdex/disdex-v13d-v11eq-v96.env
+  source /etc/disdex/disdex-v12-pengu-v2-v52.env
+  source /etc/disdex/disdex-v12-x1-all.env
+  set +a
+  (
+    cd "$release"
+    runuser -u deploy --preserve-environment -- \
+      "$release/node_modules/.bin/tsx" "$recovery_script" "$sha" "$request_id"
+  )
+}
+
 safe_release_gc() {
   local root="/home/deploy/disdex-trading/releases" current_path dir name marker marker_sha
   current_path="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
@@ -160,6 +179,7 @@ quiesce_previous_partial_activation() {
       state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
       [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_NO_TARGET_TRADING_UNIT_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
     done
+    recover_stale_margin_flatten
     recover_stale_local_state
     systemctl stop "$previous_margin" "$previous_risk"
     for unit in "$previous_margin" "$previous_risk"; do
@@ -213,6 +233,7 @@ quiesce_previous_partial_activation() {
     state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
     [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_QUIESCE_FAILED unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
   done
+  recover_stale_margin_flatten
   run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_POST_QUIESCE
   run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_POST_QUIESCE
   recover_stale_local_state
@@ -267,7 +288,8 @@ for required in \
   scripts/ops/root/install-disdex-v12-live \
   scripts/ops/root/disdex-v96-to-v12-live-migrate-final \
   scripts/ops/root/disdex-v12-live-status-report \
-  scripts/disdex-v12-stale-local-state-recovery.ts; do
+  scripts/disdex-v12-stale-local-state-recovery.ts \
+  scripts/disdex-v12-margin-flatten-recovery.ts; do
   [[ -f "$release/$required" && ! -L "$release/$required" ]] || { printf 'V12_ACTIVATE_V3_RELEASE_TOOL_MISSING path=%s\n' "$required" >&2; exit 4; }
 done
 

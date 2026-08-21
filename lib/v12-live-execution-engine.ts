@@ -4,6 +4,7 @@ import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import { readSharedKillSwitch } from "@/lib/disdex-shared-kill-switch";
 import type { ActivePortfolioPosition } from "@/lib/disdex-unified-portfolio-routing";
 import { V12AsterLiveAdapter, deterministicV12ClientOrderId } from "@/lib/v12-aster-live-adapter";
 import {
@@ -22,6 +23,7 @@ import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-execu
 
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 const EPS = 1e-12;
+const MARGIN_GUARD_FLATTEN_REASON_PREFIX = "V52 margin-aware fatal tick error:";
 
 export type V12LiveTickStatus = "locked" | "held" | "no-signal" | "capacity-blocked" | "entered" | "exited" | "risk-blocked" | "manual-review";
 export interface V12LiveTickResult { status: V12LiveTickStatus; reason: string; signal?: V12Signal; clientOrderId?: string; }
@@ -110,6 +112,40 @@ export class V12LiveExecutionEngine {
         return false;
     }
 
+    /**
+     * The shared Margin Guard may flatten a V12 position after an upstream
+     * V52 data/API failure. In that case the exchange is already flat and the
+     * V12 protection orders are gone, so treating the expected external
+     * flatten as an unknown count mismatch only creates a second outage.
+     * This narrow reconciliation never clears the shared kill switch and
+     * requires the exact fail-closed reason plus a clean V12 order book.
+     */
+    private async reconcileExternalManagedFlatten(state: V12X1AllRunnerState, positions: DirectPosition[]) {
+        if (!state.active || state.pending || state.manualReview !== "V12_POSITION_COUNT_MISMATCH" || state.killSwitch?.active !== true) return false;
+        if (state.killSwitch.reason !== "V12_POSITION_COUNT_MISMATCH") return false;
+        const sharedKill = await readSharedKillSwitch();
+        if (!sharedKill.active || !sharedKill.reason?.startsWith(MARGIN_GUARD_FLATTEN_REASON_PREFIX)) return false;
+        const actualV12 = positions.filter((row) => V12_SYMBOLS.has(row.symbol.toUpperCase()) && Math.abs(row.quantity) > EPS);
+        if (actualV12.length) return false;
+        const activeV12Orders = (await this.d.adapter.listV12Orders()).filter((row) => activeOrderStatus(row.status));
+        if (activeV12Orders.length) return false;
+        const flattenedSymbols = activePositionsOf(state).map((row) => row.symbol);
+        syncActivePositions(state, []);
+        state.manualReview = undefined;
+        state.killSwitch = undefined;
+        state.cooldownUntilTs = (state.lastReferenceTs || this.now()) + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000;
+        await this.d.stateStore.save(state);
+        this.log("v12-external-managed-flatten-reconciled", {
+            reason: sharedKill.reason,
+            flattenedSymbols,
+            positionsAfter: actualV12.length,
+            activeV12OrdersAfter: activeV12Orders.length,
+            ordersSent: false,
+            positionChangesSent: false,
+        });
+        return true;
+    }
+
     private async reconcilePendingEntry(state: V12X1AllRunnerState, pending: V12PendingOrderState, positions: DirectPosition[]): Promise<V12LiveTickResult | undefined> {
         const result = await this.d.adapter.reconcileOrder(pending.symbol, pending.clientOrderId);
         if (result.status === "UNKNOWN") return this.fail(state, `V12_PENDING_ENTRY_UNKNOWN:${pending.clientOrderId}`);
@@ -173,7 +209,10 @@ export class V12LiveExecutionEngine {
 
     private async restartReconcile(state: V12X1AllRunnerState, positions: DirectPosition[]) : Promise<V12LiveTickResult | undefined> {
         this.validatePortfolioPositions(positions);
-        if (state.killSwitch?.active || state.manualReview) return { status: "manual-review", reason: state.killSwitch?.reason || state.manualReview || "V12_MANUAL_REVIEW" };
+        if (state.killSwitch?.active || state.manualReview) {
+            if (await this.reconcileExternalManagedFlatten(state, positions)) return { status: "held", reason: "V12_EXTERNAL_MANAGED_FLATTEN_RECONCILED" };
+            return { status: "manual-review", reason: state.killSwitch?.reason || state.manualReview || "V12_MANUAL_REVIEW" };
+        }
         if (state.pending) {
             if (state.pending.action === "ENTRY") return this.reconcilePendingEntry(state, state.pending, positions);
             if (state.pending.action === "EXIT") return this.reconcilePendingExit(state, state.pending, positions);
@@ -282,6 +321,10 @@ export class V12LiveExecutionEngine {
             const positions = await this.d.adapter.getPositions();
             const recovery = await this.restartReconcile(state, positions); if (recovery) return recovery;
             state = await this.d.stateStore.load();
+            const sharedKill = await readSharedKillSwitch();
+            if (sharedKill.active && !activePositionsOf(state).length) {
+                return { status: "risk-blocked", reason: `SHARED_KILL_SWITCH:${sharedKill.reason || "UNSPECIFIED"}` };
+            }
             const data = await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
 
             const actives = activePositionsOf(state);
