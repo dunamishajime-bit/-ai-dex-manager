@@ -12,7 +12,12 @@ export const V12_X1_ALL = Object.freeze({
     inputTimeframeHours: 1,
     multiplier: 1,
     entryPolicy: "ALL" as const,
-    maximumPositions: 1,
+    // V12 Top2 residual entry contract.  Signal/indicator logic remains
+    // frozen; only the portfolio sleeve may use a second ranked candidate
+    // when fresh shared capacity is available.
+    maximumPositions: 2,
+    aggregateEntryGrossCap: 1.5,
+    perPositionEntryGrossCap: 1.0,
     leverage: 1,
     riskPerTradePct: 3.19,
     maxMarginUsagePct: 100,
@@ -59,6 +64,9 @@ export interface ResolvedV12Runtime {
     liveTradingEnabled: boolean;
     liveExecutionEnabled: boolean;
     multiplier: 1;
+    aggregateEntryGrossCap: 1.5;
+    perPositionEntryGrossCap: 1.0;
+    maximumPositions: 2;
     lockPath?: string;
     statePath: string;
     riskPath: string;
@@ -74,6 +82,9 @@ export function resolveV12X1AllRuntime(env: Partial<NodeJS.ProcessEnv> = process
         liveTradingEnabled: boolEnv(env.V12_X1_ALL_LIVE_TRADING_ENABLED, V12_X1_ALL_RUNTIME.liveTradingEnabled),
         liveExecutionEnabled: boolEnv(env.V12_X1_ALL_LIVE_EXECUTION_ENABLED, V12_X1_ALL_RUNTIME.liveExecutionEnabled),
         multiplier: 1,
+        aggregateEntryGrossCap: V12_X1_ALL.aggregateEntryGrossCap,
+        perPositionEntryGrossCap: V12_X1_ALL.perPositionEntryGrossCap,
+        maximumPositions: V12_X1_ALL.maximumPositions,
         lockPath: env.DISDEX_ACCOUNT_LOCK_PATH,
         statePath: env.V12_X1_ALL_STATE_PATH || ".runtime-state/v12-x1-all/runner.json",
         riskPath: env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || ".runtime-state/shared/crypto-daily-risk.json",

@@ -34,6 +34,24 @@ export interface V12Signal extends V12Candidate {
     regime: V12Regime;
 }
 
+export function buildV12Signals(universe: Record<string, V12Bar[]>, index: number, limit: number = V12_X1_ALL.maximumPositions): V12Signal[] {
+    const btc = universe.BTC;
+    if (!btc?.[index]) return [];
+    const regime = computeV12Regime(btc, index);
+    if (!regime) return [];
+    const candidates = V12_X1_ALL.universe
+        .map((symbol) => candidateFor(symbol, universe[symbol] || [], index, regime))
+        .filter((candidate): candidate is V12Candidate => Boolean(candidate))
+        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol))
+        .slice(0, Math.max(0, Math.floor(limit)));
+    return candidates.map((candidate) => ({
+        ...candidate,
+        regime,
+        referenceTs: universe[candidate.symbol][index].endTs,
+        entryTs: universe[candidate.symbol][index + 1]?.ts || universe[candidate.symbol][index].endTs,
+    }));
+}
+
 export interface V12PositionSizing {
     requestedNotional: number;
     requestedGross: number;
@@ -156,17 +174,7 @@ function candidateFor(symbol: string, bars: V12Bar[], index: number, regime: V12
 }
 
 export function buildV12Signal(universe: Record<string, V12Bar[]>, index: number): V12Signal | null {
-    const btc = universe.BTC;
-    if (!btc?.[index]) return null;
-    const regime = computeV12Regime(btc, index);
-    if (!regime) return null;
-    const candidates = V12_X1_ALL.universe
-        .map((symbol) => candidateFor(symbol, universe[symbol] || [], index, regime))
-        .filter((candidate): candidate is V12Candidate => Boolean(candidate))
-        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol));
-    const winner = candidates[0];
-    if (!winner) return null;
-    return { ...winner, regime, referenceTs: universe[winner.symbol][index].endTs, entryTs: universe[winner.symbol][index + 1]?.ts || universe[winner.symbol][index].endTs };
+    return buildV12Signals(universe, index, 1)[0] || null;
 }
 
 export function sizeV12Position(equity: number, entryPrice: number, candidateAtr: number, side: V12Side): V12PositionSizing {

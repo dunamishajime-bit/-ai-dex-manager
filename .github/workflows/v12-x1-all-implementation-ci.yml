@@ -68,6 +68,8 @@ jobs:
       - name: Run V12 and cross-language safety self-tests
         run: |
           npx tsx scripts/v12-x1-all-selftest.ts
+          npx tsx scripts/v12-top2-residual-selftest.ts
+          npx tsx scripts/v12-top2-race-selftest.ts
           npx tsx scripts/disdex-account-order-lock-selftest.ts
           npx tsx scripts/disdex-account-order-lock-cross-language-selftest.ts
           npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
@@ -142,6 +144,9 @@ jobs:
           grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_ACCOUNT_LOCK_WAITER_TTL_MS=10000' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'PENGU_DUAL_LS_V2_LOCK_RETRY_MS=5000' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'V12_X1_ALL_ENTRY_GROSS_CAP=1.50' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'V12_X1_ALL_PER_POSITION_GROSS_CAP=1.00' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'V12_X1_ALL_MAX_POSITIONS=2' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v12_v52_margin_guard_runtime.py' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_V12_LIVE_ALLOW_REAL_ORDERS=true' ops/env/disdex-v12-x1-all.live.env.example
           grep -Fq 'V12_X1_ALL_LOCK_RETRY_MS=5000' ops/env/disdex-v12-x1-all.live.env.example

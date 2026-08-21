@@ -66,6 +66,8 @@ jobs:
       - name: Frozen strategy and execution safety tests
         run: |
           npx tsx scripts/v12-x1-all-selftest.ts
+          npx tsx scripts/v12-top2-residual-selftest.ts
+          npx tsx scripts/v12-top2-race-selftest.ts
           npx tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts
           npx tsx scripts/v12-resident-stop-selftest.ts
           npx tsx scripts/v12-live-execution-selftest.ts
@@ -119,6 +121,9 @@ jobs:
           grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.5' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'V12_X1_ALL_ENTRY_GROSS_CAP=1.50' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'V12_X1_ALL_PER_POSITION_GROSS_CAP=1.00' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'V12_X1_ALL_MAX_POSITIONS=2' ops/env/disdex-v12-pengu-v2-v52.env.example
           ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' \
             "$activate" \
             "$audit" \

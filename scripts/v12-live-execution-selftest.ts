@@ -137,12 +137,12 @@ function fakeAdapter(): FakeAdapter {
                 const disk = await fake.stateStore.load();
                 fake.pendingObservedBeforeSend = disk.pending?.clientOrderId === input.clientOrderId;
             }
-            fake.positions = [position(input.symbol, input.side === "LONG" ? input.quantity : -input.quantity, input.expectedPrice)];
+            fake.positions = [...fake.positions, position(input.symbol, input.side === "LONG" ? input.quantity : -input.quantity, input.expectedPrice)];
             return tradeResult({ clientOrderId: input.clientOrderId, symbol: input.symbol, executedQuantity: input.quantity, price: input.expectedPrice });
         },
         executeExit: async (input: { symbol: string; clientOrderId: string; quantity: number }) => {
             fake.exitCalls += 1;
-            fake.positions = [];
+            fake.positions = fake.positions.filter((row) => row.symbol.toUpperCase() !== input.symbol.toUpperCase());
             return tradeResult({ clientOrderId: input.clientOrderId, symbol: input.symbol, executedQuantity: input.quantity });
         },
     } as unknown as FakeAdapter;
@@ -196,7 +196,7 @@ async function main() {
     try {
         // Normal entry: durable pending must exist before the exchange send.
         const normal = await enterHarness(root, "normal");
-        assert.equal(normal.adapter.entryCalls, 1);
+        assert.equal(normal.adapter.entryCalls, 2);
         assert.equal(normal.adapter.pendingObservedBeforeSend, true, "durable pending must be saved before order send");
         assert.equal(normal.state.pending, undefined);
         assert.ok(normal.state.active?.protection.stopClientOrderId);
@@ -215,7 +215,7 @@ async function main() {
         });
         const restartResult = await restarted.tick();
         assert.equal(restartResult.status, "held");
-        assert.equal(normal.adapter.entryCalls, 1, "restart must not duplicate a completed entry");
+        assert.equal(normal.adapter.entryCalls, 2, "restart must not duplicate a completed entry");
 
         // Crash after exchange send but before local fill-state persistence: the
         // pending record and same clientOrderId recover the fill without resend.

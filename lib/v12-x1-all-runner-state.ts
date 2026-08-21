@@ -47,6 +47,10 @@ export interface V12X1AllRunnerState {
     lastReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     cooldownUntilTs?: number;
+    /** Primary `active` is retained for backward compatibility; new entries
+     * are persisted in ranked order here so up to two protected positions can
+     * be reconciled after restart without changing the state file contract. */
+    activePositions?: V12ActivePositionState[];
     active?: V12ActivePositionState;
     pending?: V12PendingOrderState;
     manualReview?: string;
@@ -62,6 +66,21 @@ function validate(value: Partial<V12X1AllRunnerState>, mode: V12X1AllRunnerState
     if (value.active) {
         if (!(value.active.quantity > 0 && value.active.entryPrice > 0 && value.active.atrAtEntry > 0)) throw new Error("V12_STATE_ACTIVE_INVALID");
         if (!value.active.protection || value.active.protection.positionId !== value.active.positionId) throw new Error("V12_STATE_PROTECTION_INVALID");
+    }
+    if (value.activePositions) {
+        if (!Array.isArray(value.activePositions) || value.activePositions.length > 2) throw new Error("V12_STATE_ACTIVE_POSITIONS_INVALID");
+        const symbols = new Set<string>();
+        let aggregateGross = 0;
+        for (const active of value.activePositions) {
+            const symbol = String(active.symbol || "").toUpperCase();
+            if (symbols.has(symbol)) throw new Error("V12_STATE_DUPLICATE_ACTIVE_SYMBOL");
+            symbols.add(symbol);
+            if (!(active.quantity > 0 && active.entryPrice > 0 && active.atrAtEntry > 0 && Number.isFinite(active.gross) && active.gross > 0 && active.gross <= 1)) throw new Error("V12_STATE_ACTIVE_POSITION_INVALID");
+            if (!active.protection || active.protection.positionId !== active.positionId) throw new Error("V12_STATE_ACTIVE_POSITION_PROTECTION_INVALID");
+            aggregateGross += active.gross;
+        }
+        if (aggregateGross > 1.5 + 1e-9) throw new Error("V12_STATE_AGGREGATE_GROSS_INVALID");
+        if (value.active && value.activePositions[0]?.positionId !== value.active.positionId) throw new Error("V12_STATE_PRIMARY_ACTIVE_MISMATCH");
     }
     if (value.pending) {
         if (!value.pending.clientOrderId || !value.pending.idempotencyKey || !value.pending.symbol || !value.pending.side || !(value.pending.quantity > 0) || !Number.isFinite(value.pending.signalTs)) throw new Error("V12_STATE_PENDING_INVALID");
