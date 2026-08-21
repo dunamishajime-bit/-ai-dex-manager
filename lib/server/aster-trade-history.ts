@@ -34,7 +34,8 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): "V12" | "V52" {
+function strategyForSymbol(symbol: string): "V12" | "PENGU" | "V52" {
+  if (/^PENGU/.test(symbol)) return "PENGU";
   return /^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol) ? "V52" : "V12";
 }
 

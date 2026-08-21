@@ -156,7 +156,7 @@ export function AutoTradeHistoryPanel({ compact = false }: { compact?: boolean }
                     {entry.desiredSymbol} / {toLabel(entry.desiredSide)}
                     {entry.trigger === "manual" ? (
                       <span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-2 py-0.5 text-[10px] font-bold text-gold-100">
-                        {entry.triggerLabel || "手動トレード判定"}
+                        {entry.triggerLabel || "自動売買判定"}
                       </span>
                     ) : null}
                     {hasRotation ? (

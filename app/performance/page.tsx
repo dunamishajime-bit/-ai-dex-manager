@@ -5,7 +5,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, TrendingUp } from "
 
 import { Card } from "@/components/ui/Card";
 import { useCurrency } from "@/context/CurrencyContext";
-import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { cn } from "@/lib/utils";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
 
@@ -22,7 +22,7 @@ type TradeHistoryEntry = {
   openedAt?: string;
   closedAt?: string;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
-  strategyId?: "V12" | "V52" | "UNKNOWN";
+  strategyId?: "V12" | "PENGU" | "V52" | "UNKNOWN";
   netPnlUsd?: number;
 };
 
@@ -181,7 +181,7 @@ function toneClass(value: number) {
 
 export default function PerformancePage() {
   const { formatPrice } = useCurrency();
-  const { wallet } = useOperationalWallet();
+  const { snapshot } = useLivePortfolio();
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -241,7 +241,7 @@ export default function PerformancePage() {
     [closedTrades, monthCursor],
   );
 
-  const portfolioUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
+  const portfolioUsd = snapshot?.account.balanceUsd ?? null;
 
   return (
     <div className="space-y-6 p-4 md:p-6">

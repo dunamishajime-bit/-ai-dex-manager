@@ -1114,7 +1114,7 @@ export async function runLiveHybridAutotrade(
     const summary: LiveHybridRunSummary = {
         strategyId: RECLAIM_HYBRID_STRATEGY_ID,
         trigger: context.trigger ?? "scheduled",
-        triggerLabel: context.trigger === "manual" ? "手動トレード判定" : "12H定期トレード判定",
+        triggerLabel: "自動売買判定",
         executedAt: new Date().toISOString(),
         decisionTime: decision.isoTime,
         desiredSymbol: summaryDesiredSymbol,

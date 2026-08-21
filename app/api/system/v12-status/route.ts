@@ -1,60 +1,150 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { execFile } from "node:child_process";
+import { readFile, readlink } from "node:fs/promises";
+import { promisify } from "node:util";
 import { NextResponse } from "next/server";
 
-import { V12_X1_ALL, resolveV12X1AllRuntime } from "@/config/v12X1AllRuntime";
-import { AsterV3Client } from "@/lib/aster-v3-client";
-import { V12AsterMarketDataProvider } from "@/lib/v12-aster-market-data-provider";
-import { buildV12Signals, computeV12Regime, evaluateV12Candidate } from "@/lib/v12-x1-all";
-import type { V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
+import { loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-async function readJson<T>(path: string): Promise<T | null> {
-  try { return JSON.parse(await readFile(resolve(path), "utf8")) as T; } catch { return null; }
+const execFileAsync = promisify(execFile);
+const FALLBACK_RELEASE = "";
+const V12_STATE_PATH = process.env.V12_X1_ALL_STATE_PATH || "/var/lib/disdex/v12-x1-all/runner.json";
+const SHARED_KILL_SWITCH_PATH = process.env.DISDEX_SHARED_KILL_SWITCH_FILE || "/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json";
+const V12_ENV_PATH = "/etc/disdex/disdex-v12-x1-all.env";
+
+type JsonObject = Record<string, unknown>;
+
+async function readJson(path: string): Promise<JsonObject | null> {
+  try {
+    const parsed = JSON.parse(await readFile(path, "utf8"));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as JsonObject : null;
+  } catch {
+    return null;
+  }
+}
+
+async function readEnv(path: string) {
+  try {
+    const text = await readFile(path, "utf8");
+    return Object.fromEntries(
+      text.split(/\r?\n/).flatMap((line) => {
+        const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
+        return match ? [[match[1], match[2].trim().replace(/^['"]|['"]$/g, "")]] : [];
+      }),
+    );
+  } catch {
+    return {} as Record<string, string>;
+  }
+}
+
+async function currentRelease() {
+  try {
+    const resolved = await readlink("/home/deploy/disdex-trading/current");
+    return resolved.split(/[\\/]/).filter(Boolean).at(-1) || FALLBACK_RELEASE;
+  } catch {
+    return FALLBACK_RELEASE;
+  }
+}
+
+async function serviceState(unit: string) {
+  try {
+    const { stdout } = await execFileAsync("systemctl", [
+      "show",
+      unit,
+      "-p",
+      "LoadState",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "MainPID",
+      "--no-pager",
+    ]);
+    const values = Object.fromEntries(stdout.trim().split(/\r?\n/).map((line) => {
+      const index = line.indexOf("=");
+      return index >= 0 ? [line.slice(0, index), line.slice(index + 1)] : [line, ""];
+    }));
+    return {
+      unit,
+      loadState: values.LoadState || "unknown",
+      activeState: values.ActiveState || "unknown",
+      subState: values.SubState || "unknown",
+      mainPid: Number(values.MainPID || 0),
+      active: values.ActiveState === "active" && values.SubState === "running",
+    };
+  } catch {
+    return { unit, loadState: "unknown", activeState: "unknown", subState: "unknown", mainPid: 0, active: false };
+  }
+}
+
+function asBoolean(value: unknown) {
+  return ["1", "true", "yes", "on", "live"].includes(String(value || "").trim().toLowerCase());
+}
+
+function maskAddress(value: string | undefined) {
+  const address = value?.trim() || "";
+  if (!address) return null;
+  if (address.length <= 12) return `${address.slice(0, 4)}***${address.slice(-3)}`;
+  return `${address.slice(0, 6)}***${address.slice(-4)}`;
 }
 
 export async function GET() {
-  const runtime = resolveV12X1AllRuntime();
-  const state = await readJson<V12X1AllRunnerState>(runtime.statePath);
-  const risk = await readJson<Record<string, unknown>>(runtime.riskPath);
-  const riskSourceComplete = risk?.sourceComplete === true;
-  const riskTripped = risk?.tripped === true;
-  const riskUpdatedAt = risk?.updatedAt || risk?.asOf || null;
-  const riskHealthy = Boolean(risk && riskSourceComplete && !riskTripped && Number(riskUpdatedAt) > 0);
-  const base = {
+  const [release, env, runnerState, sharedKill, asterConfig] = await Promise.all([
+    currentRelease(),
+    readEnv(V12_ENV_PATH),
+    readJson(V12_STATE_PATH),
+    readJson(SHARED_KILL_SWITCH_PATH),
+    Promise.resolve(loadAsterDexClientConfig()),
+  ]);
+
+  const suffix = release || "unknown";
+  const [v12Service, penguService, v52Service] = await Promise.all([
+    serviceState(`disdex-v12-x1-all@${suffix}.service`),
+    serviceState(`disdex-pengu-dual-ls-v2@${suffix}.service`),
+    serviceState(`disdex-v52-aster-only@${suffix}.service`),
+  ]);
+
+  const runnerKillSwitch = runnerState?.killSwitch as { active?: boolean; reason?: string } | undefined;
+  const sharedKillSwitch = sharedKill as { active?: boolean; reason?: string } | null;
+  const killSwitch = runnerKillSwitch || sharedKillSwitch || null;
+  const manualReview = typeof runnerState?.manualReview === "string" ? runnerState.manualReview : null;
+  const v12Configured = env.V12_X1_ALL_MODE === "LIVE"
+    && asBoolean(env.V12_X1_ALL_ENABLED)
+    && asBoolean(env.V12_X1_ALL_LIVE_TRADING_ENABLED)
+    && asBoolean(env.V12_X1_ALL_LIVE_EXECUTION_ENABLED);
+  const v12Running = v12Service.active && v12Configured && killSwitch?.active !== true && !manualReview;
+
+  return NextResponse.json({
     ok: true,
     generatedAt: new Date().toISOString(),
-    strategyId: V12_X1_ALL.strategyId,
-    mode: runtime.mode,
-    enabled: runtime.enabled,
-    liveTradingEnabled: runtime.liveTradingEnabled,
-    liveExecutionEnabled: runtime.liveExecutionEnabled,
-    caps: { v12Aggregate: runtime.aggregateEntryGrossCap, v12PerPosition: runtime.perPositionEntryGrossCap, maximumPositions: runtime.maximumPositions, crypto: 1.5, portfolio: 2.5 },
-    state: { activePositions: state?.activePositions || (state?.active ? [state.active] : []), pending: state?.pending || null, killSwitch: state?.killSwitch || null, manualReview: state?.manualReview || null },
-    risk: risk ? {
-      ok: riskHealthy,
-      reason: riskHealthy ? null : (riskTripped ? "SHARED_CRYPTO_DAILY_LOSS_TRIPPED" : riskSourceComplete ? "RISK_STATE_INVALID" : "RISK_STATE_INCOMPLETE"),
-      updatedAt: riskUpdatedAt,
-      lossPct: Number(risk.lossPct || 0),
-      maximumLossPct: Number(risk.maximumLossPct || 0),
-      tripped: riskTripped,
-      sourceComplete: riskSourceComplete,
-      netDailyPnl: Number(risk.netDailyPnl || 0),
-    } : { ok: false, reason: "RISK_STATE_UNAVAILABLE", updatedAt: null, lossPct: null, maximumLossPct: null, tripped: null, sourceComplete: false, netDailyPnl: null },
-  };
-  try {
-    const client = new AsterV3Client({ baseUrl: process.env.ASTER_FUTURES_BASE_URL, userAgent: "DisDex-HP-V12-Status/1.0" });
-    const data = await new V12AsterMarketDataProvider(client, { hourlyLimit: Number(process.env.V12_X1_ALL_HOURLY_LIMIT || 500) }).load();
-    const lengths = Object.values(data).map((bars) => bars.length);
-    const index = Math.min(...lengths) - 1;
-    const btc = data.BTC;
-    const regime = computeV12Regime(btc, index);
-    const candidates = V12_X1_ALL.universe.filter((symbol) => symbol !== "BTC").map((symbol) => evaluateV12Candidate(symbol, data[symbol], index, regime));
-    const signals = buildV12Signals(data, index).map((signal, rank) => ({ symbol: signal.symbol, side: signal.side, score: signal.score, rank: rank + 1, entryTs: signal.entryTs, referenceTs: signal.referenceTs }));
-    return NextResponse.json({ ...base, market: { source: "ASTER_FUTURES_V3_PUBLIC_KLINES", index, referenceTs: btc[index]?.endTs || null, regime, candidates, signals } });
-  } catch (error) {
-    return NextResponse.json({ ...base, market: { source: "ASTER_FUTURES_V3_PUBLIC_KLINES", unavailable: true, reason: error instanceof Error ? error.message : String(error), candidates: [], signals: [] } });
-  }
+    release,
+    ownerBinding: {
+      connected: Boolean(asterConfig?.userAddress),
+      walletAddress: maskAddress(asterConfig?.userAddress),
+      venue: "AsterDEX",
+      strategies: ["V12", "PENGU V2", "V52"],
+    },
+    v12: {
+      status: v12Running ? "running" : "blocked",
+      mode: env.V12_X1_ALL_MODE || "UNKNOWN",
+      enabled: v12Configured,
+      service: v12Service,
+      activePositions: Array.isArray(runnerState?.activePositions) ? runnerState.activePositions : [],
+      killSwitch,
+      manualReview,
+      reason: !v12Service.active ? "V12 service is not active." : manualReview || (killSwitch?.active ? String(killSwitch.reason || "Kill Switch active.") : null),
+    },
+    pengu: {
+      status: penguService.active ? "running" : "blocked",
+      service: penguService,
+    },
+    v52: {
+      status: v52Service.active ? "running" : "blocked",
+      service: v52Service,
+    },
+    status: v12Running && penguService.active && v52Service.active ? "running" : "blocked",
+  });
 }

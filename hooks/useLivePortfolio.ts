@@ -19,7 +19,14 @@ export type LivePortfolioSnapshot = {
   account: {
     balanceUsd: number;
     availableUsd: number;
+    maintenanceMarginUsd: number;
+    initialMarginUsd: number;
     unrealizedPnlUsd: number;
+  };
+  wallet: {
+    address: string;
+    venue: string;
+    ownerConnected: boolean;
   };
   positions: LivePosition[];
   orders: {

@@ -32,6 +32,15 @@ export interface TradeHistoryEntry {
   reason: string;
   openedAt?: string;
   closedAt?: string;
+  tradeId?: string;
+  orderId?: string;
+  positionSide?: "BOTH" | "LONG" | "SHORT";
+  commission?: number;
+  commissionAsset?: string;
+  maker?: boolean;
+  tradeStatus?: "open" | "closed" | "unmatched_exit";
+  strategyId?: "V12" | "PENGU" | "V52" | "V96" | "UNKNOWN";
+  netPnlUsd?: number;
 }
 
 interface OpenPositionRecord {

@@ -8,6 +8,8 @@ type AccountSnapshot = {
   totalMarginBalance?: string | number;
   totalWalletBalance?: string | number;
   availableBalance?: string | number;
+  totalMaintMargin?: string | number;
+  totalInitialMargin?: string | number;
   totalUnrealizedProfit?: string | number;
 };
 
@@ -37,6 +39,12 @@ function finite(value: unknown) {
 
 function bool(value: unknown) {
   return value === true || value === "true";
+}
+
+function maskAddress(value: string) {
+  const address = value.trim();
+  if (address.length <= 12) return `${address.slice(0, 4)}***${address.slice(-3)}`;
+  return `${address.slice(0, 6)}***${address.slice(-4)}`;
 }
 
 export async function GET() {
@@ -93,7 +101,14 @@ export async function GET() {
       account: {
         balanceUsd: finite(account?.totalMarginBalance || account?.totalWalletBalance),
         availableUsd: finite(account?.availableBalance),
+        maintenanceMarginUsd: finite(account?.totalMaintMargin),
+        initialMarginUsd: finite(account?.totalInitialMargin),
         unrealizedPnlUsd: finite(account?.totalUnrealizedProfit),
+      },
+      wallet: {
+        address: maskAddress(config.userAddress),
+        venue: "AsterDEX",
+        ownerConnected: Boolean(config.userAddress),
       },
       positions,
       orders: {

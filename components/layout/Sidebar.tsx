@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, CalendarDays, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useLogicStatus } from "@/hooks/useLogicStatus";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
 
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { status } = useLogicStatus();
 
   return (
     <aside className="hidden w-[188px] shrink-0 bg-[#04070c] px-3 py-4 md:flex md:flex-col">
@@ -31,7 +33,7 @@ export function Sidebar() {
           <div className="min-w-0">
             <div className="truncate text-[11px] font-bold text-white">{SITE_BRAND_NAME}</div>
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Personal</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 + PENGU + V52 LIVE</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 + PENGU + V52 {status === "running" ? "LIVE" : "FAIL CLOSED"}</div>
           </div>
         </div>
       </div>
@@ -62,9 +64,9 @@ export function Sidebar() {
 
       <div className="mt-auto rounded-[18px] border border-[#8a8a8a] bg-[linear-gradient(180deg,rgba(17,20,23,0.96),rgba(9,11,14,0.98))] px-4 py-4 text-[11px] leading-6 text-white/78">
         <div className="mb-2 text-[11px] font-bold text-white">運用メモ</div>
-        <p>運用ウォレットの作成と入金確認は、このサイト内で順番に進められます。</p>
-        <p>売買の状況と履歴は、ダッシュボードとトレード履歴で確認できます。</p>
-        <p>認証や基本設定の見直しは、設定ページから進めてください。</p>
+        <p>AsterDEX正本の残高・建玉・履歴を表示しています。</p>
+        <p>ロジックの稼働状態は判定状況で確認できます。</p>
+        <p>このHPから注文・取消・決済は行いません。</p>
       </div>
 
       <button

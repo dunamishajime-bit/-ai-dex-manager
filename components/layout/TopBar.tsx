@@ -3,10 +3,8 @@
 import { usePathname } from "next/navigation";
 import { Bell, CreditCard, ShieldAlert, Wallet } from "lucide-react";
 
-import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { useSimulation } from "@/context/SimulationContext";
-import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useLogicStatus } from "@/hooks/useLogicStatus";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
 
@@ -22,16 +20,12 @@ const PAGE_TITLES: Record<string, string> = {
 export function TopBar() {
   const pathname = usePathname();
   const { currency, symbol } = useCurrency();
-  const { isWalletConnected, riskStatus } = useSimulation();
-  const { user } = useAuth();
-  const { wallet } = useOperationalWallet();
+  const { status } = useLogicStatus();
 
   const title = PAGE_TITLES[pathname || "/"] || SITE_BRAND_NAME;
-  const hasSavedWallet = Boolean(wallet?.address || user?.ownerWalletAddress);
-  const walletConnected = isWalletConnected || hasSavedWallet;
+  const walletConnected = status === "running";
   const walletLabel = walletConnected ? "接続中" : "未接続";
-  const riskLabel =
-    riskStatus === "CRITICAL" ? "警戒" : riskStatus === "CAUTION" ? "注意" : "通常";
+  const riskLabel = status === "running" ? "通常" : "Fail Closed";
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/6 bg-[linear-gradient(180deg,rgba(5,8,12,0.92),rgba(4,6,10,0.78))] px-3 py-3 backdrop-blur-2xl md:px-4">
@@ -66,11 +60,9 @@ export function TopBar() {
           <span
             className={cn(
               "rounded-full border px-3 py-1 text-[10px] font-semibold",
-              riskStatus === "CRITICAL"
+              status !== "running"
                 ? "border-rose-400/25 bg-rose-500/10 text-rose-100"
-                : riskStatus === "CAUTION"
-                  ? "border-amber-400/25 bg-amber-500/10 text-amber-100"
-                  : "border-gold-400/20 bg-white/[0.04] text-white/82",
+                : "border-gold-400/20 bg-white/[0.04] text-white/82",
             )}
           >
             リスク: {riskLabel}

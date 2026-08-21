@@ -9,7 +9,6 @@ import { Web3Provider } from "@/context/Web3Context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
-import { TradeNotificationToast } from "@/components/features/TradeNotificationToast";
 import ParticleBackground from "@/components/layout/ParticleBackground";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { LoginPage } from "@/components/features/LoginPage";
@@ -82,7 +81,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>
         </div>
         <FlashEffect />
-        <TradeNotificationToast />
         <LearningIndicator />
         <BottomNav />
       </div>
