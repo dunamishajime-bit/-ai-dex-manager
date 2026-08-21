@@ -1,0 +1,32 @@
+name: Research V12 Two Slot Gross Compare
+
+on:
+  push:
+    branches:
+      - research/v12-two-slot-gross-compare-20260821
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Run read-only V12 GROSS comparison
+        env:
+          RESEARCH_STATE_DIR: .research-state
+        run: npx tsx scripts/research_v12_two_slot_compare.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-two-slot-gross-compare
+          path: .research-state/v12-two-slot-gross-compare.json
+          if-no-files-found: warn
