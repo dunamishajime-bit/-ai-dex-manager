@@ -76,7 +76,7 @@ def main() -> int:
             print(f"Test {'C' if code == 'pyth_quote_stale' else 'D' if code == 'pyth_confidence_too_wide' else 'E'}: {code} -> order block: PASS")
 
         engine = object.__new__(margin.MarginAwareV52AsterOnlyEngine)
-        engine.state = {}
+        engine.state = {"dataUnavailableSinceMs": 123, "lastTransientDataCategory": "TRANSIENT_REFERENCE_DATA"}
         engine.save = lambda: None
         engine.log = lambda *_args, **_fields: None
         assert engine._handle_tick_error(stale) is True
@@ -85,6 +85,13 @@ def main() -> int:
         engine._record_reference_active()
         assert engine.state["referenceStatus"] == "ACTIVE"
         assert engine.state["referenceOrdersAllowed"] is True
+        assert "dataUnavailableSinceMs" not in engine.state
+        assert "lastTransientDataCategory" not in engine.state
+        engine.state.update({"dataUnavailableSinceMs": 456, "lastTransientDataCategory": "TRANSIENT_REFERENCE_DATA"})
+        engine._clear_recovered_reference_markers()
+        assert "dataUnavailableSinceMs" not in engine.state
+        assert "lastTransientDataCategory" not in engine.state
+        print("Test F2: market-closed ACTIVE tick clears stale outage markers: PASS")
         assert engine._handle_tick_error(RuntimeError("runtime permission failure")) is False
         print("Test F: runtime/system failure remains fatal while reference rejection recovers: PASS")
     finally:

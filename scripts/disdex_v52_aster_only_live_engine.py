@@ -116,12 +116,39 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.log("v52-reference-quality-blocked", status="BLOCKED_DATA_UNAVAILABLE", ordersAllowed=False, recoverable=True, errorCode=error.code, **error.detail)
 
     def _record_reference_active(self) -> None:
-        if self.state.get("referenceStatus") == "ACTIVE" and self.state.get("referenceOrdersAllowed") is True: return
+        already_active = self.state.get("referenceStatus") == "ACTIVE" and self.state.get("referenceOrdersAllowed") is True
         self.state["referenceStatus"] = "ACTIVE"
         self.state["referenceOrdersAllowed"] = True
         self.state.pop("referenceFailure", None)
+        # Clear transient outage markers after both reference sources recover.
+        # Leaving these fields latched made the dashboard report a daily data
+        # outage forever even though ordersAllowed had returned to ACTIVE.
+        self.state.pop("dataUnavailableSinceMs", None)
+        self.state.pop("lastTransientDataCategory", None)
         self.save()
-        self.log("v52-reference-quality-recovered", status="ACTIVE", ordersAllowed=True)
+        if not already_active:
+            self.log("v52-reference-quality-recovered", status="ACTIVE", ordersAllowed=True)
+
+    def _clear_recovered_reference_markers(self) -> None:
+        """Clear stale outage markers even while the market is closed.
+
+        The runner intentionally does not query reference feeds outside regular
+        market hours.  A previous transient outage must therefore not remain
+        latched in the durable state after the proxy has recovered; otherwise
+        the dashboard reports an outage forever despite ACTIVE/ordersAllowed.
+        This only removes legacy markers when the authoritative state is already
+        ACTIVE and does not change freshness thresholds or order gates.
+        """
+        if self.state.get("referenceStatus") != "ACTIVE" or self.state.get("referenceOrdersAllowed") is not True:
+            return
+        changed = False
+        for key in ("dataUnavailableSinceMs", "lastTransientDataCategory"):
+            if key in self.state:
+                self.state.pop(key, None)
+                changed = True
+        if changed:
+            self.save()
+            self.log("v52-reference-quality-recovered", status="ACTIVE", ordersAllowed=True, clearedMarkers=True)
 
     def _handle_tick_error(self, error: Exception) -> bool:
         if not isinstance(error, ReferenceQualityError): return False
@@ -473,6 +500,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
 
     def tick(self) -> None:
         self.reset_days()
+        self._clear_recovered_reference_markers()
         kill = self.kill_switch()
         if kill:
             self.flatten_all(str(kill.get("reason") or "KILL_SWITCH")); return
