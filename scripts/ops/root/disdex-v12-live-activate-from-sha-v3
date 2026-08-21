@@ -214,6 +214,7 @@ quiesce_previous_partial_activation() {
       case "$unit" in "$previous_v12"|"$previous_pengu"|"$previous_v52"|"$previous_margin"|"$previous_risk") ;; *) printf 'V12_PARTIAL_RESUME_UNEXPECTED_ACTIVE_UNIT unit=%s\n' "$unit" >&2; return 2 ;; esac
     done < <(systemctl list-units --type=service --state=active --no-legend --plain "$pattern" 2>/dev/null | awk '{print $1}')
   done
+  recover_stale_margin_flatten
   run_previous_readonly() {
     local check_unit="$1" label="$2"
     systemctl reset-failed "$check_unit" >/dev/null 2>&1 || true
@@ -233,7 +234,6 @@ quiesce_previous_partial_activation() {
     state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
     [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_QUIESCE_FAILED unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
   done
-  recover_stale_margin_flatten
   run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_POST_QUIESCE
   run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_POST_QUIESCE
   recover_stale_local_state
