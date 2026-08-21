@@ -26,7 +26,7 @@ type Status = {
   liveExecutionEnabled: boolean;
   caps: { v12Aggregate: number; v12PerPosition: number; maximumPositions: number; crypto: number; portfolio: number };
   state: { activePositions: Array<{ symbol: string; side: string; quantity: number; gross: number }>; pending: unknown; killSwitch: { active: boolean; reason?: string } | null; manualReview?: string | null };
-  risk: { ok: boolean; reason: string | null; updatedAt: string | number | null };
+  risk: { ok: boolean; reason: string | null; updatedAt: string | number | null; lossPct?: number | null; maximumLossPct?: number | null; tripped?: boolean | null; sourceComplete?: boolean; netDailyPnl?: number | null };
   market?: { unavailable?: boolean; reason?: string; referenceTs?: number | null; regime?: string | null; candidates: Candidate[]; signals: Array<{ symbol: string; side: string; score: number; rank: number }> };
 };
 
@@ -66,6 +66,11 @@ export function V12GateStatusPanel({ compact = false }: { compact?: boolean }) {
             <div>V12稼働: <b className={status.enabled ? "text-profit" : "text-loss"}>{status.enabled ? "有効" : "無効"}</b></div>
             <div>共通リスク: <b className={status.risk.ok ? "text-profit" : "text-loss"}>{status.risk.ok ? "PASS" : "BLOCKED"}</b></div>
             <div>保有: <b className="text-white">{status.state.activePositions.length}/{status.caps.maximumPositions}</b></div>
+          </div>
+          <div className="grid gap-2 text-[11px] text-white/70 sm:grid-cols-3">
+            <div>日次損失: <b className={status.risk.ok ? "text-profit" : "text-loss"}>{status.risk.lossPct == null ? "-" : `${status.risk.lossPct.toFixed(2)}%`} / {status.risk.maximumLossPct == null ? "-" : `${status.risk.maximumLossPct.toFixed(2)}%`}</b></div>
+            <div>日次Net PnL: <b className={(status.risk.netDailyPnl || 0) >= 0 ? "text-profit" : "text-loss"}>{status.risk.netDailyPnl == null ? "-" : status.risk.netDailyPnl.toFixed(4)}</b></div>
+            <div>判定更新: <b className="text-white">{status.risk.updatedAt ? new Date(Number(status.risk.updatedAt)).toLocaleString("ja-JP") : "-"}</b></div>
           </div>
           {status.state.killSwitch?.active || status.state.manualReview ? <div className="rounded-[14px] border border-loss/30 bg-loss/10 px-3 py-2 text-[11px] text-loss">Kill Switch / Manual Review: {status.state.killSwitch?.reason || status.state.manualReview}</div> : null}
           {market?.unavailable ? <div className="rounded-[14px] border border-loss/30 bg-loss/10 px-3 py-2 text-[11px] text-loss">参照データ unavailable: {market.reason || "unknown"}</div> : null}

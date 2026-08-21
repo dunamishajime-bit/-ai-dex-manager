@@ -19,6 +19,10 @@ export async function GET() {
   const runtime = resolveV12X1AllRuntime();
   const state = await readJson<V12X1AllRunnerState>(runtime.statePath);
   const risk = await readJson<Record<string, unknown>>(runtime.riskPath);
+  const riskSourceComplete = risk?.sourceComplete === true;
+  const riskTripped = risk?.tripped === true;
+  const riskUpdatedAt = risk?.updatedAt || risk?.asOf || null;
+  const riskHealthy = Boolean(risk && riskSourceComplete && !riskTripped && Number(riskUpdatedAt) > 0);
   const base = {
     ok: true,
     generatedAt: new Date().toISOString(),
@@ -29,7 +33,16 @@ export async function GET() {
     liveExecutionEnabled: runtime.liveExecutionEnabled,
     caps: { v12Aggregate: runtime.aggregateEntryGrossCap, v12PerPosition: runtime.perPositionEntryGrossCap, maximumPositions: runtime.maximumPositions, crypto: 1.5, portfolio: 2.5 },
     state: { activePositions: state?.activePositions || (state?.active ? [state.active] : []), pending: state?.pending || null, killSwitch: state?.killSwitch || null, manualReview: state?.manualReview || null },
-    risk: risk ? { ok: risk.ok === true, reason: typeof risk.reason === "string" ? risk.reason : null, updatedAt: risk.updatedAt || risk.asOf || null } : { ok: false, reason: "RISK_STATE_UNAVAILABLE", updatedAt: null },
+    risk: risk ? {
+      ok: riskHealthy,
+      reason: riskHealthy ? null : (riskTripped ? "SHARED_CRYPTO_DAILY_LOSS_TRIPPED" : riskSourceComplete ? "RISK_STATE_INVALID" : "RISK_STATE_INCOMPLETE"),
+      updatedAt: riskUpdatedAt,
+      lossPct: Number(risk.lossPct || 0),
+      maximumLossPct: Number(risk.maximumLossPct || 0),
+      tripped: riskTripped,
+      sourceComplete: riskSourceComplete,
+      netDailyPnl: Number(risk.netDailyPnl || 0),
+    } : { ok: false, reason: "RISK_STATE_UNAVAILABLE", updatedAt: null, lossPct: null, maximumLossPct: null, tripped: null, sourceComplete: false, netDailyPnl: null },
   };
   try {
     const client = new AsterV3Client({ baseUrl: process.env.ASTER_FUTURES_BASE_URL, userAgent: "DisDex-HP-V12-Status/1.0" });
