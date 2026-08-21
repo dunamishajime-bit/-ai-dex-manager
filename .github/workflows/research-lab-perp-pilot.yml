@@ -7,6 +7,7 @@ on:
     paths:
       - "lib/research-lab/perp/**"
       - "scripts/research-lab-perp-*.ts"
+      - "scripts/research_v12_gross_compare_clean.ts"
       - ".github/workflows/research-lab-perp-pilot.yml"
       - "package.json"
   workflow_dispatch:
@@ -41,6 +42,7 @@ permissions:
 
 jobs:
   perpetual-pilot:
+    if: ${{ github.head_ref != 'research/v12-gross-compare-clean-20260821' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
@@ -58,33 +60,53 @@ jobs:
       PERP_RESEARCH_START_DATE: ${{ github.event_name == 'workflow_dispatch' && inputs.start_date || '2023-01-01' }}
       PERP_RESEARCH_END_DATE: ${{ github.event_name == 'workflow_dispatch' && inputs.end_date || '2026-07-01' }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - name: Restore perpetual market data cache
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: .cache/perp-research
           key: perp-market-data-v1-${{ env.PERP_RESEARCH_START_DATE }}-${{ env.PERP_RESEARCH_END_DATE }}-${{ hashFiles('lib/research-lab/perp/data-store.ts', 'lib/backtest/binance-source.ts') }}
           restore-keys: |
             perp-market-data-v1-
-      - name: Install dependencies
-        run: npm ci
-      - name: TypeScript check
-        run: npm run typecheck
-      - name: Perpetual engine self-test
-        run: npm run research:perp:selftest
-      - name: Run real-data perpetual research
-        run: npm run research:perp
-      - name: Upload perpetual research evidence
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run research:perp:selftest
+      - run: npm run research:perp
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
           name: research-lab-perpetual-pilot
           path: reports/research-lab-perp
+          if-no-files-found: warn
+          retention-days: 30
+
+  v12-gross-compare:
+    if: ${{ github.head_ref == 'research/v12-gross-compare-clean-20260821' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      BINANCE_PUBLIC_ARCHIVE_ONLY: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research
+          key: v12-gross-compare-2023-07-01-2026-07-01-${{ hashFiles('lib/research-lab/perp/data-store.ts', 'lib/backtest/binance-source.ts') }}
+          restore-keys: |
+            perp-market-data-v1-
+      - run: npm ci --ignore-scripts
+      - run: npx tsx scripts/research_v12_gross_compare_clean.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-gross-compare-clean
+          path: .research-state/v12-gross-compare.json
           if-no-files-found: warn
           retention-days: 30
