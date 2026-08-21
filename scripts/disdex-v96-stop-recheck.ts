@@ -80,9 +80,24 @@ async function main() {
     const unknownOrders = openOrders.filter((row) => !classifyAsterSymbol(row.symbol).tradable);
     if (unknownOrders.length) throw new Error(`V96_STOP_RECHECK_UNKNOWN_ORDER:${unknownOrders.map((row) => row.symbol).join(",")}`);
 
-    const v96Positions = nonzero.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
+    // SOLUSDT can already be owned by a reconciled V12 activation even
+    // though it was part of the legacy V96 core universe.  Only non-V12
+    // state is a V96 residual here; the exact V12 state/protection match is
+    // verified below and remains fail-closed on any mismatch.
+    const reconciledV12Symbol = state.active ? String(state.active.symbol).toUpperCase() : undefined;
+    const v96Positions = nonzero.filter((row) => {
+        const symbol = String(row.symbol).toUpperCase();
+        return V96_CORE_SYMBOLS.has(symbol) && symbol !== reconciledV12Symbol;
+    });
     if (v96Positions.length) throw new Error(`V96_STOP_RECHECK_POSITION_REMAINS:${v96Positions.map((row) => `${row.symbol}:${row.positionAmt}`).join(",")}`);
-    const v96Orders = openOrders.filter((row) => V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
+    const v12ProtectionIds = new Set(state.active
+        ? [state.active.protection.stopClientOrderId, state.active.protection.takeProfitClientOrderId].filter(Boolean)
+        : []);
+    const v96Orders = openOrders.filter((row) => {
+        const symbol = String(row.symbol).toUpperCase();
+        const clientOrderId = String(row.clientOrderId || "");
+        return V96_CORE_SYMBOLS.has(symbol) && !v12ProtectionIds.has(clientOrderId);
+    });
     if (v96Orders.length) throw new Error(`V96_STOP_RECHECK_ORDER_REMAINS:${v96Orders.map((row) => `${row.symbol}:${row.clientOrderId || row.orderId || "unknown"}`).join(",")}`);
     const adapter = new V12AsterLiveAdapter(client, {
         maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
@@ -116,7 +131,10 @@ async function main() {
     if (!handle) throw new Error("V96_STOP_RECHECK_SHARED_LOCK_UNAVAILABLE");
     await handle.release();
 
-    const preserved = nonzero.filter((row) => !V96_CORE_SYMBOLS.has(String(row.symbol).toUpperCase()));
+    const preserved = nonzero.filter((row) => {
+        const symbol = String(row.symbol).toUpperCase();
+        return !V96_CORE_SYMBOLS.has(symbol) || symbol === reconciledV12Symbol;
+    });
     console.log(JSON.stringify({
         status: "V96_STOP_RECHECK_PASS",
         v96CorePositions: 0,
