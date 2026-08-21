@@ -19,6 +19,11 @@ import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v
  * Any state/reconciliation mismatch remains fail-closed.
  */
 const ALLOWLISTED_REASON = "V12 hourly history insufficient for BTC: 0";
+// The frozen runner fails closed when one symbol's public H1 window has a
+// transient length mismatch.  This is a data-alignment outage, not a filled
+// order or position transition.  It is recoverable only with the same strict
+// flat/pending/account reconciliation below; it never bypasses shared risk.
+const ALIGNMENT_MISMATCH_REASON_PREFIX = "V12 universe alignment mismatch:";
 const PREORDER_MARGIN_GUARD_REASON_PREFIX = "Fresh V96/V52 pre-order Margin Guard blocked exposure increase:";
 const IMMEDIATE_TRIGGER_TRAILING_REASON = "TRAILING_STOP_UPDATE_FAILED:Order would immediately trigger.";
 const RECOVERY_REQUEST_PREFIX = "v12-h2-recovery-";
@@ -53,6 +58,16 @@ function isLegacyOddHourState(state: V12X1AllRunnerState) {
         && !state.pending;
 }
 
+function isAlignmentMismatchState(state: V12X1AllRunnerState) {
+    return state.mode === "LIVE"
+        && typeof state.manualReview === "string"
+        && state.manualReview.startsWith(ALIGNMENT_MISMATCH_REASON_PREFIX)
+        && state.killSwitch?.active === true
+        && state.killSwitch.reason === state.manualReview
+        && !state.active
+        && !state.pending;
+}
+
 function isPreorderMarginGuardState(state: V12X1AllRunnerState) {
     return state.mode === "LIVE"
         && typeof state.manualReview === "string"
@@ -81,6 +96,7 @@ function isImmediateTriggerTrailingState(state: V12X1AllRunnerState) {
 
 function isRecoverableState(state: V12X1AllRunnerState, allowPreorderMarginGuardRecovery: boolean) {
     return isLegacyOddHourState(state)
+        || isAlignmentMismatchState(state)
         || (allowPreorderMarginGuardRecovery && isPreorderMarginGuardState(state))
         || isImmediateTriggerTrailingState(state);
 }
@@ -188,6 +204,14 @@ async function main() {
             updatedAt: 1,
             manualReview: ALLOWLISTED_REASON,
             killSwitch: { active: true, reason: ALLOWLISTED_REASON, trippedAt: 1 },
+        }), true);
+        assert.equal(isAlignmentMismatchState({
+            schema: "v12-x1-all-runner-state/v1",
+            strategyId: "V12_X1.00_ALL",
+            mode: "LIVE",
+            updatedAt: 1,
+            manualReview: "V12 universe alignment mismatch: LINK",
+            killSwitch: { active: true, reason: "V12 universe alignment mismatch: LINK", trippedAt: 1 },
         }), true);
         const preorderTestState: V12X1AllRunnerState = {
             schema: "v12-x1-all-runner-state/v1",
