@@ -25,6 +25,7 @@ const ALLOWLISTED_REASON = "V12 hourly history insufficient for BTC: 0";
 // flat/pending/account reconciliation below; it never bypasses shared risk.
 const ALIGNMENT_MISMATCH_REASON_PREFIX = "V12 universe alignment mismatch:";
 const PREORDER_MARGIN_GUARD_REASON_PREFIX = "Fresh V96/V52 pre-order Margin Guard blocked exposure increase:";
+const MINIMUM_ENTRY_QUANTITY_REASON = /^Quantity 0 is below Aster minQty [0-9]+(?:\.[0-9]+)? for [A-Z0-9]+USDT\.$/;
 const IMMEDIATE_TRIGGER_TRAILING_REASON = "TRAILING_STOP_UPDATE_FAILED:Order would immediately trigger.";
 const RECOVERY_REQUEST_PREFIX = "v12-h2-recovery-";
 const EPS = 1e-12;
@@ -82,6 +83,21 @@ function isPreorderMarginGuardState(state: V12X1AllRunnerState) {
         && !!state.pending.idempotencyKey;
 }
 
+function isMinimumEntryQuantityState(state: V12X1AllRunnerState) {
+    return state.mode === "LIVE"
+        && typeof state.manualReview === "string"
+        && MINIMUM_ENTRY_QUANTITY_REASON.test(state.manualReview)
+        && state.killSwitch?.active === true
+        && state.killSwitch.reason === state.manualReview
+        && !state.active
+        && state.pending?.action === "ENTRY"
+        && Number(state.pending.quantity) > 0
+        && Number.isFinite(state.pending.signalTs)
+        && Number.isFinite(state.pending.createdAt)
+        && !!state.pending.clientOrderId
+        && !!state.pending.idempotencyKey;
+}
+
 function isImmediateTriggerTrailingState(state: V12X1AllRunnerState) {
     return state.mode === "LIVE"
         && state.manualReview === IMMEDIATE_TRIGGER_TRAILING_REASON
@@ -97,6 +113,7 @@ function isImmediateTriggerTrailingState(state: V12X1AllRunnerState) {
 function isRecoverableState(state: V12X1AllRunnerState, allowPreorderMarginGuardRecovery: boolean) {
     return isLegacyOddHourState(state)
         || isAlignmentMismatchState(state)
+        || isMinimumEntryQuantityState(state)
         || (allowPreorderMarginGuardRecovery && isPreorderMarginGuardState(state))
         || isImmediateTriggerTrailingState(state);
 }
@@ -233,6 +250,26 @@ async function main() {
         };
         assert.equal(isPreorderMarginGuardState(preorderTestState), true);
         assert.equal(isRecoverableState(preorderTestState, true), true);
+        const minimumEntryQuantityState: V12X1AllRunnerState = {
+            schema: "v12-x1-all-runner-state/v1",
+            strategyId: "V12_X1.00_ALL",
+            mode: "LIVE",
+            updatedAt: 1,
+            manualReview: "Quantity 0 is below Aster minQty 1 for AVAXUSDT.",
+            killSwitch: { active: true, reason: "Quantity 0 is below Aster minQty 1 for AVAXUSDT.", trippedAt: 1 },
+            pending: {
+                idempotencyKey: "v12-entry-min-qty",
+                action: "ENTRY",
+                clientOrderId: "v12-entry-min-qty",
+                symbol: "AVAXUSDT",
+                side: "LONG",
+                quantity: 0.094,
+                signalTs: 1,
+                createdAt: 1,
+            },
+        };
+        assert.equal(isMinimumEntryQuantityState(minimumEntryQuantityState), true);
+        assert.equal(isRecoverableState(minimumEntryQuantityState, false), true);
         const trailingTestState: V12X1AllRunnerState = {
             schema: "v12-x1-all-runner-state/v1",
             strategyId: "V12_X1.00_ALL",
