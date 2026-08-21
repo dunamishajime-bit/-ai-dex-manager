@@ -2,37 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  FileText,
-  Home,
-  LogOut,
-  Settings,
-  Wallet,
-} from "lucide-react";
-
+import { BarChart3, CalendarDays, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { SITE_BRAND_NAME } from "@/lib/site-access";
 import { cn } from "@/lib/utils";
+import { SITE_BRAND_NAME } from "@/lib/site-access";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  children?: Array<{
-    href: string;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-  }>;
-};
-
-const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
-  { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
+  { href: "/positions", label: "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9", icon: BarChart3 },
+  { href: "/decision-status", label: "判定状況", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
+  { href: "/performance", label: "成績", icon: CalendarDays },
   { href: "/history", label: "トレード履歴", icon: FileText },
   { href: "/settings", label: "設定", icon: Settings },
-];
+] as const;
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -48,7 +31,7 @@ export function Sidebar() {
           <div className="min-w-0">
             <div className="truncate text-[11px] font-bold text-white">{SITE_BRAND_NAME}</div>
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Personal</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Trading Desk</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 + PENGU + V52 LIVE</div>
           </div>
         </div>
       </div>
@@ -57,48 +40,21 @@ export function Sidebar() {
         <div className="px-3 pb-2 text-[11px] font-bold text-white/76">メニュー</div>
         <nav className="space-y-1">
           {NAV_ITEMS.map((item) => {
-            const parentActive = item.href === "/"
-              ? pathname === "/"
-              : item.children?.length
-                ? pathname === item.href || pathname.startsWith(`${item.href}/`)
-                : pathname === item.href;
+            const active = pathname === item.href;
             return (
-              <div key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-[14px] border px-3 py-3 text-[13px] font-semibold transition-colors",
-                    parentActive
-                      ? "border-[#7c6d38] bg-[linear-gradient(90deg,rgba(92,73,28,0.52),rgba(63,49,21,0.28))] text-white"
-                      : "border-transparent text-white/78 hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
-                  )}
-                >
-                  <item.icon className={cn("h-4 w-4", parentActive ? "text-[#f0df9c]" : "text-white/55")} />
-                  <span>{item.label}</span>
-                </Link>
-                {item.children?.length ? (
-                  <div className="ml-5 mt-1 space-y-1 border-l border-white/10 pl-2">
-                    {item.children.map((child) => {
-                      const childActive = pathname === child.href || pathname.startsWith(`${child.href}/`);
-                      return (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          className={cn(
-                            "flex items-center gap-2 rounded-[11px] border px-3 py-2.5 text-[12px] font-semibold transition-colors",
-                            childActive
-                              ? "border-[#7c6d38]/70 bg-[#5c491c]/25 text-[#f4e8b6]"
-                              : "border-transparent text-white/50 hover:border-white/8 hover:bg-white/[0.03] hover:text-white/80",
-                          )}
-                        >
-                          <child.icon className={cn("h-3.5 w-3.5", childActive ? "text-[#f0df9c]" : "text-white/35")} />
-                          <span>{child.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-[14px] border px-3 py-3 text-[13px] font-semibold transition-colors",
+                  active
+                    ? "border-[#7c6d38] bg-[linear-gradient(90deg,rgba(92,73,28,0.52),rgba(63,49,21,0.28))] text-white"
+                    : "border-transparent text-white/78 hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
+                )}
+              >
+                <item.icon className={cn("h-4 w-4", active ? "text-[#f0df9c]" : "text-white/55")} />
+                <span>{item.label}</span>
+              </Link>
             );
           })}
         </nav>
@@ -106,8 +62,8 @@ export function Sidebar() {
 
       <div className="mt-auto rounded-[18px] border border-[#8a8a8a] bg-[linear-gradient(180deg,rgba(17,20,23,0.96),rgba(9,11,14,0.98))] px-4 py-4 text-[11px] leading-6 text-white/78">
         <div className="mb-2 text-[11px] font-bold text-white">運用メモ</div>
-        <p>V12・PENGU V2・V52の稼働状態、判定Gate、残高、建玉を正本データで確認します。</p>
-        <p>注文可否はVPS workerの共通リスク・再照合・参照データGateが最終決定します。</p>
+        <p>運用ウォレットの作成と入金確認は、このサイト内で順番に進められます。</p>
+        <p>売買の状況と履歴は、ダッシュボードとトレード履歴で確認できます。</p>
         <p>認証や基本設定の見直しは、設定ページから進めてください。</p>
       </div>
 
