@@ -1,0 +1,17 @@
+{
+  "schema": "v12-top2-residual-gross-bt/v1",
+  "artifactRun": "32482853308",
+  "status": "PASS_RESEARCH_ONLY",
+  "period": {"startInclusive": "2025-08-10T00:00:00Z", "endExclusive": "2026-08-10T00:00:00Z", "calendarDays": 365},
+  "sourceLedgerSha": "27f023a37d08b71c6e59b797fdc03c20d6032da2",
+  "caps": {"v12PerPosition": 1.0, "v12MaximumPositions": 2, "pengu": 0.75, "crypto": 1.5, "stock": 1.5, "portfolio": 2.5},
+  "variants": [
+    {"id":"CURRENT_ONE_SLOT","v12Aggregate":1.0,"maxPositions":1,"normalReturnPct":911.5876285168225,"normalPf":3.3309971147006747,"normalDdPct":-12.073873536202285,"stressReturnPct":189.47438640375748,"stressPf":2.1512802685770174,"stressDdPct":-16.27200837228052,"normalTrades":218,"stressTrades":175},
+    {"id":"TOP2_AGGREGATE_1.00","v12Aggregate":1.0,"maxPositions":2,"normalReturnPct":911.5876285168225,"normalPf":3.3309971147006747,"normalDdPct":-12.073873536202285,"stressReturnPct":189.47438640375748,"stressPf":2.1512802685770174,"stressDdPct":-16.27200837228052,"normalTrades":218,"stressTrades":175},
+    {"id":"TOP2_AGGREGATE_1.25","v12Aggregate":1.25,"maxPositions":2,"normalReturnPct":911.5876285168225,"normalPf":3.3309971147006747,"normalDdPct":-12.073873536202285,"stressReturnPct":189.47438640375748,"stressPf":2.1512802685770174,"stressDdPct":-16.27200837228052,"normalTrades":218,"stressTrades":175},
+    {"id":"TOP2_AGGREGATE_1.50","v12Aggregate":1.5,"maxPositions":2,"normalReturnPct":911.5876285168225,"normalPf":3.3309971147006747,"normalDdPct":-12.073873536202285,"stressReturnPct":189.47438640375748,"stressPf":2.1512802685770174,"stressDdPct":-16.27200837228052,"normalTrades":218,"stressTrades":175}
+  ],
+  "checks": {"allGrossWithinCaps": true, "ordersNeverSent": true, "liveUnchanged": true},
+  "candidateStream": {"rank2OnlyFromFrozenLedgerOverlap": true, "syntheticOrFutureTradesAdded": false},
+  "safety": {"mode":"RESEARCH_ONLY","ordersSent":false,"liveChanged":false,"vpsChanged":false,"productionChanged":false,"liveEligible":false}
+}

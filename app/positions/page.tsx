@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Activity, BarChart3, ShieldCheck, Wallet } from "lucide-react";
 
 import { AutoTradeHistoryPanel } from "@/components/features/autotrade/AutoTradeHistoryPanel";
-import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
+import { V12GateStatusPanel } from "@/components/features/autotrade/V12GateStatusPanel";
 import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTradeRunPanel";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
@@ -64,7 +64,7 @@ export default function PositionsPage() {
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-7 text-white/82">
                 運用ウォレットの実残高、手動判定、自動売買の履歴をまとめて確認できます。
-                通常候補と追加候補の評価は、現在の本番ロジックに合わせて表示されます。
+                V12 X1.00 ALLの発火候補、各判定Gate、実際にENTRY_ELIGIBLEとなった通貨を表示します。注文可否はVPS workerの安全Gateが最終決定します。
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-gold-400/18 bg-white/[0.03] px-4 py-2 text-[11px] text-gold-100">
@@ -138,8 +138,8 @@ export default function PositionsPage() {
               </div>
               <div className="mt-3 space-y-2 text-sm leading-7 text-white/82">
                 <p>表示される保有資産は、運用ウォレットの実残高です。</p>
-                <p>価格表示は BNB Chain 上の対USDT建てを基準に計算しています。</p>
-                <p>UNI / TWT は通常時の主力候補ではなく、USDT待機中の補助候補として評価します。</p>
+                <p>暗号資産のV12先物判定はAster Futures V3の公開H1データをH2へ整列して計算します。</p>
+                <p>ウォレット残高・保有資産は運用ウォレットAPI、V12の建玉・残余枠・保護注文はVPS runnerの再照合を正本とします。</p>
               </div>
             </div>
             <div className="panel-gold rounded-[30px] p-4">
@@ -156,7 +156,7 @@ export default function PositionsPage() {
         </section>
 
         <ManualTradeRunPanel />
-        <LiveDecisionPanel />
+        <V12GateStatusPanel />
         <AutoTradeHistoryPanel />
       </div>
     </main>

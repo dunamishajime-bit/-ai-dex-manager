@@ -286,7 +286,7 @@ export default function WalletsPage() {
             運用ウォレット
           </div>
           <h1 className="mt-2 text-[1.9rem] font-black tracking-tight text-white md:text-[2.6rem]">運用ウォレットを確認します。</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-white/80">アドレス、入金、保有資産、状態をここでまとめて見ます。</p>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-white/80">運用ウォレットの残高・保有資産・更新時刻を確認します。V12先物の建玉と判定Gateはダッシュボードで別管理されます。</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
               ウォレット管理

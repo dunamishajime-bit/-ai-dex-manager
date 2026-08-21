@@ -34,6 +34,28 @@ export interface V12Signal extends V12Candidate {
     regime: V12Regime;
 }
 
+export interface V12CandidateGate {
+    symbol: string;
+    regime: V12Regime | null;
+    available: boolean;
+    passed: boolean;
+    side?: V12Side;
+    momentum?: number;
+    volatility?: number;
+    atr?: number;
+    volumeRatio?: number;
+    score?: number;
+    gates: {
+        history: boolean;
+        indicators: boolean;
+        volume: boolean;
+        edge: boolean;
+        momentum: boolean;
+        regime: boolean;
+    };
+    reasons: string[];
+}
+
 export function buildV12Signals(universe: Record<string, V12Bar[]>, index: number, limit: number = V12_X1_ALL.maximumPositions): V12Signal[] {
     const btc = universe.BTC;
     if (!btc?.[index]) return [];
@@ -148,10 +170,11 @@ export function computeV12Regime(btcBars: V12Bar[], index: number): V12Regime | 
     return "NEUTRAL";
 }
 
-function candidateFor(symbol: string, bars: V12Bar[], index: number, regime: V12Regime): V12Candidate | null {
+export function evaluateV12Candidate(symbol: string, bars: V12Bar[], index: number, regime: V12Regime | null): V12CandidateGate {
     const current = bars[index];
     const base = bars[index - V12_X1_ALL.momentumBars];
-    if (!current || !base || !(current.close > 0 && base.close > 0) || index < V12_X1_ALL.atrBars) return null;
+    const empty = { symbol, regime, available: false, passed: false, gates: { history: false, indicators: false, volume: false, edge: false, momentum: false, regime: false }, reasons: [] } as V12CandidateGate;
+    if (!current || !base || !(current.close > 0 && base.close > 0) || index < V12_X1_ALL.atrBars) return empty;
     const momentum = current.close / base.close - 1;
     const returns = logReturns(bars, index + 1, V12_X1_ALL.volatilityLookbackBars);
     const volatility = sampleStd(returns);
@@ -159,18 +182,32 @@ function candidateFor(symbol: string, bars: V12Bar[], index: number, regime: V12
     const volumeWindow = bars.slice(Math.max(0, index - 20), index).map((bar) => bar.volume);
     const volumeMean = volumeWindow.length ? volumeWindow.reduce((a, b) => a + b, 0) / volumeWindow.length : NaN;
     const volumeRatio = volumeMean > 0 ? current.volume / volumeMean : NaN;
-    if (![momentum, volatility, currentAtr, volumeRatio].every(Number.isFinite)) return null;
-    if (volumeRatio < V12_X1_ALL.minimumVolumeRatio || Math.abs(momentum) < V12_X1_ALL.minimumEdgeToCostRatio * (V12_X1_ALL.normalRoundTripCostBps / 10_000)) return null;
+    if (![momentum, volatility, currentAtr, volumeRatio].every(Number.isFinite)) return { ...empty, available: true, reasons: ["INDICATORS_UNAVAILABLE"] };
     const scale = Math.max(0.0001, volatility * Math.sqrt(V12_X1_ALL.momentumBars));
     const raw = momentum / scale;
     const score = raw / (1 + V12_X1_ALL.volatilityPenalty * volatility * 100);
     const side: V12Side = momentum >= 0 ? "LONG" : "SHORT";
     const sideScore = side === "LONG" ? score : -score;
-    if (side === "LONG" && momentum < V12_X1_ALL.minimumMomentumPct) return null;
-    if (side === "SHORT" && momentum > -V12_X1_ALL.minimumMomentumPct) return null;
-    const allowed = regime === "LONG" ? side === "LONG" : regime === "SHORT" ? side === "SHORT" : V12_X1_ALL.allowNeutralRegime && sideScore >= V12_X1_ALL.neutralScoreThreshold;
-    if (!allowed) return null;
-    return { symbol, side, momentum, volatility, atr: currentAtr, volumeRatio, score: sideScore };
+    const gates = {
+        history: true,
+        indicators: true,
+        volume: volumeRatio >= V12_X1_ALL.minimumVolumeRatio,
+        edge: Math.abs(momentum) >= V12_X1_ALL.minimumEdgeToCostRatio * (V12_X1_ALL.normalRoundTripCostBps / 10_000),
+        momentum: side === "LONG" ? momentum >= V12_X1_ALL.minimumMomentumPct : momentum <= -V12_X1_ALL.minimumMomentumPct,
+        regime: regime === "LONG" ? side === "LONG" : regime === "SHORT" ? side === "SHORT" : V12_X1_ALL.allowNeutralRegime && sideScore >= V12_X1_ALL.neutralScoreThreshold,
+    };
+    const reasons: string[] = [];
+    if (!gates.volume) reasons.push("VOLUME_RATIO_BELOW_MIN");
+    if (!gates.edge) reasons.push("EDGE_TO_COST_BELOW_MIN");
+    if (!gates.momentum) reasons.push("MOMENTUM_BELOW_MIN");
+    if (!gates.regime) reasons.push("BTC_REGIME_DIRECTION_BLOCKED");
+    return { symbol, regime, available: true, passed: Object.values(gates).every(Boolean), side, momentum, volatility, atr: currentAtr, volumeRatio, score: sideScore, gates, reasons };
+}
+
+function candidateFor(symbol: string, bars: V12Bar[], index: number, regime: V12Regime): V12Candidate | null {
+    const diagnosis = evaluateV12Candidate(symbol, bars, index, regime);
+    if (!diagnosis.passed || !diagnosis.side || diagnosis.momentum === undefined || diagnosis.volatility === undefined || diagnosis.atr === undefined || diagnosis.volumeRatio === undefined || diagnosis.score === undefined) return null;
+    return { symbol, side: diagnosis.side, momentum: diagnosis.momentum, volatility: diagnosis.volatility, atr: diagnosis.atr, volumeRatio: diagnosis.volumeRatio, score: diagnosis.score };
 }
 
 export function buildV12Signal(universe: Record<string, V12Bar[]>, index: number): V12Signal | null {
