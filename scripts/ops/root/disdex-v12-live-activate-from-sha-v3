@@ -282,7 +282,16 @@ quiesce_previous_partial_activation() {
   fi
   state="$(systemctl is-active "$previous_v12" 2>/dev/null || true)"; pid="$(systemctl show "$previous_v12" --property MainPID --value 2>/dev/null || true)"
   [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_V12_QUIESCE_FAILED state=%s pid=%s\n' "$state" "${pid:-0}" >&2; return 2; }
-  systemctl is-enabled --quiet "$previous_target" 2>/dev/null && { printf 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_ENABLED\n' >&2; return 2; }
+  if systemctl is-enabled --quiet "$previous_target" 2>/dev/null; then
+    systemctl disable "$previous_target" >/dev/null 2>&1 || {
+      printf 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_DISABLE_FAILED unit=%s\n' "$previous_target" >&2
+      return 2
+    }
+  fi
+  systemctl is-enabled --quiet "$previous_target" 2>/dev/null && {
+    printf 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_STILL_ENABLED\n' >&2
+    return 2
+  }
 
   for unit in "$previous_risk" "$previous_margin" "$previous_pengu" "$previous_v52"; do
     state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"

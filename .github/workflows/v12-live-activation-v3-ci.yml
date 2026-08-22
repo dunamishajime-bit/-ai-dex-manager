@@ -53,6 +53,7 @@ jobs:
           grep -Fq 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_ENABLED' "$activate"
           grep -Fq 'V12_PARTIAL_RESUME_PREVIOUS_IMMUTABLE_RELEASE=PASS' "$activate"
           grep -Fq 'V12_PARTIAL_RESUME_V12_READONLY_CHECK_FAILED' "$activate"
+          grep -Fq 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_DISABLE_FAILED' "$activate"
           grep -Fq 'V12_V3_PHASE=HARDENED_LIVE_MIGRATION' "$activate"
           grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' "$activate"
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$activate"
