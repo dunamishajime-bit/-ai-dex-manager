@@ -52,7 +52,10 @@ V11_CONVERGENCE_BPS = 15.0
 V11_MIN_DEPTH_MULTIPLE = 2.0
 V11_MAX_SPREAD_BPS = 20.0
 V11_MAX_SPREAD_MEDIAN_MULTIPLE = 2.0
-V11_MAX_DATA_AGE_MS = 1500
+# The validated Pyth/IEX reference policy permits up to 5 seconds of source
+# age. This remains a hard rejection boundary; it is not a stale-price
+# fallback and does not alter signal, sizing, or execution rules.
+V11_MAX_DATA_AGE_MS = 5000
 V11_MAX_SOURCE_CLOCK_DIFF_MS = 1500
 V11_MAX_ADVERSE_TWO_SECOND_BPS = 5.0
 V11_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
@@ -1303,7 +1306,7 @@ class StockEngine:
         if local.weekday() >= 5:
             return
         sec = ny_seconds(local)
-        need_rows = self.state.get("position") is not None or clock("09:59:55") <= sec <= clock("15:30:30")
+        need_rows = bool(self.state.get("position")) or clock("09:59:55") <= sec <= clock("15:30:30")
         if not need_rows:
             return
         rows = self.books_and_refs()
@@ -1415,6 +1418,7 @@ def self_test() -> None:
     assert clock("10:30:00") == 37_800
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96"
     assert V13D_MIN_BASIS_BPS == 20.0
+    assert V11_MAX_DATA_AGE_MS == 5000
     assert V11_MAX_ROUND_TRIP_COST_BPS == 60.0
     print("V13D + V11-EQ Stock live engine self-test: PASS")
 
