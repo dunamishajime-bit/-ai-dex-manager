@@ -5,10 +5,13 @@ import {
 } from "@/lib/server/asterdex/client";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 
-const ASTER_HISTORY_SYMBOLS = [
-  "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT",
-  "AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT",
+const V12_HISTORY_SYMBOLS = [
+  "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT",
+  "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT",
+  "AAVEUSDT", "NEARUSDT",
 ] as const;
+const V52_HISTORY_SYMBOLS = ["AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"] as const;
+const ASTER_HISTORY_SYMBOLS = [...V12_HISTORY_SYMBOLS, "PENGUUSDT", ...V52_HISTORY_SYMBOLS] as const;
 const CACHE_TTL_MS = 60_000;
 const STABLE_ASSETS = new Set(["USDT", "USDC", "USDF", "BUSD", "FDUSD"]);
 
@@ -35,8 +38,16 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): "V12" | "V52" {
-  return /^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol) ? "V52" : "V12";
+function strategyForSymbol(symbol: string): "V12" | "V52" | "UNKNOWN" {
+  if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
+  if (symbol === "PENGUUSDT") return "UNKNOWN";
+  return "V12";
+}
+
+function strategyLabelForSymbol(symbol: string): "V12" | "PENGU_V2" | "V52" {
+  if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
+  if (symbol === "PENGUUSDT") return "PENGU_V2";
+  return "V12";
 }
 
 function isEntry(direction: Direction, side: "BUY" | "SELL") {
@@ -172,7 +183,7 @@ function toHistoryEntry(
     exitPriceUsd: close ? price : undefined,
     realizedPnlUsd,
     realizedPnlPct,
-    reason: "Aster official fill / " + strategyForSymbol(symbol) + " / " + direction + " / " + (entry ? "Entry" : "Exit") + (trade.maker ? " / maker" : " / taker"),
+    reason: "Aster official fill / " + strategyLabelForSymbol(symbol) + " / " + direction + " / " + (entry ? "Entry" : "Exit") + (trade.maker ? " / maker" : " / taker"),
     openedAt: entry ? executedAt : matched.openedAt,
     closedAt: close ? executedAt : undefined,
     tradeId,
@@ -250,7 +261,7 @@ async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error
 
   // The fill ledger is historical evidence; it is not authoritative for the
   // current position. Reconcile open-looking fills against positionRisk so a
-  // closed SOLUSDT position cannot remain displayed as a live holding.
+  // closed position cannot remain displayed as a live holding.
   try {
     const positions = await client.getPositionRisk();
     entries.splice(0, entries.length, ...reconcileOpenEntries(entries, positions));
