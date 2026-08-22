@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // The production VPS is memory-constrained. Its verified release path
+    // performs the repository typecheck separately, so skip Next's duplicate
+    // checker only when that release path explicitly opts in.
+    typescript: {
+        ignoreBuildErrors: process.env.DISDEX_UI_VERIFIED_TSC === "1",
+    },
     webpack: (config) => {
         config.resolve.alias = {
             ...config.resolve.alias,
