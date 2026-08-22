@@ -10,7 +10,7 @@ import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
-import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
+import { FileV12X1AllRunnerStateStore, type V12ActivePositionState } from "../lib/v12-x1-all-runner-state";
 import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { reconcileV12Protection } from "../lib/v12-resident-stop-lifecycle";
@@ -24,6 +24,11 @@ function actualSide(position: { quantity: number; positionSide: string }) {
     if (position.positionSide === "LONG") return "LONG" as const;
     if (position.positionSide === "SHORT") return "SHORT" as const;
     return position.quantity < 0 ? "SHORT" as const : "LONG" as const;
+}
+
+function activePositionsOf(state: { activePositions?: V12ActivePositionState[]; active?: V12ActivePositionState }) {
+    if (Array.isArray(state.activePositions) && state.activePositions.length) return [...state.activePositions];
+    return state.active ? [state.active] : [];
 }
 
 async function main() {
@@ -74,16 +79,15 @@ async function main() {
     // when the V12 state below is active and will pass the exact
     // state/side/quantity/protection reconciliation; any other V96-core
     // position remains a hard blocker.
-    const reconciledV12Symbol = v12State.active ? String(v12State.active.symbol).toUpperCase() : undefined;
+    const v12Actives = activePositionsOf(v12State);
+    const reconciledV12Symbols = new Set(v12Actives.map((active) => String(active.symbol).toUpperCase()));
     const v96Positions = nonzero.filter((row) => {
         const symbol = String(row.symbol).toUpperCase();
-        return V96_CORE_SYMBOLS.has(symbol) && symbol !== reconciledV12Symbol;
+        return V96_CORE_SYMBOLS.has(symbol) && !reconciledV12Symbols.has(symbol);
     });
     if (v96Positions.length) throw new Error(`MIGRATION_BLOCKED_V96_NOT_FLAT:${v96Positions.map((row) => `${row.symbol}:${row.positionAmt}`).join(",")}`);
 
-    const v12ProtectionIds = new Set(v12State.active
-        ? [v12State.active.protection.stopClientOrderId, v12State.active.protection.takeProfitClientOrderId].filter(Boolean)
-        : []);
+    const v12ProtectionIds = new Set(v12Actives.flatMap((active) => [active.protection.stopClientOrderId, active.protection.takeProfitClientOrderId].filter(Boolean)));
     const v96OpenOrders = openOrders.filter((row) => {
         const symbol = String(row.symbol).toUpperCase();
         const clientOrderId = String(row.clientOrderId || "");
@@ -104,16 +108,18 @@ async function main() {
     const actualPositions = await adapter.getPositions();
     const activeV12Orders = (await adapter.listV12Orders()).filter((row) => ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(row.status || "").toUpperCase()));
     let v12ActiveStateReconciled = false;
-    if (v12State.active) {
+    if (v12Actives.length) {
         const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
-        if (actualV12.length !== 1) throw new Error(`MIGRATION_BLOCKED_V12_ACTIVE_POSITION_COUNT_MISMATCH:${actualV12.length}`);
-        const actual = actualV12[0];
-        if (actual.symbol.toUpperCase() !== v12State.active.symbol.toUpperCase()) throw new Error("MIGRATION_BLOCKED_V12_ACTIVE_POSITION_SYMBOL_MISMATCH");
-        if (actualSide(actual) !== v12State.active.side) throw new Error("MIGRATION_BLOCKED_V12_ACTIVE_POSITION_SIDE_MISMATCH");
-        if (Math.abs(Math.abs(actual.quantity) - v12State.active.quantity) > Math.max(1e-8, v12State.active.quantity * 0.01)) throw new Error("MIGRATION_BLOCKED_V12_ACTIVE_POSITION_QTY_MISMATCH");
-        const protection = await reconcileV12Protection(adapter, v12State.active.protection);
-        if (protection.manualReview) throw new Error(`MIGRATION_BLOCKED_${protection.manualReview}`);
-        const allowed = new Set([v12State.active.protection.stopClientOrderId, v12State.active.protection.takeProfitClientOrderId].filter(Boolean));
+        if (actualV12.length !== v12Actives.length) throw new Error(`MIGRATION_BLOCKED_V12_ACTIVE_POSITION_COUNT_MISMATCH:expected=${v12Actives.length}:actual=${actualV12.length}`);
+        for (const expected of v12Actives) {
+            const actual = actualV12.find((row) => row.symbol.toUpperCase() === expected.symbol.toUpperCase());
+            if (!actual) throw new Error(`MIGRATION_BLOCKED_V12_ACTIVE_POSITION_SYMBOL_MISMATCH:${expected.symbol}`);
+            if (actualSide(actual) !== expected.side) throw new Error(`MIGRATION_BLOCKED_V12_ACTIVE_POSITION_SIDE_MISMATCH:${expected.symbol}`);
+            if (Math.abs(Math.abs(actual.quantity) - expected.quantity) > Math.max(1e-8, expected.quantity * 0.01)) throw new Error(`MIGRATION_BLOCKED_V12_ACTIVE_POSITION_QTY_MISMATCH:${expected.symbol}`);
+            const protection = await reconcileV12Protection(adapter, expected.protection);
+            if (protection.manualReview) throw new Error(`MIGRATION_BLOCKED_${protection.manualReview}`);
+        }
+        const allowed = new Set(v12Actives.flatMap((active) => [active.protection.stopClientOrderId, active.protection.takeProfitClientOrderId].filter(Boolean)));
         const unknown = activeV12Orders.filter((row) => !allowed.has(row.clientOrderId));
         if (unknown.length) throw new Error(`MIGRATION_BLOCKED_V12_UNKNOWN_ACTIVE_ORDER:${unknown.map((row) => row.clientOrderId).join(",")}`);
         v12ActiveStateReconciled = true;
@@ -136,7 +142,7 @@ async function main() {
         v96ResidentProtection: 0,
         v96Pending: 0,
         v12Pending: 0,
-        v12ActivePosition: v12State.active ? 1 : 0,
+        v12ActivePosition: v12Actives.length,
         v12ActiveStateReconciled,
         sharedKillSwitchActive: false,
         sharedRiskFresh: true,
