@@ -94,7 +94,7 @@ safe_release_gc() {
 }
 
 install_ci_artifact() {
-  local source_tree download_root archive checksum expected actual staging artifact_size chunk_size chunk_count parts range_failed i start end part expected_part_size actual_part_size
+  local source_tree download_root archive checksum expected actual staging artifact_size chunk_size chunk_count parts range_failed parallelism batch batch_end i start end part expected_part_size actual_part_size
   local -a range_pids=()
   command -v curl >/dev/null 2>&1 || return 1
   source_tree="$(runuser -u deploy -- git -C "$source_repo" rev-parse "${sha}^{tree}")"
@@ -122,24 +122,30 @@ install_ci_artifact() {
   [[ "$artifact_size" =~ ^[0-9]+$ && "$artifact_size" -gt 0 ]] || { printf 'V12_CI_ARTIFACT_SIZE_LOOKUP_FAILED\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
   chunk_size=$((32 * 1024 * 1024))
   chunk_count=$(( (artifact_size + chunk_size - 1) / chunk_size ))
+  parallelism=4
   parts="$download_root/parts"
   install -d -o deploy -g deploy -m 0700 "$parts"
-  printf 'V12_CI_ARTIFACT_PARALLEL_RANGE_DOWNLOAD size=%s chunkSize=%s chunks=%s\n' "$artifact_size" "$chunk_size" "$chunk_count"
-  for ((i=0; i<chunk_count; i++)); do
-    start=$((i * chunk_size))
-    end=$((start + chunk_size - 1))
-    (( end >= artifact_size )) && end=$((artifact_size - 1))
-    part="$parts/$(printf '%05d' "$i")"
-    runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 \
-      --retry 3 --retry-delay 1 --connect-timeout 15 --max-time 180 \
-      --range "$start-$end" "$artifact_base/$artifact_name" -o "$part" &
-    range_pids[$i]=$!
+  printf 'V12_CI_ARTIFACT_PARALLEL_RANGE_DOWNLOAD size=%s chunkSize=%s chunks=%s parallelism=%s\n' "$artifact_size" "$chunk_size" "$chunk_count" "$parallelism"
+  for ((batch=0; batch<chunk_count; batch+=parallelism)); do
+    batch_end=$((batch + parallelism))
+    (( batch_end > chunk_count )) && batch_end=$chunk_count
+    range_pids=()
+    for ((i=batch; i<batch_end; i++)); do
+      start=$((i * chunk_size))
+      end=$((start + chunk_size - 1))
+      (( end >= artifact_size )) && end=$((artifact_size - 1))
+      part="$parts/$(printf '%05d' "$i")"
+      runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 \
+        --retry 3 --retry-delay 1 --connect-timeout 15 --max-time 180 \
+        --range "$start-$end" "$artifact_base/$artifact_name" -o "$part" &
+      range_pids+=("$!")
+    done
+    range_failed=0
+    for pid in "${range_pids[@]}"; do
+      wait "$pid" || range_failed=1
+    done
+    (( range_failed == 0 )) || { printf 'V12_CI_ARTIFACT_PARALLEL_RANGE_DOWNLOAD_FAILED batch=%s\n' "$batch" >&2; rm -rf "$download_root" "$staging"; return 2; }
   done
-  range_failed=0
-  for pid in "${range_pids[@]}"; do
-    wait "$pid" || range_failed=1
-  done
-  (( range_failed == 0 )) || { printf 'V12_CI_ARTIFACT_PARALLEL_RANGE_DOWNLOAD_FAILED\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
   : > "$archive"
   for ((i=0; i<chunk_count; i++)); do
     start=$((i * chunk_size))
