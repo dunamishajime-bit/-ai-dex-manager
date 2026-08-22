@@ -289,7 +289,7 @@ quiesce_previous_partial_activation() {
     }
   fi
   systemctl is-enabled --quiet "$previous_target" 2>/dev/null && {
-    printf 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_STILL_ENABLED\n' >&2
+    printf 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_ENABLED_AFTER_DISABLE\n' >&2
     return 2
   }
 
