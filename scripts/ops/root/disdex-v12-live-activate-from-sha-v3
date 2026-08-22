@@ -202,7 +202,7 @@ PY
 
 quiesce_previous_partial_activation() {
   local previous_release previous_sha previous_target previous_v12 previous_risk previous_margin previous_pengu previous_v52
-  local unit state pid resolved previous_source_tree previous_provenance
+  local unit state pid resolved readonly_unit previous_source_tree previous_provenance
   previous_release="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
   [[ -d "$previous_release" && ! -L "$previous_release" ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_INVALID\n' >&2; return 2; }
   [[ -f "$previous_release/.disdex-release-sha" && ! -L "$previous_release/.disdex-release-sha" ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_MARKER_MISSING\n' >&2; return 2; }
@@ -266,7 +266,22 @@ quiesce_previous_partial_activation() {
     [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_V96_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
   done
   state="$(systemctl is-active "$previous_v12" 2>/dev/null || true)"; pid="$(systemctl show "$previous_v12" --property MainPID --value 2>/dev/null || true)"
-  [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_V12_ACTIVE state=%s pid=%s\n' "$state" "${pid:-0}" >&2; return 2; }
+  if [[ "$state" == "active" && "${pid:-0}" =~ ^[1-9][0-9]*$ ]]; then
+    readonly_unit="disdex-v12-runtime-status@$previous_sha.service"
+    systemctl reset-failed "$readonly_unit" >/dev/null 2>&1 || true
+    if ! systemctl start "$readonly_unit"; then
+      printf 'V12_PARTIAL_RESUME_V12_READONLY_CHECK_FAILED unit=%s\n' "$readonly_unit" >&2
+      journalctl -u "$readonly_unit" --no-pager -n 80 >&2 || true
+      return 2
+    fi
+    [[ "$(systemctl show "$readonly_unit" --property Result --value 2>/dev/null || true)" == "success" ]] || {
+      printf 'V12_PARTIAL_RESUME_V12_READONLY_RESULT_FAILED unit=%s\n' "$readonly_unit" >&2
+      return 2
+    }
+    systemctl stop "$previous_v12"
+  fi
+  state="$(systemctl is-active "$previous_v12" 2>/dev/null || true)"; pid="$(systemctl show "$previous_v12" --property MainPID --value 2>/dev/null || true)"
+  [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_V12_QUIESCE_FAILED state=%s pid=%s\n' "$state" "${pid:-0}" >&2; return 2; }
   systemctl is-enabled --quiet "$previous_target" 2>/dev/null && { printf 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_ENABLED\n' >&2; return 2; }
 
   for unit in "$previous_risk" "$previous_margin" "$previous_pengu" "$previous_v52"; do
@@ -305,7 +320,7 @@ quiesce_previous_partial_activation() {
   run_previous_readonly "disdex-v96-to-v12-migration-preflight@$previous_sha.service" ACCOUNT_POST_QUIESCE
 
   systemctl stop "$previous_target" "$previous_margin" "$previous_risk"
-  for unit in "$previous_target" "$previous_margin" "$previous_risk" "$previous_pengu" "$previous_v52"; do
+  for unit in "$previous_target" "$previous_v12" "$previous_margin" "$previous_risk" "$previous_pengu" "$previous_v52"; do
     state="$(systemctl is-active "$unit" 2>/dev/null || true)"
     [[ "$state" != "active" ]] || { printf 'V12_PARTIAL_RESUME_FINAL_QUIESCE_FAILED unit=%s\n' "$unit" >&2; return 2; }
     systemctl disable "$unit" >/dev/null 2>&1 || true
