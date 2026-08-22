@@ -121,6 +121,7 @@ jobs:
           grep -Fq 'disdex-v12-kill-switch-auto-repair.service' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'disdex-v12-three-hour-health-check.timer' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'disdex-v12-three-hour-health-check.service' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'disdex-v12-live-status-report" /usr/local/libexec/disdex-v12-live-status-report' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'disdex-v12-three-hour-health-check" /usr/local/libexec/disdex-v12-three-hour-health-check' scripts/ops/root/install-disdex-v12-live
           test -f scripts/ops/root/disdex-v12-three-hour-health-check
           test -f ops/systemd/disdex-v12-three-hour-health-check.service

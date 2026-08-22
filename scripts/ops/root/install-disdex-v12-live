@@ -186,6 +186,7 @@ for key in ASTER_FUTURES_BASE_URL ASTER_USER_ADDRESS ASTER_API_PRIVATE_KEY; do
 done
 chown root:root "$credential_tmp"; chmod 0600 "$credential_tmp"; mv -f "$credential_tmp" "$credential_overlay"
 install -o root -g root -m 0755 "$reverse_interlock_source" /usr/local/libexec/disdex-v96-refuse-while-v12-active
+install -o root -g root -m 0755 "$repo_root/scripts/ops/root/disdex-v12-live-status-report" /usr/local/libexec/disdex-v12-live-status-report
 install -o root -g root -m 0755 "$repo_root/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair
 install -o root -g root -m 0755 "$repo_root/scripts/ops/root/disdex-v12-three-hour-health-check" /usr/local/libexec/disdex-v12-three-hour-health-check
 for name in "${unit_names[@]}"; do
