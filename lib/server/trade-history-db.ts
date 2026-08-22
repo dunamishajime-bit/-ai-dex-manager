@@ -2,6 +2,7 @@
 import path from "path";
 
 import type { OperationalWalletHolding } from "@/lib/operational-wallet-types";
+import type { TradeHistoryStrategyId } from "@/lib/trade-history-types";
 import type { DirectWalletTradeInput, DirectWalletTradeResult } from "@/lib/server/direct-trade-executor";
 import { writeGitTradeHistorySnapshot } from "@/lib/server/trade-history-git-export";
 
@@ -42,7 +43,7 @@ export interface TradeHistoryEntry {
   tradeStatus?: "open" | "closed" | "unmatched_exit";
   /** Whether an open fill is confirmed by the current venue position snapshot. */
   positionVerified?: boolean;
-  strategyId?: "V12" | "V96" | "V52" | "UNKNOWN";
+  strategyId?: TradeHistoryStrategyId;
   netPnlUsd?: number;
 }
 

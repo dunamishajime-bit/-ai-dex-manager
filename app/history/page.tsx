@@ -5,6 +5,11 @@ import { Download, ExternalLink, RefreshCw, CalendarDays } from "lucide-react";
 import Link from "next/link";
 
 import { Card } from "@/components/ui/Card";
+import {
+  TRADE_HISTORY_STRATEGY_IDS,
+  tradeHistoryStrategyLabel,
+  type TradeHistoryStrategyId,
+} from "@/lib/trade-history-types";
 
 type TradeHistoryEntry = {
   id: string;
@@ -31,10 +36,12 @@ type TradeHistoryEntry = {
   tradeStatus?: "open" | "closed" | "unmatched_exit";
   positionVerified?: boolean;
   positionSide?: "BOTH" | "LONG" | "SHORT";
-  strategyId?: "V12" | "V52" | "UNKNOWN";
+  strategyId?: TradeHistoryStrategyId;
   commission?: number;
   netPnlUsd?: number;
 };
+
+type StrategyFilter = "ALL" | TradeHistoryStrategyId;
 
 function formatNumber(value?: number, digits = 2) {
   if (value === undefined || value === null || Number.isNaN(value)) return "-";
@@ -61,10 +68,17 @@ function hasExplorerTx(entry: Pick<TradeHistoryEntry, "provider" | "txHash">) {
   return /^0x[a-fA-F0-9]{32,}$/.test(entry.txHash);
 }
 
+function effectivePnlUsd(entry: Pick<TradeHistoryEntry, "realizedPnlUsd" | "netPnlUsd">) {
+  if (typeof entry.netPnlUsd === "number" && Number.isFinite(entry.netPnlUsd)) return entry.netPnlUsd;
+  if (typeof entry.realizedPnlUsd === "number" && Number.isFinite(entry.realizedPnlUsd)) return entry.realizedPnlUsd;
+  return undefined;
+}
+
 export default function HistoryPage() {
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [strategyFilter, setStrategyFilter] = useState<StrategyFilter>("ALL");
 
   const loadEntries = async () => {
     setIsLoading(true);
@@ -86,20 +100,23 @@ export default function HistoryPage() {
   }, []);
 
   const visibleEntries = useMemo(
-    () => entries.filter((entry) => Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001),
-    [entries],
+    () => entries.filter((entry) =>
+      (Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001)
+      && (strategyFilter === "ALL" || entry.strategyId === strategyFilter),
+    ),
+    [entries, strategyFilter],
   );
 
   const summary = useMemo(() => {
-    const sells = visibleEntries.filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number");
-    const realizedPnlUsd = sells.reduce((sum, entry) => sum + Number(entry.realizedPnlUsd || 0), 0);
-    const wins = sells.filter((entry) => Number(entry.realizedPnlUsd || 0) > 0).length;
+    const sells = visibleEntries.filter((entry) => entry.tradeStatus === "closed" && effectivePnlUsd(entry) !== undefined);
+    const netPnlUsd = sells.reduce((sum, entry) => sum + Number(effectivePnlUsd(entry) || 0), 0);
+    const wins = sells.filter((entry) => Number(effectivePnlUsd(entry) || 0) > 0).length;
     const walletAddress = visibleEntries[0]?.walletAddress || "-";
 
     return {
       walletAddress,
       totalTrades: visibleEntries.length,
-      realizedPnlUsd,
+      netPnlUsd,
       winRate: sells.length > 0 ? (wins / sells.length) * 100 : 0,
     };
   }, [visibleEntries]);
@@ -118,7 +135,9 @@ export default function HistoryPage() {
       "entryPriceUsd",
       "exitPriceUsd",
       "realizedPnlUsd",
+      "netPnlUsd",
       "realizedPnlPct",
+      "strategyId",
       "txHash",
     ];
 
@@ -136,7 +155,9 @@ export default function HistoryPage() {
         entry.entryPriceUsd ?? "",
         entry.exitPriceUsd ?? "",
         entry.realizedPnlUsd ?? "",
+        entry.netPnlUsd ?? "",
         entry.realizedPnlPct ?? "",
+        entry.strategyId ?? "",
         entry.txHash,
       ].join(","),
     );
@@ -158,11 +179,22 @@ export default function HistoryPage() {
             トレード履歴
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            約定履歴と、ローカル ledger ベースの概算損益を時系列で確認できます。
+            公式約定履歴と、手数料反映可能な net PnL を時系列で確認できます。
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <select
+            value={strategyFilter}
+            onChange={(event) => setStrategyFilter(event.target.value as StrategyFilter)}
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+            aria-label="strategy filter"
+          >
+            <option value="ALL">All strategies</option>
+            {TRADE_HISTORY_STRATEGY_IDS.map((strategyId) => (
+              <option key={strategyId} value={strategyId}>{tradeHistoryStrategyLabel(strategyId)}</option>
+            ))}
+          </select>
           <Link
             href="/performance"
             className="flex items-center gap-2 rounded-lg border border-gold-500/40 bg-gold-500/10 px-4 py-2 text-sm text-gold-300 transition-colors hover:bg-gold-500/20"
@@ -197,9 +229,9 @@ export default function HistoryPage() {
           <div className="mt-2 text-2xl font-semibold text-white">{summary.totalTrades}</div>
         </Card>
         <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">概算確定損益</div>
-          <div className={`mt-2 text-2xl font-semibold ${summary.realizedPnlUsd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-            {formatUsd(summary.realizedPnlUsd)}
+          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">net PnL（確定）</div>
+          <div className={`mt-2 text-2xl font-semibold ${summary.netPnlUsd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+            {formatUsd(summary.netPnlUsd)}
           </div>
         </Card>
         <Card glow="gold" noHover>
@@ -209,8 +241,11 @@ export default function HistoryPage() {
       </div>
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-        このページの損益は Aster の公式 net PnL ではなく、ローカル trade ledger の約定価格から再計算した概算値です。
-        手数料、funding、未実現損益、口座残高の増減とは一致しない場合があります。
+        手数料が安定資産で取得できる約定は net PnL（実現損益−手数料）を優先表示し、取得できない場合は実現損益へフォールバックします。
+        funding・未実現損益・口座残高の増減は公式 income endpoint 未接続のため含めません。
+      </div>
+      <div className="text-xs text-gray-500">
+        Net PnL uses commission-aware values when available; funding is intentionally excluded until an official income endpoint is connected.
       </div>
 
       <Card title="約定一覧" glow="gold">
@@ -230,7 +265,7 @@ export default function HistoryPage() {
                 <th className="px-3 py-3">数量</th>
                 <th className="px-3 py-3">取得単価</th>
                 <th className="px-3 py-3">売却単価</th>
-                <th className="px-3 py-3">損益額</th>
+                <th className="px-3 py-3">net損益額</th>
                 <th className="px-3 py-3">損益率</th>
                 <th className="px-3 py-3">Tx</th>
               </tr>
@@ -249,6 +284,7 @@ export default function HistoryPage() {
                     <div className="font-semibold text-white">
                       {entry.destSymbol} / {entry.sourceSymbol}
                     </div>
+                    <div className="mt-1 text-[11px] text-gold-200/80">{tradeHistoryStrategyLabel(entry.strategyId)}</div>
                     <div className="mt-1 text-xs text-gray-500">{entry.reason}</div>
                   </td>
                   <td className="px-3 py-4 font-mono text-xs">
@@ -263,14 +299,14 @@ export default function HistoryPage() {
                   <td className="px-3 py-4 font-mono text-xs text-white">{formatUsd(entry.exitPriceUsd, 4)}</td>
                   <td
                     className={`px-3 py-4 font-mono text-xs font-semibold ${
-                      Number(entry.realizedPnlUsd || 0) > 0
+                      Number(effectivePnlUsd(entry) || 0) > 0
                         ? "text-emerald-400"
-                        : Number(entry.realizedPnlUsd || 0) < 0
+                        : Number(effectivePnlUsd(entry) || 0) < 0
                           ? "text-red-400"
                           : "text-gray-500"
                     }`}
                   >
-                    {formatUsd(entry.realizedPnlUsd)}
+                    {formatUsd(effectivePnlUsd(entry))}
                   </td>
                   <td
                     className={`px-3 py-4 font-mono text-xs font-semibold ${

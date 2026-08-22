@@ -8,6 +8,11 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { cn } from "@/lib/utils";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
+import {
+  TRADE_HISTORY_STRATEGY_IDS,
+  tradeHistoryStrategyLabel,
+  type TradeHistoryStrategyId,
+} from "@/lib/trade-history-types";
 
 type TradeHistoryEntry = {
   id: string;
@@ -22,16 +27,19 @@ type TradeHistoryEntry = {
   openedAt?: string;
   closedAt?: string;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
-  strategyId?: "V12" | "V52" | "UNKNOWN";
+  strategyId?: TradeHistoryStrategyId;
   netPnlUsd?: number;
 };
 
 type ClosedTrade = TradeHistoryEntry & {
   realizedPnlUsd: number;
   realizedPnlPct: number;
+  pnlUsd: number;
   openedAt: string;
   closedAt: string;
 };
+
+type StrategyFilter = "ALL" | TradeHistoryStrategyId;
 
 type PeriodSummary = {
   key: string;
@@ -102,16 +110,26 @@ function weekLabel(date: Date) {
   return `${start.getMonth() + 1}/${start.getDate()} - ${end.getMonth() + 1}/${end.getDate()}`;
 }
 
-function toClosedTrades(entries: TradeHistoryEntry[]) {
+function effectivePnlUsd(entry: Pick<TradeHistoryEntry, "realizedPnlUsd" | "netPnlUsd">) {
+  if (typeof entry.netPnlUsd === "number" && Number.isFinite(entry.netPnlUsd)) return entry.netPnlUsd;
+  if (typeof entry.realizedPnlUsd === "number" && Number.isFinite(entry.realizedPnlUsd)) return entry.realizedPnlUsd;
+  return undefined;
+}
+
+function toClosedTrades(entries: TradeHistoryEntry[]): ClosedTrade[] {
   return entries
-    .filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number")
-    .map((entry) => ({
-      ...entry,
-      realizedPnlUsd: Number(entry.realizedPnlUsd),
-      realizedPnlPct: typeof entry.realizedPnlPct === "number" ? entry.realizedPnlPct : 0,
-      openedAt: entry.openedAt || entry.executedAt,
-      closedAt: entry.closedAt || entry.executedAt,
-    }))
+    .flatMap((entry) => {
+      const pnlUsd = effectivePnlUsd(entry);
+      if (entry.tradeStatus !== "closed" || pnlUsd === undefined) return [];
+      return [{
+        ...entry,
+        realizedPnlUsd: typeof entry.realizedPnlUsd === "number" ? entry.realizedPnlUsd : pnlUsd,
+        realizedPnlPct: typeof entry.realizedPnlPct === "number" ? entry.realizedPnlPct : 0,
+        pnlUsd,
+        openedAt: entry.openedAt || entry.executedAt,
+        closedAt: entry.closedAt || entry.executedAt,
+      }];
+    })
     .sort((left, right) => new Date(left.closedAt).getTime() - new Date(right.closedAt).getTime());
 }
 
@@ -139,7 +157,7 @@ function buildPeriodSummaries(
   let rollingCapital = seedCapital;
   return Array.from(grouped.entries())
     .map(([key, group]) => {
-      const pnlUsd = group.trades.reduce((sum, trade) => sum + trade.realizedPnlUsd, 0);
+      const pnlUsd = group.trades.reduce((sum, trade) => sum + trade.pnlUsd, 0);
       const startCapital = rollingCapital;
       const endCapital = startCapital + pnlUsd;
       const returnPct = startCapital > 0 ? (pnlUsd / startCapital) * 100 : 0;
@@ -186,6 +204,7 @@ export default function PerformancePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
+  const [strategyFilter, setStrategyFilter] = useState<StrategyFilter>("ALL");
 
   async function loadEntries() {
     setIsLoading(true);
@@ -206,7 +225,11 @@ export default function PerformancePage() {
     void loadEntries();
   }, []);
 
-  const closedTrades = useMemo(() => toClosedTrades(entries), [entries]);
+  const filteredEntries = useMemo(
+    () => entries.filter((entry) => strategyFilter === "ALL" || entry.strategyId === strategyFilter),
+    [entries, strategyFilter],
+  );
+  const closedTrades = useMemo(() => toClosedTrades(filteredEntries), [filteredEntries]);
   const weekly = useMemo(
     () => buildPeriodSummaries(closedTrades, (date) => dateKey(startOfWeek(date)), weekLabel).slice(0, 8),
     [closedTrades],
@@ -251,16 +274,29 @@ export default function PerformancePage() {
             成績カレンダー
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            実際の約定履歴をもとに、週次・月次・日別の成績を確認できます。
+            実際の約定履歴をもとに、commission-aware net PnL の週次・月次・日別成績を確認できます。
           </p>
         </div>
-        <button
-          onClick={() => void loadEntries()}
-          className="flex items-center gap-2 rounded-lg border border-gold-500/30 bg-gold-500/10 px-4 py-2 text-sm text-gold-200 transition-colors hover:bg-gold-500/20"
-        >
-          <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
-          更新
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={strategyFilter}
+            onChange={(event) => setStrategyFilter(event.target.value as StrategyFilter)}
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+            aria-label="strategy filter"
+          >
+            <option value="ALL">All strategies</option>
+            {TRADE_HISTORY_STRATEGY_IDS.map((strategyId) => (
+              <option key={strategyId} value={strategyId}>{tradeHistoryStrategyLabel(strategyId)}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => void loadEntries()}
+            className="flex items-center gap-2 rounded-lg border border-gold-500/30 bg-gold-500/10 px-4 py-2 text-sm text-gold-200 transition-colors hover:bg-gold-500/20"
+          >
+            <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+            更新
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -270,7 +306,7 @@ export default function PerformancePage() {
           <div className="mt-1 text-sm text-gray-400">現在のAster口座評価額</div>
         </Card>
         <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Weekly Realized PnL</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Weekly Net PnL</div>
           <div className={cn("mt-2 text-2xl font-semibold", toneClass(latestWeek?.pnlUsd ?? 0))}>
             {latestWeek ? formatPrice(latestWeek.pnlUsd) : "-"}
           </div>
@@ -279,7 +315,7 @@ export default function PerformancePage() {
           </div>
         </Card>
         <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Monthly Realized PnL</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Monthly Net PnL</div>
           <div className={cn("mt-2 text-2xl font-semibold", toneClass(latestMonth?.pnlUsd ?? 0))}>
             {latestMonth ? formatPrice(latestMonth.pnlUsd) : "-"}
           </div>
@@ -290,7 +326,10 @@ export default function PerformancePage() {
       </div>
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-        上部カードはAster口座評価額のスナップショット差分です。下の週次・月次サマリーと日別一覧は closed trade の実現損益です。
+        上部カードはAster口座評価額のスナップショット差分です。下の週次・月次サマリーと日別一覧は、取得できる手数料を反映した closed trade の net PnL です。
+      </div>
+      <div className="text-xs text-gray-500">
+        Net PnL uses commission-aware values when available; funding is intentionally excluded until an official income endpoint is connected.
       </div>
 
       {error ? (
@@ -325,7 +364,7 @@ export default function PerformancePage() {
             <CalendarDays className="h-5 w-5 text-gold-300" />
             <div>
               <div className="text-lg font-semibold text-white">{monthLabel(monthCursor)}</div>
-              <div className="text-xs text-gray-500">決済日ベースで実現損益を表示</div>
+              <div className="text-xs text-gray-500">決済日ベースでnet PnLを表示</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -391,8 +430,11 @@ export default function PerformancePage() {
                       <div className="truncate text-[11px] font-semibold text-white">
                         {trade.sourceSymbol}/{trade.destSymbol}
                       </div>
-                      <div className={cn("mt-1 text-[11px] font-semibold", toneClass(trade.realizedPnlPct))}>
-                        {formatPct(trade.realizedPnlPct, 2)}
+                      <div className="mt-1 text-[11px] font-semibold text-white/75">
+                        {formatPrice(trade.pnlUsd)}
+                      </div>
+                      <div className={cn("mt-1 text-[10px]", toneClass(trade.realizedPnlPct))}>
+                        {formatPct(trade.realizedPnlPct, 2)} / {tradeHistoryStrategyLabel(trade.strategyId)}
                       </div>
                     </div>
                   ))}
@@ -429,7 +471,7 @@ export default function PerformancePage() {
                 </div>
                 <div className="flex items-center gap-4 md:gap-6">
                   <TradeValue label="損益率" value={formatPct(trade.realizedPnlPct, 2)} tone={trade.realizedPnlPct} />
-                  <TradeValue label="損益" value={formatPrice(trade.realizedPnlUsd)} tone={trade.realizedPnlUsd} />
+                  <TradeValue label="Net損益" value={formatPrice(trade.pnlUsd)} tone={trade.pnlUsd} />
                 </div>
               </div>
             ))}
