@@ -40,6 +40,8 @@ unit_names=(
   disdex-v12-live-readiness@.service
   disdex-v12-stale-kill-switch-recovery@.service
   disdex-v12-runtime-status@.service
+  disdex-v12-kill-switch-auto-repair.service
+  disdex-v12-kill-switch-auto-repair.path
   disdex-pengu-v2-readiness@.service
   disdex-v52-v12-readiness@.service
   disdex-v96-to-v12-migration-preflight@.service
@@ -56,6 +58,7 @@ required=(
   "$repo_root/scripts/disdex-v12-live-readiness.ts"
   "$repo_root/scripts/disdex-v12-stale-local-state-recovery.ts"
   "$repo_root/scripts/disdex-v12-stale-kill-switch-recovery.ts"
+  "$repo_root/scripts/disdex-v12-kill-switch-auto-repair.ts"
   "$repo_root/scripts/disdex-v12-runtime-status.ts"
   "$repo_root/scripts/disdex-pengu-v2-live-readiness.ts"
   "$repo_root/scripts/disdex-v96-to-v12-migration-preflight.ts"
@@ -180,6 +183,7 @@ for key in ASTER_FUTURES_BASE_URL ASTER_USER_ADDRESS ASTER_API_PRIVATE_KEY; do
 done
 chown root:root "$credential_tmp"; chmod 0600 "$credential_tmp"; mv -f "$credential_tmp" "$credential_overlay"
 install -o root -g root -m 0755 "$reverse_interlock_source" /usr/local/libexec/disdex-v96-refuse-while-v12-active
+install -o root -g root -m 0755 "$repo_root/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair
 for name in "${unit_names[@]}"; do
   if [[ "$shared_risk_preexisting_active" == "true" && "$name" == "disdex-shared-crypto-risk@.service" ]]; then
     continue

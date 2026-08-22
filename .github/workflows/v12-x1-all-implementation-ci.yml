@@ -16,6 +16,7 @@ on:
       - 'scripts/disdex-pengu-dual-ls-v2-live-runner.ts'
       - 'scripts/disdex-pengu-v2-live-readiness.ts'
       - 'scripts/disdex-v12-*.ts'
+      - 'scripts/ops/root/disdex-v12-kill-switch-auto-repair'
       - 'scripts/disdex-v96-to-v12-migration-preflight.ts'
       - 'scripts/disdex-v96-stop-recheck.ts'
       - 'scripts/disdex_v12_v52_*.py'
@@ -32,6 +33,7 @@ on:
       - 'scripts/ops/root/disdex-v96-refuse-while-v12-active'
       - 'ops/env/disdex-v12-*.example'
       - 'ops/systemd/disdex-v12-*.service'
+      - 'ops/systemd/disdex-v12-*.path'
       - 'ops/systemd/disdex-v12-*.target'
       - 'ops/systemd/disdex-pengu-dual-ls-v2@.service'
       - 'ops/systemd/disdex-pengu-v2-readiness@.service'
@@ -77,6 +79,7 @@ jobs:
           npx tsx scripts/v12-resident-stop-selftest.ts
           npx tsx scripts/disdex-shared-crypto-risk-selftest.ts
           npx tsx scripts/v12-live-execution-selftest.ts
+          npx tsx scripts/disdex-v12-kill-switch-auto-repair.ts --self-test
           npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test
           python scripts/disdex_account_order_lock.py --self-test
           python scripts/disdex_v12_crypto_daily_risk.py --self-test
@@ -100,6 +103,7 @@ jobs:
           bash -n scripts/ops/root/disdex-v96-to-v12-live-migrate
           bash -n scripts/ops/root/disdex-v12-live-status-report
           bash -n scripts/ops/root/disdex-v96-refuse-while-v12-active
+          bash -n scripts/ops/root/disdex-v12-kill-switch-auto-repair
           grep -Fq 'mode="${2:-runtime}"' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           grep -Fq 'disdex-v96-stop-recheck@$sha.service' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
           ! grep -Fq 'node_modules/.bin/tsx" scripts/disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
@@ -113,6 +117,10 @@ jobs:
           grep -Fq 'currentChanged=false' scripts/ops/root/create-disdex-v12-immutable-release
           grep -Fq 'V12_LIVE_INSTALL_SOURCE_TREE_MARKER_MISSING' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'disdex-v12-runtime-status@.service' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'disdex-v12-kill-switch-auto-repair.path' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'disdex-v12-kill-switch-auto-repair.service' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'V12_HOURLY_INSPECTION_TIMER=REMOVED' scripts/ops/root/disdex-v12-live-status-report
+          ! rg -n 'OnCalendar=.*hour|OnUnitActiveSec=.*(h|hour)|hourly-inspection|hourly-check' ops/systemd scripts/ops/root
           grep -Fq '/usr/local/libexec/disdex-v96-refuse-while-v12-active' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'present_old_units' scripts/ops/root/disdex-v96-to-v12-live-migrate
@@ -137,6 +145,8 @@ jobs:
           grep -Fq 'RestartPreventExitStatus=2' ops/systemd/disdex-v12-x1-all@.service
           grep -Fq 'disdex-v12-mutual-exclusion-preflight.sh %i runtime' ops/systemd/disdex-v12-x1-all@.service
           grep -Fq 'scripts/disdex-v12-runtime-status.ts' ops/systemd/disdex-v12-runtime-status@.service
+          grep -Fq 'disdex-v12-kill-switch-auto-repair' ops/systemd/disdex-v12-kill-switch-auto-repair.service
+          grep -Fq 'PathChanged=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json' ops/systemd/disdex-v12-kill-switch-auto-repair.path
           grep -Fq 'disdex_v12_v52_margin_guard_runtime.py --mode live --daemon' ops/systemd/disdex-v12-v52-margin-guard@.service
           grep -Fq 'disdex_v12_v52_live_engine.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
           grep -Fq 'disdex-pengu-dual-ls-v2-live-runner.ts --daemon' ops/systemd/disdex-pengu-dual-ls-v2@.service

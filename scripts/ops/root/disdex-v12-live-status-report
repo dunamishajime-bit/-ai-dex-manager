@@ -18,6 +18,7 @@ source_tree="$(tr -d '[:space:]' < "$release/.disdex-release-source-tree")"
 [[ "$source_tree" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_LIVE_STATUS_SOURCE_TREE_INVALID\n' >&2; exit 2; }
 
 target="disdex-v12-pengu-v2-v52@$sha.target"
+auto_repair_path=disdex-v12-kill-switch-auto-repair.path
 v12="disdex-v12-x1-all@$sha.service"
 pengu="disdex-pengu-dual-ls-v2@$sha.service"
 v52="disdex-v52-aster-only@$sha.service"
@@ -56,6 +57,7 @@ if [[ "$mode" == "pre-enable" ]]; then
   systemctl is-enabled --quiet "$target" 2>/dev/null && { printf 'V12_LIVE_STATUS_TARGET_PREMATURELY_ENABLED\n' >&2; exit 3; }
 else
   systemctl is-enabled --quiet "$target" || { printf 'V12_LIVE_STATUS_TARGET_NOT_ENABLED\n' >&2; exit 3; }
+  [[ "$(state_of "$auto_repair_path")" == "active" ]] || { printf 'V12_LIVE_STATUS_AUTO_REPAIR_PATH_NOT_ACTIVE\n' >&2; exit 3; }
 fi
 
 for unit in "${known_old_units[@]}"; do
@@ -94,6 +96,7 @@ printf 'V96_STOPPED=TRUE\nV12_LIVE_STARTED=TRUE\nPENGU_V2_RUNNING=TRUE\nV52_RUNN
 printf 'SHARED_CRYPTO_RISK_RUNNING=TRUE\nFULL_UNIVERSE_MARGIN_GUARD_RUNNING=TRUE\n'
 printf 'V12_RUNTIME_RECONCILIATION_PASS=TRUE\nPENGU_V2_READINESS_PASS=TRUE\nV52_READINESS_PASS=TRUE\n'
 printf 'V96_REVERSE_INTERLOCK_VERIFIED=TRUE\nV96_V12_SIMULTANEOUS_LIVE=FALSE\nV12_BOOT_TARGET_ENABLED=%s\nORDERS_SENT_FOR_TESTING=0\n' "$boot_enabled"
+printf 'V12_KILL_SWITCH_AUTO_REPAIR=EVENT_DRIVEN\nV12_HOURLY_INSPECTION_TIMER=REMOVED\n'
 printf 'v12MainPid=%s\nv12Restarts=%s\npenguMainPid=%s\npenguRestarts=%s\nv52MainPid=%s\nv52Restarts=%s\n' \
   "$(pid_of "$v12")" "$(restarts_of "$v12")" \
   "$(pid_of "$pengu")" "$(restarts_of "$pengu")" \

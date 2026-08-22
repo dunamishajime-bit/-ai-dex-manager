@@ -1,0 +1,12 @@
+[Unit]
+Description=DisDex V12 immediate Kill Switch/state change detector
+After=local-fs.target
+ConditionPathExists=/home/deploy/disdex-trading/current
+
+[Path]
+PathChanged=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+PathChanged=/var/lib/disdex/v12-x1-all/runner.json
+Unit=disdex-v12-kill-switch-auto-repair.service
+
+[Install]
+WantedBy=multi-user.target

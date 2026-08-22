@@ -1,0 +1,26 @@
+[Unit]
+Description=DisDex V12 event-driven Kill Switch auto-repair coordinator
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=15min
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/current
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/disdex-v12-x1-all.env
+Environment=NODE_ENV=production
+Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+ExecStart=/usr/local/libexec/disdex-v12-kill-switch-auto-repair
+TimeoutStartSec=8min
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state /var/lib/disdex
+UMask=0077

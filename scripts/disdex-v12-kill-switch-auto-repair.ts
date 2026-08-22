@@ -1,0 +1,178 @@
+import "dotenv/config";
+
+import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
+import { chmod, mkdir, rename, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { dirname, resolve } from "node:path";
+
+import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
+import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
+import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
+
+/**
+ * Event-driven, fail-closed recovery coordinator for the V12 composition.
+ *
+ * The coordinator intentionally does not guess how to repair an unknown
+ * failure.  Only existing, audited recovery programs may clear a Kill
+ * Switch; all other reasons remain halted for operator review.
+ */
+const SUPERVISOR_EXIT_REASON = "V96/V52 trading supervisor exited unexpectedly with status 1";
+const MARGIN_FLATTEN_REASON_PREFIX = "V52 margin-aware fatal tick error:";
+const OPERATOR = "V12_KILL_SWITCH_AUTO_REPAIR_V1";
+const DEFAULT_TIMEOUT_MS = 120_000;
+
+type RepairAction = "STALE_SHARED_KILL" | "MARGIN_FLATTEN" | "LOCAL_STATE" | "NONE" | "BLOCKED";
+
+function boolEnv(name: string) {
+    return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim());
+}
+
+function lastOutput(output: string) {
+    return output.trim().split(/\r?\n/).filter(Boolean).slice(-8).join(" | ").slice(-2_000);
+}
+
+function requestToken() {
+    return `auto-${new Date().toISOString().replace(/[^0-9A-Za-z]/g, "")}-${process.pid}-${randomUUID().slice(0, 8)}`;
+}
+
+function classifyRepair(killActive: boolean, reason: string | undefined, localStateActive: boolean, localManualReview: boolean): RepairAction {
+    if (killActive && reason === SUPERVISOR_EXIT_REASON) return "STALE_SHARED_KILL";
+    if (killActive && reason?.startsWith(MARGIN_FLATTEN_REASON_PREFIX)) return "MARGIN_FLATTEN";
+    if (!killActive && (localStateActive || localManualReview)) return "LOCAL_STATE";
+    if (killActive) return "BLOCKED";
+    return "NONE";
+}
+
+function runNodeScript(script: string, args: string[] = [], timeout = DEFAULT_TIMEOUT_MS) {
+    const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
+    const result = spawnSync(tsx, [script, ...args], {
+        cwd: process.cwd(),
+        env: { ...process.env, HOME: process.env.HOME || "/home/deploy", NODE_ENV: "production" },
+        encoding: "utf8",
+        timeout,
+        maxBuffer: 2_000_000,
+    });
+    const output = `${String(result.stdout || "")}\n${String(result.stderr || "")}`;
+    if (result.error) throw result.error;
+    if (result.status !== 0) throw new Error(`${script}:exit=${String(result.status)}:${lastOutput(output)}`);
+    return output;
+}
+
+function runPythonScript(script: string, args: string[] = [], timeout = DEFAULT_TIMEOUT_MS) {
+    const result = spawnSync(process.env.DISDEX_PYTHON_BIN || "/usr/bin/python3", [script, ...args], {
+        cwd: process.cwd(),
+        env: { ...process.env, HOME: process.env.HOME || "/home/deploy", NODE_ENV: "production", PYTHONPATH: process.env.PYTHONPATH || resolve(process.cwd(), "scripts") },
+        encoding: "utf8",
+        timeout,
+        maxBuffer: 2_000_000,
+    });
+    const output = `${String(result.stdout || "")}\n${String(result.stderr || "")}`;
+    if (result.error) throw result.error;
+    if (result.status !== 0) throw new Error(`${script}:exit=${String(result.status)}:${lastOutput(output)}`);
+    return output;
+}
+
+async function writeActiveKillSwitch(path: string, reason: string) {
+    await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+    const temporary = `${path}.auto-repair.${process.pid}.${randomUUID()}.tmp`;
+    const payload = {
+        active: true,
+        strategyId: "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+        action: "FLATTEN_MANAGED",
+        reason,
+        operator: OPERATOR,
+        activatedAt: new Date().toISOString(),
+        automaticRepair: "FAIL_CLOSED",
+    };
+    await writeFile(temporary, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+    await chmod(temporary, 0o600);
+    await rename(temporary, path);
+}
+
+async function runReadOnlyReadiness() {
+    // These checks authenticate read-only account/market state and never
+    // evaluate a signal or submit/cancel an order.
+    runNodeScript("scripts/disdex-v12-runtime-status.ts");
+    runNodeScript("scripts/disdex-v12-live-readiness.ts");
+    runNodeScript("scripts/disdex-pengu-v2-live-readiness.ts");
+    runPythonScript("scripts/disdex_v12_v52_live_engine.py", ["--mode", "live", "--preflight-readonly"]);
+}
+
+async function selfTest() {
+    assert.equal(classifyRepair(true, SUPERVISOR_EXIT_REASON, false, false), "STALE_SHARED_KILL");
+    assert.equal(classifyRepair(true, `${MARGIN_FLATTEN_REASON_PREFIX} test`, false, false), "MARGIN_FLATTEN");
+    assert.equal(classifyRepair(true, "daily loss latch", false, false), "BLOCKED");
+    assert.equal(classifyRepair(false, undefined, true, false), "LOCAL_STATE");
+    assert.equal(classifyRepair(false, undefined, false, false), "NONE");
+    assert.equal(boolEnv("V12_AUTO_REPAIR_TEST_FALSE"), false);
+    console.log("V12 Kill Switch auto-repair self-test: PASS");
+}
+
+async function main() {
+    if (process.argv.includes("--self-test")) {
+        await selfTest();
+        return;
+    }
+
+    const runtime = resolveV12X1AllRuntime();
+    const failClosedIndex = process.argv.indexOf("--fail-closed");
+    if (failClosedIndex >= 0) {
+        const path = String(process.env.DISDEX_SHARED_KILL_SWITCH_FILE || "").trim();
+        const reason = String(process.argv[failClosedIndex + 1] || "V12_AUTO_REPAIR_LIVE_START_FAILED").trim();
+        if (!path) throw new Error("V12_AUTO_REPAIR_FAIL_CLOSED_KILL_SWITCH_PATH_MISSING");
+        await writeActiveKillSwitch(resolve(path), reason);
+        const after = await readSharedKillSwitch();
+        if (!after.active) throw new Error("V12_AUTO_REPAIR_FAIL_CLOSED_VERIFY_FAILED");
+        console.log(JSON.stringify({ status: "V12_AUTO_REPAIR_FAIL_CLOSED", reason, ordersSent: false, positionChangesSent: false }));
+        return;
+    }
+
+    const sha = String(process.argv[2] || "").trim();
+    if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error("V12_AUTO_REPAIR_EXACT_SHA_REQUIRED");
+    if (runtime.mode !== "LIVE" || !runtime.enabled || !runtime.liveTradingEnabled || !runtime.liveExecutionEnabled || !boolEnv("DISDEX_V12_LIVE_ALLOW_REAL_ORDERS")) {
+        throw new Error("V12_AUTO_REPAIR_LIVE_GATES_NOT_ALL_ENABLED");
+    }
+
+    const kill = await readSharedKillSwitch();
+    const state = await new FileV12X1AllRunnerStateStore(runtime.statePath, "LIVE").load();
+    const action = classifyRepair(Boolean(kill.active), kill.reason, Boolean(state.killSwitch?.active), Boolean(state.manualReview));
+    if (action === "NONE") {
+        console.log(JSON.stringify({ status: "V12_AUTO_REPAIR_NOT_REQUIRED", sha, ordersSent: false, positionChangesSent: false }));
+        return;
+    }
+    if (action === "BLOCKED") {
+        console.log(JSON.stringify({ status: "V12_AUTO_REPAIR_BLOCKED_OPERATOR_REVIEW_REQUIRED", sha, reason: kill.reason || "UNSPECIFIED", sharedKillSwitchActive: true, ordersSent: false, positionChangesSent: false }));
+        return;
+    }
+
+    const token = requestToken();
+    try {
+        if (action === "STALE_SHARED_KILL") {
+            runNodeScript("scripts/disdex-v12-stale-kill-switch-recovery.ts", [sha]);
+        } else if (action === "MARGIN_FLATTEN") {
+            runNodeScript("scripts/disdex-v12-margin-flatten-recovery.ts", [sha, `v12-margin-flatten-${token}`]);
+        } else {
+            runNodeScript("scripts/disdex-v12-stale-local-state-recovery.ts", [sha, `v12-h2-recovery-${token}`]);
+        }
+
+        const afterRepair = await readSharedKillSwitch();
+        if (afterRepair.active) throw new Error(`V12_AUTO_REPAIR_SHARED_KILL_SWITCH_REMAINS_ACTIVE:${afterRepair.reason || "UNSPECIFIED"}`);
+        await runReadOnlyReadiness();
+        const afterReadiness = await readSharedKillSwitch();
+        if (afterReadiness.active) throw new Error(`V12_AUTO_REPAIR_KILL_SWITCH_RETRIPPED:${afterReadiness.reason || "UNSPECIFIED"}`);
+        console.log(JSON.stringify({ status: "V12_AUTO_REPAIR_READY", sha, action, sharedKillSwitchActive: false, readiness: "PASS", liveResumeAllowed: true, ordersSent: false, positionChangesSent: false }));
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const current = await readSharedKillSwitch().catch(() => ({ active: true, sourcePath: kill.sourcePath }));
+        if (!current.active && current.sourcePath) {
+            await writeActiveKillSwitch(resolve(current.sourcePath), `V12_AUTO_REPAIR_FAILED:${message.slice(0, 500)}`);
+        }
+        throw error;
+    }
+}
+
+main().catch((error) => {
+    console.error(JSON.stringify({ status: "V12_AUTO_REPAIR_FAILED", message: error instanceof Error ? error.message : String(error), ordersSent: false, positionChangesSent: false }));
+    process.exitCode = 1;
+});
