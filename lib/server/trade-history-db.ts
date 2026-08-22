@@ -3,6 +3,7 @@ import path from "path";
 
 import type { OperationalWalletHolding } from "@/lib/operational-wallet-types";
 import type { DirectWalletTradeInput, DirectWalletTradeResult } from "@/lib/server/direct-trade-executor";
+import { writeGitTradeHistorySnapshot } from "@/lib/server/trade-history-git-export";
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -333,8 +334,12 @@ export async function loadOpenPositionForWalletSymbol(
 }
 
 async function saveTradeLedger(db: TradeLedgerDb) {
-  if (USE_REDIS) return saveToRedis(db);
-  saveToFs(db);
+  if (USE_REDIS) {
+    await saveToRedis(db);
+  } else {
+    saveToFs(db);
+  }
+  writeGitTradeHistorySnapshot(db.entries);
 }
 
 export async function loadTradeHistoryEntries(): Promise<TradeHistoryEntry[]> {
