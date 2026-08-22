@@ -120,7 +120,7 @@ install_ci_artifact() {
   fi
   artifact_size="$(runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 --head "$artifact_base/$artifact_name" | awk 'tolower($1)=="content-length:" {gsub("\r", "", $2); value=$2} END {print value}')"
   [[ "$artifact_size" =~ ^[0-9]+$ && "$artifact_size" -gt 0 ]] || { printf 'V12_CI_ARTIFACT_SIZE_LOOKUP_FAILED\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
-  chunk_size=$((8 * 1024 * 1024))
+  chunk_size=$((1 * 1024 * 1024))
   chunk_count=$(( (artifact_size + chunk_size - 1) / chunk_size ))
   parallelism=4
   parts="$download_root/parts"
@@ -136,7 +136,7 @@ install_ci_artifact() {
       (( end >= artifact_size )) && end=$((artifact_size - 1))
       part="$parts/$(printf '%05d' "$i")"
       runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 \
-        --retry 3 --retry-delay 1 --connect-timeout 15 --max-time 180 \
+        --http1.1 --retry 3 --retry-delay 1 --connect-timeout 15 --max-time 60 \
         --range "$start-$end" "$artifact_base/$artifact_name" -o "$part" &
       range_pids+=("$!")
     done
