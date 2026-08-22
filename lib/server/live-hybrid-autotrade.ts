@@ -33,6 +33,7 @@ import {
     loadTradeHistoryEntries,
     updateOpenPositionPartialExitPeak,
 } from "@/lib/server/trade-history-db";
+import { notifyTradeFill } from "@/lib/server/trade-fill-notification";
 import { buildTelegramMessage, sendTelegramMessage } from "@/lib/telegram-service";
 import { resolveToken } from "@/lib/tokens";
 import type { TokenRef } from "@/lib/types/market";
@@ -2937,7 +2938,7 @@ async function executeWalletAction(
     let walletAfterTrade = wallet;
     if (trade.ok) {
         walletAfterTrade = await refreshWalletBalanceAfterTrade(wallet, action, trade);
-        await appendTradeHistory({
+        const historyEntry = await appendTradeHistory({
             walletId: walletAfterTrade.id,
             walletAddress: walletAfterTrade.address,
             chainId: walletAfterTrade.chainId,
@@ -2950,6 +2951,7 @@ async function executeWalletAction(
             trade,
             executedAt: new Date().toISOString(),
         });
+        if (historyEntry) await notifyTradeFill(historyEntry);
     }
 
     const result: LiveHybridWalletRunResult = {

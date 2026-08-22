@@ -39,6 +39,7 @@ import type {
 } from "@/lib/server/combined/types";
 import { writeLiveDecisionCache } from "@/lib/server/live-decision-cache-db";
 import { appendVenueTradeHistory } from "@/lib/server/trade-history-db";
+import { notifyTradeFill } from "@/lib/server/trade-fill-notification";
 
 const DRY_RUN_NOTIONAL_USD = Number(process.env.COMBINED_DRY_RUN_NOTIONAL_USD || 100);
 const ASTER_WALLET_ID = "asterdex-primary";
@@ -808,7 +809,7 @@ async function persistTradeHistory(
   const sourceSymbol = action === "BUY" ? "USDT" : asset;
   const destSymbol = action === "BUY" ? asset : "USDT";
   const usdValue = round(qty * price, 6);
-  await appendVenueTradeHistory({
+  const historyEntry = await appendVenueTradeHistory({
     walletId: ASTER_WALLET_ID,
     walletAddress: ASTER_WALLET_ADDRESS,
     chainId: ASTER_CHAIN_ID,
@@ -824,6 +825,8 @@ async function persistTradeHistory(
     reason,
     executedAt,
   });
+  if (historyEntry) await notifyTradeFill(historyEntry);
+  return historyEntry;
 }
 
 export async function refreshCombinedDecisionCache(modeOverride?: CombinedStrategyMode) {
