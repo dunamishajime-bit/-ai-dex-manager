@@ -119,8 +119,16 @@ jobs:
           grep -Fq 'disdex-v12-runtime-status@.service' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'disdex-v12-kill-switch-auto-repair.path' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'disdex-v12-kill-switch-auto-repair.service' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'disdex-v12-three-hour-health-check.timer' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'disdex-v12-three-hour-health-check.service' scripts/ops/root/install-disdex-v12-live
+          test -f scripts/ops/root/disdex-v12-three-hour-health-check
+          test -f ops/systemd/disdex-v12-three-hour-health-check.service
+          test -f ops/systemd/disdex-v12-three-hour-health-check.timer
+          bash -n scripts/ops/root/disdex-v12-three-hour-health-check
+          grep -Fq 'OnUnitActiveSec=3h' ops/systemd/disdex-v12-three-hour-health-check.timer
+          grep -Fq 'V12_3H_INSPECTION_OK' scripts/ops/root/disdex-v12-three-hour-health-check
           grep -Fq 'V12_HOURLY_INSPECTION_TIMER=REMOVED' scripts/ops/root/disdex-v12-live-status-report
-          ! rg -n 'OnCalendar=.*hour|OnUnitActiveSec=.*(h|hour)|hourly-inspection|hourly-check' ops/systemd scripts/ops/root
+          ! rg -n 'OnCalendar=.*hour|OnUnitActiveSec=(1h|60min)|hourly-inspection|hourly-check' ops/systemd scripts/ops/root
           grep -Fq '/usr/local/libexec/disdex-v96-refuse-while-v12-active' scripts/ops/root/install-disdex-v12-live
           grep -Fq 'I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION' scripts/ops/root/disdex-v96-to-v12-live-migrate
           grep -Fq 'present_old_units' scripts/ops/root/disdex-v96-to-v12-live-migrate
@@ -148,11 +156,9 @@ jobs:
           grep -Fq 'disdex-v12-kill-switch-auto-repair' ops/systemd/disdex-v12-kill-switch-auto-repair.service
           grep -Fq 'PathChanged=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json' ops/systemd/disdex-v12-kill-switch-auto-repair.path
           grep -Fq 'V12_AUTO_REPAIR_MODE=DETERMINISTIC' ops/env/disdex-v12-x1-all.live.env.example
-          grep -Fq 'V12_CODEX_REPAIR_THREAD_ID=' ops/env/disdex-v12-x1-all.live.env.example
-          grep -Fq 'V12_CODEX_THREAD_HANDOFF_PENDING' scripts/disdex-v12-kill-switch-auto-repair.ts
+          ! rg -n 'V12_CODEX|CODEX_THREAD_HANDOFF|codex-repair-request|targetThreadId' scripts ops/env
           grep -Fq 'V12 universe alignment mismatch:' scripts/disdex-v12-kill-switch-auto-repair.ts
           grep -Fq 'TRAILING_STOP_UPDATE_FAILED:Order would immediately trigger.' scripts/disdex-v12-kill-switch-auto-repair.ts
-          grep -Fq 'targetThreadId' scripts/disdex-v12-kill-switch-auto-repair.ts
           grep -Fq 'disdex_v12_v52_margin_guard_runtime.py --mode live --daemon' ops/systemd/disdex-v12-v52-margin-guard@.service
           grep -Fq 'disdex_v12_v52_live_engine.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
           grep -Fq 'disdex-pengu-dual-ls-v2-live-runner.ts --daemon' ops/systemd/disdex-pengu-dual-ls-v2@.service

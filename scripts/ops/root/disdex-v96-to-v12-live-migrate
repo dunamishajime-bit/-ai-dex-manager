@@ -253,6 +253,7 @@ require_active "disdex-v12-x1-all@$sha.service"
 systemctl enable "$target" >/dev/null
 systemctl is-enabled --quiet "$target"
 systemctl enable --now disdex-v12-kill-switch-auto-repair.path >/dev/null
+systemctl enable --now disdex-v12-three-hour-health-check.timer >/dev/null
 [[ "$(systemctl is-active disdex-v12-kill-switch-auto-repair.path 2>/dev/null || true)" == "active" ]] || {
   printf 'V96_TO_V12_AUTO_REPAIR_PATH_NOT_ACTIVE\n' >&2
   false

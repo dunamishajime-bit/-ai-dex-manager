@@ -13,6 +13,9 @@ on:
       - 'scripts/ops/root/disdex-v12-kill-switch-auto-repair'
       - 'ops/systemd/disdex-v12-kill-switch-auto-repair.service'
       - 'ops/systemd/disdex-v12-kill-switch-auto-repair.path'
+      - 'scripts/ops/root/disdex-v12-three-hour-health-check'
+      - 'ops/systemd/disdex-v12-three-hour-health-check.service'
+      - 'ops/systemd/disdex-v12-three-hour-health-check.timer'
       - '.github/workflows/v12-live-activation-v3-ci.yml'
 
 permissions:
@@ -39,6 +42,13 @@ jobs:
           test -f "$auto_repair"
           test -f ops/systemd/disdex-v12-kill-switch-auto-repair.service
           test -f ops/systemd/disdex-v12-kill-switch-auto-repair.path
+          test -f scripts/ops/root/disdex-v12-three-hour-health-check
+          test -f ops/systemd/disdex-v12-three-hour-health-check.service
+          test -f ops/systemd/disdex-v12-three-hour-health-check.timer
+          bash -n scripts/ops/root/disdex-v12-three-hour-health-check
+          grep -Fq 'OnUnitActiveSec=3h' ops/systemd/disdex-v12-three-hour-health-check.timer
+          grep -Fq 'V12_3H_INSPECTION_OK' scripts/ops/root/disdex-v12-three-hour-health-check
+          ! rg -n 'V12_CODEX|CODEX_THREAD_HANDOFF|codex-repair-request|targetThreadId' scripts ops/env
           grep -Fq 'V12_AUTO_REPAIR_READY' "$auto_repair"
           grep -Fq 'PathChanged=' ops/systemd/disdex-v12-kill-switch-auto-repair.path
           grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' "$activate"

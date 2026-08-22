@@ -1,0 +1,11 @@
+[Unit]
+Description=DisDex all active logic three-hour health inspection schedule
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=3h
+AccuracySec=1min
+Unit=disdex-v12-three-hour-health-check.service
+
+[Install]
+WantedBy=timers.target

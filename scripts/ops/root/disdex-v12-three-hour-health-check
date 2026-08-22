@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || { printf 'V12_3H_INSPECTION_ROOT_REQUIRED\n' >&2; exit 1; }
+
+current_link=/home/deploy/disdex-trading/current
+current="$(readlink -f "$current_link" 2>/dev/null || true)"
+[[ "$current" == /home/deploy/disdex-trading/releases/* && -d "$current" && ! -L "$current" ]] || {
+  printf 'V12_3H_INSPECTION_CURRENT_INVALID\n' >&2
+  exit 2
+}
+sha="$(basename "$current")"
+[[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_3H_INSPECTION_CURRENT_SHA_INVALID\n' >&2; exit 2; }
+
+status_report=/usr/local/libexec/disdex-v12-live-status-report
+auto_repair=/usr/local/libexec/disdex-v12-kill-switch-auto-repair
+kill_file="${DISDEX_SHARED_KILL_SWITCH_FILE:-/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json}"
+state_file=/var/lib/disdex/v12-x1-all/runner.json
+target="disdex-v12-pengu-v2-v52@$sha.target"
+repair_path=disdex-v12-kill-switch-auto-repair.path
+units=(
+  "disdex-shared-crypto-risk@$sha.service"
+  "disdex-v12-v52-margin-guard@$sha.service"
+  "disdex-pengu-dual-ls-v2@$sha.service"
+  "disdex-v52-aster-only@$sha.service"
+  "disdex-v12-x1-all@$sha.service"
+)
+legacy_units=(disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service)
+
+status_log="$(mktemp /tmp/disdex-v12-3h-status.XXXXXX)"
+repair_log="$(mktemp /tmp/disdex-v12-3h-repair.XXXXXX)"
+trap 'rm -f "$status_log" "$repair_log"' EXIT
+
+run_status() {
+  "$status_report" "$sha" final >"$status_log" 2>&1
+}
+
+state_is_safe_for_component_restart() {
+  [[ -f "$state_file" ]] || return 1
+  /usr/bin/jq -e '(.pending == null) and ((.manualReview // "") == "") and ((.killSwitch.active // false) == false)' "$state_file" >/dev/null 2>&1
+}
+
+shared_kill_is_active() {
+  [[ -f "$kill_file" ]] && /usr/bin/jq -e '.active == true' "$kill_file" >/dev/null 2>&1
+}
+
+legacy_units_are_quiesced() {
+  local unit
+  for unit in "${legacy_units[@]}"; do
+    if systemctl cat "$unit" >/dev/null 2>&1; then
+      [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" != "active" ]] || return 1
+      systemctl is-enabled --quiet "$unit" 2>/dev/null && return 1
+    fi
+  done
+}
+
+if run_status; then
+  printf 'V12_3H_INSPECTION_OK sha=%s all_logic=healthy\n' "$sha"
+  exit 0
+fi
+
+printf 'V12_3H_INSPECTION_PROBLEM_DETECTED sha=%s\n' "$sha" >&2
+tail -n 80 "$status_log" >&2 || true
+repair_action="none"
+
+if shared_kill_is_active; then
+  if "$auto_repair" >"$repair_log" 2>&1; then
+    repair_action=event_driven_recovery
+  else
+    printf 'V12_3H_INSPECTION_REPAIR_FAILED action=event_driven_recovery\n' >&2
+    cat "$repair_log" >&2 || true
+    exit 3
+  fi
+elif state_is_safe_for_component_restart && systemctl is-enabled --quiet "$target" 2>/dev/null && legacy_units_are_quiesced; then
+  # A clean local state with no shared Kill Switch allows only exact-SHA
+  # component restart. Manual, pending, unknown, or legacy-live states remain
+  # fail-closed and are never force-started by this timer.
+  systemctl start "$repair_path"
+  systemctl start "$target"
+  for unit in "${units[@]}"; do
+    systemctl start "$unit"
+  done
+  repair_action=component_restart
+else
+  printf 'V12_3H_INSPECTION_REPAIR_NOT_SAFE action=fail_closed\n' >&2
+  exit 4
+fi
+
+if run_status; then
+  printf 'V12_3H_INSPECTION_REPAIRED sha=%s action=%s all_logic=healthy\n' "$sha" "$repair_action"
+  exit 0
+fi
+
+printf 'V12_3H_INSPECTION_FAILED sha=%s action=%s\n' "$sha" "$repair_action" >&2
+tail -n 120 "$status_log" >&2 || true
+cat "$repair_log" >&2 || true
+exit 5

@@ -21,8 +21,6 @@ const SUPERVISOR_EXIT_REASON = "V96/V52 trading supervisor exited unexpectedly w
 const MARGIN_FLATTEN_REASON_PREFIX = "V52 margin-aware fatal tick error:";
 const OPERATOR = "V12_KILL_SWITCH_AUTO_REPAIR_V1";
 const DEFAULT_TIMEOUT_MS = 120_000;
-const DEFAULT_CODEX_REPAIR_THREAD_ID = "01a0261e-6073-7381-bfb5-3807db374e2a";
-const DEFAULT_CODEX_REPAIR_REQUEST_PATH = "/var/lib/disdex/v12-x1-all/codex-repair-request.json";
 const HISTORICAL_LOCAL_REASON_PREFIXES = [
     "V12 universe alignment mismatch:",
     "Fresh V96/V52 pre-order Margin Guard blocked exposure increase:",
@@ -34,26 +32,9 @@ const HISTORICAL_LOCAL_EXACT_REASONS = new Set([
 const HISTORICAL_MINIMUM_ENTRY_QUANTITY_REASON = /^Quantity 0 is below Aster minQty [0-9]+(?:\.[0-9]+)? for [A-Z0-9]+USDT\.$/;
 
 type RepairAction = "STALE_SHARED_KILL" | "MARGIN_FLATTEN" | "LOCAL_STATE" | "NONE" | "BLOCKED";
-type AutoRepairMode = "CODEX_THREAD_HANDOFF" | "DETERMINISTIC";
 
 function boolEnv(name: string) {
     return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim());
-}
-
-function autoRepairMode(value = process.env.V12_AUTO_REPAIR_MODE): AutoRepairMode {
-    return String(value || "").trim().toUpperCase() === "DETERMINISTIC" ? "DETERMINISTIC" : "CODEX_THREAD_HANDOFF";
-}
-
-function resolveCodexRepairThreadId(value = process.env.V12_CODEX_REPAIR_THREAD_ID) {
-    const threadId = String(value || DEFAULT_CODEX_REPAIR_THREAD_ID).trim();
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(threadId)) {
-        throw new Error("V12_CODEX_REPAIR_THREAD_ID_INVALID");
-    }
-    return threadId;
-}
-
-function codexRepairRequestPath(value = process.env.V12_CODEX_REPAIR_REQUEST_PATH) {
-    return resolve(String(value || DEFAULT_CODEX_REPAIR_REQUEST_PATH).trim());
 }
 
 function isHistoricalLocalRepairReason(reason: string | undefined) {
@@ -125,50 +106,6 @@ async function writeActiveKillSwitch(path: string, reason: string) {
     await rename(temporary, path);
 }
 
-function buildCodexThreadHandoff(input: {
-    sha: string;
-    action: RepairAction;
-    killActive: boolean;
-    reason?: string;
-    sourcePath?: string;
-    localStateActive: boolean;
-    localManualReview: boolean;
-}) {
-    const createdAt = new Date().toISOString();
-    return {
-        schemaVersion: 1,
-        status: "PENDING_CODEX_THREAD_REPAIR",
-        mode: "CODEX_THREAD_HANDOFF",
-        targetThreadId: resolveCodexRepairThreadId(),
-        createdAt,
-        releaseSha: input.sha,
-        trigger: {
-            action: input.action,
-            sharedKillSwitchActive: input.killActive,
-            reason: input.reason || null,
-            sourcePath: input.sourcePath || null,
-            localStateActive: input.localStateActive,
-            localManualReview: input.localManualReview,
-        },
-        instruction: "このCodexスレッドを修正プログラムとして使用する。kill switchの停止理由とログ・状態を確認し、原因を修正し、read-only readinessを通過させる。標準のlive gateとkill switch解除条件を確認するまで、kill switch解除・サービス再開・注文送信を行わない。確認完了後のみlive状態へ復帰し、復帰後の稼働状態を記録する。外部AI APIは使用しない。",
-        requiredOutcome: "CODEX_THREAD_MUST_CONFIRM_READINESS_BEFORE_LIVE_RESUME",
-        ordersSent: false,
-        positionChangesSent: false,
-    };
-}
-
-async function writeCodexThreadHandoff(input: Parameters<typeof buildCodexThreadHandoff>[0]) {
-    const path = codexRepairRequestPath();
-    await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-    const temporary = `${path}.pending.${process.pid}.${randomUUID()}.tmp`;
-    const payload = buildCodexThreadHandoff(input);
-    await writeFile(temporary, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-    await chmod(temporary, 0o600);
-    await rename(temporary, path);
-    console.log(JSON.stringify({ status: "V12_CODEX_THREAD_HANDOFF_PENDING", requestPath: path, targetThreadId: payload.targetThreadId, action: input.action, releaseSha: input.sha, ordersSent: false, positionChangesSent: false }));
-    return payload;
-}
-
 async function runReadOnlyReadiness() {
     // These checks authenticate read-only account/market state and never
     // evaluate a signal or submit/cancel an order.
@@ -188,13 +125,6 @@ async function selfTest() {
     assert.equal(classifyRepair(false, undefined, true, false, "unknown manual review"), "NONE");
     assert.equal(classifyRepair(false, undefined, false, false), "NONE");
     assert.equal(boolEnv("V12_AUTO_REPAIR_TEST_FALSE"), false);
-    assert.equal(autoRepairMode(""), "CODEX_THREAD_HANDOFF");
-    assert.equal(autoRepairMode("DETERMINISTIC"), "DETERMINISTIC");
-    const handoff = buildCodexThreadHandoff({ sha: "0123456789abcdef0123456789abcdef01234567", action: "BLOCKED", killActive: true, reason: "daily loss latch", sourcePath: "/tmp/kill-switch.json", localStateActive: false, localManualReview: false });
-    assert.equal(handoff.status, "PENDING_CODEX_THREAD_REPAIR");
-    assert.equal(handoff.mode, "CODEX_THREAD_HANDOFF");
-    assert.equal(handoff.targetThreadId, DEFAULT_CODEX_REPAIR_THREAD_ID);
-    assert.match(handoff.instruction, /外部AI APIは使用しない/);
     console.log("V12 Kill Switch auto-repair self-test: PASS");
 }
 
@@ -228,18 +158,6 @@ async function main() {
     const action = classifyRepair(Boolean(kill.active), kill.reason, Boolean(state.killSwitch?.active), Boolean(state.manualReview), state.manualReview || state.killSwitch?.reason);
     if (action === "NONE") {
         console.log(JSON.stringify({ status: "V12_AUTO_REPAIR_NOT_REQUIRED", sha, ordersSent: false, positionChangesSent: false }));
-        return;
-    }
-    if (autoRepairMode() === "CODEX_THREAD_HANDOFF") {
-        await writeCodexThreadHandoff({
-            sha,
-            action,
-            killActive: Boolean(kill.active),
-            reason: kill.reason,
-            sourcePath: kill.sourcePath,
-            localStateActive: Boolean(state.killSwitch?.active),
-            localManualReview: Boolean(state.manualReview),
-        });
         return;
     }
     if (action === "BLOCKED") {

@@ -42,6 +42,8 @@ unit_names=(
   disdex-v12-runtime-status@.service
   disdex-v12-kill-switch-auto-repair.service
   disdex-v12-kill-switch-auto-repair.path
+  disdex-v12-three-hour-health-check.service
+  disdex-v12-three-hour-health-check.timer
   disdex-pengu-v2-readiness@.service
   disdex-v52-v12-readiness@.service
   disdex-v96-to-v12-migration-preflight@.service
@@ -54,6 +56,7 @@ required=(
   "$repo_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
   "$repo_root/scripts/ops/root/disdex-v96-to-v12-live-migrate"
   "$repo_root/scripts/ops/root/disdex-v12-live-status-report"
+  "$repo_root/scripts/ops/root/disdex-v12-three-hour-health-check"
   "$reverse_interlock_source"
   "$repo_root/scripts/disdex-v12-live-readiness.ts"
   "$repo_root/scripts/disdex-v12-stale-local-state-recovery.ts"

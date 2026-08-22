@@ -1,0 +1,24 @@
+[Unit]
+Description=DisDex all active logic three-hour health inspection and safe recovery
+After=network-online.target disdex-v12-kill-switch-auto-repair.path
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/current
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/disdex-v12-x1-all.env
+Environment=NODE_ENV=production
+Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+ExecStart=/usr/local/libexec/disdex-v12-three-hour-health-check
+TimeoutStartSec=15min
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state /var/lib/disdex
+UMask=0077
