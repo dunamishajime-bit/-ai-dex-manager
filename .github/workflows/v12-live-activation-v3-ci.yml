@@ -51,6 +51,7 @@ jobs:
           grep -Fq 'PENGU_POST_QUIESCE' "$activate"
           grep -Fq 'ACCOUNT_POST_QUIESCE' "$activate"
           grep -Fq 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_ENABLED' "$activate"
+          grep -Fq 'V12_PARTIAL_RESUME_PREVIOUS_IMMUTABLE_RELEASE=PASS' "$activate"
           grep -Fq 'V12_V3_PHASE=HARDENED_LIVE_MIGRATION' "$activate"
           grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' "$activate"
           grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$activate"

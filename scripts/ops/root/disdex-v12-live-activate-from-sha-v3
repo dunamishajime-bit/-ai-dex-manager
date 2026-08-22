@@ -202,7 +202,7 @@ PY
 
 quiesce_previous_partial_activation() {
   local previous_release previous_sha previous_target previous_v12 previous_risk previous_margin previous_pengu previous_v52
-  local unit state pid resolved
+  local unit state pid resolved previous_source_tree previous_provenance
   previous_release="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
   [[ -d "$previous_release" && ! -L "$previous_release" ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_INVALID\n' >&2; return 2; }
   [[ -f "$previous_release/.disdex-release-sha" && ! -L "$previous_release/.disdex-release-sha" ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_MARKER_MISSING\n' >&2; return 2; }
@@ -235,7 +235,29 @@ quiesce_previous_partial_activation() {
   fi
   (( ${#active_targets[@]} == 1 )) || { printf 'V12_PARTIAL_RESUME_MULTIPLE_TARGETS count=%s\n' "${#active_targets[@]}" >&2; return 2; }
   [[ "${active_targets[0]}" == "$previous_target" ]] || { printf 'V12_PARTIAL_RESUME_TARGET_SHA_MISMATCH unit=%s currentSha=%s\n' "${active_targets[0]}" "$previous_sha" >&2; return 2; }
-  [[ -f "$previous_release/.disdex-ci-artifact-sha256" && ! -L "$previous_release/.disdex-ci-artifact-sha256" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_CI_ARTIFACT\n' >&2; return 2; }
+  previous_provenance="ci-artifact"
+  if [[ ! -f "$previous_release/.disdex-ci-artifact-sha256" || -L "$previous_release/.disdex-ci-artifact-sha256" ]]; then
+    [[ -f "$previous_release/.disdex-release-source-tree" && ! -L "$previous_release/.disdex-release-source-tree" ]] || {
+      printf 'V12_PARTIAL_RESUME_PREVIOUS_IMMUTABLE_TREE_MARKER_MISSING\n' >&2
+      return 2
+    }
+    [[ -f "$previous_release/.disdex-release-source-files.sha256" && ! -L "$previous_release/.disdex-release-source-files.sha256" ]] || {
+      printf 'V12_PARTIAL_RESUME_PREVIOUS_IMMUTABLE_SOURCE_MANIFEST_MISSING\n' >&2
+      return 2
+    }
+    (cd "$previous_release" && sha256sum -c --quiet .disdex-release-source-files.sha256) || {
+      printf 'V12_PARTIAL_RESUME_PREVIOUS_IMMUTABLE_SOURCE_MANIFEST_MISMATCH\n' >&2
+      return 2
+    }
+    previous_source_tree="$(tr -d '[:space:]' < "$previous_release/.disdex-release-source-tree")"
+    resolved="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "${previous_sha}^{tree}" 2>/dev/null || true)"
+    [[ "$resolved" == "$previous_source_tree" ]] || {
+      printf 'V12_PARTIAL_RESUME_PREVIOUS_IMMUTABLE_TREE_MISMATCH\n' >&2
+      return 2
+    }
+    previous_provenance="immutable-source-manifest"
+    printf 'V12_PARTIAL_RESUME_PREVIOUS_IMMUTABLE_RELEASE=PASS provenance=%s previousSha=%s\n' "$previous_provenance" "$previous_sha"
+  fi
   resolved="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "${previous_sha}^{commit}" 2>/dev/null || true)"
   [[ "$resolved" == "$previous_sha" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_GIT_OBJECT_MISSING\n' >&2; return 2; }
   runuser -u deploy -- git -C "$source_repo" merge-base --is-ancestor "$previous_sha" "$sha" || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_ANCESTOR\n' >&2; return 2; }
