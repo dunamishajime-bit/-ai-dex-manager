@@ -147,6 +147,8 @@ install_ci_artifact() {
     (( range_failed == 0 )) || { printf 'V12_CI_ARTIFACT_PARALLEL_RANGE_DOWNLOAD_FAILED batch=%s\n' "$batch" >&2; rm -rf "$download_root" "$staging"; return 2; }
   done
   : > "$archive"
+  chown deploy:deploy "$archive"
+  chmod 0600 "$archive"
   for ((i=0; i<chunk_count; i++)); do
     start=$((i * chunk_size))
     end=$((start + chunk_size - 1))
