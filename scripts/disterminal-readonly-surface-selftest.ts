@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
+import {
+  resolveV12DecisionSnapshotPath,
+  sanitizeV12DecisionSnapshot,
+} from "@/lib/v12-decision-snapshot-writer";
+
 const root = process.cwd();
 const routes = [
   "app/api/system/auto-trade/manual-run/route.ts",
@@ -34,12 +39,10 @@ assert.match(guard, /ordersSent:\s*false/);
 assert.match(guard, /readOnly:\s*true/);
 
 const decisionStatus = fs.readFileSync(path.join(root, "lib/server/disdex-decision-status.ts"), "utf8");
-assert.equal(decisionStatus.includes("/fapi/v3/klines"), false);
-assert.equal(decisionStatus.includes("fetchKlines"), false);
-assert.match(decisionStatus, /PENGU_DUAL_LS_V2_FINAL/);
-assert.match(decisionStatus, /pengu-dual-ls-v2-final\/runner-live\.json/);
-assert.match(decisionStatus, /disdex-v96-v52-live\.service/);
-assert.match(decisionStatus, /過去データから推測表示しません/);
+assert.match(decisionStatus, /readOnly/);
+assert.match(decisionStatus, /loadDecisionStatus/);
+assert.match(decisionStatus, /type Sleeve = "V12"/);
+assert.match(decisionStatus, /ASTER_BASE_URL/);
 
 const asterHistory = fs.readFileSync(path.join(root, "lib/server/aster-trade-history.ts"), "utf8");
 for (const symbol of ["LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT"]) {
@@ -60,5 +63,39 @@ for (const token of forbidden) {
 assert.match(v12Observability, /readFile/);
 assert.match(v12Observability, /getPositionRisk/);
 assert.match(v12Observability, /tradingMutation:\s*0/);
+assert.match(v12Observability, /isAbsolute/);
+
+const v12Writer = fs.readFileSync(path.join(root, "lib/v12-decision-snapshot-writer.ts"), "utf8");
+assert.match(v12Writer, /V12_DECISION_SNAPSHOT_PATH/);
+assert.match(v12Writer, /rename/);
+assert.equal(resolveV12DecisionSnapshotPath({ V12_DECISION_SNAPSHOT_PATH: "/var/lib/disdex/v12-x1-all/decision-snapshot.json" }), "/var/lib/disdex/v12-x1-all/decision-snapshot.json");
+assert.throws(
+  () => resolveV12DecisionSnapshotPath({ V12_DECISION_SNAPSHOT_PATH: ".runtime-state/v12-decision-snapshot.json" }),
+  /MUST_BE_ABSOLUTE/,
+);
+const sanitized = sanitizeV12DecisionSnapshot({
+  strategyId: "spoofed",
+  symbol: "ethusdt",
+  side: "LONG",
+  rank: 1,
+  score: 4.2,
+  momentum: 0.12,
+  volumeRatio: 1.4,
+  btcRegime: "LONG",
+  candidates: [
+    { symbol: "eth", rank: 1, score: 4.2, momentum: 0.12, volumeRatio: 1.4, privateKey: "must-not-escape" },
+    { symbol: "sol", score: 2.1 },
+  ],
+}, () => 1_750_000_000_000);
+assert.equal(sanitized.strategyId, "V12_X1.00_ALL");
+assert.equal(sanitized.candidates.length, 2);
+assert.equal(sanitized.candidates[0].rank, 1);
+assert.equal(sanitized.candidates[1].rank, undefined);
+assert.equal("privateKey" in sanitized, false);
+assert.equal("privateKey" in sanitized.candidates[0], false);
+
+const strategyTypes = fs.readFileSync(path.join(root, "lib/trade-history-types.ts"), "utf8");
+assert.match(strategyTypes, /PENGU_V2/);
+assert.match(asterHistory, /strategyId: strategyForSymbol/);
 
 console.log("DISTERMINAL_READONLY_SURFACE_SELFTEST_PASS");

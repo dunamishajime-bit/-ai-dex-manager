@@ -3,6 +3,7 @@ import {
   loadAsterDexClientConfig,
   type AsterDexUserTrade,
 } from "@/lib/server/asterdex/client";
+import type { TradeHistoryStrategyId } from "@/lib/trade-history-types";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 
 const V12_HISTORY_SYMBOLS = [
@@ -38,9 +39,9 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): "V12" | "V52" | "UNKNOWN" {
+function strategyForSymbol(symbol: string): TradeHistoryStrategyId {
   if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
-  if (symbol === "PENGUUSDT") return "UNKNOWN";
+  if (symbol === "PENGUUSDT") return "PENGU_V2";
   return "V12";
 }
 

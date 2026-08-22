@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { isAbsolute } from "node:path";
 
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
@@ -35,6 +36,7 @@ function baseSymbol(symbol: string) {
 async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECISION_SNAPSHOT_PATH") {
   const configuredPath = String(process.env[envName] || "").trim();
   if (!configuredPath) return { configured: false as const, value: null, error: `${envName} is not configured for the UI service.` };
+  if (!isAbsolute(configuredPath)) return { configured: true as const, value: null, error: `${envName} must be an absolute path.` };
   try {
     const text = await readFile(configuredPath, "utf8");
     if (Buffer.byteLength(text, "utf8") > MAX_JSON_BYTES) {
@@ -76,6 +78,7 @@ function safeDecisionSnapshot(value: unknown) {
     symbol: typeof row.symbol === "string" ? row.symbol : undefined,
     side: typeof row.side === "string" ? row.side : undefined,
     regime: typeof row.regime === "string" ? row.regime : undefined,
+    btcRegime: typeof row.btcRegime === "string" ? row.btcRegime : undefined,
     rank: Number.isFinite(Number(row.rank)) ? Number(row.rank) : undefined,
     score: Number.isFinite(Number(row.score)) ? Number(row.score) : undefined,
     momentum: Number.isFinite(Number(row.momentum)) ? Number(row.momentum) : undefined,
