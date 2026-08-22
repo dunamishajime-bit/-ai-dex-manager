@@ -16,7 +16,7 @@ done
 
 release="/home/deploy/disdex-trading/releases/$sha"
 artifact_verified=false
-artifact_tag="disdex-artifact-$sha"
+artifact_tag="${V12_CI_ARTIFACT_TAG:-disdex-artifact-$sha}"
 artifact_name="disdex-release-$sha.tar.gz"
 artifact_base="https://github.com/dunamishajime-bit/-ai-dex-manager/releases/download/$artifact_tag"
 
