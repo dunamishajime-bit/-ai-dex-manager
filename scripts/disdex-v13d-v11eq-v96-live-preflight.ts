@@ -4,7 +4,10 @@ import { spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { DISDEX_V13D_V11EQ_V96_RUNTIME } from "../config/disdexStockRouterV13DV11EqRuntime";
+import {
+    DISDEX_V13D_V11EQ_V96_ALLOCATION,
+    DISDEX_V13D_V11EQ_V96_RUNTIME,
+} from "../config/disdexStockRouterV13DV11EqRuntime";
 
 function statePaths() {
     const root = resolve(process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR || DISDEX_V13D_V11EQ_V96_RUNTIME.stateDirectory);
@@ -32,35 +35,38 @@ async function main() {
         DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.root,
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stock,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.kill,
-        DISDEX_V11EQ_ASTER_ONLY_RUNNER_MODE: "live",
-        DISDEX_V11EQ_ASTER_ONLY_STATE_DIR: paths.stock,
-        DISDEX_V11EQ_ASTER_ONLY_KILL_SWITCH_FILE: paths.kill,
+        DISDEX_V52_ASTER_ONLY_RUNNER_MODE: "live",
+        DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stock,
+        DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.kill,
+        DISDEX_V52_CRYPTO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
+        DISDEX_V52_STOCK_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap),
+        DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap),
+        DISDEX_V52_V11_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v11MaximumGross),
+        DISDEX_V52_V50_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v50MaximumGross),
         DISDEX_V96_STATE_DIR: paths.crypto,
         DISDEX_V96_KILL_SWITCH_FILE: paths.kill,
-        DISDEX_V96_MAX_GROSS: "1",
+        DISDEX_V96_MAX_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
         DISDEX_V96_CONFIG_MIGRATION_MODE: "true",
     } as NodeJS.ProcessEnv;
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
-    await run(python, ["scripts/disdex_v11eq_aster_only_live_engine.py", "--mode", "live", "--preflight"], env);
+    await run(python, ["scripts/disdex_v52_aster_only_live_engine.py", "--mode", "live", "--preflight"], env);
     await run(tsx, ["scripts/disdex-v96-live-preflight.ts"], env);
     console.log(JSON.stringify({
-        status: "DISDEX_V13D_V11EQ_V96_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT",
-        stockPreflight: "PASS_ASTER_ONLY_FREE_PYTH_PRIMARY_ALPACA_IEX_VALIDATED",
+        status: "DISDEX_V96_V52_LIVE_PREFLIGHT_PASS_NO_ORDERS_SENT",
+        stockPreflight: "PASS_V52_DUAL_SLOT_ASTER_ONLY_PYTH_IEX_VALIDATED",
         cryptoV96Preflight: "PASS_VERIFIED_COMBINED_MIGRATION",
         ordersSent: false,
-        cryptoGrossCap: 1,
-        stockGrossCap: "EXCESS_MARGIN_ONLY",
-        totalGrossCap: 2,
+        cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
+        stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
+        v11MaximumGross: DISDEX_V13D_V11EQ_V96_ALLOCATION.v11MaximumGross,
+        v50MaximumGross: DISDEX_V13D_V11EQ_V96_ALLOCATION.v50MaximumGross,
+        totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
         killSwitchPath: paths.kill,
     }));
 }
 
 main().catch((error) => {
-    console.error(JSON.stringify({
-        status: "DISDEX_V13D_V11EQ_V96_LIVE_PREFLIGHT_FAILED",
-        message: error instanceof Error ? error.message : String(error),
-        ordersSent: false,
-    }));
+    console.error(JSON.stringify({ status: "DISDEX_V96_V52_LIVE_PREFLIGHT_FAILED", message: error instanceof Error ? error.message : String(error), ordersSent: false }));
     process.exitCode = 1;
 });

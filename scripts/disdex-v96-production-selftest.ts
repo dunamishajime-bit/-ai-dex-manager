@@ -9,6 +9,7 @@ import {
     DISDEX_V96_RUNTIME,
     DISDEX_V96_STRATEGY_ID,
 } from "../config/disdexV96Runtime";
+import { DISDEX_V13D_V11EQ_V96_ALLOCATION } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { allocateDisDexV96ReservedPengu } from "../lib/disdex-v96-allocation";
 import {
     disDexV96ConfigFingerprint,
@@ -127,6 +128,38 @@ async function main() {
     close(allocation.coreScale, 1.425 / 1.8);
     close(allocation.penguClip, 0.5);
     assert.ok(allocation.finalGross <= DISDEX_V96_ALLOCATION.totalGrossCap);
+
+    const combinedEthTarget = allocateDisDexV96ReservedPengu({
+        coreWeights: { ETHUSDT: 1.32 },
+        penguSide: 0,
+        totalGrossCap: 1,
+    });
+    close(combinedEthTarget.targetWeights.ETHUSDT, 1);
+    close(combinedEthTarget.finalGross, 1);
+    assert.equal(combinedEthTarget.finalGross > 1 + 1e-9, false);
+
+    const standaloneEthTarget = allocateDisDexV96ReservedPengu({
+        coreWeights: { ETHUSDT: 1.32 },
+        penguSide: 0,
+        totalGrossCap: 2,
+    });
+    close(standaloneEthTarget.targetWeights.ETHUSDT, 1.32);
+    close(standaloneEthTarget.finalGross, 1.32);
+
+    const combinedWithPengu = allocateDisDexV96ReservedPengu({
+        coreWeights: { ETHUSDT: 1.32 },
+        penguSide: 1,
+        penguTargetGross: 1.15,
+        totalGrossCap: 1,
+        minimumActivePenguClip: 0.5,
+    });
+    assert.ok(combinedWithPengu.finalGross <= 1 + 1e-12);
+    assert.ok(combinedWithPengu.penguClip >= 0.5);
+    close(combinedWithPengu.reservedPenguGross, 0.575);
+
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 1);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
 
     const approvedOverride = override();
     const live = evaluateDisDexV96LiveGates({
