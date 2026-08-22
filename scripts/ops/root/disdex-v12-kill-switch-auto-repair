@@ -20,31 +20,34 @@ sha="$(basename "$current")"
 cd "$current"
 target="disdex-v12-pengu-v2-v52@$sha.target"
 kill_file="${DISDEX_SHARED_KILL_SWITCH_FILE:-/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json}"
+repair_mode="${V12_AUTO_REPAIR_MODE:-CODEX_THREAD_HANDOFF}"
 
 # A known flatten/restart recovery must quiesce the composition first because
 # the audited recovery programs require the account and open-order view to be
 # stable. Unknown/manual reasons are never stopped or auto-cleared.
-kill_active=false
-kill_reason=""
-if [[ -f "$kill_file" ]]; then
-  kill_active="$(/usr/bin/jq -r 'if .active == true then "true" else "false" end' "$kill_file" 2>/dev/null || printf 'false')"
-  kill_reason="$(/usr/bin/jq -r '.reason // ""' "$kill_file" 2>/dev/null || true)"
+if [[ "$repair_mode" == "DETERMINISTIC" ]]; then
+  kill_active=false
+  kill_reason=""
+  if [[ -f "$kill_file" ]]; then
+    kill_active="$(/usr/bin/jq -r 'if .active == true then "true" else "false" end' "$kill_file" 2>/dev/null || printf 'false')"
+    kill_reason="$(/usr/bin/jq -r '.reason // ""' "$kill_file" 2>/dev/null || true)"
+  fi
+  case "$kill_reason" in
+    "V96/V52 trading supervisor exited unexpectedly with status 1"|"V52 margin-aware fatal tick error:"*)
+      if [[ "$kill_active" == "true" ]]; then
+        systemctl stop "$target" 2>/dev/null || true
+        for _ in 1 2 3 4 5 6; do
+          [[ "$(systemctl is-active "$target" 2>/dev/null || true)" != "active" ]] || { sleep 1; continue; }
+          break
+        done
+        [[ "$(systemctl is-active "$target" 2>/dev/null || true)" != "active" ]] || {
+          printf 'V12_AUTO_REPAIR_TARGET_QUIESCE_FAILED target=%s\n' "$target" >&2
+          exit 3
+        }
+      fi
+      ;;
+  esac
 fi
-case "$kill_reason" in
-  "V96/V52 trading supervisor exited unexpectedly with status 1"|"V52 margin-aware fatal tick error:"*)
-    if [[ "$kill_active" == "true" ]]; then
-      systemctl stop "$target" 2>/dev/null || true
-      for _ in 1 2 3 4 5 6; do
-        [[ "$(systemctl is-active "$target" 2>/dev/null || true)" != "active" ]] || { sleep 1; continue; }
-        break
-      done
-      [[ "$(systemctl is-active "$target" 2>/dev/null || true)" != "active" ]] || {
-        printf 'V12_AUTO_REPAIR_TARGET_QUIESCE_FAILED target=%s\n' "$target" >&2
-        exit 3
-      }
-    fi
-    ;;
-esac
 
 tmp="$(mktemp /tmp/disdex-v12-auto-repair.XXXXXX)"
 trap 'rm -f "$tmp"' EXIT
@@ -54,6 +57,10 @@ if ! runuser -u deploy --preserve-environment -- env HOME=/home/deploy NODE_ENV=
   exit 4
 fi
 cat "$tmp"
+if grep -Fq '"status":"V12_CODEX_THREAD_HANDOFF_PENDING"' "$tmp"; then
+  printf 'V12_CODEX_THREAD_ACTION_REQUIRED=true\ntargetThreadId=%s\nordersSent=false\n' "${V12_CODEX_REPAIR_THREAD_ID:-01a0261e-6073-7381-bfb5-3807db374e2a}" >&2
+  exit 0
+fi
 if ! grep -Fq '"status":"V12_AUTO_REPAIR_READY"' "$tmp"; then
   printf 'V12_AUTO_REPAIR_NO_LIVE_RESUME status=not-ready target=%s\n' "$target" >&2
   exit 0

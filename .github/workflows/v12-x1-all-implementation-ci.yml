@@ -147,6 +147,10 @@ jobs:
           grep -Fq 'scripts/disdex-v12-runtime-status.ts' ops/systemd/disdex-v12-runtime-status@.service
           grep -Fq 'disdex-v12-kill-switch-auto-repair' ops/systemd/disdex-v12-kill-switch-auto-repair.service
           grep -Fq 'PathChanged=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json' ops/systemd/disdex-v12-kill-switch-auto-repair.path
+          grep -Fq 'V12_AUTO_REPAIR_MODE=CODEX_THREAD_HANDOFF' ops/env/disdex-v12-x1-all.live.env.example
+          grep -Fq 'V12_CODEX_REPAIR_THREAD_ID=' ops/env/disdex-v12-x1-all.live.env.example
+          grep -Fq 'V12_CODEX_THREAD_HANDOFF_PENDING' scripts/disdex-v12-kill-switch-auto-repair.ts
+          grep -Fq 'targetThreadId' scripts/disdex-v12-kill-switch-auto-repair.ts
           grep -Fq 'disdex_v12_v52_margin_guard_runtime.py --mode live --daemon' ops/systemd/disdex-v12-v52-margin-guard@.service
           grep -Fq 'disdex_v12_v52_live_engine.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
           grep -Fq 'disdex-pengu-dual-ls-v2-live-runner.ts --daemon' ops/systemd/disdex-pengu-dual-ls-v2@.service
