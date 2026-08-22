@@ -216,20 +216,51 @@ quiesce_previous_partial_activation() {
   previous_margin="disdex-v12-v52-margin-guard@$previous_sha.service"
   previous_pengu="disdex-pengu-dual-ls-v2@$previous_sha.service"
   previous_v52="disdex-v52-aster-only@$previous_sha.service"
+  run_previous_readonly() {
+    local check_unit="$1" label="$2"
+    systemctl reset-failed "$check_unit" >/dev/null 2>&1 || true
+    if ! systemctl start "$check_unit"; then
+      printf 'V12_PARTIAL_RESUME_READONLY_CHECK_FAILED label=%s unit=%s\n' "$label" "$check_unit" >&2
+      journalctl -u "$check_unit" --no-pager -n 80 >&2 || true
+      return 1
+    fi
+    [[ "$(systemctl show "$check_unit" --property Result --value 2>/dev/null || true)" == "success" ]] || {
+      printf 'V12_PARTIAL_RESUME_READONLY_RESULT_FAILED label=%s unit=%s\n' "$label" "$check_unit" >&2
+      return 1
+    }
+  }
   mapfile -t active_targets < <(systemctl list-units --type=target --state=active --no-legend --plain 'disdex-v12-pengu-v2-v52@*.target' 2>/dev/null | awk '{print $1}')
   if (( ${#active_targets[@]} == 0 )); then
-    for unit in "$previous_v12" "$previous_pengu" "$previous_v52"; do
+    state="$(systemctl is-active "$previous_v12" 2>/dev/null || true)"; pid="$(systemctl show "$previous_v12" --property MainPID --value 2>/dev/null || true)"
+    if [[ "$state" == "active" && "${pid:-0}" =~ ^[1-9][0-9]*$ ]]; then
+      run_previous_readonly "disdex-v12-runtime-status@$previous_sha.service" V12_NO_TARGET_PRE_QUIESCE || return 2
+      systemctl stop "$previous_v12"
+    fi
+    for unit in "$previous_pengu" "$previous_v52"; do
       state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
-      [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_NO_TARGET_TRADING_UNIT_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
+      if [[ "$state" == "active" && "${pid:-0}" =~ ^[1-9][0-9]*$ ]]; then
+        if [[ "$unit" == "$previous_pengu" ]]; then
+          run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_NO_TARGET_PRE_QUIESCE || return 2
+        else
+          run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_NO_TARGET_PRE_QUIESCE || return 2
+        fi
+        systemctl stop "$unit"
+      elif [[ "$state" == "active" || "${pid:-0}" != "0" ]]; then
+        printf 'V12_PARTIAL_RESUME_NO_TARGET_TRADING_UNIT_QUIESCE_FAILED unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2
+        return 2
+      fi
     done
     recover_stale_margin_flatten
     recover_stale_local_state
     systemctl stop "$previous_margin" "$previous_risk"
-    for unit in "$previous_margin" "$previous_risk"; do
+    for unit in "$previous_v12" "$previous_pengu" "$previous_v52" "$previous_margin" "$previous_risk"; do
       state="$(systemctl is-active "$unit" 2>/dev/null || true)"
       [[ "$state" != "active" ]] || { printf 'V12_PARTIAL_RESUME_NO_TARGET_QUIESCE_FAILED unit=%s\n' "$unit" >&2; return 2; }
       systemctl disable "$unit" >/dev/null 2>&1 || true
     done
+    run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_NO_TARGET_POST_QUIESCE || return 2
+    run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_NO_TARGET_POST_QUIESCE || return 2
+    run_previous_readonly "disdex-v96-to-v12-migration-preflight@$previous_sha.service" ACCOUNT_NO_TARGET_POST_QUIESCE || return 2
     printf 'V12_PARTIAL_RESUME_QUIESCE_PASS previousSha=%s candidateSha=%s resumedNoTarget=true ordersSent=false\n' "$previous_sha" "$sha"
     return 0
   fi
@@ -304,16 +335,6 @@ quiesce_previous_partial_activation() {
     done < <(systemctl list-units --type=service --state=active --no-legend --plain "$pattern" 2>/dev/null | awk '{print $1}')
   done
   recover_stale_margin_flatten
-  run_previous_readonly() {
-    local check_unit="$1" label="$2"
-    systemctl reset-failed "$check_unit" >/dev/null 2>&1 || true
-    if ! systemctl start "$check_unit"; then
-      printf 'V12_PARTIAL_RESUME_READONLY_CHECK_FAILED label=%s unit=%s\n' "$label" "$check_unit" >&2
-      journalctl -u "$check_unit" --no-pager -n 80 >&2 || true
-      return 1
-    fi
-    [[ "$(systemctl show "$check_unit" --property Result --value 2>/dev/null || true)" == "success" ]] || { printf 'V12_PARTIAL_RESUME_READONLY_RESULT_FAILED label=%s unit=%s\n' "$label" "$check_unit" >&2; return 1; }
-  }
   run_previous_readonly "disdex-shared-crypto-risk-refresh@$previous_sha.service" SHARED_RISK_PRE_QUIESCE
   run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_PRE_QUIESCE
   run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_PRE_QUIESCE
