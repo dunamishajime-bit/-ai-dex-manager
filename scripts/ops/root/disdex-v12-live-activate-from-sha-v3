@@ -1,0 +1,328 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+[[ "$(id -u)" == "0" ]] || { printf 'V12_ACTIVATE_V3_REQUIRES_ROOT\n' >&2; exit 1; }
+source_repo="${1:-}"; sha="${2:-}"; base_sha="${3:-}"; ack="${4:-}"
+required_ack="I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3"
+[[ "$source_repo" == /* && -d "$source_repo" && ! -L "$source_repo" ]] || { printf 'V12_ACTIVATE_V3_SOURCE_REPO_INVALID\n' >&2; exit 2; }
+[[ "$sha" =~ ^[0-9a-f]{40}$ && "$base_sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_ACTIVATE_V3_SHA_INVALID\n' >&2; exit 2; }
+[[ "$ack" == "$required_ack" ]] || { printf 'V12_ACTIVATE_V3_ACK_REQUIRED expected=%s\n' "$required_ack" >&2; exit 2; }
+for commit in "$sha" "$base_sha"; do
+  resolved="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "${commit}^{commit}" 2>/dev/null || true)"
+  [[ "$resolved" == "$commit" ]] || { printf 'V12_ACTIVATE_V3_COMMIT_NOT_LOCAL sha=%s\n' "$commit" >&2; exit 3; }
+done
+
+release="/home/deploy/disdex-trading/releases/$sha"
+artifact_verified=false
+artifact_tag="disdex-artifact-$sha"
+artifact_name="disdex-release-$sha.tar.gz"
+artifact_base="https://github.com/dunamishajime-bit/-ai-dex-manager/releases/download/$artifact_tag"
+
+recover_stale_local_state() {
+  local recovery_script="$release/scripts/disdex-v12-stale-local-state-recovery.ts"
+  local request_id="v12-h2-recovery-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  [[ -f "$recovery_script" && ! -L "$recovery_script" ]] || {
+    printf 'V12_PARTIAL_RESUME_LOCAL_RECOVERY_SCRIPT_MISSING\n' >&2
+    return 2
+  }
+  for env_file in \
+    /etc/disdex/disdex-v13d-v11eq-v96.env \
+    /etc/disdex/disdex-v12-pengu-v2-v52.env \
+    /etc/disdex/disdex-v12-x1-all.env; do
+    [[ -f "$env_file" && ! -L "$env_file" ]] || {
+      printf 'V12_PARTIAL_RESUME_LOCAL_RECOVERY_ENV_MISSING path=%s\n' "$env_file" >&2
+      return 2
+    }
+  done
+  set -a
+  source /etc/disdex/disdex-v13d-v11eq-v96.env
+  source /etc/disdex/disdex-v12-pengu-v2-v52.env
+  source /etc/disdex/disdex-v12-x1-all.env
+  set +a
+  (
+    cd "$release"
+    runuser -u deploy --preserve-environment -- \
+      "$release/node_modules/.bin/tsx" "$recovery_script" "$sha" "$request_id" --allow-preorder-margin-guard-recovery
+  )
+  printf 'V12_PARTIAL_LOCAL_STATE_RECOVERY_PASS requestId=%s ordersSent=false positionChangesSent=false\n' "$request_id"
+}
+
+safe_release_gc() {
+  local root="/home/deploy/disdex-trading/releases" current_path dir name marker marker_sha
+  current_path="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+  [[ "$current_path" == "$root/"* && -d "$current_path" && ! -L "$current_path" ]] || { printf 'V12_RELEASE_GC_CURRENT_INVALID\n' >&2; return 2; }
+  for dir in "$root"/*; do
+    [[ -d "$dir" && ! -L "$dir" ]] || continue
+    name="${dir##*/}"
+    [[ "$name" =~ ^[0-9a-f]{40}$ ]] || continue
+    [[ "$dir" != "$current_path" && "$name" != "$sha" ]] || continue
+    marker="$dir/.disdex-release-sha"
+    [[ -f "$marker" && ! -L "$marker" ]] || continue
+    marker_sha="$(tr -d '[:space:]' < "$marker")"
+    [[ "$marker_sha" == "$name" ]] || continue
+    if systemctl list-units --type=service --state=active --all --no-legend 2>/dev/null | grep -Fq "@$name.service"; then
+      printf 'V12_RELEASE_GC_KEEP_ACTIVE_UNIT sha=%s\n' "$name"; continue
+    fi
+    if pgrep -af -- "$dir/" >/dev/null 2>&1; then
+      printf 'V12_RELEASE_GC_KEEP_ACTIVE_PROCESS sha=%s\n' "$name"; continue
+    fi
+    rm -rf --one-file-system -- "$dir"
+    printf 'V12_RELEASE_GC_REMOVED sha=%s\n' "$name"
+  done
+  df -Pk "$root" | awk 'NR==2 {printf "V12_RELEASE_GC_FREE_KB=%s\n", $4}'
+}
+
+install_ci_artifact() {
+  local source_tree download_root archive checksum expected actual staging
+  command -v curl >/dev/null 2>&1 || return 1
+  source_tree="$(runuser -u deploy -- git -C "$source_repo" rev-parse "${sha}^{tree}")"
+  if [[ -e "$release" || -L "$release" ]]; then
+    [[ -d "$release" && ! -L "$release" ]] || { printf 'V12_CI_ARTIFACT_EXISTING_RELEASE_INVALID\n' >&2; return 2; }
+    if [[ -f "$release/.disdex-ci-artifact-sha256" && "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$sha" && "$(tr -d '[:space:]' < "$release/.disdex-release-source-tree")" == "$source_tree" && -x "$release/node_modules/.bin/tsx" && -d "$release/.next" ]]; then
+      artifact_verified=true
+      printf 'V12_CI_ARTIFACT_ALREADY_VALID sha=%s\n' "$sha"
+      return 0
+    fi
+    return 1
+  fi
+  download_root="/home/deploy/disdex-v12-artifact-download/$sha-$$"
+  staging="/home/deploy/disdex-trading/releases/.staging-artifact-$sha-$$"
+  install -d -o deploy -g deploy -m 0700 "$download_root"
+  [[ ! -e "$staging" && ! -L "$staging" ]] || { printf 'V12_CI_ARTIFACT_STAGING_COLLISION\n' >&2; return 2; }
+  install -d -o deploy -g deploy -m 0700 "$staging"
+  archive="$download_root/$artifact_name"
+  checksum="$archive.sha256"
+  if ! runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 "$artifact_base/$artifact_name.sha256" -o "$checksum"; then
+    rm -rf "$download_root" "$staging"
+    return 1
+  fi
+  runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 "$artifact_base/$artifact_name" -o "$archive" || { rm -rf "$download_root" "$staging"; return 2; }
+  expected="$(awk 'NR==1 {print $1}' "$checksum")"
+  [[ "$expected" =~ ^[0-9a-f]{64}$ ]] || { printf 'V12_CI_ARTIFACT_CHECKSUM_FORMAT_INVALID\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  actual="$(sha256sum "$archive" | awk '{print $1}')"
+  [[ "$actual" == "$expected" ]] || { printf 'V12_CI_ARTIFACT_CHECKSUM_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  python3 - "$archive" <<'PY'
+import posixpath, sys, tarfile
+path=sys.argv[1]
+with tarfile.open(path, 'r:gz') as tf:
+    for member in tf.getmembers():
+        name=member.name
+        norm=posixpath.normpath(name)
+        if name.startswith('/') or norm == '..' or norm.startswith('../'):
+            raise SystemExit(f'V12_CI_ARTIFACT_UNSAFE_PATH:{name}')
+        if member.issym() or member.islnk():
+            target=member.linkname
+            if target.startswith('/'):
+                raise SystemExit(f'V12_CI_ARTIFACT_UNSAFE_LINK:{name}')
+            resolved=posixpath.normpath(posixpath.join(posixpath.dirname(norm), target))
+            if resolved == '..' or resolved.startswith('../'):
+                raise SystemExit(f'V12_CI_ARTIFACT_UNSAFE_LINK:{name}')
+print('V12_CI_ARTIFACT_TAR_PATHS_PASS')
+PY
+  runuser -u deploy -- tar -xzf "$archive" -C "$staging"
+  [[ -f "$staging/.disdex-release-sha" && ! -L "$staging/.disdex-release-sha" ]] || { printf 'V12_CI_ARTIFACT_SHA_MARKER_MISSING\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  [[ "$(tr -d '[:space:]' < "$staging/.disdex-release-sha")" == "$sha" ]] || { printf 'V12_CI_ARTIFACT_SHA_MARKER_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  [[ "$(tr -d '[:space:]' < "$staging/.disdex-release-source-tree")" == "$source_tree" ]] || { printf 'V12_CI_ARTIFACT_TREE_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  (cd "$staging" && sha256sum -c --quiet .disdex-release-source-files.sha256) || { printf 'V12_CI_ARTIFACT_SOURCE_HASH_MISMATCH\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  [[ -x "$staging/node_modules/.bin/tsx" && -d "$staging/.next" ]] || { printf 'V12_CI_ARTIFACT_RUNTIME_INVALID\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  printf '%s\n' "$actual" > "$staging/.disdex-ci-artifact-sha256"
+  chown -R deploy:deploy "$staging"
+  find "$staging" -xdev -type d ! -type l -exec chmod a-w {} +
+  find "$staging" -xdev -type f ! -type l -exec chmod a-w {} +
+  mv "$staging" "$release"
+  rm -rf "$download_root"
+  artifact_verified=true
+  printf 'V12_CI_ARTIFACT_INSTALL_PASS sha=%s archiveSha256=%s\n' "$sha" "$actual"
+  return 0
+}
+
+quiesce_previous_partial_activation() {
+  local previous_release previous_sha previous_target previous_v12 previous_risk previous_margin previous_pengu previous_v52
+  local unit state pid resolved
+  previous_release="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+  [[ -d "$previous_release" && ! -L "$previous_release" ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_INVALID\n' >&2; return 2; }
+  [[ -f "$previous_release/.disdex-release-sha" && ! -L "$previous_release/.disdex-release-sha" ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_MARKER_MISSING\n' >&2; return 2; }
+  previous_sha="$(tr -d '[:space:]' < "$previous_release/.disdex-release-sha")"
+  [[ "$previous_sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_PARTIAL_RESUME_CURRENT_SHA_INVALID\n' >&2; return 2; }
+  [[ "$previous_sha" != "$sha" ]] || { printf 'V12_PARTIAL_RESUME_NOT_REQUIRED reason=current-is-candidate\n'; return 0; }
+
+  previous_target="disdex-v12-pengu-v2-v52@$previous_sha.target"
+  previous_v12="disdex-v12-x1-all@$previous_sha.service"
+  previous_risk="disdex-shared-crypto-risk@$previous_sha.service"
+  previous_margin="disdex-v12-v52-margin-guard@$previous_sha.service"
+  previous_pengu="disdex-pengu-dual-ls-v2@$previous_sha.service"
+  previous_v52="disdex-v52-aster-only@$previous_sha.service"
+  mapfile -t active_targets < <(systemctl list-units --type=target --state=active --no-legend --plain 'disdex-v12-pengu-v2-v52@*.target' 2>/dev/null | awk '{print $1}')
+  if (( ${#active_targets[@]} == 0 )); then
+    for unit in "$previous_v12" "$previous_pengu" "$previous_v52"; do
+      state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
+      [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_NO_TARGET_TRADING_UNIT_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
+    done
+    recover_stale_local_state
+    systemctl stop "$previous_margin" "$previous_risk"
+    for unit in "$previous_margin" "$previous_risk"; do
+      state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+      [[ "$state" != "active" ]] || { printf 'V12_PARTIAL_RESUME_NO_TARGET_QUIESCE_FAILED unit=%s\n' "$unit" >&2; return 2; }
+      systemctl disable "$unit" >/dev/null 2>&1 || true
+    done
+    printf 'V12_PARTIAL_RESUME_QUIESCE_PASS previousSha=%s candidateSha=%s resumedNoTarget=true ordersSent=false\n' "$previous_sha" "$sha"
+    return 0
+  fi
+  (( ${#active_targets[@]} == 1 )) || { printf 'V12_PARTIAL_RESUME_MULTIPLE_TARGETS count=%s\n' "${#active_targets[@]}" >&2; return 2; }
+  [[ "${active_targets[0]}" == "$previous_target" ]] || { printf 'V12_PARTIAL_RESUME_TARGET_SHA_MISMATCH unit=%s currentSha=%s\n' "${active_targets[0]}" "$previous_sha" >&2; return 2; }
+  [[ -f "$previous_release/.disdex-ci-artifact-sha256" && ! -L "$previous_release/.disdex-ci-artifact-sha256" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_CI_ARTIFACT\n' >&2; return 2; }
+  resolved="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "${previous_sha}^{commit}" 2>/dev/null || true)"
+  [[ "$resolved" == "$previous_sha" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_GIT_OBJECT_MISSING\n' >&2; return 2; }
+  runuser -u deploy -- git -C "$source_repo" merge-base --is-ancestor "$previous_sha" "$sha" || { printf 'V12_PARTIAL_RESUME_PREVIOUS_NOT_ANCESTOR\n' >&2; return 2; }
+  for unit in disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service; do
+    state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
+    [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_V96_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
+  done
+  state="$(systemctl is-active "$previous_v12" 2>/dev/null || true)"; pid="$(systemctl show "$previous_v12" --property MainPID --value 2>/dev/null || true)"
+  [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_PREVIOUS_V12_ACTIVE state=%s pid=%s\n' "$state" "${pid:-0}" >&2; return 2; }
+  systemctl is-enabled --quiet "$previous_target" 2>/dev/null && { printf 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_ENABLED\n' >&2; return 2; }
+
+  for unit in "$previous_risk" "$previous_margin" "$previous_pengu" "$previous_v52"; do
+    state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
+    [[ "$state" == "active" && "$pid" =~ ^[1-9][0-9]*$ ]] || { printf 'V12_PARTIAL_RESUME_REQUIRED_COMPONENT_NOT_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
+  done
+  for pattern in 'disdex-v12-x1-all@*.service' 'disdex-pengu-dual-ls-v2@*.service' 'disdex-v52-aster-only@*.service' 'disdex-v12-v52-margin-guard@*.service' 'disdex-shared-crypto-risk@*.service'; do
+    while IFS= read -r unit; do
+      [[ -n "$unit" ]] || continue
+      case "$unit" in "$previous_v12"|"$previous_pengu"|"$previous_v52"|"$previous_margin"|"$previous_risk") ;; *) printf 'V12_PARTIAL_RESUME_UNEXPECTED_ACTIVE_UNIT unit=%s\n' "$unit" >&2; return 2 ;; esac
+    done < <(systemctl list-units --type=service --state=active --no-legend --plain "$pattern" 2>/dev/null | awk '{print $1}')
+  done
+  run_previous_readonly() {
+    local check_unit="$1" label="$2"
+    systemctl reset-failed "$check_unit" >/dev/null 2>&1 || true
+    if ! systemctl start "$check_unit"; then
+      printf 'V12_PARTIAL_RESUME_READONLY_CHECK_FAILED label=%s unit=%s\n' "$label" "$check_unit" >&2
+      journalctl -u "$check_unit" --no-pager -n 80 >&2 || true
+      return 1
+    fi
+    [[ "$(systemctl show "$check_unit" --property Result --value 2>/dev/null || true)" == "success" ]] || { printf 'V12_PARTIAL_RESUME_READONLY_RESULT_FAILED label=%s unit=%s\n' "$label" "$check_unit" >&2; return 1; }
+  }
+  run_previous_readonly "disdex-shared-crypto-risk-refresh@$previous_sha.service" SHARED_RISK_PRE_QUIESCE
+  run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_PRE_QUIESCE
+  run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_PRE_QUIESCE
+
+  systemctl stop "$previous_pengu" "$previous_v52"
+  for unit in "$previous_pengu" "$previous_v52"; do
+    state="$(systemctl is-active "$unit" 2>/dev/null || true)"; pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || true)"
+    [[ "$state" != "active" && "${pid:-0}" == "0" ]] || { printf 'V12_PARTIAL_RESUME_QUIESCE_FAILED unit=%s state=%s pid=%s\n' "$unit" "$state" "${pid:-0}" >&2; return 2; }
+  done
+  run_previous_readonly "disdex-pengu-v2-readiness@$previous_sha.service" PENGU_POST_QUIESCE
+  run_previous_readonly "disdex-v52-v12-readiness@$previous_sha.service" V52_POST_QUIESCE
+  recover_stale_local_state
+  run_previous_readonly "disdex-v96-to-v12-migration-preflight@$previous_sha.service" ACCOUNT_POST_QUIESCE
+
+  systemctl stop "$previous_target" "$previous_margin" "$previous_risk"
+  for unit in "$previous_target" "$previous_margin" "$previous_risk" "$previous_pengu" "$previous_v52"; do
+    state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+    [[ "$state" != "active" ]] || { printf 'V12_PARTIAL_RESUME_FINAL_QUIESCE_FAILED unit=%s\n' "$unit" >&2; return 2; }
+    systemctl disable "$unit" >/dev/null 2>&1 || true
+  done
+  printf 'V12_PARTIAL_RESUME_QUIESCE_PASS previousSha=%s candidateSha=%s ordersSent=false\n' "$previous_sha" "$sha"
+}
+
+tool_root="/home/deploy/disdex-v12-activation-v3/$sha"
+if [[ -e "$tool_root" || -L "$tool_root" ]]; then
+  [[ -d "$tool_root" && ! -L "$tool_root" ]] || { printf 'V12_ACTIVATE_V3_TOOL_ROOT_INVALID\n' >&2; exit 3; }
+  rm -rf "$tool_root"
+fi
+install -d -o deploy -g deploy -m 0700 "$tool_root"
+runuser -u deploy -- git -C "$source_repo" archive "$sha" \
+  scripts/ops/root/create-disdex-v12-immutable-release \
+  scripts/ops/disdex-v12-current-release-delta-audit-v2.sh | \
+  runuser -u deploy -- tar -x -C "$tool_root"
+builder="$tool_root/scripts/ops/root/create-disdex-v12-immutable-release"
+audit="$tool_root/scripts/ops/disdex-v12-current-release-delta-audit-v2.sh"
+[[ -f "$builder" && ! -L "$builder" && -f "$audit" && ! -L "$audit" ]] || { printf 'V12_ACTIVATE_V3_PRE_RELEASE_TOOL_MISSING\n' >&2; exit 3; }
+bash -n "$builder"; bash -n "$audit"
+
+printf 'V12_V3_PHASE=SAFE_RELEASE_GC\n'
+gc_rc=0
+safe_release_gc || gc_rc=$?
+if (( gc_rc != 0 )); then
+  printf 'V12_RELEASE_GC_FAILED\n' >&2
+  exit 4
+fi
+printf 'V12_V3_PHASE=IMMUTABLE_RELEASE_ARTIFACT_LOOKUP\n'
+artifact_rc=0
+install_ci_artifact || artifact_rc=$?
+if (( artifact_rc == 2 )); then
+  printf 'V12_ACTIVATE_V3_CI_ARTIFACT_INVALID\n' >&2
+  exit 4
+elif (( artifact_rc == 0 )); then
+  printf 'V12_V3_IMMUTABLE_RELEASE_FROM_CI_ARTIFACT=PASS\n'
+else
+  printf 'V12_ACTIVATE_V3_CI_ARTIFACT_NOT_READY\n' >&2
+  printf 'V12_V3_VPS_FALLBACK_BUILD=DISABLED\n' >&2
+  exit 4
+fi
+[[ -d "$release" && ! -L "$release" && -x "$release/node_modules/.bin/tsx" && -d "$release/.next" ]] || { printf 'V12_ACTIVATE_V3_RELEASE_BUILD_INVALID\n' >&2; exit 4; }
+for required in \
+  scripts/ops/root/install-disdex-v12-live \
+  scripts/ops/root/disdex-v96-to-v12-live-migrate-final \
+  scripts/ops/root/disdex-v12-live-status-report \
+  scripts/disdex-v12-stale-local-state-recovery.ts; do
+  [[ -f "$release/$required" && ! -L "$release/$required" ]] || { printf 'V12_ACTIVATE_V3_RELEASE_TOOL_MISSING path=%s\n' "$required" >&2; exit 4; }
+done
+
+if [[ "$artifact_verified" == "true" ]]; then
+  printf 'V12_V3_PHASE=EXTENDED_OFFLINE_VALIDATION_CI_REUSED\n'
+  printf 'V12_V3_OFFLINE_VALIDATION_PASS\nordersSent=0\nrealExchangeCalls=0\nciArtifactReused=true\n'
+else
+printf 'V12_V3_PHASE=EXTENDED_OFFLINE_VALIDATION\n'
+(
+  cd "$release"
+  clean_node=(env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS -u DISDEX_V12_LIVE_ALLOW_REAL_ORDERS HOME=/home/deploy)
+  runuser -u deploy -- "${clean_node[@]}" ./node_modules/.bin/tsc --noEmit -p tsconfig.json
+  runuser -u deploy -- "${clean_node[@]}" ./node_modules/.bin/tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+  for test_script in \
+    scripts/v12-x1-all-selftest.ts \
+    scripts/v12-x1-all-frozen-artifact-parity-selftest.ts \
+    scripts/v12-resident-stop-selftest.ts \
+    scripts/disdex-shared-crypto-risk-selftest.ts \
+    scripts/disdex-account-order-lock-selftest.ts \
+    scripts/disdex-account-order-lock-cross-language-selftest.ts \
+    scripts/disdex-unified-portfolio-routing-selftest.ts \
+    scripts/v12-live-execution-selftest.ts \
+    scripts/pengu-dual-ls-v2-selftest.ts \
+    scripts/pengu-dual-ls-v2-parity.ts; do
+    runuser -u deploy -- "${clean_node[@]}" ./node_modules/.bin/tsx "$test_script"
+  done
+)
+scratch="$tool_root/python-selftest"; install -d -o deploy -g deploy -m 0700 "$scratch"
+(
+  cd "$scratch"
+  runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS HOME=/home/deploy PYTHONPATH="$release/scripts" \
+    /usr/bin/python3 "$release/scripts/disdex_account_order_lock.py" --self-test
+)
+for py_test in scripts/disdex_v12_crypto_daily_risk.py scripts/disdex_v12_v52_margin_guard_runtime.py scripts/disdex_v12_v52_live_engine.py scripts/disdex_v52_reference_recovery_selftest.py; do
+  runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS HOME=/home/deploy PYTHONPATH="$release/scripts" \
+    /usr/bin/python3 "$release/$py_test" --self-test
+done
+printf 'V12_V3_OFFLINE_VALIDATION_PASS\nordersSent=0\nrealExchangeCalls=0\n'
+
+fi
+
+printf 'V12_V3_PHASE=FULL_TREE_VPS_DELTA_AUDIT\n'
+bash "$audit" /home/deploy/disdex-trading/current "$release" "$source_repo" "$base_sha"
+
+printf 'V12_V3_PHASE=PARTIAL_ACTIVATION_RECOVERY\n'
+quiesce_previous_partial_activation
+
+printf 'V12_V3_PHASE=INERT_INSTALL\n'
+bash "$release/scripts/ops/root/install-disdex-v12-live" "$release"
+
+printf 'V12_V3_PHASE=HARDENED_LIVE_MIGRATION\n'
+bash "$release/scripts/ops/root/disdex-v96-to-v12-live-migrate-final" "$sha" I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION
+
+printf 'V12_V3_PHASE=FINAL_READ_ONLY_VERIFICATION\n'
+bash "$release/scripts/ops/root/disdex-v12-live-status-report" "$sha" final
+printf 'STATUS: LIVE_ACTIVATED_VERIFIED\nreleaseSha=%s\nbaseSha=%s\ncurrentRelease=%s\n' "$sha" "$base_sha" "$(readlink -f /home/deploy/disdex-trading/current)"
+printf 'FULL_TREE_VPS_DELTA_PRESERVATION=PASS\nSOURCE_VALIDATION=PASS\nIMMUTABLE_RELEASE=PASS\nLIVE_MIGRATION=PASS\n'
+printf 'V96_V12_SIMULTANEOUS_LIVE=FALSE\nORDERS_SENT_FOR_TESTING=0\nARTIFICIAL_LIVE_ORDERS=0\n'

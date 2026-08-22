@@ -1,0 +1,179 @@
+name: V12 X1 ALL implementation safety CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'config/v12X1AllRuntime.ts'
+      - 'lib/v12-*.ts'
+      - 'lib/disdex-account-order-lock.ts'
+      - 'lib/disdex-shared-crypto-*.ts'
+      - 'lib/disdex-shared-kill-switch.ts'
+      - 'lib/disdex-aster-portfolio-classifier.ts'
+      - 'lib/direct-trade-executor.ts'
+      - 'lib/aster-v3-client.ts'
+      - 'lib/pengu-dual-ls-v2-portfolio-runner.ts'
+      - 'scripts/disdex-pengu-dual-ls-v2-live-runner.ts'
+      - 'scripts/disdex-pengu-v2-live-readiness.ts'
+      - 'scripts/disdex-v12-*.ts'
+      - 'scripts/disdex-v96-to-v12-migration-preflight.ts'
+      - 'scripts/disdex-v96-stop-recheck.ts'
+      - 'scripts/disdex_v12_v52_*.py'
+      - 'scripts/disdex_v52_aster_only_live_engine.py'
+      - 'scripts/disdex_account_order_lock.py'
+      - 'scripts/disdex_v12_crypto_daily_risk.py'
+      - 'scripts/v12-*-selftest.ts'
+      - 'scripts/disdex-*-selftest.ts'
+      - 'scripts/ops/disdex-v12-*.sh'
+      - 'scripts/ops/root/create-disdex-v12-immutable-release'
+      - 'scripts/ops/root/install-disdex-v12-live'
+      - 'scripts/ops/root/disdex-v96-to-v12-live-migrate'
+      - 'scripts/ops/root/disdex-v12-live-status-report'
+      - 'scripts/ops/root/disdex-v96-refuse-while-v12-active'
+      - 'ops/env/disdex-v12-*.example'
+      - 'ops/systemd/disdex-v12-*.service'
+      - 'ops/systemd/disdex-v12-*.target'
+      - 'ops/systemd/disdex-pengu-dual-ls-v2@.service'
+      - 'ops/systemd/disdex-pengu-v2-readiness@.service'
+      - 'ops/systemd/disdex-v52-aster-only@.service'
+      - 'ops/systemd/disdex-v52-v12-readiness@.service'
+      - 'ops/systemd/disdex-shared-crypto-risk*.service'
+      - 'ops/systemd/disdex-v96-to-v12-migration-preflight@.service'
+      - 'ops/systemd/disdex-v96-stop-recheck@.service'
+      - '.github/workflows/v12-x1-all-implementation-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+
+      - name: Typecheck application and PENGU contract
+        run: |
+          npx tsc --noEmit -p tsconfig.json
+          npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+
+      - name: Run V12 and cross-language safety self-tests
+        run: |
+          npx tsx scripts/v12-x1-all-selftest.ts
+          npx tsx scripts/disdex-account-order-lock-selftest.ts
+          npx tsx scripts/disdex-account-order-lock-cross-language-selftest.ts
+          npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
+          npx tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts
+          npx tsx scripts/v12-resident-stop-selftest.ts
+          npx tsx scripts/disdex-shared-crypto-risk-selftest.ts
+          npx tsx scripts/v12-live-execution-selftest.ts
+          npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test
+          python scripts/disdex_account_order_lock.py --self-test
+          python scripts/disdex_v12_crypto_daily_risk.py --self-test
+          PYTHONPATH=scripts python scripts/disdex_v12_v52_margin_guard_runtime.py --self-test
+          PYTHONPATH=scripts python scripts/disdex_v12_v52_live_engine.py --self-test
+          python -m py_compile \
+            scripts/disdex_v52_aster_only_live_engine.py \
+            scripts/disdex_v12_v52_margin_guard_runtime.py \
+            scripts/disdex_v12_v52_live_engine.py \
+            scripts/disdex_account_order_lock.py \
+            scripts/disdex_v12_crypto_daily_risk.py
+
+      - name: Validate migration and installer shell boundaries
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          bash -n scripts/ops/disdex-v12-current-release-delta-audit.sh
+          bash -n scripts/ops/root/create-disdex-v12-immutable-release
+          bash -n scripts/ops/root/install-disdex-v12-live
+          bash -n scripts/ops/root/disdex-v96-to-v12-live-migrate
+          bash -n scripts/ops/root/disdex-v12-live-status-report
+          bash -n scripts/ops/root/disdex-v96-refuse-while-v12-active
+          grep -Fq 'mode="${2:-runtime}"' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          grep -Fq 'disdex-v96-stop-recheck@$sha.service' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          ! grep -Fq 'node_modules/.bin/tsx" scripts/disdex-v96-stop-recheck.ts' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          grep -Fq '.disdex-release-source-tree' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+          grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' scripts/ops/disdex-v12-current-release-delta-audit.sh
+          grep -Fq 'VPS_DELTA_WOULD_BE_LOST' scripts/ops/disdex-v12-current-release-delta-audit.sh
+          grep -Fq 'secretsRead=false' scripts/ops/disdex-v12-current-release-delta-audit.sh
+          grep -Fq 'git -C "$source_repo" archive --format=tar' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'rev-parse --verify "${sha}^{commit}"' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'npm --prefix "$staging" run build' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'currentChanged=false' scripts/ops/root/create-disdex-v12-immutable-release
+          grep -Fq 'V12_LIVE_INSTALL_SOURCE_TREE_MARKER_MISSING' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'disdex-v12-runtime-status@.service' scripts/ops/root/install-disdex-v12-live
+          grep -Fq '/usr/local/libexec/disdex-v96-refuse-while-v12-active' scripts/ops/root/install-disdex-v12-live
+          grep -Fq 'I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'present_old_units' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq '90-v12-mutual-exclusion.conf' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'Automatic V96 restart is prohibited' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'disdex-v12-live-status-report" "$sha" pre-enable' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'disdex-v12-live-status-report" "$sha" final' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'systemctl enable "$target"' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          grep -Fq 'V96_REVERSE_INTERLOCK_VERIFIED=TRUE' scripts/ops/root/disdex-v12-live-status-report
+          grep -Fq 'LIVE_RUNTIME_VERIFIED_PRE_ENABLE' scripts/ops/root/disdex-v12-live-status-report
+          grep -Fq 'LIVE_ACTIVATED_VERIFIED' scripts/ops/root/disdex-v12-live-status-report
+          grep -Fq 'V96_START_BLOCKED_V12_SERVICE_ACTIVE' scripts/ops/root/disdex-v96-refuse-while-v12-active
+          grep -Fq 'V96_START_BLOCKED_V12_TARGET_ACTIVE' scripts/ops/root/disdex-v96-refuse-while-v12-active
+          grep -Fq 'ORDERS_SENT_FOR_TESTING=0' scripts/ops/root/disdex-v96-to-v12-live-migrate
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' scripts/ops/disdex-v12-mutual-exclusion-preflight.sh scripts/ops/disdex-v12-current-release-delta-audit.sh scripts/ops/root/create-disdex-v12-immutable-release scripts/ops/root/install-disdex-v12-live scripts/ops/root/disdex-v96-to-v12-live-migrate scripts/ops/root/disdex-v12-live-status-report scripts/ops/root/disdex-v96-refuse-while-v12-active
+
+      - name: Validate post-migration systemd and account-priority invariants
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'WorkingDirectory=/home/deploy/disdex-trading/releases/%i' ops/systemd/disdex-v12-x1-all@.service
+          grep -Fq 'RestartPreventExitStatus=2' ops/systemd/disdex-v12-x1-all@.service
+          grep -Fq 'disdex-v12-mutual-exclusion-preflight.sh %i runtime' ops/systemd/disdex-v12-x1-all@.service
+          grep -Fq 'scripts/disdex-v12-runtime-status.ts' ops/systemd/disdex-v12-runtime-status@.service
+          grep -Fq 'disdex_v12_v52_margin_guard_runtime.py --mode live --daemon' ops/systemd/disdex-v12-v52-margin-guard@.service
+          grep -Fq 'disdex_v12_v52_live_engine.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
+          grep -Fq 'disdex-pengu-dual-ls-v2-live-runner.ts --daemon' ops/systemd/disdex-pengu-dual-ls-v2@.service
+          grep -Fq 'DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'DISDEX_ACCOUNT_LOCK_WAITER_TTL_MS=10000' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_LOCK_RETRY_MS=5000' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v12_v52_margin_guard_runtime.py' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'DISDEX_V12_LIVE_ALLOW_REAL_ORDERS=true' ops/env/disdex-v12-x1-all.live.env.example
+          grep -Fq 'V12_X1_ALL_LOCK_RETRY_MS=5000' ops/env/disdex-v12-x1-all.live.env.example
+          grep -Fq 'P1: reduce-only exit / protection work' lib/disdex-account-order-lock.ts
+          grep -Fq 'P2: V52 stock exposure' lib/disdex-account-order-lock.ts
+          grep -Fq 'P3: PENGU V2 exposure' lib/disdex-account-order-lock.ts
+          grep -Fq 'P4: V12 exposure' lib/disdex-account-order-lock.ts
+          grep -Fq 'fixedSymbol: SYMBOL' scripts/disdex-pengu-dual-ls-v2-live-runner.ts
+          grep -Fq 'PENGU_DUAL_LS_V2:P${priority}' scripts/disdex-pengu-dual-ls-v2-live-runner.ts
+          grep -Fq 'PENGU_SHARED_ACCOUNT_RESERVATION_UNAVAILABLE' lib/pengu-dual-ls-v2-portfolio-runner.ts
+          grep -Fq 'sharedReservationId' lib/pengu-dual-ls-v2-portfolio-runner.ts
+          grep -Fq 'V12_X1.00_ALL:P${priority}' scripts/disdex-v12-x1-all-live-runner.ts
+          grep -Fq 'recovery_owner_prefix="V52:"' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'self.account_order_lock.reserve' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'priority=2' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'priority=1' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq '_recover_expired_owned_strategy_lock' scripts/disdex_account_order_lock.py
+          grep -Fq 'LINKUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
+          grep -Fq 'NEARUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
+          grep -Fq 'PENGUUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
+          grep -Fq 'def _account_critical' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'V52_SHARED_ACCOUNT_ORDER_LOCK_TIMEOUT' scripts/disdex_v12_v52_live_engine.py
+
+      - name: Assert tests cannot submit production orders
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ! rg -n 'I_ACCEPT_REAL_MONEY|LIVE_ACK|ASTER_API_PRIVATE_KEY|ASTER_USER_ADDRESS|placeMarket|place_limit|submitOrder' \
+            scripts/v12-*-selftest.ts \
+            scripts/disdex-shared-crypto-risk-selftest.ts \
+            scripts/disdex-account-order-lock-selftest.ts \
+            scripts/disdex-account-order-lock-cross-language-selftest.ts
+          grep -Fq 'realExchangeCalls: 0' scripts/v12-live-execution-selftest.ts
+          grep -Fq 'ordersSent: 0' scripts/v12-live-execution-selftest.ts
+          grep -Fq 'exchangeCalls: 0' scripts/disdex-account-order-lock-cross-language-selftest.ts

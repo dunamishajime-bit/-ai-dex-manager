@@ -45,7 +45,7 @@ export interface LiveRunnerFailureRecord {
 export interface LiveRunnerState {
     version: 1;
     strategyId: string;
-    mode: "paper" | "live";
+    mode: string;
     updatedAt: number;
     lastRunAt?: number;
     lastCompletedIdempotencyKey?: string;
@@ -138,6 +138,11 @@ export class FileLiveRunnerStateStore implements LiveRunnerStateStore {
         await writeFile(tempPath, `${JSON.stringify(normalized, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
         await rename(tempPath, this.path);
     }
+}
+
+export function resolveLiveRunnerLockPath(configuredPath: string | undefined, stateRoot: string, mode: "paper" | "live"): string {
+    const configured = String(configuredPath || "").trim();
+    return configured ? resolve(configured) : resolve(stateRoot, `runner-${mode.toLowerCase()}.lock`);
 }
 
 export class FileLiveRunnerLock implements LiveRunnerLock {

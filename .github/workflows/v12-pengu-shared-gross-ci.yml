@@ -1,0 +1,46 @@
+name: V12 PENGU shared gross CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'config/penguDualLsV2Runtime.ts'
+      - 'lib/pengu-dual-ls-v2-portfolio-runner.ts'
+      - 'scripts/disdex-pengu-dual-ls-v2-live-runner.ts'
+      - 'scripts/pengu-dual-ls-v2-selftest.ts'
+      - 'ops/env/disdex-v12-pengu-v2-v52.env.example'
+      - '.github/workflows/v12-pengu-shared-gross-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  gross-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Type and behavioral checks
+        run: |
+          npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+          npx tsx scripts/pengu-dual-ls-v2-selftest.ts
+          npx tsx scripts/pengu-dual-ls-v2-parity.ts
+      - name: Fixed gross boundaries
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -Fq 'portfolioGrossCap: 2.0' config/penguDualLsV2Runtime.ts
+          grep -Fq 'combinedPortfolioGrossCap: 2.0' config/penguDualLsV2Runtime.ts
+          grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'classifiedPortfolioGross' lib/pengu-dual-ls-v2-portfolio-runner.ts
+          grep -Fq 'PENGU_UNKNOWN_NONZERO_ASTER_POSITION' lib/pengu-dual-ls-v2-portfolio-runner.ts
+          grep -Fq 'remainingCryptoGross' lib/pengu-dual-ls-v2-portfolio-runner.ts
+          grep -Fq 'remainingCombinedGross' lib/pengu-dual-ls-v2-portfolio-runner.ts
+          grep -Fq 'combinedPortfolioGrossCap: runtime.combinedPortfolioGrossCap' scripts/disdex-pengu-dual-ls-v2-live-runner.ts
+          echo V12_PENGU_SHARED_GROSS_CI_PASS

@@ -1,0 +1,161 @@
+name: V12 final source readiness CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'config/v12X1AllRuntime.ts'
+      - 'config/penguDualLsV2Runtime.ts'
+      - 'lib/v12-*.ts'
+      - 'lib/aster-v3-client.ts'
+      - 'lib/direct-trade-executor.ts'
+      - 'lib/disdex-account-order-lock.ts'
+      - 'lib/disdex-shared-crypto-*.ts'
+      - 'lib/disdex-shared-kill-switch.ts'
+      - 'lib/disdex-aster-portfolio-classifier.ts'
+      - 'lib/disdex-unified-portfolio-routing.ts'
+      - 'lib/pengu-dual-ls-v2-*.ts'
+      - 'scripts/disdex-v12-*.ts'
+      - 'scripts/disdex-pengu-*.ts'
+      - 'scripts/disdex-account-order-lock-*.ts'
+      - 'scripts/disdex-unified-portfolio-routing-selftest.ts'
+      - 'scripts/disdex-shared-crypto-risk-selftest.ts'
+      - 'scripts/pengu-dual-ls-v2-*.ts'
+      - 'scripts/v12-*.ts'
+      - 'scripts/disdex_account_order_lock.py'
+      - 'scripts/disdex_v12_crypto_daily_risk.py'
+      - 'scripts/disdex_v12_v52_*.py'
+      - 'scripts/ops/disdex-v12-*.sh'
+      - 'scripts/ops/root/disdex-v12-live-activate-from-sha-v3'
+      - 'scripts/ops/root/disdex-v96-to-v12-live-migrate-final'
+      - 'scripts/ops/root/install-disdex-v12-live'
+      - 'scripts/ops/root/disdex-v12-live-status-report'
+      - 'scripts/ops/root/disdex-v96-refuse-while-v12-active'
+      - 'ops/env/disdex-v12-*.example'
+      - 'ops/systemd/disdex-v12-*.service'
+      - 'ops/systemd/disdex-v12-*.target'
+      - 'ops/systemd/disdex-pengu-*.service'
+      - 'ops/systemd/disdex-v52-*.service'
+      - '.github/workflows/v12-final-source-readiness-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  final-source-readiness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+
+      - name: Typecheck production contracts
+        run: |
+          npx tsc --noEmit -p tsconfig.json
+          npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+
+      - name: Frozen strategy and execution safety tests
+        run: |
+          npx tsx scripts/v12-x1-all-selftest.ts
+          npx tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts
+          npx tsx scripts/v12-resident-stop-selftest.ts
+          npx tsx scripts/v12-live-execution-selftest.ts
+          npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test
+          npx tsx scripts/disdex-shared-crypto-risk-selftest.ts
+          npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
+          npx tsx scripts/disdex-account-order-lock-selftest.ts
+          npx tsx scripts/disdex-account-order-lock-cross-language-selftest.ts
+          npx tsx scripts/pengu-dual-ls-v2-selftest.ts
+          npx tsx scripts/pengu-dual-ls-v2-parity.ts
+
+      - name: Python shared account and V52 safety tests
+        run: |
+          python scripts/disdex_account_order_lock.py --self-test
+          python scripts/disdex_v12_crypto_daily_risk.py --self-test
+          PYTHONPATH=scripts python scripts/disdex_v12_v52_margin_guard_runtime.py --self-test
+          PYTHONPATH=scripts python scripts/disdex_v12_v52_live_engine.py --self-test
+          python -m py_compile \
+            scripts/disdex_account_order_lock.py \
+            scripts/disdex_v12_crypto_daily_risk.py \
+            scripts/disdex_v12_v52_margin_guard_runtime.py \
+            scripts/disdex_v12_v52_live_engine.py
+
+      - name: Hardened VPS boundary static validation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          activate=scripts/ops/root/disdex-v12-live-activate-from-sha-v3
+          audit=scripts/ops/disdex-v12-current-release-delta-audit-v2.sh
+          migrate=scripts/ops/root/disdex-v96-to-v12-live-migrate-final
+          scripts=(
+            scripts/ops/disdex-v12-mutual-exclusion-preflight.sh
+            "$audit"
+            scripts/ops/root/install-disdex-v12-live
+            "$migrate"
+            scripts/ops/root/disdex-v12-live-status-report
+            scripts/ops/root/disdex-v96-refuse-while-v12-active
+            "$activate"
+          )
+          for script in "${scripts[@]}"; do bash -n "$script"; done
+          grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' "$activate"
+          grep -Fq 'disdex-v12-current-release-delta-audit-v2.sh' "$activate"
+          grep -Fq 'v12_start_attempted=true' "$migrate"
+          grep -Fq '"$v12_start_attempted" != "true"' "$migrate"
+          grep -Fq 'VPS_RELEASE_DELTA_BLOCKED' "$audit"
+          grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' "$audit"
+          grep -Fq 'VPS_RELEASE_FULL_TREE_DELTA_PRESERVATION_PASS' "$audit"
+          grep -Fq 'V96_REVERSE_INTERLOCK_VERIFIED=TRUE' scripts/ops/root/disdex-v12-live-status-report
+          grep -Fq 'Environment=DISDEX_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/crypto-v96' ops/systemd/disdex-v96-to-v12-migration-preflight@.service
+          grep -Fq 'if (( ${#active_old[@]} == 0 && ${#stale_risk_units[@]} > 0 )); then' "$migrate"
+          grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' \
+            "$activate" \
+            "$audit" \
+            "$migrate" \
+            scripts/ops/root/disdex-v12-live-status-report \
+            scripts/ops/root/disdex-v96-refuse-while-v12-active
+
+      - name: Assert offline tests cannot carry production credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          files=(
+            scripts/v12-*-selftest.ts
+            scripts/disdex-shared-crypto-risk-selftest.ts
+            scripts/disdex-account-order-lock-selftest.ts
+            scripts/disdex-account-order-lock-cross-language-selftest.ts
+            scripts/pengu-dual-ls-v2-selftest.ts
+          )
+          set +e
+          grep -En 'I_ACCEPT_REAL_MONEY|LIVE_ACK|ASTER_API_PRIVATE_KEY|ASTER_USER_ADDRESS|placeMarket|place_limit|submitOrder' "${files[@]}"
+          scan_status=$?
+          set -e
+          if (( scan_status == 0 )); then
+            echo 'OFFLINE_TEST_PRODUCTION_CREDENTIAL_OR_ORDER_SURFACE_FOUND' >&2
+            exit 1
+          fi
+          if (( scan_status != 1 )); then
+            echo "OFFLINE_TEST_SCAN_FAILED code=$scan_status" >&2
+            exit "$scan_status"
+          fi
+          grep -Fq 'realExchangeCalls: 0' scripts/v12-live-execution-selftest.ts
+          grep -Fq 'exchangeCalls: 0' scripts/disdex-account-order-lock-cross-language-selftest.ts
+
+      - name: Linux production build
+        run: npm run build
+
+      - name: Final source gate
+        run: |
+          echo 'V12_FINAL_SOURCE_READINESS_PASS'
+          echo 'ORDERS_SENT_FOR_TESTING=0'
