@@ -1,9 +1,9 @@
-# Main Strategy Research #219：WIN80_ULTRA90_TOP1_V1 / 初回100%・最大2通貨
+# Main Strategy Research #220：WIN80_ULTRA90_TOP1_V1 / 方向性が近い新ロジック
 
-- Completed: 2026-08-22T08:48:44.470Z
-- Main research iteration: 219
+- Completed: 2026-08-22T13:01:17.830Z
+- Main research iteration: 220
 - Profile: attack
-- Strategy / experiments: WIN80_ULTRA90_TOP1_V1, INITIAL_NOTIONAL_80_CHILD_V1, MAX_POSITION_1_CHILD_V1
+- Strategy / experiments: WIN80_ULTRA90_TOP1_V1, WIN85_DUAL_CONFIRM_SIBLING_V1, ULTRA90_PULLBACK_SIBLING_V1
 - BT Snapshot evidence: READY
 
 ## BT Snapshot Replay
@@ -50,31 +50,31 @@
 
 ## Summary
 
-旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「初回100%・最大2通貨」を議論。2件を提案し、最優先はINITIAL_NOTIONAL_80_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。
+旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「方向性が近い新ロジック」を議論。2件を提案し、最優先はWIN85_DUAL_CONFIRM_SIBLING_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。
 
 ## CIO Decision
 
-WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。
+WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN85_DUAL_CONFIRM_SIBLING_V1で、New sibling logicだけを変更した親子リプレイを作成します。ULTRA90_PULLBACK_SIBLING_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。
 
 ## Full Transcript
 
 ### 1. Research Moderator (moderator)
 
-- Time: 2026-08-22T08:48:35.470Z
+- Time: 2026-08-22T13:01:08.830Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: context
 
-Main Strategy Research #219を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「初回100%・最大2通貨」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。
+Main Strategy Research #220を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「方向性が近い新ロジック」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。
 
 Evidence:
 - 固定親: WIN80_ULTRA90_TOP1_V1 [positive]
 - 旧Champion継承: NO [positive]
 - 研究Program: win80_ultra90_direct_v2 [positive]
-- 今回の焦点: 初回100%・最大2通貨 [neutral]
+- 今回の焦点: 方向性が近い新ロジック [neutral]
 
 ### 2. Main Strategy Researcher (researcher)
 
-- Time: 2026-08-22T08:48:36.470Z
+- Time: 2026-08-22T13:01:09.830Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: support
 
@@ -95,20 +95,20 @@ Evidence:
 
 ### 3. Hypothesis Researcher (researcher)
 
-- Time: 2026-08-22T08:48:37.470Z
+- Time: 2026-08-22T13:01:10.830Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: proposal
 
-1. INITIAL_NOTIONAL_80_CHILD_V1: Initial notional fractionを「100.00%」から「80.00%」へ変更。初回100%集中を抑え、次のUltra90または急変時の余力を残す。 期待効果: DD低下と月利低下の比較。
-2. MAX_POSITION_1_CHILD_V1: Maximum concurrent positionsを「2」から「1」へ変更。Top-1思想を完全単一保有にした場合の集中収益と相関リスクを比較する。 期待効果: 管理単純化と分散効果消失の比較。
+1. WIN85_DUAL_CONFIRM_SIBLING_V1: New sibling logicを「WIN80 Top-1」から「Score85 + 1H/6H trend agreement + next-bar confirmation」へ変更。Win80の高選別思想を維持しながら、Entryを1段階確認して騙しを減らす近縁ロジック。 期待効果: 取引数を抑えた高勝率型。メインを変更せず別系統で検証する。
+2. ULTRA90_PULLBACK_SIBLING_V1: New sibling logicを「Immediate Ultra90 rotation」から「Ultra90 detected -> pullback/retest confirmation -> rotation」へ変更。Ultra90の強さを使いつつ、直後の高値掴みを減らす近縁ロジック。 期待効果: Slippage・Gap耐性改善とEntry遅延の比較。
 
 Evidence:
-- INITIAL_NOTIONAL_80_CHILD_V1: REPLAY_REQUIRED [neutral]
-- MAX_POSITION_1_CHILD_V1: REPLAY_REQUIRED [neutral]
+- WIN85_DUAL_CONFIRM_SIBLING_V1: REPLAY_REQUIRED [neutral]
+- ULTRA90_PULLBACK_SIBLING_V1: REPLAY_REQUIRED [neutral]
 
 ### 4. AI反対派 / Overfit (overfit_critic)
 
-- Time: 2026-08-22T08:48:38.470Z
+- Time: 2026-08-22T13:01:11.830Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -121,7 +121,7 @@ Evidence:
 
 ### 5. AI反対派 / Tail Risk (tail_risk_critic)
 
-- Time: 2026-08-22T08:48:39.470Z
+- Time: 2026-08-22T13:01:12.830Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -134,7 +134,7 @@ Evidence:
 
 ### 6. AI反対派 / Execution (execution_critic)
 
-- Time: 2026-08-22T08:48:40.470Z
+- Time: 2026-08-22T13:01:13.830Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -147,19 +147,31 @@ Evidence:
 - Aster過去Order Book: 未収録 [negative]
 - 全決済Portfolio BT: 別途必要 [neutral]
 
-### 7. Research CIO (cio)
+### 7. Sibling Logic Researcher (researcher)
 
-- Time: 2026-08-22T08:48:41.470Z
+- Time: 2026-08-22T13:01:14.830Z
+- Strategy: WIN80_ULTRA90_TOP1_V1
+- Stance: proposal
+
+方向性が近い新ロジックは、メインを改造せず独立IDで開発します。WIN85_DUAL_CONFIRM_SIBLING_V1: Score85 + 1H/6H trend agreement + next-bar confirmation / ULTRA90_PULLBACK_SIBLING_V1: Ultra90 detected -> pullback/retest confirmation -> rotation。親の高選別Top-1思想だけを継承し、成績が悪くてもWIN80_ULTRA90_TOP1_V1へ影響させません。
+
+Evidence:
+- WIN85_DUAL_CONFIRM_SIBLING_V1: 独立研究 [neutral]
+- ULTRA90_PULLBACK_SIBLING_V1: 独立研究 [neutral]
+
+### 8. Research CIO (cio)
+
+- Time: 2026-08-22T13:01:15.830Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: decision
 
-WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はINITIAL_NOTIONAL_80_CHILD_V1で、Initial notional fractionだけを変更した親子リプレイを作成します。MAX_POSITION_1_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。
+WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN85_DUAL_CONFIRM_SIBLING_V1で、New sibling logicだけを変更した親子リプレイを作成します。ULTRA90_PULLBACK_SIBLING_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。
 
 現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。
 
 Evidence:
 - メイン維持: WIN80_ULTRA90_TOP1_V1 [positive]
-- 最優先実験: INITIAL_NOTIONAL_80_CHILD_V1 [neutral]
+- 最優先実験: WIN85_DUAL_CONFIRM_SIBLING_V1 [neutral]
 - 旧Champion継承: NO [positive]
 - 自動メイン変更: 禁止 [positive]
 - 親Snapshot Replay: READY [positive]
