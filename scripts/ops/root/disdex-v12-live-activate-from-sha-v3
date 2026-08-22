@@ -94,7 +94,8 @@ safe_release_gc() {
 }
 
 install_ci_artifact() {
-  local source_tree download_root archive checksum expected actual staging
+  local source_tree download_root archive checksum expected actual staging artifact_size chunk_size chunk_count parts range_failed i start end part expected_part_size actual_part_size
+  local -a range_pids=()
   command -v curl >/dev/null 2>&1 || return 1
   source_tree="$(runuser -u deploy -- git -C "$source_repo" rev-parse "${sha}^{tree}")"
   if [[ -e "$release" || -L "$release" ]]; then
@@ -117,7 +118,41 @@ install_ci_artifact() {
     rm -rf "$download_root" "$staging"
     return 1
   fi
-  runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 "$artifact_base/$artifact_name" -o "$archive" || { rm -rf "$download_root" "$staging"; return 2; }
+  artifact_size="$(runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 --head "$artifact_base/$artifact_name" | awk 'tolower($1)=="content-length:" {gsub("\r", "", $2); value=$2} END {print value}')"
+  [[ "$artifact_size" =~ ^[0-9]+$ && "$artifact_size" -gt 0 ]] || { printf 'V12_CI_ARTIFACT_SIZE_LOOKUP_FAILED\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  chunk_size=$((32 * 1024 * 1024))
+  chunk_count=$(( (artifact_size + chunk_size - 1) / chunk_size ))
+  parts="$download_root/parts"
+  install -d -o deploy -g deploy -m 0700 "$parts"
+  printf 'V12_CI_ARTIFACT_PARALLEL_RANGE_DOWNLOAD size=%s chunkSize=%s chunks=%s\n' "$artifact_size" "$chunk_size" "$chunk_count"
+  for ((i=0; i<chunk_count; i++)); do
+    start=$((i * chunk_size))
+    end=$((start + chunk_size - 1))
+    (( end >= artifact_size )) && end=$((artifact_size - 1))
+    part="$parts/$(printf '%05d' "$i")"
+    runuser -u deploy -- curl --fail --location --silent --show-error --proto '=https' --tlsv1.2 \
+      --retry 3 --retry-delay 1 --connect-timeout 15 --max-time 180 \
+      --range "$start-$end" "$artifact_base/$artifact_name" -o "$part" &
+    range_pids[$i]=$!
+  done
+  range_failed=0
+  for pid in "${range_pids[@]}"; do
+    wait "$pid" || range_failed=1
+  done
+  (( range_failed == 0 )) || { printf 'V12_CI_ARTIFACT_PARALLEL_RANGE_DOWNLOAD_FAILED\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
+  : > "$archive"
+  for ((i=0; i<chunk_count; i++)); do
+    start=$((i * chunk_size))
+    end=$((start + chunk_size - 1))
+    (( end >= artifact_size )) && end=$((artifact_size - 1))
+    part="$parts/$(printf '%05d' "$i")"
+    expected_part_size=$((end - start + 1))
+    actual_part_size="$(stat -c '%s' "$part" 2>/dev/null || printf 0)"
+    [[ "$actual_part_size" == "$expected_part_size" ]] || { printf 'V12_CI_ARTIFACT_RANGE_SIZE_MISMATCH part=%s expected=%s actual=%s\n' "$i" "$expected_part_size" "$actual_part_size" >&2; rm -rf "$download_root" "$staging"; return 2; }
+    cat "$part" >> "$archive"
+  done
+  actual_part_size="$(stat -c '%s' "$archive" 2>/dev/null || printf 0)"
+  [[ "$actual_part_size" == "$artifact_size" ]] || { printf 'V12_CI_ARTIFACT_COMBINED_SIZE_MISMATCH expected=%s actual=%s\n' "$artifact_size" "$actual_part_size" >&2; rm -rf "$download_root" "$staging"; return 2; }
   expected="$(awk 'NR==1 {print $1}' "$checksum")"
   [[ "$expected" =~ ^[0-9a-f]{64}$ ]] || { printf 'V12_CI_ARTIFACT_CHECKSUM_FORMAT_INVALID\n' >&2; rm -rf "$download_root" "$staging"; return 2; }
   actual="$(sha256sum "$archive" | awk '{print $1}')"
