@@ -2,6 +2,12 @@ name: DisDex Research Commander Selftest
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - research/win80-profit-optimization-v1
+    paths:
+      - "apps/disdex-research-commander/**"
+      - ".github/workflows/disdex-research-commander-selftest.yml"
   push:
     branches:
       - research/win80-profit-optimization-v1
@@ -21,14 +27,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/disdex-research-commander/package-lock.json
       - name: Install
-        working-directory: apps/disdex-research-commander
-        run: npm install --ignore-scripts
+        run: |
+          cd apps/disdex-research-commander
+          test -f package.json
+          npm install --ignore-scripts
       - name: Selftest
-        working-directory: apps/disdex-research-commander
-        run: npm run selftest
+        run: |
+          cd apps/disdex-research-commander
+          npm run selftest
       - name: Syntax check
-        working-directory: apps/disdex-research-commander
-        run: node --check server.mjs && node --check lib/github.mjs && node --check lib/diagnostics.mjs
+        run: node --check apps/disdex-research-commander/server.mjs && node --check apps/disdex-research-commander/selftest.mjs && node --check apps/disdex-research-commander/lib/github.mjs && node --check apps/disdex-research-commander/lib/diagnostics.mjs && node --check apps/disdex-research-commander/lib/policy.mjs
 
 # Research-only app validation. No production/VPS/live/credential/order/account/position access.
+

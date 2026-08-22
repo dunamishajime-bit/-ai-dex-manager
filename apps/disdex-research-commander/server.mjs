@@ -1,20 +1,36 @@
 import { createServer } from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
 import {
   config, getShardCapacity, getCompletedEvidence, extractEvidenceFromRun,
   listArtifacts, downloadArtifactEntries, dispatchWorkflow,
-  putResearchFile, readRegistryCandidate, listRegistry, getContent,
+  putResearchFile, readRegistryCandidate, listRegistry,
 } from './lib/github.mjs';
 import { diagnoseEvidence, normalizeEvidence, tokenSimilarity } from './lib/diagnostics.mjs';
+import { assertSafeOutput } from './lib/policy.mjs';
 
 const VERSION = '0.1.0';
-const PORT = Number(process.env.PORT ?? 8787);
+const PORT = Number(process.env.PORT ?? 8789);
 const MCP_PATH = '/mcp';
+const MCP_AUTH_TOKEN = process.env.MCP_AUTH_TOKEN ?? '';
 
 const text = (s) => [{ type: 'text', text: s }];
-const result = (structuredContent, message = '') => ({ structuredContent, content: message ? text(message) : [] });
+const result = (structuredContent, message = '') => {
+  assertSafeOutput(structuredContent);
+  return { structuredContent, content: message ? text(message) : [] };
+};
+
+export function isAuthorized(headers = {}) {
+  if (!MCP_AUTH_TOKEN) return false;
+  const raw = headers.authorization ?? headers.Authorization;
+  if (typeof raw !== 'string' || !raw.startsWith('Bearer ')) return false;
+  const received = Buffer.from(raw.slice(7), 'utf8');
+  const expected = Buffer.from(MCP_AUTH_TOKEN, 'utf8');
+  return received.length === expected.length && timingSafeEqual(received, expected);
+}
 
 function summarizeEvidence(item) {
   const x = normalizeEvidence(item.data);
@@ -216,14 +232,26 @@ const httpServer = createServer(async (req, res) => {
   if (!req.url) return res.writeHead(400).end('Missing URL');
   const url = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`);
   if (req.method === 'OPTIONS' && url.pathname === MCP_PATH) {
-    res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, GET, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'content-type, mcp-session-id', 'Access-Control-Expose-Headers': 'Mcp-Session-Id' });
+    res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, GET, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'authorization, content-type, mcp-session-id', 'Access-Control-Expose-Headers': 'Mcp-Session-Id' });
     return res.end();
   }
   if (req.method === 'GET' && url.pathname === '/') {
-    res.writeHead(200, { 'content-type': 'application/json' });
-    return res.end(JSON.stringify({ name: 'DisDex Research Commander', version: VERSION, mode: 'research-only', mcp: MCP_PATH }));
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+    return res.end(JSON.stringify({ name: 'DisDex Research Commander', version: VERSION, mode: 'research-only', mcp: MCP_PATH, authentication: 'bearer-required' }));
+  }
+  if (req.method === 'GET' && url.pathname === '/health') {
+    if (!isAuthorized(req.headers)) {
+      res.writeHead(401, { 'content-type': 'application/json', 'cache-control': 'no-store', 'www-authenticate': 'Bearer' });
+      return res.end(JSON.stringify({ error: 'UNAUTHORIZED' }));
+    }
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+    return res.end(JSON.stringify({ ok: true, name: 'DisDex Research Commander', version: VERSION, mode: 'research-only' }));
   }
   if (url.pathname === MCP_PATH && ['POST','GET','DELETE'].includes(req.method ?? '')) {
+    if (!isAuthorized(req.headers)) {
+      res.writeHead(401, { 'content-type': 'application/json', 'cache-control': 'no-store', 'www-authenticate': 'Bearer' });
+      return res.end(JSON.stringify({ error: 'UNAUTHORIZED' }));
+    }
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id');
     const server = createCommander();
@@ -236,4 +264,14 @@ const httpServer = createServer(async (req, res) => {
   res.writeHead(404).end('Not Found');
 });
 
-httpServer.listen(PORT, () => console.log(`DisDex Research Commander listening on http://localhost:${PORT}${MCP_PATH}`));
+function start() {
+  if (MCP_AUTH_TOKEN.length < 32 || !(process.env.DISDEX_RESEARCH_GITHUB_TOKEN ?? '')) {
+    console.error('RESEARCH_COMMANDER_CONFIG_INVALID');
+    process.exitCode = 78;
+    return;
+  }
+  httpServer.listen(PORT, '127.0.0.1', () => console.log(`DisDex Research Commander listening on http://127.0.0.1:${PORT}${MCP_PATH}`));
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) start();
+
