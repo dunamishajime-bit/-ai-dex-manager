@@ -23,6 +23,15 @@ const OPERATOR = "V12_KILL_SWITCH_AUTO_REPAIR_V1";
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_CODEX_REPAIR_THREAD_ID = "01a0261e-6073-7381-bfb5-3807db374e2a";
 const DEFAULT_CODEX_REPAIR_REQUEST_PATH = "/var/lib/disdex/v12-x1-all/codex-repair-request.json";
+const HISTORICAL_LOCAL_REASON_PREFIXES = [
+    "V12 universe alignment mismatch:",
+    "Fresh V96/V52 pre-order Margin Guard blocked exposure increase:",
+] as const;
+const HISTORICAL_LOCAL_EXACT_REASONS = new Set([
+    "V12 hourly history insufficient for BTC: 0",
+    "TRAILING_STOP_UPDATE_FAILED:Order would immediately trigger.",
+]);
+const HISTORICAL_MINIMUM_ENTRY_QUANTITY_REASON = /^Quantity 0 is below Aster minQty [0-9]+(?:\.[0-9]+)? for [A-Z0-9]+USDT\.$/;
 
 type RepairAction = "STALE_SHARED_KILL" | "MARGIN_FLATTEN" | "LOCAL_STATE" | "NONE" | "BLOCKED";
 type AutoRepairMode = "CODEX_THREAD_HANDOFF" | "DETERMINISTIC";
@@ -47,6 +56,13 @@ function codexRepairRequestPath(value = process.env.V12_CODEX_REPAIR_REQUEST_PAT
     return resolve(String(value || DEFAULT_CODEX_REPAIR_REQUEST_PATH).trim());
 }
 
+function isHistoricalLocalRepairReason(reason: string | undefined) {
+    const value = String(reason || "").trim();
+    return HISTORICAL_LOCAL_EXACT_REASONS.has(value)
+        || HISTORICAL_LOCAL_REASON_PREFIXES.some((prefix) => value.startsWith(prefix))
+        || HISTORICAL_MINIMUM_ENTRY_QUANTITY_REASON.test(value);
+}
+
 function lastOutput(output: string) {
     return output.trim().split(/\r?\n/).filter(Boolean).slice(-8).join(" | ").slice(-2_000);
 }
@@ -55,10 +71,10 @@ function requestToken() {
     return `auto-${new Date().toISOString().replace(/[^0-9A-Za-z]/g, "")}-${process.pid}-${randomUUID().slice(0, 8)}`;
 }
 
-function classifyRepair(killActive: boolean, reason: string | undefined, localStateActive: boolean, localManualReview: boolean): RepairAction {
+function classifyRepair(killActive: boolean, reason: string | undefined, localStateActive: boolean, localManualReview: boolean, localReason?: string): RepairAction {
     if (killActive && reason === SUPERVISOR_EXIT_REASON) return "STALE_SHARED_KILL";
     if (killActive && reason?.startsWith(MARGIN_FLATTEN_REASON_PREFIX)) return "MARGIN_FLATTEN";
-    if (!killActive && (localStateActive || localManualReview)) return "LOCAL_STATE";
+    if (!killActive && (localStateActive || localManualReview) && isHistoricalLocalRepairReason(localReason || reason)) return "LOCAL_STATE";
     if (killActive) return "BLOCKED";
     return "NONE";
 }
@@ -166,7 +182,10 @@ async function selfTest() {
     assert.equal(classifyRepair(true, SUPERVISOR_EXIT_REASON, false, false), "STALE_SHARED_KILL");
     assert.equal(classifyRepair(true, `${MARGIN_FLATTEN_REASON_PREFIX} test`, false, false), "MARGIN_FLATTEN");
     assert.equal(classifyRepair(true, "daily loss latch", false, false), "BLOCKED");
-    assert.equal(classifyRepair(false, undefined, true, false), "LOCAL_STATE");
+    assert.equal(classifyRepair(false, undefined, true, false, "V12 hourly history insufficient for BTC: 0"), "LOCAL_STATE");
+    assert.equal(classifyRepair(false, undefined, true, false, "V12 universe alignment mismatch: LINK"), "LOCAL_STATE");
+    assert.equal(classifyRepair(false, undefined, true, false, "Quantity 0 is below Aster minQty 1 for AVAXUSDT."), "LOCAL_STATE");
+    assert.equal(classifyRepair(false, undefined, true, false, "unknown manual review"), "NONE");
     assert.equal(classifyRepair(false, undefined, false, false), "NONE");
     assert.equal(boolEnv("V12_AUTO_REPAIR_TEST_FALSE"), false);
     assert.equal(autoRepairMode(""), "CODEX_THREAD_HANDOFF");
@@ -206,7 +225,7 @@ async function main() {
 
     const kill = await readSharedKillSwitch();
     const state = await new FileV12X1AllRunnerStateStore(runtime.statePath, "LIVE").load();
-    const action = classifyRepair(Boolean(kill.active), kill.reason, Boolean(state.killSwitch?.active), Boolean(state.manualReview));
+    const action = classifyRepair(Boolean(kill.active), kill.reason, Boolean(state.killSwitch?.active), Boolean(state.manualReview), state.manualReview || state.killSwitch?.reason);
     if (action === "NONE") {
         console.log(JSON.stringify({ status: "V12_AUTO_REPAIR_NOT_REQUIRED", sha, ordersSent: false, positionChangesSent: false }));
         return;
