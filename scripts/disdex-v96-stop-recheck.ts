@@ -12,7 +12,7 @@ import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-ris
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { reconcileV12Protection } from "../lib/v12-resident-stop-lifecycle";
-import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
+import { FileV12X1AllRunnerStateStore, type V12ActivePositionState } from "../lib/v12-x1-all-runner-state";
 
 const V96_CORE_SYMBOLS = new Set(["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]);
 const EPS = 1e-12;
@@ -22,6 +22,11 @@ function actualSide(position: { quantity: number; positionSide: string }) {
     if (position.positionSide === "LONG") return "LONG" as const;
     if (position.positionSide === "SHORT") return "SHORT" as const;
     return position.quantity < 0 ? "SHORT" as const : "LONG" as const;
+}
+
+function activePositionsOf(state: { activePositions?: V12ActivePositionState[]; active?: V12ActivePositionState }) {
+    if (Array.isArray(state.activePositions) && state.activePositions.length) return [...state.activePositions];
+    return state.active ? [state.active] : [];
 }
 
 type AsterCredentialName = "ASTER_FUTURES_BASE_URL" | "ASTER_USER_ADDRESS" | "ASTER_API_PRIVATE_KEY";
@@ -84,15 +89,14 @@ async function main() {
     // though it was part of the legacy V96 core universe.  Only non-V12
     // state is a V96 residual here; the exact V12 state/protection match is
     // verified below and remains fail-closed on any mismatch.
-    const reconciledV12Symbol = state.active ? String(state.active.symbol).toUpperCase() : undefined;
+    const stateActives = activePositionsOf(state);
+    const reconciledV12Symbols = new Set(stateActives.map((active) => String(active.symbol).toUpperCase()));
     const v96Positions = nonzero.filter((row) => {
         const symbol = String(row.symbol).toUpperCase();
-        return V96_CORE_SYMBOLS.has(symbol) && symbol !== reconciledV12Symbol;
+        return V96_CORE_SYMBOLS.has(symbol) && !reconciledV12Symbols.has(symbol);
     });
     if (v96Positions.length) throw new Error(`V96_STOP_RECHECK_POSITION_REMAINS:${v96Positions.map((row) => `${row.symbol}:${row.positionAmt}`).join(",")}`);
-    const v12ProtectionIds = new Set(state.active
-        ? [state.active.protection.stopClientOrderId, state.active.protection.takeProfitClientOrderId].filter(Boolean)
-        : []);
+    const v12ProtectionIds = new Set(stateActives.flatMap((active) => [active.protection.stopClientOrderId, active.protection.takeProfitClientOrderId].filter(Boolean)));
     const v96Orders = openOrders.filter((row) => {
         const symbol = String(row.symbol).toUpperCase();
         const clientOrderId = String(row.clientOrderId || "");
@@ -107,16 +111,18 @@ async function main() {
     const actualPositions = await adapter.getPositions();
     const activeV12Orders = (await adapter.listV12Orders()).filter((row) => ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(row.status || "").toUpperCase()));
     let v12StateActive = false;
-    if (state.active) {
+    if (stateActives.length) {
         const actualV12 = actualPositions.filter((row) => Math.abs(row.quantity) > EPS && V12_X1_ALL.universe.some((base) => `${base}USDT` === row.symbol.toUpperCase()));
-        if (actualV12.length !== 1) throw new Error(`V96_STOP_RECHECK_V12_ACTIVE_POSITION_COUNT_MISMATCH:${actualV12.length}`);
-        const actual = actualV12[0];
-        if (actual.symbol.toUpperCase() !== state.active.symbol.toUpperCase()) throw new Error("V96_STOP_RECHECK_V12_ACTIVE_POSITION_SYMBOL_MISMATCH");
-        if (actualSide(actual) !== state.active.side) throw new Error("V96_STOP_RECHECK_V12_ACTIVE_POSITION_SIDE_MISMATCH");
-        if (Math.abs(Math.abs(actual.quantity) - state.active.quantity) > Math.max(1e-8, state.active.quantity * 0.01)) throw new Error("V96_STOP_RECHECK_V12_ACTIVE_POSITION_QTY_MISMATCH");
-        const protection = await reconcileV12Protection(adapter, state.active.protection);
-        if (protection.manualReview) throw new Error(`V96_STOP_RECHECK_${protection.manualReview}`);
-        const allowed = new Set([state.active.protection.stopClientOrderId, state.active.protection.takeProfitClientOrderId].filter(Boolean));
+        if (actualV12.length !== stateActives.length) throw new Error(`V96_STOP_RECHECK_V12_ACTIVE_POSITION_COUNT_MISMATCH:expected=${stateActives.length}:actual=${actualV12.length}`);
+        for (const expected of stateActives) {
+            const actual = actualV12.find((row) => row.symbol.toUpperCase() === expected.symbol.toUpperCase());
+            if (!actual) throw new Error(`V96_STOP_RECHECK_V12_ACTIVE_POSITION_SYMBOL_MISMATCH:${expected.symbol}`);
+            if (actualSide(actual) !== expected.side) throw new Error(`V96_STOP_RECHECK_V12_ACTIVE_POSITION_SIDE_MISMATCH:${expected.symbol}`);
+            if (Math.abs(Math.abs(actual.quantity) - expected.quantity) > Math.max(1e-8, expected.quantity * 0.01)) throw new Error(`V96_STOP_RECHECK_V12_ACTIVE_POSITION_QTY_MISMATCH:${expected.symbol}`);
+            const protection = await reconcileV12Protection(adapter, expected.protection);
+            if (protection.manualReview) throw new Error(`V96_STOP_RECHECK_${protection.manualReview}`);
+        }
+        const allowed = new Set(stateActives.flatMap((active) => [active.protection.stopClientOrderId, active.protection.takeProfitClientOrderId].filter(Boolean)));
         const unknown = activeV12Orders.filter((row) => !allowed.has(row.clientOrderId));
         if (unknown.length) throw new Error(`V96_STOP_RECHECK_V12_UNKNOWN_ACTIVE_ORDER:${unknown.map((row) => row.clientOrderId).join(",")}`);
         v12StateActive = true;
@@ -133,7 +139,7 @@ async function main() {
 
     const preserved = nonzero.filter((row) => {
         const symbol = String(row.symbol).toUpperCase();
-        return !V96_CORE_SYMBOLS.has(symbol) || symbol === reconciledV12Symbol;
+        return !V96_CORE_SYMBOLS.has(symbol) || reconciledV12Symbols.has(symbol);
     });
     console.log(JSON.stringify({
         status: "V96_STOP_RECHECK_PASS",
