@@ -1,0 +1,182 @@
+name: PENGU Bull Trap Frozen Cross-Venue Validation
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-bulltrap-overlay-v3-20260824
+    paths:
+      - '.github/workflows/pengu-bulltrap-crossvenue-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-bulltrap-crossvenue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+
+      - name: Download official Binance Vision monthly archives
+        run: |
+          mkdir -p .research-state/pengu-bulltrap-crossvenue
+          python - <<'PY'
+          import csv, io, json, zipfile
+          from datetime import date
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError
+
+          root=Path('.research-state/pengu-bulltrap-crossvenue')
+          base='https://data.binance.vision/data/futures/um/monthly'
+
+          def month_keys(y0,m0,y1,m1):
+              y,m=y0,m0
+              while (y,m) <= (y1,m1):
+                  yield f'{y:04d}-{m:02d}'
+                  m+=1
+                  if m==13: y,m=y+1,1
+
+          months=list(month_keys(2024,12,2026,7))
+          def get_zip(url):
+              try:
+                  req=Request(url,headers={'User-Agent':'DisDex-Research/1.0'})
+                  with urlopen(req,timeout=60) as r: return r.read()
+              except HTTPError as e:
+                  if e.code==404: return None
+                  raise
+
+          def norm_ts(v):
+              x=int(float(v))
+              if x>100_000_000_000_000: x//=1000
+              return x
+
+          def load_klines(symbol):
+              out={}
+              for ym in months:
+                  url=f'{base}/klines/{symbol}/1h/{symbol}-1h-{ym}.zip'
+                  blob=get_zip(url)
+                  if blob is None: continue
+                  with zipfile.ZipFile(io.BytesIO(blob)) as z:
+                      name=z.namelist()[0]
+                      with z.open(name) as fh:
+                          text=io.TextIOWrapper(fh,encoding='utf-8-sig')
+                          for row in csv.reader(text):
+                              if not row: continue
+                              try: t=norm_ts(row[0])
+                              except Exception: continue
+                              if len(row)<7: continue
+                              out[t]={'openTime':t,'open':float(row[1]),'high':float(row[2]),'low':float(row[3]),'close':float(row[4]),'volume':float(row[5]),'closeTime':norm_ts(row[6])}
+              rows=[out[k] for k in sorted(out)]
+              (root/f'{symbol}.json').write_text(json.dumps(rows,separators=(',',':')))
+              print(symbol,'rows',len(rows),'first',rows[0]['openTime'] if rows else None,'last',rows[-1]['openTime'] if rows else None)
+
+          def load_funding(symbol):
+              out={}
+              for ym in months:
+                  url=f'{base}/fundingRate/{symbol}/{symbol}-fundingRate-{ym}.zip'
+                  blob=get_zip(url)
+                  if blob is None: continue
+                  with zipfile.ZipFile(io.BytesIO(blob)) as z:
+                      name=z.namelist()[0]
+                      with z.open(name) as fh:
+                          text=io.TextIOWrapper(fh,encoding='utf-8-sig')
+                          rows=list(csv.reader(text))
+                      if not rows: continue
+                      header=[x.strip() for x in rows[0]]
+                      has_header=any(any(c.isalpha() for c in x) for x in header)
+                      if has_header:
+                          low=[x.lower() for x in header]
+                          ti=next((i for i,x in enumerate(low) if 'time' in x),0)
+                          ri=next((i for i,x in enumerate(low) if 'funding' in x and 'rate' in x),len(header)-1)
+                          data=rows[1:]
+                      else:
+                          ti,ri,data=0,len(rows[0])-1,rows
+                      for row in data:
+                          if len(row)<=max(ti,ri): continue
+                          try: t=norm_ts(row[ti]); r=float(row[ri])
+                          except Exception: continue
+                          out[t]={'fundingTime':t,'fundingRate':r}
+              vals=[out[k] for k in sorted(out)]
+              (root/'PENGUUSDT-funding.json').write_text(json.dumps(vals,separators=(',',':')))
+              print('funding rows',len(vals),'first',vals[0]['fundingTime'] if vals else None,'last',vals[-1]['fundingTime'] if vals else None)
+
+          load_klines('PENGUUSDT')
+          load_klines('BTCUSDT')
+          load_funding('PENGUUSDT')
+          PY
+
+      - name: Build frozen Binance copies without changing candidate logic
+        run: |
+          cp scripts/research_pengu_bulltrap_overlay_v3.ts scripts/.pengu_bulltrap_binance_prior.ts
+          cp scripts/research_pengu_bulltrap_overlay_v3.ts scripts/.pengu_bulltrap_binance_overlap.ts
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          local_data=r'''async function downloadCandles(symbol:string){const raw=JSON.parse(await fs.readFile(`.research-state/pengu-bulltrap-crossvenue/${symbol}.json`,"utf8")) as DisDexV35Candle[];return raw.filter(c=>c.openTime>=WARM_START&&c.openTime<EVAL_END);} 
+async function downloadFunding(){const raw=JSON.parse(await fs.readFile(".research-state/pengu-bulltrap-crossvenue/PENGUUSDT-funding.json","utf8")) as FundingPoint[];return raw.filter(x=>x.fundingTime>=WARM_START&&x.fundingTime<EVAL_END);} 
+'''
+          def patch(file,warm,start,end):
+              p=Path(file); s=p.read_text()
+              s=s.replace('const WARM_START=Date.parse("2025-08-01T00:00:00Z");',f'const WARM_START=Date.parse("{warm}");')
+              s=s.replace('const EVAL_START=Date.parse("2025-08-23T15:00:00Z");',f'const EVAL_START=Date.parse("{start}");')
+              s=s.replace('const EVAL_END=Date.parse("2026-08-23T15:00:00Z");',f'const EVAL_END=Date.parse("{end}");')
+              s=re.sub(r'async function downloadCandles\(symbol:string\)\{.*?\}\nasync function downloadFunding\(\)\{.*?\}\n(?=function fundingBetween)',local_data,s,flags=re.S)
+              s=re.sub(r'const expected=Math\.floor\(\(EVAL_END-EVAL_START\)/HOUR\);assert\.equal\(pengu\.filter\(x=>x\.openTime>=EVAL_START&&x\.openTime<EVAL_END\)\.length,expected\);assert\.equal\(btc\.filter\(x=>x\.openTime>=EVAL_START&&x\.openTime<EVAL_END\)\.length,expected\);','assert.ok(pengu.length>500);assert.ok(btc.length>500);',s)
+              s=s.replace('assert.equal(base.length,32);if(mode==="normal")assert.equal(base.filter(t=>t.side==="S").length,25);','assert.ok(base.length>0);')
+              p.write_text(s)
+
+          patch('scripts/.pengu_bulltrap_binance_prior.ts','2024-12-17T00:00:00Z','2024-12-24T00:00:00Z','2025-08-01T00:00:00Z')
+          patch('scripts/.pengu_bulltrap_binance_overlap.ts','2025-08-01T00:00:00Z','2025-08-23T15:00:00Z','2026-08-01T00:00:00Z')
+          PY
+
+      - name: Run untouched-period and venue-overlap validation
+        run: |
+          set -o pipefail
+          PENGU_BULLTRAP_OVERLAY_OUT=.research-state/pengu-bulltrap-crossvenue/prior.json npx tsx scripts/.pengu_bulltrap_binance_prior.ts 2>&1 | tee .research-state/pengu-bulltrap-crossvenue/prior.log
+          PENGU_BULLTRAP_OVERLAY_OUT=.research-state/pengu-bulltrap-crossvenue/overlap.json npx tsx scripts/.pengu_bulltrap_binance_overlap.ts 2>&1 | tee .research-state/pengu-bulltrap-crossvenue/overlap.log
+          rm -f scripts/.pengu_bulltrap_binance_prior.ts scripts/.pengu_bulltrap_binance_overlap.ts
+
+      - name: Apply frozen cross-venue gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state/pengu-bulltrap-crossvenue')
+          prior=json.loads((root/'prior.json').read_text())
+          overlap=json.loads((root/'overlap.json').read_text())
+          def extract(p):
+              n=p['results']['RETEST_REJECT']['NORMAL']; s=p['results']['RETEST_REJECT']['STRESS']
+              return {'normal':{'baseline':n['BASELINE'],'overlay':n['OVERLAY'],'combined':n['COMBINED']},'stress':{'baseline':s['BASELINE'],'overlay':s['OVERLAY'],'combined':s['COMBINED']}}
+          def passes(x):
+              n=x['normal']; s=x['stress']; o=n['overlay']; b=n['baseline']; c=n['combined']
+              return (b['trades']>=10 and o['trades']>=5 and (o['winRatePct'] or 0)>=65 and (o['profitFactor'] or 0)>=1.5
+                      and (c['winRatePct'] or 0)>(b['winRatePct'] or 0) and c['returnPct']>=b['returnPct']
+                      and (c['profitFactor'] or 0)>=(b['profitFactor'] or 0)
+                      and s['combined']['returnPct']>=s['baseline']['returnPct'])
+          a=extract(prior); b=extract(overlap)
+          out={'status':'PASS_RESEARCH_ONLY','schema':'pengu-bulltrap-frozen-crossvenue/v2','candidate':'RETEST_REJECT frozen at eaab138cb8ddc97ce6e61f03839d2a172c46f2a5','dataSource':'Binance Vision official USD-M monthly archives','priorPeriod':{'period':['2024-12-24T00:00:00Z','2025-08-01T00:00:00Z'],'metrics':a,'pass':passes(a)},'overlapPeriod':{'period':['2025-08-23T15:00:00Z','2026-08-01T00:00:00Z'],'metrics':b,'pass':passes(b)},'promotion':{'pass':passes(a) and passes(b)},'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          (root/'crossvenue.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          assert out['status']=='PASS_RESEARCH_ONLY'
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-bulltrap-crossvenue-${{ github.run_id }}
+          path: .research-state/pengu-bulltrap-crossvenue
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
