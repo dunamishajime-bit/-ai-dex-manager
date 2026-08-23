@@ -1,0 +1,75 @@
+name: Weak-Month B2 Structural Holdout
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_current_v12_idle_overlay_b2.ts'
+      - '.github/workflows/weak-month-b2-holdout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: weak-month-b2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: weak-month-b2-${{ runner.os }}
+          restore-keys: |
+            weak-month-b-core-
+            v26-latency-aware-3y-usdm-v1-20260816
+            v12-top2-gross15-
+            perp-research-usdm-
+      - run: npm ci
+      - name: Reuse formal current V12 ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+      - name: Run B2 pre-2026 selection and untouched 2026 holdout
+        env:
+          V12_LEDGER_IN: .research-state/input/v12-top2-ledger.json
+          B2_OVERLAY_OUT: .research-state/weak-month-b2/result.json
+        run: |
+          mkdir -p .research-state/weak-month-b2
+          set -o pipefail
+          npx tsx scripts/research_current_v12_idle_overlay_b2.ts 2>&1 | tee .research-state/weak-month-b2/run.log
+      - name: Validate research discipline
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/weak-month-b2/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['schema']=='weak-month-b2-pre2026-selection-holdout/v1'
+          assert len(p['families'])==6
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          for f in p['families']:
+              assert set(f['splits'])=={'DEV_2023','VAL_2024','PREHOLDOUT_2025','HOLDOUT_2026'}
+          print(json.dumps({'selection':p['selection'],'families':p['families'],'currentIdleLedger':p['currentIdleLedger']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weak-month-b2-${{ github.run_id }}
+          path: .research-state/weak-month-b2
+          retention-days: 90
+          if-no-files-found: error
