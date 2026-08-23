@@ -1,0 +1,68 @@
+name: PENGU A3 Risk Architecture Recent 365-Day BT
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/pengu-a2-confirmation-recent-365d.yml'
+      - 'scripts/research_pengu_a3_risk_architecture.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-a3-stable-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+
+      - name: Reuse exact recent-365d baseline and A
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-a-recent-365d-32648802579
+          path: .research-state/pengu-a3/input
+          github-token: ${{ github.token }}
+          run-id: 32648802579
+
+      - name: Run fixed A3 structural study
+        run: |
+          python scripts/research_pengu_a3_risk_architecture.py \
+            --input-dir .research-state/pengu-a3/input \
+            --output-dir .research-state/pengu-a3/out
+
+      - name: Validate research only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/pengu-a3/out/comparison.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert len(p['variants'])==5
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_A3_RISK_ARCHITECTURE_PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-a3-risk-architecture-${{ github.run_id }}
+          path: .research-state/pengu-a3/out
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
