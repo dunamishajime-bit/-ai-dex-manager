@@ -1,0 +1,53 @@
+name: PENGU Short V11 OKX Binance Cross-Venue
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-bybit-holdout-20260824
+    paths:
+      - 'scripts/research_pengu_short_v11_okx_binance.py'
+      - '.github/workflows/pengu-short-v11-okx-binance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen V11 on OKX and Binance
+        run: python scripts/research_pengu_short_v11_okx_binance.py
+      - name: Validate research-only cross-venue contract
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('.research-state/pengu-short-v11-okx-binance/result.json'))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['frozenCandidateSha']=='64b22dad74d1c026b2146d41d39cc8a3d3a819e3'
+          assert x['candidate']=='COUNTERWIND_PROGRESS_FAIL_REENTRY'
+          assert set(x['venues'])=={'OKX','Binance'}
+          for name in ('OKX','Binance'):
+              v=x['venues'][name]
+              assert v['status']=='PASS_RESEARCH_ONLY'
+              assert v['preRegistrationSha']=='64b22dad74d1c026b2146d41d39cc8a3d3a819e3'
+              assert v['preRegisteredCandidate']['candidateCount']==1
+              assert v['preRegisteredCandidate']['thresholdSweep'] is False
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'bothPromotionPass':x['bothPromotionPass'],'OKX':x['venues']['OKX']['promotion'],'Binance':x['venues']['Binance']['promotion']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-short-v11-okx-binance-${{ github.run_id }}
+          path: .research-state/pengu-short-v11-okx-binance
+          if-no-files-found: error
