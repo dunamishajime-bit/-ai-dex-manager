@@ -1,0 +1,56 @@
+name: PENGU Short Progression V6 Cross-Venue
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-progression-v6-20260824
+    paths:
+      - 'scripts/research_pengu_short_progression_v6_crossvenue.py'
+      - '.github/workflows/pengu-short-progression-v6-crossvenue.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-short-progression-v6-crossvenue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen candidate on Binance Vision
+        run: |
+          mkdir -p .research-state/pengu-short-progression-v6-crossvenue
+          set -o pipefail
+          python scripts/research_pengu_short_progression_v6_crossvenue.py 2>&1 | tee .research-state/pengu-short-progression-v6-crossvenue/runner.log
+      - name: Validate research-only output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/pengu-short-progression-v6-crossvenue/crossvenue.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['candidate'].startswith('PROGRESS_2_TO_4_EXIT_1 frozen at 23bba488')
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps(p,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-short-progression-v6-crossvenue-${{ github.run_id }}
+          path: .research-state/pengu-short-progression-v6-crossvenue
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error

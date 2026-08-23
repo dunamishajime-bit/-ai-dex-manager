@@ -1,0 +1,44 @@
+name: PENGU Short Progression V7 ATR Robustness
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-progression-v6-20260824
+    paths:
+      - 'scripts/research_pengu_short_v10_okx_holdout.ts'
+      - '.github/workflows/pengu-short-progression-v7-atr.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run pre-registered single V10 on untouched OKX holdout
+        run: npx tsx scripts/research_pengu_short_v10_okx_holdout.ts
+      - name: Validate holdout contract
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('.research-state/pengu-short-v10-okx/result.json'))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['preRegisteredCandidate']['candidateCount']==1
+          assert x['preRegisteredCandidate']['thresholdSweep'] is False
+          assert x['data']['venue']=='OKX'
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'promotion':x['promotion'],'normal':x['results']['NORMAL'],'stress':x['results']['STRESS']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-short-v10-okx-holdout-${{ github.run_id }}
+          path: .research-state/pengu-short-v10-okx
+          if-no-files-found: error
