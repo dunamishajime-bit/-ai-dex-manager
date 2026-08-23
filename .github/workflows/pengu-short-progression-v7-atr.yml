@@ -5,10 +5,7 @@ on:
     branches:
       - research/pengu-short-progression-v6-20260824
     paths:
-      - 'scripts/research_pengu_short_progression_v7_atr.ts'
-      - 'scripts/research_pengu_short_progression_v7_crossvenue.py'
-      - 'scripts/research_pengu_short_partial_v9.ts'
-      - 'scripts/research_pengu_short_partial_v9_crossvenue.py'
+      - 'scripts/research_pengu_short_v10_okx_holdout.ts'
       - '.github/workflows/pengu-short-progression-v7-atr.yml'
   workflow_dispatch:
 
@@ -18,34 +15,30 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - run: npm ci
-      - name: Populate official data cache and retain fixed V7 reference
-        run: python scripts/research_pengu_short_progression_v7_crossvenue.py
-      - name: Run single-candidate V9 partial de-risk across three environments
-        run: python scripts/research_pengu_short_partial_v9_crossvenue.py
-      - name: Validate V9 anti-overfit contract
+      - name: Run pre-registered single V10 on untouched OKX holdout
+        run: npx tsx scripts/research_pengu_short_v10_okx_holdout.ts
+      - name: Validate holdout contract
         run: |
           python - <<'PY'
           import json
-          x=json.load(open('.research-state/pengu-short-partial-v9-crossvenue/result.json'))
+          x=json.load(open('.research-state/pengu-short-v10-okx/result.json'))
           assert x['status']=='PASS_RESEARCH_ONLY'
-          assert x['candidate'].startswith('ATR_PROGRESS_HALF_DERISK')
-          assert set(x['checks'])=={'binancePrior','binanceOverlap','asterCurrent'}
+          assert x['preRegisteredCandidate']['candidateCount']==1
+          assert x['preRegisteredCandidate']['thresholdSweep'] is False
+          assert x['data']['venue']=='OKX'
           assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          print(json.dumps({'v9Promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
+          print(json.dumps({'promotion':x['promotion'],'normal':x['results']['NORMAL'],'stress':x['results']['STRESS']},indent=2))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: pengu-short-v9-robustness-${{ github.run_id }}
-          path: .research-state/pengu-short-partial-v9-crossvenue
+          name: pengu-short-v10-okx-holdout-${{ github.run_id }}
+          path: .research-state/pengu-short-v10-okx
           if-no-files-found: error
