@@ -1,0 +1,48 @@
+name: PENGU Short Progression V7 ATR Robustness
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-progression-v6-20260824
+    paths:
+      - 'scripts/research_pengu_short_progression_v7_atr.ts'
+      - 'scripts/research_pengu_short_progression_v7_crossvenue.py'
+      - '.github/workflows/pengu-short-progression-v7-atr.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run single-candidate ATR V7 across three environments
+        run: python scripts/research_pengu_short_progression_v7_crossvenue.py
+      - name: Validate anti-overfit contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-short-progression-v7-crossvenue/result.json'
+          x=json.load(open(p))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['candidate'].startswith('ATR_PROGRESS_1_TO_2_EXIT_0P5')
+          assert set(x['checks'])=={'binancePrior','binanceOverlap','asterCurrent'}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-short-progression-v7-atr-${{ github.run_id }}
+          path: .research-state/pengu-short-progression-v7-crossvenue
+          if-no-files-found: error
