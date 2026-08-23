@@ -1,0 +1,156 @@
+name: PENGU A2 Confirmation Patterns Recent 365-Day BT
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/pengu-a2-confirmation-recent-365d.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-a2-confirmation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+
+      - name: Build exact recent-365d baseline and three fixed A2 confirmation patterns
+        run: |
+          mkdir -p .research-state/pengu-a2-recent
+          for n in baseline close newlow relative; do cp scripts/research_pengu_v2_aster_ledger.ts scripts/.pengu_a2_${n}.ts; done
+          python - <<'PY'
+          from pathlib import Path
+          START='2025-08-23T15:00:00Z'
+          END='2026-08-23T15:00:00Z'
+          WARM='2025-08-01T00:00:00Z'
+
+          def common(s):
+              s=s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', f'const WARM_START = Date.parse("{WARM}");')
+              s=s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', f'const EVAL_START = Date.parse("{START}");')
+              s=s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', f'const EVAL_END = Date.parse("{END}");')
+              old='''  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);\n  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+              new='''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);\n  const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;\n  const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;\n  assert.equal(penguEvalRows, expectedEvalRows);\n  assert.equal(btcEvalRows, expectedEvalRows);\n  const penguTimestamps = new Set(pengu.map((row) => row.openTime));\n  const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));\n  assert.equal(alignedBtc.length, pengu.length);\n  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+              if old not in s: raise SystemExit('history patch target missing')
+              s=s.replace(old,new)
+              s=s.replace('''  assert.ok(normalMetrics.trades >= 25 && normalMetrics.trades <= 40, `Implausible Aster production replay trade count: ${normalMetrics.trades}`);\n  assert.ok(normalMetrics.returnPct > 0 && finiteMetric(normalMetrics.profitFactor) > 1.5, `Aster production replay lost its normal edge: ${JSON.stringify(normalMetrics)}`);\n  assert.ok(stressMetrics.returnPct > 0 && finiteMetric(stressMetrics.profitFactor) > 1.2, `Aster production replay lost its stress edge: ${JSON.stringify(stressMetrics)}`);''','''  assert.ok(normalMetrics.trades > 0);\n  assert.ok(stressMetrics.trades > 0);''')
+              return s
+
+          marker='''    const side: Side | undefined = rows[index].shortSignal ? "S" : rows[index].longSignal ? "L" : undefined;\n    if (!side || !rows[index].features) { index += 1; continue; }\n    const entryIndex = index + 1;'''
+
+          for name in ['baseline','close','newlow','relative']:
+              p=Path(f'scripts/.pengu_a2_{name}.ts')
+              s=common(p.read_text())
+              if name!='baseline':
+                  if name=='close':
+                      condition='confirmation.candle.close < rows[index].candle.close'
+                  elif name=='newlow':
+                      condition='confirmation.candle.close < rows[index].candle.low'
+                  else:
+                      condition='(confirmation.candle.close / rows[index].candle.close - 1) < 0 && (confirmation.candle.close / rows[index].candle.close - 1) < (confirmation.btcCandle.close / rows[index].btcCandle.close - 1)'
+                  repl=f'''    const side: Side | undefined = rows[index].shortSignal ? "S" : rows[index].longSignal ? "L" : undefined;\n    if (!side || !rows[index].features) {{ index += 1; continue; }}\n    let entryIndex = index + 1;\n    if (side === "S") {{\n      if (index + 2 >= rows.length) {{ index += 1; continue; }}\n      const confirmation = rows[index + 1];\n      if (!confirmation.features || !({condition})) {{ index += 1; continue; }}\n      entryIndex = index + 2;\n    }}'''
+                  if marker not in s: raise SystemExit(f'entry patch target missing {name}')
+                  s=s.replace(marker,repl)
+              p.write_text(s)
+          PY
+
+      - name: Run baseline and A2 variants
+        env:
+          PRODUCTION_SOURCE_SHA: ac254e897b7514d14c3a34c0679388978b5c3d32
+        run: |
+          set -o pipefail
+          for n in baseline close newlow relative; do
+            PENGU_LEDGER_OUT=.research-state/pengu-a2-recent/${n}.json npx tsx scripts/.pengu_a2_${n}.ts 2>&1 | tee .research-state/pengu-a2-recent/${n}.log
+          done
+          rm -f scripts/.pengu_a2_*.ts
+
+      - name: Compare fixed A2 patterns
+        run: |
+          python - <<'PY'
+          import json
+          from collections import Counter, defaultdict
+          from datetime import datetime, timezone
+          from pathlib import Path
+          root=Path('.research-state/pengu-a2-recent')
+          expected={'startInclusive':'2025-08-23T15:00:00.000Z','endExclusive':'2026-08-23T15:00:00.000Z'}
+          defs={
+            'BASELINE':'current PENGU_DUAL_LS_V2_FINAL',
+            'A2_CLOSE_CONTINUATION':'short signal -> wait 1 completed H1; require confirmation close < signal close; enter following open',
+            'A2_NEW_LOW_CONFIRM':'short signal -> wait 1 completed H1; require confirmation close < signal candle low; enter following open',
+            'A2_RELATIVE_CONTINUATION':'short signal -> wait 1 completed H1; require PENGU confirmation return < 0 and weaker than BTC; enter following open',
+          }
+          files={'BASELINE':'baseline.json','A2_CLOSE_CONTINUATION':'close.json','A2_NEW_LOW_CONFIRM':'newlow.json','A2_RELATIVE_CONTINUATION':'relative.json'}
+
+          def detail(p, mode):
+              rows=p['modes'][mode]['trades']; m=p['modes'][mode]['metrics']
+              reasons=Counter(x['exitReason'] for x in rows)
+              months=defaultdict(list)
+              for x in rows:
+                  k=datetime.fromtimestamp(x['exitTs']/1000,tz=timezone.utc).strftime('%Y-%m')
+                  months[k].append(float(x['accountReturn']))
+              monthly={}
+              for k,v in sorted(months.items()):
+                  eq=1.0
+                  for r in v: eq*=1+r
+                  monthly[k]=(eq-1)*100
+              return {'metrics':m,'exitReasons':dict(reasons),'monthlyReturnPct':monthly}
+
+          variants={}
+          for key,fn in files.items():
+              p=json.loads((root/fn).read_text())
+              assert p['period']==expected
+              assert p['safety']=={'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+              variants[key]={'definition':defs[key],'NORMAL':detail(p,'normal'),'SEVERE':detail(p,'stress')}
+          b=variants['BASELINE']
+          deltas={}
+          for key,v in variants.items():
+              if key=='BASELINE': continue
+              deltas[key]={}
+              for mode in ['NORMAL','SEVERE']:
+                  bm=b[mode]['metrics']; am=v[mode]['metrics']
+                  deltas[key][mode]={
+                    'returnPctPp':am['returnPct']-bm['returnPct'],
+                    'profitFactor':(am['profitFactor'] or 0)-(bm['profitFactor'] or 0),
+                    'maxDrawdownPctPp':am['maxDrawdownPct']-bm['maxDrawdownPct'],
+                    'winRatePctPp':am['winRatePct']-bm['winRatePct'],
+                    'trades':am['trades']-bm['trades'],
+                    'july2026ReturnPct':am.get('monthlyReturnPct',{}).get('2026-07',0),
+                    'julyDeltaPp':am.get('monthlyReturnPct',{}).get('2026-07',0)-b[mode].get('monthlyReturnPct',{}).get('2026-07',0),
+                  }
+          out={'status':'PASS_RESEARCH_ONLY','schema':'pengu-a2-confirmation-recent-365d/v1','period':expected,'selectionPolicy':'no winner tuning; all three predeclared structural patterns are reported','variants':variants,'deltaVsBaseline':deltas,'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          (root/'comparison.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Validate research only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/pengu-a2-recent/comparison.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert len(p['variants'])==4
+          assert p['safety']['productionChanged'] is False
+          print('PENGU_A2_CONFIRMATION_RESEARCH_PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-a2-confirmation-${{ github.run_id }}
+          path: .research-state/pengu-a2-recent
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
