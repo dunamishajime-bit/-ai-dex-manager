@@ -25,6 +25,7 @@ SYSTEMD_BACKUP_KEEP = 5
 PROMOTION_FAILURE_RETENTION_DAYS = 90
 PROMOTION_FAILURE_KEEP = 3
 STALE_TEMP_RETENTION_SECONDS = 24 * 60 * 60
+RELEASE_STAGING_RETENTION_SECONDS = 24 * 60 * 60
 
 
 @dataclass(frozen=True)
@@ -309,6 +310,28 @@ def cleanup_stale_temporary_files(paths: CleanupPaths, report: CleanupReport, no
                     unlink_or_rmtree(path, report)
 
 
+def cleanup_stale_release_staging(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+    """Remove abandoned immutable-release staging directories only.
+
+    Published releases have exact 40-hex names and are handled separately.
+    These dot-prefixed staging/incoming directories are never service working
+    directories; an age gate prevents touching a build that is still in flight.
+    """
+    root = paths.releases_root
+    if not root.is_dir():
+        return
+    cutoff = now - RELEASE_STAGING_RETENTION_SECONDS
+    for path in root.iterdir():
+        if path.is_symlink() or not path.is_dir():
+            continue
+        if not (path.name.startswith(".staging-") or path.name.startswith(".incoming-")):
+            continue
+        if path.stat().st_mtime < cutoff:
+            unlink_or_rmtree(path, report)
+        else:
+            report.skipped_paths.append(str(path))
+
+
 def protected_runtime_paths(paths: CleanupPaths) -> list[Path]:
     return [
         paths.current_link,
@@ -369,6 +392,7 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
         cleanup_audits(paths, report, current_time)
         cleanup_backups(paths, report, current_time)
         cleanup_stale_temporary_files(paths, report, current_time)
+        cleanup_stale_release_staging(paths, report, current_time)
         verify_protected_paths(paths, existed_before, current_before, report)
     finally:
         if lock_handle is not None:
@@ -460,6 +484,16 @@ def self_test() -> None:
                 assert getattr(archive.stat(), field) == getattr(audit_before, field)
         assert pm2.exists() and pm2.stat().st_size == 0
         assert applied.deleted_paths
+        staging = paths.releases_root / ".staging-old"
+        incoming = paths.releases_root / ".incoming-old"
+        staging.mkdir()
+        incoming.mkdir()
+        set_old(staging, 2)
+        set_old(incoming, 2)
+        applied_staging = run_cleanup(paths, dry_run=False, acquire_lock=False)
+        assert not staging.exists() and not incoming.exists()
+        assert str(staging) in applied_staging.deleted_paths
+        assert str(incoming) in applied_staging.deleted_paths
     print("DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS")
     print("runtimeAuditOwnerPreserved=true")
     print("protectedPathsTouched=false")
