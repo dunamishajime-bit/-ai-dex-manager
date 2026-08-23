@@ -1,0 +1,61 @@
+name: PENGU A7 Multi-Asset Signal Ownership
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_multi_asset_owner_a7.py'
+      - '.github/workflows/pengu-a7-multi-asset-owner.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-a7-multi-asset-owner-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse immutable current PENGU ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-a-recent-365d-32648802579
+          path: .research-state/a7/current
+          github-token: ${{ github.token }}
+          run-id: 32648802579
+      - name: Run multi-asset ownership redesign
+        run: |
+          set -o pipefail
+          PYTHONPATH=scripts python scripts/research_multi_asset_owner_a7.py \
+            --current .research-state/a7/current/baseline.json \
+            --out .research-state/a7/out | tee .research-state/a7/a7.log
+      - name: Validate research only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/a7/out/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          base=p['baseline']['NORMAL']['events']
+          for k,v in p['eventClock']['NORMAL'].items(): assert v['events']==base,(k,v['events'],base)
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_A7_MULTI_ASSET_OWNER_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-a7-multi-asset-owner-${{ github.run_id }}
+          path: .research-state/a7
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error

@@ -1,0 +1,61 @@
+name: PENGU A6 Exit Architecture
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_exit_architecture_a6.py'
+      - '.github/workflows/pengu-a6-exit-architecture.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-a6-exit-architecture-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse immutable current PENGU ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-a-recent-365d-32648802579
+          path: .research-state/a6/current
+          github-token: ${{ github.token }}
+          run-id: 32648802579
+      - name: Run fixed exit architecture study
+        run: |
+          set -o pipefail
+          PYTHONPATH=scripts python scripts/research_pengu_exit_architecture_a6.py \
+            --current .research-state/a6/current/baseline.json \
+            --out .research-state/a6/out | tee .research-state/a6/a6.log
+      - name: Validate no entry filtering
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/a6/out/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          base=p['baseline']['events']
+          for k,v in p['variants']['NORMAL'].items(): assert v['events']==base,(k,v['events'],base)
+          assert p['safety']['productionChanged'] is False
+          print('PENGU_A6_EXIT_ARCHITECTURE_RESEARCH_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-a6-exit-architecture-${{ github.run_id }}
+          path: .research-state/a6
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
