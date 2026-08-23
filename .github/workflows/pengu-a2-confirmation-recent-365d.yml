@@ -1,18 +1,19 @@
-name: PENGU A2 Confirmation Patterns Recent 365-Day BT
+name: PENGU A3 Risk Architecture Recent 365-Day BT
 
 on:
   pull_request:
     branches:
       - chatgpt/v12-live-adapter-final-20260817
     paths:
-      - '.github/workflows/pengu-a2-confirmation-recent-365d.yml'
+      - '.github/workflows/pengu-a3-risk-architecture-recent-365d.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
-  group: pengu-a2-confirmation-${{ github.ref }}
+  group: pengu-a3-risk-architecture-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -27,110 +28,233 @@ jobs:
           cache: npm
       - run: npm ci
 
-      - name: Build exact recent-365d baseline and three fixed A2 confirmation patterns
+      - name: Reuse exact recent-365d baseline and A result
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-a-recent-365d-32648802579
+          path: .research-state/pengu-a3/input
+          github-token: ${{ github.token }}
+          run-id: 32648802579
+
+      - name: Build A3 execution-equivalent harness
         run: |
-          mkdir -p .research-state/pengu-a2-recent
-          for n in baseline close newlow relative; do cp scripts/research_pengu_v2_aster_ledger.ts scripts/.pengu_a2_${n}.ts; done
+          mkdir -p .research-state/pengu-a3/out
+          cp scripts/research_pengu_v2_aster_ledger.ts scripts/.pengu_a3.ts
           python - <<'PY'
           from pathlib import Path
+          p=Path('scripts/.pengu_a3.ts')
+          s=p.read_text()
           START='2025-08-23T15:00:00Z'
           END='2026-08-23T15:00:00Z'
           WARM='2025-08-01T00:00:00Z'
+          s=s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', f'const WARM_START = Date.parse("{WARM}");')
+          s=s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', f'const EVAL_START = Date.parse("{START}");')
+          s=s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', f'const EVAL_END = Date.parse("{END}");')
+          s=s.replace('type Reason = "hard" | "trail" | "time";', 'type Reason = "hard" | "trail" | "time" | "failfast";')
 
-          def common(s):
-              s=s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', f'const WARM_START = Date.parse("{WARM}");')
-              s=s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', f'const EVAL_START = Date.parse("{START}");')
-              s=s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', f'const EVAL_END = Date.parse("{END}");')
-              old='''  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);\n  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
-              new='''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);\n  const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;\n  const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;\n  assert.equal(penguEvalRows, expectedEvalRows);\n  assert.equal(btcEvalRows, expectedEvalRows);\n  const penguTimestamps = new Set(pengu.map((row) => row.openTime));\n  const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));\n  assert.equal(alignedBtc.length, pengu.length);\n  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
-              if old not in s: raise SystemExit('history patch target missing')
-              s=s.replace(old,new)
-              s=s.replace('''  assert.ok(normalMetrics.trades >= 25 && normalMetrics.trades <= 40, `Implausible Aster production replay trade count: ${normalMetrics.trades}`);\n  assert.ok(normalMetrics.returnPct > 0 && finiteMetric(normalMetrics.profitFactor) > 1.5, `Aster production replay lost its normal edge: ${JSON.stringify(normalMetrics)}`);\n  assert.ok(stressMetrics.returnPct > 0 && finiteMetric(stressMetrics.profitFactor) > 1.2, `Aster production replay lost its stress edge: ${JSON.stringify(stressMetrics)}`);''','''  assert.ok(normalMetrics.trades > 0);\n  assert.ok(stressMetrics.trades > 0);''')
-              return s
+          a=s.index('function replay(history: PenguDualLsV2History, funding: FundingPoint[], mode: Mode) {')
+          b=s.index('\nfunction metrics(trades: LedgerTrade[]) {', a)
+          replay=r'''function replay(history: PenguDualLsV2History, funding: FundingPoint[], mode: Mode) {
+  const rows = buildPenguDualLsV2EvaluationSeries(history, EVAL_END + HOUR);
+  const trades: LedgerTrade[] = [];
+  const costPerSide = BASE_FEE_PER_SIDE + (mode === "stress" ? STRESS_ADVERSE_SLIPPAGE_PER_SIDE : 0);
+  const a3Mode = String(process.env.A3_MODE || "REL_STAGE");
+  let index = 250;
+  let cooldown = -1;
+  while (index < rows.length - 2) {
+    if (index <= cooldown) { index += 1; continue; }
+    const side: Side | undefined = rows[index].shortSignal ? "S" : rows[index].longSignal ? "L" : undefined;
+    if (!side || !rows[index].features) { index += 1; continue; }
+    const entryIndex = index + 1;
+    const entry = rows[entryIndex].candle;
+    const targetGross = targetGrossForAtr(rows[index].features!.atr24Ratio);
+    let position: PenguDualLsV2Position = {
+      side: side === "L" ? 1 : -1,
+      entryTs: entry.openTime,
+      entryPrice: entry.open,
+      quantity: 1,
+      gross: targetGross,
+      highWaterMark: entry.open,
+      lowWaterMark: entry.open,
+    };
+    const hold = side === "L" ? PENGU_DUAL_LS_V2.long.maxHoldHours : PENGU_DUAL_LS_V2.short.maxHoldHours;
+    const last = Math.min(rows.length - 1, entryIndex + hold - 1);
+    let exitIndex = last;
+    let exitPrice = rows[last].candle.close;
+    let exitReason: Reason = "time";
+    let firstBarExited = false;
 
-          marker='''    const side: Side | undefined = rows[index].shortSignal ? "S" : rows[index].longSignal ? "L" : undefined;\n    if (!side || !rows[index].features) { index += 1; continue; }\n    const entryIndex = index + 1;'''
+    for (let cursor = entryIndex; cursor <= last; cursor += 1) {
+      const features = rows[cursor].features;
+      assert(features, `Production features missing at ${cursor}`);
+      const evaluation = evaluatePenguDualLsV2PositionBar(position, features);
+      position = evaluation.updatedPosition;
+      if (evaluation.exit) {
+        exitIndex = cursor;
+        exitPrice = evaluation.exit.stopPrice ?? rows[cursor].candle.close;
+        exitReason = evaluation.exit.reason.includes("HARD") ? "hard" : evaluation.exit.reason.includes("TRAILING") ? "trail" : "time";
+        firstBarExited = cursor === entryIndex;
+        break;
+      }
+      if (side === "S" && cursor === entryIndex && a3Mode === "FAIL_FAST_REL") {
+        const pRet = rows[cursor].candle.close / entry.open - 1;
+        const bRet = rows[cursor].btcCandle.close / rows[cursor].btcCandle.open - 1;
+        const confirmed = pRet < 0 && pRet < bRet;
+        if (!confirmed && cursor + 1 < rows.length) {
+          exitIndex = cursor + 1;
+          exitPrice = rows[cursor + 1].candle.open;
+          exitReason = "failfast";
+          break;
+        }
+      }
+    }
 
-          for name in ['baseline','close','newlow','relative']:
-              p=Path(f'scripts/.pengu_a2_{name}.ts')
-              s=common(p.read_text())
-              if name!='baseline':
-                  if name=='close':
-                      condition='confirmation.candle.close < rows[index].candle.close'
-                  elif name=='newlow':
-                      condition='confirmation.candle.close < rows[index].candle.low'
-                  else:
-                      condition='(confirmation.candle.close / rows[index].candle.close - 1) < 0 && (confirmation.candle.close / rows[index].candle.close - 1) < (confirmation.btcCandle.close / rows[index].btcCandle.close - 1)'
-                  repl=f'''    const side: Side | undefined = rows[index].shortSignal ? "S" : rows[index].longSignal ? "L" : undefined;\n    if (!side || !rows[index].features) {{ index += 1; continue; }}\n    let entryIndex = index + 1;\n    if (side === "S") {{\n      if (index + 2 >= rows.length) {{ index += 1; continue; }}\n      const confirmation = rows[index + 1];\n      if (!confirmation.features || !({condition})) {{ index += 1; continue; }}\n      entryIndex = index + 2;\n    }}'''
-                  if marker not in s: raise SystemExit(f'entry patch target missing {name}')
-                  s=s.replace(marker,repl)
-              p.write_text(s)
+    if (entry.openTime >= EVAL_START && entry.openTime < EVAL_END) {
+      const exitTs = rows[exitIndex].candle.openTime;
+      const baseFundingRate = fundingBetween(funding, entry.openTime, exitTs);
+      const baseFundingUnitReturn = side === "L" ? -baseFundingRate : baseFundingRate;
+      const baseRawUnitReturn = side === "L" ? exitPrice / entry.open - 1 : entry.open / exitPrice - 1;
+      const baseCostUnitReturn = -2 * costPerSide;
+      let deployedGross = targetGross;
+      let accountReturn: number;
+      let rawUnitReturn = baseRawUnitReturn;
+      let fundingUnitReturn = baseFundingUnitReturn;
+      let costUnitReturn = baseCostUnitReturn;
+      let netUnitReturn = baseRawUnitReturn + baseFundingUnitReturn + baseCostUnitReturn;
+
+      if (side === "S" && (a3Mode === "REL_STAGE" || a3Mode === "PRICE_STAGE")) {
+        const starterGross = targetGross / 3;
+        const addGross = targetGross - starterGross;
+        const starterNet = baseRawUnitReturn + baseFundingUnitReturn + baseCostUnitReturn;
+        accountReturn = starterGross * starterNet;
+        deployedGross = starterGross;
+
+        if (!firstBarExited && entryIndex + 1 < rows.length && exitIndex > entryIndex) {
+          const confirm = rows[entryIndex];
+          const pRet = confirm.candle.close / entry.open - 1;
+          const bRet = confirm.btcCandle.close / confirm.btcCandle.open - 1;
+          const confirmed = a3Mode === "PRICE_STAGE" ? pRet < 0 : (pRet < 0 && pRet < bRet);
+          if (confirmed) {
+            const addEntry = rows[entryIndex + 1].candle.open;
+            const addFundingRate = fundingBetween(funding, rows[entryIndex + 1].candle.openTime, exitTs);
+            const addFunding = addFundingRate;
+            const addRaw = addEntry / exitPrice - 1;
+            const addNet = addRaw + addFunding - 2 * costPerSide;
+            accountReturn += addGross * addNet;
+            deployedGross = targetGross;
+            rawUnitReturn = (starterGross * baseRawUnitReturn + addGross * addRaw) / targetGross;
+            fundingUnitReturn = (starterGross * baseFundingUnitReturn + addGross * addFunding) / targetGross;
+            costUnitReturn = -2 * costPerSide;
+            netUnitReturn = accountReturn / targetGross;
+          } else {
+            rawUnitReturn = baseRawUnitReturn;
+            fundingUnitReturn = baseFundingUnitReturn;
+            costUnitReturn = baseCostUnitReturn;
+            netUnitReturn = starterNet;
+          }
+        }
+      } else {
+        accountReturn = targetGross * netUnitReturn;
+      }
+
+      trades.push({
+        side,
+        signalTs: rows[index].candle.openTime,
+        entryTs: entry.openTime,
+        exitTs,
+        entryPrice: entry.open,
+        exitPrice,
+        requestedGross: deployedGross,
+        rawUnitReturn,
+        fundingUnitReturn,
+        costUnitReturn,
+        netUnitReturn,
+        accountReturn,
+        exitReason,
+      });
+    }
+    cooldown = exitIndex + PENGU_DUAL_LS_V2.cooldownHours;
+    index = exitIndex + 1;
+  }
+  return trades;
+}
+'''
+          s=s[:a]+replay+s[b:]
+
+          old='''  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);\n  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+          new='''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);\n  const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;\n  const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;\n  assert.equal(penguEvalRows, expectedEvalRows);\n  assert.equal(btcEvalRows, expectedEvalRows);\n  const penguTimestamps = new Set(pengu.map((row) => row.openTime));\n  const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));\n  assert.equal(alignedBtc.length, pengu.length);\n  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+          if old not in s: raise SystemExit('history patch target missing')
+          s=s.replace(old,new)
+          s=s.replace('''  assert.ok(normalMetrics.trades >= 25 && normalMetrics.trades <= 40, `Implausible Aster production replay trade count: ${normalMetrics.trades}`);\n  assert.ok(normalMetrics.returnPct > 0 && finiteMetric(normalMetrics.profitFactor) > 1.5, `Aster production replay lost its normal edge: ${JSON.stringify(normalMetrics)}`);\n  assert.ok(stressMetrics.returnPct > 0 && finiteMetric(stressMetrics.profitFactor) > 1.2, `Aster production replay lost its stress edge: ${JSON.stringify(stressMetrics)}`);''','''  assert.ok(normalMetrics.trades > 0);\n  assert.ok(stressMetrics.trades > 0);''')
+          p.write_text(s)
           PY
 
-      - name: Run baseline and A2 variants
+      - name: Run three predeclared A3 structures
         env:
           PRODUCTION_SOURCE_SHA: ac254e897b7514d14c3a34c0679388978b5c3d32
         run: |
           set -o pipefail
-          for n in baseline close newlow relative; do
-            PENGU_LEDGER_OUT=.research-state/pengu-a2-recent/${n}.json npx tsx scripts/.pengu_a2_${n}.ts 2>&1 | tee .research-state/pengu-a2-recent/${n}.log
+          for spec in REL_STAGE:rel_stage PRICE_STAGE:price_stage FAIL_FAST_REL:fail_fast_rel; do
+            mode=${spec%%:*}; name=${spec##*:}
+            A3_MODE=$mode PENGU_LEDGER_OUT=.research-state/pengu-a3/out/${name}.json npx tsx scripts/.pengu_a3.ts 2>&1 | tee .research-state/pengu-a3/out/${name}.log
           done
-          rm -f scripts/.pengu_a2_*.ts
+          rm -f scripts/.pengu_a3.ts
 
-      - name: Compare fixed A2 patterns
+      - name: Compare current, A, and fixed A3 structures
         run: |
           python - <<'PY'
           import json
           from collections import Counter, defaultdict
           from datetime import datetime, timezone
           from pathlib import Path
-          root=Path('.research-state/pengu-a2-recent')
+          root=Path('.research-state/pengu-a3')
+          inp=root/'input'; outdir=root/'out'
+          baseline=json.loads((inp/'baseline.json').read_text())
+          a=json.loads((inp/'a-rsi45.json').read_text())
           expected={'startInclusive':'2025-08-23T15:00:00.000Z','endExclusive':'2026-08-23T15:00:00.000Z'}
-          defs={
-            'BASELINE':'current PENGU_DUAL_LS_V2_FINAL',
-            'A2_CLOSE_CONTINUATION':'short signal -> wait 1 completed H1; require confirmation close < signal close; enter following open',
-            'A2_NEW_LOW_CONFIRM':'short signal -> wait 1 completed H1; require confirmation close < signal candle low; enter following open',
-            'A2_RELATIVE_CONTINUATION':'short signal -> wait 1 completed H1; require PENGU confirmation return < 0 and weaker than BTC; enter following open',
-          }
-          files={'BASELINE':'baseline.json','A2_CLOSE_CONTINUATION':'close.json','A2_NEW_LOW_CONFIRM':'newlow.json','A2_RELATIVE_CONTINUATION':'relative.json'}
+          assert baseline['period']==expected and a['period']==expected
 
           def detail(p, mode):
-              rows=p['modes'][mode]['trades']; m=p['modes'][mode]['metrics']
-              reasons=Counter(x['exitReason'] for x in rows)
-              months=defaultdict(list)
-              for x in rows:
-                  k=datetime.fromtimestamp(x['exitTs']/1000,tz=timezone.utc).strftime('%Y-%m')
-                  months[k].append(float(x['accountReturn']))
-              monthly={}
-              for k,v in sorted(months.items()):
-                  eq=1.0
-                  for r in v: eq*=1+r
-                  monthly[k]=(eq-1)*100
-              return {'metrics':m,'exitReasons':dict(reasons),'monthlyReturnPct':monthly}
+            rows=p['modes'][mode]['trades']; m=p['modes'][mode]['metrics']
+            reasons=Counter(x['exitReason'] for x in rows)
+            months=defaultdict(list)
+            for x in rows:
+              k=datetime.fromtimestamp(x['exitTs']/1000,tz=timezone.utc).strftime('%Y-%m')
+              months[k].append(float(x['accountReturn']))
+            monthly={}
+            for k,v in sorted(months.items()):
+              eq=1.0
+              for r in v: eq*=1+r
+              monthly[k]=(eq-1)*100
+            return {'metrics':m,'exitReasons':dict(reasons),'monthlyReturnPct':monthly}
 
-          variants={}
-          for key,fn in files.items():
-              p=json.loads((root/fn).read_text())
-              assert p['period']==expected
-              assert p['safety']=={'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-              variants[key]={'definition':defs[key],'NORMAL':detail(p,'normal'),'SEVERE':detail(p,'stress')}
-          b=variants['BASELINE']
-          deltas={}
-          for key,v in variants.items():
-              if key=='BASELINE': continue
-              deltas[key]={}
-              for mode in ['NORMAL','SEVERE']:
-                  bm=b[mode]['metrics']; am=v[mode]['metrics']
-                  deltas[key][mode]={
-                    'returnPctPp':am['returnPct']-bm['returnPct'],
-                    'profitFactor':(am['profitFactor'] or 0)-(bm['profitFactor'] or 0),
-                    'maxDrawdownPctPp':am['maxDrawdownPct']-bm['maxDrawdownPct'],
-                    'winRatePctPp':am['winRatePct']-bm['winRatePct'],
-                    'trades':am['trades']-bm['trades'],
-                    'july2026ReturnPct':am.get('monthlyReturnPct',{}).get('2026-07',0),
-                    'julyDeltaPp':am.get('monthlyReturnPct',{}).get('2026-07',0)-b[mode].get('monthlyReturnPct',{}).get('2026-07',0),
-                  }
-          out={'status':'PASS_RESEARCH_ONLY','schema':'pengu-a2-confirmation-recent-365d/v1','period':expected,'selectionPolicy':'no winner tuning; all three predeclared structural patterns are reported','variants':variants,'deltaVsBaseline':deltas,'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
-          (root/'comparison.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
+          variants={
+            'BASELINE':baseline,
+            'A_RSI45':a,
+            'A3_REL_STAGE':json.loads((outdir/'rel_stage.json').read_text()),
+            'A3_PRICE_STAGE':json.loads((outdir/'price_stage.json').read_text()),
+            'A3_FAIL_FAST_REL':json.loads((outdir/'fail_fast_rel.json').read_text()),
+          }
+          defs={
+            'BASELINE':'current PENGU V2',
+            'A_RSI45':'short RSI14 <=45 gate',
+            'A3_REL_STAGE':'short: enter 1/3 target gross immediately; add remaining 2/3 after first H1 only if PENGU is down and weaker than BTC',
+            'A3_PRICE_STAGE':'short: enter 1/3 target gross immediately; add remaining 2/3 after first H1 only if PENGU is down',
+            'A3_FAIL_FAST_REL':'short: enter full target gross; if first H1 is not down and weaker than BTC, exit next open',
+          }
+          report={}
+          for key,p in variants.items():
+            assert p['period']==expected
+            assert p['safety']=={'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+            report[key]={'definition':defs[key],'NORMAL':detail(p,'normal'),'SEVERE':detail(p,'stress')}
+
+          def score(v):
+            n=v['NORMAL']['metrics']; s=v['SEVERE']['metrics']
+            july=v['NORMAL']['monthlyReturnPct'].get('2026-07',0)
+            return {'normalReturnPct':n['returnPct'],'normalPF':n['profitFactor'],'normalDDPct':n['maxDrawdownPct'],'severeReturnPct':s['returnPct'],'severePF':s['profitFactor'],'severeDDPct':s['maxDrawdownPct'],'july2026Pct':july,'hardStops':v['NORMAL']['exitReasons'].get('hard',0),'failFast':v['NORMAL']['exitReasons'].get('failfast',0)}
+          summary={k:score(v) for k,v in report.items()}
+          out={'status':'PASS_RESEARCH_ONLY','schema':'pengu-a3-risk-architecture-recent-365d/v1','period':expected,'selectionPolicy':'three structurally different A3 variants predeclared before execution; no threshold retuning after results','variants':report,'summary':summary,'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          (outdir/'comparison.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
           print(json.dumps(out,ensure_ascii=False,indent=2))
           PY
 
@@ -139,18 +263,18 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p=json.loads(Path('.research-state/pengu-a2-recent/comparison.json').read_text())
+          p=json.loads(Path('.research-state/pengu-a3/out/comparison.json').read_text())
           assert p['status']=='PASS_RESEARCH_ONLY'
-          assert len(p['variants'])==4
-          assert p['safety']['productionChanged'] is False
-          print('PENGU_A2_CONFIRMATION_RESEARCH_PASS')
+          assert len(p['variants'])==5
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_A3_RISK_ARCHITECTURE_PASS')
           PY
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pengu-a2-confirmation-${{ github.run_id }}
-          path: .research-state/pengu-a2-recent
+          name: pengu-a3-risk-architecture-${{ github.run_id }}
+          path: .research-state/pengu-a3/out
           include-hidden-files: true
           retention-days: 90
           if-no-files-found: error
