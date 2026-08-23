@@ -1,12 +1,12 @@
-name: PENGU Short V13 Bitget Holdout
+name: PENGU Short V14 Probation Bitget Holdout
 
 on:
   pull_request:
     branches:
       - research/pengu-short-v11-bybit-holdout-20260824
     paths:
-      - 'PRE_REGISTER_V13.md'
-      - 'scripts/research_pengu_short_v13_okx_binance_gate_bitget.py'
+      - 'PRE_REGISTER_V14.md'
+      - 'scripts/research_pengu_short_v14_probation_bitget.py'
       - '.github/workflows/pengu-short-v11-okx-binance.yml'
   workflow_dispatch:
 
@@ -16,7 +16,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,16 +27,16 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci
-      - name: Run pre-registered V13 on development venues and untouched Bitget
-        run: python scripts/research_pengu_short_v13_okx_binance_gate_bitget.py
-      - name: Validate V13 anti-overfit contract
+      - name: Run pre-registered V14 probation architecture
+        run: python scripts/research_pengu_short_v14_probation_bitget.py
+      - name: Validate V14 anti-overfit contract
         run: |
           python - <<'PY'
           import json
-          x=json.load(open('.research-state/pengu-short-v13/result.json'))
+          x=json.load(open('.research-state/pengu-short-v14/result.json'))
           assert x['status']=='PASS_RESEARCH_ONLY'
-          assert x['candidate']=='COUNTERWIND_SOFT_DERISK_RAPID_RELOAD'
-          assert x['preRegistrationSha']=='a08da0e618e74ce0ed89163509ba4428abf69997'
+          assert x['candidate']=='COUNTERWIND_PROBATION_BREAKEVEN_RESUME'
+          assert x['preRegistrationSha']=='d8c9bbcb513e1ab65ae39a30b3755b1faeb5b22d'
           assert x['candidateCount']==1
           assert x['thresholdSweep'] is False
           assert x['bitgetPerformanceObservedBeforePreRegistration'] is False
@@ -46,6 +46,6 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: pengu-short-v13-${{ github.run_id }}
-          path: .research-state/pengu-short-v13
+          name: pengu-short-v14-${{ github.run_id }}
+          path: .research-state/pengu-short-v14
           if-no-files-found: error
