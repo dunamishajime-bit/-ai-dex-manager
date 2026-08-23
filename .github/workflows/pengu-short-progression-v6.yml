@@ -1,0 +1,54 @@
+name: PENGU Short Progression V6 Research
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_short_progression_v6.ts'
+      - '.github/workflows/pengu-short-progression-v6.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-short-progression-v6-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run fixed progression-failure study
+        run: |
+          mkdir -p .research-state/pengu-short-progression-v6
+          PENGU_SHORT_PROGRESSION_OUT=.research-state/pengu-short-progression-v6/result.json npx tsx scripts/research_pengu_short_progression_v6.ts | tee .research-state/pengu-short-progression-v6/run.log
+      - name: Validate research-only contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('.research-state/pengu-short-progression-v6/result.json','utf8'));
+          if(p.status!=='PASS_RESEARCH_ONLY') throw new Error('research status');
+          if(p.safety.mode!=='RESEARCH_ONLY'||p.safety.ordersSent||p.safety.liveChanged||p.safety.vpsChanged||p.safety.productionChanged) throw new Error('safety contract');
+          for(const v of ['PROGRESS_4_TO_8_EXIT_2','PROGRESS_2_TO_4_EXIT_1']){
+            if(p.results[v].NORMAL.shortEntriesPreserved!==25) throw new Error(v+' short count');
+            if(p.results[v].NORMAL.longEntriesPreserved!==7) throw new Error(v+' long count');
+            if(p.results[v].NORMAL.COMBINED.trades!==32) throw new Error(v+' combined count');
+          }
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-short-progression-v6-${{ github.run_id }}
+          path: .research-state/pengu-short-progression-v6
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
