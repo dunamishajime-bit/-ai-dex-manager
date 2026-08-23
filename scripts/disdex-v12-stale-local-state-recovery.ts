@@ -69,6 +69,16 @@ function isAlignmentMismatchState(state: V12X1AllRunnerState) {
         && !state.pending;
 }
 
+function isAlignmentMismatchActiveState(state: V12X1AllRunnerState) {
+    return state.mode === "LIVE"
+        && typeof state.manualReview === "string"
+        && state.manualReview.startsWith(ALIGNMENT_MISMATCH_REASON_PREFIX)
+        && state.killSwitch?.active === true
+        && state.killSwitch.reason === state.manualReview
+        && activePositionsOf(state).length > 0
+        && !state.pending;
+}
+
 function isPreorderMarginGuardState(state: V12X1AllRunnerState) {
     return state.mode === "LIVE"
         && typeof state.manualReview === "string"
@@ -117,6 +127,7 @@ function isImmediateTriggerTrailingState(state: V12X1AllRunnerState) {
 function isRecoverableState(state: V12X1AllRunnerState, allowPreorderMarginGuardRecovery: boolean) {
     return isLegacyOddHourState(state)
         || isAlignmentMismatchState(state)
+        || isAlignmentMismatchActiveState(state)
         || isMinimumEntryQuantityState(state)
         || (allowPreorderMarginGuardRecovery && isPreorderMarginGuardState(state))
         || isImmediateTriggerTrailingState(state);
@@ -233,6 +244,19 @@ async function main() {
             updatedAt: 1,
             manualReview: "V12 universe alignment mismatch: LINK",
             killSwitch: { active: true, reason: "V12 universe alignment mismatch: LINK", trippedAt: 1 },
+        }), true);
+        assert.equal(isAlignmentMismatchActiveState({
+            schema: "v12-x1-all-runner-state/v1",
+            strategyId: "V12_X1.00_ALL",
+            mode: "LIVE",
+            updatedAt: 1,
+            manualReview: "V12 universe alignment mismatch: LINK",
+            killSwitch: { active: true, reason: "V12 universe alignment mismatch: LINK", trippedAt: 1 },
+            active: {
+                symbol: "XRPUSDT", side: "LONG", quantity: 1, gross: 0.3, positionId: "p1", entryPrice: 1,
+                atrAtEntry: 0.1, entrySignalTs: 1, holdingBars: 1, peakPrice: 1, troughPrice: 1,
+                protection: { strategyId: "V12_X1.00_ALL", symbol: "XRPUSDT", side: "LONG", positionId: "p1", quantity: 1, entryPrice: 1, atrAtEntry: 0.1, initialStop: 0.8, lastAckStop: 0.8, takeProfit: 1.2, peakOrTrough: 1, stopClientOrderId: "s1", takeProfitClientOrderId: "t1" },
+            },
         }), true);
         const preorderTestState: V12X1AllRunnerState = {
             schema: "v12-x1-all-runner-state/v1",
@@ -389,6 +413,52 @@ async function main() {
                 preservedActiveSymbol: after.active.symbol,
                 preservedActiveSide: after.active.side,
                 preservedActiveQuantity: after.active.quantity,
+                asterV12PositionCount: v12Positions.length,
+                asterV12ProtectionOrderCount: v12Orders.length,
+                lockAttempts,
+                sharedKillSwitchChanged: false,
+                ordersSent: false,
+                positionChangesSent: false,
+            }));
+            return;
+        }
+
+        if (isAlignmentMismatchActiveState(state)) {
+            const actives = activePositionsOf(state);
+            if (v12Positions.length !== actives.length) {
+                throw new Error(`V12_LOCAL_RECOVERY_ALIGNMENT_ACTIVE_COUNT_MISMATCH:expected=${actives.length}:actual=${v12Positions.length}`);
+            }
+            const expectedProtectionIds = new Set<string>();
+            for (const active of actives) {
+                const actual = v12Positions.find((row) => String(row.symbol).toUpperCase() === active.symbol.toUpperCase());
+                if (!actual || !activePositionMatches(actual, active)) {
+                    throw new Error(`V12_LOCAL_RECOVERY_ALIGNMENT_ACTIVE_POSITION_MISMATCH:${active.symbol}`);
+                }
+                if (!protectionOrdersMatch(openOrders, active)) {
+                    throw new Error(`V12_LOCAL_RECOVERY_ALIGNMENT_ACTIVE_PROTECTION_MISMATCH:${active.symbol}`);
+                }
+                expectedProtectionIds.add(active.protection.stopClientOrderId || "");
+                expectedProtectionIds.add(active.protection.takeProfitClientOrderId || "");
+            }
+            const unexpected = v12Orders.filter((row) => !expectedProtectionIds.has(String(row.clientOrderId || "")));
+            if (unexpected.length) {
+                throw new Error(`V12_LOCAL_RECOVERY_ALIGNMENT_ACTIVE_UNEXPECTED_OPEN_ORDER:${unexpected.map((row) => row.clientOrderId).join(",")}`);
+            }
+            const currentBytes = await readFile(statePath);
+            const currentState = await stateStore.load();
+            if (!isAlignmentMismatchActiveState(currentState)) throw new Error("V12_LOCAL_RECOVERY_STATE_CHANGED_DURING_RECONCILIATION");
+            const archived = await archiveAndRepairActive(statePath, currentBytes, requestId, currentState);
+            const after = await stateStore.load();
+            if (after.killSwitch?.active || after.manualReview || after.pending || activePositionsOf(after).length !== actives.length) {
+                throw new Error("V12_LOCAL_RECOVERY_ALIGNMENT_ACTIVE_REPAIR_VERIFICATION_FAILED");
+            }
+            console.log(JSON.stringify({
+                status: "V12_LOCAL_ALIGNMENT_ACTIVE_RECOVERY_PASS",
+                candidateSha,
+                requestId,
+                reasonMatched: true,
+                archivePath: archived.archivePath,
+                preservedActiveSymbols: activePositionsOf(after).map((row) => row.symbol),
                 asterV12PositionCount: v12Positions.length,
                 asterV12ProtectionOrderCount: v12Orders.length,
                 lockAttempts,
