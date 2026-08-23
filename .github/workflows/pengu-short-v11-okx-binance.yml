@@ -10,6 +10,7 @@ on:
       - 'PRE_REGISTER_V12_GATE_FUNDING_ADDENDUM.md'
       - 'scripts/research_pengu_short_v12_okx_binance_gate.py'
       - 'scripts/research_pengu_short_v12_gate_final.py'
+      - 'scripts/research_pengu_short_v12_gate_reentry_diagnostic.py'
       - '.github/workflows/pengu-short-v11-okx-binance.yml'
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -49,8 +50,25 @@ jobs:
           assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           print(json.dumps({'promotionPass':x['promotionPass'],'venuePasses':x['venuePasses'],'gateData':x['gateData']},indent=2))
           PY
+      - name: Diagnose Gate V12 reentry
+        run: python scripts/research_pengu_short_v12_gate_reentry_diagnostic.py
+      - name: Validate diagnostic-only contract
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('.research-state/pengu-short-v12-gate-reentry-diagnostic/diagnostic.json'))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['diagnosticOnly'] is True
+          assert x['candidate']=='RAPID_RISKON_RELATIVE_WEAKNESS_REENTRY'
+          assert x['v12PreRegistrationSha']=='2cfe0d7bb829e6cd928cef4871e1f0168c098506'
+          assert x['venue']=='Gate'
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'count':x['count'],'wins':x['wins'],'reentries':x['reentries']},indent=2))
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: pengu-short-v12-final-${{ github.run_id }}
-          path: .research-state/pengu-short-v12-gate-final
+          name: pengu-short-v12-gate-diagnostic-${{ github.run_id }}
+          path: |
+            .research-state/pengu-short-v12-gate-final
+            .research-state/pengu-short-v12-gate-reentry-diagnostic
           if-no-files-found: error
