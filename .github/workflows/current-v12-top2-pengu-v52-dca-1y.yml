@@ -89,10 +89,11 @@ jobs:
           assert pengu['period'] == {'startInclusive':'2025-08-01T00:00:00.000Z','endExclusive':'2026-08-01T00:00:00.000Z'}
           assert len(pengu['modes']['normal']['trades']) == 33
           assert pengu['data']['penguRows'] == 9084
+          assert pengu['integrity']['maximumRequestedGross'] <= 0.75 + 1e-12
           print('FROZEN_LEDGER_INPUTS_PASS')
           PY
 
-      - name: Patch research harness period comparison only
+      - name: Patch research harness validation semantics only
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -123,6 +124,14 @@ jobs:
               indent + '    raise RuntimeError(f"Unexpected PENGU period: {pengu.get(\'period\')}")',
           ]
           lines[match:match+4] = replacement
+          gross_needle = 'checks[f"{scenario}_penguGross"] = gross["entryTimeMaxPenguGross"] <= PENGU_MAX_GROSS + 1e-9'
+          gross_replacement = 'checks[f"{scenario}_penguGross"] = finite(pengu.get("integrity", {}).get("maximumRequestedGross")) <= PENGU_MAX_GROSS + 1e-9'
+          gross_matches = [i for i, line in enumerate(lines) if line.strip() == gross_needle]
+          if len(gross_matches) != 1:
+              raise SystemExit(f'PENGU gross validation line count={len(gross_matches)}; refusing silent patch')
+          i = gross_matches[0]
+          gross_indent = lines[i][:len(lines[i]) - len(lines[i].lstrip())]
+          lines[i] = gross_indent + gross_replacement
           p.write_text('\n'.join(lines) + '\n')
           PY
           python -m py_compile scripts/research_current_top2_pengu_v52_dca.py
