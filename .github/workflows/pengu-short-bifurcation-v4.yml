@@ -1,0 +1,54 @@
+name: PENGU Short Bifurcation V4 Research
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_short_bifurcation_v4.ts'
+      - '.github/workflows/pengu-short-bifurcation-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-short-bifurcation-v4-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run fixed short bifurcation campaign study
+        run: |
+          mkdir -p .research-state/pengu-short-bifurcation-v4
+          PENGU_BIFURCATION_V4_OUT=.research-state/pengu-short-bifurcation-v4/result.json npx tsx scripts/research_pengu_short_bifurcation_v4.ts | tee .research-state/pengu-short-bifurcation-v4/run.log
+      - name: Validate research-only contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('.research-state/pengu-short-bifurcation-v4/result.json','utf8'));
+          if(p.status!=='PASS_RESEARCH_ONLY') throw new Error('research status');
+          if(p.safety.mode!=='RESEARCH_ONLY'||p.safety.ordersSent||p.safety.liveChanged||p.safety.vpsChanged||p.safety.productionChanged) throw new Error('safety contract');
+          for(const v of ['PRICE_BRANCH','BREAKDOWN_RECLAIM','RELATIVE_BRANCH']){
+            if(p.results[v].NORMAL.shortOpportunitiesPreserved!==25) throw new Error(v+' short count');
+            if(p.results[v].NORMAL.longOpportunitiesPreserved!==7) throw new Error(v+' long count');
+            if(p.results[v].NORMAL.CAMPAIGNS.campaigns!==32) throw new Error(v+' campaign count');
+          }
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-short-bifurcation-v4-${{ github.run_id }}
+          path: .research-state/pengu-short-bifurcation-v4
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
