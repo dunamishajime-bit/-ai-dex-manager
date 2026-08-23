@@ -1,0 +1,152 @@
+name: Weak-Month B2 Parallel Structural Holdout
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/weak-month-b2-parallel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: weak-month-b2-parallel-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: xs
+            ids: XS_REL_TREND_25_40,XS_REL_TREND_40_60
+          - group: pullback
+            ids: PULLBACK_REACCEL_60_12,PULLBACK_REACCEL_90_15
+          - group: volexp
+            ids: TREND_VOL_EXP_82_120,TREND_VOL_EXP_70_140
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: weak-month-b2-shard-${{ matrix.group }}-${{ runner.os }}
+          restore-keys: |
+            weak-month-b-core-
+            v26-latency-aware-3y-usdm-v1-20260816
+            v12-top2-gross15-
+            perp-research-usdm-
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+      - name: Build two-family execution-equivalent shard
+        env:
+          FAMILY_IDS: ${{ matrix.ids }}
+        run: |
+          cp scripts/research_current_v12_idle_overlay_b2.ts scripts/.research_b2_shard.ts
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path('scripts/.research_b2_shard.ts')
+          s=p.read_text()
+          old='for (const family of FAMILIES) {'
+          ids=os.environ['FAMILY_IDS']
+          new=f'for (const family of FAMILIES.filter((x) => "{ids}".split(",").includes(x.id))) {{'
+          if s.count(old)!=1: raise SystemExit('family loop patch target mismatch')
+          p.write_text(s.replace(old,new))
+          PY
+      - name: Run fixed shard
+        env:
+          V12_LEDGER_IN: .research-state/input/v12-top2-ledger.json
+          B2_OVERLAY_OUT: .research-state/b2-shard/${{ matrix.group }}/result.json
+        run: |
+          mkdir -p .research-state/b2-shard/${{ matrix.group }}
+          set -o pipefail
+          npx tsx scripts/.research_b2_shard.ts 2>&1 | tee .research-state/b2-shard/${{ matrix.group }}/run.log
+          rm -f scripts/.research_b2_shard.ts
+      - name: Validate shard
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/b2-shard/${{ matrix.group }}/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert len(p['families'])==2
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'group':'${{ matrix.group }}','selection':p['selection'],'families':p['families']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weak-month-b2-shard-${{ matrix.group }}-${{ github.run_id }}
+          path: .research-state/b2-shard/${{ matrix.group }}
+          retention-days: 90
+
+  aggregate:
+    needs: shard
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: weak-month-b2-shard-*-${{ github.run_id }}
+          path: .research-state/shards
+      - name: Select globally using pre-2026 only, then audit 2026
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          files=sorted(Path('.research-state/shards').glob('**/result.json'))
+          assert len(files)==3, files
+          payloads=[json.loads(f.read_text()) for f in files]
+          families=[]
+          for p in payloads:
+              assert p['status']=='PASS_RESEARCH_ONLY'
+              families.extend(p['families'])
+          assert len(families)==6
+          eligible=[x for x in families if x['eligiblePreHoldout']]
+          selected=max(eligible,key=lambda x:(x['selectionScore'],x['family'])) if eligible else None
+          promoted=None
+          current=None
+          if selected:
+              h=selected['splits']['HOLDOUT_2026']
+              holdout=(h['normal']['trades']>=8 and h['normal']['returnPct']>0 and float(h['normal']['profitFactor'] or 0)>=1.05 and h['normal']['maxDrawdownPct']>=-15 and h['stress']['returnPct']>=0 and float(h['stress']['profitFactor'] or 0)>=1.0)
+              if holdout:
+                  promoted=selected
+                  for p in payloads:
+                      if p['selection']['preSelected']==selected['family']:
+                          current=p.get('currentIdleLedger')
+                          break
+                  assert current is not None
+          out={
+              'status':'PASS_RESEARCH_ONLY',
+              'schema':'weak-month-b2-global-parallel/v1',
+              'selection':{
+                  'discipline':'global selection uses eligiblePreHoldout + selectionScore from 2023/2024/2025 only; 2026 rule applied after winner fixed',
+                  'preSelected':selected['family'] if selected else None,
+                  'holdoutPromoted':promoted['family'] if promoted else None,
+              },
+              'families':families,
+              'currentIdleLedger':current,
+              'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False},
+          }
+          Path('.research-state/b2-global').mkdir(parents=True,exist_ok=True)
+          Path('.research-state/b2-global/result.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps({'selection':out['selection'],'winner':promoted,'currentIdleLedger':current},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weak-month-b2-global-${{ github.run_id }}
+          path: .research-state/b2-global
+          retention-days: 90
