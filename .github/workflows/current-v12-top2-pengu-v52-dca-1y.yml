@@ -97,22 +97,33 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           p = Path('scripts/research_current_top2_pengu_v52_dca.py')
-          s = p.read_text()
-          old = '''    if v12.get("period") != expected_period:
-              raise RuntimeError(f"Unexpected V12 period: {v12.get('period')}")
-          if pengu.get("period") != expected_period:
-              raise RuntimeError(f"Unexpected PENGU period: {pengu.get('period')}")'''
-          new = '''    v12_period = v12.get("period") or {}
-              pengu_period = pengu.get("period") or {}
-              v12_core_period = {key: v12_period.get(key) for key in expected_period}
-              pengu_core_period = {key: pengu_period.get(key) for key in expected_period}
-              if v12_core_period != expected_period:
-                  raise RuntimeError(f"Unexpected V12 period: {v12.get('period')}")
-              if pengu_core_period != expected_period:
-                  raise RuntimeError(f"Unexpected PENGU period: {pengu.get('period')}")'''
-          if old not in s:
+          lines = p.read_text().splitlines()
+          needle = [
+              'if v12.get("period") != expected_period:',
+              'raise RuntimeError(f"Unexpected V12 period: {v12.get(\'period\')}")',
+              'if pengu.get("period") != expected_period:',
+              'raise RuntimeError(f"Unexpected PENGU period: {pengu.get(\'period\')}")',
+          ]
+          match = None
+          for i in range(len(lines) - 3):
+              if [line.strip() for line in lines[i:i+4]] == needle:
+                  match = i
+                  break
+          if match is None:
               raise SystemExit('period comparison block not found; refusing silent patch')
-          p.write_text(s.replace(old, new))
+          indent = lines[match][:len(lines[match]) - len(lines[match].lstrip())]
+          replacement = [
+              indent + 'v12_period = v12.get("period") or {}',
+              indent + 'pengu_period = pengu.get("period") or {}',
+              indent + 'v12_core_period = {key: v12_period.get(key) for key in expected_period}',
+              indent + 'pengu_core_period = {key: pengu_period.get(key) for key in expected_period}',
+              indent + 'if v12_core_period != expected_period:',
+              indent + '    raise RuntimeError(f"Unexpected V12 period: {v12.get(\'period\')}")',
+              indent + 'if pengu_core_period != expected_period:',
+              indent + '    raise RuntimeError(f"Unexpected PENGU period: {pengu.get(\'period\')}")',
+          ]
+          lines[match:match+4] = replacement
+          p.write_text('\n'.join(lines) + '\n')
           PY
           python -m py_compile scripts/research_current_top2_pengu_v52_dca.py
 
