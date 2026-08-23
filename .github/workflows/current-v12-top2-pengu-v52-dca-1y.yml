@@ -111,6 +111,14 @@ jobs:
           if old not in s:
               raise SystemExit('PENGU row-count guard not found; refusing silent patch')
           s = s.replace(old, new)
+          old_history = '  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'
+          new_history = '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
+          const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+          assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
+          const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+          if old_history not in s:
+              raise SystemExit('PENGU history construction not found; refusing silent alignment patch')
+          s = s.replace(old_history, new_history)
           p.write_text(s)
           PY
           set -o pipefail
