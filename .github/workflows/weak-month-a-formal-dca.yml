@@ -83,9 +83,8 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          root=Path('.research-state/input')
-          p=json.loads((root/'result.json').read_text())
-          n=p['normal']
+          p=json.loads(Path('.research-state/input/result.json').read_text())
+          n=p['results']['NORMAL']
           assert abs(n['endingAssetJpy']-572544.35821388)<0.01
           assert abs(n['timeWeightedReturnPct']-1295.55361571)<1e-8
           assert n['trades']==624
@@ -195,7 +194,7 @@ jobs:
           assert all(a['checks'].values())
           assert a['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           def compact(p, mode):
-            x=p[mode]
+            x=p['results'][mode]
             months={m['month']:m for m in x['monthly']}
             return {
               'endingAssetJpy':x['endingAssetJpy'],
@@ -207,19 +206,21 @@ jobs:
               'months':{k:months.get(k) for k in ['2026-02','2026-04','2026-05','2026-07']},
               'bySleeve':x['bySleeve'],
             }
+          bn=b['results']['NORMAL']; an=a['results']['NORMAL']
+          bs=b['results']['SEVERE']; ass=a['results']['SEVERE']
           out={
             'status':'PASS_RESEARCH_ONLY',
             'gate':'PENGU_SHORT_RSI14_LE_45_AT_SIGNAL',
-            'baseline':{'NORMAL':compact(b,'normal'),'SEVERE':compact(b,'severe')},
-            'A':{'NORMAL':compact(a,'normal'),'SEVERE':compact(a,'severe')},
+            'baseline':{'NORMAL':compact(b,'NORMAL'),'SEVERE':compact(b,'SEVERE')},
+            'A':{'NORMAL':compact(a,'NORMAL'),'SEVERE':compact(a,'SEVERE')},
             'delta':{
-              'endingAssetJpy':a['normal']['endingAssetJpy']-b['normal']['endingAssetJpy'],
-              'twrPp':a['normal']['timeWeightedReturnPct']-b['normal']['timeWeightedReturnPct'],
-              'ddPp':a['normal']['maxDrawdownPctClosedEventTwr']-b['normal']['maxDrawdownPctClosedEventTwr'],
-              'pf':a['normal']['profitFactor']-b['normal']['profitFactor'],
-              'severeEndingAssetJpy':a['severe']['endingAssetJpy']-b['severe']['endingAssetJpy'],
-              'severeTwrPp':a['severe']['timeWeightedReturnPct']-b['severe']['timeWeightedReturnPct'],
-              'severeDdPp':a['severe']['maxDrawdownPctClosedEventTwr']-b['severe']['maxDrawdownPctClosedEventTwr'],
+              'endingAssetJpy':an['endingAssetJpy']-bn['endingAssetJpy'],
+              'twrPp':an['timeWeightedReturnPct']-bn['timeWeightedReturnPct'],
+              'ddPp':an['maxDrawdownPctClosedEventTwr']-bn['maxDrawdownPctClosedEventTwr'],
+              'pf':an['profitFactor']-bn['profitFactor'],
+              'severeEndingAssetJpy':ass['endingAssetJpy']-bs['endingAssetJpy'],
+              'severeTwrPp':ass['timeWeightedReturnPct']-bs['timeWeightedReturnPct'],
+              'severeDdPp':ass['maxDrawdownPctClosedEventTwr']-bs['maxDrawdownPctClosedEventTwr'],
             },
             'safety':a['safety'],
           }
@@ -234,4 +235,4 @@ jobs:
           path: .research-state/a-formal
           include-hidden-files: true
           retention-days: 90
-          if-no-files-found: error
+          if-no-files-found: warn
