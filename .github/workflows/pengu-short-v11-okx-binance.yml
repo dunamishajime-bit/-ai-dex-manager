@@ -7,6 +7,7 @@ on:
     paths:
       - 'PRE_REGISTER_V12.md'
       - 'scripts/research_pengu_short_v12_okx_binance_gate.py'
+      - 'scripts/research_pengu_short_v12_gate_retry.py'
       - '.github/workflows/pengu-short-v11-okx-binance.yml'
   workflow_dispatch:
 
@@ -28,7 +29,7 @@ jobs:
           python-version: '3.12'
       - run: npm ci
       - name: Run pre-registered V12 on OKX Binance and untouched Gate
-        run: python scripts/research_pengu_short_v12_okx_binance_gate.py
+        run: python scripts/research_pengu_short_v12_gate_retry.py
       - name: Validate V12 anti-overfit contract
         run: |
           python - <<'PY'
