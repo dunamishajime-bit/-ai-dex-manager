@@ -98,6 +98,19 @@ jobs:
           s = s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2025-07-01T00:00:00Z");')
           s = s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2025-08-01T00:00:00Z");')
           s = s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-01T00:00:00Z");')
+          old = '  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);'
+          new = '''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);
+          const requiredWarmRows = 250;
+          const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+          const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+          const penguWarmRows = pengu.filter((row) => row.openTime < EVAL_START).length;
+          const btcWarmRows = btc.filter((row) => row.openTime < EVAL_START).length;
+          assert.equal(penguEvalRows, expectedEvalRows, `Incomplete PENGU evaluation rows: ${penguEvalRows}/${expectedEvalRows}`);
+          assert.equal(btcEvalRows, expectedEvalRows, `Incomplete BTC evaluation rows: ${btcEvalRows}/${expectedEvalRows}`);
+          assert.ok(penguWarmRows >= requiredWarmRows && btcWarmRows >= requiredWarmRows, `Insufficient warm-up rows: PENGU=${penguWarmRows}, BTC=${btcWarmRows}, required=${requiredWarmRows}`);'''
+          if old not in s:
+              raise SystemExit('PENGU row-count guard not found; refusing silent patch')
+          s = s.replace(old, new)
           p.write_text(s)
           PY
           set -o pipefail
