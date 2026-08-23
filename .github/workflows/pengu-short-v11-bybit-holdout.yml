@@ -24,6 +24,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Select official Bybit backup endpoint only
+        run: sed -i 's#https://api.bybit.com#https://api.bytick.com#' scripts/research_pengu_short_v11_bybit_holdout.ts
       - name: Run pre-registered V11 once on untouched Bybit holdout
         run: npx tsx scripts/research_pengu_short_v11_bybit_holdout.ts
       - name: Validate untouched-holdout contract
