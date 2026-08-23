@@ -6,6 +6,7 @@ import { DEFAULT_ACCOUNT_SCOPE, FileAccountOrderLock, type AccountLockHandle } f
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provider";
+import { resolveV12DecisionSnapshotPath, writeV12DecisionSnapshot } from "../lib/v12-decision-snapshot-writer";
 import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
 
@@ -48,6 +49,9 @@ export async function buildV12LiveRuntime() {
     if (!runtime.liveTradingEnabled || !runtime.liveExecutionEnabled || !boolEnv("DISDEX_V12_LIVE_ALLOW_REAL_ORDERS")) {
         throw new Error("V12_LIVE_GATES_NOT_ALL_ENABLED");
     }
+    // Require an absolute, dedicated observability target before a LIVE tick.
+    // The writer is sanitized/atomic and never touches exchange state.
+    resolveV12DecisionSnapshotPath();
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
         userAddress: process.env.ASTER_USER_ADDRESS,
@@ -74,7 +78,18 @@ export async function buildV12LiveRuntime() {
         },
     );
     const marketData = new V12AsterMarketDataProvider(client, { hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500) });
-    return { runtime, status: "live" as const, engine: new V12LiveExecutionEngine({ adapter, marketData, stateStore, lock, riskPath: runtime.riskPath }) };
+    return {
+        runtime,
+        status: "live" as const,
+        engine: new V12LiveExecutionEngine({
+            adapter,
+            marketData,
+            stateStore,
+            lock,
+            riskPath: runtime.riskPath,
+            writeDecisionSnapshot: (input) => writeV12DecisionSnapshot(input),
+        }),
+    };
 }
 
 async function main() {

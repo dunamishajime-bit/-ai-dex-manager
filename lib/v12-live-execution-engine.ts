@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
-import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
+import { FileAccountOrderLock, type AccountLockHandle } from "@/lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import type { ActivePortfolioPosition } from "@/lib/disdex-unified-portfolio-routing";
@@ -15,7 +15,8 @@ import {
     type V12StopState,
     type V12TrailingPlan,
 } from "@/lib/v12-resident-stop-lifecycle";
-import { buildV12Signals, protectiveLevels, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
+import { buildV12DecisionEvaluation, protectiveLevels, sizeV12Position, type V12Bar, type V12DecisionEvaluation, type V12Signal } from "@/lib/v12-x1-all";
+import type { V12DecisionSnapshotInput } from "@/lib/v12-decision-snapshot-writer";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { decideV12ResidualEntry } from "@/lib/v12-top2-residual";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
@@ -31,6 +32,7 @@ export interface V12LiveExecutionDependencies {
     stateStore: FileV12X1AllRunnerStateStore;
     lock: FileAccountOrderLock;
     riskPath: string;
+    writeDecisionSnapshot?: (input: V12DecisionSnapshotInput) => Promise<unknown>;
     now?: () => number;
     log?: (message: string, payload?: Record<string, unknown>) => void;
 }
@@ -49,6 +51,10 @@ function latestIndex(data: Record<string, V12Bar[]>) {
     const index = lengths[0] - 1; const endTs = rows[0][1][index].endTs;
     if (rows.some(([, bars]) => bars[index].endTs !== endTs)) throw new Error("V12_MARKET_DATA_TIMESTAMP_MISMATCH");
     return index;
+}
+function isRecoverableAccountLockError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return message.includes("account-order.lock") && (message.includes("ENOENT") || message.includes("ACCOUNT_LOCK_NOT_OWNER"));
 }
 function initialProtection(input: { symbol: string; side: "LONG" | "SHORT"; quantity: number; entryPrice: number; atr: number; positionId: string }): V12StopState {
     const levels = protectiveLevels(input.entryPrice, input.atr, input.side);
@@ -73,6 +79,27 @@ export class V12LiveExecutionEngine {
 
     private async fail(state: V12X1AllRunnerState, reason: string): Promise<V12LiveTickResult> {
         await this.d.stateStore.tripKillSwitch(state, reason); this.log("v12-fail-closed", { reason }); return { status: "manual-review", reason };
+    }
+
+    private async writeDecisionSnapshot(evaluation: V12DecisionEvaluation, selected?: V12Signal, requestedGross?: number, rationale?: string) {
+        if (!this.d.writeDecisionSnapshot) return;
+        const selectedRow = selected ? evaluation.candidates.find((candidate) => candidate.symbol === selected.symbol) : undefined;
+        await this.d.writeDecisionSnapshot({
+            selected: selected ? { ...selected, rank: selectedRow?.rank, requestedGross } : undefined,
+            referenceTs: evaluation.referenceTs,
+            entryTs: evaluation.entryTs,
+            regime: evaluation.regime,
+            btcRegime: evaluation.regime,
+            rationale,
+            candidates: evaluation.candidates.map((candidate) => ({
+                symbol: candidate.symbol,
+                side: candidate.side,
+                rank: candidate.rank,
+                score: candidate.score,
+                momentum: candidate.momentum,
+                volumeRatio: candidate.volumeRatio,
+            })),
+        });
     }
 
     private validatePortfolioPositions(positions: DirectPosition[]) {
@@ -274,7 +301,17 @@ export class V12LiveExecutionEngine {
     }
 
     async tick(): Promise<V12LiveTickResult> {
-        const handle = await this.d.lock.acquire(`V12_X1.00_ALL:${process.pid}:${randomUUID()}`); if (!handle) return { status: "locked", reason: "ACCOUNT_LOCK_BUSY_OR_STALE_REVIEW_REQUIRED" };
+        let handle: AccountLockHandle | null;
+        try {
+            handle = await this.d.lock.acquire(`V12_X1.00_ALL:${process.pid}:${randomUUID()}`);
+        } catch (error) {
+            if (isRecoverableAccountLockError(error)) {
+                this.log("v12-account-lock-retry", { reason: "ACCOUNT_LOCK_TRANSIENTLY_MISSING", ordersSent: false });
+                return { status: "locked", reason: "ACCOUNT_LOCK_TRANSIENTLY_MISSING" };
+            }
+            throw error;
+        }
+        if (!handle) return { status: "locked", reason: "ACCOUNT_LOCK_BUSY_OR_STALE_REVIEW_REQUIRED" };
         try {
             let state = await this.d.stateStore.load();
             if (!(await this.d.adapter.credentialsReady())) return this.fail(state, "V12_ASTER_CREDENTIALS_NOT_READY");
@@ -285,7 +322,9 @@ export class V12LiveExecutionEngine {
             const data = await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
 
             const actives = activePositionsOf(state);
-            const signals = buildV12Signals(data, index);
+            const evaluation = buildV12DecisionEvaluation(data, index);
+            const signals = evaluation.signals;
+            await this.writeDecisionSnapshot(evaluation, signals[0], undefined, "V12_SELECTION_EVALUATED");
             if (actives.length) {
                 if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "held", reason: "NO_NEW_CONFIRMED_2H_BAR" };
                 const updated: V12ActivePositionState[] = [];
@@ -322,6 +361,7 @@ export class V12LiveExecutionEngine {
                 const snapshot = { v12Gross: freshActive.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), penguGross: freshActive.filter((row) => row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), cryptoGross: freshActive.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: freshActive.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0) };
                 const decision = decideV12ResidualEntry(sizing.requestedGross, snapshot, activePositionsOf(state).length);
                 if (!(decision.acceptedGross > 0)) return { status: "capacity-blocked", reason: `V12_RANK2_${decision.reason || "NO_RESIDUAL"}`, signal: next };
+                await this.writeDecisionSnapshot(evaluation, next, decision.acceptedGross, decision.reason || "V12_ENTRY_DECISION");
                 return this.executeEntryForSignal(state, handle, next, equity, sizing, decision.acceptedGross);
             }
 
@@ -343,12 +383,17 @@ export class V12LiveExecutionEngine {
                 const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), penguGross: activePortfolio.filter((row) => row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), cryptoGross: activePortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
                 const decision = decideV12ResidualEntry(sizing.requestedGross, snapshot, activePositionsOf(state).length);
                 if (!(decision.acceptedGross > 0)) { lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal }; break; }
+                await this.writeDecisionSnapshot(evaluation, signal, decision.acceptedGross, decision.reason || "V12_ENTRY_DECISION");
                 lastResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision.acceptedGross);
                 if (lastResult.status === "manual-review") return lastResult;
                 if (lastResult.status !== "entered") break;
             }
             return lastResult;
         } catch (error) {
+            if (isRecoverableAccountLockError(error)) {
+                this.log("v12-account-lock-retry", { reason: "ACCOUNT_LOCK_LOST_DURING_TICK", ordersSent: false });
+                return { status: "locked", reason: "ACCOUNT_LOCK_LOST_DURING_TICK" };
+            }
             const state = await this.d.stateStore.load(); return this.fail(state, error instanceof Error ? error.message : String(error));
         } finally { await handle.release(); }
     }

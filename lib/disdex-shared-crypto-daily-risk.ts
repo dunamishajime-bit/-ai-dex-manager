@@ -26,6 +26,11 @@ export interface SharedCryptoDailyRiskState {
 
 export interface DailyRiskValidation { ok: boolean; reason?: string; state?: SharedCryptoDailyRiskState }
 
+const UTC_DAY_MS = 24 * 60 * 60_000;
+const UTC_BOUNDARY_RETRY_WINDOW_MS = 15_000;
+const UTC_BOUNDARY_RETRY_DELAY_MS = 2_000;
+const UTC_BOUNDARY_RETRY_ATTEMPTS = 4;
+
 function withoutHash(state: SharedCryptoDailyRiskState) {
     const { stateHash: _stateHash, ...body } = state;
     return body;
@@ -52,8 +57,22 @@ export function validateSharedCryptoDailyRisk(value: unknown, now = Date.now(), 
 }
 
 export async function readSharedCryptoDailyRisk(path: string, now = Date.now(), maxAgeMs = 90_000): Promise<DailyRiskValidation> {
-    try { return validateSharedCryptoDailyRisk(JSON.parse(await readFile(path, "utf8")), now, maxAgeMs); }
-    catch (error) { const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : ""; return { ok: false, reason: code === "ENOENT" ? "MISSING" : "MALFORMED" }; }
+    const readOnce = async (at: number): Promise<DailyRiskValidation> => {
+        try { return validateSharedCryptoDailyRisk(JSON.parse(await readFile(path, "utf8")), at, maxAgeMs); }
+        catch (error) { const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : ""; return { ok: false, reason: code === "ENOENT" ? "MISSING" : "MALFORMED" }; }
+    };
+
+    let checkedAt = now;
+    let validation = await readOnce(checkedAt);
+    // At exactly UTC midnight the producer and consumers can cross the day
+    // boundary in either order. Retry briefly so a valid rollover does not
+    // create a false entry block; a persistent mismatch remains fail-closed.
+    for (let attempt = 0; validation.reason === "DAY_MISMATCH" && attempt < UTC_BOUNDARY_RETRY_ATTEMPTS && checkedAt % UTC_DAY_MS < UTC_BOUNDARY_RETRY_WINDOW_MS; attempt += 1) {
+        await new Promise<void>((resolve) => setTimeout(resolve, UTC_BOUNDARY_RETRY_DELAY_MS));
+        checkedAt = Date.now();
+        validation = await readOnce(checkedAt);
+    }
+    return validation;
 }
 
 export function buildSharedCryptoDailyRiskState(input: Omit<SharedCryptoDailyRiskState, "schema" | "stateHash">): SharedCryptoDailyRiskState {

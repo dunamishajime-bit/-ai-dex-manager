@@ -34,6 +34,19 @@ export interface V12Signal extends V12Candidate {
     regime: V12Regime;
 }
 
+export interface V12DecisionCandidate extends V12CandidateGate {
+    /** Rank is produced by this live evaluation, never inferred from history. */
+    rank: number;
+}
+
+export interface V12DecisionEvaluation {
+    regime: V12Regime | null;
+    referenceTs?: number;
+    entryTs?: number;
+    candidates: V12DecisionCandidate[];
+    signals: V12Signal[];
+}
+
 export interface V12CandidateGate {
     symbol: string;
     regime: V12Regime | null;
@@ -56,22 +69,44 @@ export interface V12CandidateGate {
     reasons: string[];
 }
 
-export function buildV12Signals(universe: Record<string, V12Bar[]>, index: number, limit: number = V12_X1_ALL.maximumPositions): V12Signal[] {
+export function buildV12DecisionEvaluation(universe: Record<string, V12Bar[]>, index: number, limit: number = V12_X1_ALL.maximumPositions): V12DecisionEvaluation {
     const btc = universe.BTC;
-    if (!btc?.[index]) return [];
+    if (!btc?.[index]) return { regime: null, candidates: [], signals: [] };
     const regime = computeV12Regime(btc, index);
-    if (!regime) return [];
-    const candidates = V12_X1_ALL.universe
-        .map((symbol) => candidateFor(symbol, universe[symbol] || [], index, regime))
-        .filter((candidate): candidate is V12Candidate => Boolean(candidate))
-        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol))
-        .slice(0, Math.max(0, Math.floor(limit)));
-    return candidates.map((candidate) => ({
-        ...candidate,
+    const evaluated = V12_X1_ALL.universe.map((symbol) => evaluateV12Candidate(symbol, universe[symbol] || [], index, regime));
+    const candidates = evaluated
+        .sort((a, b) => {
+            const scoreA = a.score ?? Number.NEGATIVE_INFINITY;
+            const scoreB = b.score ?? Number.NEGATIVE_INFINITY;
+            return scoreB - scoreA || a.symbol.localeCompare(b.symbol);
+        })
+        .map((candidate, rank) => ({ ...candidate, rank: rank + 1 }));
+    const signals = candidates
+        .filter((candidate) => candidate.passed && candidate.side && candidate.momentum !== undefined && candidate.volatility !== undefined && candidate.atr !== undefined && candidate.volumeRatio !== undefined && candidate.score !== undefined)
+        .slice(0, Math.max(0, Math.floor(limit)))
+        .map((candidate) => ({
+            symbol: candidate.symbol,
+            side: candidate.side!,
+            momentum: candidate.momentum!,
+            volatility: candidate.volatility!,
+            atr: candidate.atr!,
+            volumeRatio: candidate.volumeRatio!,
+            score: candidate.score!,
+            regime: regime!,
+            referenceTs: universe[candidate.symbol][index].endTs,
+            entryTs: universe[candidate.symbol][index + 1]?.ts || universe[candidate.symbol][index].endTs,
+        }));
+    return {
         regime,
-        referenceTs: universe[candidate.symbol][index].endTs,
-        entryTs: universe[candidate.symbol][index + 1]?.ts || universe[candidate.symbol][index].endTs,
-    }));
+        referenceTs: btc[index].endTs,
+        entryTs: btc[index + 1]?.ts || btc[index].endTs,
+        candidates,
+        signals,
+    };
+}
+
+export function buildV12Signals(universe: Record<string, V12Bar[]>, index: number, limit: number = V12_X1_ALL.maximumPositions): V12Signal[] {
+    return buildV12DecisionEvaluation(universe, index, limit).signals;
 }
 
 export interface V12PositionSizing {

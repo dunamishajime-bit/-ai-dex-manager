@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { resolveV12X1AllRuntime, V12_X1_ALL } from "@/config/v12X1AllRuntime";
-import { buildV12Signal, buildV12Signals, protectiveLevels, resampleV12H1ToH2, sizeV12Position } from "@/lib/v12-x1-all";
+import { buildV12DecisionEvaluation, buildV12Signal, buildV12Signals, protectiveLevels, resampleV12H1ToH2, sizeV12Position, type V12Bar } from "@/lib/v12-x1-all";
+import { alignV12H2Bars } from "@/lib/v12-aster-market-data-provider";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { buildSharedCryptoDailyRiskState, validateSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 
@@ -12,6 +13,26 @@ assert.equal(h2[0].sourceCount, 2);
 assert.equal(resampleV12H1ToH2(h1.filter((_, i) => i !== 2)).length, 1);
 const oddStartH1 = Array.from({ length: 5 }, (_, i) => ({ ts: start + 3_600_000 + i * 3_600_000, open: 100 + i, high: 101 + i, low: 99 + i, close: 100 + i, volume: 10, closed: true }));
 assert.equal(resampleV12H1ToH2(oddStartH1).length, 2);
+
+const fullUniverse: Record<string, V12Bar[]> = {};
+V12_X1_ALL.universe.forEach((symbol, symbolIndex) => {
+    fullUniverse[symbol] = Array.from({ length: 120 }, (_, index) => {
+        const close = 100 * Math.exp((0.003 + symbolIndex * 0.00002) * index);
+        return { ts: start + index * 7_200_000, endTs: start + (index + 1) * 7_200_000, open: close * 0.999, high: close * 1.004, low: close * 0.996, close, volume: 1000, sourceCount: 2, closed: true };
+    });
+});
+const evaluation = buildV12DecisionEvaluation(fullUniverse, 119);
+assert.equal(evaluation.candidates.length, V12_X1_ALL.universe.length);
+assert.deepEqual(evaluation.candidates.map((candidate) => candidate.rank), Array.from({ length: V12_X1_ALL.universe.length }, (_, index) => index + 1));
+assert.equal(evaluation.candidates[0].symbol, "NEAR");
+
+const aligned = alignV12H2Bars([
+    { symbol: "BTC", bars: fullUniverse.BTC },
+    { symbol: "LINK", bars: fullUniverse.LINK.filter((_, index) => index !== 90) },
+]);
+assert.equal(aligned.BTC.length, aligned.LINK.length);
+assert.equal(aligned.BTC.length, 119);
+assert.equal(aligned.BTC[90].endTs, aligned.LINK[90].endTs);
 assert.equal(resolveV12X1AllRuntime({}).mode, "SHADOW");
 assert.equal(resolveV12X1AllRuntime({}).enabled, false);
 assert.equal(V12_X1_ALL.multiplier, 1);
