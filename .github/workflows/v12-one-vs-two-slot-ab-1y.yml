@@ -1,0 +1,231 @@
+name: V12 One vs Two Slot A-B One-Year BT
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/v12-one-vs-two-slot-ab-1y.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout controlled research harness
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore frozen stock research cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v52-stock-resume-${{ runner.os }}
+          restore-keys: |
+            current-v12-top2-pengu-v52-stock-resume-
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Reuse formally completed current V12 and PENGU ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/ab-input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+          repository: dunamishajime-bit/-ai-dex-manager
+
+      - name: Verify immutable A-B inputs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.research-state/ab-input')
+          v12 = json.loads((root / 'v12-top2-ledger.json').read_text())
+          pengu = json.loads((root / 'pengu-v2-ledger.json').read_text())
+          assert v12['strategyId'] == 'V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
+          assert v12['period']['startInclusive'] == '2025-08-01T00:00:00.000Z'
+          assert v12['period']['endExclusive'] == '2026-08-01T00:00:00.000Z'
+          assert len(v12['modes']['normal']['trades']) == 455
+          assert pengu['strategyId'] == 'PENGU_DUAL_LS_V2_FINAL'
+          assert pengu['period']['startInclusive'] == '2025-08-01T00:00:00.000Z'
+          assert pengu['period']['endExclusive'] == '2026-08-01T00:00:00.000Z'
+          assert len(pengu['modes']['normal']['trades']) == 33
+          print('AB_INPUTS_PASS')
+          PY
+
+      - name: Run controlled no-DCA one-vs-two slot comparison
+        run: |
+          mkdir -p .research-state/v12-one-vs-two-ab
+          python - <<'PY'
+          import json, math, sys
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          import research_current_top2_pengu_v52_dca as sim
+
+          root = Path('.research-state/ab-input')
+          v12 = json.loads((root / 'v12-top2-ledger.json').read_text())
+          pengu = json.loads((root / 'pengu-v2-ledger.json').read_text())
+
+          # Controlled comparison: same period, signals, PENGU, V52, costs,
+          # priority, total/stock gross and daily-loss gates. Only V12 slots
+          # and V12/shared-crypto Gross architecture are varied.
+          sim.INITIAL_JPY = 10_000.0
+          sim.MONTHLY_JPY = 0.0  # retains zero-value month markers; no cash is added
+          sim.TOTAL_GROSS_CAP = 2.5
+          sim.STOCK_GROSS_CAP = 1.5
+          sim.PENGU_MAX_GROSS = 0.75
+          sim.V12_PER_POSITION_GROSS_CAP = 1.0
+          sim.CRYPTO_DAILY_LOSS_LIMIT = -0.075
+          sim.STOCK_DAILY_LOSS_LIMIT = -0.035
+
+          v11, v50, target_days, stock_diag = sim.build_stock(Path('.cache/aster-only-v39-overnight-open'))
+
+          variants = {
+              # Controlled representation of the former one-slot / 1.5x shared-crypto architecture.
+              'A_OLD_1SLOT_GROSS15': {'slots': 1, 'v12GrossCap': 1.0, 'cryptoGrossCap': 1.5},
+              # Gross-only change, keeping one V12 slot.
+              'B_1SLOT_CURRENT_GROSS20': {'slots': 1, 'v12GrossCap': 1.5, 'cryptoGrossCap': 2.0},
+              # Slot-only hybrid under the former shared crypto cap.
+              'C_2SLOT_GROSS15': {'slots': 2, 'v12GrossCap': 1.5, 'cryptoGrossCap': 1.5},
+              # Current architecture.
+              'D_CURRENT_2SLOT_GROSS20': {'slots': 2, 'v12GrossCap': 1.5, 'cryptoGrossCap': 2.0},
+          }
+
+          results = {}
+          for variant, cfg in variants.items():
+              sim.V12_MAX_POSITIONS = cfg['slots']
+              sim.V12_GROSS_CAP = cfg['v12GrossCap']
+              sim.CRYPTO_GROSS_CAP = cfg['cryptoGrossCap']
+              row = {'config': cfg, 'modes': {}}
+              for scenario, assumptions in sim.SCENARIOS.items():
+                  mode = str(assumptions['ledgerMode'])
+                  out = sim.simulate(
+                      v12['modes'][mode]['trades'],
+                      pengu['modes'][mode]['trades'],
+                      v11,
+                      v50,
+                      float(assumptions['stockCostBps']),
+                  )
+                  assert out['totalContributedJpy'] == 10000.0
+                  assert out['monthlyContributionJpy'] == 0.0
+                  assert out['grossVerification']['maxV12Positions'] <= cfg['slots']
+                  assert math.isfinite(out['endingAssetJpy']) and out['endingAssetJpy'] > 0
+                  row['modes'][scenario] = out
+              results[variant] = row
+
+          def ret(name, mode='NORMAL'):
+              return float(results[name]['modes'][mode]['returnOnContributedCapitalPct'])
+          def dd(name, mode='NORMAL'):
+              return float(results[name]['modes'][mode]['maxDrawdownPctClosedEventTwr'])
+
+          a='A_OLD_1SLOT_GROSS15'; b='B_1SLOT_CURRENT_GROSS20'; c='C_2SLOT_GROSS15'; d='D_CURRENT_2SLOT_GROSS20'
+          decomposition = {
+              'grossOnlyAtOneSlotPctPoint': ret(b)-ret(a),
+              'secondSlotAtOldSharedGrossPctPoint': ret(c)-ret(a),
+              'secondSlotAtCurrentGrossPctPoint': ret(d)-ret(b),
+              'sharedGrossIncreaseAtTwoSlotsPctPoint': ret(d)-ret(c),
+              'combinedOldToCurrentPctPoint': ret(d)-ret(a),
+              'combinedOldToCurrentEndingAssetJpy': results[d]['modes']['NORMAL']['endingAssetJpy'] - results[a]['modes']['NORMAL']['endingAssetJpy'],
+              'oldNormalDdPct': dd(a),
+              'currentNormalDdPct': dd(d),
+              'ddChangePctPoint': dd(d)-dd(a),
+          }
+          payload = {
+              'status': 'PASS_RESEARCH_ONLY',
+              'schema': 'v12-one-vs-two-slot-controlled-ab/v1',
+              'period': {'startInclusive':'2025-08-01T00:00:00.000Z','endExclusive':'2026-08-01T00:00:00.000Z'},
+              'capital': {'initialJpy':10000.0,'monthlyContributionJpy':0.0,'compounding':True},
+              'controlledConstants': {
+                  'sameV12CandidateLedger': True,
+                  'samePenguLedger': True,
+                  'sameV52Source': True,
+                  'sameEntryPriority': ['V52','PENGU_DUAL_LS_V2','V12'],
+                  'totalGrossCap':2.5,'stockGrossCap':1.5,'penguGrossCap':0.75,
+                  'cryptoDailyLossLimitPct':-7.5,'stockDailyLossLimitPct':-3.5,
+              },
+              'variants': results,
+              'decomposition': decomposition,
+              'stockTargetSessions': len(target_days),
+              'safety': {'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False},
+          }
+          outdir = Path('.research-state/v12-one-vs-two-ab')
+          (outdir/'result.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2)+'\n')
+
+          lines = ['# V12 one-slot vs two-slot controlled 1Y A/B', '',
+                   '- Period: 2025-08-01 to 2026-08-01',
+                   '- Initial capital: JPY 10,000', '- Monthly contribution: JPY 0',
+                   '- Same PENGU/V52/signals/costs/priority/daily-risk; only V12 slot/Gross architecture varied.', '',
+                   '| Variant | NORMAL return | Ending JPY | DD | PF | Trades | V12 trades | PENGU trades | V52 trades |',
+                   '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
+          for name in (a,b,c,d):
+              r=results[name]['modes']['NORMAL']; sleeves=r['bySleeve']
+              lines.append(f"| {name} | {r['returnOnContributedCapitalPct']:.2f}% | {r['endingAssetJpy']:.0f} | {r['maxDrawdownPctClosedEventTwr']:.2f}% | {r['profitFactor']:.3f} | {r['trades']} | {sleeves['V12']['trades']} | {sleeves['PENGU_DUAL_LS_V2']['trades']} | {sleeves['V52']['trades']} |")
+          lines += ['', '## Decomposition', '',
+                    f"- Gross-only at one slot: {decomposition['grossOnlyAtOneSlotPctPoint']:+.2f} percentage points",
+                    f"- Second slot at old shared gross: {decomposition['secondSlotAtOldSharedGrossPctPoint']:+.2f} percentage points",
+                    f"- Second slot at current gross: {decomposition['secondSlotAtCurrentGrossPctPoint']:+.2f} percentage points",
+                    f"- Shared gross increase at two slots: {decomposition['sharedGrossIncreaseAtTwoSlotsPctPoint']:+.2f} percentage points",
+                    f"- Combined old -> current: {decomposition['combinedOldToCurrentPctPoint']:+.2f} percentage points",
+                    '', 'Research only. No LIVE/VPS/production changes.']
+          (outdir/'report.md').write_text('\n'.join(lines)+'\n')
+          print(json.dumps({'status':payload['status'],'summary':{k:{'returnPct':results[k]['modes']['NORMAL']['returnOnContributedCapitalPct'],'endingAssetJpy':results[k]['modes']['NORMAL']['endingAssetJpy'],'ddPct':results[k]['modes']['NORMAL']['maxDrawdownPctClosedEventTwr'],'pf':results[k]['modes']['NORMAL']['profitFactor'],'trades':results[k]['modes']['NORMAL']['trades']} for k in (a,b,c,d)},'decomposition':decomposition}, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Validate controlled comparison
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/v12-one-vs-two-ab/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['capital']=={'initialJpy':10000.0,'monthlyContributionJpy':0.0,'compounding':True}
+          assert len(p['variants'])==4
+          for row in p['variants'].values():
+              for mode in ('NORMAL','SEVERE'):
+                  r=row['modes'][mode]
+                  assert r['totalContributedJpy']==10000.0
+                  assert r['monthlyContributionJpy']==0.0
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('CONTROLLED_AB_PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-one-vs-two-slot-ab-${{ github.run_id }}
+          path: .research-state/v12-one-vs-two-ab
+          retention-days: 90
+          if-no-files-found: warn

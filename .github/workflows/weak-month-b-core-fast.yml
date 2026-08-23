@@ -1,0 +1,79 @@
+name: Weak-Month B Core Holdout
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/weak-month-b-core-fast.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: weak-month-b-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: weak-month-b-core-${{ runner.os }}
+          restore-keys: |
+            v26-latency-aware-3y-usdm-v1-20260816
+            v12-top2-gross15-
+            perp-research-usdm-
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/core-input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+      - name: Run same B study on core liquid symbols
+        env:
+          V12_LEDGER_IN: .research-state/core-input/v12-top2-ledger.json
+          IDLE_OVERLAY_OUT: .research-state/weak-month-b-core/result.json
+        run: |
+          mkdir -p .research-state/weak-month-b-core
+          cp scripts/research_current_v12_idle_overlay.ts scripts/.research_current_v12_idle_overlay_core.ts
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/.research_current_v12_idle_overlay_core.ts')
+          s=p.read_text()
+          old='const SYMS = ["ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR"];'
+          new='const SYMS = ["ETH", "BNB", "SOL", "LINK", "AVAX"];'
+          if old not in s: raise SystemExit('core symbol patch target missing')
+          p.write_text(s.replace(old,new))
+          PY
+          set -o pipefail
+          npx tsx scripts/.research_current_v12_idle_overlay_core.ts 2>&1 | tee .research-state/weak-month-b-core/run.log
+          rm -f scripts/.research_current_v12_idle_overlay_core.ts
+      - name: Validate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/weak-month-b-core/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'selection':p['selection'],'families':p['families'],'currentIdleLedger':p['currentIdleLedger']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weak-month-b-core-${{ github.run_id }}
+          path: .research-state/weak-month-b-core
+          retention-days: 90
+          if-no-files-found: warn
