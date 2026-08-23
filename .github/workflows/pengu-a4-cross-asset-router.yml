@@ -1,0 +1,90 @@
+name: PENGU A4 Cross-Asset Opportunity Router
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_cross_asset_router_a4.py'
+      - '.github/workflows/pengu-a4-cross-asset-router.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-a4-cross-asset-router-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+
+      - name: Reuse immutable current 365d PENGU ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-a-recent-365d-32648802579
+          path: .research-state/a4/current
+          github-token: ${{ github.token }}
+          run-id: 32648802579
+
+      - name: Build prior-period production PENGU opportunity clock
+        run: |
+          mkdir -p .research-state/a4/prior
+          cp scripts/research_pengu_v2_aster_ledger.ts scripts/.pengu_a4_prior.ts
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/.pengu_a4_prior.ts'); s=p.read_text()
+          s=s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");','const WARM_START = Date.parse("2024-12-20T00:00:00Z");')
+          s=s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");','const EVAL_START = Date.parse("2025-01-15T00:00:00Z");')
+          s=s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");','const EVAL_END = Date.parse("2025-08-23T15:00:00Z");')
+          s=s.replace('assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);','assert.ok(pengu.length >= 4_000 && btc.length >= 4_000, `Insufficient prior rows: PENGU=${pengu.length}, BTC=${btc.length}`);')
+          s=s.replace('''  assert.ok(normalMetrics.trades >= 25 && normalMetrics.trades <= 40, `Implausible Aster production replay trade count: ${normalMetrics.trades}`);\n  assert.ok(normalMetrics.returnPct > 0 && finiteMetric(normalMetrics.profitFactor) > 1.5, `Aster production replay lost its normal edge: ${JSON.stringify(normalMetrics)}`);\n  assert.ok(stressMetrics.returnPct > 0 && finiteMetric(stressMetrics.profitFactor) > 1.2, `Aster production replay lost its stress edge: ${JSON.stringify(stressMetrics)}`);''','''  assert.ok(normalMetrics.trades > 0, `No prior-period normal trades`);\n  assert.ok(stressMetrics.trades > 0, `No prior-period stress trades`);''')
+          p.write_text(s)
+          PY
+          PRODUCTION_SOURCE_SHA=ac254e897b7514d14c3a34c0679388978b5c3d32 \
+          PENGU_LEDGER_OUT=.research-state/a4/prior/prior-pengu.json \
+          npx tsx scripts/.pengu_a4_prior.ts | tee .research-state/a4/prior/prior-pengu.log
+          rm -f scripts/.pengu_a4_prior.ts
+
+      - name: Run cross-asset structural redesign
+        run: |
+          python scripts/research_pengu_cross_asset_router_a4.py \
+            --current .research-state/a4/current/baseline.json \
+            --prior .research-state/a4/prior/prior-pengu.json \
+            --out .research-state/a4/out | tee .research-state/a4/a4.log
+
+      - name: Validate research-only and fixed opportunity count
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/a4/out/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          base=p['current']['baseline']['NORMAL']['events']
+          for k,v in p['current']['variants']['NORMAL'].items():
+              assert v['events']==base, (k,v['events'],base)
+          print('PENGU_A4_CROSS_ASSET_RESEARCH_PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-a4-cross-asset-${{ github.run_id }}
+          path: .research-state/a4
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
