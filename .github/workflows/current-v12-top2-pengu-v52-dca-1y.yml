@@ -1,0 +1,145 @@
+name: Current V12 Top2 PENGU V2 V52 Monthly DCA One-Year BT
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_v12_top2_gross15_one_year.ts'
+      - 'scripts/research_current_v12_top2_ledger.ts'
+      - 'scripts/research_current_top2_pengu_v52_dca.py'
+      - '.github/workflows/current-v12-top2-pengu-v52-dca-1y.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: current-v12-top2-pengu-v52-dca-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout current production lineage
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts', 'scripts/research_current_top2_pengu_v52_dca.py') }}
+          restore-keys: |
+            v12-top2-gross15-
+            v12-v52-pengu-v2-combined-
+            v26-latency-aware-3y-usdm-v1-20260816
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile DCA simulator
+        run: python -m py_compile scripts/research_current_top2_pengu_v52_dca.py
+
+      - name: Build current V12 Top2 trade ledger
+        env:
+          V12_TOP2_LEDGER_OUT: .research-state/current-top2-dca/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/current-top2-dca
+          set -o pipefail
+          npx tsx scripts/research_current_v12_top2_ledger.ts 2>&1 | tee .research-state/current-top2-dca/v12-top2.log
+
+      - name: Build current PENGU V2 Aster ledger for matching year
+        env:
+          PRODUCTION_SOURCE_SHA: ac254e897b7514d14c3a34c0679388978b5c3d32
+          PENGU_LEDGER_OUT: .research-state/current-top2-dca/pengu-v2-ledger.json
+        run: |
+          cp scripts/research_pengu_v2_aster_ledger.ts scripts/.research_pengu_v2_current_year.ts
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/.research_pengu_v2_current_year.ts')
+          s = p.read_text()
+          s = s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2025-07-01T00:00:00Z");')
+          s = s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2025-08-01T00:00:00Z");')
+          s = s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-01T00:00:00Z");')
+          p.write_text(s)
+          PY
+          set -o pipefail
+          npx tsx scripts/.research_pengu_v2_current_year.ts 2>&1 | tee .research-state/current-top2-dca/pengu-v2.log
+          rm -f scripts/.research_pengu_v2_current_year.ts
+
+      - name: Run current Gross plus monthly DCA unified backtest
+        run: |
+          set -o pipefail
+          python scripts/research_current_top2_pengu_v52_dca.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/current-top2-dca/v12-top2-ledger.json \
+            --pengu-ledger .research-state/current-top2-dca/pengu-v2-ledger.json \
+            --output-dir .research-state/current-top2-dca \
+            2>&1 | tee .research-state/current-top2-dca/combined-dca.log
+
+      - name: Validate current contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/current-top2-dca/result.json').read_text())
+          assert p['status'] == 'PASS_RESEARCH_ONLY', p['checks']
+          assert p['period']['startInclusive'].startswith('2025-08-01')
+          assert p['period']['endExclusive'].startswith('2026-08-01')
+          assert p['capital']['totalContributedJpy'] == 120000
+          assert p['architecture']['v12Slots'] == 2
+          assert p['architecture']['v12GrossCap'] == 1.5
+          assert p['architecture']['sharedCryptoGrossCap'] == 2.0
+          assert p['architecture']['stockGrossCap'] == 1.5
+          assert p['architecture']['totalGrossCap'] == 2.5
+          assert p['architecture']['entryPriority'] == ['V52', 'PENGU_DUAL_LS_V2', 'V12']
+          assert all(p['checks'].values()), p['checks']
+          assert p['safety'] == {'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'status': p['status'], 'normal': p['results']['NORMAL'], 'severe': p['results']['SEVERE'], 'checks': p['checks']}, ensure_ascii=False, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-v12-top2-pengu-v52-dca-${{ github.run_id }}
+          path: .research-state/current-top2-dca
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
