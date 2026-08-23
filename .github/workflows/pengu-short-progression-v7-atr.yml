@@ -7,6 +7,8 @@ on:
     paths:
       - 'scripts/research_pengu_short_progression_v7_atr.ts'
       - 'scripts/research_pengu_short_progression_v7_crossvenue.py'
+      - 'scripts/research_pengu_short_thesis_v8.ts'
+      - 'scripts/research_pengu_short_thesis_v8_crossvenue.py'
       - '.github/workflows/pengu-short-progression-v7-atr.yml'
   workflow_dispatch:
 
@@ -16,7 +18,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,7 +31,7 @@ jobs:
       - run: npm ci
       - name: Run single-candidate ATR V7 across three environments
         run: python scripts/research_pengu_short_progression_v7_crossvenue.py
-      - name: Validate anti-overfit contract
+      - name: Validate V7 anti-overfit contract
         run: |
           python - <<'PY'
           import json
@@ -39,10 +41,25 @@ jobs:
           assert x['candidate'].startswith('ATR_PROGRESS_1_TO_2_EXIT_0P5')
           assert set(x['checks'])=={'binancePrior','binanceOverlap','asterCurrent'}
           assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          print(json.dumps({'promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
+          print(json.dumps({'v7Promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
+          PY
+      - name: Run single-candidate V8 thesis failure across same three environments
+        run: python scripts/research_pengu_short_thesis_v8_crossvenue.py
+      - name: Validate V8 anti-overfit contract
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('.research-state/pengu-short-thesis-v8-crossvenue/result.json'))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['candidate'].startswith('ATR_ARM_EMA72_RECLAIM')
+          assert set(x['checks'])=={'binancePrior','binanceOverlap','asterCurrent'}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'v8Promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: pengu-short-progression-v7-atr-${{ github.run_id }}
-          path: .research-state/pengu-short-progression-v7-crossvenue
+          name: pengu-short-v7-v8-robustness-${{ github.run_id }}
+          path: |
+            .research-state/pengu-short-progression-v7-crossvenue
+            .research-state/pengu-short-thesis-v8-crossvenue
           if-no-files-found: error
