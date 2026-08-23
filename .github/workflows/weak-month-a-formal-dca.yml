@@ -1,0 +1,237 @@
+name: Weak-Month A Formal DCA Replay
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/weak-month-a-formal-dca.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: weak-month-a-formal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v52-stock-resume-${{ runner.os }}
+          restore-keys: |
+            current-v12-top2-pengu-v52-stock-resume-
+            v26-latency-aware-3y-usdm-v1-20260816
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - run: npm ci
+
+      - name: Reuse formal baseline ledgers and result
+        uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+
+      - name: Verify immutable baseline parity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state/input')
+          p=json.loads((root/'result.json').read_text())
+          n=p['normal']
+          assert abs(n['endingAssetJpy']-572544.35821388)<0.01
+          assert abs(n['timeWeightedReturnPct']-1295.55361571)<1e-8
+          assert n['trades']==624
+          assert abs(n['profitFactor']-2.74056254)<1e-8
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('FORMAL_BASELINE_PARITY_PASS')
+          PY
+
+      - name: Regenerate PENGU with entry-time Short RSI <= 45 gate
+        env:
+          PRODUCTION_SOURCE_SHA: ac254e897b7514d14c3a34c0679388978b5c3d32
+          PENGU_LEDGER_OUT: .research-state/a-formal/pengu-rsi45-ledger.json
+        run: |
+          mkdir -p .research-state/a-formal
+          cp scripts/research_pengu_v2_aster_ledger.ts scripts/.research_pengu_rsi45.ts
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/.research_pengu_rsi45.ts')
+          s=p.read_text()
+          s=s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");','const WARM_START = Date.parse("2025-07-01T00:00:00Z");')
+          s=s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");','const EVAL_START = Date.parse("2025-08-01T00:00:00Z");')
+          s=s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");','const EVAL_END = Date.parse("2026-08-01T00:00:00Z");')
+          old='''    const side: Side | undefined = rows[index].shortSignal ? "S" : rows[index].longSignal ? "L" : undefined;
+              if (!side || !rows[index].features) { index += 1; continue; }
+              const entryIndex = index + 1;'''
+          new='''    const side: Side | undefined = rows[index].shortSignal ? "S" : rows[index].longSignal ? "L" : undefined;
+              if (!side || !rows[index].features) { index += 1; continue; }
+              if (side === "S" && rows[index].features!.rsi14 > 45) { index += 1; continue; }
+              const entryIndex = index + 1;'''
+          if old not in s: raise SystemExit('signal gate patch target missing')
+          s=s.replace(old,new)
+          old2='''  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);
+            const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+          new2='''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);
+            const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            assert.equal(penguEvalRows, expectedEvalRows);
+            assert.equal(btcEvalRows, expectedEvalRows);
+            const penguTimestamps = new Set(pengu.map((row) => row.openTime));
+            const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+            assert.equal(alignedBtc.length, pengu.length);
+            const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+          if old2 not in s: raise SystemExit('history alignment patch target missing')
+          s=s.replace(old2,new2)
+          p.write_text(s)
+          PY
+          set -o pipefail
+          npx tsx scripts/.research_pengu_rsi45.ts 2>&1 | tee .research-state/a-formal/pengu-rsi45.log
+          rm -f scripts/.research_pengu_rsi45.ts
+
+      - name: Patch research harness validation semantics only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/research_current_top2_pengu_v52_dca.py')
+          lines=p.read_text().splitlines()
+          needle=[
+            'if v12.get("period") != expected_period:',
+            'raise RuntimeError(f"Unexpected V12 period: {v12.get(\'period\')}")',
+            'if pengu.get("period") != expected_period:',
+            'raise RuntimeError(f"Unexpected PENGU period: {pengu.get(\'period\')}")',
+          ]
+          match=None
+          for i in range(len(lines)-3):
+            if [line.strip() for line in lines[i:i+4]]==needle:
+              match=i; break
+          if match is None: raise SystemExit('period patch target missing')
+          indent=lines[match][:len(lines[match])-len(lines[match].lstrip())]
+          repl=[
+            indent+'v12_period = v12.get("period") or {}',
+            indent+'pengu_period = pengu.get("period") or {}',
+            indent+'v12_core_period = {key: v12_period.get(key) for key in expected_period}',
+            indent+'pengu_core_period = {key: pengu_period.get(key) for key in expected_period}',
+            indent+'if v12_core_period != expected_period:',
+            indent+'    raise RuntimeError(f"Unexpected V12 period: {v12.get(\'period\')}")',
+            indent+'if pengu_core_period != expected_period:',
+            indent+'    raise RuntimeError(f"Unexpected PENGU period: {pengu.get(\'period\')}")',
+          ]
+          lines[match:match+4]=repl
+          g='checks[f"{scenario}_penguGross"] = gross["entryTimeMaxPenguGross"] <= PENGU_MAX_GROSS + 1e-9'
+          hits=[i for i,line in enumerate(lines) if line.strip()==g]
+          if len(hits)!=1: raise SystemExit(f'gross patch target count={len(hits)}')
+          i=hits[0]; ind=lines[i][:len(lines[i])-len(lines[i].lstrip())]
+          lines[i]=ind+'checks[f"{scenario}_penguGross"] = finite(pengu.get("integrity", {}).get("maximumRequestedGross")) <= PENGU_MAX_GROSS + 1e-9'
+          p.write_text('\n'.join(lines)+'\n')
+          PY
+          python -m py_compile scripts/research_current_top2_pengu_v52_dca.py
+
+      - name: Run exact DCA portfolio with A gate
+        run: |
+          set -o pipefail
+          python scripts/research_current_top2_pengu_v52_dca.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/input/v12-top2-ledger.json \
+            --pengu-ledger .research-state/a-formal/pengu-rsi45-ledger.json \
+            --output-dir .research-state/a-formal \
+            2>&1 | tee .research-state/a-formal/portfolio.log
+
+      - name: Compare baseline versus A and validate safety
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          b=json.loads(Path('.research-state/input/result.json').read_text())
+          a=json.loads(Path('.research-state/a-formal/result.json').read_text())
+          assert a['status']=='PASS_RESEARCH_ONLY'
+          assert all(a['checks'].values())
+          assert a['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          def compact(p, mode):
+            x=p[mode]
+            months={m['month']:m for m in x['monthly']}
+            return {
+              'endingAssetJpy':x['endingAssetJpy'],
+              'returnOnContributedCapitalPct':x['returnOnContributedCapitalPct'],
+              'timeWeightedReturnPct':x['timeWeightedReturnPct'],
+              'moneyWeightedReturnXirrPct':x['moneyWeightedReturnXirrPct'],
+              'maxDrawdownPctClosedEventTwr':x['maxDrawdownPctClosedEventTwr'],
+              'trades':x['trades'],'winRatePct':x['winRatePct'],'profitFactor':x['profitFactor'],
+              'months':{k:months.get(k) for k in ['2026-02','2026-04','2026-05','2026-07']},
+              'bySleeve':x['bySleeve'],
+            }
+          out={
+            'status':'PASS_RESEARCH_ONLY',
+            'gate':'PENGU_SHORT_RSI14_LE_45_AT_SIGNAL',
+            'baseline':{'NORMAL':compact(b,'normal'),'SEVERE':compact(b,'severe')},
+            'A':{'NORMAL':compact(a,'normal'),'SEVERE':compact(a,'severe')},
+            'delta':{
+              'endingAssetJpy':a['normal']['endingAssetJpy']-b['normal']['endingAssetJpy'],
+              'twrPp':a['normal']['timeWeightedReturnPct']-b['normal']['timeWeightedReturnPct'],
+              'ddPp':a['normal']['maxDrawdownPctClosedEventTwr']-b['normal']['maxDrawdownPctClosedEventTwr'],
+              'pf':a['normal']['profitFactor']-b['normal']['profitFactor'],
+              'severeEndingAssetJpy':a['severe']['endingAssetJpy']-b['severe']['endingAssetJpy'],
+              'severeTwrPp':a['severe']['timeWeightedReturnPct']-b['severe']['timeWeightedReturnPct'],
+              'severeDdPp':a['severe']['maxDrawdownPctClosedEventTwr']-b['severe']['maxDrawdownPctClosedEventTwr'],
+            },
+            'safety':a['safety'],
+          }
+          Path('.research-state/a-formal/comparison.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weak-month-a-formal-${{ github.run_id }}
+          path: .research-state/a-formal
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
