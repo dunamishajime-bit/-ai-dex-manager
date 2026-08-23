@@ -7,8 +7,8 @@ on:
     paths:
       - 'scripts/research_pengu_short_progression_v7_atr.ts'
       - 'scripts/research_pengu_short_progression_v7_crossvenue.py'
-      - 'scripts/research_pengu_short_thesis_v8.ts'
-      - 'scripts/research_pengu_short_thesis_v8_crossvenue.py'
+      - 'scripts/research_pengu_short_partial_v9.ts'
+      - 'scripts/research_pengu_short_partial_v9_crossvenue.py'
       - '.github/workflows/pengu-short-progression-v7-atr.yml'
   workflow_dispatch:
 
@@ -29,37 +29,23 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci
-      - name: Run single-candidate ATR V7 across three environments
+      - name: Populate official data cache and retain fixed V7 reference
         run: python scripts/research_pengu_short_progression_v7_crossvenue.py
-      - name: Validate V7 anti-overfit contract
+      - name: Run single-candidate V9 partial de-risk across three environments
+        run: python scripts/research_pengu_short_partial_v9_crossvenue.py
+      - name: Validate V9 anti-overfit contract
         run: |
           python - <<'PY'
           import json
-          p='.research-state/pengu-short-progression-v7-crossvenue/result.json'
-          x=json.load(open(p))
+          x=json.load(open('.research-state/pengu-short-partial-v9-crossvenue/result.json'))
           assert x['status']=='PASS_RESEARCH_ONLY'
-          assert x['candidate'].startswith('ATR_PROGRESS_1_TO_2_EXIT_0P5')
+          assert x['candidate'].startswith('ATR_PROGRESS_HALF_DERISK')
           assert set(x['checks'])=={'binancePrior','binanceOverlap','asterCurrent'}
           assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          print(json.dumps({'v7Promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
-          PY
-      - name: Run single-candidate V8 thesis failure across same three environments
-        run: python scripts/research_pengu_short_thesis_v8_crossvenue.py
-      - name: Validate V8 anti-overfit contract
-        run: |
-          python - <<'PY'
-          import json
-          x=json.load(open('.research-state/pengu-short-thesis-v8-crossvenue/result.json'))
-          assert x['status']=='PASS_RESEARCH_ONLY'
-          assert x['candidate'].startswith('ATR_ARM_EMA72_RECLAIM')
-          assert set(x['checks'])=={'binancePrior','binanceOverlap','asterCurrent'}
-          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          print(json.dumps({'v8Promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
+          print(json.dumps({'v9Promotion':x['promotion'],'checks':{k:v['pass'] for k,v in x['checks'].items()}},indent=2))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: pengu-short-v7-v8-robustness-${{ github.run_id }}
-          path: |
-            .research-state/pengu-short-progression-v7-crossvenue
-            .research-state/pengu-short-thesis-v8-crossvenue
+          name: pengu-short-v9-robustness-${{ github.run_id }}
+          path: .research-state/pengu-short-partial-v9-crossvenue
           if-no-files-found: error
