@@ -1,0 +1,140 @@
+name: V50 META Entry Forensics
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/v50-meta-entry-forensics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v52-stock-resume-${{ runner.os }}
+          restore-keys: |
+            current-v12-top2-pengu-v52-stock-resume-
+      - uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+          repository: dunamishajime-bit/-ai-dex-manager
+      - name: Expose integrated source trades
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/research_current_top2_pengu_v52_dca.py')
+          text=p.read_text()
+          old='"exitReason": trade.get("exitReason")}'
+          assert text.count(old)==3
+          text=text.replace(old,'"exitReason": trade.get("exitReason"), "sourceTrade": trade}')
+          old2='"exitReason": position.get("exitReason")})'
+          assert text.count(old2)==1
+          text=text.replace(old2,'"exitReason": position.get("exitReason"), "sourceTrade": position.get("sourceTrade")})')
+          marker='"grossVerification": {"maxV12Positions"'
+          assert text.count(marker)==1
+          text=text.replace(marker,'"events": events,\n        '+marker)
+          p.write_text(text)
+          PY
+      - name: Run V50 META forensic comparison
+        run: |
+          mkdir -p .research-state/v50-meta
+          python - <<'PY'
+          import json, statistics, sys
+          from pathlib import Path
+          sys.path.insert(0,'scripts')
+          import research_current_top2_pengu_v52_dca as sim
+          root=Path('.research-state/input')
+          v12=json.loads((root/'v12-top2-ledger.json').read_text()); pengu=json.loads((root/'pengu-v2-ledger.json').read_text())
+          sim.INITIAL_JPY=10000.; sim.MONTHLY_JPY=10000.; sim.TOTAL_GROSS_CAP=2.5; sim.CRYPTO_GROSS_CAP=2.0
+          sim.V12_GROSS_CAP=1.5; sim.V12_PER_POSITION_GROSS_CAP=1.; sim.V12_MAX_POSITIONS=2; sim.PENGU_MAX_GROSS=.75; sim.STOCK_GROSS_CAP=1.5
+          sim.CRYPTO_DAILY_LOSS_LIMIT=-.075; sim.STOCK_DAILY_LOSS_LIMIT=-.035
+          v11,v50,days,diag=sim.build_stock(Path('.cache/aster-only-v39-overnight-open'))
+          normal=sim.simulate(v12['modes']['normal']['trades'],pengu['modes']['normal']['trades'],v11,v50,float(sim.SCENARIOS['NORMAL']['stockCostBps']))
+          events=normal['events']
+          rows=[]
+          for e in events:
+              if e['strategy']!='V50_POST_OPEN_BASIS' or e.get('symbol')!='METAUSDT': continue
+              st=e.get('sourceTrade') or {}
+              if int(st.get('side',0))!=-1: continue
+              rows.append({
+                  'entryTs':st.get('entryTs'),'exitTs':st.get('exitTs'),'day':st.get('day'),'route':st.get('route'),
+                  'signalBasisBps':st.get('signalBasisBps'),'entryBasisBps':st.get('entryBasisBps'),
+                  'adverseBasisMoveBps':st.get('adverseBasisMoveBps'),'edgeProxyBps':st.get('edgeProxyBps'),
+                  'holdingHours':st.get('holdingHours'),'priceReturnPct':float(st.get('priceReturn',0))*100,
+                  'fundingReturnPct':float(st.get('fundingReturn',0))*100,'exitReason':st.get('exitReason'),
+                  'pnlJpy':e.get('pnlJpy'),'eventReturnPct':float(e.get('eventReturn',0))*100,
+                  'win':float(e.get('pnlJpy',0))>0,
+              })
+          assert len(rows)==14, len(rows)
+          def agg(rs):
+              return {'n':len(rs),'wins':sum(r['win'] for r in rs),'pnlJpy':sum(r['pnlJpy'] for r in rs),
+                      'meanEventPct':statistics.mean(r['eventReturnPct'] for r in rs) if rs else None,
+                      'meanEntryBasisBps':statistics.mean(abs(float(r['entryBasisBps'])) for r in rs) if rs else None,
+                      'meanSignalBasisBps':statistics.mean(abs(float(r['signalBasisBps'])) for r in rs) if rs else None,
+                      'meanAdverseBasisBps':statistics.mean(float(r['adverseBasisMoveBps']) for r in rs) if rs else None,
+                      'meanEdgeProxyBps':statistics.mean(float(r['edgeProxyBps']) for r in rs) if rs else None}
+          wins=[r for r in rows if r['win']]; losses=[r for r in rows if not r['win']]
+          by_route={k:agg([r for r in rows if r['route']==k]) for k in sorted(set(r['route'] for r in rows))}
+          # Purely descriptive entry-known threshold splits; not a tuned recommendation.
+          splits={}
+          for field in ['entryBasisBps','signalBasisBps','adverseBasisMoveBps','edgeProxyBps']:
+              vals=sorted(set(abs(float(r[field])) if field!='adverseBasisMoveBps' else float(r[field]) for r in rows))
+              for t in vals[1:-1]:
+                  lo=[r for r in rows if (abs(float(r[field])) if field!='adverseBasisMoveBps' else float(r[field])) < t]
+                  hi=[r for r in rows if (abs(float(r[field])) if field!='adverseBasisMoveBps' else float(r[field])) >= t]
+                  if len(lo)>=3 and len(hi)>=3:
+                      key=f'{field}<{t:.6g}'
+                      splits[key]={'low':agg(lo),'high':agg(hi)}
+          payload={'status':'PASS_RESEARCH_ONLY','allMetaShort':agg(rows),'wins':agg(wins),'losses':agg(losses),'byRoute':by_route,'rows':rows,'entryKnownSplits':splits,
+                   'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          Path('.research-state/v50-meta/result.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps({'status':payload['status'],'allMetaShort':payload['allMetaShort'],'wins':payload['wins'],'losses':payload['losses'],'byRoute':by_route,'rows':rows},ensure_ascii=False,indent=2))
+          PY
+      - name: Validate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/v50-meta/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY' and p['allMetaShort']['n']==14
+          print('V50_META_FORENSICS_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v50-meta-forensics-${{ github.run_id }}
+          path: .research-state/v50-meta
+          retention-days: 90
