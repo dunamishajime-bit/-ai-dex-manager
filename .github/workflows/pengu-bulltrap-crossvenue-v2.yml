@@ -1,0 +1,55 @@
+name: PENGU Bull Trap Frozen Cross-Venue V2
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-bulltrap-overlay-v3-20260824
+    paths:
+      - 'scripts/research_pengu_bulltrap_crossvenue_runner.py'
+      - '.github/workflows/pengu-bulltrap-crossvenue-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-bulltrap-crossvenue-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen candidate on Binance Vision
+        run: |
+          set -o pipefail
+          python scripts/research_pengu_bulltrap_crossvenue_runner.py 2>&1 | tee .research-state/pengu-bulltrap-crossvenue-v2/runner.log
+      - name: Validate research-only output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/pengu-bulltrap-crossvenue-v2/crossvenue.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['candidate']=='RETEST_REJECT frozen at eaab138cb8ddc97ce6e61f03839d2a172c46f2a5'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_BULLTRAP_CROSSVENUE_V2_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-bulltrap-crossvenue-v2-${{ github.run_id }}
+          path: .research-state/pengu-bulltrap-crossvenue-v2
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
