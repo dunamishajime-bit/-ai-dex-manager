@@ -172,18 +172,19 @@ jobs:
           import json
           import os
 
-          def contract_failure(label, expected, actual):
+          failures=[]
+
+          def annotate_failure(label, expected, actual):
               message=f"{label}: expected={expected!r} actual={actual!r}"
               print(f"::error title=Step 15 contract check::{message}", flush=True)
               summary=os.environ.get('GITHUB_STEP_SUMMARY')
               if summary:
                   with open(summary, 'a', encoding='utf-8') as out:
                       out.write(f"### Step 15 contract assertion failed\n\n`{message}`\n")
-              raise AssertionError(message)
 
           def check(condition, label, expected, actual):
               if not condition:
-                  contract_failure(label, expected, actual)
+                  failures.append((label, expected, actual))
 
           p=json.load(open('.research-state/fresh-global-max2/result.json'))
           check(p['status']=='PASS_RESEARCH_ONLY', 'status', 'PASS_RESEARCH_ONLY', p['status'])
@@ -199,6 +200,10 @@ jobs:
               check(actual<=2, f'results.{name}.grossVerification.maxTotalPositions', '<=2', actual)
           expected_safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           check(p['safety']==expected_safety, 'safety', expected_safety, p['safety'])
+          for label, expected, actual in failures:
+              annotate_failure(label, expected, actual)
+          if failures:
+              raise AssertionError('; '.join(f"{label}: expected={expected!r} actual={actual!r}" for label, expected, actual in failures))
           print('FRESH_GLOBAL_MAX2_RESULT_START')
           print(json.dumps({'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'NORMAL':p['results']['NORMAL'],'SEVERE':p['results']['SEVERE'],'safety':p['safety']},ensure_ascii=False,indent=2))
           print('FRESH_GLOBAL_MAX2_RESULT_END')
