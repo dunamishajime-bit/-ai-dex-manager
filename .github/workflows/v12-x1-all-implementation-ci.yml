@@ -80,10 +80,12 @@ jobs:
           python scripts/disdex_v12_crypto_daily_risk.py --self-test
           PYTHONPATH=scripts python scripts/disdex_v12_v52_margin_guard_runtime.py --self-test
           PYTHONPATH=scripts python scripts/disdex_v12_v52_live_engine.py --self-test
+          PYTHONPATH=scripts python scripts/disdex_v12_v52_live_engine_retry.py --self-test
           python -m py_compile \
             scripts/disdex_v52_aster_only_live_engine.py \
             scripts/disdex_v12_v52_margin_guard_runtime.py \
             scripts/disdex_v12_v52_live_engine.py \
+            scripts/disdex_v12_v52_live_engine_retry.py \
             scripts/disdex_account_order_lock.py \
             scripts/disdex_v12_crypto_daily_risk.py
 
@@ -136,7 +138,7 @@ jobs:
           grep -Fq 'disdex-v12-mutual-exclusion-preflight.sh %i runtime' ops/systemd/disdex-v12-x1-all@.service
           grep -Fq 'scripts/disdex-v12-runtime-status.ts' ops/systemd/disdex-v12-runtime-status@.service
           grep -Fq 'disdex_v12_v52_margin_guard_runtime.py --mode live --daemon' ops/systemd/disdex-v12-v52-margin-guard@.service
-          grep -Fq 'disdex_v12_v52_live_engine.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
+          grep -Fq 'disdex_v12_v52_live_engine_retry.py --mode live --daemon' ops/systemd/disdex-v52-aster-only@.service
           grep -Fq 'disdex-pengu-dual-ls-v2-live-runner.ts --daemon' ops/systemd/disdex-pengu-dual-ls-v2@.service
           grep -Fq 'DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'DISDEX_ACCOUNT_LOCK_ARBITRATION_MS=200' ops/env/disdex-v12-pengu-v2-v52.env.example
@@ -158,6 +160,8 @@ jobs:
           grep -Fq 'self.account_order_lock.reserve' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'priority=2' scripts/disdex_v12_v52_live_engine.py
           grep -Fq 'priority=1' scripts/disdex_v12_v52_live_engine.py
+          grep -Fq 'RETRY_WITHIN_WINDOW' scripts/disdex_v12_v52_live_engine_retry.py
+          grep -Fq 'MISSING_V50_SIGNAL_SNAPSHOT' scripts/disdex_v12_v52_live_engine_retry.py
           grep -Fq '_recover_expired_owned_strategy_lock' scripts/disdex_account_order_lock.py
           grep -Fq 'LINKUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
           grep -Fq 'NEARUSDT' scripts/disdex_v12_v52_margin_guard_runtime.py
