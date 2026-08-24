@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import datetime as dt
 import json
 import os
 import signal
@@ -28,6 +29,9 @@ legacy.MANAGED_SYMBOLS = guard.MANAGED_SYMBOLS
 legacy.verify_managed_configuration = guard.verify_managed_configuration
 
 EPSILON = 1e-12
+V50_WINDOWS = legacy.legacy.V50_WINDOWS
+V11_SLOT = legacy.V11_SLOT
+V50_SLOT = legacy.V50_SLOT
 
 
 class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
@@ -42,6 +46,11 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
     shared arbitration priority: P1 for reduce-only/flatten and P2 for new V52
     stock exposure. New exposure is reserved in the shared lock before the
     inherited V52 code persists ``pendingOrder`` and sends the order.
+
+    V52 has its own 3.5% strategy daily-loss latch. The V12+PENGU shared crypto
+    daily-risk file is intentionally not an entry prerequisite for V52 stock
+    signal evaluation. Combined account Gross and Margin Guard checks remain
+    mandatory immediately before every exposure-increasing V52 order.
     """
 
     def __init__(self, mode: str):
@@ -94,6 +103,12 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             self._account_critical_depth = 0
             if acquired:
                 self.account_order_lock.release()
+
+    def gross_snapshot(self) -> dict:
+        """Use authenticated full-universe positions for the final V52 gross check."""
+        if not self.live:
+            return super().gross_snapshot()
+        return self.gross_snapshot_from_rows(self.account_info(), self.aster.positions())
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
         # New stock exposure is P2. If a simultaneous P1 close/protection action
@@ -180,6 +195,104 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             "totalGross": (crypto_notional + stock_notional) / equity,
         }
 
+    def tick(self) -> None:
+        """Evaluate V52 on its stock-risk contract and preserve every signal gate.
+
+        The inherited V52 implementation incorrectly returned before market-data
+        and signal evaluation whenever the V12+PENGU shared *crypto* daily-risk
+        file was missing, stale or tripped. That file covers only V12 and PENGU.
+        V52 keeps its own daily-loss latch, the shared Kill Switch, full-universe
+        gross checks and the fresh Margin Guard at order time.
+        """
+        self.reset_days()
+        kill = self.kill_switch()
+        if kill:
+            self.flatten_all(str(kill.get("reason") or "KILL_SWITCH"))
+            return
+        if self.enforce_daily_loss():
+            latch = self.state.get("v52StrategyDailyLossLatch") or {}
+            self.log(
+                "v52-entry-held-v52-daily-risk",
+                reason=latch.get("tripReason") or "V52_DAILY_RISK_BLOCKED",
+                failClosed=bool(latch.get("failClosed")),
+                ordersSent=False,
+            )
+            return
+        if self.kill_switch():
+            self.flatten_all("DAILY_LOSS")
+            return
+
+        self.update_history()
+        local = dt.datetime.now(tz=legacy.base.NY)
+        if local.weekday() >= 5:
+            return
+        sec = legacy.base.ny_seconds(local)
+        if not self.positions() and not (legacy.base.clock("09:59:50") <= sec <= legacy.base.clock("15:30:30")):
+            return
+
+        rows = self.books_and_refs()
+        self._record_reference_active()
+        if self.v96_requires_margin():
+            if self.positions():
+                self.flatten_all("V96_MARGIN_PRIORITY")
+            return
+
+        if not self.state.get("v11SignalBasis") and legacy.base.clock("09:59:55") <= sec <= legacy.base.clock("10:00:20"):
+            self.record_v11_signal(rows)
+        for window in V50_WINDOWS:
+            entry = legacy.base.clock(window + ":00")
+            if entry - 10 <= sec < entry:
+                self.capture_v50_signal(window, rows)
+
+        self.manage_positions(rows)
+
+        if not self.state.get("v11Attempted") and legacy.base.clock("10:30:00") <= sec <= legacy.base.clock("10:30:20"):
+            self.state["v11Attempted"] = True
+            self.save()
+            gross, snapshot = self.available_slot_gross(V11_SLOT)
+            self.v11_notional = gross * snapshot["equityUsd"]
+            candidate, rejections = (
+                (None, {"ROUTER": ["NO_GROSS_CAPACITY"]})
+                if gross <= 0
+                else self.v11_candidates(rows)
+            )
+            self.log(
+                "v52-v11-decision",
+                candidate=candidate,
+                rejections=rejections,
+                allocatedGross=gross,
+                grossSnapshot=snapshot,
+            )
+            if candidate:
+                self.open_basis_position(V11_SLOT, candidate, gross)
+
+        attempted = self.state.setdefault("v50Attempted", {})
+        for window in V50_WINDOWS:
+            entry = legacy.base.clock(window + ":00")
+            if attempted.get(window) or not (entry <= sec <= entry + 20):
+                continue
+            attempted[window] = True
+            self.save()
+            if int(self.state.get("v50CompletedTrades", 0)) >= legacy.legacy.V50_MAX_DAILY_TRADES or V50_SLOT in self.positions():
+                continue
+            gross, snapshot = self.available_slot_gross(V50_SLOT)
+            notional = gross * snapshot["equityUsd"]
+            candidate, rejections = (
+                (None, {"ROUTER": ["NO_GROSS_CAPACITY"]})
+                if gross <= 0
+                else self.v50_candidate(window, rows, notional)
+            )
+            self.log(
+                "v52-v50-decision",
+                window=window,
+                candidate=candidate,
+                rejections=rejections,
+                allocatedGross=gross,
+                grossSnapshot=snapshot,
+            )
+            if candidate:
+                self.open_basis_position(V50_SLOT, candidate, gross)
+
 
 def self_test() -> None:
     engine = object.__new__(V12AwareV52AsterOnlyEngine)
@@ -201,6 +314,17 @@ def self_test() -> None:
         assert "Unknown non-flat Aster symbol" in str(error)
     else:
         raise AssertionError("Unknown non-flat symbols must fail closed")
+
+    class FakeAster:
+        def positions(self):
+            return rows
+
+    engine.live = True
+    engine.aster = FakeAster()
+    engine.account_info = lambda: account
+    live_snapshot = engine.gross_snapshot()
+    assert abs(live_snapshot["cryptoNotionalUsd"] - 50.0) < EPSILON
+    assert abs(live_snapshot["stockNotionalUsd"] - 500.0) < EPSILON
 
     class FakeAccountLock:
         def __init__(self):
@@ -225,7 +349,23 @@ def self_test() -> None:
     assert ":P1:" in fake.acquires[0]
     assert fake.releases == 1
     assert engine._account_critical_depth == 0
+
+    # A missing/stale V12+PENGU crypto-risk document must no longer stop V52
+    # before V52 market-data/signal processing. This is an offline no-order test.
+    progress = {"history": 0}
+    engine.live = True
+    engine.state = {}
+    engine.reset_days = lambda: None
+    engine.kill_switch = lambda: None
+    engine.flatten_all = lambda _reason: None
+    engine.enforce_daily_loss = lambda: False
+    engine.update_history = lambda: progress.__setitem__("history", progress["history"] + 1)
+    engine.positions = lambda: {}
+    engine.tick()
+    assert progress["history"] == 1
+
     assert len(V12_CRYPTO_SYMBOLS) == 15
+    assert V50_WINDOWS == ("11:30", "12:30", "13:30")
     print("V12-aware V52 live engine self-test: PASS")
 
 
