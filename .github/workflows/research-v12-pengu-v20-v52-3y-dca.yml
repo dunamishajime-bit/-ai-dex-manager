@@ -255,6 +255,12 @@ jobs:
           print(f"::warning title=3Y validation status::status={p.get('status')} checks={json.dumps(p.get('checks'),ensure_ascii=False,separators=(',',':'))}", flush=True)
           print(f"::warning title=3Y validation capital::capital={json.dumps(p.get('capital'),ensure_ascii=False,separators=(',',':'))}", flush=True)
           print(f"::warning title=3Y validation NORMAL::metrics={json.dumps({k:p.get('results',{}).get('NORMAL',{}).get(k) for k in ('endingAssetJpy','netProfitJpy','trades','maxDrawdownPctClosedEventTwr','grossVerification')},ensure_ascii=False,separators=(',',':'))}", flush=True)
+          scalar_keys=('endingAssetJpy','netProfitJpy','returnOnContributedCapitalPct','timeWeightedReturnPct','moneyWeightedReturnXirrPct','maxDrawdownPctClosedEventTwr','trades','winRatePct','profitFactor')
+          compact={scenario:{key:p.get('results',{}).get(scenario,{}).get(key) for key in scalar_keys} for scenario in ('NORMAL','SEVERE')}
+          pengu=json.loads(Path('.research-state/fresh-3y/pengu-v20-ledger.json').read_text())
+          coverage={key:pengu.get('data',{}).get(key) for key in ('penguRows','btcRows','fundingRows','availableStart','availableEndExclusive','requestedPeriodStart','requestedPeriodEndExclusive','coverageNote')}
+          stock={key:p.get('data',{}).get(key) for key in ('stockTargetSessions','v11RawTrades','v50RawTrades')}
+          print(f"::warning title=3Y concise metrics::results={json.dumps(compact,ensure_ascii=False,separators=(',',':'))} penguCoverage={json.dumps(coverage,ensure_ascii=False,separators=(',',':'))} v52Stock={json.dumps(stock,ensure_ascii=False,separators=(',',':'))}", flush=True)
           expected_period={'startInclusive':'2023-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
           assert p['status']=='PASS_RESEARCH_ONLY', p.get('checks')
           assert p['period']==expected_period, p['period']
