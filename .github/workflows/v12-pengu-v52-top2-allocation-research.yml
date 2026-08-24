@@ -8,6 +8,10 @@ on:
     paths:
       - 'scripts/research_v12_pengu_v52_top2_allocation_bt.py'
       - '.github/workflows/v12-pengu-v52-top2-allocation-research.yml'
+  pull_request:
+    paths:
+      - 'scripts/research_v12_pengu_v52_top2_allocation_bt.py'
+      - '.github/workflows/v12-pengu-v52-top2-allocation-research.yml'
 
 permissions:
   contents: write
@@ -147,6 +151,7 @@ jobs:
           PY
 
       - name: Publish latest research result on branch
+        if: github.event_name != 'pull_request'
         run: |
           mkdir -p docs/research-results
           cp .research-state/v12-pengu-v52-top2/result.json docs/research-results/v12-pengu-v52-top2-allocation-latest.json
