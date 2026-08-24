@@ -1,0 +1,48 @@
+name: PENGU Short V11 Reentry Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-bybit-holdout-20260824
+    paths:
+      - 'scripts/research_pengu_short_v11_reentry_diagnostic.py'
+      - '.github/workflows/pengu-short-v11-reentry-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Diagnose frozen V11 reentries on OKX and Binance
+        run: python scripts/research_pengu_short_v11_reentry_diagnostic.py
+      - name: Validate diagnostic-only contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-short-v11-reentry-diagnostic/diagnostic.json'
+          x=json.load(open(p))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['diagnosticOnly'] is True
+          assert x['frozenCandidateSha']=='64b22dad74d1c026b2146d41d39cc8a3d3a819e3'
+          assert set(x['venues'])=={'OKX','Binance'}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({v:{'wins':x['venues'][v]['wins']['n'],'losses':x['venues'][v]['losses']['n']} for v in x['venues']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-short-v11-reentry-diagnostic-${{ github.run_id }}
+          path: .research-state/pengu-short-v11-reentry-diagnostic
+          if-no-files-found: error

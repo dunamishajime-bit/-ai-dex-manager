@@ -1,0 +1,52 @@
+name: PENGU V15 Regime Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-okx-binance-20260824
+    paths:
+      - 'PRE_REGISTER_V15_REGIME_DIAGNOSTIC.md'
+      - 'scripts/research_pengu_v15_regime_diagnostic.py'
+      - '.github/workflows/pengu-v15-regime-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen V15 regime diagnostic
+        run: python scripts/research_pengu_v15_regime_diagnostic.py
+      - name: Validate diagnostic-only safety contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-v15-regime-diagnostic/diagnostic.json'
+          x=json.load(open(p))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['diagnosticOnly'] is True
+          assert x['frozenCandidate']=='COUNTERWIND_CLOSE_PROBATION_COST_FLOOR_RESUME'
+          assert x['frozenPreRegistrationSha']=='9873c0b3b345f2273b5fe3c6dde4a08ae741f9ef'
+          assert x['thresholdSweep'] is False
+          assert x['candidateCount']==0
+          assert set(x['summary'])=={'OKX','Binance','Gate','Bitget'}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'counts':{v:{m:len(x['summary'][v][m]) for m in ('NORMAL','STRESS')} for v in x['summary']},'safety':x['safety']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v15-regime-diagnostic-${{ github.run_id }}
+          path: .research-state/pengu-v15-regime-diagnostic
+          if-no-files-found: error

@@ -1,0 +1,51 @@
+name: PENGU Short V15 Close Probation Bitget Holdout
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-bybit-holdout-20260824
+    paths:
+      - 'PRE_REGISTER_V15.md'
+      - 'scripts/research_pengu_short_v15_close_probation_bitget.py'
+      - '.github/workflows/pengu-short-v11-okx-binance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run pre-registered V15 close probation architecture
+        run: python scripts/research_pengu_short_v15_close_probation_bitget.py
+      - name: Validate V15 anti-overfit contract
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('.research-state/pengu-short-v15/result.json'))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['candidate']=='COUNTERWIND_CLOSE_PROBATION_COST_FLOOR_RESUME'
+          assert x['preRegistrationSha']=='9873c0b3b345f2273b5fe3c6dde4a08ae741f9ef'
+          assert x['candidateCount']==1
+          assert x['thresholdSweep'] is False
+          assert x['bitgetPerformanceObservedBeforePreRegistration'] is False
+          assert set(x['venues'])=={'OKX','Binance','Gate','Bitget'}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'promotionPass':x['promotionPass'],'venuePasses':x['venuePasses'],'bitgetData':x['bitgetData']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-short-v15-${{ github.run_id }}
+          path: .research-state/pengu-short-v15
+          if-no-files-found: error
