@@ -33,7 +33,8 @@ def main():
     text = text.replace('9873c0b3b345f2273b5fe3c6dde4a08ae741f9ef', '9b02e7ec708d02c712d7577cbd50cc548492d311')
 
     marker = '  (trade as any).diagnostic = diagnosticBase;'
-    injection = r'''  diagnosticBase.probationTrajectory = Array.from({ length: Math.max(0, Math.min(originalExitIndex, entryIndex + 18) - failureCursor + 1) }, (_, offset) => {
+    injection = r'''  const trajectoryCostCoverPrice = trade.entryPrice / (1 + 2 * (BASE_FEE_PER_SIDE + STRESS_SLIPPAGE_PER_SIDE));
+  diagnosticBase.probationTrajectory = Array.from({ length: Math.max(0, Math.min(originalExitIndex, entryIndex + 18) - failureCursor + 1) }, (_, offset) => {
     const cursor = failureCursor + offset;
     const s: any = snapshot(cursor);
     const f: any = rows[cursor]?.features;
@@ -41,10 +42,10 @@ def main():
     return {
       ...s,
       hoursFromEntry: (bar.openTime - trade.entryTs) / HOUR,
-      costFloorCovered: bar.close >= costCoverPrice,
+      costFloorCovered: bar.close >= trajectoryCostCoverPrice,
       relativeReversed: f.relativeReturn24h >= 0,
       ema72Reclaimed: bar.close >= f.ema72,
-      structuralFailure: bar.close >= costCoverPrice && f.relativeReturn24h >= 0 && bar.close >= f.ema72,
+      structuralFailure: bar.close >= trajectoryCostCoverPrice && f.relativeReturn24h >= 0 && bar.close >= f.ema72,
       thesisResumed: bar.close < lowWater && bar.close < f.ema72 && f.btcReturn24h >= 0,
     };
   });
