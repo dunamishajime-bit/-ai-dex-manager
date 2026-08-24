@@ -243,6 +243,9 @@ jobs:
           import json, os
           from pathlib import Path
           p=json.loads(Path('.research-state/fresh-3y/result.json').read_text())
+          print(f"::warning title=3Y validation status::status={p.get('status')} checks={json.dumps(p.get('checks'),ensure_ascii=False,separators=(',',':'))}", flush=True)
+          print(f"::warning title=3Y validation capital::capital={json.dumps(p.get('capital'),ensure_ascii=False,separators=(',',':'))}", flush=True)
+          print(f"::warning title=3Y validation NORMAL::metrics={json.dumps({k:p.get('results',{}).get('NORMAL',{}).get(k) for k in ('endingAssetJpy','netProfitJpy','trades','maxDrawdownPctClosedEventTwr','grossVerification')},ensure_ascii=False,separators=(',',':'))}", flush=True)
           expected_period={'startInclusive':'2023-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
           assert p['status']=='PASS_RESEARCH_ONLY', p.get('checks')
           assert p['period']==expected_period, p['period']
