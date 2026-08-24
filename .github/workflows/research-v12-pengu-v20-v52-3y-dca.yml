@@ -171,6 +171,7 @@ jobs:
               s = s.replace(old, new, 1)
           replace_once('START = dt.datetime(2025, 8, 1, tzinfo=UTC)', 'START = dt.datetime(2023, 8, 10, tzinfo=UTC)')
           replace_once('END = dt.datetime(2026, 8, 1, tzinfo=UTC)', 'END = dt.datetime(2026, 8, 10, tzinfo=UTC)')
+          replace_once('def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:', 'def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:\n    v12_trades = [trade for trade in v12_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    pengu_trades = [trade for trade in pengu_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v11_rows = [trade for trade in v11_rows if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v50_rows = [trade for trade in v50_rows if int(trade.get("exitTs", END_MS)) <= END_MS]')
           replace_once('''def contribution_points() -> List[tuple[int, float]]:
               points: List[tuple[int, float]] = []
               cur = dt.datetime(2025, 9, 1, tzinfo=UTC)
@@ -205,11 +206,19 @@ jobs:
           p.write_text(s)
           PY
           python -m py_compile scripts/.fresh_three_year_global_max2.py
+          set +e
           python scripts/.fresh_three_year_global_max2.py \
             --stock-cache-dir .cache/aster-only-v39-overnight-open \
             --v12-ledger .research-state/fresh-3y/v12-top2-ledger.json \
             --pengu-ledger .research-state/fresh-3y/pengu-v20-ledger.json \
-            --output-dir .research-state/fresh-3y
+            --output-dir .research-state/fresh-3y 2>&1 | tee .research-state/fresh-3y/simulator-3y.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            while IFS= read -r line; do
+              echo "::error title=3Y simulator detail::$line"
+            done < <(tail -n 25 .research-state/fresh-3y/simulator-3y.log)
+            exit "$status"
+          fi
           rm -f scripts/.fresh_three_year_global_max2.py
 
       - name: Validate and publish three-year result
