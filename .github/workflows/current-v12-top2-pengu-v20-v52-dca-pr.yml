@@ -171,16 +171,19 @@ jobs:
           python - <<'PY'
           import json
           p=json.load(open('.research-state/fresh-global-max2/result.json'))
-          assert p['status']=='PASS_RESEARCH_ONLY',p['checks']
-          assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
-          assert p['capital']['initialJpy']==10000
-          assert p['capital']['monthlyContributionJpy']==10000
-          assert p['capital']['contributionCountAfterStart']==12
-          assert p['capital']['totalContributedJpy']==130000
-          assert p['architecture']['portfolioMaxPositions']==2
+          assert p['status']=='PASS_RESEARCH_ONLY', f"status: expected='PASS_RESEARCH_ONLY' actual={p['status']!r}"
+          expected_period={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert p['period']==expected_period, f"period: expected={expected_period!r} actual={p['period']!r}"
+          assert p['capital']['initialJpy']==10000, f"capital.initialJpy: expected=10000 actual={p['capital']['initialJpy']!r}"
+          assert p['capital']['monthlyContributionJpy']==10000, f"capital.monthlyContributionJpy: expected=10000 actual={p['capital']['monthlyContributionJpy']!r}"
+          assert p['capital']['contributionCountAfterStart']==12, f"capital.contributionCountAfterStart: expected=12 actual={p['capital']['contributionCountAfterStart']!r}"
+          assert p['capital']['totalContributedJpy']==130000, f"capital.totalContributedJpy: expected=130000 actual={p['capital']['totalContributedJpy']!r}"
+          assert p['architecture']['portfolioMaxPositions']==2, f"architecture.portfolioMaxPositions: expected=2 actual={p['architecture']['portfolioMaxPositions']!r}"
           for name in ('NORMAL','SEVERE'):
-              assert p['results'][name]['grossVerification']['maxTotalPositions']<=2
-          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+              actual=p['results'][name]['grossVerification']['maxTotalPositions']
+              assert actual<=2, f"results.{name}.grossVerification.maxTotalPositions: expected<=2 actual={actual!r}"
+          expected_safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert p['safety']==expected_safety, f"safety: expected={expected_safety!r} actual={p['safety']!r}"
           print('FRESH_GLOBAL_MAX2_RESULT_START')
           print(json.dumps({'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'NORMAL':p['results']['NORMAL'],'SEVERE':p['results']['SEVERE'],'safety':p['safety']},ensure_ascii=False,indent=2))
           print('FRESH_GLOBAL_MAX2_RESULT_END')
