@@ -7,3 +7,5 @@ Purpose: trace the already-observed Gate Q3 modified event at original entry `17
 The diagnostic records only completed-H1 information already available to frozen V16 and does not choose or test a new candidate. It must identify the actual V16 probation termination reason and the state at that decision: `RESUME`, `RELATIVE_COST_FLOOR`, `DEADLINE`, or `ORIGINAL_EXIT`.
 
 No threshold, signal, position sizing, exit order, or promotion gate is changed. KuCoin remains unopened.
+
+The dedicated diagnostic workflow was registered on the research base branch before this synchronization commit; this line changes no research condition or strategy behavior.
