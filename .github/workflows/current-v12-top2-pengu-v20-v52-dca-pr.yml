@@ -209,6 +209,17 @@ jobs:
               annotate_failure(label, expected, actual)
           if failures:
               raise AssertionError('; '.join(f"{label}: expected={expected!r} actual={actual!r}" for label, expected, actual in failures))
+          metric_keys=('endingAssetJpy','netProfitJpy','returnOnContributedCapitalPct','timeWeightedReturnPct','moneyWeightedReturnXirrPct','maxDrawdownPctClosedEventTwr','trades','winRatePct','profitFactor')
+          def metric_summary(row):
+              return {key:row.get(key) for key in metric_keys} | {'bySleeve':row.get('bySleeve'),'v52Detail':row.get('v52Detail')}
+          result_summary={'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'NORMAL':metric_summary(p['results']['NORMAL']),'SEVERE':metric_summary(p['results']['SEVERE']),'checks':p['checks'],'safety':p['safety']}
+          result_text=json.dumps(result_summary,ensure_ascii=False,separators=(',',':'))
+          print(f'::notice title=Final backtest result::{result_text}', flush=True)
+          summary=os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary:
+              with open(summary, 'a', encoding='utf-8') as out:
+                  out.write('## Final backtest result\n\n')
+                  out.write('```json\n' + json.dumps(result_summary, ensure_ascii=False, indent=2) + '\n```\n')
           print('FRESH_GLOBAL_MAX2_RESULT_START')
           print(json.dumps({'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'NORMAL':p['results']['NORMAL'],'SEVERE':p['results']['SEVERE'],'safety':p['safety']},ensure_ascii=False,indent=2))
           print('FRESH_GLOBAL_MAX2_RESULT_END')
