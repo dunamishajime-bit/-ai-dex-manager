@@ -13,6 +13,33 @@ type JsonObject = Record<string, unknown>;
 type Direction = "LONG" | "SHORT";
 type StepState = "pass" | "blocked" | "pending" | "unknown";
 
+// Keep the read-only UI diagnosis aligned with the frozen V12 production
+// contract. The runner snapshot currently stores the ranked metrics, while
+// the per-gate booleans are intentionally not persisted there.
+const V12_SIGNAL_POLICY = Object.freeze({
+  minimumVolumeRatio: 0.9845,
+  minimumMomentumPct: 0.0227,
+  minimumEdgeToCostRatio: 6.0879,
+  normalRoundTripCostBps: 10,
+  neutralScoreThreshold: 1.4649,
+});
+
+type SanitizedCandidate = {
+  symbol?: string;
+  side?: string;
+  rank?: number;
+  score?: number;
+  momentum?: number;
+  volumeRatio?: number;
+  volatility?: number;
+  atr?: number;
+  signalGate?: {
+    status: "pass" | "blocked" | "unknown";
+    code?: string;
+    detail: string;
+  };
+};
+
 type PositionRisk = {
   symbol?: string;
   positionAmt?: string | number;
@@ -49,7 +76,39 @@ async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECIS
   }
 }
 
-function safeCandidate(value: unknown) {
+function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
+  const missingMetric = candidate.score === undefined || candidate.momentum === undefined || candidate.volumeRatio === undefined || !candidate.side;
+  if (missingMetric || !btcRegime) {
+    return { status: "unknown" as const, code: "SIGNAL_GATE_DATA_INCOMPLETE", detail: "発注SignalのGate判定材料がsnapshotに不足しています。" };
+  }
+
+  const failed: string[] = [];
+  const edgeThreshold = V12_SIGNAL_POLICY.minimumEdgeToCostRatio * (V12_SIGNAL_POLICY.normalRoundTripCostBps / 10_000);
+  if (candidate.volumeRatio < V12_SIGNAL_POLICY.minimumVolumeRatio) failed.push(`volumeRatio ${candidate.volumeRatio.toFixed(3)} < ${V12_SIGNAL_POLICY.minimumVolumeRatio.toFixed(4)}`);
+  if (Math.abs(candidate.momentum) < edgeThreshold) failed.push(`edge ${Math.abs(candidate.momentum).toFixed(4)} < ${edgeThreshold.toFixed(4)}`);
+  if (candidate.side === "LONG" && candidate.momentum < V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${candidate.momentum.toFixed(4)} < ${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
+  if (candidate.side === "SHORT" && candidate.momentum > -V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${candidate.momentum.toFixed(4)} > -${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
+
+  if (btcRegime === "LONG" && candidate.side !== "LONG") failed.push("BTC regime=LONG ですが候補sideがLONGではありません");
+  if (btcRegime === "SHORT" && candidate.side !== "SHORT") failed.push("BTC regime=SHORT ですが候補sideがSHORTではありません");
+  if (btcRegime === "NEUTRAL" && candidate.score < V12_SIGNAL_POLICY.neutralScoreThreshold) {
+    failed.push(`BTC regime=NEUTRAL、score ${candidate.score.toFixed(4)} < 必要値 ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}`);
+  }
+
+  if (failed.length) {
+    const btcBlock = btcRegime === "NEUTRAL" && candidate.score < V12_SIGNAL_POLICY.neutralScoreThreshold;
+    return {
+      status: "blocked" as const,
+      code: btcBlock ? "BTC_REGIME_DIRECTION_BLOCKED" : "V12_SIGNAL_GATE_BLOCKED",
+      detail: btcBlock
+        ? `BTCの判定基準未達：BTC regime=NEUTRALではscore ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}以上が必要ですが、${candidate.symbol || "候補"}は${candidate.score.toFixed(4)}です。`
+        : `発注Signal Gate未達：${failed.join(" / ")}`,
+    };
+  }
+  return { status: "pass" as const, detail: "記録された指標上、発注Signalの数値Gateは通過しています。" };
+}
+
+function safeCandidate(value: unknown): SanitizedCandidate | null {
   const row = asObject(value);
   if (!row) return null;
   return {
@@ -67,17 +126,18 @@ function safeCandidate(value: unknown) {
 function safeDecisionSnapshot(value: unknown) {
   const row = asObject(value);
   if (!row) return null;
+  const btcRegime = typeof row.btcRegime === "string" ? row.btcRegime : typeof row.regime === "string" ? row.regime : undefined;
   const selectionConfirmed = typeof row.symbol === "string" && typeof row.side === "string";
-  const candidates = Array.isArray(row.candidates)
+  const candidates = (Array.isArray(row.candidates)
     ? row.candidates.map(safeCandidate).filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate)).slice(0, 32)
-    : [];
+    : []).map((candidate) => ({ ...candidate, signalGate: diagnoseSignalGate(candidate, btcRegime) }));
   const selectedCandidate = candidates.find((candidate) => candidate.rank === 1) || candidates[0];
   return {
     strategyId: typeof row.strategyId === "string" ? row.strategyId : "V12_X1.00_ALL",
     symbol: typeof row.symbol === "string" ? row.symbol : selectedCandidate?.symbol,
     side: typeof row.side === "string" ? row.side : selectedCandidate?.side,
     regime: typeof row.regime === "string" ? row.regime : undefined,
-    btcRegime: typeof row.btcRegime === "string" ? row.btcRegime : undefined,
+    btcRegime,
     rank: Number.isFinite(Number(row.rank)) ? Number(row.rank) : selectedCandidate?.rank,
     score: Number.isFinite(Number(row.score)) ? Number(row.score) : selectedCandidate?.score,
     momentum: Number.isFinite(Number(row.momentum)) ? Number(row.momentum) : selectedCandidate?.momentum,
@@ -90,6 +150,7 @@ function safeDecisionSnapshot(value: unknown) {
     selectedAt: typeof row.selectedAt === "string" || Number.isFinite(Number(row.selectedAt)) ? row.selectedAt : undefined,
     rationale: typeof row.rationale === "string" ? row.rationale : typeof row.reason === "string" ? row.reason : undefined,
     selectionConfirmed,
+    signalGate: selectedCandidate?.signalGate,
     candidates,
   };
 }
@@ -172,7 +233,12 @@ function buildExecutionTrace(
 
   steps.push({ key: "candidate", label: "1. 候補選定", state: "pass", detail: `${decision.symbol} ${decision.side || "WAIT"} / Rank ${decision.rank ?? "-"} / score ${decision.score?.toFixed(4) ?? "-"}` });
   steps.push({ key: "confirmed-bar", label: "2. 確定2時間足", state: decision.referenceTs != null || decision.entryTs != null ? "pass" : "unknown", detail: decision.referenceTs != null ? `referenceTs ${new Date(decision.referenceTs).toLocaleString("ja-JP")}` : "確定足時刻未取得" });
-  steps.push({ key: "regime", label: "3. Regime / BTC regime", state: decision.regime && decision.btcRegime ? "pass" : "unknown", detail: `${decision.regime || "未取得"} / BTC ${decision.btcRegime || "未取得"}` });
+  steps.push({
+    key: "regime",
+    label: "3. Regime / BTC判定",
+    state: decision.signalGate?.status === "blocked" ? "blocked" : decision.regime && decision.btcRegime ? "pass" : "unknown",
+    detail: `${decision.regime || "未取得"} / BTC ${decision.btcRegime || "未取得"}${decision.signalGate?.status === "blocked" ? ` / ${decision.signalGate.detail}` : ""}`,
+  });
   steps.push({
     key: "risk",
     label: "4. 共有リスクGate",
@@ -197,7 +263,7 @@ function buildExecutionTrace(
   if (!decision.selectionConfirmed) {
     currentStage = "signal-gate-blocked";
     currentStageLabel = "候補順位のみ・発注Signal未成立";
-    summary = `${decision.symbol} はRank ${decision.rank ?? "-"}の候補ですが、発注Signalの全Gate合格が確認できないため発注されていません（NO_COMPLETED_BAR_SIGNAL）。`;
+    summary = `${decision.symbol} はRank ${decision.rank ?? "-"}の候補ですが、${decision.signalGate?.status === "blocked" ? decision.signalGate.detail : "発注Signalの全Gate合格が確認できないため"}発注されていません（NO_COMPLETED_BAR_SIGNAL）。`;
     nextAction = "次の完成済み2時間足で、volume・edge・momentum・BTC regimeを再評価します。";
   }
   if (matchingPosition) {
@@ -227,7 +293,7 @@ function buildExecutionTrace(
     nextAction = "daily loss / Kill Switchの解除条件を満たすまで注文Gateへ進みません。";
   }
 
-  steps.push({ key: "execution", label: "6. 発注・約定", state: currentStage === "filled" || currentStage === "filled-history" ? "pass" : currentStage === "pending" ? "pending" : "blocked", detail: currentStage === "filled" ? "Aster実建玉で約定確認済み" : currentStage === "filled-history" ? "履歴上の約定を確認" : currentStage === "pending" ? "注文処理中" : !decision.selectionConfirmed ? "NO_COMPLETED_BAR_SIGNAL：Rank/score上位でも発注Signal全Gate合格前は注文しません" : "候補選定だけでは発注・約定になりません" });
+  steps.push({ key: "execution", label: "6. 発注・約定", state: currentStage === "filled" || currentStage === "filled-history" ? "pass" : currentStage === "pending" ? "pending" : "blocked", detail: currentStage === "filled" ? "Aster実建玉で約定確認済み" : currentStage === "filled-history" ? "履歴上の約定を確認" : currentStage === "pending" ? "注文処理中" : !decision.selectionConfirmed ? `NO_COMPLETED_BAR_SIGNAL：${decision.signalGate?.status === "blocked" ? decision.signalGate.detail : "Rank/score上位でも発注Signal全Gate合格前は注文しません"}` : "候補選定だけでは発注・約定になりません" });
   return { currentStage, currentStageLabel, summary, nextAction, steps };
 }
 
