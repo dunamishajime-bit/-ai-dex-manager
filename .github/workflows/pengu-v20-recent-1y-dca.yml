@@ -1,0 +1,66 @@
+name: PENGU V20 Recent 1Y DCA Backtest
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-okx-binance-20260824
+    paths:
+      - 'docs/research/PENGU_V20_1Y_DCA_BT_20260824.md'
+      - 'scripts/research_pengu_v20_recent_1y_dca.py'
+      - '.github/workflows/pengu-v20-recent-1y-dca.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recent-1y-dca:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen V20 recent 1Y DCA backtest
+        run: python scripts/research_pengu_v20_recent_1y_dca.py
+      - name: Validate research-only contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-v20-recent-1y-dca/result.json'
+          x=json.load(open(p))
+          assert x['candidate']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          assert x['v20PreRegistrationSha']=='ad7cedb3cafaf9f9680e390112f72375d84b50ac'
+          assert x['dcaPreRegistrationSha']=='d2a8a7939b296913141658b66786289be7227c1f'
+          assert x['window']=={
+              'warmStart':'2025-07-01T00:00:00Z',
+              'evaluationStart':'2025-08-24T00:00:00Z',
+              'evaluationEnd':'2026-08-24T00:00:00Z',
+          }
+          assert x['capitalPlan']['initialCapital']==10000
+          assert x['capitalPlan']['monthlyContribution']==10000
+          assert x['capitalPlan']['scheduledContributionCount']==12
+          assert x['capitalPlan']['totalContributed']==130000
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          completed=[k for k,v in x['venues'].items() if v['status']=='COMPLETED']
+          assert completed, x['venues']
+          for name in completed:
+              d=x['venues'][name]['summary']['normal']['dca']
+              assert d['initialCapital']==10000
+              assert d['monthlyContribution']==10000
+              assert d['contributionCount']==12
+              assert d['totalContributed']==130000
+          print(json.dumps({'status':x['status'],'completedVenues':completed,'safety':x['safety']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v20-recent-1y-dca-${{ github.run_id }}
+          path: .research-state/pengu-v20-recent-1y-dca
+          if-no-files-found: error
