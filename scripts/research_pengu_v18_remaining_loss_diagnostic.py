@@ -59,20 +59,6 @@ def instrument(venue: str) -> Path:
         raise RuntimeError(f'Expected exactly one V18 resume return, got {text.count(old_resume)}')
     text = text.replace(old_resume, new_resume, 1)
 
-    old_final = 'return [{ ...trade, kind: "BASE" as const, progressFail: true }];\n}\n\nfunction metrics('
-    new_final = '''return [{ ...trade, kind: "BASE" as const, progressFail: true,
-    diagReason: "ORIGINAL_EXIT", diagDecisionTs: trade.exitTs,
-    diagProbationTs: rows[probationIndex].candle.openTime, diagLowWater: lowWater,
-    diagDecisionClose: null, diagEma72: null, diagRelativeReturn24h: null, diagBtcReturn24h: null,
-    diagCostCoverPrice: costCoverPrice, diagDeadlineBarWouldResume: null,
-    diagLateResumeTs: null, diagOriginalExitTs: trade.exitTs }];
-}
-
-function metrics('''
-    if text.count(old_final) != 1:
-        raise RuntimeError(f'Expected exactly one V18 final probation return, got {text.count(old_final)}')
-    text = text.replace(old_final, new_final, 1)
-
     marker = '    const candidate = baseline.flatMap((trade) => transformShort(trade, baseline, rows, funding, mode, rowIndex));'
     inject = marker + r'''
     const baselineByEntry = new Map(baseline.map((trade) => [trade.entryTs, trade]));
@@ -97,7 +83,7 @@ function metrics('''
           entryAtr24Ratio: trade.entryAtr24Ratio,
           btcEma168Distance: trade.btcEma168Distance,
           btcReturn24h: trade.btcReturn24h,
-          reason: trade.diagReason ?? null,
+          reason: trade.diagReason ?? (trade.exitTs === baseTrade.exitTs ? "ORIGINAL_EXIT" : null),
           decisionTs: trade.diagDecisionTs ?? null,
           decisionIso: trade.diagDecisionTs ? new Date(trade.diagDecisionTs).toISOString() : null,
           probationTs: trade.diagProbationTs ?? null,
