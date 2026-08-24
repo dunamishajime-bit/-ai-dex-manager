@@ -93,6 +93,7 @@ jobs:
 
       - name: Save three-year V12 ledger cache
         if: ${{ hashFiles('.research-state/fresh-3y/v12-top2-ledger.json') != '' }}
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: .research-state/fresh-3y/v12-top2-ledger.json
@@ -244,7 +245,7 @@ jobs:
               return {key:row.get(key) for key in keys} | {'bySleeve':row.get('bySleeve'),'v52Detail':row.get('v52Detail')}
           out={'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'data':p.get('data'),'NORMAL':summary(p['results']['NORMAL']),'SEVERE':summary(p['results']['SEVERE']),'checks':p['checks'],'safety':p['safety']}
           text=json.dumps(out,ensure_ascii=False,separators=(',',':'))
-          print(f'::notice title=Three-year backtest result::{text}', flush=True)
+          print(f'::warning title=Three-year backtest result::{text}', flush=True)
           summary_path=os.environ.get('GITHUB_STEP_SUMMARY')
           if summary_path:
               with open(summary_path,'a',encoding='utf-8') as f:
