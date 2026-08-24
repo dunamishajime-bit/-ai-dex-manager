@@ -27,11 +27,16 @@ def source_for(venue):
     text = text.replace(V18_PRE_SHA, PRE_SHA)
     text = text.replace(V18_NAME, V20_NAME)
 
-    # Insert the one preregistered V20 branch only after the existing V18 progression
-    # failure has been confirmed. probationIndex is already cursor+1, i.e. the next H1.
+    # Insert the one preregistered V20 branch only inside transformShort, after the
+    # existing V18 progression failure has been confirmed. probationIndex is already
+    # cursor+1, i.e. the next H1. replayBaseline has its own costPerSide declaration
+    # and must remain untouched.
+    fn_start = text.index('function transformShort(')
+    fn_end = text.index('\nfunction metrics(', fn_start)
+    transform = text[fn_start:fn_end]
     cost_marker = '  const costPerSide = BASE_FEE_PER_SIDE + (mode === "stress" ? STRESS_SLIPPAGE_PER_SIDE : 0);\n'
-    if text.count(cost_marker) != 1:
-        raise RuntimeError(f'Expected one V18 cost declaration, got {text.count(cost_marker)}')
+    if transform.count(cost_marker) != 1:
+        raise RuntimeError(f'Expected one transformShort V18 cost declaration, got {transform.count(cost_marker)}')
 
     v20_branch = cost_marker + r'''  const v20SizingState = trade.requestedGross === PENGU_DUAL_LS_V2.sizing.grossCap
     ? "CAP"
@@ -52,7 +57,8 @@ def source_for(venue):
       v20VolTargetFailureExit: true }];
   }
 '''
-    text = text.replace(cost_marker, v20_branch, 1)
+    transform = transform.replace(cost_marker, v20_branch, 1)
+    text = text[:fn_start] + transform + text[fn_end:]
     text = text.replace('pengu-short-v18-', 'pengu-short-v20-')
 
     out = Path(f'scripts/.pengu_v20_{venue.lower()}.ts')
