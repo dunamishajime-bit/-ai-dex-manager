@@ -1,5 +1,6 @@
 import { PENGU_DUAL_LS_V2 } from "@/config/penguDualLsV2Runtime";
 import type { DisDexV35Candle } from "@/lib/disdex-v35-signal-engine";
+import { advancePenguShortV20, type PenguShortV20Action } from "@/lib/pengu-short-v20";
 
 const HOUR = 3_600_000;
 
@@ -22,6 +23,26 @@ export interface PenguDualLsV2Position {
     gross: number;
     highWaterMark: number;
     lowWaterMark?: number;
+    /** Explicit entry lineage. Missing on v1 state is treated as legacy V2. */
+    entryVersion?: "LEGACY_V2" | "LONG_V2_FINAL" | "SHORT_V20";
+    shortV20?: PenguDualLsV2ShortV20State;
+}
+
+export type PenguDualLsV2SizingState = "CAP" | "FLOOR" | "VOL_TARGET";
+
+export interface PenguDualLsV2ShortV20State {
+    version: "SHORT_V20";
+    preRegistrationSha: "ad7cedb3cafaf9f9680e390112f72375d84b50ac";
+    requestedGross: number;
+    sizingState: PenguDualLsV2SizingState;
+    entryAtr24Ratio: number;
+    counterwind: boolean;
+    armed: boolean;
+    progressed: boolean;
+    lowWater: number;
+    phase: "TRACKING" | "PROBATION" | "RESUMED";
+    failureConfirmedTs?: number;
+    thesisResumedTs?: number;
 }
 
 export interface PenguDualLsV2Features {
@@ -54,7 +75,7 @@ export interface PenguDualLsV2Decision {
 
 export interface PenguDualLsV2ExitDecision {
     side: -1 | 1;
-    reason: "LONG_HARD_STOP" | "LONG_TRAILING_STOP" | "LONG_MAX_HOLD" | "SHORT_HARD_STOP" | "SHORT_TRAILING_STOP" | "SHORT_MAX_HOLD" | "SHARED_RISK_FLATTEN";
+    reason: "LONG_HARD_STOP" | "LONG_TRAILING_STOP" | "LONG_MAX_HOLD" | "SHORT_HARD_STOP" | "SHORT_TRAILING_STOP" | "SHORT_MAX_HOLD" | "SHORT_V20_VOL_TARGET_FAILURE_EXIT" | "SHORT_V20_DEADLINE_EXIT" | "SHARED_RISK_FLATTEN";
     stopPrice?: number;
     updatedPosition: PenguDualLsV2Position;
 }
@@ -80,6 +101,10 @@ export interface PenguDualLsV2Signal {
         shortSetupActive: boolean;
         shortSetupArmed: boolean;
         cooldownBlocked: boolean;
+        shortVersion?: "LEGACY_V2" | "SHORT_V20";
+        shortV20Phase?: "TRACKING" | "PROBATION" | "RESUMED";
+        shortV20SizingState?: PenguDualLsV2SizingState;
+        shortV20FailureConfirmedTs?: number;
     };
 }
 
@@ -331,6 +356,22 @@ export function evaluatePenguDualLsV2PositionBar(position: PenguDualLsV2Position
         return { updatedPosition: updated };
     }
     const previousBest = Math.min(position.entryPrice, position.lowWaterMark ?? position.entryPrice);
+    const v20State = position.entryVersion === "SHORT_V20" && position.shortV20?.version === "SHORT_V20" ? position.shortV20 : undefined;
+    const v20Active = Boolean(v20State);
+
+    // The V20 VOL_TARGET branch exits at the next H1 open after the completed
+    // H1 that confirmed progression failure. It intentionally precedes the
+    // baseline exit on this next bar, matching the research transform.
+    if (v20State?.phase === "PROBATION" && v20State.sizingState === "VOL_TARGET") {
+        const pending = advancePenguShortV20({ ...position, shortV20: v20State }, features).action;
+        if (pending?.kind === "VOL_TARGET_FAILURE_EXIT") {
+            return {
+                exit: { side: 1, reason: "SHORT_V20_VOL_TARGET_FAILURE_EXIT", stopPrice: pending.exitPrice, updatedPosition: position },
+                updatedPosition: position,
+            };
+        }
+    }
+
     const hard = position.entryPrice * (1 + PENGU_DUAL_LS_V2.short.hardStopPct);
     if (features.high >= hard) return { exit: { side: 1, reason: "SHORT_HARD_STOP", stopPrice: hard, updatedPosition: position }, updatedPosition: position };
     const trailing = previousBest * (1 + PENGU_DUAL_LS_V2.short.trailingRetracePct);
@@ -339,7 +380,24 @@ export function evaluatePenguDualLsV2PositionBar(position: PenguDualLsV2Position
     }
     const updated = { ...position, highWaterMark: position.highWaterMark, lowWaterMark: Math.min(previousBest, features.low) };
     if (features.referenceTs >= position.entryTs + (PENGU_DUAL_LS_V2.short.maxHoldHours - 1) * HOUR) return { exit: { side: 1, reason: "SHORT_MAX_HOLD", updatedPosition: updated }, updatedPosition: updated };
-    return { updatedPosition: updated };
+    if (!v20Active) return { updatedPosition: updated };
+
+    const advanced = advancePenguShortV20({ ...updated, shortV20: v20State! }, features);
+    const updatedWithV20 = { ...updated, shortV20: advanced.state };
+    const action: PenguShortV20Action | undefined = advanced.action;
+    if (action?.kind === "VOL_TARGET_FAILURE_EXIT") {
+        return {
+            exit: { side: 1, reason: "SHORT_V20_VOL_TARGET_FAILURE_EXIT", stopPrice: action.exitPrice, updatedPosition: updatedWithV20 },
+            updatedPosition: updatedWithV20,
+        };
+    }
+    if (action?.kind === "DEADLINE_EXIT") {
+        return {
+            exit: { side: 1, reason: "SHORT_V20_DEADLINE_EXIT", stopPrice: action.exitPrice, updatedPosition: updatedWithV20 },
+            updatedPosition: updatedWithV20,
+        };
+    }
+    return { updatedPosition: updatedWithV20 };
 }
 
 export function evaluatePenguDualLsV2Exit(position: PenguDualLsV2Position, features: PenguDualLsV2Features) {
@@ -349,6 +407,9 @@ export function evaluatePenguDualLsV2Exit(position: PenguDualLsV2Position, featu
 export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position?: PenguDualLsV2Position, now = Date.now(), cooldownUntilTs = 0): PenguDualLsV2Signal {
     const rows = buildPenguDualLsV2EvaluationSeries(history, now);
     const latest = rows.at(-1);
+    const shortVersion: "LEGACY_V2" | "SHORT_V20" | undefined = position?.side === -1
+        ? position.entryVersion === "SHORT_V20" ? "SHORT_V20" : "LEGACY_V2"
+        : undefined;
     const empty = (reason: string): PenguDualLsV2Signal => ({
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest?.features?.referenceTs ?? 0,
@@ -365,6 +426,10 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
             shortSetupActive: false,
             shortSetupArmed: false,
             cooldownBlocked: false,
+            shortVersion,
+            shortV20Phase: position?.shortV20?.phase,
+            shortV20SizingState: position?.shortV20?.sizingState,
+            shortV20FailureConfirmedTs: position?.shortV20?.failureConfirmedTs,
         },
     });
     if (!latest?.features) return empty("PENGU/BTCの確定1時間足履歴が不足しているためFail Closedです。");
@@ -380,6 +445,10 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         shortSetupActive: latest.shortSetupActive,
         shortSetupArmed: latest.shortSetupArmed,
         cooldownBlocked,
+        shortVersion,
+        shortV20Phase: position?.shortV20?.phase,
+        shortV20SizingState: position?.shortV20?.sizingState,
+        shortV20FailureConfirmedTs: position?.shortV20?.failureConfirmedTs,
     };
     const positionEvaluation = position ? evaluatePenguDualLsV2PositionBar(position, latest.features) : undefined;
     const exit = positionEvaluation?.exit;

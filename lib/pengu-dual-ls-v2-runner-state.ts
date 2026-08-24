@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
-import type { PenguDualLsV2Position, PenguDualLsV2Signal } from "@/lib/pengu-dual-ls-v2";
+import type { PenguDualLsV2Position, PenguDualLsV2ShortV20State, PenguDualLsV2Signal } from "@/lib/pengu-dual-ls-v2";
 
 export interface PenguDualLsV2PendingOrder {
     idempotencyKey: string;
@@ -18,6 +18,13 @@ export interface PenguDualLsV2PendingOrder {
     updatedAt: number;
     retryCount: number;
     lastError?: string;
+    entryVersion?: "LONG_V2_FINAL" | "SHORT_V20";
+    shortV20Seed?: {
+        requestedGross: number;
+        entryAtr24Ratio: number;
+        btcEma168Distance: number;
+        btcReturn24h: number;
+    };
 }
 
 export interface PenguDualLsV2RunnerFailure {
@@ -27,7 +34,7 @@ export interface PenguDualLsV2RunnerFailure {
 }
 
 export interface PenguDualLsV2RunnerState {
-    version: 1;
+    version: 2;
     strategyId: "PENGU_DUAL_LS_V2_FINAL";
     mode: PenguDualLsV2Mode;
     updatedAt: number;
@@ -44,7 +51,7 @@ export interface PenguDualLsV2RunnerState {
 
 function defaultState(mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
     return {
-        version: 1,
+        version: 2,
         strategyId: "PENGU_DUAL_LS_V2_FINAL",
         mode,
         updatedAt: Date.now(),
@@ -52,12 +59,40 @@ function defaultState(mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
     };
 }
 
+function validShortV20State(value: unknown): value is PenguDualLsV2ShortV20State {
+    if (!value || typeof value !== "object") return false;
+    const state = value as Partial<PenguDualLsV2ShortV20State>;
+    return state.version === "SHORT_V20"
+        && state.preRegistrationSha === "ad7cedb3cafaf9f9680e390112f72375d84b50ac"
+        && (state.sizingState === "CAP" || state.sizingState === "FLOOR" || state.sizingState === "VOL_TARGET")
+        && (state.phase === "TRACKING" || state.phase === "PROBATION" || state.phase === "RESUMED")
+        && typeof state.armed === "boolean"
+        && typeof state.progressed === "boolean"
+        && typeof state.counterwind === "boolean"
+        && Number.isFinite(state.requestedGross)
+        && Number.isFinite(state.entryAtr24Ratio)
+        && Number.isFinite(state.lowWater)
+        && (state.failureConfirmedTs === undefined || Number.isFinite(state.failureConfirmedTs))
+        && (state.thesisResumedTs === undefined || Number.isFinite(state.thesisResumedTs));
+}
+
 function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
     if (!value || typeof value !== "object") return defaultState(mode);
     const raw = value as Partial<PenguDualLsV2RunnerState>;
-    const position = raw.position && typeof raw.position === "object" ? raw.position as PenguDualLsV2Position : undefined;
+    const rawPosition = raw.position && typeof raw.position === "object" ? raw.position as PenguDualLsV2Position : undefined;
+    if (rawPosition?.entryVersion === "SHORT_V20" && !validShortV20State(rawPosition.shortV20)) {
+        throw new Error("PENGU Short V20 state is missing or invalid; fail closed for manual reconciliation.");
+    }
+    const position = rawPosition
+        ? {
+            ...rawPosition,
+            // State written before Short V20 is explicitly legacy and never
+            // receives the new Short state machine after restart.
+            entryVersion: rawPosition.entryVersion || "LEGACY_V2",
+        } satisfies PenguDualLsV2Position
+        : undefined;
     return {
-        version: 1,
+        version: 2,
         strategyId: "PENGU_DUAL_LS_V2_FINAL",
         mode,
         updatedAt: Number.isFinite(Number(raw.updatedAt)) ? Number(raw.updatedAt) : Date.now(),
@@ -100,7 +135,7 @@ export class FilePenguDualLsV2RunnerStateStore implements PenguDualLsV2RunnerSta
         await mkdir(dirname(this.path), { recursive: true });
         const value: PenguDualLsV2RunnerState = {
             ...state,
-            version: 1,
+            version: 2,
             strategyId: "PENGU_DUAL_LS_V2_FINAL",
             mode: this.mode,
             updatedAt: Date.now(),

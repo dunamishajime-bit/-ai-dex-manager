@@ -14,6 +14,13 @@ import { MemoryLiveRunnerLock } from "../lib/live-runner-state";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { PenguDualLsV2PortfolioRunner, normalizedPositionGross } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { MemoryPenguDualLsV2RunnerStateStore, createPenguDualLsV2RunnerState } from "../lib/pengu-dual-ls-v2-runner-state";
+import {
+    advancePenguShortV20,
+    classifyPenguShortV20SizingState,
+    createPenguShortV20State,
+    PENGU_SHORT_V20_CANDIDATE,
+    PENGU_SHORT_V20_PRE_REGISTRATION_SHA,
+} from "../lib/pengu-short-v20";
 
 const HOUR = 3_600_000;
 
@@ -46,6 +53,11 @@ assert.equal(PENGU_DUAL_LS_V2.short.maxHoldHours, 72);
 assert.equal(PENGU_DUAL_LS_V2.long.maxHoldHours, 120);
 assert.equal(PENGU_DUAL_LS_V2.cooldownHours, 6);
 assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.75);
+assert.equal(PENGU_SHORT_V20_CANDIDATE, "COUNTERWIND_VOL_TARGET_FAILURE_EXIT");
+assert.equal(PENGU_SHORT_V20_PRE_REGISTRATION_SHA, "ad7cedb3cafaf9f9680e390112f72375d84b50ac");
+assert.equal(classifyPenguShortV20SizingState(0.75), "CAP");
+assert.equal(classifyPenguShortV20SizingState(0.60), "FLOOR");
+assert.equal(classifyPenguShortV20SizingState(0.70), "VOL_TARGET");
 
 const defaultRuntime = resolvePenguDualLsV2Runtime({});
 assert.equal(defaultRuntime.mode, "SHADOW");
@@ -121,6 +133,53 @@ const shortPosition: PenguDualLsV2Position = { side: -1, entryTs: 100 * HOUR, en
 assert.equal(evaluatePenguDualLsV2Exit(shortPosition, features({ high: 108.01 }))?.reason, "SHORT_HARD_STOP");
 assert.equal(evaluatePenguDualLsV2Exit(shortPosition, features({ high: 87.37 }))?.reason, "SHORT_TRAILING_STOP");
 assert.equal(evaluatePenguDualLsV2Exit({ ...shortPosition, lowWaterMark: 100 }, features({ referenceTs: (100 + 71) * HOUR, high: 101 }))?.reason, "SHORT_MAX_HOLD");
+
+const v20Seed = createPenguShortV20State({
+    entryPrice: 100,
+    requestedGross: 0.70,
+    entryAtr24Ratio: 0.03,
+    btcEma168Distance: 0.01,
+    btcReturn24h: -0.01,
+});
+assert.equal(v20Seed.sizingState, "VOL_TARGET");
+assert.equal(v20Seed.counterwind, true);
+const v20Failure = advancePenguShortV20(
+    { entryPrice: 100, entryTs: 100 * HOUR, shortV20: v20Seed },
+    features({ referenceTs: 101 * HOUR, low: 97, close: 99, high: 100, btcReturn24h: -0.01 }),
+);
+assert.equal(v20Failure.state.phase, "PROBATION");
+assert.equal(v20Failure.state.failureConfirmedTs, 101 * HOUR);
+const v20NextOpen = advancePenguShortV20(
+    { entryPrice: 100, entryTs: 100 * HOUR, shortV20: v20Failure.state },
+    features({ referenceTs: 102 * HOUR, open: 98.25, low: 98, close: 98.5, high: 99, btcReturn24h: -0.01 }),
+);
+assert.equal(v20NextOpen.action?.kind, "VOL_TARGET_FAILURE_EXIT");
+assert.equal(v20NextOpen.action?.exitPrice, 98.25);
+
+const v20Position: PenguDualLsV2Position = {
+    ...shortPosition,
+    lowWaterMark: 100,
+    entryVersion: "SHORT_V20",
+    shortV20: v20Failure.state,
+};
+const v20Exit = evaluatePenguDualLsV2Exit(v20Position, features({ referenceTs: 102 * HOUR, open: 98.25, low: 98, close: 98.5, high: 99, btcReturn24h: -0.01 }));
+assert.equal(v20Exit?.reason, "SHORT_V20_VOL_TARGET_FAILURE_EXIT");
+assert.equal(v20Exit?.stopPrice, 98.25);
+
+const resumedSeed = createPenguShortV20State({ entryPrice: 100, requestedGross: 0.75, entryAtr24Ratio: 0.03, btcEma168Distance: 0.01, btcReturn24h: 0 });
+const resumedFailure = advancePenguShortV20(
+    { entryPrice: 100, entryTs: 100 * HOUR, shortV20: resumedSeed },
+    features({ referenceTs: 101 * HOUR, low: 97, close: 99, high: 100, btcReturn24h: 0 }),
+);
+const resumed = advancePenguShortV20(
+    { entryPrice: 100, entryTs: 100 * HOUR, shortV20: resumedFailure.state },
+    features({ referenceTs: 102 * HOUR, close: 96, low: 95, high: 98, ema72: 99, btcReturn24h: 0 }),
+);
+assert.equal(resumed.action?.kind, "THESIS_RESUMED");
+assert.equal(resumed.state.phase, "RESUMED");
+
+const legacyExit = evaluatePenguDualLsV2Exit(shortPosition, features({ referenceTs: 102 * HOUR, open: 98.25, low: 98, close: 98.5, high: 99, btcReturn24h: -0.01 }));
+assert.notEqual(legacyExit?.reason, "SHORT_V20_VOL_TARGET_FAILURE_EXIT");
 
 const state = createPenguDualLsV2RunnerState("PAPER");
 assert.equal(state.strategyId, "PENGU_DUAL_LS_V2_FINAL");

@@ -24,6 +24,7 @@ import type {
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import { createPenguShortV20State } from "@/lib/pengu-short-v20";
 
 const SYMBOL = "PENGUUSDT";
 
@@ -144,6 +145,8 @@ function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV
         gross: previous?.gross || 0,
         highWaterMark: side > 0 ? Math.max(previous?.highWaterMark || actual.entryPrice, actual.markPrice) : previous?.highWaterMark || actual.markPrice,
         lowWaterMark: side < 0 ? Math.min(previous?.lowWaterMark || actual.entryPrice, actual.markPrice) : previous?.lowWaterMark || actual.markPrice,
+        entryVersion: previous?.entryVersion || "LEGACY_V2",
+        shortV20: previous?.shortV20,
     };
 }
 
@@ -203,14 +206,19 @@ export class PenguDualLsV2PortfolioRunner {
             state.position = undefined;
             state.cooldownUntilTs = pending.referenceTs + 6 * 3_600_000;
         } else {
+            const entryPrice = result.averagePrice || pending.expectedPrice;
             state.position = {
                 side: pending.side === "BUY" ? 1 : -1,
                 entryTs: pending.referenceTs + 3_600_000,
-                entryPrice: result.averagePrice || pending.expectedPrice,
+                entryPrice,
                 quantity: result.executedQuantity,
                 gross: pending.targetGross,
-                highWaterMark: result.averagePrice || pending.expectedPrice,
-                lowWaterMark: result.averagePrice || pending.expectedPrice,
+                highWaterMark: entryPrice,
+                lowWaterMark: entryPrice,
+                entryVersion: pending.entryVersion || "LEGACY_V2",
+                shortV20: pending.shortV20Seed
+                    ? createPenguShortV20State({ entryPrice, ...pending.shortV20Seed })
+                    : undefined,
             };
         }
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
@@ -397,6 +405,15 @@ export class PenguDualLsV2PortfolioRunner {
                 createdAt: this.now(),
                 updatedAt: this.now(),
                 retryCount: 0,
+                entryVersion: !reduceOnly ? (signal.side < 0 ? "SHORT_V20" : "LONG_V2_FINAL") : undefined,
+                shortV20Seed: !reduceOnly && signal.side < 0 && signal.features
+                    ? {
+                        requestedGross: signal.targetGross,
+                        entryAtr24Ratio: signal.features.atr24Ratio,
+                        btcEma168Distance: signal.features.btcEma168Distance,
+                        btcReturn24h: signal.features.btcReturn24h,
+                    }
+                    : undefined,
             };
             state.pending = pending;
             await this.dependencies.stateStore.save(state);
