@@ -67,6 +67,7 @@ function safeCandidate(value: unknown) {
 function safeDecisionSnapshot(value: unknown) {
   const row = asObject(value);
   if (!row) return null;
+  const selectionConfirmed = typeof row.symbol === "string" && typeof row.side === "string";
   const candidates = Array.isArray(row.candidates)
     ? row.candidates.map(safeCandidate).filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate)).slice(0, 32)
     : [];
@@ -88,6 +89,7 @@ function safeDecisionSnapshot(value: unknown) {
     entryTs: Number.isFinite(Number(row.entryTs)) ? Number(row.entryTs) : undefined,
     selectedAt: typeof row.selectedAt === "string" || Number.isFinite(Number(row.selectedAt)) ? row.selectedAt : undefined,
     rationale: typeof row.rationale === "string" ? row.rationale : typeof row.reason === "string" ? row.reason : undefined,
+    selectionConfirmed,
     candidates,
   };
 }
@@ -192,6 +194,12 @@ function buildExecutionTrace(
   let currentStageLabel = "発火候補（未発火）";
   let summary = `${decision.symbol} は実Runnerで候補選定されていますが、実発火・約定は未確認です。`;
   let nextAction = "次回の確定2時間足で、建玉・容量・注文Gateを再判定します。";
+  if (!decision.selectionConfirmed) {
+    currentStage = "signal-gate-blocked";
+    currentStageLabel = "候補順位のみ・発注Signal未成立";
+    summary = `${decision.symbol} はRank ${decision.rank ?? "-"}の候補ですが、発注Signalの全Gate合格が確認できないため発注されていません（NO_COMPLETED_BAR_SIGNAL）。`;
+    nextAction = "次の完成済み2時間足で、volume・edge・momentum・BTC regimeを再評価します。";
+  }
   if (matchingPosition) {
     currentStage = "filled";
     currentStageLabel = "約定確認済み・保有中";
@@ -219,7 +227,7 @@ function buildExecutionTrace(
     nextAction = "daily loss / Kill Switchの解除条件を満たすまで注文Gateへ進みません。";
   }
 
-  steps.push({ key: "execution", label: "6. 発注・約定", state: currentStage === "filled" || currentStage === "filled-history" ? "pass" : currentStage === "pending" ? "pending" : "blocked", detail: currentStage === "filled" ? "Aster実建玉で約定確認済み" : currentStage === "filled-history" ? "履歴上の約定を確認" : currentStage === "pending" ? "注文処理中" : "候補選定だけでは発注・約定になりません" });
+  steps.push({ key: "execution", label: "6. 発注・約定", state: currentStage === "filled" || currentStage === "filled-history" ? "pass" : currentStage === "pending" ? "pending" : "blocked", detail: currentStage === "filled" ? "Aster実建玉で約定確認済み" : currentStage === "filled-history" ? "履歴上の約定を確認" : currentStage === "pending" ? "注文処理中" : !decision.selectionConfirmed ? "NO_COMPLETED_BAR_SIGNAL：Rank/score上位でも発注Signal全Gate合格前は注文しません" : "候補選定だけでは発注・約定になりません" });
   return { currentStage, currentStageLabel, summary, nextAction, steps };
 }
 
