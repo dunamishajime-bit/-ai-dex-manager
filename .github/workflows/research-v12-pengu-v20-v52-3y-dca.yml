@@ -197,6 +197,8 @@ jobs:
           replace_once('"grossVerification": {"maxV12Positions": max_v12_positions,', '"grossVerification": {"maxTotalPositions": max_total_positions, "maxV12Positions": max_v12_positions,')
           replace_once('"limits": {"v12Positions": V12_MAX_POSITIONS,', '"limits": {"portfolioPositions": PORTFOLIO_MAX_POSITIONS, "v12Positions": V12_MAX_POSITIONS,')
           replace_once('expected_period = {"startInclusive": "2025-08-01T00:00:00.000Z", "endExclusive": "2026-08-01T00:00:00.000Z"}', 'expected_period = {"startInclusive": "2023-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}')
+          replace_once('if v12.get("period") != expected_period:', 'if {k:v12.get("period",{}).get(k) for k in expected_period} != expected_period:')
+          replace_once('if pengu.get("period") != expected_period:', 'if {k:pengu.get("period",{}).get(k) for k in expected_period} != expected_period:')
           replace_once('abs(row["totalContributedJpy"] - 120_000.0)', 'abs(row["totalContributedJpy"] - 130_000.0)')
           replace_once('"checks": checks,', '"checks": checks,')
           replace_once('"architecture": {"v12Slots": V12_MAX_POSITIONS,', '"architecture": {"portfolioMaxPositions": PORTFOLIO_MAX_POSITIONS, "v12Slots": V12_MAX_POSITIONS,')
