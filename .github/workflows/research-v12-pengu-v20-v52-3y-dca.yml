@@ -103,31 +103,31 @@ jobs:
           replace_once('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2023-08-10T00:00:00Z");')
           replace_once('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-10T00:00:00Z");')
           replace_once('  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);', '''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);
-  const requiredRows = 250;
-  const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
-  const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
-  assert.ok(penguEvalRows >= requiredRows, `Insufficient available PENGU rows: ${penguEvalRows}/${expectedEvalRows}`);
-  assert.ok(btcEvalRows >= requiredRows, `Insufficient available BTC rows: ${btcEvalRows}/${expectedEvalRows}`);''')
+            const requiredRows = 250;
+            const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            assert.ok(penguEvalRows >= requiredRows, `Insufficient available PENGU rows: ${penguEvalRows}/${expectedEvalRows}`);
+            assert.ok(btcEvalRows >= requiredRows, `Insufficient available BTC rows: ${btcEvalRows}/${expectedEvalRows}`);''')
           replace_once('''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
-  const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
-  assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
-  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''', '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
-  const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
-  const alignedBtcTimestamps = new Set(alignedBtc.map((row) => row.openTime));
-  const alignedPengu = pengu.filter((row) => alignedBtcTimestamps.has(row.openTime));
-  assert.ok(alignedPengu.length >= 250, `Insufficient PENGU/BTC common rows: ${alignedPengu.length}`);
-  const history: PenguDualLsV2History = { pengu1h: alignedPengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''')
+            const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+            assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
+            const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''', '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
+            const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+            const alignedBtcTimestamps = new Set(alignedBtc.map((row) => row.openTime));
+            const alignedPengu = pengu.filter((row) => alignedBtcTimestamps.has(row.openTime));
+            assert.ok(alignedPengu.length >= 250, `Insufficient PENGU/BTC common rows: ${alignedPengu.length}`);
+            const history: PenguDualLsV2History = { pengu1h: alignedPengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''')
           replace_once('  assert.ok(normalMetrics.trades >= 25 && normalMetrics.trades <= 40, `Implausible Aster production replay trade count: ${normalMetrics.trades}`);', '  assert.ok(normalMetrics.trades >= 25, `Insufficient available-period PENGU replay trade count: ${normalMetrics.trades}`);')
           replace_once('    data: { penguRows: pengu.length, btcRows: btc.length, fundingRows: funding.length },', '''    data: {
-      penguRows: alignedPengu.length,
-      btcRows: alignedBtc.length,
-      fundingRows: funding.length,
-      availableStart: new Date(alignedPengu[0].openTime).toISOString(),
-      availableEndExclusive: new Date(alignedPengu.at(-1).openTime + HOUR).toISOString(),
-      requestedPeriodStart: new Date(EVAL_START).toISOString(),
-      requestedPeriodEndExclusive: new Date(EVAL_END).toISOString(),
-      coverageNote: "PENGU is included only from the first common timestamp available on Aster; no pre-listing data is synthesized.",
-    },''')
+            penguRows: alignedPengu.length,
+            btcRows: alignedBtc.length,
+            fundingRows: funding.length,
+            availableStart: new Date(alignedPengu[0].openTime).toISOString(),
+            availableEndExclusive: new Date(alignedPengu.at(-1).openTime + HOUR).toISOString(),
+            requestedPeriodStart: new Date(EVAL_START).toISOString(),
+            requestedPeriodEndExclusive: new Date(EVAL_END).toISOString(),
+            coverageNote: "PENGU is included only from the first common timestamp available on Aster; no pre-listing data is synthesized.",
+          },''')
           p.write_text(s)
           PY
           npx tsx scripts/.research_pengu_v20_3y.ts
@@ -148,19 +148,19 @@ jobs:
           replace_once('START = dt.datetime(2025, 8, 1, tzinfo=UTC)', 'START = dt.datetime(2023, 8, 10, tzinfo=UTC)')
           replace_once('END = dt.datetime(2026, 8, 1, tzinfo=UTC)', 'END = dt.datetime(2026, 8, 10, tzinfo=UTC)')
           replace_once('''def contribution_points() -> List[tuple[int, float]]:
-    points: List[tuple[int, float]] = []
-    cur = dt.datetime(2025, 9, 1, tzinfo=UTC)
-    while cur < END:
-        points.append((int(cur.timestamp() * 1000), MONTHLY_JPY))
-        cur = dt.datetime(cur.year + (cur.month == 12), 1 if cur.month == 12 else cur.month + 1, 1, tzinfo=UTC)
-    return points''', '''def contribution_points() -> List[tuple[int, float]]:
-    points: List[tuple[int, float]] = []
-    cur = dt.datetime(2023, 9, 1, tzinfo=UTC)
-    contribution_end = dt.datetime(2024, 9, 1, tzinfo=UTC)
-    while cur < contribution_end:
-        points.append((int(cur.timestamp() * 1000), MONTHLY_JPY))
-        cur = dt.datetime(cur.year + (cur.month == 12), 1 if cur.month == 12 else cur.month + 1, 1, tzinfo=UTC)
-    return points''')
+              points: List[tuple[int, float]] = []
+              cur = dt.datetime(2025, 9, 1, tzinfo=UTC)
+              while cur < END:
+                  points.append((int(cur.timestamp() * 1000), MONTHLY_JPY))
+                  cur = dt.datetime(cur.year + (cur.month == 12), 1 if cur.month == 12 else cur.month + 1, 1, tzinfo=UTC)
+              return points''', '''def contribution_points() -> List[tuple[int, float]]:
+              points: List[tuple[int, float]] = []
+              cur = dt.datetime(2023, 9, 1, tzinfo=UTC)
+              contribution_end = dt.datetime(2024, 9, 1, tzinfo=UTC)
+              while cur < contribution_end:
+                  points.append((int(cur.timestamp() * 1000), MONTHLY_JPY))
+                  cur = dt.datetime(cur.year + (cur.month == 12), 1 if cur.month == 12 else cur.month + 1, 1, tzinfo=UTC)
+              return points''')
           replace_once('TOTAL_GROSS_CAP = 2.5', 'PORTFOLIO_MAX_POSITIONS = 2\nTOTAL_GROSS_CAP = 2.5')
           replace_once('    max_v12_positions = 0\n    max_entry_v12_gross', '    max_v12_positions = 0\n    max_total_positions = 0\n    max_entry_v12_gross')
           replace_once('    def position_gross(position: dict | None) -> float:', '    def total_positions() -> int:\n        return len(active_v12) + (1 if active_pengu is not None else 0) + len(active_stock)\n\n    def position_gross(position: dict | None) -> float:')
