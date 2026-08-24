@@ -67,7 +67,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Restore three-year V12 ledger cache
+        uses: actions/cache@v4
+        with:
+          path: .research-state/fresh-3y/v12-top2-ledger.json
+          key: three-year-v12-ledger-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts') }}
+
       - name: Build three-year V12 Top2 ledger
+        if: ${{ hashFiles('.research-state/fresh-3y/v12-top2-ledger.json') == '' }}
         env:
           V12_TOP2_LEDGER_OUT: .research-state/fresh-3y/v12-top2-ledger.json
         run: |
@@ -83,6 +90,13 @@ jobs:
           PY
           npx tsx scripts/.research_current_top2_3y.ts
           rm -f scripts/.research_current_top2_3y.ts
+
+      - name: Save three-year V12 ledger cache
+        if: ${{ hashFiles('.research-state/fresh-3y/v12-top2-ledger.json') != '' }}
+        uses: actions/cache/save@v4
+        with:
+          path: .research-state/fresh-3y/v12-top2-ledger.json
+          key: three-year-v12-ledger-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts') }}
 
       - name: Build three-year PENGU V20 ledger with explicit coverage
         env:
@@ -132,7 +146,15 @@ jobs:
           },''')
           p.write_text(s)
           PY
-          npx tsx scripts/.research_pengu_v20_3y.ts
+          set +e
+          npx tsx scripts/.research_pengu_v20_3y.ts 2>&1 | tee .research-state/fresh-3y/pengu-v20-3y.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            while IFS= read -r line; do
+              echo "::error title=PENGU 3Y detail::$line"
+            done < <(tail -n 25 .research-state/fresh-3y/pengu-v20-3y.log)
+            exit "$status"
+          fi
           rm -f scripts/.research_pengu_v20_3y.ts
 
       - name: Create three-year Global Max2 DCA simulator
