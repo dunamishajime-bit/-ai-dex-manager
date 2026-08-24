@@ -170,20 +170,35 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import os
+
+          def contract_failure(label, expected, actual):
+              message=f"{label}: expected={expected!r} actual={actual!r}"
+              print(f"::error title=Step 15 contract check::{message}", flush=True)
+              summary=os.environ.get('GITHUB_STEP_SUMMARY')
+              if summary:
+                  with open(summary, 'a', encoding='utf-8') as out:
+                      out.write(f"### Step 15 contract assertion failed\n\n`{message}`\n")
+              raise AssertionError(message)
+
+          def check(condition, label, expected, actual):
+              if not condition:
+                  contract_failure(label, expected, actual)
+
           p=json.load(open('.research-state/fresh-global-max2/result.json'))
-          assert p['status']=='PASS_RESEARCH_ONLY', f"status: expected='PASS_RESEARCH_ONLY' actual={p['status']!r}"
+          check(p['status']=='PASS_RESEARCH_ONLY', 'status', 'PASS_RESEARCH_ONLY', p['status'])
           expected_period={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
-          assert p['period']==expected_period, f"period: expected={expected_period!r} actual={p['period']!r}"
-          assert p['capital']['initialJpy']==10000, f"capital.initialJpy: expected=10000 actual={p['capital']['initialJpy']!r}"
-          assert p['capital']['monthlyContributionJpy']==10000, f"capital.monthlyContributionJpy: expected=10000 actual={p['capital']['monthlyContributionJpy']!r}"
-          assert p['capital']['contributionCountAfterStart']==12, f"capital.contributionCountAfterStart: expected=12 actual={p['capital']['contributionCountAfterStart']!r}"
-          assert p['capital']['totalContributedJpy']==130000, f"capital.totalContributedJpy: expected=130000 actual={p['capital']['totalContributedJpy']!r}"
-          assert p['architecture']['portfolioMaxPositions']==2, f"architecture.portfolioMaxPositions: expected=2 actual={p['architecture']['portfolioMaxPositions']!r}"
+          check(p['period']==expected_period, 'period', expected_period, p['period'])
+          check(p['capital']['initialJpy']==10000, 'capital.initialJpy', 10000, p['capital']['initialJpy'])
+          check(p['capital']['monthlyContributionJpy']==10000, 'capital.monthlyContributionJpy', 10000, p['capital']['monthlyContributionJpy'])
+          check(p['capital']['contributionCountAfterStart']==12, 'capital.contributionCountAfterStart', 12, p['capital']['contributionCountAfterStart'])
+          check(p['capital']['totalContributedJpy']==130000, 'capital.totalContributedJpy', 130000, p['capital']['totalContributedJpy'])
+          check(p['architecture']['portfolioMaxPositions']==2, 'architecture.portfolioMaxPositions', 2, p['architecture']['portfolioMaxPositions'])
           for name in ('NORMAL','SEVERE'):
               actual=p['results'][name]['grossVerification']['maxTotalPositions']
-              assert actual<=2, f"results.{name}.grossVerification.maxTotalPositions: expected<=2 actual={actual!r}"
+              check(actual<=2, f'results.{name}.grossVerification.maxTotalPositions', '<=2', actual)
           expected_safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          assert p['safety']==expected_safety, f"safety: expected={expected_safety!r} actual={p['safety']!r}"
+          check(p['safety']==expected_safety, 'safety', expected_safety, p['safety'])
           print('FRESH_GLOBAL_MAX2_RESULT_START')
           print(json.dumps({'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'NORMAL':p['results']['NORMAL'],'SEVERE':p['results']['SEVERE'],'safety':p['safety']},ensure_ascii=False,indent=2))
           print('FRESH_GLOBAL_MAX2_RESULT_END')
