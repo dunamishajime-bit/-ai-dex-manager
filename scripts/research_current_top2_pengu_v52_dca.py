@@ -192,6 +192,15 @@ def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows:
     def position_gross(position: dict | None) -> float:
         return 0.0 if not position else finite(position.get("entryNotional")) / max(0.001, equity)
 
+    def entry_allocated_gross(position: dict | None) -> float:
+        """Return the contract allocation captured when this position entered.
+
+        Capacity gates use current equity, but entry-time contract verification
+        must not revalue an old allocation after later PnL changes equity.
+        Otherwise a compliant 0.75x PENGU entry can be reported above its cap.
+        """
+        return 0.0 if not position else max(0.0, finite(position.get("allocatedGrossAtEntry")))
+
     def v12_gross() -> float:
         return sum(position_gross(position) for position in active_v12.values())
 
@@ -203,7 +212,9 @@ def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows:
 
     def observe_entry() -> None:
         nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross
-        vg, pg, sg = v12_gross(), pengu_gross(), stock_gross()
+        vg = sum(entry_allocated_gross(position) for position in active_v12.values())
+        pg = entry_allocated_gross(active_pengu)
+        sg = sum(entry_allocated_gross(position) for position in active_stock.values())
         max_v12_positions = max(max_v12_positions, len(active_v12))
         max_entry_v12_gross = max(max_entry_v12_gross, vg)
         max_entry_pengu_gross = max(max_entry_pengu_gross, pg)
