@@ -17,7 +17,7 @@ Environment=DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
 Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
-ExecStart=/usr/bin/python3 scripts/disdex_v12_v52_live_engine.py --mode live --daemon
+ExecStart=/usr/bin/python3 scripts/disdex_v12_v52_live_engine_retry.py --mode live --daemon
 Restart=on-failure
 RestartSec=15s
 TimeoutStopSec=90s
