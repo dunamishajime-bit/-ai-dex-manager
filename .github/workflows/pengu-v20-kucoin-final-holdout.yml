@@ -1,0 +1,68 @@
+name: PENGU V20 KuCoin Final Holdout
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-okx-binance-20260824
+    paths:
+      - 'docs/research/PENGU_V20_KUCOIN_HOLDOUT_OPEN_20260824.md'
+      - 'scripts/research_pengu_short_v20_kucoin_holdout.py'
+      - '.github/workflows/pengu-v20-kucoin-final-holdout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  final-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen V20 once on KuCoin final holdout
+        run: python scripts/research_pengu_short_v20_kucoin_holdout.py
+      - name: Validate frozen holdout contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-short-v20-kucoin-holdout/holdout-result.json'
+          x=json.load(open(p))
+          assert x['candidate']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          assert x['preRegistrationSha']=='ad7cedb3cafaf9f9680e390112f72375d84b50ac'
+          assert x['holdoutOpenSha']=='8ed0f2b3399e0d24882c5852cb7b336f874f441f'
+          assert x['knownVenueFormalRun']==32683827489
+          assert x['knownVenuePasses']=={'OKX':True,'Binance':True,'GateDiagnostic':True,'Bitget':True}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert x['status'] in ('PASS_RESEARCH_ONLY','FAIL_RESEARCH_ONLY','BLOCKED_HOLDOUT_DATA','BLOCKED_HOLDOUT_ADAPTER')
+          if x['strategyPerformanceCalculated']:
+              assert x['kucoinMarketDataObserved'] is True
+              assert x['kucoinPerformanceObserved'] is True
+              assert isinstance(x['finalHoldoutPass'], bool)
+              assert x['status'] == ('PASS_RESEARCH_ONLY' if x['finalHoldoutPass'] else 'FAIL_RESEARCH_ONLY')
+          else:
+              assert x['kucoinPerformanceObserved'] is False
+              assert x['finalHoldoutPass'] is None
+              assert x['status'].startswith('BLOCKED_')
+          print(json.dumps({
+              'status':x['status'],
+              'strategyPerformanceCalculated':x['strategyPerformanceCalculated'],
+              'finalHoldoutPass':x['finalHoldoutPass'],
+              'kucoinMarketDataObserved':x['kucoinMarketDataObserved'],
+              'kucoinPerformanceObserved':x['kucoinPerformanceObserved'],
+              'safety':x['safety'],
+          },indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v20-kucoin-final-holdout-${{ github.run_id }}
+          path: .research-state/pengu-short-v20-kucoin-holdout
+          if-no-files-found: error
