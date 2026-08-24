@@ -1,0 +1,60 @@
+name: PENGU V18 Cross-Venue Loss Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-okx-binance-20260824
+    paths:
+      - 'scripts/research_pengu_v18_crossvenue_loss_diagnostic.py'
+      - '.github/workflows/pengu-v18-crossvenue-loss-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen V18 cross-venue loss diagnostic
+        run: python scripts/research_pengu_v18_crossvenue_loss_diagnostic.py
+      - name: Validate diagnostic-only contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-v18-crossvenue-loss-diagnostic/diagnostic.json'
+          x=json.load(open(p))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['diagnosticOnly'] is True
+          assert x['frozenCandidate']=='COUNTERWIND_REVERSIBLE_PROBATION_TO_DEADLINE'
+          assert x['frozenPreRegistrationSha']=='42bb6297d893125ad3b2de0a9e26dba342852223'
+          assert x['candidateCount']==0 and x['thresholdSweep'] is False
+          assert x['formalV18Parity']=={'OKX':True,'Binance':True,'Gate':True,'Bitget':True}
+          assert x['gateQ3Preserved'] is True
+          assert x['kucoinPerformanceObserved'] is False
+          assert x['kucoinHoldoutStatus']=='RESERVED_UNOPENED'
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({
+            'remainingNormalLossCounts':{v:len(x['summary'][v]['NORMAL']['remainingLosses']) for v in ('OKX','Binance','Bitget')},
+            'changedRemainingNormalLossCounts':{v:len(x['summary'][v]['NORMAL']['changedRemainingLosses']) for v in ('OKX','Binance','Bitget')},
+            'alignedThreeVenueNormalLossCount':len(x['alignedThreeVenueNormalLosses']),
+            'gateQ3Preserved':x['gateQ3Preserved'],
+            'kucoinHoldoutStatus':x['kucoinHoldoutStatus'],
+            'safety':x['safety']
+          },indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v18-crossvenue-loss-diagnostic-${{ github.run_id }}
+          path: .research-state/pengu-v18-crossvenue-loss-diagnostic
+          if-no-files-found: error

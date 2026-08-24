@@ -1,0 +1,69 @@
+name: PENGU V18 Structural State Diagnostic
+
+on:
+  push:
+    branches:
+      - research/pengu-v18-reversible-probation-20260824
+    paths:
+      - 'scripts/research_pengu_v18_structural_state_diagnostic.py'
+      - '.github/workflows/pengu-v18-structural-state-diagnostic.yml'
+  pull_request:
+    branches:
+      - research/pengu-short-v11-okx-binance-20260824
+    paths:
+      - 'scripts/research_pengu_v18_structural_state_diagnostic.py'
+      - '.github/workflows/pengu-v18-structural-state-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen V18 pre-existing categorical-state diagnostic
+        run: python scripts/research_pengu_v18_structural_state_diagnostic.py
+      - name: Validate diagnostic-only contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-v18-structural-state-diagnostic/diagnostic.json'
+          x=json.load(open(p))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['diagnosticOnly'] is True
+          assert x['frozenCandidate']=='COUNTERWIND_REVERSIBLE_PROBATION_TO_DEADLINE'
+          assert x['frozenPreRegistrationSha']=='42bb6297d893125ad3b2de0a9e26dba342852223'
+          assert x['candidateCount']==0
+          assert x['thresholdSweep'] is False
+          assert x['featureCombinationSearch'] is False
+          assert x['singleDimensionOnly'] is True
+          assert x['formalV18Parity']=={'OKX':True,'Binance':True,'Gate':True,'Bitget':True}
+          assert x['targetEntryTs']==1737792000000
+          assert x['gateQ3Preserved'] is True
+          assert x['kucoinPerformanceObserved'] is False
+          assert x['kucoinHoldoutStatus']=='RESERVED_UNOPENED'
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({
+            'singleDimensionSeparators':x['singleDimensionSeparators'],
+            'targetCategories':{v:x['analysis'][v]['target'] for v in ('OKX','Binance','Bitget')},
+            'gateQ3':x['gateQ3'],
+            'kucoinHoldoutStatus':x['kucoinHoldoutStatus'],
+            'safety':x['safety']
+          },indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v18-structural-state-diagnostic-${{ github.run_id }}
+          path: .research-state/pengu-v18-structural-state-diagnostic
+          if-no-files-found: error
