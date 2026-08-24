@@ -15,6 +15,7 @@ PRE_SHA = 'ad7cedb3cafaf9f9680e390112f72375d84b50ac'
 HOLDOUT_OPEN_SHA = '8ed0f2b3399e0d24882c5852cb7b336f874f441f'
 SYMBOL_NORMALIZATION_SHA = '1a5f75577b426386a5f76179e220c28ba00cf821'
 KLINE_GRANULARITY_SHA = 'ffcc138803f7d573d1ae3597288e3c66602c5ee9'
+KLINE_PAGE_LIMIT_SHA = 'c035ae232a947bdf10031a636f3bca1b99fff652'
 CANDIDATE = 'COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
 BASE_URL = 'https://api-futures.kucoin.com'
 HOUR = 3_600_000
@@ -68,7 +69,7 @@ def load_klines(symbol):
     verify_contract(symbol)
     by_ts, cursor, calls = {}, WARM_START, 0
     while cursor < EVAL_END:
-        end = min(EVAL_END - HOUR, cursor + 479 * HOUR)
+        end = min(EVAL_END - HOUR, cursor + 199 * HOUR)
         data = kucoin_get('/api/v1/kline/query', {
             'symbol':symbol, 'granularity':'60', 'from':str(cursor), 'to':str(end),
         })
@@ -150,7 +151,7 @@ def run_kucoin():
     finally: temp.unlink(missing_ok=True)
 
 def blocked_payload(status,exc,market_data_observed):
-    return {'status':status,'schema':'pengu-short-v20-kucoin-final-holdout/v1','candidate':CANDIDATE,'preRegistrationSha':PRE_SHA,'holdoutOpenSha':HOLDOUT_OPEN_SHA,'symbolNormalizationSha':SYMBOL_NORMALIZATION_SHA,'klineGranularitySha':KLINE_GRANULARITY_SHA,'knownVenueFormalRun':32683827489,'knownVenuePasses':{'OKX':True,'Binance':True,'GateDiagnostic':True,'Bitget':True},'kucoinMarketDataObserved':market_data_observed,'kucoinPerformanceObserved':False,'strategyPerformanceCalculated':False,'finalHoldoutPass':None,'error':str(exc),'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+    return {'status':status,'schema':'pengu-short-v20-kucoin-final-holdout/v1','candidate':CANDIDATE,'preRegistrationSha':PRE_SHA,'holdoutOpenSha':HOLDOUT_OPEN_SHA,'symbolNormalizationSha':SYMBOL_NORMALIZATION_SHA,'klineGranularitySha':KLINE_GRANULARITY_SHA,'klinePageLimitSha':KLINE_PAGE_LIMIT_SHA,'knownVenueFormalRun':32683827489,'knownVenuePasses':{'OKX':True,'Binance':True,'GateDiagnostic':True,'Bitget':True},'kucoinMarketDataObserved':market_data_observed,'kucoinPerformanceObserved':False,'strategyPerformanceCalculated':False,'finalHoldoutPass':None,'error':str(exc),'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
 
 def main():
     market_data_observed=False
@@ -163,7 +164,7 @@ def main():
     except HoldoutAdapterBlock as exc:
         payload=blocked_payload('BLOCKED_HOLDOUT_ADAPTER',exc,True); (ROOT/'holdout-result.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n'); print(json.dumps(payload,ensure_ascii=False,indent=2)); return
     final_pass=bool(result.get('promotion',{}).get('pass'))
-    payload={'status':'PASS_RESEARCH_ONLY' if final_pass else 'FAIL_RESEARCH_ONLY','schema':'pengu-short-v20-kucoin-final-holdout/v1','candidate':CANDIDATE,'preRegistrationSha':PRE_SHA,'holdoutOpenSha':HOLDOUT_OPEN_SHA,'symbolNormalizationSha':SYMBOL_NORMALIZATION_SHA,'klineGranularitySha':KLINE_GRANULARITY_SHA,'knownVenueFormalRun':32683827489,'knownVenuePasses':{'OKX':True,'Binance':True,'GateDiagnostic':True,'Bitget':True},'data':data,'kucoinMarketDataObserved':True,'kucoinPerformanceObserved':True,'strategyPerformanceCalculated':True,'finalHoldoutPass':final_pass,'kucoin':result,'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+    payload={'status':'PASS_RESEARCH_ONLY' if final_pass else 'FAIL_RESEARCH_ONLY','schema':'pengu-short-v20-kucoin-final-holdout/v1','candidate':CANDIDATE,'preRegistrationSha':PRE_SHA,'holdoutOpenSha':HOLDOUT_OPEN_SHA,'symbolNormalizationSha':SYMBOL_NORMALIZATION_SHA,'klineGranularitySha':KLINE_GRANULARITY_SHA,'klinePageLimitSha':KLINE_PAGE_LIMIT_SHA,'knownVenueFormalRun':32683827489,'knownVenuePasses':{'OKX':True,'Binance':True,'GateDiagnostic':True,'Bitget':True},'data':data,'kucoinMarketDataObserved':True,'kucoinPerformanceObserved':True,'strategyPerformanceCalculated':True,'finalHoldoutPass':final_pass,'kucoin':result,'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
     (ROOT/'holdout-result.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'status':payload['status'],'finalHoldoutPass':final_pass,'promotion':result.get('promotion'),'normal':result.get('results',{}).get('NORMAL'),'stress':result.get('results',{}).get('STRESS'),'data':data,'safety':payload['safety']},ensure_ascii=False,indent=2))
 
