@@ -108,10 +108,7 @@ jobs:
             const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
             assert.ok(penguEvalRows >= requiredRows, `Insufficient available PENGU rows: ${penguEvalRows}/${expectedEvalRows}`);
             assert.ok(btcEvalRows >= requiredRows, `Insufficient available BTC rows: ${btcEvalRows}/${expectedEvalRows}`);''')
-          replace_once('''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
-            const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
-            assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
-            const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''', '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
+          replace_once('''  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''', '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
             const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
             const alignedBtcTimestamps = new Set(alignedBtc.map((row) => row.openTime));
             const alignedPengu = pengu.filter((row) => alignedBtcTimestamps.has(row.openTime));
