@@ -16,3 +16,5 @@ Record only pre-existing frozen state and outcomes:
 - arm/failure snapshots for existing relative return, BTC return, ATR, volume ratio, RSI and EMA distance
 
 No candidate is selected or tested by this diagnostic. No thresholds are introduced. KuCoin performance remains unopened.
+
+The dedicated workflow was registered on the research base branch before this synchronization commit; this sentence changes no research condition or strategy behavior.
