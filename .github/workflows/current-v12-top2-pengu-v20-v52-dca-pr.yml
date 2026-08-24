@@ -79,6 +79,7 @@ jobs:
           Path('scripts/.fresh_v12_0810.ts').write_text(s)
           PY
           set -o pipefail
+          trap 'rc=$?; echo "::error title=Step 10 V12 ledger::V12 ledger generation failed with exit code ${rc}"; if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then echo "### Step 10 V12 ledger generation failed (exit ${rc})" >> "$GITHUB_STEP_SUMMARY"; fi; exit ${rc}' ERR
           npx tsx scripts/.fresh_v12_0810.ts 2>&1 | tee .research-state/fresh-global-max2/v12.log
           rm -f scripts/.fresh_v12_0810.ts
 
