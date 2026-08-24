@@ -40,6 +40,7 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -69,6 +70,22 @@ jobs:
         run: |
           mkdir -p .research-state/formal-v20-dca
           npx tsx scripts/research_current_v12_top2_ledger.ts 2>&1 | tee .research-state/formal-v20-dca/v12-top2.log
+
+      - name: Normalize V12 period metadata only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('.research-state/formal-v20-dca/v12-top2-ledger.json')
+          p=json.loads(path.read_text())
+          period=p.get('period',{})
+          assert period.get('startInclusive')=='2025-08-01T00:00:00.000Z', period
+          assert period.get('endExclusive')=='2026-08-01T00:00:00.000Z', period
+          period.pop('calendarDays',None)
+          p['period']=period
+          path.write_text(json.dumps(p,ensure_ascii=False,indent=2)+'\n')
+          print({'period':period,'metadataOnly':True})
+          PY
 
       - name: Build PENGU Long V2 Short V20 ledger
         env:
