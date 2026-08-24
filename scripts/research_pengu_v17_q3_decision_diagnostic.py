@@ -32,6 +32,27 @@ def main():
     text = text.replace('COUNTERWIND_CLOSE_PROBATION_COST_FLOOR_RESUME', 'COUNTERWIND_STRUCTURAL_RECLAIM_PROBATION')
     text = text.replace('9873c0b3b345f2273b5fe3c6dde4a08ae741f9ef', '9b02e7ec708d02c712d7577cbd50cc548492d311')
 
+    marker = '  (trade as any).diagnostic = diagnosticBase;'
+    injection = r'''  diagnosticBase.probationTrajectory = Array.from({ length: Math.max(0, Math.min(originalExitIndex, entryIndex + 18) - failureCursor + 1) }, (_, offset) => {
+    const cursor = failureCursor + offset;
+    const s: any = snapshot(cursor);
+    const f: any = rows[cursor]?.features;
+    const bar: any = rows[cursor]?.candle;
+    return {
+      ...s,
+      hoursFromEntry: (bar.openTime - trade.entryTs) / HOUR,
+      costFloorCovered: bar.close >= costCoverPrice,
+      relativeReversed: f.relativeReturn24h >= 0,
+      ema72Reclaimed: bar.close >= f.ema72,
+      structuralFailure: bar.close >= costCoverPrice && f.relativeReturn24h >= 0 && bar.close >= f.ema72,
+      thesisResumed: bar.close < lowWater && bar.close < f.ema72 && f.btcReturn24h >= 0,
+    };
+  });
+  (trade as any).diagnostic = diagnosticBase;'''
+    if marker not in text:
+        raise RuntimeError('diagnostic marker missing')
+    text = text.replace(marker, injection, 1)
+
     source = Path('scripts/.pengu_v17_q3_gate_diag.ts')
     source.write_text(text)
     raw = ROOT / 'raw.json'
@@ -68,6 +89,7 @@ def main():
             'entryToFailure': d.get('entryToFailure'),
             'failureToDecision': d.get('failureToDecision'),
             'entryToDecision': d.get('entryToDecision'),
+            'probationTrajectory': d.get('probationTrajectory', []),
         })
 
     out = {
