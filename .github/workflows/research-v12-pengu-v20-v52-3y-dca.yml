@@ -173,6 +173,15 @@ jobs:
           replace_once('START = dt.datetime(2025, 8, 1, tzinfo=UTC)', 'START = dt.datetime(2023, 8, 10, tzinfo=UTC)')
           replace_once('END = dt.datetime(2026, 8, 1, tzinfo=UTC)', 'END = dt.datetime(2026, 8, 10, tzinfo=UTC)')
           replace_once('def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:', 'def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:\n    v12_trades = [trade for trade in v12_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    pengu_trades = [trade for trade in pengu_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v11_rows = [trade for trade in v11_rows if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v50_rows = [trade for trade in v50_rows if int(trade.get("exitTs", END_MS)) <= END_MS]')
+          replace_once('''    def v12_gross() -> float:
+                  return sum(position_gross(position) for position in active_v12.values())''', '''    def v12_gross() -> float:
+                  return sum(entry_allocated_gross(position) for position in active_v12.values())''')
+          replace_once('''    def pengu_gross() -> float:
+                  return position_gross(active_pengu)''', '''    def pengu_gross() -> float:
+                  return entry_allocated_gross(active_pengu)''')
+          replace_once('''    def stock_gross() -> float:
+                  return sum(position_gross(position) for position in active_stock.values())''', '''    def stock_gross() -> float:
+                  return sum(entry_allocated_gross(position) for position in active_stock.values())''')
           replace_once('''    for ts, amount in contribution_points():
                   push(ts, -1, {"kind": "CONTRIBUTION", "amount": amount})''', '''    for key in month_keys():
                   month_start = dt.datetime.strptime(key, "%Y-%m").replace(tzinfo=UTC)
