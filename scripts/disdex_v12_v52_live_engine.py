@@ -33,6 +33,15 @@ V50_WINDOWS = legacy.legacy.V50_WINDOWS
 V11_SLOT = legacy.V11_SLOT
 V50_SLOT = legacy.V50_SLOT
 
+# Research-locked V50 gate profile from PR #189 / Actions run 32774114948.
+# Only strategy selectivity is changed here. Reference quality, freshness,
+# source-clock, spread, depth, adverse-move, Gross, Margin Guard, daily-loss and
+# Kill Switch gates remain unchanged and fail closed.
+V50_MIN_ENTRY_BASIS_BPS = 65.0
+V50_MIN_NET_EDGE_BPS = 5.0
+legacy.legacy.V50_MIN_ENTRY_BASIS_BPS = V50_MIN_ENTRY_BASIS_BPS
+legacy.legacy.V50_MIN_NET_EDGE_BPS = V50_MIN_NET_EDGE_BPS
+
 
 class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
     """V52 stock sleeve for the V12 + PENGU V2 crypto composition.
@@ -103,6 +112,76 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             self._account_critical_depth = 0
             if acquired:
                 self.account_order_lock.release()
+
+    def _record_gate_diagnostics(
+        self,
+        strategy: str,
+        candidate: dict | None,
+        rejections: dict,
+        *,
+        window: str | None = None,
+    ) -> None:
+        """Persist daily V52 rejection counters without changing any gate result."""
+        ny_day = str(self.state.get("nyDay") or dt.datetime.now(tz=legacy.base.NY).date().isoformat())
+        diagnostics = self.state.get("v52GateDiagnostics")
+        if not isinstance(diagnostics, dict) or diagnostics.get("nyDay") != ny_day:
+            diagnostics = {
+                "nyDay": ny_day,
+                "decisions": 0,
+                "acceptedCandidates": 0,
+                "rejections": {},
+                "byStrategy": {},
+            }
+
+        diagnostics["decisions"] = int(diagnostics.get("decisions", 0)) + 1
+        if candidate:
+            diagnostics["acceptedCandidates"] = int(diagnostics.get("acceptedCandidates", 0)) + 1
+
+        rejection_counts = diagnostics.setdefault("rejections", {})
+        strategy_counts = diagnostics.setdefault("byStrategy", {}).setdefault(
+            strategy,
+            {"decisions": 0, "acceptedCandidates": 0, "rejections": {}},
+        )
+        strategy_counts["decisions"] = int(strategy_counts.get("decisions", 0)) + 1
+        if candidate:
+            strategy_counts["acceptedCandidates"] = int(strategy_counts.get("acceptedCandidates", 0)) + 1
+
+        strategy_rejections = strategy_counts.setdefault("rejections", {})
+        for symbol, reasons in (rejections or {}).items():
+            values = reasons if isinstance(reasons, (list, tuple)) else [reasons]
+            for raw_reason in values:
+                reason = str(raw_reason or "UNKNOWN_REJECTION")
+                rejection_counts[reason] = int(rejection_counts.get(reason, 0)) + 1
+                strategy_rejections[reason] = int(strategy_rejections.get(reason, 0)) + 1
+
+        candidate_summary = None
+        if candidate:
+            candidate_summary = {
+                "symbol": candidate.get("symbol"),
+                "route": candidate.get("route"),
+                "basisBps": candidate.get("basisBps"),
+                "signalBasisBps": candidate.get("signalBasisBps"),
+            }
+        diagnostics["lastDecision"] = {
+            "at": legacy.base.now_ms(),
+            "strategy": strategy,
+            "window": window,
+            "candidate": candidate_summary,
+        }
+        self.state["v52GateDiagnostics"] = diagnostics
+        self.save()
+        self.log(
+            "v52-gate-diagnostics",
+            strategy=strategy,
+            window=window,
+            candidate=candidate_summary,
+            dailyDecisions=diagnostics["decisions"],
+            dailyAcceptedCandidates=diagnostics["acceptedCandidates"],
+            dailyRejections=dict(sorted(rejection_counts.items())),
+            v50MinimumEntryBasisBps=V50_MIN_ENTRY_BASIS_BPS,
+            v50MinimumNetEdgeBps=V50_MIN_NET_EDGE_BPS,
+            ordersSent=False,
+        )
 
     def gross_snapshot(self) -> dict:
         """Use authenticated full-universe positions for the final V52 gross check."""
@@ -263,6 +342,7 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
                 allocatedGross=gross,
                 grossSnapshot=snapshot,
             )
+            self._record_gate_diagnostics(V11_SLOT, candidate, rejections)
             if candidate:
                 self.open_basis_position(V11_SLOT, candidate, gross)
 
@@ -290,6 +370,7 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
                 allocatedGross=gross,
                 grossSnapshot=snapshot,
             )
+            self._record_gate_diagnostics(V50_SLOT, candidate, rejections, window=window)
             if candidate:
                 self.open_basis_position(V50_SLOT, candidate, gross)
 
@@ -308,6 +389,10 @@ def self_test() -> None:
     assert abs(snapshot["stockNotionalUsd"] - 500.0) < EPSILON
     assert abs(snapshot["totalGross"] - 0.55) < EPSILON
     assert engine.v96_requires_margin() is False
+    assert V50_MIN_ENTRY_BASIS_BPS == 65.0
+    assert V50_MIN_NET_EDGE_BPS == 5.0
+    assert legacy.legacy.V50_MIN_ENTRY_BASIS_BPS == 65.0
+    assert legacy.legacy.V50_MIN_NET_EDGE_BPS == 5.0
     try:
         engine.gross_snapshot_from_rows(account, rows + [{"symbol": "UNKNOWNUSDT", "positionAmt": "1", "markPrice": "1"}])
     except RuntimeError as error:
@@ -349,6 +434,23 @@ def self_test() -> None:
     assert ":P1:" in fake.acquires[0]
     assert fake.releases == 1
     assert engine._account_critical_depth == 0
+
+    diagnostics_log = []
+    engine.state = {"nyDay": "2026-08-24"}
+    engine.save = lambda: None
+    engine.log = lambda event, **payload: diagnostics_log.append((event, payload))
+    engine._record_gate_diagnostics(
+        V50_SLOT,
+        None,
+        {"META": ["SPREAD_OVER_20", "DEPTH_BELOW_2X"], "MSFT": ["SPREAD_OVER_20"]},
+        window="11:30",
+    )
+    diag = engine.state["v52GateDiagnostics"]
+    assert diag["decisions"] == 1
+    assert diag["acceptedCandidates"] == 0
+    assert diag["rejections"]["SPREAD_OVER_20"] == 2
+    assert diag["rejections"]["DEPTH_BELOW_2X"] == 1
+    assert diagnostics_log[-1][0] == "v52-gate-diagnostics"
 
     # A missing/stale V12+PENGU crypto-risk document must no longer stop V52
     # before V52 market-data/signal processing. This is an offline no-order test.
