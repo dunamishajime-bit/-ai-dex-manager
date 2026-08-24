@@ -1,0 +1,50 @@
+name: PENGU V17 Q3 Decision Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-okx-binance-20260824
+    paths:
+      - 'scripts/research_pengu_v17_q3_decision_diagnostic.py'
+      - '.github/workflows/pengu-v17-q3-decision-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Trace frozen V17 Gate Q3 decision
+        run: python scripts/research_pengu_v17_q3_decision_diagnostic.py
+      - name: Validate diagnostic-only contract
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-v17-q3-decision-diagnostic/diagnostic.json'
+          x=json.load(open(p))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['diagnosticOnly'] is True
+          assert x['candidate']=='COUNTERWIND_STRUCTURAL_RECLAIM_PROBATION'
+          assert x['preRegistrationSha']=='9b02e7ec708d02c712d7577cbd50cc548492d311'
+          assert x['venue']=='Gate' and x['targetEntryTs']==1771560000000
+          assert x['kucoinPerformanceObserved'] is False
+          assert len(x['results'])==2
+          print(json.dumps({'results':x['results'],'safety':x['safety']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v17-q3-decision-diagnostic-${{ github.run_id }}
+          path: .research-state/pengu-v17-q3-decision-diagnostic
+          if-no-files-found: error
