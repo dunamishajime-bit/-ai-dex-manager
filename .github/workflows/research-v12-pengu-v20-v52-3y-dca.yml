@@ -173,6 +173,18 @@ jobs:
           replace_once('START = dt.datetime(2025, 8, 1, tzinfo=UTC)', 'START = dt.datetime(2023, 8, 10, tzinfo=UTC)')
           replace_once('END = dt.datetime(2026, 8, 1, tzinfo=UTC)', 'END = dt.datetime(2026, 8, 10, tzinfo=UTC)')
           replace_once('def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:', 'def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:\n    v12_trades = [trade for trade in v12_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    pengu_trades = [trade for trade in pengu_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v11_rows = [trade for trade in v11_rows if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v50_rows = [trade for trade in v50_rows if int(trade.get("exitTs", END_MS)) <= END_MS]')
+          replace_once('''    for ts, amount in contribution_points():
+        push(ts, -1, {"kind": "CONTRIBUTION", "amount": amount})''', '''    for key in month_keys():
+        month_start = dt.datetime.strptime(key, "%Y-%m").replace(tzinfo=UTC)
+        push(int(month_start.timestamp() * 1000), -2, {"kind": "MONTH_OPEN", "key": key})
+    for ts, amount in contribution_points():
+        push(ts, -1, {"kind": "CONTRIBUTION", "amount": amount})''')
+          replace_once('''        kind = str(item["kind"])
+        if kind == "CONTRIBUTION":''', '''        kind = str(item["kind"])
+        if kind == "MONTH_OPEN":
+            monthly_open.setdefault(str(item["key"]), equity)
+            continue
+        if kind == "CONTRIBUTION":''')
           replace_once('''def contribution_points() -> List[tuple[int, float]]:
               points: List[tuple[int, float]] = []
               cur = dt.datetime(2025, 9, 1, tzinfo=UTC)
