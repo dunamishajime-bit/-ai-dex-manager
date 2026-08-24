@@ -1,0 +1,93 @@
+name: V52 Parallel Opportunity V41 Conservative Research
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_lab_v52_parallel_opportunity_v4.py'
+      - 'scripts/research_lab_v52_parallel_opportunity_v41_conservative.py'
+      - '.github/workflows/v52-parallel-opportunity-v41-conservative-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout frozen V11 cash and Aster source
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 dependency source
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/perp-research-usdm
+            .cache/v96-crypto-v11-v13d-one-year
+          key: v52-parallel-opportunity-v41-${{ runner.os }}-${{ hashFiles('scripts/research_lab_v52_parallel_opportunity_v41_conservative.py') }}
+          restore-keys: |
+            v52-parallel-opportunity-v4-${{ runner.os }}-
+            v52-pareto-frequency-v3-${{ runner.os }}-
+            v52-frequency-expansion-v2-${{ runner.os }}-
+      - name: Compile and self-test
+        run: |
+          python -m py_compile scripts/research_lab_v52_parallel_opportunity_v4.py scripts/research_lab_v52_parallel_opportunity_v41_conservative.py
+          python scripts/research_lab_v52_parallel_opportunity_v41_conservative.py --self-test
+      - name: Run precommitted conservative challenger
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/v52-parallel-opportunity-v41
+          python scripts/research_lab_v52_parallel_opportunity_v41_conservative.py \
+            --cache-root .cache/aster-only-v39-overnight-open \
+            --output-dir .research-state/v52-parallel-opportunity-v41 \
+            2>&1 | tee .research-state/v52-parallel-opportunity-v41/backtest.log
+      - name: Validate research-only contract
+        run: |
+          test -s .research-state/v52-parallel-opportunity-v41/result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/v52-parallel-opportunity-v41/result.json').read_text())
+          assert p['strategyId']=='DISDEX_V52_PARALLEL_OPPORTUNITY_V41_CONSERVATIVE_RESEARCH_ONLY'
+          assert p['precommit']['candidateChosenBeforeThisHoldoutInspection'] is True
+          assert p['precommit']['thresholdRelaxationVsCurrent'] is False
+          assert p['baseline']['spec']['minimum_basis_bps']==65.0
+          assert p['challenger']['spec']['minimum_basis_bps']==65.0
+          assert p['baseline']['spec']['minimum_net_edge_bps']==5.0
+          assert p['challenger']['spec']['minimum_net_edge_bps']==5.0
+          assert p['recommendation']['productionChangeAllowed'] is False
+          assert p['recommendation']['liveChanged'] is False
+          assert p['safety']['orderSubmissionAllowed'] is False
+          print(json.dumps({
+              'status':p['status'],
+              'baseline':p['baseline']['full']['NORMAL'],
+              'challenger':p['challenger']['full']['NORMAL'],
+              'challengerP95':p['challenger']['full']['P95'],
+              'baselineHoldout':p['baseline']['holdout']['NORMAL'],
+              'challengerHoldout':p['challenger']['holdout']['NORMAL'],
+              'checks':p['finalChecks'],
+          },indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v52-parallel-opportunity-v41-${{ github.run_id }}
+          path: .research-state/v52-parallel-opportunity-v41
+          retention-days: 90
+          if-no-files-found: warn
