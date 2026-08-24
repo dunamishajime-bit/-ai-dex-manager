@@ -196,6 +196,10 @@ jobs:
           check(p['capital']['contributionCountAfterStart']==12, 'capital.contributionCountAfterStart', 12, p['capital']['contributionCountAfterStart'])
           check(p['capital']['totalContributedJpy']==130000, 'capital.totalContributedJpy', 130000, p['capital']['totalContributedJpy'])
           check(p['architecture']['portfolioMaxPositions']==2, 'architecture.portfolioMaxPositions', 2, p['architecture']['portfolioMaxPositions'])
+          failed_internal={key:value for key,value in p.get('checks',{}).items() if value is not True}
+          if failed_internal:
+              context={name:{'checks':{key:value for key,value in p.get('checks',{}).items() if key.startswith(name + '_')},'totalContributedJpy':p['results'][name].get('totalContributedJpy'),'grossVerification':p['results'][name].get('grossVerification')} for name in ('NORMAL','SEVERE')}
+              annotate_failure('internal result checks', 'all checks True', {'failed':failed_internal,'context':context})
           for name in ('NORMAL','SEVERE'):
               actual=p['results'][name]['grossVerification']['maxTotalPositions']
               check(actual<=2, f'results.{name}.grossVerification.maxTotalPositions', '<=2', actual)
