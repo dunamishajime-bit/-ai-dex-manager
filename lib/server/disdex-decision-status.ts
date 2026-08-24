@@ -24,6 +24,20 @@ export type DecisionStatusSnapshot = {
   refreshIntervalMinutes: 60;
   checkedAt: string;
   source: string;
+  runtime: {
+    checkedAt: string;
+    units: Array<{
+      id: string;
+      label: string;
+      status: "LIVE";
+      releaseSha: string;
+      venue: string;
+      timeframe: string;
+      entryPolicy: string;
+      protection: string;
+      note: string;
+    }>;
+  };
   v12: { items: DecisionStatusItem[] };
   v52: { marketOpen: boolean; marketLabel: string; items: DecisionStatusItem[] };
   error?: string;
@@ -32,6 +46,47 @@ export type DecisionStatusSnapshot = {
 let cache: { expiresAt: number; snapshot: DecisionStatusSnapshot } | null = null;
 const CACHE_TTL_MS = 55 * 60 * 1000;
 const ASTER_BASE_URL = process.env.ASTER_API_BASE_URL?.trim() || "https://fapi.asterdex.com";
+
+function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runtime"] {
+  return {
+    checkedAt,
+    units: [
+      {
+        id: "V12_X1.00_ALL",
+        label: "V12 X1.00 ALL Top2",
+        status: "LIVE",
+        releaseSha: config.vpsObservedReleases.v12,
+        venue: "Aster Futures V3",
+        timeframe: "完成済み1時間足 → 2時間足",
+        entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。合計1.50x / 1件1.00x",
+        protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch",
+        note: "HPの候補表示は補助観測。実runnerは欠損・時刻不整合・risk異常時にFail Closedします。",
+      },
+      {
+        id: "PENGU_DUAL_LS_V2_FINAL",
+        label: "PENGU Dual LS V2 / Short V20",
+        status: "LIVE",
+        releaseSha: config.vpsObservedReleases.pengu,
+        venue: "Aster PENGUUSDT",
+        timeframe: "完成済みPENGU/BTC 1時間足",
+        entryPolicy: "Long/Short条件成立後、次の1時間足。Long/Short各0.75x、保有中の追加・反転なし",
+        protection: "Long/Short hard stop・trailing・max hold。新規ShortのみV20 failure/deadline exit",
+        note: "Short V20は既存Legacy Shortを誤移行せず、VOL_TARGET failureは次H1始値で処理します。",
+      },
+      {
+        id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY",
+        label: "V52 Aster-only",
+        status: "LIVE",
+        releaseSha: config.vpsObservedReleases.v52,
+        venue: "Aster-only stock sleeves",
+        timeframe: "米国株時間・V11_EQ / V50 window",
+        entryPolicy: "basis・収束・コスト・板・データ鮮度を確認。V50は11:30/12:30/13:30 NY",
+        protection: "最大保有時間、日次損失上限、建玉照合、共有Kill Switch",
+        note: "市場時間外またはshared risk DAY_MISMATCH時は新規entryを行いません。",
+      },
+    ],
+  };
+}
 
 function finite(value: unknown) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : 0; }
 
@@ -88,8 +143,8 @@ function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reas
   return { symbol, sleeve, rank: 0, score: 0, scoreMax: 4, status: "取得不能", side: "WAIT", reason, checkedAt, source: "Aster 公開市場データ" };
 }
 
-export async function loadDecisionStatus(): Promise<DecisionStatusSnapshot> {
-  const now = Date.now(); if (cache && cache.expiresAt > now) return cache.snapshot;
+export async function loadDecisionStatus(options: { force?: boolean } = {}): Promise<DecisionStatusSnapshot> {
+  const now = Date.now(); if (!options.force && cache && cache.expiresAt > now) return cache.snapshot;
   const checkedAt = new Date(now).toISOString(); const v12Items: DecisionStatusItem[] = [];
   const market = newYorkMarketClock(new Date(now)); const v52Items: DecisionStatusItem[] = []; const errors: string[] = [];
   for (const symbol of config.v12Symbols) {
@@ -103,6 +158,6 @@ export async function loadDecisionStatus(): Promise<DecisionStatusSnapshot> {
     catch { errors.push(symbol); v52Items.push(unavailableItem(symbol, "V52", checkedAt, "対象時間内ですが、Asterから株式市場データを取得できません。")); }
   }
   v52Items.sort((left, right) => right.score - left.score || left.symbol.localeCompare(right.symbol)); v52Items.forEach((item, index) => { item.rank = index + 1; });
-  const snapshot: DecisionStatusSnapshot = { ok: errors.length === 0, readOnly: true, refreshIntervalMinutes: 60, checkedAt, source: "Aster public market data / V12 V52 read-only reference monitor", v12: { items: v12Items }, v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items }, error: errors.length ? "一部銘柄の判定データを取得できません。" : undefined };
+  const snapshot: DecisionStatusSnapshot = { ok: errors.length === 0, readOnly: true, refreshIntervalMinutes: 60, checkedAt, source: "Aster public market data / VPS observed V12 PENGU V20 V52 runtime", runtime: runtimeSnapshot(checkedAt), v12: { items: v12Items }, v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items }, error: errors.length ? "一部銘柄の判定データを取得できません。" : undefined };
   cache = { expiresAt: now + CACHE_TTL_MS, snapshot }; return snapshot;
 }
