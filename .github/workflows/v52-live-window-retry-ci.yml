@@ -65,8 +65,9 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           wf = Path('.github/workflows/v52-live-window-retry-ci.yml').read_text()
-          forbidden = ['ASTER_API_KEY:', 'ASTER_API_SECRET:', 'DISDEX_LIVE_ACKNOWLEDGEMENT:']
-          for token in forbidden:
-              assert token not in wf
+          lines = [line.strip() for line in wf.splitlines()]
+          forbidden_env_names = ['ASTER_API_KEY', 'ASTER_API_SECRET', 'DISDEX_LIVE_ACKNOWLEDGEMENT']
+          for name in forbidden_env_names:
+              assert not any(line.startswith(name + ':') for line in lines)
           print('offline-only CI contract: PASS')
           PY
