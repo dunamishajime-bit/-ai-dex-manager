@@ -63,6 +63,13 @@ jobs:
           path: .v52-top2-research
           fetch-depth: 1
 
+      - name: Wire frozen V11 and V13 dependencies into Top2 research root
+        run: |
+          ln -s ../.stock-research/.v11 .v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v52-top2-research/.v13
+          test -f .v52-top2-research/.v11/research/v96_stock_perp_fade_enhancement_v11.py
+          test -f .v52-top2-research/.v13/research/v96_stock_v13_edge_floor_tournament.py
+
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -78,10 +85,14 @@ jobs:
           path: |
             .cache/perp-research-usdm
             .cache/aster-only-v39-overnight-open
+            .cache/v96-crypto-v11-v13d-one-year
             .stock-research/.cache/perp-research-usdm
             .v52-top2-research/.cache/perp-research-usdm
+            .v52-top2-research/.cache/v96-crypto-v11-v13d-one-year
           key: v12-pengu-v52-top2-allocation-${{ runner.os }}-${{ hashFiles('scripts/research_v12_pengu_v52_top2_allocation_bt.py', 'scripts/research_v12_combined_bt_ledger.ts', 'scripts/research_pengu_v2_aster_ledger.ts') }}
           restore-keys: |
+            v52-parallel-opportunity-v41-${{ runner.os }}-
+            v52-parallel-opportunity-v4-${{ runner.os }}-
             v12-v52-pengu-v2-combined-
             v26-latency-aware-3y-usdm-v1-20260816
             v96-v52-dual-slot-one-year-${{ runner.os }}-
