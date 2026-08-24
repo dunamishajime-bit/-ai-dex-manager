@@ -217,9 +217,10 @@ jobs:
             --output-dir .research-state/fresh-3y 2>&1 | tee .research-state/fresh-3y/simulator-3y.log
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
+            echo "::error title=3Y simulator exit::status=$status"
             while IFS= read -r line; do
-              echo "::error title=3Y simulator detail::$line"
-            done < <(tail -n 25 .research-state/fresh-3y/simulator-3y.log)
+              echo "::error title=3Y simulator exception::$line"
+            done < <(grep -E 'Traceback|Assertion|RuntimeError|KeyError|ValueError|TypeError|IndexError|FAILED|unexpected|missing' .research-state/fresh-3y/simulator-3y.log | tail -n 40 || true)
             exit "$status"
           fi
           rm -f scripts/.fresh_three_year_global_max2.py
