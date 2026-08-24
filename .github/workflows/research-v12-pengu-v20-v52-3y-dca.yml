@@ -99,6 +99,7 @@ jobs:
               if s.count(old) != 1:
                   raise SystemExit(f'patch marker count={s.count(old)}: {old[:120]}')
               s = s.replace(old, new, 1)
+          replace_once('import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";', 'import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";\nimport { createPenguShortV20State } from "../lib/pengu-short-v20";')
           replace_once('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2023-02-10T00:00:00Z");')
           replace_once('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2023-08-10T00:00:00Z");')
           replace_once('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-10T00:00:00Z");')
@@ -115,6 +116,10 @@ jobs:
             assert.ok(alignedPengu.length >= 250, `Insufficient PENGU/BTC common rows: ${alignedPengu.length}`);
             const history: PenguDualLsV2History = { pengu1h: alignedPengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''')
           replace_once('  assert.ok(normalMetrics.trades >= 25 && normalMetrics.trades <= 40, `Implausible Aster production replay trade count: ${normalMetrics.trades}`);', '  assert.ok(normalMetrics.trades >= 25, `Insufficient available-period PENGU replay trade count: ${normalMetrics.trades}`);')
+          replace_once('    let position: PenguDualLsV2Position = {', '    const requestedGross = targetGrossForAtr(rows[index].features!.atr24Ratio);\n    let position: PenguDualLsV2Position = {')
+          replace_once('      gross: targetGrossForAtr(rows[index].features!.atr24Ratio),', '      gross: requestedGross,')
+          replace_once('      lowWaterMark: entry.open,\n    };', '      lowWaterMark: entry.open,\n      entryVersion: side === "S" ? "SHORT_V20" : "LONG_V2_FINAL",\n      shortV20: side === "S" ? createPenguShortV20State({\n        entryPrice: entry.open,\n        requestedGross,\n        entryAtr24Ratio: rows[index].features!.atr24Ratio,\n        btcEma168Distance: rows[index].features!.btcEma168Distance,\n        btcReturn24h: rows[index].features!.btcReturn24h,\n      }) : undefined,\n    };')
+          replace_once('    strategyId: PENGU_DUAL_LS_V2.id,\n    researchOnly: true,', '    strategyId: PENGU_DUAL_LS_V2.id,\n    longVariant: "PENGU_DUAL_LS_V2_FINAL",\n    shortVariant: "COUNTERWIND_VOL_TARGET_FAILURE_EXIT",\n    shortPreRegistrationSha: "ad7cedb3cafaf9f9680e390112f72375d84b50ac",\n    researchOnly: true,')
           replace_once('    data: { penguRows: pengu.length, btcRows: btc.length, fundingRows: funding.length },', '''    data: {
             penguRows: alignedPengu.length,
             btcRows: alignedBtc.length,
