@@ -36,5 +36,8 @@ The diagnostic may identify a structural failure mode only if it is visible acro
 
 Any later candidate must be a new pre-registered structure, not a parameter adjustment to V12-V15, and must be tested on a performance-unobserved holdout venue after its pre-registration SHA exists.
 
+## Workflow registration
+The diagnostic workflow is registered on the research base branch before this synchronization commit. This line changes no research condition or strategy behavior.
+
 ## Safety
 `mode=RESEARCH_ONLY`, `ordersSent=false`, `liveChanged=false`, `vpsChanged=false`, `productionChanged=false`.
