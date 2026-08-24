@@ -170,6 +170,11 @@ def main():
     v18.v17.v16.v15.v12.v11runner.load_binance_funding()
     okx = run('OKX')
     binance = run('Binance')
+
+    # Match frozen V18 preparation: materialize the already-opened Bitget data caches before replay.
+    v18.v17.v16.v15.dense_bitget_candles('PENGUUSDT')
+    v18.v17.v16.v15.dense_bitget_candles('BTCUSDT')
+    v18.v17.v16.v15.v13.load_bitget_funding()
     bitget = run('Bitget')
 
     events = {
