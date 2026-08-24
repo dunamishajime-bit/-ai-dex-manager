@@ -13,6 +13,7 @@ ROOT = Path('.research-state/pengu-short-v20-kucoin-holdout')
 ROOT.mkdir(parents=True, exist_ok=True)
 PRE_SHA = 'ad7cedb3cafaf9f9680e390112f72375d84b50ac'
 HOLDOUT_OPEN_SHA = '8ed0f2b3399e0d24882c5852cb7b336f874f441f'
+SYMBOL_NORMALIZATION_SHA = '1a5f75577b426386a5f76179e220c28ba00cf821'
 CANDIDATE = 'COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
 BASE_URL = 'https://api-futures.kucoin.com'
 HOUR = 3_600_000
@@ -180,7 +181,7 @@ def load_funding():
 
 
 KUCOIN_FUNCS = r'''async function downloadCandles(symbol: string) {
-  const mapped = symbol === "PENGUUSDT" ? "PENGUUSDTM" : symbol === "BTCUSDT" ? "BTCUSDTM" : symbol;
+  const mapped = symbol === "PENGUUSDT" ? "PENGUUSDTM" : symbol === "BTCUSDT" ? "XBTUSDTM" : symbol;
   const raw = JSON.parse(await fs.readFile(`.research-state/pengu-short-v20-kucoin-holdout/kucoin-${mapped}.json`, "utf8")) as DisDexV35Candle[];
   return raw.filter((candle) => candle.openTime >= WARM_START && candle.openTime < EVAL_END);
 }
@@ -242,6 +243,7 @@ def blocked_payload(status, exc, market_data_observed):
         'candidate': CANDIDATE,
         'preRegistrationSha': PRE_SHA,
         'holdoutOpenSha': HOLDOUT_OPEN_SHA,
+        'symbolNormalizationSha': SYMBOL_NORMALIZATION_SHA,
         'knownVenueFormalRun': 32683827489,
         'knownVenuePasses': {'OKX': True, 'Binance': True, 'GateDiagnostic': True, 'Bitget': True},
         'kucoinMarketDataObserved': market_data_observed,
@@ -258,12 +260,12 @@ def main():
     try:
         contracts = {
             'pengu': verify_contract('PENGUUSDTM'),
-            'btc': verify_contract('BTCUSDTM'),
+            'btc': verify_contract('XBTUSDTM'),
         }
         market_data_observed = True
         data = {
             'pengu': load_klines('PENGUUSDTM'),
-            'btc': load_klines('BTCUSDTM'),
+            'btc': load_klines('XBTUSDTM'),
             'funding': load_funding(),
             'contracts': contracts,
         }
@@ -288,6 +290,7 @@ def main():
         'candidate': CANDIDATE,
         'preRegistrationSha': PRE_SHA,
         'holdoutOpenSha': HOLDOUT_OPEN_SHA,
+        'symbolNormalizationSha': SYMBOL_NORMALIZATION_SHA,
         'knownVenueFormalRun': 32683827489,
         'knownVenuePasses': {'OKX': True, 'Binance': True, 'GateDiagnostic': True, 'Bitget': True},
         'data': data,
