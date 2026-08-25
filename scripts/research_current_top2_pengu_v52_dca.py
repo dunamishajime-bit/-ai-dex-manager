@@ -202,13 +202,13 @@ def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows:
         return 0.0 if not position else max(0.0, finite(position.get("allocatedGrossAtEntry")))
 
     def v12_gross() -> float:
-        return sum(position_gross(position) for position in active_v12.values())
+        return sum(entry_allocated_gross(position) for position in active_v12.values())
 
     def pengu_gross() -> float:
-        return position_gross(active_pengu)
+        return entry_allocated_gross(active_pengu)
 
     def stock_gross() -> float:
-        return sum(position_gross(position) for position in active_stock.values())
+        return sum(entry_allocated_gross(position) for position in active_stock.values())
 
     def observe_entry() -> None:
         nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross
