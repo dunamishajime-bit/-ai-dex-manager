@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
+import { Activity, ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
@@ -27,6 +27,28 @@ function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: s
       </div>
       <p className="mt-2 text-[11px] leading-5 text-white/72">{detail}</p>
     </Link>
+  );
+}
+
+function V52Top2Summary() {
+  const policy = config.v52Top2Policy;
+  return (
+    <section className="panel-gold rounded-[30px] p-4 md:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-sm font-black"><Activity className="h-4 w-4 text-gold-100" />V52 Top2 LIVE / retry-aware</div>
+          <p className="mt-2 text-[12px] leading-6 text-white/78">最新VPS実装のV50候補選定を、固定snapshotのままHPに表示します。候補順位だけでは発注せず、basis・net edge・データ品質・容量Gateを通過した候補だけが発注経路へ進みます。</p>
+        </div>
+        <Link href="/decision-status" className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold text-emerald-100">判定状況で詳細を見る</Link>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">Top2配分</div><div className="mt-1 text-sm font-bold text-white">Rank1 {policy.rank1RequestedGross.toFixed(2)}x / Rank2 {policy.rank2RequestedGross.toFixed(2)}x</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">容量上限</div><div className="mt-1 text-sm font-bold text-white">最大{policy.maxConcurrentPositions}建玉 / 日次{policy.maxDailyEntries}件</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">発火Gate</div><div className="mt-1 text-sm font-bold text-white">basis ≥ {policy.minEntryBasisBps}bps / net edge ≥ {policy.minNetEdgeBps}bps</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">判定窓</div><div className="mt-1 text-sm font-bold text-white">NY {policy.windowsNy.join(" / ")}（各{policy.entryWindowSeconds}秒）</div></div>
+      </div>
+      <p className="mt-3 text-[11px] leading-5 text-white/58">一時的なデータ品質・板・spread拒否は窓内retry、basis/net edge不足やSIGN_CHANGED等は最終拒否。注文・取消・決済はHPから実行しません。</p>
+    </section>
   );
 }
 
@@ -70,6 +92,7 @@ export default function HomePage() {
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
         </section>
+        <V52Top2Summary />
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
           <div className="mt-3 space-y-2">
