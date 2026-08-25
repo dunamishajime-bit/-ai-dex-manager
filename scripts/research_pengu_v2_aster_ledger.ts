@@ -242,7 +242,10 @@ async function main() {
     downloadFunding("PENGUUSDT"),
   ]);
   assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);
-  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };
+  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
+  const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+  assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
+  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };
   const normal = replay(history, funding, "normal");
   const stress = replay(history, funding, "stress");
   const normalMetrics = metrics(normal);
