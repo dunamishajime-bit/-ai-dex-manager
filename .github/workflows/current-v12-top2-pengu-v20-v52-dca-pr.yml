@@ -1,0 +1,226 @@
+name: Fresh V12 PENGU V20 V52 Global Max2 DCA BT
+
+on:
+  pull_request:
+    branches:
+      - codex/pengu-short-v20-production
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore historical market-data caches only
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: fresh-global-max2-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts','lib/pengu-short-v20.ts') }}
+          restore-keys: |
+            current-v12-top2-pengu-v20-v52-dca-
+            current-v12-top2-pengu-v52-dca-
+            v12-top2-gross15-
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - run: npm ci
+
+      - name: Build fresh V12 Top2 exact 2025-08-10 to 2026-08-10 ledger
+        env:
+          V12_TOP2_LEDGER_OUT: .research-state/fresh-global-max2/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/fresh-global-max2
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('scripts/research_current_v12_top2_ledger.ts').read_text()
+          for old,new in [
+            ('"const START = Date.UTC(2025, 7, 1);"','"const START = Date.UTC(2025, 7, 10);"'),
+            ('"const END = Date.UTC(2026, 7, 1);"','"const END = Date.UTC(2026, 7, 10);"'),
+          ]:
+              assert s.count(old)==1,(old,s.count(old))
+              s=s.replace(old,new,1)
+          Path('scripts/.fresh_v12_0810.ts').write_text(s)
+          PY
+          set -o pipefail
+          trap 'rc=$?; echo "::error title=Step 10 V12 ledger::V12 ledger generation failed with exit code ${rc}"; if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then echo "### Step 10 V12 ledger generation failed (exit ${rc})" >> "$GITHUB_STEP_SUMMARY"; fi; exit ${rc}' ERR
+          npx tsx scripts/.fresh_v12_0810.ts 2>&1 | tee .research-state/fresh-global-max2/v12.log
+          rm -f scripts/.fresh_v12_0810.ts
+
+      - name: Build fresh PENGU Long Dual LS V2 Short formal V20 exact ledger
+        env:
+          PRODUCTION_SOURCE_SHA: 8ca3f52b0da705c20aa4033769da1af869202f70
+          PENGU_LEDGER_OUT: .research-state/fresh-global-max2/pengu-v20-ledger.json
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('scripts/build_pengu_long_v2_short_v20_aster_ledger.py').read_text()
+          for old,new in [
+            ("'const EVAL_START = Date.parse(\"2025-08-01T00:00:00Z\");'", "'const EVAL_START = Date.parse(\"2025-08-10T00:00:00Z\");'"),
+            ("'const EVAL_END = Date.parse(\"2026-08-01T00:00:00Z\");'", "'const EVAL_END = Date.parse(\"2026-08-10T00:00:00Z\");'"),
+          ]:
+              assert s.count(old)==1,(old,s.count(old))
+              s=s.replace(old,new,1)
+          Path('scripts/.fresh_pengu_v20_0810.py').write_text(s)
+          PY
+          set -o pipefail
+          python scripts/.fresh_pengu_v20_0810.py 2>&1 | tee .research-state/fresh-global-max2/pengu.log
+          rm -f scripts/.fresh_pengu_v20_0810.py
+
+      - name: Validate exact source lineage
+        run: |
+          python - <<'PY'
+          import json
+          v=json.load(open('.research-state/fresh-global-max2/v12-top2-ledger.json'))
+          p=json.load(open('.research-state/fresh-global-max2/pengu-v20-ledger.json'))
+          assert v['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
+          assert v['period']['startInclusive'].startswith('2025-08-10')
+          assert v['period']['endExclusive'].startswith('2026-08-10')
+          assert p['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
+          assert p['longVariant']=='PENGU_DUAL_LS_V2_FINAL'
+          assert p['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          assert p['shortPreRegistrationSha']=='ad7cedb3cafaf9f9680e390112f72375d84b50ac'
+          assert p['period']['startInclusive'].startswith('2025-08-10')
+          assert p['period']['endExclusive'].startswith('2026-08-10')
+          assert p['integrity']['noOverlap'] is True
+          assert p['integrity']['maximumRequestedGross'] <= 0.75 + 1e-12
+          print(json.dumps({'v12Normal':v['modes']['normal']['metrics'],'penguNormal':p['modes']['normal']['metrics']},indent=2))
+          PY
+
+      - name: Create exact-window global Max2 simulator
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('scripts/research_current_top2_pengu_v52_dca.py').read_text()
+          def one(old,new):
+              global s
+              n=s.count(old)
+              if n!=1: raise SystemExit(f'patch marker count={n}: {old[:120]}')
+              s=s.replace(old,new,1)
+          one('START = dt.datetime(2025, 8, 1, tzinfo=UTC)', 'START = dt.datetime(2025, 8, 10, tzinfo=UTC)')
+          one('END = dt.datetime(2026, 8, 1, tzinfo=UTC)', 'END = dt.datetime(2026, 8, 10, tzinfo=UTC)')
+          one('TOTAL_GROSS_CAP = 2.5', 'PORTFOLIO_MAX_POSITIONS = 2\nTOTAL_GROSS_CAP = 2.5')
+          one('    max_v12_positions = 0\n    max_entry_v12_gross', '    max_v12_positions = 0\n    max_total_positions = 0\n    max_entry_v12_gross')
+          one('    def position_gross(position: dict | None) -> float:', '    def total_positions() -> int:\n        return len(active_v12) + (1 if active_pengu is not None else 0) + len(active_stock)\n\n    def position_gross(position: dict | None) -> float:')
+          one('        nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross', '        nonlocal max_v12_positions, max_total_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross')
+          one('        max_v12_positions = max(max_v12_positions, len(active_v12))', '        max_v12_positions = max(max_v12_positions, len(active_v12))\n        max_total_positions = max(max_total_positions, total_positions())')
+          one('            if len(active_v12) >= V12_MAX_POSITIONS:', '            if total_positions() >= PORTFOLIO_MAX_POSITIONS:\n                stats["PORTFOLIO_POSITION_CAP_BLOCKED"] += 1\n                stats["V12_POSITION_CAP_BLOCKED"] += 1\n                continue\n            if len(active_v12) >= V12_MAX_POSITIONS:')
+          one('            if active_pengu is not None:', '            if total_positions() >= PORTFOLIO_MAX_POSITIONS:\n                stats["PORTFOLIO_POSITION_CAP_BLOCKED"] += 1\n                stats["PENGU_POSITION_CAP_BLOCKED"] += 1\n                continue\n            if active_pengu is not None:')
+          one('            if any(str(position["strategy"]) == strategy for position in active_stock.values()):', '            if total_positions() >= PORTFOLIO_MAX_POSITIONS:\n                stats["PORTFOLIO_POSITION_CAP_BLOCKED"] += 1\n                stats["STOCK_POSITION_CAP_BLOCKED"] += 1\n                continue\n            if any(str(position["strategy"]) == strategy for position in active_stock.values()):')
+          one('"grossVerification": {"maxV12Positions": max_v12_positions,', '"grossVerification": {"maxTotalPositions": max_total_positions, "maxV12Positions": max_v12_positions,')
+          one('"limits": {"v12Positions": V12_MAX_POSITIONS,', '"limits": {"portfolioPositions": PORTFOLIO_MAX_POSITIONS, "v12Positions": V12_MAX_POSITIONS,')
+          old='    expected_period = {"startInclusive": "2025-08-01T00:00:00.000Z", "endExclusive": "2026-08-01T00:00:00.000Z"}\n    if v12.get("period") != expected_period:\n        raise RuntimeError(f"Unexpected V12 period: {v12.get(\'period\')}")\n    if pengu.get("period") != expected_period:\n        raise RuntimeError(f"Unexpected PENGU period: {pengu.get(\'period\')}")'
+          new='    expected_period = {"startInclusive": "2025-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}\n    if {k:v12.get("period",{}).get(k) for k in expected_period} != expected_period:\n        raise RuntimeError(f"Unexpected V12 period: {v12.get(\'period\')}")\n    if {k:pengu.get("period",{}).get(k) for k in expected_period} != expected_period:\n        raise RuntimeError(f"Unexpected PENGU period: {pengu.get(\'period\')}")'
+          one(old,new)
+          one('checks[f"{scenario}_v12Positions"] = gross["maxV12Positions"] <= V12_MAX_POSITIONS', 'checks[f"{scenario}_portfolioPositions"] = gross["maxTotalPositions"] <= PORTFOLIO_MAX_POSITIONS\n        checks[f"{scenario}_v12Positions"] = gross["maxV12Positions"] <= V12_MAX_POSITIONS')
+          one('abs(row["totalContributedJpy"] - 120_000.0)', 'abs(row["totalContributedJpy"] - 130_000.0)')
+          one('"architecture": {"v12Slots": V12_MAX_POSITIONS,', '"architecture": {"portfolioMaxPositions": PORTFOLIO_MAX_POSITIONS, "v12Slots": V12_MAX_POSITIONS,')
+          one('"totalContributedJpy": 120_000.0', '"totalContributedJpy": 130_000.0')
+          one('"schema": "current-v12-top2-pengu-v2-v52-dca-1y/v1"', '"schema": "fresh-v12-pengu-v20-v52-global-max2-dca-1y/v1"')
+          Path('scripts/.fresh_global_max2_0810.py').write_text(s)
+          PY
+          python -m py_compile scripts/.fresh_global_max2_0810.py
+
+      - name: Run fresh all-logic global-Max2 DCA backtest
+        run: |
+          set -o pipefail
+          python scripts/.fresh_global_max2_0810.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/fresh-global-max2/v12-top2-ledger.json \
+            --pengu-ledger .research-state/fresh-global-max2/pengu-v20-ledger.json \
+            --output-dir .research-state/fresh-global-max2 \
+            2>&1 | tee .research-state/fresh-global-max2/combined.log
+
+      - name: Assert requested contract and print fresh result
+        run: |
+          python - <<'PY'
+          import json
+          import os
+
+          failures=[]
+
+          def annotate_failure(label, expected, actual):
+              message=f"{label}: expected={expected!r} actual={actual!r}"
+              print(f"::error title=Step 15 contract check::{message}", flush=True)
+              summary=os.environ.get('GITHUB_STEP_SUMMARY')
+              if summary:
+                  with open(summary, 'a', encoding='utf-8') as out:
+                      out.write(f"### Step 15 contract assertion failed\n\n`{message}`\n")
+
+          def check(condition, label, expected, actual):
+              if not condition:
+                  failures.append((label, expected, actual))
+
+          p=json.load(open('.research-state/fresh-global-max2/result.json'))
+          check(p['status']=='PASS_RESEARCH_ONLY', 'status', 'PASS_RESEARCH_ONLY', p['status'])
+          expected_period={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          check(p['period']==expected_period, 'period', expected_period, p['period'])
+          check(p['capital']['initialJpy']==10000, 'capital.initialJpy', 10000, p['capital']['initialJpy'])
+          check(p['capital']['monthlyContributionJpy']==10000, 'capital.monthlyContributionJpy', 10000, p['capital']['monthlyContributionJpy'])
+          check(p['capital']['contributionCountAfterStart']==12, 'capital.contributionCountAfterStart', 12, p['capital']['contributionCountAfterStart'])
+          check(p['capital']['totalContributedJpy']==130000, 'capital.totalContributedJpy', 130000, p['capital']['totalContributedJpy'])
+          check(p['architecture']['portfolioMaxPositions']==2, 'architecture.portfolioMaxPositions', 2, p['architecture']['portfolioMaxPositions'])
+          failed_internal={key:value for key,value in p.get('checks',{}).items() if value is not True}
+          if failed_internal:
+              context={name:{'checks':{key:value for key,value in p.get('checks',{}).items() if key.startswith(name + '_')},'totalContributedJpy':p['results'][name].get('totalContributedJpy'),'grossVerification':p['results'][name].get('grossVerification')} for name in ('NORMAL','SEVERE')}
+              annotate_failure('internal result checks', 'all checks True', {'failed':failed_internal,'context':context})
+          for name in ('NORMAL','SEVERE'):
+              actual=p['results'][name]['grossVerification']['maxTotalPositions']
+              check(actual<=2, f'results.{name}.grossVerification.maxTotalPositions', '<=2', actual)
+          expected_safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          check(p['safety']==expected_safety, 'safety', expected_safety, p['safety'])
+          for label, expected, actual in failures:
+              annotate_failure(label, expected, actual)
+          if failures:
+              raise AssertionError('; '.join(f"{label}: expected={expected!r} actual={actual!r}" for label, expected, actual in failures))
+          metric_keys=('endingAssetJpy','netProfitJpy','returnOnContributedCapitalPct','timeWeightedReturnPct','moneyWeightedReturnXirrPct','maxDrawdownPctClosedEventTwr','trades','winRatePct','profitFactor')
+          def metric_summary(row):
+              return {key:row.get(key) for key in metric_keys} | {'bySleeve':row.get('bySleeve'),'v52Detail':row.get('v52Detail')}
+          result_summary={'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'NORMAL':metric_summary(p['results']['NORMAL']),'SEVERE':metric_summary(p['results']['SEVERE']),'checks':p['checks'],'safety':p['safety']}
+          result_text=json.dumps(result_summary,ensure_ascii=False,separators=(',',':'))
+          print(f'::notice title=Final backtest result::{result_text}', flush=True)
+          summary=os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary:
+              with open(summary, 'a', encoding='utf-8') as out:
+                  out.write('## Final backtest result\n\n')
+                  out.write('```json\n' + json.dumps(result_summary, ensure_ascii=False, indent=2) + '\n```\n')
+          print('FRESH_GLOBAL_MAX2_RESULT_START')
+          print(json.dumps({'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'NORMAL':p['results']['NORMAL'],'SEVERE':p['results']['SEVERE'],'safety':p['safety']},ensure_ascii=False,indent=2))
+          print('FRESH_GLOBAL_MAX2_RESULT_END')
+          PY

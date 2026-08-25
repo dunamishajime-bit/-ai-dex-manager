@@ -1,0 +1,294 @@
+name: Research V12 PENGU V20 V52 Three-Year DCA BT
+
+on:
+  push:
+    branches:
+      - research/v12-top2-pengu-v20-v52-dca-1y-20260824
+    paths:
+      - '.github/workflows/research-v12-pengu-v20-v52-3y-dca.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest-3y:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: three-year-v12-pengu-v20-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts', 'scripts/research_current_top2_pengu_v52_dca.py', 'lib/pengu-short-v20.ts') }}
+          restore-keys: |
+            current-v12-top2-pengu-v20-v52-dca-
+            v12-top2-gross15-
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore three-year V12 ledger cache
+        uses: actions/cache@v4
+        with:
+          path: .research-state/fresh-3y/v12-top2-ledger.json
+          key: three-year-v12-ledger-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts') }}
+
+      - name: Build three-year V12 Top2 ledger
+        if: ${{ hashFiles('.research-state/fresh-3y/v12-top2-ledger.json') == '' }}
+        env:
+          V12_TOP2_LEDGER_OUT: .research-state/fresh-3y/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/fresh-3y
+          cp scripts/research_current_v12_top2_ledger.ts scripts/.research_current_top2_3y.ts
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/.research_current_top2_3y.ts')
+          s = p.read_text()
+          s = s.replace('Date.UTC(2025, 7, 1)', 'Date.UTC(2023, 7, 10)')
+          s = s.replace('Date.UTC(2026, 7, 1)', 'Date.UTC(2026, 7, 10)')
+          p.write_text(s)
+          PY
+          npx tsx scripts/.research_current_top2_3y.ts
+          rm -f scripts/.research_current_top2_3y.ts
+
+      - name: Save three-year V12 ledger cache
+        if: ${{ hashFiles('.research-state/fresh-3y/v12-top2-ledger.json') != '' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .research-state/fresh-3y/v12-top2-ledger.json
+          key: three-year-v12-ledger-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts') }}
+
+      - name: Build three-year PENGU V20 ledger with explicit coverage
+        env:
+          PRODUCTION_SOURCE_SHA: 8ca3f52b0da705c20aa4033769da1af869202f70
+          PENGU_LEDGER_OUT: .research-state/fresh-3y/pengu-v20-ledger.json
+        run: |
+          cp scripts/research_pengu_v2_aster_ledger.ts scripts/.research_pengu_v20_3y.ts
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/.research_pengu_v20_3y.ts')
+          s = p.read_text()
+          def replace_once(old, new):
+              global s
+              if s.count(old) != 1:
+                  raise SystemExit(f'patch marker count={s.count(old)}: {old[:120]}')
+              s = s.replace(old, new, 1)
+          replace_once('import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";', 'import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";\nimport { createPenguShortV20State } from "../lib/pengu-short-v20";')
+          replace_once('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2023-02-10T00:00:00Z");')
+          replace_once('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2023-08-10T00:00:00Z");')
+          replace_once('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-10T00:00:00Z");')
+          replace_once('  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);', '''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);
+            const requiredRows = 250;
+            const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            assert.ok(penguEvalRows >= requiredRows, `Insufficient available PENGU rows: ${penguEvalRows}/${expectedEvalRows}`);
+            assert.ok(btcEvalRows >= requiredRows, `Insufficient available BTC rows: ${btcEvalRows}/${expectedEvalRows}`);''')
+          replace_once('''  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''', '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
+            const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+            const alignedBtcTimestamps = new Set(alignedBtc.map((row) => row.openTime));
+            const alignedPengu = pengu.filter((row) => alignedBtcTimestamps.has(row.openTime));
+            assert.ok(alignedPengu.length >= 250, `Insufficient PENGU/BTC common rows: ${alignedPengu.length}`);
+            const history: PenguDualLsV2History = { pengu1h: alignedPengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };''')
+          replace_once('  assert.ok(normalMetrics.trades >= 25 && normalMetrics.trades <= 40, `Implausible Aster production replay trade count: ${normalMetrics.trades}`);', '  assert.ok(normalMetrics.trades >= 25, `Insufficient available-period PENGU replay trade count: ${normalMetrics.trades}`);')
+          replace_once('    let position: PenguDualLsV2Position = {', '    const requestedGross = targetGrossForAtr(rows[index].features!.atr24Ratio);\n    let position: PenguDualLsV2Position = {')
+          replace_once('      gross: targetGrossForAtr(rows[index].features!.atr24Ratio),', '      gross: requestedGross,')
+          replace_once('      lowWaterMark: entry.open,\n    };', '      lowWaterMark: entry.open,\n      entryVersion: side === "S" ? "SHORT_V20" : "LONG_V2_FINAL",\n      shortV20: side === "S" ? createPenguShortV20State({\n        entryPrice: entry.open,\n        requestedGross,\n        entryAtr24Ratio: rows[index].features!.atr24Ratio,\n        btcEma168Distance: rows[index].features!.btcEma168Distance,\n        btcReturn24h: rows[index].features!.btcReturn24h,\n      }) : undefined,\n    };')
+          replace_once('    strategyId: PENGU_DUAL_LS_V2.id,\n    researchOnly: true,', '    strategyId: PENGU_DUAL_LS_V2.id,\n    longVariant: "PENGU_DUAL_LS_V2_FINAL",\n    shortVariant: "COUNTERWIND_VOL_TARGET_FAILURE_EXIT",\n    shortPreRegistrationSha: "ad7cedb3cafaf9f9680e390112f72375d84b50ac",\n    researchOnly: true,')
+          replace_once('    data: { penguRows: pengu.length, btcRows: btc.length, fundingRows: funding.length },', '''    data: {
+            penguRows: alignedPengu.length,
+            btcRows: alignedBtc.length,
+            fundingRows: funding.length,
+            availableStart: new Date(alignedPengu[0].openTime).toISOString(),
+            availableEndExclusive: new Date(alignedPengu.at(-1).openTime + HOUR).toISOString(),
+            requestedPeriodStart: new Date(EVAL_START).toISOString(),
+            requestedPeriodEndExclusive: new Date(EVAL_END).toISOString(),
+            coverageNote: "PENGU is included only from the first common timestamp available on Aster; no pre-listing data is synthesized.",
+          },''')
+          p.write_text(s)
+          PY
+          set +e
+          npx tsx scripts/.research_pengu_v20_3y.ts 2>&1 | tee .research-state/fresh-3y/pengu-v20-3y.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            while IFS= read -r line; do
+              echo "::error title=PENGU 3Y detail::$line"
+            done < <(tail -n 25 .research-state/fresh-3y/pengu-v20-3y.log)
+            exit "$status"
+          fi
+          rm -f scripts/.research_pengu_v20_3y.ts
+
+      - name: Create three-year Global Max2 DCA simulator
+        run: |
+          cp scripts/research_current_top2_pengu_v52_dca.py scripts/.fresh_three_year_global_max2.py
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/.fresh_three_year_global_max2.py')
+          s = p.read_text()
+          def replace_once(old, new):
+              global s
+              if s.count(old) != 1:
+                  raise SystemExit(f'patch marker count={s.count(old)}: {old[:120]}')
+              s = s.replace(old, new, 1)
+          replace_once('START = dt.datetime(2025, 8, 1, tzinfo=UTC)', 'START = dt.datetime(2023, 8, 10, tzinfo=UTC)')
+          replace_once('END = dt.datetime(2026, 8, 1, tzinfo=UTC)', 'END = dt.datetime(2026, 8, 10, tzinfo=UTC)')
+          replace_once('def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:', 'def simulate(v12_trades: Sequence[dict], pengu_trades: Sequence[dict], v11_rows: Sequence[dict], v50_rows: Sequence[dict], stock_cost_bps: float) -> dict:\n    v12_trades = [trade for trade in v12_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    pengu_trades = [trade for trade in pengu_trades if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v11_rows = [trade for trade in v11_rows if int(trade.get("exitTs", END_MS)) <= END_MS]\n    v50_rows = [trade for trade in v50_rows if int(trade.get("exitTs", END_MS)) <= END_MS]')
+          replace_once('''    def v12_gross() -> float:
+                  return sum(position_gross(position) for position in active_v12.values())''', '''    def v12_gross() -> float:
+                  return sum(entry_allocated_gross(position) for position in active_v12.values())''')
+          replace_once('''    def pengu_gross() -> float:
+                  return position_gross(active_pengu)''', '''    def pengu_gross() -> float:
+                  return entry_allocated_gross(active_pengu)''')
+          replace_once('''    def stock_gross() -> float:
+                  return sum(position_gross(position) for position in active_stock.values())''', '''    def stock_gross() -> float:
+                  return sum(entry_allocated_gross(position) for position in active_stock.values())''')
+          replace_once('''    for ts, amount in contribution_points():
+                  push(ts, -1, {"kind": "CONTRIBUTION", "amount": amount})''', '''    for key in month_keys():
+                  month_start = dt.datetime.strptime(key, "%Y-%m").replace(tzinfo=UTC)
+                  push(int(month_start.timestamp() * 1000), -2, {"kind": "MONTH_OPEN", "key": key})
+              for ts, amount in contribution_points():
+                  push(ts, -1, {"kind": "CONTRIBUTION", "amount": amount})''')
+          replace_once('''        kind = str(item["kind"])
+                  if kind == "CONTRIBUTION":''', '''        kind = str(item["kind"])
+                  if kind == "MONTH_OPEN":
+                      monthly_open.setdefault(str(item["key"]), equity)
+                      continue
+                  if kind == "CONTRIBUTION":''')
+          replace_once('''def contribution_points() -> List[tuple[int, float]]:
+              points: List[tuple[int, float]] = []
+              cur = dt.datetime(2025, 9, 1, tzinfo=UTC)
+              while cur < END:
+                  points.append((int(cur.timestamp() * 1000), MONTHLY_JPY))
+                  cur = dt.datetime(cur.year + (cur.month == 12), 1 if cur.month == 12 else cur.month + 1, 1, tzinfo=UTC)
+              return points''', '''def contribution_points() -> List[tuple[int, float]]:
+              points: List[tuple[int, float]] = []
+              cur = dt.datetime(2023, 9, 1, tzinfo=UTC)
+              contribution_end = dt.datetime(2024, 9, 1, tzinfo=UTC)
+              while cur < contribution_end:
+                  points.append((int(cur.timestamp() * 1000), MONTHLY_JPY))
+                  cur = dt.datetime(cur.year + (cur.month == 12), 1 if cur.month == 12 else cur.month + 1, 1, tzinfo=UTC)
+              return points''')
+          replace_once('TOTAL_GROSS_CAP = 2.5', 'PORTFOLIO_MAX_POSITIONS = 2\nTOTAL_GROSS_CAP = 2.5')
+          replace_once('    max_v12_positions = 0\n    max_entry_v12_gross', '    max_v12_positions = 0\n    max_total_positions = 0\n    max_entry_v12_gross')
+          replace_once('    def position_gross(position: dict | None) -> float:', '    def total_positions() -> int:\n        return len(active_v12) + (1 if active_pengu is not None else 0) + len(active_stock)\n\n    def position_gross(position: dict | None) -> float:')
+          replace_once('        nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross', '        nonlocal max_v12_positions, max_total_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross')
+          replace_once('        max_v12_positions = max(max_v12_positions, len(active_v12))', '        max_v12_positions = max(max_v12_positions, len(active_v12))\n        max_total_positions = max(max_total_positions, total_positions())')
+          replace_once('            if len(active_v12) >= V12_MAX_POSITIONS:', '            if total_positions() >= PORTFOLIO_MAX_POSITIONS:\n                stats["PORTFOLIO_POSITION_CAP_BLOCKED"] += 1\n                stats["V12_POSITION_CAP_BLOCKED"] += 1\n                continue\n            if len(active_v12) >= V12_MAX_POSITIONS:')
+          replace_once('            if active_pengu is not None:', '            if total_positions() >= PORTFOLIO_MAX_POSITIONS:\n                stats["PORTFOLIO_POSITION_CAP_BLOCKED"] += 1\n                stats["PENGU_POSITION_CAP_BLOCKED"] += 1\n                continue\n            if active_pengu is not None:')
+          replace_once('            if any(str(position["strategy"]) == strategy for position in active_stock.values()):', '            if total_positions() >= PORTFOLIO_MAX_POSITIONS:\n                stats["PORTFOLIO_POSITION_CAP_BLOCKED"] += 1\n                stats["STOCK_POSITION_CAP_BLOCKED"] += 1\n                continue\n            if any(str(position["strategy"]) == strategy for position in active_stock.values()):')
+          replace_once('"grossVerification": {"maxV12Positions": max_v12_positions,', '"grossVerification": {"maxTotalPositions": max_total_positions, "maxV12Positions": max_v12_positions,')
+          replace_once('"limits": {"v12Positions": V12_MAX_POSITIONS,', '"limits": {"portfolioPositions": PORTFOLIO_MAX_POSITIONS, "v12Positions": V12_MAX_POSITIONS,')
+          replace_once('expected_period = {"startInclusive": "2025-08-01T00:00:00.000Z", "endExclusive": "2026-08-01T00:00:00.000Z"}', 'expected_period = {"startInclusive": "2023-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}')
+          replace_once('if v12.get("period") != expected_period:', 'if {k:v12.get("period",{}).get(k) for k in expected_period} != expected_period:')
+          replace_once('if pengu.get("period") != expected_period:', 'if {k:pengu.get("period",{}).get(k) for k in expected_period} != expected_period:')
+          replace_once('abs(row["totalContributedJpy"] - 120_000.0)', 'abs(row["totalContributedJpy"] - 130_000.0)')
+          replace_once('"checks": checks,', '"checks": checks,')
+          replace_once('"architecture": {"v12Slots": V12_MAX_POSITIONS,', '"architecture": {"portfolioMaxPositions": PORTFOLIO_MAX_POSITIONS, "v12Slots": V12_MAX_POSITIONS,')
+          replace_once('"totalContributedJpy": 120_000.0', '"totalContributedJpy": 130_000.0')
+          replace_once('"schema": "current-v12-top2-pengu-v2-v52-dca-1y/v1"', '"schema": "research-v12-pengu-v20-v52-3y-dca/v1"')
+          replace_once('checks[f"{scenario}_v12Positions"] = gross["maxV12Positions"] <= V12_MAX_POSITIONS', 'checks[f"{scenario}_portfolioPositions"] = gross["maxTotalPositions"] <= PORTFOLIO_MAX_POSITIONS\n        checks[f"{scenario}_v12Positions"] = gross["maxV12Positions"] <= V12_MAX_POSITIONS')
+          p.write_text(s)
+          PY
+          python -m py_compile scripts/.fresh_three_year_global_max2.py
+          set +e
+          python scripts/.fresh_three_year_global_max2.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/fresh-3y/v12-top2-ledger.json \
+            --pengu-ledger .research-state/fresh-3y/pengu-v20-ledger.json \
+            --output-dir .research-state/fresh-3y 2>&1 | tee .research-state/fresh-3y/simulator-3y.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "::error title=3Y simulator exit::status=$status"
+            while IFS= read -r line; do
+              echo "::error title=3Y simulator exception::$line"
+            done < <(grep -E 'Traceback|Assertion|RuntimeError|KeyError|ValueError|TypeError|IndexError|FAILED|unexpected|missing' .research-state/fresh-3y/simulator-3y.log | tail -n 40 || true)
+            exit "$status"
+          fi
+          rm -f scripts/.fresh_three_year_global_max2.py
+
+      - name: Validate and publish three-year result
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=json.loads(Path('.research-state/fresh-3y/result.json').read_text())
+          print(f"::warning title=3Y validation status::status={p.get('status')} checks={json.dumps(p.get('checks'),ensure_ascii=False,separators=(',',':'))}", flush=True)
+          print(f"::warning title=3Y validation capital::capital={json.dumps(p.get('capital'),ensure_ascii=False,separators=(',',':'))}", flush=True)
+          print(f"::warning title=3Y validation NORMAL::metrics={json.dumps({k:p.get('results',{}).get('NORMAL',{}).get(k) for k in ('endingAssetJpy','netProfitJpy','trades','maxDrawdownPctClosedEventTwr','grossVerification')},ensure_ascii=False,separators=(',',':'))}", flush=True)
+          scalar_keys=('endingAssetJpy','netProfitJpy','returnOnContributedCapitalPct','timeWeightedReturnPct','moneyWeightedReturnXirrPct','maxDrawdownPctClosedEventTwr','trades','winRatePct','profitFactor')
+          compact={scenario:{key:p.get('results',{}).get(scenario,{}).get(key) for key in scalar_keys} for scenario in ('NORMAL','SEVERE')}
+          pengu=json.loads(Path('.research-state/fresh-3y/pengu-v20-ledger.json').read_text())
+          coverage={key:pengu.get('data',{}).get(key) for key in ('penguRows','btcRows','fundingRows','availableStart','availableEndExclusive','requestedPeriodStart','requestedPeriodEndExclusive','coverageNote')}
+          stock={key:p.get('data',{}).get(key) for key in ('stockTargetSessions','v11RawTrades','v50RawTrades')}
+          print(f"::warning title=3Y concise metrics::results={json.dumps(compact,ensure_ascii=False,separators=(',',':'))} penguCoverage={json.dumps(coverage,ensure_ascii=False,separators=(',',':'))} v52Stock={json.dumps(stock,ensure_ascii=False,separators=(',',':'))}", flush=True)
+          expected_period={'startInclusive':'2023-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert p['status']=='PASS_RESEARCH_ONLY', p.get('checks')
+          assert p['period']==expected_period, p['period']
+          assert p['capital']['initialJpy']==10000
+          assert p['capital']['monthlyContributionJpy']==10000
+          assert p['capital']['contributionCountAfterStart']==12
+          assert p['capital']['totalContributedJpy']==130000
+          assert p['architecture']['portfolioMaxPositions']==2
+          assert all(p['checks'].values()), p['checks']
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          def summary(row):
+              keys=('endingAssetJpy','netProfitJpy','returnOnContributedCapitalPct','timeWeightedReturnPct','moneyWeightedReturnXirrPct','maxDrawdownPctClosedEventTwr','trades','winRatePct','profitFactor')
+              return {key:row.get(key) for key in keys} | {'bySleeve':row.get('bySleeve'),'v52Detail':row.get('v52Detail')}
+          out={'status':p['status'],'period':p['period'],'capital':p['capital'],'architecture':p['architecture'],'data':p.get('data'),'NORMAL':summary(p['results']['NORMAL']),'SEVERE':summary(p['results']['SEVERE']),'checks':p['checks'],'safety':p['safety']}
+          text=json.dumps(out,ensure_ascii=False,separators=(',',':'))
+          print(f'::warning title=Three-year backtest result::{text}', flush=True)
+          summary_path=os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary_path:
+              with open(summary_path,'a',encoding='utf-8') as f:
+                  f.write('## Three-year backtest result\n\n```json\n'+json.dumps(out,ensure_ascii=False,indent=2)+'\n```\n')
+          PY
+
+      - name: Upload three-year BT artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-v12-pengu-v20-v52-3y-dca-${{ github.run_id }}
+          path: .research-state/fresh-3y
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn

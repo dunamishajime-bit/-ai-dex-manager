@@ -1,0 +1,225 @@
+name: Current V12 Top2 PENGU V20 V52 Monthly DCA One-Year BT
+
+on:
+  push:
+    branches:
+      - research/v12-top2-pengu-v20-v52-dca-1y-20260824
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: current-v12-top2-pengu-v20-v52-dca-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v20-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts', 'scripts/research_current_top2_pengu_v52_dca.py', 'lib/pengu-short-v20.ts') }}
+          restore-keys: |
+            current-v12-top2-pengu-v52-dca-
+            v12-top2-gross15-
+            v12-v52-pengu-v2-combined-
+            v26-latency-aware-3y-usdm-v1-20260816
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile DCA simulator
+        run: python -m py_compile scripts/research_current_top2_pengu_v52_dca.py
+
+      - name: Build current V12 Top2 trade ledger
+        env:
+          V12_TOP2_LEDGER_OUT: .research-state/current-top2-pengu-v20-dca/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/current-top2-pengu-v20-dca
+          set -o pipefail
+          npx tsx scripts/research_current_v12_top2_ledger.ts 2>&1 | tee .research-state/current-top2-pengu-v20-dca/v12-top2.log
+
+      - name: Build Long V2 plus formal Short V20 Aster ledger for matching year
+        env:
+          PRODUCTION_SOURCE_SHA: 8ca3f52b0da705c20aa4033769da1af869202f70
+          PENGU_LEDGER_OUT: .research-state/current-top2-pengu-v20-dca/pengu-v20-ledger.json
+        run: |
+          cp scripts/research_pengu_v2_aster_ledger.ts scripts/.research_pengu_v20_current_year.ts
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/.research_pengu_v20_current_year.ts')
+          s = p.read_text()
+
+          s = s.replace('import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";', 'import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";\nimport { createPenguShortV20State } from "../lib/pengu-short-v20";')
+
+          s = s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2025-07-01T00:00:00Z");')
+          s = s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2025-08-01T00:00:00Z");')
+          s = s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-01T00:00:00Z");')
+
+          old = '  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);'
+          new = '''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);
+          const requiredWarmRows = 250;
+          const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+          const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+          const penguWarmRows = pengu.filter((row) => row.openTime < EVAL_START).length;
+          const btcWarmRows = btc.filter((row) => row.openTime < EVAL_START).length;
+          assert.equal(penguEvalRows, expectedEvalRows, `Incomplete PENGU evaluation rows: ${penguEvalRows}/${expectedEvalRows}`);
+          assert.equal(btcEvalRows, expectedEvalRows, `Incomplete BTC evaluation rows: ${btcEvalRows}/${expectedEvalRows}`);
+          assert.ok(penguWarmRows >= requiredWarmRows && btcWarmRows >= requiredWarmRows, `Insufficient warm-up rows: PENGU=${penguWarmRows}, BTC=${btcWarmRows}, required=${requiredWarmRows}`);'''
+          if old not in s:
+              raise SystemExit('PENGU row-count guard not found; refusing silent patch')
+          s = s.replace(old, new)
+
+          old_history = '  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'
+          new_history = '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
+          const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+          assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
+          const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+          if old_history not in s:
+              raise SystemExit('PENGU history construction not found; refusing silent alignment patch')
+          s = s.replace(old_history, new_history)
+
+          old_position = '''    let position: PenguDualLsV2Position = {
+      side: side === "L" ? 1 : -1,
+      entryTs: entry.openTime,
+      entryPrice: entry.open,
+      quantity: 1,
+      gross: targetGrossForAtr(rows[index].features!.atr24Ratio),
+      highWaterMark: entry.open,
+      lowWaterMark: entry.open,
+    };'''
+          new_position = '''    const requestedGross = targetGrossForAtr(rows[index].features!.atr24Ratio);
+    let position: PenguDualLsV2Position = {
+      side: side === "L" ? 1 : -1,
+      entryTs: entry.openTime,
+      entryPrice: entry.open,
+      quantity: 1,
+      gross: requestedGross,
+      highWaterMark: entry.open,
+      lowWaterMark: entry.open,
+      entryVersion: side === "S" ? "SHORT_V20" : "LONG_V2_FINAL",
+      shortV20: side === "S" ? createPenguShortV20State({
+        entryPrice: entry.open,
+        requestedGross,
+        entryAtr24Ratio: rows[index].features!.atr24Ratio,
+        btcEma168Distance: rows[index].features!.btcEma168Distance,
+        btcReturn24h: rows[index].features!.btcReturn24h,
+      }) : undefined,
+    };'''
+          if old_position not in s:
+              raise SystemExit('PENGU position initializer not found; refusing silent V20 patch')
+          s = s.replace(old_position, new_position)
+
+          old_payload = '    strategyId: PENGU_DUAL_LS_V2.id,\n    researchOnly: true,'
+          new_payload = '''    strategyId: PENGU_DUAL_LS_V2.id,
+    longVariant: "PENGU_DUAL_LS_V2_FINAL",
+    shortVariant: "COUNTERWIND_VOL_TARGET_FAILURE_EXIT",
+    shortPreRegistrationSha: "ad7cedb3cafaf9f9680e390112f72375d84b50ac",
+    researchOnly: true,'''
+          if old_payload not in s:
+              raise SystemExit('PENGU payload marker not found; refusing silent metadata patch')
+          s = s.replace(old_payload, new_payload)
+          p.write_text(s)
+          PY
+          set -o pipefail
+          npx tsx scripts/.research_pengu_v20_current_year.ts 2>&1 | tee .research-state/current-top2-pengu-v20-dca/pengu-v20.log
+          rm -f scripts/.research_pengu_v20_current_year.ts
+
+      - name: Validate formal PENGU V20 lineage
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/current-top2-pengu-v20-dca/pengu-v20-ledger.json'))
+          assert p['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
+          assert p['longVariant']=='PENGU_DUAL_LS_V2_FINAL'
+          assert p['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          assert p['shortPreRegistrationSha']=='ad7cedb3cafaf9f9680e390112f72375d84b50ac'
+          assert p['source']['productionLogicSha']=='8ca3f52b0da705c20aa4033769da1af869202f70'
+          assert p['period']['startInclusive'].startswith('2025-08-01')
+          assert p['period']['endExclusive'].startswith('2026-08-01')
+          assert p['integrity']['noOverlap'] is True
+          assert p['integrity']['maximumRequestedGross'] <= 0.75 + 1e-12
+          print(json.dumps({'normal':p['modes']['normal']['metrics'],'stress':p['modes']['stress']['metrics'],'lineage':{'long':p['longVariant'],'short':p['shortVariant']}},indent=2))
+          PY
+
+      - name: Run current Gross plus monthly DCA unified backtest
+        run: |
+          set -o pipefail
+          python scripts/research_current_top2_pengu_v52_dca.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/current-top2-pengu-v20-dca/v12-top2-ledger.json \
+            --pengu-ledger .research-state/current-top2-pengu-v20-dca/pengu-v20-ledger.json \
+            --output-dir .research-state/current-top2-pengu-v20-dca \
+            2>&1 | tee .research-state/current-top2-pengu-v20-dca/combined-dca.log
+
+      - name: Validate current contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/current-top2-pengu-v20-dca/result.json').read_text())
+          assert p['status'] == 'PASS_RESEARCH_ONLY', p['checks']
+          assert p['period']['startInclusive'].startswith('2025-08-01')
+          assert p['period']['endExclusive'].startswith('2026-08-01')
+          assert p['capital']['totalContributedJpy'] == 120000
+          assert p['architecture']['v12Slots'] == 2
+          assert p['architecture']['v12GrossCap'] == 1.5
+          assert p['architecture']['sharedCryptoGrossCap'] == 2.0
+          assert p['architecture']['stockGrossCap'] == 1.5
+          assert p['architecture']['totalGrossCap'] == 2.5
+          assert p['architecture']['entryPriority'] == ['V52', 'PENGU_DUAL_LS_V2', 'V12']
+          assert all(p['checks'].values()), p['checks']
+          assert p['safety'] == {'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'status': p['status'], 'normal': p['results']['NORMAL'], 'severe': p['results']['SEVERE'], 'checks': p['checks']}, ensure_ascii=False, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-v12-top2-pengu-v20-v52-dca-${{ github.run_id }}
+          path: .research-state/current-top2-pengu-v20-dca
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
