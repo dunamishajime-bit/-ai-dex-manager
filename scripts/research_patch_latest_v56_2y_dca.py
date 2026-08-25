@@ -16,12 +16,32 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--window", choices=("1y", "2y"), default="2y")
     args = parser.parse_args()
     s = Path(args.source).read_text(encoding="utf-8")
 
-    s = one(s, "START = dt.datetime(2025, 8, 1, tzinfo=UTC)", "START = dt.datetime(2024, 8, 10, tzinfo=UTC)", "start")
-    s = one(s, "END = dt.datetime(2026, 8, 1, tzinfo=UTC)", "END = dt.datetime(2026, 8, 10, tzinfo=UTC)", "end")
-    s = one(s, "    cur = dt.datetime(2025, 9, 1, tzinfo=UTC)", "    cur = dt.datetime(2024, 9, 1, tzinfo=UTC)", "contribution start")
+    if args.window == "1y":
+        target_start = "2025, 8, 10"
+        target_end = "2026, 8, 10"
+        contribution_start = "2025, 9, 1"
+        expected_period = '{"startInclusive": "2025-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}'
+        total_contributed = "130_000.0"
+        schema = "latest-v56-v12-pengu-v20-v52-dca-1y/v1"
+        report_title = "# Latest V56 V12 Top2 + PENGU V20 + V52 — 1Y monthly DCA backtest"
+        report_contributions = "12 additions; total contributed JPY 130,000"
+    else:
+        target_start = "2024, 8, 10"
+        target_end = "2026, 8, 10"
+        contribution_start = "2024, 9, 1"
+        expected_period = '{"startInclusive": "2024-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}'
+        total_contributed = "250_000.0"
+        schema = "latest-v56-v12-pengu-v20-v52-dca-2y/v1"
+        report_title = "# Latest V56 V12 Top2 + PENGU V20 + V52 — 2Y monthly DCA backtest"
+        report_contributions = "24 additions; total contributed JPY 250,000"
+
+    s = one(s, "START = dt.datetime(2025, 8, 1, tzinfo=UTC)", f"START = dt.datetime({target_start}, tzinfo=UTC)", "start")
+    s = one(s, "END = dt.datetime(2026, 8, 1, tzinfo=UTC)", f"END = dt.datetime({target_end}, tzinfo=UTC)", "end")
+    s = one(s, "    cur = dt.datetime(2025, 9, 1, tzinfo=UTC)", f"    cur = dt.datetime({contribution_start}, tzinfo=UTC)", "contribution start")
     s = one(s, "CRYPTO_GROSS_CAP = 2.0", "CRYPTO_GROSS_CAP = 1.5", "crypto gross")
     s = one(s, "PENGU_MAX_GROSS = 0.75", "PENGU_MAX_GROSS = 0.9375", "pengu gross")
     s = one(s, "V11_GROSS_CAP = 1.0", "V11_GROSS_CAP = 1.5", "v11 gross")
@@ -148,7 +168,7 @@ def main() -> int:
     s = one(
         s,
         '    expected_period = {"startInclusive": "2025-08-01T00:00:00.000Z", "endExclusive": "2026-08-01T00:00:00.000Z"}',
-        '    expected_period = {"startInclusive": "2024-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}',
+        f"    expected_period = {expected_period}",
         "period contract",
     )
     s = one(s, '    if v12.get("period") != expected_period:', '    if {k: v12.get("period", {}).get(k) for k in expected_period} != expected_period:', "v12 period check")
@@ -165,15 +185,15 @@ def main() -> int:
         '        stock_mode = stock_payload["modes"][mode]\n        results[scenario] = simulate(v12["modes"][mode]["trades"], pengu["modes"][mode]["trades"], stock_mode["v11"], stock_mode["v50"], finite(stock_mode["stockCostBps"]))',
         "scenario stock mode",
     )
-    s = one(s, '        checks[f"{scenario}_contributions"] = abs(row["totalContributedJpy"] - 120_000.0) < 1e-6', '        checks[f"{scenario}_contributions"] = abs(row["totalContributedJpy"] - 250_000.0) < 1e-6', "contribution check")
+    s = one(s, '        checks[f"{scenario}_contributions"] = abs(row["totalContributedJpy"] - 120_000.0) < 1e-6', f'        checks[f"{{scenario}}_contributions"] = abs(row["totalContributedJpy"] - {total_contributed}) < 1e-6', "contribution check")
     s = one(
         s,
         '    result = rounded({',
         '    checks["NORMAL_v52TradesPositive"] = results["NORMAL"]["bySleeve"]["V52"]["trades"] > 0\n    checks["stockDecisionWindowCoverage"] = finite(stock_diagnostics.get("decisionWindowCoveragePct")) >= 99.9\n    result = rounded({',
         "data checks",
     )
-    s = one(s, '"schema": "current-v12-top2-pengu-v2-v52-dca-1y/v1"', '"schema": "latest-v56-v12-pengu-v20-v52-dca-2y/v1"', "schema")
-    s = one(s, '"totalContributedJpy": 120_000.0', '"totalContributedJpy": 250_000.0', "capital total")
+    s = one(s, '"schema": "current-v12-top2-pengu-v2-v52-dca-1y/v1"', f'"schema": "{schema}"', "schema")
+    s = one(s, '"totalContributedJpy": 120_000.0', f'"totalContributedJpy": {total_contributed}', "capital total")
     s = one(
         s,
         '"architecture": {"v12Slots": V12_MAX_POSITIONS, "v12GrossCap": V12_GROSS_CAP, "v12PerPositionGrossCap": V12_PER_POSITION_GROSS_CAP, "penguGrossCap": PENGU_MAX_GROSS, "sharedCryptoGrossCap": CRYPTO_GROSS_CAP, "stockGrossCap": STOCK_GROSS_CAP, "totalGrossCap": TOTAL_GROSS_CAP, "entryPriority": ["V52", "PENGU_DUAL_LS_V2", "V12"], "cryptoDailyLossLimitPct": CRYPTO_DAILY_LOSS_LIMIT * 100, "stockDailyLossLimitPct": STOCK_DAILY_LOSS_LIMIT * 100}',
@@ -187,8 +207,8 @@ def main() -> int:
     new_data = '"data": {"stockTargetSessions": len(target_days), "v11PreparedNormalTrades": len(stock_payload["modes"]["normal"]["v11"]), "v50PreparedNormalTrades": len(stock_payload["modes"]["normal"]["v50"]), "stockDiagnostics": stock_diagnostics, "v12NormalSourceMetrics": v12["modes"]["normal"]["metrics"], "penguNormalSourceMetrics": pengu["modes"]["normal"]["metrics"], "penguData": pengu.get("data")}'
     s = one(s, old_data, new_data, "data block")
 
-    s = one(s, "# Current V12 Top2 + PENGU V2 + V52 — 1Y monthly DCA backtest", "# Latest V56 V12 Top2 + PENGU V20 + V52 — 2Y monthly DCA backtest", "report title")
-    s = one(s, "11 additions; total contributed JPY 120,000", "24 additions; total contributed JPY 250,000", "report contributions")
+    s = one(s, "# Current V12 Top2 + PENGU V2 + V52 — 1Y monthly DCA backtest", report_title, "report title")
+    s = one(s, "11 additions; total contributed JPY 120,000", report_contributions, "report contributions")
     s = one(s, "Shared crypto gross <= 2.0x", "Shared crypto gross <= 1.5x", "report crypto cap")
     s = one(
         s,

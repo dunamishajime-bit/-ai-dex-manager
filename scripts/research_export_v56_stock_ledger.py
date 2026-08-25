@@ -12,6 +12,11 @@ def main() -> int:
     parser.add_argument("--v56-root", default=".v56-research")
     parser.add_argument("--stock-cache-dir", default=".cache/aster-only-v39-overnight-open")
     parser.add_argument("--output", required=True)
+    parser.add_argument("--period-start", default="2024-08-10T00:00:00Z")
+    parser.add_argument("--period-end", default="2026-08-10T00:00:00Z")
+    parser.add_argument("--min-target-sessions", type=int, default=480)
+    parser.add_argument("--min-complete-days", type=int, default=499)
+    parser.add_argument("--min-aligned-days", type=int, default=480)
     args = parser.parse_args()
 
     root = Path(args.v56_root).resolve()
@@ -22,8 +27,8 @@ def main() -> int:
     # The V56 harness defaults to its one-year reference window.  Set the
     # research-only stock engine window before it configures the frozen V11
     # loader so cache misses fetch the requested two-year raw market data.
-    target_start = dt.datetime(2024, 8, 10, tzinfo=dt.timezone.utc)
-    target_end = dt.datetime(2026, 8, 10, tzinfo=dt.timezone.utc)
+    target_start = dt.datetime.fromisoformat(args.period_start.replace("Z", "+00:00"))
+    target_end = dt.datetime.fromisoformat(args.period_end.replace("Z", "+00:00"))
     v54.base.START = target_start
     v54.base.END = target_end
 
@@ -43,8 +48,8 @@ def main() -> int:
         raise RuntimeError(f"V52_CASH_SYMBOL_SET_MISMATCH:{sorted(cash_symbols)}")
     if set(alignment_symbols) != required:
         raise RuntimeError(f"V52_ALIGNMENT_SYMBOL_SET_MISMATCH:{sorted(alignment_symbols)}")
-    if len(target_days) < 480:
-        raise RuntimeError(f"V52_INSUFFICIENT_TARGET_SESSIONS:{len(target_days)}")
+    if len(target_days) < args.min_target_sessions:
+        raise RuntimeError(f"V52_INSUFFICIENT_TARGET_SESSIONS:{len(target_days)}<{args.min_target_sessions}")
 
     min_complete_days = min(int(cash_symbols[s].get("completeDays", 0)) for s in required)
     min_common_days = min(int(alignment_symbols[s].get("commonDays", 0)) for s in required)
@@ -52,11 +57,12 @@ def main() -> int:
     clock_rejected = sum(int(alignment_symbols[s].get("clockRejected", 0)) for s in required)
     first_days = [str(cash_symbols[s].get("firstDay", "")) for s in required]
     last_days = [str(cash_symbols[s].get("lastDay", "")) for s in required]
-    if any(day > "2024-08-10" for day in first_days) or any(day < "2026-08-07" for day in last_days):
+    latest_expected_day = (target_end - dt.timedelta(days=3)).date().isoformat()
+    if any(day > target_start.date().isoformat() for day in first_days) or any(day < latest_expected_day for day in last_days):
         raise RuntimeError(f"V52_DATA_PERIOD_INCOMPLETE:first={first_days},last={last_days}")
-    if min_complete_days < 499 or min_aligned_days < 480 or clock_rejected != 0:
+    if min_complete_days < args.min_complete_days or min_aligned_days < args.min_aligned_days or clock_rejected != 0:
         raise RuntimeError(
-            f"V52_DATA_QUALITY_FAIL:complete={min_complete_days},aligned={min_aligned_days},clockRejected={clock_rejected}"
+            f"V52_DATA_QUALITY_FAIL:complete={min_complete_days}<{args.min_complete_days},aligned={min_aligned_days}<{args.min_aligned_days},clockRejected={clock_rejected}"
         )
 
     modes: dict[str, dict] = {}

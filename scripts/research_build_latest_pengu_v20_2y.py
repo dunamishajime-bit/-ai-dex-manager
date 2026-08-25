@@ -18,6 +18,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-root", default=".pengu-current")
     parser.add_argument("--output", required=True)
+    parser.add_argument("--warm-start", default="2024-07-01T00:00:00Z")
+    parser.add_argument("--eval-start", default="2024-08-10T00:00:00Z")
+    parser.add_argument("--eval-end", default="2026-08-10T00:00:00Z")
     args = parser.parse_args()
 
     root = Path(args.source_root)
@@ -30,9 +33,9 @@ def main() -> int:
         'import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";\nimport { createPenguShortV20State } from "../lib/pengu-short-v20";',
         "V20 import",
     )
-    s = replace_once(s, 'const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2024-07-01T00:00:00Z");', "warm start")
-    s = replace_once(s, 'const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2024-08-10T00:00:00Z");', "eval start")
-    s = replace_once(s, 'const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', "eval end")
+    s = replace_once(s, 'const WARM_START = Date.parse("2025-07-20T00:00:00Z");', f'const WARM_START = Date.parse("{args.warm_start}");', "warm start")
+    s = replace_once(s, 'const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', f'const EVAL_START = Date.parse("{args.eval_start}");', "eval start")
+    s = replace_once(s, 'const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', f'const EVAL_END = Date.parse("{args.eval_end}");', "eval end")
     s = replace_once(
         s,
         '  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);',

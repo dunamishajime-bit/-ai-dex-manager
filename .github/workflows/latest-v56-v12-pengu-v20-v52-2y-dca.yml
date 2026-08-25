@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - research/latest-v56-2y-dca-v52-data-20260825
+      - research/latest-v56-1y-dca-20260826
     paths:
       - '.github/workflows/latest-v56-v12-pengu-v20-v52-2y-dca.yml'
       - 'scripts/research_export_v56_stock_ledger.py'
@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: latest-v56-2y-dca-${{ github.ref }}
+  group: latest-v56-1y-dca-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -92,12 +92,12 @@ jobs:
           path: |
             .cache/perp-research-usdm
             .cache/aster-only-v39-overnight-open
-            .cache/latest-v56-2y-real-stock
+            .cache/latest-v56-1y-real-stock
             .cache/v96-crypto-v11-v13d-one-year
             .v56-research/.v52-top2-research/.cache/perp-research-usdm
             .v56-research/.v52-top2-research/.cache/v96-crypto-v11-v13d-one-year
             .v56-research/.stock-research/.cache/perp-research-usdm
-          key: latest-v56-2y-dca-${{ runner.os }}-${{ hashFiles('scripts/research_export_v56_stock_ledger.py', 'scripts/research_build_latest_pengu_v20_2y.py', 'scripts/research_patch_latest_v56_2y_dca.py') }}
+          key: latest-v56-1y-dca-${{ runner.os }}-${{ hashFiles('scripts/research_export_v56_stock_ledger.py', 'scripts/research_build_latest_pengu_v20_2y.py', 'scripts/research_patch_latest_v56_2y_dca.py') }}
           restore-keys: |
             v56-pengu-long-boundary-${{ runner.os }}-
             v55-risk-adjusted-alpha-${{ runner.os }}-
@@ -114,16 +114,16 @@ jobs:
 
       - name: Build fresh V12 Top2 two-year ledger
         env:
-          V12_TOP2_LEDGER_OUT: .research-state/latest-v56-2y/v12-top2-ledger.json
+          V12_TOP2_LEDGER_OUT: .research-state/latest-v56-1y/v12-top2-ledger.json
         run: |
-          mkdir -p .research-state/latest-v56-2y
-          cp scripts/research_current_v12_top2_ledger.ts scripts/.latest_v12_top2_2y.ts
+          mkdir -p .research-state/latest-v56-1y
+          cp scripts/research_current_v12_top2_ledger.ts scripts/.latest_v12_top2_1y.ts
           python - <<'PY'
           from pathlib import Path
-          p=Path('scripts/.latest_v12_top2_2y.ts')
+          p=Path('scripts/.latest_v12_top2_1y.ts')
           s=p.read_text()
           pairs=[
-              ('Date.UTC(2025, 7, 1)', 'Date.UTC(2024, 7, 10)'),
+              ('Date.UTC(2025, 7, 1)', 'Date.UTC(2025, 7, 10)'),
               ('Date.UTC(2026, 7, 1)', 'Date.UTC(2026, 7, 10)'),
           ]
           for old,new in pairs:
@@ -132,8 +132,8 @@ jobs:
           p.write_text(s)
           PY
           set -o pipefail
-          npx tsx scripts/.latest_v12_top2_2y.ts 2>&1 | tee .research-state/latest-v56-2y/v12.log
-          rm -f scripts/.latest_v12_top2_2y.ts
+          npx tsx scripts/.latest_v12_top2_1y.ts 2>&1 | tee .research-state/latest-v56-1y/v12.log
+          rm -f scripts/.latest_v12_top2_1y.ts
 
       - name: Build current PENGU Long V56 plus Short V20 two-year ledger
         env:
@@ -142,16 +142,19 @@ jobs:
           set -o pipefail
           python scripts/research_build_latest_pengu_v20_2y.py \
             --source-root .pengu-current \
-            --output .research-state/latest-v56-2y/pengu-v20-ledger.json \
-            2>&1 | tee .research-state/latest-v56-2y/pengu.log
+            --warm-start "2025-07-01T00:00:00Z" \
+            --eval-start "2025-08-10T00:00:00Z" \
+            --eval-end "2026-08-10T00:00:00Z" \
+            --output .research-state/latest-v56-1y/pengu-v20-ledger.json \
+            2>&1 | tee .research-state/latest-v56-1y/pengu.log
 
       - name: Validate current crypto ledgers
         run: |
           python - <<'PY'
           import json
-          v=json.load(open('.research-state/latest-v56-2y/v12-top2-ledger.json'))
-          p=json.load(open('.research-state/latest-v56-2y/pengu-v20-ledger.json'))
-          expected={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          v=json.load(open('.research-state/latest-v56-1y/v12-top2-ledger.json'))
+          p=json.load(open('.research-state/latest-v56-1y/pengu-v20-ledger.json'))
+          expected={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
           assert {k:v['period'][k] for k in expected}==expected, v['period']
           assert {k:p['period'][k] for k in expected}==expected, p['period']
           assert v['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
@@ -172,48 +175,54 @@ jobs:
         run: |
           set -o pipefail
           python scripts/research_prepare_hf_v52_cash.py \
-            --output-dir .cache/latest-v56-2y-real-stock/aligned/v11-cash \
-            --start "2024-07-01 00:00:00" \
+            --output-dir .cache/latest-v56-1y-real-stock/aligned/v11-cash \
+            --start "2025-07-01 00:00:00" \
             --end "2026-08-10 00:00:00" \
-            2>&1 | tee .research-state/latest-v56-2y/v52-cash-provider.log
+            2>&1 | tee .research-state/latest-v56-1y/v52-cash-provider.log
           python scripts/research_export_v56_stock_ledger.py \
             --v56-root .v56-research \
-            --stock-cache-dir .cache/latest-v56-2y-real-stock \
-            --output .research-state/latest-v56-2y/v56-stock-ledger.json \
-            2>&1 | tee .research-state/latest-v56-2y/v52-stock.log
+            --stock-cache-dir .cache/latest-v56-1y-real-stock \
+            --period-start "2025-08-10T00:00:00Z" \
+            --period-end "2026-08-10T00:00:00Z" \
+            --min-target-sessions 240 \
+            --min-complete-days 240 \
+            --min-aligned-days 240 \
+            --output .research-state/latest-v56-1y/v56-stock-ledger.json \
+            2>&1 | tee .research-state/latest-v56-1y/v52-stock.log
 
       - name: Patch DCA simulator to current V56 contract
         run: |
           python scripts/research_patch_latest_v56_2y_dca.py \
             --source scripts/research_current_top2_pengu_v52_dca.py \
-            --output scripts/.latest_v56_2y_dca.py
-          python -m py_compile scripts/.latest_v56_2y_dca.py
+            --output scripts/.latest_v56_1y_dca.py \
+            --window 1y
+          python -m py_compile scripts/.latest_v56_1y_dca.py
 
       - name: Run latest V56 two-year monthly DCA backtest
         env:
           PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
         run: |
           set -o pipefail
-          python scripts/.latest_v56_2y_dca.py \
-            --stock-ledger .research-state/latest-v56-2y/v56-stock-ledger.json \
-            --v12-ledger .research-state/latest-v56-2y/v12-top2-ledger.json \
-            --pengu-ledger .research-state/latest-v56-2y/pengu-v20-ledger.json \
-            --output-dir .research-state/latest-v56-2y \
-            2>&1 | tee .research-state/latest-v56-2y/backtest.log
+          python scripts/.latest_v56_1y_dca.py \
+            --stock-ledger .research-state/latest-v56-1y/v56-stock-ledger.json \
+            --v12-ledger .research-state/latest-v56-1y/v12-top2-ledger.json \
+            --pengu-ledger .research-state/latest-v56-1y/pengu-v20-ledger.json \
+            --output-dir .research-state/latest-v56-1y \
+            2>&1 | tee .research-state/latest-v56-1y/backtest.log
 
       - name: Validate final research contract
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          p=json.loads(Path('.research-state/latest-v56-2y/result.json').read_text())
-          v=json.loads(Path('.research-state/latest-v56-2y/v12-top2-ledger.json').read_text())
-          pengu=json.loads(Path('.research-state/latest-v56-2y/pengu-v20-ledger.json').read_text())
-          stock=json.loads(Path('.research-state/latest-v56-2y/v56-stock-ledger.json').read_text())
+          p=json.loads(Path('.research-state/latest-v56-1y/result.json').read_text())
+          v=json.loads(Path('.research-state/latest-v56-1y/v12-top2-ledger.json').read_text())
+          pengu=json.loads(Path('.research-state/latest-v56-1y/pengu-v20-ledger.json').read_text())
+          stock=json.loads(Path('.research-state/latest-v56-1y/v56-stock-ledger.json').read_text())
           assert p['status']=='PASS_RESEARCH_ONLY', p['checks']
-          assert p['period']=={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
-          assert p['capital']['totalContributedJpy']==250000
-          assert p['capital']['contributionCountAfterStart']==24
+          assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert p['capital']['totalContributedJpy']==130000
+          assert p['capital']['contributionCountAfterStart']==12
           assert p['architecture']['totalGrossCap']==2.5
           assert p['architecture']['stockGrossCap']==1.5
           assert p['architecture']['sharedCryptoGrossCap']==1.5
@@ -223,7 +232,7 @@ jobs:
           assert pengu['period']==p['period'] and pengu['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
           assert pengu['longVariant']=='PENGU_DUAL_LS_V2_FINAL_V56_SIDE_AWARE'
           assert pengu['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
-          assert stock['period']['decisionStartInclusive']=='2024-08-10T00:00:00Z'
+          assert stock['period']['decisionStartInclusive']=='2025-08-10T00:00:00Z'
           assert stock['period']['decisionEndExclusive']=='2026-08-10T00:00:00Z'
           assert stock['dataQuality']['v52RealMarketData'] is True
           assert stock['dataQuality']['dataFetchFailureAcceptedAsZeroTrades'] is False
@@ -255,8 +264,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: latest-v56-v12-pengu-v20-v52-2y-dca-${{ github.run_id }}
-          path: .research-state/latest-v56-2y
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-${{ github.run_id }}
+          path: .research-state/latest-v56-1y
           include-hidden-files: true
           retention-days: 90
           if-no-files-found: warn
