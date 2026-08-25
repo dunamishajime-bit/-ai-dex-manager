@@ -158,11 +158,16 @@ def build_chart(symbol: str, rows: list[dict]) -> tuple[dict, dict]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--start", default="2024-08-10 00:00:00")
+    # V52's frozen loader names its cache from the 40-day warm-up start, not
+    # from the decision window start.  Keep the warm-up bars so the loader can
+    # validate the same lookback that the backtest uses.
+    parser.add_argument("--start", default="2024-07-01 00:00:00")
     parser.add_argument("--end", default="2026-08-10 00:00:00")
     args = parser.parse_args()
     output = Path(args.output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
+    start_date = args.start[:10]
+    end_date = args.end[:10]
     diagnostics: dict[str, dict] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(SYMBOLS)) as pool:
         futures = {pool.submit(fetch, ticker, args.start, args.end): ticker for ticker in SYMBOLS.values()}
@@ -170,7 +175,7 @@ def main() -> int:
             ticker = futures[future]
             rows = future.result()
             chart, detail = build_chart(ticker, rows)
-            path = output / f"{ticker}-60m-2024-08-10-2026-08-10.json"
+            path = output / f"{ticker}-60m-{start_date}-{end_date}.json"
             path.write_text(json.dumps(chart, separators=(",", ":")), encoding="utf-8")
             diagnostics[ticker] = detail
             print(json.dumps({"ticker": ticker, **detail}, ensure_ascii=False))
