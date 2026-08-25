@@ -1,0 +1,163 @@
+name: V55 Risk Adjusted Alpha Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/v55-risk-adjusted-alpha-20260825
+    paths:
+      - 'scripts/research_v55_risk_adjusted_alpha_bt.py'
+      - '.github/workflows/v55-risk-adjusted-alpha-research.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: v55-risk-adjusted-alpha-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 Top2 research source
+        uses: actions/checkout@v4
+        with:
+          ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065
+          path: .v52-top2-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 stock dependency root
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - name: Wire frozen Top2 dependencies
+        run: |
+          ln -s ../.stock-research/.v11 .v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v52-top2-research/.v13
+          test -f .v52-top2-research/.v11/research/v96_stock_perp_fade_enhancement_v11.py
+          test -f .v52-top2-research/.v13/research/v96_stock_v13_edge_floor_tournament.py
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable historical stock cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .cache/v96-crypto-v11-v13d-one-year
+            .v52-top2-research/.cache/perp-research-usdm
+            .v52-top2-research/.cache/v96-crypto-v11-v13d-one-year
+          key: v55-risk-adjusted-alpha-${{ runner.os }}-${{ hashFiles('scripts/research_v55_risk_adjusted_alpha_bt.py') }}
+          restore-keys: |
+            v54-structural-alpha-${{ runner.os }}-
+            v53-profit-efficiency-${{ runner.os }}-
+            v52-top2-stockcap-v2-${{ runner.os }}-
+            v52-parallel-opportunity-v41-${{ runner.os }}-
+            v52-parallel-opportunity-v4-${{ runner.os }}-
+            v12-pengu-v52-top2-allocation-${{ runner.os }}-
+
+      - name: Download locked fresh V12 and PENGU ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: v12-pengu-v52-top2-allocation-32783392588
+          path: .research-state/v12-pengu-v52-top2
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32783392588
+
+      - name: Verify locked ledger identity
+        run: |
+          test -s .research-state/v12-pengu-v52-top2/v12-ledgers.json
+          test -s .research-state/v12-pengu-v52-top2/pengu-v2-ledgers.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          v12=json.loads(Path('.research-state/v12-pengu-v52-top2/v12-ledgers.json').read_text())
+          pengu=json.loads(Path('.research-state/v12-pengu-v52-top2/pengu-v2-ledgers.json').read_text())
+          assert v12['schema'] == 'v12-combined-bt-ledger/v1'
+          assert pengu['strategyId'] == 'PENGU_DUAL_LS_V2_FINAL'
+          print('locked fresh ledgers: PASS')
+          PY
+
+      - name: Compile and self-test V55
+        env:
+          PYTHONPATH: scripts:.v52-top2-research/scripts:.stock-research/scripts
+        run: |
+          python -m py_compile scripts/research_v55_risk_adjusted_alpha_bt.py
+          python scripts/research_v55_risk_adjusted_alpha_bt.py --self-test
+
+      - name: Run V55 risk-adjusted alpha backtest
+        env:
+          PYTHONPATH: scripts:.v52-top2-research/scripts:.stock-research/scripts
+        run: |
+          mkdir -p .research-state/v55-risk-adjusted-alpha
+          python scripts/research_v55_risk_adjusted_alpha_bt.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/v12-pengu-v52-top2/v12-ledgers.json \
+            --pengu-ledger .research-state/v12-pengu-v52-top2/pengu-v2-ledgers.json \
+            --output-dir .research-state/v55-risk-adjusted-alpha \
+            2>&1 | tee .research-state/v55-risk-adjusted-alpha/backtest.log
+
+      - name: Validate research-only contract and print result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/v55-risk-adjusted-alpha/result.json').read_text())
+          assert p['status'] in {'V55_RISK_ADJUSTED_SIGNIFICANT_PASS_RESEARCH_ONLY','V55_RISK_ADJUSTED_NO_SIGNIFICANT_PROMOTION'}
+          assert p['sourceLineage']['freshLedgerRunId'] == 32783392588
+          assert p['sourceLineage']['freshLedgerArtifactId'] == 9540872862
+          assert p['safety']['mode'] == 'RESEARCH_ONLY'
+          assert p['safety']['ordersSent'] is False
+          assert p['safety']['liveChanged'] is False
+          assert p['safety']['vpsChanged'] is False
+          assert p['safety']['productionChanged'] is False
+          assert p['safety']['globalGrossCap'] == 2.5
+          assert p['safety']['stockGrossCap'] == 1.5
+          assert p['safety']['cryptoGrossCap'] == 1.5
+          if p['winner']:
+              assert p['winner']['pass'] is True
+              assert all(p['winner']['checks'].values())
+              assert p['winner']['full']['maxTotalGross'] <= 2.5 + 1e-9
+              assert p['winner']['full']['maxStockGross'] <= 1.5 + 1e-9
+              assert p['winner']['full']['maxCryptoGross'] <= 1.5 + 1e-9
+              assert p['winner']['full']['maxV50Concurrent'] <= 2
+          print('RESULT_STATUS='+p['status'])
+          print('BASELINE_FULL='+json.dumps(p['baseline']['full'], separators=(',',':')))
+          print('PHASE_C_ONLY='+json.dumps(p['phaseCOnly'], separators=(',',':')))
+          print('WINNER='+json.dumps(p['winner'], separators=(',',':')))
+          print('TOP_CASES='+json.dumps(p['topCases'][:10], separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v55-risk-adjusted-alpha-${{ github.run_id }}
+          path: .research-state/v55-risk-adjusted-alpha
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
