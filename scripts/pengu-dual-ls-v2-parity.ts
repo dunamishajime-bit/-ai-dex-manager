@@ -20,7 +20,7 @@ const BASE_URL = "https://api.bitget.com";
 const FROZEN = {
     short: { ret72Max: 0, impulse: -0.07, expiry: 24, bounceMin: 0.0125, bounceMax: 0.06, p24Floor: -0.12, btcEmaFloor: -0.04, rsiMin: 30, volMin: 0.25, volMax: 3, relMax: -0.02, btc24Max: 0.04, hold: 72, hard: 0.08, trigger: 0.15, trail: 0.04 },
     long: { ret72Min: 0.15, lookback: 18, p24Min: 0.10, relMin: 0.01, btc24Min: 0, rsiMin: 48, rsiMax: 78, volMin: 0.25, volMax: 3, atrMax: 0.05, hold: 120, hard: 0.08, trigger: 0.10, trail: 0.03 },
-    risk: { target: 0.02, multiplier: 0.75, floor: 0.60, cap: 0.75, cooldown: 6 },
+    risk: { target: 0.02, multiplier: 0.75, floor: 0.60, cap: 0.75, longMultiplier: 1.25, shortMultiplier: 1.00, cooldown: 6 },
 } as const;
 
 interface ReferenceRow extends DisDexV35Candle {
@@ -219,7 +219,8 @@ function referenceReplay(rows: ReferenceRow[]) {
         const entryIndex = index + 1;
         const entry = rows[entryIndex];
         const entryPrice = entry.open;
-        const gross = Math.min(FROZEN.risk.cap, Math.max(FROZEN.risk.floor, FROZEN.risk.multiplier * FROZEN.risk.target / rows[index].atrRatio));
+        const multiplier = side === "L" ? FROZEN.risk.longMultiplier : FROZEN.risk.shortMultiplier;
+        const gross = Math.min(FROZEN.risk.cap * multiplier, Math.max(FROZEN.risk.floor * multiplier, FROZEN.risk.multiplier * FROZEN.risk.target / rows[index].atrRatio * multiplier));
         const hold = side === "S" ? FROZEN.short.hold : FROZEN.long.hold;
         const hard = side === "S" ? entryPrice * (1 + FROZEN.short.hard) : entryPrice * (1 - FROZEN.long.hard);
         const trigger = side === "S" ? FROZEN.short.trigger : FROZEN.long.trigger;
@@ -256,7 +257,8 @@ function productionReplay(history: PenguDualLsV2History) {
         if (!side || !rows[index].features) { index += 1; continue; }
         const entryIndex = index + 1;
         const entry = rows[entryIndex].candle;
-        let position: PenguDualLsV2Position = { side: side === "L" ? 1 : -1, entryTs: entry.openTime, entryPrice: entry.open, quantity: 1, gross: targetGrossForAtr(rows[index].features!.atr24Ratio), highWaterMark: entry.open, lowWaterMark: entry.open };
+        const positionSide = side === "L" ? 1 : -1;
+        let position: PenguDualLsV2Position = { side: positionSide, entryTs: entry.openTime, entryPrice: entry.open, quantity: 1, gross: targetGrossForAtr(rows[index].features!.atr24Ratio, positionSide), highWaterMark: entry.open, lowWaterMark: entry.open };
         const hold = side === "L" ? PENGU_DUAL_LS_V2.long.maxHoldHours : PENGU_DUAL_LS_V2.short.maxHoldHours;
         const last = Math.min(rows.length - 1, entryIndex + hold - 1);
         let exitIndex = last;
@@ -315,9 +317,9 @@ async function main() {
     assertTradeParity(reference, production);
     const result = metrics(production);
     assert.equal(result.trades, 33);
-    assert.ok(Math.abs(result.returnPct - 147.49) <= 0.15, `Return mismatch ${result.returnPct}`);
-    assert.ok(Math.abs(result.profitFactor - 2.990) <= 0.01, `PF mismatch ${result.profitFactor}`);
-    assert.ok(Math.abs(result.maxDrawdownPct - (-11.31)) <= 0.05, `DD mismatch ${result.maxDrawdownPct}`);
+    assert.ok(Math.abs(result.returnPct - 150.3231) <= 0.15, `Return mismatch ${result.returnPct}`);
+    assert.ok(Math.abs(result.profitFactor - 2.9121) <= 0.01, `PF mismatch ${result.profitFactor}`);
+    assert.ok(Math.abs(result.maxDrawdownPct - (-12.7034)) <= 0.05, `DD mismatch ${result.maxDrawdownPct}`);
     console.log("PENGU_DUAL_LS_V2_FINAL_PRODUCTION_RESEARCH_PARITY_PASS");
     console.log(JSON.stringify({ source: "Bitget USDT perpetual untouched external validation", rows: { pengu: pengu.length, btc: btc.length }, ...result, ledgerParity: true, ordersSent: false, cancelSent: false, positionChangesSent: false }));
 }

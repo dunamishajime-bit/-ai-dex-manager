@@ -4,9 +4,9 @@ export const PENGU_DUAL_LS_V2 = {
     id: "PENGU_DUAL_LS_V2_FINAL",
     symbol: "PENGUUSDT",
     decisionIntervalHours: 1,
-    longGross: 0.75,
+    longGross: 0.9375,
     shortGross: 0.75,
-    maximumGross: 0.75,
+    maximumGross: 0.9375,
     portfolioGrossCap: 1.5,
     short: {
         regimeReturn72hMaximum: 0,
@@ -47,6 +47,8 @@ export const PENGU_DUAL_LS_V2 = {
         grossMultiplier: 0.75,
         grossFloor: 0.60,
         grossCap: 0.75,
+        longMultiplier: 1.25,
+        shortMultiplier: 1.00,
     },
     cooldownHours: 6,
     safety: {

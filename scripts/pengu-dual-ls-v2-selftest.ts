@@ -52,7 +52,9 @@ assert.equal(PENGU_DUAL_LS_V2.short.setupExpiryHours, 24);
 assert.equal(PENGU_DUAL_LS_V2.short.maxHoldHours, 72);
 assert.equal(PENGU_DUAL_LS_V2.long.maxHoldHours, 120);
 assert.equal(PENGU_DUAL_LS_V2.cooldownHours, 6);
-assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.75);
+assert.equal(PENGU_DUAL_LS_V2.longGross, 0.9375);
+assert.equal(PENGU_DUAL_LS_V2.shortGross, 0.75);
+assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.9375);
 assert.equal(PENGU_SHORT_V20_CANDIDATE, "COUNTERWIND_VOL_TARGET_FAILURE_EXIT");
 assert.equal(PENGU_SHORT_V20_PRE_REGISTRATION_SHA, "ad7cedb3cafaf9f9680e390112f72375d84b50ac");
 assert.equal(classifyPenguShortV20SizingState(0.75), "CAP");
@@ -72,7 +74,9 @@ const liveRuntime = resolvePenguDualLsV2Runtime({
     PENGU_DUAL_LS_V2_MAX_GROSS: "2.5",
     PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: "2.5",
 });
-assert.equal(liveRuntime.maximumGross, 0.75);
+assert.equal(liveRuntime.maximumGross, 0.9375);
+assert.equal(liveRuntime.longGross, 0.9375);
+assert.equal(liveRuntime.shortGross, 0.75);
 assert.equal(liveRuntime.portfolioGrossCap, 1.5);
 assert.equal(liveRuntime.maximumEntryDelayMs, 5 * 60_000);
 assert.equal(resolvePenguDualLsV2Runtime({ PENGU_DUAL_LS_V2_MAX_ENTRY_DELAY_MS: "9999999" }).maximumEntryDelayMs, 5 * 60_000);
@@ -122,6 +126,10 @@ assert.equal(targetGrossForAtr(0.005), 0.75);
 assert.equal(targetGrossForAtr(0.02), 0.75);
 assert.equal(targetGrossForAtr(0.05), 0.60);
 assert.equal(targetGrossForAtr(0.50), 0.60);
+assert.equal(targetGrossForAtr(0.005, 1), 0.9375);
+assert.equal(targetGrossForAtr(0.02, 1), 0.9375);
+assert.equal(targetGrossForAtr(0.05, 1), 0.75);
+assert.equal(targetGrossForAtr(0.50, 1), 0.75);
 assert.equal(targetGrossForAtr(0), 0);
 
 const longPosition: PenguDualLsV2Position = { side: 1, entryTs: 100 * HOUR, entryPrice: 100, quantity: 1, gross: 0.75, highWaterMark: 111 };
