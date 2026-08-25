@@ -15,6 +15,7 @@ V12_CRYPTO_SYMBOLS = (
 guard.MANAGED_CRYPTO_SYMBOLS = V12_CRYPTO_SYMBOLS
 guard.MANAGED_SYMBOLS = V12_CRYPTO_SYMBOLS + guard.MANAGED_STOCK_SYMBOLS
 
+import inspect
 import disdex_v96_v52_margin_guard_runtime as runtime  # noqa: E402
 
 runtime.MANAGED_SYMBOLS = guard.MANAGED_SYMBOLS
@@ -28,6 +29,9 @@ def v12_self_test() -> None:
     assert "NEARUSDT" in runtime.MANAGED_SYMBOLS
     assert "PENGUUSDT" in runtime.MANAGED_SYMBOLS
     assert len(set(runtime.MANAGED_SYMBOLS)) == len(runtime.MANAGED_SYMBOLS)
+    assert "emergency_flatten_managed(payload)" not in inspect.getsource(guard.MarginGuard.handle_failure)
+    assert "emergency_flatten_managed(payload)" not in inspect.getsource(guard.MarginGuard.evaluate_once)
+    assert "return False" in inspect.getsource(runtime.SerializedMarginGuard._kill_switch_requests_flatten)
     print("V12/PENGU/V52 serialized Margin Guard universe self-test: PASS")
 
 
