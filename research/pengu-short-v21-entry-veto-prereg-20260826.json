@@ -1,0 +1,72 @@
+{
+  "schema": "pengu-short-v21-entry-veto-prereg/v1",
+  "status": "PREREGISTERED_RESEARCH_ONLY",
+  "candidateId": "PENGU_SHORT_V21_SHALLOW_24H_DECLINE_VETO",
+  "createdFromRunId": 32908655131,
+  "createdFromHeadSha": "9754ff17eb2425811e1c1f71bc86a43dfe3c9057",
+  "productionSourceReadOnlySha": "a76fd7aaa0788209532a5a2c6489135dd8e4a27e",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "long": {
+    "mode": "EDGE",
+    "change": "NONE",
+    "reason": "RAW_REENTRY did not improve the chronological training segment and is rejected."
+  },
+  "short": {
+    "base": "COUNTERWIND_VOL_TARGET_FAILURE_EXIT",
+    "entryVeto": {
+      "feature": "penguReturn24h",
+      "operator": "gte",
+      "threshold": -0.031856427390826725,
+      "interpretation": "Reject a Short entry when PENGU 24h return is greater than or equal to -3.1856427390826725%; keep the existing V20 entry when the decline is stronger."
+    },
+    "allOtherEntryExitSizingRules": "UNCHANGED",
+    "shortGrossMax": 0.75
+  },
+  "portfolioContract": {
+    "penguLongGrossMax": 0.9375,
+    "penguShortGrossMax": 0.75,
+    "sharedCryptoGrossCap": 1.5,
+    "stockGrossCap": 1.5,
+    "totalGrossCap": 2.5
+  },
+  "confirmationAcceptance": {
+    "baselineParity": {
+      "penguTrades": 33,
+      "penguLongTrades": 5,
+      "penguShortTrades": 28
+    },
+    "candidateMustMatchPreregisteredDefinition": true,
+    "normalEndingAssetMustExceedBaseline": true,
+    "normalPfMinimumFractionOfBaseline": 0.98,
+    "normalMaxDdAllowedWorseningPctPoint": 0.5,
+    "severeEndingAssetMustNotDecline": true,
+    "severePfMinimumFractionOfBaseline": 0.98,
+    "severeMaxDdAllowedWorseningPctPoint": 0.75
+  },
+  "baseline": {
+    "runId": 32902090423,
+    "headSha": "aaf0c60004a3975c3828bfca10e0a1baf2089c79",
+    "normalEndingAssetJpy": 599074.12049995,
+    "normalMaxDrawdownPct": -12.1777701,
+    "normalProfitFactor": 2.75649103
+  },
+  "selectionEvidence": {
+    "trainingShortTradesBefore": 22,
+    "trainingShortTradesAfter": 18,
+    "trainingHardStopsBefore": 5,
+    "trainingHardStopsAfter": 3,
+    "trainingTrailingWinnersPreserved": 6,
+    "holdoutChanged": false,
+    "holdoutNote": "The final one-third contained no entry matching the veto, so holdout metrics were identical. This is non-degradation evidence, not an independent positive-gain claim."
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}
