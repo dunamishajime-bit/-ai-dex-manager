@@ -77,31 +77,35 @@ async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECIS
 }
 
 function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
-  const missingMetric = candidate.score === undefined || candidate.momentum === undefined || candidate.volumeRatio === undefined || !candidate.side;
+  const score = candidate.score;
+  const momentum = candidate.momentum;
+  const volumeRatio = candidate.volumeRatio;
+  const side = candidate.side;
+  const missingMetric = score === undefined || momentum === undefined || volumeRatio === undefined || !side;
   if (missingMetric || !btcRegime) {
     return { status: "unknown" as const, code: "SIGNAL_GATE_DATA_INCOMPLETE", detail: "発注SignalのGate判定材料がsnapshotに不足しています。" };
   }
 
   const failed: string[] = [];
   const edgeThreshold = V12_SIGNAL_POLICY.minimumEdgeToCostRatio * (V12_SIGNAL_POLICY.normalRoundTripCostBps / 10_000);
-  if (candidate.volumeRatio < V12_SIGNAL_POLICY.minimumVolumeRatio) failed.push(`volumeRatio ${candidate.volumeRatio.toFixed(3)} < ${V12_SIGNAL_POLICY.minimumVolumeRatio.toFixed(4)}`);
-  if (Math.abs(candidate.momentum) < edgeThreshold) failed.push(`edge ${Math.abs(candidate.momentum).toFixed(4)} < ${edgeThreshold.toFixed(4)}`);
-  if (candidate.side === "LONG" && candidate.momentum < V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${candidate.momentum.toFixed(4)} < ${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
-  if (candidate.side === "SHORT" && candidate.momentum > -V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${candidate.momentum.toFixed(4)} > -${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
+  if (volumeRatio < V12_SIGNAL_POLICY.minimumVolumeRatio) failed.push(`volumeRatio ${volumeRatio.toFixed(3)} < ${V12_SIGNAL_POLICY.minimumVolumeRatio.toFixed(4)}`);
+  if (Math.abs(momentum) < edgeThreshold) failed.push(`edge ${Math.abs(momentum).toFixed(4)} < ${edgeThreshold.toFixed(4)}`);
+  if (side === "LONG" && momentum < V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${momentum.toFixed(4)} < ${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
+  if (side === "SHORT" && momentum > -V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${momentum.toFixed(4)} > -${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
 
-  if (btcRegime === "LONG" && candidate.side !== "LONG") failed.push("BTC regime=LONG ですが候補sideがLONGではありません");
-  if (btcRegime === "SHORT" && candidate.side !== "SHORT") failed.push("BTC regime=SHORT ですが候補sideがSHORTではありません");
-  if (btcRegime === "NEUTRAL" && candidate.score < V12_SIGNAL_POLICY.neutralScoreThreshold) {
-    failed.push(`BTC regime=NEUTRAL、score ${candidate.score.toFixed(4)} < 必要値 ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}`);
+  if (btcRegime === "LONG" && side !== "LONG") failed.push("BTC regime=LONG ですが候補sideがLONGではありません");
+  if (btcRegime === "SHORT" && side !== "SHORT") failed.push("BTC regime=SHORT ですが候補sideがSHORTではありません");
+  if (btcRegime === "NEUTRAL" && score < V12_SIGNAL_POLICY.neutralScoreThreshold) {
+    failed.push(`BTC regime=NEUTRAL、score ${score.toFixed(4)} < 必要値 ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}`);
   }
 
   if (failed.length) {
-    const btcBlock = btcRegime === "NEUTRAL" && candidate.score < V12_SIGNAL_POLICY.neutralScoreThreshold;
+    const btcBlock = btcRegime === "NEUTRAL" && score < V12_SIGNAL_POLICY.neutralScoreThreshold;
     return {
       status: "blocked" as const,
       code: btcBlock ? "BTC_REGIME_DIRECTION_BLOCKED" : "V12_SIGNAL_GATE_BLOCKED",
       detail: btcBlock
-        ? `BTCの判定基準未達：BTC regime=NEUTRALではscore ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}以上が必要ですが、${candidate.symbol || "候補"}は${candidate.score.toFixed(4)}です。`
+        ? `BTCの判定基準未達：BTC regime=NEUTRALではscore ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}以上が必要ですが、${candidate.symbol || "候補"}は${score.toFixed(4)}です。`
         : `発注Signal Gate未達：${failed.join(" / ")}`,
     };
   }

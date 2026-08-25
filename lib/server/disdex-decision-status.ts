@@ -21,7 +21,7 @@ export type DecisionStatusItem = {
 export type DecisionStatusSnapshot = {
   ok: boolean;
   readOnly: true;
-  refreshIntervalMinutes: 60;
+  refreshIntervalMinutes: number;
   checkedAt: string;
   source: string;
   runtime: {
@@ -29,13 +29,15 @@ export type DecisionStatusSnapshot = {
     units: Array<{
       id: string;
       label: string;
-      status: "LIVE";
+      status: "LIVE" | "STALE" | "UNAVAILABLE" | "UNCONFIRMED";
       releaseSha: string;
       venue: string;
       timeframe: string;
       entryPolicy: string;
       protection: string;
       note: string;
+      reason?: string;
+      updatedAt?: number;
     }>;
   };
   v12: { items: DecisionStatusItem[] };
@@ -47,42 +49,45 @@ let cache: { expiresAt: number; snapshot: DecisionStatusSnapshot } | null = null
 const CACHE_TTL_MS = 55 * 60 * 1000;
 const ASTER_BASE_URL = process.env.ASTER_API_BASE_URL?.trim() || "https://fapi.asterdex.com";
 
-function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runtime"] {
+export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runtime"] {
   return {
     checkedAt,
     units: [
       {
         id: "V12_X1.00_ALL",
         label: "V12 X1.00 ALL Top2",
-        status: "LIVE",
+        status: "UNCONFIRMED",
         releaseSha: config.vpsObservedReleases.v12,
         venue: "Aster Futures V3",
         timeframe: "完成済み1時間足 → 2時間足",
         entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。合計1.50x / 1件1.00x",
         protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch",
-        note: "HPの候補表示は補助観測。実runnerは欠損・時刻不整合・risk異常時にFail Closedします。",
+        note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
+        reason: "V12 runner stateの実読取結果を待機中です。",
       },
       {
         id: "PENGU_DUAL_LS_V2_FINAL",
         label: "PENGU Dual LS V2 / Short V20",
-        status: "LIVE",
+        status: "UNCONFIRMED",
         releaseSha: config.vpsObservedReleases.pengu,
         venue: "Aster PENGUUSDT",
         timeframe: "完成済みPENGU/BTC 1時間足",
         entryPolicy: "Long/Short条件成立後、次の1時間足。Long/Short各0.75x、保有中の追加・反転なし",
         protection: "Long/Short hard stop・trailing・max hold。新規ShortのみV20 failure/deadline exit",
-        note: "Short V20は既存Legacy Shortを誤移行せず、VOL_TARGET failureは次H1始値で処理します。",
+        note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
+        reason: "PENGU runner stateの実読取結果を待機中です。",
       },
       {
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
         label: "V52 Top2 Aster-only",
-        status: "LIVE",
+        status: "UNCONFIRMED",
         releaseSha: config.vpsObservedReleases.v52,
         venue: "Aster-only stock sleeves",
         timeframe: "米国株時間・V11_EQ / V50 window",
-        entryPolicy: "固定snapshotのV50候補をRank1=1.00x / Rank2=0.50xで最大2建玉。basis≥65bps・net edge≥5bps、各20秒窓（11:30/12:30/13:30 NY）",
+        entryPolicy: "固定snapshotのV50候補をRank1=1.00x / 強シグナル1.25x / Rank2=0.25xで最大2建玉。basis≥65bps・net edge≥5bps、各20秒窓（11:30/12:30/13:30 NY）",
         protection: "最大保有時間、日次損失上限、建玉照合、共有Kill Switch",
-        note: "一時的なデータ品質・板・spread拒否だけ窓内retry。basis/net edge不足・SIGN_CHANGED等は最終拒否し、Fail Closedで注文しません。",
+        note: "VPS stateを実読取できた場合のみLIVE表示。一時的なデータ品質・板・spread拒否だけ窓内retryし、最終拒否はFail Closedです。",
+        reason: "V52 runner stateの実読取結果を待機中です。",
       },
     ],
   };
@@ -158,6 +163,6 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
     catch { errors.push(symbol); v52Items.push(unavailableItem(symbol, "V52", checkedAt, "対象時間内ですが、Asterから株式市場データを取得できません。")); }
   }
   v52Items.sort((left, right) => right.score - left.score || left.symbol.localeCompare(right.symbol)); v52Items.forEach((item, index) => { item.rank = index + 1; });
-  const snapshot: DecisionStatusSnapshot = { ok: errors.length === 0, readOnly: true, refreshIntervalMinutes: 60, checkedAt, source: "Aster public market data / VPS observed V12 PENGU V20 V52 runtime", runtime: runtimeSnapshot(checkedAt), v12: { items: v12Items }, v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items }, error: errors.length ? "一部銘柄の判定データを取得できません。" : undefined };
+  const snapshot: DecisionStatusSnapshot = { ok: errors.length === 0, readOnly: true, refreshIntervalMinutes: 180, checkedAt, source: "Aster public market data / runtime state observation", runtime: runtimeSnapshot(checkedAt), v12: { items: v12Items }, v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items }, error: errors.length ? "一部銘柄の判定データを取得できません。" : undefined };
   cache = { expiresAt: now + CACHE_TTL_MS, snapshot }; return snapshot;
 }

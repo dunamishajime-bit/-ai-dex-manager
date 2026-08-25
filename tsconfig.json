@@ -39,6 +39,27 @@
     "node_modules",
     "scripts",
     "backups",
-    "restoretmp"
+    "restoretmp",
+    "**/*-worktree/**",
+    "**/*-worktrees/**",
+    ".bt-*/**",
+    ".codex-*/**",
+    ".fix-worktree/**",
+    ".hp-*/**",
+    ".pengu-*/**",
+    ".tmp-*/**",
+    ".ui-*/**",
+    "ui-update/**",
+    ".v46-*/**",
+    ".v52-*/**",
+    ".v56-*/**",
+    ".worktrees/**",
+    "pengu-*/**",
+    "prod-clone/**",
+    "v12-fix-worktree/**",
+    "v52-strategy-specific-preflight*/**",
+    "worktree-*/**",
+    "runner*.ts",
+    "strategy-preflight*.ts"
   ]
 }
