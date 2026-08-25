@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { AsterV3Client } from "../lib/aster-v3-client";
-import { DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
+import { AsterV3Client, type AsterPositionRiskRow } from "../lib/aster-v3-client";
+import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME } from "../config/disdexV96Runtime";
 import {
     assertDisDexV96LiveGates,
     type DisDexV96ExecutionParityApproval,
@@ -13,12 +13,19 @@ import {
     type DisDexV96OperatorOverrideApproval,
 } from "../lib/disdex-v96-live-risk-controls";
 import { FileDisDexV96RunnerStateStore } from "../lib/disdex-v96-runner-state";
+import { disDexV96OperatorOverrideAuditMismatches } from "../lib/disdex-v96-operator-override-audit";
 import {
     assertCombinedV96MigrationReady,
     canonicalManagedPositions,
 } from "../lib/disdex-v96-combined-state-migration";
 
 const MANAGED_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT"] as const;
+type ExtendedPositionRiskRow = AsterPositionRiskRow & {
+    marginType?: string;
+    isolated?: boolean;
+    initialMargin?: string;
+    positionInitialMargin?: string;
+};
 
 function boolEnv(name: string, fallback = false) {
     const raw = process.env[name];
@@ -29,6 +36,41 @@ function boolEnv(name: string, fallback = false) {
 function numberEnv(name: string, fallback: number) {
     const value = Number(process.env[name]);
     return Number.isFinite(value) ? value : fallback;
+}
+
+function normalizedMarginType(row: ExtendedPositionRiskRow) {
+    const raw = String(row.marginType || "").trim().toLowerCase();
+    if (raw === "cross" || raw === "crossed") return "cross";
+    if (raw === "isolated" || raw === "isolate") return "isolated";
+    if (row.isolated === false) return "cross";
+    if (row.isolated === true) return "isolated";
+    return "unknown";
+}
+
+function assertManagedAccountConfiguration(positionRows: AsterPositionRiskRow[]) {
+    const requiredLeverage = numberEnv(
+        "DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE",
+        DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage,
+    );
+    if (requiredLeverage !== DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage) {
+        throw new Error(`V96 required leverage must be exactly ${DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage}x.`);
+    }
+    const bySymbol = new Map(positionRows.map((row) => [String(row.symbol).toUpperCase(), row as ExtendedPositionRiskRow]));
+    const configuration: Record<string, { leverage: number; marginType: string }> = {};
+    for (const symbol of MANAGED_SYMBOLS) {
+        const row = bySymbol.get(symbol);
+        if (!row) throw new Error(`V96 managed symbol position-risk row missing: ${symbol}`);
+        const leverage = Number(row.leverage);
+        const marginType = normalizedMarginType(row);
+        if (leverage !== requiredLeverage) {
+            throw new Error(`V96 managed symbol leverage mismatch for ${symbol}: expected ${requiredLeverage}, got ${leverage}.`);
+        }
+        if (marginType !== DISDEX_V96_LIVE_PROMOTION.requiredMarginType) {
+            throw new Error(`V96 managed symbol margin type mismatch for ${symbol}: expected cross, got ${marginType}.`);
+        }
+        configuration[symbol] = { leverage, marginType };
+    }
+    return configuration;
 }
 
 async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
@@ -45,6 +87,12 @@ async function optionalJson<T>(pathValue?: string): Promise<T | undefined> {
 async function main() {
     const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
     const configMigrationMode = boolEnv("DISDEX_V96_CONFIG_MIGRATION_MODE", false);
+    const requestedMaxGross = numberEnv("DISDEX_V96_MAX_GROSS", DISDEX_V96_RUNTIME.maximumGross);
+    const requestedDailyLossPct = numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct);
+    const requestedPenguGrossCap = numberEnv("DISDEX_V96_INITIAL_PENGU_GROSS", DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross);
+    if (Math.abs(requestedMaxGross - DISDEX_V96_RUNTIME.maximumGross) > 1e-12) {
+        throw new Error(`V96 Crypto sleeve Gross must be ${DISDEX_V96_RUNTIME.maximumGross}, got ${requestedMaxGross}.`);
+    }
     const [forwardEvidence, executionParity, operatorOverride] = await Promise.all([
         optionalJson<DisDexV96ForwardEvidenceApproval>(process.env.DISDEX_V96_FORWARD_EVIDENCE_FILE),
         optionalJson<DisDexV96ExecutionParityApproval>(process.env.DISDEX_V96_EXECUTION_PARITY_FILE),
@@ -57,12 +105,12 @@ async function main() {
         forwardEvidence,
         executionParity,
         operatorOverride,
+        maximumGross: requestedMaxGross,
+        maximumDailyLossPct: requestedDailyLossPct,
+        initialPenguGrossCap: requestedPenguGrossCap,
         runtimeCommitSha,
     });
-    if (gate.operatorOverrideApproved && gate.operatorOverride) {
-        const remainingMs = Date.parse(gate.operatorOverride.expiresAt) - Date.now();
-        if (remainingMs < 15 * 60_000) throw new Error("V96 Operator Override expires in less than 15 minutes.");
-    }
+
     const killSwitch = await readDisDexV96KillSwitch(process.env.DISDEX_V96_KILL_SWITCH_FILE);
     if (killSwitch?.active) throw new Error(`V96 Kill Switch is active: ${killSwitch.reason}`);
 
@@ -72,7 +120,7 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-V96-LIVE-Preflight/1.2",
+        userAgent: "DisDex-V96-LIVE-Preflight/1.4",
     });
     if (!client.hasTradingCredentials()) {
         throw new Error("V96 preflight requires ASTER_USER_ADDRESS and ASTER_API_PRIVATE_KEY.");
@@ -86,12 +134,13 @@ async function main() {
     ]);
     void ping;
     if (!Array.isArray(positionRows) || positionRows.length === 0) {
-        throw new Error("Aster positionRisk returned no rows; One-way Mode could not be verified.");
+        throw new Error("Aster positionRisk returned no rows; One-way Mode and leverage could not be verified.");
     }
     const nonBothRows = positionRows.filter((row) => String(row.positionSide || "").toUpperCase() !== "BOTH");
     if (nonBothRows.length) {
         throw new Error(`Aster account is not in One-way Mode; ${nonBothRows.length} position row(s) are not BOTH.`);
     }
+    const accountConfiguration = assertManagedAccountConfiguration(positionRows);
     const managedPositions = positionRows.filter((row) =>
         MANAGED_SYMBOLS.includes(String(row.symbol).toUpperCase() as typeof MANAGED_SYMBOLS[number])
         && Math.abs(Number(row.positionAmt) || 0) > 1e-12,
@@ -101,6 +150,7 @@ async function main() {
     }
 
     let migratedStateVerified = false;
+    let operatorOverrideAuditVerified = false;
     let migrationId: string | undefined;
     if (configMigrationMode) {
         const stateRoot = resolve(process.env.DISDEX_V96_STATE_DIR || DISDEX_V96_RUNTIME.stateDirectory);
@@ -108,7 +158,16 @@ async function main() {
         if (state.bootstrapRequired) throw new Error("V96 config-migration preflight requires a migrated established state with bootstrapRequired=false.");
         if (state.pending) throw new Error("V96 config-migration preflight found a pending state order.");
         if (state.manualReviewReason) throw new Error(`V96 config-migration preflight found manual review: ${state.manualReviewReason}`);
-        if (state.operatorOverride) throw new Error("Migrated V96 state still contains the old Operator Override audit.");
+        if (state.operatorOverride) {
+            if (!gate.operatorOverrideApproved || !gate.operatorOverride) {
+                throw new Error("Migrated V96 state contains an Operator Override audit but the current exact-commit Override route is not approved.");
+            }
+            const mismatches = disDexV96OperatorOverrideAuditMismatches(state.operatorOverride, gate.operatorOverride);
+            if (mismatches.length) {
+                throw new Error(`Migrated V96 state Operator Override audit does not match the current approved artifact: ${mismatches.join(",")}`);
+            }
+            operatorOverrideAuditVerified = true;
+        }
         const combinedRoot = String(process.env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT || "").trim();
         if (!combinedRoot) throw new Error("Combined migration preflight requires DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT.");
         const migration = await assertCombinedV96MigrationReady({
@@ -145,10 +204,14 @@ async function main() {
         configFingerprint: gate.configFingerprint,
         forwardEvidenceApproved: gate.forwardEvidenceApproved,
         operatorOverrideApproved: gate.operatorOverrideApproved,
-        operatorOverrideExpiresAt: gate.operatorOverride?.expiresAt,
+        operatorOverrideAuditVerified,
         initialPenguGrossCap: gate.operatorOverride?.initialPenguGrossCap,
+        maximumPortfolioGross: gate.operatorOverride?.maximumPortfolioGross,
         maximumDailyLossPct: gate.operatorOverride?.maximumDailyLossPct,
         maximumDailyLossUsd: gate.operatorOverride?.maximumDailyLossUsd,
+        accountConfiguration,
+        requiredInitialLeverage: DISDEX_V96_LIVE_PROMOTION.requiredInitialLeverage,
+        requiredMarginType: DISDEX_V96_LIVE_PROMOTION.requiredMarginType,
         oneWayMode: true,
         managedPositionCount: managedPositions.length,
         migratedStateVerified,

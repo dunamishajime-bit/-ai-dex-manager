@@ -11,6 +11,25 @@ import {
     type DisDexPenguV46Signal,
 } from "@/lib/pengu-dual-engine-v46";
 
+function legacyPenguEnabled() {
+    return !/^(0|false|off|no)$/i.test(String(process.env.PENGU_LEGACY_CORE_ENABLED ?? "true").trim());
+}
+
+function buildLegacyPenguSignal(history: DisDexPenguV46History, now: number): DisDexPenguV46Signal {
+    if (legacyPenguEnabled()) return buildDisDexPenguV46Signal(history, now);
+    return {
+        strategyId: "PENGU_DUAL_ENGINE_V46",
+        side: 0,
+        targetGross: 0,
+        reason: "Legacy PENGU V46 is disabled; PENGU_DUAL_LS_V2_FINAL is the sole PENGU order owner.",
+        diagnostics: {
+            evaluatedDecisionBars: 0,
+            fundingCoverage: false,
+            latestCompletedPenguTs: undefined,
+            latestCompletedBtcTs: undefined,
+        },
+    };
+}
 export interface DisDexV96CombinedSignal {
     strategyId: typeof DISDEX_V96_STRATEGY_ID;
     referenceTs: number;
@@ -25,20 +44,24 @@ export interface DisDexV96CombinedSignal {
 export function buildDisDexV96CombinedSignal(
     history: DisDexPenguV46History,
     now = Date.now(),
-    options: { penguTargetGrossCap?: number } = {},
+    options: { penguTargetGrossCap?: number; totalGrossCap?: number } = {},
 ): DisDexV96CombinedSignal {
     const core = buildDisDexV95CoreSignal(history, now);
-    const pengu = buildDisDexPenguV46Signal(history, now);
+    const pengu = buildLegacyPenguSignal(history, now);
     const requestedPenguGross = pengu.side === 0 ? 0 : DISDEX_V96_ALLOCATION.penguTargetGross;
     const suppliedCap = Number(options.penguTargetGrossCap);
     const penguGrossCapApplied = Number.isFinite(suppliedCap) && suppliedCap > 0
         ? Math.min(requestedPenguGross, suppliedCap)
         : requestedPenguGross;
+    const suppliedTotalGrossCap = Number(options.totalGrossCap);
+    const totalGrossCap = Number.isFinite(suppliedTotalGrossCap) && suppliedTotalGrossCap > 0
+        ? suppliedTotalGrossCap
+        : DISDEX_V96_ALLOCATION.totalGrossCap;
     const allocation = allocateDisDexV96ReservedPengu({
         coreWeights: core.targetWeights as Record<string, number>,
         penguSide: pengu.side,
         penguTargetGross: penguGrossCapApplied,
-        totalGrossCap: DISDEX_V96_ALLOCATION.totalGrossCap,
+        totalGrossCap,
         minimumActivePenguClip: DISDEX_V96_ALLOCATION.minimumActivePenguClip,
     });
     return {

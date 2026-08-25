@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# This helper is installed as an ExecStartPre drop-in on the two known legacy
+# V96 supervisors after they have been stopped for the V12 migration. It never
+# stops a process and never calls the exchange. A deliberate rollback remains
+# possible after V12/target are fully stopped and reconciled.
+if systemctl list-units --type=service --state=active --no-legend 'disdex-v12-x1-all@*.service' 2>/dev/null | grep -q .; then
+  printf 'V96_START_BLOCKED_V12_SERVICE_ACTIVE\n' >&2
+  exit 1
+fi
+if systemctl list-units --type=target --state=active --no-legend 'disdex-v12-pengu-v2-v52@*.target' 2>/dev/null | grep -q .; then
+  printf 'V96_START_BLOCKED_V12_TARGET_ACTIVE\n' >&2
+  exit 1
+fi
+if pgrep -af '[d]isdex-v12-x1-all-live-runner\.ts' >/dev/null 2>&1; then
+  printf 'V96_START_BLOCKED_V12_PROCESS_ACTIVE\n' >&2
+  exit 1
+fi
+printf 'V96_START_ALLOWED_NO_V12_RUNTIME\n'

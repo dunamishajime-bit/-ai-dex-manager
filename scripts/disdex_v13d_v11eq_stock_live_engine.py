@@ -52,7 +52,10 @@ V11_CONVERGENCE_BPS = 15.0
 V11_MIN_DEPTH_MULTIPLE = 2.0
 V11_MAX_SPREAD_BPS = 20.0
 V11_MAX_SPREAD_MEDIAN_MULTIPLE = 2.0
-V11_MAX_DATA_AGE_MS = 1500
+# The validated Pyth/IEX reference policy permits up to 5 seconds of source
+# age. This remains a hard rejection boundary; it is not a stale-price
+# fallback and does not alter signal, sizing, or execution rules.
+V11_MAX_DATA_AGE_MS = 5000
 V11_MAX_SOURCE_CLOCK_DIFF_MS = 1500
 V11_MAX_ADVERSE_TWO_SECOND_BPS = 5.0
 V11_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
@@ -123,6 +126,18 @@ def append_jsonl(path: Path, payload: dict) -> None:
         writer.flush()
 
 
+REFERENCE_QUALITY_ERROR_CODES = {
+    "pyth_quote_unavailable", "iex_quote_unavailable", "pyth_quote_stale", "iex_quote_stale",
+    "pyth_confidence_too_wide", "cross_source_divergence", "reference_http_unavailable", "reference_transport_unavailable",
+}
+
+class ReferenceQualityError(RuntimeError):
+    def __init__(self, code: str, detail: Optional[dict] = None):
+        self.code = code if code in REFERENCE_QUALITY_ERROR_CODES else "reference_http_unavailable"
+        allowed = {"symbol", "ageMs", "maximumAgeMs", "confidenceBps", "maximumConfidenceBps", "crossSourceDifferenceBps", "maximumCrossSourceBps", "httpStatus"}
+        self.detail = {key: value for key, value in (detail or {}).items() if key in allowed}
+        super().__init__(json.dumps({"error": self.code, **self.detail}, ensure_ascii=False, separators=(",", ":")))
+
 def http_json(
     url: str,
     *,
@@ -130,6 +145,7 @@ def http_json(
     params: Optional[Dict[str, Any]] = None,
     headers: Optional[Dict[str, str]] = None,
     timeout: float = 10.0,
+    reference_request: bool = False,
 ) -> Any:
     encoded = None
     target = url
@@ -151,7 +167,22 @@ def http_json(
             return json.loads(text) if text else {}
     except urllib.error.HTTPError as error:
         body = error.read().decode(errors="replace")
+        if reference_request and error.code in {502, 503, 504}:
+            detail = {}
+            try:
+                parsed = json.loads(body)
+                if isinstance(parsed, dict): detail = parsed
+            except json.JSONDecodeError:
+                pass
+            response_code = detail.get("error")
+            if response_code is not None and str(response_code) not in REFERENCE_QUALITY_ERROR_CODES:
+                raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
+            raise ReferenceQualityError(str(response_code or "reference_http_unavailable"), {**detail, "httpStatus": error.code}) from error
         raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
+    except (urllib.error.URLError, TimeoutError) as error:
+        if reference_request:
+            raise ReferenceQualityError("reference_transport_unavailable", {"httpStatus": getattr(getattr(error, "reason", None), "errno", None)}) from error
+        raise
 
 
 def get_path(payload: Any, path: str) -> Any:
@@ -692,7 +723,9 @@ class ReferenceProvider:
         received = now_ms()
         if self.mode == "external":
             url = self.template.format(symbol=symbol, unix_ms=received)
-            payload = http_json(url, headers=self.headers, timeout=self.timeout)
+            payload = http_json(url, headers=self.headers, timeout=self.timeout, reference_request=True)
+            if isinstance(payload, dict) and payload.get("error") in REFERENCE_QUALITY_ERROR_CODES:
+                raise ReferenceQualityError(str(payload["error"]), payload)
             price = finite(get_path(payload, self.price_path))
             timestamp = int(finite(get_path(payload, self.timestamp_path), received))
             if timestamp < 10_000_000_000:
@@ -1303,7 +1336,7 @@ class StockEngine:
         if local.weekday() >= 5:
             return
         sec = ny_seconds(local)
-        need_rows = self.state.get("position") is not None or clock("09:59:55") <= sec <= clock("15:30:30")
+        need_rows = bool(self.state.get("position")) or clock("09:59:55") <= sec <= clock("15:30:30")
         if not need_rows:
             return
         rows = self.books_and_refs()
@@ -1415,6 +1448,7 @@ def self_test() -> None:
     assert clock("10:30:00") == 37_800
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96"
     assert V13D_MIN_BASIS_BPS == 20.0
+    assert V11_MAX_DATA_AGE_MS == 5000
     assert V11_MAX_ROUND_TRIP_COST_BPS == 60.0
     print("V13D + V11-EQ Stock live engine self-test: PASS")
 

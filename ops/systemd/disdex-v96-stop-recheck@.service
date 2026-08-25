@@ -1,0 +1,26 @@
+[Unit]
+Description=DisDex V96 post-stop Aster recheck (%i)
+After=network-online.target disdex-shared-crypto-risk@%i.service
+Wants=network-online.target
+Requires=disdex-shared-crypto-risk@%i.service
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/disdex-v12-x1-all.env
+EnvironmentFile=/etc/disdex/disdex-v12-aster-credentials.env
+LoadCredential=aster-env:/etc/disdex/disdex-v12-aster-credentials.env
+Environment=NODE_ENV=production
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-v96-stop-recheck.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases /home/deploy/ai-dex-manager-v96-paper/.runtime-state
+ReadWritePaths=/var/lib/disdex/shared /var/lib/disdex/v12-x1-all
+UMask=0077
