@@ -1,0 +1,257 @@
+name: PENGU Short V21 Preregistered Confirmation 1Y
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v56-v20-diagnostics-20260826
+    paths:
+      - 'research/pengu-short-v21-entry-veto-prereg-20260826.json'
+      - '.github/workflows/pengu-short-v21-preregistered-confirmation-1y.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-short-v21-preregistered-confirmation-1y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout preregistered research
+        uses: actions/checkout@v4
+
+      - name: Verify preregistration before replay
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('research/pengu-short-v21-entry-veto-prereg-20260826.json'))
+          assert p['status']=='PREREGISTERED_RESEARCH_ONLY'
+          assert p['candidateId']=='PENGU_SHORT_V21_SHALLOW_24H_DECLINE_VETO'
+          assert p['long']=={'mode':'EDGE','change':'NONE','reason':'RAW_REENTRY did not improve the chronological training segment and is rejected.'}
+          v=p['short']['entryVeto']
+          assert v['feature']=='penguReturn24h' and v['operator']=='gte'
+          assert abs(v['threshold']-(-0.031856427390826725))<1e-15
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PREREGISTRATION_IDENTITY=PASS')
+          PY
+
+      - name: Checkout frozen PENGU production source read-only
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - name: Checkout frozen V56 research harness
+        uses: actions/checkout@v4
+        with:
+          ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d
+          path: .v56-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 Top2 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065
+          path: .v56-research/.v52-top2-research
+          fetch-depth: 1
+
+      - name: Checkout frozen stock dependency root
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .v56-research/.stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v56-research/.stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v56-research/.stock-research/.v13
+          fetch-depth: 1
+
+      - name: Wire frozen stock dependencies
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+
+      - name: Download immutable baseline Run 32902090423 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-32902090423
+          path: .research-state/baseline-32902090423
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32902090423
+
+      - name: Verify immutable baseline
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('.research-state/baseline-32902090423/result.json').read_text())
+          p=json.loads(Path('.research-state/baseline-32902090423/pengu-v20-ledger.json').read_text())
+          n=r['results']['NORMAL']
+          assert r['status']=='PASS_RESEARCH_ONLY'
+          assert abs(n['endingAssetJpy']-599074.12049995)<0.01
+          assert abs(n['maxDrawdownPctClosedEventTwr']-(-12.1777701))<1e-6
+          assert p['modes']['normal']['metrics']['trades']==33
+          assert p['modes']['normal']['metrics']['longTrades']==5
+          assert p['modes']['normal']['metrics']['shortTrades']==28
+          print('BASELINE_IDENTITY=PASS')
+          PY
+
+      - name: Fresh replay against preregistered candidate
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-v21-confirmation
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v21-confirmation
+          cp scripts/research_pengu_v56_v20_diagnostics.ts .pengu-current/scripts/.research_pengu_v21_confirmation.generated.ts
+          npx tsx .pengu-current/scripts/.research_pengu_v21_confirmation.generated.ts \
+            2>&1 | tee .research-state/pengu-v21-confirmation/replay.log
+          rm -f .pengu-current/scripts/.research_pengu_v21_confirmation.generated.ts
+
+      - name: Require exact preregistered candidate and replay metrics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          pre=json.loads(Path('research/pengu-short-v21-entry-veto-prereg-20260826.json').read_text())
+          d=json.loads(Path('.research-state/pengu-v21-confirmation/diagnostics.json').read_text())
+          led=json.loads(Path('.research-state/pengu-v21-confirmation/candidate-pengu-ledger.json').read_text())
+          rule=d['candidate']['shortRule']
+          want=pre['short']['entryVeto']
+          assert d['baseline']['normal']['trades']==33
+          assert d['baseline']['normal']['longTrades']==5
+          assert d['baseline']['normal']['shortTrades']==28
+          assert d['candidate']['longMode']=='EDGE'
+          assert rule['feature']==want['feature'] and rule['op']==want['operator']
+          assert abs(rule['threshold']-want['threshold'])<1e-15
+          assert d['candidate']['promoted'] is True and d['candidate']['fullValidationPass'] is True
+          assert d['shortCandidate']['passedHoldout'] is True
+          assert d['shortCandidate']['qualifyingCount']==1
+          assert led['modes']['normal']['metrics']['trades']==29
+          assert led['modes']['normal']['metrics']['longTrades']==5
+          assert led['modes']['normal']['metrics']['shortTrades']==24
+          assert led['integrity']['maximumRequestedGross']<=0.9375+1e-12
+          assert max([float(x['requestedGross']) for x in led['modes']['normal']['trades'] if x['side']=='S'] or [0])<=0.75+1e-12
+          assert d['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PREREGISTERED_REPLAY=PASS')
+          print('PENGU_NORMAL='+json.dumps(d['candidate']['normal'],separators=(',',':')))
+          print('PENGU_STRESS='+json.dumps(d['candidate']['stress'],separators=(',',':')))
+          PY
+
+      - name: Patch identical 1Y DCA simulator
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py \
+            --source scripts/research_current_top2_pengu_v52_dca.py \
+            --output scripts/.pengu_v21_confirm_1y_dca.py \
+            --window 1y
+          python -m py_compile scripts/.pengu_v21_confirm_1y_dca.py
+
+      - name: Run integrated confirmation with fixed baseline V12 and V52
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v21-integrated-confirmation
+          python scripts/.pengu_v21_confirm_1y_dca.py \
+            --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json \
+            --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json \
+            --pengu-ledger .research-state/pengu-v21-confirmation/candidate-pengu-ledger.json \
+            --output-dir .research-state/pengu-v21-integrated-confirmation \
+            2>&1 | tee .research-state/pengu-v21-integrated-confirmation/backtest.log
+
+      - name: Final preregistered confirmation contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          pre=json.loads(Path('research/pengu-short-v21-entry-veto-prereg-20260826.json').read_text())
+          b=json.loads(Path('.research-state/baseline-32902090423/result.json').read_text())
+          c=json.loads(Path('.research-state/pengu-v21-integrated-confirmation/result.json').read_text())
+          d=json.loads(Path('.research-state/pengu-v21-confirmation/diagnostics.json').read_text())
+          assert c['status']=='PASS_RESEARCH_ONLY'
+          assert c['period']==b['period']==pre['period']
+          assert c['capital']['totalContributedJpy']==130000
+          assert c['architecture']['totalGrossCap']==2.5
+          assert c['architecture']['stockGrossCap']==1.5
+          assert c['architecture']['sharedCryptoGrossCap']==1.5
+          assert c['architecture']['penguLongGrossMax']==0.9375
+          assert c['architecture']['penguShortGrossMax']==0.75
+          assert c['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          bn,cn=b['results']['NORMAL'],c['results']['NORMAL']
+          bs,cs=b['results']['SEVERE'],c['results']['SEVERE']
+          passed=(
+              cn['endingAssetJpy']>bn['endingAssetJpy']
+              and cn['profitFactor']>=bn['profitFactor']*0.98
+              and cn['maxDrawdownPctClosedEventTwr']>=bn['maxDrawdownPctClosedEventTwr']-0.5
+              and cs['endingAssetJpy']>=bs['endingAssetJpy']
+              and cs['profitFactor']>=bs['profitFactor']*0.98
+              and cs['maxDrawdownPctClosedEventTwr']>=bs['maxDrawdownPctClosedEventTwr']-0.75
+          )
+          assert passed
+          out={
+              'status':'PREREGISTERED_CONFIRMATION_PASS_RESEARCH_ONLY',
+              'candidateId':pre['candidateId'],
+              'candidate':{'longMode':'EDGE','shortRule':d['candidate']['shortRule']},
+              'baselineRunId':32902090423,
+              'normal':{'baseline':bn,'candidate':cn},
+              'severe':{'baseline':bs,'candidate':cs},
+              'delta':{
+                  'endingAssetJpy':cn['endingAssetJpy']-bn['endingAssetJpy'],
+                  'netProfitJpy':cn['netProfitJpy']-bn['netProfitJpy'],
+                  'returnOnContributedCapitalPctPoint':cn['returnOnContributedCapitalPct']-bn['returnOnContributedCapitalPct'],
+                  'xirrPctPoint':cn['moneyWeightedReturnXirrPct']-bn['moneyWeightedReturnXirrPct'],
+                  'maxDrawdownPctPoint':cn['maxDrawdownPctClosedEventTwr']-bn['maxDrawdownPctClosedEventTwr'],
+                  'profitFactor':cn['profitFactor']-bn['profitFactor'],
+                  'trades':cn['trades']-bn['trades'],
+                  'severeEndingAssetJpy':cs['endingAssetJpy']-bs['endingAssetJpy']
+              },
+              'holdoutInterpretation':'Final one-third was unchanged by the veto; this confirms non-degradation there, not independent positive alpha.',
+              'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          }
+          Path('.research-state/pengu-v21-integrated-confirmation/preregistered-confirmation.json').write_text(json.dumps(out,indent=2,ensure_ascii=False)+'\n')
+          print('PREREGISTERED_CONFIRMATION='+json.dumps({'status':out['status'],'candidate':out['candidate'],'delta':out['delta']},ensure_ascii=False,separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-short-v21-preregistered-confirmation-1y-${{ github.run_id }}
+          path: |
+            .research-state/pengu-v21-confirmation
+            .research-state/pengu-v21-integrated-confirmation
+            research/pengu-short-v21-entry-veto-prereg-20260826.json
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
