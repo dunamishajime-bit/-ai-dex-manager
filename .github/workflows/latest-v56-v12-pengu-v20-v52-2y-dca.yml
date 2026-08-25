@@ -91,6 +91,7 @@ jobs:
           path: |
             .cache/perp-research-usdm
             .cache/aster-only-v39-overnight-open
+            .cache/latest-v56-2y-real-stock
             .cache/v96-crypto-v11-v13d-one-year
             .v56-research/.v52-top2-research/.cache/perp-research-usdm
             .v56-research/.v52-top2-research/.cache/v96-crypto-v11-v13d-one-year
@@ -171,7 +172,7 @@ jobs:
           set -o pipefail
           python scripts/research_export_v56_stock_ledger.py \
             --v56-root .v56-research \
-            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --stock-cache-dir .cache/latest-v56-2y-real-stock \
             --output .research-state/latest-v56-2y/v56-stock-ledger.json \
             2>&1 | tee .research-state/latest-v56-2y/v52-stock.log
 
