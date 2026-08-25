@@ -180,18 +180,6 @@ jobs:
           python scripts/research_patch_latest_v56_2y_dca.py \
             --source scripts/research_current_top2_pengu_v52_dca.py \
             --output scripts/.latest_v56_2y_dca.py
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('scripts/.latest_v56_2y_dca.py')
-          s=p.read_text()
-          marker='''            if strategy == "V11_EQ" and any(str(position["strategy"]) == "V11_EQ" for position in active_stock.values()):'''
-          replacement='''            if len(active_stock) >= 2:
-                stats["STOCK_SLOT_CAP_BLOCKED"] += 1
-                continue
-            if strategy == "V11_EQ" and any(str(position["strategy"]) == "V11_EQ" for position in active_stock.values()):'''
-          if s.count(marker)!=1: raise SystemExit(f'stock total-slot marker count={s.count(marker)}')
-          p.write_text(s.replace(marker,replacement,1))
-          PY
           python -m py_compile scripts/.latest_v56_2y_dca.py
 
       - name: Run latest V56 two-year monthly DCA backtest

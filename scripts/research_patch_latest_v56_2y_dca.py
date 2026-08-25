@@ -49,7 +49,10 @@ def main() -> int:
                 stats[f"{strategy}_SLOT_OCCUPIED"] += 1
                 continue
             if any(str(position["symbol"]) == str(trade["symbol"]) for position in active_stock.values()):'''
-    new_slot = '''            if strategy == "V11_EQ" and any(str(position["strategy"]) == "V11_EQ" for position in active_stock.values()):
+    new_slot = '''            if len(active_stock) >= 2:
+                stats["STOCK_SLOT_CAP_BLOCKED"] += 1
+                continue
+            if strategy == "V11_EQ" and any(str(position["strategy"]) == "V11_EQ" for position in active_stock.values()):
                 stats["V11_EQ_SLOT_OCCUPIED"] += 1
                 continue
             if strategy == "V50_POST_OPEN_BASIS":
