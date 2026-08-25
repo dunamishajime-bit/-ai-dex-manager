@@ -10,6 +10,8 @@ on:
       - 'scripts/research_v12_combined_bt_ledger.ts'
       - 'scripts/research_pengu_v2_aster_ledger.ts'
       - 'scripts/research_v12_v52_pengu_v2_combined_bt.py'
+      - 'scripts/research_current_v12_top2_ledger.ts'
+      - 'scripts/research_current_top2_pengu_v52_dca.py'
       - '.github/workflows/v12-v52-pengu-v2-combined-one-year-bt.yml'
 
 permissions:
