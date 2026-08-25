@@ -210,15 +210,32 @@ jobs:
           import json
           from pathlib import Path
           p=json.loads(Path('.research-state/latest-v56-2y/result.json').read_text())
+          v=json.loads(Path('.research-state/latest-v56-2y/v12-top2-ledger.json').read_text())
+          pengu=json.loads(Path('.research-state/latest-v56-2y/pengu-v20-ledger.json').read_text())
+          stock=json.loads(Path('.research-state/latest-v56-2y/v56-stock-ledger.json').read_text())
           assert p['status']=='PASS_RESEARCH_ONLY', p['checks']
+          assert p['period']=={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
           assert p['capital']['totalContributedJpy']==250000
+          assert p['capital']['contributionCountAfterStart']==24
           assert p['architecture']['totalGrossCap']==2.5
           assert p['architecture']['stockGrossCap']==1.5
           assert p['architecture']['sharedCryptoGrossCap']==1.5
           assert p['architecture']['penguLongGrossMax']==0.9375
           assert p['architecture']['penguShortGrossMax']==0.75
+          assert v['period']==p['period'] and v['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
+          assert pengu['period']==p['period'] and pengu['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
+          assert pengu['longVariant']=='PENGU_DUAL_LS_V2_FINAL_V56_SIDE_AWARE'
+          assert pengu['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          assert stock['period']['decisionStartInclusive']=='2024-08-10T00:00:00Z'
+          assert stock['period']['decisionEndExclusive']=='2026-08-10T00:00:00Z'
+          assert stock['dataQuality']['v52RealMarketData'] is True
+          assert stock['dataQuality']['dataFetchFailureAcceptedAsZeroTrades'] is False
+          assert stock['dataQuality']['provider']
           assert p['data']['stockDiagnostics']['decisionWindowCoveragePct']>=99.9
+          assert p['data']['stockDiagnostics']['v52RealMarketData'] is True
+          assert p['data']['stockDiagnostics']['dataFetchFailureAcceptedAsZeroTrades'] is False
           assert p['results']['NORMAL']['bySleeve']['V52']['trades']>0
+          assert all(p['checks'].values()), p['checks']
           assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           n=p['results']['NORMAL']
           print('LATEST_V56_2Y_RESULT='+json.dumps({

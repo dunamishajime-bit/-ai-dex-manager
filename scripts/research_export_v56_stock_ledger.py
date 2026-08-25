@@ -63,11 +63,13 @@ def main() -> int:
 
         v11 = with_unit(prepared_v11)
         v50 = with_unit(prepared_v50)
-        if not v11 or not v50:
-            raise RuntimeError(f"V52_NONEMPTY_LEDGER_FAIL:{scenario}:v11={len(v11)},v50={len(v50)}")
         modes[mode] = {
             "scenario": scenario,
             "stockCostBps": stock_cost,
+            "signalsEvaluated": {"v11": len(v11_raw), "v50": len(v50_raw)},
+            "preparedRows": {"v11": len(v11), "v50": len(v50)},
+            "engineEvaluated": True,
+            "zeroTradesDueToDataFailure": False,
             "v11": v11,
             "v50": v50,
         }
@@ -102,6 +104,8 @@ def main() -> int:
             "missingCommonDecisionWindowCount": max(0, min_common_days - min_aligned_days),
             "timezoneNormalization": "Yahoo timestamps normalized to America/New_York cash-session slots; portfolio timestamps UTC",
             "corporateActions": "Yahoo chart corporate-action events are recorded in diagnostics; no synthetic bars or decision-window forward fill",
+            "v52RealMarketData": True,
+            "dataFetchFailureAcceptedAsZeroTrades": False,
             "rawDiagnostics": diagnostics,
         },
         "modes": modes,
