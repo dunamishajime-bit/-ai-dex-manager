@@ -395,7 +395,7 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest.features.referenceTs,
         side: decision.side,
-        targetGross: targetGrossForAtr(latest.features.atr24Ratio, decision.side),
+        targetGross: targetGrossForAtr(latest.features.atr24Ratio, decision.side === 1 ? 1 : -1),
         entryTs: latest.features.referenceTs + HOUR,
         reason: decision.reason,
         features: latest.features,
