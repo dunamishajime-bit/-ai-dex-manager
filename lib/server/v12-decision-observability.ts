@@ -243,21 +243,30 @@ function buildExecutionTrace(
     state: decision.signalGate?.status === "blocked" ? "blocked" : decision.regime && decision.btcRegime ? "pass" : "unknown",
     detail: `${decision.regime || "未取得"} / BTC ${decision.btcRegime || "未取得"}${decision.signalGate?.status === "blocked" ? ` / ${decision.signalGate.detail}` : ""}`,
   });
+  const top2 = decision.candidates.filter((candidate) => (candidate.rank || 99) <= 2);
+  steps.push({
+    key: "signal-selection",
+    label: "4. V12 Top2 Signal選定",
+    state: decision.selectionConfirmed ? "pass" : "blocked",
+    detail: decision.selectionConfirmed
+      ? `Top2候補から${decision.symbol} ${decision.side || "WAIT"}をSignal確定。1建玉最大1.00x / 合計最大1.50x。`
+      : `候補${decision.candidates.length}件、Top2 ${top2.map((candidate) => candidate.symbol || "—").join(" / ") || "未取得"}。候補順位だけでは発注せず、全Signal Gate成立が必要です。`,
+  });
   steps.push({
     key: "risk",
-    label: "4. 共有リスクGate",
+    label: "5. 共有リスクGate",
     state: sharedRisk?.tripped ? "blocked" : sharedRisk ? "pass" : "unknown",
     detail: sharedRisk ? sharedRisk.tripped ? `Kill Switch / daily loss ${sharedRisk.lossPct?.toFixed(2) ?? "-"}%` : `通過 / daily loss ${sharedRisk.lossPct?.toFixed(2) ?? "-"}% / 上限 ${sharedRisk.maximumLossPct?.toFixed(2) ?? "-"}%` : "共有リスク状態未取得",
   });
 
   if (runnerState?.pending) {
-    steps.push({ key: "position", label: "5. 建玉・容量Gate", state: "pending", detail: `${runnerState.pending.action || "ORDER"} ${runnerState.pending.symbol || candidateSymbol} の処理中` });
+    steps.push({ key: "position", label: "6. 建玉・容量Gate", state: "pending", detail: `${runnerState.pending.action || "ORDER"} ${runnerState.pending.symbol || candidateSymbol} の処理中` });
   } else if (active && sameReference) {
-    steps.push({ key: "position", label: "5. 建玉・容量Gate", state: "blocked", detail: `${active.symbol || "既存建玉"} ${active.side || ""} 保有中。同じ確定足は再処理しません（NO_NEW_CONFIRMED_2H_BAR）。` });
+    steps.push({ key: "position", label: "6. 建玉・容量Gate", state: "blocked", detail: `${active.symbol || "既存建玉"} ${active.side || ""} 保有中。同じ確定足は再処理しません（NO_NEW_CONFIRMED_2H_BAR）。V12は最大2建玉・合計1.50xです。` });
   } else if (active) {
-    steps.push({ key: "position", label: "5. 建玉・容量Gate", state: "pass", detail: `${active.symbol || "既存建玉"} ${active.side || ""} 保有中。追加建玉Gateへ進みます。` });
+    steps.push({ key: "position", label: "6. 建玉・容量Gate", state: "pass", detail: `${active.symbol || "既存建玉"} ${active.side || ""} 保有中。V12最大2建玉・合計1.50xの追加容量Gateへ進みます。` });
   } else {
-    steps.push({ key: "position", label: "5. 建玉・容量Gate", state: "pass", detail: "既存のV12建玉なし。" });
+    steps.push({ key: "position", label: "6. 建玉・容量Gate", state: "pass", detail: "既存のV12建玉なし。1建玉最大1.00x / 合計最大1.50xを確認します。" });
   }
 
   let currentStage = "candidate";
@@ -297,7 +306,7 @@ function buildExecutionTrace(
     nextAction = "daily loss / Kill Switchの解除条件を満たすまで注文Gateへ進みません。";
   }
 
-  steps.push({ key: "execution", label: "6. 発注・約定", state: currentStage === "filled" || currentStage === "filled-history" ? "pass" : currentStage === "pending" ? "pending" : "blocked", detail: currentStage === "filled" ? "Aster実建玉で約定確認済み" : currentStage === "filled-history" ? "履歴上の約定を確認" : currentStage === "pending" ? "注文処理中" : !decision.selectionConfirmed ? `NO_COMPLETED_BAR_SIGNAL：${decision.signalGate?.status === "blocked" ? decision.signalGate.detail : "Rank/score上位でも発注Signal全Gate合格前は注文しません"}` : "候補選定だけでは発注・約定になりません" });
+  steps.push({ key: "execution", label: "7. 発注・約定", state: currentStage === "filled" || currentStage === "filled-history" ? "pass" : currentStage === "pending" ? "pending" : "blocked", detail: currentStage === "filled" ? "Aster実建玉で約定確認済み" : currentStage === "filled-history" ? "履歴上の約定を確認" : currentStage === "pending" ? "注文処理中" : !decision.selectionConfirmed ? `NO_COMPLETED_BAR_SIGNAL：${decision.signalGate?.status === "blocked" ? decision.signalGate.detail : "Rank/score上位でも発注Signal全Gate合格前は注文しません"}` : "候補選定だけでは発注・約定になりません" });
   return { currentStage, currentStageLabel, summary, nextAction, steps };
 }
 
