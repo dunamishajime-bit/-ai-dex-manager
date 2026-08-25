@@ -21,6 +21,7 @@ def main() -> int:
 
     s = one(s, "START = dt.datetime(2025, 8, 1, tzinfo=UTC)", "START = dt.datetime(2024, 8, 10, tzinfo=UTC)", "start")
     s = one(s, "END = dt.datetime(2026, 8, 1, tzinfo=UTC)", "END = dt.datetime(2026, 8, 10, tzinfo=UTC)", "end")
+    s = one(s, "    cur = dt.datetime(2025, 9, 1, tzinfo=UTC)", "    cur = dt.datetime(2024, 9, 1, tzinfo=UTC)", "contribution start")
     s = one(s, "CRYPTO_GROSS_CAP = 2.0", "CRYPTO_GROSS_CAP = 1.5", "crypto gross")
     s = one(s, "PENGU_MAX_GROSS = 0.75", "PENGU_MAX_GROSS = 0.9375", "pengu gross")
     s = one(s, "V11_GROSS_CAP = 1.0", "V11_GROSS_CAP = 1.5", "v11 gross")
