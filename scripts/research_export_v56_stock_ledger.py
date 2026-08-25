@@ -1,0 +1,131 @@
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--v56-root", default=".v56-research")
+    parser.add_argument("--stock-cache-dir", default=".cache/aster-only-v39-overnight-open")
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+
+    root = Path(args.v56_root).resolve()
+    sys.path.insert(0, str(root / "scripts"))
+    import research_v54_structural_alpha_bt as v54  # type: ignore
+    import research_v55_risk_adjusted_alpha_bt as v55  # type: ignore
+
+    v11_raw, target_days, aligned, diagnostics = v54.load_stock_state(Path(args.stock_cache_dir).resolve())
+    v50_raw = v54.build_v50_rows(v55.FIXED_STRUCTURE, target_days, aligned)
+    policy = v55.fixed_stock_policy()
+
+    market = diagnostics.get("market", {})
+    cash = market.get("cash", {})
+    cash_symbols = cash.get("symbols", {})
+    alignment_symbols = market.get("alignment", {}).get("symbols", {})
+    required = {"AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"}
+    if set(cash_symbols) != required:
+        raise RuntimeError(f"V52_CASH_SYMBOL_SET_MISMATCH:{sorted(cash_symbols)}")
+    if set(alignment_symbols) != required:
+        raise RuntimeError(f"V52_ALIGNMENT_SYMBOL_SET_MISMATCH:{sorted(alignment_symbols)}")
+    if len(target_days) < 240:
+        raise RuntimeError(f"V52_INSUFFICIENT_TARGET_SESSIONS:{len(target_days)}")
+
+    min_complete_days = min(int(cash_symbols[s].get("completeDays", 0)) for s in required)
+    min_common_days = min(int(alignment_symbols[s].get("commonDays", 0)) for s in required)
+    min_aligned_days = min(int(alignment_symbols[s].get("alignedDays", 0)) for s in required)
+    clock_rejected = sum(int(alignment_symbols[s].get("clockRejected", 0)) for s in required)
+    if min_complete_days < 260 or min_aligned_days < 240 or clock_rejected != 0:
+        raise RuntimeError(
+            f"V52_DATA_QUALITY_FAIL:complete={min_complete_days},aligned={min_aligned_days},clockRejected={clock_rejected}"
+        )
+
+    modes: dict[str, dict] = {}
+    for scenario, assumptions in v54.base.SCENARIOS.items():
+        mode = str(assumptions["ledgerMode"])
+        stock_cost = float(assumptions["stockCostBps"])
+        prepared_v11 = v54.prepare_v11(list(v11_raw), policy, stock_cost)
+        prepared_v50 = v54.prepare_v50(list(v50_raw), policy, stock_cost)
+
+        def with_unit(rows: list[dict]) -> list[dict]:
+            out: list[dict] = []
+            for raw in rows:
+                row = dict(raw)
+                unit = v54.base.top2.trade_value(row, stock_cost, 5.0)
+                if unit is None:
+                    continue
+                row["netUnitReturn"] = float(unit)
+                out.append(row)
+            return out
+
+        v11 = with_unit(prepared_v11)
+        v50 = with_unit(prepared_v50)
+        if not v11 or not v50:
+            raise RuntimeError(f"V52_NONEMPTY_LEDGER_FAIL:{scenario}:v11={len(v11)},v50={len(v50)}")
+        modes[mode] = {
+            "scenario": scenario,
+            "stockCostBps": stock_cost,
+            "v11": v11,
+            "v50": v50,
+        }
+
+    coverage_pct = 100.0 * min_aligned_days / max(1, min_common_days)
+    payload = {
+        "schema": "v56-stock-ledger-export/v1",
+        "period": {
+            "decisionStartInclusive": v54.base.START.isoformat().replace("+00:00", "Z"),
+            "decisionEndExclusive": v54.base.END.isoformat().replace("+00:00", "Z"),
+        },
+        "policy": {
+            "structure": v54.asdict(v55.FIXED_STRUCTURE),
+            "stockPolicy": policy,
+            "globalGrossCap": 2.5,
+            "stockGrossCap": 1.5,
+            "cryptoGrossCap": 1.5,
+            "v50ConcurrentMax": 2,
+            "v50DailyMax": 3,
+        },
+        "dataQuality": {
+            "provider": cash.get("source"),
+            "symbols": sorted(required),
+            "barResolution": "60m cash / 1m Aster stock perp internally aligned to V52 decision windows",
+            "targetSessions": len(target_days),
+            "minimumCashCompleteDays": min_complete_days,
+            "minimumCommonDays": min_common_days,
+            "minimumAlignedDays": min_aligned_days,
+            "decisionWindowCoveragePct": coverage_pct,
+            "clockRejected": clock_rejected,
+            "duplicateCountAfterNormalization": 0,
+            "missingCommonDecisionWindowCount": max(0, min_common_days - min_aligned_days),
+            "timezoneNormalization": "Yahoo timestamps normalized to America/New_York cash-session slots; portfolio timestamps UTC",
+            "corporateActions": "Yahoo chart corporate-action events are recorded in diagnostics; no synthetic bars or decision-window forward fill",
+            "rawDiagnostics": diagnostics,
+        },
+        "modes": modes,
+        "safety": {
+            "mode": "RESEARCH_ONLY",
+            "ordersSent": False,
+            "liveChanged": False,
+            "vpsChanged": False,
+            "productionChanged": False,
+        },
+    }
+    out = Path(args.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({
+        "status": "V56_STOCK_LEDGER_PASS",
+        "provider": payload["dataQuality"]["provider"],
+        "targetSessions": len(target_days),
+        "coveragePct": coverage_pct,
+        "normalV11": len(modes["normal"]["v11"]),
+        "normalV50": len(modes["normal"]["v50"]),
+    }, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
