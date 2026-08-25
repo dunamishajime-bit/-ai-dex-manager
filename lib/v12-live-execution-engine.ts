@@ -17,7 +17,7 @@ import {
 } from "@/lib/v12-resident-stop-lifecycle";
 import { buildV12DecisionEvaluation, protectiveLevels, sizeV12Position, type V12Bar, type V12DecisionEvaluation, type V12Signal } from "@/lib/v12-x1-all";
 import type { V12DecisionSnapshotInput } from "@/lib/v12-decision-snapshot-writer";
-import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
+import { FileV12X1AllRunnerStateStore, v12ActivePositionsAggregateGross, v12ExistingAggregateGrossOverCap, V12_AGGREGATE_GROSS_CAP, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { decideV12ResidualEntry } from "@/lib/v12-top2-residual";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 
@@ -351,6 +351,17 @@ export class V12LiveExecutionEngine {
                     if (reason) return this.executeExit(state, active, latestTs, reason);
                 }
                 if (!risk.ok || activePositionsOf(state).length >= V12_X1_ALL.maximumPositions) return { status: risk.ok ? "held" : "risk-blocked", reason: risk.ok ? "V12_POSITION_HELD" : `SHARED_CRYPTO_RISK:${risk.reason}`, signal: signals[0] };
+                const existingAggregateGross = v12ActivePositionsAggregateGross(state);
+                if (v12ExistingAggregateGrossOverCap(state)) {
+                    await this.writeDecisionSnapshot(evaluation, signals[0], undefined, "V12_EXISTING_AGGREGATE_GROSS_OVER_CAP");
+                    this.log("v12-entry-fail-closed", {
+                        reason: "V12_EXISTING_AGGREGATE_GROSS_OVER_CAP",
+                        existingAggregateGross,
+                        aggregateGrossCap: V12_AGGREGATE_GROSS_CAP,
+                        ordersSent: false,
+                    });
+                    return { status: "capacity-blocked", reason: "V12_EXISTING_AGGREGATE_GROSS_OVER_CAP", signal: signals[0] };
+                }
                 const existingSymbols = new Set(activePositionsOf(state).map((row) => row.symbol.toUpperCase()));
                 const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`));
                 if (!next) return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };

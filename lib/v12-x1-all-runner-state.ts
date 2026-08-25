@@ -57,6 +57,21 @@ export interface V12X1AllRunnerState {
     killSwitch?: { active: boolean; reason: string; trippedAt: number };
 }
 
+export const V12_AGGREGATE_GROSS_CAP = 1.5;
+
+export function v12ActivePositionsAggregateGross(state: Pick<V12X1AllRunnerState, "activePositions" | "active">) {
+    const positions = Array.isArray(state.activePositions) && state.activePositions.length
+        ? state.activePositions
+        : state.active
+            ? [state.active]
+            : [];
+    return positions.reduce((sum, active) => sum + Number(active.gross || 0), 0);
+}
+
+export function v12ExistingAggregateGrossOverCap(state: Pick<V12X1AllRunnerState, "activePositions" | "active">) {
+    return v12ActivePositionsAggregateGross(state) > V12_AGGREGATE_GROSS_CAP + 1e-9;
+}
+
 function initial(mode: V12X1AllRunnerState["mode"]): V12X1AllRunnerState {
     return { schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode, updatedAt: Date.now() };
 }
@@ -79,7 +94,11 @@ function validate(value: Partial<V12X1AllRunnerState>, mode: V12X1AllRunnerState
             if (!active.protection || active.protection.positionId !== active.positionId) throw new Error("V12_STATE_ACTIVE_POSITION_PROTECTION_INVALID");
             aggregateGross += active.gross;
         }
-        if (aggregateGross > 1.5 + 1e-9) throw new Error("V12_STATE_AGGREGATE_GROSS_INVALID");
+        // Existing LIVE state can legitimately be above the current residual
+        // entry cap after a historical Top2 allocation.  Loading that state
+        // must not crash-loop the runner or remove its protection lifecycle.
+        // The execution engine treats this as an entry-only fail-closed gate.
+        void aggregateGross;
         if (value.active && value.activePositions[0]?.positionId !== value.active.positionId) throw new Error("V12_STATE_PRIMARY_ACTIVE_MISMATCH");
     }
     if (value.pending) {
