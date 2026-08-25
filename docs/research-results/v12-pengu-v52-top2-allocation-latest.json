@@ -1,0 +1,1553 @@
+{
+  "schema": "v12-pengu-v52-top2-allocation-bt/v1",
+  "status": "V52_TOP2_ALLOCATION_NO_PROMOTION",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00+00:00",
+    "endExclusive": "2026-08-10T00:00:00+00:00",
+    "holdoutStart": "2026-05-29T00:00:00+00:00"
+  },
+  "sourceLineage": {
+    "liveBaseSha": "ef91f81e86f819ba1e37ff9325e8972489e1544f",
+    "v12FrozenSha": "27f023a37d08b71c6e59b797fdc03c20d6032da2",
+    "v52Top2ResearchSha": "2ca2faf08653e0a7e1f230af0e9d57bc12710065",
+    "v52Thresholds": {
+      "basisBps": 65.0,
+      "netEdgeBps": 5.0,
+      "topK": 2,
+      "maxV50Slots": 2,
+      "maxDailyV50Trades": 3
+    }
+  },
+  "architecture": {
+    "totalGrossCap": 2.5,
+    "stockGrossCap": 1.5,
+    "penguPortfolioGrossCap": 2.0,
+    "stockDailyLossPct": 3.5,
+    "cryptoDailyLossPct": 7.5,
+    "maxStockPositions": 2,
+    "prioritySensitivity": [
+      "CRYPTO_FIRST",
+      "STOCK_FIRST"
+    ]
+  },
+  "data": {
+    "stocks": {
+      "market": {
+        "cash": {
+          "source": "Yahoo Finance public chart response",
+          "symbols": {
+            "TSLAUSDT": {
+              "ticker": "TSLA",
+              "bars": 1651,
+              "completeDays": 273,
+              "firstDay": "2025-07-01",
+              "lastDay": "2026-08-07",
+              "events": []
+            },
+            "MSFTUSDT": {
+              "ticker": "MSFT",
+              "bars": 1651,
+              "completeDays": 273,
+              "firstDay": "2025-07-01",
+              "lastDay": "2026-08-07",
+              "events": [
+                "dividends"
+              ]
+            },
+            "AMZNUSDT": {
+              "ticker": "AMZN",
+              "bars": 1651,
+              "completeDays": 273,
+              "firstDay": "2025-07-01",
+              "lastDay": "2026-08-07",
+              "events": []
+            },
+            "NVDAUSDT": {
+              "ticker": "NVDA",
+              "bars": 1651,
+              "completeDays": 273,
+              "firstDay": "2025-07-01",
+              "lastDay": "2026-08-07",
+              "events": [
+                "dividends"
+              ]
+            },
+            "METAUSDT": {
+              "ticker": "META",
+              "bars": 1651,
+              "completeDays": 273,
+              "firstDay": "2025-07-01",
+              "lastDay": "2026-08-07",
+              "events": [
+                "dividends"
+              ]
+            }
+          }
+        },
+        "perp": {
+          "symbols": {
+            "AMZNUSDT": {
+              "tradeBars": 18743,
+              "fundingRows": 1173,
+              "completeDays": 279
+            },
+            "METAUSDT": {
+              "tradeBars": 18743,
+              "fundingRows": 1181,
+              "completeDays": 279
+            },
+            "MSFTUSDT": {
+              "tradeBars": 18743,
+              "fundingRows": 1194,
+              "completeDays": 279
+            },
+            "NVDAUSDT": {
+              "tradeBars": 18743,
+              "fundingRows": 1194,
+              "completeDays": 279
+            },
+            "TSLAUSDT": {
+              "tradeBars": 18743,
+              "fundingRows": 1193,
+              "completeDays": 279
+            }
+          }
+        },
+        "alignment": {
+          "symbols": {
+            "AMZNUSDT": {
+              "commonDays": 265,
+              "alignedDays": 265,
+              "clockRejected": 0,
+              "firstDay": "2025-07-15",
+              "lastDay": "2026-08-07"
+            },
+            "METAUSDT": {
+              "commonDays": 265,
+              "alignedDays": 265,
+              "clockRejected": 0,
+              "firstDay": "2025-07-15",
+              "lastDay": "2026-08-07"
+            },
+            "MSFTUSDT": {
+              "commonDays": 265,
+              "alignedDays": 265,
+              "clockRejected": 0,
+              "firstDay": "2025-07-15",
+              "lastDay": "2026-08-07"
+            },
+            "NVDAUSDT": {
+              "commonDays": 265,
+              "alignedDays": 265,
+              "clockRejected": 0,
+              "firstDay": "2025-07-15",
+              "lastDay": "2026-08-07"
+            },
+            "TSLAUSDT": {
+              "commonDays": 265,
+              "alignedDays": 265,
+              "clockRejected": 0,
+              "firstDay": "2025-07-15",
+              "lastDay": "2026-08-07"
+            }
+          }
+        }
+      },
+      "targetSessions": 246,
+      "v11RawTrades": 73,
+      "v50Top1RawTrades": 193,
+      "v50Top2RawTrades": 277
+    },
+    "v12NormalTrades": 223,
+    "penguNormalTrades": 32
+  },
+  "selection": {
+    "periodEndExclusive": "2026-05-29T00:00:00+00:00",
+    "baselineId": "TOP1_C1.50_V121.50_P0.75",
+    "winner": null,
+    "summary": [
+      {
+        "id": "TOP1_C1.50_V120.75_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 0.75,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 560.11548167,
+        "worstSevereReturnPct": 195.16053076,
+        "worstSeverePf": 2.93982997,
+        "worstSevereDdPct": -16.4280679,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 749.52618867
+      },
+      {
+        "id": "TOP2_C1.50_V120.75_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 0.75,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 552.11867389,
+        "worstSevereReturnPct": 195.16053076,
+        "worstSeverePf": 2.93982997,
+        "worstSevereDdPct": -16.4280679,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 741.52938089
+      },
+      {
+        "id": "TOP1_C1.50_V121.00_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.0,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 572.39392073,
+        "worstSevereReturnPct": 172.39810403,
+        "worstSeverePf": 2.79242419,
+        "worstSevereDdPct": -16.27200837,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 739.09682183
+      },
+      {
+        "id": "TOP1_C1.50_V121.25_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.25,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 572.39392073,
+        "worstSevereReturnPct": 172.39810403,
+        "worstSeverePf": 2.79242419,
+        "worstSevereDdPct": -16.27200837,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 739.09682183
+      },
+      {
+        "id": "TOP1_C1.50_V121.50_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.5,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 572.39392073,
+        "worstSevereReturnPct": 172.39810403,
+        "worstSeverePf": 2.79242419,
+        "worstSevereDdPct": -16.27200837,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 739.09682183
+      },
+      {
+        "id": "TOP2_C1.50_V121.00_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.0,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 564.2483688,
+        "worstSevereReturnPct": 172.39810403,
+        "worstSeverePf": 2.79242419,
+        "worstSevereDdPct": -16.27200837,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 730.9512699
+      },
+      {
+        "id": "TOP2_C1.50_V121.25_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.25,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 564.2483688,
+        "worstSevereReturnPct": 172.39810403,
+        "worstSeverePf": 2.79242419,
+        "worstSevereDdPct": -16.27200837,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 730.9512699
+      },
+      {
+        "id": "TOP2_C1.50_V121.50_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.5,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 564.2483688,
+        "worstSevereReturnPct": 172.39810403,
+        "worstSeverePf": 2.79242419,
+        "worstSevereDdPct": -16.27200837,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 730.9512699
+      },
+      {
+        "id": "TOP1_C1.25_V120.75_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.25,
+        "v12Cap": 0.75,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 541.80188996,
+        "worstSevereReturnPct": 159.4422389,
+        "worstSeverePf": 2.78071226,
+        "worstSevereDdPct": -16.53651965,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 695.45634698
+      },
+      {
+        "id": "TOP2_C1.25_V120.75_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.25,
+        "v12Cap": 0.75,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 533.42200001,
+        "worstSevereReturnPct": 159.4422389,
+        "worstSeverePf": 2.78071226,
+        "worstSevereDdPct": -16.53651965,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 687.07645703
+      },
+      {
+        "id": "TOP1_C1.25_V121.00_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.0,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 553.73968814,
+        "worstSevereReturnPct": 138.42579362,
+        "worstSeverePf": 2.62648759,
+        "worstSevereDdPct": -16.38066264,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 686.43224984
+      },
+      {
+        "id": "TOP1_C1.25_V121.25_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.25,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 553.73968814,
+        "worstSevereReturnPct": 138.42579362,
+        "worstSeverePf": 2.62648759,
+        "worstSevereDdPct": -16.38066264,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 686.43224984
+      },
+      {
+        "id": "TOP2_C1.25_V121.00_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.0,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 545.20392854,
+        "worstSevereReturnPct": 138.42579362,
+        "worstSeverePf": 2.62648759,
+        "worstSevereDdPct": -16.38066264,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 677.89649024
+      },
+      {
+        "id": "TOP2_C1.25_V121.25_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.25,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 545.20392854,
+        "worstSevereReturnPct": 138.42579362,
+        "worstSeverePf": 2.62648759,
+        "worstSevereDdPct": -16.38066264,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 677.89649024
+      },
+      {
+        "id": "TOP1_C1.00_V120.75_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.0,
+        "v12Cap": 0.75,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 446.96594432,
+        "worstSevereReturnPct": 124.14679493,
+        "worstSeverePf": 2.59098225,
+        "worstSevereDdPct": -16.6449714,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 565.28699926
+      },
+      {
+        "id": "TOP2_C1.00_V120.75_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.0,
+        "v12Cap": 0.75,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 439.30845395,
+        "worstSevereReturnPct": 124.14679493,
+        "worstSeverePf": 2.59098225,
+        "worstSevereDdPct": -16.6449714,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 557.62950889
+      },
+      {
+        "id": "TOP1_C1.00_V121.00_P0.75",
+        "topK": 1,
+        "cryptoCap": 1.0,
+        "v12Cap": 1.0,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 457.13975209,
+        "worstSevereReturnPct": 105.06436459,
+        "worstSeverePf": 2.42848581,
+        "worstSevereDdPct": -16.48931692,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 556.43285576
+      },
+      {
+        "id": "TOP2_C1.50_V121.00_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.0,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 416.93424306,
+        "worstSevereReturnPct": 135.98111111,
+        "worstSeverePf": 2.9358956,
+        "worstSevereDdPct": -11.13204822,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 549.01913729
+      },
+      {
+        "id": "TOP2_C1.50_V121.25_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.25,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 416.93424306,
+        "worstSevereReturnPct": 135.98111111,
+        "worstSeverePf": 2.9358956,
+        "worstSevereDdPct": -11.13204822,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 549.01913729
+      },
+      {
+        "id": "TOP2_C1.50_V121.50_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.5,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 416.93424306,
+        "worstSevereReturnPct": 135.98111111,
+        "worstSeverePf": 2.9358956,
+        "worstSevereDdPct": -11.13204822,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 549.01913729
+      },
+      {
+        "id": "TOP2_C1.00_V121.00_P0.75",
+        "topK": 2,
+        "cryptoCap": 1.0,
+        "v12Cap": 1.0,
+        "penguCap": 0.75,
+        "gatePass": false,
+        "worstNormalReturnPct": 449.33982902,
+        "worstSevereReturnPct": 105.06436459,
+        "worstSeverePf": 2.42848581,
+        "worstSevereDdPct": -16.48931692,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 548.63293269
+      },
+      {
+        "id": "TOP1_C1.50_V121.00_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.0,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 412.95840118,
+        "worstSevereReturnPct": 135.98111111,
+        "worstSeverePf": 2.9358956,
+        "worstSevereDdPct": -11.13204822,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 545.04329541
+      },
+      {
+        "id": "TOP1_C1.50_V121.25_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.25,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 412.95840118,
+        "worstSevereReturnPct": 135.98111111,
+        "worstSeverePf": 2.9358956,
+        "worstSevereDdPct": -11.13204822,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 545.04329541
+      },
+      {
+        "id": "TOP1_C1.50_V121.50_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 1.5,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 412.95840118,
+        "worstSevereReturnPct": 135.98111111,
+        "worstSeverePf": 2.9358956,
+        "worstSevereDdPct": -11.13204822,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 545.04329541
+      },
+      {
+        "id": "TOP2_C1.25_V120.75_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.25,
+        "v12Cap": 0.75,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 398.91672985,
+        "worstSevereReturnPct": 125.64458693,
+        "worstSeverePf": 2.93124712,
+        "worstSevereDdPct": -10.60635388,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 520.84909292
+      },
+      {
+        "id": "TOP2_C1.50_V120.75_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.5,
+        "v12Cap": 0.75,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 398.91672985,
+        "worstSevereReturnPct": 125.64458693,
+        "worstSeverePf": 2.93124712,
+        "worstSevereDdPct": -10.60635388,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 520.84909292
+      },
+      {
+        "id": "TOP1_C1.25_V120.75_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.25,
+        "v12Cap": 0.75,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 395.31312148,
+        "worstSevereReturnPct": 125.64458693,
+        "worstSeverePf": 2.93124712,
+        "worstSevereDdPct": -10.60635388,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 517.24548455
+      },
+      {
+        "id": "TOP1_C1.50_V120.75_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.5,
+        "v12Cap": 0.75,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 395.31312148,
+        "worstSevereReturnPct": 125.64458693,
+        "worstSeverePf": 2.93124712,
+        "worstSevereDdPct": -10.60635388,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 517.24548455
+      },
+      {
+        "id": "TOP2_C1.25_V121.00_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.0,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 408.19680104,
+        "worstSevereReturnPct": 107.36596301,
+        "worstSeverePf": 2.7306047,
+        "worstSevereDdPct": -11.0396048,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 511.69890237
+      },
+      {
+        "id": "TOP2_C1.25_V121.25_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.25,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 408.19680104,
+        "worstSevereReturnPct": 107.36596301,
+        "worstSeverePf": 2.7306047,
+        "worstSevereDdPct": -11.0396048,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 511.69890237
+      },
+      {
+        "id": "TOP1_C1.25_V121.00_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.0,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 404.52616397,
+        "worstSevereReturnPct": 107.36596301,
+        "worstSeverePf": 2.7306047,
+        "worstSevereDdPct": -11.0396048,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 508.0282653
+      },
+      {
+        "id": "TOP1_C1.25_V121.25_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.25,
+        "v12Cap": 1.25,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 404.52616397,
+        "worstSevereReturnPct": 107.36596301,
+        "worstSeverePf": 2.7306047,
+        "worstSevereDdPct": -11.0396048,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 508.0282653
+      },
+      {
+        "id": "TOP2_C1.00_V120.75_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.0,
+        "v12Cap": 0.75,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 384.07961786,
+        "worstSevereReturnPct": 97.30704375,
+        "worstSeverePf": 2.70797227,
+        "worstSevereDdPct": -10.71983197,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 477.63472042
+      },
+      {
+        "id": "TOP1_C1.00_V120.75_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.0,
+        "v12Cap": 0.75,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 381.05047267,
+        "worstSevereReturnPct": 97.30704375,
+        "worstSeverePf": 2.70797227,
+        "worstSevereDdPct": -10.71983197,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 474.60557523
+      },
+      {
+        "id": "TOP2_C1.00_V121.00_P0.50",
+        "topK": 2,
+        "cryptoCap": 1.0,
+        "v12Cap": 1.0,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 393.08371223,
+        "worstSevereReturnPct": 80.50957886,
+        "worstSeverePf": 2.49448876,
+        "worstSevereDdPct": -10.92024788,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 469.77120433
+      },
+      {
+        "id": "TOP1_C1.00_V121.00_P0.50",
+        "topK": 1,
+        "cryptoCap": 1.0,
+        "v12Cap": 1.0,
+        "penguCap": 0.5,
+        "gatePass": false,
+        "worstNormalReturnPct": 389.9982236,
+        "worstSevereReturnPct": 80.50957886,
+        "worstSeverePf": 2.49448876,
+        "worstSevereDdPct": -10.92024788,
+        "priorityDeltaPctPoint": 0.0,
+        "robustScore": 466.6857157
+      }
+    ]
+  },
+  "full": {
+    "NORMAL": {
+      "BASELINE": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 238,
+          "endingEquity": 6.86949374,
+          "compoundedReturnPct": 586.94937378,
+          "profitFactor": 3.42805051,
+          "maxDrawdownPctClosedEvent": -11.40594734,
+          "winRatePct": 60.92436975,
+          "bySleeve": {
+            "V12": {
+              "events": 57,
+              "pnlPctOfInitialEquity": 40.18931531,
+              "wins": 37
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 296.43187211,
+              "wins": 19
+            },
+            "V11_EQ": {
+              "events": 50,
+              "pnlPctOfInitialEquity": 130.76230568,
+              "wins": 34
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 99,
+              "pnlPctOfInitialEquity": 119.56588069,
+              "wins": 55
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.5,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V12_ENTERED": 58,
+            "V12_EXITED": 57,
+            "V11_EQ_ENTERED": 50,
+            "V50_POST_OPEN_BASIS_ENTERED": 99,
+            "V50_RANK_1_ENTERED": 99,
+            "STOCK_SLOT_CAP_BLOCKED": 13,
+            "V50_POST_OPEN_BASIS_EXITED": 99,
+            "V11_EQ_EXITED": 50,
+            "SAME_STOCK_SYMBOL_BLOCKED": 67,
+            "V50_SLOT_CAP_BLOCKED": 14,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "V11_EQ_COST_EDGE_REJECTED": 6,
+            "V12_ENTRY_BLOCKED": 162
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 238,
+          "endingEquity": 6.86949374,
+          "compoundedReturnPct": 586.94937378,
+          "profitFactor": 3.42805051,
+          "maxDrawdownPctClosedEvent": -11.40594734,
+          "winRatePct": 60.92436975,
+          "bySleeve": {
+            "V12": {
+              "events": 57,
+              "pnlPctOfInitialEquity": 40.18931531,
+              "wins": 37
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 296.43187211,
+              "wins": 19
+            },
+            "V11_EQ": {
+              "events": 50,
+              "pnlPctOfInitialEquity": 130.76230568,
+              "wins": 34
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 99,
+              "pnlPctOfInitialEquity": 119.56588069,
+              "wins": 55
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.5,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V12_ENTERED": 58,
+            "V12_EXITED": 57,
+            "V11_EQ_ENTERED": 50,
+            "V50_POST_OPEN_BASIS_ENTERED": 99,
+            "V50_RANK_1_ENTERED": 99,
+            "STOCK_SLOT_CAP_BLOCKED": 13,
+            "V50_POST_OPEN_BASIS_EXITED": 99,
+            "V11_EQ_EXITED": 50,
+            "SAME_STOCK_SYMBOL_BLOCKED": 67,
+            "V50_SLOT_CAP_BLOCKED": 14,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "V11_EQ_COST_EDGE_REJECTED": 6,
+            "V12_ENTRY_BLOCKED": 162
+          }
+        }
+      },
+      "WINNER": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 238,
+          "endingEquity": 6.86949374,
+          "compoundedReturnPct": 586.94937378,
+          "profitFactor": 3.42805051,
+          "maxDrawdownPctClosedEvent": -11.40594734,
+          "winRatePct": 60.92436975,
+          "bySleeve": {
+            "V12": {
+              "events": 57,
+              "pnlPctOfInitialEquity": 40.18931531,
+              "wins": 37
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 296.43187211,
+              "wins": 19
+            },
+            "V11_EQ": {
+              "events": 50,
+              "pnlPctOfInitialEquity": 130.76230568,
+              "wins": 34
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 99,
+              "pnlPctOfInitialEquity": 119.56588069,
+              "wins": 55
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.5,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V12_ENTERED": 58,
+            "V12_EXITED": 57,
+            "V11_EQ_ENTERED": 50,
+            "V50_POST_OPEN_BASIS_ENTERED": 99,
+            "V50_RANK_1_ENTERED": 99,
+            "STOCK_SLOT_CAP_BLOCKED": 13,
+            "V50_POST_OPEN_BASIS_EXITED": 99,
+            "V11_EQ_EXITED": 50,
+            "SAME_STOCK_SYMBOL_BLOCKED": 67,
+            "V50_SLOT_CAP_BLOCKED": 14,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "V11_EQ_COST_EDGE_REJECTED": 6,
+            "V12_ENTRY_BLOCKED": 162
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 238,
+          "endingEquity": 6.86949374,
+          "compoundedReturnPct": 586.94937378,
+          "profitFactor": 3.42805051,
+          "maxDrawdownPctClosedEvent": -11.40594734,
+          "winRatePct": 60.92436975,
+          "bySleeve": {
+            "V12": {
+              "events": 57,
+              "pnlPctOfInitialEquity": 40.18931531,
+              "wins": 37
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 296.43187211,
+              "wins": 19
+            },
+            "V11_EQ": {
+              "events": 50,
+              "pnlPctOfInitialEquity": 130.76230568,
+              "wins": 34
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 99,
+              "pnlPctOfInitialEquity": 119.56588069,
+              "wins": 55
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.5,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V12_ENTERED": 58,
+            "V12_EXITED": 57,
+            "V11_EQ_ENTERED": 50,
+            "V50_POST_OPEN_BASIS_ENTERED": 99,
+            "V50_RANK_1_ENTERED": 99,
+            "STOCK_SLOT_CAP_BLOCKED": 13,
+            "V50_POST_OPEN_BASIS_EXITED": 99,
+            "V11_EQ_EXITED": 50,
+            "SAME_STOCK_SYMBOL_BLOCKED": 67,
+            "V50_SLOT_CAP_BLOCKED": 14,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "V11_EQ_COST_EDGE_REJECTED": 6,
+            "V12_ENTRY_BLOCKED": 162
+          }
+        }
+      }
+    },
+    "SEVERE": {
+      "BASELINE": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 114,
+          "endingEquity": 2.51026289,
+          "compoundedReturnPct": 151.02628927,
+          "profitFactor": 2.45507742,
+          "maxDrawdownPctClosedEvent": -16.27200837,
+          "winRatePct": 59.64912281,
+          "bySleeve": {
+            "V12": {
+              "events": 82,
+              "pnlPctOfInitialEquity": 36.06884815,
+              "wins": 50
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 114.95744111,
+              "wins": 18
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V12_ENTERED": 83,
+            "V12_EXITED": 82,
+            "V11_EQ_COST_EDGE_REJECTED": 56,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 193,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "CRYPTO_DAILY_LOSS_LATCHES": 1,
+            "V12_ENTRY_BLOCKED": 94
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 114,
+          "endingEquity": 2.51026289,
+          "compoundedReturnPct": 151.02628927,
+          "profitFactor": 2.45507742,
+          "maxDrawdownPctClosedEvent": -16.27200837,
+          "winRatePct": 59.64912281,
+          "bySleeve": {
+            "V12": {
+              "events": 82,
+              "pnlPctOfInitialEquity": 36.06884815,
+              "wins": 50
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 114.95744111,
+              "wins": 18
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V12_ENTERED": 83,
+            "V12_EXITED": 82,
+            "V11_EQ_COST_EDGE_REJECTED": 56,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 193,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "CRYPTO_DAILY_LOSS_LATCHES": 1,
+            "V12_ENTRY_BLOCKED": 94
+          }
+        }
+      },
+      "WINNER": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 114,
+          "endingEquity": 2.51026289,
+          "compoundedReturnPct": 151.02628927,
+          "profitFactor": 2.45507742,
+          "maxDrawdownPctClosedEvent": -16.27200837,
+          "winRatePct": 59.64912281,
+          "bySleeve": {
+            "V12": {
+              "events": 82,
+              "pnlPctOfInitialEquity": 36.06884815,
+              "wins": 50
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 114.95744111,
+              "wins": 18
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V12_ENTERED": 83,
+            "V12_EXITED": 82,
+            "V11_EQ_COST_EDGE_REJECTED": 56,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 193,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "CRYPTO_DAILY_LOSS_LATCHES": 1,
+            "V12_ENTRY_BLOCKED": 94
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 114,
+          "endingEquity": 2.51026289,
+          "compoundedReturnPct": 151.02628927,
+          "profitFactor": 2.45507742,
+          "maxDrawdownPctClosedEvent": -16.27200837,
+          "winRatePct": 59.64912281,
+          "bySleeve": {
+            "V12": {
+              "events": 82,
+              "pnlPctOfInitialEquity": 36.06884815,
+              "wins": 50
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 32,
+              "pnlPctOfInitialEquity": 114.95744111,
+              "wins": 18
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V12_ENTERED": 83,
+            "V12_EXITED": 82,
+            "V11_EQ_COST_EDGE_REJECTED": 56,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 193,
+            "PENGU_ENTERED": 32,
+            "PENGU_EXITED": 32,
+            "CRYPTO_DAILY_LOSS_LATCHES": 1,
+            "V12_ENTRY_BLOCKED": 94
+          }
+        }
+      }
+    }
+  },
+  "holdout": {
+    "NORMAL": {
+      "BASELINE": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 71,
+          "endingEquity": 1.22185631,
+          "compoundedReturnPct": 22.18563137,
+          "profitFactor": 2.04978315,
+          "maxDrawdownPctClosedEvent": -7.28174754,
+          "winRatePct": 54.92957746,
+          "bySleeve": {
+            "V12": {
+              "events": 38,
+              "pnlPctOfInitialEquity": 18.19611126,
+              "wins": 21
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.33943885,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 7,
+              "pnlPctOfInitialEquity": 8.88305834,
+              "wins": 6
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 22,
+              "pnlPctOfInitialEquity": 5.44590062,
+              "wins": 11
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.0,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_ENTERED": 22,
+            "V50_RANK_1_ENTERED": 22,
+            "V50_POST_OPEN_BASIS_EXITED": 22,
+            "V11_EQ_ENTERED": 7,
+            "V11_EQ_EXITED": 7,
+            "V12_ENTERED": 38,
+            "V12_EXITED": 38,
+            "V11_EQ_COST_EDGE_REJECTED": 3,
+            "SAME_STOCK_SYMBOL_BLOCKED": 11,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4,
+            "V50_SLOT_CAP_BLOCKED": 2
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 71,
+          "endingEquity": 1.22185631,
+          "compoundedReturnPct": 22.18563137,
+          "profitFactor": 2.04978315,
+          "maxDrawdownPctClosedEvent": -7.28174754,
+          "winRatePct": 54.92957746,
+          "bySleeve": {
+            "V12": {
+              "events": 38,
+              "pnlPctOfInitialEquity": 18.19611126,
+              "wins": 21
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.33943885,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 7,
+              "pnlPctOfInitialEquity": 8.88305834,
+              "wins": 6
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 22,
+              "pnlPctOfInitialEquity": 5.44590062,
+              "wins": 11
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.0,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_ENTERED": 22,
+            "V50_RANK_1_ENTERED": 22,
+            "V50_POST_OPEN_BASIS_EXITED": 22,
+            "V11_EQ_ENTERED": 7,
+            "V11_EQ_EXITED": 7,
+            "V12_ENTERED": 38,
+            "V12_EXITED": 38,
+            "V11_EQ_COST_EDGE_REJECTED": 3,
+            "SAME_STOCK_SYMBOL_BLOCKED": 11,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4,
+            "V50_SLOT_CAP_BLOCKED": 2
+          }
+        }
+      },
+      "WINNER": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 71,
+          "endingEquity": 1.22185631,
+          "compoundedReturnPct": 22.18563137,
+          "profitFactor": 2.04978315,
+          "maxDrawdownPctClosedEvent": -7.28174754,
+          "winRatePct": 54.92957746,
+          "bySleeve": {
+            "V12": {
+              "events": 38,
+              "pnlPctOfInitialEquity": 18.19611126,
+              "wins": 21
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.33943885,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 7,
+              "pnlPctOfInitialEquity": 8.88305834,
+              "wins": 6
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 22,
+              "pnlPctOfInitialEquity": 5.44590062,
+              "wins": 11
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.0,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_ENTERED": 22,
+            "V50_RANK_1_ENTERED": 22,
+            "V50_POST_OPEN_BASIS_EXITED": 22,
+            "V11_EQ_ENTERED": 7,
+            "V11_EQ_EXITED": 7,
+            "V12_ENTERED": 38,
+            "V12_EXITED": 38,
+            "V11_EQ_COST_EDGE_REJECTED": 3,
+            "SAME_STOCK_SYMBOL_BLOCKED": 11,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4,
+            "V50_SLOT_CAP_BLOCKED": 2
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 71,
+          "endingEquity": 1.22185631,
+          "compoundedReturnPct": 22.18563137,
+          "profitFactor": 2.04978315,
+          "maxDrawdownPctClosedEvent": -7.28174754,
+          "winRatePct": 54.92957746,
+          "bySleeve": {
+            "V12": {
+              "events": 38,
+              "pnlPctOfInitialEquity": 18.19611126,
+              "wins": 21
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.33943885,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 7,
+              "pnlPctOfInitialEquity": 8.88305834,
+              "wins": 6
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 22,
+              "pnlPctOfInitialEquity": 5.44590062,
+              "wins": 11
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 1.0,
+          "observedMaximumTotalGross": 2.5,
+          "observedMaximumV50Concurrent": 1,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_ENTERED": 22,
+            "V50_RANK_1_ENTERED": 22,
+            "V50_POST_OPEN_BASIS_EXITED": 22,
+            "V11_EQ_ENTERED": 7,
+            "V11_EQ_EXITED": 7,
+            "V12_ENTERED": 38,
+            "V12_EXITED": 38,
+            "V11_EQ_COST_EDGE_REJECTED": 3,
+            "SAME_STOCK_SYMBOL_BLOCKED": 11,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4,
+            "V50_SLOT_CAP_BLOCKED": 2
+          }
+        }
+      }
+    },
+    "SEVERE": {
+      "BASELINE": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 34,
+          "endingEquity": 1.00891259,
+          "compoundedReturnPct": 0.89125923,
+          "profitFactor": 1.08273046,
+          "maxDrawdownPctClosedEvent": -11.23894651,
+          "winRatePct": 50.0,
+          "bySleeve": {
+            "V12": {
+              "events": 30,
+              "pnlPctOfInitialEquity": 11.88558825,
+              "wins": 16
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.99432902,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 35,
+            "V11_EQ_COST_EDGE_REJECTED": 10,
+            "V12_ENTERED": 30,
+            "V12_EXITED": 30,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 34,
+          "endingEquity": 1.00891259,
+          "compoundedReturnPct": 0.89125923,
+          "profitFactor": 1.08273046,
+          "maxDrawdownPctClosedEvent": -11.23894651,
+          "winRatePct": 50.0,
+          "bySleeve": {
+            "V12": {
+              "events": 30,
+              "pnlPctOfInitialEquity": 11.88558825,
+              "wins": 16
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.99432902,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 35,
+            "V11_EQ_COST_EDGE_REJECTED": 10,
+            "V12_ENTERED": 30,
+            "V12_EXITED": 30,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4
+          }
+        }
+      },
+      "WINNER": {
+        "config": {
+          "id": "TOP1_C1.50_V121.50_P0.75",
+          "topK": 1,
+          "cryptoCap": 1.5,
+          "v12Cap": 1.5,
+          "penguCap": 0.75
+        },
+        "CRYPTO_FIRST": {
+          "events": 34,
+          "endingEquity": 1.00891259,
+          "compoundedReturnPct": 0.89125923,
+          "profitFactor": 1.08273046,
+          "maxDrawdownPctClosedEvent": -11.23894651,
+          "winRatePct": 50.0,
+          "bySleeve": {
+            "V12": {
+              "events": 30,
+              "pnlPctOfInitialEquity": 11.88558825,
+              "wins": 16
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.99432902,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 35,
+            "V11_EQ_COST_EDGE_REJECTED": 10,
+            "V12_ENTERED": 30,
+            "V12_EXITED": 30,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4
+          }
+        },
+        "STOCK_FIRST": {
+          "events": 34,
+          "endingEquity": 1.00891259,
+          "compoundedReturnPct": 0.89125923,
+          "profitFactor": 1.08273046,
+          "maxDrawdownPctClosedEvent": -11.23894651,
+          "winRatePct": 50.0,
+          "bySleeve": {
+            "V12": {
+              "events": 30,
+              "pnlPctOfInitialEquity": 11.88558825,
+              "wins": 16
+            },
+            "PENGU_DUAL_LS_V2": {
+              "events": 4,
+              "pnlPctOfInitialEquity": -10.99432902,
+              "wins": 1
+            },
+            "V11_EQ": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            },
+            "V50_POST_OPEN_BASIS": {
+              "events": 0,
+              "pnlPctOfInitialEquity": 0.0,
+              "wins": 0
+            }
+          },
+          "observedMaximumV12Gross": 1.0,
+          "observedMaximumPenguGross": 0.75,
+          "observedMaximumCryptoGross": 1.5,
+          "observedMaximumStockGross": 0.0,
+          "observedMaximumTotalGross": 1.5,
+          "observedMaximumV50Concurrent": 0,
+          "routingDiagnostics": {
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 35,
+            "V11_EQ_COST_EDGE_REJECTED": 10,
+            "V12_ENTERED": 30,
+            "V12_EXITED": 30,
+            "PENGU_ENTERED": 4,
+            "PENGU_EXITED": 4
+          }
+        }
+      }
+    }
+  },
+  "finalChecks": {
+    "selectionWinnerFound": false,
+    "winnerIsTop2": false,
+    "fullNormalReturnNotLower": true,
+    "fullSevereReturnNotLower": true,
+    "holdoutNormalPositive": true,
+    "holdoutNormalPfAtLeast1_2": true,
+    "v50TradesIncreaseAtLeast10Pct": false,
+    "totalGrossCapRespected": true,
+    "stockGrossCapRespected": true,
+    "v50ConcurrentAtMost2": true
+  },
+  "recommendation": null,
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  },
+  "limitations": [
+    "Selection and holdout are chronological slices of a historical period that overlaps prior strategy research; this is not an untouched market holdout.",
+    "Drawdown uses closed-event equity because synchronized intratrade mark-to-market paths across all sleeves are unavailable.",
+    "The V52 historical proxy cannot reconstruct sub-second queue position, partial fills or transient live data-quality rejects.",
+    "The new LIVE 20-second bounded retry improves execution opportunity capture but is not credited with synthetic extra fills in this backtest."
+  ]
+}
