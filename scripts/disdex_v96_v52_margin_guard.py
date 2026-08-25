@@ -333,11 +333,21 @@ class MarginGuard:
                 f"minimumLiquidationBuffer={payload['minimumLiquidationBufferPct']}"
             )
             self.activate_shared_kill_switch(reason, payload)
-            emergency = self.emergency_flatten_managed(payload)
-            payload["emergencyFlatten"] = emergency
-            payload["ordersSent"] = emergency["ordersSent"]
-            payload["cancelSent"] = emergency["cancelSent"]
-            payload["positionChangesSent"] = emergency["positionChangesSent"]
+            # V56 production is fail-closed and mutation-free on risk data
+            # anomalies. The Kill Switch blocks new exposure; an operator may
+            # decide a reduce-only action after a fresh, authenticated risk
+            # snapshot, but the guard must never force-exit managed positions
+            # from a stale/invalid liquidation-price observation.
+            payload["emergencyFlatten"] = {
+                "status": "SUPPRESSED_BY_V56_NO_FORCED_EXIT",
+                "reason": "Kill Switch active; automatic emergency flatten is disabled in V56.",
+                "ordersSent": False,
+                "cancelSent": False,
+                "positionChangesSent": False,
+            }
+            payload["ordersSent"] = False
+            payload["cancelSent"] = False
+            payload["positionChangesSent"] = False
             payload["checkedAt"] = base.now_ms()
             payload["nextCheckAt"] = payload["checkedAt"] + WARNING_POLL_INTERVAL_MS
             if write_state:
@@ -378,16 +388,14 @@ class MarginGuard:
         if active_count > 0 and (failures >= 2 or previous_stage in {"WARNING", "REDUCE", "CRITICAL"}):
             reason = "Margin Guard lost authenticated risk data while managed positions were active"
             self.activate_shared_kill_switch(reason, payload)
-            try:
-                emergency = self.emergency_flatten_managed(payload)
-                payload["emergencyFlatten"] = emergency
-                payload["ordersSent"] = emergency["ordersSent"]
-                payload["cancelSent"] = emergency["cancelSent"]
-                payload["positionChangesSent"] = emergency["positionChangesSent"]
-                self.write_state(payload)
-            except Exception as flatten_error:
-                payload["emergencyFlattenError"] = str(flatten_error)
-                self.write_state(payload)
+            payload["emergencyFlatten"] = {
+                "status": "SUPPRESSED_BY_V56_NO_FORCED_EXIT",
+                "reason": "Risk data unavailable; Kill Switch blocks new orders and automatic flatten is disabled in V56.",
+                "ordersSent": False,
+                "cancelSent": False,
+                "positionChangesSent": False,
+            }
+            self.write_state(payload)
         return payload
 
     def require_healthy(self, *, write_state: bool, allow_kill_switch: bool) -> dict:
