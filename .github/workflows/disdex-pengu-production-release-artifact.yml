@@ -1,0 +1,64 @@
+name: DisDex PENGU production release artifact
+
+on:
+  push:
+    branches:
+      - codex/pengu-short-v20-production
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: disdex-pengu-production-artifact-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  build-release-artifact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install exact dependencies
+        run: npm ci
+      - name: PENGU production contract validation
+        run: |
+          npm run strategy:pengu-dual-ls-v2:typecheck
+          npm run strategy:pengu-dual-ls-v2:selftest
+          npm run strategy:pengu-dual-ls-v2:parity
+          npm run strategy:pengu-dual-ls-v2:short-v20:typecheck
+          npm run strategy:pengu-dual-ls-v2:short-v20:selftest
+      - name: Linux production build
+        run: npm run build
+      - name: Build exact-SHA release archive
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sha="$GITHUB_SHA"
+          staging="$RUNNER_TEMP/disdex-pengu-artifact"
+          mkdir -p "$staging"
+          git archive --format=tar "$sha" | tar -xf - -C "$staging"
+          cp -a node_modules "$staging/node_modules"
+          cp -a .next "$staging/.next"
+          printf '%s\n' "$sha" > "$staging/.disdex-release-sha"
+          printf 'releaseSha=%s\nsourceTree=%s\nworkflow=%s\nworkflowRunId=%s\nordersSent=false\n' \
+            "$sha" "$(git rev-parse "$sha^{tree}")" "$GITHUB_WORKFLOW" "$GITHUB_RUN_ID" \
+            > "$staging/.disdex-ci-build-attestation"
+          archive="$RUNNER_TEMP/disdex-release-$sha.tar.gz"
+          tar -czf "$archive" -C "$staging" .
+          sha256sum "$archive" > "$archive.sha256"
+          gh release create "disdex-pengu-artifact-$sha" "$archive" "$archive.sha256" \
+            --target "$sha" --title "DisDex PENGU production artifact $sha" \
+            --notes "Exact-SHA PENGU Dual LS V2 / Short V20 artifact. Built after parity, self-tests, and production build. No orders/cancels/settles."
