@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Sequence
 import research_v12_v52_pengu_v2_combined_bt as base
 
 UTC = dt.timezone.utc
-START = dt.datetime(2025, 8, 1, tzinfo=UTC)
-END = dt.datetime(2026, 8, 1, tzinfo=UTC)
+START = dt.datetime(2024, 8, 10, tzinfo=UTC)
+END = dt.datetime(2026, 8, 10, tzinfo=UTC)
 START_MS = int(START.timestamp() * 1000)
 END_MS = int(END.timestamp() * 1000)
 
@@ -78,7 +78,7 @@ def month_keys() -> List[str]:
 
 def contribution_points() -> List[tuple[int, float]]:
     points: List[tuple[int, float]] = []
-    cur = dt.datetime(2025, 9, 1, tzinfo=UTC)
+    cur = dt.datetime(2024, 9, 1, tzinfo=UTC)
     while cur < END:
         points.append((int(cur.timestamp() * 1000), MONTHLY_JPY))
         cur = dt.datetime(cur.year + (cur.month == 12), 1 if cur.month == 12 else cur.month + 1, 1, tzinfo=UTC)
@@ -440,7 +440,7 @@ def write_report(output: Path, result: dict) -> None:
     lines = [
         "# Current V12 Top2 + PENGU V2 + V52 — 1Y monthly DCA backtest", "",
         f"- Period: `{result['period']['startInclusive']}` to `{result['period']['endExclusive']}`",
-        "- Initial capital: JPY 10,000", "- Monthly contribution: JPY 10,000 at each month-start after inception (11 additions; total contributed JPY 120,000)",
+        "- Initial capital: JPY 10,000", "- Monthly contribution: JPY 10,000 at each month-start after inception (24 additions; total contributed JPY 250,000)",
         "- Compounding: all realized PnL retained and used for subsequent position sizing", "- Entry priority: V52 -> PENGU V2 -> V12",
         "- V12: Top2, max 2 simultaneous positions, own gross <= 1.5x, each <= 1.0x", "- Shared crypto gross <= 2.0x; stock gross <= 1.5x; total gross <= 2.5x",
         "- Shared crypto daily-loss gate: -7.5%; stock daily-loss gate: -3.5%", "",
@@ -473,7 +473,7 @@ def main() -> None:
     args = parser.parse_args()
     v12 = load_json(Path(args.v12_ledger))
     pengu = load_json(Path(args.pengu_ledger))
-    expected_period = {"startInclusive": "2025-08-01T00:00:00.000Z", "endExclusive": "2026-08-01T00:00:00.000Z"}
+    expected_period = {"startInclusive": "2024-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}
     if v12.get("period") != expected_period:
         raise RuntimeError(f"Unexpected V12 period: {v12.get('period')}")
     if pengu.get("period") != expected_period:
@@ -496,13 +496,13 @@ def main() -> None:
         checks[f"{scenario}_cryptoGross"] = gross["entryTimeMaxCryptoGross"] <= CRYPTO_GROSS_CAP + 1e-9
         checks[f"{scenario}_stockGross"] = gross["entryTimeMaxStockGross"] <= STOCK_GROSS_CAP + 1e-9
         checks[f"{scenario}_totalGross"] = gross["entryTimeMaxTotalGross"] <= TOTAL_GROSS_CAP + 1e-9
-        checks[f"{scenario}_contributions"] = abs(row["totalContributedJpy"] - 120_000.0) < 1e-6
+        checks[f"{scenario}_contributions"] = abs(row["totalContributedJpy"] - 250_000.0) < 1e-6
     result = rounded({
-        "schema": "current-v12-top2-pengu-v2-v52-dca-1y/v1",
+    "schema": "current-v12-top2-pengu-v2-v52-dca-2y/v1",
         "status": "PASS_RESEARCH_ONLY" if all(checks.values()) else "FAIL_RESEARCH_VALIDATION",
         "period": expected_period,
         "architecture": {"v12Slots": V12_MAX_POSITIONS, "v12GrossCap": V12_GROSS_CAP, "v12PerPositionGrossCap": V12_PER_POSITION_GROSS_CAP, "penguGrossCap": PENGU_MAX_GROSS, "sharedCryptoGrossCap": CRYPTO_GROSS_CAP, "stockGrossCap": STOCK_GROSS_CAP, "totalGrossCap": TOTAL_GROSS_CAP, "entryPriority": ["V52", "PENGU_DUAL_LS_V2", "V12"], "cryptoDailyLossLimitPct": CRYPTO_DAILY_LOSS_LIMIT * 100, "stockDailyLossLimitPct": STOCK_DAILY_LOSS_LIMIT * 100},
-        "capital": {"initialJpy": INITIAL_JPY, "monthlyContributionJpy": MONTHLY_JPY, "contributionCountAfterStart": len(contribution_points()), "totalContributedJpy": 120_000.0, "compounding": True},
+        "capital": {"initialJpy": INITIAL_JPY, "monthlyContributionJpy": MONTHLY_JPY, "contributionCountAfterStart": len(contribution_points()), "totalContributedJpy": 250_000.0, "compounding": True},
         "source": {"productionGrossCommit": "ac254e897b7514d14c3a34c0679388978b5c3d32", "v12Top2ResearchCommit": "fea641f3097c2faa32db59338381b45a99edc6e0", "penguProductionReplay": "PENGU_DUAL_LS_V2_FINAL", "v52StockResearch": "04c1a369223bd27e9e42bc93604b3777b9230d92"},
         "data": {"stockTargetSessions": len(target_days), "v11RawTrades": len(v11_rows), "v50RawTrades": len(v50_rows), "stockDiagnostics": stock_diagnostics, "v12NormalSourceMetrics": v12["modes"]["normal"]["metrics"], "penguNormalSourceMetrics": pengu["modes"]["normal"]["metrics"]},
         "results": results, "checks": checks,

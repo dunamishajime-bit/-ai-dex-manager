@@ -12,8 +12,8 @@ async function main() {
     source = source.replace(needle, replacement);
   };
 
-  replaceOnce("const START = Date.UTC(2025, 7, 21);", "const START = Date.UTC(2025, 7, 1);");
-  replaceOnce("const END = Date.UTC(2026, 7, 21);", "const END = Date.UTC(2026, 7, 1);");
+  replaceOnce("const START = Date.UTC(2025, 7, 21);", "const START = Date.UTC(2024, 7, 10);");
+  replaceOnce("const END = Date.UTC(2026, 7, 21);", "const END = Date.UTC(2026, 7, 10);");
   replaceOnce(
     "  rank: number;\n};",
     "  rank: number;\n  entryTs: number;\n  entryNotional: number;\n  requestedGross: number;\n  allocatedGross: number;\n};",

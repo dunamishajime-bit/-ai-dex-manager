@@ -1,4 +1,4 @@
-name: Current V12 Top2 PENGU V20 V52 Monthly DCA One-Year BT
+name: Current V12 Top2 PENGU V20 V52 Monthly DCA Two-Year BT
 
 on:
   push:
@@ -61,6 +61,7 @@ jobs:
           key: current-v12-top2-pengu-v20-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts', 'scripts/research_current_top2_pengu_v52_dca.py', 'lib/pengu-short-v20.ts') }}
           restore-keys: |
             current-v12-top2-pengu-v52-dca-
+            current-v12-top2-pengu-v52-stock-resume-
             v12-top2-gross15-
             v12-v52-pengu-v2-combined-
             v26-latency-aware-3y-usdm-v1-20260816
@@ -94,9 +95,9 @@ jobs:
 
           s = s.replace('import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";', 'import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";\nimport { createPenguShortV20State } from "../lib/pengu-short-v20";')
 
-          s = s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2025-07-01T00:00:00Z");')
-          s = s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2025-08-01T00:00:00Z");')
-          s = s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-01T00:00:00Z");')
+          s = s.replace('const WARM_START = Date.parse("2025-07-20T00:00:00Z");', 'const WARM_START = Date.parse("2024-07-01T00:00:00Z");')
+          s = s.replace('const EVAL_START = Date.parse("2025-08-10T00:00:00Z");', 'const EVAL_START = Date.parse("2024-08-10T00:00:00Z");')
+          s = s.replace('const EVAL_END = Date.parse("2026-08-10T00:00:00Z");', 'const EVAL_END = Date.parse("2026-08-10T00:00:00Z");')
 
           old = '  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);'
           new = '''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);
@@ -177,8 +178,8 @@ jobs:
           assert p['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
           assert p['shortPreRegistrationSha']=='ad7cedb3cafaf9f9680e390112f72375d84b50ac'
           assert p['source']['productionLogicSha']=='8ca3f52b0da705c20aa4033769da1af869202f70'
-          assert p['period']['startInclusive'].startswith('2025-08-01')
-          assert p['period']['endExclusive'].startswith('2026-08-01')
+          assert p['period']['startInclusive'].startswith('2024-08-10')
+          assert p['period']['endExclusive'].startswith('2026-08-10')
           assert p['integrity']['noOverlap'] is True
           assert p['integrity']['maximumRequestedGross'] <= 0.75 + 1e-12
           print(json.dumps({'normal':p['modes']['normal']['metrics'],'stress':p['modes']['stress']['metrics'],'lineage':{'long':p['longVariant'],'short':p['shortVariant']}},indent=2))
@@ -201,9 +202,9 @@ jobs:
           from pathlib import Path
           p = json.loads(Path('.research-state/current-top2-pengu-v20-dca/result.json').read_text())
           assert p['status'] == 'PASS_RESEARCH_ONLY', p['checks']
-          assert p['period']['startInclusive'].startswith('2025-08-01')
-          assert p['period']['endExclusive'].startswith('2026-08-01')
-          assert p['capital']['totalContributedJpy'] == 120000
+          assert p['period']['startInclusive'].startswith('2024-08-10')
+          assert p['period']['endExclusive'].startswith('2026-08-10')
+          assert p['capital']['totalContributedJpy'] == 250000
           assert p['architecture']['v12Slots'] == 2
           assert p['architecture']['v12GrossCap'] == 1.5
           assert p['architecture']['sharedCryptoGrossCap'] == 2.0
@@ -218,7 +219,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: current-v12-top2-pengu-v20-v52-dca-${{ github.run_id }}
+          name: current-v12-top2-pengu-v20-v52-dca-2y-${{ github.run_id }}
           path: .research-state/current-top2-pengu-v20-dca
           include-hidden-files: true
           retention-days: 90
