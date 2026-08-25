@@ -46,6 +46,33 @@ def main() -> int:
         "v50 daily reset",
     )
 
+    s = one(
+        s,
+        '''    def v12_gross() -> float:
+        return sum(position_gross(position) for position in active_v12.values())
+
+    def pengu_gross() -> float:
+        return position_gross(active_pengu)
+
+    def stock_gross() -> float:
+        return sum(position_gross(position) for position in active_stock.values())''',
+        '''    def v12_gross() -> float:
+        return sum(entry_allocated_gross(position) for position in active_v12.values())
+
+    def pengu_gross() -> float:
+        return entry_allocated_gross(active_pengu)
+
+    def stock_gross() -> float:
+        return sum(entry_allocated_gross(position) for position in active_stock.values())''',
+        "gross capacity uses entry allocation",
+    )
+    s = one(
+        s,
+        "        Capacity gates use current equity, but entry-time contract verification\n        must not revalue an old allocation after later PnL changes equity.",
+        "        Capacity gates and contract verification use the captured entry allocation\n        so later PnL changes cannot create a gross-capacity mismatch.",
+        "gross capacity documentation",
+    )
+
     old_slot = '''            if any(str(position["strategy"]) == strategy for position in active_stock.values()):
                 stats[f"{strategy}_SLOT_OCCUPIED"] += 1
                 continue
