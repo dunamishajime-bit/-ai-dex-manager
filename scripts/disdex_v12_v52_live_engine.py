@@ -67,8 +67,8 @@ legacy.legacy.V50_MAX_DAILY_TRADES = V50_MAX_DAILY_ENTRIES
 # Only strategy selectivity is changed here. Reference quality, freshness,
 # source-clock, spread, depth, adverse-move, Gross, Margin Guard, daily-loss and
 # Kill Switch gates remain unchanged and fail closed.
-V50_MIN_ENTRY_BASIS_BPS = V50_RANK1_MIN_BASIS_BPS
-V50_MIN_NET_EDGE_BPS = V50_RANK1_MIN_NET_EDGE_BPS
+V50_MIN_ENTRY_BASIS_BPS = 65.0
+V50_MIN_NET_EDGE_BPS = 5.0
 legacy.legacy.V50_MIN_ENTRY_BASIS_BPS = V50_MIN_ENTRY_BASIS_BPS
 legacy.legacy.V50_MIN_NET_EDGE_BPS = V50_MIN_NET_EDGE_BPS
 
