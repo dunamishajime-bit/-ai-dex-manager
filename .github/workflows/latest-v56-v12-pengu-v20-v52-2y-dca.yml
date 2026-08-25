@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/latest-v56-v12-pengu-v20-v52-2y-dca.yml'
       - 'scripts/research_export_v56_stock_ledger.py'
+      - 'scripts/research_prepare_hf_v52_cash.py'
       - 'scripts/research_build_latest_pengu_v20_2y.py'
       - 'scripts/research_patch_latest_v56_2y_dca.py'
 
@@ -170,6 +171,9 @@ jobs:
           PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
         run: |
           set -o pipefail
+          python scripts/research_prepare_hf_v52_cash.py \
+            --output-dir .cache/latest-v56-2y-real-stock/aligned/v11-cash \
+            2>&1 | tee .research-state/latest-v56-2y/v52-cash-provider.log
           python scripts/research_export_v56_stock_ledger.py \
             --v56-root .v56-research \
             --stock-cache-dir .cache/latest-v56-2y-real-stock \

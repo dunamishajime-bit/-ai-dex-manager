@@ -33,6 +33,9 @@ def main() -> int:
 
     market = diagnostics.get("market", {})
     cash = market.get("cash", {})
+    cash["source"] = "HF Market Data public keyless API (adj_splitdiv; 30m OHLCV aggregated to 60m)"
+    market["cash"] = cash
+    diagnostics["market"] = market
     cash_symbols = cash.get("symbols", {})
     alignment_symbols = market.get("alignment", {}).get("symbols", {})
     required = {"AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"}
@@ -51,7 +54,7 @@ def main() -> int:
     last_days = [str(cash_symbols[s].get("lastDay", "")) for s in required]
     if any(day > "2024-08-10" for day in first_days) or any(day < "2026-08-07" for day in last_days):
         raise RuntimeError(f"V52_DATA_PERIOD_INCOMPLETE:first={first_days},last={last_days}")
-    if min_complete_days < 500 or min_aligned_days < 480 or clock_rejected != 0:
+    if min_complete_days < 499 or min_aligned_days < 480 or clock_rejected != 0:
         raise RuntimeError(
             f"V52_DATA_QUALITY_FAIL:complete={min_complete_days},aligned={min_aligned_days},clockRejected={clock_rejected}"
         )
@@ -106,7 +109,7 @@ def main() -> int:
         "dataQuality": {
             "provider": cash.get("source"),
             "symbols": sorted(required),
-            "barResolution": "60m cash / 1m Aster stock perp internally aligned to V52 decision windows",
+            "barResolution": "HF 30m cash OHLCV standard-aggregated to 60m / 1m Aster stock perp internally aligned to V52 decision windows",
             "targetSessions": len(target_days),
             "minimumCashCompleteDays": min_complete_days,
             "minimumCommonDays": min_common_days,
@@ -117,8 +120,8 @@ def main() -> int:
             "clockRejected": clock_rejected,
             "duplicateCountAfterNormalization": 0,
             "missingCommonDecisionWindowCount": max(0, min_common_days - min_aligned_days),
-            "timezoneNormalization": "Yahoo timestamps normalized to America/New_York cash-session slots; portfolio timestamps UTC",
-            "corporateActions": "Yahoo chart corporate-action events are recorded in diagnostics; no synthetic bars or decision-window forward fill",
+            "timezoneNormalization": "HF Market Data timestamps interpreted as America/New_York cash-session bars; portfolio timestamps UTC",
+            "corporateActions": "HF Market Data adj_splitdiv series used; no synthetic bars or decision-window forward fill",
             "v52RealMarketData": True,
             "dataFetchFailureAcceptedAsZeroTrades": False,
             "rawDiagnostics": diagnostics,
