@@ -304,10 +304,14 @@ export function buildPenguDualLsV2EvaluationSeries(history: PenguDualLsV2History
     });
 }
 
-export function targetGrossForAtr(atr24Ratio: number) {
+export function targetGrossForAtr(atr24Ratio: number, side: -1 | 1 = -1) {
     const sizing = PENGU_DUAL_LS_V2.sizing;
     if (!Number.isFinite(atr24Ratio) || atr24Ratio <= 0) return 0;
-    return Math.min(sizing.grossCap, Math.max(sizing.grossFloor, sizing.grossMultiplier * sizing.targetVolatility / atr24Ratio));
+    const multiplier = side > 0 ? sizing.longMultiplier : sizing.shortMultiplier;
+    return Math.min(
+        sizing.grossCap * multiplier,
+        Math.max(sizing.grossFloor * multiplier, sizing.grossMultiplier * sizing.targetVolatility / atr24Ratio * multiplier),
+    );
 }
 
 export function evaluatePenguDualLsV2Decision(features: PenguDualLsV2Features, shortEligible: boolean, previousLongRaw = false): PenguDualLsV2Decision {
@@ -391,7 +395,7 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest.features.referenceTs,
         side: decision.side,
-        targetGross: targetGrossForAtr(latest.features.atr24Ratio),
+        targetGross: targetGrossForAtr(latest.features.atr24Ratio, decision.side),
         entryTs: latest.features.referenceTs + HOUR,
         reason: decision.reason,
         features: latest.features,

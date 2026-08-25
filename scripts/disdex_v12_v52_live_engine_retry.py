@@ -134,7 +134,7 @@ class RetryAwareV52AsterOnlyEngine(current.V12AwareV52AsterOnlyEngine):
             "candidateRank": candidate.get("candidateRank") if candidate else None,
             "qualifiedRank": candidate.get("qualifiedRank") if candidate else None,
             "symbol": candidate.get("symbol") if candidate else None,
-            "requestedGross": (
+            "requestedGross": float(candidate.get("requestedGross")) if candidate and candidate.get("requestedGross") is not None else (
                 V50_RANK1_REQUESTED_GROSS
                 if candidate and int(candidate.get("candidateRank") or 1) == 1
                 else V50_RANK2_REQUESTED_GROSS
@@ -190,6 +190,10 @@ class RetryAwareV52AsterOnlyEngine(current.V12AwareV52AsterOnlyEngine):
                 "qualifiedRank": candidate.get("qualifiedRank"),
                 "symbol": candidate.get("symbol"),
                 "basisBps": candidate.get("basisBps"),
+                "estimatedNetEdgeBps": candidate.get("estimatedNetEdgeBps"),
+                "requestedGross": candidate.get("requestedGross"),
+                "rankSizingEligible": candidate.get("rankSizingEligible", True),
+                "rankSizingReason": candidate.get("rankSizingReason"),
             }
             for candidate in candidates
         ]
@@ -233,7 +237,9 @@ class RetryAwareV52AsterOnlyEngine(current.V12AwareV52AsterOnlyEngine):
         for candidate in candidates:
             rank = int(candidate.get("candidateRank") or 0)
             slot = V50_SLOT if rank == 1 else V50_RANK2_SLOT
-            requested = V50_RANK1_REQUESTED_GROSS if rank == 1 else V50_RANK2_REQUESTED_GROSS
+            requested = float(candidate.get("requestedGross") or (
+                V50_RANK1_REQUESTED_GROSS if rank == 1 else V50_RANK2_REQUESTED_GROSS
+            ))
             available, before = self.available_slot_gross(slot)
             if slot in self.positions():
                 self._record_top2_reject(window, candidate, "SLOT_ALREADY_ACTIVE", available_gross=available, snapshot=before)
@@ -241,16 +247,19 @@ class RetryAwareV52AsterOnlyEngine(current.V12AwareV52AsterOnlyEngine):
             if self.active_v50_slots() >= V50_MAX_CONCURRENT_POSITIONS:
                 self._record_top2_reject(window, candidate, "V50_MAX_CONCURRENT_POSITIONS", available_gross=available, snapshot=before)
                 continue
-            if rank == 2 and available + 1e-12 < V50_RANK2_REQUESTED_GROSS:
+            if not candidate.get("rankSizingEligible", True):
+                self._record_top2_reject(
+                    window,
+                    candidate,
+                    candidate.get("rankSizingReason") or "RANK_SIZING_REJECTED",
+                    available_gross=available,
+                    snapshot=before,
+                )
+                continue
+            if available + 1e-12 < requested:
                 self._record_top2_reject(window, candidate, "INSUFFICIENT_AVAILABLE_GROSS", available_gross=available, snapshot=before)
                 continue
-            if rank == 1:
-                allocated = min(requested, available)
-            else:
-                allocated = V50_RANK2_REQUESTED_GROSS
-            if allocated <= 0:
-                self._record_top2_reject(window, candidate, "INSUFFICIENT_AVAILABLE_GROSS", available_gross=available, snapshot=before)
-                continue
+            allocated = requested
             self.state["v50DailyEntries"] = int(self.state.get("v50DailyEntries", 0)) + 1
             self.save()
             order_sent_before = len(telemetry["entries"])
@@ -401,7 +410,8 @@ def self_test() -> None:
     assert V50_MIN_ENTRY_BASIS_BPS == 65.0
     assert V50_MIN_NET_EDGE_BPS == 5.0
     assert V50_RANK1_REQUESTED_GROSS == 1.0
-    assert V50_RANK2_REQUESTED_GROSS == 0.5
+    assert current.V50_RANK1_STRONG_REQUESTED_GROSS == 1.25
+    assert V50_RANK2_REQUESTED_GROSS == 0.25
     assert V50_MAX_CONCURRENT_POSITIONS == 2
     assert V50_MAX_DAILY_ENTRIES == 3
 
@@ -428,7 +438,7 @@ def self_test() -> None:
     # Offline router contract: two qualified candidates can fill only the two
     # V50 slots; a third slot is never created and an insufficient rank 2
     # budget is rejected without calling the order path.
-    def make_fake(rank2_available: float = 0.5, daily_entries: int = 0):
+    def make_fake(rank2_available: float = 0.25, daily_entries: int = 0):
         fake = object.__new__(RetryAwareV52AsterOnlyEngine)
         fake.state = {
             "nyDay": "2026-08-25",
@@ -474,7 +484,7 @@ def self_test() -> None:
     assert [row["candidateRank"] for row in fake.state["v52Top2Telemetry"]["11:30"]["entries"]] == [1, 2]
     assert fake._fake_positions["V12_SENTINEL"]["symbol"] == "SOL"
 
-    insufficient = make_fake(rank2_available=0.49)
+    insufficient = make_fake(rank2_available=0.24)
     insufficient._process_v50_window("11:30", {}, legacy.base.clock("11:30:00") + 1)
     rejects = insufficient.state["v52Top2Telemetry"]["11:30"]["rejections"]
     assert any(row["rank2RejectedReason"] == "INSUFFICIENT_AVAILABLE_GROSS" for row in rejects)
