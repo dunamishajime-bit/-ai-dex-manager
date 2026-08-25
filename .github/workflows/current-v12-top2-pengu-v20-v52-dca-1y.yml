@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/v12-top2-pengu-v20-v52-dca-1y-20260824
+      - codex/bt-latest-2y-20260825
   workflow_dispatch:
 
 permissions:
