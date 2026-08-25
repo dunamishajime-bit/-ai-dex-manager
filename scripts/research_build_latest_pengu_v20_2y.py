@@ -121,6 +121,10 @@ def main() -> int:
     tmp.write_text(s, encoding="utf-8")
     env = dict(os.environ)
     env["PENGU_LEDGER_OUT"] = str(Path(args.output).resolve())
+    # The checked-out production source uses @/* aliases.  Without an explicit
+    # tsconfig, tsx resolves those aliases from the research root and can mix
+    # an older gross contract into the production replay (yielding NaN sizing).
+    env["TSX_TSCONFIG_PATH"] = str((root / "tsconfig.pengu-dual-ls-v2.json").resolve())
     try:
         subprocess.run(["npx", "tsx", str(tmp)], check=True, env=env)
     finally:
