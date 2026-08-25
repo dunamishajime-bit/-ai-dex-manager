@@ -12,7 +12,7 @@ import time
 # margin-aware V52 engine. This preserves the deployed V96 implementation while
 # giving the post-migration composition the full frozen V12 universe.
 import disdex_v96_v52_margin_guard as guard
-from disdex_account_order_lock import AccountOrderLock
+from disdex_account_order_lock import AccountOrderLock, active_reserved_gross
 
 V12_CRYPTO_SYMBOLS = (
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT",
@@ -32,6 +32,11 @@ EPSILON = 1e-12
 V50_WINDOWS = legacy.legacy.V50_WINDOWS
 V11_SLOT = legacy.V11_SLOT
 V50_SLOT = legacy.V50_SLOT
+V50_RANK2_SLOT = "V50_POST_OPEN_BASIS_RANK2"
+V50_RANK1_REQUESTED_GROSS = legacy.base.float_env("DISDEX_V52_V50_RANK1_REQUESTED_GROSS", 1.0)
+V50_RANK2_REQUESTED_GROSS = legacy.base.float_env("DISDEX_V52_V50_RANK2_REQUESTED_GROSS", 0.5)
+V50_MAX_CONCURRENT_POSITIONS = legacy.base.int_env("DISDEX_V52_V50_MAX_CONCURRENT_POSITIONS", 2)
+V50_MAX_DAILY_ENTRIES = legacy.base.int_env("DISDEX_V52_V50_MAX_DAILY_ENTRIES", 3)
 
 # Research-locked V50 gate profile from PR #189 / Actions run 32774114948.
 # Only strategy selectivity is changed here. Reference quality, freshness,
@@ -80,6 +85,113 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             legacy.base.int_env("DISDEX_STOCK_LOCK_STALE_MS", 15 * 60_000),
         )
         self._account_critical_depth = 0
+
+    def reset_days(self) -> None:
+        super().reset_days()
+        ny_day = str(self.state.get("nyDay") or "")
+        entry_day = self.state.get("v50DailyEntriesDay")
+        if entry_day != ny_day:
+            self.state["v50DailyEntriesDay"] = ny_day
+            # An absent day marker is an old-state migration; preserve the
+            # already-counted attempts once. A known prior day always resets.
+            self.state["v50DailyEntries"] = (
+                min(V50_MAX_DAILY_ENTRIES, int(self.state.get("v50CompletedTrades", 0)))
+                if entry_day is None
+                else 0
+            )
+            self.save()
+        else:
+            self.state.setdefault("v50DailyEntries", int(self.state.get("v50CompletedTrades", 0)))
+
+    def active_v50_slots(self) -> int:
+        positions = self.positions()
+        return sum(1 for slot in (V50_SLOT, V50_RANK2_SLOT) if slot in positions)
+
+    def available_slot_gross(self, slot: str):
+        available, snapshot = super().available_slot_gross(slot)
+        if slot == V50_RANK2_SLOT:
+            return min(available, V50_RANK2_REQUESTED_GROSS), snapshot
+        return available, snapshot
+
+    def v50_candidates(self, window: str, rows: dict, notional: float, max_candidates: int = 2):
+        """Evaluate one frozen V50 signal snapshot and return ranked candidates.
+
+        This deliberately mirrors the existing V50 gates. The only addition is
+        returning the qualified ranking so rank 2 can be admitted as a separate
+        P2 exposure. No signal is regenerated after the window snapshot.
+        """
+        signal = (self.state.get("v50SignalBasis") or {}).get(window) or {}
+        if not signal:
+            return [], {"ROUTER": ["MISSING_V50_SIGNAL_SNAPSHOT"]}
+
+        eligible = []
+        rejections = {}
+        now = legacy.base.now_ms()
+        active_symbols = {str(position.get("symbol")) for position in self.positions().values()}
+        stock = legacy.legacy
+        for symbol, (aster, _xyz, reference) in rows.items():
+            basis = (aster.mid / reference.price - 1.0) * 10_000.0
+            signal_basis = legacy.base.finite(signal.get(symbol), 0.0)
+            side = "SELL" if basis > 0 else "BUY"
+            exit_action = "BUY" if side == "SELL" else "SELL"
+            cost, detail = self.estimate_v11_cost(aster, exit_action, notional)
+            adverse = max(0.0, abs(basis) - abs(signal_basis))
+            reasons = []
+            if symbol in active_symbols:
+                reasons.append("SAME_SYMBOL_ACTIVE")
+            if abs(basis) < V50_MIN_ENTRY_BASIS_BPS:
+                reasons.append("BASIS_BELOW_65")
+            if signal_basis * basis <= 0:
+                reasons.append("SIGN_CHANGED")
+            if adverse > stock.V50_MAX_ADVERSE_BASIS_MOVE_BPS:
+                reasons.append("ADVERSE_BASIS_MOVE")
+            if now - aster.received_ms > legacy.base.V11_MAX_DATA_AGE_MS or now - reference.received_ms > legacy.base.V11_MAX_DATA_AGE_MS:
+                reasons.append("STALE_DATA")
+            if abs(aster.received_ms - reference.received_ms) > legacy.base.V11_MAX_SOURCE_CLOCK_DIFF_MS:
+                reasons.append("SOURCE_CLOCK_MISMATCH")
+            if cost > stock.V50_MAX_ROUND_TRIP_COST_BPS:
+                reasons.append("ROUND_TRIP_COST_OVER_60")
+            if abs(basis) - stock.V50_CONVERGENCE_BPS - cost < V50_MIN_NET_EDGE_BPS:
+                reasons.append("NET_EDGE_BELOW_5")
+            if aster.depth_usd(exit_action) < 2.0 * notional:
+                reasons.append("DEPTH_BELOW_2X")
+            if aster.spread_bps > legacy.base.V11_MAX_SPREAD_BPS:
+                reasons.append("SPREAD_OVER_20")
+            rejections[symbol] = reasons
+            if not reasons:
+                eligible.append({
+                    "symbol": symbol,
+                    "basisBps": basis,
+                    "signalBasisBps": signal_basis,
+                    "side": side,
+                    "entryPrice": aster.bid if side == "BUY" else aster.ask,
+                    "estimatedRoundTripCostBps": cost,
+                    "adverseBasisMoveBps": adverse,
+                    "costDetail": detail,
+                    "route": f"POST_{window.replace(':', '')}",
+                })
+
+        eligible.sort(key=lambda row: (-abs(row["basisBps"]), row["symbol"]))
+        ranked = []
+        for rank, candidate in enumerate(eligible[:max_candidates], start=1):
+            ranked.append({**candidate, "candidateRank": rank, "qualifiedRank": rank})
+        return ranked, rejections
+
+    def v50_candidate(self, window: str, rows: dict, notional: float):
+        candidates, rejections = self.v50_candidates(window, rows, notional, max_candidates=2)
+        return (candidates[0] if candidates else None), rejections
+
+    def capture_v50_signal(self, window: str, rows: dict) -> None:
+        super().capture_v50_signal(window, rows)
+        telemetry = self.state.setdefault("v52Top2Telemetry", {}).setdefault(window, {})
+        telemetry.update({
+            "signalCaptureAttempted": True,
+            "signalCaptureSucceeded": bool((self.state.get("v50SignalBasis") or {}).get(window)),
+            "signalCapturedAt": legacy.base.now_ms(),
+            "effectiveMinimumBasisBps": V50_MIN_ENTRY_BASIS_BPS,
+            "effectiveMinimumNetEdgeBps": V50_MIN_NET_EDGE_BPS,
+        })
+        self.save()
 
     @contextlib.contextmanager
     def _account_critical(self, priority: int, wait_seconds: float, required: bool):
@@ -201,6 +313,65 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             equity = self.portfolio_equity()
             if not equity > 0:
                 raise RuntimeError("V52_ACCOUNT_EQUITY_INVALID_BEFORE_RESERVATION")
+            snapshot = self.gross_snapshot()
+            lock_document = self.account_order_lock._owned()
+            active_reservations = [
+                row for row in lock_document.get("reservations", [])
+                if row.get("status") == "RESERVED"
+            ]
+            reserved_gross = active_reserved_gross(lock_document)
+            reserved_stock_gross = sum(
+                legacy.base.finite(row.get("gross"))
+                for row in active_reservations
+                if str(row.get("strategyId") or "").startswith("V52:")
+            )
+            pending = self.state.get("pendingOrder")
+            pending_gross = legacy.base.finite(pending.get("targetGross")) if isinstance(pending, dict) else 0.0
+            global_before = snapshot["totalGross"] + reserved_gross + pending_gross
+            stock_before = snapshot["stockGross"] + reserved_stock_gross + pending_gross
+            global_after = global_before + float(target_gross)
+            stock_after = stock_before + float(target_gross)
+            self._last_reservation_telemetry = {
+                "globalGrossBeforeReservation": global_before,
+                "globalGrossAfterReservation": global_after,
+                "stockGrossBeforeReservation": stock_before,
+                "stockGrossAfterReservation": stock_after,
+                "currentReservedGross": reserved_gross,
+                "pendingReservations": pending_gross,
+            }
+            if pending_gross > EPSILON:
+                self.log(
+                    "v52-order-blocked",
+                    slot=slot,
+                    symbol=candidate.get("symbol"),
+                    reason="UNRESOLVED_PENDING_ORDER",
+                    orderBlockedReason="UNRESOLVED_PENDING_ORDER",
+                    orderSendAttempted=False,
+                    **self._last_reservation_telemetry,
+                )
+                return False
+            if global_after > self.portfolio_gross_cap + self.gross_tolerance:
+                self.log(
+                    "v52-order-blocked",
+                    slot=slot,
+                    symbol=candidate.get("symbol"),
+                    reason="INSUFFICIENT_AVAILABLE_GROSS",
+                    orderBlockedReason="INSUFFICIENT_AVAILABLE_GROSS",
+                    orderSendAttempted=False,
+                    **self._last_reservation_telemetry,
+                )
+                return False
+            if stock_after > self.stock_gross_cap + self.gross_tolerance:
+                self.log(
+                    "v52-order-blocked",
+                    slot=slot,
+                    symbol=candidate.get("symbol"),
+                    reason="INSUFFICIENT_AVAILABLE_STOCK_GROSS",
+                    orderBlockedReason="INSUFFICIENT_AVAILABLE_STOCK_GROSS",
+                    orderSendAttempted=False,
+                    **self._last_reservation_telemetry,
+                )
+                return False
             symbol = str(candidate.get("symbol") or "").upper()
             open_side = str(candidate.get("side") or "").upper()
             reservation_side = "LONG" if open_side == "BUY" else "SHORT" if open_side == "SELL" else ""
@@ -218,7 +389,25 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
                 # fresh gross/margin check -> durable pendingOrder -> send ->
                 # result/reconcile. A hard crash leaves both lock+reservation and
                 # pending evidence for dead-PID recovery.
-                return super().open_basis_position(slot, candidate, target_gross)
+                opened = super().open_basis_position(slot, candidate, target_gross)
+                if opened and slot == V50_RANK2_SLOT:
+                    position = self.positions().get(slot)
+                    if position:
+                        local = dt.datetime.now(tz=legacy.base.NY)
+                        next_checkpoint = local.replace(minute=30, second=0, microsecond=0) + dt.timedelta(hours=1)
+                        maximum_exit = min(
+                            local + dt.timedelta(hours=legacy.legacy.V50_MAX_HOLDING_HOURS),
+                            local.replace(hour=15, minute=30, second=0, microsecond=0),
+                        )
+                        position.update({
+                            "checksCompleted": 0,
+                            "nextCheckpointAt": int(next_checkpoint.timestamp() * 1000),
+                            "maximumExitAt": int(maximum_exit.timestamp() * 1000),
+                            "candidateRank": candidate.get("candidateRank", 2),
+                            "qualifiedRank": candidate.get("qualifiedRank", 2),
+                        })
+                        self.save()
+                return opened
             finally:
                 # On a live Python exception (not a hard crash), release the
                 # reservation before releasing the enclosing account lock.
@@ -233,7 +422,12 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
         # than yielding to a new exposure request. No positive-gross reservation
         # is needed for reduce-only work.
         with self._account_critical(priority=1, wait_seconds=30.0, required=True):
-            return super().close_slot(slot, reason)
+            was_active = slot in self.positions()
+            result = super().close_slot(slot, reason)
+            if was_active and slot == V50_RANK2_SLOT and slot not in self.positions():
+                self.state["v50CompletedTrades"] = int(self.state.get("v50CompletedTrades", 0)) + 1
+                self.save()
+            return result
 
     def flatten_all(self, reason: str) -> None:
         # Keep cancellation + all reduce-only close operations serialized as one
@@ -243,6 +437,40 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
 
     def v96_requires_margin(self) -> bool:
         return False
+
+    def manage_positions(self, rows: dict) -> None:
+        super().manage_positions(rows)
+        rank2 = self.positions().get(V50_RANK2_SLOT)
+        if not rank2:
+            return
+        now = legacy.base.now_ms()
+        next_checkpoint = int(rank2.get("nextCheckpointAt") or 0)
+        if now < next_checkpoint:
+            return
+        if now > next_checkpoint + 5 * 60_000:
+            self.close_slot(V50_RANK2_SLOT, "MISSED_CHECKPOINT_FAIL_CLOSED")
+            return
+        symbol = str(rank2["symbol"])
+        if symbol not in rows:
+            self.close_slot(V50_RANK2_SLOT, "MISSING_REFERENCE_FAIL_CLOSED")
+            return
+        aster, _xyz, reference = rows[symbol]
+        basis = (aster.mid / reference.price - 1.0) * 10_000.0
+        entry = legacy.base.finite(rank2["entryBasisBps"])
+        if abs(basis) <= legacy.legacy.V50_CONVERGENCE_BPS or basis * entry <= 0:
+            self.close_slot(V50_RANK2_SLOT, "BASIS_CONVERGED")
+            return
+        if abs(basis) >= legacy.legacy.V50_BASIS_STOP_MULTIPLE * abs(entry):
+            self.close_slot(V50_RANK2_SLOT, "BASIS_STOP")
+            return
+        checks = int(rank2.get("checksCompleted", 0)) + 1
+        if checks >= legacy.legacy.V50_MAX_HOLDING_HOURS or now >= int(rank2.get("maximumExitAt") or 0) or legacy.base.ny_seconds() >= legacy.base.clock("15:30:00"):
+            self.close_slot(V50_RANK2_SLOT, "TIME_3H")
+            return
+        rank2["checksCompleted"] = checks
+        rank2["nextCheckpointAt"] = next_checkpoint + 60 * 60_000
+        self.save()
+        self.log("v50-checkpoint-hold", slot=V50_RANK2_SLOT, symbol=symbol, basisBps=basis, checksCompleted=checks)
 
     def gross_snapshot_from_rows(self, account: dict, rows: list[dict]) -> dict:
         equity = legacy.base.finite(account.get("totalMarginBalance"))
@@ -391,6 +619,10 @@ def self_test() -> None:
     assert engine.v96_requires_margin() is False
     assert V50_MIN_ENTRY_BASIS_BPS == 65.0
     assert V50_MIN_NET_EDGE_BPS == 5.0
+    assert V50_RANK1_REQUESTED_GROSS == 1.0
+    assert V50_RANK2_REQUESTED_GROSS == 0.5
+    assert V50_MAX_CONCURRENT_POSITIONS == 2
+    assert V50_MAX_DAILY_ENTRIES == 3
     assert legacy.legacy.V50_MIN_ENTRY_BASIS_BPS == 65.0
     assert legacy.legacy.V50_MIN_NET_EDGE_BPS == 5.0
     try:
