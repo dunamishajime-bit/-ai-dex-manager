@@ -1,0 +1,45 @@
+name: PENGU Short V20 Production Parity
+
+on:
+  pull_request:
+    paths:
+      - "config/penguDualLsV2Runtime.ts"
+      - "lib/pengu-dual-ls-v2.ts"
+      - "lib/pengu-dual-ls-v2-portfolio-runner.ts"
+      - "lib/pengu-dual-ls-v2-runner-state.ts"
+      - "lib/pengu-short-v20.ts"
+      - "scripts/pengu-dual-ls-v2-selftest.ts"
+      - "scripts/pengu-short-v20-parity.ts"
+      - "scripts/research_pengu_short_v20_vol_target_failure_exit.py"
+      - ".github/workflows/pengu-short-v20-production-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Typecheck PENGU V2 runner
+        run: npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+      - name: PENGU V2 self-test
+        run: npx tsx scripts/pengu-dual-ls-v2-selftest.ts
+      - name: PENGU Short V20 production/research parity
+        run: npx tsx scripts/pengu-short-v20-parity.ts
+      - name: Assert no live side effect
+        shell: bash
+        run: |
+          test "${ORDERS_SENT_FOR_TESTING:-0}" = "0"
+          test "${ARTIFICIAL_LIVE_ORDERS:-0}" = "0"
+          ! rg -n "executeMarket|cancelOrder|closePosition" scripts/pengu-short-v20-parity.ts
+        env:
+          ORDERS_SENT_FOR_TESTING: "0"
+          ARTIFICIAL_LIVE_ORDERS: "0"

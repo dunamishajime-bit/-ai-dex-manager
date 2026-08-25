@@ -1,0 +1,61 @@
+name: PENGU V20 Vol Target Failure Exit Development
+
+on:
+  pull_request:
+    branches:
+      - research/pengu-short-v11-okx-binance-20260824
+    paths:
+      - 'PRE_REGISTER_V20.md'
+      - 'scripts/research_pengu_short_v20_vol_target_failure_exit.py'
+      - '.github/workflows/pengu-v20-vol-target-failure-exit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Run frozen V20 on known venues only
+        run: python scripts/research_pengu_short_v20_vol_target_failure_exit.py
+      - name: Validate preregistration and KuCoin holdout lock
+        run: |
+          python - <<'PY'
+          import json
+          p='.research-state/pengu-short-v20/development-result.json'
+          x=json.load(open(p))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['candidate']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          assert x['preRegistrationSha']=='ad7cedb3cafaf9f9680e390112f72375d84b50ac'
+          assert x['parentV18PreRegistrationSha']=='42bb6297d893125ad3b2de0a9e26dba342852223'
+          assert x['candidateCount']==1
+          assert x['thresholdSweep'] is False
+          assert x['featureCombinationSearch'] is False
+          assert x['ruleChangeCount']==1
+          assert x['gateQ3ProtectedBySizingRule'] is True
+          assert x['gateQ3RequiredSizingState']=='CAP'
+          assert x['kucoinPerformanceObserved'] is False
+          assert x['promotionPass'] is False
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          if x['developmentPass']:
+              assert x['kucoinHoldoutStatus']=='ELIGIBLE_TO_OPEN'
+          else:
+              assert x['kucoinHoldoutStatus']=='RESERVED_UNOPENED'
+          print(json.dumps({'developmentPass':x['developmentPass'],'venuePasses':x['venuePasses'],'kucoinHoldoutStatus':x['kucoinHoldoutStatus'],'safety':x['safety']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-v20-development-${{ github.run_id }}
+          path: .research-state/pengu-short-v20
+          if-no-files-found: error
