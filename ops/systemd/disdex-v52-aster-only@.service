@@ -13,6 +13,13 @@ EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 Environment=NODE_ENV=production
 Environment=DISDEX_V52_CRYPTO_GROSS_CAP=1.5
+Environment=DISDEX_V52_V11_GROSS_CAP=1.5
+Environment=DISDEX_V52_V50_GROSS_CAP=1.25
+Environment=DISDEX_V52_V50_RANK1_REQUESTED_GROSS=1.0
+Environment=DISDEX_V52_V50_RANK1_STRONG_REQUESTED_GROSS=1.25
+Environment=DISDEX_V52_V50_RANK2_REQUESTED_GROSS=0.25
+Environment=DISDEX_V52_V50_MAX_CONCURRENT_POSITIONS=2
+Environment=DISDEX_V52_V50_MAX_DAILY_ENTRIES=3
 Environment=DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
 Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha

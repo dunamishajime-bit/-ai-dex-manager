@@ -42,7 +42,10 @@ jobs:
       - name: Verify retry contract is bounded and fail closed
         run: |
           python - <<'PY'
+          import sys
           from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          import disdex_v12_v52_live_engine as current
           text = Path('scripts/disdex_v12_v52_live_engine_retry.py').read_text()
           service = Path('ops/systemd/disdex-v52-aster-only@.service').read_text()
           assert 'V11_ENTRY_WINDOW_SECONDS = 20' in text
@@ -55,8 +58,8 @@ jobs:
           assert 'SPREAD_OVER_20' in text
           assert 'MISSING_V50_SIGNAL_SNAPSHOT' in text
           assert 'scripts/disdex_v12_v52_live_engine_retry.py --mode live --daemon' in service
-          assert 'V50_MIN_ENTRY_BASIS_BPS = 65.0' in Path('scripts/disdex_v12_v52_live_engine.py').read_text()
-          assert 'V50_MIN_NET_EDGE_BPS = 5.0' in Path('scripts/disdex_v12_v52_live_engine.py').read_text()
+          assert current.V50_MIN_ENTRY_BASIS_BPS == 65.0
+          assert current.V50_MIN_NET_EDGE_BPS == 5.0
           print('bounded retry contract: PASS')
           PY
 
