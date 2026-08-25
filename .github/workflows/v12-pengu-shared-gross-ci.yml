@@ -34,10 +34,10 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          grep -Fq 'portfolioGrossCap: 2.0' config/penguDualLsV2Runtime.ts
-          grep -Fq 'combinedPortfolioGrossCap: 2.0' config/penguDualLsV2Runtime.ts
-          grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
-          grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=2.0' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'portfolioGrossCap: 1.5' config/penguDualLsV2Runtime.ts
+          grep -Fq 'combinedPortfolioGrossCap: 1.5' config/penguDualLsV2Runtime.ts
+          grep -Fq 'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5' ops/env/disdex-v12-pengu-v2-v52.env.example
+          grep -Fq 'PENGU_DUAL_LS_V2_COMBINED_PORTFOLIO_GROSS_CAP=1.5' ops/env/disdex-v12-pengu-v2-v52.env.example
           grep -Fq 'classifiedPortfolioGross' lib/pengu-dual-ls-v2-portfolio-runner.ts
           grep -Fq 'PENGU_UNKNOWN_NONZERO_ASTER_POSITION' lib/pengu-dual-ls-v2-portfolio-runner.ts
           grep -Fq 'remainingCryptoGross' lib/pengu-dual-ls-v2-portfolio-runner.ts
