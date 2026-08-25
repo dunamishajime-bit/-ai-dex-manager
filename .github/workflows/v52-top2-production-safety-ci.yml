@@ -50,6 +50,13 @@ jobs:
           os.environ.pop('ASTER_API_KEY', None)
           os.environ.pop('ASTER_API_SECRET', None)
           os.environ.pop('DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT', None)
+          for name in (
+              'DISDEX_V52_V50_RANK1_REQUESTED_GROSS',
+              'DISDEX_V52_V50_RANK2_REQUESTED_GROSS',
+              'DISDEX_V52_V50_MAX_CONCURRENT_POSITIONS',
+              'DISDEX_V52_V50_MAX_DAILY_ENTRIES',
+          ):
+              os.environ.pop(name, None)
           import disdex_v12_v52_live_engine as current
           import disdex_v12_v52_live_engine_retry as retry
 
