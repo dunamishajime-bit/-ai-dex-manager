@@ -391,6 +391,7 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
     if (position) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "PENGU V2保有中の新規Long/Shortはblocked signalとして記録し、追加発注・反転を行いません。", features: latest.features, decision, updatedPosition: positionEvaluation?.updatedPosition, diagnostics };
     if (cooldownBlocked) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "PENGU V2決済後6時間のcooldown中です。", features: latest.features, decision, diagnostics };
     if (!decision.active) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: decision.reason, features: latest.features, decision, diagnostics };
+    if (decision.side !== 1 && decision.side !== -1) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "PENGU V2 active signal has no valid Long/Short side; fail closed.", features: latest.features, decision, diagnostics };
     return {
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest.features.referenceTs,
