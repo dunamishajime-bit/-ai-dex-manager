@@ -13,6 +13,25 @@ import time
 # giving the post-migration composition the full frozen V12 universe.
 import disdex_v96_v52_margin_guard as guard
 from disdex_account_order_lock import AccountOrderLock, active_reserved_gross
+from disdex_v56_policy import (
+    V11_DEFAULT_GROSS,
+    V50_BASIS_STOP_MULTIPLE,
+    V50_MAX_ADVERSE_BASIS_MOVE_BPS,
+    V50_MAX_CONCURRENT_POSITIONS,
+    V50_MAX_DAILY_ENTRIES,
+    V50_MAX_HOLDING_HOURS,
+    V50_RANK1_MIN_BASIS_BPS,
+    V50_RANK1_MIN_NET_EDGE_BPS,
+    V50_RANK1_NORMAL_GROSS,
+    V50_RANK1_STRONG_BASIS_BPS,
+    V50_RANK1_STRONG_GROSS,
+    V50_RANK1_STRONG_NET_EDGE_BPS,
+    V50_RANK2_GROSS,
+    V50_RANK2_MIN_BASIS_BPS,
+    V50_RANK2_MIN_NET_EDGE_BPS,
+    v11_requested_gross,
+    v50_requested_gross,
+)
 
 V12_CRYPTO_SYMBOLS = (
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT",
@@ -33,17 +52,23 @@ V50_WINDOWS = legacy.legacy.V50_WINDOWS
 V11_SLOT = legacy.V11_SLOT
 V50_SLOT = legacy.V50_SLOT
 V50_RANK2_SLOT = "V50_POST_OPEN_BASIS_RANK2"
-V50_RANK1_REQUESTED_GROSS = legacy.base.float_env("DISDEX_V52_V50_RANK1_REQUESTED_GROSS", 1.0)
-V50_RANK2_REQUESTED_GROSS = legacy.base.float_env("DISDEX_V52_V50_RANK2_REQUESTED_GROSS", 0.5)
-V50_MAX_CONCURRENT_POSITIONS = legacy.base.int_env("DISDEX_V52_V50_MAX_CONCURRENT_POSITIONS", 2)
-V50_MAX_DAILY_ENTRIES = legacy.base.int_env("DISDEX_V52_V50_MAX_DAILY_ENTRIES", 3)
+V50_RANK1_REQUESTED_GROSS = V50_RANK1_NORMAL_GROSS
+V50_RANK1_STRONG_REQUESTED_GROSS = V50_RANK1_STRONG_GROSS
+V50_RANK2_REQUESTED_GROSS = V50_RANK2_GROSS
+
+# V56 is a fixed production contract.  Keep these values in the shared base
+# module because its inherited entry/exit lifecycle reads module-level policy.
+legacy.legacy.V50_MAX_HOLDING_HOURS = V50_MAX_HOLDING_HOURS
+legacy.legacy.V50_BASIS_STOP_MULTIPLE = V50_BASIS_STOP_MULTIPLE
+legacy.legacy.V50_MAX_ADVERSE_BASIS_MOVE_BPS = V50_MAX_ADVERSE_BASIS_MOVE_BPS
+legacy.legacy.V50_MAX_DAILY_TRADES = V50_MAX_DAILY_ENTRIES
 
 # Research-locked V50 gate profile from PR #189 / Actions run 32774114948.
 # Only strategy selectivity is changed here. Reference quality, freshness,
 # source-clock, spread, depth, adverse-move, Gross, Margin Guard, daily-loss and
 # Kill Switch gates remain unchanged and fail closed.
-V50_MIN_ENTRY_BASIS_BPS = 65.0
-V50_MIN_NET_EDGE_BPS = 5.0
+V50_MIN_ENTRY_BASIS_BPS = V50_RANK1_MIN_BASIS_BPS
+V50_MIN_NET_EDGE_BPS = V50_RANK1_MIN_NET_EDGE_BPS
 legacy.legacy.V50_MIN_ENTRY_BASIS_BPS = V50_MIN_ENTRY_BASIS_BPS
 legacy.legacy.V50_MIN_NET_EDGE_BPS = V50_MIN_NET_EDGE_BPS
 
@@ -84,6 +109,10 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             self.state_root / f"runner-{mode}.lock",
             legacy.base.int_env("DISDEX_STOCK_LOCK_STALE_MS", 15 * 60_000),
         )
+        if abs(self.v11_gross_cap - 1.5) > EPSILON:
+            raise RuntimeError("V56 V11 Gross cap must be exactly 1.5")
+        if abs(self.v50_gross_cap - 1.25) > EPSILON:
+            raise RuntimeError("V56 V50 Gross cap must be exactly 1.25")
         self._account_critical_depth = 0
 
     def reset_days(self) -> None:
@@ -151,7 +180,8 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
                 reasons.append("SOURCE_CLOCK_MISMATCH")
             if cost > stock.V50_MAX_ROUND_TRIP_COST_BPS:
                 reasons.append("ROUND_TRIP_COST_OVER_60")
-            if abs(basis) - stock.V50_CONVERGENCE_BPS - cost < V50_MIN_NET_EDGE_BPS:
+            net_edge = abs(basis) - stock.V50_CONVERGENCE_BPS - cost
+            if net_edge < V50_MIN_NET_EDGE_BPS:
                 reasons.append("NET_EDGE_BELOW_5")
             if aster.depth_usd(exit_action) < 2.0 * notional:
                 reasons.append("DEPTH_BELOW_2X")
@@ -166,6 +196,7 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
                     "side": side,
                     "entryPrice": aster.bid if side == "BUY" else aster.ask,
                     "estimatedRoundTripCostBps": cost,
+                    "estimatedNetEdgeBps": net_edge,
                     "adverseBasisMoveBps": adverse,
                     "costDetail": detail,
                     "route": f"POST_{window.replace(':', '')}",
@@ -174,12 +205,25 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
         eligible.sort(key=lambda row: (-abs(row["basisBps"]), row["symbol"]))
         ranked = []
         for rank, candidate in enumerate(eligible[:max_candidates], start=1):
-            ranked.append({**candidate, "candidateRank": rank, "qualifiedRank": rank})
+            requested = v50_requested_gross(
+                rank,
+                candidate["basisBps"],
+                candidate["estimatedNetEdgeBps"],
+            )
+            ranked.append({
+                **candidate,
+                "candidateRank": rank,
+                "qualifiedRank": rank,
+                "requestedGross": requested if requested is not None else (V50_RANK2_REQUESTED_GROSS if rank == 2 else V50_RANK1_REQUESTED_GROSS),
+                "rankSizingEligible": requested is not None,
+                "rankSizingReason": None if requested is not None else "RANK2_BELOW_85_BPS_OR_NET_EDGE_10",
+            })
         return ranked, rejections
 
     def v50_candidate(self, window: str, rows: dict, notional: float):
         candidates, rejections = self.v50_candidates(window, rows, notional, max_candidates=2)
-        return (candidates[0] if candidates else None), rejections
+        selected = next((candidate for candidate in candidates if candidate.get("rankSizingEligible", True)), None)
+        return selected, rejections
 
     def capture_v50_signal(self, window: str, rows: dict) -> None:
         super().capture_v50_signal(window, rows)
@@ -302,6 +346,51 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
         return self.gross_snapshot_from_rows(self.account_info(), self.aster.positions())
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        if slot == V11_SLOT:
+            requested = v11_requested_gross(
+                candidate.get("basisBps", 0.0),
+                candidate.get("estimatedNetEdgeBps", 0.0),
+            )
+            if target_gross + EPSILON < requested:
+                self.log(
+                    "v56-v11-order-blocked",
+                    symbol=candidate.get("symbol"),
+                    requestedGross=requested,
+                    availableGross=target_gross,
+                    orderBlockedReason="INSUFFICIENT_AVAILABLE_GROSS",
+                    orderSendAttempted=False,
+                    ordersSent=False,
+                )
+                return False
+            target_gross = requested
+        elif slot in (V50_SLOT, V50_RANK2_SLOT):
+            requested = float(candidate.get("requestedGross") or (
+                V50_RANK2_REQUESTED_GROSS if slot == V50_RANK2_SLOT else V50_RANK1_REQUESTED_GROSS
+            ))
+            if not candidate.get("rankSizingEligible", True):
+                self.log(
+                    "v56-v50-order-blocked",
+                    slot=slot,
+                    symbol=candidate.get("symbol"),
+                    requestedGross=requested,
+                    orderBlockedReason=candidate.get("rankSizingReason") or "RANK_SIZING_REJECTED",
+                    orderSendAttempted=False,
+                    ordersSent=False,
+                )
+                return False
+            if target_gross + EPSILON < requested:
+                self.log(
+                    "v56-v50-order-blocked",
+                    slot=slot,
+                    symbol=candidate.get("symbol"),
+                    requestedGross=requested,
+                    availableGross=target_gross,
+                    orderBlockedReason="INSUFFICIENT_AVAILABLE_GROSS",
+                    orderSendAttempted=False,
+                    ordersSent=False,
+                )
+                return False
+            target_gross = requested
         # New stock exposure is P2. If a simultaneous P1 close/protection action
         # wins arbitration, ordinary contention skips this entry instead of
         # becoming a fatal tick / Kill Switch event.
@@ -465,7 +554,7 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             return
         checks = int(rank2.get("checksCompleted", 0)) + 1
         if checks >= legacy.legacy.V50_MAX_HOLDING_HOURS or now >= int(rank2.get("maximumExitAt") or 0) or legacy.base.ny_seconds() >= legacy.base.clock("15:30:00"):
-            self.close_slot(V50_RANK2_SLOT, "TIME_3H")
+            self.close_slot(V50_RANK2_SLOT, "TIME_4H")
             return
         rank2["checksCompleted"] = checks
         rank2["nextCheckpointAt"] = next_checkpoint + 60 * 60_000
@@ -620,9 +709,21 @@ def self_test() -> None:
     assert V50_MIN_ENTRY_BASIS_BPS == 65.0
     assert V50_MIN_NET_EDGE_BPS == 5.0
     assert V50_RANK1_REQUESTED_GROSS == 1.0
-    assert V50_RANK2_REQUESTED_GROSS == 0.5
+    assert V50_RANK1_STRONG_REQUESTED_GROSS == 1.25
+    assert V50_RANK2_REQUESTED_GROSS == 0.25
     assert V50_MAX_CONCURRENT_POSITIONS == 2
     assert V50_MAX_DAILY_ENTRIES == 3
+    assert V50_MAX_HOLDING_HOURS == 4
+    assert V50_BASIS_STOP_MULTIPLE == 1.75
+    assert V50_MAX_ADVERSE_BASIS_MOVE_BPS == 10.0
+    assert v50_requested_gross(1, 65, 5) == 1.0
+    assert v50_requested_gross(1, 100, 15) == 1.25
+    assert v50_requested_gross(2, 85, 10) == 0.25
+    assert v50_requested_gross(2, 84.99, 10) is None
+    assert v11_requested_gross(50, 0) == 0.75
+    assert v11_requested_gross(80, 10) == 1.0
+    assert v11_requested_gross(110, 20) == 1.25
+    assert v11_requested_gross(140, 30) == 1.5
     assert legacy.legacy.V50_MIN_ENTRY_BASIS_BPS == 65.0
     assert legacy.legacy.V50_MIN_NET_EDGE_BPS == 5.0
     try:

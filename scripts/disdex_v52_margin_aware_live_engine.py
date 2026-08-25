@@ -34,8 +34,8 @@ class MarginAwareV52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.crypto_gross_cap = base.float_env("DISDEX_V52_CRYPTO_GROSS_CAP", 1.5)
         self.stock_gross_cap = base.float_env("DISDEX_V52_STOCK_GROSS_CAP", 1.5)
         self.portfolio_gross_cap = base.float_env("DISDEX_V52_PORTFOLIO_GROSS_CAP", 2.5)
-        self.v11_gross_cap = base.float_env("DISDEX_V52_V11_GROSS_CAP", 1.0)
-        self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", 1.0)
+        self.v11_gross_cap = base.float_env("DISDEX_V52_V11_GROSS_CAP", 1.5)
+        self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", 1.25)
         self.reserved_first_stock_gross = base.float_env("DISDEX_V52_RESERVED_FIRST_STOCK_GROSS", 1.0)
         self.minimum_first_stock_gross = base.float_env("DISDEX_V52_MINIMUM_FIRST_STOCK_GROSS", 0.5)
         self.minimum_second_stock_gross = base.float_env("DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS", 0.25)
@@ -363,9 +363,9 @@ def self_test() -> None:
     engine.crypto_gross_cap = 1.5
     engine.stock_gross_cap = 1.5
     engine.portfolio_gross_cap = 2.5
-    engine.v11_gross_cap = 1.0
-    engine.v50_gross_cap = 1.0
-    engine.reserved_first_stock_gross = 1.0
+    engine.v11_gross_cap = 1.5
+    engine.v50_gross_cap = 1.25
+    engine.reserved_first_stock_gross = 1.25
     engine.minimum_first_stock_gross = 0.5
     engine.minimum_second_stock_gross = 0.25
     engine.maximum_concurrent_stock_positions = 2
@@ -387,7 +387,7 @@ def self_test() -> None:
         "totalGross": 1.15,
     }
     first, _ = engine.available_slot_gross(V11_SLOT)
-    assert abs(first - 1.0) < EPSILON
+    assert abs(first - 1.35) < EPSILON
 
     engine.positions = lambda: {V11_SLOT: {"symbol": "META"}}
     engine.gross_snapshot = lambda: {

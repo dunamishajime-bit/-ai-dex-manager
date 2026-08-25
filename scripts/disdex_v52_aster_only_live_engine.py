@@ -26,10 +26,10 @@ V11_SLOT = "V11_EQ"
 V50_SLOT = "V50_POST_OPEN_BASIS"
 V50_WINDOWS = ("11:30", "12:30", "13:30")
 V50_MIN_ENTRY_BASIS_BPS = 75.0
-V50_MAX_HOLDING_HOURS = 3
+V50_MAX_HOLDING_HOURS = 4
 V50_MAX_DAILY_TRADES = 3
 V50_CONVERGENCE_BPS = 15.0
-V50_BASIS_STOP_MULTIPLE = 1.5
+V50_BASIS_STOP_MULTIPLE = 1.75
 V50_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
 V50_MAX_ROUND_TRIP_COST_BPS = 60.0
 V50_MIN_NET_EDGE_BPS = 10.0
@@ -403,7 +403,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             self.close_slot(V50_SLOT, "BASIS_STOP"); return
         checks = int(v50.get("checksCompleted", 0)) + 1
         if checks >= V50_MAX_HOLDING_HOURS or now >= int(v50.get("maximumExitAt") or 0) or base.ny_seconds() >= base.clock("15:30:00"):
-            self.close_slot(V50_SLOT, "TIME_3H"); return
+            self.close_slot(V50_SLOT, "TIME_4H"); return
         v50["checksCompleted"] = checks
         v50["nextCheckpointAt"] = next_checkpoint + 60 * 60_000
         self.save()

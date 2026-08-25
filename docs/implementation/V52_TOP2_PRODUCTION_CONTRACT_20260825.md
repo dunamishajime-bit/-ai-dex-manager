@@ -9,13 +9,21 @@ directly.
 - V12 X1.00 ALL, PENGU Dual LS V2 and V11 are unchanged.
 - V50 uses the frozen signal snapshot and the existing qualified-candidate
   basis ranking.
-- Rank 1 requests `1.00x` gross. Rank 2 is an additional P2 slot requesting
-  exactly `0.50x` gross.
+- Rank 1 requests `1.00x` gross normally, or `1.25x` when basis >= `100bps`
+  and net edge >= `15bps`. Rank 2 is an additional P2 slot requesting exactly
+  `0.25x` gross only when basis >= `85bps` and net edge >= `10bps`.
 - At most two V50 slots are active and at most three V50 entry attempts are
   recorded per New York day.
 - V52 stock gross is capped at `1.50x`; global gross is capped at `2.50x`.
+- V11 quality tiers request `0.75x / 1.00x / 1.25x / 1.50x` at
+  `default / 80bps+10bps / 110bps+20bps / 140bps+30bps`.
 - Rank 2 is rejected with `INSUFFICIENT_AVAILABLE_GROSS` when the atomic
-  available budget is below `0.50x`; it is never partially allocated.
+  available budget is below `0.25x`; it is never partially allocated.
+
+V56 applies the approved PENGU side-only sizing multiplier without changing
+PENGU signal or exit logic: Long `1.25x` of the existing `0.75x` base
+(maximum requested `0.9375x`), Short `1.00x` (maximum requested `0.75x`),
+with the shared crypto Gross cap fixed at `1.50x`.
 
 Immediately before reservation, the V52 runner computes current open gross,
 active durable reservations and any pending reservation evidence. The
@@ -41,7 +49,10 @@ The only retryable reasons are `STALE_DATA`, `SOURCE_CLOCK_MISMATCH`,
 `ROUND_TRIP_COST_OVER_60`, `DEPTH_BELOW_2X` and `SPREAD_OVER_20`. Strategy
 rejections (`BASIS_BELOW_65`, `NET_EDGE_BELOW_5`, `SIGN_CHANGED`,
 `ADVERSE_BASIS_MOVE`, `SAME_SYMBOL_ACTIVE`) are final for that window. The
-runner never regenerates the signal snapshot during a retry.
+runner never regenerates the signal snapshot during a retry. V50 uses a
+maximum hold of `4h` and a basis stop at `1.75x` the absolute entry basis;
+partial convergence remains disabled and the existing hard convergence
+behavior is preserved.
 
 ## VPS activation requirements
 
