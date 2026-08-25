@@ -474,9 +474,9 @@ def main() -> None:
     v12 = load_json(Path(args.v12_ledger))
     pengu = load_json(Path(args.pengu_ledger))
     expected_period = {"startInclusive": "2024-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}
-    if v12.get("period") != expected_period:
+    if {key: v12.get("period", {}).get(key) for key in expected_period} != expected_period:
         raise RuntimeError(f"Unexpected V12 period: {v12.get('period')}")
-    if pengu.get("period") != expected_period:
+    if {key: pengu.get("period", {}).get(key) for key in expected_period} != expected_period:
         raise RuntimeError(f"Unexpected PENGU period: {pengu.get('period')}")
     if v12.get("strategyId") != "V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15":
         raise RuntimeError("Unexpected V12 strategy id")
