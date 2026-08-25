@@ -58,7 +58,7 @@ jobs:
             > "$staging/.disdex-ci-build-attestation"
           archive="$RUNNER_TEMP/disdex-release-$sha.tar.gz"
           tar -czf "$archive" -C "$staging" .
-          sha256sum "$archive" > "$archive.sha256"
+          (cd "$(dirname "$archive")" && sha256sum "$(basename "$archive")" > "$archive.sha256")
           gh release create "disdex-pengu-artifact-$sha" "$archive" "$archive.sha256" \
             --target "$sha" --title "DisDex PENGU production artifact $sha" \
             --notes "Exact-SHA PENGU Dual LS V2 / Short V20 artifact. Built after parity, self-tests, and production build. No orders/cancels/settles."
