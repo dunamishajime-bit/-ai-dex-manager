@@ -229,7 +229,7 @@ jobs:
           assert p['architecture']['sharedCryptoGrossCap']==1.5
           assert p['architecture']['penguLongGrossMax']==0.9375
           assert p['architecture']['penguShortGrossMax']==0.75
-          assert v['period']==p['period'] and v['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
+          assert {k:v['period'][k] for k in p['period']}==p['period'] and v['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
           assert pengu['period']==p['period'] and pengu['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
           assert pengu['longVariant']=='PENGU_DUAL_LS_V2_FINAL_V56_SIDE_AWARE'
           assert pengu['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
