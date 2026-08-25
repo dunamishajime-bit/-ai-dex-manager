@@ -183,6 +183,8 @@ jobs:
           python -m py_compile scripts/.latest_v56_2y_dca.py
 
       - name: Run latest V56 two-year monthly DCA backtest
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
         run: |
           set -o pipefail
           python scripts/.latest_v56_2y_dca.py \
