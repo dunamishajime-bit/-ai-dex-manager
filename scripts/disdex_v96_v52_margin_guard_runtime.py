@@ -168,16 +168,18 @@ class SerializedMarginGuard(MarginGuard):
             lock_handle.close()
 
     def _kill_switch_requests_flatten(self) -> bool:
-        row = base.read_json(self.kill_switch_path, {}) or {}
-        return row.get("active") is True and row.get("action") == "FLATTEN_MANAGED"
+        # V56 treats a latched Kill Switch as fail-closed. It must not turn a
+        # stale/invalid risk snapshot into an automatic reduce-only action.
+        return False
 
     def _flatten_for_existing_kill_switch(self) -> dict:
-        decision = base.read_json(self.state_path, {}) or {
-            "stage": "KILL_SWITCH",
-            "maintenanceMarginRatioPct": None,
-            "minimumLiquidationBufferPct": None,
+        return {
+            "status": "SUPPRESSED_BY_V56_NO_FORCED_EXIT",
+            "reason": "Kill Switch is latched; automatic emergency flatten is disabled in V56.",
+            "ordersSent": False,
+            "cancelSent": False,
+            "positionChangesSent": False,
         }
-        return self.emergency_flatten_managed(decision)
 
     def _wait_without_account_calls(self, interval_ms: int, *, interrupt_on_kill_switch: bool) -> bool:
         """Wait without authenticated API calls.
