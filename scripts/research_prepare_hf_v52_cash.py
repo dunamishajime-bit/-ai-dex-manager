@@ -163,6 +163,7 @@ def main() -> int:
     # validate the same lookback that the backtest uses.
     parser.add_argument("--start", default="2024-07-01 00:00:00")
     parser.add_argument("--end", default="2026-08-10 00:00:00")
+    parser.add_argument("--min-complete-days", type=int, default=499)
     args = parser.parse_args()
     output = Path(args.output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -182,8 +183,8 @@ def main() -> int:
     required = set(SYMBOLS.values())
     if set(diagnostics) != required:
         raise RuntimeError(f"HF_MARKETDATA_SYMBOL_MISMATCH:{sorted(diagnostics)}")
-    if min(item["completeDays"] for item in diagnostics.values()) < 499:
-        raise RuntimeError(f"HF_MARKETDATA_INSUFFICIENT_DAYS:{diagnostics}")
+    if min(item["completeDays"] for item in diagnostics.values()) < args.min_complete_days:
+        raise RuntimeError(f"HF_MARKETDATA_INSUFFICIENT_DAYS:{diagnostics},required={args.min_complete_days}")
     print(json.dumps({"provider": PROVIDER, "adjustment": ADJUSTMENT, "symbols": diagnostics}, ensure_ascii=False))
     return 0
 

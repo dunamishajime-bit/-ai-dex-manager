@@ -178,6 +178,7 @@ jobs:
             --output-dir .cache/latest-v56-1y-real-stock/aligned/v11-cash \
             --start "2025-07-01 00:00:00" \
             --end "2026-08-10 00:00:00" \
+            --min-complete-days 240 \
             2>&1 | tee .research-state/latest-v56-1y/v52-cash-provider.log
           python scripts/research_export_v56_stock_ledger.py \
             --v56-root .v56-research \
