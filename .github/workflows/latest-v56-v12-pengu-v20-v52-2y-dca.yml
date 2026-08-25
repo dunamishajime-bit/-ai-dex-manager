@@ -1,0 +1,248 @@
+name: Latest V56 V12 PENGU V20 V52 Two-Year DCA BT
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/latest-v56-2y-dca-v52-data-20260825
+    paths:
+      - '.github/workflows/latest-v56-v12-pengu-v20-v52-2y-dca.yml'
+      - 'scripts/research_export_v56_stock_ledger.py'
+      - 'scripts/research_build_latest_pengu_v20_2y.py'
+      - 'scripts/research_patch_latest_v56_2y_dca.py'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: latest-v56-2y-dca-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout current PENGU V20/V56 production source
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - name: Checkout V56 research harness
+        uses: actions/checkout@v4
+        with:
+          ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d
+          path: .v56-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 Top2 research dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065
+          path: .v56-research/.v52-top2-research
+          fetch-depth: 1
+
+      - name: Checkout V52 stock dependency root
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .v56-research/.stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v56-research/.stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v56-research/.stock-research/.v13
+          fetch-depth: 1
+
+      - name: Wire V52 research dependencies
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+          test -f .v56-research/.v52-top2-research/.v11/research/v96_stock_perp_fade_enhancement_v11.py
+          test -f .v56-research/.v52-top2-research/.v13/research/v96_stock_v13_edge_floor_tournament.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore historical-data caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .cache/v96-crypto-v11-v13d-one-year
+            .v56-research/.v52-top2-research/.cache/perp-research-usdm
+            .v56-research/.v52-top2-research/.cache/v96-crypto-v11-v13d-one-year
+            .v56-research/.stock-research/.cache/perp-research-usdm
+          key: latest-v56-2y-dca-${{ runner.os }}-${{ hashFiles('scripts/research_export_v56_stock_ledger.py', 'scripts/research_build_latest_pengu_v20_2y.py', 'scripts/research_patch_latest_v56_2y_dca.py') }}
+          restore-keys: |
+            v56-pengu-long-boundary-${{ runner.os }}-
+            v55-risk-adjusted-alpha-${{ runner.os }}-
+            v54-structural-alpha-${{ runner.os }}-
+            current-v12-top2-pengu-v20-v52-dca-
+            three-year-v12-pengu-v20-v52-dca-
+            aster-only-v52-v39cache-${{ runner.os }}-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+
+      - name: Build fresh V12 Top2 two-year ledger
+        env:
+          V12_TOP2_LEDGER_OUT: .research-state/latest-v56-2y/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/latest-v56-2y
+          cp scripts/research_current_v12_top2_ledger.ts scripts/.latest_v12_top2_2y.ts
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/.latest_v12_top2_2y.ts')
+          s=p.read_text()
+          pairs=[
+              ('Date.UTC(2025, 7, 1)', 'Date.UTC(2024, 7, 10)'),
+              ('Date.UTC(2026, 7, 1)', 'Date.UTC(2026, 7, 10)'),
+          ]
+          for old,new in pairs:
+              if s.count(old)!=1: raise SystemExit(f'V12 patch marker count={s.count(old)}: {old}')
+              s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          set -o pipefail
+          npx tsx scripts/.latest_v12_top2_2y.ts 2>&1 | tee .research-state/latest-v56-2y/v12.log
+          rm -f scripts/.latest_v12_top2_2y.ts
+
+      - name: Build current PENGU Long V56 plus Short V20 two-year ledger
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+        run: |
+          set -o pipefail
+          python scripts/research_build_latest_pengu_v20_2y.py \
+            --source-root .pengu-current \
+            --output .research-state/latest-v56-2y/pengu-v20-ledger.json \
+            2>&1 | tee .research-state/latest-v56-2y/pengu.log
+
+      - name: Validate current crypto ledgers
+        run: |
+          python - <<'PY'
+          import json
+          v=json.load(open('.research-state/latest-v56-2y/v12-top2-ledger.json'))
+          p=json.load(open('.research-state/latest-v56-2y/pengu-v20-ledger.json'))
+          expected={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert {k:v['period'][k] for k in expected}==expected, v['period']
+          assert {k:p['period'][k] for k in expected}==expected, p['period']
+          assert v['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
+          assert p['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
+          assert p['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          for mode in ('normal','stress'):
+              trades=p['modes'][mode]['trades']
+              long_max=max([float(x['requestedGross']) for x in trades if x.get('side')=='L'] or [0])
+              short_max=max([float(x['requestedGross']) for x in trades if x.get('side')=='S'] or [0])
+              assert long_max <= 0.9375 + 1e-12, (mode,long_max)
+              assert short_max <= 0.75 + 1e-12, (mode,short_max)
+          print(json.dumps({'v12NormalTrades':len(v['modes']['normal']['trades']),'penguNormalTrades':len(p['modes']['normal']['trades']),'penguData':p.get('data')},indent=2))
+          PY
+
+      - name: Build V56 V52 stock ledgers from real market data
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          set -o pipefail
+          python scripts/research_export_v56_stock_ledger.py \
+            --v56-root .v56-research \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --output .research-state/latest-v56-2y/v56-stock-ledger.json \
+            2>&1 | tee .research-state/latest-v56-2y/v52-stock.log
+
+      - name: Patch DCA simulator to current V56 contract
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py \
+            --source scripts/research_current_top2_pengu_v52_dca.py \
+            --output scripts/.latest_v56_2y_dca.py
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/.latest_v56_2y_dca.py')
+          s=p.read_text()
+          marker='''            if strategy == "V11_EQ" and any(str(position["strategy"]) == "V11_EQ" for position in active_stock.values()):'''
+          replacement='''            if len(active_stock) >= 2:
+                stats["STOCK_SLOT_CAP_BLOCKED"] += 1
+                continue
+            if strategy == "V11_EQ" and any(str(position["strategy"]) == "V11_EQ" for position in active_stock.values()):'''
+          if s.count(marker)!=1: raise SystemExit(f'stock total-slot marker count={s.count(marker)}')
+          p.write_text(s.replace(marker,replacement,1))
+          PY
+          python -m py_compile scripts/.latest_v56_2y_dca.py
+
+      - name: Run latest V56 two-year monthly DCA backtest
+        run: |
+          set -o pipefail
+          python scripts/.latest_v56_2y_dca.py \
+            --stock-ledger .research-state/latest-v56-2y/v56-stock-ledger.json \
+            --v12-ledger .research-state/latest-v56-2y/v12-top2-ledger.json \
+            --pengu-ledger .research-state/latest-v56-2y/pengu-v20-ledger.json \
+            --output-dir .research-state/latest-v56-2y \
+            2>&1 | tee .research-state/latest-v56-2y/backtest.log
+
+      - name: Validate final research contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/latest-v56-2y/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY', p['checks']
+          assert p['capital']['totalContributedJpy']==250000
+          assert p['architecture']['totalGrossCap']==2.5
+          assert p['architecture']['stockGrossCap']==1.5
+          assert p['architecture']['sharedCryptoGrossCap']==1.5
+          assert p['architecture']['penguLongGrossMax']==0.9375
+          assert p['architecture']['penguShortGrossMax']==0.75
+          assert p['data']['stockDiagnostics']['decisionWindowCoveragePct']>=99.9
+          assert p['results']['NORMAL']['bySleeve']['V52']['trades']>0
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          n=p['results']['NORMAL']
+          print('LATEST_V56_2Y_RESULT='+json.dumps({
+              'status':p['status'],
+              'endingAssetJpy':n['endingAssetJpy'],
+              'netProfitJpy':n['netProfitJpy'],
+              'returnOnContributedCapitalPct':n['returnOnContributedCapitalPct'],
+              'xirrPct':n['moneyWeightedReturnXirrPct'],
+              'maxDrawdownPct':n['maxDrawdownPctClosedEventTwr'],
+              'trades':n['trades'],
+              'winRatePct':n['winRatePct'],
+              'profitFactor':n['profitFactor'],
+              'bySleeve':n['bySleeve'],
+              'v52Detail':n['v52Detail'],
+              'gross':n['grossVerification'],
+              'stockData':p['data']['stockDiagnostics'],
+          },ensure_ascii=False,separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: latest-v56-v12-pengu-v20-v52-2y-dca-${{ github.run_id }}
+          path: .research-state/latest-v56-2y
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
