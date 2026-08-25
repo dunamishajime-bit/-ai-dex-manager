@@ -1,0 +1,246 @@
+name: PENGU V56 V20 Diagnostics 1Y
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v56-v20-diagnostics-20260826
+    paths:
+      - 'scripts/research_pengu_v56_v20_diagnostics.ts'
+      - '.github/workflows/pengu-v56-v20-diagnostics-1y.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-v56-v20-diagnostics-1y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen PENGU production source read-only
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - name: Checkout frozen V56 research harness
+        uses: actions/checkout@v4
+        with:
+          ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d
+          path: .v56-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 Top2 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065
+          path: .v56-research/.v52-top2-research
+          fetch-depth: 1
+
+      - name: Checkout frozen stock dependency root
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .v56-research/.stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v56-research/.stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v56-research/.stock-research/.v13
+          fetch-depth: 1
+
+      - name: Wire frozen stock dependencies
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+          test -f .v56-research/.v52-top2-research/.v11/research/v96_stock_perp_fade_enhancement_v11.py
+          test -f .v56-research/.v52-top2-research/.v13/research/v96_stock_v13_edge_floor_tournament.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+
+      - name: Download immutable baseline Run 32902090423 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-32902090423
+          path: .research-state/baseline-32902090423
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32902090423
+
+      - name: Verify baseline identity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state/baseline-32902090423')
+          required=['result.json','pengu-v20-ledger.json','v12-top2-ledger.json','v56-stock-ledger.json']
+          for name in required:
+              assert (root/name).is_file() and (root/name).stat().st_size>0, name
+          r=json.loads((root/'result.json').read_text())
+          p=json.loads((root/'pengu-v20-ledger.json').read_text())
+          assert r['status']=='PASS_RESEARCH_ONLY'
+          assert r['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert r['capital']['totalContributedJpy']==130000
+          assert abs(r['results']['NORMAL']['endingAssetJpy']-599074.12049995)<0.01
+          assert abs(r['results']['NORMAL']['maxDrawdownPctClosedEventTwr']-(-12.1777701))<1e-6
+          assert p['currentProductionSourceSha']=='a76fd7aaa0788209532a5a2c6489135dd8e4a27e'
+          assert p['modes']['normal']['metrics']['trades']==33
+          assert p['modes']['normal']['metrics']['longTrades']==5
+          assert p['modes']['normal']['metrics']['shortTrades']==28
+          print('BASELINE_IDENTITY=PASS')
+          PY
+
+      - name: Run V56 Long and V20 Short diagnostics
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-v56-v20-diagnostics
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v56-v20-diagnostics
+          cp scripts/research_pengu_v56_v20_diagnostics.ts .pengu-current/scripts/.research_pengu_v56_v20_diagnostics.generated.ts
+          npx tsx .pengu-current/scripts/.research_pengu_v56_v20_diagnostics.generated.ts \
+            2>&1 | tee .research-state/pengu-v56-v20-diagnostics/diagnostics.log
+          rm -f .pengu-current/scripts/.research_pengu_v56_v20_diagnostics.generated.ts
+
+      - name: Validate diagnostic contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state/pengu-v56-v20-diagnostics')
+          d=json.loads((root/'diagnostics.json').read_text())
+          p=json.loads((root/'candidate-pengu-ledger.json').read_text())
+          assert d['status']=='PASS_RESEARCH_ONLY'
+          assert d['source']['productionLogicSha']=='a76fd7aaa0788209532a5a2c6489135dd8e4a27e'
+          assert d['baseline']['normal']['trades']==33
+          assert d['baseline']['normal']['longTrades']==5
+          assert d['baseline']['normal']['shortTrades']==28
+          assert d['shortDiagnostics']['hardStops']['count']==6
+          assert d['shortDiagnostics']['protectedTrailingWinners']['count']==7
+          assert p['researchOnly'] is True
+          assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert p['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
+          assert p['integrity']['noOverlap'] is True
+          assert p['integrity']['maximumRequestedGross'] <= 0.9375 + 1e-12
+          assert max([float(x['requestedGross']) for x in p['modes']['normal']['trades'] if x['side']=='S'] or [0]) <= 0.75 + 1e-12
+          assert d['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('DIAGNOSTIC_CONTRACT=PASS')
+          print('CANDIDATE='+json.dumps(d['candidate'],separators=(',',':')))
+          PY
+
+      - name: Patch fixed 1Y DCA simulator
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py \
+            --source scripts/research_current_top2_pengu_v52_dca.py \
+            --output scripts/.pengu_v56_v20_diag_1y_dca.py \
+            --window 1y
+          python -m py_compile scripts/.pengu_v56_v20_diag_1y_dca.py
+
+      - name: Run integrated DCA with candidate PENGU ledger
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v56-v20-integrated
+          python scripts/.pengu_v56_v20_diag_1y_dca.py \
+            --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json \
+            --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json \
+            --pengu-ledger .research-state/pengu-v56-v20-diagnostics/candidate-pengu-ledger.json \
+            --output-dir .research-state/pengu-v56-v20-integrated \
+            2>&1 | tee .research-state/pengu-v56-v20-integrated/backtest.log
+
+      - name: Compare with fixed baseline and decide
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          b=json.loads(Path('.research-state/baseline-32902090423/result.json').read_text())
+          c=json.loads(Path('.research-state/pengu-v56-v20-integrated/result.json').read_text())
+          d=json.loads(Path('.research-state/pengu-v56-v20-diagnostics/diagnostics.json').read_text())
+          assert c['status']=='PASS_RESEARCH_ONLY', c.get('checks')
+          assert c['period']==b['period']
+          assert c['capital']['totalContributedJpy']==130000
+          assert c['architecture']['totalGrossCap']==2.5
+          assert c['architecture']['stockGrossCap']==1.5
+          assert c['architecture']['sharedCryptoGrossCap']==1.5
+          assert c['architecture']['penguLongGrossMax']==0.9375
+          assert c['architecture']['penguShortGrossMax']==0.75
+          assert c['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          bn,cn=b['results']['NORMAL'],c['results']['NORMAL']
+          bs,cs=b['results']['SEVERE'],c['results']['SEVERE']
+          standalone=bool(d['candidate']['promoted'])
+          integrated_pass=(
+              standalone
+              and cn['endingAssetJpy'] > bn['endingAssetJpy'] + 1e-6
+              and cn['maxDrawdownPctClosedEventTwr'] >= bn['maxDrawdownPctClosedEventTwr'] - 0.5
+              and cn['profitFactor'] >= bn['profitFactor'] * 0.98
+              and cs['endingAssetJpy'] >= bs['endingAssetJpy'] - 1e-6
+              and cs['maxDrawdownPctClosedEventTwr'] >= bs['maxDrawdownPctClosedEventTwr'] - 0.75
+              and cs['profitFactor'] >= bs['profitFactor'] * 0.98
+          )
+          decision={
+              'status':'PASS_RESEARCH_ONLY',
+              'baselineRunId':32902090423,
+              'baselineHeadSha':'aaf0c60004a3975c3828bfca10e0a1baf2089c79',
+              'productionSourceReadOnlySha':'a76fd7aaa0788209532a5a2c6489135dd8e4a27e',
+              'standaloneCandidatePromoted':standalone,
+              'integratedPromotionPass':integrated_pass,
+              'recommendation':'ADOPT_RESEARCH_CANDIDATE' if integrated_pass else 'KEEP_CURRENT_V56_V20',
+              'candidateDefinition':{'longMode':d['candidate']['longMode'],'shortRule':d['candidate']['shortRule']},
+              'baseline':{'NORMAL':bn,'SEVERE':bs},
+              'candidate':{'NORMAL':cn,'SEVERE':cs},
+              'delta':{
+                  'endingAssetJpy':cn['endingAssetJpy']-bn['endingAssetJpy'],
+                  'netProfitJpy':cn['netProfitJpy']-bn['netProfitJpy'],
+                  'maxDrawdownPctPoint':cn['maxDrawdownPctClosedEventTwr']-bn['maxDrawdownPctClosedEventTwr'],
+                  'profitFactor':cn['profitFactor']-bn['profitFactor'],
+                  'trades':cn['trades']-bn['trades'],
+                  'severeEndingAssetJpy':cs['endingAssetJpy']-bs['endingAssetJpy'],
+              },
+              'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False},
+          }
+          Path('.research-state/pengu-v56-v20-integrated/final-decision.json').write_text(json.dumps(decision,indent=2,ensure_ascii=False)+'\n')
+          print('FINAL_DECISION='+json.dumps({k:decision[k] for k in ['recommendation','candidateDefinition','delta']},ensure_ascii=False,separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v56-v20-diagnostics-1y-${{ github.run_id }}
+          path: |
+            .research-state/pengu-v56-v20-diagnostics
+            .research-state/pengu-v56-v20-integrated
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
