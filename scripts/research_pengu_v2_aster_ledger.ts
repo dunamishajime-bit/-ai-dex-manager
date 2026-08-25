@@ -11,10 +11,11 @@ import {
   type PenguDualLsV2Position,
 } from "../lib/pengu-dual-ls-v2";
 import type { DisDexV35Candle } from "../lib/disdex-v35-signal-engine";
+import { createPenguShortV20State } from "../lib/pengu-short-v20";
 
 const HOUR = 3_600_000;
-const WARM_START = Date.parse("2025-07-20T00:00:00Z");
-const EVAL_START = Date.parse("2025-08-10T00:00:00Z");
+const WARM_START = Date.parse("2024-07-01T00:00:00Z");
+const EVAL_START = Date.parse("2024-08-10T00:00:00Z");
 const EVAL_END = Date.parse("2026-08-10T00:00:00Z");
 const BASE_URL = "https://fapi.asterdex.com";
 const BASE_FEE_PER_SIDE = 0.0006;
@@ -145,14 +146,23 @@ function replay(history: PenguDualLsV2History, funding: FundingPoint[], mode: Mo
     if (!side || !rows[index].features) { index += 1; continue; }
     const entryIndex = index + 1;
     const entry = rows[entryIndex].candle;
+    const requestedGross = targetGrossForAtr(rows[index].features!.atr24Ratio);
     let position: PenguDualLsV2Position = {
       side: side === "L" ? 1 : -1,
       entryTs: entry.openTime,
       entryPrice: entry.open,
       quantity: 1,
-      gross: targetGrossForAtr(rows[index].features!.atr24Ratio),
+      gross: requestedGross,
       highWaterMark: entry.open,
       lowWaterMark: entry.open,
+      entryVersion: side === "S" ? "SHORT_V20" : "LONG_V2_FINAL",
+      shortV20: side === "S" ? createPenguShortV20State({
+        entryPrice: entry.open,
+        requestedGross,
+        entryAtr24Ratio: rows[index].features!.atr24Ratio,
+        btcEma168Distance: rows[index].features!.btcEma168Distance,
+        btcReturn24h: rows[index].features!.btcReturn24h,
+      }) : undefined,
     };
     const hold = side === "L" ? PENGU_DUAL_LS_V2.long.maxHoldHours : PENGU_DUAL_LS_V2.short.maxHoldHours;
     const last = Math.min(rows.length - 1, entryIndex + hold - 1);
@@ -252,6 +262,9 @@ async function main() {
   const payload = {
     schema: "pengu-dual-ls-v2-aster-ledger/v1",
     strategyId: PENGU_DUAL_LS_V2.id,
+    longVariant: "PENGU_DUAL_LS_V2_FINAL",
+    shortVariant: "COUNTERWIND_VOL_TARGET_FAILURE_EXIT",
+    shortPreRegistrationSha: "ad7cedb3cafaf9f9680e390112f72375d84b50ac",
     researchOnly: true,
     period: { startInclusive: new Date(EVAL_START).toISOString(), endExclusive: new Date(EVAL_END).toISOString() },
     source: { venue: "Aster perpetual public REST V3", productionLogicSha: process.env.PRODUCTION_SOURCE_SHA || null },

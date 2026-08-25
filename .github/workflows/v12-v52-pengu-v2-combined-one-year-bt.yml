@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - research/v12-v52-pengu-v2-combined-1y-20260816
+      - codex/bt-latest-2y-20260825
     paths:
       - 'scripts/research_v12_combined_bt_ledger.ts'
       - 'scripts/research_pengu_v2_aster_ledger.ts'
@@ -20,6 +21,7 @@ concurrency:
 
 jobs:
   backtest:
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     steps:
@@ -172,6 +174,116 @@ jobs:
         with:
           name: v12-v52-pengu-v2-combined-${{ github.run_id }}
           path: .research-state/v12-v52-pengu-v2-combined
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
+
+  two_year_dca:
+    name: Two-year latest-logic DCA BT
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v20-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_current_v12_top2_ledger.ts', 'scripts/research_current_top2_pengu_v52_dca.py', 'lib/pengu-short-v20.ts') }}
+          restore-keys: |
+            current-v12-top2-pengu-v52-stock-resume-
+            current-v12-top2-pengu-v52-dca-
+            v12-v52-pengu-v2-combined-
+            v26-latency-aware-3y-usdm-v1-20260816
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile research simulators
+        run: python -m py_compile scripts/research_current_top2_pengu_v52_dca.py
+
+      - name: Build current V12 Top2 ledger
+        env:
+          V12_TOP2_LEDGER_OUT: .research-state/current-top2-pengu-v20-dca/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/current-top2-pengu-v20-dca
+          set -o pipefail
+          npx tsx scripts/research_current_v12_top2_ledger.ts 2>&1 | tee .research-state/current-top2-pengu-v20-dca/v12-top2.log
+
+      - name: Build current PENGU Long V2 plus Short V20 ledger
+        env:
+          PRODUCTION_SOURCE_SHA: 8ca3f52b0da705c20aa4033769da1af869202f70
+          PENGU_LEDGER_OUT: .research-state/current-top2-pengu-v20-dca/pengu-v20-ledger.json
+        run: |
+          mkdir -p .research-state/current-top2-pengu-v20-dca
+          set -o pipefail
+          npx tsx scripts/research_pengu_v2_aster_ledger.ts 2>&1 | tee .research-state/current-top2-pengu-v20-dca/pengu-v20.log
+
+      - name: Run latest-logic two-year monthly DCA backtest
+        run: |
+          set -o pipefail
+          python scripts/research_current_top2_pengu_v52_dca.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/current-top2-pengu-v20-dca/v12-top2-ledger.json \
+            --pengu-ledger .research-state/current-top2-pengu-v20-dca/pengu-v20-ledger.json \
+            --output-dir .research-state/current-top2-pengu-v20-dca \
+            2>&1 | tee .research-state/current-top2-pengu-v20-dca/combined-dca.log
+
+      - name: Validate research-only contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/current-top2-pengu-v20-dca/result.json').read_text())
+          assert p['status'] == 'PASS_RESEARCH_ONLY', p['checks']
+          assert p['period']['startInclusive'].startswith('2024-08-10')
+          assert p['period']['endExclusive'].startswith('2026-08-10')
+          assert p['capital']['totalContributedJpy'] == 250000
+          assert p['safety'] == {'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'status': p['status'], 'capital': p['capital'], 'normal': p['results']['NORMAL'], 'severe': p['results']['SEVERE'], 'checks': p['checks'], 'safety': p['safety']}, ensure_ascii=False, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: latest-logic-two-year-dca-${{ github.run_id }}
+          path: .research-state/current-top2-pengu-v20-dca
           include-hidden-files: true
           retention-days: 90
           if-no-files-found: warn
