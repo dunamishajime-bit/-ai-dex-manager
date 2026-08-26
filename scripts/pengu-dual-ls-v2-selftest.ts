@@ -152,6 +152,19 @@ assert.throws(
     /missing|timestamps are not fully aligned/,
 );
 
+const terminalPenguSkew = {
+    ...historyRows.at(-1)!,
+    openTime: historyRows.at(-1)!.openTime + HOUR,
+    closeTime: historyRows.at(-1)!.closeTime + HOUR,
+};
+const terminalSkewSignal = buildPenguDualLsV2Signal(
+    { pengu1h: [...historyRows, terminalPenguSkew], btc1h: historyRows, penguFunding: [] },
+    undefined,
+    202 * HOUR,
+);
+assert.equal(terminalSkewSignal.diagnostics.latestCompletedPenguTs, historyRows.at(-1)!.openTime);
+assert.equal(terminalSkewSignal.diagnostics.latestCompletedBtcTs, historyRows.at(-1)!.openTime);
+
 let executorCalls = 0;
 const forbiddenExecutor = {
     getAccountSnapshot: async () => { executorCalls += 1; throw new Error("SHADOW account access is forbidden"); },

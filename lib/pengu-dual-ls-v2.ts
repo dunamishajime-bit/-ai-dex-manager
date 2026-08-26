@@ -167,14 +167,33 @@ function longRaw(features: PenguDualLsV2Features) {
         && features.close > features.ema168;
 }
 
-function featureRows(pengu: DisDexV35Candle[], btc: DisDexV35Candle[]) {
-    const btcByTs = new Map(btc.map((row) => [row.openTime, row]));
-    const aligned = pengu
-        .map((candle) => ({ candle, btcCandle: btcByTs.get(candle.openTime) }))
-        .filter((row): row is { candle: DisDexV35Candle; btcCandle: DisDexV35Candle } => Boolean(row.btcCandle));
-    if (aligned.length !== pengu.length || aligned.length !== btc.length) {
-        throw new Error(`PENGU/BTC H1 timestamps are not fully aligned: PENGU=${pengu.length}, BTC=${btc.length}, aligned=${aligned.length}.`);
+function alignCompletedRows(pengu: DisDexV35Candle[], btc: DisDexV35Candle[]) {
+    if (!pengu.length && !btc.length) return [];
+    const firstPenguTs = pengu[0]?.openTime;
+    const firstBtcTs = btc[0]?.openTime;
+    const lastPenguTs = pengu.at(-1)?.openTime;
+    const lastBtcTs = btc.at(-1)?.openTime;
+    const startTs = Math.max(firstPenguTs ?? 0, firstBtcTs ?? 0);
+    const endTs = Math.min(lastPenguTs ?? 0, lastBtcTs ?? 0);
+    if (!startTs || !endTs || endTs < startTs || (endTs - startTs) % HOUR !== 0) {
+        throw new Error(`PENGU/BTC H1 timestamps are not aligned to a shared hourly range: PENGU=${pengu.length}, BTC=${btc.length}.`);
     }
+    const penguByTs = new Map(pengu.map((row) => [row.openTime, row]));
+    const btcByTs = new Map(btc.map((row) => [row.openTime, row]));
+    const aligned: Array<{ candle: DisDexV35Candle; btcCandle: DisDexV35Candle }> = [];
+    for (let timestamp = startTs; timestamp <= endTs; timestamp += HOUR) {
+        const candle = penguByTs.get(timestamp);
+        const btcCandle = btcByTs.get(timestamp);
+        if (!candle || !btcCandle) {
+            throw new Error(`PENGU/BTC H1 timestamps are not fully aligned: missing shared completed bar at ${timestamp}. PENGU=${pengu.length}, BTC=${btc.length}, aligned=${aligned.length}.`);
+        }
+        aligned.push({ candle, btcCandle });
+    }
+    return aligned;
+}
+
+function featureRows(pengu: DisDexV35Candle[], btc: DisDexV35Candle[]) {
+    const aligned = alignCompletedRows(pengu, btc);
     const closes = aligned.map((row) => row.candle.close);
     const btcCloses = aligned.map((row) => row.btcCandle.close);
     const volumes = aligned.map((row) => row.candle.volume);
