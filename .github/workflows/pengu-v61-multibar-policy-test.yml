@@ -1,0 +1,22 @@
+name: PENGU V61 Multibar Policy Test
+
+on:
+  push:
+    branches:
+      - research/pengu-v57-conditional-regime-20260826
+    paths:
+      - 'scripts/test_research_v61_multibar_policy.py'
+      - 'scripts/research_v61_multibar_policy.py'
+      - '.github/workflows/pengu-v61-multibar-policy-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run V61 multibar policy test
+        run: python scripts/test_research_v61_multibar_policy.py
