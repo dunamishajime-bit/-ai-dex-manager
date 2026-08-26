@@ -1,9 +1,9 @@
-# Main Strategy Research #245：WIN80_ULTRA90_TOP1_V1 / 方向性が近い新ロジック
+# Main Strategy Research #246：WIN80_ULTRA90_TOP1_V1 / Win80 / Ultra90 Entry品質
 
-- Completed: 2026-08-26T17:00:13.110Z
-- Main research iteration: 245
+- Completed: 2026-08-26T23:32:55.736Z
+- Main research iteration: 246
 - Profile: attack
-- Strategy / experiments: WIN80_ULTRA90_TOP1_V1, WIN85_DUAL_CONFIRM_SIBLING_V1, ULTRA90_PULLBACK_SIBLING_V1
+- Strategy / experiments: WIN80_ULTRA90_TOP1_V1, WIN80_SCORE_82_CHILD_V1, WIN80_TRIGGER_80_CHILD_V1
 - BT Snapshot evidence: READY
 
 ## BT Snapshot Replay
@@ -50,31 +50,31 @@
 
 ## Summary
 
-旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「方向性が近い新ロジック」を議論。2件を提案し、最優先はWIN85_DUAL_CONFIRM_SIBLING_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。
+旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Win80 / Ultra90 Entry品質」を議論。2件を提案し、最優先はWIN80_SCORE_82_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。
 
 ## CIO Decision
 
-WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN85_DUAL_CONFIRM_SIBLING_V1で、New sibling logicだけを変更した親子リプレイを作成します。ULTRA90_PULLBACK_SIBLING_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。
+WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN80_SCORE_82_CHILD_V1で、Win80 minimum scoreだけを変更した親子リプレイを作成します。WIN80_TRIGGER_80_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。
 
 ## Full Transcript
 
 ### 1. Research Moderator (moderator)
 
-- Time: 2026-08-26T17:00:04.110Z
+- Time: 2026-08-26T23:32:46.736Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: context
 
-Main Strategy Research #245を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「方向性が近い新ロジック」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。
+Main Strategy Research #246を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「Win80 / Ultra90 Entry品質」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。
 
 Evidence:
 - 固定親: WIN80_ULTRA90_TOP1_V1 [positive]
 - 旧Champion継承: NO [positive]
 - 研究Program: win80_ultra90_direct_v2 [positive]
-- 今回の焦点: 方向性が近い新ロジック [neutral]
+- 今回の焦点: Win80 / Ultra90 Entry品質 [neutral]
 
 ### 2. Main Strategy Researcher (researcher)
 
-- Time: 2026-08-26T17:00:05.110Z
+- Time: 2026-08-26T23:32:47.736Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: support
 
@@ -95,20 +95,20 @@ Evidence:
 
 ### 3. Hypothesis Researcher (researcher)
 
-- Time: 2026-08-26T17:00:06.110Z
+- Time: 2026-08-26T23:32:48.736Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: proposal
 
-1. WIN85_DUAL_CONFIRM_SIBLING_V1: New sibling logicを「WIN80 Top-1」から「Score85 + 1H/6H trend agreement + next-bar confirmation」へ変更。Win80の高選別思想を維持しながら、Entryを1段階確認して騙しを減らす近縁ロジック。 期待効果: 取引数を抑えた高勝率型。メインを変更せず別系統で検証する。
-2. ULTRA90_PULLBACK_SIBLING_V1: New sibling logicを「Immediate Ultra90 rotation」から「Ultra90 detected -> pullback/retest confirmation -> rotation」へ変更。Ultra90の強さを使いつつ、直後の高値掴みを減らす近縁ロジック。 期待効果: Slippage・Gap耐性改善とEntry遅延の比較。
+1. WIN80_SCORE_82_CHILD_V1: Win80 minimum scoreを「80」から「82」へ変更。Score 80直上の弱いEntryを削り、勝率とコスト耐性が改善するかを切り分ける。 期待効果: 取引数は減るが平均利益とStress耐性が改善する可能性。
+2. WIN80_TRIGGER_80_CHILD_V1: Win80 trigger progressを「76.00%」から「80.00%」へ変更。発火途中のEntryを減らし、騙しBreakoutを抑制できるかを確認する。 期待効果: 損失回数低下とEntry遅延のトレードオフ。
 
 Evidence:
-- WIN85_DUAL_CONFIRM_SIBLING_V1: REPLAY_REQUIRED [neutral]
-- ULTRA90_PULLBACK_SIBLING_V1: REPLAY_REQUIRED [neutral]
+- WIN80_SCORE_82_CHILD_V1: REPLAY_REQUIRED [neutral]
+- WIN80_TRIGGER_80_CHILD_V1: REPLAY_REQUIRED [neutral]
 
 ### 4. AI反対派 / Overfit (overfit_critic)
 
-- Time: 2026-08-26T17:00:07.110Z
+- Time: 2026-08-26T23:32:49.736Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -121,7 +121,7 @@ Evidence:
 
 ### 5. AI反対派 / Tail Risk (tail_risk_critic)
 
-- Time: 2026-08-26T17:00:08.110Z
+- Time: 2026-08-26T23:32:50.736Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -134,7 +134,7 @@ Evidence:
 
 ### 6. AI反対派 / Execution (execution_critic)
 
-- Time: 2026-08-26T17:00:09.110Z
+- Time: 2026-08-26T23:32:51.736Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: challenge
 
@@ -147,31 +147,19 @@ Evidence:
 - Aster過去Order Book: 未収録 [negative]
 - 全決済Portfolio BT: 別途必要 [neutral]
 
-### 7. Sibling Logic Researcher (researcher)
+### 7. Research CIO (cio)
 
-- Time: 2026-08-26T17:00:10.110Z
-- Strategy: WIN80_ULTRA90_TOP1_V1
-- Stance: proposal
-
-方向性が近い新ロジックは、メインを改造せず独立IDで開発します。WIN85_DUAL_CONFIRM_SIBLING_V1: Score85 + 1H/6H trend agreement + next-bar confirmation / ULTRA90_PULLBACK_SIBLING_V1: Ultra90 detected -> pullback/retest confirmation -> rotation。親の高選別Top-1思想だけを継承し、成績が悪くてもWIN80_ULTRA90_TOP1_V1へ影響させません。
-
-Evidence:
-- WIN85_DUAL_CONFIRM_SIBLING_V1: 独立研究 [neutral]
-- ULTRA90_PULLBACK_SIBLING_V1: 独立研究 [neutral]
-
-### 8. Research CIO (cio)
-
-- Time: 2026-08-26T17:00:11.110Z
+- Time: 2026-08-26T23:32:52.736Z
 - Strategy: WIN80_ULTRA90_TOP1_V1
 - Stance: decision
 
-WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN85_DUAL_CONFIRM_SIBLING_V1で、New sibling logicだけを変更した親子リプレイを作成します。ULTRA90_PULLBACK_SIBLING_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。
+WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN80_SCORE_82_CHILD_V1で、Win80 minimum scoreだけを変更した親子リプレイを作成します。WIN80_TRIGGER_80_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。
 
 現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。
 
 Evidence:
 - メイン維持: WIN80_ULTRA90_TOP1_V1 [positive]
-- 最優先実験: WIN85_DUAL_CONFIRM_SIBLING_V1 [neutral]
+- 最優先実験: WIN80_SCORE_82_CHILD_V1 [neutral]
 - 旧Champion継承: NO [positive]
 - 自動メイン変更: 禁止 [positive]
 - 親Snapshot Replay: READY [positive]
