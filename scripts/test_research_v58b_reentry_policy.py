@@ -1,6 +1,7 @@
 from pathlib import Path
 import importlib.util
 
+# Contract: V58b re-entry may repeat Recovery only, never native V57 entries.
 POLICY = Path('scripts/research_v58b_reentry_policy.py')
 assert POLICY.exists(), 'V58b reentry policy module not implemented yet'
 spec = importlib.util.spec_from_file_location('research_v58b_reentry_policy', POLICY)
