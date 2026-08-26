@@ -1,0 +1,286 @@
+name: PENGU V56 V20 Strict Final Adjudication 1Y
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v56-v20-diagnostics-20260826
+    paths:
+      - '.github/workflows/pengu-v56-v20-strict-final-adjudication-1y.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-v56-v20-strict-final-adjudication-1y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  adjudicate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V56 research harness
+        uses: actions/checkout@v4
+        with:
+          ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d
+          path: .v56-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 Top2 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065
+          path: .v56-research/.v52-top2-research
+          fetch-depth: 1
+
+      - name: Checkout frozen stock dependency root
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .v56-research/.stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v56-research/.stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v56-research/.stock-research/.v13
+          fetch-depth: 1
+
+      - name: Wire frozen stock dependencies
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Download immutable baseline Run 32902090423 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-32902090423
+          path: .research-state/baseline-32902090423
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32902090423
+
+      - name: Download V21 preregistered confirmation Run 32909088885 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-short-v21-preregistered-confirmation-1y-32909088885
+          path: .research-state/candidate-32909088885
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32909088885
+
+      - name: Apply strict user adoption rule
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          base_root=Path('.research-state/baseline-32902090423')
+          cand_root=Path('.research-state/candidate-32909088885')
+          baseline=json.loads((base_root/'result.json').read_text())
+          b_pengu=json.loads((base_root/'pengu-v20-ledger.json').read_text())
+
+          diag_paths=list(cand_root.rglob('diagnostics.json'))
+          conf_paths=list(cand_root.rglob('preregistered-confirmation.json'))
+          assert len(diag_paths)==1, diag_paths
+          assert len(conf_paths)==1, conf_paths
+          diag=json.loads(diag_paths[0].read_text())
+          conf=json.loads(conf_paths[0].read_text())
+
+          bn=baseline['results']['NORMAL']
+          assert baseline['status']=='PASS_RESEARCH_ONLY'
+          assert baseline['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert baseline['capital']['totalContributedJpy']==130000
+          assert abs(bn['endingAssetJpy']-599074.12049995)<0.01
+          assert abs(bn['maxDrawdownPctClosedEventTwr']-(-12.1777701))<1e-6
+          assert bn['trades']==657
+          assert abs(bn['profitFactor']-2.75649103)<1e-8
+          assert b_pengu['modes']['normal']['metrics']['longTrades']==5
+          assert b_pengu['modes']['normal']['metrics']['shortTrades']==28
+
+          # Long: structural RAW_REENTRY candidate failed to improve train and had zero holdout trades.
+          lc=diag['longCandidate']
+          long_improves_holdout=(
+              lc['candidateHoldout']['trades']>0 and
+              lc['candidateHoldout']['returnPct']>lc['baselineHoldout']['returnPct']
+          )
+          long_adopt=bool(lc['trainImproves'] and long_improves_holdout)
+          assert long_adopt is False
+
+          # Short: user rule requires improvement to survive chronological holdout, not merely non-degradation.
+          hb=diag['candidate']['holdout']['baseline']
+          hc=diag['candidate']['holdout']['candidate']
+          holdout_positive=(
+              hc['hardStops'] < hb['hardStops'] or
+              hc['returnPct'] > hb['returnPct'] + 1e-12 or
+              (hc['profitFactor'] is not None and hb['profitFactor'] is not None and hc['profitFactor'] > hb['profitFactor'] + 1e-12) or
+              hc['maxDrawdownPct'] > hb['maxDrawdownPct'] + 1e-12
+          )
+          short_stress_robust=(
+              diag['candidate']['stress']['returnPct'] >= diag['baseline']['stress']['returnPct'] and
+              diag['candidate']['stress']['profitFactor'] >= diag['baseline']['stress']['profitFactor'] and
+              diag['candidate']['stress']['maxDrawdownPct'] >= diag['baseline']['stress']['maxDrawdownPct'] - 1e-12
+          )
+          short_adopt=bool(holdout_positive and short_stress_robust)
+          assert hc==hb, (hb,hc)
+          assert holdout_positive is False
+          assert short_adopt is False
+          assert conf['holdoutInterpretation']=='Final one-third was unchanged by the veto; this confirms non-degradation there, not independent positive alpha.'
+
+          decision={
+              'status':'PASS_RESEARCH_ONLY',
+              'acceptanceRule':'Adopt only when improvement is robust on chronological holdout AND Stress; unchanged holdout is insufficient.',
+              'longDecision':'ADOPT_LONG_CANDIDATE' if long_adopt else 'KEEP_V56',
+              'shortDecision':'ADOPT_V21' if short_adopt else 'KEEP_V20',
+              'longReason':'RAW_REENTRY produced no train improvement; chronological holdout contained zero Long trades.' if not long_adopt else 'robust',
+              'shortReason':'V21 improved full-period/Stress but chronological holdout was exactly unchanged (6/6 same trades, 1 Hard Stop remains), so independent robustness was not demonstrated.' if not short_adopt else 'robust',
+              'baselineRunId':32902090423,
+              'candidateConfirmationRunId':32909088885,
+              'productionPenguSourceReadOnlySha':'a76fd7aaa0788209532a5a2c6489135dd8e4a27e',
+              'candidateResearchOnly':{
+                  'longMode':diag['candidate']['longMode'],
+                  'shortRule':diag['candidate']['shortRule'],
+                  'normal':diag['candidate']['normal'],
+                  'stress':diag['candidate']['stress'],
+                  'holdout':diag['candidate']['holdout'],
+                  'integratedNormal':conf['normal']['candidate'],
+                  'integratedSevere':conf['severe']['candidate'],
+                  'delta':conf['delta'],
+              },
+              'selectedPengu':'V56_LONG_PLUS_V20_SHORT',
+              'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False},
+          }
+          out=Path('.research-state/strict-final')
+          out.mkdir(parents=True,exist_ok=True)
+          (out/'strict-decision.json').write_text(json.dumps(decision,indent=2,ensure_ascii=False)+'\n')
+          print('STRICT_DECISION='+json.dumps({'longDecision':decision['longDecision'],'shortDecision':decision['shortDecision'],'holdoutPositive':holdout_positive,'stressRobust':short_stress_robust},separators=(',',':')))
+          PY
+
+      - name: Rerun exact 1Y DCA with selected V56 V20 and unchanged V12 V52
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py \
+            --source scripts/research_current_top2_pengu_v52_dca.py \
+            --output scripts/.strict_final_keep_v56_v20_1y_dca.py \
+            --window 1y
+          python -m py_compile scripts/.strict_final_keep_v56_v20_1y_dca.py
+          python scripts/.strict_final_keep_v56_v20_1y_dca.py \
+            --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json \
+            --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json \
+            --pengu-ledger .research-state/baseline-32902090423/pengu-v20-ledger.json \
+            --output-dir .research-state/strict-final/dca-recheck \
+            2>&1 | tee .research-state/strict-final/dca-recheck.log
+
+      - name: Verify exact final baseline reproduction and write report
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state/strict-final')
+          d=json.loads((root/'strict-decision.json').read_text())
+          b=json.loads(Path('.research-state/baseline-32902090423/result.json').read_text())
+          r=json.loads((root/'dca-recheck/result.json').read_text())
+          cand_root=Path('.research-state/candidate-32909088885')
+          diag=json.loads(next(cand_root.rglob('diagnostics.json')).read_text())
+
+          assert d['longDecision']=='KEEP_V56'
+          assert d['shortDecision']=='KEEP_V20'
+          assert r['status']=='PASS_RESEARCH_ONLY'
+          assert r['period']==b['period']
+          assert r['capital']['totalContributedJpy']==130000
+          rn,bn=r['results']['NORMAL'],b['results']['NORMAL']
+          rs,bs=r['results']['SEVERE'],b['results']['SEVERE']
+          for key in ['endingAssetJpy','netProfitJpy','maxDrawdownPctClosedEventTwr','trades','profitFactor']:
+              assert abs(float(rn[key])-float(bn[key]))<1e-8, (key,rn[key],bn[key])
+          for key in ['endingAssetJpy','netProfitJpy','maxDrawdownPctClosedEventTwr','trades','profitFactor']:
+              assert abs(float(rs[key])-float(bs[key]))<1e-8, (key,rs[key],bs[key])
+
+          final={
+              **d,
+              'finalIntegrated':{'NORMAL':rn,'SEVERE':rs},
+              'baselineReproductionExact':True,
+          }
+          (root/'final-result.json').write_text(json.dumps(final,indent=2,ensure_ascii=False)+'\n')
+
+          ld=diag['longDiagnostics']
+          sd=diag['shortDiagnostics']
+          def pct(x): return f'{x*100:.2f}%'
+          rows=[]
+          rows.append('# PENGU V56/V20 strict final adjudication')
+          rows.append('')
+          rows.append('Status: **PASS_RESEARCH_ONLY**')
+          rows.append('')
+          rows.append('## Final decision')
+          rows.append('')
+          rows.append('- Long: **KEEP_V56**')
+          rows.append('- Short: **KEEP_V20**')
+          rows.append('- No production/LIVE/VPS/order changes.')
+          rows.append('')
+          rows.append('## Long V56 gate diagnosis')
+          rows.append('')
+          rows.append(f"Evaluable bars: {ld['eligibleFeatureBars']}; raw bars: {ld['longRawBars']}; edge signals: {ld['longEdgeSignals']}; raw episodes: {ld['rawEpisodes']}; edge-suppressed continuation bars: {ld['edgeSuppressedRawBars']}.")
+          rows.append('')
+          rows.append('| Gate | Standalone pass | Sequential before→after | All-but-one recovery |')
+          rows.append('|---|---:|---:|---:|')
+          labels={'regime72':'72h +15%','breakout18':'18h breakout','return24':'24h +10%','relative24':'RS +1%','btc24':'BTC24h >=0','rsiMin':'RSI >=48','rsiMax':'RSI <=78','volumeMin':'Volume >=0.25','volumeMax':'Volume <=3','atrMax':'ATR <=5%','ema168':'close > EMA168'}
+          for k in ['regime72','breakout18','return24','relative24','btc24','rsiMin','rsiMax','volumeMin','volumeMax','atrMax','ema168']:
+              s=ld['sequentialDropoff'][k]
+              rows.append(f"| {labels[k]} | {ld['standalonePassCounts'][k]} ({ld['standalonePassRatesPct'][k]:.2f}%) | {s['before']}→{s['after']} | {ld['allButOneNearMissCounts'][k]} |")
+          rows.append('')
+          rows.append('Primary bottlenecks are 72h +15%, 18h breakout, and 24h +10%. RSI upper and Volume upper are secondary. Edge continuation is only 3 bars; cooldown suppression is 0, while occupied suppression is 5. RAW_REENTRY did not improve train and had no Long holdout trades.')
+          rows.append('')
+          rows.append('## Short V20 entry-time comparison')
+          rows.append('')
+          rows.append('| Feature | Hard Stop median [min,max] | Non-Hard median [min,max] | 7 Trailing winners median [min,max] |')
+          rows.append('|---|---:|---:|---:|')
+          feats=['atr24Ratio','btcEma168Distance','btcReturn24h','penguReturn24h','penguReturn72h','relativeReturn24h','volumeRatio6OverPrior36','rsi14','requestedGross']
+          for f in feats:
+              a=sd['hardStops']['entryFeatures'][f]; n=sd['nonHard']['entryFeatures'][f]; t=sd['protectedTrailingWinners']['entryFeatures'][f]
+              rows.append(f"| {f} | {a['median']:.6f} [{a['min']:.6f},{a['max']:.6f}] | {n['median']:.6f} [{n['min']:.6f},{n['max']:.6f}] | {t['median']:.6f} [{t['min']:.6f},{t['max']:.6f}] |")
+          rows.append('')
+          rows.append('V21 preregistered candidate improved full-period Normal/Stress and retained all 7 protected Short trailing winners, but its final chronological one-third holdout was exactly unchanged: 6 trades, return -1.205078%, PF 0.938947, DD -9.210813%, 1 Hard Stop. Under the fixed rule, non-degradation is insufficient; therefore KEEP_V20.')
+          rows.append('')
+          rows.append('## Final exact 1Y DCA recheck')
+          rows.append('')
+          rows.append(f"- NORMAL ending asset: ¥{rn['endingAssetJpy']:,.2f}")
+          rows.append(f"- NORMAL max DD: {rn['maxDrawdownPctClosedEventTwr']:.8f}%")
+          rows.append(f"- NORMAL trades: {rn['trades']}")
+          rows.append(f"- NORMAL PF: {rn['profitFactor']:.8f}")
+          rows.append(f"- SEVERE ending asset: ¥{rs['endingAssetJpy']:,.2f}")
+          rows.append(f"- Baseline reproduction: exact = true")
+          rows.append('')
+          rows.append('Candidate-only reference (not adopted): integrated NORMAL ¥623,846.84, +¥24,772.72 vs baseline, but without positive chronological holdout evidence.')
+          (root/'final-report.md').write_text('\n'.join(rows)+'\n')
+          print('FINAL_STATUS=PASS_RESEARCH_ONLY')
+          print('LONG_DECISION=KEEP_V56')
+          print('SHORT_DECISION=KEEP_V20')
+          print('FINAL_NORMAL='+json.dumps({k:rn[k] for k in ['endingAssetJpy','maxDrawdownPctClosedEventTwr','trades','profitFactor']},separators=(',',':')))
+          print('FINAL_SEVERE='+json.dumps({k:rs[k] for k in ['endingAssetJpy','maxDrawdownPctClosedEventTwr','trades','profitFactor']},separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v56-v20-strict-final-adjudication-1y-${{ github.run_id }}
+          path: .research-state/strict-final
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
