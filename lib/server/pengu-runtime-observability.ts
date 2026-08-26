@@ -4,6 +4,8 @@ import { isAbsolute } from "node:path";
 const MAX_JSON_BYTES = 512 * 1024;
 const STALE_AFTER_MS = 3 * 60 * 60 * 1000;
 
+export type PenguFailure = { occurredAt?: number; message: string };
+
 export type PenguRuntimeStatus = {
   status: "LIVE" | "STALE" | "UNAVAILABLE";
   configured: boolean;
@@ -15,7 +17,8 @@ export type PenguRuntimeStatus = {
   reason: string;
   latestSignal?: PenguSignalObservability;
   executionTrace: PenguExecutionTrace;
-  failures: Array<{ occurredAt?: number; message: string }>;
+  failures: PenguFailure[];
+  resolvedFailures: PenguFailure[];
   position?: { side?: number; quantity?: number; gross?: number; entryPrice?: number };
   pending?: { phase?: string; side?: string; reduceOnly?: boolean; targetGross?: number; reason?: string };
 };
@@ -71,6 +74,29 @@ function text(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+function isAlignmentFailure(message: string) {
+  return message.includes("PENGU/BTC H1 timestamps are not fully aligned")
+    || message.includes("PENGU/BTC H1 timestamps are not aligned to a shared hourly range");
+}
+
+export function classifyPenguFailures(
+  failures: PenguFailure[],
+  latestCompletedPenguTs?: number,
+  latestCompletedBtcTs?: number,
+) {
+  const currentBarsAreAligned = Number.isFinite(latestCompletedPenguTs)
+    && Number.isFinite(latestCompletedBtcTs)
+    && (latestCompletedPenguTs as number) > 0
+    && latestCompletedPenguTs === latestCompletedBtcTs;
+  const resolved: PenguFailure[] = [];
+  const active: PenguFailure[] = [];
+  for (const failure of failures) {
+    if (currentBarsAreAligned && isAlignmentFailure(failure.message)) resolved.push(failure);
+    else active.push(failure);
+  }
+  return { active, resolved };
+}
+
 const FEATURE_KEYS = [
   "open", "high", "low", "close", "previousLow", "priorHigh18h", "penguReturn24h", "penguReturn72h",
   "btcReturn24h", "relativeReturn24h", "ema72", "ema168", "btcEma168Distance", "volumeRatio6OverPrior36",
@@ -88,7 +114,7 @@ function unavailableTrace(reason: string): PenguExecutionTrace {
 }
 
 function unavailable(capturedAt: string, configured: boolean, reason: string): PenguRuntimeStatus {
-  return { status: "UNAVAILABLE", configured, capturedAt, reason, executionTrace: unavailableTrace(reason), failures: [] };
+  return { status: "UNAVAILABLE", configured, capturedAt, reason, executionTrace: unavailableTrace(reason), failures: [], resolvedFailures: [] };
 }
 
 function configuredPath() {
@@ -221,16 +247,23 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     const pendingObject = object(state.pending);
     const position = positionObject ? { side: number(positionObject.side), quantity: number(positionObject.quantity), gross: number(positionObject.gross), entryPrice: number(positionObject.entryPrice) } : undefined;
     const pending = pendingObject ? { phase: text(pendingObject.phase), side: text(pendingObject.side), reduceOnly: pendingObject.reduceOnly === true, targetGross: number(pendingObject.targetGross), reason: text(pendingObject.reason) } : undefined;
-    const failures = Array.isArray(state.failures) ? state.failures.slice(-8).map((failure) => {
+    const rawFailures = Array.isArray(state.failures) ? state.failures.slice(-8).map((failure) => {
       const item = object(failure) || {};
       return { occurredAt: number(item.occurredAt), message: text(item.message) || "PENGU runner failure" };
     }) : [];
+    const failureClassification = classifyPenguFailures(
+      rawFailures,
+      latestSignal?.diagnostics.latestCompletedPenguTs,
+      latestSignal?.diagnostics.latestCompletedBtcTs,
+    );
+    const failures = failureClassification.active;
+    const resolvedFailures = failureClassification.resolved;
     const executionTrace = buildExecutionTrace(latestSignal, killSwitchActive, sharedKillSwitch.reason || text(killSwitch?.reason), position, pending, failures);
-    if (updatedAt === undefined || ageMs === undefined) return { status: "STALE", configured: true, capturedAt, mode, killSwitchActive, releaseSha, reason: "PENGU runner stateに更新時刻がありません。", latestSignal, executionTrace, failures, position, pending };
-    if (killSwitchActive) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU Kill Switchが有効です。${sharedKillSwitch.reason || ""}`.trim(), latestSignal, executionTrace, failures, position, pending };
-    if (ageMs > STALE_AFTER_MS) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner stateが${Math.round(ageMs / 60000)}分更新されていません。`, latestSignal, executionTrace, failures, position, pending };
-    if (mode && mode.toLowerCase() !== "live") return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner mode=${mode}のためLIVE確認にしません。`, latestSignal, executionTrace, failures, position, pending };
-    return { status: "LIVE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner stateを確認しました。最新判定：${latestSignal?.reason || "未取得"}`, latestSignal, executionTrace, failures, position, pending };
+    if (updatedAt === undefined || ageMs === undefined) return { status: "STALE", configured: true, capturedAt, mode, killSwitchActive, releaseSha, reason: "PENGU runner stateに更新時刻がありません。", latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (killSwitchActive) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU Kill Switchが有効です。${sharedKillSwitch.reason || ""}`.trim(), latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (ageMs > STALE_AFTER_MS) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner stateが${Math.round(ageMs / 60000)}分更新されていません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (mode && mode.toLowerCase() !== "live") return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner mode=${mode}のためLIVE確認にしません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    return { status: "LIVE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner stateを確認しました。最新判定：${latestSignal?.reason || "未取得"}`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
   } catch (error) {
     return unavailable(capturedAt, true, error instanceof Error ? error.message : "PENGU runner stateを読み取れません。");
   }
