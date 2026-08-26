@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { useAuth } from "@/context/AuthContext";
 
 export type LiveStatusSnapshot = {
   ok: boolean;
@@ -19,8 +21,15 @@ export type LiveStatusSnapshot = {
 export function useLiveStatus() {
   const [snapshot, setSnapshot] = useState<LiveStatusSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
+    if (!isAuthenticated) {
+      setSnapshot(null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(`/api/system/live-status?refresh=${Date.now()}`, { cache: "no-store" });
@@ -31,13 +40,14 @@ export function useLiveStatus() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [isAuthenticated]);
 
   useEffect(() => {
+    if (authLoading) return;
     void refresh();
     const timer = window.setInterval(() => void refresh(), 30_000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [authLoading, refresh]);
 
   return { snapshot, loading };
 }

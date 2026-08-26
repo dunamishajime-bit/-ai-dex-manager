@@ -54,14 +54,17 @@ function attachPrice(list: TokenRef[], prices: Record<string, PricePoint>) {
     });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         let universe = await kvGet<Universe>("universe:v1");
 
         // Self-seed if empty
         if (!universe) {
             try {
-                const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/agents/refresh-universe`, { method: "POST" });
+                const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
+                const requestOrigin = new URL(request.url).origin;
+                const refreshUrl = new URL("/api/agents/refresh-universe", configuredOrigin || requestOrigin);
+                const refreshRes = await fetch(refreshUrl, { method: "POST" });
                 if (refreshRes.ok) {
                     universe = await kvGet<Universe>("universe:v1");
                 }
