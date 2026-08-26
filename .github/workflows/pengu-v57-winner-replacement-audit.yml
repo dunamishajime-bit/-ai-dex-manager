@@ -1,0 +1,77 @@
+name: PENGU V57 Winner Replacement Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v57-conditional-regime-20260826
+    paths:
+      - 'scripts/research_patch_v57_replacement_audit.py'
+      - '.github/workflows/pengu-v57-winner-replacement-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-v57-winner-replacement-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen PENGU source read-only
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+
+      - name: Generate identical conditional V57 evaluator
+        run: |
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          test -s .pengu-current/scripts/.research_pengu_v57.generated.ts
+
+      - name: Run winner replacement audit
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-v57-replacement-audit
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v57-replacement-audit
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts 2>&1 | tee .research-state/pengu-v57-replacement-audit/audit.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('.research-state/pengu-v57-replacement-audit/v57-result.json')
+          r=json.loads(p.read_text())
+          c=next(x for x in r['v57']['candidates'] if x['mode']=='V57_REGIME72_BREAKOUT')
+          a=c['replacementAudit']
+          assert r['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('REPLACEMENT_AUDIT='+json.dumps(a,separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v57-winner-replacement-audit-${{ github.run_id }}
+          path: .research-state/pengu-v57-replacement-audit
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
