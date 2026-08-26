@@ -1,0 +1,206 @@
+name: PENGU V58b Recovery Reentry 1Y
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v57-conditional-regime-20260826
+    paths:
+      - 'scripts/research_patch_v58b_reentry.py'
+      - 'scripts/research_v58b_reentry_policy.py'
+      - 'scripts/test_research_v58b_reentry_policy.py'
+      - '.github/workflows/pengu-v58b-recovery-reentry-1y.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-v58b-reentry-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen PENGU source read-only
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - name: Checkout frozen V56 research harness
+        uses: actions/checkout@v4
+        with:
+          ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d
+          path: .v56-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 Top2 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065
+          path: .v56-research/.v52-top2-research
+          fetch-depth: 1
+
+      - name: Checkout frozen stock dependency root
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .v56-research/.stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v56-research/.stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v56-research/.stock-research/.v13
+          fetch-depth: 1
+
+      - name: Wire frozen stock dependencies
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+
+      - name: Verify V58b reentry policy contract
+        run: python scripts/test_research_v58b_reentry_policy.py
+
+      - name: Download immutable baseline Run 32902090423 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-32902090423
+          path: .research-state/baseline-32902090423
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32902090423
+
+      - name: Generate V58b evaluator
+        run: |
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v58_higher_frequency.py
+          python scripts/research_patch_v58b_reentry.py
+          test -s .pengu-current/scripts/.research_pengu_v57.generated.ts
+
+      - name: Run V58b standalone validation
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-v58b
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v58b
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts 2>&1 | tee .research-state/pengu-v58b/v58b.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('.research-state/pengu-v58b/v58b-result.json').read_text())
+          v=r['v58b']
+          print('V58B='+json.dumps({k:v.get(k) for k in ['decision','selectedMode','trainingSelectionPass','frequencyGoalPass','normalHoldoutPositive','stressHoldoutPositive','stressRobust','fullNormalImproves','strictPass']},separators=(',',':')))
+          for c in v['candidates']:
+              print('CANDIDATE='+json.dumps({'mode':c['mode'],'trainingEligible':c['trainingEligible'],'metrics':c['metrics'],'deltas':c['deltas']},separators=(',',':')))
+          assert r['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          PY
+
+      - name: Patch fixed 1Y DCA simulator
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py \
+            --source scripts/research_current_top2_pengu_v52_dca.py \
+            --output scripts/.pengu_v58b_1y_dca.py \
+            --window 1y
+          python -m py_compile scripts/.pengu_v58b_1y_dca.py
+
+      - name: Run integrated DCA
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v58b-integrated
+          python scripts/.pengu_v58b_1y_dca.py \
+            --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json \
+            --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json \
+            --pengu-ledger .research-state/pengu-v58b/candidate-pengu-ledger.json \
+            --output-dir .research-state/pengu-v58b-integrated \
+            2>&1 | tee .research-state/pengu-v58b-integrated/backtest.log
+
+      - name: Final strict adjudication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state')
+          b=json.loads((root/'baseline-32902090423/result.json').read_text())
+          v=json.loads((root/'pengu-v58b/v58b-result.json').read_text())
+          c=json.loads((root/'pengu-v58b-integrated/result.json').read_text())
+          bn,cn=b['results']['NORMAL'],c['results']['NORMAL']
+          bs,cs=b['results']['SEVERE'],c['results']['SEVERE']
+          strict=bool(v['v58b']['strictPass'])
+          integrated_ok=(
+            cn['endingAssetJpy']>bn['endingAssetJpy']+1e-6
+            and cn['profitFactor']>=bn['profitFactor']*0.98
+            and cn['maxDrawdownPctClosedEventTwr']>=bn['maxDrawdownPctClosedEventTwr']-0.75
+            and cs['endingAssetJpy']>=bs['endingAssetJpy']-1e-6
+            and cs['profitFactor']>=bs['profitFactor']*0.98
+            and cs['maxDrawdownPctClosedEventTwr']>=bs['maxDrawdownPctClosedEventTwr']-0.75
+          ) if strict else False
+          adopt=strict and integrated_ok
+          d={
+            'status':'PASS_RESEARCH_ONLY','baselineRunId':32902090423,
+            'standaloneStrictPass':strict,'frequencyGoalPass':bool(v['v58b']['frequencyGoalPass']),
+            'integratedContractPass':integrated_ok,
+            'researchDecision':'ADOPT_V58B_RESEARCH_CANDIDATE' if adopt else 'KEEP_V57_RESEARCH_CANDIDATE',
+            'productionDecision':'NO_CHANGE_V56','selectedMode':v['v58b']['selectedMode'],
+            'standalone':v['v58b'],'baseline':{'NORMAL':bn,'SEVERE':bs},'candidate':{'NORMAL':cn,'SEVERE':cs},
+            'delta':{
+              'normalEndingAssetJpy':cn['endingAssetJpy']-bn['endingAssetJpy'],
+              'normalProfitFactor':cn['profitFactor']-bn['profitFactor'],
+              'normalDdPctPoint':cn['maxDrawdownPctClosedEventTwr']-bn['maxDrawdownPctClosedEventTwr'],
+              'normalTrades':cn['trades']-bn['trades'],
+              'severeEndingAssetJpy':cs['endingAssetJpy']-bs['endingAssetJpy'],
+              'severeProfitFactor':cs['profitFactor']-bs['profitFactor'],
+              'severeDdPctPoint':cs['maxDrawdownPctClosedEventTwr']-bs['maxDrawdownPctClosedEventTwr'],
+              'severeTrades':cs['trades']-bs['trades']},
+            'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          (root/'pengu-v58b-integrated/final-decision.json').write_text(json.dumps(d,indent=2)+'\n')
+          print('FINAL='+json.dumps({k:d[k] for k in ['researchDecision','productionDecision','selectedMode','standaloneStrictPass','frequencyGoalPass','integratedContractPass','delta']},separators=(',',':')))
+          assert c['checks']['NORMAL_v52TradesPositive'] is True
+          assert d['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v58b-recovery-reentry-1y-${{ github.run_id }}
+          path: |
+            .research-state/pengu-v58b
+            .research-state/pengu-v58b-integrated
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
