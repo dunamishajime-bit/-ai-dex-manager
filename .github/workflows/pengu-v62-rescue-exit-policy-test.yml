@@ -1,0 +1,17 @@
+name: PENGU V62 Rescue Exit Policy Test
+on:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v62_rescue_exit_policy.py'
+      - 'scripts/research_v62_rescue_exit_policy.py'
+      - '.github/workflows/pengu-v62-rescue-exit-policy-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/test_research_v62_rescue_exit_policy.py
