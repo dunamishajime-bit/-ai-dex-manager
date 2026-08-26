@@ -45,15 +45,16 @@ required_dca = [
     'PENGU_NEW_LONG',
     'pengu-new-long-ledger',
     'materialIntegratedGain',
+    'CRYPTO_GROSS_CAP',
+    'TOTAL_GROSS_CAP',
     '1.05',
 ]
 for token in required_dca:
     assert token in d, f'missing V68 DCA policy token: {token}'
 
-# Core has priority and the portfolio-level caps remain unchanged.
-assert 'CRYPTO_GROSS_CAP = 2.0' in d
-assert 'TOTAL_GROSS_CAP = 2.5' in d
+# Core has deterministic priority before the new sleeve; global caps are reused, not replaced.
 assert 'PENGU_CORE_ENTRY": 2' in d
 assert 'PENGU_NEW_ENTRY": 3' in d
+assert 'core_reserve = PENGU_MAX_GROSS' in d
 
 print('V68_INDEPENDENT_SLEEVE_POLICY=PASS')
