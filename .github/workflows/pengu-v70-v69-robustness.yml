@@ -1,0 +1,67 @@
+name: PENGU V70 Frozen V69 Robustness Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v70_v69_robustness.py'
+      - 'scripts/research_validate_v70_v69_robustness.py'
+      - '.github/workflows/pengu-v70-v69-robustness.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: pengu-v70-v69-robustness-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify frozen no-tuning policy
+        run: python scripts/test_research_v70_v69_robustness.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: pengu-v69-independent-short-sleeve-1y-32975370331
+          path: .research-state/v69-source
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32975370331
+      - name: Audit frozen V69 chronological folds
+        run: |
+          python scripts/research_validate_v70_v69_robustness.py \
+            --v69-root .research-state/v69-source \
+            --output-dir .research-state/pengu-v70
+      - name: Verify audit decision and safety
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('.research-state/pengu-v70/v70-result.json')
+          r=json.loads(p.read_text())
+          print('FINAL='+json.dumps(r,separators=(',',':')))
+          assert r['status']=='PASS_RESEARCH_ONLY'
+          assert r['frozenContract']['family']=='RALLY_FAILURE'
+          assert r['frozenContract']['gross']==0.25
+          assert r['frozenContract']['parameterSearchPerformed'] is False
+          assert r['allFoldPass'] is False
+          assert r['failingFolds']==[2]
+          assert r['researchDecision']=='REJECT_V69_ROBUSTNESS_KEEP_V64'
+          assert r['productionDecision']=='NO_CHANGE_V56'
+          assert r['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          PY
+      - name: Hash research outputs
+        run: |
+          cd .research-state/pengu-v70
+          find . -type f ! -path '*/MANIFEST.sha256' -print0 | sort -z | xargs -0 sha256sum > MANIFEST.sha256
+          sha256sum -c MANIFEST.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v70-frozen-v69-robustness-${{ github.run_id }}
+          path: .research-state/pengu-v70
+          include-hidden-files: true
+          retention-days: 90
