@@ -1,0 +1,16 @@
+name: PENGU V64 Supplemental Sizing Policy Test
+on:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v64_supplemental_sizing_policy.py'
+      - 'scripts/research_patch_v64_supplemental_sizing.py'
+      - '.github/workflows/pengu-v64-supplemental-sizing-policy-test.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/test_research_v64_supplemental_sizing_policy.py
