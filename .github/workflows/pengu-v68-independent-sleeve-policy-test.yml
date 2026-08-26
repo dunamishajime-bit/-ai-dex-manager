@@ -1,0 +1,21 @@
+name: PENGU V68 Independent Sleeve Policy Test
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v68_independent_sleeve.py'
+      - 'scripts/research_patch_v68_independent_sleeve.py'
+      - 'scripts/research_patch_v68_independent_sleeve_dca.py'
+      - '.github/workflows/pengu-v68-independent-sleeve-policy-test.yml'
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify V68 independent sleeve contract
+        run: python scripts/test_research_v68_independent_sleeve.py
