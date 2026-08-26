@@ -1,0 +1,22 @@
+name: PENGU V71 Independent Long Policy Test
+on:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v71_independent_long_sleeve.py'
+      - 'scripts/research_patch_v71_independent_long_sleeve.py'
+      - 'scripts/research_patch_v71_dual_pengu_dca.py'
+      - '.github/workflows/pengu-v71-independent-long-sleeve-1y.yml'
+      - '.github/workflows/pengu-v71-independent-long-policy-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify V71 fixed independent Long contract
+        run: python scripts/test_research_v71_independent_long_sleeve.py
