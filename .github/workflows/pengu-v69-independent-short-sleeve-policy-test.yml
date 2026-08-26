@@ -1,0 +1,20 @@
+name: PENGU V69 Independent Short Sleeve Policy Test
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v69_independent_short_sleeve.py'
+      - 'scripts/research_patch_v69_independent_short_sleeve.py'
+      - 'scripts/research_patch_v69_dual_pengu_dca.py'
+      - '.github/workflows/pengu-v69-independent-short-sleeve-policy-test.yml'
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python scripts/test_research_v69_independent_short_sleeve.py
