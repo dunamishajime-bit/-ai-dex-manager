@@ -1,8 +1,13 @@
+import { readFile } from "node:fs/promises";
+import { isAbsolute } from "node:path";
+
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 
 type Sleeve = "V12" | "V52";
 type Status = "発火候補" | "候補に近い" | "条件不足" | "対象時間外" | "取得不能";
-type Candle = { openTime: number; closeTime: number; close: number; volume: number };
+type JsonObject = Record<string, unknown>;
+
+const MAX_JSON_BYTES = 512 * 1024;
 
 export type DecisionStatusItem = {
   symbol: string;
@@ -47,7 +52,36 @@ export type DecisionStatusSnapshot = {
 
 let cache: { expiresAt: number; snapshot: DecisionStatusSnapshot } | null = null;
 const CACHE_TTL_MS = 55 * 60 * 1000;
-const ASTER_BASE_URL = process.env.ASTER_API_BASE_URL?.trim() || "https://fapi.asterdex.com";
+
+function object(value: unknown): JsonObject | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
+}
+
+function finite(value: unknown): number | undefined {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function text(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function side(value: unknown): DecisionStatusItem["side"] {
+  if (typeof value === "number") return value > 0 ? "LONG" : value < 0 ? "SHORT" : "WAIT";
+  const normalized = String(value || "").toUpperCase();
+  return normalized === "LONG" || normalized === "1" ? "LONG" : normalized === "SHORT" || normalized === "-1" ? "SHORT" : "WAIT";
+}
+
+async function readState(pathValue: string | undefined, label: string): Promise<JsonObject> {
+  const configuredPath = String(pathValue || "").trim();
+  if (!configuredPath) throw new Error(`${label}の絶対パスがUIサービスに設定されていません。`);
+  if (!isAbsolute(configuredPath)) throw new Error(`${label}は絶対パスで設定してください。`);
+  const content = await readFile(configuredPath, "utf8");
+  if (Buffer.byteLength(content, "utf8") > MAX_JSON_BYTES) throw new Error(`${label}が読み取り上限を超えています。`);
+  const parsed = object(JSON.parse(content));
+  if (!parsed) throw new Error(`${label}の形式が不正です。`);
+  return parsed;
+}
 
 export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runtime"] {
   return {
@@ -93,76 +127,164 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
   };
 }
 
-function finite(value: unknown) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : 0; }
-
-async function fetchKlines(symbol: string): Promise<Candle[]> {
-  const url = new URL("/fapi/v3/klines", ASTER_BASE_URL);
-  url.searchParams.set("symbol", symbol); url.searchParams.set("interval", "1h"); url.searchParams.set("limit", "100");
-  const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) throw new Error("Aster market data request failed.");
-  const payload = await response.json();
-  if (!Array.isArray(payload)) throw new Error("Aster market data response is invalid.");
-  const now = Date.now();
-  return payload.map((row): Candle | null => {
-    if (!Array.isArray(row)) return null;
-    const openTime = finite(row[0]); const close = finite(row[4]); const volume = finite(row[5]); const closeTime = finite(row[6]);
-    if (!openTime || !closeTime || close <= 0 || volume < 0 || closeTime > now) return null;
-    return { openTime, closeTime, close, volume };
-  }).filter((row): row is Candle => Boolean(row));
+function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reason: string): DecisionStatusItem {
+  return {
+    symbol,
+    sleeve,
+    rank: 0,
+    score: 0,
+    scoreMax: 1,
+    status: "取得不能",
+    side: "WAIT",
+    reason: `${reason} VPSのsanitized snapshotがない場合、過去データから推測表示しません。`,
+    checkedAt,
+    source: "VPS runner state / sanitized decision snapshot",
+  };
 }
 
-function average(values: number[]) { return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0; }
+function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionStatusItem[] {
+  const candidates = Array.isArray(state.candidates) ? state.candidates.map(object).filter((item): item is JsonObject => Boolean(item)) : [];
+  if (!candidates.length) return config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, "V12 decision snapshotに候補がありません。"));
 
-function evaluateCandles(symbol: string, sleeve: Sleeve, candles: Candle[], checkedAt: string): DecisionStatusItem {
-  if (candles.length < 25) return { symbol, sleeve, rank: 0, score: 0, scoreMax: 4, status: "取得不能", side: "WAIT", reason: "判定に必要な完成済み1時間足が不足しています。", checkedAt, source: "Aster 公開市場データ（完成済み1時間足）" };
-  const latest = candles[candles.length - 1]; const closes = candles.map((candle) => candle.close);
-  const sma20 = average(closes.slice(-20)); const sma72 = average(closes.slice(-72));
-  const momentum6 = latest.close / closes[closes.length - 7] - 1;
-  const volumeRatio = latest.volume / Math.max(average(candles.slice(-21, -1).map((candle) => candle.volume)), 1e-12);
-  const checks = [
-    { label: "短期移動平均線より上", passed: latest.close > sma20 },
-    { label: "長期移動平均線より上", passed: latest.close > sma72 },
-    { label: "6時間モメンタムがプラス", passed: momentum6 > 0 },
-    { label: "出来高比率が0.7以上", passed: volumeRatio >= 0.7 },
-  ];
-  const score = checks.filter((check) => check.passed).length;
-  const failures = checks.filter((check) => !check.passed).map((check) => check.label);
-  const status: Status = score === checks.length ? "発火候補" : score >= 3 ? "候補に近い" : "条件不足";
-  return {
-    symbol, sleeve, rank: score, score, scoreMax: checks.length, status,
-    side: status === "発火候補" ? "LONG" : "WAIT",
-    reason: status === "発火候補" ? "監視している基礎条件をすべて満たしています。実行前の本番Gate通過を別途確認します。" : "未達: " + failures.join("\u3001") + "\u3002",
-    checkedAt, source: "Aster 公開市場データ（完成済み1時間足）", dataUpdatedAt: new Date(latest.closeTime).toISOString(),
-  };
+  const btcRegime = text(state.btcRegime ?? state.regime) || "UNKNOWN";
+  const referenceTs = finite(state.referenceTs);
+  return candidates
+    .map((candidate, index) => {
+      const rank = finite(candidate.rank) ?? index + 1;
+      const score = finite(candidate.score) ?? 0;
+      const symbolName = text(candidate.symbol) || `CANDIDATE_${index + 1}`;
+      const candidateSide = side(candidate.side);
+      const status: Status = rank <= 2 ? "候補に近い" : "条件不足";
+      return {
+        symbol: symbolName,
+        sleeve: "V12" as const,
+        rank,
+        score,
+        scoreMax: 1,
+        status,
+        side: candidateSide,
+        reason: `V12 runner候補Rank${rank}。score=${score.toFixed(4)} / BTC regime=${btcRegime}。候補順位は発火・発注成立を意味しません。実runnerのSignal Gate・共有risk・容量Gateを別途確認します。`,
+        checkedAt,
+        source: "VPS V12 sanitized decision snapshot",
+        dataUpdatedAt: referenceTs === undefined ? undefined : new Date(referenceTs).toISOString(),
+      } satisfies DecisionStatusItem;
+    })
+    .sort((left, right) => left.rank - right.rank || right.score - left.score);
+}
+
+function rejectionSummary(state: JsonObject): string {
+  const diagnostics = object(state.v52GateDiagnostics);
+  const rejections = object(diagnostics?.rejections);
+  if (!rejections) return "直近の拒否理由は未取得です。";
+  const summary = Object.entries(rejections)
+    .map(([reason, count]) => `${reason}=${Number(count) || 0}`)
+    .filter((entry) => !entry.endsWith("=0"))
+    .slice(0, 5)
+    .join(" / ");
+  return summary ? `直近Gate拒否: ${summary}` : "直近の候補拒否はありません。";
+}
+
+function v52ItemsFromState(state: JsonObject, checkedAt: string): DecisionStatusItem[] {
+  const telemetry = object(state.v52Top2Telemetry);
+  const windows = config.v52Top2Policy.windowsNy
+    .map((window) => object(telemetry?.[window]))
+    .filter((item): item is JsonObject => Boolean(item));
+  const candidates = windows.flatMap((window) => Array.isArray(window.candidates) ? window.candidates.map(object).filter((item): item is JsonObject => Boolean(item)) : []);
+  if (!candidates.length) {
+    const reason = `V52 runner telemetryに候補がありません。${rejectionSummary(state)}`;
+    return config.stockSymbols.map((symbol) => ({
+      ...unavailableItem(symbol, "V52", checkedAt, reason),
+      status: "条件不足" as const,
+      reason,
+      source: "VPS V52 runner telemetry",
+    }));
+  }
+
+  const updatedAt = finite(state.updatedAt);
+  return candidates
+    .map((candidate, index) => {
+      const rank = finite(candidate.qualifiedRank ?? candidate.candidateRank) ?? index + 1;
+      const basisBps = finite(candidate.basisBps) ?? 0;
+      return {
+        symbol: text(candidate.symbol) || `STOCK_CANDIDATE_${index + 1}`,
+        sleeve: "V52" as const,
+        rank,
+        score: basisBps,
+        scoreMax: Math.max(65, basisBps),
+        status: rank <= 2 ? "候補に近い" as const : "条件不足" as const,
+        side: "WAIT" as const,
+        reason: `V52 runner telemetry Rank${rank}候補。basis=${basisBps.toFixed(2)}bps。V50/V11のnet edge・板・容量・発注Windowを別途通過する必要があります。`,
+        checkedAt,
+        source: "VPS V52 runner telemetry",
+        dataUpdatedAt: updatedAt === undefined ? undefined : new Date(updatedAt).toISOString(),
+      } satisfies DecisionStatusItem;
+    })
+    .sort((left, right) => left.rank - right.rank || right.score - left.score);
 }
 
 function newYorkMarketClock(now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(now);
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  const minutes = finite(values.hour) * 60 + finite(values.minute);
+  const minutes = (Number(values.hour) || 0) * 60 + (Number(values.minute) || 0);
   const open = values.weekday !== "Sat" && values.weekday !== "Sun" && minutes >= 570 && minutes < 960;
   return { open, label: "米国株式市場 09:30–16:00（ニューヨーク時間）" };
 }
 
-function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reason: string): DecisionStatusItem {
-  return { symbol, sleeve, rank: 0, score: 0, scoreMax: 4, status: "取得不能", side: "WAIT", reason, checkedAt, source: "Aster 公開市場データ" };
-}
-
 export async function loadDecisionStatus(options: { force?: boolean } = {}): Promise<DecisionStatusSnapshot> {
-  const now = Date.now(); if (!options.force && cache && cache.expiresAt > now) return cache.snapshot;
-  const checkedAt = new Date(now).toISOString(); const v12Items: DecisionStatusItem[] = [];
-  const market = newYorkMarketClock(new Date(now)); const v52Items: DecisionStatusItem[] = []; const errors: string[] = [];
-  for (const symbol of config.v12Symbols) {
-    try { v12Items.push(evaluateCandles(symbol, "V12", await fetchKlines(symbol), checkedAt)); }
-    catch { errors.push(symbol); v12Items.push(unavailableItem(symbol, "V12", checkedAt, "Asterからこの銘柄の判定データを取得できません。")); }
+  const now = Date.now();
+  if (!options.force && cache && cache.expiresAt > now) return cache.snapshot;
+
+  const checkedAt = new Date(now).toISOString();
+  const errors: string[] = [];
+  let v12State: JsonObject | null = null;
+  let v52State: JsonObject | null = null;
+
+  try {
+    v12State = await readState(process.env.V12_DECISION_SNAPSHOT_PATH || process.env.V12_X1_ALL_STATE_PATH, "V12 decision snapshot");
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : "V12 decision snapshotを読み取れません。");
   }
-  v12Items.sort((left, right) => right.score - left.score || left.symbol.localeCompare(right.symbol)); v12Items.forEach((item, index) => { item.rank = index + 1; });
-  for (const symbol of config.stockSymbols) {
-    if (!market.open) { v52Items.push({ symbol, sleeve: "V52", rank: 0, score: 0, scoreMax: 4, status: "対象時間外", side: "WAIT", reason: "米国株式市場の対象時間外です。市場開始まで新規判定を行いません。", checkedAt, source: market.label }); continue; }
-    try { v52Items.push(evaluateCandles(symbol, "V52", await fetchKlines(symbol), checkedAt)); }
-    catch { errors.push(symbol); v52Items.push(unavailableItem(symbol, "V52", checkedAt, "対象時間内ですが、Asterから株式市場データを取得できません。")); }
+
+  const market = newYorkMarketClock(new Date(now));
+  if (market.open) {
+    try {
+      v52State = await readState(process.env.V52_ASTER_ONLY_STATE_PATH, "V52 runner state");
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : "V52 runner stateを読み取れません。");
+    }
   }
-  v52Items.sort((left, right) => right.score - left.score || left.symbol.localeCompare(right.symbol)); v52Items.forEach((item, index) => { item.rank = index + 1; });
-  const snapshot: DecisionStatusSnapshot = { ok: errors.length === 0, readOnly: true, refreshIntervalMinutes: 180, checkedAt, source: "Aster public market data / runtime state observation", runtime: runtimeSnapshot(checkedAt), v12: { items: v12Items }, v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items }, error: errors.length ? "一部銘柄の判定データを取得できません。" : undefined };
-  cache = { expiresAt: now + CACHE_TTL_MS, snapshot }; return snapshot;
+
+  const v12Items = v12State
+    ? v12ItemsFromSnapshot(v12State, checkedAt)
+    : config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, errors[0] || "V12 decision snapshotを読み取れません。"));
+  const v52Items = !market.open
+    ? config.stockSymbols.map((symbol) => ({
+      symbol,
+      sleeve: "V52" as const,
+      rank: 0,
+      score: 0,
+      scoreMax: 1,
+      status: "対象時間外" as const,
+      side: "WAIT" as const,
+      reason: "米国株式市場の対象時間外です。市場開始まで新規判定を行いません。",
+      checkedAt,
+      source: market.label,
+    }))
+    : v52State
+      ? v52ItemsFromState(v52State, checkedAt)
+      : config.stockSymbols.map((symbol) => unavailableItem(symbol, "V52", checkedAt, errors[errors.length - 1] || "V52 runner stateを読み取れません。"));
+
+  const snapshot: DecisionStatusSnapshot = {
+    ok: errors.length === 0,
+    readOnly: true,
+    refreshIntervalMinutes: 180,
+    checkedAt,
+    source: "VPS runner state / sanitized decision snapshot",
+    runtime: runtimeSnapshot(checkedAt),
+    v12: { items: v12Items },
+    v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items },
+    error: errors.length ? errors.join(" / ") : undefined,
+  };
+  cache = { expiresAt: now + CACHE_TTL_MS, snapshot };
+  return snapshot;
 }

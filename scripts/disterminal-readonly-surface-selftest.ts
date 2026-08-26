@@ -37,8 +37,8 @@ const decisionStatus = fs.readFileSync(path.join(root, "lib/server/disdex-decisi
 assert.equal(decisionStatus.includes("/fapi/v3/klines"), false);
 assert.equal(decisionStatus.includes("fetchKlines"), false);
 assert.match(decisionStatus, /PENGU_DUAL_LS_V2_FINAL/);
-assert.match(decisionStatus, /pengu-dual-ls-v2-final\/runner-live\.json/);
-assert.match(decisionStatus, /disdex-v96-v52-live\.service/);
+assert.match(decisionStatus, /V12_DECISION_SNAPSHOT_PATH/);
+assert.match(decisionStatus, /V52_ASTER_ONLY_STATE_PATH/);
 assert.match(decisionStatus, /過去データから推測表示しません/);
 
 console.log("DISTERMINAL_READONLY_SURFACE_SELFTEST_PASS");
