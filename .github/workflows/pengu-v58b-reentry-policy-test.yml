@@ -1,0 +1,23 @@
+name: PENGU V58b Reentry Policy Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v57-conditional-regime-20260826
+    paths:
+      - 'scripts/test_research_v58b_reentry_policy.py'
+      - 'scripts/research_v58b_reentry_policy.py'
+      - '.github/workflows/pengu-v58b-reentry-policy-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run V58b reentry policy test
+        run: python scripts/test_research_v58b_reentry_policy.py
