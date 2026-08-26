@@ -1,0 +1,16 @@
+name: PENGU V65 Supplemental Exit Policy Test
+on:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v65_supplemental_exit_policy.py'
+      - 'scripts/research_patch_v65_supplemental_exit.py'
+      - '.github/workflows/pengu-v65-supplemental-exit-policy-test.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/test_research_v65_supplemental_exit_policy.py
