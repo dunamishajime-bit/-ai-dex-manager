@@ -1,0 +1,55 @@
+name: PENGU V58 Recovery Routing Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v57-conditional-regime-20260826
+    paths:
+      - 'scripts/research_patch_v58_higher_frequency.py'
+      - '.github/workflows/pengu-v58-routing-red-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+      - name: Generate current V58 evaluator
+        run: |
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v58_higher_frequency.py
+      - name: Assert recovery routes beyond V57
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/v58-routing-test
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          mkdir -p .research-state/v58-routing-test
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts > .research-state/v58-routing-test/run.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          v=json.loads(Path('.research-state/v58-routing-test/v58-result.json').read_text())['v58']
+          deltas=[c['deltas']['fullLongTrades'] for c in v['candidates']]
+          print('V58_INCREMENTAL_LONG_DELTAS='+json.dumps(deltas))
+          assert any(x > 0 for x in deltas), 'V58 recovery routing produced no Long signals beyond V57'
+          PY
