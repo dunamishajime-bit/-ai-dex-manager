@@ -1,0 +1,20 @@
+name: PENGU V67 Independent New Long Policy Test
+on:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/test_research_v67_new_long_logic.py'
+      - 'scripts/research_patch_v67_new_long_logic.py'
+      - '.github/workflows/pengu-v67-new-long-policy-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: V67 independent new Long policy contract
+        run: python scripts/test_research_v67_new_long_logic.py
