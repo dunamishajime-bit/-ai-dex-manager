@@ -141,7 +141,7 @@ if marker not in src:
     raise SystemExit('longDiagnostics marker missing')
 src = src.replace(marker, insert + marker, 1)
 
-start = src.index('  const shortBaseline = baselineNormal.filter')
+start = src.index('  const v57 = evaluateV57Conditional')
 end = src.index('\n}\n\nmain().catch', start)
 tail = r'''  const v64 = evaluateV64(rows,funding,baselineNormal);
   const selectedConfig=v64.selectedConfig as V64Config|null;
