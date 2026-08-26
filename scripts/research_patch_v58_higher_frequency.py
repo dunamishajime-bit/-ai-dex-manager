@@ -39,11 +39,6 @@ function v57BreakoutRawFromFeatures(f: PenguDualLsV2Features) {
   return allExceptRegime && !passes.regime72 && breakoutAtrScore(f) >= v57Thresholds.breakoutAtrFloor;
 }
 
-function v58CoreFailureCount(f: PenguDualLsV2Features) {
-  const passes = longGatePasses(f);
-  return v58CoreGates.filter((g) => !passes[g]).length;
-}
-
 function v58TwoFailStrongCore(f: PenguDualLsV2Features) {
   assert(v57Thresholds, "V57 thresholds required");
   const passes = longGatePasses(f);
@@ -74,8 +69,7 @@ function v58RecoveryFailureCount(f: PenguDualLsV2Features, mode: LongMode): numb
 
 function v58RawForMode(row: PenguDualLsV2EvaluationRow, mode: LongMode) {
   if (!row.features) return false;
-  const failureCount = v58RecoveryFailureCount(row.features, mode);
-  return failureCount !== null;
+  return v58RecoveryFailureCount(row.features, mode) !== null;
 }
 
 function requestedGrossForLongMode(f: PenguDualLsV2Features, mode: LongMode, baseGross: number) {
@@ -194,11 +188,11 @@ if marker not in src:
     raise SystemExit('longDiagnostics marker missing')
 src = src.replace(marker, insert + marker, 1)
 
-old_fallback = '''  if (mode === "V57_REGIME72_DUAL") return relativeStrong && breakoutStrong;\n  return false;'''
-new_fallback = '''  if (mode === "V57_REGIME72_DUAL") return relativeStrong && breakoutStrong;\n  if (v58Modes.includes(mode)) return v58RawForMode(row, mode);\n  return false;'''
-if old_fallback not in src:
-    raise SystemExit('longRawForMode fallback marker missing')
-src = src.replace(old_fallback, new_fallback, 1)
+old_route = '''  if (row.longRaw) return true;\n  const passes = longGatePasses(row.features);'''
+new_route = '''  if (row.longRaw) return true;\n  if (v58Modes.includes(mode)) return v58RawForMode(row, mode);\n  const passes = longGatePasses(row.features);'''
+if old_route not in src:
+    raise SystemExit('longRawForMode route marker missing')
+src = src.replace(old_route, new_route, 1)
 
 old_gross = '    const requestedGross = targetGrossForAtr(features.atr24Ratio, side === "L" ? 1 : -1);'
 new_gross = '''    const baseRequestedGross = targetGrossForAtr(features.atr24Ratio, side === "L" ? 1 : -1);\n    const requestedGross = side === "L" ? requestedGrossForLongMode(features, options.longMode, baseRequestedGross) : baseRequestedGross;'''
