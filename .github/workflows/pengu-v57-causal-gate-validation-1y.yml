@@ -1,0 +1,256 @@
+name: PENGU V57 Causal Gate Validation 1Y
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/pengu-v56-v20-diagnostics-20260826
+    paths:
+      - 'scripts/research_generate_pengu_v57_from_v56.py'
+      - 'research/pengu-v57-causal-prereg-20260826.json'
+      - '.github/workflows/pengu-v57-causal-gate-validation-1y.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-v57-causal-gate-validation-1y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen PENGU source read-only
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - name: Checkout frozen V56 research harness
+        uses: actions/checkout@v4
+        with:
+          ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d
+          path: .v56-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 Top2 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065
+          path: .v56-research/.v52-top2-research
+          fetch-depth: 1
+
+      - name: Checkout frozen stock dependency root
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .v56-research/.stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .v56-research/.stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .v56-research/.stock-research/.v13
+          fetch-depth: 1
+
+      - name: Wire frozen stock dependencies
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+
+      - name: Download immutable baseline Run 32902090423 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-32902090423
+          path: .research-state/baseline-32902090423
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32902090423
+
+      - name: Audit V52 executed fills versus prepared rows
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state/baseline-32902090423')
+          r=json.loads((root/'result.json').read_text())
+          s=json.loads((root/'v56-stock-ledger.json').read_text())
+          n=r['results']['NORMAL']; z=r['results']['SEVERE']
+          audit={
+            'baselineRunId':32902090423,
+            'normal':{
+              'portfolioV52Trades':n['bySleeve']['V52']['trades'],
+              'portfolioV52PnlJpy':n['bySleeve']['V52']['pnlJpy'],
+              'detail':n['v52Detail'],
+              'routingEntered':{
+                'V11_EQ':n['routingDiagnostics'].get('V11_EQ_ENTERED',0),
+                'V50_POST_OPEN_BASIS':n['routingDiagnostics'].get('V50_POST_OPEN_BASIS_ENTERED',0),
+              },
+              'prepared':s['modes']['normal']['preparedRows'],
+              'rawLedgerRows':{'v11':len(s['modes']['normal']['v11']),'v50':len(s['modes']['normal']['v50'])},
+            },
+            'severe':{
+              'portfolioV52Trades':z['bySleeve']['V52']['trades'],
+              'portfolioV52PnlJpy':z['bySleeve']['V52']['pnlJpy'],
+              'prepared':s['modes']['stress']['preparedRows'],
+              'rawLedgerRows':{'v11':len(s['modes']['stress']['v11']),'v50':len(s['modes']['stress']['v50'])},
+              'stockCostBps':s['modes']['stress']['stockCostBps'],
+              'engineEvaluated':s['modes']['stress']['engineEvaluated'],
+              'zeroTradesDueToDataFailure':s['modes']['stress']['zeroTradesDueToDataFailure'],
+            },
+            'dataQuality':{
+              'v52RealMarketData':s['dataQuality']['v52RealMarketData'],
+              'decisionWindowCoveragePct':s['dataQuality']['decisionWindowCoveragePct'],
+              'dataFetchFailureAcceptedAsZeroTrades':s['dataQuality']['dataFetchFailureAcceptedAsZeroTrades'],
+            },
+          }
+          Path('.research-state/v52-fill-audit.json').write_text(json.dumps(audit,indent=2)+'\n')
+          print('V52_AUDIT='+json.dumps(audit,separators=(',',':')))
+          PY
+
+      - name: Generate V57 evaluator
+        run: |
+          python scripts/research_generate_pengu_v57_from_v56.py
+          test -s .pengu-current/scripts/.research_pengu_v57.generated.ts
+
+      - name: Run V57 causal validation
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-v57
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v57
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts 2>&1 | tee .research-state/pengu-v57/v57.log
+
+      - name: Validate V57 strict contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('.research-state/pengu-v57/v57-result.json').read_text())
+          l=json.loads(Path('.research-state/pengu-v57/candidate-pengu-ledger.json').read_text())
+          assert r['status']=='PASS_RESEARCH_ONLY'
+          assert r['holdout']['untouchedForSelection'] is True
+          assert r['source']['productionLogicSha']=='a76fd7aaa0788209532a5a2c6489135dd8e4a27e'
+          assert {x['mode'] for x in r['v57']['candidates']}=={
+            'V57_BYPASS_BREAKOUT18','V57_BYPASS_REGIME72','V57_BYPASS_RETURN24'}
+          assert r['v57']['decision'] in ('KEEP_V56','ADOPT_V57_RESEARCH_CANDIDATE')
+          if r['v57']['strictPass']:
+              assert all(r['v57'][k] for k in ['normalHoldoutPositive','stressHoldoutPositive','stressRobust','fullNormalImproves'])
+              assert l['researchCandidate']['promoted'] is True
+          else:
+              assert l['researchCandidate']['promoted'] is False
+              assert l['researchCandidate']['longMode']=='EDGE'
+          assert l['shortVariant']=='COUNTERWIND_VOL_TARGET_FAILURE_EXIT'
+          assert l['safety']=={'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('V57_CONTRACT=PASS')
+          print('STRICT_DECISION='+json.dumps({k:r['v57'].get(k) for k in ['decision','selectedMode','strictPass','normalHoldoutPositive','stressHoldoutPositive','stressRobust']},separators=(',',':')))
+          PY
+
+      - name: Patch fixed 1Y DCA simulator
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py \
+            --source scripts/research_current_top2_pengu_v52_dca.py \
+            --output scripts/.pengu_v57_1y_dca.py \
+            --window 1y
+          python -m py_compile scripts/.pengu_v57_1y_dca.py
+
+      - name: Run integrated DCA with strict V57 decision
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-v57-integrated
+          python scripts/.pengu_v57_1y_dca.py \
+            --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json \
+            --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json \
+            --pengu-ledger .research-state/pengu-v57/candidate-pengu-ledger.json \
+            --output-dir .research-state/pengu-v57-integrated \
+            2>&1 | tee .research-state/pengu-v57-integrated/backtest.log
+
+      - name: Final strict adjudication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.research-state')
+          b=json.loads((root/'baseline-32902090423/result.json').read_text())
+          v=json.loads((root/'pengu-v57/v57-result.json').read_text())
+          c=json.loads((root/'pengu-v57-integrated/result.json').read_text())
+          assert c['status']=='PASS_RESEARCH_ONLY'
+          bn,cn=b['results']['NORMAL'],c['results']['NORMAL']
+          bs,cs=b['results']['SEVERE'],c['results']['SEVERE']
+          strict=bool(v['v57']['strictPass'])
+          if strict:
+              integrated_ok=(
+                cn['endingAssetJpy']>bn['endingAssetJpy']+1e-6
+                and cn['profitFactor']>=bn['profitFactor']*0.98
+                and cn['maxDrawdownPctClosedEventTwr']>=bn['maxDrawdownPctClosedEventTwr']-0.75
+                and cs['endingAssetJpy']>=bs['endingAssetJpy']-1e-6
+                and cs['profitFactor']>=bs['profitFactor']*0.98
+                and cs['maxDrawdownPctClosedEventTwr']>=bs['maxDrawdownPctClosedEventTwr']-0.75)
+          else:
+              integrated_ok=(abs(cn['endingAssetJpy']-bn['endingAssetJpy'])<0.01 and abs(cs['endingAssetJpy']-bs['endingAssetJpy'])<0.01)
+          final_adopt=strict and integrated_ok
+          d={
+            'status':'PASS_RESEARCH_ONLY','baselineRunId':32902090423,
+            'v57StrictStandalonePass':strict,'integratedContractPass':integrated_ok,
+            'finalDecision':'ADOPT_V57_RESEARCH_CANDIDATE' if final_adopt else 'KEEP_V56',
+            'selectedMode':v['v57']['selectedMode'],
+            'holdout':{'normalPositive':v['v57']['normalHoldoutPositive'],'stressPositive':v['v57']['stressHoldoutPositive'],'stressRobust':v['v57']['stressRobust']},
+            'baseline':{'NORMAL':bn,'SEVERE':bs},'candidate':{'NORMAL':cn,'SEVERE':cs},
+            'delta':{
+              'normalEndingAssetJpy':cn['endingAssetJpy']-bn['endingAssetJpy'],
+              'normalProfitFactor':cn['profitFactor']-bn['profitFactor'],
+              'normalDdPctPoint':cn['maxDrawdownPctClosedEventTwr']-bn['maxDrawdownPctClosedEventTwr'],
+              'normalTrades':cn['trades']-bn['trades'],
+              'severeEndingAssetJpy':cs['endingAssetJpy']-bs['endingAssetJpy'],
+              'severeProfitFactor':cs['profitFactor']-bs['profitFactor'],
+              'severeDdPctPoint':cs['maxDrawdownPctClosedEventTwr']-bs['maxDrawdownPctClosedEventTwr'],
+              'severeTrades':cs['trades']-bs['trades']},
+            'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          (root/'pengu-v57-integrated/final-decision.json').write_text(json.dumps(d,indent=2)+'\n')
+          print('FINAL='+json.dumps({k:d[k] for k in ['finalDecision','selectedMode','holdout','delta']},separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v57-causal-gate-validation-1y-${{ github.run_id }}
+          path: |
+            .research-state/v52-fill-audit.json
+            .research-state/pengu-v57
+            .research-state/pengu-v57-integrated
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
