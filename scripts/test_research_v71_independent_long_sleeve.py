@@ -37,9 +37,11 @@ for token in [
 ]:
     assert token in s, f'missing V71 fixed-contract token: {token}'
 
+# `trainScore` exists only inside the frozen V64 config; forbid V71 selection/scoring constructs.
 for forbidden in [
-    'V71_FAMILIES', 'candidateCount', 'trainScore', 'threshold_candidates',
-    'gross_candidates', 'grid_search', 'optimize_threshold', 'optimize_gross'
+    'V71_FAMILIES', 'candidateCount', 'const trainScore', 'selectedTraining',
+    'threshold_candidates', 'gross_candidates', 'grid_search',
+    'optimize_threshold', 'optimize_gross'
 ]:
     assert forbidden not in s, f'forbidden V71 tuning path: {forbidden}'
 
