@@ -43,7 +43,7 @@ for token in [
 # in both Normal and Stress. No candidate/grid/threshold search is allowed.
 for token in [
     'MIN_TRADES_PER_FOLD = 2',
-    'returnPct > 0.0',
+    "m['returnPct'] > 0.0",
     'profitFactor >= 1.0',
     'allFoldPass',
     "selectedFamily == FROZEN_FAMILY",
