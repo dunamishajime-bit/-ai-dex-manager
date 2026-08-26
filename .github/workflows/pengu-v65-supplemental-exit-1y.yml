@@ -1,0 +1,161 @@
+name: PENGU V65 Supplemental Exit 1Y
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/research_patch_v65_supplemental_exit.py'
+      - '.github/workflows/pengu-v65-supplemental-exit-1y.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: pengu-v65-exit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout research branch
+      - uses: actions/checkout@v4
+        name: Checkout frozen PENGU source
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        name: Checkout frozen V56 research
+        with: {ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d, path: .v56-research, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065, path: .v56-research/.v52-top2-research, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: 04c1a369223bd27e9e42bc93604b3777b9230d92, path: .v56-research/.stock-research, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c, path: .v56-research/.stock-research/.v11, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755, path: .v56-research/.stock-research/.v13, fetch-depth: 1}
+      - name: Wire stock deps
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install and verify V65 policy
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/test_research_v65_supplemental_exit_policy.py
+          python -m py_compile scripts/research_patch_v65_supplemental_exit.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-32902090423
+          path: .research-state/baseline-32902090423
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32902090423
+      - name: Generate and run V65 standalone
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-v65
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_v65_supplemental_exit.py
+          mkdir -p .research-state/pengu-v65
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts 2>&1 | tee .research-state/pengu-v65/v65.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('.research-state/pengu-v65/v65-result.json').read_text())
+          v=r['v65']; b=v['incumbent']['fullNormal']; bs=v['incumbent']['fullStress']
+          print('V65='+json.dumps({k:v.get(k) for k in ['decision','selectedConfig','trainingEligible','sameFrequency','normalHoldoutPositive','stressHoldoutPositive','stressRobust','fullNormalImproves','strictPass','candidateCount','eligibleCount']},separators=(',',':')))
+          print('V64_INCUMBENT_NORMAL='+json.dumps(b,separators=(',',':')))
+          print('V64_INCUMBENT_STRESS='+json.dumps(bs,separators=(',',':')))
+          if v.get('metrics'): print('V65_CANDIDATE='+json.dumps(v['metrics'],separators=(',',':')))
+          print('TOP_TRAIN='+json.dumps(v.get('topTraining',[])[:6],separators=(',',':')))
+          assert r['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert b['trades']==41 and b['longTrades']==13 and b['shortTrades']==28
+          assert abs(b['returnPct']-303.99)<0.75, b
+          assert abs(bs['returnPct']-224.21)<0.75, bs
+          PY
+      - name: Patch DCA
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py --source scripts/research_current_top2_pengu_v52_dca.py --output scripts/.pengu_v65_1y_dca.py --window 1y
+          python -m py_compile scripts/.pengu_v65_1y_dca.py
+      - name: Run integrated V64 incumbent and V65 candidate
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          mkdir -p .research-state/pengu-v65-incumbent-integrated .research-state/pengu-v65-integrated
+          python scripts/.pengu_v65_1y_dca.py --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json --pengu-ledger .research-state/pengu-v65/incumbent-v64-pengu-ledger.json --output-dir .research-state/pengu-v65-incumbent-integrated
+          python scripts/.pengu_v65_1y_dca.py --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json --pengu-ledger .research-state/pengu-v65/candidate-pengu-ledger.json --output-dir .research-state/pengu-v65-integrated
+      - name: Final adjudication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.research-state')
+          v=json.loads((r/'pengu-v65/v65-result.json').read_text())['v65']
+          b=json.loads((r/'pengu-v65-incumbent-integrated/result.json').read_text())
+          c=json.loads((r/'pengu-v65-integrated/result.json').read_text())
+          bn,cn=b['results']['NORMAL'],c['results']['NORMAL']
+          bs,cs=b['results']['SEVERE'],c['results']['SEVERE']
+          strict=bool(v['strictPass'])
+          integrated=bool(
+              strict
+              and cn['endingAssetJpy']>bn['endingAssetJpy']+1e-6
+              and cn['profitFactor']>=bn['profitFactor']*.995
+              and cn['maxDrawdownPctClosedEventTwr']>=bn['maxDrawdownPctClosedEventTwr']-1e-9
+              and cn['trades']==bn['trades']
+              and cs['endingAssetJpy']>bs['endingAssetJpy']+1e-6
+              and cs['profitFactor']>=bs['profitFactor']*.995
+              and cs['maxDrawdownPctClosedEventTwr']>=bs['maxDrawdownPctClosedEventTwr']-1e-9
+              and cs['trades']==bs['trades']
+          )
+          d={
+              'status':'PASS_RESEARCH_ONLY',
+              'researchDecision':'ADOPT_V65_RESEARCH_CANDIDATE' if integrated else 'KEEP_V64_RESEARCH_CANDIDATE',
+              'productionDecision':'NO_CHANGE_V56',
+              'selectedV64SizingConfig':v['v64Incumbent'].get('selectedConfig'),
+              'selectedV65ExitConfig':v.get('selectedConfig'),
+              'standaloneStrictPass':strict,
+              'integratedContractPass':integrated,
+              'incumbentIntegrated':{'NORMAL':bn,'SEVERE':bs},
+              'candidateIntegrated':{'NORMAL':cn,'SEVERE':cs},
+              'delta':{
+                  'normalEndingAssetJpy':cn['endingAssetJpy']-bn['endingAssetJpy'],
+                  'normalProfitFactor':cn['profitFactor']-bn['profitFactor'],
+                  'normalDdPctPoint':cn['maxDrawdownPctClosedEventTwr']-bn['maxDrawdownPctClosedEventTwr'],
+                  'normalTrades':cn['trades']-bn['trades'],
+                  'severeEndingAssetJpy':cs['endingAssetJpy']-bs['endingAssetJpy'],
+                  'severeProfitFactor':cs['profitFactor']-bs['profitFactor'],
+                  'severeDdPctPoint':cs['maxDrawdownPctClosedEventTwr']-bs['maxDrawdownPctClosedEventTwr'],
+                  'severeTrades':cs['trades']-bs['trades'],
+              },
+              'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False},
+          }
+          (r/'pengu-v65-integrated/final-decision.json').write_text(json.dumps(d,indent=2)+'\n')
+          print('FINAL='+json.dumps(d,separators=(',',':')))
+          assert b['checks']['NORMAL_v52TradesPositive'] and c['checks']['NORMAL_v52TradesPositive']
+          assert bn['trades']==657
+          assert abs(bn['endingAssetJpy']-827590)<250, bn
+          assert abs(bs['endingAssetJpy']-299570)<250, bs
+          PY
+      - name: Hash research outputs
+        if: always()
+        run: |
+          find .research-state/pengu-v65 .research-state/pengu-v65-incumbent-integrated .research-state/pengu-v65-integrated -type f -print0 | sort -z | xargs -0 sha256sum > .research-state/pengu-v65/MANIFEST.sha256 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v65-supplemental-exit-1y-${{ github.run_id }}
+          path: |
+            .research-state/pengu-v65
+            .research-state/pengu-v65-incumbent-integrated
+            .research-state/pengu-v65-integrated
+          include-hidden-files: true
+          retention-days: 90
