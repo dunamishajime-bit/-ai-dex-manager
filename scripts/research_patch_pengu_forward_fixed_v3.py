@@ -1,0 +1,56 @@
+from pathlib import Path
+
+TARGET=Path('.pengu-current/scripts/.research_pengu_v57.generated.ts')
+src=TARGET.read_text()
+
+old='const EVAL_END = Date.parse("2026-08-10T00:00:00Z");\nconst HOLDOUT_CUTOFF = EVAL_START + Math.floor((EVAL_END - EVAL_START) * 2 / 3);'
+new='const EVAL_END = Date.parse(process.env.PENGU_EVAL_END || "2026-08-27T11:00:00Z");\nconst HISTORICAL_EVAL_END = Date.parse("2026-08-10T00:00:00Z");\nconst HOLDOUT_CUTOFF = EVAL_START + Math.floor((HISTORICAL_EVAL_END - EVAL_START) * 2 / 3);'
+if old not in src: raise SystemExit('EVAL_END/HOLDOUT marker missing')
+src=src.replace(old,new,1)
+
+old_assert='''  const baselineNormalMetrics = metrics(baselineNormal), baselineStressMetrics = metrics(baselineStress);
+  assert.equal(baselineNormalMetrics.trades, 33, `baseline replay drift: ${JSON.stringify(baselineNormalMetrics)}`);
+  assert.equal(baselineNormalMetrics.longTrades, 5);
+  assert.equal(baselineNormalMetrics.shortTrades, 28);
+  assert.ok(Math.abs(baselineNormalMetrics.returnPct - 152.82887236975503) < 0.25, `baseline return drift: ${baselineNormalMetrics.returnPct}`);'''
+new_assert='''  const baselineNormalMetrics = metrics(baselineNormal), baselineStressMetrics = metrics(baselineStress);
+  const historicalBaselineNormal = baselineNormal.filter(t=>t.entryTs<HISTORICAL_EVAL_END);
+  const historicalBaselineNormalMetrics = metrics(historicalBaselineNormal);
+  assert.equal(historicalBaselineNormalMetrics.trades, 33, `historical baseline replay drift: ${JSON.stringify(historicalBaselineNormalMetrics)}`);
+  assert.equal(historicalBaselineNormalMetrics.longTrades, 5);
+  assert.equal(historicalBaselineNormalMetrics.shortTrades, 28);
+  assert.ok(Math.abs(historicalBaselineNormalMetrics.returnPct - 152.82887236975503) < 0.25, `historical baseline return drift: ${historicalBaselineNormalMetrics.returnPct}`);'''
+if old_assert not in src: raise SystemExit('baseline assertion block missing')
+src=src.replace(old_assert,new_assert,1)
+
+start=src.index('  const v64=evaluateV64(rows,funding,baselineNormal);')
+end=src.index('\n}\n\nmain().catch',start)
+tail=r'''  const forwardDerivation=deriveV57Thresholds(historicalBaselineNormal);
+  v57Thresholds=forwardDerivation.thresholds;
+  const v64Frozen:V64Config={rule:{feature:"penguReturn72h",op:"lte",threshold:0.12049482888834451},lowGross:0.1875,label:"penguReturn72h_lte_0.12049483_LOW0.1875",trainScore:31.7010356792032};
+  const recoveryFrozen:RecoveryBtConfig={rule:"R_BTC3",priority:"SHORT_FIRST",gross:.5,exit:{name:"FIXED_A6_T6_R3_H72",hardStopPct:.06,trailActivationPct:.06,trailRetracePct:.03,maxHoldHours:72,structuralBufferPct:null},yieldMode:"BASE_LONG"};
+  v64ActiveConfig=v64Frozen;
+  const baseN=replay(rows,funding,{mode:"normal",longMode:"V64_DYNAMIC"}).trades;
+  v64ActiveConfig=v64Frozen;
+  const baseS=replay(rows,funding,{mode:"stress",longMode:"V64_DYNAMIC"}).trades;
+  v64ActiveConfig=v64Frozen;
+  const candN=replayRecoveryIntegrated(rows,funding,"normal","V64_DYNAMIC",recoveryFrozen);
+  v64ActiveConfig=v64Frozen;
+  const candS=replayRecoveryIntegrated(rows,funding,"stress","V64_DYNAMIC",recoveryFrozen);
+  const histV64=baseN.filter(t=>t.entryTs<HISTORICAL_EVAL_END);
+  const histV64m=metrics(histV64);
+  assert.equal(histV64m.trades,41,`historical V64 count drift: ${JSON.stringify(histV64m)}`);
+  assert.equal(histV64m.longTrades,13);
+  assert.equal(histV64m.shortTrades,28);
+  assert.ok(Math.abs(histV64m.returnPct-303.9903920953809)<1e-9,`historical V64 return drift: ${histV64m.returnPct}`);
+  const forwardStart=HISTORICAL_EVAL_END;
+  const isComplete=(t:RichTrade)=>{if(!t.engineExitReason.includes("MAX_HOLD"))return true;const h=t.engineExitReason.startsWith("RECOVERY_")?72:(t.side==="L"?PENGU_DUAL_LS_V2.long.maxHoldHours:PENGU_DUAL_LS_V2.short.maxHoldHours);return t.exitTs-t.entryTs>=(h-1)*HOUR;};
+  const summarize=(trades:RichTrade[])=>{const observed=trades.filter(t=>t.entryTs>=forwardStart&&t.entryTs<EVAL_END),complete=observed.filter(isComplete),recovery=complete.filter(t=>t.engineExitReason.startsWith("RECOVERY_"));return{observed:metrics(observed),completeOnly:metrics(complete),completeTrades:complete.length,recoveryTrades:recovery.length,incompleteExcluded:observed.length-complete.length,trades:complete.map(t=>({side:t.side,entryTs:new Date(t.entryTs).toISOString(),exitTs:new Date(t.exitTs).toISOString(),accountReturnPct:t.accountReturn*100,exitReason:t.engineExitReason,requestedGross:t.requestedGross,mfePct:t.mfeUnit*100,maePct:t.maeUnit*100}))};};
+  const result={schema:"pengu-recovery-v2-fresh-forward/v3",start:new Date(forwardStart).toISOString(),endExclusive:new Date(EVAL_END).toISOString(),frozenBeforeForward:true,v57Frozen:forwardDerivation,v64Frozen,recoveryFrozen,baseline:{normal:summarize(baseN),stress:summarize(baseS)},candidate:{normal:summarize(candN),stress:summarize(candS)},historicalFreeze:{v64:histV64m},safety:{mode:"RESEARCH_ONLY",ordersSent:false,liveChanged:false,vpsChanged:false,productionChanged:false}};
+  await fs.mkdir(OUTPUT_DIR,{recursive:true});
+  await fs.writeFile(path.join(OUTPUT_DIR,"fresh-forward.json"),JSON.stringify(result,null,2)+"\n","utf8");
+  console.log("FRESH_FORWARD_V3="+JSON.stringify(result));
+'''
+src=src[:start]+tail+src[end:]
+TARGET.write_text(src)
+print(f'PATCHED_FRESH_FORWARD_V3={TARGET}')
