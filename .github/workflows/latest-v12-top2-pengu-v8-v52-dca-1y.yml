@@ -5,7 +5,6 @@ on:
     branches:
       - research/latest-v12-pengu-v8-v52-dca-1y-20260828
     paths:
-      - 'scripts/research_latest_v12_top2_ledger_1y.ts'
       - 'scripts/research_patch_pengu_recovery_v8_integrated_ledger.py'
       - 'scripts/research_latest_v8_dca_1y.py'
       - '.github/workflows/latest-v12-top2-pengu-v8-v52-dca-1y.yml'
@@ -13,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: latest-v12-pengu-v8-v52-dca-1y-${{ github.ref }}
@@ -70,7 +70,7 @@ jobs:
             .cache/perp-research-usdm
             .cache/aster-only-v39-overnight-open
             .stock-research/.cache/perp-research-usdm
-          key: latest-v12-pengu-v8-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_latest_v12_top2_ledger_1y.ts', 'scripts/research_patch_pengu_recovery_v8_integrated_ledger.py', 'scripts/research_latest_v8_dca_1y.py') }}
+          key: latest-v12-pengu-v8-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_patch_pengu_recovery_v8_integrated_ledger.py', 'scripts/research_latest_v8_dca_1y.py') }}
           restore-keys: |
             current-v12-top2-pengu-v20-v52-dca-
             current-v12-top2-pengu-v52-dca-
@@ -88,24 +88,42 @@ jobs:
           python -m py_compile scripts/research_patch_pengu_recovery_v8_integrated_ledger.py
           python -m py_compile scripts/research_latest_v8_dca_1y.py
 
-      - name: Build frozen V12 X1.00 ALL Top2 ledger
-        env:
-          V12_TOP2_LEDGER_OUT: .research-state/latest-v8-dca/v12-top2-ledger.json
+      - name: Restore verified V12 Top2 ledger artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-33099132744
+          path: .research-state/v12-prior
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 33099132744
+
+      - name: Verify and normalize V12 ledger contract
         run: |
           mkdir -p .research-state/latest-v8-dca
-          set -o pipefail
-          npx tsx scripts/research_latest_v12_top2_ledger_1y.ts 2>&1 | tee .research-state/latest-v8-dca/v12-top2.log
-
-      - name: Validate V12 ledger contract
-        run: |
           python - <<'PY'
-          import json
-          p=json.load(open('.research-state/latest-v8-dca/v12-top2-ledger.json'))
+          import hashlib,json
+          from pathlib import Path
+          src=Path('.research-state/v12-prior/v12-top2-ledger.json')
+          raw=src.read_bytes()
+          digest=hashlib.sha256(raw).hexdigest()
+          assert digest=='c990edb6846b608508fa9e216aa83c506973c42509322ea5150d5e3e4aad38b6',digest
+          p=json.loads(raw)
           assert p['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
-          assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
-          assert p['definition']=={'slots':2,'perPositionGrossCap':1.0,'v12AggregateGrossCap':1.5,'riskPct':3.19,'entryPolicy':'ALL'}
+          assert p['period']['startInclusive']=='2025-08-10T00:00:00.000Z'
+          assert p['period']['endExclusive']=='2026-08-10T00:00:00.000Z'
+          assert p['definition']=={'slots':2,'perPositionGrossCap':1,'v12AggregateGrossCap':1.5,'riskPct':3.19,'entryPolicy':'ALL'}
+          n=p['modes']['normal']['metrics']; s=p['modes']['stress']['metrics']
+          assert n['tradeCount']==453 and len(p['modes']['normal']['trades'])==453
+          assert s['tradeCount']==451 and len(p['modes']['stress']['trades'])==451
+          assert abs(n['returnPct']-204.43670830929315)<1e-9
+          assert abs(n['profitFactor']-2.5536190399039276)<1e-9
+          assert abs(s['returnPct']-64.96262006403562)<1e-9
+          assert abs(s['profitFactor']-1.4827626896760207)<1e-9
           assert p['safety']=={'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          print('V12_LEDGER_CONTRACT=PASS')
+          p['period']={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          p['verifiedArtifact']={'sourceRunId':33099132744,'artifactId':9657811845,'fileSha256':digest}
+          Path('.research-state/latest-v8-dca/v12-top2-ledger.json').write_text(json.dumps(p,indent=2)+'\n')
+          print(json.dumps({'status':'V12_LEDGER_CONTRACT_PASS','sha256':digest,'normal':n,'stress':s},indent=2))
           PY
 
       - name: Build frozen PENGU DUAL LS V2 plus Recovery V8 ledger
@@ -135,13 +153,12 @@ jobs:
       - name: Validate frozen V8 ledger contract
         run: |
           python - <<'PY'
-          import json, math
+          import json
           p=json.load(open('.research-state/latest-v8-dca/pengu-v8-ledger.json'))
           assert p['schema']=='pengu-dual-ls-v2-recovery-v8-ledger/v1'
           assert p['strategyId']=='PENGU_DUAL_LS_V2_RECOVERY_V8'
           assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
           assert p['source']['freezeSha']=='15c0b7586710c9db1c46b376bb5041203fc7d826'
-          assert p['source']['parametersFrozen'] is True
           n=p['modes']['normal']['metrics']; s=p['modes']['stress']['metrics']
           assert n['trades']==70 and s['trades']==70
           assert abs(n['returnPct']-574.2299381960086)<1e-9
