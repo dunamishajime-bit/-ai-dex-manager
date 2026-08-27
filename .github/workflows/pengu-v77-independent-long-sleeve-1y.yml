@@ -1,0 +1,19 @@
+name: PENGU V77 Independent Long Sleeve 1Y
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/research_patch_v77_independent_long_sleeve.py'
+      - '.github/workflows/pengu-v77-independent-long-sleeve-1y.yml'
+permissions: {contents: write, actions: read}
+concurrency:
+  group: pengu-v77-independent-long-sleeve-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  evaluate:
+    uses: ./.github/workflows/pengu-independent-long-candidate-reusable.yml
+    with:
+      version: v77
+      number: '77'
+    secrets: inherit
