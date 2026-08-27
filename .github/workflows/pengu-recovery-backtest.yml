@@ -1,0 +1,65 @@
+name: PENGU Recovery Integrated Backtest
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v82-composite-regime-20260827]
+    paths:
+      - 'scripts/research_patch_pengu_recovery_backtest.py'
+      - '.github/workflows/pengu-recovery-backtest.yml'
+permissions: {contents: read, actions: read}
+concurrency:
+  group: pengu-recovery-backtest-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Build frozen V64 plus recovery sleeve search
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-recovery-backtest
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py scripts/research_patch_pengu_directional_wave_map.py scripts/research_patch_pengu_recovery_study.py scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify frozen V64 and research-only backtest
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/pengu-recovery-backtest/missed-opportunity-map.json').read_text())
+          assert x['v64']['trades']==41 and x['v64']['longTrades']==13 and x['v64']['shortTrades']==28
+          assert abs(x['v64']['metrics']['returnPct']-303.9903920953809)<1e-9
+          assert abs(x['v64']['metrics']['profitFactor']-3.5888879900323096)<1e-9
+          bt=x['recoveryBacktest']
+          assert bt['schema']=='pengu-recovery-integrated-backtest/v1'
+          assert bt['selectionProtocol']['finalUntouched']=='Fold3 not used for candidate selection'
+          assert bt['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('RECOVERY_BT='+json.dumps({'candidateCount':bt['selectionProtocol']['candidateCount'],'survivorCount':bt['survivorCount'],'strictPass':bt['strictPass'],'decision':bt['decision'],'selected':bt['selected'] and {'cfg':bt['selected']['cfg'],'deltas':bt['selected']['deltas'],'normal':bt['selected']['metrics']['normal'],'stress':bt['selected']['metrics']['stress'],'normalFolds':bt['selected']['metrics']['normalFolds'],'stressFolds':bt['selected']['metrics']['stressFolds']}},separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-recovery-backtest-${{ github.run_id }}
+          path: .research-state/pengu-recovery-backtest
+          include-hidden-files: true
+          retention-days: 90
