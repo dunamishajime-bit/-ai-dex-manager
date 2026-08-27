@@ -1,0 +1,62 @@
+name: PENGU Recovery Study
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v82-composite-regime-20260827]
+    paths:
+      - 'scripts/research_patch_pengu_recovery_study.py'
+      - '.github/workflows/pengu-recovery-study.yml'
+permissions: {contents: read, actions: read}
+concurrency:
+  group: pengu-recovery-study-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  study:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Build frozen V64 plus causal recovery study
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-recovery-study
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py scripts/research_patch_pengu_directional_wave_map.py scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify frozen baseline and causal study contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('.research-state/pengu-recovery-study/missed-opportunity-map.json')
+          x=json.loads(p.read_text())
+          assert x['v64']['trades']==41 and x['v64']['longTrades']==13 and x['v64']['shortTrades']==28
+          assert abs(x['v64']['metrics']['returnPct']-303.9916300196064) < 1e-9
+          assert x['recoveryStudy']['schema']=='pengu-recovery-study/v1'
+          assert x['recoveryStudy']['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('RECOVERY_COUNTS='+json.dumps({t:{'events':z['all']['target8']['count'],'target8Rate':z['all']['target8']['successRatePct'],'target10Rate':z['all']['target10']['successRatePct']} for t,z in x['recoveryStudy']['byTrigger'].items()},separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-recovery-study-${{ github.run_id }}
+          path: .research-state/pengu-recovery-study
+          include-hidden-files: true
+          retention-days: 90
