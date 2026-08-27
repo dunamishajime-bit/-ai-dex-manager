@@ -1,0 +1,109 @@
+{
+  "schema": "pengu-recovery-v8-final-freeze/v1",
+  "status": "V8_RESEARCH_FINAL_PASS",
+  "date": "2026-08-28",
+  "sourceProductionSha": "a76fd7aaa0788209532a5a2c6489135dd8e4a27e",
+  "researchBranch": "research/pengu-recovery-v8-final-20260828",
+  "config": {
+    "rule": "R_BTC3",
+    "priority": "SHORT_FIRST",
+    "gross": 0.5,
+    "yieldMode": "BASE_LONG",
+    "exit": {
+      "hardStopPct": 0.06,
+      "trailActivationPct": 0.06,
+      "trailRetracePct": 0.03,
+      "maxHoldHours": 72,
+      "structuralBufferPct": null
+    },
+    "delayedPartialDefense": {
+      "partialStopPct": 0.04,
+      "partialAfterHours": 24,
+      "partialGross": 0.25,
+      "remainingGross": 0.25
+    },
+    "breakevenProtector": false,
+    "staticAtrBtcGuard": false,
+    "stagedEntry": false
+  },
+  "historical": {
+    "normal": {
+      "trades": 70,
+      "returnPct": 574.2299381960086,
+      "profitFactor": 4.331158674670027,
+      "maxDrawdownPct": -12.848857788628465,
+      "winRatePct": 71.42857142857143
+    },
+    "severe": {
+      "trades": 70,
+      "returnPct": 395.5575708353778,
+      "profitFactor": 3.4431875382578734,
+      "maxDrawdownPct": -14.773631389772579,
+      "winRatePct": 68.57142857142857
+    }
+  },
+  "crossVenueDiagnostics": {
+    "runId": 33079899290,
+    "period": {
+      "warmStart": "2026-05-15T00:00:00Z",
+      "start": "2026-06-01T00:00:00Z",
+      "endExclusive": "2026-08-10T00:00:00Z"
+    },
+    "OKX": {
+      "normalReturnPct": 1.708116883131927,
+      "normalPf": 1.2941276595322444,
+      "normalDdPct": -4.774806673972343,
+      "severeReturnPct": -2.3079031634269054,
+      "severePf": 0.7285272141032991,
+      "severeDdPct": -6.491818920508996
+    },
+    "BITGET": {
+      "normalReturnPct": 1.0641829160857874,
+      "normalPf": 1.1764674390670848,
+      "normalDdPct": -4.773000658193871,
+      "severeReturnPct": -2.928607458789878,
+      "severePf": 0.6739002510861511,
+      "severeDdPct": -7.094352669821058
+    },
+    "GATE": {
+      "normalReturnPct": 4.045017900309222,
+      "normalPf": 1.6291217581000639,
+      "normalDdPct": -4.613883091268245,
+      "severeReturnPct": -0.40462869077753094,
+      "severePf": 0.9711631263067522,
+      "severeDdPct": -5.681736069940557
+    }
+  },
+  "observedForwardDiagnostic": {
+    "period": {
+      "start": "2026-08-10T00:00:00Z",
+      "endExclusive": "2026-08-27T11:00:00Z"
+    },
+    "alreadyObserved": true,
+    "notFreshAfterV8Development": true,
+    "normalReturnPct": 0.36572114156578905,
+    "normalPf": 1.119671090027525,
+    "normalDdPct": -6.147142426211261,
+    "severeReturnPct": -1.1536741149536844,
+    "severePf": 0.9487973674855004,
+    "severeDdPct": -6.676742389084844
+  },
+  "evidence": {
+    "selectionRunId": 33079489172,
+    "selectionArtifactId": 9649444417,
+    "selectionArtifactSha256": "c19c5f09b81d9054c0e68f7646191bb9deb86b6a6e1817a20bfd9f14622834f0",
+    "finalDiagnosticsRunId": 33079899290,
+    "okxArtifactId": 9649600037,
+    "bitgetArtifactId": 9649599646,
+    "gateArtifactId": 9649595165,
+    "observedForwardArtifactId": 9649589090
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  },
+  "promotionNote": "Research candidate frozen. Do not call the observed 2026-08-10..2026-08-27 diagnostic fresh. A new temporal holdout after this freeze is required before claiming true fresh validation or LIVE promotion readiness."
+}
