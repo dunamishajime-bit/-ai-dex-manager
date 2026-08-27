@@ -1,0 +1,137 @@
+name: PENGU Recovery V7 Final Diagnostics
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-recovery-v7-final-20260827]
+    paths:
+      - 'scripts/research_fetch_cross_venue_data_v3.py'
+      - 'scripts/research_patch_pengu_recovery_v7_final_cross.py'
+      - 'scripts/research_patch_pengu_recovery_v7_final_forward.py'
+      - '.github/workflows/pengu-recovery-v7-final-diagnostics.yml'
+permissions: {contents: read, actions: read}
+concurrency:
+  group: pengu-recovery-v7-final-diagnostics-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cross:
+    strategy:
+      fail-fast: false
+      matrix: {venue: [OKX, BITGET, GATE]}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Fetch exact venue data
+        env:
+          PENGU_CROSS_VENUE: ${{ matrix.venue }}
+          PENGU_LOCAL_DATA_DIR: ${{ github.workspace }}/.research-state/v7-final-cross-${{ matrix.venue }}/input
+        run: python scripts/research_fetch_cross_venue_data_v3.py
+      - name: Run frozen V7 final venue replay
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_CROSS_VENUE: ${{ matrix.venue }}
+          PENGU_LOCAL_DATA_DIR: ${{ github.workspace }}/.research-state/v7-final-cross-${{ matrix.venue }}/input
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/v7-final-cross-${{ matrix.venue }}/output
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_recovery_v7_delayed_defense.py
+          python scripts/research_patch_pengu_recovery_v7_final_cross.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify cross contract
+        env:
+          VENUE: ${{ matrix.venue }}
+          OUT: ${{ github.workspace }}/.research-state/v7-final-cross-${{ matrix.venue }}/output/v7-final-cross.json
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads(Path(os.environ['OUT']).read_text())
+          assert x['schema']=='pengu-recovery-v7-final-cross/v1' and x['venue']==os.environ['VENUE']
+          assert x['frozenBeforeVenue'] is True and x['data']['evaluationMissing']==0
+          assert x['v7Frozen']['v7Mode']=='P5BE_H4_A12_G125' and x['v2Frozen']['v7Mode']=='BASE'
+          assert x['v7Frozen']['rule']=='R_BTC3' and abs(x['v7Frozen']['gross']-.5)<1e-12
+          safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert x['safety']==safety
+          print('V7_FINAL_CROSS_CONTRACT='+json.dumps(x,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-recovery-v7-final-cross-${{ matrix.venue }}-${{ github.run_id }}
+          path: .research-state/v7-final-cross-${{ matrix.venue }}
+          include-hidden-files: true
+          retention-days: 90
+  observed_forward:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Run frozen V7 final observed-forward replay
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/v7-final-forward
+          PENGU_EVAL_END: '2026-08-27T11:00:00Z'
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_recovery_v7_delayed_defense.py
+          python scripts/research_patch_pengu_recovery_v7_final_forward.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify observed-forward contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/v7-final-forward/v7-final-forward.json').read_text())
+          assert x['schema']=='pengu-recovery-v7-final-observed-forward/v1'
+          assert x['start']=='2026-08-10T00:00:00.000Z' and x['endExclusive']=='2026-08-27T11:00:00.000Z'
+          assert x['alreadyObserved'] is True and x['notFreshAfterV7Development'] is True
+          assert x['historicalFreeze']['v64']['trades']==41
+          assert abs(x['historicalFreeze']['v64']['returnPct']-303.9903920953809)<1e-9
+          assert x['v7Frozen']['v7Mode']=='P5BE_H4_A12_G125' and x['v2Frozen']['v7Mode']=='BASE'
+          safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert x['safety']==safety
+          print('V7_FINAL_FORWARD_CONTRACT='+json.dumps(x,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-recovery-v7-final-forward-${{ github.run_id }}
+          path: .research-state/v7-final-forward
+          include-hidden-files: true
+          retention-days: 90
