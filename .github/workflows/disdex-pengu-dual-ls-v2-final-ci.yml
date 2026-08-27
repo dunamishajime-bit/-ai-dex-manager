@@ -24,6 +24,9 @@ jobs:
       - run: npm run strategy:pengu-dual-ls-v2:typecheck
       - run: npm run strategy:pengu-dual-ls-v2:selftest
       - run: npm run strategy:pengu-dual-ls-v2:parity
+      - run: npm run strategy:pengu-dual-ls-v2:short-v20:selftest
+      - run: npm run strategy:pengu-dual-ls-v2:recovery-v8:selftest
+      - run: npm run strategy:pengu-dual-ls-v2:recovery-v8:parity
       - run: npm run strategy:disdex-v13d-v11eq-v96:preflight:selftest
       - run: npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
       - run: git diff --check
