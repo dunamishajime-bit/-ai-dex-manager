@@ -1,0 +1,81 @@
+name: PENGU Recovery V5 Staged Gross
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v82-composite-regime-20260827]
+    paths:
+      - 'scripts/research_patch_pengu_recovery_v5_staged_gross.py'
+      - '.github/workflows/pengu-recovery-v5-staged-gross.yml'
+permissions: {contents: read, actions: read}
+concurrency:
+  group: pengu-recovery-v5-staged-gross-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Build frozen V64 plus V2 parent plus V5 staged-gross grid
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-recovery-v5-staged-gross
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py scripts/research_patch_pengu_directional_wave_map.py scripts/research_patch_pengu_recovery_study.py scripts/research_patch_pengu_recovery_backtest.py scripts/research_patch_pengu_recovery_backtest_fold_fix.py scripts/research_patch_pengu_recovery_v2_subordinate.py scripts/research_patch_pengu_recovery_v5_staged_gross.py
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_recovery_v5_staged_gross.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify frozen baseline and V5 research contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/pengu-recovery-v5-staged-gross/missed-opportunity-map.json').read_text())
+          assert x['v64']['trades']==41 and x['v64']['longTrades']==13 and x['v64']['shortTrades']==28
+          assert abs(x['v64']['metrics']['returnPct']-303.9903920953809)<1e-9
+          assert abs(x['v64']['metrics']['profitFactor']-3.5888879900323096)<1e-9
+          assert abs(x['v64']['metrics']['maxDrawdownPct']-(-12.848857788628475))<1e-9
+          bt=x['recoveryBacktest']
+          assert bt['schema']=='pengu-recovery-integrated-backtest/v5-staged-gross'
+          assert bt['selectionProtocol']['candidateCount']==7
+          assert 'contaminated diagnostics' in bt['selectionProtocol']['recycledHoldoutNotice']
+          assert bt['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          selected=bt['selected']
+          print('RECOVERY_V5='+json.dumps({
+            'candidateCount':bt['selectionProtocol']['candidateCount'],
+            'survivorCount':bt['survivorCount'],
+            'historicalStrictPass':bt['strictPass'],
+            'decision':bt['decision'],
+            'selected':selected and {
+              'cfg':selected['cfg'],'riskScore':selected.get('riskScore'),'score':selected['score'],'deltas':selected['deltas'],
+              'normal':selected['metrics']['normal'],'stress':selected['metrics']['stress'],
+              'normalFolds':selected['metrics']['normalFolds'],'stressFolds':selected['metrics']['stressFolds']
+            }
+          },separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-recovery-v5-staged-gross-${{ github.run_id }}
+          path: .research-state/pengu-recovery-v5-staged-gross
+          include-hidden-files: true
+          retention-days: 90
