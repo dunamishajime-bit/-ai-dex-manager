@@ -1,0 +1,48 @@
+name: PENGU Short V11 Bybit Untouched Holdout
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'PRE_REGISTER_V11.md'
+      - 'scripts/research_pengu_short_v11_bybit_holdout.ts'
+      - '.github/workflows/pengu-short-v11-bybit-holdout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Select official Bybit backup endpoint only
+        run: sed -i 's#https://api.bybit.com#https://api.bytick.com#' scripts/research_pengu_short_v11_bybit_holdout.ts
+      - name: Run pre-registered V11 once on untouched Bybit holdout
+        run: npx tsx scripts/research_pengu_short_v11_bybit_holdout.ts
+      - name: Validate untouched-holdout contract
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('.research-state/pengu-short-v11-bybit/result.json'))
+          assert x['status']=='PASS_RESEARCH_ONLY'
+          assert x['preRegistrationSha']=='64b22dad74d1c026b2146d41d39cc8a3d3a819e3'
+          assert x['preRegisteredCandidate']['candidateCount']==1
+          assert x['preRegisteredCandidate']['thresholdSweep'] is False
+          assert x['data']['venue']=='Bybit'
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'promotion':x['promotion'],'normal':x['results']['NORMAL'],'stress':x['results']['STRESS']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-short-v11-bybit-holdout-${{ github.run_id }}
+          path: .research-state/pengu-short-v11-bybit
+          if-no-files-found: error
