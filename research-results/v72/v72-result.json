@@ -1,0 +1,211 @@
+{
+  "status": "PASS_RESEARCH_ONLY",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "source": {
+    "productionLogicSha": "a76fd7aaa0788209532a5a2c6489135dd8e4a27e",
+    "venue": "Aster perpetual public REST V3"
+  },
+  "v72": {
+    "schema": "pengu-v72-independent-long-sleeve/v1",
+    "family": "VOLATILITY_COMPRESSION_RELEASE",
+    "frozenV64Config": {
+      "rule": {
+        "feature": "penguReturn72h",
+        "op": "lte",
+        "threshold": 0.12049482888834451
+      },
+      "lowGross": 0.1875,
+      "label": "penguReturn72h_lte_0.12049483_LOW0.1875",
+      "trainScore": 31.7010356792032
+    },
+    "newLongGross": 0.25,
+    "materialGainThresholdMultiple": 1.05,
+    "incumbent": {
+      "normal": {
+        "trades": 41,
+        "returnPct": 303.9903920953809,
+        "profitFactor": 3.5888879900323096,
+        "maxDrawdownPct": -12.848857788628475,
+        "winRatePct": 63.41463414634146,
+        "hardStops": 9,
+        "trailingExits": 17,
+        "timeExits": 15,
+        "longTrades": 13,
+        "shortTrades": 28
+      },
+      "stress": {
+        "trades": 41,
+        "returnPct": 224.20754349037898,
+        "profitFactor": 2.9334915556768655,
+        "maxDrawdownPct": -13.949549455295129,
+        "winRatePct": 60.97560975609756,
+        "hardStops": 9,
+        "trailingExits": 17,
+        "timeExits": 15,
+        "longTrades": 13,
+        "shortTrades": 28
+      }
+    },
+    "folds": [
+      {
+        "fold": 1,
+        "start": "2025-08-10T00:00:00.000Z",
+        "end": "2025-12-09T16:00:00.000Z",
+        "trades": {
+          "normal": 19,
+          "stress": 19
+        },
+        "metrics": {
+          "normal": {
+            "trades": 19,
+            "returnPct": -10.224343785301382,
+            "profitFactor": 0.593459329406458,
+            "maxDrawdownPct": -17.442236004334987,
+            "winRatePct": 26.31578947368421,
+            "hardStops": 11,
+            "trailingExits": 5,
+            "timeExits": 3,
+            "longTrades": 19,
+            "shortTrades": 0
+          },
+          "stress": {
+            "trades": 19,
+            "returnPct": -13.180013161008775,
+            "profitFactor": 0.5095073605321961,
+            "maxDrawdownPct": -19.891613740519475,
+            "winRatePct": 26.31578947368421,
+            "hardStops": 11,
+            "trailingExits": 5,
+            "timeExits": 3,
+            "longTrades": 19,
+            "shortTrades": 0
+          }
+        },
+        "normalPass": false,
+        "stressPass": false,
+        "pass": false
+      },
+      {
+        "fold": 2,
+        "start": "2025-12-09T16:00:00.000Z",
+        "end": "2026-04-10T08:00:00.000Z",
+        "trades": {
+          "normal": 16,
+          "stress": 16
+        },
+        "metrics": {
+          "normal": {
+            "trades": 16,
+            "returnPct": -3.4074392392199226,
+            "profitFactor": 0.8204287857466457,
+            "maxDrawdownPct": -9.729596485946146,
+            "winRatePct": 37.5,
+            "hardStops": 8,
+            "trailingExits": 4,
+            "timeExits": 4,
+            "longTrades": 16,
+            "shortTrades": 0
+          },
+          "stress": {
+            "trades": 16,
+            "returnPct": -6.083213356451289,
+            "profitFactor": 0.6876486666285767,
+            "maxDrawdownPct": -11.157616861783215,
+            "winRatePct": 37.5,
+            "hardStops": 8,
+            "trailingExits": 4,
+            "timeExits": 4,
+            "longTrades": 16,
+            "shortTrades": 0
+          }
+        },
+        "normalPass": false,
+        "stressPass": false,
+        "pass": false
+      },
+      {
+        "fold": 3,
+        "start": "2026-04-10T08:00:00.000Z",
+        "end": "2026-08-10T00:00:00.000Z",
+        "trades": {
+          "normal": 16,
+          "stress": 16
+        },
+        "metrics": {
+          "normal": {
+            "trades": 16,
+            "returnPct": 9.143895813221548,
+            "profitFactor": 1.865608878354978,
+            "maxDrawdownPct": -4.065321124999988,
+            "winRatePct": 62.5,
+            "hardStops": 5,
+            "trailingExits": 7,
+            "timeExits": 4,
+            "longTrades": 16,
+            "shortTrades": 0
+          },
+          "stress": {
+            "trades": 16,
+            "returnPct": 6.1432375013025675,
+            "profitFactor": 1.5456834302606206,
+            "maxDrawdownPct": -5.35310261106019,
+            "winRatePct": 62.5,
+            "hardStops": 5,
+            "trailingExits": 7,
+            "timeExits": 4,
+            "longTrades": 16,
+            "shortTrades": 0
+          }
+        },
+        "normalPass": true,
+        "stressPass": true,
+        "pass": true
+      }
+    ],
+    "allFoldPass": false,
+    "fullMetrics": {
+      "normal": {
+        "trades": 51,
+        "returnPct": -5.354118683084441,
+        "profitFactor": 0.9203966227455458,
+        "maxDrawdownPct": -17.442236004334987,
+        "winRatePct": 41.17647058823529,
+        "hardStops": 24,
+        "trailingExits": 16,
+        "timeExits": 11,
+        "longTrades": 51,
+        "shortTrades": 0
+      },
+      "stress": {
+        "trades": 51,
+        "returnPct": -13.452351918377603,
+        "profitFactor": 0.7738631146465049,
+        "maxDrawdownPct": -20.36176000838403,
+        "winRatePct": 41.17647058823529,
+        "hardStops": 24,
+        "trailingExits": 16,
+        "timeExits": 11,
+        "longTrades": 51,
+        "shortTrades": 0
+      }
+    },
+    "strictPass": false,
+    "decision": "KEEP_V64_RESEARCH_CANDIDATE",
+    "reason": "Fixed V72 sleeve failed at least one predeclared chronological fold; no tuning permitted."
+  },
+  "final": {
+    "v64Preserved": true,
+    "newLongSleeveSelected": "VOLATILITY_COMPRESSION_RELEASE",
+    "newLongSleevePromoted": false
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}

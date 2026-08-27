@@ -1,0 +1,3 @@
+source_run=33039501935
+source_artifact=pengu-v72-independent-long-sleeve-1y-33039501935
+source_artifact_sha256=b6a820eee27aa78f9bc6ff93177ba2cd678d21c557fe5ca3a82f2ac2872d45ff
