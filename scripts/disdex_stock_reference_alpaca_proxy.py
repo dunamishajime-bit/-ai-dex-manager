@@ -63,12 +63,14 @@ class Quote:
 
 
 class QuoteStore:
-    def __init__(self) -> None:
+    def __init__(self, feed: str = "iex", max_age_ms: int = 1400) -> None:
         self._lock = threading.Lock()
         self._quotes: Dict[str, Quote] = {}
         self._connected = False
         self._last_error: Optional[str] = None
         self._last_message_ms = 0
+        self._feed = feed
+        self._max_age_ms = max_age_ms
 
     def set_connected(self, connected: bool) -> None:
         with self._lock:
@@ -116,11 +118,19 @@ class QuoteStore:
                 }
                 for symbol, quote in self._quotes.items()
             }
+            freshness_ready = self._connected and all(
+                symbol in rows and rows[symbol]["ageMs"] <= self._max_age_ms
+                for symbol in SYMBOLS
+            )
             return {
+                "provider": "alpaca",
+                "feed": self._feed,
                 "status": "ok" if self._connected else "degraded",
                 "connected": self._connected,
                 "lastError": self._last_error,
                 "lastMessageAt": self._last_message_ms,
+                "freshnessReady": freshness_ready,
+                "maximumQuoteAgeMs": self._max_age_ms,
                 "symbols": rows,
             }
 
@@ -262,7 +272,7 @@ class ReferenceServer(ThreadingHTTPServer):
 def self_test() -> None:
     assert parse_rfc3339_ms("2026-07-25T01:02:03.123456789Z") == 1784941323123
     assert AlpacaStream._rows('[{"T":"success","msg":"connected"}]')[0]["msg"] == "connected"
-    store = QuoteStore()
+    store = QuoteStore(feed="iex", max_age_ms=1400)
     store.update({
         "T": "q",
         "S": "NVDA",
@@ -288,7 +298,8 @@ def main() -> int:
     port = int(os.getenv("DISDEX_STOCK_REFERENCE_PORT", "8797"))
     max_age_ms = int(os.getenv("DISDEX_STOCK_REFERENCE_PROXY_MAX_AGE_MS", "1400"))
     stop_event = threading.Event()
-    store = QuoteStore()
+    feed = os.getenv("ALPACA_DATA_FEED", "iex").strip().lower()
+    store = QuoteStore(feed=feed, max_age_ms=max_age_ms)
     stream = AlpacaStream(store, stop_event)
     server = ReferenceServer((host, port), store, max_age_ms)
 
