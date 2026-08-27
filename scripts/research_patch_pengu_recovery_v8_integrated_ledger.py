@@ -35,7 +35,7 @@ tail=r'''  const frozenV57:V57Thresholds={relativeReturn24hFloor:0.1085508587241
     config:{rule:"R_BTC3",priority:"SHORT_FIRST",gross:.5,yieldMode:"BASE_LONG",exit:v8Frozen.exit,delayedPartialDefense:{partialStopPct:.04,partialAfterHours:24,partialGross:.25,remainingGross:.25},breakevenProtector:false,staticAtrBtcGuard:false,stagedEntry:false},
     costs:{normalFeeBpsPerSide:6,stressAdditionalAdverseBpsPerSide:35,actualFunding:true},
     modes:{normal:{metrics:normalMetrics,trades:v8N.map(publicV8Trade)},stress:{metrics:stressMetrics,trades:v8S.map(publicV8Trade)}},
-    integrity:{noOverlapNormal:v8N.every((t,i)=>i===0||t.entryTs>v8N[i-1].exitTs),noOverlapStress:v8S.every((t,i)=>i===0||t.entryTs>v8S[i-1].exitTs),maximumRequestedGross:Math.max(...v8N.map(t=>t.requestedGross))},
+    integrity:{noOverlapNormal:v8N.every((t,i)=>i===0||t.entryTs>=v8N[i-1].exitTs),noOverlapStress:v8S.every((t,i)=>i===0||t.entryTs>=v8S[i-1].exitTs),sameTimestampHandoffAllowed:true,maximumRequestedGross:Math.max(...v8N.map(t=>t.requestedGross))},
     safety:{mode:"RESEARCH_ONLY",ordersSent:false,liveChanged:false,vpsChanged:false,productionChanged:false}
   };
   assert.equal(ledger.period.startInclusive,"2025-08-10T00:00:00.000Z");
