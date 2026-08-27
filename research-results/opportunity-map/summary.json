@@ -1,0 +1,3305 @@
+{
+  "schema": "pengu-missed-opportunity-summary/v1",
+  "method": {
+    "entry": "every closed 1h bar -> next 1h open",
+    "horizonsHours": [
+      6,
+      12,
+      24,
+      48,
+      96
+    ],
+    "thresholdsNetMfePct": [
+      3,
+      5,
+      8,
+      10,
+      15,
+      20,
+      30
+    ],
+    "fees": {
+      "normalRoundTripPct": 0.12,
+      "severeRoundTripPct": 0.8200000000000001
+    },
+    "grossForCapacity": 0.25,
+    "deduplication": "adjacent qualifying starts separated by <=3h form one episode; representative maximizes Normal net MFE",
+    "oracle": "hindsight upper-bound only; exit at future peak, no overlap, production cooldown enforced; not a tradable strategy"
+  },
+  "v64": {
+    "trades": 41,
+    "longTrades": 13,
+    "shortTrades": 28,
+    "metrics": {
+      "trades": 41,
+      "returnPct": 303.9903920953809,
+      "profitFactor": 3.5888879900323096,
+      "maxDrawdownPct": -12.848857788628475,
+      "winRatePct": 63.41463414634146,
+      "hardStops": 9,
+      "trailingExits": 17,
+      "timeExits": 15,
+      "longTrades": 13,
+      "shortTrades": 28
+    }
+  },
+  "horizons": {
+    "6": {
+      "all": {
+        "count": 8759,
+        "mfePct": {
+          "p50": 1.1895526247737154,
+          "p75": 2.6049528222333085,
+          "p90": 4.432219427992438,
+          "p95": 5.818740535716605,
+          "max": 28.265107212475638
+        },
+        "maePct": {
+          "p50": -1.3568791778908573,
+          "p10": -4.32825713232092,
+          "min": -78.45553714443524
+        },
+        "maeBeforePeakPct": {
+          "p50": -0.4756776162268994,
+          "p10": -2.0303680642389565
+        },
+        "closeReturnPct": {
+          "p50": -0.14996250937264755,
+          "p75": 1.2968625726143657,
+          "p90": 2.9861980653520925
+        }
+      },
+      "coverage": {
+        "LONG_ALREADY_CAPTURED": {
+          "count": 490,
+          "mfePct": {
+            "p50": 2.0981309494008227,
+            "p75": 4.530157602035207,
+            "p90": 6.283165091797647,
+            "p95": 7.921184933832696,
+            "max": 16.978193146417443
+          },
+          "maePct": {
+            "p50": -1.6680886131174466,
+            "p10": -4.815847953149627,
+            "min": -9.974424552429673
+          },
+          "maeBeforePeakPct": {
+            "p50": -0.7905208245546913,
+            "p10": -2.412955319552006
+          },
+          "closeReturnPct": {
+            "p50": 0,
+            "p75": 2.0388217623902416,
+            "p90": 4.514287063139863
+          }
+        },
+        "SHORT_CONFLICT": {
+          "count": 1451,
+          "mfePct": {
+            "p50": 1.1287357304715862,
+            "p75": 2.33878470322495,
+            "p90": 3.8596491228070073,
+            "p95": 4.9762698966458245,
+            "max": 9.766345562615308
+          },
+          "maePct": {
+            "p50": -1.293661060802076,
+            "p10": -4.863741903947194,
+            "min": -78.45553714443524
+          },
+          "maeBeforePeakPct": {
+            "p50": -0.4416310908287979,
+            "p10": -2.1251089799476985
+          },
+          "closeReturnPct": {
+            "p50": -0.1113762927605455,
+            "p75": 1.1611435580554996,
+            "p90": 2.666892196662163
+          }
+        },
+        "FREE_MISSED": {
+          "count": 6818,
+          "mfePct": {
+            "p50": 1.1579268986642632,
+            "p75": 2.5745696893824443,
+            "p90": 4.335676305928307,
+            "p95": 5.772623227716826,
+            "max": 28.265107212475638
+          },
+          "maePct": {
+            "p50": -1.3493181038957192,
+            "p10": -4.228664065824197,
+            "min": -17.238369555730117
+          },
+          "maeBeforePeakPct": {
+            "p50": -0.46225807351460424,
+            "p10": -1.9671162065129
+          },
+          "closeReturnPct": {
+            "p50": -0.16258678664694548,
+            "p75": 1.2740498499763164,
+            "p90": 2.937329440033352
+          }
+        }
+      },
+      "thresholds": {
+        "3": {
+          "hourlyStarts": {
+            "all": 1684,
+            "freeMissed": 1264,
+            "shortConflict": 232,
+            "longCaptured": 188,
+            "missedSharePct": 88.83610451306413
+          },
+          "dedupedEpisodes": {
+            "all": 342,
+            "missed": 322,
+            "missedSharePct": 94.15204678362574,
+            "byCoverage": {
+              "FREE_MISSED": 256,
+              "SHORT_CONFLICT": 66,
+              "LONG_ALREADY_CAPTURED": 20
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 1221,
+            "regime72": 1203,
+            "breakout18": 1172,
+            "relative24": 836,
+            "ema168": 708,
+            "btc24": 652,
+            "rsiMin": 608,
+            "volumeMin": 191,
+            "volumeMax": 130,
+            "atrMax": 10,
+            "rsiMax": 6
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 337,
+              "compoundedGross025ReturnPct": 10440.827339265274,
+              "sumGross025ReturnPct": 469.8958699469588
+            },
+            "missedNormal": {
+              "trades": 315,
+              "compoundedGross025ReturnPct": 7427.5707689686415,
+              "sumGross025ReturnPct": 435.9388424787169
+            },
+            "allSevere": {
+              "trades": 263,
+              "compoundedGross025ReturnPct": 3679.8224570388684,
+              "sumGross025ReturnPct": 366.4783445728543
+            },
+            "missedSevere": {
+              "trades": 244,
+              "compoundedGross025ReturnPct": 2723.6556925273585,
+              "sumGross025ReturnPct": 337.05994999334484
+            }
+          }
+        },
+        "5": {
+          "hourlyStarts": {
+            "all": 627,
+            "freeMissed": 465,
+            "shortConflict": 62,
+            "longCaptured": 100,
+            "missedSharePct": 84.05103668261563
+          },
+          "dedupedEpisodes": {
+            "all": 167,
+            "missed": 150,
+            "missedSharePct": 89.82035928143712,
+            "byCoverage": {
+              "FREE_MISSED": 129,
+              "SHORT_CONFLICT": 21,
+              "LONG_ALREADY_CAPTURED": 17
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 447,
+            "regime72": 442,
+            "breakout18": 434,
+            "relative24": 301,
+            "ema168": 272,
+            "btc24": 243,
+            "rsiMin": 224,
+            "volumeMin": 78,
+            "volumeMax": 48,
+            "atrMax": 8,
+            "rsiMax": 2
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 159,
+              "compoundedGross025ReturnPct": 1874.4514527103092,
+              "sumGross025ReturnPct": 301.6175300228369
+            },
+            "missedNormal": {
+              "trades": 142,
+              "compoundedGross025ReturnPct": 1363.2703795749178,
+              "sumGross025ReturnPct": 271.37148271389094
+            },
+            "allSevere": {
+              "trades": 126,
+              "compoundedGross025ReturnPct": 939.6613743207427,
+              "sumGross025ReturnPct": 236.7807354302011
+            },
+            "missedSevere": {
+              "trades": 113,
+              "compoundedGross025ReturnPct": 728.934313055747,
+              "sumGross025ReturnPct": 213.91948648214998
+            }
+          }
+        },
+        "8": {
+          "hourlyStarts": {
+            "all": 145,
+            "freeMissed": 115,
+            "shortConflict": 8,
+            "longCaptured": 22,
+            "missedSharePct": 84.82758620689656
+          },
+          "dedupedEpisodes": {
+            "all": 49,
+            "missed": 44,
+            "missedSharePct": 89.79591836734694,
+            "byCoverage": {
+              "FREE_MISSED": 42,
+              "SHORT_CONFLICT": 2,
+              "LONG_ALREADY_CAPTURED": 5
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 110,
+            "regime72": 105,
+            "breakout18": 105,
+            "relative24": 75,
+            "ema168": 67,
+            "btc24": 63,
+            "rsiMin": 48,
+            "volumeMin": 26,
+            "volumeMax": 9,
+            "atrMax": 2
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 48,
+              "compoundedGross025ReturnPct": 264.7518854336424,
+              "sumGross025ReturnPct": 131.43213488465304
+            },
+            "missedNormal": {
+              "trades": 43,
+              "compoundedGross025ReturnPct": 221.41469742899002,
+              "sumGross025ReturnPct": 118.62009227528914
+            },
+            "allSevere": {
+              "trades": 35,
+              "compoundedGross025ReturnPct": 163.5320022412917,
+              "sumGross025ReturnPct": 98.48298370207809
+            },
+            "missedSevere": {
+              "trades": 31,
+              "compoundedGross025ReturnPct": 138.81493655023945,
+              "sumGross025ReturnPct": 88.51105426448639
+            }
+          }
+        },
+        "10": {
+          "hourlyStarts": {
+            "all": 56,
+            "freeMissed": 49,
+            "shortConflict": 0,
+            "longCaptured": 7,
+            "missedSharePct": 87.5
+          },
+          "dedupedEpisodes": {
+            "all": 16,
+            "missed": 14,
+            "missedSharePct": 87.5,
+            "byCoverage": {
+              "FREE_MISSED": 14,
+              "SHORT_CONFLICT": 0,
+              "LONG_ALREADY_CAPTURED": 2
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 47,
+            "regime72": 43,
+            "breakout18": 42,
+            "relative24": 34,
+            "ema168": 31,
+            "btc24": 27,
+            "rsiMin": 20,
+            "volumeMin": 8,
+            "atrMax": 2,
+            "volumeMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 16,
+              "compoundedGross025ReturnPct": 80.11218596384614,
+              "sumGross025ReturnPct": 60.08077714170997
+            },
+            "missedNormal": {
+              "trades": 14,
+              "compoundedGross025ReturnPct": 70.10189357719878,
+              "sumGross025ReturnPct": 54.280014548149204
+            },
+            "allSevere": {
+              "trades": 14,
+              "compoundedGross025ReturnPct": 67.0122509101825,
+              "sumGross025ReturnPct": 52.371628194067526
+            },
+            "missedSevere": {
+              "trades": 12,
+              "compoundedGross025ReturnPct": 58.26789441679014,
+              "sumGross025ReturnPct": 46.920865600506765
+            }
+          }
+        },
+        "15": {
+          "hourlyStarts": {
+            "all": 15,
+            "freeMissed": 14,
+            "shortConflict": 0,
+            "longCaptured": 1,
+            "missedSharePct": 93.33333333333333
+          },
+          "dedupedEpisodes": {
+            "all": 5,
+            "missed": 5,
+            "missedSharePct": 100,
+            "byCoverage": {
+              "FREE_MISSED": 5,
+              "SHORT_CONFLICT": 0,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {
+            "regime72": 14,
+            "return24": 14,
+            "relative24": 13,
+            "ema168": 12,
+            "breakout18": 10,
+            "btc24": 8,
+            "rsiMin": 7,
+            "volumeMin": 5,
+            "atrMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 5,
+              "compoundedGross025ReturnPct": 30.276505960490407,
+              "sumGross025ReturnPct": 27.201257223800376
+            },
+            "missedNormal": {
+              "trades": 5,
+              "compoundedGross025ReturnPct": 30.276505960490407,
+              "sumGross025ReturnPct": 27.201257223800376
+            },
+            "allSevere": {
+              "trades": 5,
+              "compoundedGross025ReturnPct": 29.198819717977507,
+              "sumGross025ReturnPct": 26.326257223800376
+            },
+            "missedSevere": {
+              "trades": 5,
+              "compoundedGross025ReturnPct": 29.198819717977507,
+              "sumGross025ReturnPct": 26.326257223800376
+            }
+          }
+        },
+        "20": {
+          "hourlyStarts": {
+            "all": 7,
+            "freeMissed": 7,
+            "shortConflict": 0,
+            "longCaptured": 0,
+            "missedSharePct": 100
+          },
+          "dedupedEpisodes": {
+            "all": 3,
+            "missed": 3,
+            "missedSharePct": 100,
+            "byCoverage": {
+              "FREE_MISSED": 3,
+              "SHORT_CONFLICT": 0,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {
+            "regime72": 7,
+            "return24": 7,
+            "ema168": 7,
+            "relative24": 6,
+            "breakout18": 3,
+            "rsiMin": 3,
+            "btc24": 2,
+            "atrMax": 1,
+            "volumeMin": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 3,
+              "compoundedGross025ReturnPct": 20.316850485358493,
+              "sumGross025ReturnPct": 19.087922472435814
+            },
+            "missedNormal": {
+              "trades": 3,
+              "compoundedGross025ReturnPct": 20.316850485358493,
+              "sumGross025ReturnPct": 19.087922472435814
+            },
+            "allSevere": {
+              "trades": 3,
+              "compoundedGross025ReturnPct": 19.723912627055217,
+              "sumGross025ReturnPct": 18.562922472435815
+            },
+            "missedSevere": {
+              "trades": 3,
+              "compoundedGross025ReturnPct": 19.723912627055217,
+              "sumGross025ReturnPct": 18.562922472435815
+            }
+          }
+        },
+        "30": {
+          "hourlyStarts": {
+            "all": 0,
+            "freeMissed": 0,
+            "shortConflict": 0,
+            "longCaptured": 0,
+            "missedSharePct": 0
+          },
+          "dedupedEpisodes": {
+            "all": 0,
+            "missed": 0,
+            "missedSharePct": 0,
+            "byCoverage": {
+              "FREE_MISSED": 0,
+              "SHORT_CONFLICT": 0,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {},
+          "oracle": {
+            "allNormal": {
+              "trades": 0,
+              "compoundedGross025ReturnPct": 0,
+              "sumGross025ReturnPct": 0
+            },
+            "missedNormal": {
+              "trades": 0,
+              "compoundedGross025ReturnPct": 0,
+              "sumGross025ReturnPct": 0
+            },
+            "allSevere": {
+              "trades": 0,
+              "compoundedGross025ReturnPct": 0,
+              "sumGross025ReturnPct": 0
+            },
+            "missedSevere": {
+              "trades": 0,
+              "compoundedGross025ReturnPct": 0,
+              "sumGross025ReturnPct": 0
+            }
+          }
+        }
+      }
+    },
+    "12": {
+      "all": {
+        "count": 8759,
+        "mfePct": {
+          "p50": 1.887385970430966,
+          "p75": 3.8806956055920883,
+          "p90": 6.375856845500816,
+          "p95": 8.308988283227599,
+          "max": 32.232004142931125
+        },
+        "maePct": {
+          "p50": -2.1991263744539857,
+          "p10": -6.0843481818983065,
+          "min": -80.19170343098358
+        },
+        "maeBeforePeakPct": {
+          "p50": -0.694149312933845,
+          "p10": -2.6642949132405236
+        },
+        "closeReturnPct": {
+          "p50": -0.34059945504086864,
+          "p75": 1.813023982291262,
+          "p90": 4.282730170714175
+        }
+      },
+      "coverage": {
+        "LONG_ALREADY_CAPTURED": {
+          "count": 490,
+          "mfePct": {
+            "p50": 3.583537957747418,
+            "p75": 5.874617685590605,
+            "p90": 9.51779756036983,
+            "p95": 10.951111253940274,
+            "max": 16.978193146417443
+          },
+          "maePct": {
+            "p50": -2.520702425826676,
+            "p10": -5.929833821134236,
+            "min": -13.019501278772383
+          },
+          "maeBeforePeakPct": {
+            "p50": -0.9613850018536318,
+            "p10": -2.8894881438877182
+          },
+          "closeReturnPct": {
+            "p50": 0.09887737682270359,
+            "p75": 2.9906514205749746,
+            "p90": 6.474003305161023
+          }
+        },
+        "SHORT_CONFLICT": {
+          "count": 1451,
+          "mfePct": {
+            "p50": 1.6773556980759885,
+            "p75": 3.428193672607016,
+            "p90": 5.299399548284045,
+            "p95": 6.794091556699112,
+            "max": 12.596242685555904
+          },
+          "maePct": {
+            "p50": -2.1955101816784506,
+            "p10": -7.393739703459634,
+            "min": -80.19170343098358
+          },
+          "maeBeforePeakPct": {
+            "p50": -0.6548084440969437,
+            "p10": -2.870264064293915
+          },
+          "closeReturnPct": {
+            "p50": -0.3140421713773045,
+            "p75": 1.6463471199209545,
+            "p90": 3.720837685917533
+          }
+        },
+        "FREE_MISSED": {
+          "count": 6818,
+          "mfePct": {
+            "p50": 1.8576231909699703,
+            "p75": 3.8388470941306263,
+            "p90": 6.328283245652211,
+            "p95": 8.31778609952017,
+            "max": 32.232004142931125
+          },
+          "maePct": {
+            "p50": -2.1727111458936466,
+            "p10": -5.965547688489586,
+            "min": -22.333529758397177
+          },
+          "maeBeforePeakPct": {
+            "p50": -0.6857945340657812,
+            "p10": -2.5683595145252855
+          },
+          "closeReturnPct": {
+            "p50": -0.36498300893984537,
+            "p75": 1.776426380139512,
+            "p90": 4.263784105949416
+          }
+        }
+      },
+      "thresholds": {
+        "3": {
+          "hourlyStarts": {
+            "all": 2869,
+            "freeMissed": 2190,
+            "shortConflict": 416,
+            "longCaptured": 263,
+            "missedSharePct": 90.83304287208087
+          },
+          "dedupedEpisodes": {
+            "all": 318,
+            "missed": 304,
+            "missedSharePct": 95.59748427672956,
+            "byCoverage": {
+              "FREE_MISSED": 244,
+              "SHORT_CONFLICT": 60,
+              "LONG_ALREADY_CAPTURED": 14
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 2128,
+            "regime72": 2107,
+            "breakout18": 2061,
+            "relative24": 1510,
+            "ema168": 1279,
+            "btc24": 1162,
+            "rsiMin": 1097,
+            "volumeMin": 382,
+            "volumeMax": 186,
+            "atrMax": 12,
+            "rsiMax": 10
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 332,
+              "compoundedGross025ReturnPct": 17777.675989895655,
+              "sumGross025ReturnPct": 523.9983797046549
+            },
+            "missedNormal": {
+              "trades": 314,
+              "compoundedGross025ReturnPct": 12543.365146673314,
+              "sumGross025ReturnPct": 488.9455772854128
+            },
+            "allSevere": {
+              "trades": 273,
+              "compoundedGross025ReturnPct": 7004.917913162427,
+              "sumGross025ReturnPct": 430.78678399256114
+            },
+            "missedSevere": {
+              "trades": 257,
+              "compoundedGross025ReturnPct": 5136.250884073096,
+              "sumGross025ReturnPct": 399.91535864230434
+            }
+          }
+        },
+        "5": {
+          "hourlyStarts": {
+            "all": 1383,
+            "freeMissed": 1053,
+            "shortConflict": 163,
+            "longCaptured": 167,
+            "missedSharePct": 87.92480115690527
+          },
+          "dedupedEpisodes": {
+            "all": 208,
+            "missed": 189,
+            "missedSharePct": 90.86538461538461,
+            "byCoverage": {
+              "FREE_MISSED": 159,
+              "SHORT_CONFLICT": 30,
+              "LONG_ALREADY_CAPTURED": 19
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 1020,
+            "regime72": 1013,
+            "breakout18": 989,
+            "relative24": 708,
+            "ema168": 611,
+            "btc24": 562,
+            "rsiMin": 505,
+            "volumeMin": 194,
+            "volumeMax": 78,
+            "atrMax": 9,
+            "rsiMax": 6
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 196,
+              "compoundedGross025ReturnPct": 5056.61877207631,
+              "sumGross025ReturnPct": 399.1116974097614
+            },
+            "missedNormal": {
+              "trades": 179,
+              "compoundedGross025ReturnPct": 3567.217922445925,
+              "sumGross025ReturnPct": 364.6237983791246
+            },
+            "allSevere": {
+              "trades": 159,
+              "compoundedGross025ReturnPct": 2351.929340803401,
+              "sumGross025ReturnPct": 323.9107865187839
+            },
+            "missedSevere": {
+              "trades": 148,
+              "compoundedGross025ReturnPct": 1819.134512078525,
+              "sumGross025ReturnPct": 299.0993776451364
+            }
+          }
+        },
+        "8": {
+          "hourlyStarts": {
+            "all": 477,
+            "freeMissed": 377,
+            "shortConflict": 30,
+            "longCaptured": 70,
+            "missedSharePct": 85.32494758909853
+          },
+          "dedupedEpisodes": {
+            "all": 76,
+            "missed": 69,
+            "missedSharePct": 90.78947368421052,
+            "byCoverage": {
+              "FREE_MISSED": 58,
+              "SHORT_CONFLICT": 11,
+              "LONG_ALREADY_CAPTURED": 7
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 362,
+            "breakout18": 352,
+            "regime72": 348,
+            "relative24": 242,
+            "ema168": 204,
+            "btc24": 189,
+            "rsiMin": 157,
+            "volumeMin": 68,
+            "volumeMax": 32,
+            "atrMax": 2,
+            "rsiMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 74,
+              "compoundedGross025ReturnPct": 713.1965965486094,
+              "sumGross025ReturnPct": 213.02609886016728
+            },
+            "missedNormal": {
+              "trades": 67,
+              "compoundedGross025ReturnPct": 561.4534945421515,
+              "sumGross025ReturnPct": 192.05203346128764
+            },
+            "allSevere": {
+              "trades": 56,
+              "compoundedGross025ReturnPct": 411.38191826585546,
+              "sumGross025ReturnPct": 165.97174354617957
+            },
+            "missedSevere": {
+              "trades": 49,
+              "compoundedGross025ReturnPct": 320.9388882500879,
+              "sumGross025ReturnPct": 146.2226781472999
+            }
+          }
+        },
+        "10": {
+          "hourlyStarts": {
+            "all": 228,
+            "freeMissed": 189,
+            "shortConflict": 5,
+            "longCaptured": 34,
+            "missedSharePct": 85.08771929824562
+          },
+          "dedupedEpisodes": {
+            "all": 37,
+            "missed": 32,
+            "missedSharePct": 86.48648648648648,
+            "byCoverage": {
+              "FREE_MISSED": 31,
+              "SHORT_CONFLICT": 1,
+              "LONG_ALREADY_CAPTURED": 5
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 181,
+            "breakout18": 174,
+            "regime72": 165,
+            "relative24": 122,
+            "ema168": 108,
+            "btc24": 93,
+            "rsiMin": 82,
+            "volumeMin": 33,
+            "volumeMax": 19,
+            "atrMax": 2
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 35,
+              "compoundedGross025ReturnPct": 248.03026310188918,
+              "sumGross025ReturnPct": 127.22869705698687
+            },
+            "missedNormal": {
+              "trades": 31,
+              "compoundedGross025ReturnPct": 203.87924889693306,
+              "sumGross025ReturnPct": 113.42663088332164
+            },
+            "allSevere": {
+              "trades": 28,
+              "compoundedGross025ReturnPct": 177.5683828811686,
+              "sumGross025ReturnPct": 104.19647899470336
+            },
+            "missedSevere": {
+              "trades": 24,
+              "compoundedGross025ReturnPct": 144.15972834266117,
+              "sumGross025ReturnPct": 91.16012449634313
+            }
+          }
+        },
+        "15": {
+          "hourlyStarts": {
+            "all": 56,
+            "freeMissed": 51,
+            "shortConflict": 0,
+            "longCaptured": 5,
+            "missedSharePct": 91.07142857142857
+          },
+          "dedupedEpisodes": {
+            "all": 10,
+            "missed": 9,
+            "missedSharePct": 90,
+            "byCoverage": {
+              "FREE_MISSED": 9,
+              "SHORT_CONFLICT": 0,
+              "LONG_ALREADY_CAPTURED": 1
+            }
+          },
+          "freeMissedGateFailures": {
+            "breakout18": 47,
+            "return24": 45,
+            "regime72": 44,
+            "relative24": 36,
+            "ema168": 29,
+            "rsiMin": 28,
+            "btc24": 26,
+            "volumeMin": 15,
+            "volumeMax": 6,
+            "atrMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 10,
+              "compoundedGross025ReturnPct": 66.48932721413314,
+              "sumGross025ReturnPct": 52.3808456293715
+            },
+            "missedNormal": {
+              "trades": 9,
+              "compoundedGross025ReturnPct": 59.80870036963446,
+              "sumGross025ReturnPct": 48.20045568248719
+            },
+            "allSevere": {
+              "trades": 9,
+              "compoundedGross025ReturnPct": 57.98007220074215,
+              "sumGross025ReturnPct": 46.98424234823801
+            },
+            "missedSevere": {
+              "trades": 8,
+              "compoundedGross025ReturnPct": 51.8960433506598,
+              "sumGross025ReturnPct": 42.978852401353706
+            }
+          }
+        },
+        "20": {
+          "hourlyStarts": {
+            "all": 18,
+            "freeMissed": 18,
+            "shortConflict": 0,
+            "longCaptured": 0,
+            "missedSharePct": 100
+          },
+          "dedupedEpisodes": {
+            "all": 4,
+            "missed": 4,
+            "missedSharePct": 100,
+            "byCoverage": {
+              "FREE_MISSED": 4,
+              "SHORT_CONFLICT": 0,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {
+            "regime72": 18,
+            "return24": 18,
+            "ema168": 18,
+            "relative24": 17,
+            "breakout18": 14,
+            "rsiMin": 13,
+            "btc24": 7,
+            "volumeMin": 5,
+            "atrMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 29.29674672154472,
+              "sumGross025ReturnPct": 26.555681057986412
+            },
+            "missedNormal": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 29.29674672154472,
+              "sumGross025ReturnPct": 26.555681057986412
+            },
+            "allSevere": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 28.450029674701582,
+              "sumGross025ReturnPct": 25.85568105798641
+            },
+            "missedSevere": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 28.450029674701582,
+              "sumGross025ReturnPct": 25.85568105798641
+            }
+          }
+        },
+        "30": {
+          "hourlyStarts": {
+            "all": 5,
+            "freeMissed": 5,
+            "shortConflict": 0,
+            "longCaptured": 0,
+            "missedSharePct": 100
+          },
+          "dedupedEpisodes": {
+            "all": 1,
+            "missed": 1,
+            "missedSharePct": 100,
+            "byCoverage": {
+              "FREE_MISSED": 1,
+              "SHORT_CONFLICT": 0,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {
+            "regime72": 5,
+            "breakout18": 5,
+            "return24": 5,
+            "relative24": 5,
+            "ema168": 5,
+            "rsiMin": 4,
+            "volumeMin": 2,
+            "btc24": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 8.028001035732778,
+              "sumGross025ReturnPct": 8.028001035732782
+            },
+            "missedNormal": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 8.028001035732778,
+              "sumGross025ReturnPct": 8.028001035732782
+            },
+            "allSevere": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 7.853001035732787,
+              "sumGross025ReturnPct": 7.853001035732782
+            },
+            "missedSevere": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 7.853001035732787,
+              "sumGross025ReturnPct": 7.853001035732782
+            }
+          }
+        }
+      }
+    },
+    "24": {
+      "all": {
+        "count": 8759,
+        "mfePct": {
+          "p50": 2.864125868784839,
+          "p75": 5.650435879668825,
+          "p90": 8.979703879763079,
+          "p95": 12.083811757734596,
+          "max": 35.92036623017141
+        },
+        "maePct": {
+          "p50": -3.358402489626555,
+          "p10": -8.595179068538156,
+          "min": -80.19170343098358
+        },
+        "maeBeforePeakPct": {
+          "p50": -0.9789156626506035,
+          "p10": -3.715282771939894
+        },
+        "closeReturnPct": {
+          "p50": -0.6672091131000868,
+          "p75": 2.5645601291133024,
+          "p90": 6.0284000264367155
+        }
+      },
+      "coverage": {
+        "LONG_ALREADY_CAPTURED": {
+          "count": 490,
+          "mfePct": {
+            "p50": 5.225211917227757,
+            "p75": 8.492929689589175,
+            "p90": 12.191913310665253,
+            "p95": 14.51534339043667,
+            "max": 20.381740523224767
+          },
+          "maePct": {
+            "p50": -3.4729788557835706,
+            "p10": -8.409688880894745,
+            "min": -14.43414322250639
+          },
+          "maeBeforePeakPct": {
+            "p50": -1.2234389414279512,
+            "p10": -4.187349680800504
+          },
+          "closeReturnPct": {
+            "p50": 0.7951726335434839,
+            "p75": 5.026002574716198,
+            "p90": 7.63776284230175
+          }
+        },
+        "SHORT_CONFLICT": {
+          "count": 1451,
+          "mfePct": {
+            "p50": 2.5777659361886363,
+            "p75": 4.90114143996454,
+            "p90": 7.227950745820411,
+            "p95": 8.818449659656613,
+            "max": 35.92036623017141
+          },
+          "maePct": {
+            "p50": -3.2176870748299335,
+            "p10": -10.022471910112362,
+            "min": -80.19170343098358
+          },
+          "maeBeforePeakPct": {
+            "p50": -1.0216569999467962,
+            "p10": -3.556268949527386
+          },
+          "closeReturnPct": {
+            "p50": -0.6644085461177673,
+            "p75": 2.3965534445011816,
+            "p90": 4.966216216216224
+          }
+        },
+        "FREE_MISSED": {
+          "count": 6818,
+          "mfePct": {
+            "p50": 2.8070436003866717,
+            "p75": 5.554469637737819,
+            "p90": 9.065301702959893,
+            "p95": 12.341347951661117,
+            "max": 33.12825860271118
+          },
+          "maePct": {
+            "p50": -3.391498080637012,
+            "p10": -8.336157408935597,
+            "min": -79.47039473684211
+          },
+          "maeBeforePeakPct": {
+            "p50": -0.9610475795744033,
+            "p10": -3.7155159567382454
+          },
+          "closeReturnPct": {
+            "p50": -0.7263640760335921,
+            "p75": 2.4404728349561644,
+            "p90": 6.084159219370608
+          }
+        }
+      },
+      "thresholds": {
+        "3": {
+          "hourlyStarts": {
+            "all": 4099,
+            "freeMissed": 3149,
+            "shortConflict": 614,
+            "longCaptured": 336,
+            "missedSharePct": 91.80287875091486
+          },
+          "dedupedEpisodes": {
+            "all": 284,
+            "missed": 274,
+            "missedSharePct": 96.47887323943662,
+            "byCoverage": {
+              "FREE_MISSED": 215,
+              "SHORT_CONFLICT": 59,
+              "LONG_ALREADY_CAPTURED": 10
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 3069,
+            "regime72": 3057,
+            "breakout18": 2975,
+            "relative24": 2204,
+            "ema168": 1909,
+            "btc24": 1696,
+            "rsiMin": 1642,
+            "volumeMin": 567,
+            "volumeMax": 276,
+            "atrMax": 16,
+            "rsiMax": 12
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 275,
+              "compoundedGross025ReturnPct": 15483.068183308873,
+              "sumGross025ReturnPct": 511.3541365164738
+            },
+            "missedNormal": {
+              "trades": 266,
+              "compoundedGross025ReturnPct": 11945.6838994318,
+              "sumGross025ReturnPct": 485.1657326542531
+            },
+            "allSevere": {
+              "trades": 240,
+              "compoundedGross025ReturnPct": 7838.692040490645,
+              "sumGross025ReturnPct": 443.0372305884141
+            },
+            "missedSevere": {
+              "trades": 230,
+              "compoundedGross025ReturnPct": 6109.491796347223,
+              "sumGross025ReturnPct": 418.0743963585871
+            }
+          }
+        },
+        "5": {
+          "hourlyStarts": {
+            "all": 2474,
+            "freeMissed": 1885,
+            "shortConflict": 337,
+            "longCaptured": 252,
+            "missedSharePct": 89.81406628940987
+          },
+          "dedupedEpisodes": {
+            "all": 219,
+            "missed": 206,
+            "missedSharePct": 94.06392694063926,
+            "byCoverage": {
+              "FREE_MISSED": 164,
+              "SHORT_CONFLICT": 42,
+              "LONG_ALREADY_CAPTURED": 13
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 1837,
+            "regime72": 1835,
+            "breakout18": 1790,
+            "relative24": 1316,
+            "ema168": 1158,
+            "btc24": 1048,
+            "rsiMin": 988,
+            "volumeMin": 335,
+            "volumeMax": 149,
+            "atrMax": 15,
+            "rsiMax": 8
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 182,
+              "compoundedGross025ReturnPct": 6398.253869761207,
+              "sumGross025ReturnPct": 423.4327346240463
+            },
+            "missedNormal": {
+              "trades": 171,
+              "compoundedGross025ReturnPct": 4847.327277423865,
+              "sumGross025ReturnPct": 395.7191958594998
+            },
+            "allSevere": {
+              "trades": 160,
+              "compoundedGross025ReturnPct": 3718.2285696037006,
+              "sumGross025ReturnPct": 369.49116562106656
+            },
+            "missedSevere": {
+              "trades": 153,
+              "compoundedGross025ReturnPct": 2955.1871469913613,
+              "sumGross025ReturnPct": 346.79551822830103
+            }
+          }
+        },
+        "8": {
+          "hourlyStarts": {
+            "all": 1131,
+            "freeMissed": 897,
+            "shortConflict": 98,
+            "longCaptured": 136,
+            "missedSharePct": 87.97524314765694
+          },
+          "dedupedEpisodes": {
+            "all": 106,
+            "missed": 98,
+            "missedSharePct": 92.45283018867924,
+            "byCoverage": {
+              "FREE_MISSED": 78,
+              "SHORT_CONFLICT": 20,
+              "LONG_ALREADY_CAPTURED": 8
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 874,
+            "regime72": 863,
+            "breakout18": 842,
+            "relative24": 610,
+            "ema168": 544,
+            "btc24": 500,
+            "rsiMin": 435,
+            "volumeMin": 135,
+            "volumeMax": 75,
+            "atrMax": 9,
+            "rsiMax": 5
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 96,
+              "compoundedGross025ReturnPct": 1719.5706242152103,
+              "sumGross025ReturnPct": 295.25097832768
+            },
+            "missedNormal": {
+              "trades": 90,
+              "compoundedGross025ReturnPct": 1381.0024744557563,
+              "sumGross025ReturnPct": 274.26227036671656
+            },
+            "allSevere": {
+              "trades": 76,
+              "compoundedGross025ReturnPct": 987.2422676956644,
+              "sumGross025ReturnPct": 243.0107227497259
+            },
+            "missedSevere": {
+              "trades": 70,
+              "compoundedGross025ReturnPct": 790.7711669316507,
+              "sumGross025ReturnPct": 222.70479949226927
+            }
+          }
+        },
+        "10": {
+          "hourlyStarts": {
+            "all": 659,
+            "freeMissed": 524,
+            "shortConflict": 43,
+            "longCaptured": 92,
+            "missedSharePct": 86.03945371775417
+          },
+          "dedupedEpisodes": {
+            "all": 69,
+            "missed": 60,
+            "missedSharePct": 86.95652173913044,
+            "byCoverage": {
+              "FREE_MISSED": 50,
+              "SHORT_CONFLICT": 10,
+              "LONG_ALREADY_CAPTURED": 9
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 513,
+            "regime72": 490,
+            "breakout18": 482,
+            "relative24": 342,
+            "ema168": 323,
+            "btc24": 276,
+            "rsiMin": 235,
+            "volumeMin": 75,
+            "volumeMax": 48,
+            "atrMax": 8,
+            "rsiMax": 2
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 57,
+              "compoundedGross025ReturnPct": 698.0712617971345,
+              "sumGross025ReturnPct": 211.99063557689738
+            },
+            "missedNormal": {
+              "trades": 51,
+              "compoundedGross025ReturnPct": 547.2003399211798,
+              "sumGross025ReturnPct": 190.64034013186037
+            },
+            "allSevere": {
+              "trades": 47,
+              "compoundedGross025ReturnPct": 475.6670122006293,
+              "sumGross025ReturnPct": 178.7231410718931
+            },
+            "missedSevere": {
+              "trades": 42,
+              "compoundedGross025ReturnPct": 379.7608698023415,
+              "sumGross025ReturnPct": 160.13581359229502
+            }
+          }
+        },
+        "15": {
+          "hourlyStarts": {
+            "all": 262,
+            "freeMissed": 233,
+            "shortConflict": 8,
+            "longCaptured": 21,
+            "missedSharePct": 91.98473282442748
+          },
+          "dedupedEpisodes": {
+            "all": 24,
+            "missed": 22,
+            "missedSharePct": 91.66666666666667,
+            "byCoverage": {
+              "FREE_MISSED": 20,
+              "SHORT_CONFLICT": 2,
+              "LONG_ALREADY_CAPTURED": 2
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 223,
+            "breakout18": 217,
+            "regime72": 212,
+            "relative24": 135,
+            "ema168": 124,
+            "btc24": 104,
+            "rsiMin": 81,
+            "volumeMin": 48,
+            "volumeMax": 22,
+            "atrMax": 7,
+            "rsiMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 22,
+              "compoundedGross025ReturnPct": 198.38353101602007,
+              "sumGross025ReturnPct": 112.22846028411934
+            },
+            "missedNormal": {
+              "trades": 20,
+              "compoundedGross025ReturnPct": 173.37600536484575,
+              "sumGross025ReturnPct": 103.27760697887369
+            },
+            "allSevere": {
+              "trades": 19,
+              "compoundedGross025ReturnPct": 158.30248159256274,
+              "sumGross025ReturnPct": 97.4250102885161
+            },
+            "missedSevere": {
+              "trades": 18,
+              "compoundedGross025ReturnPct": 146.25932886105417,
+              "sumGross025ReturnPct": 92.53457515770991
+            }
+          }
+        },
+        "20": {
+          "hourlyStarts": {
+            "all": 67,
+            "freeMissed": 59,
+            "shortConflict": 7,
+            "longCaptured": 1,
+            "missedSharePct": 98.50746268656717
+          },
+          "dedupedEpisodes": {
+            "all": 11,
+            "missed": 10,
+            "missedSharePct": 90.9090909090909,
+            "byCoverage": {
+              "FREE_MISSED": 9,
+              "SHORT_CONFLICT": 1,
+              "LONG_ALREADY_CAPTURED": 1
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 58,
+            "breakout18": 55,
+            "regime72": 51,
+            "ema168": 41,
+            "relative24": 36,
+            "rsiMin": 34,
+            "btc24": 30,
+            "volumeMin": 10,
+            "volumeMax": 6,
+            "atrMax": 4
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 10,
+              "compoundedGross025ReturnPct": 79.4227210696964,
+              "sumGross025ReturnPct": 60.26288574880633
+            },
+            "missedNormal": {
+              "trades": 9,
+              "compoundedGross025ReturnPct": 70.77235805126168,
+              "sumGross025ReturnPct": 55.19745061800014
+            },
+            "allSevere": {
+              "trades": 7,
+              "compoundedGross025ReturnPct": 53.0712452653904,
+              "sumGross025ReturnPct": 43.93787293784279
+            },
+            "missedSevere": {
+              "trades": 7,
+              "compoundedGross025ReturnPct": 53.0712452653904,
+              "sumGross025ReturnPct": 43.93787293784279
+            }
+          }
+        },
+        "30": {
+          "hourlyStarts": {
+            "all": 18,
+            "freeMissed": 12,
+            "shortConflict": 6,
+            "longCaptured": 0,
+            "missedSharePct": 100
+          },
+          "dedupedEpisodes": {
+            "all": 1,
+            "missed": 1,
+            "missedSharePct": 100,
+            "byCoverage": {
+              "FREE_MISSED": 0,
+              "SHORT_CONFLICT": 1,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {
+            "regime72": 12,
+            "breakout18": 12,
+            "return24": 12,
+            "relative24": 12,
+            "ema168": 12,
+            "rsiMin": 11,
+            "btc24": 6,
+            "volumeMin": 2
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 8.95009155754285,
+              "sumGross025ReturnPct": 8.950091557542853
+            },
+            "missedNormal": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 8.95009155754285,
+              "sumGross025ReturnPct": 8.950091557542853
+            },
+            "allSevere": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 8.775091557542858,
+              "sumGross025ReturnPct": 8.775091557542853
+            },
+            "missedSevere": {
+              "trades": 1,
+              "compoundedGross025ReturnPct": 8.775091557542858,
+              "sumGross025ReturnPct": 8.775091557542853
+            }
+          }
+        }
+      }
+    },
+    "48": {
+      "all": {
+        "count": 8759,
+        "mfePct": {
+          "p50": 4.166666666666674,
+          "p75": 7.913222874402937,
+          "p90": 12.54130517039828,
+          "p95": 17.58355459869178,
+          "max": 35.92036623017141
+        },
+        "maePct": {
+          "p50": -5.032362459546924,
+          "p10": -12.539100965967164,
+          "min": -81.0878787878788
+        },
+        "maeBeforePeakPct": {
+          "p50": -1.4747522416233894,
+          "p10": -5.227478829143985
+        },
+        "closeReturnPct": {
+          "p50": -0.9565309809756783,
+          "p75": 3.3880724528909556,
+          "p90": 8.431507316993313
+        }
+      },
+      "coverage": {
+        "LONG_ALREADY_CAPTURED": {
+          "count": 490,
+          "mfePct": {
+            "p50": 7.624473887855132,
+            "p75": 11.880312358331246,
+            "p90": 16.393908300735145,
+            "p95": 19.38681022235545,
+            "max": 28.130460104834
+          },
+          "maePct": {
+            "p50": -4.637329014549452,
+            "p10": -10.59096264787067,
+            "min": -18.59793187347932
+          },
+          "maeBeforePeakPct": {
+            "p50": -2.328196294493312,
+            "p10": -5.573135537557032
+          },
+          "closeReturnPct": {
+            "p50": 1.7048590530664653,
+            "p75": 7.0710939571609455,
+            "p90": 11.465300627415482
+          }
+        },
+        "SHORT_CONFLICT": {
+          "count": 1451,
+          "mfePct": {
+            "p50": 3.7340425531914967,
+            "p75": 6.4621849118607795,
+            "p90": 9.311036789297656,
+            "p95": 11.514176016391907,
+            "max": 35.92036623017141
+          },
+          "maePct": {
+            "p50": -5.179730404393412,
+            "p10": -14.720714663080535,
+            "min": -80.19170343098358
+          },
+          "maeBeforePeakPct": {
+            "p50": -1.6881522406384297,
+            "p10": -5.38725796377264
+          },
+          "closeReturnPct": {
+            "p50": -0.9233493549203109,
+            "p75": 2.8923768000605365,
+            "p90": 5.800933125972008
+          }
+        },
+        "FREE_MISSED": {
+          "count": 6818,
+          "mfePct": {
+            "p50": 4.1075343256028685,
+            "p75": 7.986468221559723,
+            "p90": 12.809431118423532,
+            "p95": 18.065668746421657,
+            "max": 33.12825860271118
+          },
+          "maePct": {
+            "p50": -5.033012876408849,
+            "p10": -12.19561556094797,
+            "min": -81.0878787878788
+          },
+          "maeBeforePeakPct": {
+            "p50": -1.379909184196687,
+            "p10": -5.1320932939080155
+          },
+          "closeReturnPct": {
+            "p50": -1.0671753725220445,
+            "p75": 3.3061921381797585,
+            "p90": 8.525593700663856
+          }
+        }
+      },
+      "thresholds": {
+        "3": {
+          "hourlyStarts": {
+            "all": 5270,
+            "freeMissed": 4052,
+            "shortConflict": 830,
+            "longCaptured": 388,
+            "missedSharePct": 92.63757115749526
+          },
+          "dedupedEpisodes": {
+            "all": 225,
+            "missed": 219,
+            "missedSharePct": 97.33333333333333,
+            "byCoverage": {
+              "FREE_MISSED": 175,
+              "SHORT_CONFLICT": 44,
+              "LONG_ALREADY_CAPTURED": 6
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 3957,
+            "regime72": 3952,
+            "breakout18": 3837,
+            "relative24": 2838,
+            "ema168": 2451,
+            "btc24": 2152,
+            "rsiMin": 2097,
+            "volumeMin": 741,
+            "volumeMax": 380,
+            "atrMax": 25,
+            "rsiMax": 14
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 204,
+              "compoundedGross025ReturnPct": 8406.329882460288,
+              "sumGross025ReturnPct": 451.2108754785959
+            },
+            "missedNormal": {
+              "trades": 199,
+              "compoundedGross025ReturnPct": 6908.60413981404,
+              "sumGross025ReturnPct": 431.46309786076733
+            },
+            "allSevere": {
+              "trades": 185,
+              "compoundedGross025ReturnPct": 5294.520584141961,
+              "sumGross025ReturnPct": 404.8723686250525
+            },
+            "missedSevere": {
+              "trades": 179,
+              "compoundedGross025ReturnPct": 4384.596877059195,
+              "sumGross025ReturnPct": 386.12616046046605
+            }
+          }
+        },
+        "5": {
+          "hourlyStarts": {
+            "all": 3681,
+            "freeMissed": 2829,
+            "shortConflict": 527,
+            "longCaptured": 325,
+            "missedSharePct": 91.17087747894594
+          },
+          "dedupedEpisodes": {
+            "all": 191,
+            "missed": 185,
+            "missedSharePct": 96.8586387434555,
+            "byCoverage": {
+              "FREE_MISSED": 149,
+              "SHORT_CONFLICT": 36,
+              "LONG_ALREADY_CAPTURED": 6
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 2773,
+            "regime72": 2772,
+            "breakout18": 2689,
+            "relative24": 2002,
+            "ema168": 1755,
+            "btc24": 1539,
+            "rsiMin": 1483,
+            "volumeMin": 503,
+            "volumeMax": 262,
+            "atrMax": 25,
+            "rsiMax": 8
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 155,
+              "compoundedGross025ReturnPct": 5242.355616432898,
+              "sumGross025ReturnPct": 404.4424928877961
+            },
+            "missedNormal": {
+              "trades": 149,
+              "compoundedGross025ReturnPct": 4268.154136342975,
+              "sumGross025ReturnPct": 383.9316138086185
+            },
+            "allSevere": {
+              "trades": 143,
+              "compoundedGross025ReturnPct": 3508.617796685789,
+              "sumGross025ReturnPct": 364.4831124941976
+            },
+            "missedSevere": {
+              "trades": 137,
+              "compoundedGross025ReturnPct": 2889.6840820414054,
+              "sumGross025ReturnPct": 345.3893767170259
+            }
+          }
+        },
+        "8": {
+          "hourlyStarts": {
+            "all": 2111,
+            "freeMissed": 1664,
+            "shortConflict": 214,
+            "longCaptured": 233,
+            "missedSharePct": 88.96257697773567
+          },
+          "dedupedEpisodes": {
+            "all": 118,
+            "missed": 111,
+            "missedSharePct": 94.0677966101695,
+            "byCoverage": {
+              "FREE_MISSED": 89,
+              "SHORT_CONFLICT": 22,
+              "LONG_ALREADY_CAPTURED": 7
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 1639,
+            "regime72": 1628,
+            "breakout18": 1579,
+            "relative24": 1153,
+            "ema168": 1042,
+            "btc24": 884,
+            "rsiMin": 843,
+            "volumeMin": 259,
+            "volumeMax": 157,
+            "atrMax": 24,
+            "rsiMax": 5
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 94,
+              "compoundedGross025ReturnPct": 2024.2892071247734,
+              "sumGross025ReturnPct": 311.5887678790628
+            },
+            "missedNormal": {
+              "trades": 90,
+              "compoundedGross025ReturnPct": 1708.340875475273,
+              "sumGross025ReturnPct": 295.1711462960335
+            },
+            "allSevere": {
+              "trades": 76,
+              "compoundedGross025ReturnPct": 1220.1030081059298,
+              "sumGross025ReturnPct": 263.2870087597422
+            },
+            "missedSevere": {
+              "trades": 71,
+              "compoundedGross025ReturnPct": 1015.7773840901908,
+              "sumGross025ReturnPct": 246.19002866667202
+            }
+          }
+        },
+        "10": {
+          "hourlyStarts": {
+            "all": 1441,
+            "freeMissed": 1150,
+            "shortConflict": 118,
+            "longCaptured": 173,
+            "missedSharePct": 87.99444829979181
+          },
+          "dedupedEpisodes": {
+            "all": 84,
+            "missed": 73,
+            "missedSharePct": 86.9047619047619,
+            "byCoverage": {
+              "FREE_MISSED": 60,
+              "SHORT_CONFLICT": 13,
+              "LONG_ALREADY_CAPTURED": 11
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 1139,
+            "regime72": 1116,
+            "breakout18": 1090,
+            "relative24": 777,
+            "ema168": 731,
+            "btc24": 611,
+            "rsiMin": 571,
+            "volumeMin": 172,
+            "volumeMax": 110,
+            "atrMax": 22,
+            "rsiMax": 2
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 60,
+              "compoundedGross025ReturnPct": 971.5606065400774,
+              "sumGross025ReturnPct": 242.58703313324978
+            },
+            "missedNormal": {
+              "trades": 55,
+              "compoundedGross025ReturnPct": 798.080387439124,
+              "sumGross025ReturnPct": 224.61505304017953
+            },
+            "allSevere": {
+              "trades": 54,
+              "compoundedGross025ReturnPct": 729.1134589088763,
+              "sumGross025ReturnPct": 216.22950397043934
+            },
+            "missedSevere": {
+              "trades": 48,
+              "compoundedGross025ReturnPct": 589.1655788696751,
+              "sumGross025ReturnPct": 197.4781106873965
+            }
+          }
+        },
+        "15": {
+          "hourlyStarts": {
+            "all": 628,
+            "freeMissed": 525,
+            "shortConflict": 40,
+            "longCaptured": 63,
+            "missedSharePct": 89.96815286624204
+          },
+          "dedupedEpisodes": {
+            "all": 29,
+            "missed": 27,
+            "missedSharePct": 93.10344827586206,
+            "byCoverage": {
+              "FREE_MISSED": 23,
+              "SHORT_CONFLICT": 4,
+              "LONG_ALREADY_CAPTURED": 2
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 514,
+            "breakout18": 493,
+            "regime72": 491,
+            "relative24": 300,
+            "ema168": 299,
+            "btc24": 251,
+            "rsiMin": 217,
+            "volumeMin": 91,
+            "volumeMax": 54,
+            "atrMax": 10,
+            "rsiMax": 2
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 25,
+              "compoundedGross025ReturnPct": 279.72304744345166,
+              "sumGross025ReturnPct": 137.29902494539
+            },
+            "missedNormal": {
+              "trades": 23,
+              "compoundedGross025ReturnPct": 249.2645398051432,
+              "sumGross025ReturnPct": 128.75911558445964
+            },
+            "allSevere": {
+              "trades": 23,
+              "compoundedGross025ReturnPct": 238.86901068558953,
+              "sumGross025ReturnPct": 125.56029656435167
+            },
+            "missedSevere": {
+              "trades": 22,
+              "compoundedGross025ReturnPct": 224.34021915432618,
+              "sumGross025ReturnPct": 121.08080537786078
+            }
+          }
+        },
+        "20": {
+          "hourlyStarts": {
+            "all": 272,
+            "freeMissed": 226,
+            "shortConflict": 22,
+            "longCaptured": 24,
+            "missedSharePct": 91.17647058823529
+          },
+          "dedupedEpisodes": {
+            "all": 22,
+            "missed": 21,
+            "missedSharePct": 95.45454545454545,
+            "byCoverage": {
+              "FREE_MISSED": 20,
+              "SHORT_CONFLICT": 1,
+              "LONG_ALREADY_CAPTURED": 1
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 225,
+            "breakout18": 211,
+            "regime72": 209,
+            "ema168": 148,
+            "relative24": 133,
+            "btc24": 130,
+            "rsiMin": 108,
+            "volumeMin": 35,
+            "volumeMax": 28,
+            "atrMax": 4
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 14,
+              "compoundedGross025ReturnPct": 141.15842816132985,
+              "sumGross025ReturnPct": 90.94488477974025
+            },
+            "missedNormal": {
+              "trades": 14,
+              "compoundedGross025ReturnPct": 141.15842816132985,
+              "sumGross025ReturnPct": 90.94488477974025
+            },
+            "allSevere": {
+              "trades": 12,
+              "compoundedGross025ReturnPct": 114.0945998166325,
+              "sumGross025ReturnPct": 78.6597670853604
+            },
+            "missedSevere": {
+              "trades": 12,
+              "compoundedGross025ReturnPct": 114.0945998166325,
+              "sumGross025ReturnPct": 78.6597670853604
+            }
+          }
+        },
+        "30": {
+          "hourlyStarts": {
+            "all": 47,
+            "freeMissed": 28,
+            "shortConflict": 19,
+            "longCaptured": 0,
+            "missedSharePct": 100
+          },
+          "dedupedEpisodes": {
+            "all": 4,
+            "missed": 4,
+            "missedSharePct": 100,
+            "byCoverage": {
+              "FREE_MISSED": 3,
+              "SHORT_CONFLICT": 1,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {
+            "regime72": 28,
+            "breakout18": 28,
+            "return24": 28,
+            "ema168": 28,
+            "btc24": 22,
+            "relative24": 21,
+            "rsiMin": 16,
+            "volumeMin": 2,
+            "atrMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 37.18767922165247,
+              "sumGross025ReturnPct": 32.90592990217213
+            },
+            "missedNormal": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 37.18767922165247,
+              "sumGross025ReturnPct": 32.90592990217213
+            },
+            "allSevere": {
+              "trades": 3,
+              "compoundedGross025ReturnPct": 26.97944458186341,
+              "sumGross025ReturnPct": 24.86376009085138
+            },
+            "missedSevere": {
+              "trades": 3,
+              "compoundedGross025ReturnPct": 26.97944458186341,
+              "sumGross025ReturnPct": 24.86376009085138
+            }
+          }
+        }
+      }
+    },
+    "96": {
+      "all": {
+        "count": 8759,
+        "mfePct": {
+          "p50": 5.8941058941059055,
+          "p75": 11.541306786681849,
+          "p90": 18.093110324847775,
+          "p95": 23.010033444816045,
+          "max": 53.48837209302326
+        },
+        "maePct": {
+          "p50": -7.131433793531117,
+          "p10": -18.05930861359077,
+          "min": -81.56277695716396
+        },
+        "maeBeforePeakPct": {
+          "p50": -2.077009106886085,
+          "p10": -6.7864985626363
+        },
+        "closeReturnPct": {
+          "p50": -1.6693868034506787,
+          "p75": 4.25570757092496,
+          "p90": 10.614354629943602
+        }
+      },
+      "coverage": {
+        "LONG_ALREADY_CAPTURED": {
+          "count": 490,
+          "mfePct": {
+            "p50": 9.612784320092548,
+            "p75": 13.01585416542963,
+            "p90": 17.576850615096337,
+            "p95": 24.47798233054965,
+            "max": 42.91191709844557
+          },
+          "maePct": {
+            "p50": -6.101000081413338,
+            "p10": -13.079924780298951,
+            "min": -19.25182481751826
+          },
+          "maeBeforePeakPct": {
+            "p50": -2.5308623788338536,
+            "p10": -6.867998387635152
+          },
+          "closeReturnPct": {
+            "p50": -0.17447745836816075,
+            "p75": 5.641219106601842,
+            "p90": 9.954883980619275
+          }
+        },
+        "SHORT_CONFLICT": {
+          "count": 1451,
+          "mfePct": {
+            "p50": 5.112855740922484,
+            "p75": 9.54322163211907,
+            "p90": 15.904578829609562,
+            "p95": 19.978679831246772,
+            "max": 35.92036623017141
+          },
+          "maePct": {
+            "p50": -7.778375470683163,
+            "p10": -18.29047619047619,
+            "min": -80.19170343098358
+          },
+          "maeBeforePeakPct": {
+            "p50": -2.3911921555134885,
+            "p10": -7.1666666666666545
+          },
+          "closeReturnPct": {
+            "p50": -1.9542341740437563,
+            "p75": 3.766975557640795,
+            "p90": 9.669348197884343
+          }
+        },
+        "FREE_MISSED": {
+          "count": 6818,
+          "mfePct": {
+            "p50": 5.793188391731984,
+            "p75": 11.756116808233635,
+            "p90": 18.781586765157112,
+            "p95": 23.304167634367012,
+            "max": 53.48837209302326
+          },
+          "maePct": {
+            "p50": -7.135592736017382,
+            "p10": -18.459128585753923,
+            "min": -81.56277695716396
+          },
+          "maeBeforePeakPct": {
+            "p50": -1.9647704920728482,
+            "p10": -6.738569367250102
+          },
+          "closeReturnPct": {
+            "p50": -1.7014429459107416,
+            "p75": 4.25394698591941,
+            "p90": 10.83610094265499
+          }
+        }
+      },
+      "thresholds": {
+        "3": {
+          "hourlyStarts": {
+            "all": 6143,
+            "freeMissed": 4752,
+            "shortConflict": 963,
+            "longCaptured": 428,
+            "missedSharePct": 93.03272016929839
+          },
+          "dedupedEpisodes": {
+            "all": 180,
+            "missed": 179,
+            "missedSharePct": 99.44444444444444,
+            "byCoverage": {
+              "FREE_MISSED": 144,
+              "SHORT_CONFLICT": 35,
+              "LONG_ALREADY_CAPTURED": 1
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 4653,
+            "regime72": 4634,
+            "breakout18": 4507,
+            "relative24": 3321,
+            "ema168": 2881,
+            "btc24": 2512,
+            "rsiMin": 2458,
+            "volumeMin": 889,
+            "volumeMax": 453,
+            "atrMax": 25,
+            "rsiMax": 18
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 151,
+              "compoundedGross025ReturnPct": 4246.516326928886,
+              "sumGross025ReturnPct": 384.6059218603616
+            },
+            "missedNormal": {
+              "trades": 149,
+              "compoundedGross025ReturnPct": 3833.2097428820466,
+              "sumGross025ReturnPct": 374.0430470760077
+            },
+            "allSevere": {
+              "trades": 138,
+              "compoundedGross025ReturnPct": 2985.753192709945,
+              "sumGross025ReturnPct": 349.6947446604501
+            },
+            "missedSevere": {
+              "trades": 136,
+              "compoundedGross025ReturnPct": 2701.6651725453758,
+              "sumGross025ReturnPct": 339.4818698760961
+            }
+          }
+        },
+        "5": {
+          "hourlyStarts": {
+            "all": 4796,
+            "freeMissed": 3691,
+            "shortConflict": 723,
+            "longCaptured": 382,
+            "missedSharePct": 92.03502919099249
+          },
+          "dedupedEpisodes": {
+            "all": 153,
+            "missed": 150,
+            "missedSharePct": 98.03921568627452,
+            "byCoverage": {
+              "FREE_MISSED": 122,
+              "SHORT_CONFLICT": 28,
+              "LONG_ALREADY_CAPTURED": 3
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 3625,
+            "regime72": 3615,
+            "breakout18": 3509,
+            "relative24": 2625,
+            "ema168": 2273,
+            "btc24": 2000,
+            "rsiMin": 1950,
+            "volumeMin": 673,
+            "volumeMax": 320,
+            "atrMax": 25,
+            "rsiMax": 11
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 114,
+              "compoundedGross025ReturnPct": 2883.8439338209823,
+              "sumGross025ReturnPct": 346.76213391271693
+            },
+            "missedNormal": {
+              "trades": 112,
+              "compoundedGross025ReturnPct": 2600.112722235311,
+              "sumGross025ReturnPct": 336.199259128363
+            },
+            "allSevere": {
+              "trades": 105,
+              "compoundedGross025ReturnPct": 2137.2733074983244,
+              "sumGross025ReturnPct": 317.35706364489647
+            },
+            "missedSevere": {
+              "trades": 103,
+              "compoundedGross025ReturnPct": 1931.3000799583538,
+              "sumGross025ReturnPct": 307.14418886054244
+            }
+          }
+        },
+        "8": {
+          "hourlyStarts": {
+            "all": 3372,
+            "freeMissed": 2630,
+            "shortConflict": 435,
+            "longCaptured": 307,
+            "missedSharePct": 90.89561091340451
+          },
+          "dedupedEpisodes": {
+            "all": 108,
+            "missed": 103,
+            "missedSharePct": 95.37037037037037,
+            "byCoverage": {
+              "FREE_MISSED": 85,
+              "SHORT_CONFLICT": 18,
+              "LONG_ALREADY_CAPTURED": 5
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 2597,
+            "regime72": 2573,
+            "breakout18": 2503,
+            "relative24": 1853,
+            "ema168": 1592,
+            "btc24": 1435,
+            "rsiMin": 1381,
+            "volumeMin": 474,
+            "volumeMax": 216,
+            "atrMax": 25,
+            "rsiMax": 5
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 78,
+              "compoundedGross025ReturnPct": 1632.4515951701326,
+              "sumGross025ReturnPct": 291.98054672836224
+            },
+            "missedNormal": {
+              "trades": 76,
+              "compoundedGross025ReturnPct": 1478.0064810772164,
+              "sumGross025ReturnPct": 282.1127478987906
+            },
+            "allSevere": {
+              "trades": 67,
+              "compoundedGross025ReturnPct": 1166.1283554778618,
+              "sumGross025ReturnPct": 259.99256833512027
+            },
+            "missedSevere": {
+              "trades": 64,
+              "compoundedGross025ReturnPct": 1053.9190790774317,
+              "sumGross025ReturnPct": 250.27621820353565
+            }
+          }
+        },
+        "10": {
+          "hourlyStarts": {
+            "all": 2643,
+            "freeMissed": 2083,
+            "shortConflict": 339,
+            "longCaptured": 221,
+            "missedSharePct": 91.63828982217177
+          },
+          "dedupedEpisodes": {
+            "all": 105,
+            "missed": 92,
+            "missedSharePct": 87.61904761904762,
+            "byCoverage": {
+              "FREE_MISSED": 74,
+              "SHORT_CONFLICT": 18,
+              "LONG_ALREADY_CAPTURED": 13
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 2061,
+            "regime72": 2029,
+            "breakout18": 1980,
+            "relative24": 1482,
+            "ema168": 1298,
+            "btc24": 1145,
+            "rsiMin": 1111,
+            "volumeMin": 387,
+            "volumeMax": 166,
+            "atrMax": 22,
+            "rsiMax": 4
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 55,
+              "compoundedGross025ReturnPct": 997.7125501941231,
+              "sumGross025ReturnPct": 245.9359765142298
+            },
+            "missedNormal": {
+              "trades": 52,
+              "compoundedGross025ReturnPct": 895.3495357015685,
+              "sumGross025ReturnPct": 235.69462638264503
+            },
+            "allSevere": {
+              "trades": 52,
+              "compoundedGross025ReturnPct": 830.8427162331672,
+              "sumGross025ReturnPct": 228.95705218740602
+            },
+            "missedSevere": {
+              "trades": 49,
+              "compoundedGross025ReturnPct": 748.3477723522896,
+              "sumGross025ReturnPct": 219.24070205582126
+            }
+          }
+        },
+        "15": {
+          "hourlyStarts": {
+            "all": 1332,
+            "freeMissed": 1098,
+            "shortConflict": 163,
+            "longCaptured": 71,
+            "missedSharePct": 94.66966966966967
+          },
+          "dedupedEpisodes": {
+            "all": 63,
+            "missed": 61,
+            "missedSharePct": 96.82539682539682,
+            "byCoverage": {
+              "FREE_MISSED": 51,
+              "SHORT_CONFLICT": 10,
+              "LONG_ALREADY_CAPTURED": 2
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 1080,
+            "regime72": 1051,
+            "breakout18": 1047,
+            "relative24": 759,
+            "ema168": 691,
+            "btc24": 635,
+            "rsiMin": 585,
+            "volumeMin": 200,
+            "volumeMax": 91,
+            "atrMax": 14,
+            "rsiMax": 4
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 32,
+              "compoundedGross025ReturnPct": 463.8904985534415,
+              "sumGross025ReturnPct": 178.1080386634738
+            },
+            "missedNormal": {
+              "trades": 31,
+              "compoundedGross025ReturnPct": 442.8004319206604,
+              "sumGross025ReturnPct": 174.22262048903434
+            },
+            "allSevere": {
+              "trades": 30,
+              "compoundedGross025ReturnPct": 397.4239900392944,
+              "sumGross025ReturnPct": 165.14431028243553
+            },
+            "missedSevere": {
+              "trades": 30,
+              "compoundedGross025ReturnPct": 397.4239900392944,
+              "sumGross025ReturnPct": 165.14431028243553
+            }
+          }
+        },
+        "20": {
+          "hourlyStarts": {
+            "all": 683,
+            "freeMissed": 580,
+            "shortConflict": 73,
+            "longCaptured": 30,
+            "missedSharePct": 95.60761346998535
+          },
+          "dedupedEpisodes": {
+            "all": 34,
+            "missed": 32,
+            "missedSharePct": 94.11764705882354,
+            "byCoverage": {
+              "FREE_MISSED": 30,
+              "SHORT_CONFLICT": 2,
+              "LONG_ALREADY_CAPTURED": 2
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 578,
+            "regime72": 555,
+            "breakout18": 554,
+            "relative24": 417,
+            "ema168": 397,
+            "btc24": 393,
+            "rsiMin": 331,
+            "volumeMin": 105,
+            "volumeMax": 54,
+            "atrMax": 4
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 17,
+              "compoundedGross025ReturnPct": 203.93489242464534,
+              "sumGross025ReturnPct": 115.00743995644382
+            },
+            "missedNormal": {
+              "trades": 17,
+              "compoundedGross025ReturnPct": 203.93489242464534,
+              "sumGross025ReturnPct": 115.00743995644382
+            },
+            "allSevere": {
+              "trades": 17,
+              "compoundedGross025ReturnPct": 195.5747661069191,
+              "sumGross025ReturnPct": 112.03243995644384
+            },
+            "missedSevere": {
+              "trades": 17,
+              "compoundedGross025ReturnPct": 195.5747661069191,
+              "sumGross025ReturnPct": 112.03243995644384
+            }
+          }
+        },
+        "30": {
+          "hourlyStarts": {
+            "all": 153,
+            "freeMissed": 119,
+            "shortConflict": 19,
+            "longCaptured": 15,
+            "missedSharePct": 90.19607843137256
+          },
+          "dedupedEpisodes": {
+            "all": 6,
+            "missed": 6,
+            "missedSharePct": 100,
+            "byCoverage": {
+              "FREE_MISSED": 5,
+              "SHORT_CONFLICT": 1,
+              "LONG_ALREADY_CAPTURED": 0
+            }
+          },
+          "freeMissedGateFailures": {
+            "return24": 119,
+            "regime72": 118,
+            "breakout18": 113,
+            "ema168": 107,
+            "btc24": 84,
+            "relative24": 81,
+            "rsiMin": 65,
+            "volumeMin": 18,
+            "volumeMax": 10,
+            "atrMax": 1
+          },
+          "oracle": {
+            "allNormal": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 47.15716863143924,
+              "sumGross025ReturnPct": 40.62451745300472
+            },
+            "missedNormal": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 47.15716863143924,
+              "sumGross025ReturnPct": 40.62451745300472
+            },
+            "allSevere": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 46.22399712285667,
+              "sumGross025ReturnPct": 39.92451745300472
+            },
+            "missedSevere": {
+              "trades": 4,
+              "compoundedGross025ReturnPct": 46.22399712285667,
+              "sumGross025ReturnPct": 39.92451745300472
+            }
+          }
+        }
+      }
+    }
+  },
+  "topMissed": [
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T18:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 53.48837209302326,
+      "normalNetMfePct": 53.36837209302326,
+      "severeNetMfePct": 52.668372093023265,
+      "maeBeforePeakPct": -0.26744186046512297,
+      "closeReturnPct": 48.616279069767444,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "volumeMax",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007718729497124776,
+        "btcReturn24h": -0.008387873189033335,
+        "penguReturn24h": -0.04267346486366663,
+        "penguReturn72h": -0.08156103785623126,
+        "relativeReturn24h": -0.0342855916746333,
+        "volumeRatio6OverPrior36": 6.283361138241491,
+        "rsi14": 28.008845969401875,
+        "btcEma168Distance": -0.004696757814326213
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T04:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.79546243778213,
+      "normalNetMfePct": 52.67546243778213,
+      "severeNetMfePct": 51.97546243778213,
+      "maeBeforePeakPct": -0.11575413821045544,
+      "closeReturnPct": 46.83412431994442,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007200758882373236,
+        "btcReturn24h": -0.006752186826336493,
+        "penguReturn24h": -0.03900552486187858,
+        "penguReturn72h": -0.093401438548942,
+        "relativeReturn24h": -0.03225333803554209,
+        "volumeRatio6OverPrior36": 0.5550983097133372,
+        "rsi14": 38.25239936044628,
+        "btcEma168Distance": -0.0017449641669846638
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T20:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.70708005552984,
+      "normalNetMfePct": 52.587080055529846,
+      "severeNetMfePct": 51.88708005552984,
+      "maeBeforePeakPct": -0.18509949097640366,
+      "closeReturnPct": 45.85839888940304,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "volumeMax",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007915605464227832,
+        "btcReturn24h": -0.007524083303565909,
+        "penguReturn24h": -0.0395819435179009,
+        "penguReturn72h": -0.06108695652173912,
+        "relativeReturn24h": -0.03205786021433499,
+        "volumeRatio6OverPrior36": 3.2563814854734914,
+        "rsi14": 29.611874566428014,
+        "btcEma168Distance": -0.005370169723223461
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T23:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.512998266897746,
+      "normalNetMfePct": 52.39299826689775,
+      "severeNetMfePct": 51.692998266897746,
+      "maeBeforePeakPct": -0.30040439052571033,
+      "closeReturnPct": 44.621606008087824,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.00810813411864341,
+        "btcReturn24h": -0.007729071764618123,
+        "penguReturn24h": -0.03251396648044691,
+        "penguReturn72h": -0.06196511753872813,
+        "relativeReturn24h": -0.024784894715828787,
+        "volumeRatio6OverPrior36": 1.0707692212010491,
+        "rsi14": 34.14659803896912,
+        "btcEma168Distance": -0.0032384055789916877
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T22:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.495378927911275,
+      "normalNetMfePct": 52.37537892791128,
+      "severeNetMfePct": 51.675378927911275,
+      "maeBeforePeakPct": -0.31192236598892586,
+      "closeReturnPct": 44.027264325323465,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.00801502638219775,
+        "btcReturn24h": -0.005307122968180922,
+        "penguReturn24h": -0.027117509206561752,
+        "penguReturn72h": -0.05331740688456943,
+        "relativeReturn24h": -0.02181038623838083,
+        "volumeRatio6OverPrior36": 2.481256959180724,
+        "rsi14": 37.3260915426499,
+        "btcEma168Distance": -0.0024348807672562867
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T19:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.354570637119124,
+      "normalNetMfePct": 52.23457063711913,
+      "severeNetMfePct": 51.534570637119124,
+      "maeBeforePeakPct": -0.41551246537395725,
+      "closeReturnPct": 46.018005540166214,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "volumeMax",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.008015053014472567,
+        "btcReturn24h": -0.006834631822734583,
+        "penguReturn24h": -0.04342032204330937,
+        "penguReturn72h": -0.06825310978907517,
+        "relativeReturn24h": -0.036585690220574785,
+        "volumeRatio6OverPrior36": 4.085619361238929,
+        "rsi14": 27.130016322569602,
+        "btcEma168Distance": -0.003920466216276952
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T07:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.284263959390856,
+      "normalNetMfePct": 52.16426395939086,
+      "severeNetMfePct": 51.464263959390856,
+      "maeBeforePeakPct": -0.13844023996307797,
+      "closeReturnPct": 44.67005076142132,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007604982343006293,
+        "btcReturn24h": -0.009524498429537287,
+        "penguReturn24h": -0.03831672203765213,
+        "penguReturn72h": -0.07891387356809498,
+        "relativeReturn24h": -0.028792223608114842,
+        "volumeRatio6OverPrior36": 0.326469162132187,
+        "rsi14": 40.441210956039775,
+        "btcEma168Distance": -0.003704139113208438
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T17:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.056214721806256,
+      "normalNetMfePct": 51.93621472180626,
+      "severeNetMfePct": 51.23621472180626,
+      "maeBeforePeakPct": -1.1980186614445332,
+      "closeReturnPct": 49.856007372422525,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "volumeMax",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.00825200918484501,
+        "btcReturn24h": -0.012116640848198634,
+        "penguReturn24h": -0.05099150141643061,
+        "penguReturn72h": -0.07379838366652469,
+        "relativeReturn24h": -0.03887486056823197,
+        "volumeRatio6OverPrior36": 6.969443788885027,
+        "rsi14": 30.965067802621277,
+        "btcEma168Distance": -0.004383451425954199
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T05:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.056214721806256,
+      "normalNetMfePct": 51.93621472180626,
+      "severeNetMfePct": 51.23621472180626,
+      "maeBeforePeakPct": -0.2879852551549211,
+      "closeReturnPct": 42.54118189148717,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007537567118630982,
+        "btcReturn24h": -0.008209105674113926,
+        "penguReturn24h": -0.046519337016574736,
+        "penguReturn72h": -0.0983281086729364,
+        "relativeReturn24h": -0.03831023134246081,
+        "volumeRatio6OverPrior36": 0.6161010778884299,
+        "rsi14": 33.51715642340751,
+        "btcEma168Distance": -0.004548459751468892
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T06:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 52.003684937816665,
+      "normalNetMfePct": 51.88368493781667,
+      "severeNetMfePct": 51.183684937816665,
+      "maeBeforePeakPct": -0.32243205895901017,
+      "closeReturnPct": 44.230769230769205,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007634099616858237,
+        "btcReturn24h": -0.008367987894182805,
+        "penguReturn24h": -0.03547671840354771,
+        "penguReturn72h": -0.08478855459709667,
+        "relativeReturn24h": -0.02710873050936491,
+        "volumeRatio6OverPrior36": 0.6271991359175197,
+        "rsi14": 41.64040876564766,
+        "btcEma168Distance": -0.0032253932845385247
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T08:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 51.986183074265966,
+      "normalNetMfePct": 51.86618307426597,
+      "severeNetMfePct": 51.16618307426597,
+      "maeBeforePeakPct": 0,
+      "closeReturnPct": 45.964306275187106,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "volumeMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007518616612927992,
+        "btcReturn24h": -0.010907608793829016,
+        "penguReturn24h": -0.03639591655570329,
+        "penguReturn72h": -0.07881616633075195,
+        "relativeReturn24h": -0.025488307761874274,
+        "volumeRatio6OverPrior36": 0.22406753558216816,
+        "rsi14": 40.44121095603978,
+        "btcEma168Distance": -0.003989656828662591
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T00:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 51.91621590516744,
+      "normalNetMfePct": 51.79621590516744,
+      "severeNetMfePct": 51.09621590516744,
+      "maeBeforePeakPct": -0.6905282541144087,
+      "closeReturnPct": 45.022442168258706,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.0078013775058678675,
+        "btcReturn24h": -0.009414305176341564,
+        "penguReturn24h": -0.038619465098213235,
+        "penguReturn72h": -0.06869490432165115,
+        "relativeReturn24h": -0.02920515992187167,
+        "volumeRatio6OverPrior36": 0.9974873905772272,
+        "rsi14": 34.553625472498965,
+        "btcEma168Distance": -0.004095424598104747
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T02:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 51.776474646429804,
+      "normalNetMfePct": 51.65647464642981,
+      "severeNetMfePct": 50.956474646429804,
+      "maeBeforePeakPct": -0.7818788087846418,
+      "closeReturnPct": 47.154191100379435,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.0073492775286497294,
+        "btcReturn24h": -0.007750949401016838,
+        "penguReturn24h": -0.04070152217074785,
+        "penguReturn72h": -0.08317520556609737,
+        "relativeReturn24h": -0.03295057276973101,
+        "volumeRatio6OverPrior36": 1.0694620154659369,
+        "rsi14": 38.25239936044628,
+        "btcEma168Distance": -0.0006077609670384065
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T03:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 51.776474646429804,
+      "normalNetMfePct": 51.65647464642981,
+      "severeNetMfePct": 50.956474646429804,
+      "maeBeforePeakPct": -0.7818788087846418,
+      "closeReturnPct": 46.93572496263081,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.00726783181940133,
+        "btcReturn24h": -0.008451228592702975,
+        "penguReturn24h": -0.039536167863059135,
+        "penguReturn72h": -0.08152920054916046,
+        "relativeReturn24h": -0.03108493927035616,
+        "volumeRatio6OverPrior36": 0.5826465874515117,
+        "rsi14": 38.25239936044628,
+        "btcEma168Distance": -0.0009690000355869755
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T01:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 51.67183729748361,
+      "normalNetMfePct": 51.551837297483615,
+      "severeNetMfePct": 50.85183729748361,
+      "maeBeforePeakPct": -0.8502815121222751,
+      "closeReturnPct": 44.651269677122805,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007746370983185872,
+        "btcReturn24h": -0.004926409909950635,
+        "penguReturn24h": -0.03041443850267367,
+        "penguReturn72h": -0.08147757255936672,
+        "relativeReturn24h": -0.025488028592723033,
+        "volumeRatio6OverPrior36": 1.0041551275433092,
+        "rsi14": 38.63803612498316,
+        "btcEma168Distance": -0.0021825114292776115
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T21:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 51.42824366181025,
+      "normalNetMfePct": 51.30824366181025,
+      "severeNetMfePct": 50.60824366181025,
+      "maeBeforePeakPct": -1.0095216244120797,
+      "closeReturnPct": 44.43042331077205,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.008112348371790454,
+        "btcReturn24h": -0.0029237703668478776,
+        "penguReturn24h": -0.02833240379252655,
+        "penguReturn72h": -0.052431197650386174,
+        "relativeReturn24h": -0.025408633425678673,
+        "volumeRatio6OverPrior36": 2.6326676460370466,
+        "rsi14": 36.676505449778944,
+        "btcEma168Distance": -0.00392325242345648
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T12:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 51.20274914089347,
+      "normalNetMfePct": 51.08274914089347,
+      "severeNetMfePct": 50.382749140893466,
+      "maeBeforePeakPct": -0.06872852233675841,
+      "closeReturnPct": 41.85567010309277,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.006787244530390926,
+        "btcReturn24h": -0.011223832691056312,
+        "penguReturn24h": -0.029262367491166064,
+        "penguReturn72h": -0.04776863084922012,
+        "relativeReturn24h": -0.01803853480010975,
+        "volumeRatio6OverPrior36": 0.6404278524329354,
+        "rsi14": 52.098110174798045,
+        "btcEma168Distance": 0.0003461685046399765
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T09:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 50.9433962264151,
+      "normalNetMfePct": 50.823396226415106,
+      "severeNetMfePct": 50.12339622641511,
+      "maeBeforePeakPct": -0.2401372212692765,
+      "closeReturnPct": 42.618639222412824,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007041172633436938,
+        "btcReturn24h": -0.007437046992317509,
+        "penguReturn24h": -0.03068511492970305,
+        "penguReturn72h": -0.07516235494517198,
+        "relativeReturn24h": -0.02324806793738554,
+        "volumeRatio6OverPrior36": 0.2585872329058166,
+        "rsi14": 40.811875512275954,
+        "btcEma168Distance": -0.002450536279336779
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T13:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 50.82266910420476,
+      "normalNetMfePct": 50.702669104204766,
+      "severeNetMfePct": 50.00266910420477,
+      "maeBeforePeakPct": 0,
+      "closeReturnPct": 41.5219378427788,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.006614893779611794,
+        "btcReturn24h": -0.009356000202852321,
+        "penguReturn24h": -0.02579564489112207,
+        "penguReturn72h": -0.039524386216007956,
+        "relativeReturn24h": -0.01643964468826975,
+        "volumeRatio6OverPrior36": 0.6326113425348843,
+        "rsi14": 45.37919583372788,
+        "btcEma168Distance": -0.000526427273540353
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T14:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 50.82266910420476,
+      "normalNetMfePct": 50.702669104204766,
+      "severeNetMfePct": 50.00266910420477,
+      "maeBeforePeakPct": 0,
+      "closeReturnPct": 41.73903107861061,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.0064223415600243566,
+        "btcReturn24h": -0.012111796354544957,
+        "penguReturn24h": -0.02917359955629517,
+        "penguReturn72h": -0.02981931049772757,
+        "relativeReturn24h": -0.017061803201750214,
+        "volumeRatio6OverPrior36": 0.5211864427978469,
+        "rsi14": 48.375597857258725,
+        "btcEma168Distance": -0.0008246865488530375
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T10:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 50.68493150684932,
+      "normalNetMfePct": 50.56493150684932,
+      "severeNetMfePct": 49.86493150684932,
+      "maeBeforePeakPct": -0.4109589041095818,
+      "closeReturnPct": 40.18264840182646,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007096651445966516,
+        "btcReturn24h": -0.008649269579621754,
+        "penguReturn24h": -0.027531083481349916,
+        "penguReturn72h": -0.05348460291734192,
+        "relativeReturn24h": -0.01888181390172816,
+        "volumeRatio6OverPrior36": 0.3498403280521886,
+        "rsi14": 49.111215682941996,
+        "btcEma168Distance": -0.0011205262217584
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T11:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 49.82973893303064,
+      "normalNetMfePct": 49.70973893303064,
+      "severeNetMfePct": 49.00973893303065,
+      "maeBeforePeakPct": -0.9761634506242789,
+      "closeReturnPct": 39.9205448354143,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007072343489464907,
+        "btcReturn24h": -0.010915798684428268,
+        "penguReturn24h": -0.020817098964711067,
+        "penguReturn72h": -0.050107991360691106,
+        "relativeReturn24h": -0.009901300280282799,
+        "volumeRatio6OverPrior36": 0.5714137975471548,
+        "rsi14": 52.63818474805352,
+        "btcEma168Distance": -0.0013892934841437388
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T16:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 49.085159250056456,
+      "normalNetMfePct": 48.96515925005646,
+      "severeNetMfePct": 48.265159250056456,
+      "maeBeforePeakPct": -3.128529478201958,
+      "closeReturnPct": 44.53354416083124,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "volumeMax",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007185696503338242,
+        "btcReturn24h": -0.011909244275503994,
+        "penguReturn24h": -0.03272767075306482,
+        "penguReturn72h": -0.06268561731014011,
+        "relativeReturn24h": -0.020818426477560825,
+        "volumeRatio6OverPrior36": 4.9061997223018095,
+        "rsi14": 37.33003870499449,
+        "btcEma168Distance": -0.001120254078301408
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2025-12-31T15:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 48.69888475836432,
+      "normalNetMfePct": 48.578884758364325,
+      "severeNetMfePct": 47.87888475836433,
+      "maeBeforePeakPct": -3.37952010814464,
+      "closeReturnPct": 47.51605272051371,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "rsiMin",
+        "volumeMax",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.007544156332205946,
+        "btcReturn24h": -0.004295971738449977,
+        "penguReturn24h": -0.024738867509620843,
+        "penguReturn72h": -0.06837517067534926,
+        "relativeReturn24h": -0.020442895771170866,
+        "volumeRatio6OverPrior36": 4.7680197238652084,
+        "rsi14": 39.278089506726786,
+        "btcEma168Distance": 0.004916582235494182
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T15:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 48.18140996856759,
+      "normalNetMfePct": 48.061409968567595,
+      "severeNetMfePct": 47.36140996856759,
+      "maeBeforePeakPct": -0.022451728783101643,
+      "closeReturnPct": 40.03143242029638,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24",
+        "relative24",
+        "btc24",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.005432091712370488,
+        "btcReturn24h": -0.005969757749944016,
+        "penguReturn24h": -0.013303269447576094,
+        "penguReturn72h": -0.03335542301745087,
+        "relativeReturn24h": -0.007333511697632078,
+        "volumeRatio6OverPrior36": 0.48750804510391654,
+        "rsi14": 48.375597857258725,
+        "btcEma168Distance": -0.0003587641956290799
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T16:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 47.387226440375166,
+      "normalNetMfePct": 47.26722644037517,
+      "severeNetMfePct": 46.567226440375165,
+      "maeBeforePeakPct": 0,
+      "closeReturnPct": 40.01786511835641,
+      "failedLongGates": [
+        "regime72",
+        "return24",
+        "ema168"
+      ],
+      "features": {
+        "atr24Ratio": 0.006091889880952367,
+        "btcReturn24h": 0.0009133999064987464,
+        "penguReturn24h": 0.013918750707253569,
+        "penguReturn72h": -0.014084507042253724,
+        "relativeReturn24h": 0.013005350800754822,
+        "volumeRatio6OverPrior36": 0.4209305829301069,
+        "rsi14": 64.94395842990723,
+        "btcEma168Distance": 0.0004971387171803787
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T21:00:00.000Z",
+      "peakTs": "2026-01-05T20:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 45.88989032468238,
+      "normalNetMfePct": 45.769890324682386,
+      "severeNetMfePct": 45.06989032468238,
+      "maeBeforePeakPct": -0.010858942339031508,
+      "closeReturnPct": 42.469323487892275,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24"
+      ],
+      "features": {
+        "atr24Ratio": 0.006225585937499983,
+        "btcReturn24h": 0.006549281632802106,
+        "penguReturn24h": 0.05797267822293661,
+        "penguReturn72h": 0.038422535211267705,
+        "relativeReturn24h": 0.05142339659013451,
+        "volumeRatio6OverPrior36": 0.9186029446332016,
+        "rsi14": 69.09930216780657,
+        "btcEma168Distance": 0.002876894773696348
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T17:00:00.000Z",
+      "peakTs": "2026-01-04T14:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 45.566828407587124,
+      "normalNetMfePct": 45.44682840758713,
+      "severeNetMfePct": 44.746828407587124,
+      "maeBeforePeakPct": -0.15438906043229172,
+      "closeReturnPct": 38.486987207763555,
+      "failedLongGates": [
+        "regime72",
+        "return24",
+        "volumeMin"
+      ],
+      "features": {
+        "atr24Ratio": 0.005289172209903894,
+        "btcReturn24h": 0.0037730465696206306,
+        "penguReturn24h": 0.03559127439724441,
+        "penguReturn72h": 0.0007766559414179586,
+        "relativeReturn24h": 0.03181822782762378,
+        "volumeRatio6OverPrior36": 0.1978241893920483,
+        "rsi14": 68.12219027648885,
+        "btcEma168Distance": 2.4979877154995833e-05
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-01T22:00:00.000Z",
+      "peakTs": "2026-01-05T20:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 45.526429809358746,
+      "normalNetMfePct": 45.40642980935875,
+      "severeNetMfePct": 44.70642980935875,
+      "maeBeforePeakPct": 0,
+      "closeReturnPct": 41.832755632582305,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24"
+      ],
+      "features": {
+        "atr24Ratio": 0.006235519837822172,
+        "btcReturn24h": 0.00658299495508774,
+        "penguReturn24h": 0.05620555173204855,
+        "penguReturn72h": 0.03670344517000679,
+        "relativeReturn24h": 0.04962255677696081,
+        "volumeRatio6OverPrior36": 0.9416139416018587,
+        "rsi14": 68.42281095062786,
+        "btcEma168Distance": 0.004327723958379437
+      }
+    },
+    {
+      "horizonHours": 96,
+      "entryTs": "2026-01-02T02:00:00.000Z",
+      "peakTs": "2026-01-06T01:00:00.000Z",
+      "coverage": "FREE_MISSED",
+      "mfePct": 44.89361702127659,
+      "normalNetMfePct": 44.77361702127659,
+      "severeNetMfePct": 44.07361702127659,
+      "maeBeforePeakPct": -0.6595744680851001,
+      "closeReturnPct": 41.29787234042552,
+      "failedLongGates": [
+        "regime72",
+        "breakout18",
+        "return24"
+      ],
+      "features": {
+        "atr24Ratio": 0.007957160559391031,
+        "btcReturn24h": 0.0077148189809796985,
+        "penguReturn24h": 0.08255720363343677,
+        "penguReturn72h": 0.06408227848101267,
+        "relativeReturn24h": 0.07484238465245707,
+        "volumeRatio6OverPrior36": 1.6019346833939132,
+        "rsi14": 69.19063381776445,
+        "btcEma168Distance": 0.006788195488444115
+      }
+    }
+  ],
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}
