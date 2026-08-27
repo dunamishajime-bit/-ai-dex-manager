@@ -1,0 +1,193 @@
+{
+  "status": "PASS_RESEARCH_ONLY",
+  "researchDecision": "KEEP_V64_RESEARCH_CANDIDATE",
+  "productionDecision": "NO_CHANGE_V56",
+  "family": "RANGE_COMPRESSION_BREAKOUT",
+  "standaloneStrictPass": false,
+  "allFoldPass": false,
+  "fullMetrics": {
+    "normal": {
+      "trades": 70,
+      "returnPct": -17.466861421289625,
+      "profitFactor": 0.7770293749864214,
+      "maxDrawdownPct": -18.94086658272759,
+      "winRatePct": 41.42857142857143,
+      "hardStops": 37,
+      "trailingExits": 21,
+      "timeExits": 12,
+      "longTrades": 70,
+      "shortTrades": 0
+    },
+    "stress": {
+      "trades": 70,
+      "returnPct": -27.016972965622365,
+      "profitFactor": 0.6531924395669508,
+      "maxDrawdownPct": -27.12275439713251,
+      "winRatePct": 40,
+      "hardStops": 37,
+      "trailingExits": 21,
+      "timeExits": 12,
+      "longTrades": 70,
+      "shortTrades": 0
+    }
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "start": "2025-08-10T00:00:00.000Z",
+      "end": "2025-12-09T16:00:00.000Z",
+      "trades": {
+        "normal": 25,
+        "stress": 25
+      },
+      "metrics": {
+        "normal": {
+          "trades": 25,
+          "returnPct": -7.363769815778387,
+          "profitFactor": 0.7773011607452603,
+          "maxDrawdownPct": -15.428254062024305,
+          "winRatePct": 36,
+          "hardStops": 15,
+          "trailingExits": 7,
+          "timeExits": 3,
+          "longTrades": 25,
+          "shortTrades": 0
+        },
+        "stress": {
+          "trades": 25,
+          "returnPct": -11.345649965986038,
+          "profitFactor": 0.6664392000953869,
+          "maxDrawdownPct": -18.020056307558217,
+          "winRatePct": 36,
+          "hardStops": 15,
+          "trailingExits": 7,
+          "timeExits": 3,
+          "longTrades": 25,
+          "shortTrades": 0
+        }
+      },
+      "normalPass": false,
+      "stressPass": false,
+      "pass": false
+    },
+    {
+      "fold": 2,
+      "start": "2025-12-09T16:00:00.000Z",
+      "end": "2026-04-10T08:00:00.000Z",
+      "trades": {
+        "normal": 23,
+        "stress": 23
+      },
+      "metrics": {
+        "normal": {
+          "trades": 23,
+          "returnPct": -8.33375323240051,
+          "profitFactor": 0.6896221431160457,
+          "maxDrawdownPct": -11.83356038076553,
+          "winRatePct": 39.130434782608695,
+          "hardStops": 12,
+          "trailingExits": 8,
+          "timeExits": 3,
+          "longTrades": 23,
+          "shortTrades": 0
+        },
+        "stress": {
+          "trades": 23,
+          "returnPct": -11.967332026488432,
+          "profitFactor": 0.5767956331930297,
+          "maxDrawdownPct": -14.8761430053564,
+          "winRatePct": 39.130434782608695,
+          "hardStops": 12,
+          "trailingExits": 8,
+          "timeExits": 3,
+          "longTrades": 23,
+          "shortTrades": 0
+        }
+      },
+      "normalPass": false,
+      "stressPass": false,
+      "pass": false
+    },
+    {
+      "fold": 3,
+      "start": "2026-04-10T08:00:00.000Z",
+      "end": "2026-08-10T00:00:00.000Z",
+      "trades": {
+        "normal": 22,
+        "stress": 22
+      },
+      "metrics": {
+        "normal": {
+          "trades": 22,
+          "returnPct": -2.806317323417218,
+          "profitFactor": 0.8863991744828924,
+          "maxDrawdownPct": -11.958376763118373,
+          "winRatePct": 50,
+          "hardStops": 10,
+          "trailingExits": 6,
+          "timeExits": 6,
+          "longTrades": 22,
+          "shortTrades": 0
+        },
+        "stress": {
+          "trades": 22,
+          "returnPct": -6.485714934291087,
+          "profitFactor": 0.7295113891209926,
+          "maxDrawdownPct": -14.26089018297354,
+          "winRatePct": 45.45454545454545,
+          "hardStops": 10,
+          "trailingExits": 6,
+          "timeExits": 6,
+          "longTrades": 22,
+          "shortTrades": 0
+        }
+      },
+      "normalPass": false,
+      "stressPass": false,
+      "pass": false
+    }
+  ],
+  "v64PreservedIntegrated": true,
+  "newLongUsed": true,
+  "newLongEntered": {
+    "NORMAL": 68,
+    "SEVERE": 67
+  },
+  "materialIntegratedGain": false,
+  "materialGainThresholdMultiple": 1.05,
+  "grossContractPass": true,
+  "integratedContractPass": false,
+  "incumbentEndingAssetJpy": {
+    "NORMAL": 827590.15335893,
+    "SEVERE": 299569.7572056
+  },
+  "candidateEndingAssetJpy": {
+    "NORMAL": 690245.96272031,
+    "SEVERE": 264713.24918733
+  },
+  "deltaEndingAssetPct": {
+    "NORMAL": -16.595677229989125,
+    "SEVERE": -11.635523005864478
+  },
+  "candidateIntegratedMetrics": {
+    "NORMAL": {
+      "trades": 698,
+      "winRatePct": 51.57593123,
+      "profitFactor": 2.26233306,
+      "maxDrawdownPct": -14.92460019
+    },
+    "SEVERE": {
+      "trades": 506,
+      "winRatePct": 44.86166008,
+      "profitFactor": 1.60522705,
+      "maxDrawdownPct": -18.76890287
+    }
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}
