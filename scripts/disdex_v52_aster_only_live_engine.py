@@ -39,6 +39,7 @@ def transient_reference_error(error: BaseException | str) -> bool:
     """Return true only for reference-validation failures which are safe to retry while flat."""
     message = str(error).lower()
     return any(marker in message for marker in (
+        "stale_quote",
         "iex_quote_stale",
         "pyth_quote_stale",
         "cross_source_divergence",
@@ -592,6 +593,7 @@ def self_test() -> None:
     engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoGross": 1.0, "stockGross": 1.0, "totalGross": 2.0}
     gross, _ = engine.available_slot_gross(V50_SLOT)
     assert gross == 0.5
+    assert transient_reference_error("stale_quote AMZN")
     assert transient_reference_error("iex_quote_stale META")
     assert transient_reference_error("cross_source_divergence TSLA")
     assert not transient_reference_error("Managed Stock position reconciliation mismatch")

@@ -127,7 +127,7 @@ def append_jsonl(path: Path, payload: dict) -> None:
 
 
 REFERENCE_QUALITY_ERROR_CODES = {
-    "pyth_quote_unavailable", "iex_quote_unavailable", "pyth_quote_stale", "iex_quote_stale",
+    "pyth_quote_unavailable", "iex_quote_unavailable", "stale_quote", "pyth_quote_stale", "iex_quote_stale",
     "pyth_confidence_too_wide", "cross_source_divergence", "reference_http_unavailable", "reference_transport_unavailable",
 }
 

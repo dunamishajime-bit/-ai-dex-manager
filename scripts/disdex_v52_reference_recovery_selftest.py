@@ -46,6 +46,10 @@ def main() -> int:
         assert stale.detail["ageMs"] == 5396
         print("Test A: IEX stale 5396ms -> blocked without worker-fatal classification: PASS")
 
+        proxy_stale = expect_block("stale_quote", {"symbol": "AMZN", "ageMs": 3015, "maximumAgeMs": 1400})
+        assert proxy_stale.detail["maximumAgeMs"] == 1400
+        print("Test A1: free proxy stale 3015ms -> blocked without worker-fatal classification: PASS")
+
         _ReferenceHandler.payload = {"error": "unknown_provider_internal_failure", "symbol": "META"}
         try:
             stock.http_json(url, reference_request=True)
