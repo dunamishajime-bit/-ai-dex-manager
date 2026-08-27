@@ -1,0 +1,74 @@
+name: PENGU Recovery Fresh Forward V3
+
+on:
+  push:
+    branches: [research/pengu-recovery-validation-20260827]
+    paths:
+      - 'scripts/research_patch_pengu_forward_fixed_v3.py'
+      - '.github/workflows/pengu-recovery-fresh-forward-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  forward:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run isolated frozen fresh forward
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-fresh-forward-v3
+          PENGU_EVAL_END: '2026-08-27T11:00:00Z'
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_forward_fixed_v3.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify fresh forward
+        env:
+          OUT: ${{ github.workspace }}/.research-state/pengu-fresh-forward-v3/fresh-forward.json
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads(Path(os.environ['OUT']).read_text())
+          assert x['schema']=='pengu-recovery-v2-fresh-forward/v3'
+          assert x['start']=='2026-08-10T00:00:00.000Z'
+          assert x['frozenBeforeForward'] is True
+          assert x['historicalFreeze']['v64']['trades']==41
+          assert abs(x['historicalFreeze']['v64']['returnPct']-303.9903920953809)<1e-9
+          assert x['recoveryFrozen']['rule']=='R_BTC3' and x['recoveryFrozen']['yieldMode']=='BASE_LONG'
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('FRESH_FORWARD_V3='+json.dumps(x,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-recovery-fresh-forward-v3-${{ github.run_id }}
+          path: .research-state/pengu-fresh-forward-v3
+          retention-days: 90
