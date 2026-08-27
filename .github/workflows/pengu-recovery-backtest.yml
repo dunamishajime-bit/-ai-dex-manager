@@ -5,6 +5,7 @@ on:
     branches: [research/pengu-v82-composite-regime-20260827]
     paths:
       - 'scripts/research_patch_pengu_recovery_backtest.py'
+      - 'scripts/research_patch_pengu_recovery_backtest_fold_fix.py'
       - '.github/workflows/pengu-recovery-backtest.yml'
 permissions: {contents: read, actions: read}
 concurrency:
@@ -30,7 +31,7 @@ jobs:
         run: |
           npm ci
           ln -s ../node_modules .pengu-current/node_modules
-          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py scripts/research_patch_pengu_directional_wave_map.py scripts/research_patch_pengu_recovery_study.py scripts/research_patch_pengu_recovery_backtest.py
+          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py scripts/research_patch_pengu_directional_wave_map.py scripts/research_patch_pengu_recovery_study.py scripts/research_patch_pengu_recovery_backtest.py scripts/research_patch_pengu_recovery_backtest_fold_fix.py
           python scripts/research_generate_pengu_v57_from_v56.py
           python scripts/research_patch_v57_replacement_audit.py
           python scripts/research_patch_v57_economic_winner_guard.py
@@ -39,6 +40,7 @@ jobs:
           python scripts/research_patch_pengu_directional_wave_map.py
           python scripts/research_patch_pengu_recovery_study.py
           python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
           npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
       - name: Verify frozen V64 and research-only backtest
         run: |
