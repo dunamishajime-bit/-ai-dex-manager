@@ -1,0 +1,125 @@
+name: PENGU Recovery Parallel Validation
+
+on:
+  push:
+    branches:
+      - research/pengu-v82-composite-regime-20260827
+    paths:
+      - 'scripts/research_patch_pengu_parallel_validation_suite.py'
+      - '.github/workflows/pengu-recovery-parallel-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [PURGED, RISK, FORWARD]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build frozen V64 plus fixed Recovery V2 validation
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-parallel-${{ matrix.suite }}
+          PENGU_VALIDATION_MODE: ${{ matrix.suite }}
+          PENGU_FORWARD_START: '2026-08-10T00:00:00Z'
+          PENGU_FORWARD_END: '2026-08-28T00:00:00Z'
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py scripts/research_patch_pengu_directional_wave_map.py scripts/research_patch_pengu_recovery_study.py scripts/research_patch_pengu_recovery_backtest.py scripts/research_patch_pengu_recovery_backtest_fold_fix.py scripts/research_patch_pengu_recovery_v2_subordinate.py scripts/research_patch_pengu_parallel_validation_suite.py
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_parallel_validation_suite.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify research-only validation output
+        env:
+          SUITE: ${{ matrix.suite }}
+          OUT: ${{ github.workspace }}/.research-state/pengu-parallel-${{ matrix.suite }}/parallel-validation.json
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ['OUT'])
+          x=json.loads(p.read_text())
+          assert x['schema']=='pengu-recovery-v2-parallel-validation/v1'
+          assert x['validationMode']==os.environ['SUITE']
+          assert x['frozenConfig']['rule']=='R_BTC3'
+          assert x['frozenConfig']['priority']=='SHORT_FIRST'
+          assert abs(x['frozenConfig']['gross']-0.5)<1e-12
+          assert x['frozenConfig']['yieldMode']=='BASE_LONG'
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('VALIDATION='+json.dumps(x,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-recovery-${{ matrix.suite }}-${{ github.run_id }}
+          path: .research-state/pengu-parallel-${{ matrix.suite }}
+          include-hidden-files: true
+          retention-days: 90
+
+  cross-venue:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cross-venue frozen-config availability audit
+        run: |
+          python - <<'PY'
+          import json, urllib.request, urllib.parse, time
+          venues={
+            'BINANCE':('https://fapi.binance.com/fapi/v1/klines','PENGUUSDT'),
+            'BYBIT':('https://api.bybit.com/v5/market/kline','PENGUUSDT'),
+            'OKX':('https://www.okx.com/api/v5/market/history-candles','PENGU-USDT-SWAP'),
+            'BITGET':('https://api.bitget.com/api/v2/mix/market/candles','PENGUUSDT'),
+          }
+          out={'schema':'pengu-recovery-cross-venue-audit/v1','frozenConfig':{'rule':'R_BTC3','priority':'SHORT_FIRST','gross':0.5,'yieldMode':'BASE_LONG','exit':'FIXED_A6_T6_R3_H72'},'venues':{},'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          for name,(base,symbol) in venues.items():
+            try:
+              if name=='BINANCE': url=base+'?'+urllib.parse.urlencode({'symbol':symbol,'interval':'1h','limit':5})
+              elif name=='BYBIT': url=base+'?'+urllib.parse.urlencode({'category':'linear','symbol':symbol,'interval':'60','limit':5})
+              elif name=='OKX': url=base+'?'+urllib.parse.urlencode({'instId':symbol,'bar':'1H','limit':5})
+              else: url=base+'?'+urllib.parse.urlencode({'symbol':symbol,'productType':'USDT-FUTURES','granularity':'1H','limit':5})
+              req=urllib.request.Request(url,headers={'User-Agent':'DisDex-PENGU-CrossVenue-Audit/1.0','Accept':'application/json'})
+              with urllib.request.urlopen(req,timeout=20) as r:
+                body=r.read().decode('utf-8')
+              payload=json.loads(body)
+              out['venues'][name]={'reachable':True,'sampleBytes':len(body),'shape':type(payload).__name__}
+            except Exception as e:
+              out['venues'][name]={'reachable':False,'error':str(e)[:300]}
+          open('cross-venue-audit.json','w').write(json.dumps(out,indent=2))
+          print('CROSS_VENUE='+json.dumps(out,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-recovery-CROSS-VENUE-${{ github.run_id }}
+          path: cross-venue-audit.json
+          retention-days: 90
