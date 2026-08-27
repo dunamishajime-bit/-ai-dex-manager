@@ -1,0 +1,69 @@
+name: PENGU Recovery V8 Delayed Only
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-recovery-v7-final-20260827]
+    paths:
+      - 'scripts/research_patch_pengu_recovery_v8_delayed_only.py'
+      - '.github/workflows/pengu-recovery-v8-delayed-only.yml'
+permissions: {contents: read, actions: read}
+concurrency:
+  group: pengu-recovery-v8-delayed-only-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Run V8 delayed-only selection
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-recovery-v8-delayed-only
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_recovery_v7_delayed_defense.py
+          python scripts/research_patch_pengu_recovery_v8_delayed_only.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify V8 selection contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('.research-state/pengu-recovery-v8-delayed-only/missed-opportunity-map.json').read_text())
+          bt=x['recoveryBacktest']; s=bt['selected']
+          assert bt['schema']=='pengu-recovery-integrated-backtest/v8-delayed-only'
+          assert bt['selectionProtocol']['candidateCount']==11
+          assert s is not None and s['developmentFold1Pass'] and s['validationFold2Pass']
+          pd=s['parentDeltas']
+          for k in ('fold1NormalDD','fold1StressDD','fold2NormalDD','fold2StressDD'): assert pd[k]>=-.5-1e-12,(k,pd[k])
+          for k in ('fold1NormalReturn','fold1StressReturn','fold2NormalReturn','fold2StressReturn'): assert pd[k]>=-.25-1e-12,(k,pd[k])
+          safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert bt['safety']==safety
+          print('V8_DELAYED_ONLY='+json.dumps({'survivorCount':bt['survivorCount'],'selected':s['cfg'],'normal':s['metrics']['normal'],'stress':s['metrics']['stress'],'normalFolds':s['metrics']['normalFolds'],'stressFolds':s['metrics']['stressFolds'],'parentDeltas':pd,'safety':safety},separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-recovery-v8-delayed-only-${{ github.run_id }}
+          path: .research-state/pengu-recovery-v8-delayed-only
+          include-hidden-files: true
+          retention-days: 90
