@@ -13,11 +13,45 @@ replacements=[
     ('120_000.0','130_000.0'),
     ('"schema": "current-v12-top2-pengu-v2-v52-dca-1y/v1"','"schema": "latest-v12-top2-pengu-v8-v52-dca-1y/v1"'),
     ('"penguProductionReplay": "PENGU_DUAL_LS_V2_FINAL"','"penguProductionReplay": "PENGU_DUAL_LS_V2_RECOVERY_V8"'),
+    ('# Current V12 Top2 + PENGU V2 + V52 — 1Y monthly DCA backtest','# Latest V12 Top2 + PENGU DUAL LS V2 / Recovery V8 + V52 — 1Y monthly DCA backtest'),
+    ('- Monthly contribution: JPY 10,000 at each month-start after inception (11 additions; total contributed JPY 120,000)','- Monthly contribution: JPY 10,000 at each month-start after inception (12 additions; total contributed JPY 130,000)'),
+    ('- Entry priority: V52 -> PENGU V2 -> V12','- Entry priority: V52 -> PENGU DUAL LS V2 / Recovery V8 -> V12'),
 ]
 for old,new in replacements:
     if old not in s:
         raise SystemExit(f'DCA patch marker missing: {old}')
     s=s.replace(old,new)
+
+old_observe='''    def observe_entry() -> None:
+        nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross
+        vg = sum(entry_allocated_gross(position) for position in active_v12.values())
+        pg = entry_allocated_gross(active_pengu)
+        sg = sum(entry_allocated_gross(position) for position in active_stock.values())
+        max_v12_positions = max(max_v12_positions, len(active_v12))
+        max_entry_v12_gross = max(max_entry_v12_gross, vg)
+        max_entry_pengu_gross = max(max_entry_pengu_gross, pg)
+        max_entry_stock_gross = max(max_entry_stock_gross, sg)
+        max_entry_crypto_gross = max(max_entry_crypto_gross, vg + pg)
+        max_entry_total_gross = max(max_entry_total_gross, vg + pg + sg)
+'''
+new_observe='''    def observe_entry() -> None:
+        nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross
+        # Verify the same current-equity gross basis used by the capacity gates.
+        # Entry-time allocation fractions from different timestamps are not additive.
+        vg = v12_gross()
+        pg = pengu_gross()
+        sg = stock_gross()
+        max_v12_positions = max(max_v12_positions, len(active_v12))
+        max_entry_v12_gross = max(max_entry_v12_gross, vg)
+        max_entry_pengu_gross = max(max_entry_pengu_gross, pg)
+        max_entry_stock_gross = max(max_entry_stock_gross, sg)
+        max_entry_crypto_gross = max(max_entry_crypto_gross, vg + pg)
+        max_entry_total_gross = max(max_entry_total_gross, vg + pg + sg)
+'''
+if old_observe not in s:
+    raise SystemExit('DCA gross verification marker missing')
+s=s.replace(old_observe,new_observe,1)
+
 out_path.write_text(s)
 try:
     subprocess.run([sys.executable,str(out_path),*sys.argv[1:]],check=True)
