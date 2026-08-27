@@ -168,7 +168,9 @@ jobs:
           assert abs(s['profitFactor']-3.4431875382578734)<1e-9
           assert abs(s['maxDrawdownPct']-(-14.773631389772579))<1e-9
           assert p['integrity']['noOverlapNormal'] is True and p['integrity']['noOverlapStress'] is True
-          assert p['integrity']['maximumRequestedGross']<=0.75+1e-12
+          assert abs(p['integrity']['maximumRecoveryRequestedGrossNormal']-0.5)<1e-12
+          assert abs(p['integrity']['maximumRecoveryRequestedGrossStress']-0.5)<1e-12
+          assert p['integrity']['recoveryTradeCountNormal']>0 and p['integrity']['recoveryTradeCountStress']>0
           assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           print('PENGU_V8_LEDGER_CONTRACT=PASS')
           PY
