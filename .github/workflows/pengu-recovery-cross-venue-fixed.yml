@@ -86,3 +86,5 @@ jobs:
           name: pengu-recovery-cross-fixed-${{ matrix.venue }}-${{ github.run_id }}
           path: .research-state/cross-fixed-${{ matrix.venue }}
           retention-days: 90
+
+# research rerun marker 2026-08-27T20:42+09:00
