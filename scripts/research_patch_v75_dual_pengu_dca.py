@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import subprocess,sys
+if len(sys.argv)!=2:raise SystemExit('usage: research_patch_v75_dual_pengu_dca.py <generated-dca.py>')
+p=Path(sys.argv[1]);subprocess.run([sys.executable,'scripts/research_patch_v68_dual_pengu_dca.py',str(p)],check=True);s=p.read_text()
+for a,b in [('V68_NEW_LONG_GROSS_CAP','V75_NEW_LONG_GROSS_CAP'),('V68_RESERVE_V64_GROSS','V75_RESERVE_V64_GROSS'),('V68_NEW_LONG_ENTERED','V75_NEW_LONG_ENTERED'),('V68_NEW_LONG_EXITED','V75_NEW_LONG_EXITED'),('PENGU_V68_NEW_LONG_SLEEVE','PENGU_V75_NEW_LONG_SLEEVE'),('penguV68NewLongNormalSourceMetrics','penguV75NewLongNormalSourceMetrics'),('v68NewLongGrossCap','v75NewLongGrossCap'),('v68V64ReservedGross','v75V64ReservedGross')]:s=s.replace(a,b)
+for t in ['V75_NEW_LONG_GROSS_CAP','V75_RESERVE_V64_GROSS','PENGU_V75_NEW_LONG_SLEEVE','V75_NEW_LONG_ENTERED','PENGU_V64_RESERVED_CAPACITY_BLOCKED']:assert t in s,t
+for t in ['V68_NEW_LONG_GROSS_CAP','V68_RESERVE_V64_GROSS','PENGU_V68_NEW_LONG_SLEEVE','V68_NEW_LONG_ENTERED']:assert t not in s,t
+p.write_text(s);print(f'PATCHED_V75_DUAL_PENGU_DCA={p}')
