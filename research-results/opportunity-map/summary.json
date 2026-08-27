@@ -1,5 +1,5 @@
 {
-  "schema": "pengu-missed-opportunity-summary/v1",
+  "schema": "pengu-missed-opportunity-summary/v2",
   "method": {
     "entry": "every closed 1h bar -> next 1h open",
     "horizonsHours": [
@@ -2408,6 +2408,5385 @@
             }
           }
         }
+      }
+    }
+  },
+  "directionalWaves": {
+    "schema": "pengu-directional-wave-map/v1",
+    "definition": "close-based directional-change bullish waves; threshold confirms rise from running close trough and same threshold drawdown from running close peak ends the wave; non-overlapping by construction",
+    "thresholdsPct": [
+      5,
+      8,
+      10,
+      15,
+      20
+    ],
+    "confirmationTriggersPct": [
+      2,
+      3,
+      5
+    ],
+    "result": {
+      "5": {
+        "waves": 132,
+        "capturedByAnyV64Long": 19,
+        "capturedByV64LongEntry": 12,
+        "missed": 113,
+        "missedSharePct": 85.60606060606061,
+        "shortOverlapAmongMissed": 29,
+        "movePct": {
+          "all": {
+            "count": 132,
+            "p50": 8.886195676544272,
+            "p75": 14.010257604942023,
+            "p90": 20.691830534623683,
+            "min": 5.049939601072451,
+            "max": 32.447999999999986,
+            "sum": 1467.1452147920093
+          },
+          "missed": {
+            "count": 113,
+            "p50": 8.36461126005361,
+            "p75": 12.635379061371843,
+            "p90": 15.59714823356602,
+            "min": 5.049939601072451,
+            "max": 25.649472891566273,
+            "sum": 1105.7372463132751
+          },
+          "captured": {
+            "count": 19,
+            "p50": 19.607404090162728,
+            "p75": 23.664997031757196,
+            "p90": 30.26377838277363,
+            "min": 6.481954810346591,
+            "max": 32.447999999999986,
+            "sum": 361.4079684787344
+          }
+        },
+        "perfectTroughToPeakCapacity": {
+          "missedNormal": {
+            "trades": 113,
+            "sumGross025ReturnPct": 273.04431157831874,
+            "compoundedGross025ReturnPct": 1374.9337255047824
+          },
+          "missedSevere": {
+            "trades": 113,
+            "sumGross025ReturnPct": 253.26931157831848,
+            "compoundedGross025ReturnPct": 1115.7246682769587
+          }
+        },
+        "confirmations": {
+          "2": {
+            "allConfirmed": 128,
+            "missedConfirmed": 109,
+            "missedRemainingToPeakPct": {
+              "count": 109,
+              "p50": 5.00380228136883,
+              "p75": 8.344619231169915,
+              "p90": 12.28521632106757,
+              "min": 0.004077638231936298,
+              "max": 21.11781517942204,
+              "sum": 686.4165449041585
+            },
+            "missedMaeToPeakPct": {
+              "count": 109,
+              "p50": -1.3230240549828132,
+              "p75": -0.4316990440949686,
+              "p90": 0,
+              "min": -5.639373674767589,
+              "max": 0,
+              "sum": -158.95987923005578
+            },
+            "missedNormalCapacity": {
+              "trades": 108,
+              "sumGross025ReturnPct": 168.3631168164816,
+              "compoundedGross025ReturnPct": 428.44614749632495
+            },
+            "missedSevereCapacity": {
+              "trades": 107,
+              "sumGross025ReturnPct": 149.46642826113435,
+              "compoundedGross025ReturnPct": 338.6467534861606
+            },
+            "missedGateFailures": {
+              "return24": 109,
+              "regime72": 104,
+              "breakout18": 95,
+              "relative24": 95,
+              "ema168": 75,
+              "btc24": 68,
+              "rsiMin": 51,
+              "volumeMin": 17,
+              "volumeMax": 11,
+              "atrMax": 2
+            }
+          },
+          "3": {
+            "allConfirmed": 125,
+            "missedConfirmed": 106,
+            "missedRemainingToPeakPct": {
+              "count": 106,
+              "p50": 4.459429041587127,
+              "p75": 7.969952873503805,
+              "p90": 10.610457276923558,
+              "min": 0.004077638231936298,
+              "max": 21.11781517942204,
+              "sum": 597.614781828515
+            },
+            "missedMaeToPeakPct": {
+              "count": 106,
+              "p50": -1.2356516573019005,
+              "p75": -0.4318251305288512,
+              "p90": 0,
+              "min": -5.639373674767589,
+              "max": 0,
+              "sum": -163.74528279538748
+            },
+            "missedNormalCapacity": {
+              "trades": 105,
+              "sumGross025ReturnPct": 146.2526760475708,
+              "compoundedGross025ReturnPct": 325.17298776854886
+            },
+            "missedSevereCapacity": {
+              "trades": 104,
+              "sumGross025ReturnPct": 127.88098749222353,
+              "compoundedGross025ReturnPct": 254.64926606381138
+            },
+            "missedGateFailures": {
+              "return24": 106,
+              "regime72": 101,
+              "breakout18": 82,
+              "relative24": 82,
+              "ema168": 67,
+              "btc24": 62,
+              "rsiMin": 30,
+              "volumeMin": 15,
+              "volumeMax": 12,
+              "atrMax": 2,
+              "rsiMax": 1
+            }
+          },
+          "5": {
+            "allConfirmed": 106,
+            "missedConfirmed": 88,
+            "missedRemainingToPeakPct": {
+              "count": 88,
+              "p50": 3.2679290381356307,
+              "p75": 7.62903947613181,
+              "p90": 9.837541961876045,
+              "min": -0.04013324236465943,
+              "max": 19.80793394363667,
+              "sum": 411.10883371675556
+            },
+            "missedMaeToPeakPct": {
+              "count": 88,
+              "p50": -1.6999332108012744,
+              "p75": -0.4071882566585888,
+              "p90": 0,
+              "min": -5.795016934997443,
+              "max": 0,
+              "sum": -164.8283161836353
+            },
+            "missedNormalCapacity": {
+              "trades": 84,
+              "sumGross025ReturnPct": 100.2442886576479,
+              "compoundedGross025ReturnPct": 169.7520866084583
+            },
+            "missedSevereCapacity": {
+              "trades": 77,
+              "sumGross025ReturnPct": 85.85862694257608,
+              "compoundedGross025ReturnPct": 133.98126227357227
+            },
+            "missedGateFailures": {
+              "return24": 88,
+              "regime72": 85,
+              "ema168": 49,
+              "relative24": 47,
+              "breakout18": 43,
+              "btc24": 41,
+              "volumeMax": 16,
+              "rsiMin": 10,
+              "volumeMin": 9,
+              "atrMax": 2,
+              "rsiMax": 2
+            }
+          }
+        },
+        "segments": {
+          "FOLD1": {
+            "waves": 53,
+            "missed": 46,
+            "missedSharePct": 86.79245283018868,
+            "missedMovePct": {
+              "count": 46,
+              "p50": 7.96392739414139,
+              "p75": 12.787898519230117,
+              "p90": 17.899602525561253,
+              "min": 5.049939601072451,
+              "max": 25.649472891566273,
+              "sum": 465.65771137698806
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 42,
+              "p50": 3.8416671809063607,
+              "p75": 7.99749006483998,
+              "p90": 12.175131829503773,
+              "min": 0.004077638231936298,
+              "max": 21.11781517942204,
+              "sum": 247.93063175047064
+            }
+          },
+          "FOLD2": {
+            "waves": 46,
+            "missed": 41,
+            "missedSharePct": 89.13043478260869,
+            "missedMovePct": {
+              "count": 41,
+              "p50": 8.801514239008856,
+              "p75": 12.045213705404457,
+              "p90": 14.227023737066347,
+              "min": 5.2234745433346275,
+              "max": 15.75791227096055,
+              "sum": 382.4600977023184
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 39,
+              "p50": 4.17257124862227,
+              "p75": 7.958301471395524,
+              "p90": 9.825259344230691,
+              "min": 1.1204900276387653,
+              "max": 11.745352854087843,
+              "sum": 210.0820772283234
+            }
+          },
+          "FOLD3": {
+            "waves": 33,
+            "missed": 26,
+            "missedSharePct": 78.78787878787878,
+            "missedMovePct": {
+              "count": 26,
+              "p50": 8.546186126837817,
+              "p75": 11.289326542578337,
+              "p90": 15.152506616515183,
+              "min": 5.3027974177682236,
+              "max": 21.435582822085884,
+              "sum": 257.61943723396837
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 25,
+              "p50": 4.874151018777484,
+              "p75": 7.039162727886583,
+              "p90": 9.839736502027076,
+              "min": 0.9876179245283057,
+              "max": 17.429995253915507,
+              "sum": 139.60207284972083
+            }
+          }
+        },
+        "missedWaves": [
+          {
+            "troughTs": "2025-08-10T02:00:00.000Z",
+            "peakTs": "2025-08-10T04:00:00.000Z",
+            "movePct": 5.524130773222624,
+            "durationHours": 2,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-10T04:00:00.000Z",
+              "remainingToPeakPct": 1.7870103866850284,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-10T12:00:00.000Z",
+            "peakTs": "2025-08-11T03:00:00.000Z",
+            "movePct": 8.57292897466193,
+            "durationHours": 15,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-10T17:00:00.000Z",
+              "remainingToPeakPct": 4.511563250347517,
+              "maeToPeakPct": -1.7313281941109704,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-12T09:00:00.000Z",
+            "peakTs": "2025-08-14T03:00:00.000Z",
+            "movePct": 10.344827586206895,
+            "durationHours": 42,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-12T13:00:00.000Z",
+              "remainingToPeakPct": 6.666666666666665,
+              "maeToPeakPct": -1.3916666666666466,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-14T18:00:00.000Z",
+            "peakTs": "2025-08-15T01:00:00.000Z",
+            "movePct": 6.297058913918696,
+            "durationHours": 7,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": null
+          },
+          {
+            "troughTs": "2025-08-15T15:00:00.000Z",
+            "peakTs": "2025-08-17T15:00:00.000Z",
+            "movePct": 9.118727050183594,
+            "durationHours": 48,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-15T18:00:00.000Z",
+              "remainingToPeakPct": 7.365385224859766,
+              "maeToPeakPct": -0.003169270750802422,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-20T13:00:00.000Z",
+            "peakTs": "2025-08-21T00:00:00.000Z",
+            "movePct": 12.21184659384582,
+            "durationHours": 11,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-20T16:00:00.000Z",
+              "remainingToPeakPct": 6.634139952192264,
+              "maeToPeakPct": -0.7891548511739122,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-22T12:00:00.000Z",
+            "peakTs": "2025-08-22T23:00:00.000Z",
+            "movePct": 23.077183594676054,
+            "durationHours": 11,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-22T15:00:00.000Z",
+              "remainingToPeakPct": 11.18896095949089,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-24T14:00:00.000Z",
+            "peakTs": "2025-08-24T18:00:00.000Z",
+            "movePct": 5.049939601072451,
+            "durationHours": 4,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-24T18:00:00.000Z",
+              "remainingToPeakPct": 0.9713411871318467,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-25T21:00:00.000Z",
+            "peakTs": "2025-08-26T19:00:00.000Z",
+            "movePct": 5.6483664533512945,
+            "durationHours": 22,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-26T06:00:00.000Z",
+              "remainingToPeakPct": 1.6593744935990973,
+              "maeToPeakPct": -2.2719170312753167,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-29T18:00:00.000Z",
+            "peakTs": "2025-08-30T15:00:00.000Z",
+            "movePct": 7.190553173543268,
+            "durationHours": 21,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-29T23:00:00.000Z",
+              "remainingToPeakPct": 3.741496598639449,
+              "maeToPeakPct": -2.329931972789112,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-01T02:00:00.000Z",
+            "peakTs": "2025-09-03T14:00:00.000Z",
+            "movePct": 12.635379061371843,
+            "durationHours": 60,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-01T08:00:00.000Z",
+              "remainingToPeakPct": 8.344619231169915,
+              "maeToPeakPct": -3.8476230162864278,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-04T16:00:00.000Z",
+            "peakTs": "2025-09-05T13:00:00.000Z",
+            "movePct": 7.801418439716312,
+            "durationHours": 21,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-05T08:00:00.000Z",
+              "remainingToPeakPct": 3.754266211604107,
+              "maeToPeakPct": -1.7167235494880528,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-12T15:00:00.000Z",
+            "peakTs": "2025-09-13T12:00:00.000Z",
+            "movePct": 6.405169481918138,
+            "durationHours": 21,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-12T20:00:00.000Z",
+              "remainingToPeakPct": 2.8461854540473785,
+              "maeToPeakPct": -1.9586358033146123,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-15T15:00:00.000Z",
+            "peakTs": "2025-09-18T14:00:00.000Z",
+            "movePct": 23.96181975951408,
+            "durationHours": 71,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-15T22:00:00.000Z",
+              "remainingToPeakPct": 20.619986731801475,
+              "maeToPeakPct": -2.5239732223629407,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-20T10:00:00.000Z",
+            "peakTs": "2025-09-20T16:00:00.000Z",
+            "movePct": 5.1605706569600285,
+            "durationHours": 6,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": null
+          },
+          {
+            "troughTs": "2025-09-24T03:00:00.000Z",
+            "peakTs": "2025-09-24T14:00:00.000Z",
+            "movePct": 5.1899907321594,
+            "durationHours": 11,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-24T10:00:00.000Z",
+              "remainingToPeakPct": 1.2187871581450516,
+              "maeToPeakPct": -0.6936187078874445,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-26T10:00:00.000Z",
+            "peakTs": "2025-09-27T03:00:00.000Z",
+            "movePct": 8.126436348566468,
+            "durationHours": 17,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-26T14:00:00.000Z",
+              "remainingToPeakPct": 5.600117742291566,
+              "maeToPeakPct": -1.1443078960924336,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-28T12:00:00.000Z",
+            "peakTs": "2025-09-28T23:00:00.000Z",
+            "movePct": 7.49907918968693,
+            "durationHours": 11,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-28T17:00:00.000Z",
+              "remainingToPeakPct": 3.4927839438317676,
+              "maeToPeakPct": -0.38651111662707516,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-29T12:00:00.000Z",
+            "peakTs": "2025-09-29T14:00:00.000Z",
+            "movePct": 5.153409706913381,
+            "durationHours": 2,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": null
+          },
+          {
+            "troughTs": "2025-10-06T04:00:00.000Z",
+            "peakTs": "2025-10-07T04:00:00.000Z",
+            "movePct": 9.775901266645004,
+            "durationHours": 24,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-06T15:00:00.000Z",
+              "remainingToPeakPct": 4.968944099378869,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-08T03:00:00.000Z",
+            "peakTs": "2025-10-08T19:00:00.000Z",
+            "movePct": 9.83720930232559,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-08T09:00:00.000Z",
+              "remainingToPeakPct": 5.8731226182470175,
+              "maeToPeakPct": -1.1272296410157923,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-09T16:00:00.000Z",
+            "peakTs": "2025-10-10T12:00:00.000Z",
+            "movePct": 5.852511338820765,
+            "durationHours": 20,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-10T06:00:00.000Z",
+              "remainingToPeakPct": 2.4884522802680387,
+              "maeToPeakPct": -2.0460607637759365,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-10T21:00:00.000Z",
+            "peakTs": "2025-10-11T00:00:00.000Z",
+            "movePct": 22.134210133014488,
+            "durationHours": 3,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-10T23:00:00.000Z",
+              "remainingToPeakPct": 7.999999999999985,
+              "maeToPeakPct": -2.964757709251098,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax",
+                "atrMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-11T01:00:00.000Z",
+            "peakTs": "2025-10-11T08:00:00.000Z",
+            "movePct": 6.38990109318065,
+            "durationHours": 7,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-11T03:00:00.000Z",
+              "remainingToPeakPct": 0.004077638231936298,
+              "maeToPeakPct": -5.639373674767589,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax",
+                "atrMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-12T01:00:00.000Z",
+            "peakTs": "2025-10-13T20:00:00.000Z",
+            "movePct": 25.649472891566273,
+            "durationHours": 43,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-12T04:00:00.000Z",
+              "remainingToPeakPct": 21.11781517942204,
+              "maeToPeakPct": -1.7239032799528098,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-14T12:00:00.000Z",
+            "peakTs": "2025-10-15T08:00:00.000Z",
+            "movePct": 5.667981842094094,
+            "durationHours": 20,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-14T16:00:00.000Z",
+              "remainingToPeakPct": 1.2973808361802508,
+              "maeToPeakPct": -1.8830323735155252,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-17T08:00:00.000Z",
+            "peakTs": "2025-10-20T06:00:00.000Z",
+            "movePct": 15.483613508255623,
+            "durationHours": 70,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-17T12:00:00.000Z",
+              "remainingToPeakPct": 9.50759188307082,
+              "maeToPeakPct": -2.9941819213849974,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-21T04:00:00.000Z",
+            "peakTs": "2025-10-21T15:00:00.000Z",
+            "movePct": 9.347153175124268,
+            "durationHours": 11,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-21T15:00:00.000Z",
+              "remainingToPeakPct": 2.0082254112705478,
+              "maeToPeakPct": -0.7875393769688488,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-22T22:00:00.000Z",
+            "peakTs": "2025-10-27T06:00:00.000Z",
+            "movePct": 18.109072375127422,
+            "durationHours": 104,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-23T07:00:00.000Z",
+              "remainingToPeakPct": 13.204689789936497,
+              "maeToPeakPct": -2.344894968246203,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-28T21:00:00.000Z",
+            "peakTs": "2025-10-29T20:00:00.000Z",
+            "movePct": 6.845834351331548,
+            "durationHours": 23,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-29T13:00:00.000Z",
+              "remainingToPeakPct": 2.9278855206176013,
+              "maeToPeakPct": -4.424778761061942,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-30T19:00:00.000Z",
+            "peakTs": "2025-10-31T01:00:00.000Z",
+            "movePct": 6.535618279569899,
+            "durationHours": 6,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-30T23:00:00.000Z",
+              "remainingToPeakPct": 3.239986974926734,
+              "maeToPeakPct": -0.09226093563444726,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-04T21:00:00.000Z",
+            "peakTs": "2025-11-05T18:00:00.000Z",
+            "movePct": 13.872959858844292,
+            "durationHours": 21,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-04T23:00:00.000Z",
+              "remainingToPeakPct": 7.989960259359963,
+              "maeToPeakPct": -4.817681098793846,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-07T12:00:00.000Z",
+            "peakTs": "2025-11-07T22:00:00.000Z",
+            "movePct": 17.690132675995084,
+            "durationHours": 10,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-07T15:00:00.000Z",
+              "remainingToPeakPct": 12.284706370616316,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-09T04:00:00.000Z",
+            "peakTs": "2025-11-11T03:00:00.000Z",
+            "movePct": 16.20229949918881,
+            "durationHours": 47,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-09T13:00:00.000Z",
+              "remainingToPeakPct": 10.913620144078639,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-12T00:00:00.000Z",
+            "peakTs": "2025-11-12T13:00:00.000Z",
+            "movePct": 6.929878675714574,
+            "durationHours": 13,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-12T09:00:00.000Z",
+              "remainingToPeakPct": 2.9906912259853424,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-16T16:00:00.000Z",
+            "peakTs": "2025-11-17T11:00:00.000Z",
+            "movePct": 5.7745787665630655,
+            "durationHours": 19,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-17T01:00:00.000Z",
+              "remainingToPeakPct": 2.7735834061829445,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-17T19:00:00.000Z",
+            "peakTs": "2025-11-18T19:00:00.000Z",
+            "movePct": 5.893744211501217,
+            "durationHours": 24,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-18T10:00:00.000Z",
+              "remainingToPeakPct": 3.2340146105228618,
+              "maeToPeakPct": -1.8632520725601176,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-19T18:00:00.000Z",
+            "peakTs": "2025-11-20T12:00:00.000Z",
+            "movePct": 12.838738338516208,
+            "durationHours": 18,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-19T22:00:00.000Z",
+              "remainingToPeakPct": 7.6271186440677985,
+              "maeToPeakPct": -0.4322033898304989,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-20T18:00:00.000Z",
+            "peakTs": "2025-11-20T22:00:00.000Z",
+            "movePct": 5.190556194181628,
+            "durationHours": 4,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-20T22:00:00.000Z",
+              "remainingToPeakPct": 2.102823791949193,
+              "maeToPeakPct": -0.03433181701142374,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-21T11:00:00.000Z",
+            "peakTs": "2025-11-21T18:00:00.000Z",
+            "movePct": 5.477031802120158,
+            "durationHours": 7,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-21T15:00:00.000Z",
+              "remainingToPeakPct": 0.8067542213883838,
+              "maeToPeakPct": -4.868667917448388,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-22T13:00:00.000Z",
+            "peakTs": "2025-11-25T06:00:00.000Z",
+            "movePct": 14.464589802664518,
+            "durationHours": 65,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-22T23:00:00.000Z",
+              "remainingToPeakPct": 12.304668304668297,
+              "maeToPeakPct": -0.7371007371007376,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-26T15:00:00.000Z",
+            "peakTs": "2025-11-26T21:00:00.000Z",
+            "movePct": 9.796449484152813,
+            "durationHours": 6,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-26T18:00:00.000Z",
+              "remainingToPeakPct": 2.516705718996781,
+              "maeToPeakPct": -1.5534149093118121,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-28T06:00:00.000Z",
+            "peakTs": "2025-11-28T15:00:00.000Z",
+            "movePct": 8.5626078271134,
+            "durationHours": 9,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-28T09:00:00.000Z",
+              "remainingToPeakPct": 3.9290681502086144,
+              "maeToPeakPct": -1.8776077885952813,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-03T14:00:00.000Z",
+            "peakTs": "2025-12-03T22:00:00.000Z",
+            "movePct": 5.244513564886821,
+            "durationHours": 8,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": null
+          },
+          {
+            "troughTs": "2025-12-06T08:00:00.000Z",
+            "peakTs": "2025-12-07T12:00:00.000Z",
+            "movePct": 13.746323878189926,
+            "durationHours": 28,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-12-06T15:00:00.000Z",
+              "remainingToPeakPct": 10.60885608856088,
+              "maeToPeakPct": -0.42435424354244633,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-07T14:00:00.000Z",
+            "peakTs": "2025-12-07T17:00:00.000Z",
+            "movePct": 7.375991148810623,
+            "durationHours": 3,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-12-07T16:00:00.000Z",
+              "remainingToPeakPct": 2.807203389830515,
+              "maeToPeakPct": -2.8072033898305038,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-11T16:00:00.000Z",
+            "peakTs": "2025-12-12T12:00:00.000Z",
+            "movePct": 6.150553642877088,
+            "durationHours": 20,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-11T21:00:00.000Z",
+              "remainingToPeakPct": 1.9755072852417843,
+              "maeToPeakPct": -0.5452757665147079,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-12T16:00:00.000Z",
+            "peakTs": "2025-12-13T20:00:00.000Z",
+            "movePct": 9.566854990583806,
+            "durationHours": 28,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-12T23:00:00.000Z",
+              "remainingToPeakPct": 6.313385107354952,
+              "maeToPeakPct": -1.1055276381909507,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-17T10:00:00.000Z",
+            "peakTs": "2025-12-17T14:00:00.000Z",
+            "movePct": 5.624872161996319,
+            "durationHours": 4,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": null
+          },
+          {
+            "troughTs": "2025-12-18T06:00:00.000Z",
+            "peakTs": "2025-12-18T13:00:00.000Z",
+            "movePct": 6.557377049180313,
+            "durationHours": 7,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": null
+          },
+          {
+            "troughTs": "2025-12-19T01:00:00.000Z",
+            "peakTs": "2025-12-19T20:00:00.000Z",
+            "movePct": 12.045213705404457,
+            "durationHours": 19,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-19T04:00:00.000Z",
+              "remainingToPeakPct": 6.252791424743176,
+              "maeToPeakPct": -1.3733809736489522,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-21T13:00:00.000Z",
+            "peakTs": "2025-12-22T12:00:00.000Z",
+            "movePct": 6.677283585485139,
+            "durationHours": 23,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-22T00:00:00.000Z",
+              "remainingToPeakPct": 3.145622525296954,
+              "maeToPeakPct": -0.2859656841179059,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-24T05:00:00.000Z",
+            "peakTs": "2025-12-24T23:00:00.000Z",
+            "movePct": 7.61971338692764,
+            "durationHours": 18,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-24T16:00:00.000Z",
+              "remainingToPeakPct": 3.7165955535593875,
+              "maeToPeakPct": -0.4491354143274173,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-26T00:00:00.000Z",
+            "peakTs": "2025-12-29T03:00:00.000Z",
+            "movePct": 9.621757513427042,
+            "durationHours": 75,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-26T03:00:00.000Z",
+              "remainingToPeakPct": 5.082703472450434,
+              "maeToPeakPct": -3.1438273633475844,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-06T08:00:00.000Z",
+            "peakTs": "2026-01-06T13:00:00.000Z",
+            "movePct": 5.2234745433346275,
+            "durationHours": 5,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-06T13:00:00.000Z",
+              "remainingToPeakPct": 1.1204900276387653,
+              "maeToPeakPct": -1.0084410248748732,
+              "failedLongGates": [
+                "breakout18",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-06T17:00:00.000Z",
+            "peakTs": "2026-01-06T23:00:00.000Z",
+            "movePct": 8.187702265372177,
+            "durationHours": 6,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-06T21:00:00.000Z",
+              "remainingToPeakPct": 4.837318698549575,
+              "maeToPeakPct": -0.5566444531556192,
+              "failedLongGates": [
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-08T13:00:00.000Z",
+            "peakTs": "2026-01-09T16:00:00.000Z",
+            "movePct": 8.801514239008856,
+            "durationHours": 27,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-08T16:00:00.000Z",
+              "remainingToPeakPct": 2.2064171987391745,
+              "maeToPeakPct": -5.180635254182498,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-10T04:00:00.000Z",
+            "peakTs": "2026-01-12T02:00:00.000Z",
+            "movePct": 5.57204647612588,
+            "durationHours": 46,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-10T14:00:00.000Z",
+              "remainingToPeakPct": 1.8741304525738522,
+              "maeToPeakPct": -3.5927653654145186,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-12T13:00:00.000Z",
+            "peakTs": "2026-01-14T03:00:00.000Z",
+            "movePct": 15.625531914893621,
+            "durationHours": 38,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-12T16:00:00.000Z",
+              "remainingToPeakPct": 11.745352854087843,
+              "maeToPeakPct": -3.775291988813956,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-16T15:00:00.000Z",
+            "peakTs": "2026-01-16T21:00:00.000Z",
+            "movePct": 5.353319057815842,
+            "durationHours": 6,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-16T19:00:00.000Z",
+              "remainingToPeakPct": 2.6711185308848195,
+              "maeToPeakPct": -0.3005008347245375,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-20T23:00:00.000Z",
+            "peakTs": "2026-01-21T15:00:00.000Z",
+            "movePct": 7.2356607161719655,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-21T04:00:00.000Z",
+              "remainingToPeakPct": 3.1602479422822682,
+              "maeToPeakPct": -2.316837719743936,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-21T17:00:00.000Z",
+            "peakTs": "2026-01-22T02:00:00.000Z",
+            "movePct": 7.263619286161549,
+            "durationHours": 9,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-21T20:00:00.000Z",
+              "remainingToPeakPct": 1.994641262280461,
+              "maeToPeakPct": -1.607621315867802,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-25T19:00:00.000Z",
+            "peakTs": "2026-01-28T11:00:00.000Z",
+            "movePct": 15.75791227096055,
+            "durationHours": 64,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-26T02:00:00.000Z",
+              "remainingToPeakPct": 9.714766866645608,
+              "maeToPeakPct": -2.1155667824439672,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-31T18:00:00.000Z",
+            "peakTs": "2026-02-01T09:00:00.000Z",
+            "movePct": 8.894034323072741,
+            "durationHours": 15,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-31T22:00:00.000Z",
+              "remainingToPeakPct": 4.646596858638752,
+              "maeToPeakPct": -0.654450261780104,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-02T05:00:00.000Z",
+            "peakTs": "2026-02-02T16:00:00.000Z",
+            "movePct": 7.2307068522773355,
+            "durationHours": 11,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-02T10:00:00.000Z",
+              "remainingToPeakPct": 3.8074054690566683,
+              "maeToPeakPct": -0.6672772471542521,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-03T18:00:00.000Z",
+            "peakTs": "2026-02-03T20:00:00.000Z",
+            "movePct": 7.924528301886791,
+            "durationHours": 2,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-03T20:00:00.000Z",
+              "remainingToPeakPct": 3.8321903993545847,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-06T00:00:00.000Z",
+            "peakTs": "2026-02-06T16:00:00.000Z",
+            "movePct": 13.73009220452641,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-06T02:00:00.000Z",
+              "remainingToPeakPct": 9.155269509251806,
+              "maeToPeakPct": -3.1858407079646045,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-07T11:00:00.000Z",
+            "peakTs": "2026-02-07T18:00:00.000Z",
+            "movePct": 6.014800818768706,
+            "durationHours": 7,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-07T13:00:00.000Z",
+              "remainingToPeakPct": 3.536829155774268,
+              "maeToPeakPct": -1.1686913732123605,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-11T10:00:00.000Z",
+            "peakTs": "2026-02-12T10:00:00.000Z",
+            "movePct": 10.363047554116234,
+            "durationHours": 24,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-11T20:00:00.000Z",
+              "remainingToPeakPct": 8.006672226855716,
+              "maeToPeakPct": -0.33361134278565574,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-15T20:00:00.000Z",
+            "peakTs": "2026-02-16T12:00:00.000Z",
+            "movePct": 6.877243359655427,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-16T08:00:00.000Z",
+              "remainingToPeakPct": 3.503893214682985,
+              "maeToPeakPct": -0.4588431590656139,
+              "failedLongGates": [
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-19T17:00:00.000Z",
+            "peakTs": "2026-02-21T11:00:00.000Z",
+            "movePct": 8.85352286773795,
+            "durationHours": 42,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-20T01:00:00.000Z",
+              "remainingToPeakPct": 5.322170728061004,
+              "maeToPeakPct": -2.0331888174615065,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-23T02:00:00.000Z",
+            "peakTs": "2026-02-23T12:00:00.000Z",
+            "movePct": 9.009303084707042,
+            "durationHours": 10,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-23T07:00:00.000Z",
+              "remainingToPeakPct": 3.2143409055787275,
+              "maeToPeakPct": -1.4680883943749112,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-26T16:00:00.000Z",
+            "peakTs": "2026-02-27T08:00:00.000Z",
+            "movePct": 7.254116599910998,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-27T03:00:00.000Z",
+              "remainingToPeakPct": 4.163665177928255,
+              "maeToPeakPct": -0.028814291888779042,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-28T10:00:00.000Z",
+            "peakTs": "2026-03-01T02:00:00.000Z",
+            "movePct": 15.070893739047332,
+            "durationHours": 16,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-28T14:00:00.000Z",
+              "remainingToPeakPct": 9.35654806964421,
+              "maeToPeakPct": -2.8009084027251996,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-01T20:00:00.000Z",
+            "peakTs": "2026-03-02T16:00:00.000Z",
+            "movePct": 14.227023737066347,
+            "durationHours": 20,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-02T01:00:00.000Z",
+              "remainingToPeakPct": 8.955007256894042,
+              "maeToPeakPct": -3.3817126269956588,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-03T09:00:00.000Z",
+            "peakTs": "2026-03-04T19:00:00.000Z",
+            "movePct": 9.941176470588232,
+            "durationHours": 34,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-03T17:00:00.000Z",
+              "remainingToPeakPct": 7.909930715935332,
+              "maeToPeakPct": -0.7361431870669732,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-08T16:00:00.000Z",
+            "peakTs": "2026-03-10T16:00:00.000Z",
+            "movePct": 13.29084408518575,
+            "durationHours": 48,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-09T05:00:00.000Z",
+              "remainingToPeakPct": 9.036505086774383,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-11T09:00:00.000Z",
+            "peakTs": "2026-03-13T13:00:00.000Z",
+            "movePct": 13.639657921437887,
+            "durationHours": 52,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-11T15:00:00.000Z",
+              "remainingToPeakPct": 10.26722925457102,
+              "maeToPeakPct": -2.4191279887482486,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-14T10:00:00.000Z",
+            "peakTs": "2026-03-17T01:00:00.000Z",
+            "movePct": 14.054813773717513,
+            "durationHours": 63,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-15T03:00:00.000Z",
+              "remainingToPeakPct": 10.318107667210462,
+              "maeToPeakPct": -1.1827079934747076,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-17T12:00:00.000Z",
+            "peakTs": "2026-03-18T03:00:00.000Z",
+            "movePct": 6.189352216102795,
+            "durationHours": 15,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-17T19:00:00.000Z",
+              "remainingToPeakPct": 2.818689690198073,
+              "maeToPeakPct": -2.3362112747587482,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-19T16:00:00.000Z",
+            "peakTs": "2026-03-20T05:00:00.000Z",
+            "movePct": 5.9433011944164615,
+            "durationHours": 13,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-20T02:00:00.000Z",
+              "remainingToPeakPct": 1.9526381387619418,
+              "maeToPeakPct": -1.024788810414079,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-23T09:00:00.000Z",
+            "peakTs": "2026-03-25T11:00:00.000Z",
+            "movePct": 12.833660081435694,
+            "durationHours": 50,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-23T12:00:00.000Z",
+              "remainingToPeakPct": 7.546356188012071,
+              "maeToPeakPct": -1.8542475204829656,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-29T17:00:00.000Z",
+            "peakTs": "2026-04-01T16:00:00.000Z",
+            "movePct": 7.36216042436908,
+            "durationHours": 71,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-30T03:00:00.000Z",
+              "remainingToPeakPct": 3.6146447409245885,
+              "maeToPeakPct": -2.838969903816324,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-02T13:00:00.000Z",
+            "peakTs": "2026-04-03T08:00:00.000Z",
+            "movePct": 5.747502865564114,
+            "durationHours": 19,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-04-02T21:00:00.000Z",
+              "remainingToPeakPct": 2.8016555237185603,
+              "maeToPeakPct": -1.2575612862145813,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-05T12:00:00.000Z",
+            "peakTs": "2026-04-06T10:00:00.000Z",
+            "movePct": 9.572706194104018,
+            "durationHours": 22,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-04-06T00:00:00.000Z",
+              "remainingToPeakPct": 4.17257124862227,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-07T16:00:00.000Z",
+            "peakTs": "2026-04-08T05:00:00.000Z",
+            "movePct": 10.507655116841264,
+            "durationHours": 13,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-04-07T20:00:00.000Z",
+              "remainingToPeakPct": 5.720012334258406,
+              "maeToPeakPct": -0.4316990440949686,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-09T06:00:00.000Z",
+            "peakTs": "2026-04-11T19:00:00.000Z",
+            "movePct": 15.043547110055421,
+            "durationHours": 61,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-04-09T16:00:00.000Z",
+              "remainingToPeakPct": 10.612058465286234,
+              "maeToPeakPct": -2.4969549330085328,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-17T05:00:00.000Z",
+            "peakTs": "2026-04-17T14:00:00.000Z",
+            "movePct": 8.36461126005361,
+            "durationHours": 9,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-04-17T09:00:00.000Z",
+              "remainingToPeakPct": 5.797670461981408,
+              "maeToPeakPct": -0.8375867033110773,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-22T23:00:00.000Z",
+            "peakTs": "2026-04-24T01:00:00.000Z",
+            "movePct": 7.5209930631617405,
+            "durationHours": 26,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-04-23T05:00:00.000Z",
+              "remainingToPeakPct": 3.5756154747948576,
+              "maeToPeakPct": -3.188745603751464,
+              "failedLongGates": [
+                "breakout18",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-29T16:00:00.000Z",
+            "peakTs": "2026-04-30T01:00:00.000Z",
+            "movePct": 6.072572038420487,
+            "durationHours": 9,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-04-29T19:00:00.000Z",
+              "remainingToPeakPct": 2.232051018308989,
+              "maeToPeakPct": -1.2137420283892197,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-30T05:00:00.000Z",
+            "peakTs": "2026-05-02T07:00:00.000Z",
+            "movePct": 8.171701112877571,
+            "durationHours": 50,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-04-30T08:00:00.000Z",
+              "remainingToPeakPct": 5.1081359423275075,
+              "maeToPeakPct": -2.317198764160655,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-03T03:00:00.000Z",
+            "peakTs": "2026-05-04T02:00:00.000Z",
+            "movePct": 9.477635283077879,
+            "durationHours": 23,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-03T23:00:00.000Z",
+              "remainingToPeakPct": 4.874151018777484,
+              "maeToPeakPct": -2.4470635237714755,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-08T06:00:00.000Z",
+            "peakTs": "2026-05-10T18:00:00.000Z",
+            "movePct": 8.073612347877713,
+            "durationHours": 60,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-08T10:00:00.000Z",
+              "remainingToPeakPct": 5.526036131774714,
+              "maeToPeakPct": -1.6809970051202883,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "btc24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-18T10:00:00.000Z",
+            "peakTs": "2026-05-22T07:00:00.000Z",
+            "movePct": 21.435582822085884,
+            "durationHours": 93,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-18T21:00:00.000Z",
+              "remainingToPeakPct": 17.429995253915507,
+              "maeToPeakPct": -0.09492168960606451,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-23T07:00:00.000Z",
+            "peakTs": "2026-05-23T20:00:00.000Z",
+            "movePct": 9.304800189170015,
+            "durationHours": 13,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-23T15:00:00.000Z",
+              "remainingToPeakPct": 4.8304796462183885,
+              "maeToPeakPct": -0.2381222360811952,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-29T12:00:00.000Z",
+            "peakTs": "2026-05-30T02:00:00.000Z",
+            "movePct": 6.803257157867093,
+            "durationHours": 14,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-29T16:00:00.000Z",
+              "remainingToPeakPct": 2.9106555302455206,
+              "maeToPeakPct": -1.480637813211838,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-02T22:00:00.000Z",
+            "peakTs": "2026-06-03T14:00:00.000Z",
+            "movePct": 6.385488865948985,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-03T06:00:00.000Z",
+              "remainingToPeakPct": 1.7632952461560158,
+              "maeToPeakPct": -0.6488926505854198,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-03T20:00:00.000Z",
+            "peakTs": "2026-06-03T21:00:00.000Z",
+            "movePct": 5.582417582417576,
+            "durationHours": 1,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": null
+          },
+          {
+            "troughTs": "2026-06-06T04:00:00.000Z",
+            "peakTs": "2026-06-08T00:00:00.000Z",
+            "movePct": 19.134125636672316,
+            "durationHours": 44,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-06T06:00:00.000Z",
+              "remainingToPeakPct": 14.134677944046835,
+              "maeToPeakPct": -0.7644762524398163,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-10T21:00:00.000Z",
+            "peakTs": "2026-06-13T15:00:00.000Z",
+            "movePct": 8.878357030015804,
+            "durationHours": 66,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-11T04:00:00.000Z",
+              "remainingToPeakPct": 1.2635909491624853,
+              "maeToPeakPct": -3.0120481927710885,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "volumeMax"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-14T17:00:00.000Z",
+            "peakTs": "2026-06-15T17:00:00.000Z",
+            "movePct": 14.481801357186907,
+            "durationHours": 24,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-14T22:00:00.000Z",
+              "remainingToPeakPct": 6.790389871960878,
+              "maeToPeakPct": -1.596892533448424,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "volumeMax"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-16T02:00:00.000Z",
+            "peakTs": "2026-06-17T04:00:00.000Z",
+            "movePct": 5.620071684587824,
+            "durationHours": 26,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-16T09:00:00.000Z",
+              "remainingToPeakPct": 1.1950549450549408,
+              "maeToPeakPct": -4.697802197802203,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-19T07:00:00.000Z",
+            "peakTs": "2026-06-22T13:00:00.000Z",
+            "movePct": 7.405102675793418,
+            "durationHours": 78,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-20T00:00:00.000Z",
+              "remainingToPeakPct": 3.7727341049150764,
+              "maeToPeakPct": -0.9469412295205148,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-24T17:00:00.000Z",
+            "peakTs": "2026-06-25T05:00:00.000Z",
+            "movePct": 8.207910395519779,
+            "durationHours": 12,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-24T21:00:00.000Z",
+              "remainingToPeakPct": 4.407294832826736,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-26T02:00:00.000Z",
+            "peakTs": "2026-06-27T15:00:00.000Z",
+            "movePct": 13.995405548683525,
+            "durationHours": 37,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-26T04:00:00.000Z",
+              "remainingToPeakPct": 8.822537112010798,
+              "maeToPeakPct": -2.0748987854250944,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-28T21:00:00.000Z",
+            "peakTs": "2026-06-29T17:00:00.000Z",
+            "movePct": 5.576763485477176,
+            "durationHours": 20,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-29T17:00:00.000Z",
+              "remainingToPeakPct": 1.3059404363752192,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-30T12:00:00.000Z",
+            "peakTs": "2026-07-04T15:00:00.000Z",
+            "movePct": 15.823211875843457,
+            "durationHours": 99,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-01T04:00:00.000Z",
+              "remainingToPeakPct": 10.24405908798971,
+              "maeToPeakPct": -2.296082209377004,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-05T09:00:00.000Z",
+            "peakTs": "2026-07-05T23:00:00.000Z",
+            "movePct": 5.3027974177682236,
+            "durationHours": 14,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-05T22:00:00.000Z",
+              "remainingToPeakPct": 0.9876179245283057,
+              "maeToPeakPct": -0.2505896226415172,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-14T10:00:00.000Z",
+            "peakTs": "2026-07-16T16:00:00.000Z",
+            "movePct": 11.401967673928315,
+            "durationHours": 54,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-14T14:00:00.000Z",
+              "remainingToPeakPct": 7.039162727886583,
+              "maeToPeakPct": -1.181634031060086,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-17T13:00:00.000Z",
+            "peakTs": "2026-07-21T11:00:00.000Z",
+            "movePct": 10.951403148528405,
+            "durationHours": 94,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-18T04:00:00.000Z",
+              "remainingToPeakPct": 5.723137127017774,
+              "maeToPeakPct": -3.3914886678623968,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-25T07:00:00.000Z",
+            "peakTs": "2026-07-27T10:00:00.000Z",
+            "movePct": 8.727760993622024,
+            "durationHours": 51,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-25T18:00:00.000Z",
+              "remainingToPeakPct": 3.498961495446573,
+              "maeToPeakPct": -1.198274484741968,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "rsiMax"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-29T20:00:00.000Z",
+            "peakTs": "2026-08-06T07:00:00.000Z",
+            "movePct": 10.689836756187464,
+            "durationHours": 179,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-30T03:00:00.000Z",
+              "remainingToPeakPct": 7.135575942915406,
+              "maeToPeakPct": -1.5460414542983303,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-08-06T21:00:00.000Z",
+            "peakTs": "2026-08-09T16:00:00.000Z",
+            "movePct": 14.230249831195142,
+            "durationHours": 67,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-08-08T05:00:00.000Z",
+              "remainingToPeakPct": 9.233252623083121,
+              "maeToPeakPct": -0.29055690072639084,
+              "failedLongGates": [
+                "regime72",
+                "return24"
+              ]
+            }
+          }
+        ]
+      },
+      "8": {
+        "waves": 58,
+        "capturedByAnyV64Long": 10,
+        "capturedByV64LongEntry": 10,
+        "missed": 48,
+        "missedSharePct": 82.75862068965517,
+        "shortOverlapAmongMissed": 18,
+        "movePct": {
+          "all": {
+            "count": 58,
+            "p50": 14.64895873805684,
+            "p75": 21.47774136290668,
+            "p90": 26.235160547118202,
+            "min": 8.073612347877713,
+            "max": 58.381704202461115,
+            "sum": 1018.0805561860772
+          },
+          "missed": {
+            "count": 48,
+            "p50": 13.809641868517108,
+            "p75": 17.372770135823423,
+            "p90": 21.5663878448834,
+            "min": 8.073612347877713,
+            "max": 25.649472891566273,
+            "sum": 683.090831570502
+          },
+          "captured": {
+            "count": 10,
+            "p50": 29.573007314524546,
+            "p75": 36.97876374891659,
+            "p90": 50.747496845116586,
+            "min": 21.491794209846947,
+            "max": 58.381704202461115,
+            "sum": 334.989724615575
+          }
+        },
+        "perfectTroughToPeakCapacity": {
+          "missedNormal": {
+            "trades": 48,
+            "sumGross025ReturnPct": 169.33270789262556,
+            "compoundedGross025ReturnPct": 426.4396803755425
+          },
+          "missedSevere": {
+            "trades": 48,
+            "sumGross025ReturnPct": 160.9327078926255,
+            "compoundedGross025ReturnPct": 385.37398884267355
+          }
+        },
+        "confirmations": {
+          "2": {
+            "allConfirmed": 58,
+            "missedConfirmed": 48,
+            "missedRemainingToPeakPct": {
+              "count": 48,
+              "p50": 9.015760741350842,
+              "p75": 13.291303391528741,
+              "p90": 17.866109899359277,
+              "min": 4.407294832826736,
+              "max": 21.11781517942204,
+              "sum": 492.44626152049045
+            },
+            "missedMaeToPeakPct": {
+              "count": 48,
+              "p50": -1.1900891402089941,
+              "p75": -0.5060885608856175,
+              "p90": 0,
+              "min": -5.7625474824213985,
+              "max": 0,
+              "sum": -73.063715522733
+            },
+            "missedNormalCapacity": {
+              "trades": 48,
+              "sumGross025ReturnPct": 121.6715653801226,
+              "compoundedGross025ReturnPct": 231.53454380807767
+            },
+            "missedSevereCapacity": {
+              "trades": 48,
+              "sumGross025ReturnPct": 113.27156538012258,
+              "compoundedGross025ReturnPct": 205.43238640955474
+            },
+            "missedGateFailures": {
+              "return24": 48,
+              "regime72": 47,
+              "relative24": 45,
+              "breakout18": 40,
+              "ema168": 39,
+              "btc24": 34,
+              "rsiMin": 26,
+              "volumeMax": 7,
+              "volumeMin": 7,
+              "atrMax": 1
+            }
+          },
+          "3": {
+            "allConfirmed": 58,
+            "missedConfirmed": 48,
+            "missedRemainingToPeakPct": {
+              "count": 48,
+              "p50": 8.583578171590357,
+              "p75": 10.68504710244032,
+              "p90": 15.665913883840854,
+              "min": 3.498961495446573,
+              "max": 21.11781517942204,
+              "sum": 449.4883443840635
+            },
+            "missedMaeToPeakPct": {
+              "count": 48,
+              "p50": -1.4688540604824885,
+              "p75": -0.6299988096239828,
+              "p90": 0,
+              "min": -5.7625474824213985,
+              "max": 0,
+              "sum": -81.01911796297365
+            },
+            "missedNormalCapacity": {
+              "trades": 48,
+              "sumGross025ReturnPct": 110.93208609601587,
+              "compoundedGross025ReturnPct": 198.66117496716095
+            },
+            "missedSevereCapacity": {
+              "trades": 48,
+              "sumGross025ReturnPct": 102.5320860960158,
+              "compoundedGross025ReturnPct": 175.09820993756858
+            },
+            "missedGateFailures": {
+              "return24": 48,
+              "regime72": 47,
+              "relative24": 40,
+              "breakout18": 36,
+              "ema168": 35,
+              "btc24": 31,
+              "rsiMin": 18,
+              "volumeMin": 7,
+              "volumeMax": 6,
+              "atrMax": 1,
+              "rsiMax": 1
+            }
+          },
+          "5": {
+            "allConfirmed": 58,
+            "missedConfirmed": 48,
+            "missedRemainingToPeakPct": {
+              "count": 48,
+              "p50": 7.69762213526477,
+              "p75": 9.902686924238884,
+              "p90": 13.97099461640593,
+              "min": 1.3337374962109738,
+              "max": 19.80793394363667,
+              "sum": 364.4257398160698
+            },
+            "missedMaeToPeakPct": {
+              "count": 48,
+              "p50": -2.352705151586659,
+              "p75": -1.1735463230848038,
+              "p90": -0.056551947002746114,
+              "min": -5.7625474824213985,
+              "max": 0,
+              "sum": -111.99328831198375
+            },
+            "missedNormalCapacity": {
+              "trades": 48,
+              "sumGross025ReturnPct": 89.6664349540174,
+              "compoundedGross025ReturnPct": 142.44012939248626
+            },
+            "missedSevereCapacity": {
+              "trades": 48,
+              "sumGross025ReturnPct": 81.2664349540174,
+              "compoundedGross025ReturnPct": 123.23267671651874
+            },
+            "missedGateFailures": {
+              "return24": 48,
+              "regime72": 47,
+              "ema168": 30,
+              "relative24": 29,
+              "breakout18": 27,
+              "btc24": 25,
+              "volumeMax": 10,
+              "rsiMin": 8,
+              "volumeMin": 5,
+              "rsiMax": 2,
+              "atrMax": 1
+            }
+          }
+        },
+        "segments": {
+          "FOLD1": {
+            "waves": 24,
+            "missed": 20,
+            "missedSharePct": 83.33333333333334,
+            "missedMovePct": {
+              "count": 20,
+              "p50": 13.809641868517108,
+              "p75": 18.522703810545206,
+              "p90": 23.165647211159857,
+              "min": 8.57292897466193,
+              "max": 25.649472891566273,
+              "sum": 305.8465859004503
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 20,
+              "p50": 8.192133404131209,
+              "p75": 11.462897312272247,
+              "p90": 17.815315626497107,
+              "min": 4.511563250347517,
+              "max": 21.11781517942204,
+              "sum": 203.13515278472968
+            }
+          },
+          "FOLD2": {
+            "waves": 20,
+            "missed": 17,
+            "missedSharePct": 85,
+            "missedMovePct": {
+              "count": 17,
+              "p50": 12.833660081435694,
+              "p75": 15.070893739047332,
+              "p90": 18.26187565362586,
+              "min": 8.187702265372177,
+              "max": 21.871599564744272,
+              "sum": 222.57877261181812
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 17,
+              "p50": 7.909930715935332,
+              "p75": 9.714766866645608,
+              "p90": 11.947438368236845,
+              "min": 4.440605629509187,
+              "max": 17.295032914422492,
+              "sum": 143.9728274186919
+            }
+          },
+          "FOLD3": {
+            "waves": 14,
+            "missed": 11,
+            "missedSharePct": 78.57142857142857,
+            "missedMovePct": {
+              "count": 11,
+              "p50": 13.995405548683525,
+              "p75": 18.02439880638933,
+              "p90": 19.134125636672316,
+              "min": 8.073612347877713,
+              "max": 21.435582822085884,
+              "sum": 154.6654730582337
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 11,
+              "p50": 9.065530414340284,
+              "p75": 12.189368516018273,
+              "p90": 14.967720013591567,
+              "min": 3.498961495446573,
+              "max": 17.429995253915507,
+              "sum": 102.38036418064189
+            }
+          }
+        },
+        "missedWaves": [
+          {
+            "troughTs": "2025-08-10T12:00:00.000Z",
+            "peakTs": "2025-08-11T03:00:00.000Z",
+            "movePct": 8.57292897466193,
+            "durationHours": 15,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-10T17:00:00.000Z",
+              "remainingToPeakPct": 4.511563250347517,
+              "maeToPeakPct": -1.7313281941109704,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-12T09:00:00.000Z",
+            "peakTs": "2025-08-14T03:00:00.000Z",
+            "movePct": 10.344827586206895,
+            "durationHours": 42,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-12T13:00:00.000Z",
+              "remainingToPeakPct": 6.666666666666665,
+              "maeToPeakPct": -1.3916666666666466,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-15T15:00:00.000Z",
+            "peakTs": "2025-08-17T15:00:00.000Z",
+            "movePct": 9.118727050183594,
+            "durationHours": 48,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-15T18:00:00.000Z",
+              "remainingToPeakPct": 7.365385224859766,
+              "maeToPeakPct": -0.003169270750802422,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-20T13:00:00.000Z",
+            "peakTs": "2025-08-21T00:00:00.000Z",
+            "movePct": 12.21184659384582,
+            "durationHours": 11,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-20T16:00:00.000Z",
+              "remainingToPeakPct": 6.634139952192264,
+              "maeToPeakPct": -0.7891548511739122,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-22T12:00:00.000Z",
+            "peakTs": "2025-08-22T23:00:00.000Z",
+            "movePct": 23.077183594676054,
+            "durationHours": 11,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-22T15:00:00.000Z",
+              "remainingToPeakPct": 11.18896095949089,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "return24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-01T02:00:00.000Z",
+            "peakTs": "2025-09-03T14:00:00.000Z",
+            "movePct": 12.635379061371843,
+            "durationHours": 60,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-01T08:00:00.000Z",
+              "remainingToPeakPct": 8.344619231169915,
+              "maeToPeakPct": -3.8476230162864278,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-15T15:00:00.000Z",
+            "peakTs": "2025-09-18T14:00:00.000Z",
+            "movePct": 23.96181975951408,
+            "durationHours": 71,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-15T22:00:00.000Z",
+              "remainingToPeakPct": 20.619986731801475,
+              "maeToPeakPct": -2.5239732223629407,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-26T10:00:00.000Z",
+            "peakTs": "2025-09-28T23:00:00.000Z",
+            "movePct": 9.957427570357535,
+            "durationHours": 61,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-26T14:00:00.000Z",
+              "remainingToPeakPct": 7.388328795349186,
+              "maeToPeakPct": -1.1443078960924336,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-06T04:00:00.000Z",
+            "peakTs": "2025-10-07T04:00:00.000Z",
+            "movePct": 9.775901266645004,
+            "durationHours": 24,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-06T15:00:00.000Z",
+              "remainingToPeakPct": 4.968944099378869,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-08T03:00:00.000Z",
+            "peakTs": "2025-10-08T19:00:00.000Z",
+            "movePct": 9.83720930232559,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-08T09:00:00.000Z",
+              "remainingToPeakPct": 5.8731226182470175,
+              "maeToPeakPct": -1.1272296410157923,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-10T21:00:00.000Z",
+            "peakTs": "2025-10-11T08:00:00.000Z",
+            "movePct": 22.17904648034674,
+            "durationHours": 11,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-10T23:00:00.000Z",
+              "remainingToPeakPct": 8.039647577092502,
+              "maeToPeakPct": -2.964757709251098,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax",
+                "atrMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-12T01:00:00.000Z",
+            "peakTs": "2025-10-13T20:00:00.000Z",
+            "movePct": 25.649472891566273,
+            "durationHours": 43,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-12T04:00:00.000Z",
+              "remainingToPeakPct": 21.11781517942204,
+              "maeToPeakPct": -1.7239032799528098,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-17T08:00:00.000Z",
+            "peakTs": "2025-10-21T15:00:00.000Z",
+            "movePct": 16.301691026088694,
+            "durationHours": 103,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-17T12:00:00.000Z",
+              "remainingToPeakPct": 10.283335698405939,
+              "maeToPeakPct": -2.9941819213849974,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-22T22:00:00.000Z",
+            "peakTs": "2025-10-27T06:00:00.000Z",
+            "movePct": 18.109072375127422,
+            "durationHours": 104,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-23T07:00:00.000Z",
+              "remainingToPeakPct": 13.204689789936497,
+              "maeToPeakPct": -2.344894968246203,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-04T21:00:00.000Z",
+            "peakTs": "2025-11-05T18:00:00.000Z",
+            "movePct": 13.872959858844292,
+            "durationHours": 21,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-04T23:00:00.000Z",
+              "remainingToPeakPct": 7.989960259359963,
+              "maeToPeakPct": -4.817681098793846,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-07T12:00:00.000Z",
+            "peakTs": "2025-11-07T22:00:00.000Z",
+            "movePct": 17.690132675995084,
+            "durationHours": 10,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-07T15:00:00.000Z",
+              "remainingToPeakPct": 12.284706370616316,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-09T04:00:00.000Z",
+            "peakTs": "2025-11-11T03:00:00.000Z",
+            "movePct": 16.20229949918881,
+            "durationHours": 47,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-09T13:00:00.000Z",
+              "remainingToPeakPct": 10.913620144078639,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-19T18:00:00.000Z",
+            "peakTs": "2025-11-20T12:00:00.000Z",
+            "movePct": 12.838738338516208,
+            "durationHours": 18,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-19T22:00:00.000Z",
+              "remainingToPeakPct": 7.6271186440677985,
+              "maeToPeakPct": -0.4322033898304989,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-22T13:00:00.000Z",
+            "peakTs": "2025-11-28T15:00:00.000Z",
+            "movePct": 19.763598116798555,
+            "durationHours": 146,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-22T23:00:00.000Z",
+              "remainingToPeakPct": 17.503685503685507,
+              "maeToPeakPct": -0.7371007371007376,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-06T08:00:00.000Z",
+            "peakTs": "2025-12-07T12:00:00.000Z",
+            "movePct": 13.746323878189926,
+            "durationHours": 28,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-12-06T15:00:00.000Z",
+              "remainingToPeakPct": 10.60885608856088,
+              "maeToPeakPct": -0.42435424354244633,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-12T16:00:00.000Z",
+            "peakTs": "2025-12-13T20:00:00.000Z",
+            "movePct": 9.566854990583806,
+            "durationHours": 28,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-12T23:00:00.000Z",
+              "remainingToPeakPct": 6.313385107354952,
+              "maeToPeakPct": -1.1055276381909507,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-19T01:00:00.000Z",
+            "peakTs": "2025-12-19T20:00:00.000Z",
+            "movePct": 12.045213705404457,
+            "durationHours": 19,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-19T04:00:00.000Z",
+              "remainingToPeakPct": 6.252791424743176,
+              "maeToPeakPct": -1.3733809736489522,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-24T05:00:00.000Z",
+            "peakTs": "2025-12-29T03:00:00.000Z",
+            "movePct": 11.767447279506005,
+            "durationHours": 118,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-24T16:00:00.000Z",
+              "remainingToPeakPct": 7.713900741073432,
+              "maeToPeakPct": -1.7965416573096804,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-06T17:00:00.000Z",
+            "peakTs": "2026-01-06T23:00:00.000Z",
+            "movePct": 8.187702265372177,
+            "durationHours": 6,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-06T21:00:00.000Z",
+              "remainingToPeakPct": 4.837318698549575,
+              "maeToPeakPct": -0.5566444531556192,
+              "failedLongGates": [
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-08T13:00:00.000Z",
+            "peakTs": "2026-01-14T03:00:00.000Z",
+            "movePct": 16.888927127247698,
+            "durationHours": 134,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-08T16:00:00.000Z",
+              "remainingToPeakPct": 9.803604622969363,
+              "maeToPeakPct": -5.7625474824213985,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-20T23:00:00.000Z",
+            "peakTs": "2026-01-22T02:00:00.000Z",
+            "movePct": 8.566599767613825,
+            "durationHours": 27,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-21T04:00:00.000Z",
+              "remainingToPeakPct": 4.440605629509187,
+              "maeToPeakPct": -3.393964028045937,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-25T19:00:00.000Z",
+            "peakTs": "2026-01-28T11:00:00.000Z",
+            "movePct": 15.75791227096055,
+            "durationHours": 64,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-26T02:00:00.000Z",
+              "remainingToPeakPct": 9.714766866645608,
+              "maeToPeakPct": -2.1155667824439672,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-31T18:00:00.000Z",
+            "peakTs": "2026-02-01T09:00:00.000Z",
+            "movePct": 8.894034323072741,
+            "durationHours": 15,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-31T22:00:00.000Z",
+              "remainingToPeakPct": 4.646596858638752,
+              "maeToPeakPct": -0.654450261780104,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-06T00:00:00.000Z",
+            "peakTs": "2026-02-06T16:00:00.000Z",
+            "movePct": 13.73009220452641,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-06T02:00:00.000Z",
+              "remainingToPeakPct": 9.155269509251806,
+              "maeToPeakPct": -3.1858407079646045,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-19T17:00:00.000Z",
+            "peakTs": "2026-02-21T11:00:00.000Z",
+            "movePct": 8.85352286773795,
+            "durationHours": 42,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-20T01:00:00.000Z",
+              "remainingToPeakPct": 5.322170728061004,
+              "maeToPeakPct": -2.0331888174615065,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-28T10:00:00.000Z",
+            "peakTs": "2026-03-01T02:00:00.000Z",
+            "movePct": 15.070893739047332,
+            "durationHours": 16,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-28T14:00:00.000Z",
+              "remainingToPeakPct": 9.35654806964421,
+              "maeToPeakPct": -2.8009084027251996,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-01T20:00:00.000Z",
+            "peakTs": "2026-03-02T16:00:00.000Z",
+            "movePct": 14.227023737066347,
+            "durationHours": 20,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-02T01:00:00.000Z",
+              "remainingToPeakPct": 8.955007256894042,
+              "maeToPeakPct": -3.3817126269956588,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-03T09:00:00.000Z",
+            "peakTs": "2026-03-04T19:00:00.000Z",
+            "movePct": 9.941176470588232,
+            "durationHours": 34,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-03T17:00:00.000Z",
+              "remainingToPeakPct": 7.909930715935332,
+              "maeToPeakPct": -0.7361431870669732,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-08T16:00:00.000Z",
+            "peakTs": "2026-03-13T13:00:00.000Z",
+            "movePct": 21.871599564744272,
+            "durationHours": 117,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-09T05:00:00.000Z",
+              "remainingToPeakPct": 17.295032914422492,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-14T10:00:00.000Z",
+            "peakTs": "2026-03-17T01:00:00.000Z",
+            "movePct": 14.054813773717513,
+            "durationHours": 63,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-15T03:00:00.000Z",
+              "remainingToPeakPct": 10.318107667210462,
+              "maeToPeakPct": -1.1827079934747076,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-23T09:00:00.000Z",
+            "peakTs": "2026-03-25T11:00:00.000Z",
+            "movePct": 12.833660081435694,
+            "durationHours": 50,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-23T12:00:00.000Z",
+              "remainingToPeakPct": 7.546356188012071,
+              "maeToPeakPct": -1.8542475204829656,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-05T12:00:00.000Z",
+            "peakTs": "2026-04-11T19:00:00.000Z",
+            "movePct": 20.321298443193104,
+            "durationHours": 151,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-04-06T00:00:00.000Z",
+              "remainingToPeakPct": 14.391434419776417,
+              "maeToPeakPct": -3.101873720673909,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-08T06:00:00.000Z",
+            "peakTs": "2026-05-10T18:00:00.000Z",
+            "movePct": 8.073612347877713,
+            "durationHours": 60,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-08T10:00:00.000Z",
+              "remainingToPeakPct": 5.526036131774714,
+              "maeToPeakPct": -1.6809970051202883,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "btc24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-18T10:00:00.000Z",
+            "peakTs": "2026-05-22T07:00:00.000Z",
+            "movePct": 21.435582822085884,
+            "durationHours": 93,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-18T21:00:00.000Z",
+              "remainingToPeakPct": 17.429995253915507,
+              "maeToPeakPct": -0.09492168960606451,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-23T07:00:00.000Z",
+            "peakTs": "2026-05-23T20:00:00.000Z",
+            "movePct": 9.304800189170015,
+            "durationHours": 13,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-23T15:00:00.000Z",
+              "remainingToPeakPct": 4.8304796462183885,
+              "maeToPeakPct": -0.2381222360811952,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-06T04:00:00.000Z",
+            "peakTs": "2026-06-08T00:00:00.000Z",
+            "movePct": 19.134125636672316,
+            "durationHours": 44,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-06T06:00:00.000Z",
+              "remainingToPeakPct": 14.134677944046835,
+              "maeToPeakPct": -0.7644762524398163,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-10T21:00:00.000Z",
+            "peakTs": "2026-06-15T17:00:00.000Z",
+            "movePct": 17.26698262243287,
+            "durationHours": 116,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-11T04:00:00.000Z",
+              "remainingToPeakPct": 9.065530414340284,
+              "maeToPeakPct": -5.083749632677059,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "volumeMax"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-24T17:00:00.000Z",
+            "peakTs": "2026-06-25T05:00:00.000Z",
+            "movePct": 8.207910395519779,
+            "durationHours": 12,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-24T21:00:00.000Z",
+              "remainingToPeakPct": 4.407294832826736,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-26T02:00:00.000Z",
+            "peakTs": "2026-06-27T15:00:00.000Z",
+            "movePct": 13.995405548683525,
+            "durationHours": 37,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-26T04:00:00.000Z",
+              "remainingToPeakPct": 8.822537112010798,
+              "maeToPeakPct": -2.0748987854250944,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-30T12:00:00.000Z",
+            "peakTs": "2026-07-04T15:00:00.000Z",
+            "movePct": 15.823211875843457,
+            "durationHours": 99,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-01T04:00:00.000Z",
+              "remainingToPeakPct": 10.24405908798971,
+              "maeToPeakPct": -2.296082209377004,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24",
+                "volumeMin"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-14T10:00:00.000Z",
+            "peakTs": "2026-07-21T11:00:00.000Z",
+            "movePct": 13.914265635980328,
+            "durationHours": 169,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-14T14:00:00.000Z",
+              "remainingToPeakPct": 9.453072248480776,
+              "maeToPeakPct": -2.008777852802146,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-25T07:00:00.000Z",
+            "peakTs": "2026-07-27T10:00:00.000Z",
+            "movePct": 8.727760993622024,
+            "durationHours": 51,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-25T18:00:00.000Z",
+              "remainingToPeakPct": 3.498961495446573,
+              "maeToPeakPct": -1.198274484741968,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "rsiMax"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-29T20:00:00.000Z",
+            "peakTs": "2026-08-09T16:00:00.000Z",
+            "movePct": 18.78181499034579,
+            "durationHours": 260,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-30T03:00:00.000Z",
+              "remainingToPeakPct": 14.967720013591567,
+              "maeToPeakPct": -1.5460414542983303,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          }
+        ]
+      },
+      "10": {
+        "waves": 35,
+        "capturedByAnyV64Long": 10,
+        "capturedByV64LongEntry": 10,
+        "missed": 25,
+        "missedSharePct": 71.42857142857143,
+        "shortOverlapAmongMissed": 12,
+        "movePct": {
+          "all": {
+            "count": 35,
+            "p50": 21.328856688460853,
+            "p75": 25.83831878873729,
+            "p90": 34.668008664259936,
+            "min": 10.344827586206895,
+            "max": 58.381704202461115,
+            "sum": 803.9766363510109
+          },
+          "missed": {
+            "count": 25,
+            "p50": 18.109072375127422,
+            "p75": 21.435582822085884,
+            "p90": 25.478929453557313,
+            "min": 10.344827586206895,
+            "max": 26.1464324576403,
+            "sum": 461.8499711027294
+          },
+          "captured": {
+            "count": 10,
+            "p50": 30.1768312549448,
+            "p75": 37.582256720727024,
+            "p90": 50.747496845116586,
+            "min": 23.714705402317616,
+            "max": 58.381704202461115,
+            "sum": 342.1266652482814
+          }
+        },
+        "perfectTroughToPeakCapacity": {
+          "missedNormal": {
+            "trades": 25,
+            "sumGross025ReturnPct": 114.71249277568236,
+            "compoundedGross025ReturnPct": 206.5119318596757
+          },
+          "missedSevere": {
+            "trades": 25,
+            "sumGross025ReturnPct": 110.33749277568235,
+            "compoundedGross025ReturnPct": 193.94304386968307
+          }
+        },
+        "confirmations": {
+          "2": {
+            "allConfirmed": 35,
+            "missedConfirmed": 25,
+            "missedRemainingToPeakPct": {
+              "count": 25,
+              "p50": 13.551144196305476,
+              "p75": 17.503685503685507,
+              "p90": 20.966069719234227,
+              "min": 6.666666666666665,
+              "max": 23.328267477203667,
+              "sum": 348.3735401047525
+            },
+            "missedMaeToPeakPct": {
+              "count": 25,
+              "p50": -1.8435818160998485,
+              "p75": -0.7371007371007376,
+              "p90": -0.04161609155540521,
+              "min": -5.7625474824213985,
+              "max": 0,
+              "sum": -48.09955871810913
+            },
+            "missedNormalCapacity": {
+              "trades": 25,
+              "sumGross025ReturnPct": 86.3433850261881,
+              "compoundedGross025ReturnPct": 133.29424672608977
+            },
+            "missedSevereCapacity": {
+              "trades": 25,
+              "sumGross025ReturnPct": 81.9683850261881,
+              "compoundedGross025ReturnPct": 123.6247495235634
+            },
+            "missedGateFailures": {
+              "regime72": 25,
+              "return24": 25,
+              "relative24": 24,
+              "ema168": 24,
+              "breakout18": 21,
+              "btc24": 17,
+              "rsiMin": 15,
+              "volumeMax": 5,
+              "volumeMin": 4,
+              "atrMax": 1
+            }
+          },
+          "3": {
+            "allConfirmed": 35,
+            "missedConfirmed": 25,
+            "missedRemainingToPeakPct": {
+              "count": 25,
+              "p50": 12.284706370616316,
+              "p75": 17.429995253915507,
+              "p90": 20.691065610092092,
+              "min": 6.666666666666665,
+              "max": 21.409335727109525,
+              "sum": 326.45197948869287
+            },
+            "missedMaeToPeakPct": {
+              "count": 25,
+              "p50": -2.1155667824439672,
+              "p75": -0.7644762524398163,
+              "p90": -0.03796867584242567,
+              "min": -5.7625474824213985,
+              "max": 0,
+              "sum": -54.869905370332155
+            },
+            "missedNormalCapacity": {
+              "trades": 25,
+              "sumGross025ReturnPct": 80.8629948721732,
+              "compoundedGross025ReturnPct": 121.24659000279499
+            },
+            "missedSevereCapacity": {
+              "trades": 25,
+              "sumGross025ReturnPct": 76.48799487217319,
+              "compoundedGross025ReturnPct": 112.05736715863806
+            },
+            "missedGateFailures": {
+              "regime72": 25,
+              "return24": 25,
+              "ema168": 24,
+              "relative24": 23,
+              "breakout18": 20,
+              "btc24": 16,
+              "rsiMin": 11,
+              "volumeMax": 4,
+              "volumeMin": 4,
+              "atrMax": 1
+            }
+          },
+          "5": {
+            "allConfirmed": 35,
+            "missedConfirmed": 25,
+            "missedRemainingToPeakPct": {
+              "count": 25,
+              "p50": 10.199933828047447,
+              "p75": 14.700968927497481,
+              "p90": 18.51213599840789,
+              "min": 3.2258064516129004,
+              "max": 19.867060561299855,
+              "sum": 290.79032974261423
+            },
+            "missedMaeToPeakPct": {
+              "count": 25,
+              "p50": -3.101873720673909,
+              "p75": -1.8262184482959243,
+              "p90": -0.761537691209967,
+              "min": -6.522579398312178,
+              "max": 0,
+              "sum": -73.23196364804313
+            },
+            "missedNormalCapacity": {
+              "trades": 25,
+              "sumGross025ReturnPct": 71.94758243565353,
+              "compoundedGross025ReturnPct": 102.95472707379952
+            },
+            "missedSevereCapacity": {
+              "trades": 25,
+              "sumGross025ReturnPct": 67.57258243565354,
+              "compoundedGross025ReturnPct": 94.49675116563394
+            },
+            "missedGateFailures": {
+              "regime72": 25,
+              "return24": 25,
+              "ema168": 20,
+              "relative24": 19,
+              "breakout18": 18,
+              "btc24": 13,
+              "volumeMax": 7,
+              "rsiMin": 6,
+              "volumeMin": 2,
+              "atrMax": 1,
+              "rsiMax": 1
+            }
+          }
+        },
+        "segments": {
+          "FOLD1": {
+            "waves": 16,
+            "missed": 12,
+            "missedSharePct": 75,
+            "missedMovePct": {
+              "count": 12,
+              "p50": 17.899602525561253,
+              "p75": 22.624739800138578,
+              "p90": 25.09698484284089,
+              "min": 10.344827586206895,
+              "max": 25.649472891566273,
+              "sum": 222.13677290473694
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 12,
+              "p50": 11.599163257347477,
+              "p75": 17.87742849136477,
+              "p90": 20.457853804061585,
+              "min": 6.666666666666665,
+              "max": 21.11781517942204,
+              "sum": 155.2498900195359
+            }
+          },
+          "FOLD2": {
+            "waves": 11,
+            "missed": 8,
+            "missedSharePct": 72.72727272727273,
+            "missedMovePct": {
+              "count": 8,
+              "p50": 16.32341969910412,
+              "p75": 19.776835682966517,
+              "p90": 22.06883864752726,
+              "min": 12.833660081435694,
+              "max": 26.1464324576403,
+              "sum": 138.22551337521136
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 8,
+              "p50": 9.759185744807485,
+              "p75": 13.840099331666277,
+              "p90": 16.496804811976347,
+              "min": 7.112550245645388,
+              "max": 21.409335727109525,
+              "sum": 92.78963854837308
+            }
+          },
+          "FOLD3": {
+            "waves": 8,
+            "missed": 5,
+            "missedSharePct": 62.5,
+            "missedMovePct": {
+              "count": 5,
+              "p50": 21.328856688460853,
+              "p75": 21.435582822085884,
+              "p90": 24.19053194037934,
+              "min": 13.914265635980328,
+              "max": 26.02716468590831,
+              "sum": 101.48768482278116
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 5,
+              "p50": 15.823211875843457,
+              "p75": 17.429995253915507,
+              "p90": 19.415069018937707,
+              "min": 9.453072248480776,
+              "max": 20.738451528952506,
+              "sum": 78.41245092078381
+            }
+          }
+        },
+        "missedWaves": [
+          {
+            "troughTs": "2025-08-12T09:00:00.000Z",
+            "peakTs": "2025-08-14T03:00:00.000Z",
+            "movePct": 10.344827586206895,
+            "durationHours": 42,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-12T13:00:00.000Z",
+              "remainingToPeakPct": 6.666666666666665,
+              "maeToPeakPct": -1.3916666666666466,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-08-20T13:00:00.000Z",
+            "peakTs": "2025-08-22T23:00:00.000Z",
+            "movePct": 25.22311429654387,
+            "durationHours": 58,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-20T16:00:00.000Z",
+              "remainingToPeakPct": 18.99865745440257,
+              "maeToPeakPct": -4.970693211958476,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-09-15T15:00:00.000Z",
+            "peakTs": "2025-09-18T14:00:00.000Z",
+            "movePct": 23.96181975951408,
+            "durationHours": 71,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-09-15T22:00:00.000Z",
+              "remainingToPeakPct": 20.619986731801475,
+              "maeToPeakPct": -2.5239732223629407,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-10T21:00:00.000Z",
+            "peakTs": "2025-10-11T08:00:00.000Z",
+            "movePct": 22.17904648034674,
+            "durationHours": 11,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-10T23:00:00.000Z",
+              "remainingToPeakPct": 8.039647577092502,
+              "maeToPeakPct": -2.964757709251098,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax",
+                "atrMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-12T01:00:00.000Z",
+            "peakTs": "2025-10-13T20:00:00.000Z",
+            "movePct": 25.649472891566273,
+            "durationHours": 43,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-12T04:00:00.000Z",
+              "remainingToPeakPct": 21.11781517942204,
+              "maeToPeakPct": -1.7239032799528098,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-17T08:00:00.000Z",
+            "peakTs": "2025-10-21T15:00:00.000Z",
+            "movePct": 16.301691026088694,
+            "durationHours": 103,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-17T12:00:00.000Z",
+              "remainingToPeakPct": 10.283335698405939,
+              "maeToPeakPct": -2.9941819213849974,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-22T22:00:00.000Z",
+            "peakTs": "2025-10-27T06:00:00.000Z",
+            "movePct": 18.109072375127422,
+            "durationHours": 104,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-23T07:00:00.000Z",
+              "remainingToPeakPct": 13.204689789936497,
+              "maeToPeakPct": -2.344894968246203,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-04T21:00:00.000Z",
+            "peakTs": "2025-11-05T18:00:00.000Z",
+            "movePct": 13.872959858844292,
+            "durationHours": 21,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-04T23:00:00.000Z",
+              "remainingToPeakPct": 7.989960259359963,
+              "maeToPeakPct": -4.817681098793846,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-07T12:00:00.000Z",
+            "peakTs": "2025-11-07T22:00:00.000Z",
+            "movePct": 17.690132675995084,
+            "durationHours": 10,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-07T15:00:00.000Z",
+              "remainingToPeakPct": 12.284706370616316,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-09T04:00:00.000Z",
+            "peakTs": "2025-11-11T03:00:00.000Z",
+            "movePct": 16.20229949918881,
+            "durationHours": 47,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-09T13:00:00.000Z",
+              "remainingToPeakPct": 10.913620144078639,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-19T18:00:00.000Z",
+            "peakTs": "2025-11-20T12:00:00.000Z",
+            "movePct": 12.838738338516208,
+            "durationHours": 18,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-19T22:00:00.000Z",
+              "remainingToPeakPct": 7.6271186440677985,
+              "maeToPeakPct": -0.4322033898304989,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-22T13:00:00.000Z",
+            "peakTs": "2025-11-28T15:00:00.000Z",
+            "movePct": 19.763598116798555,
+            "durationHours": 146,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-22T23:00:00.000Z",
+              "remainingToPeakPct": 17.503685503685507,
+              "maeToPeakPct": -0.7371007371007376,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-12-19T01:00:00.000Z",
+            "peakTs": "2025-12-29T03:00:00.000Z",
+            "movePct": 12.951842693983284,
+            "durationHours": 242,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2025-12-19T04:00:00.000Z",
+              "remainingToPeakPct": 7.112550245645388,
+              "maeToPeakPct": -4.287628405538191,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-08T13:00:00.000Z",
+            "peakTs": "2026-01-14T03:00:00.000Z",
+            "movePct": 16.888927127247698,
+            "durationHours": 134,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-08T16:00:00.000Z",
+              "remainingToPeakPct": 9.803604622969363,
+              "maeToPeakPct": -5.7625474824213985,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "btc24"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-25T19:00:00.000Z",
+            "peakTs": "2026-01-28T11:00:00.000Z",
+            "movePct": 15.75791227096055,
+            "durationHours": 64,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-26T02:00:00.000Z",
+              "remainingToPeakPct": 9.714766866645608,
+              "maeToPeakPct": -2.1155667824439672,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-06T00:00:00.000Z",
+            "peakTs": "2026-02-06T16:00:00.000Z",
+            "movePct": 13.73009220452641,
+            "durationHours": 16,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-06T02:00:00.000Z",
+              "remainingToPeakPct": 9.155269509251806,
+              "maeToPeakPct": -3.1858407079646045,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-28T10:00:00.000Z",
+            "peakTs": "2026-03-02T16:00:00.000Z",
+            "movePct": 19.59534809622432,
+            "durationHours": 54,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-28T14:00:00.000Z",
+              "remainingToPeakPct": 13.656320968962898,
+              "maeToPeakPct": -2.8009084027251996,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-08T16:00:00.000Z",
+            "peakTs": "2026-03-17T01:00:00.000Z",
+            "movePct": 26.1464324576403,
+            "durationHours": 201,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-09T05:00:00.000Z",
+              "remainingToPeakPct": 21.409335727109525,
+              "maeToPeakPct": 0,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-03-23T09:00:00.000Z",
+            "peakTs": "2026-03-25T11:00:00.000Z",
+            "movePct": 12.833660081435694,
+            "durationHours": 50,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-03-23T12:00:00.000Z",
+              "remainingToPeakPct": 7.546356188012071,
+              "maeToPeakPct": -1.8542475204829656,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-04-05T12:00:00.000Z",
+            "peakTs": "2026-04-11T19:00:00.000Z",
+            "movePct": 20.321298443193104,
+            "durationHours": 151,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-04-06T00:00:00.000Z",
+              "remainingToPeakPct": 14.391434419776417,
+              "maeToPeakPct": -3.101873720673909,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-18T10:00:00.000Z",
+            "peakTs": "2026-05-22T07:00:00.000Z",
+            "movePct": 21.435582822085884,
+            "durationHours": 93,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-18T21:00:00.000Z",
+              "remainingToPeakPct": 17.429995253915507,
+              "maeToPeakPct": -0.09492168960606451,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-06T04:00:00.000Z",
+            "peakTs": "2026-06-15T17:00:00.000Z",
+            "movePct": 26.02716468590831,
+            "durationHours": 229,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-06T06:00:00.000Z",
+              "remainingToPeakPct": 20.738451528952506,
+              "maeToPeakPct": -0.7644762524398163,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-26T02:00:00.000Z",
+            "peakTs": "2026-07-04T15:00:00.000Z",
+            "movePct": 21.328856688460853,
+            "durationHours": 205,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-26T04:00:00.000Z",
+              "remainingToPeakPct": 15.823211875843457,
+              "maeToPeakPct": -2.446018893387314,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-14T10:00:00.000Z",
+            "peakTs": "2026-07-21T11:00:00.000Z",
+            "movePct": 13.914265635980328,
+            "durationHours": 169,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-14T14:00:00.000Z",
+              "remainingToPeakPct": 9.453072248480776,
+              "maeToPeakPct": -2.008777852802146,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-29T20:00:00.000Z",
+            "peakTs": "2026-08-09T16:00:00.000Z",
+            "movePct": 18.78181499034579,
+            "durationHours": 260,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-30T03:00:00.000Z",
+              "remainingToPeakPct": 14.967720013591567,
+              "maeToPeakPct": -1.5460414542983303,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          }
+        ]
+      },
+      "15": {
+        "waves": 20,
+        "capturedByAnyV64Long": 9,
+        "capturedByV64LongEntry": 9,
+        "missed": 11,
+        "missedSharePct": 55.00000000000001,
+        "shortOverlapAmongMissed": 7,
+        "movePct": {
+          "all": {
+            "count": 20,
+            "p50": 25.11511468550749,
+            "p75": 32.58713336322422,
+            "p90": 46.027716178241526,
+            "min": 15.75791227096055,
+            "max": 93.2427956276913,
+            "sum": 611.6548484634615
+          },
+          "missed": {
+            "count": 11,
+            "p50": 21.328856688460853,
+            "p75": 25.62513949122609,
+            "p90": 29.28150390313846,
+            "min": 15.75791227096055,
+            "max": 33.00453345289691,
+            "sum": 245.1191856464424
+          },
+          "captured": {
+            "count": 9,
+            "p50": 32.447999999999986,
+            "p75": 44.404332129963905,
+            "p90": 67.15909721573018,
+            "min": 21.114541979120705,
+            "max": 93.2427956276913,
+            "sum": 366.5356628170191
+          }
+        },
+        "perfectTroughToPeakCapacity": {
+          "missedNormal": {
+            "trades": 11,
+            "sumGross025ReturnPct": 60.9497964116106,
+            "compoundedGross025ReturnPct": 80.82663605364951
+          },
+          "missedSevere": {
+            "trades": 11,
+            "sumGross025ReturnPct": 59.0247964116106,
+            "compoundedGross025ReturnPct": 77.55518324965165
+          }
+        },
+        "confirmations": {
+          "2": {
+            "allConfirmed": 20,
+            "missedConfirmed": 11,
+            "missedRemainingToPeakPct": {
+              "count": 11,
+              "p50": 17.503685503685507,
+              "p75": 19.72510917577528,
+              "p90": 21.16089884643595,
+              "min": 10.54082714740192,
+              "max": 22.861468584405763,
+              "sum": 187.69812617803504
+            },
+            "missedMaeToPeakPct": {
+              "count": 11,
+              "p50": -2.446018893387314,
+              "p75": -1.0715276278105756,
+              "p90": -0.7371007371007376,
+              "min": -8.594713656387675,
+              "max": 0,
+              "sum": -28.155447855149887
+            },
+            "missedNormalCapacity": {
+              "trades": 11,
+              "sumGross025ReturnPct": 46.59453154450874,
+              "compoundedGross025ReturnPct": 57.766679457253375
+            },
+            "missedSevereCapacity": {
+              "trades": 11,
+              "sumGross025ReturnPct": 44.66953154450875,
+              "compoundedGross025ReturnPct": 54.87721331618398
+            },
+            "missedGateFailures": {
+              "regime72": 11,
+              "return24": 11,
+              "relative24": 11,
+              "ema168": 11,
+              "breakout18": 9,
+              "btc24": 8,
+              "rsiMin": 6,
+              "volumeMax": 2,
+              "volumeMin": 2,
+              "atrMax": 1
+            }
+          },
+          "3": {
+            "allConfirmed": 20,
+            "missedConfirmed": 11,
+            "missedRemainingToPeakPct": {
+              "count": 11,
+              "p50": 17.429995253915507,
+              "p75": 18.305496128082332,
+              "p90": 20.738451528952506,
+              "min": 9.714766866645608,
+              "max": 22.861468584405763,
+              "sum": 178.4008471891506
+            },
+            "missedMaeToPeakPct": {
+              "count": 11,
+              "p50": -2.446018893387314,
+              "p75": -1.4400215174418918,
+              "p90": -0.7371007371007376,
+              "min": -8.594713656387675,
+              "max": -0.09492168960606451,
+              "sum": -32.59835959946542
+            },
+            "missedNormalCapacity": {
+              "trades": 11,
+              "sumGross025ReturnPct": 44.27021179728764,
+              "compoundedGross025ReturnPct": 54.270880316620726
+            },
+            "missedSevereCapacity": {
+              "trades": 11,
+              "sumGross025ReturnPct": 42.34521179728765,
+              "compoundedGross025ReturnPct": 51.43970407279777
+            },
+            "missedGateFailures": {
+              "regime72": 11,
+              "return24": 11,
+              "relative24": 11,
+              "ema168": 11,
+              "breakout18": 9,
+              "btc24": 8,
+              "rsiMin": 5,
+              "volumeMax": 2,
+              "volumeMin": 2,
+              "atrMax": 1
+            }
+          },
+          "5": {
+            "allConfirmed": 20,
+            "missedConfirmed": 11,
+            "missedRemainingToPeakPct": {
+              "count": 11,
+              "p50": 14.700968927497481,
+              "p75": 17.33383602163734,
+              "p90": 18.99647322859892,
+              "min": 9.714766866645608,
+              "max": 21.773709483793535,
+              "sum": 164.1213780416979
+            },
+            "missedMaeToPeakPct": {
+              "count": 11,
+              "p50": -3.3912462412295397,
+              "p75": -2.1558917592886697,
+              "p90": -1.8262184482959243,
+              "min": -8.594713656387675,
+              "max": -1.7062910620598393,
+              "sum": -42.245724619377384
+            },
+            "missedNormalCapacity": {
+              "trades": 11,
+              "sumGross025ReturnPct": 40.700344510424465,
+              "compoundedGross025ReturnPct": 49.071624478635734
+            },
+            "missedSevereCapacity": {
+              "trades": 11,
+              "sumGross025ReturnPct": 38.77534451042447,
+              "compoundedGross025ReturnPct": 46.32741922951724
+            },
+            "missedGateFailures": {
+              "regime72": 11,
+              "return24": 11,
+              "ema168": 11,
+              "relative24": 10,
+              "breakout18": 9,
+              "btc24": 6,
+              "rsiMin": 3,
+              "volumeMax": 3,
+              "atrMax": 1,
+              "volumeMin": 1
+            }
+          }
+        },
+        "segments": {
+          "FOLD1": {
+            "waves": 10,
+            "missed": 5,
+            "missedSharePct": 50,
+            "missedMovePct": {
+              "count": 5,
+              "p50": 19.763598116798555,
+              "p75": 25.22311429654387,
+              "p90": 29.89196579035569,
+              "min": 16.301691026088694,
+              "max": 33.00453345289691,
+              "sum": 112.40200926745544
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 5,
+              "p50": 17.503685503685507,
+              "p75": 17.612334801762096,
+              "p90": 18.44412839334638,
+              "min": 10.283335698405939,
+              "max": 18.99865745440257,
+              "sum": 77.6027032481926
+            }
+          },
+          "FOLD2": {
+            "waves": 6,
+            "missed": 2,
+            "missedSharePct": 33.33333333333333,
+            "missedMovePct": {
+              "count": 2,
+              "p50": 22.519708087049505,
+              "p75": 25.900605995093983,
+              "p90": 27.92914473992067,
+              "min": 15.75791227096055,
+              "max": 29.28150390313846,
+              "sum": 45.03941617409901
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 2,
+              "p50": 16.288117725525687,
+              "p75": 19.574793154965725,
+              "p90": 21.546798412629748,
+              "min": 9.714766866645608,
+              "max": 22.861468584405763,
+              "sum": 32.576235451051375
+            }
+          },
+          "FOLD3": {
+            "waves": 4,
+            "missed": 4,
+            "missedSharePct": 100,
+            "missedMovePct": {
+              "count": 4,
+              "p50": 21.38221975527337,
+              "p75": 22.58347828804149,
+              "p90": 24.649690126761584,
+              "min": 18.886156008432884,
+              "max": 26.02716468590831,
+              "sum": 87.67776020488793
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 4,
+              "p50": 16.62660356487948,
+              "p75": 18.257109322674758,
+              "p90": 19.745914646441406,
+              "min": 14.230249831195142,
+              "max": 20.738451528952506,
+              "sum": 68.22190848990661
+            }
+          }
+        },
+        "missedWaves": [
+          {
+            "troughTs": "2025-08-20T13:00:00.000Z",
+            "peakTs": "2025-08-22T23:00:00.000Z",
+            "movePct": 25.22311429654387,
+            "durationHours": 58,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-20T16:00:00.000Z",
+              "remainingToPeakPct": 18.99865745440257,
+              "maeToPeakPct": -4.970693211958476,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-10T21:00:00.000Z",
+            "peakTs": "2025-10-13T20:00:00.000Z",
+            "movePct": 33.00453345289691,
+            "durationHours": 71,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-10T23:00:00.000Z",
+              "remainingToPeakPct": 17.612334801762096,
+              "maeToPeakPct": -8.594713656387675,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax",
+                "atrMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-17T08:00:00.000Z",
+            "peakTs": "2025-10-21T15:00:00.000Z",
+            "movePct": 16.301691026088694,
+            "durationHours": 103,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-17T12:00:00.000Z",
+              "remainingToPeakPct": 10.283335698405939,
+              "maeToPeakPct": -2.9941819213849974,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-22T22:00:00.000Z",
+            "peakTs": "2025-10-27T06:00:00.000Z",
+            "movePct": 18.109072375127422,
+            "durationHours": 104,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-23T07:00:00.000Z",
+              "remainingToPeakPct": 13.204689789936497,
+              "maeToPeakPct": -2.344894968246203,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-11-22T13:00:00.000Z",
+            "peakTs": "2025-11-28T15:00:00.000Z",
+            "movePct": 19.763598116798555,
+            "durationHours": 146,
+            "shortOverlap": false,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-11-22T23:00:00.000Z",
+              "remainingToPeakPct": 17.503685503685507,
+              "maeToPeakPct": -0.7371007371007376,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-01-25T19:00:00.000Z",
+            "peakTs": "2026-01-28T11:00:00.000Z",
+            "movePct": 15.75791227096055,
+            "durationHours": 64,
+            "shortOverlap": false,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-01-26T02:00:00.000Z",
+              "remainingToPeakPct": 9.714766866645608,
+              "maeToPeakPct": -2.1155667824439672,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-02-28T10:00:00.000Z",
+            "peakTs": "2026-03-17T01:00:00.000Z",
+            "movePct": 29.28150390313846,
+            "durationHours": 399,
+            "shortOverlap": true,
+            "segment": "FOLD2",
+            "confirm3": {
+              "entryTs": "2026-02-28T14:00:00.000Z",
+              "remainingToPeakPct": 22.861468584405763,
+              "maeToPeakPct": -3.315669947009836,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-18T10:00:00.000Z",
+            "peakTs": "2026-05-22T07:00:00.000Z",
+            "movePct": 21.435582822085884,
+            "durationHours": 93,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-18T21:00:00.000Z",
+              "remainingToPeakPct": 17.429995253915507,
+              "maeToPeakPct": -0.09492168960606451,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-06T04:00:00.000Z",
+            "peakTs": "2026-06-15T17:00:00.000Z",
+            "movePct": 26.02716468590831,
+            "durationHours": 229,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-06T06:00:00.000Z",
+              "remainingToPeakPct": 20.738451528952506,
+              "maeToPeakPct": -0.7644762524398163,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-26T02:00:00.000Z",
+            "peakTs": "2026-07-04T15:00:00.000Z",
+            "movePct": 21.328856688460853,
+            "durationHours": 205,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-26T04:00:00.000Z",
+              "remainingToPeakPct": 15.823211875843457,
+              "maeToPeakPct": -2.446018893387314,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-07-14T10:00:00.000Z",
+            "peakTs": "2026-08-09T16:00:00.000Z",
+            "movePct": 18.886156008432884,
+            "durationHours": 630,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-07-14T14:00:00.000Z",
+              "remainingToPeakPct": 14.230249831195142,
+              "maeToPeakPct": -4.220121539500332,
+              "failedLongGates": [
+                "regime72",
+                "return24",
+                "relative24",
+                "ema168"
+              ]
+            }
+          }
+        ]
+      },
+      "20": {
+        "waves": 13,
+        "capturedByAnyV64Long": 8,
+        "capturedByV64LongEntry": 8,
+        "missed": 5,
+        "missedSharePct": 38.46153846153847,
+        "shortOverlapAmongMissed": 3,
+        "movePct": {
+          "all": {
+            "count": 13,
+            "p50": 32.44654806593768,
+            "p75": 40.55466666666667,
+            "p90": 57.39140451618471,
+            "min": 21.114541979120705,
+            "max": 93.2427956276913,
+            "sum": 485.38630901873057
+          },
+          "missed": {
+            "count": 5,
+            "p50": 25.22311429654387,
+            "p75": 26.02716468590831,
+            "p90": 30.213585946101468,
+            "min": 21.328856688460853,
+            "max": 33.00453345289691,
+            "sum": 127.01925194589583
+          },
+          "captured": {
+            "count": 8,
+            "p50": 39.30750207374581,
+            "p75": 48.4627922506579,
+            "p90": 70.41955951722531,
+            "min": 21.114541979120705,
+            "max": 93.2427956276913,
+            "sum": 358.3670570728347
+          }
+        },
+        "perfectTroughToPeakCapacity": {
+          "missedNormal": {
+            "trades": 5,
+            "sumGross025ReturnPct": 31.604812986473963,
+            "compoundedGross025ReturnPct": 35.82707919338623
+          },
+          "missedSevere": {
+            "trades": 5,
+            "sumGross025ReturnPct": 30.729812986473952,
+            "compoundedGross025ReturnPct": 34.712813169981494
+          }
+        },
+        "confirmations": {
+          "2": {
+            "allConfirmed": 13,
+            "missedConfirmed": 5,
+            "missedRemainingToPeakPct": {
+              "count": 5,
+              "p50": 18.71176682259805,
+              "p75": 20.738451528952506,
+              "p90": 20.991919919442573,
+              "min": 15.823211875843457,
+              "max": 21.16089884643595,
+              "sum": 94.04666387559206
+            },
+            "missedMaeToPeakPct": {
+              "count": 5,
+              "p50": -2.4709127983687296,
+              "p75": -2.446018893387314,
+              "p90": -1.4370933088188151,
+              "min": -8.594713656387675,
+              "max": -0.7644762524398163,
+              "sum": -17.520103730342818
+            },
+            "missedNormalCapacity": {
+              "trades": 5,
+              "sumGross025ReturnPct": 23.361665968898016,
+              "compoundedGross025ReturnPct": 25.64210850425217
+            },
+            "missedSevereCapacity": {
+              "trades": 5,
+              "sumGross025ReturnPct": 22.486665968898013,
+              "compoundedGross025ReturnPct": 24.59529603510631
+            },
+            "missedGateFailures": {
+              "regime72": 5,
+              "breakout18": 5,
+              "return24": 5,
+              "relative24": 5,
+              "btc24": 5,
+              "ema168": 5,
+              "rsiMin": 3,
+              "volumeMax": 2,
+              "atrMax": 1,
+              "volumeMin": 1
+            }
+          },
+          "3": {
+            "allConfirmed": 13,
+            "missedConfirmed": 5,
+            "missedRemainingToPeakPct": {
+              "count": 5,
+              "p50": 17.612334801762096,
+              "p75": 18.99865745440257,
+              "p90": 20.042533899132533,
+              "min": 15.823211875843457,
+              "max": 20.738451528952506,
+              "sum": 90.60265091487614
+            },
+            "missedMaeToPeakPct": {
+              "count": 5,
+              "p50": -2.446018893387314,
+              "p75": -0.7644762524398163,
+              "p90": -0.3627435147395652,
+              "min": -8.594713656387675,
+              "max": -0.09492168960606451,
+              "sum": -16.870823703779347
+            },
+            "missedNormalCapacity": {
+              "trades": 5,
+              "sumGross025ReturnPct": 22.500662728719035,
+              "compoundedGross025ReturnPct": 24.614124224116484
+            },
+            "missedSevereCapacity": {
+              "trades": 5,
+              "sumGross025ReturnPct": 21.625662728719032,
+              "compoundedGross025ReturnPct": 23.57417852189696
+            },
+            "missedGateFailures": {
+              "regime72": 5,
+              "breakout18": 5,
+              "return24": 5,
+              "relative24": 5,
+              "btc24": 5,
+              "ema168": 5,
+              "rsiMin": 3,
+              "volumeMax": 2,
+              "atrMax": 1
+            }
+          },
+          "5": {
+            "allConfirmed": 13,
+            "missedConfirmed": 5,
+            "missedRemainingToPeakPct": {
+              "count": 5,
+              "p50": 17.055337241512582,
+              "p75": 17.612334801762096,
+              "p90": 18.44281785786419,
+              "min": 14.700968927497481,
+              "max": 18.99647322859892,
+              "sum": 83.4866682298468
+            },
+            "missedMaeToPeakPct": {
+              "count": 5,
+              "p50": -3.3912462412295397,
+              "p75": -2.1962167361333718,
+              "p90": -1.9742177634309033,
+              "min": -8.594713656387675,
+              "max": -1.8262184482959243,
+              "sum": -22.53097448035869
+            },
+            "missedNormalCapacity": {
+              "trades": 5,
+              "sumGross025ReturnPct": 20.7216670574617,
+              "compoundedGross025ReturnPct": 22.507395887675695
+            },
+            "missedSevereCapacity": {
+              "trades": 5,
+              "sumGross025ReturnPct": 19.8466670574617,
+              "compoundedGross025ReturnPct": 21.481551411226807
+            },
+            "missedGateFailures": {
+              "regime72": 5,
+              "return24": 5,
+              "ema168": 5,
+              "breakout18": 4,
+              "relative24": 4,
+              "btc24": 4,
+              "rsiMin": 2,
+              "volumeMax": 2,
+              "atrMax": 1
+            }
+          }
+        },
+        "segments": {
+          "FOLD1": {
+            "waves": 6,
+            "missed": 2,
+            "missedSharePct": 33.33333333333333,
+            "missedMovePct": {
+              "count": 2,
+              "p50": 29.11382387472039,
+              "p75": 31.05917866380865,
+              "p90": 32.226391537261605,
+              "min": 25.22311429654387,
+              "max": 33.00453345289691,
+              "sum": 58.22764774944078
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 2,
+              "p50": 18.305496128082332,
+              "p75": 18.65207679124245,
+              "p90": 18.860025189138522,
+              "min": 17.612334801762096,
+              "max": 18.99865745440257,
+              "sum": 36.610992256164664
+            }
+          },
+          "FOLD2": {
+            "waves": 4,
+            "missed": 0,
+            "missedSharePct": 0,
+            "missedMovePct": {
+              "count": 0,
+              "p50": null,
+              "p75": null,
+              "p90": null,
+              "min": null,
+              "max": null,
+              "sum": 0
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 0,
+              "p50": null,
+              "p75": null,
+              "p90": null,
+              "min": null,
+              "max": null,
+              "sum": 0
+            }
+          },
+          "FOLD3": {
+            "waves": 3,
+            "missed": 3,
+            "missedSharePct": 100,
+            "missedMovePct": {
+              "count": 3,
+              "p50": 21.435582822085884,
+              "p75": 23.731373753997097,
+              "p90": 25.108848313143824,
+              "min": 21.328856688460853,
+              "max": 26.02716468590831,
+              "sum": 68.79160419645504
+            },
+            "missed3pctConfirmRemaining": {
+              "count": 3,
+              "p50": 17.429995253915507,
+              "p75": 19.08422339143401,
+              "p90": 20.076760273945105,
+              "min": 15.823211875843457,
+              "max": 20.738451528952506,
+              "sum": 53.99165865871147
+            }
+          }
+        },
+        "missedWaves": [
+          {
+            "troughTs": "2025-08-20T13:00:00.000Z",
+            "peakTs": "2025-08-22T23:00:00.000Z",
+            "movePct": 25.22311429654387,
+            "durationHours": 58,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-08-20T16:00:00.000Z",
+              "remainingToPeakPct": 18.99865745440257,
+              "maeToPeakPct": -4.970693211958476,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2025-10-10T21:00:00.000Z",
+            "peakTs": "2025-10-13T20:00:00.000Z",
+            "movePct": 33.00453345289691,
+            "durationHours": 71,
+            "shortOverlap": true,
+            "segment": "FOLD1",
+            "confirm3": {
+              "entryTs": "2025-10-10T23:00:00.000Z",
+              "remainingToPeakPct": 17.612334801762096,
+              "maeToPeakPct": -8.594713656387675,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "volumeMax",
+                "atrMax",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-05-18T10:00:00.000Z",
+            "peakTs": "2026-05-22T07:00:00.000Z",
+            "movePct": 21.435582822085884,
+            "durationHours": 93,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-05-18T21:00:00.000Z",
+              "remainingToPeakPct": 17.429995253915507,
+              "maeToPeakPct": -0.09492168960606451,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-06T04:00:00.000Z",
+            "peakTs": "2026-06-15T17:00:00.000Z",
+            "movePct": 26.02716468590831,
+            "durationHours": 229,
+            "shortOverlap": false,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-06T06:00:00.000Z",
+              "remainingToPeakPct": 20.738451528952506,
+              "maeToPeakPct": -0.7644762524398163,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "rsiMin",
+                "ema168"
+              ]
+            }
+          },
+          {
+            "troughTs": "2026-06-26T02:00:00.000Z",
+            "peakTs": "2026-07-04T15:00:00.000Z",
+            "movePct": 21.328856688460853,
+            "durationHours": 205,
+            "shortOverlap": true,
+            "segment": "FOLD3",
+            "confirm3": {
+              "entryTs": "2026-06-26T04:00:00.000Z",
+              "remainingToPeakPct": 15.823211875843457,
+              "maeToPeakPct": -2.446018893387314,
+              "failedLongGates": [
+                "regime72",
+                "breakout18",
+                "return24",
+                "relative24",
+                "btc24",
+                "volumeMax",
+                "ema168"
+              ]
+            }
+          }
+        ]
       }
     }
   },
