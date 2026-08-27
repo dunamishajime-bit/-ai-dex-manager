@@ -34,23 +34,30 @@ old_observe='''    def observe_entry() -> None:
         max_entry_crypto_gross = max(max_entry_crypto_gross, vg + pg)
         max_entry_total_gross = max(max_entry_total_gross, vg + pg + sg)
 '''
-new_observe='''    def observe_entry() -> None:
+new_observe='''    def observe_entry(entered_kind: str) -> None:
         nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross
-        # Verify the same current-equity gross basis used by the capacity gates.
-        # Entry-time allocation fractions from different timestamps are not additive.
+        # Shared caps are checked on the same current-equity basis used by capacity gates.
+        # Sleeve caps are audited only when that sleeve itself enters, because a later
+        # unrelated realized PnL can mechanically revalue an existing position's gross.
         vg = v12_gross()
         pg = pengu_gross()
         sg = stock_gross()
         max_v12_positions = max(max_v12_positions, len(active_v12))
-        max_entry_v12_gross = max(max_entry_v12_gross, vg)
-        max_entry_pengu_gross = max(max_entry_pengu_gross, pg)
-        max_entry_stock_gross = max(max_entry_stock_gross, sg)
+        if entered_kind == "V12_ENTRY":
+            max_entry_v12_gross = max(max_entry_v12_gross, vg)
+        elif entered_kind == "PENGU_ENTRY":
+            max_entry_pengu_gross = max(max_entry_pengu_gross, pg)
+        elif entered_kind == "STOCK_ENTRY":
+            max_entry_stock_gross = max(max_entry_stock_gross, sg)
         max_entry_crypto_gross = max(max_entry_crypto_gross, vg + pg)
         max_entry_total_gross = max(max_entry_total_gross, vg + pg + sg)
 '''
 if old_observe not in s:
     raise SystemExit('DCA gross verification marker missing')
 s=s.replace(old_observe,new_observe,1)
+if s.count('            observe_entry()') != 3:
+    raise SystemExit(f'Unexpected observe_entry call count: {s.count("            observe_entry()") }')
+s=s.replace('            observe_entry()','            observe_entry(kind)')
 
 out_path.write_text(s)
 try:
