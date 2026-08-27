@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
+import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
+
 const MAX_JSON_BYTES = 512 * 1024;
 const STALE_AFTER_MS = 3 * 60 * 60 * 1000;
 
@@ -14,6 +16,10 @@ export type PenguRuntimeStatus = {
   mode?: string;
   killSwitchActive?: boolean;
   releaseSha?: string;
+  expectedReleaseSha: string;
+  releaseShaSource?: "runner-state" | "vps-deployment-config";
+  releaseShaVerified?: boolean;
+  sharedRisk?: { tripped: boolean; lossPct?: number; maximumLossPct?: number; updatedAt?: number };
   reason: string;
   latestSignal?: PenguSignalObservability;
   executionTrace: PenguExecutionTrace;
@@ -29,6 +35,7 @@ export type PenguSignalObservability = {
   entryTs?: number;
   side?: number;
   targetGross?: number;
+  entryVersion?: string;
   reason?: string;
   features: Record<string, number>;
   decision: {
@@ -114,7 +121,7 @@ function unavailableTrace(reason: string): PenguExecutionTrace {
 }
 
 function unavailable(capturedAt: string, configured: boolean, reason: string): PenguRuntimeStatus {
-  return { status: "UNAVAILABLE", configured, capturedAt, reason, executionTrace: unavailableTrace(reason), failures: [], resolvedFailures: [] };
+  return { status: "UNAVAILABLE", configured, capturedAt, expectedReleaseSha: liveConfig.vpsObservedReleases.pengu, reason, executionTrace: unavailableTrace(reason), failures: [], resolvedFailures: [] };
 }
 
 function configuredPath() {
@@ -157,6 +164,26 @@ async function readKillSwitch() {
   }
 }
 
+async function readSharedRisk() {
+  const configured = String(process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || process.env.PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE || "").trim();
+  if (!configured) return undefined;
+  if (!isAbsolute(configured)) throw new Error("共有Crypto risk stateは絶対パスで設定してください。");
+  try {
+    const parsed = object(JSON.parse(await readFile(configured, "utf8")));
+    if (!parsed || typeof parsed.tripped !== "boolean") throw new Error("共有Crypto risk stateの形式が不正です。");
+    return {
+      tripped: parsed.tripped,
+      lossPct: number(parsed.lossPct),
+      maximumLossPct: number(parsed.maximumLossPct),
+      updatedAt: number(parsed.updatedAt),
+    };
+  } catch (error) {
+    const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
+    if (code === "ENOENT") throw new Error("共有Crypto risk stateが見つかりません。");
+    throw error;
+  }
+}
+
 function finiteRecord(value: unknown) {
   const row = object(value);
   return Object.fromEntries(FEATURE_KEYS.flatMap((key) => {
@@ -176,6 +203,7 @@ function signalObservability(value: unknown): PenguSignalObservability | undefin
     entryTs: number(row.entryTs),
     side: number(row.side),
     targetGross: number(row.targetGross),
+    entryVersion: text(row.entryVersion),
     reason: text(row.reason),
     features: finiteRecord(row.features),
     decision: {
@@ -203,6 +231,7 @@ function buildExecutionTrace(
   signal: PenguSignalObservability | undefined,
   killSwitchActive: boolean,
   killSwitchReason: string | undefined,
+  sharedRisk: PenguRuntimeStatus["sharedRisk"],
   position: PenguRuntimeStatus["position"],
   pending: PenguRuntimeStatus["pending"],
   failures: PenguRuntimeStatus["failures"],
@@ -211,13 +240,15 @@ function buildExecutionTrace(
   const longEligible = signal.decision.longEligible === true;
   const shortEligible = signal.decision.shortEligible === true;
   const signalActive = signal.decision.active === true || signal.side === 1 || signal.side === -1;
+  const recoveryActive = signal.entryVersion === "RECOVERY_V8";
   const steps: PenguExecutionTrace["steps"] = [
     { key: "completed-bar", label: "1. 確定1時間足", state: signal.referenceTs ? "pass" : "unknown", detail: signal.referenceTs ? `PENGU/BTC確定足 ${new Date(signal.referenceTs).toLocaleString("ja-JP")}` : "確定足時刻未取得" },
     { key: "direction", label: "2. Long / Short条件", state: signalActive ? "pass" : "blocked", detail: signal.reason || signal.decision.reason || "Long/Short条件未成立" },
-    { key: "shared-risk", label: "3. 共有リスク / Kill Switch", state: killSwitchActive ? "blocked" : "pass", detail: killSwitchActive ? `停止中：${killSwitchReason || "共有Kill Switch"}` : "Kill Switch inactive / 共有リスクGate通過" },
-    { key: "position", label: "4. 建玉・容量Gate", state: pending ? "pending" : position ? "pass" : "pass", detail: pending ? `${pending.phase || "ORDER"} ${pending.side || "—"}` : position ? `PENGU建玉あり side=${position.side ?? "—"} / exit・保護判定へ` : "PENGU建玉なし / 新規容量を確認" },
-    { key: "entry-window", label: "5. 発注Window / 同一注文防止", state: signalActive && !pending ? "unknown" : signalActive ? "pending" : "blocked", detail: pending ? "pending orderの照合を優先" : signalActive ? "entryTs・最小Notional・account lock・idempotencyをrunnerで確認" : "発注Signal未成立のため注文Windowへ進まない" },
-    { key: "execution", label: "6. 発注・約定照合", state: pending ? "pending" : "blocked", detail: pending ? "Aster注文の約定/拒否/取消照合待ち" : "注文未送信。自然シグナルと全Gate通過が必要" },
+    { key: "recovery-v8", label: "3. Recovery V8補助Entry", state: recoveryActive ? "pass" : signalActive ? "blocked" : "pending", detail: recoveryActive ? "R_BTC3成立。通常Short / Base Longが不成立のため補助Longを選択" : signalActive ? "通常Long / Shortを優先。Recovery V8は選択しない" : "通常Long / Short不成立時だけR_BTC3（3% cross + 3閾値）を評価" },
+    { key: "shared-risk", label: "4. 共有リスク / Kill Switch", state: killSwitchActive || sharedRisk?.tripped === true ? "blocked" : sharedRisk ? "pass" : "unknown", detail: killSwitchActive ? `停止中：${killSwitchReason || "共有Kill Switch"}` : sharedRisk?.tripped ? `共有Crypto risk停止中 lossPct=${sharedRisk.lossPct ?? "—"}%` : sharedRisk ? `Kill Switch inactive / shared risk ${sharedRisk.lossPct ?? "—"}% / 上限${sharedRisk.maximumLossPct ?? "—"}%` : "共有Crypto risk state未取得" },
+    { key: "position", label: "5. 建玉・容量Gate", state: pending ? "pending" : position ? "pass" : "pass", detail: pending ? `${pending.phase || "ORDER"} ${pending.side || "—"}` : position ? `PENGU建玉あり side=${position.side ?? "—"} / exit・保護判定へ` : "PENGU建玉なし / 新規容量を確認" },
+    { key: "entry-window", label: "6. 発注Window / 同一注文防止", state: signalActive && !pending ? "unknown" : signalActive ? "pending" : "blocked", detail: pending ? "pending orderの照合を優先" : signalActive ? "entryTs・最小Notional・account lock・idempotencyをrunnerで確認" : "発注Signal未成立のため注文Windowへ進まない" },
+    { key: "execution", label: "7. 発注・約定照合", state: pending ? "pending" : "blocked", detail: pending ? "Aster注文の約定/拒否/取消照合待ち" : "注文未送信。自然シグナルと全Gate通過が必要" },
   ];
   const failureNote = failures.length ? ` / 直近失敗履歴${failures.length}件（最新：${failures[failures.length - 1]?.message || "—"}）` : "";
   if (!signalActive) return { currentStage: "signal-blocked", currentStageLabel: "条件不足・未発火", summary: `PENGUは確定1時間足を評価済みですが、Long=${longEligible ? "成立" : "未成立"} / Short=${shortEligible ? "成立" : "未成立"}のため発注していません。${failureNote}`, nextAction: "次の確定1時間足でLong/Short条件、BTC相対条件、volume・ATR・RSIを再評価します。", steps };
@@ -236,12 +267,15 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     const state = object(JSON.parse(content));
     if (!state) return unavailable(capturedAt, true, "PENGU runner stateの形式が不正です。");
     const killSwitch = object(state.killSwitch);
-    const sharedKillSwitch = await readKillSwitch();
+    const [sharedKillSwitch, sharedRisk] = await Promise.all([readKillSwitch(), readSharedRisk()]);
     const killSwitchActive = killSwitch?.active === true || state.killSwitchActive === true || sharedKillSwitch.active;
     const updatedAt = number(state.updatedAt ?? state.lastHeartbeatAt ?? state.stateUpdatedAt ?? state.lastCycleAt ?? state.capturedAt);
     const ageMs = updatedAt === undefined ? undefined : Math.max(0, Date.now() - updatedAt);
     const mode = text(state.mode);
     const releaseSha = text(state.releaseSha ?? state.sourceSha ?? state.commitSha);
+    const expectedReleaseSha = liveConfig.vpsObservedReleases.pengu;
+    const releaseShaSource = releaseSha ? "runner-state" as const : "vps-deployment-config" as const;
+    const releaseShaVerified = releaseSha ? releaseSha === expectedReleaseSha : undefined;
     const latestSignal = signalObservability(state.latestSignal);
     const positionObject = object(state.position);
     const pendingObject = object(state.pending);
@@ -258,12 +292,13 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     );
     const failures = failureClassification.active;
     const resolvedFailures = failureClassification.resolved;
-    const executionTrace = buildExecutionTrace(latestSignal, killSwitchActive, sharedKillSwitch.reason || text(killSwitch?.reason), position, pending, failures);
-    if (updatedAt === undefined || ageMs === undefined) return { status: "STALE", configured: true, capturedAt, mode, killSwitchActive, releaseSha, reason: "PENGU runner stateに更新時刻がありません。", latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    if (killSwitchActive) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU Kill Switchが有効です。${sharedKillSwitch.reason || ""}`.trim(), latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    if (ageMs > STALE_AFTER_MS) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner stateが${Math.round(ageMs / 60000)}分更新されていません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    if (mode && mode.toLowerCase() !== "live") return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner mode=${mode}のためLIVE確認にしません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    return { status: "LIVE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, reason: `PENGU runner stateを確認しました。最新判定：${latestSignal?.reason || "未取得"}`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    const executionTrace = buildExecutionTrace(latestSignal, killSwitchActive, sharedKillSwitch.reason || text(killSwitch?.reason), sharedRisk, position, pending, failures);
+    if (updatedAt === undefined || ageMs === undefined) return { status: "STALE", configured: true, capturedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: "PENGU runner stateに更新時刻がありません。", latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (killSwitchActive) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU Kill Switchが有効です。${sharedKillSwitch.reason || ""}`.trim(), latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (sharedRisk?.tripped) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `共有Crypto riskが停止中です。lossPct=${sharedRisk.lossPct ?? "—"}% / 上限=${sharedRisk.maximumLossPct ?? "—"}%`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (ageMs > STALE_AFTER_MS) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner stateが${Math.round(ageMs / 60000)}分更新されていません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (mode && mode.toLowerCase() !== "live") return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner mode=${mode}のためLIVE確認にしません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    return { status: "LIVE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner stateを確認しました。最新判定：${latestSignal?.reason || "未取得"}`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
   } catch (error) {
     return unavailable(capturedAt, true, error instanceof Error ? error.message : "PENGU runner stateを読み取れません。");
   }

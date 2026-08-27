@@ -69,11 +69,11 @@ export default function HomePage() {
           <div className="panel-gold rounded-[30px] p-5 md:p-7">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
             <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{config.strategyLabel}</h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL、PENGU V2、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL、PENGU V2 / Recovery V8、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
               <span className={`rounded-full border px-3 py-1.5 ${snapshot ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 X1.00 ALL</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">PENGU V2</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">PENGU V2 / Recovery V8</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12+PENGU共有損失上限 {config.sharedCryptoDailyLossPct}%</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52損失上限 {config.v52DailyLossPct}%</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Portfolio Gross上限 ≤ {config.maximumGross.toFixed(1)}x</span>
