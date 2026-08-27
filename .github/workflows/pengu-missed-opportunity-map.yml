@@ -5,6 +5,7 @@ on:
     branches: [research/pengu-v82-composite-regime-20260827]
     paths:
       - 'scripts/research_patch_pengu_missed_opportunity_map.py'
+      - 'scripts/research_patch_pengu_directional_wave_map.py'
       - '.github/workflows/pengu-missed-opportunity-map.yml'
 permissions: {contents: write, actions: read}
 concurrency:
@@ -30,12 +31,13 @@ jobs:
         run: |
           npm ci
           ln -s ../node_modules .pengu-current/node_modules
-          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py
+          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py scripts/research_patch_pengu_directional_wave_map.py
           python scripts/research_generate_pengu_v57_from_v56.py
           python scripts/research_patch_v57_replacement_audit.py
           python scripts/research_patch_v57_economic_winner_guard.py
           python scripts/research_patch_v64_supplemental_sizing.py
           python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
           npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
       - name: Verify and publish compact decomposition summary
         run: |
@@ -46,7 +48,8 @@ jobs:
           x=json.loads(src.read_text())
           assert x['v64']['trades']==41 and x['v64']['longTrades']==13 and x['v64']['shortTrades']==28
           assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          out={'schema':'pengu-missed-opportunity-summary/v1','method':x['method'],'v64':x['v64'],'horizons':{},'topMissed':x['topMissed'][:30],'safety':x['safety']}
+          assert x['directionalWaves']['schema']=='pengu-directional-wave-map/v1'
+          out={'schema':'pengu-missed-opportunity-summary/v2','method':x['method'],'v64':x['v64'],'horizons':{},'directionalWaves':x['directionalWaves'],'topMissed':x['topMissed'][:30],'safety':x['safety']}
           for h,v in x['byHorizon'].items():
               out['horizons'][h]={'all':v['all'],'coverage':v['coverage'],'thresholds':{}}
               for t,z in v['thresholds'].items():
@@ -63,12 +66,12 @@ jobs:
                   }
           p=Path('research-results/opportunity-map');p.mkdir(parents=True,exist_ok=True)
           (p/'summary.json').write_text(json.dumps(out,indent=2)+'\n')
-          print('SUMMARY='+json.dumps(out,separators=(',',':')))
+          print('DIRECTIONAL_WAVES='+json.dumps(out['directionalWaves'],separators=(',',':')))
           PY
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add research-results/opportunity-map/summary.json
-          git commit -m 'research: publish PENGU missed-opportunity map' || true
+          git commit -m 'research: publish PENGU directional-wave opportunity map' || true
           git pull --rebase origin research/pengu-v82-composite-regime-20260827
           git push origin HEAD:research/pengu-v82-composite-regime-20260827
       - uses: actions/upload-artifact@v4
