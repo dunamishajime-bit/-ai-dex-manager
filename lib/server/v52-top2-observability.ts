@@ -51,6 +51,7 @@ export type V52Top2Observability = {
   capturedAt: string;
   updatedAt?: number;
   mode?: string;
+  reason?: string;
   referenceStatus?: string;
   referenceOrdersAllowed?: boolean;
   killSwitchActive: boolean;
@@ -134,6 +135,7 @@ function unavailable(capturedAt: string, configured: boolean, error: string): V5
     configured,
     status: "UNAVAILABLE",
     capturedAt,
+    reason: error,
     killSwitchActive: false,
     activeV50Slots: 0,
     v50DailyEntries: 0,
@@ -166,6 +168,13 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
     }).filter((position) => position.slot.startsWith("V50") || position.slot === "V11_EQ");
     const windows = config.v52Top2Policy.windowsNy.map((window) => windowSnapshot(window, object(state.v52Top2Telemetry)?.[window]));
     const status = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive ? "LIVE" : "STALE";
+    const reason = killSwitchActive
+      ? "V52共有Kill Switchが有効です。"
+      : updatedAt === undefined
+        ? "V52 runner stateに更新時刻がありません。"
+        : ageMs !== undefined && ageMs > STALE_AFTER_MS
+          ? `${"V52 runner stateが" + Math.round(ageMs / 60000) + "分更新されていません。"}`
+          : "V52 runner stateを読み取りました。";
     return {
       ok: status === "LIVE",
       readOnly: true,
@@ -175,6 +184,7 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       capturedAt,
       updatedAt,
       mode: text(state.mode),
+      reason,
       referenceStatus: text(state.referenceStatus),
       referenceOrdersAllowed: bool(state.referenceOrdersAllowed),
       killSwitchActive,
