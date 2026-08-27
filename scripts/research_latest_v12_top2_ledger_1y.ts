@@ -61,7 +61,11 @@ async function main() {
     schema: "v12-top2-latest-ledger/v1",
     strategyId: "V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15",
     researchOnly: true,
-    period: raw.period,
+    period: {
+      startInclusive: "2025-08-10T00:00:00.000Z",
+      endExclusive: "2026-08-10T00:00:00.000Z",
+    },
+    sourcePeriod: raw.period,
     source: {
       top2ResearchCommit: "fea641f3097c2faa32db59338381b45a99edc6e0",
       productionGrossCommit: "ac254e897b7514d14c3a34c0679388978b5c3d32",
@@ -83,7 +87,7 @@ async function main() {
   const out = process.env.V12_TOP2_LEDGER_OUT || ".research-state/latest-v8-dca/v12-top2-ledger.json";
   await fs.mkdir(path.dirname(out), { recursive: true });
   await fs.writeFile(out, JSON.stringify(payload, null, 2) + "\n", "utf8");
-  console.log(JSON.stringify({status:"V12_TOP2_LEDGER_PASS",period:payload.period,normal:payload.modes.normal.metrics,stress:payload.modes.stress.metrics,normalTrades:normal.trades.length,stressTrades:stress.trades.length}, null, 2));
+  console.log(JSON.stringify({status:"V12_TOP2_LEDGER_PASS",period:payload.period,sourcePeriod:payload.sourcePeriod,normal:payload.modes.normal.metrics,stress:payload.modes.stress.metrics,normalTrades:normal.trades.length,stressTrades:stress.trades.length}, null, 2));
 }
 
 main().catch((error) => {
