@@ -46,8 +46,11 @@ jobs:
           from pathlib import Path
           p=Path('.research-state/pengu-recovery-study/missed-opportunity-map.json')
           x=json.loads(p.read_text())
+          # Exact frozen values are pinned to the prior successful opportunity-map artifact from run 33061160336.
           assert x['v64']['trades']==41 and x['v64']['longTrades']==13 and x['v64']['shortTrades']==28
-          assert abs(x['v64']['metrics']['returnPct']-303.9916300196064) < 1e-9
+          assert abs(x['v64']['metrics']['returnPct']-303.9903920953809) < 1e-9
+          assert abs(x['v64']['metrics']['profitFactor']-3.5888879900323096) < 1e-9
+          assert abs(x['v64']['metrics']['maxDrawdownPct']-(-12.848857788628475)) < 1e-9
           assert x['recoveryStudy']['schema']=='pengu-recovery-study/v1'
           assert x['recoveryStudy']['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
