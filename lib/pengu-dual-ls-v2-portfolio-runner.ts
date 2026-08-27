@@ -29,6 +29,11 @@ import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
+import {
+    placeRecoveryV8EntryHardStop,
+    replaceRecoveryV8Stops,
+    type RecoveryV8ProtectiveOrderGateway,
+} from "@/lib/pengu-recovery-v8-protective-orders";
 
 const SYMBOL = "PENGUUSDT";
 
@@ -49,6 +54,7 @@ export interface PenguDualLsV2PortfolioRunnerConfig {
     maximumDailyLossPct: number;
     killSwitchPath?: string;
     portfolioDailyLossStatePath?: string;
+    recoveryV8Enabled?: boolean;
 }
 
 export interface PenguDualLsV2RunnerLogger {
@@ -65,6 +71,7 @@ export interface PenguDualLsV2PortfolioRunnerDependencies {
     config: PenguDualLsV2PortfolioRunnerConfig;
     logger?: PenguDualLsV2RunnerLogger;
     now?: () => number;
+    recoveryV8Protection?: RecoveryV8ProtectiveOrderGateway;
 }
 
 export interface PenguDualLsV2TickResult {
@@ -237,11 +244,20 @@ function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV
         entryTs: previous?.entryTs || actual.updatedAt || Date.now(),
         entryPrice: actual.entryPrice,
         quantity: Math.abs(actual.quantity),
-        gross: previous?.gross || 0,
+        gross: previous?.recoveryV8?.partialDefenseTriggered ? 0.25 : previous?.gross || 0,
         highWaterMark: side > 0 ? Math.max(previous?.highWaterMark || actual.entryPrice, actual.markPrice) : previous?.highWaterMark || actual.markPrice,
         lowWaterMark: side < 0 ? Math.min(previous?.lowWaterMark || actual.entryPrice, actual.markPrice) : previous?.lowWaterMark || actual.markPrice,
         entryVersion: previous?.entryVersion || "LEGACY_V2",
         shortV20: previous?.shortV20,
+        recoveryV8: previous?.recoveryV8
+            ? {
+                ...previous.recoveryV8,
+                entryTs: previous.entryTs || actual.updatedAt || Date.now(),
+                entryPrice: actual.entryPrice,
+                quantity: Math.abs(actual.quantity),
+                highWaterMark: side > 0 ? Math.max(previous.recoveryV8.highWaterMark, actual.markPrice) : previous.recoveryV8.highWaterMark,
+            }
+            : undefined,
     };
 }
 
@@ -280,6 +296,47 @@ export class PenguDualLsV2PortfolioRunner {
         const message = error instanceof Error ? error.message : String(error);
         state.failures = [...state.failures, { occurredAt: this.now(), message, idempotencyKey: state.pending?.idempotencyKey }].slice(-100);
         return message;
+    }
+
+    private async reconcileRecoveryV8PartialFill(state: PenguDualLsV2RunnerState, actual: DirectPosition) {
+        const position = state.position;
+        const recovery = position?.recoveryV8;
+        const gateway = this.dependencies.recoveryV8Protection;
+        if (!position || position.entryVersion !== "RECOVERY_V8" || !recovery || recovery.partialDefenseTriggered || !gateway?.getOrder || !recovery.partialStopClientOrderId) return false;
+        const previousQuantity = position.quantity;
+        const actualQuantity = Math.abs(actual.quantity);
+        if (positionSide(actual) !== 1) throw new Error("PENGU Recovery V8 partial reconciliation found a non-Long position.");
+        const expectedFilled = previousQuantity * 0.5;
+        const observedFilled = previousQuantity - actualQuantity;
+        if (!(observedFilled > 0) || Math.abs(observedFilled - expectedFilled) > Math.max(1e-8, previousQuantity * 0.01)) return false;
+        const order = await gateway.getOrder(SYMBOL, recovery.partialStopClientOrderId);
+        if (!/^FILLED$/i.test(order.status) || Math.abs((order.executedQuantity || 0) - observedFilled) > Math.max(1e-8, previousQuantity * 0.01)) {
+            throw new Error("PENGU Recovery V8 partial stop fill is not fully reconciled; manual review required.");
+        }
+        const triggerPrice = position.entryPrice * (1 - 0.04);
+        const averagePrice = Number(order.averagePrice || 0);
+        if (!(averagePrice > 0)) throw new Error("PENGU Recovery V8 partial stop fill has no average price.");
+        state.position = {
+            ...position,
+            quantity: actualQuantity,
+            gross: 0.25,
+            recoveryV8: {
+                ...recovery,
+                quantity: actualQuantity,
+                remainingGross: 0.25,
+                partialDefenseTriggered: true,
+                actualPartialFill: {
+                    filledAtTs: this.now(),
+                    executedQuantity: observedFilled,
+                    averagePrice,
+                    triggerPrice,
+                    slippageBps: (averagePrice / triggerPrice - 1) * 10_000,
+                    orderId: order.orderId,
+                    clientOrderId: order.clientOrderId,
+                },
+            },
+        };
+        return true;
     }
 
     private async manualReview(state: PenguDualLsV2RunnerState, message: string, idempotencyKey?: string): Promise<PenguDualLsV2TickResult> {
@@ -323,6 +380,7 @@ export class PenguDualLsV2PortfolioRunner {
             state.cooldownUntilTs = pending.referenceTs + 6 * 3_600_000;
         } else {
             const entryPrice = result.averagePrice;
+            const isRecoveryV8 = pending.entryVersion === "RECOVERY_V8";
             state.position = {
                 side: pending.side === "BUY" ? 1 : -1,
                 entryTs: pending.referenceTs + 3_600_000,
@@ -335,11 +393,54 @@ export class PenguDualLsV2PortfolioRunner {
                 shortV20: pending.shortV20Seed
                     ? createPenguShortV20State({ entryPrice, ...pending.shortV20Seed })
                     : undefined,
+                recoveryV8: isRecoveryV8
+                    ? {
+                        version: "RECOVERY_V8",
+                        side: 1,
+                        entryTs: pending.referenceTs + 3_600_000,
+                        entryPrice,
+                        quantity: result.executedQuantity,
+                        originalQuantity: result.executedQuantity,
+                        originalGross: 0.5,
+                        remainingGross: 0.5,
+                        partialDefenseTriggered: false,
+                        highWaterMark: entryPrice,
+                        protectionLifecycle: "MANUAL_REVIEW",
+                    }
+                    : undefined,
             };
         }
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
         state.pending = undefined;
         await this.dependencies.stateStore.save(state);
+        if (!pending.reduceOnly && pending.entryVersion === "RECOVERY_V8" && state.position?.recoveryV8) {
+            const gateway = this.dependencies.recoveryV8Protection;
+            if (!gateway) {
+                state.position.recoveryV8.protectionLifecycle = "MANUAL_REVIEW";
+                state.failures = [...state.failures, { occurredAt: this.now(), message: "PENGU Recovery V8 entry filled but protective-order gateway is unavailable." }].slice(-100);
+                await this.dependencies.stateStore.save(state);
+                return { status: "manual-review", message: "PENGU Recovery V8 entry filled without a protective-order gateway; fail closed.", idempotencyKey: pending.idempotencyKey };
+            }
+            try {
+                const stop = await placeRecoveryV8EntryHardStop(gateway, {
+                    symbol: SYMBOL,
+                    entryTs: state.position.recoveryV8.entryTs,
+                    entryPrice: state.position.recoveryV8.entryPrice,
+                    quantity: state.position.recoveryV8.quantity,
+                });
+                state.position.recoveryV8 = {
+                    ...state.position.recoveryV8,
+                    protectionLifecycle: "FULL_HARD_STOP",
+                    fullHardStopClientOrderId: stop.clientOrderId,
+                };
+                await this.dependencies.stateStore.save(state);
+            } catch (error) {
+                state.position.recoveryV8.protectionLifecycle = "MANUAL_REVIEW";
+                const message = this.recordFailure(state, error);
+                await this.dependencies.stateStore.save(state);
+                return { status: "manual-review", message: `PENGU Recovery V8 entry protection failed: ${message}`, idempotencyKey: pending.idempotencyKey };
+            }
+        }
         this.log.info("PENGU Dual LS order completed", {
             strategyId: "PENGU_DUAL_LS_V2_FINAL",
             symbol: SYMBOL,
@@ -439,7 +540,7 @@ export class PenguDualLsV2PortfolioRunner {
             if (state.pending) return await this.reconcilePending(state);
             const history = await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
-                const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs);
+                const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true });
                 state.lastSignalReferenceTs = signal.referenceTs;
                 state.latestSignal = signal;
                 await this.dependencies.stateStore.save(state);
@@ -472,12 +573,48 @@ export class PenguDualLsV2PortfolioRunner {
             if (state.position && !actual) {
                 return { status: "manual-review", message: "PENGU Dual LS state expects a position but Aster returned none." };
             }
-            if (state.position && actual) {
+            const recoveredPartial = state.position && actual
+                ? await this.reconcileRecoveryV8PartialFill(state, actual)
+                : false;
+            if (state.position && actual && !recoveredPartial) {
                 const actualSide = positionSide(actual);
                 if (actualSide !== state.position.side || Math.abs(Math.abs(actual.quantity) - state.position.quantity) > Math.max(1e-8, state.position.quantity * 0.01)) {
                     return { status: "manual-review", message: "PENGU Dual LS durable state and Aster position disagree." };
                 }
                 state.position = statePositionFromActual(actual, state.position);
+            }
+            if (state.position?.entryVersion === "RECOVERY_V8" && state.position.recoveryV8 && actual && this.dependencies.config.mode === "LIVE") {
+                if (state.position.recoveryV8.protectionLifecycle === "MANUAL_REVIEW") {
+                    return { status: "manual-review", message: "PENGU Recovery V8 protection state is in manual review; no order mutation is allowed." };
+                }
+                const gateway = this.dependencies.recoveryV8Protection;
+                if (!gateway) return { status: "manual-review", message: "PENGU Recovery V8 protective-order gateway is unavailable; fail closed." };
+                if (state.position.recoveryV8.protectionLifecycle === "FULL_HARD_STOP"
+                    && this.now() >= state.position.entryTs + 24 * 3_600_000) {
+                    try {
+                        const replaced = await replaceRecoveryV8Stops(gateway, {
+                            symbol: SYMBOL,
+                            entryTs: state.position.entryTs,
+                            entryPrice: state.position.entryPrice,
+                            currentQuantity: Math.abs(actual.quantity),
+                            oldHardStopClientOrderId: state.position.recoveryV8.fullHardStopClientOrderId,
+                            nowTs: this.now(),
+                        });
+                        state.position.recoveryV8 = {
+                            ...state.position.recoveryV8,
+                            protectionLifecycle: "SPLIT_PROTECTION",
+                            partialDefenseArmedAtTs: this.now(),
+                            partialStopClientOrderId: replaced.partial.clientOrderId,
+                            remainingHardStopClientOrderId: replaced.remainingHard.clientOrderId,
+                        };
+                        await this.dependencies.stateStore.save(state);
+                    } catch (error) {
+                        state.position.recoveryV8.protectionLifecycle = "MANUAL_REVIEW";
+                        const message = this.recordFailure(state, error);
+                        await this.dependencies.stateStore.save(state);
+                        return { status: "manual-review", message: `PENGU Recovery V8 protection replacement failed: ${message}` };
+                    }
+                }
             }
             if (quality102OpenOrder) {
                 await this.dependencies.stateStore.save(state);
@@ -488,7 +625,7 @@ export class PenguDualLsV2PortfolioRunner {
                 return { status: "held", message: "PENGU Dual LS will not create an order while any account open order exists." };
             }
 
-            const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs);
+            const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true });
             const sharedRisk = await this.sharedRiskReason();
             const signal: PenguDualLsV2Signal = sharedRisk && state.position
                 ? {
@@ -659,7 +796,7 @@ export class PenguDualLsV2PortfolioRunner {
                 createdAt: this.now(),
                 updatedAt: this.now(),
                 retryCount: 0,
-                entryVersion: !reduceOnly ? (signal.side < 0 ? "SHORT_V20" : "LONG_V2_FINAL") : undefined,
+                entryVersion: !reduceOnly ? (signal.entryVersion || (signal.side < 0 ? "SHORT_V20" : "LONG_V2_FINAL")) : undefined,
                 shortV20Seed: !reduceOnly && signal.side < 0 && signal.features
                     ? {
                         requestedGross: signal.targetGross,
@@ -667,6 +804,9 @@ export class PenguDualLsV2PortfolioRunner {
                         btcEma168Distance: signal.features.btcEma168Distance,
                         btcReturn24h: signal.features.btcReturn24h,
                     }
+                    : undefined,
+                recoveryV8Seed: !reduceOnly && signal.entryVersion === "RECOVERY_V8"
+                    ? { originalGross: 0.5, remainingGross: 0.5 }
                     : undefined,
             };
             state.pending = pending;

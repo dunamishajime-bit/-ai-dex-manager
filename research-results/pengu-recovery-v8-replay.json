@@ -1,0 +1,62 @@
+{
+  "schema": "pengu-recovery-integrated-backtest/v8-delayed-only",
+  "generatedAt": "2026-08-28T00:00:00.000Z",
+  "researchSourceSha": "a76fd7aaa0788209532a5a2c6489135dd8e4a27e",
+  "researchFreezeSha": "15c0b7586710c9db1c46b376bb5041203fc7d826",
+  "selected": {
+    "rule": "R_BTC3",
+    "priority": "SHORT_FIRST",
+    "gross": 0.5,
+    "yieldMode": "BASE_LONG",
+    "exit": {
+      "name": "FIXED_A6_T6_R3_H72",
+      "hardStopPct": 0.06,
+      "trailActivationPct": 0.06,
+      "trailRetracePct": 0.03,
+      "maxHoldHours": 72,
+      "structuralBufferPct": null
+    },
+    "delayedPartialDefense": {
+      "partialStopPct": 0.04,
+      "partialAfterHours": 24,
+      "partialGross": 0.25,
+      "remainingGross": 0.25
+    },
+    "v7Mode": "P5BE_H4_A24_G25",
+    "v7BreakevenProtectorRemoved": true
+  },
+  "historical": {
+    "normal": {
+      "trades": 70,
+      "returnPct": 574.2299381960086,
+      "profitFactor": 4.331158674670027,
+      "maxDrawdownPct": -12.848857788628465,
+      "winRatePct": 71.42857142857143
+    },
+    "severe": {
+      "trades": 70,
+      "returnPct": 395.5575708353778,
+      "profitFactor": 3.4431875382578734,
+      "maxDrawdownPct": -14.773631389772579,
+      "winRatePct": 68.57142857142857
+    }
+  },
+  "externalDiagnostics": {
+    "OKX": { "normalReturnPct": 1.708116883131927, "normalPf": 1.2941276595322444, "normalDdPct": -4.774806673972343 },
+    "BITGET": { "normalReturnPct": 1.0641829160857874, "normalPf": 1.1764674390670848, "normalDdPct": -4.773000658193871 },
+    "GATE": { "normalReturnPct": 4.045017900309222, "normalPf": 1.6291217581000639, "normalDdPct": -4.613883091268245 }
+  },
+  "observedForward": {
+    "alreadyObserved": true,
+    "notFreshHoldout": true,
+    "normalReturnPct": 0.36572114156578905,
+    "severeReturnPct": -1.1536741149536844
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}

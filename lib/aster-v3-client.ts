@@ -156,6 +156,17 @@ export interface AsterNewConditionalOrder {
     newOrderRespType?: "ACK" | "RESULT";
 }
 
+export interface AsterNewStopMarketOrder {
+    symbol: string;
+    side: AsterOrderSide;
+    quantity: string;
+    stopPrice: string;
+    positionSide?: AsterPositionSide;
+    reduceOnly: true;
+    newClientOrderId: string;
+    newOrderRespType?: "ACK" | "RESULT";
+}
+
 export class AsterApiError extends Error {
     readonly status: number;
     readonly code?: number;
@@ -310,4 +321,27 @@ export class AsterV3Client {
     cancelOrder(symbol: string, clientOrderId: string) {
         return this.request<AsterOrderResponse>({ method: "DELETE", path: "/fapi/v3/order", params: { symbol, origClientOrderId: clientOrderId }, signed: true, orderMutation: true });
     }
+
+    placeStopMarketOrder(order: AsterNewStopMarketOrder) {
+        return this.request<AsterOrderResponse>({
+            method: "POST",
+            path: "/fapi/v3/order",
+            params: {
+                symbol: order.symbol,
+                side: order.side,
+                type: "STOP_MARKET",
+                quantity: order.quantity,
+                stopPrice: order.stopPrice,
+                positionSide: order.positionSide || "BOTH",
+                reduceOnly: "true",
+                workingType: "MARK_PRICE",
+                priceProtect: "TRUE",
+                newClientOrderId: order.newClientOrderId,
+                newOrderRespType: order.newOrderRespType || "RESULT",
+            },
+            signed: true,
+            orderMutation: true,
+        });
+    }
+
 }

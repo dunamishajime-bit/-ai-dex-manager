@@ -35,6 +35,8 @@
     "strategy:pengu-dual-ls-v2:typecheck": "tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json",
     "strategy:pengu-dual-ls-v2:parity": "tsx scripts/pengu-dual-ls-v2-parity.ts",
     "strategy:pengu-dual-ls-v2:short-v20:selftest": "tsx scripts/pengu-short-v20-parity.ts",
+    "strategy:pengu-dual-ls-v2:recovery-v8:selftest": "tsx scripts/pengu-recovery-v8-selftest.ts && tsx scripts/pengu-recovery-v8-protective-order-selftest.ts && tsx scripts/pengu-recovery-v8-parity-selftest.ts",
+    "strategy:pengu-dual-ls-v2:recovery-v8:parity": "tsx scripts/pengu-recovery-v8-parity.ts",
     "strategy:pengu-dual-ls-v2:short-v20:typecheck": "tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json",
     "strategy:pengu-dual-ls-v2:once": "tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --once",
     "strategy:pengu-dual-ls-v2:daemon": "tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon",

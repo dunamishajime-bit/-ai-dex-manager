@@ -2,6 +2,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import type { PenguDualLsV2Position, PenguDualLsV2ShortV20State, PenguDualLsV2Signal } from "@/lib/pengu-dual-ls-v2";
+import type { RecoveryV8DurableState } from "@/lib/pengu-recovery-v8";
 
 export interface PenguDualLsV2PendingOrder {
     idempotencyKey: string;
@@ -18,12 +19,16 @@ export interface PenguDualLsV2PendingOrder {
     updatedAt: number;
     retryCount: number;
     lastError?: string;
-    entryVersion?: "LONG_V2_FINAL" | "SHORT_V20";
+    entryVersion?: "LONG_V2_FINAL" | "SHORT_V20" | "RECOVERY_V8";
     shortV20Seed?: {
         requestedGross: number;
         entryAtr24Ratio: number;
         btcEma168Distance: number;
         btcReturn24h: number;
+    };
+    recoveryV8Seed?: {
+        originalGross: number;
+        remainingGross: number;
     };
 }
 
@@ -76,12 +81,44 @@ function validShortV20State(value: unknown): value is PenguDualLsV2ShortV20State
         && (state.thesisResumedTs === undefined || Number.isFinite(state.thesisResumedTs));
 }
 
+function validRecoveryV8State(value: unknown, position: PenguDualLsV2Position): value is RecoveryV8DurableState {
+    if (!value || typeof value !== "object") return false;
+    const state = value as Partial<RecoveryV8DurableState>;
+    const actualFill = state.actualPartialFill;
+    const partialDefenseTriggered = state.partialDefenseTriggered === true;
+    const originalQuantity = Number(state.originalQuantity);
+    const originalGross = Number(state.originalGross);
+    const remainingGross = Number(state.remainingGross);
+    const quantity = Number(state.quantity);
+    return state.version === "RECOVERY_V8"
+        && state.entryTs === position.entryTs
+        && state.side === 1
+        && Number.isFinite(quantity) && quantity > 0
+        && Math.abs(quantity - position.quantity) <= Math.max(1e-8, position.quantity * 0.01)
+        && Number.isFinite(state.entryPrice) && state.entryPrice === position.entryPrice
+        && Number.isFinite(originalQuantity) && originalQuantity > 0
+        && Number.isFinite(originalGross) && Math.abs(originalGross - 0.5) <= 1e-12
+        && Number.isFinite(remainingGross)
+        && (Math.abs(remainingGross - 0.5) <= 1e-12 || Math.abs(remainingGross - 0.25) <= 1e-12)
+        && typeof state.partialDefenseTriggered === "boolean"
+        && (partialDefenseTriggered ? Math.abs(remainingGross - 0.25) <= 1e-12 : Math.abs(remainingGross - 0.5) <= 1e-12)
+        && (state.protectionLifecycle === "FULL_HARD_STOP" || state.protectionLifecycle === "SPLIT_PROTECTION" || state.protectionLifecycle === "MANUAL_REVIEW")
+        && (state.protectionLifecycle === "MANUAL_REVIEW"
+            || state.protectionLifecycle === "FULL_HARD_STOP" && typeof state.fullHardStopClientOrderId === "string" && state.fullHardStopClientOrderId.length > 0
+            || state.protectionLifecycle === "SPLIT_PROTECTION" && typeof state.partialStopClientOrderId === "string" && state.partialStopClientOrderId.length > 0 && typeof state.remainingHardStopClientOrderId === "string" && state.remainingHardStopClientOrderId.length > 0)
+        && Number.isFinite(state.highWaterMark)
+        && (!partialDefenseTriggered || Boolean(actualFill && Number.isFinite(actualFill.filledAtTs) && Number.isFinite(actualFill.executedQuantity) && actualFill.executedQuantity > 0 && Number.isFinite(actualFill.averagePrice) && Number.isFinite(actualFill.triggerPrice) && Number.isFinite(actualFill.slippageBps)));
+}
+
 function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
     if (!value || typeof value !== "object") return defaultState(mode);
     const raw = value as Partial<PenguDualLsV2RunnerState>;
     const rawPosition = raw.position && typeof raw.position === "object" ? raw.position as PenguDualLsV2Position : undefined;
     if (rawPosition?.entryVersion === "SHORT_V20" && !validShortV20State(rawPosition.shortV20)) {
         throw new Error("PENGU Short V20 state is missing or invalid; fail closed for manual reconciliation.");
+    }
+    if (rawPosition?.entryVersion === "RECOVERY_V8" && !validRecoveryV8State(rawPosition.recoveryV8, rawPosition)) {
+        throw new Error("PENGU Recovery V8 state is missing or invalid; fail closed for manual reconciliation.");
     }
     const position = rawPosition
         ? {

@@ -12,6 +12,7 @@ import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
 import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
 import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
+import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-protective-orders";
 
 const HOUR_MS = 60 * 60_000;
 
@@ -67,6 +68,11 @@ async function main() {
             maxGross: runtime.maximumGross + 0.05,
         })
         : aster;
+    // Recovery V8 remains research-only on this branch until a post-freeze holdout passes.
+    const recoveryV8Enabled = false;
+    const recoveryV8Protection = runtime.mode === "LIVE" && recoveryV8Enabled
+        ? new AsterRecoveryV8ProtectiveOrderGateway(client)
+        : undefined;
     const marketData = new PenguDualLsV2AsterMarketDataProvider(client, {
         hourlyLimit: numberEnv("PENGU_DUAL_LS_V2_HOURLY_LIMIT", 1000),
         cacheTtlMs: numberEnv("PENGU_DUAL_LS_V2_HISTORY_CACHE_TTL_MS", 5 * 60_000),
@@ -96,7 +102,9 @@ async function main() {
             maximumDailyLossPct: runtime.maximumDailyLossPct,
             killSwitchPath: runtime.killSwitchPath,
             portfolioDailyLossStatePath: runtime.portfolioDailyLossStatePath,
+            recoveryV8Enabled,
         },
+        recoveryV8Protection,
     });
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));

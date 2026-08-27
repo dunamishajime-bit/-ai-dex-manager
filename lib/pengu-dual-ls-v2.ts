@@ -1,8 +1,25 @@
 import { PENGU_DUAL_LS_V2 } from "@/config/penguDualLsV2Runtime";
 import type { DisDexV35Candle } from "@/lib/disdex-v35-signal-engine";
 import { advancePenguShortV20, type PenguShortV20Action } from "@/lib/pengu-short-v20";
+import {
+    buildRecoveryV8FeatureRows,
+    evaluateRecoveryV8Entry,
+    evaluateRecoveryV8PositionBar,
+    type RecoveryV8DurableState,
+    type RecoveryV8FeatureRow,
+} from "@/lib/pengu-recovery-v8";
 
 const HOUR = 3_600_000;
+
+export interface PenguDualLsV2SignalOptions {
+    recoveryV8Enabled?: boolean;
+}
+
+export function selectPenguRecoveryV8Entry(row: RecoveryV8FeatureRow | undefined, enabled: boolean) {
+    if (!enabled || !row) return undefined;
+    const decision = evaluateRecoveryV8Entry(row);
+    return decision.kind === "RECOVERY_V8" ? decision : undefined;
+}
 
 export interface PenguDualLsV2FundingPoint {
     fundingTime: number;
@@ -24,8 +41,9 @@ export interface PenguDualLsV2Position {
     highWaterMark: number;
     lowWaterMark?: number;
     /** Explicit entry lineage. Missing on v1 state is treated as legacy V2. */
-    entryVersion?: "LEGACY_V2" | "LONG_V2_FINAL" | "SHORT_V20";
+    entryVersion?: "LEGACY_V2" | "LONG_V2_FINAL" | "SHORT_V20" | "RECOVERY_V8";
     shortV20?: PenguDualLsV2ShortV20State;
+    recoveryV8?: RecoveryV8DurableState;
 }
 
 export type PenguDualLsV2SizingState = "CAP" | "FLOOR" | "VOL_TARGET";
@@ -75,7 +93,7 @@ export interface PenguDualLsV2Decision {
 
 export interface PenguDualLsV2ExitDecision {
     side: -1 | 1;
-    reason: "LONG_HARD_STOP" | "LONG_TRAILING_STOP" | "LONG_MAX_HOLD" | "SHORT_HARD_STOP" | "SHORT_TRAILING_STOP" | "SHORT_MAX_HOLD" | "SHORT_V20_VOL_TARGET_FAILURE_EXIT" | "SHORT_V20_DEADLINE_EXIT" | "SHARED_RISK_FLATTEN";
+    reason: "LONG_HARD_STOP" | "LONG_TRAILING_STOP" | "LONG_MAX_HOLD" | "SHORT_HARD_STOP" | "SHORT_TRAILING_STOP" | "SHORT_MAX_HOLD" | "SHORT_V20_VOL_TARGET_FAILURE_EXIT" | "SHORT_V20_DEADLINE_EXIT" | "RECOVERY_V8_HARD_STOP" | "RECOVERY_V8_TRAILING_STOP" | "RECOVERY_V8_MAX_HOLD" | "RECOVERY_V8_YIELD_BASE_LONG" | "SHARED_RISK_FLATTEN";
     stopPrice?: number;
     updatedPosition: PenguDualLsV2Position;
 }
@@ -91,6 +109,7 @@ export interface PenguDualLsV2Signal {
     decision?: PenguDualLsV2Decision;
     exit?: PenguDualLsV2ExitDecision;
     updatedPosition?: PenguDualLsV2Position;
+    entryVersion?: "LONG_V2_FINAL" | "SHORT_V20" | "RECOVERY_V8";
     diagnostics: {
         evaluatedDecisionBars: number;
         latestCompletedPenguTs?: number;
@@ -118,6 +137,7 @@ export interface PenguDualLsV2EvaluationRow {
     shortSignal: boolean;
     shortSetupActive: boolean;
     shortSetupArmed: boolean;
+    recoveryV8?: RecoveryV8FeatureRow;
 }
 
 interface ShortSignalState {
@@ -315,7 +335,7 @@ export function buildPenguDualLsV2EvaluationSeries(history: PenguDualLsV2History
     const btc = cleanRows(history.btc1h, now, "BTCUSDT");
     const rows = featureRows(pengu, btc);
     const short = evaluatePenguDualLsV2ShortSignals(rows.map((row) => row.features), 180);
-    return rows.map((row, index): PenguDualLsV2EvaluationRow => {
+    const baseRows = rows.map((row, index): PenguDualLsV2EvaluationRow => {
         const isLongRaw = row.features ? longRaw(row.features) : false;
         const previousLongRaw = index > 0 && rows[index - 1].features ? longRaw(rows[index - 1].features!) : false;
         return {
@@ -327,6 +347,8 @@ export function buildPenguDualLsV2EvaluationSeries(history: PenguDualLsV2History
             shortSetupArmed: short.setupArmed[index],
         };
     });
+    const recovery = buildRecoveryV8FeatureRows(baseRows);
+    return baseRows.map((row, index) => ({ ...row, recoveryV8: recovery[index] }));
 }
 
 export function targetGrossForAtr(atr24Ratio: number) {
@@ -343,6 +365,38 @@ export function evaluatePenguDualLsV2Decision(features: PenguDualLsV2Features, s
 }
 
 export function evaluatePenguDualLsV2PositionBar(position: PenguDualLsV2Position, features: PenguDualLsV2Features): { exit?: PenguDualLsV2ExitDecision; updatedPosition: PenguDualLsV2Position } {
+    if (position.entryVersion === "RECOVERY_V8" && position.recoveryV8) {
+        const recoveryRow: RecoveryV8FeatureRow = {
+            index: 0,
+            referenceTs: features.referenceTs,
+            close: features.close,
+            low: features.low,
+            high: features.high,
+            previousClose: features.close,
+            troughIndex: -1,
+            troughClose: Number.NaN,
+            troughAgeHours: Number.NaN,
+            rsiDelta6: Number.NaN,
+            ema168DistancePct: Number.NaN,
+            btcReturn6hPct: Number.NaN,
+            ordinaryLongEligible: false,
+            ordinaryShortEligible: false,
+            baseLongSignal: false,
+        };
+        const result = evaluateRecoveryV8PositionBar(position.recoveryV8, recoveryRow);
+        const updatedPosition: PenguDualLsV2Position = { ...position, quantity: result.updatedPosition.quantity, recoveryV8: { ...position.recoveryV8, ...result.updatedPosition } };
+        const reason = result.kind === "HARD_STOP" ? "RECOVERY_V8_HARD_STOP"
+            : result.kind === "TRAILING_STOP" ? "RECOVERY_V8_TRAILING_STOP"
+                : result.kind === "MAX_HOLD" ? "RECOVERY_V8_MAX_HOLD"
+                    : undefined;
+        if (reason) {
+            return {
+                exit: { side: 1, reason: reason as PenguDualLsV2ExitDecision["reason"], stopPrice: result.stopPrice, updatedPosition },
+                updatedPosition,
+            };
+        }
+        return { updatedPosition: result.kind === "PARTIAL_DEFENSE" ? position : updatedPosition };
+    }
     if (position.side > 0) {
         const previousBest = Math.max(position.entryPrice, position.highWaterMark);
         const hard = position.entryPrice * (1 - PENGU_DUAL_LS_V2.long.hardStopPct);
@@ -404,7 +458,7 @@ export function evaluatePenguDualLsV2Exit(position: PenguDualLsV2Position, featu
     return evaluatePenguDualLsV2PositionBar(position, features).exit;
 }
 
-export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position?: PenguDualLsV2Position, now = Date.now(), cooldownUntilTs = 0): PenguDualLsV2Signal {
+export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position?: PenguDualLsV2Position, now = Date.now(), cooldownUntilTs = 0, options: PenguDualLsV2SignalOptions = {}): PenguDualLsV2Signal {
     const rows = buildPenguDualLsV2EvaluationSeries(history, now);
     const latest = rows.at(-1);
     const shortVersion: "LEGACY_V2" | "SHORT_V20" | undefined = position?.side === -1
@@ -433,7 +487,11 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         },
     });
     if (!latest?.features) return empty("PENGU/BTCの確定1時間足履歴が不足しているためFail Closedです。");
-    const decision = evaluatePenguDualLsV2Decision(latest.features, latest.shortSignal, latest.longRaw && !latest.longSignal);
+    const baseDecision = evaluatePenguDualLsV2Decision(latest.features, latest.shortSignal, latest.longRaw && !latest.longSignal);
+    const recoveryDecision = selectPenguRecoveryV8Entry(latest.recoveryV8, options.recoveryV8Enabled === true);
+    const decision = !baseDecision.active && recoveryDecision?.kind === "RECOVERY_V8"
+        ? { side: 1 as const, longEligible: false, shortEligible: false, active: true, reason: recoveryDecision.reason }
+        : baseDecision;
     const cooldownBlocked = latest.features.referenceTs < cooldownUntilTs;
     const diagnostics = {
         evaluatedDecisionBars: rows.filter((row) => Boolean(row.features)).length,
@@ -450,9 +508,28 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         shortV20SizingState: position?.shortV20?.sizingState,
         shortV20FailureConfirmedTs: position?.shortV20?.failureConfirmedTs,
     };
-    const positionEvaluation = position ? evaluatePenguDualLsV2PositionBar(position, latest.features) : undefined;
+    let positionEvaluation: { exit?: PenguDualLsV2ExitDecision; updatedPosition: PenguDualLsV2Position } | undefined;
+    if (position?.entryVersion === "RECOVERY_V8" && position.recoveryV8 && latest.recoveryV8) {
+        const recoveryEvaluation = evaluateRecoveryV8PositionBar(position.recoveryV8, latest.recoveryV8);
+        const recoveryUpdated: PenguDualLsV2Position = {
+            ...position,
+            quantity: recoveryEvaluation.updatedPosition.quantity,
+            recoveryV8: { ...position.recoveryV8, ...recoveryEvaluation.updatedPosition },
+        };
+        const recoveryReason = recoveryEvaluation.kind === "HARD_STOP" ? "RECOVERY_V8_HARD_STOP"
+            : recoveryEvaluation.kind === "TRAILING_STOP" ? "RECOVERY_V8_TRAILING_STOP"
+                : recoveryEvaluation.kind === "MAX_HOLD" ? "RECOVERY_V8_MAX_HOLD"
+                    : recoveryEvaluation.kind === "YIELD_BASE_LONG" ? "RECOVERY_V8_YIELD_BASE_LONG"
+                        : undefined;
+        positionEvaluation = {
+            updatedPosition: recoveryEvaluation.kind === "PARTIAL_DEFENSE" ? position : recoveryUpdated,
+            exit: recoveryReason ? { side: 1, reason: recoveryReason, stopPrice: recoveryEvaluation.stopPrice, updatedPosition: recoveryUpdated } : undefined,
+        };
+    } else if (position) {
+        positionEvaluation = evaluatePenguDualLsV2PositionBar(position, latest.features);
+    }
     const exit = positionEvaluation?.exit;
-    if (exit) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: `PENGU V2 exit: ${exit.reason}`, features: latest.features, decision, exit, updatedPosition: positionEvaluation.updatedPosition, diagnostics };
+    if (exit && positionEvaluation) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: `PENGU V2 exit: ${exit.reason}`, features: latest.features, decision, exit, updatedPosition: positionEvaluation.updatedPosition, diagnostics };
     if (position) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "PENGU V2保有中の新規Long/Shortはblocked signalとして記録し、追加発注・反転を行いません。", features: latest.features, decision, updatedPosition: positionEvaluation?.updatedPosition, diagnostics };
     if (cooldownBlocked) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "PENGU V2決済後6時間のcooldown中です。", features: latest.features, decision, diagnostics };
     if (!decision.active) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: decision.reason, features: latest.features, decision, diagnostics };
@@ -460,11 +537,12 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest.features.referenceTs,
         side: decision.side,
-        targetGross: targetGrossForAtr(latest.features.atr24Ratio),
+        targetGross: recoveryDecision?.kind === "RECOVERY_V8" && !baseDecision.active ? recoveryDecision.gross : targetGrossForAtr(latest.features.atr24Ratio),
         entryTs: latest.features.referenceTs + HOUR,
         reason: decision.reason,
         features: latest.features,
         decision,
+        entryVersion: recoveryDecision?.kind === "RECOVERY_V8" && !baseDecision.active ? "RECOVERY_V8" : decision.side < 0 ? "SHORT_V20" : "LONG_V2_FINAL",
         diagnostics,
     };
 }
