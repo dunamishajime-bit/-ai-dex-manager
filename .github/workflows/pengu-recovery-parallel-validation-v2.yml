@@ -1,0 +1,83 @@
+name: PENGU Recovery Parallel Validation V2
+
+on:
+  push:
+    branches:
+      - research/pengu-recovery-validation-20260827
+    paths:
+      - 'scripts/research_patch_pengu_parallel_validation_v2.py'
+      - '.github/workflows/pengu-recovery-parallel-validation-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [PURGED, RISK]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run fixed Recovery V2 validation
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-parallel-v2-${{ matrix.suite }}
+          PENGU_VALIDATION_MODE: ${{ matrix.suite }}
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python -m py_compile scripts/research_patch_pengu_parallel_validation_v2.py
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_parallel_validation_v2.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify and print validation
+        env:
+          SUITE: ${{ matrix.suite }}
+          OUT: ${{ github.workspace }}/.research-state/pengu-parallel-v2-${{ matrix.suite }}/missed-opportunity-map.json
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads(Path(os.environ['OUT']).read_text())
+          p=x['parallelValidation']
+          assert p['schema']=='pengu-recovery-v2-parallel-validation/v2'
+          assert p['mode']==os.environ['SUITE']
+          assert p['frozenRecovery']['rule']=='R_BTC3'
+          assert p['frozenRecovery']['priority']=='SHORT_FIRST'
+          assert abs(p['frozenRecovery']['gross']-.5)<1e-12
+          assert p['frozenRecovery']['yieldMode']=='BASE_LONG'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PARALLEL_V2='+json.dumps(p,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-recovery-v2-${{ matrix.suite }}-${{ github.run_id }}
+          path: .research-state/pengu-parallel-v2-${{ matrix.suite }}
+          include-hidden-files: true
+          retention-days: 90
