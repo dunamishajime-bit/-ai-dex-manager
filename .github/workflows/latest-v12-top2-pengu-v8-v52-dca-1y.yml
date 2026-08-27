@@ -1,0 +1,201 @@
+name: Latest V12 Top2 PENGU V8 V52 Monthly DCA One-Year BT
+
+on:
+  push:
+    branches:
+      - research/latest-v12-pengu-v8-v52-dca-1y-20260828
+    paths:
+      - 'scripts/research_latest_v12_top2_ledger_1y.ts'
+      - 'scripts/research_patch_pengu_recovery_v8_integrated_ledger.py'
+      - 'scripts/research_latest_v8_dca_1y.py'
+      - '.github/workflows/latest-v12-top2-pengu-v8-v52-dca-1y.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: latest-v12-pengu-v8-v52-dca-1y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen PENGU production source
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: latest-v12-pengu-v8-v52-dca-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts', 'scripts/research_latest_v12_top2_ledger_1y.ts', 'scripts/research_patch_pengu_recovery_v8_integrated_ledger.py', 'scripts/research_latest_v8_dca_1y.py') }}
+          restore-keys: |
+            current-v12-top2-pengu-v20-v52-dca-
+            current-v12-top2-pengu-v52-dca-
+            v12-top2-gross15-
+            v12-v52-pengu-v2-combined-
+            v26-latency-aware-3y-usdm-v1-20260816
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile research wrappers
+        run: |
+          python -m py_compile scripts/research_patch_pengu_recovery_v8_integrated_ledger.py
+          python -m py_compile scripts/research_latest_v8_dca_1y.py
+
+      - name: Build frozen V12 X1.00 ALL Top2 ledger
+        env:
+          V12_TOP2_LEDGER_OUT: .research-state/latest-v8-dca/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/latest-v8-dca
+          set -o pipefail
+          npx tsx scripts/research_latest_v12_top2_ledger_1y.ts 2>&1 | tee .research-state/latest-v8-dca/v12-top2.log
+
+      - name: Validate V12 ledger contract
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/latest-v8-dca/v12-top2-ledger.json'))
+          assert p['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
+          assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert p['definition']=={'slots':2,'perPositionGrossCap':1.0,'v12AggregateGrossCap':1.5,'riskPct':3.19,'entryPolicy':'ALL'}
+          assert p['safety']=={'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('V12_LEDGER_CONTRACT=PASS')
+          PY
+
+      - name: Build frozen PENGU DUAL LS V2 plus Recovery V8 ledger
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/latest-v8-dca/pengu-output
+          PENGU_LEDGER_OUT: ${{ github.workspace }}/.research-state/latest-v8-dca/pengu-v8-ledger.json
+        run: |
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_recovery_v7_delayed_defense.py
+          python scripts/research_patch_pengu_recovery_v8_delayed_only.py
+          python scripts/research_patch_pengu_recovery_v8_integrated_ledger.py
+          set -o pipefail
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts 2>&1 | tee .research-state/latest-v8-dca/pengu-v8.log
+
+      - name: Validate frozen V8 ledger contract
+        run: |
+          python - <<'PY'
+          import json, math
+          p=json.load(open('.research-state/latest-v8-dca/pengu-v8-ledger.json'))
+          assert p['schema']=='pengu-dual-ls-v2-recovery-v8-ledger/v1'
+          assert p['strategyId']=='PENGU_DUAL_LS_V2_RECOVERY_V8'
+          assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert p['source']['freezeSha']=='15c0b7586710c9db1c46b376bb5041203fc7d826'
+          assert p['source']['parametersFrozen'] is True
+          n=p['modes']['normal']['metrics']; s=p['modes']['stress']['metrics']
+          assert n['trades']==70 and s['trades']==70
+          assert abs(n['returnPct']-574.2299381960086)<1e-9
+          assert abs(n['profitFactor']-4.331158674670027)<1e-9
+          assert abs(n['maxDrawdownPct']-(-12.848857788628465))<1e-9
+          assert abs(s['returnPct']-395.5575708353778)<1e-9
+          assert abs(s['profitFactor']-3.4431875382578734)<1e-9
+          assert abs(s['maxDrawdownPct']-(-14.773631389772579))<1e-9
+          assert p['integrity']['noOverlapNormal'] is True and p['integrity']['noOverlapStress'] is True
+          assert p['integrity']['maximumRequestedGross']<=0.75+1e-12
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_V8_LEDGER_CONTRACT=PASS')
+          PY
+
+      - name: Run latest unified monthly DCA one-year backtest
+        run: |
+          set -o pipefail
+          python scripts/research_latest_v8_dca_1y.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/latest-v8-dca/v12-top2-ledger.json \
+            --pengu-ledger .research-state/latest-v8-dca/pengu-v8-ledger.json \
+            --output-dir .research-state/latest-v8-dca \
+            2>&1 | tee .research-state/latest-v8-dca/combined-dca.log
+
+      - name: Validate latest integrated contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/latest-v8-dca/result.json').read_text())
+          assert p['schema']=='latest-v12-top2-pengu-v8-v52-dca-1y/v1'
+          assert p['status']=='PASS_RESEARCH_ONLY',p['checks']
+          assert p['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert p['capital']['initialJpy']==10000.0
+          assert p['capital']['monthlyContributionJpy']==10000.0
+          assert p['capital']['contributionCountAfterStart']==12
+          assert p['capital']['totalContributedJpy']==130000.0
+          assert p['architecture']['v12Slots']==2
+          assert p['architecture']['v12GrossCap']==1.5
+          assert p['architecture']['penguGrossCap']==0.75
+          assert p['architecture']['sharedCryptoGrossCap']==2.0
+          assert p['architecture']['stockGrossCap']==1.5
+          assert p['architecture']['totalGrossCap']==2.5
+          assert p['architecture']['entryPriority']==['V52','PENGU_DUAL_LS_V2','V12']
+          assert all(p['checks'].values()),p['checks']
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'status':p['status'],'period':p['period'],'capital':p['capital'],'normal':p['results']['NORMAL'],'severe':p['results']['SEVERE'],'checks':p['checks']},ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-${{ github.run_id }}
+          path: .research-state/latest-v8-dca
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
