@@ -1,0 +1,123 @@
+name: PENGU V74 Independent Long Sleeve 1Y
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - 'scripts/research_patch_v74_independent_long_sleeve.py'
+      - 'scripts/research_patch_v74_dual_pengu_dca.py'
+      - 'scripts/test_research_v74_independent_long_sleeve.py'
+      - '.github/workflows/pengu-v74-independent-long-sleeve-1y.yml'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: pengu-v74-independent-long-sleeve-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout research branch
+      - uses: actions/checkout@v4
+        name: Checkout frozen PENGU source
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        name: Checkout frozen V56 research
+        with: {ref: 0f392207f3ba7b3b8e6a2fe706bff6f454e51c2d, path: .v56-research, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: 2ca2faf08653e0a7e1f230af0e9d57bc12710065, path: .v56-research/.v52-top2-research, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: 04c1a369223bd27e9e42bc93604b3777b9230d92, path: .v56-research/.stock-research, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c, path: .v56-research/.stock-research/.v11, fetch-depth: 1}
+      - uses: actions/checkout@v4
+        with: {ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755, path: .v56-research/.stock-research/.v13, fetch-depth: 1}
+      - name: Wire stock deps
+        run: |
+          ln -s ../.stock-research/.v11 .v56-research/.v52-top2-research/.v11
+          ln -s ../.stock-research/.v13 .v56-research/.v52-top2-research/.v13
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify fixed V74 contract
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/test_research_v74_independent_long_sleeve.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: latest-v56-v12-pengu-v20-v52-1y-dca-32902090423
+          path: .research-state/baseline-32902090423
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32902090423
+      - name: Generate fixed V64 plus V74 standalone sleeve
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-v74
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+        run: |
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_v74_independent_long_sleeve.py
+          mkdir -p .research-state/pengu-v74
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts 2>&1 | tee .research-state/pengu-v74/v74.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('.research-state/pengu-v74/v74-result.json').read_text())
+          assert r['final']['v64Preserved'] is True
+          assert r['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          e=json.loads(Path('.research-state/pengu-v74/new-long-sleeve-ledger.json').read_text()); empty=json.loads(json.dumps(e)); empty['selectedFamily']=None
+          zero={'trades':0,'returnPct':0,'profitFactor':None,'maxDrawdownPct':0,'winRatePct':None,'hardStops':0,'trailingExits':0,'timeExits':0,'longTrades':0,'shortTrades':0}
+          for mode in ('normal','stress'): empty['modes'][mode]={'metrics':zero,'trades':[]}
+          Path('.research-state/pengu-v74/empty-new-long-sleeve-ledger.json').write_text(json.dumps(empty,indent=2)+'\n')
+          PY
+      - name: Build isolated V74 DCA simulator
+        run: |
+          python scripts/research_patch_latest_v56_2y_dca.py --source scripts/research_current_top2_pengu_v52_dca.py --output scripts/.pengu_v74_1y_dca.py --window 1y
+          python scripts/research_patch_v74_dual_pengu_dca.py scripts/.pengu_v74_1y_dca.py
+          python -m py_compile scripts/.pengu_v74_1y_dca.py
+      - name: Run integrated V64 control and V74 candidate
+        env:
+          PYTHONPATH: .v56-research/scripts:.v56-research/.v52-top2-research/scripts:.v56-research/.stock-research/scripts
+        run: |
+          mkdir -p .research-state/pengu-v74-incumbent-integrated .research-state/pengu-v74-integrated
+          python scripts/.pengu_v74_1y_dca.py --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json --pengu-ledger .research-state/pengu-v74/incumbent-v64-pengu-ledger.json --pengu-new-long-ledger .research-state/pengu-v74/empty-new-long-sleeve-ledger.json --output-dir .research-state/pengu-v74-incumbent-integrated
+          python scripts/.pengu_v74_1y_dca.py --stock-ledger .research-state/baseline-32902090423/v56-stock-ledger.json --v12-ledger .research-state/baseline-32902090423/v12-top2-ledger.json --pengu-ledger .research-state/pengu-v74/incumbent-v64-pengu-ledger.json --pengu-new-long-ledger .research-state/pengu-v74/new-long-sleeve-ledger.json --output-dir .research-state/pengu-v74-integrated
+      - name: Final V74 adjudication and compact summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.research-state');v=json.loads((r/'pengu-v74/v74-result.json').read_text())['v74'];b=json.loads((r/'pengu-v74-incumbent-integrated/result.json').read_text());c=json.loads((r/'pengu-v74-integrated/result.json').read_text())
+          bn,cn=b['results']['NORMAL'],c['results']['NORMAL'];bs,cs=b['results']['SEVERE'],c['results']['SEVERE'];brn,crn=bn['routingDiagnostics'],cn['routingDiagnostics'];brs,crs=bs['routingDiagnostics'],cs['routingDiagnostics']
+          standalone=bool(v['strictPass'] and v['allFoldPass']);v64Preserved=bool(crn.get('PENGU_ENTERED',0)==brn.get('PENGU_ENTERED',0)==41 and crn.get('PENGU_EXITED',0)==41 and crs.get('PENGU_ENTERED',0)==brs.get('PENGU_ENTERED',0)==41 and crs.get('PENGU_EXITED',0)==41 and abs(cn['grossVerification']['entryTimeMaxPenguGross']-bn['grossVerification']['entryTimeMaxPenguGross'])<1e-9 and abs(cs['grossVerification']['entryTimeMaxPenguGross']-bs['grossVerification']['entryTimeMaxPenguGross'])<1e-9)
+          newLongUsed=bool(crn.get('V74_NEW_LONG_ENTERED',0)>0 and crs.get('V74_NEW_LONG_ENTERED',0)>0);materialGain=bool(cn['endingAssetJpy']>=bn['endingAssetJpy']*1.05-1e-6);grossPass=bool(c['status']=='PASS_RESEARCH_ONLY' and all(c['checks'].values()));integrated=bool(standalone and v64Preserved and newLongUsed and materialGain and grossPass)
+          final={'status':'PASS_RESEARCH_ONLY','researchDecision':'ADOPT_V74_RESEARCH_CANDIDATE' if integrated else 'KEEP_V64_RESEARCH_CANDIDATE','productionDecision':'NO_CHANGE_V56','family':v['family'],'standaloneStrictPass':standalone,'allFoldPass':v['allFoldPass'],'fullMetrics':v['fullMetrics'],'folds':v['folds'],'v64PreservedIntegrated':v64Preserved,'newLongUsed':newLongUsed,'newLongEntered':{'NORMAL':crn.get('V74_NEW_LONG_ENTERED',0),'SEVERE':crs.get('V74_NEW_LONG_ENTERED',0)},'materialIntegratedGain':materialGain,'materialGainThresholdMultiple':1.05,'grossContractPass':grossPass,'integratedContractPass':integrated,'incumbentEndingAssetJpy':{'NORMAL':bn['endingAssetJpy'],'SEVERE':bs['endingAssetJpy']},'candidateEndingAssetJpy':{'NORMAL':cn['endingAssetJpy'],'SEVERE':cs['endingAssetJpy']},'deltaEndingAssetPct':{'NORMAL':(cn['endingAssetJpy']/bn['endingAssetJpy']-1)*100,'SEVERE':(cs['endingAssetJpy']/bs['endingAssetJpy']-1)*100},'candidateIntegratedMetrics':{'NORMAL':{'trades':cn['trades'],'winRatePct':cn['winRatePct'],'profitFactor':cn['profitFactor'],'maxDrawdownPct':cn['maxDrawdownPctClosedEventTwr']},'SEVERE':{'trades':cs['trades'],'winRatePct':cs['winRatePct'],'profitFactor':cs['profitFactor'],'maxDrawdownPct':cs['maxDrawdownPctClosedEventTwr']}},'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          Path('research-results/v74').mkdir(parents=True,exist_ok=True);Path('research-results/v74/summary.json').write_text(json.dumps(final,indent=2)+'\n');(r/'pengu-v74-integrated/final-decision.json').write_text(json.dumps(final,indent=2)+'\n');print('FINAL='+json.dumps(final,separators=(',',':')))
+          PY
+      - name: Publish compact V74 result
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research-results/v74/summary.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'research: publish V74 decision snapshot'
+          git push origin HEAD:research/pengu-v57-conditional-regime-20260826
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-v74-independent-long-sleeve-1y-${{ github.run_id }}
+          path: |
+            .research-state/pengu-v74
+            .research-state/pengu-v74-incumbent-integrated
+            .research-state/pengu-v74-integrated
+          include-hidden-files: true
+          retention-days: 90
