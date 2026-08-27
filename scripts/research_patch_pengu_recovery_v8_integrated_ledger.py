@@ -26,6 +26,9 @@ tail=r'''  const frozenV57:V57Thresholds={relativeReturn24hFloor:0.1085508587241
   assert.ok(Math.abs(stressMetrics.profitFactor!-3.4431875382578734)<1e-9,`V8 severe PF drift ${stressMetrics.profitFactor}`);
   assert.ok(Math.abs(stressMetrics.maxDrawdownPct-(-14.773631389772579))<1e-9,`V8 severe DD drift ${stressMetrics.maxDrawdownPct}`);
   const publicV8Trade=(t:RichTrade)=>({side:t.side,signalTs:t.signalTs,entryTs:t.entryTs,exitTs:t.exitTs,entryPrice:t.entryPrice,exitPrice:t.exitPrice,requestedGross:t.requestedGross,rawUnitReturn:t.rawUnitReturn,fundingUnitReturn:t.fundingUnitReturn,costUnitReturn:t.costUnitReturn,netUnitReturn:t.netUnitReturn,accountReturn:t.accountReturn,exitReason:t.exitReason,engineExitReason:t.engineExitReason});
+  const recoveryN=v8N.filter(t=>t.engineExitReason.startsWith("RECOVERY_"));
+  const recoveryS=v8S.filter(t=>t.engineExitReason.startsWith("RECOVERY_"));
+  assert.ok(recoveryN.length>0&&recoveryS.length>0,"Recovery V8 trades missing");
   const ledger={
     schema:"pengu-dual-ls-v2-recovery-v8-ledger/v1",
     strategyId:"PENGU_DUAL_LS_V2_RECOVERY_V8",
@@ -35,14 +38,25 @@ tail=r'''  const frozenV57:V57Thresholds={relativeReturn24hFloor:0.1085508587241
     config:{rule:"R_BTC3",priority:"SHORT_FIRST",gross:.5,yieldMode:"BASE_LONG",exit:v8Frozen.exit,delayedPartialDefense:{partialStopPct:.04,partialAfterHours:24,partialGross:.25,remainingGross:.25},breakevenProtector:false,staticAtrBtcGuard:false,stagedEntry:false},
     costs:{normalFeeBpsPerSide:6,stressAdditionalAdverseBpsPerSide:35,actualFunding:true},
     modes:{normal:{metrics:normalMetrics,trades:v8N.map(publicV8Trade)},stress:{metrics:stressMetrics,trades:v8S.map(publicV8Trade)}},
-    integrity:{noOverlapNormal:v8N.every((t,i)=>i===0||t.entryTs>=v8N[i-1].exitTs),noOverlapStress:v8S.every((t,i)=>i===0||t.entryTs>=v8S[i-1].exitTs),sameTimestampHandoffAllowed:true,maximumRequestedGross:Math.max(...v8N.map(t=>t.requestedGross))},
+    integrity:{
+      noOverlapNormal:v8N.every((t,i)=>i===0||t.entryTs>=v8N[i-1].exitTs),
+      noOverlapStress:v8S.every((t,i)=>i===0||t.entryTs>=v8S[i-1].exitTs),
+      sameTimestampHandoffAllowed:true,
+      maximumRequestedGrossNormal:Math.max(...v8N.map(t=>t.requestedGross)),
+      maximumRequestedGrossStress:Math.max(...v8S.map(t=>t.requestedGross)),
+      maximumRecoveryRequestedGrossNormal:Math.max(...recoveryN.map(t=>t.requestedGross)),
+      maximumRecoveryRequestedGrossStress:Math.max(...recoveryS.map(t=>t.requestedGross)),
+      recoveryTradeCountNormal:recoveryN.length,
+      recoveryTradeCountStress:recoveryS.length
+    },
     safety:{mode:"RESEARCH_ONLY",ordersSent:false,liveChanged:false,vpsChanged:false,productionChanged:false}
   };
   assert.equal(ledger.period.startInclusive,"2025-08-10T00:00:00.000Z");
   assert.equal(ledger.period.endExclusive,"2026-08-10T00:00:00.000Z");
   assert.equal(ledger.integrity.noOverlapNormal,true);
   assert.equal(ledger.integrity.noOverlapStress,true);
-  assert.ok(ledger.integrity.maximumRequestedGross<=.75+1e-12);
+  assert.ok(Math.abs(ledger.integrity.maximumRecoveryRequestedGrossNormal-.5)<1e-12);
+  assert.ok(Math.abs(ledger.integrity.maximumRecoveryRequestedGrossStress-.5)<1e-12);
   const out=process.env.PENGU_LEDGER_OUT||path.join(OUTPUT_DIR,"pengu-recovery-v8-ledger.json");
   await fs.mkdir(path.dirname(out),{recursive:true});
   await fs.writeFile(out,JSON.stringify(ledger,null,2)+"\n","utf8");
