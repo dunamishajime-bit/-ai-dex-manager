@@ -97,9 +97,10 @@ function StepList({ trace }: { trace: Trace }) {
   return <div className="space-y-2">{trace.steps.map((step) => <div key={step.key} className="flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="min-w-0"><div className="text-xs font-bold text-white">{step.label}</div><div className="mt-1 text-[11px] leading-5 text-white/55">{step.detail}</div></div><StateBadge state={stepState(step.state)} /></div>)}</div>;
 }
 
-function FinalGate({ trace, detail }: { trace?: Trace; detail?: string }) {
+function FinalGate({ trace, detail, state: stateOverride }: { trace?: Trace; detail?: string; state?: UiDecisionState }) {
   const step = trace?.steps.slice().reverse().find((item) => item.key === "execution" || /発注|Entry|Final/i.test(item.label));
-  const state = step ? stepState(step.state) : "WATCH";
+  const detailState: UiDecisionState | undefined = detail && /拒否|阻止|blocked|reject|fail|失敗/i.test(detail) ? "BLOCKED" : undefined;
+  const state = stateOverride || (step ? stepState(step.state) : detailState || "WATCH");
   return <div className="rounded-2xl border border-gold-300/25 bg-gold-400/8 p-3"><div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-100/75">FINAL GATE / ENTRY</div><div className="mt-2 flex flex-wrap items-center gap-2"><StateBadge state={state} /><span className="text-xs font-semibold text-white/80">{step?.label || "実Runnerの専用Final Gate項目"}</span></div><p className="mt-2 text-xs leading-5 text-white/62">{detail || step?.detail || "専用Final Gateの状態はsnapshotにありません。推測表示はしません。"}</p></div>;
 }
 
