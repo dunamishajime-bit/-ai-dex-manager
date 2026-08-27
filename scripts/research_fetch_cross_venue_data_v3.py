@@ -6,7 +6,7 @@ def get(url,params,tries=6):
     q=url+'?'+urllib.parse.urlencode(params); last=None
     for i in range(tries):
         try:
-            req=urllib.request.Request(q,headers={'Accept':'application/json','User-Agent':'DisDex-PENGU-CrossVenue/3.1'})
+            req=urllib.request.Request(q,headers={'Accept':'application/json','User-Agent':'DisDex-PENGU-CrossVenue/3.2'})
             with urllib.request.urlopen(req,timeout=30) as r:return json.loads(r.read().decode())
         except Exception as e:last=e;time.sleep(.5*(i+1))
     raise RuntimeError(f'{VENUE} request failed {q}: {last}')
@@ -56,12 +56,9 @@ def bitget_candles(symbol):
         old=min(vals);cursor=old-1
         if old<=WARM:break
         time.sleep(.05)
-    # Repair only exact missing timestamps by querying the venue again. No interpolation/synthesis.
     required=range(WARM,END,HOUR); missing=[t for t in required if t not in by]
     for t in missing:
         found=False
-        # Bitget treats endTime close to a page boundary inconsistently. Query beyond the research END,
-        # but retain only candles strictly before END. This retrieves the exact venue candle; no synthesis.
         for pad in (2,4,12,24):
             rows=bitget_page(symbol,max(WARM,t-pad*HOUR),t+pad*HOUR,min(100,2*pad+5))
             for r in rows:
@@ -90,8 +87,26 @@ def bitget_funding(symbol):
         if oldest<=START:break
         time.sleep(.05)
     return sorted(by.values(),key=lambda x:x['fundingTime'])
+def gate_candles(contract):
+    by={};cursor=WARM;max_span=1900*HOUR
+    while cursor<END:
+        chunk_end=min(END,cursor+max_span)
+        rows=get('https://api.gateio.ws/api/v4/futures/usdt/candlesticks',{'contract':contract,'from':str(cursor//1000),'to':str((chunk_end-1)//1000),'interval':'1h','timezone':'utc0'})
+        for r in rows:
+            ts=int(float(r['t']))*1000
+            if WARM<=ts<END:by[ts]={'openTime':ts,'open':float(r['o']),'high':float(r['h']),'low':float(r['l']),'close':float(r['c']),'volume':float(r.get('v') or r.get('sum') or 0),'closeTime':ts+HOUR-1}
+        cursor=chunk_end;time.sleep(.1)
+    return sorted(by.values(),key=lambda x:x['openTime'])
+def gate_funding(contract):
+    rows=get('https://api.gateio.ws/api/v4/futures/usdt/funding_rate',{'contract':contract,'from':str(START//1000),'to':str((END-1)//1000),'limit':'1000'})
+    by={}
+    for r in rows:
+        ts=int(r['t'])*1000
+        if START<=ts<END:by[ts]={'fundingTime':ts,'fundingRate':float(r['r'])}
+    return sorted(by.values(),key=lambda x:x['fundingTime'])
 if VENUE=='OKX':pengu=okx_candles('PENGU-USDT-SWAP');btc=okx_candles('BTC-USDT-SWAP');funding=okx_funding('PENGU-USDT-SWAP')
 elif VENUE=='BITGET':pengu=bitget_candles('PENGUUSDT');btc=bitget_candles('BTCUSDT');funding=bitget_funding('PENGUUSDT')
+elif VENUE=='GATE':pengu=gate_candles('PENGU_USDT');btc=gate_candles('BTC_USDT');funding=gate_funding('PENGU_USDT')
 else:raise SystemExit('unsupported venue')
 ps={x['openTime'] for x in pengu};bs={x['openTime'] for x in btc};missing=[t for t in range(START,END,HOUR) if t not in ps or t not in bs]
 if missing:raise RuntimeError(f'missing evaluation hourly bars={len(missing)} first={missing[:10]}')
