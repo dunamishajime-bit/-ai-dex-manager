@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        venue: [OKX, BITGET]
+        venue: [OKX, BITGET, GATE]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -87,4 +87,4 @@ jobs:
           path: .research-state/cross-fixed-${{ matrix.venue }}
           retention-days: 90
 
-# research rerun marker 2026-08-27T20:42+09:00
+# Gate extension 2026-08-27
