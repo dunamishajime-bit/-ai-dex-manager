@@ -1,0 +1,88 @@
+name: PENGU Recovery Cross Venue Fixed
+
+on:
+  push:
+    branches: [research/pengu-recovery-validation-20260827]
+    paths:
+      - 'scripts/research_fetch_cross_venue_data_v3.py'
+      - 'scripts/research_patch_pengu_cross_venue_fixed_bt.py'
+      - '.github/workflows/pengu-recovery-cross-venue-fixed.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        venue: [OKX, BITGET]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact venue data
+        env:
+          PENGU_CROSS_VENUE: ${{ matrix.venue }}
+          PENGU_LOCAL_DATA_DIR: ${{ github.workspace }}/.research-state/cross-fixed-${{ matrix.venue }}/input
+        run: python scripts/research_fetch_cross_venue_data_v3.py
+      - name: Run frozen cross venue backtest
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_CROSS_VENUE: ${{ matrix.venue }}
+          PENGU_LOCAL_DATA_DIR: ${{ github.workspace }}/.research-state/cross-fixed-${{ matrix.venue }}/input
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/cross-fixed-${{ matrix.venue }}/output
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_cross_venue_fixed_bt.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify frozen venue contract
+        env:
+          VENUE: ${{ matrix.venue }}
+          OUT: ${{ github.workspace }}/.research-state/cross-fixed-${{ matrix.venue }}/output/cross-venue-result.json
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads(Path(os.environ['OUT']).read_text())
+          assert x['schema']=='pengu-recovery-v2-cross-venue-fixed/v1'
+          assert x['venue']==os.environ['VENUE']
+          assert x['frozenBeforeVenue'] is True
+          assert x['v57Frozen']=={'relativeReturn24hFloor':0.10855085872412068,'breakoutAtrFloor':0.510560996033169}
+          assert x['v64Frozen']['rule']=={'feature':'penguReturn72h','op':'lte','threshold':0.12049482888834451}
+          assert abs(x['v64Frozen']['lowGross']-.1875)<1e-12
+          assert x['recoveryFrozen']['rule']=='R_BTC3' and x['recoveryFrozen']['priority']=='SHORT_FIRST' and abs(x['recoveryFrozen']['gross']-.5)<1e-12 and x['recoveryFrozen']['yieldMode']=='BASE_LONG'
+          assert x['data']['evaluationMissing']==0
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('CROSS_FIXED='+json.dumps(x,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-recovery-cross-fixed-${{ matrix.venue }}-${{ github.run_id }}
+          path: .research-state/cross-fixed-${{ matrix.venue }}
+          retention-days: 90
