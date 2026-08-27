@@ -1,0 +1,80 @@
+name: PENGU Missed Opportunity Map
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v82-composite-regime-20260827]
+    paths:
+      - 'scripts/research_patch_pengu_missed_opportunity_map.py'
+      - '.github/workflows/pengu-missed-opportunity-map.yml'
+permissions: {contents: write, actions: read}
+concurrency:
+  group: pengu-missed-opportunity-map-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e, path: .pengu-current, fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Build frozen V64 evaluator plus opportunity map
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-opportunity-map
+        run: |
+          npm ci
+          ln -s ../node_modules .pengu-current/node_modules
+          python -m py_compile scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
+      - name: Verify and publish compact decomposition summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          src=Path('.research-state/pengu-opportunity-map/missed-opportunity-map.json')
+          x=json.loads(src.read_text())
+          assert x['v64']['trades']==41 and x['v64']['longTrades']==13 and x['v64']['shortTrades']==28
+          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          out={'schema':'pengu-missed-opportunity-summary/v1','method':x['method'],'v64':x['v64'],'horizons':{},'topMissed':x['topMissed'][:30],'safety':x['safety']}
+          for h,v in x['byHorizon'].items():
+              out['horizons'][h]={'all':v['all'],'coverage':v['coverage'],'thresholds':{}}
+              for t,z in v['thresholds'].items():
+                  out['horizons'][h]['thresholds'][t]={
+                      'hourlyStarts':z['hourlyStarts'],
+                      'dedupedEpisodes':z['dedupedEpisodes'],
+                      'freeMissedGateFailures':z['freeMissedGateFailures'],
+                      'oracle':{
+                          'allNormal':{k:z['oracle']['allNormal'][k] for k in ('trades','compoundedGross025ReturnPct','sumGross025ReturnPct')},
+                          'missedNormal':{k:z['oracle']['missedNormal'][k] for k in ('trades','compoundedGross025ReturnPct','sumGross025ReturnPct')},
+                          'allSevere':{k:z['oracle']['allSevere'][k] for k in ('trades','compoundedGross025ReturnPct','sumGross025ReturnPct')},
+                          'missedSevere':{k:z['oracle']['missedSevere'][k] for k in ('trades','compoundedGross025ReturnPct','sumGross025ReturnPct')},
+                      }
+                  }
+          p=Path('research-results/opportunity-map');p.mkdir(parents=True,exist_ok=True)
+          (p/'summary.json').write_text(json.dumps(out,indent=2)+'\n')
+          print('SUMMARY='+json.dumps(out,separators=(',',':')))
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research-results/opportunity-map/summary.json
+          git commit -m 'research: publish PENGU missed-opportunity map' || true
+          git pull --rebase origin research/pengu-v82-composite-regime-20260827
+          git push origin HEAD:research/pengu-v82-composite-regime-20260827
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-missed-opportunity-map-${{ github.run_id }}
+          path: .research-state/pengu-opportunity-map
+          include-hidden-files: true
+          retention-days: 90
