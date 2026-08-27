@@ -52,6 +52,7 @@ type V12Input = {
 
 type PenguInput = {
   status: UiRuntimeStatus;
+  killSwitchActive?: boolean;
   latestSignal?: {
     side?: number;
     reason?: string;
@@ -67,6 +68,7 @@ type PenguInput = {
 type V52RowInput = {
   symbol?: string;
   candidateRank?: number;
+  rank2RejectedReason?: string | null;
   orderBlockedReason?: string | null;
   orderResult?: string;
   orderSendAttempted?: boolean;
@@ -188,31 +190,33 @@ function makeAttentionItem(input: Omit<AttentionItem, "stateLabel">): AttentionI
   return input;
 }
 
-function v52AttentionItems(details: V52Input | undefined) {
-  if (!details?.windows) return [] as AttentionItem[];
-  const items: AttentionItem[] = [];
-  for (const window of details.windows) {
-    for (const candidate of window.candidates || []) {
-      const symbol = candidate.symbol || "未取得";
-      const rejection = (window.rejections || []).find((row) => row.symbol === symbol);
-      const entry = (window.entries || []).find((row) => row.symbol === symbol);
-      const blocked = rejection?.orderBlockedReason || undefined;
-      items.push(makeAttentionItem({
-        key: `V52:${symbol}:${candidate.candidateRank ?? "?"}`,
-        strategyId: "V52",
-        label: "V52",
-        market: "EQUITY",
-        symbol,
-        side: "WAIT",
-        state: blocked ? "BLOCKED" : entry ? "SIGNAL" : "WATCH",
-        stageLabel: blocked ? "発注Gateで停止" : entry ? "発注判断記録あり" : "候補選定",
-        blocker: blocked,
-        rank: candidate.candidateRank,
-        detail: blocked ? `V52候補Rank${candidate.candidateRank ?? "—"}。${blocked}` : `V52株式候補Rank${candidate.candidateRank ?? "—"}。`,
-      }));
-    }
-  }
-  return items;
+function v52AttentionItems(details: V52Input | undefined, actionable: boolean) {
+ if (!details?.windows) return [] as AttentionItem[];
+ const items: AttentionItem[] = [];
+ for (const window of details.windows) {
+   for (const candidate of window.candidates || []) {
+     const symbol = candidate.symbol || "未取得";
+     const rejection = (window.rejections || []).find((row) => row.symbol === symbol);
+     const entry = (window.entries || []).find((row) => row.symbol === symbol);
+      const rejectionReason = rejection?.orderBlockedReason || rejection?.rank2RejectedReason || rejection?.orderResult || undefined;
+      const blocked = actionable ? rejectionReason : undefined;
+      const unavailableReason = details.status === "STALE" ? "V52 runner stateがSTALEのため、候補は表示のみです。" : "V52 runner stateがLIVE確認できないため、候補は表示のみです。";
+     items.push(makeAttentionItem({
+       key: `V52:${symbol}:${candidate.candidateRank ?? "?"}`,
+       strategyId: "V52",
+       label: "V52",
+       market: "EQUITY",
+       symbol,
+       side: "WAIT",
+        state: actionable ? blocked ? "BLOCKED" : entry ? "SIGNAL" : "WATCH" : "ERROR",
+        stageLabel: actionable ? blocked ? "発注Gateで停止" : entry ? "発注判断記録あり" : "候補選定" : "実state未確認",
+        blocker: blocked || (!actionable ? unavailableReason : undefined),
+       rank: candidate.candidateRank,
+        detail: actionable ? blocked ? `V52候補Rank${candidate.candidateRank ?? "—"}。${blocked}` : `V52株式候補Rank${candidate.candidateRank ?? "—"}。` : `V52候補Rank${candidate.candidateRank ?? "—"}。${unavailableReason}`,
+     }));
+   }
+ }
+ return items;
 }
 
 function priority(state: UiDecisionState) {
@@ -225,10 +229,11 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
   const v52Unit = runtimeUnit(input.runtime.units, "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96");
   const v12 = input.v12Observability;
   const pengu = input.penguRuntime;
-  const v52 = input.v52Top2Observability;
-  const v12Trace = v12?.executionTrace;
-  const penguTrace = pengu?.executionTrace;
-  const v52Items = v52AttentionItems(v52);
+ const v52 = input.v52Top2Observability;
+ const v12Trace = v12?.executionTrace;
+ const penguTrace = pengu?.executionTrace;
+  const v52Actionable = runtimeStatus(v52Unit) === "LIVE" && v52?.status === "LIVE";
+  const v52Items = v52AttentionItems(v52, v52Actionable);
   const v12Symbol = v12?.decision?.symbol || "未取得";
   const v12Side = side(v12?.decision?.side);
   const v12Candidates = v12?.decision?.candidates;
@@ -264,9 +269,9 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
 
   const cryptoSymbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT"];
   const equitySymbols = ["AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"];
-  const v12State = overviewState(runtimeStatus(v12Unit), v12Trace);
-  const penguState = overviewState(runtimeStatus(penguUnit), penguTrace);
-  const v52State = v52Items.some((item) => item.state === "BLOCKED") ? "BLOCKED" : v52Items.some((item) => item.state === "SIGNAL") ? "SIGNAL" : v52Items.length ? "WATCH" : runtimeStatus(v52Unit) === "LIVE" ? "WATCH" : "ERROR";
+ const v12State = overviewState(runtimeStatus(v12Unit), v12Trace);
+ const penguState = overviewState(runtimeStatus(penguUnit), penguTrace);
+  const v52State: UiDecisionState = !v52Actionable ? "ERROR" : v52Items.some((item) => item.state === "BLOCKED") ? "BLOCKED" : v52Items.some((item) => item.state === "SIGNAL") ? "SIGNAL" : v52Items.length ? "WATCH" : "WATCH";
   const strategyCards: StrategyOverview[] = [
     {
       id: "V12",
@@ -317,18 +322,20 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
     .sort((left, right) => priority(left.state) - priority(right.state) || (left.rank ?? 99) - (right.rank ?? 99))
     .slice(0, 3);
 
-  const liveStatuses = input.runtime.units.map((unit) => unit.status);
-  const failClosed = liveStatuses.includes("UNAVAILABLE") || liveStatuses.includes("UNCONFIRMED") || pengu?.latestSignal === undefined && pengu?.status === "UNAVAILABLE";
-  const degraded = liveStatuses.includes("STALE") || liveStatuses.some((status) => status !== "LIVE");
-  const systemStatus = failClosed ? "FAIL CLOSED" : degraded ? "DEGRADED" : "LIVE / HEALTHY";
+ const liveStatuses = input.runtime.units.map((unit) => unit.status);
+  const failClosed = liveStatuses.includes("UNAVAILABLE") || liveStatuses.includes("UNCONFIRMED");
+ const degraded = liveStatuses.includes("STALE") || liveStatuses.some((status) => status !== "LIVE");
+  const hasStrategyDataError = strategyCards.some((card) => card.state === "ERROR");
+  const systemStatus = failClosed ? "FAIL CLOSED" : degraded || hasStrategyDataError ? "DEGRADED" : "LIVE / HEALTHY";
 
+  const penguActionable = runtimeStatus(penguUnit) === "LIVE" && pengu?.status === "LIVE";
   const longEligible = penguSignal?.decision?.longEligible;
   const shortEligible = penguSignal?.decision?.shortEligible;
-  const directionBlocker = penguBlocker ? `${penguBlocker.label}: ${penguBlocker.detail}` : penguSignal?.reason;
-  const penguDirections: PenguDirectionOverview[] = [
-    { direction: "LONG", state: longEligible === true ? "SIGNAL" : longEligible === false ? "OFF" : "ERROR", stageLabel: longEligible === true ? penguTrace?.currentStageLabel || "Signal成立" : "条件未成立", blocker: longEligible === false ? directionBlocker : undefined, detail: longEligible === true ? "PENGU runnerのLong条件が成立しています。" : "PENGU runnerからLong成立を確認できません。" },
-    { direction: "SHORT", state: shortEligible === true ? "SIGNAL" : shortEligible === false ? "OFF" : "ERROR", stageLabel: shortEligible === true ? penguTrace?.currentStageLabel || "Signal成立" : "条件未成立", blocker: shortEligible === false ? directionBlocker : undefined, detail: shortEligible === true ? "PENGU runnerのShort条件が成立しています。" : "PENGU runnerからShort成立を確認できません。" },
-  ];
+ const directionBlocker = penguBlocker ? `${penguBlocker.label}: ${penguBlocker.detail}` : penguSignal?.reason;
+ const penguDirections: PenguDirectionOverview[] = [
+    { direction: "LONG", state: !penguActionable ? "ERROR" : pengu?.killSwitchActive ? "OFF" : longEligible === true ? "SIGNAL" : longEligible === false ? "OFF" : "ERROR", stageLabel: !penguActionable ? "実state未確認" : longEligible === true ? penguTrace?.currentStageLabel || "Signal成立" : "条件未成立", blocker: !penguActionable ? (pengu?.status === "STALE" ? "PENGU runner stateがSTALEです。" : "PENGU runner stateがLIVE確認できません。") : pengu?.killSwitchActive ? "共有Kill Switchが有効です。" : longEligible === false ? directionBlocker : undefined, detail: longEligible === true && penguActionable && !pengu?.killSwitchActive ? "PENGU runnerのLong条件が成立しています。" : "PENGU runnerからLong成立を確認できません。" },
+    { direction: "SHORT", state: !penguActionable ? "ERROR" : pengu?.killSwitchActive ? "OFF" : shortEligible === true ? "SIGNAL" : shortEligible === false ? "OFF" : "ERROR", stageLabel: !penguActionable ? "実state未確認" : shortEligible === true ? penguTrace?.currentStageLabel || "Signal成立" : "条件未成立", blocker: !penguActionable ? (pengu?.status === "STALE" ? "PENGU runner stateがSTALEです。" : "PENGU runner stateがLIVE確認できません。") : pengu?.killSwitchActive ? "共有Kill Switchが有効です。" : shortEligible === false ? directionBlocker : undefined, detail: shortEligible === true && penguActionable && !pengu?.killSwitchActive ? "PENGU runnerのShort条件が成立しています。" : "PENGU runnerからShort成立を確認できません。" },
+ ];
 
   return { systemStatus, strategyCards, attentionItems, penguDirections, checkedAt: input.runtime.checkedAt };
 }

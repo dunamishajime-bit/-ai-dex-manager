@@ -19,7 +19,7 @@ function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: s
 export default function HomePage() {
   const { snapshot: decisionSnapshot, loading: decisionLoading, error: decisionError } = useDecisionStatus();
   const { snapshot: portfolio, loading: portfolioLoading, error: portfolioError } = useLivePortfolio();
-  const model = decisionSnapshot ? buildDecisionViewModel(decisionSnapshot) : null;
+  const model = decisionSnapshot ? buildDecisionViewModel({ ...decisionSnapshot, portfolio: portfolio ? { positions: portfolio.positions.map(({ symbol, side }) => ({ symbol, side })) } : undefined }) : null;
   const positions = portfolio?.positions || [];
   const candidateCount = model?.strategyCards.reduce((sum, card) => sum + (card.observedCandidates ?? 0), 0);
   const signalCount = model?.strategyCards.reduce((sum, card) => sum + (card.eligibleDirections ?? 0), 0);
@@ -52,7 +52,7 @@ export default function HomePage() {
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickLink href="/positions" title="Dashboard" detail="残高・損益・建玉・ロジック別の運用俯瞰" icon={BarChart3} /><QuickLink href="/decision-status" title="判定状況" detail="候補からGate・発注照合までの実経路" icon={ShieldCheck} /><QuickLink href="/performance" title="損益カレンダー" detail="実約定の決済損益を日付ごとに確認" icon={Coins} /><QuickLink href="/wallets" title="運用ウォレット" detail="Aster口座とウォレット状態を確認" icon={Wallet} /></section>
 
-      <p className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-[11px] leading-5 text-white/45">HPは読み取り専用です。注文・取消・決済・建玉変更は行いません。ポートフォリオは約30秒、判定状況は手動再確認または3時間ごとに更新します。</p>
+      <p className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-[11px] leading-5 text-white/45">HPは読み取り専用です。注文・取消・決済・建玉変更は行いません。ポートフォリオと判定状況は約30秒ごと、手動再確認でも更新します。</p>
     </div>
   </main>;
 }

@@ -43,6 +43,7 @@ export function useDecisionStatus() {
       return data;
     } catch (nextError) {
       const message = nextError instanceof Error ? nextError.message : "判定データを取得できません。";
+      setSnapshot(null);
       setError(message);
       return null;
     } finally {
@@ -53,7 +54,7 @@ export function useDecisionStatus() {
   useEffect(() => {
     if (authLoading) return;
     void refresh();
-    const timer = window.setInterval(() => void refresh(), 3 * 60 * 60 * 1000);
+    const timer = window.setInterval(() => void refresh(true), 30_000);
     return () => window.clearInterval(timer);
   }, [authLoading, refresh]);
 

@@ -30,16 +30,25 @@ export default function PositionsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/system/trade-history", { cache: "no-store" }).then(async (response) => {
-      const data = await response.json() as HistoryPayload;
-      if (cancelled) return;
-      const entries = Array.isArray(data.entries) ? data.entries : [];
-      const closed = entries.filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number");
-      setRealizedPnl(closed.reduce((sum, entry) => sum + Number(entry.netPnlUsd ?? entry.realizedPnlUsd ?? 0), 0));
-      setHistorySource(data.officialHistory ? "Aster official settled fills" : data.readOnlyError || "ローカル履歴");
-    }).catch(() => {
-      if (!cancelled) setHistorySource("履歴未取得");
-    });
+    const loadHistory = async () => {
+      try {
+        const response = await fetch("/api/system/trade-history", { cache: "no-store" });
+        const data = await response.json() as HistoryPayload;
+        if (!response.ok) throw new Error(data.readOnlyError || "履歴未取得");
+        if (cancelled) return;
+        const entries = Array.isArray(data.entries) ? data.entries : [];
+        const closed = entries.filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number");
+        setRealizedPnl(closed.reduce((sum, entry) => sum + Number(entry.netPnlUsd ?? entry.realizedPnlUsd ?? 0), 0));
+        setHistorySource(data.officialHistory ? "Aster official settled fills" : data.readOnlyError || "ローカル履歴");
+      } catch (nextError) {
+        if (!cancelled) {
+          setRealizedPnl(null);
+          setHistorySource(nextError instanceof Error ? nextError.message : "履歴未取得");
+        }
+      }
+    };
+    void loadHistory();
+    const interval = window.setInterval(() => void loadHistory(), 30_000);
     return () => { cancelled = true; };
   }, []);
 

@@ -65,6 +65,7 @@ const model = buildDecisionViewModel(sample);
 assert.equal(model.systemStatus, "LIVE / HEALTHY");
 assert.equal(model.strategyCards.length, 3);
 assert.equal(model.strategyCards.find((card) => card.id === "V52")?.market, "EQUITY");
+assert.equal(model.strategyCards.find((card) => card.id === "V52")?.state, "BLOCKED");
 assert.equal(model.penguDirections.find((item) => item.direction === "LONG")?.state, "SIGNAL");
 assert.equal(model.penguDirections.find((item) => item.direction === "SHORT")?.state, "OFF");
 const v12Attention = model.attentionItems.find((item) => item.strategyId === "V12");
@@ -86,5 +87,24 @@ const marketWaiting = buildDecisionViewModel({
   v52Top2Observability: { status: "LIVE", windows: [{ candidates: [], entries: [], rejections: [] }] },
 });
 assert.equal(marketWaiting.strategyCards.find((card) => card.id === "V52")?.state, "WATCH");
+
+const stale = buildDecisionViewModel({
+  ...sample,
+  runtime: {
+    ...sample.runtime,
+    units: sample.runtime.units.map((unit, index) => index === 1 || index === 2 ? { ...unit, status: "STALE" as const } : unit),
+  },
+  penguRuntime: { ...sample.penguRuntime, status: "STALE" as const },
+  v52Top2Observability: { ...sample.v52Top2Observability, status: "STALE" as const },
+});
+assert.equal(stale.systemStatus, "DEGRADED");
+assert.equal(stale.penguDirections.find((item) => item.direction === "LONG")?.state, "ERROR");
+assert.equal(stale.strategyCards.find((card) => card.id === "V52")?.state, "ERROR");
+
+const missingTrace = buildDecisionViewModel({
+  ...sample,
+  v12Observability: { ...sample.v12Observability, executionTrace: undefined },
+});
+assert.equal(missingTrace.systemStatus, "DEGRADED");
 
 console.log("DISTerminal UI view-model self-test: PASS");
