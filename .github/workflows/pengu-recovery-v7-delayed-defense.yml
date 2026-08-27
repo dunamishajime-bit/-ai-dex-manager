@@ -1,14 +1,14 @@
-name: PENGU Recovery V7 Delayed Defense
+name: PENGU Recovery V7 Delayed Defense Final Audit
 on:
   workflow_dispatch:
   push:
-    branches: [research/pengu-v82-composite-regime-20260827]
+    branches: [research/pengu-recovery-v7-final-20260827]
     paths:
       - 'scripts/research_patch_pengu_recovery_v7_delayed_defense.py'
       - '.github/workflows/pengu-recovery-v7-delayed-defense.yml'
 permissions: {contents: read, actions: read}
 concurrency:
-  group: pengu-recovery-v7-delayed-defense-${{ github.ref }}
+  group: pengu-recovery-v7-final-audit-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   backtest:
@@ -26,7 +26,7 @@ jobs:
         env:
           PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
           TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
-          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-recovery-v7-delayed-defense
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/pengu-recovery-v7-final
         run: |
           npm ci
           ln -s ../node_modules .pengu-current/node_modules
@@ -43,39 +43,44 @@ jobs:
           python scripts/research_patch_pengu_recovery_v2_subordinate.py
           python scripts/research_patch_pengu_recovery_v7_delayed_defense.py
           npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts
-      - name: Verify frozen baseline and V7 research contract
+      - name: Verify final selector and frozen contract
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          x=json.loads(Path('.research-state/pengu-recovery-v7-delayed-defense/missed-opportunity-map.json').read_text())
+          x=json.loads(Path('.research-state/pengu-recovery-v7-final/missed-opportunity-map.json').read_text())
           assert x['v64']['trades']==41 and x['v64']['longTrades']==13 and x['v64']['shortTrades']==28
           assert abs(x['v64']['metrics']['returnPct']-303.9903920953809)<1e-9
           assert abs(x['v64']['metrics']['profitFactor']-3.5888879900323096)<1e-9
           assert abs(x['v64']['metrics']['maxDrawdownPct']-(-12.848857788628475))<1e-9
-          bt=x['recoveryBacktest']
+          bt=x['recoveryBacktest']; s=bt['selected']
           assert bt['schema']=='pengu-recovery-integrated-backtest/v7-delayed-defense'
           assert bt['selectionProtocol']['candidateCount']==11
-          assert 'contaminated diagnostics' in bt['selectionProtocol']['recycledHoldoutNotice']
-          assert bt['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          assert x['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          selected=bt['selected']
-          print('RECOVERY_V7='+json.dumps({
-            'candidateCount':bt['selectionProtocol']['candidateCount'],
-            'survivorCount':bt['survivorCount'],
-            'historicalStrictPass':bt['strictPass'],
-            'decision':bt['decision'],
-            'selected':selected and {
-              'cfg':selected['cfg'],'v7ParentScore':selected.get('v7ParentScore'),'parentDeltas':selected.get('parentDeltas'),'score':selected['score'],'deltas':selected['deltas'],
-              'normal':selected['metrics']['normal'],'stress':selected['metrics']['stress'],
-              'normalFolds':selected['metrics']['normalFolds'],'stressFolds':selected['metrics']['stressFolds']
-            }
-          },separators=(',',':')))
+          assert bt['survivorCount']==9
+          assert s is not None and s['developmentFold1Pass'] and s['validationFold2Pass']
+          assert s['cfg']['v7Mode']=='P5BE_H4_A12_G125'
+          assert s['cfg']['rule']=='R_BTC3' and s['cfg']['priority']=='SHORT_FIRST' and s['cfg']['yieldMode']=='BASE_LONG'
+          assert abs(s['cfg']['gross']-.5)<1e-12
+          pd=s['parentDeltas']
+          for k in ('fold1NormalDD','fold1StressDD','fold2NormalDD','fold2StressDD'): assert pd[k] >= -.5-1e-12, (k,pd[k])
+          assert pd['fold1NormalReturn'] >= -.25-1e-12 and pd['fold1StressReturn'] >= -.25-1e-12
+          assert pd['fold2NormalReturn'] >= -.25-1e-12 and pd['fold2StressReturn'] >= -.25-1e-12
+          assert abs(s['metrics']['stressFolds']['FOLD2']['maxDrawdownPct']-(-8.301562499999992))<1e-9
+          assert abs(pd['fold2StressDD'])<1e-12
+          assert s['metrics']['normal']['returnPct']>563.8538680907142
+          assert s['metrics']['stress']['returnPct']>387.9037995378239
+          assert s['metrics']['normal']['profitFactor']>4.226766262574592
+          assert s['metrics']['stress']['profitFactor']>3.3708419756124863
+          assert s['metrics']['normal']['maxDrawdownPct']>-13.687605874365694
+          assert s['metrics']['stress']['maxDrawdownPct']>-15.836502569317545
+          safety={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert bt['safety']==safety and x['safety']==safety
+          print('V7_FINAL_AUDIT='+json.dumps({'selected':s['cfg'],'normal':s['metrics']['normal'],'stress':s['metrics']['stress'],'normalFolds':s['metrics']['normalFolds'],'stressFolds':s['metrics']['stressFolds'],'parentDeltas':pd,'safety':safety},separators=(',',':')))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pengu-recovery-v7-delayed-defense-${{ github.run_id }}
-          path: .research-state/pengu-recovery-v7-delayed-defense
+          name: pengu-recovery-v7-final-${{ github.run_id }}
+          path: .research-state/pengu-recovery-v7-final
           include-hidden-files: true
           retention-days: 90
