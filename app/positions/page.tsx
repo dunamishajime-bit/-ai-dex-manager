@@ -1,55 +1,65 @@
 "use client";
 
 import { Activity, Layers3, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import { MetricCard, StrategyOverviewCards } from "@/components/features/DecisionUi";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useDecisionStatus } from "@/hooks/useDecisionStatus";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
-import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { buildDecisionViewModel } from "@/lib/ui/disterminal-ui-view-model";
 
-function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return <div className="panel-gold rounded-[24px] p-4"><div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/72">{label}</div><div className="mt-2 text-xl font-black text-white">{value}</div><div className="mt-1 text-[11px] leading-5 text-white/72">{detail}</div></div>;
+type HistoryPayload = {
+  officialHistory?: boolean;
+  entries?: Array<{ tradeStatus?: string; realizedPnlUsd?: number; netPnlUsd?: number }>;
+  readOnlyError?: string;
+};
+
+function signedPrice(value: number | null, formatPrice: (value: number) => string) {
+  if (value === null) return "—";
+  return `${value >= 0 ? "+" : ""}${formatPrice(value)}`;
 }
 
 export default function PositionsPage() {
-  const { snapshot, loading, error } = useLivePortfolio();
+  const { snapshot: portfolio, loading, error } = useLivePortfolio();
+  const { snapshot: decisionSnapshot, loading: decisionLoading, error: decisionError } = useDecisionStatus();
   const { formatPrice } = useCurrency();
+  const [realizedPnl, setRealizedPnl] = useState<number | null>(null);
+  const [historySource, setHistorySource] = useState("未取得");
+  const model = decisionSnapshot ? buildDecisionViewModel({ ...decisionSnapshot, portfolio: portfolio ? { positions: portfolio.positions } : undefined }) : null;
 
-  return (
-    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
-      <div className="relative z-10 space-y-3">
-        <header className="panel-gold rounded-[30px] p-5 md:p-7">
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />Current Production Dashboard</div>
-          <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{config.strategyLabel}</h1>
-          <p className="mt-3 max-w-4xl text-sm leading-7 text-white/82">Asterの読み取り結果を正本として、口座残高、実建玉、未決済注文、保護注文を表示します。データ未取得時は正常稼働と推測表示しません。</p>
-        </header>
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/system/trade-history", { cache: "no-store" }).then(async (response) => {
+      const data = await response.json() as HistoryPayload;
+      if (cancelled) return;
+      const entries = Array.isArray(data.entries) ? data.entries : [];
+      const closed = entries.filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number");
+      setRealizedPnl(closed.reduce((sum, entry) => sum + Number(entry.netPnlUsd ?? entry.realizedPnlUsd ?? 0), 0));
+      setHistorySource(data.officialHistory ? "Aster official settled fills" : data.readOnlyError || "ローカル履歴");
+    }).catch(() => {
+      if (!cancelled) setHistorySource("履歴未取得");
+    });
+    return () => { cancelled = true; };
+  }, []);
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Metric label="Aster balance" value={snapshot ? formatPrice(snapshot.account.balanceUsd) : "UNAVAILABLE"} detail={snapshot ? `Available ${formatPrice(snapshot.account.availableUsd)}` : error || "Aster state unavailable"} />
-          <Metric label="Real positions" value={snapshot ? String(snapshot.positions.length) : "—"} detail={snapshot ? `Unrealized ${formatPrice(snapshot.account.unrealizedPnlUsd)}` : "実建玉取得待ち"} />
-          <Metric label="Open orders" value={snapshot ? String(snapshot.orders.count) : "—"} detail={snapshot ? `Protection ${snapshot.orders.protectionCount}` : "未決済注文取得待ち"} />
-          <Metric label="Live source" value={snapshot ? "Aster synced" : loading ? "Loading" : "Unavailable"} detail={snapshot ? snapshot.capturedAt.replace("T", " ").slice(0, 16) + " UTC" : "推測表示なし"} />
-        </section>
+  const activeStrategies = model?.strategyCards.filter((card) => card.runtimeStatus === "LIVE").length;
+  const activeSignals = model?.strategyCards.reduce((sum, card) => sum + (card.eligibleDirections ?? 0), 0);
 
-        <section className="grid gap-3 xl:grid-cols-3">
-          <div className="panel-gold rounded-[28px] p-4"><div className="flex items-center gap-2 text-sm font-black"><Activity className="h-4 w-4 text-gold-100" />V12 X1.00 ALL</div><p className="mt-3 text-[12px] leading-6 text-white/78">14銘柄のAster Futures V3 LIVE runner。要求GrossはATR/リスクで動的に決まり、最大 {config.v12Gross.toFixed(1)}x。V12＋PENGUのCrypto共有上限は {config.sharedCryptoGross.toFixed(1)}xです。</p><p className="mt-2 text-[11px] leading-5 text-white/58">{config.v12Symbols.join(" / ")}</p></div>
-          <div className="panel-gold rounded-[28px] p-4"><div className="flex items-center gap-2 text-sm font-black"><Layers3 className="h-4 w-4 text-gold-100" />PENGU V2</div><p className="mt-3 text-[12px] leading-6 text-white/78">PENGUUSDTの独立LIVE runner。V12とCryptoリスクを共有し、重複建玉・追加注文は実runnerの安全ゲートに委譲します。</p><p className="mt-2 text-[11px] leading-5 text-white/58">Gross上限 {config.penguGross.toFixed(2)} / shared daily loss {config.sharedCryptoDailyLossPct}%</p></div>
-          <div className="panel-gold rounded-[28px] p-4"><div className="flex items-center gap-2 text-sm font-black"><Activity className="h-4 w-4 text-gold-100" />V52 Top2 / Aster-only</div><p className="mt-3 text-[12px] leading-6 text-white/78">AMZN・META・MSFT・NVDA・TSLAを固定したV50候補snapshotで順位1位と2位を評価します。各候補はbasis・net edge・データ品質・板・容量Gateを通過した場合だけ発注経路へ進みます。</p><p className="mt-2 text-[11px] leading-5 text-white/58">Rank1 {config.v52Top2Policy.rank1RequestedGross.toFixed(2)}x / Rank2 {config.v52Top2Policy.rank2RequestedGross.toFixed(2)}x / 最大{config.v52Top2Policy.maxConcurrentPositions}建玉 / 日次{config.v52Top2Policy.maxDailyEntries}件 / Stock {config.v52Top2Policy.stockGrossCap.toFixed(1)}x / Global {config.v52Top2Policy.globalGrossCap.toFixed(1)}x</p><p className="mt-2 text-[10px] leading-5 text-white/40">release {config.v52ProductionReleaseSha.slice(0, 8)}… / tradingMutation=0</p></div>
-        </section>
+  return <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
+    <div className="relative z-10 space-y-4">
+      <header className="panel-gold rounded-[28px] p-5 md:p-7"><div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-100/75"><ShieldCheck className="h-4 w-4" />TRADING COCKPIT / READ ONLY</div><div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between"><div><h1 className="gold-heading text-3xl font-black tracking-tight md:text-5xl">運用ダッシュボード</h1><p className="mt-3 max-w-4xl text-sm leading-7 text-white/68">口座、損益、実建玉、注文、3ロジックの実Runner状態を一画面で俯瞰します。判定の細部は判定状況ページに分離しています。</p></div><div className="text-left text-xs text-white/45 lg:text-right">{decisionLoading ? "判定状態を確認中…" : decisionError || "判定状態を確認済み"}<br />{loading ? "Aster portfolioを取得中…" : error || "Aster portfolioを確認済み"}</div></div></header>
 
-        <section className="panel-gold rounded-[30px] p-4 md:p-5">
-          <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><Activity className="h-4 w-4 text-gold-100" />Aster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに更新</span></div>
-          <div className="mt-4 space-y-2">
-            {snapshot?.positions.length ? snapshot.positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">Qty {position.quantity.toFixed(6)} / Notional {formatPrice(position.notionalUsd)}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice.toFixed(6)} / Mark {position.markPrice.toFixed(6)}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : error || "Aster実建玉を取得できません。"}</div>}
-          </div>
-        </section>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><MetricCard label="Total Balance" value={portfolio ? formatPrice(portfolio.account.balanceUsd) : "—"} detail="Aster total margin balance" /><MetricCard label="Available Balance" value={portfolio ? formatPrice(portfolio.account.availableUsd) : "—"} detail="Aster available balance" /><MetricCard label="Unrealized PnL" value={portfolio ? signedPrice(portfolio.account.unrealizedPnlUsd, formatPrice) : "—"} detail="Aster account unrealized" tone={portfolio && portfolio.account.unrealizedPnlUsd < 0 ? "negative" : "positive"} /><MetricCard label="Realized PnL" value={signedPrice(realizedPnl, formatPrice)} detail={historySource} tone={realizedPnl !== null && realizedPnl < 0 ? "negative" : "positive"} /></section>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><MetricCard label="Open Positions" value={portfolio ? String(portfolio.positions.length) : "—"} detail="Aster position risk" /><MetricCard label="Open Orders" value={portfolio ? String(portfolio.orders.count) : "—"} detail={portfolio ? `保護注文 ${portfolio.orders.protectionCount}` : "Aster order state"} /><MetricCard label="Active Strategies" value={activeStrategies === undefined ? "—" : String(activeStrategies)} detail="runtime status=LIVE" /><MetricCard label="Observed Signals" value={activeSignals === undefined ? "—" : String(activeSignals)} detail="Long / Shortの実成立方向" /></section>
 
-        <section className="panel-gold rounded-[30px] p-4 md:p-5">
-          <div className="flex items-center gap-2 text-sm font-bold"><Layers3 className="h-4 w-4 text-gold-100" />未決済注文 / 保護注文</div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3"><Metric label="Open orders" value={snapshot ? String(snapshot.orders.count) : "—"} detail="Aster実注文" /><Metric label="Protection" value={snapshot ? String(snapshot.orders.protectionCount) : "—"} detail="reduce-only / stop系" /><Metric label="Data policy" value="Fail Closed" detail="取得不能時は注文許可を推測しない" /></div>
-        </section>
+      <section className="panel-gold rounded-[26px] p-4 md:p-5"><div className="flex items-center gap-2"><Activity className="h-4 w-4 text-gold-100" /><div><div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-100/68">STRATEGY OVERVIEW</div><h2 className="mt-1 text-xl font-black">ロジック別サマリー</h2></div></div><div className="mt-4">{model ? <StrategyOverviewCards cards={model.strategyCards} /> : <div className="rounded-2xl border border-dashed border-white/12 px-4 py-8 text-center text-sm text-white/50">ロジック状態を取得しています…</div>}</div></section>
 
-        <p className="rounded-[22px] border border-gold-400/14 bg-black/25 px-4 py-3 text-[11px] leading-5 text-white/62">この画面は読み取り専用です。HPから注文・取消・決済・建玉変更は行いません。実残高・建玉・注文の正本はAsterとVPS runnerです。</p>
-      </div>
-    </main>
-  );
+      <section className="panel-gold rounded-[26px] p-4 md:p-5"><div className="flex items-center gap-2"><Layers3 className="h-4 w-4 text-gold-100" /><h2 className="text-xl font-black">現在のAster実建玉</h2></div><div className="mt-4 space-y-2">{portfolio?.positions.length ? portfolio.positions.map((position) => <article key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3"><div><div className="font-bold text-white">{position.symbol} <span className={position.side === "LONG" ? "text-emerald-200" : "text-rose-200"}>{position.side}</span></div><div className="mt-1 text-xs text-white/50">数量 {position.quantity.toFixed(6)} / 建玉評価額 {formatPrice(position.notionalUsd)}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-emerald-200" : "text-rose-200"}>{signedPrice(position.unrealizedPnlUsd, formatPrice)}</div><div className="text-xs text-white/45">Entry {position.entryPrice.toFixed(6)} / Mark {position.markPrice.toFixed(6)}</div></div></article>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/55">{portfolio ? "現在、Asterで確認できる実建玉はありません。" : error || "Aster実建玉を取得できません。"}</div>}</div></section>
+
+      <section className="panel-gold rounded-[26px] p-4 md:p-5"><div className="flex items-center gap-2"><Layers3 className="h-4 w-4 text-gold-100" /><h2 className="text-xl font-black">未決済注文</h2></div><div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{portfolio?.orders.items.length ? portfolio.orders.items.map((order, index) => <article key={`${order.symbol}-${order.side}-${index}`} className="rounded-2xl border border-white/10 bg-black/20 p-3 text-xs"><div className="font-bold text-white">{order.symbol} {order.side}</div><div className="mt-1 text-white/55">{order.type} / {order.status} / Qty {order.quantity}</div><div className="mt-2 text-white/45">{order.protection ? "保護注文" : "通常注文"}</div></article>) : <div className="sm:col-span-2 lg:col-span-3 rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/55">{portfolio ? "未決済注文はありません。" : "Aster注文状態を取得できません。"}</div>}</div></section>
+
+      <p className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-[11px] leading-5 text-white/45">この画面は読み取り専用です。実残高・建玉・注文はAster、判定状態はVPS runner snapshotを正本とします。</p>
+    </div>
+  </main>;
 }

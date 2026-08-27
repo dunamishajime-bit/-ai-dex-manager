@@ -8,6 +8,7 @@
         "start": "next start",
         "lint": "eslint .",
         "auth:persistence:selftest": "tsx scripts/auth-persistence-selftest.ts",
+        "disterminal:ui-view-model:selftest": "tsx scripts/disterminal-ui-view-model-selftest.ts",
         "disterminal:readonly-surface:selftest": "tsx scripts/disterminal-readonly-surface-selftest.ts",
         "bt:v7:current": "tsx scripts/backtest-v7-current-fast.ts",
         "bt:v7:live": "tsx scripts/backtest-v7-live-equivalent-fast.ts"
