@@ -1,0 +1,19 @@
+name: PENGU V83 Composite Long 1Y
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v82-composite-regime-20260827]
+    paths:
+      - 'scripts/research_patch_v83_independent_long_sleeve.py'
+      - '.github/workflows/pengu-v83-composite-long-1y.yml'
+permissions: {contents: write, actions: read}
+concurrency:
+  group: pengu-v83-composite-long-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  evaluate:
+    uses: ./.github/workflows/pengu-independent-long-candidate-reusable.yml
+    with:
+      version: v83
+      number: '83'
+    secrets: inherit
