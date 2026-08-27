@@ -6,7 +6,7 @@ def get(url,params,tries=6):
     q=url+'?'+urllib.parse.urlencode(params); last=None
     for i in range(tries):
         try:
-            req=urllib.request.Request(q,headers={'Accept':'application/json','User-Agent':'DisDex-PENGU-CrossVenue/3.0'})
+            req=urllib.request.Request(q,headers={'Accept':'application/json','User-Agent':'DisDex-PENGU-CrossVenue/3.1'})
             with urllib.request.urlopen(req,timeout=30) as r:return json.loads(r.read().decode())
         except Exception as e:last=e;time.sleep(.5*(i+1))
     raise RuntimeError(f'{VENUE} request failed {q}: {last}')
@@ -60,14 +60,23 @@ def bitget_candles(symbol):
     required=range(WARM,END,HOUR); missing=[t for t in required if t not in by]
     for t in missing:
         found=False
-        for pad in (2,4,12):
-            rows=bitget_page(symbol,max(WARM,t-pad*HOUR),min(END-1,t+pad*HOUR),min(50,2*pad+5))
+        # Bitget treats endTime close to a page boundary inconsistently. Query beyond the research END,
+        # but retain only candles strictly before END. This retrieves the exact venue candle; no synthesis.
+        for pad in (2,4,12,24):
+            rows=bitget_page(symbol,max(WARM,t-pad*HOUR),t+pad*HOUR,min(100,2*pad+5))
             for r in rows:
                 c=cobj(r)
                 if WARM<=c['openTime']<END:by[c['openTime']]=c
                 if c['openTime']==t:found=True
             if found:break
             time.sleep(.05)
+        if not found:
+            rows=bitget_page(symbol,t,t+HOUR,20)
+            for r in rows:
+                c=cobj(r)
+                if WARM<=c['openTime']<END:by[c['openTime']]=c
+                if c['openTime']==t:found=True
+        if not found: raise RuntimeError(f'exact Bitget candle unavailable at {t}')
     return sorted(by.values(),key=lambda x:x['openTime'])
 def bitget_funding(symbol):
     by={}
