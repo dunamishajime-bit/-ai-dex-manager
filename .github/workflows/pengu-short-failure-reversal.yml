@@ -1,0 +1,57 @@
+name: PENGU Short Failure Reversal Research
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_short_failure_reversal.ts'
+      - '.github/workflows/pengu-short-failure-reversal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-short-failure-reversal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run short failure-reversal study
+        env:
+          PENGU_FAILURE_REVERSAL_OUT: .research-state/pengu-failure-reversal/result.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-failure-reversal
+          npx tsx scripts/research_pengu_short_failure_reversal.ts 2>&1 | tee .research-state/pengu-failure-reversal/run.log
+      - name: Validate research-only contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/pengu-failure-reversal/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          for v in p['results'].values():
+              assert v['NORMAL']['baselineTradesPreserved']==32
+              assert v['STRESS']['baselineTradesPreserved']==32
+          print('PENGU_FAILURE_REVERSAL_RESEARCH_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-failure-reversal-${{ github.run_id }}
+          path: .research-state/pengu-failure-reversal
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
