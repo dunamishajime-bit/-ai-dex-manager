@@ -1,0 +1,36 @@
+name: PENGU Cross Venue Data V2
+
+on:
+  push:
+    branches: [research/pengu-recovery-validation-20260827]
+    paths:
+      - 'scripts/research_fetch_cross_venue_data_v2.py'
+      - '.github/workflows/pengu-cross-venue-data-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  data:
+    strategy:
+      fail-fast: false
+      matrix:
+        venue: [OKX, BITGET]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch normalized data
+        env:
+          PENGU_CROSS_VENUE: ${{ matrix.venue }}
+          PENGU_LOCAL_DATA_DIR: ${{ github.workspace }}/.research-state/cross-v2-${{ matrix.venue }}
+        run: python scripts/research_fetch_cross_venue_data_v2.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-cross-v2-${{ matrix.venue }}-${{ github.run_id }}
+          path: .research-state/cross-v2-${{ matrix.venue }}
+          retention-days: 90
