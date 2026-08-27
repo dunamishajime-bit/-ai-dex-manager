@@ -1,0 +1,54 @@
+name: PENGU V72 Publish Research Result
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/pengu-v57-conditional-regime-20260826]
+    paths:
+      - '.github/workflows/pengu-v72-publish-result.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/pengu-v57-conditional-regime-20260826
+      - name: Download immutable V72 result artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-v72-independent-long-sleeve-1y-33039501935
+          path: .v72-artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 33039501935
+      - name: Verify and publish research-only snapshot
+        run: |
+          set -euo pipefail
+          FINAL="$(find .v72-artifact -type f -path '*/pengu-v72-integrated/final-decision.json' -print -quit)"
+          STANDALONE="$(find .v72-artifact -type f -path '*/pengu-v72/v72-result.json' -print -quit)"
+          test -n "$FINAL" && test -f "$FINAL"
+          test -n "$STANDALONE" && test -f "$STANDALONE"
+          python - "$FINAL" "$STANDALONE" <<'PY'
+          import json,sys
+          final=json.load(open(sys.argv[1]))
+          standalone=json.load(open(sys.argv[2]))
+          assert final['status']=='PASS_RESEARCH_ONLY'
+          assert final['productionDecision']=='NO_CHANGE_V56'
+          assert final['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert standalone['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          PY
+          mkdir -p research-results/v72
+          cp "$FINAL" research-results/v72/final-decision.json
+          cp "$STANDALONE" research-results/v72/v72-result.json
+          printf '%s\n' 'source_run=33039501935' 'source_artifact=pengu-v72-independent-long-sleeve-1y-33039501935' 'source_artifact_sha256=b6a820eee27aa78f9bc6ff93177ba2cd678d21c557fe5ca3a82f2ac2872d45ff' > research-results/v72/SOURCE.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research-results/v72
+          if git diff --cached --quiet; then
+            echo RESULT_SNAPSHOT_UNCHANGED
+          else
+            git commit -m 'research: publish immutable V72 decision snapshot'
+            git push origin HEAD:research/pengu-v57-conditional-regime-20260826
+          fi
