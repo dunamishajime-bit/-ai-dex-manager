@@ -52,6 +52,7 @@ export type V52Top2Observability = {
   updatedAt?: number;
   mode?: string;
   reason?: string;
+  referenceHealth?: { ready: boolean; reason: string };
   referenceStatus?: string;
   referenceOrdersAllowed?: boolean;
   killSwitchActive: boolean;
@@ -78,6 +79,23 @@ function text(value: unknown): string | undefined {
 
 function bool(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
+}
+
+async function readReferenceHealth() {
+  const configuredUrl = String(process.env.V52_REFERENCE_HEALTH_URL || "").trim();
+  if (!configuredUrl) return undefined;
+  try {
+    const response = await fetch(configuredUrl, { cache: "no-store", signal: AbortSignal.timeout(5000) });
+    if (!response.ok) return { ready: false, reason: "REFERENCE_SERVICE_HTTP_" + response.status };
+    const health = object(await response.json());
+    const ready = health?.freshnessReady === true;
+    return {
+      ready,
+      reason: ready ? "REFERENCE_FRESHNESS_READY" : text(health?.healthReason) || text(health?.pythError) || "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY",
+    };
+  } catch {
+    return { ready: false, reason: "REFERENCE_SERVICE_UNAVAILABLE" };
+  }
 }
 
 function row(value: unknown): V52Top2DecisionRow {
@@ -167,9 +185,15 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       return { slot, symbol: text(position.symbol), side: text(position.side), gross: finite(position.gross) };
     }).filter((position) => position.slot.startsWith("V50") || position.slot === "V11_EQ");
     const windows = config.v52Top2Policy.windowsNy.map((window) => windowSnapshot(window, object(state.v52Top2Telemetry)?.[window]));
-    const status = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive ? "LIVE" : "STALE";
+    const referenceHealth = await readReferenceHealth();
+    const baseLive = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive;
+    const status = baseLive && (referenceHealth?.ready ?? true) ? "LIVE" : "STALE";
+    const stateReferenceOrdersAllowed = bool(state.referenceOrdersAllowed);
+    const referenceOrdersAllowed = stateReferenceOrdersAllowed === true && (referenceHealth?.ready ?? true);
     const reason = killSwitchActive
       ? "V52共有Kill Switchが有効です。"
+      : referenceHealth && !referenceHealth.ready
+        ? "V52発注Gate停止：" + referenceHealth.reason
       : updatedAt === undefined
         ? "V52 runner stateに更新時刻がありません。"
         : ageMs !== undefined && ageMs > STALE_AFTER_MS
@@ -185,8 +209,9 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       updatedAt,
       mode: text(state.mode),
       reason,
+      referenceHealth,
       referenceStatus: text(state.referenceStatus),
-      referenceOrdersAllowed: bool(state.referenceOrdersAllowed),
+      referenceOrdersAllowed,
       killSwitchActive,
       killSwitchReason: text(killSwitch?.reason ?? state.killSwitchReason),
       activeV50Slots: positions.filter((position) => position.slot.startsWith("V50")).length,
