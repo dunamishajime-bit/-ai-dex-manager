@@ -296,7 +296,7 @@ export function buildAiViewDocument(surface: DecisionStatusSurface, portfolio: P
     },
     v52: {
       runtimeStatus: v52.status,
-      state: tokenFromRuntime(v52.status),
+      state: v52ReferenceReady ? tokenFromRuntime(v52.status) : v52.referenceHealth ? "BLOCKED" : "UNKNOWN",
       referenceStatus: safeText(v52.referenceStatus),
       referenceGate: v52ReferenceReady ? "PASS" : v52.referenceHealth ? "BLOCKED" : "UNKNOWN",
       referenceReason: safeText(v52.referenceHealth?.reason || v52.reason, "V52参照状態未取得"),
