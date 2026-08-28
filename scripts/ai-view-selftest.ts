@@ -91,6 +91,24 @@ assert.deepEqual(publicPortfolio, {
 assert.equal("balanceUsd" in publicPortfolio, false);
 assert.equal("quantity" in publicPortfolio.positions[0], false);
 
+const liveReferenceBlocked = buildAiViewDocument({
+  ...surface,
+  runtime: {
+    ...surface.runtime,
+    units: surface.runtime.units.map((unit) => unit.label === "V52" ? { ...unit, status: "LIVE" as const } : unit),
+  },
+  v52Top2Observability: {
+    ...surface.v52Top2Observability,
+    status: "LIVE" as const,
+    referenceOrdersAllowed: false,
+    referenceHealth: { ready: false, reason: "REFERENCE_QUOTE_STALE:MSFT(2058ms)" },
+  },
+});
+assert.equal(liveReferenceBlocked.v52.runtimeStatus, "LIVE");
+assert.equal(liveReferenceBlocked.v52.state, "BLOCKED");
+assert.equal(liveReferenceBlocked.v52.referenceGate, "BLOCKED");
+assert.equal(liveReferenceBlocked.strategies.find((strategy) => strategy.id === "V52")?.state, "BLOCKED");
+
 const decisionRoute = fs.readFileSync(path.join(process.cwd(), "app/api/system/decision-status/route.ts"), "utf8");
 assert.match(decisionRoute, /loadDecisionStatusSurface/);
 const aiViewPage = fs.readFileSync(path.join(process.cwd(), "app/ai-view/page.tsx"), "utf8");

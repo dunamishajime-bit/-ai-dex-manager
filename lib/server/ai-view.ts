@@ -126,6 +126,13 @@ function tokenFromRuntime(status: string | undefined): AiViewStatusToken {
   return "UNKNOWN";
 }
 
+function tokenFromDecisionState(state: string | undefined): AiViewStatusToken {
+  if (state === "FIRE" || state === "SIGNAL") return "PASS";
+  if (state === "BLOCKED") return "BLOCKED";
+  if (state === "WAITING" || state === "WATCH" || state === "OFF") return "WAIT";
+  return "UNKNOWN";
+}
+
 function tokenFromTraceState(state: "pass" | "blocked" | "pending" | "unknown"): AiViewStatusToken {
   if (state === "pass") return "PASS";
   if (state === "blocked") return "BLOCKED";
@@ -238,7 +245,7 @@ export function buildAiViewDocument(surface: DecisionStatusSurface, portfolio: P
     id: strategy.id,
     label: safeText(strategy.label),
     runtimeStatus: safeText(strategy.runtimeStatus),
-    state: tokenFromRuntime(strategy.runtimeStatus === "LIVE" ? "LIVE" : strategy.runtimeStatus === "STALE" ? "STALE" : undefined),
+    state: tokenFromDecisionState(strategy.state),
     stage: safeText(strategy.stageLabel),
     detail: safeText(strategy.detail),
     blocker: strategy.blocker ? safeText(strategy.blocker) : undefined,
