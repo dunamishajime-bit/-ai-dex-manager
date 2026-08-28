@@ -25,6 +25,7 @@ import {
 
 const PUBLIC_PATHS = [
   "/login",
+  "/ai-view",
   ...(PUBLIC_RESET_PASSWORD_ENABLED ? ["/reset-password"] : []),
   ...(PUBLIC_REGISTER_ENABLED ? ["/register"] : []),
 ];
