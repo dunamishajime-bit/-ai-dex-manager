@@ -31,6 +31,26 @@ function Status({ value }: { value: AiViewStatusToken }) {
   return <span className={statusClass[value]}>{value}</span>;
 }
 
+function sideClass(side: string | undefined) {
+  if (side === "LONG") return "ai-view-side-long";
+  if (side === "SHORT") return "ai-view-side-short";
+  return "ai-view-side-wait";
+}
+
+function Side({ value: side }: { value?: string }) {
+  return <span className={`ai-view-side ${sideClass(side)}`}>{side || "WAIT"}</span>;
+}
+
+function runtimeClass(status: string) {
+  if (status === "LIVE") return "ai-view-runtime-live";
+  if (status === "STALE") return "ai-view-runtime-stale";
+  return "ai-view-runtime-unavailable";
+}
+
+function Runtime({ status }: { status: string }) {
+  return <span className={`ai-view-runtime ${runtimeClass(status)}`}>{status}</span>;
+}
+
 function value(value: unknown) {
   return value === null || value === undefined || value === "" ? "UNKNOWN" : String(value);
 }
@@ -67,18 +87,18 @@ function AiViewDocumentPage({ document }: { document: AiViewDocument }) {
 
     <section className="ai-view-card" aria-labelledby="runtime-status">
       <h2 id="runtime-status">ACTIVE LOGICS / RUNTIME STATUS</h2>
-      <div className="ai-view-table-wrap"><table><thead><tr><th>Strategy</th><th>Runtime</th><th>ACTIVE</th><th>State</th><th>Stage</th><th>Observed</th><th>Blocker / detail</th></tr></thead><tbody>{document.strategies.map((strategy) => <tr key={strategy.id}><th scope="row">{strategy.label} ({strategy.id})</th><td>{strategy.runtimeStatus}</td><td>{strategy.runtimeStatus === "LIVE" ? "ACTIVE" : "INACTIVE"}</td><td><Status value={strategy.state} /></td><td>{strategy.stage}</td><td>{value(strategy.observedCandidates)}</td><td>{strategy.blocker || strategy.detail}</td></tr>)}</tbody></table></div>
+      <div className="ai-view-table-wrap"><table><thead><tr><th>Strategy</th><th>Runtime</th><th>ACTIVE</th><th>State</th><th>Stage</th><th>Observed</th><th>Blocker / detail</th></tr></thead><tbody>{document.strategies.map((strategy) => <tr key={strategy.id}><th scope="row">{strategy.label} ({strategy.id})</th><td><Runtime status={strategy.runtimeStatus} /></td><td><span className={strategy.runtimeStatus === "LIVE" ? "ai-view-active" : "ai-view-inactive"}>{strategy.runtimeStatus === "LIVE" ? "ACTIVE" : "INACTIVE"}</span></td><td><Status value={strategy.state} /></td><td>{strategy.stage}</td><td>{value(strategy.observedCandidates)}</td><td>{strategy.blocker || strategy.detail}</td></tr>)}</tbody></table></div>
     </section>
 
     <section className="ai-view-card" aria-labelledby="attention">
       <h2 id="attention">CURRENT DECISIONS / ENTRY PATH</h2>
-      {document.attention.length ? <ul className="ai-view-list">{document.attention.map((item, index) => <li key={`${item.strategyId}-${item.symbol}-${index}`}><Status value={item.state} /> <strong>{item.strategyId} {item.symbol} {item.side}</strong> / stage={item.stage} / rank={value(item.rank)} — {item.blocker || item.detail}</li>)}</ul> : <p><Status value="UNKNOWN" /> 現在の候補・判定は未取得です。</p>}
+      {document.attention.length ? <ul className="ai-view-list">{document.attention.map((item, index) => <li key={`${item.strategyId}-${item.symbol}-${index}`}><Status value={item.state} /> <strong>{item.strategyId} {item.symbol}</strong> <Side value={item.side} /> / stage={item.stage} / rank={value(item.rank)} — {item.blocker || item.detail}</li>)}</ul> : <p><Status value="UNKNOWN" /> 現在の候補・判定は未取得です。</p>}
     </section>
 
     <section className="ai-view-card" aria-labelledby="v12">
       <h2 id="v12">V12 X1.00 ALL / 2H DECISION</h2>
       <dl className="ai-view-grid">
-        <div><dt>Selected</dt><dd>{document.v12.selected.symbol} / {document.v12.selected.side}</dd></div>
+        <div><dt>Selected</dt><dd>{document.v12.selected.symbol} / <Side value={document.v12.selected.side} /></dd></div>
         <div><dt>Rank / score</dt><dd>{value(document.v12.selected.rank)} / {value(document.v12.selected.score)}</dd></div>
         <div><dt>momentum / volumeRatio</dt><dd>{value(document.v12.selected.momentum)} / {value(document.v12.selected.volumeRatio)}</dd></div>
         <div><dt>BTC regime</dt><dd>{document.v12.selected.btcRegime}</dd></div>
@@ -87,17 +107,17 @@ function AiViewDocumentPage({ document }: { document: AiViewDocument }) {
       <h3>Execution steps</h3>
       <Steps steps={document.v12.steps} />
       <h3>All candidates / rank comparison</h3>
-      {document.v12.candidates.length ? <div className="ai-view-table-wrap"><table><thead><tr><th>Rank</th><th>Symbol</th><th>Side</th><th>Score</th><th>Momentum</th><th>VolumeRatio</th><th>BTC regime</th><th>Gate</th><th>Reason</th></tr></thead><tbody>{document.v12.candidates.map((candidate, index) => <tr key={`${candidate.symbol}-${index}`}><td>{value(candidate.rank)}</td><td>{candidate.symbol}</td><td>{candidate.side}</td><td>{value(candidate.score)}</td><td>{value(candidate.momentum)}</td><td>{value(candidate.volumeRatio)}</td><td>{candidate.btcRegime}</td><td><Status value={candidate.gate} /></td><td>{candidate.reason}</td></tr>)}</tbody></table></div> : <p><Status value="UNKNOWN" /> V12候補snapshot未取得です。</p>}
+      {document.v12.candidates.length ? <div className="ai-view-table-wrap"><table><thead><tr><th>Rank</th><th>Symbol</th><th>Side</th><th>Score</th><th>Momentum</th><th>VolumeRatio</th><th>BTC regime</th><th>Gate</th><th>Reason</th></tr></thead><tbody>{document.v12.candidates.map((candidate, index) => <tr key={`${candidate.symbol}-${index}`}><td>{value(candidate.rank)}</td><td>{candidate.symbol}</td><td><Side value={candidate.side} /></td><td>{value(candidate.score)}</td><td>{value(candidate.momentum)}</td><td>{value(candidate.volumeRatio)}</td><td>{candidate.btcRegime}</td><td><Status value={candidate.gate} /></td><td>{candidate.reason}</td></tr>)}</tbody></table></div> : <p><Status value="UNKNOWN" /> V12候補snapshot未取得です。</p>}
     </section>
 
     <section className="ai-view-card" aria-labelledby="pengu">
       <h2 id="pengu">PENGU DUAL LS V2 / SHORT V20</h2>
       <dl className="ai-view-grid">
-        <div><dt>Runtime</dt><dd>{document.pengu.runtimeStatus} / <Status value={document.pengu.state} /></dd></div>
+        <div><dt>Runtime</dt><dd><Runtime status={document.pengu.runtimeStatus} /> / <Status value={document.pengu.state} /></dd></div>
         <div><dt>Stage</dt><dd>{document.pengu.stage}</dd></div>
         <div><dt>Latest completed H1</dt><dd>{time(document.pengu.latestReference)}</dd></div>
-        <div><dt>Long</dt><dd><Status value={document.pengu.long.state} /> {document.pengu.long.detail}</dd></div>
-        <div><dt>Short</dt><dd><Status value={document.pengu.short.state} /> {document.pengu.short.detail}</dd></div>
+        <div><dt>Long</dt><dd><Side value="LONG" /> <Status value={document.pengu.long.state} /> {document.pengu.long.detail}</dd></div>
+        <div><dt>Short</dt><dd><Side value="SHORT" /> <Status value={document.pengu.short.state} /> {document.pengu.short.detail}</dd></div>
         <div><dt>Failures</dt><dd>{document.pengu.failureCount} active / {document.pengu.resolvedFailureCount} resolved</dd></div>
       </dl>
       <p>{document.pengu.detail}</p>
@@ -110,7 +130,7 @@ function AiViewDocumentPage({ document }: { document: AiViewDocument }) {
     <section className="ai-view-card" aria-labelledby="v52">
       <h2 id="v52">V52 TOP2 / ASTER-ONLY</h2>
       <dl className="ai-view-grid">
-        <div><dt>Runtime</dt><dd>{document.v52.runtimeStatus} / <Status value={document.v52.state} /></dd></div>
+        <div><dt>Runtime</dt><dd><Runtime status={document.v52.runtimeStatus} /> / <Status value={document.v52.state} /></dd></div>
         <div><dt>Reference</dt><dd>{document.v52.referenceStatus} / <Status value={document.v52.referenceGate} /></dd></div>
         <div><dt>Reference reason</dt><dd>{document.v52.referenceReason}</dd></div>
         <div><dt>Kill Switch</dt><dd><Status value={document.v52.killSwitch} /></dd></div>
@@ -128,7 +148,7 @@ function AiViewDocumentPage({ document }: { document: AiViewDocument }) {
         <div><dt>Open orders</dt><dd>{value(document.portfolio.openOrderCount)}</dd></div>
         <div><dt>Protected orders</dt><dd>{value(document.portfolio.protectedOrderCount)}</dd></div>
       </dl>
-      {document.portfolio.positions.length ? <ul className="ai-view-list">{document.portfolio.positions.map((position) => <li key={`${position.symbol}-${position.side}`}><Status value="PASS" /> {position.symbol} / {position.side} / protection={position.protected ? "YES" : "NO"}</li>)}</ul> : <p><Status value="UNKNOWN" /> 公開安全な建玉明細はありません。</p>}
+      {document.portfolio.positions.length ? <ul className="ai-view-list">{document.portfolio.positions.map((position) => <li key={`${position.symbol}-${position.side}`}><Status value="PASS" /> {position.symbol} / <Side value={position.side} /> / protection={position.protected ? "YES" : "NO"}</li>)}</ul> : <p><Status value="UNKNOWN" /> 公開安全な建玉明細はありません。</p>}
     </section>
 
     <footer className="ai-view-footer"><strong>Status vocabulary:</strong> {document.statusVocabulary.map((item) => <Status key={item} value={item} />)}<br />readOnly=true / tradingMutation=0。 このページは読み取り専用です。注文・取消・決済・建玉変更は行いません。</footer>
