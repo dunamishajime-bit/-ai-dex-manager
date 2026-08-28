@@ -52,7 +52,16 @@ export type V52Top2Observability = {
   updatedAt?: number;
   mode?: string;
   reason?: string;
-  referenceHealth?: { ready: boolean; reason: string };
+  referenceHealth?: {
+    ready: boolean;
+    reason: string;
+    status?: string;
+    connected?: boolean;
+    provider?: string;
+    feed?: string;
+    maximumQuoteAgeMs?: number;
+    staleSymbols?: Array<{ symbol: string; ageMs: number }>;
+  };
   referenceStatus?: string;
   referenceOrdersAllowed?: boolean;
   killSwitchActive: boolean;
@@ -89,9 +98,30 @@ async function readReferenceHealth() {
     if (!response.ok) return { ready: false, reason: "REFERENCE_SERVICE_HTTP_" + response.status };
     const health = object(await response.json());
     const ready = health?.freshnessReady === true;
+    const symbols = object(health?.symbols);
+    const maximumQuoteAgeMs = finite(health?.maximumQuoteAgeMs);
+    const staleSymbols = maximumQuoteAgeMs === undefined
+      ? []
+      : Object.entries(symbols || {}).map(([symbol, value]) => ({
+        symbol,
+        ageMs: finite(object(value)?.ageMs),
+      })).filter((item): item is { symbol: string; ageMs: number } => item.ageMs !== undefined && item.ageMs > maximumQuoteAgeMs);
+    const reason = ready
+      ? "REFERENCE_FRESHNESS_READY"
+      : staleSymbols.length
+        ? `REFERENCE_QUOTE_STALE:${staleSymbols.map((item) => `${item.symbol}(${item.ageMs}ms)`).join(",")}`
+        : health?.connected === false
+          ? "REFERENCE_SERVICE_DISCONNECTED"
+          : "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY";
     return {
       ready,
-      reason: ready ? "REFERENCE_FRESHNESS_READY" : text(health?.healthReason) || text(health?.pythError) || "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY",
+      reason,
+      status: text(health?.status),
+      connected: bool(health?.connected),
+      provider: text(health?.provider),
+      feed: text(health?.feed),
+      maximumQuoteAgeMs,
+      staleSymbols,
     };
   } catch {
     return { ready: false, reason: "REFERENCE_SERVICE_UNAVAILABLE" };
@@ -186,21 +216,25 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
     }).filter((position) => position.slot.startsWith("V50") || position.slot === "V11_EQ");
     const windows = config.v52Top2Policy.windowsNy.map((window) => windowSnapshot(window, object(state.v52Top2Telemetry)?.[window]));
     const referenceHealth = await readReferenceHealth();
-    const baseLive = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive;
-    const status = baseLive && (referenceHealth?.ready ?? true) ? "LIVE" : "STALE";
+    const runnerStateFresh = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS;
+    const runnerLive = runnerStateFresh;
+    const referenceGateReady = referenceHealth?.ready ?? true;
     const stateReferenceOrdersAllowed = bool(state.referenceOrdersAllowed);
-    const referenceOrdersAllowed = stateReferenceOrdersAllowed === true && (referenceHealth?.ready ?? true);
+    const referenceOrdersAllowed = stateReferenceOrdersAllowed === true && referenceGateReady;
+    const status = runnerLive ? "LIVE" : "STALE";
     const reason = killSwitchActive
       ? "V52共有Kill Switchが有効です。"
       : referenceHealth && !referenceHealth.ready
         ? "V52発注Gate停止：" + referenceHealth.reason
+      : stateReferenceOrdersAllowed !== true
+        ? "V52発注Gateがrunner state上で未許可です。"
       : updatedAt === undefined
         ? "V52 runner stateに更新時刻がありません。"
         : ageMs !== undefined && ageMs > STALE_AFTER_MS
           ? `${"V52 runner stateが" + Math.round(ageMs / 60000) + "分更新されていません。"}`
           : "V52 runner stateを読み取りました。";
     return {
-      ok: status === "LIVE",
+      ok: runnerLive && !killSwitchActive && referenceOrdersAllowed,
       readOnly: true,
       tradingMutation: 0,
       configured: true,

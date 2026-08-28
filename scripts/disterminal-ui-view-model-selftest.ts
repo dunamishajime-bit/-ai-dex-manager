@@ -88,6 +88,21 @@ const marketWaiting = buildDecisionViewModel({
 });
 assert.equal(marketWaiting.strategyCards.find((card) => card.id === "V52")?.state, "WATCH");
 
+const referenceBlocked = buildDecisionViewModel({
+  ...sample,
+  v52Top2Observability: {
+    status: "LIVE",
+    referenceOrdersAllowed: false,
+    referenceHealth: { ready: false, reason: "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY" },
+    windows: [{ candidates: [], entries: [], rejections: [] }],
+  },
+});
+const referenceBlockedCard = referenceBlocked.strategyCards.find((card) => card.id === "V52");
+assert.equal(referenceBlockedCard?.runtimeStatus, "LIVE");
+assert.equal(referenceBlockedCard?.state, "BLOCKED");
+assert.match(referenceBlockedCard?.detail || "", /参照|発注Gate/);
+assert.equal(referenceBlocked.systemStatus, "DEGRADED");
+
 const stale = buildDecisionViewModel({
   ...sample,
   runtime: {

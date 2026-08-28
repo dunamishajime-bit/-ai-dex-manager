@@ -82,6 +82,9 @@ type V52WindowInput = {
 
 type V52Input = {
   status: UiRuntimeStatus;
+  referenceOrdersAllowed?: boolean;
+  referenceHealth?: { ready: boolean; reason: string };
+  killSwitchActive?: boolean;
   windows?: V52WindowInput[];
 };
 
@@ -193,13 +196,17 @@ function makeAttentionItem(input: Omit<AttentionItem, "stateLabel">): AttentionI
 function v52AttentionItems(details: V52Input | undefined, actionable: boolean) {
  if (!details?.windows) return [] as AttentionItem[];
  const items: AttentionItem[] = [];
+ const referenceBlocked = details.killSwitchActive === true || details.referenceOrdersAllowed === false || details.referenceHealth?.ready === false;
+ const referenceBlocker = referenceBlocked
+   ? details.killSwitchActive === true ? "V52共有Kill Switchが有効です。" : details.referenceHealth?.reason || "V52参照データの発注Gateが停止しています。"
+   : undefined;
  for (const window of details.windows) {
    for (const candidate of window.candidates || []) {
      const symbol = candidate.symbol || "未取得";
      const rejection = (window.rejections || []).find((row) => row.symbol === symbol);
      const entry = (window.entries || []).find((row) => row.symbol === symbol);
       const rejectionReason = rejection?.orderBlockedReason || rejection?.rank2RejectedReason || rejection?.orderResult || undefined;
-      const blocked = actionable ? rejectionReason : undefined;
+      const blocked = actionable ? referenceBlocker || rejectionReason : undefined;
       const unavailableReason = details.status === "STALE" ? "V52 runner stateがSTALEのため、候補は表示のみです。" : "V52 runner stateがLIVE確認できないため、候補は表示のみです。";
      items.push(makeAttentionItem({
        key: `V52:${symbol}:${candidate.candidateRank ?? "?"}`,
@@ -232,8 +239,10 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
  const v52 = input.v52Top2Observability;
  const v12Trace = v12?.executionTrace;
  const penguTrace = pengu?.executionTrace;
-  const v52Actionable = runtimeStatus(v52Unit) === "LIVE" && v52?.status === "LIVE";
-  const v52Items = v52AttentionItems(v52, v52Actionable);
+ const v52Actionable = runtimeStatus(v52Unit) === "LIVE" && v52?.status === "LIVE";
+ const v52Items = v52AttentionItems(v52, v52Actionable);
+  const v52ReferenceBlocked = v52Actionable && (v52?.killSwitchActive === true || v52?.referenceOrdersAllowed === false || v52?.referenceHealth?.ready === false);
+  const v52ReferenceBlocker = v52?.killSwitchActive === true ? "V52共有Kill Switchが有効です。" : v52?.referenceHealth?.reason || "V52参照データの発注Gateが停止しています。";
   const v12Symbol = v12?.decision?.symbol || "未取得";
   const v12Side = side(v12?.decision?.side);
   const v12Candidates = v12?.decision?.candidates;
@@ -271,7 +280,7 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
   const equitySymbols = ["AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"];
  const v12State = overviewState(runtimeStatus(v12Unit), v12Trace);
  const penguState = overviewState(runtimeStatus(penguUnit), penguTrace);
-  const v52State: UiDecisionState = !v52Actionable ? "ERROR" : v52Items.some((item) => item.state === "BLOCKED") ? "BLOCKED" : v52Items.some((item) => item.state === "SIGNAL") ? "SIGNAL" : v52Items.length ? "WATCH" : "WATCH";
+  const v52State: UiDecisionState = !v52Actionable ? "ERROR" : v52ReferenceBlocked || v52Items.some((item) => item.state === "BLOCKED") ? "BLOCKED" : v52Items.some((item) => item.state === "SIGNAL") ? "SIGNAL" : v52Items.length ? "WATCH" : "WATCH";
   const strategyCards: StrategyOverview[] = [
     {
       id: "V12",
@@ -308,9 +317,9 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
       runtimeStatus: runtimeStatus(v52Unit),
       state: v52State,
       stateLabel: stateLabel(v52State),
-      stageLabel: v52Items[0]?.stageLabel || "候補データ未取得",
-      detail: v52Items[0]?.detail || v52Unit?.reason || "V52の実Runner判定データを取得できません。",
-      blocker: v52Items[0]?.blocker,
+      stageLabel: v52ReferenceBlocked ? "発注Gateで停止" : v52Items[0]?.stageLabel || "候補データ未取得",
+      detail: v52ReferenceBlocked ? `V52 RunnerはLIVEですが、参照データGateで発注停止中です。${v52ReferenceBlocker}` : v52Items[0]?.detail || v52Unit?.reason || "V52の実Runner判定データを取得できません。",
+      blocker: v52ReferenceBlocked ? v52ReferenceBlocker : v52Items[0]?.blocker,
       observedCandidates: v52Items.length || (v52 ? 0 : null),
       eligibleDirections: null,
       positionCount: positionCount(input.portfolio?.positions, equitySymbols),
@@ -326,7 +335,7 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
   const failClosed = liveStatuses.includes("UNAVAILABLE") || liveStatuses.includes("UNCONFIRMED");
  const degraded = liveStatuses.includes("STALE") || liveStatuses.some((status) => status !== "LIVE");
   const hasStrategyDataError = strategyCards.some((card) => card.state === "ERROR");
-  const systemStatus = failClosed ? "FAIL CLOSED" : degraded || hasStrategyDataError ? "DEGRADED" : "LIVE / HEALTHY";
+  const systemStatus = failClosed ? "FAIL CLOSED" : degraded || hasStrategyDataError || v52ReferenceBlocked ? "DEGRADED" : "LIVE / HEALTHY";
 
   const penguActionable = runtimeStatus(penguUnit) === "LIVE" && pengu?.status === "LIVE";
   const longEligible = penguSignal?.decision?.longEligible;
