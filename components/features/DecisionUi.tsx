@@ -60,18 +60,18 @@ function marketLabel(market: StrategyOverview["market"]) {
 }
 
 export function StrategyOverviewCards({ cards, compact = false }: { cards: StrategyOverview[]; compact?: boolean }) {
-  return <div className={cn("grid gap-3", compact ? "md:grid-cols-3" : "xl:grid-cols-3")}>{cards.map((card) => <article key={card.id} className={cn("rounded-[22px] border border-white/10 bg-black/25", compact ? "p-3" : "p-4")}>
-    <div className="flex items-start justify-between gap-2">
+  return <div className={cn("grid gap-3", compact ? "md:grid-cols-3" : "xl:grid-cols-3")}>{cards.map((card) => <article key={card.id} className={cn("min-w-0 max-w-full rounded-[22px] border border-white/10 bg-black/25", compact ? "p-3" : "p-4")}>
+    <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0"><div className="truncate text-sm font-black text-white">{card.label}</div><div className="mt-1 text-[10px] font-semibold tracking-[0.14em] text-white/45">{marketLabel(card.market)}</div></div>
-      <div className="flex shrink-0 flex-wrap justify-end gap-1.5"><StateBadge state={card.state} /><RuntimeBadge status={card.runtimeStatus} /></div>
+      <div className="flex max-w-full flex-wrap justify-end gap-1.5"><StateBadge state={card.state} /><RuntimeBadge status={card.runtimeStatus} /></div>
     </div>
-    <div className="mt-3 flex items-center justify-between gap-2 text-xs"><span className="text-white/45">現在段階</span><span className="truncate font-semibold text-white/85">{card.stageLabel}</span></div>
-    <div className="mt-2 grid grid-cols-3 gap-1.5 text-center">
+    <div className="mt-3 flex flex-wrap items-start justify-between gap-x-2 gap-y-1 text-xs"><span className="shrink-0 text-white/45">現在段階</span><span className="min-w-0 flex-1 break-words text-right font-semibold text-white/85 [overflow-wrap:anywhere]">{card.stageLabel}</span></div>
+    <div className="mt-2 grid grid-cols-2 gap-1.5 text-center min-[400px]:grid-cols-3">
       <div className="rounded-lg border border-white/8 bg-white/[0.03] px-1 py-2"><div className="text-[9px] text-white/40">候補</div><div className="mt-1 text-sm font-bold text-white">{card.observedCandidates ?? "—"}</div></div>
       <div className="rounded-lg border border-white/8 bg-white/[0.03] px-1 py-2"><div className="text-[9px] text-white/40">成立方向</div><div className="mt-1 text-sm font-bold text-white">{card.eligibleDirections ?? "—"}</div></div>
       <div className="rounded-lg border border-white/8 bg-white/[0.03] px-1 py-2"><div className="text-[9px] text-white/40">建玉</div><div className="mt-1 text-sm font-bold text-white">{card.positionCount ?? "—"}</div></div>
     </div>
-    {card.blocker ? <div className="mt-3 rounded-xl border border-rose-300/25 bg-rose-400/8 px-3 py-2 text-[11px] leading-5 text-rose-100"><span className="font-bold">BLOCKER</span><span className="mx-1 text-rose-200/50">·</span>{card.blocker}</div> : <p className="mt-3 line-clamp-2 text-[11px] leading-5 text-white/58">{card.detail}</p>}
+    {card.blocker ? <div className="mt-3 break-words rounded-xl border border-rose-300/25 bg-rose-400/8 px-3 py-2 text-[11px] leading-5 text-rose-100 [overflow-wrap:anywhere]"><span className="font-bold">BLOCKER</span><span className="mx-1 text-rose-200/50">·</span>{card.blocker}</div> : <p className="mt-3 line-clamp-2 text-[11px] leading-5 text-white/58">{card.detail}</p>}
   </article>)}</div>;
 }
 
