@@ -1,0 +1,134 @@
+name: Quality102 Gross Cap Sweep
+
+on:
+  push:
+    branches:
+      - research/latest-v12-pengu-v8-v52-dca-1y-20260828
+    paths:
+      - 'scripts/research_quality102_gross_cap_sweep.py'
+      - 'tests/test_research_quality102_gross_cap_sweep.py'
+      - '.github/workflows/quality102-gross-cap-sweep.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: quality102-gross-cap-sweep-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable stock cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: quality102-gross-cap-sweep-${{ runner.os }}-${{ hashFiles('scripts/research_current_top2_pengu_v52_dca.py') }}
+          restore-keys: |
+            quality102-grosssafe-
+            latest-v12-pengu-v8-v52-dca-
+            current-v12-top2-pengu-v20-v52-dca-
+            current-v12-top2-pengu-v52-dca-
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile and unit-test sweep logic
+        run: |
+          python -m py_compile scripts/research_quality102_gross_cap_sweep.py
+          python tests/test_research_quality102_gross_cap_sweep.py
+
+      - name: Restore prior exact Quality102 run inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-33257164125
+          path: .research-state/quality102-prior
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 33257164125
+
+      - name: Run Quality102 Gross cap sweep
+        run: |
+          set -o pipefail
+          python scripts/research_quality102_gross_cap_sweep.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/quality102-prior/v12-top2-ledger.json \
+            --pengu-ledger .research-state/quality102-prior/pengu-v8-ledger.json \
+            --output-root .research-state/quality102-gross-cap-sweep \
+            2>&1 | tee .research-state/quality102-gross-cap-sweep.log
+
+      - name: Validate sweep contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/quality102-gross-cap-sweep/sweep-summary.json').read_text())
+          assert p['schema']=='quality102-gross-cap-sweep/v1'
+          assert p['caps']==[0.15,0.175,0.2,0.225,0.25]
+          assert p['resizePnlAccounting']=='ZERO_PNL_ON_TRIMMED_NOTIONAL'
+          assert p['grossPolicy']=='BASE_PRIORITY_RESIDUAL_GROSS_SHRINK'
+          assert len(p['rows'])==5
+          for row in p['rows']:
+              cap=float(row['cap'])
+              assert row['status']=='PASS_RESEARCH_ONLY',row
+              assert row['allChecksPass'] is True,row
+              for prefix in ('normal','severe'):
+                  assert row[f'{prefix}MaxTotalGross'] <= 2.5 + 1e-9,row
+                  assert row[f'{prefix}MaxSupplementGross'] <= cap + 1e-9,row
+                  assert row[f'{prefix}GrossConflictCount']==0,row
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps(p,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality102-gross-cap-sweep-${{ github.run_id }}
+          path: |
+            .research-state/quality102-gross-cap-sweep
+            .research-state/quality102-gross-cap-sweep.log
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
