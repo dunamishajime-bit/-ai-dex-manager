@@ -19,6 +19,7 @@ assert.match(strategySource, /min-w-0 max-w-full/, "strategy cards must be allow
 assert.match(strategySource, /flex flex-wrap items-start justify-between gap-2/, "strategy header must wrap instead of widening the card");
 assert.match(strategySource, /grid grid-cols-2 gap-1\.5 text-center min-\[400px\]:grid-cols-3/, "strategy metrics must use two columns on narrow phones and three from 400px");
 assert.match(strategySource, /min-w-0 flex-1 break-words text-right/, "stage text must shrink and wrap inside the card");
-assert.match(strategySource, /break-words \[overflow-wrap:anywhere\]/, "blocker text must wrap even when it contains long unbroken tokens");
+assert.ok((strategySource.match(/break-words/g) || []).length >= 2, "stage and blocker text must both allow word breaking");
+assert.ok((strategySource.match(/\[overflow-wrap:anywhere\]/g) || []).length >= 2, "stage and blocker text must both wrap long unbroken tokens");
 
 console.log("DISTERMINAL_MOBILE_UI_SELFTEST_PASS");
