@@ -1,0 +1,46 @@
+name: Quality102 GrossSafe Source Extract
+
+on:
+  push:
+    branches:
+      - research/latest-v12-pengu-v8-v52-dca-1y-20260828
+    paths:
+      - '.github/workflows/quality102-grosssafe-extract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Extract embedded Quality102 integration source
+        run: |
+          mkdir -p .research-state/quality102-source
+          python - <<'PY'
+          import ast, base64, gzip, re
+          from pathlib import Path
+          src = Path('scripts/research_latest_v8_dca_1y.py').read_text()
+          blobs = re.findall(r"base64\.b64decode\('([^']+)'\)", src)
+          assert len(blobs) >= 2, len(blobs)
+          candidate = gzip.decompress(base64.b64decode(blobs[0]))
+          inner = gzip.decompress(base64.b64decode(blobs[1]))
+          Path('.research-state/quality102-source/quality102-frozen.csv').write_bytes(candidate)
+          Path('.research-state/quality102-source/research_latest_v8_dca_1y_inner.py').write_bytes(inner)
+          print('CANDIDATE_BYTES', len(candidate))
+          print('INNER_BYTES', len(inner))
+          print('INNER_SHA256', __import__('hashlib').sha256(inner).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quality102-grosssafe-source-${{ github.run_id }}
+          path: .research-state/quality102-source
+          retention-days: 7
+          if-no-files-found: error
