@@ -18,5 +18,5 @@ except RuntimeError as e:
 else:
     raise AssertionError('missing cap constant must fail closed')
 
-assert mod.CAPS == (0.15, 0.175, 0.20, 0.225, 0.25)
+assert mod.CAPS == (0.15, 0.175, 0.20, 0.225, 0.25, 0.275, 0.30, 0.325, 0.35)
 print('QUALITY102_SWEEP_UNIT=PASS')
