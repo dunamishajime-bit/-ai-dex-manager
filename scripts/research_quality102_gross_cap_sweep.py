@@ -12,6 +12,7 @@ from pathlib import Path
 CAPS = (0.15, 0.175, 0.20, 0.225, 0.25)
 GROSSSAFE_LAUNCHER = Path('scripts/research_latest_v8_quality102_grosssafe.py')
 GENERATED = Path('scripts/.research_latest_v8_quality102_dca_1y.generated.py')
+FROZEN_SUPPLEMENT = Path('.research-state/quality102-frozen.csv')
 
 
 def _float_constant(node: ast.AST) -> float | None:
@@ -55,22 +56,18 @@ def patch_supplement_cap(source: str, cap: float) -> str:
 
     lineno, name = matches[0]
     lines = source.splitlines(keepends=True)
-    idx = lineno - 1
-    original = lines[idx]
+    original = lines[lineno - 1]
     numeric = format(cap, '.12g')
     pattern = re.compile(r'(\b' + re.escape(name) + r'\b\s*(?::[^=]+)?=\s*)0\.15\b')
     replaced, count = pattern.subn(r'\g<1>' + numeric, original, count=1)
     if count != 1:
         raise RuntimeError(f'failed to patch gross-cap line {lineno}: {original!r}')
-    lines[idx] = replaced
+    lines[lineno - 1] = replaced
     out = ''.join(lines)
-    out = out.replace('"grossCap": 0.15', f'"grossCap": {numeric}')
-    return out
+    return out.replace('"grossCap": 0.15', f'"grossCap": {numeric}')
 
 
 def capture_grosssafe_generated(base_args: list[str]) -> str:
-    if not GROSSSAFE_LAUNCHER.exists():
-        raise RuntimeError(f'missing gross-safe launcher: {GROSSSAFE_LAUNCHER}')
     orig_run, orig_unlink, orig_argv = subprocess.run, Path.unlink, list(sys.argv)
     captured: dict[str, list[str]] = {}
 
@@ -97,38 +94,35 @@ def capture_grosssafe_generated(base_args: list[str]) -> str:
     GENERATED.unlink(missing_ok=True)
     if 'BASE_IDLE_ONE_SLOT_BASE_PRIORITY_RESIDUAL_GROSS_SHRINK' not in source:
         raise RuntimeError('captured engine is missing gross-safe residual-shrink policy')
+    if not FROZEN_SUPPLEMENT.exists():
+        raise RuntimeError(f'frozen Quality102 candidate was not materialized: {FROZEN_SUPPLEMENT}')
     return source
 
 
 def _run_one(source: str, cap: float, args: argparse.Namespace, out_dir: Path) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
-    tag = str(int(round(cap * 10000)))
-    generated = Path(f'scripts/.research_q102_cap_{tag}.generated.py')
+    generated = Path(f'scripts/.research_q102_cap_{int(round(cap * 10000))}.generated.py')
     generated.write_text(patch_supplement_cap(source, cap), encoding='utf-8')
     try:
-        cmd = [
+        subprocess.run([
             sys.executable, str(generated),
             '--stock-cache-dir', args.stock_cache_dir,
             '--v12-ledger', args.v12_ledger,
             '--pengu-ledger', args.pengu_ledger,
+            '--supplement-csv', str(FROZEN_SUPPLEMENT),
             '--output-dir', str(out_dir),
-        ]
-        subprocess.run(cmd, check=True)
+        ], check=True)
     finally:
         generated.unlink(missing_ok=True)
 
-    result_path = out_dir / 'result.json'
-    if not result_path.exists():
-        raise RuntimeError(f'missing result for cap {cap}: {result_path}')
-    p = json.loads(result_path.read_text(encoding='utf-8'))
+    p = json.loads((out_dir / 'result.json').read_text(encoding='utf-8'))
     if p.get('status') != 'PASS_RESEARCH_ONLY':
         raise RuntimeError(f'cap {cap} failed engine contract: {p.get("checks")}')
     return p
 
 
 def _metric_row(cap: float, p: dict) -> dict:
-    row: dict[str, object] = {'cap': cap, 'status': p.get('status')}
-    row['allChecksPass'] = all(bool(v) for v in p.get('checks', {}).values())
+    row: dict[str, object] = {'cap': cap, 'status': p.get('status'), 'allChecksPass': all(bool(v) for v in p.get('checks', {}).values())}
     for mode in ('NORMAL', 'SEVERE'):
         r = p['results'][mode]
         g = r['grossVerification']
@@ -165,20 +159,18 @@ def main() -> None:
 
     root = Path(args.output_root)
     root.mkdir(parents=True, exist_ok=True)
-    capture_dir = root / '_capture'
     base_args = [
         '--stock-cache-dir', args.stock_cache_dir,
         '--v12-ledger', args.v12_ledger,
         '--pengu-ledger', args.pengu_ledger,
-        '--output-dir', str(capture_dir),
+        '--output-dir', str(root / '_capture'),
     ]
     source = capture_grosssafe_generated(base_args)
 
     rows = []
     for cap in CAPS:
         out_dir = root / f'cap-{cap:.3f}'.rstrip('0').rstrip('.')
-        p = _run_one(source, cap, args, out_dir)
-        rows.append(_metric_row(cap, p))
+        rows.append(_metric_row(cap, _run_one(source, cap, args, out_dir)))
 
     for row in rows:
         cap = float(row['cap'])
@@ -198,16 +190,14 @@ def main() -> None:
     if abs(float(anchor['severeEndingAssetJpy']) - 521109.41606506) > 0.05:
         raise RuntimeError(f'15% SEVERE regression mismatch: {anchor["severeEndingAssetJpy"]}')
 
-    best_normal = max(rows, key=lambda x: float(x['normalEndingAssetJpy']))
-    best_severe = max(rows, key=lambda x: float(x['severeEndingAssetJpy']))
     summary = {
         'schema': 'quality102-gross-cap-sweep/v1',
         'caps': list(CAPS),
         'resizePnlAccounting': 'ZERO_PNL_ON_TRIMMED_NOTIONAL',
         'grossPolicy': 'BASE_PRIORITY_RESIDUAL_GROSS_SHRINK',
         'rows': rows,
-        'bestNormalByEndingAsset': best_normal,
-        'bestSevereByEndingAsset': best_severe,
+        'bestNormalByEndingAsset': max(rows, key=lambda x: float(x['normalEndingAssetJpy'])),
+        'bestSevereByEndingAsset': max(rows, key=lambda x: float(x['severeEndingAssetJpy'])),
         'safety': {'mode': 'RESEARCH_ONLY', 'ordersSent': False, 'liveChanged': False, 'vpsChanged': False, 'productionChanged': False},
     }
     (root / 'sweep-summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
