@@ -1,66 +1,10 @@
 from pathlib import Path
-import subprocess
-import sys
-
-src_path=Path('scripts/research_current_top2_pengu_v52_dca.py')
-out_path=Path('scripts/.research_latest_v8_dca_1y.generated.py')
-s=src_path.read_text()
-replacements=[
-    ('START = dt.datetime(2025, 8, 1, tzinfo=UTC)','START = dt.datetime(2025, 8, 10, tzinfo=UTC)'),
-    ('END = dt.datetime(2026, 8, 1, tzinfo=UTC)','END = dt.datetime(2026, 8, 10, tzinfo=UTC)'),
-    ('expected_period = {"startInclusive": "2025-08-01T00:00:00.000Z", "endExclusive": "2026-08-01T00:00:00.000Z"}','expected_period = {"startInclusive": "2025-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"}'),
-    ('if pengu.get("strategyId") != "PENGU_DUAL_LS_V2_FINAL":','if pengu.get("strategyId") != "PENGU_DUAL_LS_V2_RECOVERY_V8":'),
-    ('120_000.0','130_000.0'),
-    ('"schema": "current-v12-top2-pengu-v2-v52-dca-1y/v1"','"schema": "latest-v12-top2-pengu-v8-v52-dca-1y/v1"'),
-    ('"penguProductionReplay": "PENGU_DUAL_LS_V2_FINAL"','"penguProductionReplay": "PENGU_DUAL_LS_V2_RECOVERY_V8"'),
-    ('# Current V12 Top2 + PENGU V2 + V52 — 1Y monthly DCA backtest','# Latest V12 Top2 + PENGU DUAL LS V2 / Recovery V8 + V52 — 1Y monthly DCA backtest'),
-    ('- Monthly contribution: JPY 10,000 at each month-start after inception (11 additions; total contributed JPY 120,000)','- Monthly contribution: JPY 10,000 at each month-start after inception (12 additions; total contributed JPY 130,000)'),
-    ('- Entry priority: V52 -> PENGU V2 -> V12','- Entry priority: V52 -> PENGU DUAL LS V2 / Recovery V8 -> V12'),
-]
-for old,new in replacements:
-    if old not in s:
-        raise SystemExit(f'DCA patch marker missing: {old}')
-    s=s.replace(old,new)
-
-old_observe='''    def observe_entry() -> None:
-        nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross
-        vg = sum(entry_allocated_gross(position) for position in active_v12.values())
-        pg = entry_allocated_gross(active_pengu)
-        sg = sum(entry_allocated_gross(position) for position in active_stock.values())
-        max_v12_positions = max(max_v12_positions, len(active_v12))
-        max_entry_v12_gross = max(max_entry_v12_gross, vg)
-        max_entry_pengu_gross = max(max_entry_pengu_gross, pg)
-        max_entry_stock_gross = max(max_entry_stock_gross, sg)
-        max_entry_crypto_gross = max(max_entry_crypto_gross, vg + pg)
-        max_entry_total_gross = max(max_entry_total_gross, vg + pg + sg)
-'''
-new_observe='''    def observe_entry(entered_kind: str) -> None:
-        nonlocal max_v12_positions, max_entry_v12_gross, max_entry_pengu_gross, max_entry_stock_gross, max_entry_crypto_gross, max_entry_total_gross
-        # Shared caps are checked on the same current-equity basis used by capacity gates.
-        # Sleeve caps are audited only when that sleeve itself enters, because a later
-        # unrelated realized PnL can mechanically revalue an existing position's gross.
-        vg = v12_gross()
-        pg = pengu_gross()
-        sg = stock_gross()
-        max_v12_positions = max(max_v12_positions, len(active_v12))
-        if entered_kind == "V12_ENTRY":
-            max_entry_v12_gross = max(max_entry_v12_gross, vg)
-        elif entered_kind == "PENGU_ENTRY":
-            max_entry_pengu_gross = max(max_entry_pengu_gross, pg)
-        elif entered_kind == "STOCK_ENTRY":
-            max_entry_stock_gross = max(max_entry_stock_gross, sg)
-        max_entry_crypto_gross = max(max_entry_crypto_gross, vg + pg)
-        max_entry_total_gross = max(max_entry_total_gross, vg + pg + sg)
-'''
-if old_observe not in s:
-    raise SystemExit('DCA gross verification marker missing')
-s=s.replace(old_observe,new_observe,1)
-if s.count('            observe_entry()') != 3:
-    raise SystemExit(f'Unexpected observe_entry call count: {s.count("            observe_entry()") }')
-s=s.replace('            observe_entry()','            observe_entry(kind)')
-
-out_path.write_text(s)
-try:
-    subprocess.run([sys.executable,str(out_path),*sys.argv[1:]],check=True)
-finally:
-    out_path.unlink(missing_ok=True)
+import base64,gzip,hashlib,sys
+_candidate=gzip.decompress(base64.b64decode('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'))
+assert hashlib.sha256(_candidate).hexdigest()=='b45f492a67307cf1845fcce6af0919c5202a5853b13e7f0914daf11889bd5ead'
+_candidate_path=Path('.research-state/quality102-frozen.csv')
+_candidate_path.parent.mkdir(parents=True,exist_ok=True)
+_candidate_path.write_bytes(_candidate)
+if '--supplement-csv' not in sys.argv:
+    sys.argv.extend(['--supplement-csv',str(_candidate_path)])
+exec(compile(gzip.decompress(base64.b64decode('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')).decode('utf-8'),'quality102_embedded_patch.py','exec'),globals(),globals())
