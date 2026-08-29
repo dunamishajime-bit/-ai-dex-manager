@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CAPS = (0.15, 0.175, 0.20, 0.225, 0.25)
+CAPS = (0.15, 0.175, 0.20, 0.225, 0.25, 0.275, 0.30, 0.325, 0.35)
 GROSSSAFE_LAUNCHER = Path('scripts/research_latest_v8_quality102_grosssafe.py')
 GENERATED = Path('scripts/.research_latest_v8_quality102_dca_1y.generated.py')
 FROZEN_SUPPLEMENT = Path('.research-state/quality102-frozen.csv')
