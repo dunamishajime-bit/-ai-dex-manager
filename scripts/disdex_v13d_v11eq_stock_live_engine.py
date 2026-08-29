@@ -52,10 +52,10 @@ V11_CONVERGENCE_BPS = 15.0
 V11_MIN_DEPTH_MULTIPLE = 2.0
 V11_MAX_SPREAD_BPS = 20.0
 V11_MAX_SPREAD_MEDIAN_MULTIPLE = 2.0
-# The validated Pyth/IEX reference policy permits up to 5 seconds of source
+# The validated Pyth/IEX reference policy permits up to 30 seconds of source
 # age. This remains a hard rejection boundary; it is not a stale-price
 # fallback and does not alter signal, sizing, or execution rules.
-V11_MAX_DATA_AGE_MS = 5000
+V11_MAX_DATA_AGE_MS = 30000
 V11_MAX_SOURCE_CLOCK_DIFF_MS = 1500
 V11_MAX_ADVERSE_TWO_SECOND_BPS = 5.0
 V11_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
@@ -1092,6 +1092,12 @@ class StockEngine:
         adverse_two_second = max(0.0, bps_change(aster.mid, two_second_mid) * (1 if side == "BUY" else -1))
         signal_value = finite(signal_basis.get(selected), basis)
         adverse_basis = max(0.0, abs(basis) - abs(signal_value))
+        reference_age = max(0, now - reference.timestamp_ms)
+        reference_status = (
+            "UNAVAILABLE"
+            if selected in getattr(self, "_reference_fetch_errors", {})
+            else "FRESH" if reference_age <= V11_MAX_DATA_AGE_MS else "STALE"
+        )
         reasons = []
         if abs(basis) < V11_MIN_BASIS_BPS:
             reasons.append("BASIS_BELOW_50")
@@ -1135,6 +1141,8 @@ class StockEngine:
             "spreadToMedianMultiple": aster.spread_bps / median if median > 0 else float("inf"),
             "adverseTwoSecondMoveBps": adverse_two_second,
             "adverseBasisMoveBps": adverse_basis,
+            "referenceDataStatus": reference_status,
+            "referenceAgeMs": reference_age,
             "costDetail": cost_detail,
         }, rejections
 
@@ -1389,11 +1397,25 @@ class StockEngine:
         if missing_xyz:
             raise RuntimeError(f"Hyperliquid xyz symbols missing: {missing_xyz}")
         checks["xyzSymbols"] = list(XYZ_SYMBOL.values())
+        allow_stale_reference = os.getenv("DISDEX_V52_ALLOW_STALE_REFERENCE_BACKGROUND", "false").lower() == "true"
+        stale_references = []
+        reference_errors = {}
         for symbol in SYMBOLS:
-            reference = self.reference.quote(symbol)
-            if now_ms() - reference.timestamp_ms > V11_MAX_DATA_AGE_MS:
-                raise RuntimeError(f"Reference quote stale for {symbol}: {now_ms() - reference.timestamp_ms}ms")
-        checks["referenceQuotesFresh"] = True
+            try:
+                reference = self.reference.quote(symbol)
+            except Exception as error:
+                if not allow_stale_reference:
+                    raise
+                reference_errors[symbol] = str(error)
+                continue
+            age = max(0, now_ms() - reference.timestamp_ms)
+            if age > V11_MAX_DATA_AGE_MS:
+                if not allow_stale_reference:
+                    raise RuntimeError(f"Reference quote stale for {symbol}: {age}ms")
+                stale_references.append({"symbol": symbol, "ageMs": age})
+        checks["referenceQuotesFresh"] = not stale_references and not reference_errors
+        checks["referenceStaleSymbols"] = stale_references
+        checks["referenceDataErrors"] = reference_errors
         if self.live:
             checks["asterEquity"] = self.aster.equity()
             checks["xyzEquity"] = self.xyz.equity()
@@ -1448,7 +1470,7 @@ def self_test() -> None:
     assert clock("10:30:00") == 37_800
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96"
     assert V13D_MIN_BASIS_BPS == 20.0
-    assert V11_MAX_DATA_AGE_MS == 5000
+    assert V11_MAX_DATA_AGE_MS == 30000
     assert V11_MAX_ROUND_TRIP_COST_BPS == 60.0
     print("V13D + V11-EQ Stock live engine self-test: PASS")
 

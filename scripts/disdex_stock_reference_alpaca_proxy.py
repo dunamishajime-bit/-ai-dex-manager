@@ -63,12 +63,14 @@ class Quote:
 
 
 class QuoteStore:
-    def __init__(self) -> None:
+    def __init__(self, feed: str = "iex", max_age_ms: int = 1400) -> None:
         self._lock = threading.Lock()
         self._quotes: Dict[str, Quote] = {}
         self._connected = False
         self._last_error: Optional[str] = None
         self._last_message_ms = 0
+        self._feed = feed
+        self._max_age_ms = max_age_ms
 
     def set_connected(self, connected: bool) -> None:
         with self._lock:
@@ -116,11 +118,19 @@ class QuoteStore:
                 }
                 for symbol, quote in self._quotes.items()
             }
+            freshness_ready = self._connected and all(
+                symbol in rows and rows[symbol]["ageMs"] <= self._max_age_ms
+                for symbol in SYMBOLS
+            )
             return {
+                "provider": "alpaca",
+                "feed": self._feed,
                 "status": "ok" if self._connected else "degraded",
                 "connected": self._connected,
                 "lastError": self._last_error,
                 "lastMessageAt": self._last_message_ms,
+                "freshnessReady": freshness_ready,
+                "maximumQuoteAgeMs": self._max_age_ms,
                 "symbols": rows,
             }
 
@@ -191,6 +201,23 @@ class AlpacaStream(threading.Thread):
                         pass
 
 
+def quote_payload(quote: Quote, max_age_ms: int) -> Dict[str, Any]:
+    age_ms = quote.age_ms
+    stale = age_ms > max_age_ms
+    return {
+        "symbol": quote.symbol,
+        "price": quote.price,
+        "timestamp": quote.timestamp_ms,
+        "bid": quote.bid,
+        "ask": quote.ask,
+        "ageMs": age_ms,
+        "receivedAt": quote.received_ms,
+        "source": f"alpaca-{quote.feed}-nbbo-mid",
+        "freshness": "STALE" if stale else "FRESH",
+        "stale": stale,
+    }
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "DisDexAlpacaReference/1.0"
 
@@ -213,7 +240,6 @@ class Handler(BaseHTTPRequestHandler):
     @property
     def max_age_ms(self) -> int:
         return self.server.max_age_ms  # type: ignore[attr-defined]
-
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/health":
@@ -230,24 +256,10 @@ class Handler(BaseHTTPRequestHandler):
         if quote is None:
             self._json(HTTPStatus.SERVICE_UNAVAILABLE, {"error": "quote_unavailable", "symbol": symbol})
             return
-        if quote.age_ms > self.max_age_ms:
-            self._json(HTTPStatus.SERVICE_UNAVAILABLE, {
-                "error": "stale_quote",
-                "symbol": symbol,
-                "ageMs": quote.age_ms,
-                "maximumAgeMs": self.max_age_ms,
-            })
-            return
-        self._json(HTTPStatus.OK, {
-            "symbol": quote.symbol,
-            "price": quote.price,
-            "timestamp": quote.timestamp_ms,
-            "bid": quote.bid,
-            "ask": quote.ask,
-            "ageMs": quote.age_ms,
-            "receivedAt": quote.received_ms,
-            "source": f"alpaca-{quote.feed}-nbbo-mid",
-        })
+        # V52 consumes stale quotes as an explicitly labelled last-known value.
+        # The V52 Runner keeps the order-time reference gate and Aster-only
+        # fallback; /health remains false while any quote is stale.
+        self._json(HTTPStatus.OK, quote_payload(quote, self.max_age_ms))
 
 
 class ReferenceServer(ThreadingHTTPServer):
@@ -262,7 +274,7 @@ class ReferenceServer(ThreadingHTTPServer):
 def self_test() -> None:
     assert parse_rfc3339_ms("2026-07-25T01:02:03.123456789Z") == 1784941323123
     assert AlpacaStream._rows('[{"T":"success","msg":"connected"}]')[0]["msg"] == "connected"
-    store = QuoteStore()
+    store = QuoteStore(feed="iex", max_age_ms=1400)
     store.update({
         "T": "q",
         "S": "NVDA",
@@ -274,6 +286,10 @@ def self_test() -> None:
     assert quote is not None
     assert abs(quote.price - 120.12) < 1e-9
     assert quote.age_ms < 1000
+    stale = Quote("META", 99.0, 101.0, now_ms() - 1401, now_ms(), "iex")
+    stale_payload = quote_payload(stale, 1400)
+    assert stale_payload["freshness"] == "STALE"
+    assert stale_payload["stale"] is True
     print("Alpaca Stock reference proxy self-test: PASS")
 
 
@@ -288,7 +304,8 @@ def main() -> int:
     port = int(os.getenv("DISDEX_STOCK_REFERENCE_PORT", "8797"))
     max_age_ms = int(os.getenv("DISDEX_STOCK_REFERENCE_PROXY_MAX_AGE_MS", "1400"))
     stop_event = threading.Event()
-    store = QuoteStore()
+    feed = os.getenv("ALPACA_DATA_FEED", "iex").strip().lower()
+    store = QuoteStore(feed=feed, max_age_ms=max_age_ms)
     stream = AlpacaStream(store, stop_event)
     server = ReferenceServer((host, port), store, max_age_ms)
 

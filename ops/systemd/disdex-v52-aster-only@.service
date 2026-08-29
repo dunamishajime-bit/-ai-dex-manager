@@ -11,7 +11,11 @@ Group=deploy
 WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/ai-dex-manager-mail.env
 Environment=NODE_ENV=production
+Environment=DISDEX_V52_ALLOW_STALE_REFERENCE_BACKGROUND=true
+Environment=DISDEX_V52_STALE_REFERENCE_NOTIFICATIONS_ENABLED=true
+Environment=DISDEX_V52_STALE_NOTIFICATION_STATE_PATH=/var/lib/disdex/shared/v52-reference-stale-notification-state.json
 Environment=DISDEX_V52_CRYPTO_GROSS_CAP=1.5
 Environment=DISDEX_V52_V11_GROSS_CAP=1.5
 Environment=DISDEX_V52_V50_GROSS_CAP=1.25

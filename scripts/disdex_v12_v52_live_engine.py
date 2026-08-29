@@ -6,7 +6,10 @@ import datetime as dt
 import json
 import os
 import signal
+import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 # Expand the legacy V96/V52 shared Margin Guard before importing the
 # margin-aware V52 engine. This preserves the deployed V96 implementation while
@@ -55,6 +58,24 @@ V50_RANK2_SLOT = "V50_POST_OPEN_BASIS_RANK2"
 V50_RANK1_REQUESTED_GROSS = V50_RANK1_NORMAL_GROSS
 V50_RANK1_STRONG_REQUESTED_GROSS = V50_RANK1_STRONG_GROSS
 V50_RANK2_REQUESTED_GROSS = V50_RANK2_GROSS
+REFERENCE_STALE_RETRY_MS = 5 * 60_000
+REFERENCE_STALE_NOTIFICATION_STATE_PATH = "/var/lib/disdex/shared/v52-reference-stale-notification-state.json"
+
+
+def reference_age_ms(timestamp_ms: int, observed_at_ms: int | None = None) -> int:
+    """Return source quote age without ever treating a future timestamp as stale."""
+    observed = legacy.base.now_ms() if observed_at_ms is None else int(observed_at_ms)
+    return max(0, observed - int(timestamp_ms))
+
+
+def reference_entry_policy(reference_status: str, aster_data_ready: bool) -> dict:
+    """Decide whether the final V52 entry gate may use a reference fallback."""
+    status = str(reference_status or "UNKNOWN").upper()
+    if status == "FRESH":
+        return {"allow": True, "fallback": False, "reason": "REFERENCE_FRESH"}
+    if status in {"STALE", "UNAVAILABLE"} and aster_data_ready:
+        return {"allow": True, "fallback": True, "reason": "STALE_REFERENCE_ASTER_FALLBACK"}
+    return {"allow": False, "fallback": False, "reason": "REFERENCE_UNAVAILABLE_OR_ASTER_DATA_NOT_READY"}
 
 # V56 is a fixed production contract.  Keep these values in the shared base
 # module because its inherited entry/exit lifecycle reads module-level policy.
@@ -64,11 +85,11 @@ legacy.legacy.V50_MAX_ADVERSE_BASIS_MOVE_BPS = V50_MAX_ADVERSE_BASIS_MOVE_BPS
 legacy.legacy.V50_MAX_DAILY_TRADES = V50_MAX_DAILY_ENTRIES
 
 # Research-locked V50 gate profile from PR #189 / Actions run 32774114948.
-# Only strategy selectivity is changed here. Reference quality, freshness,
-# source-clock, spread, depth, adverse-move, Gross, Margin Guard, daily-loss and
-# Kill Switch gates remain unchanged and fail closed.
-V50_MIN_ENTRY_BASIS_BPS = 65.0
-V50_MIN_NET_EDGE_BPS = 5.0
+# Only strategy selectivity and the explicitly audited V52 reference recovery
+# path are changed here. Spread, depth, adverse-move, Gross, Margin Guard,
+# daily-loss and Kill Switch gates remain unchanged and fail closed.
+V50_MIN_ENTRY_BASIS_BPS = V50_RANK1_MIN_BASIS_BPS
+V50_MIN_NET_EDGE_BPS = V50_RANK1_MIN_NET_EDGE_BPS
 legacy.legacy.V50_MIN_ENTRY_BASIS_BPS = V50_MIN_ENTRY_BASIS_BPS
 legacy.legacy.V50_MIN_NET_EDGE_BPS = V50_MIN_NET_EDGE_BPS
 
@@ -91,6 +112,300 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
     signal evaluation. Combined account Gross and Margin Guard checks remain
     mandatory immediately before every exposure-increasing V52 order.
     """
+
+    def _notify_fill(self, event: dict) -> None:
+        if os.environ.get("DISDEX_TRADE_FILL_NOTIFICATIONS_ENABLED", "").lower() != "true":
+            return
+        script = Path(__file__).with_name("trade-fill-email-notifier.mjs")
+        try:
+            child = subprocess.Popen(
+                [os.environ.get("DISDEX_NODE_BIN", "node"), str(script)],
+                cwd=str(script.parent.parent),
+                env=os.environ.copy(),
+                stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                start_new_session=True,
+            )
+            if child.stdin is not None:
+                child.stdin.write(json.dumps(event, separators=(",", ":"), default=str))
+                child.stdin.close()
+        except Exception as error:
+            # Mail is observability only. Never alter the order result or
+            # activate a trading failsafe because SMTP is unavailable.
+            self.log("v52-fill-notification-dispatch-failed", error=str(error))
+
+    def _notify_reference_stale_failure(self, event: dict) -> None:
+        if os.environ.get("DISDEX_V52_STALE_REFERENCE_NOTIFICATIONS_ENABLED", "true").lower() != "true":
+            return
+        script = Path(__file__).with_name("trade-fill-email-notifier.mjs")
+        environment = os.environ.copy()
+        environment["DISDEX_TRADE_FILL_NOTIFICATION_STATE_PATH"] = os.getenv(
+            "DISDEX_V52_STALE_NOTIFICATION_STATE_PATH",
+            REFERENCE_STALE_NOTIFICATION_STATE_PATH,
+        )
+        try:
+            child = subprocess.Popen(
+                [os.environ.get("DISDEX_NODE_BIN", "node"), str(script)],
+                cwd=str(script.parent.parent),
+                env=environment,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                start_new_session=True,
+            )
+            if child.stdin is not None:
+                child.stdin.write(json.dumps(event, separators=(",", ":"), default=str))
+                child.stdin.close()
+        except Exception as error:
+            # Notification failure must never alter the V52 order or risk path.
+            self.log("v52-reference-stale-notification-dispatch-failed", error=str(error))
+
+    def _reference_recovery_state(self) -> dict:
+        state = self.state.get("v52ReferenceRecovery")
+        if not isinstance(state, dict):
+            state = {}
+            self.state["v52ReferenceRecovery"] = state
+        return state
+
+    def _append_reference_recovery_event(self, event: dict) -> None:
+        history = self.state.setdefault("v52ReferenceRecoveryHistory", [])
+        if not isinstance(history, list):
+            history = []
+            self.state["v52ReferenceRecoveryHistory"] = history
+        history.append(event)
+        del history[:-200]
+
+    def _reference_recovery_event(self, symbol: str, row: dict, event: str, **extra: object) -> dict:
+        return {
+            "event": event,
+            "symbol": symbol,
+            "at": legacy.base.now_ms(),
+            "detectedAt": row.get("detectedAt"),
+            "lastSourceTimestampMs": row.get("lastSourceTimestampMs"),
+            "lastAgeMs": row.get("lastAgeMs"),
+            **extra,
+        }
+
+    def _notify_reference_recovery_failure(self, symbol: str, row: dict) -> None:
+        if row.get("notificationSent"):
+            return
+        now = legacy.base.now_ms()
+        event = {
+            "eventId": f"v52-stale-reference:{symbol}:{row.get('detectedAt')}",
+            "eventType": "STALE_REFERENCE_ALERT",
+            "strategyId": "V52",
+            "symbol": symbol,
+            "baseAsset": symbol,
+            "quoteAsset": "USD",
+            "positionSide": "-",
+            "orderSide": "-",
+            "executedAt": dt.datetime.fromtimestamp(now / 1000, tz=dt.timezone.utc).isoformat(),
+            "exchange": "Alpaca reference",
+            "reason": "REFERENCE_RETRY_FAILED",
+            "metadata": {
+                "detectedAt": row.get("detectedAt"),
+                "retryScheduledAt": row.get("retryScheduledAt"),
+                "retryAttemptedAt": row.get("retryAttemptedAt"),
+                "retryResult": row.get("retryResult"),
+                "lastSourceTimestampMs": row.get("lastSourceTimestampMs"),
+                "lastAgeMs": row.get("lastAgeMs"),
+                "lastError": row.get("lastError"),
+                "referenceDataStatus": row.get("status"),
+            },
+        }
+        self._notify_reference_stale_failure(event)
+        row["notificationSent"] = True
+        row["notificationDispatchedAt"] = now
+        self._append_reference_recovery_event(
+            self._reference_recovery_event(symbol, row, "STALE_REFERENCE_NOTIFICATION_DISPATCHED")
+        )
+
+    def _record_reference_recovery(self, rows: dict) -> None:
+        """Track stale/missing references and retry each affected symbol once after 5m."""
+        now = legacy.base.now_ms()
+        recovery = self._reference_recovery_state()
+        errors = getattr(self, "_reference_fetch_errors", {})
+        last_known = self.state.setdefault("v52ReferenceLastKnown", {})
+        changed = False
+        for symbol in legacy.base.SYMBOLS:
+            row = recovery.get(symbol)
+            reference = rows.get(symbol, (None, None, None))[2] if symbol in rows else None
+            error = errors.get(symbol)
+            age = reference_age_ms(reference.timestamp_ms, now) if reference is not None else None
+            stale = reference is None or age > legacy.base.V11_MAX_DATA_AGE_MS
+            if reference is not None:
+                known = {
+                    "price": reference.price,
+                    "timestampMs": reference.timestamp_ms,
+                    "source": reference.source,
+                }
+                if last_known.get(symbol) != known:
+                    last_known[symbol] = known
+                    changed = True
+            if not stale and not error:
+                if isinstance(row, dict) and row.get("status") != "FRESH":
+                    row.update({"status": "RECOVERED", "recoveredAt": now, "lastAgeMs": age})
+                    self._append_reference_recovery_event(
+                        self._reference_recovery_event(symbol, row, "REFERENCE_RECOVERED", recoveredAgeMs=age)
+                    )
+                    changed = True
+                continue
+
+            if not isinstance(row, dict) or row.get("status") == "RECOVERED":
+                row = {
+                    "status": "UNAVAILABLE" if error else "STALE",
+                    "detectedAt": now,
+                    "retryScheduledAt": now + REFERENCE_STALE_RETRY_MS,
+                    "retryAttemptedAt": None,
+                    "retryResult": None,
+                    "notificationSent": False,
+                }
+                recovery[symbol] = row
+                self._append_reference_recovery_event(
+                    self._reference_recovery_event(symbol, row, "REFERENCE_STALE_DETECTED")
+                )
+                changed = True
+
+            if not (row.get("retryAttemptedAt") and row.get("status") == "RETRY_FAILED"):
+                row["status"] = "UNAVAILABLE" if error else "STALE"
+            row["lastObservedAt"] = now
+            row["lastAgeMs"] = age
+            row["lastError"] = str(error) if error else None
+            if reference is not None:
+                row["lastSourceTimestampMs"] = reference.timestamp_ms
+                row["lastSource"] = reference.source
+                last_known[symbol] = {
+                    "price": reference.price,
+                    "timestampMs": reference.timestamp_ms,
+                    "source": reference.source,
+                }
+            changed = True
+
+            if row.get("retryAttemptedAt") or now < int(row.get("retryScheduledAt") or 0):
+                continue
+            row["retryAttemptedAt"] = now
+            try:
+                retry = self.reference.quote(symbol)
+                retry_age = reference_age_ms(retry.timestamp_ms, legacy.base.now_ms())
+                if retry_age <= legacy.base.V11_MAX_DATA_AGE_MS and (
+                    reference is None or retry.timestamp_ms > reference.timestamp_ms
+                ):
+                    row.update({
+                        "status": "RECOVERED",
+                        "retryResult": "FRESH",
+                        "recoveredAt": now,
+                        "lastAgeMs": retry_age,
+                        "lastSourceTimestampMs": retry.timestamp_ms,
+                        "lastSource": retry.source,
+                    })
+                    self._append_reference_recovery_event(
+                        self._reference_recovery_event(symbol, row, "REFERENCE_RETRY_RECOVERED", retryAgeMs=retry_age)
+                    )
+                else:
+                    row.update({"status": "RETRY_FAILED", "retryResult": "STALE"})
+                    self._append_reference_recovery_event(
+                        self._reference_recovery_event(symbol, row, "REFERENCE_RETRY_FAILED", retryAgeMs=retry_age)
+                    )
+                    self._notify_reference_recovery_failure(symbol, row)
+            except Exception as retry_error:
+                row.update({"status": "RETRY_FAILED", "retryResult": "UNAVAILABLE", "lastError": str(retry_error)})
+                self._append_reference_recovery_event(
+                    self._reference_recovery_event(symbol, row, "REFERENCE_RETRY_FAILED")
+                )
+                self._notify_reference_recovery_failure(symbol, row)
+            changed = True
+
+        if changed:
+            self.save()
+
+    def _fresh_aster_entry_book(self, candidate: dict) -> tuple[bool, dict]:
+        symbol = str(candidate.get("symbol") or "").upper()
+        try:
+            book = self.aster.book(legacy.base.ASTER_SYMBOL[symbol], 20)
+        except Exception as error:
+            return False, {"status": "UNAVAILABLE", "error": str(error)}
+        age = max(0, legacy.base.now_ms() - book.received_ms)
+        detail = {
+            "status": "FRESH" if age <= legacy.base.V13D_MAX_BOOK_AGE_MS else "STALE",
+            "ageMs": age,
+            "bid": book.bid,
+            "ask": book.ask,
+            "spreadBps": book.spread_bps,
+        }
+        if age > legacy.base.V13D_MAX_BOOK_AGE_MS:
+            return False, detail
+        if book.bid <= 0 or book.ask <= 0 or book.ask < book.bid:
+            return False, {**detail, "status": "INVALID"}
+        return True, detail
+
+    def _pre_order_reference_check(self, candidate: dict) -> tuple[bool, dict]:
+        candidate_status = str(candidate.get("referenceDataStatus") or "UNKNOWN").upper()
+        symbol = str(candidate.get("symbol") or "").upper()
+        try:
+            reference = self.reference.quote(symbol)
+            age = reference_age_ms(reference.timestamp_ms)
+            current_status = "FRESH" if age <= legacy.base.V11_MAX_DATA_AGE_MS else "STALE"
+            reference_detail = {"status": current_status, "ageMs": age, "source": reference.source}
+        except Exception as error:
+            current_status = "UNAVAILABLE"
+            reference_detail = {"status": current_status, "error": str(error)}
+
+        if current_status == "FRESH":
+            return True, {"referenceDataStatus": current_status, **reference_detail, "staleFallbackUsed": False}
+        if candidate_status not in {"STALE", "UNAVAILABLE"}:
+            return False, {
+                "referenceDataStatus": current_status,
+                **reference_detail,
+                "candidateReferenceDataStatus": candidate_status,
+                "staleFallbackUsed": False,
+                "reason": "REFERENCE_LOST_AFTER_FRESH_CANDIDATE",
+            }
+        aster_ready, aster_detail = self._fresh_aster_entry_book(candidate)
+        policy = reference_entry_policy(current_status, aster_ready)
+        return policy["allow"], {
+            "referenceDataStatus": current_status,
+            **reference_detail,
+            "candidateReferenceDataStatus": candidate_status,
+            "asterDataReady": aster_ready,
+            "asterData": aster_detail,
+            "staleFallbackUsed": policy["fallback"],
+            "reason": policy["reason"],
+        }
+
+    def books_and_refs(self) -> dict:
+        """Keep V52 alive on reference outages while preserving Aster/XYZ failures."""
+        result = {}
+        errors = {}
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            jobs = {}
+            for symbol in legacy.base.SYMBOLS:
+                jobs[(symbol, "aster")] = pool.submit(self.aster.book, legacy.base.ASTER_SYMBOL[symbol], 20)
+                jobs[(symbol, "xyz")] = pool.submit(self.xyz.book, legacy.base.XYZ_SYMBOL[symbol])
+                jobs[(symbol, "ref")] = pool.submit(self.reference.quote, symbol)
+            for symbol in legacy.base.SYMBOLS:
+                aster = jobs[(symbol, "aster")].result()
+                xyz = jobs[(symbol, "xyz")].result()
+                try:
+                    reference = jobs[(symbol, "ref")].result()
+                except Exception as error:
+                    errors[symbol] = str(error)
+                    cached = (self.state.get("v52ReferenceLastKnown") or {}).get(symbol)
+                    if isinstance(cached, dict) and cached.get("price") and cached.get("timestampMs"):
+                        reference = legacy.base.ReferenceQuote(
+                            symbol,
+                            float(cached["price"]),
+                            int(cached["timestampMs"]),
+                            legacy.base.now_ms(),
+                            str(cached.get("source") or "v52-state-cache"),
+                        )
+                    else:
+                        continue
+                result[symbol] = (aster, xyz, reference)
+        self._reference_fetch_errors = errors
+        return result
 
     def __init__(self, mode: str):
         super().__init__(mode)
@@ -156,6 +471,7 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
         eligible = []
         rejections = {}
         now = legacy.base.now_ms()
+        reference_fetch_errors = getattr(self, "_reference_fetch_errors", {})
         active_symbols = {str(position.get("symbol")) for position in self.positions().values()}
         stock = legacy.legacy
         for symbol, (aster, _xyz, reference) in rows.items():
@@ -165,6 +481,12 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             exit_action = "BUY" if side == "SELL" else "SELL"
             cost, detail = self.estimate_v11_cost(aster, exit_action, notional)
             adverse = max(0.0, abs(basis) - abs(signal_basis))
+            reference_age = reference_age_ms(reference.timestamp_ms, now)
+            reference_status = (
+                "UNAVAILABLE"
+                if symbol in reference_fetch_errors
+                else "FRESH" if reference_age <= legacy.base.V11_MAX_DATA_AGE_MS else "STALE"
+            )
             reasons = []
             if symbol in active_symbols:
                 reasons.append("SAME_SYMBOL_ACTIVE")
@@ -199,6 +521,8 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
                     "estimatedNetEdgeBps": net_edge,
                     "adverseBasisMoveBps": adverse,
                     "costDetail": detail,
+                    "referenceDataStatus": reference_status,
+                    "referenceAgeMs": reference_age,
                     "route": f"POST_{window.replace(':', '')}",
                 })
 
@@ -346,6 +670,23 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
         return self.gross_snapshot_from_rows(self.account_info(), self.aster.positions())
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        reference_allowed, reference_check = self._pre_order_reference_check(candidate)
+        if not reference_allowed:
+            self.log(
+                "v52-order-blocked",
+                slot=slot,
+                symbol=candidate.get("symbol"),
+                orderBlockedReason=reference_check.get("reason") or "REFERENCE_DATA_NOT_READY",
+                preOrderReferenceCheck=reference_check,
+                orderSendAttempted=False,
+                ordersSent=False,
+            )
+            return False
+        candidate = {
+            **candidate,
+            "preOrderReferenceCheck": reference_check,
+            "staleFallbackUsed": bool(reference_check.get("staleFallbackUsed")),
+        }
         if slot == V11_SLOT:
             requested = v11_requested_gross(
                 candidate.get("basisBps", 0.0),
@@ -479,6 +820,33 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
                 # result/reconcile. A hard crash leaves both lock+reservation and
                 # pending evidence for dead-PID recovery.
                 opened = super().open_basis_position(slot, candidate, target_gross)
+                if opened:
+                    position = self.positions().get(slot)
+                    if position:
+                        self._notify_fill({
+                            "eventId": f"{position.get('entryClientOrderId')}:ENTRY:{position.get('entryClientOrderId')}",
+                            "strategyId": str(position.get("strategy") or slot),
+                            "eventType": "ENTRY_FILL",
+                            "exchange": "Aster",
+                            "symbol": position.get("symbol"),
+                            "baseAsset": str(position.get("symbol") or "").replace("USDT", ""),
+                            "quoteAsset": "USDT",
+                            "positionSide": "LONG" if str(position.get("asterOpenSide")) == "BUY" else "SHORT",
+                            "orderSide": position.get("asterOpenSide"),
+                            "filledPrice": position.get("asterEntryPrice"),
+                            "filledQuantity": position.get("asterQty"),
+                            "quoteQuantity": legacy.base.finite(position.get("asterQty")) * legacy.base.finite(position.get("asterEntryPrice")),
+                            "clientOrderId": position.get("entryClientOrderId"),
+                            "executedAt": dt.datetime.fromtimestamp(legacy.base.finite(position.get("openedAt")) / 1000, tz=dt.timezone.utc).isoformat(),
+                            "reason": str(candidate.get("reason") or "V52_ENTRY_FILLED"),
+                            "metadata": {
+                                "slot": slot,
+                                "basisBps": candidate.get("basisBps"),
+                                "signalBasisBps": candidate.get("signalBasisBps"),
+                                "candidateRank": candidate.get("candidateRank"),
+                                "qualifiedRank": candidate.get("qualifiedRank"),
+                            },
+                        })
                 if opened and slot == V50_RANK2_SLOT:
                     position = self.positions().get(slot)
                     if position:
@@ -512,10 +880,37 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
         # is needed for reduce-only work.
         with self._account_critical(priority=1, wait_seconds=30.0, required=True):
             was_active = slot in self.positions()
+            position_before = dict(self.positions().get(slot) or {})
             result = super().close_slot(slot, reason)
             if was_active and slot == V50_RANK2_SLOT and slot not in self.positions():
                 self.state["v50CompletedTrades"] = int(self.state.get("v50CompletedTrades", 0)) + 1
                 self.save()
+            if was_active and slot not in self.positions():
+                fill = getattr(self, "_last_fill", None) or {}
+                if legacy.base.finite(fill.get("executedQty")) > 0:
+                    self._notify_fill({
+                        "eventId": f"{fill.get('clientId')}:EXIT:{fill.get('clientId')}",
+                        "strategyId": str(position_before.get("strategy") or slot),
+                        "eventType": "EXIT_FILL",
+                        "exchange": "Aster",
+                        "symbol": fill.get("symbol") or position_before.get("symbol"),
+                        "baseAsset": str(fill.get("symbol") or position_before.get("symbol") or "").replace("USDT", ""),
+                        "quoteAsset": "USDT",
+                        "positionSide": "LONG" if str(position_before.get("asterOpenSide")) == "BUY" else "SHORT",
+                        "orderSide": fill.get("side"),
+                        "filledPrice": fill.get("averagePrice"),
+                        "filledQuantity": fill.get("executedQty"),
+                        "quoteQuantity": legacy.base.finite(fill.get("executedQty")) * legacy.base.finite(fill.get("averagePrice")),
+                        "clientOrderId": fill.get("clientId"),
+                        "executedAt": dt.datetime.fromtimestamp(legacy.base.finite(fill.get("executedAt")) / 1000, tz=dt.timezone.utc).isoformat(),
+                        "reason": reason,
+                        "metadata": {
+                            "slot": slot,
+                            "entryPrice": position_before.get("asterEntryPrice"),
+                            "entryQuantity": position_before.get("asterQty"),
+                            "positionId": position_before.get("positionId"),
+                        },
+                    })
             return result
 
     def flatten_all(self, reason: str) -> None:
@@ -627,6 +1022,16 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
             return
 
         rows = self.books_and_refs()
+        self._record_reference_recovery(rows)
+        missing_references = sorted(set(legacy.base.SYMBOLS) - set(rows))
+        if missing_references:
+            self.log(
+                "v52-reference-data-unavailable",
+                symbols=missing_references,
+                errors=getattr(self, "_reference_fetch_errors", {}),
+                ordersSent=False,
+            )
+            return
         self._record_reference_active()
         if self.v96_requires_margin():
             if self.positions():
@@ -693,6 +1098,10 @@ class V12AwareV52AsterOnlyEngine(legacy.MarginAwareV52AsterOnlyEngine):
 
 
 def self_test() -> None:
+    assert reference_age_ms(1_000, 31_001) == 30_001
+    assert reference_entry_policy("FRESH", False) == {"allow": True, "fallback": False, "reason": "REFERENCE_FRESH"}
+    assert reference_entry_policy("STALE", True)["fallback"] is True
+    assert reference_entry_policy("STALE", False)["allow"] is False
     engine = object.__new__(V12AwareV52AsterOnlyEngine)
     account = {"totalMarginBalance": "1000"}
     rows = [
