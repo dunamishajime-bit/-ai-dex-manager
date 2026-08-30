@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "id": "main-research-0255-2026-08-30T05-24-19-129Z",
-  "cycle": 255,
-  "startedAt": "2026-08-30T05:24:09.129Z",
-  "completedAt": "2026-08-30T05:24:19.129Z",
+  "id": "main-research-0256-2026-08-30T13-49-25-763Z",
+  "cycle": 256,
+  "startedAt": "2026-08-30T13:49:15.763Z",
+  "completedAt": "2026-08-30T13:49:25.763Z",
   "profile": "attack",
-  "title": "Main Strategy Research #255：WIN80_ULTRA90_TOP1_V1 / 方向性が近い新ロジック",
-  "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「方向性が近い新ロジック」を議論。2件を提案し、最優先はWIN85_DUAL_CONFIRM_SIBLING_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。",
-  "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN85_DUAL_CONFIRM_SIBLING_V1で、New sibling logicだけを変更した親子リプレイを作成します。ULTRA90_PULLBACK_SIBLING_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。",
+  "title": "Main Strategy Research #256：WIN80_ULTRA90_TOP1_V1 / Win80 / Ultra90 Entry品質",
+  "summary": "旧Championを継承せず、現行WIN80_ULTRA90_TOP1_V1本体を親として「Win80 / Ultra90 Entry品質」を議論。2件を提案し、最優先はWIN80_SCORE_82_CHILD_V1。汎用Perpetual GenomeのOOS数値は使用していません。 保存済みBT元データから1084件のStrategyEngineInput Snapshotを復元し、86件の選定Signalに24h/72h/168h実績を付与しました。",
+  "decision": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN80_SCORE_82_CHILD_V1で、Win80 minimum scoreだけを変更した親子リプレイを作成します。WIN80_TRIGGER_80_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。 現行親のSnapshot証拠はREADY。子案は同一Snapshot親子比較完了までREPLAY_REQUIREDです。",
   "methodology": "研究Program win80_ultra90_direct_v2。親はproduction main WIN80_ULTRA90_TOP1_V1だけです。旧Champion Deep Stateは読み込まず、実コード定数、歴史参考値、Critic反論、実パラメータ変更案から議論を生成します。再現可能なリプレイ結果がない案はREPLAY_REQUIREDとし、OOSや月利を捏造しません。 追加Evidence: binance-usdm-futuresの1h OHLCV/FundingキャッシュからStrategyEngineInputを6時間ごとに再構築し、次1h足始値Entry・固定24h/72h/168h Outcome・Fee/Slippage/Funding控除で検証。Artifact fingerprint=251058c8a001971f985f20b71d51154fee32ea07eebf3f6113378f8e15765f2d。",
   "finalCandidates": 0,
   "bestTrainMonthlyPct": null,
@@ -16,20 +16,20 @@
   "bestWorstStressMonthlyPct": null,
   "topStrategyIds": [
     "WIN80_ULTRA90_TOP1_V1",
-    "WIN85_DUAL_CONFIRM_SIBLING_V1",
-    "ULTRA90_PULLBACK_SIBLING_V1"
+    "WIN80_SCORE_82_CHILD_V1",
+    "WIN80_TRIGGER_80_CHILD_V1"
   ],
   "messages": [
     {
       "id": "m-001",
       "sequence": 1,
-      "createdAt": "2026-08-30T05:24:10.129Z",
+      "createdAt": "2026-08-30T13:49:16.763Z",
       "speakerId": "research-moderator",
       "speakerName": "Research Moderator",
       "role": "moderator",
       "stance": "context",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "Main Strategy Research #255を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「方向性が近い新ロジック」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。",
+      "content": "Main Strategy Research #256を開始します。親は実運用コードのWIN80_ULTRA90_TOP1_V1だけです。旧Champion Deepのdeep-c*、Momentum、ATR、汎用Perpetual Genomeは継承せず、今回の焦点は「Win80 / Ultra90 Entry品質」です。メインは固定し、改善案と近縁ロジックは別IDで検証します。",
       "evidence": [
         {
           "label": "固定親",
@@ -48,7 +48,7 @@
         },
         {
           "label": "今回の焦点",
-          "value": "方向性が近い新ロジック",
+          "value": "Win80 / Ultra90 Entry品質",
           "assessment": "neutral"
         }
       ]
@@ -56,7 +56,7 @@
     {
       "id": "m-002",
       "sequence": 2,
-      "createdAt": "2026-08-30T05:24:11.129Z",
+      "createdAt": "2026-08-30T13:49:17.763Z",
       "speakerId": "main-strategy-researcher",
       "speakerName": "Main Strategy Researcher",
       "role": "researcher",
@@ -114,21 +114,21 @@
     {
       "id": "m-003",
       "sequence": 3,
-      "createdAt": "2026-08-30T05:24:12.129Z",
+      "createdAt": "2026-08-30T13:49:18.763Z",
       "speakerId": "hypothesis-researcher",
       "speakerName": "Hypothesis Researcher",
       "role": "researcher",
       "stance": "proposal",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "1. WIN85_DUAL_CONFIRM_SIBLING_V1: New sibling logicを「WIN80 Top-1」から「Score85 + 1H/6H trend agreement + next-bar confirmation」へ変更。Win80の高選別思想を維持しながら、Entryを1段階確認して騙しを減らす近縁ロジック。 期待効果: 取引数を抑えた高勝率型。メインを変更せず別系統で検証する。\n2. ULTRA90_PULLBACK_SIBLING_V1: New sibling logicを「Immediate Ultra90 rotation」から「Ultra90 detected -> pullback/retest confirmation -> rotation」へ変更。Ultra90の強さを使いつつ、直後の高値掴みを減らす近縁ロジック。 期待効果: Slippage・Gap耐性改善とEntry遅延の比較。",
+      "content": "1. WIN80_SCORE_82_CHILD_V1: Win80 minimum scoreを「80」から「82」へ変更。Score 80直上の弱いEntryを削り、勝率とコスト耐性が改善するかを切り分ける。 期待効果: 取引数は減るが平均利益とStress耐性が改善する可能性。\n2. WIN80_TRIGGER_80_CHILD_V1: Win80 trigger progressを「76.00%」から「80.00%」へ変更。発火途中のEntryを減らし、騙しBreakoutを抑制できるかを確認する。 期待効果: 損失回数低下とEntry遅延のトレードオフ。",
       "evidence": [
         {
-          "label": "WIN85_DUAL_CONFIRM_SIBLING_V1",
+          "label": "WIN80_SCORE_82_CHILD_V1",
           "value": "REPLAY_REQUIRED",
           "assessment": "neutral"
         },
         {
-          "label": "ULTRA90_PULLBACK_SIBLING_V1",
+          "label": "WIN80_TRIGGER_80_CHILD_V1",
           "value": "REPLAY_REQUIRED",
           "assessment": "neutral"
         }
@@ -137,7 +137,7 @@
     {
       "id": "m-004",
       "sequence": 4,
-      "createdAt": "2026-08-30T05:24:13.129Z",
+      "createdAt": "2026-08-30T13:49:19.763Z",
       "speakerId": "overfit-critic",
       "speakerName": "AI反対派 / Overfit",
       "role": "overfit_critic",
@@ -165,7 +165,7 @@
     {
       "id": "m-005",
       "sequence": 5,
-      "createdAt": "2026-08-30T05:24:14.129Z",
+      "createdAt": "2026-08-30T13:49:20.763Z",
       "speakerId": "tail-risk-critic",
       "speakerName": "AI反対派 / Tail Risk",
       "role": "tail_risk_critic",
@@ -193,7 +193,7 @@
     {
       "id": "m-006",
       "sequence": 6,
-      "createdAt": "2026-08-30T05:24:15.129Z",
+      "createdAt": "2026-08-30T13:49:21.763Z",
       "speakerId": "execution-critic",
       "speakerName": "AI反対派 / Execution",
       "role": "execution_critic",
@@ -231,36 +231,13 @@
     {
       "id": "m-007",
       "sequence": 7,
-      "createdAt": "2026-08-30T05:24:16.129Z",
-      "speakerId": "sibling-logic-researcher",
-      "speakerName": "Sibling Logic Researcher",
-      "role": "researcher",
-      "stance": "proposal",
-      "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "方向性が近い新ロジックは、メインを改造せず独立IDで開発します。WIN85_DUAL_CONFIRM_SIBLING_V1: Score85 + 1H/6H trend agreement + next-bar confirmation / ULTRA90_PULLBACK_SIBLING_V1: Ultra90 detected -> pullback/retest confirmation -> rotation。親の高選別Top-1思想だけを継承し、成績が悪くてもWIN80_ULTRA90_TOP1_V1へ影響させません。",
-      "evidence": [
-        {
-          "label": "WIN85_DUAL_CONFIRM_SIBLING_V1",
-          "value": "独立研究",
-          "assessment": "neutral"
-        },
-        {
-          "label": "ULTRA90_PULLBACK_SIBLING_V1",
-          "value": "独立研究",
-          "assessment": "neutral"
-        }
-      ]
-    },
-    {
-      "id": "m-008",
-      "sequence": 8,
-      "createdAt": "2026-08-30T05:24:17.129Z",
+      "createdAt": "2026-08-30T13:49:22.763Z",
       "speakerId": "research-cio",
       "speakerName": "Research CIO",
       "role": "cio",
       "stance": "decision",
       "strategyId": "WIN80_ULTRA90_TOP1_V1",
-      "content": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN85_DUAL_CONFIRM_SIBLING_V1で、New sibling logicだけを変更した親子リプレイを作成します。ULTRA90_PULLBACK_SIBLING_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。\n\n現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。",
+      "content": "WIN80_ULTRA90_TOP1_V1はメインのまま固定します。旧deep-c* Championは主研究へ継承しません。今回の最優先実験はWIN80_SCORE_82_CHILD_V1で、Win80 minimum scoreだけを変更した親子リプレイを作成します。WIN80_TRIGGER_80_CHILD_V1は第2候補です。再現BTまたはForward Paper結果が出るまで採用・改善成功とは判定しません。\n\n現行親ロジックのSnapshot Replayは保存済みです。今後の議論はReference値だけでなく、各SnapshotのScore・Trigger・RR・Volumeと24h/72h/168h実績を必須証拠にします。ただし子案を改善済みとはまだ判定せず、同一Snapshotで親子比較が完了するまでREPLAY_REQUIREDを維持します。",
       "evidence": [
         {
           "label": "メイン維持",
@@ -269,7 +246,7 @@
         },
         {
           "label": "最優先実験",
-          "value": "WIN85_DUAL_CONFIRM_SIBLING_V1",
+          "value": "WIN80_SCORE_82_CHILD_V1",
           "assessment": "neutral"
         },
         {
@@ -304,7 +281,7 @@
     "datasetId": "WIN80_USDM_1H_REFERENCE_2025H2_2026Q1_V1",
     "strategyId": "WIN80_ULTRA90_TOP1_V1",
     "source": "binance-usdm-futures",
-    "generatedAt": "2026-08-30T05:24:09.129Z",
+    "generatedAt": "2026-08-30T13:49:15.762Z",
     "period": {
       "startIso": "2025-07-01T00:00:00.000Z",
       "endIso": "2026-04-07T00:00:00.000Z"
