@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import math
 
 
@@ -8,6 +9,59 @@ def _finite(name: str, value: float) -> float:
     if not math.isfinite(out):
         raise ValueError(f'{name} must be finite: {value!r}')
     return out
+
+
+def resolve_quality102_gross_cap(raw: str | None, *, default: float = 0.50, maximum: float = 0.50) -> float:
+    """Resolve Quality102 gross cap, defaulting to the validated 0.50x ceiling."""
+    source = default if raw is None or str(raw).strip() == '' else raw
+    try:
+        value = float(source)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f'QUALITY102_GROSS_CAP must be numeric: {source!r}') from exc
+    if not math.isfinite(value) or value <= 0.0 or value > maximum + 1e-12:
+        raise ValueError(f'QUALITY102_GROSS_CAP must be finite and in (0,{maximum}]: {source!r}')
+    return value
+
+
+def _target_names(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.Name):
+        return [node.id]
+    if isinstance(node, (ast.Tuple, ast.List)):
+        out: list[str] = []
+        for elt in node.elts:
+            out.extend(_target_names(elt))
+        return out
+    return []
+
+
+def patch_named_numeric_assignment(source: str, target_name: str, *, expected_old: float, new_value: float) -> str:
+    """Patch exactly one named numeric assignment without touching report literals."""
+    new_number = _finite('new_value', new_value)
+    tree = ast.parse(source)
+    matches: list[ast.Constant] = []
+    for node in ast.walk(tree):
+        names: list[str] = []
+        value_node: ast.AST | None = None
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                names.extend(_target_names(target))
+            value_node = node.value
+        elif isinstance(node, ast.AnnAssign):
+            names.extend(_target_names(node.target))
+            value_node = node.value
+        if target_name not in names or not isinstance(value_node, ast.Constant) or not isinstance(value_node.value, (int, float)):
+            continue
+        if abs(float(value_node.value) - float(expected_old)) <= 1e-12:
+            matches.append(value_node)
+    if len(matches) != 1:
+        raise ValueError(f'expected exactly one {target_name} assignment at {expected_old}; found {len(matches)}')
+    node = matches[0]
+    if node.end_lineno != node.lineno or node.end_col_offset is None:
+        raise ValueError(f'{target_name} numeric assignment must be on one line')
+    lines = source.splitlines(keepends=True)
+    line = lines[node.lineno - 1]
+    lines[node.lineno - 1] = line[:node.col_offset] + format(new_number, '.12g') + line[node.end_col_offset:]
+    return ''.join(lines)
 
 
 def solve_trim_resize(
