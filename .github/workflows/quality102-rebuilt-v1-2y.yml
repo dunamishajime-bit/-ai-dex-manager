@@ -61,7 +61,7 @@ jobs:
           assert p['selectorRecovered'] is False
           assert p['fixed102ReplayUsed'] is False
           assert p['selection']['closedCount']==len(rows)>0
-          assert p['selection']['qualityGrossCap']==0.35
+          assert p['selection']['qualityGrossCap']==0.50
           assert p['capitalContract']=={'initialJpy':10000,'monthlyContributionJpy':20000,'contributionCountAfterStart':24,'totalContributedJpy':490000}
           assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           assert all(row['ret14']=='' for row in rows)
