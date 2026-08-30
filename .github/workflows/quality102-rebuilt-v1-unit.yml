@@ -6,6 +6,8 @@ on:
       - research/quality102-rebuilt-v1-20260831
     paths:
       - 'scripts/quality102_rebuilt_v1.py'
+      - 'scripts/quality102_rebuilt_v1_outcomes.py'
+      - 'scripts/research_quality102_rebuilt_v1_2y.py'
       - 'tests/test_quality102_rebuilt_v1.py'
       - '.github/workflows/quality102-rebuilt-v1-unit.yml'
   workflow_dispatch:
@@ -22,7 +24,58 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile selector
-        run: python -m py_compile scripts/quality102_rebuilt_v1.py
+      - name: Compile selector modules
+        run: python -m py_compile scripts/quality102_rebuilt_v1.py scripts/quality102_rebuilt_v1_outcomes.py scripts/research_quality102_rebuilt_v1_2y.py
       - name: Run causal selector contract
         run: python tests/test_quality102_rebuilt_v1.py
+
+  generate-2y:
+    needs: unit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore Binance Vision archive cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/binance-vision-quality102-rebuilt-v1
+          key: quality102-rebuilt-v1-binance-vision-202405-202608-v1
+      - name: Generate dynamic two-year Quality supplement
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_quality102_rebuilt_v1_2y.py \
+            --output-dir .research-state/quality102-rebuilt-v1-2y \
+            --cache-dir .cache/binance-vision-quality102-rebuilt-v1 \
+            2>&1 | tee .research-state/quality102-rebuilt-v1-2y.log
+      - name: Enforce two-year generation contract
+        run: |
+          python - <<'PY'
+          import csv,json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/quality102-rebuilt-v1-2y/report.json').read_text())
+          rows=list(csv.DictReader(Path('.research-state/quality102-rebuilt-v1-2y/quality102-rebuilt-v1.csv').open()))
+          assert p['status']=='QUALITY102_REBUILT_V1_GENERATED',p
+          assert p['selectorId']=='QUALITY102_REBUILT_V1'
+          assert p['selectorRecovered'] is False
+          assert p['fixed102ReplayUsed'] is False
+          assert p['selection']['closedCount']==len(rows)>0
+          assert p['selection']['qualityGrossCap']==0.35
+          assert p['capitalContract']=={'initialJpy':10000,'monthlyContributionJpy':20000,'contributionCountAfterStart':24,'totalContributedJpy':490000}
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert all(row['ret14']=='' for row in rows)
+          print(json.dumps({'status':'QUALITY102_REBUILT_V1_2Y_GENERATION_PASS','selection':p['selection'],'outcomes':p['outcomes'],'csv':p['csv']},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality102-rebuilt-v1-2y-${{ github.run_id }}
+          path: |
+            .research-state/quality102-rebuilt-v1-2y
+            .research-state/quality102-rebuilt-v1-2y.log
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
