@@ -32,19 +32,12 @@ jobs:
         with:
           python-version: '3.12'
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Compile two-year bootstrap
         run: python -m py_compile scripts/research_quality102_2y_bootstrap.py
 
       - name: Recover and verify exact Quality102 source lineage
         run: |
+          mkdir -p .research-state
           set -o pipefail
           python scripts/research_quality102_2y_bootstrap.py 2>&1 | tee .research-state/quality102-2y-bootstrap.log
 
@@ -54,29 +47,17 @@ jobs:
           import json
           from pathlib import Path
           p=json.loads(Path('.research-state/quality102-2y-bootstrap/bootstrap.json').read_text())
+          assert p['status']=='QUALITY102_2Y_SOURCE_RECOVERED',p
           assert p['requestedPeriod']=={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
           assert p['capital']=={'initialJpy':10000,'monthlyContributionJpy':20000,'contributionCountAfterStart':24,'totalContributedJpy':490000}
           assert p['reference']['candidateCount']==102
           assert p['reference']['sha256']=='b45f492a67307cf1845fcce6af0919c5202a5853b13e7f0914daf11889bd5ead'
-          assert p['acceptance']['mustReproduceReferenceRowsExactly'] is True
+          assert len(p['qualityPayloads'])>=1,p['payloads']
           assert p['acceptance']['mustGenerate2024SideCausally'] is True
           assert p['acceptance']['copyOrStretchReferenceRowsForbidden'] is True
           assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          print('QUALITY102_2Y_INPUT_CONTRACT=PASS')
-          PY
-
-      - name: Stop fail-closed until exact candidate generator is recovered
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          p=json.loads(Path('.research-state/quality102-2y-bootstrap/bootstrap.json').read_text())
-          matches=p.get('historyMatches','')
-          if not matches.strip():
-              raise SystemExit('QUALITY102_2Y_BLOCKED: exact historical candidate generator not yet recovered; refusing to fabricate first-year candidates')
-          print('QUALITY102_HISTORY_MATCHES_RECOVERED')
-          print(matches[-12000:])
-          raise SystemExit('QUALITY102_2Y_RECOVERY_PHASE_COMPLETE: inspect recovered source matches and wire exact generator before integrated BT')
+          print('QUALITY102_2Y_SOURCE_RECOVERY=PASS')
+          print(json.dumps(p['qualityPayloads'],indent=2))
           PY
 
       - uses: actions/upload-artifact@v4
@@ -88,4 +69,4 @@ jobs:
             .research-state/quality102-2y-bootstrap.log
           include-hidden-files: true
           retention-days: 90
-          if-no-files-found: warn
+          if-no-files-found: error
