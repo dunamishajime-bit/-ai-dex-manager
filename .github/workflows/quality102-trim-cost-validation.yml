@@ -102,7 +102,19 @@ jobs:
             --output-root .research-state/quality102-trim-cost-validation \
             2>&1 | tee .research-state/quality102-trim-cost-validation.log
 
-      - name: Validate trim-cost contract
+      - name: Run direct default 0.50x smoke at 100bp
+        env:
+          QUALITY102_TRIM_COST_BPS: '100'
+        run: |
+          set -o pipefail
+          python scripts/research_latest_v8_quality102_grosssafe.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/quality102-prior/v12-top2-ledger.json \
+            --pengu-ledger .research-state/quality102-prior/pengu-v8-ledger.json \
+            --output-dir .research-state/quality102-default50-smoke \
+            2>&1 | tee .research-state/quality102-default50-smoke.log
+
+      - name: Validate trim-cost contract and direct default
         run: |
           python - <<'PY'
           import json
@@ -112,14 +124,35 @@ jobs:
           assert p['caps']==[0.35,0.5]
           assert p['trimCostBps']==[0.0,50.0,100.0,200.0,500.0]
           assert p['grossPolicy']=='BASE_PRIORITY_TOTAL_AND_CRYPTO_RESIDUAL_SHRINK'
+          assert p['grossSizingBasis']=='PRE_TRIM_EXECUTION_COST_EQUITY'
           assert p['costPolicy']=='TRIMMED_NOTIONAL_X_BPS_CHARGED_ONCE'
+          assert p['quality102CountsTowardCryptoGross'] is True
           assert p['requiredAdvantageCostBps']==[50.0,100.0]
           assert p['acceptance']['allEngineChecksPass'] is True
           assert p['acceptance']['allSizingGrossChecksPass'] is True
+          assert p['acceptance']['allCostAccountingChecksPass'] is True
           assert p['acceptance']['baselineFiringsPreserved'] is True
           assert p['acceptance']['fiftyBeatsThirtyFiveAtRequiredCosts'] is True
+          assert p['costSensitivityMonotone']['pass'] is True
           assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
-          print(json.dumps(p,ensure_ascii=False,indent=2))
+
+          direct=json.loads(Path('.research-state/quality102-default50-smoke/result.json').read_text())
+          target=next(row for row in p['rows'] if row['cap']==0.5 and row['trimCostBps']==100.0)
+          assert direct['status']=='PASS_RESEARCH_ONLY'
+          assert all(bool(v) for v in direct['checks'].values())
+          for mode,prefix in [('NORMAL','normal'),('SEVERE','severe')]:
+              r=direct['results'][mode]
+              g=r['grossVerification']
+              assert abs(float(g['configuredQuality102GrossCap'])-0.5) <= 1e-12
+              assert g['quality102CountsTowardCryptoGross'] is True
+              assert g['grossBasis']=='PRE_TRIM_EXECUTION_COST_EQUITY'
+              assert abs(float(g['trimExecutionCostBps'])-100.0) <= 1e-12
+              assert float(g['entryTimeMaxTotalGross']) <= 2.5 + 1e-9
+              assert float(g['entryTimeMaxCryptoGross']) <= 2.0 + 1e-9
+              assert float(g['entryTimeMaxSupplementGross']) <= 0.5 + 1e-9
+              assert len(g.get('supplementGrossConflicts',[])) == 0
+              assert abs(float(r['endingAssetJpy'])-float(target[f'{prefix}EndingAssetJpy'])) <= 1e-6
+          print(json.dumps({'summaryAcceptance':p['acceptance'],'directDefault50':'PASS'},ensure_ascii=False,indent=2))
           PY
 
       - uses: actions/upload-artifact@v4
@@ -129,6 +162,8 @@ jobs:
           path: |
             .research-state/quality102-trim-cost-validation
             .research-state/quality102-trim-cost-validation.log
+            .research-state/quality102-default50-smoke
+            .research-state/quality102-default50-smoke.log
           include-hidden-files: true
           retention-days: 90
           if-no-files-found: warn
