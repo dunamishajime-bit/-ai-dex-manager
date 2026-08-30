@@ -18,16 +18,22 @@ assert mod.QUALITY_REQUESTED_GROSS == 0.50
 assert mod.CRYPTO_GROSS_CAP == 2.0
 assert mod.TOTAL_GROSS_CAP == 2.5
 
-# Quality always requests the original 50% sleeve. Only residual portfolio
-# capacity may reduce the effective allocation.
 assert mod.allocate_quality_gross(base_crypto_gross=1.3, base_total_gross=1.8) == 0.50
 assert abs(mod.allocate_quality_gross(base_crypto_gross=1.8, base_total_gross=2.2) - 0.20) < 1e-12
 assert abs(mod.allocate_quality_gross(base_crypto_gross=1.0, base_total_gross=2.4) - 0.10) < 1e-12
 assert mod.allocate_quality_gross(base_crypto_gross=2.0, base_total_gross=2.0) == 0.0
-
-# Allocation must not inspect Normal/Stress PnL or any future outcome field.
 sig = inspect.signature(mod.allocate_quality_gross)
 assert set(sig.parameters) == {'base_crypto_gross', 'base_total_gross'}
+
+v12_wrapper_source = '''
+replaceOnce("const START = Date.UTC(2025, 7, 21);", "const START = Date.UTC(2025, 7, 1);");
+replaceOnce("const END = Date.UTC(2026, 7, 21);", "const END = Date.UTC(2026, 7, 1);");
+'''
+patched_v12 = mod.patch_v12_top2_two_year_wrapper(v12_wrapper_source)
+assert '"const START = Date.UTC(2024, 7, 10);"' in patched_v12
+assert '"const END = Date.UTC(2026, 7, 10);"' in patched_v12
+assert 'Date.UTC(2025, 7, 1)' not in patched_v12
+assert 'Date.UTC(2026, 7, 1)' not in patched_v12
 
 pengu_source = '''
 const WARM_START = Date.parse("2025-07-01T00:00:00Z");
@@ -49,8 +55,6 @@ assert 'normal return drift' not in patched_pengu
 assert 'ledger.period.startInclusive,"2024-08-10T00:00:00.000Z"' in patched_pengu
 assert 'ledger.period.endExclusive,"2026-08-10T00:00:00.000Z"' in patched_pengu
 
-# The DCA patch changes only research horizon/contributions; risk caps remain
-# those of the existing portfolio engine.
 dca_source = '''
 START = dt.datetime(2025, 8, 10, tzinfo=UTC)
 END = dt.datetime(2026, 8, 10, tzinfo=UTC)
