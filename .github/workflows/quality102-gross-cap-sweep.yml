@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/latest-v12-pengu-v8-v52-dca-1y-20260828
+      - research/quality102-original-parity-2y-20260831
     paths:
       - 'scripts/research_quality102_gross_cap_sweep.py'
       - 'tests/test_research_quality102_gross_cap_sweep.py'
@@ -99,10 +100,10 @@ jobs:
             --output-root .research-state/quality102-gross-cap-sweep \
             2>&1 | tee .research-state/quality102-gross-cap-sweep.log
 
-      - name: Validate sweep contract
+      - name: Validate sweep and original 50 percent parity contract
         run: |
           python - <<'PY'
-          import json
+          import json, math
           from pathlib import Path
           p=json.loads(Path('.research-state/quality102-gross-cap-sweep/sweep-summary.json').read_text())
           assert p['schema']=='quality102-gross-cap-sweep/v1'
@@ -119,13 +120,44 @@ jobs:
                   assert row[f'{prefix}MaxSupplementGross'] <= cap + 1e-9,row
                   assert row[f'{prefix}GrossConflictCount']==0,row
           assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+
+          result=json.loads(Path('.research-state/quality102-gross-cap-sweep/cap-0.5/result.json').read_text())
+          normal=result['scenarios']['normal']
+          severe=result['scenarios']['severe']
+          def close(a,b,tol=1e-6):
+              assert math.isclose(float(a),float(b),rel_tol=0,abs_tol=tol),(a,b)
+          close(normal['endingAssetJpy'],3626720.20629879)
+          close(normal['profitFactor'],3.50990931,1e-8)
+          close(normal['maxDrawdownPct'],-12.1772,1e-4)
+          assert normal['supplement']['trades']==102
+          close(normal['supplement']['pnlJpy'],932657.94697663)
+          close(normal['supplement']['profitFactor'],3.82614322,1e-8)
+          close(normal['supplement']['winRatePct'],67.64705882,1e-8)
+          assert normal['supplementGrossResizeCount']==7
+          assert normal['supplementGrossConflictCount']==0
+          close(normal['maxEntryGross']['total'],2.5,1e-9)
+          close(normal['maxEntryGross']['supplement'],0.5,1e-9)
+          close(severe['endingAssetJpy'],1165200.66091746)
+          assert severe['supplement']['trades']==102
+          close(severe['supplement']['pnlJpy'],453609.48988331)
+          close(severe['supplement']['profitFactor'],4.11772025,1e-8)
+          close(severe['supplement']['winRatePct'],69.60784314,1e-8)
+          assert severe['supplementGrossResizeCount']==1
+          assert severe['supplementGrossConflictCount']==0
+          close(severe['maxEntryGross']['total'],2.5,1e-9)
+          close(severe['maxEntryGross']['supplement'],0.5,1e-9)
+          assert result['supplement']['frozenCandidateCount']==102
+          assert result['supplement']['grossCap']==0.5
+          assert result['supplement']['entryPolicy']=='BASE_IDLE_ONE_SLOT_BASE_PRIORITY_RESIDUAL_GROSS_SHRINK'
+          assert result['supplement']['resizePnlAccounting']=='ZERO_PNL_ON_TRIMMED_NOTIONAL'
+          print('QUALITY102_ORIGINAL_1Y_PARITY=PASS')
           print(json.dumps(p,ensure_ascii=False,indent=2))
           PY
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: quality102-gross-cap-sweep-${{ github.run_id }}
+          name: quality102-original-parity-${{ github.run_id }}
           path: |
             .research-state/quality102-gross-cap-sweep
             .research-state/quality102-gross-cap-sweep.log
