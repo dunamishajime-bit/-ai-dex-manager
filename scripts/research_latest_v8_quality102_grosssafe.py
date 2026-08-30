@@ -1,6 +1,8 @@
 from pathlib import Path
 import ast, math, os, re, runpy, subprocess, sys
 
+from quality102_trim_cost import patch_named_numeric_assignment, resolve_quality102_gross_cap
+
 SOURCE=Path('scripts/research_latest_v8_dca_1y.py')
 GENERATED=Path('scripts/.research_latest_v8_quality102_dca_1y.generated.py')
 orig_run, orig_unlink, orig_argv = subprocess.run, Path.unlink, list(sys.argv)
@@ -54,6 +56,10 @@ def hold_unlink(self,*a,**kw):
 
 trim_cost_bps=_env_nonnegative_bps('QUALITY102_TRIM_COST_BPS',0.0)
 try:
+    quality102_gross_cap=resolve_quality102_gross_cap(os.environ.get('QUALITY102_GROSS_CAP'))
+except ValueError as exc:
+    raise SystemExit(str(exc)) from exc
+try:
     subprocess.run, Path.unlink = hold_run, hold_unlink
     sys.argv=[str(SOURCE),*orig_argv[1:]]
     runpy.run_path(str(SOURCE),run_name='__main__')
@@ -65,6 +71,11 @@ if not GENERATED.exists() or 'argv' not in captured:
 s=GENERATED.read_text(encoding='utf-8')
 crypto_cap_name=_find_cap_name(s,'CRYPTO',2.0)
 supp_cap_name=_find_cap_name(s,'SUPP',0.15)
+try:
+    s=patch_named_numeric_assignment(s,supp_cap_name,expected_old=0.15,new_value=quality102_gross_cap)
+except ValueError as exc:
+    raise SystemExit(str(exc)) from exc
+s=s.replace('"grossCap": 0.15', f'"grossCap": {format(quality102_gross_cap, ".12g")}')
 
 helper_import='from quality102_trim_cost import solve_trim_resize\n'
 if helper_import not in s:
@@ -80,6 +91,7 @@ replacement=(
     '    gross_conflicts: List[dict] = []\n'
     '    gross_resizes: List[dict] = []\n'
     f'    quality102_trim_cost_bps = {trim_cost_bps!r}\n'
+    f'    quality102_configured_gross_cap = {quality102_gross_cap!r}\n'
     '    trim_execution_cost_total_jpy = 0.0\n'
 )
 if s.count(marker)!=1:
@@ -172,18 +184,18 @@ if n!=1:
     raise SystemExit('observe patch failed')
 
 old_report='"supplementGrossConflicts": gross_conflicts, "limits":'
-new_report='"supplementGrossConflicts": gross_conflicts, "supplementGrossResizes": gross_resizes, "trimExecutionCostBps": quality102_trim_cost_bps, "trimExecutionCostJpy": trim_execution_cost_total_jpy, "grossBasis": "PRE_TRIM_EXECUTION_COST_EQUITY", "quality102CountsTowardCryptoGross": True, "limits":'
+new_report='"supplementGrossConflicts": gross_conflicts, "supplementGrossResizes": gross_resizes, "configuredQuality102GrossCap": quality102_configured_gross_cap, "trimExecutionCostBps": quality102_trim_cost_bps, "trimExecutionCostJpy": trim_execution_cost_total_jpy, "grossBasis": "PRE_TRIM_EXECUTION_COST_EQUITY", "quality102CountsTowardCryptoGross": True, "limits":'
 if s.count(old_report)!=1:
     raise SystemExit(f'gross report marker count unexpected: {s.count(old_report)}')
 s=s.replace(old_report,new_report,1)
 
 old_policy='"entryPolicy": "BASE_IDLE_ONLY_ONE_SLOT_NO_PREEMPT"'
-new_policy='"entryPolicy": "BASE_IDLE_ONE_SLOT_BASE_PRIORITY_TOTAL_AND_CRYPTO_RESIDUAL_SHRINK", "resizePnlAccounting": "TRIMMED_NOTIONAL_X_BPS_CHARGED_ONCE", "grossSizingBasis": "PRE_TRIM_EXECUTION_COST_EQUITY", "quality102CountsTowardCryptoGross": True'
+new_policy='"entryPolicy": "BASE_IDLE_ONE_SLOT_BASE_PRIORITY_TOTAL_AND_CRYPTO_RESIDUAL_SHRINK", "resizePnlAccounting": "TRIMMED_NOTIONAL_X_BPS_CHARGED_ONCE", "grossSizingBasis": "PRE_TRIM_EXECUTION_COST_EQUITY", "quality102CountsTowardCryptoGross": True, "configuredQuality102GrossCap": quality102_configured_gross_cap'
 if s.count(old_policy)!=1:
     raise SystemExit(f'entry policy marker count unexpected: {s.count(old_policy)}')
 s=s.replace(old_policy,new_policy,1)
 
-if 'SUPPLEMENT_GROSS_RESIZED' not in s or 'BASE_IDLE_ONLY_ONE_SLOT_NO_PREEMPT' in s or 'quality102CountsTowardCryptoGross' not in s:
+if 'SUPPLEMENT_GROSS_RESIZED' not in s or 'BASE_IDLE_ONLY_ONE_SLOT_NO_PREEMPT' in s or 'quality102CountsTowardCryptoGross' not in s or 'configuredQuality102GrossCap' not in s:
     raise SystemExit('gross-safe regression guard failed')
 GENERATED.write_text(s,encoding='utf-8')
 try:
