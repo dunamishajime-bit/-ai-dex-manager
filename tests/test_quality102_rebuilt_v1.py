@@ -35,7 +35,7 @@ def bars(n=360):
 
 
 assert mod.SELECTOR_ID == 'QUALITY102_REBUILT_V1'
-assert mod.MAX_QUALITY_GROSS == 0.35
+assert mod.MAX_QUALITY_GROSS == 0.50
 assert set(mod.FORBIDDEN_SELECTOR_FIELDS) >= {
     'normal_net', 'stress_net', 'exit', 'exit_reason', 'duration_hours', 'ret14'
 }
@@ -47,7 +47,7 @@ assert first, 'selector contract must exercise at least one actual selection'
 assert first == second, 'selector must be deterministic'
 assert all(1_700_000_000_000 <= x['entry_ms'] < 1_701_000_000_000 for x in first)
 assert all(x['side'] == 'long' for x in first)
-assert all(x['requested_gross'] <= 0.35 + 1e-12 for x in first)
+assert all(abs(x['requested_gross'] - 0.50) <= 1e-12 for x in first)
 assert all('normal_net' not in x and 'stress_net' not in x and 'exit' not in x for x in first)
 
 reversed_input = {'AVAX': copy.deepcopy(base['AVAX']), 'SOL': copy.deepcopy(base['SOL']), 'FET': copy.deepcopy(base['FET'])}
