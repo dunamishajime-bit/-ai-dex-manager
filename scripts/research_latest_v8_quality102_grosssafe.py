@@ -190,7 +190,7 @@ if s.count(old_report)!=1:
 s=s.replace(old_report,new_report,1)
 
 old_policy='"entryPolicy": "BASE_IDLE_ONLY_ONE_SLOT_NO_PREEMPT"'
-new_policy='"entryPolicy": "BASE_IDLE_ONE_SLOT_BASE_PRIORITY_TOTAL_AND_CRYPTO_RESIDUAL_SHRINK", "resizePnlAccounting": "TRIMMED_NOTIONAL_X_BPS_CHARGED_ONCE", "grossSizingBasis": "PRE_TRIM_EXECUTION_COST_EQUITY", "quality102CountsTowardCryptoGross": True, "configuredQuality102GrossCap": quality102_configured_gross_cap'
+new_policy=f'"entryPolicy": "BASE_IDLE_ONE_SLOT_BASE_PRIORITY_TOTAL_AND_CRYPTO_RESIDUAL_SHRINK", "resizePnlAccounting": "TRIMMED_NOTIONAL_X_BPS_CHARGED_ONCE", "grossSizingBasis": "PRE_TRIM_EXECUTION_COST_EQUITY", "quality102CountsTowardCryptoGross": True, "configuredQuality102GrossCap": {quality102_gross_cap!r}'
 if s.count(old_policy)!=1:
     raise SystemExit(f'entry policy marker count unexpected: {s.count(old_policy)}')
 s=s.replace(old_policy,new_policy,1)
