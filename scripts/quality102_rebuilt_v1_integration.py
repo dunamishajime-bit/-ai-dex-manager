@@ -42,6 +42,22 @@ def _replace_once(source: str, old: str, new: str) -> str:
     return source.replace(old, new, 1)
 
 
+def patch_v12_top2_two_year_wrapper(source: str) -> str:
+    """Patch only V12 Top2 research start/end replacements to the exact 2y window."""
+    out = source
+    out = _replace_once(
+        out,
+        'replaceOnce("const START = Date.UTC(2025, 7, 21);", "const START = Date.UTC(2025, 7, 1);");',
+        'replaceOnce("const START = Date.UTC(2025, 7, 21);", "const START = Date.UTC(2024, 7, 10);");',
+    )
+    out = _replace_once(
+        out,
+        'replaceOnce("const END = Date.UTC(2026, 7, 21);", "const END = Date.UTC(2026, 7, 1);");',
+        'replaceOnce("const END = Date.UTC(2026, 7, 21);", "const END = Date.UTC(2026, 7, 10);");',
+    )
+    return out
+
+
 def patch_pengu_v8_two_year_source(source: str) -> str:
     """Extend the already-built V8 source to two years without changing V8 logic.
 
@@ -60,12 +76,9 @@ def patch_pengu_v8_two_year_source(source: str) -> str:
         'Date.parse("2025-08-10T00:00:00Z")',
         f'Date.parse("{START_ISO}")',
     )
-    # END is already the requested 2026-08-10 boundary; assert it exists once.
     if out.count(f'Date.parse("{END_ISO}")') != 1:
         raise ValueError("unexpected PENGU V8 evaluation end marker")
 
-    # Delete only legacy one-year metric-drift assertions. Keep all structural,
-    # overlap, configuration and period integrity checks.
     patterns = (
         r'^\s*assert\.equal\(normalMetrics\.trades,70,`V8 normal trade drift .*?\);\s*$\n?',
         r'^\s*assert\.equal\(stressMetrics\.trades,70,`V8 severe trade drift .*?\);\s*$\n?',
@@ -96,7 +109,6 @@ def patch_dca_two_year_source(source: str) -> str:
         'START = dt.datetime(2025, 8, 10, tzinfo=UTC)',
         'START = dt.datetime(2024, 8, 10, tzinfo=UTC)',
     )
-    # The end boundary is intentionally unchanged but must be present.
     if out.count('END = dt.datetime(2026, 8, 10, tzinfo=UTC)') != 1:
         raise ValueError("unexpected DCA end marker")
     out = _replace_once(out, 'MONTHLY_JPY = 10_000.0', 'MONTHLY_JPY = 20_000.0')
