@@ -93,6 +93,9 @@ export type DecisionViewInput = {
     checkedAt?: string;
     units: RuntimeUnitInput[];
   };
+  v52?: {
+    marketOpen?: boolean;
+  };
   v12Observability?: V12Input;
   penguRuntime?: PenguInput;
   v52Top2Observability?: V52Input;
@@ -240,7 +243,8 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
  const v12Trace = v12?.executionTrace;
  const penguTrace = pengu?.executionTrace;
  const v52Actionable = runtimeStatus(v52Unit) === "LIVE" && v52?.status === "LIVE";
- const v52Items = v52AttentionItems(v52, v52Actionable);
+  const v52MarketClosed = input.v52?.marketOpen === false;
+  const v52Items = v52AttentionItems(v52, v52Actionable);
   const v52ReferenceBlocked = v52Actionable && (v52?.killSwitchActive === true || v52?.referenceOrdersAllowed === false || v52?.referenceHealth?.ready === false);
   const v52ReferenceBlocker = v52?.killSwitchActive === true ? "V52共有Kill Switchが有効です。" : v52?.referenceHealth?.reason || "V52参照データの発注Gateが停止しています。";
   const v12Symbol = v12?.decision?.symbol || "未取得";
@@ -280,7 +284,7 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
   const equitySymbols = ["AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"];
  const v12State = overviewState(runtimeStatus(v12Unit), v12Trace);
  const penguState = overviewState(runtimeStatus(penguUnit), penguTrace);
-  const v52State: UiDecisionState = !v52Actionable ? "ERROR" : v52ReferenceBlocked || v52Items.some((item) => item.state === "BLOCKED") ? "BLOCKED" : v52Items.some((item) => item.state === "SIGNAL") ? "SIGNAL" : v52Items.length ? "WATCH" : "WATCH";
+   const v52State: UiDecisionState = v52MarketClosed ? "OFF" : !v52Actionable ? "ERROR" : v52ReferenceBlocked || v52Items.some((item) => item.state === "BLOCKED") ? "BLOCKED" : v52Items.some((item) => item.state === "SIGNAL") ? "SIGNAL" : v52Items.length ? "WATCH" : "WATCH";
   const strategyCards: StrategyOverview[] = [
     {
       id: "V12",
@@ -317,10 +321,10 @@ export function buildDecisionViewModel(input: DecisionViewInput): DecisionViewMo
       runtimeStatus: runtimeStatus(v52Unit),
       state: v52State,
       stateLabel: stateLabel(v52State),
-      stageLabel: v52ReferenceBlocked ? "発注Gateで停止" : v52Items[0]?.stageLabel || "候補データ未取得",
-      detail: v52ReferenceBlocked ? `V52 RunnerはLIVEですが、参照データGateで発注停止中です。${v52ReferenceBlocker}` : v52Items[0]?.detail || v52Unit?.reason || "V52の実Runner判定データを取得できません。",
-      blocker: v52ReferenceBlocked ? v52ReferenceBlocker : v52Items[0]?.blocker,
-      observedCandidates: v52Items.length || (v52 ? 0 : null),
+       stageLabel: v52MarketClosed ? "対象時間外" : v52ReferenceBlocked ? "発注Gateで停止" : v52Items[0]?.stageLabel || "候補データ未取得",
+       detail: v52MarketClosed ? "米国株式市場の対象時間外です。市場開始まで新規判定を行いません。" : v52ReferenceBlocked ? `V52 RunnerはLIVEですが、参照データGateで発注停止中です。${v52ReferenceBlocker}` : v52Items[0]?.detail || v52Unit?.reason || "V52の実Runner判定データを取得できません。",
+       blocker: v52MarketClosed ? undefined : v52ReferenceBlocked ? v52ReferenceBlocker : v52Items[0]?.blocker,
+       observedCandidates: v52MarketClosed ? null : v52Items.length || (v52 ? 0 : null),
       eligibleDirections: null,
       positionCount: positionCount(input.portfolio?.positions, equitySymbols),
     },
