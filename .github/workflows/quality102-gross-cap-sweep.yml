@@ -106,10 +106,10 @@ jobs:
           from pathlib import Path
           p=json.loads(Path('.research-state/quality102-gross-cap-sweep/sweep-summary.json').read_text())
           assert p['schema']=='quality102-gross-cap-sweep/v1'
-          assert p['caps']==[0.15,0.175,0.2,0.225,0.25,0.275,0.3,0.325,0.35]
+          assert p['caps']==[0.15,0.175,0.2,0.225,0.25,0.275,0.3,0.325,0.35,0.4,0.45,0.5]
           assert p['resizePnlAccounting']=='ZERO_PNL_ON_TRIMMED_NOTIONAL'
           assert p['grossPolicy']=='BASE_PRIORITY_RESIDUAL_GROSS_SHRINK'
-          assert len(p['rows'])==9
+          assert len(p['rows'])==12
           for row in p['rows']:
               cap=float(row['cap'])
               assert row['status']=='PASS_RESEARCH_ONLY',row
