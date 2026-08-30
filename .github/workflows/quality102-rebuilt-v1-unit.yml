@@ -1,0 +1,28 @@
+name: QUALITY102_REBUILT_V1 Unit Contract
+
+on:
+  push:
+    branches:
+      - research/quality102-rebuilt-v1-20260831
+    paths:
+      - 'scripts/quality102_rebuilt_v1.py'
+      - 'tests/test_quality102_rebuilt_v1.py'
+      - '.github/workflows/quality102-rebuilt-v1-unit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile selector
+        run: python -m py_compile scripts/quality102_rebuilt_v1.py
+      - name: Run causal selector contract
+        run: python tests/test_quality102_rebuilt_v1.py
