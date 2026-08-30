@@ -28,6 +28,15 @@ jobs:
       - name: Checkout research integration
         uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile and unit-test trim cost logic
+        run: |
+          python -m py_compile scripts/quality102_trim_cost.py scripts/research_latest_v8_quality102_grosssafe.py scripts/research_quality102_trim_cost_validation.py
+          python tests/test_quality102_trim_cost.py
+
       - name: Checkout frozen V52 stock research source
         uses: actions/checkout@v4
         with:
@@ -54,10 +63,6 @@ jobs:
           node-version: '24'
           cache: npm
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Restore immutable stock cache
         uses: actions/cache/restore@v4
         with:
@@ -77,11 +82,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Compile and unit-test trim cost logic
-        run: |
-          python -m py_compile scripts/quality102_trim_cost.py scripts/research_latest_v8_quality102_grosssafe.py scripts/research_quality102_trim_cost_validation.py
-          python tests/test_quality102_trim_cost.py
 
       - name: Restore prior exact Quality102 run inputs
         uses: actions/download-artifact@v4
