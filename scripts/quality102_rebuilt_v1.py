@@ -4,7 +4,7 @@ from statistics import fmean, pstdev
 from typing import Any, Mapping, Sequence
 
 SELECTOR_ID = "QUALITY102_REBUILT_V1"
-MAX_QUALITY_GROSS = 0.35
+MAX_QUALITY_GROSS = 0.50
 FORBIDDEN_SELECTOR_FIELDS = (
     "normal_net",
     "stress_net",
@@ -47,8 +47,6 @@ def _rsi(closes: Sequence[float], periods: int = 14) -> float:
 
 
 def _features(rows: Sequence[Mapping[str, float]], index: int) -> dict[str, float] | None:
-    # A signal at rows[index] may only use rows[0:index+1]. Outcome/exit data is
-    # deliberately absent from this module.
     history = rows[: index + 1]
     closes = [float(row["close"]) for row in history]
     volumes = [float(row.get("volume", 0.0) or 0.0) for row in history]
@@ -90,8 +88,6 @@ def _features(rows: Sequence[Mapping[str, float]], index: int) -> dict[str, floa
 def _classify(features: Mapping[str, float]) -> tuple[str, float, str] | None:
     candidates: list[tuple[str, float, str]] = []
 
-    # Breakout: close clears the *prior* 24h close high while medium-term trend
-    # is positive. The current bar is excluded from the breakout reference.
     if (
         features["close"] > features["prior24_close_high"] * 1.001
         and features["r24"] > 0.025
@@ -104,8 +100,6 @@ def _classify(features: Mapping[str, float]) -> tuple[str, float, str] | None:
         )
         candidates.append(("BRK", score, "BRK_QUALITY_GATE"))
 
-    # Pullback: established 72h uptrend, below the prior 12h close high, but
-    # without a deep 12h collapse.
     if (
         features["r72"] > 0.045
         and features["close"] > features["sma72"]
@@ -119,8 +113,6 @@ def _classify(features: Mapping[str, float]) -> tuple[str, float, str] | None:
         )
         candidates.append(("PB", score, "PB_CAUSAL_PULLBACK"))
 
-    # High-vol continuation: volatility is known at entry, 12h return is
-    # positive, and price is above its 24h mean.
     if (
         features["vol24"] >= 0.007
         and features["r12"] > 0.01
@@ -133,8 +125,6 @@ def _classify(features: Mapping[str, float]) -> tuple[str, float, str] | None:
         )
         candidates.append(("HIGH_VOL", score, "HV_TRIGGER12_TRAIL5"))
 
-    # Reversal and mean-reversion arms are deliberately stricter than trend
-    # arms. They still use only entry-time observations.
     if features["r12"] > 0.025 and features["r24"] < 0.01 and features["rsi14"] < 65.0:
         score = (
             65.0
@@ -176,12 +166,7 @@ def select_candidates(
     start_ms: int,
     end_ms: int,
 ) -> list[dict[str, Any]]:
-    """Select one-slot Quality candidates using only information known at entry.
-
-    Rows at or after end_ms are discarded before feature construction. Symbols,
-    rows, and ties are sorted deterministically so dictionary/input ordering can
-    never change the result.
-    """
+    """Select one-slot Quality candidates using only information known at entry."""
     if end_ms <= start_ms:
         return []
 
