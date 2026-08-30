@@ -2,17 +2,21 @@ import copy
 import importlib.util
 from pathlib import Path
 
-MODULE = Path('scripts/quality102_rebuilt_v1.py')
-spec = importlib.util.spec_from_file_location('quality102_rebuilt_v1', MODULE)
+SELECTOR_MODULE = Path('scripts/quality102_rebuilt_v1.py')
+spec = importlib.util.spec_from_file_location('quality102_rebuilt_v1', SELECTOR_MODULE)
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
+
+OUTCOME_MODULE = Path('scripts/quality102_rebuilt_v1_outcomes.py')
+outcome_spec = importlib.util.spec_from_file_location('quality102_rebuilt_v1_outcomes', OUTCOME_MODULE)
+outcomes = importlib.util.module_from_spec(outcome_spec)
+outcome_spec.loader.exec_module(outcomes)
 
 
 def bars(n=360):
     out = []
     price = 100.0
     for i in range(n):
-        # Deterministic synthetic history with alternating trend/pullback regimes.
         drift = 0.004 if (i // 48) % 2 == 0 else -0.0015
         shock = 0.018 if i in (120, 121, 200) else (-0.014 if i in (150, 151) else 0.0)
         close = price * (1.0 + drift + shock)
@@ -46,12 +50,10 @@ assert all(x['side'] == 'long' for x in first)
 assert all(x['requested_gross'] <= 0.35 + 1e-12 for x in first)
 assert all('normal_net' not in x and 'stress_net' not in x and 'exit' not in x for x in first)
 
-# Input ordering must not change selection.
 reversed_input = {'AVAX': copy.deepcopy(base['AVAX']), 'SOL': copy.deepcopy(base['SOL']), 'FET': copy.deepcopy(base['FET'])}
 third = mod.select_candidates(reversed_input, start_ms=1_700_000_000_000, end_ms=1_701_000_000_000)
 assert first == third, 'selector must be order-invariant'
 
-# Future bars appended beyond end_ms must not alter selections inside the evaluation window.
 with_future = copy.deepcopy(base)
 for symbol in with_future:
     tail = copy.deepcopy(with_future[symbol][-24:])
@@ -64,14 +66,11 @@ for symbol in with_future:
 fourth = mod.select_candidates(with_future, start_ms=1_700_000_000_000, end_ms=1_701_000_000_000)
 assert first == fourth, 'future bars outside end_ms must not affect in-window selection'
 
-# One-slot invariant: no candidate can enter before the prior selected hold expires.
 for a, b in zip(first, first[1:]):
     assert b['entry_ms'] >= a['entry_ms'] + a['hold_hours'] * 3_600_000
 
-# Outcome calculation is a separate downstream pass. It may use future bars,
-# but it must not mutate the already-fixed selections.
 selection_snapshot = copy.deepcopy(first)
-materialized = mod.materialize_supplement_rows(
+materialized = outcomes.materialize_supplement_rows(
     first,
     base,
     end_ms=1_701_250_000_000,
