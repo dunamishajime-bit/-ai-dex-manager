@@ -7,8 +7,10 @@ on:
     paths:
       - 'scripts/quality102_rebuilt_v1.py'
       - 'scripts/quality102_rebuilt_v1_outcomes.py'
+      - 'scripts/quality102_rebuilt_v1_integration.py'
       - 'scripts/research_quality102_rebuilt_v1_2y.py'
       - 'tests/test_quality102_rebuilt_v1.py'
+      - 'tests/test_quality102_rebuilt_v1_integration.py'
       - '.github/workflows/quality102-rebuilt-v1-unit.yml'
   workflow_dispatch:
 
@@ -28,6 +30,8 @@ jobs:
         run: python -m py_compile scripts/quality102_rebuilt_v1.py scripts/quality102_rebuilt_v1_outcomes.py scripts/research_quality102_rebuilt_v1_2y.py
       - name: Run causal selector contract
         run: python tests/test_quality102_rebuilt_v1.py
+      - name: Run two-year integration contract
+        run: python tests/test_quality102_rebuilt_v1_integration.py
 
   generate-2y:
     needs: unit
