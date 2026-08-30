@@ -42,6 +42,7 @@ jobs:
 
       - name: Generate dynamic two-year Quality supplement
         run: |
+          # Research-only: public market-data reads and local artifact generation.
           set -o pipefail
           python scripts/research_quality102_rebuilt_v1_2y.py \
             --output-dir .research-state/quality102-rebuilt-v1-2y \
