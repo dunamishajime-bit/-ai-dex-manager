@@ -1,0 +1,295 @@
+name: QUALITY102_REBUILT_V1 V12 PENGU V8 V52 Two-Year Integrated BT
+
+on:
+  push:
+    branches:
+      - research/quality102-rebuilt-v1-20260831
+    paths:
+      - 'scripts/quality102_rebuilt_v1.py'
+      - 'scripts/quality102_rebuilt_v1_outcomes.py'
+      - 'scripts/quality102_rebuilt_v1_integration.py'
+      - 'scripts/research_quality102_rebuilt_v1_2y.py'
+      - 'scripts/research_quality102_rebuilt_v1_grosssafe_2y.py'
+      - 'tests/test_quality102_rebuilt_v1.py'
+      - 'tests/test_quality102_rebuilt_v1_integration.py'
+      - '.github/workflows/quality102-rebuilt-v1-v12-pengu-v8-v52-2y.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: quality102-rebuilt-v1-v12-pengu-v8-v52-2y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen PENGU production source
+        uses: actions/checkout@v4
+        with:
+          ref: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          path: .pengu-current
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable research caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .cache/binance-vision-quality102-rebuilt-v1
+            .stock-research/.cache/perp-research-usdm
+          key: quality102-rebuilt-v1-integrated-2y-${{ runner.os }}-${{ hashFiles('scripts/research_patch_pengu_recovery_v8_integrated_ledger.py', 'scripts/research_latest_v8_dca_1y.py', 'scripts/quality102_rebuilt_v1_integration.py') }}
+          restore-keys: |
+            quality102-rebuilt-v1-binance-vision-202405-202608-v1
+            latest-v12-pengu-v8-v52-dca-
+            current-v12-top2-pengu-v20-v52-dca-
+            current-v12-top2-pengu-v52-dca-
+            v12-top2-gross15-
+            v12-v52-pengu-v2-combined-
+            v26-latency-aware-3y-usdm-v1-20260816
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify rebuilt integration contracts
+        run: |
+          python -m py_compile \
+            scripts/quality102_rebuilt_v1.py \
+            scripts/quality102_rebuilt_v1_outcomes.py \
+            scripts/quality102_rebuilt_v1_integration.py \
+            scripts/research_quality102_rebuilt_v1_2y.py \
+            scripts/research_quality102_rebuilt_v1_grosssafe_2y.py
+          python tests/test_quality102_rebuilt_v1.py
+          python tests/test_quality102_rebuilt_v1_integration.py
+
+      - name: Build exact two-year V12 Top2 ledger
+        env:
+          V12_TOP2_LEDGER_OUT: ${{ github.workspace }}/.research-state/final-2y/v12-top2-ledger.json
+        run: |
+          mkdir -p .research-state/final-2y
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'scripts')
+          from quality102_rebuilt_v1_integration import patch_v12_top2_two_year_wrapper
+          src=Path('scripts/research_current_v12_top2_ledger.ts').read_text(encoding='utf-8')
+          out=Path('scripts/.quality102_v12_top2_2y.generated.ts')
+          out.write_text(patch_v12_top2_two_year_wrapper(src),encoding='utf-8')
+          print(out)
+          PY
+          set -o pipefail
+          npx tsx scripts/.quality102_v12_top2_2y.generated.ts 2>&1 | tee .research-state/final-2y/v12.log
+
+      - name: Validate V12 two-year ledger
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/final-2y/v12-top2-ledger.json'))
+          assert p['strategyId']=='V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15'
+          assert p['period']=={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'},p['period']
+          assert p['definition']=={'slots':2,'perPositionGrossCap':1,'v12AggregateGrossCap':1.5,'riskPct':3.19,'entryPolicy':'ALL'}
+          assert len(p['modes']['normal']['trades'])>0 and len(p['modes']['stress']['trades'])>0
+          assert p['safety']=={'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'status':'V12_2Y_LEDGER_PASS','period':p['period'],'normal':p['modes']['normal']['metrics'],'stress':p['modes']['stress']['metrics']},indent=2))
+          PY
+
+      - name: Build frozen PENGU V8 source
+        env:
+          PRODUCTION_SOURCE_SHA: a76fd7aaa0788209532a5a2c6489135dd8e4a27e
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.pengu-current/tsconfig.pengu-dual-ls-v2.json
+          PENGU_DIAG_OUTPUT_DIR: ${{ github.workspace }}/.research-state/final-2y/pengu-output
+          PENGU_LEDGER_OUT: ${{ github.workspace }}/.research-state/final-2y/pengu-v8-ledger.json
+        run: |
+          ln -s ../node_modules .pengu-current/node_modules
+          python scripts/research_generate_pengu_v57_from_v56.py
+          python scripts/research_patch_v57_replacement_audit.py
+          python scripts/research_patch_v57_economic_winner_guard.py
+          python scripts/research_patch_v64_supplemental_sizing.py
+          python scripts/research_patch_pengu_missed_opportunity_map.py
+          python scripts/research_patch_pengu_directional_wave_map.py
+          python scripts/research_patch_pengu_recovery_study.py
+          python scripts/research_patch_pengu_recovery_backtest.py
+          python scripts/research_patch_pengu_recovery_backtest_fold_fix.py
+          python scripts/research_patch_pengu_recovery_v2_subordinate.py
+          python scripts/research_patch_pengu_recovery_v7_delayed_defense.py
+          python scripts/research_patch_pengu_recovery_v8_delayed_only.py
+          python scripts/research_patch_pengu_recovery_v8_integrated_ledger.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'scripts')
+          from quality102_rebuilt_v1_integration import patch_pengu_v8_two_year_source
+          p=Path('.pengu-current/scripts/.research_pengu_v57.generated.ts')
+          p.write_text(patch_pengu_v8_two_year_source(p.read_text(encoding='utf-8')),encoding='utf-8')
+          print('PENGU_V8_2Y_SOURCE_PATCH=PASS')
+          PY
+          set -o pipefail
+          npx tsx .pengu-current/scripts/.research_pengu_v57.generated.ts 2>&1 | tee .research-state/final-2y/pengu-v8.log
+
+      - name: Validate PENGU V8 two-year ledger
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/final-2y/pengu-v8-ledger.json'))
+          assert p['schema']=='pengu-dual-ls-v2-recovery-v8-ledger/v1'
+          assert p['strategyId']=='PENGU_DUAL_LS_V2_RECOVERY_V8'
+          assert p['period']=={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'},p['period']
+          assert p['integrity']['noOverlapNormal'] is True and p['integrity']['noOverlapStress'] is True
+          assert abs(p['integrity']['maximumRecoveryRequestedGrossNormal']-0.5)<1e-12
+          assert abs(p['integrity']['maximumRecoveryRequestedGrossStress']-0.5)<1e-12
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'status':'PENGU_V8_2Y_LEDGER_PASS','period':p['period'],'normal':p['modes']['normal']['metrics'],'stress':p['modes']['stress']['metrics']},indent=2))
+          PY
+
+      - name: Generate dynamic Quality102 rebuilt V1 two-year supplement
+        run: |
+          set -o pipefail
+          python scripts/research_quality102_rebuilt_v1_2y.py \
+            --output-dir .research-state/final-2y/quality \
+            --cache-dir .cache/binance-vision-quality102-rebuilt-v1 \
+            2>&1 | tee .research-state/final-2y/quality.log
+          python - <<'PY'
+          from pathlib import Path
+          src=Path('.research-state/final-2y/quality/quality102-rebuilt-v1.csv')
+          header=src.read_text(encoding='utf-8').splitlines()[0]
+          Path('.research-state/final-2y/quality-empty.csv').write_text(header+'\n',encoding='utf-8')
+          PY
+
+      - name: Run two-year baseline without Quality
+        env:
+          QUALITY102_GROSS_CAP: '0.50'
+          QUALITY102_TRIM_COST_BPS: '0'
+        run: |
+          set -o pipefail
+          python scripts/research_quality102_rebuilt_v1_grosssafe_2y.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/final-2y/v12-top2-ledger.json \
+            --pengu-ledger .research-state/final-2y/pengu-v8-ledger.json \
+            --supplement-csv .research-state/final-2y/quality-empty.csv \
+            --output-dir .research-state/final-2y/baseline \
+            2>&1 | tee .research-state/final-2y/baseline.log
+
+      - name: Run two-year integrated BT with Quality 50 percent
+        env:
+          QUALITY102_GROSS_CAP: '0.50'
+          QUALITY102_TRIM_COST_BPS: '0'
+        run: |
+          set -o pipefail
+          python scripts/research_quality102_rebuilt_v1_grosssafe_2y.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/final-2y/v12-top2-ledger.json \
+            --pengu-ledger .research-state/final-2y/pengu-v8-ledger.json \
+            --supplement-csv .research-state/final-2y/quality/quality102-rebuilt-v1.csv \
+            --output-dir .research-state/final-2y/with-quality \
+            2>&1 | tee .research-state/final-2y/with-quality.log
+
+      - name: Validate and compare final two-year results
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          base=json.loads(Path('.research-state/final-2y/baseline/result.json').read_text())
+          qual=json.loads(Path('.research-state/final-2y/with-quality/result.json').read_text())
+          qreport=json.loads(Path('.research-state/final-2y/quality/report.json').read_text())
+          qcsv=Path('.research-state/final-2y/quality/quality102-rebuilt-v1.csv')
+          qsha=hashlib.sha256(qcsv.read_bytes()).hexdigest()
+          expected_period={'startInclusive':'2024-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          for label,p in [('baseline',base),('quality',qual)]:
+              assert p['period']==expected_period,(label,p['period'])
+              assert p['capital']['initialJpy']==10000.0
+              assert p['capital']['monthlyContributionJpy']==20000.0
+              assert p['capital']['contributionCountAfterStart']==24
+              assert p['capital']['totalContributedJpy']==490000.0
+              a=p['architecture']
+              assert a['v12GrossCap']==1.5 and a['penguGrossCap']==0.75
+              assert a['sharedCryptoGrossCap']==2.0 and a['stockGrossCap']==1.5 and a['totalGrossCap']==2.5
+              assert all(p['checks'].values()),(label,p['checks'])
+              assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+              for mode in ('NORMAL','SEVERE'):
+                  r=p['results'][mode]
+                  assert r['maxObservedTotalGross']<=2.5+1e-9,(label,mode,r['maxObservedTotalGross'])
+                  assert r['maxObservedCryptoGross']<=2.0+1e-9,(label,mode,r['maxObservedCryptoGross'])
+                  assert r['maxObservedV12Gross']<=1.5+1e-9
+                  assert r['maxObservedPenguGross']<=0.75+1e-9
+                  assert r['maxObservedStockGross']<=1.5+1e-9
+          assert qreport['selection']['qualityGrossCap']==0.5
+          assert qreport['selection']['closedCount']==309
+          assert qreport['fixed102ReplayUsed'] is False and qreport['selectorRecovered'] is False
+          assert qsha==qreport['csv']['sha256']
+          def metrics(p,mode):
+              r=p['results'][mode]
+              return {k:r.get(k) for k in ('finalJpy','totalContributedJpy','profitJpy','returnOnContributedPct','maxDrawdownPct','v12Entries','penguEntries','stockEntries','supplementEntries','v12Blocked','penguBlocked','stockBlocked','supplementBlocked','v12Scaled','penguScaled','stockScaled','supplementScaled','maxObservedTotalGross','maxObservedCryptoGross','maxObservedV12Gross','maxObservedPenguGross','maxObservedStockGross','maxObservedSupplementGross')}
+          comparison={
+              'schema':'quality102-rebuilt-v1-integrated-2y-comparison/v1',
+              'status':'PASS_RESEARCH_ONLY',
+              'period':expected_period,
+              'capital':qual['capital'],
+              'quality':{
+                  'selectorId':'QUALITY102_REBUILT_V1','requestedGross':0.5,
+                  'closedCount':qreport['selection']['closedCount'],'csvSha256':qsha,
+                  'fixed102ReplayUsed':False,'selectorRecovered':False,
+              },
+              'baseline':{m:metrics(base,m) for m in ('NORMAL','SEVERE')},
+              'withQuality':{m:metrics(qual,m) for m in ('NORMAL','SEVERE')},
+              'delta':{},
+              'safety':qual['safety'],
+          }
+          for m in ('NORMAL','SEVERE'):
+              b=comparison['baseline'][m]; q=comparison['withQuality'][m]
+              comparison['delta'][m]={
+                  'finalJpy':q['finalJpy']-b['finalJpy'],
+                  'returnOnContributedPct':q['returnOnContributedPct']-b['returnOnContributedPct'],
+                  'maxDrawdownPct':q['maxDrawdownPct']-b['maxDrawdownPct'],
+              }
+          Path('.research-state/final-2y/comparison.json').write_text(json.dumps(comparison,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(comparison,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality102-rebuilt-v1-integrated-2y-${{ github.run_id }}
+          path: .research-state/final-2y
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
