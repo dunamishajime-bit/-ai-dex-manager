@@ -39,6 +39,7 @@ assert set(mod.FORBIDDEN_SELECTOR_FIELDS) >= {
 base = {'FET': bars(), 'SOL': bars(), 'AVAX': bars()}
 first = mod.select_candidates(copy.deepcopy(base), start_ms=1_700_000_000_000, end_ms=1_701_000_000_000)
 second = mod.select_candidates(copy.deepcopy(base), start_ms=1_700_000_000_000, end_ms=1_701_000_000_000)
+assert first, 'selector contract must exercise at least one actual selection'
 assert first == second, 'selector must be deterministic'
 assert all(1_700_000_000_000 <= x['entry_ms'] < 1_701_000_000_000 for x in first)
 assert all(x['side'] == 'long' for x in first)
