@@ -1,0 +1,134 @@
+name: Quality102 50 Gross Safe Trim Cost Validation
+
+on:
+  push:
+    branches:
+      - research/quality102-50-gross-safe-cost-20260830
+    paths:
+      - 'scripts/quality102_trim_cost.py'
+      - 'scripts/research_latest_v8_quality102_grosssafe.py'
+      - 'scripts/research_quality102_trim_cost_validation.py'
+      - 'tests/test_quality102_trim_cost.py'
+      - '.github/workflows/quality102-trim-cost-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: quality102-trim-cost-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable stock cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: quality102-trim-cost-${{ runner.os }}-${{ hashFiles('scripts/research_current_top2_pengu_v52_dca.py') }}
+          restore-keys: |
+            quality102-gross-cap-sweep-
+            quality102-grosssafe-
+            latest-v12-pengu-v8-v52-dca-
+            current-v12-top2-pengu-v20-v52-dca-
+            current-v12-top2-pengu-v52-dca-
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile and unit-test trim cost logic
+        run: |
+          python -m py_compile scripts/quality102_trim_cost.py scripts/research_latest_v8_quality102_grosssafe.py scripts/research_quality102_trim_cost_validation.py
+          python tests/test_quality102_trim_cost.py
+
+      - name: Restore prior exact Quality102 run inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-33257164125
+          path: .research-state/quality102-prior
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 33257164125
+
+      - name: Run 35 vs 50 trim-cost validation
+        run: |
+          set -o pipefail
+          python scripts/research_quality102_trim_cost_validation.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/quality102-prior/v12-top2-ledger.json \
+            --pengu-ledger .research-state/quality102-prior/pengu-v8-ledger.json \
+            --output-root .research-state/quality102-trim-cost-validation \
+            2>&1 | tee .research-state/quality102-trim-cost-validation.log
+
+      - name: Validate trim-cost contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/quality102-trim-cost-validation/summary.json').read_text())
+          assert p['schema']=='quality102-trim-cost-validation/v1'
+          assert p['caps']==[0.35,0.5]
+          assert p['trimCostBps']==[0.0,50.0,100.0,200.0,500.0]
+          assert p['grossPolicy']=='BASE_PRIORITY_TOTAL_AND_CRYPTO_RESIDUAL_SHRINK'
+          assert p['costPolicy']=='TRIMMED_NOTIONAL_X_BPS_CHARGED_ONCE'
+          assert p['requiredAdvantageCostBps']==[50.0,100.0]
+          assert p['acceptance']['allEngineChecksPass'] is True
+          assert p['acceptance']['allSizingGrossChecksPass'] is True
+          assert p['acceptance']['baselineFiringsPreserved'] is True
+          assert p['acceptance']['fiftyBeatsThirtyFiveAtRequiredCosts'] is True
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps(p,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality102-trim-cost-validation-${{ github.run_id }}
+          path: |
+            .research-state/quality102-trim-cost-validation
+            .research-state/quality102-trim-cost-validation.log
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
