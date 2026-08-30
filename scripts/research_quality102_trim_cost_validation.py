@@ -22,6 +22,7 @@ BASE_ROUTING_KEYS = ('V12_ENTERED', 'PENGU_ENTERED', 'V11_EQ_ENTERED', 'V50_POST
 def capture_grosssafe_generated(base_args: list[str], trim_cost_bps: float) -> str:
     orig_run, orig_unlink, orig_argv = subprocess.run, Path.unlink, list(sys.argv)
     old_cost = os.environ.get('QUALITY102_TRIM_COST_BPS')
+    old_cap = os.environ.get('QUALITY102_GROSS_CAP')
     captured: dict[str, list[str]] = {}
 
     def hold_run(args, *a, **kw):
@@ -36,6 +37,10 @@ def capture_grosssafe_generated(base_args: list[str], trim_cost_bps: float) -> s
 
     try:
         os.environ['QUALITY102_TRIM_COST_BPS'] = format(trim_cost_bps, '.12g')
+        # The comparison harness needs the historical 0.15 source constant so it
+        # can deterministically patch the same captured engine to 0.35 and 0.50.
+        # This does not change the launcher default, which is independently 0.50.
+        os.environ['QUALITY102_GROSS_CAP'] = '0.15'
         subprocess.run, Path.unlink = hold_run, hold_unlink
         sys.argv = [str(GROSSSAFE_LAUNCHER), *base_args]
         runpy.run_path(str(GROSSSAFE_LAUNCHER), run_name='__main__')
@@ -45,6 +50,10 @@ def capture_grosssafe_generated(base_args: list[str], trim_cost_bps: float) -> s
             os.environ.pop('QUALITY102_TRIM_COST_BPS', None)
         else:
             os.environ['QUALITY102_TRIM_COST_BPS'] = old_cost
+        if old_cap is None:
+            os.environ.pop('QUALITY102_GROSS_CAP', None)
+        else:
+            os.environ['QUALITY102_GROSS_CAP'] = old_cap
 
     if not GENERATED.exists() or 'argv' not in captured:
         raise RuntimeError('failed to capture fully gross-safe generated engine')
@@ -54,6 +63,7 @@ def capture_grosssafe_generated(base_args: list[str], trim_cost_bps: float) -> s
         'BASE_IDLE_ONE_SLOT_BASE_PRIORITY_TOTAL_AND_CRYPTO_RESIDUAL_SHRINK',
         'TRIMMED_NOTIONAL_X_BPS_CHARGED_ONCE',
         'quality102CountsTowardCryptoGross',
+        'configuredQuality102GrossCap',
     )
     missing = [marker for marker in required if marker not in source]
     if missing:
