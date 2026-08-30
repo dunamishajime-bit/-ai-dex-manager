@@ -8,7 +8,7 @@ mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
 
-def bars(n=260):
+def bars(n=360):
     out = []
     price = 100.0
     for i in range(n):
@@ -67,5 +67,25 @@ assert first == fourth, 'future bars outside end_ms must not affect in-window se
 # One-slot invariant: no candidate can enter before the prior selected hold expires.
 for a, b in zip(first, first[1:]):
     assert b['entry_ms'] >= a['entry_ms'] + a['hold_hours'] * 3_600_000
+
+# Outcome calculation is a separate downstream pass. It may use future bars,
+# but it must not mutate the already-fixed selections.
+selection_snapshot = copy.deepcopy(first)
+materialized = mod.materialize_supplement_rows(
+    first,
+    base,
+    end_ms=1_701_250_000_000,
+    normal_cost_bps=20.0,
+    stress_cost_bps=60.0,
+)
+assert first == selection_snapshot, 'outcome materialization must not mutate selector output'
+assert materialized, 'materializer must produce closed trades for the synthetic contract'
+assert len(materialized) <= len(first)
+for row in materialized:
+    assert row['exit_ms'] > row['entry_ms']
+    assert row['normal_net'] <= row['gross_return'] + 1e-12
+    assert row['stress_net'] <= row['normal_net'] + 1e-12
+    assert row['exit_reason'] in {'STOP_8PCT', 'TRAIL_5PCT_AFTER_12PCT', 'TIME'}
+    assert row['selector_id'] == 'QUALITY102_REBUILT_V1'
 
 print('QUALITY102_REBUILT_V1_UNIT=PASS')
