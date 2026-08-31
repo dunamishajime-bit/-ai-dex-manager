@@ -1,7 +1,7 @@
 {
   "strategyId": "V96_STOCK_V13G_V13D_FIXED_FORWARD",
   "status": "V13G_V13D_FIXED_FORWARD_COVERAGE_INCOMPLETE",
-  "generatedAt": "2026-08-29T02:50:54.600358Z",
+  "generatedAt": "2026-08-31T23:54:00.388830Z",
   "configSha256": "2b4e103c01e0b386ff87146cfde01ef60c854bcb9554656a5a764d4b601a3875",
   "window": {
     "firstSession": "2026-07-27",
