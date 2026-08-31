@@ -2,7 +2,13 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from research_quality102_mtm_50 import partial_net_return, remaining_limit, solve_remaining_notional, patch_mtm_engine
+from research_quality102_mtm_50 import (
+    FROZEN_ENTRY_EVIDENCE,
+    partial_net_return,
+    remaining_limit,
+    solve_remaining_notional,
+    patch_mtm_engine,
+)
 
 
 def close(a, b, tol=1e-12):
@@ -27,12 +33,23 @@ def test_crypto_cap_can_be_more_restrictive_than_total():
     assert R < 50.0
 
 
+def test_all_102_frozen_entries_have_side_and_source_open_evidence():
+    assert len(FROZEN_ENTRY_EVIDENCE) == 102
+    assert FROZEN_ENTRY_EVIDENCE[("DOGE", 1755075600000)] == (1, 0.24954)
+    for (symbol, entry_ts), (side, entry_price) in FROZEN_ENTRY_EVIDENCE.items():
+        assert symbol
+        assert entry_ts > 0
+        assert side in (-1, 1)
+        assert entry_price > 0
+
+
 def test_patch_replaces_zero_pnl_policy_and_adds_crypto_inclusive_audit():
     source = '''import math\n\ndef finite(value: Any, fallback: float = 0.0) -> float:\n    return float(value)\n\n    def observe_entry(entered_kind: str, ts: int) -> None:\n        pass\n\n    def reset_day(ts: int) -> None:\n        pass\n\n            "netUnitReturn": finite(row[supp_col]),\n                "netUnitReturn": finite(trade.get("netUnitReturn")),\n"entryPolicy": "BASE_IDLE_ONE_SLOT_BASE_PRIORITY_RESIDUAL_GROSS_SHRINK", "resizePnlAccounting": "ZERO_PNL_ON_TRIMMED_NOTIONAL"\n'''
     out = patch_mtm_engine(source)
     assert 'MARK_TO_MARKET_BINANCE_VISION_USDM_1M_OPEN' in out
     assert 'vg + pg + ug' in out
     assert 'CRYPTO_GROSS_CAP' in out
+    assert 'QUALITY102_FROZEN_ENTRY_EVIDENCE' in out
     assert 'ZERO_PNL_ON_TRIMMED_NOTIONAL' not in out
 
 
@@ -40,5 +57,6 @@ if __name__ == '__main__':
     test_partial_net_return_short()
     test_remaining_limit_satisfies_cap_after_realized_trim()
     test_crypto_cap_can_be_more_restrictive_than_total()
+    test_all_102_frozen_entries_have_side_and_source_open_evidence()
     test_patch_replaces_zero_pnl_policy_and_adds_crypto_inclusive_audit()
     print('PASS')
