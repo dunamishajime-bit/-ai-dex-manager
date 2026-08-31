@@ -103,12 +103,10 @@ def patch_mtm_engine(source: str) -> str:
 
     # Diagnostic only: persist the fully generated research engine into the existing
     # workflow artifact so same-timestamp admission/sizing order can be inspected.
-    try:
+    if '--output-dir' in sys.argv:
         debug_dir = Path(_argv_value('--output-dir'))
         debug_dir.mkdir(parents=True, exist_ok=True)
         (debug_dir / 'generated-mtm-engine.py').write_text(patched, encoding='utf-8')
-    except Exception as exc:
-        raise RuntimeError(f'failed to persist generated MTM engine diagnostic: {exc}') from exc
     return patched
 
 
