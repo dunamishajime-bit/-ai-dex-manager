@@ -6,6 +6,8 @@ on:
       - research/latest-v12-pengu-v8-v52-dca-1y-20260828
     paths:
       - 'scripts/research_quality102_mtm_50.py'
+      - 'scripts/research_quality102_mtm_50_v2.py'
+      - 'research/quality102_mtm_entry_evidence.csv'
       - 'tests/test_research_quality102_mtm_50.py'
       - '.github/workflows/quality102-mtm-50.yml'
   workflow_dispatch:
@@ -78,7 +80,7 @@ jobs:
 
       - name: Compile and unit-test exact MTM logic
         run: |
-          python -m py_compile scripts/research_quality102_mtm_50.py
+          python -m py_compile scripts/research_quality102_mtm_50.py scripts/research_quality102_mtm_50_v2.py
           python tests/test_research_quality102_mtm_50.py
 
       - name: Restore prior exact Quality102 run inputs
@@ -93,7 +95,7 @@ jobs:
       - name: Run Quality102 exact MTM 50 percent BT
         run: |
           set -o pipefail
-          python scripts/research_quality102_mtm_50.py \
+          python scripts/research_quality102_mtm_50_v2.py \
             --stock-cache-dir .cache/aster-only-v39-overnight-open \
             --v12-ledger .research-state/quality102-prior/v12-top2-ledger.json \
             --pengu-ledger .research-state/quality102-prior/pengu-v8-ledger.json \
@@ -110,6 +112,8 @@ jobs:
           assert abs(float(p['cap'])-0.5) < 1e-12
           assert p['resizePnlAccounting']=='MARK_TO_MARKET_BINANCE_VISION_USDM_1M_OPEN'
           assert p['grossPolicy']=='BASE_PRIORITY_CRYPTO_AND_TOTAL_RESIDUAL_GROSS_SHRINK'
+          assert p['sourceValidation']=='ALL_102_FROZEN_RESEARCH_1H_OPEN_CROSSCHECK_FAIL_CLOSED'
+          assert p['frozenEntryEvidenceCount']==102
           for mode in ('NORMAL','SEVERE'):
               m=p['modes'][mode]
               assert m['maxTotalGross'] <= 2.5 + 1e-9,m
@@ -120,6 +124,7 @@ jobs:
               for resize in m['resizes']:
                   assert resize['priceSource']=='BINANCE_VISION_USDM_1M_OPEN',resize
                   assert resize['sourceEvidence']['entrySource']=='BINANCE_VISION_USDM_1M_OPEN',resize
+                  assert resize['sourceEvidence']['entrySourceCrossCheck']['kind']=='FROZEN_RESEARCH_1H_OPEN',resize
           assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
           print(json.dumps(p,ensure_ascii=False,indent=2))
           PY
