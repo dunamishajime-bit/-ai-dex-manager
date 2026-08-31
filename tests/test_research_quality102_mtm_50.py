@@ -2,7 +2,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from research_quality102_mtm_50 import (
+from research_quality102_mtm_50_v2 import (
     FROZEN_ENTRY_EVIDENCE,
     partial_net_return,
     remaining_limit,
