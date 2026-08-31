@@ -8,6 +8,7 @@ from pathlib import Path
 
 import research_quality102_mtm_50 as legacy
 
+_LEGACY_PATCH_MTM_ENGINE = legacy.patch_mtm_engine
 EVIDENCE_PATH = Path(__file__).resolve().parents[1] / 'research' / 'quality102_mtm_entry_evidence.csv'
 
 
@@ -43,7 +44,7 @@ def solve_remaining_notional(**kwargs):
 
 
 def patch_mtm_engine(source: str) -> str:
-    patched = legacy.patch_mtm_engine(source)
+    patched = _LEGACY_PATCH_MTM_ENGINE(source)
 
     side_map = {entry_ts: side for (_symbol, entry_ts), (side, _price) in FROZEN_ENTRY_EVIDENCE.items()}
     constants = (
