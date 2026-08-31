@@ -1,0 +1,136 @@
+name: Quality102 Exact MTM 50 One-Year BT
+
+on:
+  push:
+    branches:
+      - research/latest-v12-pengu-v8-v52-dca-1y-20260828
+    paths:
+      - 'scripts/research_quality102_mtm_50.py'
+      - 'tests/test_research_quality102_mtm_50.py'
+      - '.github/workflows/quality102-mtm-50.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: quality102-mtm-50-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout research integration
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable stock cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: quality102-mtm-50-${{ runner.os }}-${{ hashFiles('scripts/research_current_top2_pengu_v52_dca.py') }}
+          restore-keys: |
+            quality102-gross-cap-sweep-
+            quality102-grosssafe-
+            latest-v12-pengu-v8-v52-dca-
+            current-v12-top2-pengu-v20-v52-dca-
+            current-v12-top2-pengu-v52-dca-
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile and unit-test exact MTM logic
+        run: |
+          python -m py_compile scripts/research_quality102_mtm_50.py
+          python tests/test_research_quality102_mtm_50.py
+
+      - name: Restore prior exact Quality102 run inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-33257164125
+          path: .research-state/quality102-prior
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 33257164125
+
+      - name: Run Quality102 exact MTM 50 percent BT
+        run: |
+          set -o pipefail
+          python scripts/research_quality102_mtm_50.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/quality102-prior/v12-top2-ledger.json \
+            --pengu-ledger .research-state/quality102-prior/pengu-v8-ledger.json \
+            --output-dir .research-state/quality102-mtm-50 \
+            2>&1 | tee .research-state/quality102-mtm-50.log
+
+      - name: Validate exact MTM contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/quality102-mtm-50/mtm-summary.json').read_text())
+          assert p['schema']=='quality102-mtm-50/v1'
+          assert abs(float(p['cap'])-0.5) < 1e-12
+          assert p['resizePnlAccounting']=='MARK_TO_MARKET_BINANCE_VISION_USDM_1M_OPEN'
+          assert p['grossPolicy']=='BASE_PRIORITY_CRYPTO_AND_TOTAL_RESIDUAL_GROSS_SHRINK'
+          for mode in ('NORMAL','SEVERE'):
+              m=p['modes'][mode]
+              assert m['maxTotalGross'] <= 2.5 + 1e-9,m
+              assert m['maxCryptoGrossIncludingQuality102'] <= 2.0 + 1e-9,m
+              assert m['maxSupplementGross'] <= 0.5 + 1e-9,m
+              assert m['grossConflictCount']==0,m
+              assert m['mtmTrimExecutionCount'] >= 1,m
+              for resize in m['resizes']:
+                  assert resize['priceSource']=='BINANCE_VISION_USDM_1M_OPEN',resize
+                  assert resize['sourceEvidence']['entrySource']=='BINANCE_VISION_USDM_1M_OPEN',resize
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps(p,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality102-mtm-50-${{ github.run_id }}
+          path: |
+            .research-state/quality102-mtm-50
+            .research-state/quality102-mtm-50.log
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
