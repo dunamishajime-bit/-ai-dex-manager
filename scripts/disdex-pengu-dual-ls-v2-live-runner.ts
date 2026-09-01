@@ -6,10 +6,12 @@ import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
+import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
 import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
 import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
+import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
 
 const HOUR_MS = 60 * 60_000;
 
@@ -21,6 +23,19 @@ function numberEnv(name: string, fallback: number) {
 async function main() {
     const runtime = resolvePenguDualLsV2Runtime();
     const quality102Live = evaluateQuality102LiveSelector({ decisionTs: Date.now() });
+    if (runtime.mode === "LIVE" && runtime.enabled) {
+        const strict = assertV12StrictLiveConfiguration();
+        if (Math.abs(runtime.maximumGross - STRICT_BT33404708902.penguMaximumGross) > 1e-9) {
+            throw new Error(`PENGU_STRICT_GROSS_MISMATCH:${runtime.maximumGross}`);
+        }
+        console.log(JSON.stringify({
+            event: "strict-portfolio-live-gate",
+            strictPortfolioPlannerActive: true,
+            penguGrossCap: STRICT_BT33404708902.penguMaximumGross,
+            cryptoGrossCap: strict.cryptoGrossCap,
+            totalGrossCap: strict.totalGrossCap,
+        }));
+    }
     console.log(JSON.stringify({
         event: "quality102-live-selector",
         quality102LiveSelectorParity: quality102Live.quality102LiveSelectorParity,
@@ -34,7 +49,7 @@ async function main() {
         privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
         requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
         recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: "DisDex-PENGU-Dual-LS-V2/1.0",
+        userAgent: "DisDex-PENGU-Dual-LS-V2-Strict/1.0",
     });
     if (runtime.mode === "LIVE" && runtime.enabled && !client.hasTradingCredentials()) {
         throw new Error("PENGU_DUAL_LS_V2_FINAL LIVE requires ASTER_USER_ADDRESS and ASTER_API_PRIVATE_KEY.");
@@ -61,8 +76,6 @@ async function main() {
         marketData,
         executor,
         stateStore: new FilePenguDualLsV2RunnerStateStore(resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`), runtime.mode),
-        // PENGU and the V12/V52 runners share one account-scoped lock. This
-        // prevents sleeve-local reservations from racing across languages.
         lock: accountLock,
         config: {
             mode: runtime.mode,
@@ -77,7 +90,9 @@ async function main() {
             minimumOrderNotionalUsd: runtime.minimumOrderNotionalUsd,
             maxTransactionRetries: runtime.maxTransactionRetries,
             maximumEntryDelayMs: runtime.maximumEntryDelayMs,
-            portfolioGrossCap: runtime.portfolioGrossCap,
+            // The verified strict portfolio has a 2.00x aggregate crypto cap.
+            // PENGU's own sleeve remains capped at 0.75x by maximumGross.
+            portfolioGrossCap: STRICT_BT33404708902.cryptoGrossCap,
             maximumDailyLossPct: runtime.maximumDailyLossPct,
             killSwitchPath: runtime.killSwitchPath,
             portfolioDailyLossStatePath: runtime.portfolioDailyLossStatePath,
