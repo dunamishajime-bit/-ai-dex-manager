@@ -1,0 +1,61 @@
+name: Quality102 S1S2 Reconstructed Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/quality102-causal-live-ready-20260902
+    paths:
+      - 'scripts/research_quality102_s1s2_reconstructed.py'
+      - 'scripts/test_research_quality102_s1s2_reconstructed.py'
+      - 'research/quality102_s1s2_known_fixture.csv'
+      - '.github/workflows/quality102-s1s2-reconstructed.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  causal-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit and no-lookahead contracts
+        run: python -m unittest discover -s scripts -p 'test_research_quality102_s1s2_reconstructed.py' -v
+
+  frozen-fixture-grid-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Scan recovered 18 signals against documented raw HIGH_VOL grid
+        run: |
+          python scripts/research_quality102_s1s2_reconstructed.py \
+            --fixture research/quality102_s1s2_known_fixture.csv \
+            --output .research-state/quality102-s1s2-grid-scan.json
+      - name: Require complete public market-data evidence
+        run: |
+          python - <<'PY'
+          import json
+          p = '.research-state/quality102-s1s2-grid-scan.json'
+          d = json.load(open(p, encoding='utf-8'))
+          errors = [x for x in d['checks'] if x.get('error')]
+          assert d['fixtureRows'] == 18, d
+          assert not errors, errors
+          print(f"S1S2_RAW_GRID_MATCH={d['rawGridMatched']}/18")
+          print(f"S1S2_RAW_GRID_MISS={d['rawGridMissed']}/18")
+          print('ORIGINAL_RAW_GENERATOR_PROVEN=FALSE')
+          print('RESEARCH_ONLY=TRUE')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality102-s1s2-reconstructed-${{ github.run_id }}
+          path: .research-state/quality102-s1s2-grid-scan.json
+          if-no-files-found: warn
