@@ -11,6 +11,7 @@ export type Quality102S34Family = "PB" | "MR" | "BRK" | "REV" | string;
  * the provenance-backed raw generators and parity evidence.
  */
 export const QUALITY102_CAUSAL_CAPABILITIES = Object.freeze({
+    s1s2RawGeneratorProven: false,
     s34RawGeneratorProven: false,
     selectorImplemented: false,
 });
@@ -18,7 +19,7 @@ export const QUALITY102_CAUSAL_CAPABILITIES = Object.freeze({
 export const QUALITY102_RECOVERED_POST_GENERATION_SOURCE = Object.freeze({
     commit: "450f8fae800d3f509ef868ab035f0cd731216279",
     script: "scripts/research_quality102_selector_recovered.py",
-    scope: "POST_GENERATION_QUALITY_GATE_AND_ONE_SLOT_ONLY" as const,
+    scope: "POST_GENERATION_TRANSFORMS_QUALITY_GATE_AND_ONE_SLOT_ONLY" as const,
 });
 
 export const QUALITY102_DEFAULT_MAX_DATA_AGE_MS = 65 * 60_000;
@@ -47,9 +48,22 @@ export interface Quality102CausalReadinessResult {
     reason: string;
     sourceRun: string;
     sourceSha: string;
+    s1s2RawGeneratorProven: boolean;
     s34RawGeneratorProven: boolean;
     selectorImplemented: boolean;
     liveArmed: boolean;
+}
+
+export function getS1S2RawGeneratorStatus(): {
+    status: "UNAVAILABLE_FAIL_CLOSED";
+    reason: "QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE";
+    proven: false;
+} {
+    return {
+        status: "UNAVAILABLE_FAIL_CLOSED",
+        reason: "QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE",
+        proven: false,
+    };
 }
 
 export function getS34RawGeneratorStatus(): {
@@ -74,6 +88,7 @@ function readinessResult(
         reason,
         sourceRun: STRICT_BT33404708902.sourceRun,
         sourceSha: STRICT_BT33404708902.sourceSha,
+        s1s2RawGeneratorProven: QUALITY102_CAUSAL_CAPABILITIES.s1s2RawGeneratorProven,
         s34RawGeneratorProven: QUALITY102_CAUSAL_CAPABILITIES.s34RawGeneratorProven,
         selectorImplemented: QUALITY102_CAUSAL_CAPABILITIES.selectorImplemented,
         liveArmed,
@@ -83,9 +98,10 @@ function readinessResult(
 /**
  * Evaluate whether a causal Quality102 selector is safe to expose to LIVE.
  *
- * The current repository deliberately cannot return READY because the original
- * S34 raw generator is not present/proven. `liveArmed` is checked only after
- * executable capability checks so a caller cannot self-attest missing code.
+ * The current repository deliberately cannot return READY because neither the
+ * original S1/S2 HIGH_VOL raw-entry generator nor the S3/S4 S34 raw generator
+ * is present/proven. `liveArmed` is checked only after executable capability
+ * checks so a caller cannot self-attest missing code.
  */
 export function evaluateQuality102CausalReadiness(
     input: Quality102CausalReadinessInput,
@@ -112,6 +128,7 @@ export function evaluateQuality102CausalReadiness(
     if (!Number.isFinite(maxDataAgeMs) || maxDataAgeMs < 0) return blocked("MAX_DATA_AGE_INVALID");
     if (input.decisionTs - manifest.availableAtTs > maxDataAgeMs) return blocked("SELECTOR_DATA_STALE");
 
+    if (!QUALITY102_CAUSAL_CAPABILITIES.s1s2RawGeneratorProven) return blocked("S1S2_RAW_GENERATOR_PROOF_MISSING");
     if (!QUALITY102_CAUSAL_CAPABILITIES.s34RawGeneratorProven) return blocked("S34_RAW_GENERATOR_PROOF_MISSING");
     if (!QUALITY102_CAUSAL_CAPABILITIES.selectorImplemented) return blocked("QUALITY102_SELECTOR_IMPLEMENTATION_INCOMPLETE");
     if (!liveArmed) return blocked("QUALITY102_LIVE_NOT_ARMED");
