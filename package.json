@@ -87,7 +87,10 @@
     "strategy:disdex-v96-v52:preflight:readonly": "tsx scripts/disdex-v96-v52-readonly-preflight.ts",
     "strategy:disdex-v96-v52:preflight:readonly:selftest": "tsx scripts/disdex-v96-v52-readonly-preflight-selftest.ts",
     "strategy:v12-x1-all:selftest": "tsx scripts/v12-x1-all-selftest.ts && tsx scripts/disdex-account-order-lock-selftest.ts && tsx scripts/disdex-unified-portfolio-routing-selftest.ts && tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts && tsx scripts/v12-resident-stop-selftest.ts && tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test",
-    "strategy:v12-x1-all:typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json"
+    "strategy:v12-x1-all:typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json",
+    "strategy:strict-bt33404708902:gross:selftest": "tsx scripts/disdex-strict-bt-gross-selftest.ts",
+    "strategy:strict-bt33404708902:selector:selftest": "tsx scripts/disdex-quality102-live-selector-selftest.ts",
+    "strategy:strict-bt33404708902:contract": "tsx --test tests/strict_bt33404708902_contract.test.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

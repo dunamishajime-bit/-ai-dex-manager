@@ -10,5 +10,8 @@ const plan = planUnifiedPortfolio([
 assert.equal(plan.accepted.length, 3);
 assert.equal(plan.rejected[0].reason, "UNKNOWN_OR_SLEEVE_MISMATCH");
 assert.equal(plan.totalGross, 2.5);
+assert.equal(plan.cryptoGross <= 2, true);
+assert.equal(plan.quality102LiveSelectorParity, false);
+assert.equal(plan.quality102LiveBlockedFailClosed, true);
 assert.equal(planUnifiedPortfolio([{ sleeve: "V12", symbol: "SOLUSDT", side: "LONG", gross: 1, notionalUsd: 1, signalTs: 1 }], [{ sleeve: "V12", symbol: "ETHUSDT", gross: 0.5 }]).rejected[0].reason, "V12_SLOT_OCCUPIED_NO_PREEMPTION");
 console.log("UNIFIED_PORTFOLIO_ROUTING_SELFTEST_PASS");

@@ -1,0 +1,96 @@
+name: Strict BT 33404708902 Live Parity Contracts
+
+on:
+  push:
+    branches:
+      - codex/strict-bt33404708902-live-parity
+    paths:
+      - "config/disdexStrictBt33404708902Runtime.ts"
+      - "lib/disdex-strict-portfolio-planner.ts"
+      - "lib/disdex-quality102-live-selector.ts"
+      - "lib/disdex-unified-portfolio-routing.ts"
+      - "scripts/disdex-quality102-live-selector-selftest.ts"
+      - "scripts/disdex-strict-bt-gross-selftest.ts"
+      - "scripts/disdex-unified-portfolio-routing-selftest.ts"
+      - "scripts/disdex-v12-x1-all-live-runner.ts"
+      - "scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
+      - "scripts/disdex-v13d-v11eq-v96-live-runner.ts"
+      - "tests/strict_bt33404708902_contract.test.ts"
+      - "tests/test_research_quality102_mtm_50.py"
+      - "tests/test_research_quality102_gross_cap_sweep.py"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/strict-bt33404708902-live-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: strict-bt33404708902-live-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_RUN: "33404708902"
+      SOURCE_SHA: "aec066fefd761b12f07e6927b5f2a524f88ca08b"
+    steps:
+      - name: Checkout implementation branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify source lineage
+        shell: bash
+        run: |
+          test "$(git merge-base "$SOURCE_SHA" HEAD)" = "$SOURCE_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Python research contracts
+        run: |
+          python -m py_compile scripts/research_quality102_mtm_50.py scripts/research_quality102_mtm_50_v2.py scripts/research_quality102_gross_cap_sweep.py
+          python tests/test_research_quality102_mtm_50.py
+          python tests/test_research_quality102_gross_cap_sweep.py
+
+      - name: Strict planner and selector contracts
+        run: |
+          npm run strategy:strict-bt33404708902:gross:selftest
+          npm run strategy:strict-bt33404708902:selector:selftest
+          npm run strategy:strict-bt33404708902:contract
+
+      - name: Existing strategy regression contracts
+        run: |
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:pengu-dual-ls-v2:selftest
+          npm run strategy:disdex-v96:selftest
+          npm run strategy:disdex-v96:execution:selftest
+          npm run strategy:disdex-v13d-v11eq-v96:stock:selftest
+          npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+
+      - name: Focused typechecks
+        run: |
+          npm run strategy:pengu-dual-ls-v2:typecheck
+          npm run strategy:disdex-v96:typecheck
+
+      - name: Safety assertions
+        shell: bash
+        run: |
+          test "$SOURCE_RUN" = "33404708902"
+          test "$SOURCE_SHA" = "aec066fefd761b12f07e6927b5f2a524f88ca08b"
+          ! grep -R -n --exclude-dir=.git --exclude='*.md' -E 'executeMarket\(|submitOrder\(|createOrder\(' lib/disdex-quality102-live-selector.ts scripts/disdex-quality102-live-selector-selftest.ts
+          grep -R -n "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED" lib scripts tests
+          grep -R -n "ordersSent: 0\|ordersSent=false\|ordersSent.*0" scripts/disdex-strict-bt-gross-selftest.ts scripts/disdex-quality102-live-selector-selftest.ts scripts/disdex-v12-x1-all-live-runner.ts
