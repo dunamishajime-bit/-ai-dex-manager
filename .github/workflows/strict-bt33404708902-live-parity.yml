@@ -112,4 +112,7 @@ jobs:
           test "$SOURCE_SHA" = "aec066fefd761b12f07e6927b5f2a524f88ca08b"
           ! grep -R -n --exclude-dir=.git --exclude='*.md' -E 'executeMarket\(|submitOrder\(|createOrder\(' lib/disdex-quality102-live-selector.ts scripts/disdex-quality102-live-selector-selftest.ts
           grep -R -n "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED" lib scripts tests
-          grep -R -n "ordersSent: 0\|ordersSent=false\|ordersSent.*0" scripts/disdex-strict-bt-gross-selftest.ts scripts/disdex-quality102-live-selector-selftest.ts scripts/disdex-v12-x1-all-live-runner.ts
+          grep -n "DISDEX_V12_LIVE_ALLOW_REAL_ORDERS" scripts/disdex-v12-x1-all-live-runner.ts
+          grep -n "V12_LIVE_ACK_MUST_MATCH_EXACT_RELEASE_SHA" scripts/disdex-v12-x1-all-live-runner.ts
+          grep -n "STRICT_PORTFOLIO_PLANNER_NOT_ACTIVE" lib/v12-strict-live-adapter.ts scripts/disdex_strict_portfolio_planner.py
+          grep -n "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED" lib/v12-strict-live-adapter.ts scripts/disdex_strict_portfolio_planner.py
