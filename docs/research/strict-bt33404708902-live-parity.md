@@ -40,4 +40,4 @@ The gate only accepts an explicitly identified dynamic selector with a no-lookah
 
 The existing V12, PENGU, and V52/V96 activation gates remain in place. Runner telemetry reports the Quality102 blocked state but does not enable order submission. No synthetic, test, or real LIVE order is created by this implementation; no VPS or production process is changed.
 
-The focused runner typechecks and strategy self-tests are the relevant verification targets. The repository-wide Next typecheck currently contains unrelated pre-existing SimpleWebAuthn route errors; those are recorded separately from this strict-parity change and are not bypassed by weakening a safety gate.
+The focused runner typechecks, repository TypeScript typecheck, and strategy self-tests are the relevant verification targets. The repository-wide typecheck is run as part of the final verification; unrelated application behavior is not changed or bypassed by weakening a safety gate.

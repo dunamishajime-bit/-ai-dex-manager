@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { AsterV3Client, type AsterPositionRiskRow } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direct-trade-executor";
 import { DisDexV46AsterMarketDataProvider } from "../lib/disdex-v46-market-data-provider";
-import { FileLiveRunnerLock } from "../lib/live-runner-state";
+import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_RUNTIME, DISDEX_V96_STRATEGY_ID } from "../config/disdexV96Runtime";
 import {
@@ -221,7 +221,10 @@ async function main() {
         executor,
         config,
         stateStore,
-        lock: new FileLiveRunnerLock(resolve(stateRoot, `runner-${runnerMode}.lock`), numberEnv("DISDEX_V96_LOCK_STALE_MS", 10 * 60_000)),
+        lock: new FileAccountOrderLock(
+            process.env.DISDEX_ACCOUNT_LOCK_PATH || resolve(stateRoot, `runner-${runnerMode}.lock`),
+            numberEnv("DISDEX_V96_LOCK_STALE_MS", 10 * 60_000),
+        ),
     });
 
     console.log(JSON.stringify({

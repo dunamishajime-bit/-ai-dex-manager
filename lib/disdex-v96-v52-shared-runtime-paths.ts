@@ -7,6 +7,7 @@ export type DisDexV96V52SharedRuntimePaths = {
     cryptoStateRoot: string;
     penguStateRoot: string;
     stockStateRoot: string;
+    accountLockPath: string;
     killSwitchPath: string;
 };
 
@@ -34,11 +35,13 @@ export function resolveDisDexV96V52SharedRuntimePaths(
         }
     }
     const cryptoStateRoot = resolve(env.DISDEX_V96_STATE_DIR || resolve(combinedRoot, "crypto-v96"));
+    const accountLockPath = resolve(env.DISDEX_ACCOUNT_LOCK_PATH || resolve(combinedRoot, "account-order.lock"));
     return {
         combinedRoot,
         cryptoStateRoot,
         penguStateRoot: resolve(env.PENGU_DUAL_LS_V2_STATE_DIR || resolve(cryptoStateRoot, "pengu-dual-ls-v2-final")),
         stockStateRoot: resolve(env.DISDEX_V52_ASTER_ONLY_STATE_DIR || resolve(combinedRoot, "stock")),
+        accountLockPath,
         killSwitchPath,
     };
 }

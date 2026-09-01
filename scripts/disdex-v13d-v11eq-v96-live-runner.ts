@@ -45,6 +45,7 @@ function combinedPaths() {
         cryptoStateRoot: shared.cryptoStateRoot,
         penguStateRoot: shared.penguStateRoot,
         stockStateRoot: shared.stockStateRoot,
+        accountLockPath: shared.accountLockPath,
         killSwitchPath: shared.killSwitchPath,
     };
 }
@@ -57,6 +58,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
+        DISDEX_ACCOUNT_LOCK_PATH: paths.accountLockPath,
         DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
         DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
         DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
@@ -88,9 +90,9 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED: runnerMode === "live" ? "true" : "false",
         PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED: runnerMode === "live" ? "true" : "false",
         PENGU_DUAL_LS_V2_STATE_DIR: paths.penguStateRoot,
-        // PENGU is an independent runner. Its lock must not collide with the
-        // V96 portfolio runner lock in cryptoStateRoot.
-        PENGU_DUAL_LS_V2_LOCK_PATH: resolve(paths.penguStateRoot, `runner-${runnerMode}.lock`),
+        // All child strategies use one account-scoped lock so planning and
+        // order submission cannot race across strategy processes.
+        PENGU_DUAL_LS_V2_LOCK_PATH: paths.accountLockPath,
         PENGU_DUAL_LS_V2_KILL_SWITCH_FILE: paths.killSwitchPath,
         PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
         PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
@@ -486,9 +488,9 @@ function selfTest() {
     assert.equal(env.PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP, "1.5");
     assert.equal(
         env.PENGU_DUAL_LS_V2_LOCK_PATH,
-        resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "pengu-dual-ls-v2-final", "runner-paper.lock"),
+        resolve(".runtime-state/selftest-v96-v52", "account-order.lock"),
     );
-    assert.notEqual(env.PENGU_DUAL_LS_V2_LOCK_PATH, resolve(".runtime-state/selftest-v96-v52", "crypto-v96", "runner-paper.lock"));
+    assert.equal(env.DISDEX_ACCOUNT_LOCK_PATH, env.PENGU_DUAL_LS_V2_LOCK_PATH);
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
     assert.equal(shouldStartV52Worker("ACTIVE"), true);

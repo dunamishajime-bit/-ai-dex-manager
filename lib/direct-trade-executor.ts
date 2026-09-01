@@ -240,7 +240,9 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             availableBalance: safeNumber(row.availableBalance),
             walletBalance: safeNumber(row.balance ?? row.crossWalletBalance),
             asset: this.quoteAsset,
-            updatedAt: safeNumber(row.updateTime, Date.now()),
+            // Never synthesize exchange freshness. Strict planners must be
+            // able to fail closed when the venue omits its timestamp.
+            updatedAt: safeNumber(row.updateTime, 0),
         };
     }
 
@@ -267,7 +269,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                     notionalUsd,
                     positionSide: row.positionSide || "BOTH",
                     leverage: safeNumber(row.leverage, 1),
-                    updatedAt: safeNumber(row.updateTime, Date.now()),
+                    // A missing position timestamp is stale/unknown, not fresh.
+                    updatedAt: safeNumber(row.updateTime, 0),
                 };
             })
             .filter((position): position is DirectPosition => position !== null);
@@ -305,7 +308,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             askQuantity: safeNumber(row.askQty),
             midPrice,
             spreadBps: midPrice > 0 ? ((askPrice - bidPrice) / midPrice) * 10_000 : Number.POSITIVE_INFINITY,
-            updatedAt: safeNumber(row.time, Date.now()),
+            // A local clock is not a market-data timestamp.
+            updatedAt: safeNumber(row.time, 0),
         };
     }
 
