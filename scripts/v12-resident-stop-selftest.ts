@@ -1,13 +1,23 @@
 import assert from "node:assert/strict";
-import { installV12Protection, updateV12TrailingStop, type ResidentStopAdapter, type V12StopState } from "@/lib/v12-resident-stop-lifecycle";
+import { installV12Protection, updateV12TrailingStop, type ResidentOrderView, type ResidentStopAdapter, type V12StopState } from "@/lib/v12-resident-stop-lifecycle";
 
 function adapter(ack = true): ResidentStopAdapter & { placed: string[]; flattened: number } {
     const value = { placed: [], flattened: 0 } as ResidentStopAdapter & { placed: string[]; flattened: number };
-    value.placeStopMarket = async (input) => { value.placed.push(input.clientOrderId); return { acknowledged: ack }; };
-    value.placeTakeProfit = async (input) => { value.placed.push(input.clientOrderId); return { acknowledged: ack }; };
-    value.cancel = async () => undefined;
+    const orders = new Map<string, ResidentOrderView>();
+    value.normalizeStopPrice = async (_symbol, requested) => ({ price: requested, text: String(requested) });
+    value.placeStopMarket = async (input) => {
+        value.placed.push(input.clientOrderId);
+        orders.set(input.clientOrderId, { ...input, type: "STOP_MARKET", status: "NEW" });
+        return { acknowledged: ack };
+    };
+    value.placeTakeProfit = async (input) => {
+        value.placed.push(input.clientOrderId);
+        orders.set(input.clientOrderId, { ...input, type: "TAKE_PROFIT_MARKET", status: "NEW" });
+        return { acknowledged: ack };
+    };
+    value.cancel = async (clientOrderId) => { orders.delete(clientOrderId); };
     value.flattenReduceOnly = async () => { value.flattened += 1; };
-    value.openOrders = async () => value.placed.map((clientOrderId) => ({ clientOrderId, status: "NEW" }));
+    value.openOrders = async () => [...orders.values()];
     return value;
 }
 
