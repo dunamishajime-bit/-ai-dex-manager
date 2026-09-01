@@ -1,59 +1,124 @@
-import { resolveV12X1AllRuntime, type V12RuntimeMode } from "@/config/v12X1AllRuntime";
-import { buildV12Signal, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
-import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
-import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
-import { FileV12X1AllRunnerStateStore } from "@/lib/v12-x1-all-runner-state";
-import { evaluateQuality102LiveSelector } from "@/lib/disdex-quality102-live-selector";
+import "dotenv/config";
 
-export interface V12X1AllRunnerDependencies {
-    marketData: { load(): Promise<Record<string, V12Bar[]>> };
-    equity: () => Promise<number>;
-    now?: () => number;
-    lock?: FileAccountOrderLock;
-    stateStore?: FileV12X1AllRunnerStateStore;
-    log?: (message: string, payload?: Record<string, unknown>) => void;
+import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
+import { AsterV3Client } from "../lib/aster-v3-client";
+import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
+import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provider";
+import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
+import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
+import { assertV12StrictLiveConfiguration, V12StrictAsterLiveAdapter } from "../lib/v12-strict-live-adapter";
+
+const TWO_HOURS_MS = 2 * 60 * 60_000;
+
+function numberEnv(name: string, fallback: number) {
+    const parsed = Number(process.env[name]);
+    return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-export interface V12RunnerState { strategyId: "V12_X1.00_ALL"; mode: V12RuntimeMode; updatedAt: number; lastReferenceTs?: number; active?: { symbol: string; side: string; gross: number }; manualReview?: string; }
-export type V12TickResult = { status: "disabled" | "risk-blocked" | "locked" | "no-signal" | "shadow" | "paper" | "live-blocked"; reason: string; signal?: V12Signal; requestedGross?: number };
-
-function logger(deps: V12X1AllRunnerDependencies) { return deps.log || ((message, payload) => console.log(JSON.stringify({ message, ...(payload || {}) }))); }
-
-/**
- * Production-shaped runner. It deliberately has no venue client and cannot
- * submit an order. A future LIVE adapter must be added behind the explicit
- * gates and resident-stop lifecycle; today LIVE returns live-blocked.
- */
-export async function runV12X1AllOnce(deps: V12X1AllRunnerDependencies, env: Partial<NodeJS.ProcessEnv> = process.env): Promise<V12TickResult> {
-    const runtime = resolveV12X1AllRuntime(env);
-    const log = logger(deps);
-    if (!runtime.enabled || runtime.mode === "SHADOW" && env.V12_X1_ALL_SHADOW_DISABLED === "1") return { status: "disabled", reason: "V12_RUNTIME_DISABLED" };
-    const risk = await readSharedCryptoDailyRisk(runtime.riskPath, (deps.now || Date.now)());
-    if (!risk.ok && runtime.mode !== "SHADOW") return { status: "risk-blocked", reason: `SHARED_CRYPTO_RISK:${risk.reason}` };
-    const data = await deps.marketData.load();
-    const lengths = Object.values(data).map((bars) => bars.length);
-    if (!lengths.length || lengths.some((length) => length !== lengths[0])) return { status: "no-signal", reason: "MARKET_DATA_ALIGNMENT_REQUIRED" };
-    const index = lengths[0] - 1;
-    const signal = buildV12Signal(data, index);
-    if (!signal) return { status: "no-signal", reason: "NO_COMPLETED_BAR_SIGNAL" };
-    const equity = await deps.equity();
-    const sizing = sizeV12Position(equity, data[signal.symbol][index].close, signal.atr, signal.side);
-    const lock = deps.lock || new FileAccountOrderLock(runtime.lockPath);
-    const stateStore = deps.stateStore || new FileV12X1AllRunnerStateStore(runtime.statePath, runtime.mode);
-    const handle = await lock.acquire(`V12_X1.00_ALL:${process.pid}`);
-    if (!handle) return { status: "locked", reason: "ACCOUNT_LOCK_BUSY", signal, requestedGross: sizing.requestedGross };
-    try {
-        await handle.reserve({ strategyId: runtime.strategyId, symbol: `${signal.symbol}USDT`, side: signal.side, gross: sizing.requestedGross, notionalUsd: sizing.requestedNotional });
-        await stateStore.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: runtime.mode, updatedAt: Date.now(), lastReferenceTs: signal.referenceTs, pending: { idempotencyKey: `${runtime.strategyId}|${signal.referenceTs}|${signal.symbol}|${signal.side}`, action: "ENTRY", clientOrderId: `v12-plan-${signal.referenceTs}`, createdAt: Date.now() } });
-        const quality102Live = evaluateQuality102LiveSelector({ decisionTs: Date.now() });
-        log("v12-signal", { strategyId: runtime.strategyId, mode: runtime.mode, signal, requestedGross: sizing.requestedGross, ordersSent: 0, quality102LiveSelectorParity: quality102Live.quality102LiveSelectorParity, quality102LiveBlockedFailClosed: quality102Live.quality102LiveBlockedFailClosed });
-        if (runtime.mode === "LIVE") return { status: "live-blocked", reason: "LIVE_ADAPTER_NOT_INSTALLED_AND_EXPLICIT_ACTIVATION_REQUIRED", signal, requestedGross: sizing.requestedGross };
-        return { status: runtime.mode === "PAPER" ? "paper" : "shadow", reason: "PLAN_ONLY_NO_ORDER_SUBMISSION", signal, requestedGross: sizing.requestedGross };
-    } finally { await handle.release(); }
+function boolEnv(name: string) {
+    return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim());
 }
 
-if (process.argv.includes("--self-test")) {
-    const now = Date.now();
-    const bars = (symbol: string): V12Bar[] => Array.from({ length: 80 }, (_, index) => ({ ts: now - (80 - index) * 7_200_000, endTs: now - (79 - index) * 7_200_000, open: 100 + index, high: 101 + index, low: 99 + index, close: 100 + index, volume: 1000, sourceCount: 2 as const }));
-    runV12X1AllOnce({ marketData: { load: async () => Object.fromEntries(["BTC", "ETH", ...["BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR"].map((symbol) => [symbol, bars(symbol)])]) }, equity: async () => 1000 }, { V12_X1_ALL_ENABLED: "false" }).then((result) => { if (result.status !== "disabled") throw new Error("V12_RUNNER_SELFTEST_FAILED"); console.log("V12_X1_ALL_RUNNER_SELFTEST_PASS"); });
+function assertExactReleaseAck() {
+    const releaseSha = String(process.env.DISDEX_RELEASE_SHA || process.env.V12_LIVE_COMMIT_SHA || "").trim().toLowerCase();
+    const ack = String(process.env.V12_LIVE_ACK || "").trim().toLowerCase();
+    if (!/^[0-9a-f]{40}$/.test(releaseSha)) throw new Error("V12_LIVE_RELEASE_SHA_REQUIRED");
+    if (ack !== releaseSha) throw new Error("V12_LIVE_ACK_MUST_MATCH_EXACT_RELEASE_SHA");
+    return releaseSha;
 }
+
+export function v12AccountPriority(state: V12X1AllRunnerState) {
+    if (state.active || (state.pending && state.pending.action !== "ENTRY")) return 1;
+    return 4;
+}
+
+export async function buildV12LiveRuntime() {
+    const runtime = resolveV12X1AllRuntime();
+    if (!runtime.enabled) return { runtime, engine: undefined as V12LiveExecutionEngine | undefined, status: "disabled" as const };
+    if (runtime.mode !== "LIVE") return { runtime, engine: undefined as V12LiveExecutionEngine | undefined, status: "non-live" as const };
+    if (!runtime.liveTradingEnabled || !runtime.liveExecutionEnabled || !boolEnv("DISDEX_V12_LIVE_ALLOW_REAL_ORDERS")) {
+        throw new Error("V12_LIVE_GATES_NOT_ALL_ENABLED");
+    }
+    const releaseSha = assertExactReleaseAck();
+    const strict = assertV12StrictLiveConfiguration();
+    const client = new AsterV3Client({
+        baseUrl: process.env.ASTER_FUTURES_BASE_URL,
+        userAddress: process.env.ASTER_USER_ADDRESS,
+        privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
+        requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
+        recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
+        userAgent: `DisDex-V12-X1-All-Strict/${releaseSha.slice(0, 12)}`,
+    });
+    if (!client.hasTradingCredentials()) throw new Error("V12_LIVE_REQUIRES_ASTER_CREDENTIALS");
+    const adapter = new V12StrictAsterLiveAdapter(client, {
+        maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
+        reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+        reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+    });
+    const stateStore = new FileV12X1AllRunnerStateStore(runtime.statePath, runtime.mode);
+    const lock = new FileAccountOrderLock(runtime.lockPath || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
+    const marketData = new V12AsterMarketDataProvider(client, { hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500) });
+    const engine = new V12LiveExecutionEngine({ adapter, marketData, stateStore, lock, riskPath: runtime.riskPath });
+    return { runtime, status: "live" as const, engine, strict, releaseSha };
+}
+
+async function main() {
+    if (process.argv.includes("--self-test")) {
+        const disabled = resolveV12X1AllRuntime({ V12_X1_ALL_ENABLED: "false" });
+        if (disabled.enabled || disabled.multiplier !== 1) throw new Error("V12_RUNNER_SELFTEST_FAILED");
+        const base: V12X1AllRunnerState = { schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: Date.now() };
+        if (v12AccountPriority(base) !== 4) throw new Error("V12_ENTRY_PRIORITY_SELFTEST_FAILED");
+        if (v12AccountPriority({ ...base, pending: { idempotencyKey: "x", action: "STOP_UPDATE", clientOrderId: "x", symbol: "ETHUSDT", side: "LONG", quantity: 1, signalTs: Date.now(), createdAt: Date.now() } }) !== 1) throw new Error("V12_RISK_REDUCTION_PRIORITY_SELFTEST_FAILED");
+        console.log("V12_X1_ALL_RUNNER_SELFTEST_PASS");
+        return;
+    }
+
+    const built = await buildV12LiveRuntime();
+    if (built.status === "disabled") {
+        console.log(JSON.stringify({ strategyId: "V12_X1.00_ALL", status: "disabled" }));
+        return;
+    }
+    if (built.status !== "live" || !built.engine) {
+        throw new Error("V12_X1_ALL_PRODUCTION_RUNNER_REQUIRES_EXPLICIT_LIVE_ACTIVATION");
+    }
+
+    console.log(JSON.stringify({
+        strategyId: built.runtime.strategyId,
+        status: "live-runtime-ready",
+        releaseSha: built.releaseSha,
+        strictPortfolioPlannerActive: true,
+        cryptoGrossCap: built.strict.cryptoGrossCap,
+        totalGrossCap: built.strict.totalGrossCap,
+        quality102LiveSelectorParity: false,
+        quality102LiveBlockedFailClosed: true,
+    }));
+
+    const daemon = process.argv.includes("--daemon");
+    const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_BOUNDARY_DELAY_MS", 5_000)));
+    const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_LOCK_RETRY_MS", 5_000)));
+    const delay = createInterruptibleDelay();
+    let stopping = false;
+    const stop = () => { stopping = true; delay.interrupt(); };
+    process.on("SIGINT", stop);
+    process.on("SIGTERM", stop);
+
+    do {
+        const result = await built.engine.tick();
+        console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: built.runtime.strategyId, mode: built.runtime.mode, ...result }));
+        if (result.status === "manual-review") process.exitCode = 2;
+        if (!daemon || stopping || result.status === "manual-review") break;
+        if (result.status === "locked") {
+            await delay.wait(lockRetryMs);
+            continue;
+        }
+        const now = Date.now();
+        const wait = TWO_HOURS_MS - (now % TWO_HOURS_MS) + boundaryDelayMs;
+        await delay.wait(wait);
+    } while (!stopping);
+}
+
+main().catch((error) => {
+    console.error(JSON.stringify({ level: "fatal", strategyId: "V12_X1.00_ALL", message: error instanceof Error ? error.message : String(error) }));
+    process.exitCode = 1;
+});
