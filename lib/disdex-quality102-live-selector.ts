@@ -26,9 +26,8 @@ export interface Quality102LiveSelectorResult {
 
 /**
  * A frozen research event list is evidence for a backtest, never a live
- * selector. A future dynamic selector may pass only with an explicit,
- * source-identified, no-lookahead manifest whose data was available at the
- * decision timestamp.
+ * selector. The current repository has no independently verifiable dynamic
+ * selector implementation, so even a self-attested manifest remains blocked.
  */
 export function evaluateQuality102LiveSelector(input: Quality102LiveSelectorInput): Quality102LiveSelectorResult {
     const blocked = (reason: string): Quality102LiveSelectorResult => ({
@@ -53,12 +52,5 @@ export function evaluateQuality102LiveSelector(input: Quality102LiveSelectorInpu
     if (!Number.isFinite(manifest.availableAtTs) || manifest.availableAtTs > input.decisionTs) {
         return blocked("SELECTOR_DATA_NOT_AVAILABLE_AT_DECISION");
     }
-    return {
-        status: "LIVE_SELECTOR_READY",
-        reason: "DYNAMIC_SELECTOR_MANIFEST_VERIFIED",
-        sourceRun: STRICT_BT33404708902.sourceRun,
-        sourceSha: STRICT_BT33404708902.sourceSha,
-        quality102LiveSelectorParity: true,
-        quality102LiveBlockedFailClosed: false,
-    };
+    return blocked("QUALITY102_LIVE_SELECTOR_IMPLEMENTATION_NOT_PRESENT");
 }

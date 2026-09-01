@@ -9,12 +9,17 @@ import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime
 const NOW = 1_800_000_000_000;
 
 function position(input: Partial<StrictPortfolioPosition> & Pick<StrictPortfolioPosition, "id" | "strategy" | "symbol" | "quantity" | "entryPrice" | "markPrice">): StrictPortfolioPosition {
+    const markSource = input.markSource ?? (input.strategy === "QUALITY102" ? "BINANCE_VISION_USDM_1M_OPEN" : undefined);
     return {
         side: input.side || (input.quantity < 0 ? "SHORT" : "LONG"),
         entryTs: input.entryTs ?? NOW - 3_600_000,
         updatedAt: input.updatedAt ?? NOW,
         feeBpsPerSide: input.feeBpsPerSide ?? 0,
         fundingPerDay: input.fundingPerDay ?? 0,
+        markSource,
+        markSourceEvidence: input.markSourceEvidence ?? (markSource === "BINANCE_VISION_USDM_1M_OPEN"
+            ? { source: "BINANCE_VISION_USDM_1M_OPEN", timestamp: NOW, crossChecked: true }
+            : undefined),
         ...input,
     };
 }
@@ -114,6 +119,15 @@ const overQualityCap = planStrictPortfolio({
 assert.equal(overQualityCap.status, "blocked");
 assert.match(overQualityCap.reason || "", /QUALITY102_GROSS_OVER_CAP/);
 
+const unverifiedQualityMark = planStrictPortfolio({
+    equity: 1000,
+    now: NOW,
+    active: [position({ id: "q102-unverified", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 10, entryPrice: 10, markPrice: 10, markSource: "LIVE_MARKET_QUOTE" })],
+    intents: [],
+});
+assert.equal(unverifiedQualityMark.status, "blocked");
+assert.match(unverifiedQualityMark.reason || "", /QUALITY102_MTM_SOURCE_UNVERIFIED/);
+
 const reductionInput = position({ id: "long", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 10, entryPrice: 100, markPrice: 120 });
 const longReduction = markToMarketReducePosition({ position: reductionInput, reduceQuantity: 2, markPrice: 120, markTs: NOW, feeBpsPerSide: 0, fundingPerDay: 0 });
 assert.equal(longReduction.remainingQuantity, 8);
@@ -174,6 +188,18 @@ const duplicate = planStrictPortfolio({
 });
 assert.equal(duplicate.accepted.length, 1);
 assert.equal(duplicate.rejected[0]?.reason, "DUPLICATE_INTENT");
+
+const duplicateTarget = planStrictPortfolio({
+    equity: 1000,
+    now: NOW,
+    active: [],
+    intents: [
+        { idempotencyKey: "first-key", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
+        { idempotencyKey: "second-key", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
+    ],
+});
+assert.equal(duplicateTarget.accepted.length, 1);
+assert.equal(duplicateTarget.rejected[0]?.reason, "DUPLICATE_INTENT_TARGET");
 
 const stale = planStrictPortfolio({
     equity: 1000,

@@ -3,6 +3,13 @@ import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 
 export type StrictStrategy = StrictBtBaseStrategy | "QUALITY102";
 export type StrictPositionSide = "LONG" | "SHORT";
+export type StrictMarkSource = "BINANCE_VISION_USDM_1M_OPEN" | "LIVE_MARKET_QUOTE";
+
+export interface StrictMarkSourceEvidence {
+    source: "BINANCE_VISION_USDM_1M_OPEN";
+    timestamp: number;
+    crossChecked: true;
+}
 
 export interface StrictPortfolioPosition {
     id: string;
@@ -16,6 +23,8 @@ export interface StrictPortfolioPosition {
     updatedAt: number;
     feeBpsPerSide?: number;
     fundingPerDay?: number;
+    markSource?: StrictMarkSource;
+    markSourceEvidence?: StrictMarkSourceEvidence;
 }
 
 export interface StrictPortfolioIntent {
@@ -162,6 +171,8 @@ export function markToMarketReducePosition(input: {
     markTs: number;
     feeBpsPerSide?: number;
     fundingPerDay?: number;
+    markSource?: StrictMarkSource;
+    markSourceEvidence?: StrictMarkSourceEvidence;
 }): MarkToMarketReduction {
     const position = input.position;
     if (!Number.isFinite(position.entryTs) || position.entryTs <= 0) throw new Error("position entry timestamp is invalid.");
@@ -173,6 +184,13 @@ export function markToMarketReducePosition(input: {
     if (!Number.isFinite(input.markTs) || input.markTs < position.entryTs) throw new Error("mark timestamp is invalid or precedes entry.");
     if (input.reduceQuantity > position.quantity + EPSILON) throw new Error("reduction quantity exceeds the managed position.");
     if (position.side !== "LONG" && position.side !== "SHORT") throw new Error("position side is invalid.");
+    if (position.strategy === "QUALITY102") {
+        const source = input.markSource ?? position.markSource;
+        const evidence = input.markSourceEvidence ?? position.markSourceEvidence;
+        if (source !== "BINANCE_VISION_USDM_1M_OPEN" || evidence?.source !== source || evidence.timestamp !== input.markTs || evidence.crossChecked !== true || input.markTs % 60_000 !== 0) {
+            throw new Error("QUALITY102_MTM_SOURCE_UNVERIFIED");
+        }
+    }
     const feeBpsPerSide = nonNegative(input.feeBpsPerSide ?? position.feeBpsPerSide ?? 0, "fee bps per side");
     const fundingPerDay = nonNegative(input.fundingPerDay ?? position.fundingPerDay ?? 0, "funding per day");
     const basisNotional = input.reduceQuantity * position.entryPrice;
@@ -265,6 +283,8 @@ function trimQualityToResidual(input: {
         markTs: input.now,
         feeBpsPerSide: currentQuality.feeBpsPerSide,
         fundingPerDay: currentQuality.fundingPerDay,
+        markSource: currentQuality.markSource,
+        markSourceEvidence: currentQuality.markSourceEvidence,
     });
     reductions.push(reduction);
     equity = Math.max(0.001, equity + reduction.realizedPnl);
@@ -303,6 +323,9 @@ export function planStrictPortfolio(input: {
     }
     const activeQuality = input.active.filter((row) => row.strategy === "QUALITY102");
     if (activeQuality.length > 1) return rejectPlan("QUALITY102_ONE_SLOT_VIOLATION", input.active, equity);
+    if (activeQuality.some((row) => row.markSource !== "BINANCE_VISION_USDM_1M_OPEN" || row.markSourceEvidence?.source !== row.markSource || row.markSourceEvidence?.timestamp !== input.now || row.markSourceEvidence?.crossChecked !== true || input.now % 60_000 !== 0)) {
+        return rejectPlan("QUALITY102_MTM_SOURCE_UNVERIFIED", input.active, equity);
+    }
     if (input.active.filter((row) => row.strategy === "V12").length > STRICT_BT33404708902.v12MaximumPositions) {
         return rejectPlan("V12_SLOT_OCCUPIED_NO_PREEMPTION", input.active, equity);
     }
@@ -322,6 +345,7 @@ export function planStrictPortfolio(input: {
     let active = [...input.active];
     let workingEquity = equity;
     const seenIntentKeys = new Set<string>();
+    const seenIntentTargets = new Set<string>();
     const ordered = [...input.intents].sort((a, b) => {
         const baseRank = (strategy: StrictStrategy) => strategy === "QUALITY102" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
         return baseRank(a.strategy) - baseRank(b.strategy) || a.signalTs - b.signalTs || a.idempotencyKey.localeCompare(b.idempotencyKey);
@@ -332,6 +356,9 @@ export function planStrictPortfolio(input: {
         if (intent.strategy === "QUALITY102") { rejected.push({ intent, reason: "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED" }); continue; }
         if (!strategySymbolMatches(intent.strategy, intent.symbol)) { rejected.push({ intent, reason: "UNKNOWN_OR_SLEEVE_MISMATCH" }); continue; }
         if (!intent.idempotencyKey.trim() || !intent.symbol.trim() || (intent.side !== "LONG" && intent.side !== "SHORT") || !Number.isFinite(intent.signalTs) || intent.signalTs <= 0 || intent.signalTs > input.now || !Number.isFinite(intent.gross) || intent.gross <= 0 || !Number.isFinite(intent.notionalUsd) || intent.notionalUsd <= 0) { rejected.push({ intent, reason: "INVALID_INTENT" }); continue; }
+        const targetKey = `${intent.strategy}|${intent.symbol.toUpperCase()}|${intent.side}`;
+        if (seenIntentTargets.has(targetKey)) { rejected.push({ intent, reason: "DUPLICATE_INTENT_TARGET" }); continue; }
+        seenIntentTargets.add(targetKey);
         const baseOtherTotalNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102") + accepted.reduce((sum, row) => sum + row.notionalUsd, 0);
         const baseOtherCryptoNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102" && isCrypto(row.strategy)) + accepted.filter((row) => isCrypto(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
         const baseOtherStockNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102" && isStock(row.strategy)) + accepted.filter((row) => isStock(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);

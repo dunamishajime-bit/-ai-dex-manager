@@ -37,6 +37,21 @@ const future = evaluateQuality102LiveSelector({
 assert.equal(future.status, "LIVE_BLOCKED_FAIL_CLOSED");
 assert.match(future.reason, /SELECTOR_DATA_NOT_AVAILABLE_AT_DECISION/);
 
+const selfAttested = evaluateQuality102LiveSelector({
+    decisionTs: 1_800_000_000_000,
+    manifest: {
+        sourceKind: "dynamic-selector",
+        sourceRun: "33404708902",
+        sourceSha: "aec066fefd761b12f07e6927b5f2a524f88ca08b",
+        noLookahead: true,
+        fixedHistoricalTimestamps: false,
+        selectorParity: true,
+        availableAtTs: 1_799_999_999_000,
+    },
+});
+assert.equal(selfAttested.status, "LIVE_BLOCKED_FAIL_CLOSED");
+assert.match(selfAttested.reason, /IMPLEMENTATION_NOT_PRESENT/);
+
 console.log("QUALITY102_LIVE_SELECTOR_SELFTEST_PASS", JSON.stringify({
     quality102LiveSelectorParity: result.quality102LiveSelectorParity,
     quality102LiveBlockedFailClosed: result.quality102LiveBlockedFailClosed,

@@ -11,12 +11,17 @@ import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-se
 const NOW = 1_800_000_000_000;
 
 function position(input: Partial<StrictPortfolioPosition> & Pick<StrictPortfolioPosition, "id" | "strategy" | "symbol" | "quantity" | "entryPrice" | "markPrice">): StrictPortfolioPosition {
+    const markSource = input.markSource ?? (input.strategy === "QUALITY102" ? "BINANCE_VISION_USDM_1M_OPEN" : undefined);
     return {
         side: input.side || "LONG",
         entryTs: input.entryTs ?? NOW - 3_600_000,
         updatedAt: input.updatedAt ?? NOW,
         feeBpsPerSide: input.feeBpsPerSide ?? 0,
         fundingPerDay: input.fundingPerDay ?? 0,
+        markSource,
+        markSourceEvidence: input.markSourceEvidence ?? (markSource === "BINANCE_VISION_USDM_1M_OPEN"
+            ? { source: "BINANCE_VISION_USDM_1M_OPEN", timestamp: NOW, crossChecked: true }
+            : undefined),
         ...input,
     };
 }
