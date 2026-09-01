@@ -48,6 +48,9 @@ export function evaluateQuality102LiveSelector(input: Quality102LiveSelectorInpu
 
     if (causal.status !== "CAUSAL_SELECTOR_READY") {
         if (causal.reason === "CAUSAL_MANIFEST_MISSING") return blocked("SELECTOR_MANIFEST_MISSING");
+        if (causal.reason === "S1S2_RAW_GENERATOR_PROOF_MISSING") {
+            return blocked("QUALITY102_LIVE_SELECTOR_IMPLEMENTATION_NOT_PRESENT:S1S2_RAW_GENERATOR_PROOF_MISSING");
+        }
         if (causal.reason === "S34_RAW_GENERATOR_PROOF_MISSING") {
             return blocked("QUALITY102_LIVE_SELECTOR_IMPLEMENTATION_NOT_PRESENT:S34_RAW_GENERATOR_PROOF_MISSING");
         }
