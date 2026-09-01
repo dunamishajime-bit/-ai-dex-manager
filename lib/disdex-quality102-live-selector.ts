@@ -1,18 +1,17 @@
 import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime";
+import {
+    evaluateQuality102CausalReadiness,
+    type Quality102CausalManifest,
+} from "./disdex-quality102-causal-selector";
 
-export interface Quality102LiveSelectorManifest {
-    sourceKind: "dynamic-selector" | "frozen-historical-csv" | string;
-    sourceRun: string;
-    sourceSha: string;
-    noLookahead: boolean;
-    fixedHistoricalTimestamps: boolean;
-    selectorParity: boolean;
-    availableAtTs: number;
-}
+export interface Quality102LiveSelectorManifest extends Quality102CausalManifest {}
 
 export interface Quality102LiveSelectorInput {
     decisionTs: number;
     manifest?: Quality102LiveSelectorManifest;
+    maxDataAgeMs?: number;
+    /** Independent runtime/operator arm. It cannot bypass causal capability gates. */
+    liveArmed?: boolean;
 }
 
 export interface Quality102LiveSelectorResult {
@@ -26,8 +25,9 @@ export interface Quality102LiveSelectorResult {
 
 /**
  * A frozen research event list is evidence for a backtest, never a live
- * selector. The current repository has no independently verifiable dynamic
- * selector implementation, so even a self-attested manifest remains blocked.
+ * selector. LIVE readiness is delegated to the causal selector boundary,
+ * which derives executable capability from repository code rather than
+ * caller-supplied manifest booleans.
  */
 export function evaluateQuality102LiveSelector(input: Quality102LiveSelectorInput): Quality102LiveSelectorResult {
     const blocked = (reason: string): Quality102LiveSelectorResult => ({
@@ -38,19 +38,37 @@ export function evaluateQuality102LiveSelector(input: Quality102LiveSelectorInpu
         quality102LiveSelectorParity: false,
         quality102LiveBlockedFailClosed: true,
     });
-    if (!Number.isFinite(input.decisionTs) || input.decisionTs <= 0) return blocked("DECISION_TIMESTAMP_INVALID");
-    const manifest = input.manifest;
-    if (!manifest) return blocked("SELECTOR_MANIFEST_MISSING");
-    if (manifest.sourceKind === "frozen-historical-csv") return blocked("FIXED_HISTORICAL_SIGNAL_FORBIDDEN");
-    if (manifest.sourceKind !== "dynamic-selector") return blocked("SELECTOR_SOURCE_KIND_UNAPPROVED");
-    if (manifest.fixedHistoricalTimestamps) return blocked("FIXED_HISTORICAL_TIMESTAMP_FORBIDDEN");
-    if (!manifest.noLookahead) return blocked("LOOKAHEAD_PROOF_MISSING");
-    if (!manifest.selectorParity) return blocked("SELECTOR_PARITY_PROOF_MISSING");
-    if (manifest.sourceRun !== STRICT_BT33404708902.sourceRun || manifest.sourceSha !== STRICT_BT33404708902.sourceSha) {
-        return blocked("SELECTOR_SOURCE_IDENTITY_MISMATCH");
+
+    const causal = evaluateQuality102CausalReadiness({
+        decisionTs: input.decisionTs,
+        manifest: input.manifest,
+        maxDataAgeMs: input.maxDataAgeMs,
+        liveArmed: input.liveArmed,
+    });
+
+    if (causal.status !== "CAUSAL_SELECTOR_READY") {
+        if (causal.reason === "CAUSAL_MANIFEST_MISSING") return blocked("SELECTOR_MANIFEST_MISSING");
+        if (causal.reason === "S34_RAW_GENERATOR_PROOF_MISSING") {
+            return blocked("QUALITY102_LIVE_SELECTOR_IMPLEMENTATION_NOT_PRESENT:S34_RAW_GENERATOR_PROOF_MISSING");
+        }
+        if (causal.reason === "QUALITY102_SELECTOR_IMPLEMENTATION_INCOMPLETE") {
+            return blocked("QUALITY102_LIVE_SELECTOR_IMPLEMENTATION_NOT_PRESENT");
+        }
+        return blocked(causal.reason);
     }
-    if (!Number.isFinite(manifest.availableAtTs) || manifest.availableAtTs > input.decisionTs) {
-        return blocked("SELECTOR_DATA_NOT_AVAILABLE_AT_DECISION");
+
+    // Even after causal code exists and an operator arm is present, the strict
+    // runtime contract must be explicitly migrated away from research-only.
+    if (!STRICT_BT33404708902.quality102LiveSelectorParity || STRICT_BT33404708902.quality102LiveBlockedFailClosed) {
+        return blocked("STRICT_RUNTIME_QUALITY102_LIVE_DISABLED");
     }
-    return blocked("QUALITY102_LIVE_SELECTOR_IMPLEMENTATION_NOT_PRESENT");
+
+    return {
+        status: "LIVE_SELECTOR_READY",
+        reason: "READY",
+        sourceRun: STRICT_BT33404708902.sourceRun,
+        sourceSha: STRICT_BT33404708902.sourceSha,
+        quality102LiveSelectorParity: true,
+        quality102LiveBlockedFailClosed: false,
+    };
 }
