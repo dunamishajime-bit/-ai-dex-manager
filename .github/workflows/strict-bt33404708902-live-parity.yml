@@ -6,19 +6,29 @@ on:
       - codex/strict-bt33404708902-live-parity
     paths:
       - "config/disdexStrictBt33404708902Runtime.ts"
-      - "lib/disdex-strict-portfolio-planner.ts"
+      - "lib/aster-v3-client.ts"
+      - "lib/direct-trade-executor.ts"
       - "lib/disdex-quality102-live-selector.ts"
+      - "lib/disdex-shared-kill-switch.ts"
+      - "lib/disdex-strict-portfolio-planner.ts"
       - "lib/disdex-unified-portfolio-routing.ts"
       - "lib/disdex-v96-v52-shared-runtime-paths.ts"
-      - "lib/direct-trade-executor.ts"
       - "lib/pengu-dual-ls-v2-portfolio-runner.ts"
+      - "lib/v12-aster-live-adapter.ts"
+      - "lib/v12-live-execution-engine.ts"
+      - "lib/v12-strict-live-adapter.ts"
+      - "scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
       - "scripts/disdex-quality102-live-selector-selftest.ts"
       - "scripts/disdex-strict-bt-gross-selftest.ts"
       - "scripts/disdex-unified-portfolio-routing-selftest.ts"
       - "scripts/disdex-v12-x1-all-live-runner.ts"
-      - "scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
-      - "scripts/disdex-v96-live-runner.ts"
       - "scripts/disdex-v13d-v11eq-v96-live-runner.ts"
+      - "scripts/disdex-v96-live-runner.ts"
+      - "scripts/disdex_strict_portfolio_planner.py"
+      - "scripts/disdex_v52_aster_only_legacy_engine.py"
+      - "scripts/disdex_v52_aster_only_live_engine.py"
+      - "scripts/disdex_v52_margin_aware_legacy_engine.py"
+      - "scripts/disdex_v52_margin_aware_live_engine.py"
       - "tests/strict_bt33404708902_contract.test.ts"
       - "tests/test_research_quality102_mtm_50.py"
       - "tests/test_research_quality102_gross_cap_sweep.py"
@@ -69,6 +79,11 @@ jobs:
           python -m py_compile scripts/research_quality102_mtm_50.py scripts/research_quality102_mtm_50_v2.py scripts/research_quality102_gross_cap_sweep.py
           python tests/test_research_quality102_mtm_50.py
           python tests/test_research_quality102_gross_cap_sweep.py
+
+      - name: V52 strict Python contracts
+        run: |
+          python -m py_compile scripts/disdex_strict_portfolio_planner.py scripts/disdex_v52_aster_only_legacy_engine.py scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_margin_aware_legacy_engine.py scripts/disdex_v52_margin_aware_live_engine.py
+          python scripts/disdex_strict_portfolio_planner.py
 
       - name: Strict planner and selector contracts
         run: |
