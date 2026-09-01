@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime";
 import {
+    QUALITY102_CAUSAL_CAPABILITIES,
     evaluateQuality102CausalReadiness,
     evaluateS34QualityGate,
     getS34RawGeneratorStatus,
@@ -19,9 +20,6 @@ function manifest(overrides: Partial<Quality102CausalManifest> = {}): Quality102
         fixedHistoricalTimestamps: false,
         selectorParity: true,
         availableAtTs: DECISION_TS - 1_000,
-        s34RawGeneratorProven: false,
-        selectorImplemented: false,
-        liveArmed: false,
         ...overrides,
     };
 }
@@ -81,30 +79,19 @@ assert.deepEqual(getS34RawGeneratorStatus(), {
     reason: "QUALITY102_S34_RAW_GENERATOR_NOT_AVAILABLE",
     proven: false,
 });
+assert.deepEqual(QUALITY102_CAUSAL_CAPABILITIES, {
+    s34RawGeneratorProven: false,
+    selectorImplemented: false,
+});
 assert.equal(
     evaluateQuality102CausalReadiness({ decisionTs: DECISION_TS, manifest: manifest() }).reason,
     "S34_RAW_GENERATOR_PROOF_MISSING",
 );
+// Operator arming is an independent input and cannot self-attest missing implementation/provenance.
 assert.equal(
-    evaluateQuality102CausalReadiness({
-        decisionTs: DECISION_TS,
-        manifest: manifest({ s34RawGeneratorProven: true }),
-    }).reason,
-    "QUALITY102_SELECTOR_IMPLEMENTATION_INCOMPLETE",
+    evaluateQuality102CausalReadiness({ decisionTs: DECISION_TS, manifest: manifest(), liveArmed: true }).reason,
+    "S34_RAW_GENERATOR_PROOF_MISSING",
 );
-assert.equal(
-    evaluateQuality102CausalReadiness({
-        decisionTs: DECISION_TS,
-        manifest: manifest({ s34RawGeneratorProven: true, selectorImplemented: true }),
-    }).reason,
-    "QUALITY102_LIVE_NOT_ARMED",
-);
-const fullyAttested = evaluateQuality102CausalReadiness({
-    decisionTs: DECISION_TS,
-    manifest: manifest({ s34RawGeneratorProven: true, selectorImplemented: true, liveArmed: true }),
-});
-assert.equal(fullyAttested.status, "CAUSAL_SELECTOR_READY");
-assert.equal(fullyAttested.reason, "READY");
 
 // Exact recovered S34 post-generation quality gates.
 assert.deepEqual(
@@ -178,6 +165,7 @@ assert.equal(STRICT_BT33404708902.quality102LiveBlockedFailClosed, true);
 
 console.log("QUALITY102_CAUSAL_SELECTOR_SELFTEST_PASS", JSON.stringify({
     s34RawGeneratorProven: getS34RawGeneratorStatus().proven,
+    selectorImplemented: QUALITY102_CAUSAL_CAPABILITIES.selectorImplemented,
     quality102LiveArmed: false,
     quality102PositionCap: STRICT_BT33404708902.quality102PositionCap,
     cryptoGrossCap: STRICT_BT33404708902.cryptoGrossCap,
