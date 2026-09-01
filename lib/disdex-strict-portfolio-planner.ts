@@ -164,6 +164,10 @@ export function markToMarketReducePosition(input: {
     fundingPerDay?: number;
 }): MarkToMarketReduction {
     const position = input.position;
+    if (!Number.isFinite(position.entryTs) || position.entryTs <= 0) throw new Error("position entry timestamp is invalid.");
+    positive(position.quantity, "position quantity");
+    positive(position.entryPrice, "position entry price");
+    positive(position.markPrice, "position mark price");
     positive(input.reduceQuantity, "reduction quantity");
     positive(input.markPrice, "mark price");
     if (!Number.isFinite(input.markTs) || input.markTs < position.entryTs) throw new Error("mark timestamp is invalid or precedes entry.");
@@ -287,8 +291,10 @@ export function planStrictPortfolio(input: {
     const maxDataAgeMs = nonNegative(input.maxDataAgeMs ?? 5 * 60_000, "maximum data age");
     const ids = new Set<string>();
     for (const row of input.active) {
+        if (!row.id || !row.id.trim()) return rejectPlan("MISSING_MANAGED_POSITION_ID", input.active, equity);
         if (ids.has(row.id)) return rejectPlan("DUPLICATE_MANAGED_POSITION", input.active, equity);
         ids.add(row.id);
+        if (!Number.isFinite(row.entryTs) || row.entryTs <= 0 || row.entryTs > input.now) return rejectPlan("INVALID_ENTRY_TIMESTAMP", input.active, equity);
         if (!Number.isFinite(row.updatedAt) || row.updatedAt > input.now || input.now - row.updatedAt > maxDataAgeMs) return rejectPlan("STALE_MARK_PRICE", input.active, equity);
         if (!row.symbol || !Number.isFinite(row.quantity) || row.quantity <= 0 || !Number.isFinite(row.entryPrice) || row.entryPrice <= 0 || !Number.isFinite(row.markPrice) || row.markPrice <= 0) return rejectPlan("INVALID_MANAGED_POSITION", input.active, equity);
         if (row.side !== "LONG" && row.side !== "SHORT") return rejectPlan("INVALID_POSITION_SIDE", input.active, equity);
@@ -325,7 +331,7 @@ export function planStrictPortfolio(input: {
         seenIntentKeys.add(intent.idempotencyKey);
         if (intent.strategy === "QUALITY102") { rejected.push({ intent, reason: "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED" }); continue; }
         if (!strategySymbolMatches(intent.strategy, intent.symbol)) { rejected.push({ intent, reason: "UNKNOWN_OR_SLEEVE_MISMATCH" }); continue; }
-        if (!Number.isFinite(intent.signalTs) || intent.signalTs > input.now || !Number.isFinite(intent.gross) || intent.gross <= 0 || !Number.isFinite(intent.notionalUsd) || intent.notionalUsd <= 0) { rejected.push({ intent, reason: "INVALID_INTENT" }); continue; }
+        if (!intent.idempotencyKey.trim() || !intent.symbol.trim() || (intent.side !== "LONG" && intent.side !== "SHORT") || !Number.isFinite(intent.signalTs) || intent.signalTs <= 0 || intent.signalTs > input.now || !Number.isFinite(intent.gross) || intent.gross <= 0 || !Number.isFinite(intent.notionalUsd) || intent.notionalUsd <= 0) { rejected.push({ intent, reason: "INVALID_INTENT" }); continue; }
         const baseOtherTotalNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102") + accepted.reduce((sum, row) => sum + row.notionalUsd, 0);
         const baseOtherCryptoNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102" && isCrypto(row.strategy)) + accepted.filter((row) => isCrypto(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
         const baseOtherStockNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102" && isStock(row.strategy)) + accepted.filter((row) => isStock(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
