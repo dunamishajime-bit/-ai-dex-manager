@@ -20,14 +20,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install
         run: npm ci
 
       - name: Causal selector self-test
-        run: npx tsx scripts/disdex-quality102-causal-selector-selftest.ts
+        run: npm run strategy:strict-bt33404708902:causal-selector:selftest
 
       - name: Legacy LIVE selector fail-closed self-test
         run: npm run strategy:strict-bt33404708902:selector:selftest
