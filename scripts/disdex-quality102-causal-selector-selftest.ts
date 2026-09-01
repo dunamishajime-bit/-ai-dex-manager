@@ -4,6 +4,7 @@ import {
     QUALITY102_CAUSAL_CAPABILITIES,
     evaluateQuality102CausalReadiness,
     evaluateS34QualityGate,
+    getS1S2RawGeneratorStatus,
     getS34RawGeneratorStatus,
     routeQuality102OneSlot,
     type Quality102CausalManifest,
@@ -73,24 +74,30 @@ assert.equal(
     "SELECTOR_SOURCE_IDENTITY_MISMATCH",
 );
 
-// The repository must not claim a causal selector while the S34 raw producer is missing.
+// Neither raw-entry producer may be inferred from frozen rows or variant names.
+assert.deepEqual(getS1S2RawGeneratorStatus(), {
+    status: "UNAVAILABLE_FAIL_CLOSED",
+    reason: "QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE",
+    proven: false,
+});
 assert.deepEqual(getS34RawGeneratorStatus(), {
     status: "UNAVAILABLE_FAIL_CLOSED",
     reason: "QUALITY102_S34_RAW_GENERATOR_NOT_AVAILABLE",
     proven: false,
 });
 assert.deepEqual(QUALITY102_CAUSAL_CAPABILITIES, {
+    s1s2RawGeneratorProven: false,
     s34RawGeneratorProven: false,
     selectorImplemented: false,
 });
 assert.equal(
     evaluateQuality102CausalReadiness({ decisionTs: DECISION_TS, manifest: manifest() }).reason,
-    "S34_RAW_GENERATOR_PROOF_MISSING",
+    "S1S2_RAW_GENERATOR_PROOF_MISSING",
 );
 // Operator arming is an independent input and cannot self-attest missing implementation/provenance.
 assert.equal(
     evaluateQuality102CausalReadiness({ decisionTs: DECISION_TS, manifest: manifest(), liveArmed: true }).reason,
-    "S34_RAW_GENERATOR_PROOF_MISSING",
+    "S1S2_RAW_GENERATOR_PROOF_MISSING",
 );
 
 // Exact recovered S34 post-generation quality gates.
@@ -164,6 +171,7 @@ assert.equal(STRICT_BT33404708902.quality102LiveSelectorParity, false);
 assert.equal(STRICT_BT33404708902.quality102LiveBlockedFailClosed, true);
 
 console.log("QUALITY102_CAUSAL_SELECTOR_SELFTEST_PASS", JSON.stringify({
+    s1s2RawGeneratorProven: getS1S2RawGeneratorStatus().proven,
     s34RawGeneratorProven: getS34RawGeneratorStatus().proven,
     selectorImplemented: QUALITY102_CAUSAL_CAPABILITIES.selectorImplemented,
     quality102LiveArmed: false,
