@@ -536,15 +536,18 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         return {"strategyId": STRATEGY_ID, "mode": self.mode, "readOnly": read_only, "schemaVersion": STATE_SCHEMA_VERSION, "asterPing": True, "asterSymbols": list(base.ASTER_SYMBOL.values()), "referenceHealth": reference_health_status, "referenceFreshnessMode": reference_freshness_mode, "positions": self.positions(), "gross": snapshot, "caps": {"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap}, "ordersSent": False}
 
     def run(self, daemon: bool) -> None:
-        if not self.lock.acquire():
-            self.log("v52-account-lock-busy", accountLockPath=str(self.lock.path))
-            return
-        try:
-            self.reset_days(); self.reconcile()
-            self.log("v52-runner-start", strategyId=STRATEGY_ID, caps={"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap})
-            while not self.stop_requested:
-                started = base.now_ms()
-                try: self.tick()
+        started_once = False
+        while not self.stop_requested:
+            started = base.now_ms()
+            if not self.lock.acquire():
+                self.log("v52-account-lock-busy", accountLockPath=str(self.lock.path))
+            else:
+                try:
+                    if not started_once:
+                        self.reset_days(); self.reconcile()
+                        self.log("v52-runner-start", strategyId=STRATEGY_ID, caps={"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap})
+                        started_once = True
+                    self.tick()
                 except Exception as error:
                     self.log("v52-tick-error", error=str(error))
                     if transient_reference_error(error) and not self.positions():
@@ -555,11 +558,14 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                         self.log("v52-entry-held-reference-validation", error=str(error))
                     elif self.live:
                         self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
-                if not daemon: break
-                active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
-                interval = 250 if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
-                time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
-        finally: self.lock.release()
+                finally:
+                    # The shared lock coordinates one tick/order plan. Holding it
+                    # across daemon sleep would expire the lease and block V12/PENGU.
+                    self.lock.release()
+            if not daemon: break
+            active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
+            interval = 250 if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
+            time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
 
 
 def self_test() -> None:

@@ -16,12 +16,15 @@ on:
       - "lib/pengu-dual-ls-v2-portfolio-runner.ts"
       - "lib/v12-aster-live-adapter.ts"
       - "lib/v12-live-execution-engine.ts"
+      - "lib/v12-resident-stop-lifecycle.ts"
+      - "lib/v12-x1-all-runner-state.ts"
       - "lib/v12-strict-live-adapter.ts"
       - "scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
       - "scripts/disdex-quality102-live-selector-selftest.ts"
       - "scripts/disdex-strict-bt-gross-selftest.ts"
       - "scripts/disdex-unified-portfolio-routing-selftest.ts"
       - "scripts/disdex-v12-x1-all-live-runner.ts"
+      - "scripts/v12-resident-stop-selftest.ts"
       - "scripts/disdex-v13d-v11eq-v96-live-runner.ts"
       - "scripts/disdex-v96-live-runner.ts"
       - "scripts/disdex_strict_portfolio_planner.py"
@@ -30,6 +33,7 @@ on:
       - "scripts/disdex_v52_margin_aware_legacy_engine.py"
       - "scripts/disdex_v52_margin_aware_live_engine.py"
       - "tests/strict_bt33404708902_contract.test.ts"
+      - "tests/test_v52_account_lock_scope.py"
       - "tests/test_research_quality102_mtm_50.py"
       - "tests/test_research_quality102_gross_cap_sweep.py"
       - "package.json"
@@ -84,6 +88,7 @@ jobs:
         run: |
           python -m py_compile scripts/disdex_strict_portfolio_planner.py scripts/disdex_v52_aster_only_legacy_engine.py scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_margin_aware_legacy_engine.py scripts/disdex_v52_margin_aware_live_engine.py
           python scripts/disdex_strict_portfolio_planner.py
+          python tests/test_v52_account_lock_scope.py
 
       - name: Strict planner and selector contracts
         run: |
