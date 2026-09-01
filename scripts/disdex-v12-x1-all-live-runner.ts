@@ -3,6 +3,7 @@ import { buildV12Signal, sizeV12Position, type V12Bar, type V12Signal } from "@/
 import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { FileV12X1AllRunnerStateStore } from "@/lib/v12-x1-all-runner-state";
+import { evaluateQuality102LiveSelector } from "@/lib/disdex-quality102-live-selector";
 
 export interface V12X1AllRunnerDependencies {
     marketData: { load(): Promise<Record<string, V12Bar[]>> };
@@ -44,7 +45,8 @@ export async function runV12X1AllOnce(deps: V12X1AllRunnerDependencies, env: Par
     try {
         await handle.reserve({ strategyId: runtime.strategyId, symbol: `${signal.symbol}USDT`, side: signal.side, gross: sizing.requestedGross, notionalUsd: sizing.requestedNotional });
         await stateStore.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: runtime.mode, updatedAt: Date.now(), lastReferenceTs: signal.referenceTs, pending: { idempotencyKey: `${runtime.strategyId}|${signal.referenceTs}|${signal.symbol}|${signal.side}`, action: "ENTRY", clientOrderId: `v12-plan-${signal.referenceTs}`, createdAt: Date.now() } });
-        log("v12-signal", { strategyId: runtime.strategyId, mode: runtime.mode, signal, requestedGross: sizing.requestedGross, ordersSent: 0 });
+        const quality102Live = evaluateQuality102LiveSelector({ decisionTs: Date.now() });
+        log("v12-signal", { strategyId: runtime.strategyId, mode: runtime.mode, signal, requestedGross: sizing.requestedGross, ordersSent: 0, quality102LiveSelectorParity: quality102Live.quality102LiveSelectorParity, quality102LiveBlockedFailClosed: quality102Live.quality102LiveBlockedFailClosed });
         if (runtime.mode === "LIVE") return { status: "live-blocked", reason: "LIVE_ADAPTER_NOT_INSTALLED_AND_EXPLICIT_ACTIVATION_REQUIRED", signal, requestedGross: sizing.requestedGross };
         return { status: runtime.mode === "PAPER" ? "paper" : "shadow", reason: "PLAN_ONLY_NO_ORDER_SUBMISSION", signal, requestedGross: sizing.requestedGross };
     } finally { await handle.release(); }

@@ -9,6 +9,7 @@ import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
 import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
+import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
 
 const HOUR_MS = 60 * 60_000;
 
@@ -19,6 +20,13 @@ function numberEnv(name: string, fallback: number) {
 
 async function main() {
     const runtime = resolvePenguDualLsV2Runtime();
+    const quality102Live = evaluateQuality102LiveSelector({ decisionTs: Date.now() });
+    console.log(JSON.stringify({
+        event: "quality102-live-selector",
+        quality102LiveSelectorParity: quality102Live.quality102LiveSelectorParity,
+        quality102LiveBlockedFailClosed: quality102Live.quality102LiveBlockedFailClosed,
+        reason: quality102Live.reason,
+    }));
     const stateRoot = resolve(process.env.PENGU_DUAL_LS_V2_STATE_DIR || ".runtime-state/pengu-dual-ls-v2");
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,

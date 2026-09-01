@@ -12,6 +12,7 @@ import {
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
 import { resolveDisDexV96V52SharedRuntimePaths } from "../lib/disdex-v96-v52-shared-runtime-paths";
+import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
 import { isUsRegularEquitySession } from "./disdex-v13d-v11eq-v96-strategy-preflight";
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
@@ -270,6 +271,7 @@ async function v52HasOpenPosition(stateRoot: string): Promise<boolean> {
 
 async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     assertCombinedLiveActivation(runnerMode);
+    const quality102Live = evaluateQuality102LiveSelector({ decisionTs: Date.now() });
     const paths = combinedPaths();
     const env = buildCombinedChildEnvironment(runnerMode);
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
@@ -376,6 +378,9 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         v52PreflightStatus,
         v52WorkerStarted: shouldStartV52Worker(v52PreflightStatus),
         killSwitchPath: paths.killSwitchPath,
+        quality102LiveSelectorParity: quality102Live.quality102LiveSelectorParity,
+        quality102LiveBlockedFailClosed: quality102Live.quality102LiveBlockedFailClosed,
+        quality102LiveSelectorReason: quality102Live.reason,
     }));
     if (!daemon) {
         const exits = await Promise.all(children.map(waitForExit));
