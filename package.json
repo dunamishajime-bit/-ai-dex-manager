@@ -90,6 +90,7 @@
     "strategy:v12-x1-all:typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json",
     "strategy:strict-bt33404708902:gross:selftest": "tsx scripts/disdex-strict-bt-gross-selftest.ts",
     "strategy:strict-bt33404708902:selector:selftest": "tsx scripts/disdex-quality102-live-selector-selftest.ts",
+    "strategy:strict-bt33404708902:causal-selector:selftest": "tsx scripts/disdex-quality102-causal-selector-selftest.ts",
     "strategy:strict-bt33404708902:contract": "tsx --test tests/strict_bt33404708902_contract.test.ts"
   },
   "dependencies": {
