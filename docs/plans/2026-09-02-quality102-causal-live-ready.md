@@ -1,10 +1,10 @@
 # Quality102 causal LIVE readiness implementation plan
 
-> Scope: prepare Quality102 for causal LIVE integration without inventing the missing S34 raw generator. All unresolved provenance remains fail-closed. No VPS changes, LIVE activation, or orders are in scope.
+> Scope: prepare Quality102 for causal LIVE integration without inventing either missing raw-entry generator. All unresolved provenance remains fail-closed. No VPS changes, LIVE activation, or orders are in scope.
 
 ## Goal
 
-Build a typed, testable causal-selector boundary that can accept a proven dynamic Quality102 generator later, while implementing every exact component that is already recoverable from frozen research evidence.
+Build a typed, testable causal-selector boundary that can accept proven dynamic Quality102 generators later, while implementing every exact component already recoverable from frozen research evidence.
 
 The implementation must preserve the strict portfolio controls already present on the base branch:
 
@@ -21,27 +21,35 @@ The implementation must preserve the strict portfolio controls already present o
 1. Source identity must match strict BT run `33404708902` / SHA `aec066fefd761b12f07e6927b5f2a524f88ca08b`.
 2. Frozen historical CSV signals are research evidence only and can never be a LIVE provider.
 3. Decision data must be available no later than the decision timestamp.
-4. S34 post-generation quality gates recovered from commit `450f8fae800d3f509ef868ab035f0cd731216279`:
+4. The recovered research code can transform already-materialized HIGH_VOL rows and contains the known 72h / trigger12 / trail5 / hard-stop semantics.
+5. S34 post-generation quality gates recovered from commit `450f8fae800d3f509ef868ab035f0cd731216279`:
    - PB: reject only `PB168_0.1_P24_0.04_H12`.
    - MR: short unchanged; long requires prior-14d open/open return >= -2.5%.
    - BRK: `strength >= 0.03` and `side * ret14 >= -0.05`.
    - REV: unchanged.
-5. Layer priority: S1 > S2 > S3 > S4.
-6. Quality102 is one-slot: candidates arriving before the active candidate exits are blocked.
-7. Unknown families, invalid sides, non-finite required fields, stale/future/missing data, or missing provenance fail closed.
+6. Layer priority: S1 > S2 > S3 > S4.
+7. Quality102 is one-slot: candidates arriving before the active candidate exits are blocked.
+8. Unknown families, invalid sides, non-finite required fields, stale/future/missing data, or missing provenance fail closed.
 
 ### Not proven and therefore not to be invented
 
-The causal PB/MR/BRK/REV S34 *raw candidate generator* that originally produced `latest_stage34.csv` / `latest_core.csv` / `latest_filler.csv` is not present in the inspected GitHub history or source run artifact. Variant names and frozen output rows are not sufficient evidence to reconstruct its formulas.
+The inspected GitHub history and source-run artifact do not contain authoritative causal source for either raw-entry population:
 
-Until an authoritative implementation/provenance source is recovered, the S34 provider reports `QUALITY102_S34_RAW_GENERATOR_NOT_AVAILABLE` and Quality102 cannot arm for LIVE.
+- S1/S2 HIGH_VOL raw-entry generator -> `latest_stage1.csv` / `latest_stage2.csv`;
+- S3/S4 PB/MR/BRK/REV raw generator -> `latest_stage34.csv` / `latest_core.csv` / `latest_filler.csv`.
+
+Commit `450f8fa...` consumes these files after they already exist; it does not establish their causal generation formulas. Frozen rows and variant names are not sufficient evidence to reconstruct those formulas.
+
+Until authoritative implementations/provenance are recovered, the providers report `QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE` and `QUALITY102_S34_RAW_GENERATOR_NOT_AVAILABLE`, and Quality102 cannot arm for LIVE.
 
 ## Safety state machine
 
-Two independent gates are required:
+Independent gates are required:
 
-- `selectorImplemented`: true only when every required raw generator, including S34, has executable provenance-backed code.
-- `liveArmed`: an explicit runtime/operator arm. Implementation readiness alone must never place orders.
+- `s1s2RawGeneratorProven`: true only when the S1/S2 raw-entry producer exists with authoritative provenance/parity evidence.
+- `s34RawGeneratorProven`: true only when the S3/S4 raw producer exists with authoritative provenance/parity evidence.
+- `selectorImplemented`: true only when every required raw generator and downstream causal selector path is executable and proven.
+- `liveArmed`: explicit runtime/operator arm. Implementation readiness alone must never place orders.
 
 Readiness requires all of the following:
 
@@ -52,7 +60,8 @@ Readiness requires all of the following:
 - fixed historical timestamps = false
 - data available at decision time
 - data freshness within the configured maximum age
-- raw S34 generator proven
+- S1/S2 raw generator proven
+- S3/S4 raw generator proven
 - selector implemented
 - LIVE explicitly armed
 
@@ -62,21 +71,7 @@ Any failed condition returns `LIVE_BLOCKED_FAIL_CLOSED`.
 
 ### Task 1 — RED: causal contract tests
 
-Add `scripts/disdex-quality102-causal-selector-selftest.ts` before the implementation module. Tests cover:
-
-- missing provenance
-- future decision data
-- stale decision data
-- frozen historical provider
-- missing S34 generator proof
-- selector not implemented
-- LIVE not armed
-- unknown S34 family
-- invalid side / non-finite strength or ret14
-- exact PB/MR/BRK/REV quality gates
-- exact S1>S2>S3>S4 one-slot priority
-- occupied one-slot blocking
-- strict gross constants remain 0.50 / 2.00 / 2.50
+Add `scripts/disdex-quality102-causal-selector-selftest.ts` before the implementation module. Tests cover missing provenance, frozen/future/stale data, no-lookahead/parity/source identity, both missing raw-generator proofs, exact recovered S34 quality gates, deterministic one-slot priority, and unchanged strict gross constants.
 
 The first CI run is expected to fail because the causal implementation module does not exist yet.
 
@@ -86,37 +81,29 @@ Add `lib/disdex-quality102-causal-selector.ts` containing only proven logic:
 
 - typed provenance manifest and decision context
 - readiness evaluator
+- separate raw-generator capability blockers
 - S34 quality-gate evaluator
 - deterministic one-slot router
-- explicit missing-generator result
 - no execution/order side effects
 
-Do not implement or infer PB/MR/BRK/REV raw signal equations.
+Do not implement or infer missing S1/S2 or S3/S4 raw signal equations.
 
 ### Task 3 — integrate existing LIVE selector
 
-Refactor `lib/disdex-quality102-live-selector.ts` to delegate proof/readiness evaluation to the causal boundary while preserving existing reason codes where practical. The result must remain blocked with current repository state because S34 is unproven and `liveArmed=false`.
+Refactor `lib/disdex-quality102-live-selector.ts` to delegate proof/readiness evaluation to the causal boundary while preserving existing reason codes where practical. Current repository state must remain blocked even if an operator supplies `liveArmed=true`.
 
 ### Task 4 — CI and package entry points
 
-Add:
+Add `strategy:strict-bt33404708902:causal-selector:selftest` and `.github/workflows/quality102-causal-live-ready.yml`.
 
-- `strategy:strict-bt33404708902:causal-selector:selftest`
-- `.github/workflows/quality102-causal-live-ready.yml`
-
-CI runs:
-
-1. causal selector self-test
-2. legacy Quality102 LIVE selector self-test
-3. strict gross self-test
-4. strict contract test
-5. TypeScript typecheck
+CI runs causal selector self-test, legacy selector fail-closed self-test, strict gross self-test, strict contract and TypeScript typecheck.
 
 ### Task 5 — audit status
 
-Add `audit/quality102-causal-live-ready-status.md` with machine-readable final state. Unless the missing S34 producer is independently recovered and proven in this branch, final state must remain:
+Unless both raw producers are independently recovered and proven in this branch, final state must remain:
 
 ```text
+S1S2_RAW_GENERATOR_PROVEN=false
 S34_RAW_GENERATOR_PROVEN=false
 QUALITY102_SELECTOR_IMPLEMENTED=false
 QUALITY102_LIVE_ARMED=false
@@ -128,14 +115,6 @@ ORDERS_SENT=0
 
 ## Acceptance criteria
 
-The branch is considered *implementation-ready but not LIVE-ready* when:
+The branch is considered implementation-ready but not LIVE-ready when causal contracts pass, all exactly recovered downstream rules are implemented, strict risk constants remain unchanged, legacy selector stays fail-closed, CI passes, no VPS/order path is touched, and every missing raw generator is an explicit typed blocker rather than guessed code.
 
-- causal contracts exist and pass,
-- exact recovered S34 post-generation quality rules and one-slot routing are implemented,
-- strict risk constants are unchanged,
-- legacy selector remains fail-closed,
-- CI passes,
-- no VPS or order path has been touched,
-- missing raw generator is represented as an explicit typed blocker rather than guessed code.
-
-Full Quality102 LIVE readiness additionally requires authoritative S34 raw-generator recovery plus oracle/parity evidence (151 raw -> 124 quality -> 102 one-slot, including S1=8, S2=10, S3=69, S4=15 and 102/102 identity). That later proof is a separate gate, not something this plan fabricates.
+Full Quality102 LIVE readiness additionally requires authoritative recovery of both raw-entry producers plus oracle/parity evidence for the expected 151 raw -> 124 quality -> 102 one-slot flow, final layer counts S1=8, S2=10, S3=69, S4=15, and 102/102 identity. That later proof is a separate gate, not something this plan fabricates.
