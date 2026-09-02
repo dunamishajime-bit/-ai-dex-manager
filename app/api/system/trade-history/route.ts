@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     officialHistory: selected.source === "aster",
     historySource: selected.source,
     historyNotice: selected.source === "local-fallback"
-      ? "Aster公式約定が0件のため、保存済みの復元オンチェーンledgerを読み取り専用で表示しています。"
+      ? "Aster公式約定が0件のため、保存済みの取引ledgerを読み取り専用で表示しています。"
       : undefined,
     refreshedAt: aster.refreshedAt,
     readOnlyError: aster.error,
