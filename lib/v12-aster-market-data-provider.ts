@@ -1,5 +1,5 @@
 import { AsterV3Client, type AsterKline } from "@/lib/aster-v3-client";
-import { resampleV12H1ToH2, type V12Bar } from "@/lib/v12-x1-all";
+import { resampleV12H1ToH2, type V12Bar, type V12H1Candle } from "@/lib/v12-x1-all";
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 
 function parse(row: AsterKline) {
@@ -9,6 +9,17 @@ function parse(row: AsterKline) {
 }
 
 export interface V12AsterMarketDataProviderOptions { hourlyLimit?: number; now?: () => number; }
+
+/**
+ * A rolling H1 API window can start on either side of the fixed UTC H2
+ * boundary. Drop only the leading unaligned candle so the strict resampler
+ * receives complete H1 pairs without weakening its gap/duplicate checks.
+ */
+export function alignV12H1ForH2(input: V12H1Candle[]): V12H1Candle[] {
+    const sorted = [...input].sort((a, b) => a.ts - b.ts);
+    const firstAligned = sorted.findIndex((candle) => candle.ts % 7_200_000 === 0);
+    return firstAligned >= 0 ? sorted.slice(firstAligned) : [];
+}
 
 export class V12AsterMarketDataProvider {
     private readonly limit: number;
@@ -20,7 +31,7 @@ export class V12AsterMarketDataProvider {
         let expectedLength: number | undefined;
         for (const row of rows) {
             const parsed = row.rows.map(parse).filter((value): value is NonNullable<ReturnType<typeof parse>> => Boolean(value)).filter((value) => value.ts + 3_600_000 <= this.now());
-            const bars = resampleV12H1ToH2(parsed);
+            const bars = resampleV12H1ToH2(alignV12H1ForH2(parsed));
             if (bars.length < 80) throw new Error(`V12 hourly history insufficient for ${row.symbol}: ${bars.length}`);
             if (expectedLength === undefined) expectedLength = bars.length;
             if (bars.length !== expectedLength) throw new Error(`V12 universe alignment mismatch: ${row.symbol}`);
