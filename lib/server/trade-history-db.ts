@@ -10,6 +10,7 @@ const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST
 const USE_REDIS = !!(KV_URL && KV_TOKEN);
 const REDIS_KEY = "disdex:trade-ledger";
 const DB_PATH = path.join(process.cwd(), "data", "trade-ledger.json");
+const GIT_EXPORT_PATH = path.join(process.cwd(), "data", "trade-history-git.json");
 
 export interface TradeHistoryEntry {
   id: string;
@@ -142,7 +143,7 @@ function hasMeaningfulTradeAmounts(entry: Pick<TradeHistoryEntry, "sourceAmount"
   return Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001;
 }
 
-function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
+export function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
   const sorted = [...entries]
     .filter((entry) => entry && entry.walletId && entry.executedAt && entry.sourceSymbol && entry.destSymbol)
     .filter((entry) => hasMeaningfulTradeAmounts(entry))
@@ -195,6 +196,7 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
     const sellKey = `${next.walletId}:${next.sourceSymbol}`;
 
     if (next.action === "BUY" && destAmount > 0) {
+      next.tradeStatus ||= "open";
       const effectiveBuyUsd = next.sourceUsdValue > 0
         ? next.sourceUsdValue
         : (STABLE_SYMBOLS.has(next.sourceSymbol) ? sourceAmount : next.destUsdValue);
@@ -240,6 +242,7 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
         if (effectiveSellUsd > 0) {
           next.realizedPnlUsd = round6(effectiveSellUsd - costForSold);
           next.realizedPnlPct = costForSold > 0 ? round6((next.realizedPnlUsd / costForSold) * 100) : undefined;
+          next.tradeStatus = "closed";
           if (!next.sourceUsdValue) next.sourceUsdValue = costForSold;
           if (!next.destUsdValue) next.destUsdValue = round6(effectiveSellUsd);
         }
@@ -262,6 +265,8 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
               : open.partialExitPeakPriceUsd,
           });
         }
+      } else {
+        next.tradeStatus ||= "unmatched_exit";
       }
     }
 
@@ -318,6 +323,37 @@ function saveToFs(db: TradeLedgerDb) {
   }
 }
 
+function loadBundledTradeHistoryEntries(): TradeHistoryEntry[] {
+  try {
+    if (!fs.existsSync(GIT_EXPORT_PATH)) return [];
+    const parsed = JSON.parse(fs.readFileSync(GIT_EXPORT_PATH, "utf8")) as { entries?: unknown };
+    if (!Array.isArray(parsed.entries)) return [];
+
+    return parsed.entries.map((value, index) => {
+      const entry = value && typeof value === "object" ? value as Partial<TradeHistoryEntry> : {};
+      const walletAddress = typeof entry.walletAddress === "string" ? entry.walletAddress : "Recovered audit ledger";
+      return {
+        ...entry,
+        id: typeof entry.id === "string" && entry.id ? entry.id : `bundled-history-${index}`,
+        walletId: typeof entry.walletId === "string" && entry.walletId ? entry.walletId : `audit:${walletAddress}`,
+        walletAddress,
+        chainId: Number.isFinite(Number(entry.chainId)) ? Number(entry.chainId) : 0,
+        action: entry.action === "SELL" ? "SELL" : "BUY",
+        sourceSymbol: typeof entry.sourceSymbol === "string" ? entry.sourceSymbol : "UNKNOWN",
+        destSymbol: typeof entry.destSymbol === "string" ? entry.destSymbol : "UNKNOWN",
+        sourceAmount: Number(entry.sourceAmount || 0),
+        destAmount: Number(entry.destAmount || 0),
+        sourceUsdValue: Number(entry.sourceUsdValue || 0),
+        destUsdValue: Number(entry.destUsdValue || 0),
+        reason: typeof entry.reason === "string" ? entry.reason : "bundled audit history",
+      } as TradeHistoryEntry;
+    });
+  } catch (error) {
+    console.warn("Failed to load bundled trade history:", error);
+    return [];
+  }
+}
+
 async function loadTradeLedger(): Promise<TradeLedgerDb> {
   if (USE_REDIS) return loadFromRedis();
   return loadFromFs();
@@ -344,7 +380,8 @@ async function saveTradeLedger(db: TradeLedgerDb) {
 
 export async function loadTradeHistoryEntries(): Promise<TradeHistoryEntry[]> {
   const db = await loadTradeLedger();
-  return normalizeTradeHistoryEntries(db.entries);
+  const normalized = normalizeTradeHistoryEntries(db.entries);
+  return normalized.length ? normalized : normalizeTradeHistoryEntries(loadBundledTradeHistoryEntries());
 }
 
 export async function appendTradeHistory(input: AppendTradeHistoryInput): Promise<TradeHistoryEntry | null> {

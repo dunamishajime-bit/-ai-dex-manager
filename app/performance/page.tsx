@@ -185,6 +185,8 @@ export default function PerformancePage() {
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [historySource, setHistorySource] = useState<"aster" | "local-fallback" | "empty">("empty");
+  const [historyNotice, setHistoryNotice] = useState<string | null>(null);
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
 
   async function loadEntries() {
@@ -195,6 +197,8 @@ export default function PerformancePage() {
       if (!response.ok) throw new Error("Official trade history could not be loaded.");
       const data = await response.json();
       setEntries(Array.isArray(data.entries) ? data.entries : []);
+      setHistorySource(data.historySource === "aster" || data.historySource === "local-fallback" ? data.historySource : "empty");
+      setHistoryNotice(typeof data.historyNotice === "string" ? data.historyNotice : null);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Official trade history could not be loaded.");
     } finally {
@@ -242,6 +246,11 @@ export default function PerformancePage() {
   );
 
   const portfolioUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
+  const historyLabel = historySource === "aster"
+    ? "Aster公式決済履歴"
+    : historySource === "local-fallback"
+      ? "復元オンチェーンledger（読み取り専用）"
+      : "決済履歴なし";
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -275,7 +284,7 @@ export default function PerformancePage() {
             {latestWeek ? formatPrice(latestWeek.pnlUsd) : "-"}
           </div>
           <div className="mt-1 text-sm text-gray-400">
-            {latestWeek ? `${latestWeek.label} / ${formatPct(latestWeek.returnPct, 2)} / Aster official settled fills` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
+            {latestWeek ? `${latestWeek.label} / ${formatPct(latestWeek.returnPct, 2)} / ${historyLabel}` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
           </div>
         </Card>
         <Card glow="gold" noHover>
@@ -284,7 +293,7 @@ export default function PerformancePage() {
             {latestMonth ? formatPrice(latestMonth.pnlUsd) : "-"}
           </div>
           <div className="mt-1 text-sm text-gray-400">
-            {latestMonth ? `${latestMonth.label} / ${formatPct(latestMonth.returnPct, 2)} / Aster official settled fills` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
+            {latestMonth ? `${latestMonth.label} / ${formatPct(latestMonth.returnPct, 2)} / ${historyLabel}` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
           </div>
         </Card>
       </div>
@@ -292,6 +301,12 @@ export default function PerformancePage() {
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
         上部カードはAster口座評価額のスナップショット差分です。下の週次・月次サマリーと日別一覧は closed trade の実現損益です。
       </div>
+
+      {historyNotice ? (
+        <div className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
+          {historyNotice}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">

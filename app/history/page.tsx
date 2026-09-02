@@ -65,6 +65,7 @@ export default function HistoryPage() {
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [historyNotice, setHistoryNotice] = useState<string | null>(null);
 
   const loadEntries = async () => {
     setIsLoading(true);
@@ -74,6 +75,7 @@ export default function HistoryPage() {
       if (!response.ok) throw new Error("履歴の読み込みに失敗しました。");
       const data = await response.json();
       setEntries(Array.isArray(data.entries) ? data.entries : []);
+      setHistoryNotice(typeof data.historyNotice === "string" ? data.historyNotice : null);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "履歴の読み込みに失敗しました。");
     } finally {
@@ -212,6 +214,12 @@ export default function HistoryPage() {
         このページの損益は Aster の公式 net PnL ではなく、ローカル trade ledger の約定価格から再計算した概算値です。
         手数料、funding、未実現損益、口座残高の増減とは一致しない場合があります。
       </div>
+
+      {historyNotice ? (
+        <div className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
+          {historyNotice}
+        </div>
+      ) : null}
 
       <Card title="約定一覧" glow="gold">
         {error ? (
