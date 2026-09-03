@@ -74,7 +74,7 @@ assert.equal(
     "SELECTOR_SOURCE_IDENTITY_MISMATCH",
 );
 
-// Neither raw-entry producer may be inferred from frozen rows or variant names.
+// Aggregate producer statuses stay fail-closed until every unresolved causal link is proven.
 assert.deepEqual(getS1S2RawGeneratorStatus(), {
     status: "UNAVAILABLE_FAIL_CLOSED",
     reason: "QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE",
@@ -92,12 +92,12 @@ assert.deepEqual(QUALITY102_CAUSAL_CAPABILITIES, {
 });
 assert.equal(
     evaluateQuality102CausalReadiness({ decisionTs: DECISION_TS, manifest: manifest() }).reason,
-    "S1S2_RAW_GENERATOR_PROOF_MISSING",
+    "HIGH_VOL_525_TO_30_SELECTOR_PROOF_MISSING",
 );
 // Operator arming is an independent input and cannot self-attest missing implementation/provenance.
 assert.equal(
     evaluateQuality102CausalReadiness({ decisionTs: DECISION_TS, manifest: manifest(), liveArmed: true }).reason,
-    "S1S2_RAW_GENERATOR_PROOF_MISSING",
+    "HIGH_VOL_525_TO_30_SELECTOR_PROOF_MISSING",
 );
 
 // Exact recovered S34 post-generation quality gates.
