@@ -29,6 +29,9 @@ jobs:
       - name: Causal selector self-test
         run: npm run strategy:strict-bt33404708902:causal-selector:selftest
 
+      - name: Recovery capability boundary self-test
+        run: npx tsx scripts/disdex-quality102-recovery-capabilities-selftest.ts
+
       - name: Causal pipeline self-test
         run: npm run strategy:strict-bt33404708902:pipeline:selftest
 
