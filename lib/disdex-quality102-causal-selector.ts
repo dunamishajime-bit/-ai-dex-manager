@@ -7,14 +7,43 @@ export type Quality102S34Family = "PB" | "MR" | "BRK" | "REV" | string;
 /**
  * Compile-time capabilities are intentionally not caller-attested. A manifest
  * can prove where decision data came from, but it cannot make missing source
- * code exist. These flags may only turn true in a commit that also contains
- * the provenance-backed raw generators and parity evidence.
+ * code exist. These legacy aggregate flags remain conservative until the full
+ * end-to-end selector is provenance-backed in this repository.
  */
 export const QUALITY102_CAUSAL_CAPABILITIES = Object.freeze({
     s1s2RawGeneratorProven: false,
     s34RawGeneratorProven: false,
     selectorImplemented: false,
 });
+
+/**
+ * Granular recovery ledger. This separates code/evidence that has actually
+ * been recovered from the two still-unproven causal links. None of these
+ * fields is caller-attested and none can arm LIVE by itself.
+ *
+ * Historical HIGH_VOL parity counts are recovered evidence from the completed
+ * reconstruction work (137 old-universe + 388 expanded-universe = 525 raw
+ * candidates). They do NOT prove the missing 525 -> 30 selector.
+ */
+export const QUALITY102_RECOVERY_CAPABILITIES = Object.freeze({
+    highVolRawGeneratorImplemented: true,
+    highVolHistoricalParity: Object.freeze({
+        oldUniverseExact: Object.freeze({ expected: 137, matched: 137 }),
+        expandedUniverseExact: Object.freeze({ expected: 388, matched: 388 }),
+        combinedRawExpected: 525,
+    }),
+    highVol525To30SelectorProven: false,
+    recoveredHighVolSelectedShape: Object.freeze({ stage1: 8, stage2: 22, total: 30 }),
+    pbMrRevPostGenerationRecovered: true,
+    brkStrengthFormulaProven: false,
+    quality124TransformRecovered: true,
+    oneSlotRouterRecovered: true,
+    selectorImplemented: false,
+});
+
+export function getQuality102RecoveryCapabilities(): typeof QUALITY102_RECOVERY_CAPABILITIES {
+    return QUALITY102_RECOVERY_CAPABILITIES;
+}
 
 export const QUALITY102_RECOVERED_POST_GENERATION_SOURCE = Object.freeze({
     commit: "450f8fae800d3f509ef868ab035f0cd731216279",
@@ -54,6 +83,11 @@ export interface Quality102CausalReadinessResult {
     liveArmed: boolean;
 }
 
+/**
+ * Legacy aggregate status. It deliberately stays false until the recovered
+ * HIGH_VOL raw generator is connected to the still-missing 525 -> 30 selector
+ * and proven as one complete S1/S2 producer.
+ */
 export function getS1S2RawGeneratorStatus(): {
     status: "UNAVAILABLE_FAIL_CLOSED";
     reason: "QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE";
@@ -66,6 +100,11 @@ export function getS1S2RawGeneratorStatus(): {
     };
 }
 
+/**
+ * Legacy aggregate S34 status. PB/MR/REV post-generation behavior is recovered,
+ * but the BRK strength feature is still upstream/unproven, so the complete S34
+ * causal producer remains unavailable.
+ */
 export function getS34RawGeneratorStatus(): {
     status: "UNAVAILABLE_FAIL_CLOSED";
     reason: "QUALITY102_S34_RAW_GENERATOR_NOT_AVAILABLE";
@@ -98,10 +137,11 @@ function readinessResult(
 /**
  * Evaluate whether a causal Quality102 selector is safe to expose to LIVE.
  *
- * The current repository deliberately cannot return READY because neither the
- * original S1/S2 HIGH_VOL raw-entry generator nor the S3/S4 S34 raw generator
- * is present/proven. `liveArmed` is checked only after executable capability
- * checks so a caller cannot self-attest missing code.
+ * Recovery evidence is checked at the narrowest unresolved boundary first.
+ * The current repository deliberately cannot return READY because the exact
+ * HIGH_VOL 525 -> 30 selector and upstream BRK strength formula remain
+ * unproven. `liveArmed` is checked only after executable capability checks so
+ * a caller cannot self-attest missing code/provenance.
  */
 export function evaluateQuality102CausalReadiness(
     input: Quality102CausalReadinessInput,
@@ -128,6 +168,9 @@ export function evaluateQuality102CausalReadiness(
     if (!Number.isFinite(maxDataAgeMs) || maxDataAgeMs < 0) return blocked("MAX_DATA_AGE_INVALID");
     if (input.decisionTs - manifest.availableAtTs > maxDataAgeMs) return blocked("SELECTOR_DATA_STALE");
 
+    const recovery = getQuality102RecoveryCapabilities();
+    if (!recovery.highVol525To30SelectorProven) return blocked("HIGH_VOL_525_TO_30_SELECTOR_PROOF_MISSING");
+    if (!recovery.brkStrengthFormulaProven) return blocked("BRK_STRENGTH_FORMULA_PROOF_MISSING");
     if (!QUALITY102_CAUSAL_CAPABILITIES.s1s2RawGeneratorProven) return blocked("S1S2_RAW_GENERATOR_PROOF_MISSING");
     if (!QUALITY102_CAUSAL_CAPABILITIES.s34RawGeneratorProven) return blocked("S34_RAW_GENERATOR_PROOF_MISSING");
     if (!QUALITY102_CAUSAL_CAPABILITIES.selectorImplemented) return blocked("QUALITY102_SELECTOR_IMPLEMENTATION_INCOMPLETE");
