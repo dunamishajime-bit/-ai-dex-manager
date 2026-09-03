@@ -50,7 +50,7 @@ const selfAttested = evaluateQuality102LiveSelector({
     },
 });
 assert.equal(selfAttested.status, "LIVE_BLOCKED_FAIL_CLOSED");
-assert.match(selfAttested.reason, /IMPLEMENTATION_NOT_PRESENT/);
+assert.match(selfAttested.reason, /HIGH_VOL_525_TO_30_SELECTOR_PROOF_MISSING/);
 
 console.log("QUALITY102_LIVE_SELECTOR_SELFTEST_PASS", JSON.stringify({
     quality102LiveSelectorParity: result.quality102LiveSelectorParity,
