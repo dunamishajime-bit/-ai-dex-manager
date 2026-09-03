@@ -1,4 +1,7 @@
 {
+    "files": [
+        "scripts/disdex-quality102-causal-v1-runtime-selftest.ts"
+    ],
     "compilerOptions": {
         "target": "es2020",
         "lib": [
