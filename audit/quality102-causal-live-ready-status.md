@@ -17,8 +17,10 @@ Recovered post-generation selector source: `450f8fae800d3f509ef868ab035f0cd73121
 - Compile-time capability state separated from caller/operator manifest data.
 - Independent `liveArmed` input that cannot override missing implementation.
 - Existing `disdex-quality102-live-selector` routed through the causal readiness boundary.
+- Pure `disdex-quality102-causal-pipeline` implementation: completed-1H features, Wilder RSI/ATR, HIGH_VOL grid matching, monthly rule eligibility/Wilson ranking, next-hour entry, hard-stop/trailing/72h exits, research cost accounting, explicit stage-subset validation, S34 gate/classification, and Quality124→Quality102 one-slot routing.
+- Focused synthetic contract reproduces the required shape `151 → 124 → 102`, `22` one-slot blocks, and `S1/S2/S3/S4 = 8/10/69/15` without using frozen timestamps as runtime input.
 - Strict portfolio risk constants remain unchanged and are asserted by self-test.
-- Dedicated GitHub Actions causal-readiness workflow.
+- Dedicated GitHub Actions causal-readiness workflow runs the pipeline self-test.
 
 ## Provenance blockers
 
@@ -29,13 +31,14 @@ Two causal raw-entry producers remain unproven in the inspected repository/histo
 
 Commit `450f8fae800d3f509ef868ab035f0cd731216279` proves downstream transforms/quality gates/one-slot reconstruction from those already-materialized inputs; it does not prove how either raw candidate population was causally generated.
 
-Frozen rows, output CSVs and variant names are not treated as sufficient evidence to infer raw signal formulas. The repository therefore exposes both `QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE` and `QUALITY102_S34_RAW_GENERATOR_NOT_AVAILABLE`, and keeps executable capability flags false.
+Frozen rows, output CSVs and variant names are not treated as sufficient evidence to infer raw signal formulas. The pipeline therefore requires explicit S1/S2 stage membership and a finite upstream S34 `strength` value; it does not synthesize either missing provenance or the BRK strength formula. The repository exposes both `QUALITY102_S1S2_RAW_GENERATOR_NOT_AVAILABLE` and `QUALITY102_S34_RAW_GENERATOR_NOT_AVAILABLE`, and keeps LIVE capability flags false.
 
 ## Machine-readable state
 
 ```text
 S1S2_RAW_GENERATOR_PROVEN=false
 S34_RAW_GENERATOR_PROVEN=false
+QUALITY102_CAUSAL_PIPELINE_IMPLEMENTED=true
 QUALITY102_SELECTOR_IMPLEMENTED=false
 QUALITY102_LIVE_ARMED=false
 QUALITY102_LIVE=FAIL_CLOSED

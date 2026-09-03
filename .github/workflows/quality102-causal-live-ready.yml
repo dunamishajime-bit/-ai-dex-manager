@@ -29,6 +29,9 @@ jobs:
       - name: Causal selector self-test
         run: npm run strategy:strict-bt33404708902:causal-selector:selftest
 
+      - name: Causal pipeline self-test
+        run: npm run strategy:strict-bt33404708902:pipeline:selftest
+
       - name: Legacy LIVE selector fail-closed self-test
         run: npm run strategy:strict-bt33404708902:selector:selftest
 
