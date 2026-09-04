@@ -1,0 +1,18 @@
+[Unit]
+Description=DisDex bounded fail-closed runner watchdog
+After=local-fs.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/current
+EnvironmentFile=/etc/disdex/disdex-runner-watchdog.env
+ExecStart=/home/deploy/disdex-trading/current/node_modules/.bin/tsx scripts/disdex-runner-watchdog.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/var/lib/disdex/runner-health
+UMask=0077
