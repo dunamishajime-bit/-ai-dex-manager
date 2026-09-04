@@ -15,6 +15,7 @@ import disdex_v11eq_aster_only_live_engine as legacy
 from disdex_v52_daily_loss import update_v52_strategy_daily_latch
 from disdex_account_order_lock import AccountOrderLock
 from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
+from disdex_strict_portfolio_planner import quality102_crypto_notional_from_positions
 
 base = legacy.base
 
@@ -156,6 +157,15 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             result[symbol] = result.get(symbol, 0.0) + side * base.finite(position.get("asterQty"))
         return result
 
+    def _quality102_aware_crypto_notional(self) -> float:
+        if not self.live:
+            return 0.0
+        return quality102_crypto_notional_from_positions(
+            self.aster.positions(),
+            known_crypto=frozenset(getattr(legacy, "V96_SYMBOLS", set())),
+            known_stock=frozenset(base.ASTER_SYMBOL.values()),
+        )
+
     def _actual_stock_notional(self) -> float:
         if not self.live:
             return sum(abs(base.finite(p.get("asterQty")) * base.finite(p.get("asterEntryPrice"))) for p in self.positions().values())
@@ -170,7 +180,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         equity = self.portfolio_equity()
         if equity <= 0:
             raise RuntimeError("Aster equity must be positive")
-        crypto_notional = self.current_v96_notional()
+        crypto_notional = self._quality102_aware_crypto_notional()
         stock_notional = self._actual_stock_notional()
         return {"equityUsd": equity, "cryptoNotionalUsd": crypto_notional, "stockNotionalUsd": stock_notional, "cryptoGross": crypto_notional / equity, "stockGross": stock_notional / equity, "totalGross": (crypto_notional + stock_notional) / equity}
 

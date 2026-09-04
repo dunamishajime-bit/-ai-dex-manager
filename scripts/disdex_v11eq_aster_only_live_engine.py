@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import disdex_v13d_v11eq_stock_live_engine as base
+from disdex_strict_portfolio_planner import quality102_crypto_notional_from_positions
 
 
 STRATEGY_ID = "DISDEX_V11EQ_ASTER_ONLY_EXCESS_MARGIN"
@@ -73,21 +74,13 @@ class AsterOnlyStockEngine(base.StockEngine):
         return bool(daily.get("killSwitchActive") or daily.get("tripped") or state.get("portfolioDailyLossLatch", {}).get("tripped"))
 
     def current_v96_notional(self) -> float:
-        total = 0.0
-        for row in self.aster.positions():
-            symbol = str(row.get("symbol") or "").upper()
-            qty = abs(base.finite(row.get("positionAmt")))
-            price = base.finite(row.get("markPrice") or row.get("entryPrice"))
-            if qty <= 1e-12:
-                continue
-            if symbol in V96_SYMBOLS:
-                total += qty * price
-            elif symbol in base.ASTER_SYMBOL.values():
-                # Known stock sleeves are accounted by V52 stock gross.
-                continue
-            else:
-                raise RuntimeError(f"Unknown non-flat Aster symbol requires manual review: {symbol}")
-        return total
+        if not self.live:
+            return 0.0
+        return quality102_crypto_notional_from_positions(
+            self.aster.positions(),
+            known_crypto=frozenset(V96_SYMBOLS),
+            known_stock=frozenset(base.ASTER_SYMBOL.values()),
+        )
 
     def excess_margin_usd(self) -> float:
         if self.v96_requires_margin():
