@@ -6,6 +6,7 @@ import os
 import signal
 
 import disdex_v52_aster_only_legacy_engine as legacy
+from disdex_runner_heartbeat import publish_heartbeat
 from disdex_strict_portfolio_planner import (
     EPSILON,
     STRICT_CAPS,
@@ -88,7 +89,23 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             "quality102LiveSelectorParity": False,
             "quality102LiveBlockedFailClosed": True,
         })
+        publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="LIVE" if self.live else "WAITING", last_decision="preflight", reason=str(checks.get("referenceHealth") or "preflight"), caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
         return checks
+
+    def tick(self) -> None:
+        try:
+            result = super().tick()
+            publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="LIVE" if self.live else "WAITING", last_decision="tick", reason="tick completed", caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
+            return result
+        except Exception as error:
+            publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="FAIL_CLOSED" if self.live else "UNKNOWN", last_decision="tick-error", reason=str(error), caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
+            raise
+
+    def run(self, daemon: bool) -> None:
+        try:
+            super().run(daemon)
+        finally:
+            publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="WAITING", last_decision="stopped", reason="stop requested", caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
 
 
 def self_test() -> None:

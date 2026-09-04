@@ -12,8 +12,37 @@ import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
 import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
 import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
+import { writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
 
 const HOUR_MS = 60 * 60_000;
+const ZERO_SHA = "0".repeat(40);
+
+function penguSafety(status: string, message: string, liveEnabled: boolean): RunnerHeartbeat["safetyState"] {
+    const text = `${status} ${message}`.toLowerCase();
+    if (text.includes("kill switch")) return "KILL_SWITCH";
+    if (text.includes("daily loss") || text.includes("latch")) return "DAILY_LOSS_LATCH";
+    if (/stale|invalid|freshness|data/.test(text)) return "STALE_DATA";
+    if (status === "manual-review" || /unresolved|ambiguous|unknown/.test(text)) return "MANUAL_REVIEW";
+    return liveEnabled ? "LIVE" : "WAITING";
+}
+
+function penguHeartbeatPath() { return process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/pengu-v8.json`; }
+
+export function buildPenguRunnerHeartbeat(result: { status: string; message: string }, now = Date.now(), options: { mode: string; liveEnabled: boolean }): RunnerHeartbeat {
+    const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || ZERO_SHA).trim().toLowerCase();
+    const validSha = /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA;
+    return {
+        schema: "disdex-runner-heartbeat/v1", runnerId: "PENGU_V8", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-pengu-dual-ls-v2.service",
+        runtimeSha: validSha, expectedSha: validSha, workingDirectory: process.cwd(), mode: options.mode, liveEnabled: options.liveEnabled,
+        safetyState: penguSafety(result.status, result.message, options.liveEnabled), heartbeatAt: now, lastTickAt: now, lastReconciliationAt: null,
+        lastDecision: result.status, reason: result.message || result.status, symbols: [], caps: { strategy: 0.75, crypto: 2, total: 2.5 },
+        restartAttempts: Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0), updatedAt: now,
+    };
+}
+
+async function publishPenguHeartbeat(result: { status: string; message: string }, now = Date.now(), runtime = resolvePenguDualLsV2Runtime()) {
+    try { await writeRunnerHeartbeat(penguHeartbeatPath(), buildPenguRunnerHeartbeat(result, now, { mode: runtime.mode === "LIVE" ? "PENGU_DUAL_LS_V2_FINAL" : runtime.mode, liveEnabled: runtime.mode === "LIVE" && runtime.enabled && runtime.liveTradingEnabled && runtime.liveExecutionEnabled })); } catch (error) { console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", runnerId: "PENGU_V8", reason: error instanceof Error ? error.message : String(error) })); }
+}
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -110,6 +139,7 @@ async function main() {
     process.on("SIGTERM", stop);
     do {
         const result = await runner.tick();
+        await publishPenguHeartbeat(result);
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
         const now = Date.now();
@@ -118,7 +148,10 @@ async function main() {
     } while (!stopping);
 }
 
-main().catch((error) => {
-    console.error(JSON.stringify({ level: "fatal", strategyId: "PENGU_DUAL_LS_V2_FINAL", message: error instanceof Error ? error.message : String(error) }));
-    process.exitCode = 1;
-});
+if (process.argv[1]?.endsWith("disdex-pengu-dual-ls-v2-live-runner.ts")) {
+    main().catch((error) => {
+        void publishPenguHeartbeat({ status: "fatal", message: error instanceof Error ? error.message : String(error) });
+        console.error(JSON.stringify({ level: "fatal", strategyId: "PENGU_DUAL_LS_V2_FINAL", message: error instanceof Error ? error.message : String(error) }));
+        process.exitCode = 1;
+    });
+}

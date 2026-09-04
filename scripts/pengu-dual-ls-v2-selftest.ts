@@ -21,6 +21,7 @@ import {
     PENGU_SHORT_V20_CANDIDATE,
     PENGU_SHORT_V20_PRE_REGISTRATION_SHA,
 } from "../lib/pengu-short-v20";
+import { buildPenguRunnerHeartbeat } from "./disdex-pengu-dual-ls-v2-live-runner";
 
 const HOUR = 3_600_000;
 
@@ -247,6 +248,13 @@ async function main() {
     const shadowResult = await shadowRunner.tick();
     assert.equal(shadowResult.status, "shadow");
     assert.equal(executorCalls, 0);
+    const heartbeat = buildPenguRunnerHeartbeat({ status: "held", message: "fixture-held" }, Date.now(), {
+        mode: "PENGU_DUAL_LS_V2_FINAL",
+        liveEnabled: true,
+    });
+    assert.equal(heartbeat.runnerId, "PENGU_V8");
+    assert.equal(heartbeat.schema, "disdex-runner-heartbeat/v1");
+    assert.equal(heartbeat.mode, "PENGU_DUAL_LS_V2_FINAL");
     console.log("PENGU_DUAL_LS_V2_FINAL_SELFTEST_PASS");
     console.log("ordersSent=false");
     console.log("cancelSent=false");

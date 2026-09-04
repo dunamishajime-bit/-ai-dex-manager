@@ -14,6 +14,7 @@ import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-st
 import { resolveDisDexV96V52SharedRuntimePaths } from "../lib/disdex-v96-v52-shared-runtime-paths";
 import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
 import { isUsRegularEquitySession } from "./disdex-v13d-v11eq-v96-strategy-preflight";
+import { writeRunnerHeartbeat } from "../lib/disdex-runner-health";
 
 const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
@@ -23,6 +24,7 @@ const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-strategy-prefli
 const MARGIN_AWARE_V52_ENGINE = "scripts/disdex_v52_margin_aware_live_engine.py" as const;
 const V52_MARKET_RECHECK_INTERVAL_MS = 30_000;
 const V52_DATA_RECHECK_INTERVAL_MS = 60_000;
+const ZERO_SHA = "0".repeat(40);
 
 type RunnerMode = "paper" | "live";
 type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v2-final" | "stock-v52-aster-only"; process: ChildProcess };
@@ -134,6 +136,19 @@ export function shouldHoldFailClosed(runnerMode: RunnerMode, daemon: boolean) {
 
 function shouldStartV52Worker(status: V52PreflightStatus) {
     return status === "ACTIVE";
+}
+
+async function publishSupervisorV52Failure(reason: string) {
+    const now = Date.now();
+    const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || ZERO_SHA).toLowerCase();
+    try {
+        await writeRunnerHeartbeat(process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/v52.json`, {
+            schema: "disdex-runner-heartbeat/v1", runnerId: "V52", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-v96-v52-supervisor.service",
+            runtimeSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA, expectedSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA,
+            workingDirectory: process.cwd(), mode: mode(), liveEnabled: mode() === "live", safetyState: "FAIL_CLOSED", heartbeatAt: now,
+            lastTickAt: null, lastReconciliationAt: null, lastDecision: "supervisor-failure", reason, symbols: [], caps: { strategy: 1.5, crypto: 2, total: 2.5 }, restartAttempts: 0, updatedAt: now,
+        });
+    } catch (error) { console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", runnerId: "V52", reason: error instanceof Error ? error.message : String(error) })); }
 }
 
 export type V52WorkerAction = "START" | "STOP" | "HOLD";
@@ -448,6 +463,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
                 ? `V52 lifecycle monitor failed; fail-closed. ${first.error.message}`
                 : "Combined supervisor monitor stopped unexpectedly.";
         intentionalStop = true;
+        if (first.kind === "child-exit" && first.child.name === "stock-v52-aster-only") await publishSupervisorV52Failure(reason);
         resolveMonitorStop();
         if (runnerMode === "live") {
             await activateSharedKillSwitch(paths.killSwitchPath, reason);

@@ -21,6 +21,7 @@ import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality
 import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-runner";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
+import { writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEFAULT_STATE_ROOT = "/var/lib/disdex/quality102-causal-v1";
@@ -29,6 +30,36 @@ const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const DEFAULT_HISTORY_HOURS = 225 * 24;
 const DEFAULT_MAX_ENTRY_DELAY_MS = 2 * 60 * 60_000;
 const HOUR_MS = 3_600_000;
+const ZERO_SHA = "0".repeat(40);
+
+function q102Safety(status: string, message: string, liveEnabled: boolean): RunnerHeartbeat["safetyState"] {
+    const text = `${status} ${message}`.toLowerCase();
+    if (text.includes("kill switch")) return "KILL_SWITCH";
+    if (text.includes("daily loss") || text.includes("latch")) return "DAILY_LOSS_LATCH";
+    if (/stale|invalid|freshness|data/.test(text)) return "STALE_DATA";
+    if (status === "manual-review" || /unresolved|ambiguous|unknown/.test(text)) return "MANUAL_REVIEW";
+    return liveEnabled ? "LIVE" : "WAITING";
+}
+
+function q102HeartbeatPath() { return process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/quality102-causal-v1.json`; }
+
+export function buildQuality102RunnerHeartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Pick<Quality102CausalV1LiveResolvedConfig, "mode" | "enabled" | "liveTradingEnabled" | "liveExecutionEnabled" | "runtimeCommitSha" | "expectedRuntimeCommitSha" | "symbols">, now = Date.now()): RunnerHeartbeat {
+    const liveEnabled = config.mode === "LIVE" && config.enabled && config.liveTradingEnabled && config.liveExecutionEnabled;
+    const sha = /^[0-9a-f]{40}$/i.test(config.runtimeCommitSha) ? config.runtimeCommitSha.toLowerCase() : ZERO_SHA;
+    return {
+        schema: "disdex-runner-heartbeat/v1", runnerId: "QUALITY102_CAUSAL_V1", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-quality102-causal-v1.service",
+        runtimeSha: sha, expectedSha: /^[0-9a-f]{40}$/i.test(config.expectedRuntimeCommitSha) ? config.expectedRuntimeCommitSha.toLowerCase() : sha,
+        workingDirectory: process.cwd(), mode: config.mode, liveEnabled, safetyState: q102Safety(result.status, result.message, liveEnabled), heartbeatAt: now, lastTickAt: now,
+        lastReconciliationAt: null, lastDecision: result.status, reason: result.message || result.status,
+        symbols: config.symbols.map((symbol) => ({ symbol, eligible: result.signal?.symbol === symbol, reason: result.signal?.symbol === symbol ? result.signal.reason : result.message || "not-selected" })),
+        caps: { strategy: 0.5, crypto: 2, total: 2.5 }, restartAttempts: Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0), updatedAt: now,
+        quality102: { selectorMode: "DERIVED_HIGH_VOL_ONLY", historicalSelectorParity: false, brkLiveEnabled: false },
+    };
+}
+
+async function publishQuality102Heartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Quality102CausalV1LiveResolvedConfig, now = Date.now()) {
+    try { await writeRunnerHeartbeat(q102HeartbeatPath(), buildQuality102RunnerHeartbeat(result, config, now)); } catch (error) { console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", runnerId: "QUALITY102_CAUSAL_V1", reason: error instanceof Error ? error.message : String(error) })); }
+}
 
 export interface Quality102CausalV1LiveResolvedConfig {
     mode: Quality102CausalV1Mode;
@@ -426,6 +457,7 @@ async function main(): Promise<void> {
     process.on("SIGTERM", stop);
     do {
         const result = await built.runner.tick();
+        await publishQuality102Heartbeat(result, built.config);
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), ...result }));
         if (!daemon || stopping || result.status === "manual-review") {
             if (result.status === "manual-review") process.exitCode = 2;
@@ -439,6 +471,8 @@ async function main(): Promise<void> {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
     main().catch((error) => {
+        const fallback = resolveQuality102CausalV1LiveConfig({ ...process.env, QUALITY102_CAUSAL_V1_SYMBOLS: process.env.QUALITY102_CAUSAL_V1_SYMBOLS || "UNKNOWNUSDT" });
+        void publishQuality102Heartbeat({ status: "fatal", message: error instanceof Error ? error.message : String(error) }, fallback);
         console.error(JSON.stringify({
             level: "fatal",
             strategyId: QUALITY102_CAUSAL_V1.strategyId,

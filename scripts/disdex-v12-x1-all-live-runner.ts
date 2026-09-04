@@ -8,8 +8,41 @@ import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provide
 import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
 import { assertV12StrictLiveConfiguration, V12StrictAsterLiveAdapter } from "../lib/v12-strict-live-adapter";
+import { writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
 
 const TWO_HOURS_MS = 2 * 60 * 60_000;
+const ZERO_SHA = "0".repeat(40);
+
+function safetyState(status: string, reason: string, liveEnabled: boolean): RunnerHeartbeat["safetyState"] {
+    const text = `${status} ${reason}`.toLowerCase();
+    if (text.includes("kill switch")) return "KILL_SWITCH";
+    if (text.includes("daily loss") || text.includes("latch")) return "DAILY_LOSS_LATCH";
+    if (/stale|invalid|freshness|data/.test(text)) return "STALE_DATA";
+    if (status === "manual-review" || /unresolved|ambiguous|unknown/.test(text)) return "MANUAL_REVIEW";
+    return liveEnabled ? "LIVE" : "WAITING";
+}
+
+function heartbeatPath(runnerId: string) {
+    return process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/${runnerId.toLowerCase()}.json`;
+}
+
+export function buildV12RunnerHeartbeat(result: { status: string; reason: string }, now = Date.now(), options: { mode: string; liveTradingEnabled: boolean; liveExecutionEnabled: boolean }) : RunnerHeartbeat {
+    const liveEnabled = options.mode === "LIVE" && options.liveTradingEnabled && options.liveExecutionEnabled;
+    const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || process.env.V12_LIVE_COMMIT_SHA || ZERO_SHA).trim().toLowerCase();
+    const restartAttempts = Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0);
+    return {
+        schema: "disdex-runner-heartbeat/v1", runnerId: "V12", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-v12-x1-all.service",
+        runtimeSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA, expectedSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA,
+        workingDirectory: process.cwd(), mode: options.mode, liveEnabled, safetyState: safetyState(result.status, result.reason, liveEnabled),
+        heartbeatAt: now, lastTickAt: now, lastReconciliationAt: null, lastDecision: result.status, reason: result.reason || result.status,
+        symbols: [], caps: { strategy: 1.5, crypto: 2, total: 2.5 }, restartAttempts, updatedAt: now,
+    };
+}
+
+async function publishV12Heartbeat(result: { status: string; reason: string }, now = Date.now(), options?: { mode: string; liveTradingEnabled: boolean; liveExecutionEnabled: boolean }) {
+    const runtime = options || resolveV12X1AllRuntime();
+    try { await writeRunnerHeartbeat(heartbeatPath("v12"), buildV12RunnerHeartbeat(result, now, runtime)); } catch (error) { console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", runnerId: "V12", reason: error instanceof Error ? error.message : String(error) })); }
+}
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -105,6 +138,7 @@ async function main() {
 
     do {
         const result = await built.engine.tick();
+        await publishV12Heartbeat(result, Date.now(), built.runtime);
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: built.runtime.strategyId, mode: built.runtime.mode, ...result }));
         if (result.status === "manual-review") process.exitCode = 2;
         if (!daemon || stopping || result.status === "manual-review") break;
@@ -118,7 +152,10 @@ async function main() {
     } while (!stopping);
 }
 
-main().catch((error) => {
-    console.error(JSON.stringify({ level: "fatal", strategyId: "V12_X1.00_ALL", message: error instanceof Error ? error.message : String(error) }));
-    process.exitCode = 1;
-});
+if (process.argv[1]?.endsWith("disdex-v12-x1-all-live-runner.ts")) {
+    main().catch((error) => {
+        void publishV12Heartbeat({ status: "fatal", reason: error instanceof Error ? error.message : String(error) });
+        console.error(JSON.stringify({ level: "fatal", strategyId: "V12_X1.00_ALL", message: error instanceof Error ? error.message : String(error) }));
+        process.exitCode = 1;
+    });
+}
