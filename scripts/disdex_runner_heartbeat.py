@@ -19,6 +19,7 @@ PYTHON_RUNNERS = {"V52"}
 MAX_SYMBOLS = 128
 MAX_SYMBOL_LENGTH = 64
 MAX_REASON_LENGTH = 512
+V52_SERVICE_UNIT_RE = re.compile(r"(?:disdex-v52-aster-only@[0-9a-f]{40}\.service|disdex-v96-v52-live\.service)")
 
 
 def classify_runner_safety_state(status: str | None, reason: str | None, live_enabled: bool) -> str:
@@ -47,10 +48,12 @@ def classify_runner_safety_state(status: str | None, reason: str | None, live_en
 def _safe_reason(value: object) -> str:
     text = str(value or "runner heartbeat")
     text = re.sub(
-        r"(?i)(api[_ -]?key|private[_ -]?key|secret|token|password|authorization)\s*[:=]\s*\S+",
-        r"\1=[REDACTED]",
+        r"(?i)\b(?:api[_ -]?key|private[_ -]?key|secret|token|password|authorization|mnemonic|seed(?: phrase)?|wallet|credential)\s*[:=]\s*[^\s,;]+",
+        "[REDACTED]",
         text,
     )
+    text = re.sub(r"(?i)\b(?:sk|pk)_[A-Za-z0-9_-]{8,}\b", "[REDACTED]", text)
+    text = re.sub(r"(?i)\b0x[a-f0-9]{40,}\b", "[REDACTED]", text)
     text = re.sub(r"[\x00-\x1f\x7f]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text[:MAX_REASON_LENGTH]
@@ -118,10 +121,15 @@ def service_unit(runner_id: str) -> str:
     defaults = {
         "V12": "disdex-v12-x1-all.service",
         "PENGU_V8": "disdex-pengu-dual-ls-v2.service",
-        "V52": "disdex-v52-aster-only.service",
+        "V52": "disdex-v96-v52-live.service",
         "QUALITY102_CAUSAL_V1": "disdex-quality102-causal-v1.service",
     }
     return os.getenv(specific_names.get(runner_id, "")) or os.getenv("DISDEX_RUNNER_SERVICE_UNIT") or defaults.get(runner_id, "disdex-runner.service")
+
+
+def _validate_service_unit(runner_id: str, unit: str) -> None:
+    if runner_id == "V52" and V52_SERVICE_UNIT_RE.fullmatch(unit) is None:
+        raise ValueError("invalid V52 service unit")
 
 def _sha(value: str | None) -> str:
     value = (value or "").strip().lower()
@@ -154,10 +162,11 @@ def publish_heartbeat(*, runner_id: str, mode: str, live_enabled: bool, safety_s
         unit = service_unit(runner_id)
         if not isinstance(unit, str) or not 0 < len(unit) <= 256 or re.search(r"[\x00-\x1f\x7f]", unit):
             raise ValueError("invalid service unit")
+        _validate_service_unit(runner_id, unit)
         working_directory = str(Path.cwd())
         if len(working_directory) > 512:
             raise ValueError("invalid working directory")
-        payload = {"schema": SCHEMA, "runnerId": runner_id, "serviceUnit": service_unit(runner_id),
+        payload = {"schema": SCHEMA, "runnerId": runner_id, "serviceUnit": unit,
                    "runtimeSha": runtime_sha, "expectedSha": expected_sha,
                    "workingDirectory": working_directory, "mode": mode, "liveEnabled": bool(live_enabled), "safetyState": safety_state,
                    "heartbeatAt": now, "lastTickAt": _timestamp(last_tick_at, now) if last_tick_at is not None else now,
