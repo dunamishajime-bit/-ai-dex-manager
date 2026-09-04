@@ -1,0 +1,102 @@
+name: Quality102 Causal V1 Live Connection
+
+on:
+  push:
+    branches:
+      - 'codex/quality102-live-connection-*'
+    paths:
+      - 'config/disdexQuality102CausalV1Runtime.ts'
+      - 'lib/disdex-aster-portfolio-classifier.ts'
+      - 'lib/disdex-quality102-causal-v1-*.ts'
+      - 'lib/disdex-shared-crypto-*.ts'
+      - 'lib/disdex-strict-portfolio-planner.ts'
+      - 'lib/disdex-unified-portfolio-routing.ts'
+      - 'lib/pengu-dual-ls-v2-portfolio-runner.ts'
+      - 'lib/v12-*.ts'
+      - 'scripts/disdex-quality102-causal-v1-*.ts'
+      - 'scripts/disdex-shared-crypto-*.ts'
+      - 'scripts/disdex_v12_crypto_daily_risk.py'
+      - 'scripts/disdex_quality102_v52_mtm_selftest.py'
+      - 'scripts/disdex_strict_portfolio_planner.py'
+      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
+      - 'scripts/disdex_v52_aster_only_legacy_engine.py'
+      - 'tests/quality102_causal_v1_portfolio.test.ts'
+      - 'tests/strict_bt33404708902_contract.test.ts'
+      - 'scripts/v12-x1-all-selftest.ts'
+      - 'ops/env/**'
+      - 'ops/systemd/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/quality102-causal-v1-live-connection.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality102-causal-v1-live-connection-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout implementation
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Causal selector and pipeline contracts
+        run: |
+          npm run strategy:quality102-causal-v1:runtime:selftest
+          npm run strategy:quality102-causal-v1:signal:selftest
+          npm run strategy:quality102-causal-v1:state:selftest
+          npm run strategy:strict-bt33404708902:causal-selector:selftest
+          npm run strategy:strict-bt33404708902:pipeline:selftest
+          npm run strategy:strict-bt33404708902:selector:selftest
+
+      - name: Q102 runner and read-only live gate contracts
+        run: |
+          npm run strategy:shared-crypto-risk:selftest
+          npm run strategy:quality102-causal-v1:runner:selftest
+          npm run strategy:quality102-causal-v1:portfolio:test
+          npm run strategy:strict-bt33404708902:gross:selftest
+          npm run strategy:strict-bt33404708902:contract
+
+      - name: Existing strategy regression contracts
+        run: |
+          npm run strategy:pengu-dual-ls-v2:selftest
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:disdex-v13d-v11eq-v96:stock:selftest
+          python scripts/disdex_quality102_v52_mtm_selftest.py
+
+      - name: Python safety contracts
+        run: |
+          python -m py_compile scripts/disdex_strict_portfolio_planner.py scripts/disdex_v13d_v11eq_stock_live_engine.py scripts/disdex_v52_aster_only_legacy_engine.py
+          python scripts/disdex_strict_portfolio_planner.py
+
+      - name: Production build
+        run: npm run build
+
+      - name: Assert no live/test/synthetic order path was exercised by CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(rg -n 'realOrders|ordersSent|testOrders|syntheticOrders' scripts/disdex-quality102-causal-v1-runner-selftest.ts scripts/disdex-quality102-causal-v1-live-runner-selftest.ts | wc -l)" -ge 1
+          ! rg -n 'QUALITY102_LIVE_SELECTOR_PARITY=(true|1)|QUALITY102_LIVE_ENABLED=(true|1)' config lib scripts ops --glob '!node_modules/**'

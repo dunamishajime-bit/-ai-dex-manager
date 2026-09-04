@@ -22,6 +22,6 @@ assert.equal(classifyAsterSymbol("PENGUUSDT").sleeve, "PENGU_DUAL_LS_V2");
 assert.equal(classifyAsterSymbol("METAUSDT").sleeve, "V11_EQ");
 assert.equal(classifyAsterSymbol("NOT_A_SYMBOL").tradable, false);
 const now = Date.now();
-const risk = buildSharedCryptoDailyRiskState({ accountScope: "ASTER_FUTURES", utcDay: new Date(now).toISOString().slice(0, 10), strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL"], lossPct: 0, maximumLossPct: 5, tripped: false, updatedAt: now });
+const risk = buildSharedCryptoDailyRiskState({ accountScope: "ASTER_FUTURES", utcDay: new Date(now).toISOString().slice(0, 10), strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"], lossPct: 0, maximumLossPct: 5, tripped: false, updatedAt: now, realizedPnl: 0, unrealizedPnl: 0, fees: 0, funding: 0, netDailyPnl: 0, referenceEquity: 100, sourceComplete: true });
 assert.equal(validateSharedCryptoDailyRisk(risk, now).ok, true);
 console.log("V12_X1_ALL_SELFTEST_PASS", JSON.stringify({ strategyId: V12_X1_ALL.strategyId, bars: h2.length }));

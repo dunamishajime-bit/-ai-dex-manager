@@ -1,6 +1,6 @@
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 
-export type AsterPortfolioSleeve = "V12" | "PENGU_DUAL_LS_V2" | "V11_EQ" | "V50_POST_OPEN_BASIS" | "UNKNOWN";
+export type AsterPortfolioSleeve = "V12" | "PENGU_DUAL_LS_V2" | "V11_EQ" | "V50_POST_OPEN_BASIS" | "QUALITY102_CAUSAL_V1" | "UNKNOWN";
 export type AsterAssetClass = "CRYPTO" | "STOCK" | "UNKNOWN";
 
 const STOCK_SYMBOLS = new Set(["AMZN", "META", "MSFT", "NVDA", "TSLA"]);

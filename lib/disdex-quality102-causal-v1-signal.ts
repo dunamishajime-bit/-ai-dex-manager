@@ -46,6 +46,8 @@ export interface Quality102CausalV1Signal {
     requestedGross: number;
     reason: string;
     dataCutoffTs: number;
+    hardStop?: number;
+    maxHoldHours?: number;
     brkEnabled: false;
 }
 
@@ -343,6 +345,7 @@ export function buildQuality102CausalV1Signal(input: Quality102CausalV1SignalInp
         requestedGross: selected ? QUALITY102_CAUSAL_V1.maximumGross : 0,
         reason: selected ? "QUALITY102_CAUSAL_V1_HIGH_VOL_SIGNAL" : "QUALITY102_CAUSAL_V1_NO_SOURCE_COMPLETE_SIGNAL",
         dataCutoffTs,
+        ...(selected ? { hardStop: generated.find((item) => item.candidate?.id === selected.id)?.selection?.rule.hardStop, maxHoldHours: MAXIMUM_HOLD_HOURS } : {}),
         brkEnabled: false,
     };
 }

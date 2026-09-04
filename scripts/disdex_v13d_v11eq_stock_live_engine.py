@@ -398,13 +398,13 @@ class AsterClient:
             raise RuntimeError(f"Aster symbol is unavailable: {symbol}")
         return row
 
-    def normalize(self, symbol: str, quantity: float, price: float, side: str) -> Tuple[float, float]:
+    def normalize(self, symbol: str, quantity: float, price: float, side: str, *, allow_below_min_notional: bool = False) -> Tuple[float, float]:
         row = self.rules(symbol)
         normalized_qty = floor_step(min(quantity, row["maxQty"]), row["step"])
         normalized_price = round_tick(price, row["tick"], side)
         if normalized_qty < row["minQty"] or normalized_qty <= 0:
             raise RuntimeError(f"Aster quantity below minimum for {symbol}")
-        if row["minNotional"] > 0 and normalized_qty * normalized_price < row["minNotional"]:
+        if not allow_below_min_notional and row["minNotional"] > 0 and normalized_qty * normalized_price < row["minNotional"]:
             raise RuntimeError(f"Aster notional below minimum for {symbol}")
         return normalized_qty, normalized_price
 
@@ -508,7 +508,7 @@ class AsterClient:
         client_id: str,
         reduce_only: bool = False,
     ) -> Fill:
-        quantity, _ = self.normalize(symbol, quantity, expected_price, side)
+        quantity, _ = self.normalize(symbol, quantity, expected_price, side, allow_below_min_notional=reduce_only)
         if not self.live:
             return Fill("ASTER", symbol, side, quantity, quantity, expected_price, "FILLED", client_id, "paper")
         raw = self._signed("POST", "/fapi/v3/order", {

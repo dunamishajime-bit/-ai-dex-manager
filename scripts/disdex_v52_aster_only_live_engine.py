@@ -102,7 +102,8 @@ def self_test() -> None:
     engine.portfolio_gross_cap = 2.5
     engine.v11_gross_cap = 1.0
     engine.v50_gross_cap = 1.0
-    engine.gross_tolerance = 0.03
+    engine.gross_tolerance = 1e-6
+    engine.live = False
     engine.state = {"positions": {}}
     engine.v96_requires_margin = lambda: False
     engine.positions = lambda: {}

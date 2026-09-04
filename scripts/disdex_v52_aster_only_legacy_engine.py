@@ -4,6 +4,7 @@ import argparse
 import dataclasses
 import datetime as dt
 import json
+import math
 import os
 import shutil
 import signal
@@ -15,7 +16,11 @@ import disdex_v11eq_aster_only_live_engine as legacy
 from disdex_v52_daily_loss import update_v52_strategy_daily_latch
 from disdex_account_order_lock import AccountOrderLock
 from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
-from disdex_strict_portfolio_planner import quality102_crypto_notional_from_positions
+from disdex_strict_portfolio_planner import (
+    STRICT_CAPS,
+    quality102_crypto_notional_from_positions,
+    read_quality102_live_state_document,
+)
 
 base = legacy.base
 
@@ -62,12 +67,15 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             default_owner=f"V52:{mode}:{os.getpid()}",
         )
         self.state = base.read_json(self.state_path, {}) or {}
-        self.crypto_gross_cap = base.float_env("DISDEX_V52_CRYPTO_GROSS_CAP", 1.0)
+        self.crypto_gross_cap = base.float_env("DISDEX_V52_CRYPTO_GROSS_CAP", STRICT_CAPS.crypto_gross)
         self.stock_gross_cap = base.float_env("DISDEX_V52_STOCK_GROSS_CAP", 1.5)
         self.portfolio_gross_cap = base.float_env("DISDEX_V52_PORTFOLIO_GROSS_CAP", 2.5)
         self.v11_gross_cap = base.float_env("DISDEX_V52_V11_GROSS_CAP", 1.0)
         self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", 1.0)
-        self.gross_tolerance = base.float_env("DISDEX_V52_GROSS_TOLERANCE", 0.03)
+        # Strict caps are hard limits.  A legacy environment may still carry
+        # the old 3% reporting tolerance; never let that value authorize an
+        # over-cap order in the strict runner.
+        self.gross_tolerance = max(0.0, min(base.float_env("DISDEX_V52_GROSS_TOLERANCE", 1e-9), 1e-6))
         self.minimum_entry_usd = base.float_env("DISDEX_V52_MIN_ENTRY_USD", 5.0)
         self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
@@ -166,6 +174,185 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             known_stock=frozenset(base.ASTER_SYMBOL.values()),
         )
 
+    def _quality102_document(self):
+        """Return validated Q102 state while the shared account lock is held."""
+        return read_quality102_live_state_document(now_ms=base.now_ms())
+
+    def _quality102_marked_notional(self, document=None) -> float:
+        if not self.live:
+            return 0.0
+        document = document if document is not None else self._quality102_document()
+        if document is None:
+            return 0.0
+        _path, raw, owned = document
+        if raw.get("pending") is not None:
+            raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
+        if owned is None:
+            return 0.0
+        rows = self.aster.positions()
+        matches = [row for row in rows if str(row.get("symbol") or "").upper() == owned.symbol]
+        if len(matches) != 1:
+            raise RuntimeError("QUALITY102_STATE_POSITION_MISMATCH")
+        row = matches[0]
+        quantity = base.finite(row.get("positionAmt"))
+        mark = base.finite(row.get("markPrice") or row.get("entryPrice"))
+        if abs(quantity) <= 1e-12 or mark <= 0:
+            raise RuntimeError("QUALITY102_POSITION_MALFORMED:markPrice")
+        actual_side = 1 if quantity > 0 else -1
+        if actual_side != owned.side or abs(abs(quantity) - owned.quantity) > max(1e-8, owned.quantity * 0.02):
+            raise RuntimeError("QUALITY102_STATE_POSITION_MISMATCH")
+        return abs(quantity) * mark
+
+    def _quality102_manual_review(self, path: Path, raw: dict, pending: dict, message: str) -> None:
+        pending["phase"] = "manual_review"
+        pending["lastError"] = message
+        pending["updatedAt"] = base.now_ms()
+        failures = raw.get("failures")
+        if not isinstance(failures, list):
+            failures = []
+        failures.append({"occurredAt": base.now_ms(), "message": message, "idempotencyKey": pending.get("idempotencyKey")})
+        raw["failures"] = failures[-100:]
+        raw["updatedAt"] = base.now_ms()
+        base.atomic_write_json(path, raw)
+
+    def _prepare_quality102_for_stock_entry(self, slot: str, target_gross: float) -> float:
+        """Free total Gross for a base Stock entry using Q102 MTM only.
+
+        The caller holds the shared account lock.  The exchange is never
+        asked to open a base order until this method has reconciled every Q102
+        reduction and a fresh gross snapshot fits the hard caps.
+        """
+        if not self.live:
+            return target_gross
+        requested = base.finite(target_gross)
+        if requested <= 0:
+            return 0.0
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        requested = min(requested, slot_cap, self.stock_gross_cap)
+        for _attempt in range(3):
+            document = self._quality102_document()
+            if document is None:
+                return requested
+            path, raw, owned = document
+            if raw.get("pending") is not None:
+                raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
+            if owned is None:
+                return requested
+            snapshot = self.gross_snapshot()
+            equity = snapshot["equityUsd"]
+            q102_notional = self._quality102_marked_notional(document)
+            base_total_notional = max(0.0, snapshot["totalGross"] * equity - q102_notional)
+            desired_stock_notional = requested * equity
+            required_reduce = max(0.0, base_total_notional + q102_notional + desired_stock_notional - self.portfolio_gross_cap * equity)
+            if required_reduce <= max(1e-8, equity * self.gross_tolerance):
+                final = self.gross_snapshot()
+                self.assert_gross_safe(final)
+                return requested
+
+            symbol = owned.symbol
+            book = self.aster.book(symbol, 20)
+            now = base.now_ms()
+            if book.event_ms <= 0 or book.received_ms <= 0 or book.event_ms > now + 5_000 or now - book.received_ms > 5_000:
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_QUOTE_STALE_OR_INVALID")
+            close_side = "SELL" if owned.side > 0 else "BUY"
+            mark_price = book.bid if close_side == "SELL" else book.ask
+            if not math.isfinite(mark_price) or mark_price <= 0:
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_QUOTE_INVALID")
+            # A small overage handles book-to-fill movement; the fresh
+            # snapshot below decides whether another reduction is necessary.
+            reduce_quantity = min(owned.quantity, (required_reduce / mark_price) * 1.002)
+            if not (reduce_quantity > 1e-12):
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_QUANTITY_ZERO")
+            idempotency_key = base.hashlib.sha256(
+                f"QUALITY102_CAUSAL_V1|BASE_PRIORITY_MTM|{slot}|{symbol}|{owned.side}|{owned.quantity:.12f}|{book.event_ms}|{requested:.12f}".encode()
+            ).hexdigest()
+            client_id = f"q102v1-reduce-{idempotency_key}"[:36]
+            pending = {
+                "idempotencyKey": idempotency_key,
+                "clientOrderId": client_id,
+                "phase": "planned",
+                "symbol": symbol,
+                "side": close_side,
+                "quantity": reduce_quantity,
+                "reduceOnly": True,
+                "referenceTs": book.event_ms,
+                "createdAt": now,
+                "updatedAt": now,
+                "expectedPrice": mark_price,
+                "reason": f"BASE_PRIORITY_MTM_REDUCTION:{slot}",
+            }
+            raw["pending"] = pending
+            raw["updatedAt"] = now
+            base.atomic_write_json(path, raw)
+            try:
+                pending["phase"] = "submitted"
+                pending["updatedAt"] = base.now_ms()
+                base.atomic_write_json(path, raw)
+                fill = self.aster.place_market(
+                    symbol=symbol,
+                    side=close_side,
+                    quantity=reduce_quantity,
+                    expected_price=mark_price,
+                    client_id=client_id,
+                    reduce_only=True,
+                )
+            except Exception as error:
+                self._quality102_manual_review(path, raw, pending, f"QUALITY102_CAUSAL_V1_REDUCTION_EXECUTION_ERROR:{error}")
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW") from error
+            if (str(fill.symbol).upper() != symbol or str(fill.side).upper() != close_side
+                    or str(fill.client_id) != client_id or not math.isfinite(fill.executed_qty)
+                    or fill.executed_qty <= 0 or fill.executed_qty > reduce_quantity + 1e-8
+                    or str(fill.status).upper() not in {"FILLED", "PARTIALLY_FILLED"}):
+                message = "QUALITY102_CAUSAL_V1_REDUCTION_RESULT_IDENTITY_OR_STATUS_INVALID"
+                self._quality102_manual_review(path, raw, pending, message)
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+
+            actual_rows = [row for row in self.aster.positions() if str(row.get("symbol") or "").upper() == symbol and abs(base.finite(row.get("positionAmt"))) > 1e-12]
+            expected_remaining = owned.quantity - fill.executed_qty
+            if expected_remaining > 1e-12:
+                if len(actual_rows) != 1 or abs(abs(base.finite(actual_rows[0].get("positionAmt"))) - expected_remaining) > max(1e-8, expected_remaining * 0.02):
+                    message = "QUALITY102_CAUSAL_V1_REDUCTION_POSITION_MISMATCH"
+                    self._quality102_manual_review(path, raw, pending, message)
+                    raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+            elif actual_rows:
+                message = "QUALITY102_CAUSAL_V1_REDUCTION_NOT_FLAT"
+                self._quality102_manual_review(path, raw, pending, message)
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+            execution_price = base.finite(fill.average_price, mark_price)
+            if execution_price <= 0:
+                message = "QUALITY102_CAUSAL_V1_REDUCTION_EXECUTION_PRICE_INVALID"
+                self._quality102_manual_review(path, raw, pending, message)
+                raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_MANUAL_REVIEW")
+            fee_bps = max(0.0, base.float_env("QUALITY102_LIVE_FEE_BPS_PER_SIDE", 0.0))
+            funding_per_day = max(0.0, base.float_env("QUALITY102_LIVE_FUNDING_PER_DAY", 0.0))
+            basis = fill.executed_qty * owned.entry_price
+            price_return = owned.side * (execution_price / owned.entry_price - 1.0)
+            elapsed_days = max(0.0, book.event_ms - owned.entry_ts) / 86_400_000.0
+            transaction_cost = basis * 2.0 * fee_bps / 10_000.0
+            funding_cost = basis * elapsed_days * funding_per_day
+            raw["lastReduction"] = {
+                "idempotencyKey": idempotency_key,
+                "symbol": symbol,
+                "side": owned.side,
+                "reducedQuantity": fill.executed_qty,
+                "markTs": book.event_ms,
+                "markPrice": execution_price,
+                "realizedPnl": basis * price_return - transaction_cost - funding_cost,
+                "transactionCost": transaction_cost,
+                "fundingCost": funding_cost,
+                "accounting": "MARK_TO_MARKET_REALIZED_PNL",
+            }
+            if expected_remaining > 1e-12:
+                raw["position"]["quantity"] = abs(base.finite(actual_rows[0].get("positionAmt")))
+            else:
+                raw.pop("position", None)
+            raw.pop("pending", None)
+            raw["lastCompletedIdempotencyKey"] = idempotency_key
+            raw["lastReconciledAt"] = base.now_ms()
+            raw["updatedAt"] = base.now_ms()
+            base.atomic_write_json(path, raw)
+        raise RuntimeError("QUALITY102_CAUSAL_V1_REDUCTION_RETRY_EXHAUSTED")
+
     def _actual_stock_notional(self) -> float:
         if not self.live:
             return sum(abs(base.finite(p.get("asterQty")) * base.finite(p.get("asterEntryPrice"))) for p in self.positions().values())
@@ -188,8 +375,17 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         snapshot = self.gross_snapshot()
         if slot in self.positions() or self.v96_requires_margin():
             return 0.0, snapshot
+        document = self._quality102_document() if self.live else None
+        if document is not None and document[1].get("pending") is not None:
+            return 0.0, snapshot
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
-        available = min(slot_cap, max(0.0, self.stock_gross_cap - snapshot["stockGross"]), max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]))
+        # Q102 is lower priority than the Stock sleeves.  Give Stock the
+        # total-Gross room currently occupied by Q102, then reduce Q102 at
+        # order planning time if that room is actually needed.
+        q102_notional = self._quality102_marked_notional(document) if self.live else 0.0
+        equity = snapshot["equityUsd"]
+        total_without_q102 = max(0.0, snapshot["totalGross"] - q102_notional / equity)
+        available = min(slot_cap, max(0.0, self.stock_gross_cap - snapshot["stockGross"]), max(0.0, self.portfolio_gross_cap - total_without_q102))
         return max(0.0, available), snapshot
 
     def assert_gross_safe(self, snapshot: Optional[dict] = None) -> None:
@@ -203,6 +399,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             raise RuntimeError("Unresolved V52 pending order requires operator review before restart")
         if not self.live:
             return
+        document = self._quality102_document()
+        if document is not None and document[1].get("pending") is not None:
+            raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
         actual = self.managed_aster_positions()
         expected: Dict[str, float] = {}
         for position in self.positions().values():
@@ -248,8 +447,16 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
         if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
             return False
+        target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
         snapshot = self.gross_snapshot()
         self.assert_gross_safe(snapshot)
+        slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+        target_gross = min(
+            target_gross,
+            slot_cap,
+            max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
+            max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
+        )
         target_notional = target_gross * snapshot["equityUsd"]
         if target_notional < self.minimum_entry_usd:
             return False
@@ -524,6 +731,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             self.state_root.mkdir(parents=True, exist_ok=True); self.save()
         if self.kill_switch(): raise RuntimeError("Shared Kill Switch is active")
         if self.state.get("pendingOrder"): raise RuntimeError("V52 pending order must be resolved before no-order preflight")
+        document = self._quality102_document() if self.live else None
+        if document is not None and document[1].get("pending") is not None:
+            raise RuntimeError("QUALITY102_CAUSAL_V1_PENDING_ORDER_REQUIRES_RECONCILIATION")
         self.aster.ping(); self.aster.exchange_info()
         missing = [symbol for symbol in base.ASTER_SYMBOL.values() if symbol not in self.aster._rules]
         if missing: raise RuntimeError(f"Aster Stock symbols missing: {missing}")
@@ -583,6 +793,7 @@ def self_test() -> None:
     assert V50_WINDOWS == ("11:30", "12:30", "13:30")
     assert V50_MIN_ENTRY_BASIS_BPS == 75.0
     engine = object.__new__(V52AsterOnlyEngine)
+    engine.live = True
     engine.crypto_gross_cap = 1.0; engine.stock_gross_cap = 1.5; engine.portfolio_gross_cap = 2.5
     engine.v11_gross_cap = 1.0; engine.v50_gross_cap = 1.0; engine.gross_tolerance = 0.03
     engine.state = {"positions": {V11_SLOT: {}}}; engine.v96_requires_margin = lambda: False

@@ -26,9 +26,9 @@ function activeStatus(status: string) { return ["NEW", "PARTIALLY_FILLED", "PEND
 
 export class V12AsterLiveAdapter implements ResidentStopAdapter {
     readonly executor: AsterDirectTradeExecutor;
-    private readonly maxSlippageBps: number;
-    private readonly reconciliationAttempts: number;
-    private readonly reconciliationDelayMs: number;
+    protected readonly maxSlippageBps: number;
+    protected readonly reconciliationAttempts: number;
+    protected readonly reconciliationDelayMs: number;
 
     constructor(readonly client: AsterV3Client, options: V12AsterLiveAdapterOptions = {}) {
         this.maxSlippageBps = Math.max(0, options.maxSlippageBps ?? 20);

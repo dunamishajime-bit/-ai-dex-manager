@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
 SCHEMA = "disdex-shared-crypto-daily-risk/v1"
-STRATEGIES = ("V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL")
+STRATEGIES = ("V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1")
+
+
+def _hash_without_state_hash(value: dict[str, Any]) -> str:
+    body = {key: item for key, item in value.items() if key != "stateHash"}
+    encoded = json.dumps(body, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def validate_shared_crypto_daily_risk(value: Any, now_ms: int | None = None, max_age_ms: int = 90_000) -> tuple[bool, str, dict[str, Any] | None]:
@@ -35,6 +43,13 @@ def validate_shared_crypto_daily_risk(value: Any, now_ms: int | None = None, max
     expected_day = dt.datetime.fromtimestamp(now_ms / 1000, tz=dt.timezone.utc).date().isoformat()
     if utc_day != expected_day:
         return False, "DAY_MISMATCH", None
+    if value.get("stateHash") and value["stateHash"] != _hash_without_state_hash(value):
+        return False, "HASH_MISMATCH", None
+    breakdown = [value.get(name) for name in ("realizedPnl", "unrealizedPnl", "fees", "funding", "netDailyPnl", "referenceEquity")]
+    if value.get("sourceComplete") is not True or any(not isinstance(item, (int, float)) or not math.isfinite(float(item)) for item in breakdown) or float(value["referenceEquity"]) <= 0:
+        return False, "PNL_BREAKDOWN_INCOMPLETE", None
+    if abs(float(value["netDailyPnl"]) - sum(float(value[name]) for name in ("realizedPnl", "unrealizedPnl", "fees", "funding"))) > 1e-6:
+        return False, "PNL_BREAKDOWN_INCONSISTENT", None
     if value.get("tripped") is True:
         return False, "DAILY_LOSS_TRIPPED", value
     return True, "OK", value
@@ -56,7 +71,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.self_test:
         now = int(dt.datetime.now(dt.timezone.utc).timestamp() * 1000)
-        state = {"schema": SCHEMA, "accountScope": "ASTER_FUTURES", "utcDay": dt.datetime.fromtimestamp(now / 1000, tz=dt.timezone.utc).date().isoformat(), "strategyIds": list(STRATEGIES), "lossPct": 0.0, "maximumLossPct": 5.0, "tripped": False, "updatedAt": now}
+        state = {"schema": SCHEMA, "accountScope": "ASTER_FUTURES", "utcDay": dt.datetime.fromtimestamp(now / 1000, tz=dt.timezone.utc).date().isoformat(), "strategyIds": list(STRATEGIES), "lossPct": 0.0, "maximumLossPct": 5.0, "tripped": False, "updatedAt": now, "realizedPnl": 0.0, "unrealizedPnl": 0.0, "fees": 0.0, "funding": 0.0, "netDailyPnl": 0.0, "referenceEquity": 100.0, "sourceComplete": True}
         assert validate_shared_crypto_daily_risk(state, now)[0]
         stale = {**state, "updatedAt": now - 100_000}
         assert validate_shared_crypto_daily_risk(stale, now)[1] == "STALE"

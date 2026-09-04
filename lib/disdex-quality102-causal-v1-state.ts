@@ -17,6 +17,10 @@ export interface Quality102CausalV1PendingOrder {
   referenceTs: number;
   createdAt: number;
   updatedAt: number;
+  expectedPrice?: number;
+  targetGross?: number;
+  hardStop?: number;
+  reason?: string;
   lastError?: string;
 }
 
@@ -34,8 +38,23 @@ export interface Quality102CausalV1State {
     quantity: number;
     entryPrice: number;
     entryTs: number;
+    hardStop?: number;
+    bestPrice?: number;
+    trailActive?: boolean;
   };
   pending?: Quality102CausalV1PendingOrder;
+  lastReduction?: {
+    idempotencyKey: string;
+    symbol: string;
+    side: -1 | 1;
+    reducedQuantity: number;
+    markTs: number;
+    markPrice: number;
+    realizedPnl: number;
+    transactionCost: number;
+    fundingCost: number;
+    accounting: "MARK_TO_MARKET_REALIZED_PNL";
+  };
   lastReconciledAt?: number;
   failures: Array<{ occurredAt: number; message: string; idempotencyKey?: string }>;
 }
@@ -83,14 +102,20 @@ function optionalTimestamp(value: unknown, field: string): number | undefined {
 function normalizePosition(value: unknown): Quality102CausalV1State["position"] {
   if (value === undefined) return undefined;
   const raw = record(value, "position");
-  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs"], "position");
+  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive"], "position");
   if (raw.side !== -1 && raw.side !== 1) malformed("position.side");
+  if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("position.hardStop");
+  if (raw.bestPrice !== undefined && !(typeof raw.bestPrice === "number" && Number.isFinite(raw.bestPrice) && raw.bestPrice > 0)) malformed("position.bestPrice");
+  if (raw.trailActive !== undefined && typeof raw.trailActive !== "boolean") malformed("position.trailActive");
   return {
     symbol: requiredString(raw.symbol, "position.symbol"),
     side: raw.side,
     quantity: positiveNumber(raw.quantity, "position.quantity"),
     entryPrice: positiveNumber(raw.entryPrice, "position.entryPrice"),
     entryTs: finiteNumber(raw.entryTs, "position.entryTs"),
+    ...(raw.hardStop === undefined ? {} : { hardStop: raw.hardStop }),
+    ...(raw.bestPrice === undefined ? {} : { bestPrice: raw.bestPrice }),
+    ...(raw.trailActive === undefined ? {} : { trailActive: raw.trailActive }),
   };
 }
 
@@ -108,6 +133,10 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
     "referenceTs",
     "createdAt",
     "updatedAt",
+    "expectedPrice",
+    "targetGross",
+    "hardStop",
+    "reason",
     "lastError",
   ], "pending");
   if (raw.phase !== "planned" && raw.phase !== "submitted" && raw.phase !== "manual_review") {
@@ -116,6 +145,10 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
   if (raw.side !== "BUY" && raw.side !== "SELL") malformed("pending.side");
   if (typeof raw.reduceOnly !== "boolean") malformed("pending.reduceOnly");
   const lastError = optionalString(raw.lastError, "pending.lastError");
+  if (raw.expectedPrice !== undefined && !(typeof raw.expectedPrice === "number" && Number.isFinite(raw.expectedPrice) && raw.expectedPrice > 0)) malformed("pending.expectedPrice");
+  if (raw.targetGross !== undefined && !(typeof raw.targetGross === "number" && Number.isFinite(raw.targetGross) && raw.targetGross > 0 && raw.targetGross <= 0.5)) malformed("pending.targetGross");
+  if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("pending.hardStop");
+  const reason = optionalString(raw.reason, "pending.reason");
   return {
     idempotencyKey: requiredString(raw.idempotencyKey, "pending.idempotencyKey"),
     clientOrderId: requiredString(raw.clientOrderId, "pending.clientOrderId"),
@@ -127,7 +160,31 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
     referenceTs: finiteNumber(raw.referenceTs, "pending.referenceTs"),
     createdAt: finiteNumber(raw.createdAt, "pending.createdAt"),
     updatedAt: finiteNumber(raw.updatedAt, "pending.updatedAt"),
+    ...(raw.expectedPrice === undefined ? {} : { expectedPrice: raw.expectedPrice }),
+    ...(raw.targetGross === undefined ? {} : { targetGross: raw.targetGross }),
+    ...(raw.hardStop === undefined ? {} : { hardStop: raw.hardStop }),
+    ...(reason === undefined ? {} : { reason }),
     ...(lastError === undefined ? {} : { lastError }),
+  };
+}
+
+function normalizeReduction(value: unknown): NonNullable<Quality102CausalV1State["lastReduction"]> | undefined {
+  if (value === undefined) return undefined;
+  const raw = record(value, "lastReduction");
+  exactKeys(raw, ["idempotencyKey", "symbol", "side", "reducedQuantity", "markTs", "markPrice", "realizedPnl", "transactionCost", "fundingCost", "accounting"], "lastReduction");
+  if (raw.side !== -1 && raw.side !== 1) malformed("lastReduction.side");
+  if (raw.accounting !== "MARK_TO_MARKET_REALIZED_PNL") malformed("lastReduction.accounting");
+  return {
+    idempotencyKey: requiredString(raw.idempotencyKey, "lastReduction.idempotencyKey"),
+    symbol: requiredString(raw.symbol, "lastReduction.symbol"),
+    side: raw.side,
+    reducedQuantity: positiveNumber(raw.reducedQuantity, "lastReduction.reducedQuantity"),
+    markTs: finiteNumber(raw.markTs, "lastReduction.markTs"),
+    markPrice: positiveNumber(raw.markPrice, "lastReduction.markPrice"),
+    realizedPnl: finiteNumber(raw.realizedPnl, "lastReduction.realizedPnl"),
+    transactionCost: finiteNumber(raw.transactionCost, "lastReduction.transactionCost"),
+    fundingCost: finiteNumber(raw.fundingCost, "lastReduction.fundingCost"),
+    accounting: raw.accounting,
   };
 }
 
@@ -161,6 +218,7 @@ function normalizeState(
     "lastCompletedIdempotencyKey",
     "position",
     "pending",
+    "lastReduction",
     "lastReconciledAt",
     "failures",
   ], "root");
@@ -178,6 +236,7 @@ function normalizeState(
   const lastCompletedIdempotencyKey = optionalString(raw.lastCompletedIdempotencyKey, "lastCompletedIdempotencyKey");
   const position = normalizePosition(raw.position);
   const pending = normalizePending(raw.pending);
+  const lastReduction = normalizeReduction(raw.lastReduction);
   const lastReconciledAt = optionalTimestamp(raw.lastReconciledAt, "lastReconciledAt");
 
   return {
@@ -190,6 +249,7 @@ function normalizeState(
     ...(lastCompletedIdempotencyKey === undefined ? {} : { lastCompletedIdempotencyKey }),
     ...(position === undefined ? {} : { position }),
     ...(pending === undefined ? {} : { pending }),
+    ...(lastReduction === undefined ? {} : { lastReduction }),
     ...(lastReconciledAt === undefined ? {} : { lastReconciledAt }),
     failures: normalizeFailures(raw.failures),
   };

@@ -52,6 +52,11 @@ function combinedPaths() {
 
 export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
     const paths = combinedPaths();
+    const quality102StatePath = process.env.QUALITY102_CAUSAL_V1_STATE_PATH
+        || resolve(paths.combinedRoot, "quality102-causal-v1", "state.json");
+    const runtimeCommitSha = process.env.DISDEX_RUNTIME_COMMIT_SHA
+        || process.env.DISDEX_V96_RUNTIME_COMMIT_SHA
+        || "";
     return {
         ...process.env,
         DISDEX_V13D_V11EQ_V96_RUNNER_MODE: runnerMode,
@@ -59,6 +64,12 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
         DISDEX_ACCOUNT_LOCK_PATH: paths.accountLockPath,
+        // Base runners recognize a causal-v1 position only through this
+        // validated state file. The historical QUALITY102 selector flags are
+        // intentionally not changed here.
+        QUALITY102_CAUSAL_V1_STATE_PATH: quality102StatePath,
+        DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH: quality102StatePath,
+        DISDEX_RUNTIME_COMMIT_SHA: runtimeCommitSha,
         DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
         DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
         DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,

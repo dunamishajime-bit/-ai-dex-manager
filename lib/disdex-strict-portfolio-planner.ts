@@ -187,7 +187,8 @@ function causalLiveMarkIsFresh(position: StrictPortfolioPosition, now: number, m
     if (position.markSource !== "LIVE_MARKET_QUOTE") return false;
     const evidence = liveQuoteEvidence(position);
     return evidence !== undefined
-        && evidence.timestamp === now
+        && evidence.timestamp === position.updatedAt
+        && evidence.timestamp <= now
         && now - evidence.timestamp <= maxDataAgeMs
         && evidence.price === position.markPrice;
 }

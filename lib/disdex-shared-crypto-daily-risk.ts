@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 
 export const SHARED_CRYPTO_DAILY_RISK_SCHEMA = "disdex-shared-crypto-daily-risk/v1" as const;
-export const SHARED_CRYPTO_STRATEGIES = ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL"] as const;
+export const SHARED_CRYPTO_STRATEGIES = ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"] as const;
 
 export interface SharedCryptoDailyRiskState {
     schema: typeof SHARED_CRYPTO_DAILY_RISK_SCHEMA;
@@ -13,10 +14,26 @@ export interface SharedCryptoDailyRiskState {
     maximumLossPct: number;
     tripped: boolean;
     updatedAt: number;
+    realizedPnl?: number;
+    unrealizedPnl?: number;
+    fees?: number;
+    funding?: number;
+    netDailyPnl?: number;
+    referenceEquity?: number;
+    sourceComplete?: boolean;
     stateHash?: string;
 }
 
 export interface DailyRiskValidation { ok: boolean; reason?: string; state?: SharedCryptoDailyRiskState }
+
+function withoutHash(state: SharedCryptoDailyRiskState) {
+    const { stateHash: _stateHash, ...body } = state;
+    return body;
+}
+
+function hashState(state: SharedCryptoDailyRiskState) {
+    return createHash("sha256").update(JSON.stringify(withoutHash(state))).digest("hex");
+}
 
 export function validateSharedCryptoDailyRisk(value: unknown, now = Date.now(), maxAgeMs = 90_000): DailyRiskValidation {
     if (!value || typeof value !== "object") return { ok: false, reason: "MISSING_OR_MALFORMED" };
@@ -27,8 +44,16 @@ export function validateSharedCryptoDailyRisk(value: unknown, now = Date.now(), 
     if (![state.lossPct, state.maximumLossPct, state.updatedAt].every((n) => Number.isFinite(Number(n)))) return { ok: false, reason: "NON_FINITE" };
     if (Math.abs(now - Number(state.updatedAt)) > maxAgeMs) return { ok: false, reason: "STALE" };
     const normalized = { ...state, strategyIds: [...state.strategyIds] } as SharedCryptoDailyRiskState;
+    if (normalized.stateHash && normalized.stateHash !== hashState(normalized)) return { ok: false, reason: "HASH_MISMATCH" };
     const expectedDay = new Date(now).toISOString().slice(0, 10);
     if (normalized.utcDay !== expectedDay) return { ok: false, reason: "DAY_MISMATCH" };
+    const breakdown = [normalized.realizedPnl, normalized.unrealizedPnl, normalized.fees, normalized.funding, normalized.netDailyPnl, normalized.referenceEquity];
+    if (normalized.sourceComplete !== true || breakdown.some((n) => !Number.isFinite(Number(n))) || !(Number(normalized.referenceEquity) > 0)) {
+        return { ok: false, reason: "PNL_BREAKDOWN_INCOMPLETE" };
+    }
+    if (Math.abs(Number(normalized.netDailyPnl) - (Number(normalized.realizedPnl) + Number(normalized.unrealizedPnl) + Number(normalized.fees) + Number(normalized.funding))) > 1e-6) {
+        return { ok: false, reason: "PNL_BREAKDOWN_INCONSISTENT" };
+    }
     if (normalized.tripped) return { ok: false, reason: "DAILY_LOSS_TRIPPED", state: normalized };
     return { ok: true, state: normalized };
 }
@@ -39,7 +64,23 @@ export async function readSharedCryptoDailyRisk(path: string, now = Date.now(), 
 }
 
 export function buildSharedCryptoDailyRiskState(input: Omit<SharedCryptoDailyRiskState, "schema" | "stateHash">): SharedCryptoDailyRiskState {
-    const state = { schema: SHARED_CRYPTO_DAILY_RISK_SCHEMA, ...input };
-    const stateHash = createHash("sha256").update(JSON.stringify(state)).digest("hex");
-    return { ...state, stateHash };
+    const state: SharedCryptoDailyRiskState = { schema: SHARED_CRYPTO_DAILY_RISK_SCHEMA, ...input };
+    return { ...state, stateHash: hashState(state) };
+}
+
+export async function writeSharedCryptoDailyRisk(path: string, state: SharedCryptoDailyRiskState): Promise<void> {
+    const validation = validateSharedCryptoDailyRisk(state, state.updatedAt, Number.MAX_SAFE_INTEGER);
+    if (!validation.ok && validation.reason !== "DAILY_LOSS_TRIPPED") {
+        throw new Error(`SHARED_CRYPTO_RISK_WRITE_INVALID:${validation.reason}`);
+    }
+    if (state.stateHash && state.stateHash !== hashState(state)) throw new Error("SHARED_CRYPTO_RISK_WRITE_HASH_MISMATCH");
+    await mkdir(dirname(path), { recursive: true });
+    const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+    try {
+        await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        await rename(temporary, path);
+    } catch (error) {
+        await unlink(temporary).catch(() => undefined);
+        throw error;
+    }
 }

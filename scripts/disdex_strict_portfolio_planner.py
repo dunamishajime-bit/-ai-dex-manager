@@ -84,7 +84,7 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
     allowed = {
         "version", "strategyId", "mode", "runtimeCommitSha", "updatedAt",
         "lastProcessedReferenceTs", "lastCompletedIdempotencyKey", "position",
-        "pending", "lastReconciledAt", "failures",
+        "pending", "lastReduction", "lastReconciledAt", "failures",
     }
     if set(root) - allowed:
         raise RuntimeError("QUALITY102_STATE_MALFORMED:unknown_field")
@@ -170,7 +170,41 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
             raise RuntimeError("QUALITY102_STATE_MISMATCH:entry_pending_with_position")
         if position is None and pending["reduceOnly"]:
             raise RuntimeError("QUALITY102_STATE_MISMATCH:exit_pending_without_position")
+    if "lastReduction" in root:
+        reduction = _quality102_object(root["lastReduction"], "lastReduction")
+        required_reduction = {"idempotencyKey", "symbol", "side", "reducedQuantity", "markTs", "markPrice", "realizedPnl", "transactionCost", "fundingCost", "accounting"}
+        if set(reduction) != required_reduction or reduction.get("side") not in (-1, 1) or reduction.get("accounting") != "MARK_TO_MARKET_REALIZED_PNL":
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:lastReduction")
+        if not isinstance(reduction.get("idempotencyKey"), str) or not reduction["idempotencyKey"] or not isinstance(reduction.get("symbol"), str) or not reduction["symbol"]:
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:lastReduction_identity")
+        for field in ("reducedQuantity", "markTs", "markPrice", "realizedPnl", "transactionCost", "fundingCost"):
+            _quality102_finite(reduction.get(field), f"lastReduction.{field}", positive=field in {"reducedQuantity", "markPrice"})
     return Quality102OwnedPosition(symbol, int(side), quantity, entry_price, entry_ts, runtime_sha)
+
+
+def read_quality102_live_state_document(
+    path: Path | None = None,
+    *,
+    now_ms: float | None = None,
+) -> tuple[Path, dict, Quality102OwnedPosition | None] | None:
+    """Return a validated live-state document for cross-runner coordination.
+
+    Validation is deliberately delegated to ``load_quality102_live_state``
+    before the document is returned.  Callers that need to update the state
+    (for example, a base-priority MTM reduction) must hold the shared account
+    lock; this function does not provide locking itself.
+    """
+    resolved = path or _quality102_state_path()
+    if resolved is None or not resolved.exists():
+        return None
+    owned = load_quality102_live_state(resolved, now_ms=now_ms)
+    try:
+        raw = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from error
+    if not isinstance(raw, dict):
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:root")
+    return resolved, raw, owned
 
 
 KNOWN_BASE_SYMBOLS = frozenset({

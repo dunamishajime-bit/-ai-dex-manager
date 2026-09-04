@@ -26,7 +26,9 @@ import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { createPenguShortV20State } from "@/lib/pengu-short-v20";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
-import { planStrictPortfolio, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
+import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
+import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
+import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 
 const SYMBOL = "PENGUUSDT";
 
@@ -85,8 +87,38 @@ function finite(value: unknown, fallback = 0) {
     return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function validLiveQuote(quote: DirectMarketQuote, symbol: string, now: number, maxAgeMs = 5 * 60_000) {
+    return quote.symbol.toUpperCase() === symbol.toUpperCase()
+        && Number.isFinite(quote.bidPrice) && quote.bidPrice > 0
+        && Number.isFinite(quote.askPrice) && quote.askPrice > 0
+        && quote.askPrice >= quote.bidPrice
+        && Number.isFinite(quote.midPrice) && quote.midPrice > 0
+        && Number.isFinite(quote.spreadBps) && quote.spreadBps >= 0
+        && Number.isFinite(quote.bidQuantity) && quote.bidQuantity > 0
+        && Number.isFinite(quote.askQuantity) && quote.askQuantity > 0
+        && Number.isFinite(quote.updatedAt) && quote.updatedAt > 0
+        && quote.updatedAt <= now && now - quote.updatedAt <= maxAgeMs;
+}
+
+function validLiveAccount(account: DirectAccountSnapshot, now: number, maxAgeMs = 5 * 60_000) {
+    return Number.isFinite(account.walletBalance) && account.walletBalance > 0
+        && Number.isFinite(account.availableBalance) && account.availableBalance >= 0
+        && String(account.asset || "").trim().length > 0
+        && Number.isFinite(account.updatedAt) && account.updatedAt > 0
+        && account.updatedAt <= now && now - account.updatedAt <= maxAgeMs;
+}
+
 function filled(result: DirectTradeResult) {
     return result.status === "FILLED" && result.executedQuantity > 0;
+}
+
+function resultMatchesPending(result: DirectTradeResult, pending: PenguDualLsV2PendingOrder) {
+    return result.symbol.toUpperCase() === SYMBOL
+        && result.clientOrderId === pending.clientOrderId
+        && result.side === pending.side
+        && Number.isFinite(result.executedQuantity)
+        && result.executedQuantity >= 0
+        && result.executedQuantity <= pending.quantity + 1e-9;
 }
 
 function positionSide(position: DirectPosition): -1 | 1 {
@@ -109,7 +141,8 @@ function actualPosition(positions: DirectPosition[]) {
     return positions.find((position) => position.symbol.toUpperCase() === SYMBOL && Math.abs(position.quantity) > 1e-12);
 }
 
-function strictStrategyForPosition(position: DirectPosition) {
+function strictStrategyForPosition(position: DirectPosition, quality102Ownership?: Quality102CausalV1OwnershipSnapshot) {
+    if (quality102OwnsPosition(quality102Ownership, position)) return "QUALITY102_CAUSAL_V1" as const;
     const symbol = position.symbol.toUpperCase();
     if (symbol === SYMBOL) return "PENGU_DUAL_LS_V2" as const;
     const v12 = classifyAsterSymbol(symbol, "V12");
@@ -119,10 +152,16 @@ function strictStrategyForPosition(position: DirectPosition) {
     throw new Error(`MANUAL_REVIEW_UNKNOWN_STRATEGY_OWNERSHIP:${symbol}`);
 }
 
-function strictActivePositions(positions: DirectPosition[], now: number): StrictPortfolioPosition[] {
-    return positions.map((position) => ({
+function strictActivePositions(positions: DirectPosition[], now: number, quality102Ownership?: Quality102CausalV1OwnershipSnapshot, quality102Position?: StrictPortfolioPosition): StrictPortfolioPosition[] {
+    return positions.map((position) => {
+        const strategy = strictStrategyForPosition(position, quality102Ownership);
+        if (strategy === "QUALITY102_CAUSAL_V1") {
+            if (!quality102Position) throw new Error(`QUALITY102_CAUSAL_V1_LIVE_QUOTE_REQUIRED:${position.symbol}`);
+            return quality102Position;
+        }
+        return {
         id: `${position.symbol.toUpperCase()}:${position.positionSide}:${position.quantity}`,
-        strategy: strictStrategyForPosition(position),
+        strategy,
         symbol: position.symbol.toUpperCase(),
         side: positionSide(position) > 0 ? "LONG" : "SHORT",
         quantity: Math.abs(position.quantity),
@@ -130,7 +169,37 @@ function strictActivePositions(positions: DirectPosition[], now: number): Strict
         markPrice: position.markPrice,
         entryTs: Math.min(position.updatedAt, now),
         updatedAt: position.updatedAt,
-    }));
+        };
+    });
+}
+
+async function liveQuality102Position(
+    executor: DirectTradeExecutor,
+    positions: DirectPosition[],
+    ownership: Quality102CausalV1OwnershipSnapshot | undefined,
+    now: number,
+): Promise<StrictPortfolioPosition | undefined> {
+    const statePosition = ownership?.position;
+    if (!statePosition) return undefined;
+    const actual = positions.find((position) => quality102OwnsPosition(ownership, position));
+    if (!actual) throw new Error("QUALITY102_CAUSAL_V1_STATE_POSITION_MISMATCH");
+    const quote = await executor.getMarketQuote(actual.symbol);
+    if (!validLiveQuote(quote, actual.symbol, now)) {
+        throw new Error("QUALITY102_CAUSAL_V1_LIVE_QUOTE_REQUIRED");
+    }
+    return {
+        id: `aster:q102:${actual.symbol.toUpperCase()}`,
+        strategy: "QUALITY102_CAUSAL_V1",
+        symbol: actual.symbol.toUpperCase(),
+        side: statePosition.side > 0 ? "LONG" : "SHORT",
+        quantity: Math.abs(actual.quantity),
+        entryPrice: statePosition.entryPrice,
+        markPrice: quote.midPrice,
+        entryTs: statePosition.entryTs,
+        updatedAt: quote.updatedAt,
+        markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: quote.updatedAt, price: quote.midPrice, crossChecked: true },
+    };
 }
 
 function grossOf(position: DirectPosition) {
@@ -213,26 +282,47 @@ export class PenguDualLsV2PortfolioRunner {
         return message;
     }
 
-    private async applyResult(state: PenguDualLsV2RunnerState, pending: PenguDualLsV2PendingOrder, result: DirectTradeResult): Promise<PenguDualLsV2TickResult> {
-        if (result.status === "UNKNOWN") {
-            pending.phase = "manual_review";
-            pending.lastError = result.error || "PENGU Dual LS order status is UNKNOWN.";
-            pending.updatedAt = this.now();
-            await this.dependencies.stateStore.save(state);
-            return { status: "manual-review", message: pending.lastError, idempotencyKey: pending.idempotencyKey };
+    private async manualReview(state: PenguDualLsV2RunnerState, message: string, idempotencyKey?: string): Promise<PenguDualLsV2TickResult> {
+        if (state.pending) {
+            state.pending.phase = "manual_review";
+            state.pending.lastError = message;
+            state.pending.updatedAt = this.now();
         }
-        if (!filled(result)) {
-            pending.phase = "manual_review";
-            pending.lastError = `PENGU Dual LS order ended with ${result.status}; no blind retry is allowed.`;
-            pending.updatedAt = this.now();
-            await this.dependencies.stateStore.save(state);
-            return { status: "manual-review", message: pending.lastError, idempotencyKey: pending.idempotencyKey };
+        this.recordFailure(state, message);
+        await this.dependencies.stateStore.save(state);
+        this.log.error("PENGU Dual LS manual review required", { message, idempotencyKey });
+        return { status: "manual-review", message, idempotencyKey };
+    }
+
+    private async applyResult(state: PenguDualLsV2RunnerState, pending: PenguDualLsV2PendingOrder, result: DirectTradeResult): Promise<PenguDualLsV2TickResult> {
+        if (!resultMatchesPending(result, pending)) return this.manualReview(state, "PENGU_DUAL_LS_EXECUTION_RESULT_IDENTITY_MISMATCH", pending.idempotencyKey);
+        if (result.status === "UNKNOWN" || result.executionUnknown) {
+            return this.manualReview(state, result.error || "PENGU Dual LS order status is UNKNOWN; blind retry is forbidden.", pending.idempotencyKey);
+        }
+        if (!filled(result)) return this.manualReview(state, `PENGU Dual LS order ended with ${result.status}; no blind retry is allowed.`, pending.idempotencyKey);
+        if (!(result.averagePrice > 0) || !Number.isFinite(result.averagePrice)) {
+            return this.manualReview(state, "PENGU_DUAL_LS_EXECUTION_PRICE_INVALID", pending.idempotencyKey);
+        }
+
+        let positions: DirectPosition[];
+        try {
+            positions = await this.dependencies.executor.getPositions();
+        } catch (error) {
+            return this.manualReview(state, `PENGU_DUAL_LS_POST_FILL_RECONCILIATION_FAILED:${error instanceof Error ? error.message : String(error)}`, pending.idempotencyKey);
+        }
+        const actual = actualPosition(positions);
+        if (pending.reduceOnly) {
+            if (actual) return this.manualReview(state, "PENGU_DUAL_LS_EXIT_POSITION_REMAINS_AFTER_FILL", pending.idempotencyKey);
+        } else if (!actual
+            || positionSide(actual) !== (pending.side === "BUY" ? 1 : -1)
+            || Math.abs(Math.abs(actual.quantity) - result.executedQuantity) > Math.max(1e-8, result.executedQuantity * 0.02)) {
+            return this.manualReview(state, "PENGU_DUAL_LS_ENTRY_FILL_POSITION_MISMATCH", pending.idempotencyKey);
         }
         if (pending.reduceOnly) {
             state.position = undefined;
             state.cooldownUntilTs = pending.referenceTs + 6 * 3_600_000;
         } else {
-            const entryPrice = result.averagePrice || pending.expectedPrice;
+            const entryPrice = result.averagePrice;
             state.position = {
                 side: pending.side === "BUY" ? 1 : -1,
                 entryTs: pending.referenceTs + 3_600_000,
@@ -273,13 +363,38 @@ export class PenguDualLsV2PortfolioRunner {
     private async executePending(state: PenguDualLsV2RunnerState): Promise<PenguDualLsV2TickResult> {
         const pending = state.pending;
         if (!pending) return { status: "held", message: "No PENGU Dual LS pending order." };
+        let submitted = false;
         try {
             const quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
+            const now = this.now();
+            if (this.dependencies.config.mode === "LIVE") {
+                const [account, positions, openOrders] = await Promise.all([
+                    this.dependencies.executor.getAccountSnapshot(),
+                    this.dependencies.executor.getPositions(),
+                    this.dependencies.executor.getOpenOrders(),
+                ]);
+                if (!validLiveAccount(account, now)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_ACCOUNT_STALE_OR_INVALID");
+                if (openOrders.length > 0) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT");
+                const actual = actualPosition(positions);
+                if (pending.reduceOnly) {
+                    if (!state.position || !actual || positionSide(actual) !== state.position.side || Math.abs(Math.abs(actual.quantity) - state.position.quantity) > Math.max(1e-8, state.position.quantity * 0.02)) {
+                        throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_EXIT_POSITION_MISMATCH");
+                    }
+                } else if (actual || state.position) {
+                    throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_ENTRY_POSITION_ALREADY_ACTIVE");
+                }
+            }
+            if (this.dependencies.config.mode === "LIVE" && !validLiveQuote(quote, SYMBOL, now)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_QUOTE_STALE_OR_INVALID");
             const expectedPrice = pending.side === "BUY" ? quote.askPrice : quote.bidPrice;
+            if (!(expectedPrice > 0) || !Number.isFinite(expectedPrice)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_EXECUTION_PRICE_INVALID");
             const normalized = await this.dependencies.executor.normalizeMarketQuantity(SYMBOL, pending.quantity, expectedPrice, { allowBelowMinNotional: pending.reduceOnly });
+            if (!(normalized.quantity > 0) || !Number.isFinite(normalized.notional) || normalized.notional <= 0 || normalized.quantity > pending.quantity + 1e-9) {
+                throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_NORMALIZED_QUANTITY_INVALID");
+            }
             pending.quantity = normalized.quantity;
             pending.expectedPrice = expectedPrice;
             pending.phase = "submitted";
+            submitted = true;
             pending.updatedAt = this.now();
             await this.dependencies.stateStore.save(state);
             const command: DirectTradeCommand = {
@@ -297,10 +412,16 @@ export class PenguDualLsV2PortfolioRunner {
             const result = await this.dependencies.executor.executeMarket(command);
             return this.applyResult(state, pending, result);
         } catch (error) {
-            pending.retryCount += 1;
             pending.lastError = this.recordFailure(state, error);
             pending.updatedAt = this.now();
-            pending.phase = pending.retryCount >= this.dependencies.config.maxTransactionRetries ? "manual_review" : "planned";
+            // Once the durable state says submitted, any exception can be
+            // after the venue accepted the request. Never make that order
+            // retryable without reconciliation.
+            if (submitted) pending.phase = "manual_review";
+            else {
+                pending.retryCount += 1;
+                pending.phase = pending.retryCount >= this.dependencies.config.maxTransactionRetries ? "manual_review" : "planned";
+            }
             await this.dependencies.stateStore.save(state);
             return { status: pending.phase === "manual_review" ? "manual-review" : "failed", message: pending.lastError, idempotencyKey: pending.idempotencyKey };
         }
@@ -337,6 +458,13 @@ export class PenguDualLsV2PortfolioRunner {
                 this.dependencies.executor.getPositions(),
                 this.dependencies.executor.getOpenOrders(),
             ]);
+            let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+            if (quality102Ownership?.pending) {
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: "Quality102 causal-v1 has a pending order and must reconcile before PENGU can enter.", signal: state.latestSignal || undefined };
+            }
+            const quality102OpenOrder = openOrders.some((order) => quality102OwnsOrder(quality102Ownership, order));
+            const nonQuality102OpenOrders = openOrders.filter((order) => !quality102OwnsOrder(quality102Ownership, order));
             const actual = actualPosition(positions);
             if (!state.position && actual) {
                 return { status: "manual-review", message: "PENGU Dual LS found an unmanaged existing PENGU position; no takeover is allowed." };
@@ -351,7 +479,11 @@ export class PenguDualLsV2PortfolioRunner {
                 }
                 state.position = statePositionFromActual(actual, state.position);
             }
-            if (openOrders.length > 0) {
+            if (quality102OpenOrder) {
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: "Quality102 causal-v1 has an in-flight order; PENGU waits for reconciliation." };
+            }
+            if (nonQuality102OpenOrders.length > 0) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "PENGU Dual LS will not create an order while any account open order exists." };
             }
@@ -397,51 +529,111 @@ export class PenguDualLsV2PortfolioRunner {
                 }
             }
 
-            const quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
+            let quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
             const decisionNow = this.now();
-            if (!Number.isFinite(account.updatedAt) || account.updatedAt <= 0 || account.updatedAt > decisionNow || decisionNow - account.updatedAt > 5 * 60_000) {
+            if (!validLiveAccount(account, decisionNow)) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "PENGU Dual LS strict planner blocked: account snapshot is missing or stale." };
             }
-            if (!Number.isFinite(quote.updatedAt) || quote.updatedAt <= 0 || quote.updatedAt > decisionNow || decisionNow - quote.updatedAt > 5 * 60_000 || !(quote.bidPrice > 0 && quote.askPrice > 0 && quote.midPrice > 0)) {
+            if (!validLiveQuote(quote, SYMBOL, decisionNow)) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "PENGU Dual LS strict planner blocked: market quote is missing or stale." };
             }
-            const accountEquity = Math.max(0, finite(account.walletBalance, account.availableBalance) + positions.reduce((sum, position) => sum + finite(position.unrealizedPnl), 0));
+            let workingAccount = account;
+            let workingPositions = positions;
+            let q102StrictPosition = await liveQuality102Position(this.dependencies.executor, workingPositions, quality102Ownership, decisionNow);
+            const accountEquity = Math.max(0, finite(workingAccount.walletBalance, workingAccount.availableBalance) + workingPositions.reduce((sum, position) => sum + finite(position.unrealizedPnl), 0));
             if (!(accountEquity > 0)) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "PENGU Dual LS strict planner requires positive mark-to-market account equity.", signal };
             }
-            const reserve = accountEquity * this.dependencies.config.cashReservePct / 100;
-            const available = Math.max(0, Math.min(account.availableBalance, accountEquity - reserve));
-            const otherGross = normalizedPositionGross(positions, accountEquity, SYMBOL);
-            const remainingPortfolioGross = Math.max(0, this.dependencies.config.portfolioGrossCap - otherGross);
-            let targetGross = reduceOnly
-                ? 0
-                : Math.min(this.dependencies.config.maximumGross, signal.targetGross, remainingPortfolioGross);
-            let targetNotional = reduceOnly ? Math.abs(actual!.quantity) * quote.midPrice : Math.min(targetGross * accountEquity, available);
+            let workingEquity = accountEquity;
+            let available = 0;
+            let targetGross = 0;
+            let targetNotional = 0;
             if (!reduceOnly) {
-                const strictPlan = planStrictPortfolio({
-                    equity: accountEquity,
-                    now: decisionNow,
-                    active: strictActivePositions(positions, decisionNow),
-                    intents: [{
-                        idempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
-                        strategy: "PENGU_DUAL_LS_V2",
-                        symbol: SYMBOL,
-                        side: signal.side > 0 ? "LONG" : "SHORT",
-                        gross: targetGross,
-                        notionalUsd: targetNotional,
-                        signalTs: signal.referenceTs,
-                    }],
-                });
-                const accepted = strictPlan.accepted.find((intent) => intent.strategy === "PENGU_DUAL_LS_V2");
-                if (strictPlan.status !== "planned" || !accepted) {
-                    await this.dependencies.stateStore.save(state);
-                    return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.reason || strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
+                let accepted: StrictPortfolioIntent | undefined;
+                for (let attempt = 0; attempt < 3; attempt += 1) {
+                    const plannerNow = this.now();
+                    q102StrictPosition = await liveQuality102Position(this.dependencies.executor, workingPositions, quality102Ownership, plannerNow);
+                    workingEquity = Math.max(0, finite(workingAccount.walletBalance, workingAccount.availableBalance) + workingPositions.reduce((sum, position) => sum + finite(position.unrealizedPnl), 0));
+                    if (!(workingEquity > 0)) throw new Error("PENGU_DUAL_LS_STRICT_EQUITY_INVALID_AFTER_MTM");
+                    const reserve = workingEquity * this.dependencies.config.cashReservePct / 100;
+                    available = Math.max(0, Math.min(workingAccount.availableBalance, workingEquity - reserve));
+                    targetGross = Math.min(this.dependencies.config.maximumGross, signal.targetGross);
+                    targetNotional = Math.min(targetGross * workingEquity, available);
+                    const strictPlan = planStrictPortfolio({
+                        equity: workingEquity,
+                        now: plannerNow,
+                        active: strictActivePositions(workingPositions, plannerNow, quality102Ownership, q102StrictPosition),
+                        intents: [{
+                            idempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
+                            strategy: "PENGU_DUAL_LS_V2",
+                            symbol: SYMBOL,
+                            side: signal.side > 0 ? "LONG" : "SHORT",
+                            gross: targetGross,
+                            notionalUsd: targetNotional,
+                            signalTs: signal.referenceTs,
+                        }],
+                        maxDataAgeMs: 5 * 60_000,
+                    });
+                    if (strictPlan.status !== "planned") {
+                        await this.dependencies.stateStore.save(state);
+                        return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.reason || strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
+                    }
+                    const reductions = strictPlan.reductions.filter((reduction) => reduction.strategy === "QUALITY102_CAUSAL_V1");
+                    if (strictPlan.reductions.some((reduction) => reduction.strategy !== "QUALITY102_CAUSAL_V1")) {
+                        throw new Error("PENGU_STRICT_PORTFOLIO_UNEXPECTED_BASE_REDUCTION");
+                    }
+                    if (reductions.length > 0) {
+                        for (const reduction of reductions) {
+                            const reduced = await reduceQuality102CausalV1ForBaseConflict({
+                                executor: this.dependencies.executor,
+                                reduction,
+                                causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
+                                maxSlippageBps: this.dependencies.config.maxSlippageBps,
+                                maxDataAgeMs: 5 * 60_000,
+                                expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                            });
+                            if (reduced.status !== "reduced") throw new Error(`QUALITY102_MTM_REDUCTION_BLOCKED:${reduced.message}`);
+                        }
+                        [workingAccount, workingPositions] = await Promise.all([
+                            this.dependencies.executor.getAccountSnapshot(),
+                            this.dependencies.executor.getPositions(),
+                        ]);
+                        quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                        quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
+                        const refreshedNow = this.now();
+                        if (!validLiveAccount(workingAccount, refreshedNow) || !validLiveQuote(quote, SYMBOL, refreshedNow)) {
+                            throw new Error("PENGU_DUAL_LS_STRICT_REFRESHED_SNAPSHOT_STALE");
+                        }
+                        if ((await this.dependencies.executor.getOpenOrders()).length > 0) {
+                            throw new Error("PENGU_DUAL_LS_STRICT_REFRESHED_OPEN_ORDER_CONFLICT");
+                        }
+                        continue;
+                    }
+                    accepted = strictPlan.accepted.find((intent) => intent.strategy === "PENGU_DUAL_LS_V2");
+                    if (!accepted) {
+                        await this.dependencies.stateStore.save(state);
+                        return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
+                    }
+                    targetGross = accepted.gross;
+                    targetNotional = Math.min(accepted.notionalUsd, available);
+                    break;
                 }
-                targetGross = accepted.gross;
-                targetNotional = Math.min(accepted.notionalUsd, available);
+                if (!accepted) throw new Error("PENGU_STRICT_PORTFOLIO_REDUCTION_RETRY_EXHAUSTED");
+                const finalNow = this.now();
+                if (!validLiveAccount(workingAccount, finalNow) || !validLiveQuote(quote, SYMBOL, finalNow)) {
+                    throw new Error("PENGU_DUAL_LS_STRICT_FINAL_SNAPSHOT_STALE");
+                }
+                if ((await this.dependencies.executor.getOpenOrders()).length > 0) {
+                    throw new Error("PENGU_DUAL_LS_STRICT_FINAL_OPEN_ORDER_CONFLICT");
+                }
+            } else {
+                const reserve = workingEquity * this.dependencies.config.cashReservePct / 100;
+                available = Math.max(0, Math.min(workingAccount.availableBalance, workingEquity - reserve));
+                targetGross = 0;
+                targetNotional = Math.abs(actual!.quantity) * quote.midPrice;
             }
             if (!reduceOnly && targetNotional < this.dependencies.config.minimumOrderNotionalUsd) {
                 await this.dependencies.stateStore.save(state);
@@ -461,7 +653,7 @@ export class PenguDualLsV2PortfolioRunner {
                 quantity: requestedQuantity,
                 reduceOnly,
                 expectedPrice: side === "BUY" ? quote.askPrice : quote.bidPrice,
-                reason: reduceOnly ? signal.reason : `${signal.reason} targetGross=${targetGross.toFixed(4)} portfolioRemaining=${remainingPortfolioGross.toFixed(4)}`,
+                reason: reduceOnly ? signal.reason : `${signal.reason} targetGross=${targetGross.toFixed(4)} portfolioRemaining=${Math.max(0, this.dependencies.config.portfolioGrossCap - normalizedPositionGross(workingPositions, workingEquity, SYMBOL)).toFixed(4)}`,
                 referenceTs: signal.referenceTs,
                 targetGross,
                 createdAt: this.now(),
@@ -486,8 +678,8 @@ export class PenguDualLsV2PortfolioRunner {
                 reduceOnly,
                 targetGross,
                 targetNotional,
-                otherGross,
-                remainingPortfolioGross,
+                otherGross: normalizedPositionGross(workingPositions, workingEquity, SYMBOL),
+                remainingPortfolioGross: Math.max(0, this.dependencies.config.portfolioGrossCap - normalizedPositionGross(workingPositions, workingEquity, SYMBOL)),
                 referenceTs: signal.referenceTs,
             });
             const result = await this.executePending(state);

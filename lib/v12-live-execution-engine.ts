@@ -18,6 +18,7 @@ import {
 import { buildV12Signal, protectiveLevels, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
+import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 const EPS = 1e-12;
@@ -63,16 +64,17 @@ export class V12LiveExecutionEngine {
         await this.d.stateStore.tripKillSwitch(state, reason); this.log("v12-fail-closed", { reason }); return { status: "manual-review", reason };
     }
 
-    private validatePortfolioPositions(positions: DirectPosition[]) {
+    private validatePortfolioPositions(positions: DirectPosition[], quality102Ownership?: Quality102CausalV1OwnershipSnapshot) {
         for (const position of positions.filter((row) => Math.abs(row.quantity) > EPS)) {
+            if (quality102OwnsPosition(quality102Ownership, position)) continue;
             const classification = classifyAsterSymbol(position.symbol);
             if (!classification.tradable) throw new Error(`ASTER_UNKNOWN_NONZERO_POSITION:${position.symbol}`);
         }
     }
 
-    private activePortfolio(positions: DirectPosition[], equity: number): ActivePortfolioPosition[] {
+    private activePortfolio(positions: DirectPosition[], equity: number, quality102Ownership?: Quality102CausalV1OwnershipSnapshot): ActivePortfolioPosition[] {
         if (!(equity > 0)) throw new Error("V12_ACCOUNT_EQUITY_INVALID");
-        return positions.filter((row) => Math.abs(row.quantity) > EPS).map((position) => {
+        return positions.filter((row) => Math.abs(row.quantity) > EPS && !quality102OwnsPosition(quality102Ownership, row)).map((position) => {
             const c = classifyAsterSymbol(position.symbol);
             if (!c.tradable) throw new Error(`ASTER_UNKNOWN_NONZERO_POSITION:${position.symbol}`);
             return { sleeve: c.sleeve === "V11_EQ" ? "V11_EQ" : c.sleeve, symbol: position.symbol, gross: Math.abs(position.notionalUsd) / equity } as ActivePortfolioPosition;
@@ -152,8 +154,8 @@ export class V12LiveExecutionEngine {
         return undefined;
     }
 
-    private async restartReconcile(state: V12X1AllRunnerState, positions: DirectPosition[]) : Promise<V12LiveTickResult | undefined> {
-        this.validatePortfolioPositions(positions);
+    private async restartReconcile(state: V12X1AllRunnerState, positions: DirectPosition[], quality102Ownership?: Quality102CausalV1OwnershipSnapshot) : Promise<V12LiveTickResult | undefined> {
+        this.validatePortfolioPositions(positions, quality102Ownership);
         if (state.killSwitch?.active || state.manualReview) return { status: "manual-review", reason: state.killSwitch?.reason || state.manualReview || "V12_MANUAL_REVIEW" };
         if (state.pending) {
             if (state.pending.action === "ENTRY") return this.reconcilePendingEntry(state, state.pending, positions);
@@ -205,7 +207,8 @@ export class V12LiveExecutionEngine {
             if (!(await this.d.adapter.credentialsReady())) return this.fail(state, "V12_ASTER_CREDENTIALS_NOT_READY");
             const risk = await readSharedCryptoDailyRisk(this.d.riskPath, this.now());
             const [account, positions] = await Promise.all([this.d.adapter.getAccountSnapshot(), this.d.adapter.getPositions()]);
-            const recovery = await this.restartReconcile(state, positions); if (recovery) return recovery;
+            const quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+            const recovery = await this.restartReconcile(state, positions, quality102Ownership); if (recovery) return recovery;
             state = await this.d.stateStore.load();
             const data = await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
 
@@ -257,7 +260,10 @@ export class V12LiveExecutionEngine {
             const symbol = `${signal.symbol}USDT`; const quote = await this.d.adapter.executor.getMarketQuote(symbol); const expectedPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
             const equity = Math.max(0, finite(account.walletBalance)); if (!(equity > 0)) return this.fail(state, "V12_ACCOUNT_EQUITY_INVALID");
             const sizing = sizeV12Position(equity, expectedPrice, signal.atr, signal.side);
-            const plan = planUnifiedPortfolio([{ sleeve: "V12", symbol, side: signal.side, gross: sizing.requestedGross, notionalUsd: sizing.requestedNotional, signalTs: signal.referenceTs }], this.activePortfolio(positions, equity));
+            // The strict adapter performs the final all-sleeve plan and can
+            // execute a causal-v1 MTM reduction. Keep the legacy router from
+            // shrinking a V12 intent before that base-priority decision.
+            const plan = planUnifiedPortfolio([{ sleeve: "V12", symbol, side: signal.side, gross: sizing.requestedGross, notionalUsd: sizing.requestedNotional, signalTs: signal.referenceTs }], this.activePortfolio(positions, equity, quality102Ownership));
             const accepted = plan.accepted[0]; if (!accepted) { await this.d.stateStore.save(state); return { status: "capacity-blocked", reason: plan.rejected[0]?.reason || "CAPACITY_BLOCKED", signal }; }
             const scale = sizing.requestedGross > 0 ? accepted.gross / sizing.requestedGross : 0; const quantity = sizing.quantity * scale;
             if (!(quantity > 0)) { await this.d.stateStore.save(state); return { status: "capacity-blocked", reason: "ZERO_EXECUTABLE_QUANTITY", signal }; }
