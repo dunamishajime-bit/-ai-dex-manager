@@ -75,6 +75,7 @@ jobs:
         run: |
           npm run strategy:shared-crypto-risk:selftest
           npm run strategy:quality102-causal-v1:runner:selftest
+          npm run strategy:executor:selftest
           npm run strategy:quality102-causal-v1:portfolio:test
           npm run strategy:strict-bt33404708902:gross:selftest
           npm run strategy:strict-bt33404708902:contract

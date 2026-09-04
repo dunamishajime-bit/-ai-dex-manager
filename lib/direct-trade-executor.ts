@@ -236,13 +236,18 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         const rows = await this.client.getBalances();
         const row = rows.find((item) => item.asset?.toUpperCase() === this.quoteAsset);
         if (!row) throw new Error(`Aster ${this.quoteAsset} balance row was not returned.`);
+        // Aster's balance updateTime is the last balance mutation time, not
+        // the time at which this snapshot was observed. Use the venue's
+        // server clock after the balance read as the freshness boundary so a
+        // quiet account is not treated as stale while still failing closed if
+        // the venue cannot provide a current clock.
+        const venueTime = safeNumber((await this.client.getServerTime()).serverTime, 0);
+        if (venueTime <= 0) throw new Error("Aster venue server time was not returned.");
         return {
             availableBalance: safeNumber(row.availableBalance),
             walletBalance: safeNumber(row.balance ?? row.crossWalletBalance),
             asset: this.quoteAsset,
-            // Never synthesize exchange freshness. Strict planners must be
-            // able to fail closed when the venue omits its timestamp.
-            updatedAt: safeNumber(row.updateTime, 0),
+            updatedAt: venueTime,
         };
     }
 

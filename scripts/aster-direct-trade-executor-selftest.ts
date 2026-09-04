@@ -24,6 +24,27 @@ const exchangeInfo = {
     }],
 };
 
+async function accountSnapshotUsesVenueObservationTimeTest() {
+    const venueTime = Date.now();
+    const fetchImpl: typeof fetch = async (input) => {
+        const url = String(input);
+        if (url.includes("/balance")) {
+            return jsonResponse([{ asset: "USDT", balance: "1000", availableBalance: "900", updateTime: venueTime - 86_400_000 }]);
+        }
+        if (url.includes("/time")) return jsonResponse({ serverTime: venueTime });
+        throw new Error(`Unexpected mock request: GET ${url}`);
+    };
+    const client = new AsterV3Client({
+        fetchImpl,
+        baseUrl: "https://mock.aster",
+        userAddress: TEST_USER,
+        privateKey: TEST_PRIVATE_KEY,
+    });
+    const executor = new AsterDirectTradeExecutor(client);
+    const snapshot = await executor.getAccountSnapshot();
+    assert.equal(snapshot.updatedAt, venueTime, "account freshness must use venue observation time, not last balance mutation time");
+}
+
 async function normalOrderTest() {
     const requests: Array<{ url: string; method: string; body: string }> = [];
     const fetchImpl: typeof fetch = async (input, init) => {
@@ -180,6 +201,7 @@ async function slippageGuardTest() {
 }
 
 async function run() {
+    await accountSnapshotUsesVenueObservationTimeTest();
     await normalOrderTest();
     await unknownExecutionReconciliationTest();
     await slippageGuardTest();
