@@ -13,6 +13,7 @@ import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runne
 import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
 import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
 import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-protective-orders";
+import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
 
 const HOUR_MS = 60 * 60_000;
 
@@ -68,8 +69,8 @@ async function main() {
             maxGross: runtime.maximumGross + 0.05,
         })
         : aster;
-    // Recovery V8 remains research-only on this branch until a post-freeze holdout passes.
-    const recoveryV8Enabled = false;
+    // Fail closed: promotion evidence is explicit and cannot be raised by environment variables.
+    const recoveryV8Enabled = PENGU_RECOVERY_V8_PROMOTION.liveEnabled;
     const recoveryV8Protection = runtime.mode === "LIVE" && recoveryV8Enabled
         ? new AsterRecoveryV8ProtectiveOrderGateway(client)
         : undefined;

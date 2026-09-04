@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - codex/pengu-runtime-safety-fix
+      - research/current-performance-restoration-20260905
   pull_request:
   workflow_dispatch:
 

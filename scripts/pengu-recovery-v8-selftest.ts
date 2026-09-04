@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
     PENGU_RECOVERY_V8,
+    PENGU_RECOVERY_V8_PROMOTION,
     RECOVERY_V8_FREEZE_SHA,
     RECOVERY_V8_SOURCE_PRODUCTION_SHA,
 } from "@/config/penguRecoveryV8";
@@ -68,6 +69,10 @@ assert.equal(PENGU_RECOVERY_V8.exit.structuralBufferPct, null);
 assert.equal(PENGU_RECOVERY_V8.breakevenProtector, false);
 assert.equal(PENGU_RECOVERY_V8.staticGuard, false);
 assert.equal(PENGU_RECOVERY_V8.stagedEntry, false);
+assert.equal(PENGU_RECOVERY_V8_PROMOTION.liveEnabled, false);
+assert.equal(PENGU_RECOVERY_V8_PROMOTION.status, "HOLDOUT_INSUFFICIENT_FAIL_CLOSED");
+assert.equal(PENGU_RECOVERY_V8_PROMOTION.freshHoldout.signals, 1);
+assert.equal(PENGU_RECOVERY_V8_PROMOTION.freshHoldout.accountReturnPct, -3.0);
 
 const eligible = evaluateRecoveryV8Entry(row());
 assert.equal(eligible.kind, "RECOVERY_V8");

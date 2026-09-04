@@ -1,0 +1,65 @@
+{
+  "schema": "current-performance-restoration-20260905/v1",
+  "branch": "research/current-performance-restoration-20260905",
+  "baseSha": "8947561ea8c3c1a50e7f9863570c2c25f9f378ee",
+  "historicalBenchmark": {
+    "runId": "33404708902",
+    "endingAssetJpy": 4104976.84189697,
+    "profitFactor": 3.58254299,
+    "maxDrawdownPct": -12.1772,
+    "noQuality102EndingAssetJpy": 1180343.65773405
+  },
+  "currentCausal": {
+    "endingAssetJpy": 882837.5697426009,
+    "profitFactor": 2.7788661249298983,
+    "maxDrawdownPct": -11.618689752329182,
+    "noQuality102EndingAssetJpy": 592884.2799734086
+  },
+  "gapDecomposition": {
+    "historicalOverCurrent": 4.649753230476827,
+    "basePenguEffectRatio": 1.9908499813605947,
+    "historicalQuality102Uplift": 3.477781080958615,
+    "currentQuality102Uplift": 1.4890554524100337,
+    "quality102UpliftRatio": 2.3355618323883323
+  },
+  "fixPoints": {
+    "penguRecoveryV8": {
+      "historicalParity": {
+        "trades": 70,
+        "returnPct": 574.2299381960086,
+        "profitFactor": 4.331158674670027,
+        "maxDrawdownPct": -12.848857788628465
+      },
+      "postFreezeHoldout": {
+        "source": "BINANCE_USDM_1H_PROXY",
+        "startInclusive": "2026-08-28T00:00:00.000Z",
+        "endObserved": "2026-09-04T21:00:00.000Z",
+        "completedRows": 190,
+        "signals": 1,
+        "wins": 0,
+        "accountReturnPct": -3.0,
+        "asterKline": "HTTP_403"
+      },
+      "codeRestored": true,
+      "liveEnabled": false,
+      "status": "HOLDOUT_INSUFFICIENT_FAIL_CLOSED"
+    },
+    "quality102": {
+      "currentMode": "DERIVED_HIGH_VOL_ONLY",
+      "currentStandaloneTrades": 58,
+      "highVolRawParity": "137/137 old + 388/388 expanded = 525/525",
+      "highVol525To30SelectorProven": false,
+      "pbMrRevPostGenerationRecovered": true,
+      "s34RawGeneratorProven": false,
+      "brkStrengthFormulaProven": false,
+      "action": "KEEP_S34_FAIL_CLOSED_UNTIL_UPSTREAM_PROOF"
+    }
+  },
+  "safety": {
+    "liveChanged": false,
+    "vpsChanged": false,
+    "ordersSent": false,
+    "recoveryV8DefaultOff": true,
+    "quality102UnprovenFamiliesRemainBlocked": true
+  }
+}
