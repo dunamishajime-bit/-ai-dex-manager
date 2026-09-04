@@ -62,4 +62,3 @@ void main().catch((error) => {
     console.error(`PENGU_RECOVERY_V8_PARITY_FAIL_CLOSED: ${error instanceof Error ? error.message : String(error)}`);
     process.exitCode = 1;
 });
-
