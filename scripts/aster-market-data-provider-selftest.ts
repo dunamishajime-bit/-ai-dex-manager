@@ -81,9 +81,27 @@ async function staleBookTimestampTest() {
     );
 }
 
+async function klineRangeCompatibilityTest() {
+    const urls: URL[] = [];
+    const client = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        fetchImpl: async (input) => {
+            urls.push(new URL(String(input)));
+            return jsonResponse([]);
+        },
+    });
+    await client.getKlines("BTCUSDT", "1h", 200);
+    await client.getKlines("BTCUSDT", "1h", 500, { startTime: 1000, endTime: 2000 });
+    assert.equal(urls[0].searchParams.has("startTime"), false);
+    assert.equal(urls[0].searchParams.has("endTime"), false);
+    assert.equal(urls[1].searchParams.get("startTime"), "1000");
+    assert.equal(urls[1].searchParams.get("endTime"), "2000");
+}
+
 async function run() {
     await currentBookTimestampTest();
     await staleBookTimestampTest();
+    await klineRangeCompatibilityTest();
     console.log("ASTER_MARKET_DATA_PROVIDER_SELFTEST_OK");
 }
 

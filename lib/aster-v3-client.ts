@@ -74,6 +74,11 @@ export interface Aster24hTicker {
 
 export type AsterKline = [number, string, string, string, string, string, number, string, number, string, string, string];
 
+export interface AsterKlineRange {
+    startTime?: number;
+    endTime?: number;
+}
+
 export interface AsterBalanceRow {
     asset: string;
     balance?: string;
@@ -279,7 +284,13 @@ export class AsterV3Client {
     getPriceTickers(symbol?: string) { return this.request<AsterPriceTicker | AsterPriceTicker[]>({ method: "GET", path: "/fapi/v3/ticker/price", params: symbol ? { symbol } : undefined }); }
     getBookTickers(symbol?: string) { return this.request<AsterBookTicker | AsterBookTicker[]>({ method: "GET", path: "/fapi/v3/ticker/bookTicker", params: symbol ? { symbol } : undefined }); }
     get24hTickers(symbol?: string) { return this.request<Aster24hTicker | Aster24hTicker[]>({ method: "GET", path: "/fapi/v3/ticker/24hr", params: symbol ? { symbol } : undefined }); }
-    getKlines(symbol: string, interval: string, limit = 200) { return this.request<AsterKline[]>({ method: "GET", path: "/fapi/v3/klines", params: { symbol, interval, limit } }); }
+    getKlines(symbol: string, interval: string, limit = 200, range: AsterKlineRange = {}) {
+        return this.request<AsterKline[]>({
+            method: "GET",
+            path: "/fapi/v3/klines",
+            params: { symbol, interval, limit, startTime: range.startTime, endTime: range.endTime },
+        });
+    }
     getBalances() { return this.request<AsterBalanceRow[]>({ method: "GET", path: "/fapi/v3/balance", signed: true }); }
     getPositions(symbol?: string) { return this.request<AsterPositionRiskRow[]>({ method: "GET", path: "/fapi/v3/positionRisk", params: symbol ? { symbol } : undefined, signed: true }); }
     getOpenOrders(symbol?: string) { return this.request<AsterOrderResponse[]>({ method: "GET", path: "/fapi/v3/openOrders", params: symbol ? { symbol } : undefined, signed: true }); }
