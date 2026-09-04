@@ -9,6 +9,7 @@ const HOUR = 3_600_000;
 const NOW = Date.UTC(2026, 8, 4, 12);
 const MINIMUM_HISTORY_HOURS = 181 * 24;
 const SIGNAL_HISTORY_HOURS = 225 * 24;
+const VACANT_SLOT = { activePosition: false, unresolvedPendingEntry: false } as const;
 
 function candle(timestampMs: number, close = 100, open = close): Quality102Candle {
     return { timestampMs, open, high: Math.max(open, close) * 1.01, low: Math.min(open, close) * 0.99, close, quoteVolume: 1_000 };
@@ -62,16 +63,16 @@ function cutoffTests(): void {
     const valid = rows();
     const future = valid.map((row) => ({ ...row }));
     future[future.length - 1].timestampMs = NOW;
-    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", future), decisionTs: NOW }), /FUTURE_CANDLE/);
+    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", future), decisionTs: NOW, sleeveOccupancy: VACANT_SLOT }), /FUTURE_CANDLE/);
 
     const stale = valid.map((row) => ({ ...row, timestampMs: row.timestampMs - 2 * HOUR }));
-    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", stale), decisionTs: NOW }), /STALE_CANDLE/);
+    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", stale), decisionTs: NOW, sleeveOccupancy: VACANT_SLOT }), /STALE_CANDLE/);
 
     const gapped = valid.map((row) => ({ ...row }));
     gapped[100].timestampMs += HOUR;
-    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", gapped), decisionTs: NOW }), /NONCONTIGUOUS/);
+    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", gapped), decisionTs: NOW, sleeveOccupancy: VACANT_SLOT }), /NONCONTIGUOUS/);
 
-    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", valid.slice(1)), decisionTs: NOW }), /INSUFFICIENT_WALK_FORWARD_HISTORY/);
+    assert.throws(() => buildQuality102CausalV1Signal({ history: history("FETUSDT", valid.slice(1)), decisionTs: NOW, sleeveOccupancy: VACANT_SLOT }), /INSUFFICIENT_WALK_FORWARD_HISTORY/);
 }
 
 function signalTests(): void {
@@ -85,14 +86,14 @@ function signalTests(): void {
     for (const edits of sourceIncompleteFamilyShapes) {
         const candidate = valid.map((row) => ({ ...row }));
         for (const [hoursAgo, close] of edits) setBar(candidate, candidate.length - 1 - hoursAgo, close);
-        const signal = buildQuality102CausalV1Signal({ history: history("FETUSDT", candidate), decisionTs: NOW });
+        const signal = buildQuality102CausalV1Signal({ history: history("FETUSDT", candidate), decisionTs: NOW, sleeveOccupancy: VACANT_SLOT });
         assert.equal(signal.side, 0);
         assert.equal(signal.family, undefined);
         assert.equal(signal.brkEnabled, false);
     }
 
     const highVol = highVolRows();
-    const signal = buildQuality102CausalV1Signal({ history: history("AVAXUSDT", highVol), decisionTs: NOW });
+    const signal = buildQuality102CausalV1Signal({ history: history("AVAXUSDT", highVol), decisionTs: NOW, sleeveOccupancy: VACANT_SLOT });
     assert.equal(signal.family, "HIGH_VOL");
     assert.equal(signal.side, 1);
     assert.equal(signal.symbol, "AVAXUSDT");
@@ -101,7 +102,7 @@ function signalTests(): void {
     assert.equal(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross);
     assert.equal(signal.brkEnabled, false);
 
-    const tied = buildQuality102CausalV1Signal({ history: { candlesBySymbol: { ZZZUSDT: highVol, AAAUSDT: highVol } }, decisionTs: NOW });
+    const tied = buildQuality102CausalV1Signal({ history: { candlesBySymbol: { ZZZUSDT: highVol, AAAUSDT: highVol } }, decisionTs: NOW, sleeveOccupancy: VACANT_SLOT });
     assert.equal(tied.symbol, "AAAUSDT");
 
     const activePengu = activePenguRows();
@@ -110,8 +111,55 @@ function signalTests(): void {
     const correlatedWithActivePengu = buildQuality102CausalV1Signal({
         history: { candlesBySymbol: { PENGUUSDT: activePengu, AVAXUSDT: correlatedScanner } },
         decisionTs: NOW,
+        sleeveOccupancy: VACANT_SLOT,
     });
     assert.equal(correlatedWithActivePengu.side, 0);
+}
+
+function sleeveOccupancyTests(): void {
+    const candles = highVolRows();
+    const nextHourCandles = candles.map((row) => ({ ...row, timestampMs: row.timestampMs + HOUR }));
+    const firstScanner = buildQuality102CausalV1Signal({
+        history: history("AVAXUSDT", candles),
+        decisionTs: NOW,
+        sleeveOccupancy: VACANT_SLOT,
+    });
+    assert.equal(firstScanner.side, 1);
+    const nextScannerIfVacant = buildQuality102CausalV1Signal({
+        history: history("AVAXUSDT", nextHourCandles),
+        decisionTs: NOW + HOUR,
+        sleeveOccupancy: VACANT_SLOT,
+    });
+    assert.equal(nextScannerIfVacant.side, 1);
+    const consecutiveScanner = buildQuality102CausalV1Signal({
+        history: history("AVAXUSDT", nextHourCandles),
+        decisionTs: NOW + HOUR,
+        sleeveOccupancy: { activePosition: true, unresolvedPendingEntry: false },
+    });
+    assert.equal(consecutiveScanner.side, 0);
+    assert.equal(consecutiveScanner.requestedGross, 0);
+    assert.equal(consecutiveScanner.reason, "QUALITY102_CAUSAL_V1_SLOT_OCCUPIED");
+
+    const firstPengu = buildQuality102CausalV1Signal({
+        history: history("PENGUUSDT", candles),
+        decisionTs: NOW,
+        sleeveOccupancy: VACANT_SLOT,
+    });
+    assert.equal(firstPengu.side, 1);
+    const nextPenguIfVacant = buildQuality102CausalV1Signal({
+        history: history("PENGUUSDT", nextHourCandles),
+        decisionTs: NOW + HOUR,
+        sleeveOccupancy: VACANT_SLOT,
+    });
+    assert.equal(nextPenguIfVacant.side, 1);
+    const consecutivePengu = buildQuality102CausalV1Signal({
+        history: history("PENGUUSDT", nextHourCandles),
+        decisionTs: NOW + HOUR,
+        sleeveOccupancy: { activePosition: false, unresolvedPendingEntry: true },
+    });
+    assert.equal(consecutivePengu.side, 0);
+    assert.equal(consecutivePengu.requestedGross, 0);
+    assert.equal(consecutivePengu.reason, "QUALITY102_CAUSAL_V1_SLOT_OCCUPIED");
 }
 
 function kline(openTime: number): AsterKline {
@@ -176,6 +224,7 @@ async function providerTests(): Promise<void> {
 async function run(): Promise<void> {
     cutoffTests();
     signalTests();
+    sleeveOccupancyTests();
     await providerTests();
     console.log("QUALITY102_CAUSAL_V1_SIGNAL_SELFTEST_PASS", JSON.stringify({
         historicalSelectorParity: QUALITY102_CAUSAL_V1.historicalSelectorParity,

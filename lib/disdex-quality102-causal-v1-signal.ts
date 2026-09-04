@@ -26,6 +26,17 @@ export interface Quality102CausalV1History {
     candlesBySymbol: Readonly<Record<string, readonly Quality102Candle[]>>;
 }
 
+export interface Quality102CausalV1SleeveOccupancy {
+    activePosition: boolean;
+    unresolvedPendingEntry: boolean;
+}
+
+export interface Quality102CausalV1SignalInput {
+    history: Quality102CausalV1History;
+    decisionTs: number;
+    sleeveOccupancy: Quality102CausalV1SleeveOccupancy;
+}
+
 export interface Quality102CausalV1Signal {
     strategyId: "QUALITY102_CAUSAL_V1";
     referenceTs: number;
@@ -283,8 +294,12 @@ function activePenguSide(rows: readonly Quality102Candle[], rule: Quality102High
     return undefined;
 }
 
-export function buildQuality102CausalV1Signal(input: { history: Quality102CausalV1History; decisionTs: number }): Quality102CausalV1Signal {
+export function buildQuality102CausalV1Signal(input: Quality102CausalV1SignalInput): Quality102CausalV1Signal {
     if (!finite(input.decisionTs) || input.decisionTs <= 0) throw new Error("QUALITY102_INVALID_DECISION_TIMESTAMP");
+    if (typeof input.sleeveOccupancy?.activePosition !== "boolean"
+        || typeof input.sleeveOccupancy.unresolvedPendingEntry !== "boolean") {
+        throw new Error("QUALITY102_INVALID_SLEEVE_OCCUPANCY");
+    }
     const entries = Object.entries(input.history.candlesBySymbol).sort(([left], [right]) => left.localeCompare(right));
     if (!entries.length) throw new Error("QUALITY102_EMPTY_SYMBOL_UNIVERSE");
     for (const [symbol, rows] of entries) {
@@ -292,6 +307,17 @@ export function buildQuality102CausalV1Signal(input: { history: Quality102Causal
         assertClosedCausalHistory(rows, input.decisionTs);
     }
     const dataCutoffTs = Math.min(...entries.map(([, rows]) => rows.at(-1)!.timestampMs));
+    if (input.sleeveOccupancy.activePosition || input.sleeveOccupancy.unresolvedPendingEntry) {
+        return {
+            strategyId: "QUALITY102_CAUSAL_V1",
+            referenceTs: dataCutoffTs,
+            side: 0,
+            requestedGross: 0,
+            reason: "QUALITY102_CAUSAL_V1_SLOT_OCCUPIED",
+            dataCutoffTs,
+            brkEnabled: false,
+        };
+    }
     const normalized = entries.map(([symbol, rows]) => [symbol.trim().toUpperCase(), rows.filter((row) => row.timestampMs <= dataCutoffTs)] as const);
     const generated = normalized.filter(([symbol]) => symbol !== "BTCUSDT").map(([symbol, rows]) => ({ symbol, rows, ...candidateFor(symbol, rows, dataCutoffTs) }));
     const penguState = generated.find((item) => item.symbol === "PENGUUSDT");
