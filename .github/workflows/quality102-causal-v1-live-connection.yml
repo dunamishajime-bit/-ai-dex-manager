@@ -98,5 +98,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(rg -n 'realOrders|ordersSent|testOrders|syntheticOrders' scripts/disdex-quality102-causal-v1-runner-selftest.ts scripts/disdex-quality102-causal-v1-live-runner-selftest.ts | wc -l)" -ge 1
-          ! rg -n 'QUALITY102_LIVE_SELECTOR_PARITY=(true|1)|QUALITY102_LIVE_ENABLED=(true|1)' config lib scripts ops --glob '!node_modules/**'
+          test "$(git grep -n -E 'realOrders|ordersSent|testOrders|syntheticOrders' -- scripts/disdex-quality102-causal-v1-runner-selftest.ts scripts/disdex-quality102-causal-v1-live-runner-selftest.ts | wc -l)" -ge 1
+          ! git grep -n -E 'QUALITY102_LIVE_SELECTOR_PARITY=(true|1)|QUALITY102_LIVE_ENABLED=(true|1)' -- config lib scripts ops
