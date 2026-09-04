@@ -12,7 +12,7 @@ import {
 const RUNTIME_SHA = "5b243d3c5258cece3d60440fbdc69d207c06cbc9";
 const OTHER_SHA = "f".repeat(40);
 
-function pendingState(phase: "submitted" | "manual_review"): Quality102CausalV1State {
+function pendingState(phase: "planned" | "submitted" | "manual_review"): Quality102CausalV1State {
   return {
     version: 1,
     strategyId: "QUALITY102_CAUSAL_V1",
@@ -79,19 +79,38 @@ async function main() {
     }
 
     const statePath = join(root, "runner-live.json");
-    const stateWithPending = pendingState("submitted");
     const store = new FileQuality102CausalV1StateStore(statePath, "LIVE", RUNTIME_SHA);
-    await store.save(stateWithPending);
-    const restartedStore = new FileQuality102CausalV1StateStore(statePath, "LIVE", RUNTIME_SHA);
-    assert.deepEqual(await restartedStore.load(), stateWithPending);
-    assert.equal((await restartedStore.load()).pending?.phase, "submitted");
+    for (const phase of ["planned", "submitted", "manual_review"] as const) {
+      const stateWithPending = pendingState(phase);
+      await store.save(stateWithPending);
+      const restartedStore = new FileQuality102CausalV1StateStore(statePath, "LIVE", RUNTIME_SHA);
+      assert.deepEqual(await restartedStore.load(), stateWithPending);
+      assert.equal((await restartedStore.load()).pending?.phase, phase);
+    }
 
-    const manualReviewState = pendingState("manual_review");
-    await restartedStore.save(manualReviewState);
-    assert.deepEqual(
-      await new FileQuality102CausalV1StateStore(statePath, "LIVE", RUNTIME_SHA).load(),
-      manualReviewState,
-    );
+    const concurrentPath = join(root, "concurrent.json");
+    const concurrentStore = new FileQuality102CausalV1StateStore(concurrentPath, "LIVE", RUNTIME_SHA);
+    const concurrentStates = [pendingState("planned"), pendingState("submitted")];
+    const originalDateNow = Date.now;
+    Date.now = () => 1_788_451_200_000;
+    try {
+      const saveResults = await Promise.allSettled(concurrentStates.map((state) => concurrentStore.save(state)));
+      if (process.platform !== "win32") {
+        assert.deepEqual(saveResults.map((result) => result.status), ["fulfilled", "fulfilled"]);
+      }
+      assert.equal(saveResults.some((result) => result.status === "fulfilled"), true);
+    } finally {
+      Date.now = originalDateNow;
+    }
+    const persistedConcurrentState = await concurrentStore.load();
+    assert.ok(concurrentStates.some((expected) => {
+      try {
+        assert.deepEqual(persistedConcurrentState, expected);
+        return true;
+      } catch {
+        return false;
+      }
+    }));
 
     assert.equal((await readdir(root)).some((name) => name.endsWith(".tmp")), false);
     if (process.platform !== "win32") {

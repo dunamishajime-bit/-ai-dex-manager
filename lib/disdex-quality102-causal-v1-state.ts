@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { Quality102CausalV1Mode } from "@/config/disdexQuality102CausalV1Runtime";
@@ -252,7 +253,7 @@ export class FileQuality102CausalV1StateStore implements Quality102CausalV1State
   async save(state: Quality102CausalV1State): Promise<void> {
     const value = normalizeState(state, this.mode, this.runtimeCommitSha);
     await mkdir(dirname(this.path), { recursive: true });
-    const temporary = `${this.path}.${process.pid}.${Date.now()}.tmp`;
+    const temporary = `${this.path}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`;
     try {
       await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       await rename(temporary, this.path);
