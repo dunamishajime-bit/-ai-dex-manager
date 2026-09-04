@@ -36,7 +36,7 @@ function q102Safety(status: string, message: string, liveEnabled: boolean): Runn
     return classifyRunnerSafetyState(status, message, liveEnabled);
 }
 
-function q102HeartbeatPath() { return process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/quality102-causal-v1.json`; }
+function q102HeartbeatPath(env: NodeJS.ProcessEnv = process.env) { return env.DISDEX_RUNNER_HEARTBEAT_PATH || `${env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/quality102-causal-v1.json`; }
 
 export function buildQuality102RunnerHeartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Pick<Quality102CausalV1LiveResolvedConfig, "mode" | "enabled" | "liveTradingEnabled" | "liveExecutionEnabled" | "runtimeCommitSha" | "expectedRuntimeCommitSha" | "symbols">, now = Date.now(), state?: Pick<Quality102CausalV1State, "lastReconciledAt"> | null): RunnerHeartbeat {
     const liveEnabled = config.mode === "LIVE" && config.enabled && config.liveTradingEnabled && config.liveExecutionEnabled;
@@ -53,7 +53,7 @@ export function buildQuality102RunnerHeartbeat(result: { status: string; message
     };
 }
 
-export async function publishQuality102Heartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Quality102CausalV1LiveResolvedConfig, now = Date.now()) {
+export async function publishQuality102Heartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Quality102CausalV1LiveResolvedConfig, now = Date.now(), env: NodeJS.ProcessEnv = process.env) {
     try {
         let state: Quality102CausalV1State | undefined;
         let stateUnavailable = false;
@@ -65,7 +65,7 @@ export async function publishQuality102Heartbeat(result: { status: string; messa
         const heartbeatResult = stateUnavailable
             ? { ...result, message: `${result.message || result.status}; Q102 persisted state unavailable` }
             : result;
-        await writeRunnerHeartbeat(q102HeartbeatPath(), buildQuality102RunnerHeartbeat(heartbeatResult, config, now, state));
+        await writeRunnerHeartbeat(q102HeartbeatPath(env), buildQuality102RunnerHeartbeat(heartbeatResult, config, now, state));
     } catch (error) { console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", runnerId: "QUALITY102_CAUSAL_V1", reason: error instanceof Error ? error.message : String(error) })); }
 }
 
@@ -198,6 +198,66 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         throw new Error("QUALITY102_CAUSAL_V1_GROSS_CONTRACT_MISMATCH");
     }
     return config;
+}
+
+function safeHeartbeatSha(value: string): string {
+    return SHA_PATTERN.test(value) ? value.toLowerCase() : ZERO_SHA;
+}
+
+function safeHeartbeatMode(env: NodeJS.ProcessEnv): string {
+    const mode = String(env.QUALITY102_CAUSAL_V1_MODE || "").trim().toUpperCase();
+    return mode === "LIVE" || mode === "PAPER" || mode === "SHADOW" ? mode : "UNKNOWN";
+}
+
+export function buildQuality102FatalHeartbeat(now = Date.now(), env: NodeJS.ProcessEnv = process.env): RunnerHeartbeat {
+    return {
+        schema: "disdex-runner-heartbeat/v1",
+        runnerId: "QUALITY102_CAUSAL_V1",
+        serviceUnit: String(env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-quality102-causal-v1.service").trim() || "disdex-quality102-causal-v1.service",
+        runtimeSha: safeHeartbeatSha(requiredSha(env)),
+        expectedSha: safeHeartbeatSha(expectedSha(env)),
+        workingDirectory: (() => {
+            try { return process.cwd(); } catch { return "."; }
+        })(),
+        mode: safeHeartbeatMode(env),
+        liveEnabled: false,
+        safetyState: "UNKNOWN",
+        heartbeatAt: now,
+        lastTickAt: null,
+        lastReconciliationAt: null,
+        lastDecision: "fatal",
+        reason: "QUALITY102_CAUSAL_V1_FATAL_FAIL_CLOSED",
+        symbols: [],
+        caps: { strategy: 0.5, crypto: 2, total: 2.5 },
+        restartAttempts: Math.max(0, Number.parseInt(env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0),
+        updatedAt: now,
+        quality102: { selectorMode: "DERIVED_HIGH_VOL_ONLY", historicalSelectorParity: false, brkLiveEnabled: false },
+    };
+}
+
+export async function publishQuality102FatalHeartbeat(error: unknown, env: NodeJS.ProcessEnv = process.env, now = Date.now()): Promise<void> {
+    void error;
+    const fatalResult = { status: "fatal", message: "QUALITY102_CAUSAL_V1_FATAL_FAIL_CLOSED" };
+    try {
+        let config: Quality102CausalV1LiveResolvedConfig | undefined;
+        try {
+            config = resolveQuality102CausalV1LiveConfig(env);
+        } catch {
+            config = undefined;
+        }
+        if (config) {
+            await publishQuality102Heartbeat(fatalResult, config, now, env);
+            return;
+        }
+        await writeRunnerHeartbeat(q102HeartbeatPath(env), buildQuality102FatalHeartbeat(now, env));
+    } catch {
+        console.error(JSON.stringify({
+            level: "warn",
+            event: "runner-heartbeat-write-failed",
+            runnerId: "QUALITY102_CAUSAL_V1",
+            reason: "fatal heartbeat unavailable",
+        }));
+    }
 }
 
 export function assertQuality102CausalV1LiveActivation(
@@ -485,8 +545,7 @@ async function main(): Promise<void> {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
     main().catch((error) => {
-        const fallback = resolveQuality102CausalV1LiveConfig({ ...process.env, QUALITY102_CAUSAL_V1_SYMBOLS: process.env.QUALITY102_CAUSAL_V1_SYMBOLS || "UNKNOWNUSDT" });
-        void publishQuality102Heartbeat({ status: "fatal", message: error instanceof Error ? error.message : String(error) }, fallback);
+        void publishQuality102FatalHeartbeat(error);
         console.error(JSON.stringify({
             level: "fatal",
             strategyId: QUALITY102_CAUSAL_V1.strategyId,

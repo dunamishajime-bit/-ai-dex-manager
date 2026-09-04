@@ -310,3 +310,151 @@ no diff-check errors; exit 0 (only normal LF/CRLF conversion warnings)
 ```
 
 The Windows-only margin-guard limitation remains `ModuleNotFoundError: No module named 'fcntl'` if its POSIX self-test is attempted; it is recorded above for VPS/Linux verification and was not bypassed.
+
+## Fix round 3
+
+### Reviewer findings addressed
+
+- Removed the direct `V52HeartbeatMixin` base from `MarginAwareV52AsterOnlyEngine`. The production margin-aware entrypoint still inherits the mixin through its existing strict V52 base chain, so heartbeat publication and margin-aware safety behavior remain active without the inconsistent MRO.
+- Added `_assert_margin_aware_entrypoint_mro()` to the production margin-aware `--self-test`. It requires exactly one `V52HeartbeatMixin` in the resolved MRO and verifies the entrypoint remains a subclass of the mixin, so the exact entrypoint import/self-test catches the reviewed failure.
+- Added `publishQuality102FatalHeartbeat()` and `buildQuality102FatalHeartbeat()`. The fatal path guards configuration resolution; if resolution fails, it writes a minimal atomic `UNKNOWN` record with `liveEnabled: false`, empty symbols, exact Q102 caps/metadata, independently sanitized runtime/expected SHA fields, and a fixed non-secret reason. Heartbeat-write failures remain contained, while the original error is still logged and the runner retains exit code `1`.
+- Added focused Q102 coverage using an invalid `BTCUSDT` symbol configuration. The resolver is forced to throw, the fatal publisher does not reject, and the persisted record is asserted to be `UNKNOWN`, non-live, symbol-free, exact-cap, exact-metadata, and fixed-reason.
+
+### Files changed in fix round 3
+
+- `scripts/disdex_v52_margin_aware_live_engine.py`
+- `scripts/disdex-quality102-causal-v1-live-runner.ts`
+- `scripts/disdex-quality102-causal-v1-live-runner-selftest.ts`
+- `.superpowers/sdd/2026-09-05-four-strategy-auto-recovery-hp/task-3-report.md`
+
+### Focused RED/GREEN evidence
+
+Before the fix, the exact production command failed during class definition:
+
+```text
+python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
+TypeError: Cannot create a consistent method resolution order (MRO) for bases V52HeartbeatMixin, MarginAwareV52AsterOnlyEngine
+```
+
+The new Q102 test initially failed because `publishQuality102FatalHeartbeat` did not exist:
+
+```text
+npx tsx scripts/disdex-quality102-causal-v1-live-runner-selftest.ts
+TypeError: ...publishQuality102FatalHeartbeat is not a function
+```
+
+After the fixes, both focused checks passed:
+
+```text
+npx tsx scripts/disdex-quality102-causal-v1-live-runner-selftest.ts
+QUALITY102_CAUSAL_V1_LIVE_RUNNER_SELFTEST_PASS {"ordersSent":0,"syntheticOrders":0,"testOrders":0}
+
+python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
+V52_MARGIN_AWARE_ENTRYPOINT_MRO_SELFTEST_PASS
+DISDEX_STRICT_PORTFOLIO_PLANNER_PY_SELFTEST_PASS
+V52_STRICT_MARGIN_AWARE_SELFTEST_PASS
+```
+
+### Fix-round verification commands and exact results
+
+```text
+npx tsx --test tests/disdex_runner_health.test.ts
+✔ fresh matching service/PID/cwd/SHA returns NOOP
+✔ inactive service with no PID and no heartbeat returns RESTART
+✔ stale heartbeat returns RESTART
+✔ safety latches remain HOLD_FAIL_CLOSED and never restart
+✔ Q102 fail-closed decision is runner-local
+✔ shared reconciliation uncertainty affects every runner
+✔ exhausted retry budget never authorizes a fourth restart
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+
+npm run strategy:runner-health:selftest
+DISDEX_RUNNER_HEALTH_SELFTEST_PASS ordersSent=0 cancelSent=0 positionChangesSent=0
+
+npm run strategy:v12-x1-all:selftest
+V12_X1_ALL_SELFTEST_PASS {"strategyId":"V12_X1.00_ALL","bars":2}
+ACCOUNT_ORDER_LOCK_TS_SELFTEST_PASS
+UNIFIED_PORTFOLIO_ROUTING_SELFTEST_PASS
+V12_X1_ALL_FROZEN_ARTIFACT_PARITY_SELFTEST_PASS
+V12_RESIDENT_STOP_SELFTEST_PASS
+V12_X1_ALL_RUNNER_SELFTEST_PASS
+
+npm run strategy:pengu-dual-ls-v2:selftest
+PENGU_DUAL_LS_V2_FINAL_SELFTEST_PASS
+ordersSent=false
+cancelSent=false
+positionChangesSent=false
+
+npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+V96 + V52 margin-aware supervisor self-test: PASS
+
+npm run strategy:quality102-causal-v1:runtime:selftest
+QUALITY102_CAUSAL_V1_RUNTIME_SELFTEST_PASS
+
+npm run strategy:quality102-causal-v1:runner:selftest
+QUALITY102_CAUSAL_V1_RUNNER_SELFTEST_PASS {"realOrders":0,"testOrders":0,"syntheticOrders":0}
+QUALITY102_CAUSAL_V1_LIVE_RUNNER_SELFTEST_PASS {"ordersSent":0,"syntheticOrders":0,"testOrders":0}
+
+npx tsx --test tests/quality102_causal_v1_portfolio.test.ts
+ℹ tests 12
+ℹ pass 12
+ℹ fail 0
+
+python3 scripts/disdex_v52_aster_only_live_engine.py --self-test
+DISDEX_STRICT_PORTFOLIO_PLANNER_PY_SELFTEST_PASS
+V52_STRICT_ASTER_ONLY_SELFTEST_PASS
+
+python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
+V52_MARGIN_AWARE_ENTRYPOINT_MRO_SELFTEST_PASS
+DISDEX_STRICT_PORTFOLIO_PLANNER_PY_SELFTEST_PASS
+V52_STRICT_MARGIN_AWARE_SELFTEST_PASS
+
+python3 -m py_compile scripts/disdex_runner_heartbeat.py scripts/disdex_v52_heartbeat.py scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_margin_aware_live_engine.py scripts/disdex_v96_v52_margin_guard_runtime.py
+PY_COMPILE_MODULE_PASS 5
+
+npx tsc --noEmit
+no output; exit 0
+
+git diff --check
+no diff-check errors; exit 0
+```
+
+The first `npm run strategy:quality102-causal-v1:portfolio:test` invocation and its final rerun both stopped in Node's Windows test worker with `Error: spawn EPERM` before executing tests. The equivalent direct command above passed all 12 tests; this is a process-launch limitation of the npm wrapper on this host, not a test assertion failure.
+
+The unchanged margin-guard check remains environment-limited:
+
+```text
+python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test
+ModuleNotFoundError: No module named 'fcntl'
+```
+
+The fallback payload shape is intentionally minimal and contains no secrets:
+
+```json
+{
+  "schema": "disdex-runner-heartbeat/v1",
+  "runnerId": "QUALITY102_CAUSAL_V1",
+  "runtimeSha": "0000000000000000000000000000000000000000",
+  "expectedSha": "0000000000000000000000000000000000000000",
+  "mode": "LIVE",
+  "liveEnabled": false,
+  "safetyState": "UNKNOWN",
+  "lastTickAt": null,
+  "lastReconciliationAt": null,
+  "lastDecision": "fatal",
+  "reason": "QUALITY102_CAUSAL_V1_FATAL_FAIL_CLOSED",
+  "symbols": [],
+  "caps": { "strategy": 0.5, "crypto": 2, "total": 2.5 },
+  "quality102": {
+    "selectorMode": "DERIVED_HIGH_VOL_ONLY",
+    "historicalSelectorParity": false,
+    "brkLiveEnabled": false
+  }
+}
+```
+
+### Concerns and preserved scope
+
+The POSIX-only margin guard remains unchanged and must be rerun on the XServer/Linux VPS. The pre-existing user-owned `scripts/__pycache__/`, `scripts/account-readonly-inspect.tmp.ts`, and inaccessible temporary self-test directories were not edited, removed, staged, or committed. The round-3 Python compilation used a temporary worktree cache prefix and cleaned it afterward. No deployment, systemd action, exchange call, order/cancel/close action, or historical parity flag was enabled. The focused fix commit SHA is returned with the final response.

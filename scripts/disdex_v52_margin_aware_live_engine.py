@@ -35,7 +35,7 @@ STRICT_CRYPTO_SYMBOLS = STRICT_V12_SYMBOLS | STRICT_PENGU_SYMBOLS
 STRICT_STOCK_SYMBOLS = set(base.ASTER_SYMBOL.values())
 
 
-class MarginAwareV52AsterOnlyEngine(V52HeartbeatMixin, previous.MarginAwareV52AsterOnlyEngine):
+class MarginAwareV52AsterOnlyEngine(previous.MarginAwareV52AsterOnlyEngine):
     """Margin-aware V52 with strict BT #33404708902 gross parity enforced before every entry."""
 
     def __init__(self, mode: str):
@@ -178,7 +178,17 @@ class MarginAwareV52AsterOnlyEngine(V52HeartbeatMixin, previous.MarginAwareV52As
             raise
 
 
+def _assert_margin_aware_entrypoint_mro() -> None:
+    mro = MarginAwareV52AsterOnlyEngine.__mro__
+    if mro.count(V52HeartbeatMixin) != 1:
+        raise AssertionError("V52 margin-aware entrypoint must contain exactly one heartbeat mixin")
+    if not issubclass(MarginAwareV52AsterOnlyEngine, V52HeartbeatMixin):
+        raise AssertionError("V52 margin-aware entrypoint must inherit heartbeat behavior")
+
+
 def self_test() -> None:
+    _assert_margin_aware_entrypoint_mro()
+    print("V52_MARGIN_AWARE_ENTRYPOINT_MRO_SELFTEST_PASS")
     strict_planner_self_test()
     engine = object.__new__(MarginAwareV52AsterOnlyEngine)
     engine.crypto_gross_cap = 2.0
