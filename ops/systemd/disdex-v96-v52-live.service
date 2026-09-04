@@ -9,7 +9,7 @@ Type=simple
 User=deploy
 Group=deploy
 SupplementaryGroups=disdex-runner-health
-WorkingDirectory=/home/deploy/disdex-trading/current
+WorkingDirectory=@DISDEX_RUNNER_RELEASE_ROOT@
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=-/etc/disdex/disdex-v96-v52-live-overrides.env
 Environment=NODE_ENV=production
@@ -67,7 +67,9 @@ Environment=DISDEX_V96_OPERATOR_OVERRIDE_FILE=/home/deploy/ai-dex-manager-v96-pa
 Environment=DISDEX_V96_CONFIG_MIGRATION_MODE=true
 Environment=DISDEX_V96_CLOSE_UNMANAGED_POSITIONS=false
 Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
-ExecStart=/usr/bin/bash scripts/ops/disdex-v96-v52-live.sh
+ExecStartPre=/usr/bin/test -f @DISDEX_RUNNER_RELEASE_ROOT@/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq @DISDEX_RUNNER_RELEASE_SHA@ @DISDEX_RUNNER_RELEASE_ROOT@/.disdex-release-sha
+ExecStart=@DISDEX_RUNNER_RELEASE_ROOT@/scripts/ops/disdex-v96-v52-live.sh
 Restart=on-failure
 RestartSec=15
 TimeoutStopSec=90

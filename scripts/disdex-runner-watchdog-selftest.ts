@@ -310,6 +310,7 @@ async function main(): Promise<void> {
     await freshFixture(now, { QUALITY102_CAUSAL_V1: { safetyState: "MANUAL_REVIEW" } }, async (_root, config, system) => {
         const result = await runWatchdog({ config, system, now });
         assert.deepEqual(system.restartCalls, []);
+        assert.equal(system.calls.some((call) => /^(isActive|mainPid|processCwd|processCommand|intentionalStop):/.test(call) && !call.includes(UNITS.QUALITY102_CAUSAL_V1)), false);
         assert.equal(result.decisions.QUALITY102_CAUSAL_V1.affectsOtherRunners, false);
         assert.equal(result.decisions.V12.action, "NOOP");
         assert.equal(result.decisions.PENGU_V8.action, "NOOP");

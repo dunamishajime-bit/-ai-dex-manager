@@ -396,6 +396,7 @@ test("Q102-local failure does not restart or alter the other runner decisions", 
     await withWatchdogFixture({ QUALITY102_CAUSAL_V1: { safetyState: "MANUAL_REVIEW" } }, async (config, system) => {
         const result = await runWatchdog({ config, system, now: NOW });
         assert.deepEqual(system.restartCalls, []);
+        assert.equal(system.calls.some((call) => /^(isActive|mainPid|processCwd|processCommand|intentionalStop):/.test(call) && !call.includes(WATCHDOG_UNITS.QUALITY102_CAUSAL_V1)), false);
         assert.equal(result.decisions.QUALITY102_CAUSAL_V1.action, "HOLD_FAIL_CLOSED");
         assert.equal(result.decisions.QUALITY102_CAUSAL_V1.affectsOtherRunners, false);
         assert.equal(result.decisions.V12.action, "NOOP");
@@ -567,6 +568,8 @@ test("persisted reservations enforce the exact three-attempt backoff sequence", 
 
 test("watchdog templates pin the release and runner services can write only heartbeat state", async () => {
     const watchdogUnit = await readFile(join(process.cwd(), "ops/systemd/disdex-runner-watchdog.service"), "utf8");
+    const heartbeatWriter = await readFile(join(process.cwd(), "scripts/disdex_runner_heartbeat.py"), "utf8");
+    const combinedUnit = await readFile(join(process.cwd(), "ops/systemd/disdex-v96-v52-live.service"), "utf8");
     assert.match(watchdogUnit, /WorkingDirectory=@DISDEX_RUNNER_RELEASE_ROOT@/);
     assert.match(watchdogUnit, /ExecStartPre=\/usr\/bin\/test -f @DISDEX_RUNNER_RELEASE_ROOT@\/\.disdex-release-sha/);
     assert.match(watchdogUnit, /ExecStartPre=\/usr\/bin\/grep -Fxq @DISDEX_RUNNER_RELEASE_SHA@ @DISDEX_RUNNER_RELEASE_ROOT@\/\.disdex-release-sha/);
@@ -592,4 +595,7 @@ test("watchdog templates pin the release and runner services can write only hear
         assert.match(unit, /DISDEX_RUNNER_HEALTH_ROOT=\/var\/lib\/disdex\/runner-health\/heartbeats/);
         assert.match(unit, /ReadWritePaths=.*\/var\/lib\/disdex\/runner-health\/heartbeats/);
     }
+    assert.doesNotMatch(heartbeatWriter, /chmod\(target\.parent|chown\(/);
+    assert.match(combinedUnit, /WorkingDirectory=@DISDEX_RUNNER_RELEASE_ROOT@/);
+    assert.match(combinedUnit, /ExecStart=@DISDEX_RUNNER_RELEASE_ROOT@\/scripts\/ops\/disdex-v96-v52-live\.sh/);
 });

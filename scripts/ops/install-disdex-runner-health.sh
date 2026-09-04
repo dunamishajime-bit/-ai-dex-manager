@@ -78,6 +78,16 @@ HEALTH_ROOT="$(canonical_directory_after_create 'DISDEX_RUNNER_HEALTH_ROOT' "$HE
 SYSTEMD_DIR="$(canonical_existing_directory 'DISDEX_RUNNER_SYSTEMD_DIR' "$SYSTEMD_DIR")"
 ENV_DIR="$(canonical_directory_after_create 'DISDEX_RUNNER_ENV_DIR' "$ENV_DIR")"
 
+V12_RELEASE_ROOT="${DISDEX_RUNNER_V12_RELEASE_ROOT:-/opt/disdex/releases/${RELEASE_SHA}}"
+Q102_RELEASE_ROOT="${DISDEX_RUNNER_QUALITY102_RELEASE_ROOT:-${RELEASE_ROOT}}"
+COMBINED_RELEASE_ROOT="${DISDEX_RUNNER_COMBINED_RELEASE_ROOT:-${RELEASE_ROOT}}"
+for runner_release in "$V12_RELEASE_ROOT" "$Q102_RELEASE_ROOT" "$COMBINED_RELEASE_ROOT"; do
+  canonical_existing_directory 'runner release root' "$runner_release" >/dev/null
+  runner_marker="${runner_release}/.disdex-release-sha"
+  [[ -f "$runner_marker" && ! -L "$runner_marker" ]] || die "runner release SHA marker missing: ${runner_marker}"
+  [[ "$(tr -d '\r\n' < "$runner_marker")" == "$RELEASE_SHA" ]] || die "runner release SHA marker mismatch: ${runner_release}"
+done
+
 HEALTH_GROUP='disdex-runner-health'
 RUNNER_USER='deploy'
 getent passwd "$RUNNER_USER" >/dev/null || die "runner user ${RUNNER_USER} is unavailable"
@@ -104,10 +114,12 @@ chown root:root "$PRIVATE_ROOT"
 temporary_env=''
 temporary_service=''
 temporary_timer=''
+temporary_combined=''
 cleanup() {
   [[ -z "$temporary_env" ]] || rm -f -- "$temporary_env"
   [[ -z "$temporary_service" ]] || rm -f -- "$temporary_service"
   [[ -z "$temporary_timer" ]] || rm -f -- "$temporary_timer"
+  [[ -z "$temporary_combined" ]] || rm -f -- "$temporary_combined"
 }
 trap cleanup EXIT
 
@@ -117,6 +129,10 @@ temporary_env="$(mktemp "${ENV_DIR}/.disdex-runner-watchdog.env.XXXXXX")"
   printf 'DISDEX_RUNNER_HEARTBEAT_ROOT=%s\n' "$HEARTBEAT_ROOT"
   printf 'DISDEX_RUNNER_RELEASE_ROOT=%s\n' "$RELEASE_ROOT"
   printf 'DISDEX_RUNNER_EXPECTED_SHA=%s\n' "$RELEASE_SHA"
+  printf 'DISDEX_RUNNER_V12_EXPECTED_CWD=%s\n' "$V12_RELEASE_ROOT"
+  printf 'DISDEX_RUNNER_PENGU_V8_EXPECTED_CWD=%s\n' "$COMBINED_RELEASE_ROOT"
+  printf 'DISDEX_RUNNER_V52_EXPECTED_CWD=%s\n' "$COMBINED_RELEASE_ROOT"
+  printf 'DISDEX_RUNNER_QUALITY102_CAUSAL_V1_EXPECTED_CWD=%s\n' "$Q102_RELEASE_ROOT"
   printf 'DISDEX_RUNNER_V12_SERVICE_UNIT=disdex-v12-x1-all@%s.service\n' "$RELEASE_SHA"
   printf 'DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT=disdex-v96-v52-live.service\n'
   printf 'DISDEX_RUNNER_V52_SERVICE_UNIT=disdex-v96-v52-live.service\n'
@@ -162,14 +178,32 @@ render_watchdog_service() {
   [[ "$saw_root" -eq 1 && "$saw_test" -eq 1 && "$saw_sha" -eq 1 && "$saw_exec" -eq 1 ]] || die 'watchdog unit template is missing release placeholders'
 }
 
+render_combined_service() {
+  local input="$1"
+  local output="$2"
+  local line
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      'WorkingDirectory=@DISDEX_RUNNER_RELEASE_ROOT@') printf 'WorkingDirectory=%s\n' "$COMBINED_RELEASE_ROOT" ;;
+      'ExecStart=@DISDEX_RUNNER_RELEASE_ROOT@/scripts/ops/disdex-v96-v52-live.sh') printf 'ExecStart=%s/scripts/ops/disdex-v96-v52-live.sh\n' "$COMBINED_RELEASE_ROOT" ;;
+      'ExecStartPre=/usr/bin/test -f @DISDEX_RUNNER_RELEASE_ROOT@/.disdex-release-sha') printf 'ExecStartPre=/usr/bin/test -f %s/.disdex-release-sha\n' "$COMBINED_RELEASE_ROOT" ;;
+      'ExecStartPre=/usr/bin/grep -Fxq @DISDEX_RUNNER_RELEASE_SHA@ @DISDEX_RUNNER_RELEASE_ROOT@/.disdex-release-sha') printf 'ExecStartPre=/usr/bin/grep -Fxq %s %s/.disdex-release-sha\n' "$RELEASE_SHA" "$COMBINED_RELEASE_ROOT" ;;
+      *) printf '%s\n' "$line" ;;
+    esac
+  done < "$input" > "$output"
+}
+
 temporary_service="$(mktemp "${SYSTEMD_DIR}/.disdex-runner-watchdog.service.XXXXXX")"
 render_watchdog_service "$WATCHDOG_SERVICE" "$temporary_service"
 temporary_timer="$(mktemp "${SYSTEMD_DIR}/.disdex-runner-watchdog.timer.XXXXXX")"
 install -o root -g root -m 0644 "$WATCHDOG_TIMER" "$temporary_timer"
+temporary_combined="$(mktemp "${SYSTEMD_DIR}/.disdex-v96-v52-live.service.XXXXXX")"
+render_combined_service "${RELEASE_ROOT}/ops/systemd/disdex-v96-v52-live.service" "$temporary_combined"
 
 install -o root -g root -m 0600 "$temporary_env" "${ENV_DIR}/disdex-runner-watchdog.env"
 install -o root -g root -m 0644 "$temporary_service" "${SYSTEMD_DIR}/disdex-runner-watchdog.service"
 install -o root -g root -m 0644 "$temporary_timer" "${SYSTEMD_DIR}/disdex-runner-watchdog.timer"
+install -o root -g root -m 0644 "$temporary_combined" "${SYSTEMD_DIR}/disdex-v96-v52-live.service"
 
 /usr/bin/systemctl daemon-reload
 /usr/bin/systemctl enable disdex-runner-watchdog.timer

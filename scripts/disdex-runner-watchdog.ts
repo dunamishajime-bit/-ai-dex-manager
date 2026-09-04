@@ -424,12 +424,9 @@ async function rejectSymlinkIfPresent(path: string, label: string): Promise<void
 async function validateReleasePin(config: RunnerWatchdogConfig): Promise<RunnerWatchdogConfig> {
     const healthRoot = await canonicalExistingDirectory(config.healthRoot, "watchdog health root");
     const canonicalRunners = {} as Record<RunnerId, RunnerWatchdogRunnerConfig>;
-    let releaseRoot: string | undefined;
     for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
         const runner = config.runners[runnerId];
         const canonicalCwd = await canonicalExistingDirectory(runner.expectedCwd, `expected release root for ${runnerId}`);
-        if (releaseRoot && !samePath(releaseRoot, canonicalCwd)) throw new RunnerWatchdogSafetyError("runner release roots do not match");
-        releaseRoot = canonicalCwd;
         if (!samePath(canonicalCwd, runner.expectedCwd)) throw new RunnerWatchdogSafetyError(`expected release root is not canonical for ${runnerId}`);
 
         const markerPath = join(canonicalCwd, RELEASE_MARKER);
@@ -465,7 +462,6 @@ async function validateReleasePin(config: RunnerWatchdogConfig): Promise<RunnerW
         }
         canonicalRunners[runnerId] = { ...runner, expectedCwd: canonicalCwd };
     }
-    if (!releaseRoot) throw new RunnerWatchdogSafetyError("expected release root is unavailable");
     return { ...config, healthRoot, runners: canonicalRunners };
 }
 
@@ -732,6 +728,32 @@ function makeSharedResult(config: RunnerWatchdogConfig, now: number, reason: str
     return resultFromPrepared(prepared, 1, true);
 }
 
+function isQ102OnlyLocalFailure(loaded: LoadedHeartbeats): boolean {
+    const heartbeat = loaded.heartbeats.QUALITY102_CAUSAL_V1;
+    if (heartbeat?.runnerId !== "QUALITY102_CAUSAL_V1"
+        || !["KILL_SWITCH", "DAILY_LOSS_LATCH", "STALE_DATA", "RECONCILIATION_FAILED", "MANUAL_REVIEW", "UNKNOWN"].includes(heartbeat.safetyState)) return false;
+    return RUNNER_WATCHDOG_RUNNERS.filter((runnerId) => runnerId !== "QUALITY102_CAUSAL_V1")
+        .every((runnerId) => {
+            const state = loaded.heartbeats[runnerId]?.safetyState;
+            return state === "LIVE" || state === "WAITING";
+        });
+}
+
+function makeQ102LocalSkippedRunner(runnerId: RunnerId, config: RunnerWatchdogConfig): PreparedRunner {
+    return {
+        runnerId,
+        config: config.runners[runnerId],
+        heartbeat: undefined,
+        decision: makeDecision("NOOP", "Q102-local failure does not affect this runner", false),
+        intentionalStop: false,
+        heartbeatPresent: false,
+        effectiveAttempts: 0,
+        recentAttempts: [],
+        backoffMs: null,
+        nextAllowedAt: null,
+    };
+}
+
 async function loadHeartbeats(config: RunnerWatchdogConfig): Promise<LoadedHeartbeats> {
     const heartbeats: Partial<Record<RunnerId, RunnerHeartbeat>> = {};
     for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
@@ -935,8 +957,11 @@ export async function runWatchdog(options: {
 
         const prepared: PreparedRunner[] = [];
         let sharedObservationFailure: string | undefined;
+        const q102LocalFailure = isQ102OnlyLocalFailure(loaded);
         for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
-            const item = await prepareRunner(runnerId, config, options.system, state, loaded, now);
+            const item = q102LocalFailure && runnerId !== "QUALITY102_CAUSAL_V1"
+                ? makeQ102LocalSkippedRunner(runnerId, config)
+                : await prepareRunner(runnerId, config, options.system, state, loaded, now);
             if (item.safetyUnverified) {
                 sharedObservationFailure = item.error || `safety-unverified: ${runnerId} observation unavailable`;
                 break;
