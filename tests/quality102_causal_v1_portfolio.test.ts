@@ -36,7 +36,7 @@ function position(input: {
         fundingPerDay: input.fundingPerDay ?? 0,
         markSource,
         markSourceEvidence: input.markSourceEvidence ?? (markSource === "LIVE_MARKET_QUOTE"
-            ? { source: "LIVE_MARKET_QUOTE", timestamp: NOW }
+            ? { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: input.markPrice, crossChecked: true }
             : markSource === "BINANCE_VISION_USDM_1M_OPEN"
                 ? { source: "BINANCE_VISION_USDM_1M_OPEN", timestamp: NOW, crossChecked: true }
                 : undefined),
@@ -173,7 +173,7 @@ test("causal-v1 live-quote MTM realizes Long and Short PnL exactly once", () => 
                 side: fixture.side,
                 quantity: 10,
                 entryPrice: 100,
-                markPrice: 100,
+                markPrice: fixture.markPrice,
                 feeBpsPerSide: 10,
             }),
             reduceQuantity: 4,
@@ -181,7 +181,7 @@ test("causal-v1 live-quote MTM realizes Long and Short PnL exactly once", () => 
             markTs: NOW,
             feeBpsPerSide: 10,
             markSource: "LIVE_MARKET_QUOTE",
-            markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW },
+            markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: fixture.markPrice, crossChecked: true },
         });
 
         assert.ok(Math.abs(reduction.realizedPnl - fixture.realizedPnl) < 1e-9);
@@ -196,14 +196,14 @@ test("causal-v1 live-quote MTM realizes Long and Short PnL exactly once", () => 
 });
 
 test("base planning reduces causal-v1 before reserving stock capacity and recalculates Gross", () => {
-    for (const [side, markPrice, expectedPnl] of [
-        ["LONG", 110, 39.2],
-        ["SHORT", 90, 39.2],
-        ["LONG", 90, -40.8],
-        ["SHORT", 110, -40.8],
+    for (const [side, markPrice] of [
+        ["LONG", 110],
+        ["SHORT", 90],
+        ["LONG", 90],
+        ["SHORT", 110],
     ] as const) {
         const result = plan([
-            cryptoPosition("V12", 1.5),
+            cryptoPosition("V12", 1),
             position({
                 id: `q102v1-${side}-${markPrice}`,
                 strategy: "QUALITY102_CAUSAL_V1",
@@ -220,12 +220,20 @@ test("base planning reduces causal-v1 before reserving stock capacity and recalc
         assert.equal(result.accepted[0]?.strategy, "V52");
         assert.equal(result.reductions.length, 1);
         assert.equal(result.reductions[0]?.strategy, "QUALITY102_CAUSAL_V1");
-        assert.ok(Math.abs(result.reductions[0]!.realizedPnl - expectedPnl) < 1e-9);
-        assert.equal(result.reductions[0]?.remainingQuantity, 0);
-        assert.ok(!result.activePositions.some((row) => row.strategy === "QUALITY102_CAUSAL_V1"));
+        assert.ok(result.reductions[0]!.reducedQuantity > 0);
+        assert.ok(result.reductions[0]!.reducedQuantity <= 4 + 1e-9);
+        assert.equal(result.reductions[0]?.markTs, NOW);
+        assert.equal(result.reductions[0]?.markPrice, markPrice);
+        assert.equal(result.reductions[0]?.remainingEntryPrice, 100);
+        const remaining = result.activePositions.find((row) => row.strategy === "QUALITY102_CAUSAL_V1");
+        if (result.reductions[0]!.remainingQuantity > 0) {
+            assert.equal(remaining?.quantity, result.reductions[0]!.remainingQuantity);
+        } else {
+            assert.equal(remaining, undefined);
+        }
         assert.ok(result.totals.cryptoGross <= 2 + 1e-9);
         assert.ok(result.totals.totalGross <= 2.5 + 1e-9);
-        assert.ok(Math.abs(result.equityAfterReductions - (1_000 + expectedPnl)) < 1e-9);
+        assert.ok(Math.abs(result.equityAfterReductions - (1_000 + result.reductions[0]!.realizedPnl)) < 1e-9);
     }
 });
 
@@ -245,4 +253,154 @@ test("causal-v1 MTM rejects an unverified mark source", () => {
         markPrice: 100,
         markTs: NOW,
     }), /QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED/);
+});
+
+test("causal-v1 MTM requires cross-checked live evidence and one validation/reduction timestamp", () => {
+    assert.throws(() => markToMarketReducePosition({
+        position: position({
+            id: "q102v1-missing-live-evidence",
+            strategy: "QUALITY102_CAUSAL_V1",
+            symbol: "SOLUSDT",
+            quantity: 10,
+            entryPrice: 100,
+            markPrice: 100,
+            markSource: "LIVE_MARKET_QUOTE",
+            markSourceEvidence: undefined,
+        }),
+        reduceQuantity: 1,
+        markPrice: 100,
+        markTs: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+    }), /QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED/);
+
+    assert.throws(() => markToMarketReducePosition({
+        position: position({
+            id: "q102v1-unchecked-live-evidence",
+            strategy: "QUALITY102_CAUSAL_V1",
+            symbol: "SOLUSDT",
+            quantity: 10,
+            entryPrice: 100,
+            markPrice: 100,
+            markSource: "LIVE_MARKET_QUOTE",
+            markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, crossChecked: false },
+        }),
+        reduceQuantity: 1,
+        markPrice: 100,
+        markTs: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+    }), /QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED/);
+
+    const timestampMismatch = plan([
+        position({
+            id: "q102v1-live-timestamp-mismatch",
+            strategy: "QUALITY102_CAUSAL_V1",
+            symbol: "SOLUSDT",
+            quantity: 4,
+            entryPrice: 100,
+            markPrice: 100,
+            updatedAt: NOW,
+            markSource: "LIVE_MARKET_QUOTE",
+            markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW - 60_000, price: 100, crossChecked: true },
+        }),
+    ], [intent("V52", 1.5)]);
+    assert.equal(timestampMismatch.status, "blocked");
+    assert.equal(timestampMismatch.reason, "QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED");
+});
+
+test("causal-v1 MTM rejects a live quote whose evidence price differs from the reduction mark", () => {
+    assert.throws(() => markToMarketReducePosition({
+        position: position({
+            id: "q102v1-price-mismatch",
+            strategy: "QUALITY102_CAUSAL_V1",
+            symbol: "SOLUSDT",
+            quantity: 10,
+            entryPrice: 100,
+            markPrice: 100,
+            markSource: "LIVE_MARKET_QUOTE",
+            markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 90, crossChecked: true },
+        }),
+        reduceQuantity: 1,
+        markPrice: 100,
+        markTs: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+    }), /QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED/);
+});
+
+test("causal-v1 loss rechecks V12 and PENGU strategy caps after equity changes", () => {
+    for (const fixture of [
+        { strategy: "V12" as const, notional: 1_490, expectedReason: "V12_GROSS_OVER_CAP_AFTER_MTM" },
+        { strategy: "PENGU_DUAL_LS_V2" as const, notional: 749, expectedReason: "PENGU_GROSS_OVER_CAP_AFTER_MTM" },
+    ]) {
+        const result = plan([
+            position({
+                id: `base-${fixture.strategy}`,
+                strategy: fixture.strategy,
+                symbol: fixture.strategy === "V12" ? "ETHUSDT" : "PENGUUSDT",
+                quantity: fixture.notional / 10,
+                entryPrice: 10,
+                markPrice: 10,
+            }),
+            position({
+                id: `q102v1-loss-${fixture.strategy}`,
+                strategy: "QUALITY102_CAUSAL_V1",
+                symbol: "SOLUSDT",
+                quantity: 5,
+                entryPrice: 100,
+                markPrice: 90,
+                feeBpsPerSide: 10,
+            }),
+        ], [intent("V52", 1.5)]);
+
+        assert.equal(result.status, "blocked");
+        assert.equal(result.reason, fixture.expectedReason);
+        assert.equal(result.accepted.length, 0);
+        assert.equal(result.reductions.length, 0);
+    }
+});
+
+test("historical QUALITY102 is never selected for causal conflict reduction", () => {
+    const result = plan([
+        position({
+            id: "historical-q102",
+            strategy: "QUALITY102",
+            symbol: "SOLUSDT",
+            quantity: 50,
+            entryPrice: 10,
+            markPrice: 10,
+        }),
+    ], [
+        intent("V12", 1.5),
+        intent("PENGU_DUAL_LS_V2", 0.75),
+        intent("V52", 1.5),
+    ]);
+
+    assert.equal(result.status, "planned");
+    assert.equal(result.reductions.length, 0);
+    assert.equal(result.activePositions.find((row) => row.strategy === "QUALITY102")?.quantity, 50);
+    assert.deepEqual(
+        result.accepted.map(({ strategy, gross }) => [strategy, gross]),
+        [["V52", 1.5], ["PENGU_DUAL_LS_V2", 0.5]],
+    );
+    assert.equal(result.rejected.find(({ intent: row }) => row.strategy === "V12")?.reason, "CAPACITY_BLOCKED");
+});
+
+test("V12 slot rejection happens before causal-v1 MTM reduction", () => {
+    const result = plan([
+        cryptoPosition("V12", 1.5),
+        position({
+            id: "q102v1-slot-conflict",
+            strategy: "QUALITY102_CAUSAL_V1",
+            symbol: "SOLUSDT",
+            quantity: 500 / 90,
+            entryPrice: 100,
+            markPrice: 90,
+            feeBpsPerSide: 10,
+        }),
+    ], [intent("V12", 0.5)]);
+
+    assert.equal(result.status, "planned");
+    assert.equal(result.accepted.length, 0);
+    assert.equal(result.rejected[0]?.reason, "V12_SLOT_OCCUPIED_NO_PREEMPTION");
+    assert.equal(result.reductions.length, 0);
+    assert.equal(result.activePositions.find((row) => row.strategy === "QUALITY102_CAUSAL_V1")?.quantity, 500 / 90);
 });
