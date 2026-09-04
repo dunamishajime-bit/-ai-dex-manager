@@ -263,7 +263,6 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         pageLimit: config.historyPageLimit,
         cacheTtlMs: 0,
     });
-    const now = Date.now();
     const [ping, exchangeInfo, account, positions, openOrders] = await Promise.all([
         client.ping(),
         client.getExchangeInfo(),
@@ -271,6 +270,11 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         executor.getPositions(),
         executor.getOpenOrders(),
     ]);
+    // Establish the local freshness boundary only after the read batch has
+    // completed. Account freshness uses the venue clock, so capturing `now`
+    // before the network round-trip can incorrectly classify a healthy
+    // snapshot as being a few milliseconds in the future.
+    const now = Date.now();
     void ping;
     const exchangeRows = new Map(exchangeInfo.symbols.map((row) => [row.symbol.toUpperCase(), row]));
     for (const symbol of config.symbols) {
@@ -298,12 +302,16 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         throw new Error("QUALITY102_PREFLIGHT_STATE_POSITION_NOT_ON_EXCHANGE");
     }
     if (openOrders.length > 0) throw new Error("QUALITY102_PREFLIGHT_OPEN_ORDER_CONFLICT");
-    await Promise.all(config.symbols.map(async (symbol) => {
+    const quotes = await Promise.all(config.symbols.map(async (symbol) => {
         const quote = await executor.getMarketQuote(symbol);
-        if (quote.symbol.toUpperCase() !== symbol || !(quote.bidPrice > 0) || !(quote.askPrice > 0) || quote.askPrice < quote.bidPrice || !(quote.midPrice > 0) || !Number.isFinite(quote.updatedAt) || quote.updatedAt <= 0 || quote.updatedAt > now || now - quote.updatedAt > config.maxDataAgeMs) {
+        return { symbol, quote };
+    }));
+    const quotesNow = Date.now();
+    for (const { symbol, quote } of quotes) {
+        if (quote.symbol.toUpperCase() !== symbol || !(quote.bidPrice > 0) || !(quote.askPrice > 0) || quote.askPrice < quote.bidPrice || !(quote.midPrice > 0) || !Number.isFinite(quote.updatedAt) || quote.updatedAt <= 0 || quote.updatedAt > quotesNow || quotesNow - quote.updatedAt > config.maxDataAgeMs) {
             throw new Error(`QUALITY102_PREFLIGHT_QUOTE_INVALID:${symbol}`);
         }
-    }));
+    }
     const history = await marketData.load();
     const afterStateFile = await stateFileSnapshot(config.statePath);
     if (beforeStateFile !== afterStateFile) throw new Error("QUALITY102_PREFLIGHT_STATE_CHANGED");
