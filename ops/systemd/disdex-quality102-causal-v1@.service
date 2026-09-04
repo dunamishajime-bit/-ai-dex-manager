@@ -7,11 +7,14 @@ Wants=network-online.target
 Type=simple
 User=deploy
 Group=deploy
+SupplementaryGroups=disdex-runner-health
 WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=/etc/disdex/disdex-quality102-causal-v1.env
 Environment=NODE_ENV=production
+Environment=DISDEX_RUNNER_HEALTH_ROOT=/var/lib/disdex/runner-health/heartbeats
+Environment=DISDEX_RUNNER_HEARTBEAT_PATH=/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-live-runner.ts --preflight
@@ -26,7 +29,7 @@ PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
 ReadOnlyPaths=/home/deploy/disdex-trading/releases
-ReadWritePaths=/var/lib/disdex/quality102-causal-v1 /var/lib/disdex/shared
+ReadWritePaths=/var/lib/disdex/quality102-causal-v1 /var/lib/disdex/shared /var/lib/disdex/runner-health/heartbeats
 UMask=0077
 
 [Install]

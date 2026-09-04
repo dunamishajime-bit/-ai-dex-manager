@@ -1,8 +1,8 @@
-import { constants } from "node:fs";
 import { execFile as execFileCallback } from "node:child_process";
-import { access, chmod, mkdir, open, readFile, readlink, rename, rm } from "node:fs/promises";
+import { chmod, lstat, mkdir, open, readFile, readlink, realpath, rename, rm, rmdir } from "node:fs/promises";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { setTimeout as delay } from "node:timers/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 
 import {
@@ -19,6 +19,8 @@ export interface RunnerWatchdogSystem {
     processCwd(pid: number): Promise<string | undefined>;
     processCommand(pid: number): Promise<string | undefined>;
     restart(unit: string): Promise<void>;
+    /** Optional systemd stop-intent observation; production always supplies it. */
+    intentionalStop?(unit: string): Promise<boolean>;
 }
 
 export interface RunnerWatchdogRunnerConfig {
@@ -39,6 +41,7 @@ export interface RunnerWatchdogConfig {
     backoffMs: readonly number[];
     auditPath: string;
     statePath: string;
+    lockPath?: string;
 }
 
 export interface RunnerWatchdogRunnerResult {
@@ -50,6 +53,7 @@ export interface RunnerWatchdogRunnerResult {
     backoffMs: number | null;
     nextAllowedAt: number | null;
     error?: string;
+    safetyUnverified?: boolean;
 }
 
 export interface RunnerWatchdogResult {
@@ -78,13 +82,6 @@ export const RUNNER_WATCHDOG_SERVICE_ALLOWLIST: Record<RunnerId, RegExp> = {
     QUALITY102_CAUSAL_V1: /^disdex-quality102-causal-v1@[0-9a-f]{40}\.service$/,
 };
 
-const EXPECTED_COMMAND_FRAGMENTS: Record<RunnerId, readonly string[]> = {
-    V12: ["disdex-v12-x1-all-live-runner.ts"],
-    PENGU_V8: ["disdex-pengu-dual-ls-v2-live-runner.ts", "disdex-v96-v52-live.sh"],
-    V52: ["disdex_v52_aster_only_live_engine.py", "disdex-v96-v52-live.sh"],
-    QUALITY102_CAUSAL_V1: ["disdex-quality102-causal-v1-live-runner.ts"],
-};
-
 const DEFAULT_HEALTH_ROOT = "/var/lib/disdex/runner-health";
 const DEFAULT_ENV_FILE = "/etc/disdex/disdex-runner-watchdog.env";
 const DEFAULT_HEARTBEAT_TIMEOUT_MS = 5 * 60_000;
@@ -95,6 +92,9 @@ const ZERO_EFFECTS = { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 } as
 const ZERO_SHA = "0".repeat(40);
 const SYSTEMCTL = "/usr/bin/systemctl";
 const execFile = promisify(execFileCallback);
+const RELEASE_MARKER = ".disdex-release-sha";
+const PRIVATE_HEALTH_SUBDIRECTORY = "private";
+const HEARTBEAT_SUBDIRECTORY = "heartbeats";
 
 interface WatchdogAttempt {
     at: number;
@@ -114,7 +114,6 @@ interface WatchdogState {
 
 interface LoadedHeartbeats {
     heartbeats: Partial<Record<RunnerId, RunnerHeartbeat>>;
-    identityMismatches: Partial<Record<RunnerId, string>>;
 }
 
 interface PreparedRunner {
@@ -129,6 +128,7 @@ interface PreparedRunner {
     backoffMs: number | null;
     nextAllowedAt: number | null;
     error?: string;
+    safetyUnverified?: boolean;
 }
 
 export class RunnerWatchdogSafetyError extends Error {
@@ -165,16 +165,9 @@ function holdDecision(reason: string, affectsOtherRunners = false): RecoveryDeci
 }
 
 function sharedUncertaintyDecision(reason: string, now: number, expectedCwd: string): RecoveryDecision {
-    return decideRecovery({
-        now,
-        heartbeat: undefined,
-        serviceActive: false,
-        mainPid: 0,
-        processCwd: undefined,
-        expectedCwd,
-        restartAttempts: 0,
-        sharedUncertainty: true,
-    });
+    void now;
+    void expectedCwd;
+    return makeDecision("HOLD_FAIL_CLOSED", reason, true);
 }
 
 function runnerIdList(): RunnerId[] {
@@ -204,11 +197,29 @@ function pathWithin(root: string, candidate: string): boolean {
     const rootResolved = resolve(root);
     const candidateResolved = resolve(candidate);
     const rel = relative(rootResolved, candidateResolved);
-    return rel === "" || (rel !== ".." && !rel.startsWith(`..${candidateResolved.includes("\\") ? "\\" : "/"}`) && !isAbsolute(rel));
+    const separator = rootResolved.includes("\\") ? "\\" : "/";
+    return rel === "" || (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(`..${separator}`));
+}
+
+function configuredLockPath(config: RunnerWatchdogConfig): string {
+    return config.lockPath || join(config.healthRoot, PRIVATE_HEALTH_SUBDIRECTORY, "watchdog.lock");
+}
+
+function parameterizedServiceSha(unit: string): string | undefined {
+    const match = /^.+@([0-9a-f]{40})\.service$/.exec(unit);
+    return match?.[1];
+}
+
+function assertParameterizedUnitSha(runnerId: RunnerId, unit: string, expectedSha: string): void {
+    const instanceSha = parameterizedServiceSha(unit);
+    if ((runnerId === "V12" || runnerId === "QUALITY102_CAUSAL_V1" || runnerId === "V52") && instanceSha !== undefined && instanceSha !== expectedSha) {
+        throw new RunnerWatchdogSafetyError(`configured service unit SHA does not match expected release for ${runnerId}`);
+    }
 }
 
 function assertConfig(config: RunnerWatchdogConfig): void {
     if (!isAbsolute(config.healthRoot)) throw new RunnerWatchdogSafetyError("watchdog health root must be absolute");
+    if (resolve(config.healthRoot) !== config.healthRoot) throw new RunnerWatchdogSafetyError("watchdog health root must be canonical");
     if (!Number.isInteger(config.heartbeatTimeoutMs) || config.heartbeatTimeoutMs !== DEFAULT_HEARTBEAT_TIMEOUT_MS) {
         throw new RunnerWatchdogSafetyError("watchdog heartbeat timeout must be 300000ms");
     }
@@ -232,9 +243,14 @@ function assertConfig(config: RunnerWatchdogConfig): void {
         }
         if (!isExactSha(runner.expectedSha)) throw new RunnerWatchdogSafetyError(`expected release SHA is unavailable for ${runnerId}`);
         if (!isAbsolute(runner.expectedCwd)) throw new RunnerWatchdogSafetyError(`expected release root is not absolute for ${runnerId}`);
+        if (resolve(runner.expectedCwd) !== runner.expectedCwd) throw new RunnerWatchdogSafetyError(`expected release root is not canonical for ${runnerId}`);
+        assertParameterizedUnitSha(runnerId, runner.serviceUnit, runner.expectedSha);
         if (!pathWithin(config.healthRoot, runner.heartbeatPath) || !pathWithin(config.healthRoot, runner.intentionalStopMarkerPath)) {
             throw new RunnerWatchdogSafetyError(`watchdog paths must stay under the health root for ${runnerId}`);
         }
+    }
+    if (!pathWithin(config.healthRoot, config.auditPath) || !pathWithin(config.healthRoot, config.statePath) || !pathWithin(config.healthRoot, configuredLockPath(config))) {
+        throw new RunnerWatchdogSafetyError("watchdog private paths must stay under the health root");
     }
 }
 
@@ -308,7 +324,7 @@ export function buildWatchdogConfig(env: NodeJS.ProcessEnv = process.env): Runne
     const runners = {} as Record<RunnerId, RunnerWatchdogRunnerConfig>;
 
     for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
-        const heartbeatPath = join(healthRoot, RUNNER_WATCHDOG_HEARTBEATS[runnerId]);
+        const heartbeatPath = join(healthRoot, HEARTBEAT_SUBDIRECTORY, RUNNER_WATCHDOG_HEARTBEATS[runnerId]);
         const markerPath = join(healthRoot, `${runnerId.toLowerCase()}.intentional-stop`);
         runners[runnerId] = {
             runnerId,
@@ -327,8 +343,9 @@ export function buildWatchdogConfig(env: NodeJS.ProcessEnv = process.env): Runne
         attemptWindowMs: parseInteger(env, ["DISDEX_RUNNER_WATCHDOG_ATTEMPT_WINDOW_MS"], DEFAULT_ATTEMPT_WINDOW_MS),
         maxAttempts: parseInteger(env, ["DISDEX_RUNNER_WATCHDOG_MAX_ATTEMPTS"], DEFAULT_MAX_ATTEMPTS),
         backoffMs: parseBackoff(env),
-        auditPath: join(healthRoot, "watchdog-audit.json"),
-        statePath: join(healthRoot, "watchdog-state.json"),
+        auditPath: join(healthRoot, PRIVATE_HEALTH_SUBDIRECTORY, "watchdog-audit.json"),
+        statePath: join(healthRoot, PRIVATE_HEALTH_SUBDIRECTORY, "watchdog-state.json"),
+        lockPath: join(healthRoot, PRIVATE_HEALTH_SUBDIRECTORY, "watchdog.lock"),
     };
     assertConfig(config);
     return config;
@@ -365,6 +382,91 @@ export async function loadWatchdogConfig(env: NodeJS.ProcessEnv = process.env): 
         throw new RunnerWatchdogSafetyError(`watchdog environment unavailable: ${envFile}`, { cause: error });
     }
     return buildWatchdogConfig({ ...fileEnv, ...env });
+}
+
+function samePath(left: string, right: string): boolean {
+    const normalize = (value: string) => {
+        const resolved = resolve(value).replace(/[\\/]$/, "");
+        return process.platform === "win32" ? resolved.toLowerCase() : resolved;
+    };
+    return normalize(left) === normalize(right);
+}
+
+async function canonicalExistingDirectory(path: string, label: string): Promise<string> {
+    let canonical: string;
+    try {
+        canonical = await realpath(path);
+    } catch (error) {
+        throw new RunnerWatchdogSafetyError(`${label} cannot be verified`, { cause: error });
+    }
+    if (!samePath(canonical, path)) throw new RunnerWatchdogSafetyError(`${label} is not canonical`);
+    let stats;
+    try {
+        stats = await lstat(canonical);
+    } catch (error) {
+        throw new RunnerWatchdogSafetyError(`${label} cannot be inspected`, { cause: error });
+    }
+    if (!stats.isDirectory() || stats.isSymbolicLink()) throw new RunnerWatchdogSafetyError(`${label} is not a real directory`);
+    return canonical;
+}
+
+async function rejectSymlinkIfPresent(path: string, label: string): Promise<void> {
+    try {
+        const stats = await lstat(path);
+        if (stats.isSymbolicLink()) throw new RunnerWatchdogSafetyError(`${label} is a symlink`);
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+        if (error instanceof RunnerWatchdogSafetyError) throw error;
+        throw new RunnerWatchdogSafetyError(`${label} cannot be inspected`, { cause: error });
+    }
+}
+
+async function validateReleasePin(config: RunnerWatchdogConfig): Promise<RunnerWatchdogConfig> {
+    const healthRoot = await canonicalExistingDirectory(config.healthRoot, "watchdog health root");
+    const canonicalRunners = {} as Record<RunnerId, RunnerWatchdogRunnerConfig>;
+    let releaseRoot: string | undefined;
+    for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
+        const runner = config.runners[runnerId];
+        const canonicalCwd = await canonicalExistingDirectory(runner.expectedCwd, `expected release root for ${runnerId}`);
+        if (releaseRoot && !samePath(releaseRoot, canonicalCwd)) throw new RunnerWatchdogSafetyError("runner release roots do not match");
+        releaseRoot = canonicalCwd;
+        if (!samePath(canonicalCwd, runner.expectedCwd)) throw new RunnerWatchdogSafetyError(`expected release root is not canonical for ${runnerId}`);
+
+        const markerPath = join(canonicalCwd, RELEASE_MARKER);
+        let markerStats;
+        try {
+            markerStats = await lstat(markerPath);
+        } catch (error) {
+            throw new RunnerWatchdogSafetyError(`release marker cannot be verified for ${runnerId}`, { cause: error });
+        }
+        if (!markerStats.isFile() || markerStats.isSymbolicLink()) throw new RunnerWatchdogSafetyError(`release marker is not a regular file for ${runnerId}`);
+        if (process.platform !== "win32" && (markerStats.mode & 0o022) !== 0) throw new RunnerWatchdogSafetyError(`release marker is writable by a non-root group or user for ${runnerId}`);
+        let markerContents: string;
+        try {
+            markerContents = await readFile(markerPath, "utf8");
+        } catch (error) {
+            throw new RunnerWatchdogSafetyError(`release marker cannot be read for ${runnerId}`, { cause: error });
+        }
+        const markerSha = markerContents.endsWith("\n") ? markerContents.slice(0, -1) : markerContents;
+        if (!isExactSha(markerSha) || markerSha !== runner.expectedSha || markerContents !== `${runner.expectedSha}\n` && markerContents !== runner.expectedSha) {
+            throw new RunnerWatchdogSafetyError(`release marker SHA does not match expected release for ${runnerId}`);
+        }
+
+        for (const [path, label] of [
+            [runner.heartbeatPath, `heartbeat path for ${runnerId}`],
+            [runner.intentionalStopMarkerPath, `stop-intent marker for ${runnerId}`],
+            [config.auditPath, "watchdog audit path"],
+            [config.statePath, "watchdog state path"],
+            [configuredLockPath(config), "watchdog lock path"],
+        ] as const) {
+            if (!pathWithin(healthRoot, path)) throw new RunnerWatchdogSafetyError(`${label} escapes the health root`);
+            await rejectSymlinkIfPresent(path, label);
+            await rejectSymlinkIfPresent(dirname(path), `${label} parent`);
+        }
+        canonicalRunners[runnerId] = { ...runner, expectedCwd: canonicalCwd };
+    }
+    if (!releaseRoot) throw new RunnerWatchdogSafetyError("expected release root is unavailable");
+    return { ...config, healthRoot, runners: canonicalRunners };
 }
 
 function emptyState(): WatchdogState {
@@ -441,19 +543,81 @@ async function writeAtomicJson(path: string, value: unknown): Promise<void> {
     }
 }
 
+async function acquireCycleLock(config: RunnerWatchdogConfig): Promise<() => Promise<void>> {
+    const lockPath = configuredLockPath(config);
+    const directory = dirname(lockPath);
+    await mkdir(directory, { recursive: true, mode: 0o700 });
+    await chmod(directory, 0o700);
+    const waitStartedAt = Date.now();
+    for (;;) {
+        try {
+            await mkdir(lockPath, { recursive: false, mode: 0o700 });
+            break;
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+                throw new RunnerWatchdogSafetyError("safety-unverified: watchdog cycle lock is unavailable", { cause: error });
+            }
+            if (Date.now() - waitStartedAt >= 10_000) {
+                throw new RunnerWatchdogSafetyError("safety-unverified: another watchdog cycle did not release the lock", { cause: error });
+            }
+            await delay(10);
+        }
+    }
+    return async () => {
+        try {
+            await rmdir(lockPath);
+        } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+        }
+    };
+}
+
 async function markerExists(path: string): Promise<boolean> {
     try {
-        await access(path, constants.F_OK);
+        const stats = await lstat(path);
+        if (stats.isSymbolicLink() || !stats.isFile()) throw new RunnerWatchdogSafetyError("intentional-stop marker is not a regular file");
         return true;
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+        if (error instanceof RunnerWatchdogSafetyError) throw error;
         throw new RunnerWatchdogSafetyError("intentional-stop marker cannot be verified", { cause: error });
     }
 }
 
-function commandMatches(runnerId: RunnerId, command: string | undefined): boolean {
+function pathTokenMatches(token: string, expectedCwd: string, relativePath: string): boolean {
+    return token === relativePath || samePath(token, join(expectedCwd, relativePath));
+}
+
+function commandMatchesNodeRunner(tokens: string[], expectedCwd: string, script: string, args: readonly string[]): boolean {
+    if (tokens.length === args.length + 2 && (tokens[0] === "/usr/bin/node" || tokens[0] === "node") && pathTokenMatches(tokens[1], expectedCwd, script)) {
+        return tokens.slice(2).every((token, index) => token === args[index]);
+    }
+    if (tokens.length === args.length + 2 && (tokens[0] === "node_modules/.bin/tsx" || samePath(tokens[0], join(expectedCwd, "node_modules/.bin/tsx"))) && pathTokenMatches(tokens[1], expectedCwd, script)) {
+        return tokens.slice(2).every((token, index) => token === args[index]);
+    }
+    const tsxCli = join(expectedCwd, "node_modules/tsx/dist/cli.mjs");
+    return tokens.length === args.length + 3
+        && (tokens[0] === "/usr/bin/node" || tokens[0] === "node")
+        && samePath(tokens[1], tsxCli)
+        && pathTokenMatches(tokens[2], expectedCwd, script)
+        && tokens.slice(3).every((token, index) => token === args[index]);
+}
+
+function commandMatchesShellRunner(tokens: string[], expectedCwd: string, script: string): boolean {
+    return tokens.length === 2
+        && (tokens[0] === "/usr/bin/bash" || tokens[0] === "/bin/bash" || tokens[0] === "bash")
+        && pathTokenMatches(tokens[1], expectedCwd, script);
+}
+
+function commandMatches(runnerId: RunnerId, command: string | undefined, expectedCwd: string): boolean {
     if (!command) return false;
-    return EXPECTED_COMMAND_FRAGMENTS[runnerId].some((fragment) => command.includes(fragment));
+    const tokens = command.trim().split(/\s+/);
+    if (runnerId === "V12") {
+        return commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-v12-x1-all-live-runner.ts", ["--once"] as const)
+            || commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-v12-x1-all-live-runner.ts", ["--daemon"] as const);
+    }
+    if (runnerId === "QUALITY102_CAUSAL_V1") return commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-quality102-causal-v1-live-runner.ts", ["--daemon"] as const);
+    return commandMatchesShellRunner(tokens, expectedCwd, "scripts/ops/disdex-v96-v52-live.sh");
 }
 
 function currentAttempts(state: WatchdogState, runnerId: RunnerId, now: number, windowMs: number): WatchdogAttempt[] {
@@ -538,6 +702,7 @@ function resultFromPrepared(prepared: PreparedRunner[], exitCode: 0 | 1, sharedU
         backoffMs: item.backoffMs,
         nextAllowedAt: item.nextAllowedAt,
         ...(item.error ? { error: item.error } : {}),
+        ...(item.safetyUnverified ? { safetyUnverified: true } : {}),
     })));
     const decisions = asRecord(prepared.map((item) => item.decision));
     return {
@@ -569,10 +734,10 @@ function makeSharedResult(config: RunnerWatchdogConfig, now: number, reason: str
 
 async function loadHeartbeats(config: RunnerWatchdogConfig): Promise<LoadedHeartbeats> {
     const heartbeats: Partial<Record<RunnerId, RunnerHeartbeat>> = {};
-    const identityMismatches: Partial<Record<RunnerId, string>> = {};
     for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
         let heartbeat: RunnerHeartbeat | undefined;
         try {
+            await rejectSymlinkIfPresent(config.runners[runnerId].heartbeatPath, `heartbeat path for ${runnerId}`);
             heartbeat = await readRunnerHeartbeat(config.runners[runnerId].heartbeatPath);
         } catch (error) {
             throw new RunnerWatchdogSafetyError(`heartbeat for ${runnerId} is malformed`, { cause: error });
@@ -584,12 +749,15 @@ async function loadHeartbeats(config: RunnerWatchdogConfig): Promise<LoadedHeart
         if (!isAllowlistedForRunner(runnerId, heartbeat.serviceUnit)) {
             throw new RunnerWatchdogSafetyError(`heartbeat service unit is not allowlisted for ${runnerId}`);
         }
+        if (heartbeat.expectedSha !== config.runners[runnerId].expectedSha) {
+            throw new RunnerWatchdogSafetyError(`heartbeat expected SHA does not match configured release for ${runnerId}`);
+        }
         heartbeats[runnerId] = heartbeat;
         if (heartbeat.serviceUnit !== config.runners[runnerId].serviceUnit) {
-            identityMismatches[runnerId] = "heartbeat service unit does not match configured unit";
+            throw new RunnerWatchdogSafetyError(`heartbeat service unit does not match configured unit for ${runnerId}`);
         }
     }
-    return { heartbeats, identityMismatches };
+    return { heartbeats };
 }
 
 async function prepareRunner(
@@ -616,9 +784,6 @@ async function prepareRunner(
         nextAllowedAt: null,
     };
 
-    if (loaded.identityMismatches[runnerId]) {
-        return { ...base, decision: holdDecision(loaded.identityMismatches[runnerId]!) };
-    }
     if (heartbeat && ["KILL_SWITCH", "DAILY_LOSS_LATCH", "STALE_DATA", "RECONCILIATION_FAILED", "MANUAL_REVIEW", "UNKNOWN"].includes(heartbeat.safetyState)) {
         return {
             ...base,
@@ -634,7 +799,16 @@ async function prepareRunner(
             }),
         };
     }
-    if (await markerExists(runnerConfig.intentionalStopMarkerPath)) {
+
+    let intentionalStop = false;
+    try {
+        intentionalStop = await markerExists(runnerConfig.intentionalStopMarkerPath);
+        if (!intentionalStop && system.intentionalStop) intentionalStop = await system.intentionalStop(runnerConfig.serviceUnit);
+    } catch (error) {
+        const message = `safety-unverified: ${safeReason(error instanceof Error ? error.message : "stop intent unavailable")}`;
+        return { ...base, decision: holdDecision(message, true), error: message, safetyUnverified: true };
+    }
+    if (intentionalStop) {
         return {
             ...base,
             intentionalStop: true,
@@ -677,14 +851,16 @@ async function prepareRunner(
         if (!Number.isInteger(mainPid) || mainPid < 0) throw new RunnerWatchdogSafetyError(`invalid MainPID for ${runnerId}`);
         if (mainPid > 0) {
             processCwd = await system.processCwd(mainPid);
+            if (!processCwd) throw new RunnerWatchdogSafetyError(`process cwd unavailable for ${runnerId}`);
             processCommand = await system.processCommand(mainPid);
+            if (!processCommand) throw new RunnerWatchdogSafetyError(`process command unavailable for ${runnerId}`);
         }
     } catch (error) {
-        const message = safeReason(error instanceof Error ? error.message : "system observation unavailable");
-        return { ...base, decision: holdDecision(message), error: message };
+        const message = `safety-unverified: ${safeReason(error instanceof Error ? error.message : "system observation unavailable")}`;
+        return { ...base, decision: holdDecision(message, true), error: message, safetyUnverified: true };
     }
 
-    const commandVerified = mainPid === 0 || commandMatches(runnerId, processCommand);
+    const commandVerified = mainPid === 0 || commandMatches(runnerId, processCommand, runnerConfig.expectedCwd);
     const cwdForDecision = mainPid > 0 ? (processCwd || "__watchdog_process_cwd_unverified__") : undefined;
     const decision = decideRecovery({
         now,
@@ -736,68 +912,103 @@ export async function runWatchdog(options: {
 }): Promise<RunnerWatchdogResult> {
     const now = options.now ?? Date.now();
     if (!Number.isInteger(now) || now < 0) throw new RunnerWatchdogSafetyError("watchdog clock is invalid");
-    assertConfig(options.config);
 
-    let state: WatchdogState;
-    let loaded: LoadedHeartbeats;
     try {
-        state = await readWatchdogState(options.config, now);
-        loaded = await loadHeartbeats(options.config);
+        assertConfig(options.config);
     } catch (error) {
-        const result = makeSharedResult(options.config, now, safeReason(error instanceof Error ? error.message : "shared heartbeat uncertainty"));
-        return finishResult(options.config, now, result);
+        return makeSharedResult(options.config, now, `safety-unverified: ${safeReason(error instanceof Error ? error.message : "watchdog configuration unavailable")}`);
     }
 
-    const prepared: PreparedRunner[] = [];
-    for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
-        prepared.push(await prepareRunner(runnerId, options.config, options.system, state, loaded, now));
+    let releaseLock: (() => Promise<void>) | undefined;
+    try {
+        releaseLock = await acquireCycleLock(options.config);
+    } catch (error) {
+        return makeSharedResult(options.config, now, safeReason(error instanceof Error ? error.message : "watchdog cycle lock unavailable"));
     }
-    const blockedSharedUnits = new Set(
-        prepared
-            .filter((item) => item.intentionalStop || item.decision.action === "RECOVERY_EXHAUSTED")
-            .map((item) => item.config.serviceUnit),
-    );
-    for (const item of prepared) {
-        if (item.decision.action === "RESTART" && blockedSharedUnits.has(item.config.serviceUnit)) {
-            item.decision = holdDecision(`shared service ${item.config.serviceUnit} is intentionally stopped or recovery-exhausted`);
+
+    let config = options.config;
+    let result: RunnerWatchdogResult;
+    try {
+        config = await validateReleasePin(config);
+        const state = await readWatchdogState(config, now);
+        const loaded = await loadHeartbeats(config);
+
+        const prepared: PreparedRunner[] = [];
+        let sharedObservationFailure: string | undefined;
+        for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
+            const item = await prepareRunner(runnerId, config, options.system, state, loaded, now);
+            if (item.safetyUnverified) {
+                sharedObservationFailure = item.error || `safety-unverified: ${runnerId} observation unavailable`;
+                break;
+            }
+            prepared.push(item);
         }
-    }
-    let result = resultFromPrepared(prepared, 0);
-    const restartGroups = new Map<string, PreparedRunner[]>();
-    for (const item of prepared) {
-        if (item.decision.action !== "RESTART" || !item.decision.restartAuthorized) continue;
-        const group = restartGroups.get(item.config.serviceUnit) || [];
-        group.push(item);
-        restartGroups.set(item.config.serviceUnit, group);
-    }
 
-    if (restartGroups.size > 0) {
-        try {
-            await reserveRestartAttempts(options.config, state, prepared, now);
-        } catch (error) {
-            const message = safeReason(error instanceof Error ? error.message : "restart state unavailable");
+        if (sharedObservationFailure) {
+            result = makeSharedResult(config, now, sharedObservationFailure);
+        } else {
+            const blockedSharedUnits = new Set(
+                prepared
+                    .filter((item) => item.intentionalStop || item.decision.action === "RECOVERY_EXHAUSTED" || (item.decision.action === "HOLD_FAIL_CLOSED" && item.config.serviceUnit === "disdex-v96-v52-live.service"))
+                    .map((item) => item.config.serviceUnit),
+            );
             for (const item of prepared) {
-                if (item.decision.action !== "RESTART") continue;
-                item.decision = holdDecision(`restart withheld: ${message}`);
-                item.error = message;
+                if (item.decision.action === "RESTART" && blockedSharedUnits.has(item.config.serviceUnit)) {
+                    item.decision = holdDecision(`shared service ${item.config.serviceUnit} is intentionally stopped, safety-held, or recovery-exhausted`);
+                }
             }
-            result = resultFromPrepared(prepared, 1);
-            return finishResult(options.config, now, result);
+            result = resultFromPrepared(prepared, 0);
+            const restartGroups = new Map<string, PreparedRunner[]>();
+            for (const item of prepared) {
+                if (item.decision.action !== "RESTART" || !item.decision.restartAuthorized) continue;
+                const group = restartGroups.get(item.config.serviceUnit) || [];
+                group.push(item);
+                restartGroups.set(item.config.serviceUnit, group);
+            }
+
+            if (restartGroups.size > 0) {
+                try {
+                    await reserveRestartAttempts(config, state, prepared, now);
+                } catch (error) {
+                    const message = safeReason(error instanceof Error ? error.message : "restart state unavailable");
+                    for (const item of prepared) {
+                        if (item.decision.action !== "RESTART") continue;
+                        item.decision = holdDecision(`restart withheld: ${message}`);
+                        item.error = message;
+                    }
+                    result = resultFromPrepared(prepared, 1);
+                }
+                if (result.exitCode === 0) {
+                    for (const [unit, group] of restartGroups) {
+                        result.restartCalls.push(unit);
+                        try {
+                            await options.system.restart(unit);
+                            for (const item of group) result.runnerResults[item.runnerId].restartPerformed = true;
+                        } catch (error) {
+                            const message = safeReason(error instanceof Error ? error.message : `restart failed for ${unit}`);
+                            result.exitCode = 1;
+                            for (const item of group) result.runnerResults[item.runnerId].error = message;
+                        }
+                    }
+                }
+            }
+            if (prepared.some((item) => item.decision.action === "RECOVERY_EXHAUSTED")) result.exitCode = 1;
         }
-        for (const [unit, group] of restartGroups) {
-            result.restartCalls.push(unit);
-            try {
-                await options.system.restart(unit);
-                for (const item of group) result.runnerResults[item.runnerId].restartPerformed = true;
-            } catch (error) {
-                const message = safeReason(error instanceof Error ? error.message : `restart failed for ${unit}`);
-                result.exitCode = 1;
-                for (const item of group) result.runnerResults[item.runnerId].error = message;
-            }
+    } catch (error) {
+        result = makeSharedResult(config, now, `safety-unverified: ${safeReason(error instanceof Error ? error.message : "shared watchdog uncertainty")}`);
+    }
+
+    result = await finishResult(config, now, result);
+    try {
+        await releaseLock();
+    } catch (error) {
+        result.exitCode = 1;
+        result.sharedUncertainty = true;
+        for (const runnerId of RUNNER_WATCHDOG_RUNNERS) {
+            if (!result.runnerResults[runnerId].error) result.runnerResults[runnerId].error = "safety-unverified: watchdog cycle lock release failed";
         }
     }
-    if (prepared.some((item) => item.decision.action === "RECOVERY_EXHAUSTED")) result.exitCode = 1;
-    return finishResult(options.config, now, result);
+    return result;
 }
 
 export const runRunnerWatchdog = runWatchdog;
@@ -847,6 +1058,21 @@ export function createProductionWatchdogSystem(): RunnerWatchdogSystem {
                 if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
                 throw new RunnerWatchdogSafetyError("process command cannot be verified", { cause: error });
             }
+        },
+        async intentionalStop(unit: string): Promise<boolean> {
+            assertSystemctlUnit(unit);
+            const result = await execFile(SYSTEMCTL, ["show", unit, "--property=ActiveState,SubState,Result,ExecMainCode,ExecMainStatus", "--no-pager"], { encoding: "utf8", windowsHide: true });
+            const properties = Object.fromEntries(result.stdout.split(/\r?\n/).flatMap((line) => {
+                const separator = line.indexOf("=");
+                return separator < 0 ? [] : [[line.slice(0, separator), line.slice(separator + 1)]];
+            }));
+            // A cleanly completed allowlisted unit is the only systemd-derived stop intent.
+            // Failed/signal exits remain eligible for bounded operational recovery.
+            return properties.ActiveState === "inactive"
+                && properties.SubState === "dead"
+                && properties.Result === "success"
+                && (properties.ExecMainCode === undefined || properties.ExecMainCode === "1")
+                && (properties.ExecMainStatus === undefined || properties.ExecMainStatus === "0");
         },
         async restart(unit: string): Promise<void> {
             assertSystemctlUnit(unit);

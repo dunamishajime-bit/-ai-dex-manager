@@ -7,8 +7,11 @@ Wants=network-online.target
 Type=oneshot
 User=deploy
 Group=deploy
+SupplementaryGroups=disdex-runner-health
 WorkingDirectory=/opt/disdex/releases/%i
 EnvironmentFile=-/etc/disdex/disdex-v12-x1-all.env
+Environment=DISDEX_RUNNER_HEALTH_ROOT=/var/lib/disdex/runner-health/heartbeats
+Environment=DISDEX_RUNNER_HEARTBEAT_PATH=/var/lib/disdex/runner-health/heartbeats/v12.json
 Environment=V12_X1_ALL_MODE=SHADOW
 Environment=V12_X1_ALL_ENABLED=false
 Environment=V12_X1_ALL_LIVE_TRADING_ENABLED=false
@@ -18,7 +21,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/lib/disdex/v12-x1-all /var/lib/disdex/shared
+ReadWritePaths=/var/lib/disdex/v12-x1-all /var/lib/disdex/shared /var/lib/disdex/runner-health/heartbeats
 
 [Install]
 WantedBy=multi-user.target

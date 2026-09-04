@@ -8,11 +8,15 @@ Requires=disdex-stock-reference-free.service
 Type=simple
 User=deploy
 Group=deploy
+SupplementaryGroups=disdex-runner-health
 WorkingDirectory=/home/deploy/disdex-trading/current
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=-/etc/disdex/disdex-v96-v52-live-overrides.env
 Environment=NODE_ENV=production
 Environment=DISDEX_V13D_V11EQ_V96_RUNNER_MODE=live
+Environment=DISDEX_RUNNER_HEALTH_ROOT=/var/lib/disdex/runner-health/heartbeats
+Environment=DISDEX_PENGU_RUNNER_HEARTBEAT_PATH=/var/lib/disdex/runner-health/heartbeats/pengu-v8.json
+Environment=DISDEX_V52_RUNNER_HEARTBEAT_PATH=/var/lib/disdex/runner-health/heartbeats/v52.json
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
@@ -73,6 +77,7 @@ PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
 ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state /home/deploy/ai-dex-manager-v96-paper/.runtime-approval
+ReadWritePaths=/var/lib/disdex/runner-health/heartbeats
 ReadOnlyPaths=/home/deploy/disdex-trading/releases
 UMask=0077
 

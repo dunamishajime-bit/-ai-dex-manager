@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { setTimeout as delay } from "node:timers/promises";
 
 import {
     writeRunnerHeartbeat,
@@ -38,9 +40,37 @@ class FakeWatchdogSystem implements RunnerWatchdogSystem {
     readonly pids = new Map<string, number>();
     readonly cwds = new Map<number, string | undefined>();
     readonly commands = new Map<number, string | undefined>();
+    readonly intentionalStops = new Map<string, boolean>();
+    private observationGate?: {
+        unit: string;
+        entered: number;
+        enteredPromise: Promise<void>;
+        releasePromise: Promise<void>;
+        resolveEntered: () => void;
+        resolveRelease: () => void;
+    };
+
+    blockObservation(unit: string): Promise<void> {
+        let resolveEntered!: () => void;
+        let resolveRelease!: () => void;
+        const enteredPromise = new Promise<void>((resolve) => { resolveEntered = resolve; });
+        const releasePromise = new Promise<void>((resolve) => { resolveRelease = resolve; });
+        this.observationGate = { unit, entered: 0, enteredPromise, releasePromise, resolveEntered, resolveRelease };
+        return enteredPromise;
+    }
+
+    releaseObservation(): void {
+        this.observationGate?.resolveRelease();
+    }
 
     async isActive(unit: string): Promise<boolean> {
         this.calls.push(`isActive:${unit}`);
+        const gate = this.observationGate;
+        if (gate?.unit === unit) {
+            gate.entered += 1;
+            if (gate.entered >= 1) gate.resolveEntered();
+            await gate.releasePromise;
+        }
         return this.active.get(unit) ?? false;
     }
 
@@ -59,6 +89,11 @@ class FakeWatchdogSystem implements RunnerWatchdogSystem {
         return this.commands.get(pid);
     }
 
+    async intentionalStop(unit: string): Promise<boolean> {
+        this.calls.push(`intentionalStop:${unit}`);
+        return this.intentionalStops.get(unit) ?? false;
+    }
+
     async restart(unit: string): Promise<void> {
         this.calls.push(`restart:${unit}`);
         this.restartCalls.push(unit);
@@ -71,7 +106,7 @@ function makeConfig(root: string): RunnerWatchdogConfig {
         runners[runnerId] = {
             runnerId,
             serviceUnit: UNITS[runnerId],
-            heartbeatPath: join(root, HEARTBEAT_FILES[runnerId]),
+            heartbeatPath: join(root, "heartbeats", HEARTBEAT_FILES[runnerId]),
             expectedCwd: root,
             expectedSha: SHA,
             intentionalStopMarkerPath: join(root, `${runnerId.toLowerCase()}.intentional-stop`),
@@ -84,8 +119,9 @@ function makeConfig(root: string): RunnerWatchdogConfig {
         attemptWindowMs: 1_800_000,
         maxAttempts: 3,
         backoffMs: [15_000, 60_000, 300_000],
-        auditPath: join(root, "watchdog-audit.json"),
-        statePath: join(root, "watchdog-state.json"),
+        auditPath: join(root, "private", "watchdog-audit.json"),
+        statePath: join(root, "private", "watchdog-state.json"),
+        lockPath: join(root, "private", "watchdog.lock"),
     };
 }
 
@@ -154,6 +190,7 @@ async function freshFixture(
     const root = await mkdtemp(join(tmpdir(), "disdex-runner-watchdog-selftest-"));
     try {
         const config = makeConfig(root);
+        await writeFile(join(root, ".disdex-release-sha"), `${SHA}\n`, "utf8");
         await writeFixtures(config, now, overrides);
         await callback(root, config, makeSystem(root));
     } finally {
@@ -161,8 +198,27 @@ async function freshFixture(
     }
 }
 
+function assertNoTradingEffects(result: Awaited<ReturnType<typeof runWatchdog>>): void {
+    for (const runnerId of RUNNERS) {
+        assert.deepEqual(result.decisions[runnerId].tradingEffects, { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 });
+    }
+}
+
 async function main(): Promise<void> {
     const now = Date.now();
+    const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+    const watchdogUnit = await readFile(join(projectRoot, "ops/systemd/disdex-runner-watchdog.service"), "utf8");
+    assert.match(watchdogUnit, /WorkingDirectory=@DISDEX_RUNNER_RELEASE_ROOT@/);
+    assert.match(watchdogUnit, /ExecStartPre=\/usr\/bin\/test -f @DISDEX_RUNNER_RELEASE_ROOT@\/\.disdex-release-sha/);
+    assert.match(watchdogUnit, /ExecStartPre=\/usr\/bin\/grep -Fxq @DISDEX_RUNNER_RELEASE_SHA@ @DISDEX_RUNNER_RELEASE_ROOT@\/\.disdex-release-sha/);
+    assert.match(watchdogUnit, /ExecStart=@DISDEX_RUNNER_RELEASE_ROOT@\/node_modules\/\.bin\/tsx scripts\/disdex-runner-watchdog\.ts/);
+    assert.doesNotMatch(watchdogUnit, /\/current(?:\/|\s)/);
+    assert.match(watchdogUnit, /ProtectSystem=strict/);
+    assert.match(watchdogUnit, /ReadOnlyPaths=\/var/);
+    assert.match(watchdogUnit, /ReadWritePaths=\/var\/lib\/disdex\/runner-health\/private/);
+    const installer = await readFile(join(projectRoot, "scripts/ops/install-disdex-runner-health.sh"), "utf8");
+    assert.doesNotMatch(installer, /\bsed(?:\s|[-])/);
+    assert.match(installer, /disdex-runner-health/);
 
     const productionAdapter = createProductionWatchdogSystem();
     await assert.rejects(() => productionAdapter.isActive("disdex-arbitrary.service"), /static allowlist/);
@@ -175,18 +231,21 @@ async function main(): Promise<void> {
         const result = await runWatchdog({ config, system, now });
         assert.deepEqual(system.restartCalls, [UNITS.V12]);
         assert.equal(result.decisions.V12.action, "RESTART");
+        assertNoTradingEffects(result);
     });
 
     await freshFixture(now, { V12: { heartbeatAt: now - 10 * 60_000 } }, async (_root, config, system) => {
         const result = await runWatchdog({ config, system, now });
         assert.deepEqual(system.restartCalls, [UNITS.V12]);
         assert.equal(result.decisions.V12.action, "RESTART");
+        assertNoTradingEffects(result);
     });
 
     await freshFixture(now, {}, async (_root, config, system) => {
         const result = await runWatchdog({ config, system, now });
         assert.deepEqual(system.restartCalls, []);
         assert.equal(result.decisions.V12.action, "NOOP");
+        assertNoTradingEffects(result);
     });
 
     await freshFixture(now, { V12: { runtimeSha: OTHER_SHA } }, async (_root, config, system) => {
@@ -197,6 +256,7 @@ async function main(): Promise<void> {
         assert.deepEqual(system.restartCalls, [UNITS.V12]);
         assert.equal(result.restartCalls[0], UNITS.V12);
         assert.equal(result.decisions.V12.tradingEffects.ordersSent, 0);
+        assertNoTradingEffects(result);
     });
 
     for (const safetyState of ["KILL_SWITCH", "MANUAL_REVIEW", "STALE_DATA", "RECONCILIATION_FAILED", "UNKNOWN"] as const) {
@@ -211,13 +271,40 @@ async function main(): Promise<void> {
         });
     }
 
-    await freshFixture(now, { V12: { restartAttempts: 3 } }, async (_root, config, system) => {
+    await freshFixture(now, {
+        PENGU_V8: { safetyState: "MANUAL_REVIEW" },
+        V52: { safetyState: "MANUAL_REVIEW" },
+        QUALITY102_CAUSAL_V1: { safetyState: "MANUAL_REVIEW" },
+    }, async (_root, config, system) => {
         system.active.set(UNITS.V12, false);
         system.pids.set(UNITS.V12, 0);
-        const result = await runWatchdog({ config, system, now });
-        assert.deepEqual(system.restartCalls, []);
-        assert.equal(result.decisions.V12.action, "RECOVERY_EXHAUSTED");
-        assert.equal(result.exitCode, 1);
+        const first = await runWatchdog({ config, system, now });
+        assert.deepEqual(first.restartCalls, [UNITS.V12]);
+        let state = JSON.parse(await readFile(config.statePath, "utf8")) as { runners: Record<string, { attempts: Array<{ at: number; delayMs: number }> }> };
+        assert.equal(state.runners.V12.attempts.length, 1);
+        assert.equal(state.runners.V12.attempts[0].delayMs, 15_000);
+
+        const second = await runWatchdog({ config, system, now: now + 15_000 });
+        assert.deepEqual(second.restartCalls, [UNITS.V12]);
+        state = JSON.parse(await readFile(config.statePath, "utf8"));
+        assert.equal(state.runners.V12.attempts.length, 2);
+        assert.equal(state.runners.V12.attempts[1].delayMs, 60_000);
+
+        const thirdAt = now + 15_000 + 60_000;
+        const third = await runWatchdog({ config, system, now: thirdAt });
+        assert.deepEqual(third.restartCalls, [UNITS.V12]);
+        state = JSON.parse(await readFile(config.statePath, "utf8"));
+        assert.equal(state.runners.V12.attempts.length, 3);
+        assert.equal(state.runners.V12.attempts[2].delayMs, 300_000);
+
+        const fourth = await runWatchdog({ config, system, now: thirdAt + 300_000 });
+        assert.deepEqual(fourth.restartCalls, []);
+        assert.equal(fourth.decisions.V12.action, "RECOVERY_EXHAUSTED");
+        assert.equal(fourth.exitCode, 1);
+        assertNoTradingEffects(first);
+        assertNoTradingEffects(second);
+        assertNoTradingEffects(third);
+        assertNoTradingEffects(fourth);
     });
 
     await freshFixture(now, { QUALITY102_CAUSAL_V1: { safetyState: "MANUAL_REVIEW" } }, async (_root, config, system) => {
@@ -227,6 +314,8 @@ async function main(): Promise<void> {
         assert.equal(result.decisions.V12.action, "NOOP");
         assert.equal(result.decisions.PENGU_V8.action, "NOOP");
         assert.equal(result.decisions.V52.action, "NOOP");
+        assert.equal(system.calls.some((call) => call.startsWith("restart:")), false);
+        assertNoTradingEffects(result);
     });
 
     await freshFixture(now, {
@@ -237,6 +326,7 @@ async function main(): Promise<void> {
         assert.deepEqual(system.restartCalls, [UNITS.PENGU_V8]);
         assert.equal(result.decisions.PENGU_V8.action, "RESTART");
         assert.equal(result.decisions.V52.action, "RESTART");
+        assertNoTradingEffects(result);
     });
 
     await freshFixture(now, {}, async (_root, config, system) => {
@@ -260,6 +350,7 @@ async function main(): Promise<void> {
         assert.deepEqual(system.restartCalls, []);
         assert.equal(result.decisions.V12.action, "HOLD_FAIL_CLOSED");
         assert.equal(result.decisions.V12.restartAuthorized, false);
+        assertNoTradingEffects(result);
     });
 
     await freshFixture(now, {}, async (_root, config, system) => {
@@ -276,6 +367,42 @@ async function main(): Promise<void> {
         const fourth = await runWatchdog({ config, system, now: now + 16_000 });
         assert.deepEqual(fourth.restartCalls, []);
         assert.equal(fourth.runnerResults.V12.backoffMs, 60_000);
+    });
+
+    await freshFixture(now, {}, async (_root, config, system) => {
+        system.active.set(UNITS.V12, false);
+        system.pids.set(UNITS.V12, 0);
+        const entered = system.blockObservation(UNITS.V12);
+        const first = runWatchdog({ config, system, now });
+        await entered;
+        const second = runWatchdog({ config, system, now });
+        await delay(20);
+        system.releaseObservation();
+        const [firstResult, secondResult] = await Promise.all([first, second]);
+        assert.equal(system.restartCalls.length, 1);
+        assert.equal(firstResult.restartCalls.length + secondResult.restartCalls.length, 1);
+        const state = JSON.parse(await readFile(config.statePath, "utf8")) as { runners: Record<string, { attempts: unknown[] }> };
+        assert.equal(state.runners.V12.attempts.length, 1);
+        assertNoTradingEffects(firstResult);
+        assertNoTradingEffects(secondResult);
+    });
+
+    await freshFixture(now, {}, async (_root, config, system) => {
+        system.active.set(UNITS.V12, false);
+        system.pids.set(UNITS.V12, 0);
+        const entered = system.blockObservation(UNITS.V12);
+        const first = runWatchdog({ config, system, now });
+        await entered;
+        const second = runWatchdog({ config, system, now });
+        await delay(20);
+        system.releaseObservation();
+        const [firstResult, secondResult] = await Promise.all([first, second]);
+        assert.equal(system.restartCalls.length, 1);
+        assert.equal(firstResult.restartCalls.length + secondResult.restartCalls.length, 1);
+        const state = JSON.parse(await readFile(config.statePath, "utf8")) as { runners: Record<string, { attempts: unknown[] }> };
+        assert.equal(state.runners.V12.attempts.length, 1);
+        assertNoTradingEffects(firstResult);
+        assertNoTradingEffects(secondResult);
     });
 
     await freshFixture(now, {}, async (_root, config, system) => {

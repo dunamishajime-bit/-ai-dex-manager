@@ -1,4 +1,4 @@
-import { mkdir, open, readFile, rename, rm, chmod } from "node:fs/promises";
+import { chmod, lstat, mkdir, open, readFile, rename, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 export type RunnerId = "V12" | "PENGU_V8" | "V52" | "QUALITY102_CAUSAL_V1";
@@ -114,8 +114,41 @@ function assertRecord(value: unknown): asserts value is Record<string, unknown> 
   if (value === null || typeof value !== "object" || Array.isArray(value)) throw new RunnerHeartbeatError("heartbeat must be an object");
 }
 function requiredString(record: Record<string, unknown>, key: string): string {
-  if (typeof record[key] !== "string" || record[key].length === 0) throw new RunnerHeartbeatError(`heartbeat.${key} must be a non-empty string`);
-  return record[key] as string;
+    if (typeof record[key] !== "string" || record[key].length === 0) throw new RunnerHeartbeatError(`heartbeat.${key} must be a non-empty string`);
+    return record[key] as string;
+}
+
+function strictText(record: Record<string, unknown>, key: string, maxLength: number): string {
+    const value = requiredString(record, key);
+    if (value.length > maxLength || /[\u0000-\u001f\u007f]/.test(value)) throw new RunnerHeartbeatError(`heartbeat.${key} is not a bounded safe string`);
+    return value;
+}
+
+function redactText(value: string, maxLength: number): string {
+    return value
+        .replace(/[\u0000-\u001f\u007f]/g, " ")
+        .replace(/\b(?:api[_ -]?key|private[_ -]?key|secret|token|password|authorization|mnemonic|seed(?: phrase)?|wallet|credential)\s*[:=]\s*[^\s,;]+/gi, "[REDACTED]")
+        .replace(/\b(?:sk|pk)_[A-Za-z0-9_-]{8,}\b/g, "[REDACTED]")
+        .replace(/\b0x[a-f0-9]{40,}\b/gi, "[REDACTED]")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, maxLength);
+}
+
+function boundedText(record: Record<string, unknown>, key: string, maxLength: number, required = false): string | null {
+    const value = record[key];
+    if (value === null && !required) return null;
+    if (typeof value !== "string") throw new RunnerHeartbeatError(`heartbeat.${key} must be a string${required ? "" : " or null"}`);
+    const redacted = redactText(value, maxLength);
+    if (required && redacted.length === 0) throw new RunnerHeartbeatError(`heartbeat.${key} must be non-empty`);
+    return redacted;
+}
+
+function rejectUnknownFields(record: Record<string, unknown>, allowed: readonly string[], label: string): void {
+    const allowedSet = new Set(allowed);
+    for (const key of Object.keys(record)) {
+        if (!allowedSet.has(key)) throw new RunnerHeartbeatError(`${label} contains unknown heartbeat field ${key}`);
+    }
 }
 function timestamp(record: Record<string, unknown>, key: string, nullable = false): number | null {
   const value = record[key];
@@ -125,8 +158,12 @@ function timestamp(record: Record<string, unknown>, key: string, nullable = fals
 }
 
 function validateHeartbeat(value: unknown): RunnerHeartbeat {
-  assertRecord(value);
-  if (value.schema !== "disdex-runner-heartbeat/v1") throw new RunnerHeartbeatError("unsupported heartbeat schema");
+    assertRecord(value);
+    rejectUnknownFields(value, [
+        "schema", "runnerId", "serviceUnit", "runtimeSha", "expectedSha", "workingDirectory", "mode", "liveEnabled", "safetyState",
+        "heartbeatAt", "lastTickAt", "lastReconciliationAt", "lastDecision", "reason", "symbols", "caps", "restartAttempts", "updatedAt", "quality102",
+    ], "heartbeat");
+    if (value.schema !== "disdex-runner-heartbeat/v1") throw new RunnerHeartbeatError("unsupported heartbeat schema");
   const runnerIds: RunnerId[] = ["V12", "PENGU_V8", "V52", "QUALITY102_CAUSAL_V1"];
   const safetyStates: RunnerSafetyState[] = ["LIVE", "WAITING", "FAIL_CLOSED", "KILL_SWITCH", "DAILY_LOSS_LATCH", "STALE_DATA", "RECONCILIATION_FAILED", "MANUAL_REVIEW", "UNKNOWN"];
   if (!runnerIds.includes(value.runnerId as RunnerId)) throw new RunnerHeartbeatError("invalid runnerId");
@@ -134,40 +171,82 @@ function validateHeartbeat(value: unknown): RunnerHeartbeat {
   const runtimeSha = requiredString(value, "runtimeSha");
   const expectedSha = requiredString(value, "expectedSha");
   if (!SHA_RE.test(runtimeSha) || !SHA_RE.test(expectedSha)) throw new RunnerHeartbeatError("invalid SHA");
-  for (const key of ["serviceUnit", "workingDirectory", "mode", "reason"] as const) requiredString(value, key);
-  if (typeof value.liveEnabled !== "boolean" || typeof value.restartAttempts !== "number" || !Number.isInteger(value.restartAttempts) || value.restartAttempts < 0) throw new RunnerHeartbeatError("invalid heartbeat flags or restartAttempts");
-  const heartbeatAt = timestamp(value, "heartbeatAt") as number;
-  const updatedAt = timestamp(value, "updatedAt") as number;
-  const lastTickAt = timestamp(value, "lastTickAt", true);
-  const lastReconciliationAt = timestamp(value, "lastReconciliationAt", true);
-  if (value.lastDecision !== null && typeof value.lastDecision !== "string") throw new RunnerHeartbeatError("heartbeat.lastDecision must be string or null");
-  if (!Array.isArray(value.symbols) || !value.symbols.every((s) => {
-    if (s === null || typeof s !== "object") return false;
-    const symbol = s as Record<string, unknown>;
-    return typeof symbol.symbol === "string" && typeof symbol.eligible === "boolean" && typeof symbol.reason === "string";
-  })) throw new RunnerHeartbeatError("invalid symbols");
-  assertRecord(value.caps);
-  for (const key of ["strategy", "crypto", "total"] as const) {
-    const cap = value.caps[key];
-    if (cap !== null && (typeof cap !== "number" || !Number.isFinite(cap) || cap < 0)) throw new RunnerHeartbeatError("invalid cap");
-  }
-  if (value.quality102 !== undefined) {
-    assertRecord(value.quality102);
-    if (value.quality102.selectorMode !== "DERIVED_HIGH_VOL_ONLY" || value.quality102.historicalSelectorParity !== false || value.quality102.brkLiveEnabled !== false) throw new RunnerHeartbeatError("invalid quality102 contract");
-  }
-  return value as unknown as RunnerHeartbeat;
+    const serviceUnit = strictText(value, "serviceUnit", 256);
+    const workingDirectory = strictText(value, "workingDirectory", 512);
+    const mode = strictText(value, "mode", 128);
+    const reason = boundedText(value, "reason", 512, true)!;
+    if (typeof value.liveEnabled !== "boolean" || typeof value.restartAttempts !== "number" || !Number.isInteger(value.restartAttempts) || value.restartAttempts < 0) throw new RunnerHeartbeatError("invalid heartbeat flags or restartAttempts");
+    const heartbeatAt = timestamp(value, "heartbeatAt") as number;
+    const updatedAt = timestamp(value, "updatedAt") as number;
+    const lastTickAt = timestamp(value, "lastTickAt", true);
+    const lastReconciliationAt = timestamp(value, "lastReconciliationAt", true);
+    const lastDecision = boundedText(value, "lastDecision", 256);
+    if (!Array.isArray(value.symbols) || value.symbols.length > 128) throw new RunnerHeartbeatError("invalid symbols");
+    const symbols = value.symbols.map((entry) => {
+        assertRecord(entry);
+        rejectUnknownFields(entry, ["symbol", "eligible", "reason"], "heartbeat.symbol");
+        const symbol = strictText(entry, "symbol", 64);
+        if (typeof entry.eligible !== "boolean") throw new RunnerHeartbeatError("heartbeat.symbol.eligible must be boolean");
+        const symbolReason = boundedText(entry, "reason", 256, false) ?? "";
+        return { symbol, eligible: entry.eligible, reason: symbolReason };
+    });
+    assertRecord(value.caps);
+    rejectUnknownFields(value.caps, ["strategy", "crypto", "total"], "heartbeat.caps");
+    const caps = { strategy: null as number | null, crypto: null as number | null, total: null as number | null };
+    for (const key of ["strategy", "crypto", "total"] as const) {
+        const cap = value.caps[key];
+        if (cap !== null && (typeof cap !== "number" || !Number.isFinite(cap) || cap < 0)) throw new RunnerHeartbeatError("invalid cap");
+        caps[key] = cap as number | null;
+    }
+    let quality102: RunnerHeartbeat["quality102"];
+    if (value.runnerId === "QUALITY102_CAUSAL_V1") {
+        if (value.quality102 === undefined) throw new RunnerHeartbeatError("quality102 metadata is required");
+    } else if (value.quality102 !== undefined) {
+        throw new RunnerHeartbeatError("quality102 metadata is only valid for Q102");
+    }
+    if (value.quality102 !== undefined) {
+        assertRecord(value.quality102);
+        rejectUnknownFields(value.quality102, ["selectorMode", "historicalSelectorParity", "brkLiveEnabled"], "heartbeat.quality102");
+        if (value.quality102.selectorMode !== "DERIVED_HIGH_VOL_ONLY" || value.quality102.historicalSelectorParity !== false || value.quality102.brkLiveEnabled !== false) throw new RunnerHeartbeatError("invalid quality102 contract");
+        quality102 = { selectorMode: "DERIVED_HIGH_VOL_ONLY", historicalSelectorParity: false, brkLiveEnabled: false };
+    }
+    return {
+        schema: "disdex-runner-heartbeat/v1",
+        runnerId: value.runnerId as RunnerId,
+        serviceUnit,
+        runtimeSha,
+        expectedSha,
+        workingDirectory,
+        mode,
+        liveEnabled: value.liveEnabled,
+        safetyState: value.safetyState as RunnerSafetyState,
+        heartbeatAt,
+        lastTickAt,
+        lastReconciliationAt,
+        lastDecision,
+        reason,
+        symbols,
+        caps,
+        restartAttempts: value.restartAttempts,
+        updatedAt,
+        ...(quality102 === undefined ? {} : { quality102 }),
+    };
 }
 
 export async function writeRunnerHeartbeat(path: string, heartbeat: RunnerHeartbeat): Promise<void> {
-  validateHeartbeat(heartbeat);
-  const directory = dirname(path);
-  await mkdir(directory, { recursive: true, mode: 0o700 });
-  await chmod(directory, 0o700);
-  const temporaryPath = join(directory, `.${path.split(/[\\/]/).pop() ?? "heartbeat"}.${process.pid}.${Date.now()}.tmp`);
-  let handle: Awaited<ReturnType<typeof open>> | undefined;
-  try {
-    handle = await open(temporaryPath, "wx", 0o600);
-    await handle.writeFile(`${JSON.stringify(heartbeat)}\n`, "utf8");
+    const serializedHeartbeat = validateHeartbeat(heartbeat);
+    const directory = dirname(path);
+    await mkdir(directory, { recursive: true, mode: 0o770 });
+    const directoryStat = await lstat(directory);
+    if (!directoryStat.isDirectory() || directoryStat.isSymbolicLink()) throw new RunnerHeartbeatError("heartbeat directory is not a real directory");
+    if (process.platform !== "win32" && ((directoryStat.mode & 0o007) !== 0 || (directoryStat.mode & 0o200) === 0)) {
+        throw new RunnerHeartbeatError("heartbeat directory permissions are unsafe or not writable");
+    }
+    const temporaryPath = join(directory, `.${path.split(/[\\/]/).pop() ?? "heartbeat"}.${process.pid}.${Date.now()}.tmp`);
+    let handle: Awaited<ReturnType<typeof open>> | undefined;
+    try {
+        handle = await open(temporaryPath, "wx", 0o600);
+        await handle.writeFile(`${JSON.stringify(serializedHeartbeat)}\n`, "utf8");
     await handle.sync();
     await handle.close();
     handle = undefined;
