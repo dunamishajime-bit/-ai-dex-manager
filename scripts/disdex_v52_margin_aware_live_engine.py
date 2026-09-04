@@ -169,13 +169,31 @@ class MarginAwareV52AsterOnlyEngine(previous.MarginAwareV52AsterOnlyEngine):
             )
             return checks
         except Exception as error:
-            outcome = getattr(self, "_heartbeat_outcome", None) or (
-                "FAIL_CLOSED" if self.live else "UNKNOWN",
-                "preflight-error",
-                str(error),
+            outcome = getattr(self, "_heartbeat_outcome", None)
+            safety_state = (
+                outcome[0]
+                if outcome is not None and outcome[0] not in {"LIVE", "WAITING"}
+                else ("FAIL_CLOSED" if self.live else "UNKNOWN")
             )
-            self._publish_v52_heartbeat(outcome[0], "preflight-error", outcome[2] or str(error))
+            self._publish_v52_heartbeat(safety_state, "preflight-error", str(error))
             raise
+
+    def run(self, daemon: bool) -> None:
+        self._reset_heartbeat_cycle()
+        try:
+            super().run(daemon)
+        except Exception as error:
+            outcome = getattr(self, "_heartbeat_outcome", None)
+            if outcome is None or outcome[0] in {"LIVE", "WAITING"}:
+                outcome = (
+                    "FAIL_CLOSED" if self.live else "UNKNOWN",
+                    "run-error",
+                    str(error),
+                )
+            self._publish_v52_heartbeat(outcome[0], "run-error", str(error))
+            raise
+        finally:
+            self._publish_stopped_heartbeat()
 
 
 def _assert_margin_aware_entrypoint_mro() -> None:
@@ -188,6 +206,12 @@ def _assert_margin_aware_entrypoint_mro() -> None:
 
 def self_test() -> None:
     _assert_margin_aware_entrypoint_mro()
+    resolved_run_owner = next(
+        (owner for owner in MarginAwareV52AsterOnlyEngine.__mro__ if "run" in owner.__dict__),
+        None,
+    )
+    assert resolved_run_owner is MarginAwareV52AsterOnlyEngine
+    assert MarginAwareV52AsterOnlyEngine.run is not previous.MarginAwareV52AsterOnlyEngine.run
     print("V52_MARGIN_AWARE_ENTRYPOINT_MRO_SELFTEST_PASS")
     strict_planner_self_test()
     engine = object.__new__(MarginAwareV52AsterOnlyEngine)
@@ -217,6 +241,72 @@ def self_test() -> None:
         raise AssertionError("Unknown nonzero positions must fail closed")
     except RuntimeError as error:
         assert "UNKNOWN_NONZERO_POSITION" in str(error)
+
+    class _NoopLock:
+        def acquire(self) -> None:
+            return None
+
+        def release(self) -> None:
+            return None
+
+    stop_engine = object.__new__(MarginAwareV52AsterOnlyEngine)
+    stop_engine.live = True
+    stop_engine.stop_requested = True
+    stop_engine.lock = _NoopLock()
+    stop_engine.reset_days = lambda: None
+    stop_engine.reconcile = lambda: None
+    stop_engine.log = lambda *args, **kwargs: None
+    stop_engine._heartbeat_outcome = ("LIVE", "tick", "normal tick")
+    stop_events: list[tuple[str, str, str]] = []
+    stop_engine._publish_v52_heartbeat = lambda state, decision, reason: stop_events.append((state, decision, reason))
+    stop_engine._reset_heartbeat_cycle = lambda: setattr(
+        stop_engine,
+        "_heartbeat_outcome",
+        ("LIVE", "tick", "normal tick"),
+    )
+    MarginAwareV52AsterOnlyEngine.run(stop_engine, True)
+    assert stop_events == [("WAITING", "stopped", "stop requested")]
+
+    tick_engine = object.__new__(MarginAwareV52AsterOnlyEngine)
+    tick_engine.live = True
+    tick_engine.stop_requested = False
+    tick_engine.lock = _NoopLock()
+    tick_engine.reset_days = lambda: None
+    tick_engine.reconcile = lambda: None
+    tick_engine.log = lambda *args, **kwargs: None
+    tick_events: list[tuple[str, str, str]] = []
+    tick_engine._publish_v52_heartbeat = lambda state, decision, reason: tick_events.append((state, decision, reason))
+    tick_engine.tick = lambda: tick_engine._publish_v52_heartbeat("LIVE", "tick", "normal tick")
+    MarginAwareV52AsterOnlyEngine.run(tick_engine, False)
+    assert ("LIVE", "tick", "normal tick") in tick_events
+
+    preflight_engine = object.__new__(MarginAwareV52AsterOnlyEngine)
+    preflight_engine.live = True
+    preflight_events: list[tuple[str, str, str]] = []
+    preflight_engine._publish_v52_heartbeat = lambda state, decision, reason: preflight_events.append(
+        (state, decision, reason)
+    )
+    preflight_engine._reset_heartbeat_cycle = lambda: setattr(
+        preflight_engine,
+        "_heartbeat_outcome",
+        ("LIVE", "tick", "normal tick"),
+    )
+    previous_preflight = previous.MarginAwareV52AsterOnlyEngine.preflight
+
+    def injected_margin_preflight(self, read_only: bool = False) -> dict:
+        raise RuntimeError("injected margin preflight failure")
+
+    previous.MarginAwareV52AsterOnlyEngine.preflight = injected_margin_preflight
+    try:
+        try:
+            MarginAwareV52AsterOnlyEngine.preflight(preflight_engine)
+        except RuntimeError as error:
+            assert str(error) == "injected margin preflight failure"
+        else:
+            raise AssertionError("Injected margin preflight must fail")
+    finally:
+        previous.MarginAwareV52AsterOnlyEngine.preflight = previous_preflight
+    assert preflight_events == [("FAIL_CLOSED", "preflight-error", "injected margin preflight failure")]
     print("V52_STRICT_MARGIN_AWARE_SELFTEST_PASS")
 
 

@@ -458,3 +458,83 @@ The fallback payload shape is intentionally minimal and contains no secrets:
 ### Concerns and preserved scope
 
 The POSIX-only margin guard remains unchanged and must be rerun on the XServer/Linux VPS. The pre-existing user-owned `scripts/__pycache__/`, `scripts/account-readonly-inspect.tmp.ts`, and inaccessible temporary self-test directories were not edited, removed, staged, or committed. The round-3 Python compilation used a temporary worktree cache prefix and cleaned it afterward. No deployment, systemd action, exchange call, order/cancel/close action, or historical parity flag was enabled. The focused fix commit SHA is returned with the final response.
+
+## Fix round 4
+
+### Review finding addressed
+
+- The exact production `MarginAwareV52AsterOnlyEngine.run` now overrides the legacy method owner and delegates to `super().run(daemon)`, preserving the existing margin-aware lock, reconciliation, tick loop, margin gates, and stop behavior. The wrapper adds only the heartbeat exception/finally boundary.
+- A normal successful tick still publishes its real `LIVE` tick result. An intentional stop after a prior `LIVE` outcome publishes `WAITING` with `stopped` / `stop requested`; existing explicit safety states remain preserved by the mixin finalizer.
+- A preflight exception after a prior `LIVE` or `WAITING` outcome publishes `FAIL_CLOSED` for live mode or `UNKNOWN` for non-live mode, with the actual exception reason. Existing explicit non-LIVE safety states stay fail closed while the exception reason is refreshed.
+- The exact entrypoint self-test now asserts the resolved `run` owner, normal tick publication, the stop finalizer, and an injected post-LIVE margin-preflight failure. No second writer or margin-guard change was added.
+
+### Focused RED/GREEN evidence
+
+Before the production wrapper, the new resolved-run-path assertion failed as expected:
+
+```text
+python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
+EXIT: 1
+AssertionError: assert resolved_run_owner is MarginAwareV52AsterOnlyEngine
+```
+
+After the wrapper and failure-state fix:
+
+```text
+python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
+EXIT: 0
+V52_MARGIN_AWARE_ENTRYPOINT_MRO_SELFTEST_PASS
+DISDEX_STRICT_PORTFOLIO_PLANNER_PY_SELFTEST_PASS
+V52_STRICT_MARGIN_AWARE_SELFTEST_PASS
+```
+
+### Fix-round 4 verification
+
+```text
+npx tsx --test tests/disdex_runner_health.test.ts
+EXIT: 0; 7 passed, 0 failed
+
+npm run strategy:runner-health:selftest
+EXIT: 0; DISDEX_RUNNER_HEALTH_SELFTEST_PASS ordersSent=0 cancelSent=0 positionChangesSent=0
+
+npm run strategy:v12-x1-all:selftest
+EXIT: 0; V12_X1_ALL_RUNNER_SELFTEST_PASS
+
+npm run strategy:pengu-dual-ls-v2:selftest
+EXIT: 0; PENGU_DUAL_LS_V2_FINAL_SELFTEST_PASS; ordersSent=false; cancelSent=false; positionChangesSent=false
+
+npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+EXIT: 0; V96 + V52 margin-aware supervisor self-test: PASS
+
+npm run strategy:quality102-causal-v1:runtime:selftest
+EXIT: 0; QUALITY102_CAUSAL_V1_RUNTIME_SELFTEST_PASS
+
+npm run strategy:quality102-causal-v1:runner:selftest
+EXIT: 0; QUALITY102_CAUSAL_V1_RUNNER_SELFTEST_PASS and QUALITY102_CAUSAL_V1_LIVE_RUNNER_SELFTEST_PASS; all order counters 0
+
+npm run strategy:quality102-causal-v1:state:selftest
+EXIT: 0; QUALITY102_CAUSAL_V1_STATE_SELFTEST_PASS
+
+npm run strategy:quality102-causal-v1:signal:selftest
+EXIT: 0; QUALITY102_CAUSAL_V1_SIGNAL_SELFTEST_PASS {"historicalSelectorParity":false,"brkEnabled":false,"sourceIncompleteFamiliesGenerated":false}
+
+npx tsx --test tests/quality102_causal_v1_portfolio.test.ts
+EXIT: 0; 12 passed, 0 failed
+
+python3 scripts/disdex_v52_aster_only_live_engine.py --self-test
+EXIT: 0; DISDEX_STRICT_PORTFOLIO_PLANNER_PY_SELFTEST_PASS and V52_STRICT_ASTER_ONLY_SELFTEST_PASS
+
+python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test
+EXIT: 1; ModuleNotFoundError: No module named 'fcntl' (unchanged Windows/POSIX limitation)
+
+python3 -m py_compile scripts/disdex_runner_heartbeat.py scripts/disdex_v52_heartbeat.py scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_margin_aware_live_engine.py scripts/disdex_v96_v52_margin_guard_runtime.py
+EXIT: 0; PY_COMPILE_MODULE_PASS 5; isolated generated cache removed
+
+npx tsc --noEmit
+EXIT: 0; no output
+
+git diff --check
+EXIT: 0; no whitespace errors
+```
+
+The first `npm run strategy:quality102-causal-v1:portfolio:test` invocation exited before running the test because Node could not spawn its Windows worker (`Error: spawn EPERM`). The equivalent direct command above passed all 12 tests with process-launch permission. Existing user-owned untracked pycache files, `scripts/account-readonly-inspect.tmp.ts`, and inaccessible temporary directories remain untouched and unstaged. Q102 fail-closed/unproven flags, SHA identity rules, combined child singleton identity, best-effort heartbeat I/O, persisted Q102 reconciliation timestamp, and the unchanged margin guard remain outside this fix diff. No deployment, systemd action, exchange call, or order/cancel/position-change action occurred.
