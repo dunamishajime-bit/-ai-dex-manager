@@ -59,10 +59,15 @@ export function resampleV12H1ToH2(input: V12H1Candle[]): V12Bar[] {
     for (let i = 1; i < sorted.length; i += 1) {
         if (sorted[i].ts === sorted[i - 1].ts) return [];
     }
+    // A rolling venue request can return an odd number of completed H1 bars.
+    // Align the first pair to the frozen H2 boundary before pairing; otherwise
+    // a harmless leading H1 bar would make every pair fail the boundary check.
+    const firstAlignedIndex = sorted.findIndex((bar) => bar.ts % 7_200_000 === 0);
+    const aligned = firstAlignedIndex >= 0 ? sorted.slice(firstAlignedIndex) : [];
     const output: V12Bar[] = [];
-    for (let i = 0; i < sorted.length; i += 2) {
-        const first = sorted[i];
-        const second = sorted[i + 1];
+    for (let i = 0; i < aligned.length; i += 2) {
+        const first = aligned[i];
+        const second = aligned[i + 1];
         if (!first || !second || !validCandle(first) || !validCandle(second)) continue;
         if (first.ts % 7_200_000 !== 0 || second.ts !== first.ts + 3_600_000) continue;
         if (first.closed === false || second.closed === false) continue;
