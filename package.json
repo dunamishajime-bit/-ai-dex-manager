@@ -91,6 +91,7 @@
     "strategy:quality102-causal-v1:runtime:selftest": "tsx scripts/disdex-quality102-causal-v1-runtime-selftest.ts",
     "strategy:quality102-causal-v1:signal:selftest": "tsx scripts/disdex-quality102-causal-v1-signal-selftest.ts",
     "strategy:quality102-causal-v1:state:selftest": "tsx scripts/disdex-quality102-causal-v1-state-selftest.ts",
+    "strategy:quality102-causal-v1:portfolio:test": "tsx --test tests/quality102_causal_v1_portfolio.test.ts",
     "strategy:strict-bt33404708902:gross:selftest": "tsx scripts/disdex-strict-bt-gross-selftest.ts",
     "strategy:strict-bt33404708902:selector:selftest": "tsx scripts/disdex-quality102-live-selector-selftest.ts",
     "strategy:strict-bt33404708902:causal-selector:selftest": "tsx scripts/disdex-quality102-causal-selector-selftest.ts",

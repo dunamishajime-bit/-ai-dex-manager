@@ -1,15 +1,18 @@
 import { STRICT_BT33404708902, type StrictBtBaseStrategy } from "../config/disdexStrictBt33404708902Runtime";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 
-export type StrictStrategy = StrictBtBaseStrategy | "QUALITY102";
+export type StrictStrategy = StrictBtBaseStrategy | "QUALITY102" | "QUALITY102_CAUSAL_V1";
 export type StrictPositionSide = "LONG" | "SHORT";
 export type StrictMarkSource = "BINANCE_VISION_USDM_1M_OPEN" | "LIVE_MARKET_QUOTE";
 
-export interface StrictMarkSourceEvidence {
+export type StrictMarkSourceEvidence = {
     source: "BINANCE_VISION_USDM_1M_OPEN";
     timestamp: number;
     crossChecked: true;
-}
+} | {
+    source: "LIVE_MARKET_QUOTE";
+    timestamp: number;
+};
 
 export interface StrictPortfolioPosition {
     id: string;
@@ -38,7 +41,7 @@ export interface StrictPortfolioIntent {
 }
 
 export interface MarkToMarketReduction {
-    strategy: "QUALITY102" | StrictBtBaseStrategy;
+    strategy: StrictStrategy;
     symbol: string;
     side: StrictPositionSide;
     markTs: number;
@@ -80,11 +83,15 @@ function nonNegative(value: unknown, name: string) {
 }
 
 function isCrypto(strategy: StrictStrategy) {
-    return strategy === "V12" || strategy === "PENGU_DUAL_LS_V2" || strategy === "QUALITY102";
+    return strategy === "V12" || strategy === "PENGU_DUAL_LS_V2" || strategy === "QUALITY102" || strategy === "QUALITY102_CAUSAL_V1";
 }
 
 function isStock(strategy: StrictStrategy) {
     return strategy === "V11_EQ" || strategy === "V50_POST_OPEN_BASIS" || strategy === "V52";
+}
+
+function isQuality102Strategy(strategy: StrictStrategy) {
+    return strategy === "QUALITY102" || strategy === "QUALITY102_CAUSAL_V1";
 }
 
 function grossForNotional(notionalUsd: number, equity: number) {
@@ -98,12 +105,12 @@ function positionNotional(position: StrictPortfolioPosition) {
 function strategyCap(strategy: StrictStrategy) {
     if (strategy === "V12") return STRICT_BT33404708902.v12MaximumGross;
     if (strategy === "PENGU_DUAL_LS_V2") return STRICT_BT33404708902.penguMaximumGross;
-    if (strategy === "QUALITY102") return STRICT_BT33404708902.quality102PositionCap;
+    if (isQuality102Strategy(strategy)) return STRICT_BT33404708902.quality102PositionCap;
     return STRICT_BT33404708902.stockGrossCap;
 }
 
 function strategySymbolMatches(strategy: StrictStrategy, symbol: string) {
-    if (strategy === "QUALITY102") return String(symbol).trim().length > 0;
+    if (isQuality102Strategy(strategy)) return String(symbol).trim().length > 0;
     const requestedSleeve = strategy === "V52" ? "V50_POST_OPEN_BASIS" : strategy;
     const classification = classifyAsterSymbol(symbol, requestedSleeve as Parameters<typeof classifyAsterSymbol>[1]);
     return classification.tradable && (strategy === "V52"
@@ -159,6 +166,19 @@ function rejectPlan(reason: string, active: StrictPortfolioPosition[], equity: n
     return { status: "blocked", reason, accepted: [], rejected: [], reductions: [], activePositions: active, equityAfterReductions: equity, totals };
 }
 
+function liveQuoteTimestamp(position: StrictPortfolioPosition): number | undefined {
+    const evidence = position.markSourceEvidence;
+    if (evidence?.source === "LIVE_MARKET_QUOTE") return evidence.timestamp;
+    return position.updatedAt;
+}
+
+function causalLiveMarkIsFresh(position: StrictPortfolioPosition, now: number, maxDataAgeMs: number) {
+    if (position.markSource !== "LIVE_MARKET_QUOTE") return false;
+    if (position.markSourceEvidence !== undefined && position.markSourceEvidence.source !== "LIVE_MARKET_QUOTE") return false;
+    const timestamp = liveQuoteTimestamp(position);
+    return Number.isFinite(timestamp) && timestamp! <= now && now - timestamp! <= maxDataAgeMs;
+}
+
 /**
  * Reduce a position at the supplied timestamp mark. The average entry price
  * of the remaining quantity is preserved; only the reduced quantity realizes
@@ -190,6 +210,12 @@ export function markToMarketReducePosition(input: {
         if (source !== "BINANCE_VISION_USDM_1M_OPEN" || evidence?.source !== source || evidence.timestamp !== input.markTs || evidence.crossChecked !== true || input.markTs % 60_000 !== 0) {
             throw new Error("QUALITY102_MTM_SOURCE_UNVERIFIED");
         }
+    } else if (position.strategy === "QUALITY102_CAUSAL_V1") {
+        const source = input.markSource ?? position.markSource;
+        const evidence = input.markSourceEvidence ?? position.markSourceEvidence;
+        if (source !== "LIVE_MARKET_QUOTE" || (evidence !== undefined && (evidence.source !== source || evidence.timestamp !== input.markTs))) {
+            throw new Error("QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED");
+        }
     }
     const feeBpsPerSide = nonNegative(input.feeBpsPerSide ?? position.feeBpsPerSide ?? 0, "fee bps per side");
     const fundingPerDay = nonNegative(input.fundingPerDay ?? position.fundingPerDay ?? 0, "funding per day");
@@ -200,7 +226,9 @@ export function markToMarketReducePosition(input: {
     const transactionCost = basisNotional * 2 * feeBpsPerSide / 10_000;
     const fundingCost = basisNotional * (elapsedHours / 24) * fundingPerDay;
     const realizedPnl = basisNotional * priceReturn - transactionCost - fundingCost;
-    const remainingQuantity = Math.max(0, position.quantity - input.reduceQuantity);
+    const remainingQuantity = position.quantity - input.reduceQuantity <= EPSILON
+        ? 0
+        : position.quantity - input.reduceQuantity;
     const remainingPosition = remainingQuantity > EPSILON
         ? { ...position, quantity: remainingQuantity, markPrice: input.markPrice, updatedAt: input.markTs }
         : undefined;
@@ -296,8 +324,8 @@ function trimQualityToResidual(input: {
 
 /**
  * Build an order plan only. It does not call an exchange client or mutate
- * state. Base strategies are admitted before Quality102; Quality102 intents
- * are rejected until a live selector manifest proves parity.
+ * state. Base strategies are admitted before causal-v1; historical Quality102
+ * intents remain rejected until a live selector manifest proves parity.
  */
 export function planStrictPortfolio(input: {
     equity: number;
@@ -305,6 +333,7 @@ export function planStrictPortfolio(input: {
     active: StrictPortfolioPosition[];
     intents: StrictPortfolioIntent[];
     maxDataAgeMs?: number;
+    quality102CausalV1Ready?: boolean;
 }): StrictPortfolioPlan {
     const equity = positive(input.equity, "portfolio equity");
     if (!Number.isFinite(input.now) || input.now <= 0) return rejectPlan("INVALID_DECISION_TIMESTAMP", input.active, equity);
@@ -326,11 +355,19 @@ export function planStrictPortfolio(input: {
     if (activeQuality.some((row) => row.markSource !== "BINANCE_VISION_USDM_1M_OPEN" || row.markSourceEvidence?.source !== row.markSource || row.markSourceEvidence?.timestamp !== input.now || row.markSourceEvidence?.crossChecked !== true || input.now % 60_000 !== 0)) {
         return rejectPlan("QUALITY102_MTM_SOURCE_UNVERIFIED", input.active, equity);
     }
+    const activeCausalQuality = input.active.filter((row) => row.strategy === "QUALITY102_CAUSAL_V1");
+    if (activeCausalQuality.length > 1) return rejectPlan("QUALITY102_CAUSAL_V1_ONE_SLOT_VIOLATION", input.active, equity);
+    if (activeCausalQuality.some((row) => !causalLiveMarkIsFresh(row, input.now, maxDataAgeMs))) {
+        return rejectPlan("QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED", input.active, equity);
+    }
     if (input.active.filter((row) => row.strategy === "V12").length > STRICT_BT33404708902.v12MaximumPositions) {
         return rejectPlan("V12_SLOT_OCCUPIED_NO_PREEMPTION", input.active, equity);
     }
     if (activeQuality.some((row) => grossForNotional(positionNotional(row), equity) > STRICT_BT33404708902.quality102PositionCap + EPSILON)) {
         return rejectPlan("QUALITY102_GROSS_OVER_CAP", input.active, equity);
+    }
+    if (activeCausalQuality.some((row) => grossForNotional(positionNotional(row), equity) > STRICT_BT33404708902.quality102PositionCap + EPSILON)) {
+        return rejectPlan("QUALITY102_CAUSAL_V1_GROSS_OVER_CAP", input.active, equity);
     }
     const initialTotals = planTotals(input.active, [], equity);
     if (grossForNotional(sumNotional(input.active, (row) => row.strategy === "V12"), equity) > STRICT_BT33404708902.v12MaximumGross + EPSILON) return rejectPlan("V12_GROSS_OVER_CAP", input.active, equity);
@@ -347,29 +384,42 @@ export function planStrictPortfolio(input: {
     const seenIntentKeys = new Set<string>();
     const seenIntentTargets = new Set<string>();
     const ordered = [...input.intents].sort((a, b) => {
-        const baseRank = (strategy: StrictStrategy) => strategy === "QUALITY102" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
+        const baseRank = (strategy: StrictStrategy) => strategy === "QUALITY102" ? 5 : strategy === "QUALITY102_CAUSAL_V1" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
         return baseRank(a.strategy) - baseRank(b.strategy) || a.signalTs - b.signalTs || a.idempotencyKey.localeCompare(b.idempotencyKey);
     });
     for (const intent of ordered) {
         if (seenIntentKeys.has(intent.idempotencyKey)) { rejected.push({ intent, reason: "DUPLICATE_INTENT" }); continue; }
         seenIntentKeys.add(intent.idempotencyKey);
         if (intent.strategy === "QUALITY102") { rejected.push({ intent, reason: "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED" }); continue; }
+        if (intent.strategy === "QUALITY102_CAUSAL_V1") {
+            if (input.quality102CausalV1Ready !== true) { rejected.push({ intent, reason: "QUALITY102_CAUSAL_V1_NOT_READY" }); continue; }
+            if (activeCausalQuality.length > 0 || accepted.some((row) => row.strategy === "QUALITY102_CAUSAL_V1")) {
+                rejected.push({ intent, reason: "QUALITY102_CAUSAL_V1_SLOT_OCCUPIED" });
+                continue;
+            }
+        }
         if (!strategySymbolMatches(intent.strategy, intent.symbol)) { rejected.push({ intent, reason: "UNKNOWN_OR_SLEEVE_MISMATCH" }); continue; }
         if (!intent.idempotencyKey.trim() || !intent.symbol.trim() || (intent.side !== "LONG" && intent.side !== "SHORT") || !Number.isFinite(intent.signalTs) || intent.signalTs <= 0 || intent.signalTs > input.now || !Number.isFinite(intent.gross) || intent.gross <= 0 || !Number.isFinite(intent.notionalUsd) || intent.notionalUsd <= 0) { rejected.push({ intent, reason: "INVALID_INTENT" }); continue; }
         const targetKey = `${intent.strategy}|${intent.symbol.toUpperCase()}|${intent.side}`;
         if (seenIntentTargets.has(targetKey)) { rejected.push({ intent, reason: "DUPLICATE_INTENT_TARGET" }); continue; }
         seenIntentTargets.add(targetKey);
-        const baseOtherTotalNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102") + accepted.reduce((sum, row) => sum + row.notionalUsd, 0);
-        const baseOtherCryptoNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102" && isCrypto(row.strategy)) + accepted.filter((row) => isCrypto(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
-        const baseOtherStockNotional = sumNotional(active, (row) => row.strategy !== "QUALITY102" && isStock(row.strategy)) + accepted.filter((row) => isStock(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
+        const baseOtherTotalNotional = sumNotional(active, (row) => !isQuality102Strategy(row.strategy)) + accepted.filter((row) => !isQuality102Strategy(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
+        const baseOtherCryptoNotional = sumNotional(active, (row) => !isQuality102Strategy(row.strategy) && isCrypto(row.strategy)) + accepted.filter((row) => !isQuality102Strategy(row.strategy) && isCrypto(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
+        const baseOtherStockNotional = sumNotional(active, (row) => !isQuality102Strategy(row.strategy) && isStock(row.strategy)) + accepted.filter((row) => !isQuality102Strategy(row.strategy) && isStock(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
         const perStrategyGross = strategyCap(intent.strategy);
         const classResidual = isCrypto(intent.strategy)
             ? STRICT_BT33404708902.cryptoGrossCap - baseOtherCryptoNotional / workingEquity
             : STRICT_BT33404708902.stockGrossCap - baseOtherStockNotional / workingEquity;
         const totalResidual = STRICT_BT33404708902.totalGrossCap - baseOtherTotalNotional / workingEquity;
         const targetGross = Math.max(0, Math.min(intent.gross, perStrategyGross, classResidual, totalResidual));
-        if (targetGross <= EPSILON) { rejected.push({ intent, reason: "CAPACITY_BLOCKED" }); continue; }
-        const currentQuality = active.find((row) => row.strategy === "QUALITY102");
+        if (targetGross <= EPSILON) {
+            const reason = intent.strategy === "QUALITY102_CAUSAL_V1"
+                ? classResidual <= EPSILON ? "CRYPTO_GROSS_CAP" : totalResidual <= EPSILON ? "TOTAL_GROSS_CAP" : "CAPACITY_BLOCKED"
+                : "CAPACITY_BLOCKED";
+            rejected.push({ intent, reason });
+            continue;
+        }
+        const currentQuality = active.find((row) => isQuality102Strategy(row.strategy));
         if (currentQuality) {
             const trim = trimQualityToResidual({
                 active,

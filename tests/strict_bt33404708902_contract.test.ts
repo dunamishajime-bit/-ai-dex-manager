@@ -34,7 +34,7 @@ test("source identity and strict caps are immutable", () => {
     assert.equal(STRICT_BT33404708902.totalGrossCap, 2.5);
 });
 
-test("all four simultaneous intents admit base strategies before blocking Q102", () => {
+test("all five simultaneous intents admit base strategies before blocking historical Q102 and preserving causal priority", () => {
     const plan = planStrictPortfolio({
         equity: 1_000,
         now: NOW,
@@ -44,11 +44,14 @@ test("all four simultaneous intents admit base strategies before blocking Q102",
             { idempotencyKey: "v12", strategy: "V12", symbol: "ETHUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
             { idempotencyKey: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "SHORT", gross: 0.75, notionalUsd: 750, signalTs: NOW },
             { idempotencyKey: "v52", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
+            { idempotencyKey: "q102-causal-v1", strategy: "QUALITY102_CAUSAL_V1", symbol: "SOLUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
         ],
+        quality102CausalV1Ready: true,
     });
     assert.equal(plan.status, "planned");
     assert.deepEqual(plan.accepted.map((intent) => intent.strategy), ["V52", "PENGU_DUAL_LS_V2", "V12"]);
     assert.equal(plan.rejected.find((row) => row.intent.strategy === "QUALITY102")?.reason, "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED");
+    assert.equal(plan.rejected.find((row) => row.intent.strategy === "QUALITY102_CAUSAL_V1")?.reason, "TOTAL_GROSS_CAP");
     assert.ok(plan.totals.cryptoGross <= 2 + 1e-9);
     assert.ok(plan.totals.totalGross <= 2.5 + 1e-9);
 });
