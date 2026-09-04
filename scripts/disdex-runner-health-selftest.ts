@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { decideRecovery, type RecoveryObservation, type RunnerHeartbeat } from "../lib/disdex-runner-health";
+import { buildV12RunnerHeartbeat } from "./disdex-v12-x1-all-live-runner";
+import { buildPenguRunnerHeartbeat } from "./disdex-pengu-dual-ls-v2-live-runner";
 
 const NOW = 1_757_000_000_000;
 const SHA = "0123456789abcdef0123456789abcdef01234567";
@@ -34,6 +36,17 @@ for (const safetyState of ["KILL_SWITCH", "DAILY_LOSS_LATCH", "STALE_DATA", "REC
 }
 const localHold = decideRecovery(observe({ heartbeat: makeHeartbeat({ safetyState: "KILL_SWITCH" }) }));
 assert.equal(localHold.affectsOtherRunners, false);
+const previousRuntimeSha = process.env.DISDEX_RUNTIME_COMMIT_SHA;
+const previousReleaseSha = process.env.DISDEX_RELEASE_SHA;
+const previousV12Sha = process.env.V12_LIVE_COMMIT_SHA;
+delete process.env.DISDEX_RUNTIME_COMMIT_SHA;
+delete process.env.DISDEX_RELEASE_SHA;
+delete process.env.V12_LIVE_COMMIT_SHA;
+assert.equal(buildV12RunnerHeartbeat({ status: "held", reason: "fixture" }, NOW, { mode: "LIVE", liveTradingEnabled: true, liveExecutionEnabled: true }).safetyState, "UNKNOWN");
+assert.equal(buildPenguRunnerHeartbeat({ status: "held", message: "fixture" }, NOW, { mode: "LIVE", liveEnabled: true }).safetyState, "UNKNOWN");
+if (previousRuntimeSha === undefined) delete process.env.DISDEX_RUNTIME_COMMIT_SHA; else process.env.DISDEX_RUNTIME_COMMIT_SHA = previousRuntimeSha;
+if (previousReleaseSha === undefined) delete process.env.DISDEX_RELEASE_SHA; else process.env.DISDEX_RELEASE_SHA = previousReleaseSha;
+if (previousV12Sha === undefined) delete process.env.V12_LIVE_COMMIT_SHA; else process.env.V12_LIVE_COMMIT_SHA = previousV12Sha;
 const shared = decideRecovery(observe({ sharedUncertainty: true }));
 assert.equal(shared.action, "HOLD_FAIL_CLOSED");
 assert.equal(shared.affectsOtherRunners, true);

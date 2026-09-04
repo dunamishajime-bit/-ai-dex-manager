@@ -55,7 +55,7 @@ function combinedPaths() {
 export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
     const paths = combinedPaths();
     const quality102StatePath = process.env.QUALITY102_CAUSAL_V1_STATE_PATH
-        || resolve(paths.combinedRoot, "quality102-causal-v1", "state.json");
+        || resolve(paths.stateRoot, "quality102-causal-v1", "state.json");
     const runtimeCommitSha = process.env.DISDEX_RUNTIME_COMMIT_SHA
         || process.env.DISDEX_V96_RUNTIME_COMMIT_SHA
         || "";

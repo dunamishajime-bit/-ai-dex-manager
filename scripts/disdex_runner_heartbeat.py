@@ -26,9 +26,13 @@ def publish_heartbeat(*, runner_id: str, mode: str, live_enabled: bool, safety_s
                       last_reconciliation_at: int | None = None, caps: dict[str, float | None] | None = None) -> None:
     now = int(time.time() * 1000)
     runtime_sha = _sha(os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or os.getenv("DISDEX_RELEASE_SHA"))
+    expected_sha = _sha(os.getenv("DISDEX_EXPECTED_RUNTIME_SHA") or os.getenv("DISDEX_EXPECTED_SHA") or runtime_sha)
+    if live_enabled and (runtime_sha == ZERO_SHA or expected_sha == ZERO_SHA):
+        safety_state = "UNKNOWN"
+        reason = "runtime or expected SHA unavailable"
     target = heartbeat_path(runner_id)
     payload = {"schema": SCHEMA, "runnerId": runner_id, "serviceUnit": os.getenv("DISDEX_RUNNER_SERVICE_UNIT", "disdex-v52-aster-only.service"),
-               "runtimeSha": runtime_sha, "expectedSha": _sha(os.getenv("DISDEX_EXPECTED_RUNTIME_SHA") or runtime_sha),
+               "runtimeSha": runtime_sha, "expectedSha": expected_sha,
                "workingDirectory": str(Path.cwd()), "mode": mode, "liveEnabled": bool(live_enabled), "safetyState": safety_state,
                "heartbeatAt": now, "lastTickAt": last_tick_at if last_tick_at is not None else now,
                "lastReconciliationAt": last_reconciliation_at, "lastDecision": last_decision, "reason": reason or "runner heartbeat",

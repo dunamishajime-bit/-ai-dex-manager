@@ -46,11 +46,12 @@ function q102HeartbeatPath() { return process.env.DISDEX_RUNNER_HEARTBEAT_PATH |
 export function buildQuality102RunnerHeartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Pick<Quality102CausalV1LiveResolvedConfig, "mode" | "enabled" | "liveTradingEnabled" | "liveExecutionEnabled" | "runtimeCommitSha" | "expectedRuntimeCommitSha" | "symbols">, now = Date.now()): RunnerHeartbeat {
     const liveEnabled = config.mode === "LIVE" && config.enabled && config.liveTradingEnabled && config.liveExecutionEnabled;
     const sha = /^[0-9a-f]{40}$/i.test(config.runtimeCommitSha) ? config.runtimeCommitSha.toLowerCase() : ZERO_SHA;
+    const expectedSha = /^[0-9a-f]{40}$/i.test(config.expectedRuntimeCommitSha) ? config.expectedRuntimeCommitSha.toLowerCase() : ZERO_SHA;
+    const shaAvailable = sha !== ZERO_SHA && expectedSha !== ZERO_SHA;
     return {
         schema: "disdex-runner-heartbeat/v1", runnerId: "QUALITY102_CAUSAL_V1", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-quality102-causal-v1.service",
-        runtimeSha: sha, expectedSha: /^[0-9a-f]{40}$/i.test(config.expectedRuntimeCommitSha) ? config.expectedRuntimeCommitSha.toLowerCase() : sha,
-        workingDirectory: process.cwd(), mode: config.mode, liveEnabled, safetyState: q102Safety(result.status, result.message, liveEnabled), heartbeatAt: now, lastTickAt: now,
-        lastReconciliationAt: null, lastDecision: result.status, reason: result.message || result.status,
+        runtimeSha: sha, expectedSha, workingDirectory: process.cwd(), mode: config.mode, liveEnabled, safetyState: shaAvailable ? q102Safety(result.status, result.message, liveEnabled) : "UNKNOWN", heartbeatAt: now, lastTickAt: now,
+        lastReconciliationAt: null, lastDecision: result.status, reason: shaAvailable ? (result.message || result.status) : "runtime or expected SHA unavailable",
         symbols: config.symbols.map((symbol) => ({ symbol, eligible: result.signal?.symbol === symbol, reason: result.signal?.symbol === symbol ? result.signal.reason : result.message || "not-selected" })),
         caps: { strategy: 0.5, crypto: 2, total: 2.5 }, restartAttempts: Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0), updatedAt: now,
         quality102: { selectorMode: "DERIVED_HIGH_VOL_ONLY", historicalSelectorParity: false, brkLiveEnabled: false },

@@ -29,12 +29,14 @@ function heartbeatPath(runnerId: string) {
 export function buildV12RunnerHeartbeat(result: { status: string; reason: string }, now = Date.now(), options: { mode: string; liveTradingEnabled: boolean; liveExecutionEnabled: boolean }) : RunnerHeartbeat {
     const liveEnabled = options.mode === "LIVE" && options.liveTradingEnabled && options.liveExecutionEnabled;
     const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || process.env.V12_LIVE_COMMIT_SHA || ZERO_SHA).trim().toLowerCase();
+    const expectedSha = String(process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || sha).trim().toLowerCase();
+    const shaAvailable = /^[0-9a-f]{40}$/.test(sha) && sha !== ZERO_SHA && /^[0-9a-f]{40}$/.test(expectedSha) && expectedSha !== ZERO_SHA;
     const restartAttempts = Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0);
     return {
         schema: "disdex-runner-heartbeat/v1", runnerId: "V12", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-v12-x1-all.service",
-        runtimeSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA, expectedSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA,
-        workingDirectory: process.cwd(), mode: options.mode, liveEnabled, safetyState: safetyState(result.status, result.reason, liveEnabled),
-        heartbeatAt: now, lastTickAt: now, lastReconciliationAt: null, lastDecision: result.status, reason: result.reason || result.status,
+        runtimeSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA, expectedSha: /^[0-9a-f]{40}$/.test(expectedSha) ? expectedSha : ZERO_SHA,
+        workingDirectory: process.cwd(), mode: options.mode, liveEnabled, safetyState: shaAvailable ? safetyState(result.status, result.reason, liveEnabled) : "UNKNOWN",
+        heartbeatAt: now, lastTickAt: now, lastReconciliationAt: null, lastDecision: result.status, reason: shaAvailable ? (result.reason || result.status) : "runtime or expected SHA unavailable",
         symbols: [], caps: { strategy: 1.5, crypto: 2, total: 2.5 }, restartAttempts, updatedAt: now,
     };
 }

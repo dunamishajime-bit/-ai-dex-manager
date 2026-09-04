@@ -31,11 +31,14 @@ function penguHeartbeatPath() { return process.env.DISDEX_RUNNER_HEARTBEAT_PATH 
 export function buildPenguRunnerHeartbeat(result: { status: string; message: string }, now = Date.now(), options: { mode: string; liveEnabled: boolean }): RunnerHeartbeat {
     const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || ZERO_SHA).trim().toLowerCase();
     const validSha = /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA;
+    const expectedSha = String(process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || sha).trim().toLowerCase();
+    const validExpectedSha = /^[0-9a-f]{40}$/.test(expectedSha) ? expectedSha : ZERO_SHA;
+    const shaAvailable = validSha !== ZERO_SHA && validExpectedSha !== ZERO_SHA;
     return {
         schema: "disdex-runner-heartbeat/v1", runnerId: "PENGU_V8", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-pengu-dual-ls-v2.service",
-        runtimeSha: validSha, expectedSha: validSha, workingDirectory: process.cwd(), mode: options.mode, liveEnabled: options.liveEnabled,
-        safetyState: penguSafety(result.status, result.message, options.liveEnabled), heartbeatAt: now, lastTickAt: now, lastReconciliationAt: null,
-        lastDecision: result.status, reason: result.message || result.status, symbols: [], caps: { strategy: 0.75, crypto: 2, total: 2.5 },
+        runtimeSha: validSha, expectedSha: validExpectedSha, workingDirectory: process.cwd(), mode: options.mode, liveEnabled: options.liveEnabled,
+        safetyState: shaAvailable ? penguSafety(result.status, result.message, options.liveEnabled) : "UNKNOWN", heartbeatAt: now, lastTickAt: now, lastReconciliationAt: null,
+        lastDecision: result.status, reason: shaAvailable ? (result.message || result.status) : "runtime or expected SHA unavailable", symbols: [], caps: { strategy: 0.75, crypto: 2, total: 2.5 },
         restartAttempts: Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0), updatedAt: now,
     };
 }
