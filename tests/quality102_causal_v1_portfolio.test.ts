@@ -376,6 +376,7 @@ test("historical QUALITY102 is never selected for causal conflict reduction", ()
 
     assert.equal(result.status, "planned");
     assert.equal(result.reductions.length, 0);
+    assert.equal(result.reductions.some(({ strategy }) => strategy === "QUALITY102"), false);
     assert.equal(result.activePositions.find((row) => row.strategy === "QUALITY102")?.quantity, 50);
     assert.deepEqual(
         result.accepted.map(({ strategy, gross }) => [strategy, gross]),

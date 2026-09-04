@@ -157,6 +157,7 @@ const qualityActive = [
 const residual = planStrictPortfolio({
     equity: 1000,
     now: NOW,
+    researchMode: true,
     active: qualityActive,
     intents: [{ idempotencyKey: "v52-1", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 1, notionalUsd: 1000, signalTs: NOW }],
 });

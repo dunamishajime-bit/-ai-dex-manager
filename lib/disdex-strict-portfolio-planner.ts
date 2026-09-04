@@ -378,6 +378,7 @@ export function planStrictPortfolio(input: {
     intents: StrictPortfolioIntent[];
     maxDataAgeMs?: number;
     quality102CausalV1Ready?: boolean;
+    researchMode?: boolean;
 }): StrictPortfolioPlan {
     const equity = positive(input.equity, "portfolio equity");
     if (!Number.isFinite(input.now) || input.now <= 0) return rejectPlan("INVALID_DECISION_TIMESTAMP", input.active, equity);
@@ -468,7 +469,7 @@ export function planStrictPortfolio(input: {
             rejected.push({ intent, reason });
             continue;
         }
-        const currentQuality = active.find((row) => isCausalQuality102Strategy(row.strategy));
+        const currentQuality = active.find((row) => isCausalQuality102Strategy(row.strategy) || (input.researchMode === true && row.strategy === "QUALITY102"));
         if (currentQuality) {
             const trim = trimQualityToResidual({
                 active,

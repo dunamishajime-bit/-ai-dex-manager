@@ -91,6 +91,7 @@ test("a quality position is reduced at its current mark when a base order needs 
     const plan = planStrictPortfolio({
         equity: 1_000,
         now: NOW,
+        researchMode: true,
         active: [
             position({ id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 50, entryPrice: 10, markPrice: 10 }),
             position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 75, entryPrice: 10, markPrice: 10 }),
