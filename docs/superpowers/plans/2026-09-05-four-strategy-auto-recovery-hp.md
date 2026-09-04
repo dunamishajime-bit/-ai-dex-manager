@@ -98,7 +98,7 @@ for (const safetyState of ["KILL_SWITCH", "DAILY_LOSS_LATCH", "STALE_DATA", "REC
 }
 ```
 
-Also assert that a Q102 `HOLD_FAIL_CLOSED` decision has `affectsOtherRunners === false`, while a shared reconciliation uncertainty has `affectsOtherRunners === true`.
+Also assert that a Q102 `HOLD_FAIL_CLOSED` decision has `affectsOtherRunners === false`, while a shared reconciliation uncertainty has `affectsOtherRunners === true`. For every decision, assert `restartAuthorized === (action === "RESTART")` and `tradingEffects` equals `{ ordersSent: 0, cancelSent: 0, positionChangesSent: 0 }`.
 
 - [ ] **Step 2: Run the new tests and verify the expected failure**
 
@@ -136,6 +136,7 @@ git commit -m "test: define four-runner recovery safety contract"
   - `RunnerSymbolStatus = { symbol: string; eligible: boolean; reason: string }`.
   - `RunnerHeartbeat` with `schema`, `runnerId`, `serviceUnit`, `runtimeSha`, `expectedSha`, `workingDirectory`, `mode`, `liveEnabled`, `safetyState`, `heartbeatAt`, `lastTickAt`, `lastReconciliationAt`, `lastDecision`, `reason`, `symbols: RunnerSymbolStatus[]`, `caps: { strategy: number | null; crypto: number | null; total: number | null }`, `restartAttempts`, and `updatedAt`.
   - `Quality102HeartbeatMeta = { selectorMode: "DERIVED_HIGH_VOL_ONLY"; historicalSelectorParity: false; brkLiveEnabled: false }` on Q102 records.
+  - `RecoveryDecision` also includes `restartAuthorized: boolean` and `tradingEffects: { ordersSent: number; cancelSent: number; positionChangesSent: number }`; every recovery decision must report all three trading-effect counters as zero.
   - `RecoveryObservation`, `RecoveryDecision`, `readRunnerHeartbeat()`, `writeRunnerHeartbeat()`, and `decideRecovery()`.
 
 - [ ] **Step 1: Implement strict parsing and atomic writes**
