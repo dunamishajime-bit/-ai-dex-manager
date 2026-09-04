@@ -12,30 +12,25 @@ import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
 import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
 import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
-import { writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
+import { classifyRunnerSafetyState, writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
 
 const HOUR_MS = 60 * 60_000;
 const ZERO_SHA = "0".repeat(40);
 
 function penguSafety(status: string, message: string, liveEnabled: boolean): RunnerHeartbeat["safetyState"] {
-    const text = `${status} ${message}`.toLowerCase();
-    if (text.includes("kill switch")) return "KILL_SWITCH";
-    if (text.includes("daily loss") || text.includes("latch")) return "DAILY_LOSS_LATCH";
-    if (/stale|invalid|freshness|data/.test(text)) return "STALE_DATA";
-    if (status === "manual-review" || /unresolved|ambiguous|unknown/.test(text)) return "MANUAL_REVIEW";
-    return liveEnabled ? "LIVE" : "WAITING";
+    return classifyRunnerSafetyState(status, message, liveEnabled);
 }
 
-function penguHeartbeatPath() { return process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/pengu-v8.json`; }
+function penguHeartbeatPath() { return process.env.DISDEX_PENGU_RUNNER_HEARTBEAT_PATH || process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/pengu-v8.json`; }
 
 export function buildPenguRunnerHeartbeat(result: { status: string; message: string }, now = Date.now(), options: { mode: string; liveEnabled: boolean }): RunnerHeartbeat {
     const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || ZERO_SHA).trim().toLowerCase();
     const validSha = /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA;
-    const expectedSha = String(process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || sha).trim().toLowerCase();
+    const expectedSha = String(process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || "").trim().toLowerCase();
     const validExpectedSha = /^[0-9a-f]{40}$/.test(expectedSha) ? expectedSha : ZERO_SHA;
     const shaAvailable = validSha !== ZERO_SHA && validExpectedSha !== ZERO_SHA;
     return {
-        schema: "disdex-runner-heartbeat/v1", runnerId: "PENGU_V8", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-pengu-dual-ls-v2.service",
+        schema: "disdex-runner-heartbeat/v1", runnerId: "PENGU_V8", serviceUnit: process.env.DISDEX_PENGU_RUNNER_SERVICE_UNIT || process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-pengu-dual-ls-v2.service",
         runtimeSha: validSha, expectedSha: validExpectedSha, workingDirectory: process.cwd(), mode: options.mode, liveEnabled: options.liveEnabled,
         safetyState: shaAvailable ? penguSafety(result.status, result.message, options.liveEnabled) : "UNKNOWN", heartbeatAt: now, lastTickAt: now, lastReconciliationAt: null,
         lastDecision: result.status, reason: shaAvailable ? (result.message || result.status) : "runtime or expected SHA unavailable", symbols: [], caps: { strategy: 0.75, crypto: 2, total: 2.5 },

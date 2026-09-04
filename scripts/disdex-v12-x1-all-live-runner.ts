@@ -8,18 +8,13 @@ import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provide
 import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
 import { assertV12StrictLiveConfiguration, V12StrictAsterLiveAdapter } from "../lib/v12-strict-live-adapter";
-import { writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
+import { classifyRunnerSafetyState, writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
 
 const TWO_HOURS_MS = 2 * 60 * 60_000;
 const ZERO_SHA = "0".repeat(40);
 
 function safetyState(status: string, reason: string, liveEnabled: boolean): RunnerHeartbeat["safetyState"] {
-    const text = `${status} ${reason}`.toLowerCase();
-    if (text.includes("kill switch")) return "KILL_SWITCH";
-    if (text.includes("daily loss") || text.includes("latch")) return "DAILY_LOSS_LATCH";
-    if (/stale|invalid|freshness|data/.test(text)) return "STALE_DATA";
-    if (status === "manual-review" || /unresolved|ambiguous|unknown/.test(text)) return "MANUAL_REVIEW";
-    return liveEnabled ? "LIVE" : "WAITING";
+    return classifyRunnerSafetyState(status, reason, liveEnabled);
 }
 
 function heartbeatPath(runnerId: string) {
@@ -29,7 +24,7 @@ function heartbeatPath(runnerId: string) {
 export function buildV12RunnerHeartbeat(result: { status: string; reason: string }, now = Date.now(), options: { mode: string; liveTradingEnabled: boolean; liveExecutionEnabled: boolean }) : RunnerHeartbeat {
     const liveEnabled = options.mode === "LIVE" && options.liveTradingEnabled && options.liveExecutionEnabled;
     const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || process.env.V12_LIVE_COMMIT_SHA || ZERO_SHA).trim().toLowerCase();
-    const expectedSha = String(process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || sha).trim().toLowerCase();
+    const expectedSha = String(process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || "").trim().toLowerCase();
     const shaAvailable = /^[0-9a-f]{40}$/.test(sha) && sha !== ZERO_SHA && /^[0-9a-f]{40}$/.test(expectedSha) && expectedSha !== ZERO_SHA;
     const restartAttempts = Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0);
     return {

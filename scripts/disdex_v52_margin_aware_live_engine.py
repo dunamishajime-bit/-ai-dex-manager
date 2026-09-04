@@ -6,6 +6,7 @@ import os
 import signal
 
 import disdex_v52_margin_aware_legacy_engine as previous
+from disdex_v52_heartbeat import V52HeartbeatMixin
 from disdex_strict_portfolio_planner import (
     EPSILON,
     STRICT_CAPS,
@@ -34,7 +35,7 @@ STRICT_CRYPTO_SYMBOLS = STRICT_V12_SYMBOLS | STRICT_PENGU_SYMBOLS
 STRICT_STOCK_SYMBOLS = set(base.ASTER_SYMBOL.values())
 
 
-class MarginAwareV52AsterOnlyEngine(previous.MarginAwareV52AsterOnlyEngine):
+class MarginAwareV52AsterOnlyEngine(V52HeartbeatMixin, previous.MarginAwareV52AsterOnlyEngine):
     """Margin-aware V52 with strict BT #33404708902 gross parity enforced before every entry."""
 
     def __init__(self, mode: str):
@@ -140,25 +141,41 @@ class MarginAwareV52AsterOnlyEngine(previous.MarginAwareV52AsterOnlyEngine):
         return super().open_basis_position(slot, candidate, target_gross)
 
     def preflight(self, read_only: bool = False) -> dict:
-        checks = super().preflight(read_only=read_only)
-        if self.live:
-            assert_strict_live_configuration()
-        gross = checks.get("marginGuard", {}).get("gross") or checks.get("gross")
-        strict_snapshot = validate_gross_snapshot(gross)
-        checks.update({
-            "strictPortfolioPlannerActive": True,
-            "strictPortfolioGross": strict_snapshot,
-            "strictPortfolioCaps": {
-                "v12": STRICT_CAPS.v12_gross,
-                "pengu": STRICT_CAPS.pengu_gross,
-                "stock": STRICT_CAPS.stock_gross,
-                "crypto": STRICT_CAPS.crypto_gross,
-                "portfolio": STRICT_CAPS.total_gross,
-            },
-            "quality102LiveSelectorParity": False,
-            "quality102LiveBlockedFailClosed": True,
-        })
-        return checks
+        self._reset_heartbeat_cycle()
+        try:
+            checks = super().preflight(read_only=read_only)
+            if self.live:
+                assert_strict_live_configuration()
+            gross = checks.get("marginGuard", {}).get("gross") or checks.get("gross")
+            strict_snapshot = validate_gross_snapshot(gross)
+            checks.update({
+                "strictPortfolioPlannerActive": True,
+                "strictPortfolioGross": strict_snapshot,
+                "strictPortfolioCaps": {
+                    "v12": STRICT_CAPS.v12_gross,
+                    "pengu": STRICT_CAPS.pengu_gross,
+                    "stock": STRICT_CAPS.stock_gross,
+                    "crypto": STRICT_CAPS.crypto_gross,
+                    "portfolio": STRICT_CAPS.total_gross,
+                },
+                "quality102LiveSelectorParity": False,
+                "quality102LiveBlockedFailClosed": True,
+            })
+            outcome = self._heartbeat_after_tick()
+            self._publish_v52_heartbeat(
+                outcome[0],
+                "preflight",
+                str(checks.get("referenceHealth") or outcome[2] or "preflight"),
+            )
+            return checks
+        except Exception as error:
+            outcome = getattr(self, "_heartbeat_outcome", None) or (
+                "FAIL_CLOSED" if self.live else "UNKNOWN",
+                "preflight-error",
+                str(error),
+            )
+            self._publish_v52_heartbeat(outcome[0], "preflight-error", outcome[2] or str(error))
+            raise
 
 
 def self_test() -> None:

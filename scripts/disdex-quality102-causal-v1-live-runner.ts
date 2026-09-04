@@ -21,7 +21,7 @@ import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality
 import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-runner";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
-import { writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
+import { classifyRunnerSafetyState, writeRunnerHeartbeat, type RunnerHeartbeat } from "../lib/disdex-runner-health";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEFAULT_STATE_ROOT = "/var/lib/disdex/quality102-causal-v1";
@@ -33,17 +33,12 @@ const HOUR_MS = 3_600_000;
 const ZERO_SHA = "0".repeat(40);
 
 function q102Safety(status: string, message: string, liveEnabled: boolean): RunnerHeartbeat["safetyState"] {
-    const text = `${status} ${message}`.toLowerCase();
-    if (text.includes("kill switch")) return "KILL_SWITCH";
-    if (text.includes("daily loss") || text.includes("latch")) return "DAILY_LOSS_LATCH";
-    if (/stale|invalid|freshness|data/.test(text)) return "STALE_DATA";
-    if (status === "manual-review" || /unresolved|ambiguous|unknown/.test(text)) return "MANUAL_REVIEW";
-    return liveEnabled ? "LIVE" : "WAITING";
+    return classifyRunnerSafetyState(status, message, liveEnabled);
 }
 
 function q102HeartbeatPath() { return process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/quality102-causal-v1.json`; }
 
-export function buildQuality102RunnerHeartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Pick<Quality102CausalV1LiveResolvedConfig, "mode" | "enabled" | "liveTradingEnabled" | "liveExecutionEnabled" | "runtimeCommitSha" | "expectedRuntimeCommitSha" | "symbols">, now = Date.now()): RunnerHeartbeat {
+export function buildQuality102RunnerHeartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Pick<Quality102CausalV1LiveResolvedConfig, "mode" | "enabled" | "liveTradingEnabled" | "liveExecutionEnabled" | "runtimeCommitSha" | "expectedRuntimeCommitSha" | "symbols">, now = Date.now(), state?: Pick<Quality102CausalV1State, "lastReconciledAt"> | null): RunnerHeartbeat {
     const liveEnabled = config.mode === "LIVE" && config.enabled && config.liveTradingEnabled && config.liveExecutionEnabled;
     const sha = /^[0-9a-f]{40}$/i.test(config.runtimeCommitSha) ? config.runtimeCommitSha.toLowerCase() : ZERO_SHA;
     const expectedSha = /^[0-9a-f]{40}$/i.test(config.expectedRuntimeCommitSha) ? config.expectedRuntimeCommitSha.toLowerCase() : ZERO_SHA;
@@ -51,15 +46,27 @@ export function buildQuality102RunnerHeartbeat(result: { status: string; message
     return {
         schema: "disdex-runner-heartbeat/v1", runnerId: "QUALITY102_CAUSAL_V1", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-quality102-causal-v1.service",
         runtimeSha: sha, expectedSha, workingDirectory: process.cwd(), mode: config.mode, liveEnabled, safetyState: shaAvailable ? q102Safety(result.status, result.message, liveEnabled) : "UNKNOWN", heartbeatAt: now, lastTickAt: now,
-        lastReconciliationAt: null, lastDecision: result.status, reason: shaAvailable ? (result.message || result.status) : "runtime or expected SHA unavailable",
+        lastReconciliationAt: state?.lastReconciledAt ?? null, lastDecision: result.status, reason: shaAvailable ? (result.message || result.status) : "runtime or expected SHA unavailable",
         symbols: config.symbols.map((symbol) => ({ symbol, eligible: result.signal?.symbol === symbol, reason: result.signal?.symbol === symbol ? result.signal.reason : result.message || "not-selected" })),
         caps: { strategy: 0.5, crypto: 2, total: 2.5 }, restartAttempts: Math.max(0, Number.parseInt(process.env.DISDEX_RUNNER_RESTART_ATTEMPTS || "0", 10) || 0), updatedAt: now,
         quality102: { selectorMode: "DERIVED_HIGH_VOL_ONLY", historicalSelectorParity: false, brkLiveEnabled: false },
     };
 }
 
-async function publishQuality102Heartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Quality102CausalV1LiveResolvedConfig, now = Date.now()) {
-    try { await writeRunnerHeartbeat(q102HeartbeatPath(), buildQuality102RunnerHeartbeat(result, config, now)); } catch (error) { console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", runnerId: "QUALITY102_CAUSAL_V1", reason: error instanceof Error ? error.message : String(error) })); }
+export async function publishQuality102Heartbeat(result: { status: string; message: string; signal?: { symbol?: string; reason: string } }, config: Quality102CausalV1LiveResolvedConfig, now = Date.now()) {
+    try {
+        let state: Quality102CausalV1State | undefined;
+        let stateUnavailable = false;
+        try {
+            state = await new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.runtimeCommitSha).load();
+        } catch {
+            stateUnavailable = true;
+        }
+        const heartbeatResult = stateUnavailable
+            ? { ...result, message: `${result.message || result.status}; Q102 persisted state unavailable` }
+            : result;
+        await writeRunnerHeartbeat(q102HeartbeatPath(), buildQuality102RunnerHeartbeat(heartbeatResult, config, now, state));
+    } catch (error) { console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", runnerId: "QUALITY102_CAUSAL_V1", reason: error instanceof Error ? error.message : String(error) })); }
 }
 
 export interface Quality102CausalV1LiveResolvedConfig {
@@ -103,6 +110,10 @@ function numberEnv(env: NodeJS.ProcessEnv, name: string, fallback: number): numb
 function requiredSha(env: NodeJS.ProcessEnv): string {
     const value = String(env.DISDEX_RUNTIME_COMMIT_SHA || env.DISDEX_RELEASE_SHA || env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim().toLowerCase();
     return value;
+}
+
+function expectedSha(env: NodeJS.ProcessEnv): string {
+    return String(env.DISDEX_EXPECTED_RUNTIME_SHA || env.DISDEX_EXPECTED_SHA || "").trim().toLowerCase();
 }
 
 export function parseQuality102CausalV1Symbols(value: string | undefined): string[] {
@@ -160,7 +171,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         liveExecutionEnabled: runtime.liveExecutionEnabled,
         operatorArmed: runtime.operatorArmed,
         runtimeCommitSha: runtimeSha,
-        expectedRuntimeCommitSha: runtimeSha,
+        expectedRuntimeCommitSha: expectedSha(env),
         selectorMode: String(env.QUALITY102_CAUSAL_V1_SELECTOR_MODE || "").trim().toUpperCase(),
         symbols,
         statePath,
@@ -198,6 +209,8 @@ export function assertQuality102CausalV1LiveActivation(
         throw new Error("QUALITY102_CAUSAL_V1_LIVE_GATES_NOT_ALL_ENABLED");
     }
     if (!SHA_PATTERN.test(config.runtimeCommitSha)) throw new Error("QUALITY102_CAUSAL_V1_RUNTIME_COMMIT_SHA_REQUIRED");
+    if (!SHA_PATTERN.test(config.expectedRuntimeCommitSha)) throw new Error("QUALITY102_CAUSAL_V1_EXPECTED_RUNTIME_COMMIT_SHA_REQUIRED");
+    if (config.expectedRuntimeCommitSha.toLowerCase() !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_CAUSAL_V1_RUNTIME_SHA_MISMATCH");
     if (config.selectorMode !== "DERIVED_HIGH_VOL_ONLY") throw new Error("QUALITY102_CAUSAL_V1_SELECTOR_MODE_ACK_REQUIRED");
     const ack = String(env.QUALITY102_CAUSAL_V1_LIVE_ACK || "").trim().toLowerCase();
     if (ack !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_CAUSAL_V1_LIVE_ACK_MUST_MATCH_RUNTIME_SHA");

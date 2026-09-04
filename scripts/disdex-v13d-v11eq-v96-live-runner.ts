@@ -54,6 +54,7 @@ function combinedPaths() {
 
 export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
     const paths = combinedPaths();
+    const healthRoot = resolve(process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health");
     const quality102StatePath = process.env.QUALITY102_CAUSAL_V1_STATE_PATH
         || resolve(paths.stateRoot, "quality102-causal-v1", "state.json");
     const runtimeCommitSha = process.env.DISDEX_RUNTIME_COMMIT_SHA
@@ -72,6 +73,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         QUALITY102_CAUSAL_V1_STATE_PATH: quality102StatePath,
         DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH: quality102StatePath,
         DISDEX_RUNTIME_COMMIT_SHA: runtimeCommitSha,
+        DISDEX_RUNNER_HEALTH_ROOT: healthRoot,
         DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
         DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
         DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
@@ -110,6 +112,13 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
         PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
         PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT: "5",
+        // PENGU and the margin-aware V52 worker are children of this singleton
+        // unit. Their distinct files prevent child writers from racing while
+        // the shared service identity keeps watchdog ownership truthful.
+        DISDEX_PENGU_RUNNER_SERVICE_UNIT: "disdex-v96-v52-live.service",
+        DISDEX_PENGU_RUNNER_HEARTBEAT_PATH: resolve(healthRoot, "pengu-v8.json"),
+        DISDEX_V52_RUNNER_SERVICE_UNIT: "disdex-v96-v52-live.service",
+        DISDEX_V52_RUNNER_HEARTBEAT_PATH: resolve(healthRoot, "v52.json"),
     } as NodeJS.ProcessEnv;
 }
 
@@ -140,11 +149,12 @@ function shouldStartV52Worker(status: V52PreflightStatus) {
 
 async function publishSupervisorV52Failure(reason: string) {
     const now = Date.now();
-    const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || ZERO_SHA).toLowerCase();
+    const sha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim().toLowerCase();
+    const expectedSha = String(process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || "").trim().toLowerCase();
     try {
-        await writeRunnerHeartbeat(process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/v52.json`, {
-            schema: "disdex-runner-heartbeat/v1", runnerId: "V52", serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-v96-v52-supervisor.service",
-            runtimeSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA, expectedSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA,
+        await writeRunnerHeartbeat(process.env.DISDEX_V52_RUNNER_HEARTBEAT_PATH || process.env.DISDEX_RUNNER_HEARTBEAT_PATH || `${process.env.DISDEX_RUNNER_HEALTH_ROOT || "/var/lib/disdex/runner-health"}/v52.json`, {
+            schema: "disdex-runner-heartbeat/v1", runnerId: "V52", serviceUnit: process.env.DISDEX_V52_RUNNER_SERVICE_UNIT || process.env.DISDEX_RUNNER_SERVICE_UNIT || "disdex-v96-v52-live.service",
+            runtimeSha: /^[0-9a-f]{40}$/.test(sha) ? sha : ZERO_SHA, expectedSha: /^[0-9a-f]{40}$/.test(expectedSha) ? expectedSha : ZERO_SHA,
             workingDirectory: process.cwd(), mode: mode(), liveEnabled: mode() === "live", safetyState: "FAIL_CLOSED", heartbeatAt: now,
             lastTickAt: null, lastReconciliationAt: null, lastDecision: "supervisor-failure", reason, symbols: [], caps: { strategy: 1.5, crypto: 2, total: 2.5 }, restartAttempts: 0, updatedAt: now,
         });
@@ -477,6 +487,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
 function selfTest() {
     const selfTestState = resolve(".runtime-state/selftest-v96-v52");
     const selfTestKillSwitch = resolve(selfTestState, "kill-switch.json");
+    const selfTestHealthRoot = resolve(selfTestState, "runner-health");
     const selfTestEnvironment: Record<string, string> = {
         DISDEX_V13D_V11EQ_V96_RUNNER_MODE: "paper",
         DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: selfTestState,
@@ -488,6 +499,7 @@ function selfTest() {
         DISDEX_V96_KILL_SWITCH_FILE: selfTestKillSwitch,
         PENGU_DUAL_LS_V2_STATE_DIR: resolve(selfTestState, "crypto-v96", "pengu-dual-ls-v2-final"),
         PENGU_DUAL_LS_V2_KILL_SWITCH_FILE: selfTestKillSwitch,
+        DISDEX_RUNNER_HEALTH_ROOT: selfTestHealthRoot,
     };
     const previousEnvironment = Object.fromEntries(
         Object.keys(selfTestEnvironment).map((name) => [name, process.env[name]]),
@@ -518,6 +530,10 @@ function selfTest() {
         resolve(".runtime-state/selftest-v96-v52", "account-order.lock"),
     );
     assert.equal(env.DISDEX_ACCOUNT_LOCK_PATH, env.PENGU_DUAL_LS_V2_LOCK_PATH);
+    assert.equal(env.DISDEX_PENGU_RUNNER_SERVICE_UNIT, "disdex-v96-v52-live.service");
+    assert.equal(env.DISDEX_PENGU_RUNNER_HEARTBEAT_PATH, resolve(selfTestHealthRoot, "pengu-v8.json"));
+    assert.equal(env.DISDEX_V52_RUNNER_SERVICE_UNIT, "disdex-v96-v52-live.service");
+    assert.equal(env.DISDEX_V52_RUNNER_HEARTBEAT_PATH, resolve(selfTestHealthRoot, "v52.json"));
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
     assert.equal(shouldStartV52Worker("ACTIVE"), true);

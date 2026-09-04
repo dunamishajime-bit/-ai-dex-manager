@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 import json
 import os
 import signal
+from pathlib import Path
 
 import disdex_v52_aster_only_legacy_engine as legacy
 from disdex_runner_heartbeat import publish_heartbeat
+from disdex_v52_heartbeat import V52HeartbeatMixin
 from disdex_strict_portfolio_planner import (
     EPSILON,
     STRICT_CAPS,
@@ -34,7 +38,7 @@ V50_MIN_NET_EDGE_BPS = legacy.V50_MIN_NET_EDGE_BPS
 transient_reference_error = legacy.transient_reference_error
 
 
-class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
+class V52AsterOnlyEngine(V52HeartbeatMixin, legacy.V52AsterOnlyEngine):
     """V52 legacy execution/reconciliation with the strict BT #33404708902 planner gate."""
 
     def __init__(self, mode: str):
@@ -72,41 +76,32 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         return super().open_basis_position(slot, candidate, target_gross)
 
     def preflight(self, read_only: bool = False) -> dict:
-        checks = super().preflight(read_only=read_only)
-        if self.live:
-            assert_strict_live_configuration()
-        strict_snapshot = validate_gross_snapshot(checks["gross"])
-        checks.update({
-            "strictPortfolioPlannerActive": True,
-            "strictPortfolioGross": strict_snapshot,
-            "strictPortfolioCaps": {
-                "v12": STRICT_CAPS.v12_gross,
-                "pengu": STRICT_CAPS.pengu_gross,
-                "stock": STRICT_CAPS.stock_gross,
-                "crypto": STRICT_CAPS.crypto_gross,
-                "portfolio": STRICT_CAPS.total_gross,
-            },
-            "quality102LiveSelectorParity": False,
-            "quality102LiveBlockedFailClosed": True,
-        })
-        publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="LIVE" if self.live else "WAITING", last_decision="preflight", reason=str(checks.get("referenceHealth") or "preflight"), caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
-        return checks
-
-    def tick(self) -> None:
+        self._reset_heartbeat_cycle()
         try:
-            result = super().tick()
-            publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="LIVE" if self.live else "WAITING", last_decision="tick", reason="tick completed", caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
-            return result
+            checks = super().preflight(read_only=read_only)
+            if self.live:
+                assert_strict_live_configuration()
+            strict_snapshot = validate_gross_snapshot(checks["gross"])
+            checks.update({
+                "strictPortfolioPlannerActive": True,
+                "strictPortfolioGross": strict_snapshot,
+                "strictPortfolioCaps": {
+                    "v12": STRICT_CAPS.v12_gross,
+                    "pengu": STRICT_CAPS.pengu_gross,
+                    "stock": STRICT_CAPS.stock_gross,
+                    "crypto": STRICT_CAPS.crypto_gross,
+                    "portfolio": STRICT_CAPS.total_gross,
+                },
+                "quality102LiveSelectorParity": False,
+                "quality102LiveBlockedFailClosed": True,
+            })
+            outcome = self._heartbeat_after_tick()
+            self._publish_v52_heartbeat(outcome[0], "preflight", str(checks.get("referenceHealth") or outcome[2] or "preflight"))
+            return checks
         except Exception as error:
-            publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="FAIL_CLOSED" if self.live else "UNKNOWN", last_decision="tick-error", reason=str(error), caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
+            outcome = getattr(self, "_heartbeat_outcome", None) or ("FAIL_CLOSED" if self.live else "UNKNOWN", "preflight-error", str(error))
+            self._publish_v52_heartbeat(outcome[0], "preflight-error", outcome[2] or str(error))
             raise
-
-    def run(self, daemon: bool) -> None:
-        try:
-            super().run(daemon)
-        finally:
-            publish_heartbeat(runner_id="V52", mode=self.mode.upper(), live_enabled=self.live, safety_state="WAITING", last_decision="stopped", reason="stop requested", caps={"strategy": 1.5, "crypto": 2.0, "total": 2.5})
-
 
 def self_test() -> None:
     strict_planner_self_test()
@@ -137,6 +132,28 @@ def self_test() -> None:
     assert snapshot["strictPortfolioPlan"]["strictPortfolioPlannerActive"] is True
     assert transient_reference_error("iex_quote_stale META")
     assert not transient_reference_error("Managed Stock position reconciliation mismatch")
+    blocked_target = Path(__file__).resolve() / "heartbeat.json"
+    heartbeat_parent = blocked_target.parent
+    temp_pattern = f".{blocked_target.name}.*.tmp"
+    temp_files_before = set(heartbeat_parent.glob(temp_pattern))
+    previous_path = os.environ.get("DISDEX_RUNNER_HEARTBEAT_PATH")
+    os.environ["DISDEX_RUNNER_HEARTBEAT_PATH"] = str(blocked_target)
+    try:
+        with contextlib.redirect_stderr(io.StringIO()):
+            assert publish_heartbeat(
+                runner_id="V52",
+                mode="LIVE",
+                live_enabled=True,
+                safety_state="FAIL_CLOSED",
+                last_decision="self-test",
+                reason="health write failure must be best effort",
+            ) is False
+        assert set(heartbeat_parent.glob(temp_pattern)) == temp_files_before
+    finally:
+        if previous_path is None:
+            os.environ.pop("DISDEX_RUNNER_HEARTBEAT_PATH", None)
+        else:
+            os.environ["DISDEX_RUNNER_HEARTBEAT_PATH"] = previous_path
     print("V52_STRICT_ASTER_ONLY_SELFTEST_PASS")
 
 

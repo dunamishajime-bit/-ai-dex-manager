@@ -54,6 +54,21 @@ const LATCHED_STATES = new Set<RunnerSafetyState>(["KILL_SWITCH", "DAILY_LOSS_LA
 const SHA_RE = /^[0-9a-f]{40}$/;
 const ZERO_EFFECTS = { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 };
 
+/** Convert runner result/status text into a conservative operational state. */
+export function classifyRunnerSafetyState(status: string, reason: string, liveEnabled: boolean): RunnerSafetyState {
+  const statusText = String(status || "").trim().toLowerCase();
+  const normalized = `${statusText} ${String(reason || "").trim().toLowerCase()}`.replace(/[_-]+/g, " ");
+  if (/kill\s+switch/.test(normalized)) return "KILL_SWITCH";
+  if (/daily\s+loss|daily\s+latch/.test(normalized)) return "DAILY_LOSS_LATCH";
+  if (/stale|invalid|freshness|\bdata\b/.test(normalized)) return "STALE_DATA";
+  if (/reconciliation|unmanaged|position\s+(?:mismatch|disagreement)|state\s+(?:mismatch|invalid)/.test(normalized)) return "RECONCILIATION_FAILED";
+  if (statusText === "manual review" || /manual\s+review|unresolved|ambiguous/.test(normalized)) return "MANUAL_REVIEW";
+  if (/shared\s+(?:crypto\s+)?daily\s+risk|shared\s+risk|margin|gross|capacity|unavailable|missing|safety\s+hold/.test(normalized)) return "FAIL_CLOSED";
+  if (statusText === "fatal" || statusText === "unknown" || /uncaught|startup\s+(?:error|failed)/.test(normalized)) return "UNKNOWN";
+  if (/(?:failed|failure|error|exception|crash|blocked)/.test(statusText) || /\b(?:failed|failure|error|exception|crash)\b/.test(normalized)) return "FAIL_CLOSED";
+  return liveEnabled ? "LIVE" : "WAITING";
+}
+
 export class RunnerHeartbeatError extends Error {
   readonly code = "INVALID_RUNNER_HEARTBEAT";
   constructor(message: string, options?: { cause?: unknown }) {
