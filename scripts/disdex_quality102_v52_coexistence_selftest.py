@@ -90,6 +90,31 @@ def self_test() -> None:
             capacity = plan_v52_stock_capacity(snapshot, 1.0, 1.0)
             assert capacity["acceptedGross"] == 1.0
             assert STRICT_CAPS.stock_gross == 1.5
+
+            # Q102 publishes hourly.  If its stale state is explicitly flat,
+            # base sleeves must continue with zero Q102 exposure; a stale
+            # position must remain fail-closed to protect Crypto Gross.
+            stale_empty = state_payload()
+            stale_empty.pop("position")
+            stale_empty["updatedAt"] = time.time() * 1000 - 2 * 60 * 60_000
+            path.write_text(json.dumps(stale_empty), encoding="utf-8")
+            base_rows = [
+                {"symbol": "BTCUSDT", "positionAmt": 1.0, "markPrice": 1000.0},
+                {"symbol": "AMZNUSDT", "positionAmt": 1.0, "markPrice": 500.0},
+            ]
+            assert quality102_crypto_notional_from_positions(
+                base_rows, known_crypto=KNOWN_CRYPTO, known_stock=KNOWN_STOCK
+            ) == 1000.0
+            stale_position = state_payload()
+            stale_position["updatedAt"] = time.time() * 1000 - 2 * 60 * 60_000
+            path.write_text(json.dumps(stale_position), encoding="utf-8")
+            expect_error(
+                lambda: quality102_crypto_notional_from_positions(
+                    base_rows, known_crypto=KNOWN_CRYPTO, known_stock=KNOWN_STOCK
+                ),
+                "QUALITY102_STATE_STALE",
+            )
+            path.write_text(json.dumps(state_payload()), encoding="utf-8")
             expect_error(
                 lambda: quality102_crypto_notional_from_positions(
                     [{"symbol": "FETUSDT", "positionAmt": 2.0}],

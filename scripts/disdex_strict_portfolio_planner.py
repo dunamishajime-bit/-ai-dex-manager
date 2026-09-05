@@ -28,7 +28,10 @@ QUALITY102_LIVE_ENABLED = False
 QUALITY102_LIVE_STATUS = "FAIL_CLOSED_SELECTOR_PARITY_UNPROVEN"
 QUALITY102_STRATEGY_ID = "QUALITY102_CAUSAL_V1"
 QUALITY102_STATE_VERSION = 1
-QUALITY102_STATE_MAX_AGE_MS = 15 * 60_000
+# Q102 publishes its shared state once per closed-hour boundary.  The
+# consumer must allow one full cadence plus a bounded recovery grace, while
+# still failing closed before two missed publishes.
+QUALITY102_STATE_MAX_AGE_MS = 75 * 60_000
 _SHA256_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 
 
@@ -197,7 +200,7 @@ def read_quality102_live_state_document(
     resolved = path or _quality102_state_path()
     if resolved is None or not resolved.exists():
         return None
-    owned = load_quality102_live_state(resolved, now_ms=now_ms)
+    owned = load_quality102_live_state_for_base_accounting(resolved, now_ms=now_ms)
     try:
         raw = json.loads(resolved.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
@@ -205,6 +208,39 @@ def read_quality102_live_state_document(
     if not isinstance(raw, dict):
         raise RuntimeError("QUALITY102_STATE_MALFORMED:root")
     return resolved, raw, owned
+
+
+def load_quality102_live_state_for_base_accounting(
+    path: Path | None = None,
+    *,
+    now_ms: float | None = None,
+) -> Quality102OwnedPosition | None:
+    """Read Q102 exposure without blocking base sleeves on a flat stale lease.
+
+    Q102 publishes at an hourly boundary and remains independently
+    fail-closed when its own selector/data is stale.  A stale document that
+    explicitly has no position and no pending order contributes zero to base
+    Crypto Gross; a stale document carrying exposure remains a hard failure.
+    """
+    try:
+        return load_quality102_live_state(path, now_ms=now_ms)
+    except RuntimeError as error:
+        if str(error) != "QUALITY102_STATE_STALE":
+            raise
+        resolved = path or _quality102_state_path()
+        if resolved is None:
+            raise
+        try:
+            raw = json.loads(resolved.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as read_error:
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from read_error
+        if not isinstance(raw, dict):
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:root")
+        if raw.get("position") is not None or raw.get("pending") is not None:
+            raise
+        if not isinstance(raw.get("failures"), list):
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:failures")
+        return None
 
 
 KNOWN_BASE_SYMBOLS = frozenset({
@@ -223,7 +259,7 @@ def quality102_crypto_notional_from_positions(
     now_ms: float | None = None,
 ) -> float:
     """Account Q102 mark notional while preserving unknown-symbol fail-closed."""
-    owned = load_quality102_live_state(now_ms=now_ms)
+    owned = load_quality102_live_state_for_base_accounting(now_ms=now_ms)
     q102_rows: list[dict] = []
     total = 0.0
     for row in rows:
