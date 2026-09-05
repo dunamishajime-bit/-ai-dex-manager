@@ -2,7 +2,7 @@
 
 import { Activity, ShieldAlert } from "lucide-react";
 
-import { heartbeatAgeLabel, projectRuntimeStatusForDisplay, runtimeStateLabel, useStrategyRuntimeStatus } from "@/hooks/useStrategyRuntimeStatus";
+import { heartbeatAgeLabel, projectRuntimeStatusForDisplay, q102SymbolSafetyLabel, runtimeStateLabel, useStrategyRuntimeStatus } from "@/hooks/useStrategyRuntimeStatus";
 import type { StrategyRuntimeStatus } from "@/lib/disdex-runtime-status";
 import { cn } from "@/lib/utils";
 
@@ -65,7 +65,7 @@ function Q102Conditions({ item, stale }: { item: StrategyRuntimeStatus; stale: b
           <div key={symbol.symbol} className="grid gap-1 rounded-[14px] border border-white/10 bg-black/20 px-3 py-2 text-[11px] text-white/76 sm:grid-cols-[0.8fr_0.7fr_1.5fr]">
             <div className="font-bold text-white">{symbol.symbol}</div>
             <div>{symbol.eligible ? "eligible" : "ineligible"}</div>
-            <div className="break-words">{stale ? "要確認: status stale" : symbol.reason || "reason unavailable"}</div>
+            <div className="break-words"><span className="font-bold text-loss">{q102SymbolSafetyLabel(item, stale)}</span> · {stale ? "要確認: status stale" : symbol.reason || "reason unavailable"}</div>
           </div>
         )) : <div className="rounded-[14px] border border-dashed border-white/10 px-3 py-3 text-[11px] text-white/62">対象通貨は要確認</div>}
       </div>

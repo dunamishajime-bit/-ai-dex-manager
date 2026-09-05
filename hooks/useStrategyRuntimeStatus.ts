@@ -26,6 +26,8 @@ const DISPLAY_NAMES: Record<RuntimeStrategyId, string> = {
   "QUALITY102_CAUSAL_V1": "Quality102 Causal V1",
 };
 
+const Q102_CAPS = { strategyCap: 0.5, cryptoCap: 2, totalCap: 2.5 } as const;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -74,7 +76,29 @@ export function parseRuntimeStatusPayload(payload: unknown): StrategyRuntimeStat
   if (!Array.isArray(strategies) || strategies.length !== STRATEGY_IDS.length || !strategies.every(isStatus)) return createUnavailableRuntimeStatus();
   const ids = strategies.map((item) => item.strategyId);
   if (new Set(ids).size !== STRATEGY_IDS.length || STRATEGY_IDS.some((id) => !ids.includes(id))) return createUnavailableRuntimeStatus();
-  return strategies;
+  return strategies.map((item) => item.strategyId === "QUALITY102_CAUSAL_V1"
+    ? {
+        ...item,
+        state: "FAIL_CLOSED",
+        lastDecision: "LIVE_BLOCKED_FAIL_CLOSED",
+        gross: Q102_CAPS,
+        symbols: item.symbols.map((symbol) => ({
+          ...symbol,
+          eligible: false,
+          reason: `FAIL_CLOSED: ${symbol.reason || "reason unavailable"}`,
+        })),
+      }
+    : item);
+}
+
+export function q102SymbolSafetyLabel(item: StrategyRuntimeStatus, stale: boolean): string {
+  const freshSafe = !stale
+    && item.state === "FAIL_CLOSED"
+    && item.serviceActive
+    && item.serviceActivity === "ACTIVE"
+    && item.releaseShaMatch
+    && item.heartbeatAt !== null;
+  return freshSafe ? "FRESH / FAIL_CLOSED / NON-EXECUTABLE" : "要確認 / FAIL_CLOSED / NON-EXECUTABLE";
 }
 
 export function projectRuntimeStatusForDisplay(data: StrategyRuntimeStatus[], stale: boolean): StrategyRuntimeStatus[] {

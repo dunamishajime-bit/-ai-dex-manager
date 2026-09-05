@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseRuntimeStatusPayload, projectRuntimeStatusForDisplay, runtimeStateLabel } from "../hooks/useStrategyRuntimeStatus";
+import { parseRuntimeStatusPayload, projectRuntimeStatusForDisplay, q102SymbolSafetyLabel, runtimeStateLabel } from "../hooks/useStrategyRuntimeStatus";
 import type { StrategyRuntimeStatus } from "../lib/disdex-runtime-status";
 
 const strategyIds = [
@@ -35,9 +35,34 @@ function validStatus(strategyId: StrategyRuntimeStatus["strategyId"], index: num
 const validPayload = { strategies: strategyIds.map(validStatus) };
 
 test("parses the API envelope without deriving status from unrelated UI state", () => {
-  assert.deepEqual(parseRuntimeStatusPayload(validPayload), validPayload.strategies);
+  const parsed = parseRuntimeStatusPayload(validPayload);
+  assert.deepEqual(parsed.filter((item) => item.strategyId !== "QUALITY102_CAUSAL_V1"), validPayload.strategies.filter((item) => item.strategyId !== "QUALITY102_CAUSAL_V1"));
+  const q102 = parsed.find((item) => item.strategyId === "QUALITY102_CAUSAL_V1")!;
+  assert.equal(q102.state, "FAIL_CLOSED");
+  assert.deepEqual(q102.gross, { strategyCap: 0.5, cryptoCap: 2, totalCap: 2.5 });
+  assert.equal(q102.symbols[0].eligible, false);
   assert.equal(runtimeStateLabel("LIVE"), "LIVE");
   assert.equal(runtimeStateLabel("要確認"), "要確認");
+});
+
+test("normalizes adversarial Q102 LIVE and cap drift into a fixed non-executable card", () => {
+  const payload = {
+    strategies: validPayload.strategies.map((item) => item.strategyId === "QUALITY102_CAUSAL_V1"
+      ? { ...item, state: "LIVE", gross: { strategyCap: 9, cryptoCap: 8, totalCap: 7 }, symbols: [{ symbol: "BTCUSDT", eligible: true, reason: "eligible" }] }
+      : item),
+  };
+  const q102 = parseRuntimeStatusPayload(payload).find((item) => item.strategyId === "QUALITY102_CAUSAL_V1")!;
+  assert.equal(q102.state, "FAIL_CLOSED");
+  assert.equal(q102.lastDecision, "LIVE_BLOCKED_FAIL_CLOSED");
+  assert.deepEqual(q102.gross, { strategyCap: 0.5, cryptoCap: 2, totalCap: 2.5 });
+  assert.equal(q102.symbols[0].eligible, false);
+});
+
+test("labels every Q102 heartbeat symbol with fresh/fail-closed or stale safety state", () => {
+  const q102 = parseRuntimeStatusPayload(validPayload).find((item) => item.strategyId === "QUALITY102_CAUSAL_V1")!;
+  assert.equal(q102SymbolSafetyLabel(q102, false), "FRESH / FAIL_CLOSED / NON-EXECUTABLE");
+  const stale = projectRuntimeStatusForDisplay([q102], true)[0];
+  assert.equal(q102SymbolSafetyLabel(stale, true), "要確認 / FAIL_CLOSED / NON-EXECUTABLE");
 });
 
 test("turns unavailable or malformed runtime-status payloads into four safe cards", () => {
