@@ -10,6 +10,13 @@ import {
     type RunnerHeartbeat,
     type RunnerId,
 } from "../lib/disdex-runner-health";
+import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
+import { buildSharedCryptoDailyRiskState } from "../lib/disdex-shared-crypto-daily-risk";
+import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
+import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
+import { V12_X1_ALL } from "../config/v12X1AllRuntime";
+import type { DirectAccountSnapshot, DirectMarketQuote, DirectOpenOrder, DirectPosition, DirectTradeResult } from "../lib/direct-trade-executor";
+import type { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import {
     runWatchdog,
     type RunnerWatchdogConfig,
@@ -25,27 +32,45 @@ const UNITS: Record<RunnerId, string> = {
     QUALITY102_CAUSAL_V1: `disdex-quality102-causal-v1@${SHA}.service`,
 };
 
-type Position = { symbol: string; side: "LONG" | "SHORT"; quantity: number; managedBy: string };
-type Order = { symbol: string; side: "BUY" | "SELL"; quantity: number; clientOrderId: string; managedBy: string };
+type Position = DirectPosition & { managedBy: string };
+type Order = DirectOpenOrder & { managedBy: string };
 
 class InMemoryAccountExchange {
-    readonly positions: Position[] = [{ symbol: "ASTERUSDT", side: "LONG", quantity: 1.25, managedBy: "V52" }];
-    readonly openOrders: Order[] = [{ symbol: "ASTERUSDT", side: "SELL", quantity: 1.25, clientOrderId: "v52-existing", managedBy: "V52" }];
+    readonly positions: Position[] = [{ symbol: "PENGUUSDT", quantity: 1.25, entryPrice: 1, markPrice: 1, unrealizedPnl: 0, pnlPct: 0, notionalUsd: 1.25, positionSide: "LONG", leverage: 1, updatedAt: 1_700_000_000_000, managedBy: "V52" }];
+    readonly openOrders: Order[] = [{ symbol: "PENGUUSDT", clientOrderId: "v52-existing", side: "SELL", status: "NEW", reduceOnly: true, quantity: 1.25, executedQuantity: 0, managedBy: "V52" }];
     readonly counters = { submit: 0, cancel: 0, modify: 0, close: 0 };
-    private lockOwner: string | undefined = "V52";
+    readonly account: DirectAccountSnapshot = { availableBalance: 1000, walletBalance: 1000, asset: "USDT", updatedAt: 1_700_000_000_000 };
+    readonly quote: DirectMarketQuote = { symbol: "PENGUUSDT", bidPrice: 1, askPrice: 1, bidQuantity: 100, askQuantity: 100, midPrice: 1, spreadBps: 0, updatedAt: 1_700_000_000_000 };
 
     snapshot() {
-        return { positions: structuredClone(this.positions), openOrders: structuredClone(this.openOrders), lockOwner: this.lockOwner };
-    }
-
-    restartRunner() {
         return { positions: structuredClone(this.positions), openOrders: structuredClone(this.openOrders), ownership: this.positions.map((position) => position.managedBy) };
     }
 
-    acquireLock(owner: string) {
-        if (this.lockOwner) return false;
-        this.lockOwner = owner;
-        return true;
+    adapter() {
+        const exchange = this;
+        const executor = {
+            getAccountSnapshot: async () => exchange.account,
+            getPositions: async () => exchange.positions,
+            getOpenOrders: async () => exchange.openOrders,
+            getMarketQuote: async () => exchange.quote,
+            normalizeMarketQuantity: async () => ({ symbol: "PENGUUSDT", quantity: 1.25, quantityText: "1.25", minQuantity: 0, maxQuantity: 100, stepSize: 0.01, minNotional: 0, notional: 1.25 }),
+            executeMarket: async (_command: unknown): Promise<DirectTradeResult> => { exchange.counters.submit += 1; throw new Error("fixture must not submit"); },
+            reconcileOrder: async (_symbol: string, _clientOrderId: string): Promise<DirectTradeResult> => { throw new Error("fixture must not reconcile an unresolved order"); },
+        };
+        return {
+            executor,
+            credentialsReady: async () => true,
+            getPositions: executor.getPositions,
+            getOpenOrders: executor.getOpenOrders,
+            getAccountSnapshot: executor.getAccountSnapshot,
+            listV12Orders: async () => [],
+            openOrders: async () => [],
+            normalizeStopPrice: async (_symbol: string, price: number) => ({ price }),
+            placeStopMarket: async () => { exchange.counters.submit += 1; throw new Error("fixture must not place a stop"); },
+            placeTakeProfit: async () => { exchange.counters.submit += 1; throw new Error("fixture must not place take profit"); },
+            cancel: async () => { exchange.counters.cancel += 1; throw new Error("fixture must not cancel"); },
+            flattenReduceOnly: async () => { exchange.counters.close += 1; throw new Error("fixture must not close"); },
+        } as unknown as V12AsterLiveAdapter;
     }
 }
 
@@ -116,16 +141,29 @@ async function makeWatchdogFixture(safetyState: RunnerHeartbeat["safetyState"] =
     } satisfies { root: string; now: number; config: RunnerWatchdogConfig };
 }
 
-test("restart reload preserves managed position/order ownership without exchange writes or a second lock owner", () => {
+test("restart re-enters real V12 preflight/reconciliation and preserves managed state without writes or a second lock owner", async () => {
     const exchange = new InMemoryAccountExchange();
     const before = exchange.snapshot();
-    const after = exchange.restartRunner();
-    assert.deepEqual(after.positions, before.positions);
-    assert.deepEqual(after.openOrders, before.openOrders);
-    assert.deepEqual(after.ownership, before.positions.map((position) => position.managedBy));
-    assert.equal(exchange.acquireLock("restarted-V52"), false);
-    assert.deepEqual(exchange.counters, { submit: 0, cancel: 0, modify: 0, close: 0 });
-    assert.equal(exchange.snapshot().lockOwner, "V52");
+    const root = await mkdtemp(join(tmpdir(), "disdex-v12-restart-boundary-"));
+    try {
+        const now = 1_700_000_000_000;
+        const stateStore = new FileV12X1AllRunnerStateStore(join(root, "state.json"), "SHADOW");
+        const riskPath = join(root, "risk.json");
+        await writeFile(riskPath, JSON.stringify(buildSharedCryptoDailyRiskState({ accountScope: "ASTER_FUTURES", utcDay: new Date(now).toISOString().slice(0, 10), strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"], lossPct: 0, maximumLossPct: 5, tripped: true, updatedAt: now, realizedPnl: 0, unrealizedPnl: 0, fees: 0, funding: 0, netDailyPnl: 0, referenceEquity: 1000, sourceComplete: true })));
+        const marketData = { load: async () => Object.fromEntries(V12_X1_ALL.universe.map((symbol) => [symbol, Array.from({ length: 80 }, (_, index) => ({ ts: now - (80 - index) * 3_600_000, endTs: now - (80 - index) * 3_600_000, open: 1, high: 1, low: 1, close: 1, volume: 1, sourceCount: 2 as const }))])) };
+        const makeEngine = () => new V12LiveExecutionEngine({ adapter: exchange.adapter(), marketData, stateStore, lock: new FileAccountOrderLock(join(root, "account-order.lock")), riskPath, now: () => now });
+        assert.equal((await makeEngine().tick()).status, "risk-blocked");
+        assert.equal((await makeEngine().tick()).status, "risk-blocked");
+        assert.deepEqual(exchange.snapshot(), before);
+        const firstOwner = await new FileAccountOrderLock(join(root, "account-order.lock")).acquire("restart-owner");
+        assert.ok(firstOwner);
+        const secondOwner = await new FileAccountOrderLock(join(root, "account-order.lock")).acquire("second-owner");
+        assert.equal(secondOwner, null);
+        await firstOwner.release();
+        assert.deepEqual(exchange.counters, { submit: 0, cancel: 0, modify: 0, close: 0 });
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
 });
 
 test("watchdog safety states remain fail-closed and never promote a runner to LIVE", async () => {
@@ -158,6 +196,9 @@ test("service wiring is non-secret, singleton-safe, and exact-release bound", as
     assert.match(v12, /Environment=DISDEX_RUNNER_ID=V12/);
     assert.match(combined, /Environment=DISDEX_PENGU_RUNNER_ID=PENGU_V8/);
     assert.match(combined, /Environment=DISDEX_V52_RUNNER_ID=V52/);
+    assert.match(v12, /Type=oneshot/);
+    assert.match(v12, /--once/);
+    assert.doesNotMatch(v12, /^Restart=/m);
     assert.match(v12, /ExecStartPre=\/usr\/bin\/grep -Fxq %i \/opt\/disdex\/releases\/%i\/.disdex-release-sha/);
     assert.match(q102, /Restart=on-failure/);
     assert.match(combined, /ExecStartPre=\/usr\/bin\/grep -Fxq @DISDEX_RUNNER_RELEASE_SHA@ @DISDEX_RUNNER_RELEASE_ROOT@\/.disdex-release-sha/);

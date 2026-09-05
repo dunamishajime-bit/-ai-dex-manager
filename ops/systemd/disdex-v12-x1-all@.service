@@ -21,8 +21,9 @@ Environment=V12_X1_ALL_LIVE_EXECUTION_ENABLED=false
 ExecStartPre=/usr/bin/test -f /opt/disdex/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /opt/disdex/releases/%i/.disdex-release-sha
 ExecStart=/usr/bin/node scripts/disdex-v12-x1-all-live-runner.ts --once
-Restart=on-failure
-RestartSec=15
+# Intentional oneshot: --once performs one gated tick and exits. Operational
+# recovery is owned by the shared watchdog, which re-enters this unit only
+# after heartbeat, release, stop-intent, and safety checks.
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
