@@ -104,6 +104,7 @@
     "strategy:strict-bt33404708902:contract": "tsx --test tests/strict_bt33404708902_contract.test.ts",
     "strategy:runner-health:selftest": "tsx scripts/disdex-runner-health-selftest.ts",
     "strategy:runner-watchdog:selftest": "tsx scripts/disdex-runner-watchdog-selftest.ts",
+    "strategy:runner-watchdog:safety-boundary": "tsx scripts/disdex-runner-watchdog-safety-boundary.ts && tsx --test tests/disdex_runner_watchdog_safety_boundary.test.ts",
     "strategy:runtime-status:test": "tsx --test tests/disdex_runtime_status.test.ts"
   },
   "dependencies": {

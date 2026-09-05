@@ -51,6 +51,8 @@ done
 
 The exact evidence is: release SHA from the immutable marker and `git rev-parse`, each `MainPID`, `/proc/<pid>/cwd`, the complete allowlisted command identity, heartbeat `runtimeSha` and `expectedSha`, heartbeat timestamp in UTC, service/timer state, and reconciliation timestamp/result. A missing, malformed, stale, mismatched, or redacted-away field is `要確認`, not success.
 
+`PENGU_V8` and `V52` intentionally share the approved `disdex-v96-v52-live.service` unit. Treat that as one supervised process, but retain two heartbeat records: the PENGU heartbeat must be fresh and identity-matched, and the shared unit’s `MainPID`, `/proc/<pid>/cwd`, and complete `/proc/<pid>/cmdline` evidence must be recorded explicitly for both the `PENGU_V8` and `V52` records. A shared PID is expected; absent or conflicting heartbeat-to-unit evidence is `要確認`.
+
 ## Restart and reconciliation
 
 1. Freeze the evidence above and confirm the account is readable. Record open-order and managed-position counts and stable identifiers without recording secrets.

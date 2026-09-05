@@ -9,6 +9,9 @@ on:
       - 'scripts/disdex-runner-watchdog.ts'
       - 'scripts/disdex-runner-watchdog-selftest.ts'
       - 'scripts/disdex-quality102-causal-v1-*.ts'
+      - 'scripts/disdex-quality102-causal-v1-signal-selftest.ts'
+      - 'scripts/disdex-quality102-causal-v1-state-selftest.ts'
+      - 'scripts/disdex-runner-watchdog-safety-boundary.ts'
       - 'scripts/disdex-v12-x1-all-*.ts'
       - 'scripts/v12-x1-all-*.ts'
       - 'scripts/pengu-dual-ls-v2-*.ts'
@@ -16,6 +19,7 @@ on:
       - 'scripts/disdex_v96_v52_*.py'
       - 'tests/disdex_runner_*.test.ts'
       - 'tests/disdex_runtime_status.test.ts'
+      - 'tests/disdex_runner_watchdog_safety_boundary.test.ts'
       - 'package.json'
       - 'docs/implementation/disdex-four-strategy-auto-recovery.md'
       - '.github/workflows/disdex-runner-health-ci.yml'
@@ -25,6 +29,9 @@ on:
       - 'lib/disdex-runtime-status.ts'
       - 'scripts/disdex-runner-*.ts'
       - 'scripts/disdex-quality102-causal-v1-*.ts'
+      - 'scripts/disdex-quality102-causal-v1-signal-selftest.ts'
+      - 'scripts/disdex-quality102-causal-v1-state-selftest.ts'
+      - 'scripts/disdex-runner-watchdog-safety-boundary.ts'
       - 'scripts/disdex-v12-x1-all-*.ts'
       - 'scripts/v12-x1-all-*.ts'
       - 'scripts/pengu-dual-ls-v2-*.ts'
@@ -32,6 +39,7 @@ on:
       - 'scripts/disdex_v96_v52_*.py'
       - 'tests/disdex_runner_*.test.ts'
       - 'tests/disdex_runtime_status.test.ts'
+      - 'tests/disdex_runner_watchdog_safety_boundary.test.ts'
       - 'package.json'
       - 'docs/implementation/disdex-four-strategy-auto-recovery.md'
       - '.github/workflows/disdex-runner-health-ci.yml'
@@ -74,6 +82,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           npm run strategy:quality102-causal-v1:runtime:selftest
+          npm run strategy:quality102-causal-v1:signal:selftest
+          npm run strategy:quality102-causal-v1:state:selftest
           npm run strategy:quality102-causal-v1:runner:selftest
           npm run strategy:v12-x1-all:selftest
           npm run strategy:pengu-dual-ls-v2:selftest
@@ -88,13 +98,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          watchdog='scripts/disdex-runner-watchdog.ts'
-          test -f "$watchdog"
-          ! grep -n -Ei '^[[:space:]]*(import|export).*from.*(exchange|aster|binance|hyperliquid|direct-trade)' "$watchdog"
-          grep -Fq 'RUNNER_WATCHDOG_SERVICE_ALLOWLIST' "$watchdog"
-          grep -Fq 'assertSystemctlUnit' "$watchdog"
-          grep -Fq 'systemctl' "$watchdog"
-          ! grep -n -E 'systemctl[[:space:]]+start|submitOrder|placeMarket|place_limit|cancelOrder|closePosition|executeMarket' "$watchdog"
+          npm run strategy:runner-watchdog:safety-boundary
           ! grep -R -n -E 'QUALITY102_LIVE_SELECTOR_PARITY=(true|1)|QUALITY102_LIVE_ENABLED=(true|1)' -- config lib scripts ops \
             --exclude-dir='__pycache__' --exclude='*.tmp.*'
           ! grep -R -n -E 'placeMarket|place_limit|submitOrder|cancelOrder|closePosition|executeMarket' \
