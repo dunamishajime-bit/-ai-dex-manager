@@ -129,6 +129,45 @@ test("projects Q102 effective symbols, caps, and fail-closed selector metadata",
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
+test("keeps Q102 fail-closed when a fresh active heartbeat claims LIVE", async () => {
+  const root = await fixture({
+    QUALITY102_CAUSAL_V1: heartbeat("QUALITY102_CAUSAL_V1", {
+      safetyState: "LIVE",
+      liveEnabled: true,
+      lastDecision: "LIVE",
+    }),
+  });
+  try {
+    const q102 = (await normalizeRuntimeStatus(options(root))).find((record) => record.strategyId === "QUALITY102_CAUSAL_V1")!;
+    assert.equal(q102.state, "FAIL_CLOSED");
+    assert.match(q102.safetyReason, /selector parity/i);
+    assert.equal(q102.lastDecision, "LIVE_BLOCKED_FAIL_CLOSED");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("uses canonical Q102 caps even when the heartbeat caps drift", async () => {
+  const root = await fixture({
+    QUALITY102_CAUSAL_V1: heartbeat("QUALITY102_CAUSAL_V1", {
+      caps: { strategy: 99, crypto: 99, total: 99 },
+    }),
+  });
+  try {
+    const q102 = (await normalizeRuntimeStatus(options(root))).find((record) => record.strategyId === "QUALITY102_CAUSAL_V1")!;
+    assert.deepEqual(q102.gross, { strategyCap: 0.5, cryptoCap: 2, totalCap: 2.5 });
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("reports service activity as unavailable when no observation is supplied", async () => {
+  const root = await fixture();
+  try {
+    const records = await normalizeRuntimeStatus({ healthRoot: root, now: NOW, expectedReleaseSha: SHA });
+    assert.equal(records[0].serviceActive, false);
+    assert.equal(records[0].serviceActivity, "UNAVAILABLE");
+    assert.match(records[0].safetyReason, /service activity unavailable/i);
+    assert.equal(records[0].state, "要確認");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
 test("maps absent, malformed, stale, and SHA-mismatched heartbeats to 要確認", async () => {
   const root = await fixture({
     V12: undefined,
