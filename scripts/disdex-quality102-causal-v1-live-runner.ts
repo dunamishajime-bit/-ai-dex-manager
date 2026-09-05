@@ -8,6 +8,10 @@ import {
     resolveQuality102CausalV1Runtime,
     type Quality102CausalV1Mode,
 } from "../config/disdexQuality102CausalV1Runtime";
+import {
+    QUALITY102_CAUSAL_V4_CAPABILITIES,
+    QUALITY102_CAUSAL_V4_S34_MODEL,
+} from "../config/disdexQuality102CausalV4Model";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectPosition } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
@@ -19,6 +23,7 @@ import {
 } from "../lib/disdex-quality102-causal-v1-state";
 import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality102-causal-v1-market-data";
 import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-runner";
+import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 
@@ -39,6 +44,7 @@ export interface Quality102CausalV1LiveResolvedConfig {
     runtimeCommitSha: string;
     expectedRuntimeCommitSha: string;
     selectorMode: string;
+    highVolSymbols: string[];
     symbols: string[];
     statePath: string;
     killSwitchPath: string;
@@ -95,7 +101,9 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
     const runtime = resolveQuality102CausalV1Runtime(env);
     const stateRoot = resolve(env.QUALITY102_CAUSAL_V1_STATE_DIR || DEFAULT_STATE_ROOT);
     const sharedRoot = resolve(env.DISDEX_SHARED_RUNTIME_ROOT || DEFAULT_SHARED_ROOT);
-    const symbols = parseQuality102CausalV1Symbols(env.QUALITY102_CAUSAL_V1_SYMBOLS);
+    const highVolSymbols = parseQuality102CausalV1Symbols(env.QUALITY102_CAUSAL_V1_SYMBOLS);
+    const s34Symbols = QUALITY102_CAUSAL_V4_S34_MODEL.map((row) => row.symbol);
+    const symbols = [...new Set([...highVolSymbols, ...s34Symbols])].sort();
     const runtimeSha = requiredSha(env);
     const statePath = resolve(env.QUALITY102_CAUSAL_V1_STATE_PATH || resolve(stateRoot, "state.json"));
     const killSwitchPath = resolve(
@@ -130,6 +138,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         runtimeCommitSha: runtimeSha,
         expectedRuntimeCommitSha: runtimeSha,
         selectorMode: String(env.QUALITY102_CAUSAL_V1_SELECTOR_MODE || "").trim().toUpperCase(),
+        highVolSymbols,
         symbols,
         statePath,
         killSwitchPath,
@@ -157,16 +166,21 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
     return config;
 }
 
-export function assertQuality102CausalV1LiveActivation(
+export function assertQuality102CausalV1ReadOnlyPreflightConfiguration(
     config: Quality102CausalV1LiveResolvedConfig,
     env: NodeJS.ProcessEnv = process.env,
 ): void {
     if (config.mode !== "LIVE") return;
-    if (!config.enabled || !config.liveTradingEnabled || !config.liveExecutionEnabled || !config.operatorArmed) {
-        throw new Error("QUALITY102_CAUSAL_V1_LIVE_GATES_NOT_ALL_ENABLED");
-    }
     if (!SHA_PATTERN.test(config.runtimeCommitSha)) throw new Error("QUALITY102_CAUSAL_V1_RUNTIME_COMMIT_SHA_REQUIRED");
-    if (config.selectorMode !== "DERIVED_HIGH_VOL_ONLY") throw new Error("QUALITY102_CAUSAL_V1_SELECTOR_MODE_ACK_REQUIRED");
+    if (config.selectorMode !== "CAUSAL_V4") throw new Error("QUALITY102_CAUSAL_V1_SELECTOR_MODE_ACK_REQUIRED");
+    if (!QUALITY102_CAUSAL_V4_CAPABILITIES.selectorImplemented
+        || !QUALITY102_CAUSAL_V4_CAPABILITIES.derivedHighVolGeneratorImplemented
+        || !QUALITY102_CAUSAL_V4_CAPABILITIES.s34GeneratorImplemented
+        || QUALITY102_CAUSAL_V4_CAPABILITIES.s34ModelKeyCount !== 31
+        || QUALITY102_CAUSAL_V4_CAPABILITIES.fixedHistoricalTradeTimestamps
+        || !QUALITY102_CAUSAL_V4_CAPABILITIES.noLookaheadByConstruction) {
+        throw new Error("QUALITY102_CAUSAL_V4_IMPLEMENTATION_NOT_READY");
+    }
     const ack = String(env.QUALITY102_CAUSAL_V1_LIVE_ACK || "").trim().toLowerCase();
     if (ack !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_CAUSAL_V1_LIVE_ACK_MUST_MATCH_RUNTIME_SHA");
     if (boolEnv(env, "QUALITY102_LIVE_SELECTOR_PARITY") || boolEnv(env, "QUALITY102_LIVE_ENABLED")) {
@@ -174,6 +188,17 @@ export function assertQuality102CausalV1LiveActivation(
     }
     if (!config.killSwitchPath || !config.sharedDailyRiskPath || !config.accountLockPath) {
         throw new Error("QUALITY102_CAUSAL_V1_SHARED_SAFETY_PATHS_REQUIRED");
+    }
+}
+
+export function assertQuality102CausalV1LiveActivation(
+    config: Quality102CausalV1LiveResolvedConfig,
+    env: NodeJS.ProcessEnv = process.env,
+): void {
+    if (config.mode !== "LIVE") return;
+    assertQuality102CausalV1ReadOnlyPreflightConfiguration(config, env);
+    if (!config.enabled || !config.liveTradingEnabled || !config.liveExecutionEnabled || !config.operatorArmed) {
+        throw new Error("QUALITY102_CAUSAL_V1_LIVE_GATES_NOT_ALL_ENABLED");
     }
 }
 
@@ -227,12 +252,13 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
     env: NodeJS.ProcessEnv = process.env,
 ): Promise<Record<string, unknown>> {
     const config = resolveQuality102CausalV1LiveConfig(env);
-    assertQuality102CausalV1LiveActivation(config);
+    assertQuality102CausalV1ReadOnlyPreflightConfiguration(config, env);
     if (config.mode !== "LIVE") {
         return {
             status: "QUALITY102_CAUSAL_V1_NON_LIVE_PREFLIGHT_PASS",
             mode: config.mode,
             selectorMode: config.selectorMode,
+            highVolSymbols: config.highVolSymbols,
             symbols: config.symbols,
             networkReads: 0,
             ordersSent: 0,
@@ -284,21 +310,18 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
     if (!(account.walletBalance > 0) || !Number.isFinite(account.availableBalance) || account.availableBalance < 0 || !Number.isFinite(account.updatedAt) || account.updatedAt <= 0 || account.updatedAt > now || now - account.updatedAt > config.maxDataAgeMs) {
         throw new Error("QUALITY102_PREFLIGHT_ACCOUNT_STALE_OR_INVALID");
     }
-    const configured = new Set(config.symbols);
+    const stateMatches = (position: DirectPosition) => Boolean(beforeState.position
+        && beforeState.position.symbol.toUpperCase() === position.symbol.toUpperCase()
+        && beforeState.position.side === actualSide(position)
+        && Math.abs(beforeState.position.quantity - Math.abs(position.quantity)) <= Math.max(1e-8, beforeState.position.quantity * 0.01));
     for (const position of positions) {
         assertFreshPosition(position, now, config.maxDataAgeMs);
         const symbol = position.symbol.toUpperCase();
         if (Math.abs(position.quantity) <= 1e-12) continue;
-        if (configured.has(symbol)) {
-            const owned = beforeState.position;
-            if (!owned || owned.symbol.toUpperCase() !== symbol || owned.side !== actualSide(position) || Math.abs(owned.quantity - Math.abs(position.quantity)) > Math.max(1e-8, owned.quantity * 0.01)) {
-                throw new Error(`QUALITY102_PREFLIGHT_UNMANAGED_Q102_POSITION:${symbol}`);
-            }
-        } else if (!classifyAsterSymbol(symbol).tradable) {
-            throw new Error(`QUALITY102_PREFLIGHT_UNKNOWN_POSITION_OWNERSHIP:${symbol}`);
-        }
+        if (stateMatches(position)) continue;
+        if (!classifyAsterSymbol(symbol).tradable) throw new Error(`QUALITY102_PREFLIGHT_UNKNOWN_POSITION_OWNERSHIP:${symbol}`);
     }
-    if (beforeState.position && !positions.some((position) => configured.has(position.symbol.toUpperCase()) && Math.abs(position.quantity) > 1e-12 && beforeState.position && beforeState.position.symbol.toUpperCase() === position.symbol.toUpperCase() && beforeState.position.side === actualSide(position))) {
+    if (beforeState.position && !positions.some((position) => Math.abs(position.quantity) > 1e-12 && stateMatches(position))) {
         throw new Error("QUALITY102_PREFLIGHT_STATE_POSITION_NOT_ON_EXCHANGE");
     }
     if (openOrders.length > 0) throw new Error("QUALITY102_PREFLIGHT_OPEN_ORDER_CONFLICT");
@@ -319,6 +342,7 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         status: "QUALITY102_CAUSAL_V1_READ_ONLY_PREFLIGHT_PASS",
         mode: config.mode,
         selectorMode: config.selectorMode,
+        highVolSymbols: config.highVolSymbols,
         symbols: config.symbols,
         historySymbols: Object.keys(history.candlesBySymbol).sort(),
         statePath: config.statePath,
@@ -370,6 +394,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         executor,
         stateStore: new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.expectedRuntimeCommitSha),
         lock: new FileAccountOrderLock(config.accountLockPath, numberEnv(env, "DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000)),
+        signalBuilder: (input) => buildQuality102CausalV4Signal(input, { highVolSymbols: config.highVolSymbols }),
         config: {
             mode: config.mode,
             enabled: config.enabled,
@@ -409,13 +434,15 @@ async function main(): Promise<void> {
         mode: built.config.mode,
         enabled: built.config.enabled,
         selectorMode: built.config.selectorMode,
+        highVolSymbols: built.config.highVolSymbols,
         symbols: built.config.symbols,
         runtimeCommitSha: built.config.runtimeCommitSha,
         quality102GrossCap: built.config.maximumGross,
         cryptoGrossCap: built.config.cryptoGrossCap,
         totalGrossCap: built.config.totalGrossCap,
         historicalSelectorParity: false,
-        brkLiveEnabled: false,
+        causalV4SelectorImplemented: QUALITY102_CAUSAL_V4_CAPABILITIES.selectorImplemented,
+        brkLiveEnabled: true,
         ordersSent: 0,
     }));
     const daemon = process.argv.includes("--daemon");

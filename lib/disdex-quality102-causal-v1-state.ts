@@ -6,6 +6,10 @@ import type { Quality102CausalV1Mode } from "@/config/disdexQuality102CausalV1Ru
 const STRATEGY_ID = "QUALITY102_CAUSAL_V1" as const;
 const STATE_VERSION = 1 as const;
 
+export type Quality102CausalFamily = "HIGH_VOL" | "PB" | "MR" | "BRK" | "REV";
+export type Quality102CausalLayer = "S1" | "S2" | "S3" | "S4";
+export type Quality102CausalExitPolicy = "HIGH_VOL_TRAIL72" | "FIXED_HOLD_STOP";
+
 export interface Quality102CausalV1PendingOrder {
   idempotencyKey: string;
   clientOrderId: string;
@@ -20,6 +24,11 @@ export interface Quality102CausalV1PendingOrder {
   expectedPrice?: number;
   targetGross?: number;
   hardStop?: number;
+  family?: Quality102CausalFamily;
+  variant?: string;
+  layer?: Quality102CausalLayer;
+  exitPolicy?: Quality102CausalExitPolicy;
+  maxHoldHours?: number;
   reason?: string;
   lastError?: string;
 }
@@ -41,6 +50,11 @@ export interface Quality102CausalV1State {
     hardStop?: number;
     bestPrice?: number;
     trailActive?: boolean;
+    family?: Quality102CausalFamily;
+    variant?: string;
+    layer?: Quality102CausalLayer;
+    exitPolicy?: Quality102CausalExitPolicy;
+    maxHoldHours?: number;
   };
   pending?: Quality102CausalV1PendingOrder;
   lastReduction?: {
@@ -102,20 +116,22 @@ function optionalTimestamp(value: unknown, field: string): number | undefined {
 function normalizePosition(value: unknown): Quality102CausalV1State["position"] {
   if (value === undefined) return undefined;
   const raw = record(value, "position");
-  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive"], "position");
+  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "family", "variant", "layer", "exitPolicy", "maxHoldHours"], "position");
   if (raw.side !== -1 && raw.side !== 1) malformed("position.side");
   if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("position.hardStop");
   if (raw.bestPrice !== undefined && !(typeof raw.bestPrice === "number" && Number.isFinite(raw.bestPrice) && raw.bestPrice > 0)) malformed("position.bestPrice");
   if (raw.trailActive !== undefined && typeof raw.trailActive !== "boolean") malformed("position.trailActive");
+  if (raw.family !== undefined && !["HIGH_VOL", "PB", "MR", "BRK", "REV"].includes(String(raw.family))) malformed("position.family");
+  if (raw.layer !== undefined && !["S1", "S2", "S3", "S4"].includes(String(raw.layer))) malformed("position.layer");
+  if (raw.exitPolicy !== undefined && raw.exitPolicy !== "HIGH_VOL_TRAIL72" && raw.exitPolicy !== "FIXED_HOLD_STOP") malformed("position.exitPolicy");
+  if (raw.maxHoldHours !== undefined && !(typeof raw.maxHoldHours === "number" && Number.isFinite(raw.maxHoldHours) && raw.maxHoldHours > 0 && raw.maxHoldHours <= 72)) malformed("position.maxHoldHours");
+  const variant = optionalString(raw.variant, "position.variant");
   return {
-    symbol: requiredString(raw.symbol, "position.symbol"),
-    side: raw.side,
-    quantity: positiveNumber(raw.quantity, "position.quantity"),
-    entryPrice: positiveNumber(raw.entryPrice, "position.entryPrice"),
-    entryTs: finiteNumber(raw.entryTs, "position.entryTs"),
-    ...(raw.hardStop === undefined ? {} : { hardStop: raw.hardStop }),
-    ...(raw.bestPrice === undefined ? {} : { bestPrice: raw.bestPrice }),
-    ...(raw.trailActive === undefined ? {} : { trailActive: raw.trailActive }),
+    symbol: requiredString(raw.symbol, "position.symbol"), side: raw.side,
+    quantity: positiveNumber(raw.quantity, "position.quantity"), entryPrice: positiveNumber(raw.entryPrice, "position.entryPrice"), entryTs: finiteNumber(raw.entryTs, "position.entryTs"),
+    ...(raw.hardStop === undefined ? {} : { hardStop: raw.hardStop }), ...(raw.bestPrice === undefined ? {} : { bestPrice: raw.bestPrice }), ...(raw.trailActive === undefined ? {} : { trailActive: raw.trailActive }),
+    ...(raw.family === undefined ? {} : { family: raw.family as Quality102CausalFamily }), ...(variant === undefined ? {} : { variant }), ...(raw.layer === undefined ? {} : { layer: raw.layer as Quality102CausalLayer }),
+    ...(raw.exitPolicy === undefined ? {} : { exitPolicy: raw.exitPolicy as Quality102CausalExitPolicy }), ...(raw.maxHoldHours === undefined ? {} : { maxHoldHours: raw.maxHoldHours }),
   };
 }
 
@@ -136,6 +152,11 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
     "expectedPrice",
     "targetGross",
     "hardStop",
+    "family",
+    "variant",
+    "layer",
+    "exitPolicy",
+    "maxHoldHours",
     "reason",
     "lastError",
   ], "pending");
@@ -148,6 +169,11 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
   if (raw.expectedPrice !== undefined && !(typeof raw.expectedPrice === "number" && Number.isFinite(raw.expectedPrice) && raw.expectedPrice > 0)) malformed("pending.expectedPrice");
   if (raw.targetGross !== undefined && !(typeof raw.targetGross === "number" && Number.isFinite(raw.targetGross) && raw.targetGross > 0 && raw.targetGross <= 0.5)) malformed("pending.targetGross");
   if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("pending.hardStop");
+  if (raw.family !== undefined && !["HIGH_VOL", "PB", "MR", "BRK", "REV"].includes(String(raw.family))) malformed("pending.family");
+  if (raw.layer !== undefined && !["S1", "S2", "S3", "S4"].includes(String(raw.layer))) malformed("pending.layer");
+  if (raw.exitPolicy !== undefined && raw.exitPolicy !== "HIGH_VOL_TRAIL72" && raw.exitPolicy !== "FIXED_HOLD_STOP") malformed("pending.exitPolicy");
+  if (raw.maxHoldHours !== undefined && !(typeof raw.maxHoldHours === "number" && Number.isFinite(raw.maxHoldHours) && raw.maxHoldHours > 0 && raw.maxHoldHours <= 72)) malformed("pending.maxHoldHours");
+  const variant = optionalString(raw.variant, "pending.variant");
   const reason = optionalString(raw.reason, "pending.reason");
   return {
     idempotencyKey: requiredString(raw.idempotencyKey, "pending.idempotencyKey"),
@@ -163,6 +189,11 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
     ...(raw.expectedPrice === undefined ? {} : { expectedPrice: raw.expectedPrice }),
     ...(raw.targetGross === undefined ? {} : { targetGross: raw.targetGross }),
     ...(raw.hardStop === undefined ? {} : { hardStop: raw.hardStop }),
+    ...(raw.family === undefined ? {} : { family: raw.family as Quality102CausalFamily }),
+    ...(variant === undefined ? {} : { variant }),
+    ...(raw.layer === undefined ? {} : { layer: raw.layer as Quality102CausalLayer }),
+    ...(raw.exitPolicy === undefined ? {} : { exitPolicy: raw.exitPolicy as Quality102CausalExitPolicy }),
+    ...(raw.maxHoldHours === undefined ? {} : { maxHoldHours: raw.maxHoldHours }),
     ...(reason === undefined ? {} : { reason }),
     ...(lastError === undefined ? {} : { lastError }),
   };

@@ -201,8 +201,17 @@ async function providerTests(): Promise<void> {
     assert.equal(fet.length, MINIMUM_HISTORY_HOURS);
     assert.equal(fet[0].timestampMs, NOW - MINIMUM_HISTORY_HOURS * HOUR);
     assert.equal(fet.at(-1)?.timestampMs, NOW - HOUR);
+    assert.equal(fet.at(-1)?.baseVolume, 10);
+    assert.equal(loaded.entryOpenBySymbol.FETUSDT.timestampMs, NOW);
+    assert.equal(loaded.entryOpenBySymbol.FETUSDT.open, 100);
+    assert.equal(loaded.entryOpenBySymbol.BTCUSDT.timestampMs, NOW);
     assert.ok(paged.urls.length > 2);
-    assert.ok(paged.urls.every((url) => Number(url.searchParams.get("endTime")) < NOW));
+    assert.ok(paged.urls.every((url) => {
+        const start = Number(url.searchParams.get("startTime"));
+        const end = Number(url.searchParams.get("endTime"));
+        const limit = Number(url.searchParams.get("limit"));
+        return end < NOW || (start === NOW && end === NOW && limit === 1);
+    }));
     const requestCount = paged.urls.length;
     assert.equal((await provider.load()).candlesBySymbol.FETUSDT, fet);
     assert.equal(paged.urls.length, requestCount);

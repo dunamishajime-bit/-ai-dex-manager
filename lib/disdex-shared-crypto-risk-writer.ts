@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 
+import { QUALITY102_CAUSAL_V4_S34_MODEL } from "@/config/disdexQuality102CausalV4Model";
 import { AsterV3Client } from "@/lib/aster-v3-client";
 import {
     buildSharedCryptoDailyRiskState,
@@ -14,10 +15,13 @@ export const QUALITY102_CAUSAL_V1_SHARED_SYMBOLS = [
     "JUPUSDT", "ENAUSDT", "ONDOUSDT", "FILUSDT", "RENDERUSDT", "TAOUSDT", "TRXUSDT",
 ] as const;
 
+export const QUALITY102_CAUSAL_V4_S34_SHARED_SYMBOLS = [...new Set(QUALITY102_CAUSAL_V4_S34_MODEL.map((row) => row.symbol))].sort();
+
 export const SHARED_CRYPTO_SYMBOLS = new Set([
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT",
     "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT",
     ...QUALITY102_CAUSAL_V1_SHARED_SYMBOLS,
+    ...QUALITY102_CAUSAL_V4_S34_SHARED_SYMBOLS,
 ]);
 
 function finite(value: unknown): number {

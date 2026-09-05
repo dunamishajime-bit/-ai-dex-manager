@@ -33,14 +33,15 @@ function toCandle(row: AsterKline): Quality102Candle {
     const high = finiteNumber(row[2], "high");
     const low = finiteNumber(row[3], "low");
     const close = finiteNumber(row[4], "close");
+    const baseVolume = finiteNumber(row[5], "baseVolume");
     const quoteVolume = finiteNumber(row[7], "quoteVolume");
-    if (timestampMs <= 0 || open <= 0 || high <= 0 || low <= 0 || close <= 0 || quoteVolume < 0) {
+    if (timestampMs <= 0 || open <= 0 || high <= 0 || low <= 0 || close <= 0 || baseVolume < 0 || quoteVolume < 0) {
         throw new Error("QUALITY102_INVALID_ASTER_KLINE_VALUE");
     }
     if (high < Math.max(open, close) || low > Math.min(open, close) || high < low) {
         throw new Error("QUALITY102_INVALID_ASTER_KLINE_OHLC");
     }
-    return { timestampMs, open, high, low, close, quoteVolume };
+    return { timestampMs, open, high, low, close, quoteVolume, baseVolume };
 }
 
 export class Quality102CausalV1AsterMarketDataProvider {
@@ -93,12 +94,28 @@ export class Quality102CausalV1AsterMarketDataProvider {
         return rows;
     }
 
+    private async loadEntryOpen(symbol: string, now: number): Promise<{ timestampMs: number; open: number }> {
+        const timestampMs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS;
+        const rows = await this.client.getKlines(symbol, "1h", 1, { startTime: timestampMs, endTime: timestampMs });
+        const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
+        if (!row) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
+        const open = finiteNumber(row[1], "currentOpen");
+        if (!(open > 0)) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_INVALID:${symbol}`);
+        return { timestampMs, open };
+    }
+
     async load(): Promise<Quality102CausalV1History> {
         const now = this.now();
         if (!Number.isFinite(now) || now <= 0) throw new Error("QUALITY102_INVALID_MARKET_CLOCK");
         if (this.cached && this.cached.expiresAt > now) return this.cached.history;
-        const entries = await Promise.all(this.symbols.map(async (symbol) => [symbol, await this.loadSymbol(symbol, now)] as const));
-        const history: Quality102CausalV1History = { candlesBySymbol: Object.fromEntries(entries) };
+        const entries = await Promise.all(this.symbols.map(async (symbol) => {
+            const [candles, entryOpen] = await Promise.all([this.loadSymbol(symbol, now), this.loadEntryOpen(symbol, now)]);
+            return { symbol, candles, entryOpen };
+        }));
+        const history: Quality102CausalV1History = {
+            candlesBySymbol: Object.fromEntries(entries.map(({ symbol, candles }) => [symbol, candles])),
+            entryOpenBySymbol: Object.fromEntries(entries.map(({ symbol, entryOpen }) => [symbol, entryOpen])),
+        };
         this.cached = { expiresAt: now + this.cacheTtlMs, history };
         return history;
     }

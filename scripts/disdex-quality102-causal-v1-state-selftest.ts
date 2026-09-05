@@ -47,6 +47,17 @@ function pendingState(phase: "planned" | "submitted" | "manual_review"): Quality
 
 async function main() {
   assert.equal(createQuality102CausalV1State("PAPER").strategyId, "QUALITY102_CAUSAL_V1");
+  const v4PositionState: Quality102CausalV1State = {
+    ...createQuality102CausalV1State("LIVE", RUNTIME_SHA),
+    position: {
+      symbol: "FETUSDT", side: 1, quantity: 10, entryPrice: 1, entryTs: 1_788_444_000_000,
+      hardStop: 0.06, bestPrice: 1, trailActive: false,
+      family: "REV", variant: "REV24_T0.05_H24", layer: "S3",
+      exitPolicy: "FIXED_HOLD_STOP", maxHoldHours: 24,
+    },
+  };
+  const v4Memory = new MemoryQuality102CausalV1StateStore(v4PositionState, "LIVE", RUNTIME_SHA);
+  assert.deepEqual(await v4Memory.load(), v4PositionState);
 
   const root = join(tmpdir(), `quality102-causal-v1-state-${process.pid}-${Date.now()}`);
   await mkdir(root, { recursive: true });

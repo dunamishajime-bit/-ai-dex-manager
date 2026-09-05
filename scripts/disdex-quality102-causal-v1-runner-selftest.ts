@@ -147,6 +147,20 @@ function deps(executor: FakeExecutor, initial: Quality102CausalV1State, cfg: Par
 async function run(): Promise<void> {
     {
         const fake = new FakeExecutor();
+        assert.doesNotThrow(() => deps(fake, state(), { symbols: ["AVAXUSDT"] }, () => signal({ symbol: "AVAXUSDT" })));
+    }
+
+    {
+        const fake = new FakeExecutor();
+        fake.positions = [{ symbol: "AVAXUSDT", quantity: 1, entryPrice: 100, markPrice: 100, unrealizedPnl: 0, pnlPct: 0, notionalUsd: 100, positionSide: "BOTH", leverage: 1, updatedAt: NOW - 500 }];
+        const built = deps(fake, state(), { symbols: ["AVAXUSDT"] }, () => signal({ side: 0, symbol: undefined, requestedGross: 0, reason: "BASE_IDLE_TEST" }));
+        const result = await built.runner.tick();
+        assert.equal(result.status, "no-change");
+        assert.equal(fake.calls.execute, 0);
+    }
+
+    {
+        const fake = new FakeExecutor();
         const built = deps(fake, state("SHADOW"), { mode: "SHADOW", enabled: true, liveTradingEnabled: false, liveExecutionEnabled: false, operatorArmed: false });
         const result = await built.runner.tick();
         assert.equal(result.status, "shadow");

@@ -87,6 +87,28 @@ test("MTM reduction is restart/reconciliation stable and preserves remaining cos
     assert.equal(first.accounting, "MARK_TO_MARKET_REALIZED_PNL");
 });
 
+test("same-symbol base entry fully flattens causal Quality102 before the base order", () => {
+    const q = position({
+        id: "q102-av", strategy: "QUALITY102_CAUSAL_V1", symbol: "AVAXUSDT", quantity: 5, entryPrice: 90, markPrice: 100, updatedAt: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 100, crossChecked: true },
+    });
+    const plan = planStrictPortfolio({
+        equity: 1000,
+        now: NOW,
+        active: [q],
+        intents: [{ idempotencyKey: "v12-avax", strategy: "V12", symbol: "AVAXUSDT", side: "LONG", gross: 1.0, notionalUsd: 1000, signalTs: NOW }],
+        quality102CausalV1Ready: true,
+    });
+    assert.equal(plan.status, "planned");
+    assert.equal(plan.accepted[0]?.strategy, "V12");
+    assert.equal(plan.reductions.length, 1);
+    assert.equal(plan.reductions[0]?.strategy, "QUALITY102_CAUSAL_V1");
+    assert.equal(plan.reductions[0]?.symbol, "AVAXUSDT");
+    assert.equal(plan.reductions[0]?.remainingQuantity, 0);
+    assert.equal(plan.activePositions.some((row) => row.strategy === "QUALITY102_CAUSAL_V1"), false);
+});
+
 test("a quality position is reduced at its current mark when a base order needs capacity", () => {
     const plan = planStrictPortfolio({
         equity: 1_000,

@@ -473,18 +473,37 @@ export function planStrictPortfolio(input: {
         }
         const currentQuality = active.find((row) => isCausalQuality102Strategy(row.strategy) || (input.researchMode === true && row.strategy === "QUALITY102"));
         if (currentQuality) {
-            const trim = trimQualityToResidual({
-                active,
-                quality: currentQuality,
-                baseOtherTotalNotional,
-                baseOtherCryptoNotional,
-                baseIntent: intent,
-                equity: workingEquity,
-                now: input.now,
-            });
-            active = trim.active;
-            workingEquity = trim.equity;
-            reductions.push(...trim.reductions);
+            const sameSymbolBaseConflict = currentQuality.strategy === "QUALITY102_CAUSAL_V1"
+                && intent.strategy !== "QUALITY102_CAUSAL_V1"
+                && currentQuality.symbol.toUpperCase() === intent.symbol.toUpperCase();
+            if (sameSymbolBaseConflict) {
+                const evidence = liveQuoteEvidence(currentQuality);
+                if (!evidence) return rejectPlan("QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED", input.active, equity);
+                const reduction = markToMarketReducePosition({
+                    position: currentQuality,
+                    reduceQuantity: currentQuality.quantity,
+                    markPrice: evidence.price,
+                    markTs: evidence.timestamp,
+                    markSource: "LIVE_MARKET_QUOTE",
+                    markSourceEvidence: evidence,
+                });
+                reductions.push(reduction);
+                workingEquity = Math.max(0.001, workingEquity + reduction.realizedPnl);
+                active = active.filter((row) => row.id !== currentQuality.id);
+            } else {
+                const trim = trimQualityToResidual({
+                    active,
+                    quality: currentQuality,
+                    baseOtherTotalNotional,
+                    baseOtherCryptoNotional,
+                    baseIntent: intent,
+                    equity: workingEquity,
+                    now: input.now,
+                });
+                active = trim.active;
+                workingEquity = trim.equity;
+                reductions.push(...trim.reductions);
+            }
             const capViolation = baseGrossCapViolation(active, accepted, workingEquity);
             if (capViolation) return rejectPlan(capViolation, input.active, equity);
         }

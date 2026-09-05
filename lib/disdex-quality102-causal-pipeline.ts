@@ -54,6 +54,8 @@ export interface Quality102Candle {
     low: number;
     close: number;
     quoteVolume: number;
+    /** Base-asset volume. Required only by the causal V4 BRK volume gate. */
+    baseVolume?: number;
 }
 
 export interface Quality102HighVolFeatures {
@@ -180,7 +182,7 @@ export interface Quality102S34Identity {
 }
 
 export interface Quality102RejectedS34Candidate {
-    candidate: Quality102RawCandidate;
+    candidate: Quality102RawCandidate | Quality102SelectedCandidate;
     reason:
         | ReturnType<typeof evaluateS34QualityGate>["reason"]
         | ReturnType<typeof evaluateQuality102CausalV4FeatureGate>["reason"]

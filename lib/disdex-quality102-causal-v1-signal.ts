@@ -24,11 +24,15 @@ const MINIMUM_CORRELATION_HOURS = 10 * 24;
 
 export interface Quality102CausalV1History {
     candlesBySymbol: Readonly<Record<string, readonly Quality102Candle[]>>;
+    /** Current 1H candle open only. No unfinished high/low/close/volume is exposed to the selector. */
+    entryOpenBySymbol?: Readonly<Record<string, { timestampMs: number; open: number }>>;
 }
 
 export interface Quality102CausalV1SleeveOccupancy {
     activePosition: boolean;
     unresolvedPendingEntry: boolean;
+    /** V4 enters only while every base sleeve is idle. Legacy HIGH_VOL ignores this field. */
+    basePositionActive?: boolean;
 }
 
 export interface Quality102CausalV1SignalInput {
@@ -42,13 +46,16 @@ export interface Quality102CausalV1Signal {
     referenceTs: number;
     side: -1 | 0 | 1;
     symbol?: string;
-    family?: "HIGH_VOL" | "PB" | "MR" | "REV";
+    family?: "HIGH_VOL" | "PB" | "MR" | "BRK" | "REV";
+    variant?: string;
+    layer?: "S1" | "S2" | "S3" | "S4";
     requestedGross: number;
     reason: string;
     dataCutoffTs: number;
     hardStop?: number;
     maxHoldHours?: number;
-    brkEnabled: false;
+    exitPolicy?: "HIGH_VOL_TRAIL72" | "FIXED_HOLD_STOP";
+    brkEnabled: boolean;
 }
 
 interface TrainingMetrics {

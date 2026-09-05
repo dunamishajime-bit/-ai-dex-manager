@@ -67,7 +67,7 @@ export interface Quality102CausalV1TickResult {
     message: string;
     signal?: Quality102CausalV1Signal;
     idempotencyKey?: string;
-    exitReason?: "hard_stop" | "trail_5pct_after_12pct" | "72h_time" | "shared_risk_flatten";
+    exitReason?: "hard_stop" | "trail_5pct_after_12pct" | "72h_time" | "time" | "shared_risk_flatten";
     ordersSent?: number;
 }
 
@@ -129,7 +129,7 @@ export interface Quality102CausalV1RunnerDependencies {
     signalBuilder?: (input: {
         history: Quality102CausalV1History;
         decisionTs: number;
-        sleeveOccupancy: { activePosition: boolean; unresolvedPendingEntry: boolean };
+        sleeveOccupancy: { activePosition: boolean; unresolvedPendingEntry: boolean; basePositionActive?: boolean };
     }) => Quality102CausalV1Signal;
 }
 
@@ -179,12 +179,7 @@ function terminalWithoutExposure(result: DirectTradeResult): boolean {
 function normalizedSymbols(symbols: readonly string[]): string[] {
     const values = symbols.map((symbol) => String(symbol || "").trim().toUpperCase()).filter(Boolean);
     if (!values.length) throw new Error("QUALITY102_CAUSAL_V1_SYMBOLS_REQUIRED");
-    const unique = [...new Set(values)].sort();
-    for (const symbol of unique) {
-        const classification = classifyAsterSymbol(symbol);
-        if (classification.tradable) throw new Error(`QUALITY102_CAUSAL_V1_SYMBOL_OVERLAPS_BASE_SLEEVE:${symbol}`);
-    }
-    return unique;
+    return [...new Set(values)].sort();
 }
 
 function q102Idempotency(signal: Quality102CausalV1Signal, gross: number): string {
@@ -281,8 +276,9 @@ function strictCausalPosition(
     };
 }
 
-function q102ActualPositions(positions: readonly DirectPosition[], symbols: ReadonlySet<string>): DirectPosition[] {
-    return positions.filter((position) => symbols.has(position.symbol.toUpperCase()) && nonZero(position));
+function q102ActualPositions(positions: readonly DirectPosition[], statePosition?: Quality102CausalV1State["position"]): DirectPosition[] {
+    if (!statePosition) return [];
+    return positions.filter((position) => position.symbol.toUpperCase() === statePosition.symbol.toUpperCase() && nonZero(position));
 }
 
 function positionMatchesState(actual: DirectPosition, statePosition: NonNullable<Quality102CausalV1State["position"]>): boolean {
@@ -291,15 +287,14 @@ function positionMatchesState(actual: DirectPosition, statePosition: NonNullable
         && Math.abs(Math.abs(actual.quantity) - statePosition.quantity) <= Math.max(1e-8, statePosition.quantity * 0.01);
 }
 
-function exposurePositions(positions: readonly DirectPosition[], q102Symbols: ReadonlySet<string>, statePosition?: Quality102CausalV1State["position"]): DirectPosition[] {
-    const q102 = q102ActualPositions(positions, q102Symbols);
-    for (const position of positions.filter(nonZero)) {
-        if (q102Symbols.has(position.symbol.toUpperCase())) continue;
-        if (!isKnownBasePosition(position.symbol)) throw new Error(`UNKNOWN_POSITION_OWNERSHIP:${position.symbol}`);
-    }
-    if (!statePosition && q102.length) throw new Error(`Q102_UNMANAGED_POSITION:${q102.map((row) => row.symbol).join(",")}`);
+function exposurePositions(positions: readonly DirectPosition[], statePosition?: Quality102CausalV1State["position"]): DirectPosition[] {
+    const q102 = q102ActualPositions(positions, statePosition);
     if (statePosition && (q102.length !== 1 || !positionMatchesState(q102[0], statePosition))) {
         throw new Error("Q102_STATE_POSITION_MISMATCH");
+    }
+    for (const position of positions.filter(nonZero)) {
+        if (statePosition && positionMatchesState(position, statePosition)) continue;
+        if (!isKnownBasePosition(position.symbol)) throw new Error(`UNKNOWN_POSITION_OWNERSHIP:${position.symbol}`);
     }
     return q102;
 }
@@ -328,27 +323,40 @@ function validatePositionSnapshot(position: DirectPosition, now: number, maxAgeM
     }
 }
 
-function activePositionOrUndefined(state: Quality102CausalV1State, positions: readonly DirectPosition[], q102Symbols: ReadonlySet<string>): DirectPosition | undefined {
+function activePositionOrUndefined(state: Quality102CausalV1State, positions: readonly DirectPosition[]): DirectPosition | undefined {
     if (!state.position) return undefined;
-    const actual = q102ActualPositions(positions, q102Symbols);
+    const actual = q102ActualPositions(positions, state.position);
     if (actual.length !== 1 || !positionMatchesState(actual[0], state.position)) throw new Error("Q102_STATE_POSITION_MISMATCH");
     return actual[0];
 }
 
-function exitReasonFor(statePosition: NonNullable<Quality102CausalV1State["position"]>, markPrice: number, now: number): "hard_stop" | "trail_5pct_after_12pct" | "72h_time" | undefined {
+export function quality102ExitReasonForState(
+    statePosition: NonNullable<Quality102CausalV1State["position"]>,
+    markPrice: number,
+    now: number,
+): "hard_stop" | "trail_5pct_after_12pct" | "72h_time" | "time" | undefined {
     const hardStop = statePosition.hardStop;
-    const bestPrice = statePosition.bestPrice;
-    if (!(hardStop && bestPrice)) return undefined;
+    if (!(hardStop && Number.isFinite(markPrice) && markPrice > 0 && Number.isFinite(now) && now >= statePosition.entryTs)) return undefined;
     const long = statePosition.side > 0;
     const stopPrice = long ? statePosition.entryPrice * (1 - hardStop) : statePosition.entryPrice * (1 + hardStop);
     if ((long && markPrice <= stopPrice) || (!long && markPrice >= stopPrice)) return "hard_stop";
+
+    if (statePosition.exitPolicy === "FIXED_HOLD_STOP") {
+        const maxHoldHours = statePosition.maxHoldHours;
+        if (!(maxHoldHours && Number.isFinite(maxHoldHours) && maxHoldHours > 0)) return undefined;
+        return now - statePosition.entryTs >= maxHoldHours * HOUR_MS ? "time" : undefined;
+    }
+
+    const bestPrice = statePosition.bestPrice;
+    if (!(bestPrice && Number.isFinite(bestPrice) && bestPrice > 0)) return undefined;
     const trailActive = statePosition.trailActive === true
         || (long ? bestPrice / statePosition.entryPrice - 1 : 1 - bestPrice / statePosition.entryPrice) >= QUALITY102_HIGH_VOL_TRAIL_TRIGGER - 1e-15;
     if (trailActive) {
         const trailPrice = long ? bestPrice * (1 - QUALITY102_HIGH_VOL_TRAIL_DISTANCE) : bestPrice * (1 + QUALITY102_HIGH_VOL_TRAIL_DISTANCE);
         if ((long && markPrice <= trailPrice) || (!long && markPrice >= trailPrice)) return "trail_5pct_after_12pct";
     }
-    if (now - statePosition.entryTs >= QUALITY102_HIGH_VOL_MAX_HOLD_HOURS * HOUR_MS) return "72h_time";
+    const maxHoldHours = statePosition.maxHoldHours || QUALITY102_HIGH_VOL_MAX_HOLD_HOURS;
+    if (now - statePosition.entryTs >= maxHoldHours * HOUR_MS) return "72h_time";
     return undefined;
 }
 
@@ -397,8 +405,8 @@ export class Quality102CausalV1Runner {
         return undefined;
     }
 
-    private buildSignal(history: Quality102CausalV1History, decisionTs: number, activePosition: boolean, unresolvedPendingEntry: boolean) {
-        const input = { history, decisionTs, sleeveOccupancy: { activePosition, unresolvedPendingEntry } } as const;
+    private buildSignal(history: Quality102CausalV1History, decisionTs: number, activePosition: boolean, unresolvedPendingEntry: boolean, basePositionActive = false) {
+        const input = { history, decisionTs, sleeveOccupancy: { activePosition, unresolvedPendingEntry, basePositionActive } } as const;
         return this.dependencies.signalBuilder
             ? this.dependencies.signalBuilder(input)
             : buildQuality102CausalV1Signal(input);
@@ -424,7 +432,7 @@ export class Quality102CausalV1Runner {
 
     private async applyFilledEntry(state: Quality102CausalV1State, pending: Quality102CausalV1PendingOrder, result: DirectTradeResult): Promise<Quality102CausalV1TickResult> {
         const positions = await this.dependencies.executor.getPositions();
-        const q102Positions = q102ActualPositions(positions, this.symbolSet);
+        const q102Positions = positions.filter((position) => position.symbol.toUpperCase() === pending.symbol.toUpperCase() && nonZero(position));
         const actual = q102Positions.length === 1 ? q102Positions[0] : undefined;
         if (!actual || actualSide(actual) !== (pending.side === "BUY" ? 1 : -1) || Math.abs(Math.abs(actual.quantity) - result.executedQuantity) > Math.max(1e-8, result.executedQuantity * 0.02)) {
             return this.manualReview(state, "Q102_ENTRY_FILL_POSITION_MISMATCH", pending.idempotencyKey);
@@ -440,6 +448,11 @@ export class Quality102CausalV1Runner {
             hardStop,
             bestPrice: entryPrice,
             trailActive: false,
+            family: pending.family,
+            variant: pending.variant,
+            layer: pending.layer,
+            exitPolicy: pending.exitPolicy,
+            maxHoldHours: pending.maxHoldHours,
         };
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
         state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, pending.referenceTs);
@@ -454,7 +467,7 @@ export class Quality102CausalV1Runner {
         if (!position || !pending.reason?.startsWith("BASE_PRIORITY_MTM_REDUCTION:")) return this.manualReview(state, "Q102_BASE_REDUCTION_STATE_MISSING", pending.idempotencyKey);
         if (result.executedQuantity <= EPSILON || result.executedQuantity > position.quantity + EPSILON) return this.manualReview(state, "Q102_BASE_REDUCTION_FILL_QUANTITY_INVALID", pending.idempotencyKey);
         const positions = await this.dependencies.executor.getPositions();
-        const actualRows = q102ActualPositions(positions, this.symbolSet);
+        const actualRows = q102ActualPositions(positions, position);
         const expectedRemaining = position.quantity - result.executedQuantity;
         if (expectedRemaining > EPSILON) {
             if (actualRows.length !== 1 || !positionMatchesState(actualRows[0], { ...position, quantity: expectedRemaining })) return this.manualReview(state, "Q102_BASE_REDUCTION_RECONCILED_POSITION_MISMATCH", pending.idempotencyKey);
@@ -515,8 +528,9 @@ export class Quality102CausalV1Runner {
     }
 
     private async applyFilledExit(state: Quality102CausalV1State, pending: Quality102CausalV1PendingOrder, result: DirectTradeResult): Promise<Quality102CausalV1TickResult> {
+        const priorPosition = state.position;
         const positions = await this.dependencies.executor.getPositions();
-        if (q102ActualPositions(positions, this.symbolSet).length) return this.manualReview(state, "Q102_EXIT_POSITION_REMAINS_AFTER_FILL", pending.idempotencyKey);
+        if (priorPosition && q102ActualPositions(positions, priorPosition).length) return this.manualReview(state, "Q102_EXIT_POSITION_REMAINS_AFTER_FILL", pending.idempotencyKey);
         state.position = undefined;
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
         state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, pending.referenceTs);
@@ -575,13 +589,16 @@ export class Quality102CausalV1Runner {
             || account.updatedAt > now
             || now - account.updatedAt > maxAge) throw new Error("Q102_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
         for (const position of positions) validatePositionSnapshot(position, now, maxAge);
-        const actualQ102 = activePositionOrUndefined(state, positions, this.symbolSet);
-        exposurePositions(positions, this.symbolSet, state.position);
+        const actualQ102 = activePositionOrUndefined(state, positions);
+        exposurePositions(positions, state.position);
         for (const order of openOrders) {
             if (!String(order.symbol || "").trim() || !Number.isFinite(order.quantity) || order.quantity < 0 || !Number.isFinite(order.executedQuantity) || order.executedQuantity < 0) {
                 throw new Error("Q102_OPEN_ORDER_SNAPSHOT_INVALID");
             }
-            if (this.symbolSet.has(order.symbol.toUpperCase())) throw new Error(`Q102_UNKNOWN_OR_DUPLICATE_OPEN_ORDER:${order.clientOrderId || order.symbol}`);
+            const pendingOwnsOrder = Boolean(state.pending
+                && order.symbol.toUpperCase() === state.pending.symbol.toUpperCase()
+                && order.clientOrderId === state.pending.clientOrderId);
+            if (pendingOwnsOrder) throw new Error(`Q102_PENDING_OPEN_ORDER_REQUIRES_RECONCILIATION:${order.clientOrderId}`);
             if (!isKnownBaseOrder(order)) throw new Error(`UNKNOWN_OPEN_ORDER_OWNERSHIP:${order.clientOrderId || order.symbol}`);
         }
         return { account, positions, openOrders, equity: accountEquity(account, positions), actualQ102 };
@@ -616,6 +633,7 @@ export class Quality102CausalV1Runner {
         if (!Number.isFinite(expectedPrice) || expectedPrice <= 0) throw new Error("Q102_PENDING_EXECUTION_PRICE_INVALID");
         if (!pending.reduceOnly) {
             if (live.openOrders.length > 0) throw new Error("Q102_BASE_OR_OTHER_OPEN_ORDER_CONFLICT");
+            if (live.positions.some(nonZero)) throw new Error("QUALITY102_CAUSAL_V4_BASE_NOT_IDLE");
             const planner = planStrictPortfolio({
                 equity: live.equity,
                 now,
@@ -661,7 +679,7 @@ export class Quality102CausalV1Runner {
 
     private async updateTrailingState(state: Quality102CausalV1State, quote: DirectMarketQuote): Promise<void> {
         const position = state.position;
-        if (!position) return;
+        if (!position || position.exitPolicy === "FIXED_HOLD_STOP") return;
         const bestPrice = position.side > 0
             ? Math.max(position.bestPrice || position.entryPrice, quote.midPrice)
             : Math.min(position.bestPrice || position.entryPrice, quote.midPrice);
@@ -820,7 +838,7 @@ export class Quality102CausalV1Runner {
         }
         const symbol = signal.symbol.toUpperCase();
         if (!this.symbolSet.has(symbol)) return { status: "blocked-local", message: "Q102 signal symbol is outside configured causal universe.", signal, ordersSent: 0 };
-        if (classifyAsterSymbol(symbol).tradable) return { status: "blocked-local", message: "Q102 signal overlaps a base sleeve.", signal, ordersSent: 0 };
+        if (positions.some(nonZero)) return { status: "held", message: "QUALITY102_CAUSAL_V4_BASE_NOT_IDLE", signal, ordersSent: 0 };
         const localNow = this.now();
         if (!validQuote(quote, symbol, localNow, this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 entry quote is stale or invalid.", signal, ordersSent: 0 };
         if (!Number.isFinite(signal.referenceTs) || signal.referenceTs <= 0 || signal.referenceTs > localNow || localNow - signal.referenceTs > this.dependencies.config.maximumEntryDelayMs) {
@@ -884,6 +902,11 @@ export class Quality102CausalV1Runner {
             expectedPrice,
             targetGross: accepted.gross,
             hardStop: signal.hardStop,
+            family: signal.family,
+            variant: signal.variant,
+            layer: signal.layer,
+            exitPolicy: signal.exitPolicy,
+            maxHoldHours: signal.maxHoldHours,
             reason: `${signal.reason}:${signal.family || "UNKNOWN"}`,
         };
         if (!pending.hardStop) return this.manualReview(state, "Q102 signal has no recovered hard-stop metadata; entry blocked.", idempotencyKey);
@@ -928,13 +951,13 @@ export class Quality102CausalV1Runner {
                 const quote = await this.dependencies.executor.getMarketQuote(state.position.symbol);
                 if (!validQuote(quote, state.position.symbol, this.now(), this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 active mark quote is stale or invalid.", ordersSent: 0 };
                 await this.updateTrailingState(state, quote);
-                const reason = riskBlocked ? "shared_risk_flatten" : exitReasonFor(state.position, quote.midPrice, quote.updatedAt);
+                const reason = riskBlocked ? "shared_risk_flatten" : quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt);
                 if (!reason) return { status: "held", message: "QUALITY102_CAUSAL_V1_POSITION_HELD", ordersSent: 0 };
                 const planned = await this.planExit(state, actual!, quote, reason);
                 return planned.status === "planned" ? this.executePending(state, lock) : planned;
             }
             if (riskBlocked) return { status: "blocked-local", message: riskBlocked, ordersSent: 0 };
-            const signal = this.buildSignal(history, this.now(), false, false);
+            const signal = this.buildSignal(history, this.now(), false, false, live.positions.some(nonZero));
             if (state.lastProcessedReferenceTs !== undefined && signal.referenceTs <= state.lastProcessedReferenceTs) {
                 return { status: "no-change", message: "Q102 signal reference was already processed.", signal, ordersSent: 0 };
             }

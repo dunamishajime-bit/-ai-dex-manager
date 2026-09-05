@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 
+import { QUALITY102_CAUSAL_V4_S34_MODEL } from "@/config/disdexQuality102CausalV4Model";
 import {
     buildSharedCryptoDailyRiskState,
     validateSharedCryptoDailyRisk,
@@ -29,9 +30,12 @@ const state = buildSharedCryptoDailyRiskState({
 
 assert.equal(validateSharedCryptoDailyRisk(state, now).ok, true);
 assert.ok(QUALITY102_CAUSAL_V1_SHARED_SYMBOLS.every((symbol) => SHARED_CRYPTO_SYMBOLS.has(symbol)));
+const v4S34Symbols = [...new Set(QUALITY102_CAUSAL_V4_S34_MODEL.map((row) => row.symbol))];
+assert.ok(v4S34Symbols.every((symbol) => SHARED_CRYPTO_SYMBOLS.has(symbol)), "all V4 S34 symbols must participate in shared crypto risk");
 const tampered = { ...state, lossPct: 1 };
 assert.equal(validateSharedCryptoDailyRisk(tampered, now).reason, "HASH_MISMATCH");
 console.log("SHARED_CRYPTO_RISK_SELFTEST_PASS", JSON.stringify({
     strategyIds: state.strategyIds,
     q102Symbols: QUALITY102_CAUSAL_V1_SHARED_SYMBOLS.length,
+    v4S34Symbols: v4S34Symbols.length,
 }));

@@ -4,16 +4,20 @@ on:
   push:
     branches:
       - 'codex/quality102-live-connection-*'
+      - 'research/current-performance-restoration-*'
     paths:
       - 'config/disdexQuality102CausalV1Runtime.ts'
+      - 'config/disdexQuality102CausalV4Model.ts'
       - 'lib/disdex-aster-portfolio-classifier.ts'
       - 'lib/disdex-quality102-causal-v1-*.ts'
+      - 'lib/disdex-quality102-causal-v4-*.ts'
       - 'lib/disdex-shared-crypto-*.ts'
       - 'lib/disdex-strict-portfolio-planner.ts'
       - 'lib/disdex-unified-portfolio-routing.ts'
       - 'lib/pengu-dual-ls-v2-portfolio-runner.ts'
       - 'lib/v12-*.ts'
       - 'scripts/disdex-quality102-causal-v1-*.ts'
+      - 'scripts/disdex-quality102-causal-v4-*.ts'
       - 'scripts/disdex-shared-crypto-*.ts'
       - 'scripts/disdex_v12_crypto_daily_risk.py'
       - 'scripts/disdex_quality102_v52_mtm_selftest.py'
@@ -67,6 +71,7 @@ jobs:
           npm run strategy:quality102-causal-v1:runtime:selftest
           npm run strategy:quality102-causal-v1:signal:selftest
           npm run strategy:quality102-causal-v1:state:selftest
+          npm run strategy:quality102-causal-v4:selftest
           npm run strategy:strict-bt33404708902:causal-selector:selftest
           npm run strategy:strict-bt33404708902:pipeline:selftest
           npm run strategy:strict-bt33404708902:selector:selftest
@@ -86,6 +91,7 @@ jobs:
           npm run strategy:v12-x1-all:selftest
           npm run strategy:disdex-v13d-v11eq-v96:stock:selftest
           python scripts/disdex_quality102_v52_mtm_selftest.py
+          python scripts/disdex_quality102_v52_coexistence_selftest.py
 
       - name: Python safety contracts
         run: |

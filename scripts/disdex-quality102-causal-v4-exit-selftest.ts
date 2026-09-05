@@ -1,0 +1,11 @@
+﻿import assert from "node:assert/strict";
+import { quality102ExitReasonForState } from "../lib/disdex-quality102-causal-v1-runner";
+const ENTRY=1_800_000_000_000;
+const s34={symbol:"FETUSDT",side:1 as const,quantity:1,entryPrice:100,entryTs:ENTRY,hardStop:0.06,bestPrice:130,trailActive:true,family:"REV" as const,variant:"REV24_T0.05_H24",layer:"S3" as const,exitPolicy:"FIXED_HOLD_STOP" as const,maxHoldHours:24};
+assert.equal(quality102ExitReasonForState(s34,120,ENTRY+12*3_600_000),undefined);
+assert.equal(quality102ExitReasonForState(s34,120,ENTRY+24*3_600_000),"time");
+assert.equal(quality102ExitReasonForState(s34,93,ENTRY+6*3_600_000),"hard_stop");
+const hv={...s34,hardStop:0.15,bestPrice:113,trailActive:true,family:"HIGH_VOL" as const,variant:undefined,layer:"S1" as const,exitPolicy:"HIGH_VOL_TRAIL72" as const,maxHoldHours:72};
+assert.equal(quality102ExitReasonForState(hv,106,ENTRY+12*3_600_000),"trail_5pct_after_12pct");
+assert.equal(quality102ExitReasonForState({...hv,bestPrice:100,trailActive:false},100,ENTRY+72*3_600_000),"72h_time");
+console.log("QUALITY102_CAUSAL_V4_EXIT_SELFTEST_PASS");
