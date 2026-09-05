@@ -233,6 +233,43 @@ export function evaluateS34QualityGate(input: Quality102S34QualityGateInput): Qu
     }
 }
 
+export const QUALITY102_CAUSAL_V4_REV_LONG_RET14_MIN = 0.24;
+
+export interface Quality102CausalV4ImprovementGateInput {
+    family: Quality102S34Family;
+    side: number;
+    ret14: number;
+}
+
+export interface Quality102CausalV4ImprovementGateResult {
+    accepted: boolean;
+    reason:
+        | "V4_IMPROVEMENT_GATE_PASS"
+        | "REV_LONG_RET14_BELOW_24PCT"
+        | "INVALID_V4_IMPROVEMENT_SIDE"
+        | "INVALID_V4_IMPROVEMENT_RET14";
+}
+
+/**
+ * Forward-causal V4 improvement gate validated on a train/holdout split.
+ * Only entry-time information is used: REV longs require ret14 >= +24%.
+ * This is an additive filter and does not alter the recovered historical S34 gate.
+ */
+export function evaluateQuality102CausalV4ImprovementGate(
+    input: Quality102CausalV4ImprovementGateInput,
+): Quality102CausalV4ImprovementGateResult {
+    if (input.side !== -1 && input.side !== 1) {
+        return { accepted: false, reason: "INVALID_V4_IMPROVEMENT_SIDE" };
+    }
+    if (!Number.isFinite(input.ret14)) {
+        return { accepted: false, reason: "INVALID_V4_IMPROVEMENT_RET14" };
+    }
+    if (input.family === "REV" && input.side === 1 && input.ret14 < QUALITY102_CAUSAL_V4_REV_LONG_RET14_MIN) {
+        return { accepted: false, reason: "REV_LONG_RET14_BELOW_24PCT" };
+    }
+    return { accepted: true, reason: "V4_IMPROVEMENT_GATE_PASS" };
+}
+
 export interface Quality102OneSlotCandidate {
     id: string;
     entryTs: number;

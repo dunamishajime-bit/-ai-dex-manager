@@ -3,6 +3,7 @@ import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime
 import {
     QUALITY102_CAUSAL_CAPABILITIES,
     evaluateQuality102CausalReadiness,
+    evaluateQuality102CausalV4ImprovementGate,
     evaluateS34QualityGate,
     getS1S2RawGeneratorStatus,
     getS34RawGeneratorStatus,
@@ -148,6 +149,24 @@ assert.deepEqual(
 assert.deepEqual(
     evaluateS34QualityGate({ family: "BRK", variant: "x", side: 1, strength: Number.NaN, ret14: 0 }),
     { accepted: false, reason: "INVALID_S34_NUMERIC_INPUT" },
+);
+
+// Causal V4 improvement gate: reject weak-regime REV longs using entry-time ret14 only.
+assert.deepEqual(
+    evaluateQuality102CausalV4ImprovementGate({ family: "REV", side: 1, ret14: 0.239999 }),
+    { accepted: false, reason: "REV_LONG_RET14_BELOW_24PCT" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4ImprovementGate({ family: "REV", side: 1, ret14: 0.24 }),
+    { accepted: true, reason: "V4_IMPROVEMENT_GATE_PASS" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4ImprovementGate({ family: "REV", side: -1, ret14: -0.9 }),
+    { accepted: true, reason: "V4_IMPROVEMENT_GATE_PASS" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4ImprovementGate({ family: "MR", side: 1, ret14: -0.9 }),
+    { accepted: true, reason: "V4_IMPROVEMENT_GATE_PASS" },
 );
 
 // One-slot routing is deterministic and respects S1 > S2 > S3 > S4 at equal entry time.

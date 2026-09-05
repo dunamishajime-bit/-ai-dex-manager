@@ -1,4 +1,5 @@
 import {
+    evaluateQuality102CausalV4ImprovementGate,
     evaluateS34QualityGate,
     routeQuality102OneSlot,
     type Quality102Layer,
@@ -174,7 +175,9 @@ export interface Quality102S34Identity {
 
 export interface Quality102RejectedS34Candidate {
     candidate: Quality102RawCandidate;
-    reason: ReturnType<typeof evaluateS34QualityGate>["reason"];
+    reason:
+        | ReturnType<typeof evaluateS34QualityGate>["reason"]
+        | ReturnType<typeof evaluateQuality102CausalV4ImprovementGate>["reason"];
 }
 
 export interface Quality102SelectionInput {
@@ -183,6 +186,8 @@ export interface Quality102SelectionInput {
     /** Membership supplied by the upstream raw producer; row order is not evidence. */
     coreIdentities: readonly Quality102S34Identity[];
     fillerIdentities: readonly Quality102S34Identity[];
+    /** Apply the forward-causal V4 REV-long loss gate after recovered historical quality gates. */
+    applyV4ImprovementGate?: boolean;
 }
 
 export interface Quality102SelectionStats {
@@ -786,6 +791,17 @@ export function buildQuality102Selection(input: Quality102SelectionInput): Quali
             rejectedS34.push({ candidate, reason: gate.reason });
             continue;
         }
+        if (input.applyV4ImprovementGate) {
+            const v4Gate = evaluateQuality102CausalV4ImprovementGate({
+                family: candidate.family,
+                side: candidate.side,
+                ret14: candidate.ret14 as number,
+            });
+            if (!v4Gate.accepted) {
+                rejectedS34.push({ candidate, reason: v4Gate.reason });
+                continue;
+            }
+        }
         quality124.push(asSelected(candidate, classifyS34Layer(candidate, coreIdentities, fillerIdentities)));
     }
 
@@ -819,6 +835,11 @@ export function buildQuality102Selection(input: Quality102SelectionInput): Quali
             exitReasons: countExitReasons(quality102),
         },
     };
+}
+
+/** Build the causal V4 selection with the validated REV-long ret14 improvement gate enabled. */
+export function buildQuality102CausalV4Selection(input: Quality102SelectionInput): Quality102SelectionResult {
+    return buildQuality102Selection({ ...input, applyV4ImprovementGate: true });
 }
 
 export function evaluateQuality102Parity(

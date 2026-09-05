@@ -3,6 +3,7 @@ import {
     QUALITY102_EXPECTED_COUNTS,
     QUALITY102_HOUR_MS,
     buildQuality102Selection,
+    buildQuality102CausalV4Selection,
     computeQuality102HighVolFeatures,
     evaluateQuality102Parity,
     generateQuality102HighVolSignals,
@@ -249,6 +250,35 @@ function rawCandidate(input: Partial<Quality102RawCandidate> & Pick<Quality102Ra
         ...input,
     };
 }
+const v4BlockedCandidate = rawCandidate({
+    id: "v4-rev-long-blocked",
+    entryTs: baseTs,
+    exitTs: baseTs + HOUR,
+    layer: "S34",
+    family: "REV",
+    variant: "REV12_T0.05_H12",
+    side: 1,
+    ret14: 0.239999,
+});
+const v4BlockedSelection = buildQuality102CausalV4Selection({
+    rawHighVol: [],
+    rawS34: [v4BlockedCandidate],
+    coreIdentities: [{ entryTs: v4BlockedCandidate.entryTs, symbol: v4BlockedCandidate.symbol, variant: v4BlockedCandidate.variant, side: v4BlockedCandidate.side }],
+    fillerIdentities: [],
+});
+assert.equal(v4BlockedSelection.quality102.length, 0);
+assert.equal(v4BlockedSelection.rejectedS34[0]?.reason, "REV_LONG_RET14_BELOW_24PCT");
+
+const v4AcceptedCandidate = { ...v4BlockedCandidate, id: "v4-rev-long-accepted", ret14: 0.24 };
+const v4AcceptedSelection = buildQuality102CausalV4Selection({
+    rawHighVol: [],
+    rawS34: [v4AcceptedCandidate],
+    coreIdentities: [{ entryTs: v4AcceptedCandidate.entryTs, symbol: v4AcceptedCandidate.symbol, variant: v4AcceptedCandidate.variant, side: v4AcceptedCandidate.side }],
+    fillerIdentities: [],
+});
+assert.equal(v4AcceptedSelection.quality102.length, 1);
+assert.equal(v4AcceptedSelection.rejectedS34.length, 0);
+
 const finalCandidates: Quality102RawCandidate[] = [];
 for (let index = 0; index < 102; index += 1) {
     const layer = index < 8 ? "S1" : index < 18 ? "S2" : "S34";

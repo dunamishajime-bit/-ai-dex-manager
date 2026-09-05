@@ -57,6 +57,12 @@ class S34CausalSignalTests(unittest.TestCase):
         self.assertFalse(sig.strength_proven)
         self.assertFalse(sig.volume_gate_proven)
 
+    def test_v4_improvement_gate_requires_24pct_ret14_for_rev_long(self):
+        self.assertFalse(s34.passes_v4_improvement_gate("REV", 1, 0.239999))
+        self.assertTrue(s34.passes_v4_improvement_gate("REV", 1, 0.24))
+        self.assertTrue(s34.passes_v4_improvement_gate("REV", -1, -0.9))
+        self.assertTrue(s34.passes_v4_improvement_gate("MR", 1, -0.9))
+
     def test_generator_uses_signal_bar_before_entry_on_four_hour_grid(self):
         rows = [bar(f"2026-05-{1+i//24:02d} {i%24:02d}:00:00+00:00", 100.0, 101.0, 99.0) for i in range(30)]
         rows[24] = bar("2026-05-02 00:00:00+00:00", 103.0, 104.0, 100.0)

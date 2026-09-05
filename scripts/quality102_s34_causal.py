@@ -119,6 +119,17 @@ def detect_signal(rows: list[dict], signal_index: int, variant: str) -> S34Signa
     raise ValueError(f"unsupported S34 variant: {variant}")
 
 
+V4_REV_LONG_RET14_MIN = 0.24
+
+
+def passes_v4_improvement_gate(family: str, side: int, ret14: float) -> bool:
+    if side not in (-1, 1):
+        raise ValueError(f"invalid side: {side}")
+    if family == "REV" and side == 1:
+        return float(ret14) >= V4_REV_LONG_RET14_MIN
+    return True
+
+
 def generate_signals(rows: list[dict], variant: str) -> list[GeneratedS34Signal]:
     out: list[GeneratedS34Signal] = []
     for entry_index in range(1, len(rows)):
