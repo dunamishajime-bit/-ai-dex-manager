@@ -8,6 +8,16 @@ export const PENGU_RECOVERY_V8_PROMOTION = Object.freeze({
     freshHoldout: Object.freeze({ source: "BINANCE_USDM_1H_PROXY", startInclusive: "2026-08-28T00:00:00.000Z", endObserved: "2026-09-04T21:00:00.000Z", completedRows: 190, signals: 1, wins: 0, accountReturnPct: -3.0 }),
 });
 
+export const PENGU_V8_V64_BASE = Object.freeze({
+    breakoutAtrFloor: 0.510560996033169,
+    longMultiplier: 1.25,
+    shortMultiplier: 1.0,
+    lowGross: 0.1875,
+    lowGrossRule: Object.freeze({ feature: "penguReturn72h", op: "lte", threshold: 0.12049482888834451 }),
+    sourceProductionSha: RECOVERY_V8_SOURCE_PRODUCTION_SHA,
+    historicalIntegratedPenguCap: 0.75,
+});
+
 export const PENGU_RECOVERY_V8 = {
     id: "PENGU_RECOVERY_V8",
     symbol: "PENGUUSDT",

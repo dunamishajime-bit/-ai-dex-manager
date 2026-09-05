@@ -55,6 +55,7 @@ export interface PenguDualLsV2PortfolioRunnerConfig {
     killSwitchPath?: string;
     portfolioDailyLossStatePath?: string;
     recoveryV8Enabled?: boolean;
+    v64DynamicLongEnabled?: boolean;
 }
 
 export interface PenguDualLsV2RunnerLogger {
@@ -540,7 +541,7 @@ export class PenguDualLsV2PortfolioRunner {
             if (state.pending) return await this.reconcilePending(state);
             const history = await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
-                const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true });
+                const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
                 state.lastSignalReferenceTs = signal.referenceTs;
                 state.latestSignal = signal;
                 await this.dependencies.stateStore.save(state);
@@ -625,7 +626,7 @@ export class PenguDualLsV2PortfolioRunner {
                 return { status: "held", message: "PENGU Dual LS will not create an order while any account open order exists." };
             }
 
-            const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true });
+            const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
             const sharedRisk = await this.sharedRiskReason();
             const signal: PenguDualLsV2Signal = sharedRisk && state.position
                 ? {

@@ -1,4 +1,5 @@
 import { PENGU_DUAL_LS_V2 } from "@/config/penguDualLsV2Runtime";
+import { PENGU_V8_V64_BASE } from "@/config/penguRecoveryV8";
 import type { DisDexV35Candle } from "@/lib/disdex-v35-signal-engine";
 import { advancePenguShortV20, type PenguShortV20Action } from "@/lib/pengu-short-v20";
 import {
@@ -13,6 +14,7 @@ const HOUR = 3_600_000;
 
 export interface PenguDualLsV2SignalOptions {
     recoveryV8Enabled?: boolean;
+    v64DynamicLongEnabled?: boolean;
 }
 
 export function selectPenguRecoveryV8Entry(row: RecoveryV8FeatureRow | undefined, enabled: boolean) {
@@ -210,6 +212,59 @@ function longRaw(features: PenguDualLsV2Features) {
         && features.volumeRatio6OverPrior36 <= rule.volumeRatioMaximum
         && features.atr24Ratio <= rule.atr24RatioMaximum
         && features.close > features.ema168;
+}
+
+export function penguV8BreakoutAtrScore(features: PenguDualLsV2Features): number {
+    const atrAbs = Math.max(1e-12, features.close * features.atr24Ratio);
+    return (features.close - features.priorHigh18h) / atrAbs;
+}
+
+function longGatePasses(features: PenguDualLsV2Features) {
+    const rule = PENGU_DUAL_LS_V2.long;
+    return {
+        regime72: features.penguReturn72h >= rule.regimeReturn72hMinimum,
+        breakout18: features.close > features.priorHigh18h,
+        return24: features.penguReturn24h >= rule.penguReturn24hMinimum,
+        relative24: features.relativeReturn24h >= rule.relativeReturn24hMinimum,
+        btc24: features.btcReturn24h >= rule.btcReturn24hMinimum,
+        rsiMin: features.rsi14 >= rule.rsiMinimum,
+        rsiMax: features.rsi14 <= rule.rsiMaximum,
+        volumeMin: features.volumeRatio6OverPrior36 >= rule.volumeRatioMinimum,
+        volumeMax: features.volumeRatio6OverPrior36 <= rule.volumeRatioMaximum,
+        atrMax: features.atr24Ratio <= rule.atr24RatioMaximum,
+        ema168: features.close > features.ema168,
+    };
+}
+
+export function isPenguV8V64DynamicLongRaw(features: PenguDualLsV2Features): boolean {
+    if (longRaw(features)) return true;
+    const gates = longGatePasses(features);
+    const allExceptRegime = Object.entries(gates).every(([name, passed]) => name === "regime72" || passed);
+    return allExceptRegime
+        && !gates.regime72
+        && penguV8BreakoutAtrScore(features) >= PENGU_V8_V64_BASE.breakoutAtrFloor;
+}
+
+export function penguV8V64RequestedLongGross(features: PenguDualLsV2Features): number {
+    const sizing = PENGU_DUAL_LS_V2.sizing;
+    if (!Number.isFinite(features.atr24Ratio) || features.atr24Ratio <= 0) return 0;
+    const multiplier = PENGU_V8_V64_BASE.longMultiplier;
+    const baseGross = Math.min(
+        sizing.grossCap * multiplier,
+        Math.max(sizing.grossFloor * multiplier, sizing.grossMultiplier * sizing.targetVolatility / features.atr24Ratio * multiplier),
+    );
+    return features.penguReturn72h <= PENGU_V8_V64_BASE.lowGrossRule.threshold
+        ? baseGross
+        : Math.min(baseGross, PENGU_V8_V64_BASE.lowGross);
+}
+
+export function isPenguV8V64DynamicLongSignal(rows: readonly PenguDualLsV2EvaluationRow[], index: number): boolean {
+    const current = rows[index]?.features;
+    if (!current) return false;
+    const currentRaw = isPenguV8V64DynamicLongRaw(current);
+    const previous = index > 0 ? rows[index - 1]?.features : undefined;
+    const previousRaw = previous ? isPenguV8V64DynamicLongRaw(previous) : false;
+    return currentRaw && !previousRaw;
 }
 
 function featureRows(pengu: DisDexV35Candle[], btc: DisDexV35Candle[]) {
@@ -487,8 +542,21 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         },
     });
     if (!latest?.features) return empty("PENGU/BTCの確定1時間足履歴が不足しているためFail Closedです。");
-    const baseDecision = evaluatePenguDualLsV2Decision(latest.features, latest.shortSignal, latest.longRaw && !latest.longSignal);
-    const recoveryDecision = selectPenguRecoveryV8Entry(latest.recoveryV8, options.recoveryV8Enabled === true);
+    const latestIndex = rows.length - 1;
+    const v64LongSignal = options.v64DynamicLongEnabled === true
+        ? isPenguV8V64DynamicLongSignal(rows, latestIndex)
+        : latest.longSignal;
+    const baseDecision: PenguDualLsV2Decision = options.v64DynamicLongEnabled === true
+        ? latest.shortSignal
+            ? { side: -1, longEligible: v64LongSignal, shortEligible: true, active: true, reason: "PENGU V8 Short: SHORT_FIRST priority over V64 Dynamic Long/Recovery." }
+            : v64LongSignal
+                ? { side: 1, longEligible: true, shortEligible: false, active: true, reason: "PENGU V8 V64 Dynamic Long: ordinary Long or regime72-only breakout recovery edge passed." }
+                : { side: 0, longEligible: false, shortEligible: false, active: false, reason: "PENGU V8 base Long/Short conditions are not active." }
+        : evaluatePenguDualLsV2Decision(latest.features, latest.shortSignal, latest.longRaw && !latest.longSignal);
+    const recoveryRow = latest.recoveryV8
+        ? { ...latest.recoveryV8, ordinaryLongEligible: v64LongSignal, baseLongSignal: v64LongSignal }
+        : undefined;
+    const recoveryDecision = selectPenguRecoveryV8Entry(recoveryRow, options.recoveryV8Enabled === true);
     const decision = !baseDecision.active && recoveryDecision?.kind === "RECOVERY_V8"
         ? { side: 1 as const, longEligible: false, shortEligible: false, active: true, reason: recoveryDecision.reason }
         : baseDecision;
@@ -509,8 +577,8 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         shortV20FailureConfirmedTs: position?.shortV20?.failureConfirmedTs,
     };
     let positionEvaluation: { exit?: PenguDualLsV2ExitDecision; updatedPosition: PenguDualLsV2Position } | undefined;
-    if (position?.entryVersion === "RECOVERY_V8" && position.recoveryV8 && latest.recoveryV8) {
-        const recoveryEvaluation = evaluateRecoveryV8PositionBar(position.recoveryV8, latest.recoveryV8);
+    if (position?.entryVersion === "RECOVERY_V8" && position.recoveryV8 && recoveryRow) {
+        const recoveryEvaluation = evaluateRecoveryV8PositionBar(position.recoveryV8, recoveryRow);
         const recoveryUpdated: PenguDualLsV2Position = {
             ...position,
             quantity: recoveryEvaluation.updatedPosition.quantity,
@@ -537,7 +605,11 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest.features.referenceTs,
         side: decision.side,
-        targetGross: recoveryDecision?.kind === "RECOVERY_V8" && !baseDecision.active ? recoveryDecision.gross : targetGrossForAtr(latest.features.atr24Ratio),
+        targetGross: recoveryDecision?.kind === "RECOVERY_V8" && !baseDecision.active
+            ? recoveryDecision.gross
+            : options.v64DynamicLongEnabled === true && decision.side > 0
+                ? penguV8V64RequestedLongGross(latest.features)
+                : targetGrossForAtr(latest.features.atr24Ratio),
         entryTs: latest.features.referenceTs + HOUR,
         reason: decision.reason,
         features: latest.features,

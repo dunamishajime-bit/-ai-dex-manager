@@ -104,6 +104,7 @@ async function main() {
             killSwitchPath: runtime.killSwitchPath,
             portfolioDailyLossStatePath: runtime.portfolioDailyLossStatePath,
             recoveryV8Enabled,
+            v64DynamicLongEnabled: recoveryV8Enabled,
         },
         recoveryV8Protection,
     });

@@ -1,0 +1,128 @@
+{
+  "schema": "pengu-v8-v64-restoration-verification/v1",
+  "baseHead": "5c32e55d7ee9ba9e443eec6947c01f9ac316fd32",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "capital": {
+    "initialJpy": 10000.0,
+    "monthlyJpy": 10000.0,
+    "contributionsAfterStart": 12,
+    "totalContributedJpy": 130000,
+    "compounding": true
+  },
+  "q102UniverseComparison": {
+    "13": {
+      "trades": 58,
+      "returnPct": 112.64746499275162,
+      "profitFactor": 2.5884139303844793,
+      "maxDrawdownPct": -11.729791830517211
+    },
+    "20": {
+      "trades": 67,
+      "returnPct": 98.88873472357437,
+      "profitFactor": 1.9914171344209677,
+      "maxDrawdownPct": -19.690666555766146
+    },
+    "30": {
+      "trades": 70,
+      "returnPct": 82.90331987612917,
+      "profitFactor": 1.77129494029578,
+      "maxDrawdownPct": -19.690666555766157
+    },
+    "decision": "KEEP_CURRENT_13_CAUSAL_UNIVERSE; DO_NOT_PROMOTE_20_OR_30"
+  },
+  "penguV8HistoricalParity": {
+    "trades": 70,
+    "returnPct": 574.2299381960086,
+    "profitFactor": 4.331158674670027,
+    "maxDrawdownPct": -12.848857788628465,
+    "severeReturnPct": 395.5575708353778,
+    "severeProfitFactor": 3.4431875382578734,
+    "severeMaxDrawdownPct": -14.773631389772579
+  },
+  "integratedComparison": {
+    "current": {
+      "NORMAL": {
+        "endingAssetJpy": 882837.5697426009,
+        "netProfitJpy": 752837.5697426009,
+        "returnOnContributedCapitalPct": 579.1058228789237,
+        "timeWeightedReturnPct": 2583.0720005943376,
+        "moneyWeightedReturnXirrPct": 1800.9441269374029,
+        "maxDrawdownPctClosedEventTwr": -11.618689752329182,
+        "completedTrades": 673,
+        "realizedEvents": 731,
+        "profitFactorRealizedEvents": 2.7788661249298983
+      },
+      "STRESS": {
+        "endingAssetJpy": 300601.13357445155,
+        "netProfitJpy": 170601.13357445155,
+        "returnOnContributedCapitalPct": 131.23164121111657,
+        "timeWeightedReturnPct": 413.0048224817911,
+        "moneyWeightedReturnXirrPct": 315.9603708802092,
+        "maxDrawdownPctClosedEventTwr": -17.380791424231557,
+        "completedTrades": 539,
+        "realizedEvents": 585,
+        "profitFactorRealizedEvents": 1.8220978345995542
+      }
+    },
+    "penguV8Restored": {
+      "NORMAL": {
+        "endingAssetJpy": 1773132.5914274107,
+        "netProfitJpy": 1643132.5914274107,
+        "returnOnContributedCapitalPct": 1263.9481472518544,
+        "timeWeightedReturnPct": 6071.91327640801,
+        "moneyWeightedReturnXirrPct": 4521.994923097873,
+        "maxDrawdownPctClosedEventTwr": -14.295865365572435,
+        "completedTrades": 714,
+        "realizedEvents": 775,
+        "profitFactorRealizedEvents": 3.1494835692891243
+      },
+      "STRESS": {
+        "endingAssetJpy": 504673.89068775054,
+        "netProfitJpy": 374673.89068775054,
+        "returnOnContributedCapitalPct": 288.2106851444235,
+        "timeWeightedReturnPct": 964.6167734594926,
+        "moneyWeightedReturnXirrPct": 789.4778511782656,
+        "maxDrawdownPctClosedEventTwr": -17.88047630403232,
+        "completedTrades": 581,
+        "realizedEvents": 632,
+        "profitFactorRealizedEvents": 2.1290631466665952
+      }
+    },
+    "grossChecks": {
+      "NORMAL_contributed": true,
+      "NORMAL_v12pos": true,
+      "NORMAL_v12Gross": true,
+      "NORMAL_penguGross": true,
+      "NORMAL_q102Gross": true,
+      "NORMAL_cryptoGross": true,
+      "NORMAL_stockGross": true,
+      "NORMAL_totalGross": true,
+      "STRESS_contributed": true,
+      "STRESS_v12pos": true,
+      "STRESS_v12Gross": true,
+      "STRESS_penguGross": true,
+      "STRESS_q102Gross": true,
+      "STRESS_cryptoGross": true,
+      "STRESS_stockGross": true,
+      "STRESS_totalGross": true
+    }
+  },
+  "inputDigests": {
+    "currentPenguLedgerSha256": "ac89729b27def925c798be13f46ca898444fb57a3f88ddf3978b5b1d3dfb4f6c",
+    "v8PenguLedgerSha256": "f4c63d726b263dfa52edf9e058b0e888a769e7e438343ec253a2746cda57d60d",
+    "v12LedgerSha256": "6e91b83781b601813d70f6530b0f997e93b15ce8b9a5780dc0efa29c7c292b02",
+    "v52LedgerSha256": "6cfabc3d266ec8db87ee0cd20c0fdf81e6701348a83be9827f863c43ca84a704",
+    "q102CandidatesSha256": "0ab3f5f1c552a3bf19e1669658e08c4c8ae131dbab7abcc01ee5edce64b2a520"
+  },
+  "safety": {
+    "researchOnly": true,
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "recoveryV8PromotionRemainsFailClosed": true
+  },
+  "decision": "PUSH_PENGU_V8_V64_RESTORATION_ONLY; Q102_UNIVERSE_EXPANSION_REJECTED_BY_BT"
+}
