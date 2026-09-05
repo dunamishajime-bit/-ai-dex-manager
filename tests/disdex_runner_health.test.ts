@@ -25,6 +25,9 @@ const RELEASE = "/home/deploy/disdex-trading/releases/" + SHA;
 
 test("watchdog recognizes the actual split PENGU and V52 production commands", () => {
     assert.equal(isRunnerProcessCommand("PENGU_V8", "node_modules/.bin/tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon", RELEASE), true);
+    assert.equal(isRunnerProcessCommand("PENGU_V8", `node ${RELEASE}/node_modules/.bin/tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon`, RELEASE), true);
+    assert.equal(isRunnerProcessCommand("V12", `node ${RELEASE}/node_modules/.bin/tsx scripts/disdex-v12-x1-all-live-runner.ts --daemon`, RELEASE), true);
+    assert.equal(isRunnerProcessCommand("QUALITY102_CAUSAL_V1", `node ${RELEASE}/node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-live-runner.ts --daemon`, RELEASE), true);
     assert.equal(isRunnerProcessCommand("PENGU_V8", "/usr/bin/bash scripts/ops/disdex-v96-v52-live.sh", RELEASE), true);
     assert.equal(isRunnerProcessCommand("V52", "/usr/bin/python3 scripts/disdex_v52_aster_only_live_engine.py --mode live", RELEASE), true);
     assert.equal(isRunnerProcessCommand("V52", "python3 scripts/disdex_v52_aster_only_legacy_engine.py --mode live", RELEASE), true);

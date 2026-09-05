@@ -596,6 +596,12 @@ function commandMatchesNodeRunner(tokens: string[], expectedCwd: string, script:
     if (tokens.length === args.length + 2 && (tokens[0] === "node_modules/.bin/tsx" || samePath(tokens[0], join(expectedCwd, "node_modules/.bin/tsx"))) && pathTokenMatches(tokens[1], expectedCwd, script)) {
         return tokens.slice(2).every((token, index) => token === args[index]);
     }
+    if (tokens.length === args.length + 3
+        && (tokens[0] === "/usr/bin/node" || tokens[0] === "node")
+        && pathTokenMatches(tokens[1], expectedCwd, "node_modules/.bin/tsx")
+        && pathTokenMatches(tokens[2], expectedCwd, script)) {
+        return tokens.slice(3).every((token, index) => token === args[index]);
+    }
     const tsxCli = join(expectedCwd, "node_modules/tsx/dist/cli.mjs");
     return tokens.length === args.length + 3
         && (tokens[0] === "/usr/bin/node" || tokens[0] === "node")
