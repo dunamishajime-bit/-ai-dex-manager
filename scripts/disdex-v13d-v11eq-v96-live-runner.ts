@@ -53,7 +53,7 @@ function combinedPaths() {
 export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
     const paths = combinedPaths();
     const quality102StatePath = process.env.QUALITY102_CAUSAL_V1_STATE_PATH
-        || resolve(paths.combinedRoot, "quality102-causal-v1", "state.json");
+        || resolve(paths.stateRoot, "quality102-causal-v1", "state.json");
     const runtimeCommitSha = process.env.DISDEX_RUNTIME_COMMIT_SHA
         || process.env.DISDEX_V96_RUNTIME_COMMIT_SHA
         || "";
@@ -502,6 +502,11 @@ function selfTest() {
         resolve(".runtime-state/selftest-v96-v52", "account-order.lock"),
     );
     assert.equal(env.DISDEX_ACCOUNT_LOCK_PATH, env.PENGU_DUAL_LS_V2_LOCK_PATH);
+    assert.equal(
+        env.QUALITY102_CAUSAL_V1_STATE_PATH,
+        resolve(selfTestState, "quality102-causal-v1", "state.json"),
+    );
+    assert.equal(env.DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH, env.QUALITY102_CAUSAL_V1_STATE_PATH);
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
     assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
     assert.equal(shouldStartV52Worker("ACTIVE"), true);
