@@ -106,12 +106,15 @@ for directory in "$HEALTH_ROOT" "$HEARTBEAT_ROOT" "$PRIVATE_ROOT"; do
   [[ ! -L "$directory" ]] || die "health path is a symlink: ${directory}"
 done
 install -d -o root -g root -m 0711 "$HEALTH_ROOT"
-install -d -o root -g "$HEALTH_GROUP" -m 0770 "$HEARTBEAT_ROOT"
+# The runner owns the heartbeat directory so atomic replacement is writable by
+# the runner while remaining non-group-writable for the heartbeat contract.
+# The root watchdog can read it without being granted runner write access.
+install -d -o "$RUNNER_USER" -g "$HEALTH_GROUP" -m 0750 "$HEARTBEAT_ROOT"
 install -d -o root -g root -m 0700 "$PRIVATE_ROOT"
 chmod 0711 "$HEALTH_ROOT"
 chown root:root "$HEALTH_ROOT"
-chmod 0770 "$HEARTBEAT_ROOT"
-chown root:"$HEALTH_GROUP" "$HEARTBEAT_ROOT"
+chmod 0750 "$HEARTBEAT_ROOT"
+chown "$RUNNER_USER":"$HEALTH_GROUP" "$HEARTBEAT_ROOT"
 chmod 0700 "$PRIVATE_ROOT"
 chown root:root "$PRIVATE_ROOT"
 
