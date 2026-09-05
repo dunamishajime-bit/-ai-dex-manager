@@ -212,11 +212,12 @@ function parameterizedServiceSha(unit: string): string | undefined {
 
 function assertParameterizedUnitSha(runnerId: RunnerId, unit: string, expectedSha: string): void {
     const instanceSha = parameterizedServiceSha(unit);
-    // V52's split Aster-only unit uses a historical instance identifier while
-    // its final drop-in pins the executable cwd/marker below.  The runtime
-    // release pin is therefore verified by validateReleasePin and the process
-    // cwd/command checks, not by the legacy instance suffix.
-    if ((runnerId === "V12" || runnerId === "QUALITY102_CAUSAL_V1") && instanceSha !== undefined && instanceSha !== expectedSha) {
+    // The deployed V12 and split Aster-only V52 units can retain historical
+    // instance identifiers while their final drop-ins pin the executable
+    // cwd/marker below. The runtime release pin is therefore verified by
+    // validateReleasePin and the process cwd/command checks, not by those
+    // legacy instance suffixes. Q102 remains exact-instance bound.
+    if (runnerId === "QUALITY102_CAUSAL_V1" && instanceSha !== undefined && instanceSha !== expectedSha) {
         throw new RunnerWatchdogSafetyError(`configured service unit SHA does not match expected release for ${runnerId}`);
     }
 }

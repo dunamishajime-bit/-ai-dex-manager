@@ -471,11 +471,28 @@ test("heartbeat persistence rejects unknown fields, requires Q102 metadata, and 
 
 test("parameterized service SHA mismatch blocks observation and restart", async () => {
     await withWatchdogFixture({}, async (config, system) => {
-        config.runners.V12.serviceUnit = `disdex-v12-x1-all@${"a".repeat(40)}.service`;
+        config.runners.QUALITY102_CAUSAL_V1.serviceUnit = `disdex-quality102-causal-v1@${"a".repeat(40)}.service`;
         const result = await runWatchdog({ config, system, now: NOW });
         assert.equal(result.exitCode, 1);
         assert.equal(result.sharedUncertainty, true);
         assert.deepEqual(system.calls, []);
+        assert.deepEqual(system.restartCalls, []);
+    });
+});
+
+test("legacy V12 instance identifier is accepted when release cwd and marker are pinned", async () => {
+    await withWatchdogFixture({}, async (config, system) => {
+        const legacyUnit = `disdex-v12-x1-all@${"a".repeat(40)}.service`;
+        config.runners.V12.serviceUnit = legacyUnit;
+        const heartbeat = makeWatchdogHeartbeat("V12", { serviceUnit: legacyUnit, workingDirectory: config.runners.V12.expectedCwd });
+        await writeRunnerHeartbeat(config.runners.V12.heartbeatPath, heartbeat);
+        const pid = system.pids.get(WATCHDOG_UNITS.V12)!;
+        system.active.set(legacyUnit, true);
+        system.pids.set(legacyUnit, pid);
+        const result = await runWatchdog({ config, system, now: NOW });
+        assert.equal(result.exitCode, 0);
+        assert.equal(result.sharedUncertainty, false);
+        assert.equal(result.decisions.V12.action, "NOOP");
         assert.deepEqual(system.restartCalls, []);
     });
 });
