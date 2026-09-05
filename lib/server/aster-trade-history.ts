@@ -275,7 +275,7 @@ export async function loadAsterTradeHistory(): Promise<AsterTradeHistoryResult> 
   if (cache && cache.expiresAt > now) {
     return {
       entries: cache.entries,
-      source: cache.error && cache.entries.length === 0 ? "unavailable" : "aster",
+      source: cache.entries.length > 0 ? "aster" : "unavailable",
       refreshedAt: new Date(now).toISOString(),
       error: cache.error,
     };
@@ -290,7 +290,7 @@ export async function loadAsterTradeHistory(): Promise<AsterTradeHistoryResult> 
   cache = { expiresAt: now + CACHE_TTL_MS, entries: result.entries, error: result.error };
   return {
     entries: result.entries,
-    source: result.error && result.entries.length === 0 ? "unavailable" : "aster",
+    source: result.entries.length > 0 ? "aster" : "unavailable",
     refreshedAt: new Date(now).toISOString(),
     error: result.error,
   };
