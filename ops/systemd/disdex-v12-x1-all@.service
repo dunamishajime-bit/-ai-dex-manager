@@ -4,7 +4,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=oneshot
+Type=simple
 User=deploy
 Group=deploy
 SupplementaryGroups=disdex-runner-health
@@ -20,10 +20,9 @@ Environment=V12_X1_ALL_LIVE_TRADING_ENABLED=false
 Environment=V12_X1_ALL_LIVE_EXECUTION_ENABLED=false
 ExecStartPre=/usr/bin/test -f /opt/disdex/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /opt/disdex/releases/%i/.disdex-release-sha
-ExecStart=/usr/bin/node scripts/disdex-v12-x1-all-live-runner.ts --once
-# Intentional oneshot: --once performs one gated tick and exits. Operational
-# recovery is owned by the shared watchdog, which re-enters this unit only
-# after heartbeat, release, stop-intent, and safety checks.
+ExecStart=/usr/bin/node scripts/disdex-v12-x1-all-live-runner.ts --daemon
+Restart=on-failure
+RestartSec=15
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict

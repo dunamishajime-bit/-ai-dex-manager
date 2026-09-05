@@ -616,6 +616,18 @@ function commandMatches(runnerId: RunnerId, command: string | undefined, expecte
     return commandMatchesShellRunner(tokens, expectedCwd, "scripts/ops/disdex-v96-v52-live.sh");
 }
 
+export function isSystemdIntentionalStop(unit: string, properties: Record<string, string>): boolean {
+    // V12 is a long-running daemon. A clean inactive result can mean the
+    // daemon exited after its last successful heartbeat, so only the explicit
+    // stop-intent marker may classify it as intentional.
+    if (/^disdex-v12-x1-all@/.test(unit)) return false;
+    return properties.ActiveState === "inactive"
+        && properties.SubState === "dead"
+        && properties.Result === "success"
+        && (properties.ExecMainCode === undefined || properties.ExecMainCode === "1")
+        && (properties.ExecMainStatus === undefined || properties.ExecMainStatus === "0");
+}
+
 function currentAttempts(state: WatchdogState, runnerId: RunnerId, now: number, windowMs: number): WatchdogAttempt[] {
     const attempts = state.runners[runnerId]?.attempts || [];
     return attempts.filter((attempt) => now - attempt.at <= windowMs);
@@ -1091,13 +1103,10 @@ export function createProductionWatchdogSystem(): RunnerWatchdogSystem {
                 const separator = line.indexOf("=");
                 return separator < 0 ? [] : [[line.slice(0, separator), line.slice(separator + 1)]];
             }));
-            // A cleanly completed allowlisted unit is the only systemd-derived stop intent.
-            // Failed/signal exits remain eligible for bounded operational recovery.
-            return properties.ActiveState === "inactive"
-                && properties.SubState === "dead"
-                && properties.Result === "success"
-                && (properties.ExecMainCode === undefined || properties.ExecMainCode === "1")
-                && (properties.ExecMainStatus === undefined || properties.ExecMainStatus === "0");
+            // A cleanly completed non-daemon allowlisted unit is the only
+            // systemd-derived stop intent. Failed/signal exits remain eligible
+            // for bounded operational recovery.
+            return isSystemdIntentionalStop(unit, properties);
         },
         async restart(unit: string): Promise<void> {
             assertSystemctlUnit(unit);

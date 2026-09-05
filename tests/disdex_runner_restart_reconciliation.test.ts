@@ -18,6 +18,7 @@ import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import type { DirectAccountSnapshot, DirectMarketQuote, DirectOpenOrder, DirectPosition, DirectTradeResult } from "../lib/direct-trade-executor";
 import type { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import {
+    isSystemdIntentionalStop,
     runWatchdog,
     type RunnerWatchdogConfig,
     type RunnerWatchdogSystem,
@@ -33,12 +34,16 @@ const UNITS: Record<RunnerId, string> = {
 };
 
 type Position = DirectPosition & { managedBy: string };
-type Order = DirectOpenOrder & { managedBy: string };
+type Order = DirectOpenOrder & { managedBy: string; type?: string; stopPrice?: number };
 
 class InMemoryAccountExchange {
-    readonly positions: Position[] = [{ symbol: "PENGUUSDT", quantity: 1.25, entryPrice: 1, markPrice: 1, unrealizedPnl: 0, pnlPct: 0, notionalUsd: 1.25, positionSide: "LONG", leverage: 1, updatedAt: 1_700_000_000_000, managedBy: "V52" }];
-    readonly openOrders: Order[] = [{ symbol: "PENGUUSDT", clientOrderId: "v52-existing", side: "SELL", status: "NEW", reduceOnly: true, quantity: 1.25, executedQuantity: 0, managedBy: "V52" }];
+    readonly positions: Position[] = [{ symbol: "ETHUSDT", quantity: 1.25, entryPrice: 1, markPrice: 1, unrealizedPnl: 0, pnlPct: 0, notionalUsd: 1.25, positionSide: "LONG", leverage: 1, updatedAt: 1_700_000_000_000, managedBy: "V12" }];
+    readonly openOrders: Order[] = [
+        { symbol: "ETHUSDT", clientOrderId: "v12-stop-existing", side: "SELL", status: "NEW", type: "STOP_MARKET", stopPrice: 0.9, reduceOnly: true, quantity: 1.25, executedQuantity: 0, managedBy: "V12" },
+        { symbol: "ETHUSDT", clientOrderId: "v12-tp-existing", side: "SELL", status: "NEW", type: "TAKE_PROFIT_MARKET", stopPrice: 1.2, reduceOnly: true, quantity: 1.25, executedQuantity: 0, managedBy: "V12" },
+    ];
     readonly counters = { submit: 0, cancel: 0, modify: 0, close: 0 };
+    readonly lockOwners: string[] = [];
     readonly account: DirectAccountSnapshot = { availableBalance: 1000, walletBalance: 1000, asset: "USDT", updatedAt: 1_700_000_000_000 };
     readonly quote: DirectMarketQuote = { symbol: "PENGUUSDT", bidPrice: 1, askPrice: 1, bidQuantity: 100, askQuantity: 100, midPrice: 1, spreadBps: 0, updatedAt: 1_700_000_000_000 };
 
@@ -63,14 +68,30 @@ class InMemoryAccountExchange {
             getPositions: executor.getPositions,
             getOpenOrders: executor.getOpenOrders,
             getAccountSnapshot: executor.getAccountSnapshot,
-            listV12Orders: async () => [],
-            openOrders: async () => [],
+            listV12Orders: async () => exchange.openOrders,
+            openOrders: async (symbol: string) => exchange.openOrders.filter((order) => order.symbol === symbol),
             normalizeStopPrice: async (_symbol: string, price: number) => ({ price }),
             placeStopMarket: async () => { exchange.counters.submit += 1; throw new Error("fixture must not place a stop"); },
             placeTakeProfit: async () => { exchange.counters.submit += 1; throw new Error("fixture must not place take profit"); },
             cancel: async () => { exchange.counters.cancel += 1; throw new Error("fixture must not cancel"); },
             flattenReduceOnly: async () => { exchange.counters.close += 1; throw new Error("fixture must not close"); },
         } as unknown as V12AsterLiveAdapter;
+    }
+}
+
+class TrackingAccountOrderLock extends FileAccountOrderLock {
+    activeOwners = 0;
+    maximumOwners = 0;
+    acquisitions = 0;
+
+    override async acquire(ownerId: string) {
+        const handle = await super.acquire(ownerId);
+        if (!handle) return null;
+        this.acquisitions += 1;
+        this.activeOwners += 1;
+        this.maximumOwners = Math.max(this.maximumOwners, this.activeOwners);
+        const release = handle.release;
+        return { ...handle, release: async () => { await release(); this.activeOwners -= 1; } };
     }
 }
 
@@ -149,17 +170,21 @@ test("restart re-enters real V12 preflight/reconciliation and preserves managed 
         const now = 1_700_000_000_000;
         const stateStore = new FileV12X1AllRunnerStateStore(join(root, "state.json"), "SHADOW");
         const riskPath = join(root, "risk.json");
-        await writeFile(riskPath, JSON.stringify(buildSharedCryptoDailyRiskState({ accountScope: "ASTER_FUTURES", utcDay: new Date(now).toISOString().slice(0, 10), strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"], lossPct: 0, maximumLossPct: 5, tripped: true, updatedAt: now, realizedPnl: 0, unrealizedPnl: 0, fees: 0, funding: 0, netDailyPnl: 0, referenceEquity: 1000, sourceComplete: true })));
+        await writeFile(riskPath, JSON.stringify(buildSharedCryptoDailyRiskState({ accountScope: "ASTER_FUTURES", utcDay: new Date(now).toISOString().slice(0, 10), strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"], lossPct: 0, maximumLossPct: 5, tripped: false, updatedAt: now, realizedPnl: 0, unrealizedPnl: 0, fees: 0, funding: 0, netDailyPnl: 0, referenceEquity: 1000, sourceComplete: true })));
         const marketData = { load: async () => Object.fromEntries(V12_X1_ALL.universe.map((symbol) => [symbol, Array.from({ length: 80 }, (_, index) => ({ ts: now - (80 - index) * 3_600_000, endTs: now - (80 - index) * 3_600_000, open: 1, high: 1, low: 1, close: 1, volume: 1, sourceCount: 2 as const }))])) };
-        const makeEngine = () => new V12LiveExecutionEngine({ adapter: exchange.adapter(), marketData, stateStore, lock: new FileAccountOrderLock(join(root, "account-order.lock")), riskPath, now: () => now });
-        assert.equal((await makeEngine().tick()).status, "risk-blocked");
-        assert.equal((await makeEngine().tick()).status, "risk-blocked");
+        const protection = { strategyId: "V12_X1.00_ALL" as const, symbol: "ETHUSDT", side: "LONG" as const, positionId: "v12-position-existing", quantity: 1.25, entryPrice: 1, atrAtEntry: 0.1, initialStop: 0.9, lastAckStop: 0.9, takeProfit: 1.2, peakOrTrough: 1, stopClientOrderId: "v12-stop-existing", takeProfitClientOrderId: "v12-tp-existing" };
+        await stateStore.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "SHADOW", updatedAt: now, lastReferenceTs: now, active: { symbol: "ETHUSDT", side: "LONG", quantity: 1.25, gross: 0.00125, positionId: "v12-position-existing", entryPrice: 1, atrAtEntry: 0.1, entrySignalTs: now, holdingBars: 1, peakPrice: 1, troughPrice: 1, protection } });
+        const lock = new TrackingAccountOrderLock(join(root, "account-order.lock"));
+        const beforeState = await stateStore.load();
+        const makeEngine = () => new V12LiveExecutionEngine({ adapter: exchange.adapter(), marketData, stateStore, lock, riskPath, now: () => now });
+        assert.equal((await makeEngine().tick()).status, "held");
+        assert.equal((await makeEngine().tick()).status, "held");
+        const afterState = await stateStore.load();
         assert.deepEqual(exchange.snapshot(), before);
-        const firstOwner = await new FileAccountOrderLock(join(root, "account-order.lock")).acquire("restart-owner");
-        assert.ok(firstOwner);
-        const secondOwner = await new FileAccountOrderLock(join(root, "account-order.lock")).acquire("second-owner");
-        assert.equal(secondOwner, null);
-        await firstOwner.release();
+        assert.deepEqual({ ...afterState, updatedAt: beforeState.updatedAt }, beforeState);
+        assert.equal(lock.acquisitions, 2);
+        assert.equal(lock.maximumOwners, 1);
+        assert.equal(lock.activeOwners, 0);
         assert.deepEqual(exchange.counters, { submit: 0, cancel: 0, modify: 0, close: 0 });
     } finally {
         await rm(root, { recursive: true, force: true });
@@ -196,9 +221,11 @@ test("service wiring is non-secret, singleton-safe, and exact-release bound", as
     assert.match(v12, /Environment=DISDEX_RUNNER_ID=V12/);
     assert.match(combined, /Environment=DISDEX_PENGU_RUNNER_ID=PENGU_V8/);
     assert.match(combined, /Environment=DISDEX_V52_RUNNER_ID=V52/);
-    assert.match(v12, /Type=oneshot/);
-    assert.match(v12, /--once/);
-    assert.doesNotMatch(v12, /^Restart=/m);
+    assert.match(v12, /Type=simple/);
+    assert.match(v12, /--daemon/);
+    assert.match(v12, /^Restart=on-failure/m);
+    assert.match(v12, /^RestartSec=15/m);
+    assert.doesNotMatch(v12, /Intentional oneshot/);
     assert.match(v12, /ExecStartPre=\/usr\/bin\/grep -Fxq %i \/opt\/disdex\/releases\/%i\/.disdex-release-sha/);
     assert.match(q102, /Restart=on-failure/);
     assert.match(combined, /ExecStartPre=\/usr\/bin\/grep -Fxq @DISDEX_RUNNER_RELEASE_SHA@ @DISDEX_RUNNER_RELEASE_ROOT@\/.disdex-release-sha/);
@@ -209,6 +236,27 @@ test("service wiring is non-secret, singleton-safe, and exact-release bound", as
     for (const value of [q102, v12, combined]) {
         assert.doesNotMatch(value, /DISDEX_RUNNER_(?:API_KEY|TOKEN|SECRET|PASSWORD|PRIVATE_KEY)=/i);
     }
+});
+
+test("an active configured V12 with a stale heartbeat remains restartable after daemon exit", async () => {
+    const fixture = await makeWatchdogFixture();
+    try {
+        const system = new HealthySystem();
+        const stale = heartbeat("V12", fixture.now - 10 * 60_000);
+        await writeRunnerHeartbeat(fixture.config.runners.V12.heartbeatPath, stale);
+        const result = await runWatchdog({ config: fixture.config, system, now: fixture.now });
+        assert.equal(result.decisions.V12.action, "RESTART");
+        assert.equal(result.decisions.V12.restartAuthorized, true);
+        assert.ok(result.restartCalls.includes(UNITS.V12));
+    } finally {
+        await rm(fixture.root, { recursive: true, force: true });
+    }
+});
+
+test("clean systemd completion is not V12 daemon stop intent", () => {
+    const clean = { ActiveState: "inactive", SubState: "dead", Result: "success", ExecMainCode: "1", ExecMainStatus: "0" };
+    assert.equal(isSystemdIntentionalStop(UNITS.V12, clean), false);
+    assert.equal(isSystemdIntentionalStop("disdex-quality102-causal-v1@" + SHA + ".service", clean), true);
 });
 
 test("recovery decision itself cannot authorize LIVE promotion from a safety latch", () => {
