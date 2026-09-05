@@ -212,7 +212,11 @@ function parameterizedServiceSha(unit: string): string | undefined {
 
 function assertParameterizedUnitSha(runnerId: RunnerId, unit: string, expectedSha: string): void {
     const instanceSha = parameterizedServiceSha(unit);
-    if ((runnerId === "V12" || runnerId === "QUALITY102_CAUSAL_V1" || runnerId === "V52") && instanceSha !== undefined && instanceSha !== expectedSha) {
+    // V52's split Aster-only unit uses a historical instance identifier while
+    // its final drop-in pins the executable cwd/marker below.  The runtime
+    // release pin is therefore verified by validateReleasePin and the process
+    // cwd/command checks, not by the legacy instance suffix.
+    if ((runnerId === "V12" || runnerId === "QUALITY102_CAUSAL_V1") && instanceSha !== undefined && instanceSha !== expectedSha) {
         throw new RunnerWatchdogSafetyError(`configured service unit SHA does not match expected release for ${runnerId}`);
     }
 }
@@ -605,16 +609,37 @@ function commandMatchesShellRunner(tokens: string[], expectedCwd: string, script
         && pathTokenMatches(tokens[1], expectedCwd, script);
 }
 
-function commandMatches(runnerId: RunnerId, command: string | undefined, expectedCwd: string): boolean {
+function commandMatchesPythonRunner(tokens: string[], expectedCwd: string, scripts: readonly string[], args: readonly string[]): boolean {
+    return tokens.length === args.length + 2
+        && (tokens[0] === "/usr/bin/python3" || tokens[0] === "python3" || tokens[0] === "python")
+        && scripts.some((script) => pathTokenMatches(tokens[1], expectedCwd, script))
+        && tokens.slice(2).every((token, index) => token === args[index]);
+}
+
+export function isRunnerProcessCommand(runnerId: RunnerId, command: string | undefined, expectedCwd: string): boolean {
     if (!command) return false;
     const tokens = command.trim().split(/\s+/);
     if (runnerId === "V12") {
         return commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-v12-x1-all-live-runner.ts", ["--once"] as const)
             || commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-v12-x1-all-live-runner.ts", ["--daemon"] as const);
     }
+    if (runnerId === "PENGU_V8") {
+        return commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-pengu-dual-ls-v2-live-runner.ts", ["--once"] as const)
+            || commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-pengu-dual-ls-v2-live-runner.ts", ["--daemon"] as const)
+            || commandMatchesShellRunner(tokens, expectedCwd, "scripts/ops/disdex-v96-v52-live.sh");
+    }
+    if (runnerId === "V52") {
+        return commandMatchesPythonRunner(tokens, expectedCwd, [
+            "scripts/disdex_v52_aster_only_live_engine.py",
+            "scripts/disdex_v52_aster_only_legacy_engine.py",
+        ] as const, ["--mode", "live"] as const)
+            || commandMatchesShellRunner(tokens, expectedCwd, "scripts/ops/disdex-v96-v52-live.sh");
+    }
     if (runnerId === "QUALITY102_CAUSAL_V1") return commandMatchesNodeRunner(tokens, expectedCwd, "scripts/disdex-quality102-causal-v1-live-runner.ts", ["--daemon"] as const);
     return commandMatchesShellRunner(tokens, expectedCwd, "scripts/ops/disdex-v96-v52-live.sh");
 }
+
+const commandMatches = isRunnerProcessCommand;
 
 export function isSystemdIntentionalStop(unit: string, properties: Record<string, string>): boolean {
     // V12 is a long-running daemon. A clean inactive result can mean the

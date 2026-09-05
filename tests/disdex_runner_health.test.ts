@@ -13,6 +13,7 @@ import {
 } from "../lib/disdex-runner-health";
 import {
     createProductionWatchdogSystem,
+    isRunnerProcessCommand,
     runWatchdog,
     type RunnerWatchdogConfig,
     type RunnerWatchdogSystem,
@@ -21,6 +22,15 @@ import {
 const NOW = 1_757_000_000_000;
 const SHA = "0123456789abcdef0123456789abcdef01234567";
 const RELEASE = "/home/deploy/disdex-trading/releases/" + SHA;
+
+test("watchdog recognizes the actual split PENGU and V52 production commands", () => {
+    assert.equal(isRunnerProcessCommand("PENGU_V8", "node_modules/.bin/tsx scripts/disdex-pengu-dual-ls-v2-live-runner.ts --daemon", RELEASE), true);
+    assert.equal(isRunnerProcessCommand("PENGU_V8", "/usr/bin/bash scripts/ops/disdex-v96-v52-live.sh", RELEASE), true);
+    assert.equal(isRunnerProcessCommand("V52", "/usr/bin/python3 scripts/disdex_v52_aster_only_live_engine.py --mode live", RELEASE), true);
+    assert.equal(isRunnerProcessCommand("V52", "python3 scripts/disdex_v52_aster_only_legacy_engine.py --mode live", RELEASE), true);
+    assert.equal(isRunnerProcessCommand("V52", "/usr/bin/python3 scripts/disdex_v52_aster_only_live_engine.py --mode paper", RELEASE), false);
+    assert.equal(isRunnerProcessCommand("PENGU_V8", "node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-live-runner.ts --daemon", RELEASE), false);
+});
 
 function makeHeartbeat(overrides: Partial<RunnerHeartbeat> = {}): RunnerHeartbeat {
     return {
