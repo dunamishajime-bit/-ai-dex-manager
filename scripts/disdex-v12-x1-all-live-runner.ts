@@ -1,5 +1,7 @@
 import "dotenv/config";
 
+import { lstat, readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
@@ -63,6 +65,18 @@ export function v12AccountPriority(state: V12X1AllRunnerState) {
     return 4;
 }
 
+export async function assertV12ExactReleasePreflight(options: { cwd?: string; expectedSha?: string } = {}) {
+    const cwd = options.cwd || process.cwd();
+    const expectedSha = String(options.expectedSha || process.env.DISDEX_RELEASE_SHA || process.env.V12_LIVE_COMMIT_SHA || process.env.DISDEX_EXPECTED_RUNTIME_SHA || process.env.DISDEX_EXPECTED_SHA || "").trim().toLowerCase();
+    if (!/^[0-9a-f]{40}$/.test(expectedSha) || expectedSha === ZERO_SHA) throw new Error("V12_LIVE_EXPECTED_RELEASE_SHA_REQUIRED");
+    const markerPath = join(cwd, ".disdex-release-sha");
+    const stats = await lstat(markerPath);
+    if (!stats.isFile() || stats.isSymbolicLink()) throw new Error("V12_LIVE_RELEASE_MARKER_NOT_REGULAR_FILE");
+    const marker = (await readFile(markerPath, "utf8")).toLowerCase();
+    if (marker !== `${expectedSha}\n` && marker !== expectedSha) throw new Error("V12_LIVE_RELEASE_MARKER_SHA_MISMATCH");
+    return { cwd, expectedSha } as const;
+}
+
 export async function buildV12LiveRuntime() {
     const runtime = resolveV12X1AllRuntime();
     if (!runtime.enabled) return { runtime, engine: undefined as V12LiveExecutionEngine | undefined, status: "disabled" as const };
@@ -70,6 +84,7 @@ export async function buildV12LiveRuntime() {
     if (!runtime.liveTradingEnabled || !runtime.liveExecutionEnabled || !boolEnv("DISDEX_V12_LIVE_ALLOW_REAL_ORDERS")) {
         throw new Error("V12_LIVE_GATES_NOT_ALL_ENABLED");
     }
+    await assertV12ExactReleasePreflight();
     const releaseSha = assertExactReleaseAck();
     const strict = assertV12StrictLiveConfiguration();
     const client = new AsterV3Client({
@@ -106,10 +121,12 @@ async function main() {
 
     const built = await buildV12LiveRuntime();
     if (built.status === "disabled") {
+        await publishV12Heartbeat({ status: "disabled", reason: "V12 runtime disabled by configuration" }, Date.now(), built.runtime);
         console.log(JSON.stringify({ strategyId: "V12_X1.00_ALL", status: "disabled" }));
         return;
     }
     if (built.status !== "live" || !built.engine) {
+        await publishV12Heartbeat({ status: "non-live", reason: `V12 runtime mode ${built.runtime.mode} is not live` }, Date.now(), built.runtime);
         throw new Error("V12_X1_ALL_PRODUCTION_RUNNER_REQUIRES_EXPLICIT_LIVE_ACTIVATION");
     }
 

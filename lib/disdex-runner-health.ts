@@ -85,6 +85,13 @@ export function decideRecovery(observation: RecoveryObservation): RecoveryDecisi
   const heartbeat = observation.heartbeat;
   const shared = observation.sharedUncertainty === true;
   if (shared) return decision("HOLD_FAIL_CLOSED", "shared uncertainty", true);
+  // A published non-live heartbeat is an explicit operator/configuration
+  // state, not evidence of daemon loss. It remains a NOOP even when old.
+  // Active daemons publish liveEnabled=true and therefore retain stale-heartbeat
+  // restartability below.
+  if (heartbeat && !heartbeat.liveEnabled && heartbeat.safetyState === "WAITING" && ["SHADOW", "PAPER"].includes(heartbeat.mode.toUpperCase())) {
+    return decision("NOOP", "runner explicitly disabled or non-live", false);
+  }
   if (heartbeat && LATCHED_STATES.has(heartbeat.safetyState)) {
     return decision("HOLD_FAIL_CLOSED", `safety state ${heartbeat.safetyState}`, false);
   }
