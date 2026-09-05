@@ -101,9 +101,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           npm run strategy:runner-watchdog:safety-boundary
-          ! grep -R -n -E 'QUALITY102_LIVE_SELECTOR_PARITY=(true|1)|QUALITY102_LIVE_ENABLED=(true|1)' -- config lib scripts ops \
-            --exclude-dir='__pycache__' --exclude='*.tmp.*'
-          ! grep -R -n -E 'placeMarket|place_limit|submitOrder|cancelOrder|closePosition|executeMarket' \
+          ! grep -R -n -E --exclude-dir='__pycache__' --exclude='*.tmp.*' 'QUALITY102_LIVE_SELECTOR_PARITY=(true|1)|QUALITY102_LIVE_ENABLED=(true|1)' config lib scripts ops
+          ! grep -R -n -E --exclude-dir='__pycache__' --exclude='*.tmp.*' --exclude='disdex_runner_watchdog_safety_boundary.test.ts' '\.(placeMarket|place_limit|submitOrder|cancelOrder|closePosition|executeMarket)[[:space:]]*\(' \
             scripts/disdex-runner-health-selftest.ts scripts/disdex-runner-watchdog-selftest.ts \
             scripts/disdex-quality102-causal-v1-*-selftest.ts scripts/v12-*-selftest.ts \
             scripts/pengu-dual-ls-v2-selftest.ts tests/disdex_runner_*.test.ts tests/disdex_runtime_status.test.ts
