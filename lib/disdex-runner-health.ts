@@ -246,7 +246,7 @@ export async function writeRunnerHeartbeat(path: string, heartbeat: RunnerHeartb
     await mkdir(directory, { recursive: true, mode: 0o770 });
     const directoryStat = await lstat(directory);
     if (!directoryStat.isDirectory() || directoryStat.isSymbolicLink()) throw new RunnerHeartbeatError("heartbeat directory is not a real directory");
-    if (process.platform !== "win32" && ((directoryStat.mode & 0o007) !== 0 || (directoryStat.mode & 0o200) === 0)) {
+    if (process.platform !== "win32" && ((directoryStat.mode & 0o022) !== 0 || (directoryStat.mode & 0o200) === 0)) {
         throw new RunnerHeartbeatError("heartbeat directory permissions are unsafe or not writable");
     }
     const temporaryPath = join(directory, `.${path.split(/[\\/]/).pop() ?? "heartbeat"}.${process.pid}.${Date.now()}.tmp`);
