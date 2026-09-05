@@ -1,13 +1,14 @@
 export const DIST_TERMINAL_LIVE_CONFIG = {
   productName: "DISTerminal",
-  strategyLabel: "V12 X1.00 ALL Top2 + PENGU Dual LS V2 / Short V20 + V52 Top2",
+  strategyLabel: "V12 X1.00 ALL Top2 + PENGU Dual LS V2 / Short V20 + V52 Top2 + Quality102",
   executionVenue: "AsterDEX",
   executor: "AsterDirectTradeExecutor",
   approvedReleaseSha: "multi-lineage-production",
   productionReleaseShas: {
-    v12: "a81dd2eae17422f7d9a4354460aa2692317ba082",
-    pengu: "5a98a7e04d6ac4b867d26d46f3e718ffd7f7bfd2",
+    v12: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
+    pengu: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
     v52: "239982a73daed630a88b466404af43483aea8a10",
+    quality102: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
   },
   v12DailyLossPct: 5,
   sharedCryptoDailyLossPct: 5,
@@ -18,7 +19,36 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
   v12PerPositionGross: 1,
   v12MaximumPositions: 2,
   v12SizingMode: "ATR/リスク連動、最大2ポジション（合計1.50x）",
-  sharedCryptoGross: 1.5,
+  sharedCryptoGross: 2,
+  quality102Runtime: {
+    expectedReleaseSha: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
+    strategyGrossCap: 0.5,
+    cryptoGrossCap: 2,
+    totalGrossCap: 2.5,
+    selectorMode: "DERIVED_HIGH_VOL_ONLY",
+    historicalSelectorParity: false,
+    brkLiveEnabled: false,
+    symbols: [
+      "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT",
+      "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT",
+    ],
+  },
+  /**
+   * Strict BT #33404708902 policy is displayed separately from the currently
+   * deployed multi-lineage LIVE caps. The historical frozen selector remains
+   * fail-closed until a reproducible, no-lookahead selector is proven; the
+   * derived HIGH_VOL sleeve is described separately above.
+   */
+  strictBt33404708902: {
+    sourceRun: "33404708902",
+    sourceSha: "aec066fefd761b12f07e6927b5f2a524f88ca08b",
+    quality102PositionCap: 0.5,
+    cryptoGrossCap: 2,
+    totalGrossCap: 2.5,
+    quality102LiveSelectorParity: false,
+    quality102LiveBlockedFailClosed: true,
+    liveActivated: false,
+  },
   v52StockGross: 1.5,
   v52V11Gross: 1.5,
   v52V50Gross: 1.25,
@@ -87,12 +117,13 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     liveTriggerNote: "LIVEはentry×0.96をSTOP_MARKET triggerに使用し、実fill価格・slippageを照合。exact fillは要求しない",
   },
   vpsObservedReleases: {
-    v12: "a81dd2eae17422f7d9a4354460aa2692317ba082",
-    pengu: "5a98a7e04d6ac4b867d26d46f3e718ffd7f7bfd2",
+    v12: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
+    pengu: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
     v52: "239982a73daed630a88b466404af43483aea8a10",
+    quality102: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
   },
   v12Symbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT"],
   penguSymbol: "PENGUUSDT",
-  cryptoSymbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT"],
+  cryptoSymbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT", "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT", "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT"],
   stockSymbols: ["AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"],
 } as const;

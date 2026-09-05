@@ -3,6 +3,7 @@ import { loadDecisionStatus } from "@/lib/server/disdex-decision-status";
 import { loadV12DecisionObservability } from "@/lib/server/v12-decision-observability";
 import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
+import { loadQuality102RuntimeObservability } from "@/lib/server/quality102-runtime-observability";
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   if (req.cookies.get("disdex_auth")?.value !== "1") return NextResponse.json({ ok: false, readOnly: true, error: "ログインが必要です。" }, { status: 401 });
@@ -34,9 +35,10 @@ export async function GET(req: NextRequest) {
         errors: [observabilityError instanceof Error ? observabilityError.message : "V12 observability failed."],
       };
     }
-    const [v52Top2Observability, penguRuntime] = await Promise.all([
+    const [v52Top2Observability, penguRuntime, quality102Runtime] = await Promise.all([
       loadV52Top2Observability(),
       loadPenguRuntimeObservability(),
+      loadQuality102RuntimeObservability(),
     ]);
     const v12UpdatedAt = v12Observability.runnerState?.updatedAt;
     const v12Fresh = v12Observability.wiring.runnerStateConfigured && v12UpdatedAt !== undefined && Date.now() - v12UpdatedAt <= 3 * 60 * 60 * 1000 && v12Observability.runnerState?.mode?.toLowerCase() === "live" && v12Observability.runnerState.killSwitch?.active !== true;
@@ -46,10 +48,12 @@ export async function GET(req: NextRequest) {
       units: snapshot.runtime.units.map((unit) => {
         if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, updatedAt: v12UpdatedAt, reason: v12Fresh ? "V12 runner state更新済み、mode=LIVE、Kill Switch inactiveを確認しました。" : v12Observability.errors[0] || "V12 runner stateが未接続・停止・古いためLIVE確認できません。" };
         if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
+        if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, status: quality102Runtime.status, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };
+        if (!snapshot.v52.marketOpen) return { ...unit, status: "UNCONFIRMED" as const, updatedAt: v52Top2Observability.updatedAt, reason: "米国株式市場の対象時間外です。V52は市場時間外のため意図的停止で、新規判定・発注は行いません。" };
         return { ...unit, status: v52Top2Observability.status === "LIVE" ? "LIVE" : v52Top2Observability.status === "STALE" ? "STALE" : "UNAVAILABLE", updatedAt: v52Top2Observability.updatedAt, reason: v52Top2Observability.errors[0] || v52Top2Observability.reason || (v52Top2Observability.status === "LIVE" ? "V52 runner state更新済み、Kill Switch inactiveを確認しました。" : "V52 runner stateがLIVE確認条件を満たしていません。") };
       }),
     };
-    return NextResponse.json({ ...snapshot, runtime, v12Observability, v52Top2Observability, penguRuntime }, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ ...snapshot, runtime, v12Observability, v52Top2Observability, penguRuntime, quality102Runtime }, { headers: { "Cache-Control": "private, no-store" } });
   }
   catch (error) { return NextResponse.json({ ok: false, readOnly: true, error: error instanceof Error ? error.message : "判定データを取得できません。" }, { status: 503 }); }
 }

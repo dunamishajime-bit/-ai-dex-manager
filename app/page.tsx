@@ -6,6 +6,7 @@ import { Activity, ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet }
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
+import { useLiveStatus } from "@/hooks/useLiveStatus";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 
 function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
@@ -55,11 +56,12 @@ function V52Top2Summary() {
 export default function HomePage() {
   const { wallet } = useOperationalWallet();
   const { snapshot, loading: liveLoading, error: liveError } = useLivePortfolio();
+  const { snapshot: v12RuntimeStatus, loading: v12StatusLoading } = useLiveStatus();
   const { formatPrice } = useCurrency();
   const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
   const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
   const positions = snapshot?.positions ?? [];
-  const liveStatus = snapshot ? "Aster同期済み" : liveLoading ? "取得中" : "実状態未取得";
+  const liveStatus = v12RuntimeStatus?.status === "LIVE" ? "V12 LIVE確認済み" : v12RuntimeStatus?.status === "STALE" ? "V12 要確認" : v12StatusLoading ? "LIVE状態を確認中" : "LIVE状態未取得";
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.06)] md:p-4">
@@ -69,9 +71,9 @@ export default function HomePage() {
           <div className="panel-gold rounded-[30px] p-5 md:p-7">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
             <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{config.strategyLabel}</h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL、PENGU V2 / Recovery V8、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL、PENGU V2 / Recovery V8、V52 Stock、Quality102 derived HIGH_VOLを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
-              <span className={`rounded-full border px-3 py-1.5 ${snapshot ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
+              <span className={`rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 X1.00 ALL</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">PENGU V2 / Recovery V8</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12+PENGU共有損失上限 {config.sharedCryptoDailyLossPct}%</span>
@@ -79,6 +81,7 @@ export default function HomePage() {
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Portfolio Gross上限 ≤ {config.maximumGross.toFixed(1)}x</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 {config.v12SizingMode}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 Stock {config.v52StockGross.toFixed(1)}x / 最大{config.v52MaxConcurrentPositions}建玉</span>
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">Quality102 derived HIGH_VOL: LIVE接続 / 上限 {config.quality102Runtime.strategyGrossCap.toFixed(2)}x</span>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -87,12 +90,17 @@ export default function HomePage() {
           </div>
         </section>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、V52の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、V52、Quality102の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
           <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
         </section>
         <V52Top2Summary />
+        <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
+          <div className="font-bold">Quality102 derived HIGH_VOL の公開状態</div>
+          <p className="mt-1 text-[12px] text-amber-100/80">Quality102はLIVE時点の利用可能データだけを使う独立1-slot補完スリーブとして接続しています。歴史的102件selector parity未証明部分とBRK strength式は推測実装せず該当経路のみFAIL CLOSEDです。</p>
+          <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x / symbols {config.quality102Runtime.symbols.join(", ")}</p>
+        </section>
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
           <div className="mt-3 space-y-2">
