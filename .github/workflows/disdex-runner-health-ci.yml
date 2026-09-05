@@ -70,6 +70,8 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: npm ci
+      - name: Install Python reference dependencies
+        run: python -m pip install -r requirements-stock-aster-only.txt
 
       - name: Runner health and watchdog self-tests
         run: |
