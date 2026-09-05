@@ -2,10 +2,9 @@
   "version": 2,
   "programId": "win80_ultra90_direct_v2",
   "mainStrategyId": "WIN80_ULTRA90_TOP1_V1",
-  "iteration": 278,
-  "updatedAt": "2026-09-05T04:28:02.298Z",
+  "iteration": 279,
+  "updatedAt": "2026-09-05T11:51:12.834Z",
   "completedFocuses": [
-    "position_concentration",
     "related_logic",
     "entry_quality",
     "ultra90_rotation",
@@ -24,10 +23,33 @@
     "related_logic",
     "entry_quality",
     "ultra90_rotation",
-    "top1_ranking"
+    "top1_ranking",
+    "position_concentration"
   ],
-  "lastDiscussionId": "main-research-0278-2026-09-05T04-28-02-298Z",
+  "lastDiscussionId": "main-research-0279-2026-09-05T11-51-12-834Z",
   "experimentQueue": [
+    {
+      "id": "INITIAL_NOTIONAL_80_CHILD_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "position_concentration",
+      "parameterGroup": "Initial notional fraction",
+      "currentValue": "100.00%",
+      "proposedValue": "80.00%",
+      "rationale": "初回100%集中を抑え、次のUltra90または急変時の余力を残す。",
+      "expectedEffect": "DD低下と月利低下の比較。",
+      "status": "REPLAY_REQUIRED"
+    },
+    {
+      "id": "MAX_POSITION_1_CHILD_V1",
+      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
+      "focus": "position_concentration",
+      "parameterGroup": "Maximum concurrent positions",
+      "currentValue": "2",
+      "proposedValue": "1",
+      "rationale": "Top-1思想を完全単一保有にした場合の集中収益と相関リスクを比較する。",
+      "expectedEffect": "管理単純化と分散効果消失の比較。",
+      "status": "REPLAY_REQUIRED"
+    },
     {
       "id": "TOP1_COST_ADJUSTED_RANK_CHILD_V1",
       "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
@@ -114,28 +136,6 @@
       "proposedValue": "Ultra90 detected -> pullback/retest confirmation -> rotation",
       "rationale": "Ultra90の強さを使いつつ、直後の高値掴みを減らす近縁ロジック。",
       "expectedEffect": "Slippage・Gap耐性改善とEntry遅延の比較。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "INITIAL_NOTIONAL_80_CHILD_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "position_concentration",
-      "parameterGroup": "Initial notional fraction",
-      "currentValue": "100.00%",
-      "proposedValue": "80.00%",
-      "rationale": "初回100%集中を抑え、次のUltra90または急変時の余力を残す。",
-      "expectedEffect": "DD低下と月利低下の比較。",
-      "status": "REPLAY_REQUIRED"
-    },
-    {
-      "id": "MAX_POSITION_1_CHILD_V1",
-      "parentStrategyId": "WIN80_ULTRA90_TOP1_V1",
-      "focus": "position_concentration",
-      "parameterGroup": "Maximum concurrent positions",
-      "currentValue": "2",
-      "proposedValue": "1",
-      "rationale": "Top-1思想を完全単一保有にした場合の集中収益と相関リスクを比較する。",
-      "expectedEffect": "管理単純化と分散効果消失の比較。",
       "status": "REPLAY_REQUIRED"
     }
   ],
