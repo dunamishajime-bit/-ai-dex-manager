@@ -102,7 +102,9 @@
     "strategy:strict-bt33404708902:causal-selector:selftest": "tsx scripts/disdex-quality102-causal-selector-selftest.ts",
     "strategy:strict-bt33404708902:pipeline:selftest": "tsx scripts/disdex-quality102-causal-pipeline-selftest.ts",
     "strategy:strict-bt33404708902:contract": "tsx --test tests/strict_bt33404708902_contract.test.ts",
-    "strategy:runner-health:selftest": "tsx scripts/disdex-runner-health-selftest.ts"
+    "strategy:runner-health:selftest": "tsx scripts/disdex-runner-health-selftest.ts",
+    "strategy:runner-watchdog:selftest": "tsx scripts/disdex-runner-watchdog-selftest.ts",
+    "strategy:runtime-status:test": "tsx --test tests/disdex_runtime_status.test.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
