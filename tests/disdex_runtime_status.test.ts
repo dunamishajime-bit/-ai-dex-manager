@@ -52,7 +52,13 @@ async function fixture(overrides: Partial<Record<keyof typeof filenames, unknown
 }
 
 function options(healthRoot: string, extra: Partial<RuntimeStatusOptions> = {}): RuntimeStatusOptions {
-  return { healthRoot, now: NOW, expectedReleaseSha: SHA, ...extra };
+  return {
+    healthRoot,
+    now: NOW,
+    expectedReleaseSha: SHA,
+    serviceActiveByRunner: { V12: true, PENGU_V8: true, V52: true, QUALITY102_CAUSAL_V1: true },
+    ...extra,
+  };
 }
 
 test("normalizes exactly the four production strategy records", async () => {
@@ -65,6 +71,38 @@ test("normalizes exactly the four production strategy records", async () => {
     assert.equal(records.every((record) => record.releaseShaMatch), true);
     assert.equal(records[0].state, "LIVE");
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("never reports LIVE when the observed service is inactive or unknown", async () => {
+  const root = await fixture();
+  try {
+    const inactive = await normalizeRuntimeStatus(options(root, { serviceActiveByRunner: { V12: false } }));
+    assert.equal(inactive[0].state, "要確認");
+    assert.equal(inactive[0].serviceActive, false);
+
+    const unknown = await normalizeRuntimeStatus(options(root, { serviceActiveByRunner: {} }));
+    assert.equal(unknown[0].state, "要確認");
+    assert.equal(unknown[0].serviceActive, false);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("rejects every heartbeat presented under a different allowlisted runner filename", async () => {
+  const runnerIds = Object.keys(filenames) as Array<keyof typeof filenames>;
+  for (const [index, filenameRunnerId] of runnerIds.entries()) {
+    const heartbeatRunnerId = runnerIds[(index + 1) % runnerIds.length];
+    const root = await fixture({ [filenameRunnerId]: heartbeat(heartbeatRunnerId) });
+    try {
+      const records = await normalizeRuntimeStatus(options(root));
+      const record = records.find((entry) => entry.strategyId === {
+        V12: "V12_X1.00_ALL",
+        PENGU_V8: "PENGU_DUAL_LS_V2_FINAL",
+        V52: "V52_ASTER_ONLY",
+        QUALITY102_CAUSAL_V1: "QUALITY102_CAUSAL_V1",
+      }[filenameRunnerId as keyof typeof filenames])!;
+      assert.equal(record.state, "要確認", `${filenameRunnerId} accepted ${heartbeatRunnerId}`);
+      assert.deepEqual(record.symbols, []);
+    } finally { await rm(root, { recursive: true, force: true }); }
+  }
 });
 
 test("projects Q102 effective symbols, caps, and fail-closed selector metadata", async () => {
@@ -122,5 +160,30 @@ test("serializes only redacted public status and performs no writes", async () =
     }
     assert.equal(serialized.includes("workingDirectory"), false);
     assert.equal(serialized.includes("serviceUnit"), false);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("does not serialize hostile or non-public symbol values", async () => {
+  const root = await fixture({
+    V12: heartbeat("V12", {
+      symbols: [
+        { symbol: "ASTERUSDT", eligible: true, reason: "valid" },
+        { symbol: "PRIVATE_KEY=super-secret", eligible: true, reason: "hostile" },
+        { symbol: "bc1qsecretwalletaddress", eligible: true, reason: "hostile" },
+        { symbol: "0x1234567890abcdef1234567890abcdef12345678", eligible: true, reason: "hostile" },
+      ],
+    }),
+  });
+  try {
+    const serialized = JSON.stringify(await normalizeRuntimeStatus(options(root)));
+    for (const forbidden of ["PRIVATE_KEY", "super-secret", "bc1qsecretwalletaddress", "1234567890abcdef1234567890abcdef12345678"]) {
+      assert.equal(serialized.includes(forbidden), false, `${forbidden}: ${serialized}`);
+    }
+    assert.deepEqual((await normalizeRuntimeStatus(options(root)))[0].symbols, [
+      { symbol: "ASTERUSDT", eligible: true, reason: "valid" },
+      { symbol: "[REDACTED]", eligible: false, reason: "symbol rejected" },
+      { symbol: "[REDACTED]", eligible: false, reason: "symbol rejected" },
+      { symbol: "[REDACTED]", eligible: false, reason: "symbol rejected" },
+    ]);
   } finally { await rm(root, { recursive: true, force: true }); }
 });

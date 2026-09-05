@@ -39,6 +39,7 @@ const RUNNERS: ReadonlyArray<{
 ];
 const STALE_AFTER_MS = 5 * 60_000;
 const Q102_META = { selectorMode: "DERIVED_HIGH_VOL_ONLY" as const, historicalSelectorParity: false as const, brkLiveEnabled: false as const };
+const PUBLIC_MARKET_SYMBOL_RE = /^[A-Z0-9]{1,20}(?:USDT|USDC)$/;
 function redactPublicText(value: string | null | undefined): string | null {
   if (!value) return value ?? null;
   return value
@@ -62,8 +63,8 @@ function releaseMatches(heartbeat: RunnerHeartbeat, expectedReleaseSha?: string)
     && (expectedReleaseSha === undefined || heartbeat.runtimeSha === expectedReleaseSha);
 }
 
-function publicState(heartbeat: RunnerHeartbeat, now: number, releaseShaMatch: boolean): RuntimeDisplayState {
-  if (!isFresh(heartbeat, now) || !releaseShaMatch) return "要確認";
+function publicState(heartbeat: RunnerHeartbeat, now: number, releaseShaMatch: boolean, serviceActive: boolean): RuntimeDisplayState {
+  if (!isFresh(heartbeat, now) || !releaseShaMatch || !serviceActive) return "要確認";
   if (heartbeat.safetyState === "MANUAL_REVIEW") return "MANUAL_REVIEW";
   if (heartbeat.safetyState === "FAIL_CLOSED" || heartbeat.safetyState !== "LIVE" && heartbeat.safetyState !== "WAITING") return "FAIL_CLOSED";
   if (heartbeat.safetyState === "LIVE" && heartbeat.liveEnabled) return "LIVE";
@@ -105,10 +106,14 @@ export async function normalizeRuntimeStatus(options: RuntimeStatusOptions = {})
     const observedServiceActive = options.serviceActiveByRunner?.[item.runnerId];
     try {
       const heartbeat = await readRunnerHeartbeat(`${healthRoot}/${item.filename}`);
-      const serviceActive = observedServiceActive ?? (heartbeat !== undefined && isFresh(heartbeat, now));
+      const serviceActive = observedServiceActive === true;
       if (heartbeat === undefined) return unknownRecord(item, serviceActive, "heartbeat unavailable");
+      if (heartbeat.runnerId !== item.runnerId) throw new Error("heartbeat runnerId does not match allowlisted filename");
       const releaseShaMatch = isFresh(heartbeat, now) && releaseMatches(heartbeat, expectedReleaseSha);
-      const state = publicState(heartbeat, now, releaseShaMatch);
+      const state = publicState(heartbeat, now, releaseShaMatch, serviceActive);
+      const symbolStatuses = heartbeat.symbols.map(({ symbol, eligible, reason }) => PUBLIC_MARKET_SYMBOL_RE.test(symbol)
+        ? { symbol, eligible, reason: redactPublicText(reason) || "" }
+        : { symbol: "[REDACTED]", eligible: false, reason: "symbol rejected" });
       return {
         strategyId: item.strategyId,
         displayName: item.displayName,
@@ -117,11 +122,11 @@ export async function normalizeRuntimeStatus(options: RuntimeStatusOptions = {})
         heartbeatAt: heartbeat.heartbeatAt,
         runtimeSha: heartbeat.runtimeSha,
         releaseShaMatch,
-        safetyReason: state === "要確認" && !isFresh(heartbeat, now) ? "heartbeat stale or future-dated" : state === "要確認" ? "release identity mismatch" : safetyReason(heartbeat),
+        safetyReason: state === "要確認" && !isFresh(heartbeat, now) ? "heartbeat stale or future-dated" : state === "要確認" && !serviceActive ? "service inactive or unobserved" : state === "要確認" ? "release identity mismatch" : safetyReason(heartbeat),
         lastDecision: redactPublicText(heartbeat.lastDecision),
         recovery: recovery(heartbeat, state),
         gross: { strategyCap: heartbeat.caps.strategy, cryptoCap: heartbeat.caps.crypto, totalCap: heartbeat.caps.total },
-        symbols: heartbeat.symbols.map(({ symbol, eligible, reason }) => ({ symbol, eligible, reason: redactPublicText(reason) || "" })),
+        symbols: symbolStatuses,
         ...(item.runnerId === "QUALITY102_CAUSAL_V1" ? { quality102: Q102_META } : {}),
       };
     } catch {
