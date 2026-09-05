@@ -512,9 +512,10 @@ export default function WalletsPage() {
                 tone={hasAsterSnapshot ? "profit" : "default"}
               />
               <StatCard
-                title="Owner接続"
-                value={wallet?.ownerReconnectedAt ? "確認済み" : "未確認"}
-                note={wallet?.ownerReconnectedAt ? formatDate(wallet.ownerReconnectedAt) : "必要なときに記録できます"}
+                title="Aster残高更新"
+                value={hasAsterSnapshot ? "最新" : "取得待ち"}
+                note={hasAsterSnapshot ? formatDate(wallet?.lastAsterBalanceUpdatedAt || wallet?.lastAsterAccountVerifiedAt) : "Aster口座情報を取得しています"}
+                tone={hasAsterSnapshot ? "profit" : "default"}
               />
             </div>
 
