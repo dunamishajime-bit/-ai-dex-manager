@@ -12,7 +12,8 @@ test("maps a bounded systemctl timeout to unavailable activity", async () => {
     throw error;
   };
 
-  const activity = await observeRunnerServiceActivity({ DISDEX_RUNNER_V12_SERVICE_UNIT: UNIT } as NodeJS.ProcessEnv, execFile);
+  const env: NodeJS.ProcessEnv = { ...process.env, DISDEX_RUNNER_V12_SERVICE_UNIT: UNIT };
+  const activity = await observeRunnerServiceActivity(env, execFile);
 
   assert.ok(receivedOptions?.timeout && receivedOptions.timeout > 0);
   assert.equal(receivedOptions?.killSignal, "SIGTERM");

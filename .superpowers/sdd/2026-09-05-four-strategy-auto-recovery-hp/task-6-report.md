@@ -12,5 +12,5 @@ Implemented the read-only runtime status projection and API.
 Verification:
 
 - `npx tsx --test tests/disdex_runtime_status.test.ts tests/disdex_service_activity.test.ts` — 12 passed, 0 failed.
-- `npx tsc --noEmit` — passed.
+- `npx tsc --noEmit` — passed after correcting the service-observer test fixture to use a typed `NodeJS.ProcessEnv` value.
 - `git diff --check` — passed.
