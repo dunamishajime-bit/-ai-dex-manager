@@ -15,7 +15,7 @@ import { buildSharedCryptoDailyRiskState } from "../lib/disdex-shared-crypto-dai
 import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
 import { V12_X1_ALL } from "../config/v12X1AllRuntime";
-import { assertV12ExactReleasePreflight } from "../scripts/disdex-v12-x1-all-live-runner";
+import { assertV12ExactReleasePreflight, buildV12LiveRuntime, runV12Runner } from "../scripts/disdex-v12-x1-all-live-runner";
 import type { DirectAccountSnapshot, DirectMarketQuote, DirectOpenOrder, DirectPosition, DirectTradeResult } from "../lib/direct-trade-executor";
 import type { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import {
@@ -284,11 +284,43 @@ test("default-disabled V12 heartbeat is explicit and never restartable", async (
     }
 });
 
+test("intentional PAPER V12 publishes a non-live heartbeat and exits successfully", async () => {
+    const root = await mkdtemp(join(tmpdir(), "disdex-v12-paper-heartbeat-"));
+    const heartbeatPath = join(root, "v12.json");
+    const original = {
+        mode: process.env.V12_X1_ALL_MODE,
+        enabled: process.env.V12_X1_ALL_ENABLED,
+        heartbeat: process.env.DISDEX_RUNNER_HEARTBEAT_PATH,
+        runtime: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+        expected: process.env.DISDEX_EXPECTED_RUNTIME_SHA,
+    };
+    try {
+        process.env.V12_X1_ALL_MODE = "PAPER";
+        process.env.V12_X1_ALL_ENABLED = "true";
+        process.env.DISDEX_RUNNER_HEARTBEAT_PATH = heartbeatPath;
+        process.env.DISDEX_RUNTIME_COMMIT_SHA = SHA;
+        process.env.DISDEX_EXPECTED_RUNTIME_SHA = SHA;
+        await runV12Runner();
+        const published = JSON.parse(await readFile(heartbeatPath, "utf8")) as RunnerHeartbeat;
+        assert.equal(published.mode, "PAPER");
+        assert.equal(published.liveEnabled, false);
+        assert.equal(published.safetyState, "WAITING");
+        assert.equal(published.lastDecision, "non-live");
+    } finally {
+        for (const [key, value] of Object.entries({ V12_X1_ALL_MODE: original.mode, V12_X1_ALL_ENABLED: original.enabled, DISDEX_RUNNER_HEARTBEAT_PATH: original.heartbeat, DISDEX_RUNTIME_COMMIT_SHA: original.runtime, DISDEX_EXPECTED_RUNTIME_SHA: original.expected })) {
+            if (value === undefined) delete process.env[key]; else process.env[key] = value;
+        }
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
 test("watchdog restart adapter runs exact-release preflight before constructing the real V12 engine", async () => {
     const exchange = new InMemoryAccountExchange();
     const before = exchange.snapshot();
     const root = await mkdtemp(join(tmpdir(), "disdex-v12-startup-harness-"));
+    const originalAllow = process.env.DISDEX_V12_LIVE_ALLOW_REAL_ORDERS;
     try {
+        process.env.DISDEX_V12_LIVE_ALLOW_REAL_ORDERS = "true";
         const releaseRoot = join(root, "release");
         await mkdir(releaseRoot, { recursive: true });
         await writeFile(join(releaseRoot, ".disdex-release-sha"), `${SHA}\n`);
@@ -302,28 +334,46 @@ test("watchdog restart adapter runs exact-release preflight before constructing 
         await stateStore.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "SHADOW", updatedAt: now, lastReferenceTs: now, active: { symbol: "ETHUSDT", side: "LONG", quantity: 1.25, gross: 0.00125, positionId: "v12-position-existing", entryPrice: 1, atrAtEntry: 0.1, entrySignalTs: now, holdingBars: 1, peakPrice: 1, troughPrice: 1, protection } });
         const beforeState = await stateStore.load();
         const lock = new TrackingAccountOrderLock(join(root, "account-order.lock"));
+        const construction: string[] = [];
+        const runtime = { strategyId: V12_X1_ALL.strategyId, mode: "LIVE" as const, enabled: true, liveTradingEnabled: true, liveExecutionEnabled: true, multiplier: 1 as const, statePath: join(root, "state.json"), riskPath };
+        const build = () => buildV12LiveRuntime({
+            runtime,
+            preflight: async () => { construction.push("preflight"); return assertV12ExactReleasePreflight({ cwd: releaseRoot, expectedSha: SHA }); },
+            exactReleaseAck: () => { construction.push("ack"); return SHA; },
+            strictConfiguration: () => { construction.push("strict"); return { v12GrossCap: 1.5, penguGrossCap: 0.75, stockGrossCap: 1.5, cryptoGrossCap: 2, totalGrossCap: 2.5, quality102LiveSelectorParity: false, quality102LiveBlockedFailClosed: true }; },
+            createEngine: () => { construction.push("engine"); return new V12LiveExecutionEngine({ adapter: exchange.adapter(), marketData, stateStore, lock, riskPath, now: () => now }); },
+        });
         const startup = async () => {
-            await assertV12ExactReleasePreflight({ cwd: releaseRoot, expectedSha: SHA });
-            return new V12LiveExecutionEngine({ adapter: exchange.adapter(), marketData, stateStore, lock, riskPath, now: () => now });
+            const built = await build();
+            assert.equal(built.status, "live");
+            return built.engine!;
         };
         let started: V12LiveExecutionEngine | undefined;
         class RestartHarness extends HealthySystem {
-            override async restart(unit: string) { this.restarts.push(unit); started = await startup(); await started.tick(); }
+            override async restart(unit: string) { this.restarts.push(unit); if (unit === UNITS.V12) { started = await startup(); await started.tick(); } }
         }
         const system = new RestartHarness();
-        await assertV12ExactReleasePreflight({ cwd: releaseRoot, expectedSha: SHA });
+        await startup();
+        assert.deepEqual(construction, ["preflight", "ack", "strict", "engine"]);
         const first = new V12LiveExecutionEngine({ adapter: exchange.adapter(), marketData, stateStore, lock, riskPath, now: () => now });
         assert.equal((await first.tick()).status, "held");
         await writeRunnerHeartbeat(fixture.config.runners.V12.heartbeatPath, heartbeat("V12", now - 10 * 60_000));
         const result = await runWatchdog({ config: { ...fixture.config, runners: { ...fixture.config.runners, V12: { ...fixture.config.runners.V12, expectedCwd: releaseRoot } } }, system, now });
         assert.ok(started);
         assert.equal(result.decisions.V12.restartAuthorized, true);
+        assert.deepEqual(construction, ["preflight", "ack", "strict", "engine", "preflight", "ack", "strict", "engine"]);
         assert.deepEqual(exchange.snapshot(), before);
         const afterState = await stateStore.load();
         assert.deepEqual({ ...afterState, updatedAt: beforeState.updatedAt }, beforeState);
         assert.equal(lock.maximumOwners, 1);
         assert.deepEqual(exchange.counters, { submit: 0, cancel: 0, modify: 0, close: 0 });
+        const held = await lock.acquire("first-owner");
+        assert.ok(held);
+        const contested = await lock.acquire("second-owner");
+        assert.equal(contested, null);
+        await held!.release();
     } finally {
+        if (originalAllow === undefined) delete process.env.DISDEX_V12_LIVE_ALLOW_REAL_ORDERS; else process.env.DISDEX_V12_LIVE_ALLOW_REAL_ORDERS = originalAllow;
         await rm(root, { recursive: true, force: true });
     }
 });

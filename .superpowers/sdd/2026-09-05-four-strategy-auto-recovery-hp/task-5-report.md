@@ -82,3 +82,19 @@ Fix-round 3 exact verification:
 - `npx tsc --noEmit` — PASS; exit code 0.
 - `git diff --check` — PASS; no whitespace errors; Git emitted only LF-to-CRLF working-copy warnings for the three changed text files.
 - Limitation: verification uses in-memory/systemd-mocked fixtures and does not exercise VPS, systemd, exchange, real orders, or position mutations by design.
+
+## Fix round 4 — review round 3 findings
+
+- Intentional enabled `PAPER`/non-`LIVE` V12 configuration now publishes its explicit non-live heartbeat and returns successfully; genuine live gate, release, credential, and startup failures still throw and set a failing process exit through the existing entrypoint handler.
+- Added the narrow `buildV12LiveRuntime()` startup seam used by production defaults and the restart fixture. The fixture injects only in-memory engine dependencies, verifies the exact regular-file release marker before engine construction, and re-enters the same production startup seam after the watchdog restart.
+- Added an overlapping `FileAccountOrderLock.acquire()` assertion: the second owner returns `null` while the first handle is held; existing zero submit/cancel/modify/close assertions remain.
+- No deployment, systemd invocation, VPS/SSH access, network/exchange access, live credentials, order, cancel, modify, close, or position mutation was performed.
+
+Fix-round 4 verification:
+
+- `npx tsx --test tests/disdex_runner_restart_reconciliation.test.ts` — PASS; 9 passed, 0 failed.
+- `npx tsx --test tests/disdex_runner_health.test.ts` — PASS; 27 passed, 0 failed.
+- `npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test` — PASS; `V12_X1_ALL_RUNNER_SELFTEST_PASS`.
+- `npx tsx scripts/disdex-runner-watchdog-selftest.ts` — PASS; `restarts=0 ordersSent=0 cancelSent=0 positionChangesSent=0`.
+- `npx tsc --noEmit` — PASS; exit code 0.
+- `git diff --check` — PASS; only known LF-to-CRLF working-copy warnings.

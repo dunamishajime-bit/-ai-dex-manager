@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { lstat, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
+import { resolveV12X1AllRuntime, type ResolvedV12Runtime } from "../config/v12X1AllRuntime";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
@@ -77,38 +77,50 @@ export async function assertV12ExactReleasePreflight(options: { cwd?: string; ex
     return { cwd, expectedSha } as const;
 }
 
-export async function buildV12LiveRuntime() {
-    const runtime = resolveV12X1AllRuntime();
+type V12StrictConfiguration = ReturnType<typeof assertV12StrictLiveConfiguration>;
+
+export interface V12LiveRuntimeBuildOptions {
+    runtime?: ResolvedV12Runtime;
+    preflight?: () => Promise<{ cwd: string; expectedSha: string }>;
+    exactReleaseAck?: () => string;
+    strictConfiguration?: () => V12StrictConfiguration;
+    createEngine?: (input: { runtime: ResolvedV12Runtime; releaseSha: string; strict: V12StrictConfiguration }) => V12LiveExecutionEngine | Promise<V12LiveExecutionEngine>;
+}
+
+export async function buildV12LiveRuntime(options: V12LiveRuntimeBuildOptions = {}) {
+    const runtime = options.runtime || resolveV12X1AllRuntime();
     if (!runtime.enabled) return { runtime, engine: undefined as V12LiveExecutionEngine | undefined, status: "disabled" as const };
     if (runtime.mode !== "LIVE") return { runtime, engine: undefined as V12LiveExecutionEngine | undefined, status: "non-live" as const };
     if (!runtime.liveTradingEnabled || !runtime.liveExecutionEnabled || !boolEnv("DISDEX_V12_LIVE_ALLOW_REAL_ORDERS")) {
         throw new Error("V12_LIVE_GATES_NOT_ALL_ENABLED");
     }
-    await assertV12ExactReleasePreflight();
-    const releaseSha = assertExactReleaseAck();
-    const strict = assertV12StrictLiveConfiguration();
-    const client = new AsterV3Client({
-        baseUrl: process.env.ASTER_FUTURES_BASE_URL,
-        userAddress: process.env.ASTER_USER_ADDRESS,
-        privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
-        requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
-        recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
-        userAgent: `DisDex-V12-X1-All-Strict/${releaseSha.slice(0, 12)}`,
-    });
-    if (!client.hasTradingCredentials()) throw new Error("V12_LIVE_REQUIRES_ASTER_CREDENTIALS");
-    const adapter = new V12StrictAsterLiveAdapter(client, {
-        maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
-        reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
-        reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
-    });
-    const stateStore = new FileV12X1AllRunnerStateStore(runtime.statePath, runtime.mode);
-    const lock = new FileAccountOrderLock(runtime.lockPath || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
-    const marketData = new V12AsterMarketDataProvider(client, { hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500) });
-    const engine = new V12LiveExecutionEngine({ adapter, marketData, stateStore, lock, riskPath: runtime.riskPath });
+    await (options.preflight || (() => assertV12ExactReleasePreflight()))();
+    const releaseSha = (options.exactReleaseAck || assertExactReleaseAck)();
+    const strict = (options.strictConfiguration || (() => assertV12StrictLiveConfiguration()))();
+    const engine = await (options.createEngine || (async ({ runtime: selectedRuntime, releaseSha: selectedSha }) => {
+        const client = new AsterV3Client({
+            baseUrl: process.env.ASTER_FUTURES_BASE_URL,
+            userAddress: process.env.ASTER_USER_ADDRESS,
+            privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
+            requestTimeoutMs: numberEnv("ASTER_REQUEST_TIMEOUT_MS", 10_000),
+            recvWindowMs: numberEnv("ASTER_RECV_WINDOW_MS", 5000),
+            userAgent: `DisDex-V12-X1-All-Strict/${selectedSha.slice(0, 12)}`,
+        });
+        if (!client.hasTradingCredentials()) throw new Error("V12_LIVE_REQUIRES_ASTER_CREDENTIALS");
+        const adapter = new V12StrictAsterLiveAdapter(client, {
+            maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
+            reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+            reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+        });
+        const stateStore = new FileV12X1AllRunnerStateStore(selectedRuntime.statePath, selectedRuntime.mode);
+        const lock = new FileAccountOrderLock(selectedRuntime.lockPath || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
+        const marketData = new V12AsterMarketDataProvider(client, { hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500) });
+        return new V12LiveExecutionEngine({ adapter, marketData, stateStore, lock, riskPath: selectedRuntime.riskPath });
+    }))({ runtime, releaseSha, strict });
     return { runtime, status: "live" as const, engine, strict, releaseSha };
 }
 
-async function main() {
+export async function runV12Runner() {
     if (process.argv.includes("--self-test")) {
         const disabled = resolveV12X1AllRuntime({ V12_X1_ALL_ENABLED: "false" });
         if (disabled.enabled || disabled.multiplier !== 1) throw new Error("V12_RUNNER_SELFTEST_FAILED");
@@ -127,7 +139,8 @@ async function main() {
     }
     if (built.status !== "live" || !built.engine) {
         await publishV12Heartbeat({ status: "non-live", reason: `V12 runtime mode ${built.runtime.mode} is not live` }, Date.now(), built.runtime);
-        throw new Error("V12_X1_ALL_PRODUCTION_RUNNER_REQUIRES_EXPLICIT_LIVE_ACTIVATION");
+        console.log(JSON.stringify({ strategyId: "V12_X1.00_ALL", status: "non-live", mode: built.runtime.mode }));
+        return;
     }
 
     console.log(JSON.stringify({
@@ -173,3 +186,5 @@ if (process.argv[1]?.endsWith("disdex-v12-x1-all-live-runner.ts")) {
         process.exitCode = 1;
     });
 }
+
+async function main() { await runV12Runner(); }
