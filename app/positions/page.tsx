@@ -5,6 +5,7 @@ import { Activity, BarChart3, ShieldCheck, Wallet } from "lucide-react";
 
 import { AutoTradeHistoryPanel } from "@/components/features/autotrade/AutoTradeHistoryPanel";
 import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";
+import { StrategyRuntimeStatusPanel } from "@/components/features/autotrade/StrategyRuntimeStatusPanel";
 import { ManualTradeRunPanel } from "@/components/features/autotrade/ManualTradeRunPanel";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
@@ -156,6 +157,7 @@ export default function PositionsPage() {
         </section>
 
         <ManualTradeRunPanel />
+        <StrategyRuntimeStatusPanel />
         <LiveDecisionPanel />
         <AutoTradeHistoryPanel />
       </div>

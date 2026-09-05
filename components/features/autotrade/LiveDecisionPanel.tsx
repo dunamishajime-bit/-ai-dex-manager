@@ -231,6 +231,9 @@ export function LiveDecisionPanel({ compact = false }: { compact?: boolean }) {
           live
         </div>
       </div>
+      <a href="#q102-runtime-status" className="mt-3 inline-flex rounded-full border border-loss/25 bg-loss/[0.06] px-3 py-1.5 text-[10px] font-bold text-loss transition hover:border-loss/50">
+        Q102判定条件: DERIVED_HIGH_VOL_ONLY / FAIL_CLOSED固定（詳細へ）
+      </a>
 
       {loading ? (
         <div className="mt-3 rounded-[18px] border border-dashed border-white/10 px-4 py-6 text-sm text-white/70">
