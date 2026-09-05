@@ -2,7 +2,7 @@
 
 import { Activity, ShieldAlert } from "lucide-react";
 
-import { heartbeatAgeLabel, runtimeStateLabel, useStrategyRuntimeStatus } from "@/hooks/useStrategyRuntimeStatus";
+import { heartbeatAgeLabel, projectRuntimeStatusForDisplay, runtimeStateLabel, useStrategyRuntimeStatus } from "@/hooks/useStrategyRuntimeStatus";
 import type { StrategyRuntimeStatus } from "@/lib/disdex-runtime-status";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +19,7 @@ function capLabel(value: number | null) {
   return value === null ? "要確認" : `${value.toFixed(2)}x`;
 }
 
-function RuntimeCard({ item }: { item: StrategyRuntimeStatus }) {
+function RuntimeCard({ item, stale }: { item: StrategyRuntimeStatus; stale: boolean }) {
   return (
     <article className="min-w-0 rounded-[20px] border border-white/10 bg-white/[0.035] p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -33,7 +33,7 @@ function RuntimeCard({ item }: { item: StrategyRuntimeStatus }) {
       </div>
       <div className="mt-3 grid gap-2 text-[11px] text-white/76 sm:grid-cols-2">
         <div>Heartbeat: {heartbeatAgeLabel(item.heartbeatAt)}</div>
-        <div>Release: {item.releaseShaMatch ? "一致" : "要確認"}</div>
+        <div>Release: {item.releaseShaMatch ? "一致" : "要確認"}{stale ? "（stale）" : ""}</div>
         <div className="sm:col-span-2">Decision: {item.lastDecision || "要確認"}</div>
         <div className="sm:col-span-2 break-words">Reason: {item.safetyReason || "要確認"}</div>
         <div>Recovery: {item.recovery.action}</div>
@@ -75,7 +75,8 @@ function Q102Conditions({ item, stale }: { item: StrategyRuntimeStatus; stale: b
 
 export function StrategyRuntimeStatusPanel() {
   const snapshot = useStrategyRuntimeStatus();
-  const q102 = snapshot.data?.find((item) => item.strategyId === "QUALITY102_CAUSAL_V1");
+  const displayData = snapshot.data ? projectRuntimeStatusForDisplay(snapshot.data, snapshot.stale) : null;
+  const q102 = displayData?.find((item) => item.strategyId === "QUALITY102_CAUSAL_V1");
   return (
     <section className="panel-gold min-w-0 rounded-[28px] p-4" aria-label="Strategy runtime status">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -83,7 +84,7 @@ export function StrategyRuntimeStatusPanel() {
         <div className="text-[10px] uppercase tracking-[0.2em] text-gold-100/70">{snapshot.refreshing ? "refreshing" : snapshot.stale ? "要確認" : "60s monitor"}</div>
       </div>
       {snapshot.loading && !snapshot.data ? <div className="mt-3 rounded-[16px] border border-dashed border-white/10 px-3 py-5 text-sm text-white/70">runtime statusを読み込んでいます。</div> : null}
-      {snapshot.data ? <div className="mt-3 grid min-w-0 gap-2 md:grid-cols-2">{snapshot.data.map((item) => <RuntimeCard key={item.strategyId} item={item} />)}</div> : null}
+      {displayData ? <div className="mt-3 grid min-w-0 gap-2 md:grid-cols-2">{displayData.map((item) => <RuntimeCard key={item.strategyId} item={item} stale={snapshot.stale} />)}</div> : null}
       {!snapshot.data && !snapshot.loading ? <div className="mt-3 rounded-[16px] border border-loss/30 bg-loss/10 px-3 py-5 text-sm text-loss">Runtime status: 要確認（API unavailable）</div> : null}
       {snapshot.data && snapshot.error ? <div className="mt-3 rounded-[14px] border border-loss/25 bg-loss/[0.06] px-3 py-2 text-[11px] text-loss">最新取得に失敗しました。前回成功値を表示中: 要確認</div> : null}
       {q102 ? <Q102Conditions item={q102} stale={snapshot.stale} /> : null}
