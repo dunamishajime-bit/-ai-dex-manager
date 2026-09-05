@@ -44,6 +44,7 @@ const STALE_AFTER_MS = 5 * 60_000;
 const Q102_META = { selectorMode: "DERIVED_HIGH_VOL_ONLY" as const, historicalSelectorParity: false as const, brkLiveEnabled: false as const };
 const Q102_CAPS = { strategyCap: 0.5, cryptoCap: 2, totalCap: 2.5 } as const;
 const PUBLIC_MARKET_SYMBOL_RE = /^[A-Z0-9]{1,20}(?:USDT|USDC)$/;
+const RELEASE_SHA_RE = /^[0-9a-f]{40}$/i;
 function redactPublicText(value: string | null | undefined): string | null {
   if (!value) return value ?? null;
   return value
@@ -62,9 +63,19 @@ function isFresh(heartbeat: RunnerHeartbeat, now: number): boolean {
   return heartbeat.heartbeatAt <= now && now - heartbeat.heartbeatAt <= STALE_AFTER_MS;
 }
 
-function releaseMatches(heartbeat: RunnerHeartbeat, expectedReleaseSha?: string): boolean {
-  return heartbeat.runtimeSha === heartbeat.expectedSha
-    && (expectedReleaseSha === undefined || heartbeat.runtimeSha === expectedReleaseSha);
+function releaseMatches(heartbeat: RunnerHeartbeat, expectedReleaseSha: string | undefined): boolean {
+  return expectedReleaseSha !== undefined
+    && heartbeat.runtimeSha.toLowerCase() === heartbeat.expectedSha.toLowerCase()
+    && heartbeat.runtimeSha.toLowerCase() === expectedReleaseSha.toLowerCase();
+}
+
+function externallyAnchoredSha(options: RuntimeStatusOptions): string | undefined {
+  const candidates = [
+    options.expectedReleaseSha,
+    process.env.DISDEX_EXPECTED_RUNTIME_SHA,
+    process.env.DISDEX_RUNTIME_COMMIT_SHA,
+  ];
+  return candidates.map((candidate) => String(candidate ?? "").trim()).find((candidate) => RELEASE_SHA_RE.test(candidate));
 }
 
 function publicState(heartbeat: RunnerHeartbeat, now: number, releaseShaMatch: boolean, serviceActive: boolean, q102: boolean): RuntimeDisplayState {
@@ -109,9 +120,7 @@ function unknownRecord(item: typeof RUNNERS[number], serviceActive: boolean | un
 export async function normalizeRuntimeStatus(options: RuntimeStatusOptions = {}): Promise<StrategyRuntimeStatus[]> {
   const healthRoot = options.healthRoot ?? process.env.DISDEX_RUNNER_HEALTH_ROOT ?? "/var/lib/disdex/runner-health/heartbeats";
   const now = options.now ?? Date.now();
-  const expectedReleaseSha = options.expectedReleaseSha
-    ?? process.env.DISDEX_EXPECTED_RUNTIME_SHA
-    ?? process.env.DISDEX_RUNTIME_COMMIT_SHA;
+  const expectedReleaseSha = externallyAnchoredSha(options);
   const observedActivity = options.serviceActiveByRunner
     ?? await (options.serviceActivityObserver ?? observeRunnerServiceActivity)();
   return Promise.all(RUNNERS.map(async (item) => {
@@ -136,7 +145,7 @@ export async function normalizeRuntimeStatus(options: RuntimeStatusOptions = {})
         heartbeatAt: heartbeat.heartbeatAt,
         runtimeSha: heartbeat.runtimeSha,
         releaseShaMatch,
-        safetyReason: isQ102 && state === "FAIL_CLOSED" ? "Q102 selector parity is unproven; LIVE blocked fail-closed" : state === "要確認" && !isFresh(heartbeat, now) ? "heartbeat stale or future-dated" : state === "要確認" && observedServiceActive === undefined ? "service activity unavailable" : state === "要確認" && !serviceActive ? "service inactive" : state === "要確認" ? "release identity mismatch" : safetyReason(heartbeat),
+        safetyReason: isQ102 && state === "FAIL_CLOSED" ? "Q102 selector parity is unproven; LIVE blocked fail-closed" : state === "要確認" && !isFresh(heartbeat, now) ? "heartbeat stale or future-dated" : state === "要確認" && observedServiceActive === undefined ? "service activity unavailable" : state === "要確認" && !serviceActive ? "service inactive" : state === "要確認" && expectedReleaseSha === undefined ? "external release identity unavailable" : state === "要確認" ? "release identity mismatch" : safetyReason(heartbeat),
         lastDecision: isQ102 ? "LIVE_BLOCKED_FAIL_CLOSED" : redactPublicText(heartbeat.lastDecision),
         recovery: recovery(heartbeat, state),
         gross: isQ102 ? Q102_CAPS : { strategyCap: heartbeat.caps.strategy, cryptoCap: heartbeat.caps.crypto, totalCap: heartbeat.caps.total },

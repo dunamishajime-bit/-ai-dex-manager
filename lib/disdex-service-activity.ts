@@ -3,9 +3,16 @@ import { promisify } from "node:util";
 import type { RunnerId } from "./disdex-runner-health";
 
 export type ServiceActivityByRunner = Partial<Record<RunnerId, boolean | undefined>>;
+export type ExecFileCommand = (
+  file: string,
+  args: string[],
+  options: { windowsHide: boolean; timeout: number; killSignal: "SIGTERM" },
+) => Promise<unknown>;
 
-const execFile = promisify(execFileCallback);
+const execFileAsync = promisify(execFileCallback);
+const execFile: ExecFileCommand = (file, args, options) => execFileAsync(file, args, options);
 const SYSTEMCTL = "/usr/bin/systemctl";
+const SYSTEMCTL_TIMEOUT_MS = 5_000;
 const SERVICE_ENV_KEYS: Record<RunnerId, string> = {
   V12: "DISDEX_RUNNER_V12_SERVICE_UNIT",
   PENGU_V8: "DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT",
@@ -25,7 +32,10 @@ function exitCode(error: unknown): number | undefined {
 }
 
 /** Read only the allowlisted systemd active state; failures are explicit unavailable values. */
-export async function observeRunnerServiceActivity(env: NodeJS.ProcessEnv = process.env): Promise<ServiceActivityByRunner> {
+export async function observeRunnerServiceActivity(
+  env: NodeJS.ProcessEnv = process.env,
+  command: ExecFileCommand = execFile,
+): Promise<ServiceActivityByRunner> {
   const result: ServiceActivityByRunner = {};
   const observedUnits = new Map<string, boolean | undefined>();
   for (const runnerId of Object.keys(SERVICE_ENV_KEYS) as RunnerId[]) {
@@ -39,7 +49,11 @@ export async function observeRunnerServiceActivity(env: NodeJS.ProcessEnv = proc
       continue;
     }
     try {
-      await execFile(SYSTEMCTL, ["is-active", "--quiet", unit], { windowsHide: true });
+      await command(SYSTEMCTL, ["is-active", "--quiet", unit], {
+        windowsHide: true,
+        timeout: SYSTEMCTL_TIMEOUT_MS,
+        killSignal: "SIGTERM",
+      });
       observedUnits.set(unit, true);
       result[runnerId] = true;
     } catch (error) {

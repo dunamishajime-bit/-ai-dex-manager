@@ -168,6 +168,27 @@ test("reports service activity as unavailable when no observation is supplied", 
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
+test("requires an externally anchored release SHA when both environment sources are absent", async () => {
+  const root = await fixture();
+  const originalExpected = process.env.DISDEX_EXPECTED_RUNTIME_SHA;
+  const originalRuntime = process.env.DISDEX_RUNTIME_COMMIT_SHA;
+  try {
+    delete process.env.DISDEX_EXPECTED_RUNTIME_SHA;
+    delete process.env.DISDEX_RUNTIME_COMMIT_SHA;
+    const records = await normalizeRuntimeStatus({
+      healthRoot: root,
+      now: NOW,
+      serviceActiveByRunner: { V12: true, PENGU_V8: true, V52: true, QUALITY102_CAUSAL_V1: true },
+    });
+    assert.equal(records.every((record) => record.state === "要確認" && record.releaseShaMatch === false), true, JSON.stringify(records));
+    assert.match(records[0].safetyReason, /external release identity unavailable/i);
+  } finally {
+    if (originalExpected === undefined) delete process.env.DISDEX_EXPECTED_RUNTIME_SHA; else process.env.DISDEX_EXPECTED_RUNTIME_SHA = originalExpected;
+    if (originalRuntime === undefined) delete process.env.DISDEX_RUNTIME_COMMIT_SHA; else process.env.DISDEX_RUNTIME_COMMIT_SHA = originalRuntime;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("maps absent, malformed, stale, and SHA-mismatched heartbeats to 要確認", async () => {
   const root = await fixture({
     V12: undefined,
