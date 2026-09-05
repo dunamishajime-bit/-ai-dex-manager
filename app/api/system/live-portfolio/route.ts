@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
+import { deriveAsterAccountMetrics } from "@/lib/server/aster-account-metrics";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,6 +10,7 @@ type AccountSnapshot = {
   totalWalletBalance?: string | number;
   availableBalance?: string | number;
   totalUnrealizedProfit?: string | number;
+  assets?: unknown[];
 };
 
 type PositionRisk = {
@@ -78,6 +80,8 @@ export async function GET() {
       .filter((position): position is NonNullable<typeof position> => Boolean(position))
       .sort((left, right) => right.notionalUsd - left.notionalUsd);
 
+    const accountMetrics = deriveAsterAccountMetrics(account);
+
     const orders = (Array.isArray(openOrders) ? openOrders : []).map((order) => ({
       symbol: String(order.symbol || "").toUpperCase(),
       side: String(order.side || "").toUpperCase(),
@@ -91,9 +95,9 @@ export async function GET() {
       ok: true,
       capturedAt: new Date().toISOString(),
       account: {
-        balanceUsd: finite(account?.totalMarginBalance || account?.totalWalletBalance),
-        availableUsd: finite(account?.availableBalance),
-        unrealizedPnlUsd: finite(account?.totalUnrealizedProfit),
+        balanceUsd: accountMetrics.balanceUsd,
+        availableUsd: accountMetrics.availableUsd,
+        unrealizedPnlUsd: accountMetrics.unrealizedPnlUsd,
       },
       positions,
       orders: {

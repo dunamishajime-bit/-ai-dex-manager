@@ -18,16 +18,24 @@ export async function GET(req: NextRequest) {
   const selected = selectTradeHistorySource(aster.source === "aster" ? aster.entries : [], localEntries);
   const entries = selected.entries;
   entries.sort((left, right) => Date.parse(right.executedAt) - Date.parse(left.executedAt));
+  const officialEntries = aster.source === "aster" ? aster.entries : [];
+  const localLedgerMerged = selected.source === "aster" && entries.length > officialEntries.length;
 
   return NextResponse.json({
     ok: true,
     entries,
-    sources: { aster: aster.source, localLedgerFallback: selected.source === "local-fallback" },
+    sources: {
+      aster: aster.source,
+      localLedgerFallback: selected.source === "local-fallback",
+      localLedgerMerged,
+    },
     officialHistory: selected.source === "aster",
     historySource: selected.source,
     historyNotice: selected.source === "local-fallback"
       ? "Aster公式約定が0件のため、保存済みの取引ledgerを読み取り専用で表示しています。"
-      : undefined,
+      : localLedgerMerged
+        ? "Aster公式約定に保存済みledgerの未取得分を重複排除して補完表示しています。"
+        : undefined,
     refreshedAt: aster.refreshedAt,
     readOnlyError: aster.error,
   });

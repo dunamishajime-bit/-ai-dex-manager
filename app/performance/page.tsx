@@ -6,8 +6,10 @@ import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, TrendingUp } from "
 import { Card } from "@/components/ui/Card";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { cn } from "@/lib/utils";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
+import { displayTradePnlUsd } from "@/lib/trade-pnl";
 
 type TradeHistoryEntry = {
   id: string;
@@ -22,7 +24,7 @@ type TradeHistoryEntry = {
   openedAt?: string;
   closedAt?: string;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
-  strategyId?: "V12" | "V52" | "UNKNOWN";
+  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
   netPnlUsd?: number;
 };
 
@@ -104,10 +106,11 @@ function weekLabel(date: Date) {
 
 function toClosedTrades(entries: TradeHistoryEntry[]) {
   return entries
-    .filter((entry) => entry.tradeStatus === "closed" && typeof entry.realizedPnlUsd === "number")
-    .map((entry) => ({
+    .map((entry) => ({ entry, pnlUsd: displayTradePnlUsd(entry) }))
+    .filter(({ entry, pnlUsd }) => entry.tradeStatus === "closed" && pnlUsd !== undefined)
+    .map(({ entry, pnlUsd }) => ({
       ...entry,
-      realizedPnlUsd: Number(entry.realizedPnlUsd),
+      realizedPnlUsd: Number(pnlUsd),
       realizedPnlPct: typeof entry.realizedPnlPct === "number" ? entry.realizedPnlPct : 0,
       openedAt: entry.openedAt || entry.executedAt,
       closedAt: entry.closedAt || entry.executedAt,
@@ -126,7 +129,7 @@ function buildPeriodSummaries(
   const grouped = new Map<string, { label: string; trades: ClosedTrade[] }>();
 
   for (const trade of trades) {
-    const closeDate = new Date(trade.executedAt);
+    const closeDate = new Date(trade.closedAt);
     const key = keyFn(closeDate);
     const current = grouped.get(key);
     if (current) {
@@ -182,6 +185,7 @@ function toneClass(value: number) {
 export default function PerformancePage() {
   const { formatPrice } = useCurrency();
   const { wallet } = useOperationalWallet();
+  const { snapshot: livePortfolio } = useLivePortfolio();
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -245,7 +249,10 @@ export default function PerformancePage() {
     [closedTrades, monthCursor],
   );
 
-  const portfolioUsd = wallet ? Number(wallet.lastPortfolioUsd || 0) : null;
+  const portfolioUsd = livePortfolio?.account.balanceUsd
+    ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number"
+      ? wallet.lastAsterAccountBalanceUsd
+      : typeof wallet?.lastPortfolioUsd === "number" ? wallet.lastPortfolioUsd : null);
   const historyLabel = historySource === "aster"
     ? "Aster公式決済履歴"
     : historySource === "local-fallback"
@@ -276,7 +283,9 @@ export default function PerformancePage() {
         <Card glow="gold" noHover>
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Current Portfolio</div>
           <div className="mt-2 text-2xl font-semibold text-white">{portfolioUsd === null ? "\u53d6\u5f97\u4e0d\u80fd" : formatPrice(portfolioUsd)}</div>
-          <div className="mt-1 text-sm text-gray-400">現在のAster口座評価額</div>
+          <div className="mt-1 text-sm text-gray-400">
+            {livePortfolio ? "Aster口座評価額（最新取得）" : "Aster口座評価額（保存済みスナップショット）"}
+          </div>
         </Card>
         <Card glow="gold" noHover>
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Weekly Realized PnL</div>
@@ -284,7 +293,7 @@ export default function PerformancePage() {
             {latestWeek ? formatPrice(latestWeek.pnlUsd) : "-"}
           </div>
           <div className="mt-1 text-sm text-gray-400">
-            {latestWeek ? `${latestWeek.label} / ${formatPct(latestWeek.returnPct, 2)} / ${historyLabel}` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
+            {latestWeek ? `${latestWeek.label} / ${formatPct(latestWeek.returnPct, 2)} / 手数料控除後 / ${historyLabel}` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
           </div>
         </Card>
         <Card glow="gold" noHover>
@@ -293,13 +302,13 @@ export default function PerformancePage() {
             {latestMonth ? formatPrice(latestMonth.pnlUsd) : "-"}
           </div>
           <div className="mt-1 text-sm text-gray-400">
-            {latestMonth ? `${latestMonth.label} / ${formatPct(latestMonth.returnPct, 2)} / ${historyLabel}` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
+            {latestMonth ? `${latestMonth.label} / ${formatPct(latestMonth.returnPct, 2)} / 手数料控除後 / ${historyLabel}` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
           </div>
         </Card>
       </div>
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-        上部カードはAster口座評価額のスナップショット差分です。下の週次・月次サマリーと日別一覧は closed trade の実現損益です。
+        上部カードはAster口座評価額です。下の週次・月次サマリーと日別一覧は、約定手数料が取得できる場合は手数料控除後の closed trade 損益です。
       </div>
 
       {historyNotice ? (

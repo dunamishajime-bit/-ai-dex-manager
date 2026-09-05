@@ -55,7 +55,7 @@ assert.equal(localFallback.entries.length, 2);
 
 const officialWins = selectTradeHistorySource([normalized[1]], normalized);
 assert.equal(officialWins.source, "aster");
-assert.equal(officialWins.entries.length, 1);
+assert.equal(officialWins.entries.length, 2);
 
 void loadTradeHistoryEntries().then((persisted) => {
   assert.ok(persisted.length > 0);

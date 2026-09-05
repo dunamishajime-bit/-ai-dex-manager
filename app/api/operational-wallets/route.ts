@@ -9,6 +9,7 @@ import {
   upsertOperationalWallet,
 } from "@/lib/server/operational-wallet-db";
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
+import { deriveAsterAccountMetrics } from "@/lib/server/aster-account-metrics";
 import { appendPortfolioSnapshot } from "@/lib/server/portfolio-snapshot-db";
 import { encryptVaultSecret } from "@/lib/server/wallet-vault";
 import type {
@@ -66,6 +67,7 @@ type AsterAccountSummary = {
   totalWalletBalance?: string;
   totalMarginBalance?: string;
   availableBalance?: string;
+  totalUnrealizedProfit?: string;
   assets?: AsterAccountAsset[];
 };
 
@@ -148,19 +150,17 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
     .filter((holding): holding is OperationalWalletHolding => Boolean(holding))
     .sort((left, right) => right.usdValue - left.usdValue);
 
-  const portfolioUsd = Number(
-    trackedHoldings.reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0).toFixed(6),
-  );
   const stableBalanceUsd = trackedHoldings
     .filter((holding) => ASTER_STABLE_ASSET_SYMBOLS.has(holding.symbol))
     .reduce((sum, holding) => sum + Number(holding.usdValue || 0), 0);
-  const accountBalanceCandidate = [
-    account?.totalWalletBalance,
-    account?.totalMarginBalance,
-    stableBalanceUsd,
-  ].map(toFiniteNumber).find((value) => value > 0) ?? 0;
-  const accountBalanceUsd = Number(accountBalanceCandidate.toFixed(8));
-  const availableBalanceUsd = Number(toFiniteNumber(account?.availableBalance).toFixed(8));
+  const accountMetrics = deriveAsterAccountMetrics(account, stableBalanceUsd);
+  const accountBalanceUsd = accountMetrics.balanceUsd;
+  const availableBalanceUsd = accountMetrics.availableUsd;
+  // The calendar and wallet card must use the same account-level valuation as
+  // the live portfolio API. Holdings remain available for the asset list, but
+  // they are not a substitute for Aster's margin account total.
+  const portfolioUsd = accountBalanceUsd;
+  const capturedAt = new Date().toISOString();
   const previousHighWaterUsd = Number(wallet.lastPortfolioHighWaterUsd || 0);
   const portfolioHighWaterUsd = portfolioUsd > 0
     ? Math.max(previousHighWaterUsd, portfolioUsd)
@@ -168,7 +168,9 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
   const portfolioDrawdownPct = portfolioHighWaterUsd > 0 && portfolioUsd > 0
     ? Number((((portfolioUsd / portfolioHighWaterUsd) - 1) * 100).toFixed(6))
     : 0;
-  const hasDepositedBalance = hasOperationalTradeBalance(trackedHoldings);
+  const hasDepositedBalance = accountBalanceUsd > 0
+    || availableBalanceUsd > 0
+    || hasOperationalTradeBalance(trackedHoldings);
   const nextStatus: OperationalWalletStatus = hasDepositedBalance ? "running" : "awaiting_deposit";
 
   return {
@@ -177,14 +179,17 @@ async function refreshWalletBalanceFromAster(wallet: OperationalWalletRecord) {
     lastBalanceFormatted: availableBalanceUsd.toFixed(8),
     lastAsterAccountBalanceUsd: accountBalanceUsd,
     lastAsterAvailableBalanceUsd: availableBalanceUsd,
-    lastAsterBalanceUpdatedAt: new Date().toISOString(),
+    lastAsterAccountVerifiedAt: capturedAt,
+    lastAsterAccountSource: "AsterDEX",
+    lastAsterUnrealizedPnlUsd: accountMetrics.unrealizedPnlUsd,
+    lastAsterBalanceUpdatedAt: capturedAt,
     lastPortfolioUsd: portfolioUsd,
     lastPortfolioHighWaterUsd: portfolioHighWaterUsd,
     lastPortfolioDrawdownPct: portfolioDrawdownPct,
-    lastPortfolioDrawdownCheckedAt: new Date().toISOString(),
+    lastPortfolioDrawdownCheckedAt: capturedAt,
     trackedHoldings,
     depositDetectedAt:
-      hasDepositedBalance && !wallet.depositDetectedAt ? new Date().toISOString() : wallet.depositDetectedAt,
+      hasDepositedBalance && !wallet.depositDetectedAt ? capturedAt : wallet.depositDetectedAt,
     status: wallet.status === "paused" ? "paused" : nextStatus,
   } satisfies OperationalWalletRecord;
 }
@@ -235,7 +240,7 @@ function buildReadOnlyAsterWallet(
     chainName: "Aster Futures",
     createdAt: now,
     updatedAt: now,
-    status: "running",
+    status: "awaiting_deposit",
     backupConfirmed: false,
     whitelist: [],
   };
@@ -323,10 +328,19 @@ export async function GET(req: NextRequest) {
     if (!wallet || wallet.deletedAt) {
       const owner = userId ? await findUserById(userId) : email ? await findUserByEmail(email) : undefined;
       const config = loadAsterDexClientConfig();
-      if (!owner || !config) {
-        return NextResponse.json({ ok: true, wallet: null, reason: config ? "user_not_found" : "aster_not_configured" });
+      if (!config) {
+        return NextResponse.json({ ok: true, wallet: null, reason: "aster_not_configured" });
       }
-      wallet = buildReadOnlyAsterWallet(owner.id, owner.email, owner.displayName, config);
+      // Aster account data is still useful when the browser's local auth
+      // profile has not yet been mirrored into the server user store. Keep the
+      // read-only account keyed to the configured Aster address rather than
+      // returning an unset wallet card.
+      wallet = buildReadOnlyAsterWallet(
+        owner?.id || userId || `aster:${config.userAddress.toLowerCase()}`,
+        owner?.email || email || "aster-account@local",
+        owner?.displayName || displayName || "Aster account",
+        config,
+      );
       persistedWallet = false;
     }
 

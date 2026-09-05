@@ -4,11 +4,12 @@ import {
   type AsterDexUserTrade,
 } from "@/lib/server/asterdex/client";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
+import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
 
-const ASTER_HISTORY_SYMBOLS = [
-  "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT",
-  "AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT",
-] as const;
+const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
+  ...liveConfig.cryptoSymbols,
+  ...liveConfig.stockSymbols,
+]));
 const CACHE_TTL_MS = 60_000;
 const STABLE_ASSETS = new Set(["USDT", "USDC", "USDF", "BUSD", "FDUSD"]);
 
@@ -35,8 +36,13 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): "V12" | "V52" {
-  return /^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol) ? "V52" : "V12";
+function strategyForSymbol(symbol: string): "V12" | "V52" | "PENGU" | "QUALITY102" {
+  if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
+  if (symbol === liveConfig.penguSymbol) return "PENGU";
+  if (liveConfig.quality102Runtime.symbols.includes(symbol as (typeof liveConfig.quality102Runtime.symbols)[number])) {
+    return "QUALITY102";
+  }
+  return "V12";
 }
 
 function isEntry(direction: Direction, side: "BUY" | "SELL") {
