@@ -1,0 +1,19 @@
+{
+  "schema": "pengu-v8-gross-contract/v1",
+  "historicalRunId": "33110139791",
+  "historicalRequestedGrossDistribution": {
+    "0.50": 35,
+    "0.75": 23,
+    "0.9375": 11,
+    "0.1875": 1
+  },
+  "historicalMaximumRequestedGross": { "long": 0.9375, "short": 0.75 },
+  "historicalIntegrated": {
+    "penguGrossCap": 0.75,
+    "entryTimeMaxPenguGross": 0.75,
+    "allGrossChecksPass": true
+  },
+  "aster": { "symbol": "PENGUUSDT", "status": "TRADING", "contractType": "PERPETUAL", "quoteAsset": "USDT" },
+  "restoredContract": { "requestedLongGrossMax": 0.9375, "allocatedPenguGrossCap": 0.75 },
+  "safety": { "livePromotionChanged": false, "ordersSent": false, "vpsChanged": false }
+}

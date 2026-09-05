@@ -38,6 +38,7 @@ export interface StrictPortfolioIntent {
     symbol: string;
     side: StrictPositionSide;
     gross: number;
+    requestedGross?: number;
     notionalUsd: number;
     signalTs: number;
 }

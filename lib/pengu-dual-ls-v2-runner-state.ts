@@ -15,6 +15,7 @@ export interface PenguDualLsV2PendingOrder {
     reason: string;
     referenceTs: number;
     targetGross: number;
+    requestedGross?: number;
     createdAt: number;
     updatedAt: number;
     retryCount: number;

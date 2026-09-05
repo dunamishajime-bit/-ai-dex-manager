@@ -95,6 +95,13 @@ function finite(value: unknown, fallback = 0) {
     return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+export function buildPenguV8StrictGrossContract(requestedGross: number, equity: number, available: number) {
+    const requested = Number.isFinite(requestedGross) ? Math.max(0, requestedGross) : 0;
+    const safeEquity = Number.isFinite(equity) ? Math.max(0, equity) : 0;
+    const safeAvailable = Number.isFinite(available) ? Math.max(0, available) : 0;
+    return { requestedGross: requested, intentGross: requested, intentNotionalUsd: Math.min(requested * safeEquity, safeAvailable) };
+}
+
 function validLiveQuote(quote: DirectMarketQuote, symbol: string, now: number, maxAgeMs = 5 * 60_000) {
     return quote.symbol.toUpperCase() === symbol.toUpperCase()
         && Number.isFinite(quote.bidPrice) && quote.bidPrice > 0
@@ -687,6 +694,7 @@ export class PenguDualLsV2PortfolioRunner {
             }
             let workingEquity = accountEquity;
             let available = 0;
+            let requestedGross = 0;
             let targetGross = 0;
             let targetNotional = 0;
             if (!reduceOnly) {
@@ -698,8 +706,10 @@ export class PenguDualLsV2PortfolioRunner {
                     if (!(workingEquity > 0)) throw new Error("PENGU_DUAL_LS_STRICT_EQUITY_INVALID_AFTER_MTM");
                     const reserve = workingEquity * this.dependencies.config.cashReservePct / 100;
                     available = Math.max(0, Math.min(workingAccount.availableBalance, workingEquity - reserve));
-                    targetGross = Math.min(this.dependencies.config.maximumGross, signal.targetGross);
-                    targetNotional = Math.min(targetGross * workingEquity, available);
+                    const grossContract = buildPenguV8StrictGrossContract(signal.targetGross, workingEquity, available);
+                    requestedGross = grossContract.requestedGross;
+                    targetGross = grossContract.intentGross;
+                    targetNotional = grossContract.intentNotionalUsd;
                     const strictPlan = planStrictPortfolio({
                         equity: workingEquity,
                         now: plannerNow,
@@ -710,6 +720,7 @@ export class PenguDualLsV2PortfolioRunner {
                             symbol: SYMBOL,
                             side: signal.side > 0 ? "LONG" : "SHORT",
                             gross: targetGross,
+                            requestedGross,
                             notionalUsd: targetNotional,
                             signalTs: signal.referenceTs,
                         }],
@@ -755,8 +766,9 @@ export class PenguDualLsV2PortfolioRunner {
                         await this.dependencies.stateStore.save(state);
                         return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
                     }
-                    targetGross = accepted.gross;
-                    targetNotional = Math.min(accepted.notionalUsd, available);
+                    requestedGross = accepted.requestedGross ?? requestedGross;
+                    targetGross = Math.min(accepted.gross, this.dependencies.config.maximumGross);
+                    targetNotional = Math.min(targetGross * workingEquity, available);
                     break;
                 }
                 if (!accepted) throw new Error("PENGU_STRICT_PORTFOLIO_REDUCTION_RETRY_EXHAUSTED");
@@ -770,6 +782,7 @@ export class PenguDualLsV2PortfolioRunner {
             } else {
                 const reserve = workingEquity * this.dependencies.config.cashReservePct / 100;
                 available = Math.max(0, Math.min(workingAccount.availableBalance, workingEquity - reserve));
+                requestedGross = 0;
                 targetGross = 0;
                 targetNotional = Math.abs(actual!.quantity) * quote.midPrice;
             }
@@ -791,9 +804,10 @@ export class PenguDualLsV2PortfolioRunner {
                 quantity: requestedQuantity,
                 reduceOnly,
                 expectedPrice: side === "BUY" ? quote.askPrice : quote.bidPrice,
-                reason: reduceOnly ? signal.reason : `${signal.reason} targetGross=${targetGross.toFixed(4)} portfolioRemaining=${Math.max(0, this.dependencies.config.portfolioGrossCap - normalizedPositionGross(workingPositions, workingEquity, SYMBOL)).toFixed(4)}`,
+                reason: reduceOnly ? signal.reason : `${signal.reason} requestedGross=${requestedGross.toFixed(4)} allocatedGross=${targetGross.toFixed(4)} portfolioRemaining=${Math.max(0, this.dependencies.config.portfolioGrossCap - normalizedPositionGross(workingPositions, workingEquity, SYMBOL)).toFixed(4)}`,
                 referenceTs: signal.referenceTs,
                 targetGross,
+                requestedGross: reduceOnly ? undefined : requestedGross,
                 createdAt: this.now(),
                 updatedAt: this.now(),
                 retryCount: 0,
