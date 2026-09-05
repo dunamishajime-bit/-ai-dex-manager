@@ -119,6 +119,27 @@ def detect_signal(rows: list[dict], signal_index: int, variant: str) -> S34Signa
     raise ValueError(f"unsupported S34 variant: {variant}")
 
 
+def passes_v4_feature_gate(
+    family: str, symbol: str, variant: str, side: int, ret14: float, margin: float,
+    development_n: float, development_spf: float, development_avg: float,
+) -> bool:
+    if side not in (-1, 1):
+        raise ValueError(f"invalid side: {side}")
+    aligned = side * float(ret14)
+    if family == "BRK":
+        key = f"{symbol.upper()}|{variant}"
+        return (key == "FET|BRK24_H48_V1.2" and 0.15 <= aligned < 0.30) or (
+            key == "NEAR|BRK48_H48_V1.2" and -0.05 <= aligned < 0.02
+        ) or (key == "RENDER|BRK168_H12_V1.2" and 0.15 <= aligned < 0.30)
+    if family == "MR":
+        return (-0.15 <= aligned < -0.08 and development_n >= 20 and development_spf >= 0 and development_avg >= 0 and 1.05 <= margin < 1.70)
+    if family == "PB":
+        return (-0.50 <= aligned < 0.20 and development_n >= 0 and development_spf >= 0 and development_avg >= 0 and 1.00 <= margin < 1.70)
+    if family == "REV":
+        return (0.10 <= aligned < 0.30 and development_n >= 0 and development_spf >= 0 and development_avg >= 0 and 1.00 <= margin < 3.00)
+    return False
+
+
 V4_REV_LONG_RET14_MIN = 0.24
 
 

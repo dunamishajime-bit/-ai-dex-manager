@@ -35,3 +35,13 @@ For comparison, the same gate on V3 produced NORMAL `¥3,201,388.77961084`, PF `
 ## Safety
 
 No LIVE capability flag is changed. `QUALITY102_CAUSAL_CAPABILITIES.selectorImplemented` remains `false`, raw generator proof flags remain `false`, and the existing Fail-Closed behavior remains authoritative until the upstream causal selector is fully proven.
+## Frozen V4 feature configuration
+
+The full tracked V4 wrapper also applies the train-selected feature gates before the REV-long loss gate:
+- MR: `side*ret14 in [-0.15,-0.08)`, `developmentN>=20`, `developmentSpf>=0`, `developmentAvg>=0`, `margin in [1.05,1.70)`.
+- PB: `side*ret14 in [-0.50,0.20)`, `developmentSpf>=0`, `developmentAvg>=0`, `margin in [1.00,1.70)`.
+- REV: `side*ret14 in [0.10,0.30)`, `developmentSpf>=0`, `developmentAvg>=0`, `margin in [1.00,3.00)`, then REV Long additionally requires `ret14>=0.24`.
+- BRK: only `FET|BRK24_H48_V1.2` with aligned ret14 `[0.15,0.30)`, `NEAR|BRK48_H48_V1.2` with `[-0.05,0.02)`, and `RENDER|BRK168_H12_V1.2` with `[0.15,0.30)`.
+
+`buildQuality102CausalV4Selection()` enables both the frozen V4 feature gate and the REV-long improvement gate. The legacy `buildQuality102Selection()` remains unchanged for historical parity.
+The REV-long improvement gate is applied **after** V4 one-slot routing, matching the validated research run. A rejected REV long does not cause a previously slot-blocked candidate to backfill the slot. A tracked parity reconstruction reproduced the validated V4+Gate set exactly: `90/90` identities, with `0` tracked-only and `0` expected-only rows.

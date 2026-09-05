@@ -3,6 +3,7 @@ import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime
 import {
     QUALITY102_CAUSAL_CAPABILITIES,
     evaluateQuality102CausalReadiness,
+    evaluateQuality102CausalV4FeatureGate,
     evaluateQuality102CausalV4ImprovementGate,
     evaluateS34QualityGate,
     getS1S2RawGeneratorStatus,
@@ -149,6 +150,32 @@ assert.deepEqual(
 assert.deepEqual(
     evaluateS34QualityGate({ family: "BRK", variant: "x", side: 1, strength: Number.NaN, ret14: 0 }),
     { accepted: false, reason: "INVALID_S34_NUMERIC_INPUT" },
+);
+
+// Causal V4 feature gate is frozen from the train-only feature search.
+assert.deepEqual(
+    evaluateQuality102CausalV4FeatureGate({ family: "MR", symbol: "XRP", variant: "MR48_Z2.5_H24", side: -1, ret14: 0.10, margin: 1.05, developmentN: 20, developmentSpf: 0, developmentAvg: 0 }),
+    { accepted: true, reason: "V4_FEATURE_GATE_PASS" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4FeatureGate({ family: "MR", symbol: "XRP", variant: "MR48_Z2.5_H24", side: -1, ret14: 0.10, margin: 1.05, developmentN: 19, developmentSpf: 0, developmentAvg: 0 }),
+    { accepted: false, reason: "V4_DEVELOPMENT_GATE_REJECT" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4FeatureGate({ family: "PB", symbol: "FET", variant: "PB168_0.1_P24_0.02_H12", side: 1, ret14: 0.10, margin: 1.7, developmentN: 20, developmentSpf: 1, developmentAvg: 0.01 }),
+    { accepted: false, reason: "V4_MARGIN_GATE_REJECT" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4FeatureGate({ family: "REV", symbol: "AAVE", variant: "REV24_T0.05_H24", side: 1, ret14: 0.25, margin: 1.5, developmentN: 20, developmentSpf: 1, developmentAvg: 0.01 }),
+    { accepted: true, reason: "V4_FEATURE_GATE_PASS" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4FeatureGate({ family: "BRK", symbol: "FET", variant: "BRK24_H48_V1.2", side: 1, ret14: 0.15, margin: Number.NaN, developmentN: Number.NaN, developmentSpf: Number.NaN, developmentAvg: Number.NaN }),
+    { accepted: true, reason: "V4_FEATURE_GATE_PASS" },
+);
+assert.deepEqual(
+    evaluateQuality102CausalV4FeatureGate({ family: "BRK", symbol: "SOL", variant: "BRK24_H48_V1.2", side: 1, ret14: 0.15, margin: Number.NaN, developmentN: Number.NaN, developmentSpf: Number.NaN, developmentAvg: Number.NaN }),
+    { accepted: false, reason: "V4_BRK_VARIANT_WINDOW_REJECT" },
 );
 
 // Causal V4 improvement gate: reject weak-regime REV longs using entry-time ret14 only.

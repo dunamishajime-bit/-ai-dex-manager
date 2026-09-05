@@ -259,7 +259,11 @@ const v4BlockedCandidate = rawCandidate({
     variant: "REV12_T0.05_H12",
     side: 1,
     ret14: 0.239999,
-});
+    margin: 1.5,
+    developmentN: 20,
+    developmentSpf: 1,
+    developmentAvg: 0.01,
+} as any);
 const v4BlockedSelection = buildQuality102CausalV4Selection({
     rawHighVol: [],
     rawS34: [v4BlockedCandidate],
@@ -278,6 +282,48 @@ const v4AcceptedSelection = buildQuality102CausalV4Selection({
 });
 assert.equal(v4AcceptedSelection.quality102.length, 1);
 assert.equal(v4AcceptedSelection.rejectedS34.length, 0);
+
+const v4FeatureRejectedCandidate = rawCandidate({
+    id: "v4-mr-development-rejected",
+    entryTs: baseTs + 2 * HOUR,
+    exitTs: baseTs + 3 * HOUR,
+    layer: "S34",
+    family: "MR",
+    variant: "MR48_Z2.5_H24",
+    side: -1,
+    ret14: 0.10,
+    margin: 1.10,
+    developmentN: 19,
+    developmentSpf: 1,
+    developmentAvg: 0.01,
+} as any);
+const v4FeatureRejectedSelection = buildQuality102CausalV4Selection({
+    rawHighVol: [],
+    rawS34: [v4FeatureRejectedCandidate],
+    coreIdentities: [{ entryTs: v4FeatureRejectedCandidate.entryTs, symbol: v4FeatureRejectedCandidate.symbol, variant: v4FeatureRejectedCandidate.variant, side: v4FeatureRejectedCandidate.side }],
+    fillerIdentities: [],
+});
+assert.equal(v4FeatureRejectedSelection.quality102.length, 0);
+assert.equal(v4FeatureRejectedSelection.rejectedS34[0]?.reason, "V4_DEVELOPMENT_GATE_REJECT");
+
+// Loss gate is post-one-slot: a rejected REV long must not backfill a candidate that was already slot-blocked.
+const v4PrimaryWeakRev = rawCandidate({
+    id: "v4-post-route-primary", entryTs: baseTs + 10 * HOUR, exitTs: baseTs + 12 * HOUR, layer: "S34",
+    family: "REV", variant: "REV24_T0.05_H24", side: 1, ret14: 0.23, margin: 1.5, developmentN: 20, developmentSpf: 1, developmentAvg: 0.01,
+} as any);
+const v4SecondaryStrongRev = rawCandidate({
+    id: "v4-post-route-secondary", entryTs: baseTs + 11 * HOUR, exitTs: baseTs + 13 * HOUR, layer: "S34",
+    family: "REV", variant: "REV24_T0.08_H24", side: 1, ret14: 0.25, margin: 1.5, developmentN: 20, developmentSpf: 1, developmentAvg: 0.01,
+} as any);
+const v4NoBackfill = buildQuality102CausalV4Selection({
+    rawHighVol: [],
+    rawS34: [v4PrimaryWeakRev, v4SecondaryStrongRev],
+    coreIdentities: [v4PrimaryWeakRev, v4SecondaryStrongRev].map((row) => ({ entryTs: row.entryTs, symbol: row.symbol, variant: row.variant, side: row.side })),
+    fillerIdentities: [],
+});
+assert.equal(v4NoBackfill.quality102.length, 0);
+assert.deepEqual(v4NoBackfill.oneSlotBlocked.map((row) => row.id), ["v4-post-route-secondary"]);
+assert.ok(v4NoBackfill.rejectedS34.some((row) => row.candidate.id === "v4-post-route-primary" && row.reason === "REV_LONG_RET14_BELOW_24PCT"));
 
 const finalCandidates: Quality102RawCandidate[] = [];
 for (let index = 0; index < 102; index += 1) {

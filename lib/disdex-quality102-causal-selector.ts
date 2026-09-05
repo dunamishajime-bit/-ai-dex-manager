@@ -233,6 +233,76 @@ export function evaluateS34QualityGate(input: Quality102S34QualityGateInput): Qu
     }
 }
 
+export interface Quality102CausalV4FeatureGateInput {
+    family: Quality102S34Family;
+    symbol: string;
+    variant: string;
+    side: number;
+    ret14: number;
+    margin: number;
+    developmentN: number;
+    developmentSpf: number;
+    developmentAvg: number;
+}
+
+export interface Quality102CausalV4FeatureGateResult {
+    accepted: boolean;
+    reason:
+        | "V4_FEATURE_GATE_PASS"
+        | "V4_RET14_WINDOW_REJECT"
+        | "V4_BRK_VARIANT_WINDOW_REJECT"
+        | "V4_DEVELOPMENT_GATE_REJECT"
+        | "V4_MARGIN_GATE_REJECT"
+        | "INVALID_V4_FEATURE_SIDE"
+        | "INVALID_V4_FEATURE_INPUT"
+        | "UNKNOWN_V4_S34_FAMILY";
+}
+
+function v4FiniteDevelopment(input: Quality102CausalV4FeatureGateInput): boolean {
+    return Number.isFinite(input.margin)
+        && Number.isFinite(input.developmentN)
+        && Number.isFinite(input.developmentSpf)
+        && Number.isFinite(input.developmentAvg);
+}
+
+/** Frozen V4 train-selected feature gate; it uses only pre-entry/dev-period data. */
+export function evaluateQuality102CausalV4FeatureGate(
+    input: Quality102CausalV4FeatureGateInput,
+): Quality102CausalV4FeatureGateResult {
+    if (input.side !== -1 && input.side !== 1) return { accepted: false, reason: "INVALID_V4_FEATURE_SIDE" };
+    if (!Number.isFinite(input.ret14) || !input.symbol.trim() || !input.variant.trim()) {
+        return { accepted: false, reason: "INVALID_V4_FEATURE_INPUT" };
+    }
+    const alignedRet14 = input.side * input.ret14;
+    if (input.family === "BRK") {
+        const key = `${input.symbol.toUpperCase()}|${input.variant}`;
+        const accepted = (key === "FET|BRK24_H48_V1.2" && alignedRet14 >= 0.15 && alignedRet14 < 0.30)
+            || (key === "NEAR|BRK48_H48_V1.2" && alignedRet14 >= -0.05 && alignedRet14 < 0.02)
+            || (key === "RENDER|BRK168_H12_V1.2" && alignedRet14 >= 0.15 && alignedRet14 < 0.30);
+        return { accepted, reason: accepted ? "V4_FEATURE_GATE_PASS" : "V4_BRK_VARIANT_WINDOW_REJECT" };
+    }
+    if (!v4FiniteDevelopment(input)) return { accepted: false, reason: "INVALID_V4_FEATURE_INPUT" };
+    if (input.family === "MR") {
+        if (!(alignedRet14 >= -0.15 && alignedRet14 < -0.08)) return { accepted: false, reason: "V4_RET14_WINDOW_REJECT" };
+        if (input.developmentN < 20 || input.developmentSpf < 0 || input.developmentAvg < 0) return { accepted: false, reason: "V4_DEVELOPMENT_GATE_REJECT" };
+        if (!(input.margin >= 1.05 && input.margin < 1.70)) return { accepted: false, reason: "V4_MARGIN_GATE_REJECT" };
+        return { accepted: true, reason: "V4_FEATURE_GATE_PASS" };
+    }
+    if (input.family === "PB") {
+        if (!(alignedRet14 >= -0.50 && alignedRet14 < 0.20)) return { accepted: false, reason: "V4_RET14_WINDOW_REJECT" };
+        if (input.developmentN < 0 || input.developmentSpf < 0 || input.developmentAvg < 0) return { accepted: false, reason: "V4_DEVELOPMENT_GATE_REJECT" };
+        if (!(input.margin >= 1.00 && input.margin < 1.70)) return { accepted: false, reason: "V4_MARGIN_GATE_REJECT" };
+        return { accepted: true, reason: "V4_FEATURE_GATE_PASS" };
+    }
+    if (input.family === "REV") {
+        if (!(alignedRet14 >= 0.10 && alignedRet14 < 0.30)) return { accepted: false, reason: "V4_RET14_WINDOW_REJECT" };
+        if (input.developmentN < 0 || input.developmentSpf < 0 || input.developmentAvg < 0) return { accepted: false, reason: "V4_DEVELOPMENT_GATE_REJECT" };
+        if (!(input.margin >= 1.00 && input.margin < 3.00)) return { accepted: false, reason: "V4_MARGIN_GATE_REJECT" };
+        return { accepted: true, reason: "V4_FEATURE_GATE_PASS" };
+    }
+    return { accepted: false, reason: "UNKNOWN_V4_S34_FAMILY" };
+}
+
 export const QUALITY102_CAUSAL_V4_REV_LONG_RET14_MIN = 0.24;
 
 export interface Quality102CausalV4ImprovementGateInput {

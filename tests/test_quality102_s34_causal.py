@@ -57,6 +57,14 @@ class S34CausalSignalTests(unittest.TestCase):
         self.assertFalse(sig.strength_proven)
         self.assertFalse(sig.volume_gate_proven)
 
+    def test_v4_feature_gate_matches_frozen_train_selected_windows(self):
+        self.assertTrue(s34.passes_v4_feature_gate("MR", "XRP", "MR48_Z2.5_H24", -1, 0.10, 1.05, 20, 0.0, 0.0))
+        self.assertFalse(s34.passes_v4_feature_gate("MR", "XRP", "MR48_Z2.5_H24", -1, 0.10, 1.05, 19, 0.0, 0.0))
+        self.assertFalse(s34.passes_v4_feature_gate("PB", "FET", "PB168_0.1_P24_0.02_H12", 1, 0.10, 1.70, 20, 1.0, 0.01))
+        self.assertTrue(s34.passes_v4_feature_gate("REV", "AAVE", "REV24_T0.05_H24", 1, 0.25, 1.50, 20, 1.0, 0.01))
+        self.assertTrue(s34.passes_v4_feature_gate("BRK", "FET", "BRK24_H48_V1.2", 1, 0.15, float("nan"), float("nan"), float("nan"), float("nan")))
+        self.assertFalse(s34.passes_v4_feature_gate("BRK", "SOL", "BRK24_H48_V1.2", 1, 0.15, float("nan"), float("nan"), float("nan"), float("nan")))
+
     def test_v4_improvement_gate_requires_24pct_ret14_for_rev_long(self):
         self.assertFalse(s34.passes_v4_improvement_gate("REV", 1, 0.239999))
         self.assertTrue(s34.passes_v4_improvement_gate("REV", 1, 0.24))

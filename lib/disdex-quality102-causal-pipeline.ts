@@ -1,4 +1,5 @@
 import {
+    evaluateQuality102CausalV4FeatureGate,
     evaluateQuality102CausalV4ImprovementGate,
     evaluateS34QualityGate,
     routeQuality102OneSlot,
@@ -160,6 +161,11 @@ export interface Quality102RawCandidate {
     ret14?: number;
     /** Required for S34, including BRK. Never synthesized by this module. */
     strength?: number;
+    /** Required by the causal V4 feature gate for PB/MR/REV candidates. */
+    margin?: number;
+    developmentN?: number;
+    developmentSpf?: number;
+    developmentAvg?: number;
 }
 
 export interface Quality102SelectedCandidate extends Omit<Quality102RawCandidate, "layer">, Quality102OneSlotCandidate {
@@ -177,6 +183,7 @@ export interface Quality102RejectedS34Candidate {
     candidate: Quality102RawCandidate;
     reason:
         | ReturnType<typeof evaluateS34QualityGate>["reason"]
+        | ReturnType<typeof evaluateQuality102CausalV4FeatureGate>["reason"]
         | ReturnType<typeof evaluateQuality102CausalV4ImprovementGate>["reason"];
 }
 
@@ -186,7 +193,9 @@ export interface Quality102SelectionInput {
     /** Membership supplied by the upstream raw producer; row order is not evidence. */
     coreIdentities: readonly Quality102S34Identity[];
     fillerIdentities: readonly Quality102S34Identity[];
-    /** Apply the forward-causal V4 REV-long loss gate after recovered historical quality gates. */
+    /** Apply the frozen train-selected V4 feature gate after recovered historical quality gates. */
+    applyV4FeatureGate?: boolean;
+    /** Apply the forward-causal V4 REV-long loss gate after the V4 feature gate. */
     applyV4ImprovementGate?: boolean;
 }
 
@@ -791,7 +800,36 @@ export function buildQuality102Selection(input: Quality102SelectionInput): Quali
             rejectedS34.push({ candidate, reason: gate.reason });
             continue;
         }
-        if (input.applyV4ImprovementGate) {
+        if (input.applyV4FeatureGate) {
+            const v4FeatureGate = evaluateQuality102CausalV4FeatureGate({
+                family: candidate.family,
+                symbol: candidate.symbol,
+                variant: candidate.variant,
+                side: candidate.side,
+                ret14: candidate.ret14 as number,
+                margin: candidate.margin ?? Number.NaN,
+                developmentN: candidate.developmentN ?? Number.NaN,
+                developmentSpf: candidate.developmentSpf ?? Number.NaN,
+                developmentAvg: candidate.developmentAvg ?? Number.NaN,
+            });
+            if (!v4FeatureGate.accepted) {
+                rejectedS34.push({ candidate, reason: v4FeatureGate.reason });
+                continue;
+            }
+        }
+        quality124.push(asSelected(candidate, classifyS34Layer(candidate, coreIdentities, fillerIdentities)));
+    }
+
+    const byId = new Map(quality124.map((candidate) => [candidate.id, candidate]));
+    const routed = routeQuality102OneSlot(quality124.map(({ id, entryTs, exitTs, layer }) => ({ id, entryTs, exitTs, layer })));
+    const routedQuality102 = routed.accepted.map((candidate) => {
+        const full = byId.get(candidate.id);
+        if (!full) throw new Error("QUALITY102_ROUTER_ID_NOT_FOUND");
+        return full;
+    });
+    const quality102: Quality102SelectedCandidate[] = [];
+    for (const candidate of routedQuality102) {
+        if (input.applyV4ImprovementGate && candidate.family === "REV") {
             const v4Gate = evaluateQuality102CausalV4ImprovementGate({
                 family: candidate.family,
                 side: candidate.side,
@@ -802,16 +840,8 @@ export function buildQuality102Selection(input: Quality102SelectionInput): Quali
                 continue;
             }
         }
-        quality124.push(asSelected(candidate, classifyS34Layer(candidate, coreIdentities, fillerIdentities)));
+        quality102.push(candidate);
     }
-
-    const byId = new Map(quality124.map((candidate) => [candidate.id, candidate]));
-    const routed = routeQuality102OneSlot(quality124.map(({ id, entryTs, exitTs, layer }) => ({ id, entryTs, exitTs, layer })));
-    const quality102 = routed.accepted.map((candidate) => {
-        const full = byId.get(candidate.id);
-        if (!full) throw new Error("QUALITY102_ROUTER_ID_NOT_FOUND");
-        return full;
-    });
     const oneSlotBlocked = routed.blocked.map((candidate) => {
         const full = byId.get(candidate.id);
         if (!full) throw new Error("QUALITY102_ROUTER_BLOCKED_ID_NOT_FOUND");
@@ -839,7 +869,7 @@ export function buildQuality102Selection(input: Quality102SelectionInput): Quali
 
 /** Build the causal V4 selection with the validated REV-long ret14 improvement gate enabled. */
 export function buildQuality102CausalV4Selection(input: Quality102SelectionInput): Quality102SelectionResult {
-    return buildQuality102Selection({ ...input, applyV4ImprovementGate: true });
+    return buildQuality102Selection({ ...input, applyV4FeatureGate: true, applyV4ImprovementGate: true });
 }
 
 export function evaluateQuality102Parity(
