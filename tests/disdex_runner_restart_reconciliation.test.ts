@@ -232,8 +232,10 @@ test("service wiring is non-secret, singleton-safe, and exact-release bound", as
     assert.match(combined, /ExecStartPre=\/usr\/bin\/grep -Fxq @DISDEX_RUNNER_RELEASE_SHA@ @DISDEX_RUNNER_RELEASE_ROOT@\/.disdex-release-sha/);
     assert.equal((combined.match(/^ExecStart=/gm) || []).length, 1);
     assert.doesNotMatch(combined, /disdex-pengu-dual-ls-v2\.service/);
-    assert.match(installer, /DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT=disdex-v96-v52-live\.service/);
-    assert.match(installer, /DISDEX_RUNNER_V52_SERVICE_UNIT=disdex-v96-v52-live\.service/);
+    assert.match(installer, /printf 'DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT=%s\\n' "\$PENGU_SERVICE_UNIT"/);
+    assert.match(installer, /printf 'DISDEX_RUNNER_V52_SERVICE_UNIT=%s\\n' "\$V52_SERVICE_UNIT"/);
+    assert.match(installer, /DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT:-disdex-v96-v52-live\.service/);
+    assert.match(installer, /DISDEX_RUNNER_V52_SERVICE_UNIT:-disdex-v96-v52-live\.service/);
     for (const value of [q102, v12, combined]) {
         assert.doesNotMatch(value, /DISDEX_RUNNER_(?:API_KEY|TOKEN|SECRET|PASSWORD|PRIVATE_KEY)=/i);
     }

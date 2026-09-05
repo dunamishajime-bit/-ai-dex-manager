@@ -81,6 +81,10 @@ ENV_DIR="$(canonical_directory_after_create 'DISDEX_RUNNER_ENV_DIR' "$ENV_DIR")"
 V12_RELEASE_ROOT="${DISDEX_RUNNER_V12_RELEASE_ROOT:-/opt/disdex/releases/${RELEASE_SHA}}"
 Q102_RELEASE_ROOT="${DISDEX_RUNNER_QUALITY102_RELEASE_ROOT:-${RELEASE_ROOT}}"
 COMBINED_RELEASE_ROOT="${DISDEX_RUNNER_COMBINED_RELEASE_ROOT:-${RELEASE_ROOT}}"
+PENGU_SERVICE_UNIT="${DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT:-disdex-v96-v52-live.service}"
+V52_SERVICE_UNIT="${DISDEX_RUNNER_V52_SERVICE_UNIT:-disdex-v96-v52-live.service}"
+[[ "$PENGU_SERVICE_UNIT" =~ ^(disdex-pengu-dual-ls-v2-v20|disdex-v96-v52-live)\.service$ ]] || [[ "$PENGU_SERVICE_UNIT" =~ ^disdex-pengu-dual-ls-v2-v20\.service$ ]] || die 'PENGU service unit is not allowlisted'
+[[ "$V52_SERVICE_UNIT" =~ ^(disdex-v52-aster-only@[0-9a-f]{40}|disdex-v96-v52-live)\.service$ ]] || die 'V52 service unit is not allowlisted'
 for runner_release in "$V12_RELEASE_ROOT" "$Q102_RELEASE_ROOT" "$COMBINED_RELEASE_ROOT"; do
   canonical_existing_directory 'runner release root' "$runner_release" >/dev/null
   runner_marker="${runner_release}/.disdex-release-sha"
@@ -134,8 +138,8 @@ temporary_env="$(mktemp "${ENV_DIR}/.disdex-runner-watchdog.env.XXXXXX")"
   printf 'DISDEX_RUNNER_V52_EXPECTED_CWD=%s\n' "$COMBINED_RELEASE_ROOT"
   printf 'DISDEX_RUNNER_QUALITY102_CAUSAL_V1_EXPECTED_CWD=%s\n' "$Q102_RELEASE_ROOT"
   printf 'DISDEX_RUNNER_V12_SERVICE_UNIT=disdex-v12-x1-all@%s.service\n' "$RELEASE_SHA"
-  printf 'DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT=disdex-v96-v52-live.service\n'
-  printf 'DISDEX_RUNNER_V52_SERVICE_UNIT=disdex-v96-v52-live.service\n'
+  printf 'DISDEX_RUNNER_PENGU_V8_SERVICE_UNIT=%s\n' "$PENGU_SERVICE_UNIT"
+  printf 'DISDEX_RUNNER_V52_SERVICE_UNIT=%s\n' "$V52_SERVICE_UNIT"
   printf 'DISDEX_RUNNER_QUALITY102_CAUSAL_V1_SERVICE_UNIT=disdex-quality102-causal-v1@%s.service\n' "$RELEASE_SHA"
   printf 'DISDEX_RUNNER_WATCHDOG_HEARTBEAT_TIMEOUT_MS=300000\n'
   printf 'DISDEX_RUNNER_WATCHDOG_ATTEMPT_WINDOW_MS=1800000\n'
