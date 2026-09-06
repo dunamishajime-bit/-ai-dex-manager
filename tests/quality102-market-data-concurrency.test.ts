@@ -88,3 +88,37 @@ test("Q102 serializes kline GETs behind the request-rate gate", async () => {
     await provider.load();
     assert.equal(maximumActiveRequests, 1);
 });
+
+test("Q102 keeps other symbols evaluable when one current open is unavailable", async () => {
+    const client = {
+        async getKlines(symbol: string, _interval: string, limit: number, range: { startTime?: number; endTime?: number } = {}): Promise<AsterKline[]> {
+            if (limit === 1) {
+                if (symbol === "AAVEUSDT") return [];
+                const timestamp = Math.floor(NOW / HOUR) * HOUR;
+                return [[timestamp, "100", "101", "99", "100", "10", timestamp + HOUR - 1, "1000", 1, "0", "0", "0"]];
+            }
+            const start = Number(range.startTime);
+            const end = Number(range.endTime);
+            const rows: AsterKline[] = [];
+            for (let timestamp = start; timestamp <= end && rows.length < limit; timestamp += HOUR) {
+                rows.push([timestamp, "100", "101", "99", "100", "10", timestamp + HOUR - 1, "1000", 1, "0", "0", "0"]);
+            }
+            return rows;
+        },
+    } as unknown as AsterV3Client;
+
+    const provider = new Quality102CausalV1AsterMarketDataProvider(client, {
+        symbols: ["AAVEUSDT", "SUIUSDT"],
+        historyHours: 181 * 24,
+        pageLimit: 500,
+        maxConcurrentSymbols: 2,
+        currentOpenRetryAttempts: 2,
+        currentOpenRetryDelayMs: 0,
+        requestMinIntervalMs: 0,
+        now: () => NOW,
+    });
+    const history = await provider.load();
+    assert.equal(history.candlesBySymbol.AAVEUSDT?.length, 181 * 24);
+    assert.equal(history.entryOpenBySymbol?.AAVEUSDT, undefined);
+    assert.equal(history.entryOpenBySymbol?.SUIUSDT?.timestampMs, Math.floor(NOW / HOUR) * HOUR);
+});

@@ -37,6 +37,16 @@ function flat(symbol:string, entryOpen:number, lastClose=100, close24=100){
   assert.equal(s.exitPolicy,"FIXED_HOLD_STOP"); assert.ok((s.maxHoldHours??0)<=24); assert.equal(s.referenceTs,ENTRY_TS);
 }
 {
+  const available=flat("FETUSDT",125,94,100).history;
+  const unavailable=flat("APTUSDT",123,94,100).history;
+  const history={
+    candlesBySymbol:{...available.candlesBySymbol,...unavailable.candlesBySymbol},
+    entryOpenBySymbol:{...available.entryOpenBySymbol},
+  };
+  const s=buildQuality102CausalV4Signal({history,decisionTs:NOW,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:false}});
+  assert.equal(s.family,"REV"); assert.equal(s.side,1); assert.equal(s.symbol,"FETUSDT");
+}
+{
   const {history}=flat("APTUSDT",123,94,100);
   const s=buildQuality102CausalV4Signal({history,decisionTs:NOW,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:false}});
   assert.equal(s.side,0); assert.equal(s.reason,"QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL");

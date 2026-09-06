@@ -169,7 +169,7 @@ export class Quality102CausalV1AsterMarketDataProvider {
         return rows;
     }
 
-    private async loadEntryOpen(symbol: string, now: number): Promise<{ timestampMs: number; open: number }> {
+    private async loadEntryOpen(symbol: string, now: number): Promise<{ timestampMs: number; open: number } | undefined> {
         const timestampMs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS;
         for (let attempt = 0; attempt < this.currentOpenRetryAttempts; attempt += 1) {
             const rows = await this.getKlines(symbol, "1h", 1, quality102EntryOpenRange(timestampMs));
@@ -180,10 +180,10 @@ export class Quality102CausalV1AsterMarketDataProvider {
                 return { timestampMs, open };
             }
             if (attempt + 1 < this.currentOpenRetryAttempts && this.currentOpenRetryDelayMs > 0) {
-                await new Promise((resolve) => setTimeout(resolve, this.currentOpenRetryDelayMs));
+                await this.sleep(this.currentOpenRetryDelayMs);
             }
         }
-        throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
+        return undefined;
     }
 
     async load(): Promise<Quality102CausalV1History> {
@@ -198,9 +198,12 @@ export class Quality102CausalV1AsterMarketDataProvider {
             const entryOpen = await this.loadEntryOpen(symbol, now);
             return { symbol, candles, entryOpen };
         });
+        const entryOpenBySymbol = Object.fromEntries(entries
+            .filter(({ entryOpen }) => Boolean(entryOpen))
+            .map(({ symbol, entryOpen }) => [symbol, entryOpen!] as const));
         const history: Quality102CausalV1History = {
             candlesBySymbol: Object.fromEntries(entries.map(({ symbol, candles }) => [symbol, candles])),
-            entryOpenBySymbol: Object.fromEntries(entries.map(({ symbol, entryOpen }) => [symbol, entryOpen])),
+            ...(Object.keys(entryOpenBySymbol).length ? { entryOpenBySymbol } : {}),
         };
         this.cached = { expiresAt: now + this.cacheTtlMs, history };
         return history;

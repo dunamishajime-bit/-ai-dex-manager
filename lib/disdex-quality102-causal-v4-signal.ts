@@ -38,8 +38,7 @@ function selectedS34(input: Quality102CausalV1SignalInput): Quality102CausalV4S3
     for (const [symbol, rows] of Object.entries(input.history.candlesBySymbol)) {
         if (symbol === "BTCUSDT") continue;
         const entryOpen = input.history.entryOpenBySymbol?.[symbol];
-        if (!entryOpen) throw new Error(`QUALITY102_CAUSAL_V4_ENTRY_OPEN_MISSING:${symbol}`);
-        if (entryOpen.timestampMs !== entryTs) throw new Error(`QUALITY102_CAUSAL_V4_ENTRY_OPEN_STALE:${symbol}`);
+        if (!entryOpen || entryOpen.timestampMs !== entryTs) continue;
         candidates.push(...generateQuality102CausalV4S34Candidates({ symbol, rows, entryOpen }));
     }
     candidates.sort((a, b) => LAYER_RANK[a.layer] - LAYER_RANK[b.layer]
@@ -76,15 +75,18 @@ function highVolInput(input: Quality102CausalV1SignalInput, options: Quality102C
     if (!options.highVolSymbols) return input;
     const allowed = new Set(options.highVolSymbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean));
     if (!allowed.size) throw new Error("QUALITY102_CAUSAL_V4_HIGH_VOL_UNIVERSE_REQUIRED");
+    const entryOpenBySymbol = input.history.entryOpenBySymbol;
+    const currentEntryTs = currentHour(input.decisionTs);
     const candlesBySymbol = Object.fromEntries(Object.entries(input.history.candlesBySymbol)
-        .filter(([symbol]) => allowed.has(symbol.toUpperCase()) || symbol.toUpperCase() === "BTCUSDT"));
+        .filter(([symbol]) => {
+            if (!(allowed.has(symbol.toUpperCase()) || symbol.toUpperCase() === "BTCUSDT")) return false;
+            if (!entryOpenBySymbol) return true;
+            const entryOpen = entryOpenBySymbol[symbol];
+            return Boolean(entryOpen && entryOpen.timestampMs === currentEntryTs);
+        }));
     for (const symbol of allowed) {
-        if (!candlesBySymbol[symbol]) throw new Error(`QUALITY102_CAUSAL_V4_HIGH_VOL_HISTORY_MISSING:${symbol}`);
+        if (!input.history.candlesBySymbol[symbol]) throw new Error(`QUALITY102_CAUSAL_V4_HIGH_VOL_HISTORY_MISSING:${symbol}`);
     }
-    const entryOpenBySymbol = input.history.entryOpenBySymbol
-        ? Object.fromEntries(Object.entries(input.history.entryOpenBySymbol)
-            .filter(([symbol]) => allowed.has(symbol.toUpperCase()) || symbol.toUpperCase() === "BTCUSDT"))
-        : undefined;
     return { ...input, history: { candlesBySymbol, ...(entryOpenBySymbol ? { entryOpenBySymbol } : {}) } };
 }
 
@@ -100,8 +102,7 @@ export function buildQuality102CausalV4Signal(
 
     if (legacy.side !== 0 && legacy.symbol) {
         const entryOpen = input.history.entryOpenBySymbol?.[legacy.symbol];
-        if (!entryOpen) throw new Error(`QUALITY102_CAUSAL_V4_ENTRY_OPEN_MISSING:${legacy.symbol}`);
-        if (entryOpen.timestampMs !== entryTs) throw new Error(`QUALITY102_CAUSAL_V4_ENTRY_OPEN_STALE:${legacy.symbol}`);
+        if (!entryOpen || entryOpen.timestampMs !== entryTs) return idleSignal(legacy, "QUALITY102_CAUSAL_V4_HIGH_VOL_ENTRY_OPEN_UNAVAILABLE", entryTs);
         return {
             ...legacy,
             referenceTs: entryTs,
