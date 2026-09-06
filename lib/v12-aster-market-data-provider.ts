@@ -12,19 +12,35 @@ export interface V12AsterMarketDataProviderOptions {
     hourlyLimit?: number;
     now?: () => number;
     alignmentRetryAttempts?: number;
+    requestMinIntervalMs?: number;
+    sleepImpl?: (ms: number) => Promise<void>;
 }
 
 export class V12AsterMarketDataProvider {
     private readonly limit: number;
     private readonly now: () => number;
     private readonly alignmentRetryAttempts: number;
+    private readonly requestMinIntervalMs: number;
+    private readonly sleep: (ms: number) => Promise<void>;
+    private nextRequestAt = 0;
     constructor(private readonly client: AsterV3Client, options: V12AsterMarketDataProviderOptions = {}) {
         this.limit = Math.max(200, Math.min(1500, options.hourlyLimit ?? 500));
         this.now = options.now || Date.now;
         this.alignmentRetryAttempts = Math.max(1, Math.min(3, Math.floor(options.alignmentRetryAttempts ?? 3)));
+        this.requestMinIntervalMs = Math.max(0, Math.floor(options.requestMinIntervalMs ?? 100));
+        this.sleep = options.sleepImpl || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+    }
+    private async getKlines(symbol: string) {
+        const waitMs = Math.max(0, this.nextRequestAt - this.now());
+        if (waitMs > 0) await this.sleep(waitMs);
+        this.nextRequestAt = this.now() + this.requestMinIntervalMs;
+        return this.client.getKlines(`${symbol}USDT`, "1h", this.limit);
     }
     private async loadAligned(): Promise<Record<string, V12Bar[]>> {
-        const rows = await Promise.all(V12_X1_ALL.universe.map(async (symbol) => ({ symbol, rows: await this.client.getKlines(`${symbol}USDT`, "1h", this.limit) })));
+        const rows: Array<{ symbol: string; rows: Awaited<ReturnType<AsterV3Client["getKlines"]>> }> = [];
+        for (const symbol of V12_X1_ALL.universe) {
+            rows.push({ symbol, rows: await this.getKlines(symbol) });
+        }
         const parsedRows = rows.map((row) => {
             const parsed = row.rows.map(parse).filter((value): value is NonNullable<ReturnType<typeof parse>> => Boolean(value)).filter((value) => value.ts + 3_600_000 <= this.now());
             const bars = resampleV12H1ToH2(parsed);

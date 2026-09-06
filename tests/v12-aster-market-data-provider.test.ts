@@ -59,3 +59,20 @@ test("fails closed when the universe latest H2 timestamps remain misaligned", as
     const provider = new V12AsterMarketDataProvider(client, { alignmentRetryAttempts: 2 });
     await assert.rejects(provider.load(), /V12 universe alignment mismatch: ETH/);
 });
+
+test("serializes V12 market-data requests behind the read-only rate gate", async () => {
+    let active = 0;
+    let maximumActive = 0;
+    const client = {
+        getKlines: async () => {
+            active += 1;
+            maximumActive = Math.max(maximumActive, active);
+            await new Promise((resolve) => setTimeout(resolve, 1));
+            active -= 1;
+            return candles(162);
+        },
+    } as never;
+    const provider = new V12AsterMarketDataProvider(client, { alignmentRetryAttempts: 1, requestMinIntervalMs: 0 });
+    await provider.load();
+    assert.equal(maximumActive, 1);
+});
