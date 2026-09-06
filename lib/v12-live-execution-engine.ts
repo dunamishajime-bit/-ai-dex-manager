@@ -23,6 +23,11 @@ import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality10
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 const EPS = 1e-12;
 
+export function isV12ExchangeMinimumError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return /below Aster (?:minQty|minimum)/i.test(message);
+}
+
 export type V12LiveTickStatus = "locked" | "held" | "no-signal" | "capacity-blocked" | "entered" | "exited" | "risk-blocked" | "manual-review";
 export interface V12LiveTickResult { status: V12LiveTickStatus; reason: string; signal?: V12Signal; clientOrderId?: string; }
 export interface V12LiveExecutionDependencies {
@@ -265,7 +270,16 @@ export class V12LiveExecutionEngine {
             // shrinking a V12 intent before that base-priority decision.
             const plan = planUnifiedPortfolio([{ sleeve: "V12", symbol, side: signal.side, gross: sizing.requestedGross, notionalUsd: sizing.requestedNotional, signalTs: signal.referenceTs }], this.activePortfolio(positions, equity, quality102Ownership));
             const accepted = plan.accepted[0]; if (!accepted) { await this.d.stateStore.save(state); return { status: "capacity-blocked", reason: plan.rejected[0]?.reason || "CAPACITY_BLOCKED", signal }; }
-            const scale = sizing.requestedGross > 0 ? accepted.gross / sizing.requestedGross : 0; const quantity = sizing.quantity * scale;
+            const scale = sizing.requestedGross > 0 ? accepted.gross / sizing.requestedGross : 0;
+            const requestedQuantity = sizing.quantity * scale;
+            let quantity: number;
+            try {
+                quantity = (await this.d.adapter.executor.normalizeMarketQuantity(symbol, requestedQuantity, expectedPrice)).quantity;
+            } catch (error) {
+                if (!isV12ExchangeMinimumError(error)) throw error;
+                await this.d.stateStore.save(state);
+                return { status: "capacity-blocked", reason: "V12_EXCHANGE_MINIMUM_NOT_MET", signal };
+            }
             if (!(quantity > 0)) { await this.d.stateStore.save(state); return { status: "capacity-blocked", reason: "ZERO_EXECUTABLE_QUANTITY", signal }; }
             const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
             if (state.lastCompletedIdempotencyKey === clientOrderId) { await this.d.stateStore.save(state); return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId }; }
