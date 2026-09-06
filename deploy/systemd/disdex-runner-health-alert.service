@@ -12,7 +12,7 @@ EnvironmentFile=-/etc/disdex/ai-dex-manager-mail.env
 Environment=DISDEX_TRADING_ROOT=/home/deploy/disdex-trading/current
 Environment=DISDEX_ALERT_STATE_PATH=/var/lib/disdex/runner-health/private/email-alert-state.json
 Environment=DISDEX_ALERT_EMAIL_TO=dunamis.hajime@gmail.com
-ExecStart=/home/deploy/disdex-trading/current/node_modules/tsx/dist/cli.mjs /home/deploy/disdex-trading/current/scripts/ops/root/disdex-runner-health-alert.ts
+ExecStart=/home/deploy/disdex-trading/current/node_modules/tsx/dist/cli.mjs /home/deploy/disdex-trading/runner-health-alert/current/scripts/ops/root/disdex-runner-health-alert.ts
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
