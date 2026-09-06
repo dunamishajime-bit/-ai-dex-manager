@@ -210,7 +210,7 @@ async function providerTests(): Promise<void> {
         const start = Number(url.searchParams.get("startTime"));
         const end = Number(url.searchParams.get("endTime"));
         const limit = Number(url.searchParams.get("limit"));
-        return end < NOW || (start === NOW && end === NOW && limit === 1);
+        return end < NOW || (start === NOW && end === NOW + 1 && limit === 1);
     }));
     const requestCount = paged.urls.length;
     assert.equal((await provider.load()).candlesBySymbol.FETUSDT, fet);
