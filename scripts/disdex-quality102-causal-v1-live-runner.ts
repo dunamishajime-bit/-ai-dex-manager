@@ -69,6 +69,21 @@ function boolEnv(env: NodeJS.ProcessEnv, name: string, fallback = false): boolea
     return raw === undefined ? fallback : /^(1|true|yes|on)$/i.test(raw.trim());
 }
 
+/**
+ * The live daemon validates the complete causal history before it can make a
+ * signal decision.  A service-start preflight must not fetch that same
+ * multi-month history a second time immediately before the daemon's first
+ * tick: Aster counts Kline request weight per IP.  The default remains the
+ * strict historical check for manual/pre-deploy preflights; production may
+ * explicitly defer it to the daemon's first tick after the account and quote
+ * safety checks have passed.
+ */
+export function shouldRunQuality102CausalV1PreflightHistoryCheck(
+    env: NodeJS.ProcessEnv = process.env,
+): boolean {
+    return boolEnv(env, "QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK", true);
+}
+
 function numberEnv(env: NodeJS.ProcessEnv, name: string, fallback: number): number {
     const parsed = Number(env[name]);
     return Number.isFinite(parsed) ? parsed : fallback;
@@ -335,7 +350,9 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
             throw new Error(`QUALITY102_PREFLIGHT_QUOTE_INVALID:${symbol}`);
         }
     }
-    const history = await marketData.load();
+    const history = shouldRunQuality102CausalV1PreflightHistoryCheck(env)
+        ? await marketData.load()
+        : undefined;
     const afterStateFile = await stateFileSnapshot(config.statePath);
     if (beforeStateFile !== afterStateFile) throw new Error("QUALITY102_PREFLIGHT_STATE_CHANGED");
     return {
@@ -344,7 +361,8 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         selectorMode: config.selectorMode,
         highVolSymbols: config.highVolSymbols,
         symbols: config.symbols,
-        historySymbols: Object.keys(history.candlesBySymbol).sort(),
+        historySymbols: history ? Object.keys(history.candlesBySymbol).sort() : [],
+        historicalHistoryCheck: history ? "PASS" : "DEFERRED_TO_DAEMON_FIRST_TICK",
         statePath: config.statePath,
         stateExists: await stateFileExists(config.statePath),
         accountAsset: account.asset,

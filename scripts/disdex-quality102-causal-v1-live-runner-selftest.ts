@@ -5,6 +5,7 @@ import {
     assertQuality102CausalV1ReadOnlyPreflightConfiguration,
     parseQuality102CausalV1Symbols,
     resolveQuality102CausalV1LiveConfig,
+    shouldRunQuality102CausalV1PreflightHistoryCheck,
 } from "./disdex-quality102-causal-v1-live-runner";
 
 const SHA = "a".repeat(40);
@@ -33,6 +34,8 @@ assert.equal(config.maximumGross, 1);
 assert.equal(config.cryptoGrossCap, 2);
 assert.equal(config.totalGrossCap, 2.5);
 assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(config, baseEnv));
+assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck(baseEnv), true);
+assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK: "false" }), false);
 assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, selectorMode: "HISTORICAL_FROZEN" }, baseEnv), /SELECTOR_MODE_ACK/);
 assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, runtimeCommitSha: "" }, baseEnv), /COMMIT_SHA_REQUIRED/);
 
