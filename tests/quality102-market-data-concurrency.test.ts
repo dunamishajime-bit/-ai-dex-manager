@@ -50,3 +50,41 @@ test("Q102 market history uses bounded symbol concurrency and retries a transien
     assert.equal(maximumActive <= 2, true);
     for (const count of currentOpenCalls.values()) assert.equal(count, 2);
 });
+
+test("Q102 serializes kline GETs behind the request-rate gate", async () => {
+    let activeRequests = 0;
+    let maximumActiveRequests = 0;
+    const client = {
+        async getKlines(symbol: string, _interval: string, limit: number, range: { startTime?: number; endTime?: number } = {}): Promise<AsterKline[]> {
+            void symbol;
+            activeRequests += 1;
+            maximumActiveRequests = Math.max(maximumActiveRequests, activeRequests);
+            await new Promise((resolve) => setTimeout(resolve, 2));
+            activeRequests -= 1;
+            if (limit === 1) {
+                const timestamp = Math.floor(NOW / HOUR) * HOUR;
+                return [[timestamp, "100", "101", "99", "100", "10", timestamp + HOUR - 1, "1000", 1, "0", "0", "0"]];
+            }
+            const start = Number(range.startTime);
+            const end = Number(range.endTime);
+            const rows: AsterKline[] = [];
+            for (let timestamp = start; timestamp <= end && rows.length < limit; timestamp += HOUR) {
+                rows.push([timestamp, "100", "101", "99", "100", "10", timestamp + HOUR - 1, "1000", 1, "0", "0", "0"]);
+            }
+            return rows;
+        },
+    } as unknown as AsterV3Client;
+
+    const provider = new Quality102CausalV1AsterMarketDataProvider(client, {
+        symbols: ["SUIUSDT", "OPUSDT"],
+        historyHours: 181 * 24,
+        pageLimit: 500,
+        maxConcurrentSymbols: 2,
+        requestMinIntervalMs: 0,
+        currentOpenRetryAttempts: 1,
+        currentOpenRetryDelayMs: 0,
+        now: () => NOW,
+    });
+    await provider.load();
+    assert.equal(maximumActiveRequests, 1);
+});

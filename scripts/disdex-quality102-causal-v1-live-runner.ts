@@ -334,6 +334,7 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         pageLimit: config.historyPageLimit,
         cacheTtlMs: 0,
         maxConcurrentSymbols: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_MAX_SYMBOL_CONCURRENCY", 2)),
+        requestMinIntervalMs: numberEnv(env, "QUALITY102_CAUSAL_V1_REQUEST_MIN_INTERVAL_MS", 100),
         currentOpenRetryAttempts: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_ATTEMPTS", 2)),
         currentOpenRetryDelayMs: numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_DELAY_MS", 250),
     });
@@ -439,6 +440,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             pageLimit: config.historyPageLimit,
             cacheTtlMs: numberEnv(env, "QUALITY102_CAUSAL_V1_HISTORY_CACHE_TTL_MS", 5 * 60_000),
             maxConcurrentSymbols: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_MAX_SYMBOL_CONCURRENCY", 2)),
+            requestMinIntervalMs: numberEnv(env, "QUALITY102_CAUSAL_V1_REQUEST_MIN_INTERVAL_MS", 100),
             currentOpenRetryAttempts: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_ATTEMPTS", 2)),
             currentOpenRetryDelayMs: numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_DELAY_MS", 250),
         }),

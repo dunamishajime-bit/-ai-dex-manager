@@ -13,6 +13,8 @@ export interface Quality102CausalV1AsterMarketDataOptions {
     pageLimit?: number;
     cacheTtlMs?: number;
     maxConcurrentSymbols?: number;
+    requestMinIntervalMs?: number;
+    sleepImpl?: (delayMs: number) => Promise<void>;
     currentOpenRetryAttempts?: number;
     currentOpenRetryDelayMs?: number;
     now?: () => number;
@@ -78,9 +80,13 @@ export class Quality102CausalV1AsterMarketDataProvider {
     private readonly pageLimit: number;
     private readonly cacheTtlMs: number;
     private readonly maxConcurrentSymbols: number;
+    private readonly requestMinIntervalMs: number;
+    private readonly sleep: (delayMs: number) => Promise<void>;
     private readonly currentOpenRetryAttempts: number;
     private readonly currentOpenRetryDelayMs: number;
     private readonly now: () => number;
+    private requestGate: Promise<void> = Promise.resolve();
+    private nextRequestAt = 0;
     private cached?: { expiresAt: number; history: Quality102CausalV1History };
 
     constructor(private readonly client: AsterV3Client, options: Quality102CausalV1AsterMarketDataOptions) {
@@ -95,6 +101,12 @@ export class Quality102CausalV1AsterMarketDataProvider {
         const requestedConcurrency = Math.floor(options.maxConcurrentSymbols ?? 2);
         if (requestedConcurrency < 1) throw new Error("QUALITY102_SYMBOL_CONCURRENCY_INVALID");
         this.maxConcurrentSymbols = Math.min(8, requestedConcurrency);
+        const requestedInterval = options.requestMinIntervalMs ?? 100;
+        if (!Number.isFinite(requestedInterval) || requestedInterval < 0 || requestedInterval > 60_000) {
+            throw new Error("QUALITY102_REQUEST_RATE_POLICY_INVALID");
+        }
+        this.requestMinIntervalMs = requestedInterval;
+        this.sleep = options.sleepImpl ?? ((delayMs) => new Promise((resolve) => setTimeout(resolve, delayMs)));
         const requestedRetries = Math.floor(options.currentOpenRetryAttempts ?? 2);
         if (requestedRetries < 1) throw new Error("QUALITY102_CURRENT_OPEN_RETRY_POLICY_INVALID");
         this.currentOpenRetryAttempts = Math.min(3, requestedRetries);
@@ -104,13 +116,36 @@ export class Quality102CausalV1AsterMarketDataProvider {
         this.now = options.now ?? Date.now;
     }
 
+    private async getKlines(
+        symbol: string,
+        interval: string,
+        limit: number,
+        range: { startTime?: number; endTime?: number } = {},
+    ): Promise<AsterKline[]> {
+        // Aster's kline endpoint is rate-limited by request weight. Symbol
+        // workers may remain concurrent for scheduling, but actual GETs are
+        // serialized so a full Q102 refresh cannot burst the IP limit.
+        const previous = this.requestGate;
+        let release!: () => void;
+        this.requestGate = new Promise<void>((resolve) => { release = resolve; });
+        try {
+            await previous;
+            const waitMs = Math.max(0, this.nextRequestAt - this.now());
+            if (waitMs > 0) await this.sleep(waitMs);
+            this.nextRequestAt = this.now() + this.requestMinIntervalMs;
+            return await this.client.getKlines(symbol, interval, limit, range);
+        } finally {
+            release();
+        }
+    }
+
     private async loadSymbol(symbol: string, now: number): Promise<Quality102Candle[]> {
         const latestOpenTs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS - QUALITY102_HOUR_MS;
         const earliestOpenTs = latestOpenTs - (this.historyHours - 1) * QUALITY102_HOUR_MS;
         const pages: AsterKline[][] = [];
         for (let pageEnd = latestOpenTs; pageEnd >= earliestOpenTs;) {
             const pageStart = Math.max(earliestOpenTs, pageEnd - (this.pageLimit - 1) * QUALITY102_HOUR_MS);
-            pages.push(await this.client.getKlines(symbol, "1h", this.pageLimit, { startTime: pageStart, endTime: pageEnd }));
+            pages.push(await this.getKlines(symbol, "1h", this.pageLimit, { startTime: pageStart, endTime: pageEnd }));
             pageEnd = pageStart - QUALITY102_HOUR_MS;
         }
 
@@ -137,7 +172,7 @@ export class Quality102CausalV1AsterMarketDataProvider {
     private async loadEntryOpen(symbol: string, now: number): Promise<{ timestampMs: number; open: number }> {
         const timestampMs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS;
         for (let attempt = 0; attempt < this.currentOpenRetryAttempts; attempt += 1) {
-            const rows = await this.client.getKlines(symbol, "1h", 1, quality102EntryOpenRange(timestampMs));
+            const rows = await this.getKlines(symbol, "1h", 1, quality102EntryOpenRange(timestampMs));
             const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
             if (row) {
                 const open = finiteNumber(row[1], "currentOpen");
