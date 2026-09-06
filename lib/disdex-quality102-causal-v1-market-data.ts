@@ -15,6 +15,11 @@ export interface Quality102CausalV1AsterMarketDataOptions {
     now?: () => number;
 }
 
+export function quality102EntryOpenRange(timestampMs: number) {
+    if (!Number.isFinite(timestampMs) || timestampMs <= 0) throw new Error("QUALITY102_INVALID_ENTRY_OPEN_TIMESTAMP");
+    return { startTime: timestampMs, endTime: timestampMs + QUALITY102_HOUR_MS - 1 };
+}
+
 function normalizeSymbols(symbols: readonly string[]): string[] {
     const configured = symbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean);
     if (!configured.length) throw new Error("QUALITY102_SYMBOL_UNIVERSE_REQUIRED");
@@ -96,7 +101,7 @@ export class Quality102CausalV1AsterMarketDataProvider {
 
     private async loadEntryOpen(symbol: string, now: number): Promise<{ timestampMs: number; open: number }> {
         const timestampMs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS;
-        const rows = await this.client.getKlines(symbol, "1h", 1, { startTime: timestampMs, endTime: timestampMs });
+        const rows = await this.client.getKlines(symbol, "1h", 1, quality102EntryOpenRange(timestampMs));
         const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
         if (!row) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
         const open = finiteNumber(row[1], "currentOpen");
