@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { QUALITY102_CAUSAL_V1 } from "../config/disdexQuality102CausalV1Runtime";
 import {
     Quality102CausalV1Runner,
+    type Quality102CausalV1AccountLock,
     type Quality102CausalV1RunnerConfig,
 } from "../lib/disdex-quality102-causal-v1-runner";
 import {
@@ -126,14 +127,14 @@ function signal(overrides: Partial<Quality102CausalV1Signal> = {}): Quality102Ca
     };
 }
 
-function deps(executor: FakeExecutor, initial: Quality102CausalV1State, cfg: Partial<Quality102CausalV1RunnerConfig> = {}, customSignal = signal) {
+function deps(executor: FakeExecutor, initial: Quality102CausalV1State, cfg: Partial<Quality102CausalV1RunnerConfig> = {}, customSignal = signal, customLock?: Quality102CausalV1AccountLock) {
     let loads = 0;
     return {
         runner: new Quality102CausalV1Runner({
             marketData: { load: async () => { loads += 1; return HISTORY; } },
             executor,
             stateStore: new MemoryQuality102CausalV1StateStore(initial, initial.mode, SHA),
-            lock: new MemoryLiveRunnerLock(),
+            lock: customLock || new MemoryLiveRunnerLock(),
             config: config(cfg),
             now: () => NOW,
             riskReader: async () => undefined,
@@ -145,6 +146,29 @@ function deps(executor: FakeExecutor, initial: Quality102CausalV1State, cfg: Par
 }
 
 async function run(): Promise<void> {
+    {
+        const events: string[] = [];
+        const memoryLock = new MemoryLiveRunnerLock();
+        const orderingLock: Quality102CausalV1AccountLock = {
+            acquire: async (ownerId: string) => {
+                events.push("lock");
+                return memoryLock.acquire(ownerId);
+            },
+        };
+        const fake = new FakeExecutor();
+        const built = deps(fake, state(), {}, () => {
+            events.push("signal");
+            return signal({ side: 0, symbol: undefined, requestedGross: 0, reason: "NO_SIGNAL" });
+        }, orderingLock);
+        const originalLoad = (built.runner as unknown as { dependencies: { marketData: { load(): Promise<Quality102CausalV1History> } } }).dependencies.marketData.load;
+        (built.runner as unknown as { dependencies: { marketData: { load(): Promise<Quality102CausalV1History> } } }).dependencies.marketData.load = async () => {
+            events.push("market");
+            return originalLoad();
+        };
+        await built.runner.tick();
+        assert.deepEqual(events.slice(0, 2), ["market", "lock"]);
+    }
+
     {
         const fake = new FakeExecutor();
         assert.doesNotThrow(() => deps(fake, state(), { symbols: ["AVAXUSDT"] }, () => signal({ symbol: "AVAXUSDT" })));

@@ -918,6 +918,14 @@ export class Quality102CausalV1Runner {
     async tick(): Promise<Quality102CausalV1TickResult> {
         if (!this.dependencies.config.enabled) return { status: "disabled", message: "QUALITY102_CAUSAL_V1 is disabled.", ordersSent: 0 };
         this.ensureLiveGate();
+        // Market-data assembly can take longer than the account-lock lease.
+        // Keep pending reconciliation lock-first, but perform the read-only
+        // history load before acquiring the account-scoped execution lock for
+        // an ordinary tick. State is loaded again under the lock below.
+        const stateBeforeMarketData = await this.dependencies.stateStore.load();
+        const historyBeforeLock = stateBeforeMarketData.pending
+            ? undefined
+            : await this.dependencies.marketData.load();
         const ownerId = `${STRATEGY_ID}:${process.pid}:${randomUUID()}`;
         const lock = await this.dependencies.lock.acquire(ownerId, this.dependencies.config.accountScope || "ASTER_FUTURES");
         if (!lock) return { status: "locked", message: "Q102 shared account lock is busy or requires review.", ordersSent: 0 };
@@ -933,7 +941,7 @@ export class Quality102CausalV1Runner {
                 ? this.reconcilePending(state)
                 : this.manualReview(state, "Q102 pending phase is invalid.", state.pending.idempotencyKey);
 
-            const history = await this.dependencies.marketData.load();
+            const history = historyBeforeLock || await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
                 const signal = this.buildSignal(history, this.now(), false, false);
                 state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
