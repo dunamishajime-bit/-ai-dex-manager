@@ -64,6 +64,20 @@ export function assertV12StrictLiveConfiguration(env: NodeJS.ProcessEnv = proces
     };
 }
 
+export function assertFreshStrictPortfolioAccountSnapshot(
+    account: { walletBalance: number; updatedAt: number },
+    observedAt: number,
+    maxDataAgeMs: number,
+) {
+    if (!(account.walletBalance > 0)
+        || !Number.isFinite(account.updatedAt)
+        || account.updatedAt <= 0
+        || account.updatedAt > observedAt
+        || observedAt - account.updatedAt > maxDataAgeMs) {
+        throw new Error("STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
+    }
+}
+
 function strictStrategy(position: DirectPosition, quality102Ownership?: Quality102CausalV1OwnershipSnapshot): StrictStrategy {
     if (quality102OwnsPosition(quality102Ownership, position)) return "QUALITY102_CAUSAL_V1";
     const classification = classifyAsterSymbol(position.symbol);
@@ -123,15 +137,17 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         clientOrderId?: string;
     }): Promise<DirectTradeResult> {
         assertV12StrictLiveConfiguration();
-        const now = Date.now();
         const [account, positions] = await Promise.all([
             this.getAccountSnapshot(),
             this.getPositions(),
         ]);
+        // The account timestamp is obtained from Aster's server clock after
+        // the balance request. Compare it with the local observation time
+        // after both reads complete; using the pre-request time rejects every
+        // healthy snapshot whose server timestamp was produced in-flight.
+        const now = Date.now();
         const maxDataAgeMs = Math.max(1_000, Number(process.env.STRICT_PORTFOLIO_MAX_DATA_AGE_MS || DEFAULT_MAX_DATA_AGE_MS));
-        if (!(account.walletBalance > 0) || !Number.isFinite(account.updatedAt) || account.updatedAt <= 0 || account.updatedAt > now || now - account.updatedAt > maxDataAgeMs) {
-            throw new Error("STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
-        }
+        assertFreshStrictPortfolioAccountSnapshot(account, now, maxDataAgeMs);
         const openOrders = await this.getOpenOrders();
         if (openOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
         let workingAccount = account;
