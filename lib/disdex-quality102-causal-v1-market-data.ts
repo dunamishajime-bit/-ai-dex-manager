@@ -12,6 +12,9 @@ export interface Quality102CausalV1AsterMarketDataOptions {
     historyHours?: number;
     pageLimit?: number;
     cacheTtlMs?: number;
+    maxConcurrentSymbols?: number;
+    currentOpenRetryAttempts?: number;
+    currentOpenRetryDelayMs?: number;
     now?: () => number;
 }
 
@@ -49,11 +52,34 @@ function toCandle(row: AsterKline): Quality102Candle {
     return { timestampMs, open, high, low, close, quoteVolume, baseVolume };
 }
 
+export async function mapWithConcurrency<T, R>(
+    values: readonly T[],
+    concurrency: number,
+    mapper: (value: T, index: number) => Promise<R>,
+): Promise<R[]> {
+    if (!Number.isInteger(concurrency) || concurrency < 1) throw new Error("QUALITY102_SYMBOL_CONCURRENCY_INVALID");
+    const results = new Array<R>(values.length);
+    let nextIndex = 0;
+    async function worker(): Promise<void> {
+        while (true) {
+            const index = nextIndex;
+            nextIndex += 1;
+            if (index >= values.length) return;
+            results[index] = await mapper(values[index], index);
+        }
+    }
+    await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, () => worker()));
+    return results;
+}
+
 export class Quality102CausalV1AsterMarketDataProvider {
     private readonly symbols: string[];
     private readonly historyHours: number;
     private readonly pageLimit: number;
     private readonly cacheTtlMs: number;
+    private readonly maxConcurrentSymbols: number;
+    private readonly currentOpenRetryAttempts: number;
+    private readonly currentOpenRetryDelayMs: number;
     private readonly now: () => number;
     private cached?: { expiresAt: number; history: Quality102CausalV1History };
 
@@ -66,6 +92,15 @@ export class Quality102CausalV1AsterMarketDataProvider {
         const requestedTtl = options.cacheTtlMs ?? MAX_CACHE_TTL_MS;
         if (!Number.isFinite(requestedTtl) || requestedTtl < 0) throw new Error("QUALITY102_INVALID_CACHE_TTL");
         this.cacheTtlMs = Math.min(requestedTtl, MAX_CACHE_TTL_MS);
+        const requestedConcurrency = Math.floor(options.maxConcurrentSymbols ?? 2);
+        if (requestedConcurrency < 1) throw new Error("QUALITY102_SYMBOL_CONCURRENCY_INVALID");
+        this.maxConcurrentSymbols = Math.min(8, requestedConcurrency);
+        const requestedRetries = Math.floor(options.currentOpenRetryAttempts ?? 2);
+        if (requestedRetries < 1) throw new Error("QUALITY102_CURRENT_OPEN_RETRY_POLICY_INVALID");
+        this.currentOpenRetryAttempts = Math.min(3, requestedRetries);
+        const requestedRetryDelay = options.currentOpenRetryDelayMs ?? 250;
+        if (!Number.isFinite(requestedRetryDelay) || requestedRetryDelay < 0) throw new Error("QUALITY102_CURRENT_OPEN_RETRY_POLICY_INVALID");
+        this.currentOpenRetryDelayMs = Math.min(5_000, requestedRetryDelay);
         this.now = options.now ?? Date.now;
     }
 
@@ -101,22 +136,33 @@ export class Quality102CausalV1AsterMarketDataProvider {
 
     private async loadEntryOpen(symbol: string, now: number): Promise<{ timestampMs: number; open: number }> {
         const timestampMs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS;
-        const rows = await this.client.getKlines(symbol, "1h", 1, quality102EntryOpenRange(timestampMs));
-        const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
-        if (!row) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
-        const open = finiteNumber(row[1], "currentOpen");
-        if (!(open > 0)) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_INVALID:${symbol}`);
-        return { timestampMs, open };
+        for (let attempt = 0; attempt < this.currentOpenRetryAttempts; attempt += 1) {
+            const rows = await this.client.getKlines(symbol, "1h", 1, quality102EntryOpenRange(timestampMs));
+            const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
+            if (row) {
+                const open = finiteNumber(row[1], "currentOpen");
+                if (!(open > 0)) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_INVALID:${symbol}`);
+                return { timestampMs, open };
+            }
+            if (attempt + 1 < this.currentOpenRetryAttempts && this.currentOpenRetryDelayMs > 0) {
+                await new Promise((resolve) => setTimeout(resolve, this.currentOpenRetryDelayMs));
+            }
+        }
+        throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
     }
 
     async load(): Promise<Quality102CausalV1History> {
         const now = this.now();
         if (!Number.isFinite(now) || now <= 0) throw new Error("QUALITY102_INVALID_MARKET_CLOCK");
         if (this.cached && this.cached.expiresAt > now) return this.cached.history;
-        const entries = await Promise.all(this.symbols.map(async (symbol) => {
-            const [candles, entryOpen] = await Promise.all([this.loadSymbol(symbol, now), this.loadEntryOpen(symbol, now)]);
+        const entries = await mapWithConcurrency(this.symbols, this.maxConcurrentSymbols, async (symbol) => {
+            // Keep each symbol's history and current-open read in order. This
+            // avoids a burst of 1h requests while preserving the exact
+            // causal cutoff and continuity checks.
+            const candles = await this.loadSymbol(symbol, now);
+            const entryOpen = await this.loadEntryOpen(symbol, now);
             return { symbol, candles, entryOpen };
-        }));
+        });
         const history: Quality102CausalV1History = {
             candlesBySymbol: Object.fromEntries(entries.map(({ symbol, candles }) => [symbol, candles])),
             entryOpenBySymbol: Object.fromEntries(entries.map(({ symbol, entryOpen }) => [symbol, entryOpen])),
