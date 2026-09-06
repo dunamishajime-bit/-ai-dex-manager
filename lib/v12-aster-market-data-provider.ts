@@ -8,13 +8,22 @@ function parse(row: AsterKline) {
     return { ts, open, high, low, close, volume, closed: true } as const;
 }
 
-export interface V12AsterMarketDataProviderOptions { hourlyLimit?: number; now?: () => number; }
+export interface V12AsterMarketDataProviderOptions {
+    hourlyLimit?: number;
+    now?: () => number;
+    alignmentRetryAttempts?: number;
+}
 
 export class V12AsterMarketDataProvider {
     private readonly limit: number;
     private readonly now: () => number;
-    constructor(private readonly client: AsterV3Client, options: V12AsterMarketDataProviderOptions = {}) { this.limit = Math.max(200, Math.min(1500, options.hourlyLimit ?? 500)); this.now = options.now || Date.now; }
-    async load(): Promise<Record<string, V12Bar[]>> {
+    private readonly alignmentRetryAttempts: number;
+    constructor(private readonly client: AsterV3Client, options: V12AsterMarketDataProviderOptions = {}) {
+        this.limit = Math.max(200, Math.min(1500, options.hourlyLimit ?? 500));
+        this.now = options.now || Date.now;
+        this.alignmentRetryAttempts = Math.max(1, Math.min(3, Math.floor(options.alignmentRetryAttempts ?? 3)));
+    }
+    private async loadAligned(): Promise<Record<string, V12Bar[]>> {
         const rows = await Promise.all(V12_X1_ALL.universe.map(async (symbol) => ({ symbol, rows: await this.client.getKlines(`${symbol}USDT`, "1h", this.limit) })));
         const result: Record<string, V12Bar[]> = {};
         let expectedLength: number | undefined;
@@ -27,5 +36,18 @@ export class V12AsterMarketDataProvider {
             result[row.symbol] = bars;
         }
         return result;
+    }
+    async load(): Promise<Record<string, V12Bar[]>> {
+        let lastAlignmentError: unknown;
+        for (let attempt = 0; attempt < this.alignmentRetryAttempts; attempt += 1) {
+            try {
+                return await this.loadAligned();
+            } catch (error) {
+                if (!(error instanceof Error) || !error.message.startsWith("V12 universe alignment mismatch:")) throw error;
+                lastAlignmentError = error;
+                if (attempt + 1 < this.alignmentRetryAttempts) await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+        }
+        throw lastAlignmentError instanceof Error ? lastAlignmentError : new Error("V12 universe alignment mismatch");
     }
 }
