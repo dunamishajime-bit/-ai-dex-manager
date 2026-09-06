@@ -19,7 +19,13 @@ const DEFAULT_RECIPIENT = "dunamis.hajime@gmail.com";
 // No order, cancel, position, Kill Switch, or approval-gate mutation is
 // performed by this monitor. It is observation and email notification only.
 
-type RunnerId = "V12" | "PENGU_V8" | "V52" | "QUALITY102_CAUSAL_V1";
+type RunnerId =
+  | "V12"
+  | "PENGU_V8"
+  | "V52"
+  | "QUALITY102_CAUSAL_V1"
+  | "SHARED_CRYPTO_RISK"
+  | "MARGIN_GUARD";
 type AlertState = { runners: Partial<Record<RunnerId, RunnerAlertRecord>> };
 
 const runners: Array<{ id: RunnerId; label: string; unitEnv: string; defaultUnit: string; unitPattern: string; intentionalStopPath?: string }> = [
@@ -51,6 +57,20 @@ const runners: Array<{ id: RunnerId; label: string; unitEnv: string; defaultUnit
     unitEnv: "DISDEX_ALERT_QUALITY102_SERVICE_UNIT",
     defaultUnit: "disdex-quality102-causal-v1@f59347fad11553b833e75f6f35a0c545464fdf5f.service",
     unitPattern: "disdex-quality102-causal-v1@*.service",
+  },
+  {
+    id: "SHARED_CRYPTO_RISK",
+    label: "共有Crypto Risk安全Gate",
+    unitEnv: "DISDEX_ALERT_SHARED_CRYPTO_RISK_SERVICE_UNIT",
+    defaultUnit: "disdex-shared-crypto-risk@current.service",
+    unitPattern: "disdex-shared-crypto-risk@*.service",
+  },
+  {
+    id: "MARGIN_GUARD",
+    label: "V12/PENGU/V52 Margin Guard安全Gate",
+    unitEnv: "DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT",
+    defaultUnit: "disdex-v12-v52-margin-guard@current.service",
+    unitPattern: "disdex-v12-v52-margin-guard@*.service",
   },
 ];
 
