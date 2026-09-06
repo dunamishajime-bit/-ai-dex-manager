@@ -18,8 +18,8 @@ function BannerContent() {
       <span>PENGU Recovery V8 {config.penguRecoveryV8.entryRule} / {config.penguRecoveryV8.recoveryGross.toFixed(2)}x / {config.penguRecoveryV8.partialAfterHours}h後partial {config.penguRecoveryV8.partialGross.toFixed(2)}x</span>
       <span>V52 Top2 Rank1 {config.v52Top2Policy.rank1RequestedGross.toFixed(2)}x / Rank2 {config.v52Top2Policy.rank2RequestedGross.toFixed(2)}x / 最大{config.v52Top2Policy.maxConcurrentPositions}建玉</span>
       <span>V52 Gate basis≥{config.v52Top2Policy.minEntryBasisBps}bps / net edge≥{config.v52Top2Policy.minNetEdgeBps}bps / 各{config.v52Top2Policy.entryWindowSeconds}秒</span>
-      <span className="text-amber-200">Quality102 LIVE derived HIGH_VOL: ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x</span>
-      <span className="text-amber-200">歴史的102件selector / BRK raw式: parity未証明のため該当部分のみFAIL CLOSED</span>
+      <span className="text-amber-200">Quality102 Causal V4 LIVE: ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x</span>
+      <span className="text-amber-200">歴史的固定102件はLIVEへ不使用 / Causal V4はPB・MR・BRK・REVを確定データで判定</span>
       <LiveRuntimeBadge />
       <span className="inline-flex items-center gap-1 text-emerald-200">
         <ShieldCheck className="h-3.5 w-3.5" />

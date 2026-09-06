@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 
-const EXPORT_PATH = path.join(process.cwd(), "data", "trade-history-git.json");
+const EXPORT_PATH = resolveUiDataPath("trade-history-git.json");
 
 type GitTradeHistoryEntry = Omit<TradeHistoryEntry, "walletId">;
 

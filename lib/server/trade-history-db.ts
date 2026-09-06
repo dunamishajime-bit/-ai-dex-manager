@@ -1,16 +1,17 @@
 ﻿import fs from "fs";
-import path from "path";
 
 import type { OperationalWalletHolding } from "@/lib/operational-wallet-types";
 import type { DirectWalletTradeInput, DirectWalletTradeResult } from "@/lib/server/direct-trade-executor";
 import { writeGitTradeHistorySnapshot } from "@/lib/server/trade-history-git-export";
+import path from "path";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const USE_REDIS = !!(KV_URL && KV_TOKEN);
 const REDIS_KEY = "disdex:trade-ledger";
-const DB_PATH = path.join(process.cwd(), "data", "trade-ledger.json");
-const GIT_EXPORT_PATH = path.join(process.cwd(), "data", "trade-history-git.json");
+const DB_PATH = resolveUiDataPath("trade-ledger.json");
+const GIT_EXPORT_PATH = resolveUiDataPath("trade-history-git.json");
 
 export interface TradeHistoryEntry {
   id: string;

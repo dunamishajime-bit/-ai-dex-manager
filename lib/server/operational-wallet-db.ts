@@ -1,12 +1,13 @@
 import fs from "fs";
-import path from "path";
 import type { OperationalWalletRecord, OperationalWalletStatus, OperationalWhitelistEntry } from "@/lib/operational-wallet-types";
+import path from "path";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const USE_REDIS = !!(KV_URL && KV_TOKEN);
 const REDIS_KEY = "disdex:operational-wallets";
-const DB_PATH = path.join(process.cwd(), "data", "operational-wallets.json");
+const DB_PATH = resolveUiDataPath("operational-wallets.json");
 
 let memoryWallets: OperationalWalletRecord[] | null = null;
 

@@ -14,8 +14,10 @@ export const quality102Policy = Object.freeze({
   cryptoGrossCap: 2,
   totalGrossCap: 2.5,
   symbols: [
-    "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT",
-    "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT",
+    "AAVEUSDT", "APTUSDT", "ARBUSDT", "AVAXUSDT", "DOGEUSDT", "DOTUSDT",
+    "ENAUSDT", "FETUSDT", "FILUSDT", "JUPUSDT", "LDOUSDT", "NEARUSDT",
+    "ONDOUSDT", "OPUSDT", "RENDERUSDT", "SEIUSDT", "SOLUSDT", "SUIUSDT",
+    "TAOUSDT", "TIAUSDT", "TRXUSDT", "UNIUSDT",
   ] as const,
 });
 
@@ -90,7 +92,7 @@ function unavailable(capturedAt: string, configured: boolean, error: string): Qu
     configured,
     status: "UNAVAILABLE",
     capturedAt,
-    selectorMode: "DERIVED_HIGH_VOL_ONLY",
+    selectorMode: "CAUSAL_V4",
     historicalSelectorParity: false,
     brkLiveEnabled: false,
     caps: {
@@ -120,8 +122,7 @@ function symbols(value: unknown): string[] {
   if (!Array.isArray(value)) return [...quality102Policy.symbols];
   const result = value
     .map((item) => text(object(item)?.symbol ?? item))
-    .filter((item): item is string => Boolean(item))
-    .slice(0, quality102Policy.symbols.length);
+    .filter((item): item is string => Boolean(item));
   return result.length ? result : [...quality102Policy.symbols];
 }
 
@@ -152,7 +153,7 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
     const runtimeSha = text(heartbeat?.runtimeSha ?? state.runtimeCommitSha);
     const expectedReleaseSha = text(heartbeat?.expectedSha) ?? config.quality102Runtime.expectedReleaseSha;
     const selector = object(heartbeat?.quality102);
-    const selectorMode = text(selector?.selectorMode) ?? "DERIVED_HIGH_VOL_ONLY";
+    const selectorMode = text(selector?.selectorMode) ?? config.quality102Runtime.selectorMode;
     const historicalSelectorParity = bool(selector?.historicalSelectorParity) ?? false;
     const brkLiveEnabled = bool(selector?.brkLiveEnabled) ?? false;
     const killSwitchPath = String(process.env.QUALITY102_CAUSAL_V1_KILL_SWITCH_FILE || "").trim();
@@ -176,7 +177,7 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
         ? `Quality102 state/heartbeatが${Math.round(ageMs / 60000)}分更新されていません。`
         : mode && mode.toUpperCase() !== "LIVE"
           ? `Quality102 runner mode=${mode}のためLIVE確認にしません。`
-          : safetyState && safetyState.toUpperCase() !== "LIVE"
+          : safetyState && !["LIVE", "HEALTHY"].includes(safetyState.toUpperCase())
             ? `Quality102 safetyState=${safetyState}のためLIVE確認にしません。`
             : killSwitchActive
               ? `Quality102 Kill Switchが有効です。${killSwitchReason || ""}`.trim()

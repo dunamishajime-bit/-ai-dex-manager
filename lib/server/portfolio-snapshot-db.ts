@@ -1,7 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
-const DB_PATH = path.join(process.cwd(), "data", "portfolio-snapshots.json");
+const DB_PATH = resolveUiDataPath("portfolio-snapshots.json");
 
 export type PortfolioSnapshot = {
   walletId: string;

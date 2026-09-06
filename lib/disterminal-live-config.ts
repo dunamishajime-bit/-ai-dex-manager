@@ -5,10 +5,10 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
   executor: "AsterDirectTradeExecutor",
   approvedReleaseSha: "multi-lineage-production",
   productionReleaseShas: {
-    v12: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
-    pengu: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
-    v52: "239982a73daed630a88b466404af43483aea8a10",
-    quality102: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
+    v12: "1094ebfec3314b355f8ebe9caf17b19e5871628c",
+    pengu: "1094ebfec3314b355f8ebe9caf17b19e5871628c",
+    v52: "f59347fad11553b833e75f6f35a0c545464fdf5f",
+    quality102: "1094ebfec3314b355f8ebe9caf17b19e5871628c",
   },
   v12DailyLossPct: 5,
   sharedCryptoDailyLossPct: 5,
@@ -21,23 +21,25 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
   v12SizingMode: "ATR/リスク連動、最大2ポジション（合計1.50x）",
   sharedCryptoGross: 2,
   quality102Runtime: {
-    expectedReleaseSha: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
+    expectedReleaseSha: "1094ebfec3314b355f8ebe9caf17b19e5871628c",
     strategyGrossCap: 0.5,
     cryptoGrossCap: 2,
     totalGrossCap: 2.5,
-    selectorMode: "DERIVED_HIGH_VOL_ONLY",
+    selectorMode: "CAUSAL_V4",
     historicalSelectorParity: false,
-    brkLiveEnabled: false,
+    brkLiveEnabled: true,
     symbols: [
-      "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT",
-      "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT",
+      "AAVEUSDT", "APTUSDT", "ARBUSDT", "AVAXUSDT", "DOGEUSDT", "DOTUSDT",
+      "ENAUSDT", "FETUSDT", "FILUSDT", "JUPUSDT", "LDOUSDT", "NEARUSDT",
+      "ONDOUSDT", "OPUSDT", "RENDERUSDT", "SEIUSDT", "SOLUSDT", "SUIUSDT",
+      "TAOUSDT", "TIAUSDT", "TRXUSDT", "UNIUSDT",
     ],
   },
   /**
    * Strict BT #33404708902 policy is displayed separately from the currently
    * deployed multi-lineage LIVE caps. The historical frozen selector remains
    * fail-closed until a reproducible, no-lookahead selector is proven; the
-   * derived HIGH_VOL sleeve is described separately above.
+   * Causal V4 sleeve is described separately above.
    */
   strictBt33404708902: {
     sourceRun: "33404708902",
@@ -63,7 +65,7 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     { label: "strong", basisBps: 100, netEdgeBps: 15, requestedGross: 1.25 },
   ],
   v52MaxConcurrentPositions: 2,
-  v52ProductionReleaseSha: "239982a73daed630a88b466404af43483aea8a10",
+  v52ProductionReleaseSha: "f59347fad11553b833e75f6f35a0c545464fdf5f",
   v52Top2Policy: {
     rank1RequestedGross: 1,
     rank2RequestedGross: 0.25,
@@ -117,13 +119,13 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     liveTriggerNote: "LIVEはentry×0.96をSTOP_MARKET triggerに使用し、実fill価格・slippageを照合。exact fillは要求しない",
   },
   vpsObservedReleases: {
-    v12: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
-    pengu: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
-    v52: "239982a73daed630a88b466404af43483aea8a10",
-    quality102: "ad7b01d5dbfd3cae3dd2c5bb8d338fc4aa1cf8d7",
+    v12: "1094ebfec3314b355f8ebe9caf17b19e5871628c",
+    pengu: "1094ebfec3314b355f8ebe9caf17b19e5871628c",
+    v52: "f59347fad11553b833e75f6f35a0c545464fdf5f",
+    quality102: "1094ebfec3314b355f8ebe9caf17b19e5871628c",
   },
   v12Symbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT"],
   penguSymbol: "PENGUUSDT",
-  cryptoSymbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT", "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT", "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT"],
+  cryptoSymbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT", "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT", "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT", "DOTUSDT", "FETUSDT", "LDOUSDT", "UNIUSDT"],
   stockSymbols: ["AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"],
 } as const;

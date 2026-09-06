@@ -329,13 +329,13 @@ function V52Top2Detail({ details, marketOpen }: { details?: V52Top2Observability
 
 function Quality102Detail({ details }: { details?: Quality102RuntimeStatus }) {
   if (!details) return null;
-  const statusLabel = details.status === "LIVE" ? "稼働確認済み（derived）" : details.status === "STALE" ? "要確認" : "状態未取得";
+  const statusLabel = details.status === "LIVE" ? "稼働確認済み（Causal V4）" : details.status === "STALE" ? "要確認" : "状態未取得";
   const statusClass = details.status === "LIVE" ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : details.status === "STALE" ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
   return (
     <section className="panel-gold rounded-[28px] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />Quality102 derived HIGH_VOL 独立スリーブ</div>
+          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />Quality102 Causal V4 独立スリーブ</div>
           <p className="mt-1 text-xs text-white/55">V12・PENGU・V52を優先し、余剰Crypto/Total Grossだけを使う1-slot補完ロジック。HPは読み取り専用です。</p>
         </div>
         <div className="flex flex-wrap gap-2"><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}`}>Q102 {statusLabel}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>

@@ -1,9 +1,10 @@
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
 const MASTER_KEY_ENV = process.env.OPERATIONAL_WALLET_MASTER_KEY || process.env.WALLET_VAULT_KEY;
-const VAULT_KEY_PATH = path.join(process.cwd(), "data", "operational-wallet-vault.key");
+const VAULT_KEY_PATH = resolveUiDataPath("operational-wallet-vault.key");
 
 function ensureVaultKey(): Buffer {
   if (MASTER_KEY_ENV && MASTER_KEY_ENV.trim()) {
