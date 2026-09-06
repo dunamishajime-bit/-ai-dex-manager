@@ -1,0 +1,22 @@
+[Unit]
+Description=DisDex read-only runner health email alert
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/current
+EnvironmentFile=-/etc/disdex/ai-dex-manager-mail.env
+Environment=DISDEX_TRADING_ROOT=/home/deploy/disdex-trading/current
+Environment=DISDEX_ALERT_STATE_PATH=/var/lib/disdex/runner-health/private/email-alert-state.json
+Environment=DISDEX_ALERT_EMAIL_TO=dunamis.hajime@gmail.com
+ExecStart=/home/deploy/disdex-trading/current/node_modules/tsx/dist/cli.mjs /home/deploy/disdex-trading/current/scripts/ops/root/disdex-runner-health-alert.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/var/lib/disdex/runner-health/private
+UMask=0077

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run DisDex runner health email alert every minute
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=1min
+RandomizedDelaySec=5s
+Persistent=true
+Unit=disdex-runner-health-alert.service
+
+[Install]
+WantedBy=timers.target
