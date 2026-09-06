@@ -14,12 +14,55 @@ import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-se
 import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
 import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-protective-orders";
 import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
+import { boundedLockRetryDelay } from "../lib/disdex-bounded-lock-retry";
+import { writeRunnerHeartbeat, type RunnerHeartbeatSafetyState } from "../lib/disdex-runner-heartbeat";
 
 const HOUR_MS = 60 * 60_000;
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
     return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function heartbeatPath() {
+    return process.env.DISDEX_RUNNER_HEARTBEAT_PATH
+        || process.env.DISDEX_HEARTBEAT_PATH
+        || process.env.DISDEX_PENGU_RUNNER_HEARTBEAT_PATH
+        || process.env.PENGU_DUAL_LS_V2_HEARTBEAT_PATH
+        || "/var/lib/disdex/runner-health/heartbeats/pengu-v8.json";
+}
+
+function heartbeatSafetyState(status: string): RunnerHeartbeatSafetyState {
+    if (status === "manual-review") return "MANUAL_REVIEW";
+    if (status === "locked" || status === "failed") return "BLOCKED";
+    return "HEALTHY";
+}
+
+async function publishHeartbeat(runtime: ReturnType<typeof resolvePenguDualLsV2Runtime>, result?: { status: string; message?: string }) {
+    const now = Date.now();
+    const runtimeSha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "unknown").trim().toLowerCase();
+    try {
+        await writeRunnerHeartbeat(heartbeatPath(), {
+            serviceUnit: process.env.DISDEX_PENGU_RUNNER_SERVICE_UNIT || process.env.DISDEX_SERVICE_UNIT || process.env.SYSTEMD_UNIT || "disdex-pengu-dual-ls-v2-v20.service",
+            runnerId: process.env.DISDEX_RUNNER_ID || runtime.strategyId,
+            runtimeSha,
+            expectedSha: runtimeSha,
+            workingDirectory: process.cwd(),
+            mode: runtime.mode,
+            liveEnabled: runtime.mode === "LIVE" && runtime.enabled && runtime.liveTradingEnabled && runtime.liveExecutionEnabled,
+            safetyState: result?.status === "held" && /blocked|stale|requires|not current|below minimum/i.test(result.message || "")
+                ? "BLOCKED"
+                : heartbeatSafetyState(result?.status || "starting"),
+            heartbeatAt: now,
+            lastTickAt: now,
+            status: result?.status || "starting",
+            reason: result?.message,
+            symbols: ["PENGUUSDT"],
+            grossCaps: { strategy: runtime.maximumGross, crypto: STRICT_BT33404708902.cryptoGrossCap, total: STRICT_BT33404708902.totalGrossCap },
+        });
+    } catch (error) {
+        console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", strategyId: runtime.strategyId, message: error instanceof Error ? error.message : String(error) }));
+    }
 }
 
 async function main() {
@@ -110,7 +153,10 @@ async function main() {
     });
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
+    const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_MS", 5_000)));
+    const lockRetryWindowMs = Math.min(15 * 60_000, Math.max(lockRetryMs, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_WINDOW_MS", 5 * 60_000)));
     let stopping = false;
+    let lockedSinceMs: number | undefined;
     const boundaryWait = createInterruptibleDelay();
     const stop = () => {
         stopping = true;
@@ -118,10 +164,22 @@ async function main() {
     };
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
+    await publishHeartbeat(runtime);
     do {
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
+        await publishHeartbeat(runtime, result);
         if (!daemon || stopping) break;
+        if (result.status === "locked") {
+            const now = Date.now();
+            lockedSinceMs ??= now;
+            const retryDelayMs = boundedLockRetryDelay({ nowMs: now, lockedSinceMs, retryMs: lockRetryMs, maxRetryWindowMs: lockRetryWindowMs });
+            if (retryDelayMs !== null) {
+                await boundaryWait.wait(retryDelayMs);
+                continue;
+            }
+        }
+        lockedSinceMs = undefined;
         const now = Date.now();
         const waitUntilNextClosedHour = HOUR_MS - (now % HOUR_MS) + boundaryDelayMs;
         await boundaryWait.wait(waitUntilNextClosedHour);

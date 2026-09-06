@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
+import { resolveV12X1AllRuntime, V12_X1_ALL, type ResolvedV12Runtime } from "../config/v12X1AllRuntime";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
@@ -8,6 +8,7 @@ import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provide
 import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
 import { assertV12StrictLiveConfiguration, V12StrictAsterLiveAdapter } from "../lib/v12-strict-live-adapter";
+import { writeRunnerHeartbeat, type RunnerHeartbeatSafetyState } from "../lib/disdex-runner-heartbeat";
 
 const TWO_HOURS_MS = 2 * 60 * 60_000;
 
@@ -18,6 +19,47 @@ function numberEnv(name: string, fallback: number) {
 
 function boolEnv(name: string) {
     return /^(1|true|yes|on)$/i.test(String(process.env[name] || "").trim());
+}
+
+function heartbeatPath() {
+    return process.env.DISDEX_RUNNER_HEARTBEAT_PATH
+        || process.env.DISDEX_HEARTBEAT_PATH
+        || process.env.V12_X1_ALL_HEARTBEAT_PATH
+        || "/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json";
+}
+
+function heartbeatSafetyState(status: string): RunnerHeartbeatSafetyState {
+    if (status === "manual-review") return "MANUAL_REVIEW";
+    if (status === "locked" || status === "blocked-local") return "BLOCKED";
+    return "HEALTHY";
+}
+
+async function publishHeartbeat(
+    runtime: ResolvedV12Runtime,
+    releaseSha: string,
+    result?: { status: string; message?: string },
+) {
+    const now = Date.now();
+    try {
+        await writeRunnerHeartbeat(heartbeatPath(), {
+            runnerId: process.env.DISDEX_RUNNER_ID || runtime.strategyId,
+            serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || process.env.DISDEX_SERVICE_UNIT || process.env.SYSTEMD_UNIT || "disdex-v12-x1-all.service",
+            runtimeSha: releaseSha || "unknown",
+            expectedSha: releaseSha || "unknown",
+            workingDirectory: process.cwd(),
+            mode: runtime.mode,
+            liveEnabled: runtime.mode === "LIVE" && runtime.enabled && runtime.liveTradingEnabled && runtime.liveExecutionEnabled,
+            safetyState: heartbeatSafetyState(result?.status || "starting"),
+            heartbeatAt: now,
+            lastTickAt: now,
+            status: result?.status || "starting",
+            reason: result?.message,
+            symbols: V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`),
+            grossCaps: { strategy: 1, crypto: 2, total: 2.5 },
+        });
+    } catch (error) {
+        console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", strategyId: runtime.strategyId, message: error instanceof Error ? error.message : String(error) }));
+    }
 }
 
 function assertExactReleaseAck() {
@@ -93,6 +135,7 @@ async function main() {
         quality102LiveSelectorParity: false,
         quality102LiveBlockedFailClosed: true,
     }));
+    await publishHeartbeat(built.runtime, built.releaseSha);
 
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_BOUNDARY_DELAY_MS", 5_000)));
@@ -106,6 +149,7 @@ async function main() {
     do {
         const result = await built.engine.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: built.runtime.strategyId, mode: built.runtime.mode, ...result }));
+        await publishHeartbeat(built.runtime, built.releaseSha, result);
         if (result.status === "manual-review") process.exitCode = 2;
         if (!daemon || stopping || result.status === "manual-review") break;
         if (result.status === "locked") {

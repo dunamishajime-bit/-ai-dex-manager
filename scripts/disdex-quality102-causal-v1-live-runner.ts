@@ -26,6 +26,8 @@ import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-run
 import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
+import { boundedLockRetryDelay } from "../lib/disdex-bounded-lock-retry";
+import { writeRunnerHeartbeat, type RunnerHeartbeatSafetyState } from "../lib/disdex-runner-heartbeat";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEFAULT_STATE_ROOT = "/var/lib/disdex/quality102-causal-v1";
@@ -34,6 +36,49 @@ const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const DEFAULT_HISTORY_HOURS = 225 * 24;
 const DEFAULT_MAX_ENTRY_DELAY_MS = 2 * 60 * 60_000;
 const HOUR_MS = 3_600_000;
+
+function heartbeatPath(env: NodeJS.ProcessEnv = process.env) {
+    return env.DISDEX_RUNNER_HEARTBEAT_PATH
+        || env.DISDEX_HEARTBEAT_PATH
+        || env.QUALITY102_CAUSAL_V1_HEARTBEAT_PATH
+        || "/var/lib/disdex/runner-health/heartbeats/q102-causal-v1.json";
+}
+
+function heartbeatSafetyState(status: string): RunnerHeartbeatSafetyState {
+    if (status === "manual-review") return "MANUAL_REVIEW";
+    if (status === "locked" || status === "blocked-local") return "BLOCKED";
+    return "HEALTHY";
+}
+
+async function publishHeartbeat(config: Quality102CausalV1LiveResolvedConfig, result?: { status: string; message?: string }) {
+    const now = Date.now();
+    const runtimeSha = config.runtimeCommitSha || "unknown";
+    try {
+        await writeRunnerHeartbeat(heartbeatPath(), {
+            runnerId: process.env.DISDEX_RUNNER_ID || QUALITY102_CAUSAL_V1.strategyId,
+            serviceUnit: process.env.DISDEX_RUNNER_SERVICE_UNIT || process.env.DISDEX_SERVICE_UNIT || process.env.SYSTEMD_UNIT || "disdex-quality102-causal-v1.service",
+            runtimeSha,
+            expectedSha: config.expectedRuntimeCommitSha || runtimeSha,
+            workingDirectory: process.cwd(),
+            mode: config.mode,
+            liveEnabled: config.mode === "LIVE" && config.enabled && config.liveTradingEnabled && config.liveExecutionEnabled && config.operatorArmed,
+            safetyState: heartbeatSafetyState(result?.status || "starting"),
+            heartbeatAt: now,
+            lastTickAt: now,
+            status: result?.status || "starting",
+            reason: result?.message,
+            symbols: config.symbols,
+            grossCaps: { strategy: config.maximumGross, crypto: config.cryptoGrossCap, total: config.totalGrossCap },
+            quality102: {
+                selectorMode: config.selectorMode,
+                historicalSelectorParity: false,
+                brkLiveEnabled: QUALITY102_CAUSAL_V4_CAPABILITIES.selectorImplemented,
+            },
+        });
+    } catch (error) {
+        console.error(JSON.stringify({ level: "warn", event: "runner-heartbeat-write-failed", strategyId: QUALITY102_CAUSAL_V1.strategyId, message: error instanceof Error ? error.message : String(error) }));
+    }
+}
 
 export interface Quality102CausalV1LiveResolvedConfig {
     mode: Quality102CausalV1Mode;
@@ -288,6 +333,9 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         historyHours: config.historyHours,
         pageLimit: config.historyPageLimit,
         cacheTtlMs: 0,
+        maxConcurrentSymbols: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_MAX_SYMBOL_CONCURRENCY", 2)),
+        currentOpenRetryAttempts: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_ATTEMPTS", 2)),
+        currentOpenRetryDelayMs: numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_DELAY_MS", 250),
     });
     const [ping, exchangeInfo, account, positions, openOrders] = await Promise.all([
         client.ping(),
@@ -390,6 +438,9 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             historyHours: config.historyHours,
             pageLimit: config.historyPageLimit,
             cacheTtlMs: numberEnv(env, "QUALITY102_CAUSAL_V1_HISTORY_CACHE_TTL_MS", 5 * 60_000),
+            maxConcurrentSymbols: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_MAX_SYMBOL_CONCURRENCY", 2)),
+            currentOpenRetryAttempts: Math.floor(numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_ATTEMPTS", 2)),
+            currentOpenRetryDelayMs: numberEnv(env, "QUALITY102_CAUSAL_V1_CURRENT_OPEN_RETRY_DELAY_MS", 250),
         }),
         executor,
         stateStore: new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.expectedRuntimeCommitSha),
@@ -447,17 +498,32 @@ async function main(): Promise<void> {
     }));
     const daemon = process.argv.includes("--daemon");
     const delay = createInterruptibleDelay();
+    const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv(process.env, "QUALITY102_CAUSAL_V1_LOCK_RETRY_MS", 5_000)));
+    const lockRetryWindowMs = Math.min(15 * 60_000, Math.max(lockRetryMs, numberEnv(process.env, "QUALITY102_CAUSAL_V1_LOCK_RETRY_WINDOW_MS", 5 * 60_000)));
     let stopping = false;
+    let lockedSinceMs: number | undefined;
     const stop = () => { stopping = true; delay.interrupt(); };
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
+    await publishHeartbeat(built.config);
     do {
         const result = await built.runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), ...result }));
+        await publishHeartbeat(built.config, result);
         if (!daemon || stopping || result.status === "manual-review") {
             if (result.status === "manual-review") process.exitCode = 2;
             break;
         }
+        if (result.status === "locked") {
+            const now = Date.now();
+            lockedSinceMs ??= now;
+            const retryDelayMs = boundedLockRetryDelay({ nowMs: now, lockedSinceMs, retryMs: lockRetryMs, maxRetryWindowMs: lockRetryWindowMs });
+            if (retryDelayMs !== null) {
+                await delay.wait(retryDelayMs);
+                continue;
+            }
+        }
+        lockedSinceMs = undefined;
         const now = Date.now();
         const waitMs = HOUR_MS - (now % HOUR_MS) + Math.min(30_000, Math.max(1_000, numberEnv(process.env, "QUALITY102_CAUSAL_V1_BOUNDARY_DELAY_MS", 5_000)));
         await delay.wait(waitMs);
