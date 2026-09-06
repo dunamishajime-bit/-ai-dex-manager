@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
-const DB_PATH = path.join(process.cwd(), "data", "auto-trade-runtime-control.json");
+const DB_PATH = resolveUiDataPath("auto-trade-runtime-control.json");
 
 export type AutoTradeActiveStrategy =
   | "legacy_paused"

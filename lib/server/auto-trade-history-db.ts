@@ -2,12 +2,13 @@
 import path from "path";
 
 import type { LiveHybridRunSummary } from "@/lib/server/live-hybrid-autotrade";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const USE_REDIS = !!(KV_URL && KV_TOKEN);
 const REDIS_KEY = "disdex:auto-trade-history";
-const DB_PATH = path.join(process.cwd(), "data", "auto-trade-history.json");
+const DB_PATH = resolveUiDataPath("auto-trade-history.json");
 const MAX_HISTORY = 120;
 
 export interface AutoTradeHistoryEntry extends LiveHybridRunSummary {

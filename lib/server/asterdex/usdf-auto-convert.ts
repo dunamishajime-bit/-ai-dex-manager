@@ -16,8 +16,9 @@ import { resolveToken } from "@/lib/tokens";
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { loadOperationalWallets } from "@/lib/server/operational-wallet-db";
 import { decryptVaultSecret } from "@/lib/server/wallet-vault";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
-const STATE_PATH = path.join(process.cwd(), "data", "usdf-auto-convert-state.json");
+const STATE_PATH = resolveUiDataPath("usdf-auto-convert-state.json");
 const DEFAULT_BSC_RPC = "https://bsc-dataseed.binance.org";
 const ASTER_TREASURY_BSC = "0x128463A60784c4D3f46c23Af3f65Ed859Ba87974" as const;
 const USDF_MINT_CONTRACT_BSC = "0xC271fc70dD9E678ac1AB632f797894fe4BE2C345" as const;

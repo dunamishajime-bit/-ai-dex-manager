@@ -10,8 +10,9 @@ import {
   COMBINED_HYPE_MARKET_SYMBOL,
   COMBINED_MARKET_SYMBOL,
 } from "@/lib/server/combined/config";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
-const STATE_PATH = path.join(process.cwd(), "data", "combined-state.json");
+const STATE_PATH = resolveUiDataPath("combined-state.json");
 
 export type CombinedState = {
   updatedAt: string;

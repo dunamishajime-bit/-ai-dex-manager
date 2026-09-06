@@ -4,6 +4,7 @@ import path from "path";
 import type { HybridLiveDecisionDetails } from "@/lib/backtest/hybrid-engine";
 import type { CombinedDecisionPayload } from "@/lib/server/combined/types";
 import type { IdleBigWaveSidecarEvaluation, IdleRunnerEvaluation } from "@/lib/server/live-hybrid-autotrade";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
 export type LegacyLiveDecisionCachePayload = {
   ok: true;
@@ -29,7 +30,7 @@ export type LegacyLiveDecisionCachePayload = {
 
 export type LiveDecisionCachePayload = LegacyLiveDecisionCachePayload | CombinedDecisionPayload;
 
-const CACHE_PATH = path.join(process.cwd(), "data", "live-decision-cache.json");
+const CACHE_PATH = resolveUiDataPath("live-decision-cache.json");
 const STALE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function isValidPayload(payload: LiveDecisionCachePayload | null | undefined) {

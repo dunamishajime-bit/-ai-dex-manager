@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { TokenRef } from "../types/market";
+import { resolveUiDataPath } from "../server/ui-data-path";
 
 const COINGECKO_ID_MAP: Record<string, string> = {
     "bitcoin": "bitcoin",
@@ -39,7 +40,7 @@ const COINGECKO_ID_MAP: Record<string, string> = {
     uniswap: "uniswap",
 };
 
-const PRICE_CACHE_PATH = path.join(process.cwd(), "data", "market-price-cache.json");
+const PRICE_CACHE_PATH = resolveUiDataPath("market-price-cache.json");
 const PRICE_CACHE_TTL_MS = 10 * 60 * 1000;
 const MARKET_PROVIDER_DEBUG = process.env.MARKET_PROVIDER_DEBUG === "1";
 const BINANCE_SYMBOL_MAP: Record<string, string> = {

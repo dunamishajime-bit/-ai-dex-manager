@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { resolveUiDataPath } from "@/lib/server/ui-data-path";
 
 export type SystemSettings = {
   registrationEnabled: boolean;
@@ -7,7 +8,7 @@ export type SystemSettings = {
   updatedAt: number;
 };
 
-const SETTINGS_PATH = path.join(process.cwd(), "data", "system-settings.json");
+const SETTINGS_PATH = resolveUiDataPath("system-settings.json");
 
 const DEFAULT_SETTINGS: SystemSettings = {
   registrationEnabled: true,
