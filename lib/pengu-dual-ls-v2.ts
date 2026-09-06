@@ -513,6 +513,12 @@ export function evaluatePenguDualLsV2Exit(position: PenguDualLsV2Position, featu
     return evaluatePenguDualLsV2PositionBar(position, features).exit;
 }
 
+export function cooldownHoursForPenguExit(reason?: PenguDualLsV2ExitDecision["reason"]) {
+    const hardStop = reason === "LONG_HARD_STOP" || reason === "SHORT_HARD_STOP" || reason === "RECOVERY_V8_HARD_STOP";
+    return hardStop ? PENGU_DUAL_LS_V2.hardStopCooldownHours : PENGU_DUAL_LS_V2.cooldownHours;
+}
+
+
 export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position?: PenguDualLsV2Position, now = Date.now(), cooldownUntilTs = 0, options: PenguDualLsV2SignalOptions = {}): PenguDualLsV2Signal {
     const rows = buildPenguDualLsV2EvaluationSeries(history, now);
     const latest = rows.at(-1);

@@ -117,7 +117,14 @@ function atr(bars: V12Bar[], endExclusive: number, lookback: number) {
     return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-export function computeV12Regime(btcBars: V12Bar[], index: number): V12Regime | null {
+interface V12RegimeState {
+    regime: V12Regime;
+    distance: number;
+    momentum: number;
+    strongRegime: boolean;
+}
+
+function computeV12RegimeState(btcBars: V12Bar[], index: number): V12RegimeState | null {
     if (index < V12_X1_ALL.btcRegimeSmaBars || index < V12_X1_ALL.btcRegimeMomentumBars) return null;
     const current = btcBars[index]?.close;
     if (!(current > 0)) return null;
@@ -128,12 +135,30 @@ export function computeV12Regime(btcBars: V12Bar[], index: number): V12Regime | 
     if (!(momentumBase > 0)) return null;
     const distance = current / sma - 1;
     const momentum = current / momentumBase - 1;
-    if (distance >= V12_X1_ALL.regimeThresholdPct && momentum > 0) return "LONG";
-    if (distance <= -V12_X1_ALL.regimeThresholdPct && momentum < 0) return "SHORT";
-    return "NEUTRAL";
+    if (distance >= V12_X1_ALL.regimeThresholdPct && momentum > 0) {
+        return { regime: "LONG", distance, momentum, strongRegime: distance >= V12_X1_ALL.strongRegimeThresholdPct };
+    }
+    if (distance <= -V12_X1_ALL.regimeThresholdPct && momentum < 0) {
+        return { regime: "SHORT", distance, momentum, strongRegime: distance <= -V12_X1_ALL.strongRegimeThresholdPct };
+    }
+    return { regime: "NEUTRAL", distance, momentum, strongRegime: false };
 }
 
-function candidateFor(symbol: string, bars: V12Bar[], index: number, regime: V12Regime): V12Candidate | null {
+export function computeV12Regime(btcBars: V12Bar[], index: number): V12Regime | null {
+    return computeV12RegimeState(btcBars, index)?.regime ?? null;
+}
+
+export function evaluateV12EntryQuality(input: { regime: V12Regime; strongRegime: boolean; side: V12Side; momentum: number; atrRatio: number; score: number }) {
+    if (input.regime === "NEUTRAL") return V12_X1_ALL.allowNeutralRegime && input.score >= V12_X1_ALL.neutralScoreThreshold;
+    if (input.regime === "LONG" && input.side !== "LONG") return false;
+    if (input.regime === "SHORT" && input.side !== "SHORT") return false;
+    if (input.strongRegime) return true;
+    const alignedMomentum = input.side === "LONG" ? input.momentum : -input.momentum;
+    return input.score >= V12_X1_ALL.neutralScoreThreshold
+        || (alignedMomentum >= V12_X1_ALL.relaxedRegimeMinimumMomentumPct && input.atrRatio >= V12_X1_ALL.relaxedRegimeMinimumAtrRatio);
+}
+
+function candidateFor(symbol: string, bars: V12Bar[], index: number, regimeState: V12RegimeState): V12Candidate | null {
     const current = bars[index];
     const base = bars[index - V12_X1_ALL.momentumBars];
     if (!current || !base || !(current.close > 0 && base.close > 0) || index < V12_X1_ALL.atrBars) return null;
@@ -153,23 +178,23 @@ function candidateFor(symbol: string, bars: V12Bar[], index: number, regime: V12
     const sideScore = side === "LONG" ? score : -score;
     if (side === "LONG" && momentum < V12_X1_ALL.minimumMomentumPct) return null;
     if (side === "SHORT" && momentum > -V12_X1_ALL.minimumMomentumPct) return null;
-    const allowed = regime === "LONG" ? side === "LONG" : regime === "SHORT" ? side === "SHORT" : V12_X1_ALL.allowNeutralRegime && sideScore >= V12_X1_ALL.neutralScoreThreshold;
-    if (!allowed) return null;
+    const atrRatio = currentAtr / current.close;
+    if (!evaluateV12EntryQuality({ regime: regimeState.regime, strongRegime: regimeState.strongRegime, side, momentum, atrRatio, score: sideScore })) return null;
     return { symbol, side, momentum, volatility, atr: currentAtr, volumeRatio, score: sideScore };
 }
 
 export function buildV12Signal(universe: Record<string, V12Bar[]>, index: number): V12Signal | null {
     const btc = universe.BTC;
     if (!btc?.[index]) return null;
-    const regime = computeV12Regime(btc, index);
-    if (!regime) return null;
+    const regimeState = computeV12RegimeState(btc, index);
+    if (!regimeState) return null;
     const candidates = V12_X1_ALL.universe
-        .map((symbol) => candidateFor(symbol, universe[symbol] || [], index, regime))
+        .map((symbol) => candidateFor(symbol, universe[symbol] || [], index, regimeState))
         .filter((candidate): candidate is V12Candidate => Boolean(candidate))
         .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol));
     const winner = candidates[0];
     if (!winner) return null;
-    return { ...winner, regime, referenceTs: universe[winner.symbol][index].endTs, entryTs: universe[winner.symbol][index + 1]?.ts || universe[winner.symbol][index].endTs };
+    return { ...winner, regime: regimeState.regime, referenceTs: universe[winner.symbol][index].endTs, entryTs: universe[winner.symbol][index + 1]?.ts || universe[winner.symbol][index].endTs };
 }
 
 export function sizeV12Position(equity: number, entryPrice: number, candidateAtr: number, side: V12Side): V12PositionSizing {

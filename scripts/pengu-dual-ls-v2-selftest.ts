@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { PENGU_DUAL_LS_V2, resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import {
     buildPenguDualLsV2Signal,
+    cooldownHoursForPenguExit,
     evaluatePenguDualLsV2Decision,
     evaluatePenguDualLsV2Exit,
     evaluatePenguDualLsV2ShortSignals,
@@ -52,6 +53,11 @@ assert.equal(PENGU_DUAL_LS_V2.short.setupExpiryHours, 24);
 assert.equal(PENGU_DUAL_LS_V2.short.maxHoldHours, 72);
 assert.equal(PENGU_DUAL_LS_V2.long.maxHoldHours, 120);
 assert.equal(PENGU_DUAL_LS_V2.cooldownHours, 6);
+assert.equal(PENGU_DUAL_LS_V2.hardStopCooldownHours, 24);
+assert.equal(cooldownHoursForPenguExit("LONG_HARD_STOP"), 24);
+assert.equal(cooldownHoursForPenguExit("SHORT_HARD_STOP"), 24);
+assert.equal(cooldownHoursForPenguExit("RECOVERY_V8_HARD_STOP"), 24);
+assert.equal(cooldownHoursForPenguExit("LONG_TRAILING_STOP"), 6);
 assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.75);
 assert.equal(PENGU_SHORT_V20_CANDIDATE, "COUNTERWIND_VOL_TARGET_FAILURE_EXIT");
 assert.equal(PENGU_SHORT_V20_PRE_REGISTRATION_SHA, "ad7cedb3cafaf9f9680e390112f72375d84b50ac");

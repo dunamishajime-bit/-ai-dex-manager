@@ -29,7 +29,7 @@ assert.ok(config.symbols.includes("FETUSDT"));
 assert.ok(config.symbols.includes("AVAXUSDT"));
 assert.ok(config.symbols.includes("AAVEUSDT"));
 assert.ok(config.symbols.length > config.highVolSymbols.length);
-assert.equal(config.maximumGross, 0.5);
+assert.equal(config.maximumGross, 1);
 assert.equal(config.cryptoGrossCap, 2);
 assert.equal(config.totalGrossCap, 2.5);
 assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(config, baseEnv));

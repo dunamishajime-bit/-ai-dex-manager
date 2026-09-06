@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import type { Quality102CausalV1Mode } from "@/config/disdexQuality102CausalV1Runtime";
+import { QUALITY102_CAUSAL_V1, type Quality102CausalV1Mode } from "@/config/disdexQuality102CausalV1Runtime";
 
 const STRATEGY_ID = "QUALITY102_CAUSAL_V1" as const;
 const STATE_VERSION = 1 as const;
@@ -167,7 +167,7 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
   if (typeof raw.reduceOnly !== "boolean") malformed("pending.reduceOnly");
   const lastError = optionalString(raw.lastError, "pending.lastError");
   if (raw.expectedPrice !== undefined && !(typeof raw.expectedPrice === "number" && Number.isFinite(raw.expectedPrice) && raw.expectedPrice > 0)) malformed("pending.expectedPrice");
-  if (raw.targetGross !== undefined && !(typeof raw.targetGross === "number" && Number.isFinite(raw.targetGross) && raw.targetGross > 0 && raw.targetGross <= 0.5)) malformed("pending.targetGross");
+  if (raw.targetGross !== undefined && !(typeof raw.targetGross === "number" && Number.isFinite(raw.targetGross) && raw.targetGross > 0 && raw.targetGross <= QUALITY102_CAUSAL_V1.maximumGross)) malformed("pending.targetGross");
   if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("pending.hardStop");
   if (raw.family !== undefined && !["HIGH_VOL", "PB", "MR", "BRK", "REV"].includes(String(raw.family))) malformed("pending.family");
   if (raw.layer !== undefined && !["S1", "S2", "S3", "S4"].includes(String(raw.layer))) malformed("pending.layer");

@@ -9,6 +9,7 @@ export const STRICT_BT33404708902 = Object.freeze({
     resizePnlAccounting: "MARK_TO_MARKET_BINANCE_VISION_USDM_1M_OPEN",
     sourceValidation: "ALL_102_FROZEN_RESEARCH_1H_OPEN_CROSSCHECK_FAIL_CLOSED",
     quality102PositionCap: 0.5,
+    quality102CausalV1PositionCap: 1,
     cryptoGrossCap: 2,
     totalGrossCap: 2.5,
     stockGrossCap: 1.5,

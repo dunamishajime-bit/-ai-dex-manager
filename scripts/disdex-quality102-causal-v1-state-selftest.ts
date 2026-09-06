@@ -77,6 +77,15 @@ async function main() {
     const wrongShaStore = new FileQuality102CausalV1StateStore(wrongShaPath, "LIVE", RUNTIME_SHA);
     await assert.rejects(() => wrongShaStore.load(), /QUALITY102_STATE_MALFORMED.*runtimeCommitSha/);
 
+    const oneGrossState = pendingState("planned");
+    oneGrossState.pending = { ...oneGrossState.pending!, targetGross: 1 };
+    const oneGrossStore = new MemoryQuality102CausalV1StateStore(oneGrossState, "LIVE", RUNTIME_SHA);
+    assert.equal((await oneGrossStore.load()).pending?.targetGross, 1);
+    const overGrossState = pendingState("planned");
+    overGrossState.pending = { ...overGrossState.pending!, targetGross: 1.01 };
+    const overGrossStore = new MemoryQuality102CausalV1StateStore(overGrossState, "LIVE", RUNTIME_SHA);
+    await assert.rejects(() => overGrossStore.load(), /QUALITY102_STATE_MALFORMED.*pending.targetGross/);
+
     const malformedCases: Array<[string, unknown]> = [
       ["unknown pending phase", { ...pendingState("submitted"), pending: { ...pendingState("submitted").pending, phase: "retrying" } }],
       ["non-finite pending quantity", { ...pendingState("submitted"), pending: { ...pendingState("submitted").pending, quantity: Number.POSITIVE_INFINITY } }],

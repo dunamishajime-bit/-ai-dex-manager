@@ -30,6 +30,7 @@ test("source identity and strict caps are immutable", () => {
     assert.equal(STRICT_BT33404708902.sourceRun, "33404708902");
     assert.equal(STRICT_BT33404708902.sourceSha, "aec066fefd761b12f07e6927b5f2a524f88ca08b");
     assert.equal(STRICT_BT33404708902.quality102PositionCap, 0.5);
+    assert.equal(STRICT_BT33404708902.quality102CausalV1PositionCap, 1);
     assert.equal(STRICT_BT33404708902.cryptoGrossCap, 2);
     assert.equal(STRICT_BT33404708902.totalGrossCap, 2.5);
 });

@@ -112,7 +112,8 @@ function positionNotional(position: StrictPortfolioPosition) {
 function strategyCap(strategy: StrictStrategy) {
     if (strategy === "V12") return STRICT_BT33404708902.v12MaximumGross;
     if (strategy === "PENGU_DUAL_LS_V2") return STRICT_BT33404708902.penguMaximumGross;
-    if (isQuality102Strategy(strategy)) return STRICT_BT33404708902.quality102PositionCap;
+    if (strategy === "QUALITY102_CAUSAL_V1") return STRICT_BT33404708902.quality102CausalV1PositionCap;
+    if (strategy === "QUALITY102") return STRICT_BT33404708902.quality102PositionCap;
     return STRICT_BT33404708902.stockGrossCap;
 }
 
@@ -309,7 +310,7 @@ function trimQualityToResidual(input: {
         const effectiveCryptoCap = Math.max(0, STRICT_BT33404708902.cryptoGrossCap - (baseIsCrypto ? allocation : 0));
         const totalLimit = remainingNotionalLimit({ equity, oldNotional: oldQualityNotional, markNetRate, existingBaseNotional: baseOtherTotalNotional, cap: effectiveTotalCap });
         const cryptoLimit = remainingNotionalLimit({ equity, oldNotional: oldQualityNotional, markNetRate, existingBaseNotional: baseOtherCryptoNotional, cap: effectiveCryptoCap });
-        const nextRemaining = Math.min(oldQualityNotional, totalLimit, cryptoLimit, STRICT_BT33404708902.quality102PositionCap * equity);
+        const nextRemaining = Math.min(oldQualityNotional, totalLimit, cryptoLimit, strategyCap(input.quality.strategy) * equity);
         const nextEquity = Math.max(0.001, equity + (oldQualityNotional - nextRemaining) * markNetRate);
         const nextAllocation = baseAllocationAtEquity(nextEquity);
         if (Math.abs(nextRemaining - remainingNotional) <= Math.max(1e-8, oldQualityNotional * 1e-12) && Math.abs(nextAllocation - allocation) <= 1e-12) {
@@ -413,7 +414,7 @@ export function planStrictPortfolio(input: {
     if (activeQuality.some((row) => grossForNotional(positionNotional(row), equity) > STRICT_BT33404708902.quality102PositionCap + EPSILON)) {
         return rejectPlan("QUALITY102_GROSS_OVER_CAP", input.active, equity);
     }
-    if (activeCausalQuality.some((row) => grossForNotional(positionNotional(row), equity) > STRICT_BT33404708902.quality102PositionCap + EPSILON)) {
+    if (activeCausalQuality.some((row) => grossForNotional(positionNotional(row), equity) > STRICT_BT33404708902.quality102CausalV1PositionCap + EPSILON)) {
         return rejectPlan("QUALITY102_CAUSAL_V1_GROSS_OVER_CAP", input.active, equity);
     }
     const initialTotals = planTotals(input.active, [], equity);

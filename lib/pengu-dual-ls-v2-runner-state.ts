@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
-import type { PenguDualLsV2Position, PenguDualLsV2ShortV20State, PenguDualLsV2Signal } from "@/lib/pengu-dual-ls-v2";
+import type { PenguDualLsV2ExitDecision, PenguDualLsV2Position, PenguDualLsV2ShortV20State, PenguDualLsV2Signal } from "@/lib/pengu-dual-ls-v2";
 import type { RecoveryV8DurableState } from "@/lib/pengu-recovery-v8";
 
 export interface PenguDualLsV2PendingOrder {
@@ -13,6 +13,7 @@ export interface PenguDualLsV2PendingOrder {
     reduceOnly: boolean;
     expectedPrice: number;
     reason: string;
+    exitReason?: PenguDualLsV2ExitDecision["reason"];
     referenceTs: number;
     targetGross: number;
     requestedGross?: number;

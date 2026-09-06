@@ -2,7 +2,7 @@ export type Quality102CausalV1Mode = "SHADOW" | "PAPER" | "LIVE";
 
 export const QUALITY102_CAUSAL_V1 = Object.freeze({
   strategyId: "QUALITY102_CAUSAL_V1",
-  maximumGross: 0.5,
+  maximumGross: 1,
   cryptoGrossCap: 2,
   totalGrossCap: 2.5,
   maximumPositions: 1,
@@ -39,7 +39,7 @@ export function resolveQuality102CausalV1Runtime(
     liveTradingEnabled: bool("QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED"),
     liveExecutionEnabled: bool("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED"),
     operatorArmed: bool("QUALITY102_CAUSAL_V1_OPERATOR_ARMED"),
-    maximumGross: Math.min(0.5, Math.max(0, Number.isFinite(requestedGross) ? requestedGross : 0.5)),
+    maximumGross: Math.min(1, Math.max(0, Number.isFinite(requestedGross) ? requestedGross : 1)),
     cryptoGrossCap: 2,
     totalGrossCap: 2.5,
     maximumPositions: 1,

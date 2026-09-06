@@ -49,6 +49,7 @@ export const PENGU_DUAL_LS_V2 = {
         grossCap: 0.75,
     },
     cooldownHours: 6,
+    hardStopCooldownHours: 24,
     safety: {
         maxSlippageBps: 35,
         minimumOrderNotionalUsd: 5,

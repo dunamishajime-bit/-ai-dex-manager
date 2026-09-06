@@ -78,14 +78,14 @@ function cryptoPosition(strategy: "V12" | "PENGU_DUAL_LS_V2", gross: number) {
     });
 }
 
-test("causal-v1 requires readiness, is capped at 0.50x, and historical Quality102 stays blocked", () => {
+test("causal-v1 requires readiness, is capped at 1.00x, and historical Quality102 stays blocked", () => {
     const notReady = plan([], [intent("QUALITY102_CAUSAL_V1", 0.5)], false);
     assert.equal(notReady.accepted.length, 0);
     assert.equal(notReady.rejected[0]?.reason, "QUALITY102_CAUSAL_V1_NOT_READY");
 
-    const capped = plan([], [intent("QUALITY102_CAUSAL_V1", 0.51)]);
-    assert.equal(capped.accepted[0]?.gross, 0.5);
-    assert.equal(capped.accepted[0]?.notionalUsd, 500);
+    const capped = plan([], [intent("QUALITY102_CAUSAL_V1", 1.2)]);
+    assert.equal(capped.accepted[0]?.gross, 1);
+    assert.equal(capped.accepted[0]?.notionalUsd, 1000);
 
     const historical = plan([], [intent("QUALITY102", 0.5)]);
     assert.equal(historical.accepted.length, 0);

@@ -17,6 +17,6 @@ const live = resolveQuality102CausalV1Runtime({
   QUALITY102_CAUSAL_V1_OPERATOR_ARMED: "true",
   QUALITY102_CAUSAL_V1_MAX_GROSS: "9",
 });
-assert.equal(live.maximumGross, 0.5);
+assert.equal(live.maximumGross, 1);
 assert.equal(live.historicalSelectorParity, false);
 console.log("QUALITY102_CAUSAL_V1_RUNTIME_SELFTEST_PASS");

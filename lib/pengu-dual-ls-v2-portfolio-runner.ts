@@ -12,6 +12,7 @@ import type {
 import type { LiveRunnerLock } from "@/lib/live-runner-state";
 import {
     buildPenguDualLsV2Signal,
+    cooldownHoursForPenguExit,
     type PenguDualLsV2History,
     type PenguDualLsV2Position,
     type PenguDualLsV2Signal,
@@ -385,7 +386,7 @@ export class PenguDualLsV2PortfolioRunner {
         }
         if (pending.reduceOnly) {
             state.position = undefined;
-            state.cooldownUntilTs = pending.referenceTs + 6 * 3_600_000;
+            state.cooldownUntilTs = pending.referenceTs + cooldownHoursForPenguExit(pending.exitReason) * 3_600_000;
         } else {
             const entryPrice = result.averagePrice;
             const isRecoveryV8 = pending.entryVersion === "RECOVERY_V8";
@@ -805,6 +806,7 @@ export class PenguDualLsV2PortfolioRunner {
                 reduceOnly,
                 expectedPrice: side === "BUY" ? quote.askPrice : quote.bidPrice,
                 reason: reduceOnly ? signal.reason : `${signal.reason} requestedGross=${requestedGross.toFixed(4)} allocatedGross=${targetGross.toFixed(4)} portfolioRemaining=${Math.max(0, this.dependencies.config.portfolioGrossCap - normalizedPositionGross(workingPositions, workingEquity, SYMBOL)).toFixed(4)}`,
+                exitReason: reduceOnly ? signal.exit?.reason : undefined,
                 referenceTs: signal.referenceTs,
                 targetGross,
                 requestedGross: reduceOnly ? undefined : requestedGross,

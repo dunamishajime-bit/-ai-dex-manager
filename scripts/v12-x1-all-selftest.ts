@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { resolveV12X1AllRuntime, V12_X1_ALL } from "@/config/v12X1AllRuntime";
-import { buildV12Signal, protectiveLevels, resampleV12H1ToH2, sizeV12Position } from "@/lib/v12-x1-all";
+import { buildV12Signal, evaluateV12EntryQuality, protectiveLevels, resampleV12H1ToH2, sizeV12Position } from "@/lib/v12-x1-all";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { buildSharedCryptoDailyRiskState, validateSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 
@@ -15,6 +15,16 @@ assert.equal(resampleV12H1ToH2(oddLeadingH1).length, 2);
 assert.equal(resolveV12X1AllRuntime({}).mode, "SHADOW");
 assert.equal(resolveV12X1AllRuntime({}).enabled, false);
 assert.equal(V12_X1_ALL.multiplier, 1);
+assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
+assert.equal(V12_X1_ALL.strongRegimeThresholdPct, 0.0359);
+assert.equal(V12_X1_ALL.relaxedRegimeMinimumMomentumPct, 0.054);
+assert.equal(V12_X1_ALL.relaxedRegimeMinimumAtrRatio, 0.014);
+assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: true, side: "LONG", momentum: 0.03, atrRatio: 0.005, score: 0.2 }), true);
+assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.054, atrRatio: 0.014, score: 0.2 }), true);
+assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.054, atrRatio: 0.0139, score: 0.2 }), false);
+assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.03, atrRatio: 0.005, score: 1.4649 }), true);
+assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "SHORT", momentum: -0.08, atrRatio: 0.02, score: 2 }), false);
+assert.equal(evaluateV12EntryQuality({ regime: "NEUTRAL", strongRegime: false, side: "LONG", momentum: 0.08, atrRatio: 0.02, score: 1.4648 }), false);
 const sized = sizeV12Position(1000, 100, 2, "LONG");
 assert.ok(sized.requestedGross > 0 && sized.requestedGross <= 1);
 const levels = protectiveLevels(100, 2, "LONG");

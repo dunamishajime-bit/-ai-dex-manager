@@ -1,0 +1,113 @@
+{
+  "schema": "v12-btc2-q54-atr14-pengu-hard24-q102x1/v1",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "capital": {
+    "initialJpy": 10000,
+    "monthlyContributionJpy": 10000,
+    "monthlyContributions": 12,
+    "totalContributedJpy": 130000,
+    "compounding": true
+  },
+  "logic": {
+    "v12": {
+      "btcRegimeThresholdPct": 0.02,
+      "strongRegimeThresholdPct": 0.0359,
+      "relaxedRegimeMinimumMomentumPct": 0.054,
+      "relaxedRegimeMinimumAtrRatio": 0.014,
+      "scoreThreshold": 1.4649
+    },
+    "pengu": {
+      "normalCooldownHours": 6,
+      "hardStopCooldownHours": 24
+    },
+    "quality102CausalV1": {
+      "maximumGross": 1.0,
+      "maximumPositions": 1
+    },
+    "portfolio": {
+      "cryptoGrossCap": 2.0,
+      "stockGrossCap": 1.5,
+      "totalGrossCap": 2.5
+    }
+  },
+  "baseline": {
+    "NORMAL": 3831649.68118173,
+    "SEVERE": 689323.45864916
+  },
+  "results": {
+    "NORMAL": {
+      "endingAssetJpy": 18442769.03585051,
+      "PF": 3.57064393,
+      "DDPct": -14.33740242,
+      "executions": 1181,
+      "q102Episodes": 69,
+      "q102PnlJpy": 4491547.36209465,
+      "q102PF": 4.07741202,
+      "q102WinRatePct": 66.07142857,
+      "mtmTrims": 43,
+      "maxQ102Gross": 1.0,
+      "maxCryptoGross": 2.0,
+      "maxTotalGross": 2.5,
+      "grossConflicts": 0
+    },
+    "SEVERE": {
+      "endingAssetJpy": 2827282.1410372,
+      "PF": 2.41551514,
+      "DDPct": -17.68170098,
+      "executions": 1048,
+      "q102Episodes": 69,
+      "q102PnlJpy": 1061132.16140784,
+      "q102PF": 3.94013768,
+      "q102WinRatePct": 66.66666667,
+      "mtmTrims": 42,
+      "maxQ102Gross": 1.0,
+      "maxCryptoGross": 2.0,
+      "maxTotalGross": 2.0,
+      "grossConflicts": 0
+    }
+  },
+  "checks": {
+    "NORMAL_v12Positions": true,
+    "NORMAL_v12Gross": true,
+    "NORMAL_penguGross": true,
+    "NORMAL_cryptoGross": true,
+    "NORMAL_stockGross": true,
+    "NORMAL_totalGross": true,
+    "NORMAL_supplementGross": true,
+    "NORMAL_supplementGrossConflicts": true,
+    "NORMAL_contributions": true,
+    "NORMAL_baseParity_V12_ENTERED": true,
+    "NORMAL_baseParity_PENGU_ENTERED": true,
+    "NORMAL_baseParity_V11_EQ_ENTERED": true,
+    "NORMAL_baseParity_V50_POST_OPEN_BASIS_ENTERED": true,
+    "SEVERE_v12Positions": true,
+    "SEVERE_v12Gross": true,
+    "SEVERE_penguGross": true,
+    "SEVERE_cryptoGross": true,
+    "SEVERE_stockGross": true,
+    "SEVERE_totalGross": true,
+    "SEVERE_supplementGross": true,
+    "SEVERE_supplementGrossConflicts": true,
+    "SEVERE_contributions": true,
+    "SEVERE_baseParity_V12_ENTERED": true,
+    "SEVERE_baseParity_PENGU_ENTERED": true,
+    "SEVERE_baseParity_V11_EQ_ENTERED": true,
+    "SEVERE_baseParity_V50_POST_OPEN_BASIS_ENTERED": true,
+    "BASELINE_NORMAL_ENDING_ASSET": true,
+    "BASELINE_SEVERE_ENDING_ASSET": true
+  },
+  "status": "PASS_RESEARCH_ONLY",
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  },
+  "source": {
+    "researchSummary": ".research-state/btc-q102x1-sweep/q54-atr-hard24/atr0p014/summary.json"
+  }
+}
