@@ -6,10 +6,24 @@ import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 
 function candles(count: number) {
     const start = Math.ceil(1_700_000_000_000 / 3_600_000) * 3_600_000;
+    return candlesFrom(start, count);
+}
+
+function candlesFrom(start: number, count: number) {
     return Array.from({ length: count }, (_, index) => {
         const ts = start + index * 3_600_000;
         return [ts, "100", "101", "99", "100", "10", ts + 3_600_000 - 1] as const;
     });
+}
+
+function longerHistory(count: number) {
+    const extra = count - 162;
+    const start = Math.ceil(1_700_000_000_000 / 3_600_000) * 3_600_000 - extra * 3_600_000;
+    return candlesFrom(start, count);
+}
+
+function shiftedCandles(count: number) {
+    return candles(count).map((row) => [row[0] + 3_600_000, row[1], row[2], row[3], row[4], row[5], row[6] + 3_600_000] as const);
 }
 
 test("retries a transient hourly universe alignment mismatch", async () => {
@@ -18,8 +32,7 @@ test("retries a transient hourly universe alignment mismatch", async () => {
         getKlines: async (symbol: string) => {
             calls += 1;
             const firstAttempt = calls <= V12_X1_ALL.universe.length;
-            const count = firstAttempt && symbol === "ETHUSDT" ? 164 : 162;
-            return candles(count);
+            return firstAttempt && symbol === "ETHUSDT" ? shiftedCandles(162) : candles(162);
         },
     } as never;
     const provider = new V12AsterMarketDataProvider(client, { alignmentRetryAttempts: 2 });
@@ -28,9 +41,20 @@ test("retries a transient hourly universe alignment mismatch", async () => {
     assert.equal(calls, V12_X1_ALL.universe.length * 2);
 });
 
-test("fails closed after alignment retry budget is exhausted", async () => {
+test("aligns a longer symbol history to the common contiguous H2 suffix", async () => {
     const client = {
-        getKlines: async (symbol: string) => candles(symbol === "ETHUSDT" ? 164 : 162),
+        getKlines: async (symbol: string) => symbol === "ETHUSDT" ? longerHistory(164) : candles(162),
+    } as never;
+    const provider = new V12AsterMarketDataProvider(client, { alignmentRetryAttempts: 1 });
+    const result = await provider.load();
+    const lengths = new Set(Object.values(result).map((bars) => bars.length));
+    assert.deepEqual([...lengths], [80]);
+    assert.equal(result.ETH[0]?.endTs, result.BTC[0]?.endTs);
+});
+
+test("fails closed when the universe latest H2 timestamps remain misaligned", async () => {
+    const client = {
+        getKlines: async (symbol: string) => symbol === "ETHUSDT" ? shiftedCandles(162) : candles(162),
     } as never;
     const provider = new V12AsterMarketDataProvider(client, { alignmentRetryAttempts: 2 });
     await assert.rejects(provider.load(), /V12 universe alignment mismatch: ETH/);

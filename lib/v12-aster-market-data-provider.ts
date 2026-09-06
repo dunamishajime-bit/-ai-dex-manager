@@ -25,15 +25,43 @@ export class V12AsterMarketDataProvider {
     }
     private async loadAligned(): Promise<Record<string, V12Bar[]>> {
         const rows = await Promise.all(V12_X1_ALL.universe.map(async (symbol) => ({ symbol, rows: await this.client.getKlines(`${symbol}USDT`, "1h", this.limit) })));
-        const result: Record<string, V12Bar[]> = {};
-        let expectedLength: number | undefined;
-        for (const row of rows) {
+        const parsedRows = rows.map((row) => {
             const parsed = row.rows.map(parse).filter((value): value is NonNullable<ReturnType<typeof parse>> => Boolean(value)).filter((value) => value.ts + 3_600_000 <= this.now());
             const bars = resampleV12H1ToH2(parsed);
             if (bars.length < 80) throw new Error(`V12 hourly history insufficient for ${row.symbol}: ${bars.length}`);
-            if (expectedLength === undefined) expectedLength = bars.length;
-            if (bars.length !== expectedLength) throw new Error(`V12 universe alignment mismatch: ${row.symbol}`);
-            result[row.symbol] = bars;
+            return { symbol: row.symbol, bars };
+        });
+
+        // A rolling venue response may omit an older completed candle for only
+        // one symbol. Use only the common, contiguous H2 suffix so every
+        // strategy index refers to the same market timestamp. Never fill or
+        // synthesize a missing candle; if the common suffix is too short or
+        // latest timestamps disagree, fail closed and let the bounded retry
+        // handle a transient response race.
+        const latestEndTs = parsedRows[0]?.bars.at(-1)?.endTs;
+        if (!Number.isFinite(latestEndTs) || parsedRows.some((row) => row.bars.at(-1)?.endTs !== latestEndTs)) {
+            const mismatch = parsedRows.find((row) => row.bars.at(-1)?.endTs !== latestEndTs);
+            throw new Error(`V12 universe alignment mismatch: ${mismatch?.symbol || V12_X1_ALL.universe[0]}`);
+        }
+        let commonEndTs = parsedRows[0]?.bars.map((bar) => bar.endTs) || [];
+        for (const row of parsedRows.slice(1)) {
+            const available = new Set(row.bars.map((bar) => bar.endTs));
+            commonEndTs = commonEndTs.filter((endTs) => available.has(endTs));
+        }
+        commonEndTs.sort((a, b) => a - b);
+        let suffixStart = Math.max(0, commonEndTs.length - 1);
+        while (suffixStart > 0 && commonEndTs[suffixStart] - commonEndTs[suffixStart - 1] === 7_200_000) suffixStart -= 1;
+        const alignedEndTs = commonEndTs.slice(suffixStart);
+        if (alignedEndTs.length < 80) {
+            const mismatch = parsedRows.find((row) => row.bars.length !== alignedEndTs.length);
+            throw new Error(`V12 universe alignment mismatch: ${mismatch?.symbol || V12_X1_ALL.universe[0]}`);
+        }
+        const result: Record<string, V12Bar[]> = {};
+        for (const row of parsedRows) {
+            const byEndTs = new Map(row.bars.map((bar) => [bar.endTs, bar]));
+            const aligned = alignedEndTs.map((endTs) => byEndTs.get(endTs));
+            if (aligned.some((bar) => !bar)) throw new Error(`V12 universe alignment mismatch: ${row.symbol}`);
+            result[row.symbol] = aligned as V12Bar[];
         }
         return result;
     }
