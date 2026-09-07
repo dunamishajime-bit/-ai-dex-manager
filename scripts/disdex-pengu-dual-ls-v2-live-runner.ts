@@ -14,8 +14,7 @@ import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-se
 import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
 import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-protective-orders";
 import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
-
-const HOUR_MS = 60 * 60_000;
+import { nextPenguDaemonWaitMs } from "../lib/pengu-live-scheduling";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -110,6 +109,7 @@ async function main() {
     });
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
+    const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_MS", 5_000)));
     let stopping = false;
     const boundaryWait = createInterruptibleDelay();
     const stop = () => {
@@ -122,9 +122,8 @@ async function main() {
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
-        const now = Date.now();
-        const waitUntilNextClosedHour = HOUR_MS - (now % HOUR_MS) + boundaryDelayMs;
-        await boundaryWait.wait(waitUntilNextClosedHour);
+        const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs);
+        await boundaryWait.wait(waitMs);
     } while (!stopping);
 }
 
