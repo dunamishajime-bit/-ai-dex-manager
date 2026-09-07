@@ -174,7 +174,11 @@ export class Quality102CausalV1AsterMarketDataProvider {
         const pages: AsterKline[][] = [];
         for (let pageEnd = endTime; pageEnd >= startTime;) {
             const pageStart = Math.max(startTime, pageEnd - (this.pageLimit - 1) * QUALITY102_HOUR_MS);
-            const rows = await this.getKlines(symbol, this.pageLimit, pageStart, pageEnd);
+            // Aster rejects a zero-width range even though the requested
+            // candle itself is valid. Keep the inclusive local range intact,
+            // but make the venue request strictly wider at that boundary.
+            const requestEnd = pageStart === pageEnd ? pageEnd + 1 : pageEnd;
+            const rows = await this.getKlines(symbol, this.pageLimit, pageStart, requestEnd);
             if (!Array.isArray(rows)) throw new Error(`QUALITY102_ASTER_KLINE_RESPONSE_INVALID:${symbol}`);
             pages.push(rows);
             pageEnd = pageStart - QUALITY102_HOUR_MS;

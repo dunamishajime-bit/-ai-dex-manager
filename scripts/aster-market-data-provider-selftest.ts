@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterRealtimeMarketDataProvider } from "../lib/aster-realtime-market-data-provider";
 import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provider";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 
 function jsonResponse(payload: unknown) {
@@ -178,12 +179,39 @@ async function v12HistoryRequestsAreSerializedTest() {
     assert.deepEqual(requested, V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 }
 
+async function v12CredentialReadsAreSerializedTest() {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const requested: string[] = [];
+    const client = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        privateKey: `0x${"0".repeat(63)}1`,
+        userAddress: `0x${"0".repeat(40)}`,
+        fetchImpl: async (input) => {
+            inFlight += 1;
+            maxInFlight = Math.max(maxInFlight, inFlight);
+            requested.push(new URL(String(input)).pathname);
+            await new Promise<void>((resolve) => setTimeout(resolve, 1));
+            inFlight -= 1;
+            if (String(input).includes("/balance")) return jsonResponse([]);
+            if (String(input).includes("/positionRisk")) return jsonResponse([]);
+            if (String(input).includes("/openOrders")) return jsonResponse([]);
+            return jsonResponse({});
+        },
+    });
+    const adapter = new V12AsterLiveAdapter(client);
+    assert.equal(await adapter.credentialsReady(), true);
+    assert.equal(maxInFlight, 1);
+    assert.deepEqual(requested, ["/fapi/v3/ping", "/fapi/v3/balance", "/fapi/v3/positionRisk", "/fapi/v3/openOrders"]);
+}
+
 async function run() {
     await currentBookTimestampTest();
     await staleBookTimestampTest();
     await klineRangeCompatibilityTest();
     await readOnlyRateLimitRetryTest();
     await v12HistoryRequestsAreSerializedTest();
+    await v12CredentialReadsAreSerializedTest();
     console.log("ASTER_MARKET_DATA_PROVIDER_SELFTEST_OK");
 }
 

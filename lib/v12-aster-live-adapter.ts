@@ -11,7 +11,7 @@ export interface V12AsterOrderView {
     symbol: string; clientOrderId: string; orderId?: number; status: string; side?: AsterOrderSide; type?: string; reduceOnly?: boolean;
     quantity: number; executedQuantity: number; stopPrice?: number;
 }
-export interface V12AsterLiveAdapterOptions { maxSlippageBps?: number; reconciliationAttempts?: number; reconciliationDelayMs?: number; }
+export interface V12AsterLiveAdapterOptions { maxSlippageBps?: number; reconciliationAttempts?: number; reconciliationDelayMs?: number; readRequestSpacingMs?: number; }
 function finite(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 function sleep(ms: number) { return new Promise<void>((resolve) => setTimeout(resolve, ms)); }
 export function deterministicV12ClientOrderId(input: { action: "ENTRY" | "EXIT" | "STOP" | "TP" | "TRAIL" | "FAILSAFE_CLOSE"; signalTs: number; symbol: string; side: string; version?: string | number }) {
@@ -29,14 +29,29 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     protected readonly maxSlippageBps: number;
     protected readonly reconciliationAttempts: number;
     protected readonly reconciliationDelayMs: number;
+    protected readonly readRequestSpacingMs: number;
 
     constructor(readonly client: AsterV3Client, options: V12AsterLiveAdapterOptions = {}) {
         this.maxSlippageBps = Math.max(0, options.maxSlippageBps ?? 20);
         this.reconciliationAttempts = Math.max(1, options.reconciliationAttempts ?? 6);
         this.reconciliationDelayMs = Math.max(100, options.reconciliationDelayMs ?? 1000);
+        this.readRequestSpacingMs = Math.max(0, Math.min(10_000, options.readRequestSpacingMs ?? Number(process.env.V12_X1_ALL_REQUEST_SPACING_MS || 100)));
         this.executor = new AsterDirectTradeExecutor(client, { reconciliationAttempts: this.reconciliationAttempts, reconciliationDelayMs: this.reconciliationDelayMs });
     }
-    async credentialsReady() { if (!this.client.hasTradingCredentials()) return false; await Promise.all([this.client.ping(), this.client.getBalances(), this.client.getPositions(), this.client.getOpenOrders()]); return true; }
+    async credentialsReady() {
+        if (!this.client.hasTradingCredentials()) return false;
+        const reads = [
+            () => this.client.ping(),
+            () => this.client.getBalances(),
+            () => this.client.getPositions(),
+            () => this.client.getOpenOrders(),
+        ];
+        for (const [index, read] of reads.entries()) {
+            if (index > 0 && this.readRequestSpacingMs > 0) await sleep(this.readRequestSpacingMs);
+            await read();
+        }
+        return true;
+    }
     getPositions(): Promise<DirectPosition[]> { return this.executor.getPositions(); }
     getOpenOrders(): Promise<DirectOpenOrder[]> { return this.executor.getOpenOrders(); }
     getAccountSnapshot() { return this.executor.getAccountSnapshot(); }

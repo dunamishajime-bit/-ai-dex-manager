@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 
+import { AsterV3Client } from "../lib/aster-v3-client";
+import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality102-causal-v1-market-data";
 import {
     assertQuality102CausalV1LiveActivation,
     assertQuality102CausalV1ReadOnlyPreflightConfiguration,
@@ -51,4 +53,36 @@ const preflightConfig = resolveQuality102CausalV1LiveConfig(preflightEnv);
 assert.doesNotThrow(() => assertQuality102CausalV1ReadOnlyPreflightConfiguration(preflightConfig, preflightEnv));
 assert.throws(() => assertQuality102CausalV1LiveActivation(preflightConfig, preflightEnv), /LIVE_GATES_NOT_ALL_ENABLED/);
 
-console.log("QUALITY102_CAUSAL_V1_LIVE_RUNNER_SELFTEST_PASS", JSON.stringify({ ordersSent: 0, syntheticOrders: 0, testOrders: 0 }));
+async function zeroWidthHistoryRangeIsExpandedForAster() {
+    const requests: URL[] = [];
+    const client = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        readOnlyRateLimitMaxRetries: 0,
+        fetchImpl: async (input) => {
+            const url = new URL(String(input));
+            requests.push(url);
+            const start = Number(url.searchParams.get("startTime"));
+            const end = Number(url.searchParams.get("endTime"));
+            if (end <= start) return new Response(JSON.stringify({ code: -1023, msg: "Start time is greater than end time." }), { status: 400 });
+            return new Response(JSON.stringify([[start, "1", "1.1", "0.9", "1", "1", start + 3_600_000 - 1, "1", 1, "1", "1", "0"]]), { status: 200 });
+        },
+    });
+    const provider = new Quality102CausalV1AsterMarketDataProvider(client, {
+        symbols: ["SUIUSDT"],
+        historyHours: 181 * 24,
+        pageLimit: 500,
+        now: () => 10_000_000,
+    });
+    const internal = provider as unknown as { fetchRange: (symbol: string, startTime: number, endTime: number) => Promise<Array<{ timestampMs: number }>> };
+    const rows = await internal.fetchRange("SUIUSDT", 1_000, 1_000);
+    assert.equal(rows.length, 1);
+    assert.equal(requests[0]?.searchParams.get("startTime"), "1000");
+    assert.equal(requests[0]?.searchParams.get("endTime"), "1001");
+}
+
+zeroWidthHistoryRangeIsExpandedForAster().then(() => {
+    console.log("QUALITY102_CAUSAL_V1_LIVE_RUNNER_SELFTEST_PASS", JSON.stringify({ ordersSent: 0, syntheticOrders: 0, testOrders: 0 }));
+}).catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});
