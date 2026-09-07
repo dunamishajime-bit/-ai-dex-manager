@@ -956,6 +956,13 @@ export class Quality102CausalV1Runner {
                     runtimeCommitSha: this.dependencies.config.runtimeCommitSha,
                     completedAt,
                 };
+                // The strict portfolio planner treats `updatedAt` as the
+                // freshness boundary for the shared Q102 state document.  A
+                // successful first daemon reconciliation must therefore
+                // refresh it before V52 (or another base runner) consumes the
+                // document; otherwise a healthy state can be rejected as
+                // stale immediately after deployment.
+                state.updatedAt = completedAt;
                 state.lastReconciledAt = completedAt;
                 await this.dependencies.stateStore.save(state);
                 this.log.info("Q102 initial daemon history/account reconciliation passed; new orders remain held until the next tick.", {

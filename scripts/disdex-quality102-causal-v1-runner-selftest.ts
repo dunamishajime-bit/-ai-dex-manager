@@ -230,6 +230,7 @@ async function run(): Promise<void> {
         assert.equal(fake.calls.execute, 0);
         const saved = await (built.runner as unknown as { dependencies: { stateStore: { load(): Promise<Quality102CausalV1State> } } }).dependencies.stateStore.load();
         assert.equal(saved.initialDaemonReconciliation?.runtimeCommitSha, SHA);
+        assert.equal(saved.updatedAt, NOW);
     }
 
     {
