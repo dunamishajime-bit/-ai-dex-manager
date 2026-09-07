@@ -1,0 +1,13 @@
+[Unit]
+Description=Run DisDex confirmed fill email notifier every 15 seconds
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=15s
+RandomizedDelaySec=3s
+Persistent=true
+Unit=disdex-trade-fill-notifier.service
+
+[Install]
+WantedBy=timers.target
+

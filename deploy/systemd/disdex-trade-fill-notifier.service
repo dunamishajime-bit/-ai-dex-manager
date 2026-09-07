@@ -1,0 +1,24 @@
+[Unit]
+Description=DisDex confirmed trade fill email notifier
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/current
+EnvironmentFile=/etc/disdex/ai-dex-manager-mail.env
+Environment=NODE_ENV=production
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=/var/lib/disdex/shared/trade-fill-notifications/inbox.jsonl
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_STATE_PATH=/var/lib/disdex/shared/trade-fill-notifications/state.json
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_LOCK_PATH=/var/lib/disdex/shared/trade-fill-notifications/notifier.lock
+ExecStart=/home/deploy/disdex-trading/current/node_modules/.bin/tsx /home/deploy/disdex-trading/current/scripts/ops/root/disdex-trade-fill-notifier.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/var/lib/disdex/shared/trade-fill-notifications
+UMask=0077
+
