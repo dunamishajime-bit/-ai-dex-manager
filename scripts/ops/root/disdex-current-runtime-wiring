@@ -62,6 +62,41 @@ resolve_current() {
     printf 'release scripts directory is missing: %s/scripts\n' "$CURRENT_RELEASE" >&2
     return 1
   }
+  validate_release_artifacts
+}
+
+validate_release_artifacts() {
+  local required_file
+  local -a required_files=(
+    "$CURRENT_RELEASE/scripts/disdex-v12-x1-all-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex_runner_heartbeat.py"
+    "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
+    "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
+  )
+  for required_file in "${required_files[@]}"; do
+    [[ -f "$required_file" && ! -L "$required_file" ]] || {
+      printf 'required release artifact is missing or a symlink: %s\n' "$required_file" >&2
+      return 1
+    }
+  done
+  [[ -d "$CURRENT_RELEASE/node_modules" && ! -L "$CURRENT_RELEASE/node_modules" ]] || {
+    printf 'release node_modules directory is missing or a symlink: %s/node_modules\n' "$CURRENT_RELEASE" >&2
+    return 1
+  }
+  [[ -x "$CURRENT_RELEASE/node_modules/.bin/tsx" ]] || {
+    printf 'release tsx executable is missing: %s/node_modules/.bin/tsx\n' "$CURRENT_RELEASE" >&2
+    return 1
+  }
+  [[ -d "$CURRENT_RELEASE/.venv2" && ! -L "$CURRENT_RELEASE/.venv2" ]] || {
+    printf 'release Python environment is missing or a symlink: %s/.venv2\n' "$CURRENT_RELEASE" >&2
+    return 1
+  }
+  [[ -x "$CURRENT_RELEASE/.venv2/bin/python" ]] || {
+    printf 'release Python executable is missing: %s/.venv2/bin/python\n' "$CURRENT_RELEASE" >&2
+    return 1
+  }
 }
 
 set_units() {
@@ -186,7 +221,8 @@ DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
 DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
 DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
-PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}"
+PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
+PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
 
   write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
 Environment=DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
@@ -220,6 +256,7 @@ Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 EnvironmentFile=${CONTRACT_ENV_FILE}
 ReadWritePaths=${PENGU_STATE_ROOT}
 Environment=PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
+Environment=PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
 Environment=V12_GROSS_CAP=1.5
 Environment=PENGU_GROSS_CAP=0.75
@@ -279,9 +316,48 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
 self_test() {
   local sample_sha="0123456789abcdef0123456789abcdef01234567"
+  local fixture required_file
   [[ "$sample_sha" =~ ^[0-9a-f]{40}$ ]]
   [[ "disdex-v12-x1-all@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "disdex-quality102-causal-v1@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "scripts/disdex_runner_heartbeat.py" == scripts/* ]]
+  [[ "scripts/disdex_v96_v52_margin_guard_runtime.py" == scripts/* ]]
+  [[ "scripts/disdex_v52_aster_only_live_engine.py" == scripts/* ]]
+  fixture="$(mktemp -d)"
+  trap 'rm -rf -- "$fixture"' RETURN
+  CURRENT_RELEASE="$fixture"
+  mkdir -p "$fixture/scripts" "$fixture/node_modules/.bin" "$fixture/.venv2/bin"
+  for required_file in \
+    scripts/disdex-v12-x1-all-live-runner.ts \
+    scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
+    scripts/disdex-quality102-causal-v1-live-runner.ts \
+    scripts/disdex_runner_heartbeat.py \
+    scripts/disdex_v96_v52_margin_guard_runtime.py \
+    scripts/disdex_v52_aster_only_live_engine.py; do
+    : > "$fixture/$required_file"
+  done
+  printf '#!/bin/sh\n' > "$fixture/node_modules/.bin/tsx"
+  printf '#!/bin/sh\n' > "$fixture/.venv2/bin/python"
+  chmod +x "$fixture/node_modules/.bin/tsx" "$fixture/.venv2/bin/python"
+  validate_release_artifacts
+  mv "$fixture/node_modules" "$fixture/node_modules-real"
+  ln -s "$fixture/node_modules-real" "$fixture/node_modules"
+  if [[ -L "$fixture/node_modules" ]]; then
+    if validate_release_artifacts; then
+      printf 'artifact symlink validation unexpectedly passed\n' >&2
+      return 1
+    fi
+    rm "$fixture/node_modules"
+  else
+    rm -rf "$fixture/node_modules"
+  fi
+  mv "$fixture/node_modules-real" "$fixture/node_modules"
+  rm "$fixture/scripts/disdex_runner_heartbeat.py"
+  if validate_release_artifacts; then
+    printf 'artifact completeness validation unexpectedly passed\n' >&2
+    return 1
+  fi
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_ARTIFACT_SELFTEST_PASS\n'
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_SELFTEST_PASS\n'
 }
 
