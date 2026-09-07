@@ -31,6 +31,7 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertGreaterEqual(source.count("EnvironmentFile=${CONTRACT_ENV_FILE}"), 5)
         self.assertIn("DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk", source)
         self.assertIn("DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only", source)
+        self.assertIn("DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json", source)
 
     def test_wiring_script_does_not_stop_or_cancel_trading(self):
         source = SCRIPT.read_text(encoding="utf-8")
