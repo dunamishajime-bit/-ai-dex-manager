@@ -11,6 +11,10 @@ SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
 V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
+V12_DROPIN_DIR="/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d"
+PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
+Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
+MARGIN_DROPIN_DIR="/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d"
 V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
 
 usage() {
@@ -64,6 +68,10 @@ set_units() {
   Q102_UNIT="disdex-quality102-causal-v1@${DEPLOYED_SHA}.service"
   V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
+  V12_DROPIN_DIR="/etc/systemd/system/${V12_UNIT}.d"
+  PENGU_DROPIN_DIR="/etc/systemd/system/${PENGU_UNIT}.d"
+  Q102_DROPIN_DIR="/etc/systemd/system/${Q102_UNIT}.d"
+  MARGIN_DROPIN_DIR="/etc/systemd/system/${MARGIN_UNIT}.d"
   V52_DROPIN_DIR="/etc/systemd/system/${V52_UNIT}.d"
 }
 
@@ -80,6 +88,10 @@ show_plan() {
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
   printf 'watchdogDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$WATCHDOG_DROPIN_DIR"
   printf 'healthSnapshotDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$SNAPSHOT_DROPIN_DIR"
+  printf 'v12Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$V12_DROPIN_DIR"
+  printf 'penguDropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$PENGU_DROPIN_DIR"
+  printf 'q102Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$Q102_DROPIN_DIR"
+  printf 'marginDropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$MARGIN_DROPIN_DIR"
   printf 'v52Dropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$V52_DROPIN_DIR"
 }
 
@@ -139,6 +151,57 @@ Environment=DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}"
   write_atomic "${SNAPSHOT_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
 Environment=DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}"
+
+  write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=V12_LIVE_ACK=${DEPLOYED_SHA}
+Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
+Environment=V12_GROSS_CAP=1.5
+Environment=PENGU_GROSS_CAP=0.75
+Environment=STOCK_GROSS_CAP=1.5
+Environment=CRYPTO_GROSS_CAP=2.0
+Environment=TOTAL_GROSS_CAP=2.5
+Environment=QUALITY102_LIVE_ENABLED=false
+Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
+
+  write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
+Environment=V12_GROSS_CAP=1.5
+Environment=PENGU_GROSS_CAP=0.75
+Environment=STOCK_GROSS_CAP=1.5
+Environment=CRYPTO_GROSS_CAP=2.0
+Environment=TOTAL_GROSS_CAP=2.5
+Environment=QUALITY102_LIVE_ENABLED=false
+Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
+
+  write_atomic "${Q102_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=1.0
+Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
+Environment=QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
+Environment=QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
+Environment=QUALITY102_LIVE_SELECTOR_PARITY=false
+Environment=QUALITY102_LIVE_ENABLED=false
+Environment=QUALITY102_LIVE_BLOCKED_FAIL_CLOSED=true
+Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
+Environment=CRYPTO_GROSS_CAP=2.0
+Environment=TOTAL_GROSS_CAP=2.5"
+
+  write_atomic "${MARGIN_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/var/lib/disdex/shared/margin-risk/guard-live.json
+Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
+Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
+Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
   write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
 WorkingDirectory=${CURRENT_RELEASE}
