@@ -51,7 +51,7 @@ export type DecisionStatusSnapshot = {
 };
 
 let cache: { expiresAt: number; snapshot: DecisionStatusSnapshot } | null = null;
-const CACHE_TTL_MS = 55 * 60 * 1000;
+const CACHE_TTL_MS = 2 * 60 * 1000;
 
 function object(value: unknown): JsonObject | null {
   return value && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
@@ -94,7 +94,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.v12,
         venue: "Aster Futures V3",
         timeframe: "完成済み1時間足 → 2時間足",
-        entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。合計1.50x / 1件1.00x",
+        entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。最大1建玉 / 合計1.00x",
         protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch。Crypto共有2.00x / Total2.50x",
         note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
         reason: "V12 runner stateの実読取結果を待機中です。",
@@ -106,7 +106,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.pengu,
         venue: "Aster PENGUUSDT",
         timeframe: "完成済みPENGU/BTC 1時間足",
-        entryPolicy: "Long/Short条件成立後、次の1時間足。Long最大0.9375x（base0.75×1.25）、Short最大0.75x、保有中の追加・反転なし",
+        entryPolicy: "Long/Short条件成立後、次の1時間足。Long/Shortとも最大0.75x、保有中の追加・反転なし",
         protection: "Long/Short hard stop・trailing・max hold。新規ShortのみV20 failure/deadline exit。Crypto Gross上限2.00x / Global Gross上限2.50x",
         note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
         reason: "PENGU runner stateの実読取結果を待機中です。",
@@ -118,7 +118,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.quality102,
         venue: "Aster Futures crypto sleeve",
         timeframe: "LIVE時点の利用可能データのみ",
-        entryPolicy: "Derived HIGH_VOL selector。1 slot / 最大0.50x。V12・PENGU・V52を優先し、残余Crypto/Total Grossだけを使用",
+        entryPolicy: "Derived HIGH_VOL selector。1 slot / 最大1.00x。V12・PENGU・V52を優先し、残余Crypto/Total Grossだけを使用",
         protection: "Crypto Gross最大2.00x / Total Gross最大2.50x、shared risk、Kill Switch、reconciliation、stale-data Fail Closed",
         note: "歴史的102件selector parity未証明部分とBRKはLIVEに流用せずFail Closed。derived sleeveの実state/heartbeatだけを表示します。",
         reason: "Quality102 runner state/heartbeatの実読取結果を待機中です。",
@@ -289,7 +289,7 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
   const snapshot: DecisionStatusSnapshot = {
     ok: errors.length === 0,
     readOnly: true,
-    refreshIntervalMinutes: 180,
+    refreshIntervalMinutes: 10,
     checkedAt,
     source: "VPS runner state / sanitized decision snapshot",
     runtime: runtimeSnapshot(checkedAt),

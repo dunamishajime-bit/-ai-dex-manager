@@ -51,21 +51,13 @@ export async function GET(req: NextRequest) {
     ]);
     const v12UpdatedAt = v12Observability.runnerState?.updatedAt;
     const v12Fresh = v12Observability.wiring.runnerStateConfigured && v12UpdatedAt !== undefined && Date.now() - v12UpdatedAt <= 3 * 60 * 60 * 1000 && v12Observability.runnerState?.mode?.toLowerCase() === "live" && v12Observability.runnerState.killSwitch?.active !== true;
-    const v12Status = !v12Observability.wiring.runnerStateConfigured || v12Heartbeat.status === "UNAVAILABLE"
-      ? "UNAVAILABLE"
-      : v12Fresh && v12Heartbeat.status === "LIVE"
-        ? "LIVE"
-        : "STALE";
+    const v12Status = !v12Observability.wiring.runnerStateConfigured ? "UNAVAILABLE" : v12Fresh ? "LIVE" : "STALE";
     const runtime = {
       ...snapshot.runtime,
       units: snapshot.runtime.units.map((unit) => {
         if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, releaseSha: v12Heartbeat.runtimeSha || unit.releaseSha, updatedAt: v12Heartbeat.updatedAt ?? v12UpdatedAt, reason: v12Status === "LIVE" ? `V12 runner state/heartbeat更新済み（${v12Heartbeat.runnerStatus || "正常"}）。` : v12Heartbeat.reason || v12Observability.errors[0] || "V12 runner stateが未接続・停止・古いためLIVE確認できません。" };
         if (unit.id === "PENGU_DUAL_LS_V2_FINAL") {
-          const status = penguRuntime.status === "LIVE" && penguHeartbeat.status === "LIVE"
-            ? "LIVE"
-            : penguRuntime.status === "UNAVAILABLE" || penguHeartbeat.status === "UNAVAILABLE"
-              ? "UNAVAILABLE"
-              : "STALE";
+          const status = penguRuntime.status;
           return { ...unit, status, releaseSha: penguHeartbeat.runtimeSha || penguRuntime.releaseSha || unit.releaseSha, updatedAt: penguHeartbeat.updatedAt ?? penguRuntime.updatedAt, reason: status === "LIVE" ? penguRuntime.reason : `${penguRuntime.reason} / ${penguHeartbeat.reason}` };
         }
         if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, status: quality102Runtime.status, releaseSha: quality102Runtime.runtimeSha || unit.releaseSha, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };

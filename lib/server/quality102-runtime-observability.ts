@@ -10,7 +10,7 @@ const STALE_AFTER_MS = 6 * 60 * 60 * 1000;
 const DEFAULT_HEARTBEAT_PATH = "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json";
 
 export const quality102Policy = Object.freeze({
-  strategyGrossCap: 0.5,
+  strategyGrossCap: 1,
   cryptoGrossCap: 2,
   totalGrossCap: 2.5,
   symbols: [
