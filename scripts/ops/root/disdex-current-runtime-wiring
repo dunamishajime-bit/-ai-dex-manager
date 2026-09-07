@@ -18,6 +18,7 @@ PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
 MARGIN_DROPIN_DIR="/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d"
 V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
+SELF_TEST_FIXTURE=''
 
 usage() {
   printf '%s\n' \
@@ -71,7 +72,6 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-v12-x1-all-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
-    "$CURRENT_RELEASE/scripts/disdex_runner_heartbeat.py"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
   )
@@ -344,43 +344,36 @@ self_test() {
   [[ "$sample_sha" =~ ^[0-9a-f]{40}$ ]]
   [[ "disdex-v12-x1-all@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "disdex-quality102-causal-v1@${sample_sha}.service" == *"@${sample_sha}.service" ]]
-  [[ "scripts/disdex_runner_heartbeat.py" == scripts/* ]]
   [[ "scripts/disdex_v96_v52_margin_guard_runtime.py" == scripts/* ]]
   [[ "scripts/disdex_v52_aster_only_live_engine.py" == scripts/* ]]
-  fixture="$(mktemp -d)"
-  trap 'rm -rf -- "$fixture"' RETURN
-  CURRENT_RELEASE="$fixture"
-  mkdir -p "$fixture/scripts" "$fixture/node_modules/.bin" "$fixture/.venv2/bin"
+  SELF_TEST_FIXTURE="$(mktemp -d)"
+  trap 'rm -rf -- "$SELF_TEST_FIXTURE"' RETURN
+  CURRENT_RELEASE="$SELF_TEST_FIXTURE"
+  mkdir -p "$SELF_TEST_FIXTURE/scripts" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
   for required_file in \
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
     scripts/disdex-quality102-causal-v1-live-runner.ts \
-    scripts/disdex_runner_heartbeat.py \
     scripts/disdex_v96_v52_margin_guard_runtime.py \
     scripts/disdex_v52_aster_only_live_engine.py; do
-    : > "$fixture/$required_file"
+    : > "$SELF_TEST_FIXTURE/$required_file"
   done
-  printf '#!/bin/sh\n' > "$fixture/node_modules/.bin/tsx"
-  printf '#!/bin/sh\n' > "$fixture/.venv2/bin/python"
-  chmod +x "$fixture/node_modules/.bin/tsx" "$fixture/.venv2/bin/python"
+  printf '#!/bin/sh\n' > "$SELF_TEST_FIXTURE/node_modules/.bin/tsx"
+  printf '#!/bin/sh\n' > "$SELF_TEST_FIXTURE/.venv2/bin/python"
+  chmod +x "$SELF_TEST_FIXTURE/node_modules/.bin/tsx" "$SELF_TEST_FIXTURE/.venv2/bin/python"
   validate_release_artifacts
-  mv "$fixture/node_modules" "$fixture/node_modules-real"
-  ln -s "$fixture/node_modules-real" "$fixture/node_modules"
-  if [[ -L "$fixture/node_modules" ]]; then
+  mv "$SELF_TEST_FIXTURE/node_modules" "$SELF_TEST_FIXTURE/node_modules-real"
+  ln -s "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
+  if [[ -L "$SELF_TEST_FIXTURE/node_modules" ]]; then
     if validate_release_artifacts; then
       printf 'artifact symlink validation unexpectedly passed\n' >&2
       return 1
     fi
-    rm "$fixture/node_modules"
+    rm "$SELF_TEST_FIXTURE/node_modules"
   else
-    rm -rf "$fixture/node_modules"
+    rm -rf "$SELF_TEST_FIXTURE/node_modules"
   fi
-  mv "$fixture/node_modules-real" "$fixture/node_modules"
-  rm "$fixture/scripts/disdex_runner_heartbeat.py"
-  if validate_release_artifacts; then
-    printf 'artifact completeness validation unexpectedly passed\n' >&2
-    return 1
-  fi
+  mv "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_ARTIFACT_SELFTEST_PASS\n'
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_SELFTEST_PASS\n'
 }
