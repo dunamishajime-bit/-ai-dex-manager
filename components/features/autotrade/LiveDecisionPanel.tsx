@@ -1,209 +1,96 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Activity, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-type TrendEvaluation = {
-  symbol: string;
-  eligible: boolean;
-  score: number;
-  reasons: string[];
-  close: number;
-  sma40: number;
-  mom20: number;
-  adx14: number;
-  overheatPct: number;
-  volumeRatio: number;
-  efficiencyRatio: number;
+const REFRESH_INTERVAL_MS = 180_000;
+
+type Decision = "LONG" | "SHORT" | "WAIT" | "HOLD" | "EXIT" | "UNKNOWN";
+type StrategyRow = {
+  id: "V12" | "PENGU" | "V52" | "Q102";
+  strategyId: string;
+  mode: string;
+  enabled: boolean;
+  decision: Decision;
+  symbol?: string;
+  stateStatus: "AVAILABLE" | "MISSING" | "INVALID";
+  stateUpdatedAt?: number;
+  pending: boolean;
+  positionCount: number;
+  grossCap: number;
+  selectorMode?: string;
+  reason?: string;
 };
 
-type LiveDecisionResponse = {
-  ok: boolean;
-  details?: {
-    decision: {
-      isoTime: string;
-      desiredSymbol: string;
-      desiredSide: "trend" | "range" | "cash";
-      desiredAlloc: number;
-      reason: string;
-      regime: {
-        regimeLabel: string;
-        trendAllowed: boolean;
-        rangeAllowed: boolean;
-        breadth40: number;
-        bestMom20: number;
-        bestMomAccel: number;
-      };
-      trendCandidate: {
-        symbol: string;
-        score: number;
-        eligible: boolean;
-        reasons: string[];
-      } | null;
-      rangeCandidate: {
-        symbol: string;
-        score: number;
-        eligible: boolean;
-        reasons: string[];
-        subVariant?: string;
-      } | null;
-    };
-    trendEvaluations: TrendEvaluation[];
+type LiveStatus = {
+  source: "DAEMON_STATE_READ_ONLY";
+  generatedAt: number;
+  refreshIntervalMs: number;
+  deployedSha?: string;
+  strategies: StrategyRow[];
+  risk: {
+    killSwitchActive: boolean | null;
+    killSwitchReason?: string;
+    dailyRiskTripped: boolean | null;
+    dailyLossPct?: number;
+    accountLockStatus: "CLEAR" | "BUSY" | "STALE_REVIEW" | "UNKNOWN";
+    cryptoGrossCap: number;
+    totalGrossCap: number;
+    penguGrossCap: number;
+    stockGrossCap: number;
+    q102GrossCap: number;
   };
-  walletDecision?: {
-    currentSymbol: string;
-    desiredSymbol: string;
-    desiredSide: "trend" | "range" | "cash";
-    desiredAlloc: number;
-    reason: string;
-    rotation: {
-      fromSymbol: string;
-      toSymbol: string;
-      scoreGap: number;
-    } | null;
-  } | null;
-  error?: string;
 };
 
-function percent(value: number, digits = 2) {
-  return `${(Number(value || 0) * 100).toFixed(digits)}%`;
+type LiveStatusResponse = { ok: boolean; status?: LiveStatus; error?: string };
+
+function timeLabel(value?: number) {
+  return value ? new Date(value).toLocaleString("ja-JP") : "未取得";
 }
 
-function fixed(value: number, digits = 2) {
-  return Number(value || 0).toFixed(digits);
+function decisionTone(decision: Decision) {
+  if (decision === "LONG") return "border-profit/35 bg-profit/10 text-profit";
+  if (decision === "SHORT" || decision === "EXIT") return "border-loss/35 bg-loss/10 text-loss";
+  return "border-white/15 bg-white/[0.03] text-white/70";
 }
 
-function sideLabel(side: "trend" | "range" | "cash") {
-  if (side === "trend") return "Trend";
-  if (side === "range") return "Range";
-  return "Cash";
+function stateTone(status: StrategyRow["stateStatus"]) {
+  return status === "AVAILABLE"
+    ? "text-profit"
+    : status === "MISSING" ? "text-gold-100" : "text-loss";
 }
 
-function regimeLabel(label?: string) {
-  if (label === "trend_strong") return "強い上昇トレンド";
-  if (label === "trend_weak") return "弱い上昇トレンド";
-  if (label === "range_only") return "レンジ中心";
-  if (label === "ambiguous") return "方向感が弱い";
-  return label || "-";
-}
-
-function reasonLabel(reason: string) {
-  switch (reason) {
-    case "close>sma40":
-      return "終値がSMA40を上回っています。";
-    case "close<=sma40":
-      return "終値がSMA40を下回っています。";
-    case "mom20-ok":
-      return "20本モメンタムがプラスです。";
-    case "mom20-low":
-      return "20本モメンタムが弱いです。";
-    case "sol-ok":
-      return "SOLの追加条件を満たしています。";
-    case "sol-overheat":
-      return "SOLは過熱気味です。";
-    case "avax-mom-ok":
-      return "AVAXのモメンタム条件を満たしています。";
-    case "avax-mom-low":
-      return "AVAXのモメンタムが弱いです。";
-    case "avax-vol-ok":
-      return "AVAXの出来高条件を満たしています。";
-    case "avax-vol-low":
-      return "AVAXの出来高が不足しています。";
-    case "structure-break":
-      return "高値更新の流れがあります。";
-    case "structure-flat":
-      return "高値更新の勢いが弱いです。";
-    case "volume-ok":
-      return "出来高の裏付けがあります。";
-    case "volume-low":
-      return "出来高が不足しています。";
-    case "accel-ok":
-      return "上昇加速が維持されています。";
-    case "accel-low":
-      return "上昇加速が弱まっています。";
-    case "eff-ok":
-      return "値動きの効率が良好です。";
-    case "eff-low":
-      return "値動きの効率が弱いです。";
-    case "retq22-pass":
-      return "RETQ22の強気条件を満たしています。";
-    case "retq22-block":
-      return "RETQ22の条件に届いていません。";
-    case "retq22-off":
-      return "この銘柄ではRETQ22追加条件を使っていません。";
-    case "trend-gate-off":
-      return "BTC全体条件がトレンド許可になっていません。";
-    case "priority-pick":
-      return "優先ルールにより採用しています。";
-    case "idle-extra":
-      return "通常候補が弱い待機局面のため、追加候補として評価しています。";
-    case "reserve-wait":
-      return "条件未達のためUSDT待機です。";
-    default:
-      return reason;
-  }
-}
-
-function decisionReasonLabel(reason: string) {
-  if (reason === "reserve-wait") {
-    return "条件が揃っていないため、USDTのまま待機します。";
-  }
-
-  if (reason.startsWith("trend:")) {
-    const parts = reason.replace("trend:", "").split("|").filter(Boolean).map(reasonLabel);
-    return `トレンド条件を満たしたため採用します。${parts.join(" ")}`;
-  }
-
-  if (reason.startsWith("range:")) {
-    const parts = reason.replace("range:", "").split("|").filter(Boolean).map(reasonLabel);
-    return `レンジ条件を使う局面です。${parts.join(" ")}`;
-  }
-
-  return reason;
-}
-
-function uniqueRows(rows: TrendEvaluation[], compact: boolean) {
-  const ordered = [...rows].sort((left, right) => {
-    if (left.symbol === "PENGU") return -1;
-    if (right.symbol === "PENGU") return 1;
-    return Number(right.eligible) - Number(left.eligible) || right.score - left.score;
-  });
-  return compact ? ordered.slice(0, 5) : ordered;
+function riskTone(ok: boolean | null) {
+  if (ok === null) return "text-gold-100";
+  return ok ? "text-loss" : "text-profit";
 }
 
 export function LiveDecisionPanel({ compact = false }: { compact?: boolean }) {
-  const [response, setResponse] = useState<LiveDecisionResponse | null>(null);
+  const [response, setResponse] = useState<LiveStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
       try {
         const res = await fetch("/api/system/auto-trade/live-decision", { cache: "no-store" });
-        const json = (await res.json().catch(() => null)) as LiveDecisionResponse | null;
+        const json = (await res.json().catch(() => null)) as LiveStatusResponse | null;
         if (cancelled) return;
-
-        if (json?.ok && json.details) {
+        if (json?.ok && json.status) {
           setResponse(json);
           setError(null);
-        } else {
-          setError(json?.error || "12H判定データを取得できませんでした。");
-        }
+        } else setError(json?.error || "現LIVE daemon状態を取得できませんでした。");
       } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "12H判定データを取得できませんでした。");
-        }
+        if (!cancelled) setError(err instanceof Error ? err.message : "現LIVE daemon状態を取得できませんでした。");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-
     void load();
-    const timer = window.setInterval(load, 60000);
+    const timer = window.setInterval(load, REFRESH_INTERVAL_MS);
     window.addEventListener("auto-trade-live-decision-refresh", load);
     return () => {
       cancelled = true;
@@ -212,159 +99,83 @@ export function LiveDecisionPanel({ compact = false }: { compact?: boolean }) {
     };
   }, []);
 
-  const data = response?.details || null;
-  const walletDecision = response?.walletDecision || null;
-  const rows = useMemo(() => uniqueRows(data?.trendEvaluations || [], compact), [compact, data?.trendEvaluations]);
-  const selectedScore = data?.decision.trendCandidate?.score ?? data?.decision.rangeCandidate?.score ?? null;
-  const penguRow = rows.find((row) => row.symbol === "PENGU");
-  const rotation = walletDecision?.rotation || null;
-
+  const status = response?.status;
   return (
     <section className="panel-gold rounded-[28px] p-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-bold text-white">
-          <TrendingUp className="h-4 w-4 text-gold-100" />
-          12H自動トレード判定
+          <Activity className="h-4 w-4 text-gold-100" />
+          現LIVEロジック判定状況
         </div>
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-gold-100/70">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-gold-100/70">
           <RefreshCw className="h-3.5 w-3.5" />
-          live
+          3分更新 / daemon state
         </div>
       </div>
 
       {loading ? (
         <div className="mt-3 rounded-[18px] border border-dashed border-white/10 px-4 py-6 text-sm text-white/70">
-          現在の12H判定を読み込んでいます。
+          V12 / PENGU / V52 / Q102 の実daemon状態を読み込んでいます。
         </div>
       ) : error ? (
-        <div className="mt-3 rounded-[18px] border border-loss/30 bg-loss/10 px-4 py-6 text-sm text-loss">
-          {error}
-        </div>
-      ) : data ? (
+        <div className="mt-3 rounded-[18px] border border-loss/30 bg-loss/10 px-4 py-6 text-sm text-loss">{error}</div>
+      ) : status ? (
         <div className="mt-3 space-y-3">
-          <div className="grid gap-3 xl:grid-cols-[1fr_1fr]">
-            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">現在の採用内容</div>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <div className="text-2xl font-black text-white">
-                  {data.decision.desiredSymbol} / {sideLabel(data.decision.desiredSide)}
-                </div>
-                <span
-                  className={cn(
-                    "rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em]",
-                    data.decision.desiredSide === "cash"
-                      ? "border border-white/12 bg-white/[0.03] text-white/70"
-                      : "border border-profit/35 bg-profit/10 text-profit",
-                  )}
-                >
-                  配分 {Math.round(data.decision.desiredAlloc * 100)}%
-                </span>
-                {selectedScore != null ? (
-                  <span className="rounded-full border border-gold-400/25 bg-gold-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold-100">
-                    score {fixed(selectedScore)}
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {status.strategies.map((row) => (
+              <article key={row.id} className="min-w-0 rounded-[18px] border border-white/10 bg-white/[0.035] p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-base font-black text-white">{row.id}</div>
+                  <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold", decisionTone(row.decision))}>
+                    {row.decision}
                   </span>
-                ) : null}
-              </div>
-              <div className="mt-2 text-[12px] leading-6 text-white/82">
-                {decisionReasonLabel(data.decision.reason)}
-              </div>
-              {rotation ? (
-                <div className="mt-3 rounded-[16px] border border-profit/30 bg-profit/10 px-3 py-3 text-[11px] leading-5 text-white/85">
-                  <div className="font-bold text-profit">ローテーション予定</div>
-                  <div className="mt-1">
-                    {rotation.fromSymbol} の勢いが鈍り、{rotation.toSymbol} のScoreが {fixed(rotation.scoreGap)} 点上回っているため、
-                    次回実行では {rotation.fromSymbol} を全額決済して {rotation.toSymbol} へ切り替えます。
-                  </div>
                 </div>
-              ) : null}
-              <div className="mt-3 rounded-[16px] border border-gold-400/15 bg-black/20 px-3 py-3 text-[11px] leading-5 text-white/76">
-                PENGUは通常時の主力ではなく、待機中または保有中通貨の勢いが鈍った時だけ比較対象に入ります。
-              </div>
-              {walletDecision ? (
-                <div className="mt-2 text-[11px] text-white/60">
-                  現在保有 {walletDecision.currentSymbol} / 実行予定 {walletDecision.desiredSymbol}
+                <div className="mt-2 break-all text-[11px] leading-5 text-white/70">{row.strategyId}</div>
+                <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-white/72">
+                  <div>mode {row.mode}</div>
+                  <div className={stateTone(row.stateStatus)}>state {row.stateStatus}</div>
+                  <div>gross {row.grossCap.toFixed(2)}x</div>
+                  <div>position {row.positionCount}</div>
+                  <div>pending {row.pending ? "あり" : "なし"}</div>
+                  <div>{row.symbol || "WAIT"}</div>
                 </div>
-              ) : null}
-              <div className="mt-2 text-[11px] text-white/60">
-                判定更新 {new Date(data.decision.isoTime).toLocaleString("ja-JP")}
+                {row.selectorMode ? <div className="mt-2 text-[10px] font-bold text-gold-100">selector {row.selectorMode}</div> : null}
+                {!compact && row.reason ? <div className="mt-2 break-words text-[11px] leading-5 text-white/60">{row.reason}</div> : null}
+                <div className="mt-2 text-[10px] text-white/45">state更新 {timeLabel(row.stateUpdatedAt)}</div>
+              </article>
+            ))}
+          </div>
+          <div className="grid gap-3 xl:grid-cols-[1fr_1fr]">
+            <div className="rounded-[18px] border border-white/10 bg-black/20 p-3">
+              <div className="flex items-center gap-2 text-[11px] font-bold text-gold-100">
+                <ShieldCheck className="h-3.5 w-3.5" /> 共通Safety
               </div>
+              <div className="mt-2 grid gap-1 text-[11px] text-white/72 sm:grid-cols-2">
+                <div className={riskTone(status.risk.killSwitchActive)}>Kill Switch: {status.risk.killSwitchActive === null ? "UNKNOWN" : status.risk.killSwitchActive ? "ACTIVE" : "inactive"}</div>
+                <div>Account lock: {status.risk.accountLockStatus}</div>
+                <div className={riskTone(status.risk.dailyRiskTripped)}>Daily risk: {status.risk.dailyRiskTripped === null ? "UNKNOWN" : status.risk.dailyRiskTripped ? "TRIPPED" : "未発動"}</div>
+                <div>Daily loss: {status.risk.dailyLossPct == null ? "-" : `${status.risk.dailyLossPct.toFixed(2)}%`}</div>
+              </div>
+              {status.risk.killSwitchReason ? <div className="mt-2 break-words text-[10px] text-loss">{status.risk.killSwitchReason}</div> : null}
             </div>
 
-            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">相場の見立て</div>
-              <div className="mt-2 grid gap-2 text-sm text-white/84 md:grid-cols-2">
-                <div>レジーム: {regimeLabel(data.decision.regime.regimeLabel)}</div>
-                <div>トレンド条件: {data.decision.regime.trendAllowed ? "有効" : "無効"}</div>
-                <div>レンジ条件: {data.decision.regime.rangeAllowed ? "有効" : "無効"}</div>
-                <div>breadth40: {data.decision.regime.breadth40}</div>
-                <div>最良 mom20: {percent(data.decision.regime.bestMom20)}</div>
-                <div>最良 accel: {percent(data.decision.regime.bestMomAccel)}</div>
+            <div className="rounded-[18px] border border-white/10 bg-black/20 p-3 text-[11px] text-white/72">
+              <div className="font-bold text-gold-100">Gross / Release</div>
+              <div className="mt-2 grid grid-cols-2 gap-1">
+                <div>Crypto {status.risk.cryptoGrossCap.toFixed(1)}x</div>
+                <div>Total {status.risk.totalGrossCap.toFixed(1)}x</div>
+                <div>PENGU {status.risk.penguGrossCap.toFixed(2)}x</div>
+                <div>V52 Stock {status.risk.stockGrossCap.toFixed(1)}x</div>
+                <div>Q102 {status.risk.q102GrossCap.toFixed(1)}x</div>
               </div>
-              {penguRow ? (
-                <div className="mt-3 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] leading-5 text-white/76">
-                  PENGU score {fixed(penguRow.score)}。{penguRow.eligible ? "条件を満たしています。" : "現時点では条件未達です。"}
-                </div>
-              ) : null}
+              <div className="mt-2 break-all text-[10px] text-white/45">
+                SHA {status.deployedSha || "未取得"}
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-gold-100/80">
-              候補通貨の比較
-            </div>
-            {rows.map((row) => (
-              <div
-                key={row.symbol}
-                className="grid gap-3 rounded-[18px] border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/82 xl:grid-cols-[1fr_1fr_0.85fr]"
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="text-lg font-black text-white">{row.symbol}/USDT</div>
-                    <span
-                      className={cn(
-                        "rounded-full border px-2 py-0.5 text-[10px] font-bold",
-                        row.eligible
-                          ? "border-profit/40 bg-profit/10 text-profit"
-                          : "border-white/15 bg-white/[0.03] text-white/60",
-                      )}
-                    >
-                      {row.eligible ? "採用候補" : "見送り"}
-                    </span>
-                    {row.symbol === "PENGU" ? (
-                      <span className="rounded-full border border-gold-400/25 bg-gold-400/10 px-2 py-0.5 text-[10px] font-bold text-gold-100">
-                        追加候補
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-white/74">
-                    <div>score {fixed(row.score)}</div>
-                    <div>終値 {fixed(row.close, 4)}</div>
-                    <div>SMA40 {fixed(row.sma40, 4)}</div>
-                    <div>mom20 {percent(row.mom20)}</div>
-                    <div>ADX14 {fixed(row.adx14)}</div>
-                    <div>過熱率 {percent(row.overheatPct)}</div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-bold text-gold-100/80">判定理由</div>
-                  <div className="mt-2 space-y-1 text-[11px] leading-5 text-white/76">
-                    {row.reasons.map((reason) => (
-                      <div key={`${row.symbol}-${reason}`}>・{reasonLabel(reason)}</div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid gap-2 text-[11px] text-white/74">
-                  <div className="rounded-[12px] border border-white/8 bg-black/20 px-3 py-2">
-                    出来高比率 {fixed(row.volumeRatio)}
-                  </div>
-                  <div className="rounded-[12px] border border-white/8 bg-black/20 px-3 py-2">
-                    効率比率 {fixed(row.efficiencyRatio)}
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="text-right text-[10px] text-white/40">
+            API取得 {timeLabel(status.generatedAt)} / source {status.source}
           </div>
         </div>
       ) : null}
