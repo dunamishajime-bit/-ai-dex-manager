@@ -40,9 +40,11 @@ jobs:
       - name: Existing direct executor regression
         run: npm run strategy:executor:selftest
 
+      - name: Q102 reconciliation freshness regression
+        run: npx tsx scripts/disdex-quality102-causal-v1-runner-selftest.ts
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Production build
         run: npm run build
-
