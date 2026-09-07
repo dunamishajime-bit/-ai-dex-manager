@@ -9,6 +9,7 @@ TRADING_RELEASES="${TRADING_ROOT}/releases"
 TRADING_CURRENT="${TRADING_ROOT}/current"
 SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
 V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
+PENGU_STATE_ROOT="/var/lib/disdex/pengu-dual-ls-v2"
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
@@ -88,6 +89,7 @@ show_plan() {
   printf 'v52Unit=%s\n' "$V52_UNIT"
   printf 'marginUnit=%s\n' "$MARGIN_UNIT"
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
+  printf 'penguStateRoot=%s\n' "$PENGU_STATE_ROOT"
   printf 'contractEnvFile=%s\n' "$CONTRACT_ENV_FILE"
   printf 'watchdogDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$WATCHDOG_DROPIN_DIR"
   printf 'healthSnapshotDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$SNAPSHOT_DROPIN_DIR"
@@ -140,6 +142,18 @@ apply_wiring() {
       return 1
     }
   fi
+  if [[ -e "$PENGU_STATE_ROOT" && ! -d "$PENGU_STATE_ROOT" ]]; then
+    printf 'PENGU state path exists but is not a directory: %s\n' "$PENGU_STATE_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$PENGU_STATE_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$PENGU_STATE_ROOT"
+  else
+    [[ "$(stat -c '%U:%G:%a' "$PENGU_STATE_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'PENGU state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$PENGU_STATE_ROOT")" >&2
+      return 1
+    }
+  fi
 
   write_atomic "$CONTRACT_ENV_FILE" "DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
@@ -171,7 +185,8 @@ DISDEX_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
 DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
-DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
+DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}"
 
   write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
 Environment=DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
@@ -203,6 +218,8 @@ Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 
   write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ReadWritePaths=${PENGU_STATE_ROOT}
+Environment=PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
 Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
 Environment=V12_GROSS_CAP=1.5
 Environment=PENGU_GROSS_CAP=0.75
