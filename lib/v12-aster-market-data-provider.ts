@@ -25,16 +25,26 @@ export class V12AsterMarketDataProvider {
         // serialized. Read-only 429/418 recovery is handled by AsterV3Client.
         const rows: { symbol: string; rows: AsterKline[] }[] = [];
         for (const symbol of V12_X1_ALL.universe) rows.push({ symbol, rows: await this.loadSymbol(symbol) });
-        const result: Record<string, V12Bar[]> = {};
-        let expectedLength: number | undefined;
-        for (const row of rows) {
+        const parsedRows = rows.map((row) => {
             const parsed = row.rows.map(parse).filter((value): value is NonNullable<ReturnType<typeof parse>> => Boolean(value)).filter((value) => value.ts + 3_600_000 <= this.now());
             const bars = resampleV12H1ToH2(parsed);
             if (bars.length < 80) throw new Error(`V12 hourly history insufficient for ${row.symbol}: ${bars.length}`);
-            if (expectedLength === undefined) expectedLength = bars.length;
-            if (bars.length !== expectedLength) throw new Error(`V12 universe alignment mismatch: ${row.symbol}`);
-            result[row.symbol] = bars;
-        }
+            return { symbol: row.symbol, bars };
+        });
+
+        // A venue can omit one completed candle for a single symbol while the
+        // remaining symbols are current.  Equal array lengths are not a safe
+        // alignment contract: intersect the completed H2 timestamps instead
+        // of failing the whole V12 runner on a harmless per-symbol gap.
+        const commonEndTs = parsedRows.reduce<Set<number> | undefined>((common, row) => {
+            const timestamps = new Set(row.bars.map((bar) => bar.endTs));
+            if (!common) return timestamps;
+            return new Set([...common].filter((endTs) => timestamps.has(endTs)));
+        }, undefined);
+        if (!commonEndTs || commonEndTs.size < 80) throw new Error(`V12 common H2 history insufficient: ${commonEndTs?.size || 0}`);
+
+        const result: Record<string, V12Bar[]> = {};
+        for (const row of parsedRows) result[row.symbol] = row.bars.filter((bar) => commonEndTs.has(bar.endTs));
         return result;
     }
 }

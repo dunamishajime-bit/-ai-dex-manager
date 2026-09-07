@@ -179,6 +179,30 @@ async function v12HistoryRequestsAreSerializedTest() {
     assert.deepEqual(requested, V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 }
 
+async function v12HistoryAlignsOnCommonCompletedH2TimestampsTest() {
+    const now = 1_700_000_000_000;
+    const firstTs = Math.floor((now - 1) / 3_600_000) * 3_600_000 - 200 * 3_600_000;
+    const rows: AsterKline[] = Array.from({ length: 200 }, (_, index) => {
+        const ts = firstTs + index * 3_600_000;
+        return [ts, "100", "101", "99", "100", "10", ts + 3_600_000 - 1, "1000", 10, "5", "500", "0"];
+    });
+    const client = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        fetchImpl: async (input) => {
+            const symbol = new URL(String(input)).searchParams.get("symbol");
+            return jsonResponse(symbol === "SOLUSDT" ? rows.slice(0, -2) : rows);
+        },
+    });
+    const provider = new V12AsterMarketDataProvider(client, { hourlyLimit: 200, requestSpacingMs: 0, now: () => now });
+    const loaded = await provider.load();
+    const lengths = Object.values(loaded).map((bars) => bars.length);
+    assert.equal(new Set(lengths).size, 1);
+    assert.ok((lengths[0] || 0) >= 80);
+    const latestEndTs = loaded.BTC.at(-1)?.endTs;
+    assert.ok(latestEndTs);
+    assert.equal(loaded.SOL.at(-1)?.endTs, latestEndTs);
+}
+
 async function v12CredentialReadsAreSerializedTest() {
     let inFlight = 0;
     let maxInFlight = 0;
@@ -211,6 +235,7 @@ async function run() {
     await klineRangeCompatibilityTest();
     await readOnlyRateLimitRetryTest();
     await v12HistoryRequestsAreSerializedTest();
+    await v12HistoryAlignsOnCommonCompletedH2TimestampsTest();
     await v12CredentialReadsAreSerializedTest();
     console.log("ASTER_MARKET_DATA_PROVIDER_SELFTEST_OK");
 }
