@@ -162,7 +162,15 @@ QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
 QUALITY102_LIVE_SELECTOR_PARITY=false
 QUALITY102_LIVE_ENABLED=false
-QUALITY102_LIVE_BLOCKED_FAIL_CLOSED=true"
+QUALITY102_LIVE_BLOCKED_FAIL_CLOSED=true
+DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk
+DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/var/lib/disdex/shared/margin-risk/guard-live.json
+DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
+DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
+DISDEX_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
+DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
+DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
 
   write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
 Environment=DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
@@ -219,6 +227,7 @@ Environment=CRYPTO_GROSS_CAP=2.0
 Environment=TOTAL_GROSS_CAP=2.5"
 
   write_atomic "${MARGIN_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
 WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=
 ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
@@ -233,6 +242,7 @@ Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
 Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
   write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
 WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=
 ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha

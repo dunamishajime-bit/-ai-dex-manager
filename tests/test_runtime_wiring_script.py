@@ -28,6 +28,9 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=true", source)
         self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=true", source)
         self.assertIn("QUALITY102_CAUSAL_V1_OPERATOR_ARMED=true", source)
+        self.assertGreaterEqual(source.count("EnvironmentFile=${CONTRACT_ENV_FILE}"), 5)
+        self.assertIn("DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk", source)
+        self.assertIn("DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only", source)
 
     def test_wiring_script_does_not_stop_or_cancel_trading(self):
         source = SCRIPT.read_text(encoding="utf-8")
