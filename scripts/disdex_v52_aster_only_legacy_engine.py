@@ -22,6 +22,7 @@ from disdex_strict_portfolio_planner import (
     read_quality102_live_state_document,
 )
 from disdex_trade_fill_notification import enqueue_trade_fill_notification
+from disdex_us_equity_calendar import regular_us_equity_session
 
 base = legacy.base
 
@@ -130,6 +131,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.state["strategyId"] = STRATEGY_ID
         self.state["updatedAt"] = base.now_ms()
         base.atomic_write_json(self.state_path, self.state)
+
+    def current_local_time(self) -> dt.datetime:
+        return dt.datetime.now(tz=base.NY)
 
     def positions(self) -> Dict[str, dict]:
         value = self.state.setdefault("positions", {})
@@ -705,8 +709,16 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if self.kill_switch():
             self.flatten_all("DAILY_LOSS"); return
         self.update_history()
-        local = dt.datetime.now(tz=base.NY)
-        if local.weekday() >= 5:
+        local = self.current_local_time()
+        if not regular_us_equity_session(local):
+            self.log(
+                "v52-market-closed",
+                market="US_EQUITY",
+                localDate=local.date().isoformat(),
+                localTime=local.isoformat(),
+                referenceFetch="deferred",
+                newOrdersAllowed=False,
+            )
             return
         sec = base.ny_seconds(local)
         if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):
@@ -805,7 +817,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     # across daemon sleep would expire the lease and block V12/PENGU.
                     self.lock.release()
             if not daemon: break
-            active = base.clock("09:59:50") <= base.ny_seconds() <= base.clock("15:30:30") or bool(self.positions())
+            active = regular_us_equity_session() or bool(self.positions())
             interval = 250 if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
             time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
 

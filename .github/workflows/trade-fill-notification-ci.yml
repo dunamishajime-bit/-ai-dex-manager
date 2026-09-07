@@ -37,6 +37,9 @@ jobs:
       - name: Python fill notification tests
         run: python -m unittest tests/test_trade_fill_notification.py
 
+      - name: V52 market calendar and safety regressions
+        run: python -m unittest tests/test_v52_market_closed_gate.py tests/test_stock_reference_gate.py tests/test_v52_daily_loss_recovery.py
+
       - name: Existing direct executor regression
         run: npm run strategy:executor:selftest
 
