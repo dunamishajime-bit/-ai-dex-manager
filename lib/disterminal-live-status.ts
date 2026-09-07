@@ -6,7 +6,6 @@ import { QUALITY102_CAUSAL_V1, resolveQuality102CausalV1Runtime } from "@/config
 import { DISDEX_V13D_V11EQ_V96_ALLOCATION } from "@/config/disdexStockRouterV13DV11EqRuntime";
 import { STRICT_BT33404708902 } from "@/config/disdexStrictBt33404708902Runtime";
 import { resolveV12X1AllRuntime } from "@/config/v12X1AllRuntime";
-import { resolveDisDexV96V52SharedRuntimePaths } from "@/lib/disdex-v96-v52-shared-runtime-paths";
 
 export const DIS_TERMINAL_LIVE_REFRESH_MS = 180_000;
 
@@ -99,17 +98,17 @@ export async function readDisTerminalLiveStatus(
   env: NodeJS.ProcessEnv = process.env,
   now = Date.now(),
 ): Promise<DisTerminalLiveStatus> {
-  const shared = resolveDisDexV96V52SharedRuntimePaths(env);
   const v12Runtime = resolveV12X1AllRuntime(env);
   const penguRuntime = resolvePenguDualLsV2Runtime(env);
   const q102Runtime = resolveQuality102CausalV1Runtime(env);
+  const runtimeRoot = resolve(env.DISDEX_HP_RUNTIME_ROOT || "/var/lib/disdex");
   const v12Path = resolve(env.DISDEX_HP_V12_STATE_PATH || env.V12_X1_ALL_STATE_PATH || v12Runtime.statePath);
-  const penguPath = resolve(env.DISDEX_HP_PENGU_STATE_PATH || resolve(env.PENGU_DUAL_LS_V2_STATE_DIR || shared.penguStateRoot, "runner-live.json"));
-  const v52Path = resolve(env.DISDEX_HP_V52_STATE_PATH || resolve(shared.stockStateRoot, "runner-live.json"));
-  const q102Path = resolve(env.DISDEX_HP_Q102_STATE_PATH || env.QUALITY102_CAUSAL_V1_STATE_PATH || env.DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH || resolve(shared.combinedRoot, "quality102-causal-v1", "state.json"));
-  const killPath = resolve(env.DISDEX_HP_KILL_SWITCH_PATH || shared.killSwitchPath);
-  const riskPath = resolve(env.DISDEX_HP_DAILY_RISK_PATH || env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || resolve(shared.combinedRoot, "shared", "crypto-daily-risk.json"));
-  const lockPath = resolve(env.DISDEX_HP_ACCOUNT_LOCK_PATH || shared.accountLockPath);
+  const penguPath = resolve(env.DISDEX_HP_PENGU_STATE_PATH || env.PENGU_DUAL_LS_V2_STATE_PATH || resolve(env.PENGU_DUAL_LS_V2_STATE_DIR || resolve(runtimeRoot, "pengu-dual-ls-v2-final"), "runner-live.json"));
+  const v52Path = resolve(env.DISDEX_HP_V52_STATE_PATH || env.DISDEX_V52_ASTER_ONLY_STATE_PATH || resolve(env.DISDEX_V52_ASTER_ONLY_STATE_DIR || resolve(runtimeRoot, "v52-aster-only"), "runner-live.json"));
+  const q102Path = resolve(env.DISDEX_HP_Q102_STATE_PATH || env.QUALITY102_CAUSAL_V1_STATE_PATH || env.DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH || resolve(runtimeRoot, "quality102-causal-v1", "state.json"));
+  const killPath = resolve(env.DISDEX_HP_KILL_SWITCH_PATH || env.DISDEX_SHARED_KILL_SWITCH_FILE || env.PENGU_DUAL_LS_V2_KILL_SWITCH_FILE || env.QUALITY102_CAUSAL_V1_KILL_SWITCH_FILE || resolve(runtimeRoot, "shared", "kill-switch.json"));
+  const riskPath = resolve(env.DISDEX_HP_DAILY_RISK_PATH || env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || resolve(runtimeRoot, "shared", "crypto-daily-risk.json"));
+  const lockPath = resolve(env.DISDEX_HP_ACCOUNT_LOCK_PATH || env.DISDEX_ACCOUNT_LOCK_PATH || resolve(runtimeRoot, "shared", "account-order.lock"));
 
   const [v12, pengu, v52, q102, kill, risk, lock] = await Promise.all([
     readJson(v12Path), readJson(penguPath), readJson(v52Path), readJson(q102Path),
@@ -124,27 +123,31 @@ export async function readDisTerminalLiveStatus(
   const q102Pending = q102.state?.pending;
   const v52Position = firstV52Position(v52.state);
   const v52Pending = v52.state?.pendingOrder;
+  const v12Mode = String(v12.state?.mode || v12Runtime.mode).toUpperCase();
+  const penguMode = String(pengu.state?.mode || penguRuntime.mode).toUpperCase();
+  const q102Mode = String(q102.state?.mode || q102Runtime.mode).toUpperCase();
+  const v52Mode = String(v52.state?.mode || env.DISDEX_V52_ASTER_ONLY_RUNNER_MODE || (v52.status === "AVAILABLE" ? "LIVE" : "UNKNOWN")).toUpperCase();
 
   const strategies: DisTerminalStrategyStatus[] = [
     {
-      id: "V12", strategyId: "V12_X1.00_ALL", mode: String(v12.state?.mode || v12Runtime.mode),
-      enabled: v12Runtime.enabled, stateStatus: v12.status, stateUpdatedAt: stateTime(v12.state),
+      id: "V12", strategyId: "V12_X1.00_ALL", mode: v12Mode,
+      enabled: v12.status === "AVAILABLE" && v12Mode === "LIVE", stateStatus: v12.status, stateUpdatedAt: stateTime(v12.state),
       decision: v12Pending?.action === "EXIT" || v12Pending?.action === "FAILSAFE_CLOSE" ? "EXIT" : sideDecision(v12Active?.side ?? v12Pending?.side),
       symbol: String(v12Active?.symbol || v12Pending?.symbol || "") || undefined,
       pending: Boolean(v12Pending), positionCount: v12Active ? 1 : 0, grossCap: 1,
       reason: v12.state?.manualReview || v12Pending?.reason,
     },
     {
-      id: "PENGU", strategyId: PENGU_DUAL_LS_V2.id, mode: String(pengu.state?.mode || penguRuntime.mode),
-      enabled: penguRuntime.enabled, stateStatus: pengu.status, stateUpdatedAt: stateTime(pengu.state),
+      id: "PENGU", strategyId: PENGU_DUAL_LS_V2.id, mode: penguMode,
+      enabled: pengu.status === "AVAILABLE" && penguMode === "LIVE", stateStatus: pengu.status, stateUpdatedAt: stateTime(pengu.state),
       decision: penguPending?.reduceOnly ? "EXIT" : sideDecision(penguPosition?.side ?? penguPending?.side ?? pengu.state?.latestSignal?.side),
       symbol: PENGU_DUAL_LS_V2.symbol, pending: Boolean(penguPending), positionCount: penguPosition ? 1 : 0,
       grossCap: penguRuntime.maximumGross,
       reason: penguPending?.reason || pengu.state?.latestSignal?.reason || latestFailure(pengu.state),
     },
     {
-      id: "V52", strategyId: "V52", mode: String(env.DISDEX_V52_ASTER_ONLY_RUNNER_MODE || env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE || "UNKNOWN").toUpperCase(),
-      enabled: /^(1|true|yes|on)$/i.test(String(env.DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED || "")),
+      id: "V52", strategyId: "V52", mode: v52Mode,
+      enabled: v52.status === "AVAILABLE" && v52Mode === "LIVE",
       stateStatus: v52.status, stateUpdatedAt: stateTime(v52.state),
       decision: v52Pending ? "WAIT" : v52Position ? sideDecision(v52Position.side ?? v52Position.positionSide) : "WAIT",
       symbol: String(v52Position?.symbol || v52Pending?.symbol || "") || undefined,
@@ -152,12 +155,12 @@ export async function readDisTerminalLiveStatus(
       reason: v52.state?.manualReviewReason || v52Pending?.reason,
     },
     {
-      id: "Q102", strategyId: QUALITY102_CAUSAL_V1.strategyId, mode: String(q102.state?.mode || q102Runtime.mode),
-      enabled: q102Runtime.enabled, stateStatus: q102.status, stateUpdatedAt: stateTime(q102.state),
+      id: "Q102", strategyId: QUALITY102_CAUSAL_V1.strategyId, mode: q102Mode,
+      enabled: q102.status === "AVAILABLE" && q102Mode === "LIVE", stateStatus: q102.status, stateUpdatedAt: stateTime(q102.state),
       decision: q102Pending?.reduceOnly ? "EXIT" : sideDecision(q102Position?.side ?? q102Pending?.side),
       symbol: String(q102Position?.symbol || q102Pending?.symbol || "") || undefined,
       pending: Boolean(q102Pending), positionCount: q102Position ? 1 : 0, grossCap: q102Runtime.maximumGross,
-      selectorMode: String(env.QUALITY102_CAUSAL_V1_SELECTOR_MODE || "UNKNOWN").toUpperCase(),
+      selectorMode: String(q102.state?.selectorMode || env.QUALITY102_CAUSAL_V1_SELECTOR_MODE || "").toUpperCase() || undefined,
       reason: q102Pending?.reason || latestFailure(q102.state),
     },
   ];
@@ -176,7 +179,7 @@ export async function readDisTerminalLiveStatus(
     source: "DAEMON_STATE_READ_ONLY",
     generatedAt: now,
     refreshIntervalMs: DIS_TERMINAL_LIVE_REFRESH_MS,
-    deployedSha: String(env.DISDEX_RELEASE_SHA || env.DISDEX_RUNTIME_COMMIT_SHA || env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim() || undefined,
+    deployedSha: String(q102.state?.runtimeCommitSha || env.DISDEX_RELEASE_SHA || env.DISDEX_RUNTIME_COMMIT_SHA || env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim() || undefined,
     strategies,
     risk: {
       killSwitchActive,

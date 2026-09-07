@@ -41,24 +41,24 @@ test("read-only LIVE status summarizes V12/PENGU/V52/Q102 daemon state", async (
   await writeFile(paths.q102, JSON.stringify({ mode: "LIVE", updatedAt: now, runtimeCommitSha: "a".repeat(40), position: { symbol: "FETUSDT", side: -1 } }));
   await writeFile(paths.kill, JSON.stringify({ active: false }));
   await writeFile(paths.risk, JSON.stringify({ schema: "disdex-shared-crypto-daily-risk/v1", accountScope: "ASTER_FUTURES", utcDay: "2027-01-15", strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"], lossPct: 0, maximumLossPct: 7.5, tripped: false, updatedAt: now }));  const env = {
-    DISDEX_HP_V12_STATE_PATH: paths.v12,
-    DISDEX_HP_PENGU_STATE_PATH: paths.pengu,
+    V12_X1_ALL_STATE_PATH: paths.v12,
+    PENGU_DUAL_LS_V2_STATE_PATH: paths.pengu,
     DISDEX_HP_V52_STATE_PATH: paths.v52,
-    DISDEX_HP_Q102_STATE_PATH: paths.q102,
-    DISDEX_HP_KILL_SWITCH_PATH: paths.kill,
-    DISDEX_HP_DAILY_RISK_PATH: paths.risk,
+    QUALITY102_CAUSAL_V1_STATE_PATH: paths.q102,
+    PENGU_DUAL_LS_V2_KILL_SWITCH_FILE: paths.kill,
+    DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH: paths.risk,
     DISDEX_HP_ACCOUNT_LOCK_PATH: paths.lock,
     DISDEX_RELEASE_SHA: "f".repeat(40),
-    V12_X1_ALL_MODE: "LIVE", V12_X1_ALL_ENABLED: "true",
-    PENGU_DUAL_LS_V2_MODE: "LIVE", PENGU_DUAL_LS_V2_ENABLED: "true",
-    QUALITY102_CAUSAL_V1_MODE: "LIVE", QUALITY102_CAUSAL_V1_ENABLED: "true",
     QUALITY102_CAUSAL_V1_SELECTOR_MODE: "CAUSAL_V4",
   } as unknown as NodeJS.ProcessEnv;
   const status = await readDisTerminalLiveStatus(env, now);
   assert.equal(status.source, "DAEMON_STATE_READ_ONLY");
   assert.equal(status.refreshIntervalMs, 180_000);
-  assert.equal(status.deployedSha, "f".repeat(40));
+  assert.equal(status.deployedSha, "a".repeat(40));
   assert.equal(status.strategies.find((row: any) => row.id === "V12")?.decision, "LONG");
+  assert.equal(status.strategies.find((row: any) => row.id === "V12")?.mode, "LIVE");
+  assert.equal(status.strategies.find((row: any) => row.id === "V12")?.enabled, true);
+  assert.equal(status.strategies.find((row: any) => row.id === "V52")?.mode, "LIVE");
   assert.equal(status.strategies.find((row: any) => row.id === "Q102")?.decision, "SHORT");
   assert.equal(status.strategies.find((row: any) => row.id === "Q102")?.selectorMode, "CAUSAL_V4");  assert.equal(status.risk.killSwitchActive, false);
   assert.equal(status.risk.accountLockStatus, "CLEAR");
