@@ -95,18 +95,19 @@ validate_release_artifacts() {
 
 validate_release_dependency() {
   local dependency_path="$1"
-  local resolved target marker
+  local resolved target_root target marker
   [[ -d "$dependency_path" ]] || {
     printf 'release dependency directory is missing: %s\n' "$dependency_path" >&2
     return 1
   }
   if [[ -L "$dependency_path" ]]; then
     resolved="$(readlink -f -- "$dependency_path")"
-    [[ "$resolved" == "$TRADING_RELEASES"/* ]] || {
+    target_root="$(dirname -- "$resolved")"
+    [[ "$target_root" == "$TRADING_RELEASES"/* && "$(dirname -- "$target_root")" == "$TRADING_RELEASES" ]] || {
       printf 'release dependency symlink escapes release root: %s -> %s\n' "$dependency_path" "$resolved" >&2
       return 1
     }
-    target="$(basename -- "$resolved")"
+    target="$(basename -- "$target_root")"
     [[ "$target" =~ ^[0-9a-f]{40}$ ]] || {
       printf 'release dependency symlink target is not an exact SHA: %s -> %s\n' "$dependency_path" "$resolved" >&2
       return 1
