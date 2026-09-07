@@ -20,6 +20,14 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon", source)
         self.assertIn("Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=1.0", source)
         self.assertIn("Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", source)
+        self.assertIn('RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"', source)
+        self.assertIn('CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"', source)
+        self.assertIn("EnvironmentFile=${CONTRACT_ENV_FILE}", source)
+        self.assertIn("QUALITY102_CAUSAL_V1_MODE=LIVE", source)
+        self.assertIn("QUALITY102_CAUSAL_V1_ENABLED=true", source)
+        self.assertIn("QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=true", source)
+        self.assertIn("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=true", source)
+        self.assertIn("QUALITY102_CAUSAL_V1_OPERATOR_ARMED=true", source)
 
     def test_wiring_script_does_not_stop_or_cancel_trading(self):
         source = SCRIPT.read_text(encoding="utf-8")
