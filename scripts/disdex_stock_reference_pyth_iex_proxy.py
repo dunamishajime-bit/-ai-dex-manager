@@ -17,6 +17,8 @@ from typing import Any, Dict, Optional
 import websocket
 from zoneinfo import ZoneInfo
 
+from disdex_us_equity_calendar import is_us_equity_market_holiday
+
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
 UTC = dt.timezone.utc
 NEW_YORK = ZoneInfo("America/New_York")
@@ -30,7 +32,7 @@ def regular_us_equity_session(value: dt.datetime | None = None) -> bool:
     quote passes the normal 5-second two-source policy.
     """
     local = (value or dt.datetime.now(tz=UTC)).astimezone(NEW_YORK)
-    if local.weekday() >= 5:
+    if local.weekday() >= 5 or is_us_equity_market_holiday(local.date()):
         return False
     seconds = local.hour * 3600 + local.minute * 60 + local.second
     return 9 * 3600 + 30 * 60 <= seconds < 16 * 3600

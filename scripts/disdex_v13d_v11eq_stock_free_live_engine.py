@@ -6,16 +6,13 @@ import time
 import urllib.parse
 
 import disdex_v13d_v11eq_stock_live_engine as engine
+from disdex_stock_reference_health import reference_payload_is_ready
+from disdex_us_equity_calendar import regular_us_equity_session
 
 # The free Pyth Core + Alpaca IEX reference is deliberately held to wider
 # minimum edge floors than the consolidated SIP configuration.
 engine.V13D_MIN_PROJECTED_NET_BPS = float(os.getenv("DISDEX_V13D_MIN_PROJECTED_NET_BPS", "10"))
 engine.V11_MIN_NET_EDGE_BPS = float(os.getenv("DISDEX_V11EQ_MIN_NET_EDGE_BPS", "20"))
-
-
-def regular_us_equity_session(value: dt.datetime | None = None) -> bool:
-    local = value or dt.datetime.now(tz=engine.NY)
-    return local.weekday() < 5 and engine.clock("09:30:00") <= engine.ny_seconds(local) <= engine.clock("16:00:00")
 
 
 def reference_health(reference: engine.ReferenceProvider) -> dict:
@@ -30,15 +27,9 @@ def reference_health(reference: engine.ReferenceProvider) -> dict:
             payload = engine.http_json(health_url, headers=reference.headers, timeout=reference.timeout)
             if not isinstance(payload, dict):
                 raise RuntimeError("Free reference /health returned a non-object response")
-            if payload.get("pythConnected") is True and payload.get("iexConnected") is True:
-                if not require_fresh:
-                    return payload
-                # A live websocket handshake is not sufficient: the source can
-                # remain connected while its last quote is stale or the two
-                # sources diverge.  The reference proxy exposes these checks in
-                # freshnessReady/status; require both during regular session.
-                if payload.get("status") == "ok" and payload.get("freshnessReady") is True:
-                    return payload
+            if reference_payload_is_ready(payload, require_fresh=require_fresh, required_symbols=engine.SYMBOLS):
+                return payload
+            if payload.get("connected") is True or payload.get("pythConnected") is True:
                 last_error = RuntimeError(f"Free reference quote quality is not ready: {payload}")
             else:
                 last_error = RuntimeError(f"Free reference sources are not connected: {payload}")

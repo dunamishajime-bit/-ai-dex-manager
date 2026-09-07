@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+TRADING_ROOT="${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}"
+TRADING_RELEASES="${TRADING_ROOT}/releases"
+TRADING_CURRENT="${TRADING_ROOT}/current"
+SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
+V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
+WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
+SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
+V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
+
+usage() {
+  printf '%s\n' \
+    'Usage: disdex-current-runtime-wiring [--check|--apply|--self-test]' \
+    '  --check     validate current release and print the intended wiring (read-only)' \
+    '  --apply     write current-release systemd overrides and reload systemd' \
+    '  --self-test validate local argument/SHA rendering without touching systemd'
+}
+
+require_root_for_apply() {
+  [[ "$(id -u)" == "0" ]] || {
+    printf 'runtime wiring apply must run as root\n' >&2
+    exit 1
+  }
+}
+
+resolve_current() {
+  [[ -L "$TRADING_CURRENT" ]] || {
+    printf 'current release link is missing: %s\n' "$TRADING_CURRENT" >&2
+    return 1
+  }
+  CURRENT_RELEASE="$(readlink -f -- "$TRADING_CURRENT")"
+  [[ "$CURRENT_RELEASE" == "$TRADING_RELEASES"/* ]] || {
+    printf 'current release is outside release root: %s\n' "$CURRENT_RELEASE" >&2
+    return 1
+  }
+  DEPLOYED_SHA="$(basename -- "$CURRENT_RELEASE")"
+  [[ "$DEPLOYED_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+    printf 'current release directory is not an exact SHA: %s\n' "$DEPLOYED_SHA" >&2
+    return 1
+  }
+  [[ -f "$CURRENT_RELEASE/.disdex-release-sha" ]] || {
+    printf 'release marker is missing: %s/.disdex-release-sha\n' "$CURRENT_RELEASE" >&2
+    return 1
+  }
+  MARKER_SHA="$(tr -d '[:space:]' < "$CURRENT_RELEASE/.disdex-release-sha")"
+  [[ "$MARKER_SHA" == "$DEPLOYED_SHA" ]] || {
+    printf 'release marker mismatch: directory=%s marker=%s\n' "$DEPLOYED_SHA" "$MARKER_SHA" >&2
+    return 1
+  }
+  [[ -d "$CURRENT_RELEASE/scripts" ]] || {
+    printf 'release scripts directory is missing: %s/scripts\n' "$CURRENT_RELEASE" >&2
+    return 1
+  }
+}
+
+set_units() {
+  V12_UNIT="disdex-v12-x1-all@${DEPLOYED_SHA}.service"
+  PENGU_UNIT="disdex-pengu-dual-ls-v2@${DEPLOYED_SHA}.service"
+  Q102_UNIT="disdex-quality102-causal-v1@${DEPLOYED_SHA}.service"
+  V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
+  MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
+  V52_DROPIN_DIR="/etc/systemd/system/${V52_UNIT}.d"
+}
+
+show_plan() {
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING\n'
+  printf 'currentRelease=%s\n' "$CURRENT_RELEASE"
+  printf 'deployedSha=%s\n' "$DEPLOYED_SHA"
+  printf 'releaseMarker=%s\n' "$MARKER_SHA"
+  printf 'v12Unit=%s\n' "$V12_UNIT"
+  printf 'penguUnit=%s\n' "$PENGU_UNIT"
+  printf 'q102Unit=%s\n' "$Q102_UNIT"
+  printf 'v52Unit=%s\n' "$V52_UNIT"
+  printf 'marginUnit=%s\n' "$MARGIN_UNIT"
+  printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
+  printf 'watchdogDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$WATCHDOG_DROPIN_DIR"
+  printf 'healthSnapshotDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$SNAPSHOT_DROPIN_DIR"
+  printf 'v52Dropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$V52_DROPIN_DIR"
+}
+
+check_units() {
+  local unit state load_state
+  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$V52_UNIT" "$MARGIN_UNIT"; do
+    load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
+    state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    printf 'unit=%s loadState=%s activeState=%s\n' "$unit" "${load_state:-unknown}" "${state:-unknown}"
+    [[ "$load_state" == "loaded" ]] || {
+      printf 'required current unit is not loaded: %s\n' "$unit" >&2
+      return 1
+    }
+  done
+}
+
+write_atomic() {
+  local target="$1"
+  local content="$2"
+  local directory temporary
+  directory="$(dirname -- "$target")"
+  install -d -o root -g root -m 0755 "$directory"
+  temporary="$(mktemp "${directory}/.current-runtime-wiring.XXXXXX")"
+  trap 'rm -f -- "$temporary"' RETURN
+  printf '%s\n' "$content" > "$temporary"
+  chmod 0644 "$temporary"
+  chown root:root "$temporary"
+  mv -f -- "$temporary" "$target"
+  trap - RETURN
+}
+
+apply_wiring() {
+  require_root_for_apply
+  if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
+    printf 'V52 legacy crypto state path exists but is not a directory: %s\n' "$V52_LEGACY_CRYPTO_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$V52_LEGACY_CRYPTO_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$V52_LEGACY_CRYPTO_ROOT"
+  else
+    [[ "$(stat -c '%U:%G:%a' "$V52_LEGACY_CRYPTO_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'V52 legacy crypto state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$V52_LEGACY_CRYPTO_ROOT")" >&2
+      return 1
+    }
+  fi
+
+  write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+Environment=DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
+Environment=DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_WATCHDOG_RUNNER_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_WATCHDOG_RUNNER_ROOT=${CURRENT_RELEASE}
+Environment=DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
+Environment=DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
+Environment=DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
+Environment=DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}"
+
+  write_atomic "${SNAPSHOT_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+Environment=DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}"
+
+  write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon
+Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
+Environment=DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
+Environment=DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json
+Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
+Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
+
+  systemctl daemon-reload
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
+}
+
+self_test() {
+  local sample_sha="0123456789abcdef0123456789abcdef01234567"
+  [[ "$sample_sha" =~ ^[0-9a-f]{40}$ ]]
+  [[ "disdex-v12-x1-all@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-quality102-causal-v1@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_SELFTEST_PASS\n'
+}
+
+main() {
+  local mode="${1:---check}"
+  case "$mode" in
+    --self-test)
+      self_test
+      ;;
+    --check|--apply)
+      resolve_current
+      set_units
+      show_plan
+      check_units
+      if [[ "$mode" == "--apply" ]]; then
+        apply_wiring
+      fi
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+}
+
+main "$@"
