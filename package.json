@@ -94,6 +94,7 @@
     "strategy:quality102-causal-v1:runtime:selftest": "tsx scripts/disdex-quality102-causal-v1-runtime-selftest.ts",
     "strategy:quality102-causal-v1:signal:selftest": "tsx scripts/disdex-quality102-causal-v1-signal-selftest.ts",
     "strategy:quality102-causal-v1:state:selftest": "tsx scripts/disdex-quality102-causal-v1-state-selftest.ts",
+    "strategy:quality102-causal-v1:state:migrate:selftest": "tsx scripts/disdex-quality102-causal-v1-state-migrate-selftest.ts",
     "strategy:quality102-causal-v1:runner:selftest": "tsx scripts/disdex-quality102-causal-v1-runner-selftest.ts && tsx scripts/disdex-quality102-causal-v1-live-runner-selftest.ts",
     "strategy:quality102-causal-v1:preflight": "tsx scripts/disdex-quality102-causal-v1-live-runner.ts --preflight",
     "strategy:quality102-causal-v1:once": "tsx scripts/disdex-quality102-causal-v1-live-runner.ts --once",
