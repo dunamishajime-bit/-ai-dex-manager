@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
+import { AsterApiError } from "@/lib/aster-v3-client";
 import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
@@ -43,6 +44,10 @@ function positionMatches(state: V12ActivePositionState, actual: DirectPosition) 
 }
 function resultHasExposure(result: DirectTradeResult) { return (result.status === "FILLED" || result.status === "PARTIALLY_FILLED") && result.executedQuantity > 0; }
 function activeOrderStatus(status?: string) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(status || "").toUpperCase()); }
+function safeV12ErrorMessage(error: unknown) {
+    if (error instanceof AsterApiError) return `${error.message} [ASTER_READ path=${error.path || "unknown"} status=${error.status} code=${error.code ?? "none"}]`;
+    return error instanceof Error ? error.message : String(error);
+}
 function latestIndex(data: Record<string, V12Bar[]>) {
     const rows = Object.entries(data); if (rows.length !== V12_X1_ALL.universe.length) throw new Error("V12_MARKET_DATA_UNIVERSE_MISMATCH");
     const lengths = rows.map(([, bars]) => bars.length); if (!lengths.length || Math.min(...lengths) < 80 || lengths.some((length) => length !== lengths[0])) throw new Error("V12_MARKET_DATA_ALIGNMENT_REQUIRED");
@@ -286,7 +291,7 @@ export class V12LiveExecutionEngine {
             state.active = { ...active, protection: installed }; state.pending = undefined; state.lastCompletedIdempotencyKey = clientOrderId; await this.d.stateStore.save(state);
             return { status: "entered", reason: result.status === "PARTIALLY_FILLED" ? "PARTIAL_FILL_PROTECTED" : "ENTRY_FILLED_AND_PROTECTED", signal, clientOrderId };
         } catch (error) {
-            const state = await this.d.stateStore.load(); return this.fail(state, error instanceof Error ? error.message : String(error));
+            const state = await this.d.stateStore.load(); return this.fail(state, safeV12ErrorMessage(error));
         } finally { await handle.release(); }
     }
 }

@@ -172,15 +172,17 @@ export interface AsterNewStopMarketOrder {
 }
 
 export class AsterApiError extends Error {
+    readonly path?: string;
     readonly status: number;
     readonly code?: number;
     readonly retryAfterMs?: number;
     readonly executionUnknown: boolean;
     readonly responseBody?: unknown;
 
-    constructor(input: { message: string; status: number; code?: number; retryAfterMs?: number; executionUnknown?: boolean; responseBody?: unknown }) {
+    constructor(input: { message: string; path?: string; status: number; code?: number; retryAfterMs?: number; executionUnknown?: boolean; responseBody?: unknown }) {
         super(input.message);
         this.name = "AsterApiError";
+        this.path = input.path;
         this.status = input.status;
         this.code = input.code;
         this.retryAfterMs = input.retryAfterMs;
@@ -316,7 +318,7 @@ export class AsterV3Client {
                     const text = await response.text(); const payload = parseJsonSafe(text);
                     if (!response.ok) {
                         const executionUnknown = response.status === 503 && input.orderMutation === true;
-                        throw new AsterApiError({ message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs: retryAfterFromHeaders(response.headers), executionUnknown, responseBody: payload });
+                        throw new AsterApiError({ path: input.path, message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs: retryAfterFromHeaders(response.headers), executionUnknown, responseBody: payload });
                     }
                     return payload as T;
                 } finally { clearTimeout(timeout); }
