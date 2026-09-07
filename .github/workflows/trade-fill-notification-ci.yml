@@ -1,0 +1,48 @@
+name: Trade Fill Notification CI
+
+on:
+  push:
+    branches:
+      - codex/trade-fill-notification-all-runners-20260907
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Confirmed fill notification tests
+        run: npx tsx --test tests/trade_fill_notification.test.ts tests/direct_trade_fill_notification.test.ts
+
+      - name: Python fill notification tests
+        run: python -m unittest tests/test_trade_fill_notification.py
+
+      - name: Existing direct executor regression
+        run: npm run strategy:executor:selftest
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
+
