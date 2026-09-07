@@ -185,6 +185,15 @@ export class AsterApiError extends Error {
     }
 }
 
+/** Futures V3 deposit requirement errors are a hard safety stop. They must
+ * never be treated as a transient retry or an order-retry signal. */
+export function isAsterDepositRequirementError(error: unknown): boolean {
+    if (error instanceof AsterApiError && error.code === -5050) return true;
+    const body = error instanceof AsterApiError ? JSON.stringify(error.responseBody || "") : "";
+    const message = error instanceof Error ? error.message : String(error);
+    return /(?:^|[^0-9])-5050(?:$|[^0-9])/.test(`${message} ${body}`);
+}
+
 function normalizeBaseUrl(value?: string) { return String(value || "https://fapi3.asterdex.com").replace(/\/+$/, ""); }
 function normalizePrivateKey(value?: string): `0x${string}` | undefined {
     if (!value) return undefined;

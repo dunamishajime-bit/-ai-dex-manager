@@ -31,6 +31,7 @@ import {
 import {
     readSharedCryptoDailyRisk,
 } from "@/lib/disdex-shared-crypto-daily-risk";
+import { isAsterDepositRequirementError } from "@/lib/aster-v3-client";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import type {
     DirectAccountSnapshot,
@@ -428,6 +429,12 @@ export class Quality102CausalV1Runner {
         await this.dependencies.stateStore.save(state);
         this.log.error("Q102 causal v1 manual review", { message, idempotencyKey });
         return { status: "manual-review", message, idempotencyKey, ordersSent: 0 };
+    }
+
+    private initialDaemonReconciliationRequired(state: Quality102CausalV1State): boolean {
+        if (this.dependencies.config.mode !== "LIVE") return false;
+        return state.initialDaemonReconciliation?.runtimeCommitSha.toLowerCase()
+            !== this.dependencies.config.runtimeCommitSha.toLowerCase();
     }
 
     private async applyFilledEntry(state: Quality102CausalV1State, pending: Quality102CausalV1PendingOrder, result: DirectTradeResult): Promise<Quality102CausalV1TickResult> {
@@ -943,6 +950,22 @@ export class Quality102CausalV1Runner {
 
             const riskBlocked = await this.sharedRiskBlocked();
             const live = await this.validateLiveAccount(state);
+            if (!riskBlocked && this.initialDaemonReconciliationRequired(state)) {
+                const completedAt = this.now();
+                state.initialDaemonReconciliation = {
+                    runtimeCommitSha: this.dependencies.config.runtimeCommitSha,
+                    completedAt,
+                };
+                state.lastReconciledAt = completedAt;
+                await this.dependencies.stateStore.save(state);
+                this.log.info("Q102 initial daemon history/account reconciliation passed; new orders remain held until the next tick.", {
+                    runtimeCommitSha: this.dependencies.config.runtimeCommitSha,
+                    historyLoaded: true,
+                    openPositionsReconciled: true,
+                    openOrdersReconciled: true,
+                });
+                return { status: "held", message: "QUALITY102_CAUSAL_V1_INITIAL_DAEMON_RECONCILIATION_PASS_NEW_ORDERS_HELD", ordersSent: 0 };
+            }
             const actual = live.actualQ102;
             if (state.position && !actual) return this.manualReview(state, "Q102 state expects a position but exchange returned none.");
             if (!state.position && actual) return this.manualReview(state, "Q102 exchange position is unmanaged.");
@@ -975,7 +998,10 @@ export class Quality102CausalV1Runner {
         } catch (error) {
             const state = await this.dependencies.stateStore.load().catch(() => undefined);
             if (state) {
-                const message = this.recordFailure(state, error);
+                const message = isAsterDepositRequirementError(error)
+                    ? "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED"
+                    : this.recordFailure(state, error);
+                if (message === "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED") this.recordFailure(state, message);
                 await this.dependencies.stateStore.save(state).catch(() => undefined);
                 this.log.error("Q102 causal v1 blocked locally", { message });
                 return { status: "blocked-local", message, ordersSent: 0 };

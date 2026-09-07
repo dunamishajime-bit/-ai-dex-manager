@@ -105,8 +105,12 @@ function config(overrides: Partial<Quality102CausalV1RunnerConfig> = {}): Qualit
     };
 }
 
-function state(mode: "LIVE" | "SHADOW" = "LIVE", pending?: Quality102CausalV1State["pending"]): Quality102CausalV1State {
-    return { ...createQuality102CausalV1State(mode, mode === "LIVE" ? SHA : ""), ...(pending ? { pending } : {}) };
+function state(mode: "LIVE" | "SHADOW" = "LIVE", pending?: Quality102CausalV1State["pending"], reconciled = true): Quality102CausalV1State {
+    return {
+        ...createQuality102CausalV1State(mode, mode === "LIVE" ? SHA : ""),
+        ...(pending ? { pending } : {}),
+        ...(reconciled && mode === "LIVE" ? { initialDaemonReconciliation: { runtimeCommitSha: SHA, completedAt: NOW - 1000 } } : {}),
+    };
 }
 
 function signal(overrides: Partial<Quality102CausalV1Signal> = {}): Quality102CausalV1Signal {
@@ -215,6 +219,17 @@ async function run(): Promise<void> {
         assert.equal(saved.position?.symbol, "FETUSDT");
         assert.equal(saved.position?.hardStop, 0.1);
         assert.equal(saved.position?.trailActive, false);
+    }
+
+    {
+        const fake = new FakeExecutor();
+        const built = deps(fake, state("LIVE", undefined, false));
+        const result = await built.runner.tick();
+        assert.equal(result.status, "held");
+        assert.match(result.message, /INITIAL_DAEMON_RECONCILIATION_PASS/);
+        assert.equal(fake.calls.execute, 0);
+        const saved = await (built.runner as unknown as { dependencies: { stateStore: { load(): Promise<Quality102CausalV1State> } } }).dependencies.stateStore.load();
+        assert.equal(saved.initialDaemonReconciliation?.runtimeCommitSha, SHA);
     }
 
     {

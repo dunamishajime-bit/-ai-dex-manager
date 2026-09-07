@@ -228,6 +228,20 @@ async function providerTests(): Promise<void> {
     await assert.rejects(() => new Quality102CausalV1AsterMarketDataProvider(gap.client, {
         symbols: ["FETUSDT"], historyHours: MINIMUM_HISTORY_HOURS, pageLimit: 500, now: () => NOW,
     }).load(), /NONCONTIGUOUS_ASTER_1H:FETUSDT/);
+
+    const cachePath = `${process.cwd()}/.tmp-quality102-history-cache-${process.pid}.json`;
+    const persistent = pagedClient();
+    const first = new Quality102CausalV1AsterMarketDataProvider(persistent.client, {
+        symbols: ["FETUSDT"], historyHours: MINIMUM_HISTORY_HOURS, pageLimit: 500, cacheTtlMs: 0, cachePath, now: () => NOW,
+    });
+    await first.load();
+    const firstRequestCount = persistent.urls.length;
+    const afterRestart = new Quality102CausalV1AsterMarketDataProvider(persistent.client, {
+        symbols: ["FETUSDT"], historyHours: MINIMUM_HISTORY_HOURS, pageLimit: 500, cacheTtlMs: 0, cachePath, now: () => NOW,
+    });
+    await afterRestart.load();
+    assert.equal(persistent.urls.length, firstRequestCount + 2, "restart must reuse the persistent history checkpoint and only refresh entry-open quotes");
+    await import("node:fs/promises").then(({ unlink }) => unlink(cachePath).catch(() => undefined));
 }
 
 async function run(): Promise<void> {

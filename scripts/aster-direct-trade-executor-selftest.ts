@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { AsterV3Client } from "../lib/aster-v3-client";
+import { AsterV3Client, isAsterDepositRequirementError } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor } from "../lib/direct-trade-executor";
 
 const TEST_PRIVATE_KEY = `0x${"1".repeat(64)}` as `0x${string}`;
@@ -200,11 +200,34 @@ async function slippageGuardTest() {
     assert.equal(postCount, 0);
 }
 
+async function depositRequirementFailClosedTest() {
+    let orderGetCount = 0;
+    const fetchImpl: typeof fetch = async (input, init) => {
+        const url = String(input);
+        const method = String(init?.method || "GET");
+        if (url.includes("/exchangeInfo")) return jsonResponse(exchangeInfo);
+        if (url.includes("/ticker/bookTicker")) return jsonResponse({ symbol: "SUIUSDT", bidPrice: "9.99", bidQty: "100", askPrice: "10.00", askQty: "100", time: Date.now() });
+        if (url.includes("/order") && method === "GET") {
+            orderGetCount += 1;
+            return jsonResponse({ code: -5050, msg: "deposit requirement not met" }, 400);
+        }
+        throw new Error(`Unexpected mock request: ${method} ${url}`);
+    };
+    const client = new AsterV3Client({ fetchImpl, baseUrl: "https://mock.aster", userAddress: TEST_USER, privateKey: TEST_PRIVATE_KEY });
+    const executor = new AsterDirectTradeExecutor(client, { reconciliationAttempts: 5, reconciliationDelayMs: 1 });
+    assert.equal(isAsterDepositRequirementError(new Error("venue code -5050")), true);
+    const result = await executor.reconcileOrder("SUIUSDT", "w80-deposit-requirement");
+    assert.equal(result.status, "UNKNOWN");
+    assert.equal(result.error, "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED");
+    assert.equal(orderGetCount, 1, "-5050 must not be retried");
+}
+
 async function run() {
     await accountSnapshotUsesVenueObservationTimeTest();
     await normalOrderTest();
     await unknownExecutionReconciliationTest();
     await slippageGuardTest();
+    await depositRequirementFailClosedTest();
     console.log("ASTER_DIRECT_TRADE_EXECUTOR_SELFTEST_OK");
 }
 

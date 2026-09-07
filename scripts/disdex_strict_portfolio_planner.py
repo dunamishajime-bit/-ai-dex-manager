@@ -84,7 +84,7 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
     allowed = {
         "version", "strategyId", "mode", "runtimeCommitSha", "updatedAt",
         "lastProcessedReferenceTs", "lastCompletedIdempotencyKey", "position",
-        "pending", "lastReduction", "lastReconciledAt", "failures",
+        "pending", "lastReduction", "initialDaemonReconciliation", "lastReconciledAt", "failures",
     }
     if set(root) - allowed:
         raise RuntimeError("QUALITY102_STATE_MALFORMED:unknown_field")

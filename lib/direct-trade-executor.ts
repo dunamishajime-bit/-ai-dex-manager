@@ -4,6 +4,7 @@ import { promisify } from "node:util";
 import {
     AsterApiError,
     AsterV3Client,
+    isAsterDepositRequirementError,
     type AsterBookTicker,
     type AsterExchangeInfo,
     type AsterExchangeSymbol,
@@ -400,6 +401,10 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 });
             } catch (error) {
                 lastError = error instanceof Error ? error.message : String(error);
+                if (isAsterDepositRequirementError(error)) {
+                    lastError = "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED";
+                    break;
+                }
                 if (error instanceof AsterApiError && (error.status === 429 || error.status === 418)) {
                     await sleep(error.retryAfterMs ?? this.reconciliationDelayMs * (attempt + 1));
                 }

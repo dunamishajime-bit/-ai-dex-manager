@@ -69,6 +69,10 @@ export interface Quality102CausalV1State {
     fundingCost: number;
     accounting: "MARK_TO_MARKET_REALIZED_PNL";
   };
+  initialDaemonReconciliation?: {
+    runtimeCommitSha: string;
+    completedAt: number;
+  };
   lastReconciledAt?: number;
   failures: Array<{ occurredAt: number; message: string; idempotencyKey?: string }>;
 }
@@ -219,6 +223,18 @@ function normalizeReduction(value: unknown): NonNullable<Quality102CausalV1State
   };
 }
 
+function normalizeInitialDaemonReconciliation(value: unknown): NonNullable<Quality102CausalV1State["initialDaemonReconciliation"]> | undefined {
+  if (value === undefined) return undefined;
+  const raw = record(value, "initialDaemonReconciliation");
+  exactKeys(raw, ["runtimeCommitSha", "completedAt"], "initialDaemonReconciliation");
+  const runtimeCommitSha = requiredString(raw.runtimeCommitSha, "initialDaemonReconciliation.runtimeCommitSha");
+  if (!/^[0-9a-f]{40}$/i.test(runtimeCommitSha)) malformed("initialDaemonReconciliation.runtimeCommitSha");
+  return {
+    runtimeCommitSha,
+    completedAt: positiveNumber(raw.completedAt, "initialDaemonReconciliation.completedAt"),
+  };
+}
+
 function normalizeFailures(value: unknown): Quality102CausalV1State["failures"] {
   if (!Array.isArray(value)) malformed("failures");
   return value.map((item, index) => {
@@ -250,6 +266,7 @@ function normalizeState(
     "position",
     "pending",
     "lastReduction",
+    "initialDaemonReconciliation",
     "lastReconciledAt",
     "failures",
   ], "root");
@@ -268,6 +285,7 @@ function normalizeState(
   const position = normalizePosition(raw.position);
   const pending = normalizePending(raw.pending);
   const lastReduction = normalizeReduction(raw.lastReduction);
+  const initialDaemonReconciliation = normalizeInitialDaemonReconciliation(raw.initialDaemonReconciliation);
   const lastReconciledAt = optionalTimestamp(raw.lastReconciledAt, "lastReconciledAt");
 
   return {
@@ -281,6 +299,7 @@ function normalizeState(
     ...(position === undefined ? {} : { position }),
     ...(pending === undefined ? {} : { pending }),
     ...(lastReduction === undefined ? {} : { lastReduction }),
+    ...(initialDaemonReconciliation === undefined ? {} : { initialDaemonReconciliation }),
     ...(lastReconciledAt === undefined ? {} : { lastReconciledAt }),
     failures: normalizeFailures(raw.failures),
   };

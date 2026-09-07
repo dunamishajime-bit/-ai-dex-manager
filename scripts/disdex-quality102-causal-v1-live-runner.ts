@@ -12,7 +12,7 @@ import {
     QUALITY102_CAUSAL_V4_CAPABILITIES,
     QUALITY102_CAUSAL_V4_S34_MODEL,
 } from "../config/disdexQuality102CausalV4Model";
-import { AsterV3Client } from "../lib/aster-v3-client";
+import { AsterV3Client, isAsterDepositRequirementError } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectPosition } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
@@ -59,6 +59,7 @@ export interface Quality102CausalV1LiveResolvedConfig {
     maximumEntryDelayMs: number;
     maximumDailyLossPct: number;
     maxDataAgeMs: number;
+    historyCachePath: string;
     historyHours: number;
     historyPageLimit: number;
     stateRoot: string;
@@ -81,7 +82,8 @@ function boolEnv(env: NodeJS.ProcessEnv, name: string, fallback = false): boolea
 export function shouldRunQuality102CausalV1PreflightHistoryCheck(
     env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-    return boolEnv(env, "QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK", true);
+    const configured = env.QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK ?? env.PREFLIGHT_HISTORY_CHECK;
+    return configured === undefined ? true : /^(1|true|yes|on)$/i.test(configured.trim());
 }
 
 function numberEnv(env: NodeJS.ProcessEnv, name: string, fallback: number): number {
@@ -168,6 +170,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         maximumEntryDelayMs,
         maximumDailyLossPct: positiveConfig(numberEnv(env, "QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT", 5), "QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT"),
         maxDataAgeMs,
+        historyCachePath: resolve(env.QUALITY102_CAUSAL_V1_HISTORY_CACHE_PATH || resolve(stateRoot, "market-history.json")),
         historyHours,
         historyPageLimit,
         stateRoot,
@@ -408,6 +411,9 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             historyHours: config.historyHours,
             pageLimit: config.historyPageLimit,
             cacheTtlMs: numberEnv(env, "QUALITY102_CAUSAL_V1_HISTORY_CACHE_TTL_MS", 5 * 60_000),
+            cachePath: config.historyCachePath,
+            requestSpacingMs: numberEnv(env, "QUALITY102_CAUSAL_V1_HISTORY_REQUEST_SPACING_MS", 100),
+            rateLimitAttempts: numberEnv(env, "QUALITY102_CAUSAL_V1_HISTORY_RATE_LIMIT_ATTEMPTS", 3),
         }),
         executor,
         stateStore: new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.expectedRuntimeCommitSha),
@@ -488,7 +494,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
             level: "fatal",
             strategyId: QUALITY102_CAUSAL_V1.strategyId,
             status: "QUALITY102_CAUSAL_V1_FAIL_CLOSED",
-            message: error instanceof Error ? error.message : String(error),
+            message: isAsterDepositRequirementError(error)
+                ? "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED"
+                : error instanceof Error ? error.message : String(error),
             ordersSent: 0,
             syntheticOrders: 0,
             testOrders: 0,

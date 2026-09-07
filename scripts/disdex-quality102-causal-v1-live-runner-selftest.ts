@@ -36,6 +36,7 @@ assert.equal(config.totalGrossCap, 2.5);
 assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(config, baseEnv));
 assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck(baseEnv), true);
 assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK: "false" }), false);
+assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, PREFLIGHT_HISTORY_CHECK: "false" }), false);
 assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, selectorMode: "HISTORICAL_FROZEN" }, baseEnv), /SELECTOR_MODE_ACK/);
 assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, runtimeCommitSha: "" }, baseEnv), /COMMIT_SHA_REQUIRED/);
 
