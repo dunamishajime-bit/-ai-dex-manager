@@ -53,7 +53,12 @@ def update_v52_strategy_daily_latch(
             "lastCheckedAt": now_ms,
         }
 
-    if prior and prior.get("tripped"):
+    # A data-unavailable latch is a safety hold, not a daily-loss decision.  Once
+    # the caller has a complete, current data set again, recompute it instead of
+    # carrying an old permission/API failure forever.  A real loss trip remains
+    # sticky for the UTC day and must not be auto-cleared.
+    recovered_from_fail_closed = bool(prior and prior.get("failClosed"))
+    if prior and prior.get("tripped") and not recovered_from_fail_closed:
         return {
             **prior,
             "lastCheckedAt": now_ms,
@@ -99,6 +104,12 @@ def update_v52_strategy_daily_latch(
             f"V52 strategy daily loss limit reached: {loss_usd:.2f} USD / "
             f"{loss_usd / capital * 100.0:.4f}%. V52 new orders are stopped."
         ) if tripped else None,
-        "resetReason": "UTC_DAY_ROLLOVER" if previous and previous.get("utcDay") != day else "INITIALIZED",
+        "resetReason": (
+            "FAIL_CLOSED_DATA_RECOVERED"
+            if recovered_from_fail_closed
+            else "UTC_DAY_ROLLOVER"
+            if previous and previous.get("utcDay") != day
+            else "INITIALIZED"
+        ),
         "lastCheckedAt": now_ms,
     }
