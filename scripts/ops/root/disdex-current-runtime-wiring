@@ -112,11 +112,11 @@ validate_release_dependency() {
       printf 'release dependency symlink target is not an exact SHA: %s -> %s\n' "$dependency_path" "$resolved" >&2
       return 1
     }
-    [[ -f "$resolved/.disdex-release-sha" ]] || {
-      printf 'release dependency symlink target marker is missing: %s\n' "$resolved" >&2
+    [[ -f "$target_root/.disdex-release-sha" ]] || {
+      printf 'release dependency symlink target marker is missing: %s\n' "$target_root" >&2
       return 1
     }
-    marker="$(tr -d '[:space:]' < "$resolved/.disdex-release-sha")"
+    marker="$(tr -d '[:space:]' < "$target_root/.disdex-release-sha")"
     [[ "$marker" == "$target" ]] || {
       printf 'release dependency symlink target marker mismatch: %s -> %s\n' "$dependency_path" "$resolved" >&2
       return 1
