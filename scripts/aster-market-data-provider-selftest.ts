@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterRealtimeMarketDataProvider } from "../lib/aster-realtime-market-data-provider";
+import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provider";
+import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 
 function jsonResponse(payload: unknown) {
     return new Response(JSON.stringify(payload), {
@@ -98,10 +100,56 @@ async function klineRangeCompatibilityTest() {
     assert.equal(urls[1].searchParams.get("endTime"), "2000");
 }
 
+async function readOnlyRateLimitRetryTest() {
+    let calls = 0;
+    const client = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        readOnlyRateLimitMaxRetries: 2,
+        readOnlyRateLimitBackoffBaseMs: 1,
+        readOnlyRateLimitBackoffMaxMs: 5,
+        fetchImpl: async () => {
+            calls += 1;
+            if (calls < 3) return new Response(JSON.stringify({ code: -1003, msg: "Too many requests" }), { status: 429, headers: { "retry-after": "0" } });
+            return jsonResponse([]);
+        },
+    });
+    assert.deepEqual(await client.getKlines("BTCUSDT", "1h", 200), []);
+    assert.equal(calls, 3);
+}
+
+async function v12HistoryRequestsAreSerializedTest() {
+    const now = 1_700_000_000_000;
+    const firstTs = Math.floor((now - 1) / 3_600_000) * 3_600_000 - 200 * 3_600_000;
+    const rows: AsterKline[] = Array.from({ length: 200 }, (_, index) => {
+        const ts = firstTs + index * 3_600_000;
+        return [ts, "100", "101", "99", "100", "10", ts + 3_600_000 - 1, "1000", 10, "5", "500", "0"];
+    });
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const requested: string[] = [];
+    const client = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        fetchImpl: async (input) => {
+            inFlight += 1; maxInFlight = Math.max(maxInFlight, inFlight);
+            requested.push(new URL(String(input)).searchParams.get("symbol") || "");
+            await new Promise<void>((resolve) => setTimeout(resolve, 1));
+            inFlight -= 1;
+            return jsonResponse(rows);
+        },
+    });
+    const provider = new V12AsterMarketDataProvider(client, { hourlyLimit: 200, requestSpacingMs: 0, now: () => now });
+    const loaded = await provider.load();
+    assert.equal(Object.keys(loaded).length, V12_X1_ALL.universe.length);
+    assert.equal(maxInFlight, 1);
+    assert.deepEqual(requested, V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
+}
+
 async function run() {
     await currentBookTimestampTest();
     await staleBookTimestampTest();
     await klineRangeCompatibilityTest();
+    await readOnlyRateLimitRetryTest();
+    await v12HistoryRequestsAreSerializedTest();
     console.log("ASTER_MARKET_DATA_PROVIDER_SELFTEST_OK");
 }
 

@@ -11,6 +11,10 @@ export interface AsterV3ClientOptions {
     privateKey?: `0x${string}`;
     requestTimeoutMs?: number;
     recvWindowMs?: number;
+    /** Retries apply only to read-only 429/418 responses. Order mutations never retry. */
+    readOnlyRateLimitMaxRetries?: number;
+    readOnlyRateLimitBackoffBaseMs?: number;
+    readOnlyRateLimitBackoffMaxMs?: number;
     fetchImpl?: typeof fetch;
     userAgent?: string;
 }
@@ -232,6 +236,9 @@ function retryAfterFromHeaders(headers: Headers): number | undefined {
     const timestamp = Date.parse(raw); return Number.isFinite(timestamp) ? Math.max(0, timestamp - Date.now()) : undefined;
 }
 
+function isRateLimitStatus(status: number) { return status === 418 || status === 429; }
+function sleep(ms: number) { return new Promise<void>((resolve) => setTimeout(resolve, ms)); }
+
 class MonotonicMicrosecondNonce {
     private last = 0n;
     next() { const now = BigInt(Date.now()) * 1000n; this.last = now > this.last ? now : this.last + 1n; return this.last.toString(); }
@@ -244,6 +251,9 @@ export class AsterV3Client {
     private readonly account?: ReturnType<typeof privateKeyToAccount>;
     private readonly timeoutMs: number;
     private readonly recvWindowMs: number;
+    private readonly readOnlyRateLimitMaxRetries: number;
+    private readonly readOnlyRateLimitBackoffBaseMs: number;
+    private readonly readOnlyRateLimitBackoffMaxMs: number;
     private readonly fetchImpl: typeof fetch;
     private readonly userAgent: string;
     private readonly nonce = new MonotonicMicrosecondNonce();
@@ -256,6 +266,9 @@ export class AsterV3Client {
         this.signerAddress = this.account?.address;
         this.timeoutMs = Math.max(1000, options.requestTimeoutMs ?? 10_000);
         this.recvWindowMs = Math.min(5000, Math.max(1000, options.recvWindowMs ?? 5000));
+        this.readOnlyRateLimitMaxRetries = Math.max(0, Math.min(5, Math.floor(options.readOnlyRateLimitMaxRetries ?? 3)));
+        this.readOnlyRateLimitBackoffBaseMs = Math.max(1, Math.min(60_000, Math.floor(options.readOnlyRateLimitBackoffBaseMs ?? 1_000)));
+        this.readOnlyRateLimitBackoffMaxMs = Math.max(this.readOnlyRateLimitBackoffBaseMs, Math.min(120_000, Math.floor(options.readOnlyRateLimitBackoffMaxMs ?? 120_000)));
         this.fetchImpl = options.fetchImpl ?? fetch;
         this.userAgent = options.userAgent || "DisDex-Win80-LiveRunner/1.0";
     }
@@ -274,28 +287,48 @@ export class AsterV3Client {
     }
 
     private async request<T>(input: { method: AsterHttpMethod; path: string; params?: Record<string, unknown>; signed?: boolean; orderMutation?: boolean }): Promise<T> {
-        const method = input.method; const params = input.params || {}; const abort = new AbortController(); const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
-        try {
-            let query = ""; let body: string | undefined;
-            if (input.signed) {
-                const signed = await this.signParams(params); const payload = encodeParams({ ...signed.signedParams, signature: signed.signature });
-                if (method === "GET") query = payload; else body = payload;
-            } else {
-                const payload = encodeParams(params); if (method === "GET") query = payload; else body = payload;
+        const method = input.method;
+        const params = input.params || {};
+        let retries = 0;
+        while (true) {
+            try {
+                const abort = new AbortController();
+                const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
+                try {
+                    let query = ""; let body: string | undefined;
+                    if (input.signed) {
+                        // Re-sign each read-only retry so the nonce remains monotonic.
+                        const signed = await this.signParams(params); const payload = encodeParams({ ...signed.signedParams, signature: signed.signature });
+                        if (method === "GET") query = payload; else body = payload;
+                    } else {
+                        const payload = encodeParams(params); if (method === "GET") query = payload; else body = payload;
+                    }
+                    const url = `${this.baseUrl}${input.path}${query ? `?${query}` : ""}`;
+                    const response = await this.fetchImpl(url, { method, body, signal: abort.signal, headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": this.userAgent }, cache: "no-store" });
+                    const text = await response.text(); const payload = parseJsonSafe(text);
+                    if (!response.ok) {
+                        const executionUnknown = response.status === 503 && input.orderMutation === true;
+                        throw new AsterApiError({ message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs: retryAfterFromHeaders(response.headers), executionUnknown, responseBody: payload });
+                    }
+                    return payload as T;
+                } finally { clearTimeout(timeout); }
+            } catch (error) {
+                const canRetry = input.orderMutation !== true
+                    && retries < this.readOnlyRateLimitMaxRetries
+                    && error instanceof AsterApiError
+                    && isRateLimitStatus(error.status);
+                if (canRetry) {
+                    const exponential = this.readOnlyRateLimitBackoffBaseMs * (2 ** retries);
+                    const waitMs = Math.min(this.readOnlyRateLimitBackoffMaxMs, Math.max(exponential, error.retryAfterMs ?? 0));
+                    retries += 1;
+                    await sleep(waitMs);
+                    continue;
+                }
+                if (error instanceof AsterApiError) throw error;
+                if (error instanceof Error && error.name === "AbortError") throw new AsterApiError({ message: `Aster request timeout after ${this.timeoutMs}ms`, status: 0, executionUnknown: input.orderMutation === true });
+                throw error;
             }
-            const url = `${this.baseUrl}${input.path}${query ? `?${query}` : ""}`;
-            const response = await this.fetchImpl(url, { method, body, signal: abort.signal, headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": this.userAgent }, cache: "no-store" });
-            const text = await response.text(); const payload = parseJsonSafe(text);
-            if (!response.ok) {
-                const executionUnknown = response.status === 503 && input.orderMutation === true;
-                throw new AsterApiError({ message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs: retryAfterFromHeaders(response.headers), executionUnknown, responseBody: payload });
-            }
-            return payload as T;
-        } catch (error) {
-            if (error instanceof AsterApiError) throw error;
-            if (error instanceof Error && error.name === "AbortError") throw new AsterApiError({ message: `Aster request timeout after ${this.timeoutMs}ms`, status: 0, executionUnknown: input.orderMutation === true });
-            throw error;
-        } finally { clearTimeout(timeout); }
+        }
     }
 
     ping() { return this.request<Record<string, never>>({ method: "GET", path: "/fapi/v3/ping" }); }

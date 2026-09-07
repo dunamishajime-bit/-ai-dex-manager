@@ -8,14 +8,23 @@ function parse(row: AsterKline) {
     return { ts, open, high, low, close, volume, closed: true } as const;
 }
 
-export interface V12AsterMarketDataProviderOptions { hourlyLimit?: number; now?: () => number; }
+export interface V12AsterMarketDataProviderOptions { hourlyLimit?: number; requestSpacingMs?: number; now?: () => number; }
 
 export class V12AsterMarketDataProvider {
     private readonly limit: number;
+    private readonly requestSpacingMs: number;
     private readonly now: () => number;
-    constructor(private readonly client: AsterV3Client, options: V12AsterMarketDataProviderOptions = {}) { this.limit = Math.max(200, Math.min(1500, options.hourlyLimit ?? 500)); this.now = options.now || Date.now; }
+    constructor(private readonly client: AsterV3Client, options: V12AsterMarketDataProviderOptions = {}) { this.limit = Math.max(200, Math.min(1500, options.hourlyLimit ?? 500)); this.requestSpacingMs = Math.max(0, Math.min(10_000, options.requestSpacingMs ?? 100)); this.now = options.now || Date.now; }
+    private async loadSymbol(symbol: string) {
+        if (this.requestSpacingMs > 0) await new Promise<void>((resolve) => setTimeout(resolve, this.requestSpacingMs));
+        return this.client.getKlines(`${symbol}USDT`, "1h", this.limit);
+    }
     async load(): Promise<Record<string, V12Bar[]>> {
-        const rows = await Promise.all(V12_X1_ALL.universe.map(async (symbol) => ({ symbol, rows: await this.client.getKlines(`${symbol}USDT`, "1h", this.limit) })));
+        // Keep the 14-symbol historical burst below the venue IP limit. The
+        // strategy and bar semantics are unchanged; only request scheduling is
+        // serialized. Read-only 429/418 recovery is handled by AsterV3Client.
+        const rows: { symbol: string; rows: AsterKline[] }[] = [];
+        for (const symbol of V12_X1_ALL.universe) rows.push({ symbol, rows: await this.loadSymbol(symbol) });
         const result: Record<string, V12Bar[]> = {};
         let expectedLength: number | undefined;
         for (const row of rows) {

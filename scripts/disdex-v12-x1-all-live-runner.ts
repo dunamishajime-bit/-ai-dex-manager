@@ -58,7 +58,10 @@ export async function buildV12LiveRuntime() {
     });
     const stateStore = new FileV12X1AllRunnerStateStore(runtime.statePath, runtime.mode);
     const lock = new FileAccountOrderLock(runtime.lockPath || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
-    const marketData = new V12AsterMarketDataProvider(client, { hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500) });
+    const marketData = new V12AsterMarketDataProvider(client, {
+        hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500),
+        requestSpacingMs: numberEnv("V12_X1_ALL_REQUEST_SPACING_MS", 100),
+    });
     const engine = new V12LiveExecutionEngine({ adapter, marketData, stateStore, lock, riskPath: runtime.riskPath });
     return { runtime, status: "live" as const, engine, strict, releaseSha };
 }
