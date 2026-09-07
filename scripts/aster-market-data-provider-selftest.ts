@@ -115,6 +115,40 @@ async function readOnlyRateLimitRetryTest() {
     });
     assert.deepEqual(await client.getKlines("BTCUSDT", "1h", 200), []);
     assert.equal(calls, 3);
+
+    let legacyCalls = 0;
+    const legacyResponseClient = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        readOnlyRateLimitMaxRetries: 1,
+        readOnlyRateLimitBackoffBaseMs: 1,
+        readOnlyRateLimitBackoffMaxMs: 5,
+        fetchImpl: async () => {
+            legacyCalls += 1;
+            if (legacyCalls === 1) return new Response(JSON.stringify({ code: -1003, msg: "Too many requests" }), { status: 400 });
+            return jsonResponse([]);
+        },
+    });
+    assert.deepEqual(await legacyResponseClient.getKlines("BTCUSDT", "1h", 200), []);
+    assert.equal(legacyCalls, 2);
+
+    let mutationCalls = 0;
+    const mutationClient = new AsterV3Client({
+        baseUrl: "https://mock.aster",
+        privateKey: `0x${"0".repeat(63)}1`,
+        userAddress: `0x${"0".repeat(40)}`,
+        readOnlyRateLimitMaxRetries: 2,
+        readOnlyRateLimitBackoffBaseMs: 1,
+        readOnlyRateLimitBackoffMaxMs: 5,
+        fetchImpl: async () => {
+            mutationCalls += 1;
+            return new Response(JSON.stringify({ code: -1003, msg: "Too many requests" }), { status: 400 });
+        },
+    });
+    await assert.rejects(
+        () => mutationClient.placeMarketOrder({ symbol: "BTCUSDT", side: "BUY", quantity: "0.001", reduceOnly: false, newClientOrderId: "unit-test-only" }),
+        /Too many requests/,
+    );
+    assert.equal(mutationCalls, 1);
 }
 
 async function v12HistoryRequestsAreSerializedTest() {

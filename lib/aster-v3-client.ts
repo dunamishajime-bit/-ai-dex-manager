@@ -237,6 +237,14 @@ function retryAfterFromHeaders(headers: Headers): number | undefined {
 }
 
 function isRateLimitStatus(status: number) { return status === 418 || status === 429; }
+function isReadOnlyRateLimitError(error: AsterApiError) {
+    if (isRateLimitStatus(error.status)) return true;
+    // Aster has also returned the Binance-compatible -1003 payload with a
+    // non-429 HTTP status. Treat that response as a read-only backoff case,
+    // while keeping every order mutation non-retryable below.
+    if (error.code === -1003) return true;
+    return /too many requests|rate[ -]?limit|request weight/i.test(error.message);
+}
 function sleep(ms: number) { return new Promise<void>((resolve) => setTimeout(resolve, ms)); }
 
 class MonotonicMicrosecondNonce {
@@ -316,7 +324,7 @@ export class AsterV3Client {
                 const canRetry = input.orderMutation !== true
                     && retries < this.readOnlyRateLimitMaxRetries
                     && error instanceof AsterApiError
-                    && isRateLimitStatus(error.status);
+                    && isReadOnlyRateLimitError(error);
                 if (canRetry) {
                     const exponential = this.readOnlyRateLimitBackoffBaseMs * (2 ** retries);
                     const waitMs = Math.min(this.readOnlyRateLimitBackoffMaxMs, Math.max(exponential, error.retryAfterMs ?? 0));
