@@ -21,6 +21,7 @@ from disdex_strict_portfolio_planner import (
     quality102_crypto_notional_from_positions,
     read_quality102_live_state_document,
 )
+from disdex_trade_fill_notification import enqueue_trade_fill_notification
 
 base = legacy.base
 
@@ -38,6 +39,20 @@ V50_BASIS_STOP_MULTIPLE = 1.5
 V50_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
 V50_MAX_ROUND_TRIP_COST_BPS = 60.0
 V50_MIN_NET_EDGE_BPS = 10.0
+
+
+def notify_v52_fill(engine: "V52AsterOnlyEngine", fill: object, event_type: str, reason: str, slot: str) -> None:
+    """Queue only a confirmed live V52 fill; never affect the trade result."""
+    queued = enqueue_trade_fill_notification(
+        fill,
+        strategy_id="V52",
+        event_type=event_type,
+        reason=reason,
+        live=bool(engine.live),
+        metadata={"slot": slot},
+    )
+    if engine.live and queued:
+        engine.log("v52-trade-fill-notification-queued", slot=slot, eventType=event_type, clientOrderId=getattr(fill, "client_id", ""))
 
 
 def transient_reference_error(error: BaseException | str) -> bool:
@@ -469,6 +484,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self._set_pending({"slot": slot, "action": "OPEN", "symbol": symbol, "side": side, "quantity": quantity, "clientId": client, "candidate": candidate, "targetGross": target_gross, "price": price})
         initial = self.aster.place_limit(symbol=aster_symbol, side=side, quantity=quantity, price=price, client_id=client, post_only=True)
         fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client, quantity, side, base.V11_ENTRY_TTL_MS)
+        notify_v52_fill(self, fill, "ENTRY_FILL", f"{slot}_ENTRY", slot)
         self.log("v52-entry-result", slot=slot, candidate=candidate, targetGross=target_gross, fill=dataclasses.asdict(fill))
         if fill.fill_ratio < base.V11_MIN_FILL_RATIO:
             if fill.executed_qty > 0:
@@ -487,6 +503,11 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.log("v52-position-open", slot=slot, position=position)
         return True
 
+    def flatten_aster_leg(self, symbol: str, open_side: str, quantity: float, reason: str):
+        fill = super().flatten_aster_leg(symbol, open_side, quantity, reason)
+        notify_v52_fill(self, fill, "EXIT_FILL", reason, "RECOVERY")
+        return fill
+
     def close_slot(self, slot: str, reason: str) -> None:
         position = self.positions().get(slot)
         if not position:
@@ -501,6 +522,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self._set_pending({"slot": slot, "action": "CLOSE", "symbol": symbol, "side": close_side, "quantity": quantity, "clientId": client})
         initial = self.aster.place_limit(symbol=base.ASTER_SYMBOL[symbol], side=close_side, quantity=quantity, price=price, client_id=client, reduce_only=True, post_only=True)
         fill = initial if not self.live else self.aster.poll_fill(base.ASTER_SYMBOL[symbol], client, quantity, close_side, 2000)
+        notify_v52_fill(self, fill, "EXIT_FILL", reason, slot)
         remaining = max(0.0, quantity - fill.executed_qty)
         if remaining > quantity * 0.01:
             market = self.flatten_aster_leg(symbol, open_side, remaining, reason + "-TAKER")

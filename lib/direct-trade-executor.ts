@@ -13,6 +13,11 @@ import {
     type AsterPositionRiskRow,
     type AsterPositionSide,
 } from "@/lib/aster-v3-client";
+import {
+    buildTradeFillNotificationEvent,
+    enqueueTradeFillNotification,
+    isConfirmedTradeFill,
+} from "@/lib/trade-fill-notification";
 
 const execFileAsync = promisify(execFile);
 
@@ -43,6 +48,9 @@ export interface DirectTradeResult {
     averagePrice: number;
     quoteQuantity: number;
     orderId?: number;
+    reduceOnly?: boolean;
+    reason?: string;
+    updatedAt?: number;
     executionUnknown: boolean;
     reconciled: boolean;
     raw?: AsterOrderResponse;
@@ -360,6 +368,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         executionUnknown?: boolean;
         reconciled?: boolean;
         error?: string;
+        reduceOnly?: boolean;
+        reason?: string;
     }): DirectTradeResult {
         const raw = input.raw;
         return {
@@ -374,11 +384,33 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             averagePrice: safeNumber(raw?.avgPrice),
             quoteQuantity: safeNumber(raw?.cumQuote),
             orderId: raw?.orderId,
+            reduceOnly: input.reduceOnly ?? raw?.reduceOnly,
+            reason: input.reason,
+            updatedAt: safeNumber(raw?.updateTime) || undefined,
             executionUnknown: input.executionUnknown === true,
             reconciled: input.reconciled === true,
             raw,
             error: input.error,
         };
+    }
+
+    private async enqueueConfirmedFill(result: DirectTradeResult, context: { reason?: string; reduceOnly?: boolean } = {}) {
+        if (!isConfirmedTradeFill(result)) return;
+        try {
+            await enqueueTradeFillNotification(
+                buildTradeFillNotificationEvent(result, {
+                    env: process.env,
+                    reason: context.reason || result.reason || "Aster実約定",
+                    reduceOnly: context.reduceOnly ?? result.reduceOnly,
+                }),
+                process.env,
+            );
+        } catch (error) {
+            // Notification delivery is deliberately outside the order/state
+            // transaction.  A mail or local-spool failure must never turn a
+            // confirmed venue fill into an execution failure.
+            console.warn("[TradeFillNotification] enqueue failed", error instanceof Error ? error.message : String(error));
+        }
     }
 
     async reconcileOrder(symbol: string, clientOrderId: string): Promise<DirectTradeResult> {
@@ -389,7 +421,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             if (attempt > 0) await sleep(this.reconciliationDelayMs * attempt);
             try {
                 const raw = await this.client.getOrder(normalizedSymbol, normalizedClientOrderId);
-                return this.normalizeResult({
+                const result = this.normalizeResult({
                     requestId: normalizedClientOrderId,
                     clientOrderId: normalizedClientOrderId,
                     requestedQuantity: safeNumber(raw.origQty),
@@ -398,7 +430,11 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                     raw,
                     executionUnknown: false,
                     reconciled: true,
+                    reduceOnly: raw.reduceOnly,
+                    reason: "Aster注文の約定を再照合",
                 });
+                await this.enqueueConfirmedFill(result, { reason: "Aster注文の約定を再照合", reduceOnly: raw.reduceOnly });
+                return result;
             } catch (error) {
                 lastError = error instanceof Error ? error.message : String(error);
                 if (isAsterDepositRequirementError(error)) {
@@ -456,14 +492,18 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 newClientOrderId: clientOrderId,
                 newOrderRespType: "RESULT",
             });
-            return this.normalizeResult({
+            const result = this.normalizeResult({
                 requestId: command.requestId,
                 clientOrderId,
                 requestedQuantity: command.quantity,
                 submittedQuantity: normalized.quantity,
                 side: command.side,
                 raw,
+                reduceOnly: command.reduceOnly,
+                reason: command.reason,
             });
+            await this.enqueueConfirmedFill(result, { reason: command.reason, reduceOnly: command.reduceOnly });
+            return result;
         } catch (error) {
             if (error instanceof AsterApiError && error.executionUnknown) {
                 const reconciled = await this.reconcileOrder(symbol, clientOrderId);

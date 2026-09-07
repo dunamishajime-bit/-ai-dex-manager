@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { AsterOrderResponse, AsterV3Client } from "@/lib/aster-v3-client";
 import { PENGU_RECOVERY_V8 } from "@/config/penguRecoveryV8";
+import { buildTradeFillNotificationEvent, enqueueTradeFillNotification, isConfirmedTradeFill } from "@/lib/trade-fill-notification";
 
 export interface RecoveryV8StopOrderInput {
     symbol: string;
@@ -22,6 +23,8 @@ export interface RecoveryV8ProtectiveOrder {
     executedQuantity?: number;
     averagePrice?: number;
     orderId?: number;
+    side?: "BUY" | "SELL";
+    updatedAt?: number;
 }
 
 export interface RecoveryV8ProtectiveOrderGateway {
@@ -154,14 +157,49 @@ function fromAster(row: AsterOrderResponse): RecoveryV8ProtectiveOrder {
         executedQuantity: Number(row.executedQty || 0),
         averagePrice: Number(row.avgPrice || 0),
         orderId: row.orderId,
+        side: row.side,
+        updatedAt: Number(row.updateTime || 0) || undefined,
     };
+}
+
+async function notifyRecoveryV8Fill(order: RecoveryV8ProtectiveOrder): Promise<void> {
+    if (!order.side || !isConfirmedTradeFill({
+        symbol: order.symbol,
+        clientOrderId: order.clientOrderId,
+        side: order.side,
+        status: order.status,
+        executedQuantity: order.executedQuantity,
+    })) return;
+    try {
+        await enqueueTradeFillNotification(buildTradeFillNotificationEvent({
+            requestId: order.clientOrderId,
+            clientOrderId: order.clientOrderId,
+            symbol: order.symbol,
+            side: order.side,
+            status: order.status,
+            reduceOnly: true,
+            executedQuantity: order.executedQuantity,
+            averagePrice: order.averagePrice,
+            quoteQuantity: order.averagePrice && order.executedQuantity ? order.averagePrice * order.executedQuantity : 0,
+            orderId: order.orderId,
+            updatedAt: order.updatedAt,
+        }, {
+            env: process.env,
+            strategyId: "PENGU_DUAL_LS_V2_FINAL",
+            eventType: "EXIT_FILL",
+            reduceOnly: true,
+            reason: "PENGU_RECOVERY_V8_PROTECTIVE_FILL_RECONCILED",
+        }), process.env);
+    } catch (error) {
+        console.warn("[TradeFillNotification] PENGU Recovery V8 protection enqueue failed", error instanceof Error ? error.message : String(error));
+    }
 }
 
 export class AsterRecoveryV8ProtectiveOrderGateway implements RecoveryV8ProtectiveOrderGateway {
     constructor(private readonly client: AsterV3Client) {}
 
     async placeStopMarket(input: RecoveryV8StopOrderInput) {
-        return fromAster(await this.client.placeStopMarketOrder({
+        const order = fromAster(await this.client.placeStopMarketOrder({
             symbol: input.symbol,
             side: input.side,
             quantity: String(input.quantity),
@@ -171,6 +209,8 @@ export class AsterRecoveryV8ProtectiveOrderGateway implements RecoveryV8Protecti
             newClientOrderId: input.clientOrderId,
             newOrderRespType: "RESULT",
         }));
+        await notifyRecoveryV8Fill(order);
+        return order;
     }
 
     async cancel(clientOrderId: string, symbol = PENGU_RECOVERY_V8.symbol) {
@@ -178,10 +218,14 @@ export class AsterRecoveryV8ProtectiveOrderGateway implements RecoveryV8Protecti
     }
 
     async getOpenOrders(symbol = PENGU_RECOVERY_V8.symbol) {
-        return (await this.client.getOpenOrders(symbol)).map(fromAster);
+        const orders = (await this.client.getOpenOrders(symbol)).map(fromAster);
+        await Promise.all(orders.map((order) => notifyRecoveryV8Fill(order)));
+        return orders;
     }
 
     async getOrder(symbol: string, clientOrderId: string) {
-        return fromAster(await this.client.getOrder(symbol, clientOrderId));
+        const order = fromAster(await this.client.getOrder(symbol, clientOrderId));
+        await notifyRecoveryV8Fill(order);
+        return order;
     }
 }

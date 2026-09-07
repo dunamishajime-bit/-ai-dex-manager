@@ -3,13 +3,14 @@ import { createHash } from "node:crypto";
 import { AsterApiError, AsterV3Client, type AsterOrderResponse, type AsterOrderSide } from "@/lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition, type DirectTradeResult } from "@/lib/direct-trade-executor";
 import { assertSharedKillSwitchAllowsNewEntry } from "@/lib/disdex-shared-kill-switch";
+import { buildTradeFillNotificationEvent, enqueueTradeFillNotification, isConfirmedTradeFill } from "@/lib/trade-fill-notification";
 import type { ResidentStopAdapter } from "@/lib/v12-resident-stop-lifecycle";
 
 export const V12_CLIENT_ORDER_PREFIX = "v12-" as const;
 
 export interface V12AsterOrderView {
     symbol: string; clientOrderId: string; orderId?: number; status: string; side?: AsterOrderSide; type?: string; reduceOnly?: boolean;
-    quantity: number; executedQuantity: number; stopPrice?: number;
+    quantity: number; executedQuantity: number; averagePrice: number; quoteQuantity: number; updatedAt?: number; stopPrice?: number;
 }
 export interface V12AsterLiveAdapterOptions { maxSlippageBps?: number; reconciliationAttempts?: number; reconciliationDelayMs?: number; readRequestSpacingMs?: number; }
 function finite(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
@@ -20,7 +21,7 @@ export function deterministicV12ClientOrderId(input: { action: "ENTRY" | "EXIT" 
     return `${V12_CLIENT_ORDER_PREFIX}${input.action.toLowerCase().slice(0, 5)}-${digest}`.slice(0, 36);
 }
 function normalizeOrder(raw: AsterOrderResponse): V12AsterOrderView {
-    return { symbol: String(raw.symbol || "").toUpperCase(), clientOrderId: String(raw.clientOrderId || ""), orderId: raw.orderId, status: String(raw.status || "UNKNOWN").toUpperCase(), side: raw.side, type: raw.type, reduceOnly: raw.reduceOnly, quantity: finite(raw.origQty), executedQuantity: finite(raw.executedQty), stopPrice: finite(raw.stopPrice) || undefined };
+    return { symbol: String(raw.symbol || "").toUpperCase(), clientOrderId: String(raw.clientOrderId || ""), orderId: raw.orderId, status: String(raw.status || "UNKNOWN").toUpperCase(), side: raw.side, type: raw.type, reduceOnly: raw.reduceOnly, quantity: finite(raw.origQty), executedQuantity: finite(raw.executedQty), averagePrice: finite(raw.avgPrice), quoteQuantity: finite(raw.cumQuote), updatedAt: finite(raw.updateTime) || undefined, stopPrice: finite(raw.stopPrice) || undefined };
 }
 function activeStatus(status: string) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(status.toUpperCase()); }
 
@@ -109,7 +110,41 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     async queryOrderSameId(symbol: string, clientOrderId: string): Promise<V12AsterOrderView | null> {
         for (let attempt = 0; attempt < this.reconciliationAttempts; attempt += 1) {
             if (attempt) await sleep(this.reconciliationDelayMs * attempt);
-            try { return normalizeOrder(await this.client.getOrder(symbol.toUpperCase(), clientOrderId)); }
+            try {
+                const view = normalizeOrder(await this.client.getOrder(symbol.toUpperCase(), clientOrderId));
+                if (isConfirmedTradeFill({
+                    symbol: view.symbol,
+                    clientOrderId: view.clientOrderId || clientOrderId,
+                    side: view.side,
+                    status: view.status,
+                    executedQuantity: view.executedQuantity,
+                }) && view.side) {
+                    try {
+                        await enqueueTradeFillNotification(buildTradeFillNotificationEvent({
+                            requestId: view.clientOrderId || clientOrderId,
+                            clientOrderId: view.clientOrderId || clientOrderId,
+                            symbol: view.symbol,
+                            side: view.side,
+                            status: view.status,
+                            reduceOnly: true,
+                            executedQuantity: view.executedQuantity,
+                            averagePrice: view.averagePrice,
+                            quoteQuantity: view.quoteQuantity,
+                            orderId: view.orderId,
+                            updatedAt: view.updatedAt,
+                        }, {
+                            env: process.env,
+                            strategyId: "V12_X1.00_ALL",
+                            eventType: "EXIT_FILL",
+                            reduceOnly: true,
+                            reason: "V12_PROTECTION_FILL_RECONCILED",
+                        }), process.env);
+                    } catch (notificationError) {
+                        console.warn("[TradeFillNotification] V12 protection enqueue failed", notificationError instanceof Error ? notificationError.message : String(notificationError));
+                    }
+                }
+                return view;
+            }
             catch (error) { if (error instanceof AsterApiError && (error.status === 418 || error.status === 429)) continue; if (attempt + 1 >= this.reconciliationAttempts) return null; }
         }
         return null;
