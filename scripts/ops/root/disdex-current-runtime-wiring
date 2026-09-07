@@ -136,6 +136,8 @@ set_units() {
   MARGIN_DROPIN_DIR="/etc/systemd/system/${MARGIN_UNIT}.d"
   V52_DROPIN_DIR="/etc/systemd/system/${V52_UNIT}.d"
   CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"
+  HEALTH_SNAPSHOT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.health-snapshot.env"
+  WATCHDOG_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.watchdog.env"
 }
 
 show_plan() {
@@ -151,6 +153,8 @@ show_plan() {
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
   printf 'penguStateRoot=%s\n' "$PENGU_STATE_ROOT"
   printf 'contractEnvFile=%s\n' "$CONTRACT_ENV_FILE"
+  printf 'healthSnapshotEnvFile=%s\n' "$HEALTH_SNAPSHOT_ENV_FILE"
+  printf 'watchdogEnvFile=%s\n' "$WATCHDOG_ENV_FILE"
   printf 'watchdogDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$WATCHDOG_DROPIN_DIR"
   printf 'healthSnapshotDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$SNAPSHOT_DROPIN_DIR"
   printf 'v12Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$V12_DROPIN_DIR"
@@ -252,19 +256,34 @@ DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
 PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
 
+  write_atomic "$HEALTH_SNAPSHOT_ENV_FILE" "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT=/var/lib/disdex/runner-health
+DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=${SHARED_ROOT}/kill-switch.json"
+
+  write_atomic "$WATCHDOG_ENV_FILE" "DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_RUNNER_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_RUNNER_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
+DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
+DISDEX_WATCHDOG_AUDIT_PATH=/var/lib/disdex/runner-health/private/watchdog-current-audit.json
+DISDEX_WATCHDOG_LOCK_PATH=/var/lib/disdex/runner-health/private/watchdog-current.lock
+DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
+DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
+DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
+DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}"
+
+  # EnvironmentFile entries from the base monitor units are historical and
+  # must be cleared; otherwise systemd loads them after Environment= values
+  # and silently restores the previous release pin.
   write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
-Environment=DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
-Environment=DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}
-Environment=DISDEX_WATCHDOG_RUNNER_SHA=${DEPLOYED_SHA}
-Environment=DISDEX_WATCHDOG_RUNNER_ROOT=${CURRENT_RELEASE}
-Environment=DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
-Environment=DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
-Environment=DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
-Environment=DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}"
+EnvironmentFile=
+EnvironmentFile=${WATCHDOG_ENV_FILE}"
 
   write_atomic "${SNAPSHOT_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
-Environment=DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}
-Environment=DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}"
+EnvironmentFile=
+EnvironmentFile=${HEALTH_SNAPSHOT_ENV_FILE}"
 
   write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
