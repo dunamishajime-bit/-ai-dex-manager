@@ -693,7 +693,38 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.save()
         return bool(next_latch.get("tripped") or next_latch.get("failClosed"))
 
-    def tick(self) -> None:
+    def prepare_tick_inputs(self) -> dict:
+        local = self.current_local_time()
+        positions_open = bool(self.positions())
+        market_open = regular_us_equity_session(local)
+        sec = base.ny_seconds(local)
+        if self.kill_switch():
+            return {"local": local, "rows": None, "skipWithoutLock": False}
+        if not market_open:
+            return {"local": local, "rows": None, "skipWithoutLock": not positions_open}
+        in_decision_window = base.clock("09:59:50") <= sec <= base.clock("15:30:30")
+        if not positions_open and not in_decision_window:
+            return {"local": local, "rows": None, "skipWithoutLock": True}
+        return {"local": local, "rows": self.books_and_refs(), "skipWithoutLock": False}
+
+    def idle_tick(self, prepared: dict) -> None:
+        self.reset_days()
+        self.enforce_daily_loss()
+        self.update_history()
+        local = prepared["local"]
+        if not regular_us_equity_session(local):
+            self.log(
+                "v52-market-closed",
+                market="US_EQUITY",
+                localDate=local.date().isoformat(),
+                localTime=local.isoformat(),
+                referenceFetch="deferred",
+                newOrdersAllowed=False,
+            )
+
+    def tick(self, prepared: dict | None = None) -> None:
+        if prepared and prepared.get("preloadError") is not None:
+            raise prepared["preloadError"]
         self.reset_days()
         kill = self.kill_switch()
         if kill:
@@ -709,7 +740,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if self.kill_switch():
             self.flatten_all("DAILY_LOSS"); return
         self.update_history()
-        local = self.current_local_time()
+        local = prepared["local"] if prepared else self.current_local_time()
         if not regular_us_equity_session(local):
             self.log(
                 "v52-market-closed",
@@ -723,7 +754,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         sec = base.ny_seconds(local)
         if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):
             return
-        rows = self.books_and_refs()
+        rows = prepared.get("rows") if prepared else None
+        if rows is None:
+            rows = self.books_and_refs()
         if self.v96_requires_margin():
             if self.positions(): self.flatten_all("V96_MARGIN_PRIORITY")
             return
@@ -793,7 +826,17 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         started_once = False
         while not self.stop_requested:
             started = base.now_ms()
-            if not self.lock.acquire():
+            try:
+                prepared = self.prepare_tick_inputs()
+            except Exception as error:
+                if transient_reference_error(error) and not self.positions():
+                    self.log("v52-entry-held-reference-validation", error=str(error), phase="PRELOCK")
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True}
+                else:
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "preloadError": error}
+            if prepared.get("skipWithoutLock"):
+                self.idle_tick(prepared)
+            elif not self.lock.acquire():
                 self.log("v52-account-lock-busy", accountLockPath=str(self.lock.path))
             else:
                 try:
@@ -801,20 +844,14 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                         self.reset_days(); self.reconcile()
                         self.log("v52-runner-start", strategyId=STRATEGY_ID, caps={"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap})
                         started_once = True
-                    self.tick()
+                    self.tick(prepared)
                 except Exception as error:
                     self.log("v52-tick-error", error=str(error))
                     if transient_reference_error(error) and not self.positions():
-                        # A stale or disagreeing independent reference is an entry
-                        # gate, not an execution fault.  Do not kill the V52 daemon
-                        # or consume its narrow entry window; wait for fresh, agreeing
-                        # quotes and re-evaluate on the next tick.
                         self.log("v52-entry-held-reference-validation", error=str(error))
                     elif self.live:
                         self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
                 finally:
-                    # The shared lock coordinates one tick/order plan. Holding it
-                    # across daemon sleep would expire the lease and block V12/PENGU.
                     self.lock.release()
             if not daemon: break
             active = regular_us_equity_session() or bool(self.positions())

@@ -540,6 +540,13 @@ export class PenguDualLsV2PortfolioRunner {
     async tick(): Promise<PenguDualLsV2TickResult> {
         if (!this.dependencies.config.enabled) return { status: "disabled", message: "PENGU_DUAL_LS_V2_FINAL is disabled." };
         this.ensureLiveGate();
+        let preloadedHistory: PenguDualLsV2History | undefined;
+        try {
+            const beforeLockState = await this.dependencies.stateStore.load();
+            if (!beforeLockState.pending) preloadedHistory = await this.dependencies.marketData.load();
+        } catch {
+            // Preserve the existing fail-closed path under the shared lock.
+        }
         const ownerId = randomUUID();
         const lock = await this.dependencies.lock.acquire(ownerId);
         if (!lock) return { status: "locked", message: "Another PENGU Dual LS tick owns the account lock." };
@@ -547,7 +554,7 @@ export class PenguDualLsV2PortfolioRunner {
             const state = await this.dependencies.stateStore.load();
             state.lastRunAt = this.now();
             if (state.pending) return await this.reconcilePending(state);
-            const history = await this.dependencies.marketData.load();
+            const history = preloadedHistory ?? await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
                 const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
                 state.lastSignalReferenceTs = signal.referenceTs;

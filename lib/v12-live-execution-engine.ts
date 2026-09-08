@@ -206,6 +206,13 @@ export class V12LiveExecutionEngine {
     }
 
     async tick(): Promise<V12LiveTickResult> {
+        let preloadedData: Record<string, V12Bar[]> | undefined;
+        try {
+            const beforeLockState = await this.d.stateStore.load();
+            if (!beforeLockState.pending) preloadedData = await this.d.marketData.load();
+        } catch {
+            // Preserve the existing fail-closed path under the shared lock.
+        }
         const handle = await this.d.lock.acquire(`V12_X1.00_ALL:${process.pid}:${randomUUID()}`); if (!handle) return { status: "locked", reason: "ACCOUNT_LOCK_BUSY_OR_STALE_REVIEW_REQUIRED" };
         try {
             let state = await this.d.stateStore.load();
@@ -215,7 +222,7 @@ export class V12LiveExecutionEngine {
             const quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
             const recovery = await this.restartReconcile(state, positions, quality102Ownership); if (recovery) return recovery;
             state = await this.d.stateStore.load();
-            const data = await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
+            const data = preloadedData ?? await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
 
             if (state.active) {
                 if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "held", reason: "NO_NEW_CONFIRMED_2H_BAR" };

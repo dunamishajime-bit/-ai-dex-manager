@@ -4,6 +4,8 @@ import argparse
 import json
 import os
 import signal
+import subprocess
+import sys
 
 import disdex_v52_aster_only_legacy_engine as legacy
 from disdex_strict_portfolio_planner import (
@@ -55,6 +57,34 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         accepted = min(max(0.0, available), strict_plan["acceptedGross"])
         return accepted, {**snapshot, "strictPortfolioPlan": strict_plan}
 
+    def require_fresh_preorder_margin_guard(self) -> None:
+        if not self.live:
+            return
+        if not base.bool_env("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED", False):
+            raise RuntimeError("V52 LIVE requires fresh pre-order Margin Guard")
+        python = os.getenv("DISDEX_PYTHON_BIN") or sys.executable or "python3"
+        script = os.getenv("DISDEX_V96_V52_MARGIN_GUARD_SCRIPT") or "scripts/disdex_v96_v52_margin_guard_runtime.py"
+        result = subprocess.run(
+            [python, script, "--mode", "live", "--preorder-check"],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"V52 fresh pre-order Margin Guard failed: rc={result.returncode} stderr={result.stderr.strip()}")
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if not lines:
+            raise RuntimeError("V52 fresh pre-order Margin Guard returned no result")
+        try:
+            decision = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("V52 fresh pre-order Margin Guard returned invalid JSON") from error
+        if decision.get("stage") != "HEALTHY" or decision.get("ordersAllowed") is not True:
+            raise RuntimeError(f"V52 fresh pre-order Margin Guard blocked exposure: {decision}")
+
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
         snapshot = self.gross_snapshot()
         self.assert_gross_safe(snapshot)
@@ -68,6 +98,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
                 strictPortfolioPlan=strict_plan,
             )
             return False
+        self.require_fresh_preorder_margin_guard()
         return super().open_basis_position(slot, candidate, target_gross)
 
     def preflight(self, read_only: bool = False) -> dict:
