@@ -278,9 +278,12 @@ export class Quality102CausalV1AsterMarketDataProvider {
     private async loadEntryOpen(symbol: string, now: number): Promise<{ timestampMs: number; open: number }> {
         const timestampMs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS;
         // Aster rejects a zero-width range (startTime === endTime) with
-        // -1023. Keep the request inside the current candle and use the
-        // smallest positive range so the returned open is still causal.
-        const rows = await this.getKlines(symbol, 1, timestampMs, timestampMs + 1);
+        // -1023, and may omit the just-opened candle when the range is only
+        // 1ms wide. Query only through the already-observed current time;
+        // the selector consumes row[1] (the candle open), so no future value
+        // or later intrabar price is introduced.
+        const requestEndTime = Math.max(timestampMs + 1, now);
+        const rows = await this.getKlines(symbol, 1, timestampMs, requestEndTime);
         const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
         if (!row) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
         const open = finiteNumber(row[1], "currentOpen");
