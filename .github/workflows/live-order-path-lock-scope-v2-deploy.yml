@@ -17,27 +17,17 @@ concurrency:
 jobs:
   deploy:
     runs-on: [self-hosted, Linux, X64, disdex-vps]
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect remaining privilege paths
+      - name: Inspect GitHub Actions root control
         shell: bash
         run: |
-          set -u
-          OLD=5c49716301e2a82e6808ac4c22554279874e3a9c
-          echo "runner=$(id)"
-          echo '--- root wrappers ---'
-          ls -la /usr/local/sbin/disdex-* 2>&1 || true
-          echo '--- writable paths ---'
-          for p in /home/deploy/disdex-trading /home/deploy/disdex-trading/releases; do
-            stat -c '%U:%G:%a %n' "$p" 2>&1 || true
-            test -w "$p" && echo "writable=$p" || echo "not_writable=$p"
-          done          echo '--- no-op start permission test ---'
-          systemctl start "disdex-v12-x1-all@${OLD}.service" 2>&1
-          echo "start_rc=$?"
-          systemctl is-active "disdex-v12-x1-all@${OLD}.service" || true
-          echo '--- polkit hints ---'
-          grep -R "disdex-runner\|manage-units" /etc/polkit-1/rules.d /etc/polkit-1/localauthority 2>/dev/null || true
-          echo '--- control actions available ---'
-          sudo -n /usr/local/sbin/disdex-vps-control trading-state || true
-          sudo -n /usr/local/sbin/disdex-vps-control trading-current || true
+          set -Eeuo pipefail
+          echo '--- disdex-github-actions-entry ---'
+          sed -n '1,240p' /usr/local/sbin/disdex-github-actions-entry
+          echo '--- disdex-github-actions-control ---'
+          sed -n '1,320p' /usr/local/sbin/disdex-github-actions-control
+          echo '--- sudo permission probes ---'
+          sudo -n /usr/local/sbin/disdex-vps-control trading-state
+          sudo -n -l
