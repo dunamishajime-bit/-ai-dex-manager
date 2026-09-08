@@ -33,6 +33,7 @@ import {
 } from "@/lib/disdex-shared-crypto-daily-risk";
 import { isAsterDepositRequirementError } from "@/lib/aster-v3-client";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
+import { isOneShotStrategyPosition } from "@/lib/disdex-one-shot-force-close";
 import type {
     DirectAccountSnapshot,
     DirectMarketQuote,
@@ -977,6 +978,9 @@ export class Quality102CausalV1Runner {
             if (state.position && !actual) return this.manualReview(state, "Q102 state expects a position but exchange returned none.");
             if (!state.position && actual) return this.manualReview(state, "Q102 exchange position is unmanaged.");
             if (state.position) {
+                if (isOneShotStrategyPosition(state) && !riskBlocked) {
+                    return { status: "held", message: "Q102 one-shot force-close position is reserved for the durable close worker.", ordersSent: 0 };
+                }
                 if (!state.position.hardStop || !state.position.bestPrice || state.position.trailActive === undefined) return this.manualReview(state, "Q102 active state lacks recovered exit metadata.");
                 const quote = await this.dependencies.executor.getMarketQuote(state.position.symbol);
                 if (!validQuote(quote, state.position.symbol, this.now(), this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 active mark quote is stale or invalid.", ordersSent: 0 };

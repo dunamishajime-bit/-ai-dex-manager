@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "lib/disdex-one-shot-force-close.ts",
+    "lib/v12-live-execution-engine.ts",
+    "lib/v12-x1-all-runner-state.ts",
+    "lib/pengu-dual-ls-v2-portfolio-runner.ts",
+    "lib/pengu-dual-ls-v2-runner-state.ts",
+    "lib/disdex-quality102-causal-v1-runner.ts",
+    "lib/disdex-quality102-causal-v1-state.ts",
+    "scripts/disdex-one-shot-force-close.ts",
+    "tests/one_shot_force_close.test.ts"
+  ],
+  "exclude": ["node_modules"]
+}

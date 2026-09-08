@@ -49,6 +49,9 @@ export interface V12X1AllRunnerState {
     pending?: V12PendingOrderState;
     manualReview?: string;
     killSwitch?: { active: boolean; reason: string; trippedAt: number };
+    /** A one-shot operator test owns the position until its durable close job completes. */
+    oneShotTestId?: string;
+    oneShotCloseAtTs?: number;
 }
 
 function initial(mode: V12X1AllRunnerState["mode"]): V12X1AllRunnerState { return { schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode, updatedAt: Date.now() }; }
@@ -68,6 +71,8 @@ export class FileV12X1AllRunnerStateStore {
                 if (!value.pending.clientOrderId || !value.pending.idempotencyKey || !value.pending.symbol || !value.pending.side || !(value.pending.quantity > 0) || !Number.isFinite(value.pending.signalTs)) throw new Error("V12_STATE_PENDING_INVALID");
                 if (value.pending.action === "STOP_UPDATE" && (!value.pending.positionId || !(Number(value.pending.stopPrice) > 0) || !Number.isFinite(Number(value.pending.nextPeakOrTrough)))) throw new Error("V12_STATE_STOP_UPDATE_PENDING_INVALID");
             }
+            if (value.oneShotTestId !== undefined && (typeof value.oneShotTestId !== "string" || !value.oneShotTestId.trim())) throw new Error("V12_STATE_ONE_SHOT_ID_INVALID");
+            if (value.oneShotCloseAtTs !== undefined && !(Number.isFinite(Number(value.oneShotCloseAtTs)) && Number(value.oneShotCloseAtTs) > 0)) throw new Error("V12_STATE_ONE_SHOT_CLOSE_TIMESTAMP_INVALID");
             return { ...initial(this.mode), ...value, updatedAt: Number(value.updatedAt) || Date.now() } as V12X1AllRunnerState;
         } catch (error) { const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : ""; if (code === "ENOENT") return initial(this.mode); throw error; }
     }

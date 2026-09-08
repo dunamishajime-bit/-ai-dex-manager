@@ -57,6 +57,9 @@ export interface Quality102CausalV1State {
     maxHoldHours?: number;
   };
   pending?: Quality102CausalV1PendingOrder;
+  /** A one-shot operator test owns the position until its durable close job completes. */
+  oneShotTestId?: string;
+  oneShotCloseAtTs?: number;
   lastReduction?: {
     idempotencyKey: string;
     symbol: string;
@@ -265,6 +268,8 @@ function normalizeState(
     "lastCompletedIdempotencyKey",
     "position",
     "pending",
+    "oneShotTestId",
+    "oneShotCloseAtTs",
     "lastReduction",
     "initialDaemonReconciliation",
     "lastReconciledAt",
@@ -284,6 +289,9 @@ function normalizeState(
   const lastCompletedIdempotencyKey = optionalString(raw.lastCompletedIdempotencyKey, "lastCompletedIdempotencyKey");
   const position = normalizePosition(raw.position);
   const pending = normalizePending(raw.pending);
+  const oneShotTestId = raw.oneShotTestId === undefined ? undefined : requiredString(raw.oneShotTestId, "oneShotTestId");
+  const oneShotCloseAtTs = optionalTimestamp(raw.oneShotCloseAtTs, "oneShotCloseAtTs");
+  if (oneShotCloseAtTs !== undefined && oneShotCloseAtTs <= 0) malformed("oneShotCloseAtTs");
   const lastReduction = normalizeReduction(raw.lastReduction);
   const initialDaemonReconciliation = normalizeInitialDaemonReconciliation(raw.initialDaemonReconciliation);
   const lastReconciledAt = optionalTimestamp(raw.lastReconciledAt, "lastReconciledAt");
@@ -298,6 +306,8 @@ function normalizeState(
     ...(lastCompletedIdempotencyKey === undefined ? {} : { lastCompletedIdempotencyKey }),
     ...(position === undefined ? {} : { position }),
     ...(pending === undefined ? {} : { pending }),
+    ...(oneShotTestId === undefined ? {} : { oneShotTestId }),
+    ...(oneShotCloseAtTs === undefined ? {} : { oneShotCloseAtTs }),
     ...(lastReduction === undefined ? {} : { lastReduction }),
     ...(initialDaemonReconciliation === undefined ? {} : { initialDaemonReconciliation }),
     ...(lastReconciledAt === undefined ? {} : { lastReconciledAt }),

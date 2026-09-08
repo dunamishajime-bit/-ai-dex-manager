@@ -53,6 +53,9 @@ export interface PenguDualLsV2RunnerState {
     cooldownUntilTs?: number;
     position?: PenguDualLsV2Position;
     pending?: PenguDualLsV2PendingOrder;
+    /** A one-shot operator test owns the position until its durable close job completes. */
+    oneShotTestId?: string;
+    oneShotCloseAtTs?: number;
     failures: PenguDualLsV2RunnerFailure[];
 }
 
@@ -130,6 +133,8 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
             entryVersion: rawPosition.entryVersion || "LEGACY_V2",
         } satisfies PenguDualLsV2Position
         : undefined;
+    if (raw.oneShotTestId !== undefined && (typeof raw.oneShotTestId !== "string" || !raw.oneShotTestId.trim())) throw new Error("PENGU_STATE_ONE_SHOT_ID_INVALID");
+    if (raw.oneShotCloseAtTs !== undefined && !(Number.isFinite(Number(raw.oneShotCloseAtTs)) && Number(raw.oneShotCloseAtTs) > 0)) throw new Error("PENGU_STATE_ONE_SHOT_CLOSE_TIMESTAMP_INVALID");
     return {
         version: 2,
         strategyId: "PENGU_DUAL_LS_V2_FINAL",
@@ -142,6 +147,8 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
         cooldownUntilTs: Number.isFinite(Number(raw.cooldownUntilTs)) ? Number(raw.cooldownUntilTs) : undefined,
         position: position && (position.side === 1 || position.side === -1) ? position : undefined,
         pending: raw.pending && typeof raw.pending === "object" ? raw.pending as PenguDualLsV2PendingOrder : undefined,
+        oneShotTestId: raw.oneShotTestId,
+        oneShotCloseAtTs: raw.oneShotCloseAtTs === undefined ? undefined : Number(raw.oneShotCloseAtTs),
         failures: Array.isArray(raw.failures)
             ? raw.failures.filter((item): item is PenguDualLsV2RunnerFailure => Boolean(item && typeof item.message === "string")).slice(-100)
             : [],

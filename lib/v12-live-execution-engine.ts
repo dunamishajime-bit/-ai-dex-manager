@@ -20,6 +20,7 @@ import { buildV12Signal, protectiveLevels, sizeV12Position, type V12Bar, type V1
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
+import { isOneShotStrategyPosition } from "@/lib/disdex-one-shot-force-close";
 
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 const EPS = 1e-12;
@@ -173,7 +174,7 @@ export class V12LiveExecutionEngine {
                 return this.fail(state, `V12_FAILSAFE_CLOSE_PENDING_REQUIRES_MANUAL_REVIEW:${state.pending.clientOrderId}`);
             }
         }
-        const v12Actual = positions.filter((row) => V12_SYMBOLS.has(row.symbol.toUpperCase()) && Math.abs(row.quantity) > EPS);
+        const v12Actual = positions.filter((row) => V12_SYMBOLS.has(row.symbol.toUpperCase()) && !quality102OwnsPosition(quality102Ownership, row) && Math.abs(row.quantity) > EPS);
         if (!state.active && v12Actual.length) return this.fail(state, `V12_POSITION_ONLY_MISMATCH:${v12Actual.map((row) => row.symbol).join(",")}`);
         if (state.active) {
             const actual = v12Actual.find((row) => row.symbol.toUpperCase() === state.active!.symbol.toUpperCase());
@@ -183,12 +184,17 @@ export class V12LiveExecutionEngine {
                 } else return this.fail(state, "V12_STATE_ONLY_POSITION_MISMATCH");
             } else {
                 if (v12Actual.length !== 1 || !positionMatches(state.active, actual)) return this.fail(state, "V12_POSITION_SIDE_OR_QTY_MISMATCH");
-                const protection = await reconcileV12Protection(this.d.adapter, state.active.protection);
-                if (protection.manualReview) return this.fail(state, protection.manualReview);
-                state.active = { ...state.active, quantity: actualQuantity(actual), entryPrice: actual.entryPrice || state.active.entryPrice, protection }; await this.d.stateStore.save(state);
+                if (!isOneShotStrategyPosition(state)) {
+                    const protection = await reconcileV12Protection(this.d.adapter, state.active.protection);
+                    if (protection.manualReview) return this.fail(state, protection.manualReview);
+                    state.active = { ...state.active, quantity: actualQuantity(actual), entryPrice: actual.entryPrice || state.active.entryPrice, protection };
+                } else {
+                    state.active = { ...state.active, quantity: actualQuantity(actual), entryPrice: actual.entryPrice || state.active.entryPrice };
+                }
+                await this.d.stateStore.save(state);
             }
         }
-        await this.verifyNoUnexpectedV12Orders(state);
+        if (!isOneShotStrategyPosition(state)) await this.verifyNoUnexpectedV12Orders(state);
         return undefined;
     }
 
@@ -215,6 +221,9 @@ export class V12LiveExecutionEngine {
             const quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
             const recovery = await this.restartReconcile(state, positions, quality102Ownership); if (recovery) return recovery;
             state = await this.d.stateStore.load();
+            if (state.active && isOneShotStrategyPosition(state)) {
+                return { status: "held", reason: "ONE_SHOT_FORCE_CLOSE_POSITION_RESERVED" };
+            }
             const data = await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
 
             if (state.active) {

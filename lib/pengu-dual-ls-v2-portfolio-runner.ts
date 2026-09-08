@@ -29,6 +29,7 @@ import { createPenguShortV20State } from "@/lib/pengu-short-v20";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
+import { isOneShotStrategyPosition } from "@/lib/disdex-one-shot-force-close";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import {
     placeRecoveryV8EntryHardStop,
@@ -591,6 +592,13 @@ export class PenguDualLsV2PortfolioRunner {
                     return { status: "manual-review", message: "PENGU Dual LS durable state and Aster position disagree." };
                 }
                 state.position = statePositionFromActual(actual, state.position);
+            }
+            if (state.position && isOneShotStrategyPosition(state)) {
+                const emergencyRisk = await this.sharedRiskReason();
+                if (!emergencyRisk) {
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message: "PENGU one-shot force-close position is reserved for the durable close worker." };
+                }
             }
             if (state.position?.entryVersion === "RECOVERY_V8" && state.position.recoveryV8 && actual && this.dependencies.config.mode === "LIVE") {
                 if (state.position.recoveryV8.protectionLifecycle === "MANUAL_REVIEW") {
