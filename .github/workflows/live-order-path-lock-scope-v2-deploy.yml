@@ -24,19 +24,26 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Verify runner privilege boundary
+      - name: Inspect existing deployment control
         shell: bash
         run: |
-          set -Eeuo pipefail
-          id
-          sudo -n true
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-
-      - name: Deploy verified order-path release
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          chmod +x scripts/ops/root/disdex-order-path-lock-scope-v2-deploy
-          sudo -n bash scripts/ops/root/disdex-order-path-lock-scope-v2-deploy \
-            "$GITHUB_WORKSPACE" "$GITHUB_SHA" \
-            5c49716301e2a82e6808ac4c22554279874e3a9c
+          set -Eeuo pipefail          echo "HEAD=$(git rev-parse HEAD)"
+          echo "CURRENT=$(readlink -f /home/deploy/disdex-trading/current)"
+          echo '--- allowed control probe ---'
+          sudo -n /usr/local/sbin/disdex-vps-control trading-state || true
+          sudo -n /usr/local/sbin/disdex-vps-control trading-current || true
+          echo '--- sudo list ---'
+          sudo -n -l 2>&1 || true
+          echo '--- old units ---'
+          for unit in \
+            disdex-v12-x1-all@5c49716301e2a82e6808ac4c22554279874e3a9c.service \
+            disdex-pengu-dual-ls-v2@5c49716301e2a82e6808ac4c22554279874e3a9c.service \
+            disdex-quality102-causal-v1@5c49716301e2a82e6808ac4c22554279874e3a9c.service \
+            disdex-v52-aster-only@5c49716301e2a82e6808ac4c22554279874e3a9c.service; do
+            systemctl show "$unit" -p LoadState -p ActiveState -p WorkingDirectory -p FragmentPath -p DropInPaths --no-pager || true
+          done
+          echo '--- template cat V12/V52 ---'
+          systemctl cat disdex-v12-x1-all@.service || true
+          systemctl cat disdex-v52-aster-only@.service || true
+          echo '--- filesystem perms ---'
+          stat -c '%U:%G:%a %n' /home/deploy/disdex-trading /home/deploy/disdex-trading/releases /etc/systemd/system || true
