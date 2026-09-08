@@ -925,6 +925,26 @@ export class Quality102CausalV1Runner {
     async tick(): Promise<Quality102CausalV1TickResult> {
         if (!this.dependencies.config.enabled) return { status: "disabled", message: "QUALITY102_CAUSAL_V1 is disabled.", ordersSent: 0 };
         this.ensureLiveGate();
+        const beforeLockState = await this.dependencies.stateStore.load();
+        let preloadedHistory: Quality102CausalV1History | undefined;
+        const preloadEligible = beforeLockState.strategyId === STRATEGY_ID
+            && beforeLockState.mode === this.dependencies.config.mode
+            && (this.dependencies.config.mode !== "LIVE" || beforeLockState.runtimeCommitSha.toLowerCase() === this.dependencies.config.runtimeCommitSha.toLowerCase())
+            && !beforeLockState.pending
+            && !beforeLockState.position;
+        if (preloadEligible) {
+            try {
+                preloadedHistory = await this.dependencies.marketData.load();
+            } catch (error) {
+                const message = isAsterDepositRequirementError(error)
+                    ? "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED"
+                    : this.recordFailure(beforeLockState, error);
+                if (message === "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED") this.recordFailure(beforeLockState, message);
+                await this.dependencies.stateStore.save(beforeLockState).catch(() => undefined);
+                this.log.error("Q102 causal v1 market data blocked before account lock", { message });
+                return { status: "blocked-local", message, ordersSent: 0 };
+            }
+        }
         const ownerId = `${STRATEGY_ID}:${process.pid}:${randomUUID()}`;
         const lock = await this.dependencies.lock.acquire(ownerId, this.dependencies.config.accountScope || "ASTER_FUTURES");
         if (!lock) return { status: "locked", message: "Q102 shared account lock is busy or requires review.", ordersSent: 0 };
@@ -940,7 +960,7 @@ export class Quality102CausalV1Runner {
                 ? this.reconcilePending(state)
                 : this.manualReview(state, "Q102 pending phase is invalid.", state.pending.idempotencyKey);
 
-            const history = await this.dependencies.marketData.load();
+            const history = preloadedHistory ?? await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
                 const signal = this.buildSignal(history, this.now(), false, false);
                 state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);

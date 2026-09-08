@@ -42,6 +42,26 @@ function completed(rows: AsterKline[], now: number) {
         .filter((row, index, source) => index === 0 || row.openTime !== source[index - 1].openTime);
 }
 
+function alignCompletedPair(pengu: DisDexV35Candle[], btc: DisDexV35Candle[]) {
+    const latestPengu = pengu.at(-1)?.openTime;
+    const latestBtc = btc.at(-1)?.openTime;
+    if (!latestPengu || !latestBtc || latestPengu !== latestBtc) {
+        throw new Error(`PENGU/BTC latest completed H1 timestamps differ: PENGU=${latestPengu || 0}, BTC=${latestBtc || 0}.`);
+    }
+    const firstCommon = Math.max(pengu[0]?.openTime || 0, btc[0]?.openTime || 0);
+    const alignedPengu = pengu.filter((row) => row.openTime >= firstCommon);
+    const alignedBtc = btc.filter((row) => row.openTime >= firstCommon);
+    const skew = Math.abs(pengu.length - btc.length);
+    const same = alignedPengu.length === alignedBtc.length
+        && alignedPengu.every((row, index) => row.openTime === alignedBtc[index]?.openTime);
+    const contiguous = alignedPengu.every((row, index) => index === 0 || row.openTime === alignedPengu[index - 1].openTime + 3_600_000)
+        && alignedBtc.every((row, index) => index === 0 || row.openTime === alignedBtc[index - 1].openTime + 3_600_000);
+    if (!same || !contiguous || skew > 2) {
+        throw new Error(`PENGU/BTC H1 timestamps are not fully aligned: PENGU=${pengu.length}, BTC=${btc.length}, aligned=${Math.min(alignedPengu.length, alignedBtc.length)}.`);
+    }
+    return { pengu: alignedPengu, btc: alignedBtc };
+}
+
 export class PenguDualLsV2AsterMarketDataProvider {
     private readonly hourlyLimit: number;
     private readonly cacheTtlMs: number;
@@ -64,9 +84,12 @@ export class PenguDualLsV2AsterMarketDataProvider {
             this.client.getKlines("BTCUSDT", "1h", this.hourlyLimit),
             this.client.getKlines("PENGUUSDT", "1h", this.hourlyLimit),
         ]);
+        const completedBtc = completed(btcRows, now);
+        const completedPengu = completed(penguRows, now);
+        const aligned = alignCompletedPair(completedPengu, completedBtc);
         const history: PenguDualLsV2History = {
-            btc1h: completed(btcRows, now),
-            pengu1h: completed(penguRows, now),
+            btc1h: aligned.btc,
+            pengu1h: aligned.pengu,
             // V2's frozen specification does not consume funding. Avoid an
             // unrelated endpoint dependency that could alter signal parity.
             penguFunding: [],

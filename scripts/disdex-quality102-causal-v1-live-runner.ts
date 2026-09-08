@@ -16,6 +16,7 @@ import { AsterV3Client, isAsterDepositRequirementError } from "../lib/aster-v3-c
 import { AsterDirectTradeExecutor, type DirectPosition } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { nextQuality102DaemonWaitMs } from "../lib/quality102-live-scheduling";
 import { readQuality102CausalV1Ownership } from "../lib/disdex-quality102-causal-v1-ownership";
 import {
     FileQuality102CausalV1StateStore,
@@ -483,8 +484,9 @@ async function main(): Promise<void> {
             break;
         }
         const now = Date.now();
-        const waitMs = HOUR_MS - (now % HOUR_MS) + Math.min(30_000, Math.max(1_000, numberEnv(process.env, "QUALITY102_CAUSAL_V1_BOUNDARY_DELAY_MS", 5_000)));
-        await delay.wait(waitMs);
+        const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv(process.env, "QUALITY102_CAUSAL_V1_BOUNDARY_DELAY_MS", 5_000)));
+        const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv(process.env, "QUALITY102_CAUSAL_V1_LOCK_RETRY_MS", 5_000)));
+        await delay.wait(nextQuality102DaemonWaitMs(result.status, now, boundaryDelayMs, lockRetryMs));
     } while (!stopping);
 }
 
