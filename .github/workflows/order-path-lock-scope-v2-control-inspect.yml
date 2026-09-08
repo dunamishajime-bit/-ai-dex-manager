@@ -1,0 +1,32 @@
+name: DisDex inspect authorized VPS control
+
+on:
+  push:
+    branches:
+      - codex/order-path-lock-scope-v2-20260908
+    paths:
+      - .github/workflows/order-path-lock-scope-v2-control-inspect.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Inspect authorized control wrapper read-only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo '--- identity ---'
+          id
+          echo '--- sudo allowlist ---'
+          sudo -n -l
+          echo '--- disdex-vps-control ---'
+          sed -n '1,420p' /usr/local/sbin/disdex-vps-control
+          echo '--- control help/probes ---'
+          sudo -n /usr/local/sbin/disdex-vps-control help 2>&1 || true
+          sudo -n /usr/local/sbin/disdex-vps-control trading-state 2>&1 || true
+          sudo -n /usr/local/sbin/disdex-vps-control trading-current 2>&1 || true
