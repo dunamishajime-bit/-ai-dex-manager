@@ -20,14 +20,29 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect GitHub Actions root control
+      - name: Inspect current-runtime privileged paths
         shell: bash
         run: |
-          set -Eeuo pipefail
-          echo '--- disdex-github-actions-entry ---'
-          sed -n '1,240p' /usr/local/sbin/disdex-github-actions-entry
-          echo '--- disdex-github-actions-control ---'
-          sed -n '1,320p' /usr/local/sbin/disdex-github-actions-control
-          echo '--- sudo permission probes ---'
-          sudo -n /usr/local/sbin/disdex-vps-control trading-state
-          sudo -n -l
+          set -u
+          OLD=5c49716301e2a82e6808ac4c22554279874e3a9c
+          NEW=e796cfb9f7b8e40ea165cc9f128d8f4fe189f2f3
+          echo '--- systemd files ---'
+          systemctl list-unit-files --type=service --no-pager | grep -Ei 'disdex.*(current|runtime|wiring|deploy|release|promot|activate)' || true
+          echo '--- systemd units ---'
+          systemctl list-units --all --no-pager | grep -Ei 'disdex.*(current|runtime|wiring|deploy|release|promot|activate)' || true          echo '--- installed disdex helpers ---'
+          find /usr/local/libexec /usr/local/bin -maxdepth 1 -type f -name 'disdex*' -printf '%m %u:%g %p\n' 2>/dev/null || true
+          getcap -r /usr/local 2>/dev/null | grep -i disdex || true
+          echo '--- new unit read-only render ---'
+          for unit in \
+            disdex-v12-x1-all@${NEW}.service \
+            disdex-pengu-dual-ls-v2@${NEW}.service \
+            disdex-quality102-causal-v1@${NEW}.service \
+            disdex-v52-aster-only@${NEW}.service; do
+            systemctl show "$unit" -p LoadState -p ActiveState -p WorkingDirectory -p DropInPaths --no-pager || true
+          done
+          echo '--- no-op active-unit start permission ---'
+          systemctl start "disdex-v12-x1-all@${OLD}.service" 2>&1
+          echo "start_rc=$?"
+          systemctl is-active "disdex-v12-x1-all@${OLD}.service" || true
+          echo '--- current ---'
+          sudo -n /usr/local/sbin/disdex-vps-control trading-current || true
