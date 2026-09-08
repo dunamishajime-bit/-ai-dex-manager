@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+SOURCE_ROOT="${1:?source root required}"
+TARGET_SHA="${2:?target sha required}"
+EXPECTED_OLD_SHA="${3:?expected old sha required}"
+TRADING_ROOT=/home/deploy/disdex-trading
+RELEASES="$TRADING_ROOT/releases"
+CURRENT="$TRADING_ROOT/current"
+Q102_STATE=/var/lib/disdex/quality102-causal-v1/state.json
+KILL_SWITCH=/var/lib/disdex/shared/kill-switch.json
+RISK_STATE=/var/lib/disdex/shared/crypto-daily-risk.json
+MARGIN_STATE=/var/lib/disdex/shared/margin-risk/guard-live.json
+SWITCH_STARTED=0
+
+[[ "$(id -u)" == 0 ]] || { echo DEPLOY_REQUIRES_ROOT >&2; exit 1; }
+[[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ && "$EXPECTED_OLD_SHA" =~ ^[0-9a-f]{40}$ ]]
+OLD_RELEASE="$(readlink -f "$CURRENT")"
+OLD_SHA="$(basename "$OLD_RELEASE")"
+[[ "$OLD_SHA" == "$EXPECTED_OLD_SHA" ]] || { echo "OLD_SHA_MISMATCH actual=$OLD_SHA expected=$EXPECTED_OLD_SHA" >&2; exit 1; }
+CANDIDATE="$RELEASES/$TARGET_SHA"
+[[ ! -e "$CANDIDATE" ]] || { echo "CANDIDATE_ALREADY_EXISTS=$CANDIDATE" >&2; exit 1; }
+
+old_units=(
+  "disdex-v12-x1-all@${OLD_SHA}.service"
+  "disdex-pengu-dual-ls-v2@${OLD_SHA}.service"
+  "disdex-quality102-causal-v1@${OLD_SHA}.service"
+  "disdex-v52-aster-only@${OLD_SHA}.service"
+  "disdex-shared-crypto-risk@${OLD_SHA}.service"
+  "disdex-v12-v52-margin-guard@${OLD_SHA}.service"
+)
+new_units=(
+  "disdex-v12-x1-all@${TARGET_SHA}.service"
+  "disdex-pengu-dual-ls-v2@${TARGET_SHA}.service"
+  "disdex-quality102-causal-v1@${TARGET_SHA}.service"
+  "disdex-v52-aster-only@${TARGET_SHA}.service"
+  "disdex-shared-crypto-risk@${TARGET_SHA}.service"
+  "disdex-v12-v52-margin-guard@${TARGET_SHA}.service"
+)
+
+for unit in "${old_units[@]:0:4}"; do
+  [[ "$(systemctl is-active "$unit")" == active ]] || { echo "OLD_UNIT_NOT_ACTIVE=$unit" >&2; exit 1; }
+done
+jq -e '.pending == null and .position == null' "$Q102_STATE" >/dev/null
+[[ ! -e /var/lib/disdex/shared/account-order.lock ]] || { echo ACCOUNT_LOCK_NOT_FREE >&2; exit 1; }
+[[ "$(jq -r '.active // false' "$KILL_SWITCH")" == false ]]
+[[ "$(jq -r '.tripped // false' "$RISK_STATE")" == false ]]
+
+echo "PREDEPLOY oldSha=$OLD_SHA targetSha=$TARGET_SHA"
+for unit in "${old_units[@]}"; do
+  systemctl show "$unit" -p ActiveState -p SubState -p MainPID -p NRestarts --no-pager | tr '\n' ' '; echo
+ done
+
+install -d -o deploy -g deploy -m 0755 "$CANDIDATE"
+cp -a "$OLD_RELEASE/." "$CANDIDATE/"
+files=(
+  lib/v12-live-execution-engine.ts
+  lib/pengu-dual-ls-v2-portfolio-runner.ts
+  scripts/disdex_v52_aster_only_legacy_engine.py
+  scripts/disdex_v52_aster_only_live_engine.py
+  tests/live-order-lock-scope-v2.test.mjs
+  tests/test_v52_prelock_runtime.py
+)
+for file in "${files[@]}"; do
+  install -D -o deploy -g deploy -m 0644 "$SOURCE_ROOT/$file" "$CANDIDATE/$file"
+done
+printf '%s\n' "$TARGET_SHA" > "$CANDIDATE/.disdex-release-sha"
+chown deploy:deploy "$CANDIDATE/.disdex-release-sha"
+chmod 0644 "$CANDIDATE/.disdex-release-sha"
+
+run_as_deploy() { runuser -u deploy -- env HOME=/home/deploy "$@"; }
+run_as_deploy bash -c "cd '$CANDIDATE' && node --test tests/live-order-lock-scope-v2.test.mjs"
+run_as_deploy bash -c "cd '$CANDIDATE' && node --import tsx --test tests/pengu-market-data-alignment.test.ts tests/quality102-live-scheduling.test.ts"
+run_as_deploy env PYTHONPATH="$CANDIDATE/scripts" "$CANDIDATE/.venv2/bin/python" "$CANDIDATE/tests/test_v52_prelock_runtime.py"
+run_as_deploy "$CANDIDATE/.venv2/bin/python" -m py_compile "$CANDIDATE/scripts/disdex_v52_aster_only_legacy_engine.py" "$CANDIDATE/scripts/disdex_v52_aster_only_live_engine.py"
+run_as_deploy bash -c "cd '$CANDIDATE' && .venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --self-test"
+run_as_deploy bash -c "cd '$CANDIDATE' && npm run strategy:executor:selftest && npm run strategy:v12-x1-all:selftest && npm run strategy:pengu-dual-ls-v2:selftest && npm run strategy:quality102-causal-v4:selftest && npm run strategy:strict-bt33404708902:gross:selftest && npm run strategy:shared-crypto-risk:selftest"
+run_as_deploy bash -c "cd '$CANDIDATE' && npx tsc --noEmit"
+bash "$CANDIDATE/scripts/ops/root/disdex-current-runtime-wiring" --self-test
+
+echo CANDIDATE_VALIDATION_PASS
+
+Q102_BACKUP="${Q102_STATE}.before-${TARGET_SHA}"
+rollback() {
+  local rc="$1"
+  set +e
+  echo "ROLLBACK_BEGIN rc=$rc"
+  systemctl stop "${new_units[@]}" 2>/dev/null || true
+  ln -sfn "$OLD_RELEASE" "$CURRENT"
+  if [[ -f "$Q102_BACKUP" ]]; then
+    cp -f "$Q102_BACKUP" "$Q102_STATE"
+    chown deploy:deploy "$Q102_STATE"
+    chmod 0600 "$Q102_STATE"
+  fi
+  bash "$OLD_RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply || true
+  systemctl start "${old_units[@]}" || true
+  systemctl start disdex-runner-health-snapshot.timer disdex-runner-watchdog.timer || true
+  echo ROLLBACK_END
+  exit "$rc"
+}
+trap 'rc=$?; if [[ "$SWITCH_STARTED" == 1 ]]; then rollback "$rc"; fi; exit "$rc"' ERR
+
+SWITCH_STARTED=1
+systemctl stop disdex-runner-watchdog.timer disdex-runner-health-snapshot.timer
+systemctl stop "${old_units[@]}"
+for unit in "${old_units[@]:0:4}"; do [[ "$(systemctl is-active "$unit" || true)" == inactive ]]; done
+[[ ! -e /var/lib/disdex/shared/account-order.lock ]] || { echo ACCOUNT_LOCK_STUCK_AFTER_STOP >&2; exit 1; }
+
+run_as_deploy bash -c "cd '$CANDIDATE' && node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-state-migrate.ts --state-path '$Q102_STATE' --from-sha '$OLD_SHA' --to-sha '$TARGET_SHA' --backup-path '$Q102_BACKUP'"
+chown deploy:deploy "$Q102_STATE" "$Q102_BACKUP"
+chmod 0600 "$Q102_STATE" "$Q102_BACKUP"
+ln -sfn "$CANDIDATE" "$CURRENT"
+bash "$CANDIDATE/scripts/ops/root/disdex-current-runtime-wiring" --apply
+
+systemctl start "disdex-shared-crypto-risk@${TARGET_SHA}.service"
+systemctl start "disdex-v12-v52-margin-guard@${TARGET_SHA}.service"
+systemctl start "disdex-quality102-causal-v1@${TARGET_SHA}.service"
+systemctl start "disdex-v12-x1-all@${TARGET_SHA}.service"
+systemctl start "disdex-pengu-dual-ls-v2@${TARGET_SHA}.service"
+systemctl start "disdex-v52-aster-only@${TARGET_SHA}.service"
+systemctl start disdex-runner-health-snapshot.timer disdex-runner-watchdog.timer
+sleep 15
+
+for unit in "${new_units[@]}"; do
+  active="$(systemctl is-active "$unit" || true)"
+  [[ "$active" == active ]] || { echo "NEW_UNIT_NOT_ACTIVE=$unit state=$active" >&2; exit 1; }
+  restarts="$(systemctl show "$unit" -p NRestarts --value)"
+  [[ "$restarts" == 0 ]] || { echo "NEW_UNIT_RESTARTED=$unit count=$restarts" >&2; exit 1; }
+done
+
+[[ "$(readlink -f "$CURRENT")" == "$CANDIDATE" ]]
+[[ "$(stat -c '%U:%G:%a' /var/lib/disdex/quality102-causal-v1/market-history.json)" == "deploy:deploy:600" ]]
+jq -e --arg sha "$TARGET_SHA" '.runtimeCommitSha == $sha and .pending == null and .position == null' "$Q102_STATE" >/dev/null
+jq -e '.tripped == false' "$RISK_STATE" >/dev/null
+jq -e '.active == false' "$KILL_SWITCH" >/dev/null
+jq -e '.stage == "HEALTHY" and .ordersAllowed == true' "$MARGIN_STATE" >/dev/null
+[[ ! -e /var/lib/disdex/shared/account-order.lock ]] || { echo ACCOUNT_LOCK_NOT_FREE_AFTER_START >&2; exit 1; }
+
+systemctl start disdex-runner-health-snapshot.service
+systemctl start disdex-runner-watchdog.service
+sleep 3
+WATCHDOG_STATE=/var/lib/disdex/runner-health/private/watchdog-current-state.json
+jq -e --arg sha "$TARGET_SHA" '.releaseSha == $sha and (.errors | length) == 0 and (.restartCalls | length) == 0 and .tradingEffects.ordersSent == 0 and .tradingEffects.cancelSent == 0 and .tradingEffects.positionChangesSent == 0' "$WATCHDOG_STATE" >/dev/null
+
+# Exercise the exact V52 fresh Margin Guard method with the service's EnvironmentFiles,
+# but do not call open_basis_position or any order API.
+V52_UNIT="disdex-v52-aster-only@${TARGET_SHA}.service"
+ENV_FILES="$(systemctl show "$V52_UNIT" -p EnvironmentFiles --value)"
+set -a
+for token in $ENV_FILES; do
+  if [[ "$token" == /* && -f "$token" ]]; then . "$token"; fi
+done
+set +a
+export DISDEX_RUNTIME_COMMIT_SHA="$TARGET_SHA"
+export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
+export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py
+runuser -u deploy --preserve-environment -- env HOME=/home/deploy PYTHONPATH="$CANDIDATE/scripts" "$CANDIDATE/.venv2/bin/python" -c 'import disdex_v52_aster_only_live_engine as m; e=object.__new__(m.V52AsterOnlyEngine); e.live=True; e.require_fresh_preorder_margin_guard(); print("V52_FRESH_PREORDER_MARGIN_GUARD_PASS")'
+
+run_as_deploy bash -c "cd '$CANDIDATE' && npm run strategy:executor:selftest"
+
+for unit in "${old_units[@]}"; do systemctl disable "$unit" >/dev/null 2>&1 || true; done
+for unit in "${new_units[@]}"; do systemctl enable "$unit" >/dev/null; done
+
+for unit in "${new_units[@]}"; do
+  systemctl show "$unit" -p ActiveState -p SubState -p MainPID -p NRestarts --no-pager | tr '\n' ' '; echo
+  if journalctl -u "$unit" --since '-10 min' --no-pager | grep -Eiq 'EACCES|RUNTIME_SHA_MISMATCH|STATE_MALFORMED|permission denied|fatal tick error'; then
+    echo "FATAL_LOG_PATTERN=$unit" >&2
+    exit 1
+  fi
+done
+
+trap - ERR
+SWITCH_STARTED=0
+echo "LIVE_ORDER_PATH_V2_DEPLOYED_VERIFIED targetSha=$TARGET_SHA oldSha=$OLD_SHA"
