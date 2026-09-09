@@ -13,7 +13,7 @@ const PERSISTED_HISTORY_VERSION = 1 as const;
 const DEFAULT_REQUEST_SPACING_MS = 100;
 const DEFAULT_RATE_LIMIT_ATTEMPTS = 3;
 const MAX_BACKOFF_MS = 120_000;
-const CURRENT_OPEN_RETRY_DELAYS_MS = [1_000, 2_000, 5_000, 10_000, 15_000] as const;
+const CURRENT_OPEN_RETRY_DELAYS_MS = [1_000, 2_000, 5_000, 10_000, 15_000, 30_000, 60_000, 120_000, 180_000, 300_000] as const;
 
 export interface Quality102CausalV1AsterMarketDataOptions {
     symbols: readonly string[];
