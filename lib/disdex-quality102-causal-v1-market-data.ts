@@ -13,6 +13,7 @@ const PERSISTED_HISTORY_VERSION = 1 as const;
 const DEFAULT_REQUEST_SPACING_MS = 100;
 const DEFAULT_RATE_LIMIT_ATTEMPTS = 3;
 const MAX_BACKOFF_MS = 120_000;
+const CURRENT_OPEN_RETRY_DELAYS_MS = [1_000, 2_000, 5_000] as const;
 
 export interface Quality102CausalV1AsterMarketDataOptions {
     symbols: readonly string[];
@@ -283,12 +284,23 @@ export class Quality102CausalV1AsterMarketDataProvider {
         // the selector consumes row[1] (the candle open), so no future value
         // or later intrabar price is introduced.
         const requestEndTime = Math.max(timestampMs + 1, now);
-        const rows = await this.getKlines(symbol, 1, timestampMs, requestEndTime);
-        const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
-        if (!row) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
-        const open = finiteNumber(row[1], "currentOpen");
-        if (!(open > 0)) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_INVALID:${symbol}`);
-        return { timestampMs, open };
+        for (let attempt = 0; ; attempt += 1) {
+            const rows = await this.getKlines(symbol, 1, timestampMs, requestEndTime);
+            const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
+            if (row) {
+                const open = finiteNumber(row[1], "currentOpen");
+                if (!(open > 0)) throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_INVALID:${symbol}`);
+                return { timestampMs, open };
+            }
+            const retryDelayMs = CURRENT_OPEN_RETRY_DELAYS_MS[attempt];
+            if (retryDelayMs === undefined) break;
+            // The venue can briefly return an empty range immediately after
+            // the hour boundary while the current candle is being indexed.
+            // Retry the exact same observed range; never advance endTime or
+            // consume a later intrabar value while recovering the open.
+            await sleep(retryDelayMs);
+        }
+        throw new Error(`QUALITY102_CURRENT_ASTER_1H_OPEN_MISSING:${symbol}`);
     }
 
     async load(): Promise<Quality102CausalV1History> {
