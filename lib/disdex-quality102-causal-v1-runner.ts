@@ -1013,6 +1013,7 @@ export class Quality102CausalV1Runner {
             }
             if (signal.side === 0 || !signal.symbol) {
                 state.lastProcessedReferenceTs = signal.referenceTs;
+                state.updatedAt = this.now();
                 await this.dependencies.stateStore.save(state);
                 return { status: "no-change", message: signal.reason, signal, ordersSent: 0 };
             }

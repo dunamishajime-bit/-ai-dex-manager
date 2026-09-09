@@ -165,6 +165,26 @@ async function run(): Promise<void> {
 
     {
         const fake = new FakeExecutor();
+        const initial = state();
+        initial.updatedAt = NOW - 5_000;
+        initial.lastProcessedReferenceTs = NOW - 3_600_000;
+        const built = deps(fake, initial, { symbols: ["FETUSDT"] }, () => signal({
+            referenceTs: NOW,
+            side: 0,
+            symbol: undefined,
+            requestedGross: 0,
+            reason: "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+        }));
+        const result = await built.runner.tick();
+        assert.equal(result.status, "no-change");
+        const saved = await (built.runner as unknown as { dependencies: { stateStore: { load(): Promise<Quality102CausalV1State> } } }).dependencies.stateStore.load();
+        assert.equal(saved.lastProcessedReferenceTs, NOW);
+        assert.equal(saved.updatedAt, NOW);
+        assert.equal(fake.calls.execute, 0);
+    }
+
+    {
+        const fake = new FakeExecutor();
         const built = deps(fake, state("SHADOW"), { mode: "SHADOW", enabled: true, liveTradingEnabled: false, liveExecutionEnabled: false, operatorArmed: false });
         const result = await built.runner.tick();
         assert.equal(result.status, "shadow");
