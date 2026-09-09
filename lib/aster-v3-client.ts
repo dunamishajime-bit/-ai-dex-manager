@@ -200,7 +200,7 @@ export function isAsterDepositRequirementError(error: unknown): boolean {
     return /(?:^|[^0-9])-5050(?:$|[^0-9])/.test(`${message} ${body}`);
 }
 
-function normalizeBaseUrl(value?: string) { return String(value || "https://fapi3.asterdex.com").replace(/\/+$/, ""); }
+function normalizeBaseUrl(value?: string) { return String(value || "https://fapi.asterdex.com").replace(/\/+$/, ""); }
 function normalizePrivateKey(value?: string): `0x${string}` | undefined {
     if (!value) return undefined;
     const trimmed = value.trim();
