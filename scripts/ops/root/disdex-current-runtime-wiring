@@ -13,6 +13,7 @@ PENGU_STATE_ROOT="/var/lib/disdex/pengu-dual-ls-v2"
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
+AUTO_REPAIR_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.service.d"
 V12_DROPIN_DIR="/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d"
 PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
@@ -74,6 +75,11 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
+    "$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"
+    "$CURRENT_RELEASE/lib/aster-upstream-recovery-policy.ts"
+    "$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts"
+    "$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair"
   )
   for required_file in "${required_files[@]}"; do
     [[ -f "$required_file" && ! -L "$required_file" ]] || {
@@ -315,6 +321,14 @@ ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-relea
 ExecStart=
 ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
 
+  install -d -o root -g root -m 0755 /usr/local/libexec
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair
+  write_atomic "${AUTO_REPAIR_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Environment=DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+Environment=DISDEX_V52_SERVICE_UNIT=${V52_UNIT}
+WorkingDirectory=${CURRENT_RELEASE}"
+
   write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
@@ -391,6 +405,7 @@ Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
 Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
   systemctl daemon-reload
+  systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 
@@ -405,13 +420,18 @@ self_test() {
   SELF_TEST_FIXTURE="$(mktemp -d)"
   trap 'rm -rf -- "$SELF_TEST_FIXTURE"' RETURN
   CURRENT_RELEASE="$SELF_TEST_FIXTURE"
-  mkdir -p "$SELF_TEST_FIXTURE/scripts" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
+  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/lib" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
   for required_file in \
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
     scripts/disdex-quality102-causal-v1-live-runner.ts \
     scripts/disdex_v96_v52_margin_guard_runtime.py \
-    scripts/disdex_v52_aster_only_live_engine.py; do
+    scripts/disdex_v52_aster_only_live_engine.py \
+    lib/aster-readonly-recovery-gate.ts \
+    lib/aster-upstream-recovery-policy.ts \
+    scripts/disdex-aster-readonly-recovery-gate.ts \
+    scripts/disdex-aster-upstream-live-recovery.ts \
+    scripts/ops/root/disdex-v12-kill-switch-auto-repair; do
     : > "$SELF_TEST_FIXTURE/$required_file"
   done
   printf '#!/bin/sh\n' > "$SELF_TEST_FIXTURE/node_modules/.bin/tsx"

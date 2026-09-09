@@ -1,0 +1,301 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+SUPERVISOR_EXIT_REASON='V96/V52 trading supervisor exited unexpectedly with status 1'
+MARGIN_FLATTEN_REASON_PREFIX='V52 margin-aware fatal tick error:'
+LOCK_FILE=/var/lib/disdex/v12-auto-repair.lock
+KILL_FILE_DEFAULT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/kill-switch.json
+STATE_FILE_DEFAULT=/var/lib/disdex/v12-x1-all/runner.json
+AUTO_REPAIR_ROOT=/home/deploy/disdex-trading/auto-repair
+
+is_bool_true() { [[ "${1:-}" =~ ^(1|true|yes|on)$ ]]; }
+
+is_historical_local_reason() {
+  local reason="${1:-}"
+  [[ "$reason" == 'V12 hourly history insufficient for BTC: 0' ]] && return 0
+  [[ "$reason" == 'TRAILING_STOP_UPDATE_FAILED:Order would immediately trigger.' ]] && return 0
+  [[ "$reason" == V12\ universe\ alignment\ mismatch:* ]] && return 0
+  [[ "$reason" == Fresh\ V96/V52\ pre-order\ Margin\ Guard\ blocked\ exposure\ increase:* ]] && return 0
+  [[ "$reason" == PENGU/BTC\ H1\ timestamps\ are\ not\ fully\ aligned:* ]] && return 0
+  [[ "$reason" =~ ^Quantity\ 0\ is\ below\ Aster\ minQty\ [0-9]+([.][0-9]+)?\ for\ [A-Z0-9]+USDT[.]$ ]] && return 0
+  return 1
+}
+
+is_recoverable_shared_reason() {
+  local reason="${1:-}"
+  [[ "$reason" == "$SUPERVISOR_EXIT_REASON" ]] && return 0
+  [[ "$reason" == "$MARGIN_FLATTEN_REASON_PREFIX"* ]] && return 0
+  return 1
+}
+
+is_aster_upstream_shared_reason() {
+  local reason="${1:-}"
+  [[ "$reason" == 'V52 fatal tick error:'* || "$reason" == 'V52 upstream state unavailable:'* ]] || return 1
+  [[ "$reason" == *'HTTP 429'* ]] && return 0
+  [[ "$reason" == *'Too Many Requests'* ]] && return 0
+  [[ "$reason" == *'Connection reset by peer'* ]] && return 0
+  [[ "$reason" == *'device time must match the actual time'* ]] && return 0
+  return 1
+}
+
+validate_current_release() {
+  local link=/home/deploy/disdex-trading/current
+  CURRENT_RELEASE="$(readlink -f "$link" 2>/dev/null || true)"
+  [[ "$CURRENT_RELEASE" == /home/deploy/disdex-trading/releases/* && -d "$CURRENT_RELEASE" && ! -L "$CURRENT_RELEASE" ]] || {
+    printf 'V12_AUTO_REPAIR_CURRENT_INVALID\n' >&2
+    return 2
+  }
+  RELEASE_SHA="$(basename "$CURRENT_RELEASE")"
+  [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_AUTO_REPAIR_CURRENT_SHA_INVALID\n' >&2; return 2; }
+  [[ -f "$CURRENT_RELEASE/.disdex-release-sha" ]] || { printf 'V12_AUTO_REPAIR_RELEASE_MARKER_MISSING\n' >&2; return 2; }
+  [[ "$(tr -d '[:space:]' < "$CURRENT_RELEASE/.disdex-release-sha")" == "$RELEASE_SHA" ]] || {
+    printf 'V12_AUTO_REPAIR_RELEASE_MARKER_MISMATCH\n' >&2
+    return 2
+  }
+}
+
+unit_is_active() { [[ "$(systemctl is-active "$1" 2>/dev/null || true)" == active ]]; }
+unit_exists() { systemctl cat "$1" >/dev/null 2>&1; }
+
+unit_from_list() {
+  local pattern="$1" unit
+  unit="$(systemctl list-units --all --type=service --no-legend "$pattern" 2>/dev/null | awk 'NF {print $1; exit}')"
+  # An intentionally stopped instance (for example V52 while the market is
+  # closed) may not be loaded in list-units. Resolve an installed instance
+  # from list-unit-files without treating the template itself as a runner.
+  if [[ -z "$unit" ]]; then
+    unit="$(systemctl list-unit-files --type=service --no-legend "$pattern" 2>/dev/null | awk '$1 !~ /@\.service$/ {print $1; exit}')"
+  fi
+  [[ -n "$unit" ]] && printf '%s\n' "$unit"
+}
+
+active_unit_from_list() {
+  local pattern="$1" unit
+  unit="$(systemctl list-units --type=service --state=active --no-legend "$pattern" 2>/dev/null | awk 'NF {print $1; exit}')"
+  [[ -n "$unit" ]] && printf '%s\n' "$unit"
+}
+
+resolve_units() {
+  V12_UNIT="disdex-v12-x1-all@$RELEASE_SHA.service"
+  RISK_UNIT="disdex-shared-crypto-risk@$RELEASE_SHA.service"
+  MARGIN_UNIT="disdex-v12-v52-margin-guard@$RELEASE_SHA.service"
+  PENGU_UNIT="$(active_unit_from_list 'disdex-pengu-dual-ls-v2*' || unit_from_list 'disdex-pengu-dual-ls-v2*' || true)"
+  # V52 is intentionally stopped while the market is closed, so it may not
+  # be discoverable through list-units. The installer supplies the exact
+  # current instance explicitly; discovery remains a fallback for older
+  # installations.
+  V52_UNIT="${DISDEX_V52_SERVICE_UNIT:-}"
+  if [[ -z "$V52_UNIT" ]]; then
+    V52_UNIT="$(active_unit_from_list 'disdex-v52-aster-only@*.service' || unit_from_list 'disdex-v52-aster-only@*.service' || true)"
+  fi
+  [[ -n "$PENGU_UNIT" ]] || { printf 'V12_AUTO_REPAIR_PENGU_UNIT_NOT_FOUND\n' >&2; return 3; }
+  [[ -n "$V52_UNIT" ]] || { printf 'V12_AUTO_REPAIR_V52_UNIT_NOT_FOUND\n' >&2; return 3; }
+  unit_exists "$V52_UNIT" || { printf 'V12_AUTO_REPAIR_V52_UNIT_INVALID unit=%s\n' "$V52_UNIT" >&2; return 3; }
+}
+
+read_kill_and_state() {
+  KILL_FILE="${DISDEX_SHARED_KILL_SWITCH_FILE:-$KILL_FILE_DEFAULT}"
+  STATE_FILE="${DISDEX_V12_STATE_FILE:-$STATE_FILE_DEFAULT}"
+  KILL_ACTIVE=false
+  KILL_REASON=''
+  KILL_SOURCE_PATH="$KILL_FILE"
+  if [[ -f "$KILL_FILE" ]]; then
+    KILL_ACTIVE="$(/usr/bin/jq -r 'if .active == true then "true" else "false" end' "$KILL_FILE" 2>/dev/null || printf 'false')"
+    KILL_REASON="$(/usr/bin/jq -r '.reason // ""' "$KILL_FILE" 2>/dev/null || true)"
+    candidate_source_path="$(/usr/bin/jq -r '.sourcePath // empty' "$KILL_FILE" 2>/dev/null || true)"
+    if [[ "$candidate_source_path" == "$KILL_FILE" ]]; then
+      KILL_SOURCE_PATH="$candidate_source_path"
+    else
+      KILL_SOURCE_PATH="$KILL_FILE"
+    fi
+  fi
+  LOCAL_ACTIVE=false
+  LOCAL_MANUAL_REVIEW=''
+  LOCAL_REASON=''
+  if [[ -f "$STATE_FILE" ]]; then
+    LOCAL_ACTIVE="$(/usr/bin/jq -r 'if .killSwitch.active == true then "true" else "false" end' "$STATE_FILE" 2>/dev/null || printf 'false')"
+    LOCAL_MANUAL_REVIEW="$(/usr/bin/jq -r '.manualReview // ""' "$STATE_FILE" 2>/dev/null || true)"
+    LOCAL_REASON="$(/usr/bin/jq -r '.manualReview // .killSwitch.reason // ""' "$STATE_FILE" 2>/dev/null || true)"
+  fi
+}
+
+write_fail_closed() {
+  local reason="$1" dir tmp
+  dir="$(dirname "$KILL_SOURCE_PATH")"
+  /usr/bin/install -d -o root -g root -m 0700 "$dir"
+  tmp="$(mktemp "$dir/.disdex-auto-repair-kill.XXXXXX")"
+  /usr/bin/jq -n --arg reason "$reason" --arg sourcePath "$KILL_SOURCE_PATH" --arg activatedAt "$(date -Is)" \
+    '{active:true, strategyId:"DISDEX_V12_X1_ALL", action:"FLATTEN_MANAGED", reason:$reason, sourcePath:$sourcePath, operator:"V12_KILL_SWITCH_AUTO_REPAIR_V2", activatedAt:$activatedAt, automaticRepair:"FAIL_CLOSED"}' > "$tmp"
+  chmod 0600 "$tmp"
+  mv -f "$tmp" "$KILL_SOURCE_PATH"
+}
+
+run_recovery_script() {
+  local script="$1" path; shift
+  path="$CURRENT_RELEASE/$script"
+  [[ -f "$path" ]] || path="$AUTO_REPAIR_ROOT/$script"
+  [[ -x "$CURRENT_RELEASE/node_modules/.bin/tsx" && -f "$path" ]] || {
+    printf 'V12_AUTO_REPAIR_RECOVERY_SCRIPT_MISSING script=%s release=%s\n' "$script" "$RELEASE_SHA" >&2
+    return 4
+  }
+  runuser -u deploy --preserve-environment -- env HOME=/home/deploy NODE_ENV=production \
+    PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages \
+    "$CURRENT_RELEASE/node_modules/.bin/tsx" "$path" "$@"
+}
+
+wait_inactive() {
+  local unit="$1" i
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    unit_is_active "$unit" || return 0
+    sleep 1
+  done
+  return 1
+}
+
+wait_active() {
+  local unit="$1" i
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do
+    unit_is_active "$unit" && return 0
+    sleep 1
+  done
+  return 1
+}
+
+quiesce_composition() {
+  local unit
+  for unit in "$V12_UNIT" "$PENGU_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$RISK_UNIT"; do
+    if unit_is_active "$unit"; then
+      printf 'V12_AUTO_REPAIR_QUIESCE unit=%s\n' "$unit"
+      systemctl stop "$unit"
+      wait_inactive "$unit" || { printf 'V12_AUTO_REPAIR_QUIESCE_TIMEOUT unit=%s\n' "$unit" >&2; return 5; }
+    fi
+  done
+}
+
+resume_composition() {
+  local unit
+  for unit in "$RISK_UNIT" "$MARGIN_UNIT" "$V12_UNIT" "$PENGU_UNIT" "$V52_UNIT"; do
+    unit_exists "$unit" || { printf 'V12_AUTO_REPAIR_RESUME_UNIT_MISSING unit=%s\n' "$unit" >&2; return 6; }
+    systemctl start "$unit" || { printf 'V12_AUTO_REPAIR_RESUME_START_FAILED unit=%s\n' "$unit" >&2; return 6; }
+    wait_active "$unit" || { printf 'V12_AUTO_REPAIR_RESUME_NOT_ACTIVE unit=%s\n' "$unit" >&2; return 6; }
+  done
+}
+
+run_self_test() {
+  is_recoverable_shared_reason "$SUPERVISOR_EXIT_REASON"
+  is_recoverable_shared_reason "$MARGIN_FLATTEN_REASON_PREFIX test"
+  is_aster_upstream_shared_reason 'V52 fatal tick error: <urlopen error [Errno 104] Connection reset by peer>'
+  is_aster_upstream_shared_reason 'V52 upstream state unavailable: Aster HTTP 429'
+  ! is_aster_upstream_shared_reason 'daily loss latch'
+  is_historical_local_reason 'V12 universe alignment mismatch: PENGU'
+  is_historical_local_reason 'PENGU/BTC H1 timestamps are not fully aligned: PENGU=1000, BTC=999, aligned=999.'
+  is_historical_local_reason 'Quantity 0 is below Aster minQty 1 for BNBUSDT.'
+  ! is_recoverable_shared_reason 'daily loss latch'
+  ! is_historical_local_reason 'unknown manual review'
+  printf 'V12 Kill Switch auto-repair self-test: PASS\n'
+}
+
+main() {
+  [[ "$(id -u)" == 0 ]] || { printf 'V12_AUTO_REPAIR_ROOT_REQUIRED\n' >&2; exit 1; }
+  if [[ "${1:-}" == --self-test ]]; then run_self_test; return 0; fi
+  validate_current_release
+  resolve_units
+  read_kill_and_state
+  exec 9>"$LOCK_FILE"
+  /usr/bin/flock -n 9 || { printf 'V12_AUTO_REPAIR_ALREADY_RUNNING\n'; return 0; }
+
+  local action=NONE reason="$KILL_REASON" token
+  if is_bool_true "$KILL_ACTIVE"; then
+    if is_aster_upstream_shared_reason "$KILL_REASON"; then
+      action=ASTER_UPSTREAM
+    elif is_recoverable_shared_reason "$KILL_REASON"; then
+      action=SHARED_KILL
+    else
+      /usr/bin/jq -cn --arg reason "$KILL_REASON" '{status:"V12_AUTO_REPAIR_BLOCKED_OPERATOR_REVIEW_REQUIRED",reason:$reason,ordersSent:false,positionChangesSent:false}'
+      return 0
+    fi
+  elif is_bool_true "$LOCAL_ACTIVE" || [[ -n "$LOCAL_MANUAL_REVIEW" ]]; then
+    reason="$LOCAL_REASON"
+    if is_historical_local_reason "$reason"; then
+      action=LOCAL_STATE
+    else
+      /usr/bin/jq -cn --arg reason "$reason" '{status:"V12_AUTO_REPAIR_BLOCKED_OPERATOR_REVIEW_REQUIRED",reason:$reason,ordersSent:false,positionChangesSent:false}'
+      return 0
+    fi
+  fi
+  if [[ "$action" == NONE ]]; then
+    printf '{"status":"V12_AUTO_REPAIR_NOT_REQUIRED","releaseSha":"%s","ordersSent":false,"positionChangesSent":false}\n' "$RELEASE_SHA"
+    return 0
+  fi
+  if ! is_bool_true "${DISDEX_V12_LIVE_ALLOW_REAL_ORDERS:-false}"; then
+    printf '{"status":"V12_AUTO_REPAIR_LIVE_GATES_NOT_ALL_ENABLED","action":"%s","ordersSent":false,"positionChangesSent":false}\n' "$action"
+    return 0
+  fi
+
+  if [[ "$action" == ASTER_UPSTREAM ]]; then
+    if unit_is_active "$V12_UNIT" || unit_is_active "$V52_UNIT"; then
+      printf '{"status":"V12_AUTO_REPAIR_ASTER_UPSTREAM_BLOCKED_RUNNERS_NOT_STOPPED","releaseSha":"%s","liveResumeAllowed":false,"ordersSent":false,"positionChangesSent":false}\n' "$RELEASE_SHA"
+      return 0
+    fi
+    run_recovery_script scripts/disdex-aster-upstream-live-recovery.ts --verify-only --sha "$RELEASE_SHA" || {
+      printf '{"status":"V12_AUTO_REPAIR_ASTER_UPSTREAM_FAIL_CLOSED","phase":"VERIFY","liveResumeAllowed":false,"ordersSent":false,"positionChangesSent":false}\n'
+      return 0
+    }
+    run_recovery_script scripts/disdex-aster-upstream-live-recovery.ts --apply --sha "$RELEASE_SHA" --ack I_ACK_ASTER_UPSTREAM_RECOVERY_AFTER_3X_READONLY_FLAT || {
+      printf '{"status":"V12_AUTO_REPAIR_ASTER_UPSTREAM_FAIL_CLOSED","phase":"APPLY","liveResumeAllowed":false,"ordersSent":false,"positionChangesSent":false}\n'
+      return 0
+    }
+    read_kill_and_state
+    if is_bool_true "$KILL_ACTIVE" || is_bool_true "$LOCAL_ACTIVE" || [[ -n "$LOCAL_MANUAL_REVIEW" ]]; then
+      printf '{"status":"V12_AUTO_REPAIR_ASTER_UPSTREAM_FAIL_CLOSED","phase":"POST_APPLY_VERIFY","liveResumeAllowed":false,"ordersSent":false,"positionChangesSent":false}\n'
+      return 0
+    fi
+    printf '{"status":"V12_AUTO_REPAIR_ASTER_UPSTREAM_READY_FOR_STAGED_RESUME","releaseSha":"%s","liveResumeAllowed":false,"v12ResumePending":true,"v52ResumePending":true,"ordersSent":false,"positionChangesSent":false}\n' "$RELEASE_SHA"
+    return 0
+  fi
+
+  quiesce_composition || {
+    write_fail_closed "V12_AUTO_REPAIR_QUIESCE_FAILED:${reason}"
+    printf '{"status":"V12_AUTO_REPAIR_FAIL_CLOSED","reason":"QUIESCE_FAILED","ordersSent":false,"positionChangesSent":false}\n'
+    return 0
+  }
+  token="auto-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  if [[ "$action" == SHARED_KILL ]]; then
+    if [[ "$KILL_REASON" == "$SUPERVISOR_EXIT_REASON" ]]; then
+      run_recovery_script scripts/disdex-v12-stale-kill-switch-recovery.ts "$RELEASE_SHA" || {
+        write_fail_closed "V12_AUTO_REPAIR_RECOVERY_FAILED:$KILL_REASON"
+        printf '{"status":"V12_AUTO_REPAIR_FAIL_CLOSED","reason":"RECOVERY_FAILED","ordersSent":false,"positionChangesSent":false}\n'
+        return 0
+      }
+    else
+      run_recovery_script scripts/disdex-v12-margin-flatten-recovery.ts "$RELEASE_SHA" "v12-margin-flatten-$token" || {
+        write_fail_closed "V12_AUTO_REPAIR_RECOVERY_FAILED:$KILL_REASON"
+        printf '{"status":"V12_AUTO_REPAIR_FAIL_CLOSED","reason":"RECOVERY_FAILED","ordersSent":false,"positionChangesSent":false}\n'
+        return 0
+      }
+    fi
+  else
+    run_recovery_script scripts/disdex-v12-stale-local-state-recovery.ts "$RELEASE_SHA" "v12-h2-recovery-$token" || {
+      write_fail_closed "V12_AUTO_REPAIR_RECOVERY_FAILED:$reason"
+      printf '{"status":"V12_AUTO_REPAIR_FAIL_CLOSED","reason":"RECOVERY_FAILED","ordersSent":false,"positionChangesSent":false}\n'
+      return 0
+    }
+  fi
+  read_kill_and_state
+  if is_bool_true "$KILL_ACTIVE"; then
+    printf 'V12_AUTO_REPAIR_KILL_SWITCH_REMAINS_ACTIVE reason=%s\n' "$KILL_REASON" >&2
+    printf '{"status":"V12_AUTO_REPAIR_FAIL_CLOSED","reason":"KILL_SWITCH_REMAINS_ACTIVE","ordersSent":false,"positionChangesSent":false}\n'
+    return 0
+  fi
+  resume_composition || {
+    write_fail_closed 'V12_AUTO_REPAIR_LIVE_RESUME_FAILED'
+    printf '{"status":"V12_AUTO_REPAIR_FAIL_CLOSED","reason":"LIVE_RESUME_FAILED","ordersSent":false,"positionChangesSent":false}\n'
+    return 0
+  }
+  printf '{"status":"V12_AUTO_REPAIR_READY","releaseSha":"%s","action":"%s","liveResumeAllowed":true,"ordersSent":false,"positionChangesSent":false}\n' "$RELEASE_SHA" "$action"
+}
+
+main "$@"

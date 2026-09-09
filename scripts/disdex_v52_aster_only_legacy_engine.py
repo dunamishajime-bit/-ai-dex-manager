@@ -56,6 +56,32 @@ def notify_v52_fill(engine: "V52AsterOnlyEngine", fill: object, event_type: str,
         engine.log("v52-trade-fill-notification-queued", slot=slot, eventType=event_type, clientOrderId=getattr(fill, "client_id", ""))
 
 
+def rate_limit_error(error: BaseException | str) -> bool:
+    message = str(error).lower()
+    return any(marker in message for marker in (
+        "http 429",
+        "http error 429",
+        "too many requests",
+        "rate limit",
+        "request weight",
+        "device time must match the actual time",
+    ))
+
+
+def upstream_fail_closed_error(error: BaseException | str) -> bool:
+    message = str(error).lower()
+    return rate_limit_error(error) or any(marker in message for marker in (
+        "connection reset by peer",
+        "connectionreseterror",
+        "quality102_state_stale",
+        "quality102_state_malformed",
+        "quality102_state_mismatch",
+        "quality102_state_hash",
+        "quality102_causal_v1_pending_order_requires_reconciliation",
+        "unresolved v52 pending order requires operator review",
+    ))
+
+
 def transient_reference_error(error: BaseException | str) -> bool:
     """Return true only for reference-validation failures which are safe to retry while flat."""
     message = str(error).lower()
@@ -94,6 +120,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.gross_tolerance = max(0.0, min(base.float_env("DISDEX_V52_GROSS_TOLERANCE", 1e-9), 1e-6))
         self.minimum_entry_usd = base.float_env("DISDEX_V52_MIN_ENTRY_USD", 5.0)
         self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
+        self._upstream_fail_closed_hold = False
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
 
@@ -140,6 +167,13 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if not isinstance(value, dict):
             raise RuntimeError("V52 positions state invalid")
         return value
+
+    def _hold_upstream_fail_closed(self, error: BaseException | str, phase: str) -> None:
+        self._upstream_fail_closed_hold = True
+        message = str(error)
+        if not self.kill_switch():
+            self.activate_kill_switch(f"V52 upstream state unavailable: {message}")
+        self.log("v52-upstream-state-fail-closed", phase=phase, error=message)
 
     def reset_days(self) -> None:
         utc_day = dt.datetime.now(tz=base.UTC).date().isoformat()
@@ -728,7 +762,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.reset_days()
         kill = self.kill_switch()
         if kill:
-            self.flatten_all(str(kill.get("reason") or "KILL_SWITCH")); return
+            reason = str(kill.get("reason") or "KILL_SWITCH")
+            if self._upstream_fail_closed_hold or upstream_fail_closed_error(reason):
+                self._upstream_fail_closed_hold = True
+                self.log("v52-upstream-state-fail-closed", phase="KILL_SWITCH", error=reason)
+                return
+            self.flatten_all(reason); return
         if self.enforce_daily_loss():
             return
         if self.live:
@@ -825,16 +864,25 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def run(self, daemon: bool) -> None:
         started_once = False
         while not self.stop_requested:
+            if self._upstream_fail_closed_hold:
+                time.sleep(max(1, base.int_env("DISDEX_V52_UPSTREAM_HOLD_SECONDS", 60)))
+                continue
             started = base.now_ms()
             try:
                 prepared = self.prepare_tick_inputs()
             except Exception as error:
-                if transient_reference_error(error) and not self.positions():
+                if upstream_fail_closed_error(error):
+                    self._hold_upstream_fail_closed(error, "PRELOCK")
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "upstreamHold": True}
+                elif transient_reference_error(error) and not self.positions():
                     self.log("v52-entry-held-reference-validation", error=str(error), phase="PRELOCK")
                     prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True}
                 else:
                     prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "preloadError": error}
-            if prepared.get("skipWithoutLock"):
+            if prepared.get("upstreamHold"):
+                if not daemon:
+                    break
+            elif prepared.get("skipWithoutLock"):
                 self.idle_tick(prepared)
             elif not self.lock.acquire():
                 self.log("v52-account-lock-busy", accountLockPath=str(self.lock.path))
@@ -847,7 +895,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     self.tick(prepared)
                 except Exception as error:
                     self.log("v52-tick-error", error=str(error))
-                    if transient_reference_error(error) and not self.positions():
+                    if upstream_fail_closed_error(error):
+                        self._hold_upstream_fail_closed(error, "TICK")
+                    elif transient_reference_error(error) and not self.positions():
                         self.log("v52-entry-held-reference-validation", error=str(error))
                     elif self.live:
                         self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
