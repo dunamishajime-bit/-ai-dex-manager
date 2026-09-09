@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { v12DecisionSnapshotIsCurrent } from "@/lib/server/v12-snapshot-freshness";
 
 type Sleeve = "V12" | "V52";
 type Status = "発火候補" | "候補に近い" | "条件不足" | "対象時間外" | "取得不能";
@@ -249,12 +250,18 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
   const checkedAt = new Date(now).toISOString();
   const errors: string[] = [];
   let v12State: JsonObject | null = null;
+  let v12RunnerState: JsonObject | null = null;
   let v52State: JsonObject | null = null;
 
   try {
     v12State = await readState(process.env.V12_DECISION_SNAPSHOT_PATH || process.env.V12_X1_ALL_STATE_PATH, "V12 decision snapshot");
   } catch (error) {
     errors.push(error instanceof Error ? error.message : "V12 decision snapshotを読み取れません。");
+  }
+  try {
+    if (process.env.V12_X1_ALL_STATE_PATH) v12RunnerState = await readState(process.env.V12_X1_ALL_STATE_PATH, "V12 runner state");
+  } catch {
+    // Detailed runtime observability reports runner-state failures separately.
   }
 
   const market = newYorkMarketClock(new Date(now));
@@ -266,9 +273,21 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
     }
   }
 
-  const v12Items = v12State
-    ? v12ItemsFromSnapshot(v12State, checkedAt)
-    : config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, errors[0] || "V12 decision snapshotを読み取れません。"));
+  const v12DecisionReferenceTs = finite(v12State?.referenceTs);
+  const v12RunnerReferenceTs = finite(v12RunnerState?.lastReferenceTs);
+  const v12SnapshotCurrent = v12DecisionSnapshotIsCurrent(v12DecisionReferenceTs, v12RunnerReferenceTs);
+  const effectiveV12State = v12SnapshotCurrent ? v12State : null;
+  const staleV12Reason = !v12SnapshotCurrent
+    ? `V12 runnerは${v12RunnerReferenceTs ? new Date(v12RunnerReferenceTs).toISOString() : "最新確定足"}まで進んでいます。古いdecision snapshot候補は現在候補として表示しません。`
+    : undefined;
+  const v12Items = effectiveV12State
+    ? v12ItemsFromSnapshot(effectiveV12State, checkedAt)
+    : config.v12Symbols.map((symbol) => unavailableItem(
+      symbol,
+      "V12",
+      checkedAt,
+      staleV12Reason || errors[0] || "V12 decision snapshotを読み取れません。",
+    ));
   const v52Items = !market.open
     ? config.stockSymbols.map((symbol) => ({
       symbol,

@@ -3,6 +3,7 @@ import { isAbsolute } from "node:path";
 
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
+import { v12DecisionSnapshotIsCurrent } from "@/lib/server/v12-snapshot-freshness";
 
 const V12_BASE_SYMBOLS = new Set([
   "BTC", "ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR",
@@ -370,8 +371,11 @@ export async function loadV12DecisionObservability() {
     }
   }
 
-  const decision = safeDecisionSnapshot(decisionFile.value);
+  const rawDecision = safeDecisionSnapshot(decisionFile.value);
   const runnerState = safeRunnerState(runnerFile.value);
+  const decisionCurrent = v12DecisionSnapshotIsCurrent(rawDecision?.referenceTs, runnerState?.lastReferenceTs);
+  const decision = decisionCurrent ? rawDecision : null;
+  if (rawDecision && !decisionCurrent) errors.push(`decision-snapshot: stale relative to runner lastReferenceTs=${runnerState?.lastReferenceTs ?? "unknown"}`);
   const sharedRisk = safeSharedRisk(riskFile.value);
   const executionTrace = buildExecutionTrace(decision, runnerState, sharedRisk, positions, recentFills);
   return {

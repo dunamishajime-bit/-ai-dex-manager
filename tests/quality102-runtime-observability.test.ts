@@ -7,7 +7,7 @@ import { loadQuality102RuntimeObservability, quality102Policy } from "../lib/ser
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "../lib/disterminal-live-config";
 
 test("Quality102 runtime policy exposes the production caps and universe", () => {
-  assert.equal(quality102Policy.strategyGrossCap, 0.5);
+  assert.equal(quality102Policy.strategyGrossCap, 1);
   assert.equal(quality102Policy.cryptoGrossCap, 2);
   assert.equal(quality102Policy.totalGrossCap, 2.5);
   assert.equal(quality102Policy.symbols.length, 22);
@@ -16,7 +16,7 @@ test("Quality102 runtime policy exposes the production caps and universe", () =>
   assert.equal(quality102Policy.symbols.includes("DOTUSDT"), true);
   assert.equal(quality102Policy.symbols.includes("UNIUSDT"), true);
   assert.equal(liveConfig.sharedCryptoGross, 2);
-  assert.equal(liveConfig.quality102Runtime.strategyGrossCap, 0.5);
+  assert.equal(liveConfig.quality102Runtime.strategyGrossCap, 1);
   assert.equal(liveConfig.quality102Runtime.selectorMode, "CAUSAL_V4");
   assert.equal(liveConfig.quality102Runtime.brkLiveEnabled, true);
   assert.equal(liveConfig.quality102Runtime.symbols.length, 22);
@@ -66,7 +66,7 @@ test("Quality102 observability accepts a fresh HEALTHY heartbeat and exposes its
   try {
     const result = await loadQuality102RuntimeObservability();
     assert.equal(result.status, "LIVE");
-    assert.equal(result.caps.strategyGrossCap, 0.5);
+    assert.equal(result.caps.strategyGrossCap, 1);
     assert.equal(result.historicalSelectorParity, false);
     assert.equal(result.brkLiveEnabled, false);
     assert.equal(result.safetyState, "HEALTHY");

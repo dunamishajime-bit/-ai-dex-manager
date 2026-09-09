@@ -124,17 +124,18 @@ function unavailable(capturedAt: string, configured: boolean, reason: string): P
   return { status: "UNAVAILABLE", configured, capturedAt, expectedReleaseSha: liveConfig.vpsObservedReleases.pengu, reason, executionTrace: unavailableTrace(reason), failures: [], resolvedFailures: [] };
 }
 
-function configuredPath() {
-  for (const name of [
-    "PENGU_DUAL_LS_V2_DECISION_SNAPSHOT_PATH",
-    "PENGU_DUAL_LS_V2_STATE_PATH",
-    "PENGU_DUAL_LS_V2_RUNNER_STATE_PATH",
-    "PENGU_RUNTIME_STATE_PATH",
-  ]) {
-    const value = String(process.env[name] || "").trim();
-    if (value) return { name, value };
-  }
-  return null;
+function configuredPaths() {
+  const rows: Array<{ name: string; value: string }> = [];
+  const add = (name: string, value: unknown) => {
+    const normalized = String(value || "").trim();
+    if (normalized && !rows.some((row) => row.value === normalized)) rows.push({ name, value: normalized });
+  };
+  add("PENGU_DUAL_LS_V2_RUNNER_STATE_PATH", process.env.PENGU_DUAL_LS_V2_RUNNER_STATE_PATH);
+  add("PENGU_RUNTIME_STATE_PATH", process.env.PENGU_RUNTIME_STATE_PATH);
+  add("PENGU_CURRENT_STATE_PATH", "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json");
+  add("PENGU_DUAL_LS_V2_STATE_PATH", process.env.PENGU_DUAL_LS_V2_STATE_PATH);
+  add("PENGU_DUAL_LS_V2_DECISION_SNAPSHOT_PATH", process.env.PENGU_DUAL_LS_V2_DECISION_SNAPSHOT_PATH);
+  return rows;
 }
 
 function killSwitchPath() {
@@ -258,14 +259,30 @@ function buildExecutionTrace(
 
 export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatus> {
   const capturedAt = new Date().toISOString();
-  const configured = configuredPath();
-  if (!configured) return unavailable(capturedAt, false, "PENGU runner stateの絶対パスがUIサービスに設定されていません。");
-  if (!isAbsolute(configured.value)) return unavailable(capturedAt, true, `${configured.name}は絶対パスで設定してください。`);
+  const configured = configuredPaths();
+  if (!configured.length) return unavailable(capturedAt, false, "PENGU runner stateの絶対パスがUIサービスに設定されていません。");
+  for (const candidate of configured) {
+    if (!isAbsolute(candidate.value)) return unavailable(capturedAt, true, `${candidate.name}は絶対パスで設定してください。`);
+  }
   try {
-    const content = await readFile(configured.value, "utf8");
-    if (Buffer.byteLength(content, "utf8") > MAX_JSON_BYTES) return unavailable(capturedAt, true, "PENGU runner stateが読み取り上限を超えています。");
-    const state = object(JSON.parse(content));
-    if (!state) return unavailable(capturedAt, true, "PENGU runner stateの形式が不正です。");
+    const readable: Array<{ state: JsonObject; updatedAt: number }> = [];
+    const errors: string[] = [];
+    for (const candidate of configured) {
+      try {
+        const content = await readFile(candidate.value, "utf8");
+        if (Buffer.byteLength(content, "utf8") > MAX_JSON_BYTES) { errors.push(`${candidate.name}:size-limit`); continue; }
+        const parsed = object(JSON.parse(content));
+        if (!parsed) { errors.push(`${candidate.name}:malformed`); continue; }
+        const candidateUpdatedAt = number(parsed.updatedAt ?? parsed.lastHeartbeatAt ?? parsed.stateUpdatedAt ?? parsed.lastCycleAt ?? parsed.capturedAt) ?? 0;
+        readable.push({ state: parsed, updatedAt: candidateUpdatedAt });
+      } catch (error) {
+        const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
+        if (code !== "ENOENT") errors.push(`${candidate.name}:${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    readable.sort((left, right) => right.updatedAt - left.updatedAt);
+    const state = readable[0]?.state;
+    if (!state) return unavailable(capturedAt, true, errors[0] || "PENGU runner stateを読み取れません。");
     const killSwitch = object(state.killSwitch);
     const [sharedKillSwitch, sharedRisk] = await Promise.all([readKillSwitch(), readSharedRisk()]);
     const killSwitchActive = killSwitch?.active === true || state.killSwitchActive === true || sharedKillSwitch.active;
