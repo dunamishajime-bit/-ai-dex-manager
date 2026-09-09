@@ -16,6 +16,7 @@ PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
 ReadWritePaths=-/home/deploy/disdex-trading/releases
+ReadWritePaths=-/home/deploy/disdex-trading/ui-releases
 ReadWritePaths=-/home/deploy/ai-dex-manager-v96-paper/.runtime-state
 ReadWritePaths=-/home/deploy/ai-dex-manager-v96-paper/.runtime-approval
 ReadWritePaths=-/home/deploy/disdex-ops

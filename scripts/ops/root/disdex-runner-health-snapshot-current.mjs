@@ -5,8 +5,8 @@ import { promisify } from "node:util";
 
 const execFile = promisify(execFileCallback);
 const SYSTEMCTL = "/usr/bin/systemctl";
-const EXPECTED_SHA = String(process.env.DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA || "").trim().toLowerCase();
-const RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT || "").trim();
+const DEFAULT_EXPECTED_SHA = String(process.env.DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA || "").trim().toLowerCase();
+const DEFAULT_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT || "").trim();
 const HEALTH_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT || "/var/lib/disdex/runner-health").trim();
 const KILL_SWITCH_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json").trim();
 
@@ -14,11 +14,25 @@ function configuredPath(name, fallback) {
     return String(process.env[name] || fallback).trim();
 }
 
+function runnerPin(expectedShaEnv, releaseRootEnv) {
+    return {
+        expectedSha: String(process.env[expectedShaEnv] || DEFAULT_EXPECTED_SHA).trim().toLowerCase(),
+        releaseRoot: String(process.env[releaseRootEnv] || DEFAULT_RELEASE_ROOT).trim(),
+    };
+}
+
+const V12_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT");
+const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT");
+const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT");
+const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT");
+
 const RUNNERS = [
     {
         key: "V12_X1_ALL",
         runnerId: "V12_X1_ALL",
-        unit: `disdex-v12-x1-all@${EXPECTED_SHA}.service`,
+        unit: `disdex-v12-x1-all@${V12_PIN.expectedSha}.service`,
+        expectedSha: V12_PIN.expectedSha,
+        releaseRoot: V12_PIN.releaseRoot,
         script: "scripts/disdex-v12-x1-all-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"),
         heartbeatFile: "v12-x1-all.json",
@@ -27,7 +41,9 @@ const RUNNERS = [
     {
         key: "PENGU_V8",
         runnerId: "PENGU_V8",
-        unit: `disdex-pengu-dual-ls-v2@${EXPECTED_SHA}.service`,
+        unit: `disdex-pengu-dual-ls-v2@${PENGU_PIN.expectedSha}.service`,
+        expectedSha: PENGU_PIN.expectedSha,
+        releaseRoot: PENGU_PIN.releaseRoot,
         script: "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH", "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"),
         heartbeatFile: "pengu-v8.json",
@@ -36,7 +52,9 @@ const RUNNERS = [
     {
         key: "V52",
         runnerId: "V52",
-        unit: `disdex-v52-aster-only@${EXPECTED_SHA}.service`,
+        unit: `disdex-v52-aster-only@${V52_PIN.expectedSha}.service`,
+        expectedSha: V52_PIN.expectedSha,
+        releaseRoot: V52_PIN.releaseRoot,
         script: "scripts/disdex_v52_aster_only_live_engine.py",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH", "/var/lib/disdex/v52-aster-only/runner-live.json"),
         heartbeatFile: "v52.json",
@@ -45,7 +63,9 @@ const RUNNERS = [
     {
         key: "QUALITY102_CAUSAL_V1",
         runnerId: "QUALITY102_CAUSAL_V1",
-        unit: `disdex-quality102-causal-v1@${EXPECTED_SHA}.service`,
+        unit: `disdex-quality102-causal-v1@${Q102_PIN.expectedSha}.service`,
+        expectedSha: Q102_PIN.expectedSha,
+        releaseRoot: Q102_PIN.releaseRoot,
         script: "scripts/disdex-quality102-causal-v1-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", "/var/lib/disdex/quality102-causal-v1/state.json"),
         heartbeatFile: "quality102-causal-v1.json",
@@ -104,8 +124,10 @@ async function atomicJson(path, value) {
     }
 }
 
-function releaseValid() {
-    return /^[0-9a-f]{40}$/.test(EXPECTED_SHA) && resolve(RELEASE_ROOT) === RELEASE_ROOT;
+function releaseValid(runner) {
+    return /^[0-9a-f]{40}$/.test(runner.expectedSha)
+        && resolve(runner.releaseRoot) === runner.releaseRoot
+        && runner.releaseRoot.endsWith(`/${runner.expectedSha}`);
 }
 
 function stateIdentityMatches(runner, state) {
@@ -139,11 +161,11 @@ async function buildHeartbeat(runner, now, killReason) {
     const stateFresh = updatedAt > 0 && now - updatedAt <= runner.maxStateAgeMs;
     const serviceActive = Boolean(service?.active);
     const processPresent = Boolean(service?.pid > 0);
-    const cwdCurrent = Boolean(service?.cwd === RELEASE_ROOT);
+    const cwdCurrent = Boolean(service?.cwd === runner.releaseRoot);
     const commandCurrent = Boolean(service?.command.includes(runner.script) && service?.command.includes("--daemon"));
-    const execCurrent = Boolean(service?.execStart.includes(RELEASE_ROOT));
+    const execCurrent = Boolean(service?.execStart.includes(runner.releaseRoot));
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
-    const blockedReason = killReason || stateError || serviceError || !releaseValid()
+    const blockedReason = killReason || stateError || serviceError || !releaseValid(runner)
         ? (killReason || stateError || serviceError || "release pin is invalid")
         : !identityOk
             ? `${runner.key} service identity is not current`
@@ -156,9 +178,9 @@ async function buildHeartbeat(runner, now, killReason) {
         schema: "disdex-runner-heartbeat/v1",
         runnerId: runner.runnerId,
         serviceUnit: runner.unit,
-        runtimeSha: EXPECTED_SHA,
-        expectedSha: EXPECTED_SHA,
-        workingDirectory: RELEASE_ROOT,
+        runtimeSha: runner.expectedSha,
+        expectedSha: runner.expectedSha,
+        workingDirectory: runner.releaseRoot,
         mode: "LIVE",
         liveEnabled: serviceActive,
         safetyState: blockedReason ? "BLOCKED" : "HEALTHY",

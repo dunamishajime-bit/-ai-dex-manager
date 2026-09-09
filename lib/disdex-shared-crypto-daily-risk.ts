@@ -63,6 +63,41 @@ export async function readSharedCryptoDailyRisk(path: string, now = Date.now(), 
     catch (error) { const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : ""; return { ok: false, reason: code === "ENOENT" ? "MISSING" : "MALFORMED" }; }
 }
 
+export interface SharedCryptoRolloverRetryOptions {
+    now?: () => number;
+    sleep?: (milliseconds: number) => Promise<void>;
+    rolloverGraceMs?: number;
+    pollMs?: number;
+    maxAttempts?: number;
+    maxAgeMs?: number;
+}
+
+function millisecondsSinceUtcMidnight(now: number): number {
+    const date = new Date(now);
+    const midnight = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+    return now - midnight;
+}
+
+export async function readSharedCryptoDailyRiskWithRolloverRetry(
+    path: string,
+    options: SharedCryptoRolloverRetryOptions = {},
+): Promise<DailyRiskValidation> {
+    const now = options.now || Date.now;
+    const sleep = options.sleep || ((milliseconds: number) => new Promise<void>((resolve) => setTimeout(resolve, milliseconds)));
+    const rolloverGraceMs = Math.max(0, options.rolloverGraceMs ?? 60_000);
+    const pollMs = Math.max(100, options.pollMs ?? 2_000);
+    const maxAttempts = Math.max(1, Math.floor(options.maxAttempts ?? 5));
+    const maxAgeMs = Math.max(1, options.maxAgeMs ?? 90_000);
+    let result = await readSharedCryptoDailyRisk(path, now(), maxAgeMs);
+    for (let attempt = 1; attempt < maxAttempts && !result.ok && result.reason === "DAY_MISMATCH"; attempt += 1) {
+        const current = now();
+        if (millisecondsSinceUtcMidnight(current) > rolloverGraceMs) break;
+        await sleep(pollMs);
+        result = await readSharedCryptoDailyRisk(path, now(), maxAgeMs);
+    }
+    return result;
+}
+
 export function buildSharedCryptoDailyRiskState(input: Omit<SharedCryptoDailyRiskState, "schema" | "stateHash">): SharedCryptoDailyRiskState {
     const state: SharedCryptoDailyRiskState = { schema: SHARED_CRYPTO_DAILY_RISK_SCHEMA, ...input };
     return { ...state, stateHash: hashState(state) };

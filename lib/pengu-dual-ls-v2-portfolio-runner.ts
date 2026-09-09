@@ -24,7 +24,7 @@ import type {
 } from "@/lib/pengu-dual-ls-v2-runner-state";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
-import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-crypto-daily-risk";
 import { createPenguShortV20State } from "@/lib/pengu-short-v20";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
@@ -544,6 +544,10 @@ export class PenguDualLsV2PortfolioRunner {
         try {
             const beforeLockState = await this.dependencies.stateStore.load();
             if (!beforeLockState.pending) preloadedHistory = await this.dependencies.marketData.load();
+            const sharedPath = this.dependencies.config.portfolioDailyLossStatePath || process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH;
+            if (!beforeLockState.pending && !beforeLockState.position && sharedPath) {
+                await readSharedCryptoDailyRiskWithRolloverRetry(sharedPath, { now: this.now });
+            }
         } catch {
             // Preserve the existing fail-closed path under the shared lock.
         }
@@ -575,7 +579,7 @@ export class PenguDualLsV2PortfolioRunner {
                 this.dependencies.executor.getPositions(),
                 this.dependencies.executor.getOpenOrders(),
             ]);
-            let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+            let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
             if (quality102Ownership?.pending) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "Quality102 causal-v1 has a pending order and must reconcile before PENGU can enter.", signal: state.latestSignal || undefined };
@@ -750,7 +754,7 @@ export class PenguDualLsV2PortfolioRunner {
                                 causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
                                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
                                 maxDataAgeMs: 5 * 60_000,
-                                expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                                expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
                             });
                             if (reduced.status !== "reduced") throw new Error(`QUALITY102_MTM_REDUCTION_BLOCKED:${reduced.message}`);
                         }
@@ -758,7 +762,7 @@ export class PenguDualLsV2PortfolioRunner {
                             this.dependencies.executor.getAccountSnapshot(),
                             this.dependencies.executor.getPositions(),
                         ]);
-                        quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                        quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
                         quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
                         const refreshedNow = this.now();
                         if (!validLiveAccount(workingAccount, refreshedNow) || !validLiveQuote(quote, SYMBOL, refreshedNow)) {

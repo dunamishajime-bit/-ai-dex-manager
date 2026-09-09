@@ -136,7 +136,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         if (openOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
         let workingAccount = account;
         let workingPositions = positions;
-        let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+        let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
         const requestedNotional = Math.abs(input.quantity * input.expectedPrice);
         if (!(requestedNotional > 0)) throw new Error("STRICT_PORTFOLIO_REQUESTED_NOTIONAL_INVALID");
         let accepted: StrictPortfolioIntent | undefined;
@@ -172,12 +172,12 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                         causeIdempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
                         maxSlippageBps: this.maxSlippageBps,
                         maxDataAgeMs,
-                        expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                        expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
                     });
                     if (reduced.status !== "reduced") throw new Error(`QUALITY102_MTM_REDUCTION_BLOCKED:${reduced.message}`);
                 }
                 [workingAccount, workingPositions] = await Promise.all([this.getAccountSnapshot(), this.getPositions()]);
-                quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
                 continue;
             }
             const row = plan.accepted.find((intent) => intent.strategy === "V12" && intent.symbol.toUpperCase() === input.symbol.toUpperCase());

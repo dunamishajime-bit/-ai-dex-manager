@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import stat
+import subprocess
 import tempfile
 import time
 from dataclasses import dataclass, field
@@ -16,7 +17,9 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+UI_RELEASE_RE = re.compile(r"^ui-runtime-data-([0-9a-f]{40})$")
 RELEASE_KEEP_NONCURRENT = 2
+UI_RELEASE_KEEP_NONCURRENT = 2
 RELEASE_MIN_AGE_SECONDS = 24 * 60 * 60
 AUDIT_RETENTION_DAYS = 14
 PM2_RETENTION_DAYS = 7
@@ -38,6 +41,10 @@ class CleanupPaths:
     @property
     def releases_root(self) -> Path:
         return self.trading_root / "releases"
+
+    @property
+    def ui_releases_root(self) -> Path:
+        return self.trading_root / "ui-releases"
 
     @property
     def current_link(self) -> Path:
@@ -169,6 +176,34 @@ def current_release(paths: CleanupPaths) -> Optional[Path]:
     return target
 
 
+def ui_release_sha(path: Path) -> Optional[str]:
+    match = UI_RELEASE_RE.fullmatch(path.name)
+    return match.group(1) if match else None
+
+
+def exact_ui_release_dirs(paths: CleanupPaths) -> list[Path]:
+    if not paths.ui_releases_root.is_dir():
+        return []
+    rows = [child for child in paths.ui_releases_root.iterdir()
+            if child.is_dir() and not child.is_symlink() and ui_release_sha(child)]
+    return sorted(rows, key=lambda path: path.stat().st_mtime, reverse=True)
+
+
+def current_ui_release(paths: CleanupPaths) -> Optional[Path]:
+    configured = os.environ.get("DISDEX_UI_ACTIVE_RELEASE", "").strip()
+    if not configured:
+        configured = subprocess.check_output([
+            "/usr/bin/systemctl", "show", "ai-dex-manager-ui.service",
+            "--property=WorkingDirectory", "--value", "--no-pager",
+        ], text=True, timeout=10).strip()
+    if not configured:
+        return None
+    target = Path(configured).resolve(strict=False)
+    if not is_within(target, paths.ui_releases_root) or not ui_release_sha(target):
+        raise RuntimeError("UI service WorkingDirectory is not an immutable ui-runtime-data-<40sha> release")
+    return target
+
+
 def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
     releases = exact_release_dirs(paths)
     current = current_release(paths)
@@ -180,6 +215,33 @@ def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> 
         if release == current:
             continue
         if noncurrent_kept < RELEASE_KEEP_NONCURRENT:
+            protected.add(release)
+            noncurrent_kept += 1
+    for release in sorted(protected):
+        report.protected_paths.append(str(release))
+    for release in releases:
+        if release in protected:
+            continue
+        age = now - release.stat().st_mtime
+        if age < RELEASE_MIN_AGE_SECONDS:
+            report.skipped_paths.append(str(release))
+            continue
+        unlink_or_rmtree(release, report)
+
+
+def cleanup_ui_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+    releases = exact_ui_release_dirs(paths)
+    if not releases:
+        return
+    current = current_ui_release(paths)
+    if current is None:
+        raise RuntimeError("active UI release could not be resolved")
+    protected: set[Path] = {current}
+    noncurrent_kept = 0
+    for release in releases:
+        if release == current:
+            continue
+        if noncurrent_kept < UI_RELEASE_KEEP_NONCURRENT:
             protected.add(release)
             noncurrent_kept += 1
     for release in sorted(protected):
@@ -366,6 +428,7 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
     try:
         current_time = now_seconds()
         cleanup_releases(paths, report, current_time)
+        cleanup_ui_releases(paths, report, current_time)
         cleanup_audits(paths, report, current_time)
         cleanup_backups(paths, report, current_time)
         cleanup_stale_temporary_files(paths, report, current_time)
@@ -394,6 +457,7 @@ def self_test() -> None:
         )
         for path in [
             paths.releases_root,
+            paths.ui_releases_root,
             paths.state_root / "stock",
             paths.state_root / "crypto-v96",
             paths.state_root / "margin-risk",
@@ -413,6 +477,15 @@ def self_test() -> None:
             set_old(release, index + 2)
             releases.append(release)
         paths.current_link.symlink_to(releases[3])
+        ui_releases = []
+        for index in range(5):
+            sha = f"{index + 11:040x}"
+            release = paths.ui_releases_root / f"ui-runtime-data-{sha}"
+            release.mkdir()
+            (release / "payload.bin").write_bytes(b"u" * 100)
+            set_old(release, index + 2)
+            ui_releases.append(release)
+        os.environ["DISDEX_UI_ACTIVE_RELEASE"] = str(ui_releases[2])
         for protected in protected_runtime_paths(paths):
             if protected == paths.current_link:
                 continue
@@ -448,6 +521,9 @@ def self_test() -> None:
         remaining = exact_release_dirs(paths)
         assert releases[3] in remaining
         assert len(remaining) <= 3
+        remaining_ui = exact_ui_release_dirs(paths)
+        assert ui_releases[2] in remaining_ui
+        assert len(remaining_ui) <= 3
         assert audit.exists() and audit.stat().st_size == 0
         audit_after = audit.stat()
         assert stat.S_IMODE(audit_after.st_mode) == stat.S_IMODE(audit_before.st_mode)

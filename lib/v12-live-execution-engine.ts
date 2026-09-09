@@ -4,7 +4,7 @@ import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 import { AsterApiError } from "@/lib/aster-v3-client";
 import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
-import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-crypto-daily-risk";
 import { planUnifiedPortfolio, type ActivePortfolioPosition } from "@/lib/disdex-unified-portfolio-routing";
 import { V12AsterLiveAdapter, deterministicV12ClientOrderId } from "@/lib/v12-aster-live-adapter";
 import {
@@ -210,6 +210,9 @@ export class V12LiveExecutionEngine {
         try {
             const beforeLockState = await this.d.stateStore.load();
             if (!beforeLockState.pending) preloadedData = await this.d.marketData.load();
+            if (!beforeLockState.pending && !beforeLockState.active) {
+                await readSharedCryptoDailyRiskWithRolloverRetry(this.d.riskPath, { now: this.now });
+            }
         } catch {
             // Preserve the existing fail-closed path under the shared lock.
         }
@@ -219,7 +222,7 @@ export class V12LiveExecutionEngine {
             if (!(await this.d.adapter.credentialsReady())) return this.fail(state, "V12_ASTER_CREDENTIALS_NOT_READY");
             const risk = await readSharedCryptoDailyRisk(this.d.riskPath, this.now());
             const [account, positions] = await Promise.all([this.d.adapter.getAccountSnapshot(), this.d.adapter.getPositions()]);
-            const quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA });
+            const quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
             const recovery = await this.restartReconcile(state, positions, quality102Ownership); if (recovery) return recovery;
             state = await this.d.stateStore.load();
             const data = preloadedData ?? await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
