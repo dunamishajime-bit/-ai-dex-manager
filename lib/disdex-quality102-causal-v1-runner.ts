@@ -142,6 +142,22 @@ function defaultLogger(): Quality102CausalV1Logger {
     };
 }
 
+/**
+ * A risk-blocked tick still completed the account/state read boundary. Keep
+ * the durable document fresh so dependent portfolio readers do not confuse a
+ * safety hold with a dead Q102 runner. This never changes pending/position
+ * state and never enables an order.
+ */
+export function refreshQ102StateAfterRiskBlock(
+    state: Quality102CausalV1State,
+    now: number,
+): Quality102CausalV1State {
+    const timestamp = positive(now, "Q102 risk-block timestamp");
+    state.updatedAt = timestamp;
+    state.lastReconciledAt = timestamp;
+    return state;
+}
+
 function positive(value: unknown, name: string): number {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed <= 0) throw new Error(`${name} must be positive.`);
@@ -1006,7 +1022,11 @@ export class Quality102CausalV1Runner {
                 const planned = await this.planExit(state, actual!, quote, reason);
                 return planned.status === "planned" ? this.executePending(state, lock) : planned;
             }
-            if (riskBlocked) return { status: "blocked-local", message: riskBlocked, ordersSent: 0 };
+            if (riskBlocked) {
+                refreshQ102StateAfterRiskBlock(state, this.now());
+                await this.dependencies.stateStore.save(state);
+                return { status: "blocked-local", message: riskBlocked, ordersSent: 0 };
+            }
             const signal = this.buildSignal(history, this.now(), false, false, live.positions.some(nonZero));
             if (state.lastProcessedReferenceTs !== undefined && signal.referenceTs <= state.lastProcessedReferenceTs) {
                 return { status: "no-change", message: "Q102 signal reference was already processed.", signal, ordersSent: 0 };
