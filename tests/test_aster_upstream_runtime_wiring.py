@@ -21,6 +21,14 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         self.assertIn('disdex-v12-kill-switch-auto-repair.service.d', source)
         self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.service', source)
 
+    def test_apply_removes_only_stale_auto_repair_v52_sha_pin_dropins(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertIn("remove_stale_auto_repair_unit_pin_dropins", source)
+        self.assertIn('DISDEX_V52_SERVICE_UNIT=disdex-v52-aster-only@', source)
+        self.assertIn('[[ "$dropin" == "$current_dropin" ]] && continue', source)
+        self.assertIn('rm -f -- "$dropin"', source)
+        self.assertIn('remove_stale_auto_repair_unit_pin_dropins', source[source.index('apply_wiring()'):])
+
 
 if __name__ == "__main__":
     unittest.main()

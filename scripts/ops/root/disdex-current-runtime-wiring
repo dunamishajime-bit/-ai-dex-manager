@@ -198,6 +198,21 @@ write_atomic() {
   trap - RETURN
 }
 
+remove_stale_auto_repair_unit_pin_dropins() {
+  local current_dropin="${AUTO_REPAIR_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"
+  local dropin
+  [[ -d "$AUTO_REPAIR_DROPIN_DIR" ]] || return 0
+  while IFS= read -r -d '' dropin; do
+    [[ "$dropin" == "$current_dropin" ]] && continue
+    if grep -Fqx "Environment=DISDEX_V52_SERVICE_UNIT=${V52_UNIT}" "$dropin"; then
+      continue
+    fi
+    if grep -Eq '^Environment=DISDEX_V52_SERVICE_UNIT=disdex-v52-aster-only@[0-9a-f]{40}\.service$' "$dropin"; then
+      rm -f -- "$dropin"
+    fi
+  done < <(find "$AUTO_REPAIR_DROPIN_DIR" -maxdepth 1 -type f -print0)
+}
+
 apply_wiring() {
   require_root_for_apply
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
@@ -329,6 +344,8 @@ Environment=DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 Environment=DISDEX_V52_SERVICE_UNIT=${V52_UNIT}
 WorkingDirectory=${CURRENT_RELEASE}"
 
+  remove_stale_auto_repair_unit_pin_dropins
+
   write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
@@ -438,6 +455,17 @@ self_test() {
   printf '#!/bin/sh\n' > "$SELF_TEST_FIXTURE/.venv2/bin/python"
   chmod +x "$SELF_TEST_FIXTURE/node_modules/.bin/tsx" "$SELF_TEST_FIXTURE/.venv2/bin/python"
   validate_release_artifacts
+  AUTO_REPAIR_DROPIN_DIR="$SELF_TEST_FIXTURE/auto-repair-dropins"
+  V52_UNIT="disdex-v52-aster-only@${sample_sha}.service"
+  mkdir -p "$AUTO_REPAIR_DROPIN_DIR"
+  printf '[Service]\nEnvironment=DISDEX_V52_SERVICE_UNIT=%s\n' "$V52_UNIT" > "$AUTO_REPAIR_DROPIN_DIR/zzzzzzzzzzzz-current-release.conf"
+  printf '[Service]\nEnvironment=DISDEX_V52_SERVICE_UNIT=disdex-v52-aster-only@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.service\n' > "$AUTO_REPAIR_DROPIN_DIR/stale.conf"
+  printf '[Service]\nEnvironment=UNRELATED=true\n' > "$AUTO_REPAIR_DROPIN_DIR/unrelated.conf"
+  remove_stale_auto_repair_unit_pin_dropins
+  [[ -f "$AUTO_REPAIR_DROPIN_DIR/zzzzzzzzzzzz-current-release.conf" ]]
+  [[ ! -e "$AUTO_REPAIR_DROPIN_DIR/stale.conf" ]]
+  [[ -f "$AUTO_REPAIR_DROPIN_DIR/unrelated.conf" ]]
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_STALE_AUTO_REPAIR_DROPIN_SELFTEST_PASS\n'
   mv "$SELF_TEST_FIXTURE/node_modules" "$SELF_TEST_FIXTURE/node_modules-real"
   ln -s "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
   if [[ -L "$SELF_TEST_FIXTURE/node_modules" ]]; then
