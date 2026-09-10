@@ -320,8 +320,11 @@ function commandMatches(config, runner, command) {
     const scriptFound = scripts.some((script) => pathToken(tokens[tokens.indexOf(script)] || "", runner.expectedCwd, script) || tokens.some((token) => token === join(runner.expectedCwd, script)));
     const runnerLoaderFound = tokens.some((token) => samePath(token, join(runner.expectedCwd, "node_modules/tsx/dist/cli.mjs")) || samePath(token, join(runner.expectedCwd, "node_modules/.bin/tsx")));
     const daemon = tokens.includes("--daemon") || tokens.includes("--once");
-    const python = tokens[0] === "/usr/bin/python3" || tokens[0] === "python3" || tokens[0] === "python";
-    return scriptFound && daemon && (runnerLoaderFound || (runner.key === "V52" && python));
+    const v52Python = runner.key === "V52" && (
+        tokens[0] === "/usr/bin/python3" || tokens[0] === "python3" || tokens[0] === "python"
+        || samePath(tokens[0], join(runner.expectedCwd, ".venv2/bin/python"))
+    );
+    return scriptFound && daemon && (runnerLoaderFound || v52Python);
 }
 
 async function markerExists(path) {
@@ -537,6 +540,10 @@ function selfTest() {
     const command = `/usr/bin/node ${config.releaseRoot}/node_modules/tsx/dist/cli.mjs scripts/disdex-quality102-causal-v1-live-runner.ts --daemon`;
     if (!commandMatches(config, q102Pinned, command)) throw new Error("tsx command self-test failed");
     if (commandMatches(config, q102Pinned, "/usr/bin/node /tmp/tsx scripts/disdex-quality102-causal-v1-live-runner.ts --daemon")) throw new Error("un-pinned command self-test failed");
+    const v52Pinned = { ...v52, expectedCwd: config.releaseRoot };
+    const v52VenvCommand = `${config.releaseRoot}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon`;
+    if (!commandMatches(config, v52Pinned, v52VenvCommand)) throw new Error("V52 release venv command self-test failed");
+    if (commandMatches(config, v52Pinned, "/tmp/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon")) throw new Error("V52 unpinned venv command self-test failed");
     const snapshotOnlyHeartbeat = {
         schema: "disdex-runner-heartbeat/v1",
         runnerId: "V12_X1_ALL",
