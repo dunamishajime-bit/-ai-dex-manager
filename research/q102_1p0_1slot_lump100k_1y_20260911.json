@@ -1,0 +1,93 @@
+{
+  "schema": "q102-1p0-1slot-lump100k-1y/v1",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "capital": {
+    "initialJpy": 100000,
+    "monthlyContributionJpy": 0,
+    "totalContributedJpy": 100000,
+    "compounding": true
+  },
+  "strategy": "V12_TOP2_1.5 + PENGU_V20_V8 + V52_TOP2 + Q102_1.0_1SLOT",
+  "risk": {
+    "cryptoDailyLossPct": -5.0,
+    "cryptoGrossCap": 2.0,
+    "totalGrossCap": 2.5
+  },
+  "baselineWithoutQ102": {
+    "NORMAL": 12184575.52397179,
+    "SEVERE": 1275561.1399179
+  },
+  "results": {
+    "NORMAL": {
+      "endingAssetJpy": 63349871.26015618,
+      "PF": 3.46130115,
+      "DDPct": -14.33740242,
+      "executions": 1169,
+      "q102Episodes": 71,
+      "q102PnlJpy": 15899743.49626111,
+      "q102PF": 3.97452131,
+      "q102WinRatePct": 66.96428571,
+      "mtmTrims": 41,
+      "maxQ102Gross": 1.0,
+      "maxCryptoGross": 2.0,
+      "maxTotalGross": 2.5,
+      "grossConflicts": 0
+    },
+    "SEVERE": {
+      "endingAssetJpy": 6464329.97779967,
+      "PF": 2.35473078,
+      "DDPct": -19.94193393,
+      "executions": 1035,
+      "q102Episodes": 71,
+      "q102PnlJpy": 2574061.1405755,
+      "q102PF": 3.83557127,
+      "q102WinRatePct": 67.56756757,
+      "mtmTrims": 40,
+      "maxQ102Gross": 1.0,
+      "maxCryptoGross": 2.0,
+      "maxTotalGross": 2.0,
+      "grossConflicts": 0
+    }
+  },
+  "checks": {
+    "NORMAL_v12Positions": true,
+    "NORMAL_v12Gross": true,
+    "NORMAL_penguGross": true,
+    "NORMAL_cryptoGross": true,
+    "NORMAL_stockGross": true,
+    "NORMAL_totalGross": true,
+    "NORMAL_supplementGross": true,
+    "NORMAL_supplementGrossConflicts": true,
+    "NORMAL_contributions": true,
+    "NORMAL_baseParity_V12_ENTERED": true,
+    "NORMAL_baseParity_PENGU_ENTERED": true,
+    "NORMAL_baseParity_V11_EQ_ENTERED": true,
+    "NORMAL_baseParity_V50_POST_OPEN_BASIS_ENTERED": true,
+    "SEVERE_v12Positions": true,
+    "SEVERE_v12Gross": true,
+    "SEVERE_penguGross": true,
+    "SEVERE_cryptoGross": true,
+    "SEVERE_stockGross": true,
+    "SEVERE_totalGross": true,
+    "SEVERE_supplementGross": true,
+    "SEVERE_supplementGrossConflicts": true,
+    "SEVERE_contributions": true,
+    "SEVERE_baseParity_V12_ENTERED": true,
+    "SEVERE_baseParity_PENGU_ENTERED": true,
+    "SEVERE_baseParity_V11_EQ_ENTERED": true,
+    "SEVERE_baseParity_V50_POST_OPEN_BASIS_ENTERED": true,
+    "BASELINE_NORMAL_ENDING_ASSET": true,
+    "BASELINE_SEVERE_ENDING_ASSET": true
+  },
+  "status": "PASS_RESEARCH_ONLY",
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}
