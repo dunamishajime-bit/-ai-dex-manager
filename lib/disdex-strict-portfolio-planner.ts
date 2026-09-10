@@ -110,7 +110,7 @@ function positionNotional(position: StrictPortfolioPosition) {
 }
 
 function strategyCap(strategy: StrictStrategy) {
-    if (strategy === "V12") return STRICT_BT33404708902.v12MaximumGross;
+    if (strategy === "V12") return STRICT_BT33404708902.v12PerPositionGrossCap;
     if (strategy === "PENGU_DUAL_LS_V2") return STRICT_BT33404708902.penguMaximumGross;
     if (strategy === "QUALITY102_CAUSAL_V1") return STRICT_BT33404708902.quality102CausalV1PositionCap;
     if (strategy === "QUALITY102") return STRICT_BT33404708902.quality102PositionCap;
@@ -408,8 +408,12 @@ export function planStrictPortfolio(input: {
     if (activeCausalQuality.some((row) => !causalLiveMarkIsFresh(row, input.now, maxDataAgeMs))) {
         return rejectPlan("QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED", input.active, equity);
     }
-    if (input.active.filter((row) => row.strategy === "V12").length > STRICT_BT33404708902.v12MaximumPositions) {
-        return rejectPlan("V12_SLOT_OCCUPIED_NO_PREEMPTION", input.active, equity);
+    const activeV12 = input.active.filter((row) => row.strategy === "V12");
+    if (activeV12.length > STRICT_BT33404708902.v12LiveMaximumPositions) {
+        return rejectPlan("V12_MAX_POSITIONS_REACHED", input.active, equity);
+    }
+    if (activeV12.some((row) => grossForNotional(positionNotional(row), equity) > STRICT_BT33404708902.v12PerPositionGrossCap + EPSILON)) {
+        return rejectPlan("V12_POSITION_GROSS_OVER_CAP", input.active, equity);
     }
     if (activeQuality.some((row) => grossForNotional(positionNotional(row), equity) > STRICT_BT33404708902.quality102PositionCap + EPSILON)) {
         return rejectPlan("QUALITY102_GROSS_OVER_CAP", input.active, equity);
@@ -452,19 +456,25 @@ export function planStrictPortfolio(input: {
         if (seenIntentTargets.has(targetKey)) { rejected.push({ intent, reason: "DUPLICATE_INTENT_TARGET" }); continue; }
         seenIntentTargets.add(targetKey);
         if (intent.strategy === "V12"
-            && active.filter((row) => row.strategy === "V12").length + accepted.filter((row) => row.strategy === "V12").length >= STRICT_BT33404708902.v12MaximumPositions) {
-            rejected.push({ intent, reason: "V12_SLOT_OCCUPIED_NO_PREEMPTION" });
+            && active.filter((row) => row.strategy === "V12").length + accepted.filter((row) => row.strategy === "V12").length >= STRICT_BT33404708902.v12LiveMaximumPositions) {
+            rejected.push({ intent, reason: "V12_MAX_POSITIONS_REACHED" });
             continue;
         }
         const baseOtherTotalNotional = sumNotional(active, (row) => !isCausalQuality102Strategy(row.strategy)) + accepted.filter((row) => !isCausalQuality102Strategy(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
         const baseOtherCryptoNotional = sumNotional(active, (row) => !isCausalQuality102Strategy(row.strategy) && isCrypto(row.strategy)) + accepted.filter((row) => !isCausalQuality102Strategy(row.strategy) && isCrypto(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
         const baseOtherStockNotional = sumNotional(active, (row) => !isCausalQuality102Strategy(row.strategy) && isStock(row.strategy)) + accepted.filter((row) => !isCausalQuality102Strategy(row.strategy) && isStock(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
         const perStrategyGross = strategyCap(intent.strategy);
+        const strategyAggregateResidual = intent.strategy === "V12"
+            ? STRICT_BT33404708902.v12MaximumGross - (
+                sumNotional(active, (row) => row.strategy === "V12")
+                + accepted.filter((row) => row.strategy === "V12").reduce((sum, row) => sum + row.notionalUsd, 0)
+            ) / workingEquity
+            : Number.POSITIVE_INFINITY;
         const classResidual = isCrypto(intent.strategy)
             ? STRICT_BT33404708902.cryptoGrossCap - baseOtherCryptoNotional / workingEquity
             : STRICT_BT33404708902.stockGrossCap - baseOtherStockNotional / workingEquity;
         const totalResidual = STRICT_BT33404708902.totalGrossCap - baseOtherTotalNotional / workingEquity;
-        const targetGross = Math.max(0, Math.min(intent.gross, perStrategyGross, classResidual, totalResidual));
+        const targetGross = Math.max(0, Math.min(intent.gross, perStrategyGross, strategyAggregateResidual, classResidual, totalResidual));
         if (targetGross <= EPSILON) {
             const reason = intent.strategy === "QUALITY102_CAUSAL_V1"
                 ? classResidual <= EPSILON ? "CRYPTO_GROSS_CAP" : totalResidual <= EPSILON ? "TOTAL_GROSS_CAP" : "CAPACITY_BLOCKED"
@@ -497,7 +507,7 @@ export function planStrictPortfolio(input: {
                     quality: currentQuality,
                     baseOtherTotalNotional,
                     baseOtherCryptoNotional,
-                    baseIntent: intent,
+                    baseIntent: { ...intent, gross: targetGross, notionalUsd: targetGross * workingEquity },
                     equity: workingEquity,
                     now: input.now,
                 });
@@ -510,9 +520,16 @@ export function planStrictPortfolio(input: {
         }
         const finalClassOther = isCrypto(intent.strategy) ? baseOtherCryptoNotional : baseOtherStockNotional;
         const finalClassCap = isCrypto(intent.strategy) ? STRICT_BT33404708902.cryptoGrossCap : STRICT_BT33404708902.stockGrossCap;
+        const finalStrategyAggregateResidual = intent.strategy === "V12"
+            ? STRICT_BT33404708902.v12MaximumGross - (
+                sumNotional(active, (row) => row.strategy === "V12")
+                + accepted.filter((row) => row.strategy === "V12").reduce((sum, row) => sum + row.notionalUsd, 0)
+            ) / workingEquity
+            : Number.POSITIVE_INFINITY;
         const finalGross = Math.max(0, Math.min(
             intent.gross,
             perStrategyGross,
+            finalStrategyAggregateResidual,
             finalClassCap - finalClassOther / workingEquity,
             STRICT_BT33404708902.totalGrossCap - baseOtherTotalNotional / workingEquity,
         ));
@@ -521,6 +538,8 @@ export function planStrictPortfolio(input: {
             continue;
         }
         accepted.push({ ...intent, gross: finalGross, notionalUsd: finalGross * workingEquity });
+        const capViolation = baseGrossCapViolation(active, accepted, workingEquity);
+        if (capViolation) return rejectPlan(capViolation, input.active, equity);
     }
     const totals = planTotals(active, accepted, workingEquity);
     if (totals.cryptoGross > STRICT_BT33404708902.cryptoGrossCap + EPSILON) return rejectPlan("CRYPTO_GROSS_OVER_CAP_AFTER_PLANNING", active, workingEquity);

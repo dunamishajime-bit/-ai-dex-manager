@@ -2,6 +2,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import type { V12StopState } from "@/lib/v12-resident-stop-lifecycle";
+import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 
 export interface V12PendingOrderState {
     idempotencyKey: string;
@@ -45,6 +46,7 @@ export interface V12X1AllRunnerState {
     lastReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     cooldownUntilTs?: number;
+    activePositions?: V12ActivePositionState[];
     active?: V12ActivePositionState;
     pending?: V12PendingOrderState;
     manualReview?: string;
@@ -64,11 +66,25 @@ export class FileV12X1AllRunnerStateStore {
                 if (!(value.active.quantity > 0 && value.active.entryPrice > 0 && value.active.atrAtEntry > 0)) throw new Error("V12_STATE_ACTIVE_INVALID");
                 if (!value.active.protection || value.active.protection.positionId !== value.active.positionId) throw new Error("V12_STATE_PROTECTION_INVALID");
             }
+            const activePositions = value.activePositions === undefined ? (value.active ? [value.active] : []) : value.activePositions;
+            if (!Array.isArray(activePositions) || activePositions.length > V12_X1_ALL.maximumPositions) throw new Error("V12_STATE_ACTIVE_POSITIONS_INVALID");
+            const symbols = new Set<string>();
+            let aggregateGross = 0;
+            for (const active of activePositions) {
+                const symbol = String(active.symbol || "").toUpperCase();
+                if (symbols.has(symbol)) throw new Error("V12_STATE_DUPLICATE_ACTIVE_SYMBOL");
+                symbols.add(symbol);
+                if (!(active.quantity > 0 && active.entryPrice > 0 && active.atrAtEntry > 0 && active.gross > 0 && active.gross <= V12_X1_ALL.perPositionEntryGrossCap)) throw new Error("V12_STATE_ACTIVE_POSITION_INVALID");
+                if (!active.protection || active.protection.positionId !== active.positionId) throw new Error("V12_STATE_ACTIVE_POSITION_PROTECTION_INVALID");
+                aggregateGross += active.gross;
+            }
+            if (aggregateGross > V12_X1_ALL.aggregateEntryGrossCap + 1e-9) throw new Error("V12_STATE_AGGREGATE_GROSS_INVALID");
+            if (value.active && activePositions[0]?.positionId !== value.active.positionId) throw new Error("V12_STATE_PRIMARY_ACTIVE_MISMATCH");
             if (value.pending) {
                 if (!value.pending.clientOrderId || !value.pending.idempotencyKey || !value.pending.symbol || !value.pending.side || !(value.pending.quantity > 0) || !Number.isFinite(value.pending.signalTs)) throw new Error("V12_STATE_PENDING_INVALID");
                 if (value.pending.action === "STOP_UPDATE" && (!value.pending.positionId || !(Number(value.pending.stopPrice) > 0) || !Number.isFinite(Number(value.pending.nextPeakOrTrough)))) throw new Error("V12_STATE_STOP_UPDATE_PENDING_INVALID");
             }
-            return { ...initial(this.mode), ...value, updatedAt: Number(value.updatedAt) || Date.now() } as V12X1AllRunnerState;
+            return { ...initial(this.mode), ...value, active: activePositions[0], activePositions, updatedAt: Number(value.updatedAt) || Date.now() } as V12X1AllRunnerState;
         } catch (error) { const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : ""; if (code === "ENOENT") return initial(this.mode); throw error; }
     }
     async save(state: V12X1AllRunnerState) {
