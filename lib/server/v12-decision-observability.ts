@@ -313,6 +313,7 @@ function buildExecutionTrace(
 
 export async function loadV12DecisionObservability() {
   const errors: string[] = [];
+  const warnings: string[] = [];
   const [runnerFile, decisionFile, riskFile, history] = await Promise.all([
     readJsonFromEnvPath("V12_X1_ALL_STATE_PATH"),
     readJsonFromEnvPath("V12_DECISION_SNAPSHOT_PATH"),
@@ -322,7 +323,7 @@ export async function loadV12DecisionObservability() {
   if (runnerFile.error) errors.push(`runner-state: ${runnerFile.error}`);
   if (decisionFile.error) errors.push(`decision-snapshot: ${decisionFile.error}`);
   if (riskFile.error) errors.push(`shared-risk: ${riskFile.error}`);
-  if (history.error) errors.push(`trade-history: ${history.error}`);
+  if (history.error) warnings.push(`trade-history: ${history.error}`);
 
   const recentFills = history.entries
     .filter((entry) => V12_BASE_SYMBOLS.has(entry.action === "BUY" ? entry.destSymbol : entry.sourceSymbol))
@@ -375,7 +376,7 @@ export async function loadV12DecisionObservability() {
   const runnerState = safeRunnerState(runnerFile.value);
   const decisionCurrent = v12DecisionSnapshotIsCurrent(rawDecision?.referenceTs, runnerState?.lastReferenceTs);
   const decision = decisionCurrent ? rawDecision : null;
-  if (rawDecision && !decisionCurrent) errors.push(`decision-snapshot: stale relative to runner lastReferenceTs=${runnerState?.lastReferenceTs ?? "unknown"}`);
+  if (rawDecision && !decisionCurrent) warnings.push("decision-snapshot: 最新runnerより古いため候補を表示していません。");
   const sharedRisk = safeSharedRisk(riskFile.value);
   const executionTrace = buildExecutionTrace(decision, runnerState, sharedRisk, positions, recentFills);
   return {
@@ -392,5 +393,6 @@ export async function loadV12DecisionObservability() {
     recentFills,
     wiring: { runnerStateConfigured: runnerFile.configured, decisionSnapshotConfigured: decisionFile.configured },
     errors,
+    warnings,
   };
 }

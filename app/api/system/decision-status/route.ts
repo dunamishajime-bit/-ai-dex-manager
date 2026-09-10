@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
         recentFills: [],
         wiring: { runnerStateConfigured: false, decisionSnapshotConfigured: false },
         errors: [observabilityError instanceof Error ? observabilityError.message : "V12 observability failed."],
+        warnings: [],
       };
     }
     const [v52Top2Observability, penguRuntime, quality102Runtime, v12Heartbeat, penguHeartbeat] = await Promise.all([
