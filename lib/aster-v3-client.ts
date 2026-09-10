@@ -1,4 +1,5 @@
 import { privateKeyToAccount } from "viem/accounts";
+import { waitForAsterGlobalRateSlot } from "./disdex-aster-global-rate-budget";
 
 export type AsterHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type AsterOrderSide = "BUY" | "SELL";
@@ -302,6 +303,7 @@ export class AsterV3Client {
         let retries = 0;
         while (true) {
             try {
+                await waitForAsterGlobalRateSlot();
                 const abort = new AbortController();
                 const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
                 try {

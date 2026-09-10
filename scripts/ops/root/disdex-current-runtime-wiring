@@ -19,6 +19,7 @@ PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
 MARGIN_DROPIN_DIR="/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d"
 V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
+SHARED_RISK_DROPIN_DIR="/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.service.d"
 SELF_TEST_FIXTURE=''
 
 usage() {
@@ -77,6 +78,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
     "$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"
     "$CURRENT_RELEASE/lib/aster-upstream-recovery-policy.ts"
+    "$CURRENT_RELEASE/lib/disdex-aster-global-rate-budget.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair"
@@ -136,11 +138,13 @@ set_units() {
   Q102_UNIT="disdex-quality102-causal-v1@${DEPLOYED_SHA}.service"
   V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
+  SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"
   V12_DROPIN_DIR="/etc/systemd/system/${V12_UNIT}.d"
   PENGU_DROPIN_DIR="/etc/systemd/system/${PENGU_UNIT}.d"
   Q102_DROPIN_DIR="/etc/systemd/system/${Q102_UNIT}.d"
   MARGIN_DROPIN_DIR="/etc/systemd/system/${MARGIN_UNIT}.d"
   V52_DROPIN_DIR="/etc/systemd/system/${V52_UNIT}.d"
+  SHARED_RISK_DROPIN_DIR="/etc/systemd/system/${SHARED_RISK_UNIT}.d"
   CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"
   HEALTH_SNAPSHOT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.health-snapshot.env"
   WATCHDOG_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.watchdog.env"
@@ -243,6 +247,9 @@ apply_wiring() {
   write_atomic "$CONTRACT_ENV_FILE" "DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=${SHARED_ROOT}/aster-rate-budget.json
+DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS=50
+DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS=5000
 V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
 V12_LIVE_ACK=${DEPLOYED_SHA}
 STRICT_PORTFOLIO_PLANNER_ACTIVE=true
@@ -396,6 +403,9 @@ Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
 Environment=CRYPTO_GROSS_CAP=2.0
 Environment=TOTAL_GROSS_CAP=2.5"
 
+  write_atomic "${SHARED_RISK_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}"
+
   write_atomic "${MARGIN_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
 WorkingDirectory=${CURRENT_RELEASE}
@@ -453,6 +463,7 @@ self_test() {
     scripts/disdex_v52_aster_only_live_engine.py \
     lib/aster-readonly-recovery-gate.ts \
     lib/aster-upstream-recovery-policy.ts \
+    lib/disdex-aster-global-rate-budget.ts \
     scripts/disdex-aster-readonly-recovery-gate.ts \
     scripts/disdex-aster-upstream-live-recovery.ts \
     scripts/ops/root/disdex-v12-kill-switch-auto-repair; do

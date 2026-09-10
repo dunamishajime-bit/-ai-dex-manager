@@ -119,6 +119,49 @@ def read_json(path: Path, default: Any = None) -> Any:
         return default
 
 
+def wait_for_aster_global_rate_budget() -> None:
+    raw_path = (os.getenv("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH") or "").strip()
+    if not raw_path:
+        return
+    minimum_ms = max(1, min(1000, int_env("DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", 50)))
+    max_queue_ms = max(minimum_ms, min(30_000, int_env("DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS", 5000)))
+    path = Path(raw_path).resolve()
+    lock_path = Path(str(path) + ".lock")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    deadline = time.monotonic() + min(max_queue_ms, 2000) / 1000.0
+    while True:
+        try:
+            lock_path.mkdir(mode=0o700)
+            break
+        except FileExistsError:
+            try:
+                if time.time() - lock_path.stat().st_mtime > 5.0:
+                    lock_path.rmdir()
+                    continue
+            except FileNotFoundError:
+                continue
+            if time.monotonic() >= deadline:
+                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
+            time.sleep(0.005)
+    try:
+        current = read_json(path, {}) or {}
+        if current and current.get("schema") != "disdex-aster-rate-budget/v1":
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
+        now = now_ms()
+        permit_at = max(now, int(current.get("nextAllowedAt") or 0))
+        wait_ms = permit_at - now
+        if wait_ms > max_queue_ms:
+            raise RuntimeError(f"ASTER_GLOBAL_RATE_BUDGET_SATURATED:{wait_ms}")
+        atomic_write_json(path, {"schema": "disdex-aster-rate-budget/v1", "nextAllowedAt": permit_at + minimum_ms, "updatedAt": now, "pid": os.getpid()})
+    finally:
+        try:
+            lock_path.rmdir()
+        except FileNotFoundError:
+            pass
+    if wait_ms > 0:
+        time.sleep(wait_ms / 1000.0)
+
+
 def append_jsonl(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as writer:
@@ -333,6 +376,7 @@ class AsterClient:
     def _signed(self, method: str, path: str, params: Dict[str, Any]) -> Any:
         if self._signer is None:
             raise RuntimeError("Aster signed method called without live credentials")
+        wait_for_aster_global_rate_budget()
         signed = {
             **params,
             "recvWindow": params.get("recvWindow", self.recv_window),
@@ -371,9 +415,11 @@ class AsterClient:
         )
 
     def ping(self) -> Any:
+        wait_for_aster_global_rate_budget()
         return http_json(f"{self.base_url}/fapi/v3/ping", timeout=self.timeout)
 
     def exchange_info(self) -> dict:
+        wait_for_aster_global_rate_budget()
         payload = http_json(f"{self.base_url}/fapi/v3/exchangeInfo", timeout=self.timeout)
         for row in payload.get("symbols", []):
             filters = {item.get("filterType"): item for item in row.get("filters", [])}
@@ -410,6 +456,7 @@ class AsterClient:
 
     def book(self, symbol: str, limit: int = 20) -> Book:
         received = now_ms()
+        wait_for_aster_global_rate_budget()
         payload = http_json(
             f"{self.public_url}/fapi/v1/depth",
             params={"symbol": symbol, "limit": limit},
@@ -425,6 +472,7 @@ class AsterClient:
     def adverse_imbalance(self, symbol: str, maker_side: str) -> Optional[float]:
         end = now_ms()
         try:
+            wait_for_aster_global_rate_budget()
             rows = http_json(
                 f"{self.public_url}/fapi/v1/aggTrades",
                 params={"symbol": symbol, "limit": 200},

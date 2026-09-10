@@ -10,6 +10,7 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         for artifact in (
             '"$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"',
             '"$CURRENT_RELEASE/lib/aster-upstream-recovery-policy.ts"',
+            '"$CURRENT_RELEASE/lib/disdex-aster-global-rate-budget.ts"',
             '"$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts"',
             '"$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts"',
             '"$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair"',
@@ -19,6 +20,11 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         self.assertIn('EnvironmentFile=${CONTRACT_ENV_FILE}', source)
         contract = source.split('write_atomic "$CONTRACT_ENV_FILE"', 1)[1].split('write_atomic "$HEALTH_SNAPSHOT_ENV_FILE"', 1)[0]
         self.assertIn('DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json', contract)
+        self.assertIn('DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=${SHARED_ROOT}/aster-rate-budget.json', contract)
+        self.assertIn('DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS=50', contract)
+        self.assertIn('DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS=5000', contract)
+        self.assertIn('SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"', source)
+        self.assertIn('write_atomic "${SHARED_RISK_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf"', source)
         self.assertIn('DISDEX_V52_SERVICE_UNIT=${V52_UNIT}', source)
         self.assertIn('disdex-v12-kill-switch-auto-repair.service.d', source)
         self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.service', source)

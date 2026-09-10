@@ -121,6 +121,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.minimum_entry_usd = base.float_env("DISDEX_V52_MIN_ENTRY_USD", 5.0)
         self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
         self._upstream_fail_closed_hold = False
+        self._last_kill_flatten_key: Optional[str] = None
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
 
@@ -174,6 +175,27 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if not self.kill_switch():
             self.activate_kill_switch(f"V52 upstream state unavailable: {message}")
         self.log("v52-upstream-state-fail-closed", phase=phase, error=message)
+
+    @staticmethod
+    def _kill_flatten_key(kill: dict) -> str:
+        return json.dumps(kill, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+
+    def _kill_flatten_completed(self, kill: dict) -> bool:
+        return getattr(self, "_last_kill_flatten_key", None) == self._kill_flatten_key(kill)
+
+    def _flatten_kill_once(self, kill: dict, fallback_reason: str) -> bool:
+        key = self._kill_flatten_key(kill)
+        reason = str(kill.get("reason") or fallback_reason)
+        if getattr(self, "_last_kill_flatten_key", None) == key:
+            self.log("v52-kill-flatten-idempotent-hold", reason=reason)
+            return False
+        self.flatten_all(reason)
+        self._last_kill_flatten_key = key
+        self.log("v52-kill-flatten-complete", reason=reason)
+        return True
+
+    def _clear_kill_flatten_latch(self) -> None:
+        self._last_kill_flatten_key = None
 
     def reset_days(self) -> None:
         utc_day = dt.datetime.now(tz=base.UTC).date().isoformat()
@@ -732,8 +754,11 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         positions_open = bool(self.positions())
         market_open = regular_us_equity_session(local)
         sec = base.ny_seconds(local)
-        if self.kill_switch():
-            return {"local": local, "rows": None, "skipWithoutLock": False}
+        kill = self.kill_switch()
+        if kill:
+            completed = self._kill_flatten_completed(kill)
+            return {"local": local, "rows": None, "skipWithoutLock": completed, "killHold": completed}
+        self._clear_kill_flatten_latch()
         if not market_open:
             return {"local": local, "rows": None, "skipWithoutLock": not positions_open}
         in_decision_window = base.clock("09:59:50") <= sec <= base.clock("15:30:30")
@@ -742,6 +767,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         return {"local": local, "rows": self.books_and_refs(), "skipWithoutLock": False}
 
     def idle_tick(self, prepared: dict) -> None:
+        if prepared.get("killHold"):
+            kill = self.kill_switch() or {}
+            self.log("v52-kill-hold-without-account-lock", reason=str(kill.get("reason") or "KILL_SWITCH"))
+            return
         self.reset_days()
         self.enforce_daily_loss()
         self.update_history()
@@ -767,7 +796,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 self._upstream_fail_closed_hold = True
                 self.log("v52-upstream-state-fail-closed", phase="KILL_SWITCH", error=reason)
                 return
-            self.flatten_all(reason); return
+            self._flatten_kill_once(kill, "KILL_SWITCH")
+            return
+        self._clear_kill_flatten_latch()
         if self.enforce_daily_loss():
             return
         if self.live:
@@ -776,8 +807,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             if not ok:
                 self.log("v52-entry-held-shared-crypto-risk", reason=reason, path=risk_path)
                 return
-        if self.kill_switch():
-            self.flatten_all("DAILY_LOSS"); return
+        daily_kill = self.kill_switch()
+        if daily_kill:
+            self._flatten_kill_once(daily_kill, "DAILY_LOSS")
+            return
         self.update_history()
         local = prepared["local"] if prepared else self.current_local_time()
         if not regular_us_equity_session(local):
@@ -823,6 +856,13 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             candidate, rejections = (None, {"ROUTER": ["NO_GROSS_CAPACITY"]}) if gross <= 0 else self.v50_candidate(window, rows, notional)
             self.log("v52-v50-decision", window=window, candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
             if candidate: self.open_basis_position(V50_SLOT, candidate, gross)
+
+    def _loop_interval_ms(self, prepared: dict) -> int:
+        idle_ms = max(1_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000))
+        if prepared.get("killHold") or prepared.get("upstreamHold"):
+            return idle_ms
+        active = regular_us_equity_session() or bool(self.positions())
+        return 250 if active else idle_ms
 
     def preflight(self, read_only: bool = False) -> dict:
         if self.live:
@@ -904,8 +944,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 finally:
                     self.lock.release()
             if not daemon: break
-            active = regular_us_equity_session() or bool(self.positions())
-            interval = 250 if active else base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000)
+            interval = self._loop_interval_ms(prepared)
             time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
 
 
