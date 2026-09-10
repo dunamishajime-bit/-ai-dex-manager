@@ -325,7 +325,13 @@ DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}"
   # and silently restores the previous release pin.
   write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
 EnvironmentFile=
-EnvironmentFile=${WATCHDOG_ENV_FILE}"
+EnvironmentFile=${WATCHDOG_ENV_FILE}
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-watchdog-current.mjs"
 
   write_atomic "${SNAPSHOT_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
 EnvironmentFile=

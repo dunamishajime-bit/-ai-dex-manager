@@ -22,6 +22,9 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         self.assertIn('DISDEX_V52_SERVICE_UNIT=${V52_UNIT}', source)
         self.assertIn('disdex-v12-kill-switch-auto-repair.service.d', source)
         self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.service', source)
+        watchdog = source.split('write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"', 1)[1].split('write_atomic "${SNAPSHOT_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"', 1)[0]
+        self.assertIn('WorkingDirectory=${CURRENT_RELEASE}', watchdog)
+        self.assertIn('ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-watchdog-current.mjs', watchdog)
 
     def test_apply_removes_only_stale_auto_repair_v52_sha_pin_dropins(self):
         source = SOURCE.read_text(encoding="utf-8")
