@@ -17,6 +17,8 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
             self.assertIn(artifact, source)
         self.assertIn('install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair', source)
         self.assertIn('EnvironmentFile=${CONTRACT_ENV_FILE}', source)
+        contract = source.split('write_atomic "$CONTRACT_ENV_FILE"', 1)[1].split('write_atomic "$HEALTH_SNAPSHOT_ENV_FILE"', 1)[0]
+        self.assertIn('DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json', contract)
         self.assertIn('DISDEX_V52_SERVICE_UNIT=${V52_UNIT}', source)
         self.assertIn('disdex-v12-kill-switch-auto-repair.service.d', source)
         self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.service', source)
