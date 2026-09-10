@@ -2,6 +2,12 @@ name: Export current V52 raw one-year ledger
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - research/latest-live-4logic-bt-20260910
+    paths:
+      - 'scripts/research_export_current_v52_ledger.py'
+      - '.github/workflows/research-export-current-v52-ledger.yml'
 
 permissions:
   contents: read
