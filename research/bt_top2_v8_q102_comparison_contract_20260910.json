@@ -1,0 +1,148 @@
+{
+  "schema": "disdex-bt-comparison-contract/v1",
+  "contractId": "BT_TOP2_V8_Q102_20260910",
+  "status": "FROZEN_RESEARCH_BASELINE",
+  "purpose": "Prevent cross-run ambiguity when comparing V12 slot/gross and PENGU recovery variants.",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "capital": {
+    "initialJpy": 100000,
+    "monthlyContributionJpy": 0,
+    "additionalContributionCount": 0,
+    "totalContributedJpy": 100000,
+    "compounding": true
+  },
+  "sharedConditions": {
+    "quality102Slots": 1,
+    "quality102GrossCap": 0.5,
+    "v52Policy": "UNCHANGED_FROM_SIX_CASE_RUN",
+    "sharedCryptoDailyLossLimitPct": -5.0,
+    "sharedCryptoGrossCap": 2.0,
+    "totalGrossCap": 2.5,
+    "scenarioCostModel": "UNCHANGED_FROM_SIX_CASE_RUN"
+  },
+  "semantics": {
+    "top2Meaning": "SECOND_INDEPENDENT_V12_OPPORTUNITY_WITH_RESIDUAL_GROSS",
+    "top2AggregateGrossIsCeilingNotTarget": true,
+    "top2PerPositionGrossCap": 1.0,
+    "oneSlot1p5Status": "REJECTED_AS_DEFAULT_CANDIDATE",
+    "oneSlotPreferredGrossCap": 1.0,
+    "penguRecoveryCooldownHours": 24,
+    "v8Meaning": "RECOVERY_V8_ADDED_TO_CURRENT_PENGU_ENGINE",
+    "quality102MustNotBeSilentlyDropped": true
+  },
+  "canonicalBaselines": [
+    {
+      "id": "v12_1slot_1p0_v20",
+      "v12": {"slots": 1, "grossCap": 1.0},
+      "pengu": "V20",
+      "status": "PASS_RESEARCH_ONLY",
+      "checksPassed": 24, "checksTotal": 24, "grossConflictCount": 0,
+      "normal": {"endingAssetJpy": 6117151, "profitFactor": 2.693, "maxDrawdownPct": -19.53},
+      "severe": {"endingAssetJpy": 980549, "profitFactor": 1.872, "maxDrawdownPct": -28.01},
+      "quality102NormalPnlJpy": 459553
+    },
+    {
+      "id": "v12_1slot_1p5_v20",
+      "v12": {"slots": 1, "grossCap": 1.5},
+      "pengu": "V20",
+      "status": "PASS_RESEARCH_ONLY",
+      "checksPassed": 24, "checksTotal": 24, "grossConflictCount": 0,
+      "normal": {"endingAssetJpy": 6059746, "profitFactor": 2.661, "maxDrawdownPct": -20.28},
+      "severe": {"endingAssetJpy": 915127, "profitFactor": 1.824, "maxDrawdownPct": -28.89},
+      "quality102NormalPnlJpy": 105715
+    },
+    {
+      "id": "v12_top2_1p5_v20",
+      "v12": {"slots": 2, "grossCap": 1.5, "perPositionGrossCap": 1.0},
+      "pengu": "V20",
+      "status": "PASS_RESEARCH_ONLY",
+      "checksPassed": 24, "checksTotal": 24, "grossConflictCount": 0,
+      "normal": {"endingAssetJpy": 9821403, "profitFactor": 2.536, "maxDrawdownPct": -18.41},
+      "severe": {"endingAssetJpy": 985340, "profitFactor": 1.662, "maxDrawdownPct": -28.40},
+      "quality102NormalPnlJpy": -297543
+    },
+    {
+      "id": "v12_1slot_1p0_v8",
+      "v12": {"slots": 1, "grossCap": 1.0},
+      "pengu": "RECOVERY_V8_ON",
+      "status": "PASS_RESEARCH_ONLY",
+      "checksPassed": 24, "checksTotal": 24, "grossConflictCount": 0,
+      "normal": {"endingAssetJpy": 9460465, "profitFactor": 3.038, "maxDrawdownPct": -26.97},
+      "severe": {"endingAssetJpy": 1413926, "profitFactor": 2.077, "maxDrawdownPct": -34.11},
+      "quality102NormalPnlJpy": -544402
+    },
+    {
+      "id": "v12_1slot_1p5_v8",
+      "v12": {"slots": 1, "grossCap": 1.5},
+      "pengu": "RECOVERY_V8_ON",
+      "status": "PASS_RESEARCH_ONLY",
+      "checksPassed": 24, "checksTotal": 24, "grossConflictCount": 0,
+      "normal": {"endingAssetJpy": 9409851, "profitFactor": 3.003, "maxDrawdownPct": -27.01},
+      "severe": {"endingAssetJpy": 1339064, "profitFactor": 2.030, "maxDrawdownPct": -34.24},
+      "quality102NormalPnlJpy": -978810
+    },
+    {
+      "id": "v12_top2_1p5_v8",
+      "v12": {"slots": 2, "grossCap": 1.5, "perPositionGrossCap": 1.0},
+      "pengu": "RECOVERY_V8_ON",
+      "status": "PASS_RESEARCH_ONLY",
+      "checksPassed": 24, "checksTotal": 24, "grossConflictCount": 0,
+      "normal": {"endingAssetJpy": 15101400, "profitFactor": 2.791, "maxDrawdownPct": -28.02},
+      "severe": {"endingAssetJpy": 1444286, "profitFactor": 1.810, "maxDrawdownPct": -35.83},
+      "quality102NormalPnlJpy": -2451481
+    }
+  ],
+  "researchChampion": "v12_top2_1p5_v8",
+  "researchChampionStrategyName": "V12_TOP2_1.5 + PENGU_V20_V8 + V52_TOP2 + Q102_0.5",
+  "researchChampionReason": "Historical six-case winner. Keep its Q102 0.5x label frozen so its recorded metrics are not rewritten after the implementation target changes.",
+  "implementationCandidate": {
+    "strategyName": "V12_TOP2_1.5 + PENGU_V20_V8 + V52_TOP2 + Q102_1.0_1SLOT",
+    "quality102": {"grossCap": 1.0, "slots": 1},
+    "status": "RESEARCH_CANDIDATE_PENDING_DD_VALIDATION"
+  },
+  "liveAdoption": {
+    "enabled": false,
+    "blockedBy": [
+      "DRAWDOWN_REFINEMENT_REQUIRED",
+      "Q102_1P0_INTEGRATED_REPLAY_REQUIRED"
+    ],
+    "requiredBeforeEnable": [
+      "Reproduce the Q102 1.0x one-slot integrated candidate from event-level ledgers",
+      "Reduce NORMAL and SEVERE drawdown without changing signal logic",
+      "Keep Q102 fixed at 1.0x / one slot during the DD sweep",
+      "Run regression and gross-conflict checks"
+    ]
+  },
+  "nextExperimentContract": {
+    "baseStrategy": "V12_TOP2_1.5 + PENGU_V20_V8 + V52_TOP2 + Q102_1.0_1SLOT",
+    "fixedSignalLogic": true,
+    "fixedV12": {"slots": 2, "aggregateGrossCap": 1.5, "perPositionGrossCap": 1.0},
+    "fixedPengu": {"base": "DUAL_LS_V2", "short": "SHORT_V20", "recovery": "RECOVERY_V8_ON", "recoveryCooldownHours": 24},
+    "fixedV52": "TOP2",
+    "fixedQuality102": {"selector": "CAUSAL_V4", "slots": 1, "grossCap": 1.0},
+    "allowedExperimentAxes": ["DRAWDOWN_CONTROLS"],
+    "status": "RESEARCH_ONLY_NO_LIVE_MUTATION"
+  },
+  "prohibitions": [
+    "Do not substitute a DCA baseline for this lump-sum contract",
+    "Do not use the obsolete 6h PENGU cooldown",
+    "Do not interpret Top2 aggregate 1.5x as one-slot 1.5x leverage",
+    "Do not replace Short V20 with Recovery V8; V8 is supplemental",
+    "Do not change V12/PENGU/V52/Q102 signal definitions during the DD sweep",
+    "Do not enable LIVE from the same in-sample optimization sweep"
+  ],
+  "targetMetrics": {
+    "primary": "NORMAL_MAX_DRAWDOWN_PCT",
+    "targetNormalDrawdownPct": -20.0,
+    "secondary": [
+      "SEVERE_MAX_DRAWDOWN_PCT",
+      "NORMAL_ENDING_ASSET_JPY",
+      "NORMAL_PROFIT_FACTOR",
+      "QUALITY102_NORMAL_PNL_JPY",
+      "GROSS_CONFLICT_COUNT"
+    ]
+  }
+}
