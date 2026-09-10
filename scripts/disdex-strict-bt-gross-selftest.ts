@@ -42,7 +42,8 @@ const at199 = planStrictPortfolio({
     equity: 1000,
     now: NOW,
     active: [
-        position({ id: "v12", strategy: "V12", symbol: "ETHUSDT", quantity: 150, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
         position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 49, entryPrice: 1, markPrice: 10 }),
     ],
     intents: [],
@@ -54,7 +55,8 @@ const at200 = planStrictPortfolio({
     equity: 1000,
     now: NOW,
     active: [
-        position({ id: "v12", strategy: "V12", symbol: "ETHUSDT", quantity: 150, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
         position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
     ],
     intents: [],
@@ -66,7 +68,8 @@ const overCrypto = planStrictPortfolio({
     equity: 1000,
     now: NOW,
     active: [
-        position({ id: "v12", strategy: "V12", symbol: "ETHUSDT", quantity: 150, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
         position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 51, entryPrice: 1, markPrice: 10 }),
     ],
     intents: [],
