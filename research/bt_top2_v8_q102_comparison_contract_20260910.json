@@ -101,19 +101,31 @@
   "implementationCandidate": {
     "strategyName": "V12_TOP2_1.5 + PENGU_V20_V8 + V52_TOP2 + Q102_1.0_1SLOT",
     "quality102": {"grossCap": 1.0, "slots": 1},
-    "status": "RESEARCH_CANDIDATE_PENDING_DD_VALIDATION"
+    "status": "RESEARCH_VALIDATED_FOR_IMPLEMENTATION_HANDOFF",
+    "evidence": "research/q102_1p0_1slot_lump100k_1y_20260911.json",
+    "validation": {
+      "normalEndingAssetJpy": 63349871.26015618,
+      "normalProfitFactor": 3.46130115,
+      "normalMaxDrawdownPct": -14.33740242,
+      "severeEndingAssetJpy": 6464329.97779967,
+      "severeProfitFactor": 2.35473078,
+      "severeMaxDrawdownPct": -19.94193393,
+      "checksPassed": 28,
+      "checksTotal": 28,
+      "grossConflicts": 0
+    }
   },
   "liveAdoption": {
     "enabled": false,
     "blockedBy": [
-      "DRAWDOWN_REFINEMENT_REQUIRED",
-      "Q102_1P0_INTEGRATED_REPLAY_REQUIRED"
+      "PRODUCTION_DIFF_IMPLEMENTATION_REQUIRED",
+      "VPS_PREFLIGHT_AND_RECONCILIATION_REQUIRED"
     ],
     "requiredBeforeEnable": [
-      "Reproduce the Q102 1.0x one-slot integrated candidate from event-level ledgers",
-      "Reduce NORMAL and SEVERE drawdown without changing signal logic",
-      "Keep Q102 fixed at 1.0x / one slot during the DD sweep",
-      "Run regression and gross-conflict checks"
+      "Implement Q102 1.0x / one-slot end-to-end without changing V12/PENGU/V52 signal logic",
+      "Keep shared Crypto Gross <= 2.0x and Total Gross <= 2.5x",
+      "Run regression tests, build/typecheck, production preflight, and Aster read-only reconciliation",
+      "Only enable/restart LIVE after fail-closed checks pass with no gross conflicts or duplicate ownership"
     ]
   },
   "nextExperimentContract": {
@@ -123,8 +135,8 @@
     "fixedPengu": {"base": "DUAL_LS_V2", "short": "SHORT_V20", "recovery": "RECOVERY_V8_ON", "recoveryCooldownHours": 24},
     "fixedV52": "TOP2",
     "fixedQuality102": {"selector": "CAUSAL_V4", "slots": 1, "grossCap": 1.0},
-    "allowedExperimentAxes": ["DRAWDOWN_CONTROLS"],
-    "status": "RESEARCH_ONLY_NO_LIVE_MUTATION"
+    "allowedExperimentAxes": [],
+    "status": "RESEARCH_VALIDATED_FOR_IMPLEMENTATION_HANDOFF"
   },
   "prohibitions": [
     "Do not substitute a DCA baseline for this lump-sum contract",
