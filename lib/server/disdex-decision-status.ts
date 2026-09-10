@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
-import { v12DecisionSnapshotIsCurrent } from "@/lib/server/v12-snapshot-freshness";
+import { v12DecisionSnapshotIsCurrent, v12RunnerStateIsFresh } from "@/lib/server/v12-snapshot-freshness";
 
 type Sleeve = "V12" | "V52";
 type Status = "発火候補" | "候補に近い" | "条件不足" | "対象時間外" | "取得不能";
@@ -155,9 +155,19 @@ function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reas
   };
 }
 
-function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionStatusItem[] {
+function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string, runnerStateFresh = false): DecisionStatusItem[] {
   const candidates = Array.isArray(state.candidates) ? state.candidates.map(object).filter((item): item is JsonObject => Boolean(item)) : [];
-  if (!candidates.length) return config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, "V12 decision snapshotに候補がありません。"));
+  if (!candidates.length) {
+    if (runnerStateFresh) {
+      return config.v12Symbols.map((symbol) => ({
+        ...unavailableItem(symbol, "V12", checkedAt, "現在の候補はありません。"),
+        status: "条件不足" as const,
+        reason: "現在の候補はありません。",
+        source: "VPS V12 runner state",
+      }));
+    }
+    return config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, "V12 decision snapshotに候補がありません。"));
+  }
 
   const btcRegime = text(state.btcRegime ?? state.regime) || "UNKNOWN";
   const referenceTs = finite(state.referenceTs);
@@ -275,13 +285,18 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
 
   const v12DecisionReferenceTs = finite(v12State?.referenceTs);
   const v12RunnerReferenceTs = finite(v12RunnerState?.lastReferenceTs);
+  const v12RunnerFresh = v12RunnerStateIsFresh(
+    finite(v12RunnerState?.updatedAt),
+    v12RunnerReferenceTs,
+    v12RunnerState?.mode,
+  );
   const v12SnapshotCurrent = v12DecisionSnapshotIsCurrent(v12DecisionReferenceTs, v12RunnerReferenceTs);
   const effectiveV12State = v12SnapshotCurrent ? v12State : null;
   const staleV12Reason = !v12SnapshotCurrent
-    ? "V12の最新候補は未取得です。"
+    ? v12RunnerFresh ? "現在の候補はありません。" : "V12の最新候補は未取得です。"
     : undefined;
   const v12Items = effectiveV12State
-    ? v12ItemsFromSnapshot(effectiveV12State, checkedAt)
+    ? v12ItemsFromSnapshot(effectiveV12State, checkedAt, v12RunnerFresh)
     : config.v12Symbols.map((symbol) => unavailableItem(
       symbol,
       "V12",

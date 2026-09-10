@@ -3,7 +3,7 @@ import { isAbsolute } from "node:path";
 
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
-import { v12DecisionSnapshotIsCurrent } from "@/lib/server/v12-snapshot-freshness";
+import { v12DecisionSnapshotIsCurrent, v12RunnerStateIsFresh } from "@/lib/server/v12-snapshot-freshness";
 
 const V12_BASE_SYMBOLS = new Set([
   "BTC", "ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR",
@@ -217,15 +217,23 @@ function buildExecutionTrace(
   sharedRisk: ReturnType<typeof safeSharedRisk>,
   positions: Array<{ symbol: string; side: Direction; quantity: number }>,
   recentFills: Array<{ symbol: string; action: string; executedAt?: string; positionSide?: string }>,
+  runnerStateFresh = false,
 ) {
   const steps: Array<{ key: string; label: string; state: StepState; detail: string }> = [];
   if (!decision?.symbol) {
     return {
-      currentStage: "unavailable",
-      currentStageLabel: "候補データ未取得",
-      summary: "V12の実Runner候補スナップショットがないため、発火判定を確定できません。",
-      nextAction: "次回のV12確定足評価を待ちます。",
-      steps: [{ key: "candidate", label: "1. 候補選定", state: "unknown" as const, detail: "候補スナップショット未取得" }],
+      currentStage: runnerStateFresh ? "no-signal" : "unavailable",
+      currentStageLabel: runnerStateFresh ? "確認済み・現在候補なし" : "候補データ未取得",
+      summary: runnerStateFresh
+        ? "V12 runnerは稼働中ですが、今回の判定に発注候補はありません。"
+        : "V12の実Runner候補スナップショットがないため、発火判定を確定できません。",
+      nextAction: runnerStateFresh ? "次の確定2時間足で候補を再評価します。" : "次回のV12確定足評価を待ちます。",
+      steps: [{
+        key: "candidate",
+        label: "1. 候補選定",
+        state: runnerStateFresh ? "pass" as const : "unknown" as const,
+        detail: runnerStateFresh ? "最新runnerで候補なし（今回のSignalは未成立）" : "候補スナップショット未取得",
+      }],
     };
   }
 
@@ -374,17 +382,19 @@ export async function loadV12DecisionObservability() {
 
   const rawDecision = safeDecisionSnapshot(decisionFile.value);
   const runnerState = safeRunnerState(runnerFile.value);
+  const runnerStateFresh = v12RunnerStateIsFresh(runnerState?.updatedAt, runnerState?.lastReferenceTs, runnerState?.mode);
   const decisionCurrent = v12DecisionSnapshotIsCurrent(rawDecision?.referenceTs, runnerState?.lastReferenceTs);
   const decision = decisionCurrent ? rawDecision : null;
   if (rawDecision && !decisionCurrent) warnings.push("decision-snapshot: 最新runnerより古いため候補を表示していません。");
   const sharedRisk = safeSharedRisk(riskFile.value);
-  const executionTrace = buildExecutionTrace(decision, runnerState, sharedRisk, positions, recentFills);
+  const executionTrace = buildExecutionTrace(decision, runnerState, sharedRisk, positions, recentFills, runnerStateFresh);
   return {
     ok: true as const,
     readOnly: true as const,
     tradingMutation: 0 as const,
     capturedAt: new Date().toISOString(),
     decisionDetailsAvailable: Boolean(decision),
+    runnerStateFresh,
     decision,
     runnerState,
     sharedRisk,

@@ -59,6 +59,7 @@ type V12Observability = {
   tradingMutation: 0;
   capturedAt: string;
   decisionDetailsAvailable: boolean;
+  runnerStateFresh: boolean;
   decision: {
     strategyId?: string;
     symbol?: string;
@@ -197,7 +198,7 @@ function V12Detail({ details }: { details?: V12Observability }) {
   const decision = details.decision;
   const trace = details.executionTrace;
   const runner = details.runnerState;
-  const decisionLabel = decision ? (decision.symbol || "候補未取得") + " " + (decision.side || "WAIT") : "候補未取得";
+  const decisionLabel = decision ? (decision.symbol || "候補未取得") + " " + (decision.side || "WAIT") : details.runnerStateFresh ? "現在候補なし" : "候補未取得";
   const selectedCandidate = decision?.candidates.find((candidate) => candidate.symbol === decision.symbol) || decision?.candidates[0];
   const statusLabel = v12ObservationStatus(details);
   const statusClass = statusLabel === "要確認" ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : statusLabel === "確認済み" ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
@@ -218,7 +219,7 @@ function V12Detail({ details }: { details?: V12Observability }) {
           ["score", number(decision?.score, 4)],
           ["momentum", number(decision?.momentum, 4) + "%"],
           ["volumeRatio", number(decision?.volumeRatio, 4)],
-          ["BTC regime", decision?.btcRegime || "未取得"],
+          ["BTC regime", decision?.btcRegime || (details.runnerStateFresh ? "今回の判定なし" : "未取得")],
           ["Signal", decision?.selectionConfirmed ? "選定済み" : "未成立"],
         ].map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">{label}</div><div className={"mt-1 break-words text-sm font-semibold " + (value === "未成立" || value === "未取得" ? "text-rose-200" : "text-white")}>{value}</div></div>)}
       </div>
@@ -247,7 +248,7 @@ function V12Detail({ details }: { details?: V12Observability }) {
       </div>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
         <div className="border-b border-white/10 px-3 py-2 text-sm font-bold text-white">全候補順位とSignal Gate</div>
-        {decision?.candidates.length ? <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">Gate</th><th className="px-3 py-2">発注段階</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{number(candidate.momentum, 4)}%</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{decision.selectionConfirmed && selectedCandidate?.symbol === candidate.symbol ? "Signal選定済み" : candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。</div>}
+        {decision?.candidates.length ? <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">Gate</th><th className="px-3 py-2">発注段階</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{number(candidate.momentum, 4)}%</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{decision.selectionConfirmed && selectedCandidate?.symbol === candidate.symbol ? "Signal選定済み" : candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">{details.runnerStateFresh ? "最新runnerで候補なし。今回の発注Signalは未成立です。" : "V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。"}</div>}
       </div>
       <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-xs leading-5 text-white/65">V12仕様：1建玉最大1.00x / 最大1建玉 / 合計最大1.00x。候補順位1位でも、確定2時間足・BTC regime・score・momentum・volumeRatio・共有risk・容量・注文Gateをすべて通過するまで発注しません。直近約定履歴：{details.recentFills.length}件、現在のV12建玉：{details.v12Positions.length}件。</div>
     </section>

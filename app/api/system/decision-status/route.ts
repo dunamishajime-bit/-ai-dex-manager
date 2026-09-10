@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
         tradingMutation: 0,
         capturedAt: new Date().toISOString(),
         decisionDetailsAvailable: false,
+        runnerStateFresh: false,
         decision: null,
         runnerState: null,
         sharedRisk: null,
