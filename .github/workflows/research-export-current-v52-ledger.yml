@@ -1,0 +1,74 @@
+name: Export current V52 raw one-year ledger
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout current V52 research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+      - name: Checkout frozen V13 dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable V52 historical caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: latest-live-v52-export-${{ runner.os }}-${{ hashFiles('scripts/research_export_current_v52_ledger.py') }}
+          restore-keys: |
+            v12-v52-pengu-v2-combined-${{ runner.os }}-
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            aster-only-v52-v39cache-${{ runner.os }}-
+            perp-research-usdm-
+      - name: Export current V52 raw ledger
+        run: |
+          mkdir -p .research-state/current-v52-export
+          python scripts/research_export_current_v52_ledger.py \
+            --cache-root .cache/aster-only-v39-overnight-open \
+            --output .research-state/current-v52-export/v52-current-raw-ledger.json
+
+      - name: Validate export
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('.research-state/current-v52-export/v52-current-raw-ledger.json'))
+          assert p['contract']['v50CandidateId']=='POST_EARLY3__B75__H3__BOTH__NONE'
+          assert p['v11Raw'] and p['v50Raw']
+          print({'v11':len(p['v11Raw']),'v50':len(p['v50Raw']),'days':len(p['targetDays'])})
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: current-v52-raw-${{ github.run_id }}
+          path: .research-state/current-v52-export
+          retention-days: 30
