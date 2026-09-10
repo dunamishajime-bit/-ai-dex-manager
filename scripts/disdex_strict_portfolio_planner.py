@@ -17,6 +17,7 @@ class StrictPortfolioCaps:
     v12_gross: float = 1.50
     pengu_gross: float = 0.75
     quality102_gross: float = 0.50
+    quality102_causal_v1_gross: float = 1.00
     stock_gross: float = 1.50
     crypto_gross: float = 2.00
     total_gross: float = 2.50
@@ -162,7 +163,7 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
             _quality102_finite(pending.get(field), f"pending.{field}", positive=field == "quantity")
         if not isinstance(pending.get("idempotencyKey"), str) or not pending["idempotencyKey"] or not isinstance(pending.get("clientOrderId"), str) or not pending["clientOrderId"]:
             raise RuntimeError("QUALITY102_STATE_MALFORMED:pending_order_identity")
-        if "targetGross" in pending and _quality102_finite(pending["targetGross"], "pending.targetGross", positive=True) > 0.5:
+        if "targetGross" in pending and _quality102_finite(pending["targetGross"], "pending.targetGross", positive=True) > STRICT_CAPS.quality102_causal_v1_gross:
             raise RuntimeError("QUALITY102_STATE_MALFORMED:pending.targetGross")
         if position is not None and pending_symbol != symbol:
             raise RuntimeError("QUALITY102_STATE_MISMATCH:pending_position_symbol")

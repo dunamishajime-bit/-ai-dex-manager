@@ -5,6 +5,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULT = ROOT / "research" / "q102_1p0_1slot_lump100k_1y_20260911.json"
 CONTRACT = ROOT / "research" / "bt_top2_v8_q102_comparison_contract_20260910.json"
+PY_PLANNER = ROOT / "scripts" / "disdex_strict_portfolio_planner.py"
+ENV_EXAMPLE = ROOT / "ops" / "env" / "disdex-quality102-causal-v1.env.example"
 
 class Q102OnePointZeroImplementationContractTest(unittest.TestCase):
     def test_research_result_is_the_implementation_baseline(self):
@@ -26,6 +28,14 @@ class Q102OnePointZeroImplementationContractTest(unittest.TestCase):
         self.assertEqual(candidate["status"], "RESEARCH_VALIDATED_FOR_IMPLEMENTATION_HANDOFF")
         self.assertEqual(candidate["evidence"], "research/q102_1p0_1slot_lump100k_1y_20260911.json")
         self.assertFalse(contract["liveAdoption"]["enabled"])
+
+    def test_causal_live_runtime_is_one_point_zero_without_changing_historical_cap(self):
+        planner = PY_PLANNER.read_text(encoding="utf-8")
+        env_example = ENV_EXAMPLE.read_text(encoding="utf-8")
+        self.assertIn("quality102_gross: float = 0.50", planner)
+        self.assertIn("quality102_causal_v1_gross: float = 1.00", planner)
+        self.assertIn("STRICT_CAPS.quality102_causal_v1_gross", planner)
+        self.assertIn("QUALITY102_CAUSAL_V1_MAX_GROSS=1.00", env_example)
 
 if __name__ == "__main__":
     unittest.main()
