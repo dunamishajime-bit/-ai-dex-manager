@@ -59,6 +59,31 @@ test("最新runnerが候補なしを返した場合は銘柄ごとに未取得�
   }
 });
 
+test("古いsnapshotを破棄した場合もfresh runnerなら候補なしとして表示する", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "disdex-hp-stale-no-signal-"));
+  const decisionPath = path.join(dir, "decision.json");
+  const runnerPath = path.join(dir, "runner.json");
+  const previous = process.env.V12_DECISION_SNAPSHOT_PATH;
+  const previousRunner = process.env.V12_X1_ALL_STATE_PATH;
+  process.env.V12_DECISION_SNAPSHOT_PATH = decisionPath;
+  process.env.V12_X1_ALL_STATE_PATH = runnerPath;
+  const now = Date.now();
+  await writeFile(decisionPath, JSON.stringify({ referenceTs: now - 24 * 60 * 60 * 1000, candidates: [{ symbol: "OLD", rank: 1, score: 9 }] }), "utf8");
+  await writeFile(runnerPath, JSON.stringify({ mode: "LIVE", updatedAt: now, lastReferenceTs: now - 60_000, candidates: [] }), "utf8");
+  try {
+    const snapshot = await loadDecisionStatus({ force: true });
+    assert.ok(snapshot.v12.items.length > 0);
+    assert.ok(snapshot.v12.items.every((item) => item.status === "条件不足"));
+    assert.ok(snapshot.v12.items.every((item) => item.reason === "現在の候補はありません。"));
+  } finally {
+    if (previous === undefined) delete process.env.V12_DECISION_SNAPSHOT_PATH;
+    else process.env.V12_DECISION_SNAPSHOT_PATH = previous;
+    if (previousRunner === undefined) delete process.env.V12_X1_ALL_STATE_PATH;
+    else process.env.V12_X1_ALL_STATE_PATH = previousRunner;
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("判定状況の説明は短く、10分更新を維持する", async () => {
   const panel = await readFile(path.join(process.cwd(), "components/features/DecisionStatusPanel.tsx"), "utf8");
   assert.match(panel, /10 \* 60 \* 1000/);

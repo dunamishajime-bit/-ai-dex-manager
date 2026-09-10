@@ -155,17 +155,19 @@ function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reas
   };
 }
 
+function noCurrentV12Items(checkedAt: string): DecisionStatusItem[] {
+  return config.v12Symbols.map((symbol) => ({
+    ...unavailableItem(symbol, "V12", checkedAt, "現在の候補はありません。"),
+    status: "条件不足" as const,
+    reason: "現在の候補はありません。",
+    source: "VPS V12 runner state",
+  }));
+}
+
 function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string, runnerStateFresh = false): DecisionStatusItem[] {
   const candidates = Array.isArray(state.candidates) ? state.candidates.map(object).filter((item): item is JsonObject => Boolean(item)) : [];
   if (!candidates.length) {
-    if (runnerStateFresh) {
-      return config.v12Symbols.map((symbol) => ({
-        ...unavailableItem(symbol, "V12", checkedAt, "現在の候補はありません。"),
-        status: "条件不足" as const,
-        reason: "現在の候補はありません。",
-        source: "VPS V12 runner state",
-      }));
-    }
+    if (runnerStateFresh) return noCurrentV12Items(checkedAt);
     return config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, "V12 decision snapshotに候補がありません。"));
   }
 
@@ -297,6 +299,8 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
     : undefined;
   const v12Items = effectiveV12State
     ? v12ItemsFromSnapshot(effectiveV12State, checkedAt, v12RunnerFresh)
+    : v12RunnerFresh
+      ? noCurrentV12Items(checkedAt)
     : config.v12Symbols.map((symbol) => unavailableItem(
       symbol,
       "V12",
