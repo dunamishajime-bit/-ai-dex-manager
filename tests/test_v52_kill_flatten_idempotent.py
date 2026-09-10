@@ -50,10 +50,6 @@ class V52KillFlattenIdempotencyTests(unittest.TestCase):
         self.assertTrue(prepared["skipWithoutLock"])
         self.assertTrue(prepared["killHold"])
 
-
-if __name__ == "__main__":
-    unittest.main()
-
 class V52KillHoldCadenceTests(unittest.TestCase):
     def test_completed_kill_hold_uses_idle_cadence(self):
         engine = object.__new__(v52.V52AsterOnlyEngine)
@@ -68,3 +64,56 @@ class V52KillHoldCadenceTests(unittest.TestCase):
                 v52.os.environ.pop("DISDEX_STOCK_IDLE_INTERVAL_MS", None)
             else:
                 v52.os.environ["DISDEX_STOCK_IDLE_INTERVAL_MS"] = original
+
+
+class V52ManagedCancelTests(unittest.TestCase):
+    class FakeAster:
+        def __init__(self, orders):
+            self.orders = orders
+            self.cancel_calls = []
+            self.cancel_all_calls = []
+            self.open_orders_calls = 0
+        def open_orders(self, symbol=None):
+            self.open_orders_calls += 1
+            return list(self.orders)
+        def cancel(self, symbol, client_id):
+            self.cancel_calls.append((symbol, client_id))
+            return {"status": "CANCELED"}
+        def cancel_all(self, symbol):
+            self.cancel_all_calls.append(symbol)
+
+    def make_flat_engine(self, orders):
+        engine = object.__new__(v52.V52AsterOnlyEngine)
+        engine.live = True
+        engine.state = {"positions": {}, "pendingOrder": None}
+        engine.aster = self.FakeAster(orders)
+        engine.positions = lambda: {}
+        engine.managed_aster_positions = lambda: {}
+        engine.save = lambda: None
+        return engine
+    def test_flat_kill_reads_open_orders_once_and_sends_no_blanket_cancel(self):
+        engine = self.make_flat_engine([])
+        engine.flatten_all("RISK_LIMIT")
+        self.assertEqual(engine.aster.open_orders_calls, 1)
+        self.assertEqual(engine.aster.cancel_calls, [])
+        self.assertEqual(engine.aster.cancel_all_calls, [])
+
+    def test_kill_cancels_only_v52_managed_open_orders(self):
+        managed = {"symbol": "METAUSDT", "clientOrderId": "stock-v52-v11_eq-meta-open-abc"}
+        unmanaged = {"symbol": "METAUSDT", "clientOrderId": "manual-order"}
+        engine = self.make_flat_engine([managed, unmanaged])
+        engine.flatten_all("RISK_LIMIT")
+        self.assertEqual(engine.aster.open_orders_calls, 1)
+        self.assertEqual(engine.aster.cancel_calls, [("METAUSDT", managed["clientOrderId"])])
+        self.assertEqual(engine.aster.cancel_all_calls, [])
+
+    def test_pending_is_preserved_when_exchange_flat_verification_fails(self):
+        engine = self.make_flat_engine([])
+        engine.state["pendingOrder"] = {"clientId": "stock-v52-pending"}
+        engine.managed_aster_positions = lambda: {"METAUSDT": 1.0}
+        with self.assertRaisesRegex(RuntimeError, "flatten left unmanaged"):
+            engine.flatten_all("RISK_LIMIT")
+        self.assertEqual(engine.state["pendingOrder"], {"clientId": "stock-v52-pending"})
+
+if __name__ == "__main__":
+    unittest.main()

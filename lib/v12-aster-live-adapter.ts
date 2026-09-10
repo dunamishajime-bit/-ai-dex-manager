@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { AsterApiError, AsterV3Client, type AsterOrderResponse, type AsterOrderSide } from "@/lib/aster-v3-client";
+import { AsterApiError, AsterV3Client, isAsterIpBanError, type AsterOrderResponse, type AsterOrderSide } from "@/lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition, type DirectTradeResult } from "@/lib/direct-trade-executor";
 import { assertSharedKillSwitchAllowsNewEntry } from "@/lib/disdex-shared-kill-switch";
 import { buildTradeFillNotificationEvent, enqueueTradeFillNotification, isConfirmedTradeFill } from "@/lib/trade-fill-notification";
@@ -145,7 +145,7 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
                 }
                 return view;
             }
-            catch (error) { if (error instanceof AsterApiError && (error.status === 418 || error.status === 429)) continue; if (attempt + 1 >= this.reconciliationAttempts) return null; }
+            catch (error) { if (isAsterIpBanError(error)) return null; if (error instanceof AsterApiError && error.status === 429) continue; if (attempt + 1 >= this.reconciliationAttempts) return null; }
         }
         return null;
     }

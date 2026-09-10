@@ -5,6 +5,7 @@ import {
     AsterApiError,
     AsterV3Client,
     isAsterDepositRequirementError,
+    isAsterIpBanError,
     type AsterBookTicker,
     type AsterExchangeInfo,
     type AsterExchangeSymbol,
@@ -441,7 +442,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                     lastError = "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED";
                     break;
                 }
-                if (error instanceof AsterApiError && (error.status === 429 || error.status === 418)) {
+                if (isAsterIpBanError(error)) break;
+                if (error instanceof AsterApiError && error.status === 429) {
                     await sleep(error.retryAfterMs ?? this.reconciliationDelayMs * (attempt + 1));
                 }
             }

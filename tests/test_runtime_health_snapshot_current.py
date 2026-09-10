@@ -28,5 +28,20 @@ class RuntimeHealthSnapshotCurrentTest(unittest.TestCase):
         self.assertIn("ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs", wiring)
 
 
+class MarginGuardHealthVisibilityTest(unittest.TestCase):
+    def test_snapshot_surfaces_margin_guard_state_and_freshness(self):
+        source = SNAPSHOT.read_text(encoding="utf-8")
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH", source)
+        self.assertIn("/var/lib/disdex/shared/margin-risk/guard-live.json", source)
+        self.assertIn("marginGuardStatus", source)
+        self.assertIn("DATA_UNAVAILABLE", source)
+        self.assertIn("ordersAllowed", source)
+        self.assertIn("nextCheckAt", source)
+        self.assertIn("overallSafetyState", source)
+
+    def test_wiring_supplies_canonical_margin_guard_state_path(self):
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json", wiring)
+
 if __name__ == "__main__":
     unittest.main()

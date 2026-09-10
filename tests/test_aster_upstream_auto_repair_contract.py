@@ -23,8 +23,22 @@ class AsterUpstreamAutoRepairContractTests(unittest.TestCase):
         source = SOURCE.read_text(encoding="utf-8-sig")
         self.assertIn("V52 fatal tick error: <urlopen error [Errno 104] Connection reset by peer>", source)
         self.assertIn("V52 upstream state unavailable: Aster HTTP 429", source)
+        self.assertIn("V52 upstream state unavailable: Aster HTTP 418 IP banned", source)
         self.assertIn("! is_aster_upstream_shared_reason 'daily loss latch'", source)
 
+
+class AutoRepairReleasePinTests(unittest.TestCase):
+    def test_pengu_is_resolved_by_exact_current_release_sha(self):
+        source = SOURCE.read_text(encoding="utf-8-sig")
+        self.assertIn('PENGU_UNIT="disdex-pengu-dual-ls-v2@$RELEASE_SHA.service"', source)
+        self.assertNotIn("active_unit_from_list 'disdex-pengu-dual-ls-v2*'", source)
+
+    def test_auto_repair_pins_q102_and_all_current_units_before_recovery(self):
+        source = SOURCE.read_text(encoding="utf-8-sig")
+        self.assertIn('Q102_UNIT="disdex-quality102-causal-v1@$RELEASE_SHA.service"', source)
+        self.assertIn('V52_EXPECTED_UNIT="disdex-v52-aster-only@$RELEASE_SHA.service"', source)
+        self.assertIn('[[ "$V52_UNIT" == "$V52_EXPECTED_UNIT" ]]', source)
+        self.assertIn('for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$RISK_UNIT"', source)
 
 if __name__ == "__main__":
     unittest.main()

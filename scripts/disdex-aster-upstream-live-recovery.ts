@@ -36,6 +36,42 @@ function assertRecoveryRunnersStopped(candidateSha: string) {
         if (!new Set(["inactive", "failed"]).has(props.ActiveState)) throw new Error(`ASTER_UPSTREAM_RECOVERY_RUNNER_NOT_STOPPED:${unit}:${props.ActiveState || "UNKNOWN"}`);
     }
 }
+const RELEASE_UNIT_FAMILIES = [
+    ["disdex-v12-x1-all@*.service", "disdex-v12-x1-all"],
+    ["disdex-pengu-dual-ls-v2@*.service", "disdex-pengu-dual-ls-v2"],
+    ["disdex-quality102-causal-v1@*.service", "disdex-quality102-causal-v1"],
+    ["disdex-v52-aster-only@*.service", "disdex-v52-aster-only"],
+    ["disdex-shared-crypto-risk@*.service", "disdex-shared-crypto-risk"],
+    ["disdex-v12-v52-margin-guard@*.service", "disdex-v12-v52-margin-guard"],
+] as const;
+
+function assertLegacyLiveSupervisorInactive() {
+    const unit = "disdex-v96-v52-live.service";
+    const result = spawnSync("/usr/bin/systemctl", ["show", unit, "--property=LoadState", "--property=ActiveState", "--no-pager"], { encoding: "utf8" });
+    if (result.error || result.status !== 0) throw new Error(`ASTER_UPSTREAM_RECOVERY_SYSTEMD_CHECK_FAILED:${unit}`);
+    const props = Object.fromEntries(String(result.stdout || "").split(/\r?\n/).filter(Boolean).map((line) => line.split("=", 2) as [string, string]));
+    if (props.LoadState === "loaded" && !new Set(["inactive", "failed"]).has(props.ActiveState)) throw new Error(`ASTER_UPSTREAM_RECOVERY_LEGACY_LIVE_CONFLICT:${unit}:${props.ActiveState || "UNKNOWN"}`);
+}
+
+function escapeRegex(value: string) { return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function assertNoConflictingReleaseUnits(candidateSha: string) {
+    for (const [unitPattern, unitPrefix] of RELEASE_UNIT_FAMILIES) {
+        const expectedUnit = `${unitPrefix}@${candidateSha}.service`;
+        const expected = spawnSync("/usr/bin/systemctl", ["show", expectedUnit, "--property=LoadState", "--no-pager"], { encoding: "utf8" });
+        if (expected.error || expected.status !== 0 || !String(expected.stdout || "").includes("LoadState=loaded")) {
+            throw new Error(`ASTER_UPSTREAM_RECOVERY_CURRENT_UNIT_NOT_LOADED:${expectedUnit}`);
+        }
+        const listed = spawnSync("/usr/bin/systemctl", ["list-units", "--all", "--type=service", "--no-legend", unitPattern], { encoding: "utf8" });
+        if (listed.error || listed.status !== 0) throw new Error(`ASTER_UPSTREAM_RECOVERY_SYSTEMD_LIST_FAILED:${unitPattern}`);
+        const linePattern = new RegExp(`\\b(${escapeRegex(unitPrefix)}@[0-9a-f]{40}\\.service)\\s+\\S+\\s+(\\S+)\\s+\\S+`);
+        for (const line of String(listed.stdout || "").split(/\r?\n/)) {
+            const match = linePattern.exec(line);
+            if (match && match[2] !== "inactive" && match[1] !== expectedUnit) {
+                throw new Error(`ASTER_UPSTREAM_RECOVERY_CONFLICTING_RELEASE_UNIT:${match[1]}:expected=${expectedUnit}:state=${match[2]}`);
+            }
+        }
+    }
+}
 async function archive(path: string, bytes: Buffer, requestId: string, label: string) {
     const directory = resolve(dirname(path), "recovery-archive");
     await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -62,6 +98,8 @@ async function main() {
     if (apply && String(argValue("--ack") || "") !== APPLY_ACK) throw new Error("ASTER_UPSTREAM_RECOVERY_APPLY_ACK_REQUIRED");
 
     assertRecoveryRunnersStopped(candidateSha);
+    assertNoConflictingReleaseUnits(candidateSha);
+    assertLegacyLiveSupervisorInactive();
 
     const runtime = resolveV12X1AllRuntime();
     if (runtime.mode !== "LIVE") throw new Error("ASTER_UPSTREAM_RECOVERY_V12_MODE_NOT_LIVE");
@@ -110,6 +148,8 @@ async function main() {
             roundSpacingMs: numberEnv("DISDEX_ASTER_RECOVERY_ROUND_SPACING_MS", 5_000),
             requireFlat: true,
         });
+        assertNoConflictingReleaseUnits(candidateSha);
+    assertLegacyLiveSupervisorInactive();
         const afterStateBytes = await readFile(statePath);
         const afterKillBytes = await readFile(sharedKill.sourcePath);
         if (!beforeState.equals(afterStateBytes) || !beforeKill.equals(afterKillBytes)) throw new Error("ASTER_UPSTREAM_RECOVERY_STATE_CHANGED_DURING_READONLY_GATE");
@@ -142,6 +182,8 @@ async function main() {
                 candidateSha,
                 requestId,
             });
+            assertNoConflictingReleaseUnits(candidateSha);
+            assertLegacyLiveSupervisorInactive();
             const clean = await stateStore.load();
             const killAfter = await readSharedKillSwitch();
             if (clean.active || clean.pending || clean.manualReview || clean.killSwitch?.active) throw new Error("ASTER_UPSTREAM_RECOVERY_V12_CLEAR_VERIFY_FAILED");

@@ -302,7 +302,8 @@ DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=${SHARED_ROOT}/kill-switch.json
 DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
 DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
-DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json"
+DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
+DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json"
 
   write_atomic "$WATCHDOG_ENV_FILE" "DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}

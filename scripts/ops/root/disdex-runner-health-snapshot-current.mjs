@@ -9,6 +9,8 @@ const DEFAULT_EXPECTED_SHA = String(process.env.DISDEX_HEALTH_SNAPSHOT_EXPECTED_
 const DEFAULT_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT || "").trim();
 const HEALTH_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT || "/var/lib/disdex/runner-health").trim();
 const KILL_SWITCH_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json").trim();
+const MARGIN_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH || "/var/lib/disdex/shared/margin-risk/guard-live.json").trim();
+const MARGIN_FRESHNESS_GRACE_MS = 120_000;
 
 function configuredPath(name, fallback) {
     return String(process.env[name] || fallback).trim();
@@ -111,6 +113,29 @@ async function sharedKillSwitch() {
         return "shared kill switch could not be read";
     }
 }
+async function marginGuardStatus(now) {
+    try {
+        const state = await json(MARGIN_STATE_PATH);
+        const stage = String(state?.stage || "");
+        const checkedAt = Number(state?.checkedAt || 0);
+        const nextCheckAt = Number(state?.nextCheckAt || 0);
+        const ordersAllowed = state?.ordersAllowed === true;
+        const identityOk = state?.strategyId === "DISDEX_V96_V52_SHARED_MARGIN_GUARD" && String(state?.mode || "").toUpperCase() === "LIVE";
+        const timestampOk = Number.isFinite(checkedAt) && checkedAt > 0 && checkedAt <= now + 60_000
+            && Number.isFinite(nextCheckAt) && nextCheckAt >= checkedAt;
+        const fresh = timestampOk && now <= nextCheckAt + MARGIN_FRESHNESS_GRACE_MS;
+        let reason = "";
+        if (!identityOk) reason = "Margin Guard state identity is invalid";
+        else if (!timestampOk) reason = "Margin Guard timestamps are invalid";
+        else if (!fresh) reason = "Margin Guard state is stale";
+        else if (stage === "DATA_UNAVAILABLE") reason = "Margin Guard data is unavailable";
+        else if (!new Set(["HEALTHY", "WARNING", "REDUCE", "CRITICAL"]).has(stage)) reason = "Margin Guard stage is invalid";
+        else if (stage !== "HEALTHY" || !ordersAllowed) reason = `Margin Guard stage ${stage}: ordersAllowed=${ordersAllowed}`;
+        return { safetyState: reason ? "BLOCKED" : "HEALTHY", reason, stage, ordersAllowed, checkedAt, nextCheckAt, fresh, consecutiveFailures: Number(state?.consecutiveFailures || 0) };
+    } catch {
+        return { safetyState: "BLOCKED", reason: "Margin Guard state unavailable", stage: "UNKNOWN", ordersAllowed: false, checkedAt: 0, nextCheckAt: 0, fresh: false, consecutiveFailures: null };
+    }
+}
 
 async function atomicJson(path, value) {
     await mkdir(dirname(path), { recursive: true, mode: 0o750 });
@@ -138,7 +163,7 @@ function stateIdentityMatches(runner, state) {
         || (runner.key === "V52" && strategyId === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96");
 }
 
-async function buildHeartbeat(runner, now, killReason) {
+async function buildHeartbeat(runner, now, globalBlockReason) {
     let state;
     let stateError = "";
     try {
@@ -165,8 +190,8 @@ async function buildHeartbeat(runner, now, killReason) {
     const commandCurrent = Boolean(service?.command.includes(runner.script) && service?.command.includes("--daemon"));
     const execCurrent = Boolean(service?.execStart.includes(runner.releaseRoot));
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
-    const blockedReason = killReason || stateError || serviceError || !releaseValid(runner)
-        ? (killReason || stateError || serviceError || "release pin is invalid")
+    const blockedReason = globalBlockReason || stateError || serviceError || !releaseValid(runner)
+        ? (globalBlockReason || stateError || serviceError || "release pin is invalid")
         : !identityOk
             ? `${runner.key} service identity is not current`
             : !stateIdentityMatches(runner, state)
@@ -204,14 +229,20 @@ async function buildHeartbeat(runner, now, killReason) {
 async function main() {
     const now = Date.now();
     const killReason = await sharedKillSwitch();
+    const marginGuard = await marginGuardStatus(now);
+    const globalBlockReason = killReason || marginGuard.reason;
     const results = [];
     for (const runner of RUNNERS) {
-        const { heartbeat, diagnostics } = await buildHeartbeat(runner, now, killReason);
+        const { heartbeat, diagnostics } = await buildHeartbeat(runner, now, globalBlockReason);
         await atomicJson(`${HEALTH_ROOT}/heartbeats/${runner.heartbeatFile}`, heartbeat);
         results.push({ runner: runner.key, safetyState: heartbeat.safetyState, stateAt: heartbeat.lastTickAt, ...diagnostics });
     }
     console.log(JSON.stringify({
         status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_PASS",
+        overallSafetyState: globalBlockReason ? "BLOCKED" : "HEALTHY",
+        newOrdersAllowed: !globalBlockReason,
+        sharedKillSwitchActive: Boolean(killReason),
+        marginGuard,
         readOnly: true,
         tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
         ordersSent: 0,

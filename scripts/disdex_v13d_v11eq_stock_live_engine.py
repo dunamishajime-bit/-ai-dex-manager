@@ -119,12 +119,48 @@ def read_json(path: Path, default: Any = None) -> Any:
         return default
 
 
-def wait_for_aster_global_rate_budget() -> None:
+def _aster_global_budget_int_env(name: str, fallback: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return fallback
+    try:
+        value = float(raw)
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID") from error
+    if not math.isfinite(value):
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID")
+    return math.floor(value)
+
+
+def aster_futures_request_weight(method: str, path: str, params: Optional[Dict[str, Any]] = None) -> int:
+    values = params or {}
+    symbol = bool(str(values.get("symbol") or ""))
+    if path in {"/fapi/v3/balance", "/fapi/v3/positionRisk", "/fapi/v3/account", "/fapi/v3/accountWithJoinMargin"}: return 5
+    if path == "/fapi/v3/openOrders": return 1 if symbol else 40
+    if path == "/fapi/v3/income": return 30
+    if path == "/fapi/v3/fundingRate": return 1
+    if path in {"/fapi/v1/aggTrades", "/fapi/v3/aggTrades"}: return 20
+    if path in {"/fapi/v1/depth", "/fapi/v3/depth"}:
+        limit = int(values.get("limit") or 500)
+        return 2 if limit <= 50 else 5 if limit <= 100 else 10 if limit <= 500 else 20
+    if path == "/fapi/v3/klines":
+        limit = int(values.get("limit") or 500)
+        return 1 if limit < 100 else 2 if limit < 500 else 5 if limit <= 1000 else 10
+    if path == "/fapi/v3/ticker/24hr": return 1 if symbol else 40
+    if path in {"/fapi/v3/ticker/price", "/fapi/v3/ticker/bookTicker"}: return 1 if symbol else 2
+    if path in {"/fapi/v3/ping", "/fapi/v3/time", "/fapi/v3/exchangeInfo", "/fapi/v3/order", "/fapi/v3/allOpenOrders", "/fapi/v3/leverage", "/fapi/v3/marginType"}: return 1
+    return 100
+
+
+def wait_for_aster_global_rate_budget(weight: int = 1) -> None:
     raw_path = (os.getenv("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH") or "").strip()
     if not raw_path:
         return
-    minimum_ms = max(1, min(1000, int_env("DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", 50)))
-    max_queue_ms = max(minimum_ms, min(30_000, int_env("DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS", 5000)))
+    minimum_ms = max(1, min(1000, _aster_global_budget_int_env("DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", 50)))
+    max_queue_ms = max(minimum_ms, min(30_000, _aster_global_budget_int_env("DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS", 5000)))
+    if not isinstance(weight, (int, float)) or not math.isfinite(float(weight)):
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID")
+    weight_units = max(1, min(100, math.floor(float(weight))))
     path = Path(raw_path).resolve()
     lock_path = Path(str(path) + ".lock")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -145,14 +181,22 @@ def wait_for_aster_global_rate_budget() -> None:
             time.sleep(0.005)
     try:
         current = read_json(path, {}) or {}
+        if not isinstance(current, dict):
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
         if current and current.get("schema") != "disdex-aster-rate-budget/v1":
             raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
+        try:
+            next_allowed = float(current.get("nextAllowedAt") or 0)
+        except (TypeError, ValueError) as error:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED") from error
+        if not math.isfinite(next_allowed) or next_allowed < 0:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
         now = now_ms()
-        permit_at = max(now, int(current.get("nextAllowedAt") or 0))
+        permit_at = max(now, math.floor(next_allowed))
         wait_ms = permit_at - now
         if wait_ms > max_queue_ms:
             raise RuntimeError(f"ASTER_GLOBAL_RATE_BUDGET_SATURATED:{wait_ms}")
-        atomic_write_json(path, {"schema": "disdex-aster-rate-budget/v1", "nextAllowedAt": permit_at + minimum_ms, "updatedAt": now, "pid": os.getpid()})
+        atomic_write_json(path, {"schema": "disdex-aster-rate-budget/v1", "nextAllowedAt": permit_at + (minimum_ms * weight_units), "updatedAt": now, "pid": os.getpid()})
     finally:
         try:
             lock_path.rmdir()
@@ -160,6 +204,33 @@ def wait_for_aster_global_rate_budget() -> None:
             pass
     if wait_ms > 0:
         time.sleep(wait_ms / 1000.0)
+
+
+def defer_aster_global_rate_budget(cooldown_ms: int, status: int) -> None:
+    raw_path = (os.getenv("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH") or "").strip()
+    if not raw_path: return
+    if status not in {418, 429} or not isinstance(cooldown_ms, (int, float)) or not math.isfinite(float(cooldown_ms)) or cooldown_ms < 0:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID")
+    path = Path(raw_path).resolve(); lock_path = Path(str(path) + ".lock"); path.parent.mkdir(parents=True, exist_ok=True)
+    deadline = time.monotonic() + 2.0
+    while True:
+        try: lock_path.mkdir(mode=0o700); break
+        except FileExistsError:
+            try:
+                if time.time() - lock_path.stat().st_mtime > 5.0: lock_path.rmdir(); continue
+            except FileNotFoundError: continue
+            if time.monotonic() >= deadline: raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
+            time.sleep(0.005)
+    try:
+        current = read_json(path, {}) or {}
+        if not isinstance(current, dict) or (current and current.get("schema") != "disdex-aster-rate-budget/v1"): raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
+        existing = float(current.get("nextAllowedAt") or 0)
+        if not math.isfinite(existing) or existing < 0: raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
+        now = now_ms(); until = max(math.floor(existing), now + math.floor(float(cooldown_ms)))
+        atomic_write_json(path, {"schema":"disdex-aster-rate-budget/v1","nextAllowedAt":until,"updatedAt":now,"pid":os.getpid(),"cooldownUntil":until,"lastRateLimitStatus":status})
+    finally:
+        try: lock_path.rmdir()
+        except FileNotFoundError: pass
 
 
 def append_jsonl(path: Path, payload: dict) -> None:
@@ -197,6 +268,17 @@ def http_json(
             return json.loads(text) if text else {}
     except urllib.error.HTTPError as error:
         body = error.read().decode(errors="replace")
+        hostname = (urllib.parse.urlparse(target).hostname or "").lower()
+        if (hostname == "asterdex.com" or hostname.endswith(".asterdex.com")) and error.code in {418, 429}:
+            retry_after_ms = 0
+            raw_retry_after = error.headers.get("Retry-After") if error.headers else None
+            if raw_retry_after:
+                try:
+                    retry_after_ms = max(0, math.floor(float(raw_retry_after) * 1000))
+                except (TypeError, ValueError):
+                    retry_after_ms = 0
+            minimum_cooldown_ms = 120_000 if error.code == 418 else 60_000
+            defer_aster_global_rate_budget(max(minimum_cooldown_ms, retry_after_ms), error.code)
         raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
 
 
@@ -376,7 +458,7 @@ class AsterClient:
     def _signed(self, method: str, path: str, params: Dict[str, Any]) -> Any:
         if self._signer is None:
             raise RuntimeError("Aster signed method called without live credentials")
-        wait_for_aster_global_rate_budget()
+        wait_for_aster_global_rate_budget(aster_futures_request_weight(method, path, params))
         signed = {
             **params,
             "recvWindow": params.get("recvWindow", self.recv_window),
@@ -415,11 +497,11 @@ class AsterClient:
         )
 
     def ping(self) -> Any:
-        wait_for_aster_global_rate_budget()
+        wait_for_aster_global_rate_budget(1)
         return http_json(f"{self.base_url}/fapi/v3/ping", timeout=self.timeout)
 
     def exchange_info(self) -> dict:
-        wait_for_aster_global_rate_budget()
+        wait_for_aster_global_rate_budget(1)
         payload = http_json(f"{self.base_url}/fapi/v3/exchangeInfo", timeout=self.timeout)
         for row in payload.get("symbols", []):
             filters = {item.get("filterType"): item for item in row.get("filters", [])}
@@ -456,7 +538,7 @@ class AsterClient:
 
     def book(self, symbol: str, limit: int = 20) -> Book:
         received = now_ms()
-        wait_for_aster_global_rate_budget()
+        wait_for_aster_global_rate_budget(aster_futures_request_weight("GET", "/fapi/v1/depth", {"symbol": symbol, "limit": limit}))
         payload = http_json(
             f"{self.public_url}/fapi/v1/depth",
             params={"symbol": symbol, "limit": limit},
@@ -472,7 +554,7 @@ class AsterClient:
     def adverse_imbalance(self, symbol: str, maker_side: str) -> Optional[float]:
         end = now_ms()
         try:
-            wait_for_aster_global_rate_budget()
+            wait_for_aster_global_rate_budget(aster_futures_request_weight("GET", "/fapi/v1/aggTrades", {"symbol": symbol, "limit": 200}))
             rows = http_json(
                 f"{self.public_url}/fapi/v1/aggTrades",
                 params={"symbol": symbol, "limit": 200},

@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
-import { AsterApiError, AsterV3Client, isAsterDepositRequirementError, type AsterKline } from "./aster-v3-client";
+import { AsterApiError, AsterV3Client, isAsterDepositRequirementError, isAsterIpBanError, type AsterKline } from "./aster-v3-client";
 import { QUALITY102_HOUR_MS, type Quality102Candle } from "./disdex-quality102-causal-pipeline";
 import type { Quality102CausalV1History } from "./disdex-quality102-causal-v1-signal";
 
@@ -158,10 +158,11 @@ export class Quality102CausalV1AsterMarketDataProvider {
                 if (isAsterDepositRequirementError(error)) {
                     throw new Error("ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED");
                 }
-                if (!(error instanceof AsterApiError) || (error.status !== 429 && error.status !== 418)) throw error;
+                if (isAsterIpBanError(error)) throw new Error("QUALITY102_ASTER_IP_BAN_418_FAIL_CLOSED");
+                if (!(error instanceof AsterApiError) || error.status !== 429) throw error;
                 lastRateError = error;
                 if (attempt + 1 >= this.rateLimitAttempts) break;
-                const venueDelay = error.retryAfterMs ?? (error.status === 418 ? 60_000 : 5_000);
+                const venueDelay = error.retryAfterMs ?? 5_000;
                 const backoff = Math.min(MAX_BACKOFF_MS, Math.max(1_000 * (2 ** attempt), venueDelay));
                 await sleep(backoff);
             }

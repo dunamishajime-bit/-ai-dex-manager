@@ -12,6 +12,7 @@ class V52UpstreamFailClosedTests(unittest.TestCase):
     def test_classifies_observed_aster_transport_failures_as_upstream_fail_closed(self):
         self.assertTrue(v52.upstream_fail_closed_error("HTTP 429 /fapi/v3/positionRisk"))
         self.assertTrue(v52.upstream_fail_closed_error("HTTP Error 429: Too Many Requests"))
+        self.assertTrue(v52.upstream_fail_closed_error("HTTP 418 /fapi/v3/positionRisk: IP banned"))
         self.assertTrue(v52.upstream_fail_closed_error("<urlopen error [Errno 104] Connection reset by peer>"))
         self.assertTrue(v52.upstream_fail_closed_error("device time must match the actual time"))
         self.assertTrue(v52.upstream_fail_closed_error("QUALITY102_STATE_STALE"))

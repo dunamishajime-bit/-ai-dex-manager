@@ -1,5 +1,5 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { waitForAsterGlobalRateSlot } from "./disdex-aster-global-rate-budget";
+import { deferAsterGlobalRateBudget, waitForAsterGlobalRateSlot } from "./disdex-aster-global-rate-budget";
 
 export type AsterHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type AsterOrderSide = "BUY" | "SELL";
@@ -12,7 +12,7 @@ export interface AsterV3ClientOptions {
     privateKey?: `0x${string}`;
     requestTimeoutMs?: number;
     recvWindowMs?: number;
-    /** Retries apply only to read-only 429/418 responses. Order mutations never retry. */
+    /** Retries apply only to read-only 429 responses. HTTP 418 is an IP ban and never retries. Order mutations never retry. */
     readOnlyRateLimitMaxRetries?: number;
     readOnlyRateLimitBackoffBaseMs?: number;
     readOnlyRateLimitBackoffMaxMs?: number;
@@ -233,15 +233,36 @@ function parseErrorMessage(payload: unknown, fallback: string) {
     const value = (payload as { msg?: unknown; message?: unknown }).msg ?? (payload as { message?: unknown }).message;
     return typeof value === "string" && value ? value : fallback;
 }
+export function asterFuturesRequestWeight(method: AsterHttpMethod, path: string, params: Record<string, unknown> = {}): number {
+    const symbol = typeof params.symbol === "string" && params.symbol.length > 0;
+    if (path === "/fapi/v3/balance" || path === "/fapi/v3/positionRisk" || path === "/fapi/v3/account" || path === "/fapi/v3/accountWithJoinMargin") return 5;
+    if (path === "/fapi/v3/openOrders") return symbol ? 1 : 40;
+    if (path === "/fapi/v3/income") return 30;
+    if (path === "/fapi/v3/fundingRate") return 1;
+    if (path === "/fapi/v3/ticker/24hr") return symbol ? 1 : 40;
+    if (path === "/fapi/v3/ticker/price" || path === "/fapi/v3/ticker/bookTicker") return symbol ? 1 : 2;
+    if (path === "/fapi/v3/klines") {
+        const limit = Number(params.limit ?? 500);
+        if (!Number.isFinite(limit) || limit <= 0) return 10;
+        if (limit < 100) return 1;
+        if (limit < 500) return 2;
+        if (limit <= 1000) return 5;
+        return 10;
+    }
+    if (["/fapi/v3/ping", "/fapi/v3/time", "/fapi/v3/exchangeInfo", "/fapi/v3/order", "/fapi/v3/allOpenOrders", "/fapi/v3/leverage", "/fapi/v3/marginType"].includes(path)) return 1;
+    return 100;
+}
+
 function retryAfterFromHeaders(headers: Headers): number | undefined {
     const raw = headers.get("retry-after"); if (!raw) return undefined;
     const seconds = Number(raw); if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
     const timestamp = Date.parse(raw); return Number.isFinite(timestamp) ? Math.max(0, timestamp - Date.now()) : undefined;
 }
 
-function isRateLimitStatus(status: number) { return status === 418 || status === 429; }
+export function isAsterIpBanError(error: unknown): boolean { return error instanceof AsterApiError && error.status === 418; }
 function isReadOnlyRateLimitError(error: AsterApiError) {
-    if (isRateLimitStatus(error.status)) return true;
+    if (error.status === 418) return false;
+    if (error.status === 429) return true;
     // Aster has also returned the Binance-compatible -1003 payload with a
     // non-429 HTTP status. Treat that response as a read-only backoff case,
     // while keeping every order mutation non-retryable below.
@@ -303,7 +324,7 @@ export class AsterV3Client {
         let retries = 0;
         while (true) {
             try {
-                await waitForAsterGlobalRateSlot();
+                await waitForAsterGlobalRateSlot(asterFuturesRequestWeight(method, input.path, params));
                 const abort = new AbortController();
                 const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
                 try {
@@ -320,12 +341,19 @@ export class AsterV3Client {
                     const text = await response.text(); const payload = parseJsonSafe(text);
                     if (!response.ok) {
                         const executionUnknown = response.status === 503 && input.orderMutation === true;
-                        throw new AsterApiError({ path: input.path, message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs: retryAfterFromHeaders(response.headers), executionUnknown, responseBody: payload });
+                        const retryAfterMs = retryAfterFromHeaders(response.headers);
+                        const budgetPath = String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || "").trim();
+                        if (budgetPath && (response.status === 429 || response.status === 418)) {
+                            const minimumCooldownMs = response.status === 418 ? 120_000 : 60_000;
+                            await deferAsterGlobalRateBudget({ path: budgetPath, cooldownMs: Math.max(minimumCooldownMs, retryAfterMs ?? 0), status: response.status });
+                        }
+                        throw new AsterApiError({ path: input.path, message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs, executionUnknown, responseBody: payload });
                     }
                     return payload as T;
                 } finally { clearTimeout(timeout); }
             } catch (error) {
                 const canRetry = input.orderMutation !== true
+                    && !String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || "").trim()
                     && retries < this.readOnlyRateLimitMaxRetries
                     && error instanceof AsterApiError
                     && isReadOnlyRateLimitError(error);

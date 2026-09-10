@@ -4,6 +4,8 @@ function normalized(value: unknown) {
 
 function hasAsterCommunicationFailure(value: string) {
     return value.includes("http 429")
+        || value.includes("http 418")
+        || value.includes("ip banned")
         || value.includes("too many requests")
         || value.includes("rate limit")
         || value.includes("connection reset by peer")

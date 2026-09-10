@@ -21,6 +21,8 @@ const ATTEMPT_WINDOW_MS = 1_800_000;
 const BACKOFF_MS = [15_000, 60_000, 300_000];
 const MAX_ATTEMPTS = 3;
 const SHARED_CRYPTO_RISK_UNIT_PATTERN = "disdex-shared-crypto-risk@*.service";
+const MARGIN_GUARD_UNIT_PATTERN = "disdex-v12-v52-margin-guard@*.service";
+const LEGACY_LIVE_UNITS = ["disdex-v96-v52-live.service"];
 const RUNNERS = [
     {
         key: "V12_X1_ALL",
@@ -29,6 +31,8 @@ const RUNNERS = [
         heartbeatFile: "v12-x1-all.json",
         unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-v12-x1-all@${sha}.service`,
+        unitPattern: "disdex-v12-x1-all@*.service",
+        unitPrefix: "disdex-v12-x1-all",
         script: "scripts/disdex-v12-x1-all-live-runner.ts",
         heartbeatTimeoutMs: 10_800_000,
         tickTimeoutMs: 5_400_000,
@@ -40,6 +44,8 @@ const RUNNERS = [
         heartbeatFile: "pengu-v8.json",
         unitEnv: "DISDEX_WATCHDOG_PENGU_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-pengu-dual-ls-v2@${sha}.service`,
+        unitPattern: "disdex-pengu-dual-ls-v2@*.service",
+        unitPrefix: "disdex-pengu-dual-ls-v2",
         script: "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
         heartbeatTimeoutMs: 5_400_000,
         tickTimeoutMs: 5_400_000,
@@ -51,6 +57,8 @@ const RUNNERS = [
         heartbeatFile: "v52.json",
         unitEnv: "DISDEX_WATCHDOG_V52_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-v52-aster-only@${sha}.service`,
+        unitPattern: "disdex-v52-aster-only@*.service",
+        unitPrefix: "disdex-v52-aster-only",
         scripts: [
             "scripts/disdex_v52_aster_only_live_engine.py",
             "scripts/disdex_v52_aster_only_legacy_engine.py",
@@ -67,6 +75,8 @@ const RUNNERS = [
         heartbeatFile: "quality102-causal-v1.json",
         unitEnv: "DISDEX_WATCHDOG_Q102_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-quality102-causal-v1@${sha}.service`,
+        unitPattern: "disdex-quality102-causal-v1@*.service",
+        unitPrefix: "disdex-quality102-causal-v1",
         script: "scripts/disdex-quality102-causal-v1-live-runner.ts",
         heartbeatTimeoutMs: 5_400_000,
         tickTimeoutMs: 5_400_000,
@@ -123,21 +133,27 @@ function serviceAllowed(runner, unit, sha) {
     return unit === runner.expectedUnit(sha);
 }
 
-function parseNonInactiveServiceUnits(output) {
+function escapeRegex(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function parseNonInactiveServiceUnits(output, unitPrefix) {
     const units = [];
+    const pattern = new RegExp(`\\b(${escapeRegex(unitPrefix)}@[0-9a-f]{40}\\.service)\\s+\\S+\\s+(\\S+)\\s+\\S+`);
     for (const line of String(output || "").split(/\r?\n/)) {
-        const match = /\b(disdex-shared-crypto-risk@[0-9a-f]{40}\.service)\s+\S+\s+(\S+)\s+\S+/.exec(line);
+        const match = pattern.exec(line);
         if (match && match[2] !== "inactive") units.push(match[1]);
     }
     return units;
 }
 
-function assertSharedCryptoRiskWriterSingleton(activeUnits, expectedSha) {
-    const expectedUnit = `disdex-shared-crypto-risk@${expectedSha}.service`;
+function assertReleasePinnedRunnerSingleton(activeUnits, expectedUnit, label = "RUNNER_LINEAGE", requireExpected = false) {
     const units = [...new Set(activeUnits)];
-    if (units.length !== 1 || units[0] !== expectedUnit) {
-        throw new Error(`shared crypto risk writer singleton invariant failed: expected only ${expectedUnit}, observed ${units.join(",") || "none"}`);
+    const conflicting = units.filter((unit) => unit !== expectedUnit);
+    if (conflicting.length > 0 || units.length > 1 || (requireExpected && units.length !== 1)) {
+        throw new Error(`${label} singleton invariant failed: expected ${requireExpected ? "only" : "no conflicts with"} ${expectedUnit}, observed ${units.join(",") || "none"}`);
     }
+}
+
+function assertSharedCryptoRiskWriterSingleton(activeUnits, expectedSha) {
+    assertReleasePinnedRunnerSingleton(activeUnits, `disdex-shared-crypto-risk@${expectedSha}.service`, "SHARED_CRYPTO_RISK", true);
 }
 
 const RUNNER_OWNED_HEARTBEAT_FIELDS = [
@@ -408,24 +424,37 @@ async function run(config) {
         const decisions = {};
         const restartCalls = [];
         const errors = [];
-        let sharedRiskError;
+        let compositionInvariantError;
         try {
+            for (const legacyUnit of LEGACY_LIVE_UNITS) {
+                const legacyOutput = await systemctl(["show", legacyUnit, "--property=LoadState", "--property=ActiveState", "--no-pager"], true);
+                const props = Object.fromEntries(String(legacyOutput || "").split(/\r?\n/).filter(Boolean).map((line) => line.split("=", 2)));
+                if (props.LoadState === "loaded" && !new Set(["inactive", "failed"]).has(props.ActiveState)) {
+                    throw new Error(`LEGACY_LIVE_CONFLICT:${legacyUnit}:${props.ActiveState || "UNKNOWN"}`);
+                }
+            }
+            for (const runner of Object.values(config.runnerConfig)) {
+                const nonInactiveUnits = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", runner.unitPattern,
+                ]), runner.unitPrefix);
+                assertReleasePinnedRunnerSingleton(nonInactiveUnits, runner.unit, `RUNNER_LINEAGE:${runner.key}`);
+            }
             const nonInactiveRiskUnits = parseNonInactiveServiceUnits(await systemctl([
-                "list-units",
-                "--all",
-                "--type=service",
-                "--no-legend",
-                SHARED_CRYPTO_RISK_UNIT_PATTERN,
-            ]));
+                "list-units", "--all", "--type=service", "--no-legend", SHARED_CRYPTO_RISK_UNIT_PATTERN,
+            ]), "disdex-shared-crypto-risk");
             assertSharedCryptoRiskWriterSingleton(nonInactiveRiskUnits, config.sharedRiskExpectedSha);
+            const nonInactiveMarginUnits = parseNonInactiveServiceUnits(await systemctl([
+                "list-units", "--all", "--type=service", "--no-legend", MARGIN_GUARD_UNIT_PATTERN,
+            ]), "disdex-v12-v52-margin-guard");
+            assertReleasePinnedRunnerSingleton(nonInactiveMarginUnits, `disdex-v12-v52-margin-guard@${config.expectedSha}.service`, "MARGIN_GUARD_LINEAGE", true);
         } catch (error) {
-            sharedRiskError = safeReason(error?.message);
-            errors.push(`SHARED_CRYPTO_RISK: ${sharedRiskError}`);
+            compositionInvariantError = safeReason(error?.message);
+            errors.push(`COMPOSITION_LINEAGE: ${compositionInvariantError}`);
         }
         for (const runner of Object.values(config.runnerConfig)) {
             try {
-                if (sharedRiskError) {
-                    const result = decision("HOLD_FAIL_CLOSED", `shared crypto risk writer invariant failed: ${sharedRiskError}`, runner, { safetyUnverified: true });
+                if (compositionInvariantError) {
+                    const result = decision("HOLD_FAIL_CLOSED", `composition lineage invariant failed: ${compositionInvariantError}`, runner, { safetyUnverified: true });
                     decisions[runner.key] = result;
                     nextState.runners[runner.key] = { attempts: [] };
                     continue;
@@ -531,10 +560,29 @@ function selfTest() {
     } catch (error) {
         if (!String(error?.message || "").includes("singleton invariant")) throw error;
     }
-    const parsedRiskUnits = parseNonInactiveServiceUnits(`  ${expectedRiskUnit} loaded active running\n  ${conflictingRiskUnit} loaded activating auto-restart\n  disdex-shared-crypto-risk@${"b".repeat(40)}.service loaded inactive dead\n  disdex-shared-crypto-risk@${"c".repeat(40)}.service loaded failed failed\n  unrelated.service loaded active running`);
+    const parsedRiskUnits = parseNonInactiveServiceUnits(`  ${expectedRiskUnit} loaded active running\n  ${conflictingRiskUnit} loaded activating auto-restart\n  disdex-shared-crypto-risk@${"b".repeat(40)}.service loaded inactive dead\n  disdex-shared-crypto-risk@${"c".repeat(40)}.service loaded failed failed\n  unrelated.service loaded active running`, "disdex-shared-crypto-risk");
     if (parsedRiskUnits.length !== 3 || parsedRiskUnits[0] !== expectedRiskUnit || parsedRiskUnits[1] !== conflictingRiskUnit || parsedRiskUnits[2] !== `disdex-shared-crypto-risk@${"c".repeat(40)}.service`) throw new Error("shared risk unit parser self-test failed");
     console.log("DISDEX_CURRENT_WATCHDOG_SHARED_RISK_SINGLETON_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_NONINACTIVE_RISK_SELFTEST_PASS");
+    const expectedQ102Unit = q102.expectedUnit(sha);
+    const conflictingQ102Unit = q102.expectedUnit("a".repeat(40));
+    assertReleasePinnedRunnerSingleton([], expectedQ102Unit, "RUNNER_LINEAGE:Q102");
+    assertReleasePinnedRunnerSingleton([expectedQ102Unit], expectedQ102Unit, "RUNNER_LINEAGE:Q102");
+    try {
+        assertReleasePinnedRunnerSingleton([expectedQ102Unit, conflictingQ102Unit], expectedQ102Unit, "RUNNER_LINEAGE:Q102");
+        throw new Error("Q102 lineage singleton self-test accepted a conflicting release");
+    } catch (error) {
+        if (!String(error?.message || "").includes("singleton invariant")) throw error;
+    }
+    const expectedMarginUnit = `disdex-v12-v52-margin-guard@${sha}.service`;
+    assertReleasePinnedRunnerSingleton([expectedMarginUnit], expectedMarginUnit, "MARGIN_GUARD_LINEAGE", true);
+    try {
+        assertReleasePinnedRunnerSingleton([], expectedMarginUnit, "MARGIN_GUARD_LINEAGE", true);
+        throw new Error("margin lineage self-test accepted a missing current unit");
+    } catch (error) {
+        if (!String(error?.message || "").includes("singleton invariant")) throw error;
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_RUNNER_LINEAGE_SINGLETON_SELFTEST_PASS");
     const config = { releaseRoot: "/home/deploy/disdex-trading/releases/1094ebfec3314b355f8ebe9caf17b19e5871628c" };
     const q102Pinned = { ...q102, expectedCwd: config.releaseRoot };
     const command = `/usr/bin/node ${config.releaseRoot}/node_modules/tsx/dist/cli.mjs scripts/disdex-quality102-causal-v1-live-runner.ts --daemon`;

@@ -61,6 +61,9 @@ def rate_limit_error(error: BaseException | str) -> bool:
     return any(marker in message for marker in (
         "http 429",
         "http error 429",
+        "http 418",
+        "http error 418",
+        "ip banned",
         "too many requests",
         "rate limit",
         "request weight",
@@ -601,16 +604,27 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.save()
         self.log("v52-position-closed", slot=slot, symbol=symbol, reason=reason)
 
+    def _cancel_managed_open_orders(self) -> None:
+        if not self.live:
+            return
+        for order in self.aster.open_orders():
+            symbol = str(order.get("symbol") or "")
+            client = str(order.get("clientOrderId") or "")
+            if symbol not in base.ASTER_SYMBOL.values():
+                continue
+            if not client.startswith(("stock-v11eq-aster-only-", "stock-v52-")):
+                continue
+            self.aster.cancel(symbol, client)
+
     def flatten_all(self, reason: str) -> None:
-        for symbol in base.ASTER_SYMBOL.values():
-            self.aster.cancel_all(symbol)
-        if self.state.get("pendingOrder"):
-            self.state["pendingOrder"] = None
-            self.save()
+        self._cancel_managed_open_orders()
         for slot in list(self.positions()):
             self.close_slot(slot, reason)
         if self.live and self.managed_aster_positions():
             raise RuntimeError("V52 flatten left unmanaged Aster Stock positions")
+        if self.state.get("pendingOrder"):
+            self.state["pendingOrder"] = None
+            self.save()
 
     def capture_v50_signal(self, window: str, rows: dict) -> None:
         signals = self.state.setdefault("v50SignalBasis", {})
