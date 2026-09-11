@@ -95,7 +95,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.v12,
         venue: "Aster Futures V3",
         timeframe: "完成済み1時間足 → 2時間足",
-        entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。最大1建玉 / 合計1.00x",
+        entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。最大2建玉 / 1建玉最大1.00x / 合計上限1.50x",
         protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch。Crypto共有2.00x / Total2.50x",
         note: "最新のVPS stateを確認できた場合だけLIVE表示します。",
         reason: "V12 runner stateの実読取結果を待機中です。",

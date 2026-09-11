@@ -15,10 +15,10 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
   v52DailyLossPct: 3.5,
   /** Gross values are policy caps; V12's requested size remains risk/ATR-driven. */
   maximumGross: 2.5,
-  v12Gross: 1,
+  v12Gross: 1.5,
   v12PerPositionGross: 1,
-  v12MaximumPositions: 1,
-  v12SizingMode: "ATR/リスク連動、最大1ポジション（合計1.00x）",
+  v12MaximumPositions: 2,
+  v12SizingMode: "ATR/リスク連動、最大2ポジション（合計上限1.50x）",
   sharedCryptoGross: 2,
   quality102Runtime: {
     expectedReleaseSha: "c9018e0fcddb1f68bc1aaa11226afd178021e9f8",

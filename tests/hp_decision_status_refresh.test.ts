@@ -41,3 +41,16 @@ test("Quality102 UI reflects the active 1.0x Causal V4 cap", async () => {
   assert.match(quality, /strategyGrossCap: 1/);
   assert.match(panel, /Q102は最大1\.00x/);
 });
+
+test("V12 UI reflects Top2 capacity without implying fixed sizing", async () => {
+  const config = await source("lib/disterminal-live-config.ts");
+  const status = await source("lib/server/disdex-decision-status.ts");
+  const panel = await source("components/features/DecisionStatusPanel.tsx");
+  assert.match(config, /v12Gross: 1\.5/);
+  assert.match(config, /v12PerPositionGross: 1/);
+  assert.match(config, /v12MaximumPositions: 2/);
+  assert.match(config, /ATR\/リスク連動、最大2ポジション（合計上限1\.50x）/);
+  assert.match(status, /最大2建玉 \/ 1建玉最大1\.00x \/ 合計上限1\.50x/);
+  assert.match(panel, /1建玉最大1\.00x \/ 最大2建玉 \/ 合計上限1\.50x/);
+  assert.doesNotMatch(panel, /最大1建玉 \/ 合計最大1\.00x/);
+});
