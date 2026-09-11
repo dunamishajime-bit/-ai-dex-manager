@@ -72,3 +72,28 @@ jobs:
             echo "===${action}==="
             sudo -n /usr/local/sbin/disdex-vps-control "$action" 2>&1 || true
           done
+
+  ssh_probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      SSH_PRIVATE_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Probe constrained deploy SSH without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          : "${SSH_PORT:=22}"
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$HOME/.ssh/disdex_probe"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/disdex_probe" "$HOME/.ssh/known_hosts"
+          set +e
+          output="$(ssh -i "$HOME/.ssh/disdex_probe" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10 -p "$SSH_PORT" "deploy@$SSH_HOST" 'printf DISDEX_DEPLOY_SHELL_PROBE' 2>&1)"
+          rc=$?
+          set -e
+          echo "SSH_PROBE_RC=$rc"
+          printf '%s\n' "$output"
