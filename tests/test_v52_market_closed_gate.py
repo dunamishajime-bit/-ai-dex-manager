@@ -28,17 +28,36 @@ class V52MarketClosedGateTest(unittest.TestCase):
         return engine
 
     def test_exchange_holiday_defers_before_reference_fetch(self):
-        labor_day = dt.datetime(2026, 9, 7, 10, 30, tzinfo=dt.timezone.utc)
+        labor_day = dt.datetime(2026, 9, 7, 10, 30, tzinfo=v52.base.NY)
         engine = self.make_engine(labor_day)
 
         engine.tick()
 
         engine.books_and_refs.assert_not_called()
+        engine.update_history.assert_not_called()
         engine.log.assert_any_call(
             "v52-market-closed",
             market="US_EQUITY",
             localDate="2026-09-07",
             localTime=labor_day.isoformat(),
+            referenceFetch="deferred",
+            newOrdersAllowed=False,
+        )
+
+    def test_market_closed_with_local_position_never_refreshes_reference_history(self):
+        after_hours = dt.datetime(2026, 9, 11, 18, 30, tzinfo=v52.base.NY)
+        engine = self.make_engine(after_hours)
+        engine.positions = Mock(return_value={"V11_EQ": {"symbol": "META"}})
+
+        engine.tick({"local": after_hours, "rows": None, "skipWithoutLock": False})
+
+        engine.books_and_refs.assert_not_called()
+        engine.update_history.assert_not_called()
+        engine.log.assert_any_call(
+            "v52-market-closed",
+            market="US_EQUITY",
+            localDate="2026-09-11",
+            localTime=after_hours.isoformat(),
             referenceFetch="deferred",
             newOrdersAllowed=False,
         )
