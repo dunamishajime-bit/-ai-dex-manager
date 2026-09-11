@@ -365,7 +365,7 @@ function Quality102Detail({ details }: { details?: Quality102RuntimeStatus }) {
         <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-3 text-xs leading-5 text-amber-100/85">
           <div className="text-sm font-bold text-amber-100">適用対象通貨</div>
           <p className="mt-2 break-words">{details.symbols.join(" / ")}</p>
-          <p className="mt-2">歴史的102件selector parity：{details.historicalSelectorParity ? "確認済み" : "未証明（該当経路はFAIL CLOSED）"} / BRK live式：{details.brkLiveEnabled ? "有効" : "未証明（FAIL CLOSED）"}</p>
+          <p className="mt-2">Historical frozen Q102（0.5x）はLIVE未使用。歴史的102件selector parity：{details.historicalSelectorParity ? "確認済み" : "未証明（該当経路はFAIL CLOSED）"} / BRK live式：{details.brkLiveEnabled ? "有効" : "未証明（FAIL CLOSED）"}</p>
           <p className="mt-2">Q102は最大1.00x、Crypto最大2.00x、Total最大2.50x。主力発火時はQ102だけを残余Grossまで縮小し、主力の注文機会をblockしません。</p>
         </div>
       </div>

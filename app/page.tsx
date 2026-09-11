@@ -74,8 +74,8 @@ export default function HomePage() {
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXの4ロジックと、口座残高・実建玉・未決済注文を表示します。取得できない情報は未取得と表示します。</p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
               <span className={`rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 X1.00 ALL</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">PENGU V2 / Recovery V8</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 X1.00 ALL Top2</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">PENGU Short V20 + Recovery V8</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">共有日次損失上限 {config.sharedCryptoDailyLossPct}% / V52 {config.v52DailyLossPct}%</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">全体Gross上限 ≤ {config.maximumGross.toFixed(1)}x / Crypto ≤ {config.sharedCryptoGross.toFixed(1)}x</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 {config.v12SizingMode}</span>
@@ -89,7 +89,7 @@ export default function HomePage() {
           </div>
         </section>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、V52、Quality102の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/positions" title="ダッシュボード" detail="V12 Top2、PENGU Short V20 + Recovery V8、V52 Top2、Quality102 Causal V4の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
           <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
@@ -98,7 +98,7 @@ export default function HomePage() {
         <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
           <div className="font-bold">Quality102 Causal V4 の公開状態</div>
           <p className="mt-1 text-[12px] text-amber-100/80">Quality102 Causal V4は、主力3ロジックを優先する1 slotの補完スリーブです。</p>
-          <p className="mt-1 text-[11px] text-amber-100/65">上限：Quality102 {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total {config.quality102Runtime.totalGrossCap.toFixed(2)}x</p>
+          <p className="mt-1 text-[11px] text-amber-100/65">上限：Quality102 {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total {config.quality102Runtime.totalGrossCap.toFixed(2)}x。Historical frozen Q102はLIVE未使用です。</p>
         </section>
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
