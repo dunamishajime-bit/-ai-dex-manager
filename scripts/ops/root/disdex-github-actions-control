@@ -254,7 +254,7 @@ if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V1" ]]; then
   runuser -u deploy -- npm --prefix "$ui_stage" ci --no-audit --no-fund
   runuser -u deploy -- env NODE_OPTIONS=--max-old-space-size=1536 "$ui_stage/node_modules/.bin/tsc" --noEmit --project "$ui_stage/tsconfig.json"
   printf 'DISDEX_VPS_CONTROL_NODE_HEAP_MB=1536\n'
-  runuser -u deploy -- env NODE_OPTIONS=--max-old-space-size=1536 npm --prefix "$ui_stage" run build
+  runuser -u deploy -- env NODE_OPTIONS=--max-old-space-size=1536 DISDEX_UI_VERIFIED_TSC=1 npm --prefix "$ui_stage" run build
   [[ -d "$ui_stage/.next" ]] || { printf 'DISDEX_UI_BUILD_OUTPUT_MISSING\n' >&2; exit 69; }
   [[ "$(tr -d '[:space:]' < "$ui_stage/.disdex-release-sha")" == "$target_sha" ]] || { printf 'DISDEX_UI_RELEASE_MARKER_INVALID\n' >&2; exit 69; }
   mv -- "$ui_stage" "$ui_release"
