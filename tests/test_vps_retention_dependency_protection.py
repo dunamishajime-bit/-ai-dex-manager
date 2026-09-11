@@ -42,6 +42,11 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
             python.chmod(0o755)
             (current / ".venv2").symlink_to(dependency / ".venv2")
             paths.current_link.symlink_to(current)
+            # Creating the dependency payload refreshes the directory mtime.
+            # Make it old again so the existing retention algorithm would delete it
+            # unless it explicitly follows and protects current-release dependencies.
+            old_stamp = now - 10 * 86400
+            os.utime(dependency, (old_stamp, old_stamp))
 
             report = retention.CleanupReport(dry_run=False)
             retention.cleanup_releases(paths, report, now)
