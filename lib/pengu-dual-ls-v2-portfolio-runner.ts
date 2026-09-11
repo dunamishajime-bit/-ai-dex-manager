@@ -476,13 +476,17 @@ export class PenguDualLsV2PortfolioRunner {
         let submitted = false;
         try {
             const quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
-            const now = this.now();
+            let now = this.now();
             if (this.dependencies.config.mode === "LIVE") {
                 const [account, positions, openOrders] = await Promise.all([
                     this.dependencies.executor.getAccountSnapshot(),
                     this.dependencies.executor.getPositions(),
                     this.dependencies.executor.getOpenOrders(),
                 ]);
+                // Account snapshots are timestamped when the venue response is
+                // observed. Compare them against a clock captured afterwards,
+                // never against the pre-request time.
+                now = this.now();
                 if (!validLiveAccount(account, now)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_ACCOUNT_STALE_OR_INVALID");
                 if (openOrders.length > 0) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT");
                 const actual = actualPosition(positions);

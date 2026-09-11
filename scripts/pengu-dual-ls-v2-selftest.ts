@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { PENGU_DUAL_LS_V2, resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import {
@@ -59,6 +61,12 @@ assert.equal(cooldownHoursForPenguExit("SHORT_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("RECOVERY_V8_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("LONG_TRAILING_STOP"), 6);
 assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.75);
+const portfolioRunnerSource = readFileSync(resolve("lib/pengu-dual-ls-v2-portfolio-runner.ts"), "utf8");
+assert.match(
+    portfolioRunnerSource,
+    /getOpenOrders\(\),[\s\S]*?now = this\.now\(\);[\s\S]*?validLiveAccount\(account, now\)/,
+    "PENGU must validate venue snapshots against a clock captured after the async account reads",
+);
 assert.equal(PENGU_SHORT_V20_CANDIDATE, "COUNTERWIND_VOL_TARGET_FAILURE_EXIT");
 assert.equal(PENGU_SHORT_V20_PRE_REGISTRATION_SHA, "ad7cedb3cafaf9f9680e390112f72375d84b50ac");
 assert.equal(classifyPenguShortV20SizingState(0.75), "CAP");

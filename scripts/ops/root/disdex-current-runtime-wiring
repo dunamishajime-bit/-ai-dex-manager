@@ -73,6 +73,7 @@ validate_release_artifacts() {
   local -a required_files=(
     "$CURRENT_RELEASE/scripts/disdex-v12-x1-all-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-pengu-presubmit-snapshot-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
@@ -256,6 +257,7 @@ V12_LIVE_ACK=${DEPLOYED_SHA}
 STRICT_PORTFOLIO_PLANNER_ACTIVE=true
 V12_GROSS_CAP=1.5
 PENGU_GROSS_CAP=0.75
+PENGU_DUAL_LS_V2_MAX_GROSS=0.75
 STOCK_GROSS_CAP=1.5
 CRYPTO_GROSS_CAP=2.0
 TOTAL_GROSS_CAP=2.5
@@ -461,6 +463,7 @@ self_test() {
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
     scripts/disdex-quality102-causal-v1-live-runner.ts \
+    scripts/disdex-pengu-presubmit-snapshot-recovery.ts \
     scripts/disdex_v96_v52_margin_guard_runtime.py \
     scripts/disdex_v52_aster_only_live_engine.py \
     lib/aster-readonly-recovery-gate.ts \
