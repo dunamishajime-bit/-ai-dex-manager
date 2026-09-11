@@ -33,6 +33,7 @@ def test_v52_releases_shared_lock_before_daemon_sleep() -> None:
     engine = object.__new__(v52.V52AsterOnlyEngine)
     lock = FakeAccountLock()
     engine.lock = lock
+    engine._upstream_fail_closed_hold = False
     engine.stop_requested = False
     engine.live = False
     engine.crypto_gross_cap = 2.0
@@ -45,7 +46,7 @@ def test_v52_releases_shared_lock_before_daemon_sleep() -> None:
     engine.reconcile = lambda: lock.events.append("reconcile")
     engine.positions = lambda: {}
 
-    def tick() -> None:
+    def tick(_prepared: dict) -> None:
         lock.events.append("tick")
         engine.stop_requested = True
 
