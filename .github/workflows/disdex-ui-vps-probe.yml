@@ -51,3 +51,11 @@ jobs:
           systemctl list-unit-files --no-pager 2>/dev/null | grep -Ei 'disdex.*ui|ai-dex-manager-ui' || true
           echo "UI_DROPINS"
           systemctl show ai-dex-manager-ui.service -p DropInPaths 2>/dev/null || true
+      - name: Read-only VPS control capability inventory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "VPS_CONTROL_USAGE"
+          /usr/local/sbin/disdex-vps-control --help 2>&1 || true
+          echo "VPS_CONTROL_UI_MATCHES"
+          grep -nEi 'usage|case|ui|release|deploy|restart|systemctl|build|npm' /usr/local/sbin/disdex-vps-control | head -220 || true
