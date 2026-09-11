@@ -85,6 +85,13 @@ jobs:
                   raise SystemExit("CONTROL_UI_SHA_PAIR_BLOCKED")
               if payload["acknowledgement"] != "I_ACKNOWLEDGE_UI_ONLY_SYSTEMD_DEPLOY_V1":
                   raise SystemExit("CONTROL_UI_ACK_INVALID")
+          elif operation == "UI_SYSTEMD_DEPLOY_V2":
+              if payload["sourceRef"] != "codex/mobile-runner-ui-fix-20260912":
+                  raise SystemExit("CONTROL_UI_V2_SOURCE_REF_BLOCKED")
+              if payload["targetSha"] != "1cd5cc050b80c9b2e536740efcf2640c86a1c19e" or payload["baseSha"] != "7c2ed06ca7caee0105b55a8ef743be454b6f0fdf":
+                  raise SystemExit("CONTROL_UI_V2_SHA_PAIR_BLOCKED")
+              if payload["acknowledgement"] != "I_ACKNOWLEDGE_UI_RUNNER_READONLY_DEPLOY_V2":
+                  raise SystemExit("CONTROL_UI_V2_ACK_INVALID")
           elif operation == "V12_LIVE_ACTIVATE_V3":
               if payload["sourceRef"] != "chatgpt/v12-live-adapter-final-20260817":
                   raise SystemExit("CONTROL_SOURCE_REF_BLOCKED")
@@ -283,6 +290,14 @@ jobs:
             UI_SYSTEMD_DEPLOY_V1)
               grep -Fq 'STATUS: UI_SYSTEMD_DEPLOYED_VERIFIED' /tmp/disdex-vps-control.log
               grep -Fq 'UI_HTTP_STATUS=200' /tmp/disdex-vps-control.log
+              grep -Fq 'TRADING_CURRENT_UNCHANGED=TRUE' /tmp/disdex-vps-control.log
+              grep -Fq 'TRADING_RESTART_ATTEMPTED=FALSE' /tmp/disdex-vps-control.log
+              ;;
+            UI_SYSTEMD_DEPLOY_V2)
+              grep -Fq 'STATUS: UI_SYSTEMD_DEPLOYED_VERIFIED' /tmp/disdex-vps-control.log
+              grep -Fq 'UI_HTTP_STATUS=200' /tmp/disdex-vps-control.log
+              grep -Fq 'RUNNER_READONLY_WIRING=VERIFIED' /tmp/disdex-vps-control.log
+              grep -Fq 'HEARTBEATS_DEPLOY_READABLE=TRUE' /tmp/disdex-vps-control.log
               grep -Fq 'TRADING_CURRENT_UNCHANGED=TRUE' /tmp/disdex-vps-control.log
               grep -Fq 'TRADING_RESTART_ATTEMPTED=FALSE' /tmp/disdex-vps-control.log
               ;;

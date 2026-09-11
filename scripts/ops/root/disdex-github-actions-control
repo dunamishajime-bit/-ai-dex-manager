@@ -77,6 +77,20 @@ case "$operation" in
       exit 65
     }
     ;;
+  UI_SYSTEMD_DEPLOY_V2)
+    [[ "$source_ref" == "codex/mobile-runner-ui-fix-20260912" ]] || {
+      printf 'DISDEX_VPS_CONTROL_UI_V2_SOURCE_REF_BLOCKED\n' >&2
+      exit 65
+    }
+    [[ "$target_sha" == "1cd5cc050b80c9b2e536740efcf2640c86a1c19e" && "$base_sha" == "7c2ed06ca7caee0105b55a8ef743be454b6f0fdf" ]] || {
+      printf 'DISDEX_VPS_CONTROL_UI_V2_SHA_PAIR_BLOCKED\n' >&2
+      exit 65
+    }
+    [[ "$ack" == "I_ACKNOWLEDGE_UI_RUNNER_READONLY_DEPLOY_V2" ]] || {
+      printf 'DISDEX_VPS_CONTROL_UI_V2_ACK_REQUIRED\n' >&2
+      exit 65
+    }
+    ;;
   V12_LIVE_ACTIVATE_V3)
     [[ "$source_ref" == "chatgpt/v12-live-adapter-final-20260817" ]] || {
       printf 'DISDEX_VPS_CONTROL_V12_SOURCE_REF_BLOCKED\n' >&2
@@ -211,7 +225,7 @@ if [[ "$operation" == "CONTROL_PROBE" ]]; then
   exit 0
 fi
 
-if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V1" ]]; then
+if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V1" || "$operation" == "UI_SYSTEMD_DEPLOY_V2" ]]; then
   ui_service="ai-dex-manager-ui.service"
   ui_root="/home/deploy/disdex-trading/ui-releases"
   expected_old="${ui_root}/ui-top2-q102-1p0-${base_sha:0:8}"
@@ -227,14 +241,24 @@ if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V1" ]]; then
   ui_switched=false
   ui_dropin=""
   ui_backup=""
+  ui_runner_dropin="/etc/systemd/system/ai-dex-manager-ui.service.d/zzzzzzzzzzzzzzzzzzzz-runner-readonly-20260912.conf"
+  snapshot_share_dropin="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzz-ui-readonly-share-20260912.conf"
+  ui_runner_created=false
+  snapshot_share_created=false
   ui_rollback_on_error() {
     local rc="$1"
     trap - ERR
     set +e
+    rollback_changed=false
     if [[ "$ui_switched" == true && -n "$ui_dropin" && -f "$ui_backup" ]]; then
       cp -f -- "$ui_backup" "$ui_dropin"
       chown root:root "$ui_dropin"
       chmod 0644 "$ui_dropin"
+      rollback_changed=true
+    fi
+    if [[ "$ui_runner_created" == true ]]; then rm -f -- "$ui_runner_dropin"; rollback_changed=true; fi
+    if [[ "$snapshot_share_created" == true ]]; then rm -f -- "$snapshot_share_dropin"; rollback_changed=true; fi
+    if [[ "$rollback_changed" == true ]]; then
       systemctl daemon-reload
       systemctl restart "$ui_service"
       printf 'DISDEX_UI_ROLLBACK_ATTEMPTED=TRUE\n' >&2
@@ -276,7 +300,55 @@ if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V1" ]]; then
   chmod 0644 "$tmp_dropin"
   mv -f -- "$tmp_dropin" "$ui_dropin"
   ui_switched=true
+
+  if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V2" ]]; then
+    [[ ! -e "$ui_runner_dropin" && ! -L "$ui_runner_dropin" ]] || { printf 'DISDEX_UI_RUNNER_DROPIN_ALREADY_EXISTS\n' >&2; exit 69; }
+    [[ ! -e "$snapshot_share_dropin" && ! -L "$snapshot_share_dropin" ]] || { printf 'DISDEX_SNAPSHOT_SHARE_DROPIN_ALREADY_EXISTS\n' >&2; exit 69; }
+    cat >"${ui_runner_dropin}.tmp" <<'EOF'
+[Service]
+Environment=V12_X1_ALL_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
+Environment=V12_DECISION_SNAPSHOT_PATH=/var/lib/disdex/v12-x1-all/decision-snapshot.json
+Environment=PENGU_DUAL_LS_V2_RUNNER_STATE_PATH=/var/lib/disdex/pengu-dual-ls-v2/runner-live.json
+Environment=PENGU_DUAL_LS_V2_STATE_PATH=/var/lib/disdex/pengu-dual-ls-v2/runner-live.json
+Environment=PENGU_DUAL_LS_V2_DECISION_SNAPSHOT_PATH=/var/lib/disdex/pengu-dual-ls-v2/runner-live.json
+Environment=QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
+Environment=QUALITY102_CAUSAL_V1_HEARTBEAT_PATH=/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json
+Environment=V52_ASTER_ONLY_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
+Environment=V12_X1_ALL_HEARTBEAT_PATH=/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json
+Environment=PENGU_DUAL_LS_V2_HEARTBEAT_PATH=/var/lib/disdex/runner-health/heartbeats/pengu-v8.json
+EOF
+    chown root:root "${ui_runner_dropin}.tmp"
+    chmod 0644 "${ui_runner_dropin}.tmp"
+    mv -f -- "${ui_runner_dropin}.tmp" "$ui_runner_dropin"
+    ui_runner_created=true
+
+    install -d -o root -g root -m 0755 "$(dirname "$snapshot_share_dropin")"
+    cat >"${snapshot_share_dropin}.tmp" <<'EOF'
+[Service]
+Group=deploy
+UMask=0027
+EOF
+    chown root:root "${snapshot_share_dropin}.tmp"
+    chmod 0644 "${snapshot_share_dropin}.tmp"
+    mv -f -- "${snapshot_share_dropin}.tmp" "$snapshot_share_dropin"
+    snapshot_share_created=true
+  fi
+
   systemctl daemon-reload
+  if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V2" ]]; then
+    systemctl start disdex-runner-health-snapshot.service
+    [[ "$(systemctl show disdex-runner-health-snapshot.service --property Result --value)" == "success" ]] || { printf 'DISDEX_RUNNER_HEALTH_SNAPSHOT_FAILED\n' >&2; false; }
+    for heartbeat in \
+      /var/lib/disdex/runner-health/heartbeats/v12-x1-all.json \
+      /var/lib/disdex/runner-health/heartbeats/pengu-v8.json \
+      /var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json \
+      /var/lib/disdex/runner-health/heartbeats/v52.json; do
+      [[ -f "$heartbeat" && ! -L "$heartbeat" ]] || { printf 'DISDEX_HEARTBEAT_FILE_INVALID path=%s\n' "$heartbeat" >&2; false; }
+      [[ "$(stat -c '%U:%G:%a' "$heartbeat")" == "root:deploy:640" ]] || { printf 'DISDEX_HEARTBEAT_MODE_INVALID path=%s mode=%s\n' "$heartbeat" "$(stat -c '%U:%G:%a' "$heartbeat")" >&2; false; }
+      runuser -u deploy -- test -r "$heartbeat" || { printf 'DISDEX_HEARTBEAT_NOT_DEPLOY_READABLE path=%s\n' "$heartbeat" >&2; false; }
+    done
+    printf 'HEARTBEATS_DEPLOY_READABLE=TRUE\n'
+  fi
   systemctl restart "$ui_service"
 
   ui_http=0
@@ -293,9 +365,22 @@ if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V1" ]]; then
   trading_after="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
   [[ "$trading_after" == "$expected_trading" && "$trading_after" == "$trading_current" ]] || { printf 'DISDEX_UI_TRADING_CURRENT_CHANGED after=%s\n' "$trading_after" >&2; false; }
 
+  if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V2" ]]; then
+    ui_env="$(systemctl show "$ui_service" --property Environment --value)"
+    for expected_env in \
+      V12_X1_ALL_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json \
+      PENGU_DUAL_LS_V2_RUNNER_STATE_PATH=/var/lib/disdex/pengu-dual-ls-v2/runner-live.json \
+      QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json \
+      V52_ASTER_ONLY_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json; do
+      [[ " $ui_env " == *" $expected_env "* ]] || { printf 'DISDEX_UI_RUNNER_ENV_VERIFY_FAILED env=%s\n' "$expected_env" >&2; false; }
+    done
+  fi
+
   trap - ERR
   printf 'STATUS: UI_SYSTEMD_DEPLOYED_VERIFIED\n'
-  printf 'UI_RELEASE=%s\nUI_HTTP_STATUS=%s\nTRADING_CURRENT_UNCHANGED=TRUE\nTRADING_RESTART_ATTEMPTED=FALSE\n' "$ui_release" "$ui_http"
+  printf 'UI_RELEASE=%s\nUI_HTTP_STATUS=%s\n' "$ui_release" "$ui_http"
+  if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V2" ]]; then printf 'RUNNER_READONLY_WIRING=VERIFIED\nHEARTBEATS_DEPLOY_READABLE=TRUE\n'; fi
+  printf 'TRADING_CURRENT_UNCHANGED=TRUE\nTRADING_RESTART_ATTEMPTED=FALSE\n'
   exit 0
 fi
 
