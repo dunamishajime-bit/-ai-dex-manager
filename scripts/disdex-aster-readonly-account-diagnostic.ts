@@ -1,4 +1,4 @@
-import { AsterV3Client } from "../lib/aster-v3-client";
+import { AsterApiError, AsterV3Client } from "../lib/aster-v3-client";
 
 function numberEnv(name: string, fallback: number) {
     const value = Number(process.env[name]);
@@ -43,7 +43,12 @@ async function main() {
                 avgPrice: row.avgPrice,
             };
         } catch (error) {
-            pendingOrder = { notFoundOrUnavailable: true, message: error instanceof Error ? error.message : String(error) };
+            pendingOrder = {
+                notFoundOrUnavailable: true,
+                message: error instanceof Error ? error.message : String(error),
+                status: error instanceof AsterApiError ? error.status : undefined,
+                code: error instanceof AsterApiError ? error.code : undefined,
+            };
         }
     }
     console.log(JSON.stringify({
