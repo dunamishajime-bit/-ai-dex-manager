@@ -88,7 +88,13 @@ jobs:
           set -Eeuo pipefail
           : "${SSH_PORT:=22}"
           install -d -m 0700 "$HOME/.ssh"
-          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$HOME/.ssh/disdex_probe"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          key = os.environ['SSH_PRIVATE_KEY'].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n')
+          if not key.endswith('\n'): key += '\n'
+          Path(os.path.expanduser('~/.ssh/disdex_probe')).write_text(key, encoding='utf-8', newline='\n')
+          PY
           printf '%s %s\n' "$SSH_HOST" 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJm3mbqSLvxNe2Y4Gc0tXEWP/b0QK8kzwIbZMnPvYxRT' > "$HOME/.ssh/known_hosts"
           chmod 0600 "$HOME/.ssh/disdex_probe" "$HOME/.ssh/known_hosts"
           set +e
