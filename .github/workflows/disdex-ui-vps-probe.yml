@@ -103,3 +103,14 @@ jobs:
           set -e
           echo "SSH_PROBE_RC=$rc"
           printf '%s\n' "$output"
+
+      - name: Read-only systemd UI wiring details
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          systemctl cat ai-dex-manager-ui.service --no-pager
+          systemctl show ai-dex-manager-ui.service -p User -p Group -p Restart -p ExecStart -p WorkingDirectory
+          wd="$(systemctl show ai-dex-manager-ui.service -p WorkingDirectory --value)"
+          namei -l "$wd" || true
+          ls -ld /etc/systemd/system/ai-dex-manager-ui.service.d /home/deploy/disdex-trading/ui-releases "$wd" || true
+          find /etc/systemd/system/ai-dex-manager-ui.service.d -maxdepth 1 -type l -printf '%p -> %l\n' 2>/dev/null || true
