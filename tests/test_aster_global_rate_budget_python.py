@@ -10,9 +10,22 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 import disdex_v13d_v11eq_stock_live_engine as base  # noqa: E402
+import disdex_v96_v52_margin_guard as margin_guard  # noqa: E402
 
 
 class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
+    def test_margin_guard_state_remains_readable_by_deploy_group(self):
+        if os.name == "nt":
+            self.skipTest("POSIX ownership contract")
+        with tempfile.TemporaryDirectory() as directory:
+            guard = object.__new__(margin_guard.MarginGuard)
+            guard.state_root = Path(directory)
+            guard.state_path = guard.state_root / "guard-live.json"
+            guard.state = {}
+            guard.write_state({"stage": "HEALTHY", "ordersAllowed": True})
+            self.assertEqual(guard.state_path.stat().st_mode & 0o777, 0o660)
+            self.assertEqual(guard.state_path.stat().st_gid, guard.state_root.stat().st_gid)
+
     def test_aster_client_reserves_shared_rate_slots(self):
         original_http = base.http_json
         keys = ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")

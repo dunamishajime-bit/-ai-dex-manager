@@ -129,7 +129,7 @@ class MarginGuard:
 
     def write_state(self, payload: dict) -> None:
         self.state_root.mkdir(parents=True, exist_ok=True)
-        base.atomic_write_json(self.state_path, payload)
+        base.atomic_write_shared_json(self.state_path, payload)
         self.state = payload
 
     def activate_shared_kill_switch(self, reason: str, decision: dict) -> bool:
