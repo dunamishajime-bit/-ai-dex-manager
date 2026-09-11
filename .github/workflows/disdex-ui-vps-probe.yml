@@ -59,3 +59,8 @@ jobs:
           /usr/local/sbin/disdex-vps-control --help 2>&1 || true
           echo "VPS_CONTROL_UI_MATCHES"
           grep -nEi 'usage|case|ui|release|deploy|restart|systemctl|build|npm' /usr/local/sbin/disdex-vps-control | head -220 || true
+      - name: Read-only VPS control action block
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sed -n '320,430p' /usr/local/sbin/disdex-vps-control
