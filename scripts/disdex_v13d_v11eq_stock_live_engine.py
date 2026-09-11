@@ -112,6 +112,27 @@ def atomic_write_json(path: Path, payload: dict) -> None:
             os.unlink(temporary)
 
 
+def atomic_write_shared_budget_json(path: Path, payload: dict) -> None:
+    """Atomically publish the cross-user Aster budget without losing its shared group."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=str(path.parent))
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as writer:
+            json.dump(payload, writer, ensure_ascii=False, indent=2, sort_keys=True)
+            writer.write("\n")
+            writer.flush()
+            os.fsync(writer.fileno())
+        directory_gid = path.parent.stat().st_gid
+        if os.stat(temporary).st_gid != directory_gid:
+            os.chown(temporary, -1, directory_gid)
+        os.chmod(temporary, 0o660)
+        os.replace(temporary, path)
+        os.chmod(path, 0o660)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
 def read_json(path: Path, default: Any = None) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -196,7 +217,7 @@ def wait_for_aster_global_rate_budget(weight: int = 1) -> None:
         wait_ms = permit_at - now
         if wait_ms > max_queue_ms:
             raise RuntimeError(f"ASTER_GLOBAL_RATE_BUDGET_SATURATED:{wait_ms}")
-        atomic_write_json(path, {"schema": "disdex-aster-rate-budget/v1", "nextAllowedAt": permit_at + (minimum_ms * weight_units), "updatedAt": now, "pid": os.getpid()})
+        atomic_write_shared_budget_json(path, {"schema": "disdex-aster-rate-budget/v1", "nextAllowedAt": permit_at + (minimum_ms * weight_units), "updatedAt": now, "pid": os.getpid()})
     finally:
         try:
             lock_path.rmdir()
@@ -227,7 +248,7 @@ def defer_aster_global_rate_budget(cooldown_ms: int, status: int) -> None:
         existing = float(current.get("nextAllowedAt") or 0)
         if not math.isfinite(existing) or existing < 0: raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
         now = now_ms(); until = max(math.floor(existing), now + math.floor(float(cooldown_ms)))
-        atomic_write_json(path, {"schema":"disdex-aster-rate-budget/v1","nextAllowedAt":until,"updatedAt":now,"pid":os.getpid(),"cooldownUntil":until,"lastRateLimitStatus":status})
+        atomic_write_shared_budget_json(path, {"schema":"disdex-aster-rate-budget/v1","nextAllowedAt":until,"updatedAt":now,"pid":os.getpid(),"cooldownUntil":until,"lastRateLimitStatus":status})
     finally:
         try: lock_path.rmdir()
         except FileNotFoundError: pass

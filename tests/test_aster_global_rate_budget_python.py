@@ -32,6 +32,9 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
                 second = json.loads(budget.read_text(encoding="utf-8"))
                 self.assertEqual(second["schema"], "disdex-aster-rate-budget/v1")
                 self.assertGreaterEqual(second["nextAllowedAt"] - first["nextAllowedAt"], 20)
+                if os.name != "nt":
+                    self.assertEqual(budget.stat().st_mode & 0o777, 0o660)
+                    self.assertEqual(budget.stat().st_gid, budget.parent.stat().st_gid)
         finally:
             base.http_json = original_http
             for key, value in original_env.items():

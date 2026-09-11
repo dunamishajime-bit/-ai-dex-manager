@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, rm, rmdir, stat, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, rename, rm, rmdir, stat, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const ASTER_GLOBAL_RATE_BUDGET_SCHEMA = "disdex-aster-rate-budget/v1";
@@ -34,8 +34,9 @@ async function readBudget(path: string): Promise<Partial<BudgetState>> {
 async function atomicWriteBudget(path: string, state: BudgetState) {
   const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
   try {
-    await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+    await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o660 });
     await rename(temporary, path);
+    await chmod(path, 0o660);
   } finally {
     await rm(temporary, { force: true }).catch(() => undefined);
   }

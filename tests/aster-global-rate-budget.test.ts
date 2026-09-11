@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import { join, resolve } from "node:path";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { deferAsterGlobalRateBudget, reserveAsterGlobalRateSlot } from "../lib/disdex-aster-global-rate-budget";
 
@@ -26,6 +26,9 @@ test("shared Aster rate budget serializes permits in the Python-compatible JSON 
     const state = JSON.parse(await readFile(path, "utf8"));
     assert.equal(state.schema, "disdex-aster-rate-budget/v1");
     assert.equal(state.nextAllowedAt, 1_040);
+    if (process.platform !== "win32") {
+      assert.equal((await stat(path)).mode & 0o777, 0o660, "all daemon users must retain shared budget write access");
+    }
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

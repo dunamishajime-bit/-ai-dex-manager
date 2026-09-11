@@ -219,6 +219,7 @@ remove_stale_auto_repair_unit_pin_dropins() {
 
 apply_wiring() {
   require_root_for_apply
+  install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
     printf 'V52 legacy crypto state path exists but is not a directory: %s\n' "$V52_LEGACY_CRYPTO_ROOT" >&2
     return 1
