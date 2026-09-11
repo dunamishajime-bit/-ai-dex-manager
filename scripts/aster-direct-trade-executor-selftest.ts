@@ -25,7 +25,8 @@ const exchangeInfo = {
 };
 
 async function accountSnapshotUsesVenueObservationTimeTest() {
-    const venueTime = Date.now();
+    const requestStartedAt = Date.now();
+    const venueTime = requestStartedAt + 250;
     const fetchImpl: typeof fetch = async (input) => {
         const url = String(input);
         if (url.includes("/balance")) {
@@ -42,7 +43,27 @@ async function accountSnapshotUsesVenueObservationTimeTest() {
     });
     const executor = new AsterDirectTradeExecutor(client);
     const snapshot = await executor.getAccountSnapshot();
-    assert.equal(snapshot.updatedAt, venueTime, "account freshness must use venue observation time, not last balance mutation time");
+    assert.ok(snapshot.updatedAt >= requestStartedAt, "account freshness must use the local response observation boundary");
+    assert.ok(snapshot.updatedAt <= Date.now(), "minor venue clock lead must not create a future-dated account snapshot");
+}
+
+async function accountSnapshotRejectsLargeVenueClockSkewTest() {
+    const fetchImpl: typeof fetch = async (input) => {
+        const url = String(input);
+        if (url.includes("/balance")) {
+            return jsonResponse([{ asset: "USDT", balance: "1000", availableBalance: "900", updateTime: Date.now() }]);
+        }
+        if (url.includes("/time")) return jsonResponse({ serverTime: Date.now() + 60_000 });
+        throw new Error(`Unexpected mock request: GET ${url}`);
+    };
+    const client = new AsterV3Client({
+        fetchImpl,
+        baseUrl: "https://mock.aster",
+        userAddress: TEST_USER,
+        privateKey: TEST_PRIVATE_KEY,
+    });
+    const executor = new AsterDirectTradeExecutor(client);
+    await assert.rejects(() => executor.getAccountSnapshot(), /venue clock skew/i);
 }
 
 async function normalOrderTest() {
@@ -224,6 +245,7 @@ async function depositRequirementFailClosedTest() {
 
 async function run() {
     await accountSnapshotUsesVenueObservationTimeTest();
+    await accountSnapshotRejectsLargeVenueClockSkewTest();
     await normalOrderTest();
     await unknownExecutionReconciliationTest();
     await slippageGuardTest();

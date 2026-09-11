@@ -252,12 +252,19 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         // quiet account is not treated as stale while still failing closed if
         // the venue cannot provide a current clock.
         const venueTime = safeNumber((await this.client.getServerTime()).serverTime, 0);
+        const observedAt = Date.now();
         if (venueTime <= 0) throw new Error("Aster venue server time was not returned.");
+        // A small clock lead is normal and must not turn a just-received
+        // snapshot into a future-dated value for downstream fail-closed
+        // checks.  A material skew still blocks the snapshot.
+        if (Math.abs(venueTime - observedAt) > 30_000) {
+            throw new Error(`Aster venue clock skew exceeds 30000ms: ${venueTime - observedAt}`);
+        }
         return {
             availableBalance: safeNumber(row.availableBalance),
             walletBalance: safeNumber(row.balance ?? row.crossWalletBalance),
             asset: this.quoteAsset,
-            updatedAt: venueTime,
+            updatedAt: observedAt,
         };
     }
 

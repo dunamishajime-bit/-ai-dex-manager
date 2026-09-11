@@ -7,6 +7,7 @@ from pathlib import Path
 
 from disdex_strict_portfolio_planner import (
     STRICT_CAPS,
+    load_quality102_live_state,
     plan_v52_stock_capacity,
     quality102_crypto_notional_from_positions,
     validate_gross_snapshot,
@@ -19,13 +20,13 @@ KNOWN_CRYPTO = frozenset({"BTCUSDT"})
 KNOWN_STOCK = frozenset({"AMZNUSDT"})
 
 
-def state_payload(*, symbol: str = "FETUSDT", side: int = 1, quantity: float = 2.0) -> dict:
+def state_payload(*, symbol: str = "FETUSDT", side: int = 1, quantity: float = 2.0, updated_at: float | None = None) -> dict:
     return {
         "version": 1,
         "strategyId": "QUALITY102_CAUSAL_V1",
         "mode": "LIVE",
         "runtimeCommitSha": Q102_SHA,
-        "updatedAt": time.time() * 1000,
+        "updatedAt": updated_at if updated_at is not None else time.time() * 1000,
         "position": {
             "symbol": symbol,
             "side": side,
@@ -68,6 +69,16 @@ def self_test() -> None:
             os.environ["QUALITY102_CAUSAL_V1_STATE_PATH"] = str(path)
             os.environ.pop("DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH", None)
             os.environ["DISDEX_RUNTIME_COMMIT_SHA"] = Q102_SHA
+
+            # The Q102 daemon is hourly. A state observed 60 minutes ago is
+            # valid for ownership, while one beyond the bounded 75-minute
+            # interval remains fail-closed.
+            freshness_now = time.time() * 1000
+            path.write_text(json.dumps(state_payload(updated_at=freshness_now - 60 * 60_000)), encoding="utf-8")
+            assert load_quality102_live_state(path, now_ms=freshness_now) is not None
+            path.write_text(json.dumps(state_payload(updated_at=freshness_now - 76 * 60_000)), encoding="utf-8")
+            expect_error(lambda: load_quality102_live_state(path, now_ms=freshness_now), "QUALITY102_STATE_STALE")
+            path.write_text(json.dumps(state_payload()), encoding="utf-8")
 
             notional = quality102_crypto_notional_from_positions(
                 rows(), known_crypto=KNOWN_CRYPTO, known_stock=KNOWN_STOCK

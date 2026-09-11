@@ -29,7 +29,10 @@ QUALITY102_LIVE_ENABLED = False
 QUALITY102_LIVE_STATUS = "FAIL_CLOSED_SELECTOR_PARITY_UNPROVEN"
 QUALITY102_STRATEGY_ID = "QUALITY102_CAUSAL_V1"
 QUALITY102_STATE_VERSION = 1
-QUALITY102_STATE_MAX_AGE_MS = 15 * 60_000
+# Q102 makes decisions on confirmed hourly bars.  Cross-sleeve ownership must
+# remain fresh for one complete decision interval plus a bounded scheduling
+# allowance; 15 minutes made a healthy hourly state deterministically stale.
+QUALITY102_STATE_MAX_AGE_MS = 75 * 60_000
 _SHA256_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 
 

@@ -123,11 +123,11 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         clientOrderId?: string;
     }): Promise<DirectTradeResult> {
         assertV12StrictLiveConfiguration();
-        const now = Date.now();
         const [account, positions] = await Promise.all([
             this.getAccountSnapshot(),
             this.getPositions(),
         ]);
+        const now = Date.now();
         const maxDataAgeMs = Math.max(1_000, Number(process.env.STRICT_PORTFOLIO_MAX_DATA_AGE_MS || DEFAULT_MAX_DATA_AGE_MS));
         if (!(account.walletBalance > 0) || !Number.isFinite(account.updatedAt) || account.updatedAt <= 0 || account.updatedAt > now || now - account.updatedAt > maxDataAgeMs) {
             throw new Error("STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
