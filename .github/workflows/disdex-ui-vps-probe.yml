@@ -115,3 +115,15 @@ jobs:
           echo "SSH_PROBE_RC=$rc"
           printf '%s\n' "$output"
 
+
+      - name: Read-only full control tail and permissions
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo 'CONTROL_TAIL'
+          sed -n '390,520p' /usr/local/sbin/disdex-vps-control
+          echo 'UI_RELEASE_TARGET'
+          ls -ld /home/deploy/disdex-trading/ui-releases/ui-top2-q102-1p0-7c2ed06c 2>/dev/null || true
+          test -f /home/deploy/disdex-trading/ui-releases/ui-top2-q102-1p0-7c2ed06c/.disdex-release-sha && cat /home/deploy/disdex-trading/ui-releases/ui-top2-q102-1p0-7c2ed06c/.disdex-release-sha || true
+          echo 'PROCESS_OWNERSHIP'
+          ps -o user,group,pid,ppid,cmd -p "$(systemctl show ai-dex-manager-ui.service -p MainPID --value)" || true
