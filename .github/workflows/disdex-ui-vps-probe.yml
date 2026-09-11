@@ -39,3 +39,15 @@ jobs:
           if test -w /etc/systemd/system; then echo "SYSTEMD_WRITABLE=TRUE"; else echo "SYSTEMD_WRITABLE=FALSE"; fi
           if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then echo "SUDO_NONINTERACTIVE=TRUE"; else echo "SUDO_NONINTERACTIVE=FALSE"; fi
           echo "PROBE_STATUS=PASS"
+      - name: Read-only privilege and wrapper inventory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "SUDO_LIST"
+          sudo -n -l 2>&1 || true
+          echo "DISDEX_WRAPPERS"
+          ls -la /usr/local/sbin /usr/local/bin 2>/dev/null | grep -i disdex || true
+          echo "UI_UNITS"
+          systemctl list-unit-files --no-pager 2>/dev/null | grep -Ei 'disdex.*ui|ai-dex-manager-ui' || true
+          echo "UI_DROPINS"
+          systemctl show ai-dex-manager-ui.service -p DropInPaths 2>/dev/null || true
