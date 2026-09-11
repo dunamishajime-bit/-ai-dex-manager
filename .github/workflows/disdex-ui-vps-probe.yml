@@ -1,0 +1,41 @@
+name: DisDex UI VPS Probe
+
+on:
+  push:
+    branches:
+      - ops/ui-vps-probe-20260911
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-ui-vps-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Read-only VPS capability probe
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "PROBE_STATUS=START"
+          echo "USER=$(id -un)"
+          id
+          echo "MEMORY"
+          free -h
+          echo "SWAP"
+          swapon --show || true
+          echo "DISK"
+          df -h /home/deploy/disdex-trading || true
+          echo "UI_SERVICE"
+          systemctl show ai-dex-manager-ui.service -p WorkingDirectory -p MainPID -p ActiveState -p SubState
+          echo "TRADING_RUNTIME"
+          readlink -f /home/deploy/disdex-trading/current || true
+          echo "PERMISSIONS"
+          if test -w /home/deploy/disdex-trading/ui-releases; then echo "UI_RELEASES_WRITABLE=TRUE"; else echo "UI_RELEASES_WRITABLE=FALSE"; fi
+          if test -w /etc/systemd/system; then echo "SYSTEMD_WRITABLE=TRUE"; else echo "SYSTEMD_WRITABLE=FALSE"; fi
+          if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then echo "SUDO_NONINTERACTIVE=TRUE"; else echo "SUDO_NONINTERACTIVE=FALSE"; fi
+          echo "PROBE_STATUS=PASS"
