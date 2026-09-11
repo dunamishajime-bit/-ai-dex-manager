@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download, ExternalLink, RefreshCw } from "lucide-react";
+import { Download, ExternalLink, RefreshCw, CalendarDays } from "lucide-react";
+import Link from "next/link";
 
 import { Card } from "@/components/ui/Card";
+import { displayTradePnlUsd } from "@/lib/trade-pnl";
 
 type TradeHistoryEntry = {
   id: string;
@@ -12,6 +14,7 @@ type TradeHistoryEntry = {
   walletAddress: string;
   chainId: number;
   txHash: string;
+  provider?: string;
   action: "BUY" | "SELL";
   sourceSymbol: string;
   destSymbol: string;
@@ -24,6 +27,14 @@ type TradeHistoryEntry = {
   realizedPnlUsd?: number;
   realizedPnlPct?: number;
   reason: string;
+  openedAt?: string;
+  closedAt?: string;
+  tradeStatus?: "open" | "closed" | "unmatched_exit";
+  positionVerified?: boolean;
+  positionSide?: "BOTH" | "LONG" | "SHORT";
+  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
+  commission?: number;
+  netPnlUsd?: number;
 };
 
 function formatNumber(value?: number, digits = 2) {
@@ -46,10 +57,16 @@ function explorerTxUrl(chainId: number, txHash: string) {
   return `https://bscscan.com/tx/${txHash}`;
 }
 
+function hasExplorerTx(entry: Pick<TradeHistoryEntry, "provider" | "txHash">) {
+  if (entry.provider === "AsterDex") return false;
+  return /^0x[a-fA-F0-9]{32,}$/.test(entry.txHash);
+}
+
 export default function HistoryPage() {
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [historyNotice, setHistoryNotice] = useState<string | null>(null);
 
   const loadEntries = async () => {
     setIsLoading(true);
@@ -59,6 +76,7 @@ export default function HistoryPage() {
       if (!response.ok) throw new Error("履歴の読み込みに失敗しました。");
       const data = await response.json();
       setEntries(Array.isArray(data.entries) ? data.entries : []);
+      setHistoryNotice(typeof data.historyNotice === "string" ? data.historyNotice : null);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "履歴の読み込みに失敗しました。");
     } finally {
@@ -76,9 +94,11 @@ export default function HistoryPage() {
   );
 
   const summary = useMemo(() => {
-    const sells = visibleEntries.filter((entry) => entry.action === "SELL" && typeof entry.realizedPnlUsd === "number");
-    const realizedPnlUsd = sells.reduce((sum, entry) => sum + Number(entry.realizedPnlUsd || 0), 0);
-    const wins = sells.filter((entry) => Number(entry.realizedPnlUsd || 0) > 0).length;
+    const sells = visibleEntries
+      .map((entry) => ({ entry, pnlUsd: displayTradePnlUsd(entry) }))
+      .filter(({ entry, pnlUsd }) => entry.tradeStatus === "closed" && pnlUsd !== undefined);
+    const realizedPnlUsd = sells.reduce((sum, { pnlUsd }) => sum + Number(pnlUsd || 0), 0);
+    const wins = sells.filter(({ pnlUsd }) => Number(pnlUsd || 0) > 0).length;
     const walletAddress = visibleEntries[0]?.walletAddress || "-";
 
     return {
@@ -120,7 +140,7 @@ export default function HistoryPage() {
         entry.destUsdValue,
         entry.entryPriceUsd ?? "",
         entry.exitPriceUsd ?? "",
-        entry.realizedPnlUsd ?? "",
+        displayTradePnlUsd(entry) ?? "",
         entry.realizedPnlPct ?? "",
         entry.txHash,
       ].join(","),
@@ -143,11 +163,18 @@ export default function HistoryPage() {
             トレード履歴
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            約定履歴と確定損益を時系列で確認できます。
+            約定履歴と、ローカル ledger ベースの概算損益を時系列で確認できます。
           </p>
         </div>
 
         <div className="flex gap-2">
+          <Link
+            href="/performance"
+            className="flex items-center gap-2 rounded-lg border border-gold-500/40 bg-gold-500/10 px-4 py-2 text-sm text-gold-300 transition-colors hover:bg-gold-500/20"
+          >
+            <CalendarDays className="h-4 w-4" />
+            日別損益カレンダー
+          </Link>
           <button
             onClick={() => void loadEntries()}
             className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition-colors hover:bg-white/10"
@@ -175,7 +202,7 @@ export default function HistoryPage() {
           <div className="mt-2 text-2xl font-semibold text-white">{summary.totalTrades}</div>
         </Card>
         <Card glow="gold" noHover>
-          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">確定損益</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-gray-500">確定損益（手数料後）</div>
           <div className={`mt-2 text-2xl font-semibold ${summary.realizedPnlUsd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
             {formatUsd(summary.realizedPnlUsd)}
           </div>
@@ -185,6 +212,16 @@ export default function HistoryPage() {
           <div className="mt-2 text-2xl font-semibold text-white">{formatNumber(summary.winRate, 1)}%</div>
         </Card>
       </div>
+
+      <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+        Asterの約定履歴を基準に表示し、約定手数料が取得できる取引はnet PnL（手数料控除後）で統一しています。funding、未実現損益、入出金は含みません。
+      </div>
+
+      {historyNotice ? (
+        <div className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
+          {historyNotice}
+        </div>
+      ) : null}
 
       <Card title="約定一覧" glow="gold">
         {error ? (
@@ -214,6 +251,7 @@ export default function HistoryPage() {
                   <td className="px-3 py-4 font-mono text-xs text-gray-300">
                     {new Date(entry.executedAt).toLocaleString("ja-JP")}
                   </td>
+                  <td className="px-3 py-4 text-xs text-white/70">{entry.tradeStatus === "closed" ? "\u6c7a\u6e08\u6e08\u307f" : entry.tradeStatus === "open" && entry.positionVerified !== false ? "\u5efa\u7389\u7167\u5408\u6e08\u307f" : entry.tradeStatus === "open" ? "\u904e\u53bb\u5c65\u6b74\uff08\u73fe\u4fdd\u6709\u306a\u3057\uff09" : "\u7167\u5408\u4e0d\u4e00\u81f4"}</td>
                   <td className={`px-3 py-4 font-semibold ${entry.action === "BUY" ? "text-emerald-400" : "text-red-400"}`}>
                     {entry.action === "BUY" ? "買い" : "売り"}
                   </td>
@@ -235,14 +273,14 @@ export default function HistoryPage() {
                   <td className="px-3 py-4 font-mono text-xs text-white">{formatUsd(entry.exitPriceUsd, 4)}</td>
                   <td
                     className={`px-3 py-4 font-mono text-xs font-semibold ${
-                      Number(entry.realizedPnlUsd || 0) > 0
+                      Number(displayTradePnlUsd(entry) || 0) > 0
                         ? "text-emerald-400"
-                        : Number(entry.realizedPnlUsd || 0) < 0
+                      : Number(displayTradePnlUsd(entry) || 0) < 0
                           ? "text-red-400"
                           : "text-gray-500"
                     }`}
                   >
-                    {formatUsd(entry.realizedPnlUsd)}
+                    {formatUsd(displayTradePnlUsd(entry))}
                   </td>
                   <td
                     className={`px-3 py-4 font-mono text-xs font-semibold ${
@@ -256,21 +294,27 @@ export default function HistoryPage() {
                     {entry.realizedPnlPct !== undefined ? `${formatNumber(entry.realizedPnlPct, 2)}%` : "-"}
                   </td>
                   <td className="px-3 py-4 font-mono text-xs">
-                    <a
-                      href={explorerTxUrl(entry.chainId, entry.txHash)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-gold-300 hover:text-gold-200"
-                    >
-                      {entry.txHash.slice(0, 8)}...{entry.txHash.slice(-6)}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+                    {hasExplorerTx(entry) ? (
+                      <a
+                        href={explorerTxUrl(entry.chainId, entry.txHash)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-gold-300 hover:text-gold-200"
+                      >
+                        {entry.txHash.slice(0, 8)}...{entry.txHash.slice(-6)}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-white/75">
+                        {entry.provider || "venue"} / {entry.txHash.slice(0, 18)}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
               {!isLoading && visibleEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-3 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-3 py-10 text-center text-sm text-gray-500">
                     表示できるトレード履歴がありません。
                   </td>
                 </tr>

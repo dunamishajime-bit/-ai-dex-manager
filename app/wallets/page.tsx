@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Copy, Loader2, Plus, QrCode, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
@@ -35,6 +35,24 @@ function statusText(status?: string) {
     default:
       return "未設定";
   }
+}
+
+function asterAccountVerified(wallet?: {
+  lastAsterAccountVerifiedAt?: string;
+  lastAsterBalanceUpdatedAt?: string;
+}) {
+  return Boolean(wallet?.lastAsterAccountVerifiedAt || wallet?.lastAsterBalanceUpdatedAt);
+}
+
+function walletDisplayStatus(wallet?: {
+  status?: string;
+  lastAsterAccountVerifiedAt?: string;
+  lastAsterBalanceUpdatedAt?: string;
+}) {
+  if (!wallet) return "未設定";
+  if (wallet.status === "paused") return "停止中";
+  if (asterAccountVerified(wallet)) return "Aster連携済み";
+  return statusText(wallet.status);
 }
 
 function statusTone(status?: string) {
@@ -138,8 +156,11 @@ export default function WalletsPage() {
       .sort((a, b) => Number(b.usdValue || 0) - Number(a.usdValue || 0));
   }, [wallet?.trackedHoldings]);
 
-  const totalHoldingsUsd = Number(wallet?.lastPortfolioUsd || 0);
-  const nativeBalance = wallet?.lastBalanceFormatted ? Number(wallet.lastBalanceFormatted) : 0;
+  const hasAsterSnapshot = asterAccountVerified(wallet || undefined);
+  const totalHoldingsUsd = wallet && hasAsterSnapshot
+    ? Number(wallet.lastAsterAccountBalanceUsd ?? wallet.lastPortfolioUsd ?? 0)
+    : null;
+  const availableBalanceUsd = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
 
   useEffect(() => {
     let mounted = true;
@@ -362,8 +383,8 @@ export default function WalletsPage() {
                       <div className="text-sm font-bold text-white">{wallet.label}</div>
                       <div className="mt-1 text-[11px] text-white/64">{wallet.chainName}</div>
                     </div>
-                    <span className={`rounded-full border border-gold-400/18 px-3 py-1 text-[11px] ${statusTone(wallet.status)}`}>
-                      {statusText(wallet.status)}
+                    <span className={`rounded-full border border-gold-400/18 px-3 py-1 text-[11px] ${hasAsterSnapshot && wallet.status !== "paused" ? "text-profit" : statusTone(wallet.status)}`}>
+                      {walletDisplayStatus(wallet)}
                     </span>
                   </div>
 
@@ -398,8 +419,8 @@ export default function WalletsPage() {
                   ) : null}
 
                   <div className="mt-3 grid gap-2 text-[11px] text-white/72 md:grid-cols-2">
-                    <div>総評価額 {formatUsd(totalHoldingsUsd)}</div>
-                    <div>BNB残高 {wallet.lastBalanceFormatted ? `${wallet.lastBalanceFormatted} BNB` : "-"}</div>
+                    <div>Aster口座評価額 {totalHoldingsUsd === null ? "取得待ち" : formatUsd(totalHoldingsUsd)}</div>
+                    <div>Aster available balance {availableBalanceUsd === null ? "UNAVAILABLE" : `${availableBalanceUsd.toFixed(8)} USD`}</div>
                     <div>バックアップ確認 {wallet.backupConfirmed ? "済み" : "未確認"}</div>
                     <div>入金検知 {formatDate(wallet.depositDetectedAt)}</div>
                     <div>Owner接続 {formatDate(wallet.ownerReconnectedAt)}</div>
@@ -474,26 +495,27 @@ export default function WalletsPage() {
             <div className="grid gap-3 md:grid-cols-2">
               <StatCard
                 title="ウォレット状態"
-                value={wallet ? statusText(wallet.status) : "未設定"}
-                note={wallet?.backupConfirmed ? "バックアップ確認済み" : "バックアップ未確認"}
-                tone={wallet?.status === "running" ? "profit" : wallet?.status === "paused" ? "loss" : "default"}
+                value={walletDisplayStatus(wallet || undefined)}
+                note={hasAsterSnapshot ? `Aster口座確認済み ${formatDate(wallet?.lastAsterAccountVerifiedAt || wallet?.lastAsterBalanceUpdatedAt)}` : wallet?.backupConfirmed ? "バックアップ確認済み" : "Aster口座確認待ち"}
+                tone={hasAsterSnapshot && wallet?.status !== "paused" ? "profit" : wallet?.status === "paused" ? "loss" : "default"}
               />
               <StatCard
                 title="総評価額"
-                value={formatUsd(totalHoldingsUsd)}
-                note={nativeBalance > 0 ? `BNB残高 ${nativeBalance.toFixed(6)}` : "BNB残高はまだありません"}
-                tone={totalHoldingsUsd > 0 ? "profit" : "default"}
+                value={totalHoldingsUsd === null ? "取得待ち" : formatUsd(totalHoldingsUsd)}
+                note={availableBalanceUsd === null ? "Aster account balance unavailable" : `Available ${availableBalanceUsd.toFixed(8)} USD / ${wallet?.lastAsterAccountSource || "AsterDEX"}`}
+                tone={totalHoldingsUsd !== null && totalHoldingsUsd > 0 ? "profit" : "default"}
               />
               <StatCard
-                title="入金検知"
-                value={wallet?.depositDetectedAt ? "確認済み" : "未確認"}
-                note={wallet?.depositDetectedAt ? formatDate(wallet.depositDetectedAt) : "入金後に日時が表示されます"}
-                tone={wallet?.depositDetectedAt ? "profit" : "default"}
+                title="Aster口座接続"
+                value={hasAsterSnapshot ? "確認済み" : "取得待ち"}
+                note={hasAsterSnapshot ? formatDate(wallet?.lastAsterAccountVerifiedAt || wallet?.lastAsterBalanceUpdatedAt) : "Aster口座情報を取得しています"}
+                tone={hasAsterSnapshot ? "profit" : "default"}
               />
               <StatCard
-                title="Owner接続"
-                value={wallet?.ownerReconnectedAt ? "確認済み" : "未確認"}
-                note={wallet?.ownerReconnectedAt ? formatDate(wallet.ownerReconnectedAt) : "必要なときに記録できます"}
+                title="Aster残高更新"
+                value={hasAsterSnapshot ? "最新" : "取得待ち"}
+                note={hasAsterSnapshot ? formatDate(wallet?.lastAsterBalanceUpdatedAt || wallet?.lastAsterAccountVerifiedAt) : "Aster口座情報を取得しています"}
+                tone={hasAsterSnapshot ? "profit" : "default"}
               />
             </div>
 

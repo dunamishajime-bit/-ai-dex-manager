@@ -16,7 +16,8 @@ import {
     type V12StopState,
     type V12TrailingPlan,
 } from "@/lib/v12-resident-stop-lifecycle";
-import { buildV12Signals, protectiveLevels, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
+import { buildV12Signals, computeV12Regime, protectiveLevels, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
+import { buildV12DecisionSnapshot, type V12DecisionSnapshot } from "@/lib/v12-decision-snapshot";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { decideV12ResidualEntry } from "@/lib/v12-top2-residual";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
@@ -33,6 +34,7 @@ export interface V12LiveExecutionDependencies {
     stateStore: FileV12X1AllRunnerStateStore;
     lock: FileAccountOrderLock;
     riskPath: string;
+    decisionSnapshotStore?: { save(snapshot: V12DecisionSnapshot): Promise<void> };
     now?: () => number;
     log?: (message: string, payload?: Record<string, unknown>) => void;
 }
@@ -83,6 +85,20 @@ export class V12LiveExecutionEngine {
 
     private async fail(state: V12X1AllRunnerState, reason: string): Promise<V12LiveTickResult> {
         await this.d.stateStore.tripKillSwitch(state, reason); this.log("v12-fail-closed", { reason }); return { status: "manual-review", reason };
+    }
+
+    private async publishDecisionSnapshot(data: Record<string, V12Bar[]>, index: number, signals: V12Signal[], referenceTs: number) {
+        if (!this.d.decisionSnapshotStore) return;
+        try {
+            await this.d.decisionSnapshotStore.save(buildV12DecisionSnapshot({
+                signals,
+                referenceTs,
+                btcRegime: computeV12Regime(data.BTC || [], index) || undefined,
+                generatedAt: this.now(),
+            }));
+        } catch (error) {
+            this.log("v12-decision-snapshot-write-failed", { error: safeV12ErrorMessage(error), referenceTs });
+        }
     }
 
     private validatePortfolioPositions(positions: DirectPosition[], quality102Ownership?: Quality102CausalV1OwnershipSnapshot) {
@@ -301,6 +317,7 @@ export class V12LiveExecutionEngine {
 
             const actives = activePositionsOf(state);
             const signals = buildV12Signals(data, index);
+            await this.publishDecisionSnapshot(data, index, signals, latestTs);
             if (actives.length) {
                 if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "held", reason: "NO_NEW_CONFIRMED_2H_BAR" };
                 const updated: V12ActivePositionState[] = [];

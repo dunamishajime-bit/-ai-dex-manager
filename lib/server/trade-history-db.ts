@@ -3,12 +3,14 @@ import path from "path";
 
 import type { OperationalWalletHolding } from "@/lib/operational-wallet-types";
 import type { DirectWalletTradeInput, DirectWalletTradeResult } from "@/lib/server/direct-trade-executor";
+import { writeGitTradeHistorySnapshot } from "@/lib/server/trade-history-git-export";
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const USE_REDIS = !!(KV_URL && KV_TOKEN);
 const REDIS_KEY = "disdex:trade-ledger";
 const DB_PATH = path.join(process.cwd(), "data", "trade-ledger.json");
+const GIT_EXPORT_PATH = path.join(process.cwd(), "data", "trade-history-git.json");
 
 export interface TradeHistoryEntry {
   id: string;
@@ -32,6 +34,17 @@ export interface TradeHistoryEntry {
   reason: string;
   openedAt?: string;
   closedAt?: string;
+  tradeId?: string;
+  orderId?: string;
+  positionSide?: "BOTH" | "LONG" | "SHORT";
+  commission?: number;
+  commissionAsset?: string;
+  maker?: boolean;
+  tradeStatus?: "open" | "closed" | "unmatched_exit";
+  /** Whether an open fill is confirmed by the current venue position snapshot. */
+  positionVerified?: boolean;
+  strategyId?: "V12" | "V96" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
+  netPnlUsd?: number;
 }
 
 interface OpenPositionRecord {
@@ -41,6 +54,11 @@ interface OpenPositionRecord {
   costBasisUsd: number;
   openedAt: string;
   lastUpdatedAt: string;
+  entryReason?: string;
+  entryMom80?: number;
+  entryVolumeRatio?: number;
+  partialExitTakenAt?: string;
+  partialExitPeakPriceUsd?: number;
 }
 
 interface TradeLedgerDb {
@@ -55,6 +73,11 @@ export interface TradeLedgerOpenPosition {
   costBasisUsd: number;
   openedAt: string;
   lastUpdatedAt: string;
+  entryReason?: string;
+  entryMom80?: number;
+  entryVolumeRatio?: number;
+  partialExitTakenAt?: string;
+  partialExitPeakPriceUsd?: number;
 }
 
 interface AppendTradeHistoryInput {
@@ -68,6 +91,23 @@ interface AppendTradeHistoryInput {
   beforeHoldings: OperationalWalletHolding[];
   afterHoldings: OperationalWalletHolding[];
   trade: DirectWalletTradeResult;
+  executedAt?: string;
+}
+
+interface AppendVenueTradeHistoryInput {
+  walletId: string;
+  walletAddress: string;
+  chainId: number;
+  provider?: string;
+  txHash: string;
+  action: "BUY" | "SELL";
+  sourceSymbol: string;
+  destSymbol: string;
+  sourceAmount: number;
+  destAmount: number;
+  sourceUsdValue: number;
+  destUsdValue: number;
+  reason: string;
   executedAt?: string;
 }
 
@@ -92,11 +132,18 @@ function round6(value: number) {
   return Number(value.toFixed(6));
 }
 
+function parseNumericReasonTag(reason: string, tag: string) {
+  const match = reason.match(new RegExp(`${tag}=(-?\\d+(?:\\.\\d+)?)`));
+  if (!match) return undefined;
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? value : undefined;
+}
+
 function hasMeaningfulTradeAmounts(entry: Pick<TradeHistoryEntry, "sourceAmount" | "destAmount">) {
   return Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001;
 }
 
-function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
+export function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
   const sorted = [...entries]
     .filter((entry) => entry && entry.walletId && entry.executedAt && entry.sourceSymbol && entry.destSymbol)
     .filter((entry) => hasMeaningfulTradeAmounts(entry))
@@ -149,6 +196,7 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
     const sellKey = `${next.walletId}:${next.sourceSymbol}`;
 
     if (next.action === "BUY" && destAmount > 0) {
+      next.tradeStatus ||= "open";
       const effectiveBuyUsd = next.sourceUsdValue > 0
         ? next.sourceUsdValue
         : (STABLE_SYMBOLS.has(next.sourceSymbol) ? sourceAmount : next.destUsdValue);
@@ -172,6 +220,9 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
             costBasisUsd: round6(effectiveBuyUsd),
             openedAt: next.executedAt,
             lastUpdatedAt: next.executedAt,
+            entryReason: next.reason,
+            entryMom80: parseNumericReasonTag(next.reason, "entryMom80"),
+            entryVolumeRatio: parseNumericReasonTag(next.reason, "entryVolumeRatio"),
           });
           next.openedAt = next.executedAt;
         }
@@ -191,6 +242,7 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
         if (effectiveSellUsd > 0) {
           next.realizedPnlUsd = round6(effectiveSellUsd - costForSold);
           next.realizedPnlPct = costForSold > 0 ? round6((next.realizedPnlUsd / costForSold) * 100) : undefined;
+          next.tradeStatus = "closed";
           if (!next.sourceUsdValue) next.sourceUsdValue = costForSold;
           if (!next.destUsdValue) next.destUsdValue = round6(effectiveSellUsd);
         }
@@ -202,13 +254,19 @@ function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
         if (remainingQty <= 0.0000001 || remainingCost <= 0.0000001) {
           openPositions.delete(sellKey);
         } else {
-          openPositions.set(sellKey, {
+        openPositions.set(sellKey, {
             ...open,
             quantity: remainingQty,
             costBasisUsd: remainingCost,
             lastUpdatedAt: next.executedAt,
+            partialExitTakenAt: next.reason.includes("半分利確") ? next.executedAt : open.partialExitTakenAt,
+            partialExitPeakPriceUsd: next.reason.includes("半分利確")
+              ? (next.exitPriceUsd || open.partialExitPeakPriceUsd)
+              : open.partialExitPeakPriceUsd,
           });
         }
+      } else {
+        next.tradeStatus ||= "unmatched_exit";
       }
     }
 
@@ -265,6 +323,37 @@ function saveToFs(db: TradeLedgerDb) {
   }
 }
 
+function loadBundledTradeHistoryEntries(): TradeHistoryEntry[] {
+  try {
+    if (!fs.existsSync(GIT_EXPORT_PATH)) return [];
+    const parsed = JSON.parse(fs.readFileSync(GIT_EXPORT_PATH, "utf8")) as { entries?: unknown };
+    if (!Array.isArray(parsed.entries)) return [];
+
+    return parsed.entries.map((value, index) => {
+      const entry = value && typeof value === "object" ? value as Partial<TradeHistoryEntry> : {};
+      const walletAddress = typeof entry.walletAddress === "string" ? entry.walletAddress : "Recovered audit ledger";
+      return {
+        ...entry,
+        id: typeof entry.id === "string" && entry.id ? entry.id : `bundled-history-${index}`,
+        walletId: typeof entry.walletId === "string" && entry.walletId ? entry.walletId : `audit:${walletAddress}`,
+        walletAddress,
+        chainId: Number.isFinite(Number(entry.chainId)) ? Number(entry.chainId) : 0,
+        action: entry.action === "SELL" ? "SELL" : "BUY",
+        sourceSymbol: typeof entry.sourceSymbol === "string" ? entry.sourceSymbol : "UNKNOWN",
+        destSymbol: typeof entry.destSymbol === "string" ? entry.destSymbol : "UNKNOWN",
+        sourceAmount: Number(entry.sourceAmount || 0),
+        destAmount: Number(entry.destAmount || 0),
+        sourceUsdValue: Number(entry.sourceUsdValue || 0),
+        destUsdValue: Number(entry.destUsdValue || 0),
+        reason: typeof entry.reason === "string" ? entry.reason : "bundled audit history",
+      } as TradeHistoryEntry;
+    });
+  } catch (error) {
+    console.warn("Failed to load bundled trade history:", error);
+    return [];
+  }
+}
+
 async function loadTradeLedger(): Promise<TradeLedgerDb> {
   if (USE_REDIS) return loadFromRedis();
   return loadFromFs();
@@ -281,13 +370,18 @@ export async function loadOpenPositionForWalletSymbol(
 }
 
 async function saveTradeLedger(db: TradeLedgerDb) {
-  if (USE_REDIS) return saveToRedis(db);
-  saveToFs(db);
+  if (USE_REDIS) {
+    await saveToRedis(db);
+  } else {
+    saveToFs(db);
+  }
+  writeGitTradeHistorySnapshot(db.entries);
 }
 
 export async function loadTradeHistoryEntries(): Promise<TradeHistoryEntry[]> {
   const db = await loadTradeLedger();
-  return normalizeTradeHistoryEntries(db.entries);
+  const normalized = normalizeTradeHistoryEntries(db.entries);
+  return normalized.length ? normalized : normalizeTradeHistoryEntries(loadBundledTradeHistoryEntries());
 }
 
 export async function appendTradeHistory(input: AppendTradeHistoryInput): Promise<TradeHistoryEntry | null> {
@@ -352,6 +446,102 @@ export async function appendTradeHistory(input: AppendTradeHistoryInput): Promis
       costBasisUsd: round6(sourceUsdValue),
       openedAt: now,
       lastUpdatedAt: now,
+      entryReason: input.reason,
+      entryMom80: parseNumericReasonTag(input.reason, "entryMom80"),
+      entryVolumeRatio: parseNumericReasonTag(input.reason, "entryVolumeRatio"),
+    };
+    openedAt = now;
+  }
+
+  if (input.action === "SELL" && sourceAmount > 0) {
+    const open = db.openPositions[sourceKey];
+    if (open && open.quantity > 0 && open.costBasisUsd > 0) {
+      const averageCost = open.costBasisUsd / open.quantity;
+      const costForSold = round6(sourceAmount * averageCost);
+      realizedPnlUsd = round6(destUsdValue - costForSold);
+      realizedPnlPct = costForSold > 0 ? round6((realizedPnlUsd / costForSold) * 100) : undefined;
+      openedAt = open.openedAt;
+      closedAt = now;
+
+      const remainingQty = round6(Math.max(0, open.quantity - sourceAmount));
+      const remainingCost = round6(Math.max(0, open.costBasisUsd - costForSold));
+      if (remainingQty <= 0.0000001 || remainingCost <= 0.0000001) {
+        delete db.openPositions[sourceKey];
+      } else {
+        db.openPositions[sourceKey] = {
+          ...open,
+          quantity: remainingQty,
+          costBasisUsd: remainingCost,
+          lastUpdatedAt: now,
+          partialExitTakenAt: input.reason.includes("半分利確") ? now : open.partialExitTakenAt,
+          partialExitPeakPriceUsd: input.reason.includes("半分利確")
+            ? (exitPriceUsd || open.partialExitPeakPriceUsd)
+            : open.partialExitPeakPriceUsd,
+        };
+      }
+    }
+  }
+
+  const entry: TradeHistoryEntry = {
+    id: `trd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    executedAt: now,
+    walletId: input.walletId,
+    walletAddress: input.walletAddress,
+    chainId: input.chainId,
+    txHash: input.trade.txHash,
+    provider: input.trade.provider,
+    action: input.action,
+    sourceSymbol: input.sourceSymbol,
+    destSymbol: input.destSymbol,
+    sourceAmount: round6(sourceAmount),
+    destAmount: round6(destAmount),
+    sourceUsdValue,
+    destUsdValue,
+    entryPriceUsd,
+    exitPriceUsd,
+    realizedPnlUsd,
+    realizedPnlPct,
+    reason: input.reason,
+    openedAt,
+    closedAt,
+  };
+
+  db.entries.unshift(entry);
+  await saveTradeLedger(db);
+  return entry;
+}
+
+export async function appendVenueTradeHistory(input: AppendVenueTradeHistoryInput): Promise<TradeHistoryEntry | null> {
+  if (!input.txHash || !input.action) return null;
+
+  const db = await loadTradeLedger();
+  const now = input.executedAt || new Date().toISOString();
+  const sourceAmount = round6(Number(input.sourceAmount || 0));
+  const destAmount = round6(Number(input.destAmount || 0));
+  const sourceUsdValue = round6(Number(input.sourceUsdValue || 0));
+  const destUsdValue = round6(Number(input.destUsdValue || 0));
+  if (!hasMeaningfulTradeAmounts({ sourceAmount, destAmount })) return null;
+
+  const entryPriceUsd = input.action === "BUY" && destAmount > 0 ? round6(sourceUsdValue / destAmount) : undefined;
+  const exitPriceUsd = input.action === "SELL" && sourceAmount > 0 ? round6(destUsdValue / sourceAmount) : undefined;
+
+  let realizedPnlUsd: number | undefined;
+  let realizedPnlPct: number | undefined;
+  let openedAt: string | undefined;
+  let closedAt: string | undefined;
+
+  const openKey = `${input.walletId}:${input.destSymbol}`;
+  const sourceKey = `${input.walletId}:${input.sourceSymbol}`;
+
+  if (input.action === "BUY" && destAmount > 0 && sourceUsdValue > 0) {
+    db.openPositions[openKey] = {
+      walletId: input.walletId,
+      symbol: input.destSymbol,
+      quantity: destAmount,
+      costBasisUsd: sourceUsdValue,
+      openedAt: now,
+      lastUpdatedAt: now,
+      entryReason: input.reason,
     };
     openedAt = now;
   }
@@ -387,13 +577,13 @@ export async function appendTradeHistory(input: AppendTradeHistoryInput): Promis
     walletId: input.walletId,
     walletAddress: input.walletAddress,
     chainId: input.chainId,
-    txHash: input.trade.txHash,
-    provider: input.trade.provider,
+    txHash: input.txHash,
+    provider: input.provider,
     action: input.action,
     sourceSymbol: input.sourceSymbol,
     destSymbol: input.destSymbol,
-    sourceAmount: round6(sourceAmount),
-    destAmount: round6(destAmount),
+    sourceAmount,
+    destAmount,
     sourceUsdValue,
     destUsdValue,
     entryPriceUsd,
@@ -408,4 +598,29 @@ export async function appendTradeHistory(input: AppendTradeHistoryInput): Promis
   db.entries.unshift(entry);
   await saveTradeLedger(db);
   return entry;
+}
+
+export async function updateOpenPositionPartialExitPeak(
+  walletId: string,
+  symbol: string,
+  peakPriceUsd: number,
+): Promise<TradeLedgerOpenPosition | null> {
+  if (!Number.isFinite(peakPriceUsd) || peakPriceUsd <= 0) return null;
+
+  const db = await loadTradeLedger();
+  const key = `${walletId}:${symbol}`;
+  const open = db.openPositions[key];
+  if (!open) return null;
+
+  const previousPeak = Number(open.partialExitPeakPriceUsd || 0);
+  if (previousPeak >= peakPriceUsd) return { ...open };
+
+  const updated = {
+    ...open,
+    partialExitPeakPriceUsd: round6(peakPriceUsd),
+    lastUpdatedAt: new Date().toISOString(),
+  };
+  db.openPositions[key] = updated;
+  await saveTradeLedger(db);
+  return { ...updated };
 }

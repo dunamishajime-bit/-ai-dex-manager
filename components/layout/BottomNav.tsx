@@ -1,18 +1,19 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, BarChart3, FileText, Home, Settings, Wallet } from "lucide-react";
+import { BarChart3, CalendarDays, FileText, Home, Settings, Wallet } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { icon: Home, label: "ホーム", href: "/", matchPrefix: false },
-  { icon: BarChart3, label: "ダッシュ", href: "/positions", matchPrefix: false },
-  { icon: Activity, label: "AIラボ", href: "/research-lab", matchPrefix: true },
-  { icon: Wallet, label: "ウォレット", href: "/wallets", matchPrefix: false },
-  { icon: FileText, label: "履歴", href: "/history", matchPrefix: false },
-  { icon: Settings, label: "設定", href: "/settings", matchPrefix: false },
+  { icon: Home, label: "ホーム", href: "/" },
+  { icon: BarChart3, label: "\u30c0\u30c3\u30b7\u30e5", href: "/positions" },
+  { icon: BarChart3, label: "判定状況", href: "/decision-status" },
+  { icon: Wallet, label: "ウォレット", href: "/wallets" },
+  { icon: CalendarDays, label: "損益", href: "/performance" },
+  { icon: FileText, label: "履歴", href: "/history" },
+  { icon: Settings, label: "設定", href: "/settings" },
 ] as const;
 
 export function BottomNav() {
@@ -27,21 +28,21 @@ export function BottomNav() {
   );
 }
 
-function BottomNavItem({ icon: Icon, label, href, matchPrefix }: (typeof NAV_ITEMS)[number]) {
+function BottomNavItem({ icon: Icon, label, href }: (typeof NAV_ITEMS)[number]) {
   const pathname = usePathname();
-  const isActive = matchPrefix ? pathname === href || pathname.startsWith(`${href}/`) : pathname === href;
+  const isActive = pathname === href;
 
   return (
     <Link
       href={href}
       className={cn(
-        "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-0.5 py-2 text-center transition-all duration-200",
+        "relative flex flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-center transition-all duration-200",
         isActive ? "text-[#f0df9c]" : "text-white/45 hover:text-white/72 active:text-[#f0df9c]",
       )}
     >
-      {isActive ? <div className="absolute left-1/2 top-0 h-0.5 w-7 -translate-x-1/2 rounded-full bg-[#d4b45a]" /> : null}
-      <Icon className="h-4 w-4" />
-      <span className="truncate text-[8px] leading-none">{label}</span>
+      {isActive ? <div className="absolute left-1/2 top-0 h-0.5 w-8 -translate-x-1/2 rounded-full bg-[#d4b45a]" /> : null}
+      <Icon className="h-5 w-5" />
+      <span className="text-[9px] leading-none">{label}</span>
     </Link>
   );
 }
