@@ -64,3 +64,11 @@ jobs:
         run: |
           set -Eeuo pipefail
           sed -n '320,430p' /usr/local/sbin/disdex-vps-control
+      - name: Read-only root control state
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for action in ui-state ui-pid ui-cwd trading-state trading-pid trading-cwd trading-current; do
+            echo "===${action}==="
+            sudo -n /usr/local/sbin/disdex-vps-control "$action" 2>&1 || true
+          done
