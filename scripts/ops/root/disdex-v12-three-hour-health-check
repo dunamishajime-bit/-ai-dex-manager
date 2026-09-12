@@ -11,6 +11,12 @@ AUTO_REPAIR=/usr/local/libexec/disdex-v12-kill-switch-auto-repair
 unit_is_active() { [[ "$(systemctl is-active "$1" 2>/dev/null || true)" == active ]]; }
 unit_exists() { systemctl cat "$1" >/dev/null 2>&1; }
 
+read_kill_active() {
+  local file="$1"
+  [[ -f "$file" ]] || { printf false; return 0; }
+  /usr/bin/jq -r 'if .active == true then "true" else "false" end' "$file" 2>/dev/null || printf false
+}
+
 validate_current() {
   CURRENT_RELEASE="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
   [[ "$CURRENT_RELEASE" == /home/deploy/disdex-trading/releases/* && -d "$CURRENT_RELEASE" && ! -L "$CURRENT_RELEASE" ]] || return 1
@@ -90,14 +96,18 @@ main() {
   [[ "${1:-}" == --self-test ]] && { run_self_test; return 0; }
   validate_current || { printf 'V12_3H_INSPECTION_CURRENT_INVALID\n' >&2; exit 2; }
   resolve_units
+  STATE_FILE="${DISDEX_V12_STATE_FILE:-$STATE_FILE_DEFAULT}"
   KILL_FILE="${DISDEX_SHARED_KILL_SWITCH_FILE:-$KILL_FILE_DEFAULT}"
-  kill_active=false
-  [[ -f "$KILL_FILE" ]] && kill_active="$(/usr/bin/jq -r 'if .active == true then "true" else "false" end' "$KILL_FILE" 2>/dev/null || printf false)"
+  kill_active="$(read_kill_active "$KILL_FILE")"
 
   if [[ "$kill_active" == true ]]; then
-    if "$AUTO_REPAIR"; then
+    if DISDEX_SHARED_KILL_SWITCH_FILE="$KILL_FILE" DISDEX_V12_STATE_FILE="$STATE_FILE" "$AUTO_REPAIR"; then
+      kill_active="$(read_kill_active "$KILL_FILE")"
+      if [[ "$kill_active" == true ]]; then
+        printf 'V12_3H_INSPECTION_REPAIR_REMAINS_FAIL_CLOSED action=event_driven_recovery failClosed=true\n' >&2
+        exit 0
+      fi
       printf 'V12_3H_INSPECTION_REPAIR_TRIGGERED action=event_driven_recovery\n'
-      kill_active=false
     else
       printf 'V12_3H_INSPECTION_REPAIR_FAILED action=event_driven_recovery failClosed=true\n' >&2
       exit 0
