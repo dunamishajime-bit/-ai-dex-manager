@@ -19,6 +19,12 @@ export function isAsterUpstreamKillReason(reason: unknown) {
     return v52Upstream && hasAsterCommunicationFailure(value);
 }
 
+export function isRecoverableV52ReferenceKillReason(reason: unknown) {
+    const value = normalized(reason);
+    return value.startsWith("v52 fatal tick error: http 503 http://127.0.0.1:8797/quote?symbol=")
+        && value.includes('"error":"stale_quote"');
+}
+
 export function isRecoverableV12AsterManualReview(reason: unknown) {
     const value = normalized(reason);
     if (!value) return true;

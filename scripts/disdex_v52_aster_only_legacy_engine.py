@@ -787,7 +787,6 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             return
         self.reset_days()
         self.enforce_daily_loss()
-        self.update_history()
         local = prepared["local"]
         if not regular_us_equity_session(local):
             self.log(
@@ -798,6 +797,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 referenceFetch="deferred",
                 newOrdersAllowed=False,
             )
+            return
+        self.update_history()
 
     def tick(self, prepared: dict | None = None) -> None:
         if prepared and prepared.get("preloadError") is not None:
@@ -825,7 +826,6 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if daily_kill:
             self._flatten_kill_once(daily_kill, "DAILY_LOSS")
             return
-        self.update_history()
         local = prepared["local"] if prepared else self.current_local_time()
         if not regular_us_equity_session(local):
             self.log(
@@ -837,6 +837,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 newOrdersAllowed=False,
             )
             return
+        self.update_history()
         sec = base.ny_seconds(local)
         if not self.positions() and not (base.clock("09:59:50") <= sec <= base.clock("15:30:30")):
             return

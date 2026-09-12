@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+STATE_FILE_DEFAULT=/var/lib/disdex/v12-x1-all/runner.json
+KILL_FILE_DEFAULT=/var/lib/disdex/shared/kill-switch.json
+AUTO_REPAIR=/usr/local/libexec/disdex-v12-kill-switch-auto-repair
+
+unit_is_active() { [[ "$(systemctl is-active "$1" 2>/dev/null || true)" == active ]]; }
+unit_exists() { systemctl cat "$1" >/dev/null 2>&1; }
+
+validate_current() {
+  CURRENT_RELEASE="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+  [[ "$CURRENT_RELEASE" == /home/deploy/disdex-trading/releases/* && -d "$CURRENT_RELEASE" && ! -L "$CURRENT_RELEASE" ]] || return 1
+  RELEASE_SHA="$(basename "$CURRENT_RELEASE")"
+  [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]] || return 1
+  [[ -f "$CURRENT_RELEASE/.disdex-release-sha" ]] || return 1
+  [[ "$(tr -d '[:space:]' < "$CURRENT_RELEASE/.disdex-release-sha")" == "$RELEASE_SHA" ]]
+}
+
+resolve_units() {
+  V12_UNIT="disdex-v12-x1-all@$RELEASE_SHA.service"
+  PENGU_UNIT="disdex-pengu-dual-ls-v2@$RELEASE_SHA.service"
+  Q102_UNIT="disdex-quality102-causal-v1@$RELEASE_SHA.service"
+  V52_UNIT="disdex-v52-aster-only@$RELEASE_SHA.service"
+  RISK_UNIT="disdex-shared-crypto-risk@$RELEASE_SHA.service"
+  MARGIN_UNIT="disdex-v12-v52-margin-guard@$RELEASE_SHA.service"
+}
+
+required_units() {
+  printf '%s\n' "$RISK_UNIT" "$MARGIN_UNIT" "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$V52_UNIT"
+}
+
+all_required_active() {
+  local unit
+  while IFS= read -r unit; do
+    unit_exists "$unit" || return 1
+    unit_is_active "$unit" || return 1
+    [[ "$(systemctl show "$unit" --property MainPID --value 2>/dev/null || printf 0)" =~ ^[1-9][0-9]*$ ]] || return 1
+  done < <(required_units)
+}
+
+safe_local_state() {
+  local file="${DISDEX_V12_STATE_FILE:-$STATE_FILE_DEFAULT}"
+  [[ -f "$file" ]] && /usr/bin/jq -e '(.pending == null) and ((.manualReview // "") == "") and ((.killSwitch.active // false) == false)' "$file" >/dev/null 2>&1
+}
+
+legacy_quiesced() {
+  local unit
+  for unit in disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service; do
+    if unit_exists "$unit"; then
+      unit_is_active "$unit" && return 1
+      systemctl is-enabled --quiet "$unit" 2>/dev/null && return 1
+    fi
+  done
+}
+
+reference_health_line() {
+  local body freshness market_open reason
+  body="$(curl -fsS --max-time 5 http://127.0.0.1:8797/health 2>/dev/null || true)"
+  if [[ -z "$body" ]]; then
+    printf 'V52_REFERENCE_DATA_BLOCKED=true reason=REFERENCE_SERVICE_UNAVAILABLE failClosed=true\n'
+    return 0
+  fi
+  market_open="$(/usr/bin/jq -r 'if .marketOpen == true then "true" else "false" end' <<<"$body" 2>/dev/null || printf false)"
+  freshness="$(/usr/bin/jq -r 'if .freshnessReady == true then "true" else "false" end' <<<"$body" 2>/dev/null || printf false)"
+  reason="$(/usr/bin/jq -r '.healthReason // .pythError // "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY"' <<<"$body" 2>/dev/null || printf REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY)"
+  if [[ "$market_open" != true ]]; then
+    printf 'V52_REFERENCE_DATA_DEFERRED=true reason=MARKET_CLOSED failClosed=false\n'
+  elif [[ "$freshness" == true ]]; then
+    printf 'V52_REFERENCE_DATA_READY=true\n'
+  else
+    printf 'V52_REFERENCE_DATA_BLOCKED=true reason=%s failClosed=true\n' "$reason"
+  fi
+}
+
+run_self_test() {
+  RELEASE_SHA=0123456789abcdef0123456789abcdef01234567
+  resolve_units
+  [[ "$PENGU_UNIT" == "disdex-pengu-dual-ls-v2@$RELEASE_SHA.service" ]]
+  [[ "$V52_UNIT" == "disdex-v52-aster-only@$RELEASE_SHA.service" ]]
+  [[ "$Q102_UNIT" == "disdex-quality102-causal-v1@$RELEASE_SHA.service" ]]
+  printf 'V12 three-hour health-check self-test: PASS\n'
+}
+
+main() {
+  [[ "$(id -u)" == 0 ]] || { printf 'V12_3H_INSPECTION_ROOT_REQUIRED\n' >&2; exit 1; }
+  [[ "${1:-}" == --self-test ]] && { run_self_test; return 0; }
+  validate_current || { printf 'V12_3H_INSPECTION_CURRENT_INVALID\n' >&2; exit 2; }
+  resolve_units
+  KILL_FILE="${DISDEX_SHARED_KILL_SWITCH_FILE:-$KILL_FILE_DEFAULT}"
+  kill_active=false
+  [[ -f "$KILL_FILE" ]] && kill_active="$(/usr/bin/jq -r 'if .active == true then "true" else "false" end' "$KILL_FILE" 2>/dev/null || printf false)"
+
+  if [[ "$kill_active" == true ]]; then
+    if "$AUTO_REPAIR"; then
+      printf 'V12_3H_INSPECTION_REPAIR_TRIGGERED action=event_driven_recovery\n'
+      kill_active=false
+    else
+      printf 'V12_3H_INSPECTION_REPAIR_FAILED action=event_driven_recovery failClosed=true\n' >&2
+      exit 0
+    fi
+  fi
+
+  if ! all_required_active; then
+    if [[ "$kill_active" != true ]] && safe_local_state && legacy_quiesced; then
+      printf 'V12_3H_INSPECTION_COMPONENT_RECOVERY=true\n'
+      while IFS= read -r unit; do
+        unit_exists "$unit" || { printf 'V12_3H_INSPECTION_COMPONENT_UNIT_MISSING unit=%s\n' "$unit" >&2; exit 0; }
+        systemctl start "$unit" || { printf 'V12_3H_INSPECTION_COMPONENT_START_FAILED unit=%s failClosed=true\n' "$unit" >&2; exit 0; }
+      done < <(required_units)
+      all_required_active || { printf 'V12_3H_INSPECTION_COMPONENT_NOT_ACTIVE failClosed=true\n' >&2; exit 0; }
+    else
+      printf 'V12_3H_INSPECTION_PROCESS_NOT_HEALTHY failClosed=true\n' >&2
+      exit 0
+    fi
+  fi
+
+  printf 'V12_3H_INSPECTION_OK sha=%s all_logic_processes=healthy ordersSent=0\n' "$RELEASE_SHA"
+  reference_health_line
+  exit 0
+}
+
+main "$@"

@@ -7,7 +7,7 @@ import { dirname, resolve } from "node:path";
 
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { runAsterReadOnlyRecoveryGate } from "../lib/aster-readonly-recovery-gate";
-import { isAsterUpstreamKillReason, isRecoverableV12AsterManualReview } from "../lib/aster-upstream-recovery-policy";
+import { isAsterUpstreamKillReason, isRecoverableV12AsterManualReview, isRecoverableV52ReferenceKillReason } from "../lib/aster-upstream-recovery-policy";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
@@ -86,6 +86,14 @@ async function atomicWrite(path: string, payload: unknown) {
     await rename(temporary, path);
 }
 
+async function assertReferenceRecoverySafe(reason: unknown) {
+    if (!isRecoverableV52ReferenceKillReason(reason)) return;
+    const response = await fetch("http://127.0.0.1:8797/health", { signal: AbortSignal.timeout(5_000) });
+    if (!response.ok) throw new Error(`ASTER_UPSTREAM_RECOVERY_REFERENCE_HEALTH_HTTP_${response.status}`);
+    const payload = await response.json() as { marketOpen?: unknown };
+    if (payload.marketOpen !== false) throw new Error("ASTER_UPSTREAM_RECOVERY_REFERENCE_RECOVERY_MARKET_OPEN");
+}
+
 async function main() {
     const verifyOnly = process.argv.includes("--verify-only");
     const apply = process.argv.includes("--apply");
@@ -107,7 +115,9 @@ async function main() {
     const stateStore = new FileV12X1AllRunnerStateStore(statePath, "LIVE");
     const sharedKill = await readSharedKillSwitch();
     if (!sharedKill.active || !sharedKill.sourcePath) throw new Error("ASTER_UPSTREAM_RECOVERY_SHARED_KILL_SWITCH_NOT_ACTIVE");
-    if (!isAsterUpstreamKillReason(sharedKill.reason)) throw new Error(`ASTER_UPSTREAM_RECOVERY_KILL_REASON_NOT_ALLOWLISTED:${sharedKill.reason || "UNSPECIFIED"}`);
+    const referenceRecovery = isRecoverableV52ReferenceKillReason(sharedKill.reason);
+    if (!isAsterUpstreamKillReason(sharedKill.reason) && !referenceRecovery) throw new Error(`ASTER_UPSTREAM_RECOVERY_KILL_REASON_NOT_ALLOWLISTED:${sharedKill.reason || "UNSPECIFIED"}`);
+    await assertReferenceRecoverySafe(sharedKill.reason);
 
     const state = await stateStore.load();
     if (state.active || state.pending) throw new Error("ASTER_UPSTREAM_RECOVERY_V12_NOT_FLAT_IN_LOCAL_STATE");
@@ -148,6 +158,7 @@ async function main() {
             roundSpacingMs: numberEnv("DISDEX_ASTER_RECOVERY_ROUND_SPACING_MS", 5_000),
             requireFlat: true,
         });
+        await assertReferenceRecoverySafe(sharedKill.reason);
         assertNoConflictingReleaseUnits(candidateSha);
     assertLegacyLiveSupervisorInactive();
         const afterStateBytes = await readFile(statePath);

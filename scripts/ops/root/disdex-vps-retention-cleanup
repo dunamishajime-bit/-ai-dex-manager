@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-UI_RELEASE_RE = re.compile(r"^ui-runtime-data-([0-9a-f]{40})$")
 RELEASE_KEEP_NONCURRENT = 2
 UI_RELEASE_KEEP_NONCURRENT = 2
 RELEASE_MIN_AGE_SECONDS = 24 * 60 * 60
@@ -177,8 +176,16 @@ def current_release(paths: CleanupPaths) -> Optional[Path]:
 
 
 def ui_release_sha(path: Path) -> Optional[str]:
-    match = UI_RELEASE_RE.fullmatch(path.name)
-    return match.group(1) if match else None
+    if not path.name.startswith("ui-"):
+        return None
+    marker = path / ".disdex-ui-release-sha"
+    if marker.is_symlink() or not marker.is_file():
+        return None
+    try:
+        sha = marker.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    return sha if SHA_RE.fullmatch(sha) else None
 
 
 def exact_ui_release_dirs(paths: CleanupPaths) -> list[Path]:
@@ -200,8 +207,40 @@ def current_ui_release(paths: CleanupPaths) -> Optional[Path]:
         return None
     target = Path(configured).resolve(strict=False)
     if not is_within(target, paths.ui_releases_root) or not ui_release_sha(target):
-        raise RuntimeError("UI service WorkingDirectory is not an immutable ui-runtime-data-<40sha> release")
+        raise RuntimeError("UI service WorkingDirectory is not a marker-backed immutable UI release")
     return target
+
+
+def release_dependency_targets(paths: CleanupPaths, release: Path) -> set[Path]:
+    targets: set[Path] = set()
+    for name in (".venv2", "node_modules"):
+        dependency = release / name
+        if not dependency.is_symlink():
+            continue
+        try:
+            resolved = dependency.resolve(strict=True)
+        except FileNotFoundError as error:
+            raise RuntimeError(f"protected release dependency is dangling: {dependency}") from error
+        target_root = resolved.parent
+        if target_root.parent.resolve(strict=False) != paths.releases_root.resolve(strict=False):
+            raise RuntimeError(f"protected release dependency escapes release root: {dependency} -> {resolved}")
+        if not SHA_RE.fullmatch(target_root.name) or target_root.is_symlink() or not target_root.is_dir():
+            raise RuntimeError(f"protected release dependency target is not an exact release: {dependency} -> {resolved}")
+        marker = target_root / ".disdex-release-sha"
+        if marker.is_symlink() or not marker.is_file() or marker.read_text(encoding="utf-8").strip() != target_root.name:
+            raise RuntimeError(f"protected release dependency marker is invalid: {dependency} -> {resolved}")
+        targets.add(target_root)
+    return targets
+
+
+def protect_release_dependencies(paths: CleanupPaths, protected: set[Path]) -> None:
+    pending = list(protected)
+    while pending:
+        release = pending.pop()
+        for target in release_dependency_targets(paths, release):
+            if target not in protected:
+                protected.add(target)
+                pending.append(target)
 
 
 def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
@@ -217,6 +256,7 @@ def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> 
         if noncurrent_kept < RELEASE_KEEP_NONCURRENT:
             protected.add(release)
             noncurrent_kept += 1
+    protect_release_dependencies(paths, protected)
     for release in sorted(protected):
         report.protected_paths.append(str(release))
     for release in releases:
@@ -482,6 +522,7 @@ def self_test() -> None:
             sha = f"{index + 11:040x}"
             release = paths.ui_releases_root / f"ui-runtime-data-{sha}"
             release.mkdir()
+            (release / ".disdex-ui-release-sha").write_text(sha + "\n", encoding="utf-8")
             (release / "payload.bin").write_bytes(b"u" * 100)
             set_old(release, index + 2)
             ui_releases.append(release)

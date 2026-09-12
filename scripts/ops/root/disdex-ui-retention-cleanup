@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import fcntl
+import json
+import re
+import shutil
+import subprocess
+import time
+from pathlib import Path
+
+ROOT = Path("/home/deploy/disdex-trading/ui-releases")
+SERVICE = "ai-dex-manager-ui.service"
+LOCK = Path("/home/deploy/disdex-ops/ui-retention.lock")
+SHA = re.compile(r"^[0-9a-f]{40}$")
+KEEP_NONCURRENT = 2
+MIN_AGE_SECONDS = 24 * 60 * 60
+PRESSURE_PERCENT = 85.0
+
+
+def release_sha(path: Path) -> str | None:
+    if path.is_symlink() or not path.is_dir() or not path.name.startswith("ui-"):
+        return None
+    marker = path / ".disdex-ui-release-sha"
+    if marker.is_symlink() or not marker.is_file():
+        return None
+    value = marker.read_text(encoding="utf-8").strip()
+    return value if SHA.fullmatch(value) else None
+
+def service_working_directory() -> Path:
+    value = subprocess.check_output(
+        ["systemctl", "show", SERVICE, "--property=WorkingDirectory", "--value"],
+        text=True,
+        timeout=10,
+    ).strip()
+    path = Path(value).resolve(strict=True)
+    if path.parent != ROOT.resolve() or not release_sha(path):
+        raise RuntimeError("UI service WorkingDirectory is not a marker-backed immutable UI release")
+    return path
+
+
+def releases() -> list[Path]:
+    if not ROOT.is_dir():
+        raise RuntimeError("UI release root is missing")
+    rows = [path for path in ROOT.iterdir() if release_sha(path)]
+    return sorted(rows, key=lambda item: item.stat().st_mtime, reverse=True)
+
+
+def path_size(path: Path) -> int:
+    return sum(
+        file.stat().st_size
+        for file in path.rglob("*")
+        if file.is_file() and not file.is_symlink()
+    )
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--dry-run", action="store_true")
+    mode.add_argument("--apply", action="store_true")
+    args = parser.parse_args()
+
+    LOCK.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    with LOCK.open("a+", encoding="utf-8") as lock:
+        try:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(json.dumps({"status": "DISDEX_UI_RETENTION_SKIPPED", "reason": "lock_busy"}))
+            return 0
+
+        current = service_working_directory()
+        rows = releases()
+        if current not in rows:
+            raise RuntimeError("current UI release failed immutable marker validation")
+        protected = {current}
+        for release in rows:
+            if release != current and len(protected) < KEEP_NONCURRENT + 1:
+                protected.add(release)
+
+        usage = shutil.disk_usage(ROOT)
+        used_percent = 100.0 * usage.used / usage.total
+        under_pressure = used_percent >= PRESSURE_PERCENT
+        now = time.time()
+        candidates: list[Path] = []
+        reclaimed = 0
+        for release in rows:
+            if release in protected:
+                continue
+            if not under_pressure and now - release.stat().st_mtime < MIN_AGE_SECONDS:
+                continue
+            candidates.append(release)
+            reclaimed += path_size(release)
+            if args.apply:
+                shutil.rmtree(release)
+
+        payload = {
+            "status": "DISDEX_UI_RETENTION_PASS",
+            "dryRun": not args.apply,
+            "filesystemUsedPct": round(used_percent, 2),
+            "underPressure": under_pressure,
+            "currentRelease": str(current),
+            "protectedReleases": [str(path) for path in sorted(protected)],
+            "deletedReleases": [str(path) for path in candidates],
+            "bytesReclaimed": reclaimed,
+            "tradingReleaseDeleted": False,
+            "runtimeStateDeleted": False,
+            "approvalDeleted": False,
+            "killSwitchDeleted": False,
+            "ordersSent": False,
+            "cancelSent": False,
+            "positionChangesSent": False,
+        }
+        print(json.dumps(payload, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as error:
+        print(f"DISDEX_UI_RETENTION_FAIL_CLOSED:{error}", file=__import__("sys").stderr)
+        raise SystemExit(1)

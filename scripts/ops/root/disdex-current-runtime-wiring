@@ -83,6 +83,9 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-three-hour-health-check"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-vps-retention-cleanup"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-ui-retention-cleanup"
   )
   for required_file in "${required_files[@]}"; do
     [[ -f "$required_file" && ! -L "$required_file" ]] || {
@@ -177,7 +180,7 @@ show_plan() {
 
 check_units() {
   local unit state load_state
-  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$V52_UNIT" "$MARGIN_UNIT"; do
+  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT"; do
     load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
     state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     printf 'unit=%s loadState=%s activeState=%s\n' "$unit" "${load_state:-unknown}" "${state:-unknown}"
@@ -216,6 +219,26 @@ remove_stale_auto_repair_unit_pin_dropins() {
       rm -f -- "$dropin"
     fi
   done < <(find "$AUTO_REPAIR_DROPIN_DIR" -maxdepth 1 -type f -print0)
+}
+
+ensure_safety_daemon_active() {
+  local unit="$1" load_state active_state
+  load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
+  [[ "$load_state" == "loaded" ]] || {
+    printf 'required safety daemon is not loaded: %s\n' "$unit" >&2
+    return 1
+  }
+  active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+  if [[ "$active_state" != "active" ]]; then
+    systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+    systemctl start "$unit"
+    active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+  fi
+  [[ "$active_state" == "active" ]] || {
+    printf 'required safety daemon failed to become active: %s state=%s\n' "$unit" "$active_state" >&2
+    return 1
+  }
+  printf 'DISDEX_SAFETY_DAEMON_ACTIVE unit=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
 }
 
 apply_wiring() {
@@ -354,8 +377,11 @@ ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-relea
 ExecStart=
 ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
 
-  install -d -o root -g root -m 0755 /usr/local/libexec
+  install -d -o root -g root -m 0755 /usr/local/libexec /usr/local/sbin
   install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-three-hour-health-check" /usr/local/libexec/disdex-v12-three-hour-health-check
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-vps-retention-cleanup" /usr/local/sbin/disdex-vps-retention-cleanup
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-ui-retention-cleanup" /usr/local/sbin/disdex-ui-retention-cleanup
   write_atomic "${AUTO_REPAIR_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
 Environment=DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
@@ -444,6 +470,10 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
   systemctl daemon-reload
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
+  systemctl reset-failed disdex-runner-watchdog.service || true
+  systemctl reset-failed disdex-v12-three-hour-health-check.service || true
+  systemctl reset-failed disdex-ui-retention.service || true
+  ensure_safety_daemon_active "$SHARED_RISK_UNIT"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 
@@ -471,7 +501,10 @@ self_test() {
     lib/disdex-aster-global-rate-budget.ts \
     scripts/disdex-aster-readonly-recovery-gate.ts \
     scripts/disdex-aster-upstream-live-recovery.ts \
-    scripts/ops/root/disdex-v12-kill-switch-auto-repair; do
+    scripts/ops/root/disdex-v12-kill-switch-auto-repair \
+    scripts/ops/root/disdex-v12-three-hour-health-check \
+    scripts/ops/root/disdex-vps-retention-cleanup \
+    scripts/ops/root/disdex-ui-retention-cleanup; do
     : > "$SELF_TEST_FIXTURE/$required_file"
   done
   printf '#!/bin/sh\n' > "$SELF_TEST_FIXTURE/node_modules/.bin/tsx"
