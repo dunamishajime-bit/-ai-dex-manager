@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
@@ -130,7 +131,9 @@ async function main() {
   console.log(JSON.stringify({ status: "V12_RUNTIME_LINEAGE_RECOVERY_PASS", sha, statePath, backupPath, positions: positions.length, openOrders: openOrders.length, ordersSent: 0, cancelSent: 0, positionChangesSent: 0 }));
 }
 
-main().catch((error) => {
-  console.error(JSON.stringify({ status: "V12_RUNTIME_LINEAGE_RECOVERY_FAIL_CLOSED", message: error instanceof Error ? error.message : String(error), ordersSent: 0, cancelSent: 0, positionChangesSent: 0 }));
-  process.exitCode = 1;
-});
+if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+  main().catch((error) => {
+    console.error(JSON.stringify({ status: "V12_RUNTIME_LINEAGE_RECOVERY_FAIL_CLOSED", message: error instanceof Error ? error.message : String(error), ordersSent: 0, cancelSent: 0, positionChangesSent: 0 }));
+    process.exitCode = 1;
+  });
+}
