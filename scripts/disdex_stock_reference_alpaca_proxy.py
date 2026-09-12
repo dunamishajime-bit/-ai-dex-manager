@@ -15,6 +15,8 @@ from urllib.parse import parse_qs, urlparse
 
 import websocket
 
+from disdex_us_equity_calendar import regular_us_equity_session
+
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
 UTC = dt.timezone.utc
 
@@ -121,6 +123,7 @@ class QuoteStore:
                 "connected": self._connected,
                 "lastError": self._last_error,
                 "lastMessageAt": self._last_message_ms,
+                "marketOpen": regular_us_equity_session(),
                 "symbols": rows,
             }
 
