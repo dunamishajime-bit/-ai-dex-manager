@@ -15,7 +15,10 @@ from urllib.parse import parse_qs, urlparse
 
 import websocket
 
-from disdex_us_equity_calendar import regular_us_equity_session
+try:
+    from disdex_us_equity_calendar import regular_us_equity_session
+except ModuleNotFoundError:  # package import in tests/tools
+    from scripts.disdex_us_equity_calendar import regular_us_equity_session
 
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
 UTC = dt.timezone.utc
