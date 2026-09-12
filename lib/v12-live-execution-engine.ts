@@ -16,7 +16,7 @@ import {
     type V12StopState,
     type V12TrailingPlan,
 } from "@/lib/v12-resident-stop-lifecycle";
-import { buildV12Signals, protectiveLevels, sizeV12Position, type V12Bar, type V12Signal } from "@/lib/v12-x1-all";
+import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, type V12Bar, type V12DecisionObservation, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { decideV12ResidualEntry } from "@/lib/v12-top2-residual";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
@@ -33,6 +33,7 @@ export interface V12LiveExecutionDependencies {
     stateStore: FileV12X1AllRunnerStateStore;
     lock: FileAccountOrderLock;
     riskPath: string;
+    decisionObserver?: (snapshot: V12DecisionObservation) => Promise<void> | void;
     now?: () => number;
     log?: (message: string, payload?: Record<string, unknown>) => void;
 }
@@ -301,6 +302,14 @@ export class V12LiveExecutionEngine {
 
             const actives = activePositionsOf(state);
             const signals = buildV12Signals(data, index);
+            if (this.d.decisionObserver) {
+                try {
+                    const observation = buildV12DecisionObservation(data, index, this.now());
+                    if (observation) await this.d.decisionObserver(observation);
+                } catch (error) {
+                    this.log("v12-decision-observation-write-failed", { reason: safeV12ErrorMessage(error), referenceTs: latestTs });
+                }
+            }
             if (actives.length) {
                 if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "held", reason: "NO_NEW_CONFIRMED_2H_BAR" };
                 const updated: V12ActivePositionState[] = [];

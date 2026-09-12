@@ -5,6 +5,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provider";
+import { FileV12DecisionObservationStore } from "../lib/v12-decision-observation";
 import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
 import { assertV12StrictLiveConfiguration, V12StrictAsterLiveAdapter } from "../lib/v12-strict-live-adapter";
@@ -63,7 +64,12 @@ export async function buildV12LiveRuntime() {
         hourlyLimit: numberEnv("V12_X1_ALL_HOURLY_LIMIT", 500),
         requestSpacingMs: numberEnv("V12_X1_ALL_REQUEST_SPACING_MS", 100),
     });
-    const engine = new V12LiveExecutionEngine({ adapter, marketData, stateStore, lock, riskPath: runtime.riskPath });
+    const decisionSnapshotPath = String(process.env.V12_DECISION_SNAPSHOT_PATH || "/var/lib/disdex/v12-x1-all/decision-snapshot.json").trim();
+    const decisionStore = new FileV12DecisionObservationStore(decisionSnapshotPath);
+    const engine = new V12LiveExecutionEngine({
+        adapter, marketData, stateStore, lock, riskPath: runtime.riskPath,
+        decisionObserver: (snapshot) => decisionStore.save(snapshot),
+    });
     return { runtime, status: "live" as const, engine, strict, releaseSha };
 }
 

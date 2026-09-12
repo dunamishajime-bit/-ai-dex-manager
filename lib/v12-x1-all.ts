@@ -34,6 +34,33 @@ export interface V12Signal extends V12Candidate {
     regime: V12Regime;
 }
 
+export interface V12ObservedCandidate extends V12Candidate {
+    rank: number;
+    signalEligible: boolean;
+    signalReason: string;
+}
+
+export interface V12DecisionObservation {
+    schema: "v12-decision-observation/v1";
+    strategyId: "V12_X1.00_ALL";
+    observedAt: string;
+    selectedAt: string;
+    referenceTs: number;
+    entryTs: number;
+    regime: V12Regime;
+    btcRegime: V12Regime;
+    reason: "SIGNAL_AVAILABLE" | "NO_COMPLETED_BAR_SIGNAL";
+    symbol?: string;
+    side?: V12Side;
+    rank?: number;
+    score?: number;
+    momentum?: number;
+    volumeRatio?: number;
+    volatility?: number;
+    atr?: number;
+    candidates: V12ObservedCandidate[];
+}
+
 export interface V12PositionSizing {
     requestedNotional: number;
     requestedGross: number;
@@ -176,7 +203,7 @@ export function evaluateV12EntryQuality(input: { regime: V12Regime; strongRegime
         || (alignedMomentum >= V12_X1_ALL.relaxedRegimeMinimumMomentumPct && input.atrRatio >= V12_X1_ALL.relaxedRegimeMinimumAtrRatio);
 }
 
-function candidateFor(symbol: string, bars: V12Bar[], index: number, regimeState: V12RegimeState): V12Candidate | null {
+function candidateMetricsFor(symbol: string, bars: V12Bar[], index: number): { candidate: V12Candidate; atrRatio: number } | null {
     const current = bars[index];
     const base = bars[index - V12_X1_ALL.momentumBars];
     if (!current || !base || !(current.close > 0 && base.close > 0) || index < V12_X1_ALL.atrBars) return null;
@@ -188,17 +215,84 @@ function candidateFor(symbol: string, bars: V12Bar[], index: number, regimeState
     const volumeMean = volumeWindow.length ? volumeWindow.reduce((a, b) => a + b, 0) / volumeWindow.length : NaN;
     const volumeRatio = volumeMean > 0 ? current.volume / volumeMean : NaN;
     if (![momentum, volatility, currentAtr, volumeRatio].every(Number.isFinite)) return null;
-    if (volumeRatio < V12_X1_ALL.minimumVolumeRatio || Math.abs(momentum) < V12_X1_ALL.minimumEdgeToCostRatio * (V12_X1_ALL.normalRoundTripCostBps / 10_000)) return null;
     const scale = Math.max(0.0001, volatility * Math.sqrt(V12_X1_ALL.momentumBars));
     const raw = momentum / scale;
     const score = raw / (1 + V12_X1_ALL.volatilityPenalty * volatility * 100);
     const side: V12Side = momentum >= 0 ? "LONG" : "SHORT";
     const sideScore = side === "LONG" ? score : -score;
-    if (side === "LONG" && momentum < V12_X1_ALL.minimumMomentumPct) return null;
-    if (side === "SHORT" && momentum > -V12_X1_ALL.minimumMomentumPct) return null;
-    const atrRatio = currentAtr / current.close;
-    if (!evaluateV12EntryQuality({ regime: regimeState.regime, strongRegime: regimeState.strongRegime, side, momentum, atrRatio, score: sideScore })) return null;
-    return { symbol, side, momentum, volatility, atr: currentAtr, volumeRatio, score: sideScore };
+    return {
+        candidate: { symbol, side, momentum, volatility, atr: currentAtr, volumeRatio, score: sideScore },
+        atrRatio: currentAtr / current.close,
+    };
+}
+
+function candidateEligibility(candidate: V12Candidate, atrRatio: number, regimeState: V12RegimeState) {
+    const edgeThreshold = V12_X1_ALL.minimumEdgeToCostRatio * (V12_X1_ALL.normalRoundTripCostBps / 10_000);
+    if (candidate.volumeRatio < V12_X1_ALL.minimumVolumeRatio) return { eligible: false as const, reason: "VOLUME_RATIO_BELOW_MINIMUM" };
+    if (Math.abs(candidate.momentum) < edgeThreshold) return { eligible: false as const, reason: "EDGE_TO_COST_BELOW_MINIMUM" };
+    if (candidate.side === "LONG" && candidate.momentum < V12_X1_ALL.minimumMomentumPct) return { eligible: false as const, reason: "LONG_MOMENTUM_BELOW_MINIMUM" };
+    if (candidate.side === "SHORT" && candidate.momentum > -V12_X1_ALL.minimumMomentumPct) return { eligible: false as const, reason: "SHORT_MOMENTUM_BELOW_MINIMUM" };
+    if (!evaluateV12EntryQuality({ regime: regimeState.regime, strongRegime: regimeState.strongRegime, side: candidate.side, momentum: candidate.momentum, atrRatio, score: candidate.score })) {
+        return { eligible: false as const, reason: "BTC_REGIME_OR_ENTRY_QUALITY_BLOCKED" };
+    }
+    return { eligible: true as const, reason: "SIGNAL_ELIGIBLE" };
+}
+
+function candidateFor(symbol: string, bars: V12Bar[], index: number, regimeState: V12RegimeState): V12Candidate | null {
+    const metrics = candidateMetricsFor(symbol, bars, index);
+    if (!metrics) return null;
+    return candidateEligibility(metrics.candidate, metrics.atrRatio, regimeState).eligible ? metrics.candidate : null;
+}
+
+export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, index: number, observedAt: number = Date.now()): V12DecisionObservation | null {
+    const btc = universe.BTC;
+    if (!btc?.[index]) return null;
+    const regimeState = computeV12RegimeState(btc, index);
+    if (!regimeState) return null;
+    const ranked = V12_X1_ALL.universe
+        .map((symbol) => {
+            const metrics = candidateMetricsFor(symbol, universe[symbol] || [], index);
+            if (!metrics) return null;
+            return { ...metrics.candidate, ...candidateEligibility(metrics.candidate, metrics.atrRatio, regimeState) };
+        })
+        .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate))
+        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol))
+        .map((candidate, rankIndex) => ({
+            symbol: candidate.symbol,
+            side: candidate.side,
+            momentum: candidate.momentum,
+            volatility: candidate.volatility,
+            atr: candidate.atr,
+            volumeRatio: candidate.volumeRatio,
+            score: candidate.score,
+            rank: rankIndex + 1,
+            signalEligible: candidate.eligible,
+            signalReason: candidate.reason,
+        }));
+    const selected = ranked.find((candidate) => candidate.signalEligible);
+    const selectedAt = new Date(observedAt).toISOString();
+    const referenceTs = btc[index].endTs;
+    const entryTs = btc[index + 1]?.ts || referenceTs;
+    return {
+        schema: "v12-decision-observation/v1",
+        strategyId: "V12_X1.00_ALL",
+        observedAt: selectedAt,
+        selectedAt,
+        referenceTs,
+        entryTs,
+        regime: regimeState.regime,
+        btcRegime: regimeState.regime,
+        reason: selected ? "SIGNAL_AVAILABLE" : "NO_COMPLETED_BAR_SIGNAL",
+        symbol: selected?.symbol,
+        side: selected?.side,
+        rank: selected?.rank,
+        score: selected?.score,
+        momentum: selected?.momentum,
+        volumeRatio: selected?.volumeRatio,
+        volatility: selected?.volatility,
+        atr: selected?.atr,
+        candidates: ranked,
+    };
 }
 
 export function buildV12Signal(universe: Record<string, V12Bar[]>, index: number): V12Signal | null {

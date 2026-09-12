@@ -39,6 +39,15 @@ function data(): Record<string, V12Bar[]> {
     return result;
 }
 
+function flatData(): Record<string, V12Bar[]> {
+    const start = NOW - 140 * BAR_MS;
+    return Object.fromEntries(V12_X1_ALL.universe.map((symbol) => [symbol, Array.from({ length: 120 }, (_, index) => ({
+        ts: start + index * BAR_MS, endTs: start + (index + 1) * BAR_MS,
+        open: 100, high: 101, low: 99, close: 100, volume: 1000,
+        sourceCount: 2 as const, closed: true,
+    }))]));
+}
+
 function position(symbol: string, quantity: number, entryPrice = 100): DirectPosition {
     return {
         symbol,
@@ -324,6 +333,25 @@ async function main() {
         assert.equal(unknownResult.status, "manual-review");
         assert.equal(unknown.adapter.entryCalls, 0);
         assert.match((await unknown.stateStore.load()).manualReview || "", /V12_PENDING_ENTRY_UNKNOWN/);
+
+        // Read-only observability must update for a completed bar even when no trade Signal exists.
+        const observationStore = new FileV12X1AllRunnerStateStore(join(root, "observation-state.json"), "LIVE");
+        const observationLock = new FileAccountOrderLock(join(root, "observation-account.lock"), 120_000);
+        const observationRisk = join(root, "observation-risk.json");
+        await risk(observationRisk);
+        const observationAdapter = fakeAdapter();
+        let observed: any = null;
+        const observationMarket = flatData();
+        const observationEngine = new V12LiveExecutionEngine({
+            adapter: observationAdapter, stateStore: observationStore, lock: observationLock, riskPath: observationRisk,
+            marketData: { load: async () => observationMarket }, now: () => NOW, log: () => undefined,
+            decisionObserver: async (snapshot: any) => { observed = snapshot; },
+        } as any);
+        const observationResult = await observationEngine.tick();
+        assert.equal(observationResult.status, "no-signal");
+        assert.equal(observationResult.reason, "NO_COMPLETED_BAR_SIGNAL");
+        assert.equal(observed?.referenceTs, observationMarket.BTC.at(-1)!.endTs);
+        assert.equal(observed?.reason, "NO_COMPLETED_BAR_SIGNAL");
 
         // Position-only mismatch must never be auto-adopted or auto-closed.
         const mismatch = await makeHarness(root, "position-only");
