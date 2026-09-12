@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import { join, resolve } from "node:path";
-import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { deferAsterGlobalRateBudget, reserveAsterGlobalRateSlot } from "../lib/disdex-aster-global-rate-budget";
 
@@ -85,6 +85,30 @@ test("shared budget publishes state with atomic rename", () => {
   const source = readFileSync(resolve("lib/disdex-aster-global-rate-budget.ts"), "utf8");
   assert.match(source, /rename\(temporary, path\)/);
   assert.doesNotMatch(source, /writeFile\(path, `\$\{JSON\.stringify\(state/);
+});
+
+test("shared budget never evicts an old lock owned by a live process", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-live-lock-"));
+  const path = join(directory, "aster-rate-budget.json");
+  const lockPath = `${path}.lock`;
+  try {
+    await mkdir(lockPath, { recursive: true });
+    await writeFile(join(lockPath, "owner.json"), JSON.stringify({
+      schema: "disdex-aster-rate-budget-lock/v1",
+      pid: process.pid,
+      createdAt: Date.now() - 30_000,
+      token: "live-owner",
+    }));
+    const old = new Date(Date.now() - 30_000);
+    await utimes(lockPath, old, old);
+    await assert.rejects(
+      reserveAsterGlobalRateSlot({ path, minIntervalMs: 20, maxQueueMs: 20, nowMs: 1_000 }),
+      /ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT/,
+    );
+    assert.equal((await readFile(join(lockPath, "owner.json"), "utf8")).includes("live-owner"), true);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 test("shared Aster budget propagates venue cooldown across daemons", async () => {
   const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-cooldown-"));

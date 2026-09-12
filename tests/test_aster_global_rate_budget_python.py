@@ -4,6 +4,7 @@ import os
 import sys
 import tempfile
 import unittest
+import json as json_module
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
@@ -141,6 +142,34 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
                     os.environ.pop(key, None)
                 else:
                     os.environ[key] = value
+
+    def test_shared_budget_never_evicts_an_old_lock_owned_by_a_live_process(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "aster-rate-budget.json"
+            lock_path = Path(str(path) + ".lock")
+            lock_path.mkdir()
+            (lock_path / "owner.json").write_text(json_module.dumps({
+                "schema": "disdex-aster-rate-budget-lock/v1",
+                "pid": os.getpid(),
+                "createdAt": int(time.time() * 1000) - 30_000,
+                "token": "live-owner",
+            }), encoding="utf-8")
+            old = time.time() - 30
+            os.utime(lock_path, (old, old))
+            original_env = {key: os.environ.get(key) for key in ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")}
+            try:
+                os.environ["DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH"] = str(path)
+                os.environ["DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS"] = "20"
+                os.environ["DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS"] = "20"
+                with self.assertRaisesRegex(RuntimeError, "ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT"):
+                    base.wait_for_aster_global_rate_budget()
+                self.assertIn("live-owner", (lock_path / "owner.json").read_text(encoding="utf-8"))
+            finally:
+                for key, value in original_env.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
 
 if __name__ == "__main__":
     unittest.main()

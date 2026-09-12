@@ -8,6 +8,8 @@ import json
 import math
 import os
 import signal
+import secrets
+import shutil
 import sys
 import tempfile
 import threading
@@ -30,6 +32,8 @@ STRATEGY_ID = "DISDEX_V13D_V11EQ_STOCK_ROUTER_PLUS_CRYPTO_V96"
 V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96"
 LIVE_ACK = "I_ACCEPT_REAL_MONEY_V13D_V11EQ_V96"
 SCHEMA_VERSION = 2
+ASTER_GLOBAL_RATE_BUDGET_LOCK_SCHEMA = "disdex-aster-rate-budget-lock/v1"
+ASTER_GLOBAL_RATE_BUDGET_LOCK_RECOVERY_GRACE_SECONDS = 5.0
 
 V13D_MIN_BASIS_BPS = 20.0
 V13D_MAX_QUEUE_USD = 250.0
@@ -153,6 +157,87 @@ def _aster_global_budget_int_env(name: str, fallback: int) -> int:
     return math.floor(value)
 
 
+def _aster_budget_lock_owner_path(lock_path: Path) -> Path:
+    return lock_path / "owner.json"
+
+
+def _aster_budget_lock_owner(lock_path: Path) -> Optional[dict]:
+    try:
+        value = read_json(_aster_budget_lock_owner_path(lock_path), None)
+    except (OSError, json.JSONDecodeError):
+        value = None
+    if not isinstance(value, dict):
+        return None
+    if value.get("schema") != ASTER_GLOBAL_RATE_BUDGET_LOCK_SCHEMA:
+        return None
+    try:
+        pid = int(value.get("pid"))
+        created_at = float(value.get("createdAt"))
+    except (TypeError, ValueError):
+        return None
+    token = value.get("token")
+    if pid <= 0 or not math.isfinite(created_at) or created_at <= 0 or not isinstance(token, str) or not token:
+        return None
+    return {"schema": value["schema"], "pid": pid, "createdAt": created_at, "token": token}
+
+
+def _aster_budget_process_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except PermissionError:
+        return True
+    except ProcessLookupError:
+        return False
+    except OSError:
+        return False
+
+
+def _aster_budget_lock_is_stale(lock_path: Path) -> bool:
+    owner = _aster_budget_lock_owner(lock_path)
+    if owner is not None:
+        return not _aster_budget_process_alive(owner["pid"])
+    try:
+        return time.time() - lock_path.stat().st_mtime > ASTER_GLOBAL_RATE_BUDGET_LOCK_RECOVERY_GRACE_SECONDS
+    except FileNotFoundError:
+        return True
+
+
+def _aster_budget_acquire_lock(lock_path: Path, max_queue_ms: int) -> dict:
+    deadline = time.monotonic() + max_queue_ms / 1000.0
+    owner = {
+        "schema": ASTER_GLOBAL_RATE_BUDGET_LOCK_SCHEMA,
+        "pid": os.getpid(),
+        "createdAt": now_ms(),
+        "token": secrets.token_hex(16),
+    }
+    while True:
+        try:
+            lock_path.mkdir(mode=0o700)
+            try:
+                owner_path = _aster_budget_lock_owner_path(lock_path)
+                owner_path.write_text(json.dumps(owner, separators=(",", ":")) + "\n", encoding="utf-8")
+                os.chmod(owner_path, 0o600)
+                return owner
+            except Exception:
+                shutil.rmtree(lock_path, ignore_errors=True)
+                raise
+        except FileExistsError:
+            if _aster_budget_lock_is_stale(lock_path):
+                shutil.rmtree(lock_path, ignore_errors=True)
+                continue
+            if time.monotonic() >= deadline:
+                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
+            time.sleep(0.005)
+
+
+def _aster_budget_release_lock(lock_path: Path, owner: dict) -> None:
+    current = _aster_budget_lock_owner(lock_path)
+    if current is None or current.get("token") != owner.get("token"):
+        return
+    shutil.rmtree(lock_path, ignore_errors=True)
+
+
 def aster_futures_request_weight(method: str, path: str, params: Optional[Dict[str, Any]] = None) -> int:
     values = params or {}
     symbol = bool(str(values.get("symbol") or ""))
@@ -185,21 +270,7 @@ def wait_for_aster_global_rate_budget(weight: int = 1) -> None:
     path = Path(raw_path).resolve()
     lock_path = Path(str(path) + ".lock")
     path.parent.mkdir(parents=True, exist_ok=True)
-    deadline = time.monotonic() + min(max_queue_ms, 2000) / 1000.0
-    while True:
-        try:
-            lock_path.mkdir(mode=0o700)
-            break
-        except FileExistsError:
-            try:
-                if time.time() - lock_path.stat().st_mtime > 5.0:
-                    lock_path.rmdir()
-                    continue
-            except FileNotFoundError:
-                continue
-            if time.monotonic() >= deadline:
-                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
-            time.sleep(0.005)
+    owner = _aster_budget_acquire_lock(lock_path, max_queue_ms)
     try:
         current = read_json(path, {}) or {}
         if not isinstance(current, dict):
@@ -219,10 +290,7 @@ def wait_for_aster_global_rate_budget(weight: int = 1) -> None:
             raise RuntimeError(f"ASTER_GLOBAL_RATE_BUDGET_SATURATED:{wait_ms}")
         atomic_write_shared_json(path, {"schema": "disdex-aster-rate-budget/v1", "nextAllowedAt": permit_at + (minimum_ms * weight_units), "updatedAt": now, "pid": os.getpid()})
     finally:
-        try:
-            lock_path.rmdir()
-        except FileNotFoundError:
-            pass
+        _aster_budget_release_lock(lock_path, owner)
     if wait_ms > 0:
         time.sleep(wait_ms / 1000.0)
 
@@ -233,15 +301,7 @@ def defer_aster_global_rate_budget(cooldown_ms: int, status: int) -> None:
     if status not in {418, 429} or not isinstance(cooldown_ms, (int, float)) or not math.isfinite(float(cooldown_ms)) or cooldown_ms < 0:
         raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID")
     path = Path(raw_path).resolve(); lock_path = Path(str(path) + ".lock"); path.parent.mkdir(parents=True, exist_ok=True)
-    deadline = time.monotonic() + 2.0
-    while True:
-        try: lock_path.mkdir(mode=0o700); break
-        except FileExistsError:
-            try:
-                if time.time() - lock_path.stat().st_mtime > 5.0: lock_path.rmdir(); continue
-            except FileNotFoundError: continue
-            if time.monotonic() >= deadline: raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
-            time.sleep(0.005)
+    owner = _aster_budget_acquire_lock(lock_path, 2_000)
     try:
         current = read_json(path, {}) or {}
         if not isinstance(current, dict) or (current and current.get("schema") != "disdex-aster-rate-budget/v1"): raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_MALFORMED")
@@ -250,8 +310,7 @@ def defer_aster_global_rate_budget(cooldown_ms: int, status: int) -> None:
         now = now_ms(); until = max(math.floor(existing), now + math.floor(float(cooldown_ms)))
         atomic_write_shared_json(path, {"schema":"disdex-aster-rate-budget/v1","nextAllowedAt":until,"updatedAt":now,"pid":os.getpid(),"cooldownUntil":until,"lastRateLimitStatus":status})
     finally:
-        try: lock_path.rmdir()
-        except FileNotFoundError: pass
+        _aster_budget_release_lock(lock_path, owner)
 
 
 def append_jsonl(path: Path, payload: dict) -> None:
