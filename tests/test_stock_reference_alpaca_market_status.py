@@ -1,4 +1,9 @@
+import sys
 import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from scripts import disdex_stock_reference_alpaca_proxy as proxy
 from scripts.disdex_us_equity_calendar import regular_us_equity_session
