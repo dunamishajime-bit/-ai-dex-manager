@@ -55,3 +55,11 @@ test("Aster upstream recovery refuses Kill clear while legacy V96/V52 live super
   assert.match(source, /disdex-v96-v52-live\.service/);
   assert.match(source, /ASTER_UPSTREAM_RECOVERY_LEGACY_LIVE_CONFLICT/);
 });
+
+test("off-hours reference recovery requires market-closed proof before Kill clear", async () => {
+    const source = await readFile("scripts/disdex-aster-upstream-live-recovery.ts", "utf8");
+    assert.match(source, /isRecoverableV52ReferenceKillReason/);
+    assert.match(source, /REFERENCE_RECOVERY_MARKET_OPEN/);
+    assert.match(source, /127\.0\.0\.1:8797\/health/);
+    assert.match(source, /marketOpen/);
+});

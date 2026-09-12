@@ -1,6 +1,10 @@
 import { strict as assert } from "node:assert";
 import test from "node:test";
-import { isAsterUpstreamKillReason, isRecoverableV12AsterManualReview } from "../lib/aster-upstream-recovery-policy";
+import {
+    isAsterUpstreamKillReason,
+    isRecoverableV12AsterManualReview,
+    isRecoverableV52ReferenceKillReason,
+} from "../lib/aster-upstream-recovery-policy";
 
 test("only Aster transport/rate-limit Kill Switch reasons are allow-listed", () => {
     assert.equal(isAsterUpstreamKillReason("V52 fatal tick error: <urlopen error [Errno 104] Connection reset by peer>"), true);
@@ -8,6 +12,12 @@ test("only Aster transport/rate-limit Kill Switch reasons are allow-listed", () 
     assert.equal(isAsterUpstreamKillReason("V52 fatal tick error: device time must match the actual time"), true);
     assert.equal(isAsterUpstreamKillReason("daily loss latch"), false);
     assert.equal(isAsterUpstreamKillReason("V52 managed Stock quantity reconciliation mismatch"), false);
+});
+
+test("off-hours local reference stale kill is a separate narrow recovery reason", () => {
+    assert.equal(isRecoverableV52ReferenceKillReason('V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=META: {"error":"stale_quote","symbol":"META","ageMs":31704,"maximumAgeMs":30000}'), true);
+    assert.equal(isRecoverableV52ReferenceKillReason('V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=META: {"error":"cross_source_divergence"}'), false);
+    assert.equal(isRecoverableV52ReferenceKillReason("V52 fatal tick error: HTTP 503 https://example.com/quote?symbol=META: stale_quote"), false);
 });
 
 test("V12 operator review is clearable only for the same Aster communication incident", () => {
