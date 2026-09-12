@@ -43,6 +43,13 @@ is_aster_upstream_shared_reason() {
   return 1
 }
 
+is_reference_stale_shared_reason() {
+  local reason="${1:-}"
+  [[ "$reason" == 'V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol='* ]] || return 1
+  [[ "$reason" == *'"error":"stale_quote"'* ]] || return 1
+  return 0
+}
+
 validate_current_release() {
   local link=/home/deploy/disdex-trading/current
   CURRENT_RELEASE="$(readlink -f "$link" 2>/dev/null || true)"
@@ -171,6 +178,9 @@ run_self_test() {
   is_aster_upstream_shared_reason 'V52 fatal tick error: <urlopen error [Errno 104] Connection reset by peer>'
   is_aster_upstream_shared_reason 'V52 upstream state unavailable: Aster HTTP 429'
   is_aster_upstream_shared_reason 'V52 upstream state unavailable: Aster HTTP 418 IP banned'
+  is_reference_stale_shared_reason 'V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=META: {"error":"stale_quote"}'
+  ! is_reference_stale_shared_reason 'V52 fatal tick error: HTTP 503 https://example.com/quote?symbol=META: stale_quote'
+  ! is_reference_stale_shared_reason 'V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=META: {"error":"server_error"}'
   ! is_aster_upstream_shared_reason 'daily loss latch'
   is_historical_local_reason 'V12 universe alignment mismatch: PENGU'
   is_historical_local_reason 'PENGU/BTC H1 timestamps are not fully aligned: PENGU=1000, BTC=999, aligned=999.'
@@ -191,7 +201,7 @@ main() {
 
   local action=NONE reason="$KILL_REASON" token
   if is_bool_true "$KILL_ACTIVE"; then
-    if is_aster_upstream_shared_reason "$KILL_REASON"; then
+    if is_aster_upstream_shared_reason "$KILL_REASON" || is_reference_stale_shared_reason "$KILL_REASON"; then
       action=ASTER_UPSTREAM
     elif is_recoverable_shared_reason "$KILL_REASON"; then
       action=SHARED_KILL
