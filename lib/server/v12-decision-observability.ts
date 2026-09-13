@@ -14,9 +14,8 @@ type JsonObject = Record<string, unknown>;
 type Direction = "LONG" | "SHORT";
 type StepState = "pass" | "blocked" | "pending" | "unknown";
 
-// Keep the read-only UI diagnosis aligned with the frozen V12 production
-// contract. The runner snapshot currently stores the ranked metrics, while
-// the per-gate booleans are intentionally not persisted there.
+// Legacy snapshots predate runner-owned signalEligible/signalReason.
+// Keep the frozen numeric policy only as a read-only compatibility fallback.
 const V12_SIGNAL_POLICY = Object.freeze({
   minimumVolumeRatio: 0.9845,
   minimumMomentumPct: 0.0227,
@@ -34,6 +33,8 @@ type SanitizedCandidate = {
   volumeRatio?: number;
   volatility?: number;
   atr?: number;
+  signalEligible?: boolean;
+  signalReason?: string;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -113,6 +114,22 @@ function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
   return { status: "pass" as const, detail: "記録された指標上、発注Signalの数値Gateは通過しています。" };
 }
 
+function runnerSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
+  if (candidate.signalEligible === true) {
+    return { status: "pass" as const, code: candidate.signalReason || "SIGNAL_ELIGIBLE", detail: `Runner判定: ${candidate.signalReason || "SIGNAL_ELIGIBLE"}` };
+  }
+  if (candidate.signalEligible === false) {
+    const reason = candidate.signalReason || "RUNNER_SIGNAL_BLOCKED";
+    const detailByReason: Record<string, string> = {
+      VOLUME_RATIO_BELOW_MINIMUM: "出来高比率が最低条件未達", EDGE_TO_COST_BELOW_MINIMUM: "期待Edgeが取引コスト条件未達",
+      LONG_MOMENTUM_BELOW_MINIMUM: "Long momentumが最低条件未達", SHORT_MOMENTUM_BELOW_MINIMUM: "Short momentumが最低条件未達",
+      BTC_REGIME_OR_ENTRY_QUALITY_BLOCKED: "BTC RegimeまたはEntry Quality Gate未達",
+    };
+    return { status: "blocked" as const, code: reason, detail: `Runner判定: ${detailByReason[reason] || reason}` };
+  }
+  return diagnoseSignalGate(candidate, btcRegime);
+}
+
 function safeCandidate(value: unknown): SanitizedCandidate | null {
   const row = asObject(value);
   if (!row) return null;
@@ -125,6 +142,8 @@ function safeCandidate(value: unknown): SanitizedCandidate | null {
     volumeRatio: Number.isFinite(Number(row.volumeRatio)) ? Number(row.volumeRatio) : undefined,
     volatility: Number.isFinite(Number(row.volatility)) ? Number(row.volatility) : undefined,
     atr: Number.isFinite(Number(row.atr)) ? Number(row.atr) : undefined,
+    signalEligible: typeof row.signalEligible === "boolean" ? row.signalEligible : undefined,
+    signalReason: typeof row.signalReason === "string" ? row.signalReason : undefined,
   };
 }
 
@@ -132,15 +151,22 @@ function safeDecisionSnapshot(value: unknown) {
   const row = asObject(value);
   if (!row) return null;
   const btcRegime = typeof row.btcRegime === "string" ? row.btcRegime : typeof row.regime === "string" ? row.regime : undefined;
-  const selectionConfirmed = typeof row.symbol === "string" && typeof row.side === "string";
+  const selectedSymbol = typeof row.symbol === "string" ? row.symbol : undefined;
+  const selectedSide = typeof row.side === "string" ? row.side : undefined;
+  const selectedRank = Number.isFinite(Number(row.rank)) ? Number(row.rank) : undefined;
+  const hasSelectedSignalFields = Boolean(selectedSymbol && selectedSide);
   const candidates = (Array.isArray(row.candidates)
     ? row.candidates.map(safeCandidate).filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate)).slice(0, 32)
-    : []).map((candidate) => ({ ...candidate, signalGate: diagnoseSignalGate(candidate, btcRegime) }));
-  const selectedCandidate = candidates.find((candidate) => candidate.rank === 1) || candidates[0];
+    : []).map((candidate) => ({ ...candidate, signalGate: runnerSignalGate(candidate, btcRegime) }));
+  const selectedCandidate = hasSelectedSignalFields
+    ? candidates.find((candidate) => candidate.symbol === selectedSymbol && candidate.side === selectedSide && (selectedRank === undefined || candidate.rank === selectedRank))
+      || candidates.find((candidate) => candidate.symbol === selectedSymbol && candidate.side === selectedSide)
+    : candidates.find((candidate) => candidate.rank === 1) || candidates[0];
+  const selectionConfirmed = hasSelectedSignalFields && (selectedCandidate?.signalEligible === undefined || selectedCandidate.signalEligible === true);
   return {
     strategyId: typeof row.strategyId === "string" ? row.strategyId : "V12_X1.00_ALL",
-    symbol: typeof row.symbol === "string" ? row.symbol : selectedCandidate?.symbol,
-    side: typeof row.side === "string" ? row.side : selectedCandidate?.side,
+    symbol: selectedSymbol || selectedCandidate?.symbol,
+    side: selectedSide || selectedCandidate?.side,
     regime: typeof row.regime === "string" ? row.regime : undefined,
     btcRegime,
     rank: Number.isFinite(Number(row.rank)) ? Number(row.rank) : selectedCandidate?.rank,
