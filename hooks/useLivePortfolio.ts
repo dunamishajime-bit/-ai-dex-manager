@@ -11,6 +11,9 @@ export type LivePosition = {
   markPrice: number;
   notionalUsd: number;
   unrealizedPnlUsd: number;
+  maintenanceMarginUsd: number | null;
+  leverage: number | null;
+  marginType: string | null;
 };
 
 export type LivePortfolioSnapshot = {
@@ -20,6 +23,8 @@ export type LivePortfolioSnapshot = {
     balanceUsd: number;
     availableUsd: number;
     unrealizedPnlUsd: number;
+    maintenanceMarginUsd: number | null;
+    marginRatioPct: number | null;
   };
   positions: LivePosition[];
   orders: {

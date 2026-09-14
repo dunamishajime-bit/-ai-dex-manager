@@ -19,6 +19,14 @@ function SummaryCard({ title, value, detail, tone = "default" }: { title: string
   );
 }
 
+function marginModeLabel(value: string | null) {
+  if (!value) return "—";
+  const normalized = value.toLowerCase();
+  if (normalized === "cross") return "Cross";
+  if (normalized === "isolated") return "Isolated";
+  return value;
+}
+
 function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: string; detail: string; icon: typeof Wallet }) {
   return (
     <Link href={href} className="group rounded-[22px] border border-gold-400/16 bg-black/20 p-4 transition hover:border-gold-300/40">
@@ -60,6 +68,8 @@ export default function HomePage() {
   const { formatPrice } = useCurrency();
   const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
   const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
+  const maintenanceMargin = snapshot?.account.maintenanceMarginUsd ?? null;
+  const marginRatio = snapshot?.account.marginRatioPct ?? null;
   const positions = snapshot?.positions ?? [];
   const liveStatus = v12RuntimeStatus?.status === "LIVE" ? "V12 LIVE確認済み" : v12RuntimeStatus?.status === "STALE" ? "V12 要確認" : v12StatusLoading ? "LIVE状態を確認中" : "LIVE状態未取得";
 
@@ -85,6 +95,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <SummaryCard title="口座残高" value={balance === null ? "未取得" : formatPrice(balance)} detail={available === null ? "利用可能残高は未取得" : `利用可能 ${formatPrice(available)}`} tone="profit" />
+            <SummaryCard title="口座維持率" value={marginRatio === null ? "未取得" : `${marginRatio.toFixed(2)}%`} detail={maintenanceMargin === null ? "維持証拠金は未取得 / 30秒ごとに更新" : `維持証拠金 ${formatPrice(maintenanceMargin)} / 30秒ごとに更新`} tone={marginRatio !== null && marginRatio >= 80 ? "loss" : "default"} />
             <SummaryCard title="実建玉 / 未決済注文" value={snapshot ? `${positions.length} / ${snapshot.orders.count}` : "未取得"} detail={snapshot ? `保護注文 ${snapshot.orders.protectionCount} / ${snapshot.capturedAt.replace("T", " ").slice(0, 16)} UTC` : liveError || "Asterデータ未取得"} />
           </div>
         </section>
@@ -103,7 +114,7 @@ export default function HomePage() {
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
           <div className="mt-3 space-y-2">
-            {positions.length ? positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">数量 {position.quantity.toFixed(6)} / 建玉評価額 {formatPrice(position.notionalUsd)}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice > 0 ? position.entryPrice.toFixed(6) : "—"} / Mark {position.markPrice > 0 ? position.markPrice.toFixed(6) : "—"}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : "Aster実建玉を取得できません。"}</div>}
+            {positions.length ? positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">数量 {position.quantity.toFixed(6)} / 建玉評価額 {formatPrice(position.notionalUsd)}</div><div className="mt-1 text-[11px] text-white/55">{position.leverage === null ? "—" : `${position.leverage.toFixed(0)}x`} {marginModeLabel(position.marginType)} / 維持証拠金 {position.maintenanceMarginUsd === null ? "—" : formatPrice(position.maintenanceMarginUsd)} / 口座維持率 {marginRatio === null ? "—" : `${marginRatio.toFixed(2)}%`}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice > 0 ? position.entryPrice.toFixed(6) : "—"} / Mark {position.markPrice > 0 ? position.markPrice.toFixed(6) : "—"}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : "Aster実建玉を取得できません。"}</div>}
           </div>
           <p className="mt-3 text-[11px] leading-5 text-white/55">この表示はAsterの読み取り結果です。HPから注文・取消・決済・建玉変更は行いません。</p>
         </section>

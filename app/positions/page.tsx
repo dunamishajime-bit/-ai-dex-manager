@@ -6,6 +6,14 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 
+function marginModeLabel(value: string | null) {
+  if (!value) return "—";
+  const normalized = value.toLowerCase();
+  if (normalized === "cross") return "Cross";
+  if (normalized === "isolated") return "Isolated";
+  return value;
+}
+
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return <div className="panel-gold rounded-[24px] p-4"><div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/72">{label}</div><div className="mt-2 text-xl font-black text-white">{value}</div><div className="mt-1 text-[11px] leading-5 text-white/72">{detail}</div></div>;
 }
@@ -13,6 +21,7 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
 export default function PositionsPage() {
   const { snapshot, loading, error } = useLivePortfolio();
   const { formatPrice } = useCurrency();
+  const marginRatio = snapshot?.account.marginRatioPct ?? null;
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
@@ -24,8 +33,9 @@ export default function PositionsPage() {
           <p className="mt-2 max-w-4xl rounded-2xl border border-amber-400/25 bg-amber-500/5 px-4 py-3 text-[12px] leading-6 text-amber-100/85">Quality102 Causal V4は1 slotの補完スリーブです。V12・PENGU・V52を優先し、上限は {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total {config.quality102Runtime.totalGrossCap.toFixed(2)}xです。</p>
         </header>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <Metric label="口座残高" value={snapshot ? formatPrice(snapshot.account.balanceUsd) : "未取得"} detail={snapshot ? `利用可能 ${formatPrice(snapshot.account.availableUsd)}` : error || "残高を取得できません"} />
+          <Metric label="口座維持率" value={marginRatio === null ? "—" : `${marginRatio.toFixed(2)}%`} detail={snapshot?.account.maintenanceMarginUsd === null || snapshot?.account.maintenanceMarginUsd === undefined ? "維持証拠金は未取得" : `維持証拠金 ${formatPrice(snapshot.account.maintenanceMarginUsd)}`} />
           <Metric label="実建玉" value={snapshot ? String(snapshot.positions.length) : "—"} detail={snapshot ? `含み損益 ${formatPrice(snapshot.account.unrealizedPnlUsd)}` : "取得待ち"} />
           <Metric label="未決済注文" value={snapshot ? String(snapshot.orders.count) : "—"} detail={snapshot ? `保護注文 ${snapshot.orders.protectionCount}` : "取得待ち"} />
           <Metric label="データ時刻" value={snapshot ? "Aster同期済み" : loading ? "確認中" : "未取得"} detail={snapshot ? snapshot.capturedAt.replace("T", " ").slice(0, 16) + " UTC" : ""} />
@@ -41,7 +51,7 @@ export default function PositionsPage() {
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><Activity className="h-4 w-4 text-gold-100" />Aster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに更新</span></div>
           <div className="mt-4 space-y-2">
-            {snapshot?.positions.length ? snapshot.positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">Qty {position.quantity.toFixed(6)} / Notional {formatPrice(position.notionalUsd)}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice.toFixed(6)} / Mark {position.markPrice.toFixed(6)}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : error || "Aster実建玉を取得できません。"}</div>}
+            {snapshot?.positions.length ? snapshot.positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">Qty {position.quantity.toFixed(6)} / Notional {formatPrice(position.notionalUsd)}</div><div className="mt-1 text-[11px] text-white/55">{position.leverage === null ? "—" : `${position.leverage.toFixed(0)}x`} {marginModeLabel(position.marginType)} / 維持証拠金 {position.maintenanceMarginUsd === null ? "—" : formatPrice(position.maintenanceMarginUsd)} / 口座維持率 {marginRatio === null ? "—" : `${marginRatio.toFixed(2)}%`}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice.toFixed(6)} / Mark {position.markPrice.toFixed(6)}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : error || "Aster実建玉を取得できません。"}</div>}
           </div>
         </section>
 

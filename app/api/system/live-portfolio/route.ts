@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
-import { deriveAsterAccountMetrics } from "@/lib/server/aster-account-metrics";
+import { deriveAsterAccountMetrics, deriveAsterMaintenanceMetrics, deriveAsterPositionMaintenance } from "@/lib/server/aster-account-metrics";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -10,7 +10,18 @@ type AccountSnapshot = {
   totalWalletBalance?: string | number;
   availableBalance?: string | number;
   totalUnrealizedProfit?: string | number;
+  totalMaintMargin?: string | number;
   assets?: unknown[];
+  positions?: AccountPosition[];
+};
+
+type AccountPosition = {
+  symbol?: string;
+  positionAmt?: string | number;
+  positionSide?: string;
+  maintMargin?: string | number;
+  leverage?: string | number;
+  isolated?: boolean | string;
 };
 
 type PositionRisk = {
@@ -20,6 +31,9 @@ type PositionRisk = {
   markPrice?: string | number;
   unRealizedProfit?: string | number;
   positionSide?: string;
+  leverage?: string | number;
+  marginType?: string;
+  isolated?: boolean | string;
 };
 
 type OpenOrder = {
@@ -58,6 +72,7 @@ export async function GET() {
       client.getOpenOrders() as Promise<OpenOrder[]>,
     ]);
 
+    const accountPositions = Array.isArray(account?.positions) ? account.positions : [];
     const positions = (Array.isArray(positionRisk) ? positionRisk : [])
       .map((position) => {
         const amount = finite(position.positionAmt);
@@ -66,21 +81,37 @@ export async function GET() {
         const entryPrice = finite(position.entryPrice);
         const markPrice = finite(position.markPrice);
         const unrealizedPnlUsd = finite(position.unRealizedProfit);
+        const symbol = position.symbol.toUpperCase();
+        const positionSide = position.positionSide || "BOTH";
+        const accountPosition = accountPositions.find((row) =>
+          String(row.symbol || "").toUpperCase() === symbol
+          && String(row.positionSide || "BOTH").toUpperCase() === positionSide.toUpperCase()
+        ) || accountPositions.find((row) => String(row.symbol || "").toUpperCase() === symbol);
+        const maintenance = deriveAsterPositionMaintenance({
+          maintMargin: accountPosition?.maintMargin,
+          leverage: position.leverage ?? accountPosition?.leverage,
+          marginType: position.marginType,
+          isolated: position.isolated ?? accountPosition?.isolated,
+        });
         return {
-          symbol: position.symbol.toUpperCase(),
+          symbol,
           side: amount >= 0 ? "LONG" : "SHORT",
-          positionSide: position.positionSide || "BOTH",
+          positionSide,
           quantity,
           entryPrice,
           markPrice,
           notionalUsd: markPrice > 0 ? quantity * markPrice : 0,
           unrealizedPnlUsd,
+          maintenanceMarginUsd: maintenance.maintenanceMarginUsd,
+          leverage: maintenance.leverage,
+          marginType: maintenance.marginType,
         };
       })
       .filter((position): position is NonNullable<typeof position> => Boolean(position))
       .sort((left, right) => right.notionalUsd - left.notionalUsd);
 
     const accountMetrics = deriveAsterAccountMetrics(account);
+    const maintenanceMetrics = deriveAsterMaintenanceMetrics(account);
 
     const orders = (Array.isArray(openOrders) ? openOrders : []).map((order) => ({
       symbol: String(order.symbol || "").toUpperCase(),
@@ -98,6 +129,8 @@ export async function GET() {
         balanceUsd: accountMetrics.balanceUsd,
         availableUsd: accountMetrics.availableUsd,
         unrealizedPnlUsd: accountMetrics.unrealizedPnlUsd,
+        maintenanceMarginUsd: maintenanceMetrics.maintenanceMarginUsd,
+        marginRatioPct: maintenanceMetrics.marginRatioPct,
       },
       positions,
       orders: {
