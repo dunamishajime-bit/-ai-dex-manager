@@ -389,6 +389,12 @@ export class AsterV3Client {
     getBalances() { return this.request<AsterBalanceRow[]>({ method: "GET", path: "/fapi/v3/balance", signed: true }); }
     getPositions(symbol?: string) { return this.request<AsterPositionRiskRow[]>({ method: "GET", path: "/fapi/v3/positionRisk", params: symbol ? { symbol } : undefined, signed: true }); }
     getOpenOrders(symbol?: string) { return this.request<AsterOrderResponse[]>({ method: "GET", path: "/fapi/v3/openOrders", params: symbol ? { symbol } : undefined, signed: true }); }
+    setMarginType(symbol: string, marginType: "CROSSED" | "ISOLATED") {
+        return this.request<Record<string, unknown>>({ method: "POST", path: "/fapi/v3/marginType", params: { symbol, marginType }, signed: true, orderMutation: true });
+    }
+    setLeverage(symbol: string, leverage: number) {
+        return this.request<Record<string, unknown>>({ method: "POST", path: "/fapi/v3/leverage", params: { symbol, leverage }, signed: true, orderMutation: true });
+    }
     getOrder(symbol: string, clientOrderId: string) { return this.request<AsterOrderResponse>({ method: "GET", path: "/fapi/v3/order", params: { symbol, origClientOrderId: clientOrderId }, signed: true }); }
     getIncomeHistory(input: { symbol?: string; incomeType?: "REALIZED_PNL" | "FUNDING_FEE" | "COMMISSION"; startTime?: number; endTime?: number; limit?: number } = {}) {
         return this.request<AsterIncomeRow[]>({ method: "GET", path: "/fapi/v3/income", params: { ...input, limit: Math.min(1000, Math.max(1, input.limit ?? 1000)) }, signed: true });

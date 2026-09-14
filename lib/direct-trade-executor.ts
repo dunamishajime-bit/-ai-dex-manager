@@ -139,6 +139,15 @@ function boolEnvironment(name: string, fallback = false) {
     return /^(1|true|yes|on)$/i.test(value.trim());
 }
 
+function venueMarginType(row: AsterPositionRiskRow): "cross" | "isolated" | "unknown" {
+    const rawMarginType = String(row.marginType || "").trim().toLowerCase();
+    if (rawMarginType === "cross" || rawMarginType === "crossed") return "cross";
+    if (rawMarginType === "isolated" || rawMarginType === "isolate") return "isolated";
+    if (row.isolated === false) return "cross";
+    if (row.isolated === true) return "isolated";
+    return "unknown";
+}
+
 async function runFreshMarginGuardBeforeExposureOrder(symbol: string) {
     if (!boolEnvironment("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED", false)) return;
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
@@ -243,24 +252,37 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         return row;
     }
 
-    private async assertVenueMargin5xCross(symbol: string): Promise<void> {
+    private async ensureVenueMargin5xCross(symbol: string): Promise<void> {
         const normalized = symbol.toUpperCase();
         const rows = await this.client.getPositions(normalized);
-        const row = rows.find((candidate) => candidate.symbol.toUpperCase() === normalized);
+        const matchingRows = rows.filter((candidate) => candidate.symbol.toUpperCase() === normalized);
+        const row = matchingRows[0];
         if (!row) throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_RISK_ROW_MISSING`);
+        for (const candidate of matchingRows) {
+            const positionAmount = Number(candidate.positionAmt);
+            if (!Number.isFinite(positionAmount)) {
+                throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_AMOUNT_UNKNOWN`);
+            }
+            if (Math.abs(positionAmount) > 1e-12) {
+                throw new Error(`ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:${normalized}:NON_ZERO_POSITION`);
+            }
+        }
+        const openOrders = await this.client.getOpenOrders(normalized);
+        if (openOrders.length > 0) {
+            throw new Error(`ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:${normalized}:OPEN_ORDERS_PRESENT`);
+        }
         const leverage = Number(row.leverage);
-        const rawMarginType = String(row.marginType || "").trim().toLowerCase();
-        const marginType = rawMarginType === "cross" || rawMarginType === "crossed"
-            ? "cross"
-            : rawMarginType === "isolated" || rawMarginType === "isolate"
-                ? "isolated"
-                : row.isolated === false
-                    ? "cross"
-                    : row.isolated === true
-                        ? "isolated"
-                        : "unknown";
-        if (leverage !== 5 || marginType !== "cross") {
-            throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:expected=5x-cross:actual=${Number.isFinite(leverage) ? `${leverage}x` : "unknown"}-${marginType}`);
+        const marginType = venueMarginType(row);
+        if (marginType !== "cross") await this.client.setMarginType(normalized, "CROSSED");
+        if (leverage !== 5) await this.client.setLeverage(normalized, 5);
+
+        const readBackRows = await this.client.getPositions(normalized);
+        const readBack = readBackRows.find((candidate) => candidate.symbol.toUpperCase() === normalized);
+        if (!readBack) throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_RISK_READBACK_MISSING`);
+        const readBackLeverage = Number(readBack.leverage);
+        const readBackMarginType = venueMarginType(readBack);
+        if (readBackLeverage !== 5 || readBackMarginType !== "cross") {
+            throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:expected=5x-cross:actual=${Number.isFinite(readBackLeverage) ? `${readBackLeverage}x` : "unknown"}-${readBackMarginType}`);
         }
     }
 
@@ -498,8 +520,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
         if (command.reduceOnly !== true) {
+            if (command.requireVenueMargin5xCross === true) await this.ensureVenueMargin5xCross(symbol);
             await runFreshMarginGuardBeforeExposureOrder(symbol);
-            if (command.requireVenueMargin5xCross === true) await this.assertVenueMargin5xCross(symbol);
         }
         const quote = await this.getMarketQuote(symbol);
         const executablePrice = command.side === "BUY" ? quote.askPrice : quote.bidPrice;
