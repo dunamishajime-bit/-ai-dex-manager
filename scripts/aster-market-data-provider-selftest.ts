@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { AsterV3Client } from "../lib/aster-v3-client";
+import { AsterV3Client, type AsterKline } from "../lib/aster-v3-client";
 import { AsterRealtimeMarketDataProvider } from "../lib/aster-realtime-market-data-provider";
 import { V12AsterMarketDataProvider } from "../lib/v12-aster-market-data-provider";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
