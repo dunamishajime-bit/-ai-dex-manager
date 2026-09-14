@@ -1,0 +1,49 @@
+name: PENGU Long Completion V40
+
+on:
+  push:
+    branches:
+      - research/pengu-dual-engine-v39
+    paths:
+      - scripts/research_lab_pengu_long_completion_v40.py
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - .github/workflows/pengu-long-completion-v40.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_pengu_long_completion_v40.py
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - .github/workflows/pengu-long-completion-v40.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_pengu_long_completion_v40.py
+      - name: Run PENGU Long completion
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_pengu_long_completion_v40.py
+      - name: Upload V40 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-long-completion-v40
+          path: |
+            .research-state/pengu-long-completion-v40.json
+            .research-state/pengu-long-completion-v40.md
+          if-no-files-found: warn
+          retention-days: 30

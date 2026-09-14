@@ -1,0 +1,53 @@
+name: PENGU Long Regime Gate V44
+
+on:
+  push:
+    branches:
+      - research/pengu-dual-engine-v39
+    paths:
+      - scripts/research_lab_pengu_long_regime_gate_v44.py
+      - scripts/research_lab_pengu_recovery_dual_engine_v41.py
+      - scripts/research_lab_pengu_long_completion_v40.py
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - .github/workflows/pengu-long-regime-gate-v44.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_pengu_long_regime_gate_v44.py
+      - scripts/research_lab_pengu_recovery_dual_engine_v41.py
+      - scripts/research_lab_pengu_long_completion_v40.py
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - .github/workflows/pengu-long-regime-gate-v44.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_pengu_long_regime_gate_v44.py
+      - name: Run PENGU Long regime gate
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_pengu_long_regime_gate_v44.py
+      - name: Upload V44 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-long-regime-gate-v44
+          path: |
+            .research-state/pengu-long-regime-gate-v44.json
+            .research-state/pengu-long-regime-gate-v44.md
+          if-no-files-found: warn
+          retention-days: 30
