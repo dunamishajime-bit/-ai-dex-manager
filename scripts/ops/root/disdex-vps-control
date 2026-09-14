@@ -1,0 +1,405 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+TRANSACTION_LIB="$SCRIPT_DIR/disdex-promotion-transaction-lib.sh"
+if [[ ! -f "$TRANSACTION_LIB" ]]; then
+  TRANSACTION_LIB="/usr/local/libexec/disdex-promotion-transaction-lib.sh"
+fi
+[[ -f "$TRANSACTION_LIB" && ! -L "$TRANSACTION_LIB" ]] || {
+  printf 'promotion transaction library missing\n' >&2
+  exit 2
+}
+# shellcheck source=scripts/ops/root/disdex-promotion-transaction-lib.sh
+source "$TRANSACTION_LIB"
+
+UI_USER="deploy"
+UI_PM2_HOME="/home/deploy/.pm2"
+UI_PROCESS="ai-dex-manager-ui"
+TRADING_SERVICE="disdex-v96-v52-live.service"
+TRADING_ROOT="/home/deploy/disdex-trading"
+TRADING_RELEASES="${TRADING_ROOT}/releases"
+TRADING_CURRENT="${TRADING_ROOT}/current"
+PREFLIGHT_PREFIX="disdex-v96-v52-preflight"
+APPROVAL_PREFIX="disdex-v96-v52-approval"
+SHARED_ROOT="/home/deploy/ai-dex-manager-v96-paper"
+SHARED_APPROVAL_ROOT="${SHARED_ROOT}/.runtime-approval"
+SHARED_STATE_ROOT="${SHARED_ROOT}/.runtime-state/disdex-v13d-v11eq-v96"
+PARITY_FILE="${SHARED_APPROVAL_ROOT}/disdex-v96-parity.json"
+OVERRIDE_FILE="${SHARED_APPROVAL_ROOT}/disdex-v96-operator-override.json"
+CRYPTO_STATE_FILE="${SHARED_STATE_ROOT}/crypto-v96/runner-live.json"
+STOCK_STATE_FILE="${SHARED_STATE_ROOT}/stock/runner-live.json"
+PROMOTION_ROOT="/home/deploy/disdex-ops/promotion-transactions"
+PROMOTION_LOCK="/home/deploy/disdex-ops/promotion.lock"
+
+RUNUSER="$(command -v runuser || true)"
+PM2="$(command -v pm2 || true)"
+NODE="$(command -v node || true)"
+SYSTEMCTL="$(command -v systemctl || true)"
+JOURNALCTL="$(command -v journalctl || true)"
+FLOCK="$(command -v flock || true)"
+
+promotion_transaction_dir=""
+promotion_rollback_armed=false
+promotion_success=false
+promotion_target_sha=""
+promotion_old_sha=""
+promotion_lock_fd=""
+promotion_selftest_mode=false
+promotion_selftest_scenario=""
+promotion_selftest_root=""
+
+require_sha() {
+  local value="${1:-}"
+  [[ "$value" =~ ^[0-9a-f]{40}$ ]] || {
+    printf 'invalid exact SHA\n' >&2
+    exit 2
+  }
+}
+
+release_dir() {
+  local sha="$1"
+  printf '%s/%s' "$TRADING_RELEASES" "$sha"
+}
+
+validate_release() {
+  local sha="$1"
+  local release
+  require_sha "$sha"
+  release="$(release_dir "$sha")"
+  disdex_txn_validate_release_target "$release" "$TRADING_RELEASES" || exit 2
+  printf '%s' "$release"
+}
+
+require_trading_inactive() {
+  local state pid
+  state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+  pid="$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value)"
+  [[ "$state" == "inactive" || "$state" == "failed" ]] || {
+    printf 'trading service must be inactive\n' >&2
+    exit 3
+  }
+  [[ "$pid" == "0" ]] || {
+    printf 'trading service PID must be zero\n' >&2
+    exit 3
+  }
+}
+
+run_exact_oneshot() {
+  local unit="$1"
+  local label="$2"
+  local result status
+  "$SYSTEMCTL" reset-failed "$unit" >/dev/null 2>&1 || true
+  if ! "$SYSTEMCTL" start "$unit"; then
+    printf '%s failed\n' "$label" >&2
+    "$JOURNALCTL" -u "$unit" --no-pager -n 250 >&2 || true
+    return 1
+  fi
+  result="$($SYSTEMCTL show "$unit" --property Result --value)"
+  status="$($SYSTEMCTL show "$unit" --property ExecMainStatus --value)"
+  if [[ "$result" != "success" || "$status" != "0" ]]; then
+    printf '%s did not finish successfully\n' "$label" >&2
+    "$JOURNALCTL" -u "$unit" --no-pager -n 250 >&2 || true
+    return 1
+  fi
+}
+
+run_preflight_unit() {
+  local sha="$1"
+  run_exact_oneshot "${PREFLIGHT_PREFIX}@${sha}.service" "candidate preflight"
+}
+
+run_approval_unit() {
+  local sha="$1"
+  run_exact_oneshot "${APPROVAL_PREFIX}@${sha}.service" "exact-commit approval renewal"
+}
+
+atomic_switch_current() {
+  local sha="$1"
+  local release="$2"
+  local owner_group="deploy:deploy"
+  if [[ "$promotion_selftest_mode" == "true" ]]; then owner_group=""; fi
+  disdex_txn_atomic_symlink "$TRADING_CURRENT" "$release" "$owner_group"
+  printf 'TRADING_CURRENT_SWITCH_PASS\nsha=%s\n' "$sha"
+}
+
+start_trading_service_verified() {
+  local state pid restart_before restart_after attempt
+  "$SYSTEMCTL" reset-failed "$TRADING_SERVICE" >/dev/null 2>&1 || true
+  # reset-failed also resets systemd's historical restart counter. Capture the
+  # stability baseline afterwards so a prior failed release is not mistaken
+  # for a restart by this newly started candidate.
+  restart_before="$($SYSTEMCTL show "$TRADING_SERVICE" --property NRestarts --value 2>/dev/null || printf '0')"
+  if ! "$SYSTEMCTL" start "$TRADING_SERVICE"; then
+    "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+    printf 'LIVE service start failed; fail-closed\n' >&2
+    "$JOURNALCTL" -u "$TRADING_SERVICE" --no-pager -n 300 >&2 || true
+    return 1
+  fi
+  sleep 2
+  state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+  pid="$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value)"
+  if [[ "$state" != "active" || "$pid" == "0" ]]; then
+    "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+    printf 'LIVE service verification failed; fail-closed\n' >&2
+    "$JOURNALCTL" -u "$TRADING_SERVICE" --no-pager -n 300 >&2 || true
+    return 1
+  fi
+  for attempt in $(seq 1 10); do
+    sleep 1
+    state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+    [[ "$state" == "active" ]] || {
+      "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+      printf 'LIVE service failed startup stability gate\n' >&2
+      return 1
+    }
+    [[ "$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value)" == "$pid" ]] || {
+      "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+      printf 'LIVE service MainPID changed during startup stability gate\n' >&2
+      return 1
+    }
+  done
+  restart_after="$($SYSTEMCTL show "$TRADING_SERVICE" --property NRestarts --value 2>/dev/null || printf '0')"
+  [[ "$restart_after" == "$restart_before" ]] || {
+    "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+    printf 'LIVE service restarted during startup stability gate\n' >&2
+    return 1
+  }
+  printf 'DISDEX_V96_V52_LIVE_START_PASS\nstate=%s\nmainPid=%s\nrestartCount=%s\n' "$state" "$pid" "$restart_after"
+}
+
+acquire_promotion_lock() {
+  install -d -o root -g root -m 0700 "$PROMOTION_ROOT"
+  exec {promotion_lock_fd}>"$PROMOTION_LOCK"
+  if ! "$FLOCK" -n "$promotion_lock_fd"; then
+    printf 'another promotion transaction is already running\n' >&2
+    exit 5
+  fi
+}
+
+begin_promotion_transaction() {
+  local target_sha="$1"
+  local timestamp
+  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  promotion_transaction_dir="${PROMOTION_ROOT}/${timestamp}-${target_sha}-$$"
+  install -d -o root -g root -m 0700 "$promotion_transaction_dir"
+  disdex_txn_snapshot_current "$TRADING_CURRENT" "$TRADING_RELEASES" "$promotion_transaction_dir"
+  disdex_txn_snapshot_file "$PARITY_FILE" "$promotion_transaction_dir" parity.json
+  disdex_txn_snapshot_file "$OVERRIDE_FILE" "$promotion_transaction_dir" operator-override.json
+  disdex_txn_snapshot_file "$CRYPTO_STATE_FILE" "$promotion_transaction_dir" crypto-runner-live.json
+  disdex_txn_snapshot_file "$STOCK_STATE_FILE" "$promotion_transaction_dir" stock-runner-live.json
+  promotion_old_sha="$(tr -d '[:space:]' < "$promotion_transaction_dir/old-current-sha")"
+  promotion_target_sha="$target_sha"
+  printf '%s\n' "$target_sha" > "$promotion_transaction_dir/target-sha"
+  promotion_rollback_armed=true
+}
+
+wait_for_trading_stopped() {
+  local state pid attempt
+  "$SYSTEMCTL" stop "$TRADING_SERVICE" >/dev/null 2>&1 || true
+  for attempt in $(seq 1 60); do
+    state="$($SYSTEMCTL is-active "$TRADING_SERVICE" 2>/dev/null || true)"
+    pid="$($SYSTEMCTL show "$TRADING_SERVICE" --property MainPID --value 2>/dev/null || printf '0')"
+    if [[ ( "$state" == "inactive" || "$state" == "failed" ) && "$pid" == "0" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+  printf 'rollback could not stop LIVE service safely\n' >&2
+  return 1
+}
+
+validate_promotion_backups() {
+  disdex_txn_validate_current_snapshot "$promotion_transaction_dir" "$TRADING_RELEASES"
+  disdex_txn_validate_backup "$promotion_transaction_dir" parity.json
+  disdex_txn_validate_backup "$promotion_transaction_dir" operator-override.json
+  disdex_txn_validate_backup "$promotion_transaction_dir" crypto-runner-live.json
+  disdex_txn_validate_backup "$promotion_transaction_dir" stock-runner-live.json
+}
+
+rollback_promotion() {
+  local owner_group="deploy:deploy"
+  if [[ "$promotion_selftest_mode" == "true" ]]; then owner_group=""; fi
+  printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_BEGIN\n' >&2
+  printf 'targetSha=%s\noldSha=%s\n' "$promotion_target_sha" "$promotion_old_sha" >&2
+  validate_promotion_backups || return 1
+  wait_for_trading_stopped || return 1
+  disdex_txn_restore_file "$promotion_transaction_dir" parity.json "$PARITY_FILE" || return 1
+  disdex_txn_restore_file "$promotion_transaction_dir" operator-override.json "$OVERRIDE_FILE" || return 1
+  disdex_txn_restore_file "$promotion_transaction_dir" crypto-runner-live.json "$CRYPTO_STATE_FILE" || return 1
+  disdex_txn_restore_file "$promotion_transaction_dir" stock-runner-live.json "$STOCK_STATE_FILE" || return 1
+  disdex_txn_restore_current "$promotion_transaction_dir" "$TRADING_CURRENT" "$TRADING_RELEASES" "$owner_group" || return 1
+  disdex_txn_verify_current "$promotion_transaction_dir" "$TRADING_CURRENT" || return 1
+  require_trading_inactive
+  printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_PASS\n' >&2
+  printf 'restoredSha=%s\nservice=inactive\nmainPid=0\nordersSentByRollback=false\n' "$promotion_old_sha" >&2
+}
+
+promotion_exit_handler() {
+  local status=$?
+  trap - EXIT INT TERM HUP
+  set +e
+  if [[ "$promotion_success" == "true" ]]; then
+    rm -rf "$promotion_transaction_dir"
+    exit "$status"
+  fi
+  if [[ "$promotion_rollback_armed" == "true" ]]; then
+    if rollback_promotion; then
+      rm -rf "$promotion_transaction_dir"
+      exit "$status"
+    fi
+    printf 'DISDEX_V96_V52_PROMOTION_ROLLBACK_FAILED\n' >&2
+    printf 'transactionDir=%s\nserviceMustRemainStopped=true\n' "$promotion_transaction_dir" >&2
+    exit 70
+  fi
+  [[ -z "$promotion_transaction_dir" ]] || rm -rf "$promotion_transaction_dir"
+  exit "$status"
+}
+
+execute_promotion() {
+  local sha="$1"
+  local release
+  require_sha "$sha"
+  acquire_promotion_lock
+  require_trading_inactive
+  release="$(validate_release "$sha")"
+  begin_promotion_transaction "$sha"
+  trap promotion_exit_handler EXIT
+  trap 'exit 130' INT TERM HUP
+
+  run_approval_unit "$sha"
+  run_preflight_unit "$sha"
+  atomic_switch_current "$sha" "$release"
+  if [[ "$promotion_selftest_mode" == "true" && "$promotion_selftest_scenario" == "snapshot-tamper" ]]; then
+    printf 'tamper\n' >> "$promotion_transaction_dir/parity.json"
+    return 61
+  fi
+  run_preflight_unit "$sha"
+  start_trading_service_verified
+  [[ "$(readlink -f "$TRADING_CURRENT")" == "$release" ]]
+
+  promotion_success=true
+  printf 'DISDEX_V96_V52_PROMOTION_PASS\n'
+  printf 'sha=%s\noldSha=%s\nordersSentByPromotion=false\n' "$sha" "$promotion_old_sha"
+}
+
+promotion_selftest_library() {
+  local path="$SCRIPT_DIR/disdex-promotion-selftest-lib.sh"
+  if [[ ! -f "$path" ]]; then
+    path="/usr/local/libexec/disdex-promotion-selftest-lib.sh"
+  fi
+  [[ -f "$path" && ! -L "$path" ]] || {
+    printf 'promotion selftest library missing\n' >&2
+    return 1
+  }
+  printf '%s' "$path"
+}
+
+pm2_field() {
+  local field="$1"
+  "$RUNUSER" -u "$UI_USER" -- env PM2_HOME="$UI_PM2_HOME" "$PM2" jlist |
+    UI_PROCESS="$UI_PROCESS" PM2_FIELD="$field" "$NODE" -e '
+let input = "";
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", chunk => input += chunk);
+process.stdin.on("end", () => {
+  const name = process.env.UI_PROCESS || "";
+  const field = process.env.PM2_FIELD || "";
+  try {
+    const rows = JSON.parse(input || "[]");
+    const row = rows.find(item => item?.name === name);
+    if (!row) return process.stdout.write(field === "pid" ? "0" : "not-found");
+    if (field === "state") process.stdout.write(String(row?.pm2_env?.status || "unknown"));
+    else if (field === "pid") process.stdout.write(String(row?.pid || 0));
+    else if (field === "cwd") process.stdout.write(String(row?.pm2_env?.pm_cwd || ""));
+    else process.exitCode = 2;
+  } catch {
+    process.stdout.write(field === "pid" ? "0" : "unknown");
+    process.exitCode = 1;
+  }
+});
+'
+}
+
+action="${1:-}"
+case "$action" in
+  ui-state) pm2_field state ;;
+  ui-pid) pm2_field pid ;;
+  ui-cwd) pm2_field cwd ;;
+  ui-log) exec "$RUNUSER" -u "$UI_USER" -- env PM2_HOME="$UI_PM2_HOME" "$PM2" logs "$UI_PROCESS" --nostream --lines 500 ;;
+  ui-reload) exec "$RUNUSER" -u "$UI_USER" -- env PM2_HOME="$UI_PM2_HOME" "$PM2" reload "$UI_PROCESS" --update-env ;;
+  trading-state) "$SYSTEMCTL" is-active "$TRADING_SERVICE" 2>/dev/null || true ;;
+  trading-pid) "$SYSTEMCTL" show "$TRADING_SERVICE" --property MainPID --value ;;
+  trading-cwd) "$SYSTEMCTL" show "$TRADING_SERVICE" --property WorkingDirectory --value ;;
+  trading-current)
+    if [[ -L "$TRADING_CURRENT" ]]; then readlink -f "$TRADING_CURRENT"; else printf 'not-set\n'; fi
+    ;;
+  trading-log) exec "$JOURNALCTL" -u "$TRADING_SERVICE" --since "2 hours ago" --no-pager -n 500 ;;
+  trading-stop) exec "$SYSTEMCTL" stop "$TRADING_SERVICE" ;;
+  trading-restart) exec "$SYSTEMCTL" restart "$TRADING_SERVICE" ;;
+  trading-switch)
+    sha="${2:-}"
+    require_trading_inactive
+    release="$(validate_release "$sha")"
+    run_preflight_unit "$sha"
+    atomic_switch_current "$sha" "$release"
+    ;;
+  trading-promote)
+    execute_promotion "${2:-}"
+    ;;
+  trading-promote-selftest)
+    # shellcheck source=scripts/ops/root/disdex-promotion-selftest-lib.sh
+    source "$(promotion_selftest_library)"
+    scenario="${2:-all}"
+    case "$scenario" in
+      all) run_all_promotion_selftests ;;
+      before-switch|post-switch-preflight|service-start|snapshot-tamper) run_promotion_selftest_scenario "$scenario" ;;
+      *) printf 'unsupported promotion selftest scenario\n' >&2; exit 2 ;;
+    esac
+    ;;
+  daemon-reload) exec "$SYSTEMCTL" daemon-reload ;;
+  preflight-start)
+    sha="${2:-}"
+    validate_release "$sha" >/dev/null
+    run_preflight_unit "$sha"
+    ;;
+  preflight-state)
+    sha="${2:-}"
+    require_sha "$sha"
+    unit="${PREFLIGHT_PREFIX}@${sha}.service"
+    "$SYSTEMCTL" is-active "$unit" 2>/dev/null || true
+    "$SYSTEMCTL" is-failed "$unit" 2>/dev/null || true
+    ;;
+  preflight-log)
+    sha="${2:-}"
+    require_sha "$sha"
+    unit="${PREFLIGHT_PREFIX}@${sha}.service"
+    exec "$JOURNALCTL" -u "$unit" --no-pager -n 800
+    ;;
+  approval-start)
+    sha="${2:-}"
+    require_trading_inactive
+    validate_release "$sha" >/dev/null
+    run_approval_unit "$sha"
+    ;;
+  approval-state)
+    sha="${2:-}"
+    require_sha "$sha"
+    unit="${APPROVAL_PREFIX}@${sha}.service"
+    "$SYSTEMCTL" is-active "$unit" 2>/dev/null || true
+    "$SYSTEMCTL" is-failed "$unit" 2>/dev/null || true
+    ;;
+  approval-log)
+    sha="${2:-}"
+    require_sha "$sha"
+    unit="${APPROVAL_PREFIX}@${sha}.service"
+    exec "$JOURNALCTL" -u "$unit" --no-pager -n 1200
+    ;;
+  *)
+    printf 'unsupported fixed control action\n' >&2
+    exit 2
+    ;;
+esac

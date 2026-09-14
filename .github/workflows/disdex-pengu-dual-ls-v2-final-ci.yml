@@ -1,0 +1,29 @@
+name: Dis-Dex PENGU Dual LS V2 Final CI
+
+on:
+  push:
+    branches:
+      - codex/pengu-runtime-safety-fix
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run strategy:pengu-dual-ls-v2:typecheck
+      - run: npm run strategy:pengu-dual-ls-v2:selftest
+      - run: npm run strategy:pengu-dual-ls-v2:parity
+      - run: npm run strategy:disdex-v13d-v11eq-v96:preflight:selftest
+      - run: npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+      - run: git diff --check

@@ -1,0 +1,177 @@
+name: V12 plus PENGU V2 plus V52 Stocks One-Year Backtest
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/v12-v52-pengu-v2-combined-1y-20260816
+    paths:
+      - 'scripts/research_v12_combined_bt_ledger.ts'
+      - 'scripts/research_pengu_v2_aster_ledger.ts'
+      - 'scripts/research_v12_v52_pengu_v2_combined_bt.py'
+      - '.github/workflows/v12-v52-pengu-v2-combined-one-year-bt.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v12-v52-pengu-v2-combined-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout deployed-VPS lineage research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V12 research source
+        uses: actions/checkout@v4
+        with:
+          ref: 27f023a37d08b71c6e59b797fdc03c20d6032da2
+          path: .v12-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore immutable historical-data caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: v12-v52-pengu-v2-combined-${{ runner.os }}-${{ hashFiles('scripts/research_v12_combined_bt_ledger.ts', 'scripts/research_pengu_v2_aster_ledger.ts', 'scripts/research_v12_v52_pengu_v2_combined_bt.py') }}
+          restore-keys: |
+            v26-latency-aware-3y-usdm-v1-20260816
+            v96-v52-dual-slot-one-year-${{ runner.os }}-
+            aster-only-v52-v39cache-${{ runner.os }}-
+            perp-research-usdm-
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Compile Python simulator
+        run: python -m py_compile scripts/research_v12_v52_pengu_v2_combined_bt.py
+
+      - name: Rebuild exact production PENGU V2 Aster ledgers
+        env:
+          PRODUCTION_SOURCE_SHA: 6f4d06fd990e5e847895b59c4890bb80335ff03e
+          PENGU_LEDGER_OUT: .research-state/v12-v52-pengu-v2-combined/pengu-v2-ledgers.json
+        run: |
+          mkdir -p .research-state/v12-v52-pengu-v2-combined
+          set -o pipefail
+          npx tsx scripts/research_pengu_v2_aster_ledger.ts 2>&1 | tee .research-state/v12-v52-pengu-v2-combined/pengu-ledger.log
+
+      - name: Rebuild frozen V12 ledgers and entry-time variants
+        env:
+          V12_SOURCE_ROOT: .v12-research
+          V12_SOURCE_SHA: 27f023a37d08b71c6e59b797fdc03c20d6032da2
+          V12_LEDGER_OUT: .research-state/v12-v52-pengu-v2-combined/v12-ledgers.json
+        run: |
+          set -o pipefail
+          npx tsx scripts/research_v12_combined_bt_ledger.ts 2>&1 | tee .research-state/v12-v52-pengu-v2-combined/v12-ledger.log
+
+      - name: Run 21 portfolio variants in normal and severe modes
+        run: |
+          set -o pipefail
+          python scripts/research_v12_v52_pengu_v2_combined_bt.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/v12-v52-pengu-v2-combined/v12-ledgers.json \
+            --pengu-ledger .research-state/v12-v52-pengu-v2-combined/pengu-v2-ledgers.json \
+            --output-dir .research-state/v12-v52-pengu-v2-combined \
+            2>&1 | tee .research-state/v12-v52-pengu-v2-combined/combined-backtest.log
+
+      - name: Validate lineage, caps, variants, and safety boundary
+        run: |
+          test -s .research-state/v12-v52-pengu-v2-combined/result.json
+          test -s .research-state/v12-v52-pengu-v2-combined/report.md
+          test -s .research-state/v12-v52-pengu-v2-combined/variant-summary.csv
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = json.loads(Path('.research-state/v12-v52-pengu-v2-combined/result.json').read_text())
+          assert p['status'] == 'PASS_RESEARCH_ONLY', p['checks']
+          assert p['period']['calendarDays'] == 365
+          assert p['period']['startInclusive'].startswith('2025-08-10')
+          assert p['period']['endExclusive'].startswith('2026-08-10')
+          assert p['architecture']['v96Included'] is False
+          assert p['architecture']['totalGrossCap'] == 2.5
+          assert p['architecture']['cryptoGrossCap'] == 1.5
+          assert p['architecture']['stockGrossCap'] == 1.5
+          assert len(p['variantSummary']) == 21
+          assert all(p['checks'].values()), p['checks']
+          for scenario in ('NORMAL', 'SEVERE'):
+              for variant in p['results'][scenario].values():
+                  for order in ('CRYPTO_FIRST', 'STOCK_FIRST'):
+                      assert variant[order]['observedMaximumCryptoGross'] <= 1.5 + 1e-9
+                      assert variant[order]['observedMaximumStockGross'] <= 1.5 + 1e-9
+                      assert variant[order]['observedMaximumTotalGross'] <= 2.5 + 1e-9
+          assert p['safety'] == {
+              'mode': 'RESEARCH_ONLY',
+              'ordersSent': False,
+              'liveChanged': False,
+              'vpsChanged': False,
+              'productionChanged': False,
+              'liveEligible': False,
+          }
+          print(json.dumps({
+              'status': p['status'],
+              'recommendation': p['provisionalRecommendation'],
+              'topFive': [row for row in p['variantSummary'] if row['variantId'] != 'BASELINE_PENGU_STOCK'][:5],
+              'checks': p['checks'],
+          }, indent=2))
+          PY
+
+      - name: Publish latest research result on this branch
+        run: |
+          mkdir -p docs/research-results
+          cp .research-state/v12-v52-pengu-v2-combined/result.json docs/research-results/v12-v52-pengu-v2-combined-latest.json
+          cp .research-state/v12-v52-pengu-v2-combined/report.md docs/research-results/v12-v52-pengu-v2-combined-latest.md
+          cp .research-state/v12-v52-pengu-v2-combined/variant-summary.csv docs/research-results/v12-v52-pengu-v2-combined-variant-summary-latest.csv
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/research-results/v12-v52-pengu-v2-combined-latest.json docs/research-results/v12-v52-pengu-v2-combined-latest.md docs/research-results/v12-v52-pengu-v2-combined-variant-summary-latest.csv
+          if ! git diff --cached --quiet; then
+            git commit -m "research: record V12 PENGU V2 V52 one-year results [skip ci]"
+            git push
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-v52-pengu-v2-combined-${{ github.run_id }}
+          path: .research-state/v12-v52-pengu-v2-combined
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn

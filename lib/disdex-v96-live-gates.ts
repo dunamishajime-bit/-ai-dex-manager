@@ -50,6 +50,9 @@ export interface DisDexV96LiveGateResult {
     forwardEvidenceApproved: boolean;
     operatorOverrideApproved: boolean;
     operatorOverride?: DisDexV96OperatorOverrideApproval;
+    maximumGross?: number;
+    maximumDailyLossPct?: number;
+    initialPenguGrossCap?: number;
 }
 
 export function disDexV96ConfigFingerprint() {
@@ -123,6 +126,9 @@ export function evaluateDisDexV96LiveGates(input: {
     forwardEvidence?: DisDexV96ForwardEvidenceApproval;
     executionParity?: DisDexV96ExecutionParityApproval;
     operatorOverride?: DisDexV96OperatorOverrideApproval;
+    maximumGross?: number;
+    maximumDailyLossPct?: number;
+    initialPenguGrossCap?: number;
     runtimeCommitSha?: string;
     now?: number;
 }): DisDexV96LiveGateResult {
@@ -141,6 +147,9 @@ export function evaluateDisDexV96LiveGates(input: {
     const override = evaluateDisDexV96OperatorOverride({
         approval: input.operatorOverride,
         configFingerprint,
+        maximumGross: input.maximumGross,
+        maximumDailyLossPct: input.maximumDailyLossPct,
+        initialPenguGrossCap: input.initialPenguGrossCap,
         now: input.now,
     });
     const overrideCommitApproved = Boolean(
@@ -169,6 +178,9 @@ export function evaluateDisDexV96LiveGates(input: {
         allowed: reasons.length === 0,
         reasons,
         configFingerprint,
+        maximumGross: input.maximumGross,
+        maximumDailyLossPct: input.maximumDailyLossPct,
+        initialPenguGrossCap: input.initialPenguGrossCap,
         forwardEvidenceApproved: forward.approved,
         operatorOverrideApproved: overrideCommitApproved,
         operatorOverride: overrideCommitApproved ? input.operatorOverride : undefined,

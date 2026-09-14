@@ -1,5 +1,5 @@
 [Unit]
-Description=DisDex V96 plus Aster-only V11-EQ no-order preflight
+Description=DisDex V96 plus Aster-only V52 dual-slot no-order preflight
 After=network-online.target disdex-stock-reference-free.service
 Wants=network-online.target
 Requires=disdex-stock-reference-free.service
@@ -10,7 +10,7 @@ User=deploy
 Group=deploy
 WorkingDirectory=/home/deploy/dis-dex-manager
 EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
-ExecStart=/usr/bin/npm run strategy:disdex-v13d-v11eq-v96:preflight
+ExecStart=/usr/bin/npm run strategy:disdex-v52:preflight
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full

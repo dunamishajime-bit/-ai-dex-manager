@@ -2,10 +2,9 @@ import {
     DISDEX_V11_EQ_CONFIG,
     DISDEX_V13D_V11EQ_V96_ALLOCATION,
     DISDEX_V13D_V11EQ_V96_RUNTIME,
-    DISDEX_V13D_CONFIG,
 } from "@/config/disdexStockRouterV13DV11EqRuntime";
 
-export type StockSymbol = (typeof DISDEX_V13D_CONFIG.universe)[number];
+export type StockSymbol = (typeof DISDEX_V11_EQ_CONFIG.universe)[number];
 export type V13DDecision = { eligible: boolean; completedMakerFill: boolean; completedHedge: boolean; symbol?: StockSymbol; reason?: string };
 export type V11ExecutionSnapshot = {
     symbol: StockSymbol;
@@ -28,7 +27,6 @@ export type V11ExecutionSnapshot = {
 export type V11EqGateResult = { accepted: boolean; reasons: string[] };
 export type StockRouterDecision =
     | { action: "HOLD_CASH"; strategy: "NONE"; reasons: string[] }
-    | { action: "OPEN"; strategy: "V13D"; symbol: StockSymbol; reasons: string[] }
     | { action: "OPEN"; strategy: "V11_EQ"; symbol: StockSymbol; reasons: string[] };
 export type LiveOrderSubmissionInput = {
     runnerMode: "paper" | "live";
@@ -50,9 +48,7 @@ export function evaluateV11EqGate(snapshot: V11ExecutionSnapshot): V11EqGateResu
     if (snapshot.dataAgeMs > cfg.maximumDataAgeMs) reasons.push("STALE_MARKET_DATA");
     if (snapshot.sourceClockDifferenceMs > cfg.maximumSourceClockDifferenceMs) reasons.push("SOURCE_CLOCK_MISMATCH");
     if (snapshot.estimatedRoundTripCostBps > cfg.maximumEstimatedRoundTripCostBps) reasons.push("ROUND_TRIP_COST_TOO_HIGH");
-    if (snapshot.absoluteBasisBps <= 0 || snapshot.estimatedRoundTripCostBps / snapshot.absoluteBasisBps > cfg.maximumCostToEntryBasisRatio) {
-        reasons.push("COST_TO_BASIS_RATIO_TOO_HIGH");
-    }
+    if (snapshot.absoluteBasisBps <= 0 || snapshot.estimatedRoundTripCostBps / snapshot.absoluteBasisBps > cfg.maximumCostToEntryBasisRatio) reasons.push("COST_TO_BASIS_RATIO_TOO_HIGH");
     if (snapshot.estimatedNetEdgeBps < cfg.minimumEstimatedNetEdgeBps) reasons.push("NET_EDGE_TOO_LOW");
     if (snapshot.depthMultiple < cfg.minimumDepthMultiple) reasons.push("INSUFFICIENT_DEPTH");
     if (snapshot.currentSpreadBps > cfg.maximumCurrentSpreadBps) reasons.push("SPREAD_TOO_WIDE");
@@ -63,10 +59,8 @@ export function evaluateV11EqGate(snapshot: V11ExecutionSnapshot): V11EqGateResu
     return { accepted: reasons.length === 0, reasons };
 }
 
-export function decideStockRoute(v13d: V13DDecision, v11Snapshot?: V11ExecutionSnapshot): StockRouterDecision {
-    if (!v11Snapshot) {
-        return { action: "HOLD_CASH", strategy: "NONE", reasons: ["V13D_DISABLED", "V11_EQ_SNAPSHOT_MISSING"] };
-    }
+export function decideStockRoute(_v13d: V13DDecision, v11Snapshot?: V11ExecutionSnapshot): StockRouterDecision {
+    if (!v11Snapshot) return { action: "HOLD_CASH", strategy: "NONE", reasons: ["V13D_DISABLED", "V11_EQ_SNAPSHOT_MISSING"] };
     const gate = evaluateV11EqGate(v11Snapshot);
     if (!gate.accepted) return { action: "HOLD_CASH", strategy: "NONE", reasons: gate.reasons };
     return { action: "OPEN", strategy: "V11_EQ", symbol: v11Snapshot.symbol, reasons: ["V13D_DISABLED", "V11_EQ_GATE_PASS"] };
@@ -77,7 +71,7 @@ export function assertPortfolioGross(cryptoGross: number, stockGross: number): v
     if (!Number.isFinite(cryptoGross) || !Number.isFinite(stockGross)) throw new Error("Gross values must be finite");
     if (cryptoGross < 0 || stockGross < 0) throw new Error("Gross values cannot be negative");
     if (cryptoGross > allocation.cryptoSleeveGrossCap + 1e-12) throw new Error(`Crypto Gross cap exceeded: ${cryptoGross}`);
-    if (typeof allocation.stockSleeveGrossCap === "number" && stockGross > allocation.stockSleeveGrossCap + 1e-12) throw new Error(`Stock Gross cap exceeded: ${stockGross}`);
+    if (stockGross > allocation.stockSleeveGrossCap + 1e-12) throw new Error(`Stock Gross cap exceeded: ${stockGross}`);
     if (cryptoGross + stockGross > allocation.portfolioGrossCap + 1e-12) throw new Error(`Portfolio Gross cap exceeded: ${cryptoGross + stockGross}`);
 }
 

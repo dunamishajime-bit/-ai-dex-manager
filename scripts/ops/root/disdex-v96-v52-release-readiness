@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+repo_root="${1:-$(pwd -P)}"
+mode="${2:-source}"
+[[ "$repo_root" == /* && -d "$repo_root" ]] || {
+  printf 'usage: disdex-v96-v52-release-readiness /absolute/release/path [source|exact-release]\n' >&2
+  exit 2
+}
+[[ "$mode" == "source" || "$mode" == "exact-release" ]] || {
+  printf 'mode must be source or exact-release\n' >&2
+  exit 2
+}
+repo_root="$(cd "$repo_root" && pwd -P)"
+cd "$repo_root"
+
+required=(
+  config/disdexV96Runtime.ts
+  config/disdexStockRouterV13DV11EqRuntime.ts
+  lib/direct-trade-executor.ts
+  lib/disdex-v96-execution-capacity.ts
+  scripts/disdex_v11eq_aster_only_live_engine.py
+  scripts/disdex_v52_aster_only_live_engine.py
+  scripts/disdex_v96_v52_margin_risk_policy.py
+  scripts/disdex_v96_v52_margin_guard.py
+  scripts/disdex_v96_v52_margin_guard_runtime.py
+  scripts/disdex_v96_v52_margin_guard_selftest.py
+  scripts/disdex_v52_margin_aware_live_engine.py
+  scripts/disdex-v96-v52-prepare-account-risk.py
+  scripts/ops/disdex-v96-v52-live-policy.sh
+  scripts/ops/disdex-v96-v52-live-policy-selftest.sh
+  scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+  scripts/ops/disdex-v96-v52-candidate-preflight.sh
+  scripts/ops/disdex-v96-v52-live.sh
+  scripts/ops/disdex-v96-v52-renew-approvals.sh
+  scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
+  scripts/ops/root/disdex-promotion-transaction-lib.sh
+  scripts/ops/root/disdex-promotion-selftest-lib.sh
+  scripts/ops/root/disdex-vps-control
+  scripts/ops/root/disdex-vps-retention-cleanup
+  scripts/ops/root/install-disdex-vps-control
+  ops/systemd/disdex-v96-v52-live.service
+  ops/systemd/disdex-v96-v52-preflight@.service
+  ops/systemd/disdex-v96-v52-approval@.service
+  ops/systemd/disdex-v96-v52-account-risk@.service
+  ops/systemd/disdex-vps-retention.service
+  ops/systemd/disdex-vps-retention.timer
+  ops/systemd/90-disdex-storage-guard.conf
+)
+for path in "${required[@]}"; do
+  [[ -f "$path" && ! -L "$path" ]] || {
+    printf 'required release file missing or symlinked: %s\n' "$path" >&2
+    exit 3
+  }
+done
+
+if [[ "$mode" == "exact-release" ]]; then
+  marker="$repo_root/.disdex-release-sha"
+  [[ -f "$marker" && ! -L "$marker" ]] || { printf 'release marker missing\n' >&2; exit 4; }
+  sha="$(tr -d '[:space:]' < "$marker")"
+  [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'release marker is not an exact SHA\n' >&2; exit 4; }
+  [[ "$repo_root" == "/home/deploy/disdex-trading/releases/$sha" ]] || {
+    printf 'exact release path does not match marker SHA\n' >&2
+    exit 4
+  }
+  state="$(systemctl is-active disdex-v96-v52-live.service 2>/dev/null || true)"
+  pid="$(systemctl show disdex-v96-v52-live.service --property MainPID --value 2>/dev/null || printf '0')"
+  [[ "$state" == "inactive" || "$state" == "failed" ]] || {
+    printf 'LIVE service must be inactive during readiness validation\n' >&2
+    exit 5
+  }
+  [[ "$pid" == "0" ]] || { printf 'LIVE MainPID must be zero during readiness validation\n' >&2; exit 5; }
+fi
+
+for script in \
+  scripts/ops/disdex-v96-v52-live-policy.sh \
+  scripts/ops/disdex-v96-v52-live-policy-selftest.sh \
+  scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh \
+  scripts/ops/disdex-v96-v52-candidate-preflight.sh \
+  scripts/ops/disdex-v96-v52-live.sh \
+  scripts/ops/disdex-v96-v52-renew-approvals.sh \
+  scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh \
+  scripts/ops/root/disdex-promotion-transaction-lib.sh \
+  scripts/ops/root/disdex-promotion-selftest-lib.sh \
+  scripts/ops/root/disdex-vps-control \
+  scripts/ops/root/install-disdex-vps-control; do
+  bash -n "$script"
+done
+
+python3 -m py_compile \
+  scripts/disdex_v11eq_aster_only_live_engine.py \
+  scripts/disdex_v52_aster_only_live_engine.py \
+  scripts/disdex_v96_v52_margin_risk_policy.py \
+  scripts/disdex_v96_v52_margin_guard.py \
+  scripts/disdex_v96_v52_margin_guard_runtime.py \
+  scripts/disdex_v96_v52_margin_guard_selftest.py \
+  scripts/disdex_v52_margin_aware_live_engine.py \
+  scripts/disdex-v96-v52-prepare-account-risk.py \
+  scripts/ops/root/disdex-vps-retention-cleanup
+
+python3 scripts/disdex_v96_v52_margin_risk_policy.py >/dev/null
+python3 scripts/disdex_v96_v52_margin_guard.py --self-test >/dev/null
+python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test >/dev/null
+python3 scripts/disdex_v96_v52_margin_guard_selftest.py >/dev/null
+python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test >/dev/null
+python3 scripts/ops/root/disdex-vps-retention-cleanup --self-test >/dev/null
+bash scripts/ops/disdex-v96-v52-live-policy-selftest.sh >/dev/null
+bash scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh >/dev/null
+sudo bash scripts/ops/root/disdex-vps-control trading-promote-selftest all >/dev/null
+
+grep -Fq 'totalGrossCap: 1.5' config/disdexV96Runtime.ts
+grep -Fq 'maximumOverridePenguGross: 1.15' config/disdexV96Runtime.ts
+grep -Fq 'maximumPortfolioGross: 1.5' config/disdexV96Runtime.ts
+grep -Fq 'maximumDailyLossPct: 5' config/disdexV96Runtime.ts
+grep -Fq 'requiredInitialLeverage: 5' config/disdexV96Runtime.ts
+grep -Fq 'requiredMarginType: "cross"' config/disdexV96Runtime.ts
+grep -Fq 'cryptoSleeveGrossCap: 1.5' config/disdexStockRouterV13DV11EqRuntime.ts
+grep -Fq 'stockSleeveGrossCap: 1.5' config/disdexStockRouterV13DV11EqRuntime.ts
+grep -Fq 'portfolioGrossCap: 2.5' config/disdexStockRouterV13DV11EqRuntime.ts
+grep -Fq 'minimumSecondStockGross: 0.25' config/disdexStockRouterV13DV11EqRuntime.ts
+grep -Fq 'maximumConcurrentStockPositions: 2' config/disdexStockRouterV13DV11EqRuntime.ts
+grep -Fq 'HEALTHY_POLL_INTERVAL_MS = 5 * 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
+grep -Fq 'WARNING_POLL_INTERVAL_MS = 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
+grep -Fq 'REDUCE_MARGIN_RATIO_PCT = 65.0' scripts/disdex_v96_v52_margin_risk_policy.py
+grep -Fq '_wait_without_account_calls' scripts/disdex_v96_v52_margin_guard_runtime.py
+grep -Fq 'interrupt_on_kill_switch=False' scripts/disdex_v96_v52_margin_guard_runtime.py
+grep -Fq 'emergency-flatten.lock' scripts/disdex_v96_v52_margin_guard_runtime.py
+grep -Fq 'reduceOnly": "true"' scripts/disdex_v96_v52_margin_guard_runtime.py
+grep -Fq -- '--preorder-check' lib/direct-trade-executor.ts
+grep -Fq 'command.reduceOnly !== true' lib/direct-trade-executor.ts
+grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-live.sh
+grep -Fq 'startupWaitLoop=false' scripts/ops/disdex-v96-v52-live.sh
+grep -Fq 'DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS' scripts/ops/root/disdex-vps-retention-cleanup
+grep -Fq 'OnCalendar=daily' ops/systemd/disdex-vps-retention.timer
+grep -Fq 'SystemMaxUse=256M' ops/systemd/90-disdex-storage-guard.conf
+grep -Fq 'MaxRetentionSec=14day' ops/systemd/90-disdex-storage-guard.conf
+! grep -Fq '.disdex-preflight-pass' scripts/ops/root/disdex-vps-control
+
+printf 'DISDEX_V96_V52_RELEASE_READINESS_PASS\n'
+printf 'mode=%s\n' "$mode"
+printf 'serializedMarginGuardRuntime=PASS\n'
+printf 'healthyPollIntervalMs=300000\n'
+printf 'warningPollIntervalMs=60000\n'
+printf 'v96CryptoSleeveGross=1.5\n'
+printf 'v52StockSleeveGross=1.5\n'
+printf 'combinedPortfolioGross=2.5\n'
+printf 'fixedLeverage=5\n'
+printf 'fixedMarginType=cross\n'
+printf 'promotionRollbackSelftest=PASS\n'
+printf 'retentionSelftest=PASS\n'
+printf 'ordersSent=false\n'
+printf 'cancelSent=false\n'
+printf 'positionChangesSent=false\n'
