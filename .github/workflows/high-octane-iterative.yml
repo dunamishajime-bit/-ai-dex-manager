@@ -1,0 +1,71 @@
+name: Five-round high-octane backtest
+
+on:
+  push:
+    branches:
+      - analysis/high-octane-iterative-20260716
+    paths:
+      - "research/high_octane_iterative.py"
+      - "research/integrated_profit_parts/**"
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/high-octane-iterative.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/high_octane_iterative.py"
+      - "research/integrated_profit_parts/**"
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/high-octane-iterative.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+
+      - name: Restore price and funding cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/multiperp_4h
+            .cache/integrated_funding
+          key: integrated-profit-202101-202606-v1
+
+      - name: Assemble integrated research dependency
+        run: cat research/integrated_profit_parts/*.part > research/integrated_profit_portfolio.py
+
+      - name: Normalize mixed cached timestamps
+        run: sed -i 's/pd.to_datetime(frame\["timestamp"\], utc=True)/pd.to_datetime(frame["timestamp"], utc=True, format="mixed")/' research/integrated_profit_portfolio.py
+
+      - name: Validate syntax
+        run: python -m py_compile research/integrated_profit_portfolio.py research/high_octane_iterative.py
+
+      - name: Run five sequential research rounds
+        run: |
+          set -o pipefail
+          python -m research.high_octane_iterative 2>&1 | tee high_octane_iterative.log
+
+      - name: Upload five-round report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: high-octane-five-round-report
+          path: |
+            backtest_output_high_octane/
+            high_octane_iterative.log
+          if-no-files-found: warn

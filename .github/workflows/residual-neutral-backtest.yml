@@ -1,0 +1,53 @@
+name: Residual beta-neutral backtest
+
+on:
+  push:
+    branches:
+      - analysis/residual-neutral-20260715
+    paths:
+      - "research/residual_parts/**"
+      - ".github/workflows/residual-neutral-backtest.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/residual_parts/**"
+      - ".github/workflows/residual-neutral-backtest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+
+      - name: Assemble research script
+        run: cat research/residual_parts/*.part > research/residual_beta_neutral.py
+
+      - name: Validate syntax
+        run: python -m py_compile research/residual_beta_neutral.py
+
+      - name: Run residual neutral holdout test
+        run: python research/residual_beta_neutral.py
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: residual-neutral-backtest-report
+          path: backtest_output_residual_neutral/
+          if-no-files-found: warn

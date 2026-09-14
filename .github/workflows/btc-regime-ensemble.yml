@@ -1,0 +1,49 @@
+name: BTC regime-ensemble backtest
+
+on:
+  push:
+    branches:
+      - analysis/btc-simple-backtest-20260715
+    paths:
+      - "research/btc_regime_ensemble.py"
+      - "research/btc_simple_backtest.py"
+      - ".github/workflows/btc-regime-ensemble.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/btc_regime_ensemble.py"
+      - "research/btc_simple_backtest.py"
+      - ".github/workflows/btc-regime-ensemble.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+
+      - name: Run regime ensemble holdout test
+        run: python research/btc_regime_ensemble.py
+
+      - name: Upload advanced report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-regime-ensemble-report
+          path: backtest_output_advanced/
+          if-no-files-found: warn

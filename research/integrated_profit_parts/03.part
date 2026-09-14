@@ -1,0 +1,150 @@
+    f = funding.to_numpy(float)
+    previous = np.zeros(planned.shape[1], dtype=float)
+    equity = 1.0
+    peak = 1.0
+    for i in range(len(planned)):
+        dd = equity / peak - 1.0
+        mult = 1.0
+        if use_dd_overlay:
+            if dd <= -0.25:
+                mult = 0.25
+            elif dd <= -0.18:
+                mult = 0.50
+            elif dd <= -0.10:
+                mult = 0.75
+        pos = p[i] * mult
+        change = float(np.abs(pos - previous).sum())
+        gpnl = float(np.nansum(pos * r[i]))
+        tcost = one_way_cost * change
+        # Positive funding means longs pay and shorts receive.
+        fcost = float(np.nansum(pos * f[i]))
+        bar = max(gpnl - tcost - fcost, -0.95)
+        returns[i] = bar
+        turnover[i] = change
+        trading_cost[i] = tcost
+        funding_cost[i] = fcost
+        gross_pnl[i] = gpnl
+        ddmult[i] = mult
+        actual[i] = pos
+        equity *= 1.0 + bar
+        peak = max(peak, equity)
+        previous = pos
+    ret_s = pd.Series(returns, index=planned.index, name="strategy_return")
+    return Simulation(
+        returns=ret_s,
+        equity=(1.0 + ret_s).cumprod().rename("equity"),
+        positions=pd.DataFrame(actual, index=planned.index, columns=planned.columns),
+        turnover=pd.Series(turnover, index=planned.index, name="turnover"),
+        trading_cost=pd.Series(trading_cost, index=planned.index, name="trading_cost"),
+        funding_cost=pd.Series(funding_cost, index=planned.index, name="funding_cost"),
+        gross_pnl=pd.Series(gross_pnl, index=planned.index, name="gross_pnl"),
+        dd_multiplier=pd.Series(ddmult, index=planned.index, name="dd_multiplier"),
+    )
+
+
+def cut(series: pd.Series, start: pd.Timestamp, end: pd.Timestamp | None = None) -> pd.Series:
+    result = series.loc[series.index >= start]
+    if end is not None:
+        result = result.loc[result.index < end]
+    return result
+
+
+def cagr(ret: pd.Series) -> float:
+    if ret.empty:
+        return float("nan")
+    days = max((ret.index[-1] - ret.index[0]).total_seconds() / 86400, 1)
+    total = float((1.0 + ret).prod())
+    return -1.0 if total <= 0 else total ** (365.25 / days) - 1.0
+
+
+def max_dd(ret: pd.Series) -> float:
+    if ret.empty:
+        return float("nan")
+    eq = (1.0 + ret).cumprod()
+    return float((eq / eq.cummax() - 1.0).min())
+
+
+def sharpe(ret: pd.Series) -> float:
+    sd = ret.std(ddof=1)
+    return float(ret.mean() / sd * math.sqrt(ANNUAL_BARS)) if sd > 0 else float("nan")
+
+
+def summarize(sim: Simulation, start: pd.Timestamp, end: pd.Timestamp | None = None) -> dict:
+    ret = cut(sim.returns, start, end)
+    pos = sim.positions.loc[ret.index]
+    monthly = (1.0 + ret).resample("ME").prod() - 1.0
+    years = max((ret.index[-1] - ret.index[0]).total_seconds() / (365.25 * 86400), 1 / 365.25)
+    return {
+        "start": str(ret.index.min()), "end": str(ret.index.max()),
+        "total_return": float((1.0 + ret).prod() - 1.0),
+        "cagr": cagr(ret), "max_drawdown": max_dd(ret), "sharpe": sharpe(ret),
+        "positive_month_ratio": float((monthly > 0).mean()),
+        "average_month": float(monthly.mean()), "median_month": float(monthly.median()),
+        "best_month": float(monthly.max()), "worst_month": float(monthly.min()),
+        "annual_turnover": float(cut(sim.turnover, start, end).sum() / years),
+        "average_gross": float(pos.abs().sum(axis=1).mean()),
+        "average_net": float(pos.sum(axis=1).mean()),
+        "max_gross": float(pos.abs().sum(axis=1).max()),
+        "trading_cost_total": float(cut(sim.trading_cost, start, end).sum()),
+        "funding_cost_total": float(cut(sim.funding_cost, start, end).sum()),
+        "months": int(len(monthly)),
+    }
+
+
+def selection_score(dev: dict, val: dict) -> float:
+    gate_penalty = 0.0
+    if dev["total_return"] <= 0 or val["total_return"] <= 0:
+        gate_penalty -= 2.0
+    if dev["max_drawdown"] < -0.35 or val["max_drawdown"] < -0.35:
+        gate_penalty -= 1.0
+    return (
+        0.9 * min(dev["cagr"], val["cagr"])
+        + 0.35 * (dev["cagr"] + val["cagr"])
+        + 0.12 * np.nan_to_num(min(dev["sharpe"], val["sharpe"]), nan=-3.0)
+        + 0.55 * min(dev["max_drawdown"], val["max_drawdown"])
+        - 0.0015 * (dev["annual_turnover"] + val["annual_turnover"])
+        + gate_penalty
+    )
+
+
+def candidate_grid() -> tuple[list[CrossSpec], list[TrendSpec], list[EventSpec], list[Candidate]]:
+    crosses = [
+        CrossSpec("C1", (14, 42, 84), 3, 2, 7, 0.25),
+        CrossSpec("C2", (21, 63, 126), 3, 2, 7, 0.00),
+        CrossSpec("C3", (14, 42, 84), 3, 3, 7, 0.00),
+    ]
+    trends = [
+        TrendSpec("T1", (14, 42, 126), 0.12),
+        TrendSpec("T2", (21, 63, 189), 0.15),
+        TrendSpec("T3", (7, 30, 90), 0.18),
+    ]
+    events = [
+        EventSpec("E1", 1.5, 0.5, 6),
+        EventSpec("E2", 2.0, 0.75, 12),
+        EventSpec("E3", 2.5, 1.0, 18),
+    ]
+    mixes = [
+        (0.30, 0.55, 0.15), (0.40, 0.45, 0.15), (0.45, 0.35, 0.20),
+        (0.25, 0.50, 0.25), (0.50, 0.30, 0.20), (0.35, 0.40, 0.25),
+    ]
+    out = []
+    n = 1
+    for c in crosses:
+        for t in trends:
+            for e in events:
+                for tw, cw, ew in mixes:
+                    for vol in [0.25, 0.35, 0.45]:
+                        out.append(Candidate(
+                            name=f"I{n:03d}", cross=c.name, trend=t.name, event=e.name,
+                            trend_weight=tw, cross_weight=cw, event_weight=ew,
+                            target_vol=vol, max_gross=1.75,
+                        ))
+                        n += 1
+    return crosses, trends, events, out
+
+
+def choose_diverse(ranking: pd.DataFrame, cmap: dict[str, Candidate], count: int = 5) -> list[Candidate]:
+    selected = []
+    for row in ranking.itertuples(index=False):
+        c = cmap[row.name]
+        signature = (c.cross, c.trend, c.event, round(c.target_vol, 2))

@@ -1,0 +1,54 @@
+# Binance public archive headers have changed names across vintages. Normalize
+# all known quote-volume/taker-buy variants before feature construction. Use a
+# fresh cache namespace so previously parsed NaN flow columns are never reused.
+CACHE = Path(".cache/range_15m_v2")
+
+
+def parse_kline(raw: bytes) -> pd.DataFrame:
+    cols = [
+        "open_time", "open", "high", "low", "close", "volume",
+        "close_time", "quote_volume", "trades", "taker_buy_base",
+        "taker_buy_quote", "ignore",
+    ]
+    first = pd.read_csv(io.BytesIO(raw), header=None, nrows=2)
+    has_header = str(first.iloc[0, 0]).strip().lower().replace(" ", "_") in {
+        "open_time", "opentime"
+    }
+    if has_header:
+        df = pd.read_csv(io.BytesIO(raw))
+        df.columns = [
+            str(c).strip().lower().replace(" ", "_").replace("-", "_")
+            for c in df.columns
+        ]
+        aliases = {
+            "opentime": "open_time",
+            "close_time_ms": "close_time",
+            "quote_asset_volume": "quote_volume",
+            "quote_volume_asset": "quote_volume",
+            "taker_buy_quote_volume": "taker_buy_quote",
+            "taker_buy_quote_asset_volume": "taker_buy_quote",
+            "taker_buy_base_asset_volume": "taker_buy_base",
+            "taker_buy_volume": "taker_buy_base",
+            "number_of_trades": "trades",
+            "count": "trades",
+        }
+        df = df.rename(columns={k: v for k, v in aliases.items() if k in df.columns})
+    else:
+        df = pd.read_csv(io.BytesIO(raw), header=None)
+        df = df.iloc[:, : min(len(cols), df.shape[1])]
+        df.columns = cols[: df.shape[1]]
+    tcol = "open_time" if "open_time" in df else df.columns[0]
+    out = pd.DataFrame({"timestamp": parse_timestamp(df[tcol])})
+    for col in ["open", "high", "low", "close", "volume", "quote_volume", "taker_buy_quote"]:
+        if col in df:
+            out[col] = pd.to_numeric(df[col], errors="coerce")
+    if "quote_volume" not in out:
+        out["quote_volume"] = out["volume"] * out["close"]
+    # Do not silently fabricate order-flow. Missing flow remains NaN and is
+    # reported by the strategy through absence of eligible signals.
+    if "taker_buy_quote" not in out:
+        out["taker_buy_quote"] = np.nan
+    out = out.dropna(subset=["timestamp", "open", "high", "low", "close", "quote_volume"])
+    out = out.loc[(out[["open", "high", "low", "close"]] > 0).all(axis=1)]
+    out = out.loc[out["quote_volume"] > 0]
+    return out.drop_duplicates("timestamp", keep="last").sort_values("timestamp")

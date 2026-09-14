@@ -1,0 +1,150 @@
+
+def cross_target(fx: dict, spec: CrossSpec) -> pd.DataFrame:
+    close, rv, regime = fx["close"], fx["rv21"], fx["regime"]
+    relative = momentum_score(close, rv, spec.horizons)
+    relative = relative.sub(relative.median(axis=1), axis=0)
+    target = pd.DataFrame(0.0, index=close.index, columns=close.columns)
+    rebalance = spec.rebalance_days * 6
+    for i in range(200 * 6, len(close) - 1):
+        if i % rebalance != 0:
+            target.iloc[i] = target.iloc[i - 1]
+            continue
+        liquid = valid_liquid_symbols(fx, i)
+        ranked = relative.iloc[i][liquid].dropna().sort_values()
+        if len(ranked) < spec.long_k + spec.short_k:
+            target.iloc[i] = target.iloc[i - 1]
+            continue
+        longs = list(ranked.tail(spec.long_k).index)
+        shorts = list(ranked.head(spec.short_k).index)
+        funding_z = fx["funding_z"].iloc[i]
+        longs = [s for s in longs if not np.isfinite(funding_z.get(s, np.nan)) or funding_z[s] < 2.5]
+        shorts = [s for s in shorts if not np.isfinite(funding_z.get(s, np.nan)) or funding_z[s] > -2.5]
+        state = regime.iloc[i]
+        if state == "bull":
+            lg, sg = 1.0, spec.bull_short
+            shorts = [s for s in shorts if ranked.get(s, 0.0) < -0.12]
+        elif state == "bear":
+            lg, sg = 0.25, 1.0
+            longs = [s for s in longs if ranked.get(s, 0.0) > 0.12]
+        else:
+            lg, sg = 0.60, 0.60
+        w = pd.Series(0.0, index=close.columns)
+        lw = inverse_vol_weights(longs, 1.0, rv.iloc[i], lg, 0.32)
+        sw = inverse_vol_weights(shorts, -1.0, rv.iloc[i], sg, 0.32)
+        w.loc[lw.index] += lw
+        w.loc[sw.index] += sw
+        target.iloc[i] = w
+    return target.ffill().fillna(0.0)
+
+
+def trend_target(fx: dict, spec: TrendSpec) -> pd.DataFrame:
+    close, rv, regime = fx["close"], fx["rv21"], fx["regime"]
+    score = momentum_score(close, rv, spec.horizons)
+    target = pd.DataFrame(0.0, index=close.index, columns=close.columns)
+    for i in range(200 * 6, len(close) - 1):
+        if i % 6 != 0:
+            target.iloc[i] = target.iloc[i - 1]
+            continue
+        liquid = valid_liquid_symbols(fx, i, limit=10)
+        row = score.iloc[i][liquid].dropna()
+        longs = list(row[row >= spec.entry_floor].sort_values(ascending=False).head(5).index)
+        shorts = list(row[row <= -spec.entry_floor].sort_values().head(5).index)
+        state = regime.iloc[i]
+        if state == "bull":
+            lg, sg = 1.0, 0.20
+        elif state == "bear":
+            lg, sg = 0.20, 1.0
+        else:
+            lg, sg = 0.45, 0.45
+        w = pd.Series(0.0, index=close.columns)
+        lw = inverse_vol_weights(longs, 1.0, rv.iloc[i], lg, 0.25)
+        sw = inverse_vol_weights(shorts, -1.0, rv.iloc[i], sg, 0.25)
+        w.loc[lw.index] += lw
+        w.loc[sw.index] += sw
+        target.iloc[i] = w
+    return target.ffill().fillna(0.0)
+
+
+def event_target(fx: dict, spec: EventSpec) -> pd.DataFrame:
+    close, high, low = fx["close"], fx["high"], fx["low"]
+    prev_high = high.rolling(20 * 6, min_periods=15 * 6).max().shift(1)
+    prev_low = low.rolling(20 * 6, min_periods=15 * 6).min().shift(1)
+    up = (close > prev_high) & (fx["volume_z"] >= spec.volume_z) & (fx["range_z"] >= spec.range_z)
+    down = (close < prev_low) & (fx["volume_z"] >= spec.volume_z) & (fx["range_z"] >= spec.range_z)
+    up &= (fx["funding_z"] < 2.0) | fx["funding_z"].isna()
+    down &= (fx["funding_z"] > -2.0) | fx["funding_z"].isna()
+    active = pd.DataFrame(0.0, index=close.index, columns=close.columns)
+    strength = fx["volume_z"].fillna(0.0) + 0.5 * fx["range_z"].fillna(0.0)
+    for j, symbol in enumerate(close.columns):
+        cooldown = 0
+        for i in range(120, len(close) - spec.hold_bars - 1):
+            if cooldown > 0:
+                cooldown -= 1
+                continue
+            if not fx["available"].iat[i, j] or not np.isfinite(fx["liquidity"].iat[i, j]):
+                continue
+            state = fx["regime"].iloc[i]
+            direction = 0.0
+            if up.iat[i, j] and state != "bear":
+                direction = 1.0
+            elif down.iat[i, j] and state != "bull":
+                direction = -1.0
+            if direction:
+                active.iloc[i:i + spec.hold_bars, j] = direction
+                cooldown = spec.hold_bars
+    target = pd.DataFrame(0.0, index=close.index, columns=close.columns)
+    for i in range(len(close)):
+        names = list(active.columns[active.iloc[i] != 0])
+        if not names:
+            continue
+        # Keep the strongest three concurrent events.
+        names = list(strength.iloc[i][names].sort_values(ascending=False).head(3).index)
+        raw = active.iloc[i][names] / fx["rv21"].iloc[i][names].clip(lower=0.20)
+        gross = raw.abs().sum()
+        if gross > 0:
+            raw = raw / gross
+        raw = raw.clip(-0.40, 0.40)
+        if raw.abs().sum() > 0:
+            raw = raw / raw.abs().sum()
+        target.loc[target.index[i], raw.index] = raw
+    return target.fillna(0.0)
+
+
+def risk_scale_target(raw: pd.DataFrame, fx: dict, target_vol: float, max_gross: float) -> pd.DataFrame:
+    raw = raw.clip(-0.50, 0.50)
+    proxy_ret = (raw.shift(1).fillna(0.0) * fx["asset_return"]).sum(axis=1)
+    realized = proxy_ret.rolling(30 * 6, min_periods=15 * 6).std().shift(1) * math.sqrt(ANNUAL_BARS)
+    vol_scalar = (target_vol / realized.clip(lower=0.08)).clip(0.30, 2.0).fillna(0.5)
+    gross = raw.abs().sum(axis=1)
+    cap_scalar = (max_gross / gross.replace(0, np.nan)).clip(upper=1.0).fillna(1.0)
+    scalar = pd.concat([vol_scalar, cap_scalar], axis=1).min(axis=1)
+    result = raw.mul(scalar, axis=0).clip(-0.50, 0.50)
+    gross2 = result.abs().sum(axis=1)
+    excess = gross2 > max_gross
+    result.loc[excess] = result.loc[excess].div(gross2.loc[excess], axis=0) * max_gross
+    return result.fillna(0.0)
+
+
+def simulate(
+    fx: dict,
+    target: pd.DataFrame,
+    funding_event: pd.DataFrame,
+    one_way_cost: float = BASE_COST,
+    funding_multiplier: float = 1.0,
+    risk_scale: float = 1.0,
+    delay_bars: int = 1,
+    use_dd_overlay: bool = True,
+) -> Simulation:
+    planned = target.shift(delay_bars).fillna(0.0) * risk_scale
+    planned = planned.clip(-0.60, 0.60)
+    ret_matrix = fx["asset_return"].reindex_like(planned).fillna(0.0)
+    funding = funding_event.reindex_like(planned).fillna(0.0) * funding_multiplier
+    returns = np.zeros(len(planned))
+    turnover = np.zeros(len(planned))
+    trading_cost = np.zeros(len(planned))
+    funding_cost = np.zeros(len(planned))
+    gross_pnl = np.zeros(len(planned))
+    ddmult = np.ones(len(planned))
+    actual = np.zeros_like(planned.to_numpy(float))
+    p = planned.to_numpy(float)
+    r = ret_matrix.to_numpy(float)

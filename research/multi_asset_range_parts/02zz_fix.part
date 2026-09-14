@@ -1,0 +1,52 @@
+# Restore the complete summary function after the optimized simulator override.
+def summarize(sim: Simulation, start: pd.Timestamp, end: pd.Timestamp | None = None) -> dict:
+    mask = period_mask(sim.returns.index, start, end)
+    ret = sim.returns.loc[mask]
+    monthly = (1 + ret).resample("ME").prod() - 1
+    daily = (1 + ret).resample("D").prod() - 1
+    trades = sim.trades.copy()
+    if not trades.empty:
+        trades["entry_time"] = pd.to_datetime(trades["entry_time"], utc=True)
+        tmask = trades["entry_time"] >= start
+        if end is not None:
+            tmask &= trades["entry_time"] < end
+        trades = trades.loc[tmask]
+    sd = ret.std(ddof=1)
+    sharpe = float(ret.mean() / sd * math.sqrt(ANNUAL_BARS)) if sd > 0 else float("nan")
+    gains = trades.loc[trades.get("net_pnl", pd.Series(dtype=float)) > 0, "net_pnl"].sum() if not trades.empty else 0.0
+    losses = -trades.loc[trades.get("net_pnl", pd.Series(dtype=float)) < 0, "net_pnl"].sum() if not trades.empty else 0.0
+    loss_flags = list((trades["net_pnl"] < 0).astype(int)) if not trades.empty else []
+    max_consecutive = run = 0
+    for flag in loss_flags:
+        run = run + 1 if flag else 0
+        max_consecutive = max(max_consecutive, run)
+    active_monthly = monthly[monthly.abs() > 1e-8]
+    return {
+        "start": str(ret.index.min()), "end": str(ret.index.max()),
+        "total_return": float((1 + ret).prod() - 1), "cagr": cagr(ret),
+        "max_drawdown": max_dd(ret), "sharpe": sharpe,
+        "average_month": float(monthly.mean()), "median_month": float(monthly.median()),
+        "best_month": float(monthly.max()), "worst_month": float(monthly.min()),
+        "positive_month_ratio": float((monthly > 0).mean()),
+        "active_months": int(len(active_monthly)),
+        "active_month_median": float(active_monthly.median()) if len(active_monthly) else 0.0,
+        "best_day": float(daily.max()), "worst_day": float(daily.min()),
+        "trades": int(len(trades)),
+        "win_rate": float((trades["net_pnl"] > 0).mean()) if len(trades) else 0.0,
+        "profit_factor": float(gains / losses) if losses > 0 else float("inf") if gains > 0 else 0.0,
+        "average_trade": float(trades["net_pnl"].mean()) if len(trades) else 0.0,
+        "max_consecutive_losses": int(max_consecutive),
+        "liquidations": int((trades.get("reason", pd.Series(dtype=str)) == "liquidation").sum()) if len(trades) else 0,
+        "average_gross": float(sim.gross.loc[mask].mean()),
+        "max_gross": float(sim.gross.loc[mask].max()),
+        "average_margin": float(sim.margin.loc[mask].mean()),
+        "max_margin": float(sim.margin.loc[mask].max()),
+        "trading_cost_total": float(sim.costs.loc[mask].sum()),
+        "funding_total": float(sim.funding.loc[mask].sum()),
+    }
+
+
+# The next split file begins with the unreachable tail of the original summary
+# definition. Absorb it into a never-called compatibility function until the
+# next top-level definition appears.
+def _discard_legacy_summary_continuation() -> None:

@@ -1,0 +1,47 @@
+name: Multi-perpetual cross-sectional backtest
+
+on:
+  push:
+    branches:
+      - analysis/btc-simple-backtest-20260715
+    paths:
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/multiperp-cross-section.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/multiperp-cross-section.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+
+      - name: Run cross-sectional holdout test
+        run: python research/multiperp_cross_section.py
+
+      - name: Upload cross-sectional report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiperp-cross-sectional-report
+          path: backtest_output_cross_section/
+          if-no-files-found: warn
