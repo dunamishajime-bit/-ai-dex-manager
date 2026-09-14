@@ -10,7 +10,7 @@ import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
 import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
-import { evaluateQuality102LiveSelector } from "../lib/disdex-quality102-live-selector";
+import { buildPenguQuality102IntegrationEvent } from "../lib/pengu-quality102-integration-status";
 import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter";
 import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-protective-orders";
 import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
@@ -23,7 +23,7 @@ function numberEnv(name: string, fallback: number) {
 
 async function main() {
     const runtime = resolvePenguDualLsV2Runtime();
-    const quality102Live = evaluateQuality102LiveSelector({ decisionTs: Date.now() });
+    const expectedQ102RuntimeSha = process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA;
     if (runtime.mode === "LIVE" && runtime.enabled) {
         const strict = assertV12StrictLiveConfiguration();
         if (Math.abs(runtime.maximumGross - STRICT_BT33404708902.penguMaximumGross) > 1e-9) {
@@ -37,12 +37,9 @@ async function main() {
             totalGrossCap: strict.totalGrossCap,
         }));
     }
-    console.log(JSON.stringify({
-        event: "quality102-live-selector",
-        quality102LiveSelectorParity: quality102Live.quality102LiveSelectorParity,
-        quality102LiveBlockedFailClosed: quality102Live.quality102LiveBlockedFailClosed,
-        reason: quality102Live.reason,
-    }));
+    console.log(JSON.stringify(buildPenguQuality102IntegrationEvent({
+        expectedRuntimeSha: expectedQ102RuntimeSha,
+    })));
     const stateRoot = resolve(process.env.PENGU_DUAL_LS_V2_STATE_DIR || ".runtime-state/pengu-dual-ls-v2");
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
