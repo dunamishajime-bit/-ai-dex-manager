@@ -1,0 +1,132 @@
+name: Weak-Month Source and Bundle Diagnostics
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/weak-month-source-bundle-diagnostics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v52-stock-resume-${{ runner.os }}
+          restore-keys: |
+            current-v12-top2-pengu-v52-stock-resume-
+      - uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+          repository: dunamishajime-bit/-ai-dex-manager
+      - name: Run source-opportunity and bundled counterfactual diagnostics
+        run: |
+          mkdir -p .research-state/source-bundle
+          python - <<'PY'
+          import datetime as dt, json, sys
+          from collections import defaultdict
+          from pathlib import Path
+          sys.path.insert(0,'scripts')
+          import research_current_top2_pengu_v52_dca as sim
+          UTC=dt.timezone.utc
+          root=Path('.research-state/input')
+          v12=json.loads((root/'v12-top2-ledger.json').read_text())
+          pengu=json.loads((root/'pengu-v2-ledger.json').read_text())
+          sim.INITIAL_JPY=10000.0; sim.MONTHLY_JPY=10000.0
+          sim.TOTAL_GROSS_CAP=2.5; sim.CRYPTO_GROSS_CAP=2.0; sim.V12_GROSS_CAP=1.5
+          sim.V12_PER_POSITION_GROSS_CAP=1.0; sim.V12_MAX_POSITIONS=2; sim.PENGU_MAX_GROSS=0.75
+          sim.STOCK_GROSS_CAP=1.5; sim.CRYPTO_DAILY_LOSS_LIMIT=-0.075; sim.STOCK_DAILY_LOSS_LIMIT=-0.035
+          v11,v50,target_days,diag=sim.build_stock(Path('.cache/aster-only-v39-overnight-open'))
+          cost=float(sim.SCENARIOS['NORMAL']['stockCostBps'])
+          baseline=sim.simulate(v12['modes']['normal']['trades'],pengu['modes']['normal']['trades'],v11,v50,cost)
+          def month(ms): return dt.datetime.fromtimestamp(int(ms)/1000,tz=UTC).strftime('%Y-%m')
+          stock_source={}
+          for m in ['2026-02','2026-04','2026-05','2026-07']:
+              a11=[x for x in v11 if month(x['exitTs'])==m]; a50=[x for x in v50 if month(x['exitTs'])==m]
+              stock_source[m]={
+                  'V11_raw':len(a11),'V11_costAccepted':sum(sim.base.stock.unit_trade_value(x,cost) is not None for x in a11),
+                  'V50_raw':len(a50),'V50_costAccepted':sum(sim.base.stock.unit_trade_value(x,cost) is not None for x in a50),
+              }
+          def key(t): return (str(t.get('symbol','')),int(t.get('entryTs',-1)),int(t.get('exitTs',-1)))
+          def replay(drop_v12=set(),drop_pengu=set(),drop_v50=set()):
+              vv=[t for t in v12['modes']['normal']['trades'] if key(t) not in drop_v12]
+              pp=[t for t in pengu['modes']['normal']['trades'] if ('PENGUUSDT',int(t['entryTs']),int(t['exitTs'])) not in drop_pengu]
+              ff=[t for t in v50 if key(t) not in drop_v50]
+              return sim.simulate(vv,pp,v11,ff,cost)
+          scenarios={
+              'FEB_DROP_PENGU_HARD_PLUS_ADA_STOP': replay(
+                  drop_v12={('ADA',1772056800000,1772056800000)},
+                  drop_pengu={('PENGUUSDT',1772294400000,1772308800000)}),
+              'MAY_DROP_TWO_META_V50_LOSERS': replay(
+                  drop_v50={('METAUSDT',1779381000000,1779384600000),('METAUSDT',1779903000000,1779906600000)}),
+              'JUL_DROP_BOTH_PENGU_LOSERS': replay(
+                  drop_pengu={('PENGUUSDT',1784318400000,1784545200000),('PENGUUSDT',1785232800000,1785488400000)}),
+          }
+          out={}
+          bmonthly={x['month']:x for x in baseline['monthly']}
+          for name,r in scenarios.items():
+              rmonthly={x['month']:x for x in r['monthly']}
+              target='2026-02' if name.startswith('FEB') else '2026-05' if name.startswith('MAY') else '2026-07'
+              out[name]={
+                  'targetMonth':target,
+                  'baselineMonthPnlJpy':bmonthly[target]['tradingPnlJpy'],
+                  'counterfactualMonthPnlJpy':rmonthly[target]['tradingPnlJpy'],
+                  'monthPnlImprovementJpy':rmonthly[target]['tradingPnlJpy']-bmonthly[target]['tradingPnlJpy'],
+                  'baselineEndingAssetJpy':baseline['endingAssetJpy'],
+                  'counterfactualEndingAssetJpy':r['endingAssetJpy'],
+                  'endingAssetImprovementJpy':r['endingAssetJpy']-baseline['endingAssetJpy'],
+                  'endingAssetImprovementPct':(r['endingAssetJpy']/baseline['endingAssetJpy']-1)*100,
+              }
+          payload={'status':'PASS_RESEARCH_ONLY','stockSourceOpportunities':stock_source,'bundledCounterfactuals':out,
+                   'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}}
+          Path('.research-state/source-bundle/result.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(payload,ensure_ascii=False,indent=2))
+          PY
+      - name: Validate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/source-bundle/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert len(p['bundledCounterfactuals'])==3
+          print('SOURCE_BUNDLE_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weak-month-source-bundle-${{ github.run_id }}
+          path: .research-state/source-bundle
+          retention-days: 90
