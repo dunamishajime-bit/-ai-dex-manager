@@ -88,6 +88,11 @@ def upstream_fail_closed_error(error: BaseException | str) -> bool:
 def transient_reference_error(error: BaseException | str) -> bool:
     """Return true only for reference-validation failures which are safe to retry while flat."""
     message = str(error).lower()
+    if (
+        "http 503 http://127.0.0.1:8797/quote?symbol=" in message
+        and ('"error":"stale_quote"' in message or '"error":"quote_unavailable"' in message)
+    ):
+        return True
     return any(marker in message for marker in (
         "iex_quote_stale",
         "pyth_quote_stale",
