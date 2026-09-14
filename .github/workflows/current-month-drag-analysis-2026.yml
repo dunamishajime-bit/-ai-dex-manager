@@ -1,0 +1,317 @@
+name: Current 2026 Weak-Month Trade Drag Analysis
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - '.github/workflows/current-month-drag-analysis-2026.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout research harness
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore frozen stock research cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: current-v12-top2-pengu-v52-stock-resume-${{ runner.os }}
+          restore-keys: |
+            current-v12-top2-pengu-v52-stock-resume-
+            v12-v52-pengu-v2-combined-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - name: Reuse formally completed current V12 and PENGU ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/month-drag-input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+          repository: dunamishajime-bit/-ai-dex-manager
+
+      - name: Expose exact integrated event ledger in research runtime
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/research_current_top2_pengu_v52_dca.py')
+          text=p.read_text()
+          old='"exitReason": trade.get("exitReason")}'
+          count=text.count(old)
+          if count != 3:
+              raise SystemExit(f'expected 3 position dict tails, got {count}')
+          text=text.replace(old, '"exitReason": trade.get("exitReason"), "sourceTrade": trade}')
+          old_event='"exitReason": position.get("exitReason")})'
+          if text.count(old_event) != 1:
+              raise SystemExit('event append tail not uniquely found')
+          text=text.replace(old_event, '"exitReason": position.get("exitReason"), "sourceTrade": position.get("sourceTrade")})')
+          marker='"grossVerification": {"maxV12Positions"'
+          if text.count(marker) != 1:
+              raise SystemExit('grossVerification marker not uniquely found')
+          text=text.replace(marker, '"events": events,\n        '+marker)
+          p.write_text(text)
+          PY
+          python -m py_compile scripts/research_current_top2_pengu_v52_dca.py
+
+      - name: Run exact weak-month drag diagnostics
+        run: |
+          mkdir -p .research-state/month-drag-analysis
+          python - <<'PY'
+          from __future__ import annotations
+          import calendar, csv, datetime as dt, json, math, sys
+          from collections import defaultdict
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          import research_current_top2_pengu_v52_dca as sim
+
+          UTC=dt.timezone.utc
+          TARGETS={'2026-02','2026-04','2026-05','2026-07'}
+          inp=Path('.research-state/month-drag-input')
+          outdir=Path('.research-state/month-drag-analysis')
+          v12=json.loads((inp/'v12-top2-ledger.json').read_text())
+          pengu=json.loads((inp/'pengu-v2-ledger.json').read_text())
+
+          # Exact current architecture and DCA assumptions from the formal PASS run.
+          sim.INITIAL_JPY=10000.0
+          sim.MONTHLY_JPY=10000.0
+          sim.TOTAL_GROSS_CAP=2.5
+          sim.CRYPTO_GROSS_CAP=2.0
+          sim.V12_GROSS_CAP=1.5
+          sim.V12_PER_POSITION_GROSS_CAP=1.0
+          sim.V12_MAX_POSITIONS=2
+          sim.PENGU_MAX_GROSS=0.75
+          sim.STOCK_GROSS_CAP=1.5
+          sim.CRYPTO_DAILY_LOSS_LIMIT=-0.075
+          sim.STOCK_DAILY_LOSS_LIMIT=-0.035
+
+          v11,v50,target_days,stock_diag=sim.build_stock(Path('.cache/aster-only-v39-overnight-open'))
+          normal=sim.simulate(v12['modes']['normal']['trades'], pengu['modes']['normal']['trades'], v11, v50, float(sim.SCENARIOS['NORMAL']['stockCostBps']))
+          events=normal.pop('events')
+          assert normal['endingAssetJpy'] > 572000 and normal['endingAssetJpy'] < 573000
+          assert normal['trades'] == 624
+
+          def tsdt(ms): return dt.datetime.fromtimestamp(int(ms)/1000, tz=UTC)
+          def month_of(ms): return tsdt(ms).strftime('%Y-%m')
+          def f(v, default=0.0):
+              try: x=float(v)
+              except (TypeError,ValueError): return default
+              return x if math.isfinite(x) else default
+          def event_key(ev):
+              st=ev.get('sourceTrade') or {}
+              return (str(ev.get('strategy')),str(ev.get('symbol')),int(st.get('entryTs',-1)),int(st.get('exitTs',ev.get('ts',-1))))
+
+          rows=[]
+          for ev in events:
+              st=ev.get('sourceTrade') or {}
+              entry=int(st.get('entryTs', ev['ts']))
+              exit_ts=int(st.get('exitTs', ev['ts']))
+              side=st.get('side')
+              if side in ('L','S'): side={'L':'long','S':'short'}[side]
+              rows.append({
+                  'strategy':ev['strategy'],'sleeve':ev['sleeve'],'symbol':ev.get('symbol'),
+                  'side':side,'rank':st.get('rank'),'entryTs':entry,'exitTs':exit_ts,
+                  'entryIso':tsdt(entry).isoformat(),'exitIso':tsdt(exit_ts).isoformat(),
+                  'exitMonth':month_of(exit_ts),'durationHours':(exit_ts-entry)/3600000.0,
+                  'pnlJpy':f(ev.get('pnlJpy')),'eventReturnPct':f(ev.get('eventReturn'))*100,
+                  'allocatedGrossAtEntry':f(ev.get('allocatedGrossAtEntry')),
+                  'requestedGross':f(ev.get('requestedGross')),'exitReason':ev.get('exitReason'),
+                  'netUnitReturnPct':f(st.get('netUnitReturn'))*100 if st.get('netUnitReturn') is not None else None,
+                  'sourceKey':'|'.join(map(str,event_key(ev))),
+              })
+
+          by_month=defaultdict(list)
+          for r in rows: by_month[r['exitMonth']].append(r)
+
+          def month_bounds(key):
+              y,m=map(int,key.split('-'))
+              start=dt.datetime(y,m,1,tzinfo=UTC)
+              end=dt.datetime(y+1,1,1,tzinfo=UTC) if m==12 else dt.datetime(y,m+1,1,tzinfo=UTC)
+              return start,end
+
+          def split_gross_hours(month, sleeve=None):
+              start,end=month_bounds(month); start_ms=int(start.timestamp()*1000); end_ms=int(end.timestamp()*1000)
+              gross_hours=0.0; slot_hours=0.0; intervals=[]
+              for r in rows:
+                  if sleeve and r['sleeve']!=sleeve: continue
+                  a=max(start_ms,r['entryTs']); b=min(end_ms,r['exitTs'])
+                  if b<=a: continue
+                  hrs=(b-a)/3600000.0
+                  gross_hours += hrs*r['allocatedGrossAtEntry']
+                  slot_hours += hrs
+                  intervals.append((a,b))
+              month_hours=(end_ms-start_ms)/3600000.0
+              # union occupancy hours (at least one position in sleeve open)
+              intervals.sort(); union=0; cur_a=cur_b=None
+              for a,b in intervals:
+                  if cur_a is None: cur_a,cur_b=a,b
+                  elif a<=cur_b: cur_b=max(cur_b,b)
+                  else: union += cur_b-cur_a; cur_a,cur_b=a,b
+              if cur_a is not None: union += cur_b-cur_a
+              union_hours=union/3600000.0
+              return {'avgEntryGross':gross_hours/month_hours,'avgOpenSlots':slot_hours/month_hours,'occupiedPct':union_hours/month_hours*100,'idlePct':(1-union_hours/month_hours)*100}
+
+          monthly={}
+          monthly_map={r['month']:r for r in normal['monthly']}
+          for month in sorted(monthly_map):
+              mr=monthly_map[month]; er=by_month.get(month,[])
+              sleeves={}
+              for sl in ('V12','PENGU_DUAL_LS_V2','V52'):
+                  sr=[x for x in er if x['sleeve']==sl]
+                  gains=sum(x['pnlJpy'] for x in sr if x['pnlJpy']>0); losses=-sum(x['pnlJpy'] for x in sr if x['pnlJpy']<0)
+                  sleeves[sl]={'trades':len(sr),'pnlJpy':sum(x['pnlJpy'] for x in sr),'wins':sum(x['pnlJpy']>0 for x in sr),'losses':sum(x['pnlJpy']<0 for x in sr),'grossGainJpy':gains,'grossLossJpy':losses,'utilization':split_gross_hours(month,sl)}
+              losses=sorted([x for x in er if x['pnlJpy']<0], key=lambda x:x['pnlJpy'])
+              winners=sorted([x for x in er if x['pnlJpy']>0], key=lambda x:x['pnlJpy'], reverse=True)
+              total_loss=-sum(x['pnlJpy'] for x in losses)
+              monthly[month]={
+                  'openingAssetJpy':mr['openingAssetJpy'],'depositJpy':mr['depositJpy'],'closingAssetJpy':mr['closingAssetJpy'],
+                  'tradingPnlJpy':mr['tradingPnlJpy'],'timeWeightedReturnPct':mr['timeWeightedReturnPct'],
+                  'trades':len(er),'sleeves':sleeves,'overallUtilization':split_gross_hours(month,None),
+                  'topLosses':losses[:10],'topWinners':winners[:10],
+                  'lossConcentrationWorst1Pct':(-losses[0]['pnlJpy']/total_loss*100) if losses and total_loss else 0,
+                  'lossConcentrationWorst3Pct':(-sum(x['pnlJpy'] for x in losses[:3])/total_loss*100) if losses and total_loss else 0,
+              }
+
+          # Source opportunity count, independent of integrated routing.
+          src_v12=defaultdict(int); src_pengu=defaultdict(int)
+          for t in v12['modes']['normal']['trades']: src_v12[month_of(t['exitTs'])]+=1
+          for t in pengu['modes']['normal']['trades']: src_pengu[month_of(t['exitTs'])]+=1
+          for m in monthly:
+              monthly[m]['sourceOpportunities']={'V12':src_v12[m],'PENGU_DUAL_LS_V2':src_pengu[m]}
+
+          # Loss pattern aggregations in target weak months.
+          target_rows=[r for r in rows if r['exitMonth'] in TARGETS]
+          target_losses=[r for r in target_rows if r['pnlJpy']<0]
+          def aggregate(keys, source):
+              g=defaultdict(lambda:{'trades':0,'pnlJpy':0.0,'lossJpy':0.0,'wins':0,'losses':0})
+              for r in source:
+                  k='|'.join(str(r.get(x)) for x in keys)
+                  z=g[k]; z['trades']+=1; z['pnlJpy']+=r['pnlJpy']; z['wins']+=r['pnlJpy']>0; z['losses']+=r['pnlJpy']<0
+                  if r['pnlJpy']<0: z['lossJpy'] += -r['pnlJpy']
+              return dict(sorted(g.items(), key=lambda kv: kv[1]['pnlJpy']))
+
+          patterns={
+              'bySleeve':aggregate(['sleeve'],target_rows),
+              'byStrategy':aggregate(['strategy'],target_rows),
+              'bySymbol':aggregate(['symbol'],target_rows),
+              'bySide':aggregate(['sleeve','side'],target_rows),
+              'byExitReason':aggregate(['sleeve','exitReason'],target_rows),
+              'v12ByRank':aggregate(['rank'],[r for r in target_rows if r['sleeve']=='V12']),
+          }
+
+          # Exact counterfactual: remove each top target-month loser from the frozen source ledger and replay.
+          def drop_source(target):
+              key=(target['strategy'],target['symbol'],target['entryTs'],target['exitTs'])
+              vv=list(v12['modes']['normal']['trades']); pp=list(pengu['modes']['normal']['trades']); a11=list(v11); a50=list(v50)
+              def match(strategy,t): return (strategy,str(t.get('symbol') or ('PENGUUSDT' if strategy=='PENGU_DUAL_LS_V2' else '')),int(t.get('entryTs',-1)),int(t.get('exitTs',-1)))==key
+              if target['sleeve']=='V12': vv=[t for t in vv if not match('V12',t)]
+              elif target['sleeve']=='PENGU_DUAL_LS_V2': pp=[t for t in pp if not match('PENGU_DUAL_LS_V2',t)]
+              elif target['strategy']=='V11_EQ': a11=[t for t in a11 if not match('V11_EQ',t)]
+              elif target['strategy']=='V50_POST_OPEN_BASIS': a50=[t for t in a50 if not match('V50_POST_OPEN_BASIS',t)]
+              rerun=sim.simulate(vv,pp,a11,a50,float(sim.SCENARIOS['NORMAL']['stockCostBps']))
+              rerun.pop('events',None)
+              return rerun
+
+          top_drag=sorted(target_losses,key=lambda r:r['pnlJpy'])[:15]
+          counter=[]
+          for r in top_drag:
+              rr=drop_source(r)
+              base_month=monthly[r['exitMonth']]['tradingPnlJpy']
+              rerun_month={x['month']:x for x in rr['monthly']}[r['exitMonth']]['tradingPnlJpy']
+              counter.append({**r,
+                  'endingAssetImprovementJpyIfOmitted':rr['endingAssetJpy']-normal['endingAssetJpy'],
+                  'endingAssetImprovementPctOfBase':(rr['endingAssetJpy']/normal['endingAssetJpy']-1)*100,
+                  'targetMonthPnlImprovementJpyIfOmitted':rerun_month-base_month,
+              })
+
+          payload={
+              'status':'PASS_RESEARCH_ONLY','schema':'current-month-drag-analysis/v1',
+              'period':{'startInclusive':'2025-08-01T00:00:00.000Z','endExclusive':'2026-08-01T00:00:00.000Z'},
+              'targetMonths':sorted(TARGETS),'baseline':normal,'monthly':monthly,'patterns':patterns,
+              'topTargetMonthLosses':sorted(target_losses,key=lambda r:r['pnlJpy'])[:30],
+              'counterfactualTopLosses':counter,
+              'allEvents':rows,
+              'safety':{'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False},
+          }
+          (outdir/'analysis.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
+          with (outdir/'events.csv').open('w',newline='') as fh:
+              w=csv.DictWriter(fh,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+
+          # Compact human report.
+          lines=['# Current V12 + PENGU V2 + V52 weak-month drag analysis','',
+                 'Exact current DCA architecture; target months 2026-02/04/05/07. Research only.','']
+          lines += ['| Month | Open JPY | PnL JPY | TWR | Trades | V12 | PENGU | V52 | V12 idle |',
+                    '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
+          for m in sorted(TARGETS):
+              z=monthly[m]
+              lines.append(f"| {m} | {z['openingAssetJpy']:.0f} | {z['tradingPnlJpy']:+.0f} | {z['timeWeightedReturnPct']:+.2f}% | {z['trades']} | {z['sleeves']['V12']['trades']} | {z['sleeves']['PENGU_DUAL_LS_V2']['trades']} | {z['sleeves']['V52']['trades']} | {z['sleeves']['V12']['utilization']['idlePct']:.1f}% |")
+          lines += ['','## Worst exact integrated trades','', '| Month | Sleeve | Symbol | Side | Exit | PnL JPY | Event impact | Gross | End-asset gain if omitted |', '|---|---|---|---|---|---:|---:|---:|---:|']
+          for r in counter[:15]:
+              lines.append(f"| {r['exitMonth']} | {r['sleeve']} | {r['symbol']} | {r['side']} | {r['exitReason']} | {r['pnlJpy']:+.0f} | {r['eventReturnPct']:+.2f}% | {r['allocatedGrossAtEntry']:.2f}x | {r['endingAssetImprovementJpyIfOmitted']:+.0f} |")
+          (outdir/'report.md').write_text('\n'.join(lines)+'\n')
+
+          print(json.dumps({
+              'status':payload['status'],
+              'targets':{m:{'pnl':monthly[m]['tradingPnlJpy'],'twr':monthly[m]['timeWeightedReturnPct'],'trades':monthly[m]['trades'],'v12':monthly[m]['sleeves']['V12']['trades'],'pengu':monthly[m]['sleeves']['PENGU_DUAL_LS_V2']['trades'],'v52':monthly[m]['sleeves']['V52']['trades'],'v12IdlePct':monthly[m]['sleeves']['V12']['utilization']['idlePct']} for m in sorted(TARGETS)},
+              'worst':counter[:8]
+          },ensure_ascii=False,indent=2))
+          PY
+
+      - name: Validate diagnostics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/month-drag-analysis/analysis.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['targetMonths']==['2026-02','2026-04','2026-05','2026-07']
+          assert p['baseline']['trades']==624
+          assert abs(p['baseline']['endingAssetJpy']-572544.35821388)<1.0
+          assert len(p['allEvents'])==624
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('MONTH_DRAG_ANALYSIS_PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-month-drag-analysis-${{ github.run_id }}
+          path: .research-state/month-drag-analysis
+          retention-days: 90
+          if-no-files-found: warn

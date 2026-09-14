@@ -1,0 +1,80 @@
+name: Weak-Month B Idle Overlay Holdout
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_current_v12_idle_overlay.ts'
+      - '.github/workflows/weak-month-b-idle-overlay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: weak-month-b-idle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Restore immutable perpetual research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: weak-month-b-idle-${{ runner.os }}
+          restore-keys: |
+            v26-latency-aware-3y-usdm-v1-20260816
+            v12-top2-gross15-
+            perp-research-usdm-
+
+      - run: npm ci
+
+      - name: Reuse formal current V12 ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: current-v12-top2-pengu-v52-dca-32631037372
+          path: .research-state/b-input
+          github-token: ${{ github.token }}
+          run-id: 32631037372
+
+      - name: Run pre-2026 selection and 2026 holdout audit
+        env:
+          V12_LEDGER_IN: .research-state/b-input/v12-top2-ledger.json
+          IDLE_OVERLAY_OUT: .research-state/weak-month-b/result.json
+        run: |
+          mkdir -p .research-state/weak-month-b
+          set -o pipefail
+          npx tsx scripts/research_current_v12_idle_overlay.ts 2>&1 | tee .research-state/weak-month-b/run.log
+
+      - name: Validate research-only output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/weak-month-b/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['selection']['rule'].startswith('select using 2023/2024/2025 only')
+          assert len(p['families'])==3
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print(json.dumps({'selection':p['selection'],'families':p['families'],'currentIdleLedger':p['currentIdleLedger']},indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weak-month-b-idle-${{ github.run_id }}
+          path: .research-state/weak-month-b
+          retention-days: 90
+          if-no-files-found: warn
