@@ -1,0 +1,47 @@
+name: V35 Core Plus PENGU V67 V71 Cap Extension
+
+on:
+  pull_request:
+    branches:
+      - research/v35-core-pengu-v67-combined
+    paths:
+      - scripts/research_lab_v35_core_pengu_v67_v71_cap_extension.py
+      - .github/workflows/v35-core-pengu-v67-v71-cap-extension.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_parameter_bagged_rotation_v4.py scripts/research_lab_precomputed_multi_regime_v6.py scripts/research_lab_pengu_main_currency_v20.py scripts/research_lab_feature_combo_v28.py scripts/research_lab_asymmetric_return_stack_v32.py scripts/research_lab_resilient_profit_stack_v34.py scripts/research_lab_v35_core_pengu_v46_gross2.py scripts/research_lab_v35_core_pengu_v67_combined.py scripts/research_lab_v35_core_pengu_v67_combined_v2.py scripts/research_lab_v35_core_pengu_v67_v69_sizing.py scripts/research_lab_v35_core_pengu_v67_v70_dynamic_cap.py scripts/research_lab_v35_core_pengu_v67_v71_cap_extension.py
+      - name: Run dynamic cap extension
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_v35_core_pengu_v67_v71_cap_extension.py 2>&1 | tee .research-state/v35-core-pengu-v67-v71-cap-extension.log
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v35-core-pengu-v67-v71-cap-extension
+          path: |
+            .research-state/v35-core-pengu-v67-v71-cap-extension.json
+            .research-state/v35-core-pengu-v67-v71-cap-extension.md
+            .research-state/v35-core-pengu-v67-v71-cap-extension.log
+          if-no-files-found: warn
+          retention-days: 30
