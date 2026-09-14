@@ -1,0 +1,57 @@
+name: PENGU Bull Trap Overlay V3 Research
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_bulltrap_overlay_v3.ts'
+      - '.github/workflows/pengu-bulltrap-overlay-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-bulltrap-overlay-v3-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run baseline-preserving bull-trap overlay study
+        env:
+          PENGU_BULLTRAP_OVERLAY_OUT: .research-state/pengu-bulltrap-overlay-v3/result.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-bulltrap-overlay-v3
+          npx tsx scripts/research_pengu_bulltrap_overlay_v3.ts 2>&1 | tee .research-state/pengu-bulltrap-overlay-v3/run.log
+      - name: Validate research-only contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/pengu-bulltrap-overlay-v3/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          for v in p['results'].values():
+              assert v['NORMAL']['baselineTradesPreserved']==32
+              assert v['STRESS']['baselineTradesPreserved']==32
+          print('PENGU_BULLTRAP_OVERLAY_V3_RESEARCH_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-bulltrap-overlay-v3-${{ github.run_id }}
+          path: .research-state/pengu-bulltrap-overlay-v3
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
