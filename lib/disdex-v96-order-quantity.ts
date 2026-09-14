@@ -38,7 +38,7 @@ export async function normalizeDisDexV96OrderQuantity(input: {
     const symbol = input.symbol.toUpperCase();
     const referencePrice = disDexV96ExecutionPrice(input.quote, input.side);
     const requestedDeltaNotionalUsd = Math.abs(finitePositive(Math.abs(input.deltaNotionalUsd), "V96 delta notional"));
-    if (requestedDeltaNotionalUsd + 1e-9 < input.minimumOrderNotionalUsd) {
+    if (!input.reduceOnly && requestedDeltaNotionalUsd + 1e-9 < input.minimumOrderNotionalUsd) {
         throw new Error(`V96 order notional ${requestedDeltaNotionalUsd.toFixed(4)} is below the configured minimum ${input.minimumOrderNotionalUsd}.`);
     }
     let requestedQuantity = requestedDeltaNotionalUsd / referencePrice;
@@ -47,7 +47,7 @@ export async function normalizeDisDexV96OrderQuantity(input: {
         if (!Number.isFinite(current) || current <= 0) throw new Error("V96 reduce-only conversion requires a positive current position quantity.");
         requestedQuantity = Math.min(requestedQuantity, current);
     }
-    const normalized = await input.executor.normalizeMarketQuantity(symbol, requestedQuantity, referencePrice);
+    const normalized = await input.executor.normalizeMarketQuantity(symbol, requestedQuantity, referencePrice, { allowBelowMinNotional: input.reduceOnly });
     if (normalized.quantity <= 0) throw new Error("Aster normalized V96 quantity is zero.");
     if (normalized.quantity > requestedQuantity + Math.max(normalized.stepSize, 1e-12)) {
         throw new Error("Aster quantity normalization increased the V96 order beyond the requested quantity.");
@@ -55,7 +55,7 @@ export async function normalizeDisDexV96OrderQuantity(input: {
     if (input.reduceOnly && normalized.quantity > Math.abs(Number(input.currentPositionQuantity || 0)) + 1e-12) {
         throw new Error("Normalized V96 reduce-only quantity exceeds the current position.");
     }
-    if (normalized.notional + 1e-9 < input.minimumOrderNotionalUsd) {
+    if (!input.reduceOnly && normalized.notional + 1e-9 < input.minimumOrderNotionalUsd) {
         throw new Error(`Normalized V96 notional ${normalized.notional.toFixed(4)} is below the configured minimum.`);
     }
     return {

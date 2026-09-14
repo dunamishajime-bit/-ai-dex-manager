@@ -1,0 +1,24 @@
+[Unit]
+Description=DisDex V12-aware V52 LIVE readiness (%i)
+After=network-online.target disdex-stock-reference-free.service
+Wants=network-online.target
+Requires=disdex-stock-reference-free.service
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+Environment=NODE_ENV=production
+Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/usr/bin/python3 scripts/disdex_v12_v52_live_engine.py --mode live --preflight-readonly
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state /var/lib/disdex/shared
+UMask=0077

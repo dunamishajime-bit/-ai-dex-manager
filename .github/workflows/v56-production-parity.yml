@@ -1,0 +1,64 @@
+name: V56 Production Parity
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/disdex_v56_policy.py'
+      - 'scripts/disdex_v56_production_parity_selftest.py'
+      - 'scripts/disdex_v12_v52_live_engine.py'
+      - 'scripts/disdex_v12_v52_live_engine_retry.py'
+      - 'scripts/disdex_v52_aster_only_live_engine.py'
+      - 'config/penguDualLsV2Runtime.ts'
+      - 'lib/pengu-dual-ls-v2.ts'
+      - '.github/workflows/v56-production-parity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Download frozen V56 research evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: v56-pengu-long-boundary-32814696622
+          path: .research-state/v56-pengu-long-boundary
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 32814696622
+
+      - name: Validate aggregate research evidence and contract parity
+        env:
+          PYTHONPATH: scripts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.research-state/v56-pengu-long-boundary/v56-result.json').read_text())
+          assert p['status'] == 'V56_PENGU_LONG_BOUNDARY_PASS_RESEARCH_ONLY'
+          assert p['preferred']['penguLongMultiplier'] == 1.25
+          assert p['shortMultiplierFixed'] == 1.0
+          assert p['preferred']['full']['events'] == 254
+          assert p['preferred']['full']['maxTotalGross'] <= 2.5
+          assert p['preferred']['full']['maxStockGross'] <= 1.5
+          assert p['preferred']['full']['maxCryptoGross'] <= 1.5
+          assert p['safety']['ordersSent'] is False
+          assert p['safety']['liveChanged'] is False
+          print('V56 aggregate research evidence: PASS')
+          PY
+          python scripts/disdex_v56_production_parity_selftest.py
+          python scripts/disdex_v56_policy_selftest.py
+
+      - name: Assert no live credentials or mutation code in parity CI
+        run: |
+          ! rg -n 'ASTER_API_KEY|ASTER_API_SECRET|I_ACCEPT_REAL_MONEY|place_limit|place_market|executeMarket' .github/workflows/v56-production-parity.yml scripts/disdex_v56_*selftest.py
+          echo 'OFFLINE_ONLY_CI=TRUE'

@@ -1,0 +1,33 @@
+[Unit]
+Description=DisDex V12/PENGU/V52 serialized Margin Guard (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+Environment=NODE_ENV=production
+Environment=V12_LIVE_GRANDFATHERED_POSITION_ALLOWED=true
+Environment=V12_X1_ALL_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
+Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/usr/bin/python3 scripts/disdex_v12_v52_margin_guard_runtime.py --mode live --daemon
+Restart=on-failure
+RestartSec=15s
+TimeoutStopSec=90s
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/home/deploy/ai-dex-manager-v96-paper/.runtime-state
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

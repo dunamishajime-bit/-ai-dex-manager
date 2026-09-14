@@ -43,6 +43,12 @@ Create `.env.local` in the project root and set at least:
 - `EXECUTION_PRIVATE_KEY`
 - `TRADER_PRIVATE_KEY`
 - `TRADER_ADDRESS`
+- Email notifications (choose one provider; never commit the secret):
+  - Gmail SMTP: `GMAIL_USER` + `GMAIL_APP_PASSWORD`
+  - or SendGrid: `SENDGRID_API_KEY`
+  - recipient: `DISDEX_ORDER_FILL_EMAIL` (optional `PENGU_ORDER_FILL_EMAIL`)
+
+Gmail/ChatGPT integration is not inherited by the VPS process. Create a Google App Password and configure it in the VPS environment; never commit it.
 - `SENDGRID_API_KEY`
 - `GMAIL_USER`
 - `GMAIL_APP_PASSWORD`

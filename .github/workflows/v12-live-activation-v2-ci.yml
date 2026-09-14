@@ -1,0 +1,47 @@
+name: V12 LIVE activation v2 CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-v12-live-activate-from-sha-v2'
+      - 'scripts/ops/root/disdex-v96-to-v12-live-migrate-final'
+      - 'scripts/ops/root/disdex-v12-live-status-report'
+      - 'scripts/ops/root/disdex-v96-refuse-while-v12-active'
+      - '.github/workflows/v12-live-activation-v2-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  hardened-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate no-unsafe-rollback exact-SHA activation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          activate=scripts/ops/root/disdex-v12-live-activate-from-sha-v2
+          migrate=scripts/ops/root/disdex-v96-to-v12-live-migrate-final
+          status=scripts/ops/root/disdex-v12-live-status-report
+          reverse=scripts/ops/root/disdex-v96-refuse-while-v12-active
+          for script in "$activate" "$migrate" "$status" "$reverse"; do bash -n "$script"; done
+          grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION' "$activate"
+          grep -Fq 'git -C "$source_repo" archive "$sha"' "$activate"
+          grep -Fq 'disdex-v12-current-release-delta-audit.sh' "$activate"
+          grep -Fq 'disdex-v96-to-v12-live-migrate-final' "$activate"
+          grep -Fq 'V12_ACTIVATION_PHASE=VPS_THREE_WAY_DELTA_AUDIT' "$activate"
+          grep -Fq 'V12_ACTIVATION_PHASE=LIVE_MIGRATION' "$activate"
+          grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$activate"
+          grep -Fq 'v12_start_attempted=false' "$migrate"
+          grep -Fq 'v12_start_attempted=true' "$migrate"
+          grep -Fq '"$v12_start_attempted" != "true"' "$migrate"
+          grep -Fq 'currentSymlinkRollbackAttempted=false' "$migrate"
+          grep -Fq 'Automatic V96 restart is prohibited' "$migrate"
+          grep -Fq 'V96_REVERSE_INTERLOCK_VERIFIED=TRUE' "$status"
+          grep -Fq 'V96_START_BLOCKED_V12_SERVICE_ACTIVE' "$reverse"
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$activate" "$migrate" "$status" "$reverse"
+          ! grep -Eq 'placeMarket|place_limit|submitOrder|curl[[:space:]].*(order|fapi)' "$activate" "$migrate" "$status" "$reverse"
+          echo V12_LIVE_ACTIVATION_V2_CI_PASS

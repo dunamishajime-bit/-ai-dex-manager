@@ -1,0 +1,83 @@
+name: DisDex production release artifact
+
+on:
+  push:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: disdex-production-artifact-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  build-release-artifact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Production contract validation
+        run: |
+          npm run strategy:v12-x1-all:typecheck
+          npm run strategy:v12-x1-all:selftest
+          PYTHONPATH=scripts python scripts/disdex_v12_v52_margin_guard_runtime.py --self-test
+          PYTHONPATH=scripts python scripts/disdex_v12_v52_live_engine.py --self-test
+          PYTHONPATH=scripts python scripts/disdex_v52_reference_recovery_selftest.py
+
+      - name: Linux production build
+        run: npm run build
+
+      - name: Build exact-SHA release artifact
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash scripts/ops/create-disdex-production-release-artifact.sh \
+            "$GITHUB_SHA" "$RUNNER_TEMP/disdex-artifact"
+      - name: Publish immutable SHA release assets
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tag="disdex-artifact-$GITHUB_SHA"
+          archive="$RUNNER_TEMP/disdex-artifact/disdex-release-$GITHUB_SHA.tar.gz"
+          checksum="$archive.sha256"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json targetCommitish,assets > /tmp/release.json
+            python3 - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/release.json', encoding='utf-8'))
+          sha=os.environ['GITHUB_SHA']
+          if data.get('targetCommitish') != sha:
+              raise SystemExit('DISDEX_ARTIFACT_EXISTING_RELEASE_TARGET_MISMATCH')
+          names={a.get('name') for a in data.get('assets', [])}
+          required={f'disdex-release-{sha}.tar.gz', f'disdex-release-{sha}.tar.gz.sha256'}
+          if not required.issubset(names):
+              raise SystemExit(f'DISDEX_ARTIFACT_EXISTING_RELEASE_ASSETS_MISSING names={sorted(names)}')
+          print('DISDEX_ARTIFACT_EXISTING_RELEASE_VERIFIED')
+          PY
+          else
+            gh release create "$tag" "$archive" "$checksum" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "DisDex production artifact $GITHUB_SHA" \
+              --notes "Exact-SHA Linux production artifact. Built after typecheck, self-tests, and Next.js production build."
+          fi
+          echo 'DISDEX_PRODUCTION_ARTIFACT_PUBLISHED_PASS'
