@@ -41,5 +41,17 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         self.assertIn('remove_stale_auto_repair_unit_pin_dropins', source[source.index('apply_wiring()'):])
 
 
+class AutoRepairPathWiringTests(unittest.TestCase):
+    def test_event_watcher_tracks_only_shared_kill_switch_and_is_rearmed(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertIn('AUTO_REPAIR_PATH_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d"', source)
+        self.assertIn('write_atomic "${AUTO_REPAIR_PATH_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"', source)
+        path_block = source.split('write_atomic "${AUTO_REPAIR_PATH_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"', 1)[1].split('write_atomic "${THREE_HOUR_HEALTH_DROPIN_DIR}', 1)[0]
+        self.assertIn('PathChanged=${SHARED_ROOT}/kill-switch.json', path_block)
+        self.assertNotIn('v12-x1-all/runner.json', path_block)
+        self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.path', source)
+        self.assertIn('systemctl restart disdex-v12-kill-switch-auto-repair.path', source)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -14,6 +14,8 @@ RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
 AUTO_REPAIR_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.service.d"
+AUTO_REPAIR_PATH_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d"
+THREE_HOUR_HEALTH_DROPIN_DIR="/etc/systemd/system/disdex-v12-three-hour-health-check.service.d"
 V12_DROPIN_DIR="/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d"
 PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
@@ -390,6 +392,26 @@ WorkingDirectory=${CURRENT_RELEASE}"
 
   remove_stale_auto_repair_unit_pin_dropins
 
+  # runner.json changes on normal V12 ticks, so watching it can exhaust the
+  # oneshot service start limit and permanently kill the path watcher. Shared
+  # Kill Switch changes are the event-driven recovery trigger; local V12 state
+  # remains covered by the periodic three-hour health inspection.
+  write_atomic "${AUTO_REPAIR_PATH_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Path]
+PathChanged=
+PathChanged=${SHARED_ROOT}/kill-switch.json"
+
+  write_atomic "${THREE_HOUR_HEALTH_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+EnvironmentFile=
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/disdex-v12-x1-all.env
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Environment=DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+Environment=DISDEX_V12_STATE_FILE=/var/lib/disdex/v12-x1-all/runner.json
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStart=
+ExecStart=/usr/local/libexec/disdex-v12-three-hour-health-check"
+
   write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
@@ -470,6 +492,8 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
   systemctl daemon-reload
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
+  systemctl reset-failed disdex-v12-kill-switch-auto-repair.path || true
+  systemctl restart disdex-v12-kill-switch-auto-repair.path
   systemctl reset-failed disdex-runner-watchdog.service || true
   systemctl reset-failed disdex-v12-three-hour-health-check.service || true
   systemctl reset-failed disdex-ui-retention.service || true
