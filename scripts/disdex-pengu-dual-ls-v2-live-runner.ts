@@ -104,6 +104,7 @@ async function main() {
         },
         recoveryV8Protection,
     });
+    console.log(JSON.stringify({ timestamp: new Date().toISOString(), level: "info", event: "pengu-runtime-contract", strategyId: runtime.strategyId, mode: runtime.mode, recoveryV8Enabled, v64DynamicLongEnabled: recoveryV8Enabled, promotionStatus: PENGU_RECOVERY_V8_PROMOTION.status }));
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
     const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_MS", 5_000)));

@@ -69,8 +69,9 @@ assert.equal(PENGU_RECOVERY_V8.exit.structuralBufferPct, null);
 assert.equal(PENGU_RECOVERY_V8.breakevenProtector, false);
 assert.equal(PENGU_RECOVERY_V8.staticGuard, false);
 assert.equal(PENGU_RECOVERY_V8.stagedEntry, false);
-assert.equal(PENGU_RECOVERY_V8_PROMOTION.liveEnabled, false);
-assert.equal(PENGU_RECOVERY_V8_PROMOTION.status, "HOLDOUT_INSUFFICIENT_FAIL_CLOSED");
+assert.equal(PENGU_RECOVERY_V8_PROMOTION.liveEnabled, true);
+assert.equal(PENGU_RECOVERY_V8_PROMOTION.status, "LIVE_TARGET_APPROVED_20260911");
+assert.equal(PENGU_RECOVERY_V8_PROMOTION.promotionBasis, "research/IMPLEMENTATION_HANDOFF_V12_TOP2_PENGU_V8_Q102_1P0_20260911.md");
 assert.equal(PENGU_RECOVERY_V8_PROMOTION.freshHoldout.signals, 1);
 assert.equal(PENGU_RECOVERY_V8_PROMOTION.freshHoldout.accountReturnPct, -3.0);
 

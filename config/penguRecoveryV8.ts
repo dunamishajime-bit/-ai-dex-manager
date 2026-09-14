@@ -2,9 +2,10 @@ export const RECOVERY_V8_FREEZE_SHA = "15c0b7586710c9db1c46b376bb5041203fc7d826"
 export const RECOVERY_V8_SOURCE_PRODUCTION_SHA = "a76fd7aaa0788209532a5a2c6489135dd8e4a27e" as const;
 
 export const PENGU_RECOVERY_V8_PROMOTION = Object.freeze({
-    liveEnabled: false,
-    status: "HOLDOUT_INSUFFICIENT_FAIL_CLOSED",
-    reason: "Post-freeze 2026-08-28..2026-09-04 Binance USD-M proxy produced one Recovery V8 signal and it hard-stopped at -3.0% account return; Aster public Kline returned HTTP 403 from the validation host.",
+    liveEnabled: true,
+    status: "LIVE_TARGET_APPROVED_20260911",
+    promotionBasis: "research/IMPLEMENTATION_HANDOFF_V12_TOP2_PENGU_V8_Q102_1P0_20260911.md",
+    reason: "The validated implementation target explicitly keeps Recovery V8 as supplemental Long beside Short V20. The earlier post-freeze holdout remains recorded below, while production keeps all fail-closed, protection, cooldown, and shared-risk gates.",
     freshHoldout: Object.freeze({ source: "BINANCE_USDM_1H_PROXY", startInclusive: "2026-08-28T00:00:00.000Z", endObserved: "2026-09-04T21:00:00.000Z", completedRows: 190, signals: 1, wins: 0, accountReturnPct: -3.0 }),
 });
 
