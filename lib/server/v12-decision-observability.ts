@@ -14,17 +14,6 @@ type JsonObject = Record<string, unknown>;
 type Direction = "LONG" | "SHORT";
 type StepState = "pass" | "blocked" | "pending" | "unknown";
 
-// Keep the read-only UI diagnosis aligned with the frozen V12 production
-// contract. The runner snapshot currently stores the ranked metrics, while
-// the per-gate booleans are intentionally not persisted there.
-const V12_SIGNAL_POLICY = Object.freeze({
-  minimumVolumeRatio: 0.9845,
-  minimumMomentumPct: 0.0227,
-  minimumEdgeToCostRatio: 6.0879,
-  normalRoundTripCostBps: 10,
-  neutralScoreThreshold: 1.4649,
-});
-
 type SanitizedCandidate = {
   symbol?: string;
   side?: string;
@@ -34,6 +23,8 @@ type SanitizedCandidate = {
   volumeRatio?: number;
   volatility?: number;
   atr?: number;
+  signalEligible?: boolean;
+  signalReason?: string;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -77,40 +68,16 @@ async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECIS
   }
 }
 
-function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
-  const score = candidate.score;
-  const momentum = candidate.momentum;
-  const volumeRatio = candidate.volumeRatio;
-  const side = candidate.side;
-  const missingMetric = score === undefined || momentum === undefined || volumeRatio === undefined || !side;
-  if (missingMetric || !btcRegime) {
-    return { status: "unknown" as const, code: "SIGNAL_GATE_DATA_INCOMPLETE", detail: "発注SignalのGate判定材料がsnapshotに不足しています。" };
+function runnerSignalGate(candidate: SanitizedCandidate) {
+  if (candidate.signalEligible === true) {
+    const code = candidate.signalReason || "SIGNAL_ELIGIBLE";
+    return { status: "pass" as const, code, detail: `Runner判定：${code} / signalEligible=true` };
   }
-
-  const failed: string[] = [];
-  const edgeThreshold = V12_SIGNAL_POLICY.minimumEdgeToCostRatio * (V12_SIGNAL_POLICY.normalRoundTripCostBps / 10_000);
-  if (volumeRatio < V12_SIGNAL_POLICY.minimumVolumeRatio) failed.push(`volumeRatio ${volumeRatio.toFixed(3)} < ${V12_SIGNAL_POLICY.minimumVolumeRatio.toFixed(4)}`);
-  if (Math.abs(momentum) < edgeThreshold) failed.push(`edge ${Math.abs(momentum).toFixed(4)} < ${edgeThreshold.toFixed(4)}`);
-  if (side === "LONG" && momentum < V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${momentum.toFixed(4)} < ${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
-  if (side === "SHORT" && momentum > -V12_SIGNAL_POLICY.minimumMomentumPct) failed.push(`momentum ${momentum.toFixed(4)} > -${V12_SIGNAL_POLICY.minimumMomentumPct.toFixed(4)}`);
-
-  if (btcRegime === "LONG" && side !== "LONG") failed.push("BTC regime=LONG ですが候補sideがLONGではありません");
-  if (btcRegime === "SHORT" && side !== "SHORT") failed.push("BTC regime=SHORT ですが候補sideがSHORTではありません");
-  if (btcRegime === "NEUTRAL" && score < V12_SIGNAL_POLICY.neutralScoreThreshold) {
-    failed.push(`BTC regime=NEUTRAL、score ${score.toFixed(4)} < 必要値 ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}`);
+  if (candidate.signalEligible === false) {
+    const code = candidate.signalReason || "RUNNER_SIGNAL_BLOCKED";
+    return { status: "blocked" as const, code, detail: `Runner判定で未通過：${code}` };
   }
-
-  if (failed.length) {
-    const btcBlock = btcRegime === "NEUTRAL" && score < V12_SIGNAL_POLICY.neutralScoreThreshold;
-    return {
-      status: "blocked" as const,
-      code: btcBlock ? "BTC_REGIME_DIRECTION_BLOCKED" : "V12_SIGNAL_GATE_BLOCKED",
-      detail: btcBlock
-        ? `BTCの判定基準未達：BTC regime=NEUTRALではscore ${V12_SIGNAL_POLICY.neutralScoreThreshold.toFixed(4)}以上が必要ですが、${candidate.symbol || "候補"}は${score.toFixed(4)}です。`
-        : `発注Signal Gate未達：${failed.join(" / ")}`,
-    };
-  }
-  return { status: "pass" as const, detail: "記録された指標上、発注Signalの数値Gateは通過しています。" };
+  return { status: "unknown" as const, code: "RUNNER_SIGNAL_GATE_UNAVAILABLE", detail: "RunnerのsignalEligible/signalReasonがsnapshotにないため、HPではGateを再計算せず未取得扱いです。" };
 }
 
 function safeCandidate(value: unknown): SanitizedCandidate | null {
@@ -125,6 +92,8 @@ function safeCandidate(value: unknown): SanitizedCandidate | null {
     volumeRatio: Number.isFinite(Number(row.volumeRatio)) ? Number(row.volumeRatio) : undefined,
     volatility: Number.isFinite(Number(row.volatility)) ? Number(row.volatility) : undefined,
     atr: Number.isFinite(Number(row.atr)) ? Number(row.atr) : undefined,
+    signalEligible: typeof row.signalEligible === "boolean" ? row.signalEligible : undefined,
+    signalReason: typeof row.signalReason === "string" ? row.signalReason : undefined,
   };
 }
 
@@ -135,8 +104,10 @@ function safeDecisionSnapshot(value: unknown) {
   const selectionConfirmed = typeof row.symbol === "string" && typeof row.side === "string";
   const candidates = (Array.isArray(row.candidates)
     ? row.candidates.map(safeCandidate).filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate)).slice(0, 32)
-    : []).map((candidate) => ({ ...candidate, signalGate: diagnoseSignalGate(candidate, btcRegime) }));
-  const selectedCandidate = candidates.find((candidate) => candidate.rank === 1) || candidates[0];
+    : []).map((candidate) => ({ ...candidate, signalGate: runnerSignalGate(candidate) }));
+  const selectedCandidate = selectionConfirmed
+    ? candidates.find((candidate) => candidate.symbol === row.symbol && candidate.side === row.side)
+    : candidates.find((candidate) => candidate.rank === 1) || candidates[0];
   return {
     strategyId: typeof row.strategyId === "string" ? row.strategyId : "V12_X1.00_ALL",
     symbol: typeof row.symbol === "string" ? row.symbol : selectedCandidate?.symbol,
@@ -235,33 +206,42 @@ function buildExecutionTrace(
   const matchingPosition = positions.find((position) => position.symbol.toUpperCase() === candidateSymbol && position.side === (decision.side === "SHORT" ? "SHORT" : "LONG"));
   const selectedAtTs = decision.selectedAt == null ? undefined : Number.isFinite(Number(decision.selectedAt)) ? Number(decision.selectedAt) : Date.parse(String(decision.selectedAt));
   const matchingFill = recentFills.find((fill) => fill.symbol.toUpperCase() === decision.symbol?.toUpperCase() && fill.action === "BUY" && (!Number.isFinite(selectedAtTs) || !fill.executedAt || Date.parse(fill.executedAt) >= Number(selectedAtTs)));
+  const signalConfirmed = decision.selectionConfirmed && decision.signalGate?.status === "pass";
 
   steps.push({ key: "candidate", label: "1. 候補選定", state: "pass", detail: `${decision.symbol} ${decision.side || "WAIT"} / Rank ${decision.rank ?? "-"} / score ${decision.score?.toFixed(4) ?? "-"}` });
   steps.push({ key: "confirmed-bar", label: "2. 確定2時間足", state: decision.referenceTs != null || decision.entryTs != null ? "pass" : "unknown", detail: decision.referenceTs != null ? `referenceTs ${new Date(decision.referenceTs).toLocaleString("ja-JP")}` : "確定足時刻未取得" });
   steps.push({
     key: "regime",
-    label: "3. Regime / BTC判定",
-    state: decision.signalGate?.status === "blocked" ? "blocked" : decision.regime && decision.btcRegime ? "pass" : "unknown",
-    detail: `${decision.regime || "未取得"} / BTC ${decision.btcRegime || "未取得"}${decision.signalGate?.status === "blocked" ? ` / ${decision.signalGate.detail}` : ""}`,
+    label: "3. Runner Signal Gate / BTC・Entry品質",
+    state: decision.signalGate?.status === "pass" ? "pass" : decision.signalGate?.status === "blocked" ? "blocked" : "unknown",
+    detail: `${decision.regime || "未取得"} / BTC ${decision.btcRegime || "未取得"}${decision.signalGate ? ` / ${decision.signalGate.detail}` : ""}`,
   });
   const top2 = decision.candidates.filter((candidate) => (candidate.rank || 99) <= 2);
   steps.push({
     key: "signal-selection",
     label: "4. V12 Top2 Signal選定",
-    state: decision.selectionConfirmed ? "pass" : "blocked",
-    detail: decision.selectionConfirmed
-      ? `Top2候補から${decision.symbol} ${decision.side || "WAIT"}をSignal確定。1建玉最大1.00x / 合計最大1.50x。`
-      : `候補${decision.candidates.length}件、Top2 ${top2.map((candidate) => candidate.symbol || "—").join(" / ") || "未取得"}。候補順位だけでは発注せず、全Signal Gate成立が必要です。`,
+    state: signalConfirmed ? "pass" : decision.selectionConfirmed ? "unknown" : "blocked",
+    detail: signalConfirmed
+      ? `Top2候補から${decision.symbol} ${decision.side || "WAIT"}をRunner Signal確定。1建玉最大1.00x / 合計最大1.50x。`
+      : decision.selectionConfirmed
+        ? "Runner選定symbolはありますが、対応候補のsignalEligible/signalReasonを確認できないため未確認です。"
+        : `候補${decision.candidates.length}件、Top2 ${top2.map((candidate) => candidate.symbol || "—").join(" / ") || "未取得"}。候補順位だけでは発注せず、Runner Signal Gate成立が必要です。`,
   });
   steps.push({
     key: "risk",
     label: "5. 共有リスクGate",
-    state: sharedRisk?.tripped ? "blocked" : sharedRisk ? "pass" : "unknown",
-    detail: sharedRisk ? sharedRisk.tripped ? `Kill Switch / daily loss ${sharedRisk.lossPct?.toFixed(2) ?? "-"}%` : `通過 / daily loss ${sharedRisk.lossPct?.toFixed(2) ?? "-"}% / 上限 ${sharedRisk.maximumLossPct?.toFixed(2) ?? "-"}%` : "共有リスク状態未取得",
+    state: sharedRisk?.tripped ? "blocked" : !signalConfirmed ? "pending" : sharedRisk ? "pass" : "unknown",
+    detail: sharedRisk?.tripped
+      ? `Kill Switch / daily loss ${sharedRisk.lossPct?.toFixed(2) ?? "-"}%`
+      : !signalConfirmed
+        ? "上流のRunner Signal Gate未成立のため未到達です。共有riskが正常でもGate通過とは表示しません。"
+        : sharedRisk ? `通過 / daily loss ${sharedRisk.lossPct?.toFixed(2) ?? "-"}% / 上限 ${sharedRisk.maximumLossPct?.toFixed(2) ?? "-"}%` : "共有リスク状態未取得",
   });
 
   if (runnerState?.pending) {
     steps.push({ key: "position", label: "6. 建玉・容量Gate", state: "pending", detail: `${runnerState.pending.action || "ORDER"} ${runnerState.pending.symbol || candidateSymbol} の処理中` });
+  } else if (!signalConfirmed) {
+    steps.push({ key: "position", label: "6. 建玉・容量Gate", state: "pending", detail: "上流のRunner Signal Gate未成立のため未到達です。建玉なしでも容量Gate通過とは表示しません。" });
   } else if (active && sameReference) {
     steps.push({ key: "position", label: "6. 建玉・容量Gate", state: "blocked", detail: `${active.symbol || "既存建玉"} ${active.side || ""} 保有中。同じ確定足は再処理しません（NO_NEW_CONFIRMED_2H_BAR）。V12は最大2建玉・合計1.50xです。` });
   } else if (active) {
@@ -274,11 +254,11 @@ function buildExecutionTrace(
   let currentStageLabel = "発火候補（未発火）";
   let summary = `${decision.symbol} は実Runnerで候補選定されていますが、実発火・約定は未確認です。`;
   let nextAction = "次回の確定2時間足で、建玉・容量・注文Gateを再判定します。";
-  if (!decision.selectionConfirmed) {
-    currentStage = "signal-gate-blocked";
-    currentStageLabel = "候補順位のみ・発注Signal未成立";
-    summary = `${decision.symbol} はRank ${decision.rank ?? "-"}の候補ですが、${decision.signalGate?.status === "blocked" ? decision.signalGate.detail : "発注Signalの全Gate合格が確認できないため"}発注されていません（NO_COMPLETED_BAR_SIGNAL）。`;
-    nextAction = "次の完成済み2時間足で、volume・edge・momentum・BTC regimeを再評価します。";
+  if (!signalConfirmed) {
+    currentStage = decision.signalGate?.status === "blocked" ? "signal-gate-blocked" : "signal-gate-unconfirmed";
+    currentStageLabel = decision.signalGate?.status === "blocked" ? "Runner Signal Gate未達" : "Runner Signal Gate未確認";
+    summary = `${decision.symbol} はRank ${decision.rank ?? "-"}の候補ですが、${decision.signalGate?.status === "blocked" ? decision.signalGate.detail : "RunnerのsignalEligible/signalReasonを確認できないため"}発注済みとは表示しません。`;
+    nextAction = "次の完成済み2時間足で、RunnerがsignalEligible / signalReasonを再判定します。";
   }
   if (matchingPosition) {
     currentStage = "filled";

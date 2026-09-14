@@ -46,6 +46,8 @@ type CandidateDetail = {
   volumeRatio?: number;
   volatility?: number;
   atr?: number;
+  signalEligible?: boolean;
+  signalReason?: string;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -159,9 +161,13 @@ function TraceIcon({ state }: { state: V12Observability["executionTrace"]["steps
 }
 
 function candidateOrderStatus(candidate: CandidateDetail, decision: NonNullable<V12Observability["decision"]>) {
-  if (decision.selectionConfirmed) return (candidate.rank || 99) <= 2 ? "発注Signal選定済み" : "Top2外";
-  if ((candidate.rank || 99) <= 2 && candidate.signalGate?.code === "BTC_REGIME_DIRECTION_BLOCKED") return "候補順位のみ / BTC判定未達";
-  return (candidate.rank || 99) <= 2 ? "候補順位のみ / 発注Signal未成立" : "Top2外";
+  if ((candidate.rank || 99) > 2) return "Top2外";
+  if (decision.selectionConfirmed && candidate.symbol === decision.symbol && candidate.side === decision.side) return "発注Signal選定済み";
+  if (candidate.signalGate?.code === "BTC_REGIME_OR_ENTRY_QUALITY_BLOCKED") return "候補順位のみ / BTC・Entry品質Gate未達";
+  if (candidate.signalGate?.status === "blocked") return "候補順位のみ / Runner Signal Gate未達";
+  if (candidate.signalGate?.status === "unknown") return "候補順位のみ / Runner Gate未取得";
+  if (candidate.signalGate?.status === "pass") return "Runner Signal Gate通過候補 / 未選定";
+  return "候補順位のみ / 発注Signal未成立";
 }
 
 function runtimeStatusClass(status: RuntimeUnit["status"]) {
@@ -206,7 +212,7 @@ function V12Detail({ details }: { details?: V12Observability }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2 break-words text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />V12 X1.00 ALL Top2 判定</div>
-          <p className="mt-1 text-xs text-white/55">VPSの最新runnerデータから、候補・Gate・発注状況を表示します。</p>
+          <p className="mt-1 text-xs text-white/55">VPSの最新runnerデータから、候補・Gate・発注状況を表示します。V12はRunnerのsignalEligible / signalReasonを正本とし、HP側でSignal Gateを再計算しません。</p>
         </div>
         <div className="flex flex-wrap gap-2"><span className={"rounded-full border px-3 py-1 text-xs font-semibold " + statusClass}>V12 {statusLabel}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>
       </div>
@@ -247,7 +253,7 @@ function V12Detail({ details }: { details?: V12Observability }) {
       </div>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
         <div className="border-b border-white/10 px-3 py-2 text-sm font-bold text-white">全候補順位とSignal Gate</div>
-        {decision?.candidates.length ? <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">Gate</th><th className="px-3 py-2">発注段階</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{number(candidate.momentum, 4)}%</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{decision.selectionConfirmed && selectedCandidate?.symbol === candidate.symbol ? "Signal選定済み" : candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。</div>}
+        {decision?.candidates.length ? <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">Runner Gate</th><th className="px-3 py-2">発注段階</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{number(candidate.momentum, 4)}%</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{decision.selectionConfirmed && selectedCandidate?.symbol === candidate.symbol ? "Signal選定済み" : candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。</div>}
       </div>
       <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-xs leading-5 text-white/65">V12仕様：1建玉最大1.00x / 最大2建玉 / 合計上限1.50x。投入量はATRとリスクに応じて決まります。候補順位が上位でも、確定2時間足・BTC regime・score・momentum・volumeRatio・共有risk・容量・注文Gateをすべて通過するまで発注しません。直近約定履歴：{details.recentFills.length}件、現在のV12建玉：{details.v12Positions.length}件。</div>
     </section>
@@ -374,7 +380,7 @@ function Quality102Detail({ details }: { details?: Quality102RuntimeStatus }) {
 }
 
 function Sleeve({ title, items, marketLabel }: { title: string; items: DecisionStatusItem[]; marketLabel?: string }) {
-  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex min-w-0 items-center gap-2 break-words text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />{title}</div>{marketLabel ? <div className="text-xs text-white/55">{marketLabel}</div> : null}</div><p className="mt-2 text-xs leading-5 text-white/50">最新データの候補一覧です。</p><div className="mt-4 space-y-2">{items.map((item) => <article key={item.symbol} className="min-w-0 rounded-2xl border border-white/10 bg-black/20 p-3 md:p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={`flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm font-bold ${rankClass(item.rank)}`}>{item.rank || "-"}</span><div><div className="font-bold text-white">{item.symbol}</div><div className="text-xs text-white/50">{item.side === "LONG" ? "ロング候補" : item.side === "SHORT" ? "ショート候補" : "待機"} / スコア {item.score}/{item.scoreMax}</div></div></div><span className={`max-w-full whitespace-normal break-words rounded-full border px-3 py-1 text-center text-xs font-semibold ${statusClass(item.status)}`}>{item.status}</span></div><p className="mt-3 break-words text-sm leading-6 text-white/80">理由：{item.reason}</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/45"><span>データ：{time(item.dataUpdatedAt)}</span><span>確認：{time(item.checkedAt)}</span></div></article>)}</div></section>;
+  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex min-w-0 items-center gap-2 break-words text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />{title}</div>{marketLabel ? <div className="text-xs text-white/55">{marketLabel}</div> : null}</div><p className="mt-2 text-xs leading-5 text-white/50">最新データの候補一覧です。</p><div className="mt-4 space-y-2">{items.map((item) => <article key={item.symbol} className="min-w-0 rounded-2xl border border-white/10 bg-black/20 p-3 md:p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={`flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm font-bold ${rankClass(item.rank)}`}>{item.rank || "-"}</span><div><div className="font-bold text-white">{item.symbol}</div><div className="text-xs text-white/50">{item.side === "LONG" ? "ロング候補" : item.side === "SHORT" ? "ショート候補" : "待機"} / {item.sleeve === "V12" ? `score ${item.score.toFixed(4)}` : `basis ${item.score.toFixed(2)}bps`}</div></div></div><span className={`max-w-full whitespace-normal break-words rounded-full border px-3 py-1 text-center text-xs font-semibold ${statusClass(item.status)}`}>{item.status}</span></div><p className="mt-3 break-words text-sm leading-6 text-white/80">理由：{item.reason}</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/45"><span>データ：{time(item.dataUpdatedAt)}</span><span>確認：{time(item.checkedAt)}</span></div></article>)}</div></section>;
 }
 
 export function DecisionStatusPanel() {

@@ -167,7 +167,9 @@ function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionSta
       const score = finite(candidate.score) ?? 0;
       const symbolName = text(candidate.symbol) || `CANDIDATE_${index + 1}`;
       const candidateSide = side(candidate.side);
-      const status: Status = rank <= 2 ? "候補に近い" : "条件不足";
+      const signalEligible = typeof candidate.signalEligible === "boolean" ? candidate.signalEligible : undefined;
+      const signalReason = text(candidate.signalReason);
+      const status: Status = signalEligible === true ? "発火候補" : signalEligible === false ? "条件不足" : "取得不能";
       return {
         symbol: symbolName,
         sleeve: "V12" as const,
@@ -176,7 +178,11 @@ function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionSta
         scoreMax: 1,
         status,
         side: candidateSide,
-        reason: `V12 runner候補Rank${rank}。score=${score.toFixed(4)} / BTC regime=${btcRegime}。候補順位は発火・発注成立を意味しません。実runnerのSignal Gate・共有risk・容量Gateを別途確認します。`,
+        reason: signalEligible === false
+          ? `V12 runner候補Rank${rank}。Runner Signal Gate未達：${signalReason || "signalEligible=false"}。score=${score.toFixed(4)} / BTC regime=${btcRegime}。`
+          : signalEligible === true
+            ? `V12 runner候補Rank${rank}。Runner Signal Gate通過：${signalReason || "SIGNAL_ELIGIBLE"}。score=${score.toFixed(4)} / BTC regime=${btcRegime}。`
+            : `V12 runner候補Rank${rank}。signalEligible未取得のためHPではGateを再計算しません。score=${score.toFixed(4)} / BTC regime=${btcRegime}。`,
         checkedAt,
         source: "VPS V12 sanitized decision snapshot",
         dataUpdatedAt: referenceTs === undefined ? undefined : new Date(referenceTs).toISOString(),
