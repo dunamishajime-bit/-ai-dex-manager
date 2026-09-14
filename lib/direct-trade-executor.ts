@@ -35,6 +35,7 @@ export interface DirectTradeCommand {
     expectedPrice: number;
     maxSlippageBps: number;
     reason: string;
+    requireVenueMargin5xCross?: boolean;
 }
 
 export interface DirectTradeResult {
@@ -138,7 +139,7 @@ function boolEnvironment(name: string, fallback = false) {
     return /^(1|true|yes|on)$/i.test(value.trim());
 }
 
-async function runFreshMarginGuardBeforeExposureOrder() {
+async function runFreshMarginGuardBeforeExposureOrder(symbol: string) {
     if (!boolEnvironment("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED", false)) return;
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const script = process.env.DISDEX_V96_V52_MARGIN_GUARD_SCRIPT
@@ -146,7 +147,7 @@ async function runFreshMarginGuardBeforeExposureOrder() {
     try {
         const result = await execFileAsync(
             python,
-            [script, "--mode", "live", "--preorder-check"],
+            [script, "--mode", "live", "--preorder-check", "--symbol", symbol],
             {
                 cwd: process.cwd(),
                 env: process.env,
@@ -240,6 +241,27 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         if (!row) throw new Error(`Aster symbol not found: ${normalized}`);
         if (row.status !== "TRADING") throw new Error(`Aster symbol is not TRADING: ${normalized} (${row.status || "unknown"})`);
         return row;
+    }
+
+    private async assertVenueMargin5xCross(symbol: string): Promise<void> {
+        const normalized = symbol.toUpperCase();
+        const rows = await this.client.getPositions(normalized);
+        const row = rows.find((candidate) => candidate.symbol.toUpperCase() === normalized);
+        if (!row) throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_RISK_ROW_MISSING`);
+        const leverage = Number(row.leverage);
+        const rawMarginType = String(row.marginType || "").trim().toLowerCase();
+        const marginType = rawMarginType === "cross" || rawMarginType === "crossed"
+            ? "cross"
+            : rawMarginType === "isolated" || rawMarginType === "isolate"
+                ? "isolated"
+                : row.isolated === false
+                    ? "cross"
+                    : row.isolated === true
+                        ? "isolated"
+                        : "unknown";
+        if (leverage !== 5 || marginType !== "cross") {
+            throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:expected=5x-cross:actual=${Number.isFinite(leverage) ? `${leverage}x` : "unknown"}-${marginType}`);
+        }
     }
 
     async getAccountSnapshot(): Promise<DirectAccountSnapshot> {
@@ -476,7 +498,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
         if (command.reduceOnly !== true) {
-            await runFreshMarginGuardBeforeExposureOrder();
+            await runFreshMarginGuardBeforeExposureOrder(symbol);
+            if (command.requireVenueMargin5xCross === true) await this.assertVenueMargin5xCross(symbol);
         }
         const quote = await this.getMarketQuote(symbol);
         const executablePrice = command.side === "BUY" ? quote.askPrice : quote.bidPrice;

@@ -759,6 +759,7 @@ export class Quality102CausalV1Runner {
                 expectedPrice: executionWindow.expectedPrice,
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
                 reason: pending.reason || STRATEGY_ID,
+                requireVenueMargin5xCross: !pending.reduceOnly,
             };
             let result: DirectTradeResult;
             try {

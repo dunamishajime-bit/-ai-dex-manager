@@ -13,7 +13,6 @@ import disdex_v13d_v11eq_stock_live_engine as base
 from disdex_v96_v52_margin_guard import (
     EMERGENCY_FLATTEN_ATTEMPTS,
     EMERGENCY_RECONCILIATION_DELAY_SECONDS,
-    MANAGED_SYMBOLS,
     MarginGuard,
     active_managed_positions,
     quantity_text_from_position,
@@ -48,7 +47,8 @@ class SerializedMarginGuard(MarginGuard):
 
         lock_handle = self._acquire_emergency_lock()
         try:
-            active_positions = active_managed_positions(self.positions())
+            managed_symbols = self.managed_symbols()
+            active_positions = active_managed_positions(self.positions(managed_symbols), managed_symbols)
             if not active_positions:
                 return {
                     "status": "CONCURRENT_FLATTEN_ALREADY_COMPLETED",
@@ -65,7 +65,7 @@ class SerializedMarginGuard(MarginGuard):
             fill_results: list[dict] = []
             cancellation_errors: list[dict] = []
             order_errors: list[dict] = []
-            managed = set(MANAGED_SYMBOLS)
+            managed = set(managed_symbols)
 
             open_orders = self.client.open_orders()
             symbols_with_orders = sorted({
@@ -83,7 +83,7 @@ class SerializedMarginGuard(MarginGuard):
             remaining: List[dict] = []
             sequence = 0
             for attempt in range(1, EMERGENCY_FLATTEN_ATTEMPTS + 1):
-                remaining = active_managed_positions(self.positions())
+                remaining = active_managed_positions(self.positions(managed_symbols), managed_symbols)
                 if not remaining:
                     break
                 for row in remaining:
@@ -128,7 +128,7 @@ class SerializedMarginGuard(MarginGuard):
                         })
                 time.sleep(EMERGENCY_RECONCILIATION_DELAY_SECONDS)
 
-            remaining = active_managed_positions(self.positions())
+            remaining = active_managed_positions(self.positions(managed_symbols), managed_symbols)
             result = {
                 "status": "PASS" if not remaining else "FAILED_REMAINING_POSITIONS",
                 "serializedEmergencyAction": True,
@@ -242,6 +242,7 @@ def main() -> int:
     parser.add_argument("--emergency-once", action="store_true")
     parser.add_argument("--preflight-readonly", action="store_true")
     parser.add_argument("--preorder-check", action="store_true")
+    parser.add_argument("--symbol")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -267,14 +268,14 @@ def main() -> int:
         return 0
     if args.preflight_readonly:
         print(json.dumps(
-            guard.require_healthy(write_state=False, allow_kill_switch=False),
+            guard.require_healthy(write_state=False, allow_kill_switch=False, requested_symbol=args.symbol),
             ensure_ascii=False,
             separators=(",", ":"),
         ))
         return 0
     if args.preorder_check:
         print(json.dumps(
-            guard.require_healthy(write_state=True, allow_kill_switch=True),
+            guard.require_healthy(write_state=True, allow_kill_switch=True, requested_symbol=args.symbol),
             ensure_ascii=False,
             separators=(",", ":"),
         ))

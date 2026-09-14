@@ -102,6 +102,8 @@ export interface AsterPositionRiskRow {
     unrealizedProfit?: string;
     positionSide?: AsterPositionSide;
     leverage?: string;
+    marginType?: string;
+    isolated?: boolean;
     updateTime?: number;
 }
 

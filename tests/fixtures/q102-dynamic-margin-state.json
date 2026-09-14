@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "strategyId": "QUALITY102_CAUSAL_V1",
+  "mode": "LIVE",
+  "position": {"symbol": "AVAXUSDT", "quantity": 1},
+  "pending": {"symbol": "AAVEUSDT", "reduceOnly": false}
+}

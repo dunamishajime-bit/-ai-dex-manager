@@ -1,0 +1,7 @@
+{
+  "schema": "v12-x1-all-runner-state/v1",
+  "strategyId": "V12_X1.00_ALL",
+  "mode": "LIVE",
+  "activePositions": [{"symbol": "DOGEUSDT", "quantity": 1, "gross": 1}],
+  "pending": {"symbol": "LINKUSDT", "action": "ENTRY"}
+}

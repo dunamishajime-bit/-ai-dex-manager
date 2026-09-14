@@ -7,7 +7,7 @@ import os
 import signal
 import time
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, Iterable, List, Mapping, Optional, Set, Tuple
 
 import disdex_v13d_v11eq_stock_live_engine as base
 from disdex_v96_v52_margin_risk_policy import (
@@ -23,6 +23,8 @@ MANAGED_STOCK_SYMBOLS = tuple(base.ASTER_SYMBOL.values())
 MANAGED_SYMBOLS = MANAGED_CRYPTO_SYMBOLS + MANAGED_STOCK_SYMBOLS
 REQUIRED_LEVERAGE = 5
 REQUIRED_MARGIN_TYPE = "cross"
+DEFAULT_V12_STATE_PATH = "/var/lib/disdex/v12-x1-all/runner.json"
+DEFAULT_Q102_STATE_PATH = "/var/lib/disdex/quality102-causal-v1/state.json"
 EMERGENCY_FLATTEN_ATTEMPTS = 3
 EMERGENCY_RECONCILIATION_DELAY_SECONDS = 1.0
 
@@ -40,10 +42,79 @@ def normalized_margin_type(row: dict) -> str:
     return "unknown"
 
 
-def verify_managed_configuration(rows: List[dict]) -> Dict[str, dict]:
+def _normalized_symbol(value: object, label: str = "symbol") -> str:
+    symbol = str(value or "").strip().upper()
+    if not symbol or any(char.isspace() for char in symbol):
+        raise RuntimeError(f"Margin Guard {label} is invalid: {value}")
+    return symbol
+
+
+def _state_symbols(path: str, expected_strategy_id: str, fields: Iterable[str]) -> Set[str]:
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            raw = json.load(handle)
+    except FileNotFoundError:
+        return set()
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"Margin Guard ownership state unavailable: {path}: {error}") from error
+    if not isinstance(raw, dict):
+        raise RuntimeError(f"Margin Guard ownership state is not an object: {path}")
+    if raw.get("strategyId") != expected_strategy_id:
+        raise RuntimeError(
+            f"Margin Guard ownership state identity mismatch: {path}: "
+            f"expected={expected_strategy_id}, got={raw.get('strategyId')}"
+        )
+    if str(raw.get("mode") or "").upper() not in {"", "LIVE"}:
+        return set()
+
+    symbols: Set[str] = set()
+
+    def collect(value: object, label: str) -> None:
+        if value is None:
+            return
+        values = value if isinstance(value, list) else [value]
+        for index, item in enumerate(values):
+            if not isinstance(item, dict):
+                raise RuntimeError(f"Margin Guard ownership state entry is invalid: {path}:{label}[{index}]")
+            if "symbol" in item:
+                symbols.add(_normalized_symbol(item.get("symbol"), f"{label}[{index}].symbol"))
+
+    for field in fields:
+        collect(raw.get(field), field)
+    return symbols
+
+
+def resolve_managed_symbols(
+    requested_symbol: Optional[str] = None,
+    env: Optional[Mapping[str, str]] = None,
+) -> Tuple[str, ...]:
+    environment = os.environ if env is None else env
+    symbols = {_normalized_symbol(symbol) for symbol in MANAGED_SYMBOLS}
+    if requested_symbol:
+        symbols.add(_normalized_symbol(requested_symbol, "requested symbol"))
+    symbols.update(_state_symbols(
+        str(environment.get("V12_X1_ALL_STATE_PATH") or DEFAULT_V12_STATE_PATH),
+        "V12_X1.00_ALL",
+        ("activePositions", "active", "pending"),
+    ))
+    q102_path = str(
+        environment.get("QUALITY102_CAUSAL_V1_STATE_PATH")
+        or environment.get("DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH")
+        or DEFAULT_Q102_STATE_PATH
+    )
+    symbols.update(_state_symbols(
+        q102_path,
+        "QUALITY102_CAUSAL_V1",
+        ("position", "pending"),
+    ))
+    return tuple(sorted(symbols))
+
+
+def verify_managed_configuration(rows: List[dict], managed_symbols: Optional[Iterable[str]] = None) -> Dict[str, dict]:
+    symbols = tuple(managed_symbols) if managed_symbols is not None else MANAGED_SYMBOLS
     by_symbol = {str(row.get("symbol") or "").upper(): row for row in rows}
     result: Dict[str, dict] = {}
-    for symbol in MANAGED_SYMBOLS:
+    for symbol in symbols:
         row = by_symbol.get(symbol)
         if row is None:
             raise RuntimeError(f"Margin Guard position-risk row missing: {symbol}")
@@ -57,8 +128,8 @@ def verify_managed_configuration(rows: List[dict]) -> Dict[str, dict]:
     return result
 
 
-def active_managed_positions(rows: List[dict]) -> List[dict]:
-    managed = set(MANAGED_SYMBOLS)
+def active_managed_positions(rows: List[dict], managed_symbols: Optional[Iterable[str]] = None) -> List[dict]:
+    managed = set(managed_symbols if managed_symbols is not None else MANAGED_SYMBOLS)
     return [
         row
         for row in rows
@@ -114,7 +185,10 @@ class MarginGuard:
             }
         return self.client._signed("GET", "/fapi/v3/account", {})
 
-    def positions(self) -> List[dict]:
+    def managed_symbols(self, requested_symbol: Optional[str] = None) -> Tuple[str, ...]:
+        return resolve_managed_symbols(requested_symbol=requested_symbol)
+
+    def positions(self, managed_symbols: Optional[Iterable[str]] = None) -> List[dict]:
         return self.client.positions() if self.live else [
             {
                 "symbol": symbol,
@@ -124,7 +198,7 @@ class MarginGuard:
                 "leverage": "5",
                 "marginType": "cross",
             }
-            for symbol in MANAGED_SYMBOLS
+            for symbol in (managed_symbols if managed_symbols is not None else self.managed_symbols())
         ]
 
     def write_state(self, payload: dict) -> None:
@@ -181,11 +255,13 @@ class MarginGuard:
         cancellation_errors: list[dict] = []
         order_errors: list[dict] = []
 
+        managed_symbols = self.managed_symbols()
+        managed = set(managed_symbols)
         open_orders = self.client.open_orders()
         symbols_with_orders = sorted({
             str(row.get("symbol") or "").upper()
             for row in open_orders
-            if str(row.get("symbol") or "").upper() in set(MANAGED_SYMBOLS)
+            if str(row.get("symbol") or "").upper() in managed
         })
         for symbol in symbols_with_orders:
             try:
@@ -196,7 +272,7 @@ class MarginGuard:
 
         remaining: List[dict] = []
         for attempt in range(1, EMERGENCY_FLATTEN_ATTEMPTS + 1):
-            remaining = active_managed_positions(self.positions())
+            remaining = active_managed_positions(self.positions(managed_symbols), managed_symbols)
             if not remaining:
                 break
             for row in remaining:
@@ -235,7 +311,7 @@ class MarginGuard:
                     })
             time.sleep(EMERGENCY_RECONCILIATION_DELAY_SECONDS)
 
-        remaining = active_managed_positions(self.positions())
+        remaining = active_managed_positions(self.positions(managed_symbols), managed_symbols)
         result = {
             "status": "PASS" if not remaining else "FAILED_REMAINING_POSITIONS",
             "stage": decision.get("stage"),
@@ -270,11 +346,12 @@ class MarginGuard:
             )
         return result
 
-    def evaluate_once(self, *, write_state: bool, allow_kill_switch: bool) -> dict:
+    def evaluate_once(self, *, write_state: bool, allow_kill_switch: bool, requested_symbol: Optional[str] = None) -> dict:
+        managed_symbols = self.managed_symbols(requested_symbol)
         account = self.account_info()
-        positions = self.positions()
-        configuration = verify_managed_configuration(positions)
-        snapshot = build_margin_risk_snapshot(account, positions, MANAGED_SYMBOLS)
+        positions = self.positions(managed_symbols)
+        configuration = verify_managed_configuration(positions, managed_symbols)
+        snapshot = build_margin_risk_snapshot(account, positions, managed_symbols)
         decision = classify_margin_risk(snapshot, str(self.state.get("stage") or "HEALTHY"))
         now = base.now_ms()
         payload = {
@@ -370,8 +447,8 @@ class MarginGuard:
                 self.write_state(payload)
         return payload
 
-    def require_healthy(self, *, write_state: bool, allow_kill_switch: bool) -> dict:
-        decision = self.evaluate_once(write_state=write_state, allow_kill_switch=allow_kill_switch)
+    def require_healthy(self, *, write_state: bool, allow_kill_switch: bool, requested_symbol: Optional[str] = None) -> dict:
+        decision = self.evaluate_once(write_state=write_state, allow_kill_switch=allow_kill_switch, requested_symbol=requested_symbol)
         if decision["stage"] != "HEALTHY":
             raise RuntimeError(
                 f"Margin Guard requires HEALTHY account risk, got {decision['stage']}"
@@ -412,6 +489,7 @@ def self_test() -> None:
     assert len(checked) == len(MANAGED_SYMBOLS)
     assert HEALTHY_POLL_INTERVAL_MS == 300_000
     assert WARNING_POLL_INTERVAL_MS == 60_000
+    assert "DOGEUSDT" in resolve_managed_symbols(requested_symbol="DOGEUSDT")
     assert quantity_text_from_position({"symbol": "BTCUSDT", "positionAmt": "-0.123000"}) == "0.123000"
     assert len(active_managed_positions([
         {"symbol": "BTCUSDT", "positionAmt": "1"},
@@ -428,6 +506,7 @@ def main() -> int:
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--preflight-readonly", action="store_true")
     parser.add_argument("--preorder-check", action="store_true")
+    parser.add_argument("--symbol")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -438,14 +517,14 @@ def main() -> int:
     signal.signal(signal.SIGTERM, lambda *_: setattr(guard, "stop_requested", True))
     if args.preflight_readonly:
         print(json.dumps(
-            guard.require_healthy(write_state=False, allow_kill_switch=False),
+            guard.require_healthy(write_state=False, allow_kill_switch=False, requested_symbol=args.symbol),
             ensure_ascii=False,
             separators=(",", ":"),
         ))
         return 0
     if args.preorder_check:
         print(json.dumps(
-            guard.require_healthy(write_state=True, allow_kill_switch=True),
+            guard.require_healthy(write_state=True, allow_kill_switch=True, requested_symbol=args.symbol),
             ensure_ascii=False,
             separators=(",", ":"),
         ))
