@@ -34,6 +34,7 @@ is_recoverable_shared_reason() {
 is_aster_upstream_shared_reason() {
   local reason="${1:-}"
   [[ "$reason" == 'V52 fatal tick error:'* || "$reason" == 'V52 upstream state unavailable:'* ]] || return 1
+  [[ "$reason" == 'V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol='* && "$reason" == *'"error":"stale_quote"'* ]] && return 0
   [[ "$reason" == *'HTTP 429'* ]] && return 0
   [[ "$reason" == *'HTTP 418'* ]] && return 0
   [[ "$reason" == *'IP banned'* || "$reason" == *'ip banned'* ]] && return 0
@@ -171,6 +172,7 @@ run_self_test() {
   is_aster_upstream_shared_reason 'V52 fatal tick error: <urlopen error [Errno 104] Connection reset by peer>'
   is_aster_upstream_shared_reason 'V52 upstream state unavailable: Aster HTTP 429'
   is_aster_upstream_shared_reason 'V52 upstream state unavailable: Aster HTTP 418 IP banned'
+  is_aster_upstream_shared_reason 'V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=META: {"error":"stale_quote","symbol":"META","ageMs":30899,"maximumAgeMs":30000}'
   ! is_aster_upstream_shared_reason 'daily loss latch'
   is_historical_local_reason 'V12 universe alignment mismatch: PENGU'
   is_historical_local_reason 'PENGU/BTC H1 timestamps are not fully aligned: PENGU=1000, BTC=999, aligned=999.'
