@@ -1,0 +1,137 @@
+name: PENGU A4 Cross-Asset Opportunity Router
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_cross_asset_router_a4.py'
+      - '.github/workflows/pengu-a4-cross-asset-router.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pengu-a4-cross-asset-router-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+
+      - name: Reuse immutable current 365d PENGU ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-a-recent-365d-32648802579
+          path: .research-state/a4/current
+          github-token: ${{ github.token }}
+          run-id: 32648802579
+
+      - name: Prepare same-period structural input
+        run: |
+          mkdir -p .research-state/a4/prior
+          cp .research-state/a4/current/baseline.json .research-state/a4/prior/prior-pengu.json
+          printf '%s\n' 'Aster PENGU same-venue history before the current window is insufficient; prior placeholder is intentionally identical and excluded from final robustness decision.' > .research-state/a4/prior/history-note.txt
+
+      - name: Run cross-asset structural redesign
+        run: |
+          set -o pipefail
+          python scripts/research_pengu_cross_asset_router_a4.py \
+            --current .research-state/a4/current/baseline.json \
+            --prior .research-state/a4/prior/prior-pengu.json \
+            --out .research-state/a4/out | tee .research-state/a4/a4.log
+
+      - name: Replace placeholder prior with fixed chronological folds
+        run: |
+          python - <<'PY'
+          import csv, json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          root=Path('.research-state/a4/out')
+          p=json.loads((root/'result.json').read_text())
+          rows=[r for r in csv.DictReader((root/'events.csv').open()) if r['period']=='CURRENT_365D']
+          variants=sorted({r['variant'] for r in rows})
+          bounds={
+            'EARLY':(datetime(2025,8,23,15,tzinfo=timezone.utc),datetime(2026,1,1,tzinfo=timezone.utc)),
+            'MID':(datetime(2026,1,1,tzinfo=timezone.utc),datetime(2026,5,1,tzinfo=timezone.utc)),
+            'LATE':(datetime(2026,5,1,tzinfo=timezone.utc),datetime(2026,8,23,15,tzinfo=timezone.utc)),
+          }
+          def metric(rs):
+            eq=peak=1.0; dd=0.0; gp=gl=0.0
+            for x in rs:
+              eq*=1+x; peak=max(peak,eq); dd=min(dd,eq/peak-1)
+              if x>0: gp+=x
+              elif x<0: gl-=x
+            return {'events':len(rs),'returnPct':(eq-1)*100,'eventWinRatePct':100*sum(x>0 for x in rs)/len(rs),'profitFactor':gp/gl if gl else None,'maxDrawdownPct':dd*100}
+          folds={}
+          for name,(lo,hi) in bounds.items():
+            fr=[r for r in rows if lo.timestamp()*1000 <= int(r['signalTs']) < hi.timestamp()*1000]
+            assert fr, name
+            base_by_event={int(r['eventIndex']):float(r['baselineReturn']) for r in fr}
+            fm={'baseline':metric([base_by_event[k] for k in sorted(base_by_event)]),'variants':{}}
+            for v in variants:
+              vr=[r for r in fr if r['variant']==v]
+              fm['variants'][v]=metric([float(r['eventReturn']) for r in vr])
+            folds[name]=fm
+          b=p['current']['baseline']['NORMAL']
+          promotion={}
+          for v in variants:
+            x=p['current']['variants']['NORMAL'][v]
+            checks={
+              'eventCountPreserved':x['events']==b['events'],
+              'winRatePlus5pp':x['eventWinRatePct']>=b['eventWinRatePct']+5,
+              'returnNotLower':x['returnPct']>=b['returnPct'],
+              'pfNotLower':(x['profitFactor'] or 0)>=(b['profitFactor'] or 0),
+              'ddNoWorse':x['maxDrawdownPct']>=b['maxDrawdownPct'],
+              'severeReturnPositive':p['current']['variants']['SEVERE'][v]['returnPct']>0,
+              'atLeastTwoFoldsWinRateNoWorse':sum(folds[f]['variants'][v]['eventWinRatePct']>=folds[f]['baseline']['eventWinRatePct'] for f in folds)>=2,
+              'atLeastTwoFoldsReturnPositive':sum(folds[f]['variants'][v]['returnPct']>0 for f in folds)>=2,
+            }
+            promotion[v]={'promoted':all(checks.values()),'checks':checks,'folds':{f:{'baselineWinRatePct':folds[f]['baseline']['eventWinRatePct'],'variantWinRatePct':folds[f]['variants'][v]['eventWinRatePct'],'baselineReturnPct':folds[f]['baseline']['returnPct'],'variantReturnPct':folds[f]['variants'][v]['returnPct']} for f in folds}}
+          p['schema']='pengu-a4-cross-asset-opportunity-router/v2'
+          p.pop('prior',None)
+          p['folds']=folds
+          p['promotion']=promotion
+          p['diagnostic']={k:v for k,v in p['diagnostic'].items() if k.startswith('current')}
+          p['historyLimitation']='Aster PENGU has insufficient same-venue history before this window; robustness is therefore assessed with predeclared EARLY/MID/LATE chronological folds. Cross-venue Binance history will only be used if a candidate first passes this screen.'
+          (root/'result.json').write_text(json.dumps(p,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps({'folds':folds,'promotion':promotion},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Validate research-only and fixed opportunity count
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/a4/out/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          base=p['current']['baseline']['NORMAL']['events']
+          for k,v in p['current']['variants']['NORMAL'].items():
+              assert v['events']==base, (k,v['events'],base)
+          assert set(p['folds'])=={'EARLY','MID','LATE'}
+          print('PENGU_A4_CROSS_ASSET_RESEARCH_PASS')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-a4-cross-asset-${{ github.run_id }}
+          path: .research-state/a4
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
