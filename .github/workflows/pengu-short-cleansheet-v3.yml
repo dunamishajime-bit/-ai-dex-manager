@@ -1,0 +1,55 @@
+name: PENGU Short Clean-Sheet V3 Research
+
+on:
+  pull_request:
+    branches:
+      - chatgpt/v12-live-adapter-final-20260817
+    paths:
+      - 'scripts/research_pengu_short_cleansheet_v3.ts'
+      - '.github/workflows/pengu-short-cleansheet-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-short-cleansheet-v3-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run clean-sheet short study
+        env:
+          PENGU_SHORT_V3_OUT: .research-state/pengu-short-v3/result.json
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/pengu-short-v3
+          npx tsx scripts/research_pengu_short_cleansheet_v3.ts 2>&1 | tee .research-state/pengu-short-v3/run.log
+      - name: Validate research-only contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('.research-state/pengu-short-v3/result.json').read_text())
+          assert p['status']=='PASS_RESEARCH_ONLY'
+          assert p['safety']=={'mode':'RESEARCH_ONLY','ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert set(p['results'])=={'BASELINE','FAILED_RALLY_BREAKDOWN','COMPRESSION_BREAKDOWN','RELATIVE_WEAKNESS_REJECTION','ENSEMBLE'}
+          print('PENGU_SHORT_CLEANSHEET_V3_RESEARCH_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-short-cleansheet-v3-${{ github.run_id }}
+          path: .research-state/pengu-short-v3
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
