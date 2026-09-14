@@ -1,0 +1,103 @@
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    prices = base.load_universe()
+    panel = base.aligned_panel(prices)
+    idx = panel["close"].index[(panel["close"].index >= START) & (panel["close"].index < END)]
+    for k in list(panel):
+        panel[k] = panel[k].loc[idx]
+    panel["logret"] = np.log(panel["close"]).diff()
+    panel["funding"] = load_funding(idx, list(panel["close"].columns))
+
+    grid = candidates(); tmap = {}; rows = []
+    for n, c in enumerate(grid, 1):
+        print(f"[{n}/{len(grid)}] {c.name} {c.family}")
+        tar = targets(panel, c); tmap[c.name] = tar; sim = simulate(panel, tar)
+        st = stats(sim, START, HOLDOUT); annual = (1 + cut(sim.returns, START, HOLDOUT)).resample("YE").prod() - 1
+        rows.append({**asdict(c), **st, "selection_score": select_score(st, annual), "positive_years": int((annual > 0).sum()), "worst_year": float(annual.min())})
+    ranking = pd.DataFrame(rows).sort_values(["selection_score", "sharpe", "cagr"], ascending=False)
+    ranking.to_csv(OUT / "candidate_selection.csv", index=False)
+    best = next(c for c in grid if c.name == ranking.iloc[0]["name"]); bsim = simulate(panel, tmap[best.name])
+    sel, hold = stats(bsim, START, HOLDOUT), stats(bsim, HOLDOUT)
+
+    family_rows = []
+    for family in ["resmom", "reversal", "carry", "hybrid"]:
+        row = ranking[ranking.family == family].iloc[0]; c = next(x for x in grid if x.name == row["name"]); s = simulate(panel, tmap[c.name])
+        family_rows.append({"name": c.name, "family": family, "selection_cagr": stats(s, START, HOLDOUT)["cagr"], "selection_dd": stats(s, START, HOLDOUT)["max_drawdown"], **{f"holdout_{k}": v for k, v in stats(s, HOLDOUT).items()}})
+    pd.DataFrame(family_rows).to_csv(OUT / "family_best_holdout.csv", index=False)
+
+    risk_rows = []
+    for scale in [0.75, 1, 1.25, 1.5, 2, 2.5, 3]:
+        risk_rows.append({"risk_scale": scale, **stats(simulate(panel, tmap[best.name], scale=scale), HOLDOUT)})
+    pd.DataFrame(risk_rows).to_csv(OUT / "risk_scale.csv", index=False)
+
+    sens = []
+    for bps in [4, 6, 8, 10, 12]:
+        for fm in [0, 1, 1.5, 2]:
+            sens.append({"cost_bps": bps, "funding_multiplier": fm, **stats(simulate(panel, tmap[best.name], cost=bps / 10000, funding_mult=fm), HOLDOUT)})
+    pd.DataFrame(sens).to_csv(OUT / "sensitivity.csv", index=False)
+
+    robust = []
+    for c in grid:
+        if c.family == best.family:
+            robust.append({**asdict(c), **stats(simulate(panel, tmap[c.name]), HOLDOUT)})
+    rdf = pd.DataFrame(robust); rdf.to_csv(OUT / "best_family_robustness.csv", index=False)
+
+    monthly = (1 + cut(bsim.returns, HOLDOUT)).resample("ME").prod() - 1; monthly.rename("monthly_return").to_csv(OUT / "holdout_monthly.csv")
+    export = bsim.positions.copy(); export["strategy_return"] = bsim.returns; export["equity"] = bsim.equity; export["turnover"] = bsim.turnover; export["trading_cost"] = bsim.trading_cost; export["funding_pnl"] = bsim.funding_pnl; export["dd_multiplier"] = bsim.dd_mult; export.to_csv(OUT / "positions_and_equity.csv")
+
+    fcols = [("name", "Model", "str"), ("family", "Family", "str"), ("selection_cagr", "Selection CAGR", "pct"), ("selection_dd", "Selection DD", "pct"), ("holdout_cagr", "Holdout CAGR", "pct"), ("holdout_max_drawdown", "Holdout DD", "pct"), ("holdout_sharpe", "Sharpe", "num"), ("holdout_best_month", "Best month", "pct"), ("holdout_worst_month", "Worst month", "pct")]
+    rcols = [("risk_scale", "Risk scale", "num"), ("cagr", "CAGR", "pct"), ("max_drawdown", "Max DD", "pct"), ("sharpe", "Sharpe", "num"), ("best_month", "Best month", "pct"), ("worst_month", "Worst month", "pct"), ("months_ge_50pct", "Months >=50%", "str")]
+    report = f"""# Residual Beta-Neutral Perpetual Backtest
+
+## Difference from legacy DisDex
+
+BTC direction is not used as a trade gate. Each alt is regressed on BTC and orthogonal ETH returns. The strategy trades the unexplained residual, keeps paired long/short alt books, and uses BTC/ETH only as dynamic factor hedges.
+
+## Test design
+
+- Binance USD-M 4h prices plus actual historical funding
+- Selection: {START.date()} to {(HOLDOUT - pd.Timedelta(days=1)).date()}
+- Untouched holdout: {HOLDOUT.date()} to {(END - pd.Timedelta(days=1)).date()}
+- 24 candidates across residual momentum, shock reversal, carry, and hybrid families
+- Signal on completed close, position effective next 4h bar
+- Cost: 6 bps per side
+- Fixed current-major universe still has survivorship bias
+
+## Best model selected before holdout
+
+- Model: `{best.name}` / `{best.family}`
+- Beta lookback: {best.beta_days} days
+- Signal horizons: {best.fast_days}/{best.slow_days} days; shock {best.shock_days} day(s)
+- Rebalance: {best.rebalance_days} day(s); target vol {best.target_vol * 100:.0f}%
+
+Selection CAGR / DD / Sharpe: {pct(sel['cagr'])} / {pct(sel['max_drawdown'])} / {num(sel['sharpe'])}
+
+Holdout total / CAGR / DD / Sharpe: {pct(hold['total_return'])} / {pct(hold['cagr'])} / {pct(hold['max_drawdown'])} / {num(hold['sharpe'])}
+
+Holdout best/worst month: {pct(hold['best_month'])} / {pct(hold['worst_month'])}
+
+Trading-cost drag / funding PnL: {pct(hold['trading_cost_total'])} / {pct(hold['funding_pnl_total'])}
+
+## Best model from each independent family
+
+{table(family_rows, fcols)}
+
+## Return-versus-risk scaling
+
+{table(risk_rows, rcols)}
+
+## Robustness
+
+Same-family variants positive in holdout: {int((rdf.cagr > 0).sum())}/{len(rdf)}.
+
+A 40-60% CAGR row is not accepted if it only appears after leverage, has excessive drawdown, or depends on one exceptional month. See the CSV files for all candidates, scaling, sensitivity, monthly returns, and positions.
+"""
+    (OUT / "report.md").write_text(report, encoding="utf-8")
+    (OUT / "metrics.json").write_text(json.dumps({"best": asdict(best), "selection": sel, "holdout": hold, "positive_same_family": int((rdf.cagr > 0).sum()), "same_family_total": len(rdf)}, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    print(report)
+
+
+if __name__ == "__main__":
+    main()
