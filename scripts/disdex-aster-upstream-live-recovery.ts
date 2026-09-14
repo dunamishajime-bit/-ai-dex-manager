@@ -86,12 +86,28 @@ async function atomicWrite(path: string, payload: unknown) {
     await rename(temporary, path);
 }
 
+const V52_REFERENCE_SYMBOLS = ["META", "AMZN", "MSFT", "NVDA", "TSLA"] as const;
+
 async function assertReferenceRecoverySafe(reason: unknown) {
     if (!isRecoverableV52ReferenceKillReason(reason)) return;
     const response = await fetch("http://127.0.0.1:8797/health", { signal: AbortSignal.timeout(5_000) });
     if (!response.ok) throw new Error(`ASTER_UPSTREAM_RECOVERY_REFERENCE_HEALTH_HTTP_${response.status}`);
-    const payload = await response.json() as { marketOpen?: unknown };
-    if (payload.marketOpen !== false) throw new Error("ASTER_UPSTREAM_RECOVERY_REFERENCE_RECOVERY_MARKET_OPEN");
+    const payload = await response.json() as { connected?: unknown; lastError?: unknown };
+    if (payload.connected !== true || (payload.lastError !== null && payload.lastError !== undefined && payload.lastError !== "")) {
+        throw new Error("ASTER_UPSTREAM_RECOVERY_REFERENCE_NOT_CONNECTED");
+    }
+    const maximumAgeMs = numberEnv("DISDEX_V52_REFERENCE_RECOVERY_MAX_AGE_MS", 30_000);
+    for (const symbol of V52_REFERENCE_SYMBOLS) {
+        const quoteResponse = await fetch(`http://127.0.0.1:8797/quote?symbol=${symbol}`, { signal: AbortSignal.timeout(5_000) });
+        if (!quoteResponse.ok) throw new Error(`ASTER_UPSTREAM_RECOVERY_REFERENCE_QUOTE_HTTP_${quoteResponse.status}:${symbol}`);
+        const quote = await quoteResponse.json() as { ageMs?: unknown; price?: unknown };
+        const ageMs = Number(quote.ageMs);
+        const price = Number(quote.price);
+        if (!Number.isFinite(price) || price <= 0) throw new Error(`ASTER_UPSTREAM_RECOVERY_REFERENCE_QUOTE_INVALID:${symbol}`);
+        if (!Number.isFinite(ageMs) || ageMs < 0 || ageMs > maximumAgeMs) {
+            throw new Error(`ASTER_UPSTREAM_RECOVERY_REFERENCE_QUOTE_STALE:${symbol}:${ageMs}`);
+        }
+    }
 }
 
 async function main() {

@@ -24,6 +24,7 @@ class AsterUpstreamAutoRepairContractTests(unittest.TestCase):
         self.assertIn("V52 fatal tick error: <urlopen error [Errno 104] Connection reset by peer>", source)
         self.assertIn("V52 upstream state unavailable: Aster HTTP 429", source)
         self.assertIn("V52 upstream state unavailable: Aster HTTP 418 IP banned", source)
+        self.assertIn('V52 fatal tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=META: {"error":"stale_quote"', source)
         self.assertIn("! is_aster_upstream_shared_reason 'daily loss latch'", source)
 
 

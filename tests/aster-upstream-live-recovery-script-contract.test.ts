@@ -56,10 +56,13 @@ test("Aster upstream recovery refuses Kill clear while legacy V96/V52 live super
   assert.match(source, /ASTER_UPSTREAM_RECOVERY_LEGACY_LIVE_CONFLICT/);
 });
 
-test("off-hours reference recovery requires market-closed proof before Kill clear", async () => {
+test("reference stale recovery requires fresh proof for every V52 stock before Kill clear", async () => {
     const source = await readFile("scripts/disdex-aster-upstream-live-recovery.ts", "utf8");
     assert.match(source, /isRecoverableV52ReferenceKillReason/);
-    assert.match(source, /REFERENCE_RECOVERY_MARKET_OPEN/);
     assert.match(source, /127\.0\.0\.1:8797\/health/);
-    assert.match(source, /marketOpen/);
+    assert.match(source, /RECOVERY_REFERENCE_NOT_CONNECTED/);
+    assert.match(source, /RECOVERY_REFERENCE_QUOTE_HTTP_/);
+    assert.match(source, /RECOVERY_REFERENCE_QUOTE_STALE/);
+    for (const symbol of ["META", "AMZN", "MSFT", "NVDA", "TSLA"]) assert.ok(source.includes(`"${symbol}"`));
+    assert.equal(source.includes("REFERENCE_RECOVERY_MARKET_OPEN"), false);
 });
