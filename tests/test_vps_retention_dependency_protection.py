@@ -65,6 +65,20 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
             self.assertFalse(audit.safe)
             self.assertTrue(audit.references["process"])
 
+    def test_symlink_reference_scan_finds_target_without_recursive_python_walk(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            release = root / ("c" * 40)
+            release.mkdir()
+            link_root = root / "deploy"
+            link_root.mkdir()
+            link = link_root / "current"
+            link.symlink_to(release)
+
+            references = retention.find_symlink_references(release, link_root)
+
+            self.assertEqual(references, [f"{link} -> {release}"])
+
     def test_current_release_dependency_target_is_never_deleted(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

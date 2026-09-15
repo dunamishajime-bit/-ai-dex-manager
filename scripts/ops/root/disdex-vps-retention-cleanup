@@ -167,24 +167,10 @@ def audit_release_references(path: Path, paths: CleanupPaths) -> ReferenceAudit:
         except OSError:
             unavailable.append(f"systemd:{root}")
 
-    if not paths.symlink_scan_root.exists():
-        unavailable.append(f"symlink:{paths.symlink_scan_root}")
-    else:
-        try:
-            for directory, directories, files in os.walk(paths.symlink_scan_root, followlinks=False):
-                for name in [*directories, *files]:
-                    candidate = Path(directory) / name
-                    if not candidate.is_symlink():
-                        continue
-                    try:
-                        target = candidate.resolve(strict=False)
-                    except OSError:
-                        unavailable.append(f"symlink:{candidate}")
-                        continue
-                    if target == path or str(target).startswith(path_text + os.sep):
-                        references["symlink"].append(f"{candidate} -> {target}")
-        except OSError:
-            unavailable.append(f"symlink:{paths.symlink_scan_root}")
+    try:
+        references["symlink"].extend(find_symlink_references(path, paths.symlink_scan_root))
+    except (OSError, RuntimeError) as error:
+        unavailable.append(f"symlink:{error}")
 
     if not paths.process_root.exists():
         unavailable.append(f"process:{paths.process_root}")
@@ -224,6 +210,30 @@ def audit_release_references(path: Path, paths: CleanupPaths) -> ReferenceAudit:
     frozen = {key: tuple(values) for key, values in references.items()}
     reasons = tuple([f"{key}={value}" for key, values in frozen.items() if (value := values)] + unavailable)
     return ReferenceAudit(not reasons, frozen, reasons)
+
+
+def find_symlink_references(path: Path, root: Path) -> list[str]:
+    if not root.exists():
+        raise RuntimeError(f"scan root missing: {root}")
+    find = shutil.which("find")
+    if not find:
+        raise RuntimeError("find command missing")
+    result = subprocess.run(
+        [find, str(root), "-xdev", "-type", "l", "-print"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"find exited {result.returncode}")
+    references: list[str] = []
+    for line in result.stdout.splitlines():
+        candidate = Path(line)
+        target = candidate.resolve(strict=False)
+        if target == path or str(target).startswith(str(path) + os.sep):
+            references.append(f"{candidate} -> {target}")
+    return sorted(references)
 
 
 def add_unverified(report: CleanupReport, path: Path, marker: Optional[str], reason: str, audit: Optional[ReferenceAudit] = None) -> None:

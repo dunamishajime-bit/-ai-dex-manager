@@ -34,6 +34,20 @@ class UiRetentionContractTest(unittest.TestCase):
             self.assertFalse(audit.safe)
             self.assertTrue(audit.references["systemd"])
 
+    def test_symlink_reference_scan_finds_ui_target(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            release = root / "ui-old"
+            release.mkdir()
+            link_root = root / "deploy"
+            link_root.mkdir()
+            link = link_root / "current-ui"
+            link.symlink_to(release)
+
+            references = ui_retention.find_ui_symlink_references(release, link_root)
+
+            self.assertEqual(references, [f"{link} -> {release}"])
+
     def test_marker_backed_immutable_ui_releases_are_supported(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertIn(".disdex-ui-release-sha", source)
