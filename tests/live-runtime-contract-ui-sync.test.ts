@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-const runtimeSha = "8a2d73f7ad46d234dda161d1471191b2b09fa2bd";
+const runtimeSha = "10e18fea89b2aa889b9ce3d6a2603c43ac9e7715";
 const oldRuntimeSha = "c9018e0fcddb1f68bc1aaa11226afd178021e9f8";
 const read = (path: string) => readFileSync(path, "utf8");
 

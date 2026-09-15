@@ -56,7 +56,7 @@ function V52Top2Summary() {
         <div className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">発火Gate</div><div className="mt-1 break-words text-sm font-bold text-white">basis ≥ {policy.minEntryBasisBps}bps / net edge ≥ {policy.minNetEdgeBps}bps</div></div>
         <div className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">判定窓</div><div className="mt-1 break-words text-sm font-bold text-white">NY {policy.windowsNy.join(" / ")}（各{policy.entryWindowSeconds}秒）</div></div>
       </div>
-      <p className="mt-3 text-[11px] leading-5 text-white/58">一時的なデータ品質・板・spread拒否は窓内retry、basis/net edge不足やSIGN_CHANGED等は最終拒否。注文・取消・決済はHPから実行しません。</p>
+      <p className="mt-3 text-[11px] leading-5 text-white/58">V50はbasis ≥ {policy.minEntryBasisBps}bps / net edge ≥ {policy.minNetEdgeBps}bps / 最大保有 {policy.maxHoldingHours}h。データ品質・板・spread拒否は窓内retry、basis/net edge不足やSIGN_CHANGED等は最終拒否。注文・取消・決済はHPから実行しません。</p>
     </section>
   );
 }

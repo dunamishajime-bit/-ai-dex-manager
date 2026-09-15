@@ -15,6 +15,7 @@ function BannerContent() {
       <span>全体Gross上限 {config.maximumGross.toFixed(1)}x / Crypto {config.sharedCryptoGross.toFixed(1)}x</span>
       <span>V12 Top2 {config.v12SizingMode} / PENGU Short V20 + Recovery V8 {config.penguGross.toFixed(2)}x</span>
       <span>V52 Top2 {config.v52Top2Policy.rank1RequestedGross.toFixed(2)}x・{config.v52Top2Policy.rank2RequestedGross.toFixed(2)}x / 最大{config.v52Top2Policy.maxConcurrentPositions}建玉</span>
+      <span>V52 V50 basis≥{config.v52Top2Policy.minEntryBasisBps}bps / net edge≥{config.v52Top2Policy.minNetEdgeBps}bps / max hold {config.v52Top2Policy.maxHoldingHours}h</span>
       <span className="text-amber-200">Quality102 Causal V4 {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / 1 slot</span>
       <LiveRuntimeBadge />
       <span className="inline-flex items-center gap-1 text-emerald-200">
