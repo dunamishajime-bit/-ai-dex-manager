@@ -22,6 +22,7 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         source = WIRING.read_text(encoding="utf-8")
         self.assertIn('HISTORY_SYNC_DROPIN_DIR=', source)
         self.assertIn('scripts/disdex-aster-trade-history-git-sync.ts', source)
+        self.assertIn('EnvironmentFile=/etc/disdex/disdex-quality102-causal-v1.env', source)
         self.assertIn('ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-aster-trade-history-git-sync.ts', source)
 
 
