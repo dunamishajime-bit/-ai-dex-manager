@@ -219,7 +219,7 @@ def find_symlink_references(path: Path, root: Path) -> list[str]:
     if not find:
         raise RuntimeError("find command missing")
     result = subprocess.run(
-        [find, str(root), "-xdev", "-type", "l", "-print"],
+        [find, str(root), "-xdev", "-type", "l", "(", "-lname", str(path), "-o", "-lname", f"{path}/*", ")", "-print"],
         capture_output=True,
         text=True,
         timeout=30,
