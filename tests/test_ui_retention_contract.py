@@ -12,6 +12,28 @@ ui_retention = importlib.machinery.SourceFileLoader("disdex_ui_retention_marker_
 
 
 class UiRetentionContractTest(unittest.TestCase):
+    def test_systemd_reference_blocks_ui_release_deletion(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            release = root / "ui-old"
+            release.mkdir()
+            (release / ".disdex-ui-sha").write_text("a" * 40 + "\n", encoding="utf-8")
+            systemd = root / "systemd"
+            systemd.mkdir()
+            (systemd / "ui.conf").write_text(
+                f"WorkingDirectory={release}\n", encoding="utf-8"
+            )
+
+            audit = ui_retention.audit_ui_release_references(
+                release,
+                systemd_reference_roots=(systemd,),
+                symlink_scan_root=root / "deploy",
+                process_root=root / "proc",
+            )
+
+            self.assertFalse(audit.safe)
+            self.assertTrue(audit.references["systemd"])
+
     def test_marker_backed_immutable_ui_releases_are_supported(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertIn(".disdex-ui-release-sha", source)

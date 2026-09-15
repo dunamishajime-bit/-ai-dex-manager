@@ -11,6 +11,60 @@ retention = importlib.machinery.SourceFileLoader("disdex_retention", str(SCRIPT)
 
 
 class RetentionDependencyProtectionTest(unittest.TestCase):
+    def test_systemd_reference_makes_release_unverified_protected(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            paths = retention.CleanupPaths(
+                trading_root=root / "trading",
+                shared_root=root / "shared",
+                ops_root=root / "ops",
+                systemd_backup_root=root / "systemd-backup",
+                pm2_log_root=root / "pm2",
+                systemd_reference_roots=(root / "etc-systemd",),
+                symlink_scan_root=root / "deploy",
+                process_root=root / "proc",
+                state_reference_roots=(root / "state",),
+            )
+            release = paths.releases_root / ("a" * 40)
+            release.mkdir(parents=True)
+            (release / ".disdex-release-sha").write_text("a" * 40 + "\n", encoding="utf-8")
+            paths.systemd_reference_roots[0].mkdir(parents=True)
+            (paths.systemd_reference_roots[0] / "stale-unit.conf").write_text(
+                f"WorkingDirectory={release}\n", encoding="utf-8"
+            )
+
+            audit = retention.audit_release_references(release, paths)
+
+            self.assertFalse(audit.safe)
+            self.assertTrue(audit.references["systemd"])
+
+    def test_open_process_fd_makes_release_unverified_protected(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            paths = retention.CleanupPaths(
+                trading_root=root / "trading",
+                shared_root=root / "shared",
+                ops_root=root / "ops",
+                systemd_backup_root=root / "systemd-backup",
+                pm2_log_root=root / "pm2",
+                systemd_reference_roots=(root / "etc-systemd",),
+                symlink_scan_root=root / "deploy",
+                process_root=root / "proc",
+                state_reference_roots=(root / "state",),
+            )
+            release = paths.releases_root / ("b" * 40)
+            release.mkdir(parents=True)
+            (release / ".disdex-release-sha").write_text("b" * 40 + "\n", encoding="utf-8")
+            (release / "open.txt").write_text("open", encoding="utf-8")
+            fd_dir = paths.process_root / "123" / "fd"
+            fd_dir.mkdir(parents=True)
+            (fd_dir / "3").symlink_to(release / "open.txt")
+
+            audit = retention.audit_release_references(release, paths)
+
+            self.assertFalse(audit.safe)
+            self.assertTrue(audit.references["process"])
+
     def test_current_release_dependency_target_is_never_deleted(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -20,6 +74,10 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
                 ops_root=root / "ops",
                 systemd_backup_root=root / "systemd",
                 pm2_log_root=root / "pm2",
+                systemd_reference_roots=(root / "etc-systemd",),
+                symlink_scan_root=root / "deploy",
+                process_root=root / "proc",
+                state_reference_roots=(root / "state",),
             )
             paths.releases_root.mkdir(parents=True)
             releases = []

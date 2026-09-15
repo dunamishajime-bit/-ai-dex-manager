@@ -36,6 +36,10 @@ class CleanupPaths:
     ops_root: Path = Path("/home/deploy/disdex-ops")
     systemd_backup_root: Path = Path("/etc/disdex/systemd-backup")
     pm2_log_root: Path = Path("/home/deploy/.pm2/logs")
+    systemd_reference_roots: tuple[Path, ...] = (Path("/etc/systemd/system"), Path("/usr/lib/systemd/system"), Path("/etc/disdex"))
+    symlink_scan_root: Path = Path("/home/deploy")
+    process_root: Path = Path("/proc")
+    state_reference_roots: tuple[Path, ...] = (Path("/var/lib/disdex"), Path("/home/deploy/disdex-ops"))
 
     @property
     def releases_root(self) -> Path:
@@ -74,6 +78,7 @@ class CleanupReport:
     compressed_paths: list[str] = field(default_factory=list)
     protected_paths: list[str] = field(default_factory=list)
     skipped_paths: list[str] = field(default_factory=list)
+    unverified_protected: list[dict[str, object]] = field(default_factory=list)
     bytes_reclaimed: int = 0
     promotion_lock_busy: bool = False
 
@@ -86,6 +91,7 @@ class CleanupReport:
             "compressedPaths": self.compressed_paths,
             "protectedPaths": self.protected_paths,
             "skippedPaths": self.skipped_paths,
+            "unverifiedProtected": self.unverified_protected,
             "bytesReclaimed": self.bytes_reclaimed,
             "promotionLockBusy": self.promotion_lock_busy,
             "protectedPathsTouched": False,
@@ -97,6 +103,13 @@ class CleanupReport:
             "cancelSent": False,
             "positionChangesSent": False,
         }
+
+
+@dataclass(frozen=True)
+class ReferenceAudit:
+    safe: bool
+    references: dict[str, tuple[str, ...]]
+    reasons: tuple[str, ...]
 
 
 def now_seconds() -> float:
@@ -133,6 +146,95 @@ def is_within(path: Path, root: Path) -> bool:
         return True
     except ValueError:
         return False
+
+
+def audit_release_references(path: Path, paths: CleanupPaths) -> ReferenceAudit:
+    references: dict[str, list[str]] = {"systemd": [], "symlink": [], "process": [], "state": []}
+    unavailable: list[str] = []
+    path_text = str(path)
+
+    for root in paths.systemd_reference_roots:
+        if not root.exists():
+            continue
+        try:
+            for file in root.rglob("*"):
+                if file.is_file() and not file.is_symlink():
+                    try:
+                        if path_text in file.read_text(encoding="utf-8", errors="ignore"):
+                            references["systemd"].append(str(file))
+                    except OSError:
+                        unavailable.append(f"systemd:{file}")
+        except OSError:
+            unavailable.append(f"systemd:{root}")
+
+    if not paths.symlink_scan_root.exists():
+        unavailable.append(f"symlink:{paths.symlink_scan_root}")
+    else:
+        try:
+            for directory, directories, files in os.walk(paths.symlink_scan_root, followlinks=False):
+                for name in [*directories, *files]:
+                    candidate = Path(directory) / name
+                    if not candidate.is_symlink():
+                        continue
+                    try:
+                        target = candidate.resolve(strict=False)
+                    except OSError:
+                        unavailable.append(f"symlink:{candidate}")
+                        continue
+                    if target == path or str(target).startswith(path_text + os.sep):
+                        references["symlink"].append(f"{candidate} -> {target}")
+        except OSError:
+            unavailable.append(f"symlink:{paths.symlink_scan_root}")
+
+    if not paths.process_root.exists():
+        unavailable.append(f"process:{paths.process_root}")
+    else:
+        try:
+            for proc in paths.process_root.glob("[0-9]*"):
+                try:
+                    cwd = (proc / "cwd").resolve(strict=False)
+                except OSError:
+                    continue
+                if cwd == path or str(cwd).startswith(path_text + os.sep):
+                    references["process"].append(f"{proc.name} cwd={cwd}")
+                try:
+                    for fd in (proc / "fd").iterdir():
+                        target = os.readlink(fd)
+                        if target == path_text or target.startswith(path_text + os.sep):
+                            references["process"].append(f"{proc.name} fd={fd.name} -> {target}")
+                except OSError:
+                    continue
+        except OSError:
+            unavailable.append(f"process:{paths.process_root}")
+
+    for root in paths.state_reference_roots:
+        if not root.exists():
+            continue
+        try:
+            for file in root.rglob("*"):
+                if file.is_file() and not file.is_symlink():
+                    try:
+                        if path_text in file.read_text(encoding="utf-8", errors="ignore"):
+                            references["state"].append(str(file))
+                    except OSError:
+                        unavailable.append(f"state:{file}")
+        except OSError:
+            unavailable.append(f"state:{root}")
+
+    frozen = {key: tuple(values) for key, values in references.items()}
+    reasons = tuple([f"{key}={value}" for key, values in frozen.items() if (value := values)] + unavailable)
+    return ReferenceAudit(not reasons, frozen, reasons)
+
+
+def add_unverified(report: CleanupReport, path: Path, marker: Optional[str], reason: str, audit: Optional[ReferenceAudit] = None) -> None:
+    report.unverified_protected.append({
+        "path": str(path),
+        "size": path_size(path),
+        "markerSha": marker,
+        "parentSha": None,
+        "reason": reason,
+        "references": audit.references if audit else {},
+    })
 
 
 def unlink_or_rmtree(path: Path, report: CleanupReport) -> None:
@@ -172,6 +274,9 @@ def current_release(paths: CleanupPaths) -> Optional[Path]:
     target = paths.current_link.resolve(strict=False)
     if not is_within(target, paths.releases_root) or not SHA_RE.fullmatch(target.name):
         raise RuntimeError("current release symlink is outside the fixed release root or not an exact SHA")
+    marker = target / ".disdex-release-sha"
+    if marker.is_symlink() or not marker.is_file() or marker.read_text(encoding="utf-8").strip() != target.name:
+        raise RuntimeError("current release marker is invalid")
     return target
 
 
@@ -254,6 +359,10 @@ def protect_release_dependencies(paths: CleanupPaths, protected: set[Path]) -> N
 
 def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
     releases = exact_release_dirs(paths)
+    if paths.releases_root.is_dir():
+        for child in paths.releases_root.iterdir():
+            if child.is_dir() and not child.is_symlink() and child not in releases:
+                add_unverified(report, child, None, "UNVERIFIED_PROTECTED:invalid or missing release marker")
     current = current_release(paths)
     protected: set[Path] = set()
     if current is not None:
@@ -275,11 +384,22 @@ def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> 
         if age < RELEASE_MIN_AGE_SECONDS:
             report.skipped_paths.append(str(release))
             continue
+        audit = audit_release_references(release, paths)
+        if not audit.safe:
+            add_unverified(report, release, release.name, "UNVERIFIED_PROTECTED:external reference or scan uncertainty", audit)
+            continue
         unlink_or_rmtree(release, report)
 
 
 def cleanup_ui_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
     releases = exact_ui_release_dirs(paths)
+    all_rows = [
+        child for child in paths.ui_releases_root.iterdir()
+        if child.is_dir() and not child.is_symlink() and child.name.startswith("ui-")
+    ]
+    for child in all_rows:
+        if child not in releases:
+            add_unverified(report, child, None, "UNVERIFIED_PROTECTED:no valid identity marker or marker conflict")
     if not releases:
         return
     current = current_ui_release(paths)
@@ -293,6 +413,14 @@ def cleanup_ui_releases(paths: CleanupPaths, report: CleanupReport, now: float) 
         if noncurrent_kept < UI_RELEASE_KEEP_NONCURRENT:
             protected.add(release)
             noncurrent_kept += 1
+    parent_marker = current / ".disdex-ui-parent-sha"
+    parent_sha = parent_marker.read_text(encoding="utf-8").strip() if parent_marker.is_file() else ""
+    if parent_marker.is_file() and not SHA_RE.fullmatch(parent_sha):
+        raise RuntimeError("current UI parent marker is invalid")
+    if parent_sha:
+        for release in releases:
+            if ui_release_sha(release) == parent_sha:
+                protected.add(release)
     for release in sorted(protected):
         report.protected_paths.append(str(release))
     for release in releases:
@@ -301,6 +429,10 @@ def cleanup_ui_releases(paths: CleanupPaths, report: CleanupReport, now: float) 
         age = now - release.stat().st_mtime
         if age < RELEASE_MIN_AGE_SECONDS:
             report.skipped_paths.append(str(release))
+            continue
+        audit = audit_release_references(release, paths)
+        if not audit.safe:
+            add_unverified(report, release, ui_release_sha(release), "UNVERIFIED_PROTECTED:external reference or scan uncertainty", audit)
             continue
         unlink_or_rmtree(release, report)
 

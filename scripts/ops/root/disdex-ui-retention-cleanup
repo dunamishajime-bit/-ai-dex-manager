@@ -4,10 +4,12 @@ from __future__ import annotations
 import argparse
 import fcntl
 import json
+import os
 import re
 import shutil
 import subprocess
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path("/home/deploy/disdex-trading/ui-releases")
@@ -17,6 +19,86 @@ SHA = re.compile(r"^[0-9a-f]{40}$")
 KEEP_NONCURRENT = 2
 MIN_AGE_SECONDS = 24 * 60 * 60
 PRESSURE_PERCENT = 85.0
+SYSTEMD_REFERENCE_ROOTS = (Path("/etc/systemd/system"), Path("/usr/lib/systemd/system"), Path("/etc/disdex"))
+SYMLINK_SCAN_ROOT = Path("/home/deploy")
+PROCESS_ROOT = Path("/proc")
+
+
+@dataclass(frozen=True)
+class ReferenceAudit:
+    safe: bool
+    references: dict[str, tuple[str, ...]]
+    reasons: tuple[str, ...]
+
+
+def audit_ui_release_references(
+    path: Path,
+    *,
+    systemd_reference_roots: tuple[Path, ...] = SYSTEMD_REFERENCE_ROOTS,
+    symlink_scan_root: Path = SYMLINK_SCAN_ROOT,
+    process_root: Path = PROCESS_ROOT,
+) -> ReferenceAudit:
+    references: dict[str, list[str]] = {"systemd": [], "symlink": [], "process": []}
+    unavailable: list[str] = []
+    path_text = str(path)
+
+    for root in systemd_reference_roots:
+        if not root.exists():
+            continue
+        try:
+            for file in root.rglob("*"):
+                if file.is_file() and not file.is_symlink():
+                    try:
+                        if path_text in file.read_text(encoding="utf-8", errors="ignore"):
+                            references["systemd"].append(str(file))
+                    except OSError:
+                        unavailable.append(f"systemd:{file}")
+        except OSError:
+            unavailable.append(f"systemd:{root}")
+
+    if not symlink_scan_root.exists():
+        unavailable.append(f"symlink:{symlink_scan_root}")
+    else:
+        try:
+            for directory, directories, files in os.walk(symlink_scan_root, followlinks=False):
+                for name in [*directories, *files]:
+                    candidate = Path(directory) / name
+                    if not candidate.is_symlink():
+                        continue
+                    try:
+                        target = candidate.resolve(strict=False)
+                    except OSError:
+                        unavailable.append(f"symlink:{candidate}")
+                        continue
+                    if target == path or str(target).startswith(path_text + os.sep):
+                        references["symlink"].append(f"{candidate} -> {target}")
+        except OSError:
+            unavailable.append(f"symlink:{symlink_scan_root}")
+
+    if not process_root.exists():
+        unavailable.append(f"process:{process_root}")
+    else:
+        try:
+            for proc in process_root.glob("[0-9]*"):
+                try:
+                    cwd = (proc / "cwd").resolve(strict=False)
+                except OSError:
+                    continue
+                if cwd == path or str(cwd).startswith(path_text + os.sep):
+                    references["process"].append(f"{proc.name} cwd={cwd}")
+                try:
+                    for fd in (proc / "fd").iterdir():
+                        target = os.readlink(fd)
+                        if target == path_text or target.startswith(path_text + os.sep):
+                            references["process"].append(f"{proc.name} fd={fd.name} -> {target}")
+                except OSError:
+                    continue
+        except OSError:
+            unavailable.append(f"process:{process_root}")
+
+    frozen = {key: tuple(values) for key, values in references.items()}
+    reasons = tuple([f"{key}={value}" for key, values in frozen.items() if (value := values)] + unavailable)
+    return ReferenceAudit(not reasons, frozen, reasons)
 
 
 def release_sha(path: Path) -> str | None:
@@ -59,6 +141,16 @@ def releases() -> list[Path]:
     return sorted(rows, key=lambda item: item.stat().st_mtime, reverse=True)
 
 
+def all_ui_release_dirs() -> list[Path]:
+    if not ROOT.is_dir():
+        raise RuntimeError("UI release root is missing")
+    return sorted(
+        [path for path in ROOT.iterdir() if path.is_dir() and not path.is_symlink() and path.name.startswith("ui-")],
+        key=lambda item: item.stat().st_mtime,
+        reverse=True,
+    )
+
+
 def path_size(path: Path) -> int:
     return sum(
         file.stat().st_size
@@ -83,12 +175,27 @@ def main() -> int:
 
         current = service_working_directory()
         rows = releases()
+        all_rows = all_ui_release_dirs()
         if current not in rows:
             raise RuntimeError("current UI release failed immutable marker validation")
         protected = {current}
+        protected_records: list[dict[str, object]] = [
+            {"path": str(current), "reason": "current UI"}
+        ]
         for release in rows:
             if release != current and len(protected) < KEEP_NONCURRENT + 1:
                 protected.add(release)
+                protected_records.append({"path": str(release), "reason": "rollback retention"})
+
+        parent_marker = current / ".disdex-ui-parent-sha"
+        parent_sha = parent_marker.read_text(encoding="utf-8").strip() if parent_marker.is_file() else ""
+        if parent_marker.is_file() and not SHA.fullmatch(parent_sha):
+            raise RuntimeError("current UI parent marker is invalid")
+        if parent_sha:
+            for release in rows:
+                if release_sha(release) == parent_sha:
+                    protected.add(release)
+                    protected_records.append({"path": str(release), "reason": "current UI parent"})
 
         usage = shutil.disk_usage(ROOT)
         used_percent = 100.0 * usage.used / usage.total
@@ -96,10 +203,33 @@ def main() -> int:
         now = time.time()
         candidates: list[Path] = []
         reclaimed = 0
+        unverified: list[dict[str, object]] = []
+        for release in all_rows:
+            if release not in rows:
+                unverified.append({
+                    "path": str(release),
+                    "size": path_size(release),
+                    "markerSha": None,
+                    "parentSha": None,
+                    "reason": "UNVERIFIED_PROTECTED:no valid identity marker or marker conflict",
+                    "references": {},
+                })
         for release in rows:
             if release in protected:
                 continue
             if not under_pressure and now - release.stat().st_mtime < MIN_AGE_SECONDS:
+                continue
+            audit = audit_ui_release_references(release)
+            if not audit.safe:
+                unverified.append({
+                    "path": str(release),
+                    "size": path_size(release),
+                    "markerSha": release_sha(release),
+                    "parentSha": None,
+                    "reason": "UNVERIFIED_PROTECTED:external reference or scan uncertainty",
+                    "references": audit.references,
+                })
+                protected.add(release)
                 continue
             candidates.append(release)
             reclaimed += path_size(release)
@@ -113,6 +243,12 @@ def main() -> int:
             "underPressure": under_pressure,
             "currentRelease": str(current),
             "protectedReleases": [str(path) for path in sorted(protected)],
+            "protected": protected_records,
+            "deleteCandidates": [
+                {"path": str(path), "size": path_size(path), "reason": "all strict deletion checks passed"}
+                for path in candidates
+            ],
+            "unverifiedProtected": unverified,
             "deletedReleases": [str(path) for path in candidates],
             "bytesReclaimed": reclaimed,
             "tradingReleaseDeleted": False,
