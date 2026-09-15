@@ -79,6 +79,27 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
 
             self.assertEqual(references, [f"{link} -> {release}"])
 
+    def test_bulk_symlink_scan_indexes_trading_targets_once(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            release_one = root / ("c" * 40)
+            release_two = root / ("d" * 40)
+            release_one.mkdir()
+            release_two.mkdir()
+            link_root = root / "deploy"
+            link_root.mkdir()
+            link_one = link_root / "one"
+            link_two = link_root / "two"
+            link_one.symlink_to(release_one)
+            link_two.symlink_to(release_two)
+
+            indexed = retention.find_symlink_references_for_paths(
+                (release_one, release_two), link_root
+            )
+
+            self.assertEqual(list(indexed[str(release_one)]), [f"{link_one} -> {release_one}"])
+            self.assertEqual(list(indexed[str(release_two)]), [f"{link_two} -> {release_two}"])
+
     def test_current_release_dependency_target_is_never_deleted(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

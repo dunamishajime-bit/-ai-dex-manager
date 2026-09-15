@@ -48,13 +48,34 @@ class UiRetentionContractTest(unittest.TestCase):
 
             self.assertEqual(references, [f"{link} -> {release}"])
 
+    def test_bulk_symlink_scan_indexes_ui_targets_once(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            release_one = root / "ui-one"
+            release_two = root / "ui-two"
+            release_one.mkdir()
+            release_two.mkdir()
+            link_root = root / "deploy"
+            link_root.mkdir()
+            link_one = link_root / "one"
+            link_two = link_root / "two"
+            link_one.symlink_to(release_one)
+            link_two.symlink_to(release_two)
+
+            indexed = ui_retention.find_ui_symlink_references_for_paths(
+                (release_one, release_two), link_root
+            )
+
+            self.assertEqual(list(indexed[str(release_one)]), [f"{link_one} -> {release_one}"])
+            self.assertEqual(list(indexed[str(release_two)]), [f"{link_two} -> {release_two}"])
+
     def test_marker_backed_immutable_ui_releases_are_supported(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertIn(".disdex-ui-release-sha", source)
         self.assertIn("def ui_release_sha", source)
         self.assertIn("def current_ui_release", source)
         self.assertIn("def cleanup_ui_releases", source)
-        self.assertIn("cleanup_ui_releases(paths, report, current_time)", source)
+        self.assertIn("cleanup_ui_releases(", source)
         self.assertIn("UI_RELEASE_KEEP_NONCURRENT = 2", source)
 
     def test_ui_release_identity_comes_from_marker_not_directory_suffix(self):

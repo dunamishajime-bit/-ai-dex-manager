@@ -37,6 +37,8 @@ def audit_ui_release_references(
     systemd_reference_roots: tuple[Path, ...] = SYSTEMD_REFERENCE_ROOTS,
     symlink_scan_root: Path = SYMLINK_SCAN_ROOT,
     process_root: Path = PROCESS_ROOT,
+    symlink_references: dict[str, tuple[str, ...]] | None = None,
+    symlink_scan_error: str | None = None,
 ) -> ReferenceAudit:
     references: dict[str, list[str]] = {"systemd": [], "symlink": [], "process": []}
     unavailable: list[str] = []
@@ -56,10 +58,16 @@ def audit_ui_release_references(
         except OSError:
             unavailable.append(f"systemd:{root}")
 
-    try:
-        references["symlink"].extend(find_ui_symlink_references(path, symlink_scan_root))
-    except (OSError, RuntimeError) as error:
-        unavailable.append(f"symlink:{error}")
+    if symlink_scan_error:
+        unavailable.append(f"symlink:{symlink_scan_error}")
+    else:
+        try:
+            if symlink_references is None:
+                references["symlink"].extend(find_ui_symlink_references(path, symlink_scan_root))
+            else:
+                references["symlink"].extend(symlink_references.get(str(path), ()))
+        except (OSError, RuntimeError) as error:
+            unavailable.append(f"symlink:{error}")
 
     if not process_root.exists():
         unavailable.append(f"process:{process_root}")
@@ -109,6 +117,36 @@ def find_ui_symlink_references(path: Path, root: Path) -> list[str]:
         if target == path or str(target).startswith(str(path) + os.sep):
             references.append(f"{candidate} -> {target}")
     return sorted(references)
+
+
+def find_ui_symlink_references_for_paths(paths: tuple[Path, ...], root: Path) -> dict[str, tuple[str, ...]]:
+    """Scan the deployment root once, then index references by UI release."""
+    if not paths:
+        return {}
+    if not root.exists():
+        raise RuntimeError(f"scan root missing: {root}")
+    find = shutil.which("find")
+    if not find:
+        raise RuntimeError("find command missing")
+    release_root = paths[0].parent
+    result = subprocess.run(
+        [find, str(root), "-xdev", "-type", "l", "-lname", f"{release_root}/*", "-print"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"find exited {result.returncode}")
+    indexed: dict[str, list[str]] = {str(path): [] for path in paths}
+    for line in result.stdout.splitlines():
+        candidate = Path(line)
+        target = candidate.resolve(strict=False)
+        for path in paths:
+            if target == path or str(target).startswith(str(path) + os.sep):
+                indexed[str(path)].append(f"{candidate} -> {target}")
+                break
+    return {key: tuple(sorted(values)) for key, values in indexed.items()}
 
 
 def release_sha(path: Path) -> str | None:
@@ -211,6 +249,12 @@ def main() -> int:
         used_percent = 100.0 * usage.used / usage.total
         under_pressure = used_percent >= PRESSURE_PERCENT
         now = time.time()
+        symlink_references: dict[str, tuple[str, ...]] = {}
+        symlink_scan_error: str | None = None
+        try:
+            symlink_references = find_ui_symlink_references_for_paths(tuple(rows), SYMLINK_SCAN_ROOT)
+        except (OSError, RuntimeError) as error:
+            symlink_scan_error = str(error)
         candidates: list[Path] = []
         reclaimed = 0
         unverified: list[dict[str, object]] = []
@@ -229,7 +273,11 @@ def main() -> int:
                 continue
             if not under_pressure and now - release.stat().st_mtime < MIN_AGE_SECONDS:
                 continue
-            audit = audit_ui_release_references(release)
+            audit = audit_ui_release_references(
+                release,
+                symlink_references=symlink_references,
+                symlink_scan_error=symlink_scan_error,
+            )
             if not audit.safe:
                 unverified.append({
                     "path": str(release),

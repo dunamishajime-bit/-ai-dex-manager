@@ -148,7 +148,13 @@ def is_within(path: Path, root: Path) -> bool:
         return False
 
 
-def audit_release_references(path: Path, paths: CleanupPaths) -> ReferenceAudit:
+def audit_release_references(
+    path: Path,
+    paths: CleanupPaths,
+    *,
+    symlink_references: dict[str, tuple[str, ...]] | None = None,
+    symlink_scan_error: str | None = None,
+) -> ReferenceAudit:
     references: dict[str, list[str]] = {"systemd": [], "symlink": [], "process": [], "state": []}
     unavailable: list[str] = []
     path_text = str(path)
@@ -167,10 +173,16 @@ def audit_release_references(path: Path, paths: CleanupPaths) -> ReferenceAudit:
         except OSError:
             unavailable.append(f"systemd:{root}")
 
-    try:
-        references["symlink"].extend(find_symlink_references(path, paths.symlink_scan_root))
-    except (OSError, RuntimeError) as error:
-        unavailable.append(f"symlink:{error}")
+    if symlink_scan_error:
+        unavailable.append(f"symlink:{symlink_scan_error}")
+    else:
+        try:
+            if symlink_references is None:
+                references["symlink"].extend(find_symlink_references(path, paths.symlink_scan_root))
+            else:
+                references["symlink"].extend(symlink_references.get(str(path), ()))
+        except (OSError, RuntimeError) as error:
+            unavailable.append(f"symlink:{error}")
 
     if not paths.process_root.exists():
         unavailable.append(f"process:{paths.process_root}")
@@ -234,6 +246,41 @@ def find_symlink_references(path: Path, root: Path) -> list[str]:
         if target == path or str(target).startswith(str(path) + os.sep):
             references.append(f"{candidate} -> {target}")
     return sorted(references)
+
+
+def find_symlink_references_for_paths(paths: tuple[Path, ...], root: Path) -> dict[str, tuple[str, ...]]:
+    """Scan all release symlink targets once and index them by release path."""
+    if not paths:
+        return {}
+    if not root.exists():
+        raise RuntimeError(f"scan root missing: {root}")
+    find = shutil.which("find")
+    if not find:
+        raise RuntimeError("find command missing")
+    patterns = sorted({f"{path.parent}/*" for path in paths})
+    expression: list[str] = []
+    for index, pattern in enumerate(patterns):
+        if index:
+            expression.append("-o")
+        expression.extend(["-lname", pattern])
+    result = subprocess.run(
+        [find, str(root), "-xdev", "-type", "l", "(", *expression, ")", "-print"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"find exited {result.returncode}")
+    indexed: dict[str, list[str]] = {str(path): [] for path in paths}
+    for line in result.stdout.splitlines():
+        candidate = Path(line)
+        target = candidate.resolve(strict=False)
+        for path in paths:
+            if target == path or str(target).startswith(str(path) + os.sep):
+                indexed[str(path)].append(f"{candidate} -> {target}")
+                break
+    return {key: tuple(sorted(values)) for key, values in indexed.items()}
 
 
 def add_unverified(report: CleanupReport, path: Path, marker: Optional[str], reason: str, audit: Optional[ReferenceAudit] = None) -> None:
@@ -367,7 +414,14 @@ def protect_release_dependencies(paths: CleanupPaths, protected: set[Path]) -> N
                 pending.append(target)
 
 
-def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+def cleanup_releases(
+    paths: CleanupPaths,
+    report: CleanupReport,
+    now: float,
+    *,
+    symlink_references: dict[str, tuple[str, ...]] | None = None,
+    symlink_scan_error: str | None = None,
+) -> None:
     releases = exact_release_dirs(paths)
     if paths.releases_root.is_dir():
         for child in paths.releases_root.iterdir():
@@ -394,14 +448,26 @@ def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> 
         if age < RELEASE_MIN_AGE_SECONDS:
             report.skipped_paths.append(str(release))
             continue
-        audit = audit_release_references(release, paths)
+        audit = audit_release_references(
+            release,
+            paths,
+            symlink_references=symlink_references,
+            symlink_scan_error=symlink_scan_error,
+        )
         if not audit.safe:
             add_unverified(report, release, release.name, "UNVERIFIED_PROTECTED:external reference or scan uncertainty", audit)
             continue
         unlink_or_rmtree(release, report)
 
 
-def cleanup_ui_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+def cleanup_ui_releases(
+    paths: CleanupPaths,
+    report: CleanupReport,
+    now: float,
+    *,
+    symlink_references: dict[str, tuple[str, ...]] | None = None,
+    symlink_scan_error: str | None = None,
+) -> None:
     releases = exact_ui_release_dirs(paths)
     all_rows = [
         child for child in paths.ui_releases_root.iterdir()
@@ -440,7 +506,12 @@ def cleanup_ui_releases(paths: CleanupPaths, report: CleanupReport, now: float) 
         if age < RELEASE_MIN_AGE_SECONDS:
             report.skipped_paths.append(str(release))
             continue
-        audit = audit_release_references(release, paths)
+        audit = audit_release_references(
+            release,
+            paths,
+            symlink_references=symlink_references,
+            symlink_scan_error=symlink_scan_error,
+        )
         if not audit.safe:
             add_unverified(report, release, ui_release_sha(release), "UNVERIFIED_PROTECTED:external reference or scan uncertainty", audit)
             continue
@@ -618,8 +689,27 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
     current_before = current_release(paths)
     try:
         current_time = now_seconds()
-        cleanup_releases(paths, report, current_time)
-        cleanup_ui_releases(paths, report, current_time)
+        candidates = tuple(exact_release_dirs(paths) + exact_ui_release_dirs(paths))
+        symlink_references: dict[str, tuple[str, ...]] = {}
+        symlink_scan_error: str | None = None
+        try:
+            symlink_references = find_symlink_references_for_paths(candidates, paths.symlink_scan_root)
+        except (OSError, RuntimeError) as error:
+            symlink_scan_error = str(error)
+        cleanup_releases(
+            paths,
+            report,
+            current_time,
+            symlink_references=symlink_references,
+            symlink_scan_error=symlink_scan_error,
+        )
+        cleanup_ui_releases(
+            paths,
+            report,
+            current_time,
+            symlink_references=symlink_references,
+            symlink_scan_error=symlink_scan_error,
+        )
         cleanup_audits(paths, report, current_time)
         cleanup_backups(paths, report, current_time)
         cleanup_stale_temporary_files(paths, report, current_time)
