@@ -635,6 +635,10 @@ def self_test() -> None:
             ops_root=root / "ops",
             systemd_backup_root=root / "systemd-backup",
             pm2_log_root=root / "pm2-logs",
+            systemd_reference_roots=(root / "etc-systemd",),
+            symlink_scan_root=root / "deploy",
+            process_root=root / "proc",
+            state_reference_roots=(root / "state",),
         )
         for path in [
             paths.releases_root,
@@ -646,6 +650,8 @@ def self_test() -> None:
             paths.promotion_root,
             paths.systemd_backup_root,
             paths.pm2_log_root,
+            paths.symlink_scan_root,
+            paths.process_root,
         ]:
             path.mkdir(parents=True, exist_ok=True)
         releases = []
