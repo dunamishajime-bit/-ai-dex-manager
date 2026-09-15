@@ -139,6 +139,23 @@ export interface AsterIncomeRow {
     tradeId?: string;
 }
 
+export interface AsterUserTradeRow {
+    symbol: string;
+    id?: number | string;
+    orderId?: number | string;
+    side?: AsterOrderSide;
+    positionSide?: AsterPositionSide;
+    price?: string;
+    qty?: string;
+    quoteQty?: string;
+    realizedPnl?: string;
+    commission?: string;
+    commissionAsset?: string;
+    time?: number;
+    buyer?: boolean;
+    maker?: boolean;
+}
+
 export interface AsterNewMarketOrder {
     symbol: string;
     side: AsterOrderSide;
@@ -240,6 +257,7 @@ export function asterFuturesRequestWeight(method: AsterHttpMethod, path: string,
     if (path === "/fapi/v3/balance" || path === "/fapi/v3/positionRisk" || path === "/fapi/v3/account" || path === "/fapi/v3/accountWithJoinMargin") return 5;
     if (path === "/fapi/v3/openOrders") return symbol ? 1 : 40;
     if (path === "/fapi/v3/income") return 30;
+    if (path === "/fapi/v3/userTrades") return 5;
     if (path === "/fapi/v3/fundingRate") return 1;
     if (path === "/fapi/v3/ticker/24hr") return symbol ? 1 : 40;
     if (path === "/fapi/v3/ticker/price" || path === "/fapi/v3/ticker/bookTicker") return symbol ? 1 : 2;
@@ -398,6 +416,16 @@ export class AsterV3Client {
     getOrder(symbol: string, clientOrderId: string) { return this.request<AsterOrderResponse>({ method: "GET", path: "/fapi/v3/order", params: { symbol, origClientOrderId: clientOrderId }, signed: true }); }
     getIncomeHistory(input: { symbol?: string; incomeType?: "REALIZED_PNL" | "FUNDING_FEE" | "COMMISSION"; startTime?: number; endTime?: number; limit?: number } = {}) {
         return this.request<AsterIncomeRow[]>({ method: "GET", path: "/fapi/v3/income", params: { ...input, limit: Math.min(1000, Math.max(1, input.limit ?? 1000)) }, signed: true });
+    }
+    getUserTrades(symbol: string, input: { startTime?: number; endTime?: number; fromId?: number; limit?: number } = {}) {
+        const normalizedSymbol = String(symbol || "").trim().toUpperCase();
+        if (!normalizedSymbol) throw new Error("ASTER_USER_TRADES_SYMBOL_REQUIRED");
+        return this.request<AsterUserTradeRow[]>({
+            method: "GET",
+            path: "/fapi/v3/userTrades",
+            params: { symbol: normalizedSymbol, ...input, limit: Math.min(1000, Math.max(1, input.limit ?? 1000)) },
+            signed: true,
+        });
     }
 
     placeMarketOrder(order: AsterNewMarketOrder) {

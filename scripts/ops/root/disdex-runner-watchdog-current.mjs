@@ -139,7 +139,7 @@ function parseNonInactiveServiceUnits(output, unitPrefix) {
     const pattern = new RegExp(`\\b(${escapeRegex(unitPrefix)}@[0-9a-f]{40}\\.service)\\s+\\S+\\s+(\\S+)\\s+\\S+`);
     for (const line of String(output || "").split(/\r?\n/)) {
         const match = pattern.exec(line);
-        if (match && match[2] !== "inactive") units.push(match[1]);
+        if (match && !new Set(["inactive", "failed"]).has(match[2])) units.push(match[1]);
     }
     return units;
 }
@@ -561,7 +561,7 @@ function selfTest() {
         if (!String(error?.message || "").includes("singleton invariant")) throw error;
     }
     const parsedRiskUnits = parseNonInactiveServiceUnits(`  ${expectedRiskUnit} loaded active running\n  ${conflictingRiskUnit} loaded activating auto-restart\n  disdex-shared-crypto-risk@${"b".repeat(40)}.service loaded inactive dead\n  disdex-shared-crypto-risk@${"c".repeat(40)}.service loaded failed failed\n  unrelated.service loaded active running`, "disdex-shared-crypto-risk");
-    if (parsedRiskUnits.length !== 3 || parsedRiskUnits[0] !== expectedRiskUnit || parsedRiskUnits[1] !== conflictingRiskUnit || parsedRiskUnits[2] !== `disdex-shared-crypto-risk@${"c".repeat(40)}.service`) throw new Error("shared risk unit parser self-test failed");
+    if (parsedRiskUnits.length !== 2 || parsedRiskUnits[0] !== expectedRiskUnit || parsedRiskUnits[1] !== conflictingRiskUnit) throw new Error("shared risk unit parser self-test failed");
     console.log("DISDEX_CURRENT_WATCHDOG_SHARED_RISK_SINGLETON_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_NONINACTIVE_RISK_SELFTEST_PASS");
     const expectedQ102Unit = q102.expectedUnit(sha);

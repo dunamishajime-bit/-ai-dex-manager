@@ -1,0 +1,29 @@
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+WIRING = ROOT / "scripts" / "ops" / "root" / "disdex-current-runtime-wiring"
+WATCHDOG = ROOT / "scripts" / "ops" / "root" / "disdex-runner-watchdog-current.mjs"
+
+
+class RuntimeWiringHygieneTest(unittest.TestCase):
+    def test_watchdog_ignores_inactive_and_failed_historical_instances(self):
+        source = WATCHDOG.read_text(encoding="utf-8")
+        self.assertIn('if (match && !new Set(["inactive", "failed"]).has(match[2])) units.push(match[1]);', source)
+
+    def test_wiring_resets_stale_failed_instances_before_monitor_reactivation(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn("reset_stale_release_failed_units", source)
+        reset_call = source.index("  reset_stale_release_failed_units", source.index("systemctl daemon-reload"))
+        monitor_call = source.index('systemctl restart disdex-v12-kill-switch-auto-repair.path')
+        self.assertLess(reset_call, monitor_call)
+
+    def test_wiring_pins_trade_history_sync_to_current_release(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn('HISTORY_SYNC_DROPIN_DIR=', source)
+        self.assertIn('scripts/disdex-aster-trade-history-git-sync.ts', source)
+        self.assertIn('ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-aster-trade-history-git-sync.ts', source)
+
+
+if __name__ == "__main__":
+    unittest.main()

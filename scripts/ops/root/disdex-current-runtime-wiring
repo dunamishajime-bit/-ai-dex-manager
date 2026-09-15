@@ -16,6 +16,7 @@ SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d
 AUTO_REPAIR_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.service.d"
 AUTO_REPAIR_PATH_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d"
 THREE_HOUR_HEALTH_DROPIN_DIR="/etc/systemd/system/disdex-v12-three-hour-health-check.service.d"
+HISTORY_SYNC_DROPIN_DIR="/etc/systemd/system/aster-trade-history-git-sync.service.d"
 V12_DROPIN_DIR="/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d"
 PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
@@ -84,6 +85,8 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/lib/disdex-aster-global-rate-budget.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts"
+    "$CURRENT_RELEASE/scripts/disdex-aster-trade-history-git-sync.ts"
+    "$CURRENT_RELEASE/lib/disdex-aster-trade-history-sync.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-three-hour-health-check"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-vps-retention-cleanup"
@@ -221,6 +224,16 @@ remove_stale_auto_repair_unit_pin_dropins() {
       rm -f -- "$dropin"
     fi
   done < <(find "$AUTO_REPAIR_DROPIN_DIR" -maxdepth 1 -type f -print0)
+}
+
+reset_stale_release_failed_units() {
+  local unit
+  while read -r unit _; do
+    [[ -n "$unit" ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard)@[0-9a-f]{40}\.service$ ]] || continue
+    [[ "$unit" == *"@${DEPLOYED_SHA}.service" ]] && continue
+    systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+  done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
 }
 
 ensure_safety_daemon_active() {
@@ -412,6 +425,18 @@ WorkingDirectory=${CURRENT_RELEASE}
 ExecStart=
 ExecStart=/usr/local/libexec/disdex-v12-three-hour-health-check"
 
+  write_atomic "${HISTORY_SYNC_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+Environment=DISDEX_GIT_HISTORY_SNAPSHOT_PATH=/home/deploy/ai-dex-manager/data/trade-history-git.json
+Environment=DISDEX_GIT_HISTORY_SYNC_STATUS_PATH=/home/deploy/ai-dex-manager/data/trade-history-git-sync-status.json
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-aster-trade-history-git-sync.ts
+ReadWritePaths=
+ReadWritePaths=/home/deploy/ai-dex-manager/data"
+
   write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
@@ -491,6 +516,8 @@ Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
 Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
   systemctl daemon-reload
+  reset_stale_release_failed_units
+  systemctl reset-failed aster-trade-history-git-sync.service || true
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.path || true
   systemctl restart disdex-v12-kill-switch-auto-repair.path
@@ -525,6 +552,8 @@ self_test() {
     lib/disdex-aster-global-rate-budget.ts \
     scripts/disdex-aster-readonly-recovery-gate.ts \
     scripts/disdex-aster-upstream-live-recovery.ts \
+    scripts/disdex-aster-trade-history-git-sync.ts \
+    lib/disdex-aster-trade-history-sync.ts \
     scripts/ops/root/disdex-v12-kill-switch-auto-repair \
     scripts/ops/root/disdex-v12-three-hour-health-check \
     scripts/ops/root/disdex-vps-retention-cleanup \
