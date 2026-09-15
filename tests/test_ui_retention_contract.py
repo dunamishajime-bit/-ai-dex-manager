@@ -1,9 +1,14 @@
+import importlib.machinery
+import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/ops/root/disdex-vps-retention-cleanup"
 SERVICE = ROOT / "ops/systemd/disdex-vps-retention.service"
+UI_SCRIPT = ROOT / "scripts/ops/root/disdex-ui-retention-cleanup"
+vps_retention = importlib.machinery.SourceFileLoader("disdex_vps_retention_marker_test", str(SCRIPT)).load_module()
+ui_retention = importlib.machinery.SourceFileLoader("disdex_ui_retention_marker_test", str(UI_SCRIPT)).load_module()
 
 
 class UiRetentionContractTest(unittest.TestCase):
@@ -21,6 +26,25 @@ class UiRetentionContractTest(unittest.TestCase):
         self.assertIn('path.name.startswith("ui-")', source)
         self.assertIn("SHA_RE.fullmatch", source)
         self.assertIn(".disdex-ui-release-sha", source)
+
+
+    def test_current_ui_sha_marker_is_accepted_by_both_retention_paths(self):
+        sha = "a" * 40
+        with tempfile.TemporaryDirectory() as td:
+            release = Path(td) / "ui-current"
+            release.mkdir()
+            (release / ".disdex-ui-sha").write_text(sha + "\n", encoding="utf-8")
+            self.assertEqual(vps_retention.ui_release_sha(release), sha)
+            self.assertEqual(ui_retention.release_sha(release), sha)
+
+    def test_conflicting_ui_identity_markers_fail_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            release = Path(td) / "ui-current"
+            release.mkdir()
+            (release / ".disdex-ui-release-sha").write_text("a" * 40 + "\n", encoding="utf-8")
+            (release / ".disdex-ui-sha").write_text("b" * 40 + "\n", encoding="utf-8")
+            self.assertIsNone(vps_retention.ui_release_sha(release))
+            self.assertIsNone(ui_retention.release_sha(release))
 
     def test_systemd_grants_only_ui_release_root_for_ui_cleanup(self):
         service = SERVICE.read_text(encoding="utf-8")

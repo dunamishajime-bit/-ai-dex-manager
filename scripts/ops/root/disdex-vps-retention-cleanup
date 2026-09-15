@@ -178,14 +178,23 @@ def current_release(paths: CleanupPaths) -> Optional[Path]:
 def ui_release_sha(path: Path) -> Optional[str]:
     if not path.name.startswith("ui-"):
         return None
-    marker = path / ".disdex-ui-release-sha"
-    if marker.is_symlink() or not marker.is_file():
+    values: list[str] = []
+    for marker_name in (".disdex-ui-release-sha", ".disdex-ui-sha"):
+        marker = path / marker_name
+        if marker.is_symlink():
+            return None
+        if not marker.is_file():
+            continue
+        try:
+            value = marker.read_text(encoding="utf-8").strip()
+        except OSError:
+            return None
+        if not SHA_RE.fullmatch(value):
+            return None
+        values.append(value)
+    if not values or any(value != values[0] for value in values[1:]):
         return None
-    try:
-        sha = marker.read_text(encoding="utf-8").strip()
-    except OSError:
-        return None
-    return sha if SHA_RE.fullmatch(sha) else None
+    return values[0]
 
 
 def exact_ui_release_dirs(paths: CleanupPaths) -> list[Path]:

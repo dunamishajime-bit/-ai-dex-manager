@@ -22,11 +22,23 @@ PRESSURE_PERCENT = 85.0
 def release_sha(path: Path) -> str | None:
     if path.is_symlink() or not path.is_dir() or not path.name.startswith("ui-"):
         return None
-    marker = path / ".disdex-ui-release-sha"
-    if marker.is_symlink() or not marker.is_file():
+    values: list[str] = []
+    for marker_name in (".disdex-ui-release-sha", ".disdex-ui-sha"):
+        marker = path / marker_name
+        if marker.is_symlink():
+            return None
+        if not marker.is_file():
+            continue
+        try:
+            value = marker.read_text(encoding="utf-8").strip()
+        except OSError:
+            return None
+        if not SHA.fullmatch(value):
+            return None
+        values.append(value)
+    if not values or any(value != values[0] for value in values[1:]):
         return None
-    value = marker.read_text(encoding="utf-8").strip()
-    return value if SHA.fullmatch(value) else None
+    return values[0]
 
 def service_working_directory() -> Path:
     value = subprocess.check_output(

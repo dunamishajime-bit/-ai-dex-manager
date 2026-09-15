@@ -12,7 +12,9 @@ export function nextPenguDaemonWaitMs(
   nowMs: number,
   boundaryDelayMs: number,
   lockRetryMs: number,
+  message?: string,
 ) {
   if (status === "locked") return lockRetryMs;
+  if (status === "failed" && message?.startsWith("ASTER_GLOBAL_RATE_BUDGET_SATURATED:")) return lockRetryMs;
   return PENGU_HOUR_MS - (nowMs % PENGU_HOUR_MS) + boundaryDelayMs;
 }

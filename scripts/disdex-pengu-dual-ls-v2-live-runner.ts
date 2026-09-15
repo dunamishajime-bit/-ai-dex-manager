@@ -120,7 +120,7 @@ async function main() {
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
-        const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs);
+        const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs, result.message);
         await boundaryWait.wait(waitMs);
     } while (!stopping);
 }
