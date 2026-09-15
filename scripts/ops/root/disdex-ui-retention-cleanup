@@ -19,6 +19,7 @@ SHA = re.compile(r"^[0-9a-f]{40}$")
 KEEP_NONCURRENT = 2
 MIN_AGE_SECONDS = 24 * 60 * 60
 PRESSURE_PERCENT = 85.0
+SYMLINK_SCAN_TIMEOUT_SECONDS = 180
 SYSTEMD_REFERENCE_ROOTS = (Path("/etc/systemd/system"), Path("/usr/lib/systemd/system"), Path("/etc/disdex"))
 SYMLINK_SCAN_ROOT = Path("/home/deploy")
 PROCESS_ROOT = Path("/proc")
@@ -105,7 +106,7 @@ def find_ui_symlink_references(path: Path, root: Path) -> list[str]:
         [find, str(root), "-xdev", "-type", "l", "(", "-lname", str(path), "-o", "-lname", f"{path}/*", ")", "-print"],
         capture_output=True,
         text=True,
-        timeout=30,
+        timeout=SYMLINK_SCAN_TIMEOUT_SECONDS,
         check=False,
     )
     if result.returncode != 0:
@@ -133,7 +134,7 @@ def find_ui_symlink_references_for_paths(paths: tuple[Path, ...], root: Path) ->
         [find, str(root), "-xdev", "-type", "l", "-lname", f"{release_root}/*", "-print"],
         capture_output=True,
         text=True,
-        timeout=30,
+        timeout=SYMLINK_SCAN_TIMEOUT_SECONDS,
         check=False,
     )
     if result.returncode != 0:
