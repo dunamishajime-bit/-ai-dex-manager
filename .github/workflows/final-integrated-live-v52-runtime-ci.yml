@@ -32,6 +32,7 @@ jobs:
           tests/quality102_causal_v1_portfolio.test.ts
           tests/strict_bt33404708902_contract.test.ts
           tests/formal-integrated-parity.test.ts
+          tests/pengu-recovery-v8-aster-precision.test.ts
       - name: Runtime wiring and telemetry tests
         run: >-
           python -m unittest

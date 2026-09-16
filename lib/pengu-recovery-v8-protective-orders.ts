@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { AsterOrderResponse, AsterV3Client } from "@/lib/aster-v3-client";
+import type { AsterExchangeSymbol, AsterOrderResponse, AsterV3Client } from "@/lib/aster-v3-client";
 import { PENGU_RECOVERY_V8 } from "@/config/penguRecoveryV8";
 import { buildTradeFillNotificationEvent, enqueueTradeFillNotification, isConfirmedTradeFill } from "@/lib/trade-fill-notification";
 
@@ -25,6 +25,7 @@ export interface RecoveryV8ProtectiveOrder {
     orderId?: number;
     side?: "BUY" | "SELL";
     updatedAt?: number;
+    venueNormalizedStopPrice?: number;
 }
 
 export interface RecoveryV8ProtectiveOrderGateway {
@@ -47,6 +48,56 @@ function finitePositive(value: number, label: string) {
     if (!Number.isFinite(value) || value <= 0) throw new Error(`Recovery V8 ${label} must be finite and positive.`);
 }
 
+function decimalPlaces(value: string): number {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (!normalized || normalized.includes("e")) {
+        const numeric = Number(normalized);
+        if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+        return Math.min(12, Math.max(0, (numeric.toString().split(".")[1] || "").length));
+    }
+    return Math.min(12, Math.max(0, (normalized.split(".")[1] || "").replace(/0+$/, "").length));
+}
+
+/**
+ * Aster validates conditional-order values against symbol filters, not only
+ * against pricePrecision/quantityPrecision. Keep this fail-closed and round
+ * down to the venue increment so a protective stop is never rejected for an
+ * extra decimal place.
+ */
+export function normalizeRecoveryV8OrderValue(value: number, incrementText: string, precision = 0): string {
+    finitePositive(value, "order value");
+    const increment = Number(incrementText);
+    if (!Number.isFinite(increment) || increment <= 0) throw new Error("Recovery V8 venue increment is invalid.");
+    const decimals = Math.min(12, Math.max(decimalPlaces(incrementText), Math.floor(Number(precision) || 0)));
+    const scale = 10 ** decimals;
+    const incrementUnits = Math.max(1, Math.round(increment * scale));
+    const valueUnits = Math.floor((value * scale + Number.EPSILON * scale) / incrementUnits) * incrementUnits;
+    if (!Number.isFinite(valueUnits) || valueUnits <= 0) throw new Error("Recovery V8 order value is below the venue increment.");
+    return (valueUnits / scale).toFixed(decimals).replace(/\.?(0+)$/, "");
+}
+
+function recoveryV8VenueSymbol(info: { symbols?: AsterExchangeSymbol[] }, symbol: string): AsterExchangeSymbol {
+    const row = (info.symbols || []).find((item) => item.symbol.toUpperCase() === symbol.toUpperCase());
+    if (!row) throw new Error(`Recovery V8 venue symbol metadata is unavailable: ${symbol}`);
+    return row;
+}
+
+async function normalizeRecoveryV8OrderInput(client: AsterV3Client, input: RecoveryV8StopOrderInput): Promise<RecoveryV8StopOrderInput> {
+    const symbol = recoveryV8VenueSymbol(await client.getExchangeInfo(), input.symbol);
+    const priceFilter = rowFilter(symbol, "PRICE_FILTER");
+    const quantityFilter = rowFilter(symbol, "LOT_SIZE") || rowFilter(symbol, "MARKET_LOT_SIZE");
+    if (!priceFilter?.tickSize || !quantityFilter?.stepSize) throw new Error(`Recovery V8 venue filters are incomplete: ${input.symbol}`);
+    return {
+        ...input,
+        quantity: Number(normalizeRecoveryV8OrderValue(input.quantity, quantityFilter.stepSize, symbol.quantityPrecision ?? 0)),
+        stopPrice: Number(normalizeRecoveryV8OrderValue(input.stopPrice, priceFilter.tickSize, symbol.pricePrecision ?? 0)),
+    };
+}
+
+function rowFilter(symbol: AsterExchangeSymbol, filterType: string) {
+    return symbol.filters?.find((filter) => filter.filterType === filterType);
+}
+
 function deterministicClientOrderId(symbol: string, entryTs: number, role: string) {
     const digest = createHash("sha256").update(`PENGU_RECOVERY_V8|${symbol}|${entryTs}|${role}`).digest("hex");
     return `recv8-${digest}`.slice(0, 36);
@@ -57,7 +108,7 @@ function assertAcknowledged(order: RecoveryV8ProtectiveOrder, expected: Recovery
     if (order.clientOrderId !== expected.clientOrderId) throw new Error("Recovery V8 protective order client ID acknowledgement mismatch.");
     if (order.reduceOnly !== true) throw new Error("Recovery V8 protective order is not reduce-only.");
     if (Math.abs(order.quantity - expected.quantity) > Math.max(1e-12, expected.quantity * 1e-9)) throw new Error("Recovery V8 protective order quantity acknowledgement mismatch.");
-    if (Math.abs(order.stopPrice - expected.stopPrice) > Math.max(1e-9, expected.stopPrice * 1e-9)) throw new Error("Recovery V8 protective order trigger acknowledgement mismatch.");
+    if (order.venueNormalizedStopPrice === undefined && Math.abs(order.stopPrice - expected.stopPrice) > Math.max(1e-9, expected.stopPrice * 1e-9)) throw new Error("Recovery V8 protective order trigger acknowledgement mismatch.");
     if (/^(CANCELED|REJECTED|EXPIRED)$/i.test(order.status)) throw new Error(`Recovery V8 protective order is not active: ${order.status}.`);
 }
 
@@ -199,16 +250,27 @@ export class AsterRecoveryV8ProtectiveOrderGateway implements RecoveryV8Protecti
     constructor(private readonly client: AsterV3Client) {}
 
     async placeStopMarket(input: RecoveryV8StopOrderInput) {
-        const order = fromAster(await this.client.placeStopMarketOrder({
-            symbol: input.symbol,
-            side: input.side,
-            quantity: String(input.quantity),
-            stopPrice: String(input.stopPrice),
+        const normalized = await normalizeRecoveryV8OrderInput(this.client, input);
+        const acknowledged = fromAster(await this.client.placeStopMarketOrder({
+            symbol: normalized.symbol,
+            side: normalized.side,
+            quantity: String(normalized.quantity),
+            stopPrice: String(normalized.stopPrice),
             positionSide: "BOTH",
             reduceOnly: true,
-            newClientOrderId: input.clientOrderId,
+            newClientOrderId: normalized.clientOrderId,
             newOrderRespType: "RESULT",
         }));
+        if (Math.abs(acknowledged.quantity - normalized.quantity) > Math.max(1e-12, normalized.quantity * 1e-9)) {
+            throw new Error("Recovery V8 venue acknowledged an unexpected protective quantity.");
+        }
+        if (Math.abs(acknowledged.stopPrice - normalized.stopPrice) > Math.max(1e-12, normalized.stopPrice * 1e-9)) {
+            throw new Error("Recovery V8 venue acknowledged an unexpected protective trigger.");
+        }
+        // The public gateway contract is expressed in the venue-normalized
+        // values so the caller's acknowledgement check does not reject a
+        // valid tick-size truncation as an execution failure.
+        const order = { ...acknowledged, quantity: normalized.quantity, stopPrice: normalized.stopPrice, venueNormalizedStopPrice: normalized.stopPrice };
         await notifyRecoveryV8Fill(order);
         return order;
     }
