@@ -1,0 +1,27 @@
+name: Gross Allocation 108 Sweep
+
+on:
+  push:
+    branches:
+      - research/gross-allocation-sweep-108-20260916
+    paths:
+      - 'scripts/research_gross_allocation_108_sweep.py'
+      - 'tests/test_research_gross_allocation_108_sweep.py'
+      - '.github/workflows/gross-allocation-sweep-108.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run 108-case contract test
+        run: python tests/test_research_gross_allocation_108_sweep.py
