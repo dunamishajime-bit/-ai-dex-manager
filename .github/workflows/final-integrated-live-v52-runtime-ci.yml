@@ -1,0 +1,54 @@
+name: Final integrated V52 runtime CI
+
+on:
+  push:
+    branches:
+      - codex/final-integrated-live-v52-ui-20260917
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Contract and safety tests
+        run: >-
+          npx tsx --test
+          tests/final-integrated-logic-contract.test.ts
+          tests/dynamic-margin-gate.test.ts
+          tests/live_strategy_contract_parity.test.ts
+          tests/quality102_causal_v1_portfolio.test.ts
+          tests/strict_bt33404708902_contract.test.ts
+          tests/formal-integrated-parity.test.ts
+      - name: Runtime wiring and telemetry tests
+        run: >-
+          python -m unittest
+          tests/test_runtime_wiring_script.py
+          tests/test_runtime_wiring_v52_caps.py
+          tests/test_runtime_multilineage_monitoring.py
+          tests/test_v52_account_lock_scope.py
+          tests/test_q102_1p0_lump100k_implementation_contract.py
+          tests/test_v52_telemetry_contract.py
+      - name: Strategy self-tests
+        run: |
+          npm run strategy:shared-crypto-risk:selftest
+          npx tsx scripts/pengu-dual-ls-v2-selftest.ts
+          npm run strategy:quality102-causal-v1:runner:selftest
+          python scripts/disdex_v52_aster_only_live_engine.py --self-test
+          npx tsx scripts/v12-live-execution-selftest.ts
+          npx tsx scripts/disdex-account-order-lock-selftest.ts
+          npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
+      - run: npx tsc --noEmit
+      - run: npm run build
