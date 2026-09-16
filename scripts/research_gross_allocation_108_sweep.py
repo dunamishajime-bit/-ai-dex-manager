@@ -10,6 +10,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 import research_quality102_gross_cap_sweep as q102
 
 PENGU_GROSS_LEVELS = (0.75, 1.0, 1.25, 1.5)
