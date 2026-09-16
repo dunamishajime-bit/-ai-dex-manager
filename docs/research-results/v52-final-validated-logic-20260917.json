@@ -1,0 +1,2113 @@
+{
+  "schema": "v52-candidate-final-validation/v1",
+  "researchOnly": true,
+  "proposed": {
+    "V50_MIN_ENTRY_BASIS_BPS": 60,
+    "V50_CONVERGENCE_BPS": 20,
+    "V50_BASIS_STOP_MULTIPLE": 1.75,
+    "V50_MIN_NET_EDGE_BPS": 7.5,
+    "unchanged": [
+      "V11 logic",
+      "60bps max cost",
+      "20bps spread gate",
+      "EARLY3 windows",
+      "3h max hold",
+      "BOTH directions",
+      "stock gross 1.5",
+      "slot gross 1.0"
+    ]
+  },
+  "results": {
+    "CURRENT_FORMAL": {
+      "baseline": {
+        "24": {
+          "asset": 21444536.11505854,
+          "pf": 3.69127162,
+          "dd": -13.78567073,
+          "trades": 1188,
+          "v52Pnl": 3650674.87605199,
+          "v52Events": 139,
+          "v52Pf": 4.127557287254046,
+          "years": {
+            "2025": {
+              "pnl": 41521.58354421,
+              "events": 87,
+              "pf": 6.243089594210491
+            },
+            "2026": {
+              "pnl": 3609153.29250778,
+              "events": 52,
+              "pf": 4.113106386274384
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 3314.94754664,
+              "events": 24,
+              "pf": 11.5331368176855
+            },
+            "2025-09": {
+              "pnl": 6236.55849541,
+              "events": 27,
+              "pf": 8.383208170433525
+            },
+            "2025-10": {
+              "pnl": 13130.68184051,
+              "events": 21,
+              "pf": 10.945329804784748
+            },
+            "2025-11": {
+              "pnl": 13470.20223043,
+              "events": 14,
+              "pf": 3.476322313578121
+            },
+            "2025-12": {
+              "pnl": 5369.19343122,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 273343.10019439,
+              "events": 5,
+              "pf": 22.87695352003782
+            },
+            "2026-04": {
+              "pnl": 352410.14710527,
+              "events": 11,
+              "pf": 9.242594084657219
+            },
+            "2026-05": {
+              "pnl": -9204.927043359981,
+              "events": 8,
+              "pf": 0.9765488149116417
+            },
+            "2026-06": {
+              "pnl": 1439483.8650733,
+              "events": 15,
+              "pf": 7.435399399697715
+            },
+            "2026-07": {
+              "pnl": 1449570.7088446599,
+              "events": 12,
+              "pf": 3.971067229206175
+            },
+            "2026-08": {
+              "pnl": 103550.39833352,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 133,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 57,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 19,
+            "V50_POST_OPEN_BASIS_ENTERED": 82,
+            "V50_POST_OPEN_BASIS_EXITED": 82,
+            "V11_EQ_EXITED": 57,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 43,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 43,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 47,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 5,
+            "CONTRIBUTIONS": 12,
+            "V12_CAPACITY_BLOCKED": 3,
+            "PENGU_GROSS_SCALED": 1
+          }
+        },
+        "40": {
+          "asset": 18442769.03585051,
+          "pf": 3.57064393,
+          "dd": -14.33740242,
+          "trades": 1181,
+          "v52Pnl": 2229182.8001351003,
+          "v52Events": 132,
+          "v52Pf": 2.9107381330972295,
+          "years": {
+            "2025": {
+              "pnl": 32156.38843076,
+              "events": 84,
+              "pf": 4.602961109801913
+            },
+            "2026": {
+              "pnl": 2197026.41170434,
+              "events": 48,
+              "pf": 2.8976927779711823
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2880.39274559,
+              "events": 24,
+              "pf": 6.528515215191932
+            },
+            "2025-09": {
+              "pnl": 4957.55511346,
+              "events": 27,
+              "pf": 4.653819348824816
+            },
+            "2025-10": {
+              "pnl": 10620.51935837,
+              "events": 19,
+              "pf": 8.671972297120927
+            },
+            "2025-11": {
+              "pnl": 9404.62343548,
+              "events": 13,
+              "pf": 2.660760686156602
+            },
+            "2025-12": {
+              "pnl": 4293.29777786,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 217960.2016273,
+              "events": 5,
+              "pf": 12.259750357444785
+            },
+            "2026-04": {
+              "pnl": 206081.86893966,
+              "events": 11,
+              "pf": 3.9360436055131856
+            },
+            "2026-05": {
+              "pnl": -111832.68535705001,
+              "events": 8,
+              "pf": 0.7075044511161854
+            },
+            "2026-06": {
+              "pnl": 1067267.53819133,
+              "events": 12,
+              "pf": 8.377867797605564
+            },
+            "2026-07": {
+              "pnl": 757282.25864775,
+              "events": 11,
+              "pf": 2.3992909547743353
+            },
+            "2026-08": {
+              "pnl": 60267.22965535,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 132,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 50,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 19,
+            "V50_POST_OPEN_BASIS_ENTERED": 82,
+            "V50_POST_OPEN_BASIS_EXITED": 82,
+            "V11_EQ_EXITED": 50,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 43,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 43,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 47,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 4,
+            "CONTRIBUTIONS": 12,
+            "V12_CAPACITY_BLOCKED": 3,
+            "V11_EQ_COST_EDGE_REJECTED": 7,
+            "PENGU_GROSS_SCALED": 1
+          }
+        },
+        "44": {
+          "asset": 17825655.85431297,
+          "pf": 3.54009525,
+          "dd": -14.4749206,
+          "trades": 1180,
+          "v52Pnl": 1978720.80730662,
+          "v52Events": 131,
+          "v52Pf": 2.679284948898573,
+          "years": {
+            "2025": {
+              "pnl": 29460.46241573,
+              "events": 84,
+              "pf": 4.0668427626462025
+            },
+            "2026": {
+              "pnl": 1949260.3448908902,
+              "events": 47,
+              "pf": 2.6678799805417843
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2773.83583648,
+              "events": 24,
+              "pf": 5.852709438804662
+            },
+            "2025-09": {
+              "pnl": 4651.31208937,
+              "events": 27,
+              "pf": 4.143921236331528
+            },
+            "2025-10": {
+              "pnl": 9914.1428114,
+              "events": 19,
+              "pf": 7.633070721144963
+            },
+            "2025-11": {
+              "pnl": 8087.97968569,
+              "events": 13,
+              "pf": 2.334562081722265
+            },
+            "2025-12": {
+              "pnl": 4033.19199279,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 204625.04316032,
+              "events": 5,
+              "pf": 10.812493711107063
+            },
+            "2026-04": {
+              "pnl": 195172.04193733,
+              "events": 10,
+              "pf": 4.572794342003636
+            },
+            "2026-05": {
+              "pnl": -134572.60035723003,
+              "events": 8,
+              "pf": 0.6471360256978427
+            },
+            "2026-06": {
+              "pnl": 977614.71373324,
+              "events": 12,
+              "pf": 7.137468543643775
+            },
+            "2026-07": {
+              "pnl": 655140.4331235001,
+              "events": 11,
+              "pf": 2.1856332600180606
+            },
+            "2026-08": {
+              "pnl": 51280.71329373,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 131,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 49,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 19,
+            "V50_POST_OPEN_BASIS_ENTERED": 82,
+            "V50_POST_OPEN_BASIS_EXITED": 82,
+            "V11_EQ_EXITED": 49,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 43,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 43,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 47,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 4,
+            "CONTRIBUTIONS": 12,
+            "V12_CAPACITY_BLOCKED": 3,
+            "V11_EQ_COST_EDGE_REJECTED": 8,
+            "PENGU_GROSS_SCALED": 1
+          }
+        },
+        "60": {
+          "asset": 14586042.13341511,
+          "pf": 3.39645116,
+          "dd": -15.58883367,
+          "trades": 1156,
+          "v52Pnl": 881146.8577145,
+          "v52Events": 108,
+          "v52Pf": 1.8459160348438555,
+          "years": {
+            "2025": {
+              "pnl": 16168.212571430002,
+              "events": 76,
+              "pf": 2.454101523342464
+            },
+            "2026": {
+              "pnl": 864978.64514307,
+              "events": 32,
+              "pf": 1.8393539313156986
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2336.31132931,
+              "events": 22,
+              "pf": 4.032237811920716
+            },
+            "2025-09": {
+              "pnl": 3474.86823629,
+              "events": 27,
+              "pf": 2.783933545608478
+            },
+            "2025-10": {
+              "pnl": 3636.07261374,
+              "events": 15,
+              "pf": 2.464258444465684
+            },
+            "2025-11": {
+              "pnl": 3745.0419429100007,
+              "events": 11,
+              "pf": 1.6328797124265604
+            },
+            "2025-12": {
+              "pnl": 2975.91844918,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 116255.86097072999,
+              "events": 4,
+              "pf": 5.592735648376291
+            },
+            "2026-04": {
+              "pnl": 129599.51187657,
+              "events": 6,
+              "pf": 4.590152989244645
+            },
+            "2026-05": {
+              "pnl": -275580.77236145,
+              "events": 4,
+              "pf": 0.2110591566011636
+            },
+            "2026-06": {
+              "pnl": 528266.29173708,
+              "events": 9,
+              "pf": 4.32095069334391
+            },
+            "2026-07": {
+              "pnl": 366437.75292014,
+              "events": 9,
+              "pf": 1.7953209873903668
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 131,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 39,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+            "V50_POST_OPEN_BASIS_ENTERED": 69,
+            "V50_POST_OPEN_BASIS_EXITED": 69,
+            "V11_EQ_EXITED": 39,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 32,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 42,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 42,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 44,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 4,
+            "V11_EQ_COST_EDGE_REJECTED": 18,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 17,
+            "CONTRIBUTIONS": 12,
+            "V12_CAPACITY_BLOCKED": 3,
+            "PENGU_GROSS_SCALED": 1
+          }
+        }
+      },
+      "proposed": {
+        "24": {
+          "asset": 22487144.75564962,
+          "pf": 3.69116538,
+          "dd": -13.50726227,
+          "trades": 1212,
+          "v52Pnl": 4039933.61782976,
+          "v52Events": 163,
+          "v52Pf": 3.7421497869650087,
+          "years": {
+            "2025": {
+              "pnl": 44127.77446292,
+              "events": 93,
+              "pf": 6.31215033074737
+            },
+            "2026": {
+              "pnl": 3995805.84336684,
+              "events": 70,
+              "pf": 3.72757683614948
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 3331.78636315,
+              "events": 23,
+              "pf": 12.146114528377966
+            },
+            "2025-09": {
+              "pnl": 6117.44757357,
+              "events": 29,
+              "pf": 7.117759392646185
+            },
+            "2025-10": {
+              "pnl": 13053.8358716,
+              "events": 23,
+              "pf": 9.527803988028813
+            },
+            "2025-11": {
+              "pnl": 16207.127278099999,
+              "events": 17,
+              "pf": 3.958938556996279
+            },
+            "2025-12": {
+              "pnl": 5417.5773765,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 362171.62198253,
+              "events": 5,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 517274.0871325,
+              "events": 17,
+              "pf": 10.050269110874298
+            },
+            "2026-05": {
+              "pnl": 76571.99983231002,
+              "events": 10,
+              "pf": 1.185279829668064
+            },
+            "2026-06": {
+              "pnl": 1360937.16440212,
+              "events": 20,
+              "pf": 4.334203878707872
+            },
+            "2026-07": {
+              "pnl": 1623220.17243455,
+              "events": 16,
+              "pf": 4.044603684744514
+            },
+            "2026-08": {
+              "pnl": 55630.79758283,
+              "events": 2,
+              "pf": 2.045474632164618
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 134,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 57,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 21,
+            "V50_POST_OPEN_BASIS_ENTERED": 106,
+            "V50_POST_OPEN_BASIS_EXITED": 106,
+            "V11_EQ_EXITED": 57,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 36,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 43,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 43,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 63,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 5,
+            "CONTRIBUTIONS": 12,
+            "V12_CAPACITY_BLOCKED": 3,
+            "PENGU_GROSS_SCALED": 1
+          },
+          "deltaAssetPct": 4.861884794322724,
+          "deltaV52PnlPct": 10.662651564270021
+        },
+        "40": {
+          "asset": 19348152.48050316,
+          "pf": 3.58696725,
+          "dd": -14.19580659,
+          "trades": 1191,
+          "v52Pnl": 2636544.85976872,
+          "v52Events": 142,
+          "v52Pf": 3.0941294908465977,
+          "years": {
+            "2025": {
+              "pnl": 33814.77731812,
+              "events": 87,
+              "pf": 4.65063227638178
+            },
+            "2026": {
+              "pnl": 2602730.0824506,
+              "events": 55,
+              "pf": 3.0825932670346807
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2907.58958124,
+              "events": 23,
+              "pf": 6.869482047575882
+            },
+            "2025-09": {
+              "pnl": 4963.2302571,
+              "events": 27,
+              "pf": 4.653819348935765
+            },
+            "2025-10": {
+              "pnl": 10293.63108561,
+              "events": 21,
+              "pf": 6.974112568815629
+            },
+            "2025-11": {
+              "pnl": 11329.28884174,
+              "events": 15,
+              "pf": 2.9925105133634675
+            },
+            "2025-12": {
+              "pnl": 4321.03755243,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 298986.12339764,
+              "events": 5,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 330902.22949031,
+              "events": 15,
+              "pf": 4.418161115455316
+            },
+            "2026-05": {
+              "pnl": -83918.69780829003,
+              "events": 9,
+              "pf": 0.7902456722738022
+            },
+            "2026-06": {
+              "pnl": 1008094.94290029,
+              "events": 13,
+              "pf": 5.753100775853742
+            },
+            "2026-07": {
+              "pnl": 985439.64529853,
+              "events": 12,
+              "pf": 2.822275115588737
+            },
+            "2026-08": {
+              "pnl": 63225.83917212,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 133,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 50,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 20,
+            "V50_POST_OPEN_BASIS_ENTERED": 92,
+            "V50_POST_OPEN_BASIS_EXITED": 92,
+            "V11_EQ_EXITED": 50,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 35,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 43,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 43,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 58,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 4,
+            "CONTRIBUTIONS": 12,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 20,
+            "V12_CAPACITY_BLOCKED": 3,
+            "V11_EQ_COST_EDGE_REJECTED": 7,
+            "PENGU_GROSS_SCALED": 1
+          },
+          "deltaAssetPct": 4.90915134756984,
+          "deltaV52PnlPct": 18.274053595287533
+        },
+        "44": {
+          "asset": 18682020.47795171,
+          "pf": 3.57257739,
+          "dd": -14.4749206,
+          "trades": 1182,
+          "v52Pnl": 2489593.3201435,
+          "v52Events": 133,
+          "v52Pf": 3.332633894294371,
+          "years": {
+            "2025": {
+              "pnl": 29383.37378918,
+              "events": 83,
+              "pf": 4.067064676156204
+            },
+            "2026": {
+              "pnl": 2460209.94635432,
+              "events": 50,
+              "pf": 3.32598171840786
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2803.51807547,
+              "events": 23,
+              "pf": 6.157334401375529
+            },
+            "2025-09": {
+              "pnl": 4657.15017887,
+              "events": 27,
+              "pf": 4.1439212363235205
+            },
+            "2025-10": {
+              "pnl": 9803.81433914,
+              "events": 19,
+              "pf": 7.552808774920715
+            },
+            "2025-11": {
+              "pnl": 8086.44572111,
+              "events": 13,
+              "pf": 2.334562081720198
+            },
+            "2025-12": {
+              "pnl": 4032.44547459,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 281973.69222482,
+              "events": 5,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 290710.11172161,
+              "events": 12,
+              "pf": 6.160205471615755
+            },
+            "2026-05": {
+              "pnl": -110343.36350838996,
+              "events": 9,
+              "pf": 0.7206017244639024
+            },
+            "2026-06": {
+              "pnl": 968628.38736828,
+              "events": 12,
+              "pf": 6.898724607480941
+            },
+            "2026-07": {
+              "pnl": 975496.82191694,
+              "events": 11,
+              "pf": 3.205861920853654
+            },
+            "2026-08": {
+              "pnl": 53744.29663106,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 132,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 49,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 18,
+            "V50_POST_OPEN_BASIS_ENTERED": 84,
+            "V50_POST_OPEN_BASIS_EXITED": 84,
+            "V11_EQ_EXITED": 49,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 35,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 43,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 43,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 56,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 4,
+            "CONTRIBUTIONS": 12,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 30,
+            "V12_CAPACITY_BLOCKED": 3,
+            "V11_EQ_COST_EDGE_REJECTED": 8,
+            "PENGU_GROSS_SCALED": 1
+          },
+          "deltaAssetPct": 4.804112850812947,
+          "deltaV52PnlPct": 25.81832216806095
+        },
+        "60": {
+          "asset": 15082660.06210539,
+          "pf": 3.44634584,
+          "dd": -15.58883367,
+          "trades": 1150,
+          "v52Pnl": 1165955.12149133,
+          "v52Events": 102,
+          "v52Pf": 2.4255206250639287,
+          "years": {
+            "2025": {
+              "pnl": 18662.54123048,
+              "events": 73,
+              "pf": 3.1636421217665607
+            },
+            "2026": {
+              "pnl": 1147292.58026085,
+              "events": 29,
+              "pf": 2.4176536249944447
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2362.57280387,
+              "events": 21,
+              "pf": 4.15496135359243
+            },
+            "2025-09": {
+              "pnl": 3479.09124674,
+              "events": 27,
+              "pf": 2.7839335456308363
+            },
+            "2025-10": {
+              "pnl": 3532.1889026100002,
+              "events": 15,
+              "pf": 2.4218632377161997
+            },
+            "2025-11": {
+              "pnl": 6278.71539966,
+              "events": 9,
+              "pf": 2.8240179049336143
+            },
+            "2025-12": {
+              "pnl": 3009.9728776,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 143719.5009606,
+              "events": 3,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 131775.97347105,
+              "events": 6,
+              "pf": 4.590152989244645
+            },
+            "2026-05": {
+              "pnl": -193882.10114823998,
+              "events": 3,
+              "pf": 0.2797383984536383
+            },
+            "2026-06": {
+              "pnl": 449626.97323454,
+              "events": 8,
+              "pf": 3.7790381497285006
+            },
+            "2026-07": {
+              "pnl": 616052.2337429,
+              "events": 9,
+              "pf": 2.8033801476066253
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 131,
+            "V12_EXITED": 871,
+            "V11_EQ_ENTERED": 39,
+            "STOCK_CAPACITY_BLOCKED": 3,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 59,
+            "V11_EQ_EXITED": 39,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 42,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 42,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 15,
+            "V50_POST_OPEN_BASIS_ENTERED": 63,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 50,
+            "V50_POST_OPEN_BASIS_EXITED": 63,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_GROSS_SCALED": 4,
+            "V11_EQ_COST_EDGE_REJECTED": 18,
+            "CONTRIBUTIONS": 12,
+            "V12_CAPACITY_BLOCKED": 3,
+            "PENGU_GROSS_SCALED": 1
+          },
+          "deltaAssetPct": 3.4047476631962947,
+          "deltaV52PnlPct": 32.32245127850306
+        }
+      },
+      "severe100Baseline": {
+        "asset": 2827282.1410372,
+        "pf": 2.41551514,
+        "dd": -17.68170098,
+        "trades": 1048,
+        "v52Pnl": 0,
+        "v52Events": 0,
+        "v52Pf": null,
+        "years": {
+          "2025": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          },
+          "2026": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          }
+        },
+        "months": {},
+        "routing": {
+          "V12_ENTERED": 871,
+          "V12_GROSS_SCALED": 130,
+          "V12_EXITED": 871,
+          "V11_EQ_COST_EDGE_REJECTED": 57,
+          "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 165,
+          "SUPPLEMENT_ENTERED": 69,
+          "PENGU_ENTERED": 66,
+          "SUPPLEMENT_EXITED": 69,
+          "PENGU_EXITED": 66,
+          "SUPPLEMENT_GROSS_RESIZED": 42,
+          "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 42,
+          "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+          "CONTRIBUTIONS": 12,
+          "PENGU_GROSS_SCALED": 1
+        }
+      },
+      "severe100Proposed": {
+        "asset": 2827282.1410372,
+        "pf": 2.41551514,
+        "dd": -17.68170098,
+        "trades": 1048,
+        "v52Pnl": 0,
+        "v52Events": 0,
+        "v52Pf": null,
+        "years": {
+          "2025": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          },
+          "2026": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          }
+        },
+        "months": {},
+        "routing": {
+          "V12_ENTERED": 871,
+          "V12_GROSS_SCALED": 130,
+          "V12_EXITED": 871,
+          "V11_EQ_COST_EDGE_REJECTED": 57,
+          "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 208,
+          "SUPPLEMENT_ENTERED": 69,
+          "PENGU_ENTERED": 66,
+          "SUPPLEMENT_EXITED": 69,
+          "PENGU_EXITED": 66,
+          "SUPPLEMENT_GROSS_RESIZED": 42,
+          "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 42,
+          "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+          "CONTRIBUTIONS": 12,
+          "PENGU_GROSS_SCALED": 1
+        }
+      }
+    },
+    "SELECTED_CRYPTO": {
+      "baseline": {
+        "24": {
+          "asset": 77156180.71899264,
+          "pf": 3.79498088,
+          "dd": -17.33097423,
+          "trades": 1161,
+          "v52Pnl": 13047941.43814897,
+          "v52Events": 139,
+          "v52Pf": 4.298531245430683,
+          "years": {
+            "2025": {
+              "pnl": 55453.65554176,
+              "events": 87,
+              "pf": 5.879856921504481
+            },
+            "2026": {
+              "pnl": 12992487.782607209,
+              "events": 52,
+              "pf": 4.293975363672255
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 3370.27715713,
+              "events": 24,
+              "pf": 11.349443235854785
+            },
+            "2025-09": {
+              "pnl": 7061.43644925,
+              "events": 27,
+              "pf": 9.058947607348005
+            },
+            "2025-10": {
+              "pnl": 15451.247344129999,
+              "events": 21,
+              "pf": 11.542596123257207
+            },
+            "2025-11": {
+              "pnl": 19091.24930244,
+              "events": 14,
+              "pf": 3.1953265526686705
+            },
+            "2025-12": {
+              "pnl": 10479.44528881,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 743251.97169533,
+              "events": 5,
+              "pf": 22.961003465124488
+            },
+            "2026-04": {
+              "pnl": 1094818.67921559,
+              "events": 11,
+              "pf": 9.731309816814134
+            },
+            "2026-05": {
+              "pnl": -69367.24659522003,
+              "events": 8,
+              "pf": 0.9452426856780229
+            },
+            "2026-06": {
+              "pnl": 5592547.18850868,
+              "events": 15,
+              "pf": 8.30661035522017
+            },
+            "2026-07": {
+              "pnl": 5259480.58577699,
+              "events": 12,
+              "pf": 4.000509305895957
+            },
+            "2026-08": {
+              "pnl": 371756.60400584,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 57,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+            "V50_POST_OPEN_BASIS_ENTERED": 82,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 50,
+            "V50_POST_OPEN_BASIS_EXITED": 82,
+            "V11_EQ_EXITED": 57,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12
+          }
+        },
+        "40": {
+          "asset": 66059488.04343018,
+          "pf": 3.69085787,
+          "dd": -17.59935397,
+          "trades": 1154,
+          "v52Pnl": 8011474.14381957,
+          "v52Events": 132,
+          "v52Pf": 3.0284619279008904,
+          "years": {
+            "2025": {
+              "pnl": 42532.67158186,
+              "events": 84,
+              "pf": 4.41249072108465
+            },
+            "2026": {
+              "pnl": 7968941.47223771,
+              "events": 48,
+              "pf": 3.0240804216494817
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2931.66676575,
+              "events": 24,
+              "pf": 6.482683024913092
+            },
+            "2025-09": {
+              "pnl": 5673.14144199,
+              "events": 27,
+              "pf": 5.033163519273767
+            },
+            "2025-10": {
+              "pnl": 12482.1828013,
+              "events": 19,
+              "pf": 9.077232284238784
+            },
+            "2025-11": {
+              "pnl": 13089.13566362,
+              "events": 13,
+              "pf": 2.4580535836502886
+            },
+            "2025-12": {
+              "pnl": 8356.5449092,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 590619.72456072,
+              "events": 5,
+              "pf": 12.304418129047221
+            },
+            "2026-04": {
+              "pnl": 644581.88168145,
+              "events": 11,
+              "pf": 4.133561196534901
+            },
+            "2026-05": {
+              "pnl": -387752.44927365996,
+              "events": 8,
+              "pf": 0.6845121750124488
+            },
+            "2026-06": {
+              "pnl": 4161223.36580976,
+              "events": 12,
+              "pf": 9.094606190400832
+            },
+            "2026-07": {
+              "pnl": 2744870.946074,
+              "events": 11,
+              "pf": 2.4178142005513688
+            },
+            "2026-08": {
+              "pnl": 215398.00338544,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 50,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+            "V50_POST_OPEN_BASIS_ENTERED": 82,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 50,
+            "V50_POST_OPEN_BASIS_EXITED": 82,
+            "V11_EQ_EXITED": 50,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12,
+            "V11_EQ_COST_EDGE_REJECTED": 7
+          }
+        },
+        "44": {
+          "asset": 63672250.12187905,
+          "pf": 3.66378562,
+          "dd": -17.66638072,
+          "trades": 1153,
+          "v52Pnl": 7116371.48802935,
+          "v52Events": 131,
+          "v52Pf": 2.78584176067718,
+          "years": {
+            "2025": {
+              "pnl": 38769.42753941,
+              "events": 84,
+              "pf": 3.896343671031938
+            },
+            "2026": {
+              "pnl": 7077602.06048994,
+              "events": 47,
+              "pf": 2.782098894790203
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2824.10874767,
+              "events": 24,
+              "pf": 5.819304660356207
+            },
+            "2025-09": {
+              "pnl": 5340.91887212,
+              "events": 27,
+              "pf": 4.482692705095812
+            },
+            "2025-10": {
+              "pnl": 11658.99076064,
+              "events": 19,
+              "pf": 7.997715425327148
+            },
+            "2025-11": {
+              "pnl": 11101.03315517,
+              "events": 13,
+              "pf": 2.156361052802494
+            },
+            "2025-12": {
+              "pnl": 7844.37600381,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 553951.68308286,
+              "events": 5,
+              "pf": 10.851788599249788
+            },
+            "2026-04": {
+              "pnl": 609616.99285179,
+              "events": 10,
+              "pf": 4.875046747689263
+            },
+            "2026-05": {
+              "pnl": -457203.76296554,
+              "events": 8,
+              "pf": 0.6260520565619127
+            },
+            "2026-06": {
+              "pnl": 3818294.08156474,
+              "events": 12,
+              "pf": 7.769609952382008
+            },
+            "2026-07": {
+              "pnl": 2370171.0363598,
+              "events": 11,
+              "pf": 2.2023536860659054
+            },
+            "2026-08": {
+              "pnl": 182772.02959629,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 49,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+            "V50_POST_OPEN_BASIS_ENTERED": 82,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 50,
+            "V50_POST_OPEN_BASIS_EXITED": 82,
+            "V11_EQ_EXITED": 49,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12,
+            "V11_EQ_COST_EDGE_REJECTED": 8
+          }
+        },
+        "60": {
+          "asset": 51803650.69400232,
+          "pf": 3.53925403,
+          "dd": -17.93421503,
+          "trades": 1130,
+          "v52Pnl": 3346607.8506454,
+          "v52Events": 108,
+          "v52Pf": 1.9579883697854579,
+          "years": {
+            "2025": {
+              "pnl": 21329.04973894,
+              "events": 76,
+              "pf": 2.4260779492175084
+            },
+            "2026": {
+              "pnl": 3325278.8009064603,
+              "events": 32,
+              "pf": 1.9559756839163158
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2382.42329299,
+              "events": 22,
+              "pf": 4.02490749287313
+            },
+            "2025-09": {
+              "pnl": 4065.1348353199996,
+              "events": 27,
+              "pf": 3.0144376747032506
+            },
+            "2025-10": {
+              "pnl": 4377.75607713,
+              "events": 15,
+              "pf": 2.5583465903467957
+            },
+            "2025-11": {
+              "pnl": 4733.78419764,
+              "events": 11,
+              "pf": 1.5067419476367085
+            },
+            "2025-12": {
+              "pnl": 5769.95133586,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 312884.15154799004,
+              "events": 4,
+              "pf": 5.605484784575508
+            },
+            "2026-04": {
+              "pnl": 407936.68323954,
+              "events": 6,
+              "pf": 5.133730943880492
+            },
+            "2026-05": {
+              "pnl": -885996.45808703,
+              "events": 4,
+              "pf": 0.20484553916203344
+            },
+            "2026-06": {
+              "pnl": 2169084.17215314,
+              "events": 9,
+              "pf": 4.854187413051485
+            },
+            "2026-07": {
+              "pnl": 1321370.25205282,
+              "events": 9,
+              "pf": 1.8082958859700258
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 39,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 12,
+            "V50_POST_OPEN_BASIS_ENTERED": 69,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 47,
+            "V50_POST_OPEN_BASIS_EXITED": 69,
+            "V11_EQ_EXITED": 39,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 32,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_COST_EDGE_REJECTED": 18,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 17,
+            "CONTRIBUTIONS": 12
+          }
+        }
+      },
+      "proposed": {
+        "24": {
+          "asset": 81065059.9237533,
+          "pf": 3.79345336,
+          "dd": -17.33097423,
+          "trades": 1186,
+          "v52Pnl": 14292921.70386355,
+          "v52Events": 164,
+          "v52Pf": 3.8436912177187534,
+          "years": {
+            "2025": {
+              "pnl": 60173.8163203,
+              "events": 94,
+              "pf": 6.083539406245309
+            },
+            "2026": {
+              "pnl": 14232747.88754325,
+              "events": 70,
+              "pf": 3.8384037787767884
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 3377.62174945,
+              "events": 24,
+              "pf": 11.723420543433022
+            },
+            "2025-09": {
+              "pnl": 6936.5384172,
+              "events": 29,
+              "pf": 7.687145416025727
+            },
+            "2025-10": {
+              "pnl": 15209.3238294,
+              "events": 23,
+              "pf": 9.927331413128401
+            },
+            "2025-11": {
+              "pnl": 24046.70256418,
+              "events": 17,
+              "pf": 3.738479772275216
+            },
+            "2025-12": {
+              "pnl": 10603.62976007,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 986471.68558493,
+              "events": 5,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 1586110.31175776,
+              "events": 17,
+              "pf": 10.30814901052387
+            },
+            "2026-05": {
+              "pnl": 198878.46434567997,
+              "events": 10,
+              "pf": 1.1488293067997501
+            },
+            "2026-06": {
+              "pnl": 5378041.78880423,
+              "events": 20,
+              "pf": 4.8719040573228405
+            },
+            "2026-07": {
+              "pnl": 5883137.24925664,
+              "events": 16,
+              "pf": 4.052579325086524
+            },
+            "2026-08": {
+              "pnl": 200108.38779401002,
+              "events": 2,
+              "pf": 2.0454746321645847
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 57,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 17,
+            "V50_POST_OPEN_BASIS_ENTERED": 107,
+            "V50_POST_OPEN_BASIS_EXITED": 107,
+            "V11_EQ_EXITED": 57,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 36,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 65,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12
+          },
+          "deltaAssetPct": 5.0661906386956,
+          "deltaV52PnlPct": 9.541583794011865
+        },
+        "40": {
+          "asset": 69373656.13931108,
+          "pf": 3.70258068,
+          "dd": -17.59935397,
+          "trades": 1165,
+          "v52Pnl": 9330664.3349576,
+          "v52Events": 143,
+          "v52Pf": 3.180669433319552,
+          "years": {
+            "2025": {
+              "pnl": 45604.6073798,
+              "events": 88,
+              "pf": 4.538561907367498
+            },
+            "2026": {
+              "pnl": 9285059.7275778,
+              "events": 55,
+              "pf": 3.176567064940673
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2940.08970339,
+              "events": 24,
+              "pf": 6.633814463667737
+            },
+            "2025-09": {
+              "pnl": 5674.78359106,
+              "events": 27,
+              "pf": 5.0331635192740665
+            },
+            "2025-10": {
+              "pnl": 11961.24947429,
+              "events": 21,
+              "pf": 7.202214164912061
+            },
+            "2025-11": {
+              "pnl": 16602.1202066,
+              "events": 15,
+              "pf": 2.8384593381005034
+            },
+            "2025-12": {
+              "pnl": 8426.36440446,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 810685.9006827,
+              "events": 5,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 1003790.7679199999,
+              "events": 15,
+              "pf": 4.481096130144758
+            },
+            "2026-05": {
+              "pnl": -304595.64891714003,
+              "events": 9,
+              "pf": 0.7633924285855124
+            },
+            "2026-06": {
+              "pnl": 3989839.0298365,
+              "events": 13,
+              "pf": 6.3379646931687015
+            },
+            "2026-07": {
+              "pnl": 3559135.27559153,
+              "events": 12,
+              "pf": 2.83198667294835
+            },
+            "2026-08": {
+              "pnl": 226204.40246421,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 50,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+            "V50_POST_OPEN_BASIS_ENTERED": 93,
+            "V50_POST_OPEN_BASIS_EXITED": 93,
+            "V11_EQ_EXITED": 50,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 35,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 60,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 20,
+            "V11_EQ_COST_EDGE_REJECTED": 7
+          },
+          "deltaAssetPct": 5.016944868997508,
+          "deltaV52PnlPct": 16.46626035928376
+        },
+        "44": {
+          "asset": 66554577.53097124,
+          "pf": 3.68854838,
+          "dd": -17.66638072,
+          "trades": 1156,
+          "v52Pnl": 8788476.09362211,
+          "v52Events": 134,
+          "v52Pf": 3.4470544193590706,
+          "years": {
+            "2025": {
+              "pnl": 38469.01361761,
+              "events": 84,
+              "pf": 3.8806354272232824
+            },
+            "2026": {
+              "pnl": 8750007.0800045,
+              "events": 50,
+              "pf": 3.445436186804402
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2832.79430562,
+              "events": 24,
+              "pf": 5.9469087917808245
+            },
+            "2025-09": {
+              "pnl": 5342.48940278,
+              "events": 27,
+              "pf": 4.482692705031753
+            },
+            "2025-10": {
+              "pnl": 11385.1816457,
+              "events": 19,
+              "pf": 7.8317859830197065
+            },
+            "2025-11": {
+              "pnl": 11079.324246499998,
+              "events": 13,
+              "pf": 2.1563610528081822
+            },
+            "2025-12": {
+              "pnl": 7829.22401701,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 760993.35706957,
+              "events": 5,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 876222.05758526,
+              "events": 12,
+              "pf": 6.414934643090213
+            },
+            "2026-05": {
+              "pnl": -383731.95156113995,
+              "events": 9,
+              "pf": 0.696098198369527
+            },
+            "2026-06": {
+              "pnl": 3801346.63536346,
+              "events": 12,
+              "pf": 7.555047291986917
+            },
+            "2026-07": {
+              "pnl": 3504131.1932962,
+              "events": 11,
+              "pf": 3.2267037151017584
+            },
+            "2026-08": {
+              "pnl": 191045.78825115,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 49,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+            "V50_POST_OPEN_BASIS_ENTERED": 85,
+            "V50_POST_OPEN_BASIS_EXITED": 85,
+            "V11_EQ_EXITED": 49,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 35,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 58,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 30,
+            "V11_EQ_COST_EDGE_REJECTED": 8
+          },
+          "deltaAssetPct": 4.526818831712309,
+          "deltaV52PnlPct": 23.496589637084785
+        },
+        "60": {
+          "asset": 53483733.78116915,
+          "pf": 3.5804019,
+          "dd": -17.93421503,
+          "trades": 1125,
+          "v52Pnl": 4324532.08947891,
+          "v52Events": 103,
+          "v52Pf": 2.569508444224008,
+          "years": {
+            "2025": {
+              "pnl": 25048.83073211,
+              "events": 74,
+              "pf": 3.256674713909709
+            },
+            "2026": {
+              "pnl": 4299483.2587468,
+              "events": 29,
+              "pf": 2.566729000092291
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2379.6095540300003,
+              "events": 22,
+              "pf": 4.022028221193018
+            },
+            "2025-09": {
+              "pnl": 4064.60553142,
+              "events": 27,
+              "pf": 3.014437674700042
+            },
+            "2025-10": {
+              "pnl": 4130.47764686,
+              "events": 15,
+              "pf": 2.4721092241429328
+            },
+            "2025-11": {
+              "pnl": 8648.90925285,
+              "events": 9,
+              "pf": 2.575707819220011
+            },
+            "2025-12": {
+              "pnl": 5825.22874695,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 385961.07938507,
+              "events": 3,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 414087.93224367,
+              "events": 6,
+              "pf": 5.13373094388045
+            },
+            "2026-05": {
+              "pnl": -629307.74822687,
+              "events": 3,
+              "pf": 0.27002205545682784
+            },
+            "2026-06": {
+              "pnl": 1925447.78664964,
+              "events": 8,
+              "pf": 4.369078192608333
+            },
+            "2026-07": {
+              "pnl": 2203294.20869529,
+              "events": 9,
+              "pf": 2.820194835013158
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 39,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 12,
+            "V50_POST_OPEN_BASIS_ENTERED": 64,
+            "V50_POST_OPEN_BASIS_EXITED": 64,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 59,
+            "V11_EQ_EXITED": 39,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 33,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 52,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "V11_EQ_COST_EDGE_REJECTED": 18,
+            "CONTRIBUTIONS": 12
+          },
+          "deltaAssetPct": 3.2431750748433963,
+          "deltaV52PnlPct": 29.2213573408344
+        }
+      },
+      "severe100Baseline": {
+        "asset": 8729157.74295382,
+        "pf": 2.62470185,
+        "dd": -19.24473938,
+        "trades": 1023,
+        "v52Pnl": 0,
+        "v52Events": 0,
+        "v52Pf": null,
+        "years": {
+          "2025": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          },
+          "2026": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          }
+        },
+        "months": {},
+        "routing": {
+          "V12_ENTERED": 871,
+          "V12_GROSS_SCALED": 117,
+          "V12_EXITED": 871,
+          "V11_EQ_COST_EDGE_REJECTED": 57,
+          "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 165,
+          "SUPPLEMENT_ENTERED": 69,
+          "PENGU_ENTERED": 66,
+          "SUPPLEMENT_EXITED": 69,
+          "PENGU_EXITED": 66,
+          "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+          "CONTRIBUTIONS": 12,
+          "SUPPLEMENT_GROSS_RESIZED": 17,
+          "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 17,
+          "CRYPTO_DAILY_LOSS_LATCHES": 1
+        }
+      },
+      "severe100Proposed": {
+        "asset": 8729157.74295382,
+        "pf": 2.62470185,
+        "dd": -19.24473938,
+        "trades": 1023,
+        "v52Pnl": 0,
+        "v52Events": 0,
+        "v52Pf": null,
+        "years": {
+          "2025": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          },
+          "2026": {
+            "pnl": 0,
+            "events": 0,
+            "pf": null
+          }
+        },
+        "months": {},
+        "routing": {
+          "V12_ENTERED": 871,
+          "V12_GROSS_SCALED": 117,
+          "V12_EXITED": 871,
+          "V11_EQ_COST_EDGE_REJECTED": 57,
+          "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 208,
+          "SUPPLEMENT_ENTERED": 69,
+          "PENGU_ENTERED": 66,
+          "SUPPLEMENT_EXITED": 69,
+          "PENGU_EXITED": 66,
+          "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+          "CONTRIBUTIONS": 12,
+          "SUPPLEMENT_GROSS_RESIZED": 17,
+          "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 17,
+          "CRYPTO_DAILY_LOSS_LATCHES": 1
+        }
+      }
+    }
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  },
+  "baseCommit": "bd5c731c966f41c38748433156062d579e45b6fc",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "capital": {
+    "initialJpy": 10000,
+    "monthlyContributionJpy": 10000,
+    "monthlyContributions": 12,
+    "totalContributedJpy": 130000,
+    "compounding": true
+  },
+  "formalBaseline": {
+    "logic": {
+      "v12": {
+        "btcRegimeThresholdPct": 0.02,
+        "strongRegimeThresholdPct": 0.0359,
+        "relaxedRegimeMinimumMomentumPct": 0.054,
+        "relaxedRegimeMinimumAtrRatio": 0.014,
+        "scoreThreshold": 1.4649
+      },
+      "pengu": {
+        "normalCooldownHours": 6,
+        "hardStopCooldownHours": 24
+      },
+      "quality102CausalV1": {
+        "maximumGross": 1.0,
+        "maximumPositions": 1
+      },
+      "portfolio": {
+        "cryptoGrossCap": 2.0,
+        "stockGrossCap": 1.5,
+        "totalGrossCap": 2.5
+      }
+    },
+    "results": {
+      "NORMAL": {
+        "endingAssetJpy": 18442769.03585051,
+        "PF": 3.57064393,
+        "DDPct": -14.33740242,
+        "executions": 1181,
+        "q102Episodes": 69,
+        "q102PnlJpy": 4491547.36209465,
+        "q102PF": 4.07741202,
+        "q102WinRatePct": 66.07142857,
+        "mtmTrims": 43,
+        "maxQ102Gross": 1.0,
+        "maxCryptoGross": 2.0,
+        "maxTotalGross": 2.5,
+        "grossConflicts": 0
+      },
+      "SEVERE": {
+        "endingAssetJpy": 2827282.1410372,
+        "PF": 2.41551514,
+        "DDPct": -17.68170098,
+        "executions": 1048,
+        "q102Episodes": 69,
+        "q102PnlJpy": 1061132.16140784,
+        "q102PF": 3.94013768,
+        "q102WinRatePct": 66.66666667,
+        "mtmTrims": 42,
+        "maxQ102Gross": 1.0,
+        "maxCryptoGross": 2.0,
+        "maxTotalGross": 2.0,
+        "grossConflicts": 0
+      }
+    }
+  },
+  "finalArchitecture": {
+    "v12": {
+      "strategyId": "V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15",
+      "slots": 2,
+      "perPositionGrossCap": 1.0,
+      "aggregateGrossCap": 1.5,
+      "btcRegimeThresholdPct": 0.02,
+      "strongRegimeThresholdPct": 0.0359,
+      "relaxedRegimeMinimumMomentumPct": 0.054,
+      "relaxedRegimeMinimumAtrRatio": 0.014,
+      "scoreThreshold": 1.4649
+    },
+    "pengu": {
+      "researchStrategyId": "PENGU_DUAL_LS_V2_RECOVERY_V8",
+      "allocationGrossCap": 0.85,
+      "normalCooldownHours": 6,
+      "hardStopCooldownHours": 24
+    },
+    "quality102": {
+      "productionTarget": "Q102_CAUSAL_V4",
+      "maximumGross": 1.5,
+      "maximumPositions": 1
+    },
+    "v52": {
+      "v11": "UNCHANGED",
+      "v50MinimumEntryBasisBps": 60.0,
+      "v50ConvergenceBps": 20.0,
+      "v50BasisStopMultiple": 1.75,
+      "v50MinimumNetEdgeBps": 7.5,
+      "maximumRoundTripCostBps": 60.0,
+      "maximumSpreadBps": 20.0,
+      "entryWindows": "POST_EARLY3",
+      "maximumHoldingHours": 3,
+      "directions": "BOTH",
+      "slotGrossCap": 1.0
+    },
+    "portfolio": {
+      "cryptoGrossCap": 3.0,
+      "stockGrossCap": 1.5,
+      "totalGrossCap": 3.5,
+      "sharedCryptoDailyLossPct": 7.5,
+      "stockDailyLossPct": 3.5,
+      "venueMargin": "5x Cross",
+      "maxInitialMarginFractionAtGrossCap": 0.7
+    }
+  },
+  "finalCombined": {
+    "NORMAL": {
+      "asset": 69373656.13931108,
+      "pf": 3.70258068,
+      "dd": -17.59935397,
+      "trades": 1165,
+      "v52Pnl": 9330664.3349576,
+      "v52Events": 143,
+      "v52Pf": 3.180669433319552,
+      "years": {
+        "2025": {
+          "pnl": 45604.6073798,
+          "events": 88,
+          "pf": 4.538561907367498
+        },
+        "2026": {
+          "pnl": 9285059.7275778,
+          "events": 55,
+          "pf": 3.176567064940673
+        }
+      },
+      "months": {
+        "2025-08": {
+          "pnl": 2940.08970339,
+          "events": 24,
+          "pf": 6.633814463667737
+        },
+        "2025-09": {
+          "pnl": 5674.78359106,
+          "events": 27,
+          "pf": 5.0331635192740665
+        },
+        "2025-10": {
+          "pnl": 11961.24947429,
+          "events": 21,
+          "pf": 7.202214164912061
+        },
+        "2025-11": {
+          "pnl": 16602.1202066,
+          "events": 15,
+          "pf": 2.8384593381005034
+        },
+        "2025-12": {
+          "pnl": 8426.36440446,
+          "events": 1,
+          "pf": 999.0
+        },
+        "2026-03": {
+          "pnl": 810685.9006827,
+          "events": 5,
+          "pf": 999.0
+        },
+        "2026-04": {
+          "pnl": 1003790.7679199999,
+          "events": 15,
+          "pf": 4.481096130144758
+        },
+        "2026-05": {
+          "pnl": -304595.64891714003,
+          "events": 9,
+          "pf": 0.7633924285855124
+        },
+        "2026-06": {
+          "pnl": 3989839.0298365,
+          "events": 13,
+          "pf": 6.3379646931687015
+        },
+        "2026-07": {
+          "pnl": 3559135.27559153,
+          "events": 12,
+          "pf": 2.83198667294835
+        },
+        "2026-08": {
+          "pnl": 226204.40246421,
+          "events": 1,
+          "pf": 999.0
+        }
+      },
+      "routing": {
+        "V12_ENTERED": 874,
+        "V12_GROSS_SCALED": 115,
+        "V12_EXITED": 874,
+        "V11_EQ_ENTERED": 50,
+        "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+        "V50_POST_OPEN_BASIS_ENTERED": 93,
+        "V50_POST_OPEN_BASIS_EXITED": 93,
+        "V11_EQ_EXITED": 50,
+        "SUPPLEMENT_ENTERED": 69,
+        "PENGU_ENTERED": 66,
+        "SAME_STOCK_SYMBOL_BLOCKED": 35,
+        "SUPPLEMENT_EXITED": 69,
+        "PENGU_EXITED": 66,
+        "SUPPLEMENT_GROSS_RESIZED": 13,
+        "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+        "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 60,
+        "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+        "CONTRIBUTIONS": 12,
+        "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 20,
+        "V11_EQ_COST_EDGE_REJECTED": 7
+      },
+      "deltaAssetPct": 5.016944868997508,
+      "deltaV52PnlPct": 16.46626035928376
+    },
+    "SEVERE": {
+      "asset": 8729157.74295382,
+      "pf": 2.62470185,
+      "dd": -19.24473938,
+      "trades": 1023,
+      "v52Pnl": 0,
+      "v52Events": 0,
+      "v52Pf": null,
+      "years": {
+        "2025": {
+          "pnl": 0,
+          "events": 0,
+          "pf": null
+        },
+        "2026": {
+          "pnl": 0,
+          "events": 0,
+          "pf": null
+        }
+      },
+      "months": {},
+      "routing": {
+        "V12_ENTERED": 871,
+        "V12_GROSS_SCALED": 117,
+        "V12_EXITED": 871,
+        "V11_EQ_COST_EDGE_REJECTED": 57,
+        "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 208,
+        "SUPPLEMENT_ENTERED": 69,
+        "PENGU_ENTERED": 66,
+        "SUPPLEMENT_EXITED": 69,
+        "PENGU_EXITED": 66,
+        "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+        "CONTRIBUTIONS": 12,
+        "SUPPLEMENT_GROSS_RESIZED": 17,
+        "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 17,
+        "CRYPTO_DAILY_LOSS_LATCHES": 1
+      }
+    },
+    "normalBySleeve": {
+      "V12": {
+        "trades": 874,
+        "pnlJpy": 28176454.53203402,
+        "winRatePct": 52.63157895,
+        "profitFactor": 2.76544602
+      },
+      "PENGU_DUAL_LS_V2": {
+        "trades": 66,
+        "pnlJpy": 8951870.36991036,
+        "winRatePct": 72.72727273,
+        "profitFactor": 4.56779938
+      },
+      "V52": {
+        "trades": 143,
+        "pnlJpy": 9330664.33495759,
+        "winRatePct": 62.93706294,
+        "profitFactor": 4.97991626
+      },
+      "SUPPLEMENT_QUALITY102": {
+        "trades": 82,
+        "pnlJpy": 22784666.90240908,
+        "winRatePct": 65.85365854,
+        "profitFactor": 4.24074293
+      }
+    },
+    "severeBySleeve": {
+      "V12": {
+        "trades": 871,
+        "pnlJpy": 2544693.04234989,
+        "profitFactor": 1.59607577
+      },
+      "PENGU_DUAL_LS_V2": {
+        "trades": 66,
+        "pnlJpy": 1673441.03819318,
+        "profitFactor": 3.63716344
+      },
+      "V52": {
+        "trades": 0,
+        "pnlJpy": 0.0,
+        "profitFactor": null
+      },
+      "SUPPLEMENT_QUALITY102": {
+        "trades": 86,
+        "pnlJpy": 4381023.66241075,
+        "profitFactor": 4.0699789
+      }
+    }
+  }
+}

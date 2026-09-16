@@ -1,0 +1,421 @@
+{
+  "months": [
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08"
+  ],
+  "architectures": {
+    "CURRENT_FORMAL": {
+      "monthly": [
+        {
+          "month": "2025-08",
+          "baselinePnlJpy": 2880.39274559,
+          "proposedPnlJpy": 2907.58958124,
+          "deltaPnlJpy": 27.19683565000014,
+          "baselineEvents": 24,
+          "proposedEvents": 23
+        },
+        {
+          "month": "2025-09",
+          "baselinePnlJpy": 4957.55511346,
+          "proposedPnlJpy": 4963.2302571,
+          "deltaPnlJpy": 5.6751436399999875,
+          "baselineEvents": 27,
+          "proposedEvents": 27
+        },
+        {
+          "month": "2025-10",
+          "baselinePnlJpy": 10620.51935837,
+          "proposedPnlJpy": 10293.63108561,
+          "deltaPnlJpy": -326.8882727599994,
+          "baselineEvents": 19,
+          "proposedEvents": 21
+        },
+        {
+          "month": "2025-11",
+          "baselinePnlJpy": 9404.62343548,
+          "proposedPnlJpy": 11329.28884174,
+          "deltaPnlJpy": 1924.665406260001,
+          "baselineEvents": 13,
+          "proposedEvents": 15
+        },
+        {
+          "month": "2025-12",
+          "baselinePnlJpy": 4293.29777786,
+          "proposedPnlJpy": 4321.03755243,
+          "deltaPnlJpy": 27.73977457000001,
+          "baselineEvents": 1,
+          "proposedEvents": 1
+        },
+        {
+          "month": "2026-03",
+          "baselinePnlJpy": 217960.2016273,
+          "proposedPnlJpy": 298986.12339764,
+          "deltaPnlJpy": 81025.92177034,
+          "baselineEvents": 5,
+          "proposedEvents": 5
+        },
+        {
+          "month": "2026-04",
+          "baselinePnlJpy": 206081.86893966,
+          "proposedPnlJpy": 330902.22949031,
+          "deltaPnlJpy": 124820.36055065002,
+          "baselineEvents": 11,
+          "proposedEvents": 15
+        },
+        {
+          "month": "2026-05",
+          "baselinePnlJpy": -111832.68535705001,
+          "proposedPnlJpy": -83918.69780829003,
+          "deltaPnlJpy": 27913.98754875998,
+          "baselineEvents": 8,
+          "proposedEvents": 9
+        },
+        {
+          "month": "2026-06",
+          "baselinePnlJpy": 1067267.53819133,
+          "proposedPnlJpy": 1008094.94290029,
+          "deltaPnlJpy": -59172.59529103991,
+          "baselineEvents": 12,
+          "proposedEvents": 13
+        },
+        {
+          "month": "2026-07",
+          "baselinePnlJpy": 757282.25864775,
+          "proposedPnlJpy": 985439.64529853,
+          "deltaPnlJpy": 228157.38665077998,
+          "baselineEvents": 11,
+          "proposedEvents": 12
+        },
+        {
+          "month": "2026-08",
+          "baselinePnlJpy": 60267.22965535,
+          "proposedPnlJpy": 63225.83917212,
+          "deltaPnlJpy": 2958.609516770004,
+          "baselineEvents": 1,
+          "proposedEvents": 1
+        }
+      ],
+      "lomo": [
+        {
+          "omittedMonth": "2025-08",
+          "baselineAssetJpy": 16843279.12776536,
+          "proposedAssetJpy": 17655964.64914987,
+          "deltaAssetPct": 4.824983990467935,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2025-09",
+          "baselineAssetJpy": 16558686.50700334,
+          "proposedAssetJpy": 17370472.42107399,
+          "deltaAssetPct": 4.902477703936925,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2025-10",
+          "baselineAssetJpy": 16931958.87967432,
+          "proposedAssetJpy": 17810561.70634775,
+          "deltaAssetPct": 5.189020555253854,
+          "baselineDdPct": -12.66404029,
+          "proposedDdPct": -12.66404029
+        },
+        {
+          "omittedMonth": "2025-11",
+          "baselineAssetJpy": 17570362.34919455,
+          "proposedAssetJpy": 18282333.15889023,
+          "deltaAssetPct": 4.052112276035769,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2025-12",
+          "baselineAssetJpy": 18280034.52704833,
+          "proposedAssetJpy": 19177375.06055804,
+          "deltaAssetPct": 4.9088557911745045,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2026-03",
+          "baselineAssetJpy": 17692807.42944097,
+          "proposedAssetJpy": 18280925.90668957,
+          "deltaAssetPct": 3.3240540236139315,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2026-04",
+          "baselineAssetJpy": 17965934.48808208,
+          "proposedAssetJpy": 18489580.81845115,
+          "deltaAssetPct": 2.914662361239473,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2026-05",
+          "baselineAssetJpy": 18623014.59175745,
+          "proposedAssetJpy": 19447808.32617789,
+          "deltaAssetPct": 4.428894851349652,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2026-06",
+          "baselineAssetJpy": 17001812.55686403,
+          "proposedAssetJpy": 17988332.10554732,
+          "deltaAssetPct": 5.802437507082203,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2026-07",
+          "baselineAssetJpy": 17739106.42604849,
+          "proposedAssetJpy": 18403552.28031402,
+          "deltaAssetPct": 3.7456557185419515,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        },
+        {
+          "omittedMonth": "2026-08",
+          "baselineAssetJpy": 18382501.80619516,
+          "proposedAssetJpy": 19284926.64133104,
+          "deltaAssetPct": 4.90915134756984,
+          "baselineDdPct": -14.33740242,
+          "proposedDdPct": -14.19580659
+        }
+      ],
+      "allLomoPositive": true,
+      "minLomoDeltaPct": 2.914662361239473,
+      "maxLomoDeltaPct": 5.802437507082203,
+      "monthsProposedPnlPositive": 10,
+      "monthsDeltaPositive": 9
+    },
+    "SELECTED_CRYPTO": {
+      "monthly": [
+        {
+          "month": "2025-08",
+          "baselinePnlJpy": 2931.66676575,
+          "proposedPnlJpy": 2940.08970339,
+          "deltaPnlJpy": 8.422937639999873,
+          "baselineEvents": 24,
+          "proposedEvents": 24
+        },
+        {
+          "month": "2025-09",
+          "baselinePnlJpy": 5673.14144199,
+          "proposedPnlJpy": 5674.78359106,
+          "deltaPnlJpy": 1.6421490699995047,
+          "baselineEvents": 27,
+          "proposedEvents": 27
+        },
+        {
+          "month": "2025-10",
+          "baselinePnlJpy": 12482.1828013,
+          "proposedPnlJpy": 11961.24947429,
+          "deltaPnlJpy": -520.9333270099996,
+          "baselineEvents": 19,
+          "proposedEvents": 21
+        },
+        {
+          "month": "2025-11",
+          "baselinePnlJpy": 13089.13566362,
+          "proposedPnlJpy": 16602.1202066,
+          "deltaPnlJpy": 3512.9845429800007,
+          "baselineEvents": 13,
+          "proposedEvents": 15
+        },
+        {
+          "month": "2025-12",
+          "baselinePnlJpy": 8356.5449092,
+          "proposedPnlJpy": 8426.36440446,
+          "deltaPnlJpy": 69.81949526000062,
+          "baselineEvents": 1,
+          "proposedEvents": 1
+        },
+        {
+          "month": "2026-03",
+          "baselinePnlJpy": 590619.72456072,
+          "proposedPnlJpy": 810685.9006827,
+          "deltaPnlJpy": 220066.17612197995,
+          "baselineEvents": 5,
+          "proposedEvents": 5
+        },
+        {
+          "month": "2026-04",
+          "baselinePnlJpy": 644581.88168145,
+          "proposedPnlJpy": 1003790.7679199999,
+          "deltaPnlJpy": 359208.88623854995,
+          "baselineEvents": 11,
+          "proposedEvents": 15
+        },
+        {
+          "month": "2026-05",
+          "baselinePnlJpy": -387752.44927365996,
+          "proposedPnlJpy": -304595.64891714003,
+          "deltaPnlJpy": 83156.80035651993,
+          "baselineEvents": 8,
+          "proposedEvents": 9
+        },
+        {
+          "month": "2026-06",
+          "baselinePnlJpy": 4161223.36580976,
+          "proposedPnlJpy": 3989839.0298365,
+          "deltaPnlJpy": -171384.33597326,
+          "baselineEvents": 12,
+          "proposedEvents": 13
+        },
+        {
+          "month": "2026-07",
+          "baselinePnlJpy": 2744870.946074,
+          "proposedPnlJpy": 3559135.27559153,
+          "deltaPnlJpy": 814264.3295175298,
+          "baselineEvents": 11,
+          "proposedEvents": 12
+        },
+        {
+          "month": "2026-08",
+          "baselinePnlJpy": 215398.00338544,
+          "proposedPnlJpy": 226204.40246421,
+          "deltaPnlJpy": 10806.399078769988,
+          "baselineEvents": 1,
+          "proposedEvents": 1
+        }
+      ],
+      "lomo": [
+        {
+          "omittedMonth": "2025-08",
+          "baselineAssetJpy": 59843226.14211844,
+          "proposedAssetJpy": 62832736.94190482,
+          "deltaAssetPct": 4.995570915055203,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2025-09",
+          "baselineAssetJpy": 58090544.21667273,
+          "proposedAssetJpy": 61004627.04351761,
+          "deltaAssetPct": 5.016449520554667,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2025-10",
+          "baselineAssetJpy": 60267672.62821684,
+          "proposedAssetJpy": 63534432.19134865,
+          "deltaAssetPct": 5.420417647922138,
+          "baselineDdPct": -16.95774477,
+          "proposedDdPct": -16.95774477
+        },
+        {
+          "omittedMonth": "2025-11",
+          "baselineAssetJpy": 63176381.16458736,
+          "proposedAssetJpy": 65562861.7705926,
+          "deltaAssetPct": 3.777488615227842,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2025-12",
+          "baselineAssetJpy": 65484836.06147124,
+          "proposedAssetJpy": 68770080.74433309,
+          "deltaAssetPct": 5.0168021796343165,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2026-03",
+          "baselineAssetJpy": 63374317.75582188,
+          "proposedAssetJpy": 65604892.19230682,
+          "deltaAssetPct": 3.5196819712982608,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2026-04",
+          "baselineAssetJpy": 64219832.38840988,
+          "proposedAssetJpy": 66155397.95191371,
+          "deltaAssetPct": 3.0139685693934437,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2026-05",
+          "baselineAssetJpy": 66725549.28331667,
+          "proposedAssetJpy": 69760163.67179354,
+          "deltaAssetPct": 4.5479046947847435,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2026-06",
+          "baselineAssetJpy": 60356845.60284534,
+          "proposedAssetJpy": 63925256.34806801,
+          "deltaAssetPct": 5.912188931646956,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2026-07",
+          "baselineAssetJpy": 63538059.8175754,
+          "proposedAssetJpy": 65986719.2570307,
+          "deltaAssetPct": 3.853846728221888,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        },
+        {
+          "omittedMonth": "2026-08",
+          "baselineAssetJpy": 65844090.04004473,
+          "proposedAssetJpy": 69147451.73684686,
+          "deltaAssetPct": 5.0169448689975304,
+          "baselineDdPct": -17.59935397,
+          "proposedDdPct": -17.59935397
+        }
+      ],
+      "allLomoPositive": true,
+      "minLomoDeltaPct": 3.0139685693934437,
+      "maxLomoDeltaPct": 5.912188931646956,
+      "monthsProposedPnlPositive": 10,
+      "monthsDeltaPositive": 9
+    }
+  },
+  "stopEffect": {
+    "raw40": {
+      "rawCount15": 208,
+      "rawCount175": 208,
+      "acceptedChangedTrades": 4,
+      "improvedTrades": 4,
+      "worsenedTrades": 0,
+      "sumNetReturnDelta": 0.04876661389736059,
+      "worstDelta": 0.003587640943036874,
+      "bestDelta": 0.020416803876370127
+    },
+    "CURRENT_FORMAL": {
+      "asset15": 19261339.91143949,
+      "asset175": 19348152.48050316,
+      "deltaAssetPct": 0.4507088783169966,
+      "v52Pnl15": 2605520.28825042,
+      "v52Pnl175": 2636544.85976872,
+      "dd15": -14.19580659,
+      "dd175": -14.19580659
+    },
+    "SELECTED_CRYPTO": {
+      "asset15": 69060075.48434857,
+      "asset175": 69373656.13931108,
+      "deltaAssetPct": 0.4540693776588389,
+      "v52Pnl15": 9236481.05123348,
+      "v52Pnl175": 9330664.3349576,
+      "dd15": -17.59935397,
+      "dd175": -17.59935397
+    }
+  }
+}
