@@ -10,11 +10,15 @@ export const DISDEX_V13D_V11EQ_V96_LINEAGE = {
 } as const;
 
 export const DISDEX_V13D_V11EQ_V96_ALLOCATION = {
+    // Legacy V96 remains independently capped at cryptoSleeveGrossCap=1.5.
+    // The integrated V12/PENGU/Q102/V52 portfolio uses the shared caps below.
     cryptoSleeveGrossCap: 1.5,
+    sharedCryptoGrossCap: 3.0,
     stockSleeveGrossCap: 1.5,
     v11MaximumGross: 1.0,
     v50MaximumGross: 1.0,
-    portfolioGrossCap: 2.5,
+    portfolioGrossCap: 3.5,
+    sharedPortfolioGrossCap: 3.5,
     reservedFirstStockGross: 1.0,
     minimumFirstStockGross: 0.5,
     minimumSecondStockGross: 0.25,
@@ -78,13 +82,13 @@ export const DISDEX_V11_EQ_CONFIG = {
 } as const;
 
 export const DISDEX_V50_CONFIG = {
-    strategyId: "POST_EARLY3__B75__H3__BOTH__NONE",
+    strategyId: "POST_EARLY3__B60__C20__STOP1.75__EDGE7.5__BOTH",
     enabledForLive: true,
     priority: 2,
     timeZone: "America/New_York",
     entryTimesNy: ["11:30:00", "12:30:00", "13:30:00"],
     universe: ["AMZN", "META", "MSFT", "NVDA", "TSLA"],
-    minimumAbsoluteCashAsterBasisBps: 75,
+    minimumAbsoluteCashAsterBasisBps: 60,
     directions: "LONG_AND_SHORT",
     maximumGross: 1.0,
     receivesOnlyRemainingStockGross: true,
@@ -94,12 +98,13 @@ export const DISDEX_V50_CONFIG = {
     sameSymbolConcurrentWithV11Allowed: false,
     maximumHoldingHours: 3,
     hourlyCheckpointExitOnly: true,
-    convergenceExitBps: 15,
+    convergenceExitBps: 20,
     zeroCrossExit: true,
-    basisExpansionStopMultiple: 1.5,
+    basisExpansionStopMultiple: 1.75,
     maximumAdverseBasisMoveBps: 10,
     maximumEstimatedRoundTripCostBps: 60,
-    minimumEstimatedNetEdgeBps: 10,
+    minimumEstimatedNetEdgeBps: 7.5,
+    maximumCurrentSpreadBps: 20,
     minimumDepthMultiple: 2,
     entryOrderType: "POST_ONLY_LIMIT_GTX",
     entryOrderTtlMs: 10_000,
@@ -110,7 +115,7 @@ export const DISDEX_V50_CONFIG = {
 } as const;
 
 export const DISDEX_V13D_V11EQ_V96_RISK = {
-    maximumPortfolioDailyLossPct: 5,
+    maximumPortfolioDailyLossPct: 7.5,
     maximumV52SleeveDailyLossPct: 3.5,
     dailyLossTimeZone: "UTC",
     dailyLossAction: "CANCEL_NEW_ORDERS_AND_FLATTEN_MANAGED",
@@ -126,7 +131,7 @@ export const DISDEX_V13D_V11EQ_V96_RISK = {
 
 export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     strategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
-    implementationStatus: "VPS_LIVE_READY_V96_1P5_STOCK_1P5_PORTFOLIO_2P5_FIXED_5X_MARGIN_GATED",
+    implementationStatus: "VPS_LIVE_READY_INTEGRATED_CRYPTO_3P0_STOCK_1P5_PORTFOLIO_3P5_FIXED_5X_MARGIN_GATED",
     mode: "LIVE_READY" as const,
     liveTradingEnabled: true,
     orderSubmissionAllowed: true,
@@ -134,7 +139,7 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     stateSchemaVersion: 3,
     stateDirectory: ".runtime-state/disdex-v13d-v11eq-v96",
     stockOrderClientIdPrefix: "stock-v52-",
-    pythonStockEngine: "scripts/disdex_v52_margin_aware_live_engine.py",
+    pythonStockEngine: "scripts/disdex_v52_aster_only_live_engine.py",
     combinedSupervisor: "scripts/disdex-v13d-v11eq-v96-live-runner.ts",
     combinedPreflight: "scripts/disdex-v13d-v11eq-v96-live-preflight.ts",
     requireCredentialsAndEndpointPreflight: true,
@@ -144,5 +149,5 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     legacyV11StateMigrationAcknowledgement: "I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION",
     cryptoV96RetainsOwnLiveGates: true,
     liveBlockReason:
-        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU 1.15 and V96 Crypto Gross 1.5, combined Portfolio Gross 2.5, fixed 5x cross margin for all managed Aster symbols, at least 20% projected available balance, at most 70% projected initial-margin usage, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all sleeve limits. Hyperliquid and V13D remain excluded.",
+        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU 0.85, shared Crypto Gross 3.0, Stock Gross 1.5, Total Gross 3.5, fixed 5x cross margin for all managed Aster symbols, at least 20% projected available balance, at most 70% projected initial-margin usage, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all sleeve limits. Hyperliquid and V13D remain excluded.",
 } as const;

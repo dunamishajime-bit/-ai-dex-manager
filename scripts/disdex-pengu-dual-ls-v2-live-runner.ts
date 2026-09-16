@@ -94,7 +94,7 @@ async function main() {
             maxTransactionRetries: runtime.maxTransactionRetries,
             maximumEntryDelayMs: runtime.maximumEntryDelayMs,
             // The verified strict portfolio has a 2.00x aggregate crypto cap.
-            // PENGU's own sleeve remains capped at 0.75x by maximumGross.
+            // PENGU's own sleeve remains capped at 0.85x by maximumGross.
             portfolioGrossCap: STRICT_BT33404708902.cryptoGrossCap,
             maximumDailyLossPct: runtime.maximumDailyLossPct,
             killSwitchPath: runtime.killSwitchPath,

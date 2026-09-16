@@ -26,20 +26,66 @@ from disdex_us_equity_calendar import regular_us_equity_session
 
 base = legacy.base
 
+_V50_RUNTIME_PATH = Path(__file__).resolve().parents[1] / "config" / "v52V50Runtime.json"
+try:
+    _V50_RUNTIME = json.loads(_V50_RUNTIME_PATH.read_text(encoding="utf-8"))
+except (OSError, UnicodeError, json.JSONDecodeError) as error:
+    raise RuntimeError(f"V50_RUNTIME_CONTRACT_UNAVAILABLE:{_V50_RUNTIME_PATH}") from error
+if _V50_RUNTIME.get("policyId") != "V50_B60_C20_STOP1.75_EDGE7.5_COST60_SPREAD20":
+    raise RuntimeError("V50_RUNTIME_CONTRACT_MISMATCH:policyId")
+
 STRATEGY_ID = "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"
 LIVE_ACK = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY"
 STATE_SCHEMA_VERSION = 3
 V11_SLOT = "V11_EQ"
 V50_SLOT = "V50_POST_OPEN_BASIS"
-V50_WINDOWS = ("11:30", "12:30", "13:30")
-V50_MIN_ENTRY_BASIS_BPS = 75.0
-V50_MAX_HOLDING_HOURS = 3
+V50_WINDOWS = tuple(str(value) for value in _V50_RUNTIME["windowsNy"])
+V50_WINDOW_POLICY = str(_V50_RUNTIME["windowPolicy"])
+V50_MIN_ENTRY_BASIS_BPS = float(_V50_RUNTIME["minimumEntryBasisBps"])
+V50_MAX_HOLDING_HOURS = int(_V50_RUNTIME["maximumHoldingHours"])
 V50_MAX_DAILY_TRADES = 3
-V50_CONVERGENCE_BPS = 15.0
-V50_BASIS_STOP_MULTIPLE = 1.5
+V50_CONVERGENCE_BPS = float(_V50_RUNTIME["convergenceBps"])
+V50_BASIS_STOP_MULTIPLE = float(_V50_RUNTIME["basisStopMultiple"])
 V50_MAX_ADVERSE_BASIS_MOVE_BPS = 10.0
-V50_MAX_ROUND_TRIP_COST_BPS = 60.0
-V50_MIN_NET_EDGE_BPS = 10.0
+V50_MAX_ROUND_TRIP_COST_BPS = float(_V50_RUNTIME["maximumRoundTripCostBps"])
+V50_MAX_SPREAD_BPS = float(_V50_RUNTIME["maximumSpreadBps"])
+V50_MIN_NET_EDGE_BPS = float(_V50_RUNTIME["minimumNetEdgeBps"])
+V50_POLICY_ID = str(_V50_RUNTIME["policyId"])
+
+
+def empty_v52_gate_diagnostics(ny_day: str) -> dict:
+    return {
+        "schemaVersion": 1,
+        "policyId": V50_POLICY_ID,
+        "nyDay": ny_day,
+        "decisions": [],
+        "acceptedCandidates": [],
+        "rejectionCounters": {},
+        "lastDecision": None,
+    }
+
+
+def append_v52_diagnostic(state: dict, *, ny_day: str, row: dict) -> None:
+    diagnostics = state.setdefault("v52GateDiagnostics", empty_v52_gate_diagnostics(ny_day))
+    if diagnostics.get("nyDay") != ny_day:
+        diagnostics = empty_v52_gate_diagnostics(ny_day)
+        state["v52GateDiagnostics"] = diagnostics
+    diagnostics["decisions"] = [*diagnostics.get("decisions", []), row][-500:]
+    if row.get("accepted") is True:
+        diagnostics["acceptedCandidates"] = [*diagnostics.get("acceptedCandidates", []), row][-200:]
+    counters = diagnostics.setdefault("rejectionCounters", {})
+    for reason in row.get("rejectionReasons", []):
+        counters[reason] = int(counters.get(reason, 0)) + 1
+    diagnostics["lastDecision"] = row
+    state["v50Top2Telemetry"] = {
+        "schemaVersion": 1,
+        "policyId": V50_POLICY_ID,
+        "nyDay": ny_day,
+        "decisions": diagnostics["decisions"],
+        "acceptedCandidates": diagnostics["acceptedCandidates"],
+        "rejectionCounters": counters,
+        "lastDecision": row,
+    }
 
 
 def notify_v52_fill(engine: "V52AsterOnlyEngine", fill: object, event_type: str, reason: str, slot: str) -> None:
@@ -119,7 +165,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.state = base.read_json(self.state_path, {}) or {}
         self.crypto_gross_cap = base.float_env("DISDEX_V52_CRYPTO_GROSS_CAP", STRICT_CAPS.crypto_gross)
         self.stock_gross_cap = base.float_env("DISDEX_V52_STOCK_GROSS_CAP", 1.5)
-        self.portfolio_gross_cap = base.float_env("DISDEX_V52_PORTFOLIO_GROSS_CAP", 2.5)
+        self.portfolio_gross_cap = base.float_env("DISDEX_V52_PORTFOLIO_GROSS_CAP", 3.5)
         self.v11_gross_cap = base.float_env("DISDEX_V52_V11_GROSS_CAP", 1.0)
         self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", 1.0)
         # Strict caps are hard limits.  A legacy environment may still carry
@@ -228,8 +274,41 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 maximum_daily_loss_pct=self.max_daily_loss_pct,
                 data_available=configured_capital > 0,
             )
-        if self.state.get("nyDay") != ny_day:
-            self.state.update({"nyDay": ny_day, "v11Attempted": False, "v11SignalBasis": {}, "v11SignalSelectedSymbol": None, "v11SignalAt": None, "v50SignalBasis": {}, "v50Attempted": {}, "v50CompletedTrades": 0})
+        diagnostics = self.state.get("v52GateDiagnostics")
+        telemetry = self.state.get("v50Top2Telemetry")
+        daily_state_stale = (
+            self.state.get("nyDay") != ny_day
+            or self.state.get("v50DailyEntriesDay") != ny_day
+            or self.state.get("v50SignalSnapshotDay") != ny_day
+            or not isinstance(diagnostics, dict)
+            or diagnostics.get("nyDay") != ny_day
+            or not isinstance(telemetry, dict)
+            or telemetry.get("nyDay") != ny_day
+        )
+        if daily_state_stale:
+            self.state.update({
+                "nyDay": ny_day,
+                "v11Attempted": False,
+                "v11SignalBasis": {},
+                "v11SignalSelectedSymbol": None,
+                "v11SignalAt": None,
+                "v50SignalBasis": {},
+                "v50SignalSnapshots": {},
+                "v50SignalSnapshotDay": ny_day,
+                "v50Attempted": {},
+                "v50CompletedTrades": 0,
+                "v50DailyEntriesDay": ny_day,
+                "v52GateDiagnostics": empty_v52_gate_diagnostics(ny_day),
+                "v50Top2Telemetry": {
+                    "schemaVersion": 1,
+                    "policyId": V50_POLICY_ID,
+                    "nyDay": ny_day,
+                    "decisions": [],
+                    "acceptedCandidates": [],
+                    "rejectionCounters": {},
+                    "lastDecision": None,
+                },
+            })
         self.save()
 
     def managed_aster_positions(self) -> Dict[str, float]:
@@ -635,7 +714,16 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         signals = self.state.setdefault("v50SignalBasis", {})
         if signals.get(window):
             return
-        signals[window] = {symbol: (aster.mid / reference.price - 1.0) * 10_000.0 for symbol, (aster, _xyz, reference) in rows.items()}
+        snapshot = {
+            symbol: {
+                "signalBasisBps": (aster.mid / reference.price - 1.0) * 10_000.0,
+                "timestamp": max(int(aster.received_ms), int(reference.received_ms)),
+            }
+            for symbol, (aster, _xyz, reference) in rows.items()
+        }
+        signals[window] = {symbol: row["signalBasisBps"] for symbol, row in snapshot.items()}
+        self.state.setdefault("v50SignalSnapshots", {})[window] = snapshot
+        self.state["v50SignalSnapshotDay"] = self.current_local_time().date().isoformat()
         self.save()
         self.log("v50-signal-recorded", window=window, basis=signals[window])
 
@@ -644,7 +732,17 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         eligible: List[dict] = []
         rejections: Dict[str, List[str]] = {}
         now = base.now_ms()
+        ny_day = self.current_local_time().date().isoformat()
         active_symbols = {str(p.get("symbol")) for p in self.positions().values()}
+        try:
+            gross = self.gross_snapshot()
+        except Exception:
+            gross = {}
+        equity = base.finite(gross.get("equityUsd"), 0.0)
+        requested_gross = notional / equity if equity > 0 else 0.0
+        stock_gross = base.finite(gross.get("stockGross"), 0.0)
+        total_gross = base.finite(gross.get("totalGross"), 0.0)
+        available_stock_gross = max(0.0, self.stock_gross_cap - stock_gross)
         for symbol, (aster, _xyz, reference) in rows.items():
             basis = (aster.mid / reference.price - 1.0) * 10_000.0
             signal_basis = base.finite(signal.get(symbol), 0.0)
@@ -654,18 +752,53 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             adverse = max(0.0, abs(basis) - abs(signal_basis))
             reasons: List[str] = []
             if symbol in active_symbols: reasons.append("SAME_SYMBOL_ACTIVE")
-            if abs(basis) < V50_MIN_ENTRY_BASIS_BPS: reasons.append("BASIS_BELOW_75")
+            if abs(basis) < V50_MIN_ENTRY_BASIS_BPS: reasons.append("BASIS_BELOW_60")
             if signal_basis * basis <= 0: reasons.append("SIGN_CHANGED")
             if adverse > V50_MAX_ADVERSE_BASIS_MOVE_BPS: reasons.append("ADVERSE_BASIS_MOVE")
             if now - aster.received_ms > base.V11_MAX_DATA_AGE_MS or now - reference.received_ms > base.V11_MAX_DATA_AGE_MS: reasons.append("STALE_DATA")
             if abs(aster.received_ms - reference.received_ms) > base.V11_MAX_SOURCE_CLOCK_DIFF_MS: reasons.append("SOURCE_CLOCK_MISMATCH")
             if cost > V50_MAX_ROUND_TRIP_COST_BPS: reasons.append("ROUND_TRIP_COST_OVER_60")
-            if abs(basis) - V50_CONVERGENCE_BPS - cost < V50_MIN_NET_EDGE_BPS: reasons.append("NET_EDGE_BELOW_10")
+            calculated_net_edge = abs(basis) - V50_CONVERGENCE_BPS - cost
+            if calculated_net_edge < V50_MIN_NET_EDGE_BPS: reasons.append("NET_EDGE_BELOW_7_5")
             if aster.depth_usd(exit_action) < 2.0 * notional: reasons.append("DEPTH_BELOW_2X")
-            if aster.spread_bps > base.V11_MAX_SPREAD_BPS: reasons.append("SPREAD_OVER_20")
+            if aster.spread_bps > V50_MAX_SPREAD_BPS: reasons.append("SPREAD_OVER_20")
+            detail = detail if isinstance(detail, dict) else {}
+            accepted = not reasons
+            telemetry = {
+                "timestamp": now,
+                "nyDay": ny_day,
+                "strategy": V50_SLOT,
+                "symbol": symbol,
+                "window": window,
+                "direction": "SHORT" if side == "SELL" else "LONG",
+                "signalBasisBps": signal_basis,
+                "currentBasisBps": basis,
+                "basisBps": basis,
+                "estimatedRoundTripCostBps": cost,
+                "makerFeeBps": self.aster_maker_fee_bps,
+                "takerFeeBps": self.aster_taker_fee_bps,
+                "spreadBps": base.finite(detail.get("spreadBps"), base.finite(getattr(aster, "spread_bps", 0.0))),
+                "VWAPSlippageBps": base.finite(detail.get("vwapSlippageBps"), base.finite(detail.get("exitSlippageBps"), 0.0)),
+                "safetyBufferBps": base.finite(detail.get("safetyBufferBps"), self.v11_safety_buffer_bps),
+                "calculatedNetEdgeBps": calculated_net_edge,
+                "estimatedNetEdgeBps": calculated_net_edge,
+                "maxRoundTripCostBps": V50_MAX_ROUND_TRIP_COST_BPS,
+                "maxSpreadBps": V50_MAX_SPREAD_BPS,
+                "minimumNetEdgeBps": V50_MIN_NET_EDGE_BPS,
+                "accepted": accepted,
+                "rejectionReasons": reasons,
+                "grossRequested": requested_gross,
+                "grossAccepted": requested_gross if accepted else 0.0,
+                "availableStockGross": available_stock_gross,
+                "totalGrossBeforeReservation": total_gross,
+                "totalGrossAfterReservation": total_gross + (requested_gross if accepted else 0.0),
+            }
+            append_v52_diagnostic(self.state, ny_day=ny_day, row=telemetry)
+            self.log("v52-cost-telemetry", **telemetry)
             rejections[symbol] = reasons
             if not reasons:
                 eligible.append({"symbol": symbol, "basisBps": basis, "signalBasisBps": signal_basis, "side": side, "entryPrice": aster.bid if side == "BUY" else aster.ask, "estimatedRoundTripCostBps": cost, "adverseBasisMoveBps": adverse, "costDetail": detail, "route": f"POST_{window.replace(':', '')}"})
+        self.save()
         if not eligible:
             return None, rejections
         return sorted(eligible, key=lambda row: (-abs(row["basisBps"]), row["symbol"]))[0], rejections
@@ -971,10 +1104,16 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
 def self_test() -> None:
     assert LIVE_ACK == "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY"
     assert V50_WINDOWS == ("11:30", "12:30", "13:30")
-    assert V50_MIN_ENTRY_BASIS_BPS == 75.0
+    assert V50_WINDOW_POLICY == "POST_EARLY3"
+    assert V50_MIN_ENTRY_BASIS_BPS == 60.0
+    assert V50_CONVERGENCE_BPS == 20.0
+    assert V50_BASIS_STOP_MULTIPLE == 1.75
+    assert V50_MIN_NET_EDGE_BPS == 7.5
+    assert V50_MAX_ROUND_TRIP_COST_BPS == 60.0
+    assert V50_MAX_SPREAD_BPS == 20.0
     engine = object.__new__(V52AsterOnlyEngine)
     engine.live = True
-    engine.crypto_gross_cap = 1.0; engine.stock_gross_cap = 1.5; engine.portfolio_gross_cap = 2.5
+    engine.crypto_gross_cap = 3.0; engine.stock_gross_cap = 1.5; engine.portfolio_gross_cap = 3.5
     engine.v11_gross_cap = 1.0; engine.v50_gross_cap = 1.0; engine.gross_tolerance = 0.03
     engine.state = {"positions": {V11_SLOT: {}}}; engine.v96_requires_margin = lambda: False
     engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoGross": 1.0, "stockGross": 1.0, "totalGross": 2.0}

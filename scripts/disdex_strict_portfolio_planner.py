@@ -15,12 +15,12 @@ EPSILON = 1e-9
 @dataclass(frozen=True)
 class StrictPortfolioCaps:
     v12_gross: float = 1.50
-    pengu_gross: float = 0.75
+    pengu_gross: float = 0.85
     quality102_gross: float = 0.50
-    quality102_causal_v1_gross: float = 1.00
+    quality102_causal_v1_gross: float = 1.50
     stock_gross: float = 1.50
-    crypto_gross: float = 2.00
-    total_gross: float = 2.50
+    crypto_gross: float = 3.00
+    total_gross: float = 3.50
 
 
 STRICT_CAPS = StrictPortfolioCaps()
@@ -350,17 +350,17 @@ def plan_v52_stock_capacity(
 def self_test() -> None:
     caps = assert_strict_live_configuration({
         "STRICT_PORTFOLIO_PLANNER_ACTIVE": "true",
-        "CRYPTO_GROSS_CAP": "2.0",
+        "CRYPTO_GROSS_CAP": "3.0",
         "STOCK_GROSS_CAP": "1.5",
-        "TOTAL_GROSS_CAP": "2.5",
-        "DISDEX_V52_CRYPTO_GROSS_CAP": "2.0",
+        "TOTAL_GROSS_CAP": "3.5",
+        "DISDEX_V52_CRYPTO_GROSS_CAP": "3.0",
         "DISDEX_V52_STOCK_GROSS_CAP": "1.5",
-        "DISDEX_V52_PORTFOLIO_GROSS_CAP": "2.5",
+        "DISDEX_V52_PORTFOLIO_GROSS_CAP": "3.5",
     })
-    assert caps.crypto_gross == 2.0
-    at_limit = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 2.0, "stockGross": 0.5, "totalGross": 2.5}, 1.0, 1.0)
+    assert caps.crypto_gross == 3.0
+    at_limit = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 3.0, "stockGross": 0.5, "totalGross": 3.5}, 1.0, 1.0)
     assert at_limit["status"] == "blocked"
-    residual = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 1.25, "stockGross": 0.5, "totalGross": 1.75}, 1.0, 1.0)
+    residual = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 2.25, "stockGross": 0.5, "totalGross": 2.75}, 1.0, 1.0)
     assert abs(residual["acceptedGross"] - 0.75) < EPSILON
     try:
         assert_strict_live_configuration({"STRICT_PORTFOLIO_PLANNER_ACTIVE": "true", "CRYPTO_GROSS_CAP": "1.5"})

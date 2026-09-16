@@ -70,9 +70,9 @@ export function assertPortfolioGross(cryptoGross: number, stockGross: number): v
     const allocation = DISDEX_V13D_V11EQ_V96_ALLOCATION;
     if (!Number.isFinite(cryptoGross) || !Number.isFinite(stockGross)) throw new Error("Gross values must be finite");
     if (cryptoGross < 0 || stockGross < 0) throw new Error("Gross values cannot be negative");
-    if (cryptoGross > allocation.cryptoSleeveGrossCap + 1e-12) throw new Error(`Crypto Gross cap exceeded: ${cryptoGross}`);
+    if (cryptoGross > allocation.sharedCryptoGrossCap + 1e-12) throw new Error(`Crypto Gross cap exceeded: ${cryptoGross}`);
     if (stockGross > allocation.stockSleeveGrossCap + 1e-12) throw new Error(`Stock Gross cap exceeded: ${stockGross}`);
-    if (cryptoGross + stockGross > allocation.portfolioGrossCap + 1e-12) throw new Error(`Portfolio Gross cap exceeded: ${cryptoGross + stockGross}`);
+    if (cryptoGross + stockGross > allocation.sharedPortfolioGrossCap + 1e-12) throw new Error(`Portfolio Gross cap exceeded: ${cryptoGross + stockGross}`);
 }
 
 export function assertLiveOrderSubmissionEnabled(input: LiveOrderSubmissionInput): void {

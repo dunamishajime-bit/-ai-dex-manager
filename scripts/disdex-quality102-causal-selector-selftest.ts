@@ -210,9 +210,9 @@ assert.deepEqual(routed.blocked.map((x) => x.id), ["s2", "s3", "s4", "occupied"]
 assert.ok(routed.blocked.every((x) => x.blockedReason === "ONE_SLOT_OCCUPIED"));
 
 // Strict risk contract must not drift while adding causal selector plumbing.
-assert.equal(STRICT_BT33404708902.quality102PositionCap, 0.5);
-assert.equal(STRICT_BT33404708902.cryptoGrossCap, 2);
-assert.equal(STRICT_BT33404708902.totalGrossCap, 2.5);
+assert.equal(STRICT_BT33404708902.quality102PositionCap, 1.5);
+assert.equal(STRICT_BT33404708902.cryptoGrossCap, 3);
+assert.equal(STRICT_BT33404708902.totalGrossCap, 3.5);
 assert.equal(STRICT_BT33404708902.quality102LiveSelectorParity, false);
 assert.equal(STRICT_BT33404708902.quality102LiveBlockedFailClosed, true);
 

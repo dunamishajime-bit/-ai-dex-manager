@@ -73,9 +73,9 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
         DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
         DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
-        DISDEX_V52_CRYPTO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
+        DISDEX_V52_CRYPTO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.sharedCryptoGrossCap),
         DISDEX_V52_STOCK_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap),
-        DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap),
+        DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.sharedPortfolioGrossCap),
         DISDEX_V52_V11_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v11MaximumGross),
         DISDEX_V52_V50_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v50MaximumGross),
         DISDEX_V52_RESERVED_FIRST_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross),
@@ -379,7 +379,8 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         daemon,
         migrationId,
         authenticatedPreflightPassed: runnerMode === "live",
-        cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
+        cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.sharedCryptoGrossCap,
+        legacyV96CryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
         stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
         totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
         reservedFirstStockGross: DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross,
@@ -479,9 +480,9 @@ function selfTest() {
     Object.assign(process.env, selfTestEnvironment);
     const env = buildCombinedChildEnvironment("paper");
     assert.equal(env.DISDEX_V96_MAX_GROSS, "1.5");
-    assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "1.5");
+    assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "3");
     assert.equal(env.DISDEX_V52_STOCK_GROSS_CAP, "1.5");
-    assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "2.5");
+    assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "3.5");
     assert.equal(env.DISDEX_V52_V11_GROSS_CAP, "1");
     assert.equal(env.DISDEX_V52_V50_GROSS_CAP, "1");
     assert.equal(env.DISDEX_V52_RESERVED_FIRST_STOCK_GROSS, "1");

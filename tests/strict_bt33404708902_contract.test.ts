@@ -29,10 +29,10 @@ function position(input: Partial<StrictPortfolioPosition> & Pick<StrictPortfolio
 test("source identity and strict caps are immutable", () => {
     assert.equal(STRICT_BT33404708902.sourceRun, "33404708902");
     assert.equal(STRICT_BT33404708902.sourceSha, "aec066fefd761b12f07e6927b5f2a524f88ca08b");
-    assert.equal(STRICT_BT33404708902.quality102PositionCap, 0.5);
-    assert.equal(STRICT_BT33404708902.quality102CausalV1PositionCap, 1);
-    assert.equal(STRICT_BT33404708902.cryptoGrossCap, 2);
-    assert.equal(STRICT_BT33404708902.totalGrossCap, 2.5);
+    assert.equal(STRICT_BT33404708902.quality102PositionCap, 1.5);
+    assert.equal(STRICT_BT33404708902.quality102CausalV1PositionCap, 1.5);
+    assert.equal(STRICT_BT33404708902.cryptoGrossCap, 3);
+    assert.equal(STRICT_BT33404708902.totalGrossCap, 3.5);
 });
 
 test("all five simultaneous intents admit base strategies before blocking historical Q102 and preserving causal priority", () => {
@@ -43,18 +43,18 @@ test("all five simultaneous intents admit base strategies before blocking histor
         intents: [
             { idempotencyKey: "q", strategy: "QUALITY102", symbol: "SOLUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
             { idempotencyKey: "v12", strategy: "V12", symbol: "ETHUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
-            { idempotencyKey: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "SHORT", gross: 0.75, notionalUsd: 750, signalTs: NOW },
+            { idempotencyKey: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "SHORT", gross: 0.85, notionalUsd: 850, signalTs: NOW },
             { idempotencyKey: "v52", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
-            { idempotencyKey: "q102-causal-v1", strategy: "QUALITY102_CAUSAL_V1", symbol: "SOLUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
+            { idempotencyKey: "q102-causal-v1", strategy: "QUALITY102_CAUSAL_V1", symbol: "SOLUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
         ],
         quality102CausalV1Ready: true,
     });
     assert.equal(plan.status, "planned");
-    assert.deepEqual(plan.accepted.map((intent) => intent.strategy), ["V52", "PENGU_DUAL_LS_V2", "V12"]);
+    assert.deepEqual(plan.accepted.map((intent) => intent.strategy), ["V52", "PENGU_DUAL_LS_V2", "V12", "QUALITY102_CAUSAL_V1"]);
     assert.equal(plan.rejected.find((row) => row.intent.strategy === "QUALITY102")?.reason, "QUALITY102_LIVE_BLOCKED_FAIL_CLOSED");
-    assert.equal(plan.rejected.find((row) => row.intent.strategy === "QUALITY102_CAUSAL_V1")?.reason, "TOTAL_GROSS_CAP");
-    assert.ok(plan.totals.cryptoGross <= 2 + 1e-9);
-    assert.ok(plan.totals.totalGross <= 2.5 + 1e-9);
+    assert.equal(plan.rejected.find((row) => row.intent.strategy === "QUALITY102_CAUSAL_V1"), undefined);
+    assert.ok(plan.totals.cryptoGross <= 3 + 1e-9);
+    assert.ok(plan.totals.totalGross <= 3.5 + 1e-9);
 });
 
 test("MTM reduction is restart/reconciliation stable and preserves remaining cost basis", () => {
@@ -117,7 +117,8 @@ test("a quality position is reduced at its current mark when a base order needs 
         researchMode: true,
         active: [
             position({ id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 50, entryPrice: 10, markPrice: 10 }),
-            position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 75, entryPrice: 10, markPrice: 10 }),
+            position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 10, markPrice: 10 }),
+            position({ id: "v12", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 10, markPrice: 10 }),
         ],
         intents: [{ idempotencyKey: "v52", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW }],
     });

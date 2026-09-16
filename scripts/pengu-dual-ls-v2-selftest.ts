@@ -60,7 +60,7 @@ assert.equal(cooldownHoursForPenguExit("LONG_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("SHORT_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("RECOVERY_V8_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("LONG_TRAILING_STOP"), 6);
-assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.75);
+assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.85);
 const portfolioRunnerSource = readFileSync(resolve("lib/pengu-dual-ls-v2-portfolio-runner.ts"), "utf8");
 assert.match(
     portfolioRunnerSource,
@@ -69,7 +69,7 @@ assert.match(
 );
 assert.equal(PENGU_SHORT_V20_CANDIDATE, "COUNTERWIND_VOL_TARGET_FAILURE_EXIT");
 assert.equal(PENGU_SHORT_V20_PRE_REGISTRATION_SHA, "ad7cedb3cafaf9f9680e390112f72375d84b50ac");
-assert.equal(classifyPenguShortV20SizingState(0.75), "CAP");
+assert.equal(classifyPenguShortV20SizingState(0.85), "CAP");
 assert.equal(classifyPenguShortV20SizingState(0.60), "FLOOR");
 assert.equal(classifyPenguShortV20SizingState(0.70), "VOL_TARGET");
 
@@ -86,7 +86,7 @@ const liveRuntime = resolvePenguDualLsV2Runtime({
     PENGU_DUAL_LS_V2_MAX_GROSS: "2.5",
     PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: "2.5",
 });
-assert.equal(liveRuntime.maximumGross, 0.75);
+assert.equal(liveRuntime.maximumGross, 0.85);
 assert.equal(liveRuntime.portfolioGrossCap, 1.5);
 assert.equal(liveRuntime.maximumEntryDelayMs, 5 * 60_000);
 assert.equal(resolvePenguDualLsV2Runtime({ PENGU_DUAL_LS_V2_MAX_ENTRY_DELAY_MS: "9999999" }).maximumEntryDelayMs, 5 * 60_000);
@@ -132,18 +132,18 @@ assert.equal(invalidated.signals[1], false);
 const expiredRows = [impulse, ...Array.from({ length: 25 }, (_, index) => features({ referenceTs: (201 + index) * HOUR, close: 100, low: 100, penguReturn24h: 0 }))];
 assert.equal(evaluatePenguDualLsV2ShortSignals(expiredRows).setupActive.at(-1), false);
 
-assert.equal(targetGrossForAtr(0.005), 0.75);
-assert.equal(targetGrossForAtr(0.02), 0.75);
+assert.equal(targetGrossForAtr(0.005), 0.85);
+assert.equal(targetGrossForAtr(0.02), 0.85);
 assert.equal(targetGrossForAtr(0.05), 0.60);
 assert.equal(targetGrossForAtr(0.50), 0.60);
 assert.equal(targetGrossForAtr(0), 0);
 
-const longPosition: PenguDualLsV2Position = { side: 1, entryTs: 100 * HOUR, entryPrice: 100, quantity: 1, gross: 0.75, highWaterMark: 111 };
+const longPosition: PenguDualLsV2Position = { side: 1, entryTs: 100 * HOUR, entryPrice: 100, quantity: 1, gross: 0.85, highWaterMark: 111 };
 assert.equal(evaluatePenguDualLsV2Exit(longPosition, features({ low: 91.99 }))?.reason, "LONG_HARD_STOP");
 assert.equal(evaluatePenguDualLsV2Exit(longPosition, features({ low: 107.66 }))?.reason, "LONG_TRAILING_STOP");
 assert.equal(evaluatePenguDualLsV2Exit({ ...longPosition, highWaterMark: 100 }, features({ referenceTs: (100 + 119) * HOUR, low: 99 }))?.reason, "LONG_MAX_HOLD");
 
-const shortPosition: PenguDualLsV2Position = { side: -1, entryTs: 100 * HOUR, entryPrice: 100, quantity: 1, gross: 0.75, highWaterMark: 100, lowWaterMark: 84 };
+const shortPosition: PenguDualLsV2Position = { side: -1, entryTs: 100 * HOUR, entryPrice: 100, quantity: 1, gross: 0.85, highWaterMark: 100, lowWaterMark: 84 };
 assert.equal(evaluatePenguDualLsV2Exit(shortPosition, features({ high: 108.01 }))?.reason, "SHORT_HARD_STOP");
 assert.equal(evaluatePenguDualLsV2Exit(shortPosition, features({ high: 87.37 }))?.reason, "SHORT_TRAILING_STOP");
 assert.equal(evaluatePenguDualLsV2Exit({ ...shortPosition, lowWaterMark: 100 }, features({ referenceTs: (100 + 71) * HOUR, high: 101 }))?.reason, "SHORT_MAX_HOLD");
@@ -180,7 +180,7 @@ const v20Exit = evaluatePenguDualLsV2Exit(v20Position, features({ referenceTs: 1
 assert.equal(v20Exit?.reason, "SHORT_V20_VOL_TARGET_FAILURE_EXIT");
 assert.equal(v20Exit?.stopPrice, 98.25);
 
-const resumedSeed = createPenguShortV20State({ entryPrice: 100, requestedGross: 0.75, entryAtr24Ratio: 0.03, btcEma168Distance: 0.01, btcReturn24h: 0 });
+const resumedSeed = createPenguShortV20State({ entryPrice: 100, requestedGross: 0.85, entryAtr24Ratio: 0.03, btcEma168Distance: 0.01, btcReturn24h: 0 });
 const resumedFailure = advancePenguShortV20(
     { entryPrice: 100, entryTs: 100 * HOUR, shortV20: resumedSeed },
     features({ referenceTs: 101 * HOUR, low: 97, close: 99, high: 100, btcReturn24h: 0 }),

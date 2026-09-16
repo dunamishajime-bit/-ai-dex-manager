@@ -30,10 +30,16 @@ async function main() {
   assert.equal(artifact.logic.v12.scoreThreshold, V12_X1_ALL.neutralScoreThreshold);
   assert.equal(artifact.logic.pengu.normalCooldownHours, PENGU_DUAL_LS_V2.cooldownHours);
   assert.equal(artifact.logic.pengu.hardStopCooldownHours, PENGU_DUAL_LS_V2.hardStopCooldownHours);
-  assert.equal(artifact.logic.quality102CausalV1.maximumGross, QUALITY102_CAUSAL_V1.maximumGross);
-  assert.equal(artifact.logic.quality102CausalV1.maximumPositions, QUALITY102_CAUSAL_V1.maximumPositions);
-  assert.equal(artifact.logic.portfolio.cryptoGrossCap, STRICT_BT33404708902.cryptoGrossCap);
-  assert.equal(artifact.logic.portfolio.totalGrossCap, STRICT_BT33404708902.totalGrossCap);
+  // This artifact is historical evidence for the prior Q102 1.0x/2.0x/2.5x
+  // target. Preserve it unchanged and verify its identity explicitly; the
+  // current integrated contract is asserted by the production contract tests.
+  assert.equal(artifact.logic.quality102CausalV1.maximumGross, 1);
+  assert.equal(artifact.logic.quality102CausalV1.maximumPositions, 1);
+  assert.equal(artifact.logic.portfolio.cryptoGrossCap, 2);
+  assert.equal(artifact.logic.portfolio.totalGrossCap, 2.5);
+  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 1.5);
+  assert.equal(STRICT_BT33404708902.cryptoGrossCap, 3);
+  assert.equal(STRICT_BT33404708902.totalGrossCap, 3.5);
 
   assert.ok(Math.abs(artifact.results.NORMAL.endingAssetJpy - 18442769.03585051) < 1e-6);
   assert.ok(Math.abs(artifact.results.NORMAL.PF - 3.57064393) < 1e-8);

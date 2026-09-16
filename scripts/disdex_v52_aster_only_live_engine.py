@@ -124,13 +124,13 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
 
 def self_test() -> None:
     strict_planner_self_test()
-    assert STRICT_CAPS.crypto_gross == 2.0
+    assert STRICT_CAPS.crypto_gross == 3.0
     assert STRICT_CAPS.stock_gross == 1.5
-    assert STRICT_CAPS.total_gross == 2.5
+    assert STRICT_CAPS.total_gross == 3.5
     engine = object.__new__(V52AsterOnlyEngine)
-    engine.crypto_gross_cap = 2.0
+    engine.crypto_gross_cap = 3.0
     engine.stock_gross_cap = 1.5
-    engine.portfolio_gross_cap = 2.5
+    engine.portfolio_gross_cap = 3.5
     engine.v11_gross_cap = 1.0
     engine.v50_gross_cap = 1.0
     engine.gross_tolerance = 1e-6
@@ -147,7 +147,7 @@ def self_test() -> None:
         "totalGross": 1.75,
     }
     gross, snapshot = engine.available_slot_gross(V11_SLOT)
-    assert abs(gross - 0.75) < EPSILON
+    assert abs(gross - 1.0) < EPSILON
     assert snapshot["strictPortfolioPlan"]["strictPortfolioPlannerActive"] is True
     assert transient_reference_error("iex_quote_stale META")
     assert not transient_reference_error("Managed Stock position reconciliation mismatch")

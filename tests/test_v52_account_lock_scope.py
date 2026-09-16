@@ -36,9 +36,9 @@ def test_v52_releases_shared_lock_before_daemon_sleep() -> None:
     engine._upstream_fail_closed_hold = False
     engine.stop_requested = False
     engine.live = False
-    engine.crypto_gross_cap = 2.0
+    engine.crypto_gross_cap = 3.0
     engine.stock_gross_cap = 1.5
-    engine.portfolio_gross_cap = 2.5
+    engine.portfolio_gross_cap = 3.5
     engine.v11_gross_cap = 1.5
     engine.v50_gross_cap = 1.0
     engine.log = lambda *_args, **_kwargs: None

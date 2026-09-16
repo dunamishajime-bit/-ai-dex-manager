@@ -29,13 +29,13 @@ class Q102OnePointZeroImplementationContractTest(unittest.TestCase):
         self.assertEqual(candidate["evidence"], "research/q102_1p0_1slot_lump100k_1y_20260911.json")
         self.assertFalse(contract["liveAdoption"]["enabled"])
 
-    def test_causal_live_runtime_is_one_point_zero_without_changing_historical_cap(self):
+    def test_causal_live_runtime_is_one_point_five_without_changing_historical_fixtures(self):
         planner = PY_PLANNER.read_text(encoding="utf-8")
         env_example = ENV_EXAMPLE.read_text(encoding="utf-8")
         self.assertIn("quality102_gross: float = 0.50", planner)
-        self.assertIn("quality102_causal_v1_gross: float = 1.00", planner)
+        self.assertIn("quality102_causal_v1_gross: float = 1.50", planner)
         self.assertIn("STRICT_CAPS.quality102_causal_v1_gross", planner)
-        self.assertIn("QUALITY102_CAUSAL_V1_MAX_GROSS=1.00", env_example)
+        self.assertIn("QUALITY102_CAUSAL_V1_MAX_GROSS=1.50", env_example)
 
 if __name__ == "__main__":
     unittest.main()

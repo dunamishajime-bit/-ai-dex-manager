@@ -47,9 +47,9 @@ disdex_apply_v96_v52_fixed_live_policy() {
   export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
   export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py
 
-  export DISDEX_V52_CRYPTO_GROSS_CAP=1.5
+  export DISDEX_V52_CRYPTO_GROSS_CAP=3.0
   export DISDEX_V52_STOCK_GROSS_CAP=1.5
-  export DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5
+  export DISDEX_V52_PORTFOLIO_GROSS_CAP=3.5
   export DISDEX_V52_V11_GROSS_CAP=1
   export DISDEX_V52_V50_GROSS_CAP=1
   export DISDEX_V52_RESERVED_FIRST_STOCK_GROSS=1
@@ -65,7 +65,7 @@ disdex_apply_v96_v52_fixed_live_policy() {
   export PENGU_DUAL_LS_V2_ENABLED=true
   export PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=true
   export PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=true
-  export PENGU_DUAL_LS_V2_MAX_GROSS=0.75
+  export PENGU_DUAL_LS_V2_MAX_GROSS=0.85
   export PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5
   export PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5
 }
@@ -103,9 +103,9 @@ disdex_assert_v96_v52_fixed_live_policy() {
     printf 'fixed policy mismatch: DISDEX_V96_V52_MARGIN_GUARD_SCRIPT\n' >&2
     return 1
   }
-  [[ "${DISDEX_V52_CRYPTO_GROSS_CAP:-}" == "1.5" ]] || return 1
+  [[ "${DISDEX_V52_CRYPTO_GROSS_CAP:-}" == "3.0" ]] || return 1
   [[ "${DISDEX_V52_STOCK_GROSS_CAP:-}" == "1.5" ]] || return 1
-  [[ "${DISDEX_V52_PORTFOLIO_GROSS_CAP:-}" == "2.5" ]] || return 1
+  [[ "${DISDEX_V52_PORTFOLIO_GROSS_CAP:-}" == "3.5" ]] || return 1
   [[ "${DISDEX_V52_RESERVED_FIRST_STOCK_GROSS:-}" == "1" ]] || return 1
   [[ "${DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS:-}" == "0.25" ]] || return 1
   [[ "${DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS:-}" == "2" ]] || return 1
@@ -119,7 +119,7 @@ disdex_assert_v96_v52_fixed_live_policy() {
   [[ "${PENGU_DUAL_LS_V2_ENABLED:-}" == "true" ]] || return 1
   [[ "${PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED:-}" == "true" ]] || return 1
   [[ "${PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED:-}" == "true" ]] || return 1
-  [[ "${PENGU_DUAL_LS_V2_MAX_GROSS:-}" == "0.75" ]] || return 1
+  [[ "${PENGU_DUAL_LS_V2_MAX_GROSS:-}" == "0.85" ]] || return 1
   [[ "${PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP:-}" == "1.5" ]] || return 1
   [[ "${PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT:-}" == "7.5" ]] || return 1
 }

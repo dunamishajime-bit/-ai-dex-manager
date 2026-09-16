@@ -82,7 +82,7 @@ async function main() {
     const oneGrossStore = new MemoryQuality102CausalV1StateStore(oneGrossState, "LIVE", RUNTIME_SHA);
     assert.equal((await oneGrossStore.load()).pending?.targetGross, 1);
     const overGrossState = pendingState("planned");
-    overGrossState.pending = { ...overGrossState.pending!, targetGross: 1.01 };
+    overGrossState.pending = { ...overGrossState.pending!, targetGross: 1.51 };
     const overGrossStore = new MemoryQuality102CausalV1StateStore(overGrossState, "LIVE", RUNTIME_SHA);
     await assert.rejects(() => overGrossStore.load(), /QUALITY102_STATE_MALFORMED.*pending.targetGross/);
 

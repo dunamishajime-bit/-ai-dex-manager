@@ -247,7 +247,7 @@ test("strategy Gross contracts remain unchanged while venue leverage is 5x", asy
     assert.equal(V12_X1_ALL.leverage, 1);
     assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
     assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
-    assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 1);
-    assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 2);
-    assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 2.5);
+    assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 1.5);
+    assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
+    assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 3.5);
 });

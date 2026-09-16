@@ -18,7 +18,7 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("Environment=V12_LIVE_ACK=${DEPLOYED_SHA}", source)
         self.assertIn("Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true", source)
         self.assertIn("ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon", source)
-        self.assertIn("Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=1.0", source)
+        self.assertIn("Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=1.5", source)
         self.assertIn("Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", source)
         self.assertIn('RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"', source)
         self.assertIn('CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"', source)

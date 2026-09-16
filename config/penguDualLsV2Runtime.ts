@@ -1,4 +1,5 @@
 import { resolveSharedCryptoDailyLossPct } from "./sharedCryptoRiskPolicy";
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "./integratedProductionRiskPolicy";
 
 export type PenguDualLsV2Mode = "SHADOW" | "PAPER" | "LIVE";
 
@@ -6,9 +7,9 @@ export const PENGU_DUAL_LS_V2 = {
     id: "PENGU_DUAL_LS_V2_FINAL",
     symbol: "PENGUUSDT",
     decisionIntervalHours: 1,
-    longGross: 0.75,
-    shortGross: 0.75,
-    maximumGross: 0.75,
+    longGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
+    shortGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
+    maximumGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
     portfolioGrossCap: 1.5,
     short: {
         regimeReturn72hMaximum: 0,
@@ -46,9 +47,9 @@ export const PENGU_DUAL_LS_V2 = {
     },
     sizing: {
         targetVolatility: 0.02,
-        grossMultiplier: 0.75,
+        grossMultiplier: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
         grossFloor: 0.60,
-        grossCap: 0.75,
+        grossCap: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
     },
     cooldownHours: 6,
     hardStopCooldownHours: 24,

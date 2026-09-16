@@ -1,0 +1,15 @@
+{
+  "policyId": "V50_B60_C20_STOP1.75_EDGE7.5_COST60_SPREAD20",
+  "strategy": "V50_POST_OPEN_BASIS",
+  "windowPolicy": "POST_EARLY3",
+  "windowsNy": ["11:30", "12:30", "13:30"],
+  "direction": "BOTH",
+  "minimumEntryBasisBps": 60,
+  "convergenceBps": 20,
+  "basisStopMultiple": 1.75,
+  "minimumNetEdgeBps": 7.5,
+  "maximumRoundTripCostBps": 60,
+  "maximumSpreadBps": 20,
+  "maximumHoldingHours": 3,
+  "slotGross": 1
+}

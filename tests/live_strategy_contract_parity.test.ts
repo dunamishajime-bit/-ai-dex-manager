@@ -6,6 +6,7 @@ import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 import { PENGU_DUAL_LS_V2 } from "@/config/penguDualLsV2Runtime";
 import { PENGU_RECOVERY_V8, PENGU_RECOVERY_V8_PROMOTION } from "@/config/penguRecoveryV8";
 import { QUALITY102_CAUSAL_V1 } from "@/config/disdexQuality102CausalV1Runtime";
+import v52V50Runtime from "@/config/v52V50Runtime.json";
 
 test("current LIVE target preserves the validated V12 signal contract with intentional Top2 sizing", () => {
   assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
@@ -33,17 +34,20 @@ test("PENGU V20/V8 implementation target has Recovery V8 live-enabled as supplem
   assert.equal(PENGU_DUAL_LS_V2.hardStopCooldownHours, 24);
 });
 
-test("Q102 remains one-slot 1.0x under the shared 2.0x/2.5x contract", () => {
-  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 1);
+test("Q102 remains one-slot 1.50x under the shared 3.0x/3.5x contract", () => {
+  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 1.5);
   assert.equal(QUALITY102_CAUSAL_V1.maximumPositions, 1);
-  assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 2);
-  assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 2.5);
+  assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
+  assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 3.5);
 });
 
 test("V52 preserves the canonical V50 signal thresholds and holding window", async () => {
   const source = await readFile("scripts/disdex_v52_aster_only_legacy_engine.py", "utf8");
-  assert.match(source, /V50_WINDOWS = \("11:30", "12:30", "13:30"\)/);
-  assert.match(source, /V50_MIN_ENTRY_BASIS_BPS = 75\.0/);
-  assert.match(source, /V50_MIN_NET_EDGE_BPS = 10\.0/);
-  assert.match(source, /V50_MAX_HOLDING_HOURS = 3/);
+  assert.deepEqual(v52V50Runtime.windowsNy, ["11:30", "12:30", "13:30"]);
+  assert.equal(v52V50Runtime.minimumEntryBasisBps, 60);
+  assert.equal(v52V50Runtime.convergenceBps, 20);
+  assert.equal(v52V50Runtime.basisStopMultiple, 1.75);
+  assert.equal(v52V50Runtime.minimumNetEdgeBps, 7.5);
+  assert.equal(v52V50Runtime.maximumHoldingHours, 3);
+  assert.match(source, /V50_POLICY_ID/);
 });

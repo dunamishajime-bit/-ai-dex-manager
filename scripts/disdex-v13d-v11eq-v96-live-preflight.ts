@@ -39,7 +39,10 @@ async function main() {
         DISDEX_V52_ASTER_ONLY_RUNNER_MODE: "live",
         DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stock,
         DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.kill,
-        DISDEX_V52_CRYPTO_GROSS_CAP: String(allocation.cryptoSleeveGrossCap),
+        // V52 participates in the integrated shared Crypto sleeve. The
+        // separately capped legacy V96 runner keeps DISDEX_V96_MAX_GROSS
+        // below, but must not reduce the shared V52 capacity gate.
+        DISDEX_V52_CRYPTO_GROSS_CAP: String(allocation.sharedCryptoGrossCap),
         DISDEX_V52_STOCK_GROSS_CAP: String(allocation.stockSleeveGrossCap),
         DISDEX_V52_PORTFOLIO_GROSS_CAP: String(allocation.portfolioGrossCap),
         DISDEX_V52_V11_GROSS_CAP: String(allocation.v11MaximumGross),
@@ -66,7 +69,8 @@ async function main() {
         stockPreflight: "PASS_V52_MARGIN_AWARE_DUAL_SLOT_ASTER_ONLY_PYTH_IEX_VALIDATED",
         cryptoV96Preflight: "PASS_VERIFIED_COMBINED_MIGRATION_FIXED_5X_CROSS",
         ordersSent: false,
-        cryptoGrossCap: allocation.cryptoSleeveGrossCap,
+        cryptoGrossCap: allocation.sharedCryptoGrossCap,
+        legacyV96CryptoGrossCap: allocation.cryptoSleeveGrossCap,
         stockGrossCap: allocation.stockSleeveGrossCap,
         v11MaximumGross: allocation.v11MaximumGross,
         v50MaximumGross: allocation.v50MaximumGross,
