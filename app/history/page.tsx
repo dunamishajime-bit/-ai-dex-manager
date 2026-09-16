@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Card } from "@/components/ui/Card";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
-import { formatTradeHistoryAttributionLabel } from "@/lib/trade-history-attribution";
+import { formatTradeHistoryAttributionLabel, getTradeHistoryAttributionTone } from "@/lib/trade-history-attribution";
 
 type TradeHistoryEntry = {
   id: string;
@@ -71,17 +71,42 @@ function hasExplorerTx(entry: Pick<TradeHistoryEntry, "provider" | "txHash">) {
 }
 
 function attributionClass(entry: TradeHistoryEntry) {
-  switch (entry.attribution?.classification) {
-    case "logic":
+  switch (getTradeHistoryAttributionTone(entry.attribution)) {
+    case "v12":
       return "border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
-    case "alternate-route":
-      return "border-sky-400/30 bg-sky-500/10 text-sky-200";
+    case "q102":
+      return "border-violet-400/35 bg-violet-500/10 text-violet-200";
+    case "pengu":
+      return "border-cyan-400/35 bg-cyan-500/10 text-cyan-200";
+    case "recovery-v8":
+      return "border-orange-400/35 bg-orange-500/10 text-orange-200";
+    case "v64-dynamic":
+      return "border-fuchsia-400/35 bg-fuchsia-500/10 text-fuchsia-200";
+    case "short-v20":
+      return "border-rose-400/35 bg-rose-500/10 text-rose-200";
+    case "v52":
+      return "border-sky-400/35 bg-sky-500/10 text-sky-200";
     case "test-order":
       return "border-amber-400/30 bg-amber-500/10 text-amber-200";
+    case "alternate-route":
+      return "border-indigo-400/35 bg-indigo-500/10 text-indigo-200";
+    case "logic":
+      return "border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
     default:
       return "border-white/15 bg-white/5 text-white/60";
   }
 }
+
+const LOGIC_COLOR_LEGEND = [
+  ["V12", "border-emerald-400/30 bg-emerald-500/10 text-emerald-200"],
+  ["Q102", "border-violet-400/35 bg-violet-500/10 text-violet-200"],
+  ["PENGU", "border-cyan-400/35 bg-cyan-500/10 text-cyan-200"],
+  ["Recovery V8", "border-orange-400/35 bg-orange-500/10 text-orange-200"],
+  ["V64 Dynamic", "border-fuchsia-400/35 bg-fuchsia-500/10 text-fuchsia-200"],
+  ["Short V20", "border-rose-400/35 bg-rose-500/10 text-rose-200"],
+  ["V52", "border-sky-400/35 bg-sky-500/10 text-sky-200"],
+  ["テスト注文", "border-amber-400/30 bg-amber-500/10 text-amber-200"],
+] as const;
 
 export default function HistoryPage() {
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
@@ -246,6 +271,13 @@ export default function HistoryPage() {
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
         Asterの約定履歴を基準に表示し、約定手数料が取得できる取引はnet PnL（手数料控除後）で統一しています。funding、未実現損益、入出金は含みません。
+      </div>
+
+      <div className="flex flex-wrap gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/70" aria-label="ロジック別カラー凡例">
+        <span className="mr-1 self-center text-white/45">ロジック別カラー</span>
+        {LOGIC_COLOR_LEGEND.map(([label, className]) => (
+          <span key={label} className={`rounded-full border px-2 py-1 font-semibold ${className}`}>{label}</span>
+        ))}
       </div>
 
       {historyNotice ? (

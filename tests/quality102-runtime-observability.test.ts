@@ -67,3 +67,38 @@ test("Quality102 observability reports the fresh derived sleeve without claiming
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("Quality102 HEALTHY safety state is accepted as a live runner state", async () => {
+  const directory = await mkdtemp(join(process.cwd(), ".tmp-q102-healthy-observability-"));
+  const statePath = join(directory, "state.json");
+  const heartbeatPath = join(directory, "heartbeat.json");
+  const now = Date.now();
+  await writeFile(statePath, JSON.stringify({ mode: "LIVE", updatedAt: now, runtimeCommitSha: "b8fd" }));
+  await writeFile(heartbeatPath, JSON.stringify({
+    mode: "LIVE",
+    safetyState: "HEALTHY",
+    heartbeatAt: now,
+    runtimeSha: "b8fd",
+    expectedSha: "b8fd",
+    quality102: { selectorMode: "CAUSAL_V4", historicalSelectorParity: false, brkLiveEnabled: true },
+  }));
+  const previous = {
+    state: process.env.QUALITY102_CAUSAL_V1_STATE_PATH,
+    heartbeat: process.env.QUALITY102_CAUSAL_V1_HEARTBEAT_PATH,
+  };
+  process.env.QUALITY102_CAUSAL_V1_STATE_PATH = statePath;
+  process.env.QUALITY102_CAUSAL_V1_HEARTBEAT_PATH = heartbeatPath;
+  try {
+    const result = await loadQuality102RuntimeObservability();
+    assert.equal(result.status, "LIVE");
+    assert.equal(result.ok, true);
+    assert.equal(result.safetyState, "HEALTHY");
+    assert.equal(result.releaseShaVerified, true);
+  } finally {
+    if (previous.state === undefined) delete process.env.QUALITY102_CAUSAL_V1_STATE_PATH;
+    else process.env.QUALITY102_CAUSAL_V1_STATE_PATH = previous.state;
+    if (previous.heartbeat === undefined) delete process.env.QUALITY102_CAUSAL_V1_HEARTBEAT_PATH;
+    else process.env.QUALITY102_CAUSAL_V1_HEARTBEAT_PATH = previous.heartbeat;
+    await rm(directory, { recursive: true, force: true });
+  }
+});

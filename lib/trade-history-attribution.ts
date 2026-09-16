@@ -18,6 +18,19 @@ export type TradeHistoryAttribution = {
   evidence: TradeHistoryAttributionEvidence;
 };
 
+export type TradeHistoryAttributionTone =
+  | "v12"
+  | "q102"
+  | "pengu"
+  | "recovery-v8"
+  | "v64-dynamic"
+  | "short-v20"
+  | "v52"
+  | "alternate-route"
+  | "test-order"
+  | "logic"
+  | "unknown";
+
 export type TradeHistoryAttributionInput = {
   source: "official-fill" | "local-ledger";
   strategyId?: string;
@@ -42,6 +55,20 @@ export function formatTradeHistoryAttributionLabel(input: {
     return `ロジック発火: ${attribution.logicLabel || input.strategyId || "特定不可"}${ranking}`;
   }
   return `${attribution.logicLabel ? `${attribution.logicLabel}（推定）` : "発火経路不明"}${ranking}`;
+}
+
+export function getTradeHistoryAttributionTone(attribution?: TradeHistoryAttribution): TradeHistoryAttributionTone {
+  if (!attribution) return "unknown";
+  if (attribution.classification === "test-order") return "test-order";
+  const labels = `${attribution.logicLabel || ""} ${attribution.routeLabel || ""}`.toUpperCase();
+  if (labels.includes("RECOVERY V8")) return "recovery-v8";
+  if (labels.includes("V64 DYNAMIC LONG")) return "v64-dynamic";
+  if (labels.includes("SHORT V20")) return "short-v20";
+  if (labels.includes("Q102") || labels.includes("QUALITY102")) return "q102";
+  if (labels.includes("PENGU")) return "pengu";
+  if (labels.includes("V52")) return "v52";
+  if (labels.includes("V12")) return "v12";
+  return attribution.classification === "alternate-route" ? "alternate-route" : attribution.classification === "logic" ? "logic" : "unknown";
 }
 
 function normalizedText(value: unknown) {

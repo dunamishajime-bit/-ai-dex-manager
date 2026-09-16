@@ -90,7 +90,7 @@ function unavailable(capturedAt: string, configured: boolean, error: string): Qu
     configured,
     status: "UNAVAILABLE",
     capturedAt,
-    selectorMode: "DERIVED_HIGH_VOL_ONLY",
+    selectorMode: config.quality102Runtime.selectorMode,
     historicalSelectorParity: false,
     brkLiveEnabled: false,
     caps: {
@@ -152,7 +152,7 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
     const runtimeSha = text(heartbeat?.runtimeSha ?? state.runtimeCommitSha);
     const expectedReleaseSha = text(heartbeat?.expectedSha) ?? config.quality102Runtime.expectedReleaseSha;
     const selector = object(heartbeat?.quality102);
-    const selectorMode = text(selector?.selectorMode) ?? "DERIVED_HIGH_VOL_ONLY";
+    const selectorMode = text(selector?.selectorMode) ?? config.quality102Runtime.selectorMode;
     const historicalSelectorParity = bool(selector?.historicalSelectorParity) ?? false;
     const brkLiveEnabled = bool(selector?.brkLiveEnabled) ?? false;
     const killSwitchPath = String(process.env.QUALITY102_CAUSAL_V1_KILL_SWITCH_FILE || "").trim();
@@ -170,13 +170,14 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
     }
 
     const ageMs = updatedAt === undefined ? undefined : Math.max(0, Date.now() - updatedAt);
+    const normalizedSafetyState = safetyState?.toUpperCase();
     const staleReason = updatedAt === undefined
       ? "Quality102 state/heartbeatに更新時刻がありません。"
       : ageMs !== undefined && ageMs > STALE_AFTER_MS
         ? `Quality102 state/heartbeatが${Math.round(ageMs / 60000)}分更新されていません。`
         : mode && mode.toUpperCase() !== "LIVE"
           ? `Quality102 runner mode=${mode}のためLIVE確認にしません。`
-          : safetyState && safetyState.toUpperCase() !== "LIVE"
+          : safetyState && normalizedSafetyState !== "LIVE" && normalizedSafetyState !== "HEALTHY"
             ? `Quality102 safetyState=${safetyState}のためLIVE確認にしません。`
             : killSwitchActive
               ? `Quality102 Kill Switchが有効です。${killSwitchReason || ""}`.trim()
