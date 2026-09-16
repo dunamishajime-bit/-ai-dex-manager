@@ -11,7 +11,7 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     quality102: "10e18fea89b2aa889b9ce3d6a2603c43ac9e7715",
   },
   v12DailyLossPct: 5,
-  sharedCryptoDailyLossPct: 5,
+  sharedCryptoDailyLossPct: 7.5,
   v52DailyLossPct: 3.5,
   /** Gross values are policy caps; V12's requested size remains risk/ATR-driven. */
   maximumGross: 2.5,

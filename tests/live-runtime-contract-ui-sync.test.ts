@@ -27,6 +27,14 @@ test("current HP strategy copy matches the deployed LIVE contract", () => {
   assert.equal(/Q102\s+0\.50x/i.test(combined), false, "current LIVE surfaces must not advertise Q102 0.50x");
 });
 
+test("HP exposes the formal shared crypto daily-loss contract", () => {
+  const config = read("lib/disterminal-live-config.ts");
+  const combined = [config, read("app/page.tsx"), read("components/layout/LiveProductionBanner.tsx")].join("\n");
+  assert.match(config, /sharedCryptoDailyLossPct:\s*7\.5/);
+  assert.doesNotMatch(config, /sharedCryptoDailyLossPct:\s*5(?:\.0)?\b/);
+  assert.match(combined, /共有日次損失上限/);
+});
+
 test("historical frozen Q102 remains separate from LIVE Q102", () => {
   const config = read("lib/disterminal-live-config.ts");
   assert.match(config, /strictBt33404708902:[\s\S]*quality102PositionCap:\s*0\.5/);
