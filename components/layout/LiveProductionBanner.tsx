@@ -14,12 +14,11 @@ function BannerContent() {
       <span>V12+PENGU共有損失上限 {config.sharedCryptoDailyLossPct}%</span>
       <span>V52損失上限 {config.v52DailyLossPct}%</span>
       <span>Portfolio Gross上限 {config.maximumGross.toFixed(1)}x</span>
-      <span>V12 {config.v12SizingMode} / PENGU上限 {config.penguGross.toFixed(2)}x / Crypto共有 {config.sharedCryptoGross.toFixed(1)}x</span>
-      <span>PENGU Recovery V8 {config.penguRecoveryV8.entryRule} / {config.penguRecoveryV8.recoveryGross.toFixed(2)}x / {config.penguRecoveryV8.partialAfterHours}h後partial {config.penguRecoveryV8.partialGross.toFixed(2)}x</span>
+      <span>V12 Top2 / 1件{config.v12PerPositionGross.toFixed(2)}x / aggregate {config.v12Gross.toFixed(2)}x / PENGU上限 {config.penguGross.toFixed(2)}x / Crypto共有 {config.sharedCryptoGross.toFixed(2)}x</span>
+      <span>PENGU Short V20 / Recovery V8 {config.penguRecoveryV8.entryRule} / hard-stop後{config.penguHardStopCooldownHours}h cooldown / {config.penguRecoveryV8.recoveryGross.toFixed(2)}x</span>
       <span>V52 Top2 Rank1 {config.v52Top2Policy.rank1RequestedGross.toFixed(2)}x / Rank2 {config.v52Top2Policy.rank2RequestedGross.toFixed(2)}x / 最大{config.v52Top2Policy.maxConcurrentPositions}建玉</span>
-      <span>V52 Gate basis≥{config.v52Top2Policy.minEntryBasisBps}bps / net edge≥{config.v52Top2Policy.minNetEdgeBps}bps / 各{config.v52Top2Policy.entryWindowSeconds}秒</span>
-      <span className="text-amber-200">Quality102 LIVE derived HIGH_VOL: ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x</span>
-      <span className="text-amber-200">歴史的102件selector / BRK raw式: parity未証明のため該当部分のみFAIL CLOSED</span>
+      <span>V52 V11 unchanged / V50 Basis≥{config.v52Top2Policy.minEntryBasisBps}bps / Conv {config.v52Top2Policy.convergenceBps}bps / Stop {config.v52Top2Policy.basisStopMultiple}x / Edge≥{config.v52Top2Policy.minNetEdgeBps}bps / Cost≤{config.v52Top2Policy.maximumRoundTripCostBps}bps / Spread≤{config.v52Top2Policy.maximumSpreadBps}bps</span>
+      <span className="text-amber-200">Q102 Causal V4: 1 Slot / ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x</span>
       <LiveRuntimeBadge />
       <span className="inline-flex items-center gap-1 text-emerald-200">
         <ShieldCheck className="h-3.5 w-3.5" />

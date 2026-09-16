@@ -32,6 +32,25 @@ export type V52Top2DecisionRow = {
   attemptIndex?: number;
 };
 
+export type V52CostDecision = {
+  timestamp?: number;
+  nyDay?: string;
+  strategy?: string;
+  symbol?: string;
+  window?: string;
+  direction?: string;
+  signalBasisBps?: number;
+  currentBasisBps?: number;
+  estimatedRoundTripCostBps?: number;
+  spreadBps?: number;
+  vwapSlippageBps?: number;
+  calculatedNetEdgeBps?: number;
+  accepted?: boolean;
+  rejectionReasons?: string[];
+  grossRequested?: number;
+  grossAccepted?: number;
+};
+
 export type V52Top2Window = {
   window: string;
   decisionWindowEntered: boolean;
@@ -59,6 +78,20 @@ export type V52Top2Observability = {
   killSwitchReason?: string;
   activeV50Slots: number;
   v50DailyEntries: number;
+  currentNyDay: string;
+  diagnosticsNyDay?: string;
+  dailyDiagnosticsFresh: boolean;
+  telemetryState: "CURRENT_DAY" | "STALE" | "MISSING";
+  thresholds: {
+    basisBps: number;
+    convergenceBps: number;
+    stopMultiple: number;
+    netEdgeBps: number;
+    maxCostBps: number;
+    maxSpreadBps: number;
+  };
+  lastDecision?: V52CostDecision;
+  rejectionCounters: Record<string, number>;
   positions: Array<{ slot: string; symbol?: string; side?: string; gross?: number }>;
   windows: V52Top2Window[];
   errors: string[];
@@ -80,6 +113,52 @@ function text(value: unknown): string | undefined {
 function bool(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
+
+function nyDay(value = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(value);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value || "00";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function costDecision(value: unknown): V52CostDecision | undefined {
+  const source = object(value);
+  if (!source) return undefined;
+  const reasons = Array.isArray(source.rejectionReasons)
+    ? source.rejectionReasons.map((item) => text(item)).filter((item): item is string => Boolean(item))
+    : undefined;
+  return {
+    timestamp: finite(source.timestamp),
+    nyDay: text(source.nyDay),
+    strategy: text(source.strategy),
+    symbol: text(source.symbol),
+    window: text(source.window),
+    direction: text(source.direction),
+    signalBasisBps: finite(source.signalBasisBps),
+    currentBasisBps: finite(source.currentBasisBps),
+    estimatedRoundTripCostBps: finite(source.estimatedRoundTripCostBps),
+    spreadBps: finite(source.spreadBps),
+    vwapSlippageBps: finite(source.VWAPSlippageBps ?? source.vwapSlippageBps),
+    calculatedNetEdgeBps: finite(source.calculatedNetEdgeBps ?? source.estimatedNetEdgeBps),
+    accepted: bool(source.accepted),
+    rejectionReasons: reasons,
+    grossRequested: finite(source.grossRequested),
+    grossAccepted: finite(source.grossAccepted),
+  };
+}
+
+const thresholds = {
+  basisBps: config.v52Top2Policy.minEntryBasisBps,
+  convergenceBps: config.v52Top2Policy.convergenceBps,
+  stopMultiple: config.v52Top2Policy.basisStopMultiple,
+  netEdgeBps: config.v52Top2Policy.minNetEdgeBps,
+  maxCostBps: config.v52Top2Policy.maximumRoundTripCostBps,
+  maxSpreadBps: config.v52Top2Policy.maximumSpreadBps,
+};
 
 async function readReferenceHealth() {
   const configuredUrl = String(process.env.V52_REFERENCE_HEALTH_URL || "").trim();
@@ -157,6 +236,11 @@ function unavailable(capturedAt: string, configured: boolean, error: string): V5
     killSwitchActive: false,
     activeV50Slots: 0,
     v50DailyEntries: 0,
+    currentNyDay: nyDay(),
+    dailyDiagnosticsFresh: false,
+    telemetryState: "MISSING",
+    thresholds,
+    rejectionCounters: {},
     positions: [],
     windows: config.v52Top2Policy.windowsNy.map((window) => windowSnapshot(window, null)),
     errors: [error],
@@ -185,8 +269,29 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       return { slot, symbol: text(position.symbol), side: text(position.side), gross: finite(position.gross) };
     }).filter((position) => position.slot.startsWith("V50") || position.slot === "V11_EQ");
     const windows = config.v52Top2Policy.windowsNy.map((window) => windowSnapshot(window, object(state.v52Top2Telemetry)?.[window]));
+    const currentNyDay = nyDay();
+    const diagnostics = object(state.v52GateDiagnostics);
+    const telemetry = object(state.v50Top2Telemetry);
+    const diagnosticsNyDay = text(diagnostics?.nyDay ?? telemetry?.nyDay ?? state.nyDay);
+    const stateNyDay = text(state.nyDay);
+    const entriesNyDay = text(state.v50DailyEntriesDay);
+    const signalNyDay = text(state.v50SignalSnapshotDay);
+    const dailyDiagnosticsFresh = diagnosticsNyDay === currentNyDay
+      && (!stateNyDay || stateNyDay === currentNyDay)
+      && (!entriesNyDay || entriesNyDay === currentNyDay)
+      && (!signalNyDay || signalNyDay === currentNyDay);
+    const lastDecision = costDecision(diagnostics?.lastDecision ?? telemetry?.lastDecision);
+    const rejectionCounters = Object.fromEntries(Object.entries(object(diagnostics?.rejectionCounters ?? telemetry?.rejectionCounters) || {}).flatMap(([key, value]) => {
+      const parsed = finite(value);
+      return parsed === undefined ? [] : [[key, parsed]];
+    }));
+    const telemetryState: V52Top2Observability["telemetryState"] = !dailyDiagnosticsFresh
+      ? "STALE"
+      : lastDecision || windows.some((window) => window.candidates.length || window.entries.length || window.rejections.length)
+        ? "CURRENT_DAY"
+        : "MISSING";
     const referenceHealth = await readReferenceHealth();
-    const baseLive = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive;
+    const baseLive = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive && dailyDiagnosticsFresh;
     const status = baseLive && (referenceHealth?.ready ?? true) ? "LIVE" : "STALE";
     const stateReferenceOrdersAllowed = bool(state.referenceOrdersAllowed);
     const referenceOrdersAllowed = stateReferenceOrdersAllowed === true && (referenceHealth?.ready ?? true);
@@ -194,6 +299,8 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       ? "V52共有Kill Switchが有効です。"
       : referenceHealth && !referenceHealth.ready
         ? "V52発注Gate停止：" + referenceHealth.reason
+      : !dailyDiagnosticsFresh
+        ? `V52 daily diagnosticsが古い日付です（diagnostics=${diagnosticsNyDay || "未取得"} / current=${currentNyDay}）。`
       : updatedAt === undefined
         ? "V52 runner stateに更新時刻がありません。"
         : ageMs !== undefined && ageMs > STALE_AFTER_MS
@@ -216,6 +323,13 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       killSwitchReason: text(killSwitch?.reason ?? state.killSwitchReason),
       activeV50Slots: positions.filter((position) => position.slot.startsWith("V50")).length,
       v50DailyEntries: finite(state.v50DailyEntries) || 0,
+      currentNyDay,
+      diagnosticsNyDay,
+      dailyDiagnosticsFresh,
+      telemetryState,
+      thresholds,
+      lastDecision,
+      rejectionCounters,
       positions,
       windows,
       errors: [],

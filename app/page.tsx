@@ -45,7 +45,7 @@ function V52Top2Summary() {
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">Top2配分</div><div className="mt-1 text-sm font-bold text-white">Rank1 {policy.rank1RequestedGross.toFixed(2)}x / Rank2 {policy.rank2RequestedGross.toFixed(2)}x</div></div>
         <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">容量上限</div><div className="mt-1 text-sm font-bold text-white">最大{policy.maxConcurrentPositions}建玉 / 日次{policy.maxDailyEntries}件</div></div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">発火Gate</div><div className="mt-1 text-sm font-bold text-white">basis ≥ {policy.minEntryBasisBps}bps / net edge ≥ {policy.minNetEdgeBps}bps</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">発火Gate</div><div className="mt-1 text-sm font-bold text-white">B{policy.minEntryBasisBps} / C{policy.convergenceBps} / Stop{policy.basisStopMultiple}x / Edge≥{policy.minNetEdgeBps} / Cost≤{policy.maximumRoundTripCostBps}</div></div>
         <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">判定窓</div><div className="mt-1 text-sm font-bold text-white">NY {policy.windowsNy.join(" / ")}（各{policy.entryWindowSeconds}秒）</div></div>
       </div>
       <p className="mt-3 text-[11px] leading-5 text-white/58">一時的なデータ品質・板・spread拒否は窓内retry、basis/net edge不足やSIGN_CHANGED等は最終拒否。注文・取消・決済はHPから実行しません。</p>
@@ -71,7 +71,7 @@ export default function HomePage() {
           <div className="panel-gold rounded-[30px] p-5 md:p-7">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
             <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{config.strategyLabel}</h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL、PENGU V2 / Recovery V8、V52 Stock、Quality102 derived HIGH_VOLを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL Top2、PENGU V2 / Short V20 / Recovery V8、Q102 Causal V4、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
               <span className={`rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 X1.00 ALL</span>
@@ -81,7 +81,7 @@ export default function HomePage() {
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Portfolio Gross上限 ≤ {config.maximumGross.toFixed(1)}x</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 {config.v12SizingMode}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 Stock {config.v52StockGross.toFixed(1)}x / 最大{config.v52MaxConcurrentPositions}建玉</span>
-              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">Quality102 derived HIGH_VOL: LIVE接続 / 上限 {config.quality102Runtime.strategyGrossCap.toFixed(2)}x</span>
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">Q102 Causal V4: 1 Slot / {config.quality102Runtime.strategyGrossCap.toFixed(2)}x</span>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -97,8 +97,8 @@ export default function HomePage() {
         </section>
         <V52Top2Summary />
         <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
-          <div className="font-bold">Quality102 derived HIGH_VOL の公開状態</div>
-          <p className="mt-1 text-[12px] text-amber-100/80">Quality102はLIVE時点の利用可能データだけを使う独立1-slot補完スリーブとして接続しています。歴史的102件selector parity未証明部分とBRK strength式は推測実装せず該当経路のみFAIL CLOSEDです。</p>
+          <div className="font-bold">Q102 Causal V4 の公開状態</div>
+          <p className="mt-1 text-[12px] text-amber-100/80">Q102は固定CSV playback/replayではなく、Causal V4 generator / selector / planner / reconciliation / live adapterの実stateを読み取る1-slot補完スリーブです。</p>
           <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x / symbols {config.quality102Runtime.symbols.join(", ")}</p>
         </section>
         <section className="panel-gold rounded-[30px] p-4 md:p-5">

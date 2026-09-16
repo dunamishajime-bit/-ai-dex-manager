@@ -95,7 +95,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         venue: "Aster Futures V3",
         timeframe: "完成済み1時間足 → 2時間足",
         entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。合計1.50x / 1件1.00x",
-        protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch。Crypto共有2.00x / Total2.50x",
+        protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch。Crypto共有3.00x / Total3.50x / Aster 5x Cross",
         note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
         reason: "V12 runner stateの実読取結果を待機中です。",
       },
@@ -106,21 +106,21 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.pengu,
         venue: "Aster PENGUUSDT",
         timeframe: "完成済みPENGU/BTC 1時間足",
-        entryPolicy: "Long/Short条件成立後、次の1時間足。Long最大0.9375x（base0.75×1.25）、Short最大0.75x、保有中の追加・反転なし",
-        protection: "Long/Short hard stop・trailing・max hold。新規ShortのみV20 failure/deadline exit。Crypto Gross上限2.00x / Global Gross上限2.50x",
+        entryPolicy: "Long/Short条件成立後、次の1時間足。allocation最大0.85x、Short V20、Recovery V8補助Long、保有中の追加・反転なし。hard-stop後24h cooldown",
+        protection: "Long/Short hard stop・trailing・max hold。新規ShortのみV20 failure/deadline exit。Crypto Gross上限3.00x / Global Gross上限3.50x",
         note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
         reason: "PENGU runner stateの実読取結果を待機中です。",
       },
       {
         id: "QUALITY102_CAUSAL_V1",
-        label: "Quality102 derived high-vol sleeve",
+        label: "Q102 Causal V4",
         status: "UNCONFIRMED",
         releaseSha: config.vpsObservedReleases.quality102,
         venue: "Aster Futures crypto sleeve",
         timeframe: "LIVE時点の利用可能データのみ",
-        entryPolicy: "Derived HIGH_VOL selector。1 slot / 最大0.50x。V12・PENGU・V52を優先し、残余Crypto/Total Grossだけを使用",
-        protection: "Crypto Gross最大2.00x / Total Gross最大2.50x、shared risk、Kill Switch、reconciliation、stale-data Fail Closed",
-        note: "歴史的102件selector parity未証明部分とBRKはLIVEに流用せずFail Closed。derived sleeveの実state/heartbeatだけを表示します。",
+        entryPolicy: "CAUSAL_V4 selector。1 slot / 最大1.50x。V12・PENGU・V52を優先し、残余Crypto/Total Grossだけを使用",
+        protection: "Crypto Gross最大3.00x / Total Gross最大3.50x、shared risk、Kill Switch、reconciliation、stale-data Fail Closed。Aster 5x Cross",
+        note: "固定CSV playback/replayは使用せず、Causal V4 generator/selector/planner/live adapterの実stateだけを表示します。",
         reason: "Quality102 runner state/heartbeatの実読取結果を待機中です。",
       },
       {
@@ -130,8 +130,8 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.v52,
         venue: "Aster-only stock sleeves",
         timeframe: "米国株時間・V11_EQ / V50 window",
-        entryPolicy: "固定snapshotのV50候補をRank1通常=1.00x（basis≥65/net≥5）、強=1.25x（100/15）、Rank2=0.25x（85/10）で最大2建玉。各20秒窓（11:30/12:30/13:30 NY）",
-        protection: "V50 max hold4h・basis stop1.75x・adverse10bps、V11 tiers 0.75/1.00/1.25/1.50、日次損失・建玉照合・共有Kill Switch。Stock1.50x / Crypto2.00x / Global2.50x",
+        entryPolicy: "V11 unchanged。V50候補をRank1=1.00x / Rank2=0.25xで最大2建玉。Basis≥60bps / Convergence20bps / Net Edge≥7.5bps。各20秒窓（11:30/12:30/13:30 NY）",
+        protection: "V50 max hold3h・basis stop1.75x・Max Cost60bps・Spread20bps、V11 tiers 0.75/1.00/1.25/1.50、日次損失・建玉照合・共有Kill Switch。Stock1.50x / Crypto3.00x / Global3.50x",
         note: "VPS stateを実読取できた場合のみLIVE表示。一時的なデータ品質・板・spread拒否だけ窓内retryし、最終拒否はFail Closedです。",
         reason: "V52 runner stateの実読取結果を待機中です。",
       },
@@ -186,7 +186,7 @@ function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionSta
 
 function rejectionSummary(state: JsonObject): string {
   const diagnostics = object(state.v52GateDiagnostics);
-  const rejections = object(diagnostics?.rejections);
+  const rejections = object(diagnostics?.rejectionCounters);
   if (!rejections) return "直近の拒否理由は未取得です。";
   const summary = Object.entries(rejections)
     .map(([reason, count]) => `${reason}=${Number(count) || 0}`)
@@ -202,8 +202,22 @@ function v52ItemsFromState(state: JsonObject, checkedAt: string): DecisionStatus
     .map((window) => object(telemetry?.[window]))
     .filter((item): item is JsonObject => Boolean(item));
   const candidates = windows.flatMap((window) => Array.isArray(window.candidates) ? window.candidates.map(object).filter((item): item is JsonObject => Boolean(item)) : []);
+  const dayParts = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+  const currentNyDay = `${dayParts.find((part) => part.type === "year")?.value}-${dayParts.find((part) => part.type === "month")?.value}-${dayParts.find((part) => part.type === "day")?.value}`;
+  const diagnostics = object(state.v52GateDiagnostics);
+  const diagnosticsNyDay = text(diagnostics?.nyDay ?? object(state.v50Top2Telemetry)?.nyDay ?? state.nyDay);
+  const dailyFresh = diagnosticsNyDay === currentNyDay && (!state.v50DailyEntriesDay || state.v50DailyEntriesDay === currentNyDay);
+  if (!dailyFresh) {
+    const reason = `STALE / V52 daily diagnostics未更新（diagnostics=${diagnosticsNyDay || "未取得"} / current=${currentNyDay}）。前日のGate拒否は現在理由として表示しません。`;
+    return config.stockSymbols.map((symbol) => ({
+      ...unavailableItem(symbol, "V52", checkedAt, reason),
+      status: "取得不能" as const,
+      reason,
+      source: "VPS V52 runner telemetry",
+    }));
+  }
   if (!candidates.length) {
-    const reason = `V52 runner telemetryに候補がありません。${rejectionSummary(state)}`;
+    const reason = `本日判定済み / 条件適合候補なし（NY day ${currentNyDay}）。${rejectionSummary(state)}`;
     return config.stockSymbols.map((symbol) => ({
       ...unavailableItem(symbol, "V52", checkedAt, reason),
       status: "条件不足" as const,
@@ -222,10 +236,10 @@ function v52ItemsFromState(state: JsonObject, checkedAt: string): DecisionStatus
         sleeve: "V52" as const,
         rank,
         score: basisBps,
-        scoreMax: Math.max(65, basisBps),
+        scoreMax: Math.max(config.v52Top2Policy.minEntryBasisBps, basisBps),
         status: rank <= 2 ? "候補に近い" as const : "条件不足" as const,
         side: "WAIT" as const,
-        reason: `V52 runner telemetry Rank${rank}候補。basis=${basisBps.toFixed(2)}bps。V50/V11のnet edge・板・容量・発注Windowを別途通過する必要があります。`,
+        reason: `V52 runner telemetry Rank${rank}候補。basis=${basisBps.toFixed(2)}bps / required=${config.v52Top2Policy.minEntryBasisBps}bps。V50/V11のnet edge・板・容量・発注Windowを別途通過する必要があります。`,
         checkedAt,
         source: "VPS V52 runner telemetry",
         dataUpdatedAt: updatedAt === undefined ? undefined : new Date(updatedAt).toISOString(),

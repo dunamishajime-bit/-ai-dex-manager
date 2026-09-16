@@ -10,9 +10,9 @@ const STALE_AFTER_MS = 6 * 60 * 60 * 1000;
 const DEFAULT_HEARTBEAT_PATH = "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json";
 
 export const quality102Policy = Object.freeze({
-  strategyGrossCap: 0.5,
-  cryptoGrossCap: 2,
-  totalGrossCap: 2.5,
+  strategyGrossCap: config.quality102Runtime.strategyGrossCap,
+  cryptoGrossCap: config.quality102Runtime.cryptoGrossCap,
+  totalGrossCap: config.quality102Runtime.totalGrossCap,
   symbols: [
     "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT",
     "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT",
