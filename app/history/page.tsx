@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { Card } from "@/components/ui/Card";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
+import { formatTradeHistoryAttributionLabel } from "@/lib/trade-history-attribution";
 
 type TradeHistoryEntry = {
   id: string;
@@ -35,6 +36,13 @@ type TradeHistoryEntry = {
   strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
   commission?: number;
   netPnlUsd?: number;
+  attribution?: {
+    classification: "logic" | "alternate-route" | "test-order" | "unknown";
+    logicLabel?: string;
+    routeLabel?: string;
+    ranking?: number;
+    evidence: "explicit" | "symbol-inference" | "negative-pnl-no-logic" | "unavailable";
+  };
 };
 
 function formatNumber(value?: number, digits = 2) {
@@ -60,6 +68,19 @@ function explorerTxUrl(chainId: number, txHash: string) {
 function hasExplorerTx(entry: Pick<TradeHistoryEntry, "provider" | "txHash">) {
   if (entry.provider === "AsterDex") return false;
   return /^0x[a-fA-F0-9]{32,}$/.test(entry.txHash);
+}
+
+function attributionClass(entry: TradeHistoryEntry) {
+  switch (entry.attribution?.classification) {
+    case "logic":
+      return "border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
+    case "alternate-route":
+      return "border-sky-400/30 bg-sky-500/10 text-sky-200";
+    case "test-order":
+      return "border-amber-400/30 bg-amber-500/10 text-amber-200";
+    default:
+      return "border-white/15 bg-white/5 text-white/60";
+  }
 }
 
 export default function HistoryPage() {
@@ -124,6 +145,11 @@ export default function HistoryPage() {
       "exitPriceUsd",
       "realizedPnlUsd",
       "realizedPnlPct",
+      "executionClassification",
+      "logicLabel",
+      "routeLabel",
+      "ranking",
+      "classificationEvidence",
       "txHash",
     ];
 
@@ -142,6 +168,11 @@ export default function HistoryPage() {
         entry.exitPriceUsd ?? "",
         displayTradePnlUsd(entry) ?? "",
         entry.realizedPnlPct ?? "",
+        entry.attribution?.classification ?? "unknown",
+        entry.attribution?.logicLabel ?? "",
+        entry.attribution?.routeLabel ?? "",
+        entry.attribution?.ranking ?? "",
+        entry.attribution?.evidence ?? "unavailable",
         entry.txHash,
       ].join(","),
     );
@@ -231,12 +262,13 @@ export default function HistoryPage() {
         ) : null}
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] text-left text-sm">
+          <table className="w-full min-w-[1240px] text-left text-sm">
             <thead className="border-b border-white/10 text-xs uppercase text-gray-400">
               <tr>
                 <th className="px-3 py-3">日時</th>
                 <th className="px-3 py-3">売買</th>
                 <th className="px-3 py-3">通貨</th>
+                <th className="px-3 py-3">発火ロジック / 経路</th>
                 <th className="px-3 py-3">数量</th>
                 <th className="px-3 py-3">取得単価</th>
                 <th className="px-3 py-3">売却単価</th>
@@ -260,6 +292,17 @@ export default function HistoryPage() {
                       {entry.destSymbol} / {entry.sourceSymbol}
                     </div>
                     <div className="mt-1 text-xs text-gray-500">{entry.reason}</div>
+                  </td>
+                  <td className="px-3 py-4">
+                    <span className={`inline-flex rounded-full border px-2 py-1 text-[11px] font-semibold ${attributionClass(entry)}`}>
+                      {formatTradeHistoryAttributionLabel(entry)}
+                    </span>
+                    {entry.attribution?.evidence === "symbol-inference" ? (
+                      <div className="mt-1 text-[10px] text-white/40">通貨ベース推定。entry時点の発火証拠は未保存</div>
+                    ) : null}
+                    {entry.attribution?.evidence === "negative-pnl-no-logic" ? (
+                      <div className="mt-1 text-[10px] text-amber-200/70">明示的なロジック発火記録なし・マイナス損益</div>
+                    ) : null}
                   </td>
                   <td className="px-3 py-4 font-mono text-xs">
                     <div>
@@ -314,7 +357,7 @@ export default function HistoryPage() {
               ))}
               {!isLoading && visibleEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-3 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={11} className="px-3 py-10 text-center text-sm text-gray-500">
                     表示できるトレード履歴がありません。
                   </td>
                 </tr>

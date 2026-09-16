@@ -5,6 +5,7 @@ import {
 } from "@/lib/server/asterdex/client";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
+import { deriveTradeHistoryAttribution } from "@/lib/trade-history-attribution";
 
 const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
   ...liveConfig.cryptoSymbols,
@@ -159,6 +160,9 @@ function toHistoryEntry(
   }
   book.netQuantity += side === "BUY" ? quantity : -quantity;
 
+  const inferredStrategy = strategyForSymbol(symbol);
+  const reason = "Aster official fill / " + inferredStrategy + " / " + direction + " / " + (entry ? "Entry" : "Exit") + (trade.maker ? " / maker" : " / taker");
+
   return {
     id: "aster:" + symbol + ":" + tradeId,
     executedAt,
@@ -178,7 +182,7 @@ function toHistoryEntry(
     exitPriceUsd: close ? price : undefined,
     realizedPnlUsd,
     realizedPnlPct,
-    reason: "Aster official fill / " + strategyForSymbol(symbol) + " / " + direction + " / " + (entry ? "Entry" : "Exit") + (trade.maker ? " / maker" : " / taker"),
+    reason,
     openedAt: entry ? executedAt : matched.openedAt,
     closedAt: close ? executedAt : undefined,
     tradeId,
@@ -188,8 +192,15 @@ function toHistoryEntry(
     commissionAsset: trade.commissionAsset,
     maker: trade.maker,
     tradeStatus: close ? (matched.matchedQuantity > 0 ? "closed" : "unmatched_exit") : "open",
-    strategyId: strategyForSymbol(symbol),
+    strategyId: inferredStrategy,
     netPnlUsd,
+    attribution: deriveTradeHistoryAttribution({
+      source: "official-fill",
+      strategyId: inferredStrategy,
+      reason,
+      realizedPnlUsd,
+      netPnlUsd,
+    }),
   };
 }
 

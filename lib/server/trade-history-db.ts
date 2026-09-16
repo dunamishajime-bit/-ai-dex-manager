@@ -4,6 +4,10 @@ import path from "path";
 import type { OperationalWalletHolding } from "@/lib/operational-wallet-types";
 import type { DirectWalletTradeInput, DirectWalletTradeResult } from "@/lib/server/direct-trade-executor";
 import { writeGitTradeHistorySnapshot } from "@/lib/server/trade-history-git-export";
+import {
+  deriveTradeHistoryAttribution,
+  type TradeHistoryAttribution,
+} from "@/lib/trade-history-attribution";
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -45,6 +49,7 @@ export interface TradeHistoryEntry {
   positionVerified?: boolean;
   strategyId?: "V12" | "V96" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
   netPnlUsd?: number;
+  attribution?: TradeHistoryAttribution;
 }
 
 interface OpenPositionRecord {
@@ -168,6 +173,13 @@ export function normalizeTradeHistoryEntries(entries: TradeHistoryEntry[]) {
       realizedPnlPct: entry.realizedPnlPct,
       openedAt: entry.openedAt,
       closedAt: entry.closedAt,
+      attribution: entry.attribution || deriveTradeHistoryAttribution({
+        source: "local-ledger",
+        strategyId: entry.strategyId,
+        reason: entry.reason,
+        realizedPnlUsd: entry.realizedPnlUsd,
+        netPnlUsd: entry.netPnlUsd,
+      }),
     };
 
     if (!next.entryPriceUsd && next.action === "BUY" && destAmount > 0) {
@@ -346,6 +358,13 @@ function loadBundledTradeHistoryEntries(): TradeHistoryEntry[] {
         sourceUsdValue: Number(entry.sourceUsdValue || 0),
         destUsdValue: Number(entry.destUsdValue || 0),
         reason: typeof entry.reason === "string" ? entry.reason : "bundled audit history",
+        attribution: entry.attribution || deriveTradeHistoryAttribution({
+          source: "local-ledger",
+          strategyId: entry.strategyId,
+          reason: typeof entry.reason === "string" ? entry.reason : "bundled audit history",
+          realizedPnlUsd: entry.realizedPnlUsd,
+          netPnlUsd: entry.netPnlUsd,
+        }),
       } as TradeHistoryEntry;
     });
   } catch (error) {

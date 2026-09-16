@@ -75,6 +75,36 @@ test("history source keeps local records when official history is partial", () =
   assert.equal(selected.entries.length, 2);
 });
 
+test("official fills inherit explicit route attribution from the matching local ledger entry", () => {
+  const official = [{
+    ...baseEntry,
+    id: "aster:XRPUSDT:trade-1",
+    txHash: "order:99",
+    tradeId: "trade-1",
+    orderId: "99",
+    strategyId: "V12" as const,
+  }];
+  const local = [{
+    ...baseEntry,
+    id: "local-xrp-1",
+    txHash: "order:99",
+    provider: "AsterDex",
+    strategyId: "V12" as const,
+    reason: "V12 alternate route / Recovery V8 / rank=13",
+    attribution: {
+      classification: "alternate-route" as const,
+      logicLabel: "V12",
+      routeLabel: "Recovery V8",
+      ranking: 13,
+      evidence: "explicit" as const,
+    },
+  }];
+
+  const merged = mergeTradeHistoryEntries(official, local);
+  assert.equal(merged.length, 1);
+  assert.deepEqual(merged[0].attribution, local[0].attribution);
+});
+
 test("calendar and history use the same net PnL value when commission is available", () => {
   assert.equal(displayTradePnlUsd({ realizedPnlUsd: 10, netPnlUsd: 9.5 }), 9.5);
   assert.equal(displayTradePnlUsd({ realizedPnlUsd: -2 }), -2);
