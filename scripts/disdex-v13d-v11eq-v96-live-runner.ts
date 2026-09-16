@@ -107,7 +107,7 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         PENGU_DUAL_LS_V2_KILL_SWITCH_FILE: paths.killSwitchPath,
         PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
         PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
-        PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT: "5",
+        PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT: "7.5",
     } as NodeJS.ProcessEnv;
 }
 

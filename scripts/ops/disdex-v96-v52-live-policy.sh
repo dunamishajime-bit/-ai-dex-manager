@@ -67,7 +67,7 @@ disdex_apply_v96_v52_fixed_live_policy() {
   export PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=true
   export PENGU_DUAL_LS_V2_MAX_GROSS=0.75
   export PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5
-  export PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=5
+  export PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5
 }
 
 disdex_assert_v96_v52_fixed_live_policy() {
@@ -121,5 +121,5 @@ disdex_assert_v96_v52_fixed_live_policy() {
   [[ "${PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED:-}" == "true" ]] || return 1
   [[ "${PENGU_DUAL_LS_V2_MAX_GROSS:-}" == "0.75" ]] || return 1
   [[ "${PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP:-}" == "1.5" ]] || return 1
-  [[ "${PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT:-}" == "5" ]] || return 1
+  [[ "${PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT:-}" == "7.5" ]] || return 1
 }

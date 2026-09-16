@@ -43,7 +43,7 @@ Environment=PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=true
 Environment=PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=true
 Environment=PENGU_DUAL_LS_V2_MAX_GROSS=0.75
 Environment=PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5
-Environment=PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=5
+Environment=PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5
 Environment=DISDEX_V96_CONFIG_MIGRATION_MODE=true
 Environment=DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 import { QUALITY102_CAUSAL_V4_S34_MODEL } from "@/config/disdexQuality102CausalV4Model";
+import { resolveSharedCryptoDailyLossPct } from "@/config/sharedCryptoRiskPolicy";
 import { AsterV3Client } from "@/lib/aster-v3-client";
 import {
     buildSharedCryptoDailyRiskState,
@@ -96,7 +97,7 @@ export async function refreshSharedCryptoDailyRisk(input: {
     if (!(referenceEquity > 0)) throw new Error("SHARED_CRYPTO_RISK_REFERENCE_EQUITY_INVALID");
     const netDailyPnl = settledToday + unrealizedPnl;
     const lossPct = Math.max(0, (-netDailyPnl / referenceEquity) * 100);
-    const maximumLossPct = input.maximumLossPct ?? 5;
+    const maximumLossPct = resolveSharedCryptoDailyLossPct(input.maximumLossPct);
 
     const state = buildSharedCryptoDailyRiskState({
         accountScope: "ASTER_FUTURES",

@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -16,7 +16,7 @@ function state(utcDay: string, updatedAt: number) {
     utcDay,
     strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"],
     lossPct: 0,
-    maximumLossPct: 5,
+    maximumLossPct: 7.5,
     tripped: false,
     updatedAt,
     realizedPnl: 0,

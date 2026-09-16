@@ -100,7 +100,7 @@ function config(overrides: Partial<Quality102CausalV1RunnerConfig> = {}): Qualit
         maxSlippageBps: 35,
         minimumOrderNotionalUsd: 5,
         maximumEntryDelayMs: 2 * 3_600_000,
-        maximumDailyLossPct: 5,
+        maximumDailyLossPct: 7.5,
         ...overrides,
     };
 }

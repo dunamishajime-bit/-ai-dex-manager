@@ -245,7 +245,7 @@ const shadowRunner = new PenguDualLsV2PortfolioRunner({
         maxTransactionRetries: PENGU_DUAL_LS_V2.safety.maxTransactionRetries,
         maximumEntryDelayMs: 5 * 60_000,
         portfolioGrossCap: PENGU_DUAL_LS_V2.portfolioGrossCap,
-        maximumDailyLossPct: 5,
+        maximumDailyLossPct: 7.5,
     },
 });
 

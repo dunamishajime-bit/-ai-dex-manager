@@ -1,5 +1,6 @@
 import "dotenv/config";
 
+import { resolveSharedCryptoDailyLossPct } from "../config/sharedCryptoRiskPolicy";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { refreshSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-risk-writer";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
@@ -33,7 +34,7 @@ async function main(): Promise<void> {
         const state = await refreshSharedCryptoDailyRisk({
             client,
             path,
-            maximumLossPct: numberEnv("DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT", 5),
+            maximumLossPct: resolveSharedCryptoDailyLossPct(process.env.DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT),
         });
         console.log(JSON.stringify({
             timestamp: new Date().toISOString(),

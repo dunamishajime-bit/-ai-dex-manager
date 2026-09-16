@@ -12,6 +12,7 @@ import {
     QUALITY102_CAUSAL_V4_CAPABILITIES,
     QUALITY102_CAUSAL_V4_S34_MODEL,
 } from "../config/disdexQuality102CausalV4Model";
+import { resolveSharedCryptoDailyLossPct } from "../config/sharedCryptoRiskPolicy";
 import { AsterV3Client, isAsterDepositRequirementError } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectPosition } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
@@ -169,7 +170,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         maxSlippageBps: positiveConfig(numberEnv(env, "QUALITY102_CAUSAL_V1_MAX_SLIPPAGE_BPS", 35), "QUALITY102_CAUSAL_V1_MAX_SLIPPAGE_BPS"),
         minimumOrderNotionalUsd: Math.max(5, numberEnv(env, "QUALITY102_CAUSAL_V1_MIN_ORDER_NOTIONAL_USD", 5)),
         maximumEntryDelayMs,
-        maximumDailyLossPct: positiveConfig(numberEnv(env, "QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT", 5), "QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT"),
+        maximumDailyLossPct: resolveSharedCryptoDailyLossPct(env.QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT),
         maxDataAgeMs,
         historyCachePath: resolve(env.QUALITY102_CAUSAL_V1_HISTORY_CACHE_PATH || resolve(stateRoot, "market-history.json")),
         historyHours,

@@ -16,7 +16,7 @@ const state = buildSharedCryptoDailyRiskState({
     utcDay: new Date(now).toISOString().slice(0, 10),
     strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"],
     lossPct: 0,
-    maximumLossPct: 5,
+    maximumLossPct: 7.5,
     tripped: false,
     updatedAt: now,
     realizedPnl: 0,
