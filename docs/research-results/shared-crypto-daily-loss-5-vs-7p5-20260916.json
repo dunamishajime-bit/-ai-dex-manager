@@ -1,0 +1,22 @@
+{
+  "schema": "disdex-shared-crypto-daily-loss-investigation/v1",
+  "date": "2026-09-16",
+  "productionBaseSha": "10e18fea89b2aa889b9ce3d6a2603c43ac9e7715",
+  "historicalPolicyCommits": {
+    "pengu7p5": "672ba26bbd10b8b55b45724297c4d1921fd3f50a",
+    "writer7p5": "94a8dea06ad8cb196867d13912fc58cffd4010d0",
+    "selftest7p5": "4c6fc12595f5f667f7e8447c519f09f951f2e803",
+    "systemd7p5": "49367079cd6790d5c29c190e9066f4444a3332be",
+    "q102LiveConnection5pctLineage": "afd9244401e1738e4559e58c06091f3d543b237e"
+  },
+  "liveBeforeChange": {"maximumLossPct": 5, "tripped": false, "strategyIds": ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"]},
+  "dca130k": {
+    "normal": {"pct5": {"asset": 16876462.70732571, "pf": 3.54149451, "ddPct": -14.33740242}, "pct7p5": {"asset": 18442769.03585051, "pf": 3.57064393, "ddPct": -14.33740242}},
+    "severe": {"pct5": {"asset": 2607832.86723808, "pf": 2.39378839, "ddPct": -18.46507481}, "pct7p5": {"asset": 2827282.1410372, "pf": 2.41551514, "ddPct": -17.68170098}}
+  },
+  "lump100kCurrentSharedSemantics": {
+    "normal": {"pct5": {"asset": 60678084.97254156, "pf": 3.46233145, "ddPct": -14.33740242}, "pct7p5": {"asset": 71552183.67755231, "pf": 3.50828962, "ddPct": -14.33740242}},
+    "severe": {"pct5": {"asset": 6172183.53830541, "pf": 2.34926076, "ddPct": -19.94193393}, "pct7p5": {"asset": 7137081.49573081, "pf": 2.38172991, "ddPct": -19.17274951}}
+  },
+  "safety": {"researchOnly": true, "liveChangedByEvidenceCommit": false}
+}
