@@ -1,0 +1,141 @@
+{
+  "schema": "v52-cost-gate-audit/v1",
+  "researchOnly": true,
+  "purpose": "distinguish variable LIVE max-cost gate from prior uniform-cost BT scenarios",
+  "finding": {
+    "exactHistoricalGateSweepPossible": false,
+    "reason": "historical BT inputs do not contain per-candidate order-book spread/VWAP slippage; LIVE audit contains no numeric estimated cost observations",
+    "liveCostFormula": "makerFeeBps + takerFeeBps + spreadBps + VWAPSlippageBps + safetyBufferBps",
+    "fixedKnownComponentBps": 11.0,
+    "components": {
+      "makerFeeBps": 0.0,
+      "takerFeeBps": 6.0,
+      "safetyBufferBps": 5.0
+    },
+    "separateSpreadGateBps": 20.0
+  },
+  "liveAuditEvidence": {
+    "path": "/var/lib/disdex/v52-aster-only/audit-live.jsonl",
+    "bytes": 44337351,
+    "eventCounts": {
+      "v52-v50-decision": 8,
+      "v52-v11-decision": 3,
+      "v50-signal-recorded": 8,
+      "v11-signal-recorded": 4
+    },
+    "candidateNonNull": 0,
+    "numericEstimatedCostObservations": 0,
+    "otherAuditBackupsFound": 0
+  },
+  "selectedV50": {
+    "minimumEntryBasisBps": 60.0,
+    "convergenceBps": 20.0,
+    "minimumNetEdgeBps": 7.5,
+    "basisStopMultiple": 1.75,
+    "rawCandidates": 208
+  },
+  "structuralGateComparison": [
+    {
+      "globalGateBps": 24,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 13,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 208,
+      "shareOf208Pct": 100.0,
+      "fullGateCeilingStressStandalonePF": 5.045,
+      "fullGateCeilingStressNetReturnSum": 1.2062,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 25,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 14,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 208,
+      "shareOf208Pct": 100.0,
+      "fullGateCeilingStressStandalonePF": 4.849,
+      "fullGateCeilingStressNetReturnSum": 1.1854,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 30,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 19,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 208,
+      "shareOf208Pct": 100.0,
+      "fullGateCeilingStressStandalonePF": 4.017,
+      "fullGateCeilingStressNetReturnSum": 1.0814,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 35,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 24,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 199,
+      "shareOf208Pct": 95.7,
+      "fullGateCeilingStressStandalonePF": 3.39,
+      "fullGateCeilingStressNetReturnSum": 0.9725,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 40,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 29,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 184,
+      "shareOf208Pct": 88.5,
+      "fullGateCeilingStressStandalonePF": 3.127,
+      "fullGateCeilingStressNetReturnSum": 0.8847,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 45,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 34,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 170,
+      "shareOf208Pct": 81.7,
+      "fullGateCeilingStressStandalonePF": 2.73,
+      "fullGateCeilingStressNetReturnSum": 0.7603,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 50,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 39,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 156,
+      "shareOf208Pct": 75.0,
+      "fullGateCeilingStressStandalonePF": 2.526,
+      "fullGateCeilingStressNetReturnSum": 0.6806,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 55,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 44,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 146,
+      "shareOf208Pct": 70.2,
+      "fullGateCeilingStressStandalonePF": 2.178,
+      "fullGateCeilingStressNetReturnSum": 0.5581,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    },
+    {
+      "globalGateBps": 60,
+      "spreadPlusSlippageBudgetAfterFixed11Bps": 49,
+      "v50RowsThatStillKeep7p5BpsEdgeAtFullGateCost": 138,
+      "shareOf208Pct": 66.3,
+      "fullGateCeilingStressStandalonePF": 2.098,
+      "fullGateCeilingStressNetReturnSum": 0.5184,
+      "note": "diagnostic stress only; not a historical gate backtest"
+    }
+  ],
+  "selection": {
+    "maximumRoundTripCostBps": 60.0,
+    "status": "RETAIN_EXISTING_FAIL_CLOSED_CEILING_NOT_PROVEN_OPTIMAL",
+    "reason": "no per-trade historical cost evidence supports tightening to 24-55bps; dynamic net-edge gate already imposes a lower effective ceiling for lower-basis trades",
+    "telemetryRequiredForFutureOptimization": [
+      "estimatedRoundTripCostBps",
+      "spreadBps",
+      "VWAPSlippageBps",
+      "symbol",
+      "window",
+      "basisBps",
+      "edgeProxyBps",
+      "decision accepted/rejected"
+    ]
+  },
+  "safety": {
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}

@@ -81,16 +81,29 @@ At 40bps, the V52 change adds **+5.0169%** to ending asset versus the already-se
 | V52 | 0 | ¥0 | N/A — 100bps cost is above the 60bps Fail-Closed gate |
 | Q102 | 86 accounting events | **+¥4,381,023.66** | 4.06997890 |
 
-## V52 cost sensitivity inside the selected all-logic architecture
+## V52 cost-gate validation — correction
 
-| Stock round-trip cost | Baseline V52 logic | Selected V52 logic | Final PF | Final DD | V52 PnL |
-|---|---:|---:|---:|---:|---:|
-| 24bps | ¥77,156,180.72 | **¥81,065,059.92** | 3.79345336 | -17.33097423% | +¥14,292,921.70 |
-| 40bps | ¥66,059,488.04 | **¥69,373,656.14** | 3.70258068 | -17.59935397% | +¥9,330,664.33 |
-| 44bps | ¥63,672,250.12 | **¥66,554,577.53** | 3.68854838 | -17.66638072% | +¥8,788,476.09 |
-| 60bps | ¥51,803,650.69 | **¥53,483,733.78** | 3.58040190 | -17.93421503% | +¥4,324,532.09 |
+The 24/40/44/60bps runs used above are **uniform execution-cost stress scenarios**, not a sweep of the LIVE maximum-cost Gate. They remain useful for stress-testing the selected V52 logic, but they must not be used to conclude that a 24bps or 40bps Gate is superior.
 
-The selected V52 logic improves ending asset at every observable cost point tested. The 60bps gate itself was not relaxed.
+A true Gate sweep requires the historical `estimatedRoundTripCostBps` for every V52 candidate. LIVE computes that value as `maker fee + taker fee + current spread + depth-VWAP slippage + safety buffer`. The historical BT cache contains OHLC/funding but no order-book snapshots. The LIVE audit file was also checked: 44,337,351 bytes, 8 V50 decisions and 3 V11 decisions, but **0 non-null candidates and 0 numeric estimated-cost observations**. Therefore an exact historical 24-60bps Gate PnL sweep is not identifiable from the stored evidence.
+
+Structural diagnostics for selected V50 (B60 / convergence20 / min-edge7.5) are recorded in `v52-cost-gate-audit-20260917.json`. The known fixed LIVE cost component is 11bps (maker0 + taker6 + safety5), before spread and VWAP slippage.
+
+| Global max-cost Gate | Remaining spread+slippage budget after fixed 11bps | V50 raw rows that still retain >=7.5bps edge even at full Gate cost |
+|---:|---:|---:|
+| 24bps | 13bps | 208 / 208 |
+| 25bps | 14bps | 208 / 208 |
+| 30bps | 19bps | 208 / 208 |
+| 35bps | 24bps | 199 / 208 |
+| 40bps | 29bps | 184 / 208 |
+| 45bps | 34bps | 170 / 208 |
+| 50bps | 39bps | 156 / 208 |
+| 55bps | 44bps | 146 / 208 |
+| 60bps | 49bps | 138 / 208 |
+
+The V50 minimum basis is 60bps and convergence target is 20bps, so the minimum-basis edge proxy is 40bps. After the 7.5bps minimum-net-edge rule, a minimum-basis candidate already has an effective cost ceiling of **32.5bps** even though the global hard ceiling remains 60bps. Higher costs are therefore permitted only when basis/edge is correspondingly larger.
+
+**Final Gate decision:** retain the existing **60bps Fail-Closed ceiling**, but do **not** describe it as the profit-optimal threshold. There is currently no stored per-candidate cost evidence proving that tightening to 24-55bps improves portfolio return. The next production implementation must persist candidate-level estimated cost, spread and VWAP slippage so this Gate can later be optimized from observed data.
 
 ## Robustness checks
 
