@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Dict, Iterable, Optional
 
 HEALTHY_POLL_INTERVAL_MS = 5 * 60_000
@@ -24,6 +25,38 @@ def finite(value: object, fallback: float = 0.0) -> float:
     return result if result == result and result not in (float("inf"), float("-inf")) else fallback
 
 
+def is_finite_number(value: object) -> bool:
+    try:
+        return math.isfinite(float(value))
+    except (TypeError, ValueError):
+        return False
+
+
+def has_valid_account_margin_data(account: dict) -> bool:
+    required = (
+        "totalMaintMargin",
+        "totalMarginBalance",
+        "totalPositionInitialMargin",
+        "totalOpenOrderInitialMargin",
+        "availableBalance",
+    )
+    if not all(is_finite_number(account.get(key)) for key in required):
+        return False
+    return finite(account.get("totalMarginBalance")) > 0 and all(
+        finite(account.get(key)) >= 0
+        for key in ("totalMaintMargin", "totalPositionInitialMargin", "totalOpenOrderInitialMargin", "availableBalance")
+    )
+
+
+def position_margin_type(row: dict) -> str:
+    raw = str(row.get("marginType") or "").strip().lower()
+    if raw in {"cross", "crossed"} or row.get("isolated") is False:
+        return "cross"
+    if raw in {"isolated", "isolate"} or row.get("isolated") is True:
+        return "isolated"
+    return "unknown"
+
+
 def maintenance_margin_ratio_pct(account: dict) -> float:
     maintenance = max(0.0, finite(account.get("totalMaintMargin")))
     margin_balance = finite(account.get("totalMarginBalance"))
@@ -40,7 +73,15 @@ def liquidation_buffer_pct(row: dict) -> Optional[float]:
         return None
     mark = finite(row.get("markPrice"))
     liquidation = finite(row.get("liquidationPrice"))
-    if mark <= 0 or liquidation <= 0:
+    if mark <= 0:
+        raise RuntimeError(f"Active position has invalid mark/liquidation price: {row.get('symbol')}")
+    if liquidation <= 0:
+        # Aster may return zero liquidationPrice for a valid Cross position
+        # whose risk is represented by account-level maintenance margin. The
+        # caller must still prove that the row is Cross; isolated/unknown
+        # positions remain fail-closed.
+        if position_margin_type(row) == "cross":
+            return None
         raise RuntimeError(f"Active position has invalid mark/liquidation price: {row.get('symbol')}")
     buffer = (mark - liquidation) / mark if quantity > 0 else (liquidation - mark) / mark
     return max(0.0, buffer * 100.0)
@@ -56,16 +97,22 @@ def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed
         if symbol not in symbols or abs(finite(row.get("positionAmt"))) <= 1e-12:
             continue
         buffer = liquidation_buffer_pct(row)
-        if buffer is None:
-            continue
+        liquidation_available = finite(row.get("liquidationPrice")) > 0
+        if not liquidation_available:
+            if position_margin_type(row) != "cross" or not has_valid_account_margin_data(account):
+                raise RuntimeError(
+                    f"Active Cross position has no liquidation price and account margin data is unavailable: {symbol}"
+                )
         active.append({
             "symbol": symbol,
             "positionAmt": finite(row.get("positionAmt")),
             "markPrice": finite(row.get("markPrice")),
-            "liquidationPrice": finite(row.get("liquidationPrice")),
+            "liquidationPrice": finite(row.get("liquidationPrice")) if liquidation_available else None,
+            "liquidationPriceAvailable": liquidation_available,
+            "riskBasis": "LIQUIDATION_BUFFER" if liquidation_available else "ACCOUNT_MAINTENANCE_MARGIN_RATIO",
             "liquidationBufferPct": buffer,
             "leverage": finite(row.get("leverage")),
-            "marginType": str(row.get("marginType") or ("isolated" if row.get("isolated") is True else "cross" if row.get("isolated") is False else "unknown")).lower(),
+            "marginType": position_margin_type(row),
         })
         if minimum_buffer is None or buffer < minimum_buffer:
             minimum_buffer = buffer

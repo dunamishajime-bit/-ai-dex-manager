@@ -33,6 +33,7 @@ jobs:
           tests/strict_bt33404708902_contract.test.ts
           tests/formal-integrated-parity.test.ts
           tests/pengu-recovery-v8-aster-precision.test.ts
+          tests/pengu-recovery-v8-reconciliation.test.ts
       - name: Runtime wiring and telemetry tests
         run: >-
           python -m unittest
@@ -42,6 +43,7 @@ jobs:
           tests/test_v52_account_lock_scope.py
           tests/test_q102_1p0_lump100k_implementation_contract.py
           tests/test_v52_telemetry_contract.py
+          tests/test_dynamic_v12_q102_margin_guard.py
       - name: Strategy self-tests
         run: |
           npm run strategy:shared-crypto-risk:selftest
