@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import datetime as dt
+import errno
 import hashlib
 import json
 import math
@@ -203,6 +204,39 @@ def _aster_budget_lock_is_stale(lock_path: Path) -> bool:
         return True
 
 
+def _aster_budget_transient_lock_race(error: BaseException) -> bool:
+    return isinstance(error, OSError) and getattr(error, "errno", None) in {
+        errno.ENOENT, errno.ENOTEMPTY, errno.EACCES, errno.EPERM, errno.EBUSY,
+    }
+
+
+def _aster_budget_acquire_generation_mutex(lock_path: Path, deadline: float) -> Path:
+    recovery_path = Path(str(lock_path) + ".recovery")
+    while True:
+        try:
+            recovery_path.mkdir(mode=0o700)
+            return recovery_path
+        except OSError as error:
+            if not isinstance(error, FileExistsError) and not _aster_budget_transient_lock_race(error):
+                raise
+            if time.monotonic() >= deadline:
+                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT") from error
+            time.sleep(0.005)
+
+
+def _aster_budget_release_generation_mutex(recovery_path: Path, deadline: float) -> None:
+    while True:
+        try:
+            recovery_path.rmdir()
+            return
+        except FileNotFoundError:
+            return
+        except OSError as error:
+            if not _aster_budget_transient_lock_race(error) or time.monotonic() >= deadline:
+                raise
+            time.sleep(0.005)
+
+
 def _aster_budget_acquire_lock(lock_path: Path, max_queue_ms: int) -> dict:
     deadline = time.monotonic() + max_queue_ms / 1000.0
     owner = {
@@ -212,30 +246,58 @@ def _aster_budget_acquire_lock(lock_path: Path, max_queue_ms: int) -> dict:
         "token": secrets.token_hex(16),
     }
     while True:
+        recovery_path = _aster_budget_acquire_generation_mutex(lock_path, deadline)
+        wait_for_owner = False
+        lost_generation = False
         try:
-            lock_path.mkdir(mode=0o700)
             try:
-                owner_path = _aster_budget_lock_owner_path(lock_path)
-                owner_path.write_text(json.dumps(owner, separators=(",", ":")) + "\n", encoding="utf-8")
-                os.chmod(owner_path, 0o600)
-                return owner
-            except Exception:
-                shutil.rmtree(lock_path, ignore_errors=True)
-                raise
-        except FileExistsError:
-            if _aster_budget_lock_is_stale(lock_path):
-                shutil.rmtree(lock_path, ignore_errors=True)
-                continue
-            if time.monotonic() >= deadline:
-                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
-            time.sleep(0.005)
+                lock_path.mkdir(mode=0o700)
+            except FileExistsError:
+                if not _aster_budget_lock_is_stale(lock_path):
+                    wait_for_owner = True
+                else:
+                    try:
+                        shutil.rmtree(lock_path)
+                        lock_path.mkdir(mode=0o700)
+                    except OSError as error:
+                        if not _aster_budget_transient_lock_race(error):
+                            raise
+                        lost_generation = True
+            if not wait_for_owner and not lost_generation:
+                try:
+                    owner_path = _aster_budget_lock_owner_path(lock_path)
+                    owner_path.write_text(json.dumps(owner, separators=(",", ":")) + "\n", encoding="utf-8")
+                    os.chmod(owner_path, 0o600)
+                    return owner
+                except OSError as error:
+                    if not _aster_budget_transient_lock_race(error):
+                        shutil.rmtree(lock_path, ignore_errors=True)
+                        raise
+                    lost_generation = True
+        finally:
+            _aster_budget_release_generation_mutex(recovery_path, deadline)
+        if time.monotonic() >= deadline:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
+        time.sleep(0.005)
 
 
 def _aster_budget_release_lock(lock_path: Path, owner: dict) -> None:
     current = _aster_budget_lock_owner(lock_path)
     if current is None or current.get("token") != owner.get("token"):
         return
-    shutil.rmtree(lock_path, ignore_errors=True)
+    released_path = Path(f"{lock_path}.released.{owner.get('token')}")
+    deadline = time.monotonic() + 5.0
+    while True:
+        try:
+            lock_path.rename(released_path)
+            break
+        except FileNotFoundError:
+            return
+        except OSError as error:
+            if not _aster_budget_transient_lock_race(error) or time.monotonic() >= deadline:
+                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_RELEASE_FAILED") from error
+            time.sleep(0.005)
+    shutil.rmtree(released_path, ignore_errors=True)
 
 
 def aster_futures_request_weight(method: str, path: str, params: Optional[Dict[str, Any]] = None) -> int:

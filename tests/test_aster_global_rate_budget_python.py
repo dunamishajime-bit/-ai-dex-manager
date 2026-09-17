@@ -172,5 +172,69 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
                     else:
                         os.environ[key] = value
 
+
+    def test_lock_loss_after_owner_write_retries_instead_of_failing_v52(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lock_path = Path(directory) / "aster-rate-budget.json.lock"
+            original_chmod = base.os.chmod
+            injected = {"done": False}
+
+            def racing_chmod(path, mode):
+                target = Path(path)
+                if not injected["done"] and target.name == "owner.json":
+                    injected["done"] = True
+                    base.shutil.rmtree(lock_path, ignore_errors=True)
+                    raise FileNotFoundError(2, "simulated competing stale-lock cleanup", str(target))
+                return original_chmod(path, mode)
+
+            base.os.chmod = racing_chmod
+            try:
+                owner = base._aster_budget_acquire_lock(lock_path, 250)
+            finally:
+                base.os.chmod = original_chmod
+            try:
+                self.assertTrue(injected["done"])
+                current = json_module.loads((lock_path / "owner.json").read_text(encoding="utf-8"))
+                self.assertEqual(current["token"], owner["token"])
+            finally:
+                base._aster_budget_release_lock(lock_path, owner)
+
+
+    def test_concurrent_stale_ownerless_lock_recovery_serializes_budget_updates(self):
+        import concurrent.futures
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "aster-rate-budget.json"
+            lock_path = Path(str(path) + ".lock")
+            lock_path.mkdir()
+            old = time.time() - 30
+            os.utime(lock_path, (old, old))
+            keys = ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")
+            original_env = {key: os.environ.get(key) for key in keys}
+            original_now_ms = base.now_ms
+            try:
+                os.environ[keys[0]] = str(path)
+                os.environ[keys[1]] = "2"
+                os.environ[keys[2]] = "30000" if os.name == "nt" else "5000"
+                base.now_ms = lambda: 1_000_000
+                def reserve(_index):
+                    base.wait_for_aster_global_rate_budget(1)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
+                    failures = []
+                    for future in [executor.submit(reserve, index) for index in range(12)]:
+                        try:
+                            future.result()
+                        except Exception as error:
+                            failures.append(repr(error))
+                self.assertEqual(failures, [])
+                state = json_module.loads(path.read_text(encoding="utf-8"))
+                self.assertEqual(state["nextAllowedAt"], 1_000_000 + 12 * 2)
+            finally:
+                base.now_ms = original_now_ms
+                for key, value in original_env.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
 if __name__ == "__main__":
     unittest.main()

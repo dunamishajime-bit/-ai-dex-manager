@@ -23,6 +23,7 @@ type BudgetState = {
 
 const sleep = (ms: number) => new Promise<void>((resolveSleep) => setTimeout(resolveSleep, ms));
 const errorCode = (error: unknown) => error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code || "") : "";
+const transientLockRace = (error: unknown) => ["ENOENT", "ENOTEMPTY", "EPERM", "EBUSY"].includes(errorCode(error));
 const LOCK_OWNER_SCHEMA = "disdex-aster-rate-budget-lock/v1";
 const LOCK_RECOVERY_GRACE_MS = 5_000;
 
@@ -74,6 +75,33 @@ async function lockIsStale(lockPath: string): Promise<boolean> {
   }
 }
 
+async function acquireLockGenerationMutex(lockPath: string, deadline: number): Promise<string> {
+  const recoveryPath = `${lockPath}.recovery`;
+  while (true) {
+    try {
+      await mkdir(recoveryPath, { mode: 0o700 });
+      return recoveryPath;
+    } catch (error) {
+      if (errorCode(error) !== "EEXIST" && !transientLockRace(error)) throw error;
+      if (Date.now() >= deadline) throw new Error("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT");
+      await sleep(5);
+    }
+  }
+}
+
+async function releaseLockGenerationMutex(recoveryPath: string, deadline: number): Promise<void> {
+  while (true) {
+    try {
+      await rm(recoveryPath, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      if (errorCode(error) === "ENOENT") return;
+      if (!transientLockRace(error) || Date.now() >= deadline) throw error;
+      await sleep(5);
+    }
+  }
+}
+
 async function writeLockOwner(lockPath: string, owner: BudgetLockOwner) {
   await writeFile(join(lockPath, "owner.json"), `${JSON.stringify(owner)}\n`, { encoding: "utf8", mode: 0o600 });
 }
@@ -106,26 +134,43 @@ async function acquireBudgetLock(lockPath: string, maxQueueMs: number): Promise<
     token: randomUUID(),
   };
   while (true) {
+    const recoveryPath = await acquireLockGenerationMutex(lockPath, deadline);
+    let waitForOwner = false;
+    let lostGeneration = false;
     try {
-      await mkdir(lockPath, { mode: 0o700 });
       try {
-        await writeLockOwner(lockPath, owner);
-        return owner;
+        await mkdir(lockPath, { mode: 0o700 });
       } catch (error) {
-        await rm(lockPath, { recursive: true, force: true }).catch(() => undefined);
-        throw error;
+        if (errorCode(error) !== "EEXIST") throw error;
+        if (!(await lockIsStale(lockPath))) {
+          waitForOwner = true;
+        } else {
+          try {
+            await rm(lockPath, { recursive: true, force: true });
+            await mkdir(lockPath, { mode: 0o700 });
+          } catch (replaceError) {
+            if (!transientLockRace(replaceError)) throw replaceError;
+            lostGeneration = true;
+          }
+        }
       }
-    } catch (error) {
-      if (errorCode(error) !== "EEXIST") throw error;
-      if (await lockIsStale(lockPath)) {
-        await rm(lockPath, { recursive: true, force: true }).catch((removeError) => {
-          if (errorCode(removeError) !== "ENOENT") throw removeError;
-        });
-        continue;
+      if (!waitForOwner && !lostGeneration) {
+        try {
+          await writeLockOwner(lockPath, owner);
+          return owner;
+        } catch (error) {
+          if (!transientLockRace(error)) {
+            await rm(lockPath, { recursive: true, force: true }).catch(() => undefined);
+            throw error;
+          }
+          lostGeneration = true;
+        }
       }
-      if (Date.now() >= deadline) throw new Error("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT");
-      await sleep(5);
+    } finally {
+      await releaseLockGenerationMutex(recoveryPath, deadline);
     }
+    if (Date.now() >= deadline) throw new Error("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT");
+    await sleep(5);
   }
 }
 

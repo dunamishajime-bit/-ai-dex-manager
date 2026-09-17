@@ -110,6 +110,25 @@ test("shared budget never evicts an old lock owned by a live process", async () 
     await rm(directory, { recursive: true, force: true });
   }
 });
+test("shared budget survives concurrent stale ownerless lock recovery without duplicate permits", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-race-"));
+  const path = join(directory, "aster-rate-budget.json");
+  const lockPath = `${path}.lock`;
+  try {
+    await mkdir(lockPath);
+    const old = new Date(Date.now() - 30_000);
+    await utimes(lockPath, old, old);
+    const results = await Promise.allSettled(Array.from({ length: 48 }, () =>
+      reserveAsterGlobalRateSlot({ path, minIntervalMs: 2, maxQueueMs: 5_000 })));
+    const rejected = results.filter((result) => result.status === "rejected");
+    assert.deepEqual(rejected, []);
+    const permits = results.map((result) => result.status === "fulfilled" ? result.value.permitAt : -1);
+    assert.equal(new Set(permits).size, permits.length, "every reservation must receive a distinct serialized permit");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("shared Aster budget propagates venue cooldown across daemons", async () => {
   const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-cooldown-"));
   const path = join(directory, "aster-rate-budget.json");
