@@ -34,6 +34,7 @@ jobs:
           tests/formal-integrated-parity.test.ts
           tests/pengu-recovery-v8-aster-precision.test.ts
           tests/pengu-recovery-v8-reconciliation.test.ts
+          tests/direct-trade-executor-position-freshness.test.ts
       - name: Runtime wiring and telemetry tests
         run: >-
           python -m unittest

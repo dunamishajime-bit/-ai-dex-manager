@@ -314,6 +314,12 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
 
     async getPositions(): Promise<DirectPosition[]> {
         const rows = await this.client.getPositions();
+        // Aster's positionRisk updateTime is the last position mutation time,
+        // not the time at which this authenticated snapshot was observed.
+        // An unchanged live position must remain fresh when the venue returns
+        // it successfully; using updateTime would eventually block every
+        // runner that shares an account with a held position.
+        const observedAt = Date.now();
         return rows
             .map((row: AsterPositionRiskRow): DirectPosition | null => {
                 const rawQuantity = safeNumber(row.positionAmt);
@@ -335,8 +341,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                     notionalUsd,
                     positionSide: row.positionSide || "BOTH",
                     leverage: safeNumber(row.leverage, 1),
-                    // A missing position timestamp is stale/unknown, not fresh.
-                    updatedAt: safeNumber(row.updateTime, 0),
+                    updatedAt: observedAt,
                 };
             })
             .filter((position): position is DirectPosition => position !== null);
