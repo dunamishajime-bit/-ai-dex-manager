@@ -179,6 +179,8 @@ export async function reconcileRecoveryV8Protection(input: {
 async function main() {
     const statePath = statePathFromEnv();
     const apply = process.argv.includes("--apply");
+    const dryRun = process.argv.includes("--dry-run");
+    if (!apply && !dryRun) throw new Error("PENGU_RECOVERY_V8_RECONCILE_REQUIRES_EXPLICIT_DRY_RUN_OR_APPLY");
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
         userAddress: process.env.ASTER_USER_ADDRESS,
