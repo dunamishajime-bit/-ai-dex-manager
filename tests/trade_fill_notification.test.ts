@@ -59,7 +59,11 @@ test("strategy mapping and Japanese email rendering are deterministic", () => {
     assert.match(rendered.subject, /約定通知/);
     assert.match(rendered.text, new RegExp(strategyId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.match(rendered.text, /約定/);
-    assert.match(rendered.text, /JST/);
+    assert.match(rendered.text, /売買: 買い/);
+    assert.match(rendered.text, /状態: 約定済み/);
+    assert.match(rendered.text, /クライアント注文ID:/);
+    assert.doesNotMatch(rendered.text, /Client Order ID|ENTRY_SIGNAL|売買: BUY|状態: FILLED/);
+    assert.match(rendered.text, /日本時間/);
   }
 
   const exit = buildTradeFillNotificationEvent(
@@ -68,7 +72,10 @@ test("strategy mapping and Japanese email rendering are deterministic", () => {
   );
   assert.equal(exit.eventType, "EXIT_FILL");
   assert.equal(exit.reduceOnly, true);
-  assert.match(renderTradeFillEmail(exit).text, /決済/);
+  const renderedExit = renderTradeFillEmail(exit);
+  assert.match(renderedExit.text, /決済/);
+  assert.match(renderedExit.text, /売買: 売り/);
+  assert.match(renderedExit.text, /状態: 一部約定/);
 });
 
 test("notification key is stable and changes when fill facts change", () => {

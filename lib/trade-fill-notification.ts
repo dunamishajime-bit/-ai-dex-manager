@@ -225,11 +225,43 @@ function japaneseTimestamp(value: string): string {
         minute: "2-digit",
         second: "2-digit",
         hour12: false,
-    }).format(date).replace(/\//g, "-") + " JST";
+    }).format(date).replace(/\//g, "-") + "（日本時間）";
+}
+
+function japaneseTradeSide(side: TradeFillNotificationEvent["side"]): string {
+    return side === "BUY" ? "買い" : "売り";
+}
+
+function japaneseTradeStatus(status: string): string {
+    const labels: Record<string, string> = {
+        FILLED: "約定済み",
+        PARTIALLY_FILLED: "一部約定",
+        NEW: "未約定",
+        CANCELED: "キャンセル",
+        CANCELLED: "キャンセル",
+        REJECTED: "拒否",
+        EXPIRED: "期限切れ",
+        UNKNOWN: "不明",
+    };
+    return labels[normalizedStatus(status)] || "約定済み";
+}
+
+function japaneseTradeReason(reason: string): string {
+    const value = String(reason || "").trim();
+    const labels: Record<string, string> = {
+        V12_PROTECTION_FILL_RECONCILED: "V12保護注文の約定を確認",
+    };
+    if (labels[value]) return labels[value];
+    if (!value) return "実約定";
+    if (/^[\x00-\x7F]+$/.test(value)) return "自動売買ロジックによる約定";
+    return value;
 }
 
 export function renderTradeFillEmail(event: TradeFillNotificationEvent): TradeFillEmailPayload {
     const action = event.eventType === "EXIT_FILL" || event.reduceOnly ? "決済" : "新規";
+    const side = japaneseTradeSide(event.side);
+    const status = japaneseTradeStatus(event.status);
+    const reason = japaneseTradeReason(event.reason);
     const timestamp = japaneseTimestamp(event.executedAt);
     const price = event.averagePrice > 0 ? event.averagePrice.toLocaleString("ja-JP", { maximumFractionDigits: 12 }) : "未取得";
     const quantity = event.executedQuantity.toLocaleString("ja-JP", { maximumFractionDigits: 12 });
@@ -240,29 +272,29 @@ export function renderTradeFillEmail(event: TradeFillNotificationEvent): TradeFi
         `ロジック: ${event.strategyId}`,
         `区分: ${action}`,
         `通貨: ${event.symbol}`,
-        `売買: ${event.side}`,
-        `状態: ${event.status}`,
+        `売買: ${side}`,
+        `状態: ${status}`,
         `約定数量: ${quantity}`,
         `平均約定価格: ${price}`,
         `約定金額: ${quote}`,
         `約定時刻: ${timestamp}`,
         `注文ID: ${event.orderId || "未取得"}`,
-        `Client Order ID: ${event.clientOrderId}`,
-        `理由: ${event.reason}`,
+        `クライアント注文ID: ${event.clientOrderId}`,
+        `理由: ${reason}`,
     ].join("\n");
     const rows = [
         ["ロジック", event.strategyId],
         ["区分", action],
         ["通貨", event.symbol],
-        ["売買", event.side],
-        ["状態", event.status],
+        ["売買", side],
+        ["状態", status],
         ["約定数量", quantity],
         ["平均約定価格", price],
         ["約定金額", quote],
         ["約定時刻", timestamp],
         ["注文ID", event.orderId || "未取得"],
-        ["Client Order ID", event.clientOrderId],
-        ["理由", event.reason],
+        ["クライアント注文ID", event.clientOrderId],
+        ["理由", reason],
     ].map(([label, value]) => `<tr><th style="text-align:left;padding:6px 12px 6px 0">${htmlEscape(label)}</th><td style="padding:6px 0">${htmlEscape(value)}</td></tr>`).join("");
     const html = `<!doctype html><html lang="ja"><meta charset="utf-8"><body style="font-family:Arial,'Yu Gothic',Meiryo,sans-serif"><h2>DisDex 実約定通知</h2><table>${rows}</table></body></html>`;
     return { subject, text, html };

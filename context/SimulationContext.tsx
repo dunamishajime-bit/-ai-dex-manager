@@ -3658,7 +3658,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             || String(displaySymbol || symbol || "").replace(/\.SOL$/i, "").trim()
             || "未設定";
 
-        const subject = `[DIS TERMINAL] 自動売買 ${categoryLabelMap[category]}: ${resolvedDisplaySymbol}`;
+        const subject = `【DisDex】自動売買通知｜${categoryLabelMap[category]}｜${resolvedDisplaySymbol}`;
         const lines = [
             `種別: ${categoryLabelMap[category]}`,
             `通貨: ${resolvedDisplaySymbol}`,
@@ -3669,7 +3669,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
             `最終売却価格: ${finalLabel}`,
             `損益価格: ${pnlLabel}`,
             `理由: ${reason || "自動売買フローに基づく実行"}`,
-            `Tx Hash: ${txHash || "未発行"}`,
+            `トランザクションハッシュ: ${txHash || "未発行"}`,
             `時刻: ${new Date().toLocaleString("ja-JP")}`,
         ];
         const text = lines.join("\n");
