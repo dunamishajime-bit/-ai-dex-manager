@@ -14,7 +14,7 @@ import {
 } from "../config/disdexQuality102CausalV4Model";
 import { resolveSharedCryptoDailyLossPct } from "../config/sharedCryptoRiskPolicy";
 import { AsterV3Client, isAsterDepositRequirementError } from "../lib/aster-v3-client";
-import { AsterDirectTradeExecutor, type DirectPosition } from "../lib/direct-trade-executor";
+import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { nextQuality102DaemonWaitMs } from "../lib/quality102-live-scheduling";
@@ -36,6 +36,23 @@ const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const DEFAULT_HISTORY_HOURS = 225 * 24;
 const DEFAULT_MAX_ENTRY_DELAY_MS = 2 * 60 * 60_000;
 const HOUR_MS = 3_600_000;
+
+export function isQ102PreflightManagedProtectiveOrder(
+    order: DirectOpenOrder,
+    positions: readonly DirectPosition[],
+): boolean {
+    const symbol = String(order.symbol || "").trim().toUpperCase();
+    const clientOrderId = String(order.clientOrderId || "");
+    if (symbol !== "PENGUUSDT" || !/^recv8-[0-9a-f]{16,36}$/i.test(clientOrderId)) return false;
+    if (order.reduceOnly !== true || !["NEW", "PARTIALLY_FILLED"].includes(String(order.status || "").toUpperCase())) return false;
+    if (!Number.isFinite(order.quantity) || order.quantity <= 0 || !Number.isFinite(order.executedQuantity) || order.executedQuantity < 0) return false;
+    const position = positions.find((candidate) => candidate.symbol.toUpperCase() === symbol && Math.abs(candidate.quantity) > 1e-12);
+    if (!position || !Number.isFinite(position.quantity)) return false;
+    const expectedSide = position.quantity > 0 ? "SELL" : "BUY";
+    if (order.side !== expectedSide) return false;
+    return Math.abs(order.quantity - Math.abs(position.quantity)) <= Math.max(1e-8, Math.abs(position.quantity) * 0.01)
+        && order.executedQuantity <= 1e-12;
+}
 
 export interface Quality102CausalV1LiveResolvedConfig {
     mode: Quality102CausalV1Mode;
@@ -344,7 +361,8 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
     if (beforeState.position && !positions.some((position) => Math.abs(position.quantity) > 1e-12 && stateMatches(position))) {
         throw new Error("QUALITY102_PREFLIGHT_STATE_POSITION_NOT_ON_EXCHANGE");
     }
-    if (openOrders.length > 0) throw new Error("QUALITY102_PREFLIGHT_OPEN_ORDER_CONFLICT");
+    const unmanagedOpenOrders = openOrders.filter((order) => !isQ102PreflightManagedProtectiveOrder(order, positions));
+    if (unmanagedOpenOrders.length > 0) throw new Error("QUALITY102_PREFLIGHT_OPEN_ORDER_CONFLICT");
     const quotes = await Promise.all(config.symbols.map(async (symbol) => {
         const quote = await executor.getMarketQuote(symbol);
         return { symbol, quote };
@@ -373,6 +391,7 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
         accountAsset: account.asset,
         positionCount: positions.length,
         openOrderCount: openOrders.length,
+        managedProtectiveOrderCount: openOrders.length - unmanagedOpenOrders.length,
         quality102Position: beforeState.position?.symbol,
         quality102Pending: Boolean(beforeState.pending),
         gross: {

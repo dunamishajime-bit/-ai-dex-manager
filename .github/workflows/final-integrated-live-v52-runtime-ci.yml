@@ -35,6 +35,7 @@ jobs:
           tests/pengu-recovery-v8-aster-precision.test.ts
           tests/pengu-recovery-v8-reconciliation.test.ts
           tests/direct-trade-executor-position-freshness.test.ts
+          tests/quality102-preflight-protective-order.test.ts
       - name: Runtime wiring and telemetry tests
         run: >-
           python -m unittest
