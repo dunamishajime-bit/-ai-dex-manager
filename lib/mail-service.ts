@@ -107,20 +107,20 @@ export async function sendPasswordResetEmail(email: string, resetToken: string):
 
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
-    // Construct email content
-    const subject = "AI DEX Manager: Password Reset Request";
-    const text = `You requested a password reset. Please click the link below to reset your password:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email.`;
+    // Construct email content in Japanese.
+    const subject = "【DisDex】パスワード再設定のご案内";
+    const text = `パスワード再設定のリクエストを受け付けました。\n\n以下のリンクからパスワードを再設定してください。\n\n${resetUrl}\n\nこのリクエストにお心当たりがない場合は、このメールを破棄してください。`;
     const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-            <h2 style="color: #333;">Password Reset Request</h2>
-            <p>You requested a password reset for your AI DEX Manager account.</p>
+        <div style="font-family: Arial, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #333;">パスワード再設定のご案内</h2>
+            <p>DisDexのパスワード再設定リクエストを受け付けました。</p>
             <div style="margin: 30px 0; text-align: center;">
-                <a href="${resetUrl}" style="background-color: #ffd700; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a>
+                <a href="${resetUrl}" style="background-color: #ffd700; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">パスワードを再設定する</a>
             </div>
-            <p style="color: #666; font-size: 14px;">If the button above doesn't work, copy and paste this link into your browser:</p>
+            <p style="color: #666; font-size: 14px;">ボタンを押せない場合は、以下のリンクをブラウザに貼り付けてください。</p>
             <p style="color: #666; font-size: 12px; word-break: break-all;">${resetUrl}</p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="color: #999; font-size: 12px;">If you did not request this, please ignore this email.</p>
+            <p style="color: #999; font-size: 12px;">このリクエストにお心当たりがない場合は、このメールを破棄してください。</p>
         </div>
     `;
 

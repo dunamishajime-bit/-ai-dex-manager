@@ -15,8 +15,8 @@ export async function GET() {
 
         // Hardcoded test target
         const targetEmail = "dunamis.hajime@gmail.com";
-        const subject = "Direct API Test Email";
-        const text = "If you receive this, the API and Mail Service are working. The issue is likely in the frontend or AuthContext.";
+        const subject = "【DisDex】メール送信機能の動作確認";
+        const text = "このメールを受信できていれば、DisDexのメール送信機能は正常に動作しています。これは動作確認メールです。";
 
         const result = await sendEmail(targetEmail, subject, text);
 
