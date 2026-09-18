@@ -88,6 +88,8 @@ jobs:
             .research-state/flat-boost-current/v12-top2-ledger.json
 
       - name: Baseline parity gate
+        env:
+          ALLOCATOR_INSPECT_ONLY: '1'
         run: |
           set -o pipefail
           python scripts/research_flat_boost_preemption_20260918.py \
