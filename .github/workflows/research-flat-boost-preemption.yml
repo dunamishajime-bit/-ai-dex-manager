@@ -1,0 +1,97 @@
+name: Research flat boost preemption
+
+on:
+  push:
+    branches:
+      - research/flat-boost-preemption-20260918
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  baseline-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Checkout frozen V52 stock research source
+        uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+          fetch-depth: 1
+
+      - name: Checkout frozen V11 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+          fetch-depth: 1
+
+      - name: Checkout frozen V13 stock dependency
+        uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore stock cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .cache/aster-only-v39-overnight-open
+            .stock-research/.cache/perp-research-usdm
+          key: flat-boost-preemption-${{ runner.os }}-${{ hashFiles('scripts/research_flat_boost_preemption_20260918.py') }}
+          restore-keys: |
+            quality102-gross-cap-sweep-
+            quality102-grosssafe-
+            latest-v12-pengu-v8-v52-dca-
+            current-v12-top2-pengu-v20-v52-dca-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+
+      - run: npm ci
+
+      - name: Restore frozen V12 and PENGU ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-33257164125
+          path: .research-state/flat-boost-prior
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 33257164125
+
+      - name: Baseline parity gate
+        run: |
+          set -o pipefail
+          python scripts/research_flat_boost_preemption_20260918.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/flat-boost-prior/v12-top2-ledger.json \
+            --pengu-ledger .research-state/flat-boost-prior/pengu-v8-ledger.json \
+            --output-root .research-state/flat-boost-preemption \
+            2>&1 | tee .research-state/flat-boost-preemption.log
+
+      - name: Upload baseline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flat-boost-preemption-${{ github.run_id }}
+          path: |
+            .research-state/flat-boost-preemption
+            .research-state/flat-boost-preemption.log
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
