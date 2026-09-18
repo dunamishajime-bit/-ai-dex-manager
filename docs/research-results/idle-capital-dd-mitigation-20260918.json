@@ -1,0 +1,107 @@
+{
+  "status": "PASS_RESEARCH_ONLY",
+  "methodology": "FULL EVENT REPLAY; only Q102 family gross caps changed; V12/PENGU/V52 unchanged; crypto gross cap 3.0 and total gross cap 3.5 unchanged",
+  "current15": {
+    "NORMAL": {
+      "asset": 69373656.13931108,
+      "pf": 3.70258068,
+      "dd": -17.59935397,
+      "trades": 1165
+    },
+    "SEVERE": {
+      "asset": 8729157.74295382,
+      "pf": 2.62470185,
+      "dd": -19.24473938,
+      "trades": 1023
+    }
+  },
+  "fixed25": {
+    "NORMAL": {
+      "asset": 209152547.18258882,
+      "pf": 3.67732802,
+      "dd": -27.96929818,
+      "trades": 1244
+    },
+    "SEVERE": {
+      "asset": 24282260.37897472,
+      "pf": 2.70771839,
+      "dd": -28.8866718,
+      "trades": 1099
+    }
+  },
+  "bestStrictDd20": {
+    "caps": {
+      "HIGH_VOL": 1.665,
+      "MR": 1.0,
+      "BRK": 2.475,
+      "REV": 2.5,
+      "PB": 2.5
+    },
+    "NORMAL": {
+      "asset": 200212840.0957626,
+      "pf": 3.84957445,
+      "dd": -19.3589478,
+      "trades": 1221
+    },
+    "SEVERE": {
+      "asset": 23687637.26374145,
+      "pf": 2.80751006,
+      "dd": -19.99482558,
+      "trades": 1078
+    }
+  },
+  "firstFailingBoundarySamples": [
+    {
+      "caps": {
+        "HIGH_VOL": 1.67,
+        "MR": 1.0,
+        "BRK": 2.475,
+        "REV": 2.5,
+        "PB": 2.5
+      },
+      "NORMAL": {
+        "asset": 200317448.50512412,
+        "dd": -19.40617481
+      },
+      "SEVERE": {
+        "asset": 23697276.25233554,
+        "dd": -20.00828883
+      }
+    },
+    {
+      "caps": {
+        "HIGH_VOL": 1.66,
+        "MR": 1.0,
+        "BRK": 2.477,
+        "REV": 2.5,
+        "PB": 2.5
+      },
+      "NORMAL": {
+        "asset": 200212353.0668282,
+        "dd": -19.31172328
+      },
+      "SEVERE": {
+        "asset": 23689811.44626832,
+        "dd": -20.00442788
+      }
+    }
+  ],
+  "comparisons": {
+    "normalUpliftVsCurrentPct": 188.60067529626795,
+    "severeUpliftVsCurrentPct": 171.36223174408917,
+    "normalRetainedVsFixed25Pct": 95.7257479254977,
+    "severeRetainedVsFixed25Pct": 97.55120361138975,
+    "normalDdImprovementPoints": 8.61035038,
+    "severeDdImprovementPoints": 8.891846219999998
+  },
+  "rootCause": {
+    "fixed25PrimaryDdDriver": "Q102 HIGH_VOL ENA large loss around 2025-10-19; after HV cap, BRK/REV Sep drawdown becomes limiting",
+    "severeFloor": "~19.2447% core-side drawdown around July 2026 with no Q102 event in the max-DD window"
+  },
+  "safety": {
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false,
+    "ordersSent": false
+  }
+}
