@@ -11,11 +11,11 @@ permissions:
   actions: read
 
 concurrency:
-  group: flat-boost-preemption-${{ github.ref }}
+  group: ${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  baseline-gate:
+  lineage-gate-and-backtest:
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
@@ -56,57 +56,40 @@ jobs:
             .stock-research/.cache/perp-research-usdm
           key: flat-boost-preemption-${{ runner.os }}-${{ hashFiles('scripts/research_flat_boost_preemption_20260918.py') }}
           restore-keys: |
-            quality102-gross-cap-sweep-
-            quality102-grosssafe-
-            latest-v12-pengu-v8-v52-dca-
-            current-v12-top2-pengu-v20-v52-dca-
             aster-only-v52-v39cache-
             perp-research-usdm-
 
-      - name: Restore frozen V12 and PENGU ledgers
-        uses: actions/download-artifact@v4
-        with:
-          name: latest-v12-pengu-v8-v52-dca-1y-33257164125
-          path: .research-state/flat-boost-prior
-          github-token: ${{ github.token }}
-          repository: dunamishajime-bit/-ai-dex-manager
-          run-id: 33257164125
-
-      - name: Restore regenerated current BTC2 V12 ledger
-        uses: actions/download-artifact@v4
-        with:
-          name: flat-boost-preemption-35337138289
-          path: .research-state/reuse
-          github-token: ${{ github.token }}
-          repository: dunamishajime-bit/-ai-dex-manager
-          run-id: 35337138289
-
-      - name: Reuse current BTC2 V12 Top2 ledger
+      - name: Establish explicit recovered input locations
         run: |
-          mkdir -p .research-state/flat-boost-current
-          cp .research-state/reuse/flat-boost-current/v12-top2-ledger.json \
-            .research-state/flat-boost-current/v12-top2-ledger.json
+          mkdir -p .research-state/formal-inputs
+          test -f .research-state/formal-inputs/v12-q54-atr0p014.json
+          test -f .research-state/formal-inputs/pengu-hard-cd24.json
+          test -f .research-state/formal-inputs/candidate-1slot.csv
+          test -f .research-state/formal-inputs/evidence-1slot.csv
+          test -d .research-state/formal-inputs/stock-cache
+          test -f .stock-research/scripts/research_lab_v96_v52_dual_slot_one_year_bt.py
 
-      - name: Baseline parity gate
-        env:
-          ALLOCATOR_INSPECT_ONLY: '1'
+      - name: Run research-only lineage gate and comparison
         run: |
           set -o pipefail
           python scripts/research_flat_boost_preemption_20260918.py \
-            --stock-cache-dir .cache/aster-only-v39-overnight-open \
-            --v12-ledger .research-state/flat-boost-current/v12-top2-ledger.json \
-            --pengu-ledger .research-state/flat-boost-prior/pengu-v8-ledger.json \
+            --formal-json docs/research-results/v52-final-validated-logic-20260917.json \
+            --v12-ledger .research-state/formal-inputs/v12-q54-atr0p014.json \
+            --pengu-ledger .research-state/formal-inputs/pengu-hard-cd24.json \
+            --q102-csv .research-state/formal-inputs/candidate-1slot.csv \
+            --q102-evidence .research-state/formal-inputs/evidence-1slot.csv \
+            --stock-cache-dir .research-state/formal-inputs/stock-cache \
+            --stock-backbone .stock-research/scripts/research_lab_v96_v52_dual_slot_one_year_bt.py \
             --output-root .research-state/flat-boost-preemption \
             2>&1 | tee .research-state/flat-boost-preemption.log
 
-      - name: Upload baseline evidence
+      - name: Upload research evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: flat-boost-preemption-${{ github.run_id }}
           path: |
             .research-state/flat-boost-preemption
-            .research-state/flat-boost-current
             .research-state/flat-boost-preemption.log
           include-hidden-files: true
           retention-days: 90

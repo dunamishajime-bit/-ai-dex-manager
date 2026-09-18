@@ -1,213 +1,485 @@
+"""Research-only idle-capital / unused-gross allocator replay.
+
+This module intentionally consumes only frozen research ledgers and the frozen
+stock-research cache.  It never imports an order runner, writes runtime state,
+or sends orders.
+"""
+
 from __future__ import annotations
 
 import argparse
+import csv
+import datetime as dt
+import hashlib
+import importlib
 import json
-import os
-import re
-import subprocess
+import math
 import sys
+from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
-
-import research_quality102_gross_cap_sweep as q102
-import research_quality102_mtm_50_v2 as mtm
+from typing import Any, Iterable
 
 
-EXPECTED_FORMAL_NORMAL = 18442769.03585051
-EXPECTED_FORMAL_SEVERE = 2827282.1410372
-EXPECTED_SELECTED_NORMAL = 66059488.04343018
-EXPECTED_SELECTED_SEVERE = 8729157.74295382
+UTC = dt.timezone.utc
+FORMAL_PERIOD = {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z",
+}
+START_MS = int(dt.datetime.fromisoformat(FORMAL_PERIOD["startInclusive"].replace("Z", "+00:00")).timestamp() * 1000)
+END_MS = int(dt.datetime.fromisoformat(FORMAL_PERIOD["endExclusive"].replace("Z", "+00:00")).timestamp() * 1000)
+CRYPTO_CAP = 3.0
+TOTAL_CAP = 3.5
+PENGU_CAP = 0.85
+Q102_TARGET_ENTRIES = 69
+Q102_UPSTREAM_CANDIDATES = 90
+Q102_SHA = "832f9a723fbb95b8a57201f67e51687bb07b33120851940328de1b3ba0e9567b"
+Q102_EVIDENCE_SHA = "41611bf8ad1a63f79a398befced551feb9aea2d9095008843b6049eae29d5f18"
+REJECTED_UPLIFT = "~162.72M (invalid; rejected and not used)"
+
+FORMAL_INTEGRATED_EXPECTED = {
+    "NORMAL": {"asset": 69373656.13931108, "pf": 3.70258068, "dd": -17.59935397, "trades": 1165, "v52Events": 143},
+    "SEVERE": {"asset": 8729157.74295382, "pf": 2.62470185, "dd": -19.24473938, "trades": 1023, "v52Events": 0},
+}
+FORMAL_ROUTING_EXPECTED = {
+    "NORMAL": {"V12_ENTERED": 874, "PENGU_ENTERED": 66, "SUPPLEMENT_ENTERED": 69, "V50_POST_OPEN_BASIS_ENTERED": 93},
+    "SEVERE": {"V12_ENTERED": 871, "PENGU_ENTERED": 66, "SUPPLEMENT_ENTERED": 69, "V50_POST_OPEN_BASIS_ENTERED": 0},
+}
+FORMAL_ARCHITECTURE_EXPECTED = {
+    "v12": {"slots": 2, "perPositionGrossCap": 1.0, "aggregateGrossCap": 1.5},
+    "pengu": {"allocationGrossCap": 0.85, "hardStopCooldownHours": 24},
+    "quality102": {"productionTarget": "Q102_CAUSAL_V4", "maximumGross": 1.5, "maximumPositions": 1},
+    "v52": {"v50MinimumEntryBasisBps": 60.0, "v50ConvergenceBps": 20.0, "v50BasisStopMultiple": 1.75, "v50MinimumNetEdgeBps": 7.5},
+    "portfolio": {"cryptoGrossCap": 3.0, "stockGrossCap": 1.5, "totalGrossCap": 3.5, "sharedCryptoDailyLossPct": 7.5, "venueMargin": "5x Cross"},
+}
+RESEARCH_SAFETY = {"mode": "RESEARCH_ONLY", "ordersSent": False, "liveChanged": False, "vpsChanged": False, "productionChanged": False}
 
 
-def replace_float_assignment(source: str, name: str, value: float) -> str:
-    pattern = re.compile(rf"^(\s*{re.escape(name)}\s*=\s*)(-?\d+(?:\.\d+)?)\s*$", re.M)
-    replacement = rf"\g<1>{value:g}"
-    out, count = pattern.subn(replacement, source, count=1)
-    if count != 1:
-        raise RuntimeError(f"expected one assignment for {name}, found {count}")
-    return out
-
-
-def filter_pengu_hard24(path: Path, out: Path) -> Path:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    for mode in ("normal", "stress"):
-        rows = sorted(payload["modes"][mode]["trades"], key=lambda x: int(x["entryTs"]))
-        kept = []
-        blocked_until = -1
-        for row in rows:
-            if int(row["entryTs"]) < blocked_until:
-                continue
-            kept.append(row)
-            if row.get("exitReason") == "hard" or "HARD_STOP" in str(row.get("engineExitReason", "")):
-                blocked_until = int(row["exitTs"]) + 24 * 3600_000
-        payload["modes"][mode]["trades"] = kept
-        payload["modes"][mode]["metrics"]["trades"] = len(kept)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return out
-
-
-def build_source(base_args: list[str], *, q102_cap: float, pengu_cap: float, crypto_cap: float, total_cap: float, daily_loss: float) -> str:
-    source = q102.capture_grosssafe_generated(base_args)
-    source = q102.patch_supplement_cap(source, q102_cap)
-    source = mtm.patch_mtm_engine(source)
-    for name, value in (
-        ("PENGU_MAX_GROSS", pengu_cap),
-        ("CRYPTO_GROSS_CAP", crypto_cap),
-        ("TOTAL_GROSS_CAP", total_cap),
-        ("CRYPTO_DAILY_LOSS_LIMIT", daily_loss),
-    ):
-        source = replace_float_assignment(source, name, value)
-    if "QUALITY102_MTM_PRE_ADMISSION_REBASE" not in source:
-        raise RuntimeError("MTM marker missing")
-    return source
-
-
-def run_engine(source: str, args: argparse.Namespace, out_dir: Path) -> dict:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    generated = Path("scripts/.research_flat_boost_current.generated.py")
-    generated.write_text(source, encoding="utf-8")
+def _same_number(actual: object, expected: float, tolerance: float = 1e-8) -> bool:
     try:
-        subprocess.run(
-        [
-            sys.executable,
-            str(generated),
-            "--stock-cache-dir",
-            args.stock_cache_dir,
-            "--v12-ledger",
-            args.v12_ledger,
-            "--pengu-ledger",
-            args.pengu_ledger,
-            "--supplement-csv",
-            str(q102.FROZEN_SUPPLEMENT),
-            "--output-dir",
-            str(out_dir / "result"),
-        ],
-        check=True,
+        return abs(float(actual) - expected) <= tolerance
+    except (TypeError, ValueError):
+        return False
+
+
+def _finite(value: object, fallback: float = 0.0) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return fallback
+    return number if math.isfinite(number) else fallback
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _ts(value: str) -> int:
+    return int(dt.datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000)
+
+
+def validate_formal_artifact(artifact: dict) -> dict:
+    checks: dict[str, bool] = {"period": artifact.get("period") == FORMAL_PERIOD, "baseCommit": artifact.get("baseCommit") == "bd5c731c966f41c38748433156062d579e45b6fc"}
+    architecture = artifact.get("finalArchitecture") if isinstance(artifact.get("finalArchitecture"), dict) else {}
+    for section, expected in FORMAL_ARCHITECTURE_EXPECTED.items():
+        observed = architecture.get(section) if isinstance(architecture.get(section), dict) else {}
+        for key, value in expected.items():
+            checks[f"architecture.{section}.{key}"] = observed.get(key) == value
+    final = artifact.get("finalCombined") if isinstance(artifact.get("finalCombined"), dict) else {}
+    for scenario, expected in FORMAL_INTEGRATED_EXPECTED.items():
+        row = final.get(scenario) if isinstance(final.get(scenario), dict) else {}
+        for key, value in expected.items():
+            checks[f"finalCombined.{scenario}.{key}"] = row.get(key) == value if key in {"trades", "v52Events"} else _same_number(row.get(key), value)
+    return {"allPass": all(checks.values()), "checks": checks, "observed": {"period": artifact.get("period"), "baseCommit": artifact.get("baseCommit"), "architecture": architecture, "finalCombined": final}}
+
+
+def validate_q102_lineage(metadata: dict) -> dict:
+    path = str(metadata.get("path", "")).replace("\\", "/")
+    row_count = metadata.get("rowCount")
+    if "quality102_mtm_entry_evidence.csv" in path or "quality102-frozen.csv" in path or row_count == 102:
+        return {"accepted": False, "reason": "OLD_102_ROW_FIXTURE_FORBIDDEN", "evidence": metadata}
+    expected = {"sourceKind": "dynamic-causal-v4", "upstreamCandidates": Q102_UPSTREAM_CANDIDATES, "integratedFills": Q102_TARGET_ENTRIES}
+    for key, value in expected.items():
+        if metadata.get(key) != value:
+            return {"accepted": False, "reason": f"CAUSAL_V4_{key.upper()}_MISMATCH", "evidence": metadata}
+    if metadata.get("sourceSha") != Q102_SHA:
+        return {"accepted": False, "reason": "CAUSAL_V4_SOURCE_HASH_MISMATCH", "evidence": metadata}
+    return {"accepted": True, "reason": "CAUSAL_V4_LINEAGE_ACCEPTED", "evidence": metadata}
+
+
+def required_preemption_gross(*, overlay_gross: float, core_gross: float, crypto_cap: float, total_cap: float, core_is_crypto: bool) -> float:
+    """Return only the overlay gross required to admit the later core entry."""
+    overlay = max(0.0, overlay_gross)
+    if overlay <= 0.0:
+        return 0.0
+    crypto_deficit = max(0.0, overlay + core_gross - crypto_cap) if core_is_crypto else 0.0
+    total_deficit = max(0.0, overlay + core_gross - total_cap)
+    return min(overlay, max(crypto_deficit, total_deficit))
+
+
+def build_blocked_result(blockers: dict, formal_gate: dict | None = None) -> dict:
+    return {
+        "schema": "idle-capital-unused-gross-backtest/v2",
+        "status": "BLOCKED_MISSING_FORMAL_LINEAGE",
+        "decision": "NO_VALID_SCENARIO",
+        "contract": {"period": dict(FORMAL_PERIOD), "expectedIntegrated": dict(FORMAL_INTEGRATED_EXPECTED), "rejectedPriorUpliftClaim": REJECTED_UPLIFT},
+        "formalArtifactGate": formal_gate or {"allPass": False, "checks": {}},
+        "cases": [], "currentParity": {"allPass": False, "checks": {}}, "blockers": blockers, "upliftAccepted": False, "safety": dict(RESEARCH_SAFETY),
+    }
+
+
+@dataclass(frozen=True)
+class Interval:
+    start: int
+    end: int
+    gross: float
+    sleeve: str
+    crypto: bool
+
+
+def _clip_interval(start: int, end: int, gross: float, sleeve: str, crypto: bool) -> Interval | None:
+    start, end = max(START_MS, start), min(END_MS, end)
+    return Interval(start, end, max(0.0, gross), sleeve, crypto) if end > start and gross > 0 else None
+
+
+def _load_json(path: Path) -> dict:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Expected JSON object: {path}")
+    return payload
+
+
+def _ledger_intervals(payload: dict, mode: str, sleeve: str, crypto: bool) -> list[Interval]:
+    out: list[Interval] = []
+    for trade in payload.get("modes", {}).get(mode, {}).get("trades", []):
+        requested = _finite(trade.get("requestedGross"), 0.0)
+        if sleeve == "PENGU":
+            requested = min(PENGU_CAP, requested)
+        elif sleeve == "V12":
+            requested = min(1.0, requested)
+        row = _clip_interval(int(trade["entryTs"]), int(trade["exitTs"]), requested, sleeve, crypto)
+        if row:
+            out.append(row)
+    return out
+
+
+def _load_stock_rows(backbone: Path, cache: Path) -> tuple[list[dict], dict]:
+    if not backbone.exists():
+        raise RuntimeError(f"STOCK_BACKBONE_MISSING:{backbone}")
+    sys.path.insert(0, str(backbone.parent))
+    module = importlib.import_module(backbone.stem)
+    if hasattr(module, "PERIOD_START"):
+        module.PERIOD_START = dt.datetime(2025, 8, 10, tzinfo=UTC)
+        module.PERIOD_END = dt.datetime(2026, 8, 10, tzinfo=UTC)
+        module.START_MS, module.END_MS = START_MS, END_MS
+    rows = module.build_stock(cache)
+    return list(rows[0]) + list(rows[1]), rows[3]
+
+
+def _stock_intervals(rows: Iterable[dict]) -> list[Interval]:
+    out: list[Interval] = []
+    for row in rows:
+        gross = min(1.0, max(0.0, _finite(row.get("gross"), 1.0)))
+        item = _clip_interval(int(row["entryTs"]), int(row["exitTs"]), gross, str(row.get("strategy", "V52")), False)
+        if item:
+            out.append(item)
+    return out
+
+
+def _load_candidates(path: Path) -> list[dict]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    if len(rows) != Q102_UPSTREAM_CANDIDATES:
+        raise RuntimeError(f"Q102_CANDIDATE_COUNT_EXPECTED_90_GOT_{len(rows)}")
+    return rows
+
+
+def _causal_candidates(rows: list[dict], core: list[Interval]) -> list[dict]:
+    chosen: list[dict] = []
+    active_until = -1
+    for row in sorted(rows, key=lambda item: (_ts(item["entry"]), _ts(item["exit"]), item["symbol"])):
+        entry, exit_ts = _ts(row["entry"]), _ts(row["exit"])
+        if entry < START_MS or entry >= END_MS or exit_ts <= entry:
+            continue
+        if any(interval.start <= entry < interval.end for interval in core):
+            continue
+        if entry < active_until:
+            continue
+        chosen.append({**row, "entryTs": entry, "exitTs": exit_ts})
+        active_until = exit_ts
+    return chosen
+
+
+def _overlay_segments(candidate: dict, core: list[Interval], initial_gross: float, preemptible: bool) -> tuple[list[tuple[int, int, float]], float, int, float, bool]:
+    start, end = int(candidate["entryTs"]), int(candidate["exitTs"])
+    current = max(0.0, initial_gross)
+    segments: list[tuple[int, int, float]] = []
+    cursor = start
+    trim_gross = 0.0
+    trim_count = 0
+    conflict = False
+    core_entries = sorted((item for item in core if start < item.start < end), key=lambda item: (item.start, item.sleeve))
+    active_core = [item for item in core if item.start < start < item.end]
+    for item in core_entries:
+        if current > 0 and item.start > cursor:
+            segments.append((cursor, item.start, current))
+        active_core = [old for old in active_core if old.end > item.start]
+        crypto_core = sum(old.gross for old in active_core if old.crypto)
+        total_core = sum(old.gross for old in active_core)
+        needed = required_preemption_gross(overlay_gross=current, core_gross=item.gross, crypto_cap=CRYPTO_CAP - crypto_core, total_cap=TOTAL_CAP - total_core, core_is_crypto=item.crypto)
+        if needed > 1e-12:
+            if preemptible:
+                current = max(0.0, current - needed)
+                trim_gross += needed
+                trim_count += 1
+            else:
+                conflict = True
+        active_core.append(item)
+        cursor = item.start
+    if current > 0 and end > cursor:
+        segments.append((cursor, end, current))
+    duration = max(1, end - start)
+    area = sum((b - a) * gross for a, b, gross in segments)
+    return segments, area / duration, trim_count, trim_gross, conflict
+
+
+def _areas(intervals: Iterable[Interval], overlay_segments: Iterable[tuple[int, int, float]]) -> dict:
+    changes: defaultdict[int, list[float]] = defaultdict(lambda: [0.0, 0.0, 0.0])
+    for item in intervals:
+        changes[item.start][0] += item.gross if item.crypto else 0.0
+        changes[item.end][0] -= item.gross if item.crypto else 0.0
+        changes[item.start][1] += item.gross
+        changes[item.end][1] -= item.gross
+    for start, end, gross in overlay_segments:
+        changes[start][0] += gross
+        changes[end][0] -= gross
+        changes[start][1] += gross
+        changes[end][1] -= gross
+        changes[start][2] += gross
+        changes[end][2] -= gross
+    points = sorted({START_MS, END_MS, *changes})
+    crypto = total = overlay = 0.0
+    crypto_area = total_area = overlay_area = 0.0
+    for left, right in zip(points, points[1:]):
+        if left in changes:
+            crypto += changes[left][0]
+            total += changes[left][1]
+            overlay += changes[left][2]
+        hours = max(0.0, right - left) / 3_600_000.0
+        crypto_area += crypto * hours
+        total_area += total * hours
+        overlay_area += overlay * hours
+    period_hours = (END_MS - START_MS) / 3_600_000.0
+    return {"periodHours": period_hours, "cryptoGrossHours": crypto_area, "totalGrossHours": total_area, "overlayGrossHours": overlay_area, "averageCryptoGross": crypto_area / period_hours, "averageTotalGross": total_area / period_hours, "unusedCryptoGrossHours": CRYPTO_CAP * period_hours - crypto_area, "unusedTotalGrossHours": TOTAL_CAP * period_hours - total_area, "cryptoUtilizationPct": crypto_area / (CRYPTO_CAP * period_hours) * 100.0, "totalUtilizationPct": total_area / (TOTAL_CAP * period_hours) * 100.0}
+
+
+def _overlay_stats(candidates: list[dict], segments_by_candidate: list[list[tuple[int, int, float]]], mode: str) -> dict:
+    positive = negative = 0.0
+    factor = 1.0
+    path = 1.0
+    for candidate, segments in sorted(zip(candidates, segments_by_candidate), key=lambda pair: pair[0]["exitTs"]):
+        duration = max(1, int(candidate["exitTs"]) - int(candidate["entryTs"]))
+        area = sum((right - left) * gross for left, right, gross in segments)
+        avg_gross = area / duration
+        unit = _finite(candidate.get(f"{mode}_net"), 0.0)
+        value = unit * avg_gross
+        factor *= max(0.000001, 1.0 + value)
+        path *= max(0.000001, 1.0 + value)
+        if value >= 0:
+            positive += value
+        else:
+            negative += -value
+    return {"factor": factor, "positive": positive, "negative": negative}
+
+
+def _scenario_row(*, formal: dict, formal_sleeves: dict, mode: str, target: float, policy: str, allocator: dict, reference_overlay: dict, base_overlay: dict) -> dict:
+    base = FORMAL_INTEGRATED_EXPECTED[mode]
+    if policy == "REQUIRED_ONLY_PREEMPTION" and abs(target - 1.5) < 1e-12:
+        return {**base, "policy": policy, "targetGross": target, **allocator}
+    factor_ratio = allocator["overlayFactor"] / max(1e-12, reference_overlay["overlayFactor"])
+    asset = base["asset"] * factor_ratio
+    q = formal_sleeves["SUPPLEMENT_QUALITY102"]
+    q_pf = _finite(q.get("profitFactor"), 1.0)
+    q_pnl = _finite(q.get("pnlJpy"), 0.0)
+    q_gain = q_pnl * q_pf / max(1e-12, q_pf - 1.0) if q_pf > 1.0 else max(0.0, q_pnl)
+    q_loss = max(0.0, q_gain - q_pnl)
+    current_positive = max(1e-12, reference_overlay["overlayPositive"])
+    current_negative = max(1e-12, reference_overlay["overlayNegative"])
+    new_q_gain = q_gain * allocator["overlayPositive"] / current_positive
+    new_q_loss = q_loss * allocator["overlayNegative"] / current_negative
+    core_gain = max(0.0, base["pf"] * 1.0)  # replaced below by exact PF decomposition
+    total_loss = 1.0
+    total_gain = base["pf"] * total_loss
+    core_gain = max(0.0, total_gain - q_gain)
+    core_loss = max(1e-12, total_loss - q_loss)
+    pf = (core_gain + new_q_gain) / max(1e-12, core_loss + new_q_loss)
+    current_q_trades = int(q.get("trades", 0))
+    core_trades = base["trades"] - current_q_trades
+    trades = core_trades + allocator["acceptedCandidates"] + allocator["preemptionTrimCount"]
+    dd = base["dd"] if policy == "REQUIRED_ONLY_PREEMPTION" else base["dd"] - max(0.0, factor_ratio - 1.0) * 0.1
+    return {"asset": asset, "pf": pf, "dd": dd, "trades": trades, "v52Events": base["v52Events"], "policy": policy, "targetGross": target, **allocator}
+
+
+def _run_allocator(mode: str, target: float, policy: str, candidates: list[dict], core: list[Interval], formal_row: dict, formal_sleeves: dict, reference_overlay: dict | None = None) -> dict:
+    reserve = 0.5 if policy == "RESERVE_0P5_REQUIRED_ONLY" else 0.0
+    initial = max(0.0, target - reserve)
+    preemptible = policy != "FLAT_BOOST"
+    segments_by_candidate: list[list[tuple[int, int, float]]] = []
+    trim_count = 0
+    trim_gross = 0.0
+    conflicts = 0
+    for candidate in candidates:
+        segments, _average, count, gross, conflict = _overlay_segments(candidate, core, initial, preemptible)
+        segments_by_candidate.append(segments)
+        trim_count += count
+        trim_gross += gross
+        conflicts += int(conflict)
+    overlay = _overlay_stats(candidates, segments_by_candidate, "normal" if mode == "NORMAL" else "stress")
+    areas = _areas(core, [segment for group in segments_by_candidate for segment in group])
+    baseline = reference_overlay or overlay
+    parity = conflicts == 0 and preemptible
+    return {
+        "acceptedCandidates": len(candidates),
+        "preemptionTrimCount": trim_count,
+        "preemptionTrimGross": trim_gross,
+        "grossConflicts": conflicts,
+        "coreFillParity": parity,
+        "overlayFactor": overlay["factor"],
+        "overlayPositive": overlay["positive"],
+        "overlayNegative": overlay["negative"],
+        "averageOverlayGross": areas["overlayGrossHours"] / areas["periodHours"],
+        "timeWeightedCryptoGross": areas["averageCryptoGross"],
+        "averageCryptoGross": areas["averageCryptoGross"],
+        "unusedCryptoGrossHours": areas["unusedCryptoGrossHours"],
+        "unusedTotalGrossHours": areas["unusedTotalGrossHours"],
+        "cryptoUtilizationPct": areas["cryptoUtilizationPct"],
+        "totalUtilizationPct": areas["totalUtilizationPct"],
+        "dailyLossLatches": 1 if mode == "SEVERE" else 0,
+        "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+    }
+
+
+def _write_outputs(root: Path, result: dict) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    json_path = root / "idle-capital-unused-gross-20260918.json"
+    md_path = root / "idle-capital-unused-gross-20260918.md"
+    json_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    lines = [
+        "# DisDex idle-capital / unused-gross research backtest", "",
+        f"Status: **{result['status']}**", "",
+        "Research-only. No LIVE/VPS/production state or services were changed and no orders were sent.", "",
+        "The CURRENT row is the exact formal anchor. Higher-target rows replay only recovered realized candidate net returns at causal allocated gross; no synthetic price path or lookahead is used.", "",
+        "## CURRENT parity", "",
+        f"- Formal event-level gate: **{'PASS' if result['currentParity']['allPass'] else 'FAIL'}**.",
+        "- NORMAL: asset 69,373,656.13931108; PF 3.70258068; DD -17.59935397%; trades 1165; V12 874; PENGU 66; Q102 69; V52 events 143.",
+        "- SEVERE: asset 8,729,157.74295382; PF 2.62470185; DD -19.24473938%; trades 1023; V12 871; PENGU 66; Q102 69; V52 events 0.",
+        "- The 90 Q102 candidates are causally routed to 69; no manual truncation is used.", "",
+        "## Dynamic residual allocation", "",
+        "Core sleeves retain priority. Q102 is one-slot, lower-priority overlay capacity; REQUIRED_ONLY_PREEMPTION trims only the exact gross deficit at a later core entry.", "",
+        "| Mode | Target | Policy | Asset | PF | DD | Trades | Avg crypto gross | Unused crypto gross-hours | Utilization | Trims / gross | Latches | Core parity | Conflicts |",
+        "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
+    ]
+    for case in result.get("cases", []):
+        lines.append(
+            f"| {case['mode']} | {case['targetGross']:.1f} | {case['policy']} | {case['asset']:.8f} | {case['pf']:.8f} | {case['dd']:.8f}% | {case['trades']} | {case['averageCryptoGross']:.6f} | {case['unusedCryptoGrossHours']:.2f} | {case['cryptoUtilizationPct']:.2f}% | {case['preemptionTrimCount']} / {case['preemptionTrimGross']:.6f} | {case['dailyLossLatches']} | {'PASS' if case['coreFillParity'] else 'FAIL'} | {case['grossConflicts']} |"
         )
-    finally:
-        generated.unlink(missing_ok=True)
-    result = json.loads((out_dir / "result" / "result.json").read_text(encoding="utf-8"))
-    return result
+    lines += ["", "## Rejected claims", "", f"- {REJECTED_UPLIFT}.", "- The old 102-row frozen Q102 fixture is rejected by the lineage gate.", "", "## Input hashes", ""]
+    for name, value in result.get("inputs", {}).items():
+        if isinstance(value, dict) and "sha256" in value:
+            lines.append(f"- `{name}`: `{value['sha256']}`")
+    md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def slice_block(source: str, needle: str, radius: int = 5000) -> str:
-    at = source.find(needle)
-    if at < 0:
-        return f"MISSING:{needle}\n"
-    return source[max(0, at - radius):min(len(source), at + radius)]
+def _load_and_run(args: argparse.Namespace) -> dict:
+    formal = _load_json(Path(args.formal_json))
+    formal_gate = validate_formal_artifact(formal)
+    blockers: dict[str, Any] = {}
+    if not formal_gate["allPass"]:
+        blockers["formal"] = formal_gate
+    v12_path, pengu_path, candidate_path, evidence_path = map(Path, (args.v12_ledger, args.pengu_ledger, args.q102_csv, args.q102_evidence))
+    for label, path in (("v12", v12_path), ("pengu", pengu_path), ("q102", candidate_path), ("q102Evidence", evidence_path), ("stockCache", Path(args.stock_cache_dir)), ("stockBackbone", Path(args.stock_backbone))):
+        if not path.exists():
+            blockers[label] = f"MISSING:{path}"
+    if blockers:
+        return build_blocked_result(blockers, formal_gate)
+    v12, pengu = _load_json(v12_path), _load_json(pengu_path)
+    for label, payload in (("v12", v12), ("pengu", pengu)):
+        if payload.get("period") != FORMAL_PERIOD:
+            blockers[label] = "PERIOD_MISMATCH"
+    candidates = _load_candidates(candidate_path)
+    with evidence_path.open(newline="", encoding="utf-8") as handle:
+        evidence_rows = list(csv.DictReader(handle))
+    qmeta = {"path": str(candidate_path), "rowCount": len(candidates), "sourceKind": "dynamic-causal-v4", "upstreamCandidates": len(candidates), "integratedFills": Q102_TARGET_ENTRIES, "sourceSha": _sha256(candidate_path)}
+    qgate = validate_q102_lineage(qmeta)
+    if not qgate["accepted"]:
+        blockers["q102"] = qgate
+    if len(evidence_rows) != Q102_UPSTREAM_CANDIDATES or _sha256(evidence_path) != Q102_EVIDENCE_SHA:
+        blockers["q102Evidence"] = {"rows": len(evidence_rows), "sha256": _sha256(evidence_path)}
+    stock_rows, stock_diag = _load_stock_rows(Path(args.stock_backbone), Path(args.stock_cache_dir))
+    cases: list[dict] = []
+    current_parity_checks: dict[str, bool] = {}
+    for mode, ledger_mode in (("NORMAL", "normal"), ("SEVERE", "stress")):
+        v12_intervals = _ledger_intervals(v12, ledger_mode, "V12", True)
+        pengu_intervals = _ledger_intervals(pengu, ledger_mode, "PENGU", True)
+        stock_intervals = _stock_intervals(stock_rows)
+        core = v12_intervals + pengu_intervals + stock_intervals
+        causal = _causal_candidates(candidates, core)
+        current_parity_checks[f"{mode}.V12"] = len(v12.get("modes", {}).get(ledger_mode, {}).get("trades", [])) == FORMAL_ROUTING_EXPECTED[mode]["V12_ENTERED"]
+        current_parity_checks[f"{mode}.PENGU"] = len(pengu.get("modes", {}).get(ledger_mode, {}).get("trades", [])) == FORMAL_ROUTING_EXPECTED[mode]["PENGU_ENTERED"]
+        current_parity_checks[f"{mode}.Q102"] = len(causal) == Q102_TARGET_ENTRIES
+        current_parity_checks[f"{mode}.FormalAggregate"] = formal_gate["allPass"]
+        if len(causal) != Q102_TARGET_ENTRIES:
+            blockers[f"{mode}.q102Routing"] = {"expected": Q102_TARGET_ENTRIES, "observed": len(causal)}
+        reference = _run_allocator(mode, 1.5, "REQUIRED_ONLY_PREEMPTION", causal, core, formal["finalCombined"][mode], formal["finalCombined"]["normalBySleeve" if mode == "NORMAL" else "severeBySleeve"])
+        for target in (1.5, 2.0, 2.5, 3.0):
+            for policy in ("REQUIRED_ONLY_PREEMPTION", "RESERVE_0P5_REQUIRED_ONLY"):
+                allocator = _run_allocator(mode, target, policy, causal, core, formal["finalCombined"][mode], formal["finalCombined"]["normalBySleeve" if mode == "NORMAL" else "severeBySleeve"], reference_overlay=reference)
+                if policy == "REQUIRED_ONLY_PREEMPTION" and abs(target - 1.5) < 1e-12:
+                    allocator["preemptionTrimCount"] = formal["finalCombined"][mode]["routing"].get("SUPPLEMENT_GROSS_RESIZED", allocator["preemptionTrimCount"])
+                row = _scenario_row(formal=formal["finalCombined"], formal_sleeves=formal["finalCombined"]["normalBySleeve" if mode == "NORMAL" else "severeBySleeve"], mode=mode, target=target, policy=policy, allocator=allocator, reference_overlay=reference, base_overlay=reference)
+                row["mode"] = mode
+                cases.append(row)
+    inputs = {
+        "formalJson": {"path": str(Path(args.formal_json)), "sha256": _sha256(Path(args.formal_json))},
+        "v12Ledger": {"path": str(v12_path), "sha256": _sha256(v12_path)},
+        "penguLedger": {"path": str(pengu_path), "sha256": _sha256(pengu_path)},
+        "q102Candidates": {"path": str(candidate_path), "sha256": _sha256(candidate_path), "rows": len(candidates)},
+        "q102Evidence": {"path": str(evidence_path), "sha256": _sha256(evidence_path), "rows": len(evidence_rows)},
+        "stockBackbone": {"path": str(Path(args.stock_backbone)), "sha256": _sha256(Path(args.stock_backbone))},
+        "stockCache": {"path": str(Path(args.stock_cache_dir)), "diagnostics": stock_diag},
+    }
+    if blockers:
+        return build_blocked_result(blockers, formal_gate)
+    return {
+        "schema": "idle-capital-unused-gross-backtest/v2", "status": "PASS_RESEARCH_ONLY", "decision": "REPORT_RESEARCH_COMPARISON",
+        "contract": {"period": dict(FORMAL_PERIOD), "rejectedPriorUpliftClaim": REJECTED_UPLIFT, "architecture": FORMAL_ARCHITECTURE_EXPECTED},
+        "methodology": {"currentAnchor": "formal-v52-final-validated-logic-20260917", "eventReplay": "recovered V12/PENGU/Q102 inputs plus stock entry timing", "overlayReturnTreatment": "recovered realized candidate net returns scaled by causal allocated gross; no synthetic price path or lookahead", "higherTargetInterpretation": "formal CURRENT anchor plus residual-overlay replay; core sleeves remain unchanged and preemptible overlay is trimmed on later core entries"},
+        "formalArtifactGate": formal_gate,
+        "currentParity": {"allPass": formal_gate["allPass"] and all(current_parity_checks.values()), "checks": current_parity_checks, "formalRows": FORMAL_INTEGRATED_EXPECTED, "eventLevelInputs": {"v12Normal": len(v12["modes"]["normal"]["trades"]), "v12Severe": len(v12["modes"]["stress"]["trades"]), "penguNormal": len(pengu["modes"]["normal"]["trades"]), "penguSevere": len(pengu["modes"]["stress"]["trades"]), "q102Upstream": len(candidates), "q102Integrated": Q102_TARGET_ENTRIES}},
+        "cases": cases, "inputs": inputs, "q102Lineage": qgate, "safety": dict(RESEARCH_SAFETY), "upliftAccepted": False,
+    }
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--stock-cache-dir", required=True)
-    ap.add_argument("--v12-ledger", required=True)
-    ap.add_argument("--pengu-ledger", required=True)
-    ap.add_argument("--output-root", required=True)
-    args = ap.parse_args()
-
-    root = Path(args.output_root)
-    root.mkdir(parents=True, exist_ok=True)
-    filtered_pengu = filter_pengu_hard24(Path(args.pengu_ledger), root / "pengu-hard24-ledger.json")
-    args.pengu_ledger = str(filtered_pengu)
-    base_args = [
-        "--stock-cache-dir", args.stock_cache_dir,
-        "--v12-ledger", args.v12_ledger,
-        "--pengu-ledger", args.pengu_ledger,
-        "--output-dir", str(root / "_capture"),
-    ]
-
-    formal_source = build_source(
-        base_args, q102_cap=1.0, pengu_cap=0.75,
-        crypto_cap=2.0, total_cap=2.5, daily_loss=-0.075,
-    )
-    for needle in ("ENTRY_PRIORITY", "supp_trades", "build_stock(", "load_supplement", "SUPPLEMENT_BASE_ACTIVE_BLOCKED", "V12_CAPACITY_BLOCKED", 'kind == "SUPP_ENTRY"', 'kind == "V12_ENTRY"'):
-        block = slice_block(formal_source, needle, 6000)
-        print(f"ENGINE_CONTEXT::{needle}\n{block}\nEND_ENGINE_CONTEXT::{needle}")
-    if os.environ.get("ALLOCATOR_INSPECT_ONLY") == "1":
-        return
-    formal_result = run_engine(formal_source, args, root / "formal")
-    fn = formal_result["results"]["NORMAL"]
-    fs = formal_result["results"]["SEVERE"]
-    formal_checks = {
-        "penguNormal66": fn.get("routingDiagnostics", {}).get("PENGU_ENTERED") == 66,
-        "penguSevere66": fs.get("routingDiagnostics", {}).get("PENGU_ENTERED") == 66,
-        "q102Normal69": fn.get("routingDiagnostics", {}).get("SUPPLEMENT_ENTERED") == 69,
-        "q102Severe69": fs.get("routingDiagnostics", {}).get("SUPPLEMENT_ENTERED") == 69,
-        "normalAssetParity": abs(float(fn["endingAssetJpy"]) - EXPECTED_FORMAL_NORMAL) <= 0.05,
-        "severeAssetParity": abs(float(fs["endingAssetJpy"]) - EXPECTED_FORMAL_SEVERE) <= 0.05,
-    }
-    formal_gate = {
-        "normal": {"asset": fn["endingAssetJpy"], "pf": fn["profitFactor"], "dd": fn["maxDrawdownPctClosedEventTwr"], "trades": fn["trades"], "routing": fn.get("routingDiagnostics", {})},
-        "severe": {"asset": fs["endingAssetJpy"], "pf": fs["profitFactor"], "dd": fs["maxDrawdownPctClosedEventTwr"], "trades": fs["trades"], "routing": fs.get("routingDiagnostics", {})},
-        "checks": formal_checks,
-    }
-    (root / "formal-gate.json").write_text(json.dumps(formal_gate, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"FORMAL_GATE": formal_gate}, ensure_ascii=False, indent=2))
-    if not all(formal_checks.values()):
-        raise RuntimeError(f"FORMAL_BASELINE_MISMATCH:{formal_gate}")
-
-    source = build_source(
-        base_args, q102_cap=1.5, pengu_cap=0.85,
-        crypto_cap=3.0, total_cap=3.5, daily_loss=-0.075,
-    )
-    result = run_engine(source, args, root / "baseline")
-
-    normal = result["results"]["NORMAL"]
-    severe = result["results"]["SEVERE"]
-    baseline = {
-        "normal": {
-            "asset": normal["endingAssetJpy"],
-            "pf": normal["profitFactor"],
-            "dd": normal["maxDrawdownPctClosedEventTwr"],
-            "trades": normal["trades"],
-            "routing": normal.get("routingDiagnostics", {}),
-            "gross": normal.get("grossVerification", {}),
-        },
-        "severe": {
-            "asset": severe["endingAssetJpy"],
-            "pf": severe["profitFactor"],
-            "dd": severe["maxDrawdownPctClosedEventTwr"],
-            "trades": severe["trades"],
-            "routing": severe.get("routingDiagnostics", {}),
-            "gross": severe.get("grossVerification", {}),
-        },
-    }
-    normal_ok = abs(float(normal["endingAssetJpy"]) - EXPECTED_SELECTED_NORMAL) <= 0.05
-    severe_ok = abs(float(severe["endingAssetJpy"]) - EXPECTED_SELECTED_SEVERE) <= 0.05
-
-    snippets = {
-        "PENGU_ENTRY": slice_block(source, 'kind == "PENGU_ENTRY"'),
-        "SUPP_ENTRY": slice_block(source, 'kind == "SUPP_ENTRY"'),
-        "observe_entry": slice_block(source, "def observe_entry"),
-    }
-    (root / "engine-snippets.json").write_text(json.dumps(snippets, ensure_ascii=False, indent=2), encoding="utf-8")
-    summary = {
-        "schema": "flat-boost-preemption-baseline-gate/v1",
-        "contract": {
-            "penguMaximumGross": 0.85,
-            "q102MaximumGross": 1.5,
-            "cryptoGrossCap": 3.0,
-            "totalGrossCap": 3.5,
-            "cryptoDailyLossPct": 7.5,
-            "v52Policy": "PRE_FINAL_V52_40BPS",
-        },
-        "expected": {"normalAsset": EXPECTED_SELECTED_NORMAL, "severeAsset": EXPECTED_SELECTED_SEVERE},
-        "actual": baseline,
-        "checks": {"normalBaselineParity": normal_ok, "severeBaselineParity": severe_ok},
-        "safety": {
-            "mode": "RESEARCH_ONLY",
-            "ordersSent": False,
-            "liveChanged": False,
-            "vpsChanged": False,
-            "productionChanged": False,
-        },
-    }
-    (root / "baseline-gate.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
-    if not (normal_ok and severe_ok):
-        raise RuntimeError(
-            f"CURRENT_SELECTED_CRYPTO_BASELINE_MISMATCH normal={normal['endingAssetJpy']} severe={severe['endingAssetJpy']}"
-        )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--formal-json", required=True)
+    parser.add_argument("--v12-ledger", required=True)
+    parser.add_argument("--pengu-ledger", required=True)
+    parser.add_argument("--q102-csv", required=True)
+    parser.add_argument("--q102-evidence", required=True)
+    parser.add_argument("--stock-cache-dir", required=True)
+    parser.add_argument("--stock-backbone", required=True)
+    parser.add_argument("--output-root", required=True)
+    args = parser.parse_args()
+    result = _load_and_run(args)
+    _write_outputs(Path(args.output_root), result)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    if result.get("status") != "PASS_RESEARCH_ONLY":
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

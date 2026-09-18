@@ -1,0 +1,981 @@
+{
+  "schema": "idle-capital-unused-gross-backtest/v2",
+  "status": "PASS_RESEARCH_ONLY",
+  "decision": "REPORT_RESEARCH_COMPARISON",
+  "contract": {
+    "period": {
+      "startInclusive": "2025-08-10T00:00:00.000Z",
+      "endExclusive": "2026-08-10T00:00:00.000Z"
+    },
+    "rejectedPriorUpliftClaim": "~162.72M (invalid; rejected and not used)",
+    "architecture": {
+      "v12": {
+        "slots": 2,
+        "perPositionGrossCap": 1.0,
+        "aggregateGrossCap": 1.5
+      },
+      "pengu": {
+        "allocationGrossCap": 0.85,
+        "hardStopCooldownHours": 24
+      },
+      "quality102": {
+        "productionTarget": "Q102_CAUSAL_V4",
+        "maximumGross": 1.5,
+        "maximumPositions": 1
+      },
+      "v52": {
+        "v50MinimumEntryBasisBps": 60.0,
+        "v50ConvergenceBps": 20.0,
+        "v50BasisStopMultiple": 1.75,
+        "v50MinimumNetEdgeBps": 7.5
+      },
+      "portfolio": {
+        "cryptoGrossCap": 3.0,
+        "stockGrossCap": 1.5,
+        "totalGrossCap": 3.5,
+        "sharedCryptoDailyLossPct": 7.5,
+        "venueMargin": "5x Cross"
+      }
+    }
+  },
+  "methodology": {
+    "currentAnchor": "formal-v52-final-validated-logic-20260917",
+    "eventReplay": "recovered V12/PENGU/Q102 inputs plus stock entry timing",
+    "overlayReturnTreatment": "recovered realized candidate net returns scaled by causal allocated gross; no synthetic price path or lookahead",
+    "higherTargetInterpretation": "formal CURRENT anchor plus residual-overlay replay; core sleeves remain unchanged and preemptible overlay is trimmed on later core entries"
+  },
+  "formalArtifactGate": {
+    "allPass": true,
+    "checks": {
+      "period": true,
+      "baseCommit": true,
+      "architecture.v12.slots": true,
+      "architecture.v12.perPositionGrossCap": true,
+      "architecture.v12.aggregateGrossCap": true,
+      "architecture.pengu.allocationGrossCap": true,
+      "architecture.pengu.hardStopCooldownHours": true,
+      "architecture.quality102.productionTarget": true,
+      "architecture.quality102.maximumGross": true,
+      "architecture.quality102.maximumPositions": true,
+      "architecture.v52.v50MinimumEntryBasisBps": true,
+      "architecture.v52.v50ConvergenceBps": true,
+      "architecture.v52.v50BasisStopMultiple": true,
+      "architecture.v52.v50MinimumNetEdgeBps": true,
+      "architecture.portfolio.cryptoGrossCap": true,
+      "architecture.portfolio.stockGrossCap": true,
+      "architecture.portfolio.totalGrossCap": true,
+      "architecture.portfolio.sharedCryptoDailyLossPct": true,
+      "architecture.portfolio.venueMargin": true,
+      "finalCombined.NORMAL.asset": true,
+      "finalCombined.NORMAL.pf": true,
+      "finalCombined.NORMAL.dd": true,
+      "finalCombined.NORMAL.trades": true,
+      "finalCombined.NORMAL.v52Events": true,
+      "finalCombined.SEVERE.asset": true,
+      "finalCombined.SEVERE.pf": true,
+      "finalCombined.SEVERE.dd": true,
+      "finalCombined.SEVERE.trades": true,
+      "finalCombined.SEVERE.v52Events": true
+    },
+    "observed": {
+      "period": {
+        "startInclusive": "2025-08-10T00:00:00.000Z",
+        "endExclusive": "2026-08-10T00:00:00.000Z"
+      },
+      "baseCommit": "bd5c731c966f41c38748433156062d579e45b6fc",
+      "architecture": {
+        "v12": {
+          "strategyId": "V12_X1.00_ALL_TOP2_RESIDUAL_GROSS15",
+          "slots": 2,
+          "perPositionGrossCap": 1.0,
+          "aggregateGrossCap": 1.5,
+          "btcRegimeThresholdPct": 0.02,
+          "strongRegimeThresholdPct": 0.0359,
+          "relaxedRegimeMinimumMomentumPct": 0.054,
+          "relaxedRegimeMinimumAtrRatio": 0.014,
+          "scoreThreshold": 1.4649
+        },
+        "pengu": {
+          "researchStrategyId": "PENGU_DUAL_LS_V2_RECOVERY_V8",
+          "allocationGrossCap": 0.85,
+          "normalCooldownHours": 6,
+          "hardStopCooldownHours": 24
+        },
+        "quality102": {
+          "productionTarget": "Q102_CAUSAL_V4",
+          "maximumGross": 1.5,
+          "maximumPositions": 1
+        },
+        "v52": {
+          "v11": "UNCHANGED",
+          "v50MinimumEntryBasisBps": 60.0,
+          "v50ConvergenceBps": 20.0,
+          "v50BasisStopMultiple": 1.75,
+          "v50MinimumNetEdgeBps": 7.5,
+          "maximumRoundTripCostBps": 60.0,
+          "maximumSpreadBps": 20.0,
+          "entryWindows": "POST_EARLY3",
+          "maximumHoldingHours": 3,
+          "directions": "BOTH",
+          "slotGrossCap": 1.0,
+          "maximumRoundTripCostSelectionStatus": "RETAIN_EXISTING_FAIL_CLOSED_CEILING_NOT_PROVEN_OPTIMAL"
+        },
+        "portfolio": {
+          "cryptoGrossCap": 3.0,
+          "stockGrossCap": 1.5,
+          "totalGrossCap": 3.5,
+          "sharedCryptoDailyLossPct": 7.5,
+          "stockDailyLossPct": 3.5,
+          "venueMargin": "5x Cross",
+          "maxInitialMarginFractionAtGrossCap": 0.7
+        }
+      },
+      "finalCombined": {
+        "NORMAL": {
+          "asset": 69373656.13931108,
+          "pf": 3.70258068,
+          "dd": -17.59935397,
+          "trades": 1165,
+          "v52Pnl": 9330664.3349576,
+          "v52Events": 143,
+          "v52Pf": 3.180669433319552,
+          "years": {
+            "2025": {
+              "pnl": 45604.6073798,
+              "events": 88,
+              "pf": 4.538561907367498
+            },
+            "2026": {
+              "pnl": 9285059.7275778,
+              "events": 55,
+              "pf": 3.176567064940673
+            }
+          },
+          "months": {
+            "2025-08": {
+              "pnl": 2940.08970339,
+              "events": 24,
+              "pf": 6.633814463667737
+            },
+            "2025-09": {
+              "pnl": 5674.78359106,
+              "events": 27,
+              "pf": 5.0331635192740665
+            },
+            "2025-10": {
+              "pnl": 11961.24947429,
+              "events": 21,
+              "pf": 7.202214164912061
+            },
+            "2025-11": {
+              "pnl": 16602.1202066,
+              "events": 15,
+              "pf": 2.8384593381005034
+            },
+            "2025-12": {
+              "pnl": 8426.36440446,
+              "events": 1,
+              "pf": 999.0
+            },
+            "2026-03": {
+              "pnl": 810685.9006827,
+              "events": 5,
+              "pf": 999.0
+            },
+            "2026-04": {
+              "pnl": 1003790.7679199999,
+              "events": 15,
+              "pf": 4.481096130144758
+            },
+            "2026-05": {
+              "pnl": -304595.64891714003,
+              "events": 9,
+              "pf": 0.7633924285855124
+            },
+            "2026-06": {
+              "pnl": 3989839.0298365,
+              "events": 13,
+              "pf": 6.3379646931687015
+            },
+            "2026-07": {
+              "pnl": 3559135.27559153,
+              "events": 12,
+              "pf": 2.83198667294835
+            },
+            "2026-08": {
+              "pnl": 226204.40246421,
+              "events": 1,
+              "pf": 999.0
+            }
+          },
+          "routing": {
+            "V12_ENTERED": 874,
+            "V12_GROSS_SCALED": 115,
+            "V12_EXITED": 874,
+            "V11_EQ_ENTERED": 50,
+            "V50_POST_OPEN_BASIS_GROSS_SCALED": 16,
+            "V50_POST_OPEN_BASIS_ENTERED": 93,
+            "V50_POST_OPEN_BASIS_EXITED": 93,
+            "V11_EQ_EXITED": 50,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SAME_STOCK_SYMBOL_BLOCKED": 35,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_GROSS_RESIZED": 13,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 13,
+            "V50_POST_OPEN_BASIS_SLOT_OCCUPIED": 60,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 20,
+            "V11_EQ_COST_EDGE_REJECTED": 7
+          },
+          "deltaAssetPct": 5.016944868997508,
+          "deltaV52PnlPct": 16.46626035928376
+        },
+        "SEVERE": {
+          "asset": 8729157.74295382,
+          "pf": 2.62470185,
+          "dd": -19.24473938,
+          "trades": 1023,
+          "v52Pnl": 0,
+          "v52Events": 0,
+          "v52Pf": null,
+          "years": {
+            "2025": {
+              "pnl": 0,
+              "events": 0,
+              "pf": null
+            },
+            "2026": {
+              "pnl": 0,
+              "events": 0,
+              "pf": null
+            }
+          },
+          "months": {},
+          "routing": {
+            "V12_ENTERED": 871,
+            "V12_GROSS_SCALED": 117,
+            "V12_EXITED": 871,
+            "V11_EQ_COST_EDGE_REJECTED": 57,
+            "V50_POST_OPEN_BASIS_COST_EDGE_REJECTED": 208,
+            "SUPPLEMENT_ENTERED": 69,
+            "PENGU_ENTERED": 66,
+            "SUPPLEMENT_EXITED": 69,
+            "PENGU_EXITED": 66,
+            "SUPPLEMENT_BASE_ACTIVE_BLOCKED": 17,
+            "CONTRIBUTIONS": 12,
+            "SUPPLEMENT_GROSS_RESIZED": 17,
+            "SUPPLEMENT_MTM_TRIM_EXECUTIONS": 17,
+            "CRYPTO_DAILY_LOSS_LATCHES": 1
+          }
+        },
+        "normalBySleeve": {
+          "V12": {
+            "trades": 874,
+            "pnlJpy": 28176454.53203402,
+            "winRatePct": 52.63157895,
+            "profitFactor": 2.76544602
+          },
+          "PENGU_DUAL_LS_V2": {
+            "trades": 66,
+            "pnlJpy": 8951870.36991036,
+            "winRatePct": 72.72727273,
+            "profitFactor": 4.56779938
+          },
+          "V52": {
+            "trades": 143,
+            "pnlJpy": 9330664.33495759,
+            "winRatePct": 62.93706294,
+            "profitFactor": 4.97991626
+          },
+          "SUPPLEMENT_QUALITY102": {
+            "trades": 82,
+            "pnlJpy": 22784666.90240908,
+            "winRatePct": 65.85365854,
+            "profitFactor": 4.24074293
+          }
+        },
+        "severeBySleeve": {
+          "V12": {
+            "trades": 871,
+            "pnlJpy": 2544693.04234989,
+            "profitFactor": 1.59607577
+          },
+          "PENGU_DUAL_LS_V2": {
+            "trades": 66,
+            "pnlJpy": 1673441.03819318,
+            "profitFactor": 3.63716344
+          },
+          "V52": {
+            "trades": 0,
+            "pnlJpy": 0.0,
+            "profitFactor": null
+          },
+          "SUPPLEMENT_QUALITY102": {
+            "trades": 86,
+            "pnlJpy": 4381023.66241075,
+            "profitFactor": 4.0699789
+          }
+        }
+      }
+    }
+  },
+  "currentParity": {
+    "allPass": true,
+    "checks": {
+      "NORMAL.V12": true,
+      "NORMAL.PENGU": true,
+      "NORMAL.Q102": true,
+      "NORMAL.FormalAggregate": true,
+      "SEVERE.V12": true,
+      "SEVERE.PENGU": true,
+      "SEVERE.Q102": true,
+      "SEVERE.FormalAggregate": true
+    },
+    "formalRows": {
+      "NORMAL": {
+        "asset": 69373656.13931108,
+        "pf": 3.70258068,
+        "dd": -17.59935397,
+        "trades": 1165,
+        "v52Events": 143
+      },
+      "SEVERE": {
+        "asset": 8729157.74295382,
+        "pf": 2.62470185,
+        "dd": -19.24473938,
+        "trades": 1023,
+        "v52Events": 0
+      }
+    },
+    "eventLevelInputs": {
+      "v12Normal": 874,
+      "v12Severe": 871,
+      "penguNormal": 66,
+      "penguSevere": 66,
+      "q102Upstream": 90,
+      "q102Integrated": 69
+    }
+  },
+  "cases": [
+    {
+      "asset": 69373656.13931108,
+      "pf": 3.70258068,
+      "dd": -17.59935397,
+      "trades": 1165,
+      "v52Events": 143,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 1.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 13,
+      "preemptionTrimGross": 15.168635188870196,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 12.754107842266203,
+      "overlayPositive": 3.793694143856209,
+      "overlayNegative": 0.915375062923271,
+      "averageOverlayGross": 0.2837115498219959,
+      "timeWeightedCryptoGross": 0.6611723445168747,
+      "averageCryptoGross": 0.6611723445168747,
+      "unusedCryptoGrossHours": 20488.130262032177,
+      "unusedTotalGrossHours": 24344.13026203218,
+      "cryptoUtilizationPct": 22.039078150562492,
+      "totalUtilizationPct": 20.599705603287084,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 34660970.44949293,
+      "pf": 4.316674096288839,
+      "dd": -17.59935397,
+      "trades": 1166,
+      "v52Events": 143,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 1.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 14,
+      "preemptionTrimGross": 6.310954442278353,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 6.372300086688568,
+      "overlayPositive": 2.6464891430101933,
+      "overlayNegative": 0.6273350676931646,
+      "averageOverlayGross": 0.20133958088554074,
+      "timeWeightedCryptoGross": 0.5788003755804195,
+      "averageCryptoGross": 0.5788003755804195,
+      "unusedCryptoGrossHours": 21209.708709915525,
+      "unusedTotalGrossHours": 25065.70870991553,
+      "cryptoUtilizationPct": 19.29334585268065,
+      "totalUtilizationPct": 18.246220776531217,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 112693166.97872186,
+      "pf": 4.1391511936681065,
+      "dd": -17.59935397,
+      "trades": 1204,
+      "v52Events": 143,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 2.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 52,
+      "preemptionTrimGross": 28.672414846619116,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 20.718250770102838,
+      "overlayPositive": 4.658393499921272,
+      "overlayNegative": 1.1516051282741693,
+      "averageOverlayGross": 0.3481940469279317,
+      "timeWeightedCryptoGross": 0.7256548416228105,
+      "averageCryptoGross": 0.7256548416228105,
+      "unusedCryptoGrossHours": 19923.26358738418,
+      "unusedTotalGrossHours": 23779.263587384186,
+      "cryptoUtilizationPct": 24.18849472076035,
+      "totalUtilizationPct": 22.44206266345666,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 69373656.13931108,
+      "pf": 4.240742930000001,
+      "dd": -17.59935397,
+      "trades": 1188,
+      "v52Events": 143,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 2.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 36,
+      "preemptionTrimGross": 15.168635188870196,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 12.754107842266203,
+      "overlayPositive": 3.793694143856209,
+      "overlayNegative": 0.915375062923271,
+      "averageOverlayGross": 0.2837115498219959,
+      "timeWeightedCryptoGross": 0.6611723445168747,
+      "averageCryptoGross": 0.6611723445168747,
+      "unusedCryptoGrossHours": 20488.130262032177,
+      "unusedTotalGrossHours": 24344.13026203218,
+      "cryptoUtilizationPct": 22.039078150562492,
+      "totalUtilizationPct": 20.599705603287084,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 160150796.74069664,
+      "pf": 3.9977652970327076,
+      "dd": -17.59935397,
+      "trades": 1248,
+      "v52Events": 143,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 2.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 96,
+      "preemptionTrimGross": 47.721163164965965,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 29.44317261517743,
+      "overlayPositive": 5.348085547558171,
+      "overlayNegative": 1.3688622959032706,
+      "averageOverlayGross": 0.4007166189607181,
+      "timeWeightedCryptoGross": 0.7781774136555971,
+      "averageCryptoGross": 0.7781774136555971,
+      "unusedCryptoGrossHours": 19463.165856376967,
+      "unusedTotalGrossHours": 23319.165856376974,
+      "cryptoUtilizationPct": 25.93924712185324,
+      "totalUtilizationPct": 23.942707578679144,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 112693166.97872186,
+      "pf": 4.1391511936681065,
+      "dd": -17.66179771774254,
+      "trades": 1204,
+      "v52Events": 143,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 2.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 52,
+      "preemptionTrimGross": 28.672414846619116,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 20.718250770102838,
+      "overlayPositive": 4.658393499921272,
+      "overlayNegative": 1.1516051282741693,
+      "averageOverlayGross": 0.3481940469279317,
+      "timeWeightedCryptoGross": 0.7256548416228105,
+      "averageCryptoGross": 0.7256548416228105,
+      "unusedCryptoGrossHours": 19923.26358738418,
+      "unusedTotalGrossHours": 23779.263587384186,
+      "cryptoUtilizationPct": 24.18849472076035,
+      "totalUtilizationPct": 22.44206266345666,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 219120176.6431819,
+      "pf": 3.9603363870023656,
+      "dd": -17.59935397,
+      "trades": 1266,
+      "v52Events": 143,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 3.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 114,
+      "preemptionTrimGross": 72.13813240847256,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 40.28449009104387,
+      "overlayPositive": 5.959392100294573,
+      "overlayNegative": 1.5397442624119286,
+      "averageOverlayGross": 0.4406627214237475,
+      "timeWeightedCryptoGross": 0.818123516118627,
+      "averageCryptoGross": 0.818123516118627,
+      "unusedCryptoGrossHours": 19113.23799880083,
+      "unusedTotalGrossHours": 22969.23799880084,
+      "cryptoUtilizationPct": 27.270783870620896,
+      "totalUtilizationPct": 25.08402479190855,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 160150796.74069664,
+      "pf": 3.9977652970327076,
+      "dd": -17.73020643713694,
+      "trades": 1248,
+      "v52Events": 143,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 3.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 96,
+      "preemptionTrimGross": 47.721163164965965,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 29.44317261517743,
+      "overlayPositive": 5.348085547558171,
+      "overlayNegative": 1.3688622959032706,
+      "averageOverlayGross": 0.4007166189607181,
+      "timeWeightedCryptoGross": 0.7781774136555971,
+      "averageCryptoGross": 0.7781774136555971,
+      "unusedCryptoGrossHours": 19463.165856376967,
+      "unusedTotalGrossHours": 23319.165856376974,
+      "cryptoUtilizationPct": 25.93924712185324,
+      "totalUtilizationPct": 23.942707578679144,
+      "dailyLossLatches": 0,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "NORMAL"
+    },
+    {
+      "asset": 8729157.74295382,
+      "pf": 2.62470185,
+      "dd": -19.24473938,
+      "trades": 1023,
+      "v52Events": 0,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 1.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 17,
+      "preemptionTrimGross": 15.16728096788994,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 11.482383128255393,
+      "overlayPositive": 3.721637185775958,
+      "overlayNegative": 0.952143354275085,
+      "averageOverlayGross": 0.2837167996485068,
+      "timeWeightedCryptoGross": 0.6606848740694582,
+      "averageCryptoGross": 0.6606848740694582,
+      "unusedCryptoGrossHours": 20492.400503151548,
+      "unusedTotalGrossHours": 24348.40050315155,
+      "cryptoUtilizationPct": 22.022829135648607,
+      "totalUtilizationPct": 20.585777876218035,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    },
+    {
+      "asset": 4501043.429163812,
+      "pf": 4.142235778106435,
+      "dd": -19.24473938,
+      "trades": 1020,
+      "v52Events": 0,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 1.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 14,
+      "preemptionTrimGross": 6.311531637007667,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 5.920697809853837,
+      "overlayPositive": 2.5962312226905166,
+      "overlayNegative": 0.6526329833245861,
+      "averageOverlayGross": 0.20133710473191307,
+      "timeWeightedCryptoGross": 0.5783051791528645,
+      "averageCryptoGross": 0.5783051791528645,
+      "unusedCryptoGrossHours": 21214.046630620905,
+      "unusedTotalGrossHours": 25070.046630620913,
+      "cryptoUtilizationPct": 19.276839305095482,
+      "totalUtilizationPct": 18.23207230717249,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    },
+    {
+      "asset": 13805279.53170464,
+      "pf": 3.9692332894005706,
+      "dd": -19.24473938,
+      "trades": 1058,
+      "v52Events": 0,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 2.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 52,
+      "preemptionTrimGross": 28.670042822037647,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 18.15954224262361,
+      "overlayPositive": 4.568148151198889,
+      "overlayNegative": 1.1983785334725878,
+      "averageOverlayGross": 0.3482016386747797,
+      "timeWeightedCryptoGross": 0.7251697130957306,
+      "averageCryptoGross": 0.7251697130957306,
+      "unusedCryptoGrossHours": 19927.5133132814,
+      "unusedTotalGrossHours": 23783.513313281408,
+      "cryptoUtilizationPct": 24.172323769857687,
+      "totalUtilizationPct": 22.428201848397233,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    },
+    {
+      "asset": 8729157.74295382,
+      "pf": 4.069978899999999,
+      "dd": -19.24473938,
+      "trades": 1042,
+      "v52Events": 0,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 2.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 36,
+      "preemptionTrimGross": 15.16728096788994,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 11.482383128255393,
+      "overlayPositive": 3.721637185775958,
+      "overlayNegative": 0.952143354275085,
+      "averageOverlayGross": 0.2837167996485068,
+      "timeWeightedCryptoGross": 0.6606848740694582,
+      "averageCryptoGross": 0.6606848740694582,
+      "unusedCryptoGrossHours": 20492.400503151548,
+      "unusedTotalGrossHours": 24348.40050315155,
+      "cryptoUtilizationPct": 22.022829135648607,
+      "totalUtilizationPct": 20.585777876218035,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    },
+    {
+      "asset": 19184736.70864876,
+      "pf": 3.833118103549258,
+      "dd": -19.24473938,
+      "trades": 1102,
+      "v52Events": 0,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 2.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 96,
+      "preemptionTrimGross": 47.718444247510284,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 25.235710430508114,
+      "overlayPositive": 5.2428443756500815,
+      "overlayNegative": 1.4242139383419976,
+      "averageOverlayGross": 0.40072553357541946,
+      "timeWeightedCryptoGross": 0.7776936079963701,
+      "averageCryptoGross": 0.7776936079963701,
+      "unusedCryptoGrossHours": 19467.403993951797,
+      "unusedTotalGrossHours": 23323.403993951808,
+      "cryptoUtilizationPct": 25.92312026654567,
+      "totalUtilizationPct": 23.928884559844075,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    },
+    {
+      "asset": 13805279.53170464,
+      "pf": 3.9692332894005706,
+      "dd": -19.302890715308934,
+      "trades": 1058,
+      "v52Events": 0,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 2.5,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 52,
+      "preemptionTrimGross": 28.670042822037647,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 18.15954224262361,
+      "overlayPositive": 4.568148151198889,
+      "overlayNegative": 1.1983785334725878,
+      "averageOverlayGross": 0.3482016386747797,
+      "timeWeightedCryptoGross": 0.7251697130957306,
+      "averageCryptoGross": 0.7251697130957306,
+      "unusedCryptoGrossHours": 19927.5133132814,
+      "unusedTotalGrossHours": 23783.513313281408,
+      "cryptoUtilizationPct": 24.172323769857687,
+      "totalUtilizationPct": 22.428201848397233,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    },
+    {
+      "asset": 25796261.9734484,
+      "pf": 3.799824980176785,
+      "dd": -19.24473938,
+      "trades": 1120,
+      "v52Events": 0,
+      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "targetGross": 3.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 114,
+      "preemptionTrimGross": 72.13520500639517,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 33.93254790189522,
+      "overlayPositive": 5.841151767995736,
+      "overlayNegative": 1.600646254578445,
+      "averageOverlayGross": 0.44067239643470585,
+      "timeWeightedCryptoGross": 0.8176404708556563,
+      "averageCryptoGross": 0.8176404708556563,
+      "unusedCryptoGrossHours": 19117.469475304453,
+      "unusedTotalGrossHours": 22973.469475304453,
+      "cryptoUtilizationPct": 27.25468236185521,
+      "totalUtilizationPct": 25.070223498680843,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    },
+    {
+      "asset": 19184736.70864876,
+      "pf": 3.833118103549258,
+      "dd": -19.36451701804457,
+      "trades": 1102,
+      "v52Events": 0,
+      "policy": "RESERVE_0P5_REQUIRED_ONLY",
+      "targetGross": 3.0,
+      "acceptedCandidates": 69,
+      "preemptionTrimCount": 96,
+      "preemptionTrimGross": 47.718444247510284,
+      "grossConflicts": 0,
+      "coreFillParity": true,
+      "overlayFactor": 25.235710430508114,
+      "overlayPositive": 5.2428443756500815,
+      "overlayNegative": 1.4242139383419976,
+      "averageOverlayGross": 0.40072553357541946,
+      "timeWeightedCryptoGross": 0.7776936079963701,
+      "averageCryptoGross": 0.7776936079963701,
+      "unusedCryptoGrossHours": 19467.403993951797,
+      "unusedTotalGrossHours": 23323.403993951808,
+      "cryptoUtilizationPct": 25.92312026654567,
+      "totalUtilizationPct": 23.928884559844075,
+      "dailyLossLatches": 1,
+      "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
+      "mode": "SEVERE"
+    }
+  ],
+  "inputs": {
+    "formalJson": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\docs\\research-results\\v52-final-validated-logic-20260917.json",
+      "sha256": "0d0425f571f7b7b8781be1260a625b404b5d1893ac355e60047205a270a0dff9"
+    },
+    "v12Ledger": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\btc-q102x1-sweep\\v12-q54-atr0p014.json",
+      "sha256": "c3bb3ad341692aa2e9a987e10e1371da21564f8d848782ea3f0823d0a29b0b7c"
+    },
+    "penguLedger": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\btc-q102x1-sweep\\pengu-hard-cooldown\\pengu-hard-cd24.json",
+      "sha256": "8b2a267249d8952e11252329a8329d9b22255c8c9a25b672698d9f02215a3663"
+    },
+    "q102Candidates": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\btc-q102x1-sweep\\q54-atr-hard24\\atr0p014\\candidate-1slot.csv",
+      "sha256": "832f9a723fbb95b8a57201f67e51687bb07b33120851940328de1b3ba0e9567b",
+      "rows": 90
+    },
+    "q102Evidence": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\q102-2slot-compare\\evidence-1slot.csv",
+      "sha256": "41611bf8ad1a63f79a398befced551feb9aea2d9095008843b6049eae29d5f18",
+      "rows": 90
+    },
+    "stockBackbone": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.stock-research\\scripts\\research_lab_v96_v52_dual_slot_one_year_bt.py",
+      "sha256": "692f2194c026698feab115642301d9009db34fb9167cdfc232418aa1352a6ed3"
+    },
+    "stockCache": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\q102-2slot-compare\\inputs\\stock-cache",
+      "diagnostics": {
+        "market": {
+          "cash": {
+            "source": "Yahoo Finance public chart response",
+            "symbols": {
+              "AMZNUSDT": {
+                "ticker": "AMZN",
+                "bars": 1651,
+                "completeDays": 273,
+                "firstDay": "2025-07-01",
+                "lastDay": "2026-08-07",
+                "events": []
+              },
+              "METAUSDT": {
+                "ticker": "META",
+                "bars": 1651,
+                "completeDays": 273,
+                "firstDay": "2025-07-01",
+                "lastDay": "2026-08-07",
+                "events": [
+                  "dividends"
+                ]
+              },
+              "NVDAUSDT": {
+                "ticker": "NVDA",
+                "bars": 1651,
+                "completeDays": 273,
+                "firstDay": "2025-07-01",
+                "lastDay": "2026-08-07",
+                "events": [
+                  "dividends"
+                ]
+              },
+              "MSFTUSDT": {
+                "ticker": "MSFT",
+                "bars": 1651,
+                "completeDays": 273,
+                "firstDay": "2025-07-01",
+                "lastDay": "2026-08-07",
+                "events": [
+                  "dividends"
+                ]
+              },
+              "TSLAUSDT": {
+                "ticker": "TSLA",
+                "bars": 1651,
+                "completeDays": 273,
+                "firstDay": "2025-07-01",
+                "lastDay": "2026-08-07",
+                "events": []
+              }
+            }
+          },
+          "perp": {
+            "symbols": {
+              "AMZNUSDT": {
+                "tradeBars": 18743,
+                "fundingRows": 1173,
+                "completeDays": 279
+              },
+              "METAUSDT": {
+                "tradeBars": 18743,
+                "fundingRows": 1181,
+                "completeDays": 279
+              },
+              "MSFTUSDT": {
+                "tradeBars": 18743,
+                "fundingRows": 1194,
+                "completeDays": 279
+              },
+              "NVDAUSDT": {
+                "tradeBars": 18743,
+                "fundingRows": 1194,
+                "completeDays": 279
+              },
+              "TSLAUSDT": {
+                "tradeBars": 18743,
+                "fundingRows": 1193,
+                "completeDays": 279
+              }
+            }
+          },
+          "alignment": {
+            "symbols": {
+              "AMZNUSDT": {
+                "commonDays": 265,
+                "alignedDays": 265,
+                "clockRejected": 0,
+                "firstDay": "2025-07-15",
+                "lastDay": "2026-08-07"
+              },
+              "METAUSDT": {
+                "commonDays": 265,
+                "alignedDays": 265,
+                "clockRejected": 0,
+                "firstDay": "2025-07-15",
+                "lastDay": "2026-08-07"
+              },
+              "MSFTUSDT": {
+                "commonDays": 265,
+                "alignedDays": 265,
+                "clockRejected": 0,
+                "firstDay": "2025-07-15",
+                "lastDay": "2026-08-07"
+              },
+              "NVDAUSDT": {
+                "commonDays": 265,
+                "alignedDays": 265,
+                "clockRejected": 0,
+                "firstDay": "2025-07-15",
+                "lastDay": "2026-08-07"
+              },
+              "TSLAUSDT": {
+                "commonDays": 265,
+                "alignedDays": 265,
+                "clockRejected": 0,
+                "firstDay": "2025-07-15",
+                "lastDay": "2026-08-07"
+              }
+            }
+          }
+        },
+        "v11": {
+          "acceptedInvariantRows": 74,
+          "rejectReasons": {
+            "ENTRY_BASIS_BELOW_50": 53,
+            "NO_LONGER_TOP1": 53,
+            "ADVERSE_BASIS_OVER_10BPS": 4
+          }
+        },
+        "targetSessions": 246,
+        "v11RawTrades": 74,
+        "v50RawTrades": 165
+      }
+    }
+  },
+  "q102Lineage": {
+    "accepted": true,
+    "reason": "CAUSAL_V4_LINEAGE_ACCEPTED",
+    "evidence": {
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\btc-q102x1-sweep\\q54-atr-hard24\\atr0p014\\candidate-1slot.csv",
+      "rowCount": 90,
+      "sourceKind": "dynamic-causal-v4",
+      "upstreamCandidates": 90,
+      "integratedFills": 69,
+      "sourceSha": "832f9a723fbb95b8a57201f67e51687bb07b33120851940328de1b3ba0e9567b"
+    }
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  },
+  "upliftAccepted": false
+}
