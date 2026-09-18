@@ -52,6 +52,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
+            .cache/perp-research-usdm
             .cache/aster-only-v39-overnight-open
             .stock-research/.cache/perp-research-usdm
           key: flat-boost-preemption-${{ runner.os }}-${{ hashFiles('scripts/research_flat_boost_preemption_20260918.py') }}
