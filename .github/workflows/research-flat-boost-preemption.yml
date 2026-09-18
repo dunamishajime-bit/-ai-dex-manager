@@ -7,6 +7,10 @@ on:
         description: "Checked-in or pre-staged research-only directory containing the recovered 90-row inputs"
         required: false
         default: ".research-state/formal-inputs"
+      canonical_runner:
+        description: "Research-only reconstructed run_canonical_margin_compare.py path"
+        required: false
+        default: ".research-state/formal-inputs/run_canonical_margin_compare.py"
 
 permissions:
   contents: read
@@ -70,8 +74,11 @@ jobs:
           test -f "$INPUT_ROOT/candidate-1slot.csv"
           test -f "$INPUT_ROOT/evidence-1slot.csv"
           test -d "$INPUT_ROOT/stock-cache"
+          CANONICAL_RUNNER="${{ inputs.canonical_runner || '.research-state/formal-inputs/run_canonical_margin_compare.py' }}"
+          test -f "$CANONICAL_RUNNER"
           test -f .stock-research/scripts/research_lab_v96_v52_dual_slot_one_year_bt.py
           echo "INPUT_ROOT=$INPUT_ROOT" >> "$GITHUB_ENV"
+          echo "CANONICAL_RUNNER=$CANONICAL_RUNNER" >> "$GITHUB_ENV"
 
       - name: Run research-only lineage gate and comparison
         run: |
@@ -84,6 +91,7 @@ jobs:
             --q102-evidence "$INPUT_ROOT/evidence-1slot.csv" \
             --stock-cache-dir "$INPUT_ROOT/stock-cache" \
             --stock-backbone .stock-research/scripts/research_lab_v96_v52_dual_slot_one_year_bt.py \
+            --canonical-runner "$CANONICAL_RUNNER" \
             --output-root .research-state/flat-boost-preemption \
             2>&1 | tee .research-state/flat-boost-preemption.log
 

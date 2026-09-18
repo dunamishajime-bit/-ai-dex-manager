@@ -140,6 +140,7 @@ class IdleCapitalWorkflowTests(unittest.TestCase):
         self.assertIn("--q102-csv", workflow)
         self.assertIn("--q102-evidence", workflow)
         self.assertIn("--stock-backbone", workflow)
+        self.assertIn("--canonical-runner", workflow)
 
     def test_completed_artifact_has_exact_current_parity_and_primary_targets(self) -> None:
         artifact = json.loads((ROOT / "docs" / "research-results" / "idle-capital-unused-gross-20260918.json").read_text(encoding="utf-8"))
@@ -148,7 +149,37 @@ class IdleCapitalWorkflowTests(unittest.TestCase):
         self.assertFalse(artifact["upliftAccepted"])
         primary = [row for row in artifact["cases"] if row["comparisonTier"] == "PRIMARY"]
         self.assertEqual({row["targetGross"] for row in primary}, {1.5, 2.0, 2.5, 3.0})
+        self.assertEqual(len(primary), 8)
+        self.assertEqual({row["policy"] for row in primary}, {"REQUIRED_ONLY_PREEMPTION"})
+        self.assertNotIn("OPTIONAL_RESERVE_SENSITIVITY", {row["comparisonTier"] for row in artifact["cases"]})
         self.assertEqual({row["caseId"] for row in primary if row["targetGross"] == 1.5}, {"CURRENT"})
+        expected_targets = {
+            ("NORMAL", 1.5): (69373656.13931108, 3.70258068, -17.59935397, 1165),
+            ("SEVERE", 1.5): (8729157.74295382, 2.62470185, -19.24473938, 1023),
+            ("NORMAL", 2.0): (128760885.5631315, 3.71625945, -22.7973112, 1197),
+            ("SEVERE", 2.0): (15480956.76680395, 2.6920045, -23.70403259, 1048),
+            ("NORMAL", 2.5): (209152547.18258882, 3.67732802, -27.96929818, 1244),
+            ("SEVERE", 2.5): (24282260.37897472, 2.70771839, -28.8866718, 1099),
+            ("NORMAL", 3.0): (315968224.4887327, 3.6264564, -33.0811386, 1260),
+            ("SEVERE", 3.0): (37831721.4571375, 2.73295146, -34.04566958, 1106),
+        }
+        for row in primary:
+            expected = expected_targets[(row["mode"], row["targetGross"])]
+            self.assertAlmostEqual(row["asset"], expected[0], places=8)
+            self.assertAlmostEqual(row["pf"], expected[1], places=8)
+            self.assertAlmostEqual(row["dd"], expected[2], places=8)
+            self.assertEqual(row["trades"], expected[3])
+            self.assertTrue(row["fullEventReplay"])
+            self.assertEqual(row["grossConflicts"], 0)
+            self.assertEqual(row["coreFillCounts"]["V12"], 874 if row["mode"] == "NORMAL" else 871)
+            self.assertEqual(row["coreFillCounts"]["PENGU"], 66)
+            self.assertEqual(row["coreFillCounts"]["V50"], 93 if row["mode"] == "NORMAL" else 0)
+            self.assertEqual(row["coreFillCounts"]["Q102"], 69)
+            for key in (
+                "averageCryptoGross", "cryptoGrossHours", "unusedGrossHours", "utilizationPct",
+                "preemptionTrimCount", "releasedGrossEquivalent", "trimmedNotionalJpy",
+            ):
+                self.assertIn(key, row)
         for mode, expected in {
             "NORMAL": {"asset": 69373656.13931108, "pf": 3.70258068, "dd": -17.59935397, "trades": 1165, "v52Events": 143},
             "SEVERE": {"asset": 8729157.74295382, "pf": 2.62470185, "dd": -19.24473938, "trades": 1023, "v52Events": 0},
@@ -164,6 +195,24 @@ class IdleCapitalWorkflowTests(unittest.TestCase):
             self.assertEqual(current["grossConflicts"], 0)
             self.assertEqual(current["causalEligibleCandidates"], 69)
             self.assertFalse(current["causalRouting"]["manualTruncation"])
+
+    def test_accepted_path_forbids_approximate_factor_scaling(self) -> None:
+        source = (ROOT / "scripts" / "research_flat_boost_preemption_20260918.py").read_text(encoding="utf-8")
+        self.assertNotIn("formal_asset * factor_ratio", source)
+        self.assertNotIn("overlayFactor", source)
+        self.assertNotIn('"drawdownMethod": "formal-current-core-anchor', source)
+        self.assertIn("build_canonical_source", source)
+        self.assertIn("FULL EVENT REPLAY", source)
+
+    def test_research_artifact_declares_full_event_replay_and_drawdown_flags(self) -> None:
+        artifact = json.loads((ROOT / "docs" / "research-results" / "idle-capital-unused-gross-20260918.json").read_text(encoding="utf-8"))
+        self.assertEqual(artifact["methodology"]["eventReplay"], "FULL EVENT REPLAY")
+        self.assertEqual(artifact["methodology"]["overlayReturnTreatment"], "exact generated-engine event replay; no factor scaling")
+        self.assertEqual(artifact["methodology"]["drawdownTreatment"], "exact generated-engine event-equity drawdown")
+        for row in artifact["cases"]:
+            if row["targetGross"] >= 2.0:
+                self.assertTrue(row["drawdownWarning"])
+                self.assertFalse(row["recommendation"])
     def setUp(self) -> None:
         import tempfile
         test_root = ROOT / ".research-state" / "idle-capital-test-output"
