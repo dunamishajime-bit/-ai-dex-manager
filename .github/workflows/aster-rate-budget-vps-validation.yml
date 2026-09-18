@@ -1,0 +1,56 @@
+name: Aster rate-budget VPS validation
+on:
+  push:
+    branches:
+      - ops/aster-rate-budget-vps-validate-20260918
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: [self-hosted, Linux, X64, disdex-vps]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cc7b8bd4b18cc51bef3e70f52b4498958fb6104b
+      - name: Reuse production dependencies read-only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          current="$(readlink -f /home/deploy/disdex-trading/current)"
+          test -d "$current/node_modules"
+          test -x "$current/.venv2/bin/python"
+          ln -s "$current/node_modules" node_modules
+          ln -s "$current/.venv2" .venv2
+      - name: Linux lock and V52 safety tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node_modules/.bin/tsx --test tests/aster-global-rate-budget.test.ts
+          .venv2/bin/python -m unittest -v tests.test_aster_global_rate_budget_python
+          .venv2/bin/python -m unittest tests.test_v52_market_closed_gate tests.test_stock_reference_gate tests.test_v52_daily_loss_recovery
+      - name: Production read-only audit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          current="$(readlink -f /home/deploy/disdex-trading/current)"
+          sha="$(basename "$current")"
+          echo "current=$current"
+          echo "sha=$sha"
+          if sudo -n true 2>/dev/null; then echo "sudoNonInteractive=true"; else echo "sudoNonInteractive=false"; fi
+          for prefix in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only; do
+            unit="${prefix}@${sha}.service"
+            echo "${unit}=$(systemctl is-active "$unit" 2>/dev/null || true)"
+            systemctl show "$unit" -p MainPID -p NRestarts --no-pager
+          done
+          echo "killSwitch:"
+          jq '{active,reason,updatedAt}' /var/lib/disdex/shared/kill-switch.json 2>/dev/null || true
+          echo "q102:"
+          jq '{runtimeCommitSha,updatedAt,pendingPresent:(.pending!=null),positionPresent:(.position!=null)}' /var/lib/disdex/quality102-causal-v1/state.json 2>/dev/null || true
+          echo "pengu:"
+          jq '{updatedAt,positionPresent:(.position!=null),pendingPresent:(.pending!=null)}' /var/lib/disdex/pengu-dual-ls-v2/runner-live.json 2>/dev/null || true
+          echo "rateBudgetLock:"
+          test ! -e /var/lib/disdex/shared/aster-rate-budget.json.lock || find /var/lib/disdex/shared/aster-rate-budget.json.lock -maxdepth 1 -type f -printf '%f\n'
+          "$current/scripts/ops/root/disdex-current-runtime-wiring" --check
