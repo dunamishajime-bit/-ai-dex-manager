@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -119,9 +120,11 @@ def main() -> None:
         base_args, q102_cap=1.0, pengu_cap=0.75,
         crypto_cap=2.0, total_cap=2.5, daily_loss=-0.075,
     )
-    for needle in ("SUPPLEMENT_BASE_ACTIVE_BLOCKED", "V12_CAPACITY_BLOCKED", 'kind == "SUPP_ENTRY"', 'kind == "V12_ENTRY"', "events.sort", "priority"):
-        block = slice_block(formal_source, needle, 3500)
+    for needle in ("ENTRY_PRIORITY", "supp_trades", "build_stock(", "load_supplement", "SUPPLEMENT_BASE_ACTIVE_BLOCKED", "V12_CAPACITY_BLOCKED", 'kind == "SUPP_ENTRY"', 'kind == "V12_ENTRY"'):
+        block = slice_block(formal_source, needle, 6000)
         print(f"ENGINE_CONTEXT::{needle}\n{block}\nEND_ENGINE_CONTEXT::{needle}")
+    if os.environ.get("ALLOCATOR_INSPECT_ONLY") == "1":
+        return
     formal_result = run_engine(formal_source, args, root / "formal")
     fn = formal_result["results"]["NORMAL"]
     fs = formal_result["results"]["SEVERE"]
