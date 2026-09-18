@@ -40,18 +40,30 @@ const HOUR_MS = 3_600_000;
 export function isQ102PreflightManagedProtectiveOrder(
     order: DirectOpenOrder,
     positions: readonly DirectPosition[],
+    openOrders: readonly DirectOpenOrder[] = [order],
 ): boolean {
     const symbol = String(order.symbol || "").trim().toUpperCase();
     const clientOrderId = String(order.clientOrderId || "");
     if (symbol !== "PENGUUSDT" || !/^recv8-[0-9a-f]{16,36}$/i.test(clientOrderId)) return false;
     if (order.reduceOnly !== true || !["NEW", "PARTIALLY_FILLED"].includes(String(order.status || "").toUpperCase())) return false;
-    if (!Number.isFinite(order.quantity) || order.quantity <= 0 || !Number.isFinite(order.executedQuantity) || order.executedQuantity < 0) return false;
+    if (!Number.isFinite(order.quantity) || order.quantity <= 0 || !Number.isFinite(order.executedQuantity) || order.executedQuantity < 0 || order.executedQuantity > 1e-12) return false;
     const position = positions.find((candidate) => candidate.symbol.toUpperCase() === symbol && Math.abs(candidate.quantity) > 1e-12);
     if (!position || !Number.isFinite(position.quantity)) return false;
     const expectedSide = position.quantity > 0 ? "SELL" : "BUY";
     if (order.side !== expectedSide) return false;
-    return Math.abs(order.quantity - Math.abs(position.quantity)) <= Math.max(1e-8, Math.abs(position.quantity) * 0.01)
-        && order.executedQuantity <= 1e-12;
+
+    const managedQuantity = openOrders.reduce((total, candidate) => {
+        const candidateSymbol = String(candidate.symbol || "").trim().toUpperCase();
+        const candidateClientOrderId = String(candidate.clientOrderId || "");
+        const candidateStatus = String(candidate.status || "").toUpperCase();
+        if (candidateSymbol !== symbol || !/^recv8-[0-9a-f]{16,36}$/i.test(candidateClientOrderId)) return total;
+        if (candidate.reduceOnly !== true || !["NEW", "PARTIALLY_FILLED"].includes(candidateStatus)) return total;
+        if (candidate.side !== expectedSide || !Number.isFinite(candidate.quantity) || candidate.quantity <= 0) return total;
+        if (!Number.isFinite(candidate.executedQuantity) || candidate.executedQuantity < 0 || candidate.executedQuantity > 1e-12) return total;
+        return total + candidate.quantity;
+    }, 0);
+
+    return Math.abs(managedQuantity - Math.abs(position.quantity)) <= Math.max(1e-8, Math.abs(position.quantity) * 0.01);
 }
 
 export interface Quality102CausalV1LiveResolvedConfig {
@@ -361,7 +373,7 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
     if (beforeState.position && !positions.some((position) => Math.abs(position.quantity) > 1e-12 && stateMatches(position))) {
         throw new Error("QUALITY102_PREFLIGHT_STATE_POSITION_NOT_ON_EXCHANGE");
     }
-    const unmanagedOpenOrders = openOrders.filter((order) => !isQ102PreflightManagedProtectiveOrder(order, positions));
+    const unmanagedOpenOrders = openOrders.filter((order) => !isQ102PreflightManagedProtectiveOrder(order, positions, openOrders));
     if (unmanagedOpenOrders.length > 0) throw new Error("QUALITY102_PREFLIGHT_OPEN_ORDER_CONFLICT");
     const quotes = await Promise.all(config.symbols.map(async (symbol) => {
         const quote = await executor.getMarketQuote(symbol);

@@ -31,6 +31,26 @@ test("Q102 preflight recognizes the reconciled PENGU Recovery V8 protection orde
   assert.equal(isQ102PreflightManagedProtectiveOrder(protectiveOrder, [position]), true);
 });
 
+test("Q102 preflight recognizes split PENGU Recovery V8 protection whose aggregate covers the position", () => {
+  const splitPosition = { ...position, quantity: 4244 };
+  const splitOrders: DirectOpenOrder[] = [
+    { ...protectiveOrder, clientOrderId: "recv8-20b3c3a02e5a07d1d79c5f7761eff1", quantity: 2122 },
+    { ...protectiveOrder, clientOrderId: "recv8-1b00e3de1d7092ef238ff60fe6eafa", quantity: 2122 },
+  ];
+  assert.equal(isQ102PreflightManagedProtectiveOrder(splitOrders[0], [splitPosition], splitOrders), true);
+  assert.equal(isQ102PreflightManagedProtectiveOrder(splitOrders[1], [splitPosition], splitOrders), true);
+});
+
+test("Q102 preflight rejects split protection when the managed aggregate does not cover the position", () => {
+  const splitPosition = { ...position, quantity: 4244 };
+  const splitOrders: DirectOpenOrder[] = [
+    { ...protectiveOrder, clientOrderId: "recv8-20b3c3a02e5a07d1d79c5f7761eff1", quantity: 2122 },
+    { ...protectiveOrder, clientOrderId: "recv8-1b00e3de1d7092ef238ff60fe6eafa", quantity: 2000 },
+  ];
+  assert.equal(isQ102PreflightManagedProtectiveOrder(splitOrders[0], [splitPosition], splitOrders), false);
+  assert.equal(isQ102PreflightManagedProtectiveOrder(splitOrders[1], [splitPosition], splitOrders), false);
+});
+
 test("Q102 preflight still rejects an unknown open order", () => {
   assert.equal(isQ102PreflightManagedProtectiveOrder({ ...protectiveOrder, clientOrderId: "manual-order" }, [position]), false);
   assert.equal(isQ102PreflightManagedProtectiveOrder({ ...protectiveOrder, quantity: 1 }, [position]), false);
