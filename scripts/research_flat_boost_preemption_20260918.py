@@ -53,9 +53,10 @@ def build_current_crypto_source(base_args: list[str]) -> str:
 
 def run_engine(source: str, args: argparse.Namespace, out_dir: Path) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
-    generated = out_dir / "current-generated-engine.py"
+    generated = Path("scripts/.research_flat_boost_current.generated.py")
     generated.write_text(source, encoding="utf-8")
-    subprocess.run(
+    try:
+        subprocess.run(
         [
             sys.executable,
             str(generated),
@@ -71,7 +72,9 @@ def run_engine(source: str, args: argparse.Namespace, out_dir: Path) -> dict:
             str(out_dir / "result"),
         ],
         check=True,
-    )
+        )
+    finally:
+        generated.unlink(missing_ok=True)
     result = json.loads((out_dir / "result" / "result.json").read_text(encoding="utf-8"))
     return result
 
