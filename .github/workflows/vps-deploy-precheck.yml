@@ -1,0 +1,26 @@
+name: DisDex VPS deploy precheck
+on:
+  push:
+    branches:
+      - ops/aster-rate-budget-vps-validate-20260918
+
+permissions:
+  contents: read
+
+jobs:
+  precheck:
+    runs-on: [self-hosted, Linux, X64, disdex-vps]
+    timeout-minutes: 5
+    steps:
+      - name: Permission and controller audit
+        shell: bash
+        run: |
+          set -u
+          id
+          namei -l /home/deploy/disdex-trading/releases || true
+          ls -ld /home/deploy /home/deploy/disdex-trading /home/deploy/disdex-trading/releases 2>&1 || true
+          test -w /home/deploy/disdex-trading/releases && echo releasesWritable=true || echo releasesWritable=false
+          ls -l /usr/local/sbin/disdex-vps-control 2>&1 || true
+          sed -n '330,430p' /usr/local/sbin/disdex-vps-control 2>&1 || true
+          echo current=$(sudo -n /usr/local/sbin/disdex-vps-control trading-current 2>/dev/null || true)
+          echo legacyState=$(sudo -n /usr/local/sbin/disdex-vps-control trading-state 2>/dev/null || true)
