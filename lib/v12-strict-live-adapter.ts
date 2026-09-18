@@ -5,6 +5,7 @@ import { V12AsterLiveAdapter, type V12AsterLiveAdapterOptions } from "@/lib/v12-
 import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
+import { findManagedPenguRecoveryV8ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 
 const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
@@ -133,7 +134,9 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             throw new Error("STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
         }
         const openOrders = await this.getOpenOrders();
-        if (openOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
+        const managedProtectiveOrders = new Set(findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions));
+        const unmanagedOpenOrders = openOrders.filter((order) => !managedProtectiveOrders.has(order));
+        if (unmanagedOpenOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
         let workingAccount = account;
         let workingPositions = positions;
         let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });

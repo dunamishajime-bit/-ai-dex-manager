@@ -98,6 +98,8 @@ function validRecoveryV8State(value: unknown, position: PenguDualLsV2Position): 
         && Number.isFinite(quantity) && quantity > 0
         && Math.abs(quantity - position.quantity) <= Math.max(1e-8, position.quantity * 0.01)
         && Number.isFinite(state.entryPrice) && state.entryPrice === position.entryPrice
+        && (state.logicalEntryPrice === undefined || Number.isFinite(state.logicalEntryPrice) && state.logicalEntryPrice > 0)
+        && (state.recoveryExecutionPrice === undefined || Number.isFinite(state.recoveryExecutionPrice) && state.recoveryExecutionPrice > 0)
         && Number.isFinite(originalQuantity) && originalQuantity > 0
         && Number.isFinite(originalGross) && Math.abs(originalGross - 0.5) <= 1e-12
         && Number.isFinite(remainingGross)

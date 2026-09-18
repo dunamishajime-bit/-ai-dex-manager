@@ -30,6 +30,7 @@ import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
+import { findManagedPenguRecoveryV8ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import {
     placeRecoveryV8EntryHardStop,
     replaceRecoveryV8Stops,
@@ -263,6 +264,8 @@ function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV
                 ...previous.recoveryV8,
                 entryTs: previous.entryTs || actual.updatedAt || Date.now(),
                 entryPrice: actual.entryPrice,
+                logicalEntryPrice: previous.recoveryV8.logicalEntryPrice ?? previous.recoveryV8.entryPrice,
+                recoveryExecutionPrice: previous.recoveryV8.recoveryExecutionPrice ?? actual.entryPrice,
                 quantity: Math.abs(actual.quantity),
                 highWaterMark: side > 0 ? Math.max(previous.recoveryV8.highWaterMark, actual.markPrice) : previous.recoveryV8.highWaterMark,
             }
@@ -322,7 +325,8 @@ export class PenguDualLsV2PortfolioRunner {
         if (!/^FILLED$/i.test(order.status) || Math.abs((order.executedQuantity || 0) - observedFilled) > Math.max(1e-8, previousQuantity * 0.01)) {
             throw new Error("PENGU Recovery V8 partial stop fill is not fully reconciled; manual review required.");
         }
-        const triggerPrice = position.entryPrice * (1 - 0.04);
+        const logicalEntryPrice = recovery.logicalEntryPrice ?? position.entryPrice;
+        const triggerPrice = logicalEntryPrice * (1 - 0.04);
         const averagePrice = Number(order.averagePrice || 0);
         if (!(averagePrice > 0)) throw new Error("PENGU Recovery V8 partial stop fill has no average price.");
         state.position = {
@@ -414,6 +418,8 @@ export class PenguDualLsV2PortfolioRunner {
                         remainingGross: 0.5,
                         partialDefenseTriggered: false,
                         highWaterMark: entryPrice,
+                        logicalEntryPrice: entryPrice,
+                        recoveryExecutionPrice: entryPrice,
                         protectionLifecycle: "MANUAL_REVIEW",
                     }
                     : undefined,
@@ -434,7 +440,7 @@ export class PenguDualLsV2PortfolioRunner {
                 const stop = await placeRecoveryV8EntryHardStop(gateway, {
                     symbol: SYMBOL,
                     entryTs: state.position.recoveryV8.entryTs,
-                    entryPrice: state.position.recoveryV8.entryPrice,
+                    entryPrice: state.position.recoveryV8.logicalEntryPrice ?? state.position.recoveryV8.entryPrice,
                     quantity: state.position.recoveryV8.quantity,
                 });
                 state.position.recoveryV8 = {
@@ -589,7 +595,8 @@ export class PenguDualLsV2PortfolioRunner {
                 return { status: "held", message: "Quality102 causal-v1 has a pending order and must reconcile before PENGU can enter.", signal: state.latestSignal || undefined };
             }
             const quality102OpenOrder = openOrders.some((order) => quality102OwnsOrder(quality102Ownership, order));
-            const nonQuality102OpenOrders = openOrders.filter((order) => !quality102OwnsOrder(quality102Ownership, order));
+            const managedProtectiveOrders = new Set(findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions));
+            const nonQuality102OpenOrders = openOrders.filter((order) => !quality102OwnsOrder(quality102Ownership, order) && !managedProtectiveOrders.has(order));
             const actual = actualPosition(positions);
             if (!state.position && actual) {
                 return { status: "manual-review", message: "PENGU Dual LS found an unmanaged existing PENGU position; no takeover is allowed." };
@@ -619,7 +626,7 @@ export class PenguDualLsV2PortfolioRunner {
                         const replaced = await replaceRecoveryV8Stops(gateway, {
                             symbol: SYMBOL,
                             entryTs: state.position.entryTs,
-                            entryPrice: state.position.entryPrice,
+                            entryPrice: state.position.recoveryV8.logicalEntryPrice ?? state.position.recoveryV8.entryPrice,
                             currentQuantity: Math.abs(actual.quantity),
                             oldHardStopClientOrderId: state.position.recoveryV8.fullHardStopClientOrderId,
                             nowTs: this.now(),

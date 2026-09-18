@@ -37,6 +37,10 @@ export interface RecoveryV8Position {
     side: 1;
     entryTs: number;
     entryPrice: number;
+    /** Original strategy entry used for Recovery V8 thresholds after a manual re-entry. */
+    logicalEntryPrice?: number;
+    /** Venue execution price when Recovery V8 was manually or automatically re-entered. */
+    recoveryExecutionPrice?: number;
     quantity: number;
     originalGross: number;
     remainingGross: number;
@@ -75,8 +79,8 @@ export interface RecoveryV8PositionDecision {
     stopPrice?: number;
 }
 
-function finite(value: number) {
-    return Number.isFinite(value);
+function finite(value: unknown) {
+    return typeof value === "number" && Number.isFinite(value);
 }
 
 function inferredRecoveryCross(row: RecoveryV8FeatureRow) {
@@ -128,12 +132,15 @@ function partialPosition(position: RecoveryV8Position) {
 
 export function evaluateRecoveryV8PositionBar(position: RecoveryV8Position, row: RecoveryV8FeatureRow): RecoveryV8PositionDecision {
     const events: RecoveryV8PositionEvent[] = [];
+    const logicalEntryPrice = finite(position.logicalEntryPrice) && position.logicalEntryPrice! > 0
+        ? position.logicalEntryPrice!
+        : position.entryPrice;
     let updatedPosition = {
         ...position,
-        highWaterMark: Math.max(position.entryPrice, position.highWaterMark),
+        highWaterMark: Math.max(logicalEntryPrice, position.highWaterMark),
     };
-    const partialPrice = position.entryPrice * (1 - PENGU_RECOVERY_V8.partial.stopPct);
-    const hardPrice = position.entryPrice * (1 - PENGU_RECOVERY_V8.exit.hardStopPct);
+    const partialPrice = logicalEntryPrice * (1 - PENGU_RECOVERY_V8.partial.stopPct);
+    const hardPrice = logicalEntryPrice * (1 - PENGU_RECOVERY_V8.exit.hardStopPct);
     const partialEligible = !position.partialDefenseTriggered
         && row.referenceTs >= position.entryTs + PENGU_RECOVERY_V8.partial.afterHours * HOUR
         && row.low <= partialPrice;
@@ -154,7 +161,7 @@ export function evaluateRecoveryV8PositionBar(position: RecoveryV8Position, row:
         };
     }
     const previousBest = updatedPosition.highWaterMark;
-    if (previousBest / position.entryPrice - 1 >= PENGU_RECOVERY_V8.exit.trailActivationPct) {
+    if (previousBest / logicalEntryPrice - 1 >= PENGU_RECOVERY_V8.exit.trailActivationPct) {
         const trailingPrice = previousBest * (1 - PENGU_RECOVERY_V8.exit.trailRetracePct);
         if (row.low <= trailingPrice) {
             events.push("TRAILING_STOP");
