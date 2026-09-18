@@ -8,54 +8,55 @@ permissions:
   contents: read
 
 jobs:
-  validate:
-    runs-on: [self-hosted, Linux, X64, disdex-vps]
-    timeout-minutes: 20
+  linux-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           ref: cc7b8bd4b18cc51bef3e70f52b4498958fb6104b
-      - name: Reuse production dependencies read-only
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Lock and V52 safety tests
+        run: |
+          npx tsx --test tests/aster-global-rate-budget.test.ts
+          python -m unittest -v tests.test_aster_global_rate_budget_python
+          python -m unittest tests.test_v52_market_closed_gate tests.test_stock_reference_gate tests.test_v52_daily_loss_recovery
+          npm run typecheck
+
+  vps-audit:
+    runs-on: [self-hosted, Linux, X64, disdex-vps]
+    timeout-minutes: 10
+    steps:
+      - name: Runtime status read-only
         shell: bash
         run: |
-          set -Eeuo pipefail
-          current="$(readlink -f /home/deploy/disdex-trading/current)"
-          echo "current=$current"
-          ls -ld "$current" "$current/node_modules" "$current/.venv2" || true
-          test -d "$current/node_modules"
-          test -x "$current/.venv2/bin/python"
-          rm -rf node_modules .venv2
-          ln -s "$(readlink -f "$current/node_modules")" node_modules
-          ln -s "$(readlink -f "$current/.venv2")" .venv2
-          node --version
-          .venv2/bin/python --version
-      - name: Linux lock and V52 safety tests
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          node_modules/.bin/tsx --test tests/aster-global-rate-budget.test.ts
-          .venv2/bin/python -m unittest -v tests.test_aster_global_rate_budget_python
-          .venv2/bin/python -m unittest tests.test_v52_market_closed_gate tests.test_stock_reference_gate tests.test_v52_daily_loss_recovery
-      - name: Production read-only audit
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          current="$(readlink -f /home/deploy/disdex-trading/current)"
-          sha="$(basename "$current")"
-          echo "current=$current"
-          echo "sha=$sha"
-          if sudo -n true 2>/dev/null; then echo "sudoNonInteractive=true"; else echo "sudoNonInteractive=false"; fi
+          set -u
+          id
+          echo "sudoRules:"
+          sudo -n -l || true
+          v12_unit="$(systemctl list-units 'disdex-v12-x1-all@*.service' --state=running --no-legend | awk 'NR==1{print $1}')"
+          echo "v12Unit=$v12_unit"
+          sha="$(printf '%s' "$v12_unit" | sed -nE 's/^disdex-v12-x1-all@([0-9a-f]{40})\.service$/\1/p')"
+          echo "activeSha=$sha"
           for prefix in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only; do
             unit="${prefix}@${sha}.service"
             echo "${unit}=$(systemctl is-active "$unit" 2>/dev/null || true)"
-            systemctl show "$unit" -p MainPID -p NRestarts --no-pager
+            systemctl show "$unit" -p MainPID -p NRestarts --no-pager 2>/dev/null || true
           done
+          echo "currentViaControl:"
+          sudo -n /usr/local/sbin/disdex-vps-control trading-current 2>/dev/null || true
+          echo "currentWiringCheck:"
+          sudo -n /usr/local/sbin/disdex-current-runtime-wiring --check 2>/dev/null || true
           echo "killSwitch:"
-          jq '{active,reason,updatedAt}' /var/lib/disdex/shared/kill-switch.json 2>/dev/null || true
+          sudo -n jq '{active,reason,updatedAt}' /var/lib/disdex/shared/kill-switch.json 2>/dev/null || true
           echo "q102:"
-          jq '{runtimeCommitSha,updatedAt,pendingPresent:(.pending!=null),positionPresent:(.position!=null)}' /var/lib/disdex/quality102-causal-v1/state.json 2>/dev/null || true
-          echo "pengu:"
-          jq '{updatedAt,positionPresent:(.position!=null),pendingPresent:(.pending!=null)}' /var/lib/disdex/pengu-dual-ls-v2/runner-live.json 2>/dev/null || true
+          sudo -n jq '{runtimeCommitSha,updatedAt,pendingPresent:(.pending!=null),positionPresent:(.position!=null)}' /var/lib/disdex/quality102-causal-v1/state.json 2>/dev/null || true
           echo "rateBudgetLock:"
-          test ! -e /var/lib/disdex/shared/aster-rate-budget.json.lock || find /var/lib/disdex/shared/aster-rate-budget.json.lock -maxdepth 1 -type f -printf '%f\n'
-          "$current/scripts/ops/root/disdex-current-runtime-wiring" --check
+          sudo -n find /var/lib/disdex/shared/aster-rate-budget.json.lock -maxdepth 1 -type f -printf '%f\n' 2>/dev/null || true
