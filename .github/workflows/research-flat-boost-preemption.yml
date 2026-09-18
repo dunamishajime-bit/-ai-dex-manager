@@ -96,6 +96,7 @@ jobs:
           name: flat-boost-preemption-${{ github.run_id }}
           path: |
             .research-state/flat-boost-preemption
+            .research-state/flat-boost-current
             .research-state/flat-boost-preemption.log
           include-hidden-files: true
           retention-days: 90
