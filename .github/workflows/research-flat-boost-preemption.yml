@@ -1,10 +1,12 @@
 name: Research flat boost preemption
 
 on:
-  push:
-    branches:
-      - research/flat-boost-preemption-20260918
   workflow_dispatch:
+    inputs:
+      recovered_input_root:
+        description: "Checked-in or pre-staged research-only directory containing the recovered 90-row inputs"
+        required: false
+        default: ".research-state/formal-inputs"
 
 permissions:
   contents: read
@@ -59,26 +61,28 @@ jobs:
             aster-only-v52-v39cache-
             perp-research-usdm-
 
-      - name: Establish explicit recovered input locations
+      - name: Establish explicit recovered input locations (fail closed)
         run: |
+          INPUT_ROOT="${{ inputs.recovered_input_root || '.research-state/formal-inputs' }}"
           mkdir -p .research-state/formal-inputs
-          test -f .research-state/formal-inputs/v12-q54-atr0p014.json
-          test -f .research-state/formal-inputs/pengu-hard-cd24.json
-          test -f .research-state/formal-inputs/candidate-1slot.csv
-          test -f .research-state/formal-inputs/evidence-1slot.csv
-          test -d .research-state/formal-inputs/stock-cache
+          test -f "$INPUT_ROOT/v12-q54-atr0p014.json"
+          test -f "$INPUT_ROOT/pengu-hard-cd24.json"
+          test -f "$INPUT_ROOT/candidate-1slot.csv"
+          test -f "$INPUT_ROOT/evidence-1slot.csv"
+          test -d "$INPUT_ROOT/stock-cache"
           test -f .stock-research/scripts/research_lab_v96_v52_dual_slot_one_year_bt.py
+          echo "INPUT_ROOT=$INPUT_ROOT" >> "$GITHUB_ENV"
 
       - name: Run research-only lineage gate and comparison
         run: |
           set -o pipefail
           python scripts/research_flat_boost_preemption_20260918.py \
             --formal-json docs/research-results/v52-final-validated-logic-20260917.json \
-            --v12-ledger .research-state/formal-inputs/v12-q54-atr0p014.json \
-            --pengu-ledger .research-state/formal-inputs/pengu-hard-cd24.json \
-            --q102-csv .research-state/formal-inputs/candidate-1slot.csv \
-            --q102-evidence .research-state/formal-inputs/evidence-1slot.csv \
-            --stock-cache-dir .research-state/formal-inputs/stock-cache \
+            --v12-ledger "$INPUT_ROOT/v12-q54-atr0p014.json" \
+            --pengu-ledger "$INPUT_ROOT/pengu-hard-cd24.json" \
+            --q102-csv "$INPUT_ROOT/candidate-1slot.csv" \
+            --q102-evidence "$INPUT_ROOT/evidence-1slot.csv" \
+            --stock-cache-dir "$INPUT_ROOT/stock-cache" \
             --stock-backbone .stock-research/scripts/research_lab_v96_v52_dual_slot_one_year_bt.py \
             --output-root .research-state/flat-boost-preemption \
             2>&1 | tee .research-state/flat-boost-preemption.log

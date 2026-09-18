@@ -1,5 +1,5 @@
 {
-  "schema": "idle-capital-unused-gross-backtest/v2",
+  "schema": "idle-capital-unused-gross-backtest/v3",
   "status": "PASS_RESEARCH_ONLY",
   "decision": "REPORT_RESEARCH_COMPARISON",
   "contract": {
@@ -42,7 +42,9 @@
     "currentAnchor": "formal-v52-final-validated-logic-20260917",
     "eventReplay": "recovered V12/PENGU/Q102 inputs plus stock entry timing",
     "overlayReturnTreatment": "recovered realized candidate net returns scaled by causal allocated gross; no synthetic price path or lookahead",
-    "higherTargetInterpretation": "formal CURRENT anchor plus residual-overlay replay; core sleeves remain unchanged and preemptible overlay is trimmed on later core entries"
+    "higherTargetInterpretation": "formal CURRENT anchor plus residual-overlay replay; core sleeves remain unchanged and preemptible overlay is trimmed on later core entries",
+    "drawdownTreatment": "formal CURRENT DD is retained as the unchanged core anchor; no combined DD is claimed because the recovered formal artifact does not expose a combined event-equity path",
+    "assetTreatment": "CURRENT is authoritative; higher-target assets are unaccepted candidate-net-return replay projections"
   },
   "formalArtifactGate": {
     "allPass": true,
@@ -328,10 +330,16 @@
       "NORMAL.V12": true,
       "NORMAL.PENGU": true,
       "NORMAL.Q102": true,
+      "NORMAL.SupplementFormal": true,
+      "NORMAL.PENGUFormal": true,
+      "NORMAL.V52Events": true,
       "NORMAL.FormalAggregate": true,
       "SEVERE.V12": true,
       "SEVERE.PENGU": true,
       "SEVERE.Q102": true,
+      "SEVERE.SupplementFormal": true,
+      "SEVERE.PENGUFormal": true,
+      "SEVERE.V52Events": true,
       "SEVERE.FormalAggregate": true
     },
     "formalRows": {
@@ -366,8 +374,15 @@
       "dd": -17.59935397,
       "trades": 1165,
       "v52Events": 143,
-      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "caseId": "CURRENT",
+      "policy": "CURRENT",
       "targetGross": 1.5,
+      "equityMethod": "AUTHORITATIVE_FORMAL_CURRENT",
+      "assetIsAuthoritative": true,
+      "isProjection": false,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-integrated-trades",
+      "drawdownMethod": "formal-integrated-drawdown",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 13,
       "preemptionTrimGross": 15.168635188870196,
@@ -383,9 +398,29 @@
       "unusedTotalGrossHours": 24344.13026203218,
       "cryptoUtilizationPct": 22.039078150562492,
       "totalUtilizationPct": 20.599705603287084,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 34660970.44949293,
@@ -393,8 +428,15 @@
       "dd": -17.59935397,
       "trades": 1166,
       "v52Events": 143,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_1.5",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 1.5,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 14,
       "preemptionTrimGross": 6.310954442278353,
@@ -410,9 +452,29 @@
       "unusedTotalGrossHours": 25065.70870991553,
       "cryptoUtilizationPct": 19.29334585268065,
       "totalUtilizationPct": 18.246220776531217,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     },
     {
       "asset": 112693166.97872186,
@@ -420,8 +482,15 @@
       "dd": -17.59935397,
       "trades": 1204,
       "v52Events": 143,
+      "caseId": "REQUIRED_ONLY_PREEMPTION_2",
       "policy": "REQUIRED_ONLY_PREEMPTION",
       "targetGross": 2.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 52,
       "preemptionTrimGross": 28.672414846619116,
@@ -437,9 +506,29 @@
       "unusedTotalGrossHours": 23779.263587384186,
       "cryptoUtilizationPct": 24.18849472076035,
       "totalUtilizationPct": 22.44206266345666,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 69373656.13931108,
@@ -447,8 +536,15 @@
       "dd": -17.59935397,
       "trades": 1188,
       "v52Events": 143,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_2",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 2.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 36,
       "preemptionTrimGross": 15.168635188870196,
@@ -464,9 +560,29 @@
       "unusedTotalGrossHours": 24344.13026203218,
       "cryptoUtilizationPct": 22.039078150562492,
       "totalUtilizationPct": 20.599705603287084,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     },
     {
       "asset": 160150796.74069664,
@@ -474,8 +590,15 @@
       "dd": -17.59935397,
       "trades": 1248,
       "v52Events": 143,
+      "caseId": "REQUIRED_ONLY_PREEMPTION_2.5",
       "policy": "REQUIRED_ONLY_PREEMPTION",
       "targetGross": 2.5,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 96,
       "preemptionTrimGross": 47.721163164965965,
@@ -491,18 +614,45 @@
       "unusedTotalGrossHours": 23319.165856376974,
       "cryptoUtilizationPct": 25.93924712185324,
       "totalUtilizationPct": 23.942707578679144,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 112693166.97872186,
       "pf": 4.1391511936681065,
-      "dd": -17.66179771774254,
+      "dd": -17.59935397,
       "trades": 1204,
       "v52Events": 143,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_2.5",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 2.5,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 52,
       "preemptionTrimGross": 28.672414846619116,
@@ -518,9 +668,29 @@
       "unusedTotalGrossHours": 23779.263587384186,
       "cryptoUtilizationPct": 24.18849472076035,
       "totalUtilizationPct": 22.44206266345666,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     },
     {
       "asset": 219120176.6431819,
@@ -528,8 +698,15 @@
       "dd": -17.59935397,
       "trades": 1266,
       "v52Events": 143,
+      "caseId": "REQUIRED_ONLY_PREEMPTION_3",
       "policy": "REQUIRED_ONLY_PREEMPTION",
       "targetGross": 3.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 114,
       "preemptionTrimGross": 72.13813240847256,
@@ -545,18 +722,45 @@
       "unusedTotalGrossHours": 22969.23799880084,
       "cryptoUtilizationPct": 27.270783870620896,
       "totalUtilizationPct": 25.08402479190855,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 160150796.74069664,
       "pf": 3.9977652970327076,
-      "dd": -17.73020643713694,
+      "dd": -17.59935397,
       "trades": 1248,
       "v52Events": 143,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_3",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 3.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 96,
       "preemptionTrimGross": 47.721163164965965,
@@ -572,9 +776,29 @@
       "unusedTotalGrossHours": 23319.165856376974,
       "cryptoUtilizationPct": 25.93924712185324,
       "totalUtilizationPct": 23.942707578679144,
+      "coreFillCounts": {
+        "V12": 874,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 143
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 0,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "NORMAL"
+      "mode": "NORMAL",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     },
     {
       "asset": 8729157.74295382,
@@ -582,8 +806,15 @@
       "dd": -19.24473938,
       "trades": 1023,
       "v52Events": 0,
-      "policy": "REQUIRED_ONLY_PREEMPTION",
+      "caseId": "CURRENT",
+      "policy": "CURRENT",
       "targetGross": 1.5,
+      "equityMethod": "AUTHORITATIVE_FORMAL_CURRENT",
+      "assetIsAuthoritative": true,
+      "isProjection": false,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-integrated-trades",
+      "drawdownMethod": "formal-integrated-drawdown",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 17,
       "preemptionTrimGross": 15.16728096788994,
@@ -599,9 +830,29 @@
       "unusedTotalGrossHours": 24348.40050315155,
       "cryptoUtilizationPct": 22.022829135648607,
       "totalUtilizationPct": 20.585777876218035,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 4501043.429163812,
@@ -609,8 +860,15 @@
       "dd": -19.24473938,
       "trades": 1020,
       "v52Events": 0,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_1.5",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 1.5,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 14,
       "preemptionTrimGross": 6.311531637007667,
@@ -626,9 +884,29 @@
       "unusedTotalGrossHours": 25070.046630620913,
       "cryptoUtilizationPct": 19.276839305095482,
       "totalUtilizationPct": 18.23207230717249,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     },
     {
       "asset": 13805279.53170464,
@@ -636,8 +914,15 @@
       "dd": -19.24473938,
       "trades": 1058,
       "v52Events": 0,
+      "caseId": "REQUIRED_ONLY_PREEMPTION_2",
       "policy": "REQUIRED_ONLY_PREEMPTION",
       "targetGross": 2.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 52,
       "preemptionTrimGross": 28.670042822037647,
@@ -653,9 +938,29 @@
       "unusedTotalGrossHours": 23783.513313281408,
       "cryptoUtilizationPct": 24.172323769857687,
       "totalUtilizationPct": 22.428201848397233,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 8729157.74295382,
@@ -663,8 +968,15 @@
       "dd": -19.24473938,
       "trades": 1042,
       "v52Events": 0,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_2",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 2.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 36,
       "preemptionTrimGross": 15.16728096788994,
@@ -680,9 +992,29 @@
       "unusedTotalGrossHours": 24348.40050315155,
       "cryptoUtilizationPct": 22.022829135648607,
       "totalUtilizationPct": 20.585777876218035,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     },
     {
       "asset": 19184736.70864876,
@@ -690,8 +1022,15 @@
       "dd": -19.24473938,
       "trades": 1102,
       "v52Events": 0,
+      "caseId": "REQUIRED_ONLY_PREEMPTION_2.5",
       "policy": "REQUIRED_ONLY_PREEMPTION",
       "targetGross": 2.5,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 96,
       "preemptionTrimGross": 47.718444247510284,
@@ -707,18 +1046,45 @@
       "unusedTotalGrossHours": 23323.403993951808,
       "cryptoUtilizationPct": 25.92312026654567,
       "totalUtilizationPct": 23.928884559844075,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 13805279.53170464,
       "pf": 3.9692332894005706,
-      "dd": -19.302890715308934,
+      "dd": -19.24473938,
       "trades": 1058,
       "v52Events": 0,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_2.5",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 2.5,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 52,
       "preemptionTrimGross": 28.670042822037647,
@@ -734,9 +1100,29 @@
       "unusedTotalGrossHours": 23783.513313281408,
       "cryptoUtilizationPct": 24.172323769857687,
       "totalUtilizationPct": 22.428201848397233,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     },
     {
       "asset": 25796261.9734484,
@@ -744,8 +1130,15 @@
       "dd": -19.24473938,
       "trades": 1120,
       "v52Events": 0,
+      "caseId": "REQUIRED_ONLY_PREEMPTION_3",
       "policy": "REQUIRED_ONLY_PREEMPTION",
       "targetGross": 3.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 114,
       "preemptionTrimGross": 72.13520500639517,
@@ -761,18 +1154,45 @@
       "unusedTotalGrossHours": 22973.469475304453,
       "cryptoUtilizationPct": 27.25468236185521,
       "totalUtilizationPct": 25.070223498680843,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "PRIMARY"
     },
     {
       "asset": 19184736.70864876,
       "pf": 3.833118103549258,
-      "dd": -19.36451701804457,
+      "dd": -19.24473938,
       "trades": 1102,
       "v52Events": 0,
+      "caseId": "RESERVE_0P5_REQUIRED_ONLY_3",
       "policy": "RESERVE_0P5_REQUIRED_ONLY",
       "targetGross": 3.0,
+      "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+      "assetIsAuthoritative": false,
+      "isProjection": true,
+      "upliftAccepted": false,
+      "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+      "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
       "acceptedCandidates": 69,
       "preemptionTrimCount": 96,
       "preemptionTrimGross": 47.718444247510284,
@@ -788,14 +1208,34 @@
       "unusedTotalGrossHours": 23323.403993951808,
       "cryptoUtilizationPct": 25.92312026654567,
       "totalUtilizationPct": 23.928884559844075,
+      "coreFillCounts": {
+        "V12": 871,
+        "PENGU": 66,
+        "SUPPLEMENT": 69,
+        "V52": 0
+      },
+      "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
       "dailyLossLatches": 1,
       "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
-      "mode": "SEVERE"
+      "mode": "SEVERE",
+      "causalRouting": {
+        "upstreamCandidates": 90,
+        "periodEligibleCandidates": 86,
+        "blockedByCoreEntry": 17,
+        "integratedFills": 69,
+        "excludedCandidates": 21,
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": false
+      },
+      "causalEligibleCandidates": 69,
+      "coreSleevesUnchanged": true,
+      "grossConflictMethod": "overlay-entry-capacity-conflicts-after-core-allocation",
+      "comparisonTier": "OPTIONAL_RESERVE_SENSITIVITY"
     }
   ],
   "inputs": {
     "formalJson": {
-      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\docs\\research-results\\v52-final-validated-logic-20260917.json",
+      "path": "docs\\research-results\\v52-final-validated-logic-20260917.json",
       "sha256": "0d0425f571f7b7b8781be1260a625b404b5d1893ac355e60047205a270a0dff9"
     },
     "v12Ledger": {
@@ -812,7 +1252,7 @@
       "rows": 90
     },
     "q102Evidence": {
-      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\q102-2slot-compare\\evidence-1slot.csv",
+      "path": "C:\\Users\\dis\\-ai-dex-manager\\.worktrees\\performance-restoration-20260905\\.research-state\\btc-q102x1-sweep\\evidence-1slot.csv",
       "sha256": "41611bf8ad1a63f79a398befced551feb9aea2d9095008843b6049eae29d5f18",
       "rows": 90
     },
@@ -845,8 +1285,8 @@
                   "dividends"
                 ]
               },
-              "NVDAUSDT": {
-                "ticker": "NVDA",
+              "MSFTUSDT": {
+                "ticker": "MSFT",
                 "bars": 1651,
                 "completeDays": 273,
                 "firstDay": "2025-07-01",
@@ -855,8 +1295,8 @@
                   "dividends"
                 ]
               },
-              "MSFTUSDT": {
-                "ticker": "MSFT",
+              "NVDAUSDT": {
+                "ticker": "NVDA",
                 "bars": 1651,
                 "completeDays": 273,
                 "firstDay": "2025-07-01",

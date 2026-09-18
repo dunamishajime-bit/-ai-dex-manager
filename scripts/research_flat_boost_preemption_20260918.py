@@ -35,6 +35,12 @@ Q102_TARGET_ENTRIES = 69
 Q102_UPSTREAM_CANDIDATES = 90
 Q102_SHA = "832f9a723fbb95b8a57201f67e51687bb07b33120851940328de1b3ba0e9567b"
 Q102_EVIDENCE_SHA = "41611bf8ad1a63f79a398befced551feb9aea2d9095008843b6049eae29d5f18"
+Q102_COLUMNS = [
+    "entry", "exit", "symbol", "layer", "normal_net", "stress_net",
+    "exit_reason", "side", "family", "variant", "entry_price",
+]
+Q102_EVIDENCE_COLUMNS = ["symbol", "entry_ts_ms", "side", "entry_price"]
+TARGET_GROSSES = (1.5, 2.0, 2.5, 3.0)
 REJECTED_UPLIFT = "~162.72M (invalid; rejected and not used)"
 
 FORMAL_INTEGRATED_EXPECTED = {
@@ -123,7 +129,7 @@ def required_preemption_gross(*, overlay_gross: float, core_gross: float, crypto
 
 def build_blocked_result(blockers: dict, formal_gate: dict | None = None) -> dict:
     return {
-        "schema": "idle-capital-unused-gross-backtest/v2",
+        "schema": "idle-capital-unused-gross-backtest/v3",
         "status": "BLOCKED_MISSING_FORMAL_LINEAGE",
         "decision": "NO_VALID_SCENARIO",
         "contract": {"period": dict(FORMAL_PERIOD), "expectedIntegrated": dict(FORMAL_INTEGRATED_EXPECTED), "rejectedPriorUpliftClaim": REJECTED_UPLIFT},
@@ -192,10 +198,34 @@ def _stock_intervals(rows: Iterable[dict]) -> list[Interval]:
 
 def _load_candidates(path: Path) -> list[dict]:
     with path.open(newline="", encoding="utf-8") as handle:
-        rows = list(csv.DictReader(handle))
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != Q102_COLUMNS:
+            raise RuntimeError(f"Q102_CANDIDATE_COLUMNS_EXPECTED_{Q102_COLUMNS}_GOT_{reader.fieldnames}")
+        rows = list(reader)
     if len(rows) != Q102_UPSTREAM_CANDIDATES:
         raise RuntimeError(f"Q102_CANDIDATE_COUNT_EXPECTED_90_GOT_{len(rows)}")
     return rows
+
+
+def _causal_routing_audit(rows: list[dict], core: list[Interval]) -> dict:
+    period_rows = [
+        row for row in rows
+        if START_MS <= _ts(row["entry"]) < END_MS and _ts(row["exit"]) > _ts(row["entry"])
+    ]
+    core_blocked = [
+        row for row in period_rows
+        if any(interval.start <= _ts(row["entry"]) < interval.end for interval in core)
+    ]
+    selected = _causal_candidates(rows, core)
+    return {
+        "upstreamCandidates": len(rows),
+        "periodEligibleCandidates": len(period_rows),
+        "blockedByCoreEntry": len(core_blocked),
+        "integratedFills": len(selected),
+        "excludedCandidates": len(rows) - len(selected),
+        "selectionRule": "causal-period-entry-and-core-priority; chronological one-slot cooldown",
+        "manualTruncation": False,
+    }
 
 
 def _causal_candidates(rows: list[dict], core: list[Interval]) -> list[dict]:
@@ -299,7 +329,19 @@ def _overlay_stats(candidates: list[dict], segments_by_candidate: list[list[tupl
 def _scenario_row(*, formal: dict, formal_sleeves: dict, mode: str, target: float, policy: str, allocator: dict, reference_overlay: dict, base_overlay: dict) -> dict:
     base = FORMAL_INTEGRATED_EXPECTED[mode]
     if policy == "REQUIRED_ONLY_PREEMPTION" and abs(target - 1.5) < 1e-12:
-        return {**base, "policy": policy, "targetGross": target, **allocator}
+        return {
+            **base,
+            "caseId": "CURRENT",
+            "policy": "CURRENT",
+            "targetGross": target,
+            "equityMethod": "AUTHORITATIVE_FORMAL_CURRENT",
+            "assetIsAuthoritative": True,
+            "isProjection": False,
+            "upliftAccepted": False,
+            "tradeCountMethod": "formal-integrated-trades",
+            "drawdownMethod": "formal-integrated-drawdown",
+            **allocator,
+        }
     factor_ratio = allocator["overlayFactor"] / max(1e-12, reference_overlay["overlayFactor"])
     asset = base["asset"] * factor_ratio
     q = formal_sleeves["SUPPLEMENT_QUALITY102"]
@@ -320,8 +362,26 @@ def _scenario_row(*, formal: dict, formal_sleeves: dict, mode: str, target: floa
     current_q_trades = int(q.get("trades", 0))
     core_trades = base["trades"] - current_q_trades
     trades = core_trades + allocator["acceptedCandidates"] + allocator["preemptionTrimCount"]
-    dd = base["dd"] if policy == "REQUIRED_ONLY_PREEMPTION" else base["dd"] - max(0.0, factor_ratio - 1.0) * 0.1
-    return {"asset": asset, "pf": pf, "dd": dd, "trades": trades, "v52Events": base["v52Events"], "policy": policy, "targetGross": target, **allocator}
+    # There is no formal combined equity event path in the recovered artifact.
+    # Keep DD at the unchanged core anchor and state that limitation explicitly;
+    # do not manufacture a drawdown path from a scalar uplift factor.
+    return {
+        "asset": asset,
+        "pf": pf,
+        "dd": base["dd"],
+        "trades": trades,
+        "v52Events": base["v52Events"],
+        "caseId": f"{policy}_{target:g}",
+        "policy": policy,
+        "targetGross": target,
+        "equityMethod": "FORMAL_CURRENT_PLUS_CAUSAL_NET_RETURN_REPLAY",
+        "assetIsAuthoritative": False,
+        "isProjection": True,
+        "upliftAccepted": False,
+        "tradeCountMethod": "formal-core-trades-plus-replay-trim-executions",
+        "drawdownMethod": "formal-current-core-anchor; combined-replay-path-unavailable",
+        **allocator,
+    }
 
 
 def _run_allocator(mode: str, target: float, policy: str, candidates: list[dict], core: list[Interval], formal_row: dict, formal_sleeves: dict, reference_overlay: dict | None = None) -> dict:
@@ -342,6 +402,7 @@ def _run_allocator(mode: str, target: float, policy: str, candidates: list[dict]
     areas = _areas(core, [segment for group in segments_by_candidate for segment in group])
     baseline = reference_overlay or overlay
     parity = conflicts == 0 and preemptible
+    routing = formal_row.get("routing", {})
     return {
         "acceptedCandidates": len(candidates),
         "preemptionTrimCount": trim_count,
@@ -358,7 +419,14 @@ def _run_allocator(mode: str, target: float, policy: str, candidates: list[dict]
         "unusedTotalGrossHours": areas["unusedTotalGrossHours"],
         "cryptoUtilizationPct": areas["cryptoUtilizationPct"],
         "totalUtilizationPct": areas["totalUtilizationPct"],
-        "dailyLossLatches": 1 if mode == "SEVERE" else 0,
+        "coreFillCounts": {
+            "V12": int(routing.get("V12_ENTERED", 0)),
+            "PENGU": int(routing.get("PENGU_ENTERED", 0)),
+            "SUPPLEMENT": int(routing.get("SUPPLEMENT_ENTERED", 0)),
+            "V52": int(formal_row.get("v52Events", 0)),
+        },
+        "coreFillParityMethod": "scenario keeps formal CURRENT core counts unchanged",
+        "dailyLossLatches": int(routing.get("CRYPTO_DAILY_LOSS_LATCHES", 0)),
         "dailyLossLatchSource": "formal-current-shared-crypto-risk-replay",
     }
 
@@ -372,12 +440,12 @@ def _write_outputs(root: Path, result: dict) -> None:
         "# DisDex idle-capital / unused-gross research backtest", "",
         f"Status: **{result['status']}**", "",
         "Research-only. No LIVE/VPS/production state or services were changed and no orders were sent.", "",
-        "The CURRENT row is the exact formal anchor. Higher-target rows replay only recovered realized candidate net returns at causal allocated gross; no synthetic price path or lookahead is used.", "",
+        "The CURRENT row is the exact formal anchor. Higher-target rows are explicitly marked projections: they replay only recovered realized candidate net returns at causal allocated gross; no synthetic price path, lookahead, or accepted uplift claim is used.", "",
         "## CURRENT parity", "",
         f"- Formal event-level gate: **{'PASS' if result['currentParity']['allPass'] else 'FAIL'}**.",
         "- NORMAL: asset 69,373,656.13931108; PF 3.70258068; DD -17.59935397%; trades 1165; V12 874; PENGU 66; Q102 69; V52 events 143.",
         "- SEVERE: asset 8,729,157.74295382; PF 2.62470185; DD -19.24473938%; trades 1023; V12 871; PENGU 66; Q102 69; V52 events 0.",
-        "- The 90 Q102 candidates are causally routed to 69; no manual truncation is used.", "",
+        "- The 90 Q102 candidates are causally routed to 69; no manual truncation is used. The 21 excluded rows are outside the period or blocked by a higher-priority core entry.", "",
         "## Dynamic residual allocation", "",
         "Core sleeves retain priority. Q102 is one-slot, lower-priority overlay capacity; REQUIRED_ONLY_PREEMPTION trims only the exact gross deficit at a later core entry.", "",
         "| Mode | Target | Policy | Asset | PF | DD | Trades | Avg crypto gross | Unused crypto gross-hours | Utilization | Trims / gross | Latches | Core parity | Conflicts |",
@@ -385,7 +453,7 @@ def _write_outputs(root: Path, result: dict) -> None:
     ]
     for case in result.get("cases", []):
         lines.append(
-            f"| {case['mode']} | {case['targetGross']:.1f} | {case['policy']} | {case['asset']:.8f} | {case['pf']:.8f} | {case['dd']:.8f}% | {case['trades']} | {case['averageCryptoGross']:.6f} | {case['unusedCryptoGrossHours']:.2f} | {case['cryptoUtilizationPct']:.2f}% | {case['preemptionTrimCount']} / {case['preemptionTrimGross']:.6f} | {case['dailyLossLatches']} | {'PASS' if case['coreFillParity'] else 'FAIL'} | {case['grossConflicts']} |"
+            f"| {case['mode']} | {case['targetGross']:.1f} | {case['caseId']} / {case['policy']} | {case['asset']:.8f} | {case['pf']:.8f} | {case['dd']:.8f}% | {case['trades']} | {case['averageCryptoGross']:.6f} | {case['unusedCryptoGrossHours']:.2f} | {case['cryptoUtilizationPct']:.2f}% | {case['preemptionTrimCount']} / {case['preemptionTrimGross']:.6f} | {case['dailyLossLatches']} | {'PASS' if case['coreFillParity'] else 'FAIL'} | {case['grossConflicts']} |"
         )
     lines += ["", "## Rejected claims", "", f"- {REJECTED_UPLIFT}.", "- The old 102-row frozen Q102 fixture is rejected by the lineage gate.", "", "## Input hashes", ""]
     for name, value in result.get("inputs", {}).items():
@@ -410,15 +478,32 @@ def _load_and_run(args: argparse.Namespace) -> dict:
     for label, payload in (("v12", v12), ("pengu", pengu)):
         if payload.get("period") != FORMAL_PERIOD:
             blockers[label] = "PERIOD_MISMATCH"
-    candidates = _load_candidates(candidate_path)
-    with evidence_path.open(newline="", encoding="utf-8") as handle:
-        evidence_rows = list(csv.DictReader(handle))
-    qmeta = {"path": str(candidate_path), "rowCount": len(candidates), "sourceKind": "dynamic-causal-v4", "upstreamCandidates": len(candidates), "integratedFills": Q102_TARGET_ENTRIES, "sourceSha": _sha256(candidate_path)}
+    with candidate_path.open(newline="", encoding="utf-8") as handle:
+        candidate_reader = csv.DictReader(handle)
+        candidate_fields = candidate_reader.fieldnames
+        candidate_rows = list(candidate_reader)
+    qmeta = {"path": str(candidate_path), "rowCount": len(candidate_rows), "sourceKind": "dynamic-causal-v4", "upstreamCandidates": len(candidate_rows), "integratedFills": Q102_TARGET_ENTRIES, "sourceSha": _sha256(candidate_path)}
     qgate = validate_q102_lineage(qmeta)
     if not qgate["accepted"]:
         blockers["q102"] = qgate
-    if len(evidence_rows) != Q102_UPSTREAM_CANDIDATES or _sha256(evidence_path) != Q102_EVIDENCE_SHA:
-        blockers["q102Evidence"] = {"rows": len(evidence_rows), "sha256": _sha256(evidence_path)}
+    elif candidate_fields != Q102_COLUMNS:
+        blockers["q102"] = {"reason": "Q102_CANDIDATE_COLUMNS_MISMATCH", "expected": Q102_COLUMNS, "observed": candidate_fields}
+    candidates = candidate_rows
+    with evidence_path.open(newline="", encoding="utf-8") as handle:
+        evidence_reader = csv.DictReader(handle)
+        evidence_fields = evidence_reader.fieldnames
+        evidence_rows = list(evidence_reader)
+    if evidence_fields != Q102_EVIDENCE_COLUMNS or len(evidence_rows) != Q102_UPSTREAM_CANDIDATES or _sha256(evidence_path) != Q102_EVIDENCE_SHA:
+        blockers["q102Evidence"] = {"rows": len(evidence_rows), "columns": evidence_fields, "sha256": _sha256(evidence_path), "expectedSha256": Q102_EVIDENCE_SHA}
+    if len(candidates) != Q102_UPSTREAM_CANDIDATES:
+        blockers["q102"] = {"reason": "Q102_CANDIDATE_COUNT_MISMATCH", "expected": Q102_UPSTREAM_CANDIDATES, "observed": len(candidates), "lineage": qgate}
+    if not blockers.get("q102") and not blockers.get("q102Evidence"):
+        evidence_keys = {(row["symbol"], int(row["entry_ts_ms"]), str(row["side"]), round(_finite(row["entry_price"]), 10)) for row in evidence_rows}
+        candidate_keys = {(row["symbol"], _ts(row["entry"]), str(row["side"]), round(_finite(row["entry_price"]), 10)) for row in candidates}
+        if evidence_keys != candidate_keys:
+            blockers["q102Evidence"] = {"reason": "Q102_EVIDENCE_CANDIDATE_IDENTITY_MISMATCH", "evidenceRows": len(evidence_keys), "candidateRows": len(candidate_keys)}
+    if blockers:
+        return build_blocked_result(blockers, formal_gate)
     stock_rows, stock_diag = _load_stock_rows(Path(args.stock_backbone), Path(args.stock_cache_dir))
     cases: list[dict] = []
     current_parity_checks: dict[str, bool] = {}
@@ -428,20 +513,30 @@ def _load_and_run(args: argparse.Namespace) -> dict:
         stock_intervals = _stock_intervals(stock_rows)
         core = v12_intervals + pengu_intervals + stock_intervals
         causal = _causal_candidates(candidates, core)
+        causal_audit = _causal_routing_audit(candidates, core)
         current_parity_checks[f"{mode}.V12"] = len(v12.get("modes", {}).get(ledger_mode, {}).get("trades", [])) == FORMAL_ROUTING_EXPECTED[mode]["V12_ENTERED"]
         current_parity_checks[f"{mode}.PENGU"] = len(pengu.get("modes", {}).get(ledger_mode, {}).get("trades", [])) == FORMAL_ROUTING_EXPECTED[mode]["PENGU_ENTERED"]
         current_parity_checks[f"{mode}.Q102"] = len(causal) == Q102_TARGET_ENTRIES
+        formal_routing = formal["finalCombined"][mode].get("routing", {})
+        current_parity_checks[f"{mode}.SupplementFormal"] = formal_routing.get("SUPPLEMENT_ENTERED") == FORMAL_ROUTING_EXPECTED[mode]["SUPPLEMENT_ENTERED"]
+        current_parity_checks[f"{mode}.PENGUFormal"] = formal_routing.get("PENGU_ENTERED") == FORMAL_ROUTING_EXPECTED[mode]["PENGU_ENTERED"]
+        current_parity_checks[f"{mode}.V52Events"] = formal["finalCombined"][mode].get("v52Events") == FORMAL_INTEGRATED_EXPECTED[mode]["v52Events"]
         current_parity_checks[f"{mode}.FormalAggregate"] = formal_gate["allPass"]
         if len(causal) != Q102_TARGET_ENTRIES:
             blockers[f"{mode}.q102Routing"] = {"expected": Q102_TARGET_ENTRIES, "observed": len(causal)}
         reference = _run_allocator(mode, 1.5, "REQUIRED_ONLY_PREEMPTION", causal, core, formal["finalCombined"][mode], formal["finalCombined"]["normalBySleeve" if mode == "NORMAL" else "severeBySleeve"])
-        for target in (1.5, 2.0, 2.5, 3.0):
+        for target in TARGET_GROSSES:
             for policy in ("REQUIRED_ONLY_PREEMPTION", "RESERVE_0P5_REQUIRED_ONLY"):
                 allocator = _run_allocator(mode, target, policy, causal, core, formal["finalCombined"][mode], formal["finalCombined"]["normalBySleeve" if mode == "NORMAL" else "severeBySleeve"], reference_overlay=reference)
                 if policy == "REQUIRED_ONLY_PREEMPTION" and abs(target - 1.5) < 1e-12:
                     allocator["preemptionTrimCount"] = formal["finalCombined"][mode]["routing"].get("SUPPLEMENT_GROSS_RESIZED", allocator["preemptionTrimCount"])
                 row = _scenario_row(formal=formal["finalCombined"], formal_sleeves=formal["finalCombined"]["normalBySleeve" if mode == "NORMAL" else "severeBySleeve"], mode=mode, target=target, policy=policy, allocator=allocator, reference_overlay=reference, base_overlay=reference)
                 row["mode"] = mode
+                row["causalRouting"] = causal_audit
+                row["causalEligibleCandidates"] = len(causal)
+                row["coreSleevesUnchanged"] = True
+                row["grossConflictMethod"] = "overlay-entry-capacity-conflicts-after-core-allocation"
+                row["comparisonTier"] = "PRIMARY" if policy == "REQUIRED_ONLY_PREEMPTION" else "OPTIONAL_RESERVE_SENSITIVITY"
                 cases.append(row)
     inputs = {
         "formalJson": {"path": str(Path(args.formal_json)), "sha256": _sha256(Path(args.formal_json))},
@@ -455,9 +550,9 @@ def _load_and_run(args: argparse.Namespace) -> dict:
     if blockers:
         return build_blocked_result(blockers, formal_gate)
     return {
-        "schema": "idle-capital-unused-gross-backtest/v2", "status": "PASS_RESEARCH_ONLY", "decision": "REPORT_RESEARCH_COMPARISON",
+        "schema": "idle-capital-unused-gross-backtest/v3", "status": "PASS_RESEARCH_ONLY", "decision": "REPORT_RESEARCH_COMPARISON",
         "contract": {"period": dict(FORMAL_PERIOD), "rejectedPriorUpliftClaim": REJECTED_UPLIFT, "architecture": FORMAL_ARCHITECTURE_EXPECTED},
-        "methodology": {"currentAnchor": "formal-v52-final-validated-logic-20260917", "eventReplay": "recovered V12/PENGU/Q102 inputs plus stock entry timing", "overlayReturnTreatment": "recovered realized candidate net returns scaled by causal allocated gross; no synthetic price path or lookahead", "higherTargetInterpretation": "formal CURRENT anchor plus residual-overlay replay; core sleeves remain unchanged and preemptible overlay is trimmed on later core entries"},
+        "methodology": {"currentAnchor": "formal-v52-final-validated-logic-20260917", "eventReplay": "recovered V12/PENGU/Q102 inputs plus stock entry timing", "overlayReturnTreatment": "recovered realized candidate net returns scaled by causal allocated gross; no synthetic price path or lookahead", "higherTargetInterpretation": "formal CURRENT anchor plus residual-overlay replay; core sleeves remain unchanged and preemptible overlay is trimmed on later core entries", "drawdownTreatment": "formal CURRENT DD is retained as the unchanged core anchor; no combined DD is claimed because the recovered formal artifact does not expose a combined event-equity path", "assetTreatment": "CURRENT is authoritative; higher-target assets are unaccepted candidate-net-return replay projections"},
         "formalArtifactGate": formal_gate,
         "currentParity": {"allPass": formal_gate["allPass"] and all(current_parity_checks.values()), "checks": current_parity_checks, "formalRows": FORMAL_INTEGRATED_EXPECTED, "eventLevelInputs": {"v12Normal": len(v12["modes"]["normal"]["trades"]), "v12Severe": len(v12["modes"]["stress"]["trades"]), "penguNormal": len(pengu["modes"]["normal"]["trades"]), "penguSevere": len(pengu["modes"]["stress"]["trades"]), "q102Upstream": len(candidates), "q102Integrated": Q102_TARGET_ENTRIES}},
         "cases": cases, "inputs": inputs, "q102Lineage": qgate, "safety": dict(RESEARCH_SAFETY), "upliftAccepted": False,

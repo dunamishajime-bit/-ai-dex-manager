@@ -135,10 +135,35 @@ class IdleCapitalWorkflowTests(unittest.TestCase):
         workflow = (ROOT / ".github" / "workflows" / "research-flat-boost-preemption.yml").read_text(encoding="utf-8")
         self.assertNotIn("latest-v12-pengu-v8-v52-dca-1y-33257164125", workflow)
         self.assertNotIn("quality102-frozen.csv", workflow)
+        self.assertNotIn("  push:", workflow)
         self.assertIn("--formal-json", workflow)
         self.assertIn("--q102-csv", workflow)
         self.assertIn("--q102-evidence", workflow)
         self.assertIn("--stock-backbone", workflow)
+
+    def test_completed_artifact_has_exact_current_parity_and_primary_targets(self) -> None:
+        artifact = json.loads((ROOT / "docs" / "research-results" / "idle-capital-unused-gross-20260918.json").read_text(encoding="utf-8"))
+        self.assertEqual(artifact["status"], "PASS_RESEARCH_ONLY")
+        self.assertTrue(artifact["currentParity"]["allPass"])
+        self.assertFalse(artifact["upliftAccepted"])
+        primary = [row for row in artifact["cases"] if row["comparisonTier"] == "PRIMARY"]
+        self.assertEqual({row["targetGross"] for row in primary}, {1.5, 2.0, 2.5, 3.0})
+        self.assertEqual({row["caseId"] for row in primary if row["targetGross"] == 1.5}, {"CURRENT"})
+        for mode, expected in {
+            "NORMAL": {"asset": 69373656.13931108, "pf": 3.70258068, "dd": -17.59935397, "trades": 1165, "v52Events": 143},
+            "SEVERE": {"asset": 8729157.74295382, "pf": 2.62470185, "dd": -19.24473938, "trades": 1023, "v52Events": 0},
+        }.items():
+            current = next(row for row in primary if row["mode"] == mode and row["caseId"] == "CURRENT")
+            for key, value in expected.items():
+                if isinstance(value, float):
+                    self.assertAlmostEqual(current[key], value, places=8)
+                else:
+                    self.assertEqual(current[key], value)
+            self.assertTrue(current["assetIsAuthoritative"])
+            self.assertTrue(current["coreFillParity"])
+            self.assertEqual(current["grossConflicts"], 0)
+            self.assertEqual(current["causalEligibleCandidates"], 69)
+            self.assertFalse(current["causalRouting"]["manualTruncation"])
     def setUp(self) -> None:
         import tempfile
         test_root = ROOT / ".research-state" / "idle-capital-test-output"
