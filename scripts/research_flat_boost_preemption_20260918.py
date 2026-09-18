@@ -11,8 +11,10 @@ import research_quality102_gross_cap_sweep as q102
 import research_quality102_mtm_50_v2 as mtm
 
 
-EXPECTED_NORMAL = 66059488.04343018
-EXPECTED_SEVERE = 8729157.74295382
+EXPECTED_FORMAL_NORMAL = 18442769.03585051
+EXPECTED_FORMAL_SEVERE = 2827282.1410372
+EXPECTED_SELECTED_NORMAL = 66059488.04343018
+EXPECTED_SELECTED_SEVERE = 8729157.74295382
 
 
 def replace_float_assignment(source: str, name: str, value: float) -> str:
@@ -24,30 +26,38 @@ def replace_float_assignment(source: str, name: str, value: float) -> str:
     return out
 
 
-def build_current_crypto_source(base_args: list[str]) -> str:
+def filter_pengu_hard24(path: Path, out: Path) -> Path:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    for mode in ("normal", "stress"):
+        rows = sorted(payload["modes"][mode]["trades"], key=lambda x: int(x["entryTs"]))
+        kept = []
+        blocked_until = -1
+        for row in rows:
+            if int(row["entryTs"]) < blocked_until:
+                continue
+            kept.append(row)
+            if row.get("exitReason") == "hard" or "HARD_STOP" in str(row.get("engineExitReason", "")):
+                blocked_until = int(row["exitTs"]) + 24 * 3600_000
+        payload["modes"][mode]["trades"] = kept
+        payload["modes"][mode]["metrics"]["trades"] = len(kept)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return out
+
+
+def build_source(base_args: list[str], *, q102_cap: float, pengu_cap: float, crypto_cap: float, total_cap: float, daily_loss: float) -> str:
     source = q102.capture_grosssafe_generated(base_args)
-    source = q102.patch_supplement_cap(source, 1.5)
+    source = q102.patch_supplement_cap(source, q102_cap)
     source = mtm.patch_mtm_engine(source)
     for name, value in (
-        ("PENGU_MAX_GROSS", 0.85),
-        ("CRYPTO_GROSS_CAP", 3.0),
-        ("TOTAL_GROSS_CAP", 3.5),
-        ("CRYPTO_DAILY_LOSS_LIMIT", -0.075),
+        ("PENGU_MAX_GROSS", pengu_cap),
+        ("CRYPTO_GROSS_CAP", crypto_cap),
+        ("TOTAL_GROSS_CAP", total_cap),
+        ("CRYPTO_DAILY_LOSS_LIMIT", daily_loss),
     ):
         source = replace_float_assignment(source, name, value)
-
-    # Historical QUALITY102 fixture remains separate; the causal-v4 supplement
-    # cap is the patched 1.5x research sleeve above.
-    required = (
-        "QUALITY102_MTM_PRE_ADMISSION_REBASE",
-        "PENGU_MAX_GROSS = 0.85",
-        "CRYPTO_GROSS_CAP = 3",
-        "TOTAL_GROSS_CAP = 3.5",
-        "CRYPTO_DAILY_LOSS_LIMIT = -0.075",
-    )
-    for marker in required:
-        if marker not in source:
-            raise RuntimeError(f"current-contract marker missing: {marker}")
+    if "QUALITY102_MTM_PRE_ADMISSION_REBASE" not in source:
+        raise RuntimeError("MTM marker missing")
     return source
 
 
@@ -96,17 +106,44 @@ def main() -> None:
 
     root = Path(args.output_root)
     root.mkdir(parents=True, exist_ok=True)
+    filtered_pengu = filter_pengu_hard24(Path(args.pengu_ledger), root / "pengu-hard24-ledger.json")
+    args.pengu_ledger = str(filtered_pengu)
     base_args = [
-        "--stock-cache-dir",
-        args.stock_cache_dir,
-        "--v12-ledger",
-        args.v12_ledger,
-        "--pengu-ledger",
-        args.pengu_ledger,
-        "--output-dir",
-        str(root / "_capture"),
+        "--stock-cache-dir", args.stock_cache_dir,
+        "--v12-ledger", args.v12_ledger,
+        "--pengu-ledger", args.pengu_ledger,
+        "--output-dir", str(root / "_capture"),
     ]
-    source = build_current_crypto_source(base_args)
+
+    formal_source = build_source(
+        base_args, q102_cap=1.0, pengu_cap=0.75,
+        crypto_cap=2.0, total_cap=2.5, daily_loss=-0.075,
+    )
+    formal_result = run_engine(formal_source, args, root / "formal")
+    fn = formal_result["results"]["NORMAL"]
+    fs = formal_result["results"]["SEVERE"]
+    formal_checks = {
+        "penguNormal66": fn.get("routingDiagnostics", {}).get("PENGU_ENTERED") == 66,
+        "penguSevere66": fs.get("routingDiagnostics", {}).get("PENGU_ENTERED") == 66,
+        "q102Normal69": fn.get("routingDiagnostics", {}).get("SUPPLEMENT_ENTERED") == 69,
+        "q102Severe69": fs.get("routingDiagnostics", {}).get("SUPPLEMENT_ENTERED") == 69,
+        "normalAssetParity": abs(float(fn["endingAssetJpy"]) - EXPECTED_FORMAL_NORMAL) <= 0.05,
+        "severeAssetParity": abs(float(fs["endingAssetJpy"]) - EXPECTED_FORMAL_SEVERE) <= 0.05,
+    }
+    formal_gate = {
+        "normal": {"asset": fn["endingAssetJpy"], "pf": fn["profitFactor"], "dd": fn["maxDrawdownPctClosedEventTwr"], "trades": fn["trades"], "routing": fn.get("routingDiagnostics", {})},
+        "severe": {"asset": fs["endingAssetJpy"], "pf": fs["profitFactor"], "dd": fs["maxDrawdownPctClosedEventTwr"], "trades": fs["trades"], "routing": fs.get("routingDiagnostics", {})},
+        "checks": formal_checks,
+    }
+    (root / "formal-gate.json").write_text(json.dumps(formal_gate, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"FORMAL_GATE": formal_gate}, ensure_ascii=False, indent=2))
+    if not all(formal_checks.values()):
+        raise RuntimeError(f"FORMAL_BASELINE_MISMATCH:{formal_gate}")
+
+    source = build_source(
+        base_args, q102_cap=1.5, pengu_cap=0.85,
+        crypto_cap=3.0, total_cap=3.5, daily_loss=-0.075,
+    )
     result = run_engine(source, args, root / "baseline")
 
     normal = result["results"]["NORMAL"]
@@ -129,8 +166,8 @@ def main() -> None:
             "gross": severe.get("grossVerification", {}),
         },
     }
-    normal_ok = abs(float(normal["endingAssetJpy"]) - EXPECTED_NORMAL) <= 0.05
-    severe_ok = abs(float(severe["endingAssetJpy"]) - EXPECTED_SEVERE) <= 0.05
+    normal_ok = abs(float(normal["endingAssetJpy"]) - EXPECTED_SELECTED_NORMAL) <= 0.05
+    severe_ok = abs(float(severe["endingAssetJpy"]) - EXPECTED_SELECTED_SEVERE) <= 0.05
 
     snippets = {
         "PENGU_ENTRY": slice_block(source, 'kind == "PENGU_ENTRY"'),
@@ -148,7 +185,7 @@ def main() -> None:
             "cryptoDailyLossPct": 7.5,
             "v52Policy": "PRE_FINAL_V52_40BPS",
         },
-        "expected": {"normalAsset": EXPECTED_NORMAL, "severeAsset": EXPECTED_SEVERE},
+        "expected": {"normalAsset": EXPECTED_SELECTED_NORMAL, "severeAsset": EXPECTED_SELECTED_SEVERE},
         "actual": baseline,
         "checks": {"normalBaselineParity": normal_ok, "severeBaselineParity": severe_ok},
         "safety": {
