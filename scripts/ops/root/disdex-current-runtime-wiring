@@ -10,6 +10,13 @@ TRADING_CURRENT="${TRADING_ROOT}/current"
 SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
 V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
 PENGU_STATE_ROOT="/var/lib/disdex/pengu-dual-ls-v2"
+LIVE_STATE_FILES=(
+  "/var/lib/disdex/v12-x1-all/runner.json"
+  "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"
+  "/var/lib/disdex/quality102-causal-v1/state.json"
+  "/var/lib/disdex/quality102-causal-v1/market-history.json"
+  "/var/lib/disdex/v52-aster-only/runner-live.json"
+)
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
@@ -211,6 +218,20 @@ write_atomic() {
   trap - RETURN
 }
 
+normalize_live_state_ownership() {
+  local state_path
+  for state_path in "${LIVE_STATE_FILES[@]}"; do
+    [[ -e "$state_path" ]] || continue
+    [[ -f "$state_path" && ! -L "$state_path" ]] || {
+      printf 'LIVE state path is not a regular file: %s\n' "$state_path" >&2
+      return 1
+    }
+    # This changes metadata only; it never rewrites or recreates LIVE state.
+    chown deploy:deploy "$state_path"
+    chmod 0600 "$state_path"
+  done
+}
+
 remove_stale_auto_repair_unit_pin_dropins() {
   local current_dropin="${AUTO_REPAIR_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"
   local dropin
@@ -283,6 +304,7 @@ apply_wiring() {
       return 1
     }
   fi
+  normalize_live_state_ownership
 
   write_atomic "$CONTRACT_ENV_FILE" "DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
@@ -457,6 +479,7 @@ Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 
   write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/pengu-dual-ls-v2/runner-live.json ]; then chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2/runner-live.json && chmod 600 /var/lib/disdex/pengu-dual-ls-v2/runner-live.json; fi'
 ReadWritePaths=${PENGU_STATE_ROOT}
 Environment=PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
 Environment=PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
@@ -471,6 +494,7 @@ Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 
   write_atomic "${Q102_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
 Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=1.5
