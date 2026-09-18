@@ -24,3 +24,8 @@ jobs:
           sed -n '330,430p' /usr/local/sbin/disdex-vps-control 2>&1 || true
           echo current=$(sudo -n /usr/local/sbin/disdex-vps-control trading-current 2>/dev/null || true)
           echo legacyState=$(sudo -n /usr/local/sbin/disdex-vps-control trading-state 2>/dev/null || true)
+          target=cc7b8bd4b18cc51bef3e70f52b4498958fb6104b
+          echo "targetPreflight:"
+          sudo -n /usr/local/sbin/disdex-vps-control preflight-start "$target" || true
+          sudo -n /usr/local/sbin/disdex-vps-control preflight-state "$target" || true
+          sudo -n /usr/local/sbin/disdex-vps-control preflight-log "$target" || true
