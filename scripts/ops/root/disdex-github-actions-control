@@ -105,6 +105,20 @@ case "$operation" in
       exit 65
     }
     ;;
+  LIVE_RUNTIME_PROMOTE_V1)
+    [[ "$source_ref" == "codex/aster-rate-budget-lock-resilience-20260918" ]] || {
+      printf 'DISDEX_VPS_CONTROL_RUNTIME_PROMOTE_SOURCE_REF_BLOCKED\n' >&2
+      exit 65
+    }
+    [[ "$target_sha" == "cc7b8bd4b18cc51bef3e70f52b4498958fb6104b" && "$base_sha" == "d7209168c8c29779ef8865c5757b0c80346507e7" ]] || {
+      printf 'DISDEX_VPS_CONTROL_RUNTIME_PROMOTE_SHA_PAIR_BLOCKED\n' >&2
+      exit 65
+    }
+    [[ "$ack" == "I_ACKNOWLEDGE_ASTER_RATE_BUDGET_LOCK_RESILIENCE_LIVE_PROMOTION_V1" ]] || {
+      printf 'DISDEX_VPS_CONTROL_RUNTIME_PROMOTE_ACK_REQUIRED\n' >&2
+      exit 65
+    }
+    ;;
   *)
     printf 'DISDEX_VPS_CONTROL_OPERATION_NOT_ALLOWLISTED operation=%s\n' "$operation" >&2
     exit 65
@@ -381,6 +395,16 @@ EOF
   printf 'UI_RELEASE=%s\nUI_HTTP_STATUS=%s\n' "$ui_release" "$ui_http"
   if [[ "$operation" == "UI_SYSTEMD_DEPLOY_V2" ]]; then printf 'RUNNER_READONLY_WIRING=VERIFIED\nHEARTBEATS_DEPLOY_READABLE=TRUE\n'; fi
   printf 'TRADING_CURRENT_UNCHANGED=TRUE\nTRADING_RESTART_ATTEMPTED=FALSE\n'
+  exit 0
+fi
+
+if [[ "$operation" == "LIVE_RUNTIME_PROMOTE_V1" ]]; then
+  promoter=/usr/local/sbin/disdex-live-runtime-promote-v1
+  [[ -f "$promoter" && ! -L "$promoter" && -x "$promoter" ]] || {
+    printf 'DISDEX_VPS_CONTROL_RUNTIME_PROMOTER_MISSING\n' >&2
+    exit 68
+  }
+  DISDEX_CONTROL_REQUEST_ID="$request_id" "$promoter" "$SOURCE_REPO" "$target_sha" "$base_sha" "$ack"
   exit 0
 fi
 

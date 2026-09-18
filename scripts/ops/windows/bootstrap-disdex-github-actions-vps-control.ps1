@@ -17,6 +17,8 @@ $DedicatedPub = "$DedicatedKey.pub"
 $V12Pr = 131
 $ExpectedV12Branch = 'chatgpt/v12-live-adapter-final-20260817'
 $V12BaseSha = 'd686f6dc0b841ba6299830fe8aade797420f4597'
+$RuntimePromoteOperation = 'LIVE_RUNTIME_PROMOTE_V1'
+$RuntimePromoteAck = 'I_ACKNOWLEDGE_ASTER_RATE_BUDGET_LOCK_RESILIENCE_LIVE_PROMOTION_V1'
 
 function Write-Phase([string]$Text) {
     Write-Host "`n=== $Text ==="
@@ -297,16 +299,20 @@ runuser -u deploy -- git -C "$source_repo" merge-base --is-ancestor "$control_sh
 tool_root="/root/disdex-gha-bootstrap-$control_sha"
 rm -rf "$tool_root"
 mkdir -m 0700 "$tool_root"
-runuser -u deploy -- git -C "$source_repo" archive "$control_sha" scripts/ops/root/disdex-github-actions-entry scripts/ops/root/disdex-github-actions-control scripts/ops/root/install-disdex-github-actions-control | tar -x -C "$tool_root"
+runuser -u deploy -- git -C "$source_repo" archive "$control_sha" scripts/ops/root/disdex-github-actions-entry scripts/ops/root/disdex-github-actions-control scripts/ops/root/disdex-live-runtime-promote-v1 scripts/ops/root/install-disdex-github-actions-control | tar -x -C "$tool_root"
 entry="$tool_root/scripts/ops/root/disdex-github-actions-entry"
 control="$tool_root/scripts/ops/root/disdex-github-actions-control"
+promoter="$tool_root/scripts/ops/root/disdex-live-runtime-promote-v1"
 installer="$tool_root/scripts/ops/root/install-disdex-github-actions-control"
 bash -n "$entry"
 bash -n "$control"
+bash -n "$promoter"
 bash -n "$installer"
 grep -Fq 'SSH_ORIGINAL_COMMAND' "$entry"
 grep -Fq 'CONTROL_PROBE' "$control"
 grep -Fq 'V12_LIVE_ACTIVATE_V3' "$control"
+grep -Fq 'LIVE_RUNTIME_PROMOTE_V1' "$control"
+grep -Fq 'STATUS: LIVE_RUNTIME_PROMOTED_VERIFIED' "$promoter"
 ! grep -Fq "printf 'origin=%s" "$installer"
 bash "$installer" "$source_repo" /root/disdex-github-actions-control.pub
 rm -f /root/disdex-github-actions-control.pub

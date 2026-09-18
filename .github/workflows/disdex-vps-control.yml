@@ -99,6 +99,15 @@ jobs:
                   raise SystemExit("CONTROL_BASE_SHA_BLOCKED")
               if payload["acknowledgement"] != "I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3":
                   raise SystemExit("CONTROL_ACK_INVALID")
+          elif operation == "LIVE_RUNTIME_PROMOTE_V1":
+              if payload["sourceRef"] != "codex/aster-rate-budget-lock-resilience-20260918":
+                  raise SystemExit("CONTROL_RUNTIME_PROMOTE_SOURCE_REF_BLOCKED")
+              if payload["targetSha"] != "cc7b8bd4b18cc51bef3e70f52b4498958fb6104b":
+                  raise SystemExit("CONTROL_RUNTIME_PROMOTE_TARGET_SHA_BLOCKED")
+              if payload["baseSha"] != "d7209168c8c29779ef8865c5757b0c80346507e7":
+                  raise SystemExit("CONTROL_RUNTIME_PROMOTE_BASE_SHA_BLOCKED")
+              if payload["acknowledgement"] != "I_ACKNOWLEDGE_ASTER_RATE_BUDGET_LOCK_RESILIENCE_LIVE_PROMOTION_V1":
+                  raise SystemExit("CONTROL_RUNTIME_PROMOTE_ACK_INVALID")
           else:
               raise SystemExit("CONTROL_OPERATION_NOT_ALLOWLISTED")
 
@@ -130,6 +139,35 @@ jobs:
           }
           git fetch --no-tags origin "refs/heads/$SOURCE_REF:refs/remotes/origin/$SOURCE_REF"
           [[ "$(git rev-parse --verify "refs/remotes/origin/$SOURCE_REF^{commit}")" == "$TARGET_SHA" ]]
+
+      - name: Require exact runtime promotion diff
+        if: steps.request.outputs.operation == 'LIVE_RUNTIME_PROMOTE_V1'
+        shell: bash
+        env:
+          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
+          BASE_SHA: ${{ steps.request.outputs.base_sha }}
+        run: |
+          set -Eeuo pipefail
+          git cat-file -e "${BASE_SHA}^{commit}"
+          mapfile -t changed < <(git diff --name-only "$BASE_SHA" "$TARGET_SHA" | sort)
+          expected=(
+            lib/disdex-aster-global-rate-budget.ts
+            scripts/disdex_v13d_v11eq_stock_live_engine.py
+            tests/aster-global-rate-budget.test.ts
+            tests/test_aster_global_rate_budget_python.py
+          )
+          mapfile -t expected_sorted < <(printf '%s\n' "${expected[@]}" | sort)
+          [[ "${#changed[@]}" -eq "${#expected_sorted[@]}" ]]
+          for i in "${!changed[@]}"; do
+            [[ "${changed[$i]}" == "${expected_sorted[$i]}" ]] || {
+              echo "CONTROL_RUNTIME_PROMOTE_DIFF_BLOCKED actual=${changed[*]}" >&2
+              exit 1
+            }
+          done
+          git diff --check "$BASE_SHA" "$TARGET_SHA"
+          git cat-file -e "$TARGET_SHA:scripts/ops/root/disdex-current-runtime-wiring"
+          git cat-file -e "$TARGET_SHA:scripts/disdex-quality102-causal-v1-state-migrate.ts"
+          echo 'CONTROL_RUNTIME_PROMOTE_DIFF_PASS'
 
       - name: Require canonical V3 activation tool from exact target SHA
         if: steps.request.outputs.operation == 'V12_LIVE_ACTIVATE_V3'
@@ -304,6 +342,16 @@ jobs:
             V12_LIVE_ACTIVATE_V3)
               grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' /tmp/disdex-vps-control.log
               grep -Fq 'V96_V12_SIMULTANEOUS_LIVE=FALSE' /tmp/disdex-vps-control.log
+              grep -Fq 'ORDERS_SENT_FOR_TESTING=0' /tmp/disdex-vps-control.log
+              grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' /tmp/disdex-vps-control.log
+              ;;
+            LIVE_RUNTIME_PROMOTE_V1)
+              grep -Fq 'STATUS: LIVE_RUNTIME_PROMOTED_VERIFIED' /tmp/disdex-vps-control.log
+              grep -Fq 'TARGET_SHA=cc7b8bd4b18cc51bef3e70f52b4498958fb6104b' /tmp/disdex-vps-control.log
+              grep -Fq 'OLD_GENERATION_ACTIVE=FALSE' /tmp/disdex-vps-control.log
+              grep -Fq 'KILL_SWITCH_ACTIVE=FALSE' /tmp/disdex-vps-control.log
+              grep -Fq 'Q102_MIGRATION=PASS' /tmp/disdex-vps-control.log
+              grep -Fq 'NRESTARTS=0' /tmp/disdex-vps-control.log
               grep -Fq 'ORDERS_SENT_FOR_TESTING=0' /tmp/disdex-vps-control.log
               grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' /tmp/disdex-vps-control.log
               ;;
