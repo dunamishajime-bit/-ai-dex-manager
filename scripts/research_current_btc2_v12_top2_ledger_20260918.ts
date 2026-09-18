@@ -120,7 +120,11 @@ async function main() {
     source: {
       top2ResearchCommit: "70a802501fc2cb42021d76360cb641e2a7fd188b",
       productionGrossCommit: "ac254e897b7514d14c3a34c0679388978b5c3d32",
-      signalParametersFrozen: true,\n      btcRegimeThresholdPct: 0.02,\n      strongRegimeThresholdPct: 0.0359,\n      relaxedRegimeMinimumMomentumPct: 0.054,\n      relaxedRegimeMinimumAtrRatio: 0.014,
+      signalParametersFrozen: true,
+      btcRegimeThresholdPct: 0.02,
+      strongRegimeThresholdPct: 0.0359,
+      relaxedRegimeMinimumMomentumPct: 0.054,
+      relaxedRegimeMinimumAtrRatio: 0.014,
     },
     definition: {
       slots: 2,
