@@ -13,7 +13,7 @@ for (const [label, file, lockNeedle] of [
     assert.ok(waitAt >= 0, `${label} must invoke rollover retry`);
     assert.ok(lockAt >= 0, `${label} account lock acquisition missing`);
     assert.ok(waitAt < lockAt, `${label} rollover wait must happen before account lock acquisition`);
-    assert.match(source, /!beforeLockState\.pending[\s\S]{0,160}!beforeLockState\.(?:active|position)/);
+    assert.match(source, /!beforeLockState\.pending[\s\S]{0,220}(?:!beforeLockState\.(?:active|position)|activePositionsOf\(beforeLockState\)\.length === 0)/);
     assert.match(source, /readSharedCryptoDailyRisk\([^\n]+\)/, `${label} must retain normal in-lock risk validation`);
   });
 }
