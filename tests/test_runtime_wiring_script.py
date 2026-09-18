@@ -37,6 +37,17 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only", source)
         self.assertIn("DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json", source)
 
+    def test_wiring_normalizes_live_state_ownership_and_hardens_runner_startup(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("normalize_live_state_ownership()", source)
+        self.assertIn("normalize_live_state_ownership", source)
+        self.assertIn("chown deploy:deploy \"$state_path\"", source)
+        self.assertIn("chmod 0600 \"$state_path\"", source)
+        self.assertIn("chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2/runner-live.json", source)
+        self.assertIn("chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json", source)
+        self.assertIn("chmod 600 /var/lib/disdex/pengu-dual-ls-v2/runner-live.json", source)
+        self.assertIn("chmod 600 /var/lib/disdex/quality102-causal-v1/state.json", source)
+
     def test_wiring_script_does_not_stop_or_cancel_trading(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertNotIn("systemctl stop", source)
