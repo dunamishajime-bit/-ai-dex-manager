@@ -177,9 +177,15 @@ def _aster_budget_lock_owner(lock_path: Path) -> Optional[dict]:
     except (TypeError, ValueError):
         return None
     token = value.get("token")
+    process_start_ticks = value.get("processStartTicks")
     if pid <= 0 or not math.isfinite(created_at) or created_at <= 0 or not isinstance(token, str) or not token:
         return None
-    return {"schema": value["schema"], "pid": pid, "createdAt": created_at, "token": token}
+    if process_start_ticks is not None and (not isinstance(process_start_ticks, str) or not process_start_ticks.isdigit()):
+        return None
+    owner = {"schema": value["schema"], "pid": pid, "createdAt": created_at, "token": token}
+    if process_start_ticks is not None:
+        owner["processStartTicks"] = process_start_ticks
+    return owner
 
 
 def _aster_budget_process_alive(pid: int) -> bool:
@@ -194,10 +200,46 @@ def _aster_budget_process_alive(pid: int) -> bool:
         return False
 
 
+def _aster_budget_process_start_ticks(pid: int) -> Optional[str]:
+    if os.name != "posix":
+        return None
+    try:
+        raw = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+    except OSError:
+        return None
+    close_paren = raw.rfind(")")
+    if close_paren < 0:
+        return None
+    fields = raw[close_paren + 1:].strip().split()
+    if len(fields) <= 19 or not fields[19].isdigit():
+        return None
+    return fields[19]
+
+
+def _aster_budget_new_lock_owner() -> dict:
+    owner = {
+        "schema": ASTER_GLOBAL_RATE_BUDGET_LOCK_SCHEMA,
+        "pid": os.getpid(),
+        "createdAt": now_ms(),
+        "token": secrets.token_hex(16),
+    }
+    process_start_ticks = _aster_budget_process_start_ticks(os.getpid())
+    if process_start_ticks is not None:
+        owner["processStartTicks"] = process_start_ticks
+    return owner
+
+
 def _aster_budget_lock_is_stale(lock_path: Path) -> bool:
     owner = _aster_budget_lock_owner(lock_path)
     if owner is not None:
-        return not _aster_budget_process_alive(owner["pid"])
+        if not _aster_budget_process_alive(owner["pid"]):
+            return True
+        recorded_start = owner.get("processStartTicks")
+        if recorded_start is not None:
+            current_start = _aster_budget_process_start_ticks(owner["pid"])
+            if current_start is not None and current_start != recorded_start:
+                return True
+        return False
     try:
         return time.time() - lock_path.stat().st_mtime > ASTER_GLOBAL_RATE_BUDGET_LOCK_RECOVERY_GRACE_SECONDS
     except FileNotFoundError:
@@ -210,60 +252,72 @@ def _aster_budget_transient_lock_race(error: BaseException) -> bool:
     }
 
 
-def _aster_budget_acquire_generation_mutex(lock_path: Path, deadline: float) -> Path:
+def _aster_budget_safe_pre_request_failure(error: BaseException) -> bool:
+    message = str(error)
+    return any(code in message for code in (
+        "ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT",
+        "ASTER_GLOBAL_RATE_BUDGET_LOCK_RELEASE_FAILED",
+        "ASTER_GLOBAL_RATE_BUDGET_RECOVERY_LOCK_RELEASE_FAILED",
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED",
+    ))
+
+
+def _aster_budget_acquire_generation_mutex(lock_path: Path, deadline: float) -> tuple[Path, dict]:
     recovery_path = Path(str(lock_path) + ".recovery")
+    owner = _aster_budget_new_lock_owner()
     while True:
         try:
             recovery_path.mkdir(mode=0o700)
-            return recovery_path
+            try:
+                owner_path = _aster_budget_lock_owner_path(recovery_path)
+                owner_path.write_text(json.dumps(owner, separators=(",", ":")) + "\n", encoding="utf-8")
+                os.chmod(owner_path, 0o600)
+                return recovery_path, owner
+            except OSError as error:
+                shutil.rmtree(recovery_path, ignore_errors=True)
+                if not _aster_budget_transient_lock_race(error):
+                    raise
         except OSError as error:
             if not isinstance(error, FileExistsError) and not _aster_budget_transient_lock_race(error):
                 raise
-            if time.monotonic() >= deadline:
-                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT") from error
-            time.sleep(0.005)
+            if isinstance(error, FileExistsError) and _aster_budget_lock_is_stale(recovery_path):
+                try:
+                    shutil.rmtree(recovery_path)
+                    continue
+                except OSError as recovery_error:
+                    if not _aster_budget_transient_lock_race(recovery_error):
+                        raise
+        if time.monotonic() >= deadline:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
+        time.sleep(0.005)
 
 
-def _aster_budget_release_generation_mutex(recovery_path: Path, deadline: float) -> None:
+def _aster_budget_release_generation_mutex(recovery_path: Path, owner: dict) -> None:
+    current = _aster_budget_lock_owner(recovery_path)
+    if current is None or current.get("token") != owner.get("token"):
+        return
+    released_path = Path(f"{recovery_path}.released.{owner.get('token')}")
+    release_deadline = time.monotonic() + 5.0
     while True:
         try:
-            recovery_path.rmdir()
-            return
+            recovery_path.rename(released_path)
+            break
         except FileNotFoundError:
             return
         except OSError as error:
-            if not _aster_budget_transient_lock_race(error) or time.monotonic() >= deadline:
-                raise
+            if not _aster_budget_transient_lock_race(error) or time.monotonic() >= release_deadline:
+                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_RECOVERY_LOCK_RELEASE_FAILED") from error
             time.sleep(0.005)
+    shutil.rmtree(released_path, ignore_errors=True)
 
 
 def _aster_budget_acquire_lock(lock_path: Path, max_queue_ms: int) -> dict:
     deadline = time.monotonic() + max_queue_ms / 1000.0
-    owner = {
-        "schema": ASTER_GLOBAL_RATE_BUDGET_LOCK_SCHEMA,
-        "pid": os.getpid(),
-        "createdAt": now_ms(),
-        "token": secrets.token_hex(16),
-    }
+    owner = _aster_budget_new_lock_owner()
     while True:
-        recovery_path = _aster_budget_acquire_generation_mutex(lock_path, deadline)
-        wait_for_owner = False
-        lost_generation = False
         try:
-            try:
-                lock_path.mkdir(mode=0o700)
-            except FileExistsError:
-                if not _aster_budget_lock_is_stale(lock_path):
-                    wait_for_owner = True
-                else:
-                    try:
-                        shutil.rmtree(lock_path)
-                        lock_path.mkdir(mode=0o700)
-                    except OSError as error:
-                        if not _aster_budget_transient_lock_race(error):
-                            raise
-                        lost_generation = True
-            if not wait_for_owner and not lost_generation:
+            lock_path.mkdir(mode=0o700)
+            while True:
                 try:
                     owner_path = _aster_budget_lock_owner_path(lock_path)
                     owner_path.write_text(json.dumps(owner, separators=(",", ":")) + "\n", encoding="utf-8")
@@ -273,9 +327,28 @@ def _aster_budget_acquire_lock(lock_path: Path, max_queue_ms: int) -> dict:
                     if not _aster_budget_transient_lock_race(error):
                         shutil.rmtree(lock_path, ignore_errors=True)
                         raise
-                    lost_generation = True
-        finally:
-            _aster_budget_release_generation_mutex(recovery_path, deadline)
+                    if isinstance(error, FileNotFoundError):
+                        break
+                    if time.monotonic() >= deadline:
+                        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT") from error
+                    time.sleep(0.005)
+        except OSError as error:
+            if not isinstance(error, FileExistsError) and not _aster_budget_transient_lock_race(error):
+                raise
+            if isinstance(error, FileExistsError) and _aster_budget_lock_is_stale(lock_path):
+                recovery_path, recovery_owner = _aster_budget_acquire_generation_mutex(lock_path, deadline)
+                try:
+                    if _aster_budget_lock_is_stale(lock_path):
+                        stale_path = Path(f"{lock_path}.stale.{secrets.token_hex(16)}")
+                        try:
+                            lock_path.rename(stale_path)
+                            shutil.rmtree(stale_path, ignore_errors=True)
+                        except OSError as recovery_error:
+                            if not isinstance(recovery_error, FileNotFoundError) and not _aster_budget_transient_lock_race(recovery_error):
+                                raise
+                finally:
+                    _aster_budget_release_generation_mutex(recovery_path, recovery_owner)
+                continue
         if time.monotonic() >= deadline:
             raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT")
         time.sleep(0.005)
@@ -1662,7 +1735,17 @@ class StockEngine:
                     self.tick()
                 except Exception as error:
                     self.log("stock-runner-tick-error", error=str(error))
-                    if self.live:
+                    if self.live and _aster_budget_safe_pre_request_failure(error):
+                        # The shared rate-budget gate fails before the Aster HTTP request is sent.
+                        # Keep V52 locally fail-closed for this tick and retry later, but do not
+                        # propagate an infrastructure coordination fault into the shared Kill Switch.
+                        self.log(
+                            "stock-runner-rate-budget-deferred",
+                            error=str(error),
+                            sharedKillSwitchActivated=False,
+                            ordersSent=0,
+                        )
+                    elif self.live:
                         self.activate_kill_switch(f"Stock engine fatal tick error: {error}")
                         try:
                             self.flatten_all("FATAL_TICK_ERROR")

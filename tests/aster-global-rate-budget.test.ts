@@ -118,12 +118,83 @@ test("shared budget survives concurrent stale ownerless lock recovery without du
     await mkdir(lockPath);
     const old = new Date(Date.now() - 30_000);
     await utimes(lockPath, old, old);
+    const queueMs = process.platform === "win32" ? 15_000 : 5_000;
     const results = await Promise.allSettled(Array.from({ length: 48 }, () =>
-      reserveAsterGlobalRateSlot({ path, minIntervalMs: 2, maxQueueMs: 5_000 })));
+      reserveAsterGlobalRateSlot({ path, minIntervalMs: 2, maxQueueMs: queueMs })));
     const rejected = results.filter((result) => result.status === "rejected");
     assert.deepEqual(rejected, []);
     const permits = results.map((result) => result.status === "fulfilled" ? result.value.permitAt : -1);
     assert.equal(new Set(permits).size, permits.length, "every reservation must receive a distinct serialized permit");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("shared budget detects PID reuse using Linux process start ticks", { skip: process.platform !== "linux" }, async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-pid-reuse-"));
+  const path = join(directory, "aster-rate-budget.json");
+  const lockPath = `${path}.lock`;
+  try {
+    const raw = await readFile(`/proc/${process.pid}/stat`, "utf8");
+    const fields = raw.slice(raw.lastIndexOf(")") + 1).trim().split(/\s+/);
+    const currentStartTicks = fields[19];
+    assert.ok(currentStartTicks && /^\d+$/.test(currentStartTicks));
+    await mkdir(lockPath);
+    await writeFile(join(lockPath, "owner.json"), JSON.stringify({
+      schema: "disdex-aster-rate-budget-lock/v1",
+      pid: process.pid,
+      createdAt: Date.now(),
+      token: "reused-pid-owner",
+      processStartTicks: String(BigInt(currentStartTicks) + 1n),
+    }));
+    const result = await reserveAsterGlobalRateSlot({ path, minIntervalMs: 2, maxQueueMs: 1_000 });
+    assert.ok(result.nextAllowedAt > 0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("shared budget reclaims a stale ownerless recovery mutex after a crashed recovery", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-stale-recovery-"));
+  const path = join(directory, "aster-rate-budget.json");
+  const lockPath = `${path}.lock`;
+  const recoveryPath = `${lockPath}.recovery`;
+  try {
+    await mkdir(lockPath);
+    await mkdir(recoveryPath);
+    const old = new Date(Date.now() - 30_000);
+    await utimes(lockPath, old, old);
+    await utimes(recoveryPath, old, old);
+    const result = await reserveAsterGlobalRateSlot({ path, minIntervalMs: 2, maxQueueMs: 1_000 });
+    assert.ok(result.nextAllowedAt > 0);
+    assert.equal(existsSync(recoveryPath), false, "recovery mutex must be released after successful reservation");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("shared budget never evicts a recovery mutex owned by a live process", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-live-recovery-"));
+  const path = join(directory, "aster-rate-budget.json");
+  const lockPath = `${path}.lock`;
+  const recoveryPath = `${lockPath}.recovery`;
+  try {
+    await mkdir(lockPath);
+    await mkdir(recoveryPath);
+    await writeFile(join(recoveryPath, "owner.json"), JSON.stringify({
+      schema: "disdex-aster-rate-budget-lock/v1",
+      pid: process.pid,
+      createdAt: Date.now() - 30_000,
+      token: "live-recovery-owner",
+    }));
+    const old = new Date(Date.now() - 30_000);
+    await utimes(lockPath, old, old);
+    await utimes(recoveryPath, old, old);
+    await assert.rejects(
+      reserveAsterGlobalRateSlot({ path, minIntervalMs: 2, maxQueueMs: 20 }),
+      /ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT/,
+    );
+    assert.equal((await readFile(join(recoveryPath, "owner.json"), "utf8")).includes("live-recovery-owner"), true);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

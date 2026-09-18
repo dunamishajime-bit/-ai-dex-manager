@@ -173,6 +173,130 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
                         os.environ[key] = value
 
 
+    def test_pid_reuse_is_detected_with_process_start_ticks(self):
+        if os.name != "posix":
+            self.skipTest("Linux /proc process identity contract")
+        current_start = base._aster_budget_process_start_ticks(os.getpid())
+        if current_start is None:
+            self.skipTest("/proc start ticks unavailable")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "aster-rate-budget.json"
+            lock_path = Path(str(path) + ".lock")
+            lock_path.mkdir()
+            (lock_path / "owner.json").write_text(json_module.dumps({
+                "schema": "disdex-aster-rate-budget-lock/v1",
+                "pid": os.getpid(),
+                "createdAt": int(time.time() * 1000),
+                "token": "reused-pid-owner",
+                "processStartTicks": str(int(current_start) + 1),
+            }), encoding="utf-8")
+            owner = base._aster_budget_acquire_lock(lock_path, 1000)
+            try:
+                self.assertNotEqual(owner["token"], "reused-pid-owner")
+            finally:
+                base._aster_budget_release_lock(lock_path, owner)
+
+    def test_stale_ownerless_recovery_mutex_is_reclaimed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "aster-rate-budget.json"
+            lock_path = Path(str(path) + ".lock")
+            recovery_path = Path(str(lock_path) + ".recovery")
+            lock_path.mkdir()
+            recovery_path.mkdir()
+            old = time.time() - 30
+            os.utime(lock_path, (old, old))
+            os.utime(recovery_path, (old, old))
+            owner = base._aster_budget_acquire_lock(lock_path, 1000)
+            try:
+                self.assertTrue(lock_path.is_dir())
+                self.assertFalse(recovery_path.exists())
+            finally:
+                base._aster_budget_release_lock(lock_path, owner)
+
+    def test_live_recovery_mutex_is_never_evicted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "aster-rate-budget.json"
+            lock_path = Path(str(path) + ".lock")
+            recovery_path = Path(str(lock_path) + ".recovery")
+            lock_path.mkdir()
+            recovery_path.mkdir()
+            (recovery_path / "owner.json").write_text(json_module.dumps({
+                "schema": "disdex-aster-rate-budget-lock/v1",
+                "pid": os.getpid(),
+                "createdAt": int(time.time() * 1000) - 30_000,
+                "token": "live-recovery-owner",
+            }), encoding="utf-8")
+            old = time.time() - 30
+            os.utime(lock_path, (old, old))
+            os.utime(recovery_path, (old, old))
+            with self.assertRaisesRegex(RuntimeError, "ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT"):
+                base._aster_budget_acquire_lock(lock_path, 20)
+            self.assertIn("live-recovery-owner", (recovery_path / "owner.json").read_text(encoding="utf-8"))
+
+    def test_rate_budget_coordination_failure_is_local_fail_closed_not_shared_kill_switch(self):
+        class DummyLock:
+            def acquire(self): pass
+            def release(self): pass
+
+        class DummyXyz:
+            def connect(self): pass
+
+        engine = object.__new__(base.StockEngine)
+        engine.lock = DummyLock()
+        engine.xyz = DummyXyz()
+        engine.reset_days = lambda: None
+        engine.reconcile = lambda: None
+        events = []
+        engine.log = lambda event, **payload: events.append((event, payload))
+        engine.stop_requested = False
+        engine.tick = lambda: (_ for _ in ()).throw(RuntimeError("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT"))
+        engine.live = True
+        engine.stock_capital = 0.0
+        engine.state = {}
+        kill_switch_calls = []
+        flatten_calls = []
+        engine.activate_kill_switch = lambda reason: kill_switch_calls.append(reason)
+        engine.flatten_all = lambda reason: flatten_calls.append(reason)
+
+        engine.run(False)
+
+        self.assertEqual(kill_switch_calls, [])
+        self.assertEqual(flatten_calls, [])
+        deferred = [payload for event, payload in events if event == "stock-runner-rate-budget-deferred"]
+        self.assertEqual(len(deferred), 1)
+        self.assertFalse(deferred[0]["sharedKillSwitchActivated"])
+        self.assertEqual(deferred[0]["ordersSent"], 0)
+
+    def test_non_rate_budget_fatal_error_still_activates_shared_kill_switch(self):
+        class DummyLock:
+            def acquire(self): pass
+            def release(self): pass
+
+        class DummyXyz:
+            def connect(self): pass
+
+        engine = object.__new__(base.StockEngine)
+        engine.lock = DummyLock()
+        engine.xyz = DummyXyz()
+        engine.reset_days = lambda: None
+        engine.reconcile = lambda: None
+        engine.log = lambda *_args, **_kwargs: None
+        engine.stop_requested = False
+        engine.tick = lambda: (_ for _ in ()).throw(RuntimeError("UNSAFE_EXECUTION_STATE"))
+        engine.live = True
+        engine.stock_capital = 0.0
+        engine.state = {}
+        kill_switch_calls = []
+        flatten_calls = []
+        engine.activate_kill_switch = lambda reason: kill_switch_calls.append(reason)
+        engine.flatten_all = lambda reason: flatten_calls.append(reason)
+
+        with self.assertRaisesRegex(RuntimeError, "UNSAFE_EXECUTION_STATE"):
+            engine.run(False)
+
+        self.assertEqual(len(kill_switch_calls), 1)
+        self.assertEqual(flatten_calls, ["FATAL_TICK_ERROR"])
+
     def test_lock_loss_after_owner_write_retries_instead_of_failing_v52(self):
         with tempfile.TemporaryDirectory() as directory:
             lock_path = Path(directory) / "aster-rate-budget.json.lock"
