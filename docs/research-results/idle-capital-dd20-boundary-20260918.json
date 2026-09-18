@@ -1,0 +1,101 @@
+{
+  "schema": "idle-capital-dd20-boundary/v1",
+  "method": "FULL EVENT REPLAY",
+  "constraint": "NORMAL and SEVERE drawdown must be >= -20.0%",
+  "granularityGross": 0.01,
+  "maximumPassingTargetGross": 1.66,
+  "firstFailingTargetGross": 1.67,
+  "results": {
+    "1.60": {
+      "NORMAL": {
+        "asset": 79935629.89536975,
+        "pf": 3.71390495,
+        "dd": -18.71014555,
+        "trades": 1184
+      },
+      "SEVERE": {
+        "asset": 9959012.10330045,
+        "pf": 2.64615457,
+        "dd": -19.24473938,
+        "trades": 1040
+      }
+    },
+    "1.62": {
+      "NORMAL": {
+        "asset": 82192201.32333335,
+        "pf": 3.71602046,
+        "dd": -18.93194333,
+        "trades": 1184
+      },
+      "SEVERE": {
+        "asset": 10220550.13744392,
+        "pf": 2.65025779,
+        "dd": -19.44520384,
+        "trades": 1040
+      }
+    },
+    "1.64": {
+      "NORMAL": {
+        "asset": 84536084.55224235,
+        "pf": 3.71848215,
+        "dd": -19.12285009,
+        "trades": 1185
+      },
+      "SEVERE": {
+        "asset": 10488385.41898643,
+        "pf": 2.65433719,
+        "dd": -19.67053648,
+        "trades": 1040
+      }
+    },
+    "1.66": {
+      "NORMAL": {
+        "asset": 86943029.96205322,
+        "pf": 3.72095222,
+        "dd": -19.31172328,
+        "trades": 1185
+      },
+      "SEVERE": {
+        "asset": 10762652.45590791,
+        "pf": 2.65839298,
+        "dd": -19.89573759,
+        "trades": 1040
+      }
+    },
+    "1.67": {
+      "NORMAL": {
+        "asset": 88169878.53508095,
+        "pf": 3.72218135,
+        "dd": -19.40617481,
+        "trades": 1185
+      },
+      "SEVERE": {
+        "asset": 10902240.58366438,
+        "pf": 2.66041209,
+        "dd": -20.00828883,
+        "trades": 1040
+      }
+    },
+    "1.68": {
+      "NORMAL": {
+        "asset": 89412552.1388197,
+        "pf": 3.72340656,
+        "dd": -19.5006363,
+        "trades": 1185
+      },
+      "SEVERE": {
+        "asset": 11043488.19997802,
+        "pf": 2.66242537,
+        "dd": -20.12080718,
+        "trades": 1040
+      }
+    }
+  },
+  "safety": {
+    "mode": "RESEARCH_ONLY",
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}
