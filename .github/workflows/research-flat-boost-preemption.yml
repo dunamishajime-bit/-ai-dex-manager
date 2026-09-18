@@ -75,10 +75,20 @@ jobs:
           repository: dunamishajime-bit/-ai-dex-manager
           run-id: 33257164125
 
-      - name: Regenerate current BTC2 V12 Top2 ledger
+      - name: Restore regenerated current BTC2 V12 ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: flat-boost-preemption-35337138289
+          path: .research-state/reuse
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35337138289
+
+      - name: Reuse current BTC2 V12 Top2 ledger
         run: |
-          V12_TOP2_LEDGER_OUT=.research-state/flat-boost-current/v12-top2-ledger.json \
-            npx tsx scripts/research_current_btc2_v12_top2_ledger_20260918.ts
+          mkdir -p .research-state/flat-boost-current
+          cp .research-state/reuse/flat-boost-current/v12-top2-ledger.json \
+            .research-state/flat-boost-current/v12-top2-ledger.json
 
       - name: Baseline parity gate
         run: |
