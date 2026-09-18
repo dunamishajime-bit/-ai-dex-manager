@@ -1,0 +1,212 @@
+{
+  "schema": "v12-dynamic2-q102-brk2465/v1",
+  "status": "PASS_RESEARCH_ONLY",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z"
+  },
+  "configuration": {
+    "v12BaseAggregateGross": 1.5,
+    "v12DynamicAggregateGrossCap": 2.0,
+    "v12PerPositionGrossCap": 1.0,
+    "penguGross": 0.85,
+    "q102FamilyCaps": {
+      "HIGH_VOL": 1.665,
+      "MR": 1.0,
+      "BRK": 2.465,
+      "REV": 2.5,
+      "PB": 2.5
+    },
+    "v52StockGross": 1.98,
+    "v52SlotGross": 1.64,
+    "cryptoGrossCap": 3.0,
+    "totalGrossCap": 3.5,
+    "sharedCryptoDailyLossPct": 7.5
+  },
+  "results": [
+    {
+      "scenario": "NORMAL",
+      "endingAssetJpy": 270126566.3772751,
+      "profitFactor": 3.82886822,
+      "maxDrawdownPct": -19.72421906,
+      "trades": 1237,
+      "coreFillParity": true,
+      "grossConflicts": 0,
+      "maxCryptoGross": 3.0,
+      "maxTotalGross": 3.5,
+      "routing": {
+        "V12_ENTERED": 874,
+        "PENGU_ENTERED": 66,
+        "V11_EQ_ENTERED": 50,
+        "V50_POST_OPEN_BASIS_ENTERED": 93,
+        "SUPPLEMENT_ENTERED": 69
+      },
+      "boostEntries": 93,
+      "boostTrims": 9,
+      "boostGrossAllocated": 18.252,
+      "strictPass": true
+    },
+    {
+      "scenario": "SEVERE",
+      "endingAssetJpy": 24184641.27364947,
+      "profitFactor": 2.79016516,
+      "maxDrawdownPct": -19.97886021,
+      "trades": 1078,
+      "coreFillParity": true,
+      "grossConflicts": 0,
+      "maxCryptoGross": 3.0,
+      "maxTotalGross": 3.0,
+      "routing": {
+        "V12_ENTERED": 871,
+        "PENGU_ENTERED": 66,
+        "V11_EQ_ENTERED": 0,
+        "V50_POST_OPEN_BASIS_ENTERED": 0,
+        "SUPPLEMENT_ENTERED": 69
+      },
+      "boostEntries": 90,
+      "boostTrims": 0,
+      "boostGrossAllocated": 19.028,
+      "strictPass": true
+    }
+  ],
+  "stockDiagnostics": {
+    "market": {
+      "cash": {
+        "source": "Yahoo Finance public chart response",
+        "symbols": {
+          "AMZNUSDT": {
+            "ticker": "AMZN",
+            "bars": 1651,
+            "completeDays": 273,
+            "firstDay": "2025-07-01",
+            "lastDay": "2026-08-07",
+            "events": []
+          },
+          "METAUSDT": {
+            "ticker": "META",
+            "bars": 1651,
+            "completeDays": 273,
+            "firstDay": "2025-07-01",
+            "lastDay": "2026-08-07",
+            "events": [
+              "dividends"
+            ]
+          },
+          "MSFTUSDT": {
+            "ticker": "MSFT",
+            "bars": 1651,
+            "completeDays": 273,
+            "firstDay": "2025-07-01",
+            "lastDay": "2026-08-07",
+            "events": [
+              "dividends"
+            ]
+          },
+          "NVDAUSDT": {
+            "ticker": "NVDA",
+            "bars": 1651,
+            "completeDays": 273,
+            "firstDay": "2025-07-01",
+            "lastDay": "2026-08-07",
+            "events": [
+              "dividends"
+            ]
+          },
+          "TSLAUSDT": {
+            "ticker": "TSLA",
+            "bars": 1651,
+            "completeDays": 273,
+            "firstDay": "2025-07-01",
+            "lastDay": "2026-08-07",
+            "events": []
+          }
+        }
+      },
+      "perp": {
+        "symbols": {
+          "AMZNUSDT": {
+            "tradeBars": 18743,
+            "fundingRows": 1173,
+            "completeDays": 279
+          },
+          "METAUSDT": {
+            "tradeBars": 18743,
+            "fundingRows": 1181,
+            "completeDays": 279
+          },
+          "MSFTUSDT": {
+            "tradeBars": 18743,
+            "fundingRows": 1194,
+            "completeDays": 279
+          },
+          "NVDAUSDT": {
+            "tradeBars": 18743,
+            "fundingRows": 1194,
+            "completeDays": 279
+          },
+          "TSLAUSDT": {
+            "tradeBars": 18743,
+            "fundingRows": 1193,
+            "completeDays": 279
+          }
+        }
+      },
+      "alignment": {
+        "symbols": {
+          "AMZNUSDT": {
+            "commonDays": 265,
+            "alignedDays": 265,
+            "clockRejected": 0,
+            "firstDay": "2025-07-15",
+            "lastDay": "2026-08-07"
+          },
+          "METAUSDT": {
+            "commonDays": 265,
+            "alignedDays": 265,
+            "clockRejected": 0,
+            "firstDay": "2025-07-15",
+            "lastDay": "2026-08-07"
+          },
+          "MSFTUSDT": {
+            "commonDays": 265,
+            "alignedDays": 265,
+            "clockRejected": 0,
+            "firstDay": "2025-07-15",
+            "lastDay": "2026-08-07"
+          },
+          "NVDAUSDT": {
+            "commonDays": 265,
+            "alignedDays": 265,
+            "clockRejected": 0,
+            "firstDay": "2025-07-15",
+            "lastDay": "2026-08-07"
+          },
+          "TSLAUSDT": {
+            "commonDays": 265,
+            "alignedDays": 265,
+            "clockRejected": 0,
+            "firstDay": "2025-07-15",
+            "lastDay": "2026-08-07"
+          }
+        }
+      }
+    },
+    "v11": {
+      "acceptedInvariantRows": 74,
+      "rejectReasons": {
+        "ENTRY_BASIS_BELOW_50": 53,
+        "NO_LONGER_TOP1": 53,
+        "ADVERSE_BASIS_OVER_10BPS": 4
+      }
+    },
+    "targetSessions": 246,
+    "v11RawTrades": 74,
+    "v50RawTrades": 208
+  },
+  "safety": {
+    "ordersSent": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "productionChanged": false
+  }
+}
