@@ -1,11 +1,11 @@
-import { STRICT_BT33404708902 } from "@/config/disdexStrictBt33404708902Runtime";
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition, type StrictStrategy } from "@/lib/disdex-strict-portfolio-planner";
 import { V12AsterLiveAdapter, type V12AsterLiveAdapterOptions } from "@/lib/v12-aster-live-adapter";
 import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
-import { findManagedPenguRecoveryV8ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 
 const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
@@ -46,20 +46,25 @@ export function assertV12StrictLiveConfiguration(env: NodeJS.ProcessEnv = proces
     if (!enabled(env.STRICT_PORTFOLIO_PLANNER_ACTIVE)) {
         throw new Error("STRICT_PORTFOLIO_PLANNER_NOT_ACTIVE");
     }
-    assertConfiguredCap(env, "V12_GROSS_CAP", STRICT_BT33404708902.v12MaximumGross);
-    assertConfiguredCap(env, "PENGU_GROSS_CAP", STRICT_BT33404708902.penguMaximumGross);
-    assertConfiguredCap(env, "STOCK_GROSS_CAP", STRICT_BT33404708902.stockGrossCap);
-    assertConfiguredCap(env, "CRYPTO_GROSS_CAP", STRICT_BT33404708902.cryptoGrossCap);
-    assertConfiguredCap(env, "TOTAL_GROSS_CAP", STRICT_BT33404708902.totalGrossCap);
+    assertConfiguredCap(env, "V12_BASE_GROSS_CAP", INTEGRATED_PRODUCTION_RISK_POLICY.v12BaseAggregateGross);
+    assertConfiguredCap(env, "V12_DYNAMIC_GROSS_CAP", INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap);
+    assertConfiguredCap(env, "V12_GROSS_CAP", INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap);
+    assertConfiguredCap(env, "PENGU_GROSS_CAP", INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross);
+    assertConfiguredCap(env, "STOCK_GROSS_CAP", INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap);
+    assertConfiguredCap(env, "CRYPTO_GROSS_CAP", INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap);
+    assertConfiguredCap(env, "TOTAL_GROSS_CAP", INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap);
     if (enabled(env.QUALITY102_LIVE_ENABLED) || enabled(env.QUALITY102_LIVE_SELECTOR_PARITY)) {
         throw new Error("QUALITY102_LIVE_BLOCKED_FAIL_CLOSED");
     }
     return {
-        v12GrossCap: STRICT_BT33404708902.v12MaximumGross,
-        penguGrossCap: STRICT_BT33404708902.penguMaximumGross,
-        stockGrossCap: STRICT_BT33404708902.stockGrossCap,
-        cryptoGrossCap: STRICT_BT33404708902.cryptoGrossCap,
-        totalGrossCap: STRICT_BT33404708902.totalGrossCap,
+        v12BaseGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12BaseAggregateGross,
+        v12DynamicGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap,
+        v12GrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap,
+        penguGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
+        stockGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap,
+        stockSlotGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap,
+        cryptoGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+        totalGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
         quality102LiveSelectorParity: false as const,
         quality102LiveBlockedFailClosed: true as const,
     };
@@ -134,7 +139,10 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             throw new Error("STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
         }
         const openOrders = await this.getOpenOrders();
-        const managedProtectiveOrders = new Set(findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions));
+        const managedProtectiveOrders = new Set([
+            ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
+            ...findManagedV12ProtectiveOrders(openOrders, positions),
+        ]);
         const unmanagedOpenOrders = openOrders.filter((order) => !managedProtectiveOrders.has(order));
         if (unmanagedOpenOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
         let workingAccount = account;

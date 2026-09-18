@@ -6,7 +6,7 @@ import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
-import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime";
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "../config/integratedProductionRiskPolicy";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
 import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
@@ -15,6 +15,7 @@ import { assertV12StrictLiveConfiguration } from "../lib/v12-strict-live-adapter
 import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-protective-orders";
 import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
 import { nextPenguDaemonWaitMs } from "../lib/pengu-live-scheduling";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -26,13 +27,13 @@ async function main() {
     const expectedQ102RuntimeSha = process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA;
     if (runtime.mode === "LIVE" && runtime.enabled) {
         const strict = assertV12StrictLiveConfiguration();
-        if (Math.abs(runtime.maximumGross - STRICT_BT33404708902.penguMaximumGross) > 1e-9) {
+        if (Math.abs(runtime.maximumGross - INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross) > 1e-9) {
             throw new Error(`PENGU_STRICT_GROSS_MISMATCH:${runtime.maximumGross}`);
         }
         console.log(JSON.stringify({
             event: "strict-portfolio-live-gate",
             strictPortfolioPlannerActive: true,
-            penguGrossCap: STRICT_BT33404708902.penguMaximumGross,
+            penguGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
             cryptoGrossCap: strict.cryptoGrossCap,
             totalGrossCap: strict.totalGrossCap,
         }));
@@ -65,6 +66,14 @@ async function main() {
             maxGross: runtime.maximumGross + 0.05,
         })
         : aster;
+    const v12DynamicAdapter = runtime.mode === "LIVE"
+        ? new V12AsterLiveAdapter(client, {
+            maxSlippageBps: numberEnv("V12_X1_ALL_MAX_SLIPPAGE_BPS", 20),
+            reconciliationAttempts: numberEnv("ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+            reconciliationDelayMs: numberEnv("ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+            readRequestSpacingMs: numberEnv("V12_X1_ALL_REQUEST_SPACING_MS", 100),
+        })
+        : undefined;
     // Fail closed: promotion evidence is explicit and cannot be raised by environment variables.
     const recoveryV8Enabled = PENGU_RECOVERY_V8_PROMOTION.liveEnabled;
     const recoveryV8Protection = runtime.mode === "LIVE" && recoveryV8Enabled
@@ -95,7 +104,7 @@ async function main() {
             maximumEntryDelayMs: runtime.maximumEntryDelayMs,
             // The verified strict portfolio has a 2.00x aggregate crypto cap.
             // PENGU's own sleeve remains capped at 0.85x by maximumGross.
-            portfolioGrossCap: STRICT_BT33404708902.cryptoGrossCap,
+            portfolioGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
             maximumDailyLossPct: runtime.maximumDailyLossPct,
             killSwitchPath: runtime.killSwitchPath,
             portfolioDailyLossStatePath: runtime.portfolioDailyLossStatePath,
@@ -103,6 +112,8 @@ async function main() {
             v64DynamicLongEnabled: recoveryV8Enabled,
         },
         recoveryV8Protection,
+        v12DynamicAdapter,
+        v12StatePath: process.env.V12_X1_ALL_STATE_PATH || ".runtime-state/v12-x1-all/runner.json",
     });
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), level: "info", event: "pengu-runtime-contract", strategyId: runtime.strategyId, mode: runtime.mode, recoveryV8Enabled, v64DynamicLongEnabled: recoveryV8Enabled, promotionStatus: PENGU_RECOVERY_V8_PROMOTION.status }));
     const daemon = process.argv.includes("--daemon");

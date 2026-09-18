@@ -1,3 +1,5 @@
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "./integratedProductionRiskPolicy";
+
 /**
  * Frozen production contract for V12_X1.00_ALL.  This module is deliberately
  * side-effect free: importing it cannot enable a runner or submit an order.
@@ -13,8 +15,9 @@ export const V12_X1_ALL = Object.freeze({
     multiplier: 1,
     entryPolicy: "ALL" as const,
     maximumPositions: 2,
-    perPositionEntryGrossCap: 1,
-    aggregateEntryGrossCap: 1.5,
+    perPositionEntryGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12PerPositionGrossCap,
+    aggregateEntryGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12BaseAggregateGross,
+    dynamicResidualAggregateGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap,
     leverage: 1,
     riskPerTradePct: 3.19,
     maxMarginUsagePct: 100,

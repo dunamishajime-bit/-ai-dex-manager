@@ -9,8 +9,21 @@ import { FileV12X1AllRunnerStateStore, type V12ActivePositionState } from "@/lib
 function active(symbol: string, gross: number): V12ActivePositionState {
     const positionId = `position-${symbol}`;
     return {
-        symbol, side: "LONG", quantity: 1, gross, positionId, entryPrice: 100,
-        atrAtEntry: 2, entrySignalTs: 1, holdingBars: 0, peakPrice: 100, troughPrice: 100,
+        symbol,
+        side: "LONG",
+        quantity: 1,
+        gross,
+        baseQuantity: 1,
+        baseGross: gross,
+        dynamicQuantity: 0,
+        dynamicGross: 0,
+        positionId,
+        entryPrice: 100,
+        atrAtEntry: 2,
+        entrySignalTs: 1,
+        holdingBars: 0,
+        peakPrice: 100,
+        troughPrice: 100,
         protection: { strategyId: "V12_X1.00_ALL", symbol, side: "LONG", positionId, quantity: 1, entryPrice: 100, atrAtEntry: 2, initialStop: 95, lastAckStop: 95, takeProfit: 110, peakOrTrough: 100 },
     };
 }

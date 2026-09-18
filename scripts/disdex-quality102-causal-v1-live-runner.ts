@@ -28,6 +28,7 @@ import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-run
 import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
+import { findManagedV12ProtectiveOrders } from "../lib/disdex-managed-protective-orders";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEFAULT_STATE_ROOT = "/var/lib/disdex/quality102-causal-v1";
@@ -397,7 +398,10 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
     if (beforeState.position && !positions.some((position) => Math.abs(position.quantity) > 1e-12 && stateMatches(position))) {
         throw new Error("QUALITY102_PREFLIGHT_STATE_POSITION_NOT_ON_EXCHANGE");
     }
-    const managedProtectiveOrders = findQ102PreflightManagedProtectiveOrders(openOrders, positions);
+    const managedProtectiveOrders = [
+        ...findQ102PreflightManagedProtectiveOrders(openOrders, positions),
+        ...findManagedV12ProtectiveOrders(openOrders, positions),
+    ];
     const managedProtectiveOrderSet = new Set(managedProtectiveOrders);
     const unmanagedOpenOrders = openOrders.filter((order) => !managedProtectiveOrderSet.has(order));
     if (unmanagedOpenOrders.length > 0) throw new Error("QUALITY102_PREFLIGHT_OPEN_ORDER_CONFLICT");

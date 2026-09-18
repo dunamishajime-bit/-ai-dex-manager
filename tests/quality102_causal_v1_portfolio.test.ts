@@ -78,14 +78,18 @@ function cryptoPosition(strategy: "V12" | "PENGU_DUAL_LS_V2", gross: number, sym
     });
 }
 
-test("causal-v1 requires readiness, is capped at 1.50x, and historical Quality102 stays blocked", () => {
+test("causal-v1 requires readiness, is capped at 2.50x, and historical Quality102 stays blocked", () => {
     const notReady = plan([], [intent("QUALITY102_CAUSAL_V1", 0.5)], false);
     assert.equal(notReady.accepted.length, 0);
     assert.equal(notReady.rejected[0]?.reason, "QUALITY102_CAUSAL_V1_NOT_READY");
 
-    const capped = plan([], [intent("QUALITY102_CAUSAL_V1", 1.2)]);
-    assert.equal(capped.accepted[0]?.gross, 1.2);
-    assert.equal(capped.accepted[0]?.notionalUsd, 1200);
+    const normal = plan([], [intent("QUALITY102_CAUSAL_V1", 1.2)]);
+    assert.equal(normal.accepted[0]?.gross, 1.2);
+    assert.equal(normal.accepted[0]?.notionalUsd, 1200);
+
+    const capped = plan([], [intent("QUALITY102_CAUSAL_V1", 3.0)]);
+    assert.equal(capped.accepted[0]?.gross, 2.5);
+    assert.equal(capped.accepted[0]?.notionalUsd, 2500);
 
     const historical = plan([], [intent("QUALITY102", 0.5)]);
     assert.equal(historical.accepted.length, 0);
@@ -333,32 +337,44 @@ test("causal-v1 MTM rejects a live quote whose evidence price differs from the r
     }), /QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED/);
 });
 
-test("causal-v1 loss rechecks V12 and PENGU strategy caps after equity changes", () => {
-    for (const fixture of [
-        { strategy: "V12" as const, notional: 1_500, expectedReason: "V12_GROSS_OVER_CAP_AFTER_MTM" },
-        { strategy: "PENGU_DUAL_LS_V2" as const, notional: 850, expectedReason: "PENGU_GROSS_OVER_CAP_AFTER_MTM" },
-    ]) {
-        const basePositions = fixture.strategy === "V12"
-            ? [cryptoPosition("V12", 1, "ETHUSDT"), cryptoPosition("V12", 0.5, "BTCUSDT")]
-            : [cryptoPosition("V12", 1, "ETHUSDT"), position({ id: `base-${fixture.strategy}`, strategy: fixture.strategy, symbol: "PENGUUSDT", quantity: fixture.notional / 10, entryPrice: 10, markPrice: 10 })];
-        const result = plan([
-            ...basePositions,
-            position({
-                id: `q102v1-loss-${fixture.strategy}`,
-                strategy: "QUALITY102_CAUSAL_V1",
-                symbol: "SOLUSDT",
-                quantity: 20 / 3,
-                entryPrice: 100,
-                markPrice: 90,
-                feeBpsPerSide: 10,
-            }),
-        ], [intent("V52", 1.5)]);
+test("causal-v1 loss rechecks V12 dynamic 2.0x and PENGU 0.85x strategy caps after equity changes", () => {
+    const v12 = plan([
+        cryptoPosition("V12", 1, "ETHUSDT"),
+        cryptoPosition("V12", 0.5, "BTCUSDT"),
+        position({
+            id: "q102v1-loss-v12",
+            strategy: "QUALITY102_CAUSAL_V1",
+            symbol: "SOLUSDT",
+            quantity: 20 / 3,
+            entryPrice: 100,
+            markPrice: 90,
+            feeBpsPerSide: 10,
+        }),
+    ], [intent("V52", 1.5)]);
+    assert.equal(v12.status, "planned");
+    const v12Gross = v12.activePositions
+        .filter((row) => row.strategy === "V12")
+        .reduce((sum, row) => sum + Math.abs(row.quantity) * row.markPrice, 0)
+        / v12.equityAfterReductions;
+    assert.ok(v12Gross <= 2 + 1e-9);
 
-        assert.equal(result.status, "blocked");
-        assert.equal(result.reason, fixture.expectedReason);
-        assert.equal(result.accepted.length, 0);
-        assert.equal(result.reductions.length, 0);
-    }
+    const pengu = plan([
+        cryptoPosition("V12", 1, "ETHUSDT"),
+        position({ id: "base-pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 10, markPrice: 10 }),
+        position({
+            id: "q102v1-loss-pengu",
+            strategy: "QUALITY102_CAUSAL_V1",
+            symbol: "SOLUSDT",
+            quantity: 20 / 3,
+            entryPrice: 100,
+            markPrice: 90,
+            feeBpsPerSide: 10,
+        }),
+    ], [intent("V52", 1.5)]);
+    assert.equal(pengu.status, "blocked");
+    assert.equal(pengu.reason, "PENGU_GROSS_OVER_CAP_AFTER_MTM");
+    assert.equal(pengu.accepted.length, 0);
+    assert.equal(pengu.reductions.length, 0);
 });
 
 test("historical QUALITY102 is never selected for causal conflict reduction", () => {
@@ -410,7 +426,7 @@ test("V12 Top2 slot rejection happens before causal-v1 MTM reduction", () => {
     assert.equal(result.activePositions.find((row) => row.strategy === "QUALITY102_CAUSAL_V1")?.quantity, 500 / 90);
 });
 
-test("V12 rank2 uses only aggregate residual without unnecessary causal Q102 MTM", () => {
+test("V12 rank2 may use Dynamic residual up to aggregate 2.0x without unnecessary causal Q102 MTM", () => {
     const result = plan([
         cryptoPosition("V12", 1, "ETHUSDT"),
         position({
@@ -425,13 +441,13 @@ test("V12 rank2 uses only aggregate residual without unnecessary causal Q102 MTM
     ], [intent("V12", 1, "BTCUSDT")]);
 
     assert.equal(result.status, "planned");
-    assert.ok((result.accepted[0]?.gross || 0) > 0 && (result.accepted[0]?.gross || 0) <= 0.5);
+    assert.ok((result.accepted[0]?.gross || 0) > 0 && (result.accepted[0]?.gross || 0) <= 1);
     assert.equal(result.reductions.length, 0);
     assert.ok(result.totals.cryptoGross <= 3 + 1e-9);
     assert.ok(result.totals.totalGross <= 3.5 + 1e-9);
     const finalV12Gross = (result.activePositions.filter((row) => row.strategy === "V12").reduce((sum, row) => sum + Math.abs(row.quantity) * row.markPrice, 0)
         + result.accepted.filter((row) => row.strategy === "V12").reduce((sum, row) => sum + row.notionalUsd, 0)) / result.equityAfterReductions;
-    assert.ok(finalV12Gross <= 1.5 + 1e-9);
+    assert.ok(finalV12Gross <= 2 + 1e-9);
 });
 
 test("V12 active position over per-position 1.0x fails closed", () => {

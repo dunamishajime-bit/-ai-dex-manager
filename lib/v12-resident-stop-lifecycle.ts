@@ -170,6 +170,46 @@ export async function reconcileV12Protection(adapter: ResidentStopAdapter, state
     catch (error) { return { ...state, manualReview: `RESIDENT_PROTECTION_RECONCILIATION_FAILED:${error instanceof Error ? error.message : String(error)}` }; }
 }
 
+/**
+ * Rebuild both protection legs for a smaller, already-confirmed venue
+ * quantity. The old deterministic legs remain authoritative until both
+ * replacement legs have been placed and verified. A failure never flattens
+ * or retries the position; the caller must Fail Closed and reconcile.
+ */
+export async function resizeV12ProtectionQuantity(
+    adapter: ResidentStopAdapter,
+    state: V12StopState,
+    quantity: number,
+): Promise<V12StopState> {
+    if (!(Number.isFinite(quantity) && quantity > 0)) return { ...state, manualReview: "PROTECTION_RESIZE_QUANTITY_INVALID" };
+    if (Math.abs(quantity - state.quantity) <= Math.max(1e-8, state.quantity * 1e-8)) return state;
+    const version = Math.max(1, Math.round(quantity * 1e8));
+    const replacement: V12StopState = {
+        ...state,
+        quantity,
+        stopClientOrderId: id(state, "STOP", version),
+        takeProfitClientOrderId: id(state, "TP", version),
+        manualReview: undefined,
+    };
+    const closeSide = exitSide(state.side);
+    try {
+        await adapter.placeStopMarket({ symbol: replacement.symbol, side: closeSide, quantity, stopPrice: replacement.lastAckStop, clientOrderId: replacement.stopClientOrderId!, reduceOnly: true });
+        await adapter.placeTakeProfit({ symbol: replacement.symbol, side: closeSide, quantity, stopPrice: replacement.takeProfit, clientOrderId: replacement.takeProfitClientOrderId!, reduceOnly: true });
+        await verifyProtection(adapter, replacement, replacement.stopClientOrderId!, replacement.takeProfitClientOrderId!);
+        for (const oldId of [state.stopClientOrderId, state.takeProfitClientOrderId]) {
+            if (oldId && oldId !== replacement.stopClientOrderId && oldId !== replacement.takeProfitClientOrderId) await adapter.cancel(oldId);
+        }
+        await verifyProtection(adapter, replacement, replacement.stopClientOrderId!, replacement.takeProfitClientOrderId!);
+        return replacement;
+    } catch (error) {
+        for (const newId of [replacement.stopClientOrderId, replacement.takeProfitClientOrderId]) {
+            if (!newId || newId === state.stopClientOrderId || newId === state.takeProfitClientOrderId) continue;
+            try { await adapter.cancel(newId); } catch { /* old legs remain authoritative */ }
+        }
+        return { ...state, manualReview: `PROTECTION_RESIZE_FAILED:${error instanceof Error ? error.message : String(error)}` };
+    }
+}
+
 export async function cancelV12Protection(adapter: ResidentStopAdapter, state: V12StopState) {
     for (const clientOrderId of [state.stopClientOrderId, state.takeProfitClientOrderId]) if (clientOrderId) await adapter.cancel(clientOrderId);
     const open = await adapter.openOrders(state.symbol); const stale = open.filter((order) => order.clientOrderId.startsWith("v12-") && isActive(order.status));

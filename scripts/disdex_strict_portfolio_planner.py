@@ -14,11 +14,14 @@ EPSILON = 1e-9
 
 @dataclass(frozen=True)
 class StrictPortfolioCaps:
-    v12_gross: float = 1.50
+    v12_base_gross: float = 1.50
+    v12_gross: float = 2.00
+    v12_per_position_gross: float = 1.00
     pengu_gross: float = 0.85
     quality102_gross: float = 0.50
-    quality102_causal_v1_gross: float = 1.50
-    stock_gross: float = 1.50
+    quality102_causal_v1_gross: float = 2.50
+    stock_gross: float = 1.98
+    stock_slot_gross: float = 1.64
     crypto_gross: float = 3.00
     total_gross: float = 3.50
 
@@ -285,12 +288,16 @@ def assert_strict_live_configuration(env: Mapping[str, str] | None = None) -> St
     source = os.environ if env is None else env
     if not _enabled(source.get("STRICT_PORTFOLIO_PLANNER_ACTIVE")):
         raise RuntimeError("STRICT_PORTFOLIO_PLANNER_NOT_ACTIVE")
+    _assert_cap_env(source, "V12_BASE_GROSS_CAP", STRICT_CAPS.v12_base_gross)
+    _assert_cap_env(source, "V12_DYNAMIC_GROSS_CAP", STRICT_CAPS.v12_gross)
     _assert_cap_env(source, "V12_GROSS_CAP", STRICT_CAPS.v12_gross)
     _assert_cap_env(source, "PENGU_GROSS_CAP", STRICT_CAPS.pengu_gross)
     _assert_cap_env(source, "STOCK_GROSS_CAP", STRICT_CAPS.stock_gross)
     _assert_cap_env(source, "CRYPTO_GROSS_CAP", STRICT_CAPS.crypto_gross)
     _assert_cap_env(source, "TOTAL_GROSS_CAP", STRICT_CAPS.total_gross)
     _assert_cap_env(source, "DISDEX_V52_STOCK_GROSS_CAP", STRICT_CAPS.stock_gross)
+    _assert_cap_env(source, "DISDEX_V52_V11_GROSS_CAP", STRICT_CAPS.stock_slot_gross)
+    _assert_cap_env(source, "DISDEX_V52_V50_GROSS_CAP", STRICT_CAPS.stock_slot_gross)
     _assert_cap_env(source, "DISDEX_V52_CRYPTO_GROSS_CAP", STRICT_CAPS.crypto_gross)
     _assert_cap_env(source, "DISDEX_V52_PORTFOLIO_GROSS_CAP", STRICT_CAPS.total_gross)
     if _enabled(source.get("QUALITY102_LIVE_ENABLED")) or _enabled(source.get("QUALITY102_LIVE_SELECTOR_PARITY")):
@@ -350,11 +357,16 @@ def plan_v52_stock_capacity(
 def self_test() -> None:
     caps = assert_strict_live_configuration({
         "STRICT_PORTFOLIO_PLANNER_ACTIVE": "true",
+        "V12_BASE_GROSS_CAP": "1.5",
+        "V12_DYNAMIC_GROSS_CAP": "2.0",
+        "V12_GROSS_CAP": "2.0",
         "CRYPTO_GROSS_CAP": "3.0",
-        "STOCK_GROSS_CAP": "1.5",
+        "STOCK_GROSS_CAP": "1.98",
         "TOTAL_GROSS_CAP": "3.5",
         "DISDEX_V52_CRYPTO_GROSS_CAP": "3.0",
-        "DISDEX_V52_STOCK_GROSS_CAP": "1.5",
+        "DISDEX_V52_STOCK_GROSS_CAP": "1.98",
+        "DISDEX_V52_V11_GROSS_CAP": "1.64",
+        "DISDEX_V52_V50_GROSS_CAP": "1.64",
         "DISDEX_V52_PORTFOLIO_GROSS_CAP": "3.5",
     })
     assert caps.crypto_gross == 3.0

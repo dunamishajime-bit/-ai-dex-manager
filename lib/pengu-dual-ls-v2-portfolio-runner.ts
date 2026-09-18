@@ -4,6 +4,7 @@ import type { AsterOrderSide } from "@/lib/aster-v3-client";
 import type {
     DirectAccountSnapshot,
     DirectMarketQuote,
+    DirectOpenOrder,
     DirectPosition,
     DirectTradeCommand,
     DirectTradeExecutor,
@@ -30,7 +31,9 @@ import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
-import { findManagedPenguRecoveryV8ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
+import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import {
     placeRecoveryV8EntryHardStop,
     replaceRecoveryV8Stops,
@@ -75,6 +78,8 @@ export interface PenguDualLsV2PortfolioRunnerDependencies {
     logger?: PenguDualLsV2RunnerLogger;
     now?: () => number;
     recoveryV8Protection?: RecoveryV8ProtectiveOrderGateway;
+    v12DynamicAdapter?: V12AsterLiveAdapter;
+    v12StatePath?: string;
 }
 
 export interface PenguDualLsV2TickResult {
@@ -123,6 +128,21 @@ function validLiveAccount(account: DirectAccountSnapshot, now: number, maxAgeMs 
         && String(account.asset || "").trim().length > 0
         && Number.isFinite(account.updatedAt) && account.updatedAt > 0
         && account.updatedAt <= now && now - account.updatedAt <= maxAgeMs;
+}
+
+function unmanagedCrossSleeveOpenOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+    quality102Ownership?: Quality102CausalV1OwnershipSnapshot,
+): DirectOpenOrder[] {
+    const managedProtectiveOrders = new Set<DirectOpenOrder>([
+        ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
+        ...findManagedV12ProtectiveOrders(openOrders, positions),
+    ]);
+    return openOrders.filter(
+        (order) => !quality102OwnsOrder(quality102Ownership, order)
+            && !managedProtectiveOrders.has(order),
+    );
 }
 
 function filled(result: DirectTradeResult) {
@@ -494,7 +514,7 @@ export class PenguDualLsV2PortfolioRunner {
                 // never against the pre-request time.
                 now = this.now();
                 if (!validLiveAccount(account, now)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_ACCOUNT_STALE_OR_INVALID");
-                if (openOrders.length > 0) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT");
+                if (unmanagedCrossSleeveOpenOrders(openOrders, positions).length > 0) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT");
                 const actual = actualPosition(positions);
                 if (pending.reduceOnly) {
                     if (!state.position || !actual || positionSide(actual) !== state.position.side || Math.abs(Math.abs(actual.quantity) - state.position.quantity) > Math.max(1e-8, state.position.quantity * 0.02)) {
@@ -595,8 +615,7 @@ export class PenguDualLsV2PortfolioRunner {
                 return { status: "held", message: "Quality102 causal-v1 has a pending order and must reconcile before PENGU can enter.", signal: state.latestSignal || undefined };
             }
             const quality102OpenOrder = openOrders.some((order) => quality102OwnsOrder(quality102Ownership, order));
-            const managedProtectiveOrders = new Set(findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions));
-            const nonQuality102OpenOrders = openOrders.filter((order) => !quality102OwnsOrder(quality102Ownership, order) && !managedProtectiveOrders.has(order));
+            const nonQuality102OpenOrders = unmanagedCrossSleeveOpenOrders(openOrders, positions, quality102Ownership);
             const actual = actualPosition(positions);
             if (!state.position && actual) {
                 return { status: "manual-review", message: "PENGU Dual LS found an unmanaged existing PENGU position; no takeover is allowed." };
@@ -779,7 +798,8 @@ export class PenguDualLsV2PortfolioRunner {
                         if (!validLiveAccount(workingAccount, refreshedNow) || !validLiveQuote(quote, SYMBOL, refreshedNow)) {
                             throw new Error("PENGU_DUAL_LS_STRICT_REFRESHED_SNAPSHOT_STALE");
                         }
-                        if ((await this.dependencies.executor.getOpenOrders()).length > 0) {
+                        const refreshedOpenOrders = await this.dependencies.executor.getOpenOrders();
+                        if (unmanagedCrossSleeveOpenOrders(refreshedOpenOrders, workingPositions, quality102Ownership).length > 0) {
                             throw new Error("PENGU_DUAL_LS_STRICT_REFRESHED_OPEN_ORDER_CONFLICT");
                         }
                         continue;
@@ -788,6 +808,33 @@ export class PenguDualLsV2PortfolioRunner {
                     if (!accepted) {
                         await this.dependencies.stateStore.save(state);
                         return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
+                    }
+                    if (accepted.gross + 1e-9 < targetGross && this.dependencies.v12DynamicAdapter) {
+                        const trim = await reduceV12DynamicResidualForCoreConflict({
+                            adapter: this.dependencies.v12DynamicAdapter,
+                            requiredGross: targetGross - accepted.gross,
+                            equity: workingEquity,
+                            causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
+                            statePath: this.dependencies.v12StatePath,
+                            maxDataAgeMs: 5 * 60_000,
+                            now: this.now,
+                        });
+                        if (trim.status === "blocked") {
+                            throw new Error(`PENGU_V12_DYNAMIC_REDUCTION_BLOCKED:${trim.message}`);
+                        }
+                        if (trim.status === "reduced" && trim.trimmedGross > 1e-9) {
+                            [workingAccount, workingPositions] = await Promise.all([
+                                this.dependencies.executor.getAccountSnapshot(),
+                                this.dependencies.executor.getPositions(),
+                            ]);
+                            quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                            quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
+                            const refreshedNow = this.now();
+                            if (!validLiveAccount(workingAccount, refreshedNow) || !validLiveQuote(quote, SYMBOL, refreshedNow)) {
+                                throw new Error("PENGU_V12_DYNAMIC_REDUCTION_REFRESH_STALE");
+                            }
+                            continue;
+                        }
                     }
                     requestedGross = accepted.requestedGross ?? requestedGross;
                     targetGross = Math.min(accepted.gross, this.dependencies.config.maximumGross);
@@ -799,7 +846,8 @@ export class PenguDualLsV2PortfolioRunner {
                 if (!validLiveAccount(workingAccount, finalNow) || !validLiveQuote(quote, SYMBOL, finalNow)) {
                     throw new Error("PENGU_DUAL_LS_STRICT_FINAL_SNAPSHOT_STALE");
                 }
-                if ((await this.dependencies.executor.getOpenOrders()).length > 0) {
+                const finalOpenOrders = await this.dependencies.executor.getOpenOrders();
+                if (unmanagedCrossSleeveOpenOrders(finalOpenOrders, workingPositions, quality102Ownership).length > 0) {
                     throw new Error("PENGU_DUAL_LS_STRICT_FINAL_OPEN_ORDER_CONFLICT");
                 }
             } else {

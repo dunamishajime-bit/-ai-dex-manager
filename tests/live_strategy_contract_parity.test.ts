@@ -7,6 +7,7 @@ import { PENGU_DUAL_LS_V2 } from "@/config/penguDualLsV2Runtime";
 import { PENGU_RECOVERY_V8, PENGU_RECOVERY_V8_PROMOTION } from "@/config/penguRecoveryV8";
 import { QUALITY102_CAUSAL_V1 } from "@/config/disdexQuality102CausalV1Runtime";
 import v52V50Runtime from "@/config/v52V50Runtime.json";
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 
 test("current LIVE target preserves the validated V12 signal contract with intentional Top2 sizing", () => {
   assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
@@ -17,6 +18,7 @@ test("current LIVE target preserves the validated V12 signal contract with inten
   assert.equal(V12_X1_ALL.maximumPositions, 2);
   assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
   assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
+  assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
 });
 
 test("PENGU V20/V8 implementation target has Recovery V8 live-enabled as supplemental Long", () => {
@@ -34,11 +36,14 @@ test("PENGU V20/V8 implementation target has Recovery V8 live-enabled as supplem
   assert.equal(PENGU_DUAL_LS_V2.hardStopCooldownHours, 24);
 });
 
-test("Q102 remains one-slot 1.50x under the shared 3.0x/3.5x contract", () => {
-  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 1.5);
+test("Q102 one-slot LIVE target uses family sizing up to 2.50x under shared 3.0x/3.5x caps", () => {
+  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 2.5);
   assert.equal(QUALITY102_CAUSAL_V1.maximumPositions, 1);
   assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
   assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 3.5);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.BRK, 2.465);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 1.98);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 1.64);
 });
 
 test("V52 preserves the canonical V50 signal thresholds and holding window", async () => {

@@ -11,10 +11,11 @@ import v52V50Runtime from "../config/v52V50Runtime.json";
 
 const v52Source = readFileSync(new URL("../scripts/disdex_v52_aster_only_legacy_engine.py", import.meta.url), "utf8");
 
-test("V12 production signal and sizing contract remains unchanged", () => {
+test("V12 production signal remains unchanged while Base/Dynamic sizing is explicit", () => {
   assert.equal(V12_X1_ALL.maximumPositions, 2);
   assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
   assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
+  assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
   assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
   assert.equal(V12_X1_ALL.strongRegimeThresholdPct, 0.0359);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumMomentumPct, 0.054);
@@ -29,12 +30,21 @@ test("PENGU allocation is the formal 0.85x production contract", () => {
   assert.equal(PENGU_DUAL_LS_V2.hardStopCooldownHours, 24);
 });
 
-test("Q102 Causal V4 is one slot at 1.50x and shared caps are 3.0/1.5/3.5", () => {
-  assert.equal(STRICT_BT33404708902.quality102CausalV1PositionCap, 1.5);
-  assert.equal(STRICT_BT33404708902.cryptoGrossCap, 3);
-  assert.equal(STRICT_BT33404708902.stockGrossCap, 1.5);
-  assert.equal(STRICT_BT33404708902.totalGrossCap, 3.5);
+test("LIVE integrated risk contract uses Q102 family sizing and 3.0/1.98/3.5 shared caps", () => {
+  assert.deepEqual(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross, {
+    HIGH_VOL: 1.665,
+    MR: 1,
+    BRK: 2.465,
+    REV: 2.5,
+    PB: 2.5,
+  });
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 2.5);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102MaximumPositions, 1);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 1.98);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 1.64);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap, 3.5);
+  assert.equal(STRICT_BT33404708902.quality102CausalV1PositionCap, 1.5);
 });
 
 test("shared crypto daily loss remains the canonical 7.5% contract", () => {

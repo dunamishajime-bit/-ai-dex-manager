@@ -67,7 +67,7 @@ export async function buildV12LiveRuntime() {
     const decisionSnapshotPath = String(process.env.V12_DECISION_SNAPSHOT_PATH || "/var/lib/disdex/v12-x1-all/decision-snapshot.json").trim();
     const decisionStore = new FileV12DecisionObservationStore(decisionSnapshotPath);
     const engine = new V12LiveExecutionEngine({
-        adapter, marketData, stateStore, lock, riskPath: runtime.riskPath,
+        adapter, marketData, stateStore, lock, riskPath: runtime.riskPath, statePath: runtime.statePath,
         decisionObserver: (snapshot) => decisionStore.save(snapshot),
     });
     return { runtime, status: "live" as const, engine, strict, releaseSha };

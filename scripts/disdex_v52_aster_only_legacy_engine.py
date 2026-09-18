@@ -164,10 +164,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         )
         self.state = base.read_json(self.state_path, {}) or {}
         self.crypto_gross_cap = base.float_env("DISDEX_V52_CRYPTO_GROSS_CAP", STRICT_CAPS.crypto_gross)
-        self.stock_gross_cap = base.float_env("DISDEX_V52_STOCK_GROSS_CAP", 1.5)
+        self.stock_gross_cap = base.float_env("DISDEX_V52_STOCK_GROSS_CAP", float(_V50_RUNTIME["stockAggregateGross"]))
         self.portfolio_gross_cap = base.float_env("DISDEX_V52_PORTFOLIO_GROSS_CAP", 3.5)
-        self.v11_gross_cap = base.float_env("DISDEX_V52_V11_GROSS_CAP", 1.0)
-        self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", 1.0)
+        self.v11_gross_cap = base.float_env("DISDEX_V52_V11_GROSS_CAP", float(_V50_RUNTIME["slotGross"]))
+        self.v50_gross_cap = base.float_env("DISDEX_V52_V50_GROSS_CAP", float(_V50_RUNTIME["slotGross"]))
         # Strict caps are hard limits.  A legacy environment may still carry
         # the old 3% reporting tolerance; never let that value authorize an
         # over-cap order in the strict runner.

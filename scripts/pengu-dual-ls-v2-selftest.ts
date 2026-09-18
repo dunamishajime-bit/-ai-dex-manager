@@ -87,7 +87,7 @@ const liveRuntime = resolvePenguDualLsV2Runtime({
     PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: "2.5",
 });
 assert.equal(liveRuntime.maximumGross, 0.85);
-assert.equal(liveRuntime.portfolioGrossCap, 1.5);
+assert.equal(liveRuntime.portfolioGrossCap, 2.5);
 assert.equal(liveRuntime.maximumEntryDelayMs, 5 * 60_000);
 assert.equal(resolvePenguDualLsV2Runtime({ PENGU_DUAL_LS_V2_MAX_ENTRY_DELAY_MS: "9999999" }).maximumEntryDelayMs, 5 * 60_000);
 

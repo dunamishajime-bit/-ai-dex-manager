@@ -84,6 +84,8 @@ export interface DirectOpenOrder {
     clientOrderId: string;
     side?: AsterOrderSide;
     status?: string;
+    type?: string;
+    stopPrice?: number;
     reduceOnly?: boolean;
     quantity: number;
     executedQuantity: number;
@@ -354,6 +356,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             clientOrderId: String(row.clientOrderId || ""),
             side: row.side,
             status: row.status,
+            type: row.type,
+            stopPrice: safeNumber(row.stopPrice),
             reduceOnly: row.reduceOnly,
             quantity: safeNumber(row.origQty),
             executedQuantity: safeNumber(row.executedQty),

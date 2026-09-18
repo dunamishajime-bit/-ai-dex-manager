@@ -15,7 +15,7 @@ export interface V12AsterOrderView {
 export interface V12AsterLiveAdapterOptions { maxSlippageBps?: number; reconciliationAttempts?: number; reconciliationDelayMs?: number; readRequestSpacingMs?: number; }
 function finite(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 function sleep(ms: number) { return new Promise<void>((resolve) => setTimeout(resolve, ms)); }
-export function deterministicV12ClientOrderId(input: { action: "ENTRY" | "EXIT" | "STOP" | "TP" | "TRAIL" | "FAILSAFE_CLOSE"; signalTs: number; symbol: string; side: string; version?: string | number }) {
+export function deterministicV12ClientOrderId(input: { action: "ENTRY" | "EXIT" | "STOP" | "TP" | "TRAIL" | "FAILSAFE_CLOSE" | "DYNAMIC_TRIM"; signalTs: number; symbol: string; side: string; version?: string | number }) {
     const seed = ["V12_X1.00_ALL", input.action, input.signalTs, input.symbol.toUpperCase(), input.side.toUpperCase(), input.version ?? 0].join("|");
     const digest = createHash("sha256").update(seed).digest("hex").slice(0, 22);
     return `${V12_CLIENT_ORDER_PREFIX}${input.action.toLowerCase().slice(0, 5)}-${digest}`.slice(0, 36);
@@ -81,6 +81,20 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
         const action = input.failsafe ? "FAILSAFE_CLOSE" : "EXIT";
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action, signalTs: input.signalTs, symbol: input.symbol, side: input.positionSide });
         return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.positionSide === "LONG" ? "SELL" : "BUY", quantity: input.quantity, reduceOnly: true, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: input.failsafe ? "V12_PROTECTION_FAILSAFE_CLOSE" : "V12_X1.00_ALL_EXIT" });
+    }
+    async executeDynamicTrim(input: { signalTs: number; symbol: string; positionSide: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string }): Promise<DirectTradeResult> {
+        const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "DYNAMIC_TRIM", signalTs: input.signalTs, symbol: input.symbol, side: input.positionSide, version: input.quantity });
+        return this.executor.executeMarket({
+            requestId: clientOrderId,
+            clientOrderId,
+            symbol: input.symbol,
+            side: input.positionSide === "LONG" ? "SELL" : "BUY",
+            quantity: input.quantity,
+            reduceOnly: true,
+            expectedPrice: input.expectedPrice,
+            maxSlippageBps: this.maxSlippageBps,
+            reason: "V12_DYNAMIC_RESIDUAL_TRIM",
+        });
     }
     async reconcileOrder(symbol: string, clientOrderId: string) { return this.executor.reconcileOrder(symbol, clientOrderId); }
 

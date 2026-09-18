@@ -18,7 +18,8 @@ import {
 } from "@/lib/v12-resident-stop-lifecycle";
 import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, type V12Bar, type V12DecisionObservation, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
-import { decideV12ResidualEntry } from "@/lib/v12-top2-residual";
+import { decideV12ResidualEntry, type V12ResidualDecision } from "@/lib/v12-top2-residual";
+import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 
@@ -33,6 +34,7 @@ export interface V12LiveExecutionDependencies {
     stateStore: FileV12X1AllRunnerStateStore;
     lock: FileAccountOrderLock;
     riskPath: string;
+    statePath?: string;
     decisionObserver?: (snapshot: V12DecisionObservation) => Promise<void> | void;
     now?: () => number;
     log?: (message: string, payload?: Record<string, unknown>) => void;
@@ -67,12 +69,35 @@ function activePositionsOf(state: V12X1AllRunnerState): V12ActivePositionState[]
     return state.active ? [state.active] : [];
 }
 
+function v12GrossComponents(state: V12X1AllRunnerState, portfolio: ActivePortfolioPosition[]) {
+    const actives = activePositionsOf(state);
+    const bySymbol = new Map(actives.map((row) => [row.symbol.toUpperCase(), row]));
+    let baseGross = 0;
+    let dynamicGross = 0;
+    for (const row of portfolio.filter((position) => position.sleeve === "V12")) {
+        const managed = bySymbol.get(row.symbol.toUpperCase());
+        if (!managed || !(managed.quantity > 0)) {
+            baseGross += row.gross;
+            continue;
+        }
+        const baseRatio = Math.max(0, Math.min(1, managed.baseQuantity / managed.quantity));
+        baseGross += row.gross * baseRatio;
+        dynamicGross += row.gross * (1 - baseRatio);
+    }
+    return { baseGross, dynamicGross };
+}
+
 function syncActivePositions(state: V12X1AllRunnerState, positions: V12ActivePositionState[]) {
     const ranked = positions.filter((position) => position.quantity > EPS);
     if (ranked.length > V12_X1_ALL.maximumPositions) throw new Error("V12_MAX_POSITIONS_REACHED");
     if (new Set(ranked.map((position) => position.symbol.toUpperCase())).size !== ranked.length) throw new Error("V12_DUPLICATE_ACTIVE_SYMBOL");
     if (ranked.some((position) => position.gross > V12_X1_ALL.perPositionEntryGrossCap + EPS)) throw new Error("V12_POSITION_GROSS_OVER_CAP");
-    if (ranked.reduce((sum, position) => sum + position.gross, 0) > V12_X1_ALL.aggregateEntryGrossCap + EPS) throw new Error("V12_AGGREGATE_GROSS_OVER_CAP");
+    if (ranked.some((position) => Math.abs(position.baseGross + position.dynamicGross - position.gross) > 1e-6
+        || Math.abs(position.baseQuantity + position.dynamicQuantity - position.quantity) > Math.max(1e-8, position.quantity * 1e-6))) {
+        throw new Error("V12_BASE_DYNAMIC_STATE_MISMATCH");
+    }
+    if (ranked.reduce((sum, position) => sum + position.baseGross, 0) > V12_X1_ALL.aggregateEntryGrossCap + EPS) throw new Error("V12_BASE_AGGREGATE_GROSS_OVER_CAP");
+    if (ranked.reduce((sum, position) => sum + position.gross, 0) > V12_X1_ALL.dynamicResidualAggregateGrossCap + EPS) throw new Error("V12_AGGREGATE_GROSS_OVER_CAP");
     state.activePositions = ranked.length ? ranked : undefined;
     state.active = ranked[0];
 }
@@ -138,7 +163,29 @@ export class V12LiveExecutionEngine {
         if (!(entryPrice > 0 && pending.atrAtEntry && pending.atrAtEntry > 0)) return this.fail(state, "V12_PENDING_ENTRY_RECOVERY_METADATA_INVALID");
         const protection = initialProtection({ symbol: pending.symbol, side: pending.side, quantity, entryPrice, atr: pending.atrAtEntry, positionId: pending.clientOrderId });
         const existing = activePositionsOf(state).filter((row) => row.symbol.toUpperCase() !== pending.symbol.toUpperCase());
-        let active: V12ActivePositionState = { symbol: pending.symbol, side: pending.side, quantity, gross: actualGross, positionId: pending.clientOrderId, entryPrice, atrAtEntry: pending.atrAtEntry, entrySignalTs: pending.signalTs, holdingBars: 0, peakPrice: entryPrice, troughPrice: entryPrice, protection };
+        const plannedBaseGross = Math.max(0, finite(pending.baseRequestedGross, pending.requestedGross ?? actualGross));
+        const plannedDynamicGross = Math.max(0, finite(pending.dynamicRequestedGross, 0));
+        const plannedTotalGross = plannedBaseGross + plannedDynamicGross;
+        const baseRatio = plannedTotalGross > EPS ? Math.max(0, Math.min(1, plannedBaseGross / plannedTotalGross)) : 1;
+        let active: V12ActivePositionState = {
+            symbol: pending.symbol,
+            side: pending.side,
+            quantity,
+            gross: actualGross,
+            baseQuantity: quantity * baseRatio,
+            dynamicQuantity: quantity * (1 - baseRatio),
+            baseGross: actualGross * baseRatio,
+            dynamicGross: actualGross * (1 - baseRatio),
+            dynamicUpdatedAt: plannedDynamicGross > EPS ? this.now() : undefined,
+            positionId: pending.clientOrderId,
+            entryPrice,
+            atrAtEntry: pending.atrAtEntry,
+            entrySignalTs: pending.signalTs,
+            holdingBars: 0,
+            peakPrice: entryPrice,
+            troughPrice: entryPrice,
+            protection,
+        };
         active = { ...active, quantity, entryPrice, protection: { ...active.protection, quantity, entryPrice } };
         syncActivePositions(state, [...existing, active]); await this.d.stateStore.save(state);
         const installed = await installV12Protection(this.d.adapter, active.protection);
@@ -195,6 +242,8 @@ export class V12LiveExecutionEngine {
                 const recovery = await this.reconcilePendingStopUpdate(state, state.pending, positions);
                 if (recovery) return recovery;
                 state = await this.d.stateStore.load();
+            } else if (state.pending.action === "DYNAMIC_TRIM") {
+                return this.fail(state, `V12_DYNAMIC_TRIM_PENDING_REQUIRES_MANUAL_REVIEW:${state.pending.clientOrderId}`);
             } else {
                 return this.fail(state, `V12_FAILSAFE_CLOSE_PENDING_REQUIRES_MANUAL_REVIEW:${state.pending.clientOrderId}`);
             }
@@ -248,8 +297,9 @@ export class V12LiveExecutionEngine {
         signal: V12Signal,
         equity: number,
         sizing: ReturnType<typeof sizeV12Position>,
-        acceptedGross: number,
+        decision: V12ResidualDecision,
     ): Promise<V12LiveTickResult> {
+        const acceptedGross = decision.acceptedGross;
         const symbol = `${signal.symbol}USDT`;
         const quote = await this.d.adapter.executor.getMarketQuote(symbol);
         const expectedPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
@@ -259,7 +309,22 @@ export class V12LiveExecutionEngine {
         const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
         if (state.lastCompletedIdempotencyKey === clientOrderId) return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId };
         const reservation = await handle.reserve({ strategyId: "V12_X1.00_ALL", symbol, side: signal.side, gross: acceptedGross, notionalUsd: acceptedGross * equity });
-        const pending: V12PendingOrderState = { idempotencyKey: clientOrderId, action: "ENTRY", clientOrderId, symbol, side: signal.side, quantity, signalTs: signal.referenceTs, expectedPrice, requestedGross: acceptedGross, atrAtEntry: signal.atr, reason: "signal-entry", createdAt: this.now() };
+        const pending: V12PendingOrderState = {
+            idempotencyKey: clientOrderId,
+            action: "ENTRY",
+            clientOrderId,
+            symbol,
+            side: signal.side,
+            quantity,
+            signalTs: signal.referenceTs,
+            expectedPrice,
+            requestedGross: acceptedGross,
+            baseRequestedGross: decision.baseAcceptedGross,
+            dynamicRequestedGross: decision.dynamicAcceptedGross,
+            atrAtEntry: signal.atr,
+            reason: decision.dynamicAcceptedGross > EPS ? "signal-entry-with-dynamic-residual" : "signal-entry-base",
+            createdAt: this.now(),
+        };
         state.pending = pending; await this.d.stateStore.save(state);
         const result = await this.d.adapter.executeEntry({ signalTs: signal.referenceTs, symbol, side: signal.side, quantity, expectedPrice, clientOrderId });
         await handle.releaseReservation(reservation.reservationId);
@@ -270,7 +335,28 @@ export class V12LiveExecutionEngine {
         const entryPrice = actual.entryPrice > 0 ? actual.entryPrice : result.averagePrice; const protectionState = initialProtection({ symbol, side: signal.side, quantity: actualQuantity(actual), entryPrice, atr: signal.atr, positionId: clientOrderId });
         const actualGross = Math.abs(actual.notionalUsd) / equity;
         if (!(actualGross > 0 && actualGross <= acceptedGross + 1e-6 && actualGross <= V12_X1_ALL.perPositionEntryGrossCap + EPS)) return this.fail(state, "V12_ENTRY_FILL_GROSS_MISMATCH");
-        const active: V12ActivePositionState = { symbol, side: signal.side, quantity: actualQuantity(actual), gross: actualGross, positionId: clientOrderId, entryPrice, atrAtEntry: signal.atr, entrySignalTs: signal.referenceTs, holdingBars: 0, peakPrice: entryPrice, troughPrice: entryPrice, protection: protectionState };
+        const filledQuantity = actualQuantity(actual);
+        const plannedTotalGross = decision.baseAcceptedGross + decision.dynamicAcceptedGross;
+        const baseRatio = plannedTotalGross > EPS ? Math.max(0, Math.min(1, decision.baseAcceptedGross / plannedTotalGross)) : 1;
+        const active: V12ActivePositionState = {
+            symbol,
+            side: signal.side,
+            quantity: filledQuantity,
+            gross: actualGross,
+            baseQuantity: filledQuantity * baseRatio,
+            dynamicQuantity: filledQuantity * (1 - baseRatio),
+            baseGross: actualGross * baseRatio,
+            dynamicGross: actualGross * (1 - baseRatio),
+            dynamicUpdatedAt: decision.dynamicAcceptedGross > EPS ? this.now() : undefined,
+            positionId: clientOrderId,
+            entryPrice,
+            atrAtEntry: signal.atr,
+            entrySignalTs: signal.referenceTs,
+            holdingBars: 0,
+            peakPrice: entryPrice,
+            troughPrice: entryPrice,
+            protection: protectionState,
+        };
         syncActivePositions(state, [...activePositionsOf(state).filter((row) => row.symbol.toUpperCase() !== symbol), active]); await this.d.stateStore.save(state);
         const installed = await installV12Protection(this.d.adapter, protectionState);
         if (installed.manualReview) return this.fail(state, installed.manualReview);
@@ -339,14 +425,64 @@ export class V12LiveExecutionEngine {
                 const existingSymbols = new Set(activePositionsOf(state).map((row) => row.symbol.toUpperCase()));
                 const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`));
                 if (!next) return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
-                const [freshAccount, freshPositions] = await Promise.all([this.d.adapter.getAccountSnapshot(), this.d.adapter.getPositions()]); const freshEquity = Math.max(0, finite(freshAccount.walletBalance));
-                const freshActive = this.activePortfolio(freshPositions, freshEquity, quality102Ownership);
-                const equity = freshEquity; if (!(equity > 0)) return this.fail(state, "V12_ACCOUNT_EQUITY_INVALID");
-                const quote = await this.d.adapter.executor.getMarketQuote(`${next.symbol}USDT`); const sizing = sizeV12Position(equity, next.side === "LONG" ? quote.askPrice : quote.bidPrice, next.atr, next.side);
-                const snapshot = { v12Gross: freshActive.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), penguGross: freshActive.filter((row) => row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), cryptoGross: freshActive.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: freshActive.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0) };
-                const decision = decideV12ResidualEntry(sizing.requestedGross, snapshot, activePositionsOf(state).length);
-                if (!(decision.acceptedGross > 0)) return { status: "capacity-blocked", reason: `V12_RANK2_${decision.reason || "NO_RESIDUAL"}`, signal: next };
-                return this.executeEntryForSignal(state, handle, next, equity, sizing, decision.acceptedGross);
+                let equity = 0;
+                let sizing: ReturnType<typeof sizeV12Position> | undefined;
+                let decision: V12ResidualDecision | undefined;
+                for (let attempt = 0; attempt < 2; attempt += 1) {
+                    const [freshAccount, freshPositions] = await Promise.all([
+                        this.d.adapter.getAccountSnapshot(),
+                        this.d.adapter.getPositions(),
+                    ]);
+                    equity = Math.max(0, finite(freshAccount.walletBalance));
+                    if (!(equity > 0)) return this.fail(state, "V12_ACCOUNT_EQUITY_INVALID");
+                    const freshActive = this.activePortfolio(freshPositions, equity, quality102Ownership);
+                    const quote = await this.d.adapter.executor.getMarketQuote(`${next.symbol}USDT`);
+                    sizing = sizeV12Position(
+                        equity,
+                        next.side === "LONG" ? quote.askPrice : quote.bidPrice,
+                        next.atr,
+                        next.side,
+                    );
+                    const v12Components = v12GrossComponents(state, freshActive);
+                    const snapshot = {
+                        v12Gross: freshActive.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0),
+                        v12BaseGross: v12Components.baseGross,
+                        v12DynamicGross: v12Components.dynamicGross,
+                        cryptoGross: freshActive.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0),
+                        stockGross: freshActive.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
+                        totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0),
+                    };
+                    decision = decideV12ResidualEntry(sizing.requestedGross, snapshot, activePositionsOf(state).length);
+                    const requestedBase = Math.min(
+                        sizing.requestedGross,
+                        V12_X1_ALL.perPositionEntryGrossCap,
+                        Math.max(0, V12_X1_ALL.aggregateEntryGrossCap - v12Components.baseGross),
+                    );
+                    const trimNeeded = Math.min(
+                        Math.max(0, requestedBase - decision.baseAcceptedGross),
+                        v12Components.dynamicGross,
+                    );
+                    if (attempt === 0 && trimNeeded > 1e-9) {
+                        const trim = await reduceV12DynamicResidualForCoreConflict({
+                            adapter: this.d.adapter,
+                            requiredGross: trimNeeded,
+                            equity,
+                            causeIdempotencyKey: `V12_BASE_PRIORITY|${next.referenceTs}|${next.symbol}|${next.side}`,
+                            statePath: this.d.statePath,
+                            now: this.now,
+                        });
+                        if (trim.status === "blocked") return this.fail(state, trim.message);
+                        if (trim.status === "reduced" && trim.trimmedGross > 1e-9) {
+                            state = await this.d.stateStore.load();
+                            continue;
+                        }
+                    }
+                    break;
+                }
+                if (!sizing || !decision || !(decision.acceptedGross > 0)) {
+                    return { status: "capacity-blocked", reason: `V12_RANK2_${decision?.reason || "NO_RESIDUAL"}`, signal: next };
+                }
+                return this.executeEntryForSignal(state, handle, next, equity, sizing, decision);
             }
 
             if (!risk.ok) return { status: "risk-blocked", reason: `SHARED_CRYPTO_RISK:${risk.reason}` };
@@ -364,10 +500,11 @@ export class V12LiveExecutionEngine {
                 const quote = await this.d.adapter.executor.getMarketQuote(`${signal.symbol}USDT`);
                 const entryPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
                 const sizing = sizeV12Position(entryEquity, entryPrice, signal.atr, signal.side);
-                const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), penguGross: activePortfolio.filter((row) => row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), cryptoGross: activePortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
+                const v12Components = v12GrossComponents(state, activePortfolio);
+                const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), v12BaseGross: v12Components.baseGross, v12DynamicGross: v12Components.dynamicGross, cryptoGross: activePortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
                 const decision = decideV12ResidualEntry(sizing.requestedGross, snapshot, activePositionsOf(state).length);
                 if (!(decision.acceptedGross > 0)) { lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal }; break; }
-                lastResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision.acceptedGross);
+                lastResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision);
                 if (lastResult.status === "manual-review") return lastResult;
                 if (lastResult.status !== "entered") break;
             }
