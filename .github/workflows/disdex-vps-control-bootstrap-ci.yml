@@ -6,6 +6,7 @@ on:
       - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1'
       - '.github/workflows/disdex-vps-control-bootstrap-ci.yml'
       - 'scripts/ops/root/install-disdex-github-actions-control'
+      - 'scripts/ops/root/disdex-live-runtime-promote-v1'
   push:
     branches:
       - chatgpt/vps-control-bootstrap-safe-20260819
@@ -13,6 +14,7 @@ on:
       - 'scripts/ops/windows/bootstrap-disdex-github-actions-vps-control.ps1'
       - '.github/workflows/disdex-vps-control-bootstrap-ci.yml'
       - 'scripts/ops/root/install-disdex-github-actions-control'
+      - 'scripts/ops/root/disdex-live-runtime-promote-v1'
 
 permissions:
   contents: read
@@ -51,6 +53,9 @@ jobs:
             'tradingMutation=0',
             'V12_LIVE_ACTIVATE_V3',
             'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3',
+            'LIVE_RUNTIME_PROMOTE_V1',
+            'I_ACKNOWLEDGE_ASTER_RATE_BUDGET_LOCK_RESILIENCE_LIVE_PROMOTION_V1',
+            'disdex-live-runtime-promote-v1',
             'Dis-Dex V96 Production Contract',
             'DISDEX_VPS_DEPLOY_PRIVATE_KEY',
             'StrictHostKeyChecking=yes',

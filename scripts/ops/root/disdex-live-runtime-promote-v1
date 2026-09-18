@@ -1,0 +1,342 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+EXPECTED_SOURCE_REF="codex/aster-rate-budget-lock-resilience-20260918"
+EXPECTED_TARGET_SHA="cc7b8bd4b18cc51bef3e70f52b4498958fb6104b"
+EXPECTED_BASE_SHA="d7209168c8c29779ef8865c5757b0c80346507e7"
+EXPECTED_ACK="I_ACKNOWLEDGE_ASTER_RATE_BUDGET_LOCK_RESILIENCE_LIVE_PROMOTION_V1"
+
+SOURCE_REPO="${1:-}"
+TARGET_SHA="${2:-}"
+BASE_SHA="${3:-}"
+ACK="${4:-}"
+
+TRADING_ROOT="/home/deploy/disdex-trading"
+RELEASES_ROOT="${TRADING_ROOT}/releases"
+CURRENT_LINK="${TRADING_ROOT}/current"
+TARGET_RELEASE="${RELEASES_ROOT}/${TARGET_SHA}"
+BASE_RELEASE="${RELEASES_ROOT}/${BASE_SHA}"
+SHARED_ROOT="/var/lib/disdex/shared"
+Q102_STATE="/var/lib/disdex/quality102-causal-v1/state.json"
+KILL_SWITCH="${SHARED_ROOT}/kill-switch.json"
+PROMOTION_ROOT="/var/lib/disdex/live-runtime-promotions"
+[[ "$(id -u)" == "0" ]] || { echo "LIVE_PROMOTION_ROOT_REQUIRED" >&2; exit 70; }
+[[ "$TARGET_SHA" == "$EXPECTED_TARGET_SHA" ]] || { echo "LIVE_PROMOTION_TARGET_BLOCKED" >&2; exit 64; }
+[[ "$BASE_SHA" == "$EXPECTED_BASE_SHA" ]] || { echo "LIVE_PROMOTION_BASE_BLOCKED" >&2; exit 64; }
+[[ "$ACK" == "$EXPECTED_ACK" ]] || { echo "LIVE_PROMOTION_ACK_REQUIRED" >&2; exit 64; }
+[[ "$SOURCE_REPO" == /* && -d "$SOURCE_REPO" && ! -L "$SOURCE_REPO" ]] || { echo "LIVE_PROMOTION_SOURCE_INVALID" >&2; exit 64; }
+[[ "$(stat -c '%U' "$SOURCE_REPO")" == "deploy" ]] || { echo "LIVE_PROMOTION_SOURCE_OWNER_INVALID" >&2; exit 64; }
+
+exec 9>/var/lock/disdex-live-runtime-promote-v1.lock
+flock -n 9 || { echo "LIVE_PROMOTION_BUSY" >&2; exit 75; }
+
+current_release="$(readlink -f "$CURRENT_LINK" 2>/dev/null || true)"
+[[ "$current_release" == "$BASE_RELEASE" ]] || {
+  echo "LIVE_PROMOTION_CURRENT_BASE_MISMATCH current=$current_release expected=$BASE_RELEASE" >&2
+  exit 65
+}
+[[ -f "$BASE_RELEASE/.disdex-release-sha" ]] || { echo "LIVE_PROMOTION_BASE_MARKER_MISSING" >&2; exit 65; }
+[[ "$(tr -d '[:space:]' < "$BASE_RELEASE/.disdex-release-sha")" == "$BASE_SHA" ]] || { echo "LIVE_PROMOTION_BASE_MARKER_MISMATCH" >&2; exit 65; }
+
+request_id="${DISDEX_CONTROL_REQUEST_ID:-manual-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
+stage="${RELEASES_ROOT}/.${TARGET_SHA}.stage.${request_id}"
+promotion_dir="${PROMOTION_ROOT}/$(date -u +%Y%m%dT%H%M%SZ)-${TARGET_SHA}-$$"
+install -d -o root -g root -m 0700 "$PROMOTION_ROOT" "$promotion_dir"
+printf '%s\n' "$BASE_SHA" > "$promotion_dir/base-sha"
+printf '%s\n' "$TARGET_SHA" > "$promotion_dir/target-sha"
+
+old_v12="disdex-v12-x1-all@${BASE_SHA}.service"
+old_pengu="disdex-pengu-dual-ls-v2@${BASE_SHA}.service"
+old_q102="disdex-quality102-causal-v1@${BASE_SHA}.service"
+old_v52="disdex-v52-aster-only@${BASE_SHA}.service"
+old_margin="disdex-v12-v52-margin-guard@${BASE_SHA}.service"
+old_risk="disdex-shared-crypto-risk@${BASE_SHA}.service"
+
+new_v12="disdex-v12-x1-all@${TARGET_SHA}.service"
+new_pengu="disdex-pengu-dual-ls-v2@${TARGET_SHA}.service"
+new_q102="disdex-quality102-causal-v1@${TARGET_SHA}.service"
+new_v52="disdex-v52-aster-only@${TARGET_SHA}.service"
+new_margin="disdex-v12-v52-margin-guard@${TARGET_SHA}.service"
+new_risk="disdex-shared-crypto-risk@${TARGET_SHA}.service"
+
+mutated=false
+q102_migrated=false
+promotion_success=false
+unit_active() {
+  [[ "$(systemctl is-active "$1" 2>/dev/null || true)" == "active" ]]
+}
+
+require_old_runtime_healthy() {
+  local unit restarts
+  for unit in "$old_v12" "$old_pengu" "$old_q102" "$old_v52"; do
+    unit_active "$unit" || { echo "LIVE_PROMOTION_OLD_UNIT_NOT_ACTIVE unit=$unit" >&2; return 1; }
+    restarts="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || echo unknown)"
+    [[ "$restarts" == "0" ]] || { echo "LIVE_PROMOTION_OLD_UNIT_RESTARTED unit=$unit restarts=$restarts" >&2; return 1; }
+  done
+}
+
+require_kill_switch_inactive() {
+  /usr/bin/python3 - "$KILL_SWITCH" <<'PY'
+import json, sys
+p=sys.argv[1]
+with open(p, encoding="utf-8") as f:
+    data=json.load(f)
+if data.get("active") is not False:
+    raise SystemExit("LIVE_PROMOTION_KILL_SWITCH_ACTIVE")
+print("LIVE_PROMOTION_KILL_SWITCH_INACTIVE")
+PY
+}
+
+require_q102_flat_base() {
+  /usr/bin/python3 - "$Q102_STATE" "$BASE_SHA" <<'PY'
+import json, sys
+p, expected=sys.argv[1:3]
+with open(p, encoding="utf-8") as f:
+    data=json.load(f)
+actual=str(data.get("runtimeCommitSha") or "").lower()
+if actual != expected:
+    raise SystemExit(f"LIVE_PROMOTION_Q102_SHA_MISMATCH actual={actual} expected={expected}")
+if data.get("pending") is not None:
+    raise SystemExit("LIVE_PROMOTION_Q102_PENDING_PRESENT")
+if data.get("position") is not None:
+    raise SystemExit("LIVE_PROMOTION_Q102_POSITION_PRESENT")
+print("LIVE_PROMOTION_Q102_FLAT_BASE_PASS")
+PY
+}
+atomic_current_switch() {
+  local release="$1"
+  local tmp="${TRADING_ROOT}/.current.${request_id}.$$"
+  rm -f -- "$tmp"
+  ln -s "$release" "$tmp"
+  mv -Tf -- "$tmp" "$CURRENT_LINK"
+}
+
+start_and_verify() {
+  local unit="$1"
+  systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+  systemctl start "$unit"
+  sleep 2
+  unit_active "$unit" || {
+    journalctl -u "$unit" --no-pager -n 200 >&2 || true
+    echo "LIVE_PROMOTION_START_FAILED unit=$unit" >&2
+    return 1
+  }
+}
+
+stop_if_present() {
+  local unit="$1"
+  systemctl stop "$unit" >/dev/null 2>&1 || true
+}
+
+restore_q102_backup() {
+  local backup="$promotion_dir/q102-state.before.json"
+  [[ -f "$backup" ]] || return 0
+  cp -f -- "$backup" "$Q102_STATE"
+  chown deploy:deploy "$Q102_STATE" || true
+  chmod 0600 "$Q102_STATE" || true
+}
+rollback() {
+  local original_rc="$1"
+  set +e
+  echo "LIVE_PROMOTION_ROLLBACK_BEGIN target=$TARGET_SHA base=$BASE_SHA" >&2
+  for unit in "$new_v52" "$new_v12" "$new_pengu" "$new_q102" "$new_margin" "$new_risk"; do
+    stop_if_present "$unit"
+  done
+  if [[ "$q102_migrated" == true ]]; then
+    restore_q102_backup
+  fi
+  atomic_current_switch "$BASE_RELEASE"
+  bash "$BASE_RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply
+  for unit in "$old_risk" "$old_margin" "$old_q102" "$old_pengu" "$old_v12" "$old_v52"; do
+    systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+    systemctl start "$unit" >/dev/null 2>&1 || true
+  done
+  systemctl restart disdex-v12-kill-switch-auto-repair.path >/dev/null 2>&1 || true
+  systemctl restart disdex-runner-watchdog.service >/dev/null 2>&1 || true
+  if unit_active "$old_v12" && unit_active "$old_pengu" && unit_active "$old_q102" && unit_active "$old_v52"; then
+    echo "LIVE_PROMOTION_ROLLBACK_PASS restoredSha=$BASE_SHA" >&2
+  else
+    echo "LIVE_PROMOTION_ROLLBACK_INCOMPLETE manualReviewRequired=true" >&2
+  fi
+  exit "$original_rc"
+}
+
+finish() {
+  local rc=$?
+  trap - EXIT INT TERM HUP
+  if [[ "$promotion_success" == true ]]; then
+    rm -rf -- "$promotion_dir"
+    exit 0
+  fi
+  if [[ "$mutated" == true ]]; then
+    rollback "$rc"
+  fi
+  rm -rf -- "$promotion_dir"
+  exit "$rc"
+}
+trap finish EXIT
+trap 'exit 130' INT TERM HUP
+echo "LIVE_PROMOTION_PREFLIGHT_BEGIN base=$BASE_SHA target=$TARGET_SHA"
+require_old_runtime_healthy
+require_kill_switch_inactive
+require_q102_flat_base
+
+rm -rf -- "$stage"
+if [[ -e "$TARGET_RELEASE" || -L "$TARGET_RELEASE" ]]; then
+  echo "LIVE_PROMOTION_TARGET_RELEASE_ALREADY_EXISTS" >&2
+  exit 66
+fi
+install -d -o deploy -g deploy -m 0750 "$stage"
+runuser -u deploy -- git -C "$SOURCE_REPO" archive "$TARGET_SHA" | runuser -u deploy -- tar -x -C "$stage"
+printf '%s\n' "$TARGET_SHA" > "$stage/.disdex-release-sha"
+chown deploy:deploy "$stage/.disdex-release-sha"
+chmod 0640 "$stage/.disdex-release-sha"
+
+for dependency in node_modules .venv2; do
+  base_dependency="$(readlink -f "$BASE_RELEASE/$dependency")"
+  [[ -d "$base_dependency" ]] || { echo "LIVE_PROMOTION_BASE_DEPENDENCY_MISSING dependency=$dependency" >&2; exit 66; }
+  runuser -u deploy -- ln -s "$base_dependency" "$stage/$dependency"
+done
+
+[[ -x "$stage/node_modules/.bin/tsx" ]] || { echo "LIVE_PROMOTION_TSX_MISSING" >&2; exit 66; }
+[[ -x "$stage/.venv2/bin/python" ]] || { echo "LIVE_PROMOTION_PYTHON_MISSING" >&2; exit 66; }
+(
+  cd "$stage"
+  runuser -u deploy -- ./node_modules/.bin/tsx --test tests/aster-global-rate-budget.test.ts
+  runuser -u deploy -- ./.venv2/bin/python -m unittest tests.test_aster_global_rate_budget_python
+  runuser -u deploy -- ./.venv2/bin/python -m unittest     tests.test_v52_market_closed_gate     tests.test_stock_reference_gate     tests.test_v52_daily_loss_recovery
+  bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+  ./node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-state-migrate-selftest.ts
+)
+echo "LIVE_PROMOTION_TARGET_TESTS_PASS"
+
+chown -R deploy:deploy "$stage"
+chmod 0750 "$stage"
+mv -- "$stage" "$TARGET_RELEASE"
+[[ "$(tr -d '[:space:]' < "$TARGET_RELEASE/.disdex-release-sha")" == "$TARGET_SHA" ]] || {
+  echo "LIVE_PROMOTION_TARGET_MARKER_POSTMOVE_MISMATCH" >&2
+  exit 66
+}
+echo "LIVE_PROMOTION_RELEASE_STAGED path=$TARGET_RELEASE"
+# The target release is immutable from this point. Re-check all live
+# preconditions immediately before the first runtime mutation.
+require_old_runtime_healthy
+require_kill_switch_inactive
+require_q102_flat_base
+
+cp -a -- "$Q102_STATE" "$promotion_dir/q102-state.before.json"
+mutated=true
+
+systemctl stop disdex-v12-kill-switch-auto-repair.path >/dev/null 2>&1 || true
+systemctl stop disdex-runner-watchdog.service >/dev/null 2>&1 || true
+
+for unit in "$old_v52" "$old_v12" "$old_pengu" "$old_q102"; do
+  stop_if_present "$unit"
+done
+for unit in "$old_margin" "$old_risk"; do
+  stop_if_present "$unit"
+done
+
+for unit in "$old_v12" "$old_pengu" "$old_q102" "$old_v52" "$old_margin" "$old_risk"; do
+  if unit_active "$unit"; then
+    echo "LIVE_PROMOTION_OLD_UNIT_STILL_ACTIVE unit=$unit" >&2
+    exit 67
+  fi
+done
+echo "LIVE_PROMOTION_OLD_RUNTIME_STOPPED"
+
+# Q102 can change state between the preflight observation and daemon stop.
+# Once the daemon is stopped, require the base state to still be flat before
+# changing only its runtime lineage SHA.
+require_q102_flat_base
+
+(
+  cd "$TARGET_RELEASE"
+  ./node_modules/.bin/tsx scripts/disdex-quality102-causal-v1-state-migrate.ts     --state-path "$Q102_STATE"     --from-sha "$BASE_SHA"     --to-sha "$TARGET_SHA"     --backup-path "$promotion_dir/q102-state.migrate-backup.json"
+)
+q102_migrated=true
+echo "LIVE_PROMOTION_Q102_MIGRATED"
+
+atomic_current_switch "$TARGET_RELEASE"
+[[ "$(readlink -f "$CURRENT_LINK")" == "$TARGET_RELEASE" ]] || {
+  echo "LIVE_PROMOTION_CURRENT_SWITCH_VERIFY_FAILED" >&2
+  exit 68
+}
+echo "LIVE_PROMOTION_CURRENT_SWITCHED sha=$TARGET_SHA"
+
+bash "$TARGET_RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply
+echo "LIVE_PROMOTION_RUNTIME_WIRING_APPLIED"
+
+unit_active "$new_risk" || {
+  echo "LIVE_PROMOTION_NEW_SHARED_RISK_NOT_ACTIVE" >&2
+  exit 68
+}
+start_and_verify "$new_margin"
+start_and_verify "$new_q102"
+start_and_verify "$new_pengu"
+start_and_verify "$new_v12"
+start_and_verify "$new_v52"
+declare -A stable_pid
+for unit in "$new_v12" "$new_pengu" "$new_q102" "$new_v52" "$new_margin" "$new_risk"; do
+  unit_active "$unit" || { echo "LIVE_PROMOTION_NEW_UNIT_NOT_ACTIVE unit=$unit" >&2; exit 68; }
+  stable_pid["$unit"]="$(systemctl show "$unit" -p MainPID --value)"
+  [[ "${stable_pid[$unit]}" != "0" ]] || { echo "LIVE_PROMOTION_NEW_UNIT_PID_ZERO unit=$unit" >&2; exit 68; }
+done
+
+systemctl start disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
+systemctl start disdex-runner-watchdog.service >/dev/null 2>&1 || true
+sleep 10
+
+for unit in "$new_v12" "$new_pengu" "$new_q102" "$new_v52" "$new_margin" "$new_risk"; do
+  unit_active "$unit" || { echo "LIVE_PROMOTION_STABILITY_ACTIVE_FAILED unit=$unit" >&2; exit 68; }
+  pid_after="$(systemctl show "$unit" -p MainPID --value)"
+  restarts="$(systemctl show "$unit" -p NRestarts --value)"
+  [[ "$pid_after" == "${stable_pid[$unit]}" ]] || {
+    echo "LIVE_PROMOTION_STABILITY_PID_CHANGED unit=$unit before=${stable_pid[$unit]} after=$pid_after" >&2
+    exit 68
+  }
+  [[ "$restarts" == "0" ]] || {
+    echo "LIVE_PROMOTION_STABILITY_RESTARTED unit=$unit restarts=$restarts" >&2
+    exit 68
+  }
+done
+for unit in "$old_v12" "$old_pengu" "$old_q102" "$old_v52" "$old_margin" "$old_risk"; do
+  if unit_active "$unit"; then
+    echo "LIVE_PROMOTION_OLD_GENERATION_REACTIVATED unit=$unit" >&2
+    exit 68
+  fi
+done
+
+require_kill_switch_inactive
+
+/usr/bin/python3 - "$Q102_STATE" "$TARGET_SHA" <<'PY'
+import json, sys
+p, expected=sys.argv[1:3]
+with open(p, encoding="utf-8") as f:
+    data=json.load(f)
+if str(data.get("runtimeCommitSha") or "").lower() != expected:
+    raise SystemExit("LIVE_PROMOTION_Q102_POST_SHA_MISMATCH")
+if data.get("pending") is not None:
+    raise SystemExit("LIVE_PROMOTION_Q102_POST_PENDING_PRESENT")
+print("LIVE_PROMOTION_Q102_POSTCHECK_PASS")
+PY
+
+[[ "$(readlink -f "$CURRENT_LINK")" == "$TARGET_RELEASE" ]] || {
+  echo "LIVE_PROMOTION_FINAL_CURRENT_MISMATCH" >&2
+  exit 68
+}
+
+promotion_success=true
+echo "STATUS: LIVE_RUNTIME_PROMOTED_VERIFIED"
+echo "BASE_SHA=$BASE_SHA"
+echo "TARGET_SHA=$TARGET_SHA"
+echo "CURRENT_RELEASE=$TARGET_RELEASE"
+echo "OLD_GENERATION_ACTIVE=FALSE"
+echo "KILL_SWITCH_ACTIVE=FALSE"
+echo "Q102_MIGRATION=PASS"
+echo "NRESTARTS=0"
+echo "ARTIFICIAL_LIVE_ORDERS=0"
+echo "ORDERS_SENT_FOR_TESTING=0"

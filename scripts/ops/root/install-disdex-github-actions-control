@@ -27,12 +27,14 @@ public_key_file="${2:-}"
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 control_src="$script_dir/disdex-github-actions-control"
 entry_src="$script_dir/disdex-github-actions-entry"
-[[ -f "$control_src" && ! -L "$control_src" && -f "$entry_src" && ! -L "$entry_src" ]] || {
+promote_src="$script_dir/disdex-live-runtime-promote-v1"
+[[ -f "$control_src" && ! -L "$control_src" && -f "$entry_src" && ! -L "$entry_src" && -f "$promote_src" && ! -L "$promote_src" ]] || {
   printf 'DISDEX_GHA_INSTALL_SOURCE_TOOLS_MISSING\n' >&2
   exit 66
 }
 bash -n "$control_src"
 bash -n "$entry_src"
+bash -n "$promote_src"
 
 origin="$(runuser -u deploy -- git -C "$source_repo" remote get-url origin 2>/dev/null || true)"
 [[ -n "$origin" ]] || {
@@ -60,6 +62,7 @@ esac
 
 install -o root -g root -m 0755 "$control_src" /usr/local/sbin/disdex-github-actions-control
 install -o root -g root -m 0755 "$entry_src" /usr/local/sbin/disdex-github-actions-entry
+install -o root -g root -m 0755 "$promote_src" /usr/local/sbin/disdex-live-runtime-promote-v1
 install -d -o root -g root -m 0700 /etc/disdex
 install -d -o root -g deploy -m 0710 /var/lib/disdex-github-actions-control
 install -d -o root -g root -m 0700 /var/lib/disdex-github-actions-control/requests
@@ -116,4 +119,5 @@ printf 'sshUser=deploy\n'
 printf 'arbitraryShell=DISABLED\n'
 printf 'allowedOperation=CONTROL_PROBE\n'
 printf 'allowedOperation=V12_LIVE_ACTIVATE_V3\n'
+printf 'allowedOperation=LIVE_RUNTIME_PROMOTE_V1\n'
 printf 'next=configure GitHub Actions secrets DISDEX_VPS_SSH_HOST, DISDEX_VPS_DEPLOY_PRIVATE_KEY, DISDEX_VPS_KNOWN_HOSTS and optional variable DISDEX_VPS_SSH_PORT\n'
