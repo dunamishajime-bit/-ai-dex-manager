@@ -20,10 +20,15 @@ jobs:
         run: |
           set -Eeuo pipefail
           current="$(readlink -f /home/deploy/disdex-trading/current)"
+          echo "current=$current"
+          ls -ld "$current" "$current/node_modules" "$current/.venv2" || true
           test -d "$current/node_modules"
           test -x "$current/.venv2/bin/python"
-          ln -s "$current/node_modules" node_modules
-          ln -s "$current/.venv2" .venv2
+          rm -rf node_modules .venv2
+          ln -s "$(readlink -f "$current/node_modules")" node_modules
+          ln -s "$(readlink -f "$current/.venv2")" .venv2
+          node --version
+          .venv2/bin/python --version
       - name: Linux lock and V52 safety tests
         shell: bash
         run: |
