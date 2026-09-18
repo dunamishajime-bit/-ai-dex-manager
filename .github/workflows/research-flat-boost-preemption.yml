@@ -74,12 +74,17 @@ jobs:
           repository: dunamishajime-bit/-ai-dex-manager
           run-id: 33257164125
 
+      - name: Regenerate current BTC2 V12 Top2 ledger
+        run: |
+          V12_TOP2_LEDGER_OUT=.research-state/flat-boost-current/v12-top2-ledger.json \
+            npx tsx scripts/research_current_btc2_v12_top2_ledger_20260918.ts
+
       - name: Baseline parity gate
         run: |
           set -o pipefail
           python scripts/research_flat_boost_preemption_20260918.py \
             --stock-cache-dir .cache/aster-only-v39-overnight-open \
-            --v12-ledger .research-state/flat-boost-prior/v12-top2-ledger.json \
+            --v12-ledger .research-state/flat-boost-current/v12-top2-ledger.json \
             --pengu-ledger .research-state/flat-boost-prior/pengu-v8-ledger.json \
             --output-root .research-state/flat-boost-preemption \
             2>&1 | tee .research-state/flat-boost-preemption.log
