@@ -6,8 +6,8 @@ const build = (runnerModule as Record<string, unknown>).buildPenguV8StrictGrossC
 assert.equal(typeof build, "function", "runner must preserve requested Gross before planner allocation");
 const contract = (build as (requested: number, equity: number, available: number) => {
   requestedGross: number; intentGross: number; intentNotionalUsd: number;
-})(0.9375, 1_000, 1_000);
-assert.deepEqual(contract, { requestedGross: 0.9375, intentGross: 0.9375, intentNotionalUsd: 937.5 });
+})(1.0625, 1_000, 1_000);
+assert.deepEqual(contract, { requestedGross: 1.0625, intentGross: 1.0625, intentNotionalUsd: 1_000 });
 
 const plan = planStrictPortfolio({
   equity: 1_000, now: 1_000, active: [], maxDataAgeMs: 300_000,
@@ -16,6 +16,6 @@ const plan = planStrictPortfolio({
     signalTs: 1_000, requestedGross: contract.requestedGross } as any],
 });
 assert.equal(plan.status, "planned");
-assert.equal(plan.accepted[0]?.gross, 0.75);
-assert.equal((plan.accepted[0] as any)?.requestedGross, 0.9375);
+assert.equal(plan.accepted[0]?.gross, 0.85);
+assert.equal((plan.accepted[0] as any)?.requestedGross, 1.0625);
 console.log("PENGU_V8_GROSS_CONTRACT_SELFTEST_PASS");
