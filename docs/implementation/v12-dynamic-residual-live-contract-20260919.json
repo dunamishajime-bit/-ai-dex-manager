@@ -1,0 +1,98 @@
+{
+  "schema": "disdex-v12-dynamic-residual-live-contract/v1",
+  "date": "2026-09-19",
+  "researchSourceCommit": "27f934424b201e4c63986b9b7db64b89ff69b4bb",
+  "target": {
+    "v12": {
+      "baseAggregateGross": 1.5,
+      "dynamicAggregateGrossCap": 2,
+      "perPositionGrossCap": 1,
+      "top2": true
+    },
+    "pengu": {
+      "gross": 0.85
+    },
+    "q102": {
+      "selector": "CAUSAL_V4",
+      "slots": 1,
+      "familyGross": {
+        "HIGH_VOL": 1.665,
+        "MR": 1,
+        "BRK": 2.465,
+        "REV": 2.5,
+        "PB": 2.5
+      }
+    },
+    "v52": {
+      "stockAggregateGross": 1.98,
+      "slotGrossCap": 1.64
+    },
+    "shared": {
+      "cryptoGrossCap": 3,
+      "totalGrossCap": 3.5,
+      "cryptoDailyLossPct": 7.5
+    },
+    "venue": {
+      "marginMode": "CROSS",
+      "leverage": 5
+    }
+  },
+  "formalBacktest": {
+    "period": {
+      "startInclusive": "2025-08-10T00:00:00.000Z",
+      "endExclusive": "2026-08-10T00:00:00.000Z"
+    },
+    "initialJpy": 10000,
+    "monthlyJpy": 10000,
+    "monthlyCount": 12,
+    "compounding": true,
+    "NORMAL": {
+      "endingAssetJpy": 270126566.3772751,
+      "profitFactor": 3.82886822,
+      "maxDrawdownPct": -19.72421906,
+      "trades": 1237,
+      "routing": {
+        "V12": 874,
+        "PENGU": 66,
+        "V11_EQ": 50,
+        "V50_POST_OPEN_BASIS": 93,
+        "Q102": 69
+      },
+      "grossConflicts": 0
+    },
+    "SEVERE": {
+      "endingAssetJpy": 24184641.27364947,
+      "profitFactor": 2.79016516,
+      "maxDrawdownPct": -19.97886021,
+      "trades": 1078,
+      "routing": {
+        "V12": 871,
+        "PENGU": 66,
+        "Q102": 69
+      },
+      "grossConflicts": 0
+    }
+  },
+  "acceptance": {
+    "maxDrawdownFloorPct": -20,
+    "requireRoutingParity": true,
+    "maxCryptoGross": 3,
+    "maxTotalGross": 3.5,
+    "maxGrossConflicts": 0,
+    "requireMigrationPass": true,
+    "requireReconciliationPass": true,
+    "requireProtectionPass": true,
+    "requireUnifiedRuntimeSha": true,
+    "requireMarginGuardHealthy": true,
+    "requireKillSwitchFalseAtActivation": true,
+    "requireRollbackRelease": true
+  },
+  "safety": {
+    "dynamicV12LowerPriorityThanCore": true,
+    "trimDynamicBeforeBase": true,
+    "noSyntheticLiveTestOrder": true,
+    "noForceKillSwitchClear": true,
+    "failClosedOnAmbiguousState": true,
+    "noOldAndNewRuntimeOverlap": true
+  }
+}
