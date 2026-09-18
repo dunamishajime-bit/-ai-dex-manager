@@ -31,6 +31,7 @@ import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPo
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import {
+    findRecoveryV8ManagedProtectiveOrders,
     placeRecoveryV8EntryHardStop,
     replaceRecoveryV8Stops,
     type RecoveryV8ProtectiveOrderGateway,
@@ -246,6 +247,30 @@ async function readPortfolioDailyLoss(pathValue?: string) {
     }
 }
 
+export function classifyPenguOpenOrders(input: {
+    openOrders: readonly import("@/lib/direct-trade-executor").DirectOpenOrder[];
+    positions: readonly DirectPosition[];
+    quality102Ownership?: Quality102CausalV1OwnershipSnapshot;
+    recoveryV8?: PenguDualLsV2Position["recoveryV8"];
+}) {
+    const q102OpenOrders = input.openOrders.filter((order) => quality102OwnsOrder(input.quality102Ownership, order));
+    const verifiedRecoveryOrders = input.recoveryV8
+        ? findRecoveryV8ManagedProtectiveOrders(input.openOrders, input.positions)
+        : [];
+    const knownRecoveryIds = input.recoveryV8
+        ? new Set([
+            input.recoveryV8.fullHardStopClientOrderId,
+            input.recoveryV8.partialStopClientOrderId,
+            input.recoveryV8.remainingHardStopClientOrderId,
+        ].filter((value): value is string => Boolean(value)))
+        : new Set<string>();
+    const managedRecoveryOrders = verifiedRecoveryOrders.filter((order) => knownRecoveryIds.has(order.clientOrderId));
+    const managedRecoverySet = new Set(managedRecoveryOrders);
+    const conflicting = input.openOrders.filter((order) =>
+        !quality102OwnsOrder(input.quality102Ownership, order) && !managedRecoverySet.has(order));
+    return { q102OpenOrders, managedRecoveryOrders, conflicting };
+}
+
 function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV2Position): PenguDualLsV2Position {
     const side = positionSide(actual);
     return {
@@ -263,6 +288,7 @@ function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV
                 ...previous.recoveryV8,
                 entryTs: previous.entryTs || actual.updatedAt || Date.now(),
                 entryPrice: actual.entryPrice,
+                logicalEntryPrice: previous.recoveryV8.logicalEntryPrice ?? previous.recoveryV8.entryPrice,
                 quantity: Math.abs(actual.quantity),
                 highWaterMark: side > 0 ? Math.max(previous.recoveryV8.highWaterMark, actual.markPrice) : previous.recoveryV8.highWaterMark,
             }
@@ -348,6 +374,32 @@ export class PenguDualLsV2PortfolioRunner {
         return true;
     }
 
+    private async cleanupRecoveryV8ProtectionAfterConfirmedExit(state: PenguDualLsV2RunnerState): Promise<void> {
+        const recovery = state.position?.entryVersion === "RECOVERY_V8" ? state.position.recoveryV8 : undefined;
+        if (!recovery) return;
+        const gateway = this.dependencies.recoveryV8Protection;
+        if (!gateway) throw new Error("PENGU_RECOVERY_V8_EXIT_PROTECTION_GATEWAY_UNAVAILABLE");
+        const ids = new Set([
+            recovery.fullHardStopClientOrderId,
+            recovery.partialStopClientOrderId,
+            recovery.remainingHardStopClientOrderId,
+        ].filter((value): value is string => Boolean(value)));
+        if (!ids.size) return;
+        let open = await gateway.getOpenOrders(SYMBOL);
+        for (const order of open.filter((candidate) => ids.has(candidate.clientOrderId))) {
+            try {
+                await gateway.cancel(order.clientOrderId, SYMBOL);
+            } catch (error) {
+                open = await gateway.getOpenOrders(SYMBOL);
+                if (open.some((candidate) => candidate.clientOrderId === order.clientOrderId)) throw error;
+            }
+        }
+        open = await gateway.getOpenOrders(SYMBOL);
+        if (open.some((candidate) => ids.has(candidate.clientOrderId))) {
+            throw new Error("PENGU_RECOVERY_V8_EXIT_PROTECTION_CLEANUP_INCOMPLETE");
+        }
+    }
+
     private async manualReview(state: PenguDualLsV2RunnerState, message: string, idempotencyKey?: string): Promise<PenguDualLsV2TickResult> {
         if (state.pending) {
             state.pending.phase = "manual_review";
@@ -379,6 +431,11 @@ export class PenguDualLsV2PortfolioRunner {
         const actual = actualPosition(positions);
         if (pending.reduceOnly) {
             if (actual) return this.manualReview(state, "PENGU_DUAL_LS_EXIT_POSITION_REMAINS_AFTER_FILL", pending.idempotencyKey);
+            try {
+                await this.cleanupRecoveryV8ProtectionAfterConfirmedExit(state);
+            } catch (error) {
+                return this.manualReview(state, "PENGU_RECOVERY_V8_EXIT_PROTECTION_CLEANUP_FAILED:" + (error instanceof Error ? error.message : String(error)), pending.idempotencyKey);
+            }
         } else if (!actual
             || positionSide(actual) !== (pending.side === "BUY" ? 1 : -1)
             || Math.abs(Math.abs(actual.quantity) - result.executedQuantity) > Math.max(1e-8, result.executedQuantity * 0.02)) {
@@ -408,6 +465,7 @@ export class PenguDualLsV2PortfolioRunner {
                         side: 1,
                         entryTs: pending.referenceTs + 3_600_000,
                         entryPrice,
+                        logicalEntryPrice: entryPrice,
                         quantity: result.executedQuantity,
                         originalQuantity: result.executedQuantity,
                         originalGross: 0.5,
@@ -434,7 +492,7 @@ export class PenguDualLsV2PortfolioRunner {
                 const stop = await placeRecoveryV8EntryHardStop(gateway, {
                     symbol: SYMBOL,
                     entryTs: state.position.recoveryV8.entryTs,
-                    entryPrice: state.position.recoveryV8.entryPrice,
+                    entryPrice: state.position.recoveryV8.logicalEntryPrice ?? state.position.recoveryV8.entryPrice,
                     quantity: state.position.recoveryV8.quantity,
                 });
                 state.position.recoveryV8 = {
@@ -588,8 +646,14 @@ export class PenguDualLsV2PortfolioRunner {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "Quality102 causal-v1 has a pending order and must reconcile before PENGU can enter.", signal: state.latestSignal || undefined };
             }
-            const quality102OpenOrder = openOrders.some((order) => quality102OwnsOrder(quality102Ownership, order));
-            const nonQuality102OpenOrders = openOrders.filter((order) => !quality102OwnsOrder(quality102Ownership, order));
+            const orderClasses = classifyPenguOpenOrders({
+                openOrders,
+                positions,
+                quality102Ownership,
+                recoveryV8: state.position?.entryVersion === "RECOVERY_V8" ? state.position.recoveryV8 : undefined,
+            });
+            const quality102OpenOrder = orderClasses.q102OpenOrders.length > 0;
+            const nonQuality102OpenOrders = orderClasses.conflicting;
             const actual = actualPosition(positions);
             if (!state.position && actual) {
                 return { status: "manual-review", message: "PENGU Dual LS found an unmanaged existing PENGU position; no takeover is allowed." };
@@ -619,7 +683,7 @@ export class PenguDualLsV2PortfolioRunner {
                         const replaced = await replaceRecoveryV8Stops(gateway, {
                             symbol: SYMBOL,
                             entryTs: state.position.entryTs,
-                            entryPrice: state.position.entryPrice,
+                            entryPrice: state.position.recoveryV8.logicalEntryPrice ?? state.position.entryPrice,
                             currentQuantity: Math.abs(actual.quantity),
                             oldHardStopClientOrderId: state.position.recoveryV8.fullHardStopClientOrderId,
                             nowTs: this.now(),

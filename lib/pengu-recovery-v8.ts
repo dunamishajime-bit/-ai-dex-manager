@@ -36,7 +36,10 @@ export interface RecoveryV8EntryDecision {
 export interface RecoveryV8Position {
     side: 1;
     entryTs: number;
+    /** Venue/Aster execution entry price. */
     entryPrice: number;
+    /** Original strategy entry basis. Set when a forced restore re-enters at a different venue price. */
+    logicalEntryPrice?: number;
     quantity: number;
     originalGross: number;
     remainingGross: number;
@@ -52,6 +55,12 @@ export interface RecoveryV8DurableState extends RecoveryV8Position {
     partialStopClientOrderId?: string;
     remainingHardStopClientOrderId?: string;
     partialDefenseArmedAtTs?: number;
+    /** Forced-recovery execution metadata; optional for ordinary entries. */
+    recoveryExecutionPrice?: number;
+    recoveryExecutionTs?: number;
+    recoveryOrderId?: number;
+    recoveryClientOrderId?: string;
+    recoveredFromOriginalQuantity?: number;
     actualPartialFill?: {
         filledAtTs: number;
         executedQuantity: number;
@@ -128,12 +137,15 @@ function partialPosition(position: RecoveryV8Position) {
 
 export function evaluateRecoveryV8PositionBar(position: RecoveryV8Position, row: RecoveryV8FeatureRow): RecoveryV8PositionDecision {
     const events: RecoveryV8PositionEvent[] = [];
+    const logicalEntryPrice = Number.isFinite(position.logicalEntryPrice) && Number(position.logicalEntryPrice) > 0
+        ? Number(position.logicalEntryPrice)
+        : position.entryPrice;
     let updatedPosition = {
         ...position,
-        highWaterMark: Math.max(position.entryPrice, position.highWaterMark),
+        highWaterMark: Math.max(logicalEntryPrice, position.highWaterMark),
     };
-    const partialPrice = position.entryPrice * (1 - PENGU_RECOVERY_V8.partial.stopPct);
-    const hardPrice = position.entryPrice * (1 - PENGU_RECOVERY_V8.exit.hardStopPct);
+    const partialPrice = logicalEntryPrice * (1 - PENGU_RECOVERY_V8.partial.stopPct);
+    const hardPrice = logicalEntryPrice * (1 - PENGU_RECOVERY_V8.exit.hardStopPct);
     const partialEligible = !position.partialDefenseTriggered
         && row.referenceTs >= position.entryTs + PENGU_RECOVERY_V8.partial.afterHours * HOUR
         && row.low <= partialPrice;
@@ -154,7 +166,7 @@ export function evaluateRecoveryV8PositionBar(position: RecoveryV8Position, row:
         };
     }
     const previousBest = updatedPosition.highWaterMark;
-    if (previousBest / position.entryPrice - 1 >= PENGU_RECOVERY_V8.exit.trailActivationPct) {
+    if (previousBest / logicalEntryPrice - 1 >= PENGU_RECOVERY_V8.exit.trailActivationPct) {
         const trailingPrice = previousBest * (1 - PENGU_RECOVERY_V8.exit.trailRetracePct);
         if (row.low <= trailingPrice) {
             events.push("TRAILING_STOP");

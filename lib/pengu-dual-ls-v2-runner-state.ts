@@ -92,12 +92,22 @@ function validRecoveryV8State(value: unknown, position: PenguDualLsV2Position): 
     const originalGross = Number(state.originalGross);
     const remainingGross = Number(state.remainingGross);
     const quantity = Number(state.quantity);
+    const logicalEntryPrice = state.logicalEntryPrice === undefined ? undefined : Number(state.logicalEntryPrice);
+    const recoveryExecutionPrice = state.recoveryExecutionPrice === undefined ? undefined : Number(state.recoveryExecutionPrice);
+    const recoveryExecutionTs = state.recoveryExecutionTs === undefined ? undefined : Number(state.recoveryExecutionTs);
+    const recoveredFromOriginalQuantity = state.recoveredFromOriginalQuantity === undefined ? undefined : Number(state.recoveredFromOriginalQuantity);
     return state.version === "RECOVERY_V8"
         && state.entryTs === position.entryTs
         && state.side === 1
         && Number.isFinite(quantity) && quantity > 0
         && Math.abs(quantity - position.quantity) <= Math.max(1e-8, position.quantity * 0.01)
         && Number.isFinite(state.entryPrice) && state.entryPrice === position.entryPrice
+        && (logicalEntryPrice === undefined || Number.isFinite(logicalEntryPrice) && logicalEntryPrice > 0)
+        && (recoveryExecutionPrice === undefined || Number.isFinite(recoveryExecutionPrice) && recoveryExecutionPrice > 0)
+        && (recoveryExecutionTs === undefined || Number.isFinite(recoveryExecutionTs) && recoveryExecutionTs > 0)
+        && (state.recoveryOrderId === undefined || Number.isFinite(Number(state.recoveryOrderId)))
+        && (state.recoveryClientOrderId === undefined || typeof state.recoveryClientOrderId === "string" && state.recoveryClientOrderId.length > 0)
+        && (recoveredFromOriginalQuantity === undefined || Number.isFinite(recoveredFromOriginalQuantity) && recoveredFromOriginalQuantity > 0)
         && Number.isFinite(originalQuantity) && originalQuantity > 0
         && Number.isFinite(originalGross) && Math.abs(originalGross - 0.5) <= 1e-12
         && Number.isFinite(remainingGross)

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { AsterExchangeSymbol, AsterOrderResponse, AsterV3Client } from "@/lib/aster-v3-client";
 import { PENGU_RECOVERY_V8 } from "@/config/penguRecoveryV8";
 import { buildTradeFillNotificationEvent, enqueueTradeFillNotification, isConfirmedTradeFill } from "@/lib/trade-fill-notification";
+import type { DirectOpenOrder, DirectPosition } from "@/lib/direct-trade-executor";
 
 export interface RecoveryV8StopOrderInput {
     symbol: string;
@@ -42,6 +43,49 @@ export interface RecoveryV8ProtectionPosition {
     currentQuantity: number;
     oldHardStopClientOrderId?: string;
     nowTs: number;
+}
+
+function recoveryV8ManagedProtectiveOrderShape(
+    order: DirectOpenOrder,
+    positions: readonly DirectPosition[],
+): { position: DirectPosition; remainingQuantity: number } | undefined {
+    const symbol = String(order.symbol || "").trim().toUpperCase();
+    const clientOrderId = String(order.clientOrderId || "");
+    if (symbol !== "PENGUUSDT" || !/^recv8-[0-9a-f]{16,36}$/i.test(clientOrderId)) return undefined;
+    if (order.reduceOnly !== true || !["NEW", "PARTIALLY_FILLED"].includes(String(order.status || "").toUpperCase())) return undefined;
+    if (!Number.isFinite(order.quantity) || order.quantity <= 0 || !Number.isFinite(order.executedQuantity) || order.executedQuantity < 0 || order.executedQuantity > order.quantity) return undefined;
+    const position = positions.find((candidate) => candidate.symbol.toUpperCase() === symbol && Math.abs(candidate.quantity) > 1e-12);
+    if (!position || !Number.isFinite(position.quantity)) return undefined;
+    const expectedSide = position.quantity > 0 ? "SELL" : "BUY";
+    if (order.side !== expectedSide) return undefined;
+    const remainingQuantity = order.quantity - order.executedQuantity;
+    const tolerance = Math.max(1e-8, Math.abs(position.quantity) * 0.01);
+    if (remainingQuantity <= 1e-12 || remainingQuantity > Math.abs(position.quantity) + tolerance) return undefined;
+    return { position, remainingQuantity };
+}
+
+export function findRecoveryV8ManagedProtectiveOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): DirectOpenOrder[] {
+    const candidates = openOrders
+        .map((order) => ({ order, matched: recoveryV8ManagedProtectiveOrderShape(order, positions) }))
+        .filter((entry): entry is { order: DirectOpenOrder; matched: { position: DirectPosition; remainingQuantity: number } } => Boolean(entry.matched));
+    if (!candidates.length) return [];
+    const clientOrderIds = new Set(candidates.map(({ order }) => order.clientOrderId));
+    if (clientOrderIds.size !== candidates.length) return [];
+    const managed = new Set<DirectOpenOrder>();
+    for (const position of positions) {
+        if (position.symbol.toUpperCase() !== "PENGUUSDT" || !Number.isFinite(position.quantity) || Math.abs(position.quantity) <= 1e-12) continue;
+        const matching = candidates.filter(({ matched }) => matched.position === position);
+        if (!matching.length) continue;
+        const protectedQuantity = matching.reduce((sum, { matched }) => sum + matched.remainingQuantity, 0);
+        const tolerance = Math.max(1e-8, Math.abs(position.quantity) * 0.01);
+        if (Math.abs(protectedQuantity - Math.abs(position.quantity)) <= tolerance) {
+            for (const { order } of matching) managed.add(order);
+        }
+    }
+    return openOrders.filter((order) => managed.has(order));
 }
 
 function finitePositive(value: number, label: string) {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
     buildRecoveryV8HardStopPlan,
+    findRecoveryV8ManagedProtectiveOrders,
     replaceRecoveryV8Stops,
     type RecoveryV8ProtectiveOrderGateway,
 } from "@/lib/pengu-recovery-v8-protective-orders";
@@ -29,6 +30,16 @@ async function main() {
     assert.equal(entry.quantity, 1);
     assert.equal(entry.stopPrice, 94);
     assert.equal(entry.reduceOnly, true);
+
+    const position = { symbol: "PENGUUSDT", quantity: 4244, entryPrice: 0.007256, markPrice: 0.0075, unrealizedPnl: 0, pnlPct: 0, notionalUsd: 31.8, positionSide: "BOTH" as const, leverage: 5, updatedAt: Date.now() };
+    const split = [
+        { symbol: "PENGUUSDT", clientOrderId: "recv8-20b3c3a02e5a07d1d79c5f7761eff1", side: "SELL" as const, status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+        { symbol: "PENGUUSDT", clientOrderId: "recv8-1b00e3de1d7092ef238ff60fe6eafa", side: "SELL" as const, status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+    ];
+    assert.deepEqual(findRecoveryV8ManagedProtectiveOrders(split, [position]).map((row) => row.clientOrderId), split.map((row) => row.clientOrderId));
+    assert.equal(findRecoveryV8ManagedProtectiveOrders([{ ...split[0], quantity: 2000 }, { ...split[1], quantity: 2000 }], [position]).length, 0);
+    assert.equal(findRecoveryV8ManagedProtectiveOrders([{ ...split[0], reduceOnly: false }, split[1]], [position]).length, 0);
+    assert.equal(findRecoveryV8ManagedProtectiveOrders([{ ...split[0], side: "BUY" }, split[1]], [position]).length, 0);
 
     const result = await replaceRecoveryV8Stops(gateway, {
         symbol: "PENGUUSDT",

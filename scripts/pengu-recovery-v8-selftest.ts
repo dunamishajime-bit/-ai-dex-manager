@@ -101,6 +101,14 @@ assert.equal(collision.updatedPosition.remainingGross, 0.25);
 assert.equal(evaluateRecoveryV8PositionBar(partial.updatedPosition, row({ referenceTs: 1_000_000 + 25 * HOUR, low: 93 })).kind, "HARD_STOP");
 assert.equal(evaluateRecoveryV8PositionBar(position(), row({ referenceTs: 1_000_000 + 24 * HOUR, high: 107, low: 100 })).kind, "NONE");
 
+// Forced recovery may re-enter at a different venue price. Exit logic must remain on the original strategy basis.
+const restoredNoTrail = position({ entryPrice: 105, logicalEntryPrice: 100, highWaterMark: 100 });
+assert.equal(evaluateRecoveryV8PositionBar(restoredNoTrail, row({ referenceTs: 1_000_000 + 23 * HOUR, high: 100, low: 97 })).kind, "NONE", "logical 6% hard stop is 94, not 98.7 from the recovery fill");
+const restored = position({ entryPrice: 105, logicalEntryPrice: 100, highWaterMark: 107 });
+const restoredTrailing = evaluateRecoveryV8PositionBar(restored, row({ referenceTs: 1_000_000 + 23 * HOUR, high: 107, low: 103.7 }));
+assert.equal(restoredTrailing.kind, "TRAILING_STOP", "logical entry must activate trailing after +6% even when the recovery execution price is higher");
+assert.ok(Math.abs((restoredTrailing.stopPrice || 0) - 103.79) < 1e-9);
+
 async function stateRoundTrip() {
     const directory = await mkdtemp(join(tmpdir(), "disdex-recovery-v8-"));
     const store = new FilePenguDualLsV2RunnerStateStore(join(directory, "runner.json"), "PAPER");
@@ -123,6 +131,12 @@ async function stateRoundTrip() {
                 side: 1 as const,
                 entryTs: 1_000_000,
                 entryPrice: 100,
+                logicalEntryPrice: 95,
+                recoveryExecutionPrice: 100,
+                recoveryExecutionTs: 1_500_000,
+                recoveryOrderId: 12345,
+                recoveryClientOrderId: "rec-v8-restore-test",
+                recoveredFromOriginalQuantity: 1,
                 quantity: 0.5,
                 originalQuantity: 1,
                 originalGross: 0.5,
@@ -150,6 +164,9 @@ async function stateRoundTrip() {
     assert.equal(loaded.position?.recoveryV8?.partialDefenseTriggered, true);
     assert.equal(loaded.position?.recoveryV8?.remainingGross, 0.25);
     assert.equal(loaded.position?.recoveryV8?.partialStopClientOrderId, "recv8-partial");
+    assert.equal(loaded.position?.recoveryV8?.logicalEntryPrice, 95);
+    assert.equal(loaded.position?.recoveryV8?.recoveryExecutionPrice, 100);
+    assert.equal(loaded.position?.recoveryV8?.recoveredFromOriginalQuantity, 1);
 
     const invalidPath = join(directory, "invalid.json");
     await writeFile(invalidPath, `${JSON.stringify({ ...state, position: { ...state.position, recoveryV8: { ...state.position.recoveryV8, partialDefenseTriggered: true, remainingGross: 0.5, actualPartialFill: undefined } } })}\n`, "utf8");

@@ -83,7 +83,10 @@ function assertAsterPosition(state: PenguDualLsV2RunnerState, rows: Array<Record
     if (finite(row.leverage, "POSITION_LEVERAGE") !== 5) throw new Error("PENGU_RECOVERY_V8_RECONCILE_LEVERAGE_MISMATCH");
     const marginType = String(row.marginType || "").toLowerCase();
     if (marginType !== "cross" && marginType !== "crossed") throw new Error("PENGU_RECOVERY_V8_RECONCILE_MARGIN_TYPE_MISMATCH");
-    if (finite(row.markPrice, "POSITION_MARK_PRICE") <= recovery.entryPrice * (1 - PENGU_RECOVERY_V8.exit.hardStopPct)) {
+    const logicalEntryPrice = Number.isFinite(recovery.logicalEntryPrice) && Number(recovery.logicalEntryPrice) > 0
+        ? Number(recovery.logicalEntryPrice)
+        : recovery.entryPrice;
+    if (finite(row.markPrice, "POSITION_MARK_PRICE") <= logicalEntryPrice * (1 - PENGU_RECOVERY_V8.exit.hardStopPct)) {
         throw new Error("PENGU_RECOVERY_V8_RECONCILE_MARK_AT_OR_BELOW_HARD_STOP");
     }
 }
@@ -96,11 +99,14 @@ async function buildNormalizedPlan(client: AsterV3Client, state: PenguDualLsV2Ru
     const priceFilter = symbol.filters?.find((row) => row.filterType === "PRICE_FILTER");
     const quantityFilter = symbol.filters?.find((row) => row.filterType === "LOT_SIZE") || symbol.filters?.find((row) => row.filterType === "MARKET_LOT_SIZE");
     if (!priceFilter?.tickSize || !quantityFilter?.stepSize) throw new Error("PENGU_RECOVERY_V8_RECONCILE_VENUE_FILTERS_MISSING");
-    const rawPlan = buildRecoveryV8HardStopPlan({ symbol: SYMBOL, entryTs: recovery.entryTs, entryPrice: recovery.entryPrice, quantity: recovery.quantity });
+    const logicalEntryPrice = Number.isFinite(recovery.logicalEntryPrice) && Number(recovery.logicalEntryPrice) > 0
+        ? Number(recovery.logicalEntryPrice)
+        : recovery.entryPrice;
+    const rawPlan = buildRecoveryV8HardStopPlan({ symbol: SYMBOL, entryTs: recovery.entryTs, entryPrice: logicalEntryPrice, quantity: recovery.quantity });
     const quantity = Number(normalizeRecoveryV8OrderValue(rawPlan.quantity, quantityFilter.stepSize, symbol.quantityPrecision ?? 0));
     const stopPrice = Number(normalizeRecoveryV8OrderValue(rawPlan.stopPrice, priceFilter.tickSize, symbol.pricePrecision ?? 0));
     if (!equalWithin(quantity, recovery.quantity, 1e-9)) throw new Error("PENGU_RECOVERY_V8_RECONCILE_NORMALIZED_QUANTITY_MISMATCH");
-    if (!(stopPrice > 0 && stopPrice < recovery.entryPrice)) throw new Error("PENGU_RECOVERY_V8_RECONCILE_STOP_PRICE_INVALID");
+    if (!(stopPrice > 0 && stopPrice < logicalEntryPrice)) throw new Error("PENGU_RECOVERY_V8_RECONCILE_STOP_PRICE_INVALID");
     return { rawPlan, quantity, stopPrice };
 }
 

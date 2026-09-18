@@ -5,7 +5,8 @@ import { V12AsterLiveAdapter, type V12AsterLiveAdapterOptions } from "@/lib/v12-
 import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
-import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
+import type { DirectMarketQuote, DirectOpenOrder, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
+import { findRecoveryV8ManagedProtectiveOrders } from "@/lib/pengu-recovery-v8-protective-orders";
 
 const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const EPSILON = 1e-9;
@@ -109,6 +110,14 @@ function toStrictPosition(position: DirectPosition, now: number, quality102Owner
     };
 }
 
+export function strictPortfolioConflictingOpenOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): DirectOpenOrder[] {
+    const managedPenguProtection = new Set(findRecoveryV8ManagedProtectiveOrders(openOrders, positions));
+    return openOrders.filter((order) => !managedPenguProtection.has(order));
+}
+
 export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
     constructor(client: AsterV3Client, options: V12AsterLiveAdapterOptions = {}) {
         super(client, options);
@@ -133,7 +142,8 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             throw new Error("STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
         }
         const openOrders = await this.getOpenOrders();
-        if (openOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
+        const conflictingOpenOrders = strictPortfolioConflictingOpenOrders(openOrders, positions);
+        if (conflictingOpenOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
         let workingAccount = account;
         let workingPositions = positions;
         let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });

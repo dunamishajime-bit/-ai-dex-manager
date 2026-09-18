@@ -15,7 +15,7 @@ import {
 } from "../lib/pengu-dual-ls-v2";
 import { MemoryLiveRunnerLock } from "../lib/live-runner-state";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
-import { PenguDualLsV2PortfolioRunner, normalizedPositionGross } from "../lib/pengu-dual-ls-v2-portfolio-runner";
+import { PenguDualLsV2PortfolioRunner, classifyPenguOpenOrders, normalizedPositionGross } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { MemoryPenguDualLsV2RunnerStateStore, createPenguDualLsV2RunnerState } from "../lib/pengu-dual-ls-v2-runner-state";
 import {
     advancePenguShortV20,
@@ -201,6 +201,20 @@ assert.equal(state.pending, undefined);
 assert.equal(state.position, undefined);
 assert.equal(normalizedPositionGross([{ symbol: "BTCUSDT", quantity: 1, entryPrice: 100, markPrice: 100, unrealizedPnl: 0, pnlPct: 0, positionSide: "LONG", leverage: 5, notionalUsd: 100, updatedAt: 0 }], 1_000), 0.1);
 assert.equal(normalizedPositionGross([], 0), Number.POSITIVE_INFINITY);
+
+const livePenguPosition = { symbol: "PENGUUSDT", quantity: 4244, entryPrice: 0.007256, markPrice: 0.0075, unrealizedPnl: 0, pnlPct: 0, positionSide: "BOTH" as const, leverage: 5, notionalUsd: 31.8, updatedAt: Date.now() };
+const liveRecovery = {
+    version: "RECOVERY_V8" as const, side: 1 as const, entryTs: 1, entryPrice: 0.007256, logicalEntryPrice: 0.006938,
+    quantity: 4244, originalQuantity: 4244, originalGross: 0.5, remainingGross: 0.5, partialDefenseTriggered: false,
+    highWaterMark: 0.00760708, protectionLifecycle: "SPLIT_PROTECTION" as const,
+    partialStopClientOrderId: "recv8-1b00e3de1d7092ef238ff60fe6eafa", remainingHardStopClientOrderId: "recv8-20b3c3a02e5a07d1d79c5f7761eff1",
+};
+const liveProtection = [
+    { symbol: "PENGUUSDT", clientOrderId: liveRecovery.remainingHardStopClientOrderId, side: "SELL" as const, status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+    { symbol: "PENGUUSDT", clientOrderId: liveRecovery.partialStopClientOrderId, side: "SELL" as const, status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+];
+assert.equal(classifyPenguOpenOrders({ openOrders: liveProtection, positions: [livePenguPosition], recoveryV8: liveRecovery }).conflicting.length, 0, "verified Recovery V8 protection must not block PENGU signal/exit evaluation");
+assert.equal(classifyPenguOpenOrders({ openOrders: [...liveProtection, { ...liveProtection[0], clientOrderId: "manual-order" }], positions: [livePenguPosition], recoveryV8: liveRecovery }).conflicting.length, 1, "unmanaged orders must still fail closed");
 
 const historyRows = Array.from({ length: 200 }, (_, index) => ({
     openTime: (index + 1) * HOUR,

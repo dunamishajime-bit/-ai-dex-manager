@@ -16,6 +16,6 @@ const plan = planStrictPortfolio({
     signalTs: 1_000, requestedGross: contract.requestedGross } as any],
 });
 assert.equal(plan.status, "planned");
-assert.equal(plan.accepted[0]?.gross, 0.75);
+assert.equal(plan.accepted[0]?.gross, 0.85);
 assert.equal((plan.accepted[0] as any)?.requestedGross, 0.9375);
 console.log("PENGU_V8_GROSS_CONTRACT_SELFTEST_PASS");
