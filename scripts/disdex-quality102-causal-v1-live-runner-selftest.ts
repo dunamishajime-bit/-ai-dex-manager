@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 
 import { AsterV3Client } from "../lib/aster-v3-client";
+import type { DirectOpenOrder, DirectPosition } from "../lib/direct-trade-executor";
 import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality102-causal-v1-market-data";
 import {
     assertQuality102CausalV1LiveActivation,
     assertQuality102CausalV1ReadOnlyPreflightConfiguration,
+    findQ102PreflightManagedProtectiveOrders,
+    isQ102PreflightManagedProtectiveOrder,
     parseQuality102CausalV1Symbols,
     resolveQuality102CausalV1LiveConfig,
     shouldRunQuality102CausalV1PreflightHistoryCheck,
@@ -41,6 +44,40 @@ assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, QUAL
 assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, PREFLIGHT_HISTORY_CHECK: "false" }), false);
 assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, selectorMode: "HISTORICAL_FROZEN" }, baseEnv), /SELECTOR_MODE_ACK/);
 assert.throws(() => assertQuality102CausalV1LiveActivation({ ...config, runtimeCommitSha: "" }, baseEnv), /COMMIT_SHA_REQUIRED/);
+
+const penguLongPosition: DirectPosition = {
+    symbol: "PENGUUSDT",
+    quantity: 4244,
+    entryPrice: 0.007256,
+    markPrice: 0.00736,
+    unrealizedPnl: 0,
+    pnlPct: 0,
+    notionalUsd: 31.24,
+    positionSide: "BOTH",
+    leverage: 5,
+    updatedAt: Date.now(),
+};
+const splitProtectiveOrders: DirectOpenOrder[] = [
+    { symbol: "PENGUUSDT", clientOrderId: "recv8-20b3c3a02e5a07d1d79c5f7761eff1", side: "SELL", status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+    { symbol: "PENGUUSDT", clientOrderId: "recv8-1b00e3de1d7092ef238ff60fe6eafa", side: "SELL", status: "NEW", reduceOnly: true, quantity: 2122, executedQuantity: 0 },
+];
+assert.equal(isQ102PreflightManagedProtectiveOrder(splitProtectiveOrders[0], [penguLongPosition]), false);
+assert.deepEqual(
+    findQ102PreflightManagedProtectiveOrders(splitProtectiveOrders, [penguLongPosition]).map((order) => order.clientOrderId),
+    splitProtectiveOrders.map((order) => order.clientOrderId),
+);
+assert.equal(findQ102PreflightManagedProtectiveOrders([
+    { ...splitProtectiveOrders[0], quantity: 2000 },
+    { ...splitProtectiveOrders[1], quantity: 2000 },
+], [penguLongPosition]).length, 0);
+assert.equal(findQ102PreflightManagedProtectiveOrders([
+    { ...splitProtectiveOrders[0], quantity: 2200 },
+    { ...splitProtectiveOrders[1], quantity: 2200 },
+], [penguLongPosition]).length, 0);
+assert.equal(findQ102PreflightManagedProtectiveOrders([
+    { ...splitProtectiveOrders[0], side: "BUY" },
+    splitProtectiveOrders[1],
+], [penguLongPosition]).length, 0);
 
 const preflightEnv: NodeJS.ProcessEnv = {
     ...baseEnv,
