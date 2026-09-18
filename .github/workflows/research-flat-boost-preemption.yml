@@ -10,6 +10,10 @@ permissions:
   contents: read
   actions: read
 
+concurrency:
+  group: flat-boost-preemption-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   baseline-gate:
     runs-on: ubuntu-24.04
@@ -39,11 +43,6 @@ jobs:
           path: .stock-research/.v13
           fetch-depth: 1
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -63,8 +62,6 @@ jobs:
             current-v12-top2-pengu-v20-v52-dca-
             aster-only-v52-v39cache-
             perp-research-usdm-
-
-      - run: npm ci
 
       - name: Restore frozen V12 and PENGU ledgers
         uses: actions/download-artifact@v4
