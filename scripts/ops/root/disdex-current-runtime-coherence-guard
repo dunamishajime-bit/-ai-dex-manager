@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+TRADING_ROOT="${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}"
+TRADING_RELEASES="${TRADING_ROOT}/releases"
+TRADING_CURRENT="${TRADING_ROOT}/current"
+RUNTIME_ENV_DIR="/etc/disdex/current-runtime"
+HEALTH_DROPIN="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzzzzzzzzz-current-release.conf"
+WATCHDOG_DROPIN="/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzz-current-release.conf"
+
+FAMILIES=(
+  "disdex-v12-x1-all"
+  "disdex-pengu-dual-ls-v2"
+  "disdex-quality102-causal-v1"
+  "disdex-v52-aster-only"
+  "disdex-shared-crypto-risk"
+  "disdex-v12-v52-margin-guard"
+)
+
+usage() {
+  printf '%s\n' 'Usage: disdex-current-runtime-coherence-guard [--check|--repair|--auto]'
+}
+resolve_current() {
+  [[ -L "$TRADING_CURRENT" ]] || { echo "current symlink missing" >&2; return 1; }
+  CURRENT_RELEASE="$(readlink -f -- "$TRADING_CURRENT")"
+  [[ "$CURRENT_RELEASE" == "$TRADING_RELEASES"/* ]] || { echo "current outside release root" >&2; return 1; }
+  DEPLOYED_SHA="$(basename -- "$CURRENT_RELEASE")"
+  [[ "$DEPLOYED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "current is not exact SHA" >&2; return 1; }
+  [[ "$(tr -d '[:space:]' < "$CURRENT_RELEASE/.disdex-release-sha")" == "$DEPLOYED_SHA" ]] || {
+    echo "current release marker mismatch" >&2
+    return 1
+  }
+  HEALTH_ENV="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.health-snapshot.env"
+  WATCHDOG_ENV="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.watchdog.env"
+  CURRENT_UNITS=()
+  local family
+  for family in "${FAMILIES[@]}"; do
+    CURRENT_UNITS+=("${family}@${DEPLOYED_SHA}.service")
+  done
+}
+
+verify_current_units_active() {
+  local unit pid cwd
+  for unit in "${CURRENT_UNITS[@]}"; do
+    [[ "$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)" == "loaded" ]] || return 1
+    [[ "$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)" == "active" ]] || return 1
+    pid="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+    [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 1
+    cwd="$(readlink -f -- "/proc/$pid/cwd" 2>/dev/null || true)"
+    [[ "$cwd" == "$CURRENT_RELEASE" ]] || return 1
+  done
+}
+
+list_stale_noninactive_units() {
+  local unit load active sub rest
+  while read -r unit load active sub rest; do
+    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
+    [[ "${BASH_REMATCH[2]}" == "$DEPLOYED_SHA" ]] && continue
+    [[ "$active" == "inactive" || "$active" == "failed" ]] && continue
+    printf '%s\n' "$unit"
+  done < <(systemctl list-units --all --type=service --no-legend 2>/dev/null || true)
+}
+
+list_stale_enabled_units() {
+  local unit state preset
+  while read -r unit state preset; do
+    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
+    [[ "${BASH_REMATCH[2]}" == "$DEPLOYED_SHA" ]] && continue
+    [[ "$state" == "enabled" ]] || continue
+    printf '%s\n' "$unit"
+  done < <(systemctl list-unit-files --type=service --no-legend 2>/dev/null || true)
+}
+
+verify_current_units_enabled() {
+  local unit
+  for unit in "${CURRENT_UNITS[@]}"; do
+    [[ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "enabled" ]] || return 1
+  done
+}
+
+monitor_pins_current() {
+  [[ -f "$HEALTH_ENV" && -f "$WATCHDOG_ENV" && -f "$HEALTH_DROPIN" && -f "$WATCHDOG_DROPIN" ]] || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=$DEPLOYED_SHA" "$HEALTH_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_EXPECTED_SHA=$DEPLOYED_SHA" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_APPROVED_SHA=$DEPLOYED_SHA" "$WATCHDOG_ENV" || return 1
+  local sleeve
+  for sleeve in V12 PENGU V52 Q102; do
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_${sleeve}_EXPECTED_SHA=$DEPLOYED_SHA" "$HEALTH_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_${sleeve}_EXPECTED_SHA=$DEPLOYED_SHA" "$WATCHDOG_ENV" || return 1
+  done
+  grep -Fq "EnvironmentFile=$HEALTH_ENV" "$HEALTH_DROPIN" || return 1
+  grep -Fq "WorkingDirectory=$CURRENT_RELEASE" "$HEALTH_DROPIN" || return 1
+  grep -Fq "EnvironmentFile=$WATCHDOG_ENV" "$WATCHDOG_DROPIN" || return 1
+  grep -Fq "WorkingDirectory=$CURRENT_RELEASE" "$WATCHDOG_DROPIN" || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=disdex-shared-crypto-risk@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=disdex-v12-v52-margin-guard@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
+}
+
+heartbeat_identity_current() {
+  python3 - "$DEPLOYED_SHA" <<'PY'
+import json, pathlib, sys
+sha=sys.argv[1]
+files=[
+ pathlib.Path("/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json"),
+ pathlib.Path("/var/lib/disdex/runner-health/heartbeats/pengu-v8.json"),
+ pathlib.Path("/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json"),
+ pathlib.Path("/var/lib/disdex/runner-health/heartbeats/v52.json"),
+]
+for path in files:
+    if not path.is_file():
+        raise SystemExit(1)
+    data=json.loads(path.read_text())
+    if data.get("runtimeSha") != sha or data.get("expectedSha") != sha:
+        raise SystemExit(1)
+    if not str(data.get("serviceUnit","")).endswith(f"@{sha}.service"):
+        raise SystemExit(1)
+raise SystemExit(0)
+PY
+}
+check_coherent() {
+  verify_current_units_active || return 1
+  verify_current_units_enabled || return 1
+  monitor_pins_current || return 1
+  [[ -z "$(list_stale_noninactive_units)" ]] || return 1
+  [[ -z "$(list_stale_enabled_units)" ]] || return 1
+  heartbeat_identity_current || return 1
+  return 0
+}
+
+retire_stale_units() {
+  local unit
+  mapfile -t stale < <(list_stale_noninactive_units)
+  for unit in "${stale[@]}"; do
+    systemctl disable "$unit" >/dev/null 2>&1 || true
+    systemctl stop "$unit"
+    systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+    printf 'DISDEX_COHERENCE_RETIRED_STALE unit=%s\n' "$unit"
+  done
+  mapfile -t stale_enabled < <(list_stale_enabled_units)
+  for unit in "${stale_enabled[@]}"; do
+    systemctl disable "$unit" >/dev/null 2>&1 || true
+    printf 'DISDEX_COHERENCE_DISABLED_STALE unit=%s\n' "$unit"
+  done
+}
+
+enable_current_units() {
+  local unit
+  for unit in "${CURRENT_UNITS[@]}"; do
+    systemctl enable "$unit" >/dev/null
+  done
+}
+
+repair_coherence() {
+  [[ "$(id -u)" == "0" ]] || { echo "repair requires root" >&2; return 1; }
+  if ! verify_current_units_active; then
+    return 20
+  fi
+  "$CURRENT_RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply
+  enable_current_units
+  retire_stale_units
+  systemctl daemon-reload
+  systemctl reset-failed disdex-runner-health-snapshot.service disdex-runner-watchdog.service >/dev/null 2>&1 || true
+  systemctl start disdex-runner-health-snapshot.service
+  systemctl start disdex-runner-watchdog.service
+  sleep 1
+  check_coherent
+  printf 'DISDEX_CURRENT_RUNTIME_COHERENCE_REPAIRED sha=%s\n' "$DEPLOYED_SHA"
+}
+
+main() {
+  local mode="${1:---check}"
+  resolve_current
+  case "$mode" in
+    --check)
+      if check_coherent; then
+        printf 'DISDEX_CURRENT_RUNTIME_COHERENCE_PASS sha=%s\n' "$DEPLOYED_SHA"
+      else
+        printf 'DISDEX_CURRENT_RUNTIME_COHERENCE_DRIFT sha=%s\n' "$DEPLOYED_SHA" >&2
+        exit 1
+      fi
+      ;;
+    --repair)
+      repair_coherence
+      ;;
+    --auto)
+      if check_coherent; then
+        printf 'DISDEX_CURRENT_RUNTIME_COHERENCE_PASS sha=%s\n' "$DEPLOYED_SHA"
+        exit 0
+      fi
+      if ! verify_current_units_active; then
+        printf 'DISDEX_CURRENT_RUNTIME_COHERENCE_DEFERRED sha=%s reason=current-units-not-fully-active\n' "$DEPLOYED_SHA"
+        exit 0
+      fi
+      repair_coherence
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+}
+
+main "$@"

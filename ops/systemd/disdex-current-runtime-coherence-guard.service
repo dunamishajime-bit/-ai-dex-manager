@@ -1,0 +1,10 @@
+[Unit]
+Description=DisDex current runtime coherence guard
+After=local-fs.target network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/sbin/disdex-current-runtime-coherence-guard --auto
+Nice=10

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run DisDex current runtime coherence guard every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=1min
+AccuracySec=10s
+Persistent=true
+Unit=disdex-current-runtime-coherence-guard.service
+
+[Install]
+WantedBy=timers.target
