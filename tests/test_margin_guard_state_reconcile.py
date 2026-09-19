@@ -183,34 +183,37 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
             )
         self.assertEqual(self.paths["v12"].read_bytes(), before)
 
-    def test_persisted_fill_evidence_recovers_after_process_restart(self):
-        self.write("pengu", {"version": 2, "strategyId": "PENGU_DUAL_LS_V2_FINAL", "mode": "LIVE", "updatedAt": 1, "failures": []})
-        self.write("q102", {"version": 1, "strategyId": "QUALITY102_CAUSAL_V1", "mode": "LIVE", "runtimeCommitSha": "a" * 40, "updatedAt": 1, "failures": []})
-        self.write("v52", {"schemaVersion": 3, "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96", "updatedAt": 1, "positions": {}})
+    def test_margin_guard_records_fill_evidence_without_mutating_strategy_state(self):
         kill = {
-            "active": True, "action": "FLATTEN_MANAGED", "activatedAt": "2026-09-19T05:00:00Z",
+            "active": True,
+            "action": "FLATTEN_MANAGED",
+            "activatedAt": "2026-09-19T05:00:00Z",
             "reason": "Margin Guard test",
         }
         self.write("kill", kill)
         evidence_path = self.paths["guard_root"] / "emergency-flatten-evidence.json"
-        evidence_path.write_text(json.dumps({
-            "schemaVersion": 1,
-            "strategyId": margin_guard.STRATEGY_ID,
-            "status": "PENDING_STATE_RECONCILIATION",
-            "killActivatedAt": kill["activatedAt"],
-            "killReason": kill["reason"],
-            "fillResults": [{"symbol": "LINKUSDT", "side": "SELL", "status": "FILLED", "executedQty": "2"}],
-        }), encoding="utf-8")
+        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52")}
         guard = object.__new__(margin_guard.MarginGuard)
         guard.state_root = self.paths["guard_root"]
         guard.emergency_evidence_path = evidence_path
         guard.kill_switch_path = self.paths["kill"]
-        with patch.dict(os.environ, self.env, clear=False), patch.object(margin_guard.base, "ASTER_SYMBOL", self.stock_map):
-            result = guard.reconcile_emergency_flatten_state({"fillResults": [], "remainingManagedPositions": []})
-        self.assertEqual(result["modifiedStrategies"], ["V12"])
+
+        result = guard.record_emergency_flatten_evidence({
+            "fillResults": [
+                {"symbol": "LINKUSDT", "side": "SELL", "status": "FILLED", "executedQty": "2"},
+            ],
+            "remainingManagedPositions": [],
+        })
+
+        self.assertEqual(result["status"], "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION")
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-        self.assertEqual(evidence["status"], "RECONCILED")
-        self.assertNotIn("activePositions", self.read("v12"))
+        self.assertEqual(evidence["schemaVersion"], 2)
+        self.assertEqual(evidence["status"], "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION")
+        self.assertEqual(evidence["killActivatedAt"], kill["activatedAt"])
+        self.assertEqual(evidence["killReason"], kill["reason"])
+        self.assertIsNone(evidence["stateReconciliation"])
+        for key, raw in before.items():
+            self.assertEqual(self.paths[key].read_bytes(), raw)
 
     def test_clean_flat_state_and_no_fills_is_idempotent(self):
         self.write("v12", {"schema": "v12-x1-all-runner-state/v2", "strategyId": "V12_X1.00_ALL", "mode": "LIVE", "updatedAt": 1})

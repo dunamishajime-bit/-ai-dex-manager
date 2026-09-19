@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import shutil
@@ -377,3 +378,75 @@ def reconcile_emergency_flatten_states(
         "modifiedStrategies": modified,
         "backups": backups,
     }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--evidence-path")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--ack")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+
+    if args.self_test:
+        assert _normalized_symbol("linkusdt") == "LINKUSDT"
+        assert _aggregate_fills([
+            {"symbol": "LINKUSDT", "side": "SELL", "status": "FILLED", "executedQty": "1.25"},
+            {"symbol": "LINKUSDT", "side": "SELL", "status": "PARTIALLY_FILLED", "executedQty": "0.75"},
+        ])["LINKUSDT"]["quantity"] == 2.0
+        print("MARGIN_GUARD_STATE_RECONCILE_SELFTEST_PASS")
+        return 0
+
+    if not args.apply or args.ack != "I_ACK_MARGIN_GUARD_STATE_RECONCILIATION":
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EXPLICIT_APPLY_ACK_REQUIRED")
+    if not args.evidence_path:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_PATH_REQUIRED")
+
+    evidence_path = Path(args.evidence_path).resolve()
+    evidence = _read_object(evidence_path)
+    if evidence is None:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_MISSING")
+    if evidence.get("status") == "RECONCILED":
+        reconciled = evidence.get("stateReconciliation")
+        if isinstance(reconciled, dict) and reconciled.get("status") == "PASS":
+            print(json.dumps({
+                "status": "MARGIN_GUARD_STATE_RECONCILIATION_ALREADY_PASS",
+                "stateReconciliation": reconciled,
+            }, separators=(",", ":")))
+            return 0
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_RECONCILED_WITHOUT_PASS")
+    if evidence.get("status") != "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION":
+        raise EmergencyStateReconcileError(
+            f"STATE_RECONCILIATION_EVIDENCE_STATUS_INVALID:{evidence.get('status')}"
+        )
+    remaining = evidence.get("remainingManagedPositions")
+    if not isinstance(remaining, list) or remaining:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_EVIDENCE_REMAINING_POSITIONS")
+    fill_results = evidence.get("fillResults")
+    if not isinstance(fill_results, list) or not fill_results:
+        raise EmergencyStateReconcileError("STATE_RECONCILIATION_FILL_EVIDENCE_MISSING")
+
+    import disdex_v13d_v11eq_stock_live_engine as stock_base
+
+    result = reconcile_emergency_flatten_states(
+        fill_results,
+        env=os.environ,
+        stock_symbol_map=stock_base.ASTER_SYMBOL,
+        now_ms=int(time.time() * 1000),
+    )
+    print(json.dumps({
+        "status": "MARGIN_GUARD_STATE_RECONCILIATION_PASS",
+        "stateReconciliation": result,
+    }, ensure_ascii=False, separators=(",", ":")))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except EmergencyStateReconcileError as error:
+        print(json.dumps({
+            "status": "MARGIN_GUARD_STATE_RECONCILIATION_FAIL_CLOSED",
+            "message": str(error),
+        }, ensure_ascii=False, separators=(",", ":")))
+        raise SystemExit(1)

@@ -60,7 +60,7 @@ class SerializedMarginGuard(MarginGuard):
                     "cancelSent": False,
                     "positionChangesSent": False,
                 }
-                result["stateReconciliation"] = self.reconcile_emergency_flatten_state(result)
+                result["emergencyEvidence"] = self.record_emergency_flatten_evidence(result)
                 return result
 
             cancel_requests = 0
@@ -165,7 +165,7 @@ class SerializedMarginGuard(MarginGuard):
                     "Serialized Margin Guard emergency flatten left managed positions: "
                     + ",".join(str(row.get("symbol") or "") for row in remaining)
                 )
-            result["stateReconciliation"] = self.reconcile_emergency_flatten_state(result)
+            result["emergencyEvidence"] = self.record_emergency_flatten_evidence(result)
             return result
         finally:
             fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)

@@ -125,17 +125,21 @@ async function main() {
 
   const marginRoot = resolve(process.env.DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR || "/var/lib/disdex/shared/margin-risk");
   const evidencePath = resolve(marginRoot, "emergency-flatten-evidence.json");
-  const evidence = JSON.parse(await readFile(evidencePath, "utf8")) as Record<string, unknown>;
-  if (evidence.status !== "RECONCILED") throw new Error(`MARGIN_GUARD_RECOVERY_EVIDENCE_NOT_RECONCILED:${String(evidence.status || "UNKNOWN")}`);
+  let evidence = JSON.parse(await readFile(evidencePath, "utf8")) as Record<string, unknown>;
   if (String(evidence.killActivatedAt || "") !== activatedAt || String(evidence.killReason || "") !== reason) {
     throw new Error("MARGIN_GUARD_RECOVERY_EVIDENCE_KILL_IDENTITY_MISMATCH");
   }
-  const reconciliation = evidence.stateReconciliation as Record<string, unknown> | undefined;
-  if (!reconciliation || reconciliation.status !== "PASS") throw new Error("MARGIN_GUARD_RECOVERY_STATE_RECONCILIATION_NOT_PASS");
+  if (evidence.status !== "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION" && evidence.status !== "RECONCILED") {
+    throw new Error(`MARGIN_GUARD_RECOVERY_EVIDENCE_STATUS_INVALID:${String(evidence.status || "UNKNOWN")}`);
+  }
   const fills = Array.isArray(evidence.fillResults) ? evidence.fillResults : [];
   if (!fills.length) throw new Error("MARGIN_GUARD_RECOVERY_FILL_EVIDENCE_MISSING");
   const remaining = Array.isArray(evidence.remainingManagedPositions) ? evidence.remainingManagedPositions : [];
   if (remaining.length) throw new Error("MARGIN_GUARD_RECOVERY_EVIDENCE_REMAINING_POSITIONS");
+  let reconciliation = evidence.stateReconciliation as Record<string, unknown> | undefined;
+  if (evidence.status === "RECONCILED" && (!reconciliation || reconciliation.status !== "PASS")) {
+    throw new Error("MARGIN_GUARD_RECOVERY_STATE_RECONCILIATION_NOT_PASS");
+  }
 
   const risk = await readSharedCryptoDailyRisk(runtime.riskPath);
   if (!risk.ok) throw new Error(`MARGIN_GUARD_RECOVERY_SHARED_RISK_NOT_READY:${risk.reason}`);
@@ -192,7 +196,8 @@ async function main() {
         killSwitchActive: true,
         reason,
         evidenceStatus: evidence.status,
-        reconciliationStatus: reconciliation.status,
+        reconciliationStatus: reconciliation?.status || "PENDING_STATE_RECONCILIATION",
+        reconciliationRequired: evidence.status !== "RECONCILED",
         marginStage: marginState.stage,
         sharedRiskReady: true,
         ...gate,
@@ -201,6 +206,60 @@ async function main() {
         positionChangesSent: false,
       }));
       return;
+    }
+
+    if (evidence.status !== "RECONCILED") {
+      const stateReconcile = spawnSync(
+        "/usr/bin/python3",
+        [
+          "scripts/disdex_margin_guard_state_reconcile.py",
+          "--evidence-path", evidencePath,
+          "--apply",
+          "--ack", "I_ACK_MARGIN_GUARD_STATE_RECONCILIATION",
+        ],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            PYTHONPATH: `${resolve(process.cwd(), "scripts")}:${marginPythonPath}${process.env.PYTHONPATH ? `:${process.env.PYTHONPATH}` : ""}`,
+          },
+          encoding: "utf8",
+          timeout: 30_000,
+        },
+      );
+      if (stateReconcile.status !== 0) {
+        throw new Error(`MARGIN_GUARD_RECOVERY_STATE_RECONCILIATION_FAILED:${String(stateReconcile.stderr || stateReconcile.stdout || "").slice(-900)}`);
+      }
+      const envelope = parseLastJson(String(stateReconcile.stdout || ""));
+      reconciliation = envelope.stateReconciliation as Record<string, unknown> | undefined;
+      if (!reconciliation || reconciliation.status !== "PASS") {
+        throw new Error("MARGIN_GUARD_RECOVERY_STATE_RECONCILIATION_NOT_PASS");
+      }
+      evidence = {
+        ...evidence,
+        status: "RECONCILED",
+        reconciledAt: new Date().toISOString(),
+        lastError: null,
+        stateReconciliation: reconciliation,
+      };
+      await atomicWritePreserveOwner(evidencePath, evidence);
+      const evidenceReadback = JSON.parse(await readFile(evidencePath, "utf8")) as Record<string, unknown>;
+      const readbackReconciliation = evidenceReadback.stateReconciliation as Record<string, unknown> | undefined;
+      if (
+        evidenceReadback.status !== "RECONCILED"
+        || String(evidenceReadback.killActivatedAt || "") !== activatedAt
+        || String(evidenceReadback.killReason || "") !== reason
+        || !readbackReconciliation
+        || readbackReconciliation.status !== "PASS"
+      ) {
+        throw new Error("MARGIN_GUARD_RECOVERY_EVIDENCE_RECONCILIATION_READBACK_FAILED");
+      }
+      evidence = evidenceReadback;
+      reconciliation = readbackReconciliation;
+    }
+
+    if (!reconciliation || reconciliation.status !== "PASS") {
+      throw new Error("MARGIN_GUARD_RECOVERY_STATE_RECONCILIATION_NOT_PASS");
     }
 
     const killArchive = await archive(kill.sourcePath, killBytes, requestId);

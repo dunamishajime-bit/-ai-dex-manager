@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 from pathlib import Path
 
@@ -79,6 +80,14 @@ def main() -> int:
         guard.client = FakeAsterClient()
         guard.state_root = Path(temporary)
         guard.emergency_lock_path = Path(temporary) / "emergency-flatten.lock"
+        guard.emergency_evidence_path = Path(temporary) / "emergency-flatten-evidence.json"
+        guard.kill_switch_path = Path(temporary) / "kill-switch.json"
+        guard.kill_switch_path.write_text(json.dumps({
+            "active": True,
+            "action": "FLATTEN_MANAGED",
+            "reason": "Margin Guard triggered pre-liquidation managed stop-loss: selftest",
+            "activatedAt": "2026-09-19T00:00:00Z",
+        }), encoding="utf-8")
         result = guard.emergency_flatten_managed({
             "stage": "REDUCE",
             "maintenanceMarginRatioPct": 65.0,
@@ -92,6 +101,10 @@ def main() -> int:
         assert result["cancelSent"] is True
         assert result["positionChangesSent"] is True
         assert result["remainingManagedPositions"] == []
+        assert result["emergencyEvidence"]["status"] == "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION"
+        evidence = json.loads(guard.emergency_evidence_path.read_text(encoding="utf-8"))
+        assert evidence["status"] == "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION"
+        assert evidence["stateReconciliation"] is None
         assert sorted(guard.client.canceled_symbols) == ["BTCUSDT", "METAUSDT"]
         assert all(order["reduceOnly"] == "true" for order in guard.client.orders)
         assert {order["side"] for order in guard.client.orders} == {"BUY", "SELL"}
@@ -104,6 +117,7 @@ def main() -> int:
         })
         assert second["status"] == "CONCURRENT_FLATTEN_ALREADY_COMPLETED"
         assert second["reduceOnlyOrdersSent"] == 0
+        assert second["emergencyEvidence"]["status"] == "FLATTEN_COMPLETE_PENDING_STATE_RECONCILIATION"
 
     print("V96/V52 serialized emergency reduce-only Margin Guard self-test: PASS")
     print("exposureIncreasingOrdersSent=false")
