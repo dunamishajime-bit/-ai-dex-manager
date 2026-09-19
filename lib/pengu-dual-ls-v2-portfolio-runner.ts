@@ -310,17 +310,32 @@ export class PenguDualLsV2PortfolioRunner {
         }
     }
 
-    private async sharedRiskReason() {
+    private async sharedRiskStatus(): Promise<{ reason: string; flattenExisting: boolean } | undefined> {
         if (this.dependencies.config.mode !== "LIVE") return undefined;
         const killSwitch = await readDisDexV96KillSwitch(this.dependencies.config.killSwitchPath);
-        if (killSwitch) return `Shared Kill Switch: ${killSwitch.reason}`;
+        if (killSwitch) {
+            return {
+                reason: `Shared Kill Switch: ${killSwitch.reason}`,
+                flattenExisting: killSwitch.action === "FLATTEN_MANAGED",
+            };
+        }
         const sharedPath = this.dependencies.config.portfolioDailyLossStatePath || process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH;
         if (sharedPath) {
             const validation = await readSharedCryptoDailyRisk(sharedPath);
-            if (!validation.ok) return `Shared crypto daily-risk state blocked PENGU entry: ${validation.reason}.`;
+            if (!validation.ok) {
+                return {
+                    reason: `Shared crypto daily-risk state blocked PENGU entry: ${validation.reason}.`,
+                    flattenExisting: validation.reason === "DAILY_LOSS_TRIPPED" || validation.state?.tripped === true,
+                };
+            }
         }
         const dailyLossTripped = await readPortfolioDailyLoss(this.dependencies.config.portfolioDailyLossStatePath);
-        if (dailyLossTripped) return `Shared crypto daily loss latch is active at ${this.dependencies.config.maximumDailyLossPct}%.`;
+        if (dailyLossTripped) {
+            return {
+                reason: `Shared crypto daily loss latch is active at ${this.dependencies.config.maximumDailyLossPct}%.`,
+                flattenExisting: true,
+            };
+        }
         return undefined;
     }
 
@@ -681,12 +696,12 @@ export class PenguDualLsV2PortfolioRunner {
             }
 
             const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
-            const sharedRisk = await this.sharedRiskReason();
-            const signal: PenguDualLsV2Signal = sharedRisk && state.position
+            const sharedRisk = await this.sharedRiskStatus();
+            const signal: PenguDualLsV2Signal = sharedRisk?.flattenExisting && state.position
                 ? {
                     ...baseSignal,
                     side: 0,
-                    reason: sharedRisk,
+                    reason: sharedRisk.reason,
                     exit: {
                         side: state.position.side,
                         reason: "SHARED_RISK_FLATTEN",
@@ -703,7 +718,15 @@ export class PenguDualLsV2PortfolioRunner {
                 : signal.side > 0 ? "BUY" : signal.side < 0 ? "SELL" : undefined;
             if (sharedRisk && !state.position) {
                 await this.dependencies.stateStore.save(state);
-                return { status: "held", message: `${sharedRisk} No PENGU position is open; new entries are blocked.`, signal };
+                return { status: "held", message: `${sharedRisk.reason} No PENGU position is open; new entries are blocked.`, signal };
+            }
+            if (sharedRisk && !sharedRisk.flattenExisting && state.position && !reduceOnly && side) {
+                await this.dependencies.stateStore.save(state);
+                return {
+                    status: "held",
+                    message: `${sharedRisk.reason} Existing protected PENGU position is retained; exposure-increasing orders are blocked during recovery grace.`,
+                    signal,
+                };
             }
             if (!side) {
                 await this.dependencies.stateStore.save(state);

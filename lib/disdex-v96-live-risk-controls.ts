@@ -26,10 +26,13 @@ export interface DisDexV96OperatorOverrideApproval {
 export interface DisDexV96KillSwitchCommand {
     active: boolean;
     strategyId: string;
-    action: "FLATTEN_MANAGED";
+    action: "HOLD_PROTECTED" | "FLATTEN_MANAGED";
     reason: string;
     operator: string;
     activatedAt: string;
+    graceStartedAt?: string;
+    graceDeadlineAt?: string;
+    recoverable?: boolean;
 }
 
 export interface DisDexV96DailyRiskState {
@@ -215,7 +218,7 @@ export async function readDisDexV96KillSwitch(path?: string): Promise<DisDexV96K
         const parsed = JSON.parse(await readFile(path, "utf8")) as Partial<DisDexV96KillSwitchCommand>;
         if (parsed.active !== true) return undefined;
         if (parsed.strategyId !== DISDEX_V96_STRATEGY_ID
-            || parsed.action !== "FLATTEN_MANAGED"
+            || !["HOLD_PROTECTED", "FLATTEN_MANAGED"].includes(String(parsed.action || ""))
             || !nonEmpty(parsed.reason)
             || !nonEmpty(parsed.operator)
             || !nonEmpty(parsed.activatedAt)) {

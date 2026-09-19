@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
+import tempfile
 import unittest
 from itertools import permutations
 from pathlib import Path
@@ -170,6 +172,125 @@ class DynamicManagedSymbolTest(unittest.TestCase):
             current = snapshot["minimumLiquidationBufferPct"]
             expected = current if expected is None else expected
             self.assertAlmostEqual(current, expected, places=12)
+
+
+    def test_recoverable_data_failure_holds_protected_positions_before_grace_expiry(self):
+        with tempfile.TemporaryDirectory(prefix="margin-guard-grace-") as temporary:
+            guard = object.__new__(margin_guard.MarginGuard)
+            guard.live = True
+            guard.mode = "live"
+            guard.state_root = Path(temporary)
+            guard.state_path = Path(temporary) / "guard-live.json"
+            guard.kill_switch_path = Path(temporary) / "kill-switch.json"
+            guard.state = {
+                "stage": "HEALTHY",
+                "ordersAllowed": True,
+                "consecutiveFailures": 1,
+                "activeManagedPositionCount": 1,
+                "ordersSent": False,
+                "cancelSent": False,
+                "positionChangesSent": False,
+            }
+            guard.recovery_grace_ms = lambda: 10 * 60_000
+            flatten_calls = []
+            guard.emergency_flatten_managed = lambda decision: flatten_calls.append(dict(decision)) or {
+                "ordersSent": True,
+                "cancelSent": True,
+                "positionChangesSent": True,
+            }
+
+            result = guard.handle_failure(RuntimeError("temporary authenticated API timeout"))
+            kill = json.loads(guard.kill_switch_path.read_text(encoding="utf-8"))
+            self.assertEqual(kill["action"], margin_guard.SOFT_HOLD_ACTION)
+            self.assertTrue(kill["recoverable"])
+            self.assertTrue(kill["graceDeadlineAt"])
+            self.assertEqual(result["action"], "BLOCK_NEW_ORDERS_KEEP_PROTECTED_POSITIONS_AND_RETRY")
+            self.assertTrue(result["recoveryGraceActive"])
+            self.assertEqual(flatten_calls, [])
+            self.assertFalse(result["ordersSent"])
+            self.assertFalse(result["positionChangesSent"])
+
+            self.assertTrue(guard.clear_recoverable_hold_if_owned("recovered"))
+            cleared = json.loads(guard.kill_switch_path.read_text(encoding="utf-8"))
+            self.assertFalse(cleared["active"])
+            self.assertEqual(cleared["action"], margin_guard.SOFT_HOLD_ACTION)
+
+    def test_recoverable_hold_escalates_only_after_grace_expiry(self):
+        with tempfile.TemporaryDirectory(prefix="margin-guard-expired-") as temporary:
+            guard = object.__new__(margin_guard.MarginGuard)
+            guard.live = True
+            guard.mode = "live"
+            guard.state_root = Path(temporary)
+            guard.state_path = Path(temporary) / "guard-live.json"
+            guard.kill_switch_path = Path(temporary) / "kill-switch.json"
+            guard.state = {
+                "stage": "DATA_UNAVAILABLE",
+                "ordersAllowed": False,
+                "consecutiveFailures": 2,
+                "activeManagedPositionCount": 1,
+                "ordersSent": False,
+                "cancelSent": False,
+                "positionChangesSent": False,
+            }
+            guard.recovery_grace_ms = lambda: 10 * 60_000
+            guard.kill_switch_path.write_text(json.dumps({
+                "active": True,
+                "strategyId": "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+                "combinedStrategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+                "action": margin_guard.SOFT_HOLD_ACTION,
+                "reason": "temporary failure",
+                "operator": margin_guard.MARGIN_GUARD_OPERATOR,
+                "activatedAt": "2026-09-19T00:00:00+00:00",
+                "recoverable": True,
+                "graceStartedAt": "2026-09-19T00:00:00+00:00",
+                "graceDeadlineAt": "2026-09-19T00:10:00+00:00",
+            }), encoding="utf-8")
+            flatten_calls = []
+            guard.emergency_flatten_managed = lambda decision: flatten_calls.append(dict(decision)) or {
+                "status": "PASS",
+                "ordersSent": True,
+                "cancelSent": True,
+                "positionChangesSent": True,
+            }
+
+            result = guard.handle_failure(RuntimeError("still unavailable"))
+            kill = json.loads(guard.kill_switch_path.read_text(encoding="utf-8"))
+            self.assertEqual(kill["action"], margin_guard.HARD_FLATTEN_ACTION)
+            self.assertEqual(kill.get("escalatedFrom"), margin_guard.SOFT_HOLD_ACTION)
+            self.assertEqual(len(flatten_calls), 1)
+            self.assertTrue(result["ordersSent"])
+            self.assertTrue(result["positionChangesSent"])
+
+    def test_hard_margin_stage_still_flattens_immediately(self):
+        with tempfile.TemporaryDirectory(prefix="margin-guard-hard-") as temporary:
+            guard = object.__new__(margin_guard.MarginGuard)
+            guard.live = True
+            guard.mode = "live"
+            guard.state_root = Path(temporary)
+            guard.state_path = Path(temporary) / "guard-live.json"
+            guard.kill_switch_path = Path(temporary) / "kill-switch.json"
+            guard.state = {
+                "stage": "REDUCE",
+                "ordersAllowed": False,
+                "consecutiveFailures": 0,
+                "activeManagedPositionCount": 1,
+                "ordersSent": False,
+                "cancelSent": False,
+                "positionChangesSent": False,
+            }
+            flatten_calls = []
+            guard.emergency_flatten_managed = lambda decision: flatten_calls.append(dict(decision)) or {
+                "status": "PASS",
+                "ordersSent": True,
+                "cancelSent": True,
+                "positionChangesSent": True,
+            }
+
+            result = guard.handle_failure(RuntimeError("risk data lost after REDUCE"))
+            kill = json.loads(guard.kill_switch_path.read_text(encoding="utf-8"))
+            self.assertEqual(kill["action"], margin_guard.HARD_FLATTEN_ACTION)
+            self.assertEqual(len(flatten_calls), 1)
+            self.assertTrue(result["ordersSent"])
 
     def test_zero_liquidation_isolated_or_missing_account_data_remains_fail_closed(self):
         base_row = {

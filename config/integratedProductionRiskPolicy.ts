@@ -29,6 +29,7 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   totalGrossCap: 3.5,
   cryptoDailyLossPct: 7.5,
   stockDailyLossPct: 3.5,
+  killSwitchRecoveryGraceMs: 10 * 60_000,
   requiredAsterLeverage: 5,
   requiredAsterMarginType: "cross" as const,
   v50: Object.freeze(v52V50Runtime),
@@ -53,6 +54,7 @@ export function resolveIntegratedProductionRiskPolicy(env: Record<string, string
     STOCK_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap,
     TOTAL_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
     DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoDailyLossPct,
+    DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS: INTEGRATED_PRODUCTION_RISK_POLICY.killSwitchRecoveryGraceMs,
   };
   for (const [name, value] of Object.entries(expected)) {
     const raw = env[name];

@@ -8,6 +8,7 @@ import math
 import os
 import shutil
 import signal
+import tempfile
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -179,6 +180,109 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
 
+    def _recovery_grace_ms(self) -> int:
+        return max(60_000, base.int_env("DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS", 10 * 60_000))
+
+    @staticmethod
+    def _kill_iso_ms(value: object) -> int:
+        text = str(value or "").strip()
+        if not text:
+            return 0
+        try:
+            parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=base.UTC)
+            return int(parsed.timestamp() * 1000)
+        except ValueError:
+            return 0
+
+    def kill_switch(self) -> Optional[dict]:
+        payload = base.read_json(self.kill_switch_path, None)
+        if not payload or payload.get("active") is not True:
+            return None
+        if payload.get("strategyId") != base.V96_KILL_SWITCH_STRATEGY_ID:
+            raise RuntimeError("Shared Kill Switch is active but invalid")
+        if payload.get("action") not in {"HOLD_PROTECTED", "FLATTEN_MANAGED"}:
+            raise RuntimeError("Shared Kill Switch action is invalid")
+        return payload
+
+    def activate_kill_switch(
+        self,
+        reason: str,
+        *,
+        action: str = "FLATTEN_MANAGED",
+        recoverable: bool = False,
+    ) -> None:
+        if action not in {"HOLD_PROTECTED", "FLATTEN_MANAGED"}:
+            raise RuntimeError(f"Unsupported V52 Kill Switch action: {action}")
+        existing = base.read_json(self.kill_switch_path, {}) or {}
+        if existing.get("active"):
+            if existing.get("action") == "FLATTEN_MANAGED":
+                return
+            if action == "HOLD_PROTECTED":
+                return
+        now = dt.datetime.now(tz=base.UTC)
+        payload = {
+            "active": True,
+            "strategyId": base.V96_KILL_SWITCH_STRATEGY_ID,
+            "action": action,
+            "reason": reason,
+            "operator": "disdex-v52-aster-only",
+            "activatedAt": str(existing.get("activatedAt") or now.isoformat()),
+            "recoverable": bool(recoverable and action == "HOLD_PROTECTED"),
+        }
+        if action == "HOLD_PROTECTED":
+            started = str(existing.get("graceStartedAt") or now.isoformat())
+            started_ms = self._kill_iso_ms(started) or int(now.timestamp() * 1000)
+            payload["graceStartedAt"] = started
+            payload["graceDeadlineAt"] = dt.datetime.fromtimestamp(
+                (started_ms + self._recovery_grace_ms()) / 1000,
+                tz=base.UTC,
+            ).isoformat()
+        elif existing.get("graceStartedAt"):
+            payload["graceStartedAt"] = existing.get("graceStartedAt")
+            payload["graceDeadlineAt"] = existing.get("graceDeadlineAt")
+            payload["escalatedFrom"] = "HOLD_PROTECTED"
+        base.atomic_write_json(self.kill_switch_path, payload)
+        self.log(
+            "kill-switch-activated",
+            action=action,
+            recoverable=payload.get("recoverable", False),
+            graceDeadlineAt=payload.get("graceDeadlineAt"),
+            reason=reason,
+        )
+
+    def _own_recoverable_hold(self) -> Optional[dict]:
+        kill = self.kill_switch()
+        if (
+            kill
+            and kill.get("action") == "HOLD_PROTECTED"
+            and kill.get("operator") == "disdex-v52-aster-only"
+        ):
+            return kill
+        return None
+
+    def _recoverable_hold_expired(self, kill: Optional[dict] = None) -> bool:
+        row = kill or self._own_recoverable_hold()
+        if not row:
+            return False
+        deadline = self._kill_iso_ms(row.get("graceDeadlineAt"))
+        return bool(deadline and base.now_ms() >= deadline)
+
+    def _clear_own_recoverable_hold(self, reason: str) -> None:
+        kill = self._own_recoverable_hold()
+        if not kill:
+            return
+        base.atomic_write_json(self.kill_switch_path, {
+            **kill,
+            "active": False,
+            "action": "HOLD_PROTECTED",
+            "recoverable": True,
+            "reason": reason,
+            "recoveredAt": dt.datetime.now(tz=base.UTC).isoformat(),
+        })
+        self.log("v52-recoverable-hold-cleared", reason=reason)
+
     def _migrate_state(self) -> None:
         positions = self.state.get("positions")
         if positions is not None and not isinstance(positions, dict):
@@ -226,8 +330,26 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def _hold_upstream_fail_closed(self, error: BaseException | str, phase: str) -> None:
         self._upstream_fail_closed_hold = True
         message = str(error)
+        hold = self._own_recoverable_hold()
+        if hold and self._recoverable_hold_expired(hold):
+            self.activate_kill_switch(
+                f"V52 recovery grace expired while upstream state remained unavailable: {message}",
+                action="FLATTEN_MANAGED",
+                recoverable=False,
+            )
+            self.log(
+                "v52-recovery-grace-escalated",
+                phase=phase,
+                error=message,
+                flattenDeferredUntilAccountLock=True,
+            )
+            return
         if not self.kill_switch():
-            self.activate_kill_switch(f"V52 upstream state unavailable: {message}")
+            self.activate_kill_switch(
+                f"V52 upstream state unavailable: {message}",
+                action="HOLD_PROTECTED",
+                recoverable=True,
+            )
         self.log("v52-upstream-state-fail-closed", phase=phase, error=message)
 
     @staticmethod
@@ -907,10 +1029,11 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         market_open = regular_us_equity_session(local)
         sec = base.ny_seconds(local)
         kill = self.kill_switch()
-        if kill:
+        if kill and kill.get("action") == "FLATTEN_MANAGED":
             completed = self._kill_flatten_completed(kill)
             return {"local": local, "rows": None, "skipWithoutLock": completed, "killHold": completed}
-        self._clear_kill_flatten_latch()
+        if not kill:
+            self._clear_kill_flatten_latch()
         if not market_open:
             return {"local": local, "rows": None, "skipWithoutLock": not positions_open}
         in_decision_window = base.clock("09:59:50") <= sec <= base.clock("15:30:30")
@@ -943,27 +1066,28 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             raise prepared["preloadError"]
         self.reset_days()
         kill = self.kill_switch()
-        if kill:
-            reason = str(kill.get("reason") or "KILL_SWITCH")
-            if self._upstream_fail_closed_hold or upstream_fail_closed_error(reason):
-                self._upstream_fail_closed_hold = True
-                self.log("v52-upstream-state-fail-closed", phase="KILL_SWITCH", error=reason)
-                return
+        soft_hold = bool(kill and kill.get("action") == "HOLD_PROTECTED")
+        if kill and kill.get("action") == "FLATTEN_MANAGED":
             self._flatten_kill_once(kill, "KILL_SWITCH")
             return
-        self._clear_kill_flatten_latch()
+        if not kill:
+            self._clear_kill_flatten_latch()
         if self.enforce_daily_loss():
             return
         if self.live:
             risk_path = os.getenv("DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH", ".runtime-state/shared/crypto-daily-risk.json")
             ok, reason, _ = read_shared_crypto_daily_risk(risk_path)
             if not ok:
+                soft_hold = True
                 self.log("v52-entry-held-shared-crypto-risk", reason=reason, path=risk_path)
-                return
+                if not self.positions():
+                    return
         daily_kill = self.kill_switch()
-        if daily_kill:
+        if daily_kill and daily_kill.get("action") == "FLATTEN_MANAGED":
             self._flatten_kill_once(daily_kill, "DAILY_LOSS")
             return
+        if daily_kill and daily_kill.get("action") == "HOLD_PROTECTED":
+            soft_hold = True
         local = prepared["local"] if prepared else self.current_local_time()
         if not regular_us_equity_session(local):
             self.log(
@@ -991,6 +1115,18 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             entry = base.clock(window + ":00")
             if entry - 10 <= sec < entry: self.capture_v50_signal(window, rows)
         self.manage_positions(rows)
+        if soft_hold:
+            own_hold = self._own_recoverable_hold()
+            if own_hold:
+                self._clear_own_recoverable_hold(
+                    "V52 recovered a successful managed-position tick within recovery grace; new entries remain held until the next tick."
+                )
+            else:
+                self.log(
+                    "v52-soft-hold-entry-blocked",
+                    reason=str((self.kill_switch() or {}).get("reason") or "SHARED_RISK_RECOVERY_GRACE"),
+                )
+            return
         if not self.state.get("v11Attempted") and base.clock("10:30:00") <= sec <= base.clock("10:30:20"):
             self.state["v11Attempted"] = True; self.save()
             gross, snapshot = self.available_slot_gross(V11_SLOT)
@@ -1028,7 +1164,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 raise RuntimeError("V52 state file missing for read-only preflight")
         else:
             self.state_root.mkdir(parents=True, exist_ok=True); self.save()
-        if self.kill_switch(): raise RuntimeError("Shared Kill Switch is active")
+        preflight_kill = self.kill_switch()
+        if preflight_kill and preflight_kill.get("action") == "FLATTEN_MANAGED":
+            raise RuntimeError("Shared hard Kill Switch is active")
         if self.state.get("pendingOrder"): raise RuntimeError("V52 pending order must be resolved before no-order preflight")
         document = self._quality102_document() if self.live else None
         if document is not None and document[1].get("pending") is not None:
@@ -1059,6 +1197,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         while not self.stop_requested:
             if self._upstream_fail_closed_hold:
                 time.sleep(max(1, base.int_env("DISDEX_V52_UPSTREAM_HOLD_SECONDS", 60)))
+                self._upstream_fail_closed_hold = False
                 continue
             started = base.now_ms()
             try:
@@ -1093,7 +1232,28 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     elif transient_reference_error(error) and not self.positions():
                         self.log("v52-entry-held-reference-validation", error=str(error))
                     elif self.live:
-                        self.activate_kill_switch(f"V52 fatal tick error: {error}"); self.flatten_all("FATAL_TICK_ERROR"); raise
+                        hold = self._own_recoverable_hold()
+                        if hold and self._recoverable_hold_expired(hold):
+                            self.activate_kill_switch(
+                                f"V52 recovery grace expired after repeated tick error: {error}",
+                                action="FLATTEN_MANAGED",
+                                recoverable=False,
+                            )
+                            self.flatten_all("RECOVERY_GRACE_EXPIRED")
+                            raise
+                        self.activate_kill_switch(
+                            f"V52 recoverable tick error: {error}",
+                            action="HOLD_PROTECTED",
+                            recoverable=True,
+                        )
+                        self._upstream_fail_closed_hold = True
+                        self.log(
+                            "v52-recoverable-error-hold",
+                            error=str(error),
+                            graceDeadlineAt=(self._own_recoverable_hold() or {}).get("graceDeadlineAt"),
+                            existingPositionsRetained=bool(self.positions()),
+                            newOrdersAllowed=False,
+                        )
                 finally:
                     self.lock.release()
             if not daemon: break
@@ -1122,6 +1282,41 @@ def self_test() -> None:
     assert transient_reference_error("iex_quote_stale META")
     assert transient_reference_error("cross_source_divergence TSLA")
     assert not transient_reference_error("Managed Stock position reconciliation mismatch")
+
+    with tempfile.TemporaryDirectory(prefix="v52-soft-hold-selftest-") as temporary:
+        hold_engine = object.__new__(V52AsterOnlyEngine)
+        hold_engine.kill_switch_path = Path(temporary) / "kill-switch.json"
+        hold_engine.log = lambda *_args, **_kwargs: None
+        hold_engine._recovery_grace_ms = lambda: 10 * 60_000
+        hold_engine.activate_kill_switch(
+            "temporary upstream error",
+            action="HOLD_PROTECTED",
+            recoverable=True,
+        )
+        soft = hold_engine.kill_switch()
+        assert soft is not None
+        assert soft["action"] == "HOLD_PROTECTED"
+        assert soft["recoverable"] is True
+        assert soft.get("graceDeadlineAt")
+        assert hold_engine._recoverable_hold_expired(soft) is False
+        hold_engine._clear_own_recoverable_hold("recovered")
+        assert hold_engine.kill_switch() is None
+
+        hold_engine.activate_kill_switch(
+            "temporary upstream error",
+            action="HOLD_PROTECTED",
+            recoverable=True,
+        )
+        hold_engine.activate_kill_switch(
+            "grace expired",
+            action="FLATTEN_MANAGED",
+            recoverable=False,
+        )
+        hard = hold_engine.kill_switch()
+        assert hard is not None
+        assert hard["action"] == "FLATTEN_MANAGED"
+        assert hard.get("escalatedFrom") == "HOLD_PROTECTED"
+
     print("V52 V11-EQ + V50 Aster-only live engine self-test: PASS")
 
 

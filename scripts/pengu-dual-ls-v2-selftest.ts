@@ -64,6 +64,16 @@ assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.85);
 const portfolioRunnerSource = readFileSync(resolve("lib/pengu-dual-ls-v2-portfolio-runner.ts"), "utf8");
 assert.match(
     portfolioRunnerSource,
+    /flattenExisting:\s*killSwitch\.action === "FLATTEN_MANAGED"/,
+    "PENGU shared Kill Switch must flatten existing positions only for the hard FLATTEN_MANAGED action",
+);
+assert.match(
+    portfolioRunnerSource,
+    /Existing protected PENGU position is retained; exposure-increasing orders are blocked during recovery grace/,
+    "PENGU HOLD_PROTECTED must retain the existing protected position and block new exposure",
+);
+assert.match(
+    portfolioRunnerSource,
     /getOpenOrders\(\),[\s\S]*?now = this\.now\(\);[\s\S]*?validLiveAccount\(account, now\)/,
     "PENGU must validate venue snapshots against a clock captured after the async account reads",
 );

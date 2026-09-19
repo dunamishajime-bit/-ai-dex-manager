@@ -26,6 +26,10 @@ DEFAULT_V12_STATE_PATH = "/var/lib/disdex/v12-x1-all/runner.json"
 DEFAULT_Q102_STATE_PATH = "/var/lib/disdex/quality102-causal-v1/state.json"
 EMERGENCY_FLATTEN_ATTEMPTS = 3
 EMERGENCY_RECONCILIATION_DELAY_SECONDS = 1.0
+DEFAULT_RECOVERY_GRACE_MS = 10 * 60_000
+SOFT_HOLD_ACTION = "HOLD_PROTECTED"
+HARD_FLATTEN_ACTION = "FLATTEN_MANAGED"
+MARGIN_GUARD_OPERATOR = "disdex-v96-v52-margin-guard"
 
 
 def normalized_margin_type(row: dict) -> str:
@@ -271,18 +275,56 @@ class MarginGuard:
             "remainingManagedPositionCount": 0,
         }
 
-    def activate_shared_kill_switch(self, reason: str, decision: dict) -> bool:
+    def recovery_grace_ms(self) -> int:
+        return max(60_000, base.int_env("DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS", DEFAULT_RECOVERY_GRACE_MS))
+
+    @staticmethod
+    def _iso_to_ms(value: object) -> int:
+        text = str(value or "").strip()
+        if not text:
+            return 0
+        try:
+            parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=dt.timezone.utc)
+            return int(parsed.timestamp() * 1000)
+        except ValueError:
+            return 0
+
+    def activate_shared_kill_switch(
+        self,
+        reason: str,
+        decision: dict,
+        *,
+        action: str = HARD_FLATTEN_ACTION,
+        recoverable: bool = False,
+    ) -> bool:
+        if action not in {SOFT_HOLD_ACTION, HARD_FLATTEN_ACTION}:
+            raise RuntimeError(f"Unsupported Margin Guard Kill Switch action: {action}")
         existing = base.read_json(self.kill_switch_path, {}) or {}
         if existing.get("active"):
-            return False
+            existing_action = str(existing.get("action") or "")
+            if existing_action == HARD_FLATTEN_ACTION:
+                return False
+            if action == SOFT_HOLD_ACTION:
+                return False
+            # HARD_FLATTEN_ACTION is allowed to escalate an existing recoverable hold.
+
+        now_dt = dt.datetime.now(tz=dt.timezone.utc)
+        activated_at = (
+            str(existing.get("activatedAt") or "")
+            if existing.get("active") and action == HARD_FLATTEN_ACTION
+            else now_dt.isoformat()
+        )
         payload = {
             "active": True,
             "strategyId": "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
             "combinedStrategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
-            "action": "FLATTEN_MANAGED",
+            "action": action,
             "reason": reason,
-            "operator": "disdex-v96-v52-margin-guard",
-            "activatedAt": dt.datetime.now(tz=dt.timezone.utc).isoformat(),
+            "operator": MARGIN_GUARD_OPERATOR,
+            "activatedAt": activated_at,
+            "recoverable": bool(recoverable and action == SOFT_HOLD_ACTION),
             "marginRisk": {
                 "stage": decision.get("stage"),
                 "maintenanceMarginRatioPct": decision.get("maintenanceMarginRatioPct"),
@@ -290,15 +332,71 @@ class MarginGuard:
                 "nearestLiquidationSymbol": decision.get("nearestLiquidationSymbol"),
             },
         }
+        if action == SOFT_HOLD_ACTION:
+            grace_started = str(existing.get("graceStartedAt") or now_dt.isoformat())
+            grace_started_ms = self._iso_to_ms(grace_started) or int(now_dt.timestamp() * 1000)
+            payload["graceStartedAt"] = grace_started
+            payload["graceDeadlineAt"] = dt.datetime.fromtimestamp(
+                (grace_started_ms + self.recovery_grace_ms()) / 1000,
+                tz=dt.timezone.utc,
+            ).isoformat()
+        elif existing.get("graceStartedAt"):
+            payload["graceStartedAt"] = existing.get("graceStartedAt")
+            payload["graceDeadlineAt"] = existing.get("graceDeadlineAt")
+            payload["escalatedFrom"] = SOFT_HOLD_ACTION
+
         self.kill_switch_path.parent.mkdir(parents=True, exist_ok=True)
         base.atomic_write_json(self.kill_switch_path, payload)
         print(json.dumps({
             "event": "margin-guard-shared-kill-switch-activated",
+            "action": action,
+            "recoverable": payload.get("recoverable", False),
             "reason": reason,
+            "graceStartedAt": payload.get("graceStartedAt"),
+            "graceDeadlineAt": payload.get("graceDeadlineAt"),
             "ordersSent": False,
             "cancelSent": False,
             "positionChangesSent": False,
             **payload["marginRisk"],
+        }, separators=(",", ":")), flush=True)
+        return True
+
+    def recoverable_hold(self) -> dict:
+        row = base.read_json(self.kill_switch_path, {}) or {}
+        if (
+            row.get("active") is True
+            and row.get("action") == SOFT_HOLD_ACTION
+            and row.get("operator") == MARGIN_GUARD_OPERATOR
+        ):
+            return row
+        return {}
+
+    def recoverable_hold_expired(self, row: Optional[dict] = None) -> bool:
+        hold = row or self.recoverable_hold()
+        if not hold:
+            return False
+        deadline_ms = self._iso_to_ms(hold.get("graceDeadlineAt"))
+        return bool(deadline_ms and base.now_ms() >= deadline_ms)
+
+    def clear_recoverable_hold_if_owned(self, reason: str) -> bool:
+        hold = self.recoverable_hold()
+        if not hold:
+            return False
+        payload = {
+            **hold,
+            "active": False,
+            "action": SOFT_HOLD_ACTION,
+            "recoverable": True,
+            "reason": reason,
+            "recoveredAt": dt.datetime.now(tz=dt.timezone.utc).isoformat(),
+        }
+        base.atomic_write_json(self.kill_switch_path, payload)
+        print(json.dumps({
+            "event": "margin-guard-recoverable-hold-cleared",
+            "reason": reason,
+            "ordersSent": False,
+            "cancelSent": False,
+            "positionChangesSent": False,
         }, separators=(",", ":")), flush=True)
         return True
 
@@ -449,13 +547,15 @@ class MarginGuard:
             "cancelSent": False,
             "positionChangesSent": False,
         }, separators=(",", ":")), flush=True)
+        if allow_kill_switch and payload["stage"] == "HEALTHY":
+            self.clear_recoverable_hold_if_owned("Margin Guard authenticated risk data recovered HEALTHY within grace period.")
         if allow_kill_switch and payload["stage"] in {"REDUCE", "CRITICAL"}:
             reason = (
                 "Margin Guard triggered pre-liquidation managed stop-loss: "
                 f"stage={payload['stage']}, marginRatio={payload['maintenanceMarginRatioPct']:.4f}%, "
                 f"minimumLiquidationBuffer={payload['minimumLiquidationBufferPct']}"
             )
-            self.activate_shared_kill_switch(reason, payload)
+            self.activate_shared_kill_switch(reason, payload, action=HARD_FLATTEN_ACTION, recoverable=False)
             emergency = self.emergency_flatten_managed(payload)
             payload["emergencyFlatten"] = emergency
             payload["ordersSent"] = emergency["ordersSent"]
@@ -498,9 +598,9 @@ class MarginGuard:
             "activeManagedPositionCount": active_count,
             "ordersAllowed": False,
         }, separators=(",", ":")), flush=True)
-        if active_count > 0 and (failures >= 2 or previous_stage in {"WARNING", "REDUCE", "CRITICAL"}):
-            reason = "Margin Guard lost authenticated risk data while managed positions were active"
-            self.activate_shared_kill_switch(reason, payload)
+        if active_count > 0 and previous_stage in {"REDUCE", "CRITICAL"}:
+            reason = "Margin Guard lost authenticated risk data after a hard margin-risk stage"
+            self.activate_shared_kill_switch(reason, payload, action=HARD_FLATTEN_ACTION, recoverable=False)
             try:
                 emergency = self.emergency_flatten_managed(payload)
                 payload["emergencyFlatten"] = emergency
@@ -511,6 +611,37 @@ class MarginGuard:
             except Exception as flatten_error:
                 payload["emergencyFlattenError"] = str(flatten_error)
                 self.write_state(payload)
+        elif active_count > 0 and (failures >= 2 or previous_stage == "WARNING"):
+            reason = "Margin Guard lost authenticated risk data while protected managed positions were active"
+            self.activate_shared_kill_switch(
+                reason,
+                payload,
+                action=SOFT_HOLD_ACTION,
+                recoverable=True,
+            )
+            hold = self.recoverable_hold()
+            payload["action"] = "BLOCK_NEW_ORDERS_KEEP_PROTECTED_POSITIONS_AND_RETRY"
+            payload["recoveryGraceActive"] = bool(hold)
+            payload["recoveryGraceDeadlineAt"] = hold.get("graceDeadlineAt") if hold else None
+            if hold and self.recoverable_hold_expired(hold):
+                escalate_reason = (
+                    "Margin Guard recovery grace expired while authenticated risk data remained unavailable"
+                )
+                self.activate_shared_kill_switch(
+                    escalate_reason,
+                    payload,
+                    action=HARD_FLATTEN_ACTION,
+                    recoverable=False,
+                )
+                try:
+                    emergency = self.emergency_flatten_managed(payload)
+                    payload["emergencyFlatten"] = emergency
+                    payload["ordersSent"] = emergency["ordersSent"]
+                    payload["cancelSent"] = emergency["cancelSent"]
+                    payload["positionChangesSent"] = emergency["positionChangesSent"]
+                except Exception as flatten_error:
+                    payload["emergencyFlattenError"] = str(flatten_error)
+            self.write_state(payload)
         return payload
 
     def require_healthy(self, *, write_state: bool, allow_kill_switch: bool, requested_symbol: Optional[str] = None) -> dict:

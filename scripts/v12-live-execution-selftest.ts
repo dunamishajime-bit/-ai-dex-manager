@@ -211,6 +211,48 @@ async function main() {
         assert.ok(normal.state.active?.protection.stopClientOrderId);
         assert.ok(normal.state.active?.protection.takeProfitClientOrderId);
 
+        // Between-bar venue-resident TP/STOP fills must reconcile local state
+        // without waiting for the next 2h signal tick. Only the confirmed flat
+        // symbol is removed; the other live V12 position is preserved.
+        const protectionFill = await enterHarness(root, "between-bar-protection-fill");
+        const beforeProtectionFill = await protectionFill.stateStore.load();
+        const beforeActives = beforeProtectionFill.activePositions || (beforeProtectionFill.active ? [beforeProtectionFill.active] : []);
+        assert.equal(beforeActives.length, 2, "fixture must have two active V12 positions");
+        const exitedActive = beforeActives[1];
+        const retainedActive = beforeActives[0];
+        protectionFill.adapter.positions = protectionFill.adapter.positions.filter(
+            (row) => row.symbol.toUpperCase() !== exitedActive.symbol.toUpperCase(),
+        );
+        protectionFill.adapter.queryOrderSameId = async (_symbol: string, clientOrderId: string) => (
+            clientOrderId === exitedActive.protection.takeProfitClientOrderId
+                ? { symbol: exitedActive.symbol, clientOrderId, status: "FILLED", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: exitedActive.quantity, executedQuantity: exitedActive.quantity, stopPrice: exitedActive.protection.takeProfit }
+                : null
+        ) as never;
+        const entryCallsBeforeProtectionReconcile = protectionFill.adapter.entryCalls;
+        const exitCallsBeforeProtectionReconcile = protectionFill.adapter.exitCalls;
+        const protectionReconcile = await protectionFill.engine.reconcileProtectionFillsOnly();
+        assert.equal(protectionReconcile?.status, "exited");
+        assert.match(protectionReconcile?.reason || "", /PROTECTION_FILL_RECONCILED/);
+        const afterProtectionFill = await protectionFill.stateStore.load();
+        const afterActives = afterProtectionFill.activePositions || (afterProtectionFill.active ? [afterProtectionFill.active] : []);
+        assert.deepEqual(afterActives.map((row) => row.symbol), [retainedActive.symbol]);
+        assert.equal(protectionFill.adapter.entryCalls, entryCallsBeforeProtectionReconcile, "fill reconciliation must never submit a new entry");
+        assert.equal(protectionFill.adapter.exitCalls, exitCallsBeforeProtectionReconcile, "already-flat venue position must not be exited again");
+
+        // A state-only position without FILLED STOP/TP evidence remains fail
+        // closed; the fast reconciler must never guess that an exit occurred.
+        const unexplainedFlat = await enterHarness(root, "between-bar-unexplained-flat");
+        const unexplainedState = await unexplainedFlat.stateStore.load();
+        const unexplainedActives = unexplainedState.activePositions || (unexplainedState.active ? [unexplainedState.active] : []);
+        const unexplainedMissing = unexplainedActives[1];
+        unexplainedFlat.adapter.positions = unexplainedFlat.adapter.positions.filter(
+            (row) => row.symbol.toUpperCase() !== unexplainedMissing.symbol.toUpperCase(),
+        );
+        unexplainedFlat.adapter.queryOrderSameId = async () => null;
+        const unexplainedResult = await unexplainedFlat.engine.reconcileProtectionFillsOnly();
+        assert.equal(unexplainedResult?.status, "manual-review");
+        assert.match((await unexplainedFlat.stateStore.load()).manualReview || "", /V12_STATE_ONLY_POSITION_MISMATCH/);
+
         // Ordinary restart with a live protected V12 position must reconcile and
         // must never submit the entry again.
         const restarted = new V12LiveExecutionEngine({

@@ -145,6 +145,59 @@ export class V12LiveExecutionEngine {
         return false;
     }
 
+    /**
+     * Lightweight between-bar reconciliation for venue-resident STOP/TP fills.
+     *
+     * This does not evaluate signals or submit exposure-increasing orders. It uses
+     * the same account-order lock as the 2h tick, requires the venue position to
+     * be flat, and requires positive FILLED evidence from one of the deterministic
+     * protection orders before removing the local active state.
+     */
+    async reconcileProtectionFillsOnly(): Promise<V12LiveTickResult | undefined> {
+        const handle = await this.d.lock.acquire(`V12_PROTECTION_FILL_RECONCILE:${process.pid}:${randomUUID()}`);
+        if (!handle) return { status: "locked", reason: "ACCOUNT_LOCK_BUSY_OR_STALE_REVIEW_REQUIRED" };
+        try {
+            const state = await this.d.stateStore.load();
+            if (state.pending || state.killSwitch?.active || state.manualReview) return undefined;
+            const actives = activePositionsOf(state);
+            if (!actives.length) return undefined;
+
+            const positions = await this.d.adapter.getPositions();
+            const actualSymbols = new Set(
+                positions
+                    .filter((row) => Math.abs(row.quantity) > EPS)
+                    .map((row) => row.symbol.toUpperCase()),
+            );
+            const missing = actives.filter((active) => !actualSymbols.has(active.symbol.toUpperCase()));
+            if (!missing.length) return undefined;
+
+            for (const active of missing) {
+                if (!(await this.completedProtectionExit(active))) {
+                    return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
+                }
+            }
+
+            for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
+            const missingIds = new Set(missing.map((row) => row.positionId));
+            syncActivePositions(state, actives.filter((row) => !missingIds.has(row.positionId)));
+            state.cooldownUntilTs = Math.max(
+                Number(state.cooldownUntilTs || 0),
+                (state.lastReferenceTs || this.now()) + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000,
+            );
+            await this.d.stateStore.save(state);
+            const symbols = missing.map((row) => row.symbol).sort();
+            this.log("v12-protection-fill-reconciled", {
+                symbols,
+                remainingActivePositions: activePositionsOf(state).map((row) => row.symbol),
+                ordersSent: 0,
+                positionChangesSent: 0,
+            });
+            return { status: "exited", reason: `PROTECTION_FILL_RECONCILED:${symbols.join(",")}` };
+        } finally {
+            await handle.release();
+        }
+    }
+
     private async reconcilePendingEntry(state: V12X1AllRunnerState, pending: V12PendingOrderState, positions: DirectPosition[]): Promise<V12LiveTickResult | undefined> {
         const result = await this.d.adapter.reconcileOrder(pending.symbol, pending.clientOrderId);
         if (result.status === "UNKNOWN") return this.fail(state, `V12_PENDING_ENTRY_UNKNOWN:${pending.clientOrderId}`);

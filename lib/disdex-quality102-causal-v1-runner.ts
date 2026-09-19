@@ -408,17 +408,36 @@ export class Quality102CausalV1Runner {
         }
     }
 
-    private async sharedRiskBlocked(): Promise<string | undefined> {
+    private async sharedRiskStatus(): Promise<{ reason: string; flattenExisting: boolean } | undefined> {
         if (this.dependencies.config.mode !== "LIVE") return undefined;
-        if (this.dependencies.riskReader) return this.dependencies.riskReader();
+        if (this.dependencies.riskReader) {
+            const reason = await this.dependencies.riskReader();
+            return reason ? { reason, flattenExisting: false } : undefined;
+        }
         const killPath = String(this.dependencies.config.killSwitchPath || "").trim();
         const riskPath = String(this.dependencies.config.sharedDailyRiskPath || "").trim();
-        if (!killPath) return "QUALITY102_CAUSAL_V1_KILL_SWITCH_PATH_REQUIRED";
-        if (!riskPath) return "QUALITY102_CAUSAL_V1_DAILY_RISK_PATH_REQUIRED";
+        if (!killPath) return { reason: "QUALITY102_CAUSAL_V1_KILL_SWITCH_PATH_REQUIRED", flattenExisting: false };
+        if (!riskPath) return { reason: "QUALITY102_CAUSAL_V1_DAILY_RISK_PATH_REQUIRED", flattenExisting: false };
         const kill = await readDisDexV96KillSwitch(killPath);
-        if (kill) return `SHARED_KILL_SWITCH:${kill.reason}`;
+        if (kill) {
+            return {
+                reason: `SHARED_KILL_SWITCH:${kill.reason}`,
+                flattenExisting: kill.action === "FLATTEN_MANAGED",
+            };
+        }
         const risk = await readSharedCryptoDailyRisk(riskPath, this.now());
-        if (!risk.ok) return `SHARED_CRYPTO_DAILY_RISK:${risk.reason}`;
+        if (!risk.ok) {
+            return {
+                reason: `SHARED_CRYPTO_DAILY_RISK:${risk.reason}`,
+                flattenExisting: risk.reason === "DAILY_LOSS_TRIPPED" || risk.state?.tripped === true,
+            };
+        }
+        if (risk.state?.tripped) {
+            return {
+                reason: `SHARED_CRYPTO_DAILY_LOSS:${risk.state.tripReason || "TRIPPED"}`,
+                flattenExisting: true,
+            };
+        }
         return undefined;
     }
 
@@ -985,9 +1004,9 @@ export class Quality102CausalV1Runner {
                 return { status: "shadow", message: signal.reason, signal, ordersSent: 0 };
             }
 
-            const riskBlocked = await this.sharedRiskBlocked();
+            const sharedRisk = await this.sharedRiskStatus();
             const live = await this.validateLiveAccount(state);
-            if (!riskBlocked && this.initialDaemonReconciliationRequired(state)) {
+            if (!sharedRisk && this.initialDaemonReconciliationRequired(state)) {
                 const completedAt = this.now();
                 state.initialDaemonReconciliation = {
                     runtimeCommitSha: this.dependencies.config.runtimeCommitSha,
@@ -1018,15 +1037,25 @@ export class Quality102CausalV1Runner {
                 const quote = await this.dependencies.executor.getMarketQuote(state.position.symbol);
                 if (!validQuote(quote, state.position.symbol, this.now(), this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 active mark quote is stale or invalid.", ordersSent: 0 };
                 await this.updateTrailingState(state, quote);
-                const reason = riskBlocked ? "shared_risk_flatten" : quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt);
-                if (!reason) return { status: "held", message: "QUALITY102_CAUSAL_V1_POSITION_HELD", ordersSent: 0 };
+                const reason = sharedRisk?.flattenExisting
+                    ? "shared_risk_flatten"
+                    : quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt);
+                if (!reason) {
+                    return {
+                        status: "held",
+                        message: sharedRisk
+                            ? `${sharedRisk.reason}; existing protected Q102 position is retained during recovery grace.`
+                            : "QUALITY102_CAUSAL_V1_POSITION_HELD",
+                        ordersSent: 0,
+                    };
+                }
                 const planned = await this.planExit(state, actual!, quote, reason);
                 return planned.status === "planned" ? this.executePending(state, lock) : planned;
             }
-            if (riskBlocked) {
+            if (sharedRisk) {
                 refreshQ102StateAfterRiskBlock(state, this.now());
                 await this.dependencies.stateStore.save(state);
-                return { status: "blocked-local", message: riskBlocked, ordersSent: 0 };
+                return { status: "blocked-local", message: sharedRisk.reason, ordersSent: 0 };
             }
             const signal = this.buildSignal(history, this.now(), false, false, live.positions.some(nonZero));
             if (state.lastProcessedReferenceTs !== undefined && signal.referenceTs <= state.lastProcessedReferenceTs) {

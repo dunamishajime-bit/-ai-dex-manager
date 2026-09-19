@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 export interface SharedKillSwitchView {
     configuredPaths: string[];
     active: boolean;
+    action?: "HOLD_PROTECTED" | "FLATTEN_MANAGED";
     reason?: string;
     sourcePath?: string;
 }
@@ -26,11 +27,16 @@ export async function readSharedKillSwitch(env: NodeJS.ProcessEnv = process.env)
     if (!paths.length) return { configuredPaths: [], active: false };
     const path = paths[0];
     try {
-        const parsed = JSON.parse(await readFile(path, "utf8")) as { active?: unknown; reason?: unknown };
+        const parsed = JSON.parse(await readFile(path, "utf8")) as { active?: unknown; action?: unknown; reason?: unknown };
         if (!parsed || typeof parsed !== "object" || typeof parsed.active !== "boolean") throw new Error("SHARED_KILL_SWITCH_MALFORMED");
+        const action = parsed.action === "HOLD_PROTECTED" || parsed.action === "FLATTEN_MANAGED"
+            ? parsed.action
+            : undefined;
+        if (parsed.active && !action) throw new Error("SHARED_KILL_SWITCH_MALFORMED");
         return {
             configuredPaths: paths,
             active: parsed.active,
+            action,
             reason: typeof parsed.reason === "string" ? parsed.reason : undefined,
             sourcePath: path,
         };

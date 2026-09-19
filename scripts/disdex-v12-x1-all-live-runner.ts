@@ -107,6 +107,7 @@ async function main() {
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_BOUNDARY_DELAY_MS", 5_000)));
     const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("V12_X1_ALL_LOCK_RETRY_MS", 5_000)));
+    const protectionReconcileMs = Math.min(60_000, Math.max(5_000, numberEnv("V12_X1_ALL_PROTECTION_RECONCILE_MS", 15_000)));
     const delay = createInterruptibleDelay();
     let stopping = false;
     const stop = () => { stopping = true; delay.interrupt(); };
@@ -123,8 +124,27 @@ async function main() {
             continue;
         }
         const now = Date.now();
-        const wait = TWO_HOURS_MS - (now % TWO_HOURS_MS) + boundaryDelayMs;
-        await delay.wait(wait);
+        const boundaryAt = now + TWO_HOURS_MS - (now % TWO_HOURS_MS) + boundaryDelayMs;
+        while (!stopping && Date.now() < boundaryAt) {
+            const waitSlice = Math.min(protectionReconcileMs, Math.max(0, boundaryAt - Date.now()));
+            await delay.wait(waitSlice);
+            if (stopping || Date.now() >= boundaryAt) break;
+            const reconciliation = await built.engine.reconcileProtectionFillsOnly();
+            if (reconciliation && reconciliation.status !== "locked") {
+                console.log(JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    strategyId: built.runtime.strategyId,
+                    mode: built.runtime.mode,
+                    event: "between-bar-protection-reconcile",
+                    ...reconciliation,
+                }));
+                if (reconciliation.status === "manual-review") {
+                    process.exitCode = 2;
+                    stopping = true;
+                    break;
+                }
+            }
+        }
     } while (!stopping);
 }
 

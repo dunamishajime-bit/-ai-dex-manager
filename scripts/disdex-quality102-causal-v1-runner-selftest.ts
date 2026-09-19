@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { QUALITY102_CAUSAL_V1 } from "../config/disdexQuality102CausalV1Runtime";
 import {
@@ -149,6 +151,17 @@ function deps(executor: FakeExecutor, initial: Quality102CausalV1State, cfg: Par
 }
 
 async function run(): Promise<void> {
+    const runnerSource = readFileSync(resolve("lib/disdex-quality102-causal-v1-runner.ts"), "utf8");
+    assert.match(
+        runnerSource,
+        /flattenExisting:\s*kill\.action === "FLATTEN_MANAGED"/,
+        "Q102 shared Kill Switch must flatten existing positions only for hard FLATTEN_MANAGED",
+    );
+    assert.match(
+        runnerSource,
+        /existing protected Q102 position is retained during recovery grace/,
+        "Q102 HOLD_PROTECTED must preserve existing protected positions while blocking new exposure",
+    );
     {
         const fake = new FakeExecutor();
         assert.doesNotThrow(() => deps(fake, state(), { symbols: ["AVAXUSDT"] }, () => signal({ symbol: "AVAXUSDT" })));
