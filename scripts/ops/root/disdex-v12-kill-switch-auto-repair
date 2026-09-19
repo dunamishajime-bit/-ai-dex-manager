@@ -31,6 +31,10 @@ is_recoverable_shared_reason() {
   return 1
 }
 
+is_protected_hold_action() {
+  [[ "${1:-}" == 'HOLD_PROTECTED' ]]
+}
+
 is_aster_upstream_shared_reason() {
   local reason="${1:-}"
   [[ "$reason" == 'V52 fatal tick error:'* || "$reason" == 'V52 upstream state unavailable:'* ]] || return 1
@@ -82,10 +86,16 @@ read_kill_and_state() {
   KILL_FILE="${DISDEX_SHARED_KILL_SWITCH_FILE:-$KILL_FILE_DEFAULT}"
   STATE_FILE="${DISDEX_V12_STATE_FILE:-$STATE_FILE_DEFAULT}"
   KILL_ACTIVE=false
+  KILL_ACTION=''
+  KILL_RECOVERABLE=false
+  KILL_GRACE_DEADLINE=''
   KILL_REASON=''
   KILL_SOURCE_PATH="$KILL_FILE"
   if [[ -f "$KILL_FILE" ]]; then
     KILL_ACTIVE="$(/usr/bin/jq -r 'if .active == true then "true" else "false" end' "$KILL_FILE" 2>/dev/null || printf 'false')"
+    KILL_ACTION="$(/usr/bin/jq -r '.action // ""' "$KILL_FILE" 2>/dev/null || true)"
+    KILL_RECOVERABLE="$(/usr/bin/jq -r 'if .recoverable == true then "true" else "false" end' "$KILL_FILE" 2>/dev/null || printf 'false')"
+    KILL_GRACE_DEADLINE="$(/usr/bin/jq -r '.graceDeadlineAt // ""' "$KILL_FILE" 2>/dev/null || true)"
     KILL_REASON="$(/usr/bin/jq -r '.reason // ""' "$KILL_FILE" 2>/dev/null || true)"
     candidate_source_path="$(/usr/bin/jq -r '.sourcePath // empty' "$KILL_FILE" 2>/dev/null || true)"
     if [[ "$candidate_source_path" == "$KILL_FILE" ]]; then
@@ -179,6 +189,8 @@ run_self_test() {
   is_historical_local_reason 'Quantity 0 is below Aster minQty 1 for BNBUSDT.'
   ! is_recoverable_shared_reason 'daily loss latch'
   ! is_historical_local_reason 'unknown manual review'
+  is_protected_hold_action 'HOLD_PROTECTED'
+  ! is_protected_hold_action 'FLATTEN_MANAGED'
   printf 'V12 Kill Switch auto-repair self-test: PASS\n'
 }
 
@@ -192,6 +204,10 @@ main() {
   /usr/bin/flock -n 9 || { printf 'V12_AUTO_REPAIR_ALREADY_RUNNING\n'; return 0; }
 
   local action=NONE reason="$KILL_REASON" token
+  if is_bool_true "$KILL_ACTIVE" && is_protected_hold_action "$KILL_ACTION"; then
+    /usr/bin/jq -cn       --arg reason "$KILL_REASON"       --arg action "$KILL_ACTION"       --arg graceDeadlineAt "$KILL_GRACE_DEADLINE"       --argjson recoverable "$(is_bool_true "$KILL_RECOVERABLE" && printf 'true' || printf 'false')"       '{status:"V12_AUTO_REPAIR_DEFERRED_PROTECTED_HOLD",action:$action,reason:$reason,recoverable:$recoverable,graceDeadlineAt:($graceDeadlineAt|select(length>0)),ordersSent:false,positionChangesSent:false,killSwitchChanged:false,compositionQuiesced:false}'
+    return 0
+  fi
   if is_bool_true "$KILL_ACTIVE"; then
     if is_aster_upstream_shared_reason "$KILL_REASON"; then
       action=ASTER_UPSTREAM
