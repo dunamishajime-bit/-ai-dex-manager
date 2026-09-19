@@ -114,7 +114,7 @@ def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed
             "leverage": finite(row.get("leverage")),
             "marginType": position_margin_type(row),
         })
-        if minimum_buffer is None or buffer < minimum_buffer:
+        if buffer is not None and (minimum_buffer is None or buffer < minimum_buffer):
             minimum_buffer = buffer
             nearest_symbol = symbol
     ratio = maintenance_margin_ratio_pct(account)

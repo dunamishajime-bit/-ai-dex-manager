@@ -81,6 +81,45 @@ class DynamicManagedSymbolTest(unittest.TestCase):
         self.assertEqual(decision["stage"], "CRITICAL")
         self.assertFalse(decision["ordersAllowed"])
 
+    def test_mixed_real_and_zero_liquidation_cross_positions_do_not_compare_none(self):
+        account = {
+            "totalMaintMargin": "2.160512516071036",
+            "totalMarginBalance": "100",
+            "totalPositionInitialMargin": "20",
+            "totalOpenOrderInitialMargin": "0",
+            "availableBalance": "80",
+        }
+        positions = [
+            {
+                "symbol": "LTCUSDT",
+                "positionAmt": "1.092",
+                "markPrice": "58.15",
+                "liquidationPrice": "1.556",
+                "leverage": "5",
+                "marginType": "cross",
+            },
+            {
+                "symbol": "LINKUSDT",
+                "positionAmt": "5.07",
+                "markPrice": "12.311",
+                "liquidationPrice": "0",
+                "leverage": "5",
+                "marginType": "cross",
+            },
+        ]
+        snapshot = margin_policy.build_margin_risk_snapshot(
+            account, positions, ["LTCUSDT", "LINKUSDT"]
+        )
+        decision = margin_policy.classify_margin_risk(snapshot)
+        self.assertEqual(snapshot["activeManagedPositionCount"], 2)
+        self.assertAlmostEqual(snapshot["minimumLiquidationBufferPct"], 97.32416165090284, places=9)
+        self.assertEqual(snapshot["nearestLiquidationSymbol"], "LTCUSDT")
+        link = next(row for row in snapshot["activeManagedPositions"] if row["symbol"] == "LINKUSDT")
+        self.assertIsNone(link["liquidationBufferPct"])
+        self.assertEqual(link["riskBasis"], "ACCOUNT_MAINTENANCE_MARGIN_RATIO")
+        self.assertEqual(decision["stage"], "HEALTHY")
+        self.assertTrue(decision["ordersAllowed"])
+
     def test_zero_liquidation_isolated_or_missing_account_data_remains_fail_closed(self):
         base_row = {
             "symbol": "PENGUUSDT",
