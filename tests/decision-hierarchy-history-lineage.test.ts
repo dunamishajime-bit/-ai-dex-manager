@@ -54,8 +54,9 @@ test("decision status is split into four logic pages and Q102 has per-symbol obs
   assert.match(files[5], /\/decision-status\/pengu/);
   assert.match(files[5], /\/decision-status\/q102/);
   assert.match(files[5], /\/decision-status\/v52/);
-  assert.match(files[6], /buildQuality102CausalV4Signal/);
+  assert.match(files[6], /decision-snapshot\.json/);
   assert.match(files[6], /tradingMutation: 0/);
+  assert.doesNotMatch(files[6], /AsterV3Client|execFile|placeMarketOrder/);
 });
 
 test("history UI exposes granular route colors and forced-exit cause", async () => {
