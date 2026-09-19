@@ -132,6 +132,7 @@ export interface Quality102CausalV1RunnerDependencies {
         decisionTs: number;
         sleeveOccupancy: { activePosition: boolean; unresolvedPendingEntry: boolean; basePositionActive?: boolean };
     }) => Quality102CausalV1Signal;
+    decisionObserver?: (input: { history: Quality102CausalV1History; decisionTs: number }) => Promise<void>;
 }
 
 function defaultLogger(): Quality102CausalV1Logger {
@@ -971,6 +972,15 @@ export class Quality102CausalV1Runner {
         if (preloadEligible) {
             try {
                 preloadedHistory = await this.dependencies.marketData.load();
+                if (this.dependencies.decisionObserver) {
+                    try {
+                        await this.dependencies.decisionObserver({ history: preloadedHistory, decisionTs: this.now() });
+                    } catch (observerError) {
+                        this.log.warn("Q102 decision observability write failed; trading logic continues unchanged.", {
+                            message: observerError instanceof Error ? observerError.message : String(observerError),
+                        });
+                    }
+                }
             } catch (error) {
                 const message = isAsterDepositRequirementError(error)
                     ? "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED"

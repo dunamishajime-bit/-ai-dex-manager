@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { readFile, stat } from "node:fs/promises";
+import { readFile, rename, stat, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import {
@@ -26,6 +26,7 @@ import {
 import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality102-causal-v1-market-data";
 import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-runner";
 import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
+import { buildQuality102CausalV4DecisionSnapshot } from "../lib/disdex-quality102-causal-v4-observability";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { findManagedV12ProtectiveOrders } from "../lib/disdex-managed-protective-orders";
@@ -482,6 +483,19 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         stateStore: new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.expectedRuntimeCommitSha),
         lock: new FileAccountOrderLock(config.accountLockPath, numberEnv(env, "DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000)),
         signalBuilder: (input) => buildQuality102CausalV4Signal(input, { highVolSymbols: config.highVolSymbols }),
+        decisionObserver: async ({ history, decisionTs }) => {
+            const snapshot = buildQuality102CausalV4DecisionSnapshot({
+                history,
+                decisionTs,
+                highVolSymbols: config.highVolSymbols,
+                symbols: config.symbols,
+                runtimeCommitSha: config.runtimeCommitSha,
+            });
+            const target = resolve(config.stateRoot, "decision-snapshot.json");
+            const temporary = `${target}.${process.pid}.tmp`;
+            await writeFile(temporary, JSON.stringify(snapshot, null, 2) + "\n", { encoding: "utf8", mode: 0o600 });
+            await rename(temporary, target);
+        },
         config: {
             mode: config.mode,
             enabled: config.enabled,
