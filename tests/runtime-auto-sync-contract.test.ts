@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { extractObjectNumber } from "../lib/server/current-production-runtime";
+
 const files = {
   loader: "lib/server/current-production-runtime.ts",
   home: "app/page.tsx",
@@ -55,4 +57,10 @@ test("decision status auto-refreshes from Production runtime without static cont
   assert.match(server, /CACHE_TTL_MS = 25_000/);
   assert.match(server, /runtimeSnapshot\(checkedAt, currentRuntime\)/);
   assert.match(server, /strongRegimeQualityScoreMinimum/);
+});
+
+
+test("runtime source number parser accepts signed and scientific values", () => {
+  assert.equal(extractObjectNumber("ema168DistanceMinPct: -5.864583483302943,", "ema168DistanceMinPct"), -5.864583483302943);
+  assert.equal(extractObjectNumber("threshold: +1.4e-2,", "threshold"), 0.014);
 });

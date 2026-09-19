@@ -131,8 +131,8 @@ function requiredText(env: EnvMap, name: string): string {
   return value;
 }
 
-function extractObjectNumber(source: string, key: string): number {
-  const pattern = new RegExp(`\\b${key}\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)`);
+export function extractObjectNumber(source: string, key: string): number {
+  const pattern = new RegExp(`\\b${key}\\s*:\\s*([-+]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)`);
   const match = source.match(pattern);
   const value = match ? Number(match[1]) : Number.NaN;
   if (!Number.isFinite(value)) throw new Error(`CURRENT_RUNTIME_SOURCE_VALUE_MISSING:${key}`);
