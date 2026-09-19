@@ -440,11 +440,11 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
     try {
       const response = await fetch("/api/system/decision-status" + (force ? "?refresh=1" : ""), { cache: "no-store" });
       const data = await response.json();
-      if (!response.ok || !data?.readOnly) throw new Error(data?.error || "??????????????");
+      if (!response.ok || !data?.readOnly) throw new Error(data?.error || "判定状況を取得できませんでした");
       setSnapshot(data as Snapshot);
       setError(data.error || null);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "??????????????");
+      setError(loadError instanceof Error ? loadError.message : "判定状況を取得できませんでした");
     } finally {
       setLoading(false);
     }
@@ -455,11 +455,11 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
     try {
       const response = await fetch("/api/system/q102-symbol-status", { cache: "no-store" });
       const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || "Q102??????????????");
+      if (!response.ok || !data?.ok) throw new Error(data?.error || "Q102通貨別判定を取得できませんでした");
       setQ102Symbols(data as Q102SymbolSnapshot);
       setQ102SymbolError(null);
     } catch (loadError) {
-      setQ102SymbolError(loadError instanceof Error ? loadError.message : "Q102??????????????");
+      setQ102SymbolError(loadError instanceof Error ? loadError.message : "Q102通貨別判定を取得できませんでした");
     }
   }
 
@@ -471,29 +471,29 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
     return () => window.clearInterval(timer);
   }, [logic]);
 
-  if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">?????????????</div>;
-  if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "??????????????"}</div>;
+  if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">判定状況を読み込み中…</div>;
+  if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "判定状況を取得できませんでした"}</div>;
 
-  const toolbar = <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HP??????? / ????????????</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />?????{time(snapshot.checkedAt)} / ??????30???</span><button type="button" onClick={() => { void load(true); if (logic === "q102") void loadQ102Symbols(); }} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} />{loading ? "???" : "???"}</button></div>;
-  const warning = error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">??????????????{error}</div> : null;
+  const toolbar = <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HP読み取り専用 / 発注・取消・建玉変更なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />確認時刻：{time(snapshot.checkedAt)} / 自動更新30秒</span><button type="button" onClick={() => { void load(true); if (logic === "q102") void loadQ102Symbols(); }} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} />{loading ? "更新中" : "再読込"}</button></div>;
+  const warning = error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部観測に注意：{error}</div> : null;
 
   if (logic === "overview") {
     const cards = [
-      { key: "v12", title: "V12", href: "/decision-status/v12", detail: "???Rank / signalEligible / Entry Quality / ?????risk" },
-      { key: "pengu", title: "PENGU", href: "/decision-status/pengu", detail: "Long V2 / Short V20 / Recovery V8 / cooldown?????" },
-      { key: "q102", title: "Q102 Causal V4", href: "/decision-status/q102", detail: "?????Gate / Family / 1-slot selector / ?state" },
-      { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis?net-edge Gate" },
+      { key: "v12", title: "V12", href: "/decision-status/v12", detail: "候補Rank / signalEligible / Entry Quality / 共有risk" },
+      { key: "pengu", title: "PENGU", href: "/decision-status/pengu", detail: "Long V2 / Short V20 / Recovery V8 / cooldown / 保護状態" },
+      { key: "q102", title: "Q102 Causal V4", href: "/decision-status/q102", detail: "通貨別Gate / Family / 1-slot selector / 実state" },
+      { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis・net-edge Gate" },
     ] as const;
-    return <div className="space-y-4">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">????? ?</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
+    return <div className="space-y-4">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
   }
 
   return <div className="space-y-4">
     {toolbar}
     {warning}
-    <div><Link href="/decision-status" className="inline-flex rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/75 hover:bg-white/[0.08]">? ????????</Link></div>
-    {logic === "v12" ? <><V12Detail details={snapshot.v12Observability} production={productionRuntime} /><Sleeve title="V12 ?????????" items={snapshot.v12.items} /></> : null}
+    <div><Link href="/decision-status" className="inline-flex rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/75 hover:bg-white/[0.08]">← 判定状況一覧</Link></div>
+    {logic === "v12" ? <><V12Detail details={snapshot.v12Observability} production={productionRuntime} /><Sleeve title="V12 補助ランキング" items={snapshot.v12.items} /></> : null}
     {logic === "pengu" ? <PenguDetail details={snapshot.penguRuntime} production={productionRuntime} /> : null}
     {logic === "q102" ? <><Quality102Detail details={snapshot.quality102Runtime} production={productionRuntime} /><Quality102SymbolTable snapshot={q102Symbols} error={q102SymbolError} /></> : null}
-    {logic === "v52" ? <><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} production={productionRuntime} /><Sleeve title="V52 Stock ?????????" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / ?????" : " / ?????")} /></> : null}
+    {logic === "v52" ? <><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} production={productionRuntime} /><Sleeve title="V52 Stock 補助ランキング" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 市場時間内" : " / 市場時間外")} /></> : null}
   </div>;
 }
