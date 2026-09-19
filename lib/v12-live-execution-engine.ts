@@ -463,7 +463,7 @@ export class V12LiveExecutionEngine {
                             ? liveQuote.bidPrice <= planned.plan.stopPrice
                             : liveQuote.askPrice >= planned.plan.stopPrice;
                         if (trailingStopAlreadyCrossed) {
-                            return this.executeExit(state, active, latestTs, "trailing-stop-crossed-before-replacement");
+                            return await this.executeExit(state, active, latestTs, "trailing-stop-crossed-before-replacement");
                         }
                         const pending: V12PendingOrderState = { idempotencyKey: planned.plan.clientOrderId, action: "STOP_UPDATE", clientOrderId: planned.plan.clientOrderId, symbol: active.symbol, side: active.side, quantity: active.quantity, signalTs: latestTs, reason: "TRAILING_STOP_UPDATE", createdAt: this.now(), positionId: active.positionId, stopPrice: planned.plan.stopPrice, previousStopClientOrderId: planned.plan.previousStopClientOrderId, nextPeakOrTrough: planned.plan.nextPeakOrTrough };
                         state.pending = pending; await this.d.stateStore.save(state);
@@ -479,7 +479,7 @@ export class V12LiveExecutionEngine {
                     const primary = signals[0];
                     const changed = Boolean(primary && (`${primary.symbol}USDT` !== active.symbol || primary.side !== active.side));
                     const reason = active.holdingBars >= V12_X1_ALL.maxHoldBars ? "max-hold" : active.holdingBars >= V12_X1_ALL.rebalanceBars && changed ? "signal-rotation" : undefined;
-                    if (reason) return this.executeExit(state, active, latestTs, reason);
+                    if (reason) return await this.executeExit(state, active, latestTs, reason);
                 }
                 if (!risk.ok || activePositionsOf(state).length >= V12_X1_ALL.maximumPositions) return { status: risk.ok ? "held" : "risk-blocked", reason: risk.ok ? "V12_POSITION_HELD" : `SHARED_CRYPTO_RISK:${risk.reason}`, signal: signals[0] };
                 const existingSymbols = new Set(activePositionsOf(state).map((row) => row.symbol.toUpperCase()));
@@ -542,7 +542,7 @@ export class V12LiveExecutionEngine {
                 if (!sizing || !decision || !(decision.acceptedGross > 0)) {
                     return { status: "capacity-blocked", reason: `V12_RANK2_${decision?.reason || "NO_RESIDUAL"}`, signal: next };
                 }
-                return this.executeEntryForSignal(state, handle, next, equity, sizing, decision);
+                return await this.executeEntryForSignal(state, handle, next, equity, sizing, decision);
             }
 
             if (!risk.ok) return { status: "risk-blocked", reason: `SHARED_CRYPTO_RISK:${risk.reason}` };
