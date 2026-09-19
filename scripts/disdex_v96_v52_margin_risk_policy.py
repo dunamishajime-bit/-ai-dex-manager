@@ -90,8 +90,7 @@ def liquidation_buffer_pct(row: dict) -> Optional[float]:
 def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed_symbols: Iterable[str]) -> dict:
     symbols = {str(symbol).upper() for symbol in managed_symbols}
     active = []
-    minimum_buffer: Optional[float] = None
-    nearest_symbol: Optional[str] = None
+    available_buffers: list[tuple[float, str]] = []
     for row in positions:
         symbol = str(row.get("symbol") or "").upper()
         if symbol not in symbols or abs(finite(row.get("positionAmt"))) <= 1e-12:
@@ -114,10 +113,12 @@ def build_margin_risk_snapshot(account: dict, positions: Iterable[dict], managed
             "leverage": finite(row.get("leverage")),
             "marginType": position_margin_type(row),
         })
-        if buffer is not None and (minimum_buffer is None or buffer < minimum_buffer):
-            minimum_buffer = buffer
-            nearest_symbol = symbol
+        if buffer is not None:
+            available_buffers.append((buffer, symbol))
     ratio = maintenance_margin_ratio_pct(account)
+    nearest = min(available_buffers, key=lambda item: item[0]) if available_buffers else None
+    minimum_buffer = nearest[0] if nearest else None
+    nearest_symbol = nearest[1] if nearest else None
     return {
         "maintenanceMarginRatioPct": ratio,
         "minimumLiquidationBufferPct": minimum_buffer,

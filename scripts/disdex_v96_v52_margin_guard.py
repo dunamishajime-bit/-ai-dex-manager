@@ -16,6 +16,10 @@ from disdex_v96_v52_margin_risk_policy import (
     build_margin_risk_snapshot,
     classify_margin_risk,
 )
+from disdex_margin_guard_state_reconcile import (
+    EmergencyStateReconcileError,
+    reconcile_emergency_flatten_states,
+)
 
 STRATEGY_ID = "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
 MANAGED_CRYPTO_SYMBOLS = ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "PENGUUSDT")
@@ -161,6 +165,7 @@ class MarginGuard:
             str(combined_root / "margin-risk"),
         )).resolve()
         self.state_path = self.state_root / f"guard-{mode}.json"
+        self.emergency_evidence_path = self.state_root / "emergency-flatten-evidence.json"
         self.kill_switch_path = Path(os.getenv(
             "DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE",
             str(combined_root / "kill-switch.json"),
@@ -205,6 +210,76 @@ class MarginGuard:
         self.state_root.mkdir(parents=True, exist_ok=True)
         base.atomic_write_shared_json(self.state_path, payload)
         self.state = payload
+
+    def _write_emergency_evidence(self, payload: dict) -> None:
+        self.state_root.mkdir(parents=True, exist_ok=True)
+        base.atomic_write_shared_json(self.emergency_evidence_path, payload)
+
+    def reconcile_emergency_flatten_state(self, result: dict) -> dict:
+        kill = base.read_json(self.kill_switch_path, {}) or {}
+        activated_at = str(kill.get("activatedAt") or "")
+        reason = str(kill.get("reason") or "")
+        current_fills = list(result.get("fillResults") or [])
+        evidence = base.read_json(self.emergency_evidence_path, {}) or {}
+        same_kill = (
+            str(evidence.get("killActivatedAt") or "") == activated_at
+            and str(evidence.get("killReason") or "") == reason
+        )
+
+        if current_fills:
+            evidence = {
+                "schemaVersion": 1,
+                "strategyId": STRATEGY_ID,
+                "status": "PENDING_STATE_RECONCILIATION",
+                "recordedAt": base.now_ms(),
+                "killActivatedAt": activated_at,
+                "killReason": reason,
+                "fillResults": current_fills,
+                "remainingManagedPositions": list(result.get("remainingManagedPositions") or []),
+            }
+            self._write_emergency_evidence(evidence)
+            same_kill = True
+        elif same_kill and evidence.get("status") == "RECONCILED":
+            reconciled = evidence.get("stateReconciliation")
+            if isinstance(reconciled, dict):
+                return reconciled
+        elif same_kill and evidence.get("status") == "PENDING_STATE_RECONCILIATION":
+            persisted_fills = evidence.get("fillResults")
+            if isinstance(persisted_fills, list) and persisted_fills:
+                current_fills = persisted_fills
+
+        try:
+            reconciled = reconcile_emergency_flatten_states(
+                current_fills,
+                env=os.environ,
+                stock_symbol_map=base.ASTER_SYMBOL,
+                now_ms=base.now_ms(),
+            )
+        except EmergencyStateReconcileError as error:
+            if same_kill or current_fills:
+                evidence = {
+                    **evidence,
+                    "status": "PENDING_STATE_RECONCILIATION",
+                    "lastAttemptAt": base.now_ms(),
+                    "lastError": str(error),
+                }
+                self._write_emergency_evidence(evidence)
+            raise RuntimeError(f"MARGIN_GUARD_STATE_RECONCILIATION_FAILED:{error}") from error
+
+        if current_fills or reconciled.get("modifiedStrategies"):
+            evidence = {
+                **evidence,
+                "status": "RECONCILED",
+                "reconciledAt": base.now_ms(),
+                "lastError": None,
+                "stateReconciliation": reconciled,
+            }
+            self._write_emergency_evidence(evidence)
+        print(json.dumps({
+            "event": "margin-guard-state-reconciliation",
+            **reconciled,
+        }, ensure_ascii=False, separators=(",", ":")), flush=True)
+        return reconciled
 
     def activate_shared_kill_switch(self, reason: str, decision: dict) -> bool:
         existing = base.read_json(self.kill_switch_path, {}) or {}
@@ -344,6 +419,7 @@ class MarginGuard:
                 "Margin Guard emergency reduce-only flatten did not clear every managed position: "
                 + ",".join(str(row.get("symbol") or "") for row in remaining)
             )
+        result["stateReconciliation"] = self.reconcile_emergency_flatten_state(result)
         return result
 
     def evaluate_once(self, *, write_state: bool, allow_kill_switch: bool, requested_symbol: Optional[str] = None) -> dict:

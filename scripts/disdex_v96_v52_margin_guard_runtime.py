@@ -50,15 +50,18 @@ class SerializedMarginGuard(MarginGuard):
             managed_symbols = self.managed_symbols()
             active_positions = active_managed_positions(self.positions(managed_symbols), managed_symbols)
             if not active_positions:
-                return {
+                result = {
                     "status": "CONCURRENT_FLATTEN_ALREADY_COMPLETED",
                     "cancelRequestsSent": 0,
                     "reduceOnlyOrdersSent": 0,
+                    "fillResults": [],
                     "remainingManagedPositions": [],
                     "ordersSent": False,
                     "cancelSent": False,
                     "positionChangesSent": False,
                 }
+                result["stateReconciliation"] = self.reconcile_emergency_flatten_state(result)
+                return result
 
             cancel_requests = 0
             reduce_only_orders = 0
@@ -162,6 +165,7 @@ class SerializedMarginGuard(MarginGuard):
                     "Serialized Margin Guard emergency flatten left managed positions: "
                     + ",".join(str(row.get("symbol") or "") for row in remaining)
                 )
+            result["stateReconciliation"] = self.reconcile_emergency_flatten_state(result)
             return result
         finally:
             fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)

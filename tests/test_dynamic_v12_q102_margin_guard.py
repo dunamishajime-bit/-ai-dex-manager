@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import sys
 import unittest
+from itertools import permutations
 from pathlib import Path
 from unittest.mock import patch
 
@@ -119,6 +120,56 @@ class DynamicManagedSymbolTest(unittest.TestCase):
         self.assertEqual(link["riskBasis"], "ACCOUNT_MAINTENANCE_MARGIN_RATIO")
         self.assertEqual(decision["stage"], "HEALTHY")
         self.assertTrue(decision["ordersAllowed"])
+
+    def test_mixed_zero_and_real_liquidation_is_order_independent(self):
+        account = {
+            "totalMaintMargin": "2",
+            "totalMarginBalance": "100",
+            "totalPositionInitialMargin": "20",
+            "totalOpenOrderInitialMargin": "0",
+            "availableBalance": "80",
+        }
+        rows = [
+            {
+                "symbol": "LINKUSDT",
+                "positionAmt": "4.94",
+                "markPrice": "12.37",
+                "liquidationPrice": "0",
+                "leverage": "5",
+                "marginType": "cross",
+            },
+            {
+                "symbol": "LTCUSDT",
+                "positionAmt": "1.0",
+                "markPrice": "58",
+                "liquidationPrice": "1.56",
+                "leverage": "5",
+                "marginType": "cross",
+            },
+            {
+                "symbol": "PENGUUSDT",
+                "positionAmt": "4000",
+                "markPrice": "0.0078",
+                "liquidationPrice": "0",
+                "leverage": "5",
+                "marginType": "cross",
+            },
+        ]
+        expected = None
+        for ordered in permutations(rows):
+            snapshot = margin_policy.build_margin_risk_snapshot(
+                account, list(ordered), ["LINKUSDT", "LTCUSDT", "PENGUUSDT"]
+            )
+            self.assertEqual(snapshot["activeManagedPositionCount"], 3)
+            self.assertEqual(snapshot["nearestLiquidationSymbol"], "LTCUSDT")
+            self.assertEqual(
+                sum(1 for row in snapshot["activeManagedPositions"] if row["liquidationBufferPct"] is None),
+                2,
+            )
+            self.assertEqual(margin_policy.classify_margin_risk(snapshot)["stage"], "HEALTHY")
+            current = snapshot["minimumLiquidationBufferPct"]
+            expected = current if expected is None else expected
+            self.assertAlmostEqual(current, expected, places=12)
 
     def test_zero_liquidation_isolated_or_missing_account_data_remains_fail_closed(self):
         base_row = {
