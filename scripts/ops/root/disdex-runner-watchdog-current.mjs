@@ -283,8 +283,9 @@ async function readHeartbeat(config, runner, now) {
     if (value.runtimeSha !== runner.expectedSha || value.expectedSha !== runner.expectedSha) throw new Error(`${runner.key} heartbeat SHA does not match release`);
     if (value.workingDirectory !== runner.expectedCwd) throw new Error(`${runner.key} heartbeat cwd does not match release`);
     if (String(value.mode).toUpperCase() !== "LIVE") throw new Error(`${runner.key} heartbeat mode is not LIVE`);
-    if (value.liveEnabled !== true) return { present: true, valid: true, value, safeState: false, reason: safeReason(value.reason || `${runner.key} service identity is not current`) };
-    if (value.safetyState !== "HEALTHY") return { present: true, valid: true, value, safeState: false, reason: safeReason(value.reason || `safetyState=${value.safetyState}`) };
+    const healthReason = safeReason(value.healthReason || value.reason || "");
+    if (value.liveEnabled !== true) return { present: true, valid: true, value, safeState: false, reason: healthReason || `${runner.key} service identity is not current` };
+    if (value.safetyState !== "HEALTHY") return { present: true, valid: true, value, safeState: false, reason: healthReason || `safetyState=${value.safetyState}` };
     for (const key of ["heartbeatAt", "lastTickAt"]) {
         if (typeof value[key] !== "number" || !Number.isFinite(value[key]) || value[key] <= 0 || value[key] > now + 60_000) throw new Error(`${runner.key} heartbeat timestamp is invalid`);
     }
@@ -669,6 +670,16 @@ function selfTest() {
         lastTickAt: Date.now(),
     };
     validateRunnerOwnedHeartbeat(snapshotOnlyHeartbeat, "V12_X1_ALL");
+    const blockedSnapshotHeartbeat = {
+        ...snapshotOnlyHeartbeat,
+        liveEnabled: false,
+        safetyState: "BLOCKED",
+        healthReason: "V12_X1_ALL service identity is not current",
+    };
+    validateRunnerOwnedHeartbeat(blockedSnapshotHeartbeat, "V12_X1_ALL");
+    if (safeReason(blockedSnapshotHeartbeat.healthReason || blockedSnapshotHeartbeat.reason || "") !== "V12_X1_ALL service identity is not current") {
+        throw new Error("snapshot healthReason contract self-test failed");
+    }
     console.log("DISDEX_CURRENT_WATCHDOG_HEARTBEAT_CONTRACT_SELFTEST_PASS");
     const now = Date.now();
     const freshHeartbeat = {

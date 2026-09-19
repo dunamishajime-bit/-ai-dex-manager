@@ -308,7 +308,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
             brkLiveEnabled: true,
         };
     }
-    if (blockedReason) heartbeat.reason = blockedReason;
+    if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
         diagnostics: { active: serviceActive, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, strategyOk: stateIdentityMatches(runner, state) },

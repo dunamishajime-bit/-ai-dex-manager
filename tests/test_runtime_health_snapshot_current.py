@@ -57,6 +57,9 @@ class DependencyLivenessHealthTest(unittest.TestCase):
         self.assertIn("blockReasons", source)
         self.assertIn("sourceComplete", source)
         self.assertIn("Shared Risk state is stale", source)
+        self.assertIn("heartbeat.healthReason = blockedReason", source)
+        watchdog = (ROOT / "scripts" / "ops" / "root" / "disdex-runner-watchdog-current.mjs").read_text(encoding="utf-8")
+        self.assertIn("value.healthReason || value.reason", watchdog)
 
     def test_wiring_makes_safety_daemons_self_restarting_and_visible(self):
         wiring = WIRING.read_text(encoding="utf-8")
