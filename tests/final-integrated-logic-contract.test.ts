@@ -18,6 +18,9 @@ test("V12 production signal remains unchanged while Base/Dynamic sizing is expli
   assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
   assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
   assert.equal(V12_X1_ALL.strongRegimeThresholdPct, 0.0359);
+  assert.equal(V12_X1_ALL.strongRegimeQualityScoreMinimum, 0.15);
+  assert.equal(V12_X1_ALL.strongRegimeQualityScoreMaximum, 0.70);
+  assert.equal(V12_X1_ALL.strongRegimeQualityMinimumAtrRatio, 0.014);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumMomentumPct, 0.054);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumAtrRatio, 0.014);
   assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.4649);
@@ -32,7 +35,7 @@ test("PENGU allocation is the formal 0.85x production contract", () => {
 
 test("LIVE integrated risk contract uses Q102 family sizing and 3.0/1.98/3.5 shared caps", () => {
   assert.deepEqual(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross, {
-    HIGH_VOL: 1.665,
+    HIGH_VOL: 1.661,
     MR: 1,
     BRK: 2.465,
     REV: 2.5,

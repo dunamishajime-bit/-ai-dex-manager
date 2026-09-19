@@ -197,10 +197,15 @@ export function evaluateV12EntryQuality(input: { regime: V12Regime; strongRegime
     if (input.regime === "NEUTRAL") return V12_X1_ALL.allowNeutralRegime && input.score >= V12_X1_ALL.neutralScoreThreshold;
     if (input.regime === "LONG" && input.side !== "LONG") return false;
     if (input.regime === "SHORT" && input.side !== "SHORT") return false;
-    if (input.strongRegime) return true;
+    if (input.score >= V12_X1_ALL.neutralScoreThreshold) return true;
+    if (input.strongRegime) {
+        return input.score >= V12_X1_ALL.strongRegimeQualityScoreMinimum
+            && input.score <= V12_X1_ALL.strongRegimeQualityScoreMaximum
+            && input.atrRatio >= V12_X1_ALL.strongRegimeQualityMinimumAtrRatio;
+    }
     const alignedMomentum = input.side === "LONG" ? input.momentum : -input.momentum;
-    return input.score >= V12_X1_ALL.neutralScoreThreshold
-        || (alignedMomentum >= V12_X1_ALL.relaxedRegimeMinimumMomentumPct && input.atrRatio >= V12_X1_ALL.relaxedRegimeMinimumAtrRatio);
+    return alignedMomentum >= V12_X1_ALL.relaxedRegimeMinimumMomentumPct
+        && input.atrRatio >= V12_X1_ALL.relaxedRegimeMinimumAtrRatio;
 }
 
 function candidateMetricsFor(symbol: string, bars: V12Bar[], index: number): { candidate: V12Candidate; atrRatio: number } | null {

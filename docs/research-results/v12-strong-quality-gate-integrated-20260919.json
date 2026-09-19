@@ -1,0 +1,82 @@
+{
+  "schema": "v12-strong-quality-gate-integrated/v1",
+  "status": "PASS_RESEARCH_ONLY",
+  "period": {
+    "startInclusive": "2025-08-10T00:00:00.000Z",
+    "endExclusive": "2026-08-10T00:00:00.000Z",
+    "calendarDays": 365
+  },
+  "capital": {
+    "initialJpy": 10000,
+    "monthlyContributionJpy": 10000,
+    "monthlyContributions": 12,
+    "totalContributedJpy": 130000,
+    "compounding": true
+  },
+  "changeUnderTest": {
+    "v12StrongRegime": {
+      "before": "strongRegime=true bypasses score/ATR entry quality",
+      "after": "normal score route remains; sub-threshold strong route requires 0.15 <= score <= 0.70 AND ATR/price >= 0.014",
+      "normalScoreThreshold": 1.4649,
+      "strongScoreMinimum": 0.15,
+      "strongScoreMaximum": 0.70,
+      "strongMinimumAtrRatio": 0.014,
+      "nonStrongRelaxedRouteUnchanged": {
+        "minimumAlignedMomentum": 0.054,
+        "minimumAtrRatio": 0.014
+      }
+    },
+    "q102HighVolGross": {
+      "before": 1.665,
+      "after": 1.661,
+      "reason": "minimum exact adjustment restoring formal SEVERE max-DD below 20% after the V12 signal-quality improvement"
+    }
+  },
+  "frozenProductionContract": {
+    "v12BaseAggregateGross": 1.5,
+    "v12DynamicAggregateGrossCap": 2.0,
+    "v12PerPositionGrossCap": 1.0,
+    "penguGross": 0.85,
+    "q102FamilyGross": {"HIGH_VOL": 1.661, "MR": 1.0, "BRK": 2.465, "REV": 2.5, "PB": 2.5},
+    "v52StockGross": 1.98,
+    "v52SlotGross": 1.64,
+    "cryptoGrossCap": 3.0,
+    "totalGrossCap": 3.5,
+    "sharedCryptoDailyLossPct": 7.5
+  },
+  "v12LedgerComparison": {
+    "CURRENT": {
+      "NORMAL": {"returnPct": 1010.5985075063734, "profitFactor": 2.7725520733979683, "maxDrawdownPct": -9.238732497128076, "trades": 874},
+      "SEVERE": {"returnPct": 240.48363557136784, "profitFactor": 1.626013280161595, "maxDrawdownPct": -14.744881386891844, "trades": 871}
+    },
+    "IMPROVED": {
+      "NORMAL": {"returnPct": 1194.0444382844598, "profitFactor": 3.371519439845926, "maxDrawdownPct": -7.16562979274652, "trades": 786},
+      "SEVERE": {"returnPct": 344.4859199630844, "profitFactor": 1.966939422670249, "maxDrawdownPct": -12.116437822324173, "trades": 786}
+    }
+  },
+  "integratedComparison": {
+    "CURRENT": {
+      "NORMAL": {"endingAssetJpy": 270126566.3772751, "profitFactor": 3.82886822, "maxDrawdownPct": -19.72421906, "trades": 1237, "v12Entries": 874, "q102Entries": 69, "grossConflicts": 0},
+      "SEVERE": {"endingAssetJpy": 24184641.27364947, "profitFactor": 2.79016516, "maxDrawdownPct": -19.97886021, "trades": 1078, "v12Entries": 871, "q102Entries": 69, "grossConflicts": 0}
+    },
+    "CANDIDATE": {
+      "NORMAL": {"endingAssetJpy": 334453833.5162294, "profitFactor": 4.127662, "maxDrawdownPct": -19.88452049, "trades": 1144, "v12Entries": 786, "q102Entries": 71, "grossConflicts": 0},
+      "SEVERE": {"endingAssetJpy": 34122156.03225166, "profitFactor": 3.07240612, "maxDrawdownPct": -19.99033133, "trades": 988, "v12Entries": 786, "q102Entries": 71, "grossConflicts": 0}
+    },
+    "delta": {
+      "NORMAL": {"endingAssetJpy": 64327267.13895428, "endingAssetPct": 23.814914, "profitFactor": 0.29879378, "maxDrawdownPctPoints": -0.16030143, "trades": -93},
+      "SEVERE": {"endingAssetJpy": 9937514.75860219, "endingAssetPct": 41.092199, "profitFactor": 0.28224096, "maxDrawdownPctPoints": -0.01147112, "trades": -90}
+    }
+  },
+  "validation": {
+    "currentFormalReplayReproducedExactly": true,
+    "currentNormalEndingAssetExpectedJpy": 270126566.3772751,
+    "currentSevereEndingAssetExpectedJpy": 24184641.27364947,
+    "candidateSevereDdStrictlyWithin20Pct": true,
+    "grossConflicts": 0,
+    "maxCryptoGross": 3.0,
+    "maxTotalGrossNormal": 3.5,
+    "maxTotalGrossSevere": 3.0
+  },
+  "safety": {"ordersSent": false, "liveChanged": false, "vpsChanged": false, "productionChanged": false}
+}

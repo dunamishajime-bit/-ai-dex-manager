@@ -12,6 +12,9 @@ import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProduction
 test("current LIVE target preserves the validated V12 signal contract with intentional Top2 sizing", () => {
   assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
   assert.equal(V12_X1_ALL.strongRegimeThresholdPct, 0.0359);
+  assert.equal(V12_X1_ALL.strongRegimeQualityScoreMinimum, 0.15);
+  assert.equal(V12_X1_ALL.strongRegimeQualityScoreMaximum, 0.70);
+  assert.equal(V12_X1_ALL.strongRegimeQualityMinimumAtrRatio, 0.014);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumMomentumPct, 0.054);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumAtrRatio, 0.014);
   assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.4649);
@@ -41,6 +44,7 @@ test("Q102 one-slot LIVE target uses family sizing up to 2.50x under shared 3.0x
   assert.equal(QUALITY102_CAUSAL_V1.maximumPositions, 1);
   assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
   assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 3.5);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.HIGH_VOL, 1.661);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.BRK, 2.465);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 1.98);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 1.64);
