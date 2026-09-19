@@ -777,7 +777,7 @@ export class Quality102CausalV1Runner {
                 reduceOnly: pending.reduceOnly,
                 expectedPrice: executionWindow.expectedPrice,
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
-                reason: pending.reason || STRATEGY_ID,
+                reason: `${pending.reason || STRATEGY_ID} family=${pending.family || state.position?.family || "UNKNOWN"} variant=${pending.variant || state.position?.variant || "UNKNOWN"} layer=${pending.layer || state.position?.layer || "UNKNOWN"}`,
                 requireVenueMargin5xCross: !pending.reduceOnly,
             };
             let result: DirectTradeResult;

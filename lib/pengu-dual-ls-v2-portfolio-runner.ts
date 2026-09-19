@@ -562,7 +562,7 @@ export class PenguDualLsV2PortfolioRunner {
                 reduceOnly: pending.reduceOnly,
                 expectedPrice,
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
-                reason: pending.reason,
+                reason: `${pending.reason} entryVersion=${pending.entryVersion || state.position?.entryVersion || "UNKNOWN"}`,
             };
             const result = await this.dependencies.executor.executeMarket(command);
             return this.applyResult(state, pending, result);
