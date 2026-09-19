@@ -150,6 +150,28 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
         for key, raw in before.items():
             self.assertEqual(self.paths[key].read_bytes(), raw)
 
+    def test_partial_state_write_failure_rolls_back_prior_writes(self):
+        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52")}
+        real_write = reconcile._backup_and_write
+        calls = {"count": 0}
+
+        def flaky_write(path, raw, now_ms):
+            calls["count"] += 1
+            if calls["count"] == 2:
+                raise OSError("synthetic second-state write failure")
+            return real_write(path, raw, now_ms)
+
+        with patch.object(reconcile, "_backup_and_write", side_effect=flaky_write):
+            with self.assertRaisesRegex(
+                reconcile.EmergencyStateReconcileError,
+                "STATE_RECONCILIATION_WRITE_FAILED_ROLLED_BACK",
+            ):
+                reconcile.reconcile_emergency_flatten_states(
+                    self.fills(), env=self.env, stock_symbol_map=self.stock_map, now_ms=55_000
+                )
+        for key, raw in before.items():
+            self.assertEqual(self.paths[key].read_bytes(), raw)
+
     def test_pending_order_blocks_reconcile_without_mutation(self):
         v12 = self.read("v12")
         v12["pending"] = {"idempotencyKey": "x"}

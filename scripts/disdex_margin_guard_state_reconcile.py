@@ -252,6 +252,22 @@ def _backup_and_write(path: Path, raw: dict, now_ms: int) -> str:
     return str(backup)
 
 
+def _restore_from_backup(path: Path, backup: Path) -> None:
+    backup_stat = backup.stat()
+    handle, temp_name = tempfile.mkstemp(prefix=f".{path.name}.margin-rollback.", dir=str(path.parent))
+    os.close(handle)
+    try:
+        shutil.copyfile(backup, temp_name)
+        os.chmod(temp_name, 0o600)
+        if hasattr(os, "chown"):
+            os.chown(temp_name, backup_stat.st_uid, backup_stat.st_gid)
+        os.replace(temp_name, path)
+        os.chmod(path, 0o600)
+    finally:
+        if os.path.exists(temp_name):
+            os.unlink(temp_name)
+
+
 def reconcile_emergency_flatten_states(
     fill_results: Iterable[dict],
     *,
@@ -279,58 +295,78 @@ def reconcile_emergency_flatten_states(
     _assert_fill_evidence(claims, fills)
 
     now = int(time.time() * 1000) if now_ms is None else int(now_ms)
-    modified: list[str] = []
-    backups: dict[str, str] = {}
+    updates: list[tuple[str, Path, dict]] = []
 
     v12 = states.get("V12")
     if v12 is not None and any(c["strategy"] == "V12" for c in claims_list):
-        v12.pop("active", None)
-        v12.pop("activePositions", None)
-        v12.pop("pending", None)
-        v12.pop("manualReview", None)
-        v12.pop("killSwitch", None)
-        reference = int(_finite(v12.get("lastReferenceTs")))
-        existing_cd = int(_finite(v12.get("cooldownUntilTs")))
+        payload = dict(v12)
+        payload.pop("active", None)
+        payload.pop("activePositions", None)
+        payload.pop("pending", None)
+        payload.pop("manualReview", None)
+        payload.pop("killSwitch", None)
+        reference = int(_finite(payload.get("lastReferenceTs")))
+        existing_cd = int(_finite(payload.get("cooldownUntilTs")))
         if reference > 0:
-            v12["cooldownUntilTs"] = max(existing_cd, reference + 2 * 60 * 60 * 1000)
-        v12["updatedAt"] = now
-        backups["V12"] = _backup_and_write(paths["V12"], v12, now)
-        modified.append("V12")
+            payload["cooldownUntilTs"] = max(existing_cd, reference + 2 * 60 * 60 * 1000)
+        payload["updatedAt"] = now
+        updates.append(("V12", paths["V12"], payload))
 
     pengu = states.get("PENGU")
     if pengu is not None and any(c["strategy"] == "PENGU" for c in claims_list):
-        pengu.pop("position", None)
-        pengu.pop("pending", None)
-        reference = int(_finite(pengu.get("lastSignalReferenceTs")))
-        existing_cd = int(_finite(pengu.get("cooldownUntilTs")))
+        payload = dict(pengu)
+        payload.pop("position", None)
+        payload.pop("pending", None)
+        reference = int(_finite(payload.get("lastSignalReferenceTs")))
+        existing_cd = int(_finite(payload.get("cooldownUntilTs")))
         if reference > 0:
-            pengu["cooldownUntilTs"] = max(existing_cd, reference + 6 * 60 * 60 * 1000)
-        failures = pengu.get("failures") if isinstance(pengu.get("failures"), list) else []
+            payload["cooldownUntilTs"] = max(existing_cd, reference + 6 * 60 * 60 * 1000)
+        failures = list(payload.get("failures")) if isinstance(payload.get("failures"), list) else []
         failures.append({"occurredAt": now, "message": "MARGIN_GUARD_EMERGENCY_FLAT_RECONCILED"})
-        pengu["failures"] = failures[-100:]
-        pengu["updatedAt"] = now
-        backups["PENGU"] = _backup_and_write(paths["PENGU"], pengu, now)
-        modified.append("PENGU")
+        payload["failures"] = failures[-100:]
+        payload["updatedAt"] = now
+        updates.append(("PENGU", paths["PENGU"], payload))
 
     q102 = states.get("Q102")
     if q102 is not None and any(c["strategy"] == "Q102" for c in claims_list):
-        q102.pop("position", None)
-        q102.pop("pending", None)
-        failures = q102.get("failures") if isinstance(q102.get("failures"), list) else []
+        payload = dict(q102)
+        payload.pop("position", None)
+        payload.pop("pending", None)
+        failures = list(payload.get("failures")) if isinstance(payload.get("failures"), list) else []
         failures.append({"occurredAt": now, "message": "MARGIN_GUARD_EMERGENCY_FLAT_RECONCILED"})
-        q102["failures"] = failures[-100:]
-        q102["lastReconciledAt"] = now
-        q102["updatedAt"] = now
-        backups["Q102"] = _backup_and_write(paths["Q102"], q102, now)
-        modified.append("Q102")
+        payload["failures"] = failures[-100:]
+        payload["lastReconciledAt"] = now
+        payload["updatedAt"] = now
+        updates.append(("Q102", paths["Q102"], payload))
 
     v52 = states.get("V52")
     if v52 is not None and any(c["strategy"] == "V52" for c in claims_list):
-        v52["positions"] = {}
-        v52["pendingOrder"] = None
-        v52["updatedAt"] = now
-        backups["V52"] = _backup_and_write(paths["V52"], v52, now)
-        modified.append("V52")
+        payload = dict(v52)
+        payload["positions"] = {}
+        payload["pendingOrder"] = None
+        payload["updatedAt"] = now
+        updates.append(("V52", paths["V52"], payload))
+
+    modified: list[str] = []
+    backups: dict[str, str] = {}
+    try:
+        for strategy, path, payload in updates:
+            backup = _backup_and_write(path, payload, now)
+            backups[strategy] = backup
+            modified.append(strategy)
+    except Exception as error:
+        rollback_errors: list[str] = []
+        for strategy in reversed(modified):
+            try:
+                _restore_from_backup(paths[strategy], Path(backups[strategy]))
+            except Exception as rollback_error:
+                rollback_errors.append(f"{strategy}:{rollback_error}")
+        if rollback_errors:
+            raise EmergencyStateReconcileError(
+                f"STATE_RECONCILIATION_PARTIAL_WRITE_ROLLBACK_FAILED:{error}:"
+                + "|".join(rollback_errors)
+            ) from error
+        raise EmergencyStateReconcileError(f"STATE_RECONCILIATION_WRITE_FAILED_ROLLED_BACK:{error}") from error
 
     return {
         "status": "PASS",
