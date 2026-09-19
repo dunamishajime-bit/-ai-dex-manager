@@ -80,7 +80,7 @@ export default function HomePage() {
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52損失上限 {config.v52DailyLossPct}%</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Portfolio Gross上限 ≤ {config.maximumGross.toFixed(1)}x</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 {config.v12SizingMode}</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 Stock {config.v52StockGross.toFixed(1)}x / 最大{config.v52MaxConcurrentPositions}建玉</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 Stock {config.v52StockGross.toFixed(2)}x / Slot ≤ {config.v52V50Gross.toFixed(2)}x / 最大{config.v52MaxConcurrentPositions}建玉</span>
               <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">Q102 Causal V4: 1 Slot / {config.quality102Runtime.strategyGrossCap.toFixed(2)}x</span>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function HomePage() {
         <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
           <div className="font-bold">Q102 Causal V4 の公開状態</div>
           <p className="mt-1 text-[12px] text-amber-100/80">Q102は固定CSV playback/replayではなく、Causal V4 generator / selector / planner / reconciliation / live adapterの実stateを読み取る1-slot補完スリーブです。</p>
-          <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x / symbols {config.quality102Runtime.symbols.join(", ")}</p>
+          <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / HIGH_VOL {config.quality102Runtime.familyGross.HIGH_VOL.toFixed(3)}x / MR {config.quality102Runtime.familyGross.MR.toFixed(2)}x / BRK {config.quality102Runtime.familyGross.BRK.toFixed(3)}x / REV {config.quality102Runtime.familyGross.REV.toFixed(2)}x / PB {config.quality102Runtime.familyGross.PB.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x</p>
         </section>
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
