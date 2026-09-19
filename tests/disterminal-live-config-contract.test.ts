@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "../lib/disterminal-live-config";
 
-const releaseSha = "6ad0dd458676ae832b514ac58b19d3df46025d08";
+const releaseSha = "4230604a4cff33e5fb93725e36544e180eb0da45";
 
 test("DISTerminal mirrors the current integrated LIVE contract", () => {
   assert.equal(config.approvedReleaseSha, releaseSha);
@@ -17,7 +17,7 @@ test("DISTerminal mirrors the current integrated LIVE contract", () => {
   assert.equal(config.quality102Runtime.expectedReleaseSha, releaseSha);
   assert.equal(config.quality102Runtime.strategyGrossCap, 2.5);
   assert.deepEqual(config.quality102Runtime.familyGross, {
-    HIGH_VOL: 1.665,
+    HIGH_VOL: 1.661,
     MR: 1,
     BRK: 2.465,
     REV: 2.5,

@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "../lib/disterminal-live-config";
 
-const CURRENT_VPS_RELEASE = "6ad0dd458676ae832b514ac58b19d3df46025d08";
+const CURRENT_VPS_RELEASE = "4230604a4cff33e5fb93725e36544e180eb0da45";
 
 test("HP runtime config points at the current VPS release and current logic names", () => {
   assert.equal(liveConfig.productionReleaseShas.v12, CURRENT_VPS_RELEASE);
@@ -22,7 +22,7 @@ test("current runtime config keeps the production gross safety contract", () => 
   assert.equal(liveConfig.v12Gross, 2);
   assert.equal(liveConfig.penguGross, 0.85);
   assert.equal(liveConfig.quality102Runtime.strategyGrossCap, 2.5);
-  assert.equal(liveConfig.quality102Runtime.familyGross.HIGH_VOL, 1.665);
+  assert.equal(liveConfig.quality102Runtime.familyGross.HIGH_VOL, 1.661);
   assert.equal(liveConfig.quality102Runtime.familyGross.BRK, 2.465);
   assert.equal(liveConfig.v52StockGross, 1.98);
   assert.equal(liveConfig.v52V50Gross, 1.64);

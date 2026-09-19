@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
-import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { loadCurrentProductionRuntime, type CurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 
 type JsonObject = Record<string, unknown>;
 const MAX_JSON_BYTES = 512 * 1024;
@@ -151,14 +151,17 @@ function costDecision(value: unknown): V52CostDecision | undefined {
   };
 }
 
-const thresholds = {
-  basisBps: config.v52Top2Policy.minEntryBasisBps,
-  convergenceBps: config.v52Top2Policy.convergenceBps,
-  stopMultiple: config.v52Top2Policy.basisStopMultiple,
-  netEdgeBps: config.v52Top2Policy.minNetEdgeBps,
-  maxCostBps: config.v52Top2Policy.maximumRoundTripCostBps,
-  maxSpreadBps: config.v52Top2Policy.maximumSpreadBps,
-};
+function thresholdsFor(runtime: CurrentProductionRuntime | null): V52Top2Observability["thresholds"] {
+  const v52 = runtime?.v52;
+  return {
+    basisBps: v52?.minimumEntryBasisBps ?? Number.NaN,
+    convergenceBps: v52?.convergenceBps ?? Number.NaN,
+    stopMultiple: v52?.basisStopMultiple ?? Number.NaN,
+    netEdgeBps: v52?.minimumNetEdgeBps ?? Number.NaN,
+    maxCostBps: v52?.maximumRoundTripCostBps ?? Number.NaN,
+    maxSpreadBps: v52?.maximumSpreadBps ?? Number.NaN,
+  };
+}
 
 async function readReferenceHealth() {
   const configuredUrl = String(process.env.V52_REFERENCE_HEALTH_URL || "").trim();
@@ -224,7 +227,7 @@ function windowSnapshot(window: string, value: unknown): V52Top2Window {
   };
 }
 
-function unavailable(capturedAt: string, configured: boolean, error: string): V52Top2Observability {
+function unavailable(capturedAt: string, configured: boolean, error: string, thresholds: V52Top2Observability["thresholds"], windowsNy: string[]): V52Top2Observability {
   return {
     ok: false,
     readOnly: true,
@@ -242,22 +245,25 @@ function unavailable(capturedAt: string, configured: boolean, error: string): V5
     thresholds,
     rejectionCounters: {},
     positions: [],
-    windows: config.v52Top2Policy.windowsNy.map((window) => windowSnapshot(window, null)),
+    windows: windowsNy.map((window) => windowSnapshot(window, null)),
     errors: [error],
   };
 }
 
 export async function loadV52Top2Observability(): Promise<V52Top2Observability> {
   const capturedAt = new Date().toISOString();
+  const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
+  const thresholds = thresholdsFor(currentRuntime);
+  const windowsNy = currentRuntime?.v52.windowsNy ?? [];
   const configuredPath = String(process.env.V52_ASTER_ONLY_STATE_PATH || "").trim();
-  if (!configuredPath) return unavailable(capturedAt, false, "V52_ASTER_ONLY_STATE_PATH がUIサービスに設定されていません。");
-  if (!isAbsolute(configuredPath)) return unavailable(capturedAt, true, "V52_ASTER_ONLY_STATE_PATH は絶対パスで設定してください。");
+  if (!configuredPath) return unavailable(capturedAt, false, "V52_ASTER_ONLY_STATE_PATH がUIサービスに設定されていません。", thresholds, windowsNy);
+  if (!isAbsolute(configuredPath)) return unavailable(capturedAt, true, "V52_ASTER_ONLY_STATE_PATH は絶対パスで設定してください。", thresholds, windowsNy);
 
   try {
     const content = await readFile(configuredPath, "utf8");
-    if (Buffer.byteLength(content, "utf8") > MAX_JSON_BYTES) return unavailable(capturedAt, true, "V52 runner state が読み取り上限を超えています。");
+    if (Buffer.byteLength(content, "utf8") > MAX_JSON_BYTES) return unavailable(capturedAt, true, "V52 runner state が読み取り上限を超えています。", thresholds, windowsNy);
     const state = object(JSON.parse(content));
-    if (!state) return unavailable(capturedAt, true, "V52 runner state の形式が不正です。");
+    if (!state) return unavailable(capturedAt, true, "V52 runner state の形式が不正です。", thresholds, windowsNy);
 
     const updatedAt = finite(state.updatedAt);
     const ageMs = updatedAt === undefined ? undefined : Math.max(0, Date.now() - updatedAt);
@@ -268,7 +274,7 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       const position = object(value) || {};
       return { slot, symbol: text(position.symbol), side: text(position.side), gross: finite(position.gross) };
     }).filter((position) => position.slot.startsWith("V50") || position.slot === "V11_EQ");
-    const windows = config.v52Top2Policy.windowsNy.map((window) => windowSnapshot(window, object(state.v52Top2Telemetry)?.[window]));
+    const windows = windowsNy.map((window) => windowSnapshot(window, object(state.v52Top2Telemetry)?.[window]));
     const currentNyDay = nyDay();
     const diagnostics = object(state.v52GateDiagnostics);
     const telemetry = object(state.v50Top2Telemetry);
@@ -335,6 +341,6 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       errors: [],
     };
   } catch (error) {
-    return unavailable(capturedAt, true, error instanceof Error ? error.message : "V52 runner state を読み取れません。");
+    return unavailable(capturedAt, true, error instanceof Error ? error.message : "V52 runner state を読み取れません。", thresholds, windowsNy);
   }
 }

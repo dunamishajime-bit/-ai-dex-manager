@@ -5,6 +5,12 @@ const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha"
 const CURRENT_RELEASE_ROOT = "/home/deploy/disdex-trading/current";
 const RUNTIME_ENV_ROOT = "/etc/disdex/current-runtime";
 const SHA_RE = /^[0-9a-f]{40}$/i;
+const HEARTBEAT_PATHS = Object.freeze({
+  v12: "/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json",
+  pengu: "/var/lib/disdex/runner-health/heartbeats/pengu-v8.json",
+  quality102: "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json",
+  v52: "/var/lib/disdex/runner-health/heartbeats/v52.json",
+});
 
 type EnvMap = Record<string, string>;
 
@@ -21,6 +27,17 @@ export type CurrentProductionRuntime = {
     quality102: string;
     v52: string;
   };
+  runtimeLineage: {
+    synchronized: boolean;
+    units: Record<"v12" | "pengu" | "quality102" | "v52", {
+      runtimeSha?: string;
+      expectedSha?: string;
+      mode?: string;
+      safetyState?: string;
+      matchesCurrent: boolean;
+      error?: string;
+    }>;
+  };
   caps: {
     v12BaseGross: number;
     v12DynamicGross: number;
@@ -35,6 +52,35 @@ export type CurrentProductionRuntime = {
     sharedCryptoDailyLossPct: number;
     stockDailyLossPct: number;
   };
+  v12: {
+    strategyId: string;
+    maximumPositions: number;
+    neutralScoreThreshold: number;
+    strongRegimeThresholdPct: number;
+    strongRegimeQualityScoreMinimum: number;
+    strongRegimeQualityScoreMaximum: number;
+    strongRegimeQualityMinimumAtrRatio: number;
+    relaxedRegimeMinimumMomentumPct: number;
+    relaxedRegimeMinimumAtrRatio: number;
+  };
+  pengu: {
+    strategyId: string;
+    hardStopCooldownHours: number;
+    recoveryRule: string;
+    recoveryPriority: string;
+    recoveryInitialGross: number;
+    recoveryRsiDelta6Min: number;
+    recoveryEma168DistanceMinPct: number;
+    recoveryBtcReturn6hMinPct: number;
+    recoveryHardStopPct: number;
+    recoveryTrailActivationPct: number;
+    recoveryTrailRetracePct: number;
+    recoveryMaxHoldHours: number;
+    recoveryPartialAfterHours: number;
+    recoveryPartialGross: number;
+    longMultiplier: number;
+    lowGross: number;
+  };
   quality102: {
     selectorMode: string;
     familyGross: {
@@ -46,6 +92,9 @@ export type CurrentProductionRuntime = {
     };
   };
   v52: {
+    policyId: string;
+    strategy: string;
+    maximumHoldingHours: number;
     minimumEntryBasisBps: number;
     convergenceBps: number;
     basisStopMultiple: number;
@@ -90,10 +139,46 @@ function extractObjectNumber(source: string, key: string): number {
   return value;
 }
 
+function extractObjectText(source: string, key: string): string {
+  const pattern = new RegExp(`\\b${key}\\s*:\\s*["']([^"']+)["']`);
+  const match = source.match(pattern);
+  if (!match?.[1]) throw new Error(`CURRENT_RUNTIME_SOURCE_TEXT_MISSING:${key}`);
+  return match[1];
+}
+
 function v52Number(value: unknown, key: string): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) throw new Error(`CURRENT_V52_RUNTIME_INVALID:${key}`);
   return parsed;
+}
+
+type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
+
+async function loadRuntimeLineage(releaseSha: string): Promise<CurrentProductionRuntime["runtimeLineage"]> {
+  const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
+  for (const [unit, path] of Object.entries(HEARTBEAT_PATHS) as Array<[RuntimeUnitKey, string]>) {
+    try {
+      const raw = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
+      const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim() : undefined;
+      const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim() : undefined;
+      units[unit] = {
+        runtimeSha,
+        expectedSha,
+        mode: typeof raw.mode === "string" ? raw.mode : undefined,
+        safetyState: typeof raw.safetyState === "string" ? raw.safetyState : undefined,
+        matchesCurrent: runtimeSha === releaseSha && expectedSha === releaseSha,
+      };
+    } catch (error) {
+      units[unit] = {
+        matchesCurrent: false,
+        error: error instanceof Error ? error.message : "HEARTBEAT_UNAVAILABLE",
+      };
+    }
+  }
+  return {
+    synchronized: Object.values(units).every((unit) => unit.matchesCurrent),
+    units,
+  };
 }
 
 export async function loadCurrentProductionRuntime(): Promise<CurrentProductionRuntime> {
@@ -110,6 +195,10 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   }
 
   const q102Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "integratedProductionRiskPolicy.ts"), "utf8");
+  const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
+  const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
+  const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
+  const runtimeLineage = await loadRuntimeLineage(releaseSha);
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
     ? v52Raw.windowsNy.map((value) => String(value)).filter(Boolean)
@@ -132,6 +221,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       quality102: releaseSha,
       v52: releaseSha,
     },
+    runtimeLineage,
     caps: {
       v12BaseGross: requiredNumber(env, "V12_BASE_GROSS_CAP"),
       v12DynamicGross: requiredNumber(env, "V12_DYNAMIC_GROSS_CAP"),
@@ -146,6 +236,35 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       sharedCryptoDailyLossPct: requiredNumber(env, "DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT"),
       stockDailyLossPct,
     },
+    v12: {
+      strategyId: extractObjectText(v12Source, "strategyId"),
+      maximumPositions: extractObjectNumber(v12Source, "maximumPositions"),
+      neutralScoreThreshold: extractObjectNumber(v12Source, "neutralScoreThreshold"),
+      strongRegimeThresholdPct: extractObjectNumber(v12Source, "strongRegimeThresholdPct"),
+      strongRegimeQualityScoreMinimum: extractObjectNumber(v12Source, "strongRegimeQualityScoreMinimum"),
+      strongRegimeQualityScoreMaximum: extractObjectNumber(v12Source, "strongRegimeQualityScoreMaximum"),
+      strongRegimeQualityMinimumAtrRatio: extractObjectNumber(v12Source, "strongRegimeQualityMinimumAtrRatio"),
+      relaxedRegimeMinimumMomentumPct: extractObjectNumber(v12Source, "relaxedRegimeMinimumMomentumPct"),
+      relaxedRegimeMinimumAtrRatio: extractObjectNumber(v12Source, "relaxedRegimeMinimumAtrRatio"),
+    },
+    pengu: {
+      strategyId: extractObjectText(penguSource, "id"),
+      hardStopCooldownHours: extractObjectNumber(penguSource, "hardStopCooldownHours"),
+      recoveryRule: extractObjectText(penguRecoverySource, "rule"),
+      recoveryPriority: extractObjectText(penguRecoverySource, "priority"),
+      recoveryInitialGross: extractObjectNumber(penguRecoverySource, "initialGross"),
+      recoveryRsiDelta6Min: extractObjectNumber(penguRecoverySource, "rsiDelta6Min"),
+      recoveryEma168DistanceMinPct: extractObjectNumber(penguRecoverySource, "ema168DistanceMinPct"),
+      recoveryBtcReturn6hMinPct: extractObjectNumber(penguRecoverySource, "btcReturn6hMinPct"),
+      recoveryHardStopPct: extractObjectNumber(penguRecoverySource, "hardStopPct"),
+      recoveryTrailActivationPct: extractObjectNumber(penguRecoverySource, "trailActivationPct"),
+      recoveryTrailRetracePct: extractObjectNumber(penguRecoverySource, "trailRetracePct"),
+      recoveryMaxHoldHours: extractObjectNumber(penguRecoverySource, "maxHoldHours"),
+      recoveryPartialAfterHours: extractObjectNumber(penguRecoverySource, "afterHours"),
+      recoveryPartialGross: extractObjectNumber(penguRecoverySource, "gross"),
+      longMultiplier: extractObjectNumber(penguRecoverySource, "longMultiplier"),
+      lowGross: extractObjectNumber(penguRecoverySource, "lowGross"),
+    },
     quality102: {
       selectorMode: requiredText(env, "QUALITY102_CAUSAL_V1_SELECTOR_MODE"),
       familyGross: {
@@ -157,6 +276,9 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       },
     },
     v52: {
+      policyId: String(v52Raw.policyId || ""),
+      strategy: String(v52Raw.strategy || ""),
+      maximumHoldingHours: v52Number(v52Raw.maximumHoldingHours, "maximumHoldingHours"),
       minimumEntryBasisBps: v52Number(v52Raw.minimumEntryBasisBps, "minimumEntryBasisBps"),
       convergenceBps: v52Number(v52Raw.convergenceBps, "convergenceBps"),
       basisStopMultiple: v52Number(v52Raw.basisStopMultiple, "basisStopMultiple"),

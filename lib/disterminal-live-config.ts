@@ -1,17 +1,23 @@
 import v52V50Runtime from "@/config/v52V50Runtime.json";
 
+/**
+ * Build-time compatibility metadata only.
+ * Production strategy truth MUST come from /api/system/live-runtime, which reads
+ * /home/deploy/disdex-trading/current and the release-pinned runtime heartbeats.
+ * Do not use these values to assert the currently running Production contract.
+ */
 export const DIST_TERMINAL_LIVE_CONFIG = {
   productName: "DISTerminal",
   strategyLabel: "V12 X1.00 ALL Top2 / Dynamic Residual 2.00x + PENGU Dual LS V2 / Short V20 + Q102 Causal V4 + V52",
   executionVenue: "AsterDEX",
   executor: "AsterDirectTradeExecutor",
   /** Release currently used by the V12/PENGU/Quality102 VPS runners. */
-  approvedReleaseSha: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+  approvedReleaseSha: "4230604a4cff33e5fb93725e36544e180eb0da45",
   productionReleaseShas: {
-    v12: "6ad0dd458676ae832b514ac58b19d3df46025d08",
-    pengu: "6ad0dd458676ae832b514ac58b19d3df46025d08",
-    v52: "6ad0dd458676ae832b514ac58b19d3df46025d08",
-    quality102: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    v12: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    pengu: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    v52: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    quality102: "4230604a4cff33e5fb93725e36544e180eb0da45",
   },
   v12DailyLossPct: 7.5,
   sharedCryptoDailyLossPct: 7.5,
@@ -22,13 +28,13 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
   v12Gross: 2.0,
   v12PerPositionGross: 1,
   v12MaximumPositions: 2,
-  v12SizingMode: "ATR/リスク連動、Base合計1.50x / Dynamic Residual込み最大2.00x / Top2",
+  v12SizingMode: "ATR/繝ｪ繧ｹ繧ｯ騾｣蜍輔。ase蜷郁ｨ・.50x / Dynamic Residual霎ｼ縺ｿ譛螟ｧ2.00x / Top2",
   sharedCryptoGross: 3,
   quality102Runtime: {
-    expectedReleaseSha: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    expectedReleaseSha: "4230604a4cff33e5fb93725e36544e180eb0da45",
     strategyGrossCap: 2.5,
     familyGross: {
-      HIGH_VOL: 1.665,
+      HIGH_VOL: 1.661,
       MR: 1.0,
       BRK: 2.465,
       REV: 2.5,
@@ -74,7 +80,7 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     { label: "strong", basisBps: 100, netEdgeBps: 15, requestedGross: v52V50Runtime.slotGross },
   ],
   v52MaxConcurrentPositions: 2,
-  v52ProductionReleaseSha: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+  v52ProductionReleaseSha: "4230604a4cff33e5fb93725e36544e180eb0da45",
   v52Top2Policy: {
     rank1RequestedGross: 1,
     rank2RequestedGross: 0.25,
@@ -121,7 +127,7 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     rsiDelta6Min: 7.392354615445917,
     ema168DistanceMinPct: -5.864583483302943,
     btcReturn6hMinPct: 0.20571786048402818,
-    ordinaryPrecedence: "通常Short / Base Longが成立した場合は通常シグナルを優先。Recoveryは補助Longとして通常シグナル不成立時だけ評価",
+    ordinaryPrecedence: "??Short / Base Long??????????????????Recovery???Long?????????????????",
     recoveryGross: 0.5,
     partialGross: 0.25,
     partialAfterHours: 24,
@@ -130,14 +136,14 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     trailActivationPct: 6,
     trailRetracePct: 3,
     maxHoldHours: 72,
-    sameBarOrder: "-4% partial-defense先行 → 残りgrossへ-6% hard stop",
-    liveTriggerNote: "LIVEはentry×0.96をSTOP_MARKET triggerに使用し、実fill価格・slippageを照合。exact fillは要求しない",
+    sameBarOrder: "-4% partial-defense???????gross?-6% hard stop",
+    liveTriggerNote: "LIVE?entry?0.96?STOP_MARKET trigger??????fill???slippage????exact fill??????",
   },
   vpsObservedReleases: {
-    v12: "6ad0dd458676ae832b514ac58b19d3df46025d08",
-    pengu: "6ad0dd458676ae832b514ac58b19d3df46025d08",
-    v52: "6ad0dd458676ae832b514ac58b19d3df46025d08",
-    quality102: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    v12: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    pengu: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    v52: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    quality102: "4230604a4cff33e5fb93725e36544e180eb0da45",
   },
   v12Symbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT"],
   penguSymbol: "PENGUUSDT",
