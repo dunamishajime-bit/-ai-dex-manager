@@ -22,6 +22,12 @@ Judge explicit checks:
 python scripts/decision_gateway.py judge --input examples/disdex-health-input.json
 ```
 
+Reduce evidence and judge in one call:
+
+```
+python scripts/decision_gateway.py pipeline --input checks.json --evidence app.log
+```
+
 Routes:
 - LOCAL_ONLY: deterministic result is sufficient.
 - GATHER_EVIDENCE: collect named missing facts.

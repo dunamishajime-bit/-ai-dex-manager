@@ -141,12 +141,23 @@ def main():
     p_reduce.add_argument("--context", type=int, default=1)
     p_judge = sub.add_parser("judge")
     p_judge.add_argument("--input", default="-")
+    p_pipe = sub.add_parser("pipeline")
+    p_pipe.add_argument("--input", required=True)
+    p_pipe.add_argument("--evidence", required=True)
+    p_pipe.add_argument("--max-lines", type=int, default=80)
+    p_pipe.add_argument("--context", type=int, default=1)
     args = parser.parse_args()
 
     if args.command == "reduce":
         result = reduce_text(read_text(args.input), args.max_lines, args.context)
-    else:
+    elif args.command == "judge":
         result = judge(json.loads(read_text(args.input)))
+    else:
+        payload = json.loads(read_text(args.input))
+        reduced = reduce_text(read_text(args.evidence), args.max_lines, args.context)
+        payload["compact_context"] = reduced["compact_text"]
+        result = judge(payload)
+        result["reduction"] = {k: v for k, v in reduced.items() if k != "compact_text"}
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 if __name__ == "__main__":

@@ -10,9 +10,9 @@ Primary goal: minimize model context and repeated reasoning without hiding uncer
 
 Workflow:
 1. Prefer deterministic evidence over prose reasoning.
-2. If text is large (roughly >200 lines or >20 KB), run scripts/decision_gateway.py reduce first.
-3. Convert mechanical facts into explicit checks with status pass/fail/unknown.
-4. Run scripts/decision_gateway.py judge on that compact JSON.
+2. Convert mechanical facts into explicit checks with status pass/fail/unknown.
+3. If large evidence and checks are both available, prefer one pipeline call to reduce tool steps.
+4. Otherwise reduce text >200 lines or >20 KB before judging.
 5. Treat the returned route as advisory, not as permission to take external actions.
 
 Routing rules:
