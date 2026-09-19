@@ -575,8 +575,13 @@ export class PenguDualLsV2PortfolioRunner {
             const beforeLockState = await this.dependencies.stateStore.load();
             if (!beforeLockState.pending) preloadedHistory = await this.dependencies.marketData.load();
             const sharedPath = this.dependencies.config.portfolioDailyLossStatePath || process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH;
-            if (!beforeLockState.pending && !beforeLockState.position && sharedPath) {
-                await readSharedCryptoDailyRiskWithRolloverRetry(sharedPath, { now: this.now });
+            if (!beforeLockState.pending && sharedPath) {
+                await readSharedCryptoDailyRiskWithRolloverRetry(sharedPath, {
+                    now: this.now,
+                    rolloverGraceMs: 60_000,
+                    pollMs: 2_000,
+                    maxAttempts: 31,
+                });
             }
         } catch {
             // Preserve the existing fail-closed path under the shared lock.
