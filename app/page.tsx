@@ -7,6 +7,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useLiveStatus } from "@/hooks/useLiveStatus";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 
 function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
@@ -33,6 +34,8 @@ function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: s
 
 function V52Top2Summary() {
   const policy = config.v52Top2Policy;
+  const { snapshot: runtime } = useProductionRuntime();
+  const v52 = runtime?.v52;
   return (
     <section className="panel-gold rounded-[30px] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -45,8 +48,8 @@ function V52Top2Summary() {
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">Top2配分</div><div className="mt-1 text-sm font-bold text-white">Rank1 {policy.rank1RequestedGross.toFixed(2)}x / Rank2 {policy.rank2RequestedGross.toFixed(2)}x</div></div>
         <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">容量上限</div><div className="mt-1 text-sm font-bold text-white">最大{policy.maxConcurrentPositions}建玉 / 日次{policy.maxDailyEntries}件</div></div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">発火Gate</div><div className="mt-1 text-sm font-bold text-white">B{policy.minEntryBasisBps} / C{policy.convergenceBps} / Stop{policy.basisStopMultiple}x / Edge≥{policy.minNetEdgeBps} / Cost≤{policy.maximumRoundTripCostBps}</div></div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">判定窓</div><div className="mt-1 text-sm font-bold text-white">NY {policy.windowsNy.join(" / ")}（各{policy.entryWindowSeconds}秒）</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">発火Gate</div><div className="mt-1 text-sm font-bold text-white">B{v52?.minimumEntryBasisBps ?? policy.minEntryBasisBps} / C{v52?.convergenceBps ?? policy.convergenceBps} / Stop{v52?.basisStopMultiple ?? policy.basisStopMultiple}x / Edge≥{v52?.minimumNetEdgeBps ?? policy.minNetEdgeBps} / Cost≤{v52?.maximumRoundTripCostBps ?? policy.maximumRoundTripCostBps}</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">判定窓</div><div className="mt-1 text-sm font-bold text-white">NY {(v52?.windowsNy ?? policy.windowsNy).join(" / ")}（各{policy.entryWindowSeconds}秒）</div></div>
       </div>
       <p className="mt-3 text-[11px] leading-5 text-white/58">一時的なデータ品質・板・spread拒否は窓内retry、basis/net edge不足やSIGN_CHANGED等は最終拒否。注文・取消・決済はHPから実行しません。</p>
     </section>
@@ -57,7 +60,10 @@ export default function HomePage() {
   const { wallet } = useOperationalWallet();
   const { snapshot, loading: liveLoading, error: liveError } = useLivePortfolio();
   const { snapshot: v12RuntimeStatus, loading: v12StatusLoading } = useLiveStatus();
+  const { snapshot: productionRuntime, error: productionRuntimeError } = useProductionRuntime();
   const { formatPrice } = useCurrency();
+  const caps = productionRuntime?.caps;
+  const q102 = productionRuntime?.quality102;
   const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
   const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
   const positions = snapshot?.positions ?? [];
@@ -76,12 +82,13 @@ export default function HomePage() {
               <span className={`rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 X1.00 ALL</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">PENGU V2 / Recovery V8</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12+PENGU共有損失上限 {config.sharedCryptoDailyLossPct}%</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52損失上限 {config.v52DailyLossPct}%</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Portfolio Gross上限 ≤ {config.maximumGross.toFixed(1)}x</span>
+              <span className={`rounded-full border px-3 py-1.5 ${productionRuntime ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>{productionRuntime ? `Production ${productionRuntime.releaseSha.slice(0, 12)} / runtime直結` : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : ""}`}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12+PENGU共有損失上限 {caps?.sharedCryptoDailyLossPct ?? config.sharedCryptoDailyLossPct}%</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52損失上限 {caps?.stockDailyLossPct ?? config.v52DailyLossPct}%</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">Portfolio Gross上限 ≤ {(caps?.totalGross ?? config.maximumGross).toFixed(1)}x</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V12 {config.v12SizingMode}</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 Stock {config.v52StockGross.toFixed(2)}x / Slot ≤ {config.v52V50Gross.toFixed(2)}x / 最大{config.v52MaxConcurrentPositions}建玉</span>
-              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">Q102 Causal V4: 1 Slot / {config.quality102Runtime.strategyGrossCap.toFixed(2)}x</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">V52 Stock {(caps?.stockGross ?? config.v52StockGross).toFixed(2)}x / Slot ≤ {(caps?.v52V50Gross ?? config.v52V50Gross).toFixed(2)}x / 最大{config.v52MaxConcurrentPositions}建玉</span>
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">Q102 {q102?.selectorMode ?? config.quality102Runtime.selectorMode}: 1 Slot / {(caps?.quality102Gross ?? config.quality102Runtime.strategyGrossCap).toFixed(2)}x</span>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -99,7 +106,7 @@ export default function HomePage() {
         <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
           <div className="font-bold">Q102 Causal V4 の公開状態</div>
           <p className="mt-1 text-[12px] text-amber-100/80">Q102は固定CSV playback/replayではなく、Causal V4 generator / selector / planner / reconciliation / live adapterの実stateを読み取る1-slot補完スリーブです。</p>
-          <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {config.quality102Runtime.strategyGrossCap.toFixed(2)}x / HIGH_VOL {config.quality102Runtime.familyGross.HIGH_VOL.toFixed(3)}x / MR {config.quality102Runtime.familyGross.MR.toFixed(2)}x / BRK {config.quality102Runtime.familyGross.BRK.toFixed(3)}x / REV {config.quality102Runtime.familyGross.REV.toFixed(2)}x / PB {config.quality102Runtime.familyGross.PB.toFixed(2)}x / Crypto ≤ {config.quality102Runtime.cryptoGrossCap.toFixed(2)}x / Total ≤ {config.quality102Runtime.totalGrossCap.toFixed(2)}x</p>
+          <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {(caps?.quality102Gross ?? config.quality102Runtime.strategyGrossCap).toFixed(2)}x / HIGH_VOL {(q102?.familyGross.HIGH_VOL ?? config.quality102Runtime.familyGross.HIGH_VOL).toFixed(3)}x / MR {(q102?.familyGross.MR ?? config.quality102Runtime.familyGross.MR).toFixed(2)}x / BRK {(q102?.familyGross.BRK ?? config.quality102Runtime.familyGross.BRK).toFixed(3)}x / REV {(q102?.familyGross.REV ?? config.quality102Runtime.familyGross.REV).toFixed(2)}x / PB {(q102?.familyGross.PB ?? config.quality102Runtime.familyGross.PB).toFixed(2)}x / Crypto ≤ {(caps?.cryptoGross ?? config.quality102Runtime.cryptoGrossCap).toFixed(2)}x / Total ≤ {(caps?.totalGross ?? config.quality102Runtime.totalGrossCap).toFixed(2)}x</p>
         </section>
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>

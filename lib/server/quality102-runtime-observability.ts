@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 
 type JsonObject = Record<string, unknown>;
 
@@ -127,6 +128,7 @@ function symbols(value: unknown): string[] {
 
 export async function loadQuality102RuntimeObservability(): Promise<Quality102RuntimeStatus> {
   const capturedAt = new Date().toISOString();
+  const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
   const statePath = String(process.env.QUALITY102_CAUSAL_V1_STATE_PATH || "").trim();
   if (!statePath) return unavailable(capturedAt, false, "QUALITY102_CAUSAL_V1_STATE_PATH がUIサービスに設定されていません。");
   if (!isAbsolute(statePath)) return unavailable(capturedAt, true, "QUALITY102_CAUSAL_V1_STATE_PATH は絶対パスで設定してください。");
@@ -150,7 +152,7 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
     const mode = text(heartbeat?.mode) ?? text(state.mode);
     const safetyState = text(heartbeat?.safetyState);
     const runtimeSha = text(heartbeat?.runtimeSha ?? state.runtimeCommitSha);
-    const expectedReleaseSha = text(heartbeat?.expectedSha) ?? config.quality102Runtime.expectedReleaseSha;
+    const expectedReleaseSha = text(heartbeat?.expectedSha) ?? currentRuntime?.releaseSha ?? config.quality102Runtime.expectedReleaseSha;
     const selector = object(heartbeat?.quality102);
     const selectorMode = text(selector?.selectorMode) ?? config.quality102Runtime.selectorMode;
     const historicalSelectorParity = bool(selector?.historicalSelectorParity) ?? false;
@@ -207,9 +209,9 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
       historicalSelectorParity,
       brkLiveEnabled,
       caps: {
-        strategyGrossCap: finite(selector?.strategyGrossCap) ?? quality102Policy.strategyGrossCap,
-        cryptoGrossCap: finite(selector?.cryptoGrossCap) ?? quality102Policy.cryptoGrossCap,
-        totalGrossCap: finite(selector?.totalGrossCap) ?? quality102Policy.totalGrossCap,
+        strategyGrossCap: finite(selector?.strategyGrossCap) ?? currentRuntime?.caps.quality102Gross ?? quality102Policy.strategyGrossCap,
+        cryptoGrossCap: finite(selector?.cryptoGrossCap) ?? currentRuntime?.caps.cryptoGross ?? quality102Policy.cryptoGrossCap,
+        totalGrossCap: finite(selector?.totalGrossCap) ?? currentRuntime?.caps.totalGross ?? quality102Policy.totalGrossCap,
       },
       symbols: symbols(heartbeat?.symbols),
       position: position(state.position ?? state.active),

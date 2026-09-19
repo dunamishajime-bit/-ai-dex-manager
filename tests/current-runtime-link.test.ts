@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "../lib/disterminal-live-config";
 
-const CURRENT_VPS_RELEASE = "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32";
+const CURRENT_VPS_RELEASE = "6ad0dd458676ae832b514ac58b19d3df46025d08";
 
 test("HP runtime config points at the current VPS release and current logic names", () => {
   assert.equal(liveConfig.productionReleaseShas.v12, CURRENT_VPS_RELEASE);

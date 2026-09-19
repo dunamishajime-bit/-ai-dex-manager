@@ -7,13 +7,13 @@ import { loadQuality102RuntimeObservability, quality102Policy } from "../lib/ser
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "../lib/disterminal-live-config";
 
 test("Quality102 runtime policy exposes the production caps and universe", () => {
-  assert.equal(quality102Policy.strategyGrossCap, 1.5);
+  assert.equal(quality102Policy.strategyGrossCap, 2.5);
   assert.equal(quality102Policy.cryptoGrossCap, 3);
   assert.equal(quality102Policy.totalGrossCap, 3.5);
   assert.equal(quality102Policy.symbols.includes("SUIUSDT"), true);
   assert.equal(quality102Policy.symbols.includes("TAOUSDT"), true);
   assert.equal(liveConfig.sharedCryptoGross, 3);
-  assert.equal(liveConfig.quality102Runtime.strategyGrossCap, 1.5);
+  assert.equal(liveConfig.quality102Runtime.strategyGrossCap, 2.5);
 });
 
 test("Quality102 observability fails closed when its state path is not configured", async () => {
@@ -55,7 +55,7 @@ test("Quality102 observability reports the fresh derived sleeve without claiming
   try {
     const result = await loadQuality102RuntimeObservability();
     assert.equal(result.status, "LIVE");
-    assert.equal(result.caps.strategyGrossCap, 1.5);
+    assert.equal(result.caps.strategyGrossCap, 2.5);
     assert.equal(result.historicalSelectorParity, false);
     assert.equal(result.brkLiveEnabled, false);
     assert.deepEqual(result.symbols, ["SUIUSDT"]);

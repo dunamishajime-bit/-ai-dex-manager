@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 
 const MAX_JSON_BYTES = 512 * 1024;
 const STALE_AFTER_MS = 3 * 60 * 60 * 1000;
@@ -120,8 +121,13 @@ function unavailableTrace(reason: string): PenguExecutionTrace {
   };
 }
 
-function unavailable(capturedAt: string, configured: boolean, reason: string): PenguRuntimeStatus {
-  return { status: "UNAVAILABLE", configured, capturedAt, expectedReleaseSha: liveConfig.vpsObservedReleases.pengu, reason, executionTrace: unavailableTrace(reason), failures: [], resolvedFailures: [] };
+function unavailable(
+  capturedAt: string,
+  configured: boolean,
+  reason: string,
+  expectedReleaseSha: string = liveConfig.vpsObservedReleases.pengu,
+): PenguRuntimeStatus {
+  return { status: "UNAVAILABLE", configured, capturedAt, expectedReleaseSha, reason, executionTrace: unavailableTrace(reason), failures: [], resolvedFailures: [] };
 }
 
 function configuredPath() {
@@ -258,14 +264,16 @@ function buildExecutionTrace(
 
 export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatus> {
   const capturedAt = new Date().toISOString();
+  const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
+  const expectedReleaseSha = currentRuntime?.releaseSha ?? liveConfig.vpsObservedReleases.pengu;
   const configured = configuredPath();
-  if (!configured) return unavailable(capturedAt, false, "PENGU runner stateの絶対パスがUIサービスに設定されていません。");
-  if (!isAbsolute(configured.value)) return unavailable(capturedAt, true, `${configured.name}は絶対パスで設定してください。`);
+  if (!configured) return unavailable(capturedAt, false, "PENGU runner stateの絶対パスがUIサービスに設定されていません。", expectedReleaseSha);
+  if (!isAbsolute(configured.value)) return unavailable(capturedAt, true, `${configured.name}は絶対パスで設定してください。`, expectedReleaseSha);
   try {
     const content = await readFile(configured.value, "utf8");
-    if (Buffer.byteLength(content, "utf8") > MAX_JSON_BYTES) return unavailable(capturedAt, true, "PENGU runner stateが読み取り上限を超えています。");
+    if (Buffer.byteLength(content, "utf8") > MAX_JSON_BYTES) return unavailable(capturedAt, true, "PENGU runner stateが読み取り上限を超えています。", expectedReleaseSha);
     const state = object(JSON.parse(content));
-    if (!state) return unavailable(capturedAt, true, "PENGU runner stateの形式が不正です。");
+    if (!state) return unavailable(capturedAt, true, "PENGU runner stateの形式が不正です。", expectedReleaseSha);
     const killSwitch = object(state.killSwitch);
     const [sharedKillSwitch, sharedRisk] = await Promise.all([readKillSwitch(), readSharedRisk()]);
     const killSwitchActive = killSwitch?.active === true || state.killSwitchActive === true || sharedKillSwitch.active;
@@ -273,7 +281,6 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     const ageMs = updatedAt === undefined ? undefined : Math.max(0, Date.now() - updatedAt);
     const mode = text(state.mode);
     const releaseSha = text(state.releaseSha ?? state.sourceSha ?? state.commitSha);
-    const expectedReleaseSha = liveConfig.vpsObservedReleases.pengu;
     const releaseShaSource = releaseSha ? "runner-state" as const : "vps-deployment-config" as const;
     const releaseShaVerified = releaseSha ? releaseSha === expectedReleaseSha : undefined;
     const latestSignal = signalObservability(state.latestSignal);
@@ -300,6 +307,6 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     if (mode && mode.toLowerCase() !== "live") return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner mode=${mode}のためLIVE確認にしません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
     return { status: "LIVE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner stateを確認しました。最新判定：${latestSignal?.reason || "未取得"}`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
   } catch (error) {
-    return unavailable(capturedAt, true, error instanceof Error ? error.message : "PENGU runner stateを読み取れません。");
+    return unavailable(capturedAt, true, error instanceof Error ? error.message : "PENGU runner stateを読み取れません。", expectedReleaseSha);
   }
 }

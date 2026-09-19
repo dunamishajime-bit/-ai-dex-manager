@@ -6,12 +6,12 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
   executionVenue: "AsterDEX",
   executor: "AsterDirectTradeExecutor",
   /** Release currently used by the V12/PENGU/Quality102 VPS runners. */
-  approvedReleaseSha: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
+  approvedReleaseSha: "6ad0dd458676ae832b514ac58b19d3df46025d08",
   productionReleaseShas: {
-    v12: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
-    pengu: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
-    v52: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
-    quality102: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
+    v12: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    pengu: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    v52: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    quality102: "6ad0dd458676ae832b514ac58b19d3df46025d08",
   },
   v12DailyLossPct: 7.5,
   sharedCryptoDailyLossPct: 7.5,
@@ -25,7 +25,7 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
   v12SizingMode: "ATR/リスク連動、Base合計1.50x / Dynamic Residual込み最大2.00x / Top2",
   sharedCryptoGross: 3,
   quality102Runtime: {
-    expectedReleaseSha: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
+    expectedReleaseSha: "6ad0dd458676ae832b514ac58b19d3df46025d08",
     strategyGrossCap: 2.5,
     familyGross: {
       HIGH_VOL: 1.665,
@@ -74,7 +74,7 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     { label: "strong", basisBps: 100, netEdgeBps: 15, requestedGross: v52V50Runtime.slotGross },
   ],
   v52MaxConcurrentPositions: 2,
-  v52ProductionReleaseSha: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
+  v52ProductionReleaseSha: "6ad0dd458676ae832b514ac58b19d3df46025d08",
   v52Top2Policy: {
     rank1RequestedGross: 1,
     rank2RequestedGross: 0.25,
@@ -134,10 +134,10 @@ export const DIST_TERMINAL_LIVE_CONFIG = {
     liveTriggerNote: "LIVEはentry×0.96をSTOP_MARKET triggerに使用し、実fill価格・slippageを照合。exact fillは要求しない",
   },
   vpsObservedReleases: {
-    v12: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
-    pengu: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
-    v52: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
-    quality102: "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32",
+    v12: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    pengu: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    v52: "6ad0dd458676ae832b514ac58b19d3df46025d08",
+    quality102: "6ad0dd458676ae832b514ac58b19d3df46025d08",
   },
   v12Symbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT"],
   penguSymbol: "PENGUUSDT",

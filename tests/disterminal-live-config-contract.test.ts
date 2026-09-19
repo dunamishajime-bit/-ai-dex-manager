@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "../lib/disterminal-live-config";
 
-const releaseSha = "ec1780f8796dfb9cc0811bcfcac351d69fa6cb32";
+const releaseSha = "6ad0dd458676ae832b514ac58b19d3df46025d08";
 
 test("DISTerminal mirrors the current integrated LIVE contract", () => {
   assert.equal(config.approvedReleaseSha, releaseSha);

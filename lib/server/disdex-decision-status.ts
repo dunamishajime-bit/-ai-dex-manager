@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 
 type Sleeve = "V12" | "V52";
 type Status = "発火候補" | "候補に近い" | "条件不足" | "対象時間外" | "取得不能";
@@ -83,7 +84,10 @@ async function readState(pathValue: string | undefined, label: string): Promise<
   return parsed;
 }
 
-export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runtime"] {
+export function runtimeSnapshot(
+  checkedAt: string,
+  releaseSha: string = config.approvedReleaseSha,
+): DecisionStatusSnapshot["runtime"] {
   return {
     checkedAt,
     units: [
@@ -91,7 +95,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         id: "V12_X1.00_ALL",
         label: "V12 X1.00 ALL Top2",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.v12,
+        releaseSha,
         venue: "Aster Futures V3",
         timeframe: "完成済み1時間足 → 2時間足",
         entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。合計1.50x / 1件1.00x",
@@ -103,7 +107,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         id: "PENGU_DUAL_LS_V2_FINAL",
         label: "PENGU Dual LS V2 / Short V20",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.pengu,
+        releaseSha,
         venue: "Aster PENGUUSDT",
         timeframe: "完成済みPENGU/BTC 1時間足",
         entryPolicy: "Long/Short条件成立後、次の1時間足。allocation最大0.85x、Short V20、Recovery V8補助Long、保有中の追加・反転なし。hard-stop後24h cooldown",
@@ -115,7 +119,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         id: "QUALITY102_CAUSAL_V1",
         label: "Q102 Causal V4",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.quality102,
+        releaseSha,
         venue: "Aster Futures crypto sleeve",
         timeframe: "LIVE時点の利用可能データのみ",
         entryPolicy: "CAUSAL_V4 selector。1 slot / 最大1.50x。V12・PENGU・V52を優先し、残余Crypto/Total Grossだけを使用",
@@ -127,7 +131,7 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
         label: "V52 Top2 Aster-only",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.v52,
+        releaseSha,
         venue: "Aster-only stock sleeves",
         timeframe: "米国株時間・V11_EQ / V50 window",
         entryPolicy: "V11 unchanged。V50候補をRank1=1.00x / Rank2=0.25xで最大2建玉。Basis≥60bps / Convergence20bps / Net Edge≥7.5bps。各20秒窓（11:30/12:30/13:30 NY）",
@@ -262,6 +266,10 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
 
   const checkedAt = new Date(now).toISOString();
   const errors: string[] = [];
+  const currentRuntime = await loadCurrentProductionRuntime().catch((error) => {
+    errors.push(error instanceof Error ? error.message : "Current production runtime could not be resolved.");
+    return null;
+  });
   let v12State: JsonObject | null = null;
   let v52State: JsonObject | null = null;
 
@@ -306,7 +314,7 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
     refreshIntervalMinutes: 180,
     checkedAt,
     source: "VPS runner state / sanitized decision snapshot",
-    runtime: runtimeSnapshot(checkedAt),
+    runtime: runtimeSnapshot(checkedAt, currentRuntime?.releaseSha ?? config.approvedReleaseSha),
     v12: { items: v12Items },
     v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items },
     error: errors.length ? errors.join(" / ") : undefined,
