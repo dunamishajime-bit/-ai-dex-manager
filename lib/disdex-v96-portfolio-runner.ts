@@ -261,7 +261,12 @@ export class DisDexV96PortfolioRunner {
         } else if (state.killSwitch?.active) {
             state.killSwitch = { ...state.killSwitch, active: false, observedAt: this.now() };
         }
-        if (killSwitch) return { flatten: true, reason: `Kill Switch: ${killSwitch.reason}` };
+        if (killSwitch) {
+            return {
+                flatten: killSwitch.action === "FLATTEN_MANAGED",
+                reason: `Kill Switch: ${killSwitch.reason}`,
+            };
+        }
         if (state.portfolioDailyLossLatch?.tripped || state.dailyRisk.tripped) return { flatten: true, reason: state.dailyRisk.tripReason || "V96 portfolio daily loss limit tripped." };
         return { flatten: false, reason: undefined as string | undefined };
     }

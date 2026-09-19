@@ -434,7 +434,7 @@ export class Quality102CausalV1Runner {
         }
         if (risk.state?.tripped) {
             return {
-                reason: `SHARED_CRYPTO_DAILY_LOSS:${risk.state.tripReason || "TRIPPED"}`,
+                reason: "SHARED_CRYPTO_DAILY_LOSS:TRIPPED",
                 flattenExisting: true,
             };
         }

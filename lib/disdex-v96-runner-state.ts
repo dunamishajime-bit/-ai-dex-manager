@@ -80,7 +80,7 @@ export interface DisDexV96OperatorOverrideAudit {
 
 export interface DisDexV96KillSwitchAudit {
     active: boolean;
-    action: "FLATTEN_MANAGED";
+    action: "HOLD_PROTECTED" | "FLATTEN_MANAGED";
     reason: string;
     operator: string;
     activatedAt: string;
