@@ -1,0 +1,13 @@
+{
+  "task": "Check DisDex production health",
+  "risk": "high",
+  "checks": [
+    {"name": "runtime SHA matches approved SHA", "status": true, "hard": true, "evidence": "ec1780..."},
+    {"name": "shared kill switch inactive", "status": true, "hard": true},
+    {"name": "Margin Guard healthy", "status": true, "hard": true},
+    {"name": "all required services active", "status": true, "hard": true}
+  ],
+  "uncertainties": [],
+  "conflicts": [],
+  "requires_deep_reasoning": false
+}

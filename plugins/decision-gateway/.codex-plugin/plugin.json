@@ -1,0 +1,6 @@
+{
+  "name": "decision-gateway",
+  "version": "0.1.0",
+  "description": "Reduce large context locally and route deterministic checks before expensive reasoning.",
+  "skills": "./skills/"
+}

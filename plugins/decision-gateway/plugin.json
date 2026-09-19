@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "decision-gateway",
+  "version": "0.1.0",
+  "description": "Reduce large context locally and route deterministic checks before expensive reasoning."
+}
