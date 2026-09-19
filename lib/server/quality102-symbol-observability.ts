@@ -1,5 +1,4 @@
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 
 import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
@@ -37,21 +36,11 @@ export type Quality102SymbolSnapshot = {
 
 let cache: { hourKey: number; snapshot: Quality102SymbolSnapshot } | null = null;
 
-async function loadHighVolSymbols() {
-  const path = process.env.QUALITY102_CAUSAL_V1_ENV_PATH || "/etc/disdex/disdex-quality102-causal-v1.env";
-  const body = await readFile(path, "utf8");
-  const line = body.split(/\r?\n/).find((row) => row.startsWith("QUALITY102_CAUSAL_V1_SYMBOLS="));
-  if (!line) throw new Error("Q102_OBSERVER_HIGH_VOL_SYMBOLS_UNAVAILABLE");
-  const symbols = line.slice(line.indexOf("=") + 1).split(",").map((item) => item.trim().toUpperCase()).filter(Boolean);
-  if (!symbols.length) throw new Error("Q102_OBSERVER_HIGH_VOL_SYMBOLS_EMPTY");
-  return [...new Set(symbols)];
-}
-
 const childSource = String.raw`
 import { readFile } from "node:fs/promises";
 import { AsterV3Client } from "./lib/aster-v3-client.ts";
 import { buildQuality102CausalV4Signal } from "./lib/disdex-quality102-causal-v4-signal.ts";
-import { generateQuality102CausalV4S34Candidates } from "./lib/disdex-quality102-causal-v4-s34.ts";
+import { generateQuality102CausalV4S34Candidates, QUALITY102_CAUSAL_V4_S34_MODEL } from "./lib/disdex-quality102-causal-v4-s34.ts";
 import { evaluateQuality102CausalV4ImprovementGate } from "./lib/disdex-quality102-causal-selector.ts";
 
 const HOUR=3600000;
@@ -67,7 +56,8 @@ for (const symbol of ["BTCUSDT",...symbols]) {
     throw new Error("Q102_OBSERVER_HISTORY_STALE:"+symbol);
   }
 }
-const highVol=new Set(String(process.env.Q102_OBSERVER_HIGH_VOL_SYMBOLS||"").split(",").map(x=>x.trim().toUpperCase()).filter(Boolean));
+const s34Symbols=new Set(QUALITY102_CAUSAL_V4_S34_MODEL.map(x=>String(x.symbol).toUpperCase()));
+const highVol=new Set(symbols.filter(symbol=>!s34Symbols.has(symbol)));
 const client=new AsterV3Client({
   baseUrl: process.env.ASTER_FUTURES_BASE_URL,
   userAddress: process.env.ASTER_USER_ADDRESS,
@@ -127,15 +117,10 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
   const hourKey = Math.floor(Date.now() / HOUR_MS);
   if (cache?.hourKey === hourKey && cache.snapshot.productionSha === runtime.releaseSha) return cache.snapshot;
 
-  const highVolSymbols = await loadHighVolSymbols();
-  const env = {
-    ...process.env,
-    Q102_OBSERVER_HIGH_VOL_SYMBOLS: highVolSymbols.join(","),
-  };
   const { stdout } = await execFileAsync(
     process.execPath,
     ["--import", "tsx", "--input-type=module", "-e", childSource],
-    { cwd: CURRENT_RELEASE, env, timeout: 30_000, maxBuffer: 2 * 1024 * 1024 },
+    { cwd: CURRENT_RELEASE, env: process.env, timeout: 30_000, maxBuffer: 2 * 1024 * 1024 },
   );
   const parsed = JSON.parse(stdout.trim()) as {
     referenceTs: number;
