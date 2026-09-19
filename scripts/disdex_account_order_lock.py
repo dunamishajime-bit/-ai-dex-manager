@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import tempfile
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -56,67 +57,81 @@ class AccountOrderLock:
         self.default_owner = default_owner
         self.owner_id: str | None = None
         self.lease_id: str | None = None
+        self._operation_lock = threading.RLock()
+        self._released = True
 
     def acquire(self, owner_id: str | None = None, account_scope: str = DEFAULT_SCOPE) -> bool:
-        owner_id = owner_id or self.default_owner
-        if not owner_id:
-            raise ValueError("ACCOUNT_LOCK_OWNER_REQUIRED")
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        for attempt in range(2):
-            now = _now_ms()
-            payload = {"schema": SCHEMA, "accountScope": account_scope, "ownerId": owner_id, "leaseId": str(uuid.uuid4()), "acquiredAt": now, "expiresAt": now + self.lease_ms, "reservations": []}
-            try:
-                fd = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-                with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                    json.dump(payload, handle, indent=2)
-                    handle.write("\n")
-                self.owner_id, self.lease_id = owner_id, payload["leaseId"]
-                return True
-            except FileExistsError:
+        with self._operation_lock:
+            owner_id = owner_id or self.default_owner
+            if not owner_id:
+                raise ValueError("ACCOUNT_LOCK_OWNER_REQUIRED")
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            for attempt in range(2):
+                now = _now_ms()
+                payload = {"schema": SCHEMA, "accountScope": account_scope, "ownerId": owner_id, "leaseId": str(uuid.uuid4()), "acquiredAt": now, "expiresAt": now + self.lease_ms, "reservations": []}
                 try:
-                    current = _load(self.path)
-                    if int(current.get("expiresAt", 0)) > _now_ms() or attempt:
+                    fd = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+                    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                        json.dump(payload, handle, indent=2)
+                        handle.write("\n")
+                    self.owner_id, self.lease_id = owner_id, payload["leaseId"]
+                    self._released = False
+                    return True
+                except FileExistsError:
+                    try:
+                        _load(self.path)
+                        # Active, stale, or malformed ownership all remain
+                        # fail-closed. Only a path that vanished after O_EXCL
+                        # failed is retried once.
                         return False
-                    # Expired ownership is not proof that an exchange order is
-                    # settled. Leave the lease in place for reconciliation/manual
-                    # review instead of deleting it automatically.
-                    return False
-                except FileNotFoundError:
-                    continue
-                except Exception:
-                    return False
-        return False
+                    except FileNotFoundError:
+                        if attempt == 0:
+                            continue
+                        return False
+                    except Exception:
+                        return False
+            return False
 
     def _owned(self) -> dict[str, Any]:
+        if self._released:
+            raise RuntimeError("ACCOUNT_LOCK_RELEASED")
         current = _load(self.path)
         if current.get("ownerId") != self.owner_id or current.get("leaseId") != self.lease_id or int(current.get("expiresAt", 0)) <= _now_ms():
             raise RuntimeError("ACCOUNT_LOCK_NOT_OWNER")
         return current
 
     def reserve(self, strategy_id: str, symbol: str, side: str, gross: float, notional_usd: float) -> dict[str, Any]:
-        if gross < 0 or notional_usd < 0:
-            raise ValueError("ACCOUNT_RESERVATION_INVALID")
-        current = self._owned()
-        reservation_id = hashlib.sha256(f"{self.lease_id}|{strategy_id}|{symbol}|{side}|{gross}|{notional_usd}".encode()).hexdigest()[:24]
-        reservation = {"reservationId": reservation_id, "strategyId": strategy_id, "symbol": symbol, "side": side, "gross": gross, "notionalUsd": notional_usd, "createdAt": _now_ms(), "status": "RESERVED"}
-        current["expiresAt"] = _now_ms() + self.lease_ms
-        current["reservations"] = [row for row in current.get("reservations", []) if row.get("reservationId") != reservation_id] + [reservation]
-        _atomic_write(self.path, current)
-        return reservation
+        with self._operation_lock:
+            if gross < 0 or notional_usd < 0:
+                raise ValueError("ACCOUNT_RESERVATION_INVALID")
+            current = self._owned()
+            reservation_id = hashlib.sha256(f"{self.lease_id}|{strategy_id}|{symbol}|{side}|{gross}|{notional_usd}".encode()).hexdigest()[:24]
+            reservation = {"reservationId": reservation_id, "strategyId": strategy_id, "symbol": symbol, "side": side, "gross": gross, "notionalUsd": notional_usd, "createdAt": _now_ms(), "status": "RESERVED"}
+            current["expiresAt"] = _now_ms() + self.lease_ms
+            current["reservations"] = [row for row in current.get("reservations", []) if row.get("reservationId") != reservation_id] + [reservation]
+            _atomic_write(self.path, current)
+            return reservation
 
     def release_reservation(self, reservation_id: str) -> None:
-        current = self._owned()
-        current["expiresAt"] = _now_ms() + self.lease_ms
-        current["reservations"] = [{**row, "status": "RELEASED"} if row.get("reservationId") == reservation_id else row for row in current.get("reservations", [])]
-        _atomic_write(self.path, current)
+        with self._operation_lock:
+            current = self._owned()
+            current["expiresAt"] = _now_ms() + self.lease_ms
+            current["reservations"] = [{**row, "status": "RELEASED"} if row.get("reservationId") == reservation_id else row for row in current.get("reservations", [])]
+            _atomic_write(self.path, current)
 
     def release(self) -> None:
-        try:
-            current = _load(self.path)
-            if current.get("ownerId") == self.owner_id and current.get("leaseId") == self.lease_id:
+        with self._operation_lock:
+            if self._released:
+                return
+            try:
+                current = _load(self.path)
+                if current.get("ownerId") != self.owner_id or current.get("leaseId") != self.lease_id:
+                    self._released = True
+                    return
                 self.path.unlink()
-        except FileNotFoundError:
-            pass
+                self._released = True
+            except FileNotFoundError:
+                self._released = True
 
 
 def active_reserved_gross(document: dict[str, Any]) -> float:
@@ -138,6 +153,13 @@ if __name__ == "__main__":
             row = lock.reserve("V12_X1.00_ALL", "ETHUSDT", "LONG", 0.25, 250.0)
             assert row["status"] == "RESERVED"
             lock.release_reservation(row["reservationId"])
+            lock.release()
+            try:
+                lock.reserve("V12_X1.00_ALL", "ETHUSDT", "LONG", 0.25, 250.0)
+                raise AssertionError("reserve after release unexpectedly succeeded")
+            except RuntimeError as error:
+                assert str(error) == "ACCOUNT_LOCK_RELEASED"
+            assert lock.acquire("python-selftest-reacquire")
             lock.release()
             print("ACCOUNT_ORDER_LOCK_SELFTEST_PASS")
         finally:
