@@ -405,6 +405,13 @@ export class V12LiveExecutionEngine {
                     const planned = await planV12TrailingStop(this.d.adapter, active.protection, activeBar.close);
                     let protection = planned.state;
                     if (planned.plan) {
+                        const liveQuote = await this.d.adapter.executor.getMarketQuote(active.symbol);
+                        const trailingStopAlreadyCrossed = active.side === "LONG"
+                            ? liveQuote.bidPrice <= planned.plan.stopPrice
+                            : liveQuote.askPrice >= planned.plan.stopPrice;
+                        if (trailingStopAlreadyCrossed) {
+                            return this.executeExit(state, active, latestTs, "trailing-stop-crossed-before-replacement");
+                        }
                         const pending: V12PendingOrderState = { idempotencyKey: planned.plan.clientOrderId, action: "STOP_UPDATE", clientOrderId: planned.plan.clientOrderId, symbol: active.symbol, side: active.side, quantity: active.quantity, signalTs: latestTs, reason: "TRAILING_STOP_UPDATE", createdAt: this.now(), positionId: active.positionId, stopPrice: planned.plan.stopPrice, previousStopClientOrderId: planned.plan.previousStopClientOrderId, nextPeakOrTrough: planned.plan.nextPeakOrTrough };
                         state.pending = pending; await this.d.stateStore.save(state);
                         protection = await applyV12TrailingStop(this.d.adapter, planned.state, planned.plan);

@@ -122,7 +122,7 @@ function fakeAdapter(): FakeAdapter {
             stopPrice: row.stopPrice,
         })) as V12AsterOrderView[],
         normalizeStopPrice: async (_symbol: string, requested: number) => ({ price: requested, text: String(requested) }),
-        openOrders: async (_symbol: string) => [...fake.resident.values()],
+        openOrders: async (symbol: string) => [...fake.resident.values()].filter((row) => String((row as ResidentOrderView & { symbol?: string }).symbol || "").toUpperCase() === symbol.toUpperCase()),
         placeStopMarket: async (input: { symbol: string; side: "BUY" | "SELL"; quantity: number; stopPrice: number; clientOrderId: string; reduceOnly: true }) => {
             fake.stopPlacements += 1;
             fake.resident.set(input.clientOrderId, { ...input, status: "NEW", type: "STOP_MARKET" });
@@ -226,6 +226,22 @@ async function main() {
         assert.equal(restartResult.status, "held");
         assert.equal(normal.adapter.entryCalls, 2, "restart must not duplicate a completed entry");
 
+        // If the completed bar advances the trailing threshold but the live
+        // market has already crossed that replacement STOP, do not submit an
+        // invalid conditional order. Exit through the normal reduce-only path.
+        const crossed = await enterHarness(root, "trailing-crossed-before-replacement");
+        const crossedState = await crossed.stateStore.load();
+        crossedState.lastReferenceTs = crossed.marketData.BTC.at(-1)!.endTs - BAR_MS;
+        await crossed.stateStore.save(crossedState);
+        const crossedPositionCount = crossed.adapter.positions.length;
+        const crossedStopPlacements = crossed.adapter.stopPlacements;
+        const crossedResult = await crossed.engine.tick();
+        assert.equal(crossedResult.status, "exited");
+        assert.equal(crossedResult.reason, "trailing-stop-crossed-before-replacement");
+        assert.equal(crossed.adapter.exitCalls, 1, "crossed replacement STOP must use the normal reduce-only exit path");
+        assert.equal(crossed.adapter.stopPlacements, crossedStopPlacements, "crossed replacement STOP must not be submitted");
+        assert.equal(crossed.adapter.positions.length, crossedPositionCount - 1);
+
         // Crash after exchange send but before local fill-state persistence: the
         // pending record and same clientOrderId recover the fill without resend.
         const crash = await makeHarness(root, "crash-after-send");
@@ -308,6 +324,7 @@ async function main() {
         };
         await stopAfterSend.stateStore.save({ ...await stopAfterSend.stateStore.load(), active: { ...stopAfterState, protection: plannedAfterSend.state }, pending: pendingStopAfterSend });
         stopAfterSend.adapter.resident.set(planAfterSend.clientOrderId, {
+            symbol: stopAfterState.symbol,
             clientOrderId: planAfterSend.clientOrderId,
             status: "NEW",
             side: stopAfterState.side === "LONG" ? "SELL" : "BUY",
