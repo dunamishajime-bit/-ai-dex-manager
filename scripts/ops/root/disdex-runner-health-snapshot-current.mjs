@@ -10,7 +10,11 @@ const DEFAULT_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_RELEASE_R
 const HEALTH_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT || "/var/lib/disdex/runner-health").trim();
 const KILL_SWITCH_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json").trim();
 const MARGIN_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH || "/var/lib/disdex/shared/margin-risk/guard-live.json").trim();
+const SHARED_RISK_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json").trim();
+const SHARED_RISK_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT || `disdex-shared-crypto-risk@${DEFAULT_EXPECTED_SHA}.service`).trim();
+const MARGIN_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT || `disdex-v12-v52-margin-guard@${DEFAULT_EXPECTED_SHA}.service`).trim();
 const MARGIN_FRESHNESS_GRACE_MS = 120_000;
+const SHARED_RISK_FRESHNESS_GRACE_MS = 120_000;
 
 function configuredPath(name, fallback) {
     return String(process.env[name] || fallback).trim();
@@ -104,6 +108,88 @@ async function serviceSnapshot(unit) {
     };
 }
 
+async function safetyServiceStatus(label, unit, releaseRoot, scriptToken) {
+    try {
+        const service = await serviceSnapshot(unit);
+        const active = Boolean(service.active);
+        const processPresent = Boolean(service.pid > 0);
+        const cwdCurrent = Boolean(service.cwd === releaseRoot);
+        const commandCurrent = Boolean(service.command.includes(scriptToken) && service.command.includes("--daemon"));
+        const execCurrent = Boolean(
+            service.execStart.includes(releaseRoot)
+            || (cwdCurrent && service.execStart.includes(scriptToken))
+        );
+        const healthy = active && processPresent && cwdCurrent && commandCurrent && execCurrent;
+        const reason = healthy ? "" : `${label} service identity is not current`;
+        return {
+            safetyState: reason ? "BLOCKED" : "HEALTHY",
+            reason,
+            unit,
+            active,
+            processPresent,
+            cwdCurrent,
+            commandCurrent,
+            execCurrent,
+        };
+    } catch {
+        return {
+            safetyState: "BLOCKED",
+            reason: `${label} service observation failed`,
+            unit,
+            active: false,
+            processPresent: false,
+            cwdCurrent: false,
+            commandCurrent: false,
+            execCurrent: false,
+        };
+    }
+}
+
+async function sharedRiskStatus(now) {
+    try {
+        const state = await json(SHARED_RISK_STATE_PATH);
+        const updatedAt = Number(state?.updatedAt || 0);
+        const expectedDay = new Date(now).toISOString().slice(0, 10);
+        const identityOk = state?.schema === "disdex-shared-crypto-daily-risk/v1"
+            && String(state?.accountScope || "") === "ASTER_FUTURES";
+        const timestampOk = Number.isFinite(updatedAt) && updatedAt > 0 && updatedAt <= now + 60_000;
+        const fresh = timestampOk && now <= updatedAt + SHARED_RISK_FRESHNESS_GRACE_MS;
+        const dayOk = String(state?.utcDay || "") === expectedDay;
+        const sourceComplete = state?.sourceComplete === true;
+        const tripped = state?.tripped === true;
+        let reason = "";
+        if (!identityOk) reason = "Shared Risk state identity is invalid";
+        else if (!timestampOk) reason = "Shared Risk timestamp is invalid";
+        else if (!fresh) reason = "Shared Risk state is stale";
+        else if (!dayOk) reason = "Shared Risk UTC day is stale";
+        else if (!sourceComplete) reason = "Shared Risk source is incomplete";
+        else if (tripped) reason = "Shared Risk daily-loss limit is tripped";
+        return {
+            safetyState: reason ? "BLOCKED" : "HEALTHY",
+            reason,
+            updatedAt,
+            fresh,
+            utcDay: String(state?.utcDay || ""),
+            lossPct: Number(state?.lossPct || 0),
+            maximumLossPct: Number(state?.maximumLossPct || 0),
+            tripped,
+            sourceComplete,
+        };
+    } catch {
+        return {
+            safetyState: "BLOCKED",
+            reason: "Shared Risk state unavailable",
+            updatedAt: 0,
+            fresh: false,
+            utcDay: "",
+            lossPct: null,
+            maximumLossPct: null,
+            tripped: null,
+            sourceComplete: false,
+        };
+    }
+}
+
 async function sharedKillSwitch() {
     try {
         const value = await json(KILL_SWITCH_PATH);
@@ -190,15 +276,18 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const commandCurrent = Boolean(service?.command.includes(runner.script) && service?.command.includes("--daemon"));
     const execCurrent = Boolean(service?.execStart.includes(runner.releaseRoot));
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
+    const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
     const blockedReason = globalBlockReason || stateError || serviceError || !releaseValid(runner)
         ? (globalBlockReason || stateError || serviceError || "release pin is invalid")
-        : !identityOk
-            ? `${runner.key} service identity is not current`
-            : !stateIdentityMatches(runner, state)
-                ? `${runner.key} state identity is invalid`
-                : !stateFresh
-                    ? `${runner.key} state is stale`
-                    : "";
+        : manualReviewReason
+            ? manualReviewReason
+            : !identityOk
+                ? `${runner.key} service identity is not current`
+                : !stateIdentityMatches(runner, state)
+                    ? `${runner.key} state identity is invalid`
+                    : !stateFresh
+                        ? `${runner.key} state is stale`
+                        : "";
     const heartbeat = {
         schema: "disdex-runner-heartbeat/v1",
         runnerId: runner.runnerId,
@@ -226,23 +315,44 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     };
 }
 
+function summarizeOverallSafety(globalReasons, results) {
+    const reasons = [...globalReasons];
+    for (const result of results) {
+        if (result.safetyState !== "HEALTHY") reasons.push(`${result.runner} is ${result.safetyState}`);
+    }
+    const blockReasons = [...new Set(reasons.filter(Boolean))];
+    return {
+        blocked: blockReasons.length > 0,
+        blockReasons,
+    };
+}
+
 async function main() {
     const now = Date.now();
     const killReason = await sharedKillSwitch();
+    const sharedRisk = await sharedRiskStatus(now);
+    const sharedRiskService = await safetyServiceStatus("Shared Risk", SHARED_RISK_UNIT, DEFAULT_RELEASE_ROOT, "scripts/disdex-shared-crypto-risk-writer.ts");
     const marginGuard = await marginGuardStatus(now);
-    const globalBlockReason = killReason || marginGuard.reason;
+    const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, DEFAULT_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
+    const globalReasons = [killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
+    const globalBlockReason = globalReasons.join("; ");
     const results = [];
     for (const runner of RUNNERS) {
         const { heartbeat, diagnostics } = await buildHeartbeat(runner, now, globalBlockReason);
         await atomicJson(`${HEALTH_ROOT}/heartbeats/${runner.heartbeatFile}`, heartbeat);
         results.push({ runner: runner.key, safetyState: heartbeat.safetyState, stateAt: heartbeat.lastTickAt, ...diagnostics });
     }
+    const overall = summarizeOverallSafety(globalReasons, results);
     console.log(JSON.stringify({
         status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_PASS",
-        overallSafetyState: globalBlockReason ? "BLOCKED" : "HEALTHY",
-        newOrdersAllowed: !globalBlockReason,
+        overallSafetyState: overall.blocked ? "BLOCKED" : "HEALTHY",
+        newOrdersAllowed: !overall.blocked,
+        blockReasons: overall.blockReasons,
         sharedKillSwitchActive: Boolean(killReason),
+        sharedRisk,
+        sharedRiskService,
         marginGuard,
+        marginGuardService,
         readOnly: true,
         tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
         ordersSent: 0,
@@ -250,12 +360,26 @@ async function main() {
     }));
 }
 
-main().catch((error) => {
-    console.error(JSON.stringify({
-        status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_FAIL_CLOSED",
-        reason: String(error?.message || error).slice(0, 240),
-        tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
-        ordersSent: 0,
-    }));
-    process.exitCode = 1;
-});
+function selfTest() {
+    const blockedRunner = summarizeOverallSafety([], [{ runner: "V12_X1_ALL", safetyState: "BLOCKED" }]);
+    if (!blockedRunner.blocked || blockedRunner.blockReasons.length !== 1) throw new Error("runner block did not block overall safety");
+    const blockedDependency = summarizeOverallSafety(["Shared Risk service identity is not current"], [{ runner: "V12_X1_ALL", safetyState: "HEALTHY" }]);
+    if (!blockedDependency.blocked) throw new Error("dependency block did not block overall safety");
+    const healthy = summarizeOverallSafety([], [{ runner: "V12_X1_ALL", safetyState: "HEALTHY" }]);
+    if (healthy.blocked || healthy.blockReasons.length !== 0) throw new Error("healthy snapshot was blocked");
+    console.log("DISDEX_RUNNER_HEALTH_SNAPSHOT_SELFTEST_PASS");
+}
+
+if (process.argv.includes("--self-test")) {
+    selfTest();
+} else {
+    main().catch((error) => {
+        console.error(JSON.stringify({
+            status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_FAIL_CLOSED",
+            reason: String(error?.message || error).slice(0, 240),
+            tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
+            ordersSent: 0,
+        }));
+        process.exitCode = 1;
+    });
+}

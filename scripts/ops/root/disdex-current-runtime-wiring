@@ -373,7 +373,10 @@ DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
 DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
-DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json"
+DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json
+DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
+DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json
+DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=${MARGIN_UNIT}"
 
   write_atomic "$WATCHDOG_ENV_FILE" "DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}
@@ -517,7 +520,9 @@ Environment=CRYPTO_GROSS_CAP=3.0
 Environment=TOTAL_GROSS_CAP=3.5"
 
   write_atomic "${SHARED_RISK_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
-EnvironmentFile=${CONTRACT_ENV_FILE}"
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Restart=always
+RestartSec=5s"
 
   write_atomic "${MARGIN_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
@@ -527,6 +532,8 @@ ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
 ExecStart=
 ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon
+Restart=always
+RestartSec=15s
 Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk
 Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/var/lib/disdex/shared/margin-risk/guard-live.json
@@ -563,6 +570,7 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   systemctl reset-failed disdex-v12-three-hour-health-check.service || true
   systemctl reset-failed disdex-ui-retention.service || true
   ensure_safety_daemon_active "$SHARED_RISK_UNIT"
+  ensure_safety_daemon_active "$MARGIN_UNIT"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 

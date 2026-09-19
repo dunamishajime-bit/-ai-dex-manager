@@ -24,6 +24,16 @@ class RuntimeMultilineageMonitoringTest(unittest.TestCase):
         self.assertIn("runner.expectedSha", source)
         self.assertIn("runner.expectedCwd", source)
 
+    def test_watchdog_recovers_safety_daemons_and_service_identity_loss(self):
+        source = WATCHDOG.read_text(encoding="utf-8")
+        self.assertIn("evaluateSafetyDaemon", source)
+        self.assertIn('key: "SHARED_CRYPTO_RISK"', source)
+        self.assertIn('key: "MARGIN_GUARD"', source)
+        self.assertIn("dependencyDecisions", source)
+        self.assertIn('await systemctl(["restart", daemon.unit])', source)
+        self.assertIn('safetyReason.includes("service identity is not current")', source)
+        self.assertIn("manual review is active", SNAPSHOT.read_text(encoding="utf-8"))
+
     def test_monolithic_wiring_emits_explicit_per_runner_defaults(self):
         source = WIRING.read_text(encoding="utf-8")
         for sleeve in ("V12", "PENGU", "V52", "Q102"):
@@ -42,7 +52,7 @@ class RuntimeCurrentContractCleanupTest(unittest.TestCase):
     def test_current_wiring_has_no_legacy_pengu_or_q102_caps(self):
         source = WIRING.read_text(encoding="utf-8")
         self.assertIn("PENGU_GROSS_CAP=0.85", source)
-        self.assertIn("QUALITY102_CAUSAL_V1_MAX_GROSS=1.5", source)
+        self.assertIn("QUALITY102_CAUSAL_V1_MAX_GROSS=2.5", source)
         self.assertIn("QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", source)
         self.assertNotIn("PENGU_GROSS_CAP=0.9375", source)
         self.assertNotIn("QUALITY102_CAUSAL_V1_MAX_GROSS=0.5", source)

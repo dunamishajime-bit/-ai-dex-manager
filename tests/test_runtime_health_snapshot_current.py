@@ -43,5 +43,29 @@ class MarginGuardHealthVisibilityTest(unittest.TestCase):
         wiring = WIRING.read_text(encoding="utf-8")
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json", wiring)
 
+
+class DependencyLivenessHealthTest(unittest.TestCase):
+    def test_snapshot_blocks_on_shared_risk_and_service_liveness(self):
+        source = SNAPSHOT.read_text(encoding="utf-8")
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH", source)
+        self.assertIn("/var/lib/disdex/shared/crypto-daily-risk.json", source)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT", source)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT", source)
+        self.assertIn("sharedRiskStatus", source)
+        self.assertIn("safetyServiceStatus", source)
+        self.assertIn("summarizeOverallSafety", source)
+        self.assertIn("blockReasons", source)
+        self.assertIn("sourceComplete", source)
+        self.assertIn("Shared Risk state is stale", source)
+
+    def test_wiring_makes_safety_daemons_self_restarting_and_visible(self):
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json", wiring)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}", wiring)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=${MARGIN_UNIT}", wiring)
+        self.assertGreaterEqual(wiring.count("Restart=always"), 2)
+        self.assertIn('ensure_safety_daemon_active "$SHARED_RISK_UNIT"', wiring)
+        self.assertIn('ensure_safety_daemon_active "$MARGIN_UNIT"', wiring)
+
 if __name__ == "__main__":
     unittest.main()

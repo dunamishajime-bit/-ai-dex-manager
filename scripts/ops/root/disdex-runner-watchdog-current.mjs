@@ -233,7 +233,9 @@ function buildConfig(env) {
     }
     const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || runnerConfig.V12_X1_ALL.expectedSha).trim().toLowerCase();
     if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
-    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, runnerConfig, statePath, auditPath, lockPath };
+    const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
+    const marginGuardUnit = `disdex-v12-v52-margin-guard@${expectedSha}.service`;
+    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath };
 }
 
 async function assertRelease(config) {
@@ -280,8 +282,9 @@ async function readHeartbeat(config, runner, now) {
     if (!serviceAllowed(runner, value.serviceUnit, runner.expectedSha) || value.serviceUnit !== runner.unit) throw new Error(`${runner.key} heartbeat service unit is invalid`);
     if (value.runtimeSha !== runner.expectedSha || value.expectedSha !== runner.expectedSha) throw new Error(`${runner.key} heartbeat SHA does not match release`);
     if (value.workingDirectory !== runner.expectedCwd) throw new Error(`${runner.key} heartbeat cwd does not match release`);
-    if (String(value.mode).toUpperCase() !== "LIVE" || value.liveEnabled !== true) throw new Error(`${runner.key} heartbeat is not live-enabled`);
-    if (value.safetyState !== "HEALTHY") return { present: true, valid: true, value, safeState: false, reason: `safetyState=${safeReason(value.safetyState)}` };
+    if (String(value.mode).toUpperCase() !== "LIVE") throw new Error(`${runner.key} heartbeat mode is not LIVE`);
+    if (value.liveEnabled !== true) return { present: true, valid: true, value, safeState: false, reason: safeReason(value.reason || `${runner.key} service identity is not current`) };
+    if (value.safetyState !== "HEALTHY") return { present: true, valid: true, value, safeState: false, reason: safeReason(value.reason || `safetyState=${value.safetyState}`) };
     for (const key of ["heartbeatAt", "lastTickAt"]) {
         if (typeof value[key] !== "number" || !Number.isFinite(value[key]) || value[key] <= 0 || value[key] > now + 60_000) throw new Error(`${runner.key} heartbeat timestamp is invalid`);
     }
@@ -398,20 +401,44 @@ async function evaluateRunner(config, runner, state, now) {
     }
     const heartbeat = await readHeartbeat(config, runner, now);
     if (!heartbeat.present) return { result: decision("RESTART", "heartbeat is missing", runner), attempts };
-    if (!heartbeat.valid || heartbeat.safeState === false) return { result: decision("HOLD_FAIL_CLOSED", heartbeat.reason || "heartbeat safety state is not healthy", runner), attempts, clearAttempts: false };
     const service = await inspectService(runner.unit);
     const process = await processInfo(service.mainPid);
     const identityHealthy = service.active && service.mainPid > 0 && process.cwd === runner.expectedCwd && commandMatches(config, runner, process.command);
-    const healthy = heartbeat.fresh && identityHealthy;
-    if (healthy) return { result: decision("NOOP", "heartbeat, service, cwd, and process command are consistent", runner), attempts, clearAttempts: true };
-    if (!heartbeat.fresh && identityHealthy) {
-        const reason = heartbeat.heartbeatFresh
-            ? "runner-owned lastTickAt is older than the runner cadence; active process identity is retained without restart"
-            : "heartbeat is older than the runner cadence; active process identity is retained without restart";
-        return { result: decision("HOLD_FAIL_CLOSED", reason, runner), attempts, clearAttempts: false };
+    if (!identityHealthy) {
+        const safetyReason = safeReason(heartbeat.reason || "");
+        const serviceIdentityBlock = safetyReason.includes("service identity is not current");
+        if (heartbeat.valid && heartbeat.safeState === false && !serviceIdentityBlock) {
+            return { result: decision("HOLD_FAIL_CLOSED", safetyReason || "heartbeat safety state is not healthy", runner), attempts, clearAttempts: false };
+        }
+        const reason = !service.active || service.mainPid <= 0 ? "service is not active" : process.cwd !== runner.expectedCwd ? "process cwd is not pinned to release" : "process command is not pinned to runner";
+        return { result: decision("RESTART", reason, runner), attempts };
     }
-    const reason = !service.active || service.mainPid <= 0 ? "service is not active" : process.cwd !== runner.expectedCwd ? "process cwd is not pinned to release" : "process command is not pinned to runner";
-    return { result: decision("RESTART", reason, runner), attempts };
+    if (!heartbeat.valid || heartbeat.safeState === false) return { result: decision("HOLD_FAIL_CLOSED", heartbeat.reason || "heartbeat safety state is not healthy", runner), attempts, clearAttempts: false };
+    if (heartbeat.fresh) return { result: decision("NOOP", "heartbeat, service, cwd, and process command are consistent", runner), attempts, clearAttempts: true };
+    const reason = heartbeat.heartbeatFresh
+        ? "runner-owned lastTickAt is older than the runner cadence; active process identity is retained without restart"
+        : "heartbeat is older than the runner cadence; active process identity is retained without restart";
+    return { result: decision("HOLD_FAIL_CLOSED", reason, runner), attempts, clearAttempts: false };
+}
+
+async function evaluateSafetyDaemon(config, daemon, state, now) {
+    const attempts = recentAttempts(state, daemon.key, now);
+    const service = await inspectService(daemon.unit);
+    const process = await processInfo(service.mainPid);
+    const healthy = service.active
+        && service.mainPid > 0
+        && process.cwd === config.releaseRoot
+        && String(process.command || "").includes(daemon.script)
+        && String(process.command || "").includes("--daemon");
+    if (healthy) {
+        return { result: decision("NOOP", "service, cwd, and process command are consistent", daemon), attempts, clearAttempts: true };
+    }
+    const reason = !service.active || service.mainPid <= 0
+        ? "service is not active"
+        : process.cwd !== config.releaseRoot
+            ? "process cwd is not pinned to release"
+            : "process command is not pinned to safety daemon";
+    return { result: decision("RESTART", reason, daemon), attempts, clearAttempts: false };
 }
 
 async function run(config) {
@@ -422,8 +449,43 @@ async function run(config) {
         const state = await loadState(config.statePath);
         const nextState = { schema: "disdex-runner-watchdog/current-state-v1", runners: {} };
         const decisions = {};
+        const dependencyDecisions = {};
         const restartCalls = [];
         const errors = [];
+        const safetyDaemons = [
+            { key: "SHARED_CRYPTO_RISK", unit: config.sharedRiskUnit, script: "scripts/disdex-shared-crypto-risk-writer.ts" },
+            { key: "MARGIN_GUARD", unit: config.marginGuardUnit, script: "scripts/disdex_v96_v52_margin_guard_runtime.py" },
+        ];
+        for (const daemon of safetyDaemons) {
+            try {
+                const evaluated = await evaluateSafetyDaemon(config, daemon, state, now);
+                const attempts = evaluated.attempts;
+                let result = evaluated.result;
+                if (result.action === "RESTART") {
+                    if (attempts.length >= MAX_ATTEMPTS) {
+                        result = decision("HOLD_FAIL_CLOSED", "restart budget exhausted", daemon);
+                    } else {
+                        const last = attempts[attempts.length - 1];
+                        const delay = BACKOFF_MS[Math.min(attempts.length, BACKOFF_MS.length - 1)];
+                        if (last && now < last.at + delay) {
+                            result = decision("HOLD_FAIL_CLOSED", `restart backoff active until ${last.at + delay}`, daemon);
+                        } else {
+                            await systemctl(["restart", daemon.unit]);
+                            restartCalls.push(daemon.unit);
+                            const updated = [...attempts, { at: now, unit: daemon.unit }].slice(-MAX_ATTEMPTS);
+                            nextState.runners[daemon.key] = { attempts: updated };
+                        }
+                    }
+                }
+                if (!nextState.runners[daemon.key]) nextState.runners[daemon.key] = { attempts: evaluated.clearAttempts ? [] : attempts };
+                dependencyDecisions[daemon.key] = result;
+            } catch (error) {
+                const result = decision("HOLD_FAIL_CLOSED", safeReason(error?.message), daemon, { safetyUnverified: true });
+                dependencyDecisions[daemon.key] = result;
+                nextState.runners[daemon.key] = { attempts: [] };
+                errors.push(`${daemon.key}: ${safeReason(error?.message)}`);
+            }
+        }
         let compositionInvariantError;
         try {
             for (const legacyUnit of LEGACY_LIVE_UNITS) {
@@ -497,6 +559,7 @@ async function run(config) {
             exitCode: hasHardError ? 1 : 0,
             restartCalls,
             decisions,
+            dependencies: dependencyDecisions,
             errors,
             tradingEffects: { ...ZERO_EFFECTS },
         };

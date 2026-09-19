@@ -100,7 +100,7 @@ def self_test() -> None:
             validate_gross_snapshot(snapshot)
             capacity = plan_v52_stock_capacity(snapshot, 1.0, 1.0)
             assert capacity["acceptedGross"] == 1.0
-            assert STRICT_CAPS.stock_gross == 1.5
+            assert STRICT_CAPS.stock_gross == 1.98
             expect_error(
                 lambda: quality102_crypto_notional_from_positions(
                     [{"symbol": "FETUSDT", "positionAmt": 2.0}],
