@@ -13,9 +13,9 @@ type JsonObject = Record<string, unknown>;
 type Direction = "LONG" | "SHORT";
 type StepState = "pass" | "blocked" | "pending" | "unknown";
 
-// Keep the read-only UI diagnosis aligned with the frozen V12 production
-// contract. The runner snapshot currently stores the ranked metrics, while
-// the per-gate booleans are intentionally not persisted there.
+// Prefer the runner-persisted signalEligible / signalReason fields as the
+// authoritative UI gate result. Recompute only for legacy snapshots that do
+// not carry those fields.
 const V12_SIGNAL_POLICY = Object.freeze({
   minimumVolumeRatio: 0.9845,
   minimumMomentumPct: 0.0227,
@@ -33,6 +33,8 @@ type SanitizedCandidate = {
   volumeRatio?: number;
   volatility?: number;
   atr?: number;
+  signalEligible?: boolean;
+  signalReason?: string;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -76,7 +78,20 @@ async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECIS
   }
 }
 
-function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
+export function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
+  if (candidate.signalEligible === true) {
+    return { status: "pass" as const, code: "SIGNAL_ELIGIBLE", detail: "実runner判定: SIGNAL_ELIGIBLE（この候補はEntry Qualityまで通過）" };
+  }
+  if (candidate.signalEligible === false) {
+    const reason = candidate.signalReason || "RUNNER_SIGNAL_BLOCKED";
+    const detail = reason === "VOLUME_RATIO_BELOW_MINIMUM"
+      ? "実runner判定: volumeRatio不足でBLOCK"
+      : reason === "BTC_REGIME_OR_ENTRY_QUALITY_BLOCKED"
+        ? "実runner判定: BTC regime / Entry Quality GateでBLOCK"
+        : `実runner判定: ${reason}`;
+    return { status: "blocked" as const, code: reason, detail };
+  }
+
   const score = candidate.score;
   const momentum = candidate.momentum;
   const volumeRatio = candidate.volumeRatio;
@@ -124,6 +139,8 @@ function safeCandidate(value: unknown): SanitizedCandidate | null {
     volumeRatio: Number.isFinite(Number(row.volumeRatio)) ? Number(row.volumeRatio) : undefined,
     volatility: Number.isFinite(Number(row.volatility)) ? Number(row.volatility) : undefined,
     atr: Number.isFinite(Number(row.atr)) ? Number(row.atr) : undefined,
+    signalEligible: typeof row.signalEligible === "boolean" ? row.signalEligible : undefined,
+    signalReason: typeof row.signalReason === "string" ? row.signalReason : undefined,
   };
 }
 
@@ -135,7 +152,10 @@ function safeDecisionSnapshot(value: unknown) {
   const candidates = (Array.isArray(row.candidates)
     ? row.candidates.map(safeCandidate).filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate)).slice(0, 32)
     : []).map((candidate) => ({ ...candidate, signalGate: diagnoseSignalGate(candidate, btcRegime) }));
-  const selectedCandidate = candidates.find((candidate) => candidate.rank === 1) || candidates[0];
+  const selectedSymbol = typeof row.symbol === "string" ? row.symbol.toUpperCase() : undefined;
+  const selectedCandidate = candidates.find((candidate) => candidate.symbol?.toUpperCase() === selectedSymbol)
+    || candidates.find((candidate) => candidate.signalEligible === true)
+    || candidates[0];
   return {
     strategyId: typeof row.strategyId === "string" ? row.strategyId : "V12_X1.00_ALL",
     symbol: typeof row.symbol === "string" ? row.symbol : selectedCandidate?.symbol,
@@ -246,11 +266,11 @@ function buildExecutionTrace(
   const top2 = decision.candidates.filter((candidate) => (candidate.rank || 99) <= 2);
   steps.push({
     key: "signal-selection",
-    label: "4. V12 Top2 Signal選定",
+    label: "4. V12 Signal Eligible選定",
     state: decision.selectionConfirmed ? "pass" : "blocked",
     detail: decision.selectionConfirmed
-      ? `Top2候補から${decision.symbol} ${decision.side || "WAIT"}をSignal確定。1建玉最大1.00x / 合計最大1.50x。`
-      : `候補${decision.candidates.length}件、Top2 ${top2.map((candidate) => candidate.symbol || "—").join(" / ") || "未取得"}。候補順位だけでは発注せず、全Signal Gate成立が必要です。`,
+      ? `Signal Eligible候補から${decision.symbol} ${decision.side || "WAIT"}を選定。raw Rank ${decision.rank ?? "-"}。候補順位だけではなくEntry Qualityまで通過済みです。`
+      : `候補${decision.candidates.length}件、raw Top2 ${top2.map((candidate) => candidate.symbol || "—").join(" / ") || "未取得"}。raw順位ではなくsignalEligible=trueの候補だけが発注選定対象です。`,
   });
   steps.push({
     key: "risk",

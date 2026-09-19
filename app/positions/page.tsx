@@ -20,6 +20,18 @@ export default function PositionsPage() {
   const q102 = productionRuntime?.quality102;
   const v52 = productionRuntime?.v52;
   const lineage = productionRuntime?.runtimeLineage;
+  const totalNotionalUsd = snapshot?.positions.reduce((sum, position) => sum + position.notionalUsd, 0) ?? 0;
+  const equityUsd = snapshot?.account.balanceUsd ?? 0;
+  const usedMarginUsd = snapshot ? Math.max(0, snapshot.account.balanceUsd - snapshot.account.availableUsd) : 0;
+  const marginUsePct = equityUsd > 0 ? (usedMarginUsd / equityUsd) * 100 : 0;
+  const grossUsed = equityUsd > 0 ? totalNotionalUsd / equityUsd : 0;
+  const cryptoGrossRemaining = caps ? Math.max(0, caps.cryptoGross - grossUsed) : null;
+  const cryptoNotionalRemainingUsd = cryptoGrossRemaining != null ? cryptoGrossRemaining * equityUsd : null;
+  const entryOrderCount = snapshot?.orders.entryOrderCount ?? 0;
+  const protectionBySymbol = snapshot?.orders.items.filter((order) => order.protection).reduce<Record<string, typeof snapshot.orders.items>>((grouped, order) => {
+    (grouped[order.symbol] ||= []).push(order);
+    return grouped;
+  }, {}) ?? {};
 
   return (
     <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
@@ -32,10 +44,21 @@ export default function PositionsPage() {
         </header>
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Metric label="Aster balance" value={snapshot ? formatPrice(snapshot.account.balanceUsd) : "UNAVAILABLE"} detail={snapshot ? `Available ${formatPrice(snapshot.account.availableUsd)}` : error || "Aster state unavailable"} />
-          <Metric label="Real positions" value={snapshot ? String(snapshot.positions.length) : "—"} detail={snapshot ? `Unrealized ${formatPrice(snapshot.account.unrealizedPnlUsd)}` : "実建玉取得待ち"} />
-          <Metric label="Open orders" value={snapshot ? String(snapshot.orders.count) : "—"} detail={snapshot ? `Protection ${snapshot.orders.protectionCount}` : "未決済注文取得待ち"} />
+          <Metric label="口座評価額" value={snapshot ? formatPrice(snapshot.account.balanceUsd) : "UNAVAILABLE"} detail={snapshot ? `Aster利用可能 ${formatPrice(snapshot.account.availableUsd)}` : error || "Aster state unavailable"} />
+          <Metric label="実建玉" value={snapshot ? `${snapshot.positions.length} 通貨` : "—"} detail={snapshot ? `Notional合計 ${formatPrice(totalNotionalUsd)} / 含み損益 ${formatPrice(snapshot.account.unrealizedPnlUsd)}` : "実建玉取得待ち"} />
+          <Metric label="新規待機注文" value={snapshot ? String(entryOrderCount) : "—"} detail={snapshot ? `保護注文は別枠 ${snapshot.orders.protectionCount}件` : "未決済注文取得待ち"} />
           <Metric label="Live source" value={snapshot ? "Aster synced" : loading ? "Loading" : "Unavailable"} detail={snapshot ? snapshot.capturedAt.replace("T", " ").slice(0, 16) + " UTC" : "推測表示なし"} />
+        </section>
+
+        <section className="panel-gold rounded-[30px] p-4 md:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3"><div className="text-sm font-bold">資金使用量 / 注文余力</div><span className="text-[11px] text-white/55">Aster実残高・実建玉から30秒ごとに再計算</span></div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <Metric label="証拠金使用" value={snapshot ? formatPrice(usedMarginUsd) : "—"} detail={snapshot ? `${marginUsePct.toFixed(1)}%使用 / 利用可能 ${formatPrice(snapshot.account.availableUsd)}` : "取得待ち"} />
+            <Metric label="Gross使用" value={snapshot && caps ? `${grossUsed.toFixed(2)}x / ${caps.cryptoGross.toFixed(2)}x` : "—"} detail={snapshot ? `実建玉Notional ${formatPrice(totalNotionalUsd)}` : "取得待ち"} />
+            <Metric label="Crypto Gross余力" value={cryptoGrossRemaining != null ? `${cryptoGrossRemaining.toFixed(2)}x` : "—"} detail={cryptoNotionalRemainingUsd != null ? `約 ${formatPrice(cryptoNotionalRemainingUsd)} 相当の追加Notional余地` : "Production cap取得待ち"} />
+            <Metric label="V12建玉枠" value={snapshot?.strategyUsage.v12 && v12 ? `${snapshot.strategyUsage.v12.positionCount}/${v12.maximumPositions} 使用` : "—"} detail={snapshot?.strategyUsage.v12 && v12 ? `${snapshot.strategyUsage.v12.positionCount >= v12.maximumPositions ? "新規V12 slotは空きなし" : `空き ${Math.max(0, v12.maximumPositions - snapshot.strategyUsage.v12.positionCount)} slot`} / V12 gross ${snapshot.strategyUsage.v12.gross.toFixed(2)}x` : "V12 runner state取得待ち"} />
+          </div>
+          <p className="mt-3 text-[11px] leading-5 text-white/55">Gross余力は「追加できるNotionalの理論上限」で、実際の発注可否は各ロジックのslot・family gross・共有risk・Entry Gateでさらに制限されます。証拠金使用額はAsterの口座評価額−available balanceから算出しています。</p>
         </section>
 
         <section className="grid gap-3 xl:grid-cols-3">
@@ -53,8 +76,10 @@ export default function PositionsPage() {
         </section>
 
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
-          <div className="flex items-center gap-2 text-sm font-bold"><Layers3 className="h-4 w-4 text-gold-100" />未決済注文 / 保護注文</div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3"><Metric label="Open orders" value={snapshot ? String(snapshot.orders.count) : "—"} detail="Aster実注文" /><Metric label="Protection" value={snapshot ? String(snapshot.orders.protectionCount) : "—"} detail="reduce-only / stop系" /><Metric label="Data policy" value="Fail Closed" detail="取得不能時は注文許可を推測しない" /></div>
+          <div className="flex items-center gap-2 text-sm font-bold"><Layers3 className="h-4 w-4 text-gold-100" />注文内訳</div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-4"><Metric label="実建玉" value={snapshot ? String(snapshot.positions.length) : "—"} detail="現在保有している通貨数" /><Metric label="新規待機注文" value={snapshot ? String(entryOrderCount) : "—"} detail="Entry方向の未約定注文" /><Metric label="保護注文" value={snapshot ? String(snapshot.orders.protectionCount) : "—"} detail="既存建玉を守る損切り・利確注文" /><Metric label="Aster未決済注文 合計" value={snapshot ? String(snapshot.orders.count) : "—"} detail={snapshot ? `新規 ${entryOrderCount} + 保護 ${snapshot.orders.protectionCount}` : "取得待ち"} /></div>
+          {snapshot ? <div className="mt-4 grid gap-3 md:grid-cols-2">{Object.entries(protectionBySymbol).map(([symbol, orders]) => <div key={symbol} className="rounded-2xl border border-white/10 bg-black/20 p-3"><div className="font-bold text-white">{symbol} 保護注文</div><div className="mt-2 space-y-2">{orders.map((order, index) => { const purpose = /TAKE_PROFIT/i.test(order.type) ? "利確" : /STOP/i.test(order.type) ? "損切り" : "保護"; return <div key={`${symbol}-${order.type}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-xs"><div><span className="font-semibold text-white">{purpose}</span> <span className="text-white/60">{order.type}</span><div className="mt-1 text-white/45">Qty {order.quantity} / {order.side} / {order.status}</div></div><div className="text-right text-[10px] text-emerald-100/80">{order.reduceOnly ? "reduce-only" : order.closePosition ? "close-position" : "保護系注文"}</div></div>; })}</div></div>)}</div> : null}
+          <div className="mt-3 rounded-2xl border border-sky-400/15 bg-sky-500/5 px-4 py-3 text-[11px] leading-5 text-sky-100/75"><b>意味:</b> STOP_MARKET＝価格が不利方向へ進んだ時の損切り、TAKE_PROFIT_MARKET＝利益目標到達時の利確です。reduce-only / close-positionは既存建玉を減らす・閉じるための指定で、新しい建玉を増やす注文ではありません。</div>
         </section>
 
         <p className="rounded-[22px] border border-gold-400/14 bg-black/25 px-4 py-3 text-[11px] leading-5 text-white/62">この画面は読み取り専用です。HPから注文・取消・決済・建玉変更は行いません。実残高・建玉・注文の正本はAsterとVPS runnerです。</p>

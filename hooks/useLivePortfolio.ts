@@ -22,15 +22,25 @@ export type LivePortfolioSnapshot = {
     unrealizedPnlUsd: number;
   };
   positions: LivePosition[];
+  strategyUsage: {
+    v12: {
+      positionCount: number;
+      gross: number;
+      symbols: string[];
+    } | null;
+  };
   orders: {
     count: number;
     protectionCount: number;
+    entryOrderCount: number;
     items: Array<{
       symbol: string;
       side: string;
       type: string;
       status: string;
       quantity: number;
+      reduceOnly: boolean;
+      closePosition: boolean;
       protection: boolean;
     }>;
   };

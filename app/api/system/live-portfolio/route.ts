@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import { isAbsolute } from "node:path";
+
 import { NextResponse } from "next/server";
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { deriveAsterAccountMetrics } from "@/lib/server/aster-account-metrics";
@@ -41,6 +44,22 @@ function bool(value: unknown) {
   return value === true || value === "true";
 }
 
+async function readV12Usage() {
+  const statePath = String(process.env.V12_X1_ALL_STATE_PATH || "").trim();
+  if (!statePath || !isAbsolute(statePath)) return null;
+  try {
+    const raw = JSON.parse(await readFile(statePath, "utf8")) as { activePositions?: Array<{ symbol?: string; gross?: number }> };
+    const positions = Array.isArray(raw.activePositions) ? raw.activePositions : [];
+    return {
+      positionCount: positions.length,
+      gross: positions.reduce((sum, position) => sum + finite(position.gross), 0),
+      symbols: positions.map((position) => String(position.symbol || "").toUpperCase()).filter(Boolean),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function GET() {
   const config = loadAsterDexClientConfig();
   if (!config) {
@@ -52,10 +71,11 @@ export async function GET() {
 
   try {
     const client = new AsterDexClient(config);
-    const [account, positionRisk, openOrders] = await Promise.all([
+    const [account, positionRisk, openOrders, v12Usage] = await Promise.all([
       client.getAccount() as Promise<AccountSnapshot>,
       client.getPositionRisk() as Promise<PositionRisk[]>,
       client.getOpenOrders() as Promise<OpenOrder[]>,
+      readV12Usage(),
     ]);
 
     const positions = (Array.isArray(positionRisk) ? positionRisk : [])
@@ -82,14 +102,21 @@ export async function GET() {
 
     const accountMetrics = deriveAsterAccountMetrics(account);
 
-    const orders = (Array.isArray(openOrders) ? openOrders : []).map((order) => ({
-      symbol: String(order.symbol || "").toUpperCase(),
-      side: String(order.side || "").toUpperCase(),
-      type: String(order.type || ""),
-      status: String(order.status || ""),
-      quantity: finite(order.origQty),
-      protection: bool(order.reduceOnly) || bool(order.closePosition) || /STOP|TAKE_PROFIT/i.test(String(order.type || "")),
-    }));
+    const orders = (Array.isArray(openOrders) ? openOrders : []).map((order) => {
+      const reduceOnly = bool(order.reduceOnly);
+      const closePosition = bool(order.closePosition);
+      const type = String(order.type || "");
+      return {
+        symbol: String(order.symbol || "").toUpperCase(),
+        side: String(order.side || "").toUpperCase(),
+        type,
+        status: String(order.status || ""),
+        quantity: finite(order.origQty),
+        reduceOnly,
+        closePosition,
+        protection: reduceOnly || closePosition || /STOP|TAKE_PROFIT/i.test(type),
+      };
+    });
 
     return NextResponse.json({
       ok: true,
@@ -100,9 +127,13 @@ export async function GET() {
         unrealizedPnlUsd: accountMetrics.unrealizedPnlUsd,
       },
       positions,
+      strategyUsage: {
+        v12: v12Usage,
+      },
       orders: {
         count: orders.length,
         protectionCount: orders.filter((order) => order.protection).length,
+        entryOrderCount: orders.filter((order) => !order.protection).length,
         items: orders,
       },
     });
