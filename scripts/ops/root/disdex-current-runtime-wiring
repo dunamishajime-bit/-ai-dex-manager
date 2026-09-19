@@ -277,6 +277,26 @@ ensure_safety_daemon_active() {
   printf 'DISDEX_SAFETY_DAEMON_ACTIVE unit=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
 }
 
+ensure_monitor_timer_active() {
+  local unit="$1" load_state active_state
+  load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
+  [[ "$load_state" == "loaded" ]] || {
+    printf 'required monitor timer is not loaded: %s\n' "$unit" >&2
+    return 1
+  }
+  active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+  if [[ "$active_state" != "active" ]]; then
+    systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+    systemctl start "$unit"
+    active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+  fi
+  [[ "$active_state" == "active" ]] || {
+    printf 'required monitor timer failed to become active: %s state=%s\n' "$unit" "$active_state" >&2
+    return 1
+  }
+  printf 'DISDEX_MONITOR_TIMER_ACTIVE unit=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
+}
+
 apply_wiring() {
   require_root_for_apply
   install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
@@ -571,6 +591,9 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   systemctl reset-failed disdex-ui-retention.service || true
   ensure_safety_daemon_active "$SHARED_RISK_UNIT"
   ensure_safety_daemon_active "$MARGIN_UNIT"
+  ensure_monitor_timer_active "disdex-runner-watchdog.timer"
+  ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
+  ensure_monitor_timer_active "disdex-runner-health-alert.timer"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 

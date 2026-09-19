@@ -48,6 +48,14 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("chmod 600 /var/lib/disdex/pengu-dual-ls-v2/runner-live.json", source)
         self.assertIn("chmod 600 /var/lib/disdex/quality102-causal-v1/state.json", source)
 
+    def test_wiring_restores_required_monitor_timers(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("ensure_monitor_timer_active()", source)
+        self.assertIn('ensure_monitor_timer_active "disdex-runner-watchdog.timer"', source)
+        self.assertIn('ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"', source)
+        self.assertIn('ensure_monitor_timer_active "disdex-runner-health-alert.timer"', source)
+        self.assertIn("DISDEX_MONITOR_TIMER_ACTIVE", source)
+
     def test_wiring_script_does_not_stop_or_cancel_trading(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertNotIn("systemctl stop", source)
