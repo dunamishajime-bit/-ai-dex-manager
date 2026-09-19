@@ -5,7 +5,8 @@ import {
 } from "@/lib/server/asterdex/client";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
-import { deriveTradeHistoryAttribution } from "@/lib/trade-history-attribution";
+import { deriveTradeHistoryAttribution, type TradeHistoryAttribution } from "@/lib/trade-history-attribution";
+import { forcedExitCauseFromEvidence, loadFillLineageEvidence, routeFromFillEvidence, type FillLineageEvidence } from "@/lib/server/fill-lineage-evidence";
 
 const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
   ...liveConfig.cryptoSymbols,
@@ -15,7 +16,14 @@ const CACHE_TTL_MS = 60_000;
 const STABLE_ASSETS = new Set(["USDT", "USDC", "USDF", "BUSD", "FDUSD"]);
 
 type Direction = "LONG" | "SHORT";
-type Lot = { quantity: number; costUsd: number; openedAt: string };
+type StrategyId = NonNullable<TradeHistoryEntry["strategyId"]>;
+type Lot = {
+  quantity: number;
+  costUsd: number;
+  openedAt: string;
+  strategyId: StrategyId;
+  attribution: TradeHistoryAttribution;
+};
 type Book = { netQuantity: number; lots: Lot[] };
 type LivePosition = { symbol?: string; positionAmt?: string | number; positionSide?: string };
 
@@ -37,13 +45,38 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): "V12" | "V52" | "PENGU" | "QUALITY102" {
+function strategyForSymbol(symbol: string): Exclude<StrategyId, "V96" | "UNKNOWN"> {
   if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
   if (symbol === liveConfig.penguSymbol) return "PENGU";
   if (liveConfig.quality102Runtime.symbols.includes(symbol as (typeof liveConfig.quality102Runtime.symbols)[number])) {
     return "QUALITY102";
   }
   return "V12";
+}
+
+function strategyFromEvidence(evidence: FillLineageEvidence | undefined, fallback: StrategyId): StrategyId {
+  const value = String(evidence?.strategyId || "").toUpperCase();
+  if (value.includes("QUALITY102") || value === "Q102") return "QUALITY102";
+  if (value.includes("PENGU")) return "PENGU";
+  if (value.includes("V52") || value.includes("V11EQ") || value.includes("V50")) return "V52";
+  if (value.includes("V96")) return "V96";
+  if (value.includes("V12")) return "V12";
+  return fallback;
+}
+
+function attributionFromEvidence(strategyId: StrategyId, evidence: FillLineageEvidence | undefined, fallbackReason: string) {
+  const route = routeFromFillEvidence(evidence);
+  const evidenceReason = [
+    evidence?.reason,
+    evidence?.entryVersion,
+    evidence?.family,
+    route ? `route: ${route}` : undefined,
+  ].filter(Boolean).join(" / ");
+  return deriveTradeHistoryAttribution({
+    source: "official-fill",
+    strategyId,
+    reason: evidenceReason || fallbackReason,
+  });
 }
 
 function isEntry(direction: Direction, side: "BUY" | "SELL") {
@@ -60,6 +93,8 @@ function consumeLots(book: Book, quantity: number) {
   let remaining = quantity;
   let costUsd = 0;
   let openedAt: string | undefined;
+  let strategyId: StrategyId | undefined;
+  let attribution: TradeHistoryAttribution | undefined;
 
   while (remaining > 1e-10 && book.lots.length) {
     const lot = book.lots[0];
@@ -67,13 +102,15 @@ function consumeLots(book: Book, quantity: number) {
     const matched = Math.min(remaining, originalQuantity);
     costUsd += lot.costUsd * (matched / originalQuantity);
     openedAt ||= lot.openedAt;
+    strategyId ||= lot.strategyId;
+    attribution ||= lot.attribution;
     lot.quantity -= matched;
     lot.costUsd -= lot.costUsd * (matched / originalQuantity);
     remaining -= matched;
     if (lot.quantity <= 1e-10) book.lots.shift();
   }
 
-  return { costUsd, openedAt, matchedQuantity: quantity - remaining };
+  return { costUsd, openedAt, matchedQuantity: quantity - remaining, strategyId, attribution };
 }
 
 function directionForTrade(trade: AsterDexUserTrade, currentNetQuantity: number): Direction {
@@ -120,6 +157,7 @@ function toHistoryEntry(
   symbol: string,
   direction: Direction,
   book: Book,
+  evidence?: FillLineageEvidence,
 ): TradeHistoryEntry | null {
   const side = trade.side === "SELL" ? "SELL" : trade.side === "BUY" ? "BUY" : null;
   const quantity = finite(trade.qty);
@@ -135,7 +173,9 @@ function toHistoryEntry(
   const explicitRealized = Number.isFinite(Number(trade.realizedPnl));
   const commission = Number.isFinite(Number(trade.commission)) ? finite(trade.commission) : undefined;
   const entry = isEntry(direction, side);
-  const matched = entry ? { costUsd: 0, openedAt: undefined, matchedQuantity: 0 } : consumeLots(book, quantity);
+  const matched = entry
+    ? { costUsd: 0, openedAt: undefined, matchedQuantity: 0, strategyId: undefined, attribution: undefined }
+    : consumeLots(book, quantity);
   const close = !entry;
   const averageEntryPrice = matched.matchedQuantity > 0 ? matched.costUsd / matched.matchedQuantity : undefined;
   const derivedRealized = averageEntryPrice === undefined
@@ -155,13 +195,26 @@ function toHistoryEntry(
     ? realizedPnlUsd - commissionUsd
     : undefined;
 
+  const fallbackStrategy = strategyForSymbol(symbol);
+  const evidenceStrategy = strategyFromEvidence(evidence, fallbackStrategy);
+  const reason = "Aster official fill / " + evidenceStrategy + " / " + direction + " / " + (entry ? "Entry" : "Exit") + (trade.maker ? " / maker" : " / taker");
+  const ownAttribution = attributionFromEvidence(evidenceStrategy, evidence, reason);
+  const strategyId = close && matched.strategyId ? matched.strategyId : evidenceStrategy;
+  const attribution = close && matched.attribution ? matched.attribution : ownAttribution;
+
   if (entry) {
-    book.lots.push({ quantity, costUsd: quoteQuantity, openedAt: executedAt });
+    book.lots.push({
+      quantity,
+      costUsd: quoteQuantity,
+      openedAt: executedAt,
+      strategyId,
+      attribution,
+    });
   }
   book.netQuantity += side === "BUY" ? quantity : -quantity;
 
-  const inferredStrategy = strategyForSymbol(symbol);
-  const reason = "Aster official fill / " + inferredStrategy + " / " + direction + " / " + (entry ? "Entry" : "Exit") + (trade.maker ? " / maker" : " / taker");
+  const forcedCause = close ? forcedExitCauseFromEvidence(evidence) : undefined;
+  const protectionExit = close && Boolean(evidence?.reduceOnly) && /PROTECTION|STOP|TAKE_PROFIT/i.test(String(evidence?.reason || evidence?.clientOrderId || ""));
 
   return {
     id: "aster:" + symbol + ":" + tradeId,
@@ -192,15 +245,13 @@ function toHistoryEntry(
     commissionAsset: trade.commissionAsset,
     maker: trade.maker,
     tradeStatus: close ? (matched.matchedQuantity > 0 ? "closed" : "unmatched_exit") : "open",
-    strategyId: inferredStrategy,
+    strategyId,
     netPnlUsd,
-    attribution: deriveTradeHistoryAttribution({
-      source: "official-fill",
-      strategyId: inferredStrategy,
-      reason,
-      realizedPnlUsd,
-      netPnlUsd,
-    }),
+    attribution,
+    ...(close ? {
+      exitCause: forcedCause || (protectionExit ? "PROTECTION" : "STRATEGY"),
+      exitCauseDetail: evidence?.reason || (protectionExit ? "Protective order fill" : "Strategy exit"),
+    } : {}),
   };
 }
 
@@ -237,6 +288,7 @@ async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error
   const client = new AsterDexClient(config);
   const entries: TradeHistoryEntry[] = [];
   const errors: string[] = [];
+  const fillEvidence = await loadFillLineageEvidence();
 
   for (const symbol of ASTER_HISTORY_SYMBOLS) {
     try {
@@ -254,7 +306,8 @@ async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error
             : bothNetQuantity;
         const direction = directionForTrade(row, currentNet);
         const book = books.get(direction)!;
-        const entry = toHistoryEntry(row, symbol, direction, book);
+        const orderId = row.orderId === undefined ? undefined : String(row.orderId);
+        const entry = toHistoryEntry(row, symbol, direction, book, orderId ? fillEvidence.get(orderId) : undefined);
         if (entry) entries.push(entry);
         if (row.positionSide === "BOTH" && row.side) {
           bothNetQuantity += row.side === "BUY" ? finite(row.qty) : -finite(row.qty);

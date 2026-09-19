@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Activity, AlertCircle, CheckCircle2, CircleDashed, Clock3, RefreshCw, ServerCog, ShieldCheck } from "lucide-react";
 
@@ -8,6 +9,33 @@ import type { CurrentProductionRuntime } from "@/lib/server/current-production-r
 import type { V52Top2Observability, V52Top2DecisionRow } from "@/lib/server/v52-top2-observability";
 import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observability";
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
+
+type DecisionLogicPage = "overview" | "v12" | "pengu" | "q102" | "v52";
+
+type Q102SymbolSnapshot = {
+  ok: true;
+  readOnly: true;
+  tradingMutation: 0;
+  capturedAt: string;
+  productionSha: string;
+  selectorMode: string;
+  referenceTs: number;
+  selectedSymbol?: string;
+  selectedFamily?: string;
+  selectedReason: string;
+  items: Array<{
+    symbol: string;
+    eligible: boolean;
+    side: "LONG" | "SHORT" | "WAIT";
+    family?: string;
+    layer?: string;
+    variant?: string;
+    requestedGross: number;
+    reason: string;
+    selected: boolean;
+    referenceTs: number;
+  }>;
+};
 
 type DecisionStatusItem = {
   symbol: string;
@@ -378,33 +406,94 @@ function Quality102Detail({ details, production }: { details?: Quality102Runtime
   );
 }
 
+function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapshot | null; error: string | null }) {
+  if (error) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{error}</div></section>;
+  if (!snapshot) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 text-sm text-white/60">Production selectorをread-only評価中…</div></section>;
+  const eligible = snapshot.items.filter((item) => item.eligible);
+  return <section className="panel-gold rounded-[28px] p-4 md:p-5">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div><div className="text-lg font-bold text-white">Q102 通貨別 Causal V4 判定</div><p className="mt-1 text-xs text-white/55">Production current releaseの実Causal V4コードをread-only実行。各通貨の自然Signalと、1-slot全体selectorの今回選定を分けて表示します。</p></div>
+      <div className="text-right text-xs text-white/60"><div>Eligible {eligible.length}/{snapshot.items.length}</div><div className="mt-1">Global selected: {snapshot.selectedSymbol || "なし"} {snapshot.selectedFamily ? "/ " + snapshot.selectedFamily : ""}</div></div>
+    </div>
+    <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
+      <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">通貨</th><th className="px-3 py-2">自然Gate</th><th className="px-3 py-2">Side</th><th className="px-3 py-2">Family</th><th className="px-3 py-2">Layer</th><th className="px-3 py-2">Variant</th><th className="px-3 py-2">Gross</th><th className="px-3 py-2">1-slot選定</th><th className="px-3 py-2">理由</th></tr></thead>
+      <tbody>{snapshot.items.map((item) => <tr key={item.symbol} className="border-t border-white/5"><td className="px-3 py-2 font-semibold text-white">{item.symbol}</td><td className={"px-3 py-2 font-semibold " + (item.eligible ? "text-emerald-200" : "text-rose-200")}>{item.eligible ? "PASS" : "BLOCK"}</td><td className="px-3 py-2 text-white/75">{item.side}</td><td className="px-3 py-2 text-white/75">{item.family || "—"}</td><td className="px-3 py-2 text-white/75">{item.layer || "—"}</td><td className="px-3 py-2 text-white/65">{item.variant || "—"}</td><td className="px-3 py-2 text-white/75">{item.requestedGross > 0 ? item.requestedGross.toFixed(3) + "x" : "—"}</td><td className={"px-3 py-2 font-semibold " + (item.selected ? "text-gold-100" : "text-white/45")}>{item.selected ? "SELECTED" : "—"}</td><td className="px-3 py-2 text-white/60">{item.reason}</td></tr>)}</tbody></table>
+    </div>
+    <p className="mt-3 text-[11px] leading-5 text-white/50">自然Gate PASSでも、実発注にはQ102 1-slot、base position idle、共有Gross、Kill Switch、注文競合、最小Notionalなどの最終Gateが必要です。ここでは注文操作を行いません。</p>
+  </section>;
+}
+
 function Sleeve({ title, items, marketLabel }: { title: string; items: DecisionStatusItem[]; marketLabel?: string }) {
   return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />{title}</div>{marketLabel ? <div className="text-xs text-white/55">{marketLabel}</div> : null}</div><p className="mt-2 text-xs leading-5 text-white/50">公開データによる補助ランキングです。V12の実Runner詳細は上の実スナップショットを参照します。</p><div className="mt-4 space-y-2">{items.map((item) => <article key={item.symbol} className="rounded-2xl border border-white/10 bg-black/20 p-3 md:p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={`flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm font-bold ${rankClass(item.rank)}`}>{item.rank || "-"}</span><div><div className="font-bold text-white">{item.symbol}</div><div className="text-xs text-white/50">{item.side === "LONG" ? "ロング候補" : item.side === "SHORT" ? "ショート候補" : "待機"} / 判定スコア {item.score}/{item.scoreMax}</div></div></div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(item.status)}`}>{item.status}</span></div><p className="mt-3 text-sm leading-6 text-white/80">判定理由：{item.reason}</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/45"><span>データ時刻：{time(item.dataUpdatedAt)}</span><span>確認時刻：{time(item.checkedAt)}</span></div></article>)}</div></section>;
 }
 
-export function DecisionStatusPanel() {
+export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLogicPage }) {
   const { snapshot: productionRuntime } = useProductionRuntime();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [q102Symbols, setQ102Symbols] = useState<Q102SymbolSnapshot | null>(null);
+  const [q102SymbolError, setQ102SymbolError] = useState<string | null>(null);
 
   async function load(force = false) {
     setLoading(true);
     try {
-      const response = await fetch(`/api/system/decision-status${force ? "?refresh=1" : ""}`, { cache: "no-store" });
+      const response = await fetch("/api/system/decision-status" + (force ? "?refresh=1" : ""), { cache: "no-store" });
       const data = await response.json();
-      if (!response.ok || !data?.readOnly) throw new Error(data?.error || "判定データを取得できません。");
+      if (!response.ok || !data?.readOnly) throw new Error(data?.error || "??????????????");
       setSnapshot(data as Snapshot);
       setError(data.error || null);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "判定データを取得できません。");
+      setError(loadError instanceof Error ? loadError.message : "??????????????");
     } finally {
       setLoading(false);
     }
   }
 
+  async function loadQ102Symbols() {
+    if (logic !== "q102") return;
+    try {
+      const response = await fetch("/api/system/q102-symbol-status", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.error || "Q102??????????????");
+      setQ102Symbols(data as Q102SymbolSnapshot);
+      setQ102SymbolError(null);
+    } catch (loadError) {
+      setQ102SymbolError(loadError instanceof Error ? loadError.message : "Q102??????????????");
+    }
+  }
+
   useEffect(() => { void load(true); const timer = window.setInterval(() => void load(true), 30_000); return () => window.clearInterval(timer); }, []);
-  if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">判定状況を取得しています…</div>;
-  if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "判定データを取得できません。"}</div>;
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HPは読み取り専用 / 発注・取消・決済操作なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />最終確認：{time(snapshot.checkedAt)} / 自動再確認：30秒ごと</span><button type="button" onClick={() => void load(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{loading ? "更新中" : "再確認"}</button></div>{error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部データを取得できません：{error}</div> : null}<RuntimeSummary runtime={snapshot.runtime} /><V12Detail details={snapshot.v12Observability} production={productionRuntime} /><PenguDetail details={snapshot.penguRuntime} production={productionRuntime} /><Quality102Detail details={snapshot.quality102Runtime} production={productionRuntime} /><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} production={productionRuntime} /><div className="grid gap-4 xl:grid-cols-2"><Sleeve title="V12 Top2 補助候補ランキング" items={snapshot.v12.items} /><Sleeve title="V52 Stock 補助候補ランキング" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 取引時間内" : " / 対象時間外")} /></div></div>;
+  useEffect(() => {
+    if (logic !== "q102") return;
+    void loadQ102Symbols();
+    const timer = window.setInterval(() => void loadQ102Symbols(), 30_000);
+    return () => window.clearInterval(timer);
+  }, [logic]);
+
+  if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">?????????????</div>;
+  if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "??????????????"}</div>;
+
+  const toolbar = <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HP??????? / ????????????</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />?????{time(snapshot.checkedAt)} / ??????30???</span><button type="button" onClick={() => { void load(true); if (logic === "q102") void loadQ102Symbols(); }} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} />{loading ? "???" : "???"}</button></div>;
+  const warning = error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">??????????????{error}</div> : null;
+
+  if (logic === "overview") {
+    const cards = [
+      { key: "v12", title: "V12", href: "/decision-status/v12", detail: "???Rank / signalEligible / Entry Quality / ?????risk" },
+      { key: "pengu", title: "PENGU", href: "/decision-status/pengu", detail: "Long V2 / Short V20 / Recovery V8 / cooldown?????" },
+      { key: "q102", title: "Q102 Causal V4", href: "/decision-status/q102", detail: "?????Gate / Family / 1-slot selector / ?state" },
+      { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis?net-edge Gate" },
+    ] as const;
+    return <div className="space-y-4">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">????? ?</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
+  }
+
+  return <div className="space-y-4">
+    {toolbar}
+    {warning}
+    <div><Link href="/decision-status" className="inline-flex rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/75 hover:bg-white/[0.08]">? ????????</Link></div>
+    {logic === "v12" ? <><V12Detail details={snapshot.v12Observability} production={productionRuntime} /><Sleeve title="V12 ?????????" items={snapshot.v12.items} /></> : null}
+    {logic === "pengu" ? <PenguDetail details={snapshot.penguRuntime} production={productionRuntime} /> : null}
+    {logic === "q102" ? <><Quality102Detail details={snapshot.quality102Runtime} production={productionRuntime} /><Quality102SymbolTable snapshot={q102Symbols} error={q102SymbolError} /></> : null}
+    {logic === "v52" ? <><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} production={productionRuntime} /><Sleeve title="V52 Stock ?????????" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / ?????" : " / ?????")} /></> : null}
+  </div>;
 }

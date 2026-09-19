@@ -50,6 +50,8 @@ export interface TradeHistoryEntry {
   strategyId?: "V12" | "V96" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
   netPnlUsd?: number;
   attribution?: TradeHistoryAttribution;
+  exitCause?: "STRATEGY" | "PROTECTION" | "KILL_SWITCH" | "RISK_FORCED_EXIT" | "RECOVERY_TIMEOUT" | "UNKNOWN";
+  exitCauseDetail?: string;
 }
 
 interface OpenPositionRecord {

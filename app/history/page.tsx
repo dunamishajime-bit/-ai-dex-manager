@@ -43,6 +43,8 @@ type TradeHistoryEntry = {
     ranking?: number;
     evidence: "explicit" | "symbol-inference" | "negative-pnl-no-logic" | "unavailable";
   };
+  exitCause?: "STRATEGY" | "PROTECTION" | "KILL_SWITCH" | "RISK_FORCED_EXIT" | "RECOVERY_TIMEOUT" | "UNKNOWN";
+  exitCauseDetail?: string;
 };
 
 function formatNumber(value?: number, digits = 2) {
@@ -74,9 +76,26 @@ function attributionClass(entry: TradeHistoryEntry) {
   switch (getTradeHistoryAttributionTone(entry.attribution)) {
     case "v12":
       return "border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
+    case "v12-strong":
+      return "border-lime-400/35 bg-lime-500/10 text-lime-200";
+    case "v12-relaxed":
+      return "border-teal-400/35 bg-teal-500/10 text-teal-200";
+    case "v12-dynamic":
+      return "border-green-300/35 bg-green-400/10 text-green-100";
     case "q102":
       return "border-violet-400/35 bg-violet-500/10 text-violet-200";
+    case "q102-high-vol":
+      return "border-purple-400/35 bg-purple-500/10 text-purple-200";
+    case "q102-brk":
+      return "border-indigo-400/35 bg-indigo-500/10 text-indigo-200";
+    case "q102-mr":
+      return "border-blue-400/35 bg-blue-500/10 text-blue-200";
+    case "q102-pb":
+      return "border-yellow-400/35 bg-yellow-500/10 text-yellow-200";
+    case "q102-rev":
+      return "border-pink-400/35 bg-pink-500/10 text-pink-200";
     case "pengu":
+    case "pengu-long-v2":
       return "border-cyan-400/35 bg-cyan-500/10 text-cyan-200";
     case "recovery-v8":
       return "border-orange-400/35 bg-orange-500/10 text-orange-200";
@@ -86,6 +105,10 @@ function attributionClass(entry: TradeHistoryEntry) {
       return "border-rose-400/35 bg-rose-500/10 text-rose-200";
     case "v52":
       return "border-sky-400/35 bg-sky-500/10 text-sky-200";
+    case "v52-v11eq":
+      return "border-blue-300/35 bg-blue-400/10 text-blue-100";
+    case "v52-v50":
+      return "border-cyan-300/35 bg-cyan-400/10 text-cyan-100";
     case "test-order":
       return "border-amber-400/30 bg-amber-500/10 text-amber-200";
     case "alternate-route":
@@ -99,14 +122,31 @@ function attributionClass(entry: TradeHistoryEntry) {
 
 const LOGIC_COLOR_LEGEND = [
   ["V12", "border-emerald-400/30 bg-emerald-500/10 text-emerald-200"],
-  ["Q102", "border-violet-400/35 bg-violet-500/10 text-violet-200"],
-  ["PENGU", "border-cyan-400/35 bg-cyan-500/10 text-cyan-200"],
-  ["Recovery V8", "border-orange-400/35 bg-orange-500/10 text-orange-200"],
-  ["V64 Dynamic", "border-fuchsia-400/35 bg-fuchsia-500/10 text-fuchsia-200"],
-  ["Short V20", "border-rose-400/35 bg-rose-500/10 text-rose-200"],
+  ["V12 Strong", "border-lime-400/35 bg-lime-500/10 text-lime-200"],
+  ["V12 Relaxed", "border-teal-400/35 bg-teal-500/10 text-teal-200"],
+  ["V12 Dynamic", "border-green-300/35 bg-green-400/10 text-green-100"],
+  ["PENGU Long V2", "border-cyan-400/35 bg-cyan-500/10 text-cyan-200"],
+  ["PENGU Recovery V8", "border-orange-400/35 bg-orange-500/10 text-orange-200"],
+  ["PENGU V64 Dynamic", "border-fuchsia-400/35 bg-fuchsia-500/10 text-fuchsia-200"],
+  ["PENGU Short V20", "border-rose-400/35 bg-rose-500/10 text-rose-200"],
+  ["Q102 HIGH_VOL", "border-purple-400/35 bg-purple-500/10 text-purple-200"],
+  ["Q102 BRK", "border-indigo-400/35 bg-indigo-500/10 text-indigo-200"],
+  ["Q102 MR", "border-blue-400/35 bg-blue-500/10 text-blue-200"],
+  ["Q102 PB", "border-yellow-400/35 bg-yellow-500/10 text-yellow-200"],
+  ["Q102 REV", "border-pink-400/35 bg-pink-500/10 text-pink-200"],
   ["V52", "border-sky-400/35 bg-sky-500/10 text-sky-200"],
   ["テスト注文", "border-amber-400/30 bg-amber-500/10 text-amber-200"],
 ] as const;
+
+function exitCauseLabel(entry: TradeHistoryEntry) {
+  if (entry.tradeStatus !== "closed") return null;
+  if (entry.exitCause === "KILL_SWITCH") return { label: "Kill Switch 強制決済", className: "border-red-400/50 bg-red-500/15 text-red-100" };
+  if (entry.exitCause === "RISK_FORCED_EXIT") return { label: "Risk強制決済", className: "border-orange-400/45 bg-orange-500/15 text-orange-100" };
+  if (entry.exitCause === "RECOVERY_TIMEOUT") return { label: "復旧猶予切れ決済", className: "border-amber-400/45 bg-amber-500/15 text-amber-100" };
+  if (entry.exitCause === "PROTECTION") return { label: "損切/利確 保護決済", className: "border-sky-400/35 bg-sky-500/10 text-sky-100" };
+  if (entry.exitCause === "STRATEGY") return { label: "ロジック決済", className: "border-white/15 bg-white/5 text-white/65" };
+  return { label: "決済原因未特定", className: "border-white/15 bg-white/5 text-white/45" };
+}
 
 export default function HistoryPage() {
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
@@ -294,13 +334,14 @@ export default function HistoryPage() {
         ) : null}
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1240px] text-left text-sm">
+          <table className="w-full min-w-[1380px] text-left text-sm">
             <thead className="border-b border-white/10 text-xs uppercase text-gray-400">
               <tr>
                 <th className="px-3 py-3">日時</th>
                 <th className="px-3 py-3">売買</th>
                 <th className="px-3 py-3">通貨</th>
                 <th className="px-3 py-3">発火ロジック / 経路</th>
+                <th className="px-3 py-3">決済原因</th>
                 <th className="px-3 py-3">数量</th>
                 <th className="px-3 py-3">取得単価</th>
                 <th className="px-3 py-3">売却単価</th>
@@ -332,10 +373,8 @@ export default function HistoryPage() {
                     {entry.attribution?.evidence === "symbol-inference" ? (
                       <div className="mt-1 text-[10px] text-white/40">通貨ベース推定。entry時点の発火証拠は未保存</div>
                     ) : null}
-                    {entry.attribution?.evidence === "negative-pnl-no-logic" ? (
-                      <div className="mt-1 text-[10px] text-amber-200/70">明示的なロジック発火記録なし・マイナス損益</div>
-                    ) : null}
                   </td>
+                  <td className="px-3 py-4">{exitCauseLabel(entry) ? <><span className={"inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold " + exitCauseLabel(entry)!.className}>{exitCauseLabel(entry)!.label}</span>{entry.exitCauseDetail ? <div className="mt-1 max-w-[220px] text-[10px] leading-4 text-white/40">{entry.exitCauseDetail}</div> : null}</> : <span className="text-xs text-white/35">—</span>}</td>
                   <td className="px-3 py-4 font-mono text-xs">
                     <div>
                       {formatNumber(entry.sourceAmount, 6)} {entry.sourceSymbol}

@@ -20,12 +20,23 @@ export type TradeHistoryAttribution = {
 
 export type TradeHistoryAttributionTone =
   | "v12"
+  | "v12-strong"
+  | "v12-relaxed"
+  | "v12-dynamic"
   | "q102"
+  | "q102-high-vol"
+  | "q102-brk"
+  | "q102-mr"
+  | "q102-pb"
+  | "q102-rev"
   | "pengu"
+  | "pengu-long-v2"
   | "recovery-v8"
   | "v64-dynamic"
   | "short-v20"
   | "v52"
+  | "v52-v11eq"
+  | "v52-v50"
   | "alternate-route"
   | "test-order"
   | "logic"
@@ -64,6 +75,17 @@ export function getTradeHistoryAttributionTone(attribution?: TradeHistoryAttribu
   if (labels.includes("RECOVERY V8")) return "recovery-v8";
   if (labels.includes("V64 DYNAMIC LONG")) return "v64-dynamic";
   if (labels.includes("SHORT V20")) return "short-v20";
+  if (labels.includes("LONG V2 FINAL")) return "pengu-long-v2";
+  if (labels.includes("HIGH_VOL")) return "q102-high-vol";
+  if (/\bBRK\b/.test(labels)) return "q102-brk";
+  if (/\bMR\b/.test(labels)) return "q102-mr";
+  if (/\bPB\b/.test(labels)) return "q102-pb";
+  if (/\bREV\b/.test(labels)) return "q102-rev";
+  if (labels.includes("STRONG QUALITY")) return "v12-strong";
+  if (labels.includes("RELAXED MOMENTUM")) return "v12-relaxed";
+  if (labels.includes("DYNAMIC RESIDUAL")) return "v12-dynamic";
+  if (labels.includes("V11_EQ")) return "v52-v11eq";
+  if (labels.includes("V50")) return "v52-v50";
   if (labels.includes("Q102") || labels.includes("QUALITY102")) return "q102";
   if (labels.includes("PENGU")) return "pengu";
   if (labels.includes("V52")) return "v52";
@@ -107,20 +129,27 @@ function explicitLogicId(strategyId: string, reason: string) {
 }
 
 function routeLabel(reason: string) {
-  if (/recovery\s*v8/i.test(reason)) return "Recovery V8";
-  if (/v64\s*dynamic\s*long/i.test(reason)) return "V64 Dynamic Long";
-  if (/short\s*v20/i.test(reason)) return "Short V20";
+  if (/recovery[_\s-]*v8|recv8-/i.test(reason)) return "Recovery V8";
+  if (/v64[_\s-]*dynamic[_\s-]*long/i.test(reason)) return "V64 Dynamic Long";
+  if (/short[_\s-]*v20/i.test(reason)) return "Short V20";
+  if (/long[_\s-]*v2[_\s-]*final/i.test(reason)) return "Long V2 Final";
+  if (/high[_\s-]*vol/i.test(reason)) return "HIGH_VOL";
+  if (/(?:^|[^A-Z])BRK(?:[^A-Z]|$)/i.test(reason)) return "BRK";
+  if (/(?:^|[^A-Z])MR(?:[^A-Z]|$)/i.test(reason)) return "MR";
+  if (/(?:^|[^A-Z])PB(?:[^A-Z]|$)/i.test(reason)) return "PB";
+  if (/(?:^|[^A-Z])REV(?:[^A-Z]|$)/i.test(reason)) return "REV";
+  if (/strong[_\s-]*quality/i.test(reason)) return "Strong Quality";
+  if (/relaxed[_\s-]*(?:momentum|mom)/i.test(reason)) return "Relaxed Momentum+ATR";
+  if (/dynamic[_\s-]*residual/i.test(reason)) return "Dynamic Residual";
+  if (/normal[_\s-]*score/i.test(reason)) return "Normal Score";
+  if (/v11[_\s-]*eq/i.test(reason)) return "V11_EQ";
+  if (/v50/i.test(reason)) return "V50";
   const route = reason.match(/(?:route|経路)\s*(?:=|:)\s*([^/]+)/i)?.[1]?.trim();
   return route || undefined;
 }
 
 function isTestMarker(reason: string) {
   return /recovered:onchain-swap|manual\s*(?:probe|test)|synthetic|dummy|micro\s*order|test\s*order|テスト注文|検証注文|手動検証/i.test(reason);
-}
-
-function isNegative(input: TradeHistoryAttributionInput) {
-  const pnl = input.netPnlUsd ?? input.realizedPnlUsd;
-  return typeof pnl === "number" && Number.isFinite(pnl) && pnl < 0;
 }
 
 export function deriveTradeHistoryAttribution(
@@ -154,17 +183,11 @@ export function deriveTradeHistoryAttribution(
     };
   }
 
-  if (isNegative(input)) {
-    return {
-      classification: "test-order",
-      evidence: "negative-pnl-no-logic",
-    };
-  }
-
   if (officialSymbolInference && logic) {
     return {
-      classification: "unknown",
+      classification: route ? "alternate-route" : "logic",
       logicLabel: logic,
+      ...(route ? { routeLabel: route } : {}),
       ...(ranking === undefined ? {} : { ranking }),
       evidence: "symbol-inference",
     };

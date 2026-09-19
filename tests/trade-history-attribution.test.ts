@@ -24,7 +24,7 @@ test("explicit low-ranking alternate route is shown as an alternate route", () =
   });
 });
 
-test("official symbol inference does not claim a confirmed firing route", () => {
+test("official symbol inference preserves the strategy lineage without inventing a subroute", () => {
   const attribution = deriveTradeHistoryAttribution({
     source: "official-fill",
     strategyId: "V12",
@@ -32,13 +32,13 @@ test("official symbol inference does not claim a confirmed firing route", () => 
   });
 
   assert.deepEqual(attribution, {
-    classification: "unknown",
+    classification: "logic",
     logicLabel: "V12",
     evidence: "symbol-inference",
   });
 });
 
-test("a negative-PnL order without logic evidence is labeled as a test order", () => {
+test("a negative-PnL fill is never labeled test-order merely because it lost money", () => {
   const attribution = deriveTradeHistoryAttribution({
     source: "official-fill",
     reason: "Aster official fill / unclassified",
@@ -46,8 +46,8 @@ test("a negative-PnL order without logic evidence is labeled as a test order", (
   });
 
   assert.deepEqual(attribution, {
-    classification: "test-order",
-    evidence: "negative-pnl-no-logic",
+    classification: "unknown",
+    evidence: "unavailable",
   });
 });
 
@@ -96,15 +96,19 @@ test("history label makes a low-ranking alternate route visible", () => {
 
 test("history logic names receive distinct stable color tones", () => {
   const cases = [
-    ["V12", "v12"],
-    ["Q102 / CAUSAL_V4", "q102"],
-    ["PENGU / Recovery V8", "recovery-v8"],
-    ["PENGU / Short V20", "short-v20"],
-    ["PENGU / V64 Dynamic Long", "v64-dynamic"],
-    ["V52", "v52"],
+    [{ logicLabel: "V12" }, "v12"],
+    [{ logicLabel: "V12", routeLabel: "Strong Quality" }, "v12-strong"],
+    [{ logicLabel: "V12", routeLabel: "Relaxed Momentum+ATR" }, "v12-relaxed"],
+    [{ logicLabel: "Q102 / CAUSAL_V4", routeLabel: "HIGH_VOL" }, "q102-high-vol"],
+    [{ logicLabel: "Q102 / CAUSAL_V4", routeLabel: "BRK" }, "q102-brk"],
+    [{ logicLabel: "PENGU", routeLabel: "Long V2 Final" }, "pengu-long-v2"],
+    [{ logicLabel: "PENGU", routeLabel: "Recovery V8" }, "recovery-v8"],
+    [{ logicLabel: "PENGU", routeLabel: "Short V20" }, "short-v20"],
+    [{ logicLabel: "PENGU", routeLabel: "V64 Dynamic Long" }, "v64-dynamic"],
+    [{ logicLabel: "V52", routeLabel: "V50" }, "v52-v50"],
   ] as const;
-  for (const [logicLabel, expected] of cases) {
-    assert.equal(getTradeHistoryAttributionTone({ classification: "logic", logicLabel, evidence: "explicit" }), expected);
+  for (const [labels, expected] of cases) {
+    assert.equal(getTradeHistoryAttributionTone({ classification: "logic", ...labels, evidence: "explicit" }), expected);
   }
   assert.equal(getTradeHistoryAttributionTone({ classification: "test-order", evidence: "explicit" }), "test-order");
   assert.equal(getTradeHistoryAttributionTone({ classification: "unknown", evidence: "unavailable" }), "unknown");

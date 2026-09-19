@@ -1,5 +1,12 @@
 import { DecisionStatusPanel } from "@/components/features/DecisionStatusPanel";
 
 export default function DecisionStatusPage() {
-  return (<main className="space-y-4 p-4 md:p-6"><header className="panel-gold rounded-[28px] p-5 md:p-7"><div className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-100/70">Read-only LIVE decision monitor</div><h1 className="gold-heading mt-2 text-3xl font-black">V12 / PENGU V2・Short V20・Recovery V8 / Q102 Causal V4 / V52 判定状況</h1><p className="mt-3 max-w-4xl text-sm leading-7 text-white/75">VPSで稼働中のV12 X1.00 ALL（Top2・最大2建玉）、PENGU Dual LS V2 / Short V20 / Recovery V8、Q102 Causal V4（1-slot）、V52 Aster-onlyの発火候補→確定足→建玉・容量→共有risk/Kill Switch→注文Window→約定照合を表示します。HPは読み取り専用で、実LIVE runnerのEntry/Exit・注文・決済を置き換えません。</p><div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-500/5 px-4 py-3 text-[12px] leading-6 text-amber-100/85">Q102 Causal V4は最大1.50x・1 Slot、Crypto Grossは3.00x、Total Grossは3.50xです。未取得・古いstate・未証明経路は該当経路だけFAIL CLOSEDで、他runnerの判定を推測で補完しません。</div></header><DecisionStatusPanel /></main>);
+  return <main className="space-y-4 p-4 md:p-6">
+    <header className="panel-gold rounded-[28px] p-5 md:p-7">
+      <div className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-100/70">Read-only LIVE decision monitor</div>
+      <h1 className="gold-heading mt-2 text-3xl font-black">判定状況</h1>
+      <p className="mt-3 max-w-4xl text-sm leading-7 text-white/75">V12 / PENGU / Q102 / V52 をロジック別ページに分けました。各カードから実runnerの判定・Gate・建玉状態を確認できます。</p>
+    </header>
+    <DecisionStatusPanel logic="overview" />
+  </main>;
 }
