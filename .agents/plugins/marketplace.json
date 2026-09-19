@@ -1,0 +1,20 @@
+{
+  "name": "disdex-tools",
+  "interface": {
+    "displayName": "DisDex Tools"
+  },
+  "plugins": [
+    {
+      "name": "decision-gateway",
+      "source": {
+        "source": "local",
+        "path": "./plugins/decision-gateway"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
