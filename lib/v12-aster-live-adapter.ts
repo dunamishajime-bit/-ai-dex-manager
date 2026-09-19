@@ -41,11 +41,15 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     }
     async credentialsReady() {
         if (!this.client.hasTradingCredentials()) return false;
+        // Readiness only proves authenticated venue access. Do not consume the
+        // expensive all-symbol openOrders weight here: the same tick performs
+        // authoritative order reconciliation before any exposure-increasing
+        // action, and strict entry checks open orders again immediately before
+        // order submission.
         const reads = [
             () => this.client.ping(),
             () => this.client.getBalances(),
             () => this.client.getPositions(),
-            () => this.client.getOpenOrders(),
         ];
         for (const [index, read] of reads.entries()) {
             if (index > 0 && this.readRequestSpacingMs > 0) await sleep(this.readRequestSpacingMs);

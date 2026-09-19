@@ -226,7 +226,7 @@ async function v12CredentialReadsAreSerializedTest() {
     const adapter = new V12AsterLiveAdapter(client);
     assert.equal(await adapter.credentialsReady(), true);
     assert.equal(maxInFlight, 1);
-    assert.deepEqual(requested, ["/fapi/v3/ping", "/fapi/v3/balance", "/fapi/v3/positionRisk", "/fapi/v3/openOrders"]);
+    assert.deepEqual(requested, ["/fapi/v3/ping", "/fapi/v3/balance", "/fapi/v3/positionRisk"]);
 }
 
 async function run() {
