@@ -121,6 +121,63 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             "strictPortfolioPlan": strict_plan,
         }
 
+    def _prepare_fet_for_stock_entry(self, slot: str, target_gross: float) -> float:
+        if not self.live:
+            return target_gross
+        requested = max(0.0, base.finite(target_gross))
+        if requested <= EPSILON:
+            return 0.0
+        tsx = os.getenv("DISDEX_TSX_BIN") or os.path.join(
+            os.getcwd(), "node_modules", ".bin", "tsx"
+        )
+        script = os.getenv(
+            "DISDEX_FET_CORE_PREEMPT_SCRIPT",
+            "scripts/disdex-fet-brk48-core-preempt.ts",
+        )
+        cause = f"V52_CORE|{slot}|{base.now_ms()}|{requested:.12f}"
+        state_path = os.getenv("FET_BRK48_STATE_PATH", "/var/lib/disdex/fet-brk48-residual/state.json")
+        result = subprocess.run(
+            [
+                tsx,
+                script,
+                "--caller",
+                "V52_CORE",
+                "--shared-lock-held",
+                "true",
+                "--cause",
+                cause,
+                "--state-path",
+                state_path,
+            ],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if result.returncode != 0 or not lines:
+            detail = result.stderr.strip() or result.stdout.strip() or "no-output"
+            raise RuntimeError(f"FET_CORE_PREEMPT_HELPER_FAILED:rc={result.returncode}:{detail}")
+        try:
+            payload = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("FET_CORE_PREEMPT_HELPER_INVALID_JSON") from error
+        status = str(payload.get("status") or "")
+        if status == "blocked":
+            raise RuntimeError(f"FET_CORE_PREEMPT_HELPER_BLOCKED:{payload.get('message')}")
+        if status not in {"reduced", "not-needed"}:
+            raise RuntimeError(f"FET_CORE_PREEMPT_HELPER_UNEXPECTED_STATUS:{status}")
+        if status == "reduced":
+            self.log(
+                "v52-fet-residual-preempted-for-stock",
+                slot=slot,
+                requestedGross=requested,
+                preemption=payload,
+            )
+        return requested
+
     def _prepare_v12_dynamic_for_stock_entry(self, slot: str, target_gross: float) -> float:
         if not self.live:
             return target_gross
@@ -241,6 +298,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         # The tick loop may safely retry such a decision inside the same entry window.
         self._v52_last_entry_blocked_before_order = False
         if self.live:
+            target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
         snapshot = self.gross_snapshot()

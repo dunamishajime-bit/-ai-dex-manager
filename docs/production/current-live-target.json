@@ -2,7 +2,7 @@
   "schema": "disdex-current-live-target/v1",
   "date": "2026-09-20",
   "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
-  "productionBaseSha": "b6b62bbadf1abe25d8ef31f5f133515b52a0df1c",
+  "productionBaseSha": "b664a11725b5f8f1463651fb47d71efc177e538b",
   "strategy": {
     "v12": {
       "maximumPositions": 3,

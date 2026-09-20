@@ -37,6 +37,7 @@ import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-p
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
+import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import type {
     DirectAccountSnapshot,
@@ -300,9 +301,12 @@ function strictBasePosition(position: DirectPosition, now: number): StrictPortfo
         ? "V12"
         : classification.sleeve === "PENGU_DUAL_LS_V2"
             ? "PENGU_DUAL_LS_V2"
-            : "V52";
+            : classification.sleeve === "FET_RESIDUAL"
+                ? "FET_RESIDUAL"
+                : "V52";
     const updatedAt = positive(position.updatedAt, "base position updatedAt");
     if (updatedAt > now) throw new Error(`BASE_POSITION_TIMESTAMP_IN_FUTURE:${position.symbol}`);
+    const markPrice = positive(position.markPrice, "base position markPrice");
     return {
         id: `aster:${position.symbol.toUpperCase()}:${position.positionSide}`,
         strategy,
@@ -310,9 +314,13 @@ function strictBasePosition(position: DirectPosition, now: number): StrictPortfo
         side: actualSide(position) > 0 ? "LONG" : "SHORT",
         quantity: positive(Math.abs(position.quantity), "base position quantity"),
         entryPrice: positive(position.entryPrice, "base position entryPrice"),
-        markPrice: positive(position.markPrice, "base position markPrice"),
+        markPrice,
         entryTs: updatedAt,
         updatedAt,
+        markSource: strategy === "FET_RESIDUAL" ? "LIVE_MARKET_QUOTE" : undefined,
+        markSourceEvidence: strategy === "FET_RESIDUAL"
+            ? { source: "LIVE_MARKET_QUOTE", timestamp: updatedAt, price: markPrice, crossChecked: true }
+            : undefined,
     };
 }
 
@@ -457,6 +465,22 @@ export class Quality102CausalV1Runner {
         if (!/^[0-9a-f]{40}$/i.test(config.runtimeCommitSha) || config.runtimeCommitSha.toLowerCase() !== config.expectedRuntimeCommitSha.toLowerCase()) {
             throw new Error("QUALITY102_CAUSAL_V1_RUNTIME_SHA_MISMATCH");
         }
+    }
+
+    private async preemptFetForCoreEntry(causeIdempotencyKey: string): Promise<boolean> {
+        const adapter = this.dependencies.config.v12DynamicAdapter;
+        if (!adapter) throw new Error("QUALITY102_FET_PREEMPT_ADAPTER_REQUIRED");
+        const result = await reduceFetBrk48ForCoreConflict({
+            executor: this.dependencies.executor,
+            adapter,
+            causeIdempotencyKey,
+            statePath: process.env.FET_BRK48_STATE_PATH,
+            maxSlippageBps: this.dependencies.config.maxSlippageBps,
+            expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+            now: this.now,
+        });
+        if (result.status === "blocked") throw new Error(`QUALITY102_FET_PREEMPT_BLOCKED:${result.message}`);
+        return result.status === "reduced";
     }
 
     private async trimDynamicForCoreEntry(
@@ -776,6 +800,10 @@ export class Quality102CausalV1Runner {
                 maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
                 quality102CausalV1Ready: true,
             });
+            const fetReduction = planner.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
+            if (fetReduction && await this.preemptFetForCoreEntry(pending.idempotencyKey)) {
+                return this.validatePendingExecutionWindow(state, pending, allowDynamicTrim);
+            }
             const accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
             const capacityShortfall = planner.status !== "planned"
                 || !accepted
@@ -1009,6 +1037,15 @@ export class Quality102CausalV1Runner {
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
             quality102CausalV1Ready: true,
         });
+        const fetReduction = planner.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
+        if (fetReduction && await this.preemptFetForCoreEntry(`${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`)) {
+            const [freshAccount, freshPositions] = await Promise.all([
+                this.dependencies.executor.getAccountSnapshot(),
+                this.dependencies.executor.getPositions(),
+            ]);
+            const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim);
+        }
         let accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
         const capacityShortfall = planner.status !== "planned"
             || !accepted

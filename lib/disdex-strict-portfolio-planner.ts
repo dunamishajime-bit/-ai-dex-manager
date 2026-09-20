@@ -102,6 +102,13 @@ function isCausalQuality102Strategy(strategy: StrictStrategy) {
     return strategy === "QUALITY102_CAUSAL_V1";
 }
 
+function isCoreStrategy(strategy: StrictStrategy) {
+    return strategy === "V12"
+        || strategy === "PENGU_DUAL_LS_V2"
+        || strategy === "V52"
+        || strategy === "QUALITY102_CAUSAL_V1";
+}
+
 function grossForNotional(notionalUsd: number, equity: number) {
     return notionalUsd / equity;
 }
@@ -198,6 +205,16 @@ function causalLiveMarkIsFresh(position: StrictPortfolioPosition, now: number, m
         && evidence.price === position.markPrice;
 }
 
+function fetLiveMarkIsFresh(position: StrictPortfolioPosition, now: number, maxDataAgeMs: number) {
+    if (position.strategy !== "FET_RESIDUAL" || position.markSource !== "LIVE_MARKET_QUOTE") return false;
+    const evidence = liveQuoteEvidence(position);
+    return evidence !== undefined
+        && evidence.timestamp === position.updatedAt
+        && evidence.timestamp <= now
+        && now - evidence.timestamp <= maxDataAgeMs
+        && evidence.price === position.markPrice;
+}
+
 /**
  * Reduce a position at the supplied timestamp mark. The average entry price
  * of the remaining quantity is preserved; only the reduced quantity realizes
@@ -229,7 +246,7 @@ export function markToMarketReducePosition(input: {
         if (source !== "BINANCE_VISION_USDM_1M_OPEN" || evidence?.source !== source || evidence.timestamp !== input.markTs || evidence.crossChecked !== true || input.markTs % 60_000 !== 0) {
             throw new Error("QUALITY102_MTM_SOURCE_UNVERIFIED");
         }
-    } else if (position.strategy === "QUALITY102_CAUSAL_V1") {
+    } else if (position.strategy === "QUALITY102_CAUSAL_V1" || position.strategy === "FET_RESIDUAL") {
         const source = input.markSource ?? position.markSource;
         const evidence = input.markSourceEvidence ?? position.markSourceEvidence;
         if (source !== "LIVE_MARKET_QUOTE"
@@ -241,7 +258,9 @@ export function markToMarketReducePosition(input: {
             || evidence.price <= 0
             || evidence.timestamp !== input.markTs
             || evidence.price !== input.markPrice) {
-            throw new Error("QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED");
+            throw new Error(position.strategy === "FET_RESIDUAL"
+                ? "FET_RESIDUAL_MTM_SOURCE_UNVERIFIED"
+                : "QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED");
         }
     }
     const feeBpsPerSide = nonNegative(input.feeBpsPerSide ?? position.feeBpsPerSide ?? 0, "fee bps per side");
@@ -411,6 +430,14 @@ export function planStrictPortfolio(input: {
     if (activeCausalQuality.some((row) => !causalLiveMarkIsFresh(row, input.now, maxDataAgeMs))) {
         return rejectPlan("QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED", input.active, equity);
     }
+    const activeFet = input.active.filter((row) => row.strategy === "FET_RESIDUAL");
+    if (activeFet.length > 1) return rejectPlan("FET_RESIDUAL_ONE_SLOT_VIOLATION", input.active, equity);
+    if (activeFet.some((row) => !fetLiveMarkIsFresh(row, input.now, maxDataAgeMs))) {
+        return rejectPlan("FET_RESIDUAL_MTM_SOURCE_UNVERIFIED", input.active, equity);
+    }
+    if (activeFet.some((row) => grossForNotional(positionNotional(row), equity) > INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross + EPSILON)) {
+        return rejectPlan("FET_RESIDUAL_GROSS_OVER_CAP", input.active, equity);
+    }
     const activeV12 = input.active.filter((row) => row.strategy === "V12");
     if (activeV12.length > INTEGRATED_PRODUCTION_RISK_POLICY.v12MaximumPositions) {
         return rejectPlan("V12_MAX_POSITIONS_REACHED", input.active, equity);
@@ -462,6 +489,26 @@ export function planStrictPortfolio(input: {
             && active.filter((row) => row.strategy === "V12").length + accepted.filter((row) => row.strategy === "V12").length >= INTEGRATED_PRODUCTION_RISK_POLICY.v12MaximumPositions) {
             rejected.push({ intent, reason: "V12_MAX_POSITIONS_REACHED" });
             continue;
+        }
+        if (isCoreStrategy(intent.strategy)) {
+            const currentFet = active.find((row) => row.strategy === "FET_RESIDUAL");
+            if (currentFet) {
+                const evidence = liveQuoteEvidence(currentFet);
+                if (!evidence || !fetLiveMarkIsFresh(currentFet, input.now, maxDataAgeMs)) {
+                    return rejectPlan("FET_RESIDUAL_MTM_SOURCE_UNVERIFIED", input.active, equity);
+                }
+                const reduction = markToMarketReducePosition({
+                    position: currentFet,
+                    reduceQuantity: currentFet.quantity,
+                    markPrice: evidence.price,
+                    markTs: evidence.timestamp,
+                    markSource: "LIVE_MARKET_QUOTE",
+                    markSourceEvidence: evidence,
+                });
+                reductions.push(reduction);
+                workingEquity = Math.max(0.001, workingEquity + reduction.realizedPnl);
+                active = active.filter((row) => row.id !== currentFet.id);
+            }
         }
         const baseOtherTotalNotional = sumNotional(active, (row) => !isCausalQuality102Strategy(row.strategy)) + accepted.filter((row) => !isCausalQuality102Strategy(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
         const baseOtherCryptoNotional = sumNotional(active, (row) => !isCausalQuality102Strategy(row.strategy) && isCrypto(row.strategy)) + accepted.filter((row) => !isCausalQuality102Strategy(row.strategy) && isCrypto(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);

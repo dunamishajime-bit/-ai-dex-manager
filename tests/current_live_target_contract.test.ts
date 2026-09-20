@@ -13,7 +13,7 @@ const artifactPath = "docs/research-results/top3-fet-q102gov-integrated-20260920
 test("current live target is the sole Top3/FET/Q102 governor acceptance anchor", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   assert.equal(target.status, "CURRENT_CANONICAL_PRODUCTION_TARGET");
-  assert.equal(target.productionBaseSha, "b6b62bbadf1abe25d8ef31f5f133515b52a0df1c");
+  assert.equal(target.productionBaseSha, "b664a11725b5f8f1463651fb47d71efc177e538b");
 
   assert.equal(target.strategy.v12.maximumPositions, 3);
   assert.equal(target.strategy.v12.baseMaximumPositions, 2);

@@ -456,3 +456,59 @@ test("V12 active position over per-position 1.0x fails closed", () => {
     assert.equal(result.status, "blocked");
     assert.equal(result.reason, "V12_POSITION_GROSS_OVER_CAP");
 });
+
+
+test("Core intents fully preempt FET residual before capacity allocation", () => {
+    for (const [strategy, symbol, gross] of [
+        ["V12", "ETHUSDT", 1.0],
+        ["PENGU_DUAL_LS_V2", "PENGUUSDT", 0.85],
+        ["V52", "NVDAUSDT", 1.0],
+        ["QUALITY102_CAUSAL_V1", "SOLUSDT", 1.0],
+    ] as const) {
+        const fet = position({
+            id: `fet-${strategy}`,
+            strategy: "FET_RESIDUAL",
+            symbol: "FETUSDT",
+            quantity: 10,
+            entryPrice: 90,
+            markPrice: 100,
+            entryTs: NOW - HOUR,
+            updatedAt: NOW,
+            markSource: "LIVE_MARKET_QUOTE",
+            markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 100, crossChecked: true },
+        });
+        const result = plan([fet], [intent(strategy, gross, symbol)]);
+        assert.equal(result.status, "planned");
+        assert.equal(result.reductions[0]?.strategy, "FET_RESIDUAL");
+        assert.equal(result.reductions[0]?.reducedQuantity, 10);
+        assert.equal(result.reductions[0]?.remainingQuantity, 0);
+        assert.equal(result.activePositions.some((row) => row.strategy === "FET_RESIDUAL"), false);
+        assert.equal(result.accepted[0]?.strategy, strategy);
+    }
+});
+
+test("FET residual intent does not preempt itself", () => {
+    const result = plan([], [intent("FET_RESIDUAL", 1.25, "FETUSDT")]);
+    assert.equal(result.status, "planned");
+    assert.equal(result.reductions.length, 0);
+    assert.equal(result.accepted[0]?.strategy, "FET_RESIDUAL");
+    assert.equal(result.accepted[0]?.gross, 1.25);
+});
+
+test("stale or unverified FET residual mark fails closed", () => {
+    const stale = position({
+        id: "fet-stale",
+        strategy: "FET_RESIDUAL",
+        symbol: "FETUSDT",
+        quantity: 5,
+        entryPrice: 100,
+        markPrice: 100,
+        entryTs: NOW - HOUR,
+        updatedAt: NOW - 10 * 60_000,
+        markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW - 10 * 60_000, price: 100, crossChecked: true },
+    });
+    const result = plan([stale], [intent("V12", 1.0, "ETHUSDT")], true, 5 * 60_000);
+    assert.equal(result.status, "blocked");
+    assert.equal(result.reason, "STALE_MARK_PRICE");
+});

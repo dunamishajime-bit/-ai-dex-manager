@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 type Readiness = {
   schema: string;
   target: string;
+  implementationStatus?: "BLOCKED" | "READY";
   status: "BLOCKED" | "READY";
   ordersEnabled: boolean;
   blockers: string[];
@@ -38,17 +39,28 @@ async function main() {
   if (canonical.acceptance.requireFetCorePreemption !== true) throw new Error("CANONICAL_FET_PREEMPTION_NOT_REQUIRED");
   if (!managed.includes("findManagedFetBrk48ProtectiveOrders")) throw new Error("FET_PROTECTIVE_ORDER_CLASSIFIER_MISSING");
 
-  const actualBlockers = Object.entries(observed).filter(([, blocked]) => blocked).map(([name]) => name).sort();
-  const declaredBlockers = [...readiness.blockers].sort();
-  if (JSON.stringify(actualBlockers) !== JSON.stringify(declaredBlockers)) {
-    throw new Error(`READINESS_BLOCKER_DRIFT:declared=${declaredBlockers.join(",")}:actual=${actualBlockers.join(",")}`);
+  const actualImplementationBlockers = Object.entries(observed).filter(([, blocked]) => blocked).map(([name]) => name).sort();
+  const implementationBlockerNames = new Set(Object.keys(observed));
+  const declaredImplementationBlockers = readiness.blockers.filter((name) => implementationBlockerNames.has(name)).sort();
+  if (JSON.stringify(actualImplementationBlockers) !== JSON.stringify(declaredImplementationBlockers)) {
+    throw new Error(`READINESS_BLOCKER_DRIFT:declared=${declaredImplementationBlockers.join(",")}:actual=${actualImplementationBlockers.join(",")}`);
+  }
+  const activationBlockers = readiness.blockers.filter((name) => !implementationBlockerNames.has(name)).sort();
+  const allowedActivationBlockers = new Set(["OPERATOR_LIVE_ACTIVATION_REQUIRED"]);
+  if (activationBlockers.some((name) => !allowedActivationBlockers.has(name))) {
+    throw new Error(`READINESS_UNKNOWN_ACTIVATION_BLOCKER:${activationBlockers.join(",")}`);
+  }
+  if (actualImplementationBlockers.length === 0 && readiness.implementationStatus !== "READY") {
+    throw new Error("READINESS_IMPLEMENTATION_STATUS_NOT_READY");
   }
 
-  if (actualBlockers.length > 0 || readiness.status !== "READY" || readiness.ordersEnabled !== true) {
+  const blockers = [...actualImplementationBlockers, ...activationBlockers];
+  if (blockers.length > 0 || readiness.status !== "READY" || readiness.ordersEnabled !== true) {
     console.log(JSON.stringify({
       status: "PRODUCTION_ACTIVATION_BLOCKED",
       target: readiness.target,
-      blockers: actualBlockers,
+      implementationReady: actualImplementationBlockers.length === 0 && readiness.implementationStatus === "READY",
+      blockers,
       ordersSent: 0,
       cancelSent: 0,
       positionChangesSent: 0,

@@ -2,7 +2,9 @@
 
 **Status:** CURRENT_CANONICAL_PRODUCTION_TARGET
 **Date:** 2026-09-20
-**Production base:** `b6b62bbadf1abe25d8ef31f5f133515b52a0df1c`
+**Current LIVE base:** `b664a11725b5f8f1463651fb47d71efc177e538b`
+**Implementation readiness:** READY
+**Real-money activation:** BLOCKED — `OPERATOR_LIVE_ACTIVATION_REQUIRED`
 
 This file is the single current Production activation target. GPT, Work, Codex and deployment procedures must read this file and `docs/production/current-live-target.json` before using any older implementation or backtest contract.
 
@@ -46,4 +48,4 @@ Do not use those old acceptance values to block or authorize the current Top3 + 
 
 ## Activation rule
 
-Production may advance only when code and replay match this current contract, all relevant regressions pass, state/protection/reconciliation are verified, one runtime SHA is active, Margin Guard is HEALTHY, Kill Switch is false for a resolved reason, and Aster 5x Cross/read-only checks pass. Never use a synthetic LIVE order merely to prove activation.
+Implementation is complete only when code and replay match this current contract, all relevant regressions pass, FET Core preemption/ownership/protection are verified, and the readiness checker reports `implementationReady=true`. Real-money Production activation remains separately blocked until an operator explicitly authorizes the cutover, removes `OPERATOR_LIVE_ACTIVATION_REQUIRED`, enables the FET Core-preemption runtime gate in the exact release contract, and then verifies one runtime SHA, Margin Guard HEALTHY, Kill Switch false for a resolved reason, Aster 5x Cross, and read-only venue reconciliation. Never use a synthetic LIVE order merely to prove activation.

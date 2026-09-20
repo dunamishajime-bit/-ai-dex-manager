@@ -5,7 +5,8 @@ import { V12AsterLiveAdapter, type V12AsterLiveAdapterOptions } from "@/lib/v12-
 import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
-import { findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
+import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 
 const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
@@ -76,6 +77,7 @@ function strictStrategy(position: DirectPosition, quality102Ownership?: Quality1
     if (!classification.tradable) throw new Error(`ASTER_UNKNOWN_NONZERO_POSITION:${position.symbol}`);
     if (classification.sleeve === "V12") return "V12";
     if (classification.sleeve === "PENGU_DUAL_LS_V2") return "PENGU_DUAL_LS_V2";
+    if (classification.sleeve === "FET_RESIDUAL") return "FET_RESIDUAL";
     if (classification.sleeve === "V11_EQ" || classification.sleeve === "V50_POST_OPEN_BASIS") return "V52";
     throw new Error(`STRICT_PORTFOLIO_UNKNOWN_STRATEGY_OWNERSHIP:${position.symbol}`);
 }
@@ -101,6 +103,7 @@ function toStrictPosition(position: DirectPosition, now: number, quality102Owner
             markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: quality102Quote.updatedAt, price: quality102Quote.midPrice, crossChecked: true },
         };
     }
+    const markPrice = Number(position.markPrice);
     return {
         id: `aster:${position.symbol.toUpperCase()}:${String(position.positionSide || "BOTH")}`,
         strategy,
@@ -108,10 +111,13 @@ function toStrictPosition(position: DirectPosition, now: number, quality102Owner
         side: position.quantity < 0 || position.positionSide === "SHORT" ? "SHORT" : "LONG",
         quantity: Math.abs(position.quantity),
         entryPrice: Number(position.entryPrice),
-        markPrice: Number(position.markPrice),
+        markPrice,
         entryTs: Number.isFinite(updatedAt) && updatedAt > 0 ? Math.min(updatedAt, now) : 1,
         updatedAt,
         markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: strategy === "FET_RESIDUAL"
+            ? { source: "LIVE_MARKET_QUOTE", timestamp: updatedAt, price: markPrice, crossChecked: true }
+            : undefined,
     };
 }
 
@@ -142,11 +148,13 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         const managedProtectiveOrders = new Set([
             ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
             ...findManagedV12ProtectiveOrders(openOrders, positions),
+            ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
         ]);
         const unmanagedOpenOrders = openOrders.filter((order) => !managedProtectiveOrders.has(order));
         if (unmanagedOpenOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
         let workingAccount = account;
         let workingPositions = positions;
+        let workingOpenOrders = openOrders;
         let quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
         const requestedNotional = Math.abs(input.quantity * input.expectedPrice);
         if (!(requestedNotional > 0)) throw new Error("STRICT_PORTFOLIO_REQUESTED_NOTIONAL_INVALID");
@@ -173,6 +181,31 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                 maxDataAgeMs,
             });
             if (plan.status !== "planned") throw new Error(`STRICT_PORTFOLIO_PLAN_BLOCKED:${plan.reason || "UNKNOWN"}`);
+            const fetReduction = plan.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
+            if (fetReduction) {
+                const reduced = await reduceFetBrk48ForCoreConflict({
+                    executor: this.executor,
+                    adapter: this,
+                    causeIdempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
+                    statePath: process.env.FET_BRK48_STATE_PATH,
+                    maxSlippageBps: this.maxSlippageBps,
+                    expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                });
+                if (reduced.status !== "reduced") throw new Error(`FET_RESIDUAL_PREEMPT_BLOCKED:${reduced.message}`);
+                [workingAccount, workingPositions, workingOpenOrders] = await Promise.all([
+                    this.getAccountSnapshot(),
+                    this.getPositions(),
+                    this.getOpenOrders(),
+                ]);
+                const refreshedManaged = new Set([
+                    ...findManagedPenguRecoveryV8ProtectiveOrders(workingOpenOrders, workingPositions),
+                    ...findManagedV12ProtectiveOrders(workingOpenOrders, workingPositions),
+                    ...findManagedFetBrk48ProtectiveOrders(workingOpenOrders, workingPositions),
+                ]);
+                if (workingOpenOrders.some((order) => !refreshedManaged.has(order))) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT_AFTER_FET_PREEMPT");
+                quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                continue;
+            }
             const reductions = plan.reductions.filter((reduction) => reduction.strategy === "QUALITY102_CAUSAL_V1");
             if (plan.reductions.some((reduction) => reduction.strategy !== "QUALITY102_CAUSAL_V1")) throw new Error("STRICT_PORTFOLIO_UNEXPECTED_BASE_REDUCTION");
             if (reductions.length > 0) {

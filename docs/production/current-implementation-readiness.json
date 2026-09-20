@@ -3,15 +3,11 @@
   "date": "2026-09-20",
   "target": "top3_q102gov030_fet1.25",
   "canonicalTarget": "docs/production/current-live-target.json",
+  "implementationStatus": "READY",
   "status": "BLOCKED",
   "ordersEnabled": false,
   "blockers": [
-    "FET_CORE_PREEMPTION_V12_UNWIRED",
-    "FET_CORE_PREEMPTION_PENGU_UNWIRED",
-    "FET_CORE_PREEMPTION_Q102_UNWIRED",
-    "FET_CORE_PREEMPTION_V52_UNWIRED",
-    "FET_PROTECTIVE_ORDER_V12_RECOGNITION_UNWIRED",
-    "FET_PROTECTIVE_ORDER_PENGU_RECOGNITION_UNWIRED"
+    "OPERATOR_LIVE_ACTIVATION_REQUIRED"
   ],
   "completed": [
     "CANONICAL_740M_65M_BACKTEST_FIXED",
@@ -26,7 +22,14 @@
     "FET_24H_REDUCE_ONLY_EXIT",
     "FET_SHARED_RISK_AND_ACCOUNT_LOCK",
     "FET_READONLY_5X_CROSS_PREFLIGHT",
-    "FET_RUNTIME_MONITORING_WIRING"
+    "FET_RUNTIME_MONITORING_WIRING",
+    "FET_CORE_PREEMPTION_V12_WIRED",
+    "FET_CORE_PREEMPTION_PENGU_WIRED",
+    "FET_CORE_PREEMPTION_Q102_WIRED",
+    "FET_CORE_PREEMPTION_V52_WIRED",
+    "FET_PROTECTIVE_ORDER_V12_RECOGNITION_WIRED",
+    "FET_PROTECTIVE_ORDER_PENGU_RECOGNITION_WIRED",
+    "FET_CORE_PREEMPTION_REDUCE_ONLY_IDEMPOTENCY_TESTED"
   ],
-  "activationRule": "Activation must remain blocked until every blocker is removed by tested code and the readiness checker returns PRODUCTION_ACTIVATION_READY."
+  "activationRule": "Implementation is ready, but real-money activation remains blocked until an operator explicitly authorizes the LIVE cutover, removes OPERATOR_LIVE_ACTIVATION_REQUIRED, sets status READY/ordersEnabled true, and enables FET_BRK48_CORE_PREEMPTION_READY in the exact release contract."
 }

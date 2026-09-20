@@ -31,7 +31,8 @@ import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
-import { findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
+import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import {
@@ -138,6 +139,7 @@ function unmanagedCrossSleeveOpenOrders(
     const managedProtectiveOrders = new Set<DirectOpenOrder>([
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
+        ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
     ]);
     return openOrders.filter(
         (order) => !quality102OwnsOrder(quality102Ownership, order)
@@ -184,6 +186,8 @@ function strictStrategyForPosition(position: DirectPosition, quality102Ownership
     if (symbol === SYMBOL) return "PENGU_DUAL_LS_V2" as const;
     const v12 = classifyAsterSymbol(symbol, "V12");
     if (v12.tradable && v12.sleeve === "V12") return "V12" as const;
+    const fet = classifyAsterSymbol(symbol, "FET_RESIDUAL");
+    if (fet.tradable && fet.sleeve === "FET_RESIDUAL") return "FET_RESIDUAL" as const;
     const stock = classifyAsterSymbol(symbol, "V50_POST_OPEN_BASIS");
     if (stock.tradable && stock.assetClass === "STOCK") return "V52" as const;
     throw new Error(`MANUAL_REVIEW_UNKNOWN_STRATEGY_OWNERSHIP:${symbol}`);
@@ -206,6 +210,10 @@ function strictActivePositions(positions: DirectPosition[], now: number, quality
         markPrice: position.markPrice,
         entryTs: Math.min(position.updatedAt, now),
         updatedAt: position.updatedAt,
+        markSource: strategy === "FET_RESIDUAL" ? "LIVE_MARKET_QUOTE" : undefined,
+        markSourceEvidence: strategy === "FET_RESIDUAL"
+            ? { source: "LIVE_MARKET_QUOTE", timestamp: position.updatedAt, price: position.markPrice, crossChecked: true }
+            : undefined,
         };
     });
 }
@@ -799,6 +807,35 @@ export class PenguDualLsV2PortfolioRunner {
                     if (strictPlan.status !== "planned") {
                         await this.dependencies.stateStore.save(state);
                         return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.reason || strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
+                    }
+                    const fetReduction = strictPlan.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
+                    if (fetReduction) {
+                        if (!this.dependencies.v12DynamicAdapter) throw new Error("PENGU_FET_PREEMPT_ADAPTER_REQUIRED");
+                        const reduced = await reduceFetBrk48ForCoreConflict({
+                            executor: this.dependencies.executor,
+                            adapter: this.dependencies.v12DynamicAdapter,
+                            causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
+                            statePath: process.env.FET_BRK48_STATE_PATH,
+                            maxSlippageBps: this.dependencies.config.maxSlippageBps,
+                            expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                            now: this.now,
+                        });
+                        if (reduced.status !== "reduced") throw new Error(`PENGU_FET_PREEMPT_BLOCKED:${reduced.message}`);
+                        [workingAccount, workingPositions] = await Promise.all([
+                            this.dependencies.executor.getAccountSnapshot(),
+                            this.dependencies.executor.getPositions(),
+                        ]);
+                        quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                        quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
+                        const refreshedNow = this.now();
+                        if (!validLiveAccount(workingAccount, refreshedNow) || !validLiveQuote(quote, SYMBOL, refreshedNow)) {
+                            throw new Error("PENGU_FET_PREEMPT_REFRESH_STALE");
+                        }
+                        const refreshedOpenOrders = await this.dependencies.executor.getOpenOrders();
+                        if (unmanagedCrossSleeveOpenOrders(refreshedOpenOrders, workingPositions, quality102Ownership).length > 0) {
+                            throw new Error("PENGU_FET_PREEMPT_OPEN_ORDER_CONFLICT");
+                        }
+                        continue;
                     }
                     const reductions = strictPlan.reductions.filter((reduction) => reduction.strategy === "QUALITY102_CAUSAL_V1");
                     if (strictPlan.reductions.some((reduction) => reduction.strategy !== "QUALITY102_CAUSAL_V1")) {

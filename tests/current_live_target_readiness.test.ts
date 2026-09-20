@@ -6,18 +6,21 @@ import test from "node:test";
 
 const exec = promisify(execFile);
 
-test("current activation readiness fails closed until FET Core preemption is fully wired", async () => {
+test("implementation is ready while real-money activation remains operator-blocked", async () => {
   const readiness = JSON.parse(await readFile("docs/production/current-implementation-readiness.json", "utf8"));
+  assert.equal(readiness.implementationStatus, "READY");
   assert.equal(readiness.status, "BLOCKED");
   assert.equal(readiness.ordersEnabled, false);
-  assert.deepEqual(new Set(readiness.blockers), new Set([
-    "FET_CORE_PREEMPTION_V12_UNWIRED",
-    "FET_CORE_PREEMPTION_PENGU_UNWIRED",
-    "FET_CORE_PREEMPTION_Q102_UNWIRED",
-    "FET_CORE_PREEMPTION_V52_UNWIRED",
-    "FET_PROTECTIVE_ORDER_V12_RECOGNITION_UNWIRED",
-    "FET_PROTECTIVE_ORDER_PENGU_RECOGNITION_UNWIRED",
-  ]));
+  assert.deepEqual(readiness.blockers, ["OPERATOR_LIVE_ACTIVATION_REQUIRED"]);
+  for (const completed of [
+    "FET_CORE_PREEMPTION_V12_WIRED",
+    "FET_CORE_PREEMPTION_PENGU_WIRED",
+    "FET_CORE_PREEMPTION_Q102_WIRED",
+    "FET_CORE_PREEMPTION_V52_WIRED",
+    "FET_PROTECTIVE_ORDER_V12_RECOGNITION_WIRED",
+    "FET_PROTECTIVE_ORDER_PENGU_RECOGNITION_WIRED",
+    "FET_CORE_PREEMPTION_REDUCE_ONLY_IDEMPOTENCY_TESTED",
+  ]) assert.ok(readiness.completed.includes(completed), completed);
 
   const { stdout } = await exec(process.execPath, [
     "--import", "tsx",
@@ -25,10 +28,11 @@ test("current activation readiness fails closed until FET Core preemption is ful
   ]);
   const result = JSON.parse(stdout.trim().split(/\r?\n/).at(-1)!);
   assert.equal(result.status, "PRODUCTION_ACTIVATION_BLOCKED");
+  assert.equal(result.implementationReady, true);
+  assert.deepEqual(result.blockers, ["OPERATOR_LIVE_ACTIVATION_REQUIRED"]);
   assert.equal(result.ordersSent, 0);
   assert.equal(result.cancelSent, 0);
   assert.equal(result.positionChangesSent, 0);
-  assert.equal(result.blockers.length, 6);
 });
 
 test("readiness checker is read-only by construction", async () => {
