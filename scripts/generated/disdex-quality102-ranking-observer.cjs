@@ -1,18 +1,34 @@
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
-var __commonJS = (cb, mod2) => function __require2() {
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod2) => function __require() {
   return mod2 || (0, cb[__getOwnPropNames(cb)[0]])((mod2 = { exports: {} }).exports, mod2), mod2.exports;
 };
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__getProtoOf(mod2)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod2 || !mod2.__esModule ? __defProp(target, "default", { value: mod2, enumerable: true }) : target,
+  mod2
+));
 
 // ../-ai-dex-manager/node_modules/dotenv/package.json
 var require_package = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/package.json"(exports, module) {
-    module.exports = {
+  "../-ai-dex-manager/node_modules/dotenv/package.json"(exports2, module2) {
+    module2.exports = {
       name: "dotenv",
       version: "17.3.1",
       description: "Loads environment variables from .env file",
@@ -79,11 +95,11 @@ var require_package = __commonJS({
 
 // ../-ai-dex-manager/node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/lib/main.js"(exports, module) {
-    var fs = __require("fs");
-    var path = __require("path");
-    var os = __require("os");
-    var crypto2 = __require("crypto");
+  "../-ai-dex-manager/node_modules/dotenv/lib/main.js"(exports2, module2) {
+    var fs = require("fs");
+    var path = require("path");
+    var os = require("os");
+    var crypto2 = require("crypto");
     var packageJson = require_package();
     var version2 = packageJson.version;
     var TIPS = [
@@ -392,20 +408,20 @@ var require_main = __commonJS({
       parse,
       populate
     };
-    module.exports.configDotenv = DotenvModule.configDotenv;
-    module.exports._configVault = DotenvModule._configVault;
-    module.exports._parseVault = DotenvModule._parseVault;
-    module.exports.config = DotenvModule.config;
-    module.exports.decrypt = DotenvModule.decrypt;
-    module.exports.parse = DotenvModule.parse;
-    module.exports.populate = DotenvModule.populate;
-    module.exports = DotenvModule;
+    module2.exports.configDotenv = DotenvModule.configDotenv;
+    module2.exports._configVault = DotenvModule._configVault;
+    module2.exports._parseVault = DotenvModule._parseVault;
+    module2.exports.config = DotenvModule.config;
+    module2.exports.decrypt = DotenvModule.decrypt;
+    module2.exports.parse = DotenvModule.parse;
+    module2.exports.populate = DotenvModule.populate;
+    module2.exports = DotenvModule;
   }
 });
 
 // ../-ai-dex-manager/node_modules/dotenv/lib/env-options.js
 var require_env_options = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/lib/env-options.js"(exports, module) {
+  "../-ai-dex-manager/node_modules/dotenv/lib/env-options.js"(exports2, module2) {
     var options = {};
     if (process.env.DOTENV_CONFIG_ENCODING != null) {
       options.encoding = process.env.DOTENV_CONFIG_ENCODING;
@@ -425,15 +441,15 @@ var require_env_options = __commonJS({
     if (process.env.DOTENV_CONFIG_DOTENV_KEY != null) {
       options.DOTENV_KEY = process.env.DOTENV_CONFIG_DOTENV_KEY;
     }
-    module.exports = options;
+    module2.exports = options;
   }
 });
 
 // ../-ai-dex-manager/node_modules/dotenv/lib/cli-options.js
 var require_cli_options = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/lib/cli-options.js"(exports, module) {
+  "../-ai-dex-manager/node_modules/dotenv/lib/cli-options.js"(exports2, module2) {
     var re = /^dotenv_config_(encoding|path|quiet|debug|override|DOTENV_KEY)=(.+)$/;
-    module.exports = function optionMatcher(args) {
+    module2.exports = function optionMatcher(args) {
       const options = args.reduce(function(acc, cur) {
         const matches = cur.match(re);
         if (matches) {
@@ -461,11 +477,11 @@ var require_cli_options = __commonJS({
 })();
 
 // scripts/disdex-quality102-ranking-observer.ts
-import { readFile as readFile3, rename as rename2, writeFile as writeFile2 } from "node:fs/promises";
-import { resolve as resolve3 } from "node:path";
+var import_promises3 = require("node:fs/promises");
+var import_node_path3 = require("node:path");
 
 // ../-ai-dex-manager/node_modules/@noble/hashes/esm/cryptoNode.js
-import * as nc from "node:crypto";
+var nc = __toESM(require("node:crypto"), 1);
 var crypto = nc && typeof nc === "object" && "webcrypto" in nc ? nc.webcrypto : nc && typeof nc === "object" && "randomBytes" in nc ? nc : void 0;
 
 // ../-ai-dex-manager/node_modules/@noble/hashes/esm/utils.js
@@ -5081,9 +5097,9 @@ function privateKeyToAccount(privateKey, options = {}) {
 }
 
 // lib/disdex-aster-global-rate-budget.ts
-import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
-import { randomUUID } from "node:crypto";
-import { dirname, join, resolve } from "node:path";
+var import_promises = require("node:fs/promises");
+var import_node_crypto = require("node:crypto");
+var import_node_path = require("node:path");
 var ASTER_GLOBAL_RATE_BUDGET_SCHEMA = "disdex-aster-rate-budget/v1";
 var sleep = (ms) => new Promise((resolveSleep) => setTimeout(resolveSleep, ms));
 var errorCode = (error) => error && typeof error === "object" && "code" in error ? String(error.code || "") : "";
@@ -5099,7 +5115,7 @@ function validLockOwner(value) {
 }
 async function readLockOwner(lockPath) {
   try {
-    const parsed = JSON.parse(await readFile(join(lockPath, "owner.json"), "utf8"));
+    const parsed = JSON.parse(await (0, import_promises.readFile)((0, import_node_path.join)(lockPath, "owner.json"), "utf8"));
     return validLockOwner(parsed) ? parsed : void 0;
   } catch (error) {
     if (errorCode(error) === "ENOENT") return void 0;
@@ -5117,7 +5133,7 @@ function processAlive(pid) {
 async function processStartTicks(pid) {
   if (process.platform !== "linux") return void 0;
   try {
-    const raw = await readFile(`/proc/${pid}/stat`, "utf8");
+    const raw = await (0, import_promises.readFile)(`/proc/${pid}/stat`, "utf8");
     const closeParen = raw.lastIndexOf(")");
     if (closeParen < 0) return void 0;
     const fields = raw.slice(closeParen + 1).trim().split(/\s+/);
@@ -5133,7 +5149,7 @@ async function newLockOwner() {
     schema: LOCK_OWNER_SCHEMA,
     pid: process.pid,
     createdAt: Date.now(),
-    token: randomUUID(),
+    token: (0, import_node_crypto.randomUUID)(),
     ...startTicks ? { processStartTicks: startTicks } : {}
   };
 }
@@ -5148,7 +5164,7 @@ async function lockIsStale(lockPath) {
     return false;
   }
   try {
-    const metadata = await stat(lockPath);
+    const metadata = await (0, import_promises.stat)(lockPath);
     return Date.now() - metadata.mtimeMs > LOCK_RECOVERY_GRACE_MS;
   } catch (error) {
     return errorCode(error) === "ENOENT";
@@ -5159,19 +5175,19 @@ async function acquireLockGenerationMutex(lockPath, deadline) {
   const owner = await newLockOwner();
   while (true) {
     try {
-      await mkdir(recoveryPath, { mode: 448 });
+      await (0, import_promises.mkdir)(recoveryPath, { mode: 448 });
       try {
         await writeLockOwner(recoveryPath, owner);
         return { path: recoveryPath, owner };
       } catch (error) {
-        await rm(recoveryPath, { recursive: true, force: true }).catch(() => void 0);
+        await (0, import_promises.rm)(recoveryPath, { recursive: true, force: true }).catch(() => void 0);
         if (!transientLockRace(error)) throw error;
       }
     } catch (error) {
       if (errorCode(error) !== "EEXIST" && !transientLockRace(error)) throw error;
       if (errorCode(error) === "EEXIST" && await lockIsStale(recoveryPath)) {
         try {
-          await rm(recoveryPath, { recursive: true, force: true });
+          await (0, import_promises.rm)(recoveryPath, { recursive: true, force: true });
           continue;
         } catch (recoveryError) {
           if (!transientLockRace(recoveryError)) throw recoveryError;
@@ -5189,7 +5205,7 @@ async function releaseLockGenerationMutex(recovery) {
   const releaseDeadline = Date.now() + 5e3;
   while (true) {
     try {
-      await rename(recovery.path, releasedPath);
+      await (0, import_promises.rename)(recovery.path, releasedPath);
       break;
     } catch (error) {
       if (errorCode(error) === "ENOENT") return;
@@ -5199,15 +5215,15 @@ async function releaseLockGenerationMutex(recovery) {
       await sleep(5);
     }
   }
-  await rm(releasedPath, { recursive: true, force: true });
+  await (0, import_promises.rm)(releasedPath, { recursive: true, force: true });
 }
 async function writeLockOwner(lockPath, owner) {
-  await writeFile(join(lockPath, "owner.json"), `${JSON.stringify(owner)}
+  await (0, import_promises.writeFile)((0, import_node_path.join)(lockPath, "owner.json"), `${JSON.stringify(owner)}
 `, { encoding: "utf8", mode: 384 });
 }
 async function readBudget(path) {
   try {
-    return JSON.parse(await readFile(path, "utf8"));
+    return JSON.parse(await (0, import_promises.readFile)(path, "utf8"));
   } catch (error) {
     if (errorCode(error) === "ENOENT") return {};
     throw error;
@@ -5216,12 +5232,12 @@ async function readBudget(path) {
 async function atomicWriteBudget(path, state) {
   const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
   try {
-    await writeFile(temporary, `${JSON.stringify(state, null, 2)}
+    await (0, import_promises.writeFile)(temporary, `${JSON.stringify(state, null, 2)}
 `, { encoding: "utf8", mode: 432 });
-    await rename(temporary, path);
-    await chmod(path, 432);
+    await (0, import_promises.rename)(temporary, path);
+    await (0, import_promises.chmod)(path, 432);
   } finally {
-    await rm(temporary, { force: true }).catch(() => void 0);
+    await (0, import_promises.rm)(temporary, { force: true }).catch(() => void 0);
   }
 }
 async function acquireBudgetLock(lockPath, maxQueueMs) {
@@ -5229,14 +5245,14 @@ async function acquireBudgetLock(lockPath, maxQueueMs) {
   const owner = await newLockOwner();
   while (true) {
     try {
-      await mkdir(lockPath, { mode: 448 });
+      await (0, import_promises.mkdir)(lockPath, { mode: 448 });
       while (true) {
         try {
           await writeLockOwner(lockPath, owner);
           return owner;
         } catch (error) {
           if (!transientLockRace(error)) {
-            await rm(lockPath, { recursive: true, force: true }).catch(() => void 0);
+            await (0, import_promises.rm)(lockPath, { recursive: true, force: true }).catch(() => void 0);
             throw error;
           }
           if (errorCode(error) === "ENOENT") break;
@@ -5250,10 +5266,10 @@ async function acquireBudgetLock(lockPath, maxQueueMs) {
         const recovery = await acquireLockGenerationMutex(lockPath, deadline);
         try {
           if (await lockIsStale(lockPath)) {
-            const stalePath = `${lockPath}.stale.${randomUUID()}`;
+            const stalePath = `${lockPath}.stale.${(0, import_node_crypto.randomUUID)()}`;
             try {
-              await rename(lockPath, stalePath);
-              await rm(stalePath, { recursive: true, force: true });
+              await (0, import_promises.rename)(lockPath, stalePath);
+              await (0, import_promises.rm)(stalePath, { recursive: true, force: true });
             } catch (recoveryError) {
               if (errorCode(recoveryError) !== "ENOENT" && !transientLockRace(recoveryError)) throw recoveryError;
             }
@@ -5275,7 +5291,7 @@ async function releaseBudgetLock(lockPath, owner) {
   const deadline = Date.now() + 5e3;
   while (true) {
     try {
-      await rename(lockPath, releasedPath);
+      await (0, import_promises.rename)(lockPath, releasedPath);
       break;
     } catch (error) {
       if (errorCode(error) === "ENOENT") return;
@@ -5285,10 +5301,10 @@ async function releaseBudgetLock(lockPath, owner) {
       await sleep(5);
     }
   }
-  await rm(releasedPath, { recursive: true, force: true });
+  await (0, import_promises.rm)(releasedPath, { recursive: true, force: true });
 }
 async function reserveAsterGlobalRateSlot(options) {
-  const path = resolve(options.path);
+  const path = (0, import_node_path.resolve)(options.path);
   const lockPath = `${path}.lock`;
   if (!Number.isFinite(options.minIntervalMs) || !Number.isFinite(options.maxQueueMs) || options.weight !== void 0 && !Number.isFinite(options.weight) || options.nowMs !== void 0 && !Number.isFinite(options.nowMs)) {
     throw new Error("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID");
@@ -5296,7 +5312,7 @@ async function reserveAsterGlobalRateSlot(options) {
   const minIntervalMs = Math.max(1, Math.min(1e3, Math.floor(options.minIntervalMs)));
   const maxQueueMs = Math.max(minIntervalMs, Math.min(3e4, Math.floor(options.maxQueueMs)));
   const weight = Math.max(1, Math.min(100, Math.floor(options.weight ?? 1)));
-  await mkdir(dirname(path), { recursive: true, mode: 448 });
+  await (0, import_promises.mkdir)((0, import_node_path.dirname)(path), { recursive: true, mode: 448 });
   const owner = await acquireBudgetLock(lockPath, maxQueueMs);
   try {
     const current = await readBudget(path);
@@ -5323,10 +5339,10 @@ async function reserveAsterGlobalRateSlot(options) {
 }
 async function deferAsterGlobalRateBudget(options) {
   if (!Number.isFinite(options.cooldownMs) || options.cooldownMs < 0 || options.nowMs !== void 0 && !Number.isFinite(options.nowMs)) throw new Error("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID");
-  const path = resolve(options.path);
+  const path = (0, import_node_path.resolve)(options.path);
   const lockPath = `${path}.lock`;
   const now = options.nowMs ?? Date.now();
-  await mkdir(dirname(path), { recursive: true, mode: 448 });
+  await (0, import_promises.mkdir)((0, import_node_path.dirname)(path), { recursive: true, mode: 448 });
   const owner = await acquireBudgetLock(lockPath, 2e3);
   try {
     const current = await readBudget(path);
@@ -6733,8 +6749,8 @@ function augmentQuality102DecisionSnapshotWithRanking(input) {
 }
 
 // lib/disdex-quality102-ranking-history.ts
-import { appendFile, readFile as readFile2, readdir, unlink } from "node:fs/promises";
-import { resolve as resolve2 } from "node:path";
+var import_promises2 = require("node:fs/promises");
+var import_node_path2 = require("node:path");
 var PREFIX = "decision-ranking-history-";
 var SUFFIX = ".jsonl";
 var DEFAULT_RETENTION_DAYS = 90;
@@ -6756,13 +6772,13 @@ function lastReferenceTs(text) {
 }
 async function pruneOldRankingHistory(stateRoot, now, retentionDays) {
   const cutoff = now - retentionDays * DAY_MS;
-  const names = await readdir(stateRoot);
+  const names = await (0, import_promises2.readdir)(stateRoot);
   await Promise.all(names.map(async (name) => {
     const match = /^decision-ranking-history-(\d{4}-\d{2}-\d{2})\.jsonl$/.exec(name);
     if (!match) return;
     const fileDay = Date.parse(`${match[1]}T00:00:00.000Z`);
     if (Number.isFinite(fileDay) && fileDay < cutoff) {
-      await unlink(resolve2(stateRoot, name)).catch(() => void 0);
+      await (0, import_promises2.unlink)((0, import_node_path2.resolve)(stateRoot, name)).catch(() => void 0);
     }
   }));
 }
@@ -6772,16 +6788,16 @@ async function persistQuality102RankingHistory(input) {
   if (input.snapshot.schemaVersion !== 2 || input.snapshot.rankingModelVersion !== "Q102_PROXIMITY_V1") {
     throw new Error("Q102_RANKING_HISTORY_SCHEMA_UNSUPPORTED");
   }
-  const path = resolve2(input.stateRoot, historyFileName(referenceTs));
+  const path = (0, import_node_path2.resolve)(input.stateRoot, historyFileName(referenceTs));
   let existing = "";
   try {
-    existing = await readFile2(path, "utf8");
+    existing = await (0, import_promises2.readFile)(path, "utf8");
   } catch (error) {
     const code = error.code;
     if (code !== "ENOENT") throw error;
   }
   if (lastReferenceTs(existing) === referenceTs) return { appended: false, path };
-  await appendFile(path, JSON.stringify(input.snapshot) + "\n", { encoding: "utf8", mode: 384 });
+  await (0, import_promises2.appendFile)(path, JSON.stringify(input.snapshot) + "\n", { encoding: "utf8", mode: 384 });
   await pruneOldRankingHistory(input.stateRoot, Date.now(), input.retentionDays ?? DEFAULT_RETENTION_DAYS);
   return { appended: true, path };
 }
@@ -6801,7 +6817,7 @@ function finitePositive2(value, field) {
   return number;
 }
 async function loadBaseSnapshot(path) {
-  const parsed = JSON.parse(await readFile3(path, "utf8"));
+  const parsed = JSON.parse(await (0, import_promises3.readFile)(path, "utf8"));
   if (parsed.strategyId !== "QUALITY102_CAUSAL_V1") throw new Error("Q102_RANKING_OBSERVER_STRATEGY_MISMATCH");
   if (parsed.selectorMode !== "CAUSAL_V4") throw new Error("Q102_RANKING_OBSERVER_SELECTOR_MISMATCH");
   if (!SHA_PATTERN.test(String(parsed.runtimeCommitSha || ""))) throw new Error("Q102_RANKING_OBSERVER_RUNTIME_SHA_INVALID");
@@ -6810,7 +6826,7 @@ async function loadBaseSnapshot(path) {
   return parsed;
 }
 async function loadClosedHistory(path) {
-  const parsed = JSON.parse(await readFile3(path, "utf8"));
+  const parsed = JSON.parse(await (0, import_promises3.readFile)(path, "utf8"));
   if (!parsed.candlesBySymbol || typeof parsed.candlesBySymbol !== "object") {
     throw new Error("Q102_RANKING_OBSERVER_HISTORY_MISSING");
   }
@@ -6824,10 +6840,10 @@ async function loadEntryOpen(client, symbol, referenceTs) {
   return { timestampMs: referenceTs, open: finitePositive2(row[1], `ENTRY_OPEN_${symbol}`) };
 }
 async function main() {
-  const stateRoot = resolve3(process.env.QUALITY102_CAUSAL_V1_STATE_DIR || DEFAULT_STATE_ROOT);
-  const baseSnapshotPath = resolve3(process.env.QUALITY102_DECISION_SNAPSHOT_PATH || resolve3(stateRoot, "decision-snapshot.json"));
-  const historyPath = resolve3(process.env.QUALITY102_CAUSAL_V1_HISTORY_CACHE_PATH || resolve3(stateRoot, "market-history.json"));
-  const outputPath = resolve3(process.env.QUALITY102_RANKING_SNAPSHOT_PATH || resolve3(stateRoot, "decision-ranking-snapshot.json"));
+  const stateRoot = (0, import_node_path3.resolve)(process.env.QUALITY102_CAUSAL_V1_STATE_DIR || DEFAULT_STATE_ROOT);
+  const baseSnapshotPath = (0, import_node_path3.resolve)(process.env.QUALITY102_DECISION_SNAPSHOT_PATH || (0, import_node_path3.resolve)(stateRoot, "decision-snapshot.json"));
+  const historyPath = (0, import_node_path3.resolve)(process.env.QUALITY102_CAUSAL_V1_HISTORY_CACHE_PATH || (0, import_node_path3.resolve)(stateRoot, "market-history.json"));
+  const outputPath = (0, import_node_path3.resolve)(process.env.QUALITY102_RANKING_SNAPSHOT_PATH || (0, import_node_path3.resolve)(stateRoot, "decision-ranking-snapshot.json"));
   const observerCommitSha = String(process.env.DISDEX_OBSERVER_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "").trim();
   if (!SHA_PATTERN.test(observerCommitSha)) throw new Error("Q102_RANKING_OBSERVER_COMMIT_SHA_REQUIRED");
   const highVolSymbols = requiredHighVolSymbols(process.env.QUALITY102_CAUSAL_V1_SYMBOLS);
@@ -6854,8 +6870,8 @@ async function main() {
     rankingCapturedAt: (/* @__PURE__ */ new Date()).toISOString()
   });
   const temporary = `${outputPath}.${process.pid}.tmp`;
-  await writeFile2(temporary, JSON.stringify(ranked, null, 2) + "\n", { encoding: "utf8", mode: 384 });
-  await rename2(temporary, outputPath);
+  await (0, import_promises3.writeFile)(temporary, JSON.stringify(ranked, null, 2) + "\n", { encoding: "utf8", mode: 384 });
+  await (0, import_promises3.rename)(temporary, outputPath);
   await persistQuality102RankingHistory({ stateRoot, snapshot: ranked });
   console.log(JSON.stringify({
     status: "Q102_RANKING_OBSERVER_OK",
