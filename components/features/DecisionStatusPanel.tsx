@@ -12,11 +12,57 @@ import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-ob
 
 type DecisionLogicPage = "overview" | "v12" | "pengu" | "q102" | "v52";
 
+type Q102GateDiagnostic = {
+  name?: string;
+  pass?: boolean;
+  reason?: string;
+  value?: number | string | boolean;
+  threshold?: number | string;
+};
+
+type Q102S34Diagnostic = {
+  key?: string;
+  family?: string;
+  layer?: string;
+  variant?: string;
+  gridOpen?: boolean;
+  rawDetected?: boolean;
+  candidateSide?: number;
+  proximityScore?: number;
+  rankingScore?: number;
+  rankingStage?: string;
+  reason?: string;
+  metrics?: Record<string, number | string | boolean>;
+  gates?: Q102GateDiagnostic[];
+};
+
+type Q102HighVolDiagnostic = {
+  selectionAvailable?: boolean;
+  scannerHealthPass?: boolean;
+  marketValid?: boolean;
+  rawMatched?: boolean;
+  matchedSide?: number;
+  proximitySide?: number;
+  proximityScore?: number;
+  rankingScore?: number;
+  legacySelectorScore?: number;
+  reason?: string;
+  rule?: Record<string, number>;
+  metrics?: Record<string, number>;
+  features?: Record<string, number | boolean>;
+  gateProgress?: Record<string, number>;
+};
+
 type Q102SymbolSnapshot = {
   ok: true;
   readOnly: true;
   tradingMutation: 0;
   capturedAt: string;
+  rankingCapturedAt?: string;
+  observerCommitSha?: string;
+  rankingModelVersion?: string;
+  rankingAvailable?: boolean;
+  snapshotSource?: "ranking" | "decision";
   productionSha: string;
   selectorMode: string;
   referenceTs: number;
@@ -34,6 +80,17 @@ type Q102SymbolSnapshot = {
     reason: string;
     selected: boolean;
     referenceTs: number;
+    rankingScore?: number;
+    rankingRank?: number;
+    rankingFamily?: string;
+    rankingLayer?: string;
+    rankingVariant?: string;
+    rankingStage?: string;
+    rankingReason?: string;
+    diagnostics?: {
+      highVol?: Q102HighVolDiagnostic;
+      s34?: Q102S34Diagnostic[];
+    };
   }>;
 };
 
@@ -429,56 +486,166 @@ function q102ReasonText(reason: string) {
   return reason || "理由未取得";
 }
 
+
+function q102StageText(stage?: string) {
+  switch (stage) {
+    case "SIGNAL_READY": return "発火条件到達";
+    case "IMPROVEMENT_PASS": return "最終Gate直前";
+    case "FEATURE_PASS": return "Feature Gate通過";
+    case "QUALITY_PASS": return "Quality Gate通過";
+    case "RAW_REJECTED": return "Raw発生・後段Block";
+    case "GRID_WAIT": return "Grid待ち";
+    case "HIGH_VOL_RAW_READY": return "HIGH_VOL Raw到達";
+    case "HIGH_VOL_APPROACH": return "HIGH_VOL接近中";
+    case "NO_RAW": return "Raw条件へ接近中";
+    case "NO_MODEL": return "観測モデルなし";
+    case "OBSERVER_ERROR": return "観測エラー";
+    default: return stage || "未評価";
+  }
+}
+
+function q102MetricName(key: string) {
+  const names: Record<string, string> = {
+    zScore: "Z-score",
+    zThreshold: "必要Z",
+    move: "短期Move",
+    threshold: "必要Move",
+    longRet: "Trend return",
+    pullRet: "Pullback return",
+    trendThreshold: "Trend閾値",
+    pullThreshold: "Pullback閾値",
+    ret14: "14日return",
+    breakoutDistance: "Breakout距離",
+    volumeRatio: "Volume比",
+    volumeThreshold: "必要Volume比",
+    strength: "Strength",
+    margin: "Margin",
+    close: "Close",
+    priorHigh: "直近High",
+    priorLow: "直近Low",
+    developmentN: "Dev N",
+    developmentSpf: "Dev SPF",
+    developmentAvg: "Dev Avg",
+    ret24: "24h return",
+    ret14d: "14日return",
+    rsi14: "RSI14",
+    atrPct: "ATR%",
+    barUp: "陽線",
+    barDown: "陰線",
+  };
+  return names[key] || key;
+}
+
+function q102MetricValue(key: string, value: number | string | boolean) {
+  if (typeof value === "boolean") return value ? "YES" : "NO";
+  if (typeof value !== "number" || !Number.isFinite(value)) return String(value);
+  if (["ret14", "ret14d", "ret24", "move", "longRet", "pullRet", "breakoutDistance", "atrPct"].includes(key)) {
+    return (value * 100).toFixed(2) + "%";
+  }
+  return Math.abs(value) >= 100 ? value.toFixed(2) : value.toFixed(4);
+}
+
 function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapshot | null; error: string | null }) {
   if (error) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{error}</div></section>;
   if (!snapshot) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 text-sm text-white/60">Production selectorをread-only評価中…</div></section>;
+
   const eligible = snapshot.items.filter((item) => item.eligible);
   const referenceHourUtc = Number.isFinite(snapshot.referenceTs) ? new Date(snapshot.referenceTs).getUTCHours() : -1;
   const s34GridOpen = referenceHourUtc >= 0 && referenceHourUtc % 4 === 1;
+  const ranked = [...snapshot.items].sort((a, b) =>
+    (a.rankingRank ?? 999) - (b.rankingRank ?? 999)
+    || (b.rankingScore ?? -1) - (a.rankingScore ?? -1)
+    || a.symbol.localeCompare(b.symbol)
+  );
+  const topFive = ranked.filter((item) => Number.isFinite(item.rankingScore)).slice(0, 5);
 
   return <section className="panel-gold rounded-[28px] p-4 md:p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <div className="text-lg font-bold text-white">Q102 通貨別 Causal V4 判定</div>
-        <p className="mt-1 text-xs text-white/55">各行を開くと、NO_SIGNALの中身・S34対象モデル・Family別Gate・4時間Grid・1-slot selectorまで確認できます。表示はread-onlyです。</p>
+        <p className="mt-1 text-xs text-white/55">実測featureを保存し、発火条件への接近度を0〜100でランキングします。ランキングは観測・検証専用で、発注条件には使用しません。</p>
       </div>
       <div className="text-right text-xs text-white/60">
         <div>Eligible {eligible.length}/{snapshot.items.length}</div>
         <div className="mt-1">Global selected: {snapshot.selectedSymbol || "なし"} {snapshot.selectedFamily ? "/ " + snapshot.selectedFamily : ""}</div>
-        <div className="mt-1">判定時刻 UTC {referenceHourUtc >= 0 ? String(referenceHourUtc).padStart(2, "0") + ":00" : "不明"} / S34 4h Grid: {s34GridOpen ? "対象" : "対象外"}</div>
+        <div className="mt-1">UTC {referenceHourUtc >= 0 ? String(referenceHourUtc).padStart(2, "0") + ":00" : "不明"} / S34 4h Grid: {s34GridOpen ? "対象" : "対象外"}</div>
+        <div className="mt-1">Ranking: {snapshot.rankingAvailable ? snapshot.rankingModelVersion || "ON" : "次回observer更新待ち"}</div>
       </div>
     </div>
 
+    {topFive.length ? <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+      {topFive.map((item) => <div key={"rank-" + item.symbol} className="rounded-2xl border border-gold-100/15 bg-gold-100/[0.04] p-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-bold text-gold-100">#{item.rankingRank ?? "-"}</span>
+          <span className="text-xl font-black text-white">{item.rankingScore?.toFixed(1)}</span>
+        </div>
+        <div className="mt-1 font-bold text-white">{item.symbol}</div>
+        <div className="mt-1 text-[11px] text-white/55">{item.rankingFamily || "—"} / {q102StageText(item.rankingStage)}</div>
+      </div>)}
+    </div> : <div className="mt-4 rounded-2xl border border-sky-400/20 bg-sky-400/[0.05] px-4 py-3 text-xs text-sky-100">ランキング実測値はobserver snapshot生成後に表示されます。現在の売買判定には影響しません。</div>}
+
     <div className="mt-4 space-y-2">
-      {snapshot.items.map((item) => {
+      {ranked.map((item) => {
         const models = Q102_S34_MODELS[item.symbol] || [];
+        const highVol = item.diagnostics?.highVol;
+        const s34 = item.diagnostics?.s34 || [];
+        const bestS34 = s34[0];
+        const score = item.rankingScore;
+        const scoreClass = score === undefined ? "text-white/35" : score >= 90 ? "text-emerald-200" : score >= 70 ? "text-gold-100" : score >= 50 ? "text-amber-200" : "text-white/55";
         return <details key={item.symbol} className="group rounded-2xl border border-white/10 bg-black/20">
-          <summary className="grid cursor-pointer list-none grid-cols-[90px_72px_70px_1fr_92px] items-center gap-2 px-3 py-3 text-xs md:grid-cols-[110px_80px_80px_110px_100px_1fr_100px]">
+          <summary className="grid cursor-pointer list-none grid-cols-[42px_90px_62px_64px_1fr_84px] items-center gap-2 px-3 py-3 text-xs md:grid-cols-[48px_110px_72px_72px_110px_1fr_100px]">
+            <span className="font-black text-gold-100">#{item.rankingRank ?? "—"}</span>
             <span className="font-bold text-white">{item.symbol}</span>
+            <span className={"text-lg font-black " + scoreClass}>{score === undefined ? "—" : score.toFixed(1)}</span>
             <span className={"font-semibold " + (item.eligible ? "text-emerald-200" : "text-rose-200")}>{item.eligible ? "PASS" : "BLOCK"}</span>
-            <span className="text-white/75">{item.side}</span>
-            <span className="hidden text-white/75 md:block">{item.family || "候補なし"}</span>
-            <span className="hidden text-white/65 md:block">{item.variant || "—"}</span>
-            <span className="truncate text-white/55">{q102ReasonText(item.reason)}</span>
+            <span className="hidden text-white/75 md:block">{item.rankingFamily || item.family || "候補なし"}</span>
+            <span className="truncate text-white/55">{q102StageText(item.rankingStage)} / {item.rankingReason || q102ReasonText(item.reason)}</span>
             <span className={"text-right font-semibold " + (item.selected ? "text-gold-100" : "text-white/45")}>{item.selected ? "SELECTED" : "詳細 ▼"}</span>
           </summary>
+
           <div className="border-t border-white/10 px-3 py-4 text-xs leading-5 text-white/70 md:px-4">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">今回の結論</div><div className="mt-1">{q102ReasonText(item.reason)}</div><div className="mt-2 text-white/45">Reference: {new Date(item.referenceTs).toLocaleString("ja-JP")}</div></div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">S34 4時間Grid</div><div className="mt-1">{s34GridOpen ? "PASS: UTC hour % 4 == 1" : "WAIT: 今回はS34新規判定Grid外"}</div><div className="mt-2 text-white/45">S34は UTC 01/05/09/13/17/21 時に評価</div></div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">Gross / 1-slot</div><div className="mt-1">要求Gross: {item.requestedGross > 0 ? item.requestedGross.toFixed(3) + "x" : "候補未生成"}</div><div className="mt-1">Global selector: {item.selected ? "この通貨を選択" : snapshot.selectedSymbol ? snapshot.selectedSymbol + " を優先" : "選択候補なし"}</div></div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">S34対象モデル</div><div className="mt-1">{models.length ? models.join(" / ") : "固定S34モデルなし（HIGH_VOL経路または対象外）"}</div></div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="font-semibold text-white">ランキング</div>
+                <div className="mt-1 text-2xl font-black text-white">{score === undefined ? "—" : score.toFixed(1)}<span className="text-xs font-normal text-white/45"> / 100</span></div>
+                <div className="mt-1">#{item.rankingRank ?? "—"} / {item.rankingFamily || "—"} / {q102StageText(item.rankingStage)}</div>
+                <div className="mt-1 break-all text-white/45">{item.rankingVariant || "Variant未取得"}</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="font-semibold text-white">今回の正式判定</div>
+                <div className="mt-1">{q102ReasonText(item.reason)}</div>
+                <div className="mt-2">Side: {item.side} / Gross: {item.requestedGross > 0 ? item.requestedGross.toFixed(3) + "x" : "候補未生成"}</div>
+                <div className="mt-1 text-white/45">Reference: {new Date(item.referenceTs).toLocaleString("ja-JP")}</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="font-semibold text-white">S34 4時間Grid / 1-slot</div>
+                <div className="mt-1">{s34GridOpen ? "Grid対象: UTC hour % 4 == 1" : "Grid対象外: 次の評価時刻待ち"}</div>
+                <div className="mt-1">Global selector: {item.selected ? "この通貨を選択" : snapshot.selectedSymbol ? snapshot.selectedSymbol + " を優先" : "選択候補なし"}</div>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="font-semibold text-white">観測保存</div>
+                <div className="mt-1">Ranking snapshot: {snapshot.rankingAvailable ? "保存中" : "未取得"}</div>
+                <div className="mt-1">観測時刻: {snapshot.rankingCapturedAt ? new Date(snapshot.rankingCapturedAt).toLocaleString("ja-JP") : "—"}</div>
+                <div className="mt-1 text-white/45">Observer SHA: {snapshot.observerCommitSha ? snapshot.observerCommitSha.slice(0, 8) : "—"}</div>
+              </div>
             </div>
 
-            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">PB</span><div className="mt-1">Trend + Pullback raw → weak variant除外 → ret14 / development / margin Gate。</div></div>
-              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">MR</span><div className="mt-1">Z-score逆張り raw → regime Gate → ret14 / development / margin Gate。</div></div>
-              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">BRK</span><div className="mt-1">過去高値/安値Break + 72h median volume → quality Gate → V4 symbol/variant ret14 window。</div></div>
-              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">REV</span><div className="mt-1">短期反転 raw → V4 feature Gate。Longは追加で ret14 ≥ +24% が必須。</div></div>
-            </div>
+            {highVol ? <div className="mt-3 rounded-xl border border-violet-400/20 bg-violet-400/[0.04] p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-white">HIGH_VOL 実測</span><span className="text-white/50">接近度 {highVol.proximityScore?.toFixed(1) ?? "—"} / scanner {highVol.scannerHealthPass ? "PASS" : "BLOCK"} / raw {highVol.rawMatched ? "MATCH" : "WAIT"}</span></div>
+              {highVol.features ? <div className="mt-2 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">{Object.entries(highVol.features).map(([key, value]) => <div key={key} className="rounded-lg bg-black/20 px-2 py-1"><div className="text-[10px] text-white/40">{q102MetricName(key)}</div><div className="font-semibold text-white/80">{q102MetricValue(key, value)}</div></div>)}</div> : null}
+              {highVol.rule ? <div className="mt-2 text-[11px] text-white/50">Monthly rule: {Object.entries(highVol.rule).map(([key, value]) => key + "=" + value).join(" / ")}</div> : null}
+            </div> : null}
+
+            {bestS34 ? <div className="mt-3 rounded-xl border border-sky-400/20 bg-sky-400/[0.04] p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-white">最有力 S34: {bestS34.family} / {bestS34.variant}</span><span className="text-white/50">接近度 {bestS34.proximityScore?.toFixed(1) ?? "—"} / Rank score {bestS34.rankingScore?.toFixed(1) ?? "—"}</span></div>
+              {bestS34.metrics ? <div className="mt-2 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">{Object.entries(bestS34.metrics).map(([key, value]) => <div key={key} className="rounded-lg bg-black/20 px-2 py-1"><div className="text-[10px] text-white/40">{q102MetricName(key)}</div><div className="font-semibold text-white/80">{q102MetricValue(key, value)}</div></div>)}</div> : null}
+              {bestS34.gates?.length ? <div className="mt-3 flex flex-wrap gap-2">{bestS34.gates.map((gate, index) => <span key={(gate.name || "gate") + index} className={"rounded-full border px-2 py-1 text-[10px] font-semibold " + (gate.pass ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200" : "border-rose-400/30 bg-rose-500/10 text-rose-200")}>{gate.name}: {gate.pass ? "PASS" : "BLOCK"}{gate.value !== undefined ? " [" + String(gate.value) + (gate.threshold !== undefined ? " / " + String(gate.threshold) : "") + "]" : ""}</span>)}</div> : null}
+            </div> : null}
+
+            {!highVol && !bestS34 ? <div className="mt-3 rounded-xl border border-white/10 p-3 text-white/55">実測diagnosticsは次回ranking observer更新後に表示されます。対象S34モデル: {models.length ? models.join(" / ") : "固定S34モデルなし（HIGH_VOL経路）"}</div> : null}
 
             <div className="mt-3 rounded-xl border border-sky-400/15 bg-sky-400/[0.05] px-3 py-2 text-[11px] text-white/55">
-              判定順: raw detector → historical quality Gate → V4 feature Gate → REV improvement Gate → family/layer priority → 1-slot global selector。現在snapshotに実測feature値が無い場合は条件構造を表示し、値を推測しません。
+              この0〜100は「現在の発火条件への接近度」です。利益予測スコアではありません。保存履歴に将来リターンを後付けして、スコア帯別PF・勝率・DDを検証してからロジック利用を判断します。
             </div>
           </div>
         </details>;
