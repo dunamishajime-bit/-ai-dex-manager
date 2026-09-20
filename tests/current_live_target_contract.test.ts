@@ -39,10 +39,11 @@ test("current live target is the sole Top3/FET/Q102 governor acceptance anchor",
 test("selected formal replay is exactly the 740.77M / 65.67M case", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   const bytes = await readFile(artifactPath);
-  const sha = createHash("sha256").update(bytes).digest("hex").toUpperCase();
+  const canonicalText = bytes.toString("utf8").replace(/\r\n/g, "\n");
+  const sha = createHash("sha256").update(Buffer.from(canonicalText, "utf8")).digest("hex").toUpperCase();
   assert.equal(sha, target.formalBacktest.sourceArtifactSha256);
 
-  const cases = JSON.parse(bytes.toString("utf8"));
+  const cases = JSON.parse(canonicalText);
   const selected = cases.find((row: any) => row.case === target.formalBacktest.selectedCase);
   assert.ok(selected, "selected current formal replay case must exist");
 

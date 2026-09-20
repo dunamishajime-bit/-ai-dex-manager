@@ -21,7 +21,7 @@ This file is the single current Production activation target. GPT, Work, Codex a
 ## Formal backtest acceptance
 
 Source artifact: `docs/research-results/top3-fet-q102gov-integrated-20260920.json`
-SHA256: `3E5891E27B76E928BE76405FC6CEDAEA4EB4A42A14E9C2BABECA7E608BC0EA2E`
+SHA256: `9E522E7D93A4C3E7023065825D6D5F41688CDD47410C6223D97ED016DBBDD995`
 Selected case: `top3_q102gov030_fet1.25`
 
 | Scenario | Ending asset | PF | Max DD | Trades | Crypto max | Total max | FET max | Conflicts |
