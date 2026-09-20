@@ -30,6 +30,7 @@ import {
 } from "@/lib/disdex-v96-live-risk-controls";
 import {
     readSharedCryptoDailyRisk,
+    readSharedCryptoDailyRiskWithRolloverRetry,
 } from "@/lib/disdex-shared-crypto-daily-risk";
 import { isAsterDepositRequirementError } from "@/lib/aster-v3-client";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
@@ -963,6 +964,24 @@ export class Quality102CausalV1Runner {
         if (!this.dependencies.config.enabled) return { status: "disabled", message: "QUALITY102_CAUSAL_V1 is disabled.", ordersSent: 0 };
         this.ensureLiveGate();
         const beforeLockState = await this.dependencies.stateStore.load();
+        if (this.dependencies.config.mode === "LIVE"
+            && !this.dependencies.riskReader
+            && !beforeLockState.pending
+            && !beforeLockState.position) {
+            const sharedPath = String(this.dependencies.config.sharedDailyRiskPath || "").trim();
+            if (sharedPath) {
+                try {
+                    await readSharedCryptoDailyRiskWithRolloverRetry(sharedPath, {
+                        now: this.now,
+                        rolloverGraceMs: 60_000,
+                        pollMs: 2_000,
+                        maxAttempts: 31,
+                    });
+                } catch {
+                    // Preserve the normal in-lock fail-closed risk decision.
+                }
+            }
+        }
         let preloadedHistory: Quality102CausalV1History | undefined;
         const preloadEligible = beforeLockState.strategyId === STRATEGY_ID
             && beforeLockState.mode === this.dependencies.config.mode

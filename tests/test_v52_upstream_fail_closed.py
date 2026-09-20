@@ -22,16 +22,22 @@ class V52UpstreamFailClosedTests(unittest.TestCase):
     def test_existing_upstream_kill_reason_holds_without_flatten_mutations(self):
         engine = object.__new__(v52.V52AsterOnlyEngine)
         engine._upstream_fail_closed_hold = False
-        engine.reset_days = lambda: None
-        engine.kill_switch = lambda: {
+        hold = {
             "active": True,
-            "reason": "V52 fatal tick error: <urlopen error [Errno 104] Connection reset by peer>",
+            "strategyId": v52.base.V96_KILL_SWITCH_STRATEGY_ID,
+            "action": "HOLD_PROTECTED",
+            "reason": "V52 upstream state unavailable: Connection reset by peer",
+            "operator": "disdex-v52-aster-only",
+            "recoverable": True,
         }
+        engine.kill_switch = lambda: hold
+        engine._recoverable_hold_expired = lambda _hold=None: False
+        engine.activate_kill_switch = lambda *_args, **_kwargs: self.fail("existing recoverable hold must not be replaced")
         engine.flatten_all = lambda reason: self.fail(f"flatten_all must not run for upstream outage: {reason}")
         logs = []
         engine.log = lambda event, **kwargs: logs.append((event, kwargs))
 
-        engine.tick({})
+        engine._hold_upstream_fail_closed(ConnectionResetError(104, "Connection reset by peer"), "TICK")
 
         self.assertTrue(engine._upstream_fail_closed_hold)
         self.assertTrue(any(event == "v52-upstream-state-fail-closed" for event, _ in logs))
@@ -42,7 +48,7 @@ class V52UpstreamFailClosedTests(unittest.TestCase):
         activations = []
         logs = []
         engine.kill_switch = lambda: None
-        engine.activate_kill_switch = lambda reason: activations.append(reason)
+        engine.activate_kill_switch = lambda reason, **kwargs: activations.append((reason, kwargs))
         engine.flatten_all = lambda reason: self.fail(f"flatten_all must not run for upstream outage: {reason}")
         engine.log = lambda event, **kwargs: logs.append((event, kwargs))
 
@@ -50,7 +56,9 @@ class V52UpstreamFailClosedTests(unittest.TestCase):
 
         self.assertTrue(engine._upstream_fail_closed_hold)
         self.assertEqual(len(activations), 1)
-        self.assertIn("V52 upstream state unavailable", activations[0])
+        self.assertIn("V52 upstream state unavailable", activations[0][0])
+        self.assertEqual(activations[0][1].get("action"), "HOLD_PROTECTED")
+        self.assertTrue(activations[0][1].get("recoverable"))
         self.assertTrue(any(event == "v52-upstream-state-fail-closed" for event, _ in logs))
 
 

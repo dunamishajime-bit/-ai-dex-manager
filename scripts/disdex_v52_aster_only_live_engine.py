@@ -237,6 +237,9 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             raise RuntimeError(f"V52 fresh pre-order Margin Guard blocked exposure: {decision}")
 
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
+        # Set only for a block that happened before any V52 order was submitted.
+        # The tick loop may safely retry such a decision inside the same entry window.
+        self._v52_last_entry_blocked_before_order = False
         if self.live:
             target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
@@ -251,6 +254,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
                 requestedGross=target_gross,
                 strictPortfolioPlan=strict_plan,
             )
+            self._v52_last_entry_blocked_before_order = True
             return False
         self.require_fresh_preorder_margin_guard()
         return super().open_basis_position(slot, candidate, target_gross)

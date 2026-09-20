@@ -1128,23 +1128,40 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 )
             return
         if not self.state.get("v11Attempted") and base.clock("10:30:00") <= sec <= base.clock("10:30:20"):
-            self.state["v11Attempted"] = True; self.save()
             gross, snapshot = self.available_slot_gross(V11_SLOT)
             self.v11_notional = gross * snapshot["equityUsd"]
             candidate, rejections = (None, {"ROUTER": ["NO_GROSS_CAPACITY"]}) if gross <= 0 else self.v11_candidates(rows)
             self.log("v52-v11-decision", candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
-            if candidate: self.open_basis_position(V11_SLOT, candidate, gross)
+            if candidate:
+                self.state["v11Attempted"] = True; self.save()
+                try:
+                    opened = self.open_basis_position(V11_SLOT, candidate, gross)
+                except Exception:
+                    if not self.state.get("pendingOrder") and V11_SLOT not in self.positions():
+                        self.state["v11Attempted"] = False; self.save()
+                    raise
+                if not opened and getattr(self, "_v52_last_entry_blocked_before_order", False):
+                    self.state["v11Attempted"] = False; self.save()
         attempted = self.state.setdefault("v50Attempted", {})
         for window in V50_WINDOWS:
             entry = base.clock(window + ":00")
             if attempted.get(window) or not (entry <= sec <= entry + 20): continue
-            attempted[window] = True; self.save()
-            if int(self.state.get("v50CompletedTrades", 0)) >= V50_MAX_DAILY_TRADES or V50_SLOT in self.positions(): continue
+            if int(self.state.get("v50CompletedTrades", 0)) >= V50_MAX_DAILY_TRADES or V50_SLOT in self.positions():
+                attempted[window] = True; self.save(); continue
             gross, snapshot = self.available_slot_gross(V50_SLOT)
             notional = gross * snapshot["equityUsd"]
             candidate, rejections = (None, {"ROUTER": ["NO_GROSS_CAPACITY"]}) if gross <= 0 else self.v50_candidate(window, rows, notional)
             self.log("v52-v50-decision", window=window, candidate=candidate, rejections=rejections, allocatedGross=gross, grossSnapshot=snapshot)
-            if candidate: self.open_basis_position(V50_SLOT, candidate, gross)
+            if candidate:
+                attempted[window] = True; self.save()
+                try:
+                    opened = self.open_basis_position(V50_SLOT, candidate, gross)
+                except Exception:
+                    if not self.state.get("pendingOrder") and V50_SLOT not in self.positions():
+                        attempted[window] = False; self.save()
+                    raise
+                if not opened and getattr(self, "_v52_last_entry_blocked_before_order", False):
+                    attempted[window] = False; self.save()
 
     def _loop_interval_ms(self, prepared: dict) -> int:
         idle_ms = max(1_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000))
