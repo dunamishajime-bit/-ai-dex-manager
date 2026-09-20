@@ -153,9 +153,14 @@ test("recovery state metadata requires deploy ownership contract and mode 0600",
   assert.throws(() => assertLiveStateMetadata({ ...ok, isSymbolicLink: () => true }, 1001, 1001, "TEST_STATE"), /NOT_REGULAR_FILE/);
 });
 
-test("both V12 recovery helpers enforce ownership normalization", async () => {
+test("all root-run V12 recovery helpers enforce ownership normalization", async () => {
   const benign = await readFile("scripts/disdex-v12-benign-entry-gate-recovery.ts", "utf8");
   const presubmit = await readFile("scripts/disdex-v12-presubmit-snapshot-recovery.ts", "utf8");
+  const upstream = await readFile("scripts/disdex-aster-upstream-live-recovery.ts", "utf8");
+  const lineage = await readFile("scripts/disdex-v12-runtime-lineage-recovery.ts", "utf8");
   assert.match(benign, /normalizeLiveStateOwnership\(statePath/);
   assert.match(presubmit, /normalizeLiveStateOwnership\(v12StatePath/);
+  assert.match(upstream, /normalizeLiveStateOwnership\(statePath/);
+  assert.match(lineage, /normalizeLiveStateOwnership\(statePath/);
+  assert.match(lineage, /v12-x1-all-runner-state\/v2/);
 });

@@ -8,6 +8,7 @@ import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-ris
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { FileQuality102CausalV1StateStore } from "../lib/disdex-quality102-causal-v1-state";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
+import { normalizeLiveStateOwnership } from "../lib/disdex-live-state-ownership";
 
 const SHA = /^[0-9a-f]{40}$/i;
 const RECOVERABLE_REASON = "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH";
@@ -30,7 +31,7 @@ function activePositions(state: V12X1AllRunnerState) {
 
 export function assertRecoverableV12RuntimeLineageState(value: unknown, targetSha: string): asserts value is V12X1AllRunnerState {
   const state = value as Partial<V12X1AllRunnerState>;
-  if (state.schema !== "v12-x1-all-runner-state/v1" || state.strategyId !== "V12_X1.00_ALL" || state.mode !== "LIVE") {
+  if (!["v12-x1-all-runner-state/v1", "v12-x1-all-runner-state/v2"].includes(String(state.schema)) || state.strategyId !== "V12_X1.00_ALL" || state.mode !== "LIVE") {
     throw new Error("V12_RUNTIME_LINEAGE_RECOVERY_STATE_SCHEMA");
   }
   if (activePositions(state as V12X1AllRunnerState).length > 0) throw new Error("V12_RUNTIME_LINEAGE_RECOVERY_POSITION_PRESENT");
@@ -125,6 +126,7 @@ async function main() {
   const backupPath = await archiveState(statePath, beforeBytes, sha);
   const recovered = buildRecoveredV12RuntimeLineageState(before, Date.now());
   await v12Store.save(recovered);
+  await normalizeLiveStateOwnership(statePath, { label: "V12_RUNTIME_LINEAGE_RECOVERY_STATE" });
   const after = await v12Store.load();
   if (after.manualReview || after.killSwitch?.active || after.pending || activePositions(after).length > 0) throw new Error("V12_RUNTIME_LINEAGE_RECOVERY_POSTCHECK_FAILED");
   if (after.lastReferenceTs !== before.lastReferenceTs || after.lastCompletedIdempotencyKey !== before.lastCompletedIdempotencyKey) throw new Error("V12_RUNTIME_LINEAGE_RECOVERY_HISTORY_CHANGED");

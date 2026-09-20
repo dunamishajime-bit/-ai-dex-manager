@@ -13,6 +13,7 @@ import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-ris
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
+import { normalizeLiveStateOwnership } from "../lib/disdex-live-state-ownership";
 
 const APPLY_ACK = "I_ACK_ASTER_UPSTREAM_RECOVERY_AFTER_3X_READONLY_FLAT";
 
@@ -217,6 +218,7 @@ async function main() {
             if (killAfter.active) throw new Error("ASTER_UPSTREAM_RECOVERY_SHARED_KILL_CLEAR_VERIFY_FAILED");
         } catch (error) {
             await writeFile(statePath, beforeState, { mode: 0o600 }).catch(() => undefined);
+            await normalizeLiveStateOwnership(statePath, { label: "ASTER_UPSTREAM_RECOVERY_V12_ROLLBACK_STATE" }).catch(() => undefined);
             await writeFile(sharedKill.sourcePath, beforeKill, { mode: 0o600 }).catch(() => undefined);
             throw error;
         }
