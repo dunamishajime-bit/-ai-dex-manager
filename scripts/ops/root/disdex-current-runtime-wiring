@@ -336,6 +336,15 @@ assert_current_live_target_ready() {
   "$tsx" "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts" --require-implementation-ready
 }
 
+operator_activation_all_trading_ready() {
+  local runner
+  local gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+  for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL; do
+    /usr/bin/node "$gate"       --release-root "$CURRENT_RELEASE"       --sha "$DEPLOYED_SHA"       --runner "$runner"       --activation-path "$OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
+  done
+  return 0
+}
+
 apply_wiring() {
   require_root_for_apply
   assert_current_live_target_ready
@@ -672,13 +681,22 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   systemctl reset-failed aster-trade-history-git-sync.service || true
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.path || true
-  systemctl restart disdex-v12-kill-switch-auto-repair.path
   systemctl reset-failed disdex-runner-watchdog.service || true
   systemctl reset-failed disdex-v12-three-hour-health-check.service || true
   systemctl reset-failed disdex-ui-retention.service || true
   ensure_safety_daemon_active "$SHARED_RISK_UNIT"
   ensure_safety_daemon_active "$MARGIN_UNIT"
-  ensure_monitor_timer_active "disdex-runner-watchdog.timer"
+
+  if operator_activation_all_trading_ready; then
+    systemctl restart disdex-v12-kill-switch-auto-repair.path
+    ensure_monitor_timer_active "disdex-runner-watchdog.timer"
+    printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
+  else
+    systemctl stop disdex-v12-kill-switch-auto-repair.path disdex-v12-kill-switch-auto-repair.service || true
+    systemctl stop disdex-runner-watchdog.timer disdex-runner-watchdog.service || true
+    printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_BLOCKED\n'
+  fi
+
   ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
   ensure_monitor_timer_active "disdex-runner-health-alert.timer"
   ensure_monitor_timer_active "disdex-runner-position-recovery.timer"

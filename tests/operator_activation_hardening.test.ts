@@ -116,6 +116,19 @@ test("runtime wiring places activation gate in every trading runner prestart", a
   assert.match(source, /DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH=/);
 });
 
+test("runtime wiring leaves watchdog and auto-repair disabled until all trading runners are operator-approved", async () => {
+  const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
+  const gate = source.indexOf("if operator_activation_all_trading_ready; then");
+  const enableAutoRepair = source.indexOf("systemctl restart disdex-v12-kill-switch-auto-repair.path", gate);
+  const enableWatchdog = source.indexOf('ensure_monitor_timer_active "disdex-runner-watchdog.timer"', gate);
+  const blocked = source.indexOf("DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_BLOCKED", gate);
+  const stopAutoRepair = source.indexOf("systemctl stop disdex-v12-kill-switch-auto-repair.path", gate);
+  const stopWatchdog = source.indexOf("systemctl stop disdex-runner-watchdog.timer", gate);
+  assert.ok(gate >= 0 && enableAutoRepair > gate && enableWatchdog > gate);
+  assert.ok(blocked > gate && stopAutoRepair > gate && stopWatchdog > gate);
+  assert.match(source, /for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL/);
+});
+
 test("auto-repair checks operator activation before quiescing or resuming trading runners", async () => {
   const source = await readFile("scripts/ops/root/disdex-v12-kill-switch-auto-repair", "utf8");
   const gateIndex = source.indexOf("if ! operator_activation_ready; then");
