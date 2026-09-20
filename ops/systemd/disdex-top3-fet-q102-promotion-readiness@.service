@@ -1,0 +1,29 @@
+[Unit]
+Description=DisDex Top3 + FET + Q102 promotion readiness (%i)
+After=disdex-top3-fet-q102-shadow@%i.service
+ConditionPathExists=/var/lib/disdex/top3-fet-q102-shadow/snapshot.json
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+Environment=NODE_ENV=production
+Environment=TOP3_FET_Q102_SHADOW_SNAPSHOT_PATH=/var/lib/disdex/top3-fet-q102-shadow/snapshot.json
+Environment=DISDEX_CURRENT_RELEASE_LINK=/home/deploy/disdex-trading/current
+Environment=TOP3_FET_Q102_EXPECTED_PRODUCTION_SHA=b6b62bbadf1abe25d8ef31f5f133515b52a0df1c
+Environment=TOP3_FET_Q102_READINESS_MAX_AGE_MS=180000
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-top3-fet-q102-promotion-readiness.ts
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX
+ReadOnlyPaths=/home/deploy/disdex-trading /var/lib/disdex/top3-fet-q102-shadow
+UMask=0077
