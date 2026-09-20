@@ -18,6 +18,7 @@ export interface V12PendingOrderState {
     requestedGross?: number;
     baseRequestedGross?: number;
     dynamicRequestedGross?: number;
+    entryRank?: 1 | 2 | 3;
     atrAtEntry?: number;
     reason?: string;
     createdAt: number;
@@ -39,6 +40,7 @@ export interface V12ActivePositionState {
     dynamicQuantity: number;
     dynamicGross: number;
     dynamicUpdatedAt?: number;
+    entryRank?: 1 | 2 | 3;
     positionId: string;
     entryPrice: number;
     atrAtEntry: number;
@@ -117,6 +119,9 @@ export class FileV12X1AllRunnerStateStore {
                 ? (legacyActive ? [legacyActive] : [])
                 : value.activePositions.map((row) => normalizeActive(row));
             if (!Array.isArray(activePositions) || activePositions.length > V12_X1_ALL.maximumPositions) throw new Error("V12_STATE_ACTIVE_POSITIONS_INVALID");
+            if (activePositions.filter((position) => position.entryRank !== 3).length > 2) throw new Error("V12_STATE_BASE_SLOT_COUNT_INVALID");
+            if (activePositions.filter((position) => position.entryRank === 3).length > 1) throw new Error("V12_STATE_RANK3_SLOT_COUNT_INVALID");
+            if (activePositions.some((position) => position.entryRank === 3 && position.gross > V12_X1_ALL.rank3EntryGrossCap + 1e-9)) throw new Error("V12_STATE_RANK3_GROSS_INVALID");
             const symbols = new Set<string>();
             let aggregateBaseGross = 0;
             let aggregateGross = 0;

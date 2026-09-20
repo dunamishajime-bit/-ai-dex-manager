@@ -1,0 +1,43 @@
+[Unit]
+Description=DisDex FET BRK48 residual LIVE (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env
+Environment=NODE_ENV=production
+Environment=DISDEX_RUNTIME_COMMIT_SHA=%i
+Environment=DISDEX_RELEASE_SHA=%i
+Environment=FET_BRK48_LIVE_ENABLED=true
+Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+Environment=DISDEX_SHARED_CRYPTO_DAILY_RISK_FILE=/var/lib/disdex/shared/crypto-daily-risk.json
+Environment=DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock
+Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
+ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json ]; then chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json && chmod 600 /var/lib/disdex/fet-brk48-residual/state.json; fi'
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-current-live-target-readiness.ts --require-ready
+ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-fet-brk48-live-runner.ts --preflight
+ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-fet-brk48-live-runner.ts --daemon
+Restart=on-failure
+RestartSec=15s
+TimeoutStartSec=10min
+TimeoutStopSec=90s
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/var/lib/disdex/fet-brk48-residual /var/lib/disdex/shared
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

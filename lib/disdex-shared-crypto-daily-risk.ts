@@ -3,7 +3,7 @@ import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
 export const SHARED_CRYPTO_DAILY_RISK_SCHEMA = "disdex-shared-crypto-daily-risk/v1" as const;
-export const SHARED_CRYPTO_STRATEGIES = ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"] as const;
+export const SHARED_CRYPTO_STRATEGIES = ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"] as const;
 
 export interface SharedCryptoDailyRiskState {
     schema: typeof SHARED_CRYPTO_DAILY_RISK_SCHEMA;

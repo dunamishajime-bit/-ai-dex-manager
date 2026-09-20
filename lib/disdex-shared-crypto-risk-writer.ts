@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { QUALITY102_CAUSAL_V4_S34_MODEL } from "@/config/disdexQuality102CausalV4Model";
 import { resolveSharedCryptoDailyLossPct } from "@/config/sharedCryptoRiskPolicy";
 import { AsterV3Client } from "@/lib/aster-v3-client";
+import { governorIncomeStartTime, refreshPortfolioDdGovernor, type PortfolioDdGovernorState } from "@/lib/disdex-portfolio-dd-governor";
 import {
     buildSharedCryptoDailyRiskState,
     SHARED_CRYPTO_DAILY_RISK_SCHEMA,
@@ -20,7 +21,7 @@ export const QUALITY102_CAUSAL_V4_S34_SHARED_SYMBOLS = [...new Set(QUALITY102_CA
 
 export const SHARED_CRYPTO_SYMBOLS = new Set([
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT",
-    "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT",
+    "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "FETUSDT", "PENGUUSDT",
     ...QUALITY102_CAUSAL_V1_SHARED_SYMBOLS,
     ...QUALITY102_CAUSAL_V4_S34_SHARED_SYMBOLS,
 ]);
@@ -63,19 +64,23 @@ export async function refreshSharedCryptoDailyRisk(input: {
     path: string;
     now?: number;
     maximumLossPct?: number;
-}): Promise<SharedCryptoDailyRiskState> {
+    portfolioDdGovernorPath?: string;
+}): Promise<SharedCryptoDailyRiskState & { portfolioDdGovernor?: PortfolioDdGovernorState }> {
     const now = input.now ?? Date.now();
     const startTime = utcStart(now);
+    const incomeStartTime = input.portfolioDdGovernorPath
+        ? await governorIncomeStartTime(input.portfolioDdGovernorPath, now, startTime)
+        : startTime;
     const utcDay = new Date(now).toISOString().slice(0, 10);
     const [balances, positions, income, priorTripped] = await Promise.all([
         input.client.getBalances(),
         input.client.getPositions(),
-        input.client.getIncomeHistory({ startTime, endTime: now, limit: 1000 }),
+        input.client.getIncomeHistory({ startTime: incomeStartTime, endTime: now, limit: 1000 }),
         priorTripForUtcDay(input.path, utcDay),
     ]);
     if (income.length >= 1000) throw new Error("SHARED_CRYPTO_RISK_INCOME_PAGE_INCOMPLETE");
 
-    const relevant = income.filter((row) => SHARED_CRYPTO_SYMBOLS.has(String(row.symbol || "").toUpperCase()));
+    const relevant = income.filter((row) => Number(row.time) >= startTime && SHARED_CRYPTO_SYMBOLS.has(String(row.symbol || "").toUpperCase()));
     let realizedPnl = 0;
     let fees = 0;
     let funding = 0;
@@ -116,5 +121,19 @@ export async function refreshSharedCryptoDailyRisk(input: {
         sourceComplete: true,
     });
     await writeSharedCryptoDailyRisk(input.path, state);
-    return state;
+    let portfolioDdGovernor: PortfolioDdGovernorState | undefined;
+    if (input.portfolioDdGovernorPath) {
+        try {
+            portfolioDdGovernor = await refreshPortfolioDdGovernor({
+                path: input.portfolioDdGovernorPath,
+                now,
+                walletBalanceUsd: walletBalance,
+                income,
+            });
+        } catch {
+            // Daily risk remains independent. Q102 boost fails closed to family gross
+            // when the governor state is missing or stale.
+        }
+    }
+    return Object.assign(state, { portfolioDdGovernor });
 }

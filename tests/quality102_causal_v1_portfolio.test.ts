@@ -78,7 +78,7 @@ function cryptoPosition(strategy: "V12" | "PENGU_DUAL_LS_V2", gross: number, sym
     });
 }
 
-test("causal-v1 requires readiness, is capped at 2.50x, and historical Quality102 stays blocked", () => {
+test("causal-v1 requires readiness, is capped at 3.00x, and historical Quality102 stays blocked", () => {
     const notReady = plan([], [intent("QUALITY102_CAUSAL_V1", 0.5)], false);
     assert.equal(notReady.accepted.length, 0);
     assert.equal(notReady.rejected[0]?.reason, "QUALITY102_CAUSAL_V1_NOT_READY");
@@ -88,8 +88,8 @@ test("causal-v1 requires readiness, is capped at 2.50x, and historical Quality10
     assert.equal(normal.accepted[0]?.notionalUsd, 1200);
 
     const capped = plan([], [intent("QUALITY102_CAUSAL_V1", 3.0)]);
-    assert.equal(capped.accepted[0]?.gross, 2.5);
-    assert.equal(capped.accepted[0]?.notionalUsd, 2500);
+    assert.equal(capped.accepted[0]?.gross, 3.0);
+    assert.equal(capped.accepted[0]?.notionalUsd, 3000);
 
     const historical = plan([], [intent("QUALITY102", 0.5)]);
     assert.equal(historical.accepted.length, 0);
@@ -404,10 +404,11 @@ test("historical QUALITY102 is never selected for causal conflict reduction", ()
     assert.equal(result.rejected.find(({ intent: row }) => row.strategy === "V12"), undefined);
 });
 
-test("V12 Top2 slot rejection happens before causal-v1 MTM reduction", () => {
+test("V12 Top3 slot rejection happens before causal-v1 MTM reduction", () => {
     const result = plan([
-        cryptoPosition("V12", 1, "ETHUSDT"),
-        cryptoPosition("V12", 0.5, "BTCUSDT"),
+        cryptoPosition("V12", 0.8, "ETHUSDT"),
+        cryptoPosition("V12", 0.6, "BTCUSDT"),
+        cryptoPosition("V12", 0.1, "LINKUSDT"),
         position({
             id: "q102v1-slot-conflict",
             strategy: "QUALITY102_CAUSAL_V1",

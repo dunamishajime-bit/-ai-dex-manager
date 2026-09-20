@@ -16,7 +16,7 @@ import {
     type V12StopState,
     type V12TrailingPlan,
 } from "@/lib/v12-resident-stop-lifecycle";
-import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, type V12Bar, type V12DecisionObservation, type V12Signal } from "@/lib/v12-x1-all";
+import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, v12EntryGrossCapForRank, type V12Bar, type V12DecisionObservation, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { decideV12ResidualEntry, type V12ResidualDecision } from "@/lib/v12-top2-residual";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
@@ -69,6 +69,13 @@ function activePositionsOf(state: V12X1AllRunnerState): V12ActivePositionState[]
     return state.active ? [state.active] : [];
 }
 
+function v12SlotAvailable(active: readonly V12ActivePositionState[], rank: number | undefined) {
+    if (active.length >= V12_X1_ALL.maximumPositions) return false;
+    const baseCount = active.filter((position) => position.entryRank !== 3).length;
+    const residualOccupied = active.some((position) => position.entryRank === 3);
+    return rank === 3 ? !residualOccupied : baseCount < 2;
+}
+
 function v12GrossComponents(state: V12X1AllRunnerState, portfolio: ActivePortfolioPosition[]) {
     const actives = activePositionsOf(state);
     const bySymbol = new Map(actives.map((row) => [row.symbol.toUpperCase(), row]));
@@ -90,6 +97,9 @@ function v12GrossComponents(state: V12X1AllRunnerState, portfolio: ActivePortfol
 function syncActivePositions(state: V12X1AllRunnerState, positions: V12ActivePositionState[]) {
     const ranked = positions.filter((position) => position.quantity > EPS);
     if (ranked.length > V12_X1_ALL.maximumPositions) throw new Error("V12_MAX_POSITIONS_REACHED");
+    if (ranked.filter((position) => position.entryRank !== 3).length > 2) throw new Error("V12_BASE_SLOT_COUNT_OVER_CAP");
+    if (ranked.filter((position) => position.entryRank === 3).length > 1) throw new Error("V12_RANK3_SLOT_COUNT_OVER_CAP");
+    if (ranked.some((position) => position.entryRank === 3 && position.gross > V12_X1_ALL.rank3EntryGrossCap + EPS)) throw new Error("V12_RANK3_GROSS_OVER_CAP");
     if (new Set(ranked.map((position) => position.symbol.toUpperCase())).size !== ranked.length) throw new Error("V12_DUPLICATE_ACTIVE_SYMBOL");
     if (ranked.some((position) => position.gross > V12_X1_ALL.perPositionEntryGrossCap + EPS)) throw new Error("V12_POSITION_GROSS_OVER_CAP");
     if (ranked.some((position) => Math.abs(position.baseGross + position.dynamicGross - position.gross) > 1e-6
@@ -230,6 +240,7 @@ export class V12LiveExecutionEngine {
             baseGross: actualGross * baseRatio,
             dynamicGross: actualGross * (1 - baseRatio),
             dynamicUpdatedAt: plannedDynamicGross > EPS ? this.now() : undefined,
+            entryRank: pending.entryRank,
             positionId: pending.clientOrderId,
             entryPrice,
             atrAtEntry: pending.atrAtEntry,
@@ -374,6 +385,7 @@ export class V12LiveExecutionEngine {
             requestedGross: acceptedGross,
             baseRequestedGross: decision.baseAcceptedGross,
             dynamicRequestedGross: decision.dynamicAcceptedGross,
+            entryRank: signal.rank,
             atrAtEntry: signal.atr,
             reason: decision.dynamicAcceptedGross > EPS ? "signal-entry-with-dynamic-residual" : "signal-entry-base",
             createdAt: this.now(),
@@ -401,6 +413,7 @@ export class V12LiveExecutionEngine {
             baseGross: actualGross * baseRatio,
             dynamicGross: actualGross * (1 - baseRatio),
             dynamicUpdatedAt: decision.dynamicAcceptedGross > EPS ? this.now() : undefined,
+            entryRank: signal.rank,
             positionId: clientOrderId,
             entryPrice,
             atrAtEntry: signal.atr,
@@ -493,8 +506,9 @@ export class V12LiveExecutionEngine {
                     state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
                     return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
                 }
-                const existingSymbols = new Set(activePositionsOf(state).map((row) => row.symbol.toUpperCase()));
-                const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`));
+                const currentActives = activePositionsOf(state);
+                const existingSymbols = new Set(currentActives.map((row) => row.symbol.toUpperCase()));
+                const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`) && v12SlotAvailable(currentActives, candidate.rank));
                 if (!next) {
                     state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
                     return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
@@ -533,10 +547,11 @@ export class V12LiveExecutionEngine {
                         stockGross: freshActive.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
                         totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0),
                     };
-                    decision = decideV12ResidualEntry(sizing.requestedGross, snapshot, activePositionsOf(state).length);
+                    const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForRank(next.rank));
+                    decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
                     const requestedBase = Math.min(
-                        sizing.requestedGross,
-                        V12_X1_ALL.perPositionEntryGrossCap,
+                        rankedRequestGross,
+                        v12EntryGrossCapForRank(next.rank),
                         Math.max(0, V12_X1_ALL.aggregateEntryGrossCap - v12Components.baseGross),
                     );
                     const trimNeeded = Math.min(
@@ -575,7 +590,10 @@ export class V12LiveExecutionEngine {
             if ((state.cooldownUntilTs || 0) > latestTs) { await this.d.stateStore.save(state); return { status: "held", reason: "V12_COOLDOWN_ACTIVE", signal: signals[0] }; }
             let latestPositions = positions;
             let lastResult: V12LiveTickResult = { status: "no-signal", reason: "NO_ENTRY" };
+            let enteredCount = 0;
             for (const signal of signals.slice(0, V12_X1_ALL.maximumPositions)) {
+                const currentActives = activePositionsOf(state);
+                if (currentActives.some((position) => position.symbol.toUpperCase() === `${signal.symbol}USDT`) || !v12SlotAvailable(currentActives, signal.rank)) continue;
                 const [freshAccount, freshPositions] = await Promise.all([this.d.adapter.getAccountSnapshot(), this.d.adapter.getPositions()]);
                 latestPositions = freshPositions;
                 const entryEquity = Math.max(0, finite(freshAccount.walletBalance)); if (!(entryEquity > 0)) return this.fail(state, "V12_ACCOUNT_EQUITY_INVALID");
@@ -585,11 +603,17 @@ export class V12LiveExecutionEngine {
                 const sizing = sizeV12Position(entryEquity, entryPrice, signal.atr, signal.side);
                 const v12Components = v12GrossComponents(state, activePortfolio);
                 const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), v12BaseGross: v12Components.baseGross, v12DynamicGross: v12Components.dynamicGross, cryptoGross: activePortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
-                const decision = decideV12ResidualEntry(sizing.requestedGross, snapshot, activePositionsOf(state).length);
-                if (!(decision.acceptedGross > 0)) { lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal }; break; }
-                lastResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision);
-                if (lastResult.status === "manual-review") return lastResult;
-                if (lastResult.status !== "entered") break;
+                const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForRank(signal.rank));
+                const decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
+                if (!(decision.acceptedGross > 0)) {
+                    if (enteredCount === 0) lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal };
+                    break;
+                }
+                const entryResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision);
+                if (entryResult.status === "manual-review") return entryResult;
+                if (entryResult.status !== "entered") { if (enteredCount === 0) lastResult = entryResult; break; }
+                enteredCount += 1;
+                lastResult = { ...entryResult, reason: `V12_ENTRIES_COMPLETED:${enteredCount}` };
             }
             return lastResult;
         } catch (error) {

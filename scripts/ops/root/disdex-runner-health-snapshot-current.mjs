@@ -31,6 +31,7 @@ const V12_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEA
 const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT");
 const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT");
 const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT");
+const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT");
 
 const RUNNERS = [
     {
@@ -75,6 +76,17 @@ const RUNNERS = [
         script: "scripts/disdex-quality102-causal-v1-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", "/var/lib/disdex/quality102-causal-v1/state.json"),
         heartbeatFile: "quality102-causal-v1.json",
+        maxStateAgeMs: 3 * 60 * 60_000,
+    },
+    {
+        key: "FET_BRK48_RESIDUAL",
+        runnerId: "FET_BRK48_RESIDUAL",
+        unit: `disdex-fet-brk48@${FET_PIN.expectedSha}.service`,
+        expectedSha: FET_PIN.expectedSha,
+        releaseRoot: FET_PIN.releaseRoot,
+        script: "scripts/disdex-fet-brk48-live-runner.ts",
+        statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH", "/var/lib/disdex/fet-brk48-residual/state.json"),
+        heartbeatFile: "fet-brk48-residual.json",
         maxStateAgeMs: 3 * 60 * 60_000,
     },
 ];

@@ -2,7 +2,7 @@ import { STRICT_BT33404708902, type StrictBtBaseStrategy } from "../config/disde
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "../config/integratedProductionRiskPolicy";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 
-export type StrictStrategy = StrictBtBaseStrategy | "QUALITY102" | "QUALITY102_CAUSAL_V1";
+export type StrictStrategy = StrictBtBaseStrategy | "FET_RESIDUAL" | "QUALITY102" | "QUALITY102_CAUSAL_V1";
 export type StrictPositionSide = "LONG" | "SHORT";
 export type StrictMarkSource = "BINANCE_VISION_USDM_1M_OPEN" | "LIVE_MARKET_QUOTE";
 
@@ -87,7 +87,7 @@ function nonNegative(value: unknown, name: string) {
 }
 
 function isCrypto(strategy: StrictStrategy) {
-    return strategy === "V12" || strategy === "PENGU_DUAL_LS_V2" || strategy === "QUALITY102" || strategy === "QUALITY102_CAUSAL_V1";
+    return strategy === "V12" || strategy === "PENGU_DUAL_LS_V2" || strategy === "FET_RESIDUAL" || strategy === "QUALITY102" || strategy === "QUALITY102_CAUSAL_V1";
 }
 
 function isStock(strategy: StrictStrategy) {
@@ -113,6 +113,7 @@ function positionNotional(position: StrictPortfolioPosition) {
 function strategyCap(strategy: StrictStrategy) {
     if (strategy === "V12") return INTEGRATED_PRODUCTION_RISK_POLICY.v12PerPositionGrossCap;
     if (strategy === "PENGU_DUAL_LS_V2") return INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross;
+    if (strategy === "FET_RESIDUAL") return INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross;
     if (strategy === "QUALITY102_CAUSAL_V1") return INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross;
     if (strategy === "QUALITY102") return STRICT_BT33404708902.quality102PositionCap;
     return INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap;
@@ -120,6 +121,7 @@ function strategyCap(strategy: StrictStrategy) {
 
 function strategySymbolMatches(strategy: StrictStrategy, symbol: string) {
     if (isQuality102Strategy(strategy)) return String(symbol).trim().length > 0;
+    if (strategy === "FET_RESIDUAL") return classifyAsterSymbol(symbol, "FET_RESIDUAL").sleeve === "FET_RESIDUAL";
     const requestedSleeve = strategy === "V52" ? "V50_POST_OPEN_BASIS" : strategy;
     const classification = classifyAsterSymbol(symbol, requestedSleeve as Parameters<typeof classifyAsterSymbol>[1]);
     return classification.tradable && (strategy === "V52"
@@ -410,7 +412,7 @@ export function planStrictPortfolio(input: {
         return rejectPlan("QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED", input.active, equity);
     }
     const activeV12 = input.active.filter((row) => row.strategy === "V12");
-    if (activeV12.length > STRICT_BT33404708902.v12LiveMaximumPositions) {
+    if (activeV12.length > INTEGRATED_PRODUCTION_RISK_POLICY.v12MaximumPositions) {
         return rejectPlan("V12_MAX_POSITIONS_REACHED", input.active, equity);
     }
     if (activeV12.some((row) => grossForNotional(positionNotional(row), equity) > INTEGRATED_PRODUCTION_RISK_POLICY.v12PerPositionGrossCap + EPSILON)) {
@@ -437,7 +439,7 @@ export function planStrictPortfolio(input: {
     const seenIntentKeys = new Set<string>();
     const seenIntentTargets = new Set<string>();
     const ordered = [...input.intents].sort((a, b) => {
-        const baseRank = (strategy: StrictStrategy) => strategy === "QUALITY102" ? 5 : strategy === "QUALITY102_CAUSAL_V1" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
+        const baseRank = (strategy: StrictStrategy) => strategy === "FET_RESIDUAL" ? 6 : strategy === "QUALITY102" ? 5 : strategy === "QUALITY102_CAUSAL_V1" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
         return baseRank(a.strategy) - baseRank(b.strategy) || a.signalTs - b.signalTs || a.idempotencyKey.localeCompare(b.idempotencyKey);
     });
     for (const intent of ordered) {
@@ -457,7 +459,7 @@ export function planStrictPortfolio(input: {
         if (seenIntentTargets.has(targetKey)) { rejected.push({ intent, reason: "DUPLICATE_INTENT_TARGET" }); continue; }
         seenIntentTargets.add(targetKey);
         if (intent.strategy === "V12"
-            && active.filter((row) => row.strategy === "V12").length + accepted.filter((row) => row.strategy === "V12").length >= STRICT_BT33404708902.v12LiveMaximumPositions) {
+            && active.filter((row) => row.strategy === "V12").length + accepted.filter((row) => row.strategy === "V12").length >= INTEGRATED_PRODUCTION_RISK_POLICY.v12MaximumPositions) {
             rejected.push({ intent, reason: "V12_MAX_POSITIONS_REACHED" });
             continue;
         }

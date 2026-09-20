@@ -51,7 +51,7 @@ test("Q102 flat entry waits through UTC rollover before the account lock without
   assert.match(preLock, /pollMs:\s*2_000/);
   assert.match(preLock, /maxAttempts:\s*31/);
   const riskBlockAt = source.indexOf("refreshQ102StateAfterRiskBlock(state, this.now())");
-  const nextSignalAt = source.indexOf("const signal = this.buildSignal", riskBlockAt);
+  const nextSignalAt = source.indexOf("const baseSignal = this.buildSignal", riskBlockAt);
   const riskBlock = source.slice(riskBlockAt, nextSignalAt);
   assert.doesNotMatch(riskBlock, /lastProcessedReferenceTs\s*=/, "Q102 risk hold must not consume the entry reference");
 });

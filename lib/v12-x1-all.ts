@@ -32,6 +32,8 @@ export interface V12Signal extends V12Candidate {
     referenceTs: number;
     entryTs: number;
     regime: V12Regime;
+    /** Portfolio slot rank. Rank3 is the lower-priority 0.10x residual slot. */
+    rank: 1 | 2 | 3;
 }
 
 export interface V12ObservedCandidate extends V12Candidate {
@@ -70,22 +72,39 @@ export interface V12PositionSizing {
     quantity: number;
 }
 
+export function selectV12Top3Candidates(ranked: readonly V12Candidate[], limit: number = V12_X1_ALL.maximumPositions): Array<{ candidate: V12Candidate; rank: 1 | 2 | 3 }> {
+    const requestedSlots = Math.max(0, Math.min(V12_X1_ALL.maximumPositions, Math.floor(limit)));
+    const selected: Array<{ candidate: V12Candidate; rank: 1 | 2 | 3 }> = [];
+    if (requestedSlots >= 1 && ranked[0]) selected.push({ candidate: ranked[0], rank: 1 });
+    if (requestedSlots >= 2 && ranked[1]) selected.push({ candidate: ranked[1], rank: 2 });
+    if (requestedSlots >= 3) {
+        const third = ranked.slice(2).find((candidate) => candidate.score >= V12_X1_ALL.rank3MinimumScore);
+        if (third) selected.push({ candidate: third, rank: 3 });
+    }
+    return selected;
+}
+
 export function buildV12Signals(universe: Record<string, V12Bar[]>, index: number, limit: number = V12_X1_ALL.maximumPositions): V12Signal[] {
     const btc = universe.BTC;
     if (!btc?.[index]) return [];
     const regimeState = computeV12RegimeState(btc, index);
     if (!regimeState) return [];
-    return V12_X1_ALL.universe
+    const ranked = V12_X1_ALL.universe
         .map((symbol) => candidateFor(symbol, universe[symbol] || [], index, regimeState))
         .filter((candidate): candidate is V12Candidate => Boolean(candidate))
-        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol))
-        .slice(0, Math.max(0, Math.floor(limit)))
-        .map((candidate) => ({
-            ...candidate,
-            regime: regimeState.regime,
-            referenceTs: universe[candidate.symbol][index].endTs,
-            entryTs: universe[candidate.symbol][index + 1]?.ts || universe[candidate.symbol][index].endTs,
-        }));
+        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol));
+
+    return selectV12Top3Candidates(ranked, limit).map(({ candidate, rank }) => ({
+        ...candidate,
+        rank,
+        regime: regimeState.regime,
+        referenceTs: universe[candidate.symbol][index].endTs,
+        entryTs: universe[candidate.symbol][index + 1]?.ts || universe[candidate.symbol][index].endTs,
+    }));
+}
+
+export function v12EntryGrossCapForRank(rank: number | undefined): number {
+    return rank === 3 ? V12_X1_ALL.rank3EntryGrossCap : V12_X1_ALL.perPositionEntryGrossCap;
 }
 
 function finite(value: unknown, fallback = NaN) {

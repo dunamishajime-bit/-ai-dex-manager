@@ -14,7 +14,7 @@ function state(utcDay: string, updatedAt: number) {
   return buildSharedCryptoDailyRiskState({
     accountScope: "ASTER_FUTURES",
     utcDay,
-    strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"],
+    strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
     lossPct: 0,
     maximumLossPct: 7.5,
     tripped: false,

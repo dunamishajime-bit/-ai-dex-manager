@@ -37,7 +37,7 @@ async function main() {
   assert.equal(artifact.logic.quality102CausalV1.maximumPositions, 1);
   assert.equal(artifact.logic.portfolio.cryptoGrossCap, 2);
   assert.equal(artifact.logic.portfolio.totalGrossCap, 2.5);
-  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 2.5);
+  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 3.0);
   assert.equal(STRICT_BT33404708902.cryptoGrossCap, 3);
   assert.equal(STRICT_BT33404708902.totalGrossCap, 3.5);
 

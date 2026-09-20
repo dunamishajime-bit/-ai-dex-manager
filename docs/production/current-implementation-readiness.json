@@ -1,0 +1,32 @@
+{
+  "schema": "disdex-current-implementation-readiness/v1",
+  "date": "2026-09-20",
+  "target": "top3_q102gov030_fet1.25",
+  "canonicalTarget": "docs/production/current-live-target.json",
+  "status": "BLOCKED",
+  "ordersEnabled": false,
+  "blockers": [
+    "FET_CORE_PREEMPTION_V12_UNWIRED",
+    "FET_CORE_PREEMPTION_PENGU_UNWIRED",
+    "FET_CORE_PREEMPTION_Q102_UNWIRED",
+    "FET_CORE_PREEMPTION_V52_UNWIRED",
+    "FET_PROTECTIVE_ORDER_V12_RECOGNITION_UNWIRED",
+    "FET_PROTECTIVE_ORDER_PENGU_RECOGNITION_UNWIRED"
+  ],
+  "completed": [
+    "CANONICAL_740M_65M_BACKTEST_FIXED",
+    "V12_TOP3_RANK3_010_SCORE070",
+    "Q102_DD_GOVERNOR_030_TO_300",
+    "Q102_5X_MARGIN_NOTIONAL_SIZING",
+    "Q102_CORE_COEXISTENCE_RESTORED",
+    "FET_BRK48_SIGNAL_CAUSAL",
+    "FET_LIVE_STATE_MACHINE",
+    "FET_5PCT_PROTECTIVE_STOP_READBACK",
+    "FET_RESTART_RECONCILIATION",
+    "FET_24H_REDUCE_ONLY_EXIT",
+    "FET_SHARED_RISK_AND_ACCOUNT_LOCK",
+    "FET_READONLY_5X_CROSS_PREFLIGHT",
+    "FET_RUNTIME_MONITORING_WIRING"
+  ],
+  "activationRule": "Activation must remain blocked until every blocker is removed by tested code and the readiness checker returns PRODUCTION_ACTIVATION_READY."
+}

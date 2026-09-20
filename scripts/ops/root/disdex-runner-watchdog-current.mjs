@@ -81,6 +81,19 @@ const RUNNERS = [
         heartbeatTimeoutMs: 5_400_000,
         tickTimeoutMs: 5_400_000,
     },
+    {
+        key: "FET_BRK48_RESIDUAL",
+        expectedShaEnv: "DISDEX_WATCHDOG_FET_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_FET_RELEASE_ROOT",
+        heartbeatFile: "fet-brk48-residual.json",
+        unitEnv: "DISDEX_WATCHDOG_FET_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-fet-brk48@${sha}.service`,
+        unitPattern: "disdex-fet-brk48@*.service",
+        unitPrefix: "disdex-fet-brk48",
+        script: "scripts/disdex-fet-brk48-live-runner.ts",
+        heartbeatTimeoutMs: 5_400_000,
+        tickTimeoutMs: 5_400_000,
+    },
 ];
 
 const ZERO_EFFECTS = { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 };
@@ -577,12 +590,14 @@ function selfTest() {
     const pengu = RUNNERS[1];
     const v52 = RUNNERS[2];
     const q102 = RUNNERS[3];
+    const fet = RUNNERS[4];
     if (!serviceAllowed(v12, v12.expectedUnit(sha), sha)) throw new Error("V12 allowlist self-test failed");
     if (!serviceAllowed(pengu, pengu.expectedUnit(sha), sha)) throw new Error("PENGU release-pinned allowlist self-test failed");
     if (serviceAllowed(pengu, "disdex-pengu-dual-ls-v2-v20.service", sha)) throw new Error("PENGU legacy unit fail-closed self-test failed");
     if (!serviceAllowed(v52, v52.expectedUnit(sha), sha)) throw new Error("V52 release-pinned allowlist self-test failed");
     if (serviceAllowed(v52, v52.expectedUnit("f59347fad11553b833e75f6f35a0c545464fdf5f"), sha)) throw new Error("V52 SHA mismatch fail-closed self-test failed");
     if (serviceAllowed(q102, "disdex-quality102-causal-v1@f59347fad11553b833e75f6f35a0c545464fdf5.service", sha)) throw new Error("39/40 SHA fail-closed self-test failed");
+    if (!serviceAllowed(fet, fet.expectedUnit(sha), sha)) throw new Error("FET release-pinned allowlist self-test failed");
     const baseConfigEnv = {
         DISDEX_WATCHDOG_HEALTH_ROOT: join(process.cwd(), "self-test-health"),
         DISDEX_WATCHDOG_RELEASE_ROOT: join(process.cwd(), "self-test-releases", sha),
@@ -591,6 +606,7 @@ function selfTest() {
         DISDEX_WATCHDOG_PENGU_SERVICE_UNIT: pengu.expectedUnit(sha),
         DISDEX_WATCHDOG_V52_SERVICE_UNIT: v52.expectedUnit(sha),
         DISDEX_WATCHDOG_Q102_SERVICE_UNIT: q102.expectedUnit(sha),
+        DISDEX_WATCHDOG_FET_SERVICE_UNIT: fet.expectedUnit(sha),
     };
     try {
         buildConfig(baseConfigEnv);

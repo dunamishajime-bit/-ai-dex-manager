@@ -40,16 +40,20 @@ test("legacy active state migrates in memory to one activePositions row", async 
     } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
-test("two distinct positions persist but duplicate, third, or aggregate over-cap fail closed", async () => {
+test("three distinct positions persist but duplicate, fourth, or aggregate over-cap fail closed", async () => {
     const dir = await mkdtemp(join(tmpdir(), "v12-top2-state-"));
     try {
         const path = join(dir, "state.json");
         const store = new FileV12X1AllRunnerStateStore(path, "LIVE");
         const first = active("ETHUSDT", 1);
         const second = active("SOLUSDT", 0.5);
-        await store.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: 1, active: first, activePositions: [first, second] });
-        assert.equal((await store.load()).activePositions?.length, 2);
-        for (const invalid of [[first, first], [first, second, active("LINKUSDT", 0.1)], [first, active("SOLUSDT", 0.51)]]) {
+        const third = { ...active("LINKUSDT", 0.1), entryRank: 3 as const, baseQuantity: 0, baseGross: 0, dynamicQuantity: 1, dynamicGross: 0.1 };
+        await store.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: 1, active: first, activePositions: [first, second, third] });
+        assert.equal((await store.load()).activePositions?.length, 3);
+        const thirdBase = active("LINKUSDT", 0.1);
+        const secondRank3 = { ...active("AAVEUSDT", 0.05), entryRank: 3 as const, baseQuantity: 0, baseGross: 0, dynamicQuantity: 1, dynamicGross: 0.05 };
+        const oversizedRank3 = { ...third, gross: 0.11, dynamicGross: 0.11 };
+        for (const invalid of [[first, first], [first, second, third, active("AAVEUSDT", 0.1)], [first, active("SOLUSDT", 0.51), third], [first, second, thirdBase], [first, third, secondRank3], [first, second, oversizedRank3]]) {
             await writeFile(path, JSON.stringify({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: 1, active: first, activePositions: invalid }));
             await assert.rejects(() => store.load(), /V12_STATE_/);
         }

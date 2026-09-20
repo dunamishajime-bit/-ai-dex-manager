@@ -162,7 +162,7 @@ async function risk(path: string) {
     await writeSharedCryptoDailyRisk(path, buildSharedCryptoDailyRiskState({
         accountScope: "ASTER_FUTURES",
         utcDay: new Date(NOW).toISOString().slice(0, 10),
-        strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"],
+        strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
         lossPct: 0,
         maximumLossPct: 7.5,
         tripped: false,
@@ -181,7 +181,7 @@ async function blockedRisk(path: string) {
     await writeSharedCryptoDailyRisk(path, buildSharedCryptoDailyRiskState({
         accountScope: "ASTER_FUTURES",
         utcDay: new Date(NOW).toISOString().slice(0, 10),
-        strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"],
+        strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
         lossPct: 8,
         maximumLossPct: 7.5,
         tripped: true,

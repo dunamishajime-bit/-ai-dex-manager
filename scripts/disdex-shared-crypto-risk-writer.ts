@@ -12,6 +12,7 @@ function numberEnv(name: string, fallback: number): number {
 
 async function main(): Promise<void> {
     const path = process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || ".runtime-state/shared/crypto-daily-risk.json";
+    const portfolioDdGovernorPath = process.env.DISDEX_PORTFOLIO_DD_GOVERNOR_PATH || ".runtime-state/shared/portfolio-dd-governor.json";
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
         userAddress: process.env.ASTER_USER_ADDRESS,
@@ -35,6 +36,7 @@ async function main(): Promise<void> {
             client,
             path,
             maximumLossPct: resolveSharedCryptoDailyLossPct(process.env.DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT),
+            portfolioDdGovernorPath,
         });
         console.log(JSON.stringify({
             timestamp: new Date().toISOString(),
@@ -47,6 +49,12 @@ async function main(): Promise<void> {
             unrealizedPnl: state.unrealizedPnl,
             fees: state.fees,
             funding: state.funding,
+            portfolioDdGovernor: state.portfolioDdGovernor ? {
+                currentDrawdownPct: state.portfolioDdGovernor.currentDrawdownPct,
+                twrIndex: state.portfolioDdGovernor.twrIndex,
+                twrPeak: state.portfolioDdGovernor.twrPeak,
+                closedEvents: state.portfolioDdGovernor.closedEvents,
+            } : undefined,
         }));
         if (!daemon || stopping) break;
         await delay.wait(intervalMs);

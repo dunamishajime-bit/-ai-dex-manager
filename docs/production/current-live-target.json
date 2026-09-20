@@ -1,0 +1,137 @@
+{
+  "schema": "disdex-current-live-target/v1",
+  "date": "2026-09-20",
+  "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
+  "productionBaseSha": "b6b62bbadf1abe25d8ef31f5f133515b52a0df1c",
+  "strategy": {
+    "v12": {
+      "maximumPositions": 3,
+      "baseMaximumPositions": 2,
+      "rank3GrossCap": 0.10,
+      "rank3MinimumScore": 0.70,
+      "additionalRank3BtcDistanceGate": false,
+      "btcRegimeContract": "PRESERVE_EXISTING_V12_REGIME_AND_ENTRY_QUALITY_LOGIC",
+      "baseAggregateGross": 1.5,
+      "dynamicResidualAggregateGrossCap": 2.0,
+      "perPositionGrossCap": 1.0
+    },
+    "fet": {
+      "strategyId": "FET_BRK48_LONG",
+      "symbol": "FETUSDT",
+      "side": "LONG",
+      "breakoutLookbackHours": 48,
+      "volumeMedianHours": 72,
+      "minimumVolumeRatio": 1.2,
+      "decisionModuloHours": 4,
+      "decisionHourRemainderUtc": 1,
+      "holdHours": 24,
+      "hardStopPct": 0.05,
+      "maximumGross": 1.25,
+      "minimumResidualGross": 0.05,
+      "priority": "LOWER_THAN_CORE"
+    },
+    "q102": {
+      "selector": "CAUSAL_V4",
+      "maximumPositions": 1,
+      "portfolioDdGovernorEntryThresholdPct": 0.30,
+      "boostMaximumGross": 3.0,
+      "baseFamilyGross": {
+        "HIGH_VOL": 1.661,
+        "MR": 1.0,
+        "BRK": 2.465,
+        "REV": 2.5,
+        "PB": 2.5
+      },
+      "failSafe": "STALE_MISSING_MALFORMED_GOVERNOR_USES_BASE_FAMILY_GROSS"
+    },
+    "pengu": {
+      "policy": "PRESERVE_CURRENT_PRODUCTION"
+    },
+    "v52": {
+      "policy": "PRESERVE_CURRENT_PRODUCTION"
+    },
+    "portfolio": {
+      "cryptoGrossCap": 3.0,
+      "totalGrossCap": 3.5,
+      "sharedCryptoDailyLossPct": 7.5,
+      "venueLeverage": 5,
+      "venueMarginMode": "CROSS"
+    }
+  },
+  "formalBacktest": {
+    "sourceArtifact": "docs/research-results/top3-fet-q102gov-integrated-20260920.json",
+    "sourceArtifactSha256": "3E5891E27B76E928BE76405FC6CEDAEA4EB4A42A14E9C2BABECA7E608BC0EA2E",
+    "selectedCase": "top3_q102gov030_fet1.25",
+    "period": {
+      "startInclusive": "2025-08-10T00:00:00.000Z",
+      "endExclusive": "2026-08-10T00:00:00.000Z"
+    },
+    "capital": {
+      "initialJpy": 10000,
+      "monthlyJpy": 10000,
+      "monthlyCount": 12,
+      "compounding": true
+    },
+    "NORMAL": {
+      "endingAssetJpy": 740771278.0140501,
+      "profitFactor": 4.12008119,
+      "maxDrawdownPct": -19.88452049,
+      "trades": 1195,
+      "maxCryptoGross": 3.0,
+      "maxTotalGross": 3.5,
+      "maxFetGross": 1.25,
+      "grossConflicts": 0,
+      "routing": {
+        "V12": 793,
+        "PENGU": 66,
+        "Q102": 71,
+        "FET": 26,
+        "V11_EQ": 50,
+        "V50_POST_OPEN_BASIS": 93
+      }
+    },
+    "SEVERE": {
+      "endingAssetJpy": 65669109.00323203,
+      "profitFactor": 3.05645475,
+      "maxDrawdownPct": -19.99033133,
+      "trades": 1036,
+      "maxCryptoGross": 3.0,
+      "maxTotalGross": 3.0,
+      "maxFetGross": 1.25,
+      "grossConflicts": 0,
+      "routing": {
+        "V12": 793,
+        "PENGU": 66,
+        "Q102": 71,
+        "FET": 29
+      }
+    }
+  },
+  "supersedesForCurrentActivation": [
+    {
+      "name": "V12_DYNAMIC_RESIDUAL_LIVE_CONTRACT_20260919",
+      "researchSha": "27f934424b201e4c63986b9b7db64b89ff69b4bb",
+      "note": "Historical evidence only. Do not use its 270126566/24184641 formal acceptance as the current Production activation target."
+    },
+    {
+      "name": "codex/v12-dynamic-residual-live-20260920-clean",
+      "implementationSha": "f9b0861816b8a70f6158e98f00893457f83e81bb",
+      "note": "Superseded implementation path for current activation."
+    }
+  ],
+  "acceptance": {
+    "requireExactSelectedBacktestParity": true,
+    "maximumDrawdownFloorPct": -20.0,
+    "maximumCryptoGross": 3.0,
+    "maximumTotalGross": 3.5,
+    "maximumGrossConflicts": 0,
+    "requireExistingV12Rank1Rank2Parity": true,
+    "requireFetCorePreemption": true,
+    "requireGovernorFailSafe": true,
+    "requireFiveXCross": true,
+    "requireUnifiedRuntimeSha": true,
+    "requireMigrationAndReconciliation": true,
+    "requireProtectionReadback": true,
+    "requireKillSwitchFalseAtActivation": true
+  }
+}

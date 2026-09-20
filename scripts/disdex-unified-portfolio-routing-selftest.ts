@@ -20,7 +20,10 @@ const top2 = planUnifiedPortfolio([
 assert.deepEqual(top2.accepted.map((item) => item.gross), [1, 0.5]);
 assert.equal(planUnifiedPortfolio([{ sleeve: "V12", symbol: "SOLUSDT", side: "LONG", gross: 1, notionalUsd: 1, signalTs: 1 }], [{ sleeve: "V12", symbol: "ETHUSDT", gross: 0.5 }]).accepted[0].gross, 1);
 assert.equal(planUnifiedPortfolio([
-    { sleeve: "V12", symbol: "SOLUSDT", side: "LONG", gross: 1, notionalUsd: 1, signalTs: 1 },
-    { sleeve: "V12", symbol: "LINKUSDT", side: "LONG", gross: 1, notionalUsd: 1, signalTs: 1 },
-], [{ sleeve: "V12", symbol: "ETHUSDT", gross: 1 }]).rejected[0].reason, "V12_MAX_POSITIONS_REACHED");
+    { sleeve: "V12", symbol: "AVAXUSDT", side: "LONG", gross: 0.1, notionalUsd: 100, signalTs: 1 },
+], [
+    { sleeve: "V12", symbol: "ETHUSDT", gross: 0.4 },
+    { sleeve: "V12", symbol: "SOLUSDT", gross: 0.4 },
+    { sleeve: "V12", symbol: "LINKUSDT", gross: 0.1 },
+]).rejected[0].reason, "V12_MAX_POSITIONS_REACHED");
 console.log("UNIFIED_PORTFOLIO_ROUTING_SELFTEST_PASS");

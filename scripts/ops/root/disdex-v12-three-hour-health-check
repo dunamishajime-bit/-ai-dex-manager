@@ -24,13 +24,14 @@ resolve_units() {
   V12_UNIT="disdex-v12-x1-all@$RELEASE_SHA.service"
   PENGU_UNIT="disdex-pengu-dual-ls-v2@$RELEASE_SHA.service"
   Q102_UNIT="disdex-quality102-causal-v1@$RELEASE_SHA.service"
+  FET_UNIT="disdex-fet-brk48@$RELEASE_SHA.service"
   V52_UNIT="disdex-v52-aster-only@$RELEASE_SHA.service"
   RISK_UNIT="disdex-shared-crypto-risk@$RELEASE_SHA.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@$RELEASE_SHA.service"
 }
 
 required_units() {
-  printf '%s\n' "$RISK_UNIT" "$MARGIN_UNIT" "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$V52_UNIT"
+  printf '%s\n' "$RISK_UNIT" "$MARGIN_UNIT" "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$V52_UNIT"
 }
 
 all_required_active() {
@@ -82,6 +83,7 @@ run_self_test() {
   [[ "$PENGU_UNIT" == "disdex-pengu-dual-ls-v2@$RELEASE_SHA.service" ]]
   [[ "$V52_UNIT" == "disdex-v52-aster-only@$RELEASE_SHA.service" ]]
   [[ "$Q102_UNIT" == "disdex-quality102-causal-v1@$RELEASE_SHA.service" ]]
+  [[ "$FET_UNIT" == "disdex-fet-brk48@$RELEASE_SHA.service" ]]
   printf 'V12 three-hour health-check self-test: PASS\n'
 }
 

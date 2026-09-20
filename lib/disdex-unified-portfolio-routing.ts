@@ -1,4 +1,5 @@
 import { STRICT_BT33404708902 } from "@/config/disdexStrictBt33404708902Runtime";
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import { classifyAsterSymbol, type AsterPortfolioSleeve } from "@/lib/disdex-aster-portfolio-classifier";
 
 export { markToMarketReducePosition, planStrictPortfolio } from "@/lib/disdex-strict-portfolio-planner";
@@ -12,7 +13,7 @@ export const V12_PENGU_V52_PORTFOLIO_POLICY = Object.freeze({
     cryptoGrossCap: STRICT_BT33404708902.cryptoGrossCap,
     stockGrossCap: STRICT_BT33404708902.stockGrossCap,
     totalGrossCap: STRICT_BT33404708902.totalGrossCap,
-    maximumV12Positions: STRICT_BT33404708902.v12LiveMaximumPositions,
+    maximumV12Positions: INTEGRATED_PRODUCTION_RISK_POLICY.v12MaximumPositions,
     preemptions: false,
     forcedRebalance: false,
     topUp: false,

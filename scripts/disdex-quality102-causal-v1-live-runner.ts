@@ -28,6 +28,7 @@ import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-run
 import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
 import { buildQuality102CausalV4DecisionSnapshot } from "../lib/disdex-quality102-causal-v4-observability";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { findManagedV12ProtectiveOrders } from "../lib/disdex-managed-protective-orders";
 
@@ -106,6 +107,7 @@ export interface Quality102CausalV1LiveResolvedConfig {
     statePath: string;
     killSwitchPath: string;
     sharedDailyRiskPath: string;
+    portfolioDdGovernorPath: string;
     accountLockPath: string;
     maximumGross: number;
     cryptoGrossCap: number;
@@ -192,6 +194,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         || env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH
         || resolve(sharedRoot, "crypto-daily-risk.json"),
     );
+    const portfolioDdGovernorPath = resolve(env.DISDEX_PORTFOLIO_DD_GOVERNOR_PATH || resolve(sharedRoot, "portfolio-dd-governor.json"));
     const accountLockPath = resolve(
         env.QUALITY102_CAUSAL_V1_ACCOUNT_LOCK_PATH
         || env.DISDEX_ACCOUNT_LOCK_PATH
@@ -217,6 +220,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         statePath,
         killSwitchPath,
         sharedDailyRiskPath,
+        portfolioDdGovernorPath,
         accountLockPath,
         maximumGross: runtime.maximumGross,
         cryptoGrossCap: runtime.cryptoGrossCap,
@@ -469,6 +473,14 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             maxGross: config.totalGrossCap,
         })
         : aster;
+    const sharedV12Adapter = config.mode === "LIVE"
+        ? new V12AsterLiveAdapter(client, {
+            maxSlippageBps: config.maxSlippageBps,
+            reconciliationAttempts: numberEnv(env, "ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+            reconciliationDelayMs: numberEnv(env, "ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+            readRequestSpacingMs: numberEnv(env, "V12_X1_ALL_REQUEST_SPACING_MS", 100),
+        })
+        : undefined;
     const runner = new Quality102CausalV1Runner({
         marketData: new Quality102CausalV1AsterMarketDataProvider(client, {
             symbols: config.symbols,
@@ -516,6 +528,9 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             maxDataAgeMs: config.maxDataAgeMs,
             killSwitchPath: config.killSwitchPath,
             sharedDailyRiskPath: config.sharedDailyRiskPath,
+            portfolioDdGovernorPath: config.portfolioDdGovernorPath,
+            v12DynamicAdapter: sharedV12Adapter,
+            v12StatePath: env.V12_X1_ALL_STATE_PATH || "/var/lib/disdex/v12-x1-all/runner.json",
             accountScope: "ASTER_FUTURES",
         },
     });

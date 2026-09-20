@@ -11,8 +11,10 @@ import v52V50Runtime from "../config/v52V50Runtime.json";
 
 const v52Source = readFileSync(new URL("../scripts/disdex_v52_aster_only_legacy_engine.py", import.meta.url), "utf8");
 
-test("V12 production signal remains unchanged while Base/Dynamic sizing is explicit", () => {
-  assert.equal(V12_X1_ALL.maximumPositions, 2);
+test("V12 Top3 preserves strong-quality signal while Rank3 residual sizing is explicit", () => {
+  assert.equal(V12_X1_ALL.maximumPositions, 3);
+  assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.10);
+  assert.equal(V12_X1_ALL.rank3MinimumScore, 0.70);
   assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
   assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
   assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
@@ -41,8 +43,10 @@ test("LIVE integrated risk contract uses Q102 family sizing and 3.0/1.98/3.5 sha
     REV: 2.5,
     PB: 2.5,
   });
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 2.5);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 3.0);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102MaximumPositions, 1);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 1.25);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMinimumGross, 0.05);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 1.98);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 1.64);

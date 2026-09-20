@@ -24,6 +24,7 @@ REQUIRED_LEVERAGE = 5
 REQUIRED_MARGIN_TYPE = "cross"
 DEFAULT_V12_STATE_PATH = "/var/lib/disdex/v12-x1-all/runner.json"
 DEFAULT_Q102_STATE_PATH = "/var/lib/disdex/quality102-causal-v1/state.json"
+DEFAULT_FET_STATE_PATH = "/var/lib/disdex/fet-brk48-residual/state.json"
 EMERGENCY_FLATTEN_ATTEMPTS = 3
 EMERGENCY_RECONCILIATION_DELAY_SECONDS = 1.0
 DEFAULT_RECOVERY_GRACE_MS = 10 * 60_000
@@ -108,6 +109,12 @@ def resolve_managed_symbols(
     symbols.update(_state_symbols(
         q102_path,
         "QUALITY102_CAUSAL_V1",
+        ("position", "pending"),
+    ))
+    fet_path = str(environment.get("FET_BRK48_STATE_PATH") or DEFAULT_FET_STATE_PATH)
+    symbols.update(_state_symbols(
+        fet_path,
+        "FET_BRK48_RESIDUAL",
         ("position", "pending"),
     ))
     return tuple(sorted(symbols))

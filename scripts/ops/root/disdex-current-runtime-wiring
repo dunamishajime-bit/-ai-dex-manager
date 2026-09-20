@@ -15,6 +15,7 @@ LIVE_STATE_FILES=(
   "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"
   "/var/lib/disdex/quality102-causal-v1/state.json"
   "/var/lib/disdex/quality102-causal-v1/market-history.json"
+  "/var/lib/disdex/fet-brk48-residual/state.json"
   "/var/lib/disdex/v52-aster-only/runner-live.json"
 )
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
@@ -27,6 +28,7 @@ HISTORY_SYNC_DROPIN_DIR="/etc/systemd/system/aster-trade-history-git-sync.servic
 V12_DROPIN_DIR="/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d"
 PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
+FET_DROPIN_DIR="/etc/systemd/system/disdex-fet-brk48@CURRENT.service.d"
 MARGIN_DROPIN_DIR="/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d"
 V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
 SHARED_RISK_DROPIN_DIR="/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.service.d"
@@ -85,6 +87,8 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-pengu-dual-ls-v2-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-pengu-presubmit-snapshot-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts"
+    "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
     "$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"
@@ -152,12 +156,14 @@ set_units() {
   V12_UNIT="disdex-v12-x1-all@${DEPLOYED_SHA}.service"
   PENGU_UNIT="disdex-pengu-dual-ls-v2@${DEPLOYED_SHA}.service"
   Q102_UNIT="disdex-quality102-causal-v1@${DEPLOYED_SHA}.service"
+  FET_UNIT="disdex-fet-brk48@${DEPLOYED_SHA}.service"
   V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
   SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"
   V12_DROPIN_DIR="/etc/systemd/system/${V12_UNIT}.d"
   PENGU_DROPIN_DIR="/etc/systemd/system/${PENGU_UNIT}.d"
   Q102_DROPIN_DIR="/etc/systemd/system/${Q102_UNIT}.d"
+  FET_DROPIN_DIR="/etc/systemd/system/${FET_UNIT}.d"
   MARGIN_DROPIN_DIR="/etc/systemd/system/${MARGIN_UNIT}.d"
   V52_DROPIN_DIR="/etc/systemd/system/${V52_UNIT}.d"
   SHARED_RISK_DROPIN_DIR="/etc/systemd/system/${SHARED_RISK_UNIT}.d"
@@ -174,6 +180,7 @@ show_plan() {
   printf 'v12Unit=%s\n' "$V12_UNIT"
   printf 'penguUnit=%s\n' "$PENGU_UNIT"
   printf 'q102Unit=%s\n' "$Q102_UNIT"
+  printf 'fetUnit=%s\n' "$FET_UNIT"
   printf 'v52Unit=%s\n' "$V52_UNIT"
   printf 'marginUnit=%s\n' "$MARGIN_UNIT"
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
@@ -186,13 +193,14 @@ show_plan() {
   printf 'v12Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$V12_DROPIN_DIR"
   printf 'penguDropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$PENGU_DROPIN_DIR"
   printf 'q102Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$Q102_DROPIN_DIR"
+  printf 'fetDropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$FET_DROPIN_DIR"
   printf 'marginDropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$MARGIN_DROPIN_DIR"
   printf 'v52Dropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$V52_DROPIN_DIR"
 }
 
 check_units() {
   local unit state load_state
-  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT"; do
+  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT"; do
     load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
     state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     printf 'unit=%s loadState=%s activeState=%s\n' "$unit" "${load_state:-unknown}" "${state:-unknown}"
@@ -297,8 +305,14 @@ ensure_monitor_timer_active() {
   printf 'DISDEX_MONITOR_TIMER_ACTIVE unit=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
 }
 
+assert_current_live_target_ready() {
+  local tsx="$CURRENT_RELEASE/node_modules/.bin/tsx"
+  "$tsx" "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts" --require-ready
+}
+
 apply_wiring() {
   require_root_for_apply
+  assert_current_live_target_ready
   install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
     printf 'V52 legacy crypto state path exists but is not a directory: %s\n' "$V52_LEGACY_CRYPTO_ROOT" >&2
@@ -341,6 +355,7 @@ V12_GROSS_CAP=2.0
 PENGU_GROSS_CAP=0.85
 PENGU_DUAL_LS_V2_MAX_GROSS=0.85
 DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
+DISDEX_PORTFOLIO_DD_GOVERNOR_PATH=/var/lib/disdex/shared/portfolio-dd-governor.json
 DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS=600000
 PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5
 QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7.5
@@ -357,10 +372,14 @@ QUALITY102_CAUSAL_V1_ENABLED=true
 QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=true
 QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=true
 QUALITY102_CAUSAL_V1_OPERATOR_ARMED=true
-QUALITY102_CAUSAL_V1_MAX_GROSS=2.5
+QUALITY102_CAUSAL_V1_MAX_GROSS=3.0
 QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
 QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
+FET_BRK48_LIVE_ENABLED=true
+FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+FET_BRK48_MAX_GROSS=1.25
+FET_BRK48_CORE_PREEMPTION_READY=false
 DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
 QUALITY102_LIVE_SELECTOR_PARITY=false
@@ -388,12 +407,15 @@ DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=${SHARED_ROOT}/kill-switch.json
 DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
 DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
+DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
 DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json
 DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
 DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json
@@ -412,6 +434,8 @@ DISDEX_WATCHDOG_V52_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_V52_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_FET_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_FET_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
@@ -420,7 +444,8 @@ DISDEX_WATCHDOG_LOCK_PATH=/var/lib/disdex/runner-health/private/watchdog-current
 DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
 DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
 DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
-DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}"
+DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}
+DISDEX_WATCHDOG_FET_SERVICE_UNIT=${FET_UNIT}"
 
   # EnvironmentFile entries from the base monitor units are historical and
   # must be cleared; otherwise systemd loads them after Environment= values
@@ -529,7 +554,7 @@ EnvironmentFile=${CONTRACT_ENV_FILE}
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
 Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
-Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=2.5
+Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=3.0
 Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
 Environment=QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
 Environment=QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
@@ -539,6 +564,19 @@ Environment=QUALITY102_LIVE_BLOCKED_FAIL_CLOSED=true
 Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
 Environment=CRYPTO_GROSS_CAP=3.0
 Environment=TOTAL_GROSS_CAP=3.5"
+
+  write_atomic "${FET_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json ]; then chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json && chmod 600 /var/lib/disdex/fet-brk48-residual/state.json; fi'
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=FET_BRK48_LIVE_ENABLED=true
+Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+Environment=FET_BRK48_MAX_GROSS=1.25
+Environment=CRYPTO_GROSS_CAP=3.0
+Environment=TOTAL_GROSS_CAP=3.5
+ReadWritePaths=/var/lib/disdex/fet-brk48-residual /var/lib/disdex/shared"
 
   write_atomic "${SHARED_RISK_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
@@ -604,6 +642,7 @@ self_test() {
   [[ "$sample_sha" =~ ^[0-9a-f]{40}$ ]]
   [[ "disdex-v12-x1-all@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "disdex-quality102-causal-v1@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-fet-brk48@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "scripts/disdex_v96_v52_margin_guard_runtime.py" == scripts/* ]]
   [[ "scripts/disdex_v52_aster_only_live_engine.py" == scripts/* ]]
   SELF_TEST_FIXTURE="$(mktemp -d)"
@@ -614,6 +653,8 @@ self_test() {
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
     scripts/disdex-quality102-causal-v1-live-runner.ts \
+    scripts/disdex-current-live-target-readiness.ts \
+    scripts/disdex-fet-brk48-live-runner.ts \
     scripts/disdex-pengu-presubmit-snapshot-recovery.ts \
     scripts/disdex_v96_v52_margin_guard_runtime.py \
     scripts/disdex_v52_aster_only_live_engine.py \

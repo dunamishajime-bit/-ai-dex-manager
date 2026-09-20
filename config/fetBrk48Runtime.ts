@@ -1,0 +1,17 @@
+export const FET_BRK48_RESIDUAL = Object.freeze({
+  strategyId: "FET_BRK48_RESIDUAL",
+  symbol: "FETUSDT",
+  side: "LONG" as const,
+  lookbackHours: 48,
+  volumeMedianHours: 72,
+  minimumVolumeRatio: 1.2,
+  holdHours: 24,
+  hardStopPct: 0.05,
+  maximumGross: 1.25,
+  minimumResidualGross: 0.05,
+  decisionEntryHourModulo: 4,
+  decisionEntryHourRemainder: 1,
+  liveEntryWindowMs: 5 * 60_000,
+  requiredLeverage: 5,
+  requiredMarginType: "cross" as const,
+});

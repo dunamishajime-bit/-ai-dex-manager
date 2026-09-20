@@ -112,3 +112,39 @@ export function findManagedV12ProtectiveOrders(
     }
     return openOrders.filter((order) => managed.has(order));
 }
+
+type FetProtectionCandidate = {
+    order: DirectOpenOrder;
+    position: DirectPosition;
+    remainingQuantity: number;
+};
+
+function fetProtectionCandidate(
+    order: DirectOpenOrder,
+    positions: readonly DirectPosition[],
+): FetProtectionCandidate | undefined {
+    const symbol = String(order.symbol || "").trim().toUpperCase();
+    const clientOrderId = String(order.clientOrderId || "");
+    if (symbol !== "FETUSDT" || !/^fet-stop-[0-9a-f]{16,36}$/i.test(clientOrderId)) return undefined;
+    if (order.reduceOnly !== true || !["NEW", "PARTIALLY_FILLED"].includes(String(order.status || "").toUpperCase())) return undefined;
+    if (String(order.type || "").toUpperCase() !== "STOP_MARKET") return undefined;
+    if (!Number.isFinite(order.quantity) || order.quantity <= 0) return undefined;
+    if (!Number.isFinite(order.executedQuantity) || order.executedQuantity < 0 || order.executedQuantity > order.quantity) return undefined;
+    const position = positions.find((row) => row.symbol.toUpperCase() === symbol && Math.abs(row.quantity) > MIN_REMAINING_QUANTITY);
+    if (!position || position.quantity <= 0 || order.side !== "SELL") return undefined;
+    const remainingQuantity = order.quantity - order.executedQuantity;
+    const tolerance = Math.max(1e-8, Math.abs(position.quantity) * PROTECTION_TOLERANCE_PCT);
+    if (remainingQuantity <= MIN_REMAINING_QUANTITY || Math.abs(remainingQuantity - Math.abs(position.quantity)) > tolerance) return undefined;
+    return { order, position, remainingQuantity };
+}
+
+export function findManagedFetBrk48ProtectiveOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): DirectOpenOrder[] {
+    const candidates = openOrders
+        .map((order) => fetProtectionCandidate(order, positions))
+        .filter((entry): entry is FetProtectionCandidate => Boolean(entry));
+    if (candidates.length !== 1) return [];
+    return [candidates[0].order];
+}
