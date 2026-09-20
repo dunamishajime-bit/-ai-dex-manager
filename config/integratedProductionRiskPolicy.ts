@@ -1,7 +1,7 @@
 import v52V50Runtime from "./v52V50Runtime.json";
 
 export const Q102_CAUSAL_V4_FAMILY_GROSS = Object.freeze({
-  HIGH_VOL: 1.661,
+  HIGH_VOL: 1.665,
   MR: 1.0,
   BRK: 2.465,
   REV: 2.5,

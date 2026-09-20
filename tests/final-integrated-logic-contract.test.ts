@@ -35,7 +35,7 @@ test("PENGU allocation is the formal 0.85x production contract", () => {
 
 test("LIVE integrated risk contract uses Q102 family sizing and 3.0/1.98/3.5 shared caps", () => {
   assert.deepEqual(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross, {
-    HIGH_VOL: 1.661,
+    HIGH_VOL: 1.665,
     MR: 1,
     BRK: 2.465,
     REV: 2.5,

@@ -30,6 +30,7 @@ import { buildQuality102CausalV4DecisionSnapshot } from "../lib/disdex-quality10
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { findManagedV12ProtectiveOrders } from "../lib/disdex-managed-protective-orders";
+import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEFAULT_STATE_ROOT = "/var/lib/disdex/quality102-causal-v1";
@@ -517,6 +518,12 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             killSwitchPath: config.killSwitchPath,
             sharedDailyRiskPath: config.sharedDailyRiskPath,
             accountScope: "ASTER_FUTURES",
+            v12DynamicAdapter: new V12AsterLiveAdapter(client, {
+                maxSlippageBps: config.maxSlippageBps,
+                reconciliationAttempts: numberEnv(env, "ASTER_ORDER_RECONCILE_ATTEMPTS", 6),
+                reconciliationDelayMs: numberEnv(env, "ASTER_ORDER_RECONCILE_DELAY_MS", 1500),
+            }),
+            v12StatePath: String(env.V12_X1_ALL_STATE_PATH || "/var/lib/disdex/v12-x1-all/runner.json").trim(),
         },
     });
     return { config, runner };

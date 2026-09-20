@@ -70,7 +70,8 @@ const overCrypto = planStrictPortfolio({
     active: [
         position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
         position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
-        position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 51, entryPrice: 1, markPrice: 10 }),
+        position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 1, markPrice: 10 }),
+        position({ id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 66, entryPrice: 1, markPrice: 10 }),
     ],
     intents: [],
 });
@@ -87,7 +88,7 @@ const at249 = planStrictPortfolio({
     intents: [],
 });
 assert.equal(at249.status, "planned");
-assert.ok(at249.totals.totalGross < 2.5);
+assert.ok(at249.totals.totalGross < 3.5);
 
 const at250 = planStrictPortfolio({
     equity: 1000,
@@ -105,7 +106,8 @@ const overTotal = planStrictPortfolio({
     equity: 1000,
     now: NOW,
     active: [
-        position({ id: "v12", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
         position({ id: "stock", strategy: "V52", symbol: "NVDAUSDT", quantity: 151, entryPrice: 1, markPrice: 10 }),
     ],
     intents: [],
@@ -116,7 +118,7 @@ assert.match(overTotal.reason || "", /TOTAL_GROSS/);
 const overQualityCap = planStrictPortfolio({
     equity: 1000,
     now: NOW,
-    active: [position({ id: "q102-over", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 51, entryPrice: 1, markPrice: 10 })],
+    active: [position({ id: "q102-over", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 151, entryPrice: 1, markPrice: 10 })],
     intents: [],
 });
 assert.equal(overQualityCap.status, "blocked");
@@ -153,9 +155,10 @@ assert.ok(Math.abs(losingReduction.realizedPnl + 40) < 1e-9);
 assert.notEqual(losingReduction.realizedPnl, 0);
 
 const qualityActive = [
-    position({ id: "v12", strategy: "V12", symbol: "ETHUSDT", quantity: 75, entryPrice: 1, markPrice: 10 }),
-    position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 75, entryPrice: 1, markPrice: 10 }),
-    position({ id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 50, entryPrice: 8, markPrice: 10 }),
+    position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+    position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
+    position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 1, markPrice: 10 }),
+    position({ id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 65, entryPrice: 8, markPrice: 10 }),
 ];
 const residual = planStrictPortfolio({
     equity: 1000,
@@ -169,8 +172,8 @@ assert.equal(residual.accepted.length, 1);
 assert.equal(residual.accepted[0].strategy, "V52");
 assert.equal(residual.reductions.length, 1);
 assert.equal(residual.reductions[0].strategy, "QUALITY102");
-assert.ok(residual.totals.cryptoGross <= 2 + 1e-9);
-assert.ok(residual.totals.totalGross <= 2.5 + 1e-9);
+assert.ok(residual.totals.cryptoGross <= 3 + 1e-9);
+assert.ok(residual.totals.totalGross <= 3.5 + 1e-9);
 
 const qualityIntent = planStrictPortfolio({
     equity: 1000,

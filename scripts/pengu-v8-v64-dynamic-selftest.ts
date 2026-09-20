@@ -17,7 +17,7 @@ assert.equal(isPenguV8V64DynamicLongRaw(f), true);
 assert.equal(isPenguV8V64DynamicLongRaw({ ...f, close: 100.5 }), false);
 assert.equal(isPenguV8V64DynamicLongRaw({ ...f, penguReturn24h: 0.05 }), false);
 
-// Historical raw request was side-aware: up to 0.9375x; V64 low-risk branch is 0.1875x.
-assert.equal(penguV8V64RequestedLongGross({ ...f, atr24Ratio: 0.01, penguReturn72h: 0.10 }), 0.9375);
+// The raw request is preserved for planner clamping; production PENGU remains capped at 0.85x.
+assert.equal(penguV8V64RequestedLongGross({ ...f, atr24Ratio: 0.01, penguReturn72h: 0.10 }), 1.0625);
 assert.equal(penguV8V64RequestedLongGross({ ...f, atr24Ratio: 0.01, penguReturn72h: 0.13 }), 0.1875);
 console.log("PENGU_V8_V64_DYNAMIC_SELFTEST_PASS");

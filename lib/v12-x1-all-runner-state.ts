@@ -54,6 +54,14 @@ export interface V12X1AllRunnerState {
     strategyId: "V12_X1.00_ALL";
     mode: "SHADOW" | "PAPER" | "LIVE";
     updatedAt: number;
+    /** Runtime lineage and Dynamic trim observability persisted with the state. */
+    runtimeCommitSha?: string;
+    reconciliationStatus?: "PASS" | "MANUAL_REVIEW" | "UNKNOWN";
+    latestTrimOrderId?: string;
+    lastTrimReason?: string;
+    lastTrimAt?: number;
+    lastTrimQuantity?: number;
+    trimCount?: number;
     lastReferenceTs?: number;
     /** Latest completed bar whose entry opportunity was deferred only because shared risk was temporarily unavailable. */
     deferredEntryReferenceTs?: number;
@@ -164,7 +172,21 @@ export class FileV12X1AllRunnerStateStore {
     async save(state: V12X1AllRunnerState) {
         await mkdir(dirname(this.path), { recursive: true });
         const temp = `${this.path}.${process.pid}.${Date.now()}.tmp`;
-        await writeFile(temp, `${JSON.stringify({ ...state, schema: "v12-x1-all-runner-state/v2", strategyId: "V12_X1.00_ALL", mode: this.mode, updatedAt: Date.now() }, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        const runtimeCommitSha = String(
+            state.runtimeCommitSha
+                || process.env.DISDEX_RELEASE_SHA
+                || process.env.V12_LIVE_COMMIT_SHA
+                || "",
+        ).trim();
+        const persisted = {
+            ...state,
+            ...(runtimeCommitSha ? { runtimeCommitSha } : {}),
+            schema: "v12-x1-all-runner-state/v2" as const,
+            strategyId: "V12_X1.00_ALL" as const,
+            mode: this.mode,
+            updatedAt: Date.now(),
+        };
+        await writeFile(temp, `${JSON.stringify(persisted, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
         await rename(temp, this.path);
     }
 

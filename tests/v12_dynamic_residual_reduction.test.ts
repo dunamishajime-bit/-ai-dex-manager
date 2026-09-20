@@ -152,6 +152,10 @@ test("dynamic trim preserves Base and resizes protection to venue quantity", asy
         assert.ok(Math.abs(active.dynamicGross - 0.2) < 1e-9);
         assert.ok(Math.abs(active.protection.quantity - 0.8) < 1e-9);
         assert.equal(after.pending, undefined);
+        assert.ok(after.latestTrimOrderId);
+        assert.equal(after.lastTrimReason, "test-core-entry");
+        assert.equal(after.trimCount, 1);
+        assert.equal(after.reconciliationStatus, "PASS");
         assert.equal(orders.some((order) => order.clientOrderId === "old-stop"), false);
         assert.equal(orders.some((order) => order.clientOrderId === "old-tp"), false);
         assert.equal(orders.filter((order) => order.type === "STOP_MARKET").length, 1);

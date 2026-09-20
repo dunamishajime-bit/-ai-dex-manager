@@ -34,6 +34,9 @@ import {
 } from "@/lib/disdex-shared-crypto-daily-risk";
 import { isAsterDepositRequirementError } from "@/lib/aster-v3-client";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
+import { findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
+import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import type {
     DirectAccountSnapshot,
     DirectMarketQuote,
@@ -94,6 +97,12 @@ export interface Quality102CausalV1RunnerConfig {
     killSwitchPath?: string;
     sharedDailyRiskPath?: string;
     accountScope?: string;
+    /**
+     * Optional shared V12 adapter/state path. When present, Q102 may reclaim
+     * only lower-priority V12 Dynamic residual capacity before a Core entry.
+     */
+    v12DynamicAdapter?: V12AsterLiveAdapter;
+    v12StatePath?: string;
 }
 
 export interface Quality102CausalV1Logger {
@@ -218,6 +227,43 @@ function isKnownBasePosition(symbol: string): boolean {
 function isKnownBaseOrder(order: DirectOpenOrder): boolean {
     if (isKnownBasePosition(order.symbol)) return true;
     return /^(v12-|dualls2-|v52-|v96-|win80-|ultra90-)/i.test(String(order.clientOrderId || ""));
+}
+
+function managedProtectiveOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): DirectOpenOrder[] {
+    const managed = new Set<DirectOpenOrder>([
+        ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
+        ...findManagedV12ProtectiveOrders(openOrders, positions),
+    ]);
+    return openOrders.filter((order) => managed.has(order));
+}
+
+function grossForPosition(position: DirectPosition, equity: number): number {
+    const notional = Number(position.notionalUsd);
+    return equity > 0 && Number.isFinite(notional) && notional > 0 ? notional / equity : 0;
+}
+
+function requiredDynamicTrimGross(
+    positions: readonly DirectPosition[],
+    equity: number,
+    requestedGross: number,
+    cryptoCap: number,
+    totalCap: number,
+): number {
+    const cryptoGross = positions.filter(nonZero).reduce((sum, position) => {
+        const classification = classifyAsterSymbol(position.symbol);
+        return classification.assetClass === "CRYPTO"
+            ? sum + grossForPosition(position, equity)
+            : sum;
+    }, 0);
+    const totalGross = positions.filter(nonZero).reduce((sum, position) => sum + grossForPosition(position, equity), 0);
+    return Math.max(
+        0,
+        cryptoGross + Math.max(0, requestedGross) - cryptoCap,
+        totalGross + Math.max(0, requestedGross) - totalCap,
+    );
 }
 
 function validQuote(quote: DirectMarketQuote, expectedSymbol: string, now: number, maxAgeMs: number): boolean {
@@ -408,6 +454,36 @@ export class Quality102CausalV1Runner {
         if (!/^[0-9a-f]{40}$/i.test(config.runtimeCommitSha) || config.runtimeCommitSha.toLowerCase() !== config.expectedRuntimeCommitSha.toLowerCase()) {
             throw new Error("QUALITY102_CAUSAL_V1_RUNTIME_SHA_MISMATCH");
         }
+    }
+
+    private async trimDynamicForCoreEntry(
+        positions: readonly DirectPosition[],
+        equity: number,
+        requestedGross: number,
+        causeIdempotencyKey: string,
+    ): Promise<boolean> {
+        const adapter = this.dependencies.config.v12DynamicAdapter;
+        const statePath = String(this.dependencies.config.v12StatePath || "").trim();
+        if (!adapter || !statePath) return false;
+        const requiredGross = requiredDynamicTrimGross(
+            positions,
+            equity,
+            requestedGross,
+            this.dependencies.config.cryptoGrossCap,
+            this.dependencies.config.totalGrossCap,
+        );
+        if (!(requiredGross > EPSILON)) return false;
+        const trim = await reduceV12DynamicResidualForCoreConflict({
+            adapter,
+            requiredGross,
+            equity,
+            causeIdempotencyKey,
+            statePath,
+            maxDataAgeMs: this.dependencies.config.maxDataAgeMs,
+            now: this.now,
+        });
+        if (trim.status === "blocked") throw new Error("QUALITY102_V12_DYNAMIC_REDUCTION_BLOCKED:" + trim.message);
+        return trim.status === "reduced" && trim.trimmedGross > EPSILON;
     }
 
     private async sharedRiskStatus(): Promise<{ reason: string; flattenExisting: boolean } | undefined> {
@@ -616,7 +692,7 @@ export class Quality102CausalV1Runner {
 
     private async validateLiveAccount(
         state: Quality102CausalV1State,
-    ): Promise<{ account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[]; equity: number; actualQ102?: DirectPosition }> {
+    ): Promise<{ account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[]; unmanagedOpenOrders: DirectOpenOrder[]; equity: number; actualQ102?: DirectPosition }> {
         const [account, positions, openOrders] = await Promise.all([
             this.dependencies.executor.getAccountSnapshot(),
             this.dependencies.executor.getPositions(),
@@ -645,7 +721,9 @@ export class Quality102CausalV1Runner {
             if (pendingOwnsOrder) throw new Error(`Q102_PENDING_OPEN_ORDER_REQUIRES_RECONCILIATION:${order.clientOrderId}`);
             if (!isKnownBaseOrder(order)) throw new Error(`UNKNOWN_OPEN_ORDER_OWNERSHIP:${order.clientOrderId || order.symbol}`);
         }
-        return { account, positions, openOrders, equity: accountEquity(account, positions), actualQ102 };
+        const managed = new Set(managedProtectiveOrders(openOrders, positions));
+        const unmanagedOpenOrders = openOrders.filter((order) => !managed.has(order));
+        return { account, positions, openOrders, unmanagedOpenOrders, equity: accountEquity(account, positions), actualQ102 };
     }
 
     private validatePendingIdentity(state: Quality102CausalV1State, pending: Quality102CausalV1PendingOrder): void {
@@ -667,7 +745,8 @@ export class Quality102CausalV1Runner {
     private async validatePendingExecutionWindow(
         state: Quality102CausalV1State,
         pending: Quality102CausalV1PendingOrder,
-    ): Promise<{ account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[]; equity: number; quote: DirectMarketQuote; expectedPrice: number }> {
+        allowDynamicTrim = true,
+    ): Promise<{ account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[]; unmanagedOpenOrders: DirectOpenOrder[]; equity: number; quote: DirectMarketQuote; expectedPrice: number }> {
         this.validatePendingIdentity(state, pending);
         const live = await this.validateLiveAccount(state);
         const now = this.now();
@@ -676,8 +755,8 @@ export class Quality102CausalV1Runner {
         const expectedPrice = pending.side === "BUY" ? quote.askPrice : quote.bidPrice;
         if (!Number.isFinite(expectedPrice) || expectedPrice <= 0) throw new Error("Q102_PENDING_EXECUTION_PRICE_INVALID");
         if (!pending.reduceOnly) {
-            if (live.openOrders.length > 0) throw new Error("Q102_BASE_OR_OTHER_OPEN_ORDER_CONFLICT");
-            if (live.positions.some(nonZero)) throw new Error("QUALITY102_CAUSAL_V4_BASE_NOT_IDLE");
+            if (live.unmanagedOpenOrders.length > 0) throw new Error("Q102_BASE_OR_OTHER_OPEN_ORDER_CONFLICT");
+            const targetGross = positive(pending.targetGross, "Q102 pending targetGross");
             const planner = planStrictPortfolio({
                 equity: live.equity,
                 now,
@@ -687,7 +766,7 @@ export class Quality102CausalV1Runner {
                     strategy: STRATEGY_ID,
                     symbol: pending.symbol,
                     side: pending.side === "BUY" ? "LONG" : "SHORT",
-                    gross: positive(pending.targetGross, "Q102 pending targetGross"),
+                    gross: targetGross,
                     notionalUsd: positive(pending.quantity * expectedPrice, "Q102 pending notional"),
                     signalTs: pending.referenceTs,
                 }],
@@ -695,7 +774,14 @@ export class Quality102CausalV1Runner {
                 quality102CausalV1Ready: true,
             });
             const accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
-            if (planner.status !== "planned" || !accepted || accepted.gross + EPSILON < positive(pending.targetGross, "Q102 pending targetGross")) {
+            const capacityShortfall = planner.status !== "planned"
+                || !accepted
+                || accepted.gross + EPSILON < targetGross;
+            if (capacityShortfall && allowDynamicTrim
+                && await this.trimDynamicForCoreEntry(live.positions, live.equity, targetGross, pending.idempotencyKey)) {
+                return this.validatePendingExecutionWindow(state, pending, false);
+            }
+            if (planner.status !== "planned" || !accepted || accepted.gross + EPSILON < targetGross) {
                 throw new Error(`Q102_PENDING_CAPACITY_CHANGED:${planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason || "NO_ACCEPTED_INTENT"}`);
             }
             if (pending.quantity * expectedPrice / live.equity > accepted.gross + EPSILON) throw new Error("Q102_PENDING_NOTIONAL_OVER_CAPACITY");
@@ -875,6 +961,7 @@ export class Quality102CausalV1Runner {
         account: DirectAccountSnapshot,
         positions: DirectPosition[],
         quote: DirectMarketQuote,
+        allowDynamicTrim = true,
     ): Promise<Quality102CausalV1TickResult> {
         if (signal.side === 0 || !signal.symbol || signal.requestedGross <= 0) {
             state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
@@ -883,7 +970,10 @@ export class Quality102CausalV1Runner {
         }
         const symbol = signal.symbol.toUpperCase();
         if (!this.symbolSet.has(symbol)) return { status: "blocked-local", message: "Q102 signal symbol is outside configured causal universe.", signal, ordersSent: 0 };
-        if (positions.some(nonZero)) return { status: "held", message: "QUALITY102_CAUSAL_V4_BASE_NOT_IDLE", signal, ordersSent: 0 };
+        if (positions.some((position) => nonZero(position) && position.symbol.toUpperCase() === symbol)) {
+            return this.manualReview(state, "Q102 exchange position exists without matching Q102 state; entry blocked.", undefined);
+        }
+        if (activePositionOrUndefined(state, positions)) return { status: "held", message: "QUALITY102_CAUSAL_V4_POSITION_HELD", signal, ordersSent: 0 };
         const localNow = this.now();
         if (!validQuote(quote, symbol, localNow, this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 entry quote is stale or invalid.", signal, ordersSent: 0 };
         if (!Number.isFinite(signal.referenceTs) || signal.referenceTs <= 0 || signal.referenceTs > localNow || localNow - signal.referenceTs > this.dependencies.config.maximumEntryDelayMs) {
@@ -899,23 +989,41 @@ export class Quality102CausalV1Runner {
             return { status: "held", message: "Q102 executable notional is below minimum.", signal, ordersSent: 0 };
         }
         const entrySide = signal.side > 0 ? "LONG" : "SHORT";
+        const targetGross = Math.min(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross);
         const planner: StrictPortfolioPlan = planStrictPortfolio({
             equity,
             now: quote.updatedAt,
-            active: positions.filter(nonZero).map(strictBasePosition),
+            active: positions.filter(nonZero).map((position) => strictBasePosition(position, quote.updatedAt)),
             intents: [{
                 idempotencyKey: `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}`,
                 strategy: STRATEGY_ID,
                 symbol,
                 side: entrySide,
-                gross: Math.min(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross),
+                gross: targetGross,
                 notionalUsd: requestedNotional,
                 signalTs: signal.referenceTs,
             }],
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
             quality102CausalV1Ready: true,
         });
-        const accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
+        let accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
+        const capacityShortfall = planner.status !== "planned"
+            || !accepted
+            || accepted.gross + EPSILON < targetGross;
+        if (capacityShortfall && allowDynamicTrim
+            && await this.trimDynamicForCoreEntry(
+                positions,
+                equity,
+                targetGross,
+                `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`,
+            )) {
+            const [freshAccount, freshPositions] = await Promise.all([
+                this.dependencies.executor.getAccountSnapshot(),
+                this.dependencies.executor.getPositions(),
+            ]);
+            const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false);
+        }
         if (planner.status !== "planned" || !accepted) {
             state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
             await this.dependencies.stateStore.save(state);
@@ -1096,8 +1204,8 @@ export class Quality102CausalV1Runner {
                 await this.dependencies.stateStore.save(state);
                 return { status: "no-change", message: signal.reason, signal, ordersSent: 0 };
             }
-            if (live.openOrders.length > 0) {
-                return { status: "blocked-local", message: "Q102 entry waits for the shared account to have no open orders; base orders remain untouched.", signal, ordersSent: 0 };
+            if (live.unmanagedOpenOrders.length > 0) {
+                return { status: "blocked-local", message: "Q102 entry waits for unmanaged open orders to clear; managed protective orders remain untouched.", signal, ordersSent: 0 };
             }
             const quote = await this.dependencies.executor.getMarketQuote(signal.symbol);
             const planned = await this.planEntry(state, signal, live.account, live.positions, quote);

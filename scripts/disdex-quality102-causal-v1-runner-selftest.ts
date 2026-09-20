@@ -162,6 +162,16 @@ async function run(): Promise<void> {
         /existing protected Q102 position is retained during recovery grace/,
         "Q102 HOLD_PROTECTED must preserve existing protected positions while blocking new exposure",
     );
+    assert.match(
+        runnerSource,
+        /reduceV12DynamicResidualForCoreConflict/,
+        "Q102 Core entry must be able to reclaim lower-priority V12 Dynamic residual capacity",
+    );
+    assert.match(
+        runnerSource,
+        /unmanagedOpenOrders/,
+        "Q102 entry must distinguish managed protective orders from conflicting orders",
+    );
     {
         const fake = new FakeExecutor();
         assert.doesNotThrow(() => deps(fake, state(), { symbols: ["AVAXUSDT"] }, () => signal({ symbol: "AVAXUSDT" })));
@@ -252,6 +262,30 @@ async function run(): Promise<void> {
         assert.equal(saved.position?.symbol, "FETUSDT");
         assert.equal(saved.position?.hardStop, 0.1);
         assert.equal(saved.position?.trailActive, false);
+    }
+
+    {
+        const fake = new FakeExecutor();
+        fake.positions = [{
+            symbol: "PENGUUSDT",
+            quantity: 1,
+            entryPrice: 100,
+            markPrice: 100,
+            unrealizedPnl: 0,
+            pnlPct: 0,
+            notionalUsd: 100,
+            positionSide: "BOTH",
+            leverage: 5,
+            updatedAt: NOW - 1000,
+        }];
+        fake.openOrders = [
+            { symbol: "PENGUUSDT", clientOrderId: "recv8-aaaaaaaaaaaaaaaa", side: "SELL", status: "NEW", type: "STOP_MARKET", reduceOnly: true, quantity: 0.5, executedQuantity: 0 },
+            { symbol: "PENGUUSDT", clientOrderId: "recv8-bbbbbbbbbbbbbbbb", side: "SELL", status: "NEW", type: "STOP_MARKET", reduceOnly: true, quantity: 0.5, executedQuantity: 0 },
+        ];
+        const built = deps(fake, state());
+        const result = await built.runner.tick();
+        assert.equal(result.status, "completed");
+        assert.equal(fake.calls.execute, 1);
     }
 
     {
