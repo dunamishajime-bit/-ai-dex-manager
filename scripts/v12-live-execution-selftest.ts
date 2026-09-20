@@ -91,6 +91,7 @@ type FakeAdapter = V12AsterLiveAdapter & {
     tpPlacements: number;
     reconcileResult?: DirectTradeResult;
     pendingObservedBeforeSend: boolean;
+    entryError?: Error;
     stateStore?: FileV12X1AllRunnerStateStore;
 };
 
@@ -105,6 +106,16 @@ function fakeAdapter(): FakeAdapter {
         pendingObservedBeforeSend: false,
         executor: {
             getMarketQuote: async (symbol: string) => ({ symbol, bidPrice: 99.9, askPrice: 100.1, bidQuantity: 100, askQuantity: 100, midPrice: 100, spreadBps: 20, updatedAt: NOW }),
+            normalizeMarketQuantity: async (symbol: string, quantity: number, referencePrice: number) => ({
+                symbol,
+                quantity,
+                quantityText: String(quantity),
+                minQuantity: 0.001,
+                maxQuantity: 1_000_000,
+                stepSize: 0.001,
+                minNotional: 5,
+                notional: quantity * referencePrice,
+            }),
         },
         credentialsReady: async () => true,
         getAccountSnapshot: async () => ({ availableBalance: 1000, walletBalance: 1000, asset: "USDT", updatedAt: NOW }),
@@ -146,6 +157,7 @@ function fakeAdapter(): FakeAdapter {
                 const disk = await fake.stateStore.load();
                 fake.pendingObservedBeforeSend = disk.pending?.clientOrderId === input.clientOrderId;
             }
+            if (fake.entryError) throw fake.entryError;
             fake.positions = [...fake.positions, position(input.symbol, input.side === "LONG" ? input.quantity : -input.quantity, input.expectedPrice)];
             return tradeResult({ clientOrderId: input.clientOrderId, symbol: input.symbol, executedQuantity: input.quantity, price: input.expectedPrice });
         },
@@ -229,6 +241,51 @@ async function main() {
         assert.equal(normal.state.pending, undefined);
         assert.ok(normal.state.active?.protection.stopClientOrderId);
         assert.ok(normal.state.active?.protection.takeProfitClientOrderId);
+
+        // Venue minimums are a benign capacity gate. They are detected before
+        // pending state/order submission and must never trip the local kill switch.
+        const minQty = await makeHarness(root, "min-qty-capacity-block");
+        minQty.adapter.executor.normalizeMarketQuantity = async () => {
+            throw new Error("Quantity 0.000795 is below Aster minQty 0.001 for BTCUSDT.");
+        };
+        const minQtyResult = await minQty.engine.tick();
+        assert.equal(minQtyResult.status, "capacity-blocked");
+        assert.equal(minQtyResult.reason, "V12_ENTRY_MIN_QTY_CAPACITY_BLOCKED");
+        assert.equal(minQty.adapter.entryCalls, 0, "minQty capacity gate must not call executeEntry");
+        const minQtyState = await minQty.stateStore.load();
+        assert.equal(minQtyState.pending, undefined);
+        assert.equal(minQtyState.manualReview, undefined);
+        assert.equal(minQtyState.killSwitch?.active, undefined);
+        assert.equal(minQtyState.lastCompletedIdempotencyKey, minQtyResult.clientOrderId);
+
+        const minNotional = await makeHarness(root, "min-notional-capacity-block");
+        minNotional.adapter.executor.normalizeMarketQuantity = async () => {
+            throw new Error("Notional 4.8721 is below Aster minimum 5 for ETHUSDT.");
+        };
+        const minNotionalResult = await minNotional.engine.tick();
+        assert.equal(minNotionalResult.status, "capacity-blocked");
+        assert.equal(minNotionalResult.reason, "V12_ENTRY_MIN_NOTIONAL_CAPACITY_BLOCKED");
+        assert.equal(minNotional.adapter.entryCalls, 0, "minNotional capacity gate must not call executeEntry");
+        const minNotionalState = await minNotional.stateStore.load();
+        assert.equal(minNotionalState.pending, undefined);
+        assert.equal(minNotionalState.manualReview, undefined);
+        assert.equal(minNotionalState.killSwitch?.active, undefined);
+
+        // Race fallback: venue constraints can change between the explicit
+        // preflight and executeEntry. The exact same pre-submit error must
+        // clear durable pending state without tripping Fail Closed.
+        const lateVenueMinimum = await makeHarness(root, "late-venue-minimum");
+        lateVenueMinimum.adapter.entryError = new Error("Quantity 0.000795 is below Aster minQty 0.001 for BTCUSDT.");
+        const lateVenueMinimumResult = await lateVenueMinimum.engine.tick();
+        assert.equal(lateVenueMinimumResult.status, "capacity-blocked");
+        assert.equal(lateVenueMinimumResult.reason, "V12_ENTRY_MIN_QTY_CAPACITY_BLOCKED");
+        assert.equal(lateVenueMinimum.adapter.entryCalls, 1, "late venue minimum must be caught after pending save");
+        assert.equal(lateVenueMinimum.adapter.pendingObservedBeforeSend, true);
+        const lateVenueMinimumState = await lateVenueMinimum.stateStore.load();
+        assert.equal(lateVenueMinimumState.pending, undefined);
+        assert.equal(lateVenueMinimumState.manualReview, undefined);
+        assert.equal(lateVenueMinimumState.killSwitch?.active, undefined);
+        assert.equal(lateVenueMinimumState.lastCompletedIdempotencyKey, lateVenueMinimumResult.clientOrderId);
 
         // A transient shared-risk block with one free V12 slot must not consume
         // the completed bar. After risk recovers, the same bar is retried for

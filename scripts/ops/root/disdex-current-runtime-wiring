@@ -21,6 +21,9 @@ LIVE_STATE_FILES=(
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
+POSITION_RECOVERY_DROPIN_DIR="/etc/systemd/system/disdex-runner-position-recovery.service.d"
+FILL_NOTIFIER_DROPIN_DIR="/etc/systemd/system/disdex-trade-fill-notifier.service.d"
+CURRENT_SUPPORT_OVERRIDE="zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 AUTO_REPAIR_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.service.d"
 AUTO_REPAIR_PATH_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d"
 THREE_HOUR_HEALTH_DROPIN_DIR="/etc/systemd/system/disdex-v12-three-hour-health-check.service.d"
@@ -100,6 +103,9 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/lib/disdex-aster-trade-history-sync.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-three-hour-health-check"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-runner-watchdog-current.mjs"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-trade-fill-notifier.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-vps-retention-cleanup"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-ui-retention-cleanup"
   )
@@ -188,8 +194,10 @@ show_plan() {
   printf 'contractEnvFile=%s\n' "$CONTRACT_ENV_FILE"
   printf 'healthSnapshotEnvFile=%s\n' "$HEALTH_SNAPSHOT_ENV_FILE"
   printf 'watchdogEnvFile=%s\n' "$WATCHDOG_ENV_FILE"
-  printf 'watchdogDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$WATCHDOG_DROPIN_DIR"
-  printf 'healthSnapshotDropin=%s/zzzzzzzzzzzz-current-release.conf\n' "$SNAPSHOT_DROPIN_DIR"
+  printf 'watchdogDropin=%s/%s\n' "$WATCHDOG_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
+  printf 'healthSnapshotDropin=%s/%s\n' "$SNAPSHOT_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
+  printf 'positionRecoveryDropin=%s/%s\n' "$POSITION_RECOVERY_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
+  printf 'fillNotifierDropin=%s/%s\n' "$FILL_NOTIFIER_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
   printf 'v12Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$V12_DROPIN_DIR"
   printf 'penguDropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$PENGU_DROPIN_DIR"
   printf 'q102Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$Q102_DROPIN_DIR"
@@ -253,6 +261,21 @@ remove_stale_auto_repair_unit_pin_dropins() {
       rm -f -- "$dropin"
     fi
   done < <(find "$AUTO_REPAIR_DROPIN_DIR" -maxdepth 1 -type f -print0)
+}
+
+
+remove_stale_support_release_pin_dropins() {
+  local dir keep dropin
+  for dir in "$WATCHDOG_DROPIN_DIR" "$SNAPSHOT_DROPIN_DIR" "$POSITION_RECOVERY_DROPIN_DIR" "$FILL_NOTIFIER_DROPIN_DIR"; do
+    [[ -d "$dir" ]] || continue
+    keep="$dir/$CURRENT_SUPPORT_OVERRIDE"
+    while IFS= read -r -d '' dropin; do
+      [[ "$dropin" == "$keep" ]] && continue
+      if grep -Eq '/home/deploy/disdex-trading/(releases|position-recovery/releases|runner-watchdog/releases|runner-health-snapshot/releases)/[0-9a-f]{40}' "$dropin"; then
+        rm -f -- "$dropin"
+      fi
+    done < <(find "$dir" -maxdepth 1 -type f -name '*.conf' -print0)
+  done
 }
 
 reset_stale_release_failed_units() {
@@ -450,7 +473,7 @@ DISDEX_WATCHDOG_FET_SERVICE_UNIT=${FET_UNIT}"
   # EnvironmentFile entries from the base monitor units are historical and
   # must be cleared; otherwise systemd loads them after Environment= values
   # and silently restores the previous release pin.
-  write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+  write_atomic "${WATCHDOG_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
 EnvironmentFile=
 EnvironmentFile=${WATCHDOG_ENV_FILE}
 WorkingDirectory=${CURRENT_RELEASE}
@@ -460,7 +483,7 @@ ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-relea
 ExecStart=
 ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-watchdog-current.mjs"
 
-  write_atomic "${SNAPSHOT_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+  write_atomic "${SNAPSHOT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
 EnvironmentFile=
 EnvironmentFile=${HEALTH_SNAPSHOT_ENV_FILE}
 WorkingDirectory=${CURRENT_RELEASE}
@@ -469,6 +492,21 @@ ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
 ExecStart=
 ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+
+  write_atomic "${POSITION_RECOVERY_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/local/libexec/disdex-runner-position-recovery"
+
+  write_atomic "${FILL_NOTIFIER_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/ops/root/disdex-trade-fill-notifier.ts"
+
+  remove_stale_support_release_pin_dropins
 
   install -d -o root -g root -m 0755 /usr/local/libexec /usr/local/sbin
   install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair
@@ -633,6 +671,8 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   ensure_monitor_timer_active "disdex-runner-watchdog.timer"
   ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
   ensure_monitor_timer_active "disdex-runner-health-alert.timer"
+  ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
+  ensure_monitor_timer_active "disdex-trade-fill-notifier.timer"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 
@@ -667,6 +707,9 @@ self_test() {
     lib/disdex-aster-trade-history-sync.ts \
     scripts/ops/root/disdex-v12-kill-switch-auto-repair \
     scripts/ops/root/disdex-v12-three-hour-health-check \
+    scripts/ops/root/disdex-runner-watchdog-current.mjs \
+    scripts/ops/root/disdex-runner-health-snapshot-current.mjs \
+    scripts/ops/root/disdex-trade-fill-notifier.ts \
     scripts/ops/root/disdex-vps-retention-cleanup \
     scripts/ops/root/disdex-ui-retention-cleanup; do
     : > "$SELF_TEST_FIXTURE/$required_file"
@@ -686,6 +729,25 @@ self_test() {
   [[ ! -e "$AUTO_REPAIR_DROPIN_DIR/stale.conf" ]]
   [[ -f "$AUTO_REPAIR_DROPIN_DIR/unrelated.conf" ]]
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_STALE_AUTO_REPAIR_DROPIN_SELFTEST_PASS\n'
+  WATCHDOG_DROPIN_DIR="$SELF_TEST_FIXTURE/watchdog-dropins"
+  SNAPSHOT_DROPIN_DIR="$SELF_TEST_FIXTURE/snapshot-dropins"
+  POSITION_RECOVERY_DROPIN_DIR="$SELF_TEST_FIXTURE/position-recovery-dropins"
+  FILL_NOTIFIER_DROPIN_DIR="$SELF_TEST_FIXTURE/fill-notifier-dropins"
+  for fixture in "$WATCHDOG_DROPIN_DIR" "$SNAPSHOT_DROPIN_DIR" "$POSITION_RECOVERY_DROPIN_DIR" "$FILL_NOTIFIER_DROPIN_DIR"; do
+    mkdir -p "$fixture"
+    printf '[Service]\nWorkingDirectory=%s\n' "$CURRENT_RELEASE" > "$fixture/$CURRENT_SUPPORT_OVERRIDE"
+    printf '[Service]\nWorkingDirectory=/home/deploy/disdex-trading/releases/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n' > "$fixture/stale-release.conf"
+    printf '[Service]\nEnvironment=UNRELATED=true\n' > "$fixture/unrelated.conf"
+  done
+  printf '[Service]\nWorkingDirectory=/home/deploy/disdex-trading/position-recovery/releases/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n' > "$POSITION_RECOVERY_DROPIN_DIR/stale-position-release.conf"
+  remove_stale_support_release_pin_dropins
+  for fixture in "$WATCHDOG_DROPIN_DIR" "$SNAPSHOT_DROPIN_DIR" "$POSITION_RECOVERY_DROPIN_DIR" "$FILL_NOTIFIER_DROPIN_DIR"; do
+    [[ -f "$fixture/$CURRENT_SUPPORT_OVERRIDE" ]]
+    [[ ! -e "$fixture/stale-release.conf" ]]
+    [[ -f "$fixture/unrelated.conf" ]]
+  done
+  [[ ! -e "$POSITION_RECOVERY_DROPIN_DIR/stale-position-release.conf" ]]
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_STALE_SUPPORT_DROPIN_SELFTEST_PASS\n'
   mv "$SELF_TEST_FIXTURE/node_modules" "$SELF_TEST_FIXTURE/node_modules-real"
   ln -s "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
   if [[ -L "$SELF_TEST_FIXTURE/node_modules" ]]; then

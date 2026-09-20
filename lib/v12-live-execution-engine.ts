@@ -49,10 +49,29 @@ function positionMatches(state: V12ActivePositionState, actual: DirectPosition) 
 }
 function resultHasExposure(result: DirectTradeResult) { return (result.status === "FILLED" || result.status === "PARTIALLY_FILLED") && result.executedQuantity > 0; }
 function activeOrderStatus(status?: string) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(status || "").toUpperCase()); }
+
+const BENIGN_V12_ENTRY_QUANTITY_GATE_PATTERNS = [
+    /^Quantity\s+[0-9.+\-eE]+\s+is\s+below\s+Aster\s+minQty\s+[0-9.+\-eE]+\s+for\s+[A-Z0-9]+\.$/,
+    /^Notional\s+[0-9.+\-eE]+\s+is\s+below\s+Aster\s+minimum\s+[0-9.+\-eE]+\s+for\s+[A-Z0-9]+\.$/,
+];
+
+export function isV12BenignEntryQuantityGateError(error: unknown): boolean {
+    const message = (error instanceof Error ? error.message : String(error)).trim();
+    return BENIGN_V12_ENTRY_QUANTITY_GATE_PATTERNS.some((pattern) => pattern.test(message));
+}
+
+function v12BenignEntryQuantityGateReason(error: unknown): string {
+    const message = (error instanceof Error ? error.message : String(error)).trim();
+    if (message.startsWith("Quantity ")) return "V12_ENTRY_MIN_QTY_CAPACITY_BLOCKED";
+    if (message.startsWith("Notional ")) return "V12_ENTRY_MIN_NOTIONAL_CAPACITY_BLOCKED";
+    return "V12_ENTRY_VENUE_MINIMUM_CAPACITY_BLOCKED";
+}
+
 function safeV12ErrorMessage(error: unknown) {
     if (error instanceof AsterApiError) return `${error.message} [ASTER_READ path=${error.path || "unknown"} status=${error.status} code=${error.code ?? "none"}]`;
     return error instanceof Error ? error.message : String(error);
 }
+
 function latestIndex(data: Record<string, V12Bar[]>) {
     const rows = Object.entries(data); if (rows.length !== V12_X1_ALL.universe.length) throw new Error("V12_MARKET_DATA_UNIVERSE_MISMATCH");
     const lengths = rows.map(([, bars]) => bars.length); if (!lengths.length || Math.min(...lengths) < 80 || lengths.some((length) => length !== lengths[0])) throw new Error("V12_MARKET_DATA_ALIGNMENT_REQUIRED");
@@ -430,6 +449,26 @@ export class V12LiveExecutionEngine {
         if (!(quantity > 0)) return { status: "capacity-blocked", reason: "ZERO_EXECUTABLE_QUANTITY", signal };
         const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
         if (state.lastCompletedIdempotencyKey === clientOrderId) return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId };
+        try {
+            await this.d.adapter.executor.normalizeMarketQuantity(symbol, quantity, expectedPrice);
+        } catch (error) {
+            if (isV12BenignEntryQuantityGateError(error)) {
+                const reason = v12BenignEntryQuantityGateReason(error);
+                state.lastCompletedIdempotencyKey = clientOrderId;
+                await this.d.stateStore.save(state);
+                this.log("v12-entry-capacity-blocked", {
+                    reason,
+                    symbol,
+                    quantity,
+                    expectedPrice,
+                    detail: safeV12ErrorMessage(error),
+                    ordersSent: 0,
+                    positionChangesSent: 0,
+                });
+                return { status: "capacity-blocked", reason, signal, clientOrderId };
+            }
+            throw error;
+        }
         const reservation = await handle.reserve({ strategyId: "V12_X1.00_ALL", symbol, side: signal.side, gross: acceptedGross, notionalUsd: acceptedGross * equity });
         const pending: V12PendingOrderState = {
             idempotencyKey: clientOrderId,
@@ -449,8 +488,30 @@ export class V12LiveExecutionEngine {
             createdAt: this.now(),
         };
         state.pending = pending; await this.d.stateStore.save(state);
-        const result = await this.d.adapter.executeEntry({ signalTs: signal.referenceTs, symbol, side: signal.side, quantity, expectedPrice, clientOrderId });
-        await handle.releaseReservation(reservation.reservationId);
+        let result: DirectTradeResult;
+        try {
+            result = await this.d.adapter.executeEntry({ signalTs: signal.referenceTs, symbol, side: signal.side, quantity, expectedPrice, clientOrderId });
+        } catch (error) {
+            if (isV12BenignEntryQuantityGateError(error)) {
+                const reason = v12BenignEntryQuantityGateReason(error);
+                state.pending = undefined;
+                state.lastCompletedIdempotencyKey = clientOrderId;
+                await this.d.stateStore.save(state);
+                this.log("v12-entry-capacity-blocked", {
+                    reason,
+                    symbol,
+                    quantity,
+                    expectedPrice,
+                    detail: safeV12ErrorMessage(error),
+                    ordersSent: 0,
+                    positionChangesSent: 0,
+                });
+                return { status: "capacity-blocked", reason, signal, clientOrderId };
+            }
+            throw error;
+        } finally {
+            await handle.releaseReservation(reservation.reservationId);
+        }
         if (result.status === "UNKNOWN") return this.fail(state, `V12_ENTRY_UNKNOWN:${clientOrderId}`);
         if (!resultHasExposure(result)) { state.pending = undefined; state.lastCompletedIdempotencyKey = clientOrderId; await this.d.stateStore.save(state); return { status: "held", reason: `ENTRY_${result.status}_NO_RETRY`, signal, clientOrderId }; }
         const refreshed = await this.d.adapter.getPositions(); const actual = refreshed.find((row) => row.symbol.toUpperCase() === symbol && Math.abs(row.quantity) > EPS);

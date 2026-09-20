@@ -66,7 +66,7 @@ async function archive(path: string, bytes: Buffer, label: string, sha: string) 
 async function main() {
     if (process.argv.includes("--self-test")) {
         const pending = assertRecoverableV12PreSubmitState({
-            schema: "v12-x1-all-runner-state/v1",
+            schema: "v12-x1-all-runner-state/v2",
             strategyId: "V12_X1.00_ALL",
             mode: "LIVE",
             updatedAt: 1,
@@ -135,13 +135,19 @@ async function main() {
         const killBackup = await archive(sharedKill.sourcePath, killBytes, "kill-switch", sha);
         try {
             await v12Store.save({
-                schema: "v12-x1-all-runner-state/v1",
+                ...state,
+                schema: "v12-x1-all-runner-state/v2",
                 strategyId: "V12_X1.00_ALL",
                 mode: "LIVE",
+                runtimeCommitSha: sha,
                 updatedAt: Date.now(),
-                lastReferenceTs: state.lastReferenceTs,
                 lastCompletedIdempotencyKey: pending.idempotencyKey,
-                activePositions: [],
+                active: undefined,
+                activePositions: undefined,
+                pending: undefined,
+                manualReview: undefined,
+                killSwitch: undefined,
+                reconciliationStatus: "PASS",
             });
             await atomicWrite(sharedKill.sourcePath, {
                 active: false,
