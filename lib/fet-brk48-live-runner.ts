@@ -335,6 +335,9 @@ export class FetBrk48LiveRunner {
 
     try {
       let state = await readFetBrk48State(this.deps.statePath, this.deps.runtimeSha);
+      // Persist a heartbeat even while flat/no-signal so health monitoring can
+      // distinguish a healthy idle runner from a missing/stale state store.
+      await writeFetBrk48State(this.deps.statePath, state);
       if (state.manualReview) return { status: "manual-review", message: state.manualReview, ordersSent: 0 };
 
       const pendingResult = await reconcilePending(this.deps, state);

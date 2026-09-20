@@ -12,13 +12,13 @@ import { readFetBrk48State } from "../lib/fet-brk48-state";
 const HOUR = 3_600_000;
 const RUNTIME_SHA = "a".repeat(40);
 
-function makeKlines(entryTs: number) {
+function makeKlines(entryTs: number, signalEnabled = true) {
   const rows: any[] = [];
   const start = entryTs - 80 * HOUR;
   for (let i = 0; i < 80; i += 1) {
     const openTs = start + i * HOUR;
     const closeTs = openTs + HOUR - 1;
-    const isSignal = openTs === entryTs - HOUR;
+    const isSignal = signalEnabled && openTs === entryTs - HOUR;
     rows.push([
       openTs,
       "100",
@@ -171,8 +171,9 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
       },
     };
 
+    let signalEnabled = false;
     const client: any = {
-      getKlines: async () => makeKlines(entryTs),
+      getKlines: async () => makeKlines(entryTs, signalEnabled),
     };
 
     const deps: any = {
@@ -188,6 +189,16 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
       now: () => now,
     };
 
+    const idle = await new FetBrk48LiveRunner(deps).tick();
+    assert.equal(idle.status, "no-signal");
+    assert.equal(idle.ordersSent, 0);
+    assert.equal(tradeCalls.length, 0);
+    const idleState = await readFetBrk48State(statePath, RUNTIME_SHA);
+    assert.equal(idleState.runtimeCommitSha, RUNTIME_SHA);
+    assert.ok(idleState.updatedAt > 0);
+
+    signalEnabled = true;
+    now += 1_000;
     const first = await new FetBrk48LiveRunner(deps).tick();
     assert.equal(first.status, "entered");
     assert.equal(first.ordersSent, 1);
