@@ -1,0 +1,11 @@
+[Unit]
+Description=Run DisDex Q102 ranking observer hourly (%i)
+
+[Timer]
+OnCalendar=*-*-* *:05:00
+Persistent=true
+AccuracySec=1min
+Unit=disdex-quality102-ranking-observer@%i.service
+
+[Install]
+WantedBy=timers.target

@@ -1,8 +1,17 @@
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
 import { evaluateQuality102CausalV4ImprovementGate } from "./disdex-quality102-causal-selector";
-import type { Quality102CausalV1History, Quality102CausalV1Signal } from "./disdex-quality102-causal-v1-signal";
+import {
+    diagnoseQuality102HighVolSymbol,
+    type Quality102CausalV1History,
+    type Quality102CausalV1Signal,
+    type Quality102HighVolObservabilityDiagnostic,
+} from "./disdex-quality102-causal-v1-signal";
 import { buildQuality102CausalV4Signal } from "./disdex-quality102-causal-v4-signal";
 import { generateQuality102CausalV4S34Candidates } from "./disdex-quality102-causal-v4-s34";
+import {
+    diagnoseQuality102CausalV4S34Symbol,
+    type Quality102S34ModelDiagnostic,
+} from "./disdex-quality102-causal-v4-ranking";
 
 const LAYER_RANK = Object.freeze({ S3: 1, S4: 2 });
 const FAMILY_RANK = Object.freeze({ BRK: 1, PB: 2, MR: 3, REV: 4 });
@@ -18,10 +27,25 @@ export interface Quality102CausalV4SymbolDecision {
     reason: string;
     selected: boolean;
     referenceTs: number;
+    /** Observability-only 0-100 trigger-proximity score. Never used for trading. */
+    rankingScore?: number;
+    rankingRank?: number;
+    rankingFamily?: "HIGH_VOL" | "PB" | "MR" | "BRK" | "REV";
+    rankingLayer?: "S1" | "S2" | "S3" | "S4";
+    rankingVariant?: string;
+    rankingStage?: string;
+    rankingReason?: string;
+    diagnostics?: {
+        highVol?: Quality102HighVolObservabilityDiagnostic;
+        s34?: Quality102S34ModelDiagnostic[];
+    };
 }
 
 export interface Quality102CausalV4DecisionSnapshot {
-    schemaVersion: 1;
+    schemaVersion: 1 | 2;
+    rankingModelVersion?: "Q102_PROXIMITY_V1";
+    rankingCapturedAt?: string;
+    observerCommitSha?: string;
     strategyId: "QUALITY102_CAUSAL_V1";
     selectorMode: "CAUSAL_V4";
     runtimeCommitSha: string;
@@ -122,6 +146,106 @@ function nonHighVolNaturalSignal(
         maxHoldHours: candidate.maxHoldHours,
         exitPolicy: candidate.exitPolicy,
         brkEnabled: true,
+    };
+}
+
+
+function highVolVariantLabel(diagnostic: Quality102HighVolObservabilityDiagnostic | undefined): string | undefined {
+    const rule = diagnostic?.rule;
+    if (!rule) return undefined;
+    return `HV_LD${rule.longDrop}_LRSI${rule.longRsi}_SR${rule.shortRally}_SRSI${rule.shortRsi}_STOP${rule.hardStop}`;
+}
+
+
+export function augmentQuality102DecisionSnapshotWithRanking(input: {
+    snapshot: Quality102CausalV4DecisionSnapshot;
+    history: Quality102CausalV1History;
+    highVolSymbols: readonly string[];
+    observerCommitSha?: string;
+    rankingCapturedAt?: string;
+}): Quality102CausalV4DecisionSnapshot {
+    const highVol = new Set(input.highVolSymbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean));
+    const rankedItems = input.snapshot.items.map((item): Quality102CausalV4SymbolDecision => {
+        const symbol = item.symbol.toUpperCase();
+        try {
+            const rows = input.history.candlesBySymbol[symbol];
+            if (!rows?.length) throw new Error(`QUALITY102_OBSERVER_HISTORY_MISSING:${symbol}`);
+            const entryOpen = input.history.entryOpenBySymbol?.[symbol];
+            const dataCutoffTs = rows.at(-1)!.timestampMs;
+            const highVolDiagnostic = highVol.has(symbol)
+                ? diagnoseQuality102HighVolSymbol(symbol, rows, dataCutoffTs)
+                : undefined;
+            const s34Diagnostics = entryOpen
+                ? diagnoseQuality102CausalV4S34Symbol({ symbol, rows, entryOpen })
+                : [];
+            const bestS34 = s34Diagnostics[0];
+            const highVolScore = highVolDiagnostic?.rankingScore ?? -1;
+            const s34Score = bestS34?.rankingScore ?? -1;
+            const naturalEligible = item.eligible === true;
+
+            const rankingFamily = naturalEligible && item.family
+                ? item.family
+                : highVolScore >= s34Score && highVolDiagnostic
+                    ? "HIGH_VOL" as const
+                    : bestS34?.family;
+            const rankingLayer = naturalEligible && item.layer
+                ? item.layer
+                : rankingFamily === "HIGH_VOL"
+                    ? "S1" as const
+                    : bestS34?.layer;
+            const rankingVariant = naturalEligible && item.variant
+                ? item.variant
+                : rankingFamily === "HIGH_VOL"
+                    ? highVolVariantLabel(highVolDiagnostic)
+                    : bestS34?.variant;
+            const rankingScore = naturalEligible ? 100 : Math.max(0, highVolScore, s34Score);
+            const rankingStage = naturalEligible
+                ? "SIGNAL_READY"
+                : rankingFamily === "HIGH_VOL"
+                    ? (highVolDiagnostic?.rawMatched ? "HIGH_VOL_RAW_READY" : "HIGH_VOL_APPROACH")
+                    : bestS34?.rankingStage || "NO_MODEL";
+            const rankingReason = naturalEligible
+                ? item.reason
+                : rankingFamily === "HIGH_VOL"
+                    ? highVolDiagnostic?.reason || item.reason
+                    : bestS34?.reason || item.reason;
+
+            return {
+                ...item,
+                rankingScore,
+                ...(rankingFamily ? { rankingFamily } : {}),
+                ...(rankingLayer ? { rankingLayer } : {}),
+                ...(rankingVariant ? { rankingVariant } : {}),
+                rankingStage,
+                rankingReason,
+                diagnostics: {
+                    ...(highVolDiagnostic ? { highVol: highVolDiagnostic } : {}),
+                    ...(s34Diagnostics.length ? { s34: s34Diagnostics } : {}),
+                },
+            };
+        } catch (error) {
+            return {
+                ...item,
+                rankingScore: 0,
+                rankingStage: "OBSERVER_ERROR",
+                rankingReason: error instanceof Error ? error.message : String(error),
+            };
+        }
+    });
+
+    const rankBySymbol = new Map(
+        [...rankedItems]
+            .sort((left, right) => (right.rankingScore ?? 0) - (left.rankingScore ?? 0) || left.symbol.localeCompare(right.symbol))
+            .map((item, index) => [item.symbol, index + 1] as const),
+    );
+
+    return {
+        ...input.snapshot,
+        schemaVersion: 2,
+        rankingModelVersion: "Q102_PROXIMITY_V1",
+        rankingCapturedAt: input.rankingCapturedAt || new Date().toISOString(),
+        ...(input.observerCommitSha ? { observerCommitSha: input.observerCommitSha } : {}),
+        items: rankedItems.map((item) => ({ ...item, rankingRank: rankBySymbol.get(item.symbol) })),
     };
 }
 

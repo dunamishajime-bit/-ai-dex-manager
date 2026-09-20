@@ -1,0 +1,27 @@
+[Unit]
+Description=DisDex Q102 ranking observer (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+Environment=NODE_ENV=production
+Environment=DISDEX_OBSERVER_COMMIT_SHA=%i
+Environment=QUALITY102_CAUSAL_V1_STATE_DIR=/var/lib/disdex/quality102-causal-v1
+Environment=QUALITY102_DECISION_SNAPSHOT_PATH=/var/lib/disdex/quality102-causal-v1/decision-snapshot.json
+Environment=QUALITY102_RANKING_SNAPSHOT_PATH=/var/lib/disdex/quality102-causal-v1/decision-ranking-snapshot.json
+Environment=QUALITY102_CAUSAL_V1_HISTORY_CACHE_PATH=/var/lib/disdex/quality102-causal-v1/market-history.json
+Environment=QUALITY102_CAUSAL_V1_SYMBOLS=SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,TIAUSDT,JUPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,RENDERUSDT,TAOUSDT,TRXUSDT
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-quality102-ranking-observer.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/var/lib/disdex/quality102-causal-v1
+UMask=0077

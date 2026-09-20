@@ -6,6 +6,7 @@ import {
     QUALITY102_RESEARCH_COSTS,
     computeQuality102HighVolFeatures,
     matchQuality102HighVolGrid,
+    quality102HighVolMarketValid,
     monthStartUtc,
     selectQuality102HighVolMonthlyRule,
     type Quality102Candle,
@@ -245,6 +246,131 @@ function candidateFor(symbol: string, rows: readonly Quality102Candle[], dataCut
         + 2 * Math.min(features.volumeRatio, 3)
         + (symbol === "PENGUUSDT" ? 3 : 0);
     return { selection, candidate: { id: `HIGH_VOL:${symbol}:${features.signalTs}`, symbol, side, score } };
+}
+
+
+export interface Quality102HighVolObservabilityDiagnostic {
+    symbol: string;
+    selectionAvailable: boolean;
+    scannerHealthPass: boolean;
+    marketValid: boolean;
+    rawMatched: boolean;
+    matchedSide?: Quality102Side;
+    proximitySide?: Quality102Side;
+    proximityScore: number;
+    rankingScore: number;
+    legacySelectorScore?: number;
+    rule?: Quality102HighVolRule;
+    metrics?: TrainingMetrics;
+    features?: Quality102HighVolFeatures;
+    gateProgress?: {
+        regime: number;
+        barDirection: number;
+        ret24: number;
+        rsi14: number;
+        atrPct: number;
+        volumeRatio: number;
+    };
+    reason: string;
+}
+
+function clamp01(value: number): number {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(1, value));
+}
+
+function highVolProximity(
+    features: Quality102HighVolFeatures,
+    rule: Quality102HighVolRule,
+    side: Quality102Side,
+): { score: number; progress: NonNullable<Quality102HighVolObservabilityDiagnostic["gateProgress"]> } {
+    const long = side === 1;
+    const progress = {
+        regime: long ? (features.ret14d >= 0 ? 1 : 0) : (features.ret14d < 0 ? 1 : 0),
+        barDirection: long ? (features.barUp ? 1 : 0) : (features.barDown ? 1 : 0),
+        ret24: long
+            ? clamp01((-features.ret24) / rule.longDrop)
+            : clamp01(features.ret24 / rule.shortRally),
+        rsi14: long
+            ? (features.rsi14 <= rule.longRsi ? 1 : clamp01(rule.longRsi / Math.max(features.rsi14, 1e-9)))
+            : (features.rsi14 >= rule.shortRsi ? 1 : clamp01(features.rsi14 / rule.shortRsi)),
+        atrPct: clamp01(features.atrPct / 0.01),
+        volumeRatio: clamp01(features.volumeRatio / 0.50),
+    };
+    const score = 100 * (
+        progress.regime
+        + progress.barDirection
+        + progress.ret24
+        + progress.rsi14
+        + progress.atrPct
+        + progress.volumeRatio
+    ) / 6;
+    return { score, progress };
+}
+
+/**
+ * Read-only HIGH_VOL diagnostics for observability/ranking only.
+ * This function does not alter selector decisions or order sizing.
+ */
+export function diagnoseQuality102HighVolSymbol(
+    symbolInput: string,
+    rows: readonly Quality102Candle[],
+    dataCutoffTs: number,
+): Quality102HighVolObservabilityDiagnostic {
+    const symbol = symbolInput.trim().toUpperCase();
+    const { selection, candidate } = candidateFor(symbol, rows, dataCutoffTs);
+    if (!selection) {
+        return {
+            symbol,
+            selectionAvailable: false,
+            scannerHealthPass: false,
+            marketValid: false,
+            rawMatched: false,
+            proximityScore: 0,
+            rankingScore: 0,
+            reason: "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE",
+        };
+    }
+
+    const features = computeQuality102HighVolFeatures(rows, rows.length - 1);
+    const healthPass = symbol === "PENGUUSDT" || scannerHealthPass(selection.metrics);
+    const marketValid = quality102HighVolMarketValid(features);
+    const matched = matchedSide(features, selection.rule);
+    const long = highVolProximity(features, selection.rule, 1);
+    const short = highVolProximity(features, selection.rule, -1);
+    const best = long.score >= short.score
+        ? { side: 1 as Quality102Side, ...long }
+        : { side: -1 as Quality102Side, ...short };
+    const proximityScore = Math.round(best.score * 100) / 100;
+    const rankingScore = matched !== undefined && healthPass
+        ? 100
+        : healthPass
+            ? Math.round((40 + 0.40 * proximityScore) * 100) / 100
+            : Math.round((20 + 0.20 * proximityScore) * 100) / 100;
+
+    return {
+        symbol,
+        selectionAvailable: true,
+        scannerHealthPass: healthPass,
+        marketValid,
+        rawMatched: matched !== undefined,
+        ...(matched !== undefined ? { matchedSide: matched } : {}),
+        proximitySide: best.side,
+        proximityScore,
+        rankingScore,
+        ...(candidate ? { legacySelectorScore: candidate.score } : {}),
+        rule: selection.rule,
+        metrics: selection.metrics,
+        features,
+        gateProgress: best.progress,
+        reason: matched !== undefined && healthPass
+            ? "HIGH_VOL_RAW_SIGNAL_READY"
+            : !healthPass
+                ? "HIGH_VOL_SCANNER_HEALTH_BLOCKED"
+                : !marketValid
+                    ? "HIGH_VOL_MARKET_VALIDITY_BLOCKED"
+                    : "HIGH_VOL_THRESHOLD_NOT_REACHED",
+    };
 }
 
 function trailingCorrelation(left: readonly Quality102Candle[], right: readonly Quality102Candle[], cutoffTs: number): number {
