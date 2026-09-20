@@ -491,10 +491,10 @@ function q102StageText(stage?: string) {
   switch (stage) {
     case "SIGNAL_READY": return "発火条件到達";
     case "IMPROVEMENT_PASS": return "最終Gate直前";
-    case "FEATURE_PASS": return "Feature Gate通過";
-    case "QUALITY_PASS": return "Quality Gate通過";
-    case "RAW_REJECTED": return "Raw発生・後段Block";
-    case "GRID_WAIT": return "Grid待ち";
+    case "FEATURE_PASS": return "V4追加条件通過";
+    case "QUALITY_PASS": return "過去成績・品質条件通過";
+    case "RAW_REJECTED": return "基本シグナル発生・後段で不通過";
+    case "GRID_WAIT": return "4時間判定待ち";
     case "HIGH_VOL_RAW_READY": return "HIGH_VOL Raw到達";
     case "HIGH_VOL_APPROACH": return "HIGH_VOL接近中";
     case "NO_RAW": return "Raw条件へ接近中";
@@ -502,6 +502,62 @@ function q102StageText(stage?: string) {
     case "OBSERVER_ERROR": return "観測エラー";
     default: return stage || "未評価";
   }
+}
+
+
+function q102GateName(name?: string) {
+  switch (name) {
+    case "S34_4H_GRID": return "S34 4時間判定タイミング";
+    case "RAW_DETECTOR": return "基本シグナル条件";
+    case "HISTORICAL_QUALITY": return "過去成績・品質条件";
+    case "V4_FEATURE": return "V4追加条件（14日リターン・Margin・Development）";
+    case "V4_IMPROVEMENT": return "V4最終改善条件";
+    default: return name || "判定条件";
+  }
+}
+
+function q102GateResult(pass?: boolean) {
+  return pass ? "通過" : "不通過";
+}
+
+function q102GateReasonText(reason?: string) {
+  switch (reason) {
+    case "UTC_HOUR_MOD4_EQ1": return "4時間ごとのS34判定時刻に一致";
+    case "UTC_HOUR_MOD4_NOT1": return "4時間ごとのS34判定時刻ではない";
+    case "RAW_SIGNAL_DETECTED": return "基本シグナル条件を満たした";
+    case "RAW_THRESHOLD_NOT_REACHED": return "基本シグナル条件の閾値に未到達";
+    case "V4_FEATURE_GATE_PASS": return "V4追加条件をすべて通過";
+    case "V4_RET14_WINDOW_REJECT": return "14日リターンがV4の許容範囲外";
+    case "V4_BRK_VARIANT_WINDOW_REJECT": return "BRKの通貨・Variant・14日リターン条件がV4許容範囲外";
+    case "V4_DEVELOPMENT_GATE_REJECT": return "Development条件が不足";
+    case "V4_MARGIN_GATE_REJECT": return "MarginがV4の許容範囲外";
+    case "INVALID_V4_FEATURE_SIDE": return "売買方向の入力が不正";
+    case "INVALID_V4_FEATURE_INPUT": return "V4追加条件に必要な実測値が不足または不正";
+    case "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL":
+      return "REV Longの最終条件で14日リターン+24%以上を満たしていない";
+    default: return reason || "";
+  }
+}
+
+function q102FeatureGateDescription(family?: string, variant?: string, symbol?: string) {
+  if (family === "MR") return "MRでは、方向補正14日リターン -15%以上〜-8%未満、Development N 20以上、Dev SPF 0以上、Dev Avg 0以上、Margin 1.05以上〜1.70未満を確認します。";
+  if (family === "PB") return "PBでは、方向補正14日リターン -50%以上〜+20%未満、Development各値 0以上、Margin 1.00以上〜1.70未満を確認します。";
+  if (family === "REV") return "REVでは、方向補正14日リターン +10%以上〜+30%未満、Development各値 0以上、Margin 1.00以上〜3.00未満を確認します。REV Longはこの後さらに14日リターン+24%以上の最終条件があります。";
+  if (family === "BRK") {
+    if (symbol === "FETUSDT" && variant === "BRK24_H48_V1.2") return "FET BRK24_H48_V1.2では、方向補正14日リターン +15%以上〜+30%未満を確認します。";
+    if (symbol === "NEARUSDT" && variant === "BRK48_H48_V1.2") return "NEAR BRK48_H48_V1.2では、方向補正14日リターン -5%以上〜+2%未満を確認します。";
+    if (symbol === "RENDERUSDT" && variant === "BRK168_H12_V1.2") return "RENDER BRK168_H12_V1.2では、方向補正14日リターン +15%以上〜+30%未満を確認します。";
+    return "このBRK通貨・VariantはV4追加条件の許可対象外です。BRKは通貨とVariantごとに固定された14日リターン条件を確認します。";
+  }
+  return "V4追加条件は、基本シグナルと過去品質条件を通過した後に、14日リターン・Margin・DevelopmentなどがV4で固定した許容範囲内かを確認する絞り込み条件です。";
+}
+
+function q102GateValueText(gate: Q102GateDiagnostic) {
+  if (gate.name === "S34_4H_GRID" && typeof gate.value === "number") {
+    return `UTC ${gate.value}時 / 4時間ごとの判定時刻`;
+  }
+  if (gate.value === undefined) return "";
+  return `${String(gate.value)}${gate.threshold !== undefined ? " / 基準 " + String(gate.threshold) : ""}`;
 }
 
 function q102MetricName(key: string) {
@@ -639,7 +695,18 @@ function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapsh
             {bestS34 ? <div className="mt-3 rounded-xl border border-sky-400/20 bg-sky-400/[0.04] p-3">
               <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-white">最有力 S34: {bestS34.family} / {bestS34.variant}</span><span className="text-white/50">接近度 {bestS34.proximityScore?.toFixed(1) ?? "—"} / Rank score {bestS34.rankingScore?.toFixed(1) ?? "—"}</span></div>
               {bestS34.metrics ? <div className="mt-2 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">{Object.entries(bestS34.metrics).map(([key, value]) => <div key={key} className="rounded-lg bg-black/20 px-2 py-1"><div className="text-[10px] text-white/40">{q102MetricName(key)}</div><div className="font-semibold text-white/80">{q102MetricValue(key, value)}</div></div>)}</div> : null}
-              {bestS34.gates?.length ? <div className="mt-3 flex flex-wrap gap-2">{bestS34.gates.map((gate, index) => <span key={(gate.name || "gate") + index} className={"rounded-full border px-2 py-1 text-[10px] font-semibold " + (gate.pass ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200" : "border-rose-400/30 bg-rose-500/10 text-rose-200")}>{gate.name}: {gate.pass ? "PASS" : "BLOCK"}{gate.value !== undefined ? " [" + String(gate.value) + (gate.threshold !== undefined ? " / " + String(gate.threshold) : "") + "]" : ""}</span>)}</div> : null}
+              {bestS34.gates?.length ? <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">{bestS34.gates.map((gate, index) => <div key={(gate.name || "gate") + index} className={"rounded-xl border px-3 py-2 " + (gate.pass ? "border-emerald-400/30 bg-emerald-500/10" : "border-rose-400/30 bg-rose-500/10")}>
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-semibold text-white">{q102GateName(gate.name)}</span>
+                  <span className={gate.pass ? "font-bold text-emerald-200" : "font-bold text-rose-200"}>{q102GateResult(gate.pass)}</span>
+                </div>
+                {q102GateValueText(gate) ? <div className="mt-1 text-[10px] text-white/55">{q102GateValueText(gate)}</div> : null}
+                {gate.reason ? <div className="mt-1 text-[10px] text-white/65">{q102GateReasonText(gate.reason)}</div> : null}
+              </div>)}</div> : null}
+              {bestS34.gates?.some((gate) => gate.name === "V4_FEATURE") ? <div className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/[0.05] px-3 py-2 text-[11px] leading-5 text-white/65">
+                <span className="font-semibold text-amber-100">V4追加条件とは：</span>
+                {q102FeatureGateDescription(bestS34.family, bestS34.variant, item.symbol)}
+              </div> : null}
             </div> : null}
 
             {!highVol && !bestS34 ? <div className="mt-3 rounded-xl border border-white/10 p-3 text-white/55">実測diagnosticsは次回ranking observer更新後に表示されます。対象S34モデル: {models.length ? models.join(" / ") : "固定S34モデルなし（HIGH_VOL経路）"}</div> : null}
