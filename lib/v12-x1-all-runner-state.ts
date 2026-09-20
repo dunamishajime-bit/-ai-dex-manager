@@ -55,6 +55,8 @@ export interface V12X1AllRunnerState {
     mode: "SHADOW" | "PAPER" | "LIVE";
     updatedAt: number;
     lastReferenceTs?: number;
+    /** Latest completed bar whose entry opportunity was deferred only because shared risk was temporarily unavailable. */
+    deferredEntryReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     cooldownUntilTs?: number;
     activePositions?: V12ActivePositionState[];
@@ -105,6 +107,7 @@ export class FileV12X1AllRunnerStateStore {
                 || value.strategyId !== "V12_X1.00_ALL" || value.mode !== this.mode) {
                 throw new Error("V12_STATE_SCHEMA_MISMATCH");
             }
+            if (value.deferredEntryReferenceTs !== undefined && !Number.isFinite(Number(value.deferredEntryReferenceTs))) throw new Error("V12_STATE_DEFERRED_ENTRY_REFERENCE_INVALID");
             const legacyActive = value.active ? normalizeActive(value.active) : undefined;
             if (legacyActive) {
                 if (!(legacyActive.quantity > 0 && legacyActive.entryPrice > 0 && legacyActive.atrAtEntry > 0)) throw new Error("V12_STATE_ACTIVE_INVALID");

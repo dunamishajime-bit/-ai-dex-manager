@@ -422,8 +422,13 @@ export class V12LiveExecutionEngine {
         try {
             const beforeLockState = await this.d.stateStore.load();
             if (!beforeLockState.pending) preloadedData = await this.d.marketData.load();
-            if (!beforeLockState.pending && activePositionsOf(beforeLockState).length === 0) {
-                await readSharedCryptoDailyRiskWithRolloverRetry(this.d.riskPath, { now: this.now });
+            if (!beforeLockState.pending) {
+                await readSharedCryptoDailyRiskWithRolloverRetry(this.d.riskPath, {
+                    now: this.now,
+                    rolloverGraceMs: 60_000,
+                    pollMs: 2_000,
+                    maxAttempts: 31,
+                });
             }
         } catch {
             // Preserve the existing fail-closed path under the shared lock.
@@ -450,41 +455,57 @@ export class V12LiveExecutionEngine {
                 }
             }
             if (actives.length) {
-                if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "held", reason: "NO_NEW_CONFIRMED_2H_BAR" };
-                const updated: V12ActivePositionState[] = [];
-                for (const active of actives) {
-                    const activeBars = data[active.symbol.replace(/USDT$/, "")]; if (!activeBars) return this.fail(state, "V12_ACTIVE_SYMBOL_MARKET_DATA_MISSING");
-                    const activeBar = activeBars[index];
-                    const planned = await planV12TrailingStop(this.d.adapter, active.protection, activeBar.close);
-                    let protection = planned.state;
-                    if (planned.plan) {
-                        const liveQuote = await this.d.adapter.executor.getMarketQuote(active.symbol);
-                        const trailingStopAlreadyCrossed = active.side === "LONG"
-                            ? liveQuote.bidPrice <= planned.plan.stopPrice
-                            : liveQuote.askPrice >= planned.plan.stopPrice;
-                        if (trailingStopAlreadyCrossed) {
-                            return await this.executeExit(state, active, latestTs, "trailing-stop-crossed-before-replacement");
+                const deferredEntryRetry = state.deferredEntryReferenceTs === latestTs;
+                if (!deferredEntryRetry) {
+                    if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "held", reason: "NO_NEW_CONFIRMED_2H_BAR" };
+                    const updated: V12ActivePositionState[] = [];
+                    for (const active of actives) {
+                        const activeBars = data[active.symbol.replace(/USDT$/, "")]; if (!activeBars) return this.fail(state, "V12_ACTIVE_SYMBOL_MARKET_DATA_MISSING");
+                        const activeBar = activeBars[index];
+                        const planned = await planV12TrailingStop(this.d.adapter, active.protection, activeBar.close);
+                        let protection = planned.state;
+                        if (planned.plan) {
+                            const liveQuote = await this.d.adapter.executor.getMarketQuote(active.symbol);
+                            const trailingStopAlreadyCrossed = active.side === "LONG"
+                                ? liveQuote.bidPrice <= planned.plan.stopPrice
+                                : liveQuote.askPrice >= planned.plan.stopPrice;
+                            if (trailingStopAlreadyCrossed) {
+                                return await this.executeExit(state, active, latestTs, "trailing-stop-crossed-before-replacement");
+                            }
+                            const pending: V12PendingOrderState = { idempotencyKey: planned.plan.clientOrderId, action: "STOP_UPDATE", clientOrderId: planned.plan.clientOrderId, symbol: active.symbol, side: active.side, quantity: active.quantity, signalTs: latestTs, reason: "TRAILING_STOP_UPDATE", createdAt: this.now(), positionId: active.positionId, stopPrice: planned.plan.stopPrice, previousStopClientOrderId: planned.plan.previousStopClientOrderId, nextPeakOrTrough: planned.plan.nextPeakOrTrough };
+                            state.pending = pending; await this.d.stateStore.save(state);
+                            protection = await applyV12TrailingStop(this.d.adapter, planned.state, planned.plan);
+                            if (protection.manualReview) return this.fail(state, protection.manualReview);
+                            state.pending = undefined;
                         }
-                        const pending: V12PendingOrderState = { idempotencyKey: planned.plan.clientOrderId, action: "STOP_UPDATE", clientOrderId: planned.plan.clientOrderId, symbol: active.symbol, side: active.side, quantity: active.quantity, signalTs: latestTs, reason: "TRAILING_STOP_UPDATE", createdAt: this.now(), positionId: active.positionId, stopPrice: planned.plan.stopPrice, previousStopClientOrderId: planned.plan.previousStopClientOrderId, nextPeakOrTrough: planned.plan.nextPeakOrTrough };
-                        state.pending = pending; await this.d.stateStore.save(state);
-                        protection = await applyV12TrailingStop(this.d.adapter, planned.state, planned.plan);
-                        if (protection.manualReview) return this.fail(state, protection.manualReview);
-                        state.pending = undefined;
+                        const holdingBars = active.holdingBars + 1;
+                        updated.push({ ...active, holdingBars, peakPrice: Math.max(active.peakPrice, activeBar.high), troughPrice: Math.min(active.troughPrice, activeBar.low), protection });
                     }
-                    const holdingBars = active.holdingBars + 1;
-                    updated.push({ ...active, holdingBars, peakPrice: Math.max(active.peakPrice, activeBar.high), troughPrice: Math.min(active.troughPrice, activeBar.low), protection });
+                    syncActivePositions(state, updated); state.lastReferenceTs = latestTs; await this.d.stateStore.save(state);
+                    for (const active of activePositionsOf(state)) {
+                        const primary = signals[0];
+                        const changed = Boolean(primary && (`${primary.symbol}USDT` !== active.symbol || primary.side !== active.side));
+                        const reason = active.holdingBars >= V12_X1_ALL.maxHoldBars ? "max-hold" : active.holdingBars >= V12_X1_ALL.rebalanceBars && changed ? "signal-rotation" : undefined;
+                        if (reason) return await this.executeExit(state, active, latestTs, reason);
+                    }
                 }
-                syncActivePositions(state, updated); state.lastReferenceTs = latestTs; await this.d.stateStore.save(state);
-                for (const active of activePositionsOf(state)) {
-                    const primary = signals[0];
-                    const changed = Boolean(primary && (`${primary.symbol}USDT` !== active.symbol || primary.side !== active.side));
-                    const reason = active.holdingBars >= V12_X1_ALL.maxHoldBars ? "max-hold" : active.holdingBars >= V12_X1_ALL.rebalanceBars && changed ? "signal-rotation" : undefined;
-                    if (reason) return await this.executeExit(state, active, latestTs, reason);
+                if (activePositionsOf(state).length >= V12_X1_ALL.maximumPositions) {
+                    state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
+                    return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
                 }
-                if (!risk.ok || activePositionsOf(state).length >= V12_X1_ALL.maximumPositions) return { status: risk.ok ? "held" : "risk-blocked", reason: risk.ok ? "V12_POSITION_HELD" : `SHARED_CRYPTO_RISK:${risk.reason}`, signal: signals[0] };
                 const existingSymbols = new Set(activePositionsOf(state).map((row) => row.symbol.toUpperCase()));
                 const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`));
-                if (!next) return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
+                if (!next) {
+                    state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
+                    return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
+                }
+                if (!risk.ok) {
+                    state.deferredEntryReferenceTs = latestTs; await this.d.stateStore.save(state);
+                    return { status: "risk-blocked", reason: `SHARED_CRYPTO_RISK:${risk.reason}`, signal: next };
+                }
+                if (state.deferredEntryReferenceTs !== undefined) {
+                    state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
+                }
                 let equity = 0;
                 let sizing: ReturnType<typeof sizeV12Position> | undefined;
                 let decision: V12ResidualDecision | undefined;
@@ -546,8 +567,10 @@ export class V12LiveExecutionEngine {
             }
 
             if (!risk.ok) return { status: "risk-blocked", reason: `SHARED_CRYPTO_RISK:${risk.reason}` };
-            if (state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "no-signal", reason: "NO_NEW_CONFIRMED_2H_BAR" };
+            const deferredFlatEntryRetry = state.deferredEntryReferenceTs === latestTs;
+            if (!deferredFlatEntryRetry && state.lastReferenceTs !== undefined && latestTs <= state.lastReferenceTs) return { status: "no-signal", reason: "NO_NEW_CONFIRMED_2H_BAR" };
             state.lastReferenceTs = latestTs;
+            state.deferredEntryReferenceTs = undefined;
             if (!signals.length) { await this.d.stateStore.save(state); return { status: "no-signal", reason: "NO_COMPLETED_BAR_SIGNAL" }; }
             if ((state.cooldownUntilTs || 0) > latestTs) { await this.d.stateStore.save(state); return { status: "held", reason: "V12_COOLDOWN_ACTIVE", signal: signals[0] }; }
             let latestPositions = positions;

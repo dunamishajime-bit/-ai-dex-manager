@@ -177,6 +177,25 @@ async function risk(path: string) {
     }));
 }
 
+async function blockedRisk(path: string) {
+    await writeSharedCryptoDailyRisk(path, buildSharedCryptoDailyRiskState({
+        accountScope: "ASTER_FUTURES",
+        utcDay: new Date(NOW).toISOString().slice(0, 10),
+        strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1"],
+        lossPct: 8,
+        maximumLossPct: 7.5,
+        tripped: true,
+        updatedAt: NOW,
+        realizedPnl: -80,
+        unrealizedPnl: 0,
+        fees: 0,
+        funding: 0,
+        netDailyPnl: -80,
+        referenceEquity: 1000,
+        sourceComplete: true,
+    }));
+}
+
 async function makeHarness(root: string, name: string) {
     const stateStore = new FileV12X1AllRunnerStateStore(join(root, `${name}-state.json`), "LIVE");
     const lock = new FileAccountOrderLock(join(root, `${name}-account.lock`), 120_000);
@@ -210,6 +229,51 @@ async function main() {
         assert.equal(normal.state.pending, undefined);
         assert.ok(normal.state.active?.protection.stopClientOrderId);
         assert.ok(normal.state.active?.protection.takeProfitClientOrderId);
+
+        // A transient shared-risk block with one free V12 slot must not consume
+        // the completed bar. After risk recovers, the same bar is retried for
+        // entry without advancing holdingBars/trailing maintenance twice.
+        const deferred = await enterHarness(root, "shared-risk-deferred-entry");
+        const deferredState = await deferred.stateStore.load();
+        const deferredActives = deferredState.activePositions || (deferredState.active ? [deferredState.active] : []);
+        assert.equal(deferredActives.length, 2);
+        const retained = deferredActives[0];
+        const removed = deferredActives[1];
+        deferred.adapter.positions = deferred.adapter.positions.filter((row) => row.symbol.toUpperCase() === retained.symbol.toUpperCase());
+        if (removed.protection.stopClientOrderId) deferred.adapter.resident.delete(removed.protection.stopClientOrderId);
+        if (removed.protection.takeProfitClientOrderId) deferred.adapter.resident.delete(removed.protection.takeProfitClientOrderId);
+        deferredState.activePositions = [retained];
+        deferredState.active = retained;
+        deferredState.lastCompletedIdempotencyKey = retained.positionId;
+        const originalDeferredQuote = deferred.adapter.executor.getMarketQuote;
+        deferred.adapter.executor.getMarketQuote = async (symbol: string) => {
+            if (symbol.toUpperCase() !== retained.symbol.toUpperCase()) return originalDeferredQuote(symbol);
+            const bar = deferred.marketData[retained.symbol.replace(/USDT$/, "")].at(-1)!;
+            const mid = bar.close;
+            return retained.side === "LONG"
+                ? { symbol, bidPrice: mid * 1.001, askPrice: mid * 1.002, bidQuantity: 100, askQuantity: 100, midPrice: mid * 1.0015, spreadBps: 10, updatedAt: NOW }
+                : { symbol, bidPrice: mid * 0.998, askPrice: mid * 0.999, bidQuantity: 100, askQuantity: 100, midPrice: mid * 0.9985, spreadBps: 10, updatedAt: NOW };
+        };
+        deferredState.lastReferenceTs = deferred.marketData.BTC.at(-1)!.endTs - BAR_MS;
+        deferredState.deferredEntryReferenceTs = undefined;
+        await deferred.stateStore.save(deferredState);
+        await blockedRisk(deferred.riskPath);
+        const entriesBeforeBlock = deferred.adapter.entryCalls;
+        const blocked = await deferred.engine.tick();
+        assert.equal(blocked.status, "risk-blocked");
+        assert.match(blocked.reason, /SHARED_CRYPTO_RISK:DAILY_LOSS_TRIPPED/);
+        const blockedState = await deferred.stateStore.load();
+        assert.equal(blockedState.lastReferenceTs, deferred.marketData.BTC.at(-1)!.endTs, "position maintenance may consume the bar");
+        assert.equal(blockedState.deferredEntryReferenceTs, deferred.marketData.BTC.at(-1)!.endTs, "entry opportunity must remain deferred");
+        const heldBarsAfterBlockedMaintenance = (blockedState.activePositions || [blockedState.active!])[0].holdingBars;
+        await risk(deferred.riskPath);
+        const retried = await deferred.engine.tick();
+        assert.equal(retried.status, "entered");
+        assert.equal(deferred.adapter.entryCalls, entriesBeforeBlock + 1, "same-bar retry must fill the free V12 slot exactly once");
+        const retriedState = await deferred.stateStore.load();
+        assert.equal(retriedState.deferredEntryReferenceTs, undefined);
+        assert.equal((retriedState.activePositions || []).length, 2);
+        assert.equal((retriedState.activePositions || [])[0].holdingBars, heldBarsAfterBlockedMaintenance, "deferred retry must not double-count the completed bar");
 
         // Between-bar venue-resident TP/STOP fills must reconcile local state
         // without waiting for the next 2h signal tick. Only the confirmed flat
