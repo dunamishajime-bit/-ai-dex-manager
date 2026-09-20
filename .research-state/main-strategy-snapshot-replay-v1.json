@@ -2,7 +2,7 @@
   "version": 1,
   "datasetId": "WIN80_USDM_1H_REFERENCE_2025H2_2026Q1_V1",
   "strategyId": "WIN80_ULTRA90_TOP1_V1",
-  "generatedAt": "2026-09-20T13:04:12.292Z",
+  "generatedAt": "2026-09-20T18:48:12.471Z",
   "source": "binance-usdm-futures",
   "period": {
     "startTs": 1751328000000,
