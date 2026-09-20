@@ -9,7 +9,7 @@ import { QUALITY102_CAUSAL_V1 } from "@/config/disdexQuality102CausalV1Runtime";
 import v52V50Runtime from "@/config/v52V50Runtime.json";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 
-test("current LIVE target preserves the validated V12 signal contract with intentional Top2 sizing", () => {
+test("current LIVE target preserves the validated V12 signal contract with Top3 residual sizing", () => {
   assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
   assert.equal(V12_X1_ALL.strongRegimeThresholdPct, 0.0359);
   assert.equal(V12_X1_ALL.strongRegimeQualityScoreMinimum, 0.15);
@@ -18,8 +18,10 @@ test("current LIVE target preserves the validated V12 signal contract with inten
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumMomentumPct, 0.054);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumAtrRatio, 0.014);
   assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.4649);
-  assert.equal(V12_X1_ALL.maximumPositions, 2);
+  assert.equal(V12_X1_ALL.maximumPositions, 3);
   assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
+  assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.10);
+  assert.equal(V12_X1_ALL.rank3MinimumScore, 0.70);
   assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
   assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
 });
@@ -39,8 +41,8 @@ test("PENGU V20/V8 implementation target has Recovery V8 live-enabled as supplem
   assert.equal(PENGU_DUAL_LS_V2.hardStopCooldownHours, 24);
 });
 
-test("Q102 one-slot LIVE target uses family sizing up to 2.50x under shared 3.0x/3.5x caps", () => {
-  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 2.5);
+test("Q102 one-slot LIVE target uses DD-governed sizing up to 3.00x under shared 3.0x/3.5x caps", () => {
+  assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 3.0);
   assert.equal(QUALITY102_CAUSAL_V1.maximumPositions, 1);
   assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
   assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 3.5);

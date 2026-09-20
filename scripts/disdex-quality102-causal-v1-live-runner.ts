@@ -530,7 +530,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             sharedDailyRiskPath: config.sharedDailyRiskPath,
             portfolioDdGovernorPath: config.portfolioDdGovernorPath,
             v12DynamicAdapter: sharedV12Adapter,
-            v12StatePath: env.V12_X1_ALL_STATE_PATH || "/var/lib/disdex/v12-x1-all/runner.json",
+            v12StatePath: String(env.V12_X1_ALL_STATE_PATH || "/var/lib/disdex/v12-x1-all/runner.json").trim(),
             accountScope: "ASTER_FUTURES",
         },
     });

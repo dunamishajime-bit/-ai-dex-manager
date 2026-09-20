@@ -38,6 +38,7 @@ async function failClosed(
     message: string,
 ): Promise<V12DynamicResidualReductionResult> {
     state.manualReview = message;
+    state.reconciliationStatus = "MANUAL_REVIEW";
     await store.save(state);
     return { status: "blocked", message, trimmedGross: 0 };
 }
@@ -219,6 +220,12 @@ export async function reduceV12DynamicResidualForCoreConflict(
         updateActives(state, latestRows);
         state.pending = undefined;
         state.lastCompletedIdempotencyKey = clientOrderId;
+        state.latestTrimOrderId = result.clientOrderId || clientOrderId;
+        state.lastTrimReason = input.causeIdempotencyKey;
+        state.lastTrimAt = decisionNow;
+        state.lastTrimQuantity = result.executedQuantity;
+        state.trimCount = (state.trimCount || 0) + 1;
+        state.reconciliationStatus = "PASS";
         await store.save(state);
 
         const actualTrimmedGross = Math.max(

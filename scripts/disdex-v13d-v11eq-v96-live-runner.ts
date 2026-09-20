@@ -20,7 +20,7 @@ const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as co
 
 const READ_ONLY_PREFLIGHT_SCRIPT = "scripts/disdex-v96-v52-readonly-preflight.ts" as const;
 const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-strategy-preflight.ts" as const;
-const MARGIN_AWARE_V52_ENGINE = "scripts/disdex_v52_margin_aware_live_engine.py" as const;
+const V52_ENGINE = DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine;
 const V52_MARKET_RECHECK_INTERVAL_MS = 30_000;
 const V52_DATA_RECHECK_INTERVAL_MS = 60_000;
 
@@ -184,7 +184,7 @@ function spawnV52Worker(runnerMode: RunnerMode, daemon: boolean): ManagedChild {
     const env = buildCombinedChildEnvironment(runnerMode);
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
-    const stock = spawn(python, [MARGIN_AWARE_V52_ENGINE, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    const stock = spawn(python, [V52_ENGINE, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
     return { name: "stock-v52-aster-only", process: stock };
 }
 
@@ -388,7 +388,7 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
         requiredInitialLeverage: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoInitialLeverage,
         maximumInitialMarginFraction: DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumInitialMarginFraction,
         minimumAvailableBalanceFractionAfterOrder: DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumAvailableBalanceFractionAfterOrder,
-        v52Engine: MARGIN_AWARE_V52_ENGINE,
+        v52Engine: V52_ENGINE,
         v52PreflightStatus,
         v52WorkerStarted: shouldStartV52Worker(v52PreflightStatus),
         killSwitchPath: paths.killSwitchPath,
@@ -523,12 +523,12 @@ function selfTest() {
     assert.equal(shouldHoldFailClosed("live", false), false);
     assert.equal(shouldHoldFailClosed("paper", true), false);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
-    assert.equal(MARGIN_AWARE_V52_ENGINE, DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine);
+    assert.equal(V52_ENGINE, DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine);
     for (const [name, previous] of Object.entries(previousEnvironment)) {
         if (previous === undefined) delete process.env[name];
         else process.env[name] = previous;
     }
-    console.log("V96 + V52 margin-aware supervisor self-test: PASS");
+    console.log("V96 + V52 supervisor self-test: PASS");
 }
 
 async function main() {

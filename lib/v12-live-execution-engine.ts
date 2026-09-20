@@ -13,6 +13,7 @@ import {
     installV12Protection,
     planV12TrailingStop,
     reconcileV12Protection,
+    resizeV12ProtectionQuantity,
     type V12StopState,
     type V12TrailingPlan,
 } from "@/lib/v12-resident-stop-lifecycle";
@@ -296,6 +297,60 @@ export class V12LiveExecutionEngine {
         return undefined;
     }
 
+    private async reconcilePendingDynamicTrim(state: V12X1AllRunnerState, pending: V12PendingOrderState): Promise<V12LiveTickResult | undefined> {
+        const active = activePositionsOf(state).find((row) => row.positionId === pending.positionId || row.symbol.toUpperCase() === pending.symbol.toUpperCase());
+        if (!active) return this.fail(state, "V12_DYNAMIC_TRIM_PENDING_WITHOUT_ACTIVE_STATE");
+        const result = await this.d.adapter.reconcileOrder(pending.symbol, pending.clientOrderId);
+        if (result.status === "UNKNOWN" || result.executionUnknown) return this.fail(state, "V12_DYNAMIC_TRIM_PENDING_UNKNOWN");
+        if (["REJECTED", "CANCELED", "EXPIRED"].includes(result.status) && result.executedQuantity <= EPS) {
+            state.pending = undefined;
+            state.lastCompletedIdempotencyKey = pending.idempotencyKey;
+            state.latestTrimOrderId = result.clientOrderId || pending.clientOrderId;
+            state.lastTrimReason = pending.reason || "DYNAMIC_TRIM_TERMINAL_NO_RETRY";
+            state.lastTrimAt = this.now();
+            state.reconciliationStatus = "PASS";
+            await this.d.stateStore.save(state);
+            return { status: "held", reason: "V12_DYNAMIC_TRIM_TERMINAL_NO_RETRY", clientOrderId: pending.clientOrderId };
+        }
+        if (result.status !== "FILLED" || result.executedQuantity <= EPS) return this.fail(state, "V12_DYNAMIC_TRIM_PENDING_UNRESOLVED");
+        if (result.symbol.toUpperCase() !== active.symbol.toUpperCase()
+            || result.executedQuantity > active.dynamicQuantity + Math.max(1e-8, active.dynamicQuantity * 0.001)) {
+            return this.fail(state, "V12_DYNAMIC_TRIM_PENDING_RESULT_MISMATCH");
+        }
+        const refreshed = (await this.d.adapter.getPositions()).find((row) => row.symbol.toUpperCase() === active.symbol.toUpperCase() && Math.abs(row.quantity) > EPS);
+        const expectedRemaining = Math.max(0, active.quantity - result.executedQuantity);
+        if (expectedRemaining > EPS && (!refreshed || Math.abs(actualQuantity(refreshed) - expectedRemaining) > Math.max(1e-8, expectedRemaining * 0.02))) {
+            return this.fail(state, "V12_DYNAMIC_TRIM_PENDING_POSITION_MISMATCH");
+        }
+        let protection = active.protection;
+        if (expectedRemaining > EPS) {
+            protection = await resizeV12ProtectionQuantity(this.d.adapter, protection, expectedRemaining);
+            if (protection.manualReview) return this.fail(state, protection.manualReview);
+        } else {
+            await cancelV12Protection(this.d.adapter, protection);
+        }
+        const venueQuantity = expectedRemaining;
+        const nextDynamicQuantity = Math.max(0, venueQuantity - active.baseQuantity);
+        const dynamicRatio = active.dynamicQuantity > EPS ? nextDynamicQuantity / active.dynamicQuantity : 0;
+        const nextDynamicGross = Math.max(0, active.dynamicGross * dynamicRatio);
+        const updated = venueQuantity > EPS
+            ? { ...active, quantity: venueQuantity, gross: active.baseGross + nextDynamicGross, baseQuantity: Math.min(active.baseQuantity, venueQuantity), dynamicQuantity: nextDynamicQuantity, dynamicGross: nextDynamicGross, dynamicUpdatedAt: this.now(), protection }
+            : undefined;
+        const remaining = activePositionsOf(state).filter((row) => row.positionId !== active.positionId);
+        syncActivePositions(state, updated ? [...remaining, updated] : remaining);
+        state.pending = undefined;
+        state.lastCompletedIdempotencyKey = pending.idempotencyKey;
+        state.latestTrimOrderId = result.clientOrderId || pending.clientOrderId;
+        state.lastTrimReason = pending.reason || "CORE_PRIORITY_DYNAMIC_TRIM";
+        state.lastTrimAt = this.now();
+        state.lastTrimQuantity = result.executedQuantity;
+        state.trimCount = (state.trimCount || 0) + 1;
+        state.reconciliationStatus = "PASS";
+        await this.d.stateStore.save(state);
+        await this.verifyNoUnexpectedV12Orders(state);
+        return undefined;
+    }
+
     private async restartReconcile(state: V12X1AllRunnerState, positions: DirectPosition[], quality102Ownership?: Quality102CausalV1OwnershipSnapshot) : Promise<V12LiveTickResult | undefined> {
         this.validatePortfolioPositions(positions, quality102Ownership);
         if (state.killSwitch?.active || state.manualReview) return { status: "manual-review", reason: state.killSwitch?.reason || state.manualReview || "V12_MANUAL_REVIEW" };
@@ -307,7 +362,10 @@ export class V12LiveExecutionEngine {
                 if (recovery) return recovery;
                 state = await this.d.stateStore.load();
             } else if (state.pending.action === "DYNAMIC_TRIM") {
-                return this.fail(state, `V12_DYNAMIC_TRIM_PENDING_REQUIRES_MANUAL_REVIEW:${state.pending.clientOrderId}`);
+                const recovery = await this.reconcilePendingDynamicTrim(state, state.pending);
+                if (recovery) return recovery;
+                state = await this.d.stateStore.load();
+                positions = await this.d.adapter.getPositions();
             } else {
                 return this.fail(state, `V12_FAILSAFE_CLOSE_PENDING_REQUIRES_MANUAL_REVIEW:${state.pending.clientOrderId}`);
             }
