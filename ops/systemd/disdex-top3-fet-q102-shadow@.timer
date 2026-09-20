@@ -1,0 +1,11 @@
+[Unit]
+Description=Run DisDex Top3 + FET + Q102 DD Governor shadow every minute (%i)
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=60s
+AccuracySec=5s
+Persistent=false
+
+[Install]
+WantedBy=timers.target

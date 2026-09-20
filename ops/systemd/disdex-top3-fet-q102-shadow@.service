@@ -1,0 +1,28 @@
+[Unit]
+Description=DisDex Top3 + FET + Q102 DD Governor shadow (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=-/etc/disdex/disdex-v12-x1-all.env
+Environment=NODE_ENV=production
+Environment=TOP3_FET_Q102_SHADOW_STATE_PATH=/var/lib/disdex/top3-fet-q102-shadow/state.json
+Environment=TOP3_FET_Q102_SHADOW_SNAPSHOT_PATH=/var/lib/disdex/top3-fet-q102-shadow/snapshot.json
+Environment=V12_DECISION_SNAPSHOT_PATH=/var/lib/disdex/v12-x1-all/decision-snapshot.json
+ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/top3-fet-q102-shadow
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-top3-fet-q102-shadow.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases /var/lib/disdex/v12-x1-all
+ReadWritePaths=/var/lib/disdex/top3-fet-q102-shadow
+UMask=0077
