@@ -406,20 +406,84 @@ function Quality102Detail({ details, production }: { details?: Quality102Runtime
   );
 }
 
+
+const Q102_S34_MODELS: Record<string, string[]> = {
+  AAVEUSDT: ["MR48_Z2.5_H24 / MR / S3"],
+  APTUSDT: ["REV24_T0.05_H24 / REV / S3", "REV6_T0.03_H24 / REV / S3"],
+  AVAXUSDT: ["MR24_Z1.5_H24 / MR / S3", "PB168_0.1_P24_0.04_H24 / PB / S3", "REV12_T0.03_H12 / REV / S3", "REV12_T0.03_H8 / REV / S3", "REV12_T0.08_H24 / REV / S3"],
+  DOGEUSDT: ["BRK24_H48_V1.0 / BRK / S3", "BRK72_H48_V0.8 / BRK / S3", "MR48_Z2.0_H12 / MR / S4", "MR72_Z1.5_H12 / MR / S4", "MR72_Z2.5_H12 / MR / S4"],
+  DOTUSDT: ["BRK72_H48_V0.8 / BRK / S3"],
+  FETUSDT: ["BRK24_H48_V1.2 / BRK / S3", "PB168_0.1_P24_0.02_H12 / PB / S3", "PB72_0.1_P12_0.04_H12 / PB / S3", "REV12_T0.05_H12 / REV / S3", "REV12_T0.08_H24 / REV / S3", "REV24_T0.05_H8 / REV / S3", "REV24_T0.08_H8 / REV / S3"],
+  LDOUSDT: ["BRK24_H24_V1.0 / BRK / S3", "BRK48_H24_V1.0 / BRK / S3"],
+  NEARUSDT: ["BRK168_H24_V1.2 / BRK / S3", "BRK48_H48_V1.2 / BRK / S3"],
+  RENDERUSDT: ["BRK168_H12_V1.2 / BRK / S4"],
+  SOLUSDT: ["BRK24_H48_V1.2 / BRK / S3", "BRK72_H48_V1.2 / BRK / S3"],
+  UNIUSDT: ["MR24_Z2.0_H24 / MR / S4", "MR48_Z1.5_H24 / MR / S4", "MR72_Z1.5_H24 / MR / S4"],
+};
+
+function q102ReasonText(reason: string) {
+  if (reason === "QUALITY102_CAUSAL_V4_NO_SIGNAL") return "今回の判定時刻では HIGH_VOL / S34 のどちらからも最終候補が生成されていません。";
+  if (reason === "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL") return "REV Long候補は生成されましたが、14日リターン +24% 条件を満たさず棄却。別候補へのbackfillはしません。";
+  if (reason === "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL") return "Causal V4の自然シグナルが全Gateを通過しています。";
+  if (reason.startsWith("OBSERVER_ERROR:")) return "read-only判定の取得中にエラー: " + reason.slice("OBSERVER_ERROR:".length);
+  return reason || "理由未取得";
+}
+
 function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapshot | null; error: string | null }) {
   if (error) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{error}</div></section>;
   if (!snapshot) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 text-sm text-white/60">Production selectorをread-only評価中…</div></section>;
   const eligible = snapshot.items.filter((item) => item.eligible);
+  const referenceHourUtc = Number.isFinite(snapshot.referenceTs) ? new Date(snapshot.referenceTs).getUTCHours() : -1;
+  const s34GridOpen = referenceHourUtc >= 0 && referenceHourUtc % 4 === 1;
+
   return <section className="panel-gold rounded-[28px] p-4 md:p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div><div className="text-lg font-bold text-white">Q102 通貨別 Causal V4 判定</div><p className="mt-1 text-xs text-white/55">Production current releaseの実Causal V4コードをread-only実行。各通貨の自然Signalと、1-slot全体selectorの今回選定を分けて表示します。</p></div>
-      <div className="text-right text-xs text-white/60"><div>Eligible {eligible.length}/{snapshot.items.length}</div><div className="mt-1">Global selected: {snapshot.selectedSymbol || "なし"} {snapshot.selectedFamily ? "/ " + snapshot.selectedFamily : ""}</div></div>
+      <div>
+        <div className="text-lg font-bold text-white">Q102 通貨別 Causal V4 判定</div>
+        <p className="mt-1 text-xs text-white/55">各行を開くと、NO_SIGNALの中身・S34対象モデル・Family別Gate・4時間Grid・1-slot selectorまで確認できます。表示はread-onlyです。</p>
+      </div>
+      <div className="text-right text-xs text-white/60">
+        <div>Eligible {eligible.length}/{snapshot.items.length}</div>
+        <div className="mt-1">Global selected: {snapshot.selectedSymbol || "なし"} {snapshot.selectedFamily ? "/ " + snapshot.selectedFamily : ""}</div>
+        <div className="mt-1">判定時刻 UTC {referenceHourUtc >= 0 ? String(referenceHourUtc).padStart(2, "0") + ":00" : "不明"} / S34 4h Grid: {s34GridOpen ? "対象" : "対象外"}</div>
+      </div>
     </div>
-    <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
-      <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">通貨</th><th className="px-3 py-2">自然Gate</th><th className="px-3 py-2">Side</th><th className="px-3 py-2">Family</th><th className="px-3 py-2">Layer</th><th className="px-3 py-2">Variant</th><th className="px-3 py-2">Gross</th><th className="px-3 py-2">1-slot選定</th><th className="px-3 py-2">理由</th></tr></thead>
-      <tbody>{snapshot.items.map((item) => <tr key={item.symbol} className="border-t border-white/5"><td className="px-3 py-2 font-semibold text-white">{item.symbol}</td><td className={"px-3 py-2 font-semibold " + (item.eligible ? "text-emerald-200" : "text-rose-200")}>{item.eligible ? "PASS" : "BLOCK"}</td><td className="px-3 py-2 text-white/75">{item.side}</td><td className="px-3 py-2 text-white/75">{item.family || "—"}</td><td className="px-3 py-2 text-white/75">{item.layer || "—"}</td><td className="px-3 py-2 text-white/65">{item.variant || "—"}</td><td className="px-3 py-2 text-white/75">{item.requestedGross > 0 ? item.requestedGross.toFixed(3) + "x" : "—"}</td><td className={"px-3 py-2 font-semibold " + (item.selected ? "text-gold-100" : "text-white/45")}>{item.selected ? "SELECTED" : "—"}</td><td className="px-3 py-2 text-white/60">{item.reason}</td></tr>)}</tbody></table>
+
+    <div className="mt-4 space-y-2">
+      {snapshot.items.map((item) => {
+        const models = Q102_S34_MODELS[item.symbol] || [];
+        return <details key={item.symbol} className="group rounded-2xl border border-white/10 bg-black/20">
+          <summary className="grid cursor-pointer list-none grid-cols-[90px_72px_70px_1fr_92px] items-center gap-2 px-3 py-3 text-xs md:grid-cols-[110px_80px_80px_110px_100px_1fr_100px]">
+            <span className="font-bold text-white">{item.symbol}</span>
+            <span className={"font-semibold " + (item.eligible ? "text-emerald-200" : "text-rose-200")}>{item.eligible ? "PASS" : "BLOCK"}</span>
+            <span className="text-white/75">{item.side}</span>
+            <span className="hidden text-white/75 md:block">{item.family || "候補なし"}</span>
+            <span className="hidden text-white/65 md:block">{item.variant || "—"}</span>
+            <span className="truncate text-white/55">{q102ReasonText(item.reason)}</span>
+            <span className={"text-right font-semibold " + (item.selected ? "text-gold-100" : "text-white/45")}>{item.selected ? "SELECTED" : "詳細 ▼"}</span>
+          </summary>
+          <div className="border-t border-white/10 px-3 py-4 text-xs leading-5 text-white/70 md:px-4">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">今回の結論</div><div className="mt-1">{q102ReasonText(item.reason)}</div><div className="mt-2 text-white/45">Reference: {new Date(item.referenceTs).toLocaleString("ja-JP")}</div></div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">S34 4時間Grid</div><div className="mt-1">{s34GridOpen ? "PASS: UTC hour % 4 == 1" : "WAIT: 今回はS34新規判定Grid外"}</div><div className="mt-2 text-white/45">S34は UTC 01/05/09/13/17/21 時に評価</div></div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">Gross / 1-slot</div><div className="mt-1">要求Gross: {item.requestedGross > 0 ? item.requestedGross.toFixed(3) + "x" : "候補未生成"}</div><div className="mt-1">Global selector: {item.selected ? "この通貨を選択" : snapshot.selectedSymbol ? snapshot.selectedSymbol + " を優先" : "選択候補なし"}</div></div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3"><div className="font-semibold text-white">S34対象モデル</div><div className="mt-1">{models.length ? models.join(" / ") : "固定S34モデルなし（HIGH_VOL経路または対象外）"}</div></div>
+            </div>
+
+            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">PB</span><div className="mt-1">Trend + Pullback raw → weak variant除外 → ret14 / development / margin Gate。</div></div>
+              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">MR</span><div className="mt-1">Z-score逆張り raw → regime Gate → ret14 / development / margin Gate。</div></div>
+              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">BRK</span><div className="mt-1">過去高値/安値Break + 72h median volume → quality Gate → V4 symbol/variant ret14 window。</div></div>
+              <div className="rounded-xl border border-white/10 p-3"><span className="font-semibold text-white">REV</span><div className="mt-1">短期反転 raw → V4 feature Gate。Longは追加で ret14 ≥ +24% が必須。</div></div>
+            </div>
+
+            <div className="mt-3 rounded-xl border border-sky-400/15 bg-sky-400/[0.05] px-3 py-2 text-[11px] text-white/55">
+              判定順: raw detector → historical quality Gate → V4 feature Gate → REV improvement Gate → family/layer priority → 1-slot global selector。現在snapshotに実測feature値が無い場合は条件構造を表示し、値を推測しません。
+            </div>
+          </div>
+        </details>;
+      })}
     </div>
-    <p className="mt-3 text-[11px] leading-5 text-white/50">自然Gate PASSでも、実発注にはQ102 1-slot、base position idle、共有Gross、Kill Switch、注文競合、最小Notionalなどの最終Gateが必要です。ここでは注文操作を行いません。</p>
   </section>;
 }
 
