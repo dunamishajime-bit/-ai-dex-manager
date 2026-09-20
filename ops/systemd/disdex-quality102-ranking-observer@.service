@@ -17,7 +17,7 @@ Environment=QUALITY102_CAUSAL_V1_HISTORY_CACHE_PATH=/var/lib/disdex/quality102-c
 Environment=QUALITY102_CAUSAL_V1_SYMBOLS=SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,TIAUSDT,JUPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,RENDERUSDT,TAOUSDT,TRXUSDT
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
-ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-quality102-ranking-observer.ts
+ExecStart=/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/generated/disdex-quality102-ranking-observer.mjs
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
