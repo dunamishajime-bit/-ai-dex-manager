@@ -50,13 +50,14 @@ test("activation entry points require the read-only readiness gate", async () =>
     readFile("ops/systemd/disdex-quality102-causal-v1@.service", "utf8"),
   ]);
   assert.match(wiring, /assert_current_live_target_ready\(\)/);
-  assert.match(wiring, /scripts\/disdex-current-live-target-readiness\.ts\" --require-ready/);
+  assert.match(wiring, /scripts\/disdex-current-live-target-readiness\.ts\" --require-implementation-ready/);
   const applyStart = wiring.indexOf("apply_wiring() {");
   const gate = wiring.indexOf("  assert_current_live_target_ready", applyStart);
   const firstMutation = wiring.indexOf("  install -d", applyStart);
-  assert.ok(applyStart >= 0 && gate > applyStart && firstMutation > gate, "readiness must run before apply mutations");
-  for (const unit of [fetUnit, q102Unit]) {
-    assert.match(unit, /ExecStartPre=.*disdex-current-live-target-readiness\.ts --require-ready/);
+  assert.ok(applyStart >= 0 && gate > applyStart && firstMutation > gate, "implementation readiness must run before apply mutations");
+  for (const [unit, runner] of [[fetUnit, "FET_BRK48_RESIDUAL"], [q102Unit, "QUALITY102_CAUSAL_V1"]] as const) {
+    assert.match(unit, /ExecStartPre=.*disdex-current-live-target-readiness\.ts --require-implementation-ready/);
+    assert.match(unit, new RegExp(`ExecStartPre=.*disdex-live-operator-activation-gate\\.mjs.*--runner ${runner}`));
   }
 });
 

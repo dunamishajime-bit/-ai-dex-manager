@@ -67,6 +67,17 @@ validate_current_release() {
 unit_is_active() { [[ "$(systemctl is-active "$1" 2>/dev/null || true)" == active ]]; }
 unit_exists() { systemctl cat "$1" >/dev/null 2>&1; }
 
+
+operator_activation_ready() {
+  local runner
+  local gate="${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+  local activation_path="${DISDEX_OPERATOR_ACTIVATION_PATH:-/var/lib/disdex/shared/operator-activation/current.json}"
+  [[ -f "$gate" ]] || return 1
+  for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL; do
+    /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$RELEASE_SHA" --runner "$runner" --activation-path "$activation_path" >/dev/null 2>&1 || return 1
+  done
+}
+
 resolve_units() {
   V12_UNIT="disdex-v12-x1-all@$RELEASE_SHA.service"
   PENGU_UNIT="disdex-pengu-dual-ls-v2@$RELEASE_SHA.service"
@@ -190,13 +201,14 @@ run_self_test() {
   ! is_recoverable_shared_reason 'daily loss latch'
   ! is_historical_local_reason 'unknown manual review'
   is_protected_hold_action 'HOLD_PROTECTED'
+  grep -q 'V12_AUTO_REPAIR_OPERATOR_ACTIVATION_REQUIRED' "$0"
   ! is_protected_hold_action 'FLATTEN_MANAGED'
   printf 'V12 Kill Switch auto-repair self-test: PASS\n'
 }
 
 main() {
-  [[ "$(id -u)" == 0 ]] || { printf 'V12_AUTO_REPAIR_ROOT_REQUIRED\n' >&2; exit 1; }
   if [[ "${1:-}" == --self-test ]]; then run_self_test; return 0; fi
+  [[ "$(id -u)" == 0 ]] || { printf 'V12_AUTO_REPAIR_ROOT_REQUIRED\n' >&2; exit 1; }
   validate_current_release
   resolve_units
   read_kill_and_state
@@ -232,6 +244,11 @@ main() {
   fi
   if ! is_bool_true "${DISDEX_V12_LIVE_ALLOW_REAL_ORDERS:-false}"; then
     printf '{"status":"V12_AUTO_REPAIR_LIVE_GATES_NOT_ALL_ENABLED","action":"%s","ordersSent":false,"positionChangesSent":false}\n' "$action"
+    return 0
+  fi
+
+  if ! operator_activation_ready; then
+    printf '{"status":"V12_AUTO_REPAIR_OPERATOR_ACTIVATION_REQUIRED","action":"%s","ordersSent":false,"positionChangesSent":false,"compositionQuiesced":false}\n' "$action"
     return 0
   fi
 

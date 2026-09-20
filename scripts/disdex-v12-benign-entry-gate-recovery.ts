@@ -9,6 +9,7 @@ import { runAsterReadOnlyRecoveryGate } from "../lib/aster-readonly-recovery-gat
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { isV12BenignEntryQuantityGateError } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
+import { normalizeLiveStateOwnership } from "../lib/disdex-live-state-ownership";
 
 const ACK = "I_ACK_V12_BENIGN_ENTRY_GATE_RECOVERY_AFTER_READONLY_ABSENCE";
 const SHA = /^[0-9a-f]{40}$/;
@@ -171,9 +172,11 @@ async function main() {
         };
         try {
             await atomicWrite(statePath, recovered);
+            await normalizeLiveStateOwnership(statePath, { label: "V12_BENIGN_RECOVERY_STATE" });
             await store.load();
         } catch (error) {
             await writeFile(statePath, bytes, { mode: 0o600 }).catch(() => undefined);
+            await normalizeLiveStateOwnership(statePath, { label: "V12_BENIGN_RECOVERY_ROLLBACK_STATE" }).catch(() => undefined);
             throw error;
         }
 

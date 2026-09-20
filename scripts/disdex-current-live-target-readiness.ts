@@ -55,11 +55,17 @@ async function main() {
   }
 
   const blockers = [...actualImplementationBlockers, ...activationBlockers];
+  const implementationReady = actualImplementationBlockers.length === 0 && readiness.implementationStatus === "READY";
+  if (process.argv.includes("--require-implementation-ready") && !implementationReady) {
+    console.log(JSON.stringify({ status: "PRODUCTION_IMPLEMENTATION_NOT_READY", target: readiness.target, implementationReady: false, blockers: actualImplementationBlockers, ordersSent: 0, cancelSent: 0, positionChangesSent: 0 }));
+    process.exitCode = 2;
+    return;
+  }
   if (blockers.length > 0 || readiness.status !== "READY" || readiness.ordersEnabled !== true) {
     console.log(JSON.stringify({
       status: "PRODUCTION_ACTIVATION_BLOCKED",
       target: readiness.target,
-      implementationReady: actualImplementationBlockers.length === 0 && readiness.implementationStatus === "READY",
+      implementationReady,
       blockers,
       ordersSent: 0,
       cancelSent: 0,

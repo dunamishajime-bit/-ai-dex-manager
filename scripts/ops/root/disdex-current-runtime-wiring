@@ -8,6 +8,7 @@ TRADING_ROOT="${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}"
 TRADING_RELEASES="${TRADING_ROOT}/releases"
 TRADING_CURRENT="${TRADING_ROOT}/current"
 SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
+OPERATOR_ACTIVATION_PATH="${SHARED_ROOT}/operator-activation/current.json"
 V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
 PENGU_STATE_ROOT="/var/lib/disdex/pengu-dual-ls-v2"
 LIVE_STATE_FILES=(
@@ -92,6 +93,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-v12-benign-entry-gate-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
@@ -331,13 +333,14 @@ ensure_monitor_timer_active() {
 
 assert_current_live_target_ready() {
   local tsx="$CURRENT_RELEASE/node_modules/.bin/tsx"
-  "$tsx" "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts" --require-ready
+  "$tsx" "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts" --require-implementation-ready
 }
 
 apply_wiring() {
   require_root_for_apply
   assert_current_live_target_ready
   install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
+  install -d -o root -g root -m 0755 "${SHARED_ROOT}/operator-activation"
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
     printf 'V52 legacy crypto state path exists but is not a directory: %s\n' "$V52_LEGACY_CRYPTO_ROOT" >&2
     return 1
@@ -465,6 +468,7 @@ DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
 DISDEX_WATCHDOG_AUDIT_PATH=/var/lib/disdex/runner-health/private/watchdog-current-audit.json
 DISDEX_WATCHDOG_LOCK_PATH=/var/lib/disdex/runner-health/private/watchdog-current.lock
+DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
 DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
 DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
 DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
@@ -557,6 +561,7 @@ ReadWritePaths=/home/deploy/ai-dex-manager/data"
 
   write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V12_X1_ALL --activation-path ${OPERATOR_ACTIVATION_PATH}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=V12_LIVE_ACK=${DEPLOYED_SHA}
@@ -573,6 +578,7 @@ Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 
   write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner PENGU_V8 --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/pengu-dual-ls-v2/runner-live.json ]; then chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2/runner-live.json && chmod 600 /var/lib/disdex/pengu-dual-ls-v2/runner-live.json; fi'
 ReadWritePaths=${PENGU_STATE_ROOT}
 Environment=PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
@@ -590,6 +596,7 @@ Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 
   write_atomic "${Q102_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner QUALITY102_CAUSAL_V1 --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
 Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
@@ -606,6 +613,7 @@ Environment=TOTAL_GROSS_CAP=3.5"
 
   write_atomic "${FET_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner FET_BRK48_RESIDUAL --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json ]; then chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json && chmod 600 /var/lib/disdex/fet-brk48-residual/state.json; fi'
 Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
@@ -645,6 +653,7 @@ WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=
 ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V52 --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStart=
 ExecStart=${CURRENT_RELEASE}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
@@ -710,6 +719,7 @@ self_test() {
     scripts/ops/root/disdex-v12-kill-switch-auto-repair \
     scripts/ops/root/disdex-v12-three-hour-health-check \
     scripts/ops/root/disdex-runner-watchdog-current.mjs \
+    scripts/ops/root/disdex-live-operator-activation-gate.mjs \
     scripts/ops/root/disdex-runner-health-snapshot-current.mjs \
     scripts/ops/root/disdex-trade-fill-notifier.ts \
     scripts/ops/root/disdex-vps-retention-cleanup \

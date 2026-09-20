@@ -9,6 +9,7 @@ import { FileQuality102CausalV1StateStore } from "../lib/disdex-quality102-causa
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
+import { normalizeLiveStateOwnership } from "../lib/disdex-live-state-ownership";
 
 const ACK = "I_ACK_V12_PRESUBMIT_SNAPSHOT_RECOVERY_AFTER_READONLY_FLAT";
 const REVIEW_REASON = "STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID";
@@ -149,6 +150,7 @@ async function main() {
                 killSwitch: undefined,
                 reconciliationStatus: "PASS",
             });
+            await normalizeLiveStateOwnership(v12StatePath, { label: "V12_PRESUBMIT_RECOVERY_STATE" });
             await atomicWrite(sharedKill.sourcePath, {
                 active: false,
                 reason: "V12 pre-submit account snapshot failure reconciled read-only; no exchange order or position existed.",
@@ -160,6 +162,7 @@ async function main() {
             });
         } catch (error) {
             await writeFile(v12StatePath, stateBytes, { mode: 0o600 }).catch(() => undefined);
+            await normalizeLiveStateOwnership(v12StatePath, { label: "V12_PRESUBMIT_RECOVERY_ROLLBACK_STATE" }).catch(() => undefined);
             await writeFile(sharedKill.sourcePath, killBytes, { mode: 0o600 }).catch(() => undefined);
             throw error;
         }

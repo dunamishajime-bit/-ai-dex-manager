@@ -3,6 +3,7 @@ import { chmod, lstat, mkdir, readFile, readlink, realpath, rename, unlink, writ
 import { readFileSync } from "node:fs";
 import { promisify } from "node:util";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { applyOperatorActivationGateToRestart, evaluateOperatorActivationGate } from "./disdex-live-operator-activation-gate.mjs";
 
 /**
  * Release-pinned, read-only runner health watchdog.
@@ -241,14 +242,16 @@ function buildConfig(env) {
     const statePath = env.DISDEX_WATCHDOG_STATE_PATH || join(healthRoot, "private", "watchdog-current-state.json");
     const auditPath = env.DISDEX_WATCHDOG_AUDIT_PATH || join(healthRoot, "private", "watchdog-current-audit.json");
     const lockPath = env.DISDEX_WATCHDOG_LOCK_PATH || join(healthRoot, "private", "watchdog-current.lock");
+    const operatorActivationPath = env.DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH || "/var/lib/disdex/shared/operator-activation/current.json";
     for (const path of [statePath, auditPath, lockPath]) {
         if (!pathWithin(healthRoot, path) || !isAbsoluteCanonicalPath(path)) throw new Error("watchdog private path escapes health root");
     }
+    if (!isAbsoluteCanonicalPath(operatorActivationPath)) throw new Error("watchdog operator activation path is non-canonical");
     const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || runnerConfig.V12_X1_ALL.expectedSha).trim().toLowerCase();
     if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
     const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
     const marginGuardUnit = `disdex-v12-v52-margin-guard@${expectedSha}.service`;
-    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath };
+    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
 }
 
 async function assertRelease(config) {
@@ -539,6 +542,15 @@ async function run(config) {
                 const attempts = evaluated.attempts;
                 let result = evaluated.result;
                 if (result.action === "RESTART") {
+                    const operatorGate = await evaluateOperatorActivationGate({
+                        releaseRoot: runner.expectedCwd,
+                        sha: runner.expectedSha,
+                        runner: runner.key,
+                        activationPath: config.operatorActivationPath,
+                    });
+                    result = applyOperatorActivationGateToRestart(result, operatorGate, runner, decision);
+                }
+                if (result.action === "RESTART") {
                     if (attempts.length >= MAX_ATTEMPTS) {
                         result = decision("HOLD_FAIL_CLOSED", "restart budget exhausted", runner);
                     } else {
@@ -601,6 +613,7 @@ function selfTest() {
     const baseConfigEnv = {
         DISDEX_WATCHDOG_HEALTH_ROOT: join(process.cwd(), "self-test-health"),
         DISDEX_WATCHDOG_RELEASE_ROOT: join(process.cwd(), "self-test-releases", sha),
+        DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH: join(process.cwd(), "self-test-operator-activation", "current.json"),
         DISDEX_WATCHDOG_EXPECTED_SHA: sha,
         DISDEX_WATCHDOG_V12_SERVICE_UNIT: v12.expectedUnit(sha),
         DISDEX_WATCHDOG_PENGU_SERVICE_UNIT: pengu.expectedUnit(sha),
@@ -717,6 +730,12 @@ function selfTest() {
     }
     console.log("DISDEX_CURRENT_WATCHDOG_RUNNER_TICK_FRESHNESS_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_V52_RELEASE_PIN_SELFTEST_PASS");
+    const restartRequested = decision("RESTART", "service is not active", v12);
+    const activationBlocked = applyOperatorActivationGateToRestart(restartRequested, { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_ABSENT" }, v12, decision);
+    if (activationBlocked.action !== "HOLD_FAIL_CLOSED" || activationBlocked.operatorActivationBlocked !== true || !activationBlocked.reason.includes("OPERATOR_LIVE_ACTIVATION_REQUIRED")) throw new Error("operator activation restart-block self-test failed");
+    const activationAllowed = applyOperatorActivationGateToRestart(restartRequested, { allowed: true, reason: "OPERATOR_LIVE_ACTIVATION_CONFIRMED" }, v12, decision);
+    if (activationAllowed.action !== "RESTART") throw new Error("operator activation ready self-test failed");
+    console.log("DISDEX_CURRENT_WATCHDOG_OPERATOR_ACTIVATION_GATE_SELFTEST_PASS");
     const source = readFileSync(new URL(import.meta.url), "utf8");
     if (/(?:submitOrder|cancelOrder|closePosition|placeMarket|modifyPosition)\s*\(/.test(source)) throw new Error("forbidden operation self-test failed");
     console.log("DISDEX_CURRENT_WATCHDOG_SELFTEST_PASS");
