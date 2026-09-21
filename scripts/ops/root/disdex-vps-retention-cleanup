@@ -176,6 +176,14 @@ def audit_release_references(
 
     if symlink_scan_error:
         unavailable.append(f"symlink:{symlink_scan_error}")
+        # A failed global symlink scan is already sufficient to make this
+        # release unverified.  Do not perform the much larger systemd/proc/
+        # state walks after that point; no candidate can be deleted safely.
+        return ReferenceAudit(
+            safe=False,
+            references={key: tuple(values) for key, values in references.items()},
+            reasons=tuple(unavailable),
+        )
     else:
         try:
             if symlink_references is None:
