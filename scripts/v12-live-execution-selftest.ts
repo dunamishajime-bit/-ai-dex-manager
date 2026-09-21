@@ -10,7 +10,7 @@ import type { V12AsterLiveAdapter, V12AsterOrderView } from "@/lib/v12-aster-liv
 import { V12LiveExecutionEngine } from "@/lib/v12-live-execution-engine";
 import { planV12TrailingStop, type ResidentOrderView } from "@/lib/v12-resident-stop-lifecycle";
 import { buildV12Signal, type V12Bar } from "@/lib/v12-x1-all";
-import { FileV12X1AllRunnerStateStore, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
+import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 
 const NOW = Date.parse("2026-08-17T12:00:00Z");
@@ -93,6 +93,7 @@ type FakeAdapter = V12AsterLiveAdapter & {
     pendingObservedBeforeSend: boolean;
     entryError?: Error;
     stateStore?: FileV12X1AllRunnerStateStore;
+    maxSlippageBps: number;
 };
 
 function fakeAdapter(): FakeAdapter {
@@ -104,6 +105,7 @@ function fakeAdapter(): FakeAdapter {
         stopPlacements: 0,
         tpPlacements: 0,
         pendingObservedBeforeSend: false,
+        maxSlippageBps: 0,
         executor: {
             getMarketQuote: async (symbol: string) => ({ symbol, bidPrice: 99.9, askPrice: 100.1, bidQuantity: 100, askQuantity: 100, midPrice: 100, spreadBps: 20, updatedAt: NOW }),
             normalizeMarketQuantity: async (symbol: string, quantity: number, referencePrice: number) => ({
@@ -120,6 +122,7 @@ function fakeAdapter(): FakeAdapter {
         credentialsReady: async () => true,
         getAccountSnapshot: async () => ({ availableBalance: 1000, walletBalance: 1000, asset: "USDT", updatedAt: NOW }),
         getPositions: async () => fake.positions,
+        getMaxSlippageBps: () => fake.maxSlippageBps,
         getOpenOrders: async () => [],
         listV12Orders: async () => [...fake.resident.values()].filter((row) => row.clientOrderId.startsWith("v12-") && row.status !== "CANCELED").map((row) => ({
             symbol: fake.positions[0]?.symbol || "ETHUSDT",
@@ -241,6 +244,46 @@ async function main() {
         assert.equal(normal.state.pending, undefined);
         assert.ok(normal.state.active?.protection.stopClientOrderId);
         assert.ok(normal.state.active?.protection.takeProfitClientOrderId);
+
+        // A fresh quote/fill slippage buffer must block an entry before the
+        // exposure adapter is called when an existing V12 position leaves no
+        // safe base-cap headroom.
+        const preorderCap = await makeHarness(root, "preorder-cap");
+        preorderCap.adapter.maxSlippageBps = 20;
+        const existingId = "v12-entry-existing-ltc";
+        const existingStopId = "v12-stop-existing-ltc";
+        const existingTpId = "v12-tp-existing-ltc";
+        const existing: V12ActivePositionState = {
+            symbol: "LTCUSDT",
+            side: "LONG",
+            quantity: 8,
+            gross: 0.9,
+            baseQuantity: 8,
+            baseGross: 0.9,
+            dynamicQuantity: 0,
+            dynamicGross: 0,
+            entryRank: 2,
+            positionId: existingId,
+            entryPrice: 112.5,
+            atrAtEntry: 2,
+            entrySignalTs: NOW - BAR_MS,
+            holdingBars: 0,
+            peakPrice: 1000,
+            troughPrice: 112.5,
+            protection: {
+                strategyId: "V12_X1.00_ALL", symbol: "LTCUSDT", side: "LONG", positionId: existingId,
+                quantity: 8, entryPrice: 112.5, atrAtEntry: 2, initialStop: 107.5, lastAckStop: 999.2,
+                takeProfit: 118.9, peakOrTrough: 1000, stopClientOrderId: existingStopId, takeProfitClientOrderId: existingTpId,
+            },
+        };
+        preorderCap.adapter.positions = [position("LTCUSDT", 8, 112.5)];
+        preorderCap.adapter.resident.set(existingStopId, { symbol: "LTCUSDT", clientOrderId: existingStopId, status: "NEW", side: "SELL", type: "STOP_MARKET", reduceOnly: true, quantity: 8, stopPrice: 999.2 });
+        preorderCap.adapter.resident.set(existingTpId, { symbol: "LTCUSDT", clientOrderId: existingTpId, status: "NEW", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: 8, stopPrice: 118.9 });
+        await preorderCap.stateStore.save({ ...(await preorderCap.stateStore.load()), active: existing, activePositions: [existing] });
+        const preorderCapResult = await preorderCap.engine.tick();
+        assert.equal(preorderCapResult.status, "capacity-blocked");
+        assert.match(preorderCapResult.reason, /^V12_(POSITION|BASE_AGGREGATE)_GROSS_OVER_CAP$/);
+        assert.equal(preorderCap.adapter.entryCalls, 0, "pre-order gross cap must prevent exposure submission");
 
         // Venue minimums are a benign capacity gate. They are detected before
         // pending state/order submission and must never trip the local kill switch.
@@ -422,14 +465,21 @@ async function main() {
             atrAtEntry: crash.signal!.atr,
             createdAt: NOW,
         };
-        const crashState: V12X1AllRunnerState = { schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: NOW, pending };
+        const crashState: V12X1AllRunnerState = {
+            schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: NOW, pending,
+            manualReview: "V12_BASE_AGGREGATE_GROSS_OVER_CAP",
+            killSwitch: { active: true, reason: "V12_BASE_AGGREGATE_GROSS_OVER_CAP", trippedAt: NOW },
+        };
         await crash.stateStore.save(crashState);
         crash.adapter.positions = [position(pending.symbol, pending.side === "LONG" ? pending.quantity : -pending.quantity, 100)];
         crash.adapter.reconcileResult = tradeResult({ clientOrderId: pendingId, symbol: pending.symbol, executedQuantity: pending.quantity, price: 100 });
         const recovered = await crash.engine.tick();
         assert.equal(recovered.status, "entered");
         assert.equal(crash.adapter.entryCalls, 0, "pending recovery must query the original ID instead of resubmitting");
-        assert.equal((await crash.stateStore.load()).pending, undefined);
+        const recoveredState = await crash.stateStore.load();
+        assert.equal(recoveredState.pending, undefined);
+        assert.equal(recoveredState.manualReview, undefined, "fully protected pending recovery may clear the prior review only after all checks pass");
+        assert.equal(recoveredState.killSwitch, undefined);
 
         // Crash after STOP_UPDATE pending save but before the exchange send: the
         // same deterministic replacement ID is submitted exactly once on restart.

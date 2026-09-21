@@ -60,6 +60,7 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     getPositions(): Promise<DirectPosition[]> { return this.executor.getPositions(); }
     getOpenOrders(): Promise<DirectOpenOrder[]> { return this.executor.getOpenOrders(); }
     getAccountSnapshot() { return this.executor.getAccountSnapshot(); }
+    getMaxSlippageBps() { return this.maxSlippageBps; }
 
     async normalizeStopPrice(symbol: string, requested: number) {
         if (!(requested > 0)) throw new Error("V12_STOP_PRICE_INVALID");

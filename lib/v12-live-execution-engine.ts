@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 import { AsterApiError } from "@/lib/aster-v3-client";
-import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
+import { activeReservedGross, FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-crypto-daily-risk";
 import type { ActivePortfolioPosition } from "@/lib/disdex-unified-portfolio-routing";
@@ -19,7 +19,7 @@ import {
 } from "@/lib/v12-resident-stop-lifecycle";
 import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, v12EntryGrossCapForRank, type V12Bar, type V12DecisionObservation, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
-import { decideV12ResidualEntry, type V12ResidualDecision } from "@/lib/v12-top2-residual";
+import { decideV12ResidualEntry, validateV12EntryGrossReservation, type V12ResidualDecision } from "@/lib/v12-top2-residual";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
@@ -271,11 +271,28 @@ export class V12LiveExecutionEngine {
             protection,
         };
         active = { ...active, quantity, entryPrice, protection: { ...active.protection, quantity, entryPrice } };
-        syncActivePositions(state, [...existing, active]); await this.d.stateStore.save(state);
         const installed = await installV12Protection(this.d.adapter, active.protection);
         if (installed.manualReview) return this.fail(state, installed.manualReview);
         const protectedActive = { ...active, protection: installed };
-        syncActivePositions(state, [...existing, protectedActive]); state.pending = undefined; state.lastCompletedIdempotencyKey = pending.idempotencyKey; await this.d.stateStore.save(state);
+        try {
+            syncActivePositions(state, [...existing, protectedActive]);
+        } catch (error) {
+            const reason = error instanceof Error ? error.message : String(error);
+            // The venue exposure already exists, so retain the pending/manual
+            // review state after protection is confirmed. This preserves the
+            // operator checkpoint instead of persisting an invalid over-cap
+            // active state or pretending the entry reconciled successfully.
+            state.reconciliationStatus = "MANUAL_REVIEW";
+            state.manualReview = reason;
+            await this.d.stateStore.save(state);
+            return this.fail(state, reason);
+        }
+        state.pending = undefined;
+        state.lastCompletedIdempotencyKey = pending.idempotencyKey;
+        state.manualReview = undefined;
+        state.killSwitch = undefined;
+        state.reconciliationStatus = "PASS";
+        await this.d.stateStore.save(state);
         return { status: "entered", reason: result.status === "PARTIALLY_FILLED" ? "PARTIAL_FILL_PROTECTED_AND_RECONCILED" : "ENTRY_RECOVERED_AND_PROTECTED", clientOrderId: pending.clientOrderId };
     }
 
@@ -372,7 +389,6 @@ export class V12LiveExecutionEngine {
 
     private async restartReconcile(state: V12X1AllRunnerState, positions: DirectPosition[], quality102Ownership?: Quality102CausalV1OwnershipSnapshot) : Promise<V12LiveTickResult | undefined> {
         this.validatePortfolioPositions(positions, quality102Ownership);
-        if (state.killSwitch?.active || state.manualReview) return { status: "manual-review", reason: state.killSwitch?.reason || state.manualReview || "V12_MANUAL_REVIEW" };
         if (state.pending) {
             if (state.pending.action === "ENTRY") return this.reconcilePendingEntry(state, state.pending, positions);
             if (state.pending.action === "EXIT") return this.reconcilePendingExit(state, state.pending, positions);
@@ -389,6 +405,7 @@ export class V12LiveExecutionEngine {
                 return this.fail(state, `V12_FAILSAFE_CLOSE_PENDING_REQUIRES_MANUAL_REVIEW:${state.pending.clientOrderId}`);
             }
         }
+        if (state.killSwitch?.active || state.manualReview) return { status: "manual-review", reason: state.killSwitch?.reason || state.manualReview || "V12_MANUAL_REVIEW" };
         const v12Actual = positions.filter((row) => V12_SYMBOLS.has(row.symbol.toUpperCase()) && Math.abs(row.quantity) > EPS);
         const stateActives = activePositionsOf(state);
         if (!stateActives.length && v12Actual.length) return this.fail(state, `V12_POSITION_ONLY_MISMATCH:${v12Actual.map((row) => row.symbol).join(",")}`);
@@ -439,6 +456,7 @@ export class V12LiveExecutionEngine {
         equity: number,
         sizing: ReturnType<typeof sizeV12Position>,
         decision: V12ResidualDecision,
+        quality102Ownership?: Quality102CausalV1OwnershipSnapshot,
     ): Promise<V12LiveTickResult> {
         const acceptedGross = decision.acceptedGross;
         const symbol = `${signal.symbol}USDT`;
@@ -450,7 +468,57 @@ export class V12LiveExecutionEngine {
         const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
         if (state.lastCompletedIdempotencyKey === clientOrderId) return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId };
         try {
-            await this.d.adapter.executor.normalizeMarketQuantity(symbol, quantity, expectedPrice);
+            const normalized = await this.d.adapter.executor.normalizeMarketQuantity(symbol, quantity, expectedPrice);
+            const [freshAccount, freshPositions, lockDocument] = await Promise.all([
+                this.d.adapter.getAccountSnapshot(),
+                this.d.adapter.getPositions(),
+                handle.document(),
+            ]);
+            const freshEquity = Math.max(0, finite(freshAccount.walletBalance));
+            if (!(freshEquity > 0)) return this.fail(state, "V12_ENTRY_GROSS_RESERVATION_EQUITY_INVALID");
+            const freshPortfolio = this.activePortfolio(freshPositions, freshEquity, quality102Ownership);
+            const freshComponents = v12GrossComponents(state, freshPortfolio);
+            const pendingBaseGross = state.pending?.action === "ENTRY"
+                ? finite(state.pending.baseRequestedGross, state.pending.requestedGross ?? 0)
+                : 0;
+            const pendingDynamicGross = state.pending?.action === "ENTRY"
+                ? finite(state.pending.dynamicRequestedGross, 0)
+                : 0;
+            const reservedGross = activeReservedGross(lockDocument);
+            const worstCaseGross = normalized.quantity * expectedPrice
+                * (1 + this.d.adapter.getMaxSlippageBps() / 10_000)
+                / freshEquity;
+            const reservation = validateV12EntryGrossReservation({
+                snapshot: {
+                    v12Gross: freshPortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0),
+                    v12BaseGross: freshComponents.baseGross,
+                    v12DynamicGross: freshComponents.dynamicGross,
+                    cryptoGross: freshPortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0),
+                    stockGross: freshPortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
+                    totalGross: freshPortfolio.reduce((sum, row) => sum + row.gross, 0),
+                },
+                pendingBaseGross,
+                pendingDynamicGross,
+                reservedGross,
+                candidateBaseGross: decision.baseAcceptedGross,
+                candidateDynamicGross: decision.dynamicAcceptedGross,
+                candidateWorstCaseGross: worstCaseGross,
+            });
+            if (!reservation.orderAllowed) {
+                this.log("v12-entry-preorder-gross-reservation-blocked", {
+                    symbol,
+                    reason: reservation.reason,
+                    requestedGross: acceptedGross,
+                    candidateWorstCaseGross: reservation.candidateWorstCaseGross,
+                    projectedBaseGross: reservation.projectedBaseGross,
+                    projectedV12Gross: reservation.projectedV12Gross,
+                    projectedCryptoGross: reservation.projectedCryptoGross,
+                    projectedTotalGross: reservation.projectedTotalGross,
+                    ordersSent: 0,
+                    positionChangesSent: 0,
+                });
+                return { status: "capacity-blocked", reason: reservation.reason || "V12_PREORDER_GROSS_RESERVATION_BLOCKED", signal, clientOrderId };
+            }
         } catch (error) {
             if (isV12BenignEntryQuantityGateError(error)) {
                 const reason = v12BenignEntryQuantityGateReason(error);
@@ -697,7 +765,7 @@ export class V12LiveExecutionEngine {
                 if (!sizing || !decision || !(decision.acceptedGross > 0)) {
                     return { status: "capacity-blocked", reason: `V12_RANK2_${decision?.reason || "NO_RESIDUAL"}`, signal: next };
                 }
-                return await this.executeEntryForSignal(state, handle, next, equity, sizing, decision);
+                return await this.executeEntryForSignal(state, handle, next, equity, sizing, decision, quality102Ownership);
             }
 
             if (!risk.ok) return { status: "risk-blocked", reason: `SHARED_CRYPTO_RISK:${risk.reason}` };
@@ -728,7 +796,7 @@ export class V12LiveExecutionEngine {
                     if (enteredCount === 0) lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal };
                     break;
                 }
-                const entryResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision);
+                const entryResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision, quality102Ownership);
                 if (entryResult.status === "manual-review") return entryResult;
                 if (entryResult.status !== "entered") { if (enteredCount === 0) lastResult = entryResult; break; }
                 enteredCount += 1;

@@ -2,6 +2,16 @@ name: V12 X1 ALL implementation safety CI
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/v12-preorder-gross-reservation-20260921
+    paths:
+      - 'lib/v12-live-execution-engine.ts'
+      - 'lib/v12-top2-residual.ts'
+      - 'lib/v12-aster-live-adapter.ts'
+      - 'scripts/v12-live-execution-selftest.ts'
+      - 'tests/v12-preorder-gross-reservation.test.ts'
+      - '.github/workflows/v12-x1-all-implementation-ci.yml'
   pull_request:
     paths:
       - 'config/v12X1AllRuntime.ts'
@@ -17,6 +27,7 @@ on:
       - 'scripts/disdex_account_order_lock.py'
       - 'scripts/disdex_v12_crypto_daily_risk.py'
       - 'scripts/v12-*-selftest.ts'
+      - 'tests/v12-preorder-gross-reservation.test.ts'
       - 'scripts/disdex-account-order-lock-selftest.ts'
       - '.github/workflows/v12-x1-all-implementation-ci.yml'
 
@@ -49,6 +60,7 @@ jobs:
           npx tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts
           npx tsx scripts/v12-resident-stop-selftest.ts
           npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test
+          npx tsx --test tests/v12-preorder-gross-reservation.test.ts
           python scripts/disdex_account_order_lock.py --self-test
           python scripts/disdex_v12_crypto_daily_risk.py --self-test
           python -m py_compile scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_account_order_lock.py scripts/disdex_v12_crypto_daily_risk.py
