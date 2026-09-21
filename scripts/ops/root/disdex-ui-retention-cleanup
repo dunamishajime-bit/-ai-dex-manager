@@ -61,6 +61,11 @@ def audit_ui_release_references(
 
     if symlink_scan_error:
         unavailable.append(f"symlink:{symlink_scan_error}")
+        return ReferenceAudit(
+            safe=False,
+            references={key: tuple(values) for key, values in references.items()},
+            reasons=tuple(unavailable),
+        )
     else:
         try:
             if symlink_references is None:
@@ -171,14 +176,21 @@ def release_sha(path: Path) -> str | None:
         return None
     return values[0]
 
-def service_working_directory() -> Path:
+def configured_service_directory() -> Path:
     value = subprocess.check_output(
         ["systemctl", "show", SERVICE, "--property=WorkingDirectory", "--value"],
         text=True,
         timeout=10,
     ).strip()
     path = Path(value).resolve(strict=True)
-    if path.parent != ROOT.resolve() or not release_sha(path):
+    if path.parent != ROOT.resolve() or not path.is_dir():
+        raise RuntimeError("UI service WorkingDirectory is outside the fixed UI release root")
+    return path
+
+
+def service_working_directory() -> Path:
+    path = configured_service_directory()
+    if not release_sha(path):
         raise RuntimeError("UI service WorkingDirectory is not a marker-backed immutable UI release")
     return path
 
@@ -222,14 +234,17 @@ def main() -> int:
             print(json.dumps({"status": "DISDEX_UI_RETENTION_SKIPPED", "reason": "lock_busy"}))
             return 0
 
-        current = service_working_directory()
+        current = configured_service_directory()
         rows = releases()
         all_rows = all_ui_release_dirs()
-        if current not in rows:
-            raise RuntimeError("current UI release failed immutable marker validation")
+        if current not in all_rows:
+            raise RuntimeError("current UI release is not a directory under the fixed UI release root")
         protected = {current}
         protected_records: list[dict[str, object]] = [
-            {"path": str(current), "reason": "current UI"}
+            {
+                "path": str(current),
+                "reason": "current UI" if release_sha(current) else "current UI / UNVERIFIED_PROTECTED: no valid identity marker",
+            }
         ]
         for release in rows:
             if release != current and len(protected) < KEEP_NONCURRENT + 1:
@@ -254,7 +269,7 @@ def main() -> int:
         symlink_scan_error: str | None = None
         try:
             symlink_references = find_ui_symlink_references_for_paths(tuple(rows), SYMLINK_SCAN_ROOT)
-        except (OSError, RuntimeError) as error:
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
             symlink_scan_error = str(error)
         candidates: list[Path] = []
         reclaimed = 0
@@ -263,7 +278,7 @@ def main() -> int:
             if release not in rows:
                 unverified.append({
                     "path": str(release),
-                    "size": path_size(release),
+                    "size": 0,
                     "markerSha": None,
                     "parentSha": None,
                     "reason": "UNVERIFIED_PROTECTED:no valid identity marker or marker conflict",
@@ -282,7 +297,7 @@ def main() -> int:
             if not audit.safe:
                 unverified.append({
                     "path": str(release),
-                    "size": path_size(release),
+                    "size": 0,
                     "markerSha": release_sha(release),
                     "parentSha": None,
                     "reason": "UNVERIFIED_PROTECTED:external reference or scan uncertainty",

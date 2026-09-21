@@ -2,6 +2,7 @@ import importlib.machinery
 import os
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -111,6 +112,20 @@ class UiRetentionContractTest(unittest.TestCase):
                     os.environ.pop("DISDEX_UI_ACTIVE_RELEASE", None)
                 else:
                     os.environ["DISDEX_UI_ACTIVE_RELEASE"] = previous
+
+    def test_unverified_current_ui_path_is_resolved_only_for_protection(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "ui-releases"
+            release = root / "ui-current-markerless"
+            release.mkdir(parents=True)
+            with mock.patch.object(ui_retention, "ROOT", root), mock.patch.object(
+                ui_retention.subprocess,
+                "check_output",
+                return_value=f"{release}\n",
+            ):
+                resolved = ui_retention.configured_service_directory()
+                self.assertEqual(resolved, release)
+                self.assertIsNone(ui_retention.release_sha(resolved))
 
     def test_conflicting_ui_identity_markers_fail_closed(self):
         with tempfile.TemporaryDirectory() as td:
