@@ -39,6 +39,7 @@ jobs:
           tests/pengu-recovery-v8-reconciliation.test.ts
           tests/direct-trade-executor-position-freshness.test.ts
           tests/quality102-preflight-protective-order.test.ts
+          tests/v12-active-state-sha-migration.test.ts
       # The Q102 1.0x/legacy implementation-contract test remains a historical
       # artifact and is not a gate for the current Causal V4 3.0x LIVE target.
       - name: Runtime wiring and telemetry tests
