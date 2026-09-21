@@ -100,64 +100,64 @@ jobs:
 
           old = '  assert.ok(pengu.length >= 9_200 && btc.length >= 9_200, `Insufficient Aster rows: PENGU=${pengu.length}, BTC=${btc.length}`);'
           new = '''  const expectedEvalRows = Math.floor((EVAL_END - EVAL_START) / HOUR);
-          const requiredWarmRows = 250;
-          const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
-          const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
-          const penguWarmRows = pengu.filter((row) => row.openTime < EVAL_START).length;
-          const btcWarmRows = btc.filter((row) => row.openTime < EVAL_START).length;
-          assert.equal(penguEvalRows, expectedEvalRows, `Incomplete PENGU evaluation rows: ${penguEvalRows}/${expectedEvalRows}`);
-          assert.equal(btcEvalRows, expectedEvalRows, `Incomplete BTC evaluation rows: ${btcEvalRows}/${expectedEvalRows}`);
-          assert.ok(penguWarmRows >= requiredWarmRows && btcWarmRows >= requiredWarmRows, `Insufficient warm-up rows: PENGU=${penguWarmRows}, BTC=${btcWarmRows}, required=${requiredWarmRows}`);'''
+            const requiredWarmRows = 250;
+            const penguEvalRows = pengu.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            const btcEvalRows = btc.filter((row) => row.openTime >= EVAL_START && row.openTime < EVAL_END).length;
+            const penguWarmRows = pengu.filter((row) => row.openTime < EVAL_START).length;
+            const btcWarmRows = btc.filter((row) => row.openTime < EVAL_START).length;
+            assert.equal(penguEvalRows, expectedEvalRows, `Incomplete PENGU evaluation rows: ${penguEvalRows}/${expectedEvalRows}`);
+            assert.equal(btcEvalRows, expectedEvalRows, `Incomplete BTC evaluation rows: ${btcEvalRows}/${expectedEvalRows}`);
+            assert.ok(penguWarmRows >= requiredWarmRows && btcWarmRows >= requiredWarmRows, `Insufficient warm-up rows: PENGU=${penguWarmRows}, BTC=${btcWarmRows}, required=${requiredWarmRows}`);'''
           if old not in s:
               raise SystemExit('PENGU row-count guard not found; refusing silent patch')
           s = s.replace(old, new)
 
           old_history = '  const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: btc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'
           new_history = '''  const penguTimestamps = new Set(pengu.map((row) => row.openTime));
-          const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
-          assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
-          const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
+            const alignedBtc = btc.filter((row) => penguTimestamps.has(row.openTime));
+            assert.equal(alignedBtc.length, pengu.length, `PENGU/BTC common-timestamp alignment incomplete: PENGU=${pengu.length}, BTC_ALIGNED=${alignedBtc.length}`);
+            const history: PenguDualLsV2History = { pengu1h: pengu, btc1h: alignedBtc, penguFunding: funding.map((row) => ({ fundingTime: row.fundingTime, fundingRate: row.fundingRate })) };'''
           if old_history not in s:
               raise SystemExit('PENGU history construction not found; refusing silent alignment patch')
           s = s.replace(old_history, new_history)
 
           old_position = '''    let position: PenguDualLsV2Position = {
-      side: side === "L" ? 1 : -1,
-      entryTs: entry.openTime,
-      entryPrice: entry.open,
-      quantity: 1,
-      gross: targetGrossForAtr(rows[index].features!.atr24Ratio),
-      highWaterMark: entry.open,
-      lowWaterMark: entry.open,
-    };'''
+                side: side === "L" ? 1 : -1,
+                entryTs: entry.openTime,
+                entryPrice: entry.open,
+                quantity: 1,
+                gross: targetGrossForAtr(rows[index].features!.atr24Ratio),
+                highWaterMark: entry.open,
+                lowWaterMark: entry.open,
+              };'''
           new_position = '''    const requestedGross = targetGrossForAtr(rows[index].features!.atr24Ratio);
-    let position: PenguDualLsV2Position = {
-      side: side === "L" ? 1 : -1,
-      entryTs: entry.openTime,
-      entryPrice: entry.open,
-      quantity: 1,
-      gross: requestedGross,
-      highWaterMark: entry.open,
-      lowWaterMark: entry.open,
-      entryVersion: side === "S" ? "SHORT_V20" : "LONG_V2_FINAL",
-      shortV20: side === "S" ? createPenguShortV20State({
-        entryPrice: entry.open,
-        requestedGross,
-        entryAtr24Ratio: rows[index].features!.atr24Ratio,
-        btcEma168Distance: rows[index].features!.btcEma168Distance,
-        btcReturn24h: rows[index].features!.btcReturn24h,
-      }) : undefined,
-    };'''
+              let position: PenguDualLsV2Position = {
+                side: side === "L" ? 1 : -1,
+                entryTs: entry.openTime,
+                entryPrice: entry.open,
+                quantity: 1,
+                gross: requestedGross,
+                highWaterMark: entry.open,
+                lowWaterMark: entry.open,
+                entryVersion: side === "S" ? "SHORT_V20" : "LONG_V2_FINAL",
+                shortV20: side === "S" ? createPenguShortV20State({
+                  entryPrice: entry.open,
+                  requestedGross,
+                  entryAtr24Ratio: rows[index].features!.atr24Ratio,
+                  btcEma168Distance: rows[index].features!.btcEma168Distance,
+                  btcReturn24h: rows[index].features!.btcReturn24h,
+                }) : undefined,
+              };'''
           if old_position not in s:
               raise SystemExit('PENGU position initializer not found; refusing silent V20 patch')
           s = s.replace(old_position, new_position)
 
           old_payload = '    strategyId: PENGU_DUAL_LS_V2.id,\n    researchOnly: true,'
           new_payload = '''    strategyId: PENGU_DUAL_LS_V2.id,
-    longVariant: "PENGU_DUAL_LS_V2_FINAL",
-    shortVariant: "COUNTERWIND_VOL_TARGET_FAILURE_EXIT",
-    shortPreRegistrationSha: "ad7cedb3cafaf9f9680e390112f72375d84b50ac",
-    researchOnly: true,'''
+              longVariant: "PENGU_DUAL_LS_V2_FINAL",
+              shortVariant: "COUNTERWIND_VOL_TARGET_FAILURE_EXIT",
+              shortPreRegistrationSha: "ad7cedb3cafaf9f9680e390112f72375d84b50ac",
+              researchOnly: true,'''
           if old_payload not in s:
               raise SystemExit('PENGU payload marker not found; refusing silent metadata patch')
           s = s.replace(old_payload, new_payload)
