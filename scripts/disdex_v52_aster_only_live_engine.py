@@ -340,18 +340,18 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
 
 def self_test() -> None:
     strict_planner_self_test()
-    assert STRICT_CAPS.v12_base_gross == 1.5
+    assert STRICT_CAPS.v12_base_gross == 2.0
     assert STRICT_CAPS.v12_gross == 2.0
     assert STRICT_CAPS.crypto_gross == 3.0
-    assert STRICT_CAPS.stock_gross == 1.98
-    assert STRICT_CAPS.stock_slot_gross == 1.64
-    assert STRICT_CAPS.total_gross == 3.5
+    assert STRICT_CAPS.stock_gross == 4.0
+    assert STRICT_CAPS.stock_slot_gross == 2.0
+    assert STRICT_CAPS.total_gross == 4.25
     engine = object.__new__(V52AsterOnlyEngine)
     engine.crypto_gross_cap = 3.0
-    engine.stock_gross_cap = 1.98
-    engine.portfolio_gross_cap = 3.5
-    engine.v11_gross_cap = 1.64
-    engine.v50_gross_cap = 1.64
+    engine.stock_gross_cap = 4.0
+    engine.portfolio_gross_cap = 4.25
+    engine.v11_gross_cap = 2.0
+    engine.v50_gross_cap = 2.0
     engine.gross_tolerance = 1e-6
     engine.live = False
     engine.state = {"positions": {}}
@@ -366,7 +366,7 @@ def self_test() -> None:
         "totalGross": 1.75,
     }
     gross, snapshot = engine.available_slot_gross(V11_SLOT)
-    assert abs(gross - 1.48) < EPSILON
+    assert abs(gross - 2.0) < EPSILON
     assert snapshot["strictPortfolioPlan"]["strictPortfolioPlannerActive"] is True
 
     engine.live = True
@@ -381,7 +381,10 @@ def self_test() -> None:
         "totalGross": 3.40,
     }
     reclaimed, reclaimed_snapshot = engine.available_slot_gross(V11_SLOT)
-    assert abs(reclaimed - 0.50) < EPSILON
+    # Under the final 4.25x total cap, the live planner can reclaim the
+    # dynamic V12 gross before calculating stock capacity.  The resulting
+    # available slot is 1.25x in this fixture, not the retired 0.50x value.
+    assert abs(reclaimed - 1.25) < EPSILON
     assert abs(reclaimed_snapshot["v12DynamicReclaimGross"] - 0.40) < EPSILON
 
     assert transient_reference_error("iex_quote_stale META")
