@@ -512,6 +512,7 @@ WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=
 ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --all --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStart=
 ExecStart=/usr/local/libexec/disdex-runner-position-recovery"
 
@@ -688,18 +689,25 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   ensure_safety_daemon_active "$MARGIN_UNIT"
 
   if operator_activation_all_trading_ready; then
-    systemctl restart disdex-v12-kill-switch-auto-repair.path
-    ensure_monitor_timer_active "disdex-runner-watchdog.timer"
+    systemctl enable --now disdex-v12-kill-switch-auto-repair.path
+    systemctl enable --now disdex-runner-watchdog.timer
+    systemctl enable --now disdex-runner-position-recovery.timer
+    systemctl enable --now disdex-v12-three-hour-health-check.timer
     printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
   else
-    systemctl stop disdex-v12-kill-switch-auto-repair.path disdex-v12-kill-switch-auto-repair.service || true
-    systemctl stop disdex-runner-watchdog.timer disdex-runner-watchdog.service || true
+    systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
+    systemctl stop disdex-v12-kill-switch-auto-repair.service || true
+    systemctl disable --now disdex-runner-watchdog.timer || true
+    systemctl stop disdex-runner-watchdog.service || true
+    systemctl disable --now disdex-runner-position-recovery.timer || true
+    systemctl stop disdex-runner-position-recovery.service || true
+    systemctl disable --now disdex-v12-three-hour-health-check.timer || true
+    systemctl stop disdex-v12-three-hour-health-check.service || true
     printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_BLOCKED\n'
   fi
 
   ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
   ensure_monitor_timer_active "disdex-runner-health-alert.timer"
-  ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
   ensure_monitor_timer_active "disdex-trade-fill-notifier.timer"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
@@ -791,6 +799,12 @@ self_test() {
   fi
   mv "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_ARTIFACT_SELFTEST_PASS\n'
+  grep -q -- '--all --activation-path ${OPERATOR_ACTIVATION_PATH}' "$0"
+  grep -q 'systemctl disable --now disdex-runner-position-recovery.timer' "$0"
+  grep -q 'systemctl disable --now disdex-v12-three-hour-health-check.timer' "$0"
+  grep -q 'systemctl enable --now disdex-runner-position-recovery.timer' "$0"
+  grep -q 'systemctl enable --now disdex-v12-three-hour-health-check.timer' "$0"
+  printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_SELFTEST_PASS\n'
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_SELFTEST_PASS\n'
 }
 

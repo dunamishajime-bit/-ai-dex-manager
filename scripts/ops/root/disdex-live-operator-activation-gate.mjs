@@ -128,6 +128,27 @@ export async function evaluateOperatorActivationGate(input) {
   });
 }
 
+export async function evaluateAllOperatorActivationGates(input) {
+  const results = [];
+  for (const runner of TRADING_RUNNERS) {
+    const result = await evaluateOperatorActivationGate({ ...input, runner });
+    results.push({ runner, ...result });
+    if (!result.allowed) {
+      return {
+        allowed: false,
+        reason: result.reason || "OPERATOR_LIVE_ACTIVATION_REQUIRED",
+        blockedRunner: runner,
+        results,
+      };
+    }
+  }
+  return {
+    allowed: true,
+    reason: "OPERATOR_LIVE_ACTIVATION_CONFIRMED_ALL",
+    results,
+  };
+}
+
 function arg(name) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : undefined;
@@ -167,12 +188,17 @@ function selfTest() {
 }
 
 async function cliMain() {
-  const result = await evaluateOperatorActivationGate({
+  const common = {
     releaseRoot: arg("--release-root"),
     sha: arg("--sha"),
-    runner: arg("--runner"),
     activationPath: arg("--activation-path") || DEFAULT_PATH,
-  });
+  };
+  const result = process.argv.includes("--all")
+    ? await evaluateAllOperatorActivationGates(common)
+    : await evaluateOperatorActivationGate({
+        ...common,
+        runner: arg("--runner"),
+      });
   console.log(JSON.stringify({
     status: result.allowed ? "OPERATOR_ACTIVATION_READY" : "OPERATOR_ACTIVATION_BLOCKED",
     ...result,

@@ -11,6 +11,13 @@ AUTO_REPAIR=/usr/local/libexec/disdex-v12-kill-switch-auto-repair
 unit_is_active() { [[ "$(systemctl is-active "$1" 2>/dev/null || true)" == active ]]; }
 unit_exists() { systemctl cat "$1" >/dev/null 2>&1; }
 
+operator_activation_ready() {
+  local gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+  local activation_path="${DISDEX_OPERATOR_ACTIVATION_PATH:-/var/lib/disdex/shared/operator-activation/current.json}"
+  [[ -f "$gate" ]] || return 1
+  /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$RELEASE_SHA" --all --activation-path "$activation_path" >/dev/null 2>&1
+}
+
 validate_current() {
   CURRENT_RELEASE="$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
   [[ "$CURRENT_RELEASE" == /home/deploy/disdex-trading/releases/* && -d "$CURRENT_RELEASE" && ! -L "$CURRENT_RELEASE" ]] || return 1
@@ -84,14 +91,20 @@ run_self_test() {
   [[ "$V52_UNIT" == "disdex-v52-aster-only@$RELEASE_SHA.service" ]]
   [[ "$Q102_UNIT" == "disdex-quality102-causal-v1@$RELEASE_SHA.service" ]]
   [[ "$FET_UNIT" == "disdex-fet-brk48@$RELEASE_SHA.service" ]]
+  grep -q 'V12_3H_INSPECTION_OPERATOR_ACTIVATION_REQUIRED' "$0"
+  grep -q -- '--all --activation-path' "$0"
   printf 'V12 three-hour health-check self-test: PASS\n'
 }
 
 main() {
-  [[ "$(id -u)" == 0 ]] || { printf 'V12_3H_INSPECTION_ROOT_REQUIRED\n' >&2; exit 1; }
   [[ "${1:-}" == --self-test ]] && { run_self_test; return 0; }
+  [[ "$(id -u)" == 0 ]] || { printf 'V12_3H_INSPECTION_ROOT_REQUIRED\n' >&2; exit 1; }
   validate_current || { printf 'V12_3H_INSPECTION_CURRENT_INVALID\n' >&2; exit 2; }
   resolve_units
+  if ! operator_activation_ready; then
+    printf 'V12_3H_INSPECTION_OPERATOR_ACTIVATION_REQUIRED action=NO_START failClosed=true ordersSent=0 cancelsSent=0 positionChangesSent=0\n'
+    exit 0
+  fi
   KILL_FILE="${DISDEX_SHARED_KILL_SWITCH_FILE:-$KILL_FILE_DEFAULT}"
   kill_active=false
   [[ -f "$KILL_FILE" ]] && kill_active="$(/usr/bin/jq -r 'if .active == true then "true" else "false" end' "$KILL_FILE" 2>/dev/null || printf false)"

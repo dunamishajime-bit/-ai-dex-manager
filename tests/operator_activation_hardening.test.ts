@@ -119,13 +119,17 @@ test("runtime wiring places activation gate in every trading runner prestart", a
 test("runtime wiring leaves watchdog and auto-repair disabled until all trading runners are operator-approved", async () => {
   const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   const gate = source.indexOf("if operator_activation_all_trading_ready; then");
-  const enableAutoRepair = source.indexOf("systemctl restart disdex-v12-kill-switch-auto-repair.path", gate);
-  const enableWatchdog = source.indexOf('ensure_monitor_timer_active "disdex-runner-watchdog.timer"', gate);
+  const enableAutoRepair = source.indexOf("systemctl enable --now disdex-v12-kill-switch-auto-repair.path", gate);
+  const enableWatchdog = source.indexOf("systemctl enable --now disdex-runner-watchdog.timer", gate);
+  const enablePositionRecovery = source.indexOf("systemctl enable --now disdex-runner-position-recovery.timer", gate);
+  const enableThreeHour = source.indexOf("systemctl enable --now disdex-v12-three-hour-health-check.timer", gate);
   const blocked = source.indexOf("DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_BLOCKED", gate);
-  const stopAutoRepair = source.indexOf("systemctl stop disdex-v12-kill-switch-auto-repair.path", gate);
-  const stopWatchdog = source.indexOf("systemctl stop disdex-runner-watchdog.timer", gate);
-  assert.ok(gate >= 0 && enableAutoRepair > gate && enableWatchdog > gate);
-  assert.ok(blocked > gate && stopAutoRepair > gate && stopWatchdog > gate);
+  const stopAutoRepair = source.indexOf("systemctl disable --now disdex-v12-kill-switch-auto-repair.path", gate);
+  const stopWatchdog = source.indexOf("systemctl disable --now disdex-runner-watchdog.timer", gate);
+  const stopPositionRecovery = source.indexOf("systemctl disable --now disdex-runner-position-recovery.timer", gate);
+  const stopThreeHour = source.indexOf("systemctl disable --now disdex-v12-three-hour-health-check.timer", gate);
+  assert.ok(gate >= 0 && enableAutoRepair > gate && enableWatchdog > gate && enablePositionRecovery > gate && enableThreeHour > gate);
+  assert.ok(blocked > gate && stopAutoRepair > gate && stopWatchdog > gate && stopPositionRecovery > gate && stopThreeHour > gate);
   assert.match(source, /for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL/);
 });
 
@@ -163,4 +167,16 @@ test("all root-run V12 recovery helpers enforce ownership normalization", async 
   assert.match(upstream, /normalizeLiveStateOwnership\(statePath/);
   assert.match(lineage, /normalizeLiveStateOwnership\(statePath/);
   assert.match(lineage, /v12-x1-all-runner-state\/v2/);
+});
+
+
+test("three-hour and position-recovery automation remain blocked before operator approval", async () => {
+  const threeHour = await readFile("scripts/ops/root/disdex-v12-three-hour-health-check", "utf8");
+  const wiring = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
+  assert.match(threeHour, /V12_3H_INSPECTION_OPERATOR_ACTIVATION_REQUIRED/);
+  assert.match(threeHour, /--all --activation-path/);
+  assert.match(wiring, /disdex-runner-position-recovery\.service/);
+  assert.match(wiring, /--all --activation-path \$\{OPERATOR_ACTIVATION_PATH\}/);
+  assert.match(wiring, /disable --now disdex-runner-position-recovery\.timer/);
+  assert.match(wiring, /disable --now disdex-v12-three-hour-health-check\.timer/);
 });
