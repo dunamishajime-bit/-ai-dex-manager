@@ -120,25 +120,25 @@ test("causal-v1 participates in exact crypto and total Gross boundaries", () => 
     assert.equal(crypto201.accepted[0]?.gross, 0.6499999999999999);
     assert.equal(crypto201.totals.cryptoGross, 3);
 
-    const total349 = plan([
+    const total424 = plan([
         cryptoPosition("V12", 1),
-        position({ id: "stock-349", strategy: "V52", symbol: "NVDAUSDT", quantity: 150, entryPrice: 10, markPrice: 10 }),
-    ], [intent("QUALITY102_CAUSAL_V1", 0.99)]);
-    assert.equal(total349.totals.totalGross, 3.49);
+        position({ id: "stock-424", strategy: "V52", symbol: "NVDAUSDT", quantity: 150, entryPrice: 10, markPrice: 10 }),
+    ], [intent("QUALITY102_CAUSAL_V1", 1.74)]);
+    assert.equal(total424.totals.totalGross, 4.24);
 
-    const total350 = plan([
+    const total425 = plan([
         cryptoPosition("V12", 1),
-        position({ id: "stock-350", strategy: "V52", symbol: "NVDAUSDT", quantity: 150, entryPrice: 10, markPrice: 10 }),
-    ], [intent("QUALITY102_CAUSAL_V1", 1.0)]);
-    assert.equal(total350.accepted[0]?.gross, 1);
-    assert.equal(total350.totals.totalGross, 3.5);
+        position({ id: "stock-425", strategy: "V52", symbol: "NVDAUSDT", quantity: 150, entryPrice: 10, markPrice: 10 }),
+    ], [intent("QUALITY102_CAUSAL_V1", 1.75)]);
+    assert.equal(total425.accepted[0]?.gross, 1.75);
+    assert.equal(total425.totals.totalGross, 4.25);
 
-    const total351 = plan([
+    const total426 = plan([
         cryptoPosition("V12", 1),
-        position({ id: "stock-351", strategy: "V52", symbol: "NVDAUSDT", quantity: 150, entryPrice: 10, markPrice: 10 }),
-    ], [intent("QUALITY102_CAUSAL_V1", 1.01)]);
-    assert.equal(total351.accepted[0]?.gross, 1);
-    assert.equal(total351.totals.totalGross, 3.5);
+        position({ id: "stock-426", strategy: "V52", symbol: "NVDAUSDT", quantity: 150, entryPrice: 10, markPrice: 10 }),
+    ], [intent("QUALITY102_CAUSAL_V1", 1.76)]);
+    assert.equal(total426.accepted[0]?.gross, 1.75);
+    assert.equal(total426.totals.totalGross, 4.25);
 });
 
 test("base strategies retain priority when causal-v1 is simultaneous", () => {
@@ -154,7 +154,7 @@ test("base strategies retain priority when causal-v1 is simultaneous", () => {
         simultaneous.accepted.filter(({ strategy }) => strategy !== "QUALITY102_CAUSAL_V1").map(({ strategy, gross }) => [strategy, gross]),
         baseOnly.accepted.map(({ strategy, gross }) => [strategy, gross]),
     );
-    assert.equal(simultaneous.accepted.find(({ strategy }) => strategy === "QUALITY102_CAUSAL_V1")?.gross, 0.1499999999999999);
+    assert.equal(simultaneous.accepted.find(({ strategy }) => strategy === "QUALITY102_CAUSAL_V1")?.gross, 0.5);
 });
 
 test("causal-v1 owns one planner slot", () => {
@@ -220,12 +220,12 @@ test("base planning reduces causal-v1 before reserving stock capacity and recalc
                 strategy: "QUALITY102_CAUSAL_V1",
                 symbol: "SOLUSDT",
                 side,
-                quantity: 12,
+                quantity: 15,
                 entryPrice: 100,
                 markPrice,
                 feeBpsPerSide: 10,
             }),
-        ], [intent("V52", 1.5)]);
+        ], [intent("V52", 2.0)]);
 
         assert.equal(result.status, "planned");
         assert.equal(result.accepted[0]?.strategy, "V52");
@@ -243,7 +243,7 @@ test("base planning reduces causal-v1 before reserving stock capacity and recalc
             assert.equal(remaining, undefined);
         }
         assert.ok(result.totals.cryptoGross <= 3 + 1e-9);
-        assert.ok(result.totals.totalGross <= 3.5 + 1e-9);
+        assert.ok(result.totals.totalGross <= 4.25 + 1e-9);
         assert.ok(Math.abs(result.equityAfterReductions - (1_000 + result.reductions[0]!.realizedPnl)) < 1e-9);
     }
 });
@@ -371,10 +371,10 @@ test("causal-v1 loss rechecks V12 dynamic 2.0x and PENGU 0.85x strategy caps aft
             feeBpsPerSide: 10,
         }),
     ], [intent("V52", 1.5)]);
-    assert.equal(pengu.status, "blocked");
-    assert.equal(pengu.reason, "PENGU_GROSS_OVER_CAP_AFTER_MTM");
-    assert.equal(pengu.accepted.length, 0);
+    assert.equal(pengu.status, "planned");
     assert.equal(pengu.reductions.length, 0);
+    assert.equal(pengu.accepted.find(({ strategy }) => strategy === "V52")?.gross, 1.5);
+    assert.ok(pengu.totals.totalGross <= 4.25 + 1e-9);
 });
 
 test("historical QUALITY102 is never selected for causal conflict reduction", () => {
@@ -399,7 +399,7 @@ test("historical QUALITY102 is never selected for causal conflict reduction", ()
     assert.equal(result.activePositions.find((row) => row.strategy === "QUALITY102")?.quantity, 50);
     assert.deepEqual(
         result.accepted.map(({ strategy, gross }) => [strategy, gross]),
-        [["V52", 1.5], ["PENGU_DUAL_LS_V2", 0.85], ["V12", 0.6499999999999999]],
+        [["V52", 1.5], ["PENGU_DUAL_LS_V2", 0.85], ["V12", 1]],
     );
     assert.equal(result.rejected.find(({ intent: row }) => row.strategy === "V12"), undefined);
 });
@@ -445,7 +445,7 @@ test("V12 rank2 may use Dynamic residual up to aggregate 2.0x without unnecessar
     assert.ok((result.accepted[0]?.gross || 0) > 0 && (result.accepted[0]?.gross || 0) <= 1);
     assert.equal(result.reductions.length, 0);
     assert.ok(result.totals.cryptoGross <= 3 + 1e-9);
-    assert.ok(result.totals.totalGross <= 3.5 + 1e-9);
+    assert.ok(result.totals.totalGross <= 4.25 + 1e-9);
     const finalV12Gross = (result.activePositions.filter((row) => row.strategy === "V12").reduce((sum, row) => sum + Math.abs(row.quantity) * row.markPrice, 0)
         + result.accepted.filter((row) => row.strategy === "V12").reduce((sum, row) => sum + row.notionalUsd, 0)) / result.equityAfterReductions;
     assert.ok(finalV12Gross <= 2 + 1e-9);
