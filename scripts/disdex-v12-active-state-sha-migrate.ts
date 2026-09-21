@@ -108,6 +108,7 @@ function assertExchangeMatchesState(
     }
     const protection = position.protection;
     for (const clientOrderId of [protection.stopClientOrderId, protection.takeProfitClientOrderId]) {
+      if (!clientOrderId) throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_ID_MISSING:${position.symbol}`);
       managedOrderIds.add(clientOrderId);
       const order = openOrders.find((candidate) => String(candidate.clientOrderId || "") === clientOrderId);
       if (!order || order.reduceOnly !== true || !["NEW", "OPEN"].includes(String(order.status || "").toUpperCase())) {

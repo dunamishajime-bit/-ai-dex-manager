@@ -5,6 +5,7 @@ import {
   assertActiveV12StateForShaMigration,
   buildMigratedV12State,
 } from "../scripts/disdex-v12-active-state-sha-migrate";
+import type { V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
 
 const FROM = "a".repeat(40);
 const TO = "b".repeat(40);
@@ -58,7 +59,7 @@ function state(overrides: Record<string, unknown> = {}) {
 test("active V12 state migration preserves positions and changes only runtime SHA", () => {
   const before = state();
   assert.doesNotThrow(() => assertActiveV12StateForShaMigration(before, FROM, TO));
-  const after = buildMigratedV12State(before, TO, 2);
+  const after = buildMigratedV12State(before as unknown as V12X1AllRunnerState, TO, 2);
   assert.equal(after.runtimeCommitSha, TO);
   assert.deepEqual(after.activePositions, before.activePositions);
   assert.deepEqual(after.active, before.active);
