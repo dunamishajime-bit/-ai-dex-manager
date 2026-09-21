@@ -246,9 +246,9 @@ test("strategy Gross contracts remain separate from venue leverage 5x", async ()
     const { QUALITY102_CAUSAL_V1 } = await import("../config/disdexQuality102CausalV1Runtime");
     assert.equal(V12_X1_ALL.leverage, 1);
     assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
-    assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
+    assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 2);
     assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
-    assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 2.5);
+    assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 3);
     assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
-    assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 3.5);
+    assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 4.25);
 });

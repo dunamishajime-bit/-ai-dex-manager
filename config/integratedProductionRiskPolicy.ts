@@ -16,20 +16,26 @@ export type Q102CausalV4GrossFamily = keyof typeof Q102_CAUSAL_V4_FAMILY_GROSS;
  * submit an order.
  */
 export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
-  v12BaseAggregateGross: 1.5,
+  v12BaseAggregateGross: 2.0,
   v12DynamicAggregateGrossCap: 2.0,
   v12PerPositionGrossCap: 1.0,
   v12MaximumPositions: 3,
-  fetResidualMaximumGross: 1.25,
+  fetResidualMaximumGross: 2.25,
   fetResidualMinimumGross: 0.05,
   penguMaximumGross: 0.85,
   q102FamilyGross: Q102_CAUSAL_V4_FAMILY_GROSS,
   q102CausalV4MaximumGross: 3.0,
   q102MaximumPositions: 1,
-  cryptoGrossCap: 3,
+  // Normal operating caps proven by the 2026-09-22 DD<20% integrated replay.
+  cryptoGrossCap: 3.0,
   stockGrossCap: Number(v52V50Runtime.stockAggregateGross),
   stockSlotGrossCap: Number(v52V50Runtime.slotGross),
-  totalGrossCap: 3.5,
+  totalGrossCap: 4.25,
+  // Absolute ceilings. Entry exposure may only expand above the normal caps
+  // through the integrated profit/DD/margin governor.
+  cryptoGrossHardCap: 5.0,
+  totalGrossHardCap: 8.0,
+  grossGovernorBaseAvailableBalanceReservePct: 15.0,
   cryptoDailyLossPct: 7.5,
   stockDailyLossPct: 3.5,
   killSwitchRecoveryGraceMs: 10 * 60_000,
@@ -54,8 +60,10 @@ export function resolveIntegratedProductionRiskPolicy(env: Record<string, string
     PENGU_DUAL_LS_V2_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
     QUALITY102_CAUSAL_V1_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross,
     CRYPTO_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+    CRYPTO_GROSS_HARD_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap,
     STOCK_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap,
     TOTAL_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+    TOTAL_GROSS_HARD_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap,
     DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoDailyLossPct,
     DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS: INTEGRATED_PRODUCTION_RISK_POLICY.killSwitchRecoveryGraceMs,
   };

@@ -41,7 +41,7 @@ class RuntimeMultilineageMonitoringTest(unittest.TestCase):
             self.assertIn(f"DISDEX_WATCHDOG_{sleeve}_EXPECTED_SHA=${{DEPLOYED_SHA}}", source)
         self.assertIn("QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json", source)
         self.assertIn("FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json", source)
-        self.assertIn("FET_BRK48_MAX_GROSS=1.25", source)
+        self.assertIn("FET_BRK48_MAX_GROSS=2.25", source)
         self.assertIn("DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}", source)
         self.assertIn("DISDEX_WATCHDOG_APPROVED_SHA=${DEPLOYED_SHA}", source)
 

@@ -1,19 +1,19 @@
 {
   "schema": "disdex-current-live-target/v1",
-  "date": "2026-09-20",
+  "date": "2026-09-22",
   "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
-  "productionBaseSha": "b664a11725b5f8f1463651fb47d71efc177e538b",
+  "productionBaseSha": "2f22282e5ea3cddcb6005b9c9f4e043553cf0f7d",
   "strategy": {
     "v12": {
       "maximumPositions": 3,
       "baseMaximumPositions": 2,
-      "rank3GrossCap": 0.10,
-      "rank3MinimumScore": 0.70,
+      "rank3GrossCap": 0.1,
+      "rank3MinimumScore": 0.7,
       "additionalRank3BtcDistanceGate": false,
       "btcRegimeContract": "PRESERVE_EXISTING_V12_REGIME_AND_ENTRY_QUALITY_LOGIC",
-      "baseAggregateGross": 1.5,
-      "dynamicResidualAggregateGrossCap": 2.0,
-      "perPositionGrossCap": 1.0
+      "baseAggregateGross": 2,
+      "dynamicResidualAggregateGrossCap": 2,
+      "perPositionGrossCap": 1
     },
     "fet": {
       "strategyId": "FET_BRK48_LONG",
@@ -26,18 +26,18 @@
       "decisionHourRemainderUtc": 1,
       "holdHours": 24,
       "hardStopPct": 0.05,
-      "maximumGross": 1.25,
+      "maximumGross": 2.25,
       "minimumResidualGross": 0.05,
       "priority": "LOWER_THAN_CORE"
     },
     "q102": {
       "selector": "CAUSAL_V4",
       "maximumPositions": 1,
-      "portfolioDdGovernorEntryThresholdPct": 0.30,
-      "boostMaximumGross": 3.0,
+      "portfolioDdGovernorEntryThresholdPct": 0.3,
+      "boostMaximumGross": 3,
       "baseFamilyGross": {
         "HIGH_VOL": 1.661,
-        "MR": 1.0,
+        "MR": 1,
         "BRK": 2.465,
         "REV": 2.5,
         "PB": 2.5
@@ -45,23 +45,65 @@
       "failSafe": "STALE_MISSING_MALFORMED_GOVERNOR_USES_BASE_FAMILY_GROSS"
     },
     "pengu": {
-      "policy": "PRESERVE_CURRENT_PRODUCTION"
+      "policy": "PRESERVE_CURRENT_PRODUCTION",
+      "maximumGross": 0.85
     },
     "v52": {
-      "policy": "PRESERVE_CURRENT_PRODUCTION"
+      "policy": "PRESERVE_CURRENT_PRODUCTION",
+      "stockAggregateGross": 4,
+      "slotGross": 2
     },
     "portfolio": {
-      "cryptoGrossCap": 3.0,
-      "totalGrossCap": 3.5,
+      "cryptoGrossCap": 3,
+      "totalGrossCap": 4.25,
       "sharedCryptoDailyLossPct": 7.5,
       "venueLeverage": 5,
-      "venueMarginMode": "CROSS"
+      "venueMarginMode": "CROSS",
+      "cryptoGrossHardCap": 5,
+      "totalGrossHardCap": 8,
+      "grossGovernor": {
+        "baseAvailableBalanceReservePct": 15,
+        "tiers": [
+          {
+            "name": "PROFIT_1",
+            "minimumTwrIndex": 1.05,
+            "maximumDrawdownPct": 3,
+            "cryptoGrossCap": 3.25,
+            "desiredTotalGrossCap": 5,
+            "availableBalanceReservePct": 12.5
+          },
+          {
+            "name": "PROFIT_2",
+            "minimumTwrIndex": 1.1,
+            "maximumDrawdownPct": 2,
+            "cryptoGrossCap": 3.5,
+            "desiredTotalGrossCap": 6,
+            "availableBalanceReservePct": 10
+          },
+          {
+            "name": "PROFIT_3",
+            "minimumTwrIndex": 1.2,
+            "maximumDrawdownPct": 1,
+            "cryptoGrossCap": 4,
+            "desiredTotalGrossCap": 7,
+            "availableBalanceReservePct": 5
+          },
+          {
+            "name": "PROFIT_4",
+            "minimumTwrIndex": 1.3,
+            "maximumDrawdownPct": 0.5,
+            "cryptoGrossCap": 5,
+            "desiredTotalGrossCap": 8,
+            "availableBalanceReservePct": 0
+          }
+        ]
+      }
     }
   },
   "formalBacktest": {
-    "sourceArtifact": "docs/research-results/top3-fet-q102gov-integrated-20260920.json",
-    "sourceArtifactSha256": "9E522E7D93A4C3E7023065825D6D5F41688CDD47410C6223D97ED016DBBDD995",
-    "selectedCase": "top3_q102gov030_fet1.25",
+    "sourceArtifact": "docs/research-results/final-live-governor-20260922.json",
+    "sourceArtifactSha256": "F14079E54874934C6BE0CAE4C37272659AB22D5A1A035416EA424BB55227CD1D",
+    "selectedCase": "top3_q102gov030_fet2.25",
     "period": {
       "startInclusive": "2025-08-10T00:00:00.000Z",
       "endExclusive": "2026-08-10T00:00:00.000Z"
@@ -73,16 +115,16 @@
       "compounding": true
     },
     "NORMAL": {
-      "endingAssetJpy": 740771278.0140501,
-      "profitFactor": 4.12008119,
-      "maxDrawdownPct": -19.88452049,
-      "trades": 1195,
-      "maxCryptoGross": 3.0,
-      "maxTotalGross": 3.5,
-      "maxFetGross": 1.25,
+      "endingAssetJpy": 1448665533.0239232,
+      "profitFactor": 4.14112335,
+      "maxDrawdownPct": -19.61179353,
+      "trades": 1164,
+      "maxCryptoGross": 4.67947803,
+      "maxTotalGross": 5,
+      "maxFetGross": 2.25,
       "grossConflicts": 0,
       "routing": {
-        "V12": 793,
+        "V12": 791,
         "PENGU": 66,
         "Q102": 71,
         "FET": 26,
@@ -91,17 +133,17 @@
       }
     },
     "SEVERE": {
-      "endingAssetJpy": 65669109.00323203,
-      "profitFactor": 3.05645475,
-      "maxDrawdownPct": -19.99033133,
-      "trades": 1036,
-      "maxCryptoGross": 3.0,
-      "maxTotalGross": 3.0,
-      "maxFetGross": 1.25,
+      "endingAssetJpy": 75982803.52048858,
+      "profitFactor": 3.01497717,
+      "maxDrawdownPct": -19.97886021,
+      "trades": 1020,
+      "maxCryptoGross": 4.63551394,
+      "maxTotalGross": 4.63551394,
+      "maxFetGross": 2.25,
       "grossConflicts": 0,
       "routing": {
-        "V12": 793,
-        "PENGU": 66,
+        "V12": 795,
+        "PENGU": 65,
         "Q102": 71,
         "FET": 29
       }
@@ -121,9 +163,9 @@
   ],
   "acceptance": {
     "requireExactSelectedBacktestParity": true,
-    "maximumDrawdownFloorPct": -20.0,
-    "maximumCryptoGross": 3.0,
-    "maximumTotalGross": 3.5,
+    "maximumDrawdownFloorPct": -20,
+    "maximumCryptoGross": 5,
+    "maximumTotalGross": 8,
     "maximumGrossConflicts": 0,
     "requireExistingV12Rank1Rank2Parity": true,
     "requireFetCorePreemption": true,

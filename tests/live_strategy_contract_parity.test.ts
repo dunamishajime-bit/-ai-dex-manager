@@ -22,7 +22,7 @@ test("current LIVE target preserves the validated V12 signal contract with Top3 
   assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
   assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.10);
   assert.equal(V12_X1_ALL.rank3MinimumScore, 0.70);
-  assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
+  assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 2);
   assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
 });
 
@@ -45,11 +45,11 @@ test("Q102 one-slot LIVE target uses DD-governed sizing up to 3.00x under shared
   assert.equal(QUALITY102_CAUSAL_V1.maximumGross, 3.0);
   assert.equal(QUALITY102_CAUSAL_V1.maximumPositions, 1);
   assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
-  assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 3.5);
+  assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 4.25);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.HIGH_VOL, 1.661);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.BRK, 2.465);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 1.98);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 1.64);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 4);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 2);
 });
 
 test("V52 preserves the canonical V50 signal thresholds and holding window", async () => {

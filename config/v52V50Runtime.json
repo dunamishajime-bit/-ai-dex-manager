@@ -11,6 +11,6 @@
   "maximumRoundTripCostBps": 60,
   "maximumSpreadBps": 20,
   "maximumHoldingHours": 3,
-  "stockAggregateGross": 1.98,
-  "slotGross": 1.64
+  "stockAggregateGross": 4.0,
+  "slotGross": 2.0
 }

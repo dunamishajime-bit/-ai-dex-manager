@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
@@ -8,23 +8,23 @@ import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { FET_BRK48_RESIDUAL } from "../config/fetBrk48Runtime";
 
 const targetPath = "docs/production/current-live-target.json";
-const artifactPath = "docs/research-results/top3-fet-q102gov-integrated-20260920.json";
+const artifactPath = "docs/research-results/final-live-governor-20260922.json";
 
 test("current live target is the sole Top3/FET/Q102 governor acceptance anchor", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   assert.equal(target.status, "CURRENT_CANONICAL_PRODUCTION_TARGET");
-  assert.equal(target.productionBaseSha, "b664a11725b5f8f1463651fb47d71efc177e538b");
+  assert.equal(target.productionBaseSha, "2f22282e5ea3cddcb6005b9c9f4e043553cf0f7d");
 
   assert.equal(target.strategy.v12.maximumPositions, 3);
   assert.equal(target.strategy.v12.baseMaximumPositions, 2);
   assert.equal(target.strategy.v12.rank3GrossCap, 0.10);
   assert.equal(target.strategy.v12.rank3MinimumScore, 0.70);
   assert.equal(target.strategy.v12.additionalRank3BtcDistanceGate, false);
-  assert.equal(target.strategy.fet.maximumGross, 1.25);
+  assert.equal(target.strategy.fet.maximumGross, 2.25);
   assert.equal(target.strategy.q102.portfolioDdGovernorEntryThresholdPct, 0.30);
   assert.equal(target.strategy.q102.boostMaximumGross, 3.0);
   assert.equal(target.strategy.portfolio.cryptoGrossCap, 3.0);
-  assert.equal(target.strategy.portfolio.totalGrossCap, 3.5);
+  assert.equal(target.strategy.portfolio.totalGrossCap, 4.25);
 
   assert.equal(V12_X1_ALL.maximumPositions, target.strategy.v12.maximumPositions);
   assert.equal(V12_X1_ALL.rank3EntryGrossCap, target.strategy.v12.rank3GrossCap);
@@ -36,7 +36,7 @@ test("current live target is the sole Top3/FET/Q102 governor acceptance anchor",
   assert.deepEqual(Q102_CAUSAL_V4_FAMILY_GROSS, target.strategy.q102.baseFamilyGross);
 });
 
-test("selected formal replay is exactly the 740.77M / 65.67M case", async () => {
+test("selected formal replay is the final 2026-09-22 LIVE governor case", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   const bytes = await readFile(artifactPath);
   const canonicalText = bytes.toString("utf8").replace(/\r\n/g, "\n");

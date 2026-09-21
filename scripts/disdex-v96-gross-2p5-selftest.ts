@@ -62,8 +62,8 @@ assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross, 1.15);
 assert.equal(DISDEX_V96_LIVE_PROMOTION.maximumPortfolioGross, 1.5);
 assert.equal(DISDEX_V96_RUNTIME.minimumExecutionLeverage, 5);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 1.5);
-assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
-assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 4.0);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 4.25);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross, 1.0);
 
 const reservedAllocation = allocateDisDexV96ReservedPengu({

@@ -53,7 +53,7 @@ test("three distinct positions persist but duplicate, fourth, or aggregate over-
         const thirdBase = active("LINKUSDT", 0.1);
         const secondRank3 = { ...active("AAVEUSDT", 0.05), entryRank: 3 as const, baseQuantity: 0, baseGross: 0, dynamicQuantity: 1, dynamicGross: 0.05 };
         const oversizedRank3 = { ...third, gross: 0.11, dynamicGross: 0.11 };
-        for (const invalid of [[first, first], [first, second, third, active("AAVEUSDT", 0.1)], [first, active("SOLUSDT", 0.51), third], [first, second, thirdBase], [first, third, secondRank3], [first, second, oversizedRank3]]) {
+        for (const invalid of [[first, first], [first, second, third, active("AAVEUSDT", 0.1)], [first, active("SOLUSDT", 1.0), third], [first, second, thirdBase], [first, third, secondRank3], [first, second, oversizedRank3]]) {
             await writeFile(path, JSON.stringify({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: 1, active: first, activePositions: invalid }));
             await assert.rejects(() => store.load(), /V12_STATE_/);
         }

@@ -105,7 +105,7 @@ jobs:
           if (!v96Config.includes('maximumPortfolioGross: 1.5')) throw new Error('Operator Override V96 Gross 1.5 missing');
           if (!v96Config.includes('requiredInitialLeverage: 5')) throw new Error('fixed 5x leverage missing');
           if (!combinedConfig.includes('cryptoSleeveGrossCap: 1.5')) throw new Error('Crypto sleeve 1.5 missing');
-          if (!combinedConfig.includes('stockSleeveGrossCap: 1.5')) throw new Error('Stock sleeve 1.5 missing');
+          if (!combinedConfig.includes('stockSleeveGrossCap: 4.0')) throw new Error('Stock sleeve 1.5 missing');
           if (!combinedConfig.includes('portfolioGrossCap: 2.5')) throw new Error('Combined Gross 2.5 missing');
           if (!combinedConfig.includes('reservedFirstStockGross: 1.0')) throw new Error('first Stock slot reservation missing');
           if (!combinedConfig.includes('minimumSecondStockGross: 0.25')) throw new Error('second Stock minimum missing');

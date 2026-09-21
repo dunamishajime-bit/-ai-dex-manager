@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
@@ -16,7 +16,7 @@ test("V12 Top3 preserves strong-quality signal while Rank3 residual sizing is ex
   assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.10);
   assert.equal(V12_X1_ALL.rank3MinimumScore, 0.70);
   assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
-  assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
+  assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 2);
   assert.equal(V12_X1_ALL.dynamicResidualAggregateGrossCap, 2);
   assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
   assert.equal(V12_X1_ALL.strongRegimeThresholdPct, 0.0359);
@@ -35,7 +35,7 @@ test("PENGU allocation is the formal 0.85x production contract", () => {
   assert.equal(PENGU_DUAL_LS_V2.hardStopCooldownHours, 24);
 });
 
-test("LIVE integrated risk contract uses Q102 family sizing and 3.0/1.98/3.5 shared caps", () => {
+test("LIVE integrated risk contract uses final Q102/FET/stock/shared caps", () => {
   assert.deepEqual(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross, {
     HIGH_VOL: 1.661,
     MR: 1,
@@ -45,12 +45,12 @@ test("LIVE integrated risk contract uses Q102 family sizing and 3.0/1.98/3.5 sha
   });
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 3.0);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102MaximumPositions, 1);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 1.25);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 2.25);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMinimumGross, 0.05);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 1.98);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 1.64);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap, 3.5);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 4);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 2);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap, 4.25);
   assert.equal(STRICT_BT33404708902.quality102CausalV1PositionCap, 1.5);
 });
 

@@ -481,10 +481,10 @@ function selfTest() {
     const env = buildCombinedChildEnvironment("paper");
     assert.equal(env.DISDEX_V96_MAX_GROSS, "1.5");
     assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "3");
-    assert.equal(env.DISDEX_V52_STOCK_GROSS_CAP, "1.5");
-    assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "3.5");
-    assert.equal(env.DISDEX_V52_V11_GROSS_CAP, "1");
-    assert.equal(env.DISDEX_V52_V50_GROSS_CAP, "1");
+    assert.equal(env.DISDEX_V52_STOCK_GROSS_CAP, "4");
+    assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "4.25");
+    assert.equal(env.DISDEX_V52_V11_GROSS_CAP, "2");
+    assert.equal(env.DISDEX_V52_V50_GROSS_CAP, "2");
     assert.equal(env.DISDEX_V52_RESERVED_FIRST_STOCK_GROSS, "1");
     assert.equal(env.DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS, "0.25");
     assert.equal(env.DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS, "2");

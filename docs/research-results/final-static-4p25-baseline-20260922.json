@@ -1,0 +1,512 @@
+[
+  {
+    "case": "top3_q102gov030_fet2.25",
+    "fetGrossCap": 2.25,
+    "NORMAL": {
+      "asset": 1479916279.6535711,
+      "pf": 4.18705843,
+      "dd": -19.61179353,
+      "trades": 1180,
+      "govMax": 4.25,
+      "govHours": {
+        "base5": 8760.0,
+        "gt5": 0.0,
+        "ge6": 0.0,
+        "ge7": 0.0,
+        "ge7p9": 0.0
+      },
+      "util": 28.33034067,
+      "unused": 18834.78647224,
+      "avgCrypto": 0.84991022,
+      "maxV12": 2.0,
+      "v12Scaled": 6,
+      "v12Pnl": 479482827.7477574,
+      "maxCrypto": 3.0,
+      "maxTotal": 4.25,
+      "maxFet": 2.25,
+      "conflicts": 0,
+      "conflictDetails": [],
+      "v12": 791,
+      "pengu": 66,
+      "q102": 71,
+      "fet": 26,
+      "fetExited": 6,
+      "fetPreempted": 20,
+      "fetBlocked": 5,
+      "stock11": 50,
+      "stock50": 93,
+      "worstEvent": {
+        "ts": 1761091200000,
+        "strategy": "V12",
+        "sleeve": "V12",
+        "symbol": "DOGE",
+        "layer": null,
+        "eventReturn": -0.00441486,
+        "pnlJpy": -655.33926348,
+        "exitReason": "trail"
+      },
+      "ddAttribution": {
+        "peakIndex": 251,
+        "troughIndex": 265,
+        "troughTs": 1761091200000,
+        "segmentEvents": 14,
+        "pnlBySleeve": {
+          "V12": -4004.0142503100005,
+          "SUPPLEMENT_QUALITY102": -32381.170919950004,
+          "V52": 331.21771988
+        },
+        "tail": [
+          {
+            "ts": 1760868000000,
+            "sleeve": "SUPPLEMENT_QUALITY102",
+            "strategy": "SUPPLEMENT_QUALITY102",
+            "symbol": "ENA",
+            "layer": "HV",
+            "pnlJpy": -30850.10923813,
+            "eventReturn": -0.16863303
+          },
+          {
+            "ts": 1760970600000,
+            "sleeve": "SUPPLEMENT_QUALITY102",
+            "strategy": "SUPPLEMENT_QUALITY102_TRIM",
+            "symbol": "SEI",
+            "layer": "HV",
+            "pnlJpy": -213.45658872,
+            "eventReturn": -0.00140347
+          },
+          {
+            "ts": 1760976000000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "LINK",
+            "layer": null,
+            "pnlJpy": -389.57965834,
+            "eventReturn": -0.00256507
+          },
+          {
+            "ts": 1760976000000,
+            "sleeve": "SUPPLEMENT_QUALITY102",
+            "strategy": "SUPPLEMENT_QUALITY102_TRIM",
+            "symbol": "SEI",
+            "layer": "HV",
+            "pnlJpy": 86.16400595,
+            "eventReturn": 0.00056878
+          },
+          {
+            "ts": 1760977800000,
+            "sleeve": "V52",
+            "strategy": "V11_EQ",
+            "symbol": "NVDAUSDT",
+            "layer": null,
+            "pnlJpy": -520.70433378,
+            "eventReturn": -0.00343529
+          },
+          {
+            "ts": 1760983200000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "DOGE",
+            "layer": null,
+            "pnlJpy": -421.84245452,
+            "eventReturn": -0.00279265
+          },
+          {
+            "ts": 1761064200000,
+            "sleeve": "SUPPLEMENT_QUALITY102",
+            "strategy": "SUPPLEMENT_QUALITY102_TRIM",
+            "symbol": "SEI",
+            "layer": "HV",
+            "pnlJpy": -1403.76909905,
+            "eventReturn": -0.00931915
+          },
+          {
+            "ts": 1761069600000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "DOGE",
+            "layer": null,
+            "pnlJpy": -547.09127559,
+            "eventReturn": -0.00366612
+          },
+          {
+            "ts": 1761069600000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "LINK",
+            "layer": null,
+            "pnlJpy": -389.70728416,
+            "eventReturn": -0.00262108
+          },
+          {
+            "ts": 1761075000000,
+            "sleeve": "V52",
+            "strategy": "V50_POST_OPEN_BASIS",
+            "symbol": "MSFTUSDT",
+            "layer": null,
+            "pnlJpy": 851.92205366,
+            "eventReturn": 0.00574489
+          },
+          {
+            "ts": 1761091200000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "LTC",
+            "layer": null,
+            "pnlJpy": -704.53326525,
+            "eventReturn": -0.00472384
+          },
+          {
+            "ts": 1761091200000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "DOGE",
+            "layer": null,
+            "pnlJpy": -655.33926348,
+            "eventReturn": -0.00441486
+          }
+        ]
+      },
+      "monthly": [
+        {
+          "month": "2025-08",
+          "openingAssetJpy": 10000.0,
+          "depositJpy": 0.0,
+          "closingAssetJpy": 17197.52082502,
+          "tradingPnlJpy": 7197.52082502,
+          "timeWeightedReturnPct": 71.97520825
+        },
+        {
+          "month": "2025-09",
+          "openingAssetJpy": 17197.52082502,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 48209.66127344,
+          "tradingPnlJpy": 21012.14044842,
+          "timeWeightedReturnPct": 77.25755808
+        },
+        {
+          "month": "2025-10",
+          "openingAssetJpy": 48209.66127344,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 204859.97654696,
+          "tradingPnlJpy": 146650.31527352,
+          "timeWeightedReturnPct": 251.93466525
+        },
+        {
+          "month": "2025-11",
+          "openingAssetJpy": 204859.97654696,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 1866448.02997545,
+          "tradingPnlJpy": 1651588.05342848,
+          "timeWeightedReturnPct": 768.68111035
+        },
+        {
+          "month": "2025-12",
+          "openingAssetJpy": 1866448.02997545,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 2589107.23600576,
+          "tradingPnlJpy": 712659.20603032,
+          "timeWeightedReturnPct": 37.97916034
+        },
+        {
+          "month": "2026-01",
+          "openingAssetJpy": 2589107.23600576,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 14464678.92465744,
+          "tradingPnlJpy": 11865571.68865167,
+          "timeWeightedReturnPct": 456.52489918
+        },
+        {
+          "month": "2026-02",
+          "openingAssetJpy": 14464678.92465744,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 38165264.35498785,
+          "tradingPnlJpy": 23690585.43033042,
+          "timeWeightedReturnPct": 163.66916015
+        },
+        {
+          "month": "2026-03",
+          "openingAssetJpy": 38165264.35498785,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 147510569.70165157,
+          "tradingPnlJpy": 109335305.34666371,
+          "timeWeightedReturnPct": 286.4035317
+        },
+        {
+          "month": "2026-04",
+          "openingAssetJpy": 147510569.70165157,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 264484081.1862976,
+          "tradingPnlJpy": 116963511.48464602,
+          "timeWeightedReturnPct": 79.28623901
+        },
+        {
+          "month": "2026-05",
+          "openingAssetJpy": 264484081.1862976,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 450214995.78668004,
+          "tradingPnlJpy": 185720914.60038245,
+          "timeWeightedReturnPct": 70.21741801
+        },
+        {
+          "month": "2026-06",
+          "openingAssetJpy": 450214995.78668004,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 1325511967.4618084,
+          "tradingPnlJpy": 875286971.6751285,
+          "timeWeightedReturnPct": 194.41101224
+        },
+        {
+          "month": "2026-07",
+          "openingAssetJpy": 1325511967.4618084,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 1442928818.069525,
+          "tradingPnlJpy": 117406850.60771656,
+          "timeWeightedReturnPct": 8.85740512
+        },
+        {
+          "month": "2026-08",
+          "openingAssetJpy": 1442928818.069525,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 1479916279.6535711,
+          "tradingPnlJpy": 36977461.58404613,
+          "timeWeightedReturnPct": 2.5626493
+        }
+      ]
+    },
+    "SEVERE": {
+      "asset": 84470298.59226112,
+      "pf": 3.07036,
+      "dd": -19.97886021,
+      "trades": 1031,
+      "govMax": 4.25,
+      "govHours": {
+        "base5": 8760.0,
+        "gt5": 0.0,
+        "ge6": 0.0,
+        "ge7": 0.0,
+        "ge7p9": 0.0
+      },
+      "util": 28.51328896,
+      "unused": 18786.70766202,
+      "avgCrypto": 0.85539867,
+      "maxV12": 2.0,
+      "v12Scaled": 1,
+      "v12Pnl": 23950058.049786832,
+      "maxCrypto": 3.0,
+      "maxTotal": 3.0,
+      "maxFet": 2.25,
+      "conflicts": 0,
+      "conflictDetails": [],
+      "v12": 795,
+      "pengu": 65,
+      "q102": 71,
+      "fet": 29,
+      "fetExited": 10,
+      "fetPreempted": 19,
+      "fetBlocked": 2,
+      "stock11": 0,
+      "stock50": 0,
+      "worstEvent": {
+        "ts": 1758549600000,
+        "strategy": "V12",
+        "sleeve": "V12",
+        "symbol": "ADA",
+        "layer": null,
+        "eventReturn": -0.00426943,
+        "pnlJpy": -101.32215755,
+        "exitReason": "trail"
+      },
+      "ddAttribution": {
+        "peakIndex": 84,
+        "troughIndex": 92,
+        "troughTs": 1758549600000,
+        "segmentEvents": 8,
+        "pnlBySleeve": {
+          "V12": 741.9649476799999,
+          "SUPPLEMENT_QUALITY102": -6641.82893516
+        },
+        "tail": [
+          {
+            "ts": 1758096000000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "ADA",
+            "layer": null,
+            "pnlJpy": -177.39604702,
+            "eventReturn": -0.00600721
+          },
+          {
+            "ts": 1758283200000,
+            "sleeve": "SUPPLEMENT_QUALITY102",
+            "strategy": "SUPPLEMENT_QUALITY102",
+            "symbol": "RENDER",
+            "layer": "S4",
+            "pnlJpy": -3780.57401788,
+            "eventReturn": -0.12879625
+          },
+          {
+            "ts": 1758520800000,
+            "sleeve": "SUPPLEMENT_QUALITY102",
+            "strategy": "SUPPLEMENT_QUALITY102_TRIM",
+            "symbol": "AVAX",
+            "layer": "S3",
+            "pnlJpy": -244.31896404,
+            "eventReturn": -0.00955395
+          },
+          {
+            "ts": 1758520800000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "AVAX",
+            "layer": null,
+            "pnlJpy": 993.698867,
+            "eventReturn": 0.03923284
+          },
+          {
+            "ts": 1758524400000,
+            "sleeve": "SUPPLEMENT_QUALITY102",
+            "strategy": "SUPPLEMENT_QUALITY102",
+            "symbol": "AVAX",
+            "layer": "S3",
+            "pnlJpy": -2616.93595324,
+            "eventReturn": -0.09942032
+          },
+          {
+            "ts": 1758535200000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "INJ",
+            "layer": null,
+            "pnlJpy": 95.88919469,
+            "eventReturn": 0.0040451
+          },
+          {
+            "ts": 1758535200000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "DOGE",
+            "layer": null,
+            "pnlJpy": -68.90490944,
+            "eventReturn": -0.00289506
+          },
+          {
+            "ts": 1758549600000,
+            "sleeve": "V12",
+            "strategy": "V12",
+            "symbol": "ADA",
+            "layer": null,
+            "pnlJpy": -101.32215755,
+            "eventReturn": -0.00426943
+          }
+        ]
+      },
+      "monthly": [
+        {
+          "month": "2025-08",
+          "openingAssetJpy": 10000.0,
+          "depositJpy": 0.0,
+          "closingAssetJpy": 9564.33166295,
+          "tradingPnlJpy": -435.66833705,
+          "timeWeightedReturnPct": -4.35668337
+        },
+        {
+          "month": "2025-09",
+          "openingAssetJpy": 9564.33166295,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 24098.76548421,
+          "tradingPnlJpy": 4534.43382126,
+          "timeWeightedReturnPct": 23.17704432
+        },
+        {
+          "month": "2025-10",
+          "openingAssetJpy": 24098.76548421,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 82003.99041528,
+          "tradingPnlJpy": 47905.22493107,
+          "timeWeightedReturnPct": 140.48961671
+        },
+        {
+          "month": "2025-11",
+          "openingAssetJpy": 82003.99041528,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 575796.18832581,
+          "tradingPnlJpy": 483792.19791053,
+          "timeWeightedReturnPct": 525.83827693
+        },
+        {
+          "month": "2025-12",
+          "openingAssetJpy": 575796.18832581,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 687590.49160267,
+          "tradingPnlJpy": 101794.30327686,
+          "timeWeightedReturnPct": 17.37708529
+        },
+        {
+          "month": "2026-01",
+          "openingAssetJpy": 687590.49160267,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 3232435.83869782,
+          "tradingPnlJpy": 2534845.34709515,
+          "timeWeightedReturnPct": 363.371545
+        },
+        {
+          "month": "2026-02",
+          "openingAssetJpy": 3232435.83869782,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 7385192.39796025,
+          "tradingPnlJpy": 4142756.55926243,
+          "timeWeightedReturnPct": 127.76680142
+        },
+        {
+          "month": "2026-03",
+          "openingAssetJpy": 7385192.39796025,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 21575880.57582496,
+          "tradingPnlJpy": 14180688.17786471,
+          "timeWeightedReturnPct": 191.75550026
+        },
+        {
+          "month": "2026-04",
+          "openingAssetJpy": 21575880.57582496,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 26935361.17988821,
+          "tradingPnlJpy": 5349480.60406325,
+          "timeWeightedReturnPct": 24.78231354
+        },
+        {
+          "month": "2026-05",
+          "openingAssetJpy": 26935361.17988821,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 42559935.95947539,
+          "tradingPnlJpy": 15614574.77958718,
+          "timeWeightedReturnPct": 57.94902757
+        },
+        {
+          "month": "2026-06",
+          "openingAssetJpy": 42559935.95947539,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 92134312.30523013,
+          "tradingPnlJpy": 49564376.34575474,
+          "timeWeightedReturnPct": 116.4304696
+        },
+        {
+          "month": "2026-07",
+          "openingAssetJpy": 92134312.30523013,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 83212533.89843164,
+          "tradingPnlJpy": -8931778.40679848,
+          "timeWeightedReturnPct": -9.69324984
+        },
+        {
+          "month": "2026-08",
+          "openingAssetJpy": 83212533.89843164,
+          "depositJpy": 10000.0,
+          "closingAssetJpy": 84470298.59226112,
+          "tradingPnlJpy": 1247764.69382948,
+          "timeWeightedReturnPct": 1.49931111
+        }
+      ]
+    },
+    "name": "best_no_dd_scale"
+  }
+]

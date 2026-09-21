@@ -8,6 +8,8 @@ import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
+import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 
 const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const EPSILON = 1e-9;
@@ -145,6 +147,14 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             throw new Error("STRICT_PORTFOLIO_ACCOUNT_SNAPSHOT_STALE_OR_INVALID");
         }
         const openOrders = await this.getOpenOrders();
+        const sharedRiskPath = process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH;
+        const sharedRisk = sharedRiskPath
+            ? await readSharedCryptoDailyRisk(sharedRiskPath, now).catch(() => ({ ok: false as const }))
+            : { ok: false as const };
+        const ddGovernorPath = process.env.DISDEX_PORTFOLIO_DD_GOVERNOR_PATH;
+        const portfolioDdGovernor = ddGovernorPath
+            ? await readPortfolioDdGovernor(ddGovernorPath).catch(() => undefined)
+            : undefined;
         const managedProtectiveOrders = new Set([
             ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
             ...findManagedV12ProtectiveOrders(openOrders, positions),
@@ -169,6 +179,9 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                 equity: workingAccount.walletBalance,
                 now: plannerNow,
                 active,
+                availableBalanceUsd: workingAccount.availableBalance,
+                sharedDailyRisk: sharedRisk.ok ? sharedRisk.state : undefined,
+                portfolioDdGovernor,
                 intents: [{
                     idempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
                     strategy: "V12",

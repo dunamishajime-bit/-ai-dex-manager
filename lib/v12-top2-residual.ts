@@ -151,9 +151,10 @@ export function v12ResidualCapacity(snapshot: V12GrossSnapshot, activeV12Positio
 
 /**
  * Admit the existing V12 request without changing the signal/risk request.
- * Base capacity is consumed first up to 1.50x aggregate. Any remaining part
- * of the same request may use residual capacity as lower-priority Dynamic
- * notional, with total V12 capped at 2.00x.
+ * Base capacity is consumed first up to the configured base aggregate cap.
+ * Any remaining part of the same request may use residual capacity as
+ * lower-priority Dynamic notional, with total V12 bounded by the configured
+ * dynamic aggregate cap.
  */
 export function decideV12ResidualEntry(requestedGross: number, snapshot: V12GrossSnapshot, activeV12Positions = 0): V12ResidualDecision {
     const capacity = v12ResidualCapacity(snapshot, activeV12Positions);

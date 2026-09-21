@@ -513,6 +513,22 @@ export class Quality102CausalV1Runner {
         return trim.status === "reduced" && trim.trimmedGross > EPSILON;
     }
 
+    private async integratedGrossContext(now: number, account: DirectAccountSnapshot) {
+        const riskPath = String(this.dependencies.config.sharedDailyRiskPath || "").trim();
+        const risk = riskPath
+            ? await readSharedCryptoDailyRisk(riskPath, now).catch(() => ({ ok: false as const }))
+            : { ok: false as const };
+        const ddPath = String(this.dependencies.config.portfolioDdGovernorPath || "").trim();
+        const portfolioDdGovernor = ddPath
+            ? await readPortfolioDdGovernor(ddPath).catch(() => undefined)
+            : undefined;
+        return {
+            availableBalanceUsd: account.availableBalance,
+            sharedDailyRisk: risk.ok ? risk.state : undefined,
+            portfolioDdGovernor,
+        };
+    }
+
     private async sharedRiskStatus(): Promise<{ reason: string; flattenExisting: boolean } | undefined> {
         if (this.dependencies.config.mode !== "LIVE") return undefined;
         if (this.dependencies.riskReader) {
@@ -784,10 +800,12 @@ export class Quality102CausalV1Runner {
         if (!pending.reduceOnly) {
             if (live.unmanagedOpenOrders.length > 0) throw new Error("Q102_BASE_OR_OTHER_OPEN_ORDER_CONFLICT");
             const targetGross = positive(pending.targetGross, "Q102 pending targetGross");
+            const grossContext = await this.integratedGrossContext(now, live.account);
             const planner = planStrictPortfolio({
                 equity: live.equity,
                 now,
                 active: live.positions.filter(nonZero).map((position) => strictBasePosition(position, now)),
+                ...grossContext,
                 intents: [{
                     idempotencyKey: pending.idempotencyKey,
                     strategy: STRATEGY_ID,
@@ -1021,10 +1039,12 @@ export class Quality102CausalV1Runner {
         }
         const entrySide = signal.side > 0 ? "LONG" : "SHORT";
         const targetGross = Math.min(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross);
+        const grossContext = await this.integratedGrossContext(quote.updatedAt, account);
         const planner: StrictPortfolioPlan = planStrictPortfolio({
             equity,
             now: quote.updatedAt,
             active: positions.filter(nonZero).map((position) => strictBasePosition(position, quote.updatedAt)),
+            ...grossContext,
             intents: [{
                 idempotencyKey: `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}`,
                 strategy: STRATEGY_ID,

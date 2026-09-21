@@ -1,7 +1,7 @@
 {
   "schema": "disdex-current-implementation-readiness/v1",
-  "date": "2026-09-20",
-  "target": "top3_q102gov030_fet1.25",
+  "date": "2026-09-22",
+  "target": "top3_q102gov030_fet2.25",
   "canonicalTarget": "docs/production/current-live-target.json",
   "implementationStatus": "READY",
   "status": "BLOCKED",
@@ -10,7 +10,12 @@
     "OPERATOR_LIVE_ACTIVATION_REQUIRED"
   ],
   "completed": [
-    "CANONICAL_740M_65M_BACKTEST_FIXED",
+    "FINAL_LIVE_GOVERNOR_BT_DD_LT20_FIXED",
+    "STATIC_4P25_BASELINE_BT_DD_LT20_FIXED",
+    "V12_BASE_AGGREGATE_GROSS_2P0",
+    "FET_BRK48_MAX_GROSS_2P25",
+    "V52_STOCK_AGGREGATE_4P0_SLOT_2P0",
+    "PORTFOLIO_BASE_4P25_HARD_8P0_GOVERNOR",
     "V12_TOP3_RANK3_010_SCORE070",
     "Q102_DD_GOVERNOR_030_TO_300",
     "Q102_5X_MARGIN_NOTIONAL_SIZING",

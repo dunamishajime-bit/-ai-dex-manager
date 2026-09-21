@@ -22,7 +22,7 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", source)
         self.assertIn("Environment=FET_BRK48_LIVE_ENABLED=true", source)
         self.assertIn("Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json", source)
-        self.assertIn("Environment=FET_BRK48_MAX_GROSS=1.25", source)
+        self.assertIn("Environment=FET_BRK48_MAX_GROSS=2.25", source)
         self.assertIn('RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"', source)
         self.assertIn('CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"', source)
         self.assertIn("EnvironmentFile=${CONTRACT_ENV_FILE}", source)
@@ -55,14 +55,24 @@ class RuntimeWiringScriptTest(unittest.TestCase):
     def test_wiring_restores_required_monitor_timers(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertIn("ensure_monitor_timer_active()", source)
-        self.assertIn('ensure_monitor_timer_active "disdex-runner-watchdog.timer"', source)
         self.assertIn('ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"', source)
         self.assertIn('ensure_monitor_timer_active "disdex-runner-health-alert.timer"', source)
         self.assertIn("DISDEX_MONITOR_TIMER_ACTIVE", source)
+        # Recovery/watchdog automation is intentionally conditional on the
+        # operator activation artifact after the premature-activation incident.
+        self.assertIn("if operator_activation_all_trading_ready; then", source)
+        self.assertIn("systemctl enable --now disdex-runner-watchdog.timer", source)
+        self.assertIn("systemctl disable --now disdex-runner-watchdog.timer", source)
 
     def test_wiring_script_does_not_stop_or_cancel_trading(self):
         source = SCRIPT.read_text(encoding="utf-8")
-        self.assertNotIn("systemctl stop", source)
+        # The hardening may stop automation helpers while activation is absent,
+        # but must never directly stop a real trading runner.
+        self.assertNotIn('systemctl stop "$V12_UNIT"', source)
+        self.assertNotIn('systemctl stop "$PENGU_UNIT"', source)
+        self.assertNotIn('systemctl stop "$Q102_UNIT"', source)
+        self.assertNotIn('systemctl stop "$FET_UNIT"', source)
+        self.assertNotIn('systemctl stop "$V52_UNIT"', source)
         self.assertNotIn("systemctl cancel", source)
         self.assertNotIn("pkill", source)
 

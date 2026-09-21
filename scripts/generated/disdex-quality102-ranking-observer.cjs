@@ -25,9 +25,9 @@ var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__
   mod2
 ));
 
-// ../-ai-dex-manager/node_modules/dotenv/package.json
+// node_modules/dotenv/package.json
 var require_package = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/package.json"(exports2, module2) {
+  "node_modules/dotenv/package.json"(exports2, module2) {
     module2.exports = {
       name: "dotenv",
       version: "17.3.1",
@@ -93,9 +93,9 @@ var require_package = __commonJS({
   }
 });
 
-// ../-ai-dex-manager/node_modules/dotenv/lib/main.js
+// node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/lib/main.js"(exports2, module2) {
+  "node_modules/dotenv/lib/main.js"(exports2, module2) {
     var fs = require("fs");
     var path = require("path");
     var os = require("os");
@@ -419,9 +419,9 @@ var require_main = __commonJS({
   }
 });
 
-// ../-ai-dex-manager/node_modules/dotenv/lib/env-options.js
+// node_modules/dotenv/lib/env-options.js
 var require_env_options = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/lib/env-options.js"(exports2, module2) {
+  "node_modules/dotenv/lib/env-options.js"(exports2, module2) {
     var options = {};
     if (process.env.DOTENV_CONFIG_ENCODING != null) {
       options.encoding = process.env.DOTENV_CONFIG_ENCODING;
@@ -445,9 +445,9 @@ var require_env_options = __commonJS({
   }
 });
 
-// ../-ai-dex-manager/node_modules/dotenv/lib/cli-options.js
+// node_modules/dotenv/lib/cli-options.js
 var require_cli_options = __commonJS({
-  "../-ai-dex-manager/node_modules/dotenv/lib/cli-options.js"(exports2, module2) {
+  "node_modules/dotenv/lib/cli-options.js"(exports2, module2) {
     var re = /^dotenv_config_(encoding|path|quiet|debug|override|DOTENV_KEY)=(.+)$/;
     module2.exports = function optionMatcher(args) {
       const options = args.reduce(function(acc, cur) {
@@ -465,7 +465,7 @@ var require_cli_options = __commonJS({
   }
 });
 
-// ../-ai-dex-manager/node_modules/dotenv/config.js
+// node_modules/dotenv/config.js
 (function() {
   require_main().config(
     Object.assign(
@@ -480,11 +480,11 @@ var require_cli_options = __commonJS({
 var import_promises3 = require("node:fs/promises");
 var import_node_path3 = require("node:path");
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/cryptoNode.js
+// node_modules/@noble/hashes/esm/cryptoNode.js
 var nc = __toESM(require("node:crypto"), 1);
 var crypto = nc && typeof nc === "object" && "webcrypto" in nc ? nc.webcrypto : nc && typeof nc === "object" && "randomBytes" in nc ? nc : void 0;
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/utils.js
+// node_modules/@noble/hashes/esm/utils.js
 function isBytes(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
@@ -588,7 +588,7 @@ function randomBytes(bytesLength = 32) {
   throw new Error("crypto.getRandomValues must be defined");
 }
 
-// ../-ai-dex-manager/node_modules/@noble/curves/esm/abstract/utils.js
+// node_modules/@noble/curves/esm/abstract/utils.js
 var _0n = /* @__PURE__ */ BigInt(0);
 var _1n = /* @__PURE__ */ BigInt(1);
 function isBytes2(a) {
@@ -809,7 +809,7 @@ function memoized(fn) {
   };
 }
 
-// ../-ai-dex-manager/node_modules/@noble/curves/esm/abstract/modular.js
+// node_modules/@noble/curves/esm/abstract/modular.js
 var _0n2 = BigInt(0);
 var _1n2 = BigInt(1);
 var _2n = /* @__PURE__ */ BigInt(2);
@@ -1083,7 +1083,7 @@ function mapHashToField(key, fieldOrder, isLE2 = false) {
   return isLE2 ? numberToBytesLE(reduced, fieldLen) : numberToBytesBE(reduced, fieldLen);
 }
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/_md.js
+// node_modules/@noble/hashes/esm/_md.js
 function setBigUint64(view, byteOffset, value, isLE2) {
   if (typeof view.setBigUint64 === "function")
     return view.setBigUint64(byteOffset, value, isLE2);
@@ -1203,7 +1203,7 @@ var SHA256_IV = /* @__PURE__ */ Uint32Array.from([
   1541459225
 ]);
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/_u64.js
+// node_modules/@noble/hashes/esm/_u64.js
 var U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
 var _32n = /* @__PURE__ */ BigInt(32);
 function fromBig(n, le = false) {
@@ -1226,7 +1226,7 @@ var rotlSL = (h, l, s) => l << s | h >>> 32 - s;
 var rotlBH = (h, l, s) => l << s - 32 | h >>> 64 - s;
 var rotlBL = (h, l, s) => h << s - 32 | l >>> 64 - s;
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/sha2.js
+// node_modules/@noble/hashes/esm/sha2.js
 var SHA256_K = /* @__PURE__ */ Uint32Array.from([
   1116352408,
   1899447441,
@@ -1366,7 +1366,7 @@ var SHA256 = class extends HashMD {
 };
 var sha256 = /* @__PURE__ */ createHasher(() => new SHA256());
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/hmac.js
+// node_modules/@noble/hashes/esm/hmac.js
 var HMAC = class extends Hash {
   constructor(hash, _key) {
     super();
@@ -1434,7 +1434,7 @@ var HMAC = class extends Hash {
 var hmac = (hash, key, message) => new HMAC(hash, key).update(message).digest();
 hmac.create = (hash, key) => new HMAC(hash, key);
 
-// ../-ai-dex-manager/node_modules/@noble/curves/esm/abstract/curve.js
+// node_modules/@noble/curves/esm/abstract/curve.js
 var _0n3 = BigInt(0);
 var _1n3 = BigInt(1);
 function constTimeNegate(condition, item) {
@@ -1668,7 +1668,7 @@ function validateBasic(curve) {
   });
 }
 
-// ../-ai-dex-manager/node_modules/@noble/curves/esm/abstract/weierstrass.js
+// node_modules/@noble/curves/esm/abstract/weierstrass.js
 function validateSigVerOpts(opts) {
   if (opts.lowS !== void 0)
     abool("lowS", opts.lowS);
@@ -2554,7 +2554,7 @@ function weierstrass(curveDef) {
   };
 }
 
-// ../-ai-dex-manager/node_modules/@noble/curves/esm/_shortw_utils.js
+// node_modules/@noble/curves/esm/_shortw_utils.js
 function getHash(hash) {
   return {
     hash,
@@ -2567,7 +2567,7 @@ function createCurve(curveDef, defHash) {
   return { ...create(defHash), create };
 }
 
-// ../-ai-dex-manager/node_modules/@noble/curves/esm/secp256k1.js
+// node_modules/@noble/curves/esm/secp256k1.js
 var secp256k1P = BigInt("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f");
 var secp256k1N = BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
 var _0n5 = BigInt(0);
@@ -2635,10 +2635,10 @@ var secp256k1 = createCurve({
   }
 }, sha256);
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/version.js
-var version = "2.48.4";
+// node_modules/viem/_esm/errors/version.js
+var version = "2.45.3";
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/base.js
+// node_modules/viem/_esm/errors/base.js
 var errorConfig = {
   getDocsUrl: ({ docsBaseUrl, docsPath = "", docsSlug }) => docsPath ? `${docsBaseUrl ?? "https://viem.sh"}${docsPath}${docsSlug ? `#${docsSlug}` : ""}` : void 0,
   version: `viem@${version}`
@@ -2722,7 +2722,7 @@ function walk(err, fn) {
   return fn ? null : err;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/encoding.js
+// node_modules/viem/_esm/errors/encoding.js
 var IntegerOutOfRangeError = class extends BaseError {
   constructor({ max, min, signed, size: size2, value }) {
     super(`Number "${value}" is not in safe ${size2 ? `${size2 * 8}-bit ${signed ? "signed" : "unsigned"} ` : ""}integer range ${max ? `(${min} to ${max})` : `(above ${min})`}`, { name: "IntegerOutOfRangeError" });
@@ -2734,7 +2734,7 @@ var SizeOverflowError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/data/isHex.js
+// node_modules/viem/_esm/utils/data/isHex.js
 function isHex(value, { strict = true } = {}) {
   if (!value)
     return false;
@@ -2743,14 +2743,14 @@ function isHex(value, { strict = true } = {}) {
   return strict ? /^0x[0-9a-fA-F]*$/.test(value) : value.startsWith("0x");
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/data/size.js
+// node_modules/viem/_esm/utils/data/size.js
 function size(value) {
   if (isHex(value, { strict: false }))
     return Math.ceil((value.length - 2) / 2);
   return value.length;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/data/trim.js
+// node_modules/viem/_esm/utils/data/trim.js
 function trim(hexOrBytes, { dir = "left" } = {}) {
   let data = typeof hexOrBytes === "string" ? hexOrBytes.replace("0x", "") : hexOrBytes;
   let sliceLength = 0;
@@ -2769,7 +2769,7 @@ function trim(hexOrBytes, { dir = "left" } = {}) {
   return data;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/data.js
+// node_modules/viem/_esm/errors/data.js
 var SliceOffsetOutOfBoundsError = class extends BaseError {
   constructor({ offset, position, size: size2 }) {
     super(`Slice ${position === "start" ? "starting" : "ending"} at offset "${offset}" is out-of-bounds (size: ${size2}).`, { name: "SliceOffsetOutOfBoundsError" });
@@ -2781,7 +2781,7 @@ var SizeExceedsPaddingSizeError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/data/pad.js
+// node_modules/viem/_esm/utils/data/pad.js
 function pad(hexOrBytes, { dir, size: size2 = 32 } = {}) {
   if (typeof hexOrBytes === "string")
     return padHex(hexOrBytes, { dir, size: size2 });
@@ -2816,7 +2816,7 @@ function padBytes(bytes, { dir, size: size2 = 32 } = {}) {
   return paddedBytes;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/encoding/toHex.js
+// node_modules/viem/_esm/utils/encoding/toHex.js
 var hexes2 = /* @__PURE__ */ Array.from({ length: 256 }, (_v, i) => i.toString(16).padStart(2, "0"));
 function toHex(value, opts = {}) {
   if (typeof value === "number" || typeof value === "bigint")
@@ -2882,7 +2882,7 @@ function stringToHex(value_, opts = {}) {
   return bytesToHex2(value, opts);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/encoding/toBytes.js
+// node_modules/viem/_esm/utils/encoding/toBytes.js
 var encoder2 = /* @__PURE__ */ new TextEncoder();
 function toBytes2(value, opts = {}) {
   if (typeof value === "number" || typeof value === "bigint")
@@ -2953,7 +2953,7 @@ function stringToBytes(value, opts = {}) {
   return bytes;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/encoding/fromHex.js
+// node_modules/viem/_esm/utils/encoding/fromHex.js
 function assertSize(hexOrBytes, { size: size2 }) {
   if (size(hexOrBytes) > size2)
     throw new SizeOverflowError({
@@ -2988,7 +2988,7 @@ function hexToNumber2(hex, opts = {}) {
   return number;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/lru.js
+// node_modules/viem/_esm/utils/lru.js
 var LruMap = class extends Map {
   constructor(size2) {
     super();
@@ -3002,26 +3002,24 @@ var LruMap = class extends Map {
   }
   get(key) {
     const value = super.get(key);
-    if (super.has(key)) {
-      super.delete(key);
+    if (super.has(key) && value !== void 0) {
+      this.delete(key);
       super.set(key, value);
     }
     return value;
   }
   set(key, value) {
-    if (super.has(key))
-      super.delete(key);
     super.set(key, value);
     if (this.maxSize && this.size > this.maxSize) {
-      const firstKey = super.keys().next().value;
-      if (firstKey !== void 0)
-        super.delete(firstKey);
+      const firstKey = this.keys().next().value;
+      if (firstKey)
+        this.delete(firstKey);
     }
     return this;
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/signature/serializeSignature.js
+// node_modules/viem/_esm/utils/signature/serializeSignature.js
 function serializeSignature({ r, s, to = "hex", v, yParity }) {
   const yParity_ = (() => {
     if (yParity === 0 || yParity === 1)
@@ -3036,7 +3034,7 @@ function serializeSignature({ r, s, to = "hex", v, yParity }) {
   return hexToBytes2(signature);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/address.js
+// node_modules/viem/_esm/errors/address.js
 var InvalidAddressError = class extends BaseError {
   constructor({ address }) {
     super(`Address "${address}" is invalid.`, {
@@ -3049,7 +3047,7 @@ var InvalidAddressError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/sha3.js
+// node_modules/@noble/hashes/esm/sha3.js
 var _0n6 = BigInt(0);
 var _1n6 = BigInt(1);
 var _2n4 = BigInt(2);
@@ -3230,7 +3228,7 @@ var Keccak = class _Keccak extends Hash {
 var gen = (suffix, blockLen, outputLen) => createHasher(() => new Keccak(blockLen, suffix, outputLen));
 var keccak_256 = /* @__PURE__ */ (() => gen(1, 136, 256 / 8))();
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/hash/keccak256.js
+// node_modules/viem/_esm/utils/hash/keccak256.js
 function keccak256(value, to_) {
   const to = to_ || "hex";
   const bytes = keccak_256(isHex(value, { strict: false }) ? toBytes2(value) : value);
@@ -3239,7 +3237,7 @@ function keccak256(value, to_) {
   return toHex(bytes);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/address/getAddress.js
+// node_modules/viem/_esm/utils/address/getAddress.js
 var checksumAddressCache = /* @__PURE__ */ new LruMap(8192);
 function checksumAddress(address_, chainId) {
   if (checksumAddressCache.has(`${address_}.${chainId}`))
@@ -3260,7 +3258,7 @@ function checksumAddress(address_, chainId) {
   return result;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/address/isAddress.js
+// node_modules/viem/_esm/utils/address/isAddress.js
 var addressRegex = /^0x[a-fA-F0-9]{40}$/;
 var isAddressCache = /* @__PURE__ */ new LruMap(8192);
 function isAddress(address, options) {
@@ -3281,7 +3279,7 @@ function isAddress(address, options) {
   return result;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/toAccount.js
+// node_modules/viem/_esm/accounts/toAccount.js
 function toAccount(source) {
   if (typeof source === "string") {
     if (!isAddress(source, { strict: false }))
@@ -3306,13 +3304,13 @@ function toAccount(source) {
   };
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/utils/publicKeyToAddress.js
+// node_modules/viem/_esm/accounts/utils/publicKeyToAddress.js
 function publicKeyToAddress(publicKey) {
   const address = keccak256(`0x${publicKey.substring(4)}`).substring(26);
   return checksumAddress(`0x${address}`);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/utils/sign.js
+// node_modules/viem/_esm/accounts/utils/sign.js
 var extraEntropy = false;
 async function sign({ hash, privateKey, to = "object" }) {
   const { r, s, recovery } = secp256k1.sign(hash.slice(2), privateKey.slice(2), {
@@ -3332,7 +3330,7 @@ async function sign({ hash, privateKey, to = "object" }) {
   })();
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/data/concat.js
+// node_modules/viem/_esm/utils/data/concat.js
 function concat(values) {
   if (typeof values[0] === "string")
     return concatHex(values);
@@ -3355,7 +3353,7 @@ function concatHex(values) {
   return `0x${values.reduce((acc, x) => acc + x.replace("0x", ""), "")}`;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/cursor.js
+// node_modules/viem/_esm/errors/cursor.js
 var NegativeOffsetError = class extends BaseError {
   constructor({ offset }) {
     super(`Offset \`${offset}\` cannot be negative.`, {
@@ -3374,7 +3372,7 @@ var RecursiveReadLimitExceededError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/cursor.js
+// node_modules/viem/_esm/utils/cursor.js
 var staticCursor = {
   bytes: new Uint8Array(),
   dataView: new DataView(new ArrayBuffer(0)),
@@ -3543,7 +3541,7 @@ function createCursor(bytes, { recursiveReadLimit = 8192 } = {}) {
   return cursor;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/encoding/toRlp.js
+// node_modules/viem/_esm/utils/encoding/toRlp.js
 function toRlp(bytes, to = "hex") {
   const encodable = getEncodable(bytes);
   const cursor = createCursor(new Uint8Array(encodable.length));
@@ -3632,7 +3630,7 @@ function getSizeOfLength(length) {
   throw new BaseError("Length is too large.");
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/authorization/hashAuthorization.js
+// node_modules/viem/_esm/utils/authorization/hashAuthorization.js
 function hashAuthorization(parameters) {
   const { chainId, nonce, to } = parameters;
   const address = parameters.contractAddress ?? parameters.address;
@@ -3649,7 +3647,7 @@ function hashAuthorization(parameters) {
   return hash;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/utils/signAuthorization.js
+// node_modules/viem/_esm/accounts/utils/signAuthorization.js
 async function signAuthorization(parameters) {
   const { chainId, nonce, privateKey, to = "object" } = parameters;
   const address = parameters.contractAddress ?? parameters.address;
@@ -3668,10 +3666,10 @@ async function signAuthorization(parameters) {
   return signature;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/constants/strings.js
+// node_modules/viem/_esm/constants/strings.js
 var presignMessagePrefix = "Ethereum Signed Message:\n";
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/signature/toPrefixedMessage.js
+// node_modules/viem/_esm/utils/signature/toPrefixedMessage.js
 function toPrefixedMessage(message_) {
   const message = (() => {
     if (typeof message_ === "string")
@@ -3684,23 +3682,23 @@ function toPrefixedMessage(message_) {
   return concat([prefix, message]);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/signature/hashMessage.js
+// node_modules/viem/_esm/utils/signature/hashMessage.js
 function hashMessage(message, to_) {
   return keccak256(toPrefixedMessage(message), to_);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/utils/signMessage.js
+// node_modules/viem/_esm/accounts/utils/signMessage.js
 async function signMessage({ message, privateKey }) {
   return await sign({ hash: hashMessage(message), privateKey, to: "hex" });
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/constants/unit.js
+// node_modules/viem/_esm/constants/unit.js
 var gweiUnits = {
   ether: -9,
   wei: 9
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/unit/formatUnits.js
+// node_modules/viem/_esm/utils/unit/formatUnits.js
 function formatUnits(value, decimals) {
   let display = value.toString();
   const negative = display.startsWith("-");
@@ -3715,12 +3713,12 @@ function formatUnits(value, decimals) {
   return `${negative ? "-" : ""}${integer || "0"}${fraction ? `.${fraction}` : ""}`;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/unit/formatGwei.js
+// node_modules/viem/_esm/utils/unit/formatGwei.js
 function formatGwei(wei, unit = "wei") {
   return formatUnits(wei, gweiUnits[unit]);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/transaction.js
+// node_modules/viem/_esm/errors/transaction.js
 function prettyPrint(args) {
   const entries = Object.entries(args).map(([key, value]) => {
     if (value === void 0 || value === false)
@@ -3764,7 +3762,7 @@ var InvalidStorageKeySizeError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/authorization/serializeAuthorizationList.js
+// node_modules/viem/_esm/utils/authorization/serializeAuthorizationList.js
 function serializeAuthorizationList(authorizationList) {
   if (!authorizationList || authorizationList.length === 0)
     return [];
@@ -3782,7 +3780,7 @@ function serializeAuthorizationList(authorizationList) {
   return serializedAuthorizationList;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/blob/blobsToCommitments.js
+// node_modules/viem/_esm/utils/blob/blobsToCommitments.js
 function blobsToCommitments(parameters) {
   const { kzg } = parameters;
   const to = parameters.to ?? (typeof parameters.blobs[0] === "string" ? "hex" : "bytes");
@@ -3793,7 +3791,7 @@ function blobsToCommitments(parameters) {
   return to === "bytes" ? commitments : commitments.map((x) => bytesToHex2(x));
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/blob/blobsToProofs.js
+// node_modules/viem/_esm/utils/blob/blobsToProofs.js
 function blobsToProofs(parameters) {
   const { kzg } = parameters;
   const to = parameters.to ?? (typeof parameters.blobs[0] === "string" ? "hex" : "bytes");
@@ -3808,10 +3806,10 @@ function blobsToProofs(parameters) {
   return to === "bytes" ? proofs : proofs.map((x) => bytesToHex2(x));
 }
 
-// ../-ai-dex-manager/node_modules/@noble/hashes/esm/sha256.js
+// node_modules/@noble/hashes/esm/sha256.js
 var sha2562 = sha256;
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/hash/sha256.js
+// node_modules/viem/_esm/utils/hash/sha256.js
 function sha2563(value, to_) {
   const to = to_ || "hex";
   const bytes = sha2562(isHex(value, { strict: false }) ? toBytes2(value) : value);
@@ -3820,7 +3818,7 @@ function sha2563(value, to_) {
   return toHex(bytes);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/blob/commitmentToVersionedHash.js
+// node_modules/viem/_esm/utils/blob/commitmentToVersionedHash.js
 function commitmentToVersionedHash(parameters) {
   const { commitment, version: version2 = 1 } = parameters;
   const to = parameters.to ?? (typeof commitment === "string" ? "hex" : "bytes");
@@ -3829,7 +3827,7 @@ function commitmentToVersionedHash(parameters) {
   return to === "bytes" ? versionedHash : bytesToHex2(versionedHash);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/blob/commitmentsToVersionedHashes.js
+// node_modules/viem/_esm/utils/blob/commitmentsToVersionedHashes.js
 function commitmentsToVersionedHashes(parameters) {
   const { commitments, version: version2 } = parameters;
   const to = parameters.to ?? (typeof commitments[0] === "string" ? "hex" : "bytes");
@@ -3844,7 +3842,7 @@ function commitmentsToVersionedHashes(parameters) {
   return hashes;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/constants/blob.js
+// node_modules/viem/_esm/constants/blob.js
 var blobsPerTransaction = 6;
 var bytesPerFieldElement = 32;
 var fieldElementsPerBlob = 4096;
@@ -3853,10 +3851,10 @@ var maxBytesPerTransaction = bytesPerBlob * blobsPerTransaction - // terminator 
 1 - // zero byte (0x00) appended to each field element.
 1 * fieldElementsPerBlob * blobsPerTransaction;
 
-// ../-ai-dex-manager/node_modules/viem/_esm/constants/kzg.js
+// node_modules/viem/_esm/constants/kzg.js
 var versionedHashVersionKzg = 1;
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/blob.js
+// node_modules/viem/_esm/errors/blob.js
 var BlobSizeTooLargeError = class extends BaseError {
   constructor({ maxSize, size: size2 }) {
     super("Blob size is too large.", {
@@ -3890,7 +3888,7 @@ var InvalidVersionedHashVersionError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/blob/toBlobs.js
+// node_modules/viem/_esm/utils/blob/toBlobs.js
 function toBlobs(parameters) {
   const to = parameters.to ?? (typeof parameters.data === "string" ? "hex" : "bytes");
   const data = typeof parameters.data === "string" ? hexToBytes2(parameters.data) : parameters.data;
@@ -3925,7 +3923,7 @@ function toBlobs(parameters) {
   return to === "bytes" ? blobs.map((x) => x.bytes) : blobs.map((x) => bytesToHex2(x.bytes));
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/blob/toBlobSidecars.js
+// node_modules/viem/_esm/utils/blob/toBlobSidecars.js
 function toBlobSidecars(parameters) {
   const { data, kzg, to } = parameters;
   const blobs = parameters.blobs ?? toBlobs({ data, to });
@@ -3941,7 +3939,7 @@ function toBlobSidecars(parameters) {
   return sidecars;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/constants/number.js
+// node_modules/viem/_esm/constants/number.js
 var maxInt8 = 2n ** (8n - 1n) - 1n;
 var maxInt16 = 2n ** (16n - 1n) - 1n;
 var maxInt24 = 2n ** (24n - 1n) - 1n;
@@ -4039,14 +4037,14 @@ var maxUint240 = 2n ** 240n - 1n;
 var maxUint248 = 2n ** 248n - 1n;
 var maxUint256 = 2n ** 256n - 1n;
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/chain.js
+// node_modules/viem/_esm/errors/chain.js
 var InvalidChainIdError = class extends BaseError {
   constructor({ chainId }) {
     super(typeof chainId === "number" ? `Chain ID "${chainId}" is invalid.` : "Chain ID is invalid.", { name: "InvalidChainIdError" });
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/node.js
+// node_modules/viem/_esm/errors/node.js
 var ExecutionRevertedError = class extends BaseError {
   constructor({ cause, message } = {}) {
     const reason = message?.replace("execution reverted: ", "")?.replace("execution reverted", "");
@@ -4217,7 +4215,7 @@ Object.defineProperty(TipAboveFeeCapError, "nodeMessage", {
   value: /max priority fee per gas higher than max fee per gas|tip higher than fee cap/
 });
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/data/slice.js
+// node_modules/viem/_esm/utils/data/slice.js
 function slice(value, start, end, { strict } = {}) {
   if (isHex(value, { strict: false }))
     return sliceHex(value, start, end, {
@@ -4259,7 +4257,7 @@ function sliceHex(value_, start, end, { strict } = {}) {
   return value;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/transaction/assertTransaction.js
+// node_modules/viem/_esm/utils/transaction/assertTransaction.js
 function assertTransactionEIP7702(transaction) {
   const { authorizationList } = transaction;
   if (authorizationList) {
@@ -4327,7 +4325,7 @@ function assertTransactionLegacy(transaction) {
     throw new FeeCapTooHighError({ maxFeePerGas: gasPrice });
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/transaction/getTransactionType.js
+// node_modules/viem/_esm/utils/transaction/getTransactionType.js
 function getTransactionType(transaction) {
   if (transaction.type)
     return transaction.type;
@@ -4346,7 +4344,7 @@ function getTransactionType(transaction) {
   throw new InvalidSerializableTransactionError({ transaction });
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/transaction/serializeAccessList.js
+// node_modules/viem/_esm/utils/transaction/serializeAccessList.js
 function serializeAccessList(accessList) {
   if (!accessList || accessList.length === 0)
     return [];
@@ -4366,7 +4364,7 @@ function serializeAccessList(accessList) {
   return serializedAccessList;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/transaction/serializeTransaction.js
+// node_modules/viem/_esm/utils/transaction/serializeTransaction.js
 function serializeTransaction(transaction, signature) {
   const type = getTransactionType(transaction);
   if (type === "eip1559")
@@ -4566,7 +4564,7 @@ function toYParitySignatureArray(transaction, signature_) {
   return [yParity_, r === "0x00" ? "0x" : r, s === "0x00" ? "0x" : s];
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/utils/signTransaction.js
+// node_modules/viem/_esm/accounts/utils/signTransaction.js
 async function signTransaction(parameters) {
   const { privateKey, transaction, serializer = serializeTransaction } = parameters;
   const signableTransaction = (() => {
@@ -4584,7 +4582,7 @@ async function signTransaction(parameters) {
   return await serializer(transaction, signature);
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/abi.js
+// node_modules/viem/_esm/errors/abi.js
 var AbiEncodingArrayLengthMismatchError = class extends BaseError {
   constructor({ expectedLength, givenLength, type }) {
     super([
@@ -4631,11 +4629,11 @@ var InvalidArrayError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/regex.js
+// node_modules/viem/_esm/utils/regex.js
 var bytesRegex = /^bytes([1-9]|1[0-9]|2[0-9]|3[0-2])?$/;
 var integerRegex = /^(u?int)(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?$/;
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/abi/encodeAbiParameters.js
+// node_modules/viem/_esm/utils/abi/encodeAbiParameters.js
 function encodeAbiParameters(params, values) {
   if (params.length !== values.length)
     throw new AbiEncodingLengthMismatchError({
@@ -4849,13 +4847,13 @@ function getArrayComponents(type) {
   ) : void 0;
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/stringify.js
+// node_modules/viem/_esm/utils/stringify.js
 var stringify = (value, replacer, space) => JSON.stringify(value, (key, value_) => {
   const value2 = typeof value_ === "bigint" ? value_.toString() : value_;
   return typeof replacer === "function" ? replacer(key, value2) : value2;
 }, space);
 
-// ../-ai-dex-manager/node_modules/viem/_esm/errors/typedData.js
+// node_modules/viem/_esm/errors/typedData.js
 var InvalidDomainError = class extends BaseError {
   constructor({ domain }) {
     super(`Invalid domain "${stringify(domain)}".`, {
@@ -4880,7 +4878,7 @@ var InvalidStructTypeError = class extends BaseError {
   }
 };
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/typedData.js
+// node_modules/viem/_esm/utils/typedData.js
 function validateTypedData(parameters) {
   const { domain, message, primaryType, types } = parameters;
   const validateData = (struct, data) => {
@@ -4945,7 +4943,7 @@ function validateReference(type) {
     throw new InvalidStructTypeError({ type });
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/utils/signature/hashTypedData.js
+// node_modules/viem/_esm/utils/signature/hashTypedData.js
 function hashTypedData(parameters) {
   const { domain = {}, message, primaryType } = parameters;
   const types = {
@@ -5055,7 +5053,7 @@ function encodeField({ types, name, type, value }) {
   return [{ type }, value];
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/utils/signTypedData.js
+// node_modules/viem/_esm/accounts/utils/signTypedData.js
 async function signTypedData(parameters) {
   const { privateKey, ...typedData } = parameters;
   return await sign({
@@ -5065,7 +5063,7 @@ async function signTypedData(parameters) {
   });
 }
 
-// ../-ai-dex-manager/node_modules/viem/_esm/accounts/privateKeyToAccount.js
+// node_modules/viem/_esm/accounts/privateKeyToAccount.js
 function privateKeyToAccount(privateKey, options = {}) {
   const { nonceManager } = options;
   const publicKey = toHex(secp256k1.getPublicKey(privateKey.slice(2), false));
@@ -5654,8 +5652,8 @@ var v52V50Runtime_default = {
   maximumRoundTripCostBps: 60,
   maximumSpreadBps: 20,
   maximumHoldingHours: 3,
-  stockAggregateGross: 1.98,
-  slotGross: 1.64
+  stockAggregateGross: 4,
+  slotGross: 2
 };
 
 // config/integratedProductionRiskPolicy.ts
@@ -5667,20 +5665,26 @@ var Q102_CAUSAL_V4_FAMILY_GROSS = Object.freeze({
   PB: 2.5
 });
 var INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
-  v12BaseAggregateGross: 1.5,
+  v12BaseAggregateGross: 2,
   v12DynamicAggregateGrossCap: 2,
   v12PerPositionGrossCap: 1,
   v12MaximumPositions: 3,
-  fetResidualMaximumGross: 1.25,
+  fetResidualMaximumGross: 2.25,
   fetResidualMinimumGross: 0.05,
   penguMaximumGross: 0.85,
   q102FamilyGross: Q102_CAUSAL_V4_FAMILY_GROSS,
   q102CausalV4MaximumGross: 3,
   q102MaximumPositions: 1,
+  // Normal operating caps proven by the 2026-09-22 DD<20% integrated replay.
   cryptoGrossCap: 3,
   stockGrossCap: Number(v52V50Runtime_default.stockAggregateGross),
   stockSlotGrossCap: Number(v52V50Runtime_default.slotGross),
-  totalGrossCap: 3.5,
+  totalGrossCap: 4.25,
+  // Absolute ceilings. Entry exposure may only expand above the normal caps
+  // through the integrated profit/DD/margin governor.
+  cryptoGrossHardCap: 5,
+  totalGrossHardCap: 8,
+  grossGovernorBaseAvailableBalanceReservePct: 15,
   cryptoDailyLossPct: 7.5,
   stockDailyLossPct: 3.5,
   killSwitchRecoveryGraceMs: 10 * 6e4,

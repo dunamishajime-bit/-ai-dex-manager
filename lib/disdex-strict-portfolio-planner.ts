@@ -1,6 +1,9 @@
 import { STRICT_BT33404708902, type StrictBtBaseStrategy } from "../config/disdexStrictBt33404708902Runtime";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "../config/integratedProductionRiskPolicy";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
+import { resolveIntegratedGrossGovernor } from "./disdex-integrated-gross-governor";
+import type { PortfolioDdGovernorState } from "./disdex-portfolio-dd-governor";
+import type { SharedCryptoDailyRiskState } from "./disdex-shared-crypto-daily-risk";
 
 export type StrictStrategy = StrictBtBaseStrategy | "FET_RESIDUAL" | "QUALITY102" | "QUALITY102_CAUSAL_V1";
 export type StrictPositionSide = "LONG" | "SHORT";
@@ -59,6 +62,11 @@ export interface MarkToMarketReduction {
     remainingNotionalUsd: number;
     remainingPosition?: StrictPortfolioPosition;
     accounting: "MARK_TO_MARKET_REALIZED_PNL";
+}
+
+export interface StrictPortfolioEntryGrossCaps {
+    cryptoGrossCap: number;
+    totalGrossCap: number;
 }
 
 export interface StrictPortfolioPlan {
@@ -304,6 +312,8 @@ function trimQualityToResidual(input: {
     baseIntent: StrictPortfolioIntent;
     equity: number;
     now: number;
+    cryptoGrossCap: number;
+    totalGrossCap: number;
 }): { active: StrictPortfolioPosition[]; equity: number; reductions: MarkToMarketReduction[] } {
     let active = input.active;
     let equity = input.equity;
@@ -317,19 +327,19 @@ function trimQualityToResidual(input: {
     const baseAllocationAtEquity = (candidateEquity: number) => {
         const e = Math.max(0.001, candidateEquity);
         const classOther = baseIsCrypto ? baseOtherCryptoNotional : Math.max(0, baseOtherTotalNotional - baseOtherCryptoNotional);
-        const classCap = baseIsCrypto ? INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap;
+        const classCap = baseIsCrypto ? input.cryptoGrossCap : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap;
         return Math.max(0, Math.min(
             input.baseIntent.gross,
             strategyCap(strategy),
             classCap - classOther / e,
-            INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap - baseOtherTotalNotional / e,
+            input.totalGrossCap - baseOtherTotalNotional / e,
         ));
     };
     let allocation = baseAllocationAtEquity(equity);
     let remainingNotional = oldQualityNotional;
     for (let iteration = 0; iteration < 128; iteration += 1) {
-        const effectiveTotalCap = Math.max(0, INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap - allocation);
-        const effectiveCryptoCap = Math.max(0, INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap - (baseIsCrypto ? allocation : 0));
+        const effectiveTotalCap = Math.max(0, input.totalGrossCap - allocation);
+        const effectiveCryptoCap = Math.max(0, input.cryptoGrossCap - (baseIsCrypto ? allocation : 0));
         const totalLimit = remainingNotionalLimit({ equity, oldNotional: oldQualityNotional, markNetRate, existingBaseNotional: baseOtherTotalNotional, cap: effectiveTotalCap });
         const cryptoLimit = remainingNotionalLimit({ equity, oldNotional: oldQualityNotional, markNetRate, existingBaseNotional: baseOtherCryptoNotional, cap: effectiveCryptoCap });
         const nextRemaining = Math.min(oldQualityNotional, totalLimit, cryptoLimit, strategyCap(input.quality.strategy) * equity);
@@ -404,6 +414,10 @@ export function planStrictPortfolio(input: {
     maxDataAgeMs?: number;
     quality102CausalV1Ready?: boolean;
     researchMode?: boolean;
+    availableBalanceUsd?: number;
+    sharedDailyRisk?: SharedCryptoDailyRiskState;
+    portfolioDdGovernor?: PortfolioDdGovernorState;
+    entryGrossCaps?: StrictPortfolioEntryGrossCaps;
 }): StrictPortfolioPlan {
     const equity = positive(input.equity, "portfolio equity");
     if (!Number.isFinite(input.now) || input.now <= 0) return rejectPlan("INVALID_DECISION_TIMESTAMP", input.active, equity);
@@ -452,10 +466,25 @@ export function planStrictPortfolio(input: {
         return rejectPlan("QUALITY102_CAUSAL_V1_GROSS_OVER_CAP", input.active, equity);
     }
     const initialTotals = planTotals(input.active, [], equity);
+    const governor = resolveIntegratedGrossGovernor({
+        now: input.now,
+        equityUsd: equity,
+        availableBalanceUsd: input.availableBalanceUsd,
+        currentCryptoGross: initialTotals.cryptoGross,
+        currentTotalGross: initialTotals.totalGross,
+        sharedDailyRisk: input.sharedDailyRisk,
+        portfolioDdGovernor: input.portfolioDdGovernor,
+    });
+    const requestedCryptoEntryCap = Number(input.entryGrossCaps?.cryptoGrossCap ?? governor.cryptoEntryCap);
+    const requestedTotalEntryCap = Number(input.entryGrossCaps?.totalGrossCap ?? governor.totalEntryCap);
+    if (!Number.isFinite(requestedCryptoEntryCap) || requestedCryptoEntryCap <= 0 || requestedCryptoEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap + EPSILON) return rejectPlan("CRYPTO_ENTRY_GROSS_CAP_INVALID", input.active, equity);
+    if (!Number.isFinite(requestedTotalEntryCap) || requestedTotalEntryCap <= 0 || requestedTotalEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap + EPSILON) return rejectPlan("TOTAL_ENTRY_GROSS_CAP_INVALID", input.active, equity);
+    const cryptoEntryCeiling = Math.max(initialTotals.cryptoGross, requestedCryptoEntryCap);
+    const totalEntryCeiling = Math.max(initialTotals.totalGross, requestedTotalEntryCap);
     if (grossForNotional(sumNotional(input.active, (row) => row.strategy === "V12"), equity) > INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap + EPSILON) return rejectPlan("V12_GROSS_OVER_CAP", input.active, equity);
     if (grossForNotional(sumNotional(input.active, (row) => row.strategy === "PENGU_DUAL_LS_V2"), equity) > INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross + EPSILON) return rejectPlan("PENGU_GROSS_OVER_CAP", input.active, equity);
-    if (initialTotals.cryptoGross > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap + EPSILON) return rejectPlan("CRYPTO_GROSS_OVER_CAP", input.active, equity);
-    if (initialTotals.totalGross > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap + EPSILON) return rejectPlan("TOTAL_GROSS_OVER_CAP", input.active, equity);
+    if (initialTotals.cryptoGross > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap + EPSILON) return rejectPlan("CRYPTO_GROSS_HARD_CAP", input.active, equity);
+    if (initialTotals.totalGross > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap + EPSILON) return rejectPlan("TOTAL_GROSS_HARD_CAP", input.active, equity);
     if (initialTotals.stockGross > INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap + EPSILON) return rejectPlan("STOCK_GROSS_OVER_CAP", input.active, equity);
 
     const accepted: StrictPortfolioIntent[] = [];
@@ -521,9 +550,9 @@ export function planStrictPortfolio(input: {
             ) / workingEquity
             : Number.POSITIVE_INFINITY;
         const classResidual = isCrypto(intent.strategy)
-            ? INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap - baseOtherCryptoNotional / workingEquity
+            ? cryptoEntryCeiling - baseOtherCryptoNotional / workingEquity
             : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap - baseOtherStockNotional / workingEquity;
-        const totalResidual = INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap - baseOtherTotalNotional / workingEquity;
+        const totalResidual = totalEntryCeiling - baseOtherTotalNotional / workingEquity;
         const targetGross = Math.max(0, Math.min(intent.gross, perStrategyGross, strategyAggregateResidual, classResidual, totalResidual));
         if (targetGross <= EPSILON) {
             const reason = intent.strategy === "QUALITY102_CAUSAL_V1"
@@ -560,6 +589,8 @@ export function planStrictPortfolio(input: {
                     baseIntent: { ...intent, gross: targetGross, notionalUsd: targetGross * workingEquity },
                     equity: workingEquity,
                     now: input.now,
+                    cryptoGrossCap: cryptoEntryCeiling,
+                    totalGrossCap: totalEntryCeiling,
                 });
                 active = trim.active;
                 workingEquity = trim.equity;
@@ -569,7 +600,7 @@ export function planStrictPortfolio(input: {
             if (capViolation) return rejectPlan(capViolation, input.active, equity);
         }
         const finalClassOther = isCrypto(intent.strategy) ? baseOtherCryptoNotional : baseOtherStockNotional;
-        const finalClassCap = isCrypto(intent.strategy) ? INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap;
+        const finalClassCap = isCrypto(intent.strategy) ? cryptoEntryCeiling : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap;
         const finalStrategyAggregateResidual = intent.strategy === "V12"
             ? INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap - (
                 sumNotional(active, (row) => row.strategy === "V12")
@@ -581,7 +612,7 @@ export function planStrictPortfolio(input: {
             perStrategyGross,
             finalStrategyAggregateResidual,
             finalClassCap - finalClassOther / workingEquity,
-            INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap - baseOtherTotalNotional / workingEquity,
+            totalEntryCeiling - baseOtherTotalNotional / workingEquity,
         ));
         if (finalGross <= EPSILON) {
             rejected.push({ intent, reason: "CAPACITY_BLOCKED_AFTER_MTM" });
@@ -592,8 +623,10 @@ export function planStrictPortfolio(input: {
         if (capViolation) return rejectPlan(capViolation, input.active, equity);
     }
     const totals = planTotals(active, accepted, workingEquity);
-    if (totals.cryptoGross > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap + EPSILON) return rejectPlan("CRYPTO_GROSS_OVER_CAP_AFTER_PLANNING", active, workingEquity);
-    if (totals.totalGross > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap + EPSILON) return rejectPlan("TOTAL_GROSS_OVER_CAP_AFTER_PLANNING", active, workingEquity);
+    if (totals.cryptoGross > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap + EPSILON) return rejectPlan("CRYPTO_GROSS_HARD_CAP_AFTER_PLANNING", active, workingEquity);
+    if (totals.totalGross > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap + EPSILON) return rejectPlan("TOTAL_GROSS_HARD_CAP_AFTER_PLANNING", active, workingEquity);
+    if (totals.cryptoGross > cryptoEntryCeiling + EPSILON) return rejectPlan("CRYPTO_ENTRY_GROSS_CAP_AFTER_PLANNING", active, workingEquity);
+    if (totals.totalGross > totalEntryCeiling + EPSILON) return rejectPlan("TOTAL_ENTRY_GROSS_CAP_AFTER_PLANNING", active, workingEquity);
     if (totals.stockGross > INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap + EPSILON) return rejectPlan("STOCK_GROSS_OVER_CAP_AFTER_PLANNING", active, workingEquity);
     return { status: "planned", accepted, rejected, reductions, activePositions: active, equityAfterReductions: workingEquity, totals };
 }

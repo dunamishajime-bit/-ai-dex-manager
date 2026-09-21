@@ -147,8 +147,8 @@ async function main() {
 
     assert.equal(DISDEX_V96_ALLOCATION.totalGrossCap, 1.5);
     assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 1.5);
-    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
-    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 2.5);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 4.0);
+    assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 4.25);
     assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross, 1.0);
 
     const allocation = allocateDisDexV96ReservedPengu({

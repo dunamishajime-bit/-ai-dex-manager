@@ -20,8 +20,8 @@ export interface ResolvedQuality102CausalV1Runtime {
   readonly liveExecutionEnabled: boolean;
   readonly operatorArmed: boolean;
   readonly maximumGross: number;
-  readonly cryptoGrossCap: 3;
-  readonly totalGrossCap: 3.5;
+  readonly cryptoGrossCap: number;
+  readonly totalGrossCap: number;
   readonly maximumPositions: 1;
   readonly historicalSelectorParity: false;
   readonly brkEnabled: false;

@@ -7,7 +7,7 @@ export const FET_BRK48_RESIDUAL = Object.freeze({
   minimumVolumeRatio: 1.2,
   holdHours: 24,
   hardStopPct: 0.05,
-  maximumGross: 1.25,
+  maximumGross: 2.25,
   minimumResidualGross: 0.05,
   decisionEntryHourModulo: 4,
   decisionEntryHourRemainder: 1,

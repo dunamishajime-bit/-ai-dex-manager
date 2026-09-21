@@ -18,7 +18,7 @@ assert.equal(V12_X1_ALL.multiplier, 1);
 assert.equal(V12_X1_ALL.maximumPositions, 3);
 assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.10);
 assert.equal(V12_X1_ALL.rank3MinimumScore, 0.70);
-assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 1.5);
+assert.equal(V12_X1_ALL.aggregateEntryGrossCap, 2);
 assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
 assert.equal(V12_X1_ALL.regimeThresholdPct, 0.02);
 assert.equal(V12_X1_ALL.strongRegimeThresholdPct, 0.0359);

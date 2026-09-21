@@ -118,7 +118,7 @@ grep -Fq 'maximumDailyLossPct: 5' config/disdexV96Runtime.ts
 grep -Fq 'requiredInitialLeverage: 5' config/disdexV96Runtime.ts
 grep -Fq 'requiredMarginType: "cross"' config/disdexV96Runtime.ts
 grep -Fq 'cryptoSleeveGrossCap: 1.5' config/disdexStockRouterV13DV11EqRuntime.ts
-grep -Fq 'stockSleeveGrossCap: 1.5' config/disdexStockRouterV13DV11EqRuntime.ts
+grep -Fq 'stockSleeveGrossCap: 4.0' config/disdexStockRouterV13DV11EqRuntime.ts
 grep -Fq 'portfolioGrossCap: 2.5' config/disdexStockRouterV13DV11EqRuntime.ts
 grep -Fq 'minimumSecondStockGross: 0.25' config/disdexStockRouterV13DV11EqRuntime.ts
 grep -Fq 'maximumConcurrentStockPositions: 2' config/disdexStockRouterV13DV11EqRuntime.ts

@@ -26,6 +26,7 @@ import type {
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
 import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-crypto-daily-risk";
+import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { createPenguShortV20State } from "@/lib/pengu-short-v20";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
@@ -764,6 +765,14 @@ export class PenguDualLsV2PortfolioRunner {
             }
             let workingAccount = account;
             let workingPositions = positions;
+            const grossRiskPath = this.dependencies.config.portfolioDailyLossStatePath || process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH;
+            const grossRisk = grossRiskPath
+                ? await readSharedCryptoDailyRisk(grossRiskPath, decisionNow).catch(() => ({ ok: false as const }))
+                : { ok: false as const };
+            const ddGovernorPath = process.env.DISDEX_PORTFOLIO_DD_GOVERNOR_PATH;
+            const portfolioDdGovernor = ddGovernorPath
+                ? await readPortfolioDdGovernor(ddGovernorPath).catch(() => undefined)
+                : undefined;
             let q102StrictPosition = await liveQuality102Position(this.dependencies.executor, workingPositions, quality102Ownership, decisionNow);
             const accountEquity = Math.max(0, finite(workingAccount.walletBalance, workingAccount.availableBalance) + workingPositions.reduce((sum, position) => sum + finite(position.unrealizedPnl), 0));
             if (!(accountEquity > 0)) {
@@ -792,6 +801,9 @@ export class PenguDualLsV2PortfolioRunner {
                         equity: workingEquity,
                         now: plannerNow,
                         active: strictActivePositions(workingPositions, plannerNow, quality102Ownership, q102StrictPosition),
+                        availableBalanceUsd: workingAccount.availableBalance,
+                        sharedDailyRisk: grossRisk.ok ? grossRisk.state : undefined,
+                        portfolioDdGovernor,
                         intents: [{
                             idempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
                             strategy: "PENGU_DUAL_LS_V2",

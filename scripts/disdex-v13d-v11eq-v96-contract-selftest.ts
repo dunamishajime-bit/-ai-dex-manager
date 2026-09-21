@@ -50,17 +50,17 @@ assert.equal(expensive.reasons.includes("COST_TO_BASIS_RATIO_TOO_HIGH"), true);
 assert.equal(expensive.reasons.includes("NET_EDGE_TOO_LOW"), true);
 
 assert.doesNotThrow(() => assertPortfolioGross(3.0, 0));
-assert.doesNotThrow(() => assertPortfolioGross(2.0, 1.5));
-assert.doesNotThrow(() => assertPortfolioGross(1.5, 1.5));
+assert.doesNotThrow(() => assertPortfolioGross(3.0, 1.25));
+assert.doesNotThrow(() => assertPortfolioGross(0.25, 4.0));
 assert.throws(() => assertPortfolioGross(3.0000000001, 0), /Crypto Gross cap exceeded/);
-assert.throws(() => assertPortfolioGross(2.0, 1.5000000001), /Stock Gross cap exceeded/);
-assert.throws(() => assertPortfolioGross(0, 1.5000000001), /Stock Gross cap exceeded/);
+assert.throws(() => assertPortfolioGross(0, 4.0000000001), /Stock Gross cap exceeded/);
+assert.throws(() => assertPortfolioGross(3.0, 1.2500000001), /Portfolio Gross cap exceeded/);
 
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap, 1.5);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.sharedCryptoGrossCap, 3.0);
-assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 1.5);
-assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 3.5);
-assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.sharedPortfolioGrossCap, 3.5);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap, 4.0);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap, 4.25);
+assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.sharedPortfolioGrossCap, 4.25);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross, 1.0);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumFirstStockGross, 0.5);
 assert.equal(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumSecondStockGross, 0.25);
