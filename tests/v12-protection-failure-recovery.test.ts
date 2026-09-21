@@ -33,7 +33,7 @@ function state(overrides: Record<string, unknown> = {}) {
 
 test("accepts only the exact flattened protection-failure state", () => {
   assert.doesNotThrow(() => assertRecoverableV12ProtectionFailureState(state(), SHA));
-  assert.throws(() => assertRecoverableV12ProtectionFailureState(state({ activePositions: [{ symbol: "DOGEUSDT" }] }), SHA), /POSITION_PRESENT/);
+  assert.doesNotThrow(() => assertRecoverableV12ProtectionFailureState(state({ activePositions: [{ symbol: "DOGEUSDT" }] }), SHA));
   assert.throws(() => assertRecoverableV12ProtectionFailureState(state({ manualReview: "UNKNOWN" }), SHA), /REASON_NOT_EXACT/);
 });
 

@@ -36,7 +36,6 @@ export function assertRecoverableV12ProtectionFailureState(value: unknown, targe
   if (!["v12-x1-all-runner-state/v1", "v12-x1-all-runner-state/v2"].includes(String(state.schema)) || state.strategyId !== "V12_X1.00_ALL" || state.mode !== "LIVE") {
     throw new Error("V12_PROTECTION_FAILURE_RECOVERY_STATE_SCHEMA");
   }
-  if (activePositions(state as V12X1AllRunnerState).length > 0) throw new Error("V12_PROTECTION_FAILURE_RECOVERY_POSITION_PRESENT");
   if (!state.pending || state.pending.action !== "ENTRY" || !state.pending.idempotencyKey || !state.pending.clientOrderId || !state.pending.symbol) {
     throw new Error("V12_PROTECTION_FAILURE_RECOVERY_PENDING_REQUIRED");
   }
@@ -154,7 +153,7 @@ async function main() {
     if (after.pending || after.manualReview || after.killSwitch?.active || activePositions(after).length > 0 || String(after.runtimeCommitSha || "").toLowerCase() !== sha) {
       throw new Error("V12_PROTECTION_FAILURE_RECOVERY_POSTCHECK_FAILED");
     }
-    console.log(JSON.stringify({ recoveryStatus: "V12_PROTECTION_FAILURE_RECOVERY_PASS", sha, statePath, backupPath, pendingClientOrderId: before.pending!.clientOrderId, exchangeFlat: true, openOrders: 0, ...gate, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
+    console.log(JSON.stringify({ recoveryStatus: "V12_PROTECTION_FAILURE_RECOVERY_PASS", sha, statePath, backupPath, pendingClientOrderId: before.pending!.clientOrderId, staleLocalActiveCount: activePositions(before).length, exchangeFlat: true, openOrders: 0, ...gate, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
   } finally {
     await handle.release();
   }
