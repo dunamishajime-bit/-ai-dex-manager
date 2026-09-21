@@ -1,8 +1,10 @@
 import importlib.machinery
 import os
+import subprocess
 import tempfile
 import time
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -146,6 +148,49 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
 
             self.assertTrue(dependency.exists(), "dependency release backing current .venv2 must be retained")
             self.assertTrue((current / ".venv2/bin/python").exists(), "current dependency symlink must remain resolvable")
+
+    def test_symlink_scan_timeout_is_fail_closed_without_service_failure(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            paths = retention.CleanupPaths(
+                trading_root=root / "trading",
+                shared_root=root / "shared",
+                ops_root=root / "ops",
+                systemd_backup_root=root / "systemd-backup",
+                pm2_log_root=root / "pm2",
+                systemd_reference_roots=(root / "etc-systemd",),
+                symlink_scan_root=root / "deploy",
+                process_root=root / "proc",
+                state_reference_roots=(root / "state",),
+            )
+            paths.releases_root.mkdir(parents=True)
+            paths.ui_releases_root.mkdir(parents=True)
+            releases = []
+            now = time.time()
+            for index in range(5):
+                sha = f"{index + 1:040x}"
+                release = paths.releases_root / sha
+                release.mkdir()
+                (release / ".disdex-release-sha").write_text(sha + "\n", encoding="utf-8")
+                (release / "payload").write_text("x", encoding="utf-8")
+                stamp = now - (index + 2) * 86400
+                os.utime(release, (stamp, stamp))
+                releases.append(release)
+            paths.current_link.parent.mkdir(parents=True, exist_ok=True)
+            paths.current_link.symlink_to(releases[0])
+
+            with mock.patch.object(
+                retention,
+                "find_symlink_references_for_paths",
+                side_effect=subprocess.TimeoutExpired(["find"], 180),
+            ):
+                report = retention.run_cleanup(paths, dry_run=True)
+
+            self.assertFalse(report.deleted_paths)
+            self.assertGreaterEqual(len(report.unverified_protected), 1)
+            self.assertTrue(
+                all("UNVERIFIED_PROTECTED" in row["reason"] for row in report.unverified_protected)
+            )
 
 
 if __name__ == "__main__":

@@ -699,7 +699,7 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
         symlink_scan_error: str | None = None
         try:
             symlink_references = find_symlink_references_for_paths(candidates, paths.symlink_scan_root)
-        except (OSError, RuntimeError) as error:
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
             symlink_scan_error = str(error)
         cleanup_releases(
             paths,
