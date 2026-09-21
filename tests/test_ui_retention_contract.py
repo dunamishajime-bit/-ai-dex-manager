@@ -1,4 +1,5 @@
 import importlib.machinery
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -93,6 +94,23 @@ class UiRetentionContractTest(unittest.TestCase):
             (release / ".disdex-ui-sha").write_text(sha + "\n", encoding="utf-8")
             self.assertEqual(vps_retention.ui_release_sha(release), sha)
             self.assertEqual(ui_retention.release_sha(release), sha)
+
+    def test_markerless_current_ui_is_resolved_for_protection(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            ui_root = root / "ui-releases"
+            release = ui_root / "ui-current-markerless"
+            release.mkdir(parents=True)
+            paths = vps_retention.CleanupPaths(trading_root=root)
+            previous = os.environ.get("DISDEX_UI_ACTIVE_RELEASE")
+            os.environ["DISDEX_UI_ACTIVE_RELEASE"] = str(release)
+            try:
+                self.assertEqual(vps_retention.current_ui_release(paths), release)
+            finally:
+                if previous is None:
+                    os.environ.pop("DISDEX_UI_ACTIVE_RELEASE", None)
+                else:
+                    os.environ["DISDEX_UI_ACTIVE_RELEASE"] = previous
 
     def test_conflicting_ui_identity_markers_fail_closed(self):
         with tempfile.TemporaryDirectory() as td:

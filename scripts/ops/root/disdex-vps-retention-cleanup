@@ -378,8 +378,12 @@ def current_ui_release(paths: CleanupPaths) -> Optional[Path]:
     if not configured:
         return None
     target = Path(configured).resolve(strict=False)
-    if not is_within(target, paths.ui_releases_root) or not ui_release_sha(target):
-        raise RuntimeError("UI service WorkingDirectory is not a marker-backed immutable UI release")
+    if not is_within(target, paths.ui_releases_root) or not target.is_dir():
+        raise RuntimeError("UI service WorkingDirectory is outside the fixed UI release root")
+    # A markerless current UI is still protected.  It is unverified and must
+    # never make the whole retention service fail or become a deletion target.
+    # The caller keeps this path in the protected set while all marker-backed
+    # releases continue through the normal reference audit.
     return target
 
 
