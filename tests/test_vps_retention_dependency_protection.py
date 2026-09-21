@@ -187,6 +187,10 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
                 retention,
                 "cleanup_audits",
                 side_effect=AssertionError("uncertain reference scan must stop cleanup"),
+            ), mock.patch.object(
+                retention,
+                "path_size",
+                side_effect=AssertionError("uncertain reference scan must not recurse through release size"),
             ):
                 report = retention.run_cleanup(paths, dry_run=True)
 

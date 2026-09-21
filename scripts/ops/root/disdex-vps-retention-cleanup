@@ -295,7 +295,10 @@ def find_symlink_references_for_paths(paths: tuple[Path, ...], root: Path) -> di
 def add_unverified(report: CleanupReport, path: Path, marker: Optional[str], reason: str, audit: Optional[ReferenceAudit] = None) -> None:
     report.unverified_protected.append({
         "path": str(path),
-        "size": path_size(path),
+        # Unverified paths are never deletion candidates.  Avoid a recursive
+        # size walk here because the same uncertainty that blocks deletion
+        # can occur on very large immutable releases or markerless UI roots.
+        "size": 0,
         "markerSha": marker,
         "parentSha": None,
         "reason": reason,
