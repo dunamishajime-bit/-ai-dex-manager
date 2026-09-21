@@ -183,6 +183,10 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
                 retention,
                 "find_symlink_references_for_paths",
                 side_effect=subprocess.TimeoutExpired(["find"], 180),
+            ), mock.patch.object(
+                retention,
+                "cleanup_audits",
+                side_effect=AssertionError("uncertain reference scan must stop cleanup"),
             ):
                 report = retention.run_cleanup(paths, dry_run=True)
 

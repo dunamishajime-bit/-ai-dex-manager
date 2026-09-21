@@ -723,6 +723,12 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
             symlink_references=symlink_references,
             symlink_scan_error=symlink_scan_error,
         )
+        if symlink_scan_error:
+            # A global reference scan failure means no retention mutation is
+            # provably safe.  Release/UI candidates are already recorded as
+            # UNVERIFIED_PROTECTED; skip unrelated cleanup work as well.
+            verify_protected_paths(paths, existed_before, current_before, report)
+            return report
         cleanup_audits(paths, report, current_time)
         cleanup_backups(paths, report, current_time)
         cleanup_stale_temporary_files(paths, report, current_time)
