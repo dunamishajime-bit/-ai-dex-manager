@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { HistoryAnalyticsNav } from "@/components/features/HistoryAnalyticsNav";
 import { Card } from "@/components/ui/Card";
+import { useCurrency } from "@/context/CurrencyContext";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
 import { formatTradeHistoryAttributionLabel, getTradeHistoryAttributionTone } from "@/lib/trade-history-attribution";
 
@@ -34,7 +35,7 @@ type TradeHistoryEntry = {
   tradeStatus?: "open" | "closed" | "unmatched_exit";
   positionVerified?: boolean;
   positionSide?: "BOTH" | "LONG" | "SHORT";
-  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
+  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "FET" | "UNKNOWN";
   commission?: number;
   netPnlUsd?: number;
   attribution?: {
@@ -56,9 +57,14 @@ function formatNumber(value?: number, digits = 2) {
   });
 }
 
-function formatUsd(value?: number, digits = 2) {
+function formatJpyFromUsd(value: number | undefined, jpyRate: number, digits = 0) {
   if (value === undefined || value === null || Number.isNaN(value)) return "-";
-  return `$${formatNumber(value, digits)}`;
+  const converted = value * jpyRate;
+  const sign = converted < 0 ? "-" : "";
+  return `${sign}¥${Math.abs(converted).toLocaleString("ja-JP", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
+  })}`;
 }
 
 function explorerTxUrl(chainId: number, txHash: string) {
@@ -110,6 +116,8 @@ function attributionClass(entry: TradeHistoryEntry) {
       return "border-blue-300/35 bg-blue-400/10 text-blue-100";
     case "v52-v50":
       return "border-cyan-300/35 bg-cyan-400/10 text-cyan-100";
+    case "fet":
+      return "border-amber-300/35 bg-amber-400/10 text-amber-100";
     case "test-order":
       return "border-amber-400/30 bg-amber-500/10 text-amber-200";
     case "alternate-route":
@@ -150,6 +158,7 @@ function exitCauseLabel(entry: TradeHistoryEntry) {
 }
 
 export default function HistoryPage() {
+  const { jpyRate } = useCurrency();
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -303,7 +312,7 @@ export default function HistoryPage() {
         <Card glow="gold" noHover>
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">確定損益（手数料後）</div>
           <div className={`mt-2 text-2xl font-semibold ${summary.realizedPnlUsd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-            {formatUsd(summary.realizedPnlUsd)}
+            {formatJpyFromUsd(summary.realizedPnlUsd, jpyRate)}
           </div>
         </Card>
         <Card glow="gold" noHover>
@@ -386,8 +395,8 @@ export default function HistoryPage() {
                       → {formatNumber(entry.destAmount, 6)} {entry.destSymbol}
                     </div>
                   </td>
-                  <td className="px-3 py-4 font-mono text-xs text-white">{formatUsd(entry.entryPriceUsd, 4)}</td>
-                  <td className="px-3 py-4 font-mono text-xs text-white">{formatUsd(entry.exitPriceUsd, 4)}</td>
+                  <td className="px-3 py-4 font-mono text-xs text-white">{formatJpyFromUsd(entry.entryPriceUsd, jpyRate, 2)}</td>
+                  <td className="px-3 py-4 font-mono text-xs text-white">{formatJpyFromUsd(entry.exitPriceUsd, jpyRate, 2)}</td>
                   <td
                     className={`px-3 py-4 font-mono text-xs font-semibold ${
                       Number(displayTradePnlUsd(entry) || 0) > 0
@@ -397,7 +406,7 @@ export default function HistoryPage() {
                           : "text-gray-500"
                     }`}
                   >
-                    {formatUsd(displayTradePnlUsd(entry))}
+                    {formatJpyFromUsd(displayTradePnlUsd(entry), jpyRate)}
                   </td>
                   <td
                     className={`px-3 py-4 font-mono text-xs font-semibold ${

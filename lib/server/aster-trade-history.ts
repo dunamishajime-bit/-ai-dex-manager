@@ -10,6 +10,7 @@ import { forcedExitCauseFromEvidence, loadFillLineageEvidence, routeFromFillEvid
 
 const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
   ...liveConfig.cryptoSymbols,
+  "FETUSDT",
   ...liveConfig.stockSymbols,
 ]));
 const CACHE_TTL_MS = 60_000;
@@ -45,9 +46,10 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): Exclude<StrategyId, "V96" | "UNKNOWN"> {
+function strategyForSymbol(symbol: string): StrategyId {
   if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
   if (symbol === liveConfig.penguSymbol) return "PENGU";
+  if (symbol === "FETUSDT") return "UNKNOWN";
   if (liveConfig.quality102Runtime.symbols.includes(symbol as (typeof liveConfig.quality102Runtime.symbols)[number])) {
     return "QUALITY102";
   }
@@ -59,6 +61,7 @@ function strategyFromEvidence(evidence: FillLineageEvidence | undefined, fallbac
   if (value.includes("QUALITY102") || value === "Q102") return "QUALITY102";
   if (value.includes("PENGU")) return "PENGU";
   if (value.includes("V52") || value.includes("V11EQ") || value.includes("V50")) return "V52";
+  if (value.includes("FET")) return "FET";
   if (value.includes("V96")) return "V96";
   if (value.includes("V12")) return "V12";
   return fallback;

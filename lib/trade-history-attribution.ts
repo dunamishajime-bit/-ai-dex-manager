@@ -37,6 +37,7 @@ export type TradeHistoryAttributionTone =
   | "v52"
   | "v52-v11eq"
   | "v52-v50"
+  | "fet"
   | "alternate-route"
   | "test-order"
   | "logic"
@@ -89,6 +90,7 @@ export function getTradeHistoryAttributionTone(attribution?: TradeHistoryAttribu
   if (labels.includes("Q102") || labels.includes("QUALITY102")) return "q102";
   if (labels.includes("PENGU")) return "pengu";
   if (labels.includes("V52")) return "v52";
+  if (labels.includes("FET")) return "fet";
   if (labels.includes("V12")) return "v12";
   return attribution.classification === "alternate-route" ? "alternate-route" : attribution.classification === "logic" ? "logic" : "unknown";
 }
@@ -112,6 +114,7 @@ function logicLabel(strategyId: string, reason: string) {
   if (normalized.includes("PENGU")) return "PENGU";
   if (normalized.includes("V12")) return "V12";
   if (normalized.includes("V52")) return "V52";
+  if (normalized.includes("FET")) return "FET";
   if (normalized.includes("V96")) return "V96";
   return undefined;
 }
@@ -124,6 +127,7 @@ function explicitLogicId(strategyId: string, reason: string) {
   if (/PENGU/.test(upper)) return "PENGU";
   if (/V12/.test(upper)) return "V12";
   if (/V52/.test(upper)) return "V52";
+  if (/FET[_\s-]*BRK48|\bFET\b/.test(upper)) return "FET";
   if (/V96/.test(upper)) return "V96";
   return undefined;
 }

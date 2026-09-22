@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 
+import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "@/lib/server/historical-fill-lineage";
+
 export const LIVE_LOGIC_KEYS = ["V12", "PENGU", "Q102", "FET", "V52", "UNATTRIBUTED"] as const;
 export type LiveLogicKey = (typeof LIVE_LOGIC_KEYS)[number];
 
@@ -28,6 +30,9 @@ type FillEvent = {
   reason?: string;
   metadata?: Record<string, unknown>;
   reduceOnly?: boolean;
+  entryVersion?: string;
+  routeLabel?: string;
+  family?: string;
 };
 
 type FundingRow = {
@@ -169,6 +174,17 @@ async function readJson<T>(path: string): Promise<T | null> {
   }
 }
 
+function mergeFillEvent(base: FillEvent | undefined, next: FillEvent | undefined): FillEvent {
+  const merged: FillEvent = { ...(base || {}) };
+  if (!next) return merged;
+  for (const [key, value] of Object.entries(next)) {
+    if (value !== undefined && value !== null && value !== "") {
+      (merged as Record<string, unknown>)[key] = value;
+    }
+  }
+  return merged;
+}
+
 async function readFillEvents(path: string): Promise<FillEvent[]> {
   try {
     const raw = await readFile(path, "utf8");
@@ -195,11 +211,14 @@ function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: st
     strategyId,
     event?.reason,
     event?.clientOrderId,
+    event?.entryVersion,
+    event?.routeLabel,
+    event?.family,
     event?.metadata ? JSON.stringify(event.metadata) : "",
   ].filter(Boolean).join(" ").toUpperCase();
 
   if (upper.startsWith("V12")) {
-    if (/ALTERNATE|ALT_ROUTE|RESIDUAL|DYNAMIC/.test(trace)) return { logic: "V12", variant: "V12 別ルート / Dynamic", strategyId };
+    if (/ALTERNATE|ALT_ROUTE|RESIDUAL|DYNAMIC/.test(trace)) return { logic: "V12", variant: "V12 別ルート / Dynamic Residual", strategyId };
     if (/RANK3/.test(trace)) return { logic: "V12", variant: "V12 Rank3", strategyId };
     return { logic: "V12", variant: "V12 通常", strategyId };
   }
@@ -277,9 +296,12 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
   ]);
 
   const fillByOrderId = new Map<string, FillEvent>();
+  for (const [orderId, raw] of Object.entries(HISTORICAL_FILL_LINEAGE_BY_ORDER_ID)) {
+    fillByOrderId.set(orderId, mergeFillEvent(undefined, raw as FillEvent));
+  }
   for (const event of fills) {
     const orderId = String(event.orderId || "").trim();
-    if (orderId) fillByOrderId.set(orderId, event);
+    if (orderId) fillByOrderId.set(orderId, mergeFillEvent(fillByOrderId.get(orderId), event));
   }
 
   const entries = Array.isArray(history?.entries) ? history!.entries! : [];

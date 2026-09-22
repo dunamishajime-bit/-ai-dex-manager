@@ -8,6 +8,8 @@ const files = {
   nav: readFileSync("components/features/HistoryAnalyticsNav.tsx", "utf8"),
   sidebar: readFileSync("components/layout/Sidebar.tsx", "utf8"),
   performance: readFileSync("app/performance/page.tsx", "utf8"),
+  history: readFileSync("app/history/page.tsx", "utf8"),
+  overview: readFileSync("components/features/LivePerformanceOverviewCharts.tsx", "utf8"),
 };
 
 test("LIVE performance UI is sourced from actual production analytics, never BT artifacts", () => {
@@ -19,6 +21,15 @@ test("LIVE performance UI is sourced from actual production analytics, never BT 
 
 test("existing performance page includes live total asset and PnL charts", () => {
   assert.match(files.performance, /LivePerformanceOverviewCharts/);
+});
+
+test("trade history and performance analytics render monetary values in JPY", () => {
+  assert.match(files.history, /formatJpyFromUsd/);
+  assert.doesNotMatch(files.history, /function formatUsd/);
+  assert.match(files.dashboard, /formatJpyMoney/);
+  assert.match(files.dashboard, /useCurrency/);
+  assert.match(files.overview, /formatJpyMoney/);
+  assert.match(files.overview, /useCurrency/);
 });
 
 test("trade history exposes total and per-logic performance children", () => {

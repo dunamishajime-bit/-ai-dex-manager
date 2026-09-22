@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { Card } from "@/components/ui/Card";
+import { useCurrency } from "@/context/CurrencyContext";
 
 type Analytics = {
   attribution: { coveragePct: number };
@@ -24,16 +25,18 @@ type Analytics = {
   assetSeries: Array<{ at: string; label: string; assetUsd: number; cumulativePnlUsd: number }>;
 };
 
-function money(value: number, signed = false) {
-  const sign = signed ? (value > 0 ? "+" : value < 0 ? "-" : "") : value < 0 ? "-" : "";
-  return `${sign}$${Math.abs(value).toLocaleString("ja-JP", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function formatJpyMoney(value: number, jpyRate: number, signed = false) {
+  const converted = value * jpyRate;
+  const sign = signed ? (converted > 0 ? "+" : converted < 0 ? "-" : "") : converted < 0 ? "-" : "";
+  return `${sign}¥${Math.abs(converted).toLocaleString("ja-JP", { maximumFractionDigits: 0 })}`;
 }
 
-function compact(value: number) {
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
-  return `$${value.toFixed(abs < 10 ? 2 : 0)}`;
+function compactJpy(value: number, jpyRate: number) {
+  const converted = value * jpyRate;
+  const abs = Math.abs(converted);
+  if (abs >= 100_000_000) return `¥${(converted / 100_000_000).toFixed(1)}億`;
+  if (abs >= 10_000) return `¥${(converted / 10_000).toFixed(1)}万`;
+  return `¥${Math.round(converted).toLocaleString("ja-JP")}`;
 }
 
 function numeric(value: unknown) {
@@ -43,6 +46,9 @@ function numeric(value: unknown) {
 }
 
 export function LivePerformanceOverviewCharts() {
+  const { jpyRate } = useCurrency();
+  const money = (value: number, signed = false) => formatJpyMoney(value, jpyRate, signed);
+  const compact = (value: number) => compactJpy(value, jpyRate);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
 
   useEffect(() => {

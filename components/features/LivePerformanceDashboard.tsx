@@ -19,6 +19,7 @@ import {
 
 import { HistoryAnalyticsNav } from "@/components/features/HistoryAnalyticsNav";
 import { Card } from "@/components/ui/Card";
+import { useCurrency } from "@/context/CurrencyContext";
 
 type LogicKey = "V12" | "PENGU" | "Q102" | "FET" | "V52" | "UNATTRIBUTED";
 
@@ -84,10 +85,11 @@ type Props = {
   title?: string;
 };
 
-function money(value: number | null | undefined, digits = 2, signed = true) {
+function formatJpyMoney(value: number | null | undefined, jpyRate: number, digits = 0, signed = true) {
   if (value == null || !Number.isFinite(value)) return "-";
-  const prefix = signed ? (value > 0 ? "+" : value < 0 ? "-" : "") : value < 0 ? "-" : "";
-  return `${prefix}$${Math.abs(value).toLocaleString("ja-JP", {
+  const converted = value * jpyRate;
+  const prefix = signed ? (converted > 0 ? "+" : converted < 0 ? "-" : "") : converted < 0 ? "-" : "";
+  return `${prefix}¥${Math.abs(converted).toLocaleString("ja-JP", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })}`;
@@ -104,11 +106,12 @@ function pnlClass(value: number) {
   return "text-white";
 }
 
-function compactUsd(value: number) {
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
-  return `$${value.toFixed(abs < 10 ? 2 : 0)}`;
+function compactJpy(value: number, jpyRate: number) {
+  const converted = value * jpyRate;
+  const abs = Math.abs(converted);
+  if (abs >= 100_000_000) return `¥${(converted / 100_000_000).toFixed(1)}億`;
+  if (abs >= 10_000) return `¥${(converted / 10_000).toFixed(1)}万`;
+  return `¥${Math.round(converted).toLocaleString("ja-JP")}`;
 }
 
 function numeric(value: unknown) {
@@ -118,6 +121,9 @@ function numeric(value: unknown) {
 }
 
 export function LivePerformanceDashboard({ logic, title }: Props) {
+  const { jpyRate } = useCurrency();
+  const money = (value: number | null | undefined, digits = 0, signed = true) => formatJpyMoney(value, jpyRate, digits, signed);
+  const compactUsd = (value: number) => compactJpy(value, jpyRate);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
