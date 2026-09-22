@@ -13,6 +13,7 @@ DEFAULT_V12_STATE_PATH = "/var/lib/disdex/v12-x1-all/runner.json"
 DEFAULT_PENGU_STATE_PATH = "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"
 DEFAULT_Q102_STATE_PATH = "/var/lib/disdex/quality102-causal-v1/state.json"
 DEFAULT_V52_STATE_PATH = "/var/lib/disdex/v52-aster-only/runner-live.json"
+DEFAULT_FET_STATE_PATH = "/var/lib/disdex/fet-brk48-residual/state.json"
 
 QTY_EPS = 1e-8
 QTY_REL_TOL = 0.001
@@ -57,6 +58,7 @@ def _state_paths(env: Mapping[str, str]) -> dict[str, Path]:
         "PENGU": Path(str(env.get("PENGU_DUAL_LS_V2_STATE_PATH") or (Path(pengu_root) / "runner-live.json" if pengu_root else DEFAULT_PENGU_STATE_PATH))).resolve(),
         "Q102": Path(str(env.get("QUALITY102_CAUSAL_V1_STATE_PATH") or env.get("DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH") or DEFAULT_Q102_STATE_PATH)).resolve(),
         "V52": Path(str(env.get("DISDEX_V52_ASTER_ONLY_STATE_PATH") or (Path(v52_root) / "runner-live.json" if v52_root else DEFAULT_V52_STATE_PATH))).resolve(),
+        "FET": Path(str(env.get("FET_BRK48_STATE_PATH") or env.get("FET_BRK48_RESIDUAL_STATE_PATH") or DEFAULT_FET_STATE_PATH)).resolve(),
     }
 
 
@@ -153,6 +155,24 @@ def _claims_from_states(states: Mapping[str, Optional[dict]], stock_symbol_map: 
                 aster_symbol,
                 abs(_finite(row.get("asterQty"))),
                 "SELL" if open_side == "BUY" else "BUY" if open_side == "SELL" else "",
+            ))
+
+    fet = states.get("FET")
+    if fet is not None:
+        if fet.get("strategyId") != "FET_BRK48_RESIDUAL":
+            raise EmergencyStateReconcileError("FET_STATE_IDENTITY_MISMATCH")
+        if fet.get("pending") is not None:
+            raise EmergencyStateReconcileError("FET_PENDING_REQUIRES_RECONCILIATION")
+        position = fet.get("position")
+        if position is not None:
+            if not isinstance(position, dict):
+                raise EmergencyStateReconcileError("FET_POSITION_STATE_MALFORMED")
+            side = int(_finite(position.get("side")))
+            claims.append(_claim(
+                "FET",
+                str(position.get("symbol") or "FETUSDT"),
+                abs(_finite(position.get("quantity"))),
+                "SELL" if side == 1 else "BUY" if side == -1 else "",
             ))
     return claims
 
@@ -347,6 +367,14 @@ def reconcile_emergency_flatten_states(
         payload["pendingOrder"] = None
         payload["updatedAt"] = now
         updates.append(("V52", paths["V52"], payload))
+
+    fet = states.get("FET")
+    if fet is not None and any(c["strategy"] == "FET" for c in claims_list):
+        payload = dict(fet)
+        payload.pop("position", None)
+        payload.pop("pending", None)
+        payload["updatedAt"] = now
+        updates.append(("FET", paths["FET"], payload))
 
     modified: list[str] = []
     backups: dict[str, str] = {}

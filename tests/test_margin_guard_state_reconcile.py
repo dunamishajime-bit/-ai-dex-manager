@@ -26,6 +26,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
             "pengu": self.root / "pengu.json",
             "q102": self.root / "q102.json",
             "v52": self.root / "v52.json",
+            "fet": self.root / "fet.json",
             "kill": self.root / "kill.json",
             "guard_root": self.root / "margin-risk",
         }
@@ -35,6 +36,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
             "PENGU_DUAL_LS_V2_STATE_PATH": str(self.paths["pengu"]),
             "QUALITY102_CAUSAL_V1_STATE_PATH": str(self.paths["q102"]),
             "DISDEX_V52_ASTER_ONLY_STATE_PATH": str(self.paths["v52"]),
+            "FET_BRK48_STATE_PATH": str(self.paths["fet"]),
         }
         self.stock_map = {"AAPL": "AAPLUSDT"}
         self.write_default_states()
@@ -92,6 +94,13 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
                 },
             },
         })
+        self.write("fet", {
+            "schema": "fet-brk48-residual-state/v1",
+            "strategyId": "FET_BRK48_RESIDUAL",
+            "mode": "LIVE",
+            "updatedAt": 1,
+            "position": {"symbol": "FETUSDT", "side": 1, "quantity": 6.0},
+        })
 
     def fills(self):
         return [
@@ -99,15 +108,16 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
             {"symbol": "PENGUUSDT", "side": "BUY", "status": "FILLED", "executedQty": "3"},
             {"symbol": "DOGEUSDT", "side": "SELL", "status": "FILLED", "executedQty": "4"},
             {"symbol": "AAPLUSDT", "side": "SELL", "status": "FILLED", "executedQty": "5"},
+            {"symbol": "FETUSDT", "side": "SELL", "status": "FILLED", "executedQty": "6"},
         ]
 
     def test_all_strategy_states_clear_only_after_exact_fill_evidence(self):
-        original_stats = {key: self.paths[key].stat() for key in ("v12", "pengu", "q102", "v52")}
+        original_stats = {key: self.paths[key].stat() for key in ("v12", "pengu", "q102", "v52", "fet")}
         result = reconcile.reconcile_emergency_flatten_states(
             self.fills(), env=self.env, stock_symbol_map=self.stock_map, now_ms=30_000
         )
         self.assertEqual(result["status"], "PASS")
-        self.assertEqual(result["modifiedStrategies"], ["V12", "PENGU", "Q102", "V52"])
+        self.assertEqual(result["modifiedStrategies"], ["V12", "PENGU", "Q102", "V52", "FET"])
         self.assertNotIn("activePositions", self.read("v12"))
         self.assertEqual(self.read("v12")["cooldownUntilTs"], 7_210_000)
         self.assertNotIn("position", self.read("pengu"))
@@ -132,6 +142,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
         self.write("q102", q102)
         self.write("pengu", {"version": 2, "strategyId": "PENGU_DUAL_LS_V2_FINAL", "mode": "LIVE", "updatedAt": 1, "failures": []})
         self.write("v52", {"schemaVersion": 3, "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96", "updatedAt": 1, "positions": {}})
+        self.write("fet", {"schema": "fet-brk48-residual-state/v1", "strategyId": "FET_BRK48_RESIDUAL", "mode": "LIVE", "updatedAt": 1})
         result = reconcile.reconcile_emergency_flatten_states(
             [{"symbol": "LINKUSDT", "side": "SELL", "status": "FILLED", "executedQty": "3.5"}],
             env=self.env, stock_symbol_map=self.stock_map, now_ms=40_000,
@@ -140,7 +151,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
         self.assertEqual(set(result["modifiedStrategies"]), {"V12", "Q102"})
 
     def test_quantity_mismatch_is_fail_closed_and_does_not_mutate_state(self):
-        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52")}
+        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52", "fet")}
         bad = self.fills()
         bad[0] = {**bad[0], "executedQty": "1.5"}
         with self.assertRaisesRegex(reconcile.EmergencyStateReconcileError, "CLAIM_FILL_QTY_MISMATCH"):
@@ -151,7 +162,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
             self.assertEqual(self.paths[key].read_bytes(), raw)
 
     def test_partial_state_write_failure_rolls_back_prior_writes(self):
-        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52")}
+        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52", "fet")}
         real_write = reconcile._backup_and_write
         calls = {"count": 0}
 
@@ -192,7 +203,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
         }
         self.write("kill", kill)
         evidence_path = self.paths["guard_root"] / "emergency-flatten-evidence.json"
-        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52")}
+        before = {key: self.paths[key].read_bytes() for key in ("v12", "pengu", "q102", "v52", "fet")}
         guard = object.__new__(margin_guard.MarginGuard)
         guard.state_root = self.paths["guard_root"]
         guard.emergency_evidence_path = evidence_path
@@ -220,6 +231,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
         self.write("pengu", {"version": 2, "strategyId": "PENGU_DUAL_LS_V2_FINAL", "mode": "LIVE", "updatedAt": 1, "failures": []})
         self.write("q102", {"version": 1, "strategyId": "QUALITY102_CAUSAL_V1", "mode": "LIVE", "runtimeCommitSha": "a" * 40, "updatedAt": 1, "failures": []})
         self.write("v52", {"schemaVersion": 3, "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96", "updatedAt": 1, "positions": {}})
+        self.write("fet", {"schema": "fet-brk48-residual-state/v1", "strategyId": "FET_BRK48_RESIDUAL", "mode": "LIVE", "updatedAt": 1})
         result = reconcile.reconcile_emergency_flatten_states(
             [], env=self.env, stock_symbol_map=self.stock_map, now_ms=70_000
         )
