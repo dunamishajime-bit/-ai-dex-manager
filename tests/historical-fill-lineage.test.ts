@@ -35,6 +35,25 @@ test("historical Aster order read-back restores V12 Dynamic, PENGU Recovery V8 a
   }
 });
 
+test("clientOrderId lineage overrides a conflicting strategy label", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "disdex-client-lineage-"));
+  const spool = join(dir, "fills.jsonl");
+  try {
+    await writeFile(spool, JSON.stringify({
+      strategyId: "V12_X1.00_ALL",
+      eventType: "ENTRY_FILL",
+      orderId: "q102-conflict",
+      symbol: "SUIUSDT",
+      clientOrderId: "q102v1-entry-conflict",
+      reason: "conflicting historical label",
+    }) + "\n", "utf8");
+    const evidence = await loadFillLineageEvidence(spool);
+    assert.equal(evidence.get("q102-conflict")?.strategyId, "QUALITY102_CAUSAL_V1");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("LIVE performance uses audited order lineage without changing Aster PnL truth", async () => {
   const dir = await mkdtemp(join(tmpdir(), "disdex-live-lineage-"));
   const historyPath = join(dir, "history.json");

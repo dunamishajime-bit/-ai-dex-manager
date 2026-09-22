@@ -51,7 +51,7 @@ export function parseFillLineageEvidenceLine(line: string): FillLineageEvidence 
     if (!raw || typeof raw !== "object") return null;
     const orderId = raw.orderId === undefined || raw.orderId === null ? undefined : String(raw.orderId);
     const clientOrderId = text(raw.clientOrderId);
-    const strategyId = text(raw.strategyId) || strategyFromClientOrderId(clientOrderId);
+    const strategyId = strategyFromClientOrderId(clientOrderId) || text(raw.strategyId);
     const symbol = text(raw.symbol)?.toUpperCase();
     if (!orderId && !strategyId && !symbol) return null;
     return {
@@ -120,7 +120,7 @@ export async function loadFillLineageEvidence(pathValue = process.env.DISDEX_TRA
   for (const [orderId, raw] of Object.entries(HISTORICAL_FILL_LINEAGE_BY_ORDER_ID)) {
     const clientOrderId = text(raw.clientOrderId);
     const historical = mergeEvidence(undefined, {
-      strategyId: text(raw.strategyId) || strategyFromClientOrderId(clientOrderId),
+      strategyId: strategyFromClientOrderId(clientOrderId) || text(raw.strategyId),
       eventType: text(raw.eventType),
       symbol: text(raw.symbol)?.toUpperCase(),
       side: text(raw.side)?.toUpperCase(),

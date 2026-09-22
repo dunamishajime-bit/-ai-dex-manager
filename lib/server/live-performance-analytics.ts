@@ -205,7 +205,17 @@ function logicLabel(logic: LiveLogicKey) {
 }
 
 function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: string; strategyId: string } {
-  const strategyId = String(event?.strategyId || "").trim();
+  const clientOrderId = String(event?.clientOrderId || "").trim().toLowerCase();
+  const clientStrategy = clientOrderId.startsWith("q102v1-")
+    ? "QUALITY102_CAUSAL_V1"
+    : clientOrderId.startsWith("fet-")
+      ? "FET_BRK48_RESIDUAL"
+      : clientOrderId.startsWith("v12-")
+        ? "V12_X1.00_ALL"
+        : clientOrderId.startsWith("dualls2-") || clientOrderId.startsWith("rec-v8-")
+          ? "PENGU_DUAL_LS_V2_FINAL"
+          : "";
+  const strategyId = clientStrategy || String(event?.strategyId || "").trim();
   const upper = strategyId.toUpperCase();
   const trace = [
     strategyId,
