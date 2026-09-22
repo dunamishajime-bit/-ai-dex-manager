@@ -3,6 +3,8 @@ import test from "node:test";
 import {
     isAsterUpstreamKillReason,
     isRecoverableV12AsterManualReview,
+    isRecoverableV12RuntimeLineageKillReason,
+    isRecoverableV12RuntimeLineageManualReview,
     isRecoverableV52ReferenceKillReason,
 } from "../lib/aster-upstream-recovery-policy";
 
@@ -25,4 +27,12 @@ test("V12 operator review is clearable only for the same Aster communication inc
     assert.equal(isRecoverableV12AsterManualReview("Aster HTTP 429 [ASTER_READ path=/fapi/v3/ping status=429 code=none]"), true);
     assert.equal(isRecoverableV12AsterManualReview("Aster request connection reset by peer"), true);
     assert.equal(isRecoverableV12AsterManualReview("V12_POSITION_COUNT_MISMATCH"), false);
+});
+
+test("only the exact stale pre-cutover Q102 lineage mismatch is recoverable", () => {
+    assert.equal(isRecoverableV12RuntimeLineageKillReason("V52 upstream state unavailable: QUALITY102_STATE_MISMATCH:runtimeCommitSha"), true);
+    assert.equal(isRecoverableV12RuntimeLineageKillReason("V52 upstream state unavailable: QUALITY102_STATE_MISMATCH:position"), false);
+    assert.equal(isRecoverableV12RuntimeLineageKillReason("V52 fatal tick error: QUALITY102_STATE_MISMATCH:runtimeCommitSha"), false);
+    assert.equal(isRecoverableV12RuntimeLineageManualReview("QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"), true);
+    assert.equal(isRecoverableV12RuntimeLineageManualReview("QUALITY102_STATE_MISMATCH:runtimeCommitSha"), false);
 });

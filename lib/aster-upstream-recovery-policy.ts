@@ -30,3 +30,15 @@ export function isRecoverableV12AsterManualReview(reason: unknown) {
     if (!value) return true;
     return value.startsWith("aster ") && hasAsterCommunicationFailure(value);
 }
+
+// A pre-cutover V52 daemon can write this exact state-lineage reason after a
+// newer Q102 state has already been migrated.  It is recoverable only after
+// the release-conflicting daemon has been stopped and the authenticated flat
+// recovery gate has passed; all other state mismatches remain fail-closed.
+export function isRecoverableV12RuntimeLineageKillReason(reason: unknown) {
+    return normalized(reason) === "v52 upstream state unavailable: quality102_state_mismatch:runtimecommitsha";
+}
+
+export function isRecoverableV12RuntimeLineageManualReview(reason: unknown) {
+    return normalized(reason) === "quality102_ownership_runtime_sha_mismatch";
+}

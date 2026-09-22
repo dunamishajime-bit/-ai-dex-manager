@@ -7,7 +7,13 @@ import { dirname, resolve } from "node:path";
 
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { runAsterReadOnlyRecoveryGate } from "../lib/aster-readonly-recovery-gate";
-import { isAsterUpstreamKillReason, isRecoverableV12AsterManualReview, isRecoverableV52ReferenceKillReason } from "../lib/aster-upstream-recovery-policy";
+import {
+    isAsterUpstreamKillReason,
+    isRecoverableV12AsterManualReview,
+    isRecoverableV12RuntimeLineageKillReason,
+    isRecoverableV12RuntimeLineageManualReview,
+    isRecoverableV52ReferenceKillReason,
+} from "../lib/aster-upstream-recovery-policy";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
@@ -133,12 +139,14 @@ async function main() {
     const sharedKill = await readSharedKillSwitch();
     if (!sharedKill.active || !sharedKill.sourcePath) throw new Error("ASTER_UPSTREAM_RECOVERY_SHARED_KILL_SWITCH_NOT_ACTIVE");
     const referenceRecovery = isRecoverableV52ReferenceKillReason(sharedKill.reason);
-    if (!isAsterUpstreamKillReason(sharedKill.reason) && !referenceRecovery) throw new Error(`ASTER_UPSTREAM_RECOVERY_KILL_REASON_NOT_ALLOWLISTED:${sharedKill.reason || "UNSPECIFIED"}`);
+    const runtimeLineageRecovery = isRecoverableV12RuntimeLineageKillReason(sharedKill.reason);
+    if (!isAsterUpstreamKillReason(sharedKill.reason) && !referenceRecovery && !runtimeLineageRecovery) throw new Error(`ASTER_UPSTREAM_RECOVERY_KILL_REASON_NOT_ALLOWLISTED:${sharedKill.reason || "UNSPECIFIED"}`);
     await assertReferenceRecoverySafe(sharedKill.reason);
 
     const state = await stateStore.load();
     if (state.active || state.pending) throw new Error("ASTER_UPSTREAM_RECOVERY_V12_NOT_FLAT_IN_LOCAL_STATE");
-    if (!isRecoverableV12AsterManualReview(state.manualReview || state.killSwitch?.reason || "")) {
+    const localReviewReason = state.manualReview || state.killSwitch?.reason || "";
+    if (!isRecoverableV12AsterManualReview(localReviewReason) && !(runtimeLineageRecovery && isRecoverableV12RuntimeLineageManualReview(localReviewReason))) {
         throw new Error(`ASTER_UPSTREAM_RECOVERY_V12_OPERATOR_REVIEW_NOT_ALLOWLISTED:${state.manualReview || state.killSwitch?.reason || "UNKNOWN"}`);
     }
     const risk = await readSharedCryptoDailyRisk(runtime.riskPath);
@@ -164,7 +172,8 @@ async function main() {
         const beforeKill = await readFile(sharedKill.sourcePath);
         const stateBeforeGate = await stateStore.load();
         const killBeforeGate = await readSharedKillSwitch();
-        if (stateBeforeGate.active || stateBeforeGate.pending || !isRecoverableV12AsterManualReview(stateBeforeGate.manualReview || stateBeforeGate.killSwitch?.reason || "")) {
+        const stateBeforeGateReason = stateBeforeGate.manualReview || stateBeforeGate.killSwitch?.reason || "";
+        if (stateBeforeGate.active || stateBeforeGate.pending || (!isRecoverableV12AsterManualReview(stateBeforeGateReason) && !(runtimeLineageRecovery && isRecoverableV12RuntimeLineageManualReview(stateBeforeGateReason)))) {
             throw new Error("ASTER_UPSTREAM_RECOVERY_V12_STATE_CHANGED_BEFORE_GATE");
         }
         if (!killBeforeGate.active || killBeforeGate.reason !== sharedKill.reason) throw new Error("ASTER_UPSTREAM_RECOVERY_KILL_STATE_CHANGED_BEFORE_GATE");
